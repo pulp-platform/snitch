@@ -1,0 +1,15 @@
+[package]
+name = "banshee"
+version = "0.1.0"
+authors = ["Florian Zaruba <zarubaf@iis.ee.ethz.ch>"]
+edition = "2018"
+build = "build/softfloat.rs"
+
+[dependencies]
+log = "0.4"
+simple_logger = "1.3.0"
+elf = "0.0.10"
+
+[build-dependencies]
+cc = "1.0"
+
