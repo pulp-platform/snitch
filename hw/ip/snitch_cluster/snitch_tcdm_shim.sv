@@ -10,7 +10,7 @@
 `include "common_cells/registers.svh"
 
 // TODO(zarubaf): Limit soc request protocol to 32 bit
-module tcdm_shim #(
+module snitch_tcdm_shim #(
   parameter  int unsigned AddrWidth = 32,
   parameter  int unsigned DataWidth = 64,
   parameter  int unsigned MaxOutStandingReads = 2,
