@@ -22,3 +22,6 @@ sources:
     - src/snitch_icache_handler.sv
     # Level 3:
     - src/snitch_icache.sv
+    - target: test
+      files:
+        - test/snitch_icache_l0_tb.sv
