@@ -33,7 +33,7 @@ module addr_decode #(
   /// Total number of rules.
   parameter int unsigned NoRules   = 32'd0,
   /// Address type inside the rules and to decode.
-  parameter type         addr_t    = logic,
+  parameter type         addr_t    = bugu,
   /// Rule packed struct type.
   /// The address decoder expects three fields in `rule_t`:
   ///
