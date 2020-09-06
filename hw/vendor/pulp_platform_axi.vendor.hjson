@@ -2,16 +2,17 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 {
-  name: "pulp_platform_common_cells",
-  target_dir: "pulp_platform_common_cells",
+  name: "pulp_platform_axi",
+  target_dir: "pulp_platform_axi",
 
   upstream: {
-    url: "https://github.com/pulp-platform/common_cells.git",
-    rev: "master",
+    url: "https://github.com/pulp-platform/axi.git",
+    rev: "axi_dma_tbenz",
   },
 
   exclude_from_upstream: [
-    "ci/*",
+    ".ci",
+    ".github",
     "ips_list.yml",
     "src_files.yml"
   ]
