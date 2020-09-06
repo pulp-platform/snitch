@@ -1,3 +1,6 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
 root = true
 
 # Unix-style newlines with a newline ending every file
@@ -8,7 +11,7 @@ indent_style = space
 indent_size = 4
 
 # SystemVerilog wants 2 spaces of indentation
-[*.sv]
+[*.{sv,svh}]
 indent_size = 2
 
 # Use tabs for Makefiles.
