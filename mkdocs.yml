@@ -20,6 +20,9 @@ markdown_extensions:
       emoji_generator: !!python/name:materialx.emoji.to_svg
 nav:
     - Home: index.md
+    - User Guide:
+      - Directory Structure: ug/directory_structure.md
+      - Documentation: ug/documentation.md
     - Reference Manual:
       - Solder: rm/solder.md
 
