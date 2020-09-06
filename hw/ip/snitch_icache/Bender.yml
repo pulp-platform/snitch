@@ -1,0 +1,24 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+package:
+    name: snitch_icache
+    authors:
+        - "Fabian Schuiki <fschuiki@iis.ee.ethz.ch>"
+        - "Florian Zaruba <zarubaf@iis.ee.ethz.ch>"
+
+dependencies:
+    common_cells: { path: ../../vendor/pulp_platform_common_cells }
+
+sources:
+    # Level 0:
+    - src/snitch_icache_pkg.sv
+    # Level 1:
+    - src/snitch_icache_l0.sv
+    - src/snitch_icache_refill.sv
+    - src/snitch_icache_lfsr.sv
+    - src/snitch_icache_lookup.sv
+    # Level 2:
+    - src/snitch_icache_handler.sv
+    # Level 3:
+    - src/snitch_icache.sv
