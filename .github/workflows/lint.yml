@@ -1,3 +1,7 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 name: lint
 on: [push]
 
@@ -29,8 +33,8 @@ jobs:
                 --rules=-interface-name-style --lint_fatal --parse_fatal
                 echo "::remove-matcher owner=verible-lint-matcher::"
     # Check that all vendored sources are up-to-date.
-    vendor:
-        name: Check vendored source up-to-date.
+    vendor-licence:
+        name: Check vendored source up-to-date and licence.
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
@@ -45,3 +49,6 @@ jobs:
                     -name '*.vendor.hjson' \
                     | xargs -n1 util/vendor.py --verbose \
                     && git diff --exit-code
+            - name: Check license
+              run: |
+                ./util/lowrisc_misc-linters/licence-checker/licence-checker.py --config util/licence-checker.hjson
