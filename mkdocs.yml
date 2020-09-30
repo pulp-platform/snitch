@@ -21,6 +21,7 @@ markdown_extensions:
 nav:
 - Home: index.md
 - User Guide:
+  - Getting Started: ug/getting_started.md
   - Directory Structure: ug/directory_structure.md
   - Documentation: ug/documentation.md
 - Reference Manual:
