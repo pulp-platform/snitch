@@ -1,19 +1,27 @@
 // This seems to be bug in the compiler.
 #![allow(unused_parens)]
+
+#[macro_use]
+extern crate clap;
 #[macro_use]
 extern crate log;
-extern crate elf;
-extern crate simple_logger;
-
-mod riscv;
-mod softfloat;
+extern crate llvm_sys as llvm;
 
 // use std::collections::HashMap;
+use anyhow::{anyhow, bail, Context, Result};
+use clap::Arg;
+use llvm_sys::{bit_writer::*, core::*, initialization::*, prelude::*};
 use softfloat::{self as sf, Sf32, Sf64};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
-use std::path::PathBuf;
+use std::{path::Path, ptr::null_mut};
+
+pub mod engine;
+pub mod riscv;
+mod softfloat;
+
+use engine::*;
 
 /// Architectural state of a Snich Hart.
 struct Snitch<'a> {
@@ -776,53 +784,123 @@ impl<'a> RWMemory for SimpleXBar<'a> {
     }
 }
 
-fn main() {
-    simple_logger::init().unwrap();
-    info!("Starting Banshee");
+fn main() -> Result<()> {
+    // Parse the command line arguments.
+    let matches = app_from_crate!()
+        .arg(
+            Arg::with_name("binary")
+                .help("RISC-V ELF binary to execute")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("dump-llvm")
+                .long("dump-llvm")
+                .short("d")
+                .help("Dump the translated LLVM IR module"),
+        )
+        .arg(
+            Arg::with_name("emit-llvm")
+                .long("emit-llvm")
+                .short("S")
+                .takes_value(true)
+                .help("Emit the translated LLVM assembly to a file"),
+        )
+        .arg(
+            Arg::with_name("emit-bitcode")
+                .long("emit-bitcode")
+                .short("c")
+                .takes_value(true)
+                .help("Emit the translated LLVM bitcode to a file"),
+        )
+        .get_matches();
 
-    let path = PathBuf::from("/home/zarubaf/eth/snitch/sw/bin/billywig/matmul_baseline");
-    let file = match elf::File::open_path(&path) {
-        Ok(f) => f,
-        Err(e) => panic!("Error {:?}", e),
+    // Configure the logger.
+    pretty_env_logger::init_custom_env("SNITCH_LOG");
+
+    // Initialize the LLVM core.
+    let context = unsafe {
+        let pass_reg = LLVMGetGlobalPassRegistry();
+        LLVMInitializeCore(pass_reg);
+        LLVMGetGlobalContext()
     };
 
-    let ddr_size: usize = 1024 * 1024;
-    let mut ddr_vec = vec![];
-    ddr_vec.resize(ddr_size, 0);
-    let mut ddr = SRAM::new(0x80000000, ddr_size as u32, ddr_vec);
+    // Setup the execution engine.
+    let engine = Engine::new(context);
 
-    // Prepare Main Memory. Filter non-relevant sections from ELF.
-    let prog_sections: Vec<elf::Section> = file
-        .sections
-        .into_iter()
-        .filter(|s| s.shdr.shtype == elf::types::SHT_PROGBITS)
-        .collect();
+    // Read the binary.
+    let path = Path::new(matches.value_of("binary").unwrap());
+    info!("Loading binary {}", path.display());
+    let elf = match elf::File::open_path(&path) {
+        Ok(f) => f,
+        Err(e) => bail!("Failed to open binary {}: {:?}", path.display(), e),
+    };
 
-    for s in prog_sections {
-        let mut i = 0;
-        for data in s.data {
-            ddr.write(s.shdr.addr as u32 + i, data as u64, AccessSize::Byte);
-            i += 1;
+    // Translate the binary.
+    engine
+        .translate_elf(&elf)
+        .context("Failed to translate ELF binary")?;
+
+    // Dump the module if requested.
+    if matches.is_present("dump-llvm") {
+        unsafe {
+            LLVMDumpModule(engine.module);
         }
     }
 
-    // let bootrom = SRAM::new(0x80000000 as u32, 128, text_scn.data.clone());
-    // TODO(zarubaf): Implement peripherals.
-    let mut peripherals = SRAM::new(0x40000000 as u32, 1024, vec![0; 1024]);
-    let mut l1 = SRAM::new(0x00000000 as u32, 1024, vec![0; 1024]);
-
-    let mut xbar = SimpleXBar::new();
-    // xbar.add_slave(&bootrom);
-    xbar.add_slave(&mut ddr);
-    xbar.add_slave(&mut l1);
-    xbar.add_slave(&mut peripherals);
-
-    // Print instruction memory.
-    // 1. construct system
-    // &xbar
-    let mut snitch = Snitch::new(0x80010000, 10, &xbar, &xbar);
-
-    for _ in 0..20 {
-        snitch.step();
+    // Write the module to disk if requested.
+    if let Some(path) = matches.value_of("emit-llvm") {
+        unsafe {
+            LLVMPrintModuleToFile(
+                engine.module,
+                format!("{}\0", path).as_ptr() as *const _,
+                null_mut(),
+            );
+        }
     }
+    if let Some(path) = matches.value_of("emit-bitcode") {
+        unsafe {
+            LLVMWriteBitcodeToFile(engine.module, format!("{}\0", path).as_ptr() as *const _);
+        }
+    }
+
+    // let ddr_size: usize = 1024 * 1024;
+    // let mut ddr_vec = vec![];
+    // ddr_vec.resize(ddr_size, 0);
+    // let mut ddr = SRAM::new(0x80000000, ddr_size as u32, ddr_vec);
+
+    // // Prepare Main Memory. Filter non-relevant sections from ELF.
+    // let prog_sections: Vec<elf::Section> = file
+    //     .sections
+    //     .into_iter()
+    //     .filter(|s| s.shdr.shtype == elf::types::SHT_PROGBITS)
+    //     .collect();
+
+    // for s in prog_sections {
+    //     let mut i = 0;
+    //     for data in s.data {
+    //         ddr.write(s.shdr.addr as u32 + i, data as u64, AccessSize::Byte);
+    //         i += 1;
+    //     }
+    // }
+
+    // // let bootrom = SRAM::new(0x80000000 as u32, 128, text_scn.data.clone());
+    // // TODO(zarubaf): Implement peripherals.
+    // let mut peripherals = SRAM::new(0x40000000 as u32, 1024, vec![0; 1024]);
+    // let mut l1 = SRAM::new(0x00000000 as u32, 1024, vec![0; 1024]);
+
+    // let mut xbar = SimpleXBar::new();
+    // // xbar.add_slave(&bootrom);
+    // xbar.add_slave(&mut ddr);
+    // xbar.add_slave(&mut l1);
+    // xbar.add_slave(&mut peripherals);
+
+    // // Print instruction memory.
+    // // 1. construct system
+    // // &xbar
+    // let mut snitch = Snitch::new(0x80010000, 10, &xbar, &xbar);
+
+    // for _ in 0..20 {
+    //     snitch.step();
+    // }
+    Ok(())
 }
