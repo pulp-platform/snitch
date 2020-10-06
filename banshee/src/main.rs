@@ -1,5 +1,5 @@
 // This seems to be bug in the compiler.
-#![allow(unused_parens)]
+#![allow(unused_parens, dead_code)]
 
 #[macro_use]
 extern crate clap;
@@ -8,10 +8,10 @@ extern crate log;
 extern crate llvm_sys as llvm;
 
 // use std::collections::HashMap;
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{bail, Context, Result};
 use clap::Arg;
-use llvm_sys::{bit_writer::*, core::*, initialization::*, prelude::*};
-use softfloat::{self as sf, Sf32, Sf64};
+use llvm_sys::{bit_writer::*, core::*, initialization::*};
+// use softfloat::{self as sf, Sf32, Sf64};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
