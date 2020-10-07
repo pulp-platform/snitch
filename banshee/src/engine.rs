@@ -1,7 +1,7 @@
 //! Engine for dynamic binary translation and execution
 
 use crate::riscv;
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use llvm_sys::{core::*, prelude::*};
 use std::collections::{BTreeSet, HashMap};
 
@@ -138,7 +138,7 @@ impl<'a> ElfTranslator<'a> {
                     },
                 ) => {
                     // Ensure that we can branch to the target address.
-                    let target = (addr as i64 + fmt.jimm() as i64) as u64;
+                    let target = (addr as i64).wrapping_add(fmt.jimm() as i64) as u64;
                     debug!(
                         "Found immediate jump 0x{:x}: {} to 0x{:x}",
                         addr, inst, target,
@@ -150,6 +150,12 @@ impl<'a> ElfTranslator<'a> {
                     if fmt.rd != 0 {
                         target_addrs.insert(addr + 4);
                     }
+                }
+                riscv::Format::Bimm12hiBimm12loRs1Rs2(fmt) => {
+                    let target = (addr as i64).wrapping_add((fmt.bimm() as i64) << 1) as u64;
+                    debug!("Found branch 0x{:x}: {} to 0x{:x}", addr, inst, target,);
+                    target_addrs.insert(target);
+                    target_addrs.insert(addr + 4);
                 }
                 _ => (),
             }
@@ -237,12 +243,15 @@ impl<'a> ElfTranslator<'a> {
             InstructionTranslator {
                 elf_tran: self,
                 engine,
+                func,
                 builder,
                 addr,
                 inst,
                 state,
+                target_bbs: &target_bbs,
             }
             .emit()
+            .map_err(|e| error!("{}", e))
             .ok(); // TODO(fschuiki): Remove and make a `?`
         }
 
@@ -255,23 +264,74 @@ impl<'a> ElfTranslator<'a> {
 pub struct InstructionTranslator<'a> {
     elf_tran: &'a ElfTranslator<'a>,
     engine: &'a Engine,
+    func: LLVMValueRef,
     builder: LLVMBuilderRef,
     addr: u64,
     inst: riscv::Format,
     state: LLVMValueRef,
+    target_bbs: &'a HashMap<u64, LLVMBasicBlockRef>,
 }
 
 impl<'a> InstructionTranslator<'a> {
     unsafe fn emit(&self) -> Result<()> {
-        trace!("Translating {}", self.inst);
+        // trace!("Translating {}", self.inst);
         match self.inst {
-            riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
+            riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
-            _ => Err(anyhow!(
-                "Unsupported instruction 0x{:x}: {}",
-                self.addr,
-                self.inst
-            )),
+            riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
+            riscv::Format::Jimm20Rd(x) => self.emit_jimm20_rd(x),
+            riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
+            _ => Err(anyhow!("Unsupported instruction format")),
+        }
+        .with_context(|| format!("Unsupported instruction 0x{:x}: {}", self.addr, self.inst))
+    }
+
+    unsafe fn emit_bimm12hi_bimm12lo_rs1_rs2(
+        &self,
+        data: riscv::FormatBimm12hiBimm12loRs1Rs2,
+    ) -> Result<()> {
+        let target = (self.addr as i64).wrapping_add((data.bimm() as i64) << 1) as u64;
+        trace!("{} x{}, x{}, 0x{:x}", data.op, data.rs1, data.rs2, target);
+        let rs1 = self.read_reg(data.rs1);
+        let rs2 = self.read_reg(data.rs2);
+        let name = format!("{}_x{}_x{}\0", data.op, data.rs1, data.rs2);
+        let name = name.as_bytes().as_ptr() as *const _;
+        use llvm::LLVMIntPredicate::*;
+        let predicate = match data.op {
+            riscv::OpcodeBimm12hiBimm12loRs1Rs2::Beq => LLVMIntEQ,
+            riscv::OpcodeBimm12hiBimm12loRs1Rs2::Bne => LLVMIntNE,
+            riscv::OpcodeBimm12hiBimm12loRs1Rs2::Blt => LLVMIntSLT,
+            riscv::OpcodeBimm12hiBimm12loRs1Rs2::Bge => LLVMIntSGE,
+            riscv::OpcodeBimm12hiBimm12loRs1Rs2::Bltu => LLVMIntULT,
+            riscv::OpcodeBimm12hiBimm12loRs1Rs2::Bgeu => LLVMIntUGE,
+        };
+        let cmp = LLVMBuildICmp(self.builder, predicate, rs1, rs2, name);
+        let bb = LLVMAppendBasicBlockInContext(
+            self.engine.context,
+            self.func,
+            b"\0".as_ptr() as *const _,
+        );
+        LLVMBuildCondBr(self.builder, cmp, self.target_bbs[&target], bb);
+        LLVMPositionBuilderAtEnd(self.builder, bb);
+        Ok(())
+    }
+
+    unsafe fn emit_imm12_rd_rs1(&self, data: riscv::FormatImm12RdRs1) -> Result<()> {
+        match data.op {
+            riscv::OpcodeImm12RdRs1::Addi => {
+                let value = data.imm();
+                trace!("addi x{} = x{} + 0x{:x}", data.rd, data.rs1, value);
+                let rs1 = self.read_reg(data.rs1);
+                let value = LLVMBuildAdd(
+                    self.builder,
+                    rs1,
+                    LLVMConstInt(LLVMInt32Type(), (value as i64) as u64, 0),
+                    format!("addi\0").as_bytes().as_ptr() as *const _,
+                );
+                self.write_reg(data.rd, value);
+                Ok(())
+            }
+            _ => Err(anyhow!("Unsupported opcode {}", data.op)),
         }
     }
 
@@ -283,28 +343,42 @@ impl<'a> InstructionTranslator<'a> {
                 self.write_reg(data.rd, LLVMConstInt(LLVMInt32Type(), value as u64, 0));
                 Ok(())
             }
-            _ => Err(anyhow!("Unsupported instruction")),
+            _ => Err(anyhow!("Unsupported opcode {}", data.op)),
         }
     }
 
-    unsafe fn emit_imm12_rd_rs1(&self, data: riscv::FormatImm12RdRs1) -> Result<()> {
+    unsafe fn emit_jimm20_rd(&self, data: riscv::FormatJimm20Rd) -> Result<()> {
         match data.op {
-            riscv::OpcodeImm12RdRs1::Addi => {
-                let value = ((data.imm12 << 20) as i32) >> 20;
-                trace!("addi x{} = x{} + 0x{:x}", data.rd, data.rs1, value);
-                let rs1 = self.read_reg(data.rs1);
-                let value = LLVMBuildAdd(
-                    self.builder,
-                    rs1,
-                    LLVMConstInt(LLVMInt32Type(), (value as i64) as u64, 0),
-                    format!("addi\0").as_bytes().as_ptr() as *const _,
-                );
-                self.write_reg(data.rd, value);
-                // self.write_reg(data.rd, LLVMConstInt(LLVMInt32Type(), value as u64, 0));
+            riscv::OpcodeJimm20Rd::Jal => {
+                let target = (self.addr as i64).wrapping_add(data.jimm() as i64) as u64;
+                trace!("jal x{}, 0x{:x}", data.rd, target);
+                LLVMBuildBr(self.builder, self.target_bbs[&target]);
                 Ok(())
             }
-            _ => Err(anyhow!("Unsupported instruction")),
         }
+    }
+
+    unsafe fn emit_rd_rs1_rs2(&self, data: riscv::FormatRdRs1Rs2) -> Result<()> {
+        trace!("{} x{} = x{}, x{}", data.op, data.rd, data.rs1, data.rs2);
+        let rs1 = self.read_reg(data.rs1);
+        let rs2 = self.read_reg(data.rs2);
+        let name = format!("{}\0", data.op);
+        let name = name.as_bytes().as_ptr() as *const _;
+        let value = match data.op {
+            riscv::OpcodeRdRs1Rs2::Add => LLVMBuildAdd(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::Sub => LLVMBuildSub(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::And => LLVMBuildAnd(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::Or => LLVMBuildOr(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::Xor => LLVMBuildXor(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::Mul => LLVMBuildMul(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::Div => LLVMBuildSDiv(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::Divu => LLVMBuildUDiv(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::Rem => LLVMBuildSRem(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::Remu => LLVMBuildURem(self.builder, rs1, rs2, name),
+            _ => return Err(anyhow!("Unsupported opcode {}", data.op)),
+        };
+        self.write_reg(data.rd, value);
+        Ok(())
     }
 
     unsafe fn read_reg(&self, rs: u32) -> LLVMValueRef {
