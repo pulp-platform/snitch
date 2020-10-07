@@ -190,7 +190,10 @@ impl<'a> ElfTranslator<'a> {
             engine.context,
             format!("cpu\0").as_bytes().as_ptr() as *const _,
         );
-        let mut state_fields = [LLVMArrayType(LLVMInt32Type(), 32)];
+        let mut state_fields = [
+            LLVMInt32Type(),                    // PC
+            LLVMArrayType(LLVMInt32Type(), 32), // Registers
+        ];
         LLVMStructSetBody(
             state_type,
             state_fields.as_mut_ptr(),
@@ -342,7 +345,13 @@ pub struct InstructionTranslator<'a> {
 
 impl<'a> InstructionTranslator<'a> {
     unsafe fn emit(&self) -> Result<()> {
-        // trace!("Translating {}", self.inst);
+        // Update the PC register to reflect this instruction.
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMInt32Type(), self.addr, 0),
+            self.pc_ptr(),
+        );
+
         match self.inst {
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
@@ -467,12 +476,26 @@ impl<'a> InstructionTranslator<'a> {
             self.section.state_ptr,
             [
                 LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
+                LLVMConstInt(LLVMInt32Type(), 1, 0),
                 LLVMConstInt(LLVMInt32Type(), r as u64, 0),
             ]
             .as_mut_ptr(),
             3 as u32,
             format!("ptr_x{}\0", r).as_bytes().as_ptr() as *const _,
+        )
+    }
+
+    unsafe fn pc_ptr(&self) -> LLVMValueRef {
+        LLVMBuildGEP(
+            self.builder,
+            self.section.state_ptr,
+            [
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+            ]
+            .as_mut_ptr(),
+            2 as u32,
+            format!("ptr_pc\0").as_bytes().as_ptr() as *const _,
         )
     }
 }
