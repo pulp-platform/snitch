@@ -1,7 +1,7 @@
 //! Engine for dynamic binary translation and execution
 
 use crate::riscv;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use llvm_sys::{core::*, prelude::*};
 use std::{
     cell::Cell,
@@ -64,8 +64,8 @@ pub struct ElfTranslator<'a> {
     pub elf: &'a elf::File,
     /// Predicted branch target addresses.
     pub target_addrs: BTreeSet<u64>,
-    /// Basic blocks for the branch target addresses.
-    pub target_bbs: HashMap<u64, LLVMBasicBlockRef>,
+    /// Basic blocks for each instruction address.
+    pub inst_bbs: HashMap<u64, LLVMBasicBlockRef>,
 }
 
 impl<'a> ElfTranslator<'a> {
@@ -74,7 +74,7 @@ impl<'a> ElfTranslator<'a> {
         Self {
             elf,
             target_addrs: Default::default(),
-            target_bbs: Default::default(),
+            inst_bbs: Default::default(),
         }
     }
 
@@ -158,7 +158,7 @@ impl<'a> ElfTranslator<'a> {
                     }
                 }
                 riscv::Format::Bimm12hiBimm12loRs1Rs2(fmt) => {
-                    let target = (addr as i64).wrapping_add((fmt.bimm() as i64) << 1) as u64;
+                    let target = (addr as i64).wrapping_add(fmt.bimm() as i64) as u64;
                     debug!("Found branch 0x{:x}: {} to 0x{:x}", addr, inst, target,);
                     target_addrs.insert(target);
                     target_addrs.insert(addr + 4);
@@ -213,9 +213,19 @@ impl<'a> ElfTranslator<'a> {
         let entry_bb =
             LLVMAppendBasicBlockInContext(engine.context, func, b"entry\0".as_ptr() as *const _);
 
-        // Create a basic block for every jump target address.
-        let target_bbs: HashMap<u64, LLVMBasicBlockRef> = self
-            .target_addrs
+        // Gather the set of executable addresses.
+        let inst_addrs: BTreeSet<u64> = self
+            .all_instructions()
+            .map(|(addr, _)| addr)
+            .chain(self.sections().map(|section| section.shdr.addr))
+            .chain(
+                self.sections()
+                    .map(|section| section.shdr.addr + section.shdr.size),
+            )
+            .collect();
+
+        // Create a basic block for every instruction address.
+        let inst_bbs: HashMap<u64, LLVMBasicBlockRef> = inst_addrs
             .iter()
             .map(|&addr| {
                 let bb = LLVMAppendBasicBlockInContext(
@@ -226,11 +236,11 @@ impl<'a> ElfTranslator<'a> {
                 (addr, bb)
             })
             .collect();
-        self.target_bbs = target_bbs;
+        self.inst_bbs = inst_bbs;
 
         // Emit the branch to the entry symbol.
         LLVMPositionBuilderAtEnd(builder, entry_bb);
-        LLVMBuildBr(builder, self.target_bbs[&self.elf.ehdr.entry]);
+        LLVMBuildBr(builder, self.inst_bbs[&self.elf.ehdr.entry]);
 
         // Create a translator for each section.
         let section_tran: Vec<_> = self
@@ -244,13 +254,21 @@ impl<'a> ElfTranslator<'a> {
                 builder,
                 addr_start: section.shdr.addr,
                 addr_end: section.shdr.addr + section.shdr.size,
-                state: Default::default(),
             })
             .collect();
 
         // Emit the instructions for each section.
         for tran in &section_tran {
             tran.emit()?;
+        }
+
+        // Emit escape abort code into all unpopulated instruction locations.
+        for (&addr, &bb) in &self.inst_bbs {
+            if LLVMGetBasicBlockTerminator(bb).is_null() {
+                trace!("Plugging instruction slot hole at 0x{:x}", addr);
+                LLVMPositionBuilderAtEnd(builder, bb);
+                section_tran[0].emit_escape_abort(addr);
+            }
         }
 
         // Clean up.
@@ -272,8 +290,6 @@ pub struct SectionTranslator<'a> {
     addr_start: u64,
     /// The point beyond the last address in the section.
     addr_end: u64,
-    /// The state the previous instruction has left the section translation in.
-    pub state: Cell<SectionState>,
 }
 
 impl<'a> SectionTranslator<'a> {
@@ -281,54 +297,18 @@ impl<'a> SectionTranslator<'a> {
     /// of the binary.
     unsafe fn emit_escape_abort(&self, addr: u64) {
         trace!("Emit escape abort at 0x{:x}", addr);
-        self.prepare_inst(addr);
         LLVMBuildRetVoid(self.builder);
-        self.state.set(SectionState::Terminated);
     }
 
     /// Emit the code to handle an illegal instruction.
     unsafe fn emit_illegal_abort(&self, addr: u64) {
         trace!("Emit illegal instruction abort at 0x{:x}", addr);
-        self.prepare_inst(addr);
         LLVMBuildRetVoid(self.builder);
-        self.state.set(SectionState::Terminated);
-    }
-
-    /// Emit a basic block if necessary to accept new instructions.
-    ///
-    /// If the previous instruction has left the section in a terminated state,
-    /// for example because it was an illegal instruction, this generates a new
-    /// basic block to insert into.
-    unsafe fn prepare_inst(&self, addr: u64) {
-        let need_block = match self.state.get() {
-            SectionState::Empty => true,
-            SectionState::Filled(next_inst) if next_inst != addr => {
-                self.emit_escape_abort(next_inst);
-                true
-            }
-            SectionState::Filled(_) => false,
-            SectionState::Terminated => true,
-        };
-        if need_block {
-            let bb = if let Some(&bb) = self.elf.target_bbs.get(&addr) {
-                trace!("Moving to 0x{:x}", addr);
-                bb
-            } else {
-                trace!("Creating resume block at 0x{:x}", addr);
-                let bb =
-                    LLVMCreateBasicBlockInContext(self.engine.context, b"\0".as_ptr() as *const _);
-                LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb);
-                bb
-            };
-            LLVMPositionBuilderAtEnd(self.builder, bb);
-            self.state.set(SectionState::Filled(addr));
-        }
     }
 
     /// Emit the code for the entire section.
     unsafe fn emit(&self) -> Result<()> {
         for (addr, inst) in self.elf.instructions(self.section) {
-            self.prepare_inst(addr);
             let tran = InstructionTranslator {
                 section: self,
                 builder: self.builder,
@@ -336,46 +316,19 @@ impl<'a> SectionTranslator<'a> {
                 inst,
                 was_terminator: Default::default(),
             };
+            LLVMPositionBuilderAtEnd(self.builder, self.elf.inst_bbs[&addr]);
             match tran.emit() {
-                Ok(()) => {
-                    self.state.set(match tran.was_terminator.get() {
-                        true => SectionState::Terminated,
-                        false => SectionState::Filled(addr + 4),
-                    });
-                }
+                Ok(()) => (),
                 Err(e) => {
                     error!("{}", e);
                     self.emit_illegal_abort(addr);
                 }
             }
+            if LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null() {
+                LLVMBuildBr(self.builder, self.elf.inst_bbs[&(addr + 4)]);
+            }
         }
-
-        // Close the section.
-        match self.state.get() {
-            SectionState::Empty => self.emit_escape_abort(self.addr_start),
-            SectionState::Filled(addr) => self.emit_escape_abort(addr),
-            _ => (),
-        }
-        assert_eq!(self.state.get(), SectionState::Terminated);
-
         Ok(())
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum SectionState {
-    /// The section has no instructions yet.
-    Empty,
-    /// The previous instruction was no terminator. The argument is the address
-    /// the next instruction in the section will have.
-    Filled(u64),
-    /// The previous instruction was a terminator.
-    Terminated,
-}
-
-impl Default for SectionState {
-    fn default() -> Self {
-        Self::Empty
     }
 }
 
@@ -405,7 +358,7 @@ impl<'a> InstructionTranslator<'a> {
         &self,
         data: riscv::FormatBimm12hiBimm12loRs1Rs2,
     ) -> Result<()> {
-        let target = (self.addr as i64).wrapping_add((data.bimm() as i64) << 1) as u64;
+        let target = (self.addr as i64).wrapping_add(data.bimm() as i64) as u64;
         trace!("{} x{}, x{}, 0x{:x}", data.op, data.rs1, data.rs2, target);
         let rs1 = self.read_reg(data.rs1);
         let rs2 = self.read_reg(data.rs2);
@@ -424,14 +377,13 @@ impl<'a> InstructionTranslator<'a> {
         let bb =
             LLVMCreateBasicBlockInContext(self.section.engine.context, b"\0".as_ptr() as *const _);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb);
-        LLVMBuildCondBr(self.builder, cmp, self.section.elf.target_bbs[&target], bb);
+        LLVMBuildCondBr(self.builder, cmp, self.section.elf.inst_bbs[&target], bb);
         LLVMPositionBuilderAtEnd(self.builder, bb);
-        self.was_terminator.set(true);
         Ok(())
     }
 
     unsafe fn emit_imm12_rd_rs1(&self, data: riscv::FormatImm12RdRs1) -> Result<()> {
-        match data.op {
+        Ok(match data.op {
             riscv::OpcodeImm12RdRs1::Addi => {
                 let value = data.imm();
                 trace!("addi x{} = x{} + 0x{:x}", data.rd, data.rs1, value);
@@ -443,10 +395,9 @@ impl<'a> InstructionTranslator<'a> {
                     format!("addi\0").as_bytes().as_ptr() as *const _,
                 );
                 self.write_reg(data.rd, value);
-                Ok(())
             }
-            _ => Err(anyhow!("Unsupported opcode {}", data.op)),
-        }
+            _ => bail!("Unsupported opcode {}", data.op),
+        })
     }
 
     unsafe fn emit_imm20_rd(&self, data: riscv::FormatImm20Rd) -> Result<()> {
@@ -456,7 +407,7 @@ impl<'a> InstructionTranslator<'a> {
                 trace!("auipc x{} = 0x{:x}", data.rd, value);
                 self.write_reg(data.rd, LLVMConstInt(LLVMInt32Type(), value as u64, 0));
             }
-            _ => return Err(anyhow!("Unsupported opcode {}", data.op)),
+            _ => bail!("Unsupported opcode {}", data.op),
         })
     }
 
@@ -465,7 +416,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeJimm20Rd::Jal => {
                 let target = (self.addr as i64).wrapping_add(data.jimm() as i64) as u64;
                 trace!("jal x{}, 0x{:x}", data.rd, target);
-                LLVMBuildBr(self.builder, self.section.elf.target_bbs[&target]);
+                LLVMBuildBr(self.builder, self.section.elf.inst_bbs[&target]);
                 self.was_terminator.set(true);
                 Ok(())
             }
@@ -489,7 +440,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeRdRs1Rs2::Divu => LLVMBuildUDiv(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Rem => LLVMBuildSRem(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Remu => LLVMBuildURem(self.builder, rs1, rs2, name),
-            _ => return Err(anyhow!("Unsupported opcode {}", data.op)),
+            _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
         Ok(())
