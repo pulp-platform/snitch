@@ -2,7 +2,7 @@
 
 use crate::{engine::Engine, riscv};
 use anyhow::{anyhow, bail, Context, Result};
-use llvm_sys::{core::*, prelude::*, LLVMIntPredicate::*};
+use llvm_sys::{core::*, prelude::*, LLVMIntPredicate::*, LLVMRealPredicate::*};
 use std::{
     cell::Cell,
     collections::{BTreeSet, HashMap},
@@ -146,6 +146,7 @@ impl<'a> ElfTranslator<'a> {
         let mut state_fields = [
             LLVMPointerType(LLVMInt8Type(), 0), // Context
             LLVMArrayType(LLVMInt32Type(), 32), // Registers
+            LLVMArrayType(LLVMInt64Type(), 32), // Float Registers
             LLVMInt32Type(),                    // PC
             LLVMInt64Type(),                    // Retired Instructions
         ];
@@ -465,6 +466,8 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::Imm12hiImm12loRs1Rs2(x) => self.emit_imm12hi_imm12lo_rs1_rs2(x),
             riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
             riscv::Format::Jimm20Rd(x) => self.emit_jimm20_rd(x),
+            riscv::Format::RdRmRs1(x) => self.emit_rd_rm_rs1(x),
+            riscv::Format::RdRmRs1Rs2(x) => self.emit_rd_rm_rs1_rs2(x),
             riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
             riscv::Format::RdRs1Shamt(x) => self.emit_rd_rs1_shamt(x),
             riscv::Format::Unit(x) => self.emit_unit(x),
@@ -506,15 +509,50 @@ impl<'a> InstructionTranslator<'a> {
     ) -> Result<()> {
         let imm = data.imm();
         trace!("{} x{}, x{}, 0x{:x}", data.op, data.rs1, data.rs2, imm);
+
+        // Compute the address.
         let rs1 = self.read_reg(data.rs1);
-        let rs2 = self.read_reg(data.rs2);
         let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
-        // let name = format!("{}\0", data.op);
-        // let name = name.as_ptr() as *const _;
+        let addr = LLVMBuildAdd(self.builder, rs1, imm, NONAME);
+
+        // Perform the operation.
         match data.op {
-            riscv::OpcodeImm12hiImm12loRs1Rs2::Sb => self.emit_store(rs1, imm, rs2, 0),
-            riscv::OpcodeImm12hiImm12loRs1Rs2::Sh => self.emit_store(rs1, imm, rs2, 1),
-            riscv::OpcodeImm12hiImm12loRs1Rs2::Sw => self.emit_store(rs1, imm, rs2, 2),
+            riscv::OpcodeImm12hiImm12loRs1Rs2::Sb => {
+                self.write_mem(addr, self.read_reg(data.rs2), 0)
+            }
+            riscv::OpcodeImm12hiImm12loRs1Rs2::Sh => {
+                self.write_mem(addr, self.read_reg(data.rs2), 1)
+            }
+            riscv::OpcodeImm12hiImm12loRs1Rs2::Sw => {
+                self.write_mem(addr, self.read_reg(data.rs2), 2)
+            }
+            riscv::OpcodeImm12hiImm12loRs1Rs2::Fsw => {
+                let rs2 = self.read_freg(data.rs2);
+                let rs2_lo = LLVMBuildTrunc(self.builder, rs2, LLVMInt32Type(), NONAME);
+                self.write_mem(addr, rs2_lo, 2);
+            }
+            riscv::OpcodeImm12hiImm12loRs1Rs2::Fsd => {
+                let rs2 = self.read_freg(data.rs2);
+                let rs2_lo = LLVMBuildTrunc(self.builder, rs2, LLVMInt32Type(), NONAME);
+                let rs2_hi = LLVMBuildLShr(
+                    self.builder,
+                    rs2,
+                    LLVMConstInt(LLVMInt64Type(), 32, 0),
+                    NONAME,
+                );
+                let rs2_hi = LLVMBuildTrunc(self.builder, rs2_hi, LLVMInt32Type(), NONAME);
+                self.write_mem(addr, rs2_lo, 2);
+                self.write_mem(
+                    LLVMBuildAdd(
+                        self.builder,
+                        addr,
+                        LLVMConstInt(LLVMInt32Type(), 4, 0),
+                        NONAME,
+                    ),
+                    rs2_hi,
+                    2,
+                );
+            }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
@@ -602,6 +640,39 @@ impl<'a> InstructionTranslator<'a> {
                 self.section.emit_branch_abort(self.addr, target);
                 return Ok(()); // we have already written the link register
             }
+            riscv::OpcodeImm12RdRs1::Flw => {
+                let raw = self.emit_load(rs1, imm, 2, false);
+                let raw = LLVMBuildZExt(self.builder, raw, LLVMInt64Type(), NONAME);
+                let pad = LLVMConstInt(LLVMInt64Type(), (-1i64 as u64) << 32, 0);
+                let value = LLVMBuildOr(self.builder, raw, pad, NONAME);
+                self.write_freg(data.rd, value);
+                return Ok(());
+            }
+            riscv::OpcodeImm12RdRs1::Fld => {
+                let raw_lo = self.emit_load(rs1, imm, 2, false);
+                let raw_hi = self.emit_load(
+                    rs1,
+                    LLVMBuildAdd(
+                        self.builder,
+                        imm,
+                        LLVMConstInt(LLVMInt32Type(), 4, 0),
+                        NONAME,
+                    ),
+                    2,
+                    false,
+                );
+                let raw_lo = LLVMBuildZExt(self.builder, raw_lo, LLVMInt64Type(), NONAME);
+                let raw_hi = LLVMBuildZExt(self.builder, raw_hi, LLVMInt64Type(), NONAME);
+                let raw_hi = LLVMBuildShl(
+                    self.builder,
+                    raw_hi,
+                    LLVMConstInt(LLVMInt64Type(), 32, 0),
+                    NONAME,
+                );
+                let value = LLVMBuildOr(self.builder, raw_lo, raw_hi, NONAME);
+                self.write_freg(data.rd, value);
+                return Ok(());
+            }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
@@ -639,12 +710,330 @@ impl<'a> InstructionTranslator<'a> {
         }
     }
 
-    unsafe fn emit_rd_rs1_rs2(&self, data: riscv::FormatRdRs1Rs2) -> Result<()> {
-        trace!("{} x{} = x{}, x{}", data.op, data.rd, data.rs1, data.rs2);
-        let rs1 = self.read_reg(data.rs1);
-        let rs2 = self.read_reg(data.rs2);
+    unsafe fn emit_rd_rm_rs1(&self, data: riscv::FormatRdRmRs1) -> Result<()> {
+        trace!("{} x{}, f{}", data.op, data.rd, data.rs1);
         let name = format!("{}\0", data.op);
         let name = name.as_ptr() as *const _;
+        match data.op {
+            riscv::OpcodeRdRmRs1::FcvtDW => {
+                let rs1 = self.read_reg(data.rs1);
+                let value = LLVMBuildSIToFP(self.builder, rs1, LLVMDoubleType(), name);
+                self.write_freg_f64(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtDWu => {
+                let rs1 = self.read_reg(data.rs1);
+                let value = LLVMBuildUIToFP(self.builder, rs1, LLVMDoubleType(), name);
+                self.write_freg_f64(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtSW => {
+                let rs1 = self.read_reg(data.rs1);
+                let value = LLVMBuildSIToFP(self.builder, rs1, LLVMFloatType(), name);
+                self.write_freg_f32(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtSWu => {
+                let rs1 = self.read_reg(data.rs1);
+                let value = LLVMBuildUIToFP(self.builder, rs1, LLVMFloatType(), name);
+                self.write_freg_f32(data.rd, value);
+            }
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
+        Ok(())
+    }
+
+    unsafe fn emit_rd_rm_rs1_rs2(&self, data: riscv::FormatRdRmRs1Rs2) -> Result<()> {
+        trace!("{} f{} = f{}, f{}", data.op, data.rd, data.rs1, data.rs2);
+        let name = format!("{}\0", data.op);
+        let name = name.as_ptr() as *const _;
+        match data.op {
+            riscv::OpcodeRdRmRs1Rs2::FaddS => self.write_freg_f32(
+                data.rd,
+                LLVMBuildFAdd(
+                    self.builder,
+                    self.read_freg_f32(data.rs1),
+                    self.read_freg_f32(data.rs2),
+                    name,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FsubS => self.write_freg_f32(
+                data.rd,
+                LLVMBuildFSub(
+                    self.builder,
+                    self.read_freg_f32(data.rs1),
+                    self.read_freg_f32(data.rs2),
+                    name,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FmulS => self.write_freg_f32(
+                data.rd,
+                LLVMBuildFMul(
+                    self.builder,
+                    self.read_freg_f32(data.rs1),
+                    self.read_freg_f32(data.rs2),
+                    name,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FdivS => self.write_freg_f32(
+                data.rd,
+                LLVMBuildFDiv(
+                    self.builder,
+                    self.read_freg_f32(data.rs1),
+                    self.read_freg_f32(data.rs2),
+                    name,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FaddD => self.write_freg_f64(
+                data.rd,
+                LLVMBuildFAdd(
+                    self.builder,
+                    self.read_freg_f64(data.rs1),
+                    self.read_freg_f64(data.rs2),
+                    name,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FsubD => self.write_freg_f64(
+                data.rd,
+                LLVMBuildFSub(
+                    self.builder,
+                    self.read_freg_f64(data.rs1),
+                    self.read_freg_f64(data.rs2),
+                    name,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FmulD => self.write_freg_f64(
+                data.rd,
+                LLVMBuildFMul(
+                    self.builder,
+                    self.read_freg_f64(data.rs1),
+                    self.read_freg_f64(data.rs2),
+                    name,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FdivD => self.write_freg_f64(
+                data.rd,
+                LLVMBuildFDiv(
+                    self.builder,
+                    self.read_freg_f64(data.rs1),
+                    self.read_freg_f64(data.rs2),
+                    name,
+                ),
+            ),
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
+        Ok(())
+    }
+
+    unsafe fn emit_rd_rs1_rs2(&self, data: riscv::FormatRdRs1Rs2) -> Result<()> {
+        trace!("{} x{} = x{}, x{}", data.op, data.rd, data.rs1, data.rs2);
+        let name = format!("{}\0", data.op);
+        let name = name.as_ptr() as *const _;
+
+        // Handle floating-point operations.
+        match data.op {
+            // Sign injection
+            riscv::OpcodeRdRs1Rs2::FsgnjS => {
+                self.write_freg_f32(
+                    data.rd,
+                    self.emit_fsgnj(self.read_freg_f32(data.rs1), self.read_freg_f32(data.rs2)),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjnS => {
+                self.write_freg_f32(
+                    data.rd,
+                    self.emit_fsgnjn(self.read_freg_f32(data.rs1), self.read_freg_f32(data.rs2)),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjxS => {
+                self.write_freg_f32(
+                    data.rd,
+                    self.emit_fsgnjx(self.read_freg_f32(data.rs1), self.read_freg_f32(data.rs2)),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjD => {
+                self.write_freg_f64(
+                    data.rd,
+                    self.emit_fsgnj(self.read_freg_f64(data.rs1), self.read_freg_f64(data.rs2)),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjnD => {
+                self.write_freg_f64(
+                    data.rd,
+                    self.emit_fsgnjn(self.read_freg_f64(data.rs1), self.read_freg_f64(data.rs2)),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjxD => {
+                self.write_freg_f64(
+                    data.rd,
+                    self.emit_fsgnjx(self.read_freg_f64(data.rs1), self.read_freg_f64(data.rs2)),
+                );
+                return Ok(());
+            }
+
+            // Max/min
+            riscv::OpcodeRdRs1Rs2::FmaxS => {
+                self.write_freg_f32(
+                    data.rd,
+                    self.emit_binary_float_intrinsic(
+                        "llvm.maxnum",
+                        self.read_freg_f32(data.rs1),
+                        self.read_freg_f32(data.rs2),
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FminS => {
+                self.write_freg_f32(
+                    data.rd,
+                    self.emit_binary_float_intrinsic(
+                        "llvm.minnum",
+                        self.read_freg_f32(data.rs1),
+                        self.read_freg_f32(data.rs2),
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FmaxD => {
+                self.write_freg_f64(
+                    data.rd,
+                    self.emit_binary_float_intrinsic(
+                        "llvm.maxnum",
+                        self.read_freg_f64(data.rs1),
+                        self.read_freg_f64(data.rs2),
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FminD => {
+                self.write_freg_f64(
+                    data.rd,
+                    self.emit_binary_float_intrinsic(
+                        "llvm.minnum",
+                        self.read_freg_f64(data.rs1),
+                        self.read_freg_f64(data.rs2),
+                    ),
+                );
+                return Ok(());
+            }
+
+            // Comparison
+            riscv::OpcodeRdRs1Rs2::FeqS => {
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        LLVMBuildFCmp(
+                            self.builder,
+                            LLVMRealOEQ,
+                            self.read_freg_f32(data.rs1),
+                            self.read_freg_f32(data.rs2),
+                            name,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FltS => {
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        LLVMBuildFCmp(
+                            self.builder,
+                            LLVMRealOLT,
+                            self.read_freg_f32(data.rs1),
+                            self.read_freg_f32(data.rs2),
+                            name,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FleS => {
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        LLVMBuildFCmp(
+                            self.builder,
+                            LLVMRealOLE,
+                            self.read_freg_f32(data.rs1),
+                            self.read_freg_f32(data.rs2),
+                            name,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FeqD => {
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        LLVMBuildFCmp(
+                            self.builder,
+                            LLVMRealOEQ,
+                            self.read_freg_f64(data.rs1),
+                            self.read_freg_f64(data.rs2),
+                            name,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FltD => {
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        LLVMBuildFCmp(
+                            self.builder,
+                            LLVMRealOLT,
+                            self.read_freg_f64(data.rs1),
+                            self.read_freg_f64(data.rs2),
+                            name,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FleD => {
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        LLVMBuildFCmp(
+                            self.builder,
+                            LLVMRealOLE,
+                            self.read_freg_f64(data.rs1),
+                            self.read_freg_f64(data.rs2),
+                            name,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            _ => (),
+        }
+
+        // Handle other operations.
+        let rs1 = self.read_reg(data.rs1);
+        let rs2 = self.read_reg(data.rs2);
         let value = match data.op {
             riscv::OpcodeRdRs1Rs2::Add => LLVMBuildAdd(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Sub => LLVMBuildSub(self.builder, rs1, rs2, name),
@@ -675,6 +1064,49 @@ impl<'a> InstructionTranslator<'a> {
         };
         self.write_reg(data.rd, value);
         Ok(())
+    }
+
+    unsafe fn emit_fsgnj(&self, rs1: LLVMValueRef, rs2: LLVMValueRef) -> LLVMValueRef {
+        self.emit_fsgnj_common(rs1, rs2, |_, b| b)
+    }
+
+    unsafe fn emit_fsgnjn(&self, rs1: LLVMValueRef, rs2: LLVMValueRef) -> LLVMValueRef {
+        self.emit_fsgnj_common(rs1, rs2, |_, b| LLVMBuildNot(self.builder, b, NONAME))
+    }
+
+    unsafe fn emit_fsgnjx(&self, rs1: LLVMValueRef, rs2: LLVMValueRef) -> LLVMValueRef {
+        self.emit_fsgnj_common(rs1, rs2, |a, b| LLVMBuildXor(self.builder, a, b, NONAME))
+    }
+
+    unsafe fn emit_fsgnj_common(
+        &self,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        combine: impl FnOnce(LLVMValueRef, LLVMValueRef) -> LLVMValueRef,
+    ) -> LLVMValueRef {
+        let fzero = LLVMConstNull(LLVMTypeOf(rs1));
+        let sign_rs1 = LLVMBuildFCmp(self.builder, LLVMRealOLT, rs1, fzero, NONAME);
+        let sign_rs2 = LLVMBuildFCmp(self.builder, LLVMRealOLT, rs2, fzero, NONAME);
+        let exp = combine(sign_rs1, sign_rs2);
+        let need_flip = LLVMBuildICmp(self.builder, LLVMIntNE, sign_rs1, exp, NONAME);
+        let rs1_neg = LLVMBuildFNeg(self.builder, rs1, NONAME);
+        LLVMBuildSelect(self.builder, need_flip, rs1_neg, rs1, NONAME)
+    }
+
+    unsafe fn emit_binary_float_intrinsic(
+        &self,
+        name: &str,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+    ) -> LLVMValueRef {
+        let id = LLVMLookupIntrinsicID(name.as_ptr() as *const _, name.len());
+        let decl = LLVMGetIntrinsicDeclaration(
+            self.section.engine.module,
+            id,
+            [LLVMTypeOf(rs1)].as_mut_ptr(),
+            1,
+        );
+        LLVMBuildCall(self.builder, decl, [rs1, rs2].as_mut_ptr(), 2, NONAME)
     }
 
     unsafe fn emit_rd_rs1_shamt(&self, data: riscv::FormatRdRs1Shamt) -> Result<()> {
@@ -848,6 +1280,88 @@ impl<'a> InstructionTranslator<'a> {
         }
     }
 
+    /// Emit the code necessary to read a value from a float register.
+    unsafe fn read_freg(&self, rs: u32) -> LLVMValueRef {
+        let ptr = self.freg_ptr(rs);
+        LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
+    }
+
+    /// Emit the code necessary to write a value to a float register.
+    unsafe fn write_freg(&self, rd: u32, data: LLVMValueRef) {
+        let ptr = self.freg_ptr(rd);
+        LLVMBuildStore(self.builder, data, ptr);
+    }
+
+    /// Emit the code to read a f64 value from a float register.
+    unsafe fn read_freg_f64(&self, rs: u32) -> LLVMValueRef {
+        let ptr = self.freg_ptr(rs);
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            ptr,
+            LLVMPointerType(LLVMDoubleType(), 0),
+            NONAME,
+        );
+        LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
+    }
+
+    /// Emit the code to read a f32 value from a float register.
+    unsafe fn read_freg_f32(&self, rs: u32) -> LLVMValueRef {
+        let ptr = self.freg_ptr(rs);
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            ptr,
+            LLVMPointerType(LLVMFloatType(), 0),
+            NONAME,
+        );
+        LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
+    }
+
+    /// Emit the code to write a f64 value to a float register.
+    unsafe fn write_freg_f64(&self, rd: u32, data: LLVMValueRef) {
+        let ptr = self.freg_ptr(rd);
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            ptr,
+            LLVMPointerType(LLVMDoubleType(), 0),
+            NONAME,
+        );
+        LLVMBuildStore(self.builder, data, ptr);
+    }
+
+    /// Emit the code to write a f32 value to a float register.
+    unsafe fn write_freg_f32(&self, rd: u32, data: LLVMValueRef) {
+        let ptr = self.freg_ptr(rd);
+
+        // Nanbox the value.
+        let ptr_hi = LLVMBuildBitCast(
+            self.builder,
+            ptr,
+            LLVMPointerType(LLVMInt32Type(), 0),
+            NONAME,
+        );
+        let ptr_hi = LLVMBuildGEP(
+            self.builder,
+            ptr_hi,
+            [LLVMConstInt(LLVMInt32Type(), 1, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMInt32Type(), -1i32 as u64, 0),
+            ptr_hi,
+        );
+
+        // Write the actual value.
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            ptr,
+            LLVMPointerType(LLVMFloatType(), 0),
+            NONAME,
+        );
+        LLVMBuildStore(self.builder, data, ptr);
+    }
+
     /// Emit the code necessary to read a value from a register.
     unsafe fn read_csr(&self, csr: u32) -> LLVMValueRef {
         LLVMBuildCall(
@@ -901,13 +1415,29 @@ impl<'a> InstructionTranslator<'a> {
         )
     }
 
-    unsafe fn pc_ptr(&self) -> LLVMValueRef {
+    unsafe fn freg_ptr(&self, r: u32) -> LLVMValueRef {
+        assert!(r < 32);
         LLVMBuildGEP(
             self.builder,
             self.section.state_ptr,
             [
                 LLVMConstInt(LLVMInt32Type(), 0, 0),
                 LLVMConstInt(LLVMInt32Type(), 2, 0),
+                LLVMConstInt(LLVMInt32Type(), r as u64, 0),
+            ]
+            .as_mut_ptr(),
+            3 as u32,
+            format!("ptr_f{}\0", r).as_ptr() as *const _,
+        )
+    }
+
+    unsafe fn pc_ptr(&self) -> LLVMValueRef {
+        LLVMBuildGEP(
+            self.builder,
+            self.section.state_ptr,
+            [
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+                LLVMConstInt(LLVMInt32Type(), 3, 0),
             ]
             .as_mut_ptr(),
             2 as u32,
@@ -921,7 +1451,7 @@ impl<'a> InstructionTranslator<'a> {
             self.section.state_ptr,
             [
                 LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 3, 0),
+                LLVMConstInt(LLVMInt32Type(), 4, 0),
             ]
             .as_mut_ptr(),
             2 as u32,

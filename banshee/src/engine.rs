@@ -6,7 +6,10 @@ use itertools::Itertools;
 use llvm_sys::{
     core::*, execution_engine::*, prelude::*, support::*, transforms::pass_manager_builder::*,
 };
-use std::cell::Cell;
+use std::{
+    cell::{Cell, RefCell},
+    collections::HashMap,
+};
 
 /// An execution engine.
 pub struct Engine {
@@ -20,6 +23,8 @@ pub struct Engine {
     pub opt_llvm: bool,
     /// Optimize during JIT compilation.
     pub opt_jit: bool,
+    /// The global memory.
+    pub memory: RefCell<HashMap<u64, u32>>,
 }
 
 impl Engine {
@@ -40,6 +45,7 @@ impl Engine {
             exit_code: Default::default(),
             opt_llvm: true,
             opt_jit: true,
+            memory: Default::default(),
         }
     }
 
@@ -70,6 +76,28 @@ impl Engine {
         // Optimize the translation.
         if self.opt_llvm {
             unsafe { self.optimize() };
+        }
+
+        // Copy the executable sections into memory.
+        {
+            let mut mem = self.memory.borrow_mut();
+            for section in &elf.sections {
+                if section.shdr.shtype != elf::types::SHT_PROGBITS {
+                    continue;
+                }
+                use byteorder::{LittleEndian, ReadBytesExt};
+                mem.extend(
+                    section
+                        .data
+                        .chunks(4)
+                        .enumerate()
+                        .map(|(offset, mut value)| {
+                            let addr = section.shdr.addr + offset as u64 * 4;
+                            let value = value.read_u32::<LittleEndian>().unwrap_or(0);
+                            (addr, value)
+                        }),
+                );
+            }
         }
 
         Ok(())
@@ -140,8 +168,9 @@ impl Engine {
         trace!("Final state: {:#?}", cpu.state);
         debug!("Exit code is 0x{:x}", self.exit_code.get());
         info!(
-            "Retired {} inst, {} inst/s",
+            "Retired {} inst in {} s, {} inst/s",
             cpu.state.instret,
+            duration,
             cpu.state.instret as f64 / duration
         );
         Ok(())
@@ -202,7 +231,13 @@ impl<'a> Cpu<'a> {
             0x40000008 => 0x43000,                     // tcdm_end
             0x40000010 => 1,                           // nr_cores
             0x40000020 => self.engine.exit_code.get(), // scratch_reg
-            _ => 0,
+            _ => self
+                .engine
+                .memory
+                .borrow()
+                .get(&(addr as u64))
+                .copied()
+                .unwrap_or(0),
         }
     }
 
@@ -210,7 +245,9 @@ impl<'a> Cpu<'a> {
         trace!("Store 0x{:x} = 0x{:x} ({}B)", addr, value, 8 << size);
         match addr {
             0x40000020 => self.engine.exit_code.set(value), // scratch_reg
-            _ => (),
+            _ => {
+                self.engine.memory.borrow_mut().insert(addr as u64, value);
+            }
         }
     }
 
@@ -251,6 +288,7 @@ impl<'a> Cpu<'a> {
 #[repr(C)]
 pub struct CpuState {
     regs: [u32; 32],
+    fregs: [u64; 32],
     pc: u32,
     instret: u64,
 }
@@ -267,8 +305,19 @@ impl std::fmt::Debug for CpuState {
             .into_iter()
             .map(|mut chunk| chunk.join("  "))
             .join("\n");
+        let fregs = self
+            .fregs
+            .iter()
+            .copied()
+            .enumerate()
+            .map(|(i, value)| format!("f{:02}: 0x{:016x}", i, value))
+            .chunks(4)
+            .into_iter()
+            .map(|mut chunk| chunk.join("  "))
+            .join("\n");
         f.debug_struct("CpuState")
             .field("regs", &format_args!("\n{}", regs))
+            .field("fregs", &format_args!("\n{}", fregs))
             .field("pc", &format_args!("0x{:x}", self.pc))
             .field("instret", &self.instret)
             .finish()
