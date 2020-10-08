@@ -145,8 +145,9 @@ impl<'a> ElfTranslator<'a> {
             LLVMStructCreateNamed(self.engine.context, format!("cpu\0").as_ptr() as *const _);
         let mut state_fields = [
             LLVMPointerType(LLVMInt8Type(), 0), // Context
-            LLVMInt32Type(),                    // PC
             LLVMArrayType(LLVMInt32Type(), 32), // Registers
+            LLVMInt32Type(),                    // PC
+            LLVMInt64Type(),                    // Retired Instructions
         ];
         LLVMStructSetBody(
             state_type,
@@ -366,6 +367,16 @@ impl<'a> InstructionTranslator<'a> {
             LLVMConstInt(LLVMInt32Type(), self.addr, 0),
             self.pc_ptr(),
         );
+
+        // Update the instret counter.
+        let instret = LLVMBuildLoad(self.builder, self.instret_ptr(), NONAME);
+        let instret = LLVMBuildAdd(
+            self.builder,
+            instret,
+            LLVMConstInt(LLVMTypeOf(instret), 1, 0),
+            NONAME,
+        );
+        LLVMBuildStore(self.builder, instret, self.instret_ptr());
 
         match self.inst {
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
@@ -800,7 +811,7 @@ impl<'a> InstructionTranslator<'a> {
             self.section.state_ptr,
             [
                 LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 2, 0),
+                LLVMConstInt(LLVMInt32Type(), 1, 0),
                 LLVMConstInt(LLVMInt32Type(), r as u64, 0),
             ]
             .as_mut_ptr(),
@@ -815,7 +826,21 @@ impl<'a> InstructionTranslator<'a> {
             self.section.state_ptr,
             [
                 LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 1, 0),
+                LLVMConstInt(LLVMInt32Type(), 2, 0),
+            ]
+            .as_mut_ptr(),
+            2 as u32,
+            format!("ptr_pc\0").as_ptr() as *const _,
+        )
+    }
+
+    unsafe fn instret_ptr(&self) -> LLVMValueRef {
+        LLVMBuildGEP(
+            self.builder,
+            self.section.state_ptr,
+            [
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+                LLVMConstInt(LLVMInt32Type(), 3, 0),
             ]
             .as_mut_ptr(),
             2 as u32,

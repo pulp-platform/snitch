@@ -10,7 +10,7 @@ extern crate llvm_sys as llvm;
 // use std::collections::HashMap;
 use anyhow::{bail, Context, Result};
 use clap::Arg;
-use llvm_sys::{bit_writer::*, core::*, initialization::*};
+use llvm_sys::{bit_writer::*, core::*, execution_engine::*, initialization::*, target::*};
 // use softfloat::{self as sf, Sf32, Sf64};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -813,6 +813,22 @@ fn main() -> Result<()> {
                 .takes_value(true)
                 .help("Emit the translated LLVM bitcode to a file"),
         )
+        .arg(
+            Arg::with_name("dry-run")
+                .long("dry-run")
+                .short("n")
+                .help("Translate the binary, but do not execute"),
+        )
+        .arg(
+            Arg::with_name("no-opt-llvm")
+                .long("no-opt-llvm")
+                .help("Do not optimize LLVM IR"),
+        )
+        .arg(
+            Arg::with_name("no-opt-jit")
+                .long("no-opt-jit")
+                .help("Do not optimize during JIT compilation"),
+        )
         .get_matches();
 
     // Configure the logger.
@@ -822,11 +838,17 @@ fn main() -> Result<()> {
     let context = unsafe {
         let pass_reg = LLVMGetGlobalPassRegistry();
         LLVMInitializeCore(pass_reg);
+        LLVMLinkInMCJIT();
+        LLVM_InitializeNativeTarget();
+        LLVM_InitializeNativeAsmPrinter();
+        engine::add_llvm_symbols();
         LLVMGetGlobalContext()
     };
 
     // Setup the execution engine.
-    let engine = Engine::new(context);
+    let mut engine = Engine::new(context);
+    engine.opt_llvm = !matches.is_present("no-opt-llvm");
+    engine.opt_jit = !matches.is_present("no-opt-jit");
 
     // Read the binary.
     let path = Path::new(matches.value_of("binary").unwrap());
@@ -840,13 +862,6 @@ fn main() -> Result<()> {
     engine
         .translate_elf(&elf)
         .context("Failed to translate ELF binary")?;
-
-    // Dump the module if requested.
-    if matches.is_present("dump-llvm") {
-        unsafe {
-            LLVMDumpModule(engine.module);
-        }
-    }
 
     // Write the module to disk if requested.
     if let Some(path) = matches.value_of("emit-llvm") {
@@ -862,6 +877,18 @@ fn main() -> Result<()> {
         unsafe {
             LLVMWriteBitcodeToFile(engine.module, format!("{}\0", path).as_ptr() as *const _);
         }
+    }
+
+    // Dump the module if requested.
+    if matches.is_present("dump-llvm") {
+        unsafe {
+            LLVMDumpModule(engine.module);
+        }
+    }
+
+    // Execute the binary.
+    if !matches.is_present("dry-run") {
+        engine.execute().context("Failed to execute ELF binary")?;
     }
 
     // let ddr_size: usize = 1024 * 1024;
