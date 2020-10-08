@@ -123,9 +123,9 @@ impl<'a> ElfTranslator<'a> {
         }
 
         // Dump what we have found.
-        debug!("Predicted jump targets:");
+        trace!("Predicted jump targets:");
         for &addr in &target_addrs {
-            debug!("  - 0x{:x}", addr);
+            trace!("  - 0x{:x}", addr);
         }
 
         self.target_addrs = target_addrs;
@@ -194,6 +194,32 @@ impl<'a> ElfTranslator<'a> {
                 LLVMInt32Type(), // Value
             ],
         );
+        self.declare_func(
+            "banshee_abort_escape",
+            LLVMVoidType(),
+            [
+                state_ptr_type,  // CPU
+                LLVMInt32Type(), // Addr
+            ],
+        );
+        self.declare_func(
+            "banshee_abort_illegal_inst",
+            LLVMVoidType(),
+            [
+                state_ptr_type,  // CPU
+                LLVMInt32Type(), // Addr
+                LLVMInt32Type(), // Raw
+            ],
+        );
+        self.declare_func(
+            "banshee_abort_illegal_branch",
+            LLVMVoidType(),
+            [
+                state_ptr_type,  // CPU
+                LLVMInt32Type(), // Addr
+                LLVMInt32Type(), // Target
+            ],
+        );
 
         // Emit the function which will run the binary.
         let func_name = format!("execute_binary\0");
@@ -258,6 +284,7 @@ impl<'a> ElfTranslator<'a> {
 
         // Emit the instructions for each section.
         for tran in &section_tran {
+            debug!("Translating section `{}`", tran.section.shdr.name);
             tran.emit()?;
         }
 
@@ -288,8 +315,22 @@ impl<'a> ElfTranslator<'a> {
             LLVMFunctionType(ret, args.as_ptr() as *mut _, args.len() as u32, 0),
         )
     }
+
+    unsafe fn lookup_func(&self, name: &str) -> LLVMValueRef {
+        let ptr = LLVMGetNamedFunction(
+            self.engine.module,
+            CString::new(name).unwrap().as_ptr() as *const _,
+        );
+        assert!(
+            !ptr.is_null(),
+            "function `{}` not found in LLVM module",
+            name
+        );
+        ptr
+    }
 }
 
+/// A translator for a section.
 pub struct SectionTranslator<'a> {
     elf: &'a ElfTranslator<'a>,
     section: &'a elf::Section,
@@ -310,18 +351,45 @@ impl<'a> SectionTranslator<'a> {
     /// of the binary.
     unsafe fn emit_escape_abort(&self, addr: u64) {
         trace!("Emit escape abort at 0x{:x}", addr);
+        self.emit_call(
+            "banshee_abort_escape",
+            [
+                self.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), addr as u64, 0),
+            ],
+        );
         LLVMBuildRetVoid(self.builder);
     }
 
     /// Emit the code to handle an illegal instruction.
-    unsafe fn emit_illegal_abort(&self, addr: u64) {
-        trace!("Emit illegal instruction abort at 0x{:x}", addr);
+    unsafe fn emit_illegal_abort(&self, addr: u64, inst: riscv::Format) {
+        trace!(
+            "Emit illegal instruction abort at 0x{:x} for {}",
+            addr,
+            inst
+        );
+        self.emit_call(
+            "banshee_abort_illegal_inst",
+            [
+                self.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), addr as u64, 0),
+                LLVMConstInt(LLVMInt32Type(), inst.raw() as u64, 0),
+            ],
+        );
         LLVMBuildRetVoid(self.builder);
     }
 
     /// Emit the code to handle a branch to an unpredicted instruction.
-    unsafe fn emit_branch_abort(&self, inst_addr: u64, _target: LLVMValueRef) {
+    unsafe fn emit_branch_abort(&self, inst_addr: u64, target: LLVMValueRef) {
         trace!("Emit illegal branch abort at 0x{:x}", inst_addr);
+        self.emit_call(
+            "banshee_abort_illegal_branch",
+            [
+                self.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), inst_addr as u64, 0),
+                target,
+            ],
+        );
         LLVMBuildRetVoid(self.builder);
     }
 
@@ -340,7 +408,7 @@ impl<'a> SectionTranslator<'a> {
                 Ok(()) => (),
                 Err(e) => {
                     error!("{}", e);
-                    self.emit_illegal_abort(addr);
+                    self.emit_illegal_abort(addr, inst);
                 }
             }
             if LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null() {
@@ -349,8 +417,21 @@ impl<'a> SectionTranslator<'a> {
         }
         Ok(())
     }
+
+    /// Emit a call to a named function.
+    unsafe fn emit_call(&self, name: &str, args: impl AsRef<[LLVMValueRef]>) -> LLVMValueRef {
+        let args = args.as_ref();
+        LLVMBuildCall(
+            self.builder,
+            self.elf.lookup_func(name),
+            args.as_ptr() as *mut _,
+            args.len() as u32,
+            NONAME,
+        )
+    }
 }
 
+/// A translator for a single instruction.
 pub struct InstructionTranslator<'a> {
     section: &'a SectionTranslator<'a>,
     builder: LLVMBuilderRef,

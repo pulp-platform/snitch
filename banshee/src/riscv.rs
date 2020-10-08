@@ -3,7 +3,7 @@
 /// The different instruction formats.
 #[derive(Debug, Copy, Clone)]
 pub enum Format {
-    Illegal,
+    Illegal(u32),
     Unit(FormatUnit),
     AqrlRdRs1(FormatAqrlRdRs1),
     AqrlRdRs1Rs2(FormatAqrlRdRs1Rs2),
@@ -25,10 +25,37 @@ pub enum Format {
     Rs1Rs2(FormatRs1Rs2),
 }
 
+impl Format {
+    pub fn raw(&self) -> u32 {
+        match self {
+            Self::Illegal(x) => *x,
+            Self::Unit(x) => x.raw,
+            Self::AqrlRdRs1(x) => x.raw,
+            Self::AqrlRdRs1Rs2(x) => x.raw,
+            Self::Bimm12hiBimm12loRs1Rs2(x) => x.raw,
+            Self::FmPredRdRs1Succ(x) => x.raw,
+            Self::Imm12RdRs1(x) => x.raw,
+            Self::Imm12hiImm12loRs1Rs2(x) => x.raw,
+            Self::Imm20Rd(x) => x.raw,
+            Self::Jimm20Rd(x) => x.raw,
+            Self::RdRmRs1(x) => x.raw,
+            Self::RdRmRs1Rs2(x) => x.raw,
+            Self::RdRmRs1Rs2Rs3(x) => x.raw,
+            Self::RdRs1(x) => x.raw,
+            Self::RdRs1Rs2(x) => x.raw,
+            Self::RdRs1Rs2Rs3(x) => x.raw,
+            Self::RdRs1Rs3Shamt(x) => x.raw,
+            Self::RdRs1Shamt(x) => x.raw,
+            Self::RdRs1Shamtw(x) => x.raw,
+            Self::Rs1Rs2(x) => x.raw,
+        }
+    }
+}
+
 impl std::fmt::Display for Format {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Self::Illegal => write!(f, "<illegal>"),
+            Self::Illegal(x) => write!(f, "<illegal 0x{:x}>", x),
             Self::Unit(x) => write!(f, "{}", x),
             Self::AqrlRdRs1(x) => write!(f, "{}", x),
             Self::AqrlRdRs1Rs2(x) => write!(f, "{}", x),
@@ -1543,7 +1570,7 @@ pub fn parse_u32(raw: u32) -> Format {
         0x10500073 => return parse_unit(OpcodeUnit::Wfi, raw),
         _ => (),
     }
-    Format::Illegal
+    Format::Illegal(raw)
 }
 
 /// Parse the first bytes of a `&[u8]` slice into an instruction.
@@ -1551,7 +1578,7 @@ pub fn parse(mut raw: &[u8]) -> Format {
     use byteorder::{LittleEndian, ReadBytesExt};
     raw.read_u32::<LittleEndian>()
         .map(parse_u32)
-        .unwrap_or(Format::Illegal)
+        .unwrap_or(Format::Illegal(0))
 }
 
 /// Parse an instruction with the `Unit` format.
