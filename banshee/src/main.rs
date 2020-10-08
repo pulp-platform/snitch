@@ -20,6 +20,7 @@ use std::{path::Path, ptr::null_mut};
 pub mod engine;
 pub mod riscv;
 mod softfloat;
+pub mod tran;
 
 use engine::*;
 
