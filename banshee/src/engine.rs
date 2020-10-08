@@ -1,7 +1,8 @@
 //! Engine for dynamic binary translation and execution
 
-use crate::tran::ElfTranslator;
+use crate::{riscv, tran::ElfTranslator};
 use anyhow::{bail, Result};
+use itertools::Itertools;
 use llvm_sys::{
     core::*, execution_engine::*, prelude::*, support::*, transforms::pass_manager_builder::*,
 };
@@ -164,6 +165,18 @@ pub unsafe fn add_llvm_symbols() {
         b"banshee_csr_write\0".as_ptr() as *const _,
         Cpu::binary_csr_write as *mut _,
     );
+    LLVMAddSymbol(
+        b"banshee_abort_escape\0".as_ptr() as *const _,
+        Cpu::binary_abort_escape as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_abort_illegal_inst\0".as_ptr() as *const _,
+        Cpu::binary_abort_illegal_inst as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_abort_illegal_branch\0".as_ptr() as *const _,
+        Cpu::binary_abort_illegal_branch as *mut _,
+    );
 }
 
 /// A CPU pointer to be passed to the binary code.
@@ -171,15 +184,6 @@ pub unsafe fn add_llvm_symbols() {
 pub struct Cpu<'a> {
     engine: &'a Engine,
     state: CpuState,
-}
-
-/// A representation of a single CPU core's state.
-#[derive(Debug, Default)]
-#[repr(C)]
-pub struct CpuState {
-    regs: [u32; 32],
-    pc: u32,
-    instret: u64,
 }
 
 impl<'a> Cpu<'a> {
@@ -220,5 +224,53 @@ impl<'a> Cpu<'a> {
 
     fn binary_csr_write(&self, csr: u16, value: u32) {
         trace!("Write CSR 0x{:x} = 0x{:?}", csr, value);
+    }
+
+    fn binary_abort_escape(&self, addr: u32) {
+        error!("CPU escaped binary at 0x{:x}", addr);
+    }
+
+    fn binary_abort_illegal_inst(&self, addr: u32, inst_raw: u32) {
+        error!(
+            "Illegal instruction {} at 0x{:x}",
+            riscv::parse_u32(inst_raw),
+            addr
+        );
+    }
+
+    fn binary_abort_illegal_branch(&self, addr: u32, target: u32) {
+        error!(
+            "Branch to unpredicted address 0x{:x} at 0x{:x}",
+            target, addr
+        );
+    }
+}
+
+/// A representation of a single CPU core's state.
+#[derive(Default)]
+#[repr(C)]
+pub struct CpuState {
+    regs: [u32; 32],
+    pc: u32,
+    instret: u64,
+}
+
+impl std::fmt::Debug for CpuState {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let regs = self
+            .regs
+            .iter()
+            .copied()
+            .enumerate()
+            .map(|(i, value)| format!("x{:02}: 0x{:08x}", i, value))
+            .chunks(4)
+            .into_iter()
+            .map(|mut chunk| chunk.join("  "))
+            .join("\n");
+        f.debug_struct("CpuState")
+            .field("regs", &format_args!("\n{}", regs))
+            .field("pc", &format_args!("0x{:x}", self.pc))
+            .field("instret", &self.instret)
+            .finish()
     }
 }
