@@ -1,10 +1,13 @@
 //! Binary translation
 
-use crate::{engine::Engine, riscv};
+use crate::{
+    engine::{Engine, TraceAccess},
+    riscv,
+};
 use anyhow::{anyhow, bail, Context, Result};
 use llvm_sys::{core::*, prelude::*, LLVMIntPredicate::*, LLVMRealPredicate::*};
 use std::{
-    cell::Cell,
+    cell::{Cell, RefCell},
     collections::{BTreeSet, HashMap},
     ffi::CString,
 };
@@ -20,6 +23,8 @@ pub struct ElfTranslator<'a> {
     pub target_addrs: BTreeSet<u64>,
     /// Basic blocks for each instruction address.
     pub inst_bbs: HashMap<u64, LLVMBasicBlockRef>,
+    /// Generate instruction tracing code.
+    pub trace: bool,
 }
 
 impl<'a> ElfTranslator<'a> {
@@ -30,6 +35,7 @@ impl<'a> ElfTranslator<'a> {
             engine,
             target_addrs: Default::default(),
             inst_bbs: Default::default(),
+            trace: engine.trace,
         }
     }
 
@@ -221,6 +227,17 @@ impl<'a> ElfTranslator<'a> {
                 LLVMInt32Type(), // Target
             ],
         );
+        self.declare_func(
+            "banshee_trace",
+            LLVMVoidType(),
+            [
+                state_ptr_type,                    // CPU
+                LLVMInt32Type(),                   // Addr
+                LLVMInt32Type(),                   // Inst
+                LLVMArrayType(LLVMInt64Type(), 2), // Access Slice
+                LLVMArrayType(LLVMInt64Type(), 2), // Data Slice
+            ],
+        );
 
         // Emit the function which will run the binary.
         let func_name = format!("execute_binary\0");
@@ -403,6 +420,8 @@ impl<'a> SectionTranslator<'a> {
                 addr,
                 inst,
                 was_terminator: Default::default(),
+                trace_accesses: Default::default(),
+                trace_emitted: Default::default(),
             };
             LLVMPositionBuilderAtEnd(self.builder, self.elf.inst_bbs[&addr]);
             match tran.emit() {
@@ -439,6 +458,8 @@ pub struct InstructionTranslator<'a> {
     addr: u64,
     inst: riscv::Format,
     was_terminator: Cell<bool>,
+    trace_accesses: RefCell<Vec<(TraceAccess, LLVMValueRef)>>,
+    trace_emitted: Cell<bool>,
 }
 
 impl<'a> InstructionTranslator<'a> {
@@ -460,6 +481,7 @@ impl<'a> InstructionTranslator<'a> {
         );
         LLVMBuildStore(self.builder, instret, self.instret_ptr());
 
+        // Emit the code for the instruction itself.
         match self.inst {
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
@@ -468,12 +490,17 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::Jimm20Rd(x) => self.emit_jimm20_rd(x),
             riscv::Format::RdRmRs1(x) => self.emit_rd_rm_rs1(x),
             riscv::Format::RdRmRs1Rs2(x) => self.emit_rd_rm_rs1_rs2(x),
+            riscv::Format::RdRmRs1Rs2Rs3(x) => self.emit_rd_rm_rs1_rs2_rs3(x),
             riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
             riscv::Format::RdRs1Shamt(x) => self.emit_rd_rs1_shamt(x),
             riscv::Format::Unit(x) => self.emit_unit(x),
             _ => Err(anyhow!("Unsupported instruction format")),
         }
-        .with_context(|| format!("Unsupported instruction 0x{:x}: {}", self.addr, self.inst))
+        .with_context(|| format!("Unsupported instruction 0x{:x}: {}", self.addr, self.inst))?;
+
+        // Emit the tracing code if requested.
+        self.emit_trace();
+        Ok(())
     }
 
     unsafe fn emit_bimm12hi_bimm12lo_rs1_rs2(
@@ -498,6 +525,7 @@ impl<'a> InstructionTranslator<'a> {
         let bb =
             LLVMCreateBasicBlockInContext(self.section.engine.context, b"\0".as_ptr() as *const _);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb);
+        self.emit_trace();
         LLVMBuildCondBr(self.builder, cmp, self.section.elf.inst_bbs[&target], bb);
         LLVMPositionBuilderAtEnd(self.builder, bb);
         Ok(())
@@ -615,6 +643,7 @@ impl<'a> InstructionTranslator<'a> {
                     data.rd,
                     LLVMConstInt(LLVMInt32Type(), (self.addr + 4) as u64, 0),
                 );
+                self.emit_trace();
 
                 // Create a basic block where we land in case of an unpredicted
                 // branch target (not in the `target_addrs` set).
@@ -703,6 +732,7 @@ impl<'a> InstructionTranslator<'a> {
                     data.rd,
                     LLVMConstInt(LLVMInt32Type(), (self.addr + 4) as u64, 0),
                 );
+                self.emit_trace(); // need to do this before we branch away
                 LLVMBuildBr(self.builder, self.section.elf.inst_bbs[&target]);
                 self.was_terminator.set(true);
                 Ok(())
@@ -820,6 +850,98 @@ impl<'a> InstructionTranslator<'a> {
             _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
+    }
+
+    unsafe fn emit_rd_rm_rs1_rs2_rs3(&self, data: riscv::FormatRdRmRs1Rs2Rs3) -> Result<()> {
+        trace!(
+            "{} f{} = f{}, f{}, f{}",
+            data.op,
+            data.rd,
+            data.rs1,
+            data.rs2,
+            data.rs3
+        );
+        match data.op {
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmaddS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubS => self.write_freg_f32(
+                data.rd,
+                self.emit_fmadd(
+                    data,
+                    self.read_freg_f32(data.rs1),
+                    self.read_freg_f32(data.rs2),
+                    self.read_freg_f32(data.rs3),
+                )?,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmaddD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubD => self.write_freg_f64(
+                data.rd,
+                self.emit_fmadd(
+                    data,
+                    self.read_freg_f64(data.rs1),
+                    self.read_freg_f64(data.rs2),
+                    self.read_freg_f64(data.rs3),
+                )?,
+            ),
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
+        Ok(())
+    }
+
+    unsafe fn emit_fmadd(
+        &self,
+        data: riscv::FormatRdRmRs1Rs2Rs3,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        rs3: LLVMValueRef,
+    ) -> Result<LLVMValueRef> {
+        let name = format!("{}\0", data.op);
+        let name = name.as_ptr() as *const _;
+        Ok(match data.op {
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmaddS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmaddD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmaddQ => LLVMBuildFAdd(
+                self.builder,
+                LLVMBuildFMul(self.builder, rs1, rs2, NONAME),
+                rs3,
+                name,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmsubS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubQ => LLVMBuildFSub(
+                self.builder,
+                LLVMBuildFMul(self.builder, rs1, rs2, NONAME),
+                rs3,
+                name,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddQ => LLVMBuildFAdd(
+                self.builder,
+                LLVMBuildFNeg(
+                    self.builder,
+                    LLVMBuildFMul(self.builder, rs1, rs2, NONAME),
+                    NONAME,
+                ),
+                rs3,
+                name,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubQ => LLVMBuildFSub(
+                self.builder,
+                LLVMBuildFNeg(
+                    self.builder,
+                    LLVMBuildFMul(self.builder, rs1, rs2, NONAME),
+                    NONAME,
+                ),
+                rs3,
+                name,
+            ),
+        })
     }
 
     unsafe fn emit_rd_rs1_rs2(&self, data: riscv::FormatRdRs1Rs2) -> Result<()> {
@@ -1134,7 +1256,10 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn emit_unit(&self, data: riscv::FormatUnit) -> Result<()> {
         trace!("{}", data.op,);
         match data.op {
-            riscv::OpcodeUnit::Wfi => LLVMBuildRetVoid(self.builder),
+            riscv::OpcodeUnit::Wfi => {
+                self.emit_trace();
+                LLVMBuildRetVoid(self.builder)
+            }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
@@ -1162,6 +1287,70 @@ impl<'a> InstructionTranslator<'a> {
             value,
             size,
         )
+    }
+
+    /// Emit the code for instruction tracing.
+    ///
+    /// Only emits the code once if called multiple times. Does nothing if the
+    /// parent `ElfTranslator` has tracing disabled.
+    unsafe fn emit_trace(&self) {
+        // Don't emit tracing twice, or if disabled, or if the current basic
+        // block has already been terminated.
+        if self.trace_emitted.get()
+            || !self.section.elf.trace
+            || !LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null()
+        {
+            return;
+        }
+        self.trace_emitted.set(true);
+
+        // Compose a list of accesses.
+        let accesses = self.trace_accesses.borrow();
+        let mut val_access = LLVMConstNull(LLVMArrayType(LLVMInt16Type(), accesses.len() as u32));
+        let mut val_data = LLVMConstNull(LLVMArrayType(LLVMInt64Type(), accesses.len() as u32));
+        for (i, &(access, data)) in accesses.iter().enumerate() {
+            let access: u16 = std::mem::transmute(access);
+            let data = LLVMBuildZExt(self.builder, data, LLVMInt64Type(), NONAME);
+            val_access = LLVMBuildInsertValue(
+                self.builder,
+                val_access,
+                LLVMConstInt(LLVMInt16Type(), access as u64, 0),
+                i as u32,
+                NONAME,
+            );
+            val_data = LLVMBuildInsertValue(self.builder, val_data, data, i as u32, NONAME);
+        }
+
+        // Move the list of accesses to the stack.
+        let ptr_access = LLVMBuildAlloca(self.builder, LLVMTypeOf(val_access), NONAME);
+        let ptr_data = LLVMBuildAlloca(self.builder, LLVMTypeOf(val_data), NONAME);
+        LLVMBuildStore(self.builder, val_access, ptr_access);
+        LLVMBuildStore(self.builder, val_data, ptr_data);
+        let ptr_access = LLVMBuildPtrToInt(self.builder, ptr_access, LLVMInt64Type(), NONAME);
+        let ptr_data = LLVMBuildPtrToInt(self.builder, ptr_data, LLVMInt64Type(), NONAME);
+
+        // Assemble the slice arguments in the format tha rust expects
+        // `(ptr, len)`.
+        let len = LLVMConstInt(LLVMInt64Type(), accesses.len() as u64, 0);
+        let slice_access = LLVMConstNull(LLVMArrayType(LLVMInt64Type(), 2));
+        let slice_access = LLVMBuildInsertValue(self.builder, slice_access, ptr_access, 0, NONAME);
+        let slice_access = LLVMBuildInsertValue(self.builder, slice_access, len, 1, NONAME);
+        let slice_data = LLVMConstNull(LLVMArrayType(LLVMInt64Type(), 2));
+        let slice_data = LLVMBuildInsertValue(self.builder, slice_data, ptr_data, 0, NONAME);
+        let slice_data = LLVMBuildInsertValue(self.builder, slice_data, len, 1, NONAME);
+
+        // Call the trace function.
+        let addr = LLVMConstInt(LLVMInt32Type(), self.addr as u64, 0);
+        let inst = LLVMConstInt(LLVMInt32Type(), self.inst.raw() as u64, 0);
+        self.section.emit_call(
+            "banshee_trace",
+            [self.section.state_ptr, addr, inst, slice_access, slice_data],
+        );
+    }
+
+    /// Log an access for the trace.
+    fn trace_access(&self, access: TraceAccess, data: LLVMValueRef) {
+        self.trace_accesses.borrow_mut().push((access, data));
     }
 
     /// Emit the code to read-modify-write a CSR with an immediate rs1.
@@ -1217,6 +1406,7 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code necessary to load a value from memory.
     unsafe fn read_mem(&self, addr: LLVMValueRef, size: usize, sext: bool) -> LLVMValueRef {
+        self.trace_access(TraceAccess::ReadMem, addr);
         let value = LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
@@ -1244,6 +1434,7 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code necessary to store a value to memory.
     unsafe fn write_mem(&self, addr: LLVMValueRef, value: LLVMValueRef, size: usize) {
+        self.trace_access(TraceAccess::WriteMem, addr);
         LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
@@ -1268,7 +1459,9 @@ impl<'a> InstructionTranslator<'a> {
             LLVMConstInt(LLVMInt32Type(), 0, 0)
         } else {
             let ptr = self.reg_ptr(rs);
-            LLVMBuildLoad(self.builder, ptr, format!("x{}\0", rs).as_ptr() as *const _)
+            let data = LLVMBuildLoad(self.builder, ptr, format!("x{}\0", rs).as_ptr() as *const _);
+            self.trace_access(TraceAccess::ReadReg(rs as u8), data);
+            data
         }
     }
 
@@ -1276,6 +1469,7 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn write_reg(&self, rd: u32, data: LLVMValueRef) {
         if rd != 0 {
             let ptr = self.reg_ptr(rd);
+            self.trace_access(TraceAccess::WriteReg(rd as u8), data);
             LLVMBuildStore(self.builder, data, ptr);
         }
     }
@@ -1283,12 +1477,15 @@ impl<'a> InstructionTranslator<'a> {
     /// Emit the code necessary to read a value from a float register.
     unsafe fn read_freg(&self, rs: u32) -> LLVMValueRef {
         let ptr = self.freg_ptr(rs);
-        LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
+        let data = LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _);
+        self.trace_access(TraceAccess::ReadFReg(rs as u8), data);
+        data
     }
 
     /// Emit the code necessary to write a value to a float register.
     unsafe fn write_freg(&self, rd: u32, data: LLVMValueRef) {
         let ptr = self.freg_ptr(rd);
+        self.trace_access(TraceAccess::WriteFReg(rd as u8), data);
         LLVMBuildStore(self.builder, data, ptr);
     }
 
@@ -1455,7 +1652,7 @@ impl<'a> InstructionTranslator<'a> {
             ]
             .as_mut_ptr(),
             2 as u32,
-            format!("ptr_pc\0").as_ptr() as *const _,
+            format!("ptr_instret\0").as_ptr() as *const _,
         )
     }
 }

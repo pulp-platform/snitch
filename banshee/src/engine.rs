@@ -23,6 +23,8 @@ pub struct Engine {
     pub opt_llvm: bool,
     /// Optimize during JIT compilation.
     pub opt_jit: bool,
+    /// Enable instruction tracing.
+    pub trace: bool,
     /// The global memory.
     pub memory: RefCell<HashMap<u64, u32>>,
 }
@@ -45,6 +47,7 @@ impl Engine {
             exit_code: Default::default(),
             opt_llvm: true,
             opt_jit: true,
+            trace: false,
             memory: Default::default(),
         }
     }
@@ -82,10 +85,11 @@ impl Engine {
         {
             let mut mem = self.memory.borrow_mut();
             for section in &elf.sections {
-                if section.shdr.shtype != elf::types::SHT_PROGBITS {
+                if (section.shdr.flags.0 & elf::types::SHF_ALLOC.0) == 0 {
                     continue;
                 }
                 use byteorder::{LittleEndian, ReadBytesExt};
+                trace!("Preloading ELF section `{}`", section.shdr.name);
                 mem.extend(
                     section
                         .data
@@ -94,6 +98,7 @@ impl Engine {
                         .map(|(offset, mut value)| {
                             let addr = section.shdr.addr + offset as u64 * 4;
                             let value = value.read_u32::<LittleEndian>().unwrap_or(0);
+                            trace!("  - 0x{:x} = 0x{:x}", addr, value);
                             (addr, value)
                         }),
                 );
@@ -206,6 +211,10 @@ pub unsafe fn add_llvm_symbols() {
         b"banshee_abort_illegal_branch\0".as_ptr() as *const _,
         Cpu::binary_abort_illegal_branch as *mut _,
     );
+    LLVMAddSymbol(
+        b"banshee_trace\0".as_ptr() as *const _,
+        Cpu::binary_trace as *mut _,
+    );
 }
 
 /// A CPU pointer to be passed to the binary code.
@@ -281,6 +290,24 @@ impl<'a> Cpu<'a> {
             target, addr
         );
     }
+
+    fn binary_trace(&self, addr: u32, inst: u32, accesses: &[TraceAccess], data: &[u64]) {
+        // Assemble the arguments.
+        let args = accesses.iter().copied().zip(data.iter().copied());
+        let mut args = args.map(|(access, data)| match access {
+            TraceAccess::ReadMem => format!("RA:{:08x}", data as u32),
+            TraceAccess::WriteMem => format!("WA:{:08x}", data as u32),
+            TraceAccess::ReadReg(x) => format!("x{}:{:08x}", x, data as u32),
+            TraceAccess::WriteReg(x) => format!("x{}={:08x}", x, data as u32),
+            TraceAccess::ReadFReg(x) => format!("f{}:{:016x}", x, data),
+            TraceAccess::WriteFReg(x) => format!("f{}={:016x}", x, data),
+        });
+        let args = args.join(" ");
+
+        // Assemble the trace line.
+        let line = format!("{:08x}  DASM({:08x})    # {}", addr, inst, args);
+        println!("{}", line);
+    }
 }
 
 /// A representation of a single CPU core's state.
@@ -322,4 +349,16 @@ impl std::fmt::Debug for CpuState {
             .field("instret", &self.instret)
             .finish()
     }
+}
+
+/// A single register or memory access as recorded in a trace.
+#[derive(Debug, Clone, Copy)]
+#[repr(C, u8)]
+pub enum TraceAccess {
+    ReadMem,
+    ReadReg(u8),
+    ReadFReg(u8),
+    WriteMem,
+    WriteReg(u8),
+    WriteFReg(u8),
 }

@@ -829,6 +829,12 @@ fn main() -> Result<()> {
                 .long("no-opt-jit")
                 .help("Do not optimize during JIT compilation"),
         )
+        .arg(
+            Arg::with_name("trace")
+                .long("trace")
+                .short("t")
+                .help("Enable instruction tracing"),
+        )
         .get_matches();
 
     // Configure the logger.
@@ -849,6 +855,7 @@ fn main() -> Result<()> {
     let mut engine = Engine::new(context);
     engine.opt_llvm = !matches.is_present("no-opt-llvm");
     engine.opt_jit = !matches.is_present("no-opt-jit");
+    engine.trace = matches.is_present("trace");
 
     // Read the binary.
     let path = Path::new(matches.value_of("binary").unwrap());
