@@ -6,3 +6,12 @@
 
 - Static translation only at the moment
 - Float rounding modes are ignored
+
+## Todo
+
+- [ ] Add instruction tracing
+- [ ] Add SSR support
+- [ ] Add FREP support
+- [ ] Add fast local memory / memory hierarchy
+- [ ] Add multi-core single-cluster execution
+- [ ] Add multi-cluster execution

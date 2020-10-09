@@ -433,7 +433,7 @@ pub struct FormatImm12hiImm12loRs1Rs2 {
 
 impl FormatImm12hiImm12loRs1Rs2 {
     pub fn imm(&self) -> i32 {
-        (((((self.imm12lo >> 0) & 0x1f) << 0 | ((self.imm12hi >> 5) & 0x7f) << 5) << 20) as i32)
+        (((((self.imm12lo >> 0) & 0x1f) << 0 | ((self.imm12hi >> 0) & 0x1f) << 5) << 20) as i32)
             >> 20
     }
 }
@@ -525,9 +525,9 @@ impl FormatJimm20Rd {
         (((((self.jimm20 >> 0) & 0xff) << 12
             | ((self.jimm20 >> 8) & 0x1) << 11
             | ((self.jimm20 >> 9) & 0x3ff) << 1
-            | ((self.jimm20 >> 19) & 0x1) << 12)
-            << 12) as i32)
-            >> 12
+            | ((self.jimm20 >> 19) & 0x1) << 20)
+            << 11) as i32)
+            >> 11
     }
 }
 
