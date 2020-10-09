@@ -28,6 +28,10 @@ pub struct ElfTranslator<'a> {
     pub inst_bbs: HashMap<u64, LLVMBasicBlockRef>,
     /// Generate instruction tracing code.
     pub trace: bool,
+    /// Start address of the fast local scratchpad.
+    pub tcdm_start: u32,
+    /// End address of the fast local scratchpad.
+    pub tcdm_end: u32,
 }
 
 impl<'a> ElfTranslator<'a> {
@@ -39,6 +43,8 @@ impl<'a> ElfTranslator<'a> {
             target_addrs: Default::default(),
             inst_bbs: Default::default(),
             trace: engine.trace,
+            tcdm_start: 0x000000,
+            tcdm_end: 0x020000,
         }
     }
 
@@ -153,11 +159,12 @@ impl<'a> ElfTranslator<'a> {
         let state_type =
             LLVMStructCreateNamed(self.engine.context, format!("cpu\0").as_ptr() as *const _);
         let mut state_fields = [
-            LLVMPointerType(LLVMInt8Type(), 0), // Context
-            LLVMArrayType(LLVMInt32Type(), 32), // Registers
-            LLVMArrayType(LLVMInt64Type(), 32), // Float Registers
-            LLVMInt32Type(),                    // PC
-            LLVMInt64Type(),                    // Retired Instructions
+            LLVMPointerType(LLVMInt8Type(), 0),  // Context
+            LLVMArrayType(LLVMInt32Type(), 32),  // Registers
+            LLVMArrayType(LLVMInt64Type(), 32),  // Float Registers
+            LLVMInt32Type(),                     // PC
+            LLVMInt64Type(),                     // Retired Instructions
+            LLVMPointerType(LLVMInt32Type(), 0), // TCDM
         ];
         LLVMStructSetBody(
             state_type,
@@ -1444,6 +1451,24 @@ impl<'a> InstructionTranslator<'a> {
     /// Emit the code necessary to load a value from memory.
     unsafe fn read_mem(&self, addr: LLVMValueRef, size: usize, sext: bool) -> LLVMValueRef {
         self.trace_access(TraceAccess::ReadMem, addr);
+
+        // Check if the address is in the TCDM, and emit a fast access.
+        let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(addr);
+        let bb_tcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_slow = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_tcdm);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_slow);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
+        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_slow);
+
+        // Emit the TCDM fast case.
+        LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
+        let value_tcdm = LLVMBuildLoad(self.builder, tcdm_ptr, NONAME);
+        LLVMBuildBr(self.builder, bb_end);
+
+        // Emit the regular slow case.
+        LLVMPositionBuilderAtEnd(self.builder, bb_slow);
         let value = LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
@@ -1459,19 +1484,49 @@ impl<'a> InstructionTranslator<'a> {
             3,
             NONAME,
         );
-        if sext {
+        let value_slow = if sext {
             let ty = LLVMIntType(8 << size);
             let value = LLVMBuildTrunc(self.builder, value, ty, NONAME);
             let value = LLVMBuildSExt(self.builder, value, LLVMInt32Type(), NONAME);
             value
         } else {
             value
-        }
+        };
+        LLVMBuildBr(self.builder, bb_end);
+
+        // Build the PHI node to bring the two together.
+        LLVMPositionBuilderAtEnd(self.builder, bb_end);
+        let phi = LLVMBuildPhi(self.builder, LLVMInt32Type(), NONAME);
+        LLVMAddIncoming(
+            phi,
+            [value_tcdm, value_slow].as_mut_ptr(),
+            [bb_tcdm, bb_slow].as_mut_ptr(),
+            2,
+        );
+        phi
     }
 
     /// Emit the code necessary to store a value to memory.
     unsafe fn write_mem(&self, addr: LLVMValueRef, value: LLVMValueRef, size: usize) {
         self.trace_access(TraceAccess::WriteMem, addr);
+
+        // Check if the address is in the TCDM, and emit a fast access.
+        let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(addr);
+        let bb_tcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_slow = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_tcdm);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_slow);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
+        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_slow);
+
+        // Emit the TCDM fast case.
+        LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
+        LLVMBuildStore(self.builder, value, tcdm_ptr);
+        LLVMBuildBr(self.builder, bb_end);
+
+        // Emit the regular slow case.
+        LLVMPositionBuilderAtEnd(self.builder, bb_slow);
         LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
@@ -1488,6 +1543,41 @@ impl<'a> InstructionTranslator<'a> {
             4,
             NONAME,
         );
+        LLVMBuildBr(self.builder, bb_end);
+
+        // Reconverge.
+        LLVMPositionBuilderAtEnd(self.builder, bb_end);
+    }
+
+    /// Emit the code to check if an address is within the TCDM.
+    ///
+    /// Returns an `i1` indicating whether it is as first result, and a pointer
+    /// to that location in the TCDM.
+    unsafe fn emit_tcdm_check(&self, addr: LLVMValueRef) -> (LLVMValueRef, LLVMValueRef) {
+        let tcdm_start = LLVMConstInt(LLVMInt32Type(), self.section.elf.tcdm_start as u64, 0);
+        let tcdm_end = LLVMConstInt(LLVMInt32Type(), self.section.elf.tcdm_end as u64, 0);
+        let in_range = LLVMBuildAnd(
+            self.builder,
+            LLVMBuildICmp(self.builder, LLVMIntUGE, addr, tcdm_start, NONAME),
+            LLVMBuildICmp(self.builder, LLVMIntULT, addr, tcdm_end, NONAME),
+            NONAME,
+        );
+        let index = LLVMBuildSub(self.builder, addr, tcdm_start, NONAME);
+        let index = LLVMBuildUDiv(
+            self.builder,
+            index,
+            LLVMConstInt(LLVMInt32Type(), 4, 0),
+            NONAME,
+        );
+        let ptr = LLVMBuildLoad(self.builder, self.tcdm_ptr(), NONAME);
+        let ptr = LLVMBuildGEP(
+            self.builder,
+            ptr,
+            [index].as_mut_ptr(),
+            1 as u32,
+            b"ptr_tcdm\0".as_ptr() as *const _,
+        );
+        (in_range, ptr)
     }
 
     /// Emit the code necessary to read a value from a register.
@@ -1690,6 +1780,20 @@ impl<'a> InstructionTranslator<'a> {
             .as_mut_ptr(),
             2 as u32,
             format!("ptr_instret\0").as_ptr() as *const _,
+        )
+    }
+
+    unsafe fn tcdm_ptr(&self) -> LLVMValueRef {
+        LLVMBuildGEP(
+            self.builder,
+            self.section.state_ptr,
+            [
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+                LLVMConstInt(LLVMInt32Type(), 5, 0),
+            ]
+            .as_mut_ptr(),
+            2 as u32,
+            format!("ptr_tcdm\0").as_ptr() as *const _,
         )
     }
 }
