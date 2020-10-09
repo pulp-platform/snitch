@@ -164,14 +164,14 @@ impl Engine {
         trace!("Initial state: {:#?}", cpu.state);
 
         // Execute the binary.
-        debug!("Launching binary");
+        info!("Launching binary");
         let t0 = std::time::Instant::now();
         exec(&cpu);
         let t1 = std::time::Instant::now();
         let duration = (t1.duration_since(t0)).as_secs_f64();
 
         trace!("Final state: {:#?}", cpu.state);
-        debug!("Exit code is 0x{:x}", self.exit_code.get());
+        info!("Exit code is 0x{:x}", self.exit_code.get());
         info!(
             "Retired {} inst in {} s, {} inst/s",
             cpu.state.instret,
