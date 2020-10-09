@@ -159,8 +159,16 @@ impl Engine {
         ));
         debug!("Translated binary is at {:?}", exec as *const i8);
 
+        // Allocate some TCDM memory.
+        let mut tcdm = vec![0u32; 128 * 1024 / 4];
+        for (&addr, &value) in self.memory.borrow().iter() {
+            if addr < 0x020000 {
+                tcdm[(addr / 4) as usize] = value;
+            }
+        }
+
         // Create a CPU.
-        let cpu = Cpu::new(self);
+        let cpu = Cpu::new(self, tcdm.as_ptr());
         trace!("Initial state: {:#?}", cpu.state);
 
         // Execute the binary.
@@ -222,22 +230,24 @@ pub unsafe fn add_llvm_symbols() {
 pub struct Cpu<'a> {
     engine: &'a Engine,
     state: CpuState,
+    tcdm_ptr: *const u32,
 }
 
 impl<'a> Cpu<'a> {
     /// Create a new CPU in a default state.
-    pub fn new(engine: &'a Engine) -> Self {
+    pub fn new(engine: &'a Engine, tcdm_ptr: *const u32) -> Self {
         Self {
             engine,
             state: Default::default(),
+            tcdm_ptr,
         }
     }
 
     fn binary_load(&self, addr: u32, size: u8) -> u32 {
         trace!("Load 0x{:x} ({}B)", addr, 8 << size);
         match addr {
-            0x40000000 => 0x42000,                     // tcdm_start
-            0x40000008 => 0x43000,                     // tcdm_end
+            0x40000000 => 0x000000,                    // tcdm_start
+            0x40000008 => 0x020000,                    // tcdm_end
             0x40000010 => 1,                           // nr_cores
             0x40000020 => self.engine.exit_code.get(), // scratch_reg
             _ => self
