@@ -14,6 +14,9 @@ use std::{
 
 static NONAME: &'static i8 = unsafe { std::mem::transmute("\0".as_ptr()) };
 
+/// Number of arguments the trace maximally shows per instruction.
+const TRACE_BUFFER_LEN: u32 = 8;
+
 /// A translator for an entire ELF file.
 pub struct ElfTranslator<'a> {
     pub elf: &'a elf::File,
@@ -255,6 +258,25 @@ impl<'a> ElfTranslator<'a> {
             func,
             b"entry\0".as_ptr() as *const _,
         );
+        LLVMPositionBuilderAtEnd(builder, entry_bb);
+
+        // Allocate space for tracing data, if needed.
+        let (trace_access_buffer, trace_data_buffer) = if self.trace {
+            (
+                LLVMBuildAlloca(
+                    builder,
+                    LLVMArrayType(LLVMInt16Type(), TRACE_BUFFER_LEN),
+                    NONAME,
+                ),
+                LLVMBuildAlloca(
+                    builder,
+                    LLVMArrayType(LLVMInt64Type(), TRACE_BUFFER_LEN),
+                    NONAME,
+                ),
+            )
+        } else {
+            (std::ptr::null_mut(), std::ptr::null_mut())
+        };
 
         // Gather the set of executable addresses.
         let inst_addrs: BTreeSet<u64> = self
@@ -282,7 +304,6 @@ impl<'a> ElfTranslator<'a> {
         self.inst_bbs = inst_bbs;
 
         // Emit the branch to the entry symbol.
-        LLVMPositionBuilderAtEnd(builder, entry_bb);
         LLVMBuildBr(builder, self.inst_bbs[&self.elf.ehdr.entry]);
 
         // Create a translator for each section.
@@ -294,6 +315,8 @@ impl<'a> ElfTranslator<'a> {
                 engine: self.engine,
                 func,
                 state_ptr,
+                trace_access_buffer,
+                trace_data_buffer,
                 builder,
                 addr_start: section.shdr.addr,
                 addr_end: section.shdr.addr + section.shdr.size,
@@ -356,6 +379,10 @@ pub struct SectionTranslator<'a> {
     func: LLVMValueRef,
     /// An LLVM value that holds the pointer to the CPU state structure.
     state_ptr: LLVMValueRef,
+    /// An LLVM value that holds the pointer to the trace access buffer.
+    trace_access_buffer: LLVMValueRef,
+    /// An LLVM value that holds the pointer to the trace data buffer.
+    trace_data_buffer: LLVMValueRef,
     /// The builder to emit instructions with.
     builder: LLVMBuilderRef,
     /// The first address in the section.
@@ -1308,7 +1335,7 @@ impl<'a> InstructionTranslator<'a> {
         let accesses = self.trace_accesses.borrow();
         let mut val_access = LLVMConstNull(LLVMArrayType(LLVMInt16Type(), accesses.len() as u32));
         let mut val_data = LLVMConstNull(LLVMArrayType(LLVMInt64Type(), accesses.len() as u32));
-        for (i, &(access, data)) in accesses.iter().enumerate() {
+        for (i, &(access, data)) in accesses.iter().enumerate().take(TRACE_BUFFER_LEN as usize) {
             let access: u16 = std::mem::transmute(access);
             let data = LLVMBuildZExt(self.builder, data, LLVMInt64Type(), NONAME);
             val_access = LLVMBuildInsertValue(
@@ -1322,8 +1349,18 @@ impl<'a> InstructionTranslator<'a> {
         }
 
         // Move the list of accesses to the stack.
-        let ptr_access = LLVMBuildAlloca(self.builder, LLVMTypeOf(val_access), NONAME);
-        let ptr_data = LLVMBuildAlloca(self.builder, LLVMTypeOf(val_data), NONAME);
+        let ptr_access = LLVMBuildBitCast(
+            self.builder,
+            self.section.trace_access_buffer,
+            LLVMPointerType(LLVMTypeOf(val_access), 0),
+            NONAME,
+        );
+        let ptr_data = LLVMBuildBitCast(
+            self.builder,
+            self.section.trace_data_buffer,
+            LLVMPointerType(LLVMTypeOf(val_data), 0),
+            NONAME,
+        );
         LLVMBuildStore(self.builder, val_access, ptr_access);
         LLVMBuildStore(self.builder, val_data, ptr_data);
         let ptr_access = LLVMBuildPtrToInt(self.builder, ptr_access, LLVMInt64Type(), NONAME);
