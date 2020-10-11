@@ -1618,10 +1618,14 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code to read a f64 value from a float register.
     unsafe fn read_freg_f64(&self, rs: u32) -> LLVMValueRef {
-        let ptr = self.freg_ptr(rs);
+        let raw_ptr = self.freg_ptr(rs);
+        self.trace_access(
+            TraceAccess::ReadFReg(rs as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
         let ptr = LLVMBuildBitCast(
             self.builder,
-            ptr,
+            raw_ptr,
             LLVMPointerType(LLVMDoubleType(), 0),
             NONAME,
         );
@@ -1630,10 +1634,14 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code to read a f32 value from a float register.
     unsafe fn read_freg_f32(&self, rs: u32) -> LLVMValueRef {
-        let ptr = self.freg_ptr(rs);
+        let raw_ptr = self.freg_ptr(rs);
+        self.trace_access(
+            TraceAccess::ReadFReg(rs as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
         let ptr = LLVMBuildBitCast(
             self.builder,
-            ptr,
+            raw_ptr,
             LLVMPointerType(LLVMFloatType(), 0),
             NONAME,
         );
@@ -1642,24 +1650,28 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code to write a f64 value to a float register.
     unsafe fn write_freg_f64(&self, rd: u32, data: LLVMValueRef) {
-        let ptr = self.freg_ptr(rd);
+        let raw_ptr = self.freg_ptr(rd);
         let ptr = LLVMBuildBitCast(
             self.builder,
-            ptr,
+            raw_ptr,
             LLVMPointerType(LLVMDoubleType(), 0),
             NONAME,
         );
         LLVMBuildStore(self.builder, data, ptr);
+        self.trace_access(
+            TraceAccess::WriteFReg(rd as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
     }
 
     /// Emit the code to write a f32 value to a float register.
     unsafe fn write_freg_f32(&self, rd: u32, data: LLVMValueRef) {
-        let ptr = self.freg_ptr(rd);
+        let raw_ptr = self.freg_ptr(rd);
 
         // Nanbox the value.
         let ptr_hi = LLVMBuildBitCast(
             self.builder,
-            ptr,
+            raw_ptr,
             LLVMPointerType(LLVMInt32Type(), 0),
             NONAME,
         );
@@ -1679,11 +1691,15 @@ impl<'a> InstructionTranslator<'a> {
         // Write the actual value.
         let ptr = LLVMBuildBitCast(
             self.builder,
-            ptr,
+            raw_ptr,
             LLVMPointerType(LLVMFloatType(), 0),
             NONAME,
         );
         LLVMBuildStore(self.builder, data, ptr);
+        self.trace_access(
+            TraceAccess::WriteFReg(rd as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
     }
 
     /// Emit the code necessary to read a value from a register.
