@@ -158,12 +158,15 @@ impl<'a> ElfTranslator<'a> {
         // Assemble the struct type which holds the CPU state.
         let state_type =
             LLVMStructCreateNamed(self.engine.context, format!("cpu\0").as_ptr() as *const _);
+        let ssr_type = LLVMGetTypeByName(self.engine.module, "SsrState\0".as_ptr() as *const _);
         let mut state_fields = [
             LLVMPointerType(LLVMInt8Type(), 0),  // Context
             LLVMArrayType(LLVMInt32Type(), 32),  // Registers
             LLVMArrayType(LLVMInt64Type(), 32),  // Float Registers
             LLVMInt32Type(),                     // PC
             LLVMInt64Type(),                     // Retired Instructions
+            LLVMArrayType(ssr_type, 2),          // SSRs
+            LLVMInt32Type(),                     // SSR enable
             LLVMPointerType(LLVMInt32Type(), 0), // TCDM
         ];
         LLVMStructSetBody(
@@ -712,34 +715,37 @@ impl<'a> InstructionTranslator<'a> {
                 return Ok(());
             }
             riscv::OpcodeImm12RdRs1::Fld => {
-                let raw_lo = self.emit_load(rs1, imm, 2, false);
-                let raw_hi = self.emit_load(
-                    rs1,
-                    LLVMBuildAdd(
-                        self.builder,
-                        imm,
-                        LLVMConstInt(LLVMInt32Type(), 4, 0),
-                        NONAME,
-                    ),
-                    2,
-                    false,
-                );
-                let raw_lo = LLVMBuildZExt(self.builder, raw_lo, LLVMInt64Type(), NONAME);
-                let raw_hi = LLVMBuildZExt(self.builder, raw_hi, LLVMInt64Type(), NONAME);
-                let raw_hi = LLVMBuildShl(
-                    self.builder,
-                    raw_hi,
-                    LLVMConstInt(LLVMInt64Type(), 32, 0),
-                    NONAME,
-                );
-                let value = LLVMBuildOr(self.builder, raw_lo, raw_hi, NONAME);
-                self.write_freg(data.rd, value);
+                self.emit_fld(data.rd, LLVMBuildAdd(self.builder, rs1, imm, NONAME));
                 return Ok(());
             }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
         Ok(())
+    }
+
+    unsafe fn emit_fld(&self, rd: u32, addr: LLVMValueRef) {
+        let raw_lo = self.read_mem(addr, 2, false);
+        let raw_hi = self.read_mem(
+            LLVMBuildAdd(
+                self.builder,
+                addr,
+                LLVMConstInt(LLVMInt32Type(), 4, 0),
+                NONAME,
+            ),
+            2,
+            false,
+        );
+        let raw_lo = LLVMBuildZExt(self.builder, raw_lo, LLVMInt64Type(), NONAME);
+        let raw_hi = LLVMBuildZExt(self.builder, raw_hi, LLVMInt64Type(), NONAME);
+        let raw_hi = LLVMBuildShl(
+            self.builder,
+            raw_hi,
+            LLVMConstInt(LLVMInt64Type(), 32, 0),
+            NONAME,
+        );
+        let value = LLVMBuildOr(self.builder, raw_lo, raw_hi, NONAME);
+        self.write_freg(rd, value);
     }
 
     unsafe fn emit_imm20_rd(&self, data: riscv::FormatImm20Rd) -> Result<()> {
@@ -1451,24 +1457,41 @@ impl<'a> InstructionTranslator<'a> {
     /// Emit the code necessary to load a value from memory.
     unsafe fn read_mem(&self, addr: LLVMValueRef, size: usize, sext: bool) -> LLVMValueRef {
         self.trace_access(TraceAccess::ReadMem, addr);
+        let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
 
         // Check if the address is in the TCDM, and emit a fast access.
         let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(addr);
         let bb_tcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        let bb_slow = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_notcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_tcdm);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_slow);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
-        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_slow);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_notcdm);
+        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_notcdm);
 
         // Emit the TCDM fast case.
         LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
         let value_tcdm = LLVMBuildLoad(self.builder, tcdm_ptr, NONAME);
         LLVMBuildBr(self.builder, bb_end);
+        LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
+
+        // Check if the address is in the SSR configuration space.
+        let (is_ssr, ssr_ptr, ssr_addr) = self.emit_ssr_check(addr);
+        let bb_ssr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_nossr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_ssr);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_nossr);
+        LLVMBuildCondBr(self.builder, is_ssr, bb_ssr, bb_nossr);
+
+        // Emit the SSR case,
+        LLVMPositionBuilderAtEnd(self.builder, bb_ssr);
+        let value_ssr = self
+            .section
+            .emit_call("banshee_ssr_read_cfg", [ssr_ptr, ssr_addr]);
+        LLVMBuildBr(self.builder, bb_end);
+        LLVMPositionBuilderAtEnd(self.builder, bb_nossr);
 
         // Emit the regular slow case.
-        LLVMPositionBuilderAtEnd(self.builder, bb_slow);
+        let bb_slow = bb_nossr;
         let value = LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
@@ -1499,9 +1522,9 @@ impl<'a> InstructionTranslator<'a> {
         let phi = LLVMBuildPhi(self.builder, LLVMInt32Type(), NONAME);
         LLVMAddIncoming(
             phi,
-            [value_tcdm, value_slow].as_mut_ptr(),
-            [bb_tcdm, bb_slow].as_mut_ptr(),
-            2,
+            [value_tcdm, value_ssr, value_slow].as_mut_ptr(),
+            [bb_tcdm, bb_ssr, bb_slow].as_mut_ptr(),
+            3,
         );
         phi
     }
@@ -1509,24 +1532,39 @@ impl<'a> InstructionTranslator<'a> {
     /// Emit the code necessary to store a value to memory.
     unsafe fn write_mem(&self, addr: LLVMValueRef, value: LLVMValueRef, size: usize) {
         self.trace_access(TraceAccess::WriteMem, addr);
+        let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
 
         // Check if the address is in the TCDM, and emit a fast access.
         let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(addr);
         let bb_tcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        let bb_slow = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_notcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_tcdm);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_slow);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
-        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_slow);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_notcdm);
+        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_notcdm);
 
         // Emit the TCDM fast case.
         LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
         LLVMBuildStore(self.builder, value, tcdm_ptr);
         LLVMBuildBr(self.builder, bb_end);
+        LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
+
+        // Check if the address is in the SSR configuration space.
+        let (is_ssr, ssr_ptr, ssr_addr) = self.emit_ssr_check(addr);
+        let bb_ssr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_nossr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_ssr);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_nossr);
+        LLVMBuildCondBr(self.builder, is_ssr, bb_ssr, bb_nossr);
+
+        // Emit the SSR case.
+        LLVMPositionBuilderAtEnd(self.builder, bb_ssr);
+        self.section
+            .emit_call("banshee_ssr_write_cfg", [ssr_ptr, ssr_addr, value]);
+        LLVMBuildBr(self.builder, bb_end);
+        LLVMPositionBuilderAtEnd(self.builder, bb_nossr);
 
         // Emit the regular slow case.
-        LLVMPositionBuilderAtEnd(self.builder, bb_slow);
         LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
@@ -1580,6 +1618,42 @@ impl<'a> InstructionTranslator<'a> {
         (in_range, ptr)
     }
 
+    /// Emit the code to check if an address is within the SSR config range.
+    ///
+    /// Returns an `i1` indicating whether it is as first result, a pointer to
+    /// the corresponding SSR state as a second result, and an address within
+    /// the SSR config as a third result.
+    unsafe fn emit_ssr_check(
+        &self,
+        addr: LLVMValueRef,
+    ) -> (LLVMValueRef, LLVMValueRef, LLVMValueRef) {
+        let ssr_start = LLVMConstInt(LLVMInt32Type(), 0x204800, 0);
+        let ssr_end = LLVMConstInt(LLVMInt32Type(), 0x204800 + 32 * 8 * 2, 0);
+        let ssr_size = LLVMConstInt(LLVMInt32Type(), 32 * 8, 0);
+        let in_range = LLVMBuildAnd(
+            self.builder,
+            LLVMBuildICmp(self.builder, LLVMIntUGE, addr, ssr_start, NONAME),
+            LLVMBuildICmp(self.builder, LLVMIntULT, addr, ssr_end, NONAME),
+            NONAME,
+        );
+        let index = LLVMBuildSub(self.builder, addr, ssr_start, NONAME);
+        let subaddr = LLVMBuildURem(self.builder, index, ssr_size, NONAME);
+        let index = LLVMBuildUDiv(self.builder, index, ssr_size, NONAME);
+        let ptr = LLVMBuildGEP(
+            self.builder,
+            self.section.state_ptr,
+            [
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+                LLVMConstInt(LLVMInt32Type(), 5, 0),
+                index,
+            ]
+            .as_mut_ptr(),
+            3 as u32,
+            b"ptr_ssrcfg\0".as_ptr() as *const _,
+        );
+        (in_range, ptr, subaddr)
+    }
+
     /// Emit the code necessary to read a value from a register.
     unsafe fn read_reg(&self, rs: u32) -> LLVMValueRef {
         if rs == 0 {
@@ -1603,6 +1677,7 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code necessary to read a value from a float register.
     unsafe fn read_freg(&self, rs: u32) -> LLVMValueRef {
+        self.emit_possible_ssr_read(rs);
         let ptr = self.freg_ptr(rs);
         let data = LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _);
         self.trace_access(TraceAccess::ReadFReg(rs as u8), data);
@@ -1618,6 +1693,7 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code to read a f64 value from a float register.
     unsafe fn read_freg_f64(&self, rs: u32) -> LLVMValueRef {
+        self.emit_possible_ssr_read(rs);
         let raw_ptr = self.freg_ptr(rs);
         self.trace_access(
             TraceAccess::ReadFReg(rs as u8),
@@ -1634,6 +1710,7 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code to read a f32 value from a float register.
     unsafe fn read_freg_f32(&self, rs: u32) -> LLVMValueRef {
+        self.emit_possible_ssr_read(rs);
         let raw_ptr = self.freg_ptr(rs);
         self.trace_access(
             TraceAccess::ReadFReg(rs as u8),
@@ -1700,6 +1777,37 @@ impl<'a> InstructionTranslator<'a> {
             TraceAccess::WriteFReg(rd as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
+    }
+
+    /// Emit the code to load the next value of an SSR, if enabled.
+    unsafe fn emit_possible_ssr_read(&self, rs: u32) {
+        // Don't do anything for registers which are not SSR-enabled.
+        if rs >= 2 {
+            return;
+        }
+
+        // Check if SSRs are enabled.
+        let enabled_ptr = self.ssr_enabled_ptr();
+        let enabled = LLVMBuildLoad(self.builder, enabled_ptr, NONAME);
+        let enabled = LLVMBuildTrunc(self.builder, enabled, LLVMInt1Type(), NONAME);
+
+        let bb_ssron = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_ssroff = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_ssron);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_ssroff);
+        LLVMBuildCondBr(self.builder, enabled, bb_ssron, bb_ssroff);
+
+        // Emit the SSR load.
+        LLVMPositionBuilderAtEnd(self.builder, bb_ssron);
+        // LOAD
+        let addr = self
+            .section
+            .emit_call("banshee_ssr_next", [self.ssr_ptr(rs)]);
+        self.emit_fld(rs, addr);
+        LLVMBuildBr(self.builder, bb_ssroff);
+
+        // Emit a block for the remainder of the operation.
+        LLVMPositionBuilderAtEnd(self.builder, bb_ssroff);
     }
 
     /// Emit the code necessary to read a value from a register.
@@ -1805,11 +1913,40 @@ impl<'a> InstructionTranslator<'a> {
             self.section.state_ptr,
             [
                 LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 5, 0),
+                LLVMConstInt(LLVMInt32Type(), 7, 0),
             ]
             .as_mut_ptr(),
             2 as u32,
             format!("ptr_tcdm\0").as_ptr() as *const _,
+        )
+    }
+
+    unsafe fn ssr_ptr(&self, ssr: u32) -> LLVMValueRef {
+        LLVMBuildGEP(
+            self.builder,
+            self.section.state_ptr,
+            [
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+                LLVMConstInt(LLVMInt32Type(), 5, 0),
+                LLVMConstInt(LLVMInt32Type(), ssr as u64, 0),
+            ]
+            .as_mut_ptr(),
+            3 as u32,
+            format!("ptr_ssr\0").as_ptr() as *const _,
+        )
+    }
+
+    unsafe fn ssr_enabled_ptr(&self) -> LLVMValueRef {
+        LLVMBuildGEP(
+            self.builder,
+            self.section.state_ptr,
+            [
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+                LLVMConstInt(LLVMInt32Type(), 6, 0),
+            ]
+            .as_mut_ptr(),
+            2 as u32,
+            format!("ptr_ssr_enabled\0").as_ptr() as *const _,
         )
     }
 }

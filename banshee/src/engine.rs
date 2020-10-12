@@ -4,12 +4,15 @@ use crate::{riscv, tran::ElfTranslator};
 use anyhow::{bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
-    core::*, execution_engine::*, prelude::*, support::*, transforms::pass_manager_builder::*,
+    core::*, execution_engine::*, ir_reader::*, prelude::*, support::*,
+    transforms::pass_manager_builder::*,
 };
 use std::{
     cell::{Cell, RefCell},
     collections::HashMap,
 };
+
+pub use crate::runtime::SsrState;
 
 /// An execution engine.
 pub struct Engine {
@@ -34,8 +37,30 @@ impl Engine {
     pub fn new(context: LLVMContextRef) -> Self {
         // Create a new LLVM module ot compile into.
         let module = unsafe {
-            let module =
-                LLVMModuleCreateWithNameInContext(b"banshee\0".as_ptr() as *const _, context);
+            // Wrap the runtime IR up in an LLVM memory buffer.
+            let mut runtime_ir = include_bytes!("runtime.ll").to_vec();
+            runtime_ir.push(0); // somehow this is needed despite RequireNullTerminated=0 below
+            let runtime_buf = LLVMCreateMemoryBufferWithMemoryRange(
+                runtime_ir.as_ptr() as *const _,
+                runtime_ir.len() - 1,
+                b"runtime.ll\0".as_ptr() as *const _,
+                0,
+            );
+
+            // Parse the module.
+            let mut module = std::mem::MaybeUninit::uninit().assume_init();
+            let mut errmsg = std::mem::MaybeUninit::zeroed().assume_init();
+            if LLVMParseIRInContext(context, runtime_buf, &mut module, &mut errmsg) != 0
+                || !errmsg.is_null()
+            {
+                error!(
+                    "Cannot parse runtime IR: {:?}",
+                    std::ffi::CStr::from_ptr(errmsg)
+                );
+            }
+
+            // let module =
+            //     LLVMModuleCreateWithNameInContext(b"banshee\0".as_ptr() as *const _, context);
             // LLVMSetDataLayout(module, b"i8:8-i16:16-i32:32-i64:64\0".as_ptr() as *const _);
             module
         };
@@ -273,13 +298,18 @@ impl<'a> Cpu<'a> {
     fn binary_csr_read(&self, csr: u16) -> u32 {
         trace!("Read CSR 0x{:x}", csr);
         match csr {
+            0x7C0 => self.state.ssr_enable,
             0xF14 => 0, // mhartid
             _ => 0,
         }
     }
 
-    fn binary_csr_write(&self, csr: u16, value: u32) {
+    fn binary_csr_write(&mut self, csr: u16, value: u32) {
         trace!("Write CSR 0x{:x} = 0x{:?}", csr, value);
+        match csr {
+            0x7C0 => self.state.ssr_enable = value,
+            _ => (),
+        }
     }
 
     fn binary_abort_escape(&self, addr: u32) {
@@ -328,6 +358,8 @@ pub struct CpuState {
     fregs: [u64; 32],
     pc: u32,
     instret: u64,
+    ssrs: [SsrState; 2],
+    ssr_enable: u32,
 }
 
 impl std::fmt::Debug for CpuState {
@@ -357,6 +389,7 @@ impl std::fmt::Debug for CpuState {
             .field("fregs", &format_args!("\n{}", fregs))
             .field("pc", &format_args!("0x{:x}", self.pc))
             .field("instret", &self.instret)
+            .field("ssrs", &self.ssrs)
             .finish()
     }
 }
