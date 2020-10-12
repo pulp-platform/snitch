@@ -7,6 +7,9 @@ PARSE_OPCODES ?= $(RISCV_OPCODES)/parse-opcodes
 OPCODES := opcodes opcodes-pseudo
 OPCODES_PATH := $(patsubst %, $(RISCV_OPCODES)/%, $(OPCODES))
 
+all:: src/riscv.rs
+all:: src/runtime.ll
+
 src/riscv.rs: $(OPCODES_PATH) $(PARSE_OPCODES)
 	echo "// Copyright 2020 ETH Zurich and University of Bologna." > $@
 	echo "// Licensed under the Apache License, Version 2.0, see LICENSE for details." >> $@
@@ -14,3 +17,6 @@ src/riscv.rs: $(OPCODES_PATH) $(PARSE_OPCODES)
 	echo >> $@
 	cat $(OPCODES_PATH) | $(PARSE_OPCODES) -rust >> $@
 	rustfmt $@
+
+src/runtime.ll: src/runtime.rs
+	rustc $< -o $@ --emit=llvm-ir --crate-type=staticlib -C opt-level=3 -C debuginfo=0 -C panic=abort

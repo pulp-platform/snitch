@@ -19,6 +19,7 @@ use std::{path::Path, ptr::null_mut};
 
 pub mod engine;
 pub mod riscv;
+mod runtime;
 mod softfloat;
 pub mod tran;
 
