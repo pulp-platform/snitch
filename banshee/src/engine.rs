@@ -1,7 +1,7 @@
 //! Engine for dynamic binary translation and execution
 
 use crate::{riscv, tran::ElfTranslator};
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
     core::*, execution_engine::*, ir_reader::*, prelude::*, support::*,
@@ -22,6 +22,8 @@ pub struct Engine {
     pub module: LLVMModuleRef,
     /// The exit code set by the binary.
     pub exit_code: Cell<u32>,
+    /// Whether an error occurred during execution.
+    pub had_error: Cell<bool>,
     /// Optimize the LLVM IR.
     pub opt_llvm: bool,
     /// Optimize during JIT compilation.
@@ -70,6 +72,7 @@ impl Engine {
             context,
             module,
             exit_code: Default::default(),
+            had_error: Default::default(),
             opt_llvm: true,
             opt_jit: true,
             trace: false,
@@ -211,7 +214,11 @@ impl Engine {
             duration,
             cpu.state.instret as f64 / duration
         );
-        Ok(self.exit_code.get() >> 1)
+        if self.had_error.get() {
+            Err(anyhow!("Encountered an error during execution"))
+        } else {
+            Ok(self.exit_code.get() >> 1)
+        }
     }
 }
 
@@ -314,6 +321,7 @@ impl<'a> Cpu<'a> {
 
     fn binary_abort_escape(&self, addr: u32) {
         error!("CPU escaped binary at 0x{:x}", addr);
+        self.engine.had_error.set(true);
     }
 
     fn binary_abort_illegal_inst(&self, addr: u32, inst_raw: u32) {
@@ -322,6 +330,7 @@ impl<'a> Cpu<'a> {
             riscv::parse_u32(inst_raw),
             addr
         );
+        self.engine.had_error.set(true);
     }
 
     fn binary_abort_illegal_branch(&self, addr: u32, target: u32) {
@@ -329,6 +338,7 @@ impl<'a> Cpu<'a> {
             "Branch to unpredicted address 0x{:x} at 0x{:x}",
             target, addr
         );
+        self.engine.had_error.set(true);
     }
 
     fn binary_trace(&self, addr: u32, inst: u32, accesses: &[TraceAccess], data: &[u64]) {
