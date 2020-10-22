@@ -896,7 +896,8 @@ fn main() -> Result<()> {
 
     // Execute the binary.
     if !matches.is_present("dry-run") {
-        engine.execute().context("Failed to execute ELF binary")?;
+        let return_code = engine.execute().context("Failed to execute ELF binary")?;
+        std::process::exit(return_code as i32);
     }
 
     // let ddr_size: usize = 1024 * 1024;

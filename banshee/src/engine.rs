@@ -159,11 +159,11 @@ impl Engine {
     }
 
     // Execute the loaded memory.
-    pub fn execute(&self) -> Result<()> {
+    pub fn execute(&self) -> Result<u32> {
         unsafe { self.execute_inner() }
     }
 
-    unsafe fn execute_inner<'b>(&'b self) -> Result<()> {
+    unsafe fn execute_inner<'b>(&'b self) -> Result<u32> {
         // Create a JIT compiler for the module (and consumes it).
         debug!("Creating JIT compiler for translated code");
         let mut ee = std::mem::MaybeUninit::uninit().assume_init();
@@ -204,14 +204,14 @@ impl Engine {
         let duration = (t1.duration_since(t0)).as_secs_f64();
 
         trace!("Final state: {:#?}", cpu.state);
-        info!("Exit code is 0x{:x}", self.exit_code.get());
+        info!("Exit code is 0x{:x}", self.exit_code.get() >> 1);
         info!(
             "Retired {} inst in {} s, {} inst/s",
             cpu.state.instret,
             duration,
             cpu.state.instret as f64 / duration
         );
-        Ok(())
+        Ok(self.exit_code.get() >> 1)
     }
 }
 

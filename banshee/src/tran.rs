@@ -314,7 +314,15 @@ impl<'a> ElfTranslator<'a> {
         self.inst_bbs = inst_bbs;
 
         // Emit the branch to the entry symbol.
-        LLVMBuildBr(builder, self.inst_bbs[&self.elf.ehdr.entry]);
+        match self.inst_bbs.get(&self.elf.ehdr.entry) {
+            Some(&bb) => {
+                LLVMBuildBr(builder, bb);
+            }
+            None => {
+                error!("No instruction at entry point 0x{:x}", self.elf.ehdr.entry);
+                LLVMBuildBr(builder, entry_bb);
+            }
+        }
 
         // Create a translator for each section.
         let section_tran: Vec<_> = self
