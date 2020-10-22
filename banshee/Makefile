@@ -4,7 +4,7 @@
 
 RISCV_OPCODES ?= ../sw/vendor/riscv-opcodes
 PARSE_OPCODES ?= $(RISCV_OPCODES)/parse-opcodes
-OPCODES := opcodes opcodes-pseudo
+OPCODES := opcodes opcodes-rep
 OPCODES_PATH := $(patsubst %,$(RISCV_OPCODES)/%,$(OPCODES))
 
 all:: src/riscv.rs
