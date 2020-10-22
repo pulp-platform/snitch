@@ -4,6 +4,7 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 target triple = "x86_64-unknown-linux-gnu"
 
 %SsrState = type { [0 x i32], [4 x i32], [0 x i32], [4 x i32], [0 x i32], [4 x i32], [0 x i32], i32, [0 x i16], i16, [0 x i16], i16, [0 x i8], i8, [0 x i8], i8, [0 x i8], i8, [1 x i8] }
+%DmaState = type { [0 x i64], i64, [0 x i64], i64, [0 x i8], i8, [7 x i8] }
 %"unwind::libunwind::_Unwind_Exception" = type { [0 x i64], i64, [0 x i64], void (i32, %"unwind::libunwind::_Unwind_Exception"*)*, [0 x i64], [6 x i64], [0 x i64] }
 %"unwind::libunwind::_Unwind_Context" = type { [0 x i8] }
 
@@ -226,6 +227,30 @@ bb15:                                             ; preds = %bb2.i
 
 bb19:                                             ; preds = %bb1, %bb10
   ret i32 %ptr
+}
+
+; Function Attrs: nofree norecurse nounwind nonlazybind writeonly
+define void @banshee_dma_src(%DmaState* nocapture align 8 dereferenceable(24) %dma, i32 %lo, i32 %hi) unnamed_addr #0 {
+start:
+  %_5 = zext i32 %hi to i64
+  %_4 = shl nuw i64 %_5, 32
+  %_7 = zext i32 %lo to i64
+  %0 = getelementptr inbounds %DmaState, %DmaState* %dma, i64 0, i32 0, i64 0
+  %1 = or i64 %_4, %_7
+  store i64 %1, i64* %0, align 8
+  ret void
+}
+
+; Function Attrs: nofree norecurse nounwind nonlazybind writeonly
+define void @banshee_dma_dst(%DmaState* nocapture align 8 dereferenceable(24) %dma, i32 %lo, i32 %hi) unnamed_addr #0 {
+start:
+  %_5 = zext i32 %hi to i64
+  %_4 = shl nuw i64 %_5, 32
+  %_7 = zext i32 %lo to i64
+  %0 = getelementptr inbounds %DmaState, %DmaState* %dma, i64 0, i32 3
+  %1 = or i64 %_4, %_7
+  store i64 %1, i64* %0, align 8
+  ret void
 }
 
 ; Function Attrs: nounwind nonlazybind

@@ -107,3 +107,33 @@ pub unsafe fn banshee_ssr_next(ssr: &mut SsrState) -> u32 {
     }
     ptr
 }
+
+/// A representation of a DMA backend's state.
+#[derive(Default)]
+#[repr(C)]
+pub struct DmaState {
+    src: u64,
+    dst: u64,
+    done: bool,
+}
+
+impl std::fmt::Debug for DmaState {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.debug_struct("DmaState")
+            .field("src", &format_args!("{:08x}", self.src))
+            .field("dst", &format_args!("{:08x}", self.dst))
+            .finish()
+    }
+}
+
+/// Implementation of the `dm.src` instruction.
+#[no_mangle]
+pub unsafe fn banshee_dma_src(dma: &mut DmaState, lo: u32, hi: u32) {
+    dma.src = (hi as u64) << 32 | (lo as u64);
+}
+
+/// Implementation of the `dm.dst` instruction.
+#[no_mangle]
+pub unsafe fn banshee_dma_dst(dma: &mut DmaState, lo: u32, hi: u32) {
+    dma.dst = (hi as u64) << 32 | (lo as u64);
+}

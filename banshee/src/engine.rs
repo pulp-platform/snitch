@@ -12,7 +12,7 @@ use std::{
     collections::HashMap,
 };
 
-pub use crate::runtime::SsrState;
+pub use crate::runtime::{DmaState, SsrState};
 
 /// An execution engine.
 pub struct Engine {
@@ -370,6 +370,7 @@ pub struct CpuState {
     instret: u64,
     ssrs: [SsrState; 2],
     ssr_enable: u32,
+    dma: DmaState,
 }
 
 impl std::fmt::Debug for CpuState {
@@ -400,6 +401,7 @@ impl std::fmt::Debug for CpuState {
             .field("pc", &format_args!("0x{:x}", self.pc))
             .field("instret", &self.instret)
             .field("ssrs", &self.ssrs)
+            .field("dma", &self.dma)
             .finish()
     }
 }

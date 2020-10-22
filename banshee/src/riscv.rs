@@ -423,6 +423,9 @@ pub enum OpcodeImm12RdRs1 {
     Flw,
     Fld,
     Flq,
+    DmStrti,
+    DmStati,
+    DmErri,
 }
 
 impl std::fmt::Display for FormatImm12RdRs1 {
@@ -463,6 +466,9 @@ impl std::fmt::Display for OpcodeImm12RdRs1 {
             Self::Flw => write!(f, "flw"),
             Self::Fld => write!(f, "fld"),
             Self::Flq => write!(f, "flq"),
+            Self::DmStrti => write!(f, "dm.strti"),
+            Self::DmStati => write!(f, "dm.stati"),
+            Self::DmErri => write!(f, "dm.erri"),
         }
     }
 }
@@ -993,6 +999,11 @@ pub enum OpcodeRdRs1Rs2 {
     FleQ,
     FltQ,
     FeqQ,
+    DmStrt,
+    DmStat,
+    DmErr,
+    DmTwodStrd,
+    DmTwodReps,
 }
 
 impl std::fmt::Display for FormatRdRs1Rs2 {
@@ -1091,6 +1102,11 @@ impl std::fmt::Display for OpcodeRdRs1Rs2 {
             Self::FleQ => write!(f, "fle.q"),
             Self::FltQ => write!(f, "flt.q"),
             Self::FeqQ => write!(f, "feq.q"),
+            Self::DmStrt => write!(f, "dm.strt"),
+            Self::DmStat => write!(f, "dm.stat"),
+            Self::DmErr => write!(f, "dm.err"),
+            Self::DmTwodStrd => write!(f, "dm.twod.strd"),
+            Self::DmTwodReps => write!(f, "dm.twod.reps"),
         }
     }
 }
@@ -1296,6 +1312,8 @@ pub enum OpcodeRs1Rs2 {
     SfenceVma,
     HfenceBvma,
     HfenceGvma,
+    DmSrc,
+    DmDst,
 }
 
 impl std::fmt::Display for FormatRs1Rs2 {
@@ -1313,6 +1331,8 @@ impl std::fmt::Display for OpcodeRs1Rs2 {
             Self::SfenceVma => write!(f, "sfence.vma"),
             Self::HfenceBvma => write!(f, "hfence.bvma"),
             Self::HfenceGvma => write!(f, "hfence.gvma"),
+            Self::DmSrc => write!(f, "dm.src"),
+            Self::DmDst => write!(f, "dm.dst"),
         }
     }
 }
@@ -1367,6 +1387,9 @@ pub fn parse_u32(raw: u32) -> Format {
         0x2027 => return parse_imm12hi_imm12lo_rs1_rs2(OpcodeImm12hiImm12loRs1Rs2::Fsw, raw),
         0x3027 => return parse_imm12hi_imm12lo_rs1_rs2(OpcodeImm12hiImm12loRs1Rs2::Fsd, raw),
         0x4027 => return parse_imm12hi_imm12lo_rs1_rs2(OpcodeImm12hiImm12loRs1Rs2::Fsq, raw),
+        0x102b => return parse_imm12_rd_rs1(OpcodeImm12RdRs1::DmStrti, raw),
+        0x202b => return parse_imm12_rd_rs1(OpcodeImm12RdRs1::DmStati, raw),
+        0x302b => return parse_imm12_rd_rs1(OpcodeImm12RdRs1::DmErri, raw),
         _ => (),
     }
     match raw & 0x400707f {
@@ -1542,12 +1565,19 @@ pub fn parse_u32(raw: u32) -> Format {
         0xa6000053 => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::FleQ, raw),
         0xa6001053 => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::FltQ, raw),
         0xa6002053 => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::FeqQ, raw),
+        0x400002b => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::DmStrt, raw),
+        0x600002b => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::DmStat, raw),
+        0x800002b => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::DmErr, raw),
+        0xa00002b => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::DmTwodStrd, raw),
+        0xc00002b => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::DmTwodReps, raw),
         _ => (),
     }
     match raw & 0xfe007fff {
         0x12000073 => return parse_rs1_rs2(OpcodeRs1Rs2::SfenceVma, raw),
         0x22000073 => return parse_rs1_rs2(OpcodeRs1Rs2::HfenceBvma, raw),
         0xa2000073 => return parse_rs1_rs2(OpcodeRs1Rs2::HfenceGvma, raw),
+        0x2b => return parse_rs1_rs2(OpcodeRs1Rs2::DmSrc, raw),
+        0x200002b => return parse_rs1_rs2(OpcodeRs1Rs2::DmDst, raw),
         _ => (),
     }
     match raw & 0xfff0007f {
