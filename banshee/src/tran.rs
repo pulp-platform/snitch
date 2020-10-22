@@ -331,7 +331,6 @@ impl<'a> ElfTranslator<'a> {
                 elf: self,
                 section,
                 engine: self.engine,
-                func,
                 state_ptr,
                 trace_access_buffer,
                 trace_data_buffer,
@@ -394,7 +393,6 @@ pub struct SectionTranslator<'a> {
     elf: &'a ElfTranslator<'a>,
     section: &'a elf::Section,
     engine: &'a Engine,
-    func: LLVMValueRef,
     /// An LLVM value that holds the pointer to the CPU state structure.
     state_ptr: LLVMValueRef,
     /// An LLVM value that holds the pointer to the trace access buffer.
@@ -404,8 +402,10 @@ pub struct SectionTranslator<'a> {
     /// The builder to emit instructions with.
     builder: LLVMBuilderRef,
     /// The first address in the section.
+    #[allow(dead_code)]
     addr_start: u64,
     /// The point beyond the last address in the section.
+    #[allow(dead_code)]
     addr_end: u64,
 }
 
@@ -1321,20 +1321,6 @@ impl<'a> InstructionTranslator<'a> {
         sext: bool,
     ) -> LLVMValueRef {
         self.read_mem(LLVMBuildAdd(self.builder, base, offset, NONAME), size, sext)
-    }
-
-    unsafe fn emit_store(
-        &self,
-        base: LLVMValueRef,
-        offset: LLVMValueRef,
-        value: LLVMValueRef,
-        size: usize,
-    ) {
-        self.write_mem(
-            LLVMBuildAdd(self.builder, base, offset, NONAME),
-            value,
-            size,
-        )
     }
 
     /// Emit the code for instruction tracing.
