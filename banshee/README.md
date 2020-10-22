@@ -9,9 +9,10 @@
 
 ## Todo
 
-- [ ] Add instruction tracing
-- [ ] Add SSR support
+- [x] Add instruction tracing
+- [x] Add SSR support
+- [ ] Add DMA support
 - [ ] Add FREP support
-- [ ] Add fast local memory / memory hierarchy
-- [ ] Add multi-core single-cluster execution
+- [x] Add fast local memory / memory hierarchy
+- [ ] Add multi-core execution
 - [ ] Add multi-cluster execution
