@@ -114,7 +114,7 @@ pub unsafe fn banshee_ssr_next(ssr: &mut SsrState) -> u32 {
 pub struct DmaState {
     src: u64,
     dst: u64,
-    done: bool,
+    done_id: u32,
 }
 
 impl std::fmt::Debug for DmaState {
@@ -122,6 +122,7 @@ impl std::fmt::Debug for DmaState {
         f.debug_struct("DmaState")
             .field("src", &format_args!("{:08x}", self.src))
             .field("dst", &format_args!("{:08x}", self.dst))
+            .field("done_id", &self.done_id)
             .finish()
     }
 }
@@ -136,4 +137,23 @@ pub unsafe fn banshee_dma_src(dma: &mut DmaState, lo: u32, hi: u32) {
 #[no_mangle]
 pub unsafe fn banshee_dma_dst(dma: &mut DmaState, lo: u32, hi: u32) {
     dma.dst = (hi as u64) << 32 | (lo as u64);
+}
+
+/// Implementation of the `dm.strt` and `dm.strti` instructions.
+#[no_mangle]
+pub unsafe fn banshee_dma_strt(dma: &mut DmaState, _size: u32, _flags: u32) -> u32 {
+    let id = dma.done_id;
+    dma.done_id += 1;
+    id
+}
+
+/// Implementation of the `dm.stat` and `dm.stati` instructions.
+#[no_mangle]
+pub unsafe fn banshee_dma_stat(dma: &DmaState, addr: u32) -> u32 {
+    match addr & 0x3 {
+        0 => dma.done_id,     // completed_id
+        1 => dma.done_id + 1, // next_id
+        2 | 3 => 0,           // busy
+        _ => 0,
+    }
 }
