@@ -5,7 +5,9 @@ use crate::{
     riscv,
 };
 use anyhow::{anyhow, bail, Context, Result};
-use llvm_sys::{core::*, prelude::*, LLVMIntPredicate::*, LLVMRealPredicate::*};
+use llvm_sys::{
+    core::*, prelude::*, LLVMAttributeFunctionIndex, LLVMIntPredicate::*, LLVMRealPredicate::*,
+};
 use std::{
     cell::{Cell, RefCell},
     collections::{BTreeSet, HashMap},
@@ -159,6 +161,7 @@ impl<'a> ElfTranslator<'a> {
         let state_type =
             LLVMStructCreateNamed(self.engine.context, format!("cpu\0").as_ptr() as *const _);
         let ssr_type = LLVMGetTypeByName(self.engine.module, "SsrState\0".as_ptr() as *const _);
+        let dma_type = LLVMGetTypeByName(self.engine.module, "DmaState\0".as_ptr() as *const _);
         let mut state_fields = [
             LLVMPointerType(LLVMInt8Type(), 0),  // Context
             LLVMArrayType(LLVMInt32Type(), 32),  // Registers
@@ -167,6 +170,7 @@ impl<'a> ElfTranslator<'a> {
             LLVMInt64Type(),                     // Retired Instructions
             LLVMArrayType(ssr_type, 2),          // SSRs
             LLVMInt32Type(),                     // SSR enable
+            dma_type,                            // DMA
             LLVMPointerType(LLVMInt32Type(), 0), // TCDM
         ];
         LLVMStructSetBody(
@@ -486,13 +490,18 @@ impl<'a> SectionTranslator<'a> {
     /// Emit a call to a named function.
     unsafe fn emit_call(&self, name: &str, args: impl AsRef<[LLVMValueRef]>) -> LLVMValueRef {
         let args = args.as_ref();
-        LLVMBuildCall(
+        let call = LLVMBuildCall(
             self.builder,
             self.elf.lookup_func(name),
             args.as_ptr() as *mut _,
             args.len() as u32,
             NONAME,
-        )
+        );
+        let attr = "argmemonly";
+        let attr = LLVMGetEnumAttributeKindForName(attr.as_ptr() as *mut _, attr.len());
+        let attr = LLVMCreateEnumAttribute(self.engine.context, attr, 0);
+        LLVMAddCallSiteAttribute(call, LLVMAttributeFunctionIndex, attr);
+        call
     }
 }
 
@@ -538,6 +547,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::RdRmRs1Rs2Rs3(x) => self.emit_rd_rm_rs1_rs2_rs3(x),
             riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
             riscv::Format::RdRs1Shamt(x) => self.emit_rd_rs1_shamt(x),
+            riscv::Format::Rs1Rs2(x) => self.emit_rs1_rs2(x),
             riscv::Format::Unit(x) => self.emit_unit(x),
             _ => Err(anyhow!("Unsupported instruction format")),
         }
@@ -1301,6 +1311,24 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
+    unsafe fn emit_rs1_rs2(&self, data: riscv::FormatRs1Rs2) -> Result<()> {
+        trace!("{} x{}, x{}", data.op, data.rs1, data.rs2);
+        let name = format!("{}\0", data.op);
+        let _name = name.as_ptr() as *const _;
+        let rs1 = self.read_reg(data.rs1);
+        let rs2 = self.read_reg(data.rs2);
+        match data.op {
+            riscv::OpcodeRs1Rs2::DmSrc => self
+                .section
+                .emit_call("banshee_dma_src", [self.dma_ptr(), rs1, rs2]),
+            riscv::OpcodeRs1Rs2::DmDst => self
+                .section
+                .emit_call("banshee_dma_dst", [self.dma_ptr(), rs1, rs2]),
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
+        Ok(())
+    }
+
     unsafe fn emit_unit(&self, data: riscv::FormatUnit) -> Result<()> {
         trace!("{}", data.op,);
         match data.op {
@@ -1907,7 +1935,7 @@ impl<'a> InstructionTranslator<'a> {
             self.section.state_ptr,
             [
                 LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 7, 0),
+                LLVMConstInt(LLVMInt32Type(), 8, 0),
             ]
             .as_mut_ptr(),
             2 as u32,
@@ -1941,6 +1969,20 @@ impl<'a> InstructionTranslator<'a> {
             .as_mut_ptr(),
             2 as u32,
             format!("ptr_ssr_enabled\0").as_ptr() as *const _,
+        )
+    }
+
+    unsafe fn dma_ptr(&self) -> LLVMValueRef {
+        LLVMBuildGEP(
+            self.builder,
+            self.section.state_ptr,
+            [
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+                LLVMConstInt(LLVMInt32Type(), 7, 0),
+            ]
+            .as_mut_ptr(),
+            2 as u32,
+            format!("ptr_dma\0").as_ptr() as *const _,
         )
     }
 }
