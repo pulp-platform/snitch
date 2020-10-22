@@ -4,7 +4,7 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 target triple = "x86_64-unknown-linux-gnu"
 
 %SsrState = type { [0 x i32], [4 x i32], [0 x i32], [4 x i32], [0 x i32], [4 x i32], [0 x i32], i32, [0 x i16], i16, [0 x i16], i16, [0 x i8], i8, [0 x i8], i8, [0 x i8], i8, [1 x i8] }
-%DmaState = type { [0 x i64], i64, [0 x i64], i64, [0 x i8], i8, [7 x i8] }
+%DmaState = type { [0 x i64], i64, [0 x i64], i64, [0 x i32], i32, [1 x i32] }
 %"unwind::libunwind::_Unwind_Exception" = type { [0 x i64], i64, [0 x i64], void (i32, %"unwind::libunwind::_Unwind_Exception"*)*, [0 x i64], [6 x i64], [0 x i64] }
 %"unwind::libunwind::_Unwind_Context" = type { [0 x i8] }
 
@@ -253,12 +253,53 @@ start:
   ret void
 }
 
+; Function Attrs: nofree norecurse nounwind nonlazybind
+define i32 @banshee_dma_strt(%DmaState* nocapture align 8 dereferenceable(24) %dma, i32 %_size, i32 %_flags) unnamed_addr #3 {
+start:
+  %0 = getelementptr inbounds %DmaState, %DmaState* %dma, i64 0, i32 5
+  %id = load i32, i32* %0, align 8
+  %1 = add i32 %id, 1
+  store i32 %1, i32* %0, align 8
+  ret i32 %id
+}
+
+; Function Attrs: norecurse nounwind nonlazybind readonly
+define i32 @banshee_dma_stat(%DmaState* noalias nocapture readonly align 8 dereferenceable(24) %dma, i32 %addr) unnamed_addr #1 {
+start:
+  %_3 = and i32 %addr, 3
+  switch i32 %_3, label %bb11 [
+    i32 0, label %bb2
+    i32 1, label %bb3
+    i32 2, label %bb5
+    i32 3, label %bb5
+  ]
+
+bb11:                                             ; preds = %start
+  unreachable
+
+bb2:                                              ; preds = %start
+  %0 = getelementptr inbounds %DmaState, %DmaState* %dma, i64 0, i32 5
+  %1 = load i32, i32* %0, align 8
+  br label %bb5
+
+bb3:                                              ; preds = %start
+  %2 = getelementptr inbounds %DmaState, %DmaState* %dma, i64 0, i32 5
+  %_5 = load i32, i32* %2, align 8
+  %3 = add i32 %_5, 1
+  br label %bb5
+
+bb5:                                              ; preds = %start, %start, %bb2, %bb3
+  %.0 = phi i32 [ %3, %bb3 ], [ %1, %bb2 ], [ 0, %start ], [ 0, %start ]
+  ret i32 %.0
+}
+
 ; Function Attrs: nounwind nonlazybind
 declare i32 @rust_eh_personality(i32, i32, i64, %"unwind::libunwind::_Unwind_Exception"*, %"unwind::libunwind::_Unwind_Context"*) unnamed_addr #2
 
 attributes #0 = { nofree norecurse nounwind nonlazybind writeonly "probe-stack"="__rust_probestack" "target-cpu"="x86-64" }
 attributes #1 = { norecurse nounwind nonlazybind readonly "probe-stack"="__rust_probestack" "target-cpu"="x86-64" }
 attributes #2 = { nounwind nonlazybind "probe-stack"="__rust_probestack" "target-cpu"="x86-64" }
+attributes #3 = { nofree norecurse nounwind nonlazybind "probe-stack"="__rust_probestack" "target-cpu"="x86-64" }
 
 !llvm.module.flags = !{!0, !1}
 

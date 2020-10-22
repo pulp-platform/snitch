@@ -543,6 +543,7 @@ impl<'a> InstructionTranslator<'a> {
         // Emit the code for the instruction itself.
         match self.inst {
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
+            riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
             riscv::Format::Imm12hiImm12loRs1Rs2(x) => self.emit_imm12hi_imm12lo_rs1_rs2(x),
             riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
@@ -550,6 +551,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::RdRmRs1(x) => self.emit_rd_rm_rs1(x),
             riscv::Format::RdRmRs1Rs2(x) => self.emit_rd_rm_rs1_rs2(x),
             riscv::Format::RdRmRs1Rs2Rs3(x) => self.emit_rd_rm_rs1_rs2_rs3(x),
+            riscv::Format::RdRs1(x) => self.emit_rd_rs1(x),
             riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
             riscv::Format::RdRs1Shamt(x) => self.emit_rd_rs1_shamt(x),
             riscv::Format::Rs1Rs2(x) => self.emit_rs1_rs2(x),
@@ -643,6 +645,21 @@ impl<'a> InstructionTranslator<'a> {
             }
             _ => bail!("Unsupported opcode {}", data.op),
         };
+        Ok(())
+    }
+
+    unsafe fn emit_imm12_rd(&self, data: riscv::FormatImm12Rd) -> Result<()> {
+        let imm = data.imm();
+        trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
+        let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
+        let name = format!("{}\0", data.op);
+        let _name = name.as_ptr() as *const _;
+        let value = match data.op {
+            riscv::OpcodeImm12Rd::DmStati => self
+                .section
+                .emit_call("banshee_dma_stat", [self.dma_ptr(), imm]),
+        };
+        self.write_reg(data.rd, value);
         Ok(())
     }
 
@@ -741,6 +758,9 @@ impl<'a> InstructionTranslator<'a> {
                 self.emit_fld(data.rd, LLVMBuildAdd(self.builder, rs1, imm, NONAME));
                 return Ok(());
             }
+            riscv::OpcodeImm12RdRs1::DmStrti => self
+                .section
+                .emit_call("banshee_dma_strt", [self.dma_ptr(), rs1, imm]),
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
@@ -1007,6 +1027,21 @@ impl<'a> InstructionTranslator<'a> {
         })
     }
 
+    unsafe fn emit_rd_rs1(&self, data: riscv::FormatRdRs1) -> Result<()> {
+        trace!("{} x{} = x{}", data.op, data.rd, data.rs1);
+        let name = format!("{}\0", data.op);
+        let _name = name.as_ptr() as *const _;
+        let rs1 = self.read_reg(data.rs1);
+        let value = match data.op {
+            riscv::OpcodeRdRs1::DmStat => self
+                .section
+                .emit_call("banshee_dma_stat", [self.dma_ptr(), rs1]),
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
+        self.write_reg(data.rd, value);
+        Ok(())
+    }
+
     unsafe fn emit_rd_rs1_rs2(&self, data: riscv::FormatRdRs1Rs2) -> Result<()> {
         trace!("{} x{} = x{}, x{}", data.op, data.rd, data.rs1, data.rs2);
         let name = format!("{}\0", data.op);
@@ -1245,6 +1280,9 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeRdRs1Rs2::Sll => LLVMBuildShl(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Srl => LLVMBuildLShr(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Sra => LLVMBuildAShr(self.builder, rs1, rs2, name),
+            riscv::OpcodeRdRs1Rs2::DmStrt => self
+                .section
+                .emit_call("banshee_dma_strt", [self.dma_ptr(), rs1, rs2]),
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
