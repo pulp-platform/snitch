@@ -114,6 +114,9 @@ pub unsafe fn banshee_ssr_next(ssr: &mut SsrState) -> u32 {
 pub struct DmaState {
     src: u64,
     dst: u64,
+    src_stride: u32,
+    dst_stride: u32,
+    reps: u32,
     done_id: u32,
 }
 
@@ -141,9 +144,35 @@ pub unsafe fn banshee_dma_dst(dma: &mut DmaState, lo: u32, hi: u32) {
 
 /// Implementation of the `dm.strt` and `dm.strti` instructions.
 #[no_mangle]
-pub unsafe fn banshee_dma_strt(dma: &mut DmaState, _size: u32, _flags: u32) -> u32 {
+pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: *const u8, size: u32, flags: u32) -> u32 {
+    extern "C" {
+        fn banshee_load(cpu: *const u8, addr: u32, size: u8) -> u32;
+        fn banshee_store(cpu: *const u8, addr: u32, value: u32, size: u8);
+    }
+
     let id = dma.done_id;
     dma.done_id += 1;
+
+    assert_eq!(
+        size % 4,
+        0,
+        "DMA transfer size must be a multiple of 4B for now"
+    );
+    let num_beats = size / 4;
+    let enable_2d = (flags & (1 << 1)) != 0;
+    let steps = if enable_2d { dma.reps } else { 1 };
+
+    for i in 0..steps as u64 {
+        let src = dma.src + i * dma.src_stride as u64;
+        let dst = dma.dst + i * dma.dst_stride as u64;
+        assert_eq!(src % 4, 0, "DMA src transfer block must be 4-byte-aligned");
+        assert_eq!(dst % 4, 0, "DMA dst transfer block must be 4-byte-aligned");
+        for j in 0..num_beats as u64 {
+            let tmp = banshee_load(cpu, (src + j * 4) as u32, 2);
+            banshee_store(cpu, (dst + j * 4) as u32, tmp, 2);
+        }
+    }
+
     id
 }
 
