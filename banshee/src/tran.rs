@@ -182,25 +182,25 @@ impl<'a> ElfTranslator<'a> {
         let state_ptr_type = LLVMPointerType(state_type, 0u32);
 
         // Declare the callbacks.
-        self.declare_func(
-            "banshee_load",
-            LLVMInt32Type(),
-            [
-                state_ptr_type,  // CPU
-                LLVMInt32Type(), // Address
-                LLVMInt8Type(),  // Size
-            ],
-        );
-        self.declare_func(
-            "banshee_store",
-            LLVMVoidType(),
-            [
-                state_ptr_type,  // CPU
-                LLVMInt32Type(), // Address
-                LLVMInt32Type(), // Value
-                LLVMInt8Type(),  // Size
-            ],
-        );
+        // self.declare_func(
+        //     "banshee_load",
+        //     LLVMInt32Type(),
+        //     [
+        //         state_ptr_type,  // CPU
+        //         LLVMInt32Type(), // Address
+        //         LLVMInt8Type(),  // Size
+        //     ],
+        // );
+        // self.declare_func(
+        //     "banshee_store",
+        //     LLVMVoidType(),
+        //     [
+        //         state_ptr_type,  // CPU
+        //         LLVMInt32Type(), // Address
+        //         LLVMInt32Type(), // Value
+        //         LLVMInt8Type(),  // Size
+        //     ],
+        // );
         self.declare_func(
             "banshee_csr_read",
             LLVMInt32Type(),
@@ -658,6 +658,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12Rd::DmStati => self
                 .section
                 .emit_call("banshee_dma_stat", [self.dma_ptr(), imm]),
+            _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
         Ok(())
@@ -758,9 +759,20 @@ impl<'a> InstructionTranslator<'a> {
                 self.emit_fld(data.rd, LLVMBuildAdd(self.builder, rs1, imm, NONAME));
                 return Ok(());
             }
-            riscv::OpcodeImm12RdRs1::DmStrti => self
-                .section
-                .emit_call("banshee_dma_strt", [self.dma_ptr(), rs1, imm]),
+            riscv::OpcodeImm12RdRs1::DmStrti => self.section.emit_call(
+                "banshee_dma_strt",
+                [
+                    self.dma_ptr(),
+                    LLVMBuildBitCast(
+                        self.builder,
+                        self.section.state_ptr,
+                        LLVMPointerType(LLVMInt8Type(), 0),
+                        NONAME,
+                    ),
+                    rs1,
+                    imm,
+                ],
+            ),
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
@@ -1564,7 +1576,12 @@ impl<'a> InstructionTranslator<'a> {
                 "banshee_load\0".as_ptr() as *const _,
             ),
             [
-                self.section.state_ptr,
+                LLVMBuildBitCast(
+                    self.builder,
+                    self.section.state_ptr,
+                    LLVMPointerType(LLVMInt8Type(), 0),
+                    NONAME,
+                ),
                 addr,
                 LLVMConstInt(LLVMInt8Type(), size as u64, 0),
             ]
@@ -1637,7 +1654,12 @@ impl<'a> InstructionTranslator<'a> {
                 "banshee_store\0".as_ptr() as *const _,
             ),
             [
-                self.section.state_ptr,
+                LLVMBuildBitCast(
+                    self.builder,
+                    self.section.state_ptr,
+                    LLVMPointerType(LLVMInt8Type(), 0),
+                    NONAME,
+                ),
                 addr,
                 value,
                 LLVMConstInt(LLVMInt8Type(), size as u64, 0),
