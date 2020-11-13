@@ -6,7 +6,8 @@ use crate::{
 };
 use anyhow::{anyhow, bail, Context, Result};
 use llvm_sys::{
-    core::*, prelude::*, LLVMAttributeFunctionIndex, LLVMIntPredicate::*, LLVMRealPredicate::*,
+    core::*, debuginfo::*, prelude::*, LLVMAttributeFunctionIndex, LLVMIntPredicate::*,
+    LLVMRealPredicate::*,
 };
 use std::{
     cell::{Cell, RefCell},
@@ -24,6 +25,12 @@ pub struct ElfTranslator<'a> {
     pub elf: &'a elf::File,
     /// The translation engine.
     pub engine: &'a Engine,
+    /// The debug info builder.
+    pub di_builder: LLVMDIBuilderRef,
+    /// The root compile unit debug info.
+    pub di_cu: LLVMMetadataRef,
+    /// The root file debug info.
+    pub di_file: LLVMMetadataRef,
     /// Predicted branch target addresses.
     pub target_addrs: BTreeSet<u64>,
     /// Basic blocks for each instruction address.
@@ -39,9 +46,46 @@ pub struct ElfTranslator<'a> {
 impl<'a> ElfTranslator<'a> {
     /// Create a new ELF file translator.
     pub fn new(elf: &'a elf::File, engine: &'a Engine) -> Self {
+        // Create the root debugging information.
+        let (di_builder, di_cu, di_file) = unsafe {
+            let dir_name = ".";
+            let file_name = "binary.riscv";
+            let producer = "banshee";
+
+            let di_builder = LLVMCreateDIBuilder(engine.module);
+            let di_file = LLVMDIBuilderCreateFile(
+                di_builder,
+                file_name.as_ptr() as *const _,
+                file_name.len(),
+                dir_name.as_ptr() as *const _,
+                dir_name.len(),
+            );
+            let di_cu = LLVMDIBuilderCreateCompileUnit(
+                di_builder,                                        // Builder
+                LLVMDWARFSourceLanguage::LLVMDWARFSourceLanguageC, // Lang
+                di_file,                                           // FileRef
+                producer.as_ptr() as *const _,                     // Producer
+                producer.len(),                                    // ProducerLen
+                0,                                                 // isOptimized
+                std::ptr::null(),                                  // Flags
+                0,                                                 // FlagsLen
+                0,                                                 // RuntimeVer
+                std::ptr::null(),                                  // SplitName
+                0,                                                 // SplitNameLen
+                LLVMDWARFEmissionKind::LLVMDWARFEmissionKindNone,  // Kind
+                0,                                                 // DWOId
+                1,                                                 // SplitDebugInlining
+                1,                                                 // DebugInfoForProfiling
+            );
+            (di_builder, di_cu, di_file)
+        };
+
         Self {
             elf,
             engine,
+            di_builder,
+            di_cu,
+            di_file,
             target_addrs: Default::default(),
             inst_bbs: Default::default(),
             trace: engine.trace,
@@ -266,6 +310,35 @@ impl<'a> ElfTranslator<'a> {
         );
         let state_ptr = LLVMGetParam(func, 0);
 
+        // Emit the subprogram debug information for this function.
+        // let di_builder = LLVMCreateDIBuilder(self.engine.module);
+        let di_builder = self.di_builder;
+        let di_name = "execute_binary";
+        let di_linkage_name = "execute_binary";
+        let di_scope = LLVMDIBuilderCreateFunction(
+            di_builder,                           // Builder
+            self.di_file,                         // Scope
+            di_name.as_ptr() as *const _,         // Name
+            di_name.len(),                        // NameLen
+            di_linkage_name.as_ptr() as *const _, // LinkageName
+            di_linkage_name.len(),                // LinkageNameLen
+            self.di_file,                         // File
+            0,                                    // LineNo
+            LLVMDIBuilderCreateSubroutineType(
+                di_builder,
+                self.di_file,
+                [].as_mut_ptr(),
+                0,
+                LLVMDIFlagZero,
+            ), // Ty
+            0,                                    // IsLocalToUnit
+            1,                                    // IsDefinition
+            0,                                    // ScopeLine
+            LLVMDIFlagPrototyped,                 // Flags
+            0,                                    // IsOptimized
+        );
+        LLVMSetSubprogram(func, di_scope);
+
         // Create the entry block.
         let entry_bb = LLVMAppendBasicBlockInContext(
             self.engine.context,
@@ -335,6 +408,7 @@ impl<'a> ElfTranslator<'a> {
                 elf: self,
                 section,
                 engine: self.engine,
+                di_scope,
                 state_ptr,
                 trace_access_buffer,
                 trace_data_buffer,
@@ -360,6 +434,7 @@ impl<'a> ElfTranslator<'a> {
         }
 
         // Clean up.
+        LLVMDIBuilderFinalize(di_builder);
         LLVMDisposeBuilder(builder);
         Ok(())
     }
@@ -397,6 +472,8 @@ pub struct SectionTranslator<'a> {
     elf: &'a ElfTranslator<'a>,
     section: &'a elf::Section,
     engine: &'a Engine,
+    /// The debug info scope for additional debug info emitted in the section.
+    di_scope: LLVMMetadataRef,
     /// An LLVM value that holds the pointer to the CPU state structure.
     state_ptr: LLVMValueRef,
     /// An LLVM value that holds the pointer to the trace access buffer.
@@ -523,6 +600,17 @@ pub struct InstructionTranslator<'a> {
 
 impl<'a> InstructionTranslator<'a> {
     unsafe fn emit(&self) -> Result<()> {
+        // Emit some debug information that indicates what instruction we are
+        // currently processing.
+        let di_loc = LLVMDIBuilderCreateDebugLocation(
+            self.section.engine.context, // Ctx
+            self.addr as u32,            // Line
+            1,                           // Column
+            self.section.di_scope,       // Scope
+            std::ptr::null_mut(),        // InlinedAt
+        );
+        LLVMSetCurrentDebugLocation2(self.builder, di_loc);
+
         // Update the PC register to reflect this instruction.
         LLVMBuildStore(
             self.builder,
