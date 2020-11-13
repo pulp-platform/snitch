@@ -71,3 +71,6 @@ test-%: ../banshee-tests/bin/% ../banshee-tests/trace/%.txt test-info
 
 test-%: ../banshee-tests/bin/% test-info
 	$(call test_template,$*,$(BANSHEE) $<)
+
+debug-%: ../banshee-tests/bin/% test-info
+	lldb -- $(BANSHEE) $<
