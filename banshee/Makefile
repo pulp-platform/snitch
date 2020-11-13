@@ -19,9 +19,6 @@ src/riscv.rs: $(OPCODES_PATH) $(PARSE_OPCODES)
 	cat $(OPCODES_PATH) | $(PARSE_OPCODES) -rust >> $@
 	rustfmt $@
 
-src/runtime.ll: src/runtime.rs
-	rustc $< -o $@ --emit=llvm-ir --crate-type=staticlib -C opt-level=3 -C debuginfo=0 -C panic=abort
-
 
 ###########################
 ###  INTEGRATION TESTS  ###

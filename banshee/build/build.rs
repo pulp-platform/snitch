@@ -8,4 +8,5 @@ fn main() {
 
     // Build the components.
     softfloat::build();
+    runtime::build();
 }

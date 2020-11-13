@@ -4,7 +4,7 @@ use crate::{riscv, tran::ElfTranslator};
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
-    core::*, execution_engine::*, ir_reader::*, prelude::*, support::*,
+    core::*, execution_engine::*, ir_reader::*, linker::*, prelude::*, support::*,
     transforms::pass_manager_builder::*,
 };
 use std::{
@@ -40,23 +40,23 @@ impl Engine {
         // Create a new LLVM module ot compile into.
         let module = unsafe {
             // Wrap the runtime IR up in an LLVM memory buffer.
-            let mut runtime_ir = include_bytes!("runtime.ll").to_vec();
-            runtime_ir.push(0); // somehow this is needed despite RequireNullTerminated=0 below
-            let runtime_buf = LLVMCreateMemoryBufferWithMemoryRange(
-                runtime_ir.as_ptr() as *const _,
-                runtime_ir.len() - 1,
-                b"runtime.ll\0".as_ptr() as *const _,
+            let mut initial_ir = crate::runtime::JIT_INITIAL.to_vec();
+            initial_ir.push(0); // somehow this is needed despite RequireNullTerminated=0 below
+            let initial_buf = LLVMCreateMemoryBufferWithMemoryRange(
+                initial_ir.as_ptr() as *const _,
+                initial_ir.len() - 1,
+                b"jit.ll\0".as_ptr() as *const _,
                 0,
             );
 
             // Parse the module.
             let mut module = std::mem::MaybeUninit::uninit().assume_init();
             let mut errmsg = std::mem::MaybeUninit::zeroed().assume_init();
-            if LLVMParseIRInContext(context, runtime_buf, &mut module, &mut errmsg) != 0
+            if LLVMParseIRInContext(context, initial_buf, &mut module, &mut errmsg) != 0
                 || !errmsg.is_null()
             {
                 error!(
-                    "Cannot parse runtime IR: {:?}",
+                    "Cannot parse `jit.ll` IR: {:?}",
                     std::ffi::CStr::from_ptr(errmsg)
                 );
             }
@@ -108,6 +108,33 @@ impl Engine {
         if self.opt_llvm {
             unsafe { self.optimize() };
         }
+
+        // Load and link the LLVM IR for the `jit.rs` runtime library.
+        unsafe {
+            let mut runtime_ir = crate::runtime::JIT_GENERATED.to_vec();
+            runtime_ir.push(0); // somehow this is needed despite RequireNullTerminated=0 below
+            let runtime_buf = LLVMCreateMemoryBufferWithMemoryRange(
+                runtime_ir.as_ptr() as *const _,
+                runtime_ir.len() - 1,
+                b"jit.rs\0".as_ptr() as *const _,
+                0,
+            );
+
+            // Parse the module.
+            let mut runtime = std::mem::MaybeUninit::uninit().assume_init();
+            let mut errmsg = std::mem::MaybeUninit::zeroed().assume_init();
+            if LLVMParseIRInContext(self.context, runtime_buf, &mut runtime, &mut errmsg) != 0
+                || !errmsg.is_null()
+            {
+                error!(
+                    "Cannot parse `jit.rs` IR: {:?}",
+                    std::ffi::CStr::from_ptr(errmsg)
+                );
+            }
+
+            // Link the runtime module into the translated binary module.
+            LLVMLinkModules2(self.module, runtime);
+        };
 
         // Copy the executable sections into memory.
         {
