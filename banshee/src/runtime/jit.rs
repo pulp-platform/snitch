@@ -1,41 +1,15 @@
-//! Runtime cod included as LLVM IR in the translated binary.
+//! Runtime code included as LLVM IR in the translated binary.
+//!
+//! Be very careful about what exactly goes in here, as it has the potential to
+//! greatly disrupt execution of the translated binary. Especially the linker
+//! that resolves symbol references in the JITed binary is very brittle. As a
+//! rule of thumb, avoid the following:
+//!
+//! - assertions
+//! - index accesses; try `get_unchecked` and friends instead
+//! - any of the macros from the `log` crate
 
-/// A representation of a single SSR address generator's state.
-#[derive(Default)]
-#[repr(C)]
-pub struct SsrState {
-    index: [u32; 4],
-    bound: [u32; 4],
-    stride: [u32; 4],
-    ptr: u32,
-    repeat_count: u16,
-    repeat_bound: u16,
-    write: bool,
-    dims: u8,
-    done: bool,
-}
-
-impl std::fmt::Debug for SsrState {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        f.debug_struct("SsrState")
-            .field("index", &format_args!("{:?}", self.index))
-            .field("bound", &format_args!("{:?}", self.bound))
-            .field("stride", &format_args!("{:08x?}", self.stride))
-            .field("ptr", &format_args!("{:08x}", self.ptr))
-            .field(
-                "repeat",
-                &format_args!("{} of {}", self.repeat_count, self.repeat_bound),
-            )
-            .field(
-                "status",
-                &format_args!(
-                    "{{ done: {}, write: {}, dims: {} }}",
-                    self.done, self.write, self.dims
-                ),
-            )
-            .finish()
-    }
-}
+include!("common.rs");
 
 /// Write to an SSR control register.
 #[no_mangle]
@@ -106,28 +80,6 @@ pub unsafe fn banshee_ssr_next(ssr: &mut SsrState) -> u32 {
         ssr.repeat_count += 1;
     }
     ptr
-}
-
-/// A representation of a DMA backend's state.
-#[derive(Default)]
-#[repr(C)]
-pub struct DmaState {
-    src: u64,
-    dst: u64,
-    src_stride: u32,
-    dst_stride: u32,
-    reps: u32,
-    done_id: u32,
-}
-
-impl std::fmt::Debug for DmaState {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        f.debug_struct("DmaState")
-            .field("src", &format_args!("{:08x}", self.src))
-            .field("dst", &format_args!("{:08x}", self.dst))
-            .field("done_id", &self.done_id)
-            .finish()
-    }
 }
 
 /// Implementation of the `dm.src` instruction.
