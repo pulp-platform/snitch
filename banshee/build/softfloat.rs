@@ -71,6 +71,9 @@ const SPECIALIZATION_FILES: &[&str] = &[
 fn main() {
     println!("# building softfloat library");
 
+    // Prevent cargo from re-building everything by default.
+    println!("cargo:rerun-if-changed=build/softfloat.rs");
+
     let source_files = SOURCE_FILES
         .iter()
         .map(|f| format!("vendor/SoftFloat-3e/source/{}", f));
