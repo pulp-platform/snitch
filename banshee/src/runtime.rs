@@ -153,11 +153,11 @@ pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: *const u8, size: u32, fl
     let id = dma.done_id;
     dma.done_id += 1;
 
-    assert_eq!(
-        size % 4,
-        0,
-        "DMA transfer size must be a multiple of 4B for now"
-    );
+    // assert_eq!(
+    //     size % 4,
+    //     0,
+    //     "DMA transfer size must be a multiple of 4B for now"
+    // );
     let num_beats = size / 4;
     let enable_2d = (flags & (1 << 1)) != 0;
     let steps = if enable_2d { dma.reps } else { 1 };
@@ -165,8 +165,8 @@ pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: *const u8, size: u32, fl
     for i in 0..steps as u64 {
         let src = dma.src + i * dma.src_stride as u64;
         let dst = dma.dst + i * dma.dst_stride as u64;
-        assert_eq!(src % 4, 0, "DMA src transfer block must be 4-byte-aligned");
-        assert_eq!(dst % 4, 0, "DMA dst transfer block must be 4-byte-aligned");
+        // assert_eq!(src % 4, 0, "DMA src transfer block must be 4-byte-aligned");
+        // assert_eq!(dst % 4, 0, "DMA dst transfer block must be 4-byte-aligned");
         for j in 0..num_beats as u64 {
             let tmp = banshee_load(cpu, (src + j * 4) as u32, 2);
             banshee_store(cpu, (dst + j * 4) as u32, tmp, 2);
