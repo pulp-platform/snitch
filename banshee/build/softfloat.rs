@@ -68,12 +68,7 @@ const SPECIALIZATION_FILES: &[&str] = &[
     "s_propagateNaNF64UI.c",
 ];
 
-fn main() {
-    println!("# building softfloat library");
-
-    // Prevent cargo from re-building everything by default.
-    println!("cargo:rerun-if-changed=build/softfloat.rs");
-
+pub fn build() {
     let source_files = SOURCE_FILES
         .iter()
         .map(|f| format!("vendor/SoftFloat-3e/source/{}", f));
@@ -82,6 +77,11 @@ fn main() {
         .map(|f| format!("build/softfloat/{}", f));
 
     let all_files = source_files.chain(specialization_files).collect::<Vec<_>>();
+
+    // Ensure that we rebuild whenever any of the input files changes.
+    for f in &all_files {
+        println!("cargo:rerun-if-changed={}", f);
+    }
 
     Build::new()
         .files(all_files)

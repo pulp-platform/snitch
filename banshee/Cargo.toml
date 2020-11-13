@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Florian Zaruba <zarubaf@iis.ee.ethz.ch>", "Fabian Schuiki <fschuiki@iis.ee.ethz.ch>"]
 description = "Emulates a Snitch system using dynamic LLVM JIT binary translation."
 edition = "2018"
-build = "build/softfloat.rs"
+build = "build/build.rs"
 
 [dependencies]
 anyhow = "1"
