@@ -5,10 +5,7 @@ use crate::{
     riscv,
 };
 use anyhow::{anyhow, bail, Context, Result};
-use llvm_sys::{
-    core::*, debuginfo::*, prelude::*, LLVMAttributeFunctionIndex, LLVMIntPredicate::*,
-    LLVMRealPredicate::*,
-};
+use llvm_sys::{core::*, debuginfo::*, prelude::*, LLVMIntPredicate::*, LLVMRealPredicate::*};
 use std::{
     cell::{Cell, RefCell},
     collections::{BTreeSet, HashMap},
