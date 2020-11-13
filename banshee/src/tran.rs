@@ -497,10 +497,15 @@ impl<'a> SectionTranslator<'a> {
             args.len() as u32,
             NONAME,
         );
-        let attr = "argmemonly";
-        let attr = LLVMGetEnumAttributeKindForName(attr.as_ptr() as *mut _, attr.len());
-        let attr = LLVMCreateEnumAttribute(self.engine.context, attr, 0);
-        LLVMAddCallSiteAttribute(call, LLVMAttributeFunctionIndex, attr);
+        // TODO(fschuiki): The following is very dangerous. It can cause the IR
+        // to produce broken machine code if the attribute is set on a function
+        // which has side effects. Not sure why a call to 0x0 is inserted in
+        // that case, though. Anyway, since this is just a performance
+        // optimization, keep it disabled for now.
+        // let attr = "argmemonly";
+        // let attr = LLVMGetEnumAttributeKindForName(attr.as_ptr() as *mut _, attr.len());
+        // let attr = LLVMCreateEnumAttribute(self.engine.context, attr, 0);
+        // LLVMAddCallSiteAttribute(call, LLVMAttributeFunctionIndex, attr);
         call
     }
 }
