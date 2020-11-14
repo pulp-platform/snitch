@@ -236,7 +236,15 @@ impl Engine {
 
         // Create the CPUs.
         let cpus: Vec<_> = (0..self.num_cores)
-            .map(|i| Cpu::new(self, &tcdm[0], self.base_hartid + i, self.num_cores))
+            .map(|i| {
+                Cpu::new(
+                    self,
+                    &tcdm[0],
+                    self.base_hartid + i,
+                    self.num_cores,
+                    self.base_hartid,
+                )
+            })
             .collect();
         trace!(
             "Initial state hart {}: {:#?}",
@@ -331,17 +339,25 @@ pub struct Cpu<'a, 'b> {
     tcdm_ptr: &'b u32,
     hartid: usize,
     num_cores: usize,
+    cluster_base_hartid: usize,
 }
 
 impl<'a, 'b> Cpu<'a, 'b> {
     /// Create a new CPU in a default state.
-    pub fn new(engine: &'a Engine, tcdm_ptr: &'b u32, hartid: usize, num_cores: usize) -> Self {
+    pub fn new(
+        engine: &'a Engine,
+        tcdm_ptr: &'b u32,
+        hartid: usize,
+        num_cores: usize,
+        cluster_base_hartid: usize,
+    ) -> Self {
         Self {
             engine,
             state: Default::default(),
             tcdm_ptr,
             hartid,
             num_cores,
+            cluster_base_hartid,
         }
     }
 
@@ -352,6 +368,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             0x40000008 => 0x020000,                                     // tcdm_end
             0x40000010 => self.num_cores as u32,                        // nr_cores
             0x40000020 => self.engine.exit_code.load(Ordering::SeqCst), // scratch_reg
+            0x40000040 => self.cluster_base_hartid as u32,              // cluster_base_hartid
             _ => self
                 .engine
                 .memory
@@ -370,6 +387,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             0x40000008 => (),                                                   // tcdm_end
             0x40000010 => (),                                                   // nr_cores
             0x40000020 => self.engine.exit_code.store(value, Ordering::SeqCst), // scratch_reg
+            0x40000040 => (), // cluster_base_hartid
             _ => {
                 self.engine
                     .memory
@@ -434,7 +452,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
 
         // Assemble the trace line.
         let line = format!(
-            "{:08} {:04} {:08x}  {:36}  # DASM({:08x})",
+            "{:08} {:04} {:08x}  {:38}  # DASM({:08x})",
             self.state.instret, self.hartid, addr, args, inst
         );
         println!("{}", line);
