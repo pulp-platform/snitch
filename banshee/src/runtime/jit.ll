@@ -1,6 +1,11 @@
 ; Initial code for the translated binary, before emitting code for the
 ; individual instructions.
 
+; Annotate the debug info version of the module.
+!llvm.module.flags = !{!0, !1}
+!0 = !{i32 2, !"Debug Info Version", i32 3}
+!1 = !{i32 2, !"Dwarf Version", i32 2}
+
 ; Forward-declared the SSR/DMA state types. This will go away at some point,
 ; when we leave the runtime data structure management entirely to Rust, and use
 ; inline functions to access them transparently in the JITed IR.

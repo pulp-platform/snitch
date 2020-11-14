@@ -69,7 +69,7 @@ impl<'a> ElfTranslator<'a> {
                 0,                                                 // RuntimeVer
                 std::ptr::null(),                                  // SplitName
                 0,                                                 // SplitNameLen
-                LLVMDWARFEmissionKind::LLVMDWARFEmissionKindNone,  // Kind
+                LLVMDWARFEmissionKind::LLVMDWARFEmissionKindFull,  // Kind
                 0,                                                 // DWOId
                 1,                                                 // SplitDebugInlining
                 1,                                                 // DebugInfoForProfiling
@@ -335,6 +335,14 @@ impl<'a> ElfTranslator<'a> {
             0,                                    // IsOptimized
         );
         LLVMSetSubprogram(func, di_scope);
+        let di_loc = LLVMDIBuilderCreateDebugLocation(
+            self.engine.context,  // Ctx
+            0,                    // Line
+            0,                    // Column
+            di_scope,             // Scope
+            std::ptr::null_mut(), // InlinedAt
+        );
+        LLVMSetCurrentDebugLocation2(builder, di_loc);
 
         // Create the entry block.
         let entry_bb = LLVMAppendBasicBlockInContext(
@@ -398,10 +406,12 @@ impl<'a> ElfTranslator<'a> {
             }
         }
 
-        // Create a translator for each section.
-        let section_tran: Vec<_> = self
-            .sections()
-            .map(|section| SectionTranslator {
+        // Emit the instructions for each section.
+        let mut last_section_tran = None;
+        let mut inst_index = 0;
+        for section in self.sections() {
+            debug!("Translating section `{}`", section.shdr.name);
+            let tran = SectionTranslator {
                 elf: self,
                 section,
                 engine: self.engine,
@@ -412,13 +422,9 @@ impl<'a> ElfTranslator<'a> {
                 builder,
                 addr_start: section.shdr.addr,
                 addr_end: section.shdr.addr + section.shdr.size,
-            })
-            .collect();
-
-        // Emit the instructions for each section.
-        for tran in &section_tran {
-            debug!("Translating section `{}`", tran.section.shdr.name);
-            tran.emit()?;
+            };
+            tran.emit(&mut inst_index)?;
+            last_section_tran = Some(tran);
         }
 
         // Emit escape abort code into all unpopulated instruction locations.
@@ -426,7 +432,10 @@ impl<'a> ElfTranslator<'a> {
             if LLVMGetBasicBlockTerminator(bb).is_null() {
                 trace!("Plugging instruction slot hole at 0x{:x}", addr);
                 LLVMPositionBuilderAtEnd(builder, bb);
-                section_tran[0].emit_escape_abort(addr);
+                last_section_tran
+                    .as_ref()
+                    .expect("missing section; can't emit escape abort")
+                    .emit_escape_abort(addr);
             }
         }
 
@@ -535,7 +544,7 @@ impl<'a> SectionTranslator<'a> {
     }
 
     /// Emit the code for the entire section.
-    unsafe fn emit(&self) -> Result<()> {
+    unsafe fn emit(&self, inst_index: &mut u32) -> Result<()> {
         for (addr, inst) in self.elf.instructions(self.section) {
             let tran = InstructionTranslator {
                 section: self,
@@ -547,7 +556,7 @@ impl<'a> SectionTranslator<'a> {
                 trace_emitted: Default::default(),
             };
             LLVMPositionBuilderAtEnd(self.builder, self.elf.inst_bbs[&addr]);
-            match tran.emit() {
+            match tran.emit(inst_index) {
                 Ok(()) => (),
                 Err(e) => {
                     error!("{}", e);
@@ -596,15 +605,47 @@ pub struct InstructionTranslator<'a> {
 }
 
 impl<'a> InstructionTranslator<'a> {
-    unsafe fn emit(&self) -> Result<()> {
+    unsafe fn emit(&self, inst_index: &mut u32) -> Result<()> {
         // Emit some debug information that indicates what instruction we are
         // currently processing.
+        *inst_index += 1;
+        let di_line = *inst_index;
+        let di_name = format!("0x{:x} {}", self.addr, self.inst);
+        let di_scope = LLVMDIBuilderCreateFunction(
+            self.section.elf.di_builder,  // Builder
+            self.section.elf.di_file,     // Scope
+            di_name.as_ptr() as *const _, // Name
+            di_name.len(),                // NameLen
+            di_name.as_ptr() as *const _, // LinkageName
+            di_name.len(),                // LinkageNameLen
+            self.section.elf.di_file,     // File
+            di_line,                      // LineNo
+            LLVMDIBuilderCreateSubroutineType(
+                self.section.elf.di_builder, // Builder
+                self.section.elf.di_file,    // File
+                [].as_mut_ptr(),             // ParameterTypes
+                0,                           // NumParameterTypes
+                LLVMDIFlagZero,              // Flags
+            ), // Ty
+            0,                            // IsLocalToUnit
+            1,                            // IsDefinition
+            di_line,                      // ScopeLine
+            LLVMDIFlagPrototyped,         // Flags
+            0,                            // IsOptimized
+        );
         let di_loc = LLVMDIBuilderCreateDebugLocation(
             self.section.engine.context, // Ctx
-            self.addr as u32,            // Line
-            1,                           // Column
+            di_line,                     // Line
+            0,                           // Column
             self.section.di_scope,       // Scope
             std::ptr::null_mut(),        // InlinedAt
+        );
+        let di_loc = LLVMDIBuilderCreateDebugLocation(
+            self.section.engine.context, // Ctx
+            di_line,                     // Line
+            0,                           // Column
+            di_scope,                    // Scope
+            di_loc,                      // InlinedAt
         );
         LLVMSetCurrentDebugLocation2(self.builder, di_loc);
 
