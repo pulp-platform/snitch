@@ -69,6 +69,18 @@ fn main() -> Result<()> {
                 .short("t")
                 .help("Enable instruction tracing"),
         )
+        .arg(
+            Arg::with_name("num-cores")
+                .long("num-cores")
+                .takes_value(true)
+                .help("Number of cores to simulate"),
+        )
+        .arg(
+            Arg::with_name("base-hartid")
+                .long("base-hartid")
+                .takes_value(true)
+                .help("The hartid of the first core"),
+        )
         .get_matches();
 
     // Configure the logger.
@@ -90,6 +102,13 @@ fn main() -> Result<()> {
     engine.opt_llvm = !matches.is_present("no-opt-llvm");
     engine.opt_jit = !matches.is_present("no-opt-jit");
     engine.trace = matches.is_present("trace");
+    matches
+        .value_of("num-cores")
+        .map(|x| engine.num_cores = x.parse().unwrap());
+    matches
+        .value_of("base-hartid")
+        .map(|x| engine.base_hartid = x.parse().unwrap());
+    assert!(engine.num_cores > 0);
 
     // Read the binary.
     let path = Path::new(matches.value_of("binary").unwrap());

@@ -1,6 +1,6 @@
 //! Engine for dynamic binary translation and execution
 
-use crate::{riscv, tran::ElfTranslator};
+use crate::{riscv, tran::ElfTranslator, util::SiUnit};
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
@@ -8,8 +8,11 @@ use llvm_sys::{
     transforms::pass_manager_builder::*,
 };
 use std::{
-    cell::{Cell, RefCell},
     collections::HashMap,
+    sync::{
+        atomic::{AtomicBool, AtomicU32, Ordering},
+        Mutex,
+    },
 };
 
 pub use crate::runtime::{DmaState, SsrState};
@@ -21,18 +24,26 @@ pub struct Engine {
     /// The LLVM module which contains the translated code.
     pub module: LLVMModuleRef,
     /// The exit code set by the binary.
-    pub exit_code: Cell<u32>,
+    pub exit_code: AtomicU32,
     /// Whether an error occurred during execution.
-    pub had_error: Cell<bool>,
+    pub had_error: AtomicBool,
     /// Optimize the LLVM IR.
     pub opt_llvm: bool,
     /// Optimize during JIT compilation.
     pub opt_jit: bool,
     /// Enable instruction tracing.
     pub trace: bool,
+    /// The base hartid.
+    pub base_hartid: usize,
+    /// The number of cores.
+    pub num_cores: usize,
     /// The global memory.
-    pub memory: RefCell<HashMap<u64, u32>>,
+    pub memory: Mutex<HashMap<u64, u32>>,
 }
+
+// SAFETY: This is safe because only `context` and `module`
+unsafe impl std::marker::Send for Engine {}
+unsafe impl std::marker::Sync for Engine {}
 
 impl Engine {
     /// Create a new execution engine.
@@ -76,6 +87,8 @@ impl Engine {
             opt_llvm: true,
             opt_jit: true,
             trace: false,
+            base_hartid: 0,
+            num_cores: 1,
             memory: Default::default(),
         }
     }
@@ -138,7 +151,7 @@ impl Engine {
 
         // Copy the executable sections into memory.
         {
-            let mut mem = self.memory.borrow_mut();
+            let mut mem = self.memory.lock().unwrap();
             for section in &elf.sections {
                 if (section.shdr.flags.0 & elf::types::SHF_ALLOC.0) == 0 {
                     continue;
@@ -208,43 +221,65 @@ impl Engine {
         }
 
         // Lookup the function which executes the binary.
-        let exec: extern "C" fn(&Cpu<'b>) = std::mem::transmute(LLVMGetFunctionAddress(
-            ee,
-            b"execute_binary\0".as_ptr() as *const _,
-        ));
+        let exec: for<'c> extern "C" fn(&'c Cpu<'b, 'c>) = std::mem::transmute(
+            LLVMGetFunctionAddress(ee, b"execute_binary\0".as_ptr() as *const _),
+        );
         debug!("Translated binary is at {:?}", exec as *const i8);
 
         // Allocate some TCDM memory.
         let mut tcdm = vec![0u32; 128 * 1024 / 4];
-        for (&addr, &value) in self.memory.borrow().iter() {
+        for (&addr, &value) in self.memory.lock().unwrap().iter() {
             if addr < 0x020000 {
                 tcdm[(addr / 4) as usize] = value;
             }
         }
 
-        // Create a CPU.
-        let cpu = Cpu::new(self, tcdm.as_ptr());
-        trace!("Initial state: {:#?}", cpu.state);
+        // Create the CPUs.
+        let cpus: Vec<_> = (0..self.num_cores)
+            .map(|i| Cpu::new(self, &tcdm[0], self.base_hartid + i, self.num_cores))
+            .collect();
+        trace!(
+            "Initial state hart {}: {:#?}",
+            cpus[0].hartid,
+            cpus[0].state
+        );
 
         // Execute the binary.
-        info!("Launching binary");
+        info!("Launching binary on {} harts", self.num_cores);
         let t0 = std::time::Instant::now();
-        exec(&cpu);
+        crossbeam_utils::thread::scope(|s| {
+            for cpu in &cpus {
+                s.spawn(move |_| {
+                    exec(cpu);
+                    debug!("Hart {} finished", cpu.hartid);
+                });
+            }
+        })
+        .unwrap();
         let t1 = std::time::Instant::now();
         let duration = (t1.duration_since(t0)).as_secs_f64();
+        debug!("All {} harts finished", self.num_cores);
 
-        trace!("Final state: {:#?}", cpu.state);
-        info!("Exit code is 0x{:x}", self.exit_code.get() >> 1);
+        // Count the number of instructions that we have retired.
+        let instret: u64 = cpus.iter().map(|cpu| cpu.state.instret).sum();
+
+        // Print some final statistics.
+        trace!("Final state hart {}: {:#?}", cpus[0].hartid, cpus[0].state);
         info!(
-            "Retired {} inst in {} s, {} inst/s",
-            cpu.state.instret,
-            duration,
-            cpu.state.instret as f64 / duration
+            "Exit code is 0x{:x}",
+            self.exit_code.load(Ordering::SeqCst) >> 1
         );
-        if self.had_error.get() {
+        info!(
+            "Retired {} ({}) in {}, {}",
+            instret,
+            (instret as isize).si_unit("inst"),
+            duration.si_unit("s"),
+            (instret as f64 / duration).si_unit("inst/s"),
+        );
+        if self.had_error.load(Ordering::SeqCst) {
             Err(anyhow!("Encountered an error during execution"))
         } else {
-            Ok(self.exit_code.get() >> 1)
+            Ok(self.exit_code.load(Ordering::SeqCst) >> 1)
         }
     }
 }
@@ -284,35 +319,44 @@ pub unsafe fn add_llvm_symbols() {
     );
 }
 
+// /// A representation of the system state.
+// #[repr(C)]
+// pub struct System<'a> {}
+
 /// A CPU pointer to be passed to the binary code.
 #[repr(C)]
-pub struct Cpu<'a> {
+pub struct Cpu<'a, 'b> {
     engine: &'a Engine,
     state: CpuState,
-    tcdm_ptr: *const u32,
+    tcdm_ptr: &'b u32,
+    hartid: usize,
+    num_cores: usize,
 }
 
-impl<'a> Cpu<'a> {
+impl<'a, 'b> Cpu<'a, 'b> {
     /// Create a new CPU in a default state.
-    pub fn new(engine: &'a Engine, tcdm_ptr: *const u32) -> Self {
+    pub fn new(engine: &'a Engine, tcdm_ptr: &'b u32, hartid: usize, num_cores: usize) -> Self {
         Self {
             engine,
             state: Default::default(),
             tcdm_ptr,
+            hartid,
+            num_cores,
         }
     }
 
     fn binary_load(&self, addr: u32, size: u8) -> u32 {
         trace!("Load 0x{:x} ({}B)", addr, 8 << size);
         match addr {
-            0x40000000 => 0x000000,                    // tcdm_start
-            0x40000008 => 0x020000,                    // tcdm_end
-            0x40000010 => 1,                           // nr_cores
-            0x40000020 => self.engine.exit_code.get(), // scratch_reg
+            0x40000000 => 0x000000,                                     // tcdm_start
+            0x40000008 => 0x020000,                                     // tcdm_end
+            0x40000010 => self.num_cores as u32,                        // nr_cores
+            0x40000020 => self.engine.exit_code.load(Ordering::SeqCst), // scratch_reg
             _ => self
                 .engine
                 .memory
-                .borrow()
+                .lock()
+                .unwrap()
                 .get(&(addr as u64))
                 .copied()
                 .unwrap_or(0),
@@ -322,9 +366,16 @@ impl<'a> Cpu<'a> {
     fn binary_store(&self, addr: u32, value: u32, size: u8) {
         trace!("Store 0x{:x} = 0x{:x} ({}B)", addr, value, 8 << size);
         match addr {
-            0x40000020 => self.engine.exit_code.set(value), // scratch_reg
+            0x40000000 => (),                                                   // tcdm_start
+            0x40000008 => (),                                                   // tcdm_end
+            0x40000010 => (),                                                   // nr_cores
+            0x40000020 => self.engine.exit_code.store(value, Ordering::SeqCst), // scratch_reg
             _ => {
-                self.engine.memory.borrow_mut().insert(addr as u64, value);
+                self.engine
+                    .memory
+                    .lock()
+                    .unwrap()
+                    .insert(addr as u64, value);
             }
         }
     }
@@ -333,7 +384,7 @@ impl<'a> Cpu<'a> {
         trace!("Read CSR 0x{:x}", csr);
         match csr {
             0x7C0 => self.state.ssr_enable,
-            0xF14 => 0, // mhartid
+            0xF14 => self.hartid as u32, // mhartid
             _ => 0,
         }
     }
@@ -348,7 +399,7 @@ impl<'a> Cpu<'a> {
 
     fn binary_abort_escape(&self, addr: u32) {
         error!("CPU escaped binary at 0x{:x}", addr);
-        self.engine.had_error.set(true);
+        self.engine.had_error.store(true, Ordering::SeqCst);
     }
 
     fn binary_abort_illegal_inst(&self, addr: u32, inst_raw: u32) {
@@ -357,7 +408,7 @@ impl<'a> Cpu<'a> {
             riscv::parse_u32(inst_raw),
             addr
         );
-        self.engine.had_error.set(true);
+        self.engine.had_error.store(true, Ordering::SeqCst);
     }
 
     fn binary_abort_illegal_branch(&self, addr: u32, target: u32) {
@@ -365,7 +416,7 @@ impl<'a> Cpu<'a> {
             "Branch to unpredicted address 0x{:x} at 0x{:x}",
             target, addr
         );
-        self.engine.had_error.set(true);
+        self.engine.had_error.store(true, Ordering::SeqCst);
     }
 
     fn binary_trace(&self, addr: u32, inst: u32, accesses: &[TraceAccess], data: &[u64]) {
@@ -382,7 +433,10 @@ impl<'a> Cpu<'a> {
         let args = args.join(" ");
 
         // Assemble the trace line.
-        let line = format!("{:08x}  DASM({:08x})    # {}", addr, inst, args);
+        let line = format!(
+            "{:08} {:04} {:08x}  {:36}  # DASM({:08x})",
+            self.state.instret, self.hartid, addr, args, inst
+        );
         println!("{}", line);
     }
 }
