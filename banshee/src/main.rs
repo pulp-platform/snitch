@@ -76,6 +76,12 @@ fn main() -> Result<()> {
                 .help("Number of cores to simulate"),
         )
         .arg(
+            Arg::with_name("num-clusters")
+                .long("num-clusters")
+                .takes_value(true)
+                .help("Number of clusters to simulate"),
+        )
+        .arg(
             Arg::with_name("base-hartid")
                 .long("base-hartid")
                 .takes_value(true)
@@ -106,9 +112,11 @@ fn main() -> Result<()> {
         .value_of("num-cores")
         .map(|x| engine.num_cores = x.parse().unwrap());
     matches
+        .value_of("num-clusters")
+        .map(|x| engine.num_clusters = x.parse().unwrap());
+    matches
         .value_of("base-hartid")
         .map(|x| engine.base_hartid = x.parse().unwrap());
-    assert!(engine.num_cores > 0);
 
     // Read the binary.
     let path = Path::new(matches.value_of("binary").unwrap());

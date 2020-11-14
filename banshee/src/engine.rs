@@ -37,6 +37,8 @@ pub struct Engine {
     pub base_hartid: usize,
     /// The number of cores.
     pub num_cores: usize,
+    /// The number of clusters.
+    pub num_clusters: usize,
     /// The global memory.
     pub memory: Mutex<HashMap<u64, u32>>,
 }
@@ -89,6 +91,7 @@ impl Engine {
             trace: false,
             base_hartid: 0,
             num_cores: 1,
+            num_clusters: 1,
             memory: Default::default(),
         }
     }
@@ -226,23 +229,28 @@ impl Engine {
         );
         debug!("Translated binary is at {:?}", exec as *const i8);
 
-        // Allocate some TCDM memory.
-        let mut tcdm = vec![0u32; 128 * 1024 / 4];
-        for (&addr, &value) in self.memory.lock().unwrap().iter() {
-            if addr < 0x020000 {
-                tcdm[(addr / 4) as usize] = value;
+        // Allocate some TCDM memories.
+        let tcdms: Vec<_> = {
+            let mut tcdm = vec![0u32; 128 * 1024 / 4];
+            for (&addr, &value) in self.memory.lock().unwrap().iter() {
+                if addr < 0x020000 {
+                    tcdm[(addr / 4) as usize] = value;
+                }
             }
-        }
+            (0..self.num_clusters).map(|_| tcdm.clone()).collect()
+        };
 
         // Create the CPUs.
-        let cpus: Vec<_> = (0..self.num_cores)
-            .map(|i| {
+        let cpus: Vec<_> = (0..self.num_clusters)
+            .flat_map(|j| (0..self.num_cores).map(move |i| (j, i)))
+            .map(|(j, i)| {
+                let base_hartid = self.base_hartid + j * self.num_cores;
                 Cpu::new(
                     self,
-                    &tcdm[0],
-                    self.base_hartid + i,
+                    &tcdms[j][0],
+                    base_hartid + i,
                     self.num_cores,
-                    self.base_hartid,
+                    base_hartid,
                 )
             })
             .collect();
@@ -253,7 +261,7 @@ impl Engine {
         );
 
         // Execute the binary.
-        info!("Launching binary on {} harts", self.num_cores);
+        info!("Launching binary on {} harts", cpus.len());
         let t0 = std::time::Instant::now();
         crossbeam_utils::thread::scope(|s| {
             for cpu in &cpus {
@@ -266,7 +274,7 @@ impl Engine {
         .unwrap();
         let t1 = std::time::Instant::now();
         let duration = (t1.duration_since(t0)).as_secs_f64();
-        debug!("All {} harts finished", self.num_cores);
+        debug!("All {} harts finished", cpus.len());
 
         // Count the number of instructions that we have retired.
         let instret: u64 = cpus.iter().map(|cpu| cpu.state.instret).sum();

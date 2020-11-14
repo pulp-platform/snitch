@@ -126,7 +126,7 @@ As a hacky workaround, try changing the `llvm-sys = "100"` line to whatever majo
 - [ ] Add FREP support
 - [x] Add fast local memory / memory hierarchy
 - [x] Add multi-core execution
-- [ ] Add multi-cluster execution
+- [x] Add multi-cluster execution
 - [ ] Replace all `self.declare_func(..)` in `tran.rs` with decls in `jit.ll`
 - [ ] Replace state type in `tran.rs` with decl in `jit.ll`
 - [ ] Replace all GEP on state ptr in `tran.rs` with calls into `jit.rs`
