@@ -15,6 +15,7 @@ pub mod riscv;
 mod runtime;
 mod softfloat;
 pub mod tran;
+pub mod util;
 
 use crate::engine::*;
 
