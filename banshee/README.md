@@ -4,6 +4,8 @@
 
 ## Usage
 
+    cargo run -- -h
+
 Run a binary as follows:
 
     cargo run -- path/to/riscv/bin
@@ -105,6 +107,12 @@ You can set breakpoints on instructions in the RISC-V binary based on their inde
     (gdb) c
     Breakpoint 2, 0x80010020 () at binary.riscv:9
 
+## Dependencies
+
+Banshee currently requires LLVM 10 to be installed on the system. It is *technically* possible to support multiple LLVM versions through the use of cargo features, but that is not yet implemented.
+
+As a hacky workaround, try changing the `llvm-sys = "100"` line to whatever major version you have times 10, and hope for the best. Be prepared that this breaks the build due to some API changes in LLVM.
+
 ## Limitations
 
 - Static translation only at the moment
@@ -117,7 +125,7 @@ You can set breakpoints on instructions in the RISC-V binary based on their inde
 - [ ] Add DMA support
 - [ ] Add FREP support
 - [x] Add fast local memory / memory hierarchy
-- [ ] Add multi-core execution
+- [x] Add multi-core execution
 - [ ] Add multi-cluster execution
 - [ ] Replace all `self.declare_func(..)` in `tran.rs` with decls in `jit.ll`
 - [ ] Replace state type in `tran.rs` with decl in `jit.ll`
