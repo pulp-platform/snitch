@@ -12,6 +12,32 @@ If you make any changes to `src/runtime.rs` or the `../riscv-opcodes`, run `make
 
 To enable logging output, set the `SNITCH_LOG` environment variable to `error`, `warn`, `info`, `debug`, or `trace`. More detailed [configurations](https://docs.rs/env_logger) are possible.
 
+### Tracing
+
+Instructions can be traced as they execute using the `--trace` option:
+
+    $ banshee path/to/riscv/bin --trace
+    # cycle  hart pc        accesses            dasm
+    00000001 0005 80010000  x10=00000005      # DASM(f1402573)
+    00000002 0005 80010004  x10:00000005 […]  # DASM(00351293)
+    00000003 0005 80010008  x6=20000000       # DASM(20000337)
+    00000004 0005 8001000c  x5:00000028 […]   # DASM(006282b3)
+    00000005 0005 80010010  x5:20000028 […]   # DASM(00a2a023)
+    00000006 0005 80010014                    # DASM(10500073)
+
+Piping the output into `sort` will cause the trace to be sorted by cycle and hartid, which is convenient. Piping into `spike-dasm` will provide further inline disassembly:
+
+    $ banshee path/to/riscv/bin --trace | sort | spike-dasm
+    # cycle  hart pc        accesses            dasm
+    00000001 0005 80010000  x10=00000005      # csrr    a0, mhartid
+    00000002 0005 80010004  x10:00000005 […]  # slli    t0, a0, 3
+    00000003 0005 80010008  x6=20000000       # lui     t1, 0x20000
+    00000004 0005 8001000c  x5:00000028 […]   # add     t0, t0, t1
+    00000005 0005 80010010  x5:20000028 […]   # sw      a0, 0(t0)
+    00000006 0005 80010014                    # wfi (args unknown)
+
+**Caution:** Piping the stdout through `spike-dasm` can cause the instruction trace to look delayed with respect to debug and trace logs (which run through stderr), if you have them enabled in `SNITCH_LOG`. This is just a visual artifact.
+
 ### Unit Tests
 
 Unit tests are in `../banshee-tests` and can be compiled and built as follows (compilation requires a riscv toolchain):
