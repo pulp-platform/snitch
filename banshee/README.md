@@ -96,3 +96,4 @@ You can set breakpoints on instructions in the RISC-V binary based on their inde
 - [ ] Replace all `self.declare_func(..)` in `tran.rs` with decls in `jit.ll`
 - [ ] Replace state type in `tran.rs` with decl in `jit.ll`
 - [ ] Replace all GEP on state ptr in `tran.rs` with calls into `jit.rs`
+- [ ] Read the DWARF data in the RISC-V binary, and emit that again as part of the translated LLVM IR; which should allow GDB to debug the original source code of the RISC-V binary
