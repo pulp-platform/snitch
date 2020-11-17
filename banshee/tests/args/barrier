@@ -1,0 +1,4 @@
+--num-cores=1
+--num-cores=32
+--num-cores=1 --num-clusters=2
+--num-cores=32 --num-clusters=2

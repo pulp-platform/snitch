@@ -56,22 +56,27 @@ test-info:
 	@truncate -s0 $(LOG_TOTAL)
 
 define test_template
-	@if [ ! -z $(filter $(1),$(TESTS_BLACKLIST)) ]; then \
-		echo "$(2) ... `tput setaf 3`ignored`tput sgr0`"; \
-	elif ! { env SNITCH_LOG=warn $(2); } $(TEST_SUFFIX); then \
-		echo "$(2) ... `tput setaf 1`FAILED`tput sgr0`"; \
-		echo $(1) >>$(LOG_FAILED); \
-	else \
-		echo "$(2) ... `tput setaf 2`passed`tput sgr0`"; \
-	fi; \
-	echo $(1) >>$(LOG_TOTAL)
+	@ \
+	ARGS=$(patsubst $(TESTS_DIR)/%,$(TESTS_DIR)/../args/%,$(3)); \
+	(cat $$ARGS 2>/dev/null || echo) | while read ARG; do \
+		CMD=`echo $(2) $(3) $(4) $$ARG`; \
+		if [ ! -z $(filter $(1),$(TESTS_BLACKLIST)) ]; then \
+			echo "$$CMD ... `tput setaf 3`ignored`tput sgr0`"; \
+		elif ! { env SNITCH_LOG=warn $$CMD; } $(TEST_SUFFIX); then \
+			echo "$$CMD ... `tput setaf 1`FAILED`tput sgr0`"; \
+			echo $$CMD >>$(LOG_FAILED); \
+		else \
+			echo "$$CMD ... `tput setaf 2`passed`tput sgr0`"; \
+		fi; \
+		echo $$CMD >>$(LOG_TOTAL); \
+	done
 endef
 
 test-%: $(TESTS_DIR)/% $(TESTS_DIR)/../trace/%.txt test-info
-	$(call test_template,$*,$(BANSHEE) $(TEST_ARGS) --trace $< | diff - $(word 2,$^))
+	$(call test_template,$*,$(BANSHEE) $(TEST_ARGS) --trace, $<, | diff - $(word 2,$^))
 
 test-%: $(TESTS_DIR)/% test-info
-	$(call test_template,$*,$(BANSHEE) $(TEST_ARGS) $<)
+	$(call test_template,$*,$(BANSHEE) $(TEST_ARGS), $<,)
 
 debug-%: $(TESTS_DIR)/% test-info
 	gdb --args $(BANSHEE) $<
