@@ -46,6 +46,7 @@ test: test-info $(TEST_TARGETS)
 .PHONY: test test-info
 
 test-info:
+	@cargo build
 	@echo "# using TARGET_DIR = $(TARGET_DIR)"
 	@echo "# using BANSHEE = $(BANSHEE)"
 	@echo "# using TESTS = $(TESTS)"
