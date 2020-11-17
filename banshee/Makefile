@@ -69,10 +69,10 @@ define test_template
 endef
 
 test-%: ../banshee-tests/bin/% ../banshee-tests/trace/%.txt test-info
-	$(call test_template,$*,$(BANSHEE) --trace $< | diff - $(word 2,$^))
+	$(call test_template,$*,$(BANSHEE) $(TEST_ARGS) --trace $< | diff - $(word 2,$^))
 
 test-%: ../banshee-tests/bin/% test-info
-	$(call test_template,$*,$(BANSHEE) $<)
+	$(call test_template,$*,$(BANSHEE) $(TEST_ARGS) $<)
 
 debug-%: ../banshee-tests/bin/% test-info
 	gdb --args $(BANSHEE) $<
