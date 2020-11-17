@@ -14,7 +14,7 @@ output_checksum:
     .word 0x416ae85a
     .word 0x1919ac7a
     .word 0x41727201
-    .word 0x0a7c5ac4
+    .word 0x0a7c5ac5
     .word 0x41776fd5
     .word 0xfbdf0910
     .word 0x417c6da8
@@ -30,11 +30,11 @@ output_checksum:
     .word 0x418ab166
     .word 0x52178f69
     .word 0x418d3050
-    .word 0x4ac8e68f
+    .word 0x4ac8e68e
     .word 0x418faf3a
     .word 0x21bd1eda
     .word 0x41911712
-    .word 0x1e15ca6d
+    .word 0x1e15ca6c
     .word 0x41925687
     .word 0x1a6e75ff
     .word 0x419395fc

@@ -26,6 +26,9 @@ bin/%: %.s
 	$(RISCV_STRIP) $@ -g -S -d --strip-debug
 	$(RISCV_OBJDUMP) -D $@ > dump/$*.dump
 
+matmul/data.S: matmul/gen_data.py
+	$(PYTHON) $< > $@
+
 bin/matmul_baseline: matmul/data.S
 bin/matmul_ssr: matmul/data.S
 bin/matmul_ssr_frep: matmul/data.S

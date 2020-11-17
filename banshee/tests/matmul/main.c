@@ -14,6 +14,9 @@ static void populate(double *ptr, uint32_t N, uint32_t M, uint32_t ld, uint32_t 
 
 int main(uint32_t core_id, uint32_t core_num) {
     pulp_timer_t start_time, stop_time;
+    uint32_t compute_core_num = core_num;
+    if (input_size < compute_core_num)
+        compute_core_num = input_size;
 
     // Generate input data in the TCDM.
     double *ptr = (void *)&l1_alloc_base;
@@ -23,30 +26,29 @@ int main(uint32_t core_id, uint32_t core_num) {
     ptr += input_size * (input_size + 1) + 1;
     double *input_C = ptr;
     ptr += input_size * (input_size + 1) + 1;
-    if (core_id == 0 % core_num)
+    if (core_id == (0 % compute_core_num))
         populate(input_A, input_size, input_size, input_size + 1, 1);
-    if (core_id == 1 % core_num)
+    if (core_id == (1 % compute_core_num))
         populate(input_B, input_size, input_size, input_size + 1, 2);
-    if (core_id == 2 % core_num)
+    if (core_id == (2 % compute_core_num))
         populate(input_C, input_size, input_size, input_size + 1, 3);
 
     // Distribute work across the available cores.
-    uint32_t N = input_size / core_num;
+    uint32_t N = input_size / compute_core_num;
     uint32_t M = input_size;
     uint32_t K = input_size;
-    double *argA = input_A + core_id * input_size;
+    double *argA = input_A + core_id * (input_size + 1);
     double *argB = input_B;
-    double *argC = input_C + core_id * input_size;
-    uint32_t ldA = (input_size + 1) * core_num;
+    double *argC = input_C + core_id * (input_size + 1);
+    uint32_t ldA = (input_size + 1) * compute_core_num;
     uint32_t ldB = (input_size + 1);
-    uint32_t ldC = (input_size + 1) * core_num;
+    uint32_t ldC = (input_size + 1) * compute_core_num;
 
     // Execute sequential kernel on each core.
     pulp_barrier();
     start_time = pulp_get_timer();
-    if (core_id < core_num)
-        // for (int i = 0; i < 100000; i++)
-            gemm_seq(N, M, K, argA, ldA, argB, ldB, argC, ldC);
+    if (core_id < compute_core_num)
+        gemm_seq(N, M, K, argA, ldA, argB, ldB, argC, ldC);
     stop_time = pulp_get_timer();
     pulp_barrier();
 
