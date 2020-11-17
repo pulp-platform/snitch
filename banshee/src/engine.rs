@@ -10,7 +10,7 @@ use llvm_sys::{
 use std::{
     collections::HashMap,
     sync::{
-        atomic::{AtomicBool, AtomicU32, Ordering},
+        atomic::{AtomicBool, AtomicU32, AtomicUsize, Ordering},
         Mutex,
     },
 };
@@ -240,6 +240,11 @@ impl Engine {
             (0..self.num_clusters).map(|_| tcdm.clone()).collect()
         };
 
+        // Allocate some barriers.
+        let barriers: Vec<_> = (0..self.num_clusters)
+            .map(|_| AtomicUsize::new(0))
+            .collect();
+
         // Create the CPUs.
         let cpus: Vec<_> = (0..self.num_clusters)
             .flat_map(|j| (0..self.num_cores).map(move |i| (j, i)))
@@ -251,6 +256,7 @@ impl Engine {
                     base_hartid + i,
                     self.num_cores,
                     base_hartid,
+                    &barriers[j],
                 )
             })
             .collect();
@@ -348,6 +354,8 @@ pub struct Cpu<'a, 'b> {
     hartid: usize,
     num_cores: usize,
     cluster_base_hartid: usize,
+    /// The cluster's shared barrier state.
+    barrier: &'b AtomicUsize,
 }
 
 impl<'a, 'b> Cpu<'a, 'b> {
@@ -358,6 +366,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         hartid: usize,
         num_cores: usize,
         cluster_base_hartid: usize,
+        barrier: &'b AtomicUsize,
     ) -> Self {
         Self {
             engine,
@@ -366,37 +375,44 @@ impl<'a, 'b> Cpu<'a, 'b> {
             hartid,
             num_cores,
             cluster_base_hartid,
+            barrier,
         }
     }
 
     fn binary_load(&self, addr: u32, size: u8) -> u32 {
-        trace!("Load 0x{:x} ({}B)", addr, 8 << size);
         match addr {
             0x40000000 => 0x000000,                                     // tcdm_start
             0x40000008 => 0x020000,                                     // tcdm_end
             0x40000010 => self.num_cores as u32,                        // nr_cores
             0x40000020 => self.engine.exit_code.load(Ordering::SeqCst), // scratch_reg
+            0x40000038 => {
+                self.cluster_barrier();
+                0
+            } // barrier_reg
             0x40000040 => self.cluster_base_hartid as u32,              // cluster_base_hartid
-            _ => self
-                .engine
-                .memory
-                .lock()
-                .unwrap()
-                .get(&(addr as u64))
-                .copied()
-                .unwrap_or(0),
+            _ => {
+                trace!("Load 0x{:x} ({}B)", addr, 8 << size);
+                self.engine
+                    .memory
+                    .lock()
+                    .unwrap()
+                    .get(&(addr as u64))
+                    .copied()
+                    .unwrap_or(0)
+            }
         }
     }
 
     fn binary_store(&self, addr: u32, value: u32, size: u8) {
-        trace!("Store 0x{:x} = 0x{:x} ({}B)", addr, value, 8 << size);
         match addr {
             0x40000000 => (),                                                   // tcdm_start
             0x40000008 => (),                                                   // tcdm_end
             0x40000010 => (),                                                   // nr_cores
             0x40000020 => self.engine.exit_code.store(value, Ordering::SeqCst), // scratch_reg
+            0x40000038 => (),                                                   // barrier_reg
             0x40000040 => (), // cluster_base_hartid
             _ => {
+                trace!("Store 0x{:x} = 0x{:x} ({}B)", addr, value, 8 << size);
                 self.engine
                     .memory
                     .lock()
@@ -464,6 +480,36 @@ impl<'a, 'b> Cpu<'a, 'b> {
             self.state.instret, self.hartid, addr, args, inst
         );
         println!("{}", line);
+    }
+
+    /// A simple barrier across all cores in the cluster.
+    ///
+    /// Uses an atomic barrier flag shared across all CPU threads in a cluster.
+    /// Core 0 coordinates. In a first phase, it waits until all cores but
+    /// itself have bumped the flag, then bumps itself and waits for all cores
+    /// to make it through.
+    fn cluster_barrier(&self) {
+        let core_id = self.hartid - self.cluster_base_hartid;
+        let core_num = self.num_cores;
+        if core_id == 0 {
+            while self.barrier.load(Ordering::Relaxed) < core_num - 1 {
+                std::thread::yield_now();
+            }
+            self.barrier.fetch_add(1, Ordering::Relaxed);
+            while self.barrier.load(Ordering::Relaxed) < 2 * core_num - 1 {
+                std::thread::yield_now();
+            }
+            self.barrier.store(0, Ordering::Relaxed);
+        } else {
+            while self.barrier.load(Ordering::Relaxed) >= core_num {
+                std::thread::yield_now();
+            }
+            self.barrier.fetch_add(1, Ordering::Relaxed);
+            while self.barrier.load(Ordering::Relaxed) < core_num {
+                std::thread::yield_now();
+            }
+            self.barrier.fetch_add(1, Ordering::Relaxed);
+        }
     }
 }
 
