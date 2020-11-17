@@ -75,4 +75,4 @@ test-%: ../banshee-tests/bin/% test-info
 	$(call test_template,$*,$(BANSHEE) $<)
 
 debug-%: ../banshee-tests/bin/% test-info
-	lldb -- $(BANSHEE) $<
+	gdb --args $(BANSHEE) $<
