@@ -58,13 +58,14 @@ Disassembly of section .text.startup:
 80010080:	00000797          	auipc	a5,0x0
 80010084:	0307b707          	fld	fa4,48(a5) # 800100b0 <main+0x30>
 80010088:	d20007d3          	fcvt.d.w	fa5,zero
-8001008c:	0002808b          	0x2808b
-80010090:	02e7f7d3          	fadd.d	fa5,fa5,fa4
-80010094:	00000797          	auipc	a5,0x0
-80010098:	0247b707          	fld	fa4,36(a5) # 800100b8 <main+0x38>
-8001009c:	a2e7a553          	feq.d	a0,fa5,fa4
-800100a0:	00154513          	xori	a0,a0,1
-800100a4:	00008067          	ret
+8001008c:	00400793          	li	a5,4
+80010090:	0002808b          	0x2808b
+80010094:	02e7f7d3          	fadd.d	fa5,fa5,fa4
+80010098:	00000797          	auipc	a5,0x0
+8001009c:	0207b707          	fld	fa4,32(a5) # 800100b8 <main+0x38>
+800100a0:	a2e7a553          	feq.d	a0,fa5,fa4
+800100a4:	00154513          	xori	a0,a0,1
+800100a8:	00008067          	ret
 
 Disassembly of section .sdata:
 
