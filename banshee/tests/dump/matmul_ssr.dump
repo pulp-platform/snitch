@@ -1,0 +1,408 @@
+
+bin/matmul_ssr:     file format elf32-littleriscv
+
+
+Disassembly of section .l1:
+
+00000000 <input_size>:
+   0:	0010                	0x10
+   2:	0000                	unimp
+   4:	0000                	unimp
+	...
+
+00000008 <output_checksum>:
+   8:	0cc4                	addi	s1,sp,596
+   a:	278d                	jal	76c <l1_alloc_base+0x6dc>
+   c:	c42a                	sw	a0,8(sp)
+   e:	9fc7414b          	fnmsub.q	ft2,fa4,ft8,fs3,rmm
+  12:	6ca8                	flw	fa0,88(s1)
+  14:	ecb2                	fsw	fa2,88(sp)
+  16:	4160                	lw	s0,68(a0)
+  18:	fc5d                	bnez	s0,ffffffd6 <fake_uart+0x3fffffd6>
+  1a:	4f6d                	li	t5,27
+  1c:	e85a                	fsw	fs6,16(sp)
+  1e:	416a                	lw	sp,152(sp)
+  20:	ac7a                	fsd	ft10,24(sp)
+  22:	1919                	addi	s2,s2,-26
+  24:	7201                	lui	tp,0xfffe0
+  26:	4172                	lw	sp,28(sp)
+  28:	5ac4                	lw	s1,52(a3)
+  2a:	0a7c                	addi	a5,sp,284
+  2c:	6fd5                	lui	t6,0x15
+  2e:	09104177          	0x9104177
+  32:	fbdf 6da8 417c      	0x417c6da8fbdf
+  38:	dbae                	sw	a1,244(sp)
+  3a:	76a0                	flw	fs0,104(a3)
+  3c:	b5be                	fsd	fa5,232(sp)
+  3e:	4180                	lw	s0,0(a1)
+  40:	32d2                	fld	ft5,304(sp)
+  42:	6f52                	flw	ft10,20(sp)
+  44:	34a8                	fld	fa0,104(s1)
+  46:	89f84183          	lbu	gp,-1889(a6)
+  4a:	b3926803          	0xb3926803
+  4e:	4185                	li	gp,1
+  50:	e11e                	fsw	ft7,128(sp)
+  52:	60b4                	flw	fa3,64(s1)
+  54:	327c                	fld	fa5,224(a2)
+  56:	4188                	lw	a0,0(a1)
+  58:	59663843          	fmadd.s	fa6,fa2,fs6,fa1,rup
+  5c:	b166                	fsd	fs9,160(sp)
+  5e:	418a                	lw	gp,128(sp)
+  60:	8f69                	and	a4,a4,a0
+  62:	30505217          	auipc	tp,0x30505
+  66:	418d                	li	gp,3
+  68:	4ac8e68f          	0x4ac8e68f
+  6c:	af3a                	fsd	fa4,408(sp)
+  6e:	1eda418f          	0x1eda418f
+  72:	21bd                	jal	4e0 <l1_alloc_base+0x450>
+  74:	1712                	slli	a4,a4,0x24
+  76:	4191                	li	gp,4
+  78:	ca6d                	beqz	a2,16a <l1_alloc_base+0xda>
+  7a:	1e15                	addi	t3,t3,-27
+  7c:	41925687          	0x41925687
+  80:	75ff                	0x75ff
+  82:	1a6e                	slli	s4,s4,0x3b
+  84:	95fc                	0x95fc
+  86:	          	xori	gp,zero,0
+
+00000088 <atomic_barrier>:
+  88:	0000                	unimp
+	...
+
+Disassembly of section .text:
+
+80010000 <_start>:
+80010000:	00001197          	auipc	gp,0x1
+80010004:	c5018193          	addi	gp,gp,-944 # 80010c50 <__global_pointer$>
+80010008:	0040006f          	j	8001000c <reset_vector>
+
+8001000c <reset_vector>:
+8001000c:	bfff0117          	auipc	sp,0xbfff0
+80010010:	ffc10113          	addi	sp,sp,-4 # 40000008 <tcdm_end_address_reg>
+80010014:	00012103          	lw	sp,0(sp)
+80010018:	f1402573          	csrr	a0,mhartid
+8001001c:	00351293          	slli	t0,a0,0x3
+80010020:	40510133          	sub	sp,sp,t0
+80010024:	00629293          	slli	t0,t0,0x6
+80010028:	40510133          	sub	sp,sp,t0
+8001002c:	00010213          	mv	tp,sp
+80010030:	00100293          	li	t0,1
+80010034:	00929293          	slli	t0,t0,0x9
+80010038:	40520233          	sub	tp,tp,t0
+8001003c:	bfff0297          	auipc	t0,0xbfff0
+80010040:	fd428293          	addi	t0,t0,-44 # 40000010 <nr_cores_address_reg>
+80010044:	0002a583          	lw	a1,0(t0)
+80010048:	174000ef          	jal	ra,800101bc <main>
+8001004c:	00151513          	slli	a0,a0,0x1
+80010050:	00156513          	ori	a0,a0,1
+80010054:	0100006f          	j	80010064 <eoc>
+
+80010058 <fail>:
+80010058:	fff00293          	li	t0,-1
+8001005c:	00554533          	xor	a0,a0,t0
+80010060:	0040006f          	j	80010064 <eoc>
+
+80010064 <eoc>:
+80010064:	f14022f3          	csrr	t0,mhartid
+80010068:	00029863          	bnez	t0,80010078 <halt>
+8001006c:	bfff0297          	auipc	t0,0xbfff0
+80010070:	fb428293          	addi	t0,t0,-76 # 40000020 <scratch_reg>
+80010074:	00a2a023          	sw	a0,0(t0)
+
+80010078 <halt>:
+80010078:	10500073          	wfi
+8001007c:	ffdff06f          	j	80010078 <halt>
+
+80010080 <gemm_seq>:
+80010080:	ff010113          	addi	sp,sp,-16
+80010084:	00050313          	mv	t1,a0
+80010088:	00068f13          	mv	t5,a3
+8001008c:	00812623          	sw	s0,12(sp)
+80010090:	00070513          	mv	a0,a4
+80010094:	00078e93          	mv	t4,a5
+80010098:	00088693          	mv	a3,a7
+8001009c:	fff60893          	addi	a7,a2,-1
+800100a0:	00381813          	slli	a6,a6,0x3
+800100a4:	01089893          	slli	a7,a7,0x10
+800100a8:	01081813          	slli	a6,a6,0x10
+800100ac:	0108d893          	srli	a7,a7,0x10
+800100b0:	01085813          	srli	a6,a6,0x10
+800100b4:	03180fb3          	mul	t6,a6,a7
+800100b8:	fff58713          	addi	a4,a1,-1
+800100bc:	002057b7          	lui	a5,0x205
+800100c0:	fff30293          	addi	t0,t1,-1
+800100c4:	01071713          	slli	a4,a4,0x10
+800100c8:	8117a823          	sw	a7,-2032(a5) # 204810 <ssr_config_reg+0x10>
+800100cc:	01075713          	srli	a4,a4,0x10
+800100d0:	00389393          	slli	t2,a7,0x3
+800100d4:	01029293          	slli	t0,t0,0x10
+800100d8:	80e7ac23          	sw	a4,-2024(a5)
+800100dc:	0102d293          	srli	t0,t0,0x10
+800100e0:	01039393          	slli	t2,t2,0x10
+800100e4:	00351513          	slli	a0,a0,0x3
+800100e8:	8257a023          	sw	t0,-2016(a5)
+800100ec:	0103d393          	srli	t2,t2,0x10
+800100f0:	00800e13          	li	t3,8
+800100f4:	01051513          	slli	a0,a0,0x10
+800100f8:	83c7a823          	sw	t3,-2000(a5)
+800100fc:	40700433          	neg	s0,t2
+80010100:	01055513          	srli	a0,a0,0x10
+80010104:	8287ac23          	sw	s0,-1992(a5)
+80010108:	40750533          	sub	a0,a0,t2
+8001010c:	84a7a023          	sw	a0,-1984(a5)
+80010110:	9117a823          	sw	a7,-1776(a5)
+80010114:	010f9513          	slli	a0,t6,0x10
+80010118:	90e7ac23          	sw	a4,-1768(a5)
+8001011c:	01055513          	srli	a0,a0,0x10
+80010120:	00371713          	slli	a4,a4,0x3
+80010124:	00e50733          	add	a4,a0,a4
+80010128:	9257a023          	sw	t0,-1760(a5)
+8001012c:	01071713          	slli	a4,a4,0x10
+80010130:	9307a823          	sw	a6,-1744(a5)
+80010134:	40ae0e33          	sub	t3,t3,a0
+80010138:	01075713          	srli	a4,a4,0x10
+8001013c:	93c7ac23          	sw	t3,-1736(a5)
+80010140:	40e00733          	neg	a4,a4
+80010144:	94e7a023          	sw	a4,-1728(a5)
+80010148:	8de7a823          	sw	t5,-1840(a5)
+8001014c:	9dd7a823          	sw	t4,-1584(a5)
+80010150:	7c00e073          	csrsi	0x7c0,1
+80010154:	04030c63          	beqz	t1,800101ac <gemm_seq+0x12c>
+80010158:	04058a63          	beqz	a1,800101ac <gemm_seq+0x12c>
+8001015c:	01012803          	lw	a6,16(sp)
+80010160:	00359793          	slli	a5,a1,0x3
+80010164:	40b005b3          	neg	a1,a1
+80010168:	00359513          	slli	a0,a1,0x3
+8001016c:	00381813          	slli	a6,a6,0x3
+80010170:	00f686b3          	add	a3,a3,a5
+80010174:	00000593          	li	a1,0
+80010178:	00a68733          	add	a4,a3,a0
+8001017c:	00073787          	fld	fa5,0(a4)
+80010180:	00060a63          	beqz	a2,80010194 <gemm_seq+0x114>
+80010184:	00000793          	li	a5,0
+80010188:	7a1077c3          	fmadd.d	fa5,ft0,ft1,fa5
+8001018c:	00178793          	addi	a5,a5,1
+80010190:	fef61ce3          	bne	a2,a5,80010188 <gemm_seq+0x108>
+80010194:	00f73027          	fsd	fa5,0(a4)
+80010198:	00870713          	addi	a4,a4,8
+8001019c:	fee690e3          	bne	a3,a4,8001017c <gemm_seq+0xfc>
+800101a0:	00158593          	addi	a1,a1,1
+800101a4:	010686b3          	add	a3,a3,a6
+800101a8:	fcb318e3          	bne	t1,a1,80010178 <gemm_seq+0xf8>
+800101ac:	7c00f073          	csrci	0x7c0,1
+800101b0:	00c12403          	lw	s0,12(sp)
+800101b4:	01010113          	addi	sp,sp,16
+800101b8:	00008067          	ret
+
+Disassembly of section .text.startup:
+
+800101bc <main>:
+800101bc:	fd010113          	addi	sp,sp,-48
+800101c0:	03212023          	sw	s2,32(sp)
+800101c4:	00000913          	li	s2,0
+800101c8:	00092603          	lw	a2,0(s2)
+800101cc:	09000693          	li	a3,144
+800101d0:	02812423          	sw	s0,40(sp)
+800101d4:	00160813          	addi	a6,a2,1
+800101d8:	03060733          	mul	a4,a2,a6
+800101dc:	02912223          	sw	s1,36(sp)
+800101e0:	02112623          	sw	ra,44(sp)
+800101e4:	01312e23          	sw	s3,28(sp)
+800101e8:	00050413          	mv	s0,a0
+800101ec:	00058f13          	mv	t5,a1
+800101f0:	00170713          	addi	a4,a4,1
+800101f4:	00371713          	slli	a4,a4,0x3
+800101f8:	00e687b3          	add	a5,a3,a4
+800101fc:	00e784b3          	add	s1,a5,a4
+80010200:	0a051c63          	bnez	a0,800102b8 <main+0xfc>
+80010204:	06060663          	beqz	a2,80010270 <main+0xb4>
+80010208:	00381593          	slli	a1,a6,0x3
+8001020c:	00068e93          	mv	t4,a3
+80010210:	00080313          	mv	t1,a6
+80010214:	00000e13          	li	t3,0
+80010218:	00100513          	li	a0,1
+8001021c:	00000717          	auipc	a4,0x0
+80010220:	23473707          	fld	fa4,564(a4) # 80010450 <main+0x294>
+80010224:	000e8893          	mv	a7,t4
+80010228:	00050713          	mv	a4,a0
+8001022c:	d21707d3          	fcvt.d.wu	fa5,a4
+80010230:	00888893          	addi	a7,a7,8
+80010234:	00170713          	addi	a4,a4,1
+80010238:	12e7f7d3          	fmul.d	fa5,fa5,fa4
+8001023c:	fef8bc27          	fsd	fa5,-8(a7)
+80010240:	fe6716e3          	bne	a4,t1,8001022c <main+0x70>
+80010244:	001e0e13          	addi	t3,t3,1
+80010248:	00c50533          	add	a0,a0,a2
+8001024c:	00c70333          	add	t1,a4,a2
+80010250:	00be8eb3          	add	t4,t4,a1
+80010254:	fdc618e3          	bne	a2,t3,80010224 <main+0x68>
+80010258:	00100713          	li	a4,1
+8001025c:	03e77733          	remu	a4,a4,t5
+80010260:	18070063          	beqz	a4,800103e0 <main+0x224>
+80010264:	00200713          	li	a4,2
+80010268:	03e77733          	remu	a4,a4,t5
+8001026c:	06070863          	beqz	a4,800102dc <main+0x120>
+80010270:	bfff0997          	auipc	s3,0xbfff0
+80010274:	dc898993          	addi	s3,s3,-568 # 40000038 <barrier_reg>
+80010278:	0009a703          	lw	a4,0(s3)
+8001027c:	00070013          	mv	zero,a4
+80010280:	b0002773          	csrr	a4,mcycle
+80010284:	13e46463          	bltu	s0,t5,800103ac <main+0x1f0>
+80010288:	b00027f3          	csrr	a5,mcycle
+8001028c:	0009a983          	lw	s3,0(s3)
+80010290:	00098013          	mv	zero,s3
+80010294:	00000513          	li	a0,0
+80010298:	0a040063          	beqz	s0,80010338 <main+0x17c>
+8001029c:	02c12083          	lw	ra,44(sp)
+800102a0:	02812403          	lw	s0,40(sp)
+800102a4:	02412483          	lw	s1,36(sp)
+800102a8:	02012903          	lw	s2,32(sp)
+800102ac:	01c12983          	lw	s3,28(sp)
+800102b0:	03010113          	addi	sp,sp,48
+800102b4:	00008067          	ret
+800102b8:	00100713          	li	a4,1
+800102bc:	02b77733          	remu	a4,a4,a1
+800102c0:	10a70a63          	beq	a4,a0,800103d4 <main+0x218>
+800102c4:	00200713          	li	a4,2
+800102c8:	02b77733          	remu	a4,a4,a1
+800102cc:	faa712e3          	bne	a4,a0,80010270 <main+0xb4>
+800102d0:	fa0600e3          	beqz	a2,80010270 <main+0xb4>
+800102d4:	00000717          	auipc	a4,0x0
+800102d8:	17c73707          	fld	fa4,380(a4) # 80010450 <main+0x294>
+800102dc:	00000513          	li	a0,0
+800102e0:	00300e13          	li	t3,3
+800102e4:	00000593          	li	a1,0
+800102e8:	fff60e93          	addi	t4,a2,-1
+800102ec:	00351313          	slli	t1,a0,0x3
+800102f0:	00648333          	add	t1,s1,t1
+800102f4:	00000893          	li	a7,0
+800102f8:	01c88733          	add	a4,a7,t3
+800102fc:	d21707d3          	fcvt.d.wu	fa5,a4
+80010300:	00830313          	addi	t1,t1,8
+80010304:	00188893          	addi	a7,a7,1
+80010308:	12e7f7d3          	fmul.d	fa5,fa5,fa4
+8001030c:	fef33c27          	fsd	fa5,-8(t1)
+80010310:	fec8e4e3          	bltu	a7,a2,800102f8 <main+0x13c>
+80010314:	00000713          	li	a4,0
+80010318:	00060463          	beqz	a2,80010320 <main+0x164>
+8001031c:	000e8713          	mv	a4,t4
+80010320:	00170713          	addi	a4,a4,1
+80010324:	00158593          	addi	a1,a1,1
+80010328:	00ee0e33          	add	t3,t3,a4
+8001032c:	01050533          	add	a0,a0,a6
+80010330:	fac5eee3          	bltu	a1,a2,800102ec <main+0x130>
+80010334:	f3dff06f          	j	80010270 <main+0xb4>
+80010338:	00092583          	lw	a1,0(s2)
+8001033c:	06058463          	beqz	a1,800103a4 <main+0x1e8>
+80010340:	ff800813          	li	a6,-8
+80010344:	03058833          	mul	a6,a1,a6
+80010348:	00158513          	addi	a0,a1,1
+8001034c:	00351513          	slli	a0,a0,0x3
+80010350:	ff850713          	addi	a4,a0,-8
+80010354:	00800613          	li	a2,8
+80010358:	00e48733          	add	a4,s1,a4
+8001035c:	00000693          	li	a3,0
+80010360:	00000797          	auipc	a5,0x0
+80010364:	0f87b687          	fld	fa3,248(a5) # 80010458 <main+0x29c>
+80010368:	d20007d3          	fcvt.d.w	fa5,zero
+8001036c:	00e807b3          	add	a5,a6,a4
+80010370:	0007b707          	fld	fa4,0(a5)
+80010374:	00878793          	addi	a5,a5,8
+80010378:	02e7f7d3          	fadd.d	fa5,fa5,fa4
+8001037c:	fef71ae3          	bne	a4,a5,80010370 <main+0x1b4>
+80010380:	00063707          	fld	fa4,0(a2)
+80010384:	0ae7f7d3          	fsub.d	fa5,fa5,fa4
+80010388:	22f7a7d3          	fabs.d	fa5,fa5
+8001038c:	a2f697d3          	flt.d	a5,fa3,fa5
+80010390:	00168693          	addi	a3,a3,1
+80010394:	00860613          	addi	a2,a2,8
+80010398:	00f40433          	add	s0,s0,a5
+8001039c:	00a70733          	add	a4,a4,a0
+800103a0:	fcd594e3          	bne	a1,a3,80010368 <main+0x1ac>
+800103a4:	00040513          	mv	a0,s0
+800103a8:	ef5ff06f          	j	8001029c <main+0xe0>
+800103ac:	03e65533          	divu	a0,a2,t5
+800103b0:	00060593          	mv	a1,a2
+800103b4:	02860333          	mul	t1,a2,s0
+800103b8:	03e80733          	mul	a4,a6,t5
+800103bc:	00331313          	slli	t1,t1,0x3
+800103c0:	006488b3          	add	a7,s1,t1
+800103c4:	006686b3          	add	a3,a3,t1
+800103c8:	00e12023          	sw	a4,0(sp)
+800103cc:	cb5ff0ef          	jal	ra,80010080 <gemm_seq>
+800103d0:	eb9ff06f          	j	80010288 <main+0xcc>
+800103d4:	e8060ee3          	beqz	a2,80010270 <main+0xb4>
+800103d8:	00000717          	auipc	a4,0x0
+800103dc:	07873707          	fld	fa4,120(a4) # 80010450 <main+0x294>
+800103e0:	00000513          	li	a0,0
+800103e4:	00200e13          	li	t3,2
+800103e8:	00000593          	li	a1,0
+800103ec:	fff60e93          	addi	t4,a2,-1
+800103f0:	00351313          	slli	t1,a0,0x3
+800103f4:	00678333          	add	t1,a5,t1
+800103f8:	00000893          	li	a7,0
+800103fc:	01c88733          	add	a4,a7,t3
+80010400:	d21707d3          	fcvt.d.wu	fa5,a4
+80010404:	00830313          	addi	t1,t1,8
+80010408:	00188893          	addi	a7,a7,1
+8001040c:	12e7f7d3          	fmul.d	fa5,fa5,fa4
+80010410:	fef33c27          	fsd	fa5,-8(t1)
+80010414:	fec8e4e3          	bltu	a7,a2,800103fc <main+0x240>
+80010418:	00000713          	li	a4,0
+8001041c:	00060463          	beqz	a2,80010424 <main+0x268>
+80010420:	000e8713          	mv	a4,t4
+80010424:	00170713          	addi	a4,a4,1
+80010428:	00158593          	addi	a1,a1,1
+8001042c:	00ee0e33          	add	t3,t3,a4
+80010430:	01050533          	add	a0,a0,a6
+80010434:	fac5eee3          	bltu	a1,a2,800103f0 <main+0x234>
+80010438:	00200713          	li	a4,2
+8001043c:	03e77733          	remu	a4,a4,t5
+80010440:	e2e418e3          	bne	s0,a4,80010270 <main+0xb4>
+80010444:	e99ff06f          	j	800102dc <main+0x120>
+
+Disassembly of section .sdata:
+
+80010450 <__bss_end-0x10>:
+80010450:	e354                	fsw	fa3,4(a4)
+80010452:	9ba5                	andi	a5,a5,-23
+80010454:	20c4                	fld	fs1,128(s1)
+80010456:	4009                	c.li	zero,2
+80010458:	a9fc                	fsd	fa5,208(a1)
+8001045a:	d2f1                	beqz	a3,8001041e <main+0x262>
+8001045c:	624d                	lui	tp,0x13
+8001045e:	3f50                	fld	fa2,184(a4)
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	3a434347          	fmsub.d	ft6,ft6,ft4,ft7,rmm
+   4:	2820                	fld	fs0,80(s0)
+   6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
+   a:	3920                	fld	fs0,112(a0)
+   c:	322e                	fld	ft4,232(sp)
+   e:	302e                	fld	ft0,232(sp)
+	...
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	2f41                	jal	790 <l1_alloc_base+0x700>
+   2:	0000                	unimp
+   4:	7200                	flw	fs0,32(a2)
+   6:	7369                	lui	t1,0xffffa
+   8:	01007663          	bgeu	zero,a6,14 <output_checksum+0xc>
+   c:	0025                	c.nop	9
+   e:	0000                	unimp
+  10:	1004                	addi	s1,sp,32
+  12:	7205                	lui	tp,0xfffe1
+  14:	3376                	fld	ft6,376(sp)
+  16:	6932                	flw	fs2,12(sp)
+  18:	7032                	flw	ft0,44(sp)
+  1a:	5f30                	lw	a2,120(a4)
+  1c:	326d                	jal	fffff9c6 <fake_uart+0x3ffff9c6>
+  1e:	3070                	fld	fa2,224(s0)
+  20:	615f 7032 5f30      	0x5f307032615f
+  26:	3266                	fld	ft4,120(sp)
+  28:	3070                	fld	fa2,224(s0)
+  2a:	645f 7032 0030      	0x307032645f
