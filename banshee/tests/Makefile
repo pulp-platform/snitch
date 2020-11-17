@@ -1,4 +1,4 @@
-DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))/../sw
+DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))/../../sw
 VPATH += $(DIR)
 include $(DIR)/runtime/runtime.mk
 
