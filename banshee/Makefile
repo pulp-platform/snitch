@@ -8,7 +8,6 @@ OPCODES := opcodes opcodes-rep opcodes-dma
 OPCODES_PATH := $(patsubst %,$(RISCV_OPCODES)/%,$(OPCODES))
 
 all:: src/riscv.rs
-all:: src/runtime.ll
 .PHONY: all
 
 src/riscv.rs: $(OPCODES_PATH) $(PARSE_OPCODES)
