@@ -23,7 +23,7 @@ src/riscv.rs: $(OPCODES_PATH) $(PARSE_OPCODES)
 ###  INTEGRATION TESTS  ###
 ###########################
 
-TESTS_DIR ?= ../banshee-tests/bin
+TESTS_DIR ?= tests/bin
 TESTS_BLACKLIST += dma_simple frep_multiple frep_single matmul_ssr_frep
 TESTS += $(patsubst $(TESTS_DIR)/%,%,$(wildcard $(TESTS_DIR)/*))
 TEST_TARGETS = $(patsubst %,test-%,$(TESTS))
@@ -67,11 +67,11 @@ define test_template
 	echo $(1) >>$(LOG_TOTAL)
 endef
 
-test-%: ../banshee-tests/bin/% ../banshee-tests/trace/%.txt test-info
+test-%: $(TESTS_DIR)/% $(TESTS_DIR)/../trace/%.txt test-info
 	$(call test_template,$*,$(BANSHEE) $(TEST_ARGS) --trace $< | diff - $(word 2,$^))
 
-test-%: ../banshee-tests/bin/% test-info
+test-%: $(TESTS_DIR)/% test-info
 	$(call test_template,$*,$(BANSHEE) $(TEST_ARGS) $<)
 
-debug-%: ../banshee-tests/bin/% test-info
+debug-%: $(TESTS_DIR)/% test-info
 	gdb --args $(BANSHEE) $<

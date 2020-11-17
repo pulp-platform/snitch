@@ -1,0 +1,109 @@
+
+bin/large_lfsr:     file format elf32-littleriscv
+
+
+Disassembly of section .l1:
+
+00000000 <atomic_barrier>:
+   0:	0000                	unimp
+	...
+
+Disassembly of section .text:
+
+80010000 <_start>:
+80010000:	00001197          	auipc	gp,0x1
+80010004:	8d018193          	addi	gp,gp,-1840 # 800108d0 <__global_pointer$>
+80010008:	0040006f          	j	8001000c <reset_vector>
+
+8001000c <reset_vector>:
+8001000c:	bfff0117          	auipc	sp,0xbfff0
+80010010:	ffc10113          	addi	sp,sp,-4 # 40000008 <tcdm_end_address_reg>
+80010014:	00012103          	lw	sp,0(sp)
+80010018:	f1402573          	csrr	a0,mhartid
+8001001c:	00351293          	slli	t0,a0,0x3
+80010020:	40510133          	sub	sp,sp,t0
+80010024:	00629293          	slli	t0,t0,0x6
+80010028:	40510133          	sub	sp,sp,t0
+8001002c:	00010213          	mv	tp,sp
+80010030:	00100293          	li	t0,1
+80010034:	00929293          	slli	t0,t0,0x9
+80010038:	40520233          	sub	tp,tp,t0
+8001003c:	bfff0297          	auipc	t0,0xbfff0
+80010040:	fd428293          	addi	t0,t0,-44 # 40000010 <nr_cores_address_reg>
+80010044:	0002a583          	lw	a1,0(t0)
+80010048:	038000ef          	jal	ra,80010080 <main>
+8001004c:	00151513          	slli	a0,a0,0x1
+80010050:	00156513          	ori	a0,a0,1
+80010054:	0100006f          	j	80010064 <eoc>
+
+80010058 <fail>:
+80010058:	fff00293          	li	t0,-1
+8001005c:	00554533          	xor	a0,a0,t0
+80010060:	0040006f          	j	80010064 <eoc>
+
+80010064 <eoc>:
+80010064:	f14022f3          	csrr	t0,mhartid
+80010068:	00029863          	bnez	t0,80010078 <halt>
+8001006c:	bfff0297          	auipc	t0,0xbfff0
+80010070:	fb428293          	addi	t0,t0,-76 # 40000020 <scratch_reg>
+80010074:	00a2a023          	sw	a0,0(t0)
+
+80010078 <halt>:
+80010078:	10500073          	wfi
+8001007c:	ffdff06f          	j	80010078 <halt>
+
+Disassembly of section .text.startup:
+
+80010080 <main>:
+80010080:	400007b7          	lui	a5,0x40000
+80010084:	0087a783          	lw	a5,8(a5) # 40000008 <tcdm_end_address_reg>
+80010088:	05f5e6b7          	lui	a3,0x5f5e
+8001008c:	d0000637          	lui	a2,0xd0000
+80010090:	0017e713          	ori	a4,a5,1
+80010094:	10068693          	addi	a3,a3,256 # 5f5e100 <ssr_config_reg+0x5d59900>
+80010098:	00160613          	addi	a2,a2,1 # d0000001 <fake_uart+0x10000001>
+8001009c:	00177793          	andi	a5,a4,1
+800100a0:	40f007b3          	neg	a5,a5
+800100a4:	00175713          	srli	a4,a4,0x1
+800100a8:	00c7f7b3          	and	a5,a5,a2
+800100ac:	fff68693          	addi	a3,a3,-1
+800100b0:	00e7c733          	xor	a4,a5,a4
+800100b4:	fe0694e3          	bnez	a3,8001009c <main+0x1c>
+800100b8:	400007b7          	lui	a5,0x40000
+800100bc:	02e7a423          	sw	a4,40(a5) # 40000028 <wake_up_reg>
+800100c0:	00000513          	li	a0,0
+800100c4:	00008067          	ret
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	3a434347          	fmsub.d	ft6,ft6,ft4,ft7,rmm
+   4:	2820                	fld	fs0,80(s0)
+   6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
+   a:	3920                	fld	fs0,112(a0)
+   c:	322e                	fld	ft4,232(sp)
+   e:	302e                	fld	ft0,232(sp)
+	...
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	2f41                	jal	790 <l1_alloc_base+0x780>
+   2:	0000                	unimp
+   4:	7200                	flw	fs0,32(a2)
+   6:	7369                	lui	t1,0xffffa
+   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
+   c:	0025                	c.nop	9
+   e:	0000                	unimp
+  10:	1004                	addi	s1,sp,32
+  12:	7205                	lui	tp,0xfffe1
+  14:	3376                	fld	ft6,376(sp)
+  16:	6932                	flw	fs2,12(sp)
+  18:	7032                	flw	ft0,44(sp)
+  1a:	5f30                	lw	a2,120(a4)
+  1c:	326d                	jal	fffff9c6 <fake_uart+0x3ffff9c6>
+  1e:	3070                	fld	fa2,224(s0)
+  20:	615f 7032 5f30      	0x5f307032615f
+  26:	3266                	fld	ft4,120(sp)
+  28:	3070                	fld	fa2,224(s0)
+  2a:	645f 7032 0030      	0x307032645f
