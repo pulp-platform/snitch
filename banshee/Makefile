@@ -25,6 +25,7 @@ src/riscv.rs: $(OPCODES_PATH) $(PARSE_OPCODES)
 ###########################
 
 TESTS_DIR ?= ../banshee-tests/bin
+TESTS_BLACKLIST += dma_simple frep_multiple frep_single
 TESTS += $(patsubst $(TESTS_DIR)/%,%,$(wildcard $(TESTS_DIR)/*))
 TEST_TARGETS = $(patsubst %,test-%,$(TESTS))
 LOG_FAILED ?= /tmp/banshee_tests_failed
@@ -54,8 +55,10 @@ test-info:
 	@truncate -s0 $(LOG_FAILED)
 	@truncate -s0 $(LOG_TOTAL)
 
-define test_template =
-	@if ! env SNITCH_LOG=warn $(2); then \
+define test_template
+	@if [ ! -z $(filter $(1),$(TESTS_BLACKLIST)) ]; then \
+		echo "$(2) ... `tput setaf 3`ignored`tput sgr0`"; \
+	elif ! env SNITCH_LOG=warn $(2); then \
 		echo "$(2) ... `tput setaf 1`FAILED`tput sgr0`"; \
 		echo $(1) >>$(LOG_FAILED); \
 	else \
