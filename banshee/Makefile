@@ -25,7 +25,7 @@ src/riscv.rs: $(OPCODES_PATH) $(PARSE_OPCODES)
 ###########################
 
 TESTS_DIR ?= ../banshee-tests/bin
-TESTS_BLACKLIST += dma_simple frep_multiple frep_single
+TESTS_BLACKLIST += dma_simple frep_multiple frep_single matmul_ssr_frep
 TESTS += $(patsubst $(TESTS_DIR)/%,%,$(wildcard $(TESTS_DIR)/*))
 TEST_TARGETS = $(patsubst %,test-%,$(TESTS))
 LOG_FAILED ?= /tmp/banshee_tests_failed
