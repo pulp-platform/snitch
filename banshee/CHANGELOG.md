@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Add test case blacklists
 - Add `TEST_ARGS` to pass additional arguments to banshee during testing
 - Add support for the cluster hardware barrier
+- Add `-L` option to forward arguments to LLVM
 
 ### Fixed
 - Fix crash on missing `banshee_ssr_next`

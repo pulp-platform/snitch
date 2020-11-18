@@ -7,8 +7,10 @@ extern crate llvm_sys as llvm;
 
 use anyhow::{bail, Context, Result};
 use clap::Arg;
-use llvm_sys::{bit_writer::*, core::*, execution_engine::*, initialization::*, target::*};
-use std::{path::Path, ptr::null_mut};
+use llvm_sys::{
+    bit_writer::*, core::*, execution_engine::*, initialization::*, support::*, target::*,
+};
+use std::{ffi::CString, os::raw::c_int, path::Path, ptr::null_mut};
 
 pub mod engine;
 pub mod riscv;
@@ -87,6 +89,13 @@ fn main() -> Result<()> {
                 .takes_value(true)
                 .help("The hartid of the first core"),
         )
+        .arg(
+            Arg::with_name("llvm-args")
+                .short("L")
+                .takes_value(true)
+                .multiple(true)
+                .help("Pass command line arguments to LLVM"),
+        )
         .get_matches();
 
     // Configure the logger.
@@ -102,6 +111,23 @@ fn main() -> Result<()> {
         engine::add_llvm_symbols();
         LLVMGetGlobalContext()
     };
+
+    // Pass command line arguments to LLVM.
+    if let Some(args) = matches.values_of("llvm-args") {
+        let exec_name = CString::new("banshee").unwrap();
+        let args: Vec<_> = args.map(|a| CString::new(a).unwrap()).collect();
+        let mut argv = vec![];
+        argv.push(exec_name.as_ptr());
+        argv.extend(args.iter().map(|a| (*a).as_ptr()));
+        let overview = CString::new("Banshee is magic!").unwrap();
+        unsafe {
+            LLVMParseCommandLineOptions(
+                argv.len() as c_int,
+                argv.as_ptr(),
+                overview.as_ptr() as *const _,
+            );
+        }
+    }
 
     // Setup the execution engine.
     let mut engine = Engine::new(context);
