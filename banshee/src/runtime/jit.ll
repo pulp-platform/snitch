@@ -6,32 +6,20 @@
 !0 = !{i32 2, !"Debug Info Version", i32 3}
 !1 = !{i32 2, !"Dwarf Version", i32 2}
 
-; Forward-declared the SSR/DMA state types. This will go away at some point,
-; when we leave the runtime data structure management entirely to Rust, and use
-; inline functions to access them transparently in the JITed IR.
-%SsrState = type { [0 x i32], [4 x i32], [0 x i32], [4 x i32], [0 x i32], [4 x i32], [0 x i32], i32, [0 x i16], i16, [0 x i16], i16, [0 x i8], i8, [0 x i8], i8, [0 x i8], i8, [1 x i8] }
-%DmaState = type { [0 x i64], i64, [0 x i64], i64, [0 x i32], i32, [0 x i32], i32, [0 x i32], i32, [0 x i32], i32, [0 x i32] }
-%cpu = type {
-    i8*,             ; Context
-    [32 x i32],      ; Registers
-    [32 x i64],      ; Float Registers
-    i32,             ; PC
-    i64,             ; Retired Instructions
-    [2 x %SsrState], ; SSRs
-    i32,             ; SSR enable
-    %DmaState,       ; DMA
-    i32*             ; TCDM
-}
+; Opaque pointers we get from the Rust part of the runtime.
+%Cpu = type opaque
+%SsrState = type opaque
+%DmaState = type opaque
 
 ; Forward declarations.
-declare i32 @banshee_load(%cpu* %cpu, i32 %addr, i8 %size)
-declare void @banshee_store(%cpu* %cpu, i32 %addr, i32 %value, i8 %size)
-declare i32 @banshee_csr_read(%cpu* %cpu, i16 %csr)
-declare void @banshee_csr_write(%cpu* %cpu, i16 %csr, i32 %value)
-declare void @banshee_abort_escape(%cpu* %cpu, i32 %addr)
-declare void @banshee_abort_illegal_inst(%cpu* %cpu, i32 %addr, i32 %raw)
-declare void @banshee_abort_illegal_branch(%cpu* %cpu, i32 %addr, i32 %target)
-declare void @banshee_trace(%cpu* %cpu, i32 %addr, i32 %raw, [2 x i64] %access_slice, [2 x i64] %data_slice)
+declare i32 @banshee_load(%Cpu* %cpu, i32 %addr, i8 %size)
+declare void @banshee_store(%Cpu* %cpu, i32 %addr, i32 %value, i8 %size)
+declare i32 @banshee_csr_read(%Cpu* %cpu, i16 %csr)
+declare void @banshee_csr_write(%Cpu* %cpu, i16 %csr, i32 %value)
+declare void @banshee_abort_escape(%Cpu* %cpu, i32 %addr)
+declare void @banshee_abort_illegal_inst(%Cpu* %cpu, i32 %addr, i32 %raw)
+declare void @banshee_abort_illegal_branch(%Cpu* %cpu, i32 %addr, i32 %target)
+declare void @banshee_trace(%Cpu* %cpu, i32 %addr, i32 %raw, [2 x i64] %access_slice, [2 x i64] %data_slice)
 
 declare void @banshee_ssr_write_cfg(%SsrState* writeonly %ssr, i32 %addr, i32 %value)
 declare i32 @banshee_ssr_read_cfg(%SsrState* readonly %ssr, i32 %addr)
@@ -42,4 +30,11 @@ declare void @banshee_dma_dst(%DmaState* writeonly %dma, i32 %lo, i32 %hi)
 declare i32 @banshee_dma_strt(%DmaState* %dma, i8* %cpu, i32 %size, i32 %flags)
 declare i32 @banshee_dma_stat(%DmaState* readonly %dma, i32 %addr)
 
-; declare i32* @banshee_reg_ptr(%Cpu* %cpu, i32 %reg)
+declare i32* @banshee_reg_ptr(%Cpu* %cpu, i32 %reg)
+declare i64* @banshee_freg_ptr(%Cpu* %cpu, i32 %reg)
+declare i32* @banshee_pc_ptr(%Cpu* %cpu)
+declare i64* @banshee_instret_ptr(%Cpu* %cpu)
+declare i32* @banshee_tcdm_ptr(%Cpu* %cpu)
+declare %SsrState* @banshee_ssr_ptr(%Cpu* %cpu, i32 %ssr)
+declare i32* @banshee_ssr_enabled_ptr(%Cpu* %cpu)
+declare %DmaState* @banshee_dma_ptr(%Cpu* %cpu)
