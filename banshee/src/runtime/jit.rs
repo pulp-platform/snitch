@@ -154,10 +154,10 @@ pub unsafe fn banshee_dma_dst(dma: &mut DmaState, lo: u32, hi: u32) {
 
 /// Implementation of the `dm.strt` and `dm.strti` instructions.
 #[no_mangle]
-pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: *const u8, size: u32, flags: u32) -> u32 {
+pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: &mut Cpu, size: u32, flags: u32) -> u32 {
     extern "C" {
-        fn banshee_load(cpu: *const u8, addr: u32, size: u8) -> u32;
-        fn banshee_store(cpu: *const u8, addr: u32, value: u32, size: u8);
+        fn banshee_load(cpu: &mut Cpu, addr: u32, size: u8) -> u32;
+        fn banshee_store(cpu: &mut Cpu, addr: u32, value: u32, size: u8);
     }
 
     let id = dma.done_id;
