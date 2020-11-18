@@ -1,6 +1,6 @@
 [package]
 name = "banshee"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Florian Zaruba <zarubaf@iis.ee.ethz.ch>", "Fabian Schuiki <fschuiki@iis.ee.ethz.ch>"]
 description = "Emulates a Snitch system using dynamic LLVM JIT binary translation."
 edition = "2018"
