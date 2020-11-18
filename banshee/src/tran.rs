@@ -199,103 +199,8 @@ impl<'a> ElfTranslator<'a> {
         let builder = LLVMCreateBuilderInContext(self.engine.context);
 
         // Assemble the struct type which holds the CPU state.
-        let state_type =
-            LLVMStructCreateNamed(self.engine.context, format!("cpu\0").as_ptr() as *const _);
-        let ssr_type = LLVMGetTypeByName(self.engine.module, "SsrState\0".as_ptr() as *const _);
-        let dma_type = LLVMGetTypeByName(self.engine.module, "DmaState\0".as_ptr() as *const _);
-        let mut state_fields = [
-            LLVMPointerType(LLVMInt8Type(), 0),  // Context
-            LLVMArrayType(LLVMInt32Type(), 32),  // Registers
-            LLVMArrayType(LLVMInt64Type(), 32),  // Float Registers
-            LLVMInt32Type(),                     // PC
-            LLVMInt64Type(),                     // Retired Instructions
-            LLVMArrayType(ssr_type, 2),          // SSRs
-            LLVMInt32Type(),                     // SSR enable
-            dma_type,                            // DMA
-            LLVMPointerType(LLVMInt32Type(), 0), // TCDM
-        ];
-        LLVMStructSetBody(
-            state_type,
-            state_fields.as_mut_ptr(),
-            state_fields.len() as u32,
-            0,
-        );
+        let state_type = LLVMGetTypeByName(self.engine.module, "cpu\0".as_ptr() as *const _);
         let state_ptr_type = LLVMPointerType(state_type, 0u32);
-
-        // Declare the callbacks.
-        self.declare_func(
-            "banshee_load",
-            LLVMInt32Type(),
-            [
-                state_ptr_type,  // CPU
-                LLVMInt32Type(), // Address
-                LLVMInt8Type(),  // Size
-            ],
-        );
-        self.declare_func(
-            "banshee_store",
-            LLVMVoidType(),
-            [
-                state_ptr_type,  // CPU
-                LLVMInt32Type(), // Address
-                LLVMInt32Type(), // Value
-                LLVMInt8Type(),  // Size
-            ],
-        );
-        self.declare_func(
-            "banshee_csr_read",
-            LLVMInt32Type(),
-            [
-                state_ptr_type,  // CPU
-                LLVMInt16Type(), // CSR
-            ],
-        );
-        self.declare_func(
-            "banshee_csr_write",
-            LLVMVoidType(),
-            [
-                state_ptr_type,  // CPU
-                LLVMInt16Type(), // CSR
-                LLVMInt32Type(), // Value
-            ],
-        );
-        self.declare_func(
-            "banshee_abort_escape",
-            LLVMVoidType(),
-            [
-                state_ptr_type,  // CPU
-                LLVMInt32Type(), // Addr
-            ],
-        );
-        self.declare_func(
-            "banshee_abort_illegal_inst",
-            LLVMVoidType(),
-            [
-                state_ptr_type,  // CPU
-                LLVMInt32Type(), // Addr
-                LLVMInt32Type(), // Raw
-            ],
-        );
-        self.declare_func(
-            "banshee_abort_illegal_branch",
-            LLVMVoidType(),
-            [
-                state_ptr_type,  // CPU
-                LLVMInt32Type(), // Addr
-                LLVMInt32Type(), // Target
-            ],
-        );
-        self.declare_func(
-            "banshee_trace",
-            LLVMVoidType(),
-            [
-                state_ptr_type,                    // CPU
-                LLVMInt32Type(),                   // Addr
-                LLVMInt32Type(),                   // Inst
-                LLVMArrayType(LLVMInt64Type(), 2), // Access Slice
-                LLVMArrayType(LLVMInt64Type(), 2), // Data Slice
-            ],
-        );
 
         // Emit the function which will run the binary.
         let func_name = format!("execute_binary\0");
@@ -445,20 +350,6 @@ impl<'a> ElfTranslator<'a> {
         Ok(())
     }
 
-    unsafe fn declare_func(
-        &self,
-        name: &str,
-        ret: LLVMTypeRef,
-        args: impl AsRef<[LLVMTypeRef]>,
-    ) -> LLVMValueRef {
-        let args = args.as_ref();
-        LLVMAddFunction(
-            self.engine.module,
-            CString::new(name).unwrap().as_ptr() as *const _,
-            LLVMFunctionType(ret, args.as_ptr() as *mut _, args.len() as u32, 0),
-        )
-    }
-
     unsafe fn lookup_func(&self, name: &str) -> LLVMValueRef {
         let ptr = LLVMGetNamedFunction(
             self.engine.module,
@@ -572,13 +463,23 @@ impl<'a> SectionTranslator<'a> {
 
     /// Emit a call to a named function.
     unsafe fn emit_call(&self, name: &str, args: impl AsRef<[LLVMValueRef]>) -> LLVMValueRef {
+        self.emit_call_with_name(name, args, "")
+    }
+
+    /// Emit a call to a named function, and assign a name to the return value.
+    unsafe fn emit_call_with_name(
+        &self,
+        name: &str,
+        args: impl AsRef<[LLVMValueRef]>,
+        result_name: &str,
+    ) -> LLVMValueRef {
         let args = args.as_ref();
         let call = LLVMBuildCall(
             self.builder,
             self.elf.lookup_func(name),
             args.as_ptr() as *mut _,
             args.len() as u32,
-            NONAME,
+            format!("{}\0", result_name).as_ptr() as *mut _,
         );
         // TODO(fschuiki): The following is very dangerous. It can cause the IR
         // to produce broken machine code if the attribute is set on a function
@@ -2064,6 +1965,11 @@ impl<'a> InstructionTranslator<'a> {
 
     unsafe fn reg_ptr(&self, r: u32) -> LLVMValueRef {
         assert!(r < 32);
+        // self.section.emit_call_with_name(
+        //     "banshee_reg_ptr",
+        //     [LLVMConstInt(LLVMInt32Type(), r as u64, 0)],
+        //     &format!("ptr_x{}", r),
+        // )
         LLVMBuildGEP(
             self.builder,
             self.section.state_ptr,
