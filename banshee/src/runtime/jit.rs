@@ -9,7 +9,9 @@
 //! - index accesses; try `get_unchecked` and friends instead
 //! - any of the macros from the `log` crate
 
+// Include the common elements shared with the rust part of the engine.
 include!("common.rs");
+pub type Engine = i8;
 
 // /// Get a pointer to a register.
 // #[no_mangle]

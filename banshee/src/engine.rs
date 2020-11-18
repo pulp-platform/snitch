@@ -15,7 +15,7 @@ use std::{
     },
 };
 
-pub use crate::runtime::{DmaState, SsrState};
+pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState};
 
 /// An execution engine.
 pub struct Engine {
@@ -345,19 +345,6 @@ pub unsafe fn add_llvm_symbols() {
 // #[repr(C)]
 // pub struct System<'a> {}
 
-/// A CPU pointer to be passed to the binary code.
-#[repr(C)]
-pub struct Cpu<'a, 'b> {
-    engine: &'a Engine,
-    state: CpuState,
-    tcdm_ptr: &'b u32,
-    hartid: usize,
-    num_cores: usize,
-    cluster_base_hartid: usize,
-    /// The cluster's shared barrier state.
-    barrier: &'b AtomicUsize,
-}
-
 impl<'a, 'b> Cpu<'a, 'b> {
     /// Create a new CPU in a default state.
     pub fn new(
@@ -510,52 +497,6 @@ impl<'a, 'b> Cpu<'a, 'b> {
             }
             self.barrier.fetch_add(1, Ordering::Relaxed);
         }
-    }
-}
-
-/// A representation of a single CPU core's state.
-#[derive(Default)]
-#[repr(C)]
-pub struct CpuState {
-    regs: [u32; 32],
-    fregs: [u64; 32],
-    pc: u32,
-    instret: u64,
-    ssrs: [SsrState; 2],
-    ssr_enable: u32,
-    dma: DmaState,
-}
-
-impl std::fmt::Debug for CpuState {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let regs = self
-            .regs
-            .iter()
-            .copied()
-            .enumerate()
-            .map(|(i, value)| format!("x{:02}: 0x{:08x}", i, value))
-            .chunks(4)
-            .into_iter()
-            .map(|mut chunk| chunk.join("  "))
-            .join("\n");
-        let fregs = self
-            .fregs
-            .iter()
-            .copied()
-            .enumerate()
-            .map(|(i, value)| format!("f{:02}: 0x{:016x}", i, value))
-            .chunks(4)
-            .into_iter()
-            .map(|mut chunk| chunk.join("  "))
-            .join("\n");
-        f.debug_struct("CpuState")
-            .field("regs", &format_args!("\n{}", regs))
-            .field("fregs", &format_args!("\n{}", fregs))
-            .field("pc", &format_args!("0x{:x}", self.pc))
-            .field("instret", &self.instret)
-            .field("ssrs", &self.ssrs)
-            .field("dma", &self.dma)
-            .finish()
     }
 }
 
