@@ -9,7 +9,7 @@ pub fn build() {
     println!("cargo:rerun-if-changed={}", src_path.display());
 
     // Generate the JIT LLVM IR.
-    Command::new(std::env::var_os("RUSTC").unwrap())
+    let status = Command::new(std::env::var_os("RUSTC").unwrap())
         .arg(&src_path)
         .arg("-o")
         .arg(&dst_path)
@@ -22,6 +22,7 @@ pub fn build() {
         ])
         .status()
         .unwrap();
+    assert!(status.success());
 
     println!("Compiled {} to {}", src_path.display(), dst_path.display());
 }
