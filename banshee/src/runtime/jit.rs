@@ -11,6 +11,13 @@
 
 include!("common.rs");
 
+// /// Get a pointer to a register.
+// #[no_mangle]
+// #[inline(always)]
+// pub unsafe fn banshee_reg_ptr(cpu: &mut ()) -> *mut u32 {
+//     std::ptr::null_mut()
+// }
+
 /// Write to an SSR control register.
 #[no_mangle]
 pub unsafe fn banshee_ssr_write_cfg(ssr: &mut SsrState, addr: u32, value: u32) {
