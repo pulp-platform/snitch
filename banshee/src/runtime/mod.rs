@@ -23,6 +23,9 @@
 //! - Binary translation emits code into the module.
 //! - The module is linked with the LLVM IR obtained from `jit.rs`.
 
+use crate::engine::Engine;
+use itertools::Itertools;
+
 include!("common.rs");
 
 /// The initial contents of the LLVM module for the JITed binary.
@@ -39,6 +42,39 @@ pub static JIT_INITIAL: &'static [u8] = include_bytes!("jit.ll");
 /// declaratiosn in `jit.ll` should go.
 pub static JIT_GENERATED: &'static [u8] =
     include_bytes!(concat!(env!("OUT_DIR"), "/jit_generated.ll"));
+
+impl std::fmt::Debug for CpuState {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let regs = self
+            .regs
+            .iter()
+            .copied()
+            .enumerate()
+            .map(|(i, value)| format!("x{:02}: 0x{:08x}", i, value))
+            .chunks(4)
+            .into_iter()
+            .map(|mut chunk| chunk.join("  "))
+            .join("\n");
+        let fregs = self
+            .fregs
+            .iter()
+            .copied()
+            .enumerate()
+            .map(|(i, value)| format!("f{:02}: 0x{:016x}", i, value))
+            .chunks(4)
+            .into_iter()
+            .map(|mut chunk| chunk.join("  "))
+            .join("\n");
+        f.debug_struct("CpuState")
+            .field("regs", &format_args!("\n{}", regs))
+            .field("fregs", &format_args!("\n{}", fregs))
+            .field("pc", &format_args!("0x{:x}", self.pc))
+            .field("instret", &self.instret)
+            .field("ssrs", &self.ssrs)
+            .field("dma", &self.dma)
+            .finish()
+    }
+}
 
 impl std::fmt::Debug for SsrState {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
