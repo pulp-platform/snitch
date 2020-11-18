@@ -13,12 +13,61 @@
 include!("common.rs");
 pub type Engine = i8;
 
-// /// Get a pointer to a register.
-// #[no_mangle]
-// #[inline(always)]
-// pub unsafe fn banshee_reg_ptr(cpu: &mut ()) -> *mut u32 {
-//     std::ptr::null_mut()
-// }
+/// Get a pointer to a register.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_reg_ptr<'a>(cpu: &'a mut Cpu, reg: u32) -> &'a mut u32 {
+    cpu.state.regs.get_unchecked_mut(reg as usize)
+}
+
+/// Get a pointer to a float register.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_freg_ptr<'a>(cpu: &'a mut Cpu, reg: u32) -> &'a mut u64 {
+    cpu.state.fregs.get_unchecked_mut(reg as usize)
+}
+
+/// Get a pointer to the program counter register.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_pc_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut u32 {
+    &mut cpu.state.pc
+}
+
+/// Get a pointer to the instret counter.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_instret_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut u64 {
+    &mut cpu.state.instret
+}
+
+/// Get a pointer to the TCDM buffer.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_tcdm_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut u32 {
+    &mut *(cpu.tcdm_ptr as *const _ as *mut _)
+}
+
+/// Get a pointer to an SSR.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_ssr_ptr<'a>(cpu: &'a mut Cpu, ssr: u32) -> &'a mut SsrState {
+    cpu.state.ssrs.get_unchecked_mut(ssr as usize)
+}
+
+/// Get a pointer to the SSR enable flag.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_ssr_enabled_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut u32 {
+    &mut cpu.state.ssr_enable
+}
+
+/// Get a pointer to the DMA state.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_dma_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut DmaState {
+    &mut cpu.state.dma
+}
 
 /// Write to an SSR control register.
 #[no_mangle]

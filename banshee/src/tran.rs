@@ -199,7 +199,7 @@ impl<'a> ElfTranslator<'a> {
         let builder = LLVMCreateBuilderInContext(self.engine.context);
 
         // Assemble the struct type which holds the CPU state.
-        let state_type = LLVMGetTypeByName(self.engine.module, "cpu\0".as_ptr() as *const _);
+        let state_type = LLVMGetTypeByName(self.engine.module, "Cpu\0".as_ptr() as *const _);
         let state_ptr_type = LLVMPointerType(state_type, 0u32);
 
         // Emit the function which will run the binary.
@@ -1723,10 +1723,9 @@ impl<'a> InstructionTranslator<'a> {
             LLVMConstInt(LLVMInt32Type(), 4, 0),
             NONAME,
         );
-        let ptr = LLVMBuildLoad(self.builder, self.tcdm_ptr(), NONAME);
         let ptr = LLVMBuildGEP(
             self.builder,
-            ptr,
+            self.tcdm_ptr(),
             [index].as_mut_ptr(),
             1 as u32,
             b"ptr_tcdm\0".as_ptr() as *const _,
@@ -1755,18 +1754,7 @@ impl<'a> InstructionTranslator<'a> {
         let index = LLVMBuildSub(self.builder, addr, ssr_start, NONAME);
         let subaddr = LLVMBuildURem(self.builder, index, ssr_size, NONAME);
         let index = LLVMBuildUDiv(self.builder, index, ssr_size, NONAME);
-        let ptr = LLVMBuildGEP(
-            self.builder,
-            self.section.state_ptr,
-            [
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 5, 0),
-                index,
-            ]
-            .as_mut_ptr(),
-            3 as u32,
-            b"ptr_ssrcfg\0".as_ptr() as *const _,
-        );
+        let ptr = self.ssr_dyn_ptr(index);
         (in_range, ptr, subaddr)
     }
 
@@ -1965,123 +1953,69 @@ impl<'a> InstructionTranslator<'a> {
 
     unsafe fn reg_ptr(&self, r: u32) -> LLVMValueRef {
         assert!(r < 32);
-        // self.section.emit_call_with_name(
-        //     "banshee_reg_ptr",
-        //     [LLVMConstInt(LLVMInt32Type(), r as u64, 0)],
-        //     &format!("ptr_x{}", r),
-        // )
-        LLVMBuildGEP(
-            self.builder,
-            self.section.state_ptr,
+        self.section.emit_call_with_name(
+            "banshee_reg_ptr",
             [
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 1, 0),
+                self.section.state_ptr,
                 LLVMConstInt(LLVMInt32Type(), r as u64, 0),
-            ]
-            .as_mut_ptr(),
-            3 as u32,
-            format!("ptr_x{}\0", r).as_ptr() as *const _,
+            ],
+            &format!("ptr_x{}", r),
         )
     }
 
     unsafe fn freg_ptr(&self, r: u32) -> LLVMValueRef {
         assert!(r < 32);
-        LLVMBuildGEP(
-            self.builder,
-            self.section.state_ptr,
+        self.section.emit_call_with_name(
+            "banshee_freg_ptr",
             [
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 2, 0),
+                self.section.state_ptr,
                 LLVMConstInt(LLVMInt32Type(), r as u64, 0),
-            ]
-            .as_mut_ptr(),
-            3 as u32,
-            format!("ptr_f{}\0", r).as_ptr() as *const _,
+            ],
+            &format!("ptr_f{}", r),
         )
     }
 
     unsafe fn pc_ptr(&self) -> LLVMValueRef {
-        LLVMBuildGEP(
-            self.builder,
-            self.section.state_ptr,
-            [
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 3, 0),
-            ]
-            .as_mut_ptr(),
-            2 as u32,
-            format!("ptr_pc\0").as_ptr() as *const _,
-        )
+        self.section
+            .emit_call_with_name("banshee_pc_ptr", [self.section.state_ptr], "ptr_pc")
     }
 
     unsafe fn instret_ptr(&self) -> LLVMValueRef {
-        LLVMBuildGEP(
-            self.builder,
-            self.section.state_ptr,
-            [
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 4, 0),
-            ]
-            .as_mut_ptr(),
-            2 as u32,
-            format!("ptr_instret\0").as_ptr() as *const _,
+        self.section.emit_call_with_name(
+            "banshee_instret_ptr",
+            [self.section.state_ptr],
+            "ptr_instret",
         )
     }
 
     unsafe fn tcdm_ptr(&self) -> LLVMValueRef {
-        LLVMBuildGEP(
-            self.builder,
-            self.section.state_ptr,
-            [
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 8, 0),
-            ]
-            .as_mut_ptr(),
-            2 as u32,
-            format!("ptr_tcdm\0").as_ptr() as *const _,
-        )
+        self.section
+            .emit_call_with_name("banshee_tcdm_ptr", [self.section.state_ptr], "ptr_tcdm")
     }
 
     unsafe fn ssr_ptr(&self, ssr: u32) -> LLVMValueRef {
-        LLVMBuildGEP(
-            self.builder,
-            self.section.state_ptr,
-            [
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 5, 0),
-                LLVMConstInt(LLVMInt32Type(), ssr as u64, 0),
-            ]
-            .as_mut_ptr(),
-            3 as u32,
-            format!("ptr_ssr\0").as_ptr() as *const _,
+        assert!(ssr < 2);
+        self.ssr_dyn_ptr(LLVMConstInt(LLVMInt32Type(), ssr as u64, 0))
+    }
+
+    unsafe fn ssr_dyn_ptr(&self, ssr: LLVMValueRef) -> LLVMValueRef {
+        self.section.emit_call_with_name(
+            "banshee_ssr_ptr",
+            [self.section.state_ptr, ssr],
+            "ptr_ssr",
         )
     }
 
     unsafe fn ssr_enabled_ptr(&self) -> LLVMValueRef {
-        LLVMBuildGEP(
-            self.builder,
-            self.section.state_ptr,
-            [
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 6, 0),
-            ]
-            .as_mut_ptr(),
-            2 as u32,
-            format!("ptr_ssr_enabled\0").as_ptr() as *const _,
+        self.section.emit_call_with_name(
+            "banshee_ssr_enabled_ptr",
+            [self.section.state_ptr],
+            "ptr_ssr_enabled",
         )
     }
 
     unsafe fn dma_ptr(&self) -> LLVMValueRef {
-        LLVMBuildGEP(
-            self.builder,
-            self.section.state_ptr,
-            [
-                LLVMConstInt(LLVMInt32Type(), 0, 0),
-                LLVMConstInt(LLVMInt32Type(), 7, 0),
-            ]
-            .as_mut_ptr(),
-            2 as u32,
-            format!("ptr_dma\0").as_ptr() as *const _,
-        )
+        self.section
+            .emit_call_with_name("banshee_dma_ptr", [self.section.state_ptr], "ptr_dma")
     }
 }
