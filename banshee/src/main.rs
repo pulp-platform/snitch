@@ -103,11 +103,26 @@ fn main() -> Result<()> {
 
     // Initialize the LLVM core.
     let context = unsafe {
-        let pass_reg = LLVMGetGlobalPassRegistry();
-        LLVMInitializeCore(pass_reg);
         LLVMLinkInMCJIT();
         LLVM_InitializeNativeTarget();
         LLVM_InitializeNativeAsmPrinter();
+
+        // Initialize passes (inspired by llvm/tools/opt/opt.cpp:527).
+        let pass_reg = LLVMGetGlobalPassRegistry();
+        LLVMInitializeAggressiveInstCombiner(pass_reg);
+        LLVMInitializeAnalysis(pass_reg);
+        LLVMInitializeCodeGen(pass_reg);
+        LLVMInitializeCore(pass_reg);
+        LLVMInitializeIPA(pass_reg);
+        LLVMInitializeIPO(pass_reg);
+        LLVMInitializeInstCombine(pass_reg);
+        LLVMInitializeInstrumentation(pass_reg);
+        LLVMInitializeObjCARCOpts(pass_reg);
+        LLVMInitializeScalarOpts(pass_reg);
+        LLVMInitializeTarget(pass_reg);
+        LLVMInitializeTransformUtils(pass_reg);
+        LLVMInitializeVectorization(pass_reg);
+
         engine::add_llvm_symbols();
         LLVMGetGlobalContext()
     };
