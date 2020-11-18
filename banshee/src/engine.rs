@@ -5,7 +5,7 @@ use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
     core::*, execution_engine::*, ir_reader::*, linker::*, prelude::*, support::*,
-    transforms::pass_manager_builder::*,
+    target_machine::*, transforms::pass_manager_builder::*,
 };
 use std::{
     collections::HashMap,
@@ -120,11 +120,6 @@ impl Engine {
         // Translate the binary.
         tran.translate()?;
 
-        // Optimize the translation.
-        if self.opt_llvm {
-            unsafe { self.optimize() };
-        }
-
         // Load and link the LLVM IR for the `jit.rs` runtime library.
         unsafe {
             let mut runtime_ir = crate::runtime::JIT_GENERATED.to_vec();
@@ -151,6 +146,11 @@ impl Engine {
             // Link the runtime module into the translated binary module.
             LLVMLinkModules2(self.module, runtime);
         };
+
+        // Optimize the translation.
+        if self.opt_llvm {
+            unsafe { self.optimize() };
+        }
 
         // Copy the executable sections into memory.
         {
@@ -181,27 +181,68 @@ impl Engine {
 
     unsafe fn optimize(&self) {
         debug!("Optimizing IR");
-        let mpm = LLVMCreatePassManager();
-        // let fpm = LLVMCreateFunctionPassManagerForModule(self.module);
 
-        trace!("Populating pass managers");
-        let pmb = LLVMPassManagerBuilderCreate();
-        LLVMPassManagerBuilderSetOptLevel(pmb, 3);
-        // LLVMPassManagerBuilderPopulateFunctionPassManager(pmb, fpm);
-        LLVMPassManagerBuilderPopulateModulePassManager(pmb, mpm);
-        LLVMPassManagerBuilderDispose(pmb);
+        // Create the pass managers.
+        let func_passes = LLVMCreateFunctionPassManagerForModule(self.module);
+        let module_passes = LLVMCreatePassManager();
 
-        // trace!("Optimizing function");
-        // let func = LLVMGetNamedFunction(self.module, "execute_binary\0".as_ptr() as *const _);
-        // LLVMInitializeFunctionPassManager(fpm);
-        // LLVMRunFunctionPassManager(fpm, func);
-        // LLVMFinalizeFunctionPassManager(fpm);
+        // Determine the target machine we are running on.
+        let tm_triple = LLVMGetDefaultTargetTriple();
+        let mut tm_target = std::ptr::null_mut();
+        let mut tm_target_msg = std::ptr::null_mut();
+        assert_eq!(
+            LLVMGetTargetFromTriple(tm_triple, &mut tm_target, &mut tm_target_msg),
+            0
+        );
+        let tm_cpu = LLVMGetHostCPUName();
+        let tm_features = LLVMGetHostCPUFeatures();
+        let tm = LLVMCreateTargetMachine(
+            tm_target,
+            tm_triple,
+            tm_cpu,
+            tm_features,
+            LLVMCodeGenOptLevel::LLVMCodeGenLevelAggressive,
+            LLVMRelocMode::LLVMRelocDefault,
+            LLVMCodeModel::LLVMCodeModelJITDefault,
+        );
+        LLVMDisposeMessage(tm_triple);
+        LLVMDisposeMessage(tm_cpu);
+        LLVMDisposeMessage(tm_features);
 
-        trace!("Optimizing entire module");
-        LLVMRunPassManager(mpm, self.module);
+        // Create a pass manager builder.
+        let builder = LLVMPassManagerBuilderCreate();
+        LLVMPassManagerBuilderSetOptLevel(builder, 3);
+        LLVMPassManagerBuilderSetSizeLevel(builder, 0);
+        LLVMPassManagerBuilderUseInlinerWithThreshold(builder, 275);
 
-        LLVMDisposePassManager(mpm);
-        // LLVMDisposePassManager(fpm);
+        LLVMPassManagerBuilderPopulateFunctionPassManager(builder, func_passes);
+        LLVMAddAnalysisPasses(tm, module_passes);
+        LLVMPassManagerBuilderPopulateLTOPassManager(builder, module_passes, 0, 1);
+        LLVMPassManagerBuilderPopulateModulePassManager(builder, module_passes);
+
+        // Create and run the function pass manager.
+        LLVMInitializeFunctionPassManager(func_passes);
+        let mut func = LLVMGetFirstFunction(self.module);
+        while !func.is_null() {
+            let mut name_len = 0;
+            let name = LLVMGetValueName2(func, &mut name_len);
+            let name = std::slice::from_raw_parts(name as *const u8, name_len as usize);
+            let name = std::str::from_utf8_unchecked(name);
+            trace!("  - Optimizing function {}", name);
+            LLVMRunFunctionPassManager(func_passes, func);
+            func = LLVMGetNextFunction(func);
+        }
+        LLVMFinalizeFunctionPassManager(func_passes);
+
+        // Create and run the module pass manager.
+        trace!("  - Optimizing module");
+        LLVMRunPassManager(module_passes, self.module);
+
+        // Clean up.
+        LLVMPassManagerBuilderDispose(builder);
+        LLVMDisposePassManager(func_passes);
+        LLVMDisposePassManager(module_passes);
+        LLVMDisposeTargetMachine(tm);
     }
 
     // Execute the loaded memory.
