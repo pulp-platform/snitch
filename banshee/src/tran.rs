@@ -21,6 +21,94 @@ static NONAME: &'static i8 = unsafe { std::mem::transmute("\0".as_ptr()) };
 /// Number of arguments the trace maximally shows per instruction.
 const TRACE_BUFFER_LEN: u32 = 8;
 
+/// The length of a sequencer's instruction ring buffer.
+const SEQ_BUFFER_LEN: u8 = 16;
+
+/// The sequencer's JIT iterators for loop emulation.
+struct SequencerIterators {
+    /// A u8* pointing to the current stagger offset.
+    stg_ptr_ref: LLVMValueRef,
+    /// A u32* pointing to the repetition index.
+    rpt_ptr_ref: LLVMValueRef,
+}
+
+/// The sequencer's context during section-level translation.
+struct SequencerContext {
+    /// Whether the sequencer is currently buffering instructions
+    active: bool,
+    /// The biggest instruction index to buffer.
+    max_inst: u8,
+    /// A u32 repetition index until which the block is iterated.
+    max_rpt_ref: LLVMValueRef,
+    /// Whether repetition is block-first or instruction-first.
+    is_outer: bool,
+    /// The maximum stagger index.
+    stagger_max: u8,
+    /// A mask indicating which register numbers to stagger.
+    stagger_mask: u8,
+    /// The addresses for the instruction basic blocks buffered.
+    inst_buffer: [u64; SEQ_BUFFER_LEN as usize],
+    /// The current buffer insertion point.
+    buffer_pos: u8,
+}
+
+impl SequencerContext {
+    /// Initialize a sequence job.
+    fn init_rep(
+        &mut self,
+        max_inst: u8,
+        max_rpt_ref: LLVMValueRef,
+        is_outer: bool,
+        stagger_max: u8,
+        stagger_mask: u8,
+    ) -> Result<()> {
+        if !self.active {
+            self.active = true;
+            self.max_inst = max_inst;
+            self.max_rpt_ref = max_rpt_ref;
+            self.is_outer = is_outer;
+            self.stagger_mask = stagger_mask;
+            self.stagger_max = stagger_max;
+            self.buffer_pos = 0;
+            if max_inst < SEQ_BUFFER_LEN {
+                Ok(())
+            } else {
+                Err(anyhow!(
+                    "Sequencer buffer not large enough: set {}, max {}",
+                    max_inst,
+                    SEQ_BUFFER_LEN
+                ))
+            }
+        } else {
+            Err(anyhow!("Illegal sequencer repetition nesting"))
+        }
+    }
+
+    /// Push an instruction into the sequence buffer.
+    fn push_rep_instruction(&mut self, inst_bb_addr: u64) -> Result<()> {
+        if self.active {
+            if self.buffer_pos <= self.max_inst {
+                self.inst_buffer[self.buffer_pos as usize] = inst_bb_addr;
+                self.buffer_pos += 1;
+                Ok(())
+            } else {
+                Err(anyhow!(
+                    "Sequence overflow: pos {}, max {}",
+                    self.buffer_pos,
+                    self.max_inst
+                ))
+            }
+        } else {
+            Err(anyhow!("No active sequence"))
+        }
+    }
+
+    // Whether repetition body is complete and ready for loop emission.
+    fn is_body_complete(&self) -> bool {
+        self.buffer_pos == self.max_inst + 1
+    }
+}
+
 /// A translator for an entire ELF file.
 pub struct ElfTranslator<'a> {
     pub elf: &'a elf::File,
@@ -309,6 +397,18 @@ impl<'a> ElfTranslator<'a> {
             (std::ptr::null_mut(), std::ptr::null_mut())
         };
 
+        // Allocate the sequencer iterators and init them as pointing to a zero constant.
+        let const_zero_8 = LLVMConstInt(LLVMInt8Type(), 0, 0);
+        let stg_ptr_ref = LLVMBuildAlloca(builder, LLVMInt8Type(), NONAME);
+        LLVMBuildStore(builder, const_zero_8, stg_ptr_ref);
+        let const_zero_32 = LLVMConstInt(LLVMInt32Type(), 0, 0);
+        let rpt_ptr_ref = LLVMBuildAlloca(builder, LLVMInt32Type(), NONAME);
+        LLVMBuildStore(builder, const_zero_32, rpt_ptr_ref);
+        let fseq_iter = SequencerIterators {
+            stg_ptr_ref,
+            rpt_ptr_ref,
+        };
+
         // Gather the set of executable addresses.
         let inst_addrs: BTreeSet<u64> = self
             .all_instructions()
@@ -423,6 +523,7 @@ impl<'a> ElfTranslator<'a> {
                 indirect_target_var,
                 indirect_addr_var,
                 indirect_bb,
+                fseq_iter: &fseq_iter,
             };
             tran.emit(&mut inst_index)?;
             last_section_tran = Some(tran);
@@ -487,6 +588,8 @@ pub struct SectionTranslator<'a> {
     indirect_addr_var: LLVMValueRef,
     /// The basic block to branch to to make a fallback indirect jump.
     indirect_bb: LLVMBasicBlockRef,
+    /// The JIT-level sequencer iterators.
+    fseq_iter: &'a SequencerIterators,
 }
 
 impl<'a> SectionTranslator<'a> {
@@ -537,8 +640,48 @@ impl<'a> SectionTranslator<'a> {
         LLVMBuildRetVoid(self.builder);
     }
 
+    /// Emit the code for the remaining iterations of a buffered FREP loop.
+    unsafe fn emit_frep(&self, fseq: &SequencerContext, curr_addr: u64) -> Result<()> {
+        // TODO: Handle staggering by loading stagger aloca, adding to reg indices directly in instuction IR emission.
+        if fseq.is_outer {
+            // Load repetition counter from stack.
+            let rpt_cnt = LLVMBuildLoad(self.builder, self.fseq_iter.rpt_ptr_ref, NONAME);
+            // Compare to repetition maximum: repeat if less than maximum iteration.
+            let rpt_cmp =
+                LLVMBuildICmp(self.builder, LLVMIntULT, rpt_cnt, fseq.max_rpt_ref, NONAME);
+            // Jump back to beginning of loop body if repetitions left, else go to next PC.
+            let target = fseq.inst_buffer[0];
+            // Increment rep counter, store
+            let const_one = LLVMConstInt(LLVMInt8Type(), 1, 0);
+            let rpt_cnt_inc = LLVMBuildAdd(self.builder, rpt_cnt, const_one, NONAME);
+            LLVMBuildStore(self.builder, rpt_cnt_inc, self.fseq_iter.rpt_ptr_ref);
+            // Insert branch as terminator (following terminator will be omitted).
+            LLVMBuildCondBr(
+                self.builder,
+                rpt_cmp,
+                self.elf.inst_bbs[&target],
+                self.elf.inst_bbs[&(curr_addr + 4)],
+            );
+            Ok(())
+        } else {
+            Err(anyhow!("Inner FREP not yet supported"))
+        }
+    }
+
     /// Emit the code for the entire section.
     unsafe fn emit(&self, inst_index: &mut u32) -> Result<()> {
+        // Initialize floating point sequencer context.
+        let mut fseq = SequencerContext {
+            active: false,
+            max_inst: 0,
+            max_rpt_ref: LLVMConstInt(LLVMInt32Type(), 0 as u64, 0),
+            is_outer: false,
+            stagger_max: 0,
+            stagger_mask: 0,
+            inst_buffer: [0; SEQ_BUFFER_LEN as usize],
+            buffer_pos: 0,
+        };
+        // iterate over section instructions
         for (addr, inst) in self.elf.instructions(self.section) {
             let tran = InstructionTranslator {
                 section: self,
@@ -549,15 +692,25 @@ impl<'a> SectionTranslator<'a> {
                 trace_accesses: Default::default(),
                 trace_emitted: Default::default(),
                 trace_disabled: Default::default(),
+                was_freppable: Default::default(),
             };
             LLVMPositionBuilderAtEnd(self.builder, self.elf.inst_bbs[&addr]);
-            match tran.emit(inst_index) {
+            match tran.emit(inst_index, &mut fseq) {
                 Ok(()) => (),
                 Err(e) => {
                     error!("{}", e);
                     self.emit_illegal_abort(addr, inst);
                 }
             }
+            // Note that FREP itself is not freppable.
+            if fseq.active && tran.was_freppable.get() {
+                fseq.push_rep_instruction(addr)?;
+                if !fseq.is_outer || fseq.is_body_complete() {
+                    self.emit_frep(&fseq, addr)?;
+                    fseq.active = false;
+                }
+            }
+            // Place branch to next instruction only after processing of sequence
             if LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null() {
                 LLVMBuildBr(self.builder, self.elf.inst_bbs[&(addr + 4)]);
             }
@@ -608,10 +761,11 @@ pub struct InstructionTranslator<'a> {
     trace_accesses: RefCell<Vec<(TraceAccess, LLVMValueRef)>>,
     trace_emitted: Cell<bool>,
     trace_disabled: Cell<bool>,
+    was_freppable: Cell<bool>,
 }
 
 impl<'a> InstructionTranslator<'a> {
-    unsafe fn emit(&self, inst_index: &mut u32) -> Result<()> {
+    unsafe fn emit(&self, inst_index: &mut u32, fseq: &mut SequencerContext) -> Result<()> {
         // Emit some debug information that indicates what instruction we are
         // currently processing.
         *inst_index += 1;
@@ -677,6 +831,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
             riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
+            riscv::Format::Imm12RdRmRs1(x) => self.emit_imm12_rd_rm_rs1(x, fseq),
             riscv::Format::Imm12hiImm12loRs1Rs2(x) => self.emit_imm12hi_imm12lo_rs1_rs2(x),
             riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
             riscv::Format::Jimm20Rd(x) => self.emit_jimm20_rd(x),
@@ -988,6 +1143,7 @@ impl<'a> InstructionTranslator<'a> {
         trace!("{} f{} = f{}, f{}", data.op, data.rd, data.rs1, data.rs2);
         let name = format!("{}\0", data.op);
         let name = name.as_ptr() as *const _;
+        self.was_freppable.set(true);
         match data.op {
             riscv::OpcodeRdRmRs1Rs2::FaddS => self.write_freg_f32(
                 data.rd,
@@ -1103,6 +1259,32 @@ impl<'a> InstructionTranslator<'a> {
             _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
+    }
+
+    unsafe fn emit_imm12_rd_rm_rs1(
+        &self,
+        data: riscv::FormatImm12RdRmRs1,
+        fseq: &mut SequencerContext,
+    ) -> Result<()> {
+        trace!(
+            "{} x{}, {}, 0b{:b}, {}, {}",
+            data.op,
+            data.rs1,     // register containing max repetition
+            data.imm12,   // max instruction
+            data.rd >> 1, // stagger mask
+            data.rm,      // stagger max
+            data.rd & 1   // whether outer loop
+        );
+        match data.op {
+            riscv::OpcodeImm12RdRmRs1::Frep => fseq.init_rep(
+                data.imm12 as u8,
+                self.read_reg(data.rs1),
+                data.rd != 0,
+                (data.rd & 1) as u8,
+                (data.rs1) as u8,
+            ),
+            _ => bail!("Unsupported opcode {}", data.op),
+        }
     }
 
     unsafe fn emit_fmadd(

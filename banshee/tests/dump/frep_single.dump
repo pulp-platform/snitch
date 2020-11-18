@@ -55,29 +55,25 @@ Disassembly of section .text:
 Disassembly of section .text.startup:
 
 80010080 <main>:
-80010080:	00000797          	auipc	a5,0x0
-80010084:	0307b707          	fld	fa4,48(a5) # 800100b0 <main+0x30>
-80010088:	d20007d3          	fcvt.d.w	fa5,zero
-8001008c:	00400793          	li	a5,4
+80010080:	00400293          	li	t0,4
+80010084:	00000797          	auipc	a5,0x0
+80010088:	02c7b707          	fld	fa4,44(a5) # 800100b0 <main+0x30>
+8001008c:	d20007d3          	fcvt.d.w	fa5,zero
 80010090:	0002808b          	0x2808b
 80010094:	02e7f7d3          	fadd.d	fa5,fa5,fa4
-80010098:	00000797          	auipc	a5,0x0
-8001009c:	0207b707          	fld	fa4,32(a5) # 800100b8 <main+0x38>
-800100a0:	a2e7a553          	feq.d	a0,fa5,fa4
+80010098:	00500793          	li	a5,5
+8001009c:	d2078753          	fcvt.d.w	fa4,a5
+800100a0:	a2f72553          	feq.d	a0,fa4,fa5
 800100a4:	00154513          	xori	a0,a0,1
 800100a8:	00008067          	ret
 
 Disassembly of section .sdata:
 
-800100b0 <__bss_end-0x10>:
+800100b0 <__bss_end-0x8>:
 800100b0:	0000                	unimp
 800100b2:	0000                	unimp
 800100b4:	0000                	unimp
 800100b6:	3ff0                	fld	fa2,248(a5)
-800100b8:	0000                	unimp
-800100ba:	0000                	unimp
-800100bc:	0000                	unimp
-800100be:	4010                	lw	a2,0(s0)
 
 Disassembly of section .comment:
 
@@ -85,10 +81,10 @@ Disassembly of section .comment:
    0:	3a434347          	fmsub.d	ft6,ft6,ft4,ft7,rmm
    4:	2820                	fld	fs0,80(s0)
    6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
-   a:	3920                	fld	fs0,112(a0)
-   c:	322e                	fld	ft4,232(sp)
-   e:	302e                	fld	ft0,232(sp)
-	...
+   a:	3120                	fld	fs0,96(a0)
+   c:	2e30                	fld	fa2,88(a2)
+   e:	2e31                	jal	32a <l1_alloc_base+0x31a>
+  10:	0030                	addi	a2,sp,8
 
 Disassembly of section .riscv.attributes:
 
