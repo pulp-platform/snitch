@@ -24,6 +24,8 @@ macro(add_snitch_test name)
     add_test(NAME ${name} COMMAND banshee $<TARGET_FILE:test-${name}> --trace)
 endmacro()
 
+include_directories(include)
+
 # Generic Runtime (requiring bootloader/OS)
 add_snitch_library(snRuntime src/start.S)
 
