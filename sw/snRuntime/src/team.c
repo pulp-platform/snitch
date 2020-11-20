@@ -7,14 +7,14 @@
 __thread struct snrt_team *_snrt_team_current;
 const uint32_t _snrt_team_size = sizeof(struct snrt_team_root);
 
-static uint32_t hartid() {
+uint32_t __attribute__((pure)) snrt_hartid() {
     uint32_t hartid;
-    asm volatile ("csrr %0, mhartid" : "=r"(hartid));
+    asm ("csrr %0, mhartid" : "=r"(hartid));
     return hartid;
 }
 
 uint32_t snrt_global_core_idx() {
-    return hartid() - _snrt_team_current->root->global_core_base_hartid;
+    return snrt_hartid() - _snrt_team_current->root->global_core_base_hartid;
 }
 
 uint32_t snrt_global_core_num() {
@@ -30,7 +30,7 @@ uint32_t snrt_cluster_num() {
 }
 
 uint32_t snrt_cluster_core_idx() {
-    return hartid() - _snrt_team_current->root->cluster_core_base_hartid;
+    return snrt_hartid() - _snrt_team_current->root->cluster_core_base_hartid;
 }
 
 uint32_t snrt_cluster_core_num() {
