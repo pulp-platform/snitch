@@ -297,6 +297,7 @@ impl Engine {
                     base_hartid + i,
                     self.num_cores,
                     base_hartid,
+                    j,
                     &barriers[j],
                 )
             })
@@ -394,6 +395,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         hartid: usize,
         num_cores: usize,
         cluster_base_hartid: usize,
+        cluster_id: usize,
         barrier: &'b AtomicUsize,
     ) -> Self {
         Self {
@@ -403,6 +405,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             hartid,
             num_cores,
             cluster_base_hartid,
+            cluster_id,
             barrier,
         }
     }
@@ -418,6 +421,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 0
             } // barrier_reg
             0x40000040 => self.cluster_base_hartid as u32,              // cluster_base_hartid
+            0x40000048 => self.engine.num_clusters as u32,              // cluster_num
+            0x40000050 => self.cluster_id as u32,                       // cluster_id
             _ => {
                 trace!("Load 0x{:x} ({}B)", addr, 8 << size);
                 self.engine
@@ -439,6 +444,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
             0x40000020 => self.engine.exit_code.store(value, Ordering::SeqCst), // scratch_reg
             0x40000038 => (),                                                   // barrier_reg
             0x40000040 => (), // cluster_base_hartid
+            0x40000048 => (), // cluster_num
+            0x40000050 => (), // cluster_id
             _ => {
                 trace!("Store 0x{:x} = 0x{:x} ({}B)", addr, value, 8 << size);
                 self.engine

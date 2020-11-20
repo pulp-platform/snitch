@@ -18,6 +18,8 @@ pub struct Cpu<'a, 'b> {
     pub hartid: usize,
     pub num_cores: usize,
     pub cluster_base_hartid: usize,
+    /// The cluster's identifier.
+    pub cluster_id: usize,
     /// The cluster's shared barrier state.
     pub barrier: &'b AtomicUsize,
 }
