@@ -24,6 +24,7 @@ macro(add_snitch_test name)
     add_test(NAME ${name} COMMAND banshee $<TARGET_FILE:test-${name}> --trace)
 endmacro()
 
+add_compile_options(-O3 -ffunction-sections)
 include_directories(include)
 
 # Common sources
