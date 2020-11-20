@@ -30,6 +30,7 @@ include_directories(include)
 # Common sources
 set(sources
     src/barrier.c
+    src/team.c
 )
 
 # Generic Runtime (requiring bootloader/OS)
