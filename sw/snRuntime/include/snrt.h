@@ -7,6 +7,7 @@
 
 extern void snrt_barrier();
 
+extern uint32_t __attribute__((pure)) snrt_hartid();
 extern uint32_t snrt_global_core_idx();
 extern uint32_t snrt_global_core_num();
 extern uint32_t snrt_cluster_core_idx();
