@@ -41,6 +41,11 @@ snrt.crt0.init_stack:
     addi      a3, a3, -8
     sw        zero, 0(a3)
 
+    # Set space aside for the root team structure.
+    lw        t0, _snrt_team_size
+    sub       a3, a3, t0
+    mv        a4, a3
+
     # Compute the stack top for this hart, and the cluster-wide stack bottom.
     lw        t2, snrt_stack_size  # load stack size (overridable by binary)
 
@@ -54,12 +59,6 @@ snrt.crt0.init_stack:
     slli      t1, a1, 3  # all harts
     add       sp, sp, t0
     add       a3, a3, t1
-
-    # Synchronize cores.
-snrt.crt0.pre_barrier:
-    la        t0, barrier_reg
-    lw        t0, 0(t0)
-    mv        zero, t0
 
     # Allocate thread-local storage at the top of the stack.
 snrt.crt0.init_tls:
@@ -88,6 +87,25 @@ snrt.crt0.init_tls:
     blt       t0, t2, 1b
 2:
 
+    # Initialize the root team.
+snrt.crt0.init_team:
+    addi      sp, sp, -16
+    sw        a0, 0(sp)
+    sw        a1, 4(sp)
+    sw        a2, 8(sp)
+    sw        a3, 12(sp)
+    call      _snrt_init_team
+    lw        a0, 0(sp)
+    lw        a1, 4(sp)
+    lw        a2, 8(sp)
+    lw        a3, 12(sp)
+    addi      sp, sp, 16
+
+    # Synchronize cores.
+snrt.crt0.pre_barrier:
+    lw        t0, barrier_reg
+    mv        zero, t0
+
     # Execute the main function.
 snrt.crt0.main:
     call      main  # main(int core_id, int core_num, void *spm_start, void *spm_end)
@@ -97,8 +115,7 @@ snrt.crt0.main:
 
     # Synchronize cores.
 snrt.crt0.post_barrier:
-    la        t0, barrier_reg
-    lw        t0, 0(t0)
+    lw        t0, barrier_reg
     mv        zero, t0
 
     # Write execution result to EOC register.
