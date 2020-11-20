@@ -26,17 +26,23 @@ endmacro()
 
 include_directories(include)
 
+# Common sources
+set(sources
+    src/barrier.c
+)
+
 # Generic Runtime (requiring bootloader/OS)
-add_snitch_library(snRuntime src/start.S)
+add_snitch_library(snRuntime src/start.S ${sources})
 
 # Bare Runtimes (with startup code)
-add_snitch_library(snRuntime-banshee src/start_banshee.S)
-add_snitch_library(snRuntime-billywig src/start_billywig.S)
-add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S)
-add_snitch_library(snRuntime-lethifold src/start_lethifold.S)
-add_snitch_library(snRuntime-thestral src/start_thestral.S)
+add_snitch_library(snRuntime-banshee src/start_banshee.S ${sources})
+add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources})
+add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S ${sources})
+add_snitch_library(snRuntime-lethifold src/start_lethifold.S ${sources})
+add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources})
 
 # Unit tests
 enable_testing()
 add_snitch_test(tls tests/tls.c)
 add_snitch_test(simple tests/simple.c)
+add_snitch_test(barrier tests/barrier.c)
