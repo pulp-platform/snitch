@@ -14,6 +14,8 @@ all: bin/multi_core
 all: bin/multi_cluster
 all: bin/barrier
 all: bin/loads
+all: bin/unpred_jr_1
+all: bin/unpred_jr_2
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump
