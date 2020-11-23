@@ -4,7 +4,7 @@ use crate::{riscv, tran::ElfTranslator, util::SiUnit};
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
-    core::*, execution_engine::*, ir_reader::*, linker::*, prelude::*, support::*,
+    analysis::*, core::*, execution_engine::*, ir_reader::*, linker::*, prelude::*, support::*,
     target_machine::*, transforms::pass_manager_builder::*,
 };
 use std::{
@@ -146,6 +146,29 @@ impl Engine {
             // Link the runtime module into the translated binary module.
             LLVMLinkModules2(self.module, runtime);
         };
+
+        // Verify that nothing is broken at this point.
+        let failed = unsafe {
+            LLVMVerifyModule(
+                self.module,
+                LLVMVerifierFailureAction::LLVMPrintMessageAction,
+                std::ptr::null_mut(),
+            )
+        };
+        if failed != 0 {
+            let path = "/tmp/banshee_failed.ll";
+            unsafe {
+                LLVMPrintModuleToFile(
+                    self.module,
+                    format!("{}\0", path).as_ptr() as *const _,
+                    std::ptr::null_mut(),
+                );
+            }
+            bail!(
+                "LLVM module did not pass verification (failing IR written to {})",
+                path
+            );
+        }
 
         // Optimize the translation.
         if self.opt_llvm {
