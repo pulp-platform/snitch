@@ -1,0 +1,50 @@
+
+bin/unpred_jr_2:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+80010000 <_start>:
+80010000:	00100513          	li	a0,1
+80010004:	00000297          	auipc	t0,0x0
+80010008:	02c2a283          	lw	t0,44(t0) # 80010030 <magic>
+8001000c:	00028067          	jr	t0
+80010010:	0080006f          	j	80010018 <end>
+
+80010014 <fix>:
+80010014:	00000513          	li	a0,0
+
+80010018 <end>:
+80010018:	00151513          	slli	a0,a0,0x1
+8001001c:	00156513          	ori	a0,a0,1
+80010020:	bfff0297          	auipc	t0,0xbfff0
+80010024:	00028293          	mv	t0,t0
+80010028:	00a2a023          	sw	a0,0(t0) # 40000020 <scratch_reg>
+8001002c:	10500073          	wfi
+
+80010030 <magic>:
+80010030:	0014                	0x14
+80010032:	8001                	c.srli64	s0
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	3141                	jal	fffffc80 <fake_uart+0x3ffffc80>
+   2:	0000                	unimp
+   4:	7200                	flw	fs0,32(a2)
+   6:	7369                	lui	t1,0xffffa
+   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x14>
+   c:	00000027          	0x27
+  10:	7205                	lui	tp,0xfffe1
+  12:	3376                	fld	ft6,376(sp)
+  14:	6932                	flw	fs2,12(sp)
+  16:	7032                	flw	ft0,44(sp)
+  18:	5f30                	lw	a2,120(a4)
+  1a:	326d                	jal	fffff9c4 <fake_uart+0x3ffff9c4>
+  1c:	3070                	fld	fa2,224(s0)
+  1e:	615f 7032 5f30      	0x5f307032615f
+  24:	3266                	fld	ft4,120(sp)
+  26:	3070                	fld	fa2,224(s0)
+  28:	645f 7032 0030      	0x307032645f
+  2e:	0108                	addi	a0,sp,128
+  30:	0b0a                	slli	s6,s6,0x2
