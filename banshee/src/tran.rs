@@ -1580,9 +1580,10 @@ impl<'a> InstructionTranslator<'a> {
         LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
         let value_tcdm = LLVMBuildLoad(self.builder, tcdm_ptr, NONAME);
         LLVMBuildBr(self.builder, bb_end);
-        LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
+        let bb_tcdm = LLVMGetInsertBlock(self.builder);
 
         // Check if the address is in the SSR configuration space.
+        LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
         let (is_ssr, ssr_ptr, ssr_addr) = self.emit_ssr_check(addr);
         let bb_ssr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         let bb_nossr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
@@ -1596,10 +1597,10 @@ impl<'a> InstructionTranslator<'a> {
             .section
             .emit_call("banshee_ssr_read_cfg", [ssr_ptr, ssr_addr]);
         LLVMBuildBr(self.builder, bb_end);
-        LLVMPositionBuilderAtEnd(self.builder, bb_nossr);
+        let bb_ssr = LLVMGetInsertBlock(self.builder);
 
         // Emit the regular slow case.
-        let bb_slow = bb_nossr;
+        LLVMPositionBuilderAtEnd(self.builder, bb_nossr);
         let value = LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
@@ -1630,6 +1631,7 @@ impl<'a> InstructionTranslator<'a> {
             value
         };
         LLVMBuildBr(self.builder, bb_end);
+        let bb_nossr = LLVMGetInsertBlock(self.builder);
 
         // Build the PHI node to bring the two together.
         LLVMPositionBuilderAtEnd(self.builder, bb_end);
@@ -1637,7 +1639,7 @@ impl<'a> InstructionTranslator<'a> {
         LLVMAddIncoming(
             phi,
             [value_tcdm, value_ssr, value_slow].as_mut_ptr(),
-            [bb_tcdm, bb_ssr, bb_slow].as_mut_ptr(),
+            [bb_tcdm, bb_ssr, bb_nossr].as_mut_ptr(),
             3,
         );
         phi
