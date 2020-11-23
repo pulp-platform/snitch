@@ -30,6 +30,8 @@ pub struct ElfTranslator<'a> {
     pub di_file: LLVMMetadataRef,
     /// Predicted branch target addresses.
     pub target_addrs: BTreeSet<u64>,
+    /// Symbol name hints.
+    pub symbol_hints: HashMap<u64, String>,
     /// Basic blocks for each instruction address.
     pub inst_bbs: HashMap<u64, LLVMBasicBlockRef>,
     /// Generate instruction tracing code.
@@ -84,6 +86,7 @@ impl<'a> ElfTranslator<'a> {
             di_cu,
             di_file,
             target_addrs: Default::default(),
+            symbol_hints: Default::default(),
             inst_bbs: Default::default(),
             trace: engine.trace,
             tcdm_start: 0x000000,
@@ -111,6 +114,14 @@ impl<'a> ElfTranslator<'a> {
             .map(move |(i, raw)| (section.shdr.addr + i as u64 * 4, riscv::parse(raw)))
     }
 
+    /// Get an iterator over the `.symtab` sections.
+    pub fn symtab_sections(&self) -> impl Iterator<Item = &'a elf::Section> + '_ {
+        self.elf
+            .sections
+            .iter()
+            .filter(|section| section.shdr.shtype == elf::types::SHT_SYMTAB)
+    }
+
     /// Get an iterator over all instructions in the binary.
     pub fn all_instructions(&self) -> impl Iterator<Item = (u64, riscv::Format)> + '_ {
         self.sections().flat_map(move |s| self.instructions(s))
@@ -120,6 +131,7 @@ impl<'a> ElfTranslator<'a> {
     /// addresses.
     pub fn update_target_addrs(&mut self) {
         let mut target_addrs = BTreeSet::new();
+        let mut symbol_hints = HashMap::new();
 
         // Ensure that we can jump to the entry symbol.
         target_addrs.insert(self.elf.ehdr.entry);
@@ -127,6 +139,23 @@ impl<'a> ElfTranslator<'a> {
         // Ensure that we can jump to the beginning of a section.
         for section in self.sections() {
             target_addrs.insert(section.shdr.addr);
+        }
+
+        // Ensure that we can jump to the beginning of symbols.
+        let symbols = self
+            .symtab_sections()
+            .flat_map(|section| self.elf.get_symbols(section))
+            .fold(vec![], |a, mut b| {
+                b.extend(a);
+                b
+            });
+        trace!("Loaded {} symbols", symbols.len());
+        for sym in symbols {
+            if sym.symtype == elf::types::STT_FUNC {
+                debug!("Found symbol 0x{:x}: {}", sym.value, sym.name);
+                target_addrs.insert(sym.value);
+                symbol_hints.insert(sym.value, sym.name);
+            }
         }
 
         // Estimate target addresses.
@@ -187,6 +216,7 @@ impl<'a> ElfTranslator<'a> {
         }
 
         self.target_addrs = target_addrs;
+        self.symbol_hints = symbol_hints;
     }
 
     /// Translate the binary.
@@ -290,10 +320,14 @@ impl<'a> ElfTranslator<'a> {
         let inst_bbs: HashMap<u64, LLVMBasicBlockRef> = inst_addrs
             .iter()
             .map(|&addr| {
+                let name = match self.symbol_hints.get(&addr) {
+                    Some(sym) => format!("{}_0x{:x}\0", sym, addr),
+                    None => format!("inst_0x{:x}\0", addr),
+                };
                 let bb = LLVMAppendBasicBlockInContext(
                     self.engine.context,
                     func,
-                    format!("inst_0x{:x}\0", addr).as_ptr() as *const _,
+                    name.as_ptr() as *const _,
                 );
                 (addr, bb)
             })
