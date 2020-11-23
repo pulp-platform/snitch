@@ -10,13 +10,14 @@ project(snRuntime LANGUAGES C ASM)
 
 include(SnitchUtilities)
 
-add_compile_options(-O3 -ffunction-sections)
+add_compile_options(-O3 -g -ffunction-sections)
 include_directories(include)
 
 # Common sources
 set(sources
     src/barrier.c
     src/team.c
+    src/printf.c
 )
 
 # Generic Runtime (requiring bootloader/OS)
@@ -33,6 +34,8 @@ add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources})
 enable_testing()
 add_snitch_test(tls tests/tls.c)
 add_snitch_test(simple tests/simple.c)
+add_snitch_test(printf_simple tests/printf_simple.c)
+add_snitch_test(printf_fmtint tests/printf_fmtint.c)
 add_snitch_test(barrier tests/barrier.c)
 add_snitch_test_custom(team_global tests/team_global.c)
 add_test(NAME team_global COMMAND ${SNITCH_BANSHEE} $<TARGET_FILE:test-team_global> --base-hartid=3 --num-cores=4 --num-clusters=2)
