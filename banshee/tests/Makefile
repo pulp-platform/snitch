@@ -13,6 +13,7 @@ all: bin/matmul_ssr_frep
 all: bin/multi_core
 all: bin/multi_cluster
 all: bin/barrier
+all: bin/loads
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump

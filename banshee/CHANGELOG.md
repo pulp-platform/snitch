@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 - Add cluster ID and count registers
 
+### Fixed
+- Fix lb, lbu, lh, lhu instructions (properly align and truncate)
+
 ## 0.3.0 - 2020-11-18
 ### Added
 - Add test case blacklists

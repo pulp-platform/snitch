@@ -764,11 +764,11 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12RdRs1::Andi => LLVMBuildAnd(self.builder, rs1, imm, name),
             riscv::OpcodeImm12RdRs1::Ori => LLVMBuildOr(self.builder, rs1, imm, name),
             riscv::OpcodeImm12RdRs1::Xori => LLVMBuildXor(self.builder, rs1, imm, name),
-            riscv::OpcodeImm12RdRs1::Lb => self.emit_load(rs1, imm, 0, false),
-            riscv::OpcodeImm12RdRs1::Lh => self.emit_load(rs1, imm, 1, false),
-            riscv::OpcodeImm12RdRs1::Lw => self.emit_load(rs1, imm, 2, false),
-            riscv::OpcodeImm12RdRs1::Lbu => self.emit_load(rs1, imm, 0, true),
-            riscv::OpcodeImm12RdRs1::Lhu => self.emit_load(rs1, imm, 1, true),
+            riscv::OpcodeImm12RdRs1::Lb => self.emit_load(rs1, imm, 0, true),
+            riscv::OpcodeImm12RdRs1::Lh => self.emit_load(rs1, imm, 1, true),
+            riscv::OpcodeImm12RdRs1::Lw => self.emit_load(rs1, imm, 2, true),
+            riscv::OpcodeImm12RdRs1::Lbu => self.emit_load(rs1, imm, 0, false),
+            riscv::OpcodeImm12RdRs1::Lhu => self.emit_load(rs1, imm, 1, false),
             riscv::OpcodeImm12RdRs1::Csrrw
             | riscv::OpcodeImm12RdRs1::Csrrs
             | riscv::OpcodeImm12RdRs1::Csrrc
@@ -1602,8 +1602,16 @@ impl<'a> InstructionTranslator<'a> {
         let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
 
+        // Align the address.
+        let aligned_addr = LLVMBuildAnd(
+            self.builder,
+            addr,
+            LLVMConstInt(LLVMInt32Type(), !3, 0),
+            NONAME,
+        );
+
         // Check if the address is in the TCDM, and emit a fast access.
-        let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(addr);
+        let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(aligned_addr);
         let bb_tcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         let bb_notcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_tcdm);
@@ -1618,7 +1626,7 @@ impl<'a> InstructionTranslator<'a> {
 
         // Check if the address is in the SSR configuration space.
         LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
-        let (is_ssr, ssr_ptr, ssr_addr) = self.emit_ssr_check(addr);
+        let (is_ssr, ssr_ptr, ssr_addr) = self.emit_ssr_check(aligned_addr);
         let bb_ssr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         let bb_nossr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_ssr);
@@ -1635,7 +1643,7 @@ impl<'a> InstructionTranslator<'a> {
 
         // Emit the regular slow case.
         LLVMPositionBuilderAtEnd(self.builder, bb_nossr);
-        let value = LLVMBuildCall(
+        let value_slow = LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
                 self.section.engine.module,
@@ -1649,21 +1657,13 @@ impl<'a> InstructionTranslator<'a> {
                 //     LLVMPointerType(LLVMInt8Type(), 0),
                 //     NONAME,
                 // ),
-                addr,
+                aligned_addr,
                 LLVMConstInt(LLVMInt8Type(), size as u64, 0),
             ]
             .as_mut_ptr(),
             3,
             NONAME,
         );
-        let value_slow = if sext {
-            let ty = LLVMIntType(8 << size);
-            let value = LLVMBuildTrunc(self.builder, value, ty, NONAME);
-            let value = LLVMBuildSExt(self.builder, value, LLVMInt32Type(), NONAME);
-            value
-        } else {
-            value
-        };
         LLVMBuildBr(self.builder, bb_end);
         let bb_nossr = LLVMGetInsertBlock(self.builder);
 
@@ -1676,7 +1676,32 @@ impl<'a> InstructionTranslator<'a> {
             [bb_tcdm, bb_ssr, bb_nossr].as_mut_ptr(),
             3,
         );
-        phi
+
+        // Align the read.
+        let shift = LLVMBuildAnd(
+            self.builder,
+            addr,
+            LLVMConstInt(LLVMInt32Type(), 3, 0),
+            NONAME,
+        );
+        let shift = LLVMBuildMul(
+            self.builder,
+            shift,
+            LLVMConstInt(LLVMInt32Type(), 8, 0),
+            NONAME,
+        );
+        let value = LLVMBuildLShr(self.builder, phi, shift, NONAME);
+
+        // Align narrow reads, and perform truncation and extension.
+        let ty = LLVMIntType(8 << size);
+        let value = LLVMBuildTrunc(self.builder, value, ty, NONAME);
+        let value = if sext {
+            LLVMBuildSExt(self.builder, value, LLVMInt32Type(), NONAME)
+        } else {
+            LLVMBuildZExt(self.builder, value, LLVMInt32Type(), NONAME)
+        };
+
+        value
     }
 
     /// Emit the code necessary to store a value to memory.
