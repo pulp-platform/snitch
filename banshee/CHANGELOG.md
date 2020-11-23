@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 - Add cluster ID and count registers
 - Add support for indirect jumps to any translated instruction
+- Add dummy stdout printing via address `0xF00B8000`
 
 ### Fixed
 - Fix lb, lbu, lh, lhu instructions (properly align and truncate)
