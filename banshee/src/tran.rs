@@ -334,6 +334,61 @@ impl<'a> ElfTranslator<'a> {
             .collect();
         self.inst_bbs = inst_bbs;
 
+        // Create a block for the fallback indirect jump table.
+        let indirect_target_var = LLVMBuildAlloca(
+            builder,
+            LLVMInt32Type(),
+            b"indirect_target\0".as_ptr() as *const _,
+        );
+        let indirect_addr_var = LLVMBuildAlloca(
+            builder,
+            LLVMInt32Type(),
+            b"indirect_addr\0".as_ptr() as *const _,
+        );
+        let indirect_fail_bb = LLVMAppendBasicBlockInContext(
+            self.engine.context,
+            func,
+            b"indirect_fail\0".as_ptr() as *const _,
+        );
+        let indirect_bb = LLVMAppendBasicBlockInContext(
+            self.engine.context,
+            func,
+            b"indirect\0".as_ptr() as *const _,
+        );
+        LLVMPositionBuilderAtEnd(builder, indirect_bb);
+
+        // Emit the switch statement with all branch targets.
+        let indirect_target = LLVMBuildLoad(builder, indirect_target_var, NONAME);
+        let sw = LLVMBuildSwitch(
+            builder,
+            indirect_target,
+            indirect_fail_bb,
+            inst_addrs.len() as u32,
+        );
+        for &addr in &inst_addrs {
+            LLVMAddCase(
+                sw,
+                LLVMConstInt(LLVMInt32Type(), addr as u64, 0),
+                self.inst_bbs[&addr],
+            );
+        }
+
+        // Emit the illegal branch code.
+        LLVMPositionBuilderAtEnd(builder, indirect_fail_bb);
+        let indirect_addr = LLVMBuildLoad(builder, indirect_addr_var, NONAME);
+        LLVMBuildCall(
+            builder,
+            LLVMGetNamedFunction(
+                self.engine.module,
+                "banshee_abort_illegal_branch\0".as_ptr() as *const _,
+            ),
+            [state_ptr, indirect_addr, indirect_target].as_mut_ptr(),
+            3,
+            NONAME,
+        );
+        LLVMBuildRetVoid(builder);
+        LLVMPositionBuilderAtEnd(builder, entry_bb);
+
         // Emit the branch to the entry symbol.
         match self.inst_bbs.get(&self.elf.ehdr.entry) {
             Some(&bb) => {
@@ -361,6 +416,9 @@ impl<'a> ElfTranslator<'a> {
                 builder,
                 addr_start: section.shdr.addr,
                 addr_end: section.shdr.addr + section.shdr.size,
+                indirect_target_var,
+                indirect_addr_var,
+                indirect_bb,
             };
             tran.emit(&mut inst_index)?;
             last_section_tran = Some(tran);
@@ -419,6 +477,12 @@ pub struct SectionTranslator<'a> {
     /// The point beyond the last address in the section.
     #[allow(dead_code)]
     addr_end: u64,
+    /// The alloca variable holding the indirect jump target address.
+    indirect_target_var: LLVMValueRef,
+    /// The alloca variable holding the indirect jump instruction address.
+    indirect_addr_var: LLVMValueRef,
+    /// The basic block to branch to to make a fallback indirect jump.
+    indirect_bb: LLVMBasicBlockRef,
 }
 
 impl<'a> SectionTranslator<'a> {
@@ -455,6 +519,7 @@ impl<'a> SectionTranslator<'a> {
     }
 
     /// Emit the code to handle a branch to an unpredicted instruction.
+    #[allow(dead_code)]
     unsafe fn emit_branch_abort(&self, inst_addr: u64, target: LLVMValueRef) {
         trace!("Emit illegal branch abort at 0x{:x}", inst_addr);
         self.emit_call(
@@ -786,28 +851,15 @@ impl<'a> InstructionTranslator<'a> {
                 );
                 self.emit_trace();
 
-                // Create a basic block where we land in case of an unpredicted
-                // branch target (not in the `target_addrs` set).
-                let bb = LLVMCreateBasicBlockInContext(
-                    self.section.engine.context,
-                    b"\0".as_ptr() as *const _,
+                // Use the prepared indirect jump switch statement.
+                LLVMBuildStore(self.builder, target, self.section.indirect_target_var);
+                LLVMBuildStore(
+                    self.builder,
+                    LLVMConstInt(LLVMInt32Type(), self.addr as u64, 0),
+                    self.section.indirect_addr_var,
                 );
-                LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb);
-
-                // Emit the switch statement with all branch targets.
-                let target_addrs = &self.section.elf.target_addrs;
-                let sw = LLVMBuildSwitch(self.builder, target, bb, target_addrs.len() as u32);
-                for &addr in target_addrs {
-                    LLVMAddCase(
-                        sw,
-                        LLVMConstInt(LLVMInt32Type(), addr as u64, 0),
-                        self.section.elf.inst_bbs[&addr],
-                    );
-                }
-
-                // Emit the illegal branch code.
-                LLVMPositionBuilderAtEnd(self.builder, bb);
-                self.section.emit_branch_abort(self.addr, target);
+                LLVMBuildBr(self.builder, self.section.indirect_bb);
+                // self.section.emit_branch_abort(self.addr, target);
                 return Ok(()); // we have already written the link register
             }
             riscv::OpcodeImm12RdRs1::Flw => {
