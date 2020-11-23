@@ -1,34 +1,14 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+
 cmake_minimum_required(VERSION 3.10)
-set(CMAKE_TOOLCHAIN_FILE toolchain.cmake)
-project(snRuntime C ASM)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
-macro(add_snitch_library name)
-    add_library(${ARGV})
-    add_custom_command(
-        TARGET ${name}
-        POST_BUILD
-        COMMAND ${CMAKE_OBJDUMP} -dh $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.s)
-endmacro()
+set(CMAKE_TOOLCHAIN_FILE toolchain-gcc) # select which toolchain to use
+project(snRuntime LANGUAGES C ASM)
 
-macro(add_snitch_executable name)
-    add_executable(${ARGV})
-    add_custom_command(
-        TARGET ${name}
-        POST_BUILD
-        COMMAND ${CMAKE_OBJDUMP} -dh $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.s)
-endmacro()
-
-macro(add_snitch_test_custom name)
-    add_snitch_executable(test-${name} ${ARGN})
-    target_link_libraries(test-${name} snRuntime-banshee)
-endmacro()
-
-macro(add_snitch_test name)
-    add_snitch_test_custom(${ARGV})
-    add_test(NAME ${name}-core COMMAND banshee $<TARGET_FILE:test-${name}> --base-hartid=3)
-    add_test(NAME ${name}-cluster COMMAND banshee $<TARGET_FILE:test-${name}> --base-hartid=3 --num-cores=8)
-    add_test(NAME ${name}-system COMMAND banshee $<TARGET_FILE:test-${name}> --base-hartid=3 --num-cores=8 --num-clusters=4)
-endmacro()
+include(SnitchUtilities)
 
 add_compile_options(-O3 -ffunction-sections)
 include_directories(include)
@@ -55,4 +35,4 @@ add_snitch_test(tls tests/tls.c)
 add_snitch_test(simple tests/simple.c)
 add_snitch_test(barrier tests/barrier.c)
 add_snitch_test_custom(team_global tests/team_global.c)
-add_test(NAME team_global COMMAND banshee $<TARGET_FILE:test-team_global> --base-hartid=3 --num-cores=4 --num-clusters=2)
+add_test(NAME team_global COMMAND ${SNITCH_BANSHEE} $<TARGET_FILE:test-team_global> --base-hartid=3 --num-cores=4 --num-clusters=2)
