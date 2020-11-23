@@ -445,6 +445,7 @@ impl<'a> SectionTranslator<'a> {
                 was_terminator: Default::default(),
                 trace_accesses: Default::default(),
                 trace_emitted: Default::default(),
+                trace_disabled: Default::default(),
             };
             LLVMPositionBuilderAtEnd(self.builder, self.elf.inst_bbs[&addr]);
             match tran.emit(inst_index) {
@@ -503,6 +504,7 @@ pub struct InstructionTranslator<'a> {
     was_terminator: Cell<bool>,
     trace_accesses: RefCell<Vec<(TraceAccess, LLVMValueRef)>>,
     trace_emitted: Cell<bool>,
+    trace_disabled: Cell<bool>,
 }
 
 impl<'a> InstructionTranslator<'a> {
@@ -1504,7 +1506,9 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Log an access for the trace.
     fn trace_access(&self, access: TraceAccess, data: LLVMValueRef) {
-        self.trace_accesses.borrow_mut().push((access, data));
+        if !self.trace_disabled.get() {
+            self.trace_accesses.borrow_mut().push((access, data));
+        }
     }
 
     /// Emit the code to read-modify-write a CSR with an immediate rs1.
@@ -1903,11 +1907,16 @@ impl<'a> InstructionTranslator<'a> {
 
         // Emit the SSR load.
         LLVMPositionBuilderAtEnd(self.builder, bb_ssron);
-        // LOAD
+        // Otherwise we trace the loads, which are conditional on SSRs being
+        // enabled, which will cause the resulting IR to have dominance issues
+        // (since execution might have taken the path through the non-ssr
+        // access, but the tracing slot would still be allocated).
+        let td = self.trace_disabled.replace(true);
         let addr = self
             .section
             .emit_call("banshee_ssr_next", [self.ssr_ptr(rs)]);
         self.emit_fld(rs, addr);
+        self.trace_disabled.set(td);
         LLVMBuildBr(self.builder, bb_ssroff);
 
         // Emit a block for the remainder of the operation.
