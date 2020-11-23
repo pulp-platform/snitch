@@ -41,6 +41,8 @@ pub struct Engine {
     pub num_clusters: usize,
     /// The global memory.
     pub memory: Mutex<HashMap<u64, u32>>,
+    /// The per-core putchar buffers (per hartid).
+    pub putchar_buffer: Mutex<HashMap<usize, Vec<u8>>>,
 }
 
 // SAFETY: This is safe because only `context` and `module`
@@ -93,6 +95,7 @@ impl Engine {
             num_cores: 1,
             num_clusters: 1,
             memory: Default::default(),
+            putchar_buffer: Default::default(),
         }
     }
 
@@ -469,6 +472,16 @@ impl<'a, 'b> Cpu<'a, 'b> {
             0x40000040 => (), // cluster_base_hartid
             0x40000048 => (), // cluster_num
             0x40000050 => (), // cluster_id
+            0xF00B8000 => {
+                let mut buffer = self.engine.putchar_buffer.lock().unwrap();
+                let buffer = buffer.entry(self.hartid).or_default();
+                if value == '\n' as u32 {
+                    println!("{}", String::from_utf8_lossy(buffer));
+                    buffer.clear();
+                } else {
+                    buffer.push(value as u8);
+                }
+            }
             _ => {
                 trace!("Store 0x{:x} = 0x{:x} ({}B)", addr, value, 8 << size);
                 self.engine
