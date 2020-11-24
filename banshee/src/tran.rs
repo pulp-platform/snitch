@@ -1776,12 +1776,47 @@ impl<'a> InstructionTranslator<'a> {
 
         // Emit the TCDM fast case.
         LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
-        LLVMBuildStore(self.builder, value, tcdm_ptr);
-        LLVMBuildBr(self.builder, bb_end);
+        let ty = LLVMIntType(8 << size);
+        {
+            let pty = LLVMPointerType(ty, 0);
+            let value = LLVMBuildTrunc(self.builder, value, ty, NONAME);
+            let tcdm_ptr = LLVMBuildBitCast(self.builder, tcdm_ptr, pty, NONAME);
+            LLVMBuildStore(self.builder, value, tcdm_ptr);
+            LLVMBuildBr(self.builder, bb_end);
+        }
         LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
 
+        // Align the address.
+        let aligned_addr = LLVMBuildAnd(
+            self.builder,
+            addr,
+            LLVMConstInt(LLVMInt32Type(), !3, 0),
+            NONAME,
+        );
+
+        // Compute the misalignment.
+        let shift = LLVMBuildAnd(
+            self.builder,
+            addr,
+            LLVMConstInt(LLVMInt32Type(), 3, 0),
+            NONAME,
+        );
+        let shift = LLVMBuildMul(
+            self.builder,
+            shift,
+            LLVMConstInt(LLVMInt32Type(), 8, 0),
+            NONAME,
+        );
+
+        // Align the data to the address and generate a bit mask.
+        let mask = LLVMConstNull(ty);
+        let mask = LLVMBuildNot(self.builder, mask, NONAME);
+        let mask = LLVMBuildZExt(self.builder, mask, LLVMInt32Type(), NONAME);
+        let mask = LLVMBuildShl(self.builder, mask, shift, NONAME);
+        let value = LLVMBuildShl(self.builder, value, shift, NONAME);
+
         // Check if the address is in the SSR configuration space.
-        let (is_ssr, ssr_ptr, ssr_addr) = self.emit_ssr_check(addr);
+        let (is_ssr, ssr_ptr, ssr_addr) = self.emit_ssr_check(aligned_addr);
         let bb_ssr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         let bb_nossr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_ssr);
@@ -1791,32 +1826,20 @@ impl<'a> InstructionTranslator<'a> {
         // Emit the SSR case.
         LLVMPositionBuilderAtEnd(self.builder, bb_ssr);
         self.section
-            .emit_call("banshee_ssr_write_cfg", [ssr_ptr, ssr_addr, value]);
+            .emit_call("banshee_ssr_write_cfg", [ssr_ptr, ssr_addr, value, mask]);
         LLVMBuildBr(self.builder, bb_end);
         LLVMPositionBuilderAtEnd(self.builder, bb_nossr);
 
         // Emit the regular slow case.
-        LLVMBuildCall(
-            self.builder,
-            LLVMGetNamedFunction(
-                self.section.engine.module,
-                "banshee_store\0".as_ptr() as *const _,
-            ),
+        self.section.emit_call(
+            "banshee_store",
             [
                 self.section.state_ptr,
-                // LLVMBuildBitCast(
-                //     self.builder,
-                //     self.section.state_ptr,
-                //     LLVMPointerType(LLVMInt8Type(), 0),
-                //     NONAME,
-                // ),
-                addr,
+                aligned_addr,
                 value,
+                mask,
                 LLVMConstInt(LLVMInt8Type(), size as u64, 0),
-            ]
-            .as_mut_ptr(),
-            4,
-            NONAME,
+            ],
         );
         LLVMBuildBr(self.builder, bb_end);
 
@@ -1838,19 +1861,16 @@ impl<'a> InstructionTranslator<'a> {
             NONAME,
         );
         let index = LLVMBuildSub(self.builder, addr, tcdm_start, NONAME);
-        let index = LLVMBuildUDiv(
-            self.builder,
-            index,
-            LLVMConstInt(LLVMInt32Type(), 4, 0),
-            NONAME,
-        );
+        let pty32 = LLVMPointerType(LLVMInt32Type(), 0);
+        let pty8 = LLVMPointerType(LLVMInt8Type(), 0);
         let ptr = LLVMBuildGEP(
             self.builder,
-            self.tcdm_ptr(),
+            LLVMBuildBitCast(self.builder, self.tcdm_ptr(), pty8, NONAME),
             [index].as_mut_ptr(),
             1 as u32,
             b"ptr_tcdm\0".as_ptr() as *const _,
         );
+        let ptr = LLVMBuildBitCast(self.builder, ptr, pty32, NONAME);
         (in_range, ptr)
     }
 

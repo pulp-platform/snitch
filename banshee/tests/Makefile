@@ -18,6 +18,7 @@ all: bin/multi_core
 all: bin/multi_cluster
 all: bin/barrier
 all: bin/loads
+all: bin/stores
 all: bin/unpred_jr_1
 all: bin/unpred_jr_2
 all: bin/far_jump

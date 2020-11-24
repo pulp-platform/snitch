@@ -466,7 +466,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         }
     }
 
-    fn binary_store(&self, addr: u32, value: u32, size: u8) {
+    fn binary_store(&self, addr: u32, value: u32, mask: u32, size: u8) {
         match addr {
             0x40000000 => (),                                                   // tcdm_start
             0x40000008 => (),                                                   // tcdm_end
@@ -487,12 +487,17 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 }
             }
             _ => {
-                trace!("Store 0x{:x} = 0x{:x} ({}B)", addr, value, 8 << size);
-                self.engine
-                    .memory
-                    .lock()
-                    .unwrap()
-                    .insert(addr as u64, value);
+                trace!(
+                    "Store 0x{:x} = 0x{:x} if 0x{:x} ({}B)",
+                    addr,
+                    value,
+                    mask,
+                    8 << size
+                );
+                let mut data = self.engine.memory.lock().unwrap();
+                let data = data.entry(addr as u64).or_default();
+                *data &= !mask;
+                *data |= value & mask;
             }
         }
     }

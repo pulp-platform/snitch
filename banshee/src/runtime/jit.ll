@@ -17,7 +17,7 @@
 
 ; Forward declarations.
 declare i32 @banshee_load(%Cpu* %cpu, i32 %addr, i8 %size)
-declare void @banshee_store(%Cpu* %cpu, i32 %addr, i32 %value, i8 %size)
+declare void @banshee_store(%Cpu* %cpu, i32 %addr, i32 %value, i32 %mask, i8 %size)
 declare i32 @banshee_csr_read(%Cpu* %cpu, i16 %csr)
 declare void @banshee_csr_write(%Cpu* %cpu, i16 %csr, i32 %value)
 declare void @banshee_abort_escape(%Cpu* %cpu, i32 %addr)
@@ -25,7 +25,7 @@ declare void @banshee_abort_illegal_inst(%Cpu* %cpu, i32 %addr, i32 %raw)
 declare void @banshee_abort_illegal_branch(%Cpu* %cpu, i32 %addr, i32 %target)
 declare void @banshee_trace(%Cpu* %cpu, i32 %addr, i32 %raw, [2 x i64] %access_slice, [2 x i64] %data_slice)
 
-declare void @banshee_ssr_write_cfg(%SsrState* writeonly %ssr, i32 %addr, i32 %value)
+declare void @banshee_ssr_write_cfg(%SsrState* writeonly %ssr, i32 %addr, i32 %value, i32 %mask)
 declare i32 @banshee_ssr_read_cfg(%SsrState* readonly %ssr, i32 %addr)
 declare i32 @banshee_ssr_next(%SsrState* %ssr)
 
