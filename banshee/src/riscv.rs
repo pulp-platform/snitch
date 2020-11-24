@@ -265,8 +265,8 @@ impl FormatBimm12hiBimm12loRs1Rs2 {
             | ((self.bimm12lo >> 1) & 0xf) << 1
             | ((self.bimm12hi >> 0) & 0x3f) << 5
             | ((self.bimm12hi >> 6) & 0x1) << 12)
-            << 20) as i32)
-            >> 20
+            << 19) as i32)
+            >> 19
     }
 }
 

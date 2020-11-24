@@ -20,6 +20,7 @@ all: bin/barrier
 all: bin/loads
 all: bin/unpred_jr_1
 all: bin/unpred_jr_2
+all: bin/far_jump
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump
