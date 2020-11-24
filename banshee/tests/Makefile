@@ -1,3 +1,7 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))/../../sw
 VPATH += $(DIR)
 include $(DIR)/runtime/runtime.mk

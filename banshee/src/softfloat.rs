@@ -1,3 +1,7 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
 //! Berkeley SoftFloat bindings.
 //!
 //! These are partial bindings, and only part of the SoftFloat package is actually linked into the
