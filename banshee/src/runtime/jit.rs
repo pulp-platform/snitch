@@ -1,3 +1,7 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
 //! Runtime code included as LLVM IR in the translated binary.
 //!
 //! Be very careful about what exactly goes in here, as it has the potential to

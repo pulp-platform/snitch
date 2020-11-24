@@ -1,3 +1,7 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
 // Runtime code shared between banshee and the translated binary.
 //
 // Be very careful what you put in here. This module should only contain code
