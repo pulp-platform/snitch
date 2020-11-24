@@ -1,3 +1,7 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+
 # This file defines the `_start` symbol and initializes the global pointer. This
 # is common among all bare runtimes.
 
