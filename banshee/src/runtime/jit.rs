@@ -75,7 +75,8 @@ pub unsafe fn banshee_dma_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut DmaState {
 
 /// Write to an SSR control register.
 #[no_mangle]
-pub unsafe fn banshee_ssr_write_cfg(ssr: &mut SsrState, addr: u32, value: u32) {
+pub unsafe fn banshee_ssr_write_cfg(ssr: &mut SsrState, addr: u32, value: u32, mask: u32) {
+    // TODO: Handle the mask!
     let addr = addr as usize / 8;
     match addr {
         0 => {
@@ -161,7 +162,7 @@ pub unsafe fn banshee_dma_dst(dma: &mut DmaState, lo: u32, hi: u32) {
 pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: &mut Cpu, size: u32, flags: u32) -> u32 {
     extern "C" {
         fn banshee_load(cpu: &mut Cpu, addr: u32, size: u8) -> u32;
-        fn banshee_store(cpu: &mut Cpu, addr: u32, value: u32, size: u8);
+        fn banshee_store(cpu: &mut Cpu, addr: u32, value: u32, mask: u32, size: u8);
     }
 
     let id = dma.done_id;
@@ -183,7 +184,7 @@ pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: &mut Cpu, size: u32, fla
         // assert_eq!(dst % 4, 0, "DMA dst transfer block must be 4-byte-aligned");
         for j in 0..num_beats as u64 {
             let tmp = banshee_load(cpu, (src + j * 4) as u32, 2);
-            banshee_store(cpu, (dst + j * 4) as u32, tmp, 2);
+            banshee_store(cpu, (dst + j * 4) as u32, tmp, u32::max_value(), 2);
         }
     }
 

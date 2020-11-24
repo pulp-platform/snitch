@@ -1,0 +1,86 @@
+
+bin/stores:     file format elf32-littleriscv
+
+
+Disassembly of section .l1:
+
+00000000 <buffer_tcdm>:
+   0:	0000                	unimp
+	...
+
+Disassembly of section .text:
+
+80010000 <_start>:
+80010000:	00000413          	li	s0,0
+80010004:	00000513          	li	a0,0
+80010008:	030000ef          	jal	ra,80010038 <check>
+8001000c:	00a40433          	add	s0,s0,a0
+80010010:	00000517          	auipc	a0,0x0
+80010014:	0a050513          	addi	a0,a0,160 # 800100b0 <buffer_global>
+80010018:	020000ef          	jal	ra,80010038 <check>
+8001001c:	00a40433          	add	s0,s0,a0
+80010020:	00141413          	slli	s0,s0,0x1
+80010024:	00146413          	ori	s0,s0,1
+80010028:	bfff0297          	auipc	t0,0xbfff0
+8001002c:	ff828293          	addi	t0,t0,-8 # 40000020 <scratch_reg>
+80010030:	0082a023          	sw	s0,0(t0)
+80010034:	10500073          	wfi
+
+80010038 <check>:
+80010038:	00050593          	mv	a1,a0
+8001003c:	00000513          	li	a0,0
+80010040:	f8000293          	li	t0,-128
+80010044:	f8100313          	li	t1,-127
+80010048:	f8200393          	li	t2,-126
+8001004c:	f8300e13          	li	t3,-125
+80010050:	00558023          	sb	t0,0(a1)
+80010054:	006580a3          	sb	t1,1(a1)
+80010058:	00758123          	sb	t2,2(a1)
+8001005c:	01c581a3          	sb	t3,3(a1)
+80010060:	0005a283          	lw	t0,0(a1)
+80010064:	83828337          	lui	t1,0x83828
+80010068:	18030313          	addi	t1,t1,384 # 83828180 <fake_uart+0xc3828180>
+8001006c:	406282b3          	sub	t0,t0,t1
+80010070:	005032b3          	snez	t0,t0
+80010074:	00550533          	add	a0,a0,t0
+80010078:	ffff82b7          	lui	t0,0xffff8
+8001007c:	58428293          	addi	t0,t0,1412 # ffff8584 <fake_uart+0x3fff8584>
+80010080:	ffff8337          	lui	t1,0xffff8
+80010084:	78630313          	addi	t1,t1,1926 # ffff8786 <fake_uart+0x3fff8786>
+80010088:	00559023          	sh	t0,0(a1)
+8001008c:	00659123          	sh	t1,2(a1)
+80010090:	0005a283          	lw	t0,0(a1)
+80010094:	87868337          	lui	t1,0x87868
+80010098:	58430313          	addi	t1,t1,1412 # 87868584 <fake_uart+0xc7868584>
+8001009c:	406282b3          	sub	t0,t0,t1
+800100a0:	005032b3          	snez	t0,t0
+800100a4:	00550533          	add	a0,a0,t0
+800100a8:	00008067          	ret
+800100ac:	00000013          	nop
+
+800100b0 <buffer_global>:
+800100b0:	0000                	unimp
+	...
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	3141                	jal	fffffc80 <fake_uart+0x3ffffc80>
+   2:	0000                	unimp
+   4:	7200                	flw	fs0,32(a2)
+   6:	7369                	lui	t1,0xffffa
+   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
+   c:	00000027          	0x27
+  10:	7205                	lui	tp,0xfffe1
+  12:	3376                	fld	ft6,376(sp)
+  14:	6932                	flw	fs2,12(sp)
+  16:	7032                	flw	ft0,44(sp)
+  18:	5f30                	lw	a2,120(a4)
+  1a:	326d                	jal	fffff9c4 <fake_uart+0x3ffff9c4>
+  1c:	3070                	fld	fa2,224(s0)
+  1e:	615f 7032 5f30      	0x5f307032615f
+  24:	3266                	fld	ft4,120(sp)
+  26:	3070                	fld	fa2,224(s0)
+  28:	645f 7032 0030      	0x307032645f
+  2e:	0108                	addi	a0,sp,128
+  30:	0b0a                	slli	s6,s6,0x2
