@@ -17,12 +17,6 @@
 .globl _snrt_banshee_cluster_num
 .globl _snrt_banshee_cluster_id
 
-.section .rodata
-.balign 4
-snrt_stack_size:
-    .weak snrt_stack_size
-    .word 8
-
 # TODO(fschuiki): This should be made to not pollute the symbol space with
 # "barrier_reg". It would be better to provide short snippets of
 # platform-specific code where stuff like this can go, together with a proper
