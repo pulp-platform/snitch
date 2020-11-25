@@ -2,3 +2,6 @@
 # the repo. Unless a later match takes precedence,
 
 *       @zarubaf @fabianschuiki
+
+# The DMA is owned by @thommythomaso
+hw/ip/snitch_dma @thommythomaso
