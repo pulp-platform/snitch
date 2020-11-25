@@ -13,4 +13,5 @@ dependencies:
 
 sources:
     # Level 0:
+    - src/snitch.sv
     - src/snitch_amo_shim.sv
