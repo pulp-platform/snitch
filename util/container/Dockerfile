@@ -7,6 +7,7 @@
 FROM ubuntu:18.04 AS snitch
 ARG RISCV_GCC_VERSION=8.3.0-2020.04.0
 ARG VERIBLE_VERSION=0.0-776-g09e0b87
+ARG VERILATOR_VERSION=4.040
 
 LABEL version="0.1"
 LABEL description="Snitch container for hardware and software development."
@@ -29,7 +30,9 @@ RUN apt-get update && \
         gnupg2 \
         libc6-i386 \
         libtool \
-        screen && \
+        screen \
+        curl \
+        gpg && \
     apt-get clean ; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
@@ -37,6 +40,11 @@ RUN apt-get update && \
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
+
+# Install Verilator
+RUN echo 'deb http://download.opensuse.org/repositories/home:/phiwag:/edatools/xUbuntu_18.04/ /' | tee /etc/apt/sources.list.d/home:phiwag:edatools.list
+RUN curl -fsSL https://download.opensuse.org/repositories/home:phiwag:edatools/xUbuntu_18.04/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/home_phiwag_edatools.gpg > /dev/null
+RUN apt-get update && apt-get install -y verilator-${VERILATOR_VERSION}
 
 # Copy repository into tmp directory to execute additional install steps.
 COPY python-requirements.txt /tmp/python-requirements.txt
