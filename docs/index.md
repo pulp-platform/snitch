@@ -16,4 +16,4 @@ This repository is developed as a monorepo, external dependencies are "vendored-
 
 ## Licensing
 
-TODO(zarubaf): TBD once licensing is determined.
+Snitch is being made available under permissive open source licenses. See the `README.md` for a more detailed break-down.
