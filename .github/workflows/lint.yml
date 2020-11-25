@@ -28,9 +28,7 @@ jobs:
             - name: Run Lint
               run: |
                 echo "::add-matcher::.github/verible-lint-matcher.json"
-                find hw/ip -name "*.sv" \
-                | xargs verible-verilog-lint \
-                --rules=-interface-name-style --lint_fatal --parse_fatal
+                util/verible-lint.sh
                 echo "::remove-matcher owner=verible-lint-matcher::"
     # Check that all vendored sources are up-to-date.
     vendor-licence:
