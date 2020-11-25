@@ -1,0 +1,2 @@
+frep            rd rs1 imm12 rm 6..2=0x02 1..0=3
+irep            rd rs1 imm12 rm 6..2=0x0F 1..0=3
