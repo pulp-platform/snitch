@@ -32,7 +32,7 @@ RUN apt-get update && \
         libtool \
         screen \
         curl \
-        gpg && \
+        wget  && \
     apt-get clean ; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
@@ -43,7 +43,7 @@ ENV LANGUAGE en_US:en
 
 # Install Verilator
 RUN echo 'deb http://download.opensuse.org/repositories/home:/phiwag:/edatools/xUbuntu_18.04/ /' | tee /etc/apt/sources.list.d/home:phiwag:edatools.list
-RUN curl -fsSL https://download.opensuse.org/repositories/home:phiwag:edatools/xUbuntu_18.04/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/home_phiwag_edatools.gpg > /dev/null
+RUN curl -fsSL https://download.opensuse.org/repositories/home:phiwag:edatools/xUbuntu_18.04/Release.key | gpg2 --dearmor | tee /etc/apt/trusted.gpg.d/home_phiwag_edatools.gpg > /dev/null
 RUN apt-get update && apt-get install -y verilator-${VERILATOR_VERSION}
 
 # Copy repository into tmp directory to execute additional install steps.
