@@ -1,0 +1,13 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+# Keep sorted.
+clang-format
+graphviz
+python3
+python3-pip
+python3-setuptools
+python3-wheel
+wget
+tar

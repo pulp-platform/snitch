@@ -1,0 +1,10 @@
+.git/
+.bender/
+*~
+*.bak
+__pycache__
+*.log
+*.vcd
+
+# Any modelsim files.
+work
