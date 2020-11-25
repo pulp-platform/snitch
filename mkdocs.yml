@@ -25,4 +25,5 @@ nav:
       - Documentation: ug/documentation.md
     - Reference Manual:
       - Solder: rm/solder.md
+      - Custom Instructions: rm/custom_instructions.md
 
