@@ -2,8 +2,6 @@
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
 
-// Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-
 class icache_request;
   rand snitch_pkg::addr_t addr;
   rand bit flush;
@@ -65,7 +63,7 @@ module snitch_icache_l0_tb import snitch_pkg::*; #(
   localparam time ClkPeriod = 10ns;
   localparam time TA = 2ns;
   localparam time TT = 8ns;
-  localparam bit DEBUG = 1'b0;
+  localparam bit Debug = 1'b0;
 
   // backing memory
   logic [LINE_WIDTH-1:0] memory [logic [$bits(addr_t)-1:0]];
@@ -90,8 +88,8 @@ module snitch_icache_l0_tb import snitch_pkg::*; #(
       SET_ALIGN:   $clog2(SET_COUNT),
       TAG_WIDTH:   FETCH_AW - $clog2(LINE_WIDTH/8) - $clog2(LINE_COUNT) + 1,
       L0_TAG_WIDTH: FETCH_AW - $clog2(LINE_WIDTH/8),
-      L0_EARLY_TAG_WIDTH:
-        (L0_EARLY_TAG_WIDTH == -1) ? FETCH_AW - $clog2(LINE_WIDTH/8) : L0_EARLY_TAG_WIDTH,
+      L0_EARLY_TAG_WIDTH: (L0_EARLY_TAG_WIDTH == -1) ?
+        FETCH_AW - $clog2(LINE_WIDTH/8) : L0_EARLY_TAG_WIDTH,
       ID_WIDTH_REQ: $clog2(NR_FETCH_PORTS) + 1,
       ID_WIDTH_RESP: 2*NR_FETCH_PORTS,
       PENDING_IW:  $clog2(2)
@@ -322,7 +320,7 @@ module snitch_icache_l0_tb import snitch_pkg::*; #(
             memory[addr][i*32+:32] = rand_data.inst;
           end
         end
-        if (DEBUG) $info("Response for Address: %h, ID: 0, Data: %h", dut_out.addr, memory[addr]);
+        if (Debug) $info("Response for Address: %h, ID: 0, Data: %h", dut_out.addr, memory[addr]);
         send_data.data = memory[addr];
         response_lock.get();
         in_driver.send(send_data);
@@ -347,7 +345,7 @@ module snitch_icache_l0_tb import snitch_pkg::*; #(
             memory[addr][i*32+:32] = rand_data.inst;
           end
         end
-        if (DEBUG) $info("Response for Address: %h, ID: 1, Data: %h", dut_out.addr, memory[addr]);
+        if (Debug) $info("Response for Address: %h, ID: 1, Data: %h", dut_out.addr, memory[addr]);
         send_data.data = memory[addr];
         response_lock.get();
         in_driver.send(send_data);
