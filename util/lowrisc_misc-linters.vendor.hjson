@@ -17,5 +17,7 @@
     'licence-checker.hjson',
     // Github CI Configuration
     '.github',
+    // We have our own CLA.
+    'CLA'
   ]
 }
