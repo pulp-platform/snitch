@@ -3,11 +3,28 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Docker container for Snitch development.
+# 1. Stage
+FROM ubuntu:18.04 AS builder
 
+RUN apt-get update && \
+    apt-get install -y \
+        build-essential \
+        gnupg2 \
+        curl && \
+    apt-get clean
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH "/root/.cargo/bin:${PATH}"
+RUN cargo install bender
+
+# Build `riscv-isa-sim`
+# TODO(zarubaf)
+
+# 2. Stage
 FROM ubuntu:18.04 AS snitch
 ARG RISCV_GCC_VERSION=8.3.0-2020.04.0
 ARG VERIBLE_VERSION=0.0-776-g09e0b87
-ARG VERILATOR_VERSION=4.040
+ARG VERILATOR_VERSION=4.102
 
 LABEL version="0.1"
 LABEL description="Snitch container for hardware and software development."
@@ -19,27 +36,17 @@ WORKDIR /tools
 # The list of extra packages is leftover from before this Dockerfile used
 # apt-requirements.txt
 #
-# This also adds `locales` and `locales-all` so we can set the locale to utf-8
 COPY apt-requirements.txt /tmp/apt-requirements.txt
 RUN apt-get update && \
     sed 's/#.*//' /tmp/apt-requirements.txt \
         | xargs apt-get install -y && \
     apt-get install -y \
-        locales \
-        locales-all \
         gnupg2 \
-        libc6-i386 \
-        libtool \
-        screen \
         curl \
-        wget  && \
+        wget \
+        git && \
     apt-get clean ; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
-
-# Set Locale to utf-8 everywhere
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
 
 # Install Verilator
 RUN echo 'deb http://download.opensuse.org/repositories/home:/phiwag:/edatools/xUbuntu_18.04/ /' | tee /etc/apt/sources.list.d/home:phiwag:edatools.list
@@ -61,3 +68,5 @@ RUN wget https://github.com/google/verible/releases/download/master/verible-v${V
 RUN tar -x -f verible-v${VERIBLE_VERSION}-Ubuntu-18.04-bionic-x86_64.tar.gz --strip-components=1 -C .
 RUN rm -rf verible-v${VERIBLE_VERSION}-Ubuntu-18.04-bionic-x86_64.tar.gz
 ENV PATH "/tools/bin:${PATH}"
+
+COPY --from=builder /root/.cargo/bin/bender bin/

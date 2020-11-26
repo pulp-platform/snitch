@@ -5,13 +5,15 @@ software development tools for Snitch.
 
 ## Local Build Instructions
 
-Skip this step if planning to use the pre-built container. To build in local
-mode:
+To build the container in local mode:
 
 ```shell
 $ cd $REPO_TOP
 $ sudo docker build -t snitch -f util/container/Dockerfile .
 ```
+
+> We currently do not provide a pre-built image from a registry. This might
+> change in the future.
 
 ## Using the Container
 
