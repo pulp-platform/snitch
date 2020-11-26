@@ -9,12 +9,11 @@ package:
 
 dependencies:
   common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  snitch: {path: ../../ip/snitch}
 
 sources:
 # Level 0:
-- src/snitch_l0_tlb.sv
 - src/snitch_ptw.sv
 - target: test
   files:
-  - test/snitch_l0_tlb_tb.sv
   - test/snitch_ptw_l0_tb.sv

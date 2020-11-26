@@ -4,7 +4,7 @@
 
 // Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 `include "common_cells/registers.svh"
-`include "common_cells/assert.svh"
+`include "common_cells/assertions.svh"
 
 /// Shim in front of SRAMs which translates atomic (and normal)
 /// memory operations to RMW sequences. The requests are atomic except

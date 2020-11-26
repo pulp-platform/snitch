@@ -8,9 +8,8 @@ package:
   - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
 dependencies:
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, version: 1.16.4}
-  common_verification: {git: https://github.com/pulp-platform/common_verification.git,
-    version: 0.1.1}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  axi: {path: ../../vendor/pulp_platform_axi}
 
 export_include_dirs:
 - include
@@ -20,3 +19,16 @@ sources:
 - src/reqrsp_pkg.sv
 # Level 1:
 - src/reqrsp_intf.sv
+# Level 2:
+- src/reqrsp_to_axi.sv
+- src/axi_to_reqrsp.sv
+- src/reqrsp_to_tcdm.sv
+
+- target: simulation
+  files:
+    # Level 0
+  - test/reqrsp_test.sv
+- target: test
+  files:
+    # Level 0
+  - test/reqrsp_to_axi_tb.sv

@@ -8,11 +8,44 @@ package:
   - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 
 dependencies:
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, version: 1.16.4}
-  common_verification: {git: https://github.com/pulp-platform/common_verification.git,
-    version: 0.1.1}
+  axi: {path: ../../vendor/pulp_platform_axi}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  # TODO(zarubaf): Remove dependency
+  cluster_interconnect: {path: ../../vendor/cluster_interconnect}
+  fpnew: {path: ../../vendor/pulp_platform_fpnew}
+  register_interface: {path: ../../vendor/pulp_platform_register_interface}
+  riscv-dbg: {path: ../../vendor/pulp_platform_riscv_dbg}
+  tech_cells_generic: {path: ../../vendor/pulp_platform_tech_cells_generic}
+  # Local dependencies.
+  reqrsp_interface: {path: ../../ip/reqrsp_interface}
+  snitch: {path: ../../ip/snitch}
+  snitch_dma: {path: ../../ip/snitch_dma}
+  snitch_icache: {path: ../../ip/snitch_icache}
+  snitch_ipu: {path: ../../ip/snitch_ipu}
+  snitch_vm: {path: ../../ip/snitch_vm}
 
 sources:
 # Level 0:
-- src/snitch.sv
+- src/tcdm_shim.sv
+- src/snitch_addr_demux.sv
 - src/snitch_amo_shim.sv
+- src/snitch_axi_adapter.sv
+- src/snitch_cluster_peripheral.sv
+- src/snitch_demux.sv
+- src/snitch_dma_addr_decoder.sv
+- src/snitch_fpu.sv
+- src/snitch_sequencer.sv
+- src/snitch_ssr_addr_gen.sv
+- src/snitch_ssr_switch.sv
+- src/snitch_tcdm_mux.sv
+# Level 1:
+- src/snitch_fp_ss.sv
+- src/snitch_ssr_streamer.sv
+- src/snitch_shared_muldiv.sv
+# Level 2:
+- src/snitch_cc.sv
+- src/snitch_clkdiv2.sv
+# Level 3:
+- src/snitch_hive.sv
+# Level 4:
+- src/snitch_cluster.sv

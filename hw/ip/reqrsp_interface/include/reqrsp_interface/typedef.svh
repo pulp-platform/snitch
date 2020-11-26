@@ -8,7 +8,7 @@
 `ifndef REQRSP_INTERFACE_TYPEDEF_SVH_
 `define REQRSP_INTERFACE_TYPEDEF_SVH_
 
-`define REQRSP_TYPEDEF_REQ_CHAN_T(__req_chan_t, __addr_t, ____data_t, __strb_t) \
+`define REQRSP_TYPEDEF_REQ_CHAN_T(__req_chan_t, __addr_t, __data_t, __strb_t) \
   typedef struct packed { \
     __addr_t             addr;  \
     logic                write; \
@@ -21,7 +21,7 @@
 `define REQRSP_TYPEDEF_RSP_CHAN_T(__rsp_chan_t, __data_t) \
   typedef struct packed { \
     __data_t data;        \
-    logic  error;       \
+     logic  error;       \
   } __rsp_chan_t;
 
 `define REQRSP_TYPEDEF_REQ_T(__req_t, __req_chan_t) \

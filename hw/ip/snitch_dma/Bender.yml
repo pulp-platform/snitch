@@ -9,6 +9,7 @@ package:
 dependencies:
   common_cells: {path: ../../vendor/pulp_platform_common_cells}
   axi: {path: ../../vendor/pulp_platform_axi}
+  snitch: {path: ../../ip/snitch}
 
 sources:
 # Level 0:

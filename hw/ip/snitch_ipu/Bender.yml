@@ -1,0 +1,21 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+package:
+  name: snitch_ipu
+  authors:
+  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+
+dependencies:
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  snitch: {path: ../../ip/snitch}
+
+sources:
+# Level 0:
+- src/snitch_ipu_pkg.sv
+# Level 1:
+- src/snitch_ipu_alu.sv
+# Level 2:
+- src/snitch_int_ss.sv
+

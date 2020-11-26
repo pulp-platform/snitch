@@ -122,32 +122,38 @@ module snitch_icache_lookup #(
 
     // Instantiate the RAM sets.
     for (genvar i = 0; i < CFG.SET_COUNT; i++) begin : g_sets
-        sram #(
-            .DATA_WIDTH ( CFG.TAG_WIDTH+2 ),
-            .NUM_WORDS  ( CFG.LINE_COUNT  )
+        tc_sram #(
+          .NumWords (CFG.LINE_COUNT),
+          .DataWidth (CFG.TAG_WIDTH+2),
+          .ByteWidth (8),
+          .NumPorts (1),
+          .Latency (1)
         ) i_tag (
-            .clk_i   ( clk_i         ),
-            .rst_ni  ( rst_ni        ),
-            .req_i   ( ram_enable[i] ),
-            .we_i    ( ram_write     ),
-            .addr_i  ( ram_addr      ),
-            .wdata_i ( ram_wtag      ),
-            .be_i    ( '1            ),
-            .rdata_o ( ram_rtag[i]   )
+          .clk_i (clk_i),
+          .rst_ni (rst_ni),
+          .req_i (ram_enable[i]),
+          .we_i (ram_write),
+          .addr_i (ram_addr),
+          .wdata_i (ram_wtag),
+          .be_i ('1),
+          .rdata_o (ram_rtag[i])
         );
 
-        sram #(
-            .DATA_WIDTH ( CFG.LINE_WIDTH ),
-            .NUM_WORDS  ( CFG.LINE_COUNT )
+        tc_sram #(
+          .NumWords (CFG.LINE_COUNT),
+          .DataWidth (CFG.TAG_WIDTH+2),
+          .ByteWidth (8),
+          .NumPorts (1),
+          .Latency (1)
         ) i_data (
-            .clk_i   ( clk_i         ),
-            .rst_ni  ( rst_ni        ),
-            .req_i   ( ram_enable[i] ),
-            .we_i    ( ram_write     ),
-            .addr_i  ( ram_addr      ),
-            .wdata_i ( ram_wdata     ),
-            .be_i    ( '1            ),
-            .rdata_o ( ram_rdata[i]  )
+          .clk_i (clk_i),
+          .rst_ni (rst_ni),
+          .req_i (ram_enable[i]),
+          .we_i (ram_write),
+          .addr_i (ram_addr),
+          .wdata_i (ram_wtag),
+          .be_i ('1),
+          .rdata_o (ram_rdata[i])
         );
     end
 

@@ -1845,9 +1845,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       // DMA instructions
-      riscv_instr::DM_SRC,
-      riscv_instr::DM_DST,
-      riscv_instr::DM_TWOD_STRD : begin
+      DMSRC,
+      DMDST,
+      DMSTR: begin
         if (SDMA) begin
           acc_qaddr_o  = DMA_SS;
           opa_select   = Reg;
@@ -1858,7 +1858,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
-      riscv_instr::DM_STRTI : begin
+      DMCPYI: begin
         if (SDMA) begin
           acc_qaddr_o     = DMA_SS;
           opa_select      = Reg;
@@ -1870,7 +1870,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
-      riscv_instr::DM_STRT : begin
+      DMCPY: begin
         if (SDMA) begin
           acc_qaddr_o     = DMA_SS;
           opa_select      = Reg;
@@ -1883,8 +1883,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
-      riscv_instr::DM_STATI,
-      riscv_instr::DM_ERRI : begin
+      DMSTATI: begin
         if (SDMA) begin
           acc_qaddr_o     = DMA_SS;
           acc_qvalid_o    = valid_instr;
@@ -1895,8 +1894,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
-      riscv_instr::DM_STAT,
-      riscv_instr::DM_ERR : begin
+      DMSTAT: begin
         if (SDMA) begin
           acc_qaddr_o     = DMA_SS;
           opa_select      = Reg;
@@ -1908,7 +1906,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
-      riscv_instr::DM_TWOD_REPS : begin
+      DMREP: begin
         if (SDMA) begin
           acc_qaddr_o     = DMA_SS;
           opa_select      = Reg;

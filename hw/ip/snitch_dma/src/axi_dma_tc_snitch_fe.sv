@@ -39,7 +39,6 @@ module axi_dma_tc_snitch_fe #(
 
     // performance output
     output axi_dma_pkg::dma_perf_t dma_perf_o
-
 );
 
     //--------------------------------------
@@ -50,6 +49,7 @@ module axi_dma_tc_snitch_fe #(
     axi_dma_pkg::burst_req_t burst_req;
     logic                    burst_req_valid;
     logic                    burst_req_ready;
+    logic                    oned_trans_complete;
 
     axi_dma_backend #(
         .DataWidth       ( snitch_axi_pkg::DMADataWidth       ),

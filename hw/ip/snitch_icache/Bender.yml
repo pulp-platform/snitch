@@ -9,6 +9,7 @@ package:
 
 dependencies:
   common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  tech_cells_generic: {path: ../../vendor/pulp_platform_tech_cells_generic}
 
 sources:
 # Level 0:

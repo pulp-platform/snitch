@@ -1,0 +1,30 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+package:
+  name: snitch
+  authors:
+  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+
+dependencies:
+  axi: {path: ../../vendor/pulp_platform_axi}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  fpnew: {path: ../../vendor/pulp_platform_fpnew}
+  riscv-dbg: {path: ../../vendor/pulp_platform_riscv_dbg}
+
+sources:
+# Level 0:
+- src/snitch_pkg.sv
+- src/riscv_instr.sv
+- src/snitch_regfile_ff.sv
+# - src/snitch_regfile_fpga.sv
+# - src/snitch_regfile_latch.sv
+- src/snitch_lsu.sv
+- src/snitch_l0_tlb.sv
+# Level 1:
+- src/snitch.sv
+
+- target: test
+  files:
+  - test/snitch_l0_tlb_tb.sv

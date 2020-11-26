@@ -681,19 +681,17 @@ module snitch_cc #(
   // Tracer
   // --------------------------
   // pragma translate_off
-  // verilog_lint: waive-start always-ff-non-blocking
-  `ifndef VERILATOR
   int f;
   string fn;
   logic [63:0] cycle;
-
-  always_ff @(posedge rst_i) begin
-    if (rst_i) begin
-      $sformat(fn, "trace_hart_%05x.dasm", hart_id_i);
-      f = $fopen(fn, "w");
-      $display("[Tracer] Logging Hart %d to %s", hart_id_i, fn);
-    end
+  initial begin
+    $sformat(fn, "trace_hart_%05x.dasm", hart_id_i);
+    f = $fopen(fn, "w");
+    $display("[Tracer] Logging Hart %d to %s", hart_id_i, fn);
   end
+
+  // verilog_lint: waive-start always-ff-non-blocking
+  `ifndef VERILATOR
 
   typedef enum logic [1:0] {SrcSnitch =  0, SrcFpu = 1, SrcFpuSeq = 2} trace_src_e;
 
@@ -843,7 +841,7 @@ module snitch_cc #(
           if (FPUSequencer) begin
             if (extras_fpu_seq_out["cbuf_push"]) begin
               fmt_extras(extras_fpu_seq_out, extras_str);
-              $sformat(trace_entry, "%t %1d %8d 0x%h SASM(%h) #; %s\n",
+              $sformat(trace_entry, "%t %1d %8d 0x%h DASM(%h) #; %s\n",
                   $time, cycle, i_snitch.priv_lvl_q, 32'hz, 64'hz, extras_str);
               $fwrite(f, trace_entry);
             end
@@ -853,11 +851,30 @@ module snitch_cc #(
         cycle = '0;
       end
     end
+  `else
+  // Reduced featureset Verilator tracer.
+  always_ff @(posedge clk_i) begin
+    automatic string trace_entry;
+
+    if (!rst_i) begin
+      cycle++;
+        // Trace snitch iff:
+        // we are not stalled <==> we have issued and processed an instruction (including offloads)
+        // OR we are retiring (issuing a writeback from) a load or accelerator instruction
+        if (
+            !i_snitch.stall || i_snitch.retire_load || i_snitch.retire_acc
+        ) begin
+          $sformat(trace_entry, "%t %1d %8d 0x%h DASM(%h)\n",
+                  $time, cycle, i_snitch.priv_lvl_q, i_snitch.pc_q, i_snitch.inst_data_i);
+          $fwrite(f, trace_entry);
+        end
+    end
+  end
+  `endif
 
   final begin
     $fclose(f);
   end
-  `endif
   // verilog_lint: waive-stop always-ff-non-blocking
   // pragma translate_on
 

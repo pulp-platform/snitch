@@ -12,23 +12,26 @@
 /// high and none of the signals may change. The transaction completes when both
 /// valid and ready are high. Valid must not depend on ready. The master can
 /// request a read or write on the `q` channel. The slave responds on the `p`
-/// channel once the action has been completed.
-/// Every transaction returns a response. For write transaction the datum
-/// on the response channel is invalid. For read and atomic transaction the
-/// value corresponds to the un-modified value (the value read before an
-/// operation was performed).
-interface REQRSP_BUS import reqrsp_pkg::*; #(
+/// channel once the action has been completed. Every transaction returns a
+/// response. For write transaction the datum on the response channel is
+/// invalid. For read and atomic transaction the value corresponds to the
+/// un-modified value (the value read before an operation was performed).For
+/// further details see docs/index.md
+
+interface REQRSP_BUS #(
   /// The width of the address.
   parameter int ADDR_WIDTH = -1,
   /// The width of the data.
-  parameter int DATA_WIDTH = -1,
-  /// The width of the ID.
-  parameter int ID_WIDTH = -1
+  parameter int DATA_WIDTH = -1
 );
-  typedef logic [AXI_ID_WIDTH-1:0]   id_t;
-  typedef logic [AXI_ADDR_WIDTH-1:0] addr_t;
-  typedef logic [AXI_DATA_WIDTH-1:0] data_t;
-  typedef logic [AXI_STRB_WIDTH-1:0] strb_t;
+
+  import reqrsp_pkg::*;
+
+  localparam int unsigned StrbWidth = DATA_WIDTH / 8;
+
+  typedef logic [ADDR_WIDTH-1:0] addr_t;
+  typedef logic [DATA_WIDTH-1:0] data_t;
+  typedef logic [StrbWidth-1:0] strb_t;
   // The request channel (Q).
   addr_t   q_addr;
   logic    q_write; // 0=read, 1=write
@@ -55,20 +58,22 @@ interface REQRSP_BUS import reqrsp_pkg::*; #(
 endinterface
 
 // The DV interface additionally caries a clock signal.
-interface REQRSP_BUS_DV import reqrsp_pkg::*; #(
+interface REQRSP_BUS_DV #(
   /// The width of the address.
   parameter int ADDR_WIDTH = -1,
   /// The width of the data.
-  parameter int DATA_WIDTH = -1,
-  /// The width of the ID.
-  parameter int ID_WIDTH = -1
-)(
+  parameter int DATA_WIDTH = -1
+) (
   input logic clk_i
 );
-  typedef logic [AXI_ID_WIDTH-1:0]   id_t;
-  typedef logic [AXI_ADDR_WIDTH-1:0] addr_t;
-  typedef logic [AXI_DATA_WIDTH-1:0] data_t;
-  typedef logic [AXI_STRB_WIDTH-1:0] strb_t;
+
+  import reqrsp_pkg::*;
+
+  localparam int unsigned StrbWidth = DATA_WIDTH / 8;
+
+  typedef logic [ADDR_WIDTH-1:0] addr_t;
+  typedef logic [DATA_WIDTH-1:0] data_t;
+  typedef logic [StrbWidth-1:0] strb_t;
   // The request channel (Q).
   addr_t   q_addr;
   logic    q_write; // 0=read, 1=write

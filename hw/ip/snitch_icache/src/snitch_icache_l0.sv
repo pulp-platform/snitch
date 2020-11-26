@@ -6,7 +6,7 @@
 // Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
 `include "common_cells/registers.svh"
-`include "common_cells/assert.svh"
+`include "common_cells/assertions.svh"
 
 /// A simple single-line cache private to each port.
 module snitch_icache_l0 import snitch_icache_pkg::*; #(
@@ -65,7 +65,12 @@ module snitch_icache_l0 import snitch_icache_pkg::*; #(
   } prefetch_req_t;
 
   logic latch_prefetch, last_cycle_was_prefetch_q;
-  prefetch_req_t prefetch_req_q, prefetch_req_d, prefetcher_out;
+  prefetch_req_t prefetcher_out;
+  // As we have different flipflops (resetable vs non-resetable) we need to
+  // split that struct into two distinct signals to avoid multi-driven warnings
+  // in Verilator.
+  logic prefetch_req_vld_q, prefetch_req_vld_d;
+  logic [CFG.FETCH_AW-1:0] prefetch_req_addr_q, prefetch_req_addr_d;
 
   // Holds the onehot signal for the line being refilled at the moment
   logic [CFG.L0_LINE_COUNT-1:0] pending_line_refill_q;
@@ -347,25 +352,26 @@ module snitch_icache_l0 import snitch_icache_pkg::*; #(
   // check whether cache-line we want to pre-fetch is already present
   assign addr_tag_prefetch = prefetcher_out.addr >> CFG.LINE_ALIGN;
 
-  assign latch_prefetch = prefetcher_out.vld & ~prefetch_req_q.vld;
+  assign latch_prefetch = prefetcher_out.vld & ~prefetch_req_vld_q;
 
   always_comb begin
-      prefetch_req_d = prefetch_req_q;
+      prefetch_req_vld_d = prefetch_req_vld_q;
+      prefetch_req_addr_d = prefetch_req_addr_q;
 
-      if (prefetch_ready) prefetch_req_d.vld = 1'b0;
+      if (prefetch_ready) prefetch_req_vld_d = 1'b0;
 
       if (latch_prefetch) begin
-          prefetch_req_d.vld = 1'b1;
-          prefetch_req_d.addr = prefetcher_out.addr;
+          prefetch_req_vld_d = 1'b1;
+          prefetch_req_addr_d = prefetcher_out.addr;
       end
   end
 
   assign prefetch.is_prefetch = 1'b1;
-  assign prefetch.addr = prefetch_req_q.addr;
-  assign prefetch_valid = prefetch_req_q.vld;
+  assign prefetch.addr = prefetch_req_addr_q;
+  assign prefetch_valid = prefetch_req_vld_q;
 
-  `FF(prefetch_req_q.vld, prefetch_req_d.vld, '0)
-  `FFNR(prefetch_req_q.addr, prefetch_req_d.addr, clk_i)
+  `FF(prefetch_req_vld_q, prefetch_req_vld_d, '0)
+  `FFNR(prefetch_req_addr_q, prefetch_req_addr_d, clk_i)
 
   // ------------------
   // Performance Events

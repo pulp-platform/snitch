@@ -68,7 +68,7 @@ endpackage
 
 package snitch_pkg;
 
-  localparam DLEN = 64;
+  localparam DLEN = snitch_cfg::DataLength;
 
   // Physical address width of the system.
   localparam PLEN = 48;

@@ -389,9 +389,8 @@ module snitch_cluster
   // connection to memory
   REQRSP_BUS #(
     .ADDR_WIDTH ( 64                         ),
-    .DATA_WIDTH ( DMADataWidth               ),
-    .ID_WIDTH   ( IdWidthDmaSlave )
-  ) reqresp_dma_to_tcdm[NrDMAPorts-1:0](clk_i);
+    .DATA_WIDTH ( DMADataWidth               )
+  ) reqresp_dma_to_tcdm[NrDMAPorts-1:0]();
 
   AXI_BUS #(
     .AXI_ADDR_WIDTH ( snitch_axi_pkg::DMAAddrWidth ),
@@ -527,18 +526,22 @@ module snitch_cluster
     for (genvar j = 0; j < BPSB; j++) begin : tcdm_bank
       // verilog_lint: waive parameter-name-style
       localparam int unsigned k = i*BPSB + j;
-      sram #(
-        .DATA_WIDTH ( DLEN      ),
-        .NUM_WORDS  ( TCDMDepth )
+
+      tc_sram #(
+        .NumWords (TCDMDepth),
+        .DataWidth (DLEN),
+        .ByteWidth (8),
+        .NumPorts (1),
+        .Latency (1)
       ) i_data_mem (
-        .clk_i   ( clk_i        ),
-        .rst_ni  ( ~rst_i       ),
-        .req_i   ( mem_cs[k]    ),
-        .we_i    ( mem_wen[k]   ),
-        .addr_i  ( mem_add[k]   ),
-        .wdata_i ( mem_wdata[k] ),
-        .be_i    ( mem_be[k]    ),
-        .rdata_o ( mem_rdata[k] )
+        .clk_i (clk_i),
+        .rst_ni (~rst_i),
+        .req_i (mem_cs[k]),
+        .we_i (mem_wen[k]),
+        .addr_i (mem_add[k]),
+        .wdata_i (mem_wdata[k]),
+        .be_i (mem_be[k]),
+        .rdata_o (mem_rdata[k])
       );
 
       // assignments to connect the tcdm mux in front of the atomic
@@ -1130,9 +1133,8 @@ module snitch_cluster
   // adapted to the TCDM, which does not support response stalls.
   REQRSP_BUS #(
     .ADDR_WIDTH ( snitch_axi_pkg::AddrWidth ),
-    .DATA_WIDTH ( snitch_axi_pkg::DataWidth ),
-    .ID_WIDTH   ( IdWidthSlave )
-  ) axi_to_tcdm[NrDMAPorts-1:0](clk_i);
+    .DATA_WIDTH ( snitch_axi_pkg::DataWidth )
+  ) axi_to_tcdm[NrDMAPorts-1:0]();
 
   // TODO: Remove interface
   AXI_BUS #(
@@ -1201,8 +1203,8 @@ module snitch_cluster
     .clk_i          ( clk_i                          ),
     .rst_ni         ( ~rst_i                         ),
     .testmode_i     ( 1'b0                           ),
-    .axi_lite_req_i ( slave_req[ClusterPeripherals]  ),
-    .axi_lite_rsp_o ( slave_resp[ClusterPeripherals] ),
+    .axi_req_i      ( slave_req[ClusterPeripherals]  ),
+    .axi_rsp_o      ( slave_resp[ClusterPeripherals] ),
     .reg_req_o      ( reg_req                        ),
     .reg_rsp_i      ( reg_rsp                        )
   );

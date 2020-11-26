@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: SHL-0.51
 
 `include "common_cells/registers.svh"
-`include "common_cells/assert.svh"
+`include "common_cells/assertions.svh"
 // Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 // Description: Page table walker (PTW) for RISC-V
 //              (Custom)Sv32 address translation.
