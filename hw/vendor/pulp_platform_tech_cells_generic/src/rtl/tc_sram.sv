@@ -90,7 +90,9 @@ module tc_sram #(
         case (SimInit)
           "zeros":  init_val[i][j] = 1'b0;
           "ones":   init_val[i][j] = 1'b1;
+          `ifndef VERILATOR
           "random": init_val[i][j] = $urandom();
+          `endif
           default:  init_val[i][j] = 1'bx;
         endcase
       end
