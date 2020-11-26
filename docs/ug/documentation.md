@@ -6,7 +6,7 @@ Documentation of the generator and related infrastructure is hosted under `docs`
 pip install -r docs/requirements.txt
 ```
 
-After everything ist installed, you can build and serve a local copy by executing:
+After everything ist installed, you can build and serve a local copy by executing (in the root directory):
 
 ```bash
 mkdocs serve

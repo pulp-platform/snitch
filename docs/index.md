@@ -4,7 +4,7 @@ The Snitch project is an open-source RISC-V hardware research project of ETH Zur
 
 ## Getting Started
 
-TODO(zarubaf) TBD once the system stabilizes.
+See our dedicated [getting started guide](ug/getting_started.md).
 
 ## Documentation
 
