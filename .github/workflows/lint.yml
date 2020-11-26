@@ -30,9 +30,9 @@ jobs:
                 echo "::add-matcher::.github/verible-lint-matcher.json"
                 util/verible-lint.sh
                 echo "::remove-matcher owner=verible-lint-matcher::"
-    # Check that all vendored sources are up-to-date.
+        # Check that all vendored sources are up-to-date.
     vendor-licence:
-        name: Check vendored source up-to-date and licence.
+        name: Check vendored source up-to-date, licence, Bender.yml formatting.
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
@@ -50,3 +50,6 @@ jobs:
             - name: Check license
               run: |
                 ./util/lowrisc_misc-linters/licence-checker/licence-checker.py --config util/licence-checker.hjson
+            # Check the proper formatting of all Bender.yml
+            - name: Check Bender.yml formatting
+              run: util/format-bender && git diff --exit-code

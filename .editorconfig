@@ -14,6 +14,9 @@ indent_size = 4
 [*.{sv,svh}]
 indent_size = 2
 
+[*.{yml}]
+indent_size = 2
+
 # Use tabs for Makefiles.
 [Makefile]
 indent_style = tab

@@ -1,21 +1,22 @@
 # Copyright 2020 ETH Zurich and University of Bologna.
-# Licensed under the Apache License, Version 2.0, see LICENSE for details.
-# SPDX-License-Identifier: Apache-2.0
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
 package:
-    name: reqrsp_interface
-    authors:
-        - "Fabian Schuiki <fschuiki@iis.ee.ethz.ch>"
-        - "Florian Zaruba <zarubaf@iis.ee.ethz.ch>"
+  name: reqrsp_interface
+  authors:
+  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
 dependencies:
-    common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.16.4 }
-    common_verification: { git: "https://github.com/pulp-platform/common_verification.git", version: 0.1.1 }
+  common_cells: {git: https://github.com/pulp-platform/common_cells.git, version: 1.16.4}
+  common_verification: {git: https://github.com/pulp-platform/common_verification.git,
+    version: 0.1.1}
 
 export_include_dirs:
-    - include
+- include
 
 sources:
-    # Level 0:
-    - src/reqrsp_pkg.sv
-    # Level 1:
-    - src/reqrsp_intf.sv
+# Level 0:
+- src/reqrsp_pkg.sv
+# Level 1:
+- src/reqrsp_intf.sv
