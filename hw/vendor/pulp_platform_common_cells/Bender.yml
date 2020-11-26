@@ -37,6 +37,7 @@ sources:
   - src/lfsr_16bit.sv
   - src/lfsr_8bit.sv
   - src/mv_filter.sv
+  - src/onehot.sv
   - src/onehot_to_bin.sv
   - src/plru_tree.sv
   - src/popcount.sv
