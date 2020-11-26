@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/pulp-platform/common_cells.git
-    rev: 6eb61543aa38cda3bd960087ce79a573839666d1
+    rev: a06e4beb08b8c0a5ef2c85d9afcfe0d96be76f30
   }
 }
