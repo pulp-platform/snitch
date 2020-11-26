@@ -67,6 +67,7 @@ sources:
   - src/lzc.sv
   - src/max_counter.sv
   - src/rstgen.sv
+  - src/stream_addr_demux.sv
   - src/stream_delay.sv
   - src/stream_fifo.sv
   - src/stream_fork_dynamic.sv
