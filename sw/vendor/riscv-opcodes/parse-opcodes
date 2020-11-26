@@ -1115,7 +1115,7 @@ def make_chisel():
   print('}')
 
 def print_sverilog_insn(name):
-  s = "  localparam [31:0] %-18s = 32'b" % name.replace('.', '_').upper()
+  s = "  localparam logic [31:0] %-18s = 32'b" % name.replace('.', '_').upper()
   for i in range(31, -1, -1):
     if yank(mask[name], i, 1):
       s = '%s%d' % (s, yank(match[name], i, 1))
