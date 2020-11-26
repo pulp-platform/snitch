@@ -3,5 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 overrides:
+    tech_cells_generic: { path: hw/vendor/pulp_platform_tech_cells_generic }
     common_cells: { path: hw/vendor/pulp_platform_common_cells }
     axi: { path: hw/vendor/pulp_platform_axi }
