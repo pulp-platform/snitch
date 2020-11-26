@@ -10,6 +10,8 @@
     rev: "master",
   },
 
+  patch_dir: "patches/pulp_platform_tech_cells_generic",
+
   exclude_from_upstream: [
     "scripts",
     "test",
