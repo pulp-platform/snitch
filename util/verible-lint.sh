@@ -7,9 +7,11 @@ set -e
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
 # Skip third party sources.
+# TODO(zarubaf): Remove the package from the exclude.
 find hw/ \
     -not \( -path '*.bender' -prune \) \
     -not \( -path 'hw/vendor' -prune \) \
-    -name "*.sv" \
+    -not \( -name 'snitch_pkg.sv' \) \
+    -name '*.sv' \
     | xargs verible-verilog-lint \
     --rules=-interface-name-style --lint_fatal --parse_fatal
