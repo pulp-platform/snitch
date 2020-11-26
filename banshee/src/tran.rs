@@ -904,11 +904,13 @@ impl<'a> InstructionTranslator<'a> {
                 self.write_mem(addr, self.read_reg(data.rs2), 2)
             }
             riscv::OpcodeImm12hiImm12loRs1Rs2::Fsw => {
+                self.was_freppable.set(true);
                 let rs2 = self.read_freg(data.rs2);
                 let rs2_lo = LLVMBuildTrunc(self.builder, rs2, LLVMInt32Type(), NONAME);
                 self.write_mem(addr, rs2_lo, 2);
             }
             riscv::OpcodeImm12hiImm12loRs1Rs2::Fsd => {
+                self.was_freppable.set(true);
                 let rs2 = self.read_freg(data.rs2);
                 let rs2_lo = LLVMBuildTrunc(self.builder, rs2, LLVMInt32Type(), NONAME);
                 let rs2_hi = LLVMBuildLShr(
@@ -1022,6 +1024,7 @@ impl<'a> InstructionTranslator<'a> {
                 return Ok(()); // we have already written the link register
             }
             riscv::OpcodeImm12RdRs1::Flw => {
+                self.was_freppable.set(true);
                 let raw = self.emit_load(rs1, imm, 2, false);
                 let raw = LLVMBuildZExt(self.builder, raw, LLVMInt64Type(), NONAME);
                 let pad = LLVMConstInt(LLVMInt64Type(), (-1i64 as u64) << 32, 0);
@@ -1030,6 +1033,7 @@ impl<'a> InstructionTranslator<'a> {
                 return Ok(());
             }
             riscv::OpcodeImm12RdRs1::Fld => {
+                self.was_freppable.set(true);
                 self.emit_fld(data.rd, LLVMBuildAdd(self.builder, rs1, imm, NONAME));
                 return Ok(());
             }
@@ -1140,6 +1144,7 @@ impl<'a> InstructionTranslator<'a> {
     }
 
     unsafe fn emit_rd_rm_rs1_rs2(&self, data: riscv::FormatRdRmRs1Rs2) -> Result<()> {
+        self.was_freppable.set(true);
         trace!("{} f{} = f{}, f{}", data.op, data.rd, data.rs1, data.rs2);
         let name = format!("{}\0", data.op);
         let name = name.as_ptr() as *const _;
@@ -1223,6 +1228,7 @@ impl<'a> InstructionTranslator<'a> {
     }
 
     unsafe fn emit_rd_rm_rs1_rs2_rs3(&self, data: riscv::FormatRdRmRs1Rs2Rs3) -> Result<()> {
+        self.was_freppable.set(true);
         trace!(
             "{} f{} = f{}, f{}, f{}",
             data.op,
@@ -1360,6 +1366,9 @@ impl<'a> InstructionTranslator<'a> {
         let name = format!("{}\0", data.op);
         let name = name.as_ptr() as *const _;
 
+        // Assume generally freppable, later exclude comparisons.
+        self.was_freppable.set(true);
+
         // Handle floating-point operations.
         match data.op {
             // Sign injection
@@ -1454,6 +1463,7 @@ impl<'a> InstructionTranslator<'a> {
 
             // Comparison
             riscv::OpcodeRdRs1Rs2::FeqS => {
+                self.was_freppable.set(false);
                 self.write_reg(
                     data.rd,
                     LLVMBuildZExt(
@@ -1472,6 +1482,7 @@ impl<'a> InstructionTranslator<'a> {
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::FltS => {
+                self.was_freppable.set(false);
                 self.write_reg(
                     data.rd,
                     LLVMBuildZExt(
@@ -1490,6 +1501,7 @@ impl<'a> InstructionTranslator<'a> {
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::FleS => {
+                self.was_freppable.set(false);
                 self.write_reg(
                     data.rd,
                     LLVMBuildZExt(
@@ -1508,6 +1520,7 @@ impl<'a> InstructionTranslator<'a> {
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::FeqD => {
+                self.was_freppable.set(false);
                 self.write_reg(
                     data.rd,
                     LLVMBuildZExt(
@@ -1526,6 +1539,7 @@ impl<'a> InstructionTranslator<'a> {
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::FltD => {
+                self.was_freppable.set(false);
                 self.write_reg(
                     data.rd,
                     LLVMBuildZExt(
@@ -1544,6 +1558,7 @@ impl<'a> InstructionTranslator<'a> {
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::FleD => {
+                self.was_freppable.set(false);
                 self.write_reg(
                     data.rd,
                     LLVMBuildZExt(
