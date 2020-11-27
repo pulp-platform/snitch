@@ -49,7 +49,7 @@ jobs:
                     && git diff --exit-code
             - name: Check license
               run: |
-                ./util/lowrisc_misc-linters/licence-checker/licence-checker.py --config util/licence-checker.hjson
+                ./util/check-license
             # Check the proper formatting of all Bender.yml
             - name: Check Bender.yml formatting
               run: util/format-bender && git diff --exit-code
