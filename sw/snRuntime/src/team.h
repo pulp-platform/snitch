@@ -12,6 +12,15 @@ struct snrt_team {
     struct snrt_team_root *root;
 };
 
+struct snrt_mailbox {
+    /// A common location to perform an atomic barrier on.
+    size_t barrier;
+    /// Pointer to the data being exchanged.
+    void *ptr;
+    /// Length of the data being exchanged.
+    size_t len;
+};
+
 struct snrt_team_root {
     struct snrt_team base;
     uint32_t global_core_base_hartid;
@@ -22,4 +31,6 @@ struct snrt_team_root {
     uint32_t cluster_core_num;
     snrt_slice_t global_mem;
     snrt_slice_t cluster_mem;
+    struct snrt_mailbox *global_mailbox;
+    struct snrt_mailbox *cluster_mailbox;
 };
