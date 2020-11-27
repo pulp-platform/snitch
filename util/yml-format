@@ -8,7 +8,7 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
 # Get all Bender.yml and format them. Exclude the vendor directory and hidden
 # dirs.
-cd $ROOT && find hw \
-    -not \( -path 'hw/vendor' -prune \) \
-    -not -path '*/\.*' \
-    -name 'Bender.yml' | xargs yamlfmt -w
+find $ROOT \
+    -not \( -path $ROOT/'hw/vendor' -prune \) \
+    -not -path '*/\.bender/*' \
+    -name '*.yml' | xargs yamlfmt -w

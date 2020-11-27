@@ -14,7 +14,10 @@ indent_size = 4
 [*.{sv,svh}]
 indent_size = 2
 
-[*.{yml}]
+[*.yml]
+indent_size = 2
+
+[*.{c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx}]
 indent_size = 2
 
 # Use tabs for Makefiles.

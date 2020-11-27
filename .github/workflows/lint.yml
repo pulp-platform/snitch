@@ -6,50 +6,59 @@ name: lint
 on: [push]
 
 jobs:
-    # Run all lint checks
-    lint-verilog:
-        name: Lint Verilog
-        # This job runs on Linux (fixed ubuntu version)
-        runs-on: ubuntu-18.04
-        env:
-            VERIBLE_VERSION: 0.0-776-g09e0b87
-        steps:
-            - uses: actions/checkout@v2
-            - name: Install Verible
-              run: |
-                set -e
-                mkdir -p build/verible
-                cd build/verible
-                curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/master/verible-v$VERIBLE_VERSION-Ubuntu-18.04-bionic-x86_64.tar.gz
-                sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
-                tar -C /tools/verible -xf verible.tar.gz --strip-components=1
-                echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
-            # Run linter in hw/ip subdir
-            - name: Run Lint
-              run: |
-                echo "::add-matcher::.github/verible-lint-matcher.json"
-                util/verible-lint.sh
-                echo "::remove-matcher owner=verible-lint-matcher::"
-        # Check that all vendored sources are up-to-date.
-    vendor-licence:
-        name: Check vendored source up-to-date, licence, Bender.yml formatting.
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-python@v2
-              with:
-                python-version: 3.x
-            - name: Install requirements
-              run: pip install -r python-requirements.txt
-            - name: Re-vendor and diff
-              run: |
-                find . \
-                    -name '*.vendor.hjson' \
-                    | xargs -n1 util/vendor.py --verbose \
-                    && git diff --exit-code
-            - name: Check license
-              run: |
-                ./util/check-license
-            # Check the proper formatting of all Bender.yml
-            - name: Check Bender.yml formatting
-              run: util/format-bender && git diff --exit-code
+  # Run all lint checks
+  lint-verilog:
+    name: Lint Verilog
+    # This job runs on Linux (fixed ubuntu version)
+    runs-on: ubuntu-18.04
+    env:
+      VERIBLE_VERSION: 0.0-776-g09e0b87
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Verible
+      run: |
+        set -e
+        mkdir -p build/verible
+        cd build/verible
+        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/master/verible-v$VERIBLE_VERSION-Ubuntu-18.04-bionic-x86_64.tar.gz
+        sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
+        tar -C /tools/verible -xf verible.tar.gz --strip-components=1
+        echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
+    # Run linter in hw/ip subdir
+    - name: Run Lint
+      run: |
+        echo "::add-matcher::.github/verible-lint-matcher.json"
+        util/verible-lint
+        echo "::remove-matcher owner=verible-lint-matcher::"
+  # Check that all vendored sources are up-to-date.
+  vendor-licence:
+    name: Check vendored source up-to-date, licence, Bender.yml formatting.
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install requirements
+      run: pip install -r python-requirements.txt
+    - name: Re-vendor and diff
+      run: |
+        find . \
+            -name '*.vendor.hjson' \
+            | xargs -n1 util/vendor.py --verbose \
+            && git diff --exit-code
+    - name: Check license
+      run: |
+        ./util/check-license
+    # Check the proper formatting of all Bender.yml
+    - name: Check Bender.yml formatting
+      run: util/yml-format && git diff --exit-code
+  # Check C/C++ files for correct formatting.
+  formatting-check:
+    name: Clang Format Check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: DoozyX/clang-format-lint-action@v0.11
+      with:
+        clangFormatVersion: 10

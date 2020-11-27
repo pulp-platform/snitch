@@ -12,18 +12,18 @@ repo_url: https://github.com/pulp-platform/snitch
 repo_name: pulp-platform/snitch
 
 markdown_extensions:
-  - admonition
-  - def_list
-  - pymdownx.superfences
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+- admonition
+- def_list
+- pymdownx.superfences
+- pymdownx.emoji:
+    emoji_index: !%21python/name:materialx.emoji.twemoji
+    emoji_generator: !%21python/name:materialx.emoji.to_svg
 nav:
-    - Home: index.md
-    - User Guide:
-      - Directory Structure: ug/directory_structure.md
-      - Documentation: ug/documentation.md
-    - Reference Manual:
-      - Solder: rm/solder.md
-      - Custom Instructions: rm/custom_instructions.md
+- Home: index.md
+- User Guide:
+  - Directory Structure: ug/directory_structure.md
+  - Documentation: ug/documentation.md
+- Reference Manual:
+  - Solder: rm/solder.md
+  - Custom Instructions: rm/custom_instructions.md
 
