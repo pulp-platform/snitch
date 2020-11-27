@@ -36,3 +36,11 @@ uint32_t snrt_cluster_core_idx() {
 uint32_t snrt_cluster_core_num() {
     return _snrt_team_current->root->cluster_core_num;
 }
+
+snrt_slice_t snrt_global_memory() {
+    return _snrt_team_current->root->global_mem;
+}
+
+snrt_slice_t snrt_cluster_memory() {
+    return _snrt_team_current->root->cluster_mem;
+}

@@ -20,5 +20,6 @@ struct snrt_team_root {
     uint32_t cluster_num;
     uint32_t cluster_core_base_hartid;
     uint32_t cluster_core_num;
-    // more stuff goes here
+    snrt_slice_t global_mem;
+    snrt_slice_t cluster_mem;
 };
