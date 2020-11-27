@@ -2,22 +2,23 @@
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
 
-module testharness (
+module testharness import snitch_axi_pkg::*; (
   input  logic        clk_i,
-  input  logic        rst_i,
+  input  logic        rst_ni,
   input  logic [8:0]  debug_req_i,
   input  logic [8:0]  meip_i,
   input  logic [8:0]  mtip_i,
   input  logic [8:0]  msip_i
 );
 
-  snitch_axi_pkg::req_t axi_slv_req;
-  snitch_axi_pkg::resp_t axi_slv_res;
-  snitch_axi_pkg::req_slv_t axi_mst_req;
-  snitch_axi_pkg::resp_slv_t axi_mst_res;
-  snitch_axi_pkg::req_dma_slv_t axi_dma_req;
-  snitch_axi_pkg::resp_dma_slv_t axi_dma_resp;
+  req_t axi_slv_req;
+  resp_t axi_slv_res;
+  req_slv_t axi_mst_req;
+  resp_slv_t axi_mst_res;
+  req_dma_slv_t axi_dma_req;
+  resp_dma_slv_t axi_dma_resp;
 
+  // Snitch cluster under test.
   snitch_cluster #(
     .BootAddr           ( 32'h8001_0000              ),
     .NrCores            ( 9                          ),
@@ -38,7 +39,7 @@ module testharness (
     .IsoCrossing        ( 1'b0                       )
   ) i_cluster (
     .clk_i           ( clk_i        ),
-    .rst_i           ( rst_i        ),
+    .rst_i           ( ~rst_ni      ),
     .debug_req_i     ( debug_req_i  ),
     .hart_base_id_i  ( '0           ),
     .meip_i          ( meip_i       ),
@@ -51,6 +52,21 @@ module testharness (
     .axi_mst_res_i   ( axi_mst_res  ),
     .ext_dma_req_o   ( axi_dma_req  ),
     .ext_dma_resp_i  ( axi_dma_resp )
+  );
+
+  // Tie-off unused ports.
+  assign axi_slv_req = '0;
+  assign axi_dma_resp = '0;
+
+  // Simulation memory.
+  tb_memory #(
+    .req_t (req_slv_t),
+    .rsp_t (resp_slv_t)
+  ) i_mem (
+    .clk_i,
+    .rst_ni,
+    .req_i (axi_mst_req),
+    .rsp_o (axi_mst_res)
   );
 
 endmodule

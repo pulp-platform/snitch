@@ -13,5 +13,7 @@ dependencies:
 
 sources:
 # Level 0:
+- test/tb_memory.sv
+# Level 1:
 - test/testharness.sv
 

@@ -1,2 +1,5 @@
+bin/
 obj_dir/
 Bender.lock
+*.vcd
+trace_*
