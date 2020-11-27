@@ -31,5 +31,13 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num, void *
     team->cluster_mem.start = spm_start;
     team->cluster_mem.end = spm_end;
 
+    // Allocate memory for a global mailbox.
+    team->global_mailbox = team->global_mem.start;
+    team->global_mem.start += sizeof(struct snrt_mailbox);
+
+    // Allocate memory for a cluster mailbox.
+    team->cluster_mem.end -= sizeof(struct snrt_mailbox);
+    team->cluster_mailbox = team->cluster_mem.end;
+
     _snrt_team_current = &team->base;
 }
