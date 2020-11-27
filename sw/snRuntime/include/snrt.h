@@ -45,4 +45,7 @@ extern uint32_t snrt_cluster_num();
 extern snrt_slice_t snrt_global_memory();
 extern snrt_slice_t snrt_cluster_memory();
 
+extern void snrt_bcast_send(void *data, size_t len);
+extern void snrt_bcast_recv(void *data, size_t len);
+
 extern void *snrt_memcpy(void *dst, const void *src, size_t n);
