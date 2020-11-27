@@ -6,6 +6,14 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifndef snrt_min
+#define snrt_min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef snrt_max
+#define snrt_max(a, b) ((a) > (b) ? (a) : (b))
+#endif
+
 extern void snrt_barrier();
 
 extern uint32_t __attribute__((pure)) snrt_hartid();
