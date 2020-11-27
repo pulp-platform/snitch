@@ -26,6 +26,7 @@ set(sources
     src/barrier.c
     src/team.c
     src/printf.c
+    src/memcpy.c
 )
 
 # Generic Runtime (requiring bootloader/OS)

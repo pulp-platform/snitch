@@ -4,6 +4,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 extern void snrt_barrier();
 
@@ -18,3 +19,5 @@ extern uint32_t snrt_cluster_dm_core_idx();
 extern uint32_t snrt_cluster_dm_core_num();
 extern uint32_t snrt_cluster_idx();
 extern uint32_t snrt_cluster_num();
+
+extern void *snrt_memcpy(void *dst, const void *src, size_t n);
