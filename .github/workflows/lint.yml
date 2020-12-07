@@ -54,7 +54,7 @@ jobs:
         find . \
             -name '*.vendor.hjson' \
             | xargs -n1 util/vendor.py --verbose \
-            && git diff --exit-code
+            && util/git-diff.py --error-msg "::error ::Found differences, please re-vendor."
 
   #################
   # Check License #
@@ -87,10 +87,12 @@ jobs:
       with:
         python-version: 3.x
     - name: Install requirements
-      run: pip install yamlfmt
+      run: pip install -r python-requirements.txt
     # Check the proper formatting of all Bender.yml
-    - name: Check Bender.yml formatting
-      run: util/yml-format && git diff --exit-code
+    - name: Check YAML formatting
+      run: |
+        util/yml-format
+        util/git-diff.py --error-msg "::error ::Found differences, run util/yml-format before committing."
 
   ######################
   # Clang-Format Check #
