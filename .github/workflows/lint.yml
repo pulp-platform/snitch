@@ -71,7 +71,9 @@ jobs:
       run: pip install -r python-requirements.txt
     - name: Check license
       run: |
+        echo "::add-matcher::.github/license-checker-matcher.json"
         ./util/check-license
+        echo "::remove-matcher owner=license-checker-matcher::"
 
   ####################
   # Format YML Files #
