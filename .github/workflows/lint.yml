@@ -2,13 +2,17 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
+# Run all lint checks
 name: lint
 on: [push, pull_request]
 
 jobs:
-  # Run all lint checks
-  lint-verilog:
-    name: Lint Verilog
+
+  ################
+  # Verible Lint #
+  ################
+  verilog:
+    name: (System)Verilog
     # This job runs on Linux (fixed ubuntu version)
     runs-on: ubuntu-18.04
     env:
@@ -30,9 +34,13 @@ jobs:
         echo "::add-matcher::.github/verible-lint-matcher.json"
         util/verible-lint
         echo "::remove-matcher owner=verible-lint-matcher::"
+
+  #####################
+  # Vendor Up-to-Date #
+  #####################
   # Check that all vendored sources are up-to-date.
-  vendor-licence:
-    name: Check vendored source up-to-date, licence, Bender.yml formatting.
+  check-vendor:
+    name: Vendor Up-to-Date
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -47,15 +55,47 @@ jobs:
             -name '*.vendor.hjson' \
             | xargs -n1 util/vendor.py --verbose \
             && git diff --exit-code
+
+  #################
+  # Check License #
+  #################
+  licence:
+    name: Check License
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install requirements
+      run: pip install -r python-requirements.txt
     - name: Check license
       run: |
         ./util/check-license
+
+  ####################
+  # Format YML Files #
+  ####################
+  yamlfmt:
+    name: YAML Sources
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install requirements
+      run: pip install yamlfmt
     # Check the proper formatting of all Bender.yml
     - name: Check Bender.yml formatting
       run: util/yml-format && git diff --exit-code
+
+  ######################
+  # Clang-Format Check #
+  ######################
   # Check C/C++ files for correct formatting.
-  formatting-check:
-    name: Clang Format Check
+  clangfmt:
+    name: C/C++ Sources
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -67,8 +107,8 @@ jobs:
   # Lint Editor Config #
   ######################
   # Detect trailing whitespaces, missing new lines and wrong file encodings.
-  lint-editorconfig:
-    name: Lint Editorconfig
+  editorconfig:
+    name: Editorconfig
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -86,8 +126,8 @@ jobs:
   ################
   # Lint Commits #
   ################
-  lint-commits:
-    name: Lint Commit Messages
+  commits:
+    name: Commit Messages
     runs-on: ubuntu-latest
     # Only trigger on pull requests, otherwise we don't know the base and the
     # `github.event.pull_request` object isn't available either.
