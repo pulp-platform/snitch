@@ -16,8 +16,8 @@ markdown_extensions:
 - def_list
 - pymdownx.superfences
 - pymdownx.emoji:
-    emoji_index: !%21python/name:materialx.emoji.twemoji
-    emoji_generator: !%21python/name:materialx.emoji.to_svg
+    emoji_index: !!python/name:materialx.emoji.twemoji
+    emoji_generator: !!python/name:materialx.emoji.to_svg
 nav:
 - Home: index.md
 - User Guide:
