@@ -1,0 +1,15 @@
+#!/bin/bash
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+
+set -e
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+
+# Skip third party sources and disable identation as it doesn't cope well with
+# lines which belong to the previous line.
+cd $ROOT && \
+  editorconfig-checker \
+    -disable-indentation \
+    -v \
+    -exclude "(hw/vendor/*)|(sw/vendor/*)|(util/lowrisc_misc-linters/*)"

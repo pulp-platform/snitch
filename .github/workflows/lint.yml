@@ -63,6 +63,26 @@ jobs:
       with:
         clangFormatVersion: 10
 
+  ######################
+  # Lint Editor Config #
+  ######################
+  # Detect trailing whitespaces, missing new lines and wrong file encodings.
+  lint-editorconfig:
+    name: Lint Editorconfig
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install requirements
+      run: pip install -r python-requirements.txt
+    - name: Check files
+      run: |
+        echo "::add-matcher::.github/editorconfig-checker-matcher.json"
+        util/lint-editorconfig
+        echo "::remove-matcher owner=editorconfig-checker-matcher::"
+
   ################
   # Lint Commits #
   ################

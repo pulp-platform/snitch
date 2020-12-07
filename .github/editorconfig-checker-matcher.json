@@ -1,0 +1,15 @@
+{
+    "problemMatcher": [
+        {
+            "owner": "editorconfig-checker-matcher",
+            "pattern": [
+                {
+                    "regexp": "^(.+) error found in (.+?)(\\d+)?$",
+                    "file": 2,
+                    "line": 3,
+                    "message": 1
+                }
+            ]
+        }
+    ]
+}
