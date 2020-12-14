@@ -131,8 +131,8 @@ COMMENT_CHARS = [
     # Software Files
     ([".c", ".c.tpl", ".h", ".h.tpl", ".cc", ".cpp"], SLASH_SLASH),  # C, C++
     ([".def"], SLASH_SLASH),  # C, C++ X-Include List Declaration Files
-    ([".S"], [SLASH_SLASH, SLASH_STAR]),  # Assembly (With Preprocessing)
-    ([".s"], SLASH_STAR),  # Assembly (Without Preprocessing)
+    ([".S"], [SLASH_SLASH, SLASH_STAR, HASH]),  # Assembly (With Preprocessing)
+    ([".s"], [SLASH_STAR, HASH]),  # Assembly (Without Preprocessing)
     ([".ld", ".ld.tpl"], SLASH_STAR),  # Linker Scripts
     ([".rs"], SLASH_SLASH),  # Rust
 
