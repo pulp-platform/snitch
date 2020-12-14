@@ -96,12 +96,12 @@ def lint_commit_message(commit):
     # We didn't get an area prefix, so just make sure the message started with a
     # capital letter.
     if summary_line_split_len == 1:
-        if not re.match('[A-Z]', lines[0]):
+        if not re.match(r'[A-Z]', lines[0]):
             error("The summary line must start with a capital letter.", commit)
             success = False
     # The user specified an area on which she worked.
     elif summary_line_split_len == 2:
-        if not re.match('[a-z_A-Z\-]*(/[a-z_A-Z\-]+)*', summary_line_split[0]):
+        if not re.match(r'[a-z_A-Z\-]*(/[a-z_A-Z\-]+)*', summary_line_split[0]):
             error(
                 'The area specifier is mal-formed. Only letters,'
                 'underscores and hyphens are allowed. Different areas must be'
@@ -111,7 +111,7 @@ def lint_commit_message(commit):
         if not summary_line_split[1].startswith(' '):
             error("The area must be separated by a single space.", commit)
             success = False
-        if not re.match('\s[A-Z]', summary_line_split[1]):
+        if not re.match(r'\s[A-Z]', summary_line_split[1]):
             error(
                 "The summary line after the colon must start with a capital letter.",
                 commit)
