@@ -7,8 +7,8 @@
 import argparse
 import fnmatch
 import logging
-import subprocess
 import re
+import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -122,6 +122,8 @@ COMMENT_CHARS = [
     ([".vlt"], SLASH_SLASH),  # Verilator configuration (waiver) files
     ([".vbl"], HASH),  # Verible configuration files
     ([".el", ".el.tpl"], SLASH_SLASH),  # Exclusion list
+    ([".cfg", ".cfg.tpl"], [SLASH_SLASH,
+                            HASH]),  # Kinds of configuration files
     ([".f"], []),  # File lists (not checked)
 
     # The following two rules will inevitably bite us.
@@ -131,10 +133,10 @@ COMMENT_CHARS = [
     # Software Files
     ([".c", ".c.tpl", ".h", ".h.tpl", ".cc", ".cpp"], SLASH_SLASH),  # C, C++
     ([".def"], SLASH_SLASH),  # C, C++ X-Include List Declaration Files
-    ([".S"], [SLASH_SLASH, SLASH_STAR, HASH]),  # Assembly (With Preprocessing)
-    ([".s"], [SLASH_STAR, HASH]),  # Assembly (Without Preprocessing)
+    ([".S"], [SLASH_SLASH, SLASH_STAR]),  # Assembly (With Preprocessing)
+    ([".s"], SLASH_STAR),  # Assembly (Without Preprocessing)
     ([".ld", ".ld.tpl"], SLASH_STAR),  # Linker Scripts
-    ([".rs"], SLASH_SLASH),  # Rust
+    ([".rs", ".rs.tpl"], SLASH_SLASH),  # Rust
 
     # Software Build Systems
     (["meson.build", "toolchain.txt", "meson_options.txt"], HASH),  # Meson
@@ -175,7 +177,7 @@ class LicenceMatcher:
                     # Catch any regex error here and raise a runtime error.
                 except re.error as e:
                     raise RuntimeError(
-                        "Cannot compile line {} of the licence as a regular expression. Saw `{}`: {}"
+                        "Can't compile line {} of the licence as a regular expression. Saw `{}`: {}"
                         .format(i, e.pattern[e.pos], e.msg))
             # use the "first line" as a licence marker
             self.search_marker = self.expected_lines[0]
