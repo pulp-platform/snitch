@@ -10,6 +10,8 @@
     rev: "master",
   },
 
+  patch_dir: "patches/lowrisc_misc-linters",
+
   exclude_from_upstream: [
     // We shouldn't reformat upstream code
     '.style.yapf',
