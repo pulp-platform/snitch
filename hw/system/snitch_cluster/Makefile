@@ -51,3 +51,6 @@ traces: $(shell ls trace_hart_*.dasm | sed 's/\.dasm/\.txt/')
 
 trace_hart_%.txt: trace_hart_%.dasm
 	spike-dasm < $< > $@
+
+test/sw/alive: test/sw/alive.S test/sw/link.ld
+	riscv64-unknown-elf-gcc -mabi=ilp32d -march=rv32imafd -static -nostartfiles $< -T test/sw/link.ld -o $@
