@@ -1,0 +1,27 @@
+From b06999924c47e86ea9f03d3ff4a917502e24a03e Mon Sep 17 00:00:00 2001
+From: Fabian Schuiki <fabian@schuiki.ch>
+Date: Mon, 14 Dec 2020 10:50:47 +0100
+Subject: [PATCH] util: Allow hash comments in assembly
+
+---
+ licence-checker/licence-checker.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/licence-checker/licence-checker.py b/licence-checker/licence-checker.py
+index 5237da4..327a30f 100755
+--- a/licence-checker/licence-checker.py
++++ b/licence-checker/licence-checker.py
+@@ -133,8 +133,8 @@ COMMENT_CHARS = [
+     # Software Files
+     ([".c", ".c.tpl", ".h", ".h.tpl", ".cc", ".cpp"], SLASH_SLASH),  # C, C++
+     ([".def"], SLASH_SLASH),  # C, C++ X-Include List Declaration Files
+-    ([".S"], [SLASH_SLASH, SLASH_STAR]),  # Assembly (With Preprocessing)
+-    ([".s"], SLASH_STAR),  # Assembly (Without Preprocessing)
++    ([".S"], [SLASH_SLASH, SLASH_STAR, HASH]),  # Assembly (With Preprocessing)
++    ([".s"], [SLASH_STAR, HASH]),  # Assembly (Without Preprocessing)
+     ([".ld", ".ld.tpl"], SLASH_STAR),  # Linker Scripts
+     ([".rs", ".rs.tpl"], SLASH_SLASH),  # Rust
+ 
+-- 
+2.29.2
+

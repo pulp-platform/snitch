@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/lowRISC/misc-linters.git
-    rev: 693fc7ad0314685c71160cc401f02ff538522e8f
+    rev: 5fe6181d2ffa715934bee759f49506749d0fd44d
   }
 }
