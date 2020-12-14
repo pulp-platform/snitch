@@ -12,4 +12,4 @@ cd $ROOT && \
   editorconfig-checker \
     -disable-indentation \
     -v \
-    -exclude "(*/vendor/*)|(*/patches/*)|(util/lowrisc_misc-linters/*)|(banshee/tests/bin/*)"
+    -exclude "(*/vendor/*)|(*/patches/*)|(util/lowrisc_misc-linters/*)|(sw/banshee/tests/bin/*)"
