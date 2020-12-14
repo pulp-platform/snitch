@@ -12,7 +12,7 @@ jobs:
   # Verible Lint #
   ################
   verilog:
-    name: (System)Verilog
+    name: Verilog Sources
     # This job runs on Linux (fixed ubuntu version)
     runs-on: ubuntu-18.04
     env:
@@ -93,6 +93,26 @@ jobs:
       run: |
         util/yml-format
         util/git-diff.py --error-msg "::error ::Found differences, run util/yml-format before committing."
+
+  ########################
+  # Check Python Sources #
+  ########################
+  python:
+    name: Python Sources
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install requirements
+      run: pip install flake8
+    # Check that all python sources conform to the `pep8` standard
+    - name: Check Python sources
+      run: |
+        echo "::add-matcher::.github/flake8-matcher.json"
+        flake8
+        echo "::remove-matcher owner=flake8-matcher::"
 
   ######################
   # Clang-Format Check #
