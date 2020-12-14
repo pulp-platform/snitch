@@ -5,5 +5,6 @@
 # Ignore vendor directories.
 ./hw/vendor/*
 ./sw/vendor/*
+./banshee/vendor/*
 # Ignore any checked-out directories
 */.bender/*
