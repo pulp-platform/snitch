@@ -7,10 +7,11 @@
 extern uint32_t input_size;
 extern double output_checksum[];
 
-static void populate(double *ptr, uint32_t N, uint32_t M, uint32_t ld, uint32_t seed) {
+static void populate(double *ptr, uint32_t N, uint32_t M, uint32_t ld,
+                     uint32_t seed) {
     for (uint32_t n = 0; n < N; n++) {
         for (uint32_t m = 0; m < M; m++) {
-            ptr[n*ld+m] = (double)seed * 3.141;
+            ptr[n * ld + m] = (double)seed * 3.141;
             ++seed;
         }
     }
@@ -19,8 +20,7 @@ static void populate(double *ptr, uint32_t N, uint32_t M, uint32_t ld, uint32_t 
 int main(uint32_t core_id, uint32_t core_num) {
     pulp_timer_t start_time, stop_time;
     uint32_t compute_core_num = core_num;
-    if (input_size < compute_core_num)
-        compute_core_num = input_size;
+    if (input_size < compute_core_num) compute_core_num = input_size;
 
     // Generate input data in the TCDM.
     double *ptr = (void *)&l1_alloc_base;
@@ -65,13 +65,12 @@ int main(uint32_t core_id, uint32_t core_num) {
                 sum += input_C[i * (input_size + 1) + n];
             }
             double d = sum - output_checksum[i];
-            asm volatile("fabs.d %[d], %[d]"
-                         : [d] "+f"(d));
+            asm volatile("fabs.d %[d], %[d]" : [ d ] "+f"(d));
             // if (d < 0)
             //     d = -d;
             // int b;
-            // asm volatile ("fle.d %[b], %[eps], %[d]" : [b]"=r"(b) : [eps]"f"(0.001), [d]"f"(d));
-            // diffs += b;
+            // asm volatile ("fle.d %[b], %[eps], %[d]" : [b]"=r"(b) :
+            // [eps]"f"(0.001), [d]"f"(d)); diffs += b;
             diffs += d > 0.001;
             // diffs += d > 0.001;
             // diffs += (d != 0);
