@@ -492,7 +492,7 @@ def make_rust():
       print("    }")
     if "bimm12hi" in a and "bimm12lo" in a:
       print("    pub fn bimm(&self) -> i32 {")
-      print("        {}".format(make_rust_field_shuffle(bits_bimm12, 12)));
+      print("        {}".format(make_rust_field_shuffle(bits_bimm12, 13)));
       print("    }")
     if "jimm20" in a:
       print("    pub fn jimm(&self) -> i32 {")
