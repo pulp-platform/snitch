@@ -4,3 +4,4 @@
 
 # The CI runs on `clang-format` version 10
 BasedOnStyle: Google
+IndentWidth: 4
