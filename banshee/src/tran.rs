@@ -652,7 +652,7 @@ impl<'a> SectionTranslator<'a> {
             // Jump back to beginning of loop body if repetitions left, else go to next PC.
             let target = fseq.inst_buffer[0];
             // Increment rep counter, store
-            let const_one = LLVMConstInt(LLVMInt8Type(), 1, 0);
+            let const_one = LLVMConstInt(LLVMTypeOf(rpt_cnt), 1, 0);
             let rpt_cnt_inc = LLVMBuildAdd(self.builder, rpt_cnt, const_one, NONAME);
             LLVMBuildStore(self.builder, rpt_cnt_inc, self.fseq_iter.rpt_ptr_ref);
             // Insert branch as terminator (following terminator will be omitted).
