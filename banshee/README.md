@@ -2,6 +2,13 @@
 
 > The Banshee (Old Irish spelling ben síde) is a Dark creature native to Ireland. Banshees are malevolent spirits that have the appearance of women and their cries are fatal to anyone that hears them. The Laughing Potion is effective defence against them.
 
+## Installation
+
+Banshee can be installed on your system using cargo as follows:
+
+    cargo install --path . -f
+    banshee --help
+
 ## Usage
 
     cargo run -- -h
@@ -42,17 +49,17 @@ Piping the output into `sort` will cause the trace to be sorted by cycle and har
 
 ### Unit Tests
 
-Unit tests are in `../banshee-tests` and can be compiled and built as follows (compilation requires a riscv toolchain):
+Unit tests are in `tests` and can be compiled and built as follows (compilation requires a riscv toolchain):
 
-    make -C ../banshee-tests
+    make -C tests
     make test
 
-    # or run an individual test `../banshee-tests/bin/dummy`
+    # or run an individual test `tests/bin/dummy`
     make test-dummy
 
 An `lldb` session with one of the unit tests can be started as follows:
 
-    # for test `../banshee-tests/bin/dummy`
+    # for test `tests/bin/dummy`
     make debug-dummy
 
 ### Debugging
@@ -123,7 +130,7 @@ As a hacky workaround, try changing the `llvm-sys = "100"` line to whatever majo
 - [x] Add instruction tracing
 - [x] Add SSR support
 - [ ] Add DMA support
-- [ ] Add FREP support
+- [x] Add FREP support
 - [x] Add fast local memory / memory hierarchy
 - [x] Add multi-core execution
 - [x] Add multi-cluster execution
