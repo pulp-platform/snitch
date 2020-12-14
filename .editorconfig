@@ -19,7 +19,7 @@ indent_size = 2
 [*.yml]
 indent_size = 2
 
-[*.{c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx}]
+[*.py]
 indent_size = 2
 
 # Use tabs for Makefiles.

@@ -62,7 +62,7 @@ def git_is_clean_workdir(git_workdir):
     return not modified_files
 
 
-def github_qualify_references(log, repo_userorg, repo_name):
+def github_qualify_references(logs, repo_userorg, repo_name):
     """ Replace "unqualified" GitHub references with "fully qualified" one
 
     GitHub automatically links issues and pull requests if they have a specific
@@ -77,7 +77,7 @@ def github_qualify_references(log, repo_userorg, repo_name):
 
     r = re.compile(r"(^|[^\w])(?:#|[gG][hH]-)(\d+)\b")
     repl_str = r'\1%s/%s#\2' % (repo_userorg, repo_name)
-    return [r.sub(repl_str, l) for l in log]
+    return [r.sub(repl_str, log) for log in logs]
 
 
 def test_github_qualify_references():
