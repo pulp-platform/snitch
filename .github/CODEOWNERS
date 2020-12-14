@@ -5,3 +5,5 @@
 
 # The DMA is owned by @thommythomaso
 hw/ip/snitch_dma @thommythomaso
+
+banshee @fabianschuiki
