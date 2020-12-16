@@ -34,6 +34,8 @@ LOG_TOTAL ?= /tmp/banshee_tests_total
 TARGET_DIR ?= $(shell cargo metadata --format-version 1 | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')
 BANSHEE ?= $(TARGET_DIR)/debug/banshee
 
+SNITCH_LOG ?= info
+
 test: test-info $(TEST_TARGETS)
 	@echo
 	@echo -n "test result: `tput bold`"
@@ -64,7 +66,7 @@ define test_template
 		LOGFILE=`mktemp`; \
 		if [ ! -z $(filter $(1),$(TESTS_BLACKLIST)) ]; then \
 			echo "$$CMD ... `tput setaf 3`ignored`tput sgr0`"; \
-		elif ! env SNITCH_LOG=debug $$CMD &> $$LOGFILE; then \
+		elif ! { env SNITCH_LOG=$(SNITCH_LOG) $$CMD; } $(TEST_SUFFIX); then \
 			echo "$$CMD ... `tput setaf 1`FAILED`tput sgr0`"; \
 			cat $$LOGFILE; \
 			echo $$CMD >>$(LOG_FAILED); \
