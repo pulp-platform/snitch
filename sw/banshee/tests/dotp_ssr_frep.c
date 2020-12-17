@@ -32,8 +32,10 @@ static inline void ssr_dvec_dvec_dotp(const double* const vals_a,
         // Setup zero register
         "fcvt.d.w   ft2, zero           \n"
         // SSR setup
-        "sw         %[c8], 864(%[scfg]) \n"  // stride_0[0,1]
-        "sw         t0,    832(%[scfg]) \n"  // bounds_0[0,1]
+        "sw         %[c8],  48(%[scfg]) \n"  // stride_0[0]
+        "sw         %[c8], 304(%[scfg]) \n"  // stride_0[1]
+        "sw         t0,     16(%[scfg]) \n"  // bounds_0[0]
+        "sw         t0,    272(%[scfg]) \n"  // bounds_0[1]
         "sw         %[va], 192(%[scfg]) \n"  // rptr_0[0]
         "sw         %[vb], 448(%[scfg]) \n"  // rptr_0[1]
         // Enable SSRs
@@ -66,5 +68,6 @@ static inline void ssr_dvec_dvec_dotp(const double* const vals_a,
 int main() {
     volatile double res;
     ssr_dvec_dvec_dotp(a_vals, b_vals, A_LEN, &res);
-    return (res != gold);
+    volatile double eps = 1.0e-15;
+    return !(res - gold < eps && gold - res < eps);
 }
