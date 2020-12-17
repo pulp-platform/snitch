@@ -662,20 +662,17 @@ impl<'a> SectionTranslator<'a> {
         if fseq.is_outer {
 
             // Create basic block for first increment-and-branch ahead of time
-            let bb_incr_branch_init = LLVMCreateBasicBlockInContext(self.engine.context, NONAME);
-            let mut bb_incr_branch = bb_incr_branch_init;
+            let mut bb_incr_branch = LLVMCreateBasicBlockInContext(self.engine.context, NONAME);
 
             // Jump to first increment-and-branch block from unterminated last frep instruction block
             if LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null() {
-                LLVMBuildBr(self.builder, bb_incr_branch_init);
+                LLVMBuildBr(self.builder, bb_incr_branch);
             } else {
-                error!("Cannot go to FREP from already terminated instruction");
+                error!("Cannot add branch to FREP to already terminated instruction");
             }
 
-            println!("FREP with {} max stagger", fseq.stagger_max);
-
-            // Create at least one copy of loop body (with stagger index one) for zero-stagger-max case
-            for s in 1..=std::cmp::max(fseq.stagger_max as u32, 1) {
+            // Create staggered loop bodies if any
+            for stg_offs in 1..=(fseq.stagger_max as u32) {
                 // Place and start inserting into block for increment-and-branch
                 LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_incr_branch);
                 LLVMPositionBuilderAtEnd(self.builder, bb_incr_branch);
@@ -709,18 +706,15 @@ impl<'a> SectionTranslator<'a> {
                     let mut rs2 = (inst_raw >> 20) & 0x1f;
                     let mut rs3 = (inst_raw >> 27) & 0x1f;
                     // Stagger register fields
-                    if fseq.stagger_mask & 0b0001 != 0 {rd  = (rd  + s) & 0x1f;}
-                    if fseq.stagger_mask & 0b0010 != 0 {rs1 = (rs1 + s) & 0x1f;}
-                    if fseq.stagger_mask & 0b0100 != 0 {rs2 = (rs2 + s) & 0x1f;}
-                    if fseq.stagger_mask & 0b1000 != 0 {rs3 = (rs3 + s) & 0x1f;}
+                    if fseq.stagger_mask & 0b0001 != 0 {rd  = (rd  + stg_offs) & 0x1f;}
+                    if fseq.stagger_mask & 0b0010 != 0 {rs1 = (rs1 + stg_offs) & 0x1f;}
+                    if fseq.stagger_mask & 0b0100 != 0 {rs2 = (rs2 + stg_offs) & 0x1f;}
+                    if fseq.stagger_mask & 0b1000 != 0 {rs3 = (rs3 + stg_offs) & 0x1f;}
                     // Assemble, return new instruction
                     const MREST : u32 = 0xffff_ffff ^ ( (0x1f << 7) | (0x1f << 15) | (0x1f << 20) | (0x1f << 27) );
-                    let inst_new = (inst_raw & MREST) | (rd << 7) | (rs1 << 15) | (rs2 << 20) | (rs3 << 27);
-
-                    println!("inst_new: {:x}", inst_new);
-
-                    let inst = riscv::parse_u32(inst_new);
-                    //let inst = inst_nonstag;
+                    let inst = riscv::parse_u32(
+                        (inst_raw & MREST) | (rd << 7) | (rs1 << 15) | (rs2 << 20) | (rs3 << 27)
+                    );
 
                     // Create translator for staggered instruction
                     let tran = InstructionTranslator {
@@ -751,7 +745,7 @@ impl<'a> SectionTranslator<'a> {
                     if LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null() {
                         LLVMBuildBr(self.builder, bb_loop_inst);
                     } else {
-                        error!("Cannot use terminating instruction in an FREP");
+                        error!("Cannot use terminating instruction inside an FREP");
                     }
                 }
 
@@ -759,11 +753,27 @@ impl<'a> SectionTranslator<'a> {
                 bb_incr_branch = bb_loop_inst;
             }
 
-            // Use left-over increment-and-branch block as jump-back block ti intial increment-and-branch
-            // This means that the staggered loop bodies are repeated until an increment-and-branch branches out
+            // Place and start inserting into final branch-and-increment block pointing back to original loop body
             LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_incr_branch);
             LLVMPositionBuilderAtEnd(self.builder, bb_incr_branch);
-            LLVMBuildBr(self.builder, bb_incr_branch_init);
+
+            // Load repetition counter from stack.
+            let rpt_cnt = LLVMBuildLoad(self.builder, self.fseq_iter.rpt_ptr_ref, NONAME);
+            // Compare to repetition maximum: repeat if less than maximum iteration.
+            let rpt_cmp =
+                LLVMBuildICmp(self.builder, LLVMIntULT, rpt_cnt, fseq.max_rpt_ref, NONAME);
+            // Increment rep counter, store
+            let const_one = LLVMConstInt(LLVMTypeOf(rpt_cnt), 1, 0);
+            let rpt_cnt_inc = LLVMBuildAdd(self.builder, rpt_cnt, const_one, NONAME);
+            LLVMBuildStore(self.builder, rpt_cnt_inc, self.fseq_iter.rpt_ptr_ref);
+
+            // Insert branch terminating the FREP iterations or going to original loop body (following terminator will be omitted).
+            LLVMBuildCondBr(
+                self.builder,
+                rpt_cmp,
+                self.elf.inst_bbs[&(fseq.inst_buffer[0].0)],
+                self.elf.inst_bbs[&(curr_addr + 4)],
+            );
 
             Ok(())
         } else {
