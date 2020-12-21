@@ -45,7 +45,7 @@ build:
 verilate:
 	mkdir -p obj_dir
 	bender script verilator -t rtl > obj_dir/files
-	verilator src/snitch_cfg.sv -f obj_dir/files $(VERILATOR_FLAGS) -j $(shell nproc) --cc --build --top-module testharness
+	verilator src/snitch_cfg.sv -f obj_dir/files $(VERILATOR_FLAGS) --cc --build --top-module testharness
 
 traces: $(shell ls trace_hart_*.dasm | sed 's/\.dasm/\.txt/')
 
@@ -54,3 +54,6 @@ trace_hart_%.txt: trace_hart_%.dasm
 
 test/sw/alive: test/sw/alive.S test/sw/link.ld
 	riscv64-unknown-elf-gcc -mabi=ilp32d -march=rv32imafd -static -nostartfiles $< -T test/sw/link.ld -o $@
+
+clean:
+	rm -rf obj_dir Bender.lock .bender/

@@ -6,5 +6,9 @@ __pycache__
 *.log
 *.vcd
 
-# Any modelsim files.
-work
+# We don't need the following files in the container
+hw/
+docs/
+util/
+sw/banshee/target
+sw/vendor

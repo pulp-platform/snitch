@@ -4,6 +4,7 @@
 
 # Keep sorted.
 clang-format
+device-tree-compiler
 graphviz
 python3
 python3-pip
