@@ -1,8 +1,13 @@
 # Getting Started
 
-We recommend using the [Docker](ug/../docker.md) container if possible. If that
-should not be possible (because of missing privileges for example) you can
-install the required tools and components yourself.
+We recommend using the [Docker](ug/../docker.md) container if possible:
+
+```
+$ docker run -it -v $REPO_TOP:/repo -w /repo ghcr.io/pulp-platform/snitch
+```
+
+If that should not be possible (because of missing privileges for example) you
+can install the required tools and components yourself.
 
 ## Prerequisites
 
@@ -24,12 +29,12 @@ curl --proto '=https' --tlsv1.2 https://fabianschuiki.github.io/bender/init -sSf
 
 An alternative way, if you have Rust installed is `cargo install bender`.
 
-## Tool Requirements
+### Tool Requirements
 
 - `bender >= 0.21`
 - `verilator >= 4.100`
 
-## Hardware Development
+### Hardware Development
 
 We use `verible` for style linting. Either build it from
 [source](https://github.com/google/verible) or - if available for your platform
