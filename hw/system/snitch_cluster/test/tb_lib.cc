@@ -32,7 +32,7 @@ void Sim::read_chunk(addr_t taddr, size_t len, void *dst) {
 }
 
 void Sim::write_chunk(addr_t taddr, size_t len, const void *src) {
-    uint8_t strb[8] = {[0 ... 7] = 1};
+    uint8_t strb[8] = {1, 1, 1, 1, 1, 1, 1, 1};
     MEM.write(taddr, len, reinterpret_cast<const uint8_t *>(src), strb);
 }
 

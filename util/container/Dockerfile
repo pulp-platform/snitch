@@ -7,6 +7,8 @@
 # 1. Stage
 FROM ubuntu:18.04 AS builder
 
+ARG SPIKE_VERSION=641d7d03e6a8d822b720fcb1a19f261813c00c4a
+
 COPY apt-requirements.txt /tmp/apt-requirements.txt
 RUN apt-get update && \
     sed 's/#.*//' /tmp/apt-requirements.txt \

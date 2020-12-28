@@ -22,7 +22,7 @@ VERILATOR_FLAGS += -Wno-fatal
 VERILATOR_FLAGS += --trace
 VERILATOR_FLAGS += --unroll-count 1024
 
-CFLAGS ?= -std=c++14 -I obj_dir -I $(VERILATOR_ROOT)/include -I $(VERILATOR_ROOT)/include/vltstd -I $(RISCV)/include
+CFLAGS ?= -std=c++14 -pthread -I obj_dir -I $(VERILATOR_ROOT)/include -I $(VERILATOR_ROOT)/include/vltstd -I $(RISCV)/include
 
 build:
 	$(CXX) $(CFLAGS) -c test/tb_lib.cc -o obj_dir/tb_lib.o
@@ -45,7 +45,7 @@ build:
 verilate:
 	mkdir -p obj_dir
 	bender script verilator -t rtl > obj_dir/files
-	verilator src/snitch_cfg.sv -f obj_dir/files $(VERILATOR_FLAGS) --cc --build --top-module testharness
+	verilator src/snitch_cfg.sv -f obj_dir/files $(VERILATOR_FLAGS) -j $(shell nproc) --cc --build --top-module testharness
 
 traces: $(shell ls trace_hart_*.dasm | sed 's/\.dasm/\.txt/')
 
