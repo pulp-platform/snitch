@@ -6,6 +6,7 @@
 #include <fesvr/context.h>
 #include <fesvr/htif.h>
 
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <memory>
