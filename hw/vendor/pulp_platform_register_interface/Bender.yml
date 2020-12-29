@@ -11,8 +11,9 @@ export_include_dirs:
 
 sources:
   # Level 0
-  - src/reg_intf_pkg.sv
   - src/reg_intf.sv
+  - vendor/lowrisc_opentitan/src/prim_subreg_arb.sv
+  - vendor/lowrisc_opentitan/src/prim_subreg_ext.sv
   # Level 1
   - src/apb_to_reg.sv
   - src/axi_to_reg.sv
@@ -21,6 +22,8 @@ sources:
   - src/reg_mux.sv
   - src/reg_to_mem.sv
   - src/reg_uniform.sv
+  - vendor/lowrisc_opentitan/src/prim_subreg_shadow.sv
+  - vendor/lowrisc_opentitan/src/prim_subreg.sv
   # Level 2
   - src/axi_lite_to_reg.sv
   - target: test

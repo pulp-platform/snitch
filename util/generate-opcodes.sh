@@ -12,6 +12,6 @@ HEADER="// Copyright 2020 ETH Zurich and University of Bologna.\n// Solderpad Ha
 echo -e $HEADER > $INSTR_SV
 echo -e "// verilog_lint: waive-start parameter-name-style" >> $INSTR_SV
 cd $ROOT/sw/vendor/riscv-opcodes && \
-    cat opcodes opcodes-rvc opcodes-rvc-pseudo opcodes-pseudo opcodes-sflt opcodes-dma opcodes-rep opcodes-ipu | ./parse-opcodes -sverilog >> $INSTR_SV
+    cat opcodes opcodes-rvc opcodes-rvc-pseudo opcodes-pseudo opcodes-sflt opcodes-dma opcodes-rep opcodes-ipu opcodes-ssr | ./parse-opcodes -sverilog >> $INSTR_SV
 echo -e "// verilog_lint: waive-stop parameter-name-style" >> $INSTR_SV
 

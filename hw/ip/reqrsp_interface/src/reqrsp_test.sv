@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: SHL-0.51
 
 // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
 /// A set of testbench utilities for REQRSP interfaces.
 package reqrsp_test;

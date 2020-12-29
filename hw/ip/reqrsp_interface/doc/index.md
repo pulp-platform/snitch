@@ -50,13 +50,15 @@ respect to each other (that needs to be maintained when translating to AXI).
 
 Atomic memory operations supported are:
 
-| Operation    | Description                                                               |
-| ------------ | ------------------------------------------------------------------------- |
-| Swap         | Swaps the values.                                                         |
-| Add          | Signed addition.                                                          |
-| And, Or, Xor | Bitwise `and`, `or`, and `xor` operation.                                 |
-| Max, Maxu    | Signed and unsigned maximum operation.                                    |
-| Min, Minu    | Signed and unsigned minimum operation.                                    |
+| Operation          | Description                                                               |
+| ------------------ | ------------------------------------------------------------------------- |
+| `Swap`             | Swaps the values.                                                         |
+| `Add`              | Signed addition.                                                          |
+| `And`, `Or`, `Xor` | Bitwise `and`, `or`, and `xor` operation.                                 |
+| `Max`, `Maxu`      | Signed and unsigned maximum operation.                                    |
+| `Min`, `Minu`      | Signed and unsigned minimum operation.                                    |
+| `Lr`               | Places a reservation on the given memory address                          |
+| `Sc`               | Conditional store, returns `0` on `q.data` if successfull, `1` otherwise. |
 
 
 The operation reads the value at the given address and returns the read value on

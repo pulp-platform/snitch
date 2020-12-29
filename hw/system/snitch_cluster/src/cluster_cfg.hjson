@@ -1,0 +1,79 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+// Cluster configuration for a simple testbench system.
+{
+    cluster: {
+        addr_width: 48,
+        data_width: 64,
+        tcdm: {
+            size: 128,
+            banks: 32,
+        },
+        cluster_base_addr: 0,
+        dma_data_width: 512,
+        dma_axi_req_fifo_depth: 3,
+        dma_req_fifo_depth: 3,
+        // Timing parameters
+        lat_comp_fp32: 3,
+        lat_comp_fp64: 3,
+        lat_comp_fp16_alt: 2,
+        lat_comp_fp8: 1,
+        lat_noncomp: 1,
+        lat_conv: 1,
+        fpu_pipe_config: "BEFORE"
+        narrow_xbar_latency: "CUT_ALL_PORTS",
+        wide_xbar_latency: "CUT_ALL_PORTS",
+        hives: [
+            // Hive 1
+            {
+                icache: {
+                    size: 8, // total instruction cache size in kByte
+                    sets: 2, // number of ways
+                    cacheline: 128 // word size in bits
+                },
+                cores: [
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/dma_core_template" }
+                ]
+            },
+            // Hive 0
+            {
+                cores: [
+                    // { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                ]
+            }
+        ]
+    },
+    dram: {
+        // 0x8000_0000
+        address: 2147483648,
+        // 0x8000_0000
+        length: 2147483648
+    },
+    // Templates.
+    compute_core_template: {
+        isa: "rv32imafd",
+        xssr: true
+        xfrep: true
+        ssr_nr_credits: 4,
+        num_int_outstanding_loads: 1,
+        num_mem_outstanding_loads: 4,
+        num_fp_outstanding_loads: 4,
+        num_mem_outstanding_loads: 4,
+        num_sequencer_instructions: 16,
+        num_dtlb_entries: 1,
+        num_itlb_entries: 1,
+    },
+    dma_core_template: {
+        isa: "rv32ema",
+        xdma: true
+    }
+}

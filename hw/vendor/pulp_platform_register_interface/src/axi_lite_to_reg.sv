@@ -176,7 +176,8 @@ module axi_lite_to_reg #(
   );
 
   assign axi_lite_rsp_o.r.data = read_resp_fifo_out.data;
-  assign axi_lite_rsp_o.r.resp = read_resp_fifo_out.error ? axi_pkg::RESP_SLVERR : axi_pkg::RESP_OKAY;
+  assign axi_lite_rsp_o.r.resp =
+    read_resp_fifo_out.error ? axi_pkg::RESP_SLVERR : axi_pkg::RESP_OKAY;
   assign axi_lite_rsp_o.r_valid = ~read_resp_fifo_empty;
   assign read_resp_fifo_pop = axi_lite_rsp_o.r_valid & axi_lite_req_i.r_ready;
   assign read_resp_fifo_push = reg_req_o.valid & reg_rsp_i.ready & ~reg_req_o.write;

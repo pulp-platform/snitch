@@ -2,6 +2,11 @@
 
 This monolithic repository hosts software and hardware for the Snitch generator and generated systems.
 
+## Tool Requirements
+
+* `verilator = v4.100`
+* `bender >= v0.21.0`
+
 ## License
 
 Snitch is being made available under permissive open source licenses.

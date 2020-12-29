@@ -1,7 +1,9 @@
 .bender/
 .vscode/
+__pycache__
 
 // Modelsim Fiels
 *.wlf
 modelsim.ini
 *stacktrace*
+transcript

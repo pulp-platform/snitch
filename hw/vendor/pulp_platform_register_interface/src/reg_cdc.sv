@@ -26,7 +26,8 @@ module reg_cdc #(
     input  rsp_t dst_rsp_i
 );
 
-    enum logic { Idle, Busy } src_state_d, src_state_q, dst_state_d, dst_state_q;
+    typedef enum logic { Idle, Busy } state_e;
+    state_e src_state_d, src_state_q, dst_state_d, dst_state_q;
     rsp_t dst_rsp_d, dst_rsp_q;
     logic src_req_valid, src_req_ready, src_rsp_valid, src_rsp_ready;
     logic dst_req_valid, dst_req_ready, dst_rsp_valid, dst_rsp_ready;
@@ -114,6 +115,7 @@ module reg_cdc #(
                     src_state_d = Idle;
                 end
             end
+            default:;
         endcase
     end
 
@@ -158,6 +160,7 @@ module reg_cdc #(
                     dst_state_d = Idle;
                 end
             end
+            default:;
         endcase
     end
 

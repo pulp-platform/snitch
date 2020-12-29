@@ -26,6 +26,11 @@ nav:
   - Directory Structure: ug/directory_structure.md
   - Documentation: ug/documentation.md
 - Reference Manual:
-  - Solder: rm/solder.md
+  - Snitch: rm/snitch/index.md
+  - Snitch Cluster: rm/snitch_cluster/index.md
+  - Reqrsp Interface: rm/reqrsp_interface/index.md
   - Custom Instructions: rm/custom_instructions.md
-
+  - Solder: rm/solder.md
+- Schema Docs:
+  - Manticore: schema-doc/manticore.md
+  - Snitch Cluster: schema-doc/snitch_cluster.md

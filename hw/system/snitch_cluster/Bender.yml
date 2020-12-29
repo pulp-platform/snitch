@@ -13,7 +13,13 @@ dependencies:
 
 sources:
 # Level 0:
-- test/tb_memory.sv
+- generated/snitch_cluster_wrapper.sv
 # Level 1:
-- test/testharness.sv
-
+- target: any(simulation, verilator)
+  files:
+  - test/tb_memory.sv
+  - test/testharness.sv
+# Level 2:
+- target: test
+  files:
+  - test/tb_bin.sv

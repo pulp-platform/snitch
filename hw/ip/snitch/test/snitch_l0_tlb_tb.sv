@@ -3,6 +3,13 @@
 // SPDX-License-Identifier: SHL-0.51
 
 // Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+`include "snitch_vm/typedef.svh"
+// verilog_lint: waive-start package-filename
+package snitch_l0_tlb_tb_pkg;
+  `SNITCH_VM_TYPEDEF(48)
+endpackage
+// verilog_lint: waive-stop package-filename
+
 class translation_request;
   rand snitch_pkg::va_t addr;
   rand bit write;
@@ -25,7 +32,7 @@ endclass
 
 class page_table_entry;
 
-  rand snitch_pkg::pa_t    pa;
+  rand snitch_l0_tlb_tb_pkg::pa_t    pa;
   rand logic               d;
   rand logic               a;
   rand logic               g;
@@ -34,7 +41,7 @@ class page_table_entry;
   rand logic               w;
   rand logic               r;
 
-  function snitch_pkg::l0_pte_t get_pte ();
+  function snitch_l0_tlb_tb_pkg::l0_pte_t get_pte ();
     return '{
               pa: '{
                 ppn1: pa.ppn1,
@@ -44,7 +51,7 @@ class page_table_entry;
                 d: d,
                 a: a,
                 u: u,
-                x: sx,
+                x: x,
                 w: w,
                 r: r
               }
@@ -76,18 +83,20 @@ module snitch_l0_tlb_tb #(
   logic dut_valid, valid_refill;
   logic dut_ready, ready_refill;
   snitch_pkg::va_t dut_va, va_refill;
-  snitch_pkg::l0_pte_t pte_refill;
+  snitch_l0_tlb_tb_pkg::l0_pte_t pte_refill;
   logic is_4mega;
   logic dut_write;
   logic dut_execute;
-  snitch_pkg::pa_t dut_pa;
+  snitch_l0_tlb_tb_pkg::pa_t dut_pa;
   logic dut_page_fault;
 
   // save translation entries here
-  snitch_pkg::l0_pte_t memory [bit [$bits(snitch_pkg::va_t)-1:0]];
+  snitch_l0_tlb_tb_pkg::l0_pte_t memory [bit [$bits(snitch_pkg::va_t)-1:0]];
 
   snitch_l0_tlb #(
-    .NrEntries (NrEntries)
+    .NrEntries (NrEntries),
+    .pa_t (snitch_l0_tlb_tb_pkg::pa_t),
+    .l0_pte_t (snitch_l0_tlb_tb_pkg::l0_pte_t)
   ) i_dut (
     .clk_i (clk),
     .rst_i (rst),
@@ -131,7 +140,7 @@ module snitch_l0_tlb_tb #(
 
   task static send_req (
     input translation_request tr,
-    output snitch_pkg::pa_t pa,
+    output snitch_l0_tlb_tb_pkg::pa_t pa,
     output logic page_fault
   );
       dut_valid    <= #TA 1;
@@ -155,7 +164,7 @@ module snitch_l0_tlb_tb #(
   initial begin
     automatic int unsigned stall_cycles;
     automatic translation_request tr = new;
-    automatic snitch_pkg::pa_t pa;
+    automatic snitch_l0_tlb_tb_pkg::pa_t pa;
     automatic logic page_fault;
     automatic snitch_pkg::va_t va_old = '0;
     reset();

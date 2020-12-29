@@ -7,7 +7,7 @@ from git import Repo
 
 
 def main():
-    repo = Repo()
+    repo = Repo(search_parent_directories=True)
 
     parser = argparse.ArgumentParser(
         description='Check for changes in repository')

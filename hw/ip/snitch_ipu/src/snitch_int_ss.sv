@@ -5,8 +5,16 @@
 `include "common_cells/registers.svh"
 
 module snitch_int_ss import riscv_instr::*; import snitch_ipu_pkg::*; import snitch_pkg::*; #(
-  parameter bit IPUSequencer = 1,
-  parameter bit RegisterSequencer = 1
+  parameter int unsigned AddrWidth = 0,
+  parameter int unsigned DataWidth = 0,
+  parameter int unsigned NumIPUSequencerInstr = 0,
+  parameter bit          IPUSequencer = 1,
+  parameter bit          RegisterSequencer = 1,
+  parameter type         acc_req_t = logic,
+  parameter type         acc_resp_t = logic,
+  /// Derived parameter *Do not override*
+  parameter type addr_t = logic [AddrWidth-1:0],
+  parameter type data_t = logic [DataWidth-1:0]
 ) (
   input  logic          clk_i,
   input  logic          rst_i,
@@ -87,7 +95,7 @@ module snitch_int_ss import riscv_instr::*; import snitch_ipu_pkg::*; import sni
   logic             acc_req_ready, acc_req_ready_q;
   if (IPUSequencer) begin : gen_ipu_sequencer
     snitch_sequencer #(
-      .Depth    ( snitch_pkg::IPUSequencerInstr )
+      .Depth    ( NumIPUSequencerInstr )
     ) i_snitch_ipu_sequencer (
       .clk_i,
       .rst_i,

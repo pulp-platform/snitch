@@ -20,9 +20,6 @@
 
 module tb_axi_dw_downsizer;
 
-  timeunit      1ns;
-  timeprecision 10ps;
-
   parameter AW   = 64;
   parameter IW   = 4;
   parameter DW   = 32;

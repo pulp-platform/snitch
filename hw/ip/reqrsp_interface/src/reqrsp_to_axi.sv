@@ -35,7 +35,7 @@
 /// ## Complexity
 ///
 /// The module just needs to save the amount of transactions which are currently
-/// in-flight. This parameter is bound by `MAX_TRANS` and O(log2(MAX_TRANS)))
+/// in-flight. This parameter is bound by `MaxTrans` and O(log2(MaxTrans)))
 /// storage complexity is needed.
 ///
 /// This module does not emit any bursts, but AXI5 capability is needed because
@@ -43,11 +43,11 @@
 module reqrsp_to_axi import reqrsp_pkg::*; #(
   /// Number of same transactions which can be in-flight
   /// simulatnously. Must be greater than 1.
-  parameter int unsigned MAX_TRANS = 4,
+  parameter int unsigned MaxTrans = 4,
   /// ID with which to send the transactions.
   parameter int unsigned ID = 0,
   /// Data width of bus, must be 32 or 64.
-  parameter int unsigned DATA_WIDTH = 32'b0,
+  parameter int unsigned DataWidth = 32'b0,
   parameter type reqrsp_req_t = logic,
   parameter type reqrsp_rsp_t = logic,
   parameter type axi_req_t = logic,
@@ -61,13 +61,13 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   input  axi_rsp_t axi_rsp_i
 );
 
-  localparam int unsigned CounterWidth = cf_math_pkg::idx_width(MAX_TRANS);
+  localparam int unsigned CounterWidth = cf_math_pkg::idx_width(MaxTrans);
   typedef logic [CounterWidth-1:0] cnt_t;
   logic req_is_amo;
   logic atomic_in_flight_d, atomic_in_flight_q;
   cnt_t read_cnt_d, read_cnt_q;
   cnt_t write_cnt_d, write_cnt_q;
-  logic [DATA_WIDTH-1:0] write_data;
+  logic [DataWidth-1:0] write_data;
 
   logic q_valid, q_ready;
   logic q_valid_read, q_ready_read;
@@ -96,8 +96,8 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   assign write_cnt_not_zero = write_cnt_q > 1 | (write_cnt_q == 1 & ~dec_write_cnt);
   // Reads and writes stall iff there are transactions of the othter type in place.
   // See ordering rules above.
-  assign stall_write = reqrsp_req_i.q.write & (write_cnt_q == MAX_TRANS-1 | read_cnt_not_zero);
-  assign stall_read = !reqrsp_req_i.q.write & (read_cnt_q == MAX_TRANS-1 | write_cnt_not_zero);
+  assign stall_write = reqrsp_req_i.q.write & (write_cnt_q == MaxTrans-1 | read_cnt_not_zero);
+  assign stall_read = !reqrsp_req_i.q.write & (read_cnt_q == MaxTrans-1 | write_cnt_not_zero);
   // For atomics we additionally need to check whether there are any in-flight
   // writes, as atomci are already write transactions this wouldn't be captured
   // by the regular case. This makes sure that neither read nor writes are
@@ -154,10 +154,10 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
     if (dec_write_cnt) write_cnt_d--;
   end
 
-  `ASSERT(WriteCntOverflow,  (write_cnt_q == MAX_TRANS - 1) |=> !(write_cnt_q == 0))
-  `ASSERT(ReadCntOverflow,  (read_cnt_q == MAX_TRANS - 1) |=> !(read_cnt_q == 0))
-  `ASSERT(WriteCntUnderflow, (write_cnt_q == 0) |=> !(write_cnt_q == MAX_TRANS - 1))
-  `ASSERT(ReadCntUnderflow,  (read_cnt_q == 0) |=> !(read_cnt_q == MAX_TRANS - 1))
+  `ASSERT(WriteCntOverflow,  (write_cnt_q == MaxTrans - 1) |=> !(write_cnt_q == 0))
+  `ASSERT(ReadCntOverflow,  (read_cnt_q == MaxTrans - 1) |=> !(read_cnt_q == 0))
+  `ASSERT(WriteCntUnderflow, (write_cnt_q == 0) |=> !(write_cnt_q == MaxTrans - 1))
+  `ASSERT(ReadCntUnderflow,  (read_cnt_q == 0) |=> !(read_cnt_q == MaxTrans - 1))
 
   // -------------
   // Read Channel
@@ -274,8 +274,8 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   // Assertions:
   // Check that the data width is in the range of 32 or 64 bit. We didn't define
   // any other bus widths so far.
-  `ASSERT_INIT(check_data_width, DATA_WIDTH inside {32, 64})
-  `ASSERT_INIT(max_trans_greater_than_one, MAX_TRANS > 1)
+  `ASSERT_INIT(check_DataWidth, DataWidth inside {32, 64})
+  `ASSERT_INIT(MaxTrans_greater_than_one, MaxTrans > 1)
   // 1. Assert that the in-flight counters are never both 2+ == 2+, that would
   //    imply an illegal state.
 
@@ -290,13 +290,13 @@ module reqrsp_to_axi_intf #(
   /// ID width which to send the transactions.
   parameter int unsigned ID = 0,
   /// AXI ID width.
-  parameter int unsigned AXI_ID_WIDTH = 32'd0,
+  parameter int unsigned AxiIdWidth = 32'd0,
   /// AXI and REQRSP address width.
-  parameter int unsigned ADDR_WIDTH = 32'd0,
+  parameter int unsigned AddrWidth = 32'd0,
   /// AXI and REQRSP data width.
-  parameter int unsigned DATA_WIDTH = 32'd0,
+  parameter int unsigned DataWidth = 32'd0,
   /// AXI user width.
-  parameter int unsigned AXI_USER_WIDTH = 32'd0
+  parameter int unsigned AxiUserWidth = 32'd0
 ) (
   input logic clk_i,
   input logic rst_ni,
@@ -304,11 +304,11 @@ module reqrsp_to_axi_intf #(
   AXI_BUS     axi
 );
 
-  typedef logic [ADDR_WIDTH-1:0] addr_t;
-  typedef logic [DATA_WIDTH-1:0] data_t;
-  typedef logic [DATA_WIDTH/8-1:0] strb_t;
-  typedef logic [AXI_ID_WIDTH-1:0] id_t;
-  typedef logic [AXI_USER_WIDTH-1:0] user_t;
+  typedef logic [AddrWidth-1:0] addr_t;
+  typedef logic [DataWidth-1:0] data_t;
+  typedef logic [DataWidth/8-1:0] strb_t;
+  typedef logic [AxiIdWidth-1:0] id_t;
+  typedef logic [AxiUserWidth-1:0] user_t;
 
   `REQRSP_TYPEDEF_ALL(reqrsp, addr_t, data_t, strb_t)
 
@@ -328,7 +328,7 @@ module reqrsp_to_axi_intf #(
   axi_rsp_t axi_rsp;
 
   reqrsp_to_axi #(
-    .DATA_WIDTH ( DATA_WIDTH ),
+    .DataWidth ( DataWidth ),
     .reqrsp_req_t (reqrsp_req_t),
     .reqrsp_rsp_t (reqrsp_rsp_t),
     .axi_req_t (axi_req_t),

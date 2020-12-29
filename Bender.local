@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 overrides:
+    common_verification: { git: https://github.com/pulp-platform/common_verification.git, rev: master}
     tech_cells_generic: { path: hw/vendor/pulp_platform_tech_cells_generic }
     common_cells: { path: hw/vendor/pulp_platform_common_cells }
     axi: { path: hw/vendor/pulp_platform_axi }

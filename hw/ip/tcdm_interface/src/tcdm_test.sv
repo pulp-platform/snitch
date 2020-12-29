@@ -257,9 +257,7 @@ package tcdm_test;
     parameter time  TA = 0ps,
     parameter time  TT = 0ps,
     parameter int unsigned REQ_MIN_WAIT_CYCLES = 1,
-    parameter int unsigned REQ_MAX_WAIT_CYCLES = 20,
-    parameter int unsigned RSP_MIN_WAIT_CYCLES = 1,
-    parameter int unsigned RSP_MAX_WAIT_CYCLES = 20
+    parameter int unsigned REQ_MAX_WAIT_CYCLES = 20
   ) extends rand_tcdm #(.AW(AW), .DW(DW), .user_t (user_t), .TA(TA), .TT(TT));
 
     int unsigned cnt = 0;
@@ -304,7 +302,6 @@ package tcdm_test;
       while (!this.req_done || this.cnt > 0) begin
         automatic rsp_t rsp;
         this.cnt--;
-        rand_wait(RSP_MIN_WAIT_CYCLES, RSP_MAX_WAIT_CYCLES);
         this.drv.recv_rsp(rsp);
       end
     endtask

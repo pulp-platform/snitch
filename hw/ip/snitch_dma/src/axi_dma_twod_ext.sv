@@ -8,16 +8,18 @@
 
 module axi_dma_twod_ext #(
     parameter int unsigned ADDR_WIDTH      = -1,
-    parameter int unsigned REQ_FIFO_DEPTH  = -1
+    parameter int unsigned REQ_FIFO_DEPTH  = -1,
+    parameter type burst_req_t = logic,
+    parameter type twod_req_t = logic
 ) (
     input  logic                     clk_i,
     input  logic                     rst_ni,
     // arbitrary burst request
-    output axi_dma_pkg::burst_req_t  burst_req_o,
+    output burst_req_t               burst_req_o,
     output logic                     burst_req_valid_o,
     input  logic                     burst_req_ready_i,
     // 2D request request
-    input  axi_dma_pkg::twod_req_t   twod_req_i,
+    input  twod_req_t                twod_req_i,
     input  logic                     twod_req_valid_i,
     output logic                     twod_req_ready_o,
     // 2D request completed
@@ -28,7 +30,7 @@ module axi_dma_twod_ext #(
     // 2D Request Fifo
     //--------------------------------------
     // currently worked on element
-    axi_dma_pkg::twod_req_t   twod_req_current;
+    twod_req_t twod_req_current;
     // control signals
     logic req_fifo_full;
     logic req_fifo_empty;
@@ -37,7 +39,7 @@ module axi_dma_twod_ext #(
 
     fifo_v3 #(
         .DEPTH       ( REQ_FIFO_DEPTH            ),
-        .dtype       ( axi_dma_pkg::twod_req_t   )
+        .dtype       ( twod_req_t                )
     ) i_twod_req_fifo_v3 (
         .clk_i       ( clk_i              ),
         .rst_ni      ( rst_ni             ),

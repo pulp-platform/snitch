@@ -6,6 +6,8 @@ editorconfig-checker
 flake8
 gitpython
 hjson
+jsonref
+jsonschema
 mako
 tabulate
 yamlfmt

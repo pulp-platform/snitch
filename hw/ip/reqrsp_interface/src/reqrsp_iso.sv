@@ -19,7 +19,8 @@ module reqrsp_iso #(
     /// Response type.
     parameter type rsp_t             = logic,
     /// Bypass.
-    parameter bit  Bypass            = '0
+    parameter bit  BypassReq         = 0,
+    parameter bit  BypassRsp         = 0
 ) (
     /// Clock of source clock domain.
     input  logic src_clk_i,
@@ -47,7 +48,7 @@ module reqrsp_iso #(
 
   isochronous_spill_register #(
     .T (reqrsp_req_chan_t),
-    .Bypass (Bypass)
+    .Bypass (BypassReq)
   ) i_isochronous_spill_register_q (
     .src_clk_i (src_clk_i),
     .src_rst_ni (src_rst_ni),
@@ -63,7 +64,7 @@ module reqrsp_iso #(
 
   isochronous_spill_register #(
     .T (reqrsp_rsp_chan_t),
-    .Bypass (Bypass)
+    .Bypass (BypassRsp)
   ) i_isochronous_spill_register_p (
     .src_clk_i (dst_clk_i),
     .src_rst_ni (dst_rst_ni),

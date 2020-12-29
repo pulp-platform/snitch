@@ -57,6 +57,7 @@ sources:
   - src/sync_wedge.sv
   - src/unread.sv
   # Level 1
+  - src/addr_decode_napot.sv
   - src/addr_decode.sv
   - src/cb_filter.sv
   - src/cdc_fifo_2phase.sv
@@ -68,7 +69,6 @@ sources:
   - src/lzc.sv
   - src/max_counter.sv
   - src/rstgen.sv
-  - src/stream_addr_demux.sv
   - src/stream_delay.sv
   - src/stream_fifo.sv
   - src/stream_fork_dynamic.sv

@@ -9,24 +9,27 @@
 /// Author: Florian Zaruba , <zarubaf@iis.ee.ethz.ch>
 
 module snitch_shared_muldiv #(
-  parameter int unsigned IdWidth = 5
+  parameter int unsigned IdWidth = 5,
+  parameter int unsigned DataWidth = 0,
+  /// Derived parameter *Do not override*
+  parameter type data_t = logic [DataWidth-1:0]
 ) (
-  input  logic                            clk_i,
-  input  logic                            rst_i,
+  input  logic                clk_i,
+  input  logic                rst_ni,
   // Accelerator Interface - Slave
-  input  logic              [       31:0] acc_qaddr_i,  // unused
-  input  logic              [IdWidth-1:0] acc_qid_i,
-  input  logic              [       31:0] acc_qdata_op_i,  // RISC-V instruction
-  input  snitch_pkg::data_t               acc_qdata_arga_i,
-  input  snitch_pkg::data_t               acc_qdata_argb_i,
-  input  snitch_pkg::data_t               acc_qdata_argc_i,
-  input  logic                            acc_qvalid_i,
-  output logic                            acc_qready_o,
-  output snitch_pkg::data_t               acc_pdata_o,
-  output logic              [IdWidth-1:0] acc_pid_o,
-  output logic                            acc_perror_o,
-  output logic                            acc_pvalid_o,
-  input  logic                            acc_pready_i
+  input  logic  [31:0]        acc_qaddr_i,  // unused
+  input  logic  [IdWidth-1:0] acc_qid_i,
+  input  logic  [31:0]        acc_qdata_op_i,  // RISC-V instruction
+  input  data_t               acc_qdata_arga_i,
+  input  data_t               acc_qdata_argb_i,
+  input  data_t               acc_qdata_argc_i,
+  input  logic                acc_qvalid_i,
+  output logic                acc_qready_o,
+  output data_t               acc_pdata_o,
+  output logic [IdWidth-1:0]  acc_pid_o,
+  output logic                acc_perror_o,
+  output logic                acc_pvalid_o,
+  input  logic                acc_pready_i
 );
   typedef struct packed {
     logic [31:0] result;
@@ -66,7 +69,7 @@ module snitch_shared_muldiv #(
     .IdWidth   (IdWidth)
   ) i_multiplier (
     .clk_i,
-    .rst_i,
+    .rst_ni,
     .id_i       (acc_qid_i),
     .operator_i (acc_qdata_op_i),
     .operand_a_i(acc_qdata_arga_i[31:0]),
@@ -84,7 +87,7 @@ module snitch_shared_muldiv #(
     .IdWidth   (IdWidth)
   ) i_div (
     .clk_i     (clk_i),
-    .rst_ni    (~rst_i),
+    .rst_ni    (rst_ni),
     .id_i      (acc_qid_i),
     .operator_i(acc_qdata_op_i),
     .op_a_i    (acc_qdata_arga_i[31:0]),
@@ -102,7 +105,7 @@ module snitch_shared_muldiv #(
     .N_INP (2)
   ) i_stream_arbiter (
     .clk_i,
-    .rst_ni     (~rst_i),
+    .rst_ni     (rst_ni),
     .inp_data_i ({div, mul}),
     .inp_valid_i({div_valid, mul_valid}),
     .inp_ready_o({div_ready, mul_ready}),
@@ -119,7 +122,7 @@ module multiplier #(
   parameter int unsigned IdWidth = 5
 ) (
   input  logic               clk_i,
-  input  logic               rst_i,
+  input  logic               rst_ni,
   input  logic [IdWidth-1:0] id_i,
   input  logic [       31:0] operator_i,
   input  logic [  Width-1:0] operand_a_i,
@@ -191,7 +194,7 @@ module multiplier #(
     if (valid_q & ready_i) valid_d = 0;
     if (valid_i & ready_o) valid_d = 1;
   end
-  `FFSR(valid_q, valid_d, '0, clk_i, rst_i)
+  `FF(valid_q, valid_d, '0)
   // Pipe-line registers
   `FFLNR(id_q, id_i, (valid_i & ready_o), clk_i)
   `FFLNR(result_q, result_d, (valid_i & ready_o), clk_i)

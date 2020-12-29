@@ -21,7 +21,3 @@ sources:
 - src/axi_dma_tc_snitch_fe_id_gen.sv
 # Level 2:
 - src/axi_dma_tc_snitch_fe.sv
-- target: test
-  files:
-  - test/axi_dma_tb.sv
-  - test/fixture_oned_axi_dma.sv

@@ -23,6 +23,10 @@ module axi_to_reg #(
   parameter int ID_WIDTH = -1,
   /// The width of the user signal.
   parameter int USER_WIDTH = -1,
+  /// Maximum number of outstanding writes.
+  parameter int unsigned AXI_MAX_WRITE_TXNS = 32'd2,
+  /// Maximum number of outstanding reads.
+  parameter int unsigned AXI_MAX_READ_TXNS  = 32'd2,
   /// Whether the AXI-Lite W channel should be decoupled with a register. This
   /// can help break long paths at the expense of registers.
   parameter bit DECOUPLE_W = 1,
@@ -66,9 +70,9 @@ module axi_to_reg #(
     .AxiIdWidth       ( ID_WIDTH   ),
     .AxiUserWidth     ( USER_WIDTH ),
     /// Maximum number of outstanding writes.
-    .AxiMaxWriteTxns ( 2 ),
+    .AxiMaxWriteTxns ( AXI_MAX_WRITE_TXNS ),
     /// Maximum number of outstanding reads.
-    .AxiMaxReadTxns  ( 2 ),
+    .AxiMaxReadTxns  ( AXI_MAX_READ_TXNS ),
     .FallThrough     ( 0 ),
     .full_req_t      ( axi_req_t ),
     .full_resp_t     ( axi_rsp_t ),
@@ -117,6 +121,10 @@ module axi_to_reg_intf #(
   parameter int ID_WIDTH = -1,
   /// The width of the user signal.
   parameter int USER_WIDTH = -1,
+  /// Maximum number of outstanding writes.
+  parameter int unsigned AXI_MAX_WRITE_TXNS = 32'd2,
+  /// Maximum number of outstanding reads.
+  parameter int unsigned AXI_MAX_READ_TXNS  = 32'd2,
   /// Whether the AXI-Lite W channel should be decoupled with a register. This
   /// can help break long paths at the expense of registers.
   parameter bit DECOUPLE_W = 1
@@ -140,10 +148,10 @@ module axi_to_reg_intf #(
     .AXI_ID_WIDTH       ( ID_WIDTH   ),
     .AXI_USER_WIDTH     ( USER_WIDTH ),
     /// Maximum number of outstanding writes.
-    .AXI_MAX_WRITE_TXNS ( 2 ),
+    .AXI_MAX_WRITE_TXNS ( AXI_MAX_WRITE_TXNS ),
     /// Maximum number of outstanding reads.
-    .AXI_MAX_READ_TXNS  ( 2 ),
-    .FALL_THROUGH       ( 0 )
+    .AXI_MAX_READ_TXNS  ( AXI_MAX_READ_TXNS ),
+    .FALL_THROUGH       ( 0                 )
   ) i_axi_to_axi_lite (
     .clk_i,
     .rst_ni,

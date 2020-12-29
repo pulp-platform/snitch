@@ -174,7 +174,8 @@ module reqrsp_to_tcdm_tb import reqrsp_pkg::*; #(
       tcdm_monitor.req_mbx.get(tcdm_req);
       tcdm_monitor.rsp_mbx.get(tcdm_rsp);
       nr_transactions++;
-      assert(tcdm_req.addr == req.addr) else $error("Expected `%h` got `%h`", req.addr, tcdm_req.addr);
+      assert(tcdm_req.addr == req.addr)
+        else $error("Expected `%h` got `%h`", req.addr, tcdm_req.addr);
       assert(tcdm_req.write == req.write);
       assert(tcdm_req.amo == req.amo);
       assert(tcdm_req.data == req.data);

@@ -4,11 +4,20 @@
 
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 
-module snitch_ssr_streamer import snitch_pkg::*; (
+module snitch_ssr_streamer import snitch_pkg::*; #(
+  parameter int unsigned AddrWidth = 0,
+  parameter int unsigned DataWidth = 0,
+  parameter int unsigned SSRNrCredits = 0,
+  parameter type tcdm_req_t = logic,
+  parameter type tcdm_rsp_t = logic,
+  /// Derived parameter *Do not override*
+  parameter type addr_t = logic [AddrWidth-1:0],
+  parameter type data_t = logic [DataWidth-1:0]
+) (
   input  logic             clk_i,
   input  logic             rst_ni,
   // Access to configuration registers (REG_BUS).
-  input  logic [6:0]       cfg_word_i,
+  input  logic [11:0]      cfg_word_i,
   input  logic             cfg_write_i, // 0 = read, 1 = write
   output logic [31:0]      cfg_rdata_o,
   input  logic [31:0]      cfg_wdata_i,
@@ -25,20 +34,12 @@ module snitch_ssr_streamer import snitch_pkg::*; (
   output logic  [0:0]      ssr_wready_o,
   input  logic  [0:0]      ssr_wdone_i,
   // Ports into memory.
-  output addr_t [2:0]      mem_qaddr_o,
-  output logic  [2:0]      mem_qwrite_o,
-  output strb_t [2:0]      mem_qstrb_o,
-  output data_t [2:0]      mem_qdata_o,
-  output logic  [2:0]      mem_qvalid_o,
-  input  logic  [2:0]      mem_qready_i,
+  output tcdm_req_t [2:0]  mem_req_o,
+  input  tcdm_rsp_t [2:0]  mem_rsp_i,
 
-  input  logic  [2:0]      mem_pvalid_i,
-  input  data_t [2:0]      mem_pdata_i,
-  output logic  [2:0]      mem_pready_o,
-  input  logic  [2:0]      mem_perror_i
+  input  addr_t            tcdm_start_address_i
 );
-  // We are always ready as this was adapted from the creepy req/gnt procotocl.
-  assign mem_pready_o = '1;
+
   data_t [2:0] lane_rdata;
   data_t [2:0] lane_wdata;
   logic  [2:0] lane_write;
@@ -49,7 +50,9 @@ module snitch_ssr_streamer import snitch_pkg::*; (
   logic [2:0][31:0] dmcfg_rdata;
   logic [2:0]       dmcfg_strobe; // which data mover is currently addressed
 
-  snitch_ssr_switch i_switch (
+  snitch_ssr_switch #(
+    .DataWidth (DataWidth)
+  ) i_switch (
     .clk_i,
     .rst_ni,
     .ssr_raddr_i,
@@ -79,7 +82,7 @@ module snitch_ssr_streamer import snitch_pkg::*; (
 
     fifo_v3 #(
       .FALL_THROUGH ( 0           ),
-      .DATA_WIDTH   ( DLEN        ),
+      .DATA_WIDTH   ( DataWidth   ),
       .DEPTH        ( SSRNrCredits )
     ) i_fifo (
       .clk_i,
@@ -95,7 +98,11 @@ module snitch_ssr_streamer import snitch_pkg::*; (
       .pop_i      ( fifo_pop   )
     );
 
-    snitch_ssr_addr_gen i_addr_gen (
+    logic mem_req_qvalid;
+
+    snitch_ssr_addr_gen #(
+      .AddrWidth (AddrWidth)
+    ) i_addr_gen (
       .clk_i,
       .rst_ni,
       .cfg_word_i     ( dmcfg_word                        ),
@@ -103,34 +110,38 @@ module snitch_ssr_streamer import snitch_pkg::*; (
       .cfg_wdata_i    ( cfg_wdata_i                       ),
       .cfg_write_i    ( cfg_write_i & dmcfg_strobe[i]     ),
       .reg_rep_o      ( rep_max                           ),
-      .mem_addr_o     ( mem_qaddr_o[i]                    ),
-      .mem_write_o    ( mem_qwrite_o[i]                    ),
+      .mem_addr_o     ( mem_req_o[i].q.addr               ),
+      .mem_write_o    ( mem_req_o[i].q.write              ),
       .mem_valid_o    ( mover_valid                       ),
-      .mem_ready_i    ( mem_qvalid_o[i] & mem_qready_i[i] )
+      .mem_ready_i    ( mem_req_qvalid & mem_rsp_i[i].q_ready ),
+      .tcdm_start_address_i
     );
 
+    assign mem_req_o[i].q_valid = mem_req_qvalid;
+    assign mem_req_o[i].q.amo = reqrsp_pkg::AMONone;
+
     assign lane_rdata[i]  = fifo_out;
-    assign mem_qdata_o[i] = fifo_out;
-    assign mem_qstrb_o[i] = '1;
+    assign mem_req_o[i].q.data = fifo_out;
+    assign mem_req_o[i].q.strb = '1;
 
     always_comb begin
-      if (mem_qwrite_o[i]) begin
+      if (mem_req_o[i].q.write) begin
         lane_valid[i] = ~fifo_full;
-        mem_qvalid_o[i] = mover_valid & ~fifo_empty;
+        mem_req_qvalid = mover_valid & ~fifo_empty;
         fifo_push = lane_ready[i] & ~fifo_full;
         fifo_in = lane_wdata[i];
         rep_enable = 0;
-        fifo_pop = mem_qvalid_o[i] & mem_qready_i[i];
+        fifo_pop = mem_req_qvalid & mem_rsp_i[i].q_ready;
         credit_take = fifo_push;
-        credit_give = mem_pvalid_i[i];
+        credit_give = mem_rsp_i[i].p_valid;
       end else begin
         lane_valid[i] = ~fifo_empty;
-        mem_qvalid_o[i] = mover_valid & ~fifo_full & has_credit;
-        fifo_push = mem_pvalid_i[i];
-        fifo_in = mem_pdata_i[i];
+        mem_req_qvalid = mover_valid & ~fifo_full & has_credit;
+        fifo_push = mem_rsp_i[i].p_valid;
+        fifo_in = mem_rsp_i[i].p.data;
         rep_enable = lane_ready[i] & ~fifo_empty;
         fifo_pop = rep_enable & rep_done;
-        credit_take = mem_qvalid_o[i] & mem_qready_i[i];
+        credit_take = mem_req_qvalid & mem_rsp_i[i].q_ready;
         credit_give = fifo_pop;
       end
     end
@@ -161,7 +172,7 @@ module snitch_ssr_streamer import snitch_pkg::*; (
   // use the upper address bits to select one of the data movers, or select
   // all if the bits are all 1.
   always_comb begin
-    logic [1:0] upper_addr;
+    logic [11:4] upper_addr;
     {upper_addr, dmcfg_word} = cfg_word_i;
     dmcfg_strobe = (upper_addr == '1 ? '1 : (1 << upper_addr));
     cfg_rdata_o = dmcfg_rdata[upper_addr];
