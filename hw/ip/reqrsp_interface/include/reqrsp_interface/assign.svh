@@ -63,9 +63,9 @@
 // Usage Example:
 // `REQRSP_ASSIGN_FROM_REQ(my_if, my_req_struct)
 `define REQRSP_ASSIGN_FROM_REQ(reqrsp_if, req_struct)        \
-  `REQRSP_ASSIGN_READY(assign, reqrsp_if, req_struct, q)     \
+  `REQRSP_ASSIGN_VALID(assign, reqrsp_if, req_struct, q)     \
   `REQRSP_ASSIGN_Q_CHAN(assign, reqrsp_if, req_struct, _, .) \
-  `REQRSP_ASSIGN_VALID(assign, reqrsp_if, req_struct, p)
+  `REQRSP_ASSIGN_READY(assign, reqrsp_if, req_struct, p)
 
 `define REQRSP_ASSIGN_FROM_RESP(reqrsp_if, resp_struct)       \
   `REQRSP_ASSIGN_READY(assign, reqrsp_if, resp_struct, q)     \

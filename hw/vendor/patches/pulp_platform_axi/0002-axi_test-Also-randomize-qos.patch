@@ -1,0 +1,43 @@
+From 91dc62e9d4a054dd6428ad0b90edfa271f0021d9 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Wed, 13 Jan 2021 01:03:59 +0100
+Subject: [PATCH 2/4] axi_test: Also randomize qos
+
+---
+ src/axi_test.sv | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/axi_test.sv b/src/axi_test.sv
+index 96d27bf..110d3bd 100644
+--- a/src/axi_test.sv
++++ b/src/axi_test.sv
+@@ -236,7 +236,7 @@ package axi_test;
+     logic               ax_lock   = '0;
+     logic [3:0]         ax_cache  = '0;
+     logic [2:0]         ax_prot   = '0;
+-    logic [3:0]         ax_qos    = '0;
++    rand logic [3:0]    ax_qos    = '0;
+     logic [3:0]         ax_region = '0;
+     logic [5:0]         ax_atop   = '0; // Only defined on the AW channel.
+     rand logic [UW-1:0] ax_user   = '0;
+@@ -732,6 +732,7 @@ package axi_test;
+       automatic burst_t burst;
+       automatic cache_t cache;
+       automatic id_t id;
++      automatic qos_t qos;
+       automatic len_t len;
+       automatic size_t size;
+       automatic int unsigned mem_region_idx;
+@@ -835,7 +836,9 @@ package axi_test;
+ 
+       ax_beat.ax_addr = addr;
+       rand_success = std::randomize(id); assert(rand_success);
++      assert(std::randomize(qos));
+       ax_beat.ax_id = id;
++      ax_beat.ax_qos = qos;
+       return ax_beat;
+     endfunction
+ 
+-- 
+2.25.1.377.g2d2118b814
+

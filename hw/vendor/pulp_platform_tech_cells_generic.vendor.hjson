@@ -14,7 +14,6 @@
 
   exclude_from_upstream: [
     "scripts",
-    "test",
     "src/deprecated",
     "ips_list.yml",
     "src_files.yml"
