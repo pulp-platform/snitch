@@ -123,7 +123,7 @@ module snitch_lsu import snitch_pkg::*; #(
   /* verilator lint_on WIDTH */
 
   // the interface didn't accept our request yet
-  assign lsu_qready_o = ~(data_qvalid_o & ~data_qready_i) & ~laq_full;
+  assign lsu_qready_o = ~(data_qvalid_o & ~data_qready_i) & (lsu_qwrite | ~laq_full);
   assign laq_push = ~lsu_qwrite & data_qready_i & data_qvalid_o & ~laq_full;
 
   // Return Path
