@@ -149,7 +149,11 @@ module tcdm_mux_intf #(
     .mst_rsp_i (tcdm_mst_rsp)
   );
 
+<<<<<<< HEAD
   for (genvar i = 0; i < NrPorts; i++) begin : gen_interface_assignment
+=======
+    for (genvar i = 0; i < NrPorts; i++) begin : gen_interface_assignment
+>>>>>>> 4761089... fixup! tcdm_interface: Add doc and include
     `TCDM_ASSIGN_TO_REQ(tcdm_slv_req[i], slv[i])
     `TCDM_ASSIGN_FROM_RESP(slv[i], tcdm_slv_rsp[i])
   end
@@ -157,4 +161,9 @@ module tcdm_mux_intf #(
   `TCDM_ASSIGN_FROM_REQ(mst, tcdm_mst_req)
   `TCDM_ASSIGN_TO_RESP(tcdm_mst_rsp, mst)
 
+<<<<<<< HEAD
 endmodule
+=======
+
+endmodule
+>>>>>>> 4761089... fixup! tcdm_interface: Add doc and include
