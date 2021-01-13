@@ -11,6 +11,8 @@ AMBA standard:
 - The receiver asserts `ready` whenever it is ready to receive the transaction.
 - When both `valid` and `ready` are high the transaction is successful.
 
+The bus is little endian.
+
 ## Channels
 
 The two channels are:
@@ -55,14 +57,24 @@ Atomic memory operations supported are:
 | And, Or, Xor | Bitwise `and`, `or`, and `xor` operation.                                 |
 | Max, Maxu    | Signed and unsigned maximum operation.                                    |
 | Min, Minu    | Signed and unsigned minimum operation.                                    |
-| Lr           | Places a reservation on the given memory address                          |
-| Sc           | Conditional store, returns `0` on `q.data` if successfull, `1` otherwise. |
 
 
 The operation reads the value at the given address and returns the read value on
 the `p` channel. The same memory location is updated with the data and operation
 supplied on the `q.amo` and `q.data` signals. The `q.write` signal must be set.
 
+## Load-Reserved/Store-conditional
+
+The `q.amo` field carries the information on whether the transaction encodes an
+LR/SC.
+
+| Operation    | Description                                                               |
+| ------------ | ------------------------------------------------------------------------- |
+| Lr           | Places a reservation on the given memory address                          |
+| Sc           | Conditional store, returns `0` on `q.data` if successfull, `1` otherwise. |
+
+For `Sc` the `q.write = 0` signal must be set. `Lr` is signalled as a read with
+`q.write = 0`.
 
 ## Error
 

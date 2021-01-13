@@ -2,240 +2,350 @@
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
 
-// Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// AUthor: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
-/// A protocol adapter from REQRSP to AXI4.
-module reqrsp_to_axi #(
-    /// The address width of the REQRSP bus. >=1.
-    parameter int IN_AW = -1,
-    /// The data width of the REQRSP bus. >=1.
-    parameter int IN_DW = -1,
-    /// The ID width of the REQRSP bus. >=0.
-    parameter int IN_IW = -1,
-    /// The address width of the AXI bus. >=1.
-    parameter int OUT_AW = -1,
-    /// The data width of the AXI bus. >=1.
-    parameter int OUT_DW = -1,
-    /// The ID width of the AXI bus. >=0.
-    parameter int OUT_IW = -1,
-    /// The user data width of the AXI bus. >=0.
-    parameter int OUT_UW = -1,
-    /// The number of reads that may be pending at any time.
-    parameter int NUM_PENDING = 4
-)(
-    input logic    clk_i,
-    input logic    rst_ni,
-    REQRSP_BUS.in  reqrsp_i,
-    AXI_BUS.Master axi_o
+`include "common_cells/registers.svh"
+`include "common_cells/assertions.svh"
+
+/// Convert reqrsp to AXI.
+///
+/// Two things make this module a bit more special:
+/// 1. We need to be careful with the memory model: AXI does not imply any
+///    ordering between the read and the write channel. On the other hand the
+///    reqrsp protocol does (implicitly because everything is in issue order).
+/// 2. Atomic memory operations are supported and they are a bit quirky in the
+///    AXI5 standard. In particular the kind of break the assumption that every
+///    `AW` implies exactly one `B` because the read data is also returned on
+///    the `R` channel.
+///
+/// ## Memory Ordering
+///
+/// 1. Atomics need to block and wait until the ID becomes available again.
+/// 2. Reads can go after reads, AXI will maintain the ordering.
+/// 3. Similarly, writes can go after writes, AXI will also maintain the
+///    ordering there.
+///
+/// This has the drawback that we are overly conservative when only
+/// point-to-point ordering is needed. In the future one can implement two
+/// regions: (i) one where the ordering between reads and writs is point to
+/// point (ii) one where the ordering is strong as it is currently the case.
+/// That would also mean that we would need to keep a FIFO width the arbitration
+/// decisions so that we can route the response from the correct channel.
+///
+/// ## Complexity
+///
+/// The module just needs to save the amount of transactions which are currently
+/// in-flight. This parameter is bound by `MAX_TRANS` and O(log2(MAX_TRANS)))
+/// storage complexity is needed.
+///
+/// This module does not emit any bursts, but AXI5 capability is needed because
+/// of the atomic memory operations.
+module reqrsp_to_axi import reqrsp_pkg::*; #(
+  /// Number of same transactions which can be in-flight
+  /// simulatnously. Must be greater than 1.
+  parameter int unsigned MAX_TRANS = 4,
+  /// ID with which to send the transactions.
+  parameter int unsigned ID = 0,
+  /// Data width of bus, must be 32 or 64.
+  parameter int unsigned DATA_WIDTH = 32'b0,
+  parameter type reqrsp_req_t = logic,
+  parameter type reqrsp_rsp_t = logic,
+  parameter type axi_req_t = logic,
+  parameter type axi_rsp_t = logic
+) (
+  input  logic clk_i,
+  input  logic rst_ni,
+  input  reqrsp_req_t reqrsp_req_i,
+  output reqrsp_rsp_t reqrsp_rsp_o,
+  output axi_req_t axi_req_o,
+  input  axi_rsp_t axi_rsp_i
 );
 
-    localparam int unsigned InAlign   = $clog2(IN_DW/8);
-    localparam int unsigned OutAlign  = $clog2(OUT_DW/8);
-    localparam int unsigned AlignDiffReq = InAlign > OutAlign ? InAlign-OutAlign : 0;
-    localparam int unsigned AlignDiffRsp = OutAlign > InAlign ? OutAlign-InAlign : 0;
+  localparam int unsigned CounterWidth = cf_math_pkg::idx_width(MAX_TRANS);
+  typedef logic [CounterWidth-1:0] cnt_t;
+  logic req_is_amo;
+  logic atomic_in_flight_d, atomic_in_flight_q;
+  cnt_t read_cnt_d, read_cnt_q;
+  cnt_t write_cnt_d, write_cnt_q;
+  logic [DATA_WIDTH-1:0] write_data;
 
-    // Check invariants.
-    `ifndef SYNTHESIS
-    initial begin
-        assert(IN_AW  >  0);
-        assert(IN_DW  >  0);
-        assert(IN_IW  >= 0);
-        assert(OUT_AW >  0);
-        assert(OUT_DW >  0);
-        assert(OUT_IW >= 0);
-        assert(OUT_UW >= 0);
-        assert(axi_o.AXI_ADDR_WIDTH == OUT_AW);
-        assert(axi_o.AXI_DATA_WIDTH == OUT_DW);
-        assert(axi_o.AXI_ID_WIDTH   == OUT_IW);
-        assert(axi_o.AXI_USER_WIDTH == OUT_UW);
-        assert(reqrsp_i.ADDR_WIDTH  == IN_AW);
-        assert(reqrsp_i.DATA_WIDTH  == IN_DW);
-        assert(OUT_IW >= IN_IW); // this could be removed with proper ID remapping
-        assert(OUT_DW >= IN_DW);
+  logic q_valid, q_ready;
+  logic q_valid_read, q_ready_read;
+  logic q_valid_write, q_ready_write;
+
+  logic delay_r_for_atomic, delay_r_for_atomic_q;
+  logic r_valid, r_ready;
+
+  // Globally no new transactions can be accepted if there is an unresolved
+  // atomic transactions and per channel we can not accept a new transaction iff:
+  // - The other channel has in-flight transactions (we can't guarantee the ordering).
+  // - The counter would overflow.
+  logic stall_read, dec_read_cnt, read_cnt_not_zero;
+  logic stall_write, dec_write_cnt, write_cnt_not_zero;
+  // AMos need to make sure that they don't re-use an in-flight ID.
+  logic stall_amo;
+
+  assign req_is_amo = is_amo(reqrsp_req_i.q.amo);
+
+  assign dec_read_cnt = r_valid & r_ready;
+  assign dec_write_cnt = axi_rsp_i.b_valid & axi_req_o.b_ready;
+
+  // Read count isn't zero in this cycle.
+  assign read_cnt_not_zero = read_cnt_q > 1 | (read_cnt_q == 1 & ~dec_read_cnt);
+  // Write count isn't zero in this cycle.
+  assign write_cnt_not_zero = write_cnt_q > 1 | (write_cnt_q == 1 & ~dec_write_cnt);
+  // Reads and writes stall iff there are transactions of the othter type in place.
+  // See ordering rules above.
+  assign stall_write = reqrsp_req_i.q.write & (write_cnt_q == MAX_TRANS-1 | read_cnt_not_zero);
+  assign stall_read = !reqrsp_req_i.q.write & (read_cnt_q == MAX_TRANS-1 | write_cnt_not_zero);
+  // For atomics we additionally need to check whether there are any in-flight
+  // writes, as atomci are already write transactions this wouldn't be captured
+  // by the regular case. This makes sure that neither read nor writes are
+  // in-flight.
+  assign stall_amo = req_is_amo & write_cnt_not_zero;
+
+  // Incoming handshake. Make sure we can accept the new transactions according
+  // to our rules.
+  always_comb begin
+    q_valid = reqrsp_req_i.q_valid;
+    reqrsp_rsp_o.q_ready = q_ready;
+    // Stall new transaction.
+    if (atomic_in_flight_q || stall_write || stall_read || stall_amo) begin
+      q_valid = 1'b0;
+      reqrsp_rsp_o.q_ready = 1'b0;
     end
-    `endif
+  end
 
-    // The write queue keeps track of the data and strobes that need to go onto
-    // the AXI W channel.
-    typedef struct packed {
-        logic [AlignDiffReq-1:0] offset;
-        logic [IN_DW-1:0]          data;
-        logic [IN_DW/8-1:0]        strb;
-    } write_t;
+  assign q_valid_read = q_valid & ~reqrsp_req_i.q.write;
+  assign q_valid_write = q_valid & reqrsp_req_i.q.write;
+  assign q_ready = (q_valid_read & q_ready_read) | (q_valid_write & q_ready_write);
 
-    logic   write_queue_full;
-    logic   write_queue_empty;
-    write_t write_queue_in, write_queue_out;
+  // ------------------
+  // Counter Management
+  // ------------------
+  // Count the number of in-fligh reads.
+  `FF(read_cnt_q, read_cnt_d, '0)
+  // Count the number of in-fligh writes.
+  `FF(write_cnt_q, write_cnt_d, '0)
+  `FF(atomic_in_flight_q, atomic_in_flight_d, '0)
 
-    assign write_queue_in = '{
-        reqrsp_i.q_addr >> InAlign,
-        reqrsp_i.q_data,
-        reqrsp_i.q_strb
-    };
+  always_comb begin
+    atomic_in_flight_d = atomic_in_flight_q;
+    read_cnt_d = read_cnt_q;
+    write_cnt_d = write_cnt_q;
 
-    fifo #(
-        .DEPTH        ( 1       ),
-        .dtype        ( write_t )
-    ) i_write_queue (
-        .clk_i       ( clk_i                                               ),
-        .rst_ni      ( rst_ni                                              ),
-        .flush_i     ( 1'b0                                                ),
-        .testmode_i  ( 1'b0                                                ),
-        .full_o      ( write_queue_full                                    ),
-        .empty_o     ( write_queue_empty                                   ),
-        .threshold_o (                                                     ),
-        .data_i      ( write_queue_in                                      ),
-        .push_i      ( reqrsp_i.q_valid & reqrsp_i.q_ready & reqrsp_i.q_write ),
-        .data_o      ( write_queue_out                                     ),
-        .pop_i       ( axi_o.w_valid & axi_o.w_ready & axi_o.w_last        )
-    );
+    if (reqrsp_req_i.q_valid && reqrsp_rsp_o.q_ready) begin
+      // Set atomic in-flight flag if we sent an atomic.
+      if (req_is_amo) begin
+        atomic_in_flight_d = 1'b1;
+        read_cnt_d++;
+      end
 
-    // The read queue keeps track of the alignment of read data.
-    typedef struct packed {
-        logic [AlignDiffRsp-1:0] offset;
-    } read_t;
-
-    logic  read_queue_full;
-    logic  read_queue_empty;
-    read_t read_queue_in, read_queue_out;
-
-    assign read_queue_in = '{reqrsp_i.q_addr >> InAlign};
-
-    fifo #(
-        .DEPTH ( NUM_PENDING ),
-        .dtype ( read_t      )
-    ) i_read_queue (
-        .clk_i       ( clk_i                                                ),
-        .rst_ni      ( rst_ni                                               ),
-        .flush_i     ( 1'b0                                                 ),
-        .testmode_i  ( 1'b0                                                 ),
-        .full_o      ( read_queue_full                                      ),
-        .empty_o     ( read_queue_empty                                     ),
-        .threshold_o (                                                      ),
-        .data_i      ( read_queue_in                                        ),
-        .push_i      ( reqrsp_i.q_valid & reqrsp_i.q_ready & ~reqrsp_i.q_write ),
-        .data_o      ( read_queue_out                                       ),
-        .pop_i       ( axi_o.r_valid & axi_o.r_ready & axi_o.r_last         )
-    );
-
-    // Generate the appropriate AW and AR requests from the incoming request.
-    always_comb begin : p_aw_ar
-        axi_o.aw_id     = 0;
-        axi_o.aw_addr   = reqrsp_i.q_addr >> OutAlign << OutAlign;
-        axi_o.aw_len    = 2**AlignDiffReq - 1;
-        axi_o.aw_size   = InAlign < OutAlign ? InAlign : OutAlign;
-        axi_o.aw_burst  = axi_pkg::BURST_INCR;
-        axi_o.aw_lock   = '0;
-        axi_o.aw_cache  = '0;
-        axi_o.aw_prot   = '0;
-        axi_o.aw_qos    = '0;
-        axi_o.aw_region = '0;
-        axi_o.aw_user   = '0;
-        axi_o.aw_valid  = '0;
-        axi_o.aw_atop   = '0;
-
-        axi_o.ar_id     = 0;
-        axi_o.ar_addr   = reqrsp_i.q_addr >> OutAlign << OutAlign;
-        axi_o.ar_len    = 2**AlignDiffReq - 1;
-        axi_o.ar_size   = InAlign < OutAlign ? InAlign : OutAlign;
-        axi_o.ar_burst  = axi_pkg::BURST_INCR;
-        axi_o.ar_lock   = '0;
-        axi_o.ar_cache  = '0;
-        axi_o.ar_prot   = '0;
-        axi_o.ar_qos    = '0;
-        axi_o.ar_region = '0;
-        axi_o.ar_user   = '0;
-        axi_o.ar_valid  = '0;
-        reqrsp_i.q_ready = 0;
-
-        if (reqrsp_i.q_valid) begin
-            if (reqrsp_i.q_write) begin
-                axi_o.aw_valid = ~write_queue_full;
-                reqrsp_i.q_ready = axi_o.aw_ready & ~write_queue_full;
-            end else begin
-                axi_o.ar_valid = ~read_queue_full;
-                reqrsp_i.q_ready = axi_o.ar_ready & ~read_queue_full;
-            end
-        end
+      if (!reqrsp_req_i.q.write) read_cnt_d++;
+      else write_cnt_d++;
     end
 
-    // Generate the W transactions.
-    logic [AlignDiffReq-1:0] w_count, w_count_q;
-
-    if (IN_DW > OUT_DW) begin : gen_in_dw_smaller_than_out_dw
-        always_ff @(posedge clk_i, negedge rst_ni) begin
-            if (!rst_ni)
-                w_count_q <= 0;
-            else if (axi_o.w_valid && axi_o.w_ready && IN_DW > OUT_DW)
-                w_count_q <= w_count_q + 1;
-        end
-        assign w_count = w_count_q;
-    end else begin : gen_in_dw_greater_than_out_dw
-        assign w_count = 0;
+    // Reset atomic in-flight flag.
+    if (read_cnt_d == 0 && write_cnt_d == 0) begin
+      atomic_in_flight_d = 1'b0;
     end
+    // Decrement the write counter again when the signals arrived.
+    if (dec_read_cnt) read_cnt_d--;
+    if (dec_write_cnt) write_cnt_d--;
+  end
 
-    always_comb begin : p_w
-        if (IN_DW > OUT_DW) begin
-            axi_o.w_data = write_queue_out.data >> (w_count * OUT_DW);
-            axi_o.w_strb = write_queue_out.strb >> (w_count * OUT_DW);
-        end else begin
-            for (int i = 0; i < OUT_DW/IN_DW; i++) begin
-                axi_o.w_data[i*IN_DW   +: IN_DW  ] = write_queue_out.data;
-                // axi_o.w_strb[i*IN_DW/8 +: IN_DW/8] = write_queue_out.strb;
-            end
-            // axi_o.w_strb &= ~('1 << IN_DW/8) << (write_queue_out.offset * IN_DW/8);
-            axi_o.w_strb = write_queue_out.strb;
-        end
-        axi_o.w_last  = w_count == 2**AlignDiffReq - 1;
-        axi_o.w_user  = 0;
-        axi_o.w_valid = ~write_queue_empty;
+  `ASSERT(WriteCntOverflow,  (write_cnt_q == MAX_TRANS - 1) |=> !(write_cnt_q == 0))
+  `ASSERT(ReadCntOverflow,  (read_cnt_q == MAX_TRANS - 1) |=> !(read_cnt_q == 0))
+  `ASSERT(WriteCntUnderflow, (write_cnt_q == 0) |=> !(write_cnt_q == MAX_TRANS - 1))
+  `ASSERT(ReadCntUnderflow,  (read_cnt_q == 0) |=> !(read_cnt_q == MAX_TRANS - 1))
+
+  // -------------
+  // Read Channel
+  // -------------
+
+  // AXI read bus assignment.
+  assign axi_req_o.ar.addr   = reqrsp_req_i.q.addr;
+  assign axi_req_o.ar.size   = {1'b0, reqrsp_req_i.q.size};
+  assign axi_req_o.ar.burst  = axi_pkg::BURST_INCR;
+  assign axi_req_o.ar.lock   = (reqrsp_req_i.q.amo == AMOLR);
+  assign axi_req_o.ar.cache  = axi_pkg::CACHE_MODIFIABLE;
+  assign axi_req_o.ar.id     = $unsigned(ID);
+  assign axi_req_o.ar_valid  = q_valid_read;
+  assign q_ready_read        = axi_rsp_i.ar_ready;
+
+  // -------------
+  // Write Channel
+  // -------------
+
+  // AXI write bus assignment.
+  assign axi_req_o.aw.addr   = reqrsp_req_i.q.addr;
+  assign axi_req_o.aw.size   = {1'b0, reqrsp_req_i.q.size};
+  assign axi_req_o.aw.burst  = axi_pkg::BURST_INCR;
+  assign axi_req_o.aw.lock   = (reqrsp_req_i.q.amo == AMOSC);
+  assign axi_req_o.aw.cache  = axi_pkg::CACHE_MODIFIABLE;
+  assign axi_req_o.aw.id     = $unsigned(ID);
+  assign axi_req_o.w.data    = write_data;
+  assign axi_req_o.w.strb    = reqrsp_req_i.q.strb;
+  assign axi_req_o.w.last    = 1'b1;
+
+  // Both channels need to handshake (independently).
+  stream_fork #(
+    .N_OUP (2)
+  ) i_stream_fork (
+    .clk_i,
+    .rst_ni,
+    .valid_i (q_valid_write),
+    .ready_o (q_ready_write),
+    .valid_o ({axi_req_o.aw_valid, axi_req_o.w_valid}),
+    .ready_i ({axi_rsp_i.aw_ready, axi_rsp_i.w_ready})
+  );
+
+  `ASSERT(AssertStability, q_valid_write && !q_ready_write |=> q_valid_write)
+
+  // Atomic signalling.
+  assign axi_req_o.aw.atop = to_axi_amo(reqrsp_req_i.q.amo);
+  always_comb begin
+    write_data = reqrsp_req_i.q.data;
+    if (reqrsp_req_i.q.amo == AMOAnd) begin
+      // in this case we need to invert the data to get a "CLR"
+      write_data = ~reqrsp_req_i.q.data;
     end
+  end
 
-    // The arbitration flag is used as a tie breaker when both a B and R beat
-    // are available.
-    logic arb_q, arb_dn;
+  // -----------
+  // Return Path
+  // -----------
+  // There is an atomic instruction present which didn't receive a full
+  // handshake on either the AW or W channel. We silence the R channel.
+  assign delay_r_for_atomic = q_valid_write & ~q_ready_write & req_is_amo;
 
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-        if (!rst_ni)
-            arb_q <= 0;
-        else
-            arb_q <= ~arb_dn;
+  assign r_valid = axi_rsp_i.r_valid & ~delay_r_for_atomic_q;
+  assign axi_req_o.r_ready  = r_ready & ~delay_r_for_atomic_q;
+
+  // Delay the signal for one cycle. We will never get the R response in the
+  // same cycle as the request. (Except for when the W is after the AW and the R
+  // comes in the same cycle, we will loose a cycle latency)
+  `FF(delay_r_for_atomic_q, delay_r_for_atomic, '0)
+
+  // As we can never have two read and write transactions in-flight (except for
+  // atomics) simultaneously return path arbitration becomes quite an simply an
+  // `or` between `r` and `b` channel.
+  assign reqrsp_rsp_o.p.error = (r_valid & axi_rsp_i.r.resp[1])
+                              | (axi_rsp_i.b_valid & axi_rsp_i.b.resp[1]);
+
+  // In case we have an atomic instruction in-flight we don't pass on the
+  // b channel as we are just interested in the read data. The logic in this
+  // module will make sure that we only issue new instructions if the atomic has
+  // been fully resolved.
+  assign reqrsp_rsp_o.p_valid = r_valid | (~atomic_in_flight_q & axi_rsp_i.b_valid);
+  // In case we have an atomic in flight we need to delay the r response. In AXI
+  // they can come before the interface accepted the W beat, this would mess
+  // with the counters (underflow).
+  assign r_ready = reqrsp_req_i.p_ready & r_valid;
+  assign axi_req_o.b_ready = (reqrsp_req_i.p_ready | atomic_in_flight_q) & axi_rsp_i.b_valid;
+
+  always_comb begin
+    reqrsp_rsp_o.p.data = '0;
+    // Normal case.
+    if (r_valid) reqrsp_rsp_o.p.data = axi_rsp_i.r.data;
+    // In case we got a B response and this wasn't an atomic, let's check
+    // if we need to signal an `exclusive error` i.e., check if the we got `RESP_EXOKAY`.
+    // In case we didn't, we set the response to `1` which signals a failed
+    // store conditional for the reqrsp interface.
+    if ((axi_rsp_i.b_valid && ~atomic_in_flight_q
+          && axi_rsp_i.b.resp != axi_pkg::RESP_EXOKAY)) begin
+      reqrsp_rsp_o.p.data = 1;
     end
+  end
 
+  // AXI auxiliary signal
+  assign axi_req_o.aw.len = '0;
+  assign axi_req_o.aw.user = '0;
+  assign axi_req_o.aw.qos = 4'b0;
+  assign axi_req_o.aw.prot = 3'b0;
+  assign axi_req_o.aw.region = 4'b0;
+  assign axi_req_o.ar.len = '0;
+  assign axi_req_o.ar.user = '0;
+  assign axi_req_o.ar.qos = 4'b0;
+  assign axi_req_o.ar.prot = 3'b0;
+  assign axi_req_o.ar.region = 4'b0;
+  assign axi_req_o.w.user = '0;
 
-    // Receive the B and R responses.
-    always_comb begin : p_b_r
-        axi_o.b_ready = 0;
-        axi_o.r_ready = 0;
-        reqrsp_i.p_data  = 0;
-        reqrsp_i.p_error = 0;
-        reqrsp_i.p_valid = 0;
+  // Assertions:
+  // Check that the data width is in the range of 32 or 64 bit. We didn't define
+  // any other bus widths so far.
+  `ASSERT_INIT(check_data_width, DATA_WIDTH inside {32, 64})
+  `ASSERT_INIT(max_trans_greater_than_one, MAX_TRANS > 1)
+  // 1. Assert that the in-flight counters are never both 2+ == 2+, that would
+  //    imply an illegal state.
 
-        // Arbitrate between the incoming requests.
-        if (axi_o.b_valid && axi_o.r_valid)
-            arb_dn = arb_q;
-        else if (axi_o.b_valid)
-            arb_dn = 0;
-        else if (axi_o.r_valid)
-            arb_dn = 1;
-        else
-            arb_dn = ~arb_q;
+endmodule
 
-        // Handle write responses.
-        if (axi_o.b_valid && arb_dn == 0) begin
-            reqrsp_i.p_error = axi_o.b_resp != axi_pkg::RESP_OKAY;
-            reqrsp_i.p_valid = 1;
-            axi_o.b_ready   = reqrsp_i.p_ready;
-        end
+`include "reqrsp_interface/typedef.svh"
+`include "reqrsp_interface/assign.svh"
+`include "axi/typedef.svh"
+`include "axi/assign.svh"
 
-        // Handle read responses.
-        if (axi_o.r_valid && arb_dn == 1 && !read_queue_empty) begin
-            reqrsp_i.p_data  = axi_o.r_data; // >> (read_queue_out.offset * IN_DW);
-            reqrsp_i.p_error = axi_o.r_resp != axi_pkg::RESP_OKAY;
-            reqrsp_i.p_id    = axi_o.r_id;
-            reqrsp_i.p_valid = 1;
-            axi_o.r_ready   = reqrsp_i.p_ready;
-        end
-    end
+module reqrsp_to_axi_intf #(
+  /// ID width which to send the transactions.
+  parameter int unsigned ID = 0,
+  /// AXI ID width.
+  parameter int unsigned AXI_ID_WIDTH = 32'd0,
+  /// AXI and REQRSP address width.
+  parameter int unsigned ADDR_WIDTH = 32'd0,
+  /// AXI and REQRSP data width.
+  parameter int unsigned DATA_WIDTH = 32'd0,
+  /// AXI user width.
+  parameter int unsigned AXI_USER_WIDTH = 32'd0
+) (
+  input logic clk_i,
+  input logic rst_ni,
+  REQRSP_BUS  reqrsp,
+  AXI_BUS     axi
+);
+
+  typedef logic [ADDR_WIDTH-1:0] addr_t;
+  typedef logic [DATA_WIDTH-1:0] data_t;
+  typedef logic [DATA_WIDTH/8-1:0] strb_t;
+  typedef logic [AXI_ID_WIDTH-1:0] id_t;
+  typedef logic [AXI_USER_WIDTH-1:0] user_t;
+
+  `REQRSP_TYPEDEF_ALL(reqrsp, addr_t, data_t, strb_t)
+
+  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)
+  `AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_R_CHAN_T(r_chan_t, data_t, id_t, user_t)
+
+  `AXI_TYPEDEF_REQ_T(axi_req_t, aw_chan_t, w_chan_t, ar_chan_t)
+  `AXI_TYPEDEF_RESP_T(axi_rsp_t, b_chan_t, r_chan_t)
+
+  reqrsp_req_t reqrsp_req;
+  reqrsp_rsp_t reqrsp_rsp;
+
+  axi_req_t axi_req;
+  axi_rsp_t axi_rsp;
+
+  reqrsp_to_axi #(
+    .DATA_WIDTH ( DATA_WIDTH ),
+    .reqrsp_req_t (reqrsp_req_t),
+    .reqrsp_rsp_t (reqrsp_rsp_t),
+    .axi_req_t (axi_req_t),
+    .axi_rsp_t (axi_rsp_t)
+  ) i_reqrsp_to_axi (
+    .clk_i,
+    .rst_ni,
+    .reqrsp_req_i (reqrsp_req),
+    .reqrsp_rsp_o (reqrsp_rsp),
+    .axi_req_o (axi_req),
+    .axi_rsp_i (axi_rsp)
+  );
+
+  `REQRSP_ASSIGN_TO_REQ(reqrsp_req, reqrsp)
+  `REQRSP_ASSIGN_FROM_RESP(reqrsp, reqrsp_rsp)
+
+  `AXI_ASSIGN_FROM_REQ(axi, axi_req)
+  `AXI_ASSIGN_TO_RESP(axi_rsp, axi)
 
 endmodule

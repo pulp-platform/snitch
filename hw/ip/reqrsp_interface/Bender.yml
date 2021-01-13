@@ -20,15 +20,21 @@ sources:
 # Level 1:
 - src/reqrsp_intf.sv
 # Level 2:
-- src/reqrsp_to_axi.sv
 - src/axi_to_reqrsp.sv
-- src/reqrsp_to_tcdm.sv
-
+- src/reqrsp_cut.sv
+- src/reqrsp_demux.sv
+- src/reqrsp_iso.sv
+- src/reqrsp_mux.sv
+- src/reqrsp_to_axi.sv
 - target: simulation
   files:
-    # Level 0
-  - test/reqrsp_test.sv
+   # Level 0
+  - src/reqrsp_test.sv
 - target: test
   files:
-    # Level 0
+  # Level 0
+  - test/axi_to_reqrsp_tb.sv
+  - test/reqrsp_demux_tb.sv
+  - test/reqrsp_idempotent_tb.sv
+  - test/reqrsp_mux_tb.sv
   - test/reqrsp_to_axi_tb.sv

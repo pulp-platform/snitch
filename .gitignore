@@ -1,2 +1,7 @@
 .bender/
 .vscode/
+
+// Modelsim Fiels
+*.wlf
+modelsim.ini
+*stacktrace*

@@ -38,7 +38,7 @@
     logic      q_ready; \
   } __rsp_t;
 
-`define REQRSP_BUS_TYPEDEF_ALL(__name, __addr_t, __data_t, __strb_t) \
+`define REQRSP_TYPEDEF_ALL(__name, __addr_t, __data_t, __strb_t) \
   `REQRSP_TYPEDEF_REQ_CHAN_T(__name``_req_chan_t, __addr_t, __data_t, __strb_t) \
   `REQRSP_TYPEDEF_RSP_CHAN_T(__name``_rsp_chan_t, __data_t) \
   `REQRSP_TYPEDEF_REQ_T(__name``_req_t, __name``_req_chan_t) \

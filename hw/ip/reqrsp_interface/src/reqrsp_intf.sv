@@ -32,28 +32,34 @@ interface REQRSP_BUS #(
   typedef logic [ADDR_WIDTH-1:0] addr_t;
   typedef logic [DATA_WIDTH-1:0] data_t;
   typedef logic [StrbWidth-1:0] strb_t;
-  // The request channel (Q).
+  /// The request channel (Q).
   addr_t   q_addr;
-  logic    q_write; // 0=read, 1=write
+  /// 0 = read, 1 = write, 1 = amo fetch-and-op
+  logic    q_write;
   amo_op_e q_amo;
   data_t   q_data;
-  strb_t   q_strb;  // byte-wise strobe
+  /// Byte-wise strobe
+  strb_t   q_strb;
   size_t   q_size;
   logic    q_valid;
   logic    q_ready;
 
-  // The response channel (P).
+  /// The response channel (P).
   data_t   p_data;
-  logic    p_error; // 0=ok, 1=error
+  /// 0 = ok, 1 = error
+  logic    p_error;
   logic    p_valid;
   logic    p_ready;
 
+
   modport in  (
     input  q_addr, q_write, q_amo, q_size, q_data, q_strb, q_valid, p_ready,
-    output q_ready, p_data, p_error, p_valid);
+    output q_ready, p_data, p_error, p_valid
+  );
   modport out (
     output q_addr, q_write, q_amo, q_size, q_data, q_strb, q_valid, p_ready,
-    input  q_ready, p_data, p_error, p_valid);
+    input  q_ready, p_data, p_error, p_valid
+  );
 
 endinterface
 
@@ -74,27 +80,52 @@ interface REQRSP_BUS_DV #(
   typedef logic [ADDR_WIDTH-1:0] addr_t;
   typedef logic [DATA_WIDTH-1:0] data_t;
   typedef logic [StrbWidth-1:0] strb_t;
-  // The request channel (Q).
+  /// The request channel (Q).
   addr_t   q_addr;
-  logic    q_write; // 0=read, 1=write
+  /// 0 = read, 1 = write, 1 = amo fetch-and-op
+  logic    q_write;
   amo_op_e q_amo;
   data_t   q_data;
-  strb_t   q_strb;  // byte-wise strobe
+  /// Byte-wise strobe
+  strb_t   q_strb;
   size_t   q_size;
   logic    q_valid;
   logic    q_ready;
 
-  // The response channel (P).
+  /// The response channel (P).
   data_t   p_data;
-  logic    p_error; // 0=ok, 1=error
+  /// 0 = ok, 1 = error
+  logic    p_error;
   logic    p_valid;
   logic    p_ready;
 
   modport in  (
     input  q_addr, q_write, q_amo, q_size, q_data, q_strb, q_valid, p_ready,
-    output q_ready, p_data, p_error, p_valid);
+    output q_ready, p_data, p_error, p_valid
+  );
   modport out (
     output q_addr, q_write, q_amo, q_size, q_data, q_strb, q_valid, p_ready,
-    input  q_ready, p_data, p_error, p_valid);
+    input  q_ready, p_data, p_error, p_valid
+  );
+  modport monitor (
+    input q_addr, q_write, q_amo, q_size, q_data, q_strb, q_valid, p_ready,
+          q_ready, p_data, p_error, p_valid
+  );
+
+  // pragma translate_off
+  `ifndef VERILATOR
+  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_addr)));
+  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_write)));
+  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_amo)));
+  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_size)));
+  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_data)));
+  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_strb)));
+  assert property (@(posedge clk_i) (q_valid && !q_ready |=> q_valid));
+
+  assert property (@(posedge clk_i) (p_valid && !p_ready |=> $stable(p_data)));
+  assert property (@(posedge clk_i) (p_valid && !p_ready |=> $stable(p_error)));
+  assert property (@(posedge clk_i) (p_valid && !p_ready |=> p_valid));
+  `endif
+  // pragma translate_on
 
 endinterface

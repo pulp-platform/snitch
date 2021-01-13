@@ -2,505 +2,487 @@
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
 
-// Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// Authors:
+// - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+// - Andreas Kurth <akurth@iis.ee.ethz.ch>
+// - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
 
-/// A protocol adapter from AXI4 to REQRSP.
+`include "common_cells/registers.svh"
+
+/// AXI4+ATOP slave module which translates AXI bursts to reqrsp. This module
+/// fully supports the Atomic + LR/SC semantic of the reqrsp interface.
+///
+/// ## Complexity
+///
+/// The complexity of the module increases lineraly with `BufDepth` as all
+/// requests need to be saved for proper response routing and error condition
+/// generation.
+///
+/// ## Note
+///
+/// > This work is largely (99.5%) based on `axi_to_mem` found in the AXI
+/// > repository. Eventually these two modules can be merged (translating from AXI
+/// > to reqrsp to mem).
 module axi_to_reqrsp #(
-    /// The address width of the AXI bus. >=1.
-    parameter int IN_AW = -1,
-    /// The data width of the AXI bus. >=1.
-    parameter int IN_DW = -1,
-    /// The ID width of the AXI bus. >=0.
-    parameter int IN_IW = -1,
-    /// The user data width of the AXI bus. >=0.
-    parameter int IN_UW = -1,
-    /// The address width of the REQRSP bus. >=1.
-    parameter int OUT_AW = -1,
-    /// The data width of the REQRSP bus. >=1.
-    parameter int OUT_DW = -1,
-    /// The number of REQRSP ports. Power of two; >=1.
-    parameter int NUM_PORTS = 1
-)(
-    input logic    clk_i,
-    input logic    rst_ni,
-    AXI_BUS.Slave  axi_i,
-    REQRSP_BUS.out reqrsp_o[NUM_PORTS]
+  /// AXI4+ATOP request type. See `include/axi/typedef.svh`.
+  parameter type         axi_req_t  = logic,
+  /// AXI4+ATOP response type. See `include/axi/typedef.svh`.
+  parameter type         axi_resp_t = logic,
+  /// Address width, has to be less or equal than the width off the AXI address
+  /// field. Determines the width of `mem_addr_o`. Has to be wide enough to emit
+  /// the memory region which should be accessible.
+  parameter int unsigned AddrWidth  = 0,
+  parameter int unsigned DataWidth  = 0,
+  /// AXI4+ATOP ID width.
+  parameter int unsigned IdWidth    = 0,
+  /// Depth of memory response buffer. This should be equal to the downstream
+  /// response latency.
+  parameter int unsigned BufDepth   = 1,
+  /// Reqrsp request channel type.
+  parameter type         reqrsp_req_t = logic,
+  /// Reqrsp response channel type.
+  parameter type         reqrsp_rsp_t = logic
+) (
+  /// Clock input.
+  input  logic                           clk_i,
+  /// Asynchronous reset, active low.
+  input  logic                           rst_ni,
+  /// The unit is busy handling an AXI4+ATOP request.
+  output logic                           busy_o,
+  /// AXI4+ATOP slave port, request input.
+  input  axi_req_t                       axi_req_i,
+  /// AXI4+ATOP slave port, response output.
+  output axi_resp_t                      axi_resp_o,
+  /// Reqrsp request channel.
+  output reqrsp_req_t                    reqrsp_req_o,
+  /// Reqrsp respone channel.
+  input  reqrsp_rsp_t                    reqrsp_rsp_i
 );
 
-    localparam int unsigned LogPorts = $clog2(NUM_PORTS);
+  localparam int unsigned StrbWidth = DataWidth/8;
 
-    localparam int unsigned InAlign   = $clog2(IN_DW/8);
-    localparam int unsigned OutAlign  = $clog2(OUT_DW/8);
-    localparam int unsigned OutWord   = NUM_PORTS*OUT_DW;
-    localparam int unsigned WordAlign = $clog2(OutWord/8);
-    localparam int unsigned AlignDiffReq = InAlign > WordAlign ? InAlign-WordAlign : 0;
-    localparam int unsigned AlignDiffRsp = WordAlign > InAlign ? WordAlign-InAlign : 0;
+  typedef logic [AddrWidth-1:0]   addr_t;
+  typedef logic [DataWidth-1:0]   data_t;
+  typedef logic [IdWidth-1:0]     axi_id_t;
 
-    // Check invariants.
-    `ifndef SYNTHESIS
-    initial begin
-        assert(IN_AW >  0);
-        assert(IN_DW >  0);
-        assert(IN_IW >= 0);
-        assert(IN_UW >= 0);
-        assert(NUM_PORTS > 0);
-        assert(2**LogPorts == NUM_PORTS);
-        assert(axi_i.AXI_ADDR_WIDTH == IN_AW);
-        assert(axi_i.AXI_DATA_WIDTH == IN_DW);
-        assert(axi_i.AXI_ID_WIDTH   == IN_IW);
-        assert(axi_i.AXI_USER_WIDTH == IN_UW);
+  typedef struct packed {
+    addr_t          addr;
+    axi_pkg::atop_t atop;
+    axi_id_t        id;
+    logic           last;
+    axi_pkg::qos_t  qos;
+    axi_pkg::size_t size;
+    logic           write;
+    logic           lock;
+  } meta_t;
+
+  reqrsp_pkg::amo_op_e amo;
+  data_t data;
+  axi_pkg::resp_t resp;
+  axi_pkg::len_t  r_cnt_d,        r_cnt_q,
+                  w_cnt_d,        w_cnt_q;
+  logic           arb_valid,      arb_ready,
+                  rd_valid,       rd_ready,
+                  wr_valid,       wr_ready,
+                  sel_b,          sel_buf_b,
+                  sel_r,          sel_buf_r,
+                  sel_valid,      sel_ready,
+                  sel_buf_valid,  sel_buf_ready,
+                  sel_lock_d,     sel_lock_q,
+                  meta_valid,     meta_ready,
+                  meta_buf_valid, meta_buf_ready,
+                  meta_sel_d,     meta_sel_q;
+  meta_t          rd_meta,
+                  rd_meta_d,      rd_meta_q,
+                  wr_meta,
+                  wr_meta_d,      wr_meta_q,
+                  meta,           meta_buf;
+
+  assign busy_o = axi_req_i.aw_valid | axi_req_i.ar_valid | axi_req_i.w_valid |
+                    axi_resp_o.b_valid | axi_resp_o.r_valid |
+                    (r_cnt_q > 0) | (w_cnt_q > 0);
+
+  // Handle reads.
+  always_comb begin
+    // Default assignments
+    axi_resp_o.ar_ready = 1'b0;
+    rd_meta_d           = rd_meta_q;
+    rd_meta             = '{default: '0};
+    rd_valid            = 1'b0;
+    r_cnt_d             = r_cnt_q;
+    // Handle R burst in progress.
+    if (r_cnt_q > '0) begin
+      rd_meta_d.last = (r_cnt_q == 8'd1);
+      rd_meta        = rd_meta_d;
+      rd_meta.addr   = rd_meta_q.addr + axi_pkg::num_bytes(rd_meta_q.size);
+      rd_valid       = 1'b1;
+      if (rd_ready) begin
+        r_cnt_d--;
+        rd_meta_d.addr = rd_meta.addr;
+      end
+    // Handle new AR if there is one.
+    end else if (axi_req_i.ar_valid) begin
+      rd_meta_d = '{
+        addr:  addr_t'(axi_pkg::aligned_addr(axi_req_i.ar.addr, axi_req_i.ar.size)),
+        atop:  '0,
+        id:    axi_req_i.ar.id,
+        last:  (axi_req_i.ar.len == '0),
+        qos:   axi_req_i.ar.qos,
+        size:  axi_req_i.ar.size,
+        write: 1'b0,
+        lock: axi_req_i.ar.lock
+      };
+      rd_meta      = rd_meta_d;
+      rd_meta.addr = addr_t'(axi_req_i.ar.addr);
+      rd_valid     = 1'b1;
+      if (rd_ready) begin
+        r_cnt_d             = axi_req_i.ar.len;
+        axi_resp_o.ar_ready = 1'b1;
+      end
     end
-    for (genvar i = 0; i < NUM_PORTS; i++) initial begin
-        assert(reqrsp_o[i].ADDR_WIDTH == OUT_AW);
-        assert(reqrsp_o[i].DATA_WIDTH == OUT_DW);
+  end
+
+  // Handle writes.
+  always_comb begin
+    // Default assignments
+    axi_resp_o.aw_ready = 1'b0;
+    axi_resp_o.w_ready  = 1'b0;
+    wr_meta_d           = wr_meta_q;
+    wr_meta             = '{default: '0};
+    wr_valid            = 1'b0;
+    w_cnt_d             = w_cnt_q;
+    // Handle W bursts in progress.
+    if (w_cnt_q > '0) begin
+      wr_meta_d.last = (w_cnt_q == 8'd1);
+      wr_meta        = wr_meta_d;
+      wr_meta.addr   = wr_meta_q.addr + axi_pkg::num_bytes(wr_meta_q.size);
+      if (axi_req_i.w_valid) begin
+        wr_valid = 1'b1;
+        if (wr_ready) begin
+          axi_resp_o.w_ready = 1'b1;
+          w_cnt_d--;
+          wr_meta_d.addr = wr_meta.addr;
+        end
+      end
+    // Handle new AW if there is one.
+    end else if (axi_req_i.aw_valid && axi_req_i.w_valid) begin
+      wr_meta_d = '{
+        addr:   addr_t'(axi_pkg::aligned_addr(axi_req_i.aw.addr, axi_req_i.aw.size)),
+        atop:   axi_req_i.aw.atop,
+        id:     axi_req_i.aw.id,
+        last:   (axi_req_i.aw.len == '0),
+        qos:    axi_req_i.aw.qos,
+        size:   axi_req_i.aw.size,
+        write:  1'b1,
+        lock:   axi_req_i.aw.lock
+      };
+      wr_meta = wr_meta_d;
+      wr_meta.addr = addr_t'(axi_req_i.aw.addr);
+      wr_valid = 1'b1;
+      if (wr_ready) begin
+        w_cnt_d = axi_req_i.aw.len;
+        axi_resp_o.aw_ready = 1'b1;
+        axi_resp_o.w_ready = 1'b1;
+      end
     end
-    `endif
+  end
 
-    // The request metadata contains information about a read/write request.
-    typedef struct packed {
-        logic              write; // 0=AR, 1=AW
-        logic [OUT_AW-1:0] addr;  // AxADDR
-        logic [2:0]        size;  // AxSIZE
-        logic [7:0]        len;   // AxLEN
-        logic [IN_IW-1:0]  id;    // AxID
-        logic [IN_UW-1:0]  user;  // AxUSER
-    } req_meta_t;
-
-    // The response metadata contains information about a response coming in on
-    // the REQRSP bus.
-    typedef struct packed {
-        logic                      write;  // 0=AR, 1=AW
-        logic                      last;   // whether this is the last beat of the transfer
-        logic                      send;   // whether this beat is completely assembled
-        logic [AlignDiffReq-1:0] offset; // first byte of the AXI word that is active
-        logic [NUM_PORTS-1:0]      mask;   // which ports will provide a response
-        logic [IN_IW-1:0]          id;     // AxID
-        logic [IN_UW-1:0]          user;   // AxUSER
-    } rsp_meta_t;
-
-    // The request and response queues transport the metadata between the
-    // different processing stages.
-    req_meta_t req_queue_in, req_queue_out;
-    rsp_meta_t rsp_queue_in, rsp_queue_out;
-    logic req_queue_push, req_queue_pop, req_queue_empty, req_queue_full;
-    logic rsp_queue_push, rsp_queue_pop, rsp_queue_empty, rsp_queue_full;
-
-    fifo_v3 #(
-        .DEPTH ( 4          ),
-        .dtype ( req_meta_t )
-    ) i_req_queue (
-        .clk_i       ( clk_i           ),
-        .rst_ni      ( rst_ni          ),
-        .flush_i     ( 1'b0            ),
-        .testmode_i  ( 1'b0            ),
-        .full_o      ( req_queue_full  ),
-        .empty_o     ( req_queue_empty ),
-        .usage_o     (                 ),
-        .data_i      ( req_queue_in    ),
-        .push_i      ( req_queue_push  ),
-        .data_o      ( req_queue_out   ),
-        .pop_i       ( req_queue_pop   )
-    );
-
-    fifo_v3 #(
-        .DEPTH ( 4          ),
-        .dtype ( rsp_meta_t )
-    ) i_rsp_queue (
-        .clk_i       ( clk_i           ),
-        .rst_ni      ( rst_ni          ),
-        .flush_i     ( 1'b0            ),
-        .testmode_i  ( 1'b0            ),
-        .full_o      ( rsp_queue_full  ),
-        .empty_o     ( rsp_queue_empty ),
-        .usage_o     (                 ),
-        .data_i      ( rsp_queue_in    ),
-        .push_i      ( rsp_queue_push  ),
-        .data_o      ( rsp_queue_out   ),
-        .pop_i       ( rsp_queue_pop   )
-    );
-
-    // The arbitration flag is used as a tie breaker when both an AW and AR beat
-    // are available.
-    logic arb_q, arb_dn;
-
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-        if (!rst_ni)
-            arb_q <= 0;
-        else if (req_queue_push)
-            arb_q <= ~arb_dn;
+  // Arbitrate between reads and writes.
+  stream_mux #(
+    .DATA_T ( meta_t ),
+    .N_INP  ( 32'd2  )
+  ) i_ax_mux (
+    .inp_data_i   ({wr_meta,  rd_meta }),
+    .inp_valid_i  ({wr_valid, rd_valid}),
+    .inp_ready_o  ({wr_ready, rd_ready}),
+    .inp_sel_i    ( meta_sel_d         ),
+    .oup_data_o   ( meta               ),
+    .oup_valid_o  ( arb_valid          ),
+    .oup_ready_i  ( arb_ready          )
+  );
+  always_comb begin
+    meta_sel_d = meta_sel_q;
+    sel_lock_d = sel_lock_q;
+    if (sel_lock_q) begin
+      meta_sel_d = meta_sel_q;
+      if (arb_valid && arb_ready) begin
+        sel_lock_d = 1'b0;
+      end
+    end else begin
+      if (wr_valid ^ rd_valid) begin
+        // If either write or read is valid but not both, select the valid one.
+        meta_sel_d = wr_valid;
+      end else if (wr_valid && rd_valid) begin
+        // If both write and read are valid, decide according to QoS then burst properties.
+        // Prioritize higher QoS.
+        if (wr_meta.qos > rd_meta.qos) begin
+          meta_sel_d = 1'b1;
+        end else if (rd_meta.qos > wr_meta.qos) begin
+          meta_sel_d = 1'b0;
+        // Decide requests with identical QoS.
+        end else if (wr_meta.qos == rd_meta.qos) begin
+          // 1. Prioritize individual writes over read bursts.
+          // Rationale: Read bursts can be interleaved on AXI but write bursts cannot.
+          if (wr_meta.last && !rd_meta.last) begin
+            meta_sel_d = 1'b1;
+          // 2. Prioritize ongoing burst.
+          // Rationale: Stalled bursts create back-pressure or require costly buffers.
+          end else if (w_cnt_q > '0) begin
+            meta_sel_d = 1'b1;
+          end else if (r_cnt_q > '0) begin
+            meta_sel_d = 1'b0;
+          // 3. Otherwise arbitrate round robin to prevent starvation.
+          end else begin
+            meta_sel_d = ~meta_sel_q;
+          end
+        end
+      end
+      // Lock arbitration if valid but not yet ready.
+      if (arb_valid && !arb_ready) begin
+        sel_lock_d = 1'b1;
+      end
     end
+  end
 
-    // The request multiplexer is responsible for arbitrating between the
-    // incoming AR and AW requests, and filling the request queue.
-    always_comb begin : p_mux
-        req_queue_push = 0;
-        req_queue_in   = '0;
-        axi_i.aw_ready = 0;
-        axi_i.ar_ready = 0;
+  // Fork arbitrated stream to meta data, memory requests, and R/B channel selection.
+  stream_fork #(
+    .N_OUP ( 32'd3 )
+  ) i_fork (
+    .clk_i,
+    .rst_ni,
+    .valid_i ( arb_valid                            ),
+    .ready_o ( arb_ready                            ),
+    .valid_o ({sel_valid, meta_valid, reqrsp_req_o.q_valid}),
+    .ready_i ({sel_ready, meta_ready, reqrsp_rsp_i.q_ready})
+  );
 
-        // Arbitrate between the incoming requests.
-        if (axi_i.aw_valid && axi_i.ar_valid)
-            arb_dn = arb_q;
-        else if (axi_i.aw_valid)
-            arb_dn = 0;
-        else if (axi_i.ar_valid)
-            arb_dn = 1;
-        else
-            arb_dn = ~arb_q;
+  assign sel_b = meta.write & meta.last;
+  assign sel_r = ~meta.write | meta.atop[5];
 
-        // Handle writes.
-        if (axi_i.aw_valid && arb_dn == 0) begin
-            req_queue_in.write = 1;
-            req_queue_in.addr  = axi_i.aw_addr & ('1 << axi_i.aw_size);
-            req_queue_in.size  = axi_i.aw_size ;
-            req_queue_in.len   = axi_i.aw_len  ;
-            req_queue_in.id    = axi_i.aw_id   ;
-            req_queue_in.user  = axi_i.aw_user ;
-            if (!req_queue_full) begin
-                axi_i.aw_ready = 1;
-                req_queue_push = 1;
-            end
-        end
+  stream_fifo #(
+    .FALL_THROUGH ( 1'b1             ),
+    .DEPTH        ( 32'd1 + BufDepth ),
+    .T            ( logic[1:0]       )
+  ) i_sel_buf (
+    .clk_i,
+    .rst_ni,
+    .flush_i    ( 1'b0                    ),
+    .testmode_i ( 1'b0                    ),
+    .data_i     ({sel_b,        sel_r    }),
+    .valid_i    ( sel_valid               ),
+    .ready_o    ( sel_ready               ),
+    .data_o     ({sel_buf_b,    sel_buf_r}),
+    .valid_o    ( sel_buf_valid           ),
+    .ready_i    ( sel_buf_ready           ),
+    .usage_o    ( /* unused */            )
+  );
 
-        // Handle reads.
-        if (axi_i.ar_valid && arb_dn == 1) begin
-            req_queue_in.write = 0;
-            req_queue_in.addr  = axi_i.ar_addr & ('1 << axi_i.ar_size);
-            req_queue_in.size  = axi_i.ar_size ;
-            req_queue_in.len   = axi_i.ar_len  ;
-            req_queue_in.id    = axi_i.ar_id   ;
-            req_queue_in.user  = axi_i.ar_user ;
-            if (!req_queue_full) begin
-                axi_i.ar_ready = 1;
-                req_queue_push = 1;
-            end
-        end
+  stream_fifo #(
+    .FALL_THROUGH ( 1'b1             ),
+    .DEPTH        ( 32'd1 + BufDepth ),
+    .T            ( meta_t           )
+  ) i_meta_buf (
+    .clk_i,
+    .rst_ni,
+    .flush_i    ( 1'b0           ),
+    .testmode_i ( 1'b0           ),
+    .data_i     ( meta           ),
+    .valid_i    ( meta_valid     ),
+    .ready_o    ( meta_ready     ),
+    .data_o     ( meta_buf       ),
+    .valid_o    ( meta_buf_valid ),
+    .ready_i    ( meta_buf_ready ),
+    .usage_o    ( /* unused */   )
+  );
+
+  assign reqrsp_req_o.q = '{
+    addr: meta.addr,
+    write: meta.write,
+    amo: amo,
+    // Silence those channels in case of a read.
+    data: data & {DataWidth{meta.write}},
+    strb: axi_req_i.w.strb & {StrbWidth{meta.write}},
+    size: meta.size
+  };
+
+  always_comb begin
+    amo = reqrsp_pkg::from_axi_amo(meta.atop);
+    data = axi_req_i.w.data;
+    // The `AMOAnd` has a slightly different semantic to the AXI `Set`.
+    if (amo == reqrsp_pkg::AMOAnd) data = ~axi_req_i.w.data;
+    // Check wether this meant to be an exclusive access.
+    if (meta.lock) begin
+      if (meta.write) amo = reqrsp_pkg::AMOSC;
+      else amo = reqrsp_pkg::AMOLR;
     end
+  end
 
-    // The request address counter keeps track of the current address and AXI
-    // beat for each transfer. It is reset whenever the item at the queue's
-    // output changes.
-    typedef struct packed {
-        logic              valid;
-        logic [OUT_AW-1:0] addr;
-        logic [7:0]        beat;
-    } reqcnt_t;
-    reqcnt_t reqcnt, reqcnt_q;
-    logic              req_next;          // advance to the next request
-    logic [OUT_AW-1:0] req_addr_last;     // address pattern that signals beat completion
-    logic [OUT_AW-1:0] req_addr_step;     // address increment per request burst
-    logic              req_beat_complete; // whether the beat is complete
+  // Join memory read data and meta data stream.
+  logic mem_join_valid, mem_join_ready;
+  stream_join #(
+    .N_INP ( 32'd2 )
+  ) i_join (
+    .inp_valid_i  ({reqrsp_rsp_i.p_valid, meta_buf_valid}),
+    .inp_ready_o  ({reqrsp_req_o.p_ready, meta_buf_ready}),
+    .oup_valid_o  ( mem_join_valid                 ),
+    .oup_ready_i  ( mem_join_ready                 )
+  );
 
-    always_ff @(posedge clk_i, negedge rst_ni) begin : ps_reqcnt
-        if (!rst_ni) begin
-            reqcnt_q <= '0;
-        end else if (req_next) begin
-            reqcnt_q.valid <= !req_queue_pop && !req_queue_empty;
-            reqcnt_q.addr  <= reqcnt.addr + req_addr_step;
-            reqcnt_q.beat  <= req_beat_complete ? reqcnt.beat + 1 : reqcnt.beat;
-        end
+  // Dynamically fork the joined stream to B and R channels.
+  stream_fork_dynamic #(
+    .N_OUP ( 32'd2 )
+  ) i_fork_dynamic (
+    .clk_i,
+    .rst_ni,
+    .valid_i      ( mem_join_valid                         ),
+    .ready_o      ( mem_join_ready                         ),
+    .sel_i        ({sel_buf_b,          sel_buf_r         }),
+    .sel_valid_i  ( sel_buf_valid                          ),
+    .sel_ready_o  ( sel_buf_ready                          ),
+    .valid_o      ({axi_resp_o.b_valid, axi_resp_o.r_valid}),
+    .ready_i      ({axi_req_i.b_ready,  axi_req_i.r_ready })
+  );
+
+  // Compose error flag.
+  always_comb begin
+    resp = axi_pkg::RESP_OKAY;
+    resp[1] = reqrsp_rsp_i.p.error;
+    // The success is encoded in the LSB.
+    if (meta_buf.lock) begin
+      resp[0] = reqrsp_rsp_i.p.data[0];
     end
+  end
 
-    always_comb begin : pc_reqcnt
-        req_addr_step =
-          $unsigned(1 << (req_queue_out.size < WordAlign ? req_queue_out.size : WordAlign));
-        if (reqcnt_q.valid) begin
-            reqcnt = reqcnt_q;
-        end else begin
-            reqcnt.valid = !req_queue_empty;
-            reqcnt.addr  = req_queue_out.addr;
-            reqcnt.beat  = 0;
-        end
-    end
+  // Compose B responses.
+  assign axi_resp_o.b = '{
+    id:   meta_buf.id,
+    resp: resp,
+    user: '0
+  };
 
-    // Determine the address pattern of the last transfer in a beat. Based
-    // on this, determine whether after dealing with the requests the AXI
-    // beat is complete.
-    assign req_addr_last = ('1 << WordAlign) & ~('1 << req_queue_out.size);
-    assign req_beat_complete = (reqcnt.addr & req_addr_last) == req_addr_last;
+  // Compose R responses.
+  assign axi_resp_o.r = '{
+    data: reqrsp_rsp_i.p.data,
+    id:   meta_buf.id,
+    last: meta_buf.last,
+    resp: resp,
+    user: '0
+  };
 
-    // Align the data on the AXI W channel on the REQRSP outputs. The outputs
-    // together form a word. The width of the W channel may be less, equal, or
-    // greater than that word. Depending on which is the case, and what the
-    // current address is, different parts of the bus are multiplexed onto the
-    // outputs.
-    //
-    // - `data` and `strb` carry the multiplexed data and strobe of the AXI W
-    //   channel.
-    // - `active` indicates which output bytes are to be active.
-    logic [NUM_PORTS-1:0][OUT_DW-1:0]   reqadj_data;
-    logic [NUM_PORTS-1:0][OUT_DW/8-1:0] reqadj_strb;
-    logic [NUM_PORTS-1:0][OUT_DW/8-1:0] reqadj_active;
+  // Registers
+  `FFARN(meta_sel_q, meta_sel_d, 1'b0, clk_i, rst_ni)
+  `FFARN(sel_lock_q, sel_lock_d, 1'b0, clk_i, rst_ni)
+  `FFARN(rd_meta_q, rd_meta_d, meta_t'{default: '0}, clk_i, rst_ni)
+  `FFARN(wr_meta_q, wr_meta_d, meta_t'{default: '0}, clk_i, rst_ni)
+  `FFARN(r_cnt_q, r_cnt_d, '0, clk_i, rst_ni)
+  `FFARN(w_cnt_q, w_cnt_d, '0, clk_i, rst_ni)
 
-    if (OutWord < IN_DW) begin : g_reqadj_mux
-        always_comb begin
-            automatic logic [AlignDiffReq-1:0] sel;
-            sel = reqcnt.addr >> WordAlign;
-            reqadj_data = axi_i.w_data >> (sel * OutWord);
-            reqadj_strb = axi_i.w_strb >> (sel * OutWord/8);
-        end
-    end else if (OutWord == IN_DW) begin : g_reqadj_pass
-        always_comb begin
-            reqadj_data = axi_i.w_data;
-            reqadj_strb = axi_i.w_strb;
-        end
-    end else if (OutWord > IN_DW) begin : g_reqadj_repl
-        always_comb begin
-            automatic logic [OutWord-1:0]   data;
-            automatic logic [OutWord/8-1:0] strb;
-            for (int i = 0; i < OutWord; i += IN_DW) begin
-                data[i   +: IN_DW  ] = axi_i.w_data[0 +: IN_DW];
-                strb[i/8 +: IN_DW/8] = axi_i.w_strb[0 +: IN_DW/8];
-            end
-            reqadj_data = data;
-            reqadj_strb = strb;
-        end
-    end
+  // Assertions
+  // pragma translate_off
+  `ifndef VERILATOR
+  default disable iff (!rst_ni);
+  assume property (@(posedge clk_i)
+      axi_req_i.ar_valid && !axi_resp_o.ar_ready |=> $stable(axi_req_i.ar))
+    else $error("AR must remain stable until handshake has happened!");
+  assert property (@(posedge clk_i)
+      axi_resp_o.r_valid && !axi_req_i.r_ready |=> $stable(axi_resp_o.r))
+    else $error("R must remain stable until handshake has happened!");
+  assume property (@(posedge clk_i)
+      axi_req_i.aw_valid && !axi_resp_o.aw_ready |=> $stable(axi_req_i.aw))
+    else $error("AW must remain stable until handshake has happened!");
+  assume property (@(posedge clk_i)
+      axi_req_i.w_valid && !axi_resp_o.w_ready |=> $stable(axi_req_i.w))
+    else $error("W must remain stable until handshake has happened!");
+  assert property (@(posedge clk_i)
+      axi_resp_o.b_valid && !axi_req_i.b_ready |=> $stable(axi_resp_o.b))
+    else $error("B must remain stable until handshake has happened!");
+  assert property (@(posedge clk_i) axi_req_i.ar_valid && axi_req_i.ar.len > 0 |->
+      axi_req_i.ar.burst == axi_pkg::BURST_INCR)
+    else $error("Non-incrementing bursts are not supported!");
+  assert property (@(posedge clk_i) axi_req_i.aw_valid && axi_req_i.aw.len > 0 |->
+      axi_req_i.aw.burst == axi_pkg::BURST_INCR)
+    else $error("Non-incrementing bursts are not supported!");
+  assert property (@(posedge clk_i) meta_valid && meta.atop != '0 |-> meta.write)
+    else $warning("Unexpected atomic operation on read.");
+  `endif
+  // pragma translate_on
+endmodule
 
-    always_comb begin : p_reqadj_active
-        // This is a funny process. It generates a second byte strobe that
-        // indicates which bytes of the output word are currently active, as
-        // determined by AxSIZE and the current address.
-        //
-        // - `active` is a signal with the lower 2**AxSIZE bits set.
-        // - `shift` indicates the offset of the first byte in the output word
-        //   that is valid.
-        automatic logic [OutWord/8-1:0] active;
-        automatic logic [OUT_AW-1:0]     shift;
-        active = ~('1 << 2**req_queue_out.size);
-        shift  = reqcnt.addr & ~('1 << WordAlign);
-        reqadj_active = active << shift;
-    end
+`include "reqrsp_interface/typedef.svh"
+`include "reqrsp_interface/assign.svh"
+`include "axi/typedef.svh"
+`include "axi/assign.svh"
 
-    // The global and per-port request processes are responsible for emitting
-    // requests on the output ports. Each output port has its lower address bits
-    // fixed depending on its position in the output word. A transaction is only
-    // triggered if a port
-    //
-    // Note that the qvalid/qready handshake for each of the ports may terminate
-    // at different times. Therefore we generate a `req_drive` signal which
-    // indicates whether a transaction should occur for a port. The `req_served`
-    // signal then indicates for which ports the request has been acknowledged.
-    logic                 req_drive_all, req_drive_all_late;
-    logic [NUM_PORTS-1:0] req_drive;
-    logic [NUM_PORTS-1:0] req_served_q, req_served;
+/// Interface Wrapper
+module axi_to_reqrsp_intf #(
+  /// AXI addr width.
+  parameter int unsigned AddrWidth  = 0,
+  /// AXI data width.
+  parameter int unsigned DataWidth  = 0,
+  /// AXI id width.
+  parameter int unsigned IdWidth    = 0,
+  /// AXI user wdith.
+  parameter int unsigned UserWidth  = 0,
+  /// Depth of memory response buffer. This should be equal to the downstream
+  /// response latency.
+  parameter int unsigned BufDepth   = 1
+) (
+  /// Clock input.
+  input  logic   clk_i,
+  /// Asynchronous reset, active low.
+  input  logic   rst_ni,
+  /// The unit is busy handling an AXI4+ATOP request.
+  output logic   busy_o,
+  REQRSP_BUS     reqrsp,
+  AXI_BUS        axi
+);
 
-    always_comb begin : p_req
-        req_drive_all  = 0;
-        req_next       = 0;
-        req_queue_pop  = 0;
-        rsp_queue_push = 0;
-        axi_i.w_ready  = 0;
+  typedef logic [AddrWidth-1:0] addr_t;
+  typedef logic [DataWidth-1:0] data_t;
+  typedef logic [DataWidth/8-1:0] strb_t;
+  typedef logic [IdWidth-1:0] id_t;
+  typedef logic [UserWidth-1:0] user_t;
 
-        // Handle reads and writes.
-        if (!req_queue_empty && !rsp_queue_full) begin
-            if (req_queue_out.write) begin
-                req_drive_all = axi_i.w_valid;
-                req_next = req_drive_all && &req_served;
-                axi_i.w_ready = req_next && req_beat_complete;
-            end else begin
-                req_drive_all = 1;
-                req_next = req_drive_all && &req_served;
-            end
-            if (req_next && req_beat_complete && reqcnt.beat == req_queue_out.len)
-                req_queue_pop = 1;
-        end
+  `REQRSP_TYPEDEF_ALL(reqrsp, addr_t, data_t, strb_t)
 
-        // For each transfer, push metadata into the response queue.
-        rsp_queue_in.write  = req_queue_out.write;
-        rsp_queue_in.last   = reqcnt.beat == req_queue_out.len;
-        rsp_queue_in.send   = req_beat_complete;
-        rsp_queue_in.offset = reqcnt.addr >> WordAlign;
-        rsp_queue_in.mask   = req_drive;
-        rsp_queue_in.id     = req_queue_out.id;
-        rsp_queue_in.user   = req_queue_out.user;
-        // push in the first cycle of each transfer
-        rsp_queue_push = req_drive_all & ~req_drive_all_late;
-    end
+  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)
+  `AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)
+  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, addr_t, id_t, user_t)
+  `AXI_TYPEDEF_R_CHAN_T(r_chan_t, data_t, id_t, user_t)
 
-    for (genvar i = 0; i < NUM_PORTS; i++) begin : g_req_port
-        always_comb begin : p_req_port
-            automatic logic [OUT_AW-1:0] addr_mask, addr_fixed;
-            addr_mask  = '1 << WordAlign;
-            addr_fixed = $unsigned(i << OutAlign);
-            reqrsp_o[i].q_addr  = (reqcnt.addr & addr_mask) | addr_fixed;
-            reqrsp_o[i].q_write = req_queue_out.write;
-            reqrsp_o[i].q_data  = reqadj_data[i];
-            reqrsp_o[i].q_strb  = reqadj_strb[i] & reqadj_active[i];
-            if (req_queue_out.write)
-                req_drive[i] = req_drive_all & |reqrsp_o[i].q_strb;
-            else
-                req_drive[i] = req_drive_all & |reqadj_active[i];
-            reqrsp_o[i].q_valid = req_drive[i] & ~req_served_q[i];
-        end
+  `AXI_TYPEDEF_REQ_T(axi_req_t, aw_chan_t, w_chan_t, ar_chan_t)
+  `AXI_TYPEDEF_RESP_T(axi_rsp_t, b_chan_t, r_chan_t)
 
-        always_ff @(posedge clk_i, negedge rst_ni) begin : ps_req_served
-            if (!rst_ni)
-                req_served_q[i] <= 0;
-            else
-                req_served_q[i] <= ~req_next & (req_served_q[i] | reqrsp_o[i].q_ready);
-        end
+  reqrsp_req_t reqrsp_req;
+  reqrsp_rsp_t reqrsp_rsp;
 
-        always_comb begin : pc_req_served
-            req_served[i] = req_served_q[i] | reqrsp_o[i].q_ready | ~req_drive[i];
-        end
-    end
+  axi_req_t axi_req;
+  axi_rsp_t axi_rsp;
 
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-        if (!rst_ni)
-            req_drive_all_late <= 0;
-        else
-            req_drive_all_late <= ~req_next & req_drive_all;
-    end
+  axi_to_reqrsp #(
+    .axi_req_t (axi_req_t),
+    .axi_resp_t (axi_rsp_t),
+    .AddrWidth (AddrWidth),
+    .DataWidth (DataWidth),
+    .IdWidth (IdWidth),
+    .BufDepth (BufDepth),
+    .reqrsp_req_t (reqrsp_req_t),
+    .reqrsp_rsp_t (reqrsp_rsp_t )
+  ) i_dut (
+    .clk_i,
+    .rst_ni,
+    .busy_o,
+    .axi_req_i (axi_req),
+    .axi_resp_o (axi_rsp),
+    .reqrsp_req_o (reqrsp_req),
+    .reqrsp_rsp_i (reqrsp_rsp)
+  );
 
+  `REQRSP_ASSIGN_FROM_REQ(reqrsp, reqrsp_req)
+  `REQRSP_ASSIGN_TO_RESP(reqrsp_rsp, reqrsp)
 
-    // Pack the response ports.
-    logic                               rsp_next;
-    logic [NUM_PORTS-1:0][OUT_DW-1:0]   rsp_data;
-    logic [NUM_PORTS-1:0][OUT_DW/8-1:0] rsp_error;
-    logic [NUM_PORTS-1:0][OUT_DW/8-1:0] rsp_valid;
-    logic [NUM_PORTS-1:0][OUT_DW/8-1:0] rsp_active;
-
-    for (genvar i = 0; i < NUM_PORTS; i++) begin : g_rsp_port
-        always_comb begin : p_rsp_pack
-            rsp_data[i]   = reqrsp_o[i].p_data;
-            rsp_error[i]  = reqrsp_o[i].p_error ? '1 : '0;
-            rsp_valid[i]  = reqrsp_o[i].p_valid ? '1 : '0;
-            rsp_active[i] = rsp_queue_out.mask[i] ? '1 : '0;
-            reqrsp_o[i].p_ready = rsp_next;
-        end
-    end
-
-    logic [OutWord-1:0]   rsp_pack_data;
-    logic [OutWord/8-1:0] rsp_pack_error;
-    logic [OutWord/8-1:0] rsp_pack_valid;
-    logic [OutWord/8-1:0] rsp_pack_active;
-
-    always_comb begin : p_rsp_pack
-        rsp_pack_data   = rsp_data;
-        rsp_pack_error  = rsp_error;
-        rsp_pack_valid  = rsp_valid;
-        rsp_pack_active = rsp_active;
-    end
-
-    // Align the output ports to the AXI R channel.
-    logic [IN_DW-1:0]   rspadj_data;
-    logic [IN_DW/8-1:0] rspadj_error;
-    logic [IN_DW/8-1:0] rspadj_valid;
-    logic [IN_DW/8-1:0] rspadj_active;
-
-    if (OutWord > IN_DW) begin : g_rspadj_mux
-        always_comb begin
-            automatic logic [OutWord/IN_DW-1:0][IN_DW-1:0]   reshaped_data;
-            automatic logic [OutWord/IN_DW-1:0][IN_DW/8-1:0] reshaped_error;
-            automatic logic [OutWord/IN_DW-1:0][IN_DW/8-1:0] reshaped_valid;
-            automatic logic [OutWord/IN_DW-1:0][IN_DW/8-1:0] reshaped_active;
-
-            automatic logic [IN_DW-1:0][OutWord/IN_DW-1:0]   masked_data;
-            automatic logic [IN_DW/8-1:0][OutWord/IN_DW-1:0] masked_error;
-            automatic logic [IN_DW/8-1:0][OutWord/IN_DW-1:0] masked_valid;
-            automatic logic [IN_DW/8-1:0][OutWord/IN_DW-1:0] masked_active;
-
-            // Reshape the port data to make it easier to index.
-            reshaped_data   = rsp_pack_data;
-            reshaped_error  = rsp_pack_error;
-            reshaped_valid  = rsp_pack_valid;
-            reshaped_active = rsp_pack_active;
-
-            // Mask the port data with the corresponding active signal.
-            for (int i = 0; i < OutWord/IN_DW; i++) begin
-                for (int n = 0; n < IN_DW/8; n++) begin
-                    for (int m = 0; m < 8; m++)
-                        masked_data[n*8+m][i] = reshaped_active[i][n] & reshaped_data[i][n*8+m];
-                    masked_error[n][i]  = reshaped_active[i][n] & reshaped_error[i][n];
-                    masked_valid[n][i]  = reshaped_active[i][n] & reshaped_valid[i][n];
-                    masked_active[n][i] = reshaped_active[i][n];
-                end
-            end
-
-            // Create a OR tree for each of the adjusted bits.
-            for (int i = 0; i < IN_DW; i++) begin
-                rspadj_data[i] = |masked_data[i];
-            end
-            for (int i = 0; i < IN_DW/8; i++) begin
-                rspadj_error[i]  = |masked_error[i];
-                rspadj_valid[i]  = |masked_valid[i];
-                rspadj_active[i] = |masked_active[i];
-            end
-        end
-    end else if (OutWord == IN_DW) begin : g_rspadj_pass
-        always_comb begin
-            rspadj_data   = rsp_pack_data;
-            rspadj_error  = rsp_pack_error;
-            rspadj_valid  = rsp_pack_valid;
-            rspadj_active = rsp_pack_active;
-        end
-    end else if (OutWord < IN_DW) begin : g_rspadj_repl
-        always_comb begin
-            for (int i = 0; i < IN_DW/OutWord; i++) begin
-                rspadj_data  [i*OutWord   +: OutWord  ] = rsp_pack_data  [0 +: OutWord  ];
-                rspadj_error [i*OutWord/8 +: OutWord/8] = rsp_pack_error [0 +: OutWord/8];
-                rspadj_valid [i*OutWord/8 +: OutWord/8] = rsp_pack_valid [0 +: OutWord/8];
-            end
-            rspadj_active = rsp_pack_active << (rsp_queue_out.offset * OutWord/8);
-        end
-    end
-
-    // The response assembly register stores the response data coming from the
-    // output ports.
-    logic [IN_DW-1:0] rsp_data_assembled_q, rsp_data_assembled;
-    logic rsp_error_q;
-
-    always_ff @(posedge clk_i, negedge rst_ni) begin : ps_rsp_assemble
-        if (!rst_ni) begin
-            rsp_data_assembled_q <= '0;
-            rsp_error_q <= 0;
-        end else if (rsp_next) begin
-            rsp_data_assembled_q <= rsp_queue_out.send ? '0 : rsp_data_assembled;
-            rsp_error_q <= ~rsp_queue_pop & (rsp_error_q | (|(rspadj_error & rspadj_active)));
-        end
-    end
-
-    always_comb begin : pc_rsp_assemble
-        rsp_data_assembled = rsp_data_assembled_q;
-        if (~rsp_queue_out.write)
-            for (int i = 0; i < IN_DW/8; i++)
-                if (rspadj_active[i])
-                    rsp_data_assembled[i*8+:8] = rspadj_data[i*8+:8];
-    end
-
-    // The response process is responsible for emitting AXI R or B beats, and
-    // controlling the handshake with the response queue and output ports.
-    always_comb begin : p_rsp
-        rsp_next      = 0;
-        rsp_queue_pop = 0;
-
-        axi_i.b_id    = rsp_queue_out.id;
-        axi_i.b_user  = rsp_queue_out.user;
-        axi_i.b_resp  = rsp_error_q ? axi_pkg::RESP_DECERR : axi_pkg::RESP_OKAY;
-        axi_i.b_valid = 0;
-
-        axi_i.r_id    = rsp_queue_out.id;
-        axi_i.r_user  = rsp_queue_out.user;
-        axi_i.r_resp  = rsp_error_q ? axi_pkg::RESP_DECERR : axi_pkg::RESP_OKAY;
-        axi_i.r_data  = rsp_data_assembled;
-        axi_i.r_last  = rsp_queue_out.last;
-        axi_i.r_valid = 0;
-
-        if (!rsp_queue_empty && &(rsp_pack_valid | ~rsp_pack_active)) begin
-            if (rsp_queue_out.send) begin
-                if (rsp_queue_out.write) begin
-                    axi_i.b_valid = rsp_queue_out.last;
-                    rsp_next = ~rsp_queue_out.last | axi_i.b_ready;
-                end else begin
-                    axi_i.r_valid = 1;
-                    rsp_next = axi_i.r_ready;
-                end
-            end else begin
-                rsp_next = 1;
-            end
-            rsp_queue_pop = rsp_next;
-        end
-    end
+  `AXI_ASSIGN_TO_REQ(axi_req, axi)
+  `AXI_ASSIGN_FROM_RESP(axi, axi_rsp)
 
 endmodule
