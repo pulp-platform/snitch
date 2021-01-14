@@ -5,6 +5,19 @@ document gives a brief overview of their encoding.
 
 ## "Xssr" Extension for Stream Semantic Registers
 
+The "Xssr" extension assigns stream semantics to a handful of the processor's registers. If enabled, reading and writing these registers translates into corresponding memory reads and writes. The addresses for these memory accesses are derived from a hardware address generator.
+
+### Configuration Register Operations
+
+| imm[11:4] | imm[4:0] | rs1    | funct3 | rd    | opcode     | operation |
+|:---------:|:--------:|:------:|:------:|:-----:|:----------:|:---------:|
+| 7         | 5        | 5      | 3      | 5     | 7          |           |
+| addr      | ssr      | 000000 | 100    | dest  | OP-CUSTOM1 | SCFGR     |
+| addr      | ssr      | value  | 101    | 00000 | OP-CUSTOM1 | SCFGW     |
+
+SCFGR reads a value from an SSR configuration register, and SCFGW writes a value to an SSR configuration register. The argument *addr* specifies the index of the register, *ssr* specifies which SSR should be accessed. SCFGR places the read value in *rd*. SCFGW moves the value in *rs1* to the selected SSR configuration register.
+
+
 ## "Xfrep" Extension for Floating-Point Repetition
 
 ## "Xdma" Extension for Asynchronous Data Movement
