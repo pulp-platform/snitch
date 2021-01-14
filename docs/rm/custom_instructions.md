@@ -17,7 +17,6 @@ The "Xssr" extension assigns stream semantics to a handful of the processor's re
 
 SCFGR reads a value from an SSR configuration register, and SCFGW writes a value to an SSR configuration register. The argument *addr* specifies the index of the register, *ssr* specifies which SSR should be accessed. SCFGR places the read value in *rd*. SCFGW moves the value in *rs1* to the selected SSR configuration register.
 
-
 ## "Xfrep" Extension for Floating-Point Repetition
 
 ## "Xdma" Extension for Asynchronous Data Movement
@@ -39,8 +38,8 @@ DMSRC and DMDST specify the source and destination address pointers for the next
 | funct7  | rs2     | rs1     | funct3 | rd    | opcode     | operation |
 |:-------:|:-------:|:-------:|:------:|:-----:|:----------:|:---------:|
 | 7       | 5       | 5       | 3      | 5     | 7          |           |
-| 0000101 | dststrd | srcstrd | 000    | 00000 | OP-CUSTOM1 | DMSTRD    |
-| 0000110 | 00000   | reps    | 000    | 00000 | OP-CUSTOM1 | DMREPS    |
+| 0000110 | dststrd | srcstrd | 000    | 00000 | OP-CUSTOM1 | DMSTR     |
+| 0000111 | 00000   | reps    | 000    | 00000 | OP-CUSTOM1 | DMREP     |
 
 DMSTRD configures the stride for two-dimensional transfers. The value in registers *rs1* and *rs2* are sign-extended to PLEN and configured as the source and destination stride, respectively. After each transfer of the innermost dimension, the strides are added to the respective address pointers.
 
@@ -51,26 +50,21 @@ DMREPS configures the value in register *rs1* as the size of the outer dimension
 | funct7  | rs2    | rs1   | funct3 | rd    | opcode     | operation |
 |:-------:|:------:|:-----:|:------:|:-----:|:----------:|:---------:|
 | 7       | 5      | 5     | 3      | 5     | 7          |           |
-| 0000010 | config | size  | 000    | dest  | OP-CUSTOM1 | DMSTRT    |
-| 0000011 | status | 00000 | 000    | 00000 | OP-CUSTOM1 | DMSTAT    |
-| 0000100 | error  | 00000 | 000    | 00000 | OP-CUSTOM1 | DMERR     |
+| 0000011 | config | size  | 000    | dest  | OP-CUSTOM1 | DMCPY     |
+| 0000101 | status | 00000 | 000    | dest  | OP-CUSTOM1 | DMSTAT    |
 
-| imm[11:0] | rs1    | funct3 | rd    | opcode     | operation |
-|:---------:|:------:|:------:|:-----:|:----------:|:---------:|
-| 12        | 5      | 3      | 5     | 7          |           |
-| config    | size   | 001    | dest  | OP-CUSTOM1 | DMSTRTI   |
-| status    | 00000  | 010    | dest  | OP-CUSTOM1 | DMSTATI   |
-| error     | 00000  | 011    | dest  | OP-CUSTOM1 | DMERRI    |
+| funct7  | imm5   | rs1   | funct3 | rd    | opcode     | operation |
+|:-------:|:------:|:-----:|:------:|:-----:|:----------:|:---------:|
+| 7       | 5      | 5     | 3      | 5     | 7          |           |
+| 0000010 | config | size  | 000    | dest  | OP-CUSTOM1 | DMCPYI    |
+| 0000100 | status | 00000 | 000    | dest  | OP-CUSTOM1 | DMSTATI   |
 
-DMSTRT and DMSTRTI initiate an asynchronous data movement with the parameters configured by the previous DM* instructions. A transfer id is placed in register *rd*, which is necessary to later check for transfer completion. *size* contains the number of consecutive bytes to transfer. For multi-dimensional transfers this is the size of the innermost dimension. *config* determines the following parameters of the transfer:
+DMCPY and DMCPYI initiate an asynchronous data movement with the parameters configured by the previous DM* instructions. A transfer id is placed in register *rd*, which is necessary to later check for transfer completion. *size* contains the number of consecutive bytes to transfer. For multi-dimensional transfers this is the size of the innermost dimension. *config* determines the following parameters of the transfer:
 
 | Bits         | Value       | Description
 |--------------|-------------|-------------
 | config[0]    | decouple_rw | Decouple the handshakes of the read and write channels
 | config[1]    | enable_2d   | Enable two-dimensional transfer
-| config[3:2]  | 0b10        | Reserved (Source burst type)
-| config[5:4]  | 0b10        | Reserved (Destination burst type)
-| config[6]    | deburst     | Split bursts into individual bus transfers
 
 DMSTAT and DMSTATI place the selected *status* flag of the DMA into register *rd*. The following *status* flags are supported:
 
@@ -79,11 +73,11 @@ DMSTAT and DMSTATI place the selected *status* flag of the DMA into register *rd
 | 0      | completed_id | Id of last completed transfer
 | 1      | next_id      | Id allocated to the next transfer
 | 2      | busy         | At least one transfer in progress
-| 3      | would_block  | Next DMSTRT[I] blocks (transfer queue full)
+| 3      | would_block  | Next DMCPY[I] blocks (transfer queue full)
 
 The DMSTATI instruction can be used to implement a blocking wait for the completion of a specific DMA transfer:
 
-        dmstrti a0, ...
+        dmcpyi a0, ...
     1:  dmstati t0, 0
         bltu a0, t0, 1b
 
@@ -91,5 +85,3 @@ Similarly, waiting for the completion of *all* DMA transfers:
 
     1:  dmstati t0, 2
         bnez t0, zero, 1b
-
-DMERR and DMERRI read the specified *error* status from the DMA and place the result in register *rd*. Placeholder; always sets *rd* to 0.
