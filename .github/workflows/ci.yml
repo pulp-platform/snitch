@@ -1,0 +1,22 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+# Run functional regression checks
+name: ci
+on: [push]
+
+jobs:
+  ##################
+  # Snitch Cluster #
+  ##################
+  snitch_cluster_default:
+    container:
+      image: ghcr.io/pulp-platform/snitch
+    name: Snitch Cluster Default Config
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: |
+        cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
