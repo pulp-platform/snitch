@@ -191,7 +191,7 @@ module snitch_hive #(
     .rsp_t (drsp_t),
     .BypassReq (1'b0),
     .BypassRsp (1'b0)
-  ) i_dut (
+  ) i_reqrsp_iso (
     .src_clk_i (clk_d2_i),
     .src_rst_ni (rst_ni),
     .src_req_i (ptw_req),

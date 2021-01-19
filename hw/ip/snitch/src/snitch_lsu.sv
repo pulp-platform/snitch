@@ -82,7 +82,7 @@ module snitch_lsu #(
     .data_i (laq_in),
     .push_i (laq_push),
     .data_o (laq_out),
-    .pop_i (data_rsp_i.p_valid & data_req_o.p_ready)
+    .pop_i (data_rsp_i.p_valid & data_req_o.p_ready & ~mem_out)
   );
 
   // For each memory transaction save whether this was a load or a store. We
@@ -174,8 +174,8 @@ module snitch_lsu #(
   assign lsu_pdata_o = ld_result[DataWidth-1:0];
   assign lsu_ptag_o = laq_out.tag;
   // In case of a write, don't signal a valid transaction. Stores are always
-  // without ans answer.
+  // without ans answer to the core.
   assign lsu_pvalid_o = data_rsp_i.p_valid & ~mem_out;
-  assign data_req_o.p_ready = lsu_pready_i;
+  assign data_req_o.p_ready = lsu_pready_i | mem_out;
 
 endmodule
