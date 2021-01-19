@@ -7,10 +7,10 @@
 module testharness import snitch_cluster_pkg::*; (
   input  logic        clk_i,
   input  logic        rst_ni,
-  input  logic [8:0]  debug_req_i,
-  input  logic [8:0]  meip_i,
-  input  logic [8:0]  mtip_i,
-  input  logic [8:0]  msip_i
+  input  logic [snitch_cluster_pkg::NrCores-1:0]  debug_req_i,
+  input  logic [snitch_cluster_pkg::NrCores-1:0]  meip_i,
+  input  logic [snitch_cluster_pkg::NrCores-1:0]  mtip_i,
+  input  logic [snitch_cluster_pkg::NrCores-1:0]  msip_i
 );
 
   narrow_in_req_t narrow_in_req;
