@@ -11,14 +11,42 @@ Compile the Verilator model:
 
 This generates the following files:
 
-- `bin/snitch_cluster.vlt`: An executable that runs a RISC-V binary on a Snitch cluster.
-- `bin/libsnitch_cluster.a`: A library version that allows other programs to run binaries on the system and interact with the memory.
+- `bin/snitch_cluster.vlt`: An executable that runs a RISC-V binary on a Snitch
+  cluster.
+- `bin/libsnitch_cluster.a`: A library version that allows other programs to run
+  binaries on the system and interact with the memory.
 
 ## Running
 
-You can run a binary on the simulator by passing it as a command line argument to `bin/snitch_cluster`, for example:
+You can run a binary on the simulator by passing it as a command line argument
+to `bin/snitch_cluster`, for example:
 
     bin/snitch_cluster.vlt sw/alive
+
+## Configure the Cluster
+
+To configure the cluster with a different configuration either edit the the
+configuration files in the `cfg` folder or create a new configuration file and
+pass it to the Makefile:
+
+```
+    make bin/snitch_cluster.vlt CFG=cfg/single-core.hjson
+```
+
+The default config is in `cfg/cluster.default.hjson`. Alternatively you can also
+set your `CFG` environnement variable, the Makefile will pick it up and override
+the standard config.
+
+
+## Traces
+
+Each simulation will generate a unique tracefile for each hart in the system.
+The tracefile can be disassembled to instruction mnemonics by using the `traces`
+target.
+
+```
+    make traces
+```
 
 ## Additional Simulator Support
 

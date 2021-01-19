@@ -8,7 +8,7 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../..
-CFG 		:= src/cluster_cfg.hjson
+CFG 		?= cfg/cluster.default.hjson
 CLUSTER_GEN ?= $(ROOT)/util/clustergen.py
 CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
 
@@ -26,6 +26,7 @@ FESVR_VERSION  ?= 35d50bc40e59ea1d5566fbd3d9226023821b1bb6
 MATCH_END := '/+incdir+/ s/$$/\/*\/*/'
 MATCH_BGN := 's/+incdir+//g'
 SED_SRCS  := sed -e ${MATCH_END} -e ${MATCH_BGN}
+TB_SRCS   := $(wildcard test/*)
 
 VLT_BUILDDIR := work-vlt
 VLT_FLAGS    += -Wno-BLKANDNBLK
@@ -75,7 +76,7 @@ work/lib/libfesvr.a: work/${FESVR_VERSION}_unzip
 #############
 # Verilator #
 #############
-${VLT_BUILDDIR}/verilate: $(VLT_SOURCES)
+${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 	mkdir -p $(dir $@)
 	bender script verilator ${VLT_BENDER} > $(dir $@)files
 	$(VLT) \
@@ -106,7 +107,7 @@ bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/tb_b
 ############
 # Modelsim #
 ############
-${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES)
+${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS}
 	vlib $(dir $@)
 	${BENDER} script vsim ${VSIM_BENDER} --vlog-arg="${VLOG_FLAGS} -work $(dir $@) " > $@
 	echo 'vlog -work $(dir $@) test/rtl_lib.cc -ccflags "-std=c++14 -I${FESVR}/include"' >> $@
@@ -126,7 +127,7 @@ bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
 #######
 # VCS #
 #######
-work-vcs/compile.sh: $(VSIM_SOURCES)
+work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
 	mkdir -p work-vcs
 	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover" >> $@
 	chmod +x $@
