@@ -141,7 +141,7 @@ module snitch_icache_lookup #(
 
         tc_sram #(
           .NumWords (CFG.LINE_COUNT),
-          .DataWidth (CFG.TAG_WIDTH+2),
+          .DataWidth (CFG.LINE_WIDTH),
           .ByteWidth (8),
           .NumPorts (1),
           .Latency (1)
@@ -151,7 +151,7 @@ module snitch_icache_lookup #(
           .req_i (ram_enable[i]),
           .we_i (ram_write),
           .addr_i (ram_addr),
-          .wdata_i (ram_wtag),
+          .wdata_i (ram_wdata),
           .be_i ('1),
           .rdata_o (ram_rdata[i])
         );

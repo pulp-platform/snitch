@@ -36,12 +36,12 @@ module reg_uniform #(
   logic [NUM_REG-1:0][REG_WIDTH-1:0] reg_q;
   logic [NUM_REG-1:0][REG_WIDTH/8-1:0] reg_wr;
 
-  for (genvar i = 0; i < NUM_REG; i++) begin
+  for (genvar i = 0; i < NUM_REG; i++) begin : gen_regs
     // If this register is writable, create a flip flop for it. Otherwise map it
     // to the initial value.
-    if (REG_WRITABLE[i]) begin
+    if (REG_WRITABLE[i]) begin : gen_writable
       // Generate one flip-flop per byte enable.
-      for (genvar j = 0; j < REG_WIDTH/8; j++) begin
+      for (genvar j = 0; j < REG_WIDTH/8; j++) begin : gen_ff
         always_ff @(posedge clk_i, negedge rst_ni) begin
           if (!rst_ni)
             reg_q[i][j*8+7 -: 8] <= init_val_i[i][j*8+7 -: 8];
@@ -49,7 +49,7 @@ module reg_uniform #(
             reg_q[i][j*8+7 -: 8] <= reg_i.wdata[(i*REG_WIDTH+j*8+7)%DATA_WIDTH -: 8];
         end
       end
-    end else begin
+    end else begin : gen_readonly
       assign reg_q[i] = init_val_i[i];
     end
   end
@@ -62,14 +62,14 @@ module reg_uniform #(
   end
 
   // Map the byte address of the bus to a bus word address.
-  localparam int ADDR_SHIFT = $clog2(DATA_WIDTH/8);
-  logic [ADDR_WIDTH-ADDR_SHIFT-1:0] bus_word_addr;
-  assign bus_word_addr = reg_i.addr >> ADDR_SHIFT;
+  localparam int AddrShift = $clog2(DATA_WIDTH/8);
+  logic [ADDR_WIDTH-AddrShift-1:0] bus_word_addr;
+  assign bus_word_addr = reg_i.addr >> AddrShift;
 
   // Map the register dimensions to bus dimensions.
-  localparam int NUM_BUS_WORDS = (NUM_REG * REG_WIDTH + DATA_WIDTH - 1) / DATA_WIDTH;
-  logic [NUM_BUS_WORDS-1:0][DATA_WIDTH-1:0] reg_busmapped;
-  logic [NUM_BUS_WORDS-1:0][DATA_WIDTH/8-1:0] reg_wr_busmapped;
+  localparam int NumBusWords = (NUM_REG * REG_WIDTH + DATA_WIDTH - 1) / DATA_WIDTH;
+  logic [NumBusWords-1:0][DATA_WIDTH-1:0] reg_busmapped;
+  logic [NumBusWords-1:0][DATA_WIDTH/8-1:0] reg_wr_busmapped;
   assign reg_busmapped = rd_val_i;
   assign reg_wr = reg_wr_busmapped;
 
@@ -80,7 +80,7 @@ module reg_uniform #(
     reg_i.rdata = '0;
     reg_i.error = 0;
     if (reg_i.valid) begin
-      if (bus_word_addr < NUM_BUS_WORDS) begin
+      if (bus_word_addr < NumBusWords) begin
         reg_i.rdata = reg_busmapped[bus_word_addr];
         if (reg_i.write) begin
           reg_wr_busmapped[bus_word_addr] = reg_i.wstrb;

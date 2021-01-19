@@ -5,12 +5,15 @@
 `include "common_cells/registers.svh"
 
 /// Description: Filters FPU repetition instructions
-module snitch_sequencer
-  import snitch_pkg::*;
-#(
+module snitch_sequencer import snitch_pkg::*; #(
+    parameter int unsigned AddrWidth = 0,
+    parameter int unsigned DataWidth = 0,
     parameter int unsigned Depth = 16,
     parameter acc_addr_e DstAddr = FP_SS,
-    localparam int unsigned DepthBits = $clog2(Depth)
+    /// Derived parameter *Do not override*
+    parameter type addr_t = logic [AddrWidth-1:0],
+    parameter type data_t = logic [DataWidth-1:0],
+    parameter int unsigned DepthBits = $clog2(Depth)
 ) (
     input  logic                             clk_i,
     input  logic                             rst_i,
@@ -58,7 +61,7 @@ module snitch_sequencer
 
   logic seq_out_ready, seq_out_valid;
   logic [31:0] seq_qdata_op;
-  logic [PLEN-1:0] seq_qdata_argc;
+  logic [AddrWidth-1:0] seq_qdata_argc;
 
   logic core_rb_valid, core_rb_ready;
   logic core_rpt_valid, core_rpt_ready;

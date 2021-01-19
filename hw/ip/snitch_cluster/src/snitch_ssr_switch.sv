@@ -5,9 +5,11 @@
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 // Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
-module snitch_ssr_switch
-  import snitch_pkg::*;
-(
+module snitch_ssr_switch #(
+    parameter int unsigned DataWidth = 0,
+    /// Derived parameter *Do not override*
+    parameter type data_t = logic [DataWidth-1:0]
+) (
     input  logic             clk_i,
     input  logic             rst_ni,
     // Read and write streams coming from the processor.

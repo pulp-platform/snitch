@@ -27,7 +27,7 @@ module axi_to_reqrsp #(
   /// AXI4+ATOP request type. See `include/axi/typedef.svh`.
   parameter type         axi_req_t  = logic,
   /// AXI4+ATOP response type. See `include/axi/typedef.svh`.
-  parameter type         axi_resp_t = logic,
+  parameter type         axi_rsp_t = logic,
   /// Address width, has to be less or equal than the width off the AXI address
   /// field. Determines the width of `mem_addr_o`. Has to be wide enough to emit
   /// the memory region which should be accessible.
@@ -52,7 +52,7 @@ module axi_to_reqrsp #(
   /// AXI4+ATOP slave port, request input.
   input  axi_req_t                       axi_req_i,
   /// AXI4+ATOP slave port, response output.
-  output axi_resp_t                      axi_resp_o,
+  output axi_rsp_t                       axi_rsp_o,
   /// Reqrsp request channel.
   output reqrsp_req_t                    reqrsp_req_o,
   /// Reqrsp respone channel.
@@ -99,13 +99,13 @@ module axi_to_reqrsp #(
                   meta,           meta_buf;
 
   assign busy_o = axi_req_i.aw_valid | axi_req_i.ar_valid | axi_req_i.w_valid |
-                    axi_resp_o.b_valid | axi_resp_o.r_valid |
+                    axi_rsp_o.b_valid | axi_rsp_o.r_valid |
                     (r_cnt_q > 0) | (w_cnt_q > 0);
 
   // Handle reads.
   always_comb begin
     // Default assignments
-    axi_resp_o.ar_ready = 1'b0;
+    axi_rsp_o.ar_ready = 1'b0;
     rd_meta_d           = rd_meta_q;
     rd_meta             = '{default: '0};
     rd_valid            = 1'b0;
@@ -137,7 +137,7 @@ module axi_to_reqrsp #(
       rd_valid     = 1'b1;
       if (rd_ready) begin
         r_cnt_d             = axi_req_i.ar.len;
-        axi_resp_o.ar_ready = 1'b1;
+        axi_rsp_o.ar_ready = 1'b1;
       end
     end
   end
@@ -145,8 +145,8 @@ module axi_to_reqrsp #(
   // Handle writes.
   always_comb begin
     // Default assignments
-    axi_resp_o.aw_ready = 1'b0;
-    axi_resp_o.w_ready  = 1'b0;
+    axi_rsp_o.aw_ready = 1'b0;
+    axi_rsp_o.w_ready  = 1'b0;
     wr_meta_d           = wr_meta_q;
     wr_meta             = '{default: '0};
     wr_valid            = 1'b0;
@@ -159,7 +159,7 @@ module axi_to_reqrsp #(
       if (axi_req_i.w_valid) begin
         wr_valid = 1'b1;
         if (wr_ready) begin
-          axi_resp_o.w_ready = 1'b1;
+          axi_rsp_o.w_ready = 1'b1;
           w_cnt_d--;
           wr_meta_d.addr = wr_meta.addr;
         end
@@ -181,8 +181,8 @@ module axi_to_reqrsp #(
       wr_valid = 1'b1;
       if (wr_ready) begin
         w_cnt_d = axi_req_i.aw.len;
-        axi_resp_o.aw_ready = 1'b1;
-        axi_resp_o.w_ready = 1'b1;
+        axi_rsp_o.aw_ready = 1'b1;
+        axi_rsp_o.w_ready = 1'b1;
       end
     end
   end
@@ -339,7 +339,7 @@ module axi_to_reqrsp #(
     .sel_i        ({sel_buf_b,          sel_buf_r         }),
     .sel_valid_i  ( sel_buf_valid                          ),
     .sel_ready_o  ( sel_buf_ready                          ),
-    .valid_o      ({axi_resp_o.b_valid, axi_resp_o.r_valid}),
+    .valid_o      ({axi_rsp_o.b_valid, axi_rsp_o.r_valid}),
     .ready_i      ({axi_req_i.b_ready,  axi_req_i.r_ready })
   );
 
@@ -354,14 +354,14 @@ module axi_to_reqrsp #(
   end
 
   // Compose B responses.
-  assign axi_resp_o.b = '{
+  assign axi_rsp_o.b = '{
     id:   meta_buf.id,
     resp: resp,
     user: '0
   };
 
   // Compose R responses.
-  assign axi_resp_o.r = '{
+  assign axi_rsp_o.r = '{
     data: reqrsp_rsp_i.p.data,
     id:   meta_buf.id,
     last: meta_buf.last,
@@ -382,19 +382,19 @@ module axi_to_reqrsp #(
   `ifndef VERILATOR
   default disable iff (!rst_ni);
   assume property (@(posedge clk_i)
-      axi_req_i.ar_valid && !axi_resp_o.ar_ready |=> $stable(axi_req_i.ar))
+      axi_req_i.ar_valid && !axi_rsp_o.ar_ready |=> $stable(axi_req_i.ar))
     else $error("AR must remain stable until handshake has happened!");
   assert property (@(posedge clk_i)
-      axi_resp_o.r_valid && !axi_req_i.r_ready |=> $stable(axi_resp_o.r))
+      axi_rsp_o.r_valid && !axi_req_i.r_ready |=> $stable(axi_rsp_o.r))
     else $error("R must remain stable until handshake has happened!");
   assume property (@(posedge clk_i)
-      axi_req_i.aw_valid && !axi_resp_o.aw_ready |=> $stable(axi_req_i.aw))
+      axi_req_i.aw_valid && !axi_rsp_o.aw_ready |=> $stable(axi_req_i.aw))
     else $error("AW must remain stable until handshake has happened!");
   assume property (@(posedge clk_i)
-      axi_req_i.w_valid && !axi_resp_o.w_ready |=> $stable(axi_req_i.w))
+      axi_req_i.w_valid && !axi_rsp_o.w_ready |=> $stable(axi_req_i.w))
     else $error("W must remain stable until handshake has happened!");
   assert property (@(posedge clk_i)
-      axi_resp_o.b_valid && !axi_req_i.b_ready |=> $stable(axi_resp_o.b))
+      axi_rsp_o.b_valid && !axi_req_i.b_ready |=> $stable(axi_rsp_o.b))
     else $error("B must remain stable until handshake has happened!");
   assert property (@(posedge clk_i) axi_req_i.ar_valid && axi_req_i.ar.len > 0 |->
       axi_req_i.ar.burst == axi_pkg::BURST_INCR)
@@ -462,7 +462,7 @@ module axi_to_reqrsp_intf #(
 
   axi_to_reqrsp #(
     .axi_req_t (axi_req_t),
-    .axi_resp_t (axi_rsp_t),
+    .axi_rsp_t (axi_rsp_t),
     .AddrWidth (AddrWidth),
     .DataWidth (DataWidth),
     .IdWidth (IdWidth),
@@ -474,7 +474,7 @@ module axi_to_reqrsp_intf #(
     .rst_ni,
     .busy_o,
     .axi_req_i (axi_req),
-    .axi_resp_o (axi_rsp),
+    .axi_rsp_o (axi_rsp),
     .reqrsp_req_o (reqrsp_req),
     .reqrsp_rsp_i (reqrsp_rsp)
   );

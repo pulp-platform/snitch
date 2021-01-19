@@ -6,9 +6,29 @@
 
 // Floating Point Subsystem
 module snitch_fp_ss import snitch_pkg::*; #(
+  parameter int unsigned AddrWidth = 32,
+  parameter int unsigned DataWidth = 32,
+  parameter int unsigned NumFPOutstandingLoads = 0,
+  parameter int unsigned NumFPOutstandingMem = 0,
+  parameter int unsigned NumFPUSequencerInstr = 0,
+  parameter type dreq_t = logic,
+  parameter type drsp_t = logic,
   parameter bit RegisterSequencer = 0,
-  parameter bit FPUSequencer = 1,
-  parameter bit Xssr = 1
+  parameter bit Xfrep = 1,
+  parameter fpnew_pkg::fpu_implementation_t FPUImplementation = '0,
+  parameter bit Xssr = 1,
+  parameter type acc_req_t = logic,
+  parameter type acc_resp_t = logic,
+  parameter bit RVF = 1,
+  parameter bit RVD = 1,
+  parameter bit XF16 = 0,
+  parameter bit XF16ALT = 0,
+  parameter bit XF8 = 0,
+  parameter bit XFVEC = 0,
+  parameter int unsigned FLEN = DataWidth,
+  /// Derived parameter *Do not override*
+  parameter type addr_t = logic [AddrWidth-1:0],
+  parameter type data_t = logic [DataWidth-1:0]
 ) (
   input  logic             clk_i,
   input  logic             rst_i,
@@ -23,18 +43,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
   output acc_resp_t        acc_resp_o,
   output logic             acc_resp_valid_o,
   input  logic             acc_resp_ready_i,
-  // TCDM Data Interface - Two Ports (DM0 - DM1)
-  output addr_t            data_qaddr_o,
-  output logic             data_qwrite_o,
-  output data_t            data_qdata_o,
-  output logic  [1:0]      data_qsize_o,
-  output strb_t            data_qstrb_o,
-  output logic             data_qvalid_o,
-  input  logic             data_qready_i,
-  input  data_t            data_pdata_i,
-  input  logic             data_perror_i,
-  input  logic             data_pvalid_i,
-  output logic             data_pready_o,
+  // TCDM Data Interface for regular FP load/stores.
+  output dreq_t            data_req_o,
+  input  drsp_t            data_rsp_i,
   // Register Interface
   // FPU **un-timed** Side-channel
   input  fpnew_pkg::roundmode_e fpu_rnd_mode_i,
@@ -137,9 +148,11 @@ module snitch_fp_ss import snitch_pkg::*; #(
   acc_req_t         acc_req, acc_req_q;
   logic             acc_req_valid, acc_req_valid_q;
   logic             acc_req_ready, acc_req_ready_q;
-  if (FPUSequencer) begin : gen_fpu_sequencer
+  if (Xfrep) begin : gen_fpu_sequencer
     snitch_sequencer #(
-      .Depth    ( snitch_pkg::FPUSequencerInstr )
+      .AddrWidth (AddrWidth),
+      .DataWidth (DataWidth),
+      .Depth     (NumFPUSequencerInstr)
     ) i_snitch_fpu_sequencer (
       .clk_i,
       .rst_i,
@@ -175,7 +188,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
   // Optional spill-register
   spill_register  #(
     .T      ( acc_req_t                           ),
-    .Bypass ( !RegisterSequencer || !FPUSequencer )
+    .Bypass ( !RegisterSequencer || !Xfrep )
   ) i_spill_register_acc (
     .clk_i   ,
     .rst_ni  ( ~rst_i          ),
@@ -2516,7 +2529,16 @@ module snitch_fp_ss import snitch_pkg::*; #(
   // ----------------------
   // Floating Point Unit
   // ----------------------
-  snitch_fpu i_fpu (
+  snitch_fpu #(
+    .RVF (RVF),
+    .RVD (RVD),
+    .XF16 (XF16),
+    .XF16ALT (XF16ALT),
+    .XF8 (XF8),
+    .XFVEC (XFVEC),
+    .FLEN (FLEN),
+    .FPUImplementation (FPUImplementation)
+  ) i_fpu (
     .clk_i                           ,
     .rst_ni         ( ~rst_i        ),
     .operands_i     ( op            ),
@@ -2591,38 +2613,34 @@ module snitch_fp_ss import snitch_pkg::*; #(
   assign lsu_qvalid = acc_req_valid_q & (&op_ready) & (is_load | is_store);
 
   snitch_lsu #(
-    .tag_t               ( logic [4:0]                       ),
-    .NumOutstandingLoads ( snitch_pkg::NumFPOutstandingLoads ),
-    .NaNBox              ( 1'b1                              )
+    .AddrWidth (AddrWidth),
+    .DataWidth (DataWidth),
+    .dreq_t (dreq_t),
+    .drsp_t (drsp_t),
+    .tag_t (logic [4:0]),
+    .NumOutstandingMem (NumFPOutstandingMem),
+    .NumOutstandingLoads (NumFPOutstandingLoads),
+    .NaNBox (1'b1)
   ) i_snitch_lsu (
-    .clk_i                                   ,
-    .rst_i                                   ,
-    .lsu_qtag_i    ( rd                     ),
-    .lsu_qwrite    ( is_store               ),
-    .lsu_qsigned   ( 1'b1                   ), // all floating point loads are signed
-    .lsu_qaddr_i   ( acc_req_q.data_argc[PLEN-1:0] ),
-    .lsu_qdata_i   ( op[1]                  ),
-    .lsu_qsize_i   ( ls_size                ),
-    .lsu_qamo_i    ( AMONone                ),
-    .lsu_qvalid_i  ( lsu_qvalid             ),
-    .lsu_qready_o  ( lsu_qready             ),
-    .lsu_pdata_o   ( ld_result              ),
-    .lsu_ptag_o    ( lsu_rd                 ),
-    .lsu_perror_o  (                        ), // ignored for the moment
-    .lsu_pvalid_o  ( lsu_pvalid             ),
-    .lsu_pready_i  ( lsu_pready             ),
-    .data_qaddr_o  ( data_qaddr_o           ),
-    .data_qwrite_o ( data_qwrite_o          ),
-    .data_qdata_o  ( data_qdata_o           ),
-    .data_qsize_o  ( data_qsize_o           ),
-    .data_qamo_o   (                        ),
-    .data_qstrb_o  ( data_qstrb_o           ),
-    .data_qvalid_o ( data_qvalid_o          ),
-    .data_qready_i ( data_qready_i          ),
-    .data_pdata_i  ( data_pdata_i           ),
-    .data_perror_i ( data_perror_i          ),
-    .data_pvalid_i ( data_pvalid_i          ),
-    .data_pready_o ( data_pready_o          )
+    .clk_i (clk_i),
+    .rst_i (rst_i),
+    .lsu_qtag_i (rd),
+    .lsu_qwrite (is_store),
+    .lsu_qsigned (1'b1), // all floating point loads are signed
+    .lsu_qaddr_i (acc_req_q.data_argc[AddrWidth-1:0]),
+    .lsu_qdata_i (op[1]),
+    .lsu_qsize_i (ls_size),
+    .lsu_qamo_i (reqrsp_pkg::AMONone),
+    .lsu_qvalid_i (lsu_qvalid),
+    .lsu_qready_o (lsu_qready),
+    .lsu_pdata_o (ld_result),
+    .lsu_ptag_o (lsu_rd),
+    .lsu_perror_o (), // ignored for the moment
+    .lsu_pvalid_o (lsu_pvalid),
+    .lsu_pready_i (lsu_pready),
+    .lsu_empty_o (/* unused */),
+    .data_req_o,
+    .data_rsp_i
   );
 
   // SSRs

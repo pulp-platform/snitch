@@ -52,7 +52,8 @@ module reqrsp_idempotent_tb import reqrsp_pkg::*; #(
   reqrsp_iso_intf #(
     .AddrWidth (AW),
     .DataWidth (DW),
-    .Bypass (1'b1)
+    .BypassReq (1),
+    .BypassRsp (1)
   ) i_dut (
     .src_clk_i (clk),
     .src_rst_ni (rst_n),

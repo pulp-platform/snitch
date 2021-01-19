@@ -6,8 +6,34 @@ We recommend using the [Docker](ug/../docker.md) container if possible:
 $ docker run -it -v $REPO_TOP:/repo -w /repo ghcr.io/pulp-platform/snitch
 ```
 
+`$REPO_TOP` should point to the base of the cloned repository.
+
 If that should not be possible (because of missing privileges for example) you
-can install the required tools and components yourself.
+can install the required tools and components yourself. See [prerequisites]( Prerequisites).
+
+Besides containing the sources for the Snitch core and surrounding cluster
+infrastructure this repository also hosts systems, testbenches and related
+infrastructure.
+
+All Snitch-based systems in this repository can be found in `hw/system`. To get
+accommodated with the system we recommend getting started with the cluster
+testbench system. This testbench instantiates a cluster and an "infinite"
+simulation memory which the cluster can access, see `hw/system/README.md`.
+
+To build the Verilator executable of this system:
+
+```
+    cd $REPO_TOP/hw/system
+    make bin/snitch_cluster.vlt
+```
+
+This places a binary called `snitch_cluster.vlt` in the `bin` folder. You can
+then execute a suitable ELF file by appending it as a positional argument to the
+binary:
+
+```
+    bin/snitch_cluster.vlt <path/to/riscv-elf>
+```
 
 ## Prerequisites
 

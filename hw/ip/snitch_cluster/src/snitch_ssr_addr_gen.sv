@@ -4,7 +4,11 @@
 
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 
-module snitch_ssr_addr_gen import snitch_pkg::*; (
+module snitch_ssr_addr_gen import snitch_pkg::*; #(
+  parameter int unsigned AddrWidth = 0,
+  /// Derived parameter *Do not override*
+  parameter type addr_t = logic [AddrWidth-1:0]
+) (
   input  logic        clk_i,
   input  logic        rst_ni,
 
@@ -18,7 +22,9 @@ module snitch_ssr_addr_gen import snitch_pkg::*; (
   output addr_t       mem_addr_o,
   output logic        mem_write_o,
   output logic        mem_valid_o,
-  input  logic        mem_ready_i
+  input  logic        mem_ready_i,
+
+  input  addr_t       tcdm_start_address_i
 );
 
   localparam int AW = 18; // address pointer width
@@ -65,7 +71,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; (
   assign enable = ~config_q.done & mem_valid_o & mem_ready_i;
   assign mem_valid_o = ~config_q.done;
   assign mem_write_o = config_q.write;
-  assign mem_addr_o = {TCDMStartAddress[PLEN-1:AW], pointer_q};
+  assign mem_addr_o = {tcdm_start_address_i[AddrWidth-1:AW], pointer_q};
 
   // Unpack the configuration address and write signal into a write strobe for
   // the individual registers. Also assign the alias strobe if the address is
@@ -75,7 +81,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; (
   assign alias_fields = cfg_word_i[0+:$bits(alias_fields)];
 
   // Generate the loop counters.
-  for (genvar i = 0; i < NL; i++) begin : loop
+  for (genvar i = 0; i < NL; i++) begin : gen_loop_counter
     always_comb begin
       stride_sd[i] = stride_sq[i];
       bound_sd[i] = bound_sq[i];

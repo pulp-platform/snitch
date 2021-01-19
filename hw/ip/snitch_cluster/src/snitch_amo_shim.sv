@@ -14,7 +14,10 @@
 /// indicate a fault to the programmer.
 
 /// LR/SC reservations are happening on `DataWidth` granularity.
-module snitch_amo_shim import snitch_pkg::*; #(
+module snitch_amo_shim
+  import snitch_pkg::*;
+  import reqrsp_pkg::*;
+#(
   /// Address width.
   parameter int unsigned AddrMemWidth = 32,
   /// Word width.
@@ -37,7 +40,7 @@ module snitch_amo_shim import snitch_pkg::*; #(
   /// Request address. Word aligned (not byte aligned!)
   input   logic [AddrMemWidth-1:0]  addr_i,
   /// Request AMO type. Must AMONone if `dma_access_i` is set.
-  input   amo_op_t                  amo_i,
+  input   amo_op_e      amo_i,
   /// Request is a write. Must be `0` for AMOs.
   input   logic                     write_i,
   /// Data to write, second operand for AMOs.
@@ -74,7 +77,7 @@ module snitch_amo_shim import snitch_pkg::*; #(
   logic idx_q, idx_d;
   logic [31:0] operand_a, operand_b_q, amo_result, amo_result_q;
   logic [AddrMemWidth-1:0] addr_q;
-  amo_op_t amo_op_q;
+  amo_op_e amo_op_q;
   logic load_amo;
   logic sc_successful, sc_successful_q;
   logic sc_q;
@@ -194,7 +197,8 @@ module snitch_amo_shim import snitch_pkg::*; #(
   `FFLNR(amo_result_q, amo_result, (state_q == DoAMO), clk_i)
 
   assign idx_d = ((DataWidth == 64) ? wstrb_i[DataWidth/8/2] : 0);
-  assign load_amo = valid_i & ready_o & ~(amo_i inside {AMONone, AMOLR, AMOSC});
+  assign load_amo = valid_i & ready_o &
+          ~(amo_i inside {AMONone, AMOLR, AMOSC});
   assign operand_a = mem_rdata_i[32*idx_q+:32];
 
   always_comb begin
@@ -254,11 +258,11 @@ module snitch_amo_shim import snitch_pkg::*; #(
 endmodule
 
 /// Simple ALU supporting atomic memory operations.
-module snitch_amo_alu import snitch_pkg::*; (
-  input  amo_op_t     amo_op_i,
-  input  logic [31:0] operand_a_i,
-  input  logic [31:0] operand_b_i,
-  output logic [31:0] result_o
+module snitch_amo_alu import reqrsp_pkg::*; (
+  input  amo_op_e amo_op_i,
+  input  logic [31:0]         operand_a_i,
+  input  logic [31:0]         operand_b_i,
+  output logic [31:0]         result_o
 );
     // ----------------
     // AMO ALU
@@ -277,25 +281,25 @@ module snitch_amo_alu import snitch_pkg::*; (
 
         unique case (amo_op_i)
             // the default is to output operand_b
-            snitch_pkg::AMOSwap:;
-            snitch_pkg::AMOAdd: result_o = adder_sum[31:0];
-            snitch_pkg::AMOAnd: result_o = operand_a_i & operand_b_i;
-            snitch_pkg::AMOOr:  result_o = operand_a_i | operand_b_i;
-            snitch_pkg::AMOXor: result_o = operand_a_i ^ operand_b_i;
-            snitch_pkg::AMOMax: begin
+            AMOSwap:;
+            AMOAdd: result_o = adder_sum[31:0];
+            AMOAnd: result_o = operand_a_i & operand_b_i;
+            AMOOr:  result_o = operand_a_i | operand_b_i;
+            AMOXor: result_o = operand_a_i ^ operand_b_i;
+            AMOMax: begin
                 adder_operand_b = -$signed(operand_b_i);
                 result_o = adder_sum[32] ? operand_b_i : operand_a_i;
             end
-            snitch_pkg::AMOMin: begin
+            AMOMin: begin
                 adder_operand_b = -$signed(operand_b_i);
                 result_o = adder_sum[32] ? operand_a_i : operand_b_i;
             end
-            snitch_pkg::AMOMaxu: begin
+            AMOMaxu: begin
                 adder_operand_a = $unsigned(operand_a_i);
                 adder_operand_b = -$unsigned(operand_b_i);
                 result_o = adder_sum[32] ? operand_b_i : operand_a_i;
             end
-            snitch_pkg::AMOMinu: begin
+            AMOMinu: begin
                 adder_operand_a = $unsigned(operand_a_i);
                 adder_operand_b = -$unsigned(operand_b_i);
                 result_o = adder_sum[32] ? operand_a_i : operand_b_i;

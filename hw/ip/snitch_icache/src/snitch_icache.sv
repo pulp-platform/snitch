@@ -39,7 +39,9 @@ module snitch_icache #(
     /// disabling this feature.
     parameter int L0_EARLY_TAG_WIDTH = -1,
     /// Operate L0 cache in slower clock-domain
-    parameter bit ISO_CROSSING      = 1
+    parameter bit ISO_CROSSING      = 1,
+    parameter type axi_req_t = logic,
+    parameter type axi_rsp_t = logic
 ) (
     input  logic clk_i,
     input  logic clk_d2_i,
@@ -57,17 +59,8 @@ module snitch_icache #(
     input  logic [NR_FETCH_PORTS-1:0]               inst_valid_i,
     output logic [NR_FETCH_PORTS-1:0]               inst_ready_o,
     output logic [NR_FETCH_PORTS-1:0]               inst_error_o,
-    // AXI-like read-only interface
-    output logic [FILL_AW-1:0]   refill_qaddr_o,
-    output logic [7:0]           refill_qlen_o,
-    output logic                 refill_qvalid_o,
-    input  logic                 refill_qready_i,
-
-    input  logic [FILL_DW-1:0]   refill_pdata_i,
-    input  logic                 refill_perror_i,
-    input  logic                 refill_pvalid_i,
-    input  logic                 refill_plast_i,
-    output logic                 refill_pready_o
+    output axi_req_t axi_req_o,
+    input  axi_rsp_t axi_rsp_i
 );
 
     // Bundle the parameters up into a proper configuration struct that we can
@@ -504,28 +497,12 @@ module snitch_icache #(
     assign handler_rsp = refill_rsp;
     assign bypass_rsp = refill_rsp;
 
-    // AXI-like read-only interface
-    typedef struct packed {
-        logic [FILL_AW-1:0] addr;
-        logic [7:0]         len;
-    } extern_req_t;
-
-    typedef struct packed {
-        logic [FILL_DW-1:0] data;
-        logic               error;
-        logic               last;
-    } extern_rsp_t;
-
-    extern_req_t          extern_req, extern_req_q;
-    logic                 extern_qvalid;
-    logic                 extern_qready;
-
-    extern_rsp_t          extern_rsp, extern_rsp_q;
-    logic                 extern_pvalid_q;
-    logic                 extern_pready_q;
-
     // Instantiate the cache refill module which emits AXI transactions.
-    snitch_icache_refill #(CFG) i_refill (
+    snitch_icache_refill #(
+        .CFG(CFG),
+        .axi_req_t (axi_req_t),
+        .axi_rsp_t (axi_rsp_t)
+    ) i_refill (
         .clk_i,
         .rst_ni,
 
@@ -541,49 +518,10 @@ module snitch_icache #(
         .in_rsp_bypass_o ( refill_rsp.bypass  ),
         .in_rsp_valid_o  ( refill_rsp_valid   ),
         .in_rsp_ready_i  ( refill_rsp_ready   ),
-
-        .refill_qaddr_o  ( extern_req.addr    ),
-        .refill_qlen_o   ( extern_req.len     ),
-        .refill_qvalid_o ( extern_qvalid      ),
-        .refill_qready_i ( extern_qready      ),
-        .refill_pdata_i  ( extern_rsp_q.data  ),
-        .refill_perror_i ( extern_rsp_q.error ),
-        .refill_plast_i  ( extern_rsp_q.last  ),
-        .refill_pvalid_i ( extern_pvalid_q    ),
-        .refill_pready_o ( extern_pready_q    )
+        .axi_req_o (axi_req_o),
+        .axi_rsp_i (axi_rsp_i)
     );
 
-    // Insert Slices.
-    spill_register #(.T(extern_req_t)) i_spill_register_req (
-        .clk_i,
-        .rst_ni,
-        .valid_i ( extern_qvalid   ),
-        .ready_o ( extern_qready   ),
-        .data_i  ( extern_req      ),
-        // Q Output
-        .valid_o ( refill_qvalid_o ),
-        .ready_i ( refill_qready_i ),
-        .data_o  ( extern_req_q    )
-    );
-
-    assign refill_qaddr_o = extern_req_q.addr;
-    assign refill_qlen_o = extern_req_q.len;
-
-    spill_register #(.T(extern_rsp_t)) i_spill_register_resp (
-        .clk_i,
-        .rst_ni,
-        .valid_i ( refill_pvalid_i ),
-        .ready_o ( refill_pready_o ),
-        .data_i  ( extern_rsp      ),
-        // Q Output
-        .valid_o ( extern_pvalid_q ),
-        .ready_i ( extern_pready_q ),
-        .data_o  ( extern_rsp_q    )
-    );
-
-    assign extern_rsp.data = refill_pdata_i;
-    assign extern_rsp.error = refill_perror_i;
-    assign extern_rsp.last = refill_plast_i;
 endmodule
 
 // Translate register interface to refill requests.

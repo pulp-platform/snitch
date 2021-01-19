@@ -45,8 +45,6 @@ module tb_axi_atop_filter #(
   parameter int unsigned N_TXNS = 1000
 );
 
-  timeunit 1ns;
-  timeprecision 10ps;
 
   localparam int unsigned AXI_STRB_WIDTH  = AXI_DATA_WIDTH / 8;
   localparam int unsigned NUM_AXI_IDS     = 2**AXI_ID_WIDTH;

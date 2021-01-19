@@ -3,7 +3,16 @@
 // SPDX-License-Identifier: SHL-0.51
 
 /// FPU Synthesis Wrapper
-module snitch_fpu import snitch_pkg::*; (
+module snitch_fpu import snitch_pkg::*; #(
+  parameter fpnew_pkg::fpu_implementation_t FPUImplementation = '0,
+  parameter bit          RVF                = 1,
+  parameter bit          RVD                = 1,
+  parameter bit          XF16               = 0,
+  parameter bit          XF16ALT            = 0,
+  parameter bit          XF8                = 0,
+  parameter bit          XFVEC              = 0,
+  parameter int unsigned FLEN               = 0
+) (
   input logic                               clk_i,
   input logic                               rst_ni,
   // Input signals
@@ -27,6 +36,14 @@ module snitch_fpu import snitch_pkg::*; (
   output logic                              out_valid_o,
   input  logic                              out_ready_i
 );
+
+  localparam fpnew_pkg::fpu_features_t FPUFeatures = '{
+    Width:         fpnew_pkg::maximum(FLEN, 32),
+    EnableVectors: XFVEC,
+    EnableNanBox:  1'b1,
+    FpFmtMask:     {RVF, RVD, XF16, XF8, XF16ALT},
+    IntFmtMask:    {XFVEC && XF8, XFVEC && (XF16 || XF16ALT), 1'b1, 1'b0}
+  };
 
   typedef struct packed {
     logic [2:0][FLEN-1:0]    operands;
@@ -79,9 +96,9 @@ module snitch_fpu import snitch_pkg::*; (
 
   fpnew_top #(
     // FPU configuration
-    .Features       ( snitch_pkg::FPU_FEATURES       ),
-    .Implementation ( snitch_pkg::FPU_IMPLEMENTATION ),
-    .TagType        ( logic[5:0]                     )
+    .Features       ( FPUFeatures ),
+    .Implementation ( FPUImplementation ),
+    .TagType        ( logic[5:0]        )
   ) i_fpu (
     .clk_i                                    ,
     .rst_ni                                   ,

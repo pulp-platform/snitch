@@ -1,0 +1,13 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+package:
+  name: future
+
+dependencies:
+  axi: {path: ../../vendor/pulp_platform_axi}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+
+sources:
+# Level 0:
+- src/axi_to_mem.sv

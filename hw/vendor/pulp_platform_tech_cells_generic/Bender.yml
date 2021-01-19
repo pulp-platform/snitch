@@ -6,7 +6,7 @@ dependencies:
   common_verification: { git: "https://github.com/pulp-platform/common_verification.git", version: 0.1.1 }
 
 sources:
-  - target: rtl
+  - target: any(all(rtl, simulation), verilator)
     files:
       # level 0
       - src/rtl/tc_sram.sv

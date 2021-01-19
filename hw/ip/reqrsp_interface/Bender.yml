@@ -28,7 +28,6 @@ sources:
 - src/reqrsp_to_axi.sv
 - target: simulation
   files:
-   # Level 0
   - src/reqrsp_test.sv
 - target: test
   files:

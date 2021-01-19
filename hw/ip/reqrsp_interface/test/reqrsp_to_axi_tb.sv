@@ -55,10 +55,10 @@ module reqrsp_to_axi_tb import reqrsp_pkg::*; #(
   ) slave_dv (clk);
 
   reqrsp_to_axi_intf #(
-    .AXI_ID_WIDTH (IW),
-    .ADDR_WIDTH (AW),
-    .DATA_WIDTH (DW),
-    .AXI_USER_WIDTH (UW)
+    .AxiIdWidth (IW),
+    .AddrWidth (AW),
+    .DataWidth (DW),
+    .AxiUserWidth (UW)
   ) i_reqrsp_to_axi (
     .clk_i (clk),
     .rst_ni (rst_n),

@@ -4,8 +4,10 @@
 
 // Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
-class icache_request;
-  rand snitch_pkg::addr_t addr;
+class icache_request #(
+  parameter int unsigned AddrWidth = 48
+);
+  rand logic [AddrWidth-1:0] addr;
   rand bit flush;
 
   constraint flush_c {
@@ -46,17 +48,19 @@ class riscv_inst;
   }
 endclass
 
-`include "common_cells/assert.svh"
+`include "common_cells/assertions.svh"
 
 module snitch_icache_l0_tb import snitch_pkg::*; #(
+    parameter int unsigned AddrWidth = 48,
+    parameter type addr_t = logic [AddrWidth-1:0],
     parameter int NR_FETCH_PORTS = 1,
     parameter int L0_LINE_COUNT = 8,
     parameter int LINE_WIDTH = 128,
     parameter int LINE_COUNT = 0,
     parameter int SET_COUNT = 1,
-    parameter int FETCH_AW = $bits(addr_t),
+    parameter int FETCH_AW = AddrWidth,
     parameter int FETCH_DW = 32,
-    parameter int FILL_AW = $bits(addr_t),
+    parameter int FILL_AW = AddrWidth,
     parameter int FILL_DW = 64,
     parameter int L0_EARLY_TAG_WIDTH = 8,
     parameter bit EARLY_LATCH = 0
@@ -68,7 +72,7 @@ module snitch_icache_l0_tb import snitch_pkg::*; #(
   localparam bit DEBUG = 1'b0;
 
   // backing memory
-  logic [LINE_WIDTH-1:0] memory [logic [$bits(addr_t)-1:0]];
+  logic [LINE_WIDTH-1:0] memory [logic [AddrWidth-1:0]];
 
   localparam snitch_icache_pkg::config_t CFG = '{
       NR_FETCH_PORTS:    NR_FETCH_PORTS,
@@ -215,7 +219,7 @@ module snitch_icache_l0_tb import snitch_pkg::*; #(
     automatic logic [31:0] data;
     automatic logic [31:0] golden;
     automatic addr_t addr, immediate;
-    automatic icache_request req = new;
+    automatic icache_request #(.AddrWidth (AddrWidth)) req = new;
     automatic int requests = 0;
     reset();
     @(negedge rst);

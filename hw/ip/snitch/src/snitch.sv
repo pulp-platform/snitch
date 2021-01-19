@@ -10,89 +10,86 @@
 // `SNITCH_ENABLE_PERF Enables mcycle, minstret performance counters (read only)
 
 module snitch import snitch_pkg::*; import riscv_instr::*; #(
+  /// Boot address of core.
   parameter logic [31:0] BootAddr  = 32'h0000_1000,
-  parameter bit          RVE       = 0,   // Reduced-register extension
-  parameter bit          SDMA      = 0,   // Enable Snitch DMA as accelerator
-  parameter bit          RVFD      = 1,   // Enable F and D Extension
-  parameter bit          Xipu      = 1
+  /// Physical Address width of the core.
+  parameter int unsigned AddrWidth = 48,
+  /// Data width of memory interface.
+  parameter int unsigned DataWidth = 64,
+  /// Reduced-register extension.
+  parameter bit          RVE       = 0,
+  /// Enable Snitch DMA as accelerator.
+  parameter bit          Xdma      = 0,
+  parameter bit          Xssr      = 0,
+  /// Enable FP in general
+  parameter bit          FP_EN     = 1,
+  /// Enable F Extension.
+  parameter bit          RVF       = 0,
+  /// Enable D Extension.
+  parameter bit          RVD       = 0,
+  parameter bit          XF16      = 0,
+  parameter bit          XF16ALT   = 0,
+  parameter bit          XF8       = 0,
+  parameter bit          XFVEC     = 0,
+  int unsigned           FLEN      = DataWidth,
+  /// Enable experimental IPU extension.
+  parameter bit          Xipu      = 1,
+  /// Data port request type.
+  parameter type         dreq_t    = logic,
+  /// Data port response type.
+  parameter type         drsp_t     = logic,
+  parameter type         acc_req_t  = logic,
+  parameter type         acc_resp_t = logic,
+  parameter type         pa_t       = logic,
+  parameter type         l0_pte_t   = logic,
+  parameter int unsigned NumIntOutstandingLoads = 0,
+  parameter int unsigned NumIntOutstandingMem = 0,
+  parameter int unsigned NumDTLBEntries = 0,
+  parameter int unsigned NumITLBEntries = 0,
+  snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
+  /// Derived parameter *Do not override*
+  parameter type addr_t = logic [AddrWidth-1:0],
+  parameter type data_t = logic [DataWidth-1:0]
 ) (
   input  logic          clk_i,
   input  logic          rst_i,
   input  logic [31:0]   hart_id_i,
-  input  logic          debug_req_i,
-  input  logic          meip_i, // machine external interrupt pending
-  input  logic          mtip_i, // machine external timer interrupt pending
-  input  logic          msip_i, // machine external software interrupt pending
-  output logic          flush_i_valid_o, // instruction cache flush requst
-  input  logic          flush_i_ready_i, // tie to 1'b1 if unsused
+  /// Interrupts
+  input  interrupts_t   irq_i,
+  /// Instruction cache flush request
+  output logic          flush_i_valid_o,
+  /// Flush has completed when the signal goes to `1`.
+  /// Tie to `1` if unused
+  input  logic          flush_i_ready_i,
   // Instruction Refill Port
   output addr_t         inst_addr_o,
   output logic          inst_cacheable_o,
   input  logic [31:0]   inst_data_i,
   output logic          inst_valid_o,
   input  logic          inst_ready_i,
-`ifdef RISCV_FORMAL
-  output logic [0:0]       rvfi_valid,
-  output logic [0:0][63:0] rvfi_order,
-  output logic [0:0][31:0] rvfi_insn,
-  output logic [0:0]       rvfi_trap,
-  output logic [0:0]       rvfi_halt,
-  output logic [0:0]       rvfi_intr,
-  output logic [0:0][1:0]  rvfi_mode,
-  output logic [0:0][4:0]  rvfi_rs1_addr,
-  output logic [0:0][4:0]  rvfi_rs2_addr,
-  output logic [0:0][31:0] rvfi_rs1_rdata,
-  output logic [0:0][31:0] rvfi_rs2_rdata,
-  output logic [0:0][4:0]  rvfi_rd_addr,
-  output logic [0:0][31:0] rvfi_rd_wdata,
-  output logic [0:0][31:0] rvfi_pc_rdata,
-  output logic [0:0][31:0] rvfi_pc_wdata,
-  output logic [0:0][31:0] rvfi_mem_addr,
-  output logic [0:0][3:0]  rvfi_mem_rmask,
-  output logic [0:0][3:0]  rvfi_mem_wmask,
-  output logic [0:0][31:0] rvfi_mem_rdata,
-  output logic [0:0][31:0] rvfi_mem_wdata,
-`endif
   /// Accelerator Interface - Master Port
   /// Independent channels for transaction request and read completion.
   /// AXI-like handshaking.
   /// Same IDs need to be handled in-order.
-  output acc_addr_e     acc_qaddr_o,
-  output logic [4:0]    acc_qid_o,
-  output logic [31:0]   acc_qdata_op_o,
-  output data_t         acc_qdata_arga_o,
-  output data_t         acc_qdata_argb_o,
-  output addr_t         acc_qdata_argc_o,
+  output acc_req_t      acc_qreq_o,
   output logic          acc_qvalid_o,
   input  logic          acc_qready_i,
-  input  data_t         acc_pdata_i,
-  input  logic [4:0]    acc_pid_i,
-  input  logic          acc_perror_i,
+  input  acc_resp_t     acc_prsp_i,
   input  logic          acc_pvalid_i,
   output logic          acc_pready_o,
   /// TCDM Data Interface
   /// Write transactions do not return data on the `P Channel`
   /// Transactions need to be handled strictly in-order.
-  output addr_t             data_qaddr_o,
-  output logic              data_qwrite_o,
-  output amo_op_t           data_qamo_o,
-  output logic [1:0]        data_qsize_o,
-  output data_t             data_qdata_o,
-  output strb_t             data_qstrb_o,
-  output logic              data_qvalid_o,
-  input  logic              data_qready_i,
-  input  data_t             data_pdata_i,
-  input  logic              data_perror_i,
-  input  logic              data_pvalid_i,
-  output logic              data_pready_o,
-  input  logic              wake_up_sync_i, // synchronous wake-up interrupt
+  output dreq_t         data_req_o,
+  input  drsp_t         data_rsp_i,
+  input  logic          wake_up_sync_i, // synchronous wake-up interrupt
   // Address Translation interface.
-  output logic    [1:0]     ptw_valid_o,
-  input  logic    [1:0]     ptw_ready_i,
-  output va_t     [1:0]     ptw_va_o,
-  output pa_t     [1:0]     ptw_ppn_o,
-  input  l0_pte_t [1:0]     ptw_pte_i,
-  input  logic    [1:0]     ptw_is_4mega_i,
+  output logic    [1:0] ptw_valid_o,
+  input  logic    [1:0] ptw_ready_i,
+  output va_t     [1:0] ptw_va_o,
+  output pa_t     [1:0] ptw_ppn_o,
+  input  l0_pte_t [1:0] ptw_pte_i,
+  input  logic    [1:0] ptw_is_4mega_i,
   // FPU **un-timed** Side-channel
   output fpnew_pkg::roundmode_e fpu_rnd_mode_o,
   input  fpnew_pkg::status_t    fpu_status_i
@@ -100,6 +97,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // Debug module's base address
   localparam logic [31:0] DmBaseAddress = 0;
   localparam int RegWidth = RVE ? 4 : 5;
+  /// Total physical address portion.
+  localparam int unsigned PPNSize = AddrWidth - PAGE_SHIFT;
+  localparam bit NSX = XF16 | XF16ALT | XF8 | XFVEC;
 
   logic illegal_inst, illegal_csr;
   logic interrupt, ecall, ebreak;
@@ -160,7 +160,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic  trans_ready;
   logic  trans_active;
   logic  itlb_trans_valid, dtlb_trans_valid;
-  logic [PPN_SIZE-1:0] trans_active_exp;
+  logic [PPNSize-1:0] trans_active_exp;
   logic  tlb_flush;
 
 
@@ -172,12 +172,13 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   } ls_size_e;
   ls_size_e ls_size;
 
-  amo_op_t ls_amo;
+  reqrsp_pkg::amo_op_e ls_amo;
 
   data_t ld_result;
   logic  lsu_qready, lsu_qvalid;
   logic  lsu_tlb_qready, lsu_tlb_qvalid; // gated version considering TLB and LSU
   logic  lsu_pvalid, lsu_pready;
+  logic  lsu_empty;
   addr_t ls_paddr;
   logic [RegWidth-1:0] lsu_rd;
 
@@ -300,19 +301,19 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   `FFLSR(instret_q, instret_q + 1, !stall, '0, clk_i, rst_i)
   `endif
 
-  logic [snitch_pkg::PLEN-32-1:0] mseg_q, mseg_d;
+  logic [AddrWidth-32-1:0] mseg_q, mseg_d;
   `FFSR(mseg_q, mseg_d, '0, clk_i, rst_i)
 
   // accelerator offloading interface
   // register int destination in scoreboard
   logic  acc_register_rd;
 
-  assign acc_qid_o = rd;
-  assign acc_qdata_op_o = inst_data_i;
-  assign acc_qdata_arga_o = {{32{gpr_rdata[0][31]}}, gpr_rdata[0]};
-  assign acc_qdata_argb_o = {{32{gpr_rdata[1][31]}}, gpr_rdata[1]};
+  assign acc_qreq_o.id = rd;
+  assign acc_qreq_o.data_op = inst_data_i;
+  assign acc_qreq_o.data_arga = {{32{gpr_rdata[0][31]}}, gpr_rdata[0]};
+  assign acc_qreq_o.data_argb = {{32{gpr_rdata[1][31]}}, gpr_rdata[1]};
   // operand C is currently only used for load/store instructions
-  assign acc_qdata_argc_o = ls_paddr;
+  assign acc_qreq_o.data_argc = ls_paddr;
 
   // ---------
   // L0 ITLB
@@ -320,6 +321,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign itlb_va = va_t'(pc_q[31:PAGE_SHIFT]);
 
   snitch_l0_tlb #(
+    .pa_t (pa_t),
+    .l0_pte_t (l0_pte_t),
     .NrEntries ( NumITLBEntries )
   ) i_snitch_l0_tlb_inst (
     .clk_i,
@@ -349,9 +352,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // Instruction Fetch Interface
   // ---------------------------
   // Mulitplexer using and/or as this signal is likely timing critical.
-  assign inst_addr_o[PPN_SIZE+PAGE_SHIFT-1:PAGE_SHIFT] =
+  assign inst_addr_o[PPNSize+PAGE_SHIFT-1:PAGE_SHIFT] =
       (trans_active & itlb_pa)
-    | (~trans_active & {{{snitch_pkg::PLEN-32}{1'b0}}, pc_q[31:PAGE_SHIFT]});
+    | (~trans_active & {{{AddrWidth-32}{1'b0}}, pc_q[31:PAGE_SHIFT]});
   assign inst_addr_o[PAGE_SHIFT-1:0] = pc_q[PAGE_SHIFT-1:0];
   assign inst_cacheable_o = snitch_pma_pkg::is_inside_cacheable_regions(SnitchPMACfg, inst_addr_o);
   assign inst_valid_o = ~wfi_q;
@@ -369,7 +372,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     if (retire_load) sb_d[lsu_rd] = 1'b0;
     // only place the reservation if we actually executed the load or offload instruction
     if ((is_load | acc_register_rd) && !stall && !exception) sb_d[rd] = 1'b1;
-    if (retire_acc) sb_d[acc_pid_i[RegWidth-1:0]] = 1'b0;
+    if (retire_acc) sb_d[acc_prsp_i.id[RegWidth-1:0]] = 1'b0;
     sb_d[0] = 1'b0;
   end
   // TODO(zarubaf): This can probably be described a bit more efficient
@@ -380,14 +383,25 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // sure that its destination operand is not marked busy in the scoreboard.
   assign dst_ready = ~uses_rd | (uses_rd & ~sb_q[rd]);
 
-  assign valid_instr = (inst_ready_i & inst_valid_o)
-          & operands_ready & dst_ready & ((itlb_valid & itlb_ready) | ~trans_active);
+  assign valid_instr = inst_ready_i
+                      & inst_valid_o
+                      & operands_ready
+                      & dst_ready
+                      & ((itlb_valid & itlb_ready) | ~trans_active);
   // the accelerator interface stalled us
-  assign acc_stall = (acc_qvalid_o & ~acc_qready_i);
+  assign acc_stall = acc_qvalid_o & ~acc_qready_i;
   // the LSU Interface didn't accept our request yet
-  assign lsu_stall = (lsu_tlb_qvalid & ~lsu_tlb_qready);
+  assign lsu_stall = lsu_tlb_qvalid & ~lsu_tlb_qready;
   // Stall the stage if we either didn't get a valid instruction or the LSU/Accelerator is not ready
-  assign stall = ~valid_instr | lsu_stall | acc_stall | (flush_i_valid_o & ~flush_i_ready_i);
+  assign stall = ~valid_instr
+                // The LSU is stalling.
+                | lsu_stall
+                // The accelerator port is stalling.
+                | acc_stall
+                // We are waiting on the `fence.i` flush.
+                | (flush_i_valid_o & ~flush_i_ready_i)
+                // We are waiting on the `fence` flush.
+                | (valid_instr & (inst_data_i ==? FENCE) & ~lsu_empty);
 
   // --------------------
   // Instruction Frontend
@@ -419,7 +433,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           DmBaseAddress + dm::HaltAddress : DmBaseAddress + dm::ExceptionAddress;
       end else begin
       end
-      if (!debug_q && (debug_req_i || dcsr_q.step)) pc_d = DmBaseAddress + dm::HaltAddress;
+      if (!debug_q && (irq_i.debug || dcsr_q.step)) pc_d = DmBaseAddress + dm::HaltAddress;
     end
   end
 
@@ -458,16 +472,16 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     is_fp_store = 1'b0;
     is_signed = 1'b0;
     ls_size = Byte;
-    ls_amo = AMONone;
+    ls_amo = reqrsp_pkg::AMONone;
 
     acc_qvalid_o = 1'b0;
-    acc_qaddr_o = FP_SS;
+    acc_qreq_o.addr = FP_SS;
     acc_register_rd = 1'b0;
 
     debug_d = (!debug_q && (
           // the external debugger or an ebreak instruction triggerd the
           // request to debug.
-          debug_req_i ||
+          irq_i.debug ||
           // We encountered an ebreak and the default ebreak behaviour is switched off
           (dcsr_q.ebreakm && inst_data_i == EBREAK) ||
           // This was a single-step
@@ -477,7 +491,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     csr_en = 1'b0;
     // Debug request and wake up are possibilties to move out of
     // the low power state.
-    wfi_d = (wake_up_sync_i || debug_req_i || debug_q || any_interrupt_pending) ? 1'b0 : wfi_q;
+    wfi_d = (wake_up_sync_i || irq_i.debug || debug_q || any_interrupt_pending) ? 1'b0 : wfi_q;
 
     unique casez (inst_data_i)
       ADD: begin
@@ -804,7 +818,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOAdd;
+        ls_amo = reqrsp_pkg::AMOAdd;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -815,7 +829,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOXor;
+        ls_amo = reqrsp_pkg::AMOXor;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -826,7 +840,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOOr;
+        ls_amo = reqrsp_pkg::AMOOr;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -837,7 +851,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOAnd;
+        ls_amo = reqrsp_pkg::AMOAnd;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -848,7 +862,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOMin;
+        ls_amo = reqrsp_pkg::AMOMin;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -859,7 +873,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOMax;
+        ls_amo = reqrsp_pkg::AMOMax;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -870,7 +884,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOMinu;
+        ls_amo = reqrsp_pkg::AMOMinu;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -881,7 +895,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOMaxu;
+        ls_amo = reqrsp_pkg::AMOMaxu;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -892,7 +906,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOSwap;
+        ls_amo = reqrsp_pkg::AMOSwap;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -903,7 +917,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOLR;
+        ls_amo = reqrsp_pkg::AMOLR;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -914,7 +928,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         is_load = 1'b1;
         is_signed = 1'b1;
         ls_size = Word;
-        ls_amo = AMOSC;
+        ls_amo = reqrsp_pkg::AMOSC;
         opa_select = Reg;
         opb_select = Reg;
       end
@@ -938,7 +952,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         opa_select = Reg;
         opb_select = Reg;
         acc_register_rd = 1'b1;
-        acc_qaddr_o = SHARED_MULDIV;
+        acc_qreq_o.addr = SHARED_MULDIV;
       end
       // Off-loaded to IPU
       ANDN, ORN, XNOR, SLO, SRO, ROL, ROR, SBCLR, SBSET, SBINV, SBEXT,
@@ -952,7 +966,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         opa_select = Reg;
         opb_select = Reg;
         acc_register_rd = 1'b1;
-        acc_qaddr_o = INT_SS;
+        acc_qreq_o.addr = INT_SS;
       end
       SLOI, SROI, RORI, SBCLRI, SBSETI, SBINVI, SBEXTI, GORCI,
       GREVI, SHFLI, UNSHFLI: begin
@@ -962,7 +976,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         opa_select = Reg;
         opb_select = IImmediate;
         acc_register_rd = 1'b1;
-        acc_qaddr_o = INT_SS;
+        acc_qreq_o.addr = INT_SS;
       end
       IADDI, ISLLI, ISLTI, ISLTIU, IXORI, ISRLI, ISRAI, IORI, IANDI, IADD,
       ISUB, ISLL, ISLT, ISLTU, IXOR, ISRL, ISRA, IOR, IAND,
@@ -974,7 +988,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       ICLMULH, IMIN, IMAX, IMINU, IMAXU, ISHFL, IUNSHFL, IBEXT, IBDEP, IPACK,
       IPACKU, IPACKH, IBFP: begin
         if (Xipu) begin
-          acc_qaddr_o = INT_SS;
+          acc_qreq_o.addr = INT_SS;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -983,7 +997,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       IMV_X_W: begin
         if (Xipu) begin
-          acc_qaddr_o = INT_SS;
+          acc_qreq_o.addr = INT_SS;
           write_rd = 1'b0;
           uses_rd = 1'b1;
           acc_qvalid_o = valid_instr;
@@ -994,7 +1008,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       IMV_W_X: begin
         if (Xipu) begin
-          acc_qaddr_o = INT_SS;
+          acc_qreq_o.addr = INT_SS;
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1004,7 +1018,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       IREP: begin
         if (Xipu) begin
-          acc_qaddr_o = INT_SS;
+          acc_qreq_o.addr = INT_SS;
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1029,7 +1043,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMSUB_S,
       FNMSUB_S,
       FNMADD_S: begin
-        if (RVFD && RVF) begin
+        if (FP_EN && RVF) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1062,7 +1076,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFSGNJX_R_S,
       VFCPKA_S_S,
       VFCPKA_S_D: begin
-        if (RVFD && XFVEC && RVF && RVD) begin
+        if (FP_EN && XFVEC && RVF && RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1084,7 +1098,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMSUB_D,
       FNMSUB_D,
       FNMADD_D: begin
-        if (RVFD && RVD) begin
+        if (FP_EN && RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1093,7 +1107,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       FCVT_S_D,
       FCVT_D_S: begin
-        if (RVFD && RVF && RVD) begin
+        if (FP_EN && RVF && RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1110,7 +1124,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMSUB_H,
       FNMSUB_H,
       FNMADD_H: begin
-        if (RVFD && (XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
+        if (FP_EN && (XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
             (XF16ALT && inst_data_i[14:12] == 3'b101)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1124,7 +1138,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FSGNJX_H,
       FMIN_H,
       FMAX_H: begin
-        if (RVFD && XF16) begin
+        if (FP_EN && XF16) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1133,7 +1147,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       FCVT_S_H,
       FCVT_H_S: begin
-        if (RVFD && RVF) begin
+        if (FP_EN && RVF) begin
           if ((XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
               (XF16ALT && inst_data_i[14:12] == 3'b101)) begin
             write_rd = 1'b0;
@@ -1147,7 +1161,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       FCVT_D_H,
       FCVT_H_D: begin
-        if (RVFD && RVD) begin
+        if (FP_EN && RVD) begin
           if ((XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
               (XF16ALT && inst_data_i[14:12] == 3'b101)) begin
             write_rd = 1'b0;
@@ -1184,7 +1198,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFSGNJX_H,
       VFSGNJX_R_H,
       VFCPKA_H_S: begin
-        if (RVFD && XFVEC && XF16 && RVF) begin
+        if (FP_EN && XFVEC && XF16 && RVF) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1198,7 +1212,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCPKB_H_S,
       VFCPKA_H_D,
       VFCPKB_H_D: begin
-        if (RVFD && XFVEC && XF16 && RVF && RVD) begin
+        if (FP_EN && XFVEC && XF16 && RVF && RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1211,7 +1225,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FSGNJX_AH,
       FMIN_AH,
       FMAX_AH: begin
-        if (RVFD && XF16ALT) begin
+        if (FP_EN && XF16ALT) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1219,7 +1233,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       FCVT_S_AH: begin
-        if (RVFD && RVF && XF16ALT) begin
+        if (FP_EN && RVF && XF16ALT) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1227,7 +1241,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       FCVT_D_AH: begin
-        if (RVFD && RVD && XF16ALT) begin
+        if (FP_EN && RVD && XF16ALT) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1236,7 +1250,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       FCVT_H_AH,
       FCVT_AH_H: begin
-        if (RVFD && XF16 && XF16ALT) begin
+        if (FP_EN && XF16 && XF16ALT) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1268,7 +1282,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFSGNJX_AH,
       VFSGNJX_R_AH,
       VFCPKA_AH_S: begin
-        if (RVFD && XFVEC && XF16ALT && RVF) begin
+        if (FP_EN && XFVEC && XF16ALT && RVF) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1282,7 +1296,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCPKB_AH_S,
       VFCPKA_AH_D,
       VFCPKB_AH_D: begin
-        if (RVFD && XFVEC && XF16ALT && RVF && RVD) begin
+        if (FP_EN && XFVEC && XF16ALT && RVF && RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1293,7 +1307,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCVTU_H_AH,
       VFCVT_AH_H,
       VFCVTU_AH_H: begin
-        if (RVFD && XFVEC && XF16ALT && XF16 && RVF) begin
+        if (FP_EN && XFVEC && XF16ALT && XF16 && RVF) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1315,7 +1329,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMSUB_B,
       FNMSUB_B,
       FNMADD_B: begin
-        if (RVFD && XF8) begin
+        if (FP_EN && XF8) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1324,7 +1338,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       FCVT_S_B,
       FCVT_B_S: begin
-        if (RVFD && RVF && XF8) begin
+        if (FP_EN && RVF && XF8) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1333,7 +1347,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       FCVT_D_B,
       FCVT_B_D: begin
-        if (RVFD && RVD && XF8) begin
+        if (FP_EN && RVD && XF8) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1342,7 +1356,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       FCVT_H_B,
       FCVT_B_H: begin
-        if (RVFD && XF16 && XF8) begin
+        if (FP_EN && XF16 && XF8) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1351,7 +1365,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       FCVT_AH_B,
       FCVT_B_AH: begin
-        if (RVFD && RVF && RVD) begin
+        if (FP_EN && RVF && RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1382,7 +1396,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFSGNJN_R_B,
       VFSGNJX_B,
       VFSGNJX_R_B: begin
-        if (RVFD && XFVEC && XF8 && FLEN >= 16) begin
+        if (FP_EN && XFVEC && XF8 && FLEN >= 16) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1391,7 +1405,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       VFCPKA_B_S,
       VFCPKB_B_S: begin
-        if (RVFD && XFVEC && XF8 && RVF) begin
+        if (FP_EN && XFVEC && XF8 && RVF) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1402,7 +1416,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCVTU_S_B,
       VFCVT_B_S,
       VFCVTU_B_S: begin
-        if (RVFD && XFVEC && XF8 && RVF && FLEN >= 64) begin
+        if (FP_EN && XFVEC && XF8 && RVF && FLEN >= 64) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1415,7 +1429,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCPKB_B_D,
       VFCPKC_B_D,
       VFCPKD_B_D: begin
-        if (RVFD && XFVEC && XF8 && RVD) begin
+        if (FP_EN && XFVEC && XF8 && RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1426,7 +1440,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCVTU_H_B,
       VFCVT_B_H,
       VFCVTU_B_H: begin
-        if (RVFD && XFVEC && XF8 && XF16 && FLEN >= 32) begin
+        if (FP_EN && XFVEC && XF8 && XF16 && FLEN >= 32) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1437,7 +1451,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCVTU_AH_B,
       VFCVT_B_AH,
       VFCVTU_B_AH: begin
-        if (RVFD && XFVEC && XF8 && XF16ALT && FLEN >= 32) begin
+        if (FP_EN && XFVEC && XF8 && XF16ALT && FLEN >= 32) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1453,7 +1467,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FCVT_W_S,
       FCVT_WU_S,
       FMV_X_W: begin
-        if (RVFD && RVF) begin
+        if (FP_EN && RVF) begin
           write_rd = 1'b0;
           uses_rd = 1'b1;
           acc_qvalid_o = valid_instr;
@@ -1476,7 +1490,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFGT_S,
       VFGT_R_S,
       VFCLASS_S: begin
-        if (RVFD && XFVEC && RVF && FLEN >= 64) begin
+        if (FP_EN && XFVEC && RVF && FLEN >= 64) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1490,7 +1504,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FCLASS_D,
       FCVT_W_D,
       FCVT_WU_D: begin
-        if (RVFD && RVD) begin
+        if (FP_EN && RVD) begin
           write_rd = 1'b0;
           uses_rd = 1'b1;
           acc_qvalid_o = valid_instr;
@@ -1507,7 +1521,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FCVT_W_H,
       FCVT_WU_H,
       FMV_X_H: begin
-        if (RVFD && (XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
+        if (FP_EN && (XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
               (XF16ALT && inst_data_i[14:12] == 3'b101)) begin
           write_rd = 1'b0;
           uses_rd = 1'b1;
@@ -1531,7 +1545,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFGT_H,
       VFGT_R_H,
       VFCLASS_H: begin
-        if (RVFD && XFVEC && XF16 && FLEN >= 32) begin
+        if (FP_EN && XFVEC && XF16 && FLEN >= 32) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1541,7 +1555,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFMV_X_H,
       VFCVT_X_H,
       VFCVT_XU_H: begin
-        if (RVFD && XFVEC && XF16 && FLEN >= 32 && ~RVD) begin
+        if (FP_EN && XFVEC && XF16 && FLEN >= 32 && ~RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1554,7 +1568,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FEQ_AH,
       FCLASS_AH,
       FMV_X_AH: begin
-        if (RVFD && XF16ALT) begin
+        if (FP_EN && XF16ALT) begin
           write_rd = 1'b0;
           uses_rd = 1'b1;
           acc_qvalid_o = valid_instr;
@@ -1577,7 +1591,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFGT_AH,
       VFGT_R_AH,
       VFCLASS_AH: begin
-        if (RVFD && XFVEC && XF16ALT && FLEN >= 32) begin
+        if (FP_EN && XFVEC && XF16ALT && FLEN >= 32) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1587,7 +1601,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFMV_X_AH,
       VFCVT_X_AH,
       VFCVT_XU_AH: begin
-        if (RVFD && XFVEC && XF16ALT && FLEN >= 32 && ~RVD) begin
+        if (FP_EN && XFVEC && XF16ALT && FLEN >= 32 && ~RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1602,7 +1616,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FCVT_W_B,
       FCVT_WU_B,
       FMV_X_B: begin
-        if (RVFD && XF8) begin
+        if (FP_EN && XF8) begin
           write_rd = 1'b0;
           uses_rd = 1'b1;
           acc_qvalid_o = valid_instr;
@@ -1624,7 +1638,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFLE_R_B,
       VFGT_B,
       VFGT_R_B: begin
-        if (RVFD && XFVEC && XF8 && FLEN >= 16) begin
+        if (FP_EN && XFVEC && XF8 && FLEN >= 16) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1635,7 +1649,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCLASS_B,
       VFCVT_X_B,
       VFCVT_XU_B: begin
-        if (RVFD && XFVEC && XF8 && FLEN >= 16 && ~RVD) begin
+        if (FP_EN && XFVEC && XF8 && FLEN >= 16 && ~RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1647,7 +1661,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMV_W_X,
       FCVT_S_W,
       FCVT_S_WU: begin
-        if (RVFD && RVF) begin
+        if (FP_EN && RVF) begin
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1658,7 +1672,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       // Double Precision Floating-Point
       FCVT_D_W,
       FCVT_D_WU: begin
-        if (RVFD && RVD) begin
+        if (FP_EN && RVD) begin
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1670,7 +1684,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMV_H_X,
       FCVT_H_W,
       FCVT_H_WU: begin
-        if (RVFD && XF16) begin
+        if (FP_EN && XF16) begin
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1682,7 +1696,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFMV_H_X,
       VFCVT_H_X,
       VFCVT_H_XU: begin
-        if (RVFD && XFVEC && XF16 && FLEN >= 32 && ~RVD) begin
+        if (FP_EN && XFVEC && XF16 && FLEN >= 32 && ~RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1691,7 +1705,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       // Alternate Half Precision Floating-Point
       FMV_AH_X: begin
-        if (RVFD && XF16ALT) begin
+        if (FP_EN && XF16ALT) begin
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1703,7 +1717,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFMV_AH_X,
       VFCVT_AH_X,
       VFCVT_AH_XU: begin
-        if (RVFD && XFVEC && XF16ALT && FLEN >= 32 && ~RVD) begin
+        if (FP_EN && XFVEC && XF16ALT && FLEN >= 32 && ~RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1714,7 +1728,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMV_B_X,
       FCVT_B_W,
       FCVT_B_WU: begin
-        if (RVFD && XF8) begin
+        if (FP_EN && XF8) begin
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1726,7 +1740,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFMV_B_X,
       VFCVT_B_X,
       VFCVT_B_XU: begin
-        if (RVFD && XFVEC && XF8 && FLEN >= 16 && ~RVD) begin
+        if (FP_EN && XFVEC && XF8 && FLEN >= 16 && ~RVD) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1735,7 +1749,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       // FP Sequencer
       FREP: begin
-        if (RVFD && FP_PRESENT) begin
+        if (FP_EN) begin
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1746,7 +1760,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       // Floating-Point Load/Store
       // Single Precision Floating-Point
       FLW: begin
-        if (RVFD && RVF) begin
+        if (FP_EN && RVF) begin
           opa_select = Reg;
           opb_select = IImmediate;
           write_rd = 1'b0;
@@ -1758,7 +1772,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       FSW: begin
-        if (RVFD && RVF) begin
+        if (FP_EN && RVF) begin
           opa_select = Reg;
           opb_select = SFImmediate;
           write_rd = 1'b0;
@@ -1771,7 +1785,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       // Double Precision Floating-Point
       FLD: begin
-        if (RVFD && (RVD || XFVEC)) begin
+        if (FP_EN && (RVD || XFVEC)) begin
           opa_select = Reg;
           opb_select = IImmediate;
           write_rd = 1'b0;
@@ -1783,7 +1797,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       FSD: begin
-        if (RVFD && (RVD || XFVEC)) begin
+        if (FP_EN && (RVD || XFVEC)) begin
           opa_select = Reg;
           opb_select = SFImmediate;
           write_rd = 1'b0;
@@ -1796,7 +1810,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       // Half Precision Floating-Point
       FLH: begin
-        if (RVFD && (XF16 || XF16ALT)) begin
+        if (FP_EN && (XF16 || XF16ALT)) begin
           opa_select = Reg;
           opb_select = IImmediate;
           write_rd = 1'b0;
@@ -1808,7 +1822,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       FSH: begin
-        if (RVFD && (XF16 || XF16ALT)) begin
+        if (FP_EN && (XF16 || XF16ALT)) begin
           opa_select = Reg;
           opb_select = SFImmediate;
           write_rd = 1'b0;
@@ -1821,7 +1835,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       // Quarter Precision Floating-Point
       FLB: begin
-        if (RVFD && XF8) begin
+        if (FP_EN && XF8) begin
           opa_select = Reg;
           opb_select = IImmediate;
           write_rd = 1'b0;
@@ -1833,7 +1847,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       FSB: begin
-        if (RVFD && XF8) begin
+        if (FP_EN && XF8) begin
           opa_select = Reg;
           opb_select = SFImmediate;
           write_rd = 1'b0;
@@ -1848,8 +1862,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       DMSRC,
       DMDST,
       DMSTR: begin
-        if (SDMA) begin
-          acc_qaddr_o  = DMA_SS;
+        if (Xdma) begin
+          acc_qreq_o.addr  = DMA_SS;
           opa_select   = Reg;
           opb_select   = Reg;
           acc_qvalid_o = valid_instr;
@@ -1859,8 +1873,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       DMCPYI: begin
-        if (SDMA) begin
-          acc_qaddr_o     = DMA_SS;
+        if (Xdma) begin
+          acc_qreq_o.addr     = DMA_SS;
           opa_select      = Reg;
           acc_qvalid_o    = valid_instr;
           write_rd        = 1'b0;
@@ -1871,8 +1885,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       DMCPY: begin
-        if (SDMA) begin
-          acc_qaddr_o     = DMA_SS;
+        if (Xdma) begin
+          acc_qreq_o.addr     = DMA_SS;
           opa_select      = Reg;
           opb_select      = Reg;
           acc_qvalid_o    = valid_instr;
@@ -1884,8 +1898,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       DMSTATI: begin
-        if (SDMA) begin
-          acc_qaddr_o     = DMA_SS;
+        if (Xdma) begin
+          acc_qreq_o.addr     = DMA_SS;
           acc_qvalid_o    = valid_instr;
           write_rd        = 1'b0;
           uses_rd         = 1'b1;
@@ -1895,8 +1909,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       DMSTAT: begin
-        if (SDMA) begin
-          acc_qaddr_o     = DMA_SS;
+        if (Xdma) begin
+          acc_qreq_o.addr     = DMA_SS;
           opa_select      = Reg;
           acc_qvalid_o    = valid_instr;
           write_rd        = 1'b0;
@@ -1907,8 +1921,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       DMREP: begin
-        if (SDMA) begin
-          acc_qaddr_o     = DMA_SS;
+        if (Xdma) begin
+          acc_qreq_o.addr     = DMA_SS;
           opa_select      = Reg;
           acc_qvalid_o    = valid_instr;
           write_rd        = 1'b0;
@@ -1916,8 +1930,21 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
-      // Offload Multiply Instructions
-      // TODO(zarubaf): Illegal Instructions
+      SCFGR: begin
+        if (Xssr) begin
+          acc_qreq_o.addr = SSR_CFG;
+          acc_qvalid_o = valid_instr;
+        end else illegal_inst = 1'b1;
+      end
+      SCFGW: begin
+        if (Xssr) begin
+          acc_qreq_o.addr = SSR_CFG;
+          opa_select = Reg;
+          acc_qvalid_o = valid_instr;
+          write_rd = 1'b0;
+        end else illegal_inst = 1'b1;
+      end
+
       default: begin
         illegal_inst = 1'b1;
       end
@@ -1951,9 +1978,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   end
   // pragma translate_on
 
-  assign meip = meip_i & eie_q[M];
-  assign mtip = mtip_i & tie_q[M];
-  assign msip = msip_i & sie_q[M];
+  assign meip = irq_i.meip & eie_q[M];
+  assign mtip = irq_i.mtip & tie_q[M];
+  assign msip = irq_i.msip & sie_q[M];
 
   assign seip = seip_q & eie_q[S];
   assign stip = stip_q & tie_q[S];
@@ -2001,7 +2028,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       if (valid_instr && inst_data_i == EBREAK) begin
         dpc_d = pc_q;
         dcsr_d.cause = dm::CauseBreakpoint;
-      end else if (debug_req_i) begin
+      end else if (irq_i.debug) begin
         dpc_d = npc;
         dcsr_d.cause = dm::CauseRequest;
       end else if (valid_instr && dcsr_q.step) begin
@@ -2020,11 +2047,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
                               // C - Compressed extension
                               | (0   <<  2)
                               // D - Double precsision floating-point extension
-                              | ((RVFD & RVD) <<  3)
+                              | ((FP_EN & RVD) <<  3)
                               // E - RV32E base ISA
-                              | ((RVFD & RVE) <<  4)
+                              | ((FP_EN & RVE) <<  4)
                               // F - Single precsision floating-point extension
-                              | ((RVFD & RVF) <<  5)
+                              | ((FP_EN & RVF) <<  5)
                               // I - RV32I/64I/128I base ISA
                               | (1   <<  8)
                               // M - Integer Multiply/Divide extension
@@ -2036,7 +2063,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
                               // U - User mode implemented
                               | (0   << 20)
                               // X - Non-standard extensions present
-                              | (((NSX & RVFD) | SDMA) << 23)
+                              | (((NSX & FP_EN) | Xdma | Xssr) << 23)
                               // RV32
                               | (1   << 30);
           CSR_MHARTID: begin
@@ -2064,7 +2091,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           CSR_MSTATUS: begin
             automatic snitch_pkg::status_rv32_t mstatus, mstatus_d;
             mstatus = '0;
-            if (RVFD) begin
+            if (FP_EN) begin
               mstatus.fs = snitch_pkg::XDirty;
               mstatus.sd = 1'b1;
             end
@@ -2084,9 +2111,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             epc_d[M] = alu_result[31:0];
           end
           CSR_MIP: begin
-            csr_rvalue[MEI] = meip_i;
-            csr_rvalue[MTI] = mtip_i;
-            csr_rvalue[MSI] = msip_i;
+            csr_rvalue[MEI] = irq_i.meip;
+            csr_rvalue[MTI] = irq_i.mtip;
+            csr_rvalue[MSI] = irq_i.msip;
             csr_rvalue[SEI] = seip_q;
             csr_rvalue[STI] = stip_q;
             csr_rvalue[SSI] = ssip_q;
@@ -2151,19 +2178,19 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           end
           // F/D Extension
           CSR_FFLAGS: begin
-            if (RVFD) begin
+            if (FP_EN) begin
               csr_rvalue = {27'b0, fcsr_q.fflags};
               fcsr_d.fflags = fpnew_pkg::status_t'(alu_result[4:0]);
             end else illegal_csr = 1'b1;
           end
           CSR_FRM: begin
-            if (RVFD) begin
+            if (FP_EN) begin
               csr_rvalue = {29'b0, fcsr_q.frm};
               fcsr_d.frm = fpnew_pkg::roundmode_e'(alu_result[2:0]);
             end else illegal_csr = 1'b1;
           end
           CSR_FCSR: begin
-            if (RVFD) begin
+            if (FP_EN) begin
               csr_rvalue = {24'b0, fcsr_q};
               fcsr_d = fcsr_t'(alu_result[7:0]);
             end else illegal_csr = 1'b1;
@@ -2379,6 +2406,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // --------------------
   assign dtlb_va = va_t'(alu_result[31:PAGE_SHIFT]);
   snitch_l0_tlb #(
+    .pa_t (pa_t),
+    .l0_pte_t (l0_pte_t),
     .NrEntries ( NumDTLBEntries )
   ) i_snitch_l0_tlb_data (
     .clk_i,
@@ -2407,13 +2436,13 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // Translation is active if it is set in SATP and we are not in machine mode or debug mode.
   assign trans_active = satp_q.mode & (priv_lvl_q != PrivLvlM) & ~debug_q;
   assign dtlb_trans_valid = trans_active & dtlb_valid & dtlb_ready;
-  assign trans_active_exp = {{PPN_SIZE}{trans_active}};
+  assign trans_active_exp = {{PPNSize}{trans_active}};
   assign trans_ready = ((trans_active & dtlb_ready) | ~trans_active);
 
   assign dtlb_valid = (lsu_tlb_qvalid & trans_active) | ((is_fp_load | is_fp_store) & trans_active);
 
   // Mulitplexer using and/or as this signal is likely timing critical.
-  assign ls_paddr[PPN_SIZE+PAGE_SHIFT-1:PAGE_SHIFT] =
+  assign ls_paddr[PPNSize+PAGE_SHIFT-1:PAGE_SHIFT] =
           (trans_active & dtlb_pa) | (~trans_active & {mseg_q, alu_result[31:PAGE_SHIFT]});
   assign ls_paddr[PAGE_SHIFT-1:0] = alu_result[PAGE_SHIFT-1:0];
 
@@ -2428,37 +2457,33 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign lsu_qdata = $unsigned(gpr_rdata[1]);
 
   snitch_lsu #(
-    .tag_t               ( logic[RegWidth-1:0]    ),
-    .NumOutstandingLoads ( NumIntOutstandingLoads )
+    .AddrWidth (AddrWidth),
+    .DataWidth (DataWidth),
+    .dreq_t (dreq_t),
+    .drsp_t (drsp_t),
+    .tag_t (logic[RegWidth-1:0]),
+    .NumOutstandingMem (NumIntOutstandingMem),
+    .NumOutstandingLoads (NumIntOutstandingLoads)
   ) i_snitch_lsu (
-    .clk_i                      ,
-    .rst_i                      ,
-    .lsu_qtag_i   ( rd         ),
-    .lsu_qwrite   ( is_store   ),
-    .lsu_qsigned  ( is_signed  ),
-    .lsu_qaddr_i  ( ls_paddr   ),
-    .lsu_qdata_i  ( lsu_qdata  ),
-    .lsu_qsize_i  ( ls_size    ),
-    .lsu_qamo_i   ( ls_amo     ),
-    .lsu_qvalid_i ( lsu_qvalid ),
-    .lsu_qready_o ( lsu_qready ),
-    .lsu_pdata_o  ( ld_result  ),
-    .lsu_ptag_o   ( lsu_rd     ),
-    .lsu_perror_o (            ), // ignored for the moment
-    .lsu_pvalid_o ( lsu_pvalid ),
-    .lsu_pready_i ( lsu_pready ),
-    .data_qaddr_o               ,
-    .data_qwrite_o              ,
-    .data_qdata_o               ,
-    .data_qsize_o               ,
-    .data_qamo_o                ,
-    .data_qstrb_o               ,
-    .data_qvalid_o              ,
-    .data_qready_i              ,
-    .data_pdata_i               ,
-    .data_perror_i              ,
-    .data_pvalid_i              ,
-    .data_pready_o
+    .clk_i (clk_i),
+    .rst_i (rst_i),
+    .lsu_qtag_i (rd),
+    .lsu_qwrite (is_store),
+    .lsu_qsigned (is_signed),
+    .lsu_qaddr_i (ls_paddr),
+    .lsu_qdata_i (lsu_qdata),
+    .lsu_qsize_i (ls_size),
+    .lsu_qamo_i (ls_amo),
+    .lsu_qvalid_i (lsu_qvalid),
+    .lsu_qready_o (lsu_qready),
+    .lsu_pdata_o (ld_result),
+    .lsu_ptag_o (lsu_rd),
+    .lsu_perror_o (/* ignored for the moment */),
+    .lsu_pvalid_o (lsu_pvalid),
+    .lsu_pready_i (lsu_pready),
+    .lsu_empty_o (lsu_empty),
+    .data_req_o,
+    .data_rsp_i
   );
 
   assign lsu_tlb_qvalid = valid_instr & (is_load | is_store)
@@ -2531,8 +2556,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     end else if (acc_pvalid_i) begin
       retire_acc = 1'b1;
       gpr_we[0] = 1'b1;
-      gpr_waddr[0] = acc_pid_i;
-      gpr_wdata[0] = acc_pdata_i[31:0];
+      gpr_waddr[0] = acc_prsp_i.id;
+      gpr_wdata[0] = acc_prsp_i.data[31:0];
       acc_pready_o = 1'b1;
     end
   end

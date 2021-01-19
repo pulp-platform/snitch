@@ -8,8 +8,18 @@
 // to an accelerator bus in the snitch system
 
 module axi_dma_tc_snitch_fe #(
-    parameter type         axi_req_t          = logic,
-    parameter type         axi_res_t          = logic
+    parameter int unsigned AddrWidth     = 0,
+    parameter int unsigned DataWidth     = 0,
+    parameter int unsigned DMADataWidth  = 0,
+    parameter int unsigned IdWidth       = 0,
+    parameter int unsigned DMAAxiReqFifoDepth = 3,
+    parameter int unsigned DMAReqFifoDepth    = 3,
+    parameter type         axi_req_t     = logic,
+    parameter type         axi_res_t     = logic,
+    parameter type         acc_resp_t    = logic,
+    /// Derived parameter *Do not override*
+    parameter type addr_t = logic [AddrWidth-1:0],
+    parameter type data_t = logic [DataWidth-1:0]
 ) (
     input  logic           clk_i,
     input  logic           rst_ni,
@@ -19,20 +29,20 @@ module axi_dma_tc_snitch_fe #(
     // debug output
     output logic           dma_busy_o,
     // accelerator interface
-    input  logic [31:0]       acc_qaddr_i,
-    input  logic [ 4:0]       acc_qid_i,
-    input  logic [31:0]       acc_qdata_op_i,
-    input  snitch_pkg::data_t acc_qdata_arga_i,
-    input  snitch_pkg::data_t acc_qdata_argb_i,
-    input  snitch_pkg::addr_t acc_qdata_argc_i,
-    input  logic              acc_qvalid_i,
-    output logic              acc_qready_o,
+    input  logic [31:0]    acc_qaddr_i,
+    input  logic [ 4:0]    acc_qid_i,
+    input  logic [31:0]    acc_qdata_op_i,
+    input  data_t          acc_qdata_arga_i,
+    input  data_t          acc_qdata_argb_i,
+    input  addr_t          acc_qdata_argc_i,
+    input  logic           acc_qvalid_i,
+    output logic           acc_qready_o,
 
-    output snitch_pkg::data_t acc_pdata_o,
-    output logic [ 4:0]       acc_pid_o,
-    output logic              acc_perror_o,
-    output logic              acc_pvalid_o,
-    input  logic              acc_pready_i,
+    output data_t          acc_pdata_o,
+    output logic [ 4:0]    acc_pid_o,
+    output logic           acc_perror_o,
+    output logic           acc_pvalid_o,
+    input  logic           acc_pready_i,
 
     // hart id of the frankensnitch
     input  logic [31:0]       hart_id_i,
@@ -41,28 +51,50 @@ module axi_dma_tc_snitch_fe #(
     output axi_dma_pkg::dma_perf_t dma_perf_o
 );
 
+    typedef logic [IdWidth-1:0] id_t;
+
+    typedef struct packed {
+        id_t              id;
+        addr_t            src, dst, num_bytes;
+        axi_pkg::cache_t  cache_src, cache_dst;
+        axi_pkg::burst_t  burst_src, burst_dst;
+        logic             decouple_rw;
+        logic             deburst;
+    } burst_req_t;
+
+    typedef struct packed {
+        id_t              id;
+        addr_t            src, dst, num_bytes;
+        axi_pkg::cache_t  cache_src, cache_dst;
+        addr_t            stride_src, stride_dst, num_repetitions;
+        axi_pkg::burst_t  burst_src, burst_dst;
+        logic             decouple_rw;
+        logic             deburst;
+        logic             is_twod;
+    } twod_req_t;
+
     //--------------------------------------
     // Backend Instanciation
     //--------------------------------------
     logic                    backend_idle;
     logic                    trans_complete;
-    axi_dma_pkg::burst_req_t burst_req;
+    burst_req_t burst_req;
     logic                    burst_req_valid;
     logic                    burst_req_ready;
     logic                    oned_trans_complete;
 
     axi_dma_backend #(
-        .DataWidth       ( snitch_axi_pkg::DMADataWidth       ),
-        .AddrWidth       ( snitch_axi_pkg::DMAAddrWidth       ),
-        .IdWidth         ( snitch_pkg::IdWidthDma             ),
-        .AxReqFifoDepth  ( snitch_pkg::DMA_AXI_REQ_FIFO_DEPTH ),
-        .TransFifoDepth  ( snitch_pkg::DMA_REQ_FIFO_DEPTH     ),
-        .BufferDepth     ( 3                                  ),
-        .axi_req_t       ( axi_req_t                          ),
-        .axi_res_t       ( axi_res_t                          ),
-        .burst_req_t     ( axi_dma_pkg::burst_req_t           ),
-        .DmaIdWidth      ( 32                                 ),
-        .DmaTracing      ( 1                                  )
+        .DataWidth       ( DMADataWidth ),
+        .AddrWidth       ( AddrWidth ),
+        .IdWidth         ( IdWidth ),
+        .AxReqFifoDepth  ( DMAAxiReqFifoDepth ),
+        .TransFifoDepth  ( DMAReqFifoDepth ),
+        .BufferDepth     ( 3 ),
+        .axi_req_t       ( axi_req_t ),
+        .axi_res_t       ( axi_res_t ),
+        .burst_req_t     ( burst_req_t ),
+        .DmaIdWidth      ( 32 ),
+        .DmaTracing      ( 1 )
     ) i_axi_dma_backend (
         .clk_i            ( clk_i               ),
         .rst_ni           ( rst_ni              ),
@@ -79,14 +111,16 @@ module axi_dma_tc_snitch_fe #(
     //--------------------------------------
     // 2D Extension
     //--------------------------------------
-    axi_dma_pkg::twod_req_t twod_req_d, twod_req_q;
-    logic                   twod_req_valid;
-    logic                   twod_req_ready;
-    logic                   twod_req_last;
+    twod_req_t twod_req_d, twod_req_q;
+    logic      twod_req_valid;
+    logic      twod_req_ready;
+    logic      twod_req_last;
 
     axi_dma_twod_ext #(
-        .ADDR_WIDTH       ( snitch_axi_pkg::DMAAddrWidth   ),
-        .REQ_FIFO_DEPTH   ( snitch_pkg::DMA_REQ_FIFO_DEPTH )
+        .ADDR_WIDTH       ( AddrWidth   ),
+        .REQ_FIFO_DEPTH   ( DMAReqFifoDepth ),
+        .burst_req_t      ( burst_req_t ),
+        .twod_req_t       ( twod_req_t )
     ) i_axi_dma_twod_ext (
         .clk_i                ( clk_i           ),
         .rst_ni               ( rst_ni          ),
@@ -102,8 +136,8 @@ module axi_dma_tc_snitch_fe #(
     //--------------------------------------
     // Buffer twod last
     //--------------------------------------
-    localparam int unsigned TwodBufferDepth = 2 * snitch_pkg::DMA_REQ_FIFO_DEPTH +
-        snitch_pkg::DMA_AXI_REQ_FIFO_DEPTH + 3 + 1;
+    localparam int unsigned TwodBufferDepth = 2 * DMAReqFifoDepth +
+        DMAAxiReqFifoDepth + 3 + 1;
     logic twod_req_last_realigned;
     fifo_v3 # (
         .DATA_WIDTH  (  1                 ),
@@ -147,7 +181,7 @@ module axi_dma_tc_snitch_fe #(
     //--------------------------------------
     axi_dma_perf_counters #(
         .TRANSFER_ID_WIDTH  ( 32           ),
-        .DATA_WIDTH         ( snitch_axi_pkg::DMADataWidth ),
+        .DATA_WIDTH         ( DMADataWidth ),
         .axi_req_t          ( axi_req_t    ),
         .axi_res_t          ( axi_res_t    )
     ) i_axi_dma_perf_counters (
@@ -164,13 +198,13 @@ module axi_dma_tc_snitch_fe #(
     //--------------------------------------
     // Spill register for response channel
     //--------------------------------------
-    snitch_pkg::acc_resp_t acc_pdata_spill, acc_pdata;
+    acc_resp_t acc_pdata_spill, acc_pdata;
     logic acc_pvalid_spill;
     logic acc_pready_spill;
 
     // the response path needs to be decoupled
     spill_register #(
-        .T            ( snitch_pkg::acc_resp_t )
+        .T            ( acc_resp_t )
     ) i_spill_register_dma_resp (
         .clk_i        ( clk_i            ),
         .rst_ni       ( rst_ni           ),
@@ -212,7 +246,7 @@ module axi_dma_tc_snitch_fe #(
             // manipulate the source register
             riscv_instr::DMSRC : begin
                 twod_req_d.src[31: 0] = acc_qdata_arga_i[31:0];
-                twod_req_d.src[snitch_pkg::PLEN-1:32] = acc_qdata_argb_i[snitch_pkg::PLEN-1-32: 0];
+                twod_req_d.src[AddrWidth-1:32] = acc_qdata_argb_i[AddrWidth-1-32: 0];
                 acc_qready_o = 1'b1;
                 is_dma_op    = 1'b1;
                 dma_op_name  = "DMSRC";
@@ -221,7 +255,7 @@ module axi_dma_tc_snitch_fe #(
             // manipulate the destination register
             riscv_instr::DMDST : begin
                 twod_req_d.dst[31: 0] = acc_qdata_arga_i[31:0];
-                twod_req_d.dst[snitch_pkg::PLEN-1:32] = acc_qdata_argb_i[snitch_pkg::PLEN-1-32: 0];
+                twod_req_d.dst[AddrWidth-1:32] = acc_qdata_argb_i[AddrWidth-1-32: 0];
                 acc_qready_o = 1'b1;
                 is_dma_op    = 1'b1;
                 dma_op_name  = "DMDST";

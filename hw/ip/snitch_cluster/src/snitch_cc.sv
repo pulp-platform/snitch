@@ -2,20 +2,72 @@
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
 
-// Snitch Core Complex (CC)
-// Contains the Snitch Integer Core + floating point unit
+// Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
-/// Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+`include "common_cells/assertions.svh"
+`include "common_cells/registers.svh"
+`include "snitch_vm/typedef.svh"
+
+/// Snitch Core Complex (CC)
+/// Contains the Snitch Integer Core + FPU + Private Accelerators
 module snitch_cc #(
+  /// Address width of the buses
+  parameter int unsigned AddrWidth          = 0,
+  /// Data width of the buses.
+  parameter int unsigned DataWidth          = 0,
+  /// Data width of the AXI DMA buses.
+  parameter int unsigned DMADataWidth       = 0,
+  /// Id width of the AXI DMA bus.
+  parameter int unsigned DMAIdWidth         = 0,
+  parameter int unsigned DMAAxiReqFifoDepth = 0,
+  parameter int unsigned DMAReqFifoDepth    = 0,
+  /// Data port request type.
+  parameter type         dreq_t             = logic,
+  /// Data port response type.
+  parameter type         drsp_t             = logic,
+  /// Data port request type.
+  parameter type         tcdm_req_t         = logic,
+  /// Data port response type.
+  parameter type         tcdm_rsp_t         = logic,
+  /// TCDM User Payload
+  parameter type         tcdm_user_t        = logic,
+  parameter type         axi_req_t          = logic,
+  parameter type         axi_rsp_t          = logic,
+  parameter type         hive_req_t         = logic,
+  parameter type         hive_rsp_t         = logic,
+  parameter type         acc_req_t          = logic,
+  parameter type         acc_resp_t         = logic,
+  parameter fpnew_pkg::fpu_implementation_t FPUImplementation = '0,
+  /// Boot address of core.
   parameter logic [31:0] BootAddr           = 32'h0000_1000,
-  parameter bit          RVE                = 0,       // Reduced-register extension
-  parameter bit          RVFD               = 1,       // Enable F and D Extension
-  parameter bit          SDMA               = 0,       // Enable Snitch DMA
-  /// Add isochronous clock-domain crossings e.g., make it possible to operate the core in a slower clock domain.
-  parameter bit          IsoCrossing        = 1,
-  parameter bit          FPUSequencer       = 1,
+  /// Reduced-register extension
+  parameter bit          RVE                = 0,
+  /// Enable F and D Extension
+  parameter bit          RVF                = 1,
+  parameter bit          RVD                = 1,
+  parameter bit          XF8                = 0,
+  parameter bit          XF16               = 0,
+  parameter bit          XF16ALT            = 0,
+  parameter bit          XFVEC              = 0,
+  /// Enable Snitch DMA
+  parameter bit          Xdma               = 0,
+  /// Has `frep` support.
+  parameter bit          Xfrep              = 1,
+  /// Has `SSR` support.
   parameter bit          Xssr               = 1,
+  /// Has `IPU` support.
   parameter bit          Xipu               = 1,
+  parameter int unsigned NumIntOutstandingLoads = 0,
+  parameter int unsigned NumIntOutstandingMem = 0,
+  parameter int unsigned NumFPOutstandingLoads = 0,
+  parameter int unsigned NumFPOutstandingMem = 0,
+  parameter int unsigned NumDTLBEntries = 0,
+  parameter int unsigned NumITLBEntries = 0,
+  parameter int unsigned NumSequencerInstr = 0,
+  parameter int unsigned SSRNrCredits = 0,
+  /// Add isochronous clock-domain crossings e.g., make it possible to operate
+  /// the core in a slower clock domain.
+  parameter bit          IsoCrossing        = 1,
   /// Insert Pipeline registers into off-loading path (request)
   parameter bit          RegisterOffload    = 1,
   /// Insert Pipeline registers into off-loading path (response)
@@ -23,251 +75,183 @@ module snitch_cc #(
   /// Insert Pipeline registers into data memory request path
   parameter bit          RegisterTCDMReq    = 1,
   /// Insert Pipeline registers after sequencer
-  parameter bit          RegisterSequencer  = 0
+  parameter bit          RegisterSequencer  = 0,
+  snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
+  /// Derived parameter *Do not override*
+  parameter int unsigned TCDMPorts          = 3,
+  parameter type addr_t = logic [AddrWidth-1:0],
+  parameter type data_t = logic [DataWidth-1:0]
 ) (
-  input  logic               clk_i,
-  input  logic               clk_d2_i,
-  input  logic               rst_i,
-  input  logic               rst_int_ss_ni,
-  input  logic               rst_fp_ss_ni,
-  input  logic [31:0]        hart_id_i,
-  input  logic               debug_req_i,
-  output logic               flush_i_valid_o,
-  input  logic               flush_i_ready_i,
-  input  logic               meip_i,
-  input  logic               mtip_i,
-  input  logic               msip_i,
-  // Instruction Port (Potentially in slower clock-domain)
-  output snitch_pkg::addr_t  inst_addr_o,
-  output logic               inst_cacheable_o,
-  input  logic [31:0]        inst_data_i,
-  output logic               inst_valid_o,
-  input  logic               inst_ready_i,
-  // TCDM Ports
-  output snitch_pkg::addr_t   [2:0] data_qaddr_o,
-  output logic                [2:0] data_qwrite_o,
-  output snitch_pkg::amo_op_t [2:0] data_qamo_o,
-  output snitch_pkg::data_t   [2:0] data_qdata_o,
-  output snitch_pkg::size_t   [2:0] data_qsize_o,
-  output snitch_pkg::strb_t   [2:0] data_qstrb_o,
-  output logic                [2:0] data_qvalid_o,
-  input  logic                [2:0] data_qready_i,
-  input  snitch_pkg::data_t   [2:0] data_pdata_i,
-  input  logic                [2:0] data_perror_i,
-  input  logic                [2:0] data_pvalid_i,
-  output logic                [2:0] data_pready_o,
-  input  logic                      wake_up_sync_i,
-  // Accelerator Off-load port
-  output snitch_pkg::acc_req_t  acc_req_o,
-  output logic                  acc_qvalid_o,
-  input  logic                  acc_qready_i,
-  input  snitch_pkg::acc_resp_t acc_resp_i,
-  input  logic                  acc_pvalid_i,
-  output logic                  acc_pready_o,
-  // Address Translation Interface.
-  output logic                [1:0] ptw_valid_o,
-  input  logic                [1:0] ptw_ready_i,
-  output snitch_pkg::va_t     [1:0] ptw_va_o,
-  output snitch_pkg::pa_t     [1:0] ptw_ppn_o,
-  input  snitch_pkg::l0_pte_t [1:0] ptw_pte_i,
-  input  logic                [1:0] ptw_is_4mega_i,
+  input  logic                       clk_i,
+  input  logic                       clk_d2_i,
+  input  logic                       rst_ni,
+  input  logic                       rst_int_ss_ni,
+  input  logic                       rst_fp_ss_ni,
+  input  logic [31:0]                hart_id_i,
+  input  snitch_pkg::interrupts_t    irq_i,
+  output hive_req_t                  hive_req_o,
+  input  hive_rsp_t                  hive_rsp_i,
+  // Core data ports
+  output dreq_t                      data_req_o,
+  input  drsp_t                      data_rsp_i,
+  // TCDM Streamer Ports
+  output tcdm_req_t [TCDMPorts-1:0]  tcdm_req_o,
+  input  tcdm_rsp_t [TCDMPorts-1:0]  tcdm_rsp_i,
+  input  logic                       wake_up_sync_i,
+  // Accelerator Offload port
   // DMA ports
-  output snitch_axi_pkg::req_dma_t   axi_dma_req_o,
-  input  snitch_axi_pkg::resp_dma_t  axi_dma_res_i,
+  output axi_req_t                   axi_dma_req_o,
+  input  axi_rsp_t                   axi_dma_res_i,
   output logic                       axi_dma_busy_o,
   output axi_dma_pkg::dma_perf_t     axi_dma_perf_o,
   // Core event strobes
-  output snitch_pkg::core_events_t core_events_o
+  output snitch_pkg::core_events_t   core_events_o,
+  input  addr_t                      tcdm_addr_base_i,
+  input  addr_t                      tcdm_addr_mask_i
 );
 
-  snitch_pkg::acc_req_t acc_snitch_req;
-  snitch_pkg::acc_req_t acc_snitch_demux;
-  snitch_pkg::acc_req_t acc_snitch_demux_q;
-  snitch_pkg::acc_resp_t acc_seq;
-  snitch_pkg::acc_resp_t acc_demux_snitch;
-  snitch_pkg::acc_resp_t acc_demux_snitch_q;
-  snitch_pkg::acc_resp_t dma_resp;
-  snitch_pkg::acc_resp_t ipu_resp;
+  localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XFVEC | XF16 | XF16ALT | XF8;
+  localparam int unsigned FLEN = RVD     ? 64 : // D ext.
+                          RVF     ? 32 : // F ext.
+                          XF16    ? 16 : // Xf16 ext.
+                          XF16ALT ? 16 : // Xf16alt ext.
+                          XF8     ? 8 :  // Xf8 ext.
+                          0;             // Unused in case of no FP
+
+  typedef struct packed {
+    logic [4:0]  id;
+    logic [11:0] word;
+    logic [31:0] data;
+    logic        write;
+  } ssr_cfg_req_t;
+
+  typedef struct packed {
+    logic [4:0]  id;
+    logic [31:0] data;
+  } ssr_cfg_rsp_t;
+
+  acc_req_t acc_snitch_req;
+  acc_req_t acc_snitch_demux;
+  acc_req_t acc_snitch_demux_q;
+  acc_resp_t acc_seq;
+  acc_resp_t acc_demux_snitch;
+  acc_resp_t acc_demux_snitch_q;
+  acc_resp_t dma_resp;
+  acc_resp_t ipu_resp;
+
+  acc_resp_t ssr_resp;
 
   logic acc_snitch_demux_qvalid, acc_snitch_demux_qready;
   logic acc_snitch_demux_qvalid_q, acc_snitch_demux_qready_q;
   logic acc_qvalid, acc_qready;
   logic dma_qvalid, dma_qready;
   logic ipu_qvalid, ipu_qready;
+  logic ssr_qvalid, ssr_qready;
 
   logic acc_pvalid, acc_pready;
   logic dma_pvalid, dma_pready;
   logic ipu_pvalid, ipu_pready;
+  logic ssr_pvalid, ssr_pready;
   logic acc_demux_snitch_valid, acc_demux_snitch_ready;
   logic acc_demux_snitch_valid_q, acc_demux_snitch_ready_q;
 
   fpnew_pkg::roundmode_e fpu_rnd_mode;
   fpnew_pkg::status_t    fpu_status;
 
-  snitch_pkg::dreq_t data_req [3];
-  logic     data_req_valid    [3];
-  logic     data_req_ready    [3];
-
-  snitch_pkg::dreq_t data_req_q [3];
-  logic     data_req_valid_q    [3];
-  logic     data_req_ready_q    [3];
-
-  snitch_pkg::dresp_t [2:0] data_pdata_q;
-  logic [2:0] data_pvalid_q;
-  logic [2:0] data_pready_q;
-  // Internal signals
-  snitch_pkg::dreq_t  snitch_data_req, snitch_data_req_mux, snitch_data_req_mux_q;
-  snitch_pkg::dresp_t snitch_data_resp, snitch_data_resp_mux, snitch_data_resp_mux_q;
-  logic snitch_data_req_valid, snitch_data_req_ready;
-  logic snitch_data_resp_valid, snitch_data_resp_ready;
-  logic snitch_data_req_mux_valid, snitch_data_req_mux_ready;
-  logic snitch_data_req_mux_valid_q, snitch_data_req_mux_ready_q;
-  logic snitch_data_resp_mux_valid, snitch_data_resp_mux_ready;
-  logic snitch_data_resp_mux_valid_q, snitch_data_resp_mux_ready_q;
-  // SSRs
-  snitch_pkg::dreq_t  ssr_data_req;
-  snitch_pkg::dresp_t ssr_data_resp;
-  logic ssr_data_req_valid, ssr_data_req_ready;
-  logic ssr_data_resp_valid, ssr_data_resp_ready;
-
-  snitch_pkg::dreq_t fp_data_req [3];
-  logic     fp_data_req_valid [3];
-  logic     fp_data_req_ready [3];
-
-  snitch_pkg::dresp_t fp_data_resp [3];
-  logic      fp_data_resp_valid [3];
-  logic      fp_data_resp_ready [3];
-
-  for (genvar i = 0; i < 3; i++) begin : gen_spill_register
-    spill_register  #(
-      .T      ( snitch_pkg::dreq_t    ),
-      .Bypass ( !RegisterTCDMReq  || i == 0 ) // Bypass path 0
-    ) i_spill_register_tcdm_req (
-      .clk_i                           ,
-      .rst_ni  ( ~rst_i               ),
-      .valid_i ( data_req_valid   [i] ),
-      .ready_o ( data_req_ready   [i] ),
-      .data_i  ( data_req         [i] ),
-      .valid_o ( data_req_valid_q [i] ),
-      .ready_i ( data_req_ready_q [i] ),
-      .data_o  ( data_req_q       [i] )
-    );
-  end
-
-  for (genvar i = 0; i < 3; i++) begin : gen_explode_struct
-    assign data_qaddr_o     [i] = data_req_q[i].addr;
-    assign data_qwrite_o    [i] = data_req_q[i].write;
-    assign data_qamo_o      [i] = data_req_q[i].amo;
-    assign data_qdata_o     [i] = data_req_q[i].data;
-    assign data_qsize_o     [i] = data_req_q[i].size;
-    assign data_qstrb_o     [i] = data_req_q[i].strb;
-    assign data_qvalid_o    [i] = data_req_valid_q[i];
-    assign data_req_ready_q [i] = data_qready_i[i];
-  end
-
   // Snitch Integer Core
+  dreq_t snitch_dreq_d, snitch_dreq_q, merged_dreq;
+  drsp_t snitch_drsp_d, snitch_drsp_q, merged_drsp;
+
+
+  `SNITCH_VM_TYPEDEF(AddrWidth)
+
   snitch #(
-    .BootAddr ( BootAddr ),
-    .RVE      ( RVE      ),
-    .SDMA     ( SDMA     ),
-    .RVFD     ( RVFD     )
+    .AddrWidth (AddrWidth),
+    .DataWidth (DataWidth),
+    .acc_req_t (acc_req_t),
+    .acc_resp_t (acc_resp_t),
+    .dreq_t (dreq_t),
+    .drsp_t (drsp_t),
+    .pa_t (pa_t),
+    .l0_pte_t (l0_pte_t),
+    .BootAddr (BootAddr),
+    .SnitchPMACfg (SnitchPMACfg),
+    .NumIntOutstandingLoads (NumIntOutstandingLoads),
+    .NumIntOutstandingMem (NumIntOutstandingMem),
+    .NumDTLBEntries (NumDTLBEntries),
+    .NumITLBEntries (NumITLBEntries),
+    .RVE (RVE),
+    .FP_EN (FPEn),
+    .Xdma (Xdma),
+    .Xssr (Xssr),
+    .RVF (RVF),
+    .RVD (RVD),
+    .XF16 (XF16),
+    .XF16ALT (XF16ALT),
+    .XF8 (XF8),
+    .XFVEC (XFVEC),
+    .FLEN (FLEN)
   ) i_snitch (
-    .clk_i            ( clk_d2_i                   ), // if necessary operate on half the frequency
-    .rst_i                                          ,
-    .hart_id_i                                      ,
-    .debug_req_i                                    ,
-    .flush_i_valid_o                                ,
-    .flush_i_ready_i                                ,
-    .meip_i                                         ,
-    .mtip_i                                         ,
-    .msip_i                                         ,
-    .inst_addr_o                                    ,
-    .inst_cacheable_o                               ,
-    .inst_data_i                                    ,
-    .inst_valid_o                                   ,
-    .inst_ready_i                                   ,
-    .acc_qaddr_o      ( acc_snitch_demux.addr      ),
-    .acc_qid_o        ( acc_snitch_demux.id        ),
-    .acc_qdata_op_o   ( acc_snitch_demux.data_op   ),
-    .acc_qdata_arga_o ( acc_snitch_demux.data_arga ),
-    .acc_qdata_argb_o ( acc_snitch_demux.data_argb ),
-    .acc_qdata_argc_o ( acc_snitch_demux.data_argc ),
-    .acc_qvalid_o     ( acc_snitch_demux_qvalid    ),
-    .acc_qready_i     ( acc_snitch_demux_qready    ),
-    .acc_pdata_i      ( acc_demux_snitch.data      ),
-    .acc_pid_i        ( acc_demux_snitch.id        ),
-    .acc_perror_i     ( acc_demux_snitch.error     ),
-    .acc_pvalid_i     ( acc_demux_snitch_valid     ),
-    .acc_pready_o     ( acc_demux_snitch_ready     ),
-    .data_qaddr_o     ( snitch_data_req_mux.addr   ),
-    .data_qwrite_o    ( snitch_data_req_mux.write  ),
-    .data_qamo_o      ( snitch_data_req_mux.amo    ),
-    .data_qdata_o     ( snitch_data_req_mux.data   ),
-    .data_qstrb_o     ( snitch_data_req_mux.strb   ),
-    .data_qsize_o     ( snitch_data_req_mux.size   ),
-    .data_qvalid_o    ( snitch_data_req_mux_valid  ),
-    .data_qready_i    ( snitch_data_req_mux_ready  ),
-    .data_pdata_i     ( snitch_data_resp_mux_q.data  ),
-    .data_perror_i    ( snitch_data_resp_mux_q.error ),
-    .data_pvalid_i    ( snitch_data_resp_mux_valid_q ),
-    .data_pready_o    ( snitch_data_resp_mux_ready_q ),
-    .ptw_valid_o,
-    .ptw_ready_i,
-    .ptw_va_o,
-    .ptw_ppn_o,
-    .ptw_pte_i,
-    .ptw_is_4mega_i,
+    .clk_i ( clk_d2_i ), // if necessary operate on half the frequency
+    .rst_i ( ~rst_ni ),
+    .hart_id_i,
+    .irq_i,
+    .flush_i_valid_o (hive_req_o.flush_i_valid),
+    .flush_i_ready_i (hive_rsp_i.flush_i_ready),
+    .inst_addr_o (hive_req_o.inst_addr),
+    .inst_cacheable_o (hive_req_o.inst_cacheable),
+    .inst_data_i (hive_rsp_i.inst_data),
+    .inst_valid_o (hive_req_o.inst_valid),
+    .inst_ready_i (hive_rsp_i.inst_ready),
+    .acc_qreq_o ( acc_snitch_demux ),
+    .acc_qvalid_o ( acc_snitch_demux_qvalid ),
+    .acc_qready_i ( acc_snitch_demux_qready ),
+    .acc_prsp_i ( acc_demux_snitch ),
+    .acc_pvalid_i ( acc_demux_snitch_valid ),
+    .acc_pready_o ( acc_demux_snitch_ready ),
+    .data_req_o ( snitch_dreq_d ),
+    .data_rsp_i ( snitch_drsp_d ),
+    .ptw_valid_o (hive_req_o.ptw_valid),
+    .ptw_ready_i (hive_rsp_i.ptw_ready),
+    .ptw_va_o (hive_req_o.ptw_va),
+    .ptw_ppn_o (hive_req_o.ptw_ppn),
+    .ptw_pte_i (hive_rsp_i.ptw_pte),
+    .ptw_is_4mega_i (hive_rsp_i.ptw_is_4mega),
     .wake_up_sync_i,
-    .fpu_rnd_mode_o   ( fpu_rnd_mode               ),
-    .fpu_status_i     ( fpu_status                 )
+    .fpu_rnd_mode_o ( fpu_rnd_mode ),
+    .fpu_status_i ( fpu_status )
   );
 
-  // Cut data request path
-  isochronous_spill_register  #(
-    .T      ( snitch_pkg::dreq_t  ),
-    .Bypass ( 1'b0                )
-  ) i_spill_register_snitch_lsu_req (
-    .src_clk_i   ( clk_d2_i                  ),
-    .src_rst_ni  ( ~rst_i                    ),
-    .src_valid_i ( snitch_data_req_mux_valid   ),
-    .src_ready_o ( snitch_data_req_mux_ready   ),
-    .src_data_i  ( snitch_data_req_mux         ),
-    .dst_clk_i   ( clk_i                     ),
-    .dst_rst_ni  ( ~rst_i                    ),
-    .dst_valid_o ( snitch_data_req_mux_valid_q ),
-    .dst_ready_i ( snitch_data_req_mux_ready_q ),
-    .dst_data_o  ( snitch_data_req_mux_q       )
-  );
-
-  // Cut data response path
-  isochronous_spill_register #(
-    .T      ( snitch_pkg::dresp_t ),
-    .Bypass ( !IsoCrossing        )
-  ) i_spill_register_snitch_lsu_resp (
-    .src_clk_i   ( clk_i                        ),
-    .src_rst_ni  ( ~rst_i                       ),
-    .src_valid_i ( snitch_data_resp_mux_valid   ),
-    .src_ready_o ( snitch_data_resp_mux_ready   ),
-    .src_data_i  ( snitch_data_resp_mux         ),
-    .dst_clk_i   ( clk_d2_i                     ),
-    .dst_rst_ni  ( ~rst_i                       ),
-    .dst_valid_o ( snitch_data_resp_mux_valid_q ),
-    .dst_ready_i ( snitch_data_resp_mux_ready_q ),
-    .dst_data_o  ( snitch_data_resp_mux_q       )
+  reqrsp_iso #(
+    .AddrWidth (AddrWidth),
+    .DataWidth (DataWidth),
+    .req_t (dreq_t),
+    .rsp_t (drsp_t),
+    .BypassReq (1'b0),
+    .BypassRsp (!IsoCrossing)
+  ) i_dut (
+    .src_clk_i (clk_d2_i),
+    .src_rst_ni (rst_ni),
+    .src_req_i (snitch_dreq_d),
+    .src_rsp_o (snitch_drsp_d),
+    .dst_clk_i (clk_i),
+    .dst_rst_ni (rst_ni),
+    .dst_req_o (snitch_dreq_q),
+    .dst_rsp_i (snitch_drsp_q)
   );
 
   // Cut off-loading request path
   isochronous_spill_register #(
-    .T      ( snitch_pkg::acc_req_t ),
+    .T      ( acc_req_t ),
     .Bypass ( 1'b0                  )
   ) i_spill_register_acc_demux_req (
     .src_clk_i   ( clk_d2_i                  ),
-    .src_rst_ni  ( ~rst_i                    ),
+    .src_rst_ni  ( rst_ni                    ),
     .src_valid_i ( acc_snitch_demux_qvalid   ),
     .src_ready_o ( acc_snitch_demux_qready   ),
     .src_data_i  ( acc_snitch_demux          ),
     .dst_clk_i   ( clk_i                     ),
-    .dst_rst_ni  ( ~rst_i                    ),
+    .dst_rst_ni  ( rst_ni                    ),
     .dst_valid_o ( acc_snitch_demux_qvalid_q ),
     .dst_ready_i ( acc_snitch_demux_qready_q ),
     .dst_data_o  ( acc_snitch_demux_q        )
@@ -275,16 +259,16 @@ module snitch_cc #(
 
   // Cut off-loading response path
   isochronous_spill_register #(
-    .T      ( snitch_pkg::acc_resp_t              ),
+    .T      ( acc_resp_t              ),
     .Bypass ( !RegisterOffloadRsp && !IsoCrossing )
   ) i_spill_register_acc_demux_resp (
     .src_clk_i   ( clk_i                    ),
-    .src_rst_ni  ( ~rst_i                   ),
+    .src_rst_ni  ( rst_ni                   ),
     .src_valid_i ( acc_demux_snitch_valid_q ),
     .src_ready_o ( acc_demux_snitch_ready_q ),
     .src_data_i  ( acc_demux_snitch_q       ),
     .dst_clk_i   ( clk_d2_i                 ),
-    .dst_rst_ni  ( ~rst_i                   ),
+    .dst_rst_ni  ( rst_ni                   ),
     .dst_valid_o ( acc_demux_snitch_valid   ),
     .dst_ready_i ( acc_demux_snitch_ready   ),
     .dst_data_o  ( acc_demux_snitch         )
@@ -292,41 +276,47 @@ module snitch_cc #(
 
   // Accelerator Demux Port
   stream_demux #(
-    .N_OUP ( 4 )
+    .N_OUP ( 5 )
   ) i_stream_demux_offload (
     .inp_valid_i  ( acc_snitch_demux_qvalid_q  ),
     .inp_ready_o  ( acc_snitch_demux_qready_q  ),
-    .oup_sel_i    ( acc_snitch_demux_q.addr[$clog2(4)-1:0]             ),
-    .oup_valid_o  ( {ipu_qvalid, dma_qvalid, acc_qvalid_o, acc_qvalid} ),
-    .oup_ready_i  ( {ipu_qready, dma_qready, acc_qready_i, acc_qready} )
+    .oup_sel_i    ( acc_snitch_demux_q.addr[$clog2(5)-1:0]             ),
+    .oup_valid_o  ( {ssr_qvalid, ipu_qvalid, dma_qvalid, hive_req_o.acc_qvalid, acc_qvalid} ),
+    .oup_ready_i  ( {ssr_qready, ipu_qready, dma_qready, hive_rsp_i.acc_qready, acc_qready} )
   );
 
   // To shared muldiv
-  assign acc_req_o = acc_snitch_demux_q;
+  assign hive_req_o.acc_req = acc_snitch_demux_q;
   assign acc_snitch_req = acc_snitch_demux_q;
 
   stream_arbiter #(
-    .DATA_T      ( snitch_pkg::acc_resp_t      ),
-    .N_INP       ( 4                           ),
-    .ARBITER     ( "rr"                        )
+    .DATA_T      ( acc_resp_t ),
+    .N_INP       ( 5          )
   ) i_stream_arbiter_offload (
     .clk_i       ( clk_i                                   ),
-    .rst_ni      ( ~rst_i                                  ),
-    .inp_data_i  ( {ipu_resp,   dma_resp,   acc_resp_i,   acc_seq    } ),
-    .inp_valid_i ( {ipu_pvalid, dma_pvalid, acc_pvalid_i, acc_pvalid } ),
-    .inp_ready_o ( {ipu_pready, dma_pready, acc_pready_o, acc_pready } ),
+    .rst_ni      ( rst_ni                                  ),
+    .inp_data_i  ( {ssr_resp,   ipu_resp,   dma_resp,   hive_rsp_i.acc_resp,   acc_seq    } ),
+    .inp_valid_i ( {ssr_pvalid, ipu_pvalid, dma_pvalid, hive_rsp_i.acc_pvalid, acc_pvalid } ),
+    .inp_ready_o ( {ssr_pready, ipu_pready, dma_pready, hive_req_o.acc_pready, acc_pready } ),
     .oup_data_o  ( acc_demux_snitch_q                      ),
     .oup_valid_o ( acc_demux_snitch_valid_q                ),
     .oup_ready_i ( acc_demux_snitch_ready_q                )
   );
 
-  if (SDMA) begin : gen_dma
+  if (Xdma) begin : gen_dma
     axi_dma_tc_snitch_fe #(
-      .axi_req_t    ( snitch_axi_pkg::req_dma_t     ),
-      .axi_res_t    ( snitch_axi_pkg::resp_dma_t     )
+      .AddrWidth (AddrWidth),
+      .DataWidth (DataWidth),
+      .DMADataWidth (DMADataWidth),
+      .IdWidth (DMAIdWidth),
+      .DMAAxiReqFifoDepth (DMAAxiReqFifoDepth),
+      .DMAReqFifoDepth (DMAReqFifoDepth),
+      .axi_req_t (axi_req_t),
+      .axi_res_t (axi_rsp_t),
+      .acc_resp_t (acc_resp_t)
     ) i_axi_dma_tc_snitch_fe (
       .clk_i            ( clk_i                     ),
-      .rst_ni           ( ~rst_i                    ),
+      .rst_ni           ( rst_ni                    ),
       .axi_dma_req_o    ( axi_dma_req_o             ),
       .axi_dma_res_i    ( axi_dma_res_i             ),
       .dma_busy_o       ( axi_dma_busy_o            ),
@@ -361,9 +351,15 @@ module snitch_cc #(
   end
 
   if (Xipu) begin : gen_ipu
-    snitch_int_ss i_snitch_int_ss (
+    snitch_int_ss # (
+      .AddrWidth (AddrWidth),
+      .DataWidth (DataWidth),
+      .NumIPUSequencerInstr (NumSequencerInstr),
+      .acc_req_t (acc_req_t),
+      .acc_resp_t (acc_resp_t)
+    ) i_snitch_int_ss (
       .clk_i            ( clk_i                    ),
-      .rst_i            ( rst_i | (~rst_int_ss_ni) ),
+      .rst_i            ( (~rst_ni) | (~rst_int_ss_ni) ),
       .acc_req_i        ( acc_snitch_req           ),
       .acc_req_valid_i  ( ipu_qvalid               ),
       .acc_req_ready_o  ( ipu_qready               ),
@@ -382,7 +378,8 @@ module snitch_cc #(
       .ssr_wdone_o      ( /* TODO */               )
     );
   end else begin : gen_no_ipu
-
+    assign ipu_resp = '0;
+    assign ipu_pvalid = '0;
   end
 
   // pragma translate_off
@@ -390,93 +387,47 @@ module snitch_cc #(
   snitch_pkg::fpu_sequencer_trace_port_t fpu_sequencer_trace;
   // pragma translate_on
 
-  logic              [2:0][4:0] ssr_raddr;
-  snitch_pkg::data_t [2:0]      ssr_rdata;
-  logic              [2:0]      ssr_rvalid;
-  logic              [2:0]      ssr_rready;
-  logic              [2:0]      ssr_rdone;
-  logic              [0:0][4:0] ssr_waddr;
-  snitch_pkg::data_t [0:0]      ssr_wdata;
-  logic              [0:0]      ssr_wvalid;
-  logic              [0:0]      ssr_wready;
-  logic              [0:0]      ssr_wdone;
+  logic  [2:0][4:0] ssr_raddr;
+  data_t [2:0]      ssr_rdata;
+  logic  [2:0]      ssr_rvalid;
+  logic  [2:0]      ssr_rready;
+  logic  [2:0]      ssr_rdone;
+  logic  [0:0][4:0] ssr_waddr;
+  data_t [0:0]      ssr_wdata;
+  logic  [0:0]      ssr_wvalid;
+  logic  [0:0]      ssr_wready;
+  logic  [0:0]      ssr_wdone;
 
-  logic [6:0]  cfg_word;
-  logic        cfg_write;
-  logic [31:0] cfg_wdata;
-  logic [31:0] cfg_rdata;
-
-  if (RVFD) begin : gen_fpu
+  if (FPEn) begin : gen_fpu
     snitch_pkg::core_events_t fp_ss_core_events;
 
-    snitch_addr_demux #(
-      .NrOutput            ( 2                   ),
-      .AddressWidth        ( snitch_pkg::PLEN    ),
-      .DefaultSlave        ( 0                   ),
-      .NrRules             ( 1                   ),
-      .MaxOutStandingReads ( 4                   ),
-      .req_t               ( snitch_pkg::dreq_t  ),
-      .resp_t              ( snitch_pkg::dresp_t )
-    ) i_snitch_addr_demux (
-      .clk_i,
-      .rst_ni         ( ~rst_i                      ),
-      .req_addr_i     ( snitch_data_req_mux_q.addr  ),
-      .req_write_i    ( snitch_data_req_mux_q.write ),
-      .req_payload_i  ( snitch_data_req_mux_q       ),
-      .req_valid_i    ( snitch_data_req_mux_valid_q ),
-      .req_ready_o    ( snitch_data_req_mux_ready_q ),
-      .resp_payload_o ( snitch_data_resp_mux        ),
-      .resp_valid_o   ( snitch_data_resp_mux_valid  ),
-      .resp_ready_i   ( snitch_data_resp_mux_ready  ),
-      .req_payload_o  ( {ssr_data_req,        snitch_data_req}        ),
-      .req_valid_o    ( {ssr_data_req_valid,  snitch_data_req_valid}  ),
-      .req_ready_i    ( {ssr_data_req_ready,  snitch_data_req_ready}  ),
-      .resp_payload_i ( {ssr_data_resp,       snitch_data_resp}       ),
-      .resp_valid_i   ( {ssr_data_resp_valid, snitch_data_resp_valid} ),
-      .resp_ready_o   ( {ssr_data_resp_ready, snitch_data_resp_ready} ),
-      .addr_base_i    ( { snitch_pkg::SSR_ADDR_BASE } ),
-      .addr_mask_i    ( { snitch_pkg::SSR_ADDR_MASK } ),
-      .addr_slave_i   ( { 1'b1                      } )
-    );
-
-    // protocol conversion
-    logic ssr_full, ssr_empty;
-    logic [31:0] ssr_cfg_rdata;
-
-    assign ssr_data_req_ready = ~ssr_full;
-
-    assign ssr_data_resp.error = 1'b0;
-    assign ssr_data_resp.data = ssr_cfg_rdata[31:0]; // shift down
-    assign ssr_data_resp_valid = ~ssr_empty;
-
-    assign cfg_word = ssr_data_req.addr >> 3; // convert to 8 byte word addresses
-    assign cfg_wdata = ssr_data_req.data;
-    assign cfg_write = ssr_data_req.write & ssr_data_req_valid;
-
-    fifo_v3 #(
-      .DATA_WIDTH ( 32 ),
-      .DEPTH      ( 1  )
-    ) i_fifo_ssr (
-      .clk_i,
-      .rst_ni     ( ~rst_i                                                        ),
-      .flush_i    ( 1'b0                                                          ),
-      .testmode_i ( 1'b0                                                          ),
-      .full_o     ( ssr_full                                                      ),
-      .empty_o    ( ssr_empty                                                     ),
-      .usage_o    (                                                               ),
-      .data_i     ( cfg_rdata                                                     ),
-      .push_i     ( ssr_data_req_valid & ssr_data_req_ready & ~ssr_data_req.write ),
-      .data_o     ( ssr_cfg_rdata                                                 ),
-      .pop_i      ( ssr_data_resp_valid & ssr_data_resp_ready                     )
-    );
+    dreq_t fpu_dreq;
+    drsp_t fpu_drsp;
 
     snitch_fp_ss #(
+      .AddrWidth (AddrWidth),
+      .DataWidth (DataWidth),
+      .NumFPOutstandingLoads (NumFPOutstandingLoads),
+      .NumFPOutstandingMem (NumFPOutstandingMem),
+      .NumFPUSequencerInstr (NumSequencerInstr),
+      .FPUImplementation (FPUImplementation),
+      .dreq_t (dreq_t),
+      .drsp_t (drsp_t),
+      .acc_req_t (acc_req_t),
+      .acc_resp_t (acc_resp_t),
       .RegisterSequencer ( RegisterSequencer ),
-      .FPUSequencer      ( FPUSequencer      ),
-      .Xssr              ( Xssr              )
+      .Xfrep (Xfrep),
+      .Xssr (Xssr),
+      .RVF (RVF),
+      .RVD (RVD),
+      .XF16 (XF16),
+      .XF16ALT (XF16ALT),
+      .XF8 (XF8),
+      .XFVEC (XFVEC),
+      .FLEN (FLEN)
     ) i_snitch_fp_ss (
       .clk_i,
-      .rst_i            ( rst_i | (~rst_fp_ss_ni)   ),
+      .rst_i            ( ~rst_ni | (~rst_fp_ss_ni)   ),
       // pragma translate_off
       .trace_port_o            ( fpu_trace           ),
       .sequencer_tracer_port_o ( fpu_sequencer_trace ),
@@ -487,33 +438,40 @@ module snitch_cc #(
       .acc_resp_o       ( acc_seq        ),
       .acc_resp_valid_o ( acc_pvalid     ),
       .acc_resp_ready_i ( acc_pready     ),
-      .data_qaddr_o     ( fp_data_req[0].addr   ),
-      .data_qwrite_o    ( fp_data_req[0].write  ),
-      .data_qdata_o     ( fp_data_req[0].data   ),
-      .data_qsize_o     ( fp_data_req[0].size   ),
-      .data_qstrb_o     ( fp_data_req[0].strb   ),
-      .data_qvalid_o    ( fp_data_req_valid[0]  ),
-      .data_qready_i    ( fp_data_req_ready[0]  ),
-      .data_pdata_i     ( fp_data_resp[0].data  ),
-      .data_perror_i    ( fp_data_resp[0].error ),
-      .data_pvalid_i    ( fp_data_resp_valid[0] ),
-      .data_pready_o    ( fp_data_resp_ready[0] ),
-      .fpu_rnd_mode_i   ( fpu_rnd_mode          ),
-      .fpu_status_o     ( fpu_status            ),
-      .ssr_raddr_o      ( ssr_raddr             ),
-      .ssr_rdata_i      ( ssr_rdata             ),
-      .ssr_rvalid_o     ( ssr_rvalid            ),
-      .ssr_rready_i     ( ssr_rready            ),
-      .ssr_rdone_o      ( ssr_rdone             ),
-      .ssr_waddr_o      ( ssr_waddr             ),
-      .ssr_wdata_o      ( ssr_wdata             ),
-      .ssr_wvalid_o     ( ssr_wvalid            ),
-      .ssr_wready_i     ( ssr_wready            ),
-      .ssr_wdone_o      ( ssr_wdone             ),
+      .data_req_o       ( fpu_dreq       ),
+      .data_rsp_i       ( fpu_drsp       ),
+      .fpu_rnd_mode_i   ( fpu_rnd_mode   ),
+      .fpu_status_o     ( fpu_status     ),
+      .ssr_raddr_o      ( ssr_raddr      ),
+      .ssr_rdata_i      ( ssr_rdata      ),
+      .ssr_rvalid_o     ( ssr_rvalid     ),
+      .ssr_rready_i     ( ssr_rready     ),
+      .ssr_rdone_o      ( ssr_rdone      ),
+      .ssr_waddr_o      ( ssr_waddr      ),
+      .ssr_wdata_o      ( ssr_wdata      ),
+      .ssr_wvalid_o     ( ssr_wvalid     ),
+      .ssr_wready_i     ( ssr_wready     ),
+      .ssr_wdone_o      ( ssr_wdone      ),
       .core_events_o
     );
-    // the floating point unit can't issue atomics
-    assign fp_data_req[0].amo = snitch_pkg::AMONone;
+
+    reqrsp_mux #(
+      .NrPorts (2),
+      .AddrWidth (AddrWidth),
+      .DataWidth (DataWidth),
+      .req_t (dreq_t),
+      .rsp_t (drsp_t),
+      // TODO(zarubaf): Wire-up to top-level.
+      .RespDepth (8),
+      .RegisterReq (0)
+    ) i_reqrsp_mux (
+      .clk_i,
+      .rst_ni,
+      .slv_req_i ({fpu_dreq, snitch_dreq_q}),
+      .slv_rsp_o ({fpu_drsp, snitch_drsp_q}),
+      .mst_req_o (merged_dreq),
+      .mst_rsp_i (merged_drsp)
+    );
 
   end else begin : gen_no_fpu
     assign fpu_status = '0;
@@ -526,47 +484,144 @@ module snitch_cc #(
     assign ssr_wvalid = '0;
     assign ssr_wdone = '0;
 
-    assign cfg_word = '0;
-    assign cfg_wdata = '0;
-    assign cfg_write = '0;
-
-    assign fp_data_req[0] = '0;
-    assign fp_data_req_valid[0] = '0;
-    assign fp_data_resp_ready[0] = '0;
-
     assign acc_qready    = '0;
     assign acc_seq.data  = '0;
     assign acc_seq.id    = '0;
     assign acc_seq.error = '0;
     assign acc_pvalid    = '0;
 
-    assign snitch_data_req = snitch_data_req_mux_q;
-    assign snitch_data_req_valid = snitch_data_req_mux_valid_q;
-    assign snitch_data_req_mux_ready_q = snitch_data_req_ready;
-
-    assign snitch_data_resp_mux = snitch_data_resp;
-    assign snitch_data_resp_mux_valid = snitch_data_resp_valid;
-    assign snitch_data_resp_ready = snitch_data_resp_mux_ready;
+    assign merged_dreq = snitch_dreq_q;
+    assign snitch_drsp_q = merged_drsp;
 
     assign core_events_o = '0;
   end
 
-  snitch_pkg::dreq_t ssr_req;
-  snitch_pkg::dresp_t ssr_resp;
-  logic ssr_req_valid, ssr_req_ready;
-  logic ssr_resp_valid, ssr_resp_ready;
+  // Decide whether to go to SoC or TCDM
+  dreq_t data_tcdm_req;
+  drsp_t data_tcdm_rsp;
+  localparam int unsigned SelectWidth = cf_math_pkg::idx_width(2);
+  typedef logic [SelectWidth-1:0] select_t;
+  select_t slave_select;
+  reqrsp_demux #(
+    .NrPorts (2),
+    .req_t (dreq_t),
+    .rsp_t (drsp_t),
+    // TODO(zarubaf): Make a parameter.
+    .RespDepth (4)
+  ) i_reqrsp_demux (
+    .clk_i,
+    .rst_ni,
+    .slv_select_i (slave_select),
+    .slv_req_i (merged_dreq),
+    .slv_rsp_o (merged_drsp),
+    .mst_req_o ({data_tcdm_req, data_req_o}),
+    .mst_rsp_i ({data_tcdm_rsp, data_rsp_i})
+  );
+
+  typedef struct packed {
+    int unsigned idx;
+    logic [AddrWidth-1:0] base;
+    logic [AddrWidth-1:0] mask;
+  } reqrsp_rule_t;
+
+  reqrsp_rule_t addr_map;
+  assign addr_map = '{
+    idx: 1,
+    base: tcdm_addr_base_i,
+    mask: tcdm_addr_mask_i
+  };
+
+  addr_decode_napot #(
+    .NoIndices (2),
+    .NoRules (1),
+    .addr_t (logic [AddrWidth-1:0]),
+    .rule_t (reqrsp_rule_t)
+  ) i_addr_decode_napot (
+    .addr_i (merged_dreq.q.addr),
+    .addr_map_i (addr_map),
+    .idx_o (slave_select),
+    .dec_valid_o (),
+    .dec_error_o (),
+    .en_default_idx_i (1'b1),
+    .default_idx_i ('0)
+  );
+
+  tcdm_req_t core_tcdm_req;
+  tcdm_rsp_t core_tcdm_rsp;
+
+  reqrsp_to_tcdm #(
+    .AddrWidth (AddrWidth),
+    .DataWidth (DataWidth),
+    // TODO(zarubaf): Make a parameter.
+    .BufDepth (4),
+    .reqrsp_req_t (dreq_t),
+    .reqrsp_rsp_t (drsp_t),
+    .tcdm_req_t (tcdm_req_t),
+    .tcdm_rsp_t (tcdm_rsp_t)
+  ) i_reqrsp_to_tcdm (
+    .clk_i,
+    .rst_ni,
+    .reqrsp_req_i (data_tcdm_req),
+    .reqrsp_rsp_o (data_tcdm_rsp),
+    .tcdm_req_o (core_tcdm_req),
+    .tcdm_rsp_i (core_tcdm_rsp)
+  );
 
   // ----
   // SSRs
   // ----
   if (Xssr) begin : gen_ssrs
-    snitch_ssr_streamer i_snitch_ssr_streamer (
+    tcdm_req_t tcdm_req;
+    tcdm_rsp_t tcdm_rsp;
+
+    ssr_cfg_req_t ssr_cfg_req, cfg_req;
+    ssr_cfg_rsp_t ssr_cfg_rsp, cfg_rsp;
+
+    logic cfg_req_valid, cfg_req_valid_q;
+    `FF(cfg_req_valid_q, cfg_req_valid, 0)
+    `FF(cfg_rsp.id, ssr_cfg_req.id, 0)
+
+    assign ssr_cfg_req.word = acc_snitch_demux_q.data_op[31:20];
+    assign ssr_cfg_req.write = acc_snitch_demux_q.data_op ==? riscv_instr::SCFGW;
+    assign ssr_cfg_req.data = acc_snitch_demux_q.data_argb[31:0];
+
+    assign ssr_resp.id = ssr_cfg_rsp.id;
+    assign ssr_resp.error = 1'b0;
+    assign ssr_resp.data = ssr_cfg_rsp.data;
+
+    stream_to_mem #(
+      .mem_req_t (ssr_cfg_req_t),
+      .mem_resp_t (ssr_cfg_rsp_t),
+      .BufDepth (1)
+    ) i_stream_to_mem (
       .clk_i,
-      .rst_ni         ( ~rst_i     ),
-      .cfg_word_i     ( cfg_word   ),
-      .cfg_write_i    ( cfg_write  ),
-      .cfg_rdata_o    ( cfg_rdata  ),
-      .cfg_wdata_i    ( cfg_wdata  ),
+      .rst_ni,
+      .req_i (ssr_cfg_req),
+      .req_valid_i (ssr_qvalid),
+      .req_ready_o (ssr_qready),
+      .resp_o (ssr_cfg_rsp),
+      .resp_valid_o (ssr_pvalid),
+      .resp_ready_i (ssr_pready),
+      .mem_req_o (cfg_req),
+      .mem_req_valid_o (cfg_req_valid),
+      .mem_req_ready_i (1'b1),
+      .mem_resp_i (cfg_rsp),
+      .mem_resp_valid_i (cfg_req_valid_q)
+    );
+
+    snitch_ssr_streamer #(
+      .AddrWidth (AddrWidth),
+      .DataWidth (DataWidth),
+      .SSRNrCredits (SSRNrCredits),
+      .tcdm_req_t (tcdm_req_t),
+      .tcdm_rsp_t (tcdm_rsp_t)
+    ) i_snitch_ssr_streamer (
+      .clk_i,
+      .rst_ni         ( rst_ni    ),
+      .cfg_word_i     ( cfg_req.word  ),
+      .cfg_write_i    ( cfg_req.write & cfg_req_valid ),
+      .cfg_rdata_o    ( cfg_rsp.data  ),
+      .cfg_wdata_i    ( cfg_req.data ),
 
       .ssr_raddr_i    ( ssr_raddr  ),
       .ssr_rdata_o    ( ssr_rdata  ),
@@ -578,103 +633,35 @@ module snitch_cc #(
       .ssr_wvalid_i   ( ssr_wvalid ),
       .ssr_wready_o   ( ssr_wready ),
       .ssr_wdone_i    ( ssr_wdone  ),
-
-      .mem_qaddr_o    ( {fp_data_req[2].addr,   fp_data_req[1].addr,   ssr_req.addr}   ),
-      .mem_qwrite_o   ( {fp_data_req[2].write,  fp_data_req[1].write,  ssr_req.write}  ),
-      .mem_qstrb_o    ( {fp_data_req[2].strb,   fp_data_req[1].strb,   ssr_req.strb}   ),
-      .mem_qdata_o    ( {fp_data_req[2].data,   fp_data_req[1].data,   ssr_req.data}   ),
-      .mem_qvalid_o   ( {fp_data_req_valid[2],  fp_data_req_valid[1],  ssr_req_valid}  ),
-      .mem_qready_i   ( {fp_data_req_ready[2],  fp_data_req_ready[1],  ssr_req_ready}  ),
-      .mem_pvalid_i   ( {fp_data_resp_valid[2], fp_data_resp_valid[1], ssr_resp_valid} ),
-      .mem_pready_o   ( {fp_data_resp_ready[2], fp_data_resp_ready[1], ssr_resp_ready} ),
-      .mem_pdata_i    ( {fp_data_resp[2].data,  fp_data_resp[1].data,  ssr_resp.data}  ),
-      .mem_perror_i   ( {fp_data_resp[2].error, fp_data_resp[1].error, ssr_resp.error} )
+      .mem_req_o      ( {tcdm_req_o[2:1], tcdm_req} ),
+      .mem_rsp_i      ( {tcdm_rsp_i[2:1], tcdm_rsp} ),
+      .tcdm_start_address_i (tcdm_addr_base_i)
     );
-    assign fp_data_req[1].size = snitch_pkg::DATA_ALIGN[1:0];
-    assign fp_data_req[2].size = snitch_pkg::DATA_ALIGN[1:0];
-    assign fp_data_req[1].amo = snitch_pkg::AMONone;
-    assign fp_data_req[2].amo = snitch_pkg::AMONone;
-    assign ssr_req.amo = snitch_pkg::AMONone;
-    assign ssr_req.size = snitch_pkg::DATA_ALIGN[1:0];
-  end else begin : gen_no_ssrs
-    assign ssr_req = '0;
-    assign fp_data_req[1] = '0;
-    assign fp_data_req[2] = '0;
-    assign fp_data_req_valid[1] = '0;
-    assign fp_data_req_valid[2] = '0;
-    assign ssr_req_valid = '0;
-    assign fp_data_resp_ready[1] = '0;
-    assign fp_data_resp_ready[2] = '0;
-    assign ssr_resp_ready = '0;
-  end
 
-
-  // -----------------------------------
-  // Priority Arbitrate Request Port O
-  // -----------------------------------
-  snitch_pkg::dresp_t demux_in;
-  assign demux_in = data_pdata_q[0];
-
-  // Arbitrate between SSRs, FP data and integer data.
-  snitch_demux #(
-    .NrPorts        ( 3                    ),
-    .req_t          ( snitch_pkg::dreq_t   ),
-    .resp_t         ( snitch_pkg::dresp_t  ),
-    .RespDepth      ( 4                    ),
-    .Arbiter        ( "rr"                 ), // TODO(zarubaf): Set to prio
-    .RegisterReq    ( 3'b010               )
-  ) i_snitch_demux (
+  tcdm_mux #(
+    .NrPorts (2),
+    .AddrWidth (AddrWidth),
+    .DataWidth (DataWidth),
+    // TODO(zarubaf): Make parameter
+    .RespDepth (4),
+    // TODO(zarubaf): USer type
+    .tcdm_req_t (tcdm_req_t),
+    .tcdm_rsp_t (tcdm_rsp_t),
+    .user_t (tcdm_user_t)
+  ) i_tcdm_mux (
     .clk_i,
-    .rst_ni         ( ~rst_i                                          ),
-    .req_payload_i  ( {ssr_req,       fp_data_req[0],       snitch_data_req}         ),
-    .req_valid_i    ( {ssr_req_valid, fp_data_req_valid[0], snitch_data_req_valid}   ),
-    .req_ready_o    ( {ssr_req_ready, fp_data_req_ready[0], snitch_data_req_ready}   ),
-
-    .resp_payload_o ( {ssr_resp,       fp_data_resp[0],       snitch_data_resp}       ),
-    .resp_valid_o   ( {ssr_resp_valid, fp_data_resp_valid[0], snitch_data_resp_valid} ),
-    .resp_ready_i   ( {ssr_resp_ready, fp_data_resp_ready[0], snitch_data_resp_ready} ),
-    .resp_last_o    ( /* not used */                                                  ),
-
-    .req_payload_o  ( data_req[0]                                     ),
-    .req_valid_o    ( data_req_valid[0]                               ),
-    .req_ready_i    ( data_req_ready[0]                               ),
-
-    .resp_payload_i ( demux_in                                        ),
-    .resp_last_i    ( 1'b1                                            ),
-    .resp_valid_i   ( data_pvalid_q[0]                                ),
-    .resp_ready_o   ( data_pready_q[0]                                )
+    .rst_ni,
+    .slv_req_i({core_tcdm_req, tcdm_req}),
+    .slv_rsp_o({core_tcdm_rsp, tcdm_rsp}),
+    .mst_req_o(tcdm_req_o[0]),
+    .mst_rsp_i(tcdm_rsp_i[0])
   );
 
-  // Port 1/2: Dedicated to SSR
-  for (genvar i = 1; i < 3; i++) begin : gen_port_connections
-    assign data_req[i]           = fp_data_req[i];
-    assign data_req_valid[i]     = fp_data_req_valid[i];
-    assign fp_data_req_ready[i]  = data_req_ready[i];
-
-    assign data_pready_q[i]      = fp_data_resp_ready[i];
-    assign fp_data_resp[i]       = data_pdata_q[i];
-    assign fp_data_resp_valid[i] = data_pvalid_q[i];
-  end
-
-  // Spill-register on data response port
-  for (genvar i = 0; i < 3; i++) begin : gen_resp_spill_reg
-    // assignment pattern in port not supported by Synopsys
-    snitch_pkg::dresp_t tmp_data_pdata;
-    assign tmp_data_pdata = '{error: data_perror_i[i], data: data_pdata_i[i]};
-
-    spill_register #(
-      .T (snitch_pkg::dresp_t),
-      .Bypass (1'b0)
-    ) i_spill_register_data_resp (
-      .clk_i                           ,
-      .rst_ni  ( ~rst_i               ),
-      .valid_i ( data_pvalid_i    [i] ),
-      .ready_o ( data_pready_o    [i] ),
-      .data_i  ( tmp_data_pdata       ),
-      .valid_o ( data_pvalid_q [i]    ),
-      .ready_i ( data_pready_q [i]    ),
-      .data_o  ( data_pdata_q  [i]    )
-    );
+  end else begin : gen_no_ssrs
+    assign tcdm_req_o[0] = core_tcdm_req;
+    assign core_tcdm_rsp = tcdm_rsp_i[0];
+    // Tie-off the rest/
+    assign tcdm_req_o[2:1] = '0;
   end
 
   // --------------------------
@@ -685,6 +672,12 @@ module snitch_cc #(
   string fn;
   logic [63:0] cycle;
   initial begin
+    // We need to schedule the assignment into a safe region, otherwise
+    // `hart_id_i` won't have a value assigned at the beginning of the first
+    // delta cycle.
+    /* verilator lint_off STMTDLY */
+    #0;
+    /* verilator lint_on STMTDLY */
     $sformat(fn, "trace_hart_%05x.dasm", hart_id_i);
     f = $fopen(fn, "w");
     $display("[Tracer] Logging Hart %d to %s", hart_id_i, fn);
@@ -712,7 +705,7 @@ module snitch_cc #(
       automatic longint extras_fpu_seq_in   [string];
       automatic longint extras_fpu_seq_out  [string];
 
-      if (!rst_i) begin
+      if (rst_ni) begin
         extras_snitch = '{
           // State
           "source":       SrcSnitch,
@@ -745,15 +738,15 @@ module snitch_cc #(
           "ls_amo":       i_snitch.ls_amo,
           // Accumulator
           "retire_acc":   i_snitch.retire_acc,
-          "acc_pid":      i_snitch.acc_pid_i,
-          "acc_pdata_32": i_snitch.acc_pdata_i[31:0],
+          "acc_pid":      i_snitch.acc_qreq_o.id,
+          "acc_pdata_32": i_snitch.acc_qreq_o.data_op[31:0],
           // FPU offload
           "fpu_offload":
-            (i_snitch.acc_qready_i && i_snitch.acc_qvalid_o && i_snitch.acc_qaddr_o == 0),
+            (i_snitch.acc_qready_i && i_snitch.acc_qvalid_o && i_snitch.acc_qreq_o.addr == 0),
           "is_seq_insn":  (i_snitch.inst_data_i ==? riscv_instr::FREP)
         };
 
-        if (RVFD) begin
+        if (FPEn) begin
           extras_fpu = '{
             // State and handshakes
             "source":       SrcFpu,
@@ -798,7 +791,7 @@ module snitch_cc #(
             "fpr_we":       fpu_trace.fpr_we
           };
 
-          if (FPUSequencer) begin
+          if (Xfrep)       begin
             // Addenda to FPU extras iff popping sequencer
             extras_fpu_seq_out = '{
               "source":     SrcFpuSeq,
@@ -824,7 +817,7 @@ module snitch_cc #(
               $time, cycle, i_snitch.priv_lvl_q, i_snitch.pc_q, i_snitch.inst_data_i, extras_str);
           $fwrite(f, trace_entry);
         end
-        if (RVFD) begin
+        if (FPEn) begin
           // Trace FPU iff:
           // an incoming handshake on the accelerator bus occurs <==> an instruction was issued
           // OR an FPU result is ready to be written back to an FPR register or the bus
@@ -838,7 +831,7 @@ module snitch_cc #(
             $fwrite(f, trace_entry);
           end
           // sequencer instructions
-          if (FPUSequencer) begin
+          if (Xfrep)       begin
             if (extras_fpu_seq_out["cbuf_push"]) begin
               fmt_extras(extras_fpu_seq_out, extras_str);
               $sformat(trace_entry, "%t %1d %8d 0x%h DASM(%h) #; %s\n",
@@ -856,7 +849,7 @@ module snitch_cc #(
   always_ff @(posedge clk_i) begin
     automatic string trace_entry;
 
-    if (!rst_i) begin
+    if (rst_ni) begin
       cycle++;
         // Trace snitch iff:
         // we are not stalled <==> we have issued and processed an instruction (including offloads)
@@ -877,5 +870,7 @@ module snitch_cc #(
   end
   // verilog_lint: waive-stop always-ff-non-blocking
   // pragma translate_on
+
+  `ASSERT_INIT(BootAddrAligned, BootAddr[1:0] == 2'b00)
 
 endmodule

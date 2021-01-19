@@ -10,35 +10,34 @@ package:
 dependencies:
   axi: {path: ../../vendor/pulp_platform_axi}
   common_cells: {path: ../../vendor/pulp_platform_common_cells}
-  # TODO(zarubaf): Remove dependency
-  cluster_interconnect: {path: ../../vendor/cluster_interconnect}
   fpnew: {path: ../../vendor/pulp_platform_fpnew}
   register_interface: {path: ../../vendor/pulp_platform_register_interface}
   riscv-dbg: {path: ../../vendor/pulp_platform_riscv_dbg}
   tech_cells_generic: {path: ../../vendor/pulp_platform_tech_cells_generic}
   # Local dependencies.
+  future: {path: ../../ip/future}
   reqrsp_interface: {path: ../../ip/reqrsp_interface}
-  snitch: {path: ../../ip/snitch}
+  mem_interface: {path: ../../ip/mem_interface}
+  tcdm_interface: {path: ../../ip/tcdm_interface}
   snitch_dma: {path: ../../ip/snitch_dma}
   snitch_icache: {path: ../../ip/snitch_icache}
   snitch_ipu: {path: ../../ip/snitch_ipu}
   snitch_vm: {path: ../../ip/snitch_vm}
+  snitch: {path: ../../ip/snitch}
 
 sources:
 # Level 0:
-- src/tcdm_shim.sv
-- src/snitch_addr_demux.sv
 - src/snitch_amo_shim.sv
-- src/snitch_axi_adapter.sv
-- src/snitch_cluster_peripheral.sv
-- src/snitch_demux.sv
-- src/snitch_dma_addr_decoder.sv
+- src/snitch_cluster_peripheral/snitch_cluster_peripheral_reg_pkg.sv
+- src/snitch_cluster_peripheral/snitch_cluster_peripheral_reg_top.sv
+- src/snitch_cluster_peripheral/snitch_cluster_peripheral.sv
 - src/snitch_fpu.sv
 - src/snitch_sequencer.sv
 - src/snitch_ssr_addr_gen.sv
 - src/snitch_ssr_switch.sv
-- src/snitch_tcdm_mux.sv
+- src/snitch_tcdm_interconnect.sv
 # Level 1:
+- src/snitch_barrier.sv
 - src/snitch_fp_ss.sv
 - src/snitch_ssr_streamer.sv
 - src/snitch_shared_muldiv.sv
@@ -49,3 +48,7 @@ sources:
 - src/snitch_hive.sv
 # Level 4:
 - src/snitch_cluster.sv
+- target: test
+  files:
+  # Level 0
+  - test/snitch_tcdm_interconnect_tb.sv

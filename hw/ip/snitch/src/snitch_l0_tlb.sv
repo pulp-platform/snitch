@@ -7,7 +7,9 @@
 
 // MMU w/ L0 TLB
 module snitch_l0_tlb import snitch_pkg::*; #(
-  parameter int unsigned NrEntries = 1
+  parameter int unsigned NrEntries = 1,
+  parameter type         pa_t      = logic,
+  parameter type         l0_pte_t  = logic
 ) (
   input  logic clk_i,
   input  logic rst_i,

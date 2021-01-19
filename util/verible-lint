@@ -14,4 +14,5 @@ find $ROOT/hw/ \
     -not \( -name 'snitch_pkg.sv' \) \
     -name '*.sv' \
     | xargs verible-verilog-lint \
-    --rules=-interface-name-style --lint_fatal --parse_fatal
+    --rules=-interface-name-style --lint_fatal --parse_fatal \
+    --waiver_files $ROOT/hw/ip/snitch_cluster/lint/waiver.verible

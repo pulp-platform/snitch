@@ -1,0 +1,134 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+{
+    param_list: [
+        { name: "NumPerfCounters",
+        desc: "Number of performance counters",
+        type: "int",
+        default: "2"
+        },
+    ],
+    name: "Snitch Cluster Peripheral",
+    clock_primary: "clk_i",
+    bus_device: "reg",
+    bus_host: "none",
+    regwidth: 64,
+    registers: [{
+        multireg: {
+            name: "PERF_COUNTER_ENABLE",
+            desc: "Enable particular performance counter and start tracking.",
+            swaccess: "rw",
+            hwaccess: "hro",
+            count: "NumPerfCounters",
+            cname: "performance counter enable ",
+            fields: [{
+                bits: "0:0",
+                resval: "0",
+                name: "CYCLE",
+                desc: '''
+                    Cycle counter. Counts up as long as the cluster is powered.
+                    '''
+            },
+            {
+                bits: "1:1",
+                resval: "0",
+                name: "TCDM_ACCESSED"
+                desc: '''
+                        Increased whenever the TCDM is accessed. Each individual access is tracked,
+                        so if `n` cores access the TCDM, `n` will be added. Accesses are tracked at the TCDM,
+                        so it doesn't matter whether the cores or the for example the SSR hardware accesses
+                        the TCDM. _This is a cluster-global signal._
+                        '''
+            },
+            {
+                bits: "2:2",
+                resval: "0",
+                name: "TCDM_CONGESTED"
+                desc: '''
+                        Incremented whenever an access twoards the TCDM is made but the arbitration
+                        logic didn't grant the access (due to congestion). Is strictly less than TCDM_ACCESSED.
+                        _This is a cluster-global signal._
+                        '''
+            },
+            {
+                bits: "3:3",
+                resval: "0",
+                name: "ISSUE_FPU"
+                desc: '''
+                        Core operations performed in the FPU. _This is a hart-local signal._
+                        '''
+            },
+            {
+                bits: "4:4",
+                resval: "0",
+                name: "ISSUE_FPU_SEQ"
+                desc: '''
+                        Incremented whenever the FPU Sequencer issues an FPU instruction.
+                        Might be non available if the hardware doesn't support FREP.
+                        _This is a hart-local signal._
+                        '''
+            },
+            {
+                bits: "5:5",
+                resval: "0",
+                name: "ISSUE_CORE_TO_FPU"
+                desc: '''Incremented whenever the core issues an FPU instruction.
+                        _This is a hart-local signal._'''
+            }]
+        }
+    },
+    {
+        multireg: {
+            name: "HART_SELECT",
+            desc: '''Select from which hart in the cluster, starting from `0`,
+                     the event should be counted. For each performance counter
+                     the cores can be selected individually. If a hart greater
+                     than the clusters total hart size is selected the selection
+                     will wrap and the hart corresponding to `hart_select % total_harts_in_cluster`
+                     will be selected.'''
+            swaccess: "rw",
+            hwaccess: "hro",
+            count: "NumPerfCounters",
+            cname: "hart select ",
+            fields: [{
+                bits: "9:0",
+                name: "HART_SELECT",
+                desc: "Select source of per-hart performance counter"
+            }]
+        }
+    }
+    {
+        multireg: {
+            name: "PERF_COUNTER",
+            desc: '''Performance counter. Set corresponding PERF_COUNTER_ENABLE bits depending on what
+            performance metric you would like to track.'''
+            swaccess: "rw",
+            hwaccess: "hrw",
+            count: "NumPerfCounters",
+            cname: "performance counter ",
+            hwext: true,
+            hwqe:  true,
+            fields: [{
+                bits: "47:0",
+                name: "PERF_COUNTER",
+                desc: "Performance counter"
+            }]
+        }
+    }
+    {
+        name: "HW_BARRIER",
+        desc: '''Hardware barrier register. Loads to this register will block until all cores have
+        performed the load. At this stage we know that they reached the same point in the control flow,
+        i.e., the cores are synchronized.'''
+        swaccess: "ro",
+        hwaccess: "hrw",
+        hwext: true,
+        fields: [{
+            bits: "31:0",
+            name: "HW_BARRIER",
+            desc: "Hardware barrier register."
+        }]
+    }
+    ]
+}

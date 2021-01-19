@@ -11,12 +11,16 @@ dependencies:
   axi: {path: ../../vendor/pulp_platform_axi}
   common_cells: {path: ../../vendor/pulp_platform_common_cells}
   fpnew: {path: ../../vendor/pulp_platform_fpnew}
+  reqrsp_interface: {path: ../reqrsp_interface}
   riscv-dbg: {path: ../../vendor/pulp_platform_riscv_dbg}
 
 sources:
 # Level 0:
-- src/snitch_pkg.sv
+- src/snitch_pma_pkg.sv
 - src/riscv_instr.sv
+# Level 1:
+- src/snitch_pkg.sv
+# Level 2:
 - src/snitch_regfile_ff.sv
 # - src/snitch_regfile_fpga.sv
 # - src/snitch_regfile_latch.sv

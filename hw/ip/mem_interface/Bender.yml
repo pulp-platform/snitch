@@ -1,0 +1,24 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+package:
+  name: mem_interface
+  authors:
+  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+
+dependencies:
+  reqrsp_interface: {path: ../reqrsp_interface}
+
+export_include_dirs:
+- include
+
+sources:
+- src/mem_wide_narrow_mux.sv
+- src/mem_interface.sv
+- target: simulation
+  files:
+  - src/mem_test.sv
+- target: test
+  files:
+  # Level 0
+  - test/mem_wide_narrow_mux_tb.sv

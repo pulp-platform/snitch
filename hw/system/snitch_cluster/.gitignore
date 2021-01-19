@@ -2,4 +2,13 @@ bin/
 obj_dir/
 Bender.lock
 *.vcd
+*.log
 trace_*
+generated
+work*/
+*wlf*
+modelsim.ini
+*.vstf
+simv*
+ucli.key
+vc_hdrs.h
