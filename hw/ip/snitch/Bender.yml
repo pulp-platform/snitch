@@ -27,7 +27,15 @@ sources:
 - src/snitch_lsu.sv
 - src/snitch_l0_tlb.sv
 # Level 1:
-- src/snitch.sv
+- target: not(disable_pmcs)
+  defines:
+    SNITCH_ENABLE_PERF:
+  files:
+  - src/snitch.sv
+# Disable the performance monitoring counters to save area.
+- target: disable_pmcs
+  files:
+  - src/snitch.sv
 
 - target: test
   files:
