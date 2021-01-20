@@ -104,27 +104,33 @@ module tb_memory #(
     .reg_o      ( regb )
   );
 
-  // Handle requests on the register bus.
-  always_comb begin
-    regb.error = 0;
-    regb.ready = 1;
-    if (regb.valid) begin
+  assign regb.error = 0;
+  assign regb.ready = 1;
+
+  // Handle write requests on the register bus.
+  always_ff @(posedge clk_i) begin
+    if (rst_ni && regb.valid) begin
       automatic byte data[NumBytes];
       automatic bit  strb[NumBytes];
       if (regb.write) begin
-        // $display("Write [%h] = %h (%b)", regb.addr, regb.wdata, regb.wstrb);
-        regb.rdata = 0;
         for (int i = 0; i < NumBytes; i++) begin
+          // verilog_lint: waive-start always-ff-non-blocking
           data[i] = regb.wdata[i*8+:8];
           strb[i] = regb.wstrb[i];
+          // verilog_lint: waive-start always-ff-non-blocking
         end
         tb_memory_write((regb.addr >> BusAlign) << BusAlign, NumBytes, data, strb);
-      end else begin
-        // $display("Read [%h]", regb.addr);
-        tb_memory_read((regb.addr >> BusAlign) << BusAlign, NumBytes, data);
-        for (int i = 0; i < NumBytes; i++) begin
-          regb.rdata[i*8+:8] = data[i];
-        end
+      end
+    end
+  end
+
+  // Handle read requests combinatorial on the register bus.
+  always_comb begin
+    if (regb.valid) begin
+      automatic byte data[NumBytes];
+      tb_memory_read((regb.addr >> BusAlign) << BusAlign, NumBytes, data);
+      for (int i = 0; i < NumBytes; i++) begin
+        regb.rdata[i*8+:8] = data[i];
       end
     end
   end
