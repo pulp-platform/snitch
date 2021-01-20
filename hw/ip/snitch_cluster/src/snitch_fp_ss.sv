@@ -2662,7 +2662,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
 
   // Tracer
   // pragma translate_off
-  assign trace_port_o.acc_q_hs     = (acc_req_valid_q  && acc_req_ready_q  );
+  assign trace_port_o.source       = snitch_pkg::SrcFpu;
+  assign trace_port_o.acc_q_hs     = (acc_req_valid_q  && acc_req_ready_q );
   assign trace_port_o.fpu_out_hs   = (fpu_out_valid && fpu_out_ready );
   assign trace_port_o.lsu_q_hs     = (lsu_qvalid    && lsu_qready    );
   assign trace_port_o.op_in        = acc_req_q.data_op;

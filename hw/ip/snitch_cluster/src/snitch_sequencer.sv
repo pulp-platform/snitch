@@ -414,6 +414,7 @@ module snitch_sequencer import snitch_pkg::*; #(
 
   // Trace Port
   // pragma translate_off
+  assign trace_port_o.source    = snitch_pkg::SrcFpuSeq;
   assign trace_port_o.cbuf_push = seq_cfg_buffer_push;
   assign trace_port_o.is_outer  = seq_cfg_buffer_in.is_outer;
   assign trace_port_o.max_inst  = seq_cfg_buffer_in.max_inst;

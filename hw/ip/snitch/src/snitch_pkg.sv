@@ -171,8 +171,87 @@ package snitch_pkg;
     logic issue_core_to_fpu;  // instructions issued from core to FPU
   } core_events_t;
 
+  // SSRs
+  localparam logic [11:0] CSR_SSR = 'h7c0;
+  localparam logic [11:0] CSR_MSEG = 12'hBC0;
+
+  // --------------------
+  // Trace Infrastructure
+  // --------------------
+  typedef enum logic [1:0] {
+    SrcSnitch =  0,
+    SrcFpu = 1,
+    SrcFpuSeq = 2
+  } trace_src_e;
+
+  typedef struct packed {
+    longint source;
+    longint stall;
+    longint rs1;
+    longint rs2;
+    longint rd;
+    longint is_load;
+    longint is_store;
+    longint is_branch;
+    longint pc_d;
+    longint opa;
+    longint opb;
+    longint opa_select;
+    longint opb_select;
+    longint write_rd;
+    longint csr_addr;
+    longint writeback;
+    longint gpr_rdata_1;
+    longint ls_size;
+    longint ld_result_32;
+    longint lsu_rd;
+    longint retire_load;
+    longint alu_result;
+    longint ls_amo;
+    longint retire_acc;
+    longint acc_pid;
+    longint acc_pdata_32;
+    longint fpu_offload;
+    longint is_seq_insn;
+  } snitch_trace_port_t;
+
+  function automatic string print_snitch_trace(snitch_trace_port_t snitch_trace);
+    string extras_str = "{";
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "source", snitch_trace.source);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "stall", snitch_trace.stall);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rs1", snitch_trace.rs1);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rs2", snitch_trace.rs2);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rd", snitch_trace.rd);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "is_load", snitch_trace.is_load);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "is_store", snitch_trace.is_store);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "is_branch", snitch_trace.is_branch);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "pc_d", snitch_trace.pc_d);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "opa", snitch_trace.opa);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "opb", snitch_trace.opb);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "opa_select", snitch_trace.opa_select);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "opb_select", snitch_trace.opb_select);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "write_rd", snitch_trace.write_rd);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "csr_addr", snitch_trace.csr_addr);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "writeback", snitch_trace.writeback);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "gpr_rdata_1", snitch_trace.gpr_rdata_1);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "ls_size", snitch_trace.ls_size);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "ld_result_32", snitch_trace.ld_result_32);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "lsu_rd", snitch_trace.lsu_rd);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "retire_load", snitch_trace.retire_load);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "alu_result", snitch_trace.alu_result);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "ls_amo", snitch_trace.ls_amo);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "retire_acc", snitch_trace.retire_acc);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "acc_pid", snitch_trace.acc_pid);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "acc_pdata_32", snitch_trace.acc_pdata_32);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "fpu_offload", snitch_trace.fpu_offload);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "is_seq_insn", snitch_trace.is_seq_insn);
+    extras_str = $sformatf("%s}", extras_str);
+    return extras_str;
+  endfunction
+
   // Trace-Port Definitions
   typedef struct packed {
+    longint source;
     longint acc_q_hs;
     longint fpu_out_hs;
     longint lsu_q_hs;
@@ -208,7 +287,48 @@ package snitch_pkg;
     longint fpr_we;
   } fpu_trace_port_t;
 
+  function automatic string print_fpu_trace(fpu_trace_port_t fpu_trace);
+    string extras_str = "{";
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "source", fpu_trace.source);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "acc_q_hs", fpu_trace.acc_q_hs);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "fpu_out_hs", fpu_trace.fpu_out_hs);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "lsu_q_hs", fpu_trace.lsu_q_hs);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "op_in", fpu_trace.op_in);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rs1", fpu_trace.rs1);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rs2", fpu_trace.rs2);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rs3", fpu_trace.rs3);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rd", fpu_trace.rd);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "op_sel_0", fpu_trace.op_sel_0);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "op_sel_1", fpu_trace.op_sel_1);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "op_sel_2", fpu_trace.op_sel_2);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "src_fmt", fpu_trace.src_fmt);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "dst_fmt", fpu_trace.dst_fmt);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "int_fmt", fpu_trace.int_fmt);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "acc_qdata_0", fpu_trace.acc_qdata_0);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "acc_qdata_1", fpu_trace.acc_qdata_1);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "acc_qdata_2", fpu_trace.acc_qdata_2);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "op_0", fpu_trace.op_0);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "op_1", fpu_trace.op_1);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "op_2", fpu_trace.op_2);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "use_fpu", fpu_trace.use_fpu);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "fpu_in_rd", fpu_trace.fpu_in_rd);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "fpu_in_acc", fpu_trace.fpu_in_acc);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "ls_size", fpu_trace.ls_size);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "is_load", fpu_trace.is_load);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "is_store", fpu_trace.is_store);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "lsu_qaddr", fpu_trace.lsu_qaddr);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "lsu_rd", fpu_trace.lsu_rd);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "acc_wb_ready", fpu_trace.acc_wb_ready);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "fpu_out_acc", fpu_trace.fpu_out_acc);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "fpr_waddr", fpu_trace.fpr_waddr);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "fpr_wdata", fpu_trace.fpr_wdata);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "fpr_we", fpu_trace.fpr_we);
+    extras_str = $sformatf("%s}", extras_str);
+    return extras_str;
+  endfunction
+
   typedef struct packed {
+    longint source;
     longint cbuf_push;
     longint is_outer;
     longint max_inst;
@@ -217,8 +337,17 @@ package snitch_pkg;
     longint stg_mask;
   } fpu_sequencer_trace_port_t;
 
-  // SSRs
-  localparam logic [11:0] CSR_SSR = 'h7c0;
-  localparam logic [11:0] CSR_MSEG = 12'hBC0;
+  function automatic string print_fpu_sequencer_trace(fpu_sequencer_trace_port_t fpu_sequencer);
+    string extras_str = "{";
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "source", fpu_sequencer.source);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "cbuf_push", fpu_sequencer.cbuf_push);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "is_outer", fpu_sequencer.is_outer);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "max_inst", fpu_sequencer.max_inst);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "max_rpt", fpu_sequencer.max_rpt);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "stg_max", fpu_sequencer.stg_max);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "stg_mask", fpu_sequencer.stg_mask);
+    extras_str = $sformatf("%s}", extras_str);
+    return extras_str;
+  endfunction
 
 endpackage
