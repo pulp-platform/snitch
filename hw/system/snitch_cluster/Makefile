@@ -54,7 +54,7 @@ VSIM_SOURCES  := $(shell ${BENDER} script flist ${VSIM_BENDER} | ${SED_SRCS})
 #######
 # RTL #
 #######
-generated/snitch_cluster_wrapper.sv: ${CFG} ${CLUSTER_GEN} ${CLUSTER_GEN_SRC}
+${MKFILE_DIR}generated/snitch_cluster_wrapper.sv: ${CFG} ${CLUSTER_GEN} ${CLUSTER_GEN_SRC}
 	$(CLUSTER_GEN) -c $< -o .
 
 #################
@@ -75,7 +75,7 @@ work/lib/libfesvr.a: work/${FESVR_VERSION}_unzip
 #############
 # Verilator #
 #############
-${VLT_BUILDDIR}/verilate: $(VLT_SOURCES) generated/snitch_cluster_wrapper.sv
+${VLT_BUILDDIR}/verilate: $(VLT_SOURCES)
 	mkdir -p $(dir $@)
 	bender script verilator ${VLT_BENDER} > $(dir $@)files
 	$(VLT) \
@@ -106,7 +106,7 @@ bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/tb_b
 ############
 # Modelsim #
 ############
-${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) generated/snitch_cluster_wrapper.sv
+${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES)
 	vlib $(dir $@)
 	${BENDER} script vsim ${VSIM_BENDER} --vlog-arg="${VLOG_FLAGS} -work $(dir $@) " > $@
 	echo 'vlog -work $(dir $@) test/rtl_lib.cc -ccflags "-std=c++14 -I${FESVR}/include"' >> $@
@@ -126,7 +126,7 @@ bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
 #######
 # VCS #
 #######
-work-vcs/compile.sh: $(VSIM_SOURCES) generated/snitch_cluster_wrapper.sv
+work-vcs/compile.sh: $(VSIM_SOURCES)
 	mkdir -p work-vcs
 	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover" >> $@
 	chmod +x $@
