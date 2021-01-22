@@ -6,10 +6,9 @@ http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing
 
 
 
-
-| Abstract            | Extensible | Status         | Identifiable | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                                        |
-| :------------------ | ---------- | -------------- | ------------ | :---------------- | --------------------- | ------------------- | --------------------------------------------------------------------------------- |
-| Can be instantiated | No         | Unknown status | No           | Forbidden         | Allowed               | none                | [snitch_cluster.schema.json\*](snitch_cluster.schema.json "open original schema") |
+| Abstract            | Extensible | Status         | Identifiable | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                                       |
+| :------------------ | :--------- | :------------- | :----------- | :---------------- | :-------------------- | :------------------ | :------------------------------------------------------------------------------- |
+| Can be instantiated | No         | Unknown status | No           | Forbidden         | Allowed               | none                | [snitch_cluster.schema.json*](snitch_cluster.schema.json "open original schema") |
 
 ## timing Type
 
@@ -36,38 +35,40 @@ The default value is:
 
 # Timing and Latency Tuning Parameter Properties
 
-| Property                                      | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                     |
-| :-------------------------------------------- | --------- | -------- | -------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [iso_crossings](#iso_crossings)               | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-iso_crossings.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/iso_crossings")               |
-| [narrow_xbar_latency](#narrow_xbar_latency)   | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-narrow_xbar_latency.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/narrow_xbar_latency")   |
-| [wide_xbar_latency](#wide_xbar_latency)       | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-wide_xbar_latency.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/wide_xbar_latency")       |
-| [register_offload](#register_offload)         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload")         |
-| [register_offload_rsp](#register_offload_rsp) | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload_rsp.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload_rsp") |
-| [register_tcdm_req](#register_tcdm_req)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_req.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_req")       |
-| [register_tcdm_cuts](#register_tcdm_cuts)     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_cuts.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_cuts")     |
-| [register_ext_wide](#register_ext_wide)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_wide.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_wide")       |
-| [register_ext_narrow](#register_ext_narrow)   | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_narrow.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_narrow")   |
-| [register_sequencer](#register_sequencer)     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_sequencer.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_sequencer")     |
-| [lat_comp_fp32](#lat_comp_fp32)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp32.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp32")               |
-| [lat_comp_fp64](#lat_comp_fp64)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp64.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp64")               |
-| [lat_comp_fp16](#lat_comp_fp16)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16")               |
-| [lat_comp_fp16_alt](#lat_comp_fp16_alt)       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16_alt.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16_alt")       |
-| [lat_comp_fp8](#lat_comp_fp8)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp8.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp8")                 |
-| [lat_noncomp](#lat_noncomp)                   | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_noncomp.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_noncomp")                   |
-| [lat_conv](#lat_conv)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_conv.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_conv")                         |
-| [fpu_pipe_config](#fpu_pipe_config)           | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-fpu_pipe_config.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/fpu_pipe_config")           |
+| Property                                      | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                |
+| :-------------------------------------------- | :-------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [iso_crossings](#iso_crossings)               | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-iso_crossings.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/iso_crossings")               |
+| [narrow_xbar_latency](#narrow_xbar_latency)   | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-narrow_xbar_latency.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/narrow_xbar_latency")   |
+| [wide_xbar_latency](#wide_xbar_latency)       | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-wide_xbar_latency.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/wide_xbar_latency")       |
+| [register_offload](#register_offload)         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload")         |
+| [register_offload_rsp](#register_offload_rsp) | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload_rsp.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload_rsp") |
+| [register_tcdm_req](#register_tcdm_req)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_req")       |
+| [register_tcdm_cuts](#register_tcdm_cuts)     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_cuts.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_cuts")     |
+| [register_ext_wide](#register_ext_wide)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_wide.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_wide")       |
+| [register_ext_narrow](#register_ext_narrow)   | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_narrow.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_narrow")   |
+| [register_sequencer](#register_sequencer)     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_sequencer.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_sequencer")     |
+| [lat_comp_fp32](#lat_comp_fp32)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp32.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp32")               |
+| [lat_comp_fp64](#lat_comp_fp64)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp64.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp64")               |
+| [lat_comp_fp16](#lat_comp_fp16)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16")               |
+| [lat_comp_fp16_alt](#lat_comp_fp16_alt)       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16_alt.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16_alt")       |
+| [lat_comp_fp8](#lat_comp_fp8)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp8.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp8")                 |
+| [lat_noncomp](#lat_noncomp)                   | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_noncomp.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_noncomp")                   |
+| [lat_conv](#lat_conv)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_conv.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_conv")                         |
+| [fpu_pipe_config](#fpu_pipe_config)           | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-fpu_pipe_config.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/fpu_pipe_config")           |
 
 ## iso_crossings
 
 Enable isochroous crossings, this clocks the integer core at half the speed of the rest of the system.
 
-
 `iso_crossings`
 
--   is optional
--   Type: `boolean`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-iso_crossings.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/iso_crossings")
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-iso_crossings.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/iso_crossings")
 
 ### iso_crossings Type
 
@@ -77,13 +78,15 @@ Enable isochroous crossings, this clocks the integer core at half the speed of t
 
 Latency mode of the cluster crossbar.
 
-
 `narrow_xbar_latency`
 
--   is optional
--   Type: `string`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-narrow_xbar_latency.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/narrow_xbar_latency")
+*   is optional
+
+*   Type: `string`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-narrow_xbar_latency.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/narrow_xbar_latency")
 
 ### narrow_xbar_latency Type
 
@@ -94,7 +97,7 @@ Latency mode of the cluster crossbar.
 **enum**: the value of this property must be equal to one of the following values:
 
 | Value             | Explanation |
-| :---------------- | ----------- |
+| :---------------- | :---------- |
 | `"NO_LATENCY"`    |             |
 | `"CUT_SLV_AX"`    |             |
 | `"CUT_MST_AX"`    |             |
@@ -107,13 +110,15 @@ Latency mode of the cluster crossbar.
 
 Latency mode of the DMA crossbar.
 
-
 `wide_xbar_latency`
 
--   is optional
--   Type: `string`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-wide_xbar_latency.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/wide_xbar_latency")
+*   is optional
+
+*   Type: `string`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-wide_xbar_latency.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/wide_xbar_latency")
 
 ### wide_xbar_latency Type
 
@@ -124,7 +129,7 @@ Latency mode of the DMA crossbar.
 **enum**: the value of this property must be equal to one of the following values:
 
 | Value             | Explanation |
-| :---------------- | ----------- |
+| :---------------- | :---------- |
 | `"NO_LATENCY"`    |             |
 | `"CUT_SLV_AX"`    |             |
 | `"CUT_MST_AX"`    |             |
@@ -137,13 +142,15 @@ Latency mode of the DMA crossbar.
 
 Insert Pipeline registers into off-loading path (request).
 
-
 `register_offload`
 
--   is optional
--   Type: `boolean`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload")
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload")
 
 ### register_offload Type
 
@@ -153,13 +160,15 @@ Insert Pipeline registers into off-loading path (request).
 
 Insert Pipeline registers into off-loading path (response).
 
-
 `register_offload_rsp`
 
--   is optional
--   Type: `boolean`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload_rsp.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload_rsp")
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload_rsp.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload_rsp")
 
 ### register_offload_rsp Type
 
@@ -169,13 +178,15 @@ Insert Pipeline registers into off-loading path (response).
 
 Insert Pipeline registers into data memory request path.
 
-
 `register_tcdm_req`
 
--   is optional
--   Type: `boolean`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_req.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_req")
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_req")
 
 ### register_tcdm_req Type
 
@@ -185,13 +196,15 @@ Insert Pipeline registers into data memory request path.
 
 Insert Pipeline registers after each memory cut.
 
-
 `register_tcdm_cuts`
 
--   is optional
--   Type: `boolean`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_cuts.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_cuts")
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_cuts.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_cuts")
 
 ### register_tcdm_cuts Type
 
@@ -201,13 +214,15 @@ Insert Pipeline registers after each memory cut.
 
 Decouple wide external AXI plug.
 
-
 `register_ext_wide`
 
--   is optional
--   Type: `boolean`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_wide.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_wide")
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_wide.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_wide")
 
 ### register_ext_wide Type
 
@@ -217,13 +232,15 @@ Decouple wide external AXI plug.
 
 Decouple narrow external AXI plug.
 
-
 `register_ext_narrow`
 
--   is optional
--   Type: `boolean`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_narrow.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_narrow")
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_narrow.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_narrow")
 
 ### register_ext_narrow Type
 
@@ -233,13 +250,15 @@ Decouple narrow external AXI plug.
 
 Insert Pipeline registers after sequencer.
 
-
 `register_sequencer`
 
--   is optional
--   Type: `boolean`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_sequencer.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_sequencer")
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_sequencer.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_sequencer")
 
 ### register_sequencer Type
 
@@ -249,13 +268,15 @@ Insert Pipeline registers after sequencer.
 
 Latency setting (number of pipeline stages) for FP32.
 
-
 `lat_comp_fp32`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp32.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp32")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp32.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp32")
 
 ### lat_comp_fp32 Type
 
@@ -273,13 +294,15 @@ The default value is:
 
 Latency setting (number of pipeline stages) for FP64.
 
-
 `lat_comp_fp64`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp64.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp64")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp64.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp64")
 
 ### lat_comp_fp64 Type
 
@@ -297,13 +320,15 @@ The default value is:
 
 Latency setting (number of pipeline stages) for FP16.
 
-
 `lat_comp_fp16`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16")
 
 ### lat_comp_fp16 Type
 
@@ -317,23 +342,25 @@ The default value is:
 1
 ```
 
-## lat_comp_fp16_alt
+## lat_comp_fp16\_alt
 
 Latency setting (number of pipeline stages) for FP16alt (brainfloat).
 
-
 `lat_comp_fp16_alt`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16_alt.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16_alt")
+*   is optional
 
-### lat_comp_fp16_alt Type
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16\_alt.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16\_alt")
+
+### lat_comp_fp16\_alt Type
 
 `number`
 
-### lat_comp_fp16_alt Default Value
+### lat_comp_fp16\_alt Default Value
 
 The default value is:
 
@@ -345,13 +372,15 @@ The default value is:
 
 Latency setting (number of pipeline stages) for FP32 (fp8).
 
-
 `lat_comp_fp8`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp8.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp8")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp8.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp8")
 
 ### lat_comp_fp8 Type
 
@@ -369,13 +398,15 @@ The default value is:
 
 Latency setting (number of pipeline stages) for floating-point non-computational instructions (except conversions), i.e., `classify`, etc.
 
-
 `lat_noncomp`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_noncomp.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_noncomp")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_noncomp.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_noncomp")
 
 ### lat_noncomp Type
 
@@ -393,13 +424,15 @@ The default value is:
 
 Latency setting (number of pipeline stages) for floating-point conversion instructions.
 
-
 `lat_conv`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_conv.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_conv")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_conv.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_conv")
 
 ### lat_conv Type
 
@@ -417,13 +450,15 @@ The default value is:
 
 Pipeline configuration (i.e., position of the registers) of the FPU.
 
-
 `fpu_pipe_config`
 
--   is optional
--   Type: `string`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-fpu_pipe_config.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/fpu_pipe_config")
+*   is optional
+
+*   Type: `string`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-fpu_pipe_config.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/fpu_pipe_config")
 
 ### fpu_pipe_config Type
 
@@ -434,7 +469,7 @@ Pipeline configuration (i.e., position of the registers) of the FPU.
 **enum**: the value of this property must be equal to one of the following values:
 
 | Value           | Explanation |
-| :-------------- | ----------- |
+| :-------------- | :---------- |
 | `"BEFORE"`      |             |
 | `"AFTER"`       |             |
 | `"INSIDE"`      |             |
