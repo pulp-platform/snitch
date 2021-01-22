@@ -6,10 +6,9 @@ http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/ite
 
 Description of a single core.
 
-
-| Abstract            | Extensible | Status         | Identifiable | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                                        |
-| :------------------ | ---------- | -------------- | ------------ | :---------------- | --------------------- | ------------------- | --------------------------------------------------------------------------------- |
-| Can be instantiated | No         | Unknown status | No           | Forbidden         | Allowed               | none                | [snitch_cluster.schema.json\*](snitch_cluster.schema.json "open original schema") |
+| Abstract            | Extensible | Status         | Identifiable | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                                       |
+| :------------------ | :--------- | :------------- | :----------- | :---------------- | :-------------------- | :------------------ | :------------------------------------------------------------------------------- |
+| Can be instantiated | No         | Unknown status | No           | Forbidden         | Allowed               | none                | [snitch_cluster.schema.json*](snitch_cluster.schema.json "open original schema") |
 
 ## items Type
 
@@ -17,36 +16,38 @@ Description of a single core.
 
 # Core Description Properties
 
-| Property                                                  | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                                                                                  |
-| :-------------------------------------------------------- | --------- | -------- | -------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [isa](#isa)                                               | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-isa-string-containing-risc-v-standard-extensions.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/isa")  |
-| [xssr](#xssr)                                             | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xssr-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xssr")                            |
-| [xfrep](#xfrep)                                           | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xfrep-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfrep")                          |
-| [xdma](#xdma)                                             | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xdma-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xdma")                                   |
-| [xf8](#xf8)                                               | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf8-16-bit-float-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf8")                        |
-| [xf16](#xf16)                                             | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16-16-bit-float-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16")                      |
-| [xf16alt](#xf16alt)                                       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16alt-16-bit-brain-float-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16alt")          |
-| [xfvec](#xfvec)                                           | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xfvec-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfvec")                                 |
-| [ssr_nr_credits](#ssr_nr_credits)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr_nr_credits.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_nr_credits")                         |
-| [num_int_outstanding_loads](#num_int_outstanding_loads)   | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_loads.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_loads")   |
-| [num_int_outstanding_mem](#num_int_outstanding_mem)       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_mem.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_mem")       |
-| [num_fp_outstanding_loads](#num_fp_outstanding_loads)     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_fp_outstanding_loads.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_fp_outstanding_loads")     |
-| [num_fp_outstanding_mem](#num_fp_outstanding_mem)         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_fp_outstanding_mem.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_fp_outstanding_mem")         |
-| [num_sequencer_instructions](#num_sequencer_instructions) | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_sequencer_instructions.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_sequencer_instructions") |
-| [num_itlb_entries](#num_itlb_entries)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_itlb_entries.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_itlb_entries")                     |
-| [num_dtlb_entries](#num_dtlb_entries)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_dtlb_entries.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_dtlb_entries")                     |
+| Property                                                  | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                                                                             |
+| :-------------------------------------------------------- | :-------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [isa](#isa)                                               | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-isa-string-containing-risc-v-standard-extensions.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/isa")  |
+| [xssr](#xssr)                                             | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xssr-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xssr")                            |
+| [xfrep](#xfrep)                                           | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xfrep-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfrep")                          |
+| [xdma](#xdma)                                             | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xdma-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xdma")                                   |
+| [xf8](#xf8)                                               | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf8-16-bit-float-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf8")                        |
+| [xf16](#xf16)                                             | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16-16-bit-float-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16")                      |
+| [xf16alt](#xf16alt)                                       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16alt-16-bit-brain-float-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16alt")          |
+| [xfvec](#xfvec)                                           | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xfvec-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfvec")                                 |
+| [ssr_nr_credits](#ssr_nr_credits)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr_nr_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_nr_credits")                         |
+| [num_int_outstanding_loads](#num_int_outstanding_loads)   | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_loads.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_loads")   |
+| [num_int_outstanding_mem](#num_int_outstanding_mem)       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_mem.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_mem")       |
+| [num_fp_outstanding_loads](#num_fp_outstanding_loads)     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_fp_outstanding_loads.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_fp_outstanding_loads")     |
+| [num_fp_outstanding_mem](#num_fp_outstanding_mem)         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_fp_outstanding_mem.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_fp_outstanding_mem")         |
+| [num_sequencer_instructions](#num_sequencer_instructions) | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_sequencer_instructions.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_sequencer_instructions") |
+| [num_itlb_entries](#num_itlb_entries)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_itlb_entries.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_itlb_entries")                     |
+| [num_dtlb_entries](#num_dtlb_entries)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_dtlb_entries.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_dtlb_entries")                     |
 
 ## isa
 
 ISA string as defined by the RISC-V standard. Only contain the standardized ISA extensions.
 
-
 `isa`
 
--   is optional
--   Type: `string` ([ISA String containing RISC-V standard extensions.](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-isa-string-containing-risc-v-standard-extensions.md))
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-isa-string-containing-risc-v-standard-extensions.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/isa")
+*   is optional
+
+*   Type: `string` ([ISA String containing RISC-V standard extensions.](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-isa-string-containing-risc-v-standard-extensions.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-isa-string-containing-risc-v-standard-extensions.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/isa")
 
 ### isa Type
 
@@ -70,13 +71,15 @@ The default value is:
 
 Stream Semantic Registers (Xssr) custom extension.
 
-
 `xssr`
 
--   is optional
--   Type: `boolean` ([Enable Xssr Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xssr-extension.md))
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xssr-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xssr")
+*   is optional
+
+*   Type: `boolean` ([Enable Xssr Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xssr-extension.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xssr-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xssr")
 
 ### xssr Type
 
@@ -94,13 +97,15 @@ true
 
 Floating-point repetition buffer (Xfrep) custom extension.
 
-
 `xfrep`
 
--   is optional
--   Type: `boolean` ([Enable Xfrep Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xfrep-extension.md))
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xfrep-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfrep")
+*   is optional
+
+*   Type: `boolean` ([Enable Xfrep Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xfrep-extension.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xfrep-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfrep")
 
 ### xfrep Type
 
@@ -118,13 +123,15 @@ true
 
 Direct memory access (Xdma) custom extension.
 
-
 `xdma`
 
--   is optional
--   Type: `boolean` ([Xdma Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xdma-extension.md))
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xdma-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xdma")
+*   is optional
+
+*   Type: `boolean` ([Xdma Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xdma-extension.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xdma-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xdma")
 
 ### xdma Type
 
@@ -134,13 +141,15 @@ Direct memory access (Xdma) custom extension.
 
 Enable Smallfloat Xf8 extension (IEEE 8-bit float).
 
-
 `xf8`
 
--   is optional
--   Type: `boolean` ([Xf8 16-bit Float Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf8-16-bit-float-extension.md))
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf8-16-bit-float-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf8")
+*   is optional
+
+*   Type: `boolean` ([Xf8 16-bit Float Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf8-16-bit-float-extension.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf8-16-bit-float-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf8")
 
 ### xf8 Type
 
@@ -150,13 +159,15 @@ Enable Smallfloat Xf8 extension (IEEE 8-bit float).
 
 Enable Smallfloat Xf16 extension (IEEE 16-bit float).
 
-
 `xf16`
 
--   is optional
--   Type: `boolean` ([Xf16 16-bit Float Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16-16-bit-float-extension.md))
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16-16-bit-float-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16")
+*   is optional
+
+*   Type: `boolean` ([Xf16 16-bit Float Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16-16-bit-float-extension.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16-16-bit-float-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16")
 
 ### xf16 Type
 
@@ -166,13 +177,15 @@ Enable Smallfloat Xf16 extension (IEEE 16-bit float).
 
 Enable Smallfloat Xf16alt extension, also known as brain-float.
 
-
 `xf16alt`
 
--   is optional
--   Type: `boolean` ([Xf16alt 16-bit Brain-Float Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16alt-16-bit-brain-float-extension.md))
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16alt-16-bit-brain-float-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16alt")
+*   is optional
+
+*   Type: `boolean` ([Xf16alt 16-bit Brain-Float Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16alt-16-bit-brain-float-extension.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16alt-16-bit-brain-float-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16alt")
 
 ### xf16alt Type
 
@@ -182,13 +195,15 @@ Enable Smallfloat Xf16alt extension, also known as brain-float.
 
 Enable Smallfloat vector extension (SIMD).
 
-
 `xfvec`
 
--   is optional
--   Type: `boolean` ([Xfvec Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xfvec-extension.md))
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xfvec-extension.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfvec")
+*   is optional
+
+*   Type: `boolean` ([Xfvec Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xfvec-extension.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xfvec-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfvec")
 
 ### xfvec Type
 
@@ -198,13 +213,15 @@ Enable Smallfloat vector extension (SIMD).
 
 Number of credits and buffer depth of SSR FIFOs.
 
-
 `ssr_nr_credits`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr_nr_credits.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_nr_credits")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr_nr_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_nr_credits")
 
 ### ssr_nr_credits Type
 
@@ -222,13 +239,15 @@ The default value is:
 
 Number of outstanding integer loads. Determines the buffer size in the core's load/store unit.
 
-
 `num_int_outstanding_loads`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_loads.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_loads")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_loads.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_loads")
 
 ### num_int_outstanding_loads Type
 
@@ -246,13 +265,15 @@ The default value is:
 
 Number of outstanding memory operations. Determines the buffer size in the core's load/store unit.
 
-
 `num_int_outstanding_mem`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_mem.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_mem")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_mem.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_mem")
 
 ### num_int_outstanding_mem Type
 
@@ -270,13 +291,15 @@ The default value is:
 
 Number of outstanding floating-point loads. Determines the buffer size in the FPU's load/store unit.
 
-
 `num_fp_outstanding_loads`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_fp_outstanding_loads.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_fp_outstanding_loads")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_fp_outstanding_loads.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_fp_outstanding_loads")
 
 ### num_fp_outstanding_loads Type
 
@@ -294,13 +317,15 @@ The default value is:
 
 Number of outstanding memory operations. Determines the buffer size in the core's load/store unit.
 
-
 `num_fp_outstanding_mem`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_fp_outstanding_mem.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_fp_outstanding_mem")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_fp_outstanding_mem.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_fp_outstanding_mem")
 
 ### num_fp_outstanding_mem Type
 
@@ -318,13 +343,15 @@ The default value is:
 
 Amount of floating-point instruction the floating-point sequence buffer can hold.
 
-
 `num_sequencer_instructions`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_sequencer_instructions.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_sequencer_instructions")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_sequencer_instructions.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_sequencer_instructions")
 
 ### num_sequencer_instructions Type
 
@@ -342,13 +369,15 @@ The default value is:
 
 Number of ITLB entries. Determines the core's size.
 
-
 `num_itlb_entries`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_itlb_entries.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_itlb_entries")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_itlb_entries.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_itlb_entries")
 
 ### num_itlb_entries Type
 
@@ -366,13 +395,15 @@ The default value is:
 
 Number of DTLB entries. Determines the core's size.
 
-
 `num_dtlb_entries`
 
--   is optional
--   Type: `number`
--   cannot be null
--   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_dtlb_entries.md "http&#x3A;//pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_dtlb_entries")
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_dtlb_entries.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_dtlb_entries")
 
 ### num_dtlb_entries Type
 

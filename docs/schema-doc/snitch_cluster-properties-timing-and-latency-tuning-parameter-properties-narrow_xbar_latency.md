@@ -6,10 +6,9 @@ http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/pr
 
 Latency mode of the cluster crossbar.
 
-
-| Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                                        |
-| :------------------ | ---------- | -------------- | ----------------------- | :---------------- | --------------------- | ------------------- | --------------------------------------------------------------------------------- |
-| Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [snitch_cluster.schema.json\*](snitch_cluster.schema.json "open original schema") |
+| Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                                       |
+| :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :------------------------------------------------------------------------------- |
+| Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [snitch_cluster.schema.json*](snitch_cluster.schema.json "open original schema") |
 
 ## narrow_xbar_latency Type
 
@@ -20,7 +19,7 @@ Latency mode of the cluster crossbar.
 **enum**: the value of this property must be equal to one of the following values:
 
 | Value             | Explanation |
-| :---------------- | ----------- |
+| :---------------- | :---------- |
 | `"NO_LATENCY"`    |             |
 | `"CUT_SLV_AX"`    |             |
 | `"CUT_MST_AX"`    |             |
