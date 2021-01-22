@@ -32,7 +32,10 @@ def emit(name, array):
             s += "%02x" % bs[i + 3 - n]
         print("    .word 0x%s" % s)
 
-
+print("# Copyright 2020 ETH Zurich and University of Bologna.")
+print("# Licensed under the Apache License, Version 2.0, see LICENSE for details.")
+print("# SPDX-License-Identifier: Apache-2.0")
+print()
 print(".section .l1,\"aw\",@progbits")
 emit("input_size", np.array(N, dtype=np.uint32))
 # emit("input_A", A)

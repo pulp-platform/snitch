@@ -2,9 +2,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))/../../sw
-VPATH += $(DIR)
-include $(DIR)/runtime/runtime.mk
+include runtime/runtime.mk
 
 all: bin/large_lfsr
 all: bin/dummy
@@ -25,13 +23,13 @@ all: bin/far_jump
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump
-	$(RISCV_CC) -Iinclude $(RISCV_LDFLAGS) -o $@ $^ -T$(DIR)/runtime/link.ld $(DIR)/runtime/billywig_crt0.S
+	$(RISCV_CC) -Iinclude $(RISCV_LDFLAGS) -o $@ $^ -Truntime/link.ld runtime/billywig_crt0.S
 	$(RISCV_STRIP) $@ -g -S -d --strip-debug
 	$(RISCV_OBJDUMP) -D $@ > dump/$*.dump
 
 bin/%: %.s
 	mkdir -p $(shell dirname $@) dump
-	$(RISCV_CC) -Iinclude $(RISCV_LDFLAGS) -o $@ $^ -T$(DIR)/runtime/link.ld
+	$(RISCV_CC) -Iinclude $(RISCV_LDFLAGS) -o $@ $^ -Truntime/link.ld
 	$(RISCV_STRIP) $@ -g -S -d --strip-debug
 	$(RISCV_OBJDUMP) -D $@ > dump/$*.dump
 

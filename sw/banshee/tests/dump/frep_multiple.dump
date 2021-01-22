@@ -20,54 +20,57 @@ Disassembly of section .text:
 80010010:	ffc10113          	addi	sp,sp,-4 # 40000008 <tcdm_end_address_reg>
 80010014:	00012103          	lw	sp,0(sp)
 80010018:	f1402573          	csrr	a0,mhartid
-8001001c:	00351293          	slli	t0,a0,0x3
-80010020:	40510133          	sub	sp,sp,t0
-80010024:	00629293          	slli	t0,t0,0x6
-80010028:	40510133          	sub	sp,sp,t0
-8001002c:	00010213          	mv	tp,sp
-80010030:	00100293          	li	t0,1
-80010034:	00929293          	slli	t0,t0,0x9
-80010038:	40520233          	sub	tp,tp,t0
-8001003c:	bfff0297          	auipc	t0,0xbfff0
-80010040:	fd428293          	addi	t0,t0,-44 # 40000010 <nr_cores_address_reg>
-80010044:	0002a583          	lw	a1,0(t0)
-80010048:	038000ef          	jal	ra,80010080 <main>
-8001004c:	00151513          	slli	a0,a0,0x1
-80010050:	00156513          	ori	a0,a0,1
-80010054:	0100006f          	j	80010064 <eoc>
+8001001c:	bfff0297          	auipc	t0,0xbfff0
+80010020:	0242a283          	lw	t0,36(t0) # 40000040 <cluster_base_hart_id_reg>
+80010024:	40550533          	sub	a0,a0,t0
+80010028:	00351293          	slli	t0,a0,0x3
+8001002c:	40510133          	sub	sp,sp,t0
+80010030:	00629293          	slli	t0,t0,0x6
+80010034:	40510133          	sub	sp,sp,t0
+80010038:	00010213          	mv	tp,sp
+8001003c:	00100293          	li	t0,1
+80010040:	00929293          	slli	t0,t0,0x9
+80010044:	40520233          	sub	tp,tp,t0
+80010048:	bfff0297          	auipc	t0,0xbfff0
+8001004c:	fc828293          	addi	t0,t0,-56 # 40000010 <nr_cores_address_reg>
+80010050:	0002a583          	lw	a1,0(t0)
+80010054:	038000ef          	jal	ra,8001008c <main>
+80010058:	00151513          	slli	a0,a0,0x1
+8001005c:	00156513          	ori	a0,a0,1
+80010060:	0100006f          	j	80010070 <eoc>
 
-80010058 <fail>:
-80010058:	fff00293          	li	t0,-1
-8001005c:	00554533          	xor	a0,a0,t0
-80010060:	0040006f          	j	80010064 <eoc>
+80010064 <fail>:
+80010064:	fff00293          	li	t0,-1
+80010068:	00554533          	xor	a0,a0,t0
+8001006c:	0040006f          	j	80010070 <eoc>
 
-80010064 <eoc>:
-80010064:	f14022f3          	csrr	t0,mhartid
-80010068:	00029863          	bnez	t0,80010078 <halt>
-8001006c:	bfff0297          	auipc	t0,0xbfff0
-80010070:	fb428293          	addi	t0,t0,-76 # 40000020 <scratch_reg>
-80010074:	00a2a023          	sw	a0,0(t0)
+80010070 <eoc>:
+80010070:	f14022f3          	csrr	t0,mhartid
+80010074:	00029863          	bnez	t0,80010084 <halt>
+80010078:	bfff0297          	auipc	t0,0xbfff0
+8001007c:	fa828293          	addi	t0,t0,-88 # 40000020 <scratch_reg>
+80010080:	00a2a023          	sw	a0,0(t0)
 
-80010078 <halt>:
-80010078:	10500073          	wfi
-8001007c:	ffdff06f          	j	80010078 <halt>
+80010084 <halt>:
+80010084:	10500073          	wfi
+80010088:	ffdff06f          	j	80010084 <halt>
 
 Disassembly of section .text.startup:
 
-80010080 <main>:
-80010080:	00000797          	auipc	a5,0x0
-80010084:	0407b707          	fld	fa4,64(a5) # 800100c0 <main+0x40>
-80010088:	00000797          	auipc	a5,0x0
-8001008c:	0407b687          	fld	fa3,64(a5) # 800100c8 <main+0x48>
-80010090:	d20007d3          	fcvt.d.w	fa5,zero
-80010094:	0012808b          	0x12808b
-80010098:	02e7f7d3          	fadd.d	fa5,fa5,fa4
-8001009c:	12d7f7d3          	fmul.d	fa5,fa5,fa3
-800100a0:	00000797          	auipc	a5,0x0
-800100a4:	0307b707          	fld	fa4,48(a5) # 800100d0 <main+0x50>
-800100a8:	a2e7a553          	feq.d	a0,fa5,fa4
-800100ac:	00154513          	xori	a0,a0,1
-800100b0:	00008067          	ret
+8001008c <main>:
+8001008c:	00000797          	auipc	a5,0x0
+80010090:	0347b707          	fld	fa4,52(a5) # 800100c0 <main+0x34>
+80010094:	00000797          	auipc	a5,0x0
+80010098:	0347b687          	fld	fa3,52(a5) # 800100c8 <main+0x3c>
+8001009c:	d20007d3          	fcvt.d.w	fa5,zero
+800100a0:	0012808b          	0x12808b
+800100a4:	02e7f7d3          	fadd.d	fa5,fa5,fa4
+800100a8:	12d7f7d3          	fmul.d	fa5,fa5,fa3
+800100ac:	00000797          	auipc	a5,0x0
+800100b0:	0247b707          	fld	fa4,36(a5) # 800100d0 <main+0x44>
+800100b4:	a2e7a553          	feq.d	a0,fa5,fa4
+800100b8:	00154513          	xori	a0,a0,1
+800100bc:	00008067          	ret
 
 Disassembly of section .sdata:
 
@@ -91,20 +94,20 @@ Disassembly of section .comment:
    0:	3a434347          	fmsub.d	ft6,ft6,ft4,ft7,rmm
    4:	2820                	fld	fs0,80(s0)
    6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
-   a:	3920                	fld	fs0,112(a0)
-   c:	322e                	fld	ft4,232(sp)
-   e:	302e                	fld	ft0,232(sp)
-	...
+   a:	3120                	fld	fs0,96(a0)
+   c:	2e30                	fld	fa2,88(a2)
+   e:	2e32                	fld	ft8,264(sp)
+  10:	0030                	addi	a2,sp,8
 
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-   0:	2f41                	jal	790 <l1_alloc_base+0x780>
+   0:	3341                	jal	fffffd80 <fake_uart+0x3ffffd80>
    2:	0000                	unimp
    4:	7200                	flw	fs0,32(a2)
    6:	7369                	lui	t1,0xffffa
    8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
-   c:	0025                	c.nop	9
+   c:	0029                	c.nop	10
    e:	0000                	unimp
   10:	1004                	addi	s1,sp,32
   12:	7205                	lui	tp,0xfffe1
@@ -118,3 +121,5 @@ Disassembly of section .riscv.attributes:
   26:	3266                	fld	ft4,120(sp)
   28:	3070                	fld	fa2,224(s0)
   2a:	645f 7032 0030      	0x307032645f
+  30:	0108                	addi	a0,sp,128
+  32:	0b0a                	slli	s6,s6,0x2
