@@ -14,6 +14,7 @@
     exclude_paths: [
         # Exclude anything in vendored directories
         '*/vendor/*',
-        'util/lowrisc_misc-linters/*'
+        'util/lowrisc_misc-linters/*',
+        'sw/banshee/tests/runtime/printf.*'
     ],
 }

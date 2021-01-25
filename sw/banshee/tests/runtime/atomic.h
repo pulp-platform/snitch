@@ -1,3 +1,7 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
 #define ATOMIC_OP(op, asm_op, I, asm_type, c_type, prefix)     \
 static __always_inline                                         \
 void atomic##prefix##_##op(c_type i, atomic##prefix##_t *v)    \
