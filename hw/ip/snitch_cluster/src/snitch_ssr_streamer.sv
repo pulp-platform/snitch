@@ -119,6 +119,7 @@ module snitch_ssr_streamer import snitch_pkg::*; #(
 
     assign mem_req_o[i].q_valid = mem_req_qvalid;
     assign mem_req_o[i].q.amo = reqrsp_pkg::AMONone;
+    assign mem_req_o[i].q.user = '0;
 
     assign lane_rdata[i]  = fifo_out;
     assign mem_req_o[i].q.data = fifo_out;

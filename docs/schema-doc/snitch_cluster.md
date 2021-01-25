@@ -409,25 +409,6 @@ The default value is:
 
 `object` ([Timing and Latency Tuning Parameter](snitch_cluster-properties-timing-and-latency-tuning-parameter.md))
 
-### timing Default Value
-
-The default value is:
-
-```json
-{
-  "narrow_xbar_latency": "CUT_ALL_PORTS",
-  "wide_xbar_latency": "CUT_ALL_PORTS",
-  "iso_crossings": false,
-  "register_offload": false,
-  "register_offload_rsp": false,
-  "register_tcdm_req": false,
-  "register_tcdm_cuts": false,
-  "register_ext_wide": false,
-  "register_ext_narrow": false,
-  "register_sequencer": false
-}
-```
-
 ## hives
 
 Cores in a hive share an instruction cache and other shared infrastructure such as the PTW or the multiply/divide unit.

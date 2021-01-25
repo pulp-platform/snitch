@@ -508,6 +508,7 @@ module snitch_cluster
     .tcdm_rsp_t (tcdm_dma_rsp_t),
     .mem_req_t (mem_dma_req_t),
     .mem_rsp_t (mem_dma_rsp_t),
+    .user_t (logic),
     .MemAddrWidth (TCDMAddrWidth),
     .DataWidth (WideDataWidth),
     .MemoryResponseLatency (MemoryMacroLatency)
@@ -620,6 +621,7 @@ module snitch_cluster
     .mem_rsp_t (mem_rsp_t),
     .MemAddrWidth (TCDMAddrWidth),
     .DataWidth (NarrowDataWidth),
+    .user_t (tcdm_user_t),
     .MemoryResponseLatency (1 + RegisterTCDMCuts),
     .Radix (Radix),
     .Topology (Topology)
@@ -662,6 +664,8 @@ module snitch_cluster
       i_sync_mtip  (.clk_i, .rst_ni, .serial_i (mtip_i[i]), .serial_o (irq.mtip));
     sync #(.STAGES (2))
       i_sync_msip  (.clk_i, .rst_ni, .serial_i (msip_i[i]), .serial_o (irq.msip));
+
+      tcdm_req_t [2:0] tcdm_req_wo_user;
 
       snitch_cc #(
         .AddrWidth (PhysicalAddrWidth),
@@ -720,7 +724,7 @@ module snitch_cluster
         .irq_i (irq),
         .data_req_o (core_req[i]),
         .data_rsp_i (core_rsp[i]),
-        .tcdm_req_o (tcdm_req[3*i+:3]),
+        .tcdm_req_o (tcdm_req_wo_user),
         .tcdm_rsp_i (tcdm_rsp[3*i+:3]),
         .wake_up_sync_i (wake_up_sync[i]),
         .axi_dma_req_o (axi_dma_req),
@@ -731,6 +735,13 @@ module snitch_cluster
         .tcdm_addr_base_i (tcdm_start_address),
         .tcdm_addr_mask_i (TCDMMask)
       );
+      for (genvar j = 0; j < 3; j++) begin : gen_tcdm_user
+        always_comb begin
+          tcdm_req[3*i+j] = tcdm_req_wo_user[j];
+          tcdm_req[3*i+j].q.user.core_id = i;
+          tcdm_req[3*i+j].q.user.is_core = 1;
+        end
+      end
       if (Xdma[i]) begin : gen_dma_connection
         assign axi_dma_mst_req[SDMAMst] = axi_dma_req;
         assign axi_dma_res = axi_dma_mst_res[SDMAMst];

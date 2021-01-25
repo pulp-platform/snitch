@@ -27,3 +27,11 @@ Latency mode of the cluster crossbar.
 | `"CUT_SLV_PORTS"` |             |
 | `"CUT_MST_PORTS"` |             |
 | `"CUT_ALL_PORTS"` |             |
+
+## narrow_xbar_latency Default Value
+
+The default value is:
+
+```json
+"CUT_ALL_PORTS"
+```

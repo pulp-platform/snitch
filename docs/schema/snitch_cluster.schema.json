@@ -108,22 +108,11 @@
         "timing": {
             "type": "object",
             "title": "Timing and Latency Tuning Parameter",
-            "default": {
-                "narrow_xbar_latency": "CUT_ALL_PORTS",
-                "wide_xbar_latency": "CUT_ALL_PORTS",
-                "iso_crossings": false,
-                "register_offload": false,
-                "register_offload_rsp": false,
-                "register_tcdm_req": false,
-                "register_tcdm_cuts": false,
-                "register_ext_wide": false,
-                "register_ext_narrow": false,
-                "register_sequencer": false
-            },
             "properties": {
                 "iso_crossings": {
                     "type": "boolean",
-                    "description": "Enable isochroous crossings, this clocks the integer core at half the speed of the rest of the system."
+                    "description": "Enable isochroous crossings, this clocks the integer core at half the speed of the rest of the system.",
+                    "default": false
                 },
                 "narrow_xbar_latency": {
                     "type": "string",
@@ -136,7 +125,8 @@
                         "CUT_SLV_PORTS",
                         "CUT_MST_PORTS",
                         "CUT_ALL_PORTS"
-                    ]
+                    ],
+                    "default": "CUT_ALL_PORTS"
                 },
                 "wide_xbar_latency": {
                     "type": "string",
@@ -149,35 +139,43 @@
                         "CUT_SLV_PORTS",
                         "CUT_MST_PORTS",
                         "CUT_ALL_PORTS"
-                    ]
+                    ],
+                    "default": "CUT_ALL_PORTS"
                 },
                 "register_offload": {
                     "type": "boolean",
-                    "description": "Insert Pipeline registers into off-loading path (request)."
+                    "description": "Insert Pipeline registers into off-loading path (request).",
+                    "default": false
                 },
                 "register_offload_rsp": {
                     "type": "boolean",
-                    "description": "Insert Pipeline registers into off-loading path (response)."
+                    "description": "Insert Pipeline registers into off-loading path (response).",
+                    "default": false
                 },
                 "register_tcdm_req": {
                     "type": "boolean",
-                    "description": "Insert Pipeline registers into data memory request path."
+                    "description": "Insert Pipeline registers into data memory request path.",
+                    "default": false
                 },
                 "register_tcdm_cuts": {
                     "type": "boolean",
-                    "description": "Insert Pipeline registers after each memory cut."
+                    "description": "Insert Pipeline registers after each memory cut.",
+                    "default": false
                 },
                 "register_ext_wide": {
                     "type": "boolean",
-                    "description": "Decouple wide external AXI plug."
+                    "description": "Decouple wide external AXI plug.",
+                    "default": false
                 },
                 "register_ext_narrow": {
                     "type": "boolean",
-                    "description": "Decouple narrow external AXI plug."
+                    "description": "Decouple narrow external AXI plug.",
+                    "default": false
                 },
                 "register_sequencer": {
                     "type": "boolean",
-                    "description": "Insert Pipeline registers after sequencer."
+                    "description": "Insert Pipeline registers after sequencer.",
+                    "default": false
                 },
                 "lat_comp_fp32": {
                     "type": "number",

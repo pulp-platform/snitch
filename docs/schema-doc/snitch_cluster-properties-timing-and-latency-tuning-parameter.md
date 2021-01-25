@@ -14,25 +14,6 @@ http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing
 
 `object` ([Timing and Latency Tuning Parameter](snitch_cluster-properties-timing-and-latency-tuning-parameter.md))
 
-## timing Default Value
-
-The default value is:
-
-```json
-{
-  "narrow_xbar_latency": "CUT_ALL_PORTS",
-  "wide_xbar_latency": "CUT_ALL_PORTS",
-  "iso_crossings": false,
-  "register_offload": false,
-  "register_offload_rsp": false,
-  "register_tcdm_req": false,
-  "register_tcdm_cuts": false,
-  "register_ext_wide": false,
-  "register_ext_narrow": false,
-  "register_sequencer": false
-}
-```
-
 # Timing and Latency Tuning Parameter Properties
 
 | Property                                      | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                |
@@ -106,6 +87,14 @@ Latency mode of the cluster crossbar.
 | `"CUT_MST_PORTS"` |             |
 | `"CUT_ALL_PORTS"` |             |
 
+### narrow_xbar_latency Default Value
+
+The default value is:
+
+```json
+"CUT_ALL_PORTS"
+```
+
 ## wide_xbar_latency
 
 Latency mode of the DMA crossbar.
@@ -137,6 +126,14 @@ Latency mode of the DMA crossbar.
 | `"CUT_SLV_PORTS"` |             |
 | `"CUT_MST_PORTS"` |             |
 | `"CUT_ALL_PORTS"` |             |
+
+### wide_xbar_latency Default Value
+
+The default value is:
+
+```json
+"CUT_ALL_PORTS"
+```
 
 ## register_offload
 
