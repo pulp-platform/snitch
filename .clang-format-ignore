@@ -7,5 +7,7 @@
 ./sw/vendor/*
 ./sw/banshee/vendor/*
 ./sw/banshee/build/*
+./sw/banshee/tests/runtime/printf.*
+./sw/banshee/tests/runtime/encoding.h
 # Ignore any checked-out directories
 */.bender/*
