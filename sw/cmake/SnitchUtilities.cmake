@@ -4,6 +4,7 @@
 
 # Locate the banshee simulator for test execution.
 set(SNITCH_BANSHEE "banshee" CACHE PATH "Path to the banshee simulator for testing")
+set(SNITCH_RUNTIME "snRuntime-banshee" CACHE PATH "Target name of the snRuntime flavor to link against")
 message(STATUS "Check for Banshee")
 execute_process(COMMAND ${SNITCH_BANSHEE} --version OUTPUT_VARIABLE SNITCH_BANSHEE_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
 message(STATUS "Using simulator: ${SNITCH_BANSHEE} - version ${SNITCH_BANSHEE_VERSION}")
@@ -26,7 +27,7 @@ endmacro()
 
 macro(add_snitch_test_executable name)
     add_snitch_executable(test-${name} ${ARGN})
-    target_link_libraries(test-${name} snRuntime-banshee)
+    target_link_libraries(test-${name} ${SNITCH_RUNTIME})
 endmacro()
 
 macro(add_snitch_test_args executable_name test_name)
