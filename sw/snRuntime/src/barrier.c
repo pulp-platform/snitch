@@ -4,12 +4,12 @@
 #include "snrt.h"
 
 static void snrt_barrier_cluster() {
-    asm volatile (" \
+    asm volatile(
+        " \
         lw t0, barrier_reg; \
         mv zero, t0; \
-    " ::: "t0");
+    " ::
+            : "t0");
 }
 
-void snrt_barrier() {
-    snrt_barrier_cluster();
-}
+void snrt_barrier() { snrt_barrier_cluster(); }

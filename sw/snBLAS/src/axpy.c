@@ -3,6 +3,4 @@
 // SPDX-License-Identifier: SHL-0.51
 #include <snblas.h>
 
-double snblas_hello() {
-    return 42.3141;
-}
+double snblas_hello() { return 42.3141; }

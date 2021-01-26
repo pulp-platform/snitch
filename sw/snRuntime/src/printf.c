@@ -21,4 +21,5 @@ void snrt_putchar(char character) {
 #define PRINTF_DISABLE_SUPPORT_FLOAT
 #include <stdarg.h>
 #include <stddef.h>
+
 #include "../vendor/printf.c"

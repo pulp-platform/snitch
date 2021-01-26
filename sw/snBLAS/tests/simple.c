@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <snrt.h>
 #include <snblas.h>
+#include <snrt.h>
+#include <stdio.h>
 
 struct data {
     size_t n;
@@ -23,12 +23,10 @@ static struct data allocate_data(snrt_slice_t mem) {
     size_t n = snrt_min(n_ideal, n_avail);
     printf("Allocating %d elements\n", n);
 
-    return (struct data){
-        .n  = n,
-        .x  = (double*)mem.start + 0 * n,
-        .y  = (double*)mem.start + 1 * n,
-        .yo = (double*)mem.start + 2 * n
-    };
+    return (struct data){.n = n,
+                         .x = (double *)mem.start + 0 * n,
+                         .y = (double *)mem.start + 1 * n,
+                         .yo = (double *)mem.start + 2 * n};
 }
 
 /// Generate the test data.
@@ -36,15 +34,13 @@ static void generate_data(const struct data *data) {
     // Compute the range of the data that should be populated by this core.
     size_t lo = (snrt_global_core_idx() + 0) * data->n / snrt_global_core_num();
     size_t hi = (snrt_global_core_idx() + 1) * data->n / snrt_global_core_num();
-    printf("Core %d/%d populating from %d to %d\n",
-        snrt_global_core_idx(), snrt_global_core_num(),
-        lo, hi
-    );
+    printf("Core %d/%d populating from %d to %d\n", snrt_global_core_idx(),
+           snrt_global_core_num(), lo, hi);
 
     // Populate the range with data.
     for (size_t i = lo; i < hi; i++) {
         data->x[i] = i;
-        data->y[i] = i*3;
+        data->y[i] = i * 3;
     }
 }
 
@@ -55,7 +51,8 @@ int main() {
     if (snrt_global_core_idx() == 0) {
         size_t size_cluster = snrt_slice_len(snrt_cluster_memory());
         size_t size_global = snrt_slice_len(snrt_global_memory());
-        printf("Available memory: %d KiB cluster, %d KiB global\n", size_cluster/1024, size_global/1024);
+        printf("Available memory: %d KiB cluster, %d KiB global\n",
+               size_cluster / 1024, size_global / 1024);
         if (snrt_cluster_num() > 1) {
             printf("Preparing data in global memory\n");
             data = allocate_data(snrt_global_memory());
@@ -72,15 +69,8 @@ int main() {
     }
 
     printf("Core %d/%d (cluster %d/%d) works on %d items in %p, %p, %p\n",
-        snrt_global_core_idx(),
-        snrt_global_core_num(),
-        snrt_cluster_idx(),
-        snrt_cluster_num(),
-        data.n,
-        data.x,
-        data.y,
-        data.yo
-    );
+           snrt_global_core_idx(), snrt_global_core_num(), snrt_cluster_idx(),
+           snrt_cluster_num(), data.n, data.x, data.y, data.yo);
 
     // Generate the test data.
     generate_data(&data);

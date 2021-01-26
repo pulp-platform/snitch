@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: SHL-0.51
 #include <snrt.h>
 
-static volatile uint32_t *sink = (void*)0xF1230000;
+static volatile uint32_t *sink = (void *)0xF1230000;
 
 int main(uint32_t core_id, uint32_t core_num, void *spm_start, void *spm_end) {
-    volatile uint32_t *x = spm_start+4;
+    volatile uint32_t *x = spm_start + 4;
     if (core_id == 0) {
         *x = 0;
     }
