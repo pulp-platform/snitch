@@ -4,7 +4,7 @@
 #include <stdarg.h>
 
 // Use `-O1` for this function and don't inline.
-int __attribute__ ((noinline)) __attribute__ ((optimize(1))) sum(int N, ...) {
+int __attribute__((noinline)) __attribute__((optimize(1))) sum(int N, ...) {
     int sum = 0;
     va_list va;
     va_start(va, N);
@@ -18,8 +18,8 @@ int __attribute__ ((noinline)) __attribute__ ((optimize(1))) sum(int N, ...) {
 int main() {
     int e = 0;
     e += sum(1, 1) != 1;
-    e += sum(2, 1,2) != 1+2;
-    e += sum(3, 4,5,6) != 4+5+6;
-    e += sum(4, 2,6,8,1) != 2+6+8+1;
+    e += sum(2, 1, 2) != 1 + 2;
+    e += sum(3, 4, 5, 6) != 4 + 5 + 6;
+    e += sum(4, 2, 6, 8, 1) != 2 + 6 + 8 + 1;
     return e;
 }

@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: SHL-0.51
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifndef snrt_min
 #define snrt_min(a, b) ((a) < (b) ? (a) : (b))
@@ -20,9 +20,7 @@ typedef struct snrt_slice {
     void *end;
 } snrt_slice_t;
 
-static inline size_t snrt_slice_len(snrt_slice_t s) {
-    return s.end - s.start;
-}
+static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
 
 extern void snrt_barrier();
 

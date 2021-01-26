@@ -11,7 +11,7 @@ static const struct {
 } table;
 
 int main() {
-    uint32_t i = snrt_hartid() - 3; // shift by base hartid
+    uint32_t i = snrt_hartid() - 3;  // shift by base hartid
     uint32_t errors = 0;
     errors += (snrt_global_core_idx() != i);
     errors += (snrt_global_core_num() != 8);
