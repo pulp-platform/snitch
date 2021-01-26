@@ -67,3 +67,12 @@ For VCS:
 or for Questasim:
 
     bin/snitch_cluster.vsim path/to/riscv/binary
+
+## Software
+
+The runtime and additional software libraries for the cluster configuration can be compiled as follows:
+
+    mkdir sw/build
+    cd sw/build
+    cmake ..
+    make

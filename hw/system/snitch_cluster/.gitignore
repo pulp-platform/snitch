@@ -12,3 +12,4 @@ modelsim.ini
 simv*
 ucli.key
 vc_hdrs.h
+build/
