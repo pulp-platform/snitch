@@ -16,15 +16,17 @@
         dma_axi_req_fifo_depth: 3,
         dma_req_fifo_depth: 3,
         // Timing parameters
-        lat_comp_fp32: 3,
-        lat_comp_fp64: 3,
-        lat_comp_fp16_alt: 2,
-        lat_comp_fp8: 1,
-        lat_noncomp: 1,
-        lat_conv: 1,
-        fpu_pipe_config: "BEFORE"
-        narrow_xbar_latency: "CUT_ALL_PORTS",
-        wide_xbar_latency: "CUT_ALL_PORTS",
+        timing: {
+            lat_comp_fp32: 3,
+            lat_comp_fp64: 3,
+            lat_comp_fp16_alt: 2,
+            lat_comp_fp8: 1,
+            lat_noncomp: 1,
+            lat_conv: 1,
+            fpu_pipe_config: "BEFORE"
+            narrow_xbar_latency: "CUT_ALL_PORTS",
+            wide_xbar_latency: "CUT_ALL_PORTS",
+        },
         hives: [
             // Hive 1
             {
@@ -65,9 +67,9 @@
         xfrep: true
         ssr_nr_credits: 4,
         num_int_outstanding_loads: 1,
-        num_mem_outstanding_loads: 4,
+        num_int_outstanding_mem: 4,
         num_fp_outstanding_loads: 4,
-        num_mem_outstanding_loads: 4,
+        num_fp_outstanding_mem: 4,
         num_sequencer_instructions: 16,
         num_dtlb_entries: 1,
         num_itlb_entries: 1,

@@ -179,7 +179,7 @@ module snitch_tcdm_interconnect #(
       .d_i ( in_rsp_mux ),
       .d_o ( out_rsp_mux )
     );
-    assign rsp_o[i].p = mem_rsp_i[out_rsp_mux.bank_select].p;
+    assign rsp_o[i].p.data = mem_rsp_i[out_rsp_mux.bank_select].p.data;
     assign rsp_o[i].p_valid = out_rsp_mux.valid;
   end
 

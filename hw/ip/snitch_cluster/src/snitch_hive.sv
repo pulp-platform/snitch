@@ -78,7 +78,7 @@ module snitch_hive #(
 
   snitch_icache #(
     .NR_FETCH_PORTS    ( CoreCount        ),
-    .L0_LINE_COUNT     ( 4                ),
+    .L0_LINE_COUNT     ( 8                ),
     .LINE_WIDTH        ( ICacheLineWidth  ),
     .LINE_COUNT        ( ICacheLineCount  ),
     .SET_COUNT         ( ICacheSets       ),

@@ -142,7 +142,8 @@ bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch
 # Phony #
 #########
 clean:
-	rm -rf ${VLT_BUILDDIR} Bender.lock .bender/ work/
+	rm -rf ${VLT_BUILDDIR} Bender.lock .bender/
+	# work/
 
 trace_hart_%.txt: trace_hart_%.dasm ${ROOT}/util/gen_trace.py
 	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py > $@
