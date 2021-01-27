@@ -111,7 +111,7 @@
             "properties": {
                 "iso_crossings": {
                     "type": "boolean",
-                    "description": "Enable isochroous crossings, this clocks the integer core at half the speed of the rest of the system.",
+                    "description": "Enable isochronous crossings, this clocks the integer core at half the speed of the rest of the system.",
                     "default": false
                 },
                 "narrow_xbar_latency": {
