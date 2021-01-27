@@ -39,7 +39,7 @@ http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing
 
 ## iso_crossings
 
-Enable isochroous crossings, this clocks the integer core at half the speed of the rest of the system.
+Enable isochronous crossings, this clocks the integer core at half the speed of the rest of the system.
 
 `iso_crossings`
 
