@@ -26,7 +26,7 @@ FESVR_VERSION  ?= 35d50bc40e59ea1d5566fbd3d9226023821b1bb6
 MATCH_END := '/+incdir+/ s/$$/\/*\/*/'
 MATCH_BGN := 's/+incdir+//g'
 SED_SRCS  := sed -e ${MATCH_END} -e ${MATCH_BGN}
-TB_SRCS   := $(wildcard test/*)
+TB_SRCS   := $(wildcard test/*.sv)
 
 VLT_BUILDDIR := work-vlt
 VLT_FLAGS    += -Wno-BLKANDNBLK
@@ -86,13 +86,15 @@ ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 
 verilate: ${VLT_BUILDDIR}/verilate
 
-bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/tb_bin.cc work/lib/libfesvr.a
+bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/common_lib.cc test/tb_bin.cc work/lib/libfesvr.a
+	$(CXX) $(VLT_CFLAGS) -c test/common_lib.cc -o ${VLT_BUILDDIR}/common_lib.o
 	$(CXX) $(VLT_CFLAGS) -c test/verilator_lib.cc -o ${VLT_BUILDDIR}/verilator_lib.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated.cpp -o ${VLT_BUILDDIR}/verilated.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated_dpi.cpp -o ${VLT_BUILDDIR}/verilated_dpi.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated_vcd_c.cpp -o ${VLT_BUILDDIR}/verilated_vcd_c.o
 	mkdir -p bin
 	$(LD) -o ${VLT_BUILDDIR}/snitch_cluster.o -r \
+		${VLT_BUILDDIR}/common_lib.o \
 		${VLT_BUILDDIR}/verilator_lib.o \
 		${VLT_BUILDDIR}/verilated.o \
 		${VLT_BUILDDIR}/verilated_dpi.o \
@@ -107,10 +109,10 @@ bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/tb_b
 ############
 # Modelsim #
 ############
-${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS}
+${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} test/rtl_lib.cc test/common_lib.cc
 	vlib $(dir $@)
 	${BENDER} script vsim ${VSIM_BENDER} --vlog-arg="${VLOG_FLAGS} -work $(dir $@) " > $@
-	echo 'vlog -work $(dir $@) test/rtl_lib.cc -ccflags "-std=c++14 -I${FESVR}/include"' >> $@
+	echo 'vlog -work $(dir $@) test/rtl_lib.cc test/common_lib.cc -ccflags "-std=c++14 -I${FESVR}/include"' >> $@
 	echo 'return 0' >> $@
 
 bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
@@ -135,7 +137,7 @@ work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
 
 bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch_cluster_wrapper.sv
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/snitch_cluster.vcs -cc $(CC) -cpp $(CXX) \
-		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin test/rtl_lib.cc \
+		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin test/rtl_lib.cc test/common_lib.cc \
 		-CFLAGS "-std=c++14 -I${FESVR}/include" -LDFLAGS "-L${FESVR}/lib" -lfesvr
 
 #########

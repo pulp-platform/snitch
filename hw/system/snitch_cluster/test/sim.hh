@@ -21,12 +21,13 @@ using namespace std::chrono_literals;
 struct Sim : htif_t {
     Sim(int argc, char **argv);
 
+    virtual void start();
+
     int run();
     void main();
-    // HTIF overrides. Calls into the global memory.
-    // HTIF overrides.
-    void read_chunk(addr_t taddr, size_t len, void *dst);
 
+    // HTIF overrides. Calls into the global memory.
+    void read_chunk(addr_t taddr, size_t len, void *dst);
     void write_chunk(addr_t taddr, size_t len, const void *src);
 
     void idle();
