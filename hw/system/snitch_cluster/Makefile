@@ -91,8 +91,9 @@ ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 
 verilate: ${VLT_BUILDDIR}/verilate
 
-bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/common_lib.cc test/tb_bin.cc work/lib/libfesvr.a test/bootrom.bin
+bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/common_lib.cc test/tb_bin.cc work/lib/libfesvr.a test/bootrom.bin generated/bootdata.cc
 	$(CXX) $(VLT_CFLAGS) -c test/common_lib.cc -o ${VLT_BUILDDIR}/common_lib.o -Itest
+	$(CXX) $(VLT_CFLAGS) -c generated/bootdata.cc -o ${VLT_BUILDDIR}/bootdata.o -Itest
 	$(CXX) $(VLT_CFLAGS) -c test/verilator_lib.cc -o ${VLT_BUILDDIR}/verilator_lib.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated.cpp -o ${VLT_BUILDDIR}/verilated.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated_dpi.cpp -o ${VLT_BUILDDIR}/verilated_dpi.o
@@ -100,6 +101,7 @@ bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/comm
 	mkdir -p bin
 	$(LD) -o ${VLT_BUILDDIR}/snitch_cluster.o -r \
 		${VLT_BUILDDIR}/common_lib.o \
+		${VLT_BUILDDIR}/bootdata.o \
 		${VLT_BUILDDIR}/verilator_lib.o \
 		${VLT_BUILDDIR}/verilated.o \
 		${VLT_BUILDDIR}/verilated_dpi.o \

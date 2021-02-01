@@ -275,6 +275,11 @@ class SnitchClusterTB(Generator):
         return cfg_template.render_unicode(cfg=self.cfg,
                                            l1_region=self.cluster.l1_region())
 
+    def render_bootdata(self):
+        """Generate a C file with boot information for the cluster testbench"""
+        cfg_template = self.templates.get_template("test/bootdata.cc.tpl")
+        return cfg_template.render_unicode(cfg=self.cfg)
+
     def render_deps(self, dep_name):
         return self.cluster.render_deps(dep_name)
 

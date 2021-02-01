@@ -52,6 +52,9 @@ def main():
     with open(outdir / "link.ld", "w") as f:
         f.write(cluster_tb.render_linker_script())
 
+    with open(outdir / "bootdata.cc", "w") as f:
+        f.write(cluster_tb.render_bootdata())
+
 
 if __name__ == "__main__":
     main()
