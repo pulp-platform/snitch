@@ -73,6 +73,11 @@ work/lib/libfesvr.a: work/${FESVR_VERSION}_unzip
 	mkdir -p $(dir $@)
 	cp $(dir $<)libfesvr.a $@
 
+test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom.ld
+	riscv64-unknown-elf-gcc -mabi=ilp32d -march=rv32imafd -static -nostartfiles -Ttest/bootrom.ld $< -o test/bootrom.elf
+	riscv64-unknown-elf-objdump -d test/bootrom.elf > test/bootrom.dump
+	riscv64-unknown-elf-objcopy -j .text -O binary test/bootrom.elf test/bootrom.bin
+
 #############
 # Verilator #
 #############
@@ -86,8 +91,8 @@ ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 
 verilate: ${VLT_BUILDDIR}/verilate
 
-bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/common_lib.cc test/tb_bin.cc work/lib/libfesvr.a
-	$(CXX) $(VLT_CFLAGS) -c test/common_lib.cc -o ${VLT_BUILDDIR}/common_lib.o
+bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/common_lib.cc test/tb_bin.cc work/lib/libfesvr.a test/bootrom.bin
+	$(CXX) $(VLT_CFLAGS) -c test/common_lib.cc -o ${VLT_BUILDDIR}/common_lib.o -Itest
 	$(CXX) $(VLT_CFLAGS) -c test/verilator_lib.cc -o ${VLT_BUILDDIR}/verilator_lib.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated.cpp -o ${VLT_BUILDDIR}/verilated.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated_dpi.cpp -o ${VLT_BUILDDIR}/verilated_dpi.o
