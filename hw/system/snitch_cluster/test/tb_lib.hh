@@ -115,4 +115,10 @@ struct GlobalMemory {
 // The global memory all memory ports write into.
 extern GlobalMemory MEM;
 
+// The boot data generated along with the system RTL.
+struct BootData {
+    uint32_t boot_addr;
+};
+extern const BootData BOOTDATA;
+
 }  // namespace sim

@@ -5,13 +5,14 @@
 // Cluster configuration for a simple testbench system.
 {
     cluster: {
+        boot_addr: 4096, // 0x1000
+        cluster_base_addr: 1048576, // 0x100000
         addr_width: 48,
         data_width: 64,
         tcdm: {
             size: 128,
             banks: 32,
         },
-        cluster_base_addr: 0,
         dma_data_width: 512,
         dma_axi_req_fifo_depth: 3,
         dma_req_fifo_depth: 3,
