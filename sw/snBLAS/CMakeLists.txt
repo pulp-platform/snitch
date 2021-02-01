@@ -23,10 +23,9 @@ include_directories(${SNRUNTIME_INCLUDE_DIRS})
 
 add_snitch_library(snBLAS src/axpy.c)
 
-# Tests for standalone builds.
-if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    enable_testing()
-    link_libraries(snBLAS)
-    add_snitch_test_executable(simple tests/simple.c)
-    add_snitch_test_args(simple simple --no-opt-llvm)
-endif()
+# Tests
+enable_testing()
+set(SNITCH_TEST_PREFIX snBLAS-)
+link_libraries(snBLAS)
+add_snitch_test_executable(simple tests/simple.c)
+add_snitch_test_args(simple simple --no-opt-llvm)
