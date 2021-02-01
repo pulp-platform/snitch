@@ -9,6 +9,17 @@
 
 namespace sim {
 
+// Bootloader
+extern "C" {
+    extern const char tb_bootrom_start;
+    extern const char tb_bootrom_end;
+}
+
+asm(".global tb_bootrom_start \n"
+    ".global tb_bootrom_end \n"
+    "tb_bootrom_start: .incbin \"test/bootrom.bin\" \n"
+    "tb_bootrom_end: \n");
+
 // The global memory all memory ports write into.
 GlobalMemory MEM;
 
@@ -16,7 +27,12 @@ GlobalMemory MEM;
 // symbol.
 void Sim::start() {
     htif_t::start();
+    auto f = std::cerr.flags();
+    std::cerr << std::hex;
     std::cerr << "Entry point of binary is at " << get_entry_point() << "\n";
+    std::cerr << "Bootrom start at " << (const void *)&tb_bootrom_start << "\n";
+    std::cerr << "Bootrom end at " << (const void *)&tb_bootrom_end << "\n";
+    std::cerr.flags(f);
 }
 
 void Sim::read_chunk(addr_t taddr, size_t len, void *dst) {
