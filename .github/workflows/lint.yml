@@ -67,7 +67,7 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: '12'
-    - run: npm install -g @adobe/jsonschema2md
+    - run: npm install -g @adobe/jsonschema2md@v5.0.1
     - uses: actions/setup-python@v2
       with:
         python-version: 3.x
