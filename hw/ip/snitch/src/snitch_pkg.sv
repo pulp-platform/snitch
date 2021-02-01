@@ -178,6 +178,7 @@ package snitch_pkg;
   // --------------------
   // Trace Infrastructure
   // --------------------
+  // pragma translate_off
   typedef enum logic [1:0] {
     SrcSnitch =  0,
     SrcFpu = 1,
@@ -349,5 +350,6 @@ package snitch_pkg;
     extras_str = $sformatf("%s}", extras_str);
     return extras_str;
   endfunction
+  // pragma translate_on
 
 endpackage

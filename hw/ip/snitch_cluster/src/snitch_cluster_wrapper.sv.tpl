@@ -74,7 +74,7 @@ package ${cfg['pkg_name']};
   `AXI_TYPEDEF_ALL(wide_in, addr_t, wide_in_id_t, data_dma_t, strb_dma_t, user_t)
   `AXI_TYPEDEF_ALL(wide_out, addr_t, wide_out_id_t, data_dma_t, strb_dma_t, user_t)
 
-  parameter snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{
+  localparam snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{
       NrCachedRegionRules: ${len(cfg['pmas']['cached'])},
       CachedRegion: '{
 % for cp in cfg['pmas']['cached']:
@@ -177,12 +177,14 @@ module ${cfg['name']}_wrapper (
     .Hive (snitch_cluster_pkg::Hive),
     .Topology (snitch_pkg::LogarithmicInterconnect),
     .Radix (2),
-    .RegisterOffload (${int(cfg['timing']['register_offload'])}),
+    .RegisterOffloadReq (${int(cfg['timing']['register_offload_req'])}),
     .RegisterOffloadRsp (${int(cfg['timing']['register_offload_rsp'])}),
-    .RegisterTCDMReq (${int(cfg['timing']['register_tcdm_req'])}),
+    .RegisterCoreReq (${int(cfg['timing']['register_core_req'])}),
+    .RegisterCoreRsp (${int(cfg['timing']['register_core_rsp'])}),
     .RegisterTCDMCuts (${int(cfg['timing']['register_tcdm_cuts'])}),
     .RegisterExtWide (${int(cfg['timing']['register_ext_wide'])}),
     .RegisterExtNarrow (${int(cfg['timing']['register_ext_narrow'])}),
+    .RegisterFPUReq (${int(cfg['timing']['register_fpu_req'])}),
     .RegisterSequencer (${int(cfg['timing']['register_sequencer'])}),
     .IsoCrossing (${int(cfg['timing']['iso_crossings'])}),
     .NarrowXbarLatency (axi_pkg::${cfg['timing']['narrow_xbar_latency']}),

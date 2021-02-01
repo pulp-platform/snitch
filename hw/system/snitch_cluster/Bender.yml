@@ -2,7 +2,7 @@
 # Solderpad Hardware License, Version 0.51, see LICENSE for details.
 # SPDX-License-Identifier: SHL-0.51
 package:
-  name: snitch
+  name: system-snitch-cluster
   authors:
   - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
   - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>

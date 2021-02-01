@@ -624,56 +624,68 @@ module mem_to_banks #(
     return (addr >> $clog2(DataBytes)) << $clog2(DataBytes);
   endfunction
 
-  // Handle requests.
-  assign req_valid = req_i & gnt_o;
-  for (genvar i = 0; unsigned'(i) < NumBanks; i++) begin : gen_reqs
-    assign bank_req[i].addr  = align_addr(addr_i) + i * BytesPerBank;
-    assign bank_req[i].wdata = wdata_i[i*BitsPerBank+:BitsPerBank];
-    assign bank_req[i].strb  = strb_i[i*BytesPerBank+:BytesPerBank];
-    assign bank_req[i].atop  = atop_i;
-    assign bank_req[i].we    = we_i;
-    fall_through_register #(
-      .T ( req_t )
-    ) i_ft_reg (
-      .clk_i,
-      .rst_ni,
-      .clr_i      ( 1'b0          ),
-      .testmode_i ( 1'b0          ),
-      .valid_i    ( req_valid     ),
-      .ready_o    ( req_ready[i]  ),
-      .data_i     ( bank_req[i]   ),
-      .valid_o    ( bank_req_o[i] ),
-      .ready_i    ( bank_gnt_i[i] ),
-      .data_o     ( bank_oup[i]   )
-    );
-    assign bank_addr_o[i]  = bank_oup[i].addr;
-    assign bank_wdata_o[i] = bank_oup[i].wdata;
-    assign bank_strb_o[i]  = bank_oup[i].strb;
-    assign bank_atop_o[i]  = bank_oup[i].atop;
-    assign bank_we_o[i]    = bank_oup[i].we;
-  end
+  if (NumBanks == 1) begin : gen_direct_connection
+    assign bank_req_o = req_i;
+    assign gnt_o = bank_gnt_i;
+    assign bank_addr_o = addr_i;
+    assign bank_wdata_o = wdata_i;
+    assign bank_strb_o = strb_i;
+    assign bank_atop_o = atop_i;
+    assign bank_we_o = we_i;
+    assign rvalid_o = bank_rvalid_i;
+    assign rdata_o = bank_rdata_i;
+  end else begin : gen_bank_split
+    // Handle requests.
+    assign req_valid = req_i & gnt_o;
+    for (genvar i = 0; unsigned'(i) < NumBanks; i++) begin : gen_reqs
+      assign bank_req[i].addr  = align_addr(addr_i) + i * BytesPerBank;
+      assign bank_req[i].wdata = wdata_i[i*BitsPerBank+:BitsPerBank];
+      assign bank_req[i].strb  = strb_i[i*BytesPerBank+:BytesPerBank];
+      assign bank_req[i].atop  = atop_i;
+      assign bank_req[i].we    = we_i;
+      fall_through_register #(
+        .T ( req_t )
+      ) i_ft_reg (
+        .clk_i,
+        .rst_ni,
+        .clr_i      ( 1'b0          ),
+        .testmode_i ( 1'b0          ),
+        .valid_i    ( req_valid     ),
+        .ready_o    ( req_ready[i]  ),
+        .data_i     ( bank_req[i]   ),
+        .valid_o    ( bank_req_o[i] ),
+        .ready_i    ( bank_gnt_i[i] ),
+        .data_o     ( bank_oup[i]   )
+      );
+      assign bank_addr_o[i]  = bank_oup[i].addr;
+      assign bank_wdata_o[i] = bank_oup[i].wdata;
+      assign bank_strb_o[i]  = bank_oup[i].strb;
+      assign bank_atop_o[i]  = bank_oup[i].atop;
+      assign bank_we_o[i]    = bank_oup[i].we;
+    end
 
-  // Grant output if all our requests have been granted.
-  assign gnt_o = (&req_ready) & (&resp_ready);
+    // Grant output if all our requests have been granted.
+    assign gnt_o = (&req_ready) & (&resp_ready);
 
-  // Handle responses.
-  for (genvar i = 0; unsigned'(i) < NumBanks; i++) begin : gen_resp_regs
-    fall_through_register #(
-      .T ( oup_data_t )
-    ) i_ft_reg (
-      .clk_i,
-      .rst_ni,
-      .clr_i      ( 1'b0                                ),
-      .testmode_i ( 1'b0                                ),
-      .valid_i    ( bank_rvalid_i[i]                    ),
-      .ready_o    ( resp_ready[i]                       ),
-      .data_i     ( bank_rdata_i[i]                     ),
-      .data_o     ( rdata_o[i*BitsPerBank+:BitsPerBank] ),
-      .ready_i    ( rvalid_o                            ),
-      .valid_o    ( resp_valid[i]                       )
-    );
+    // Handle responses.
+    for (genvar i = 0; unsigned'(i) < NumBanks; i++) begin : gen_resp_regs
+      fall_through_register #(
+        .T ( oup_data_t )
+      ) i_ft_reg (
+        .clk_i,
+        .rst_ni,
+        .clr_i      ( 1'b0                                ),
+        .testmode_i ( 1'b0                                ),
+        .valid_i    ( bank_rvalid_i[i]                    ),
+        .ready_o    ( resp_ready[i]                       ),
+        .data_i     ( bank_rdata_i[i]                     ),
+        .data_o     ( rdata_o[i*BitsPerBank+:BitsPerBank] ),
+        .ready_i    ( rvalid_o                            ),
+        .valid_o    ( resp_valid[i]                       )
+      );
+    end
+    assign rvalid_o = &resp_valid;
   end
-  assign rvalid_o = &resp_valid;
 
   // Assertions
   // pragma translate_off

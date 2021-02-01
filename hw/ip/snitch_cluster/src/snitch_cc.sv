@@ -67,13 +67,18 @@ module snitch_cc #(
   parameter int unsigned SSRNrCredits = 0,
   /// Add isochronous clock-domain crossings e.g., make it possible to operate
   /// the core in a slower clock domain.
-  parameter bit          IsoCrossing        = 1,
+  parameter bit          IsoCrossing        = 0,
+  /// Timing Parameters
   /// Insert Pipeline registers into off-loading path (request)
-  parameter bit          RegisterOffload    = 1,
+  parameter bit          RegisterOffloadReq = 0,
   /// Insert Pipeline registers into off-loading path (response)
   parameter bit          RegisterOffloadRsp = 0,
-  /// Insert Pipeline registers into data memory request path
-  parameter bit          RegisterTCDMReq    = 1,
+  /// Insert Pipeline registers into data memory path (request)
+  parameter bit          RegisterCoreReq    = 0,
+  /// Insert Pipeline registers into data memory path (response)
+  parameter bit          RegisterCoreRsp    = 0,
+  /// Insert Pipeline register into the FPU data path (request)
+  parameter bit          RegisterFPUReq     = 0,
   /// Insert Pipeline registers after sequencer
   parameter bit          RegisterSequencer  = 0,
   snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
@@ -227,8 +232,8 @@ module snitch_cc #(
     .DataWidth (DataWidth),
     .req_t (dreq_t),
     .rsp_t (drsp_t),
-    .BypassReq (1'b0),
-    .BypassRsp (!IsoCrossing)
+    .BypassReq (!RegisterCoreReq),
+    .BypassRsp (!IsoCrossing && !RegisterCoreRsp)
   ) i_reqrsp_iso (
     .src_clk_i (clk_d2_i),
     .src_rst_ni (rst_ni),
@@ -242,8 +247,8 @@ module snitch_cc #(
 
   // Cut off-loading request path
   isochronous_spill_register #(
-    .T      ( acc_req_t ),
-    .Bypass ( 1'b0                  )
+    .T      (acc_req_t),
+    .Bypass (!IsoCrossing && !RegisterOffloadReq)
   ) i_spill_register_acc_demux_req (
     .src_clk_i   ( clk_d2_i                  ),
     .src_rst_ni  ( rst_ni                    ),
@@ -259,8 +264,8 @@ module snitch_cc #(
 
   // Cut off-loading response path
   isochronous_spill_register #(
-    .T      ( acc_resp_t              ),
-    .Bypass ( !RegisterOffloadRsp && !IsoCrossing )
+    .T (acc_resp_t),
+    .Bypass (!IsoCrossing && !RegisterOffloadRsp)
   ) i_spill_register_acc_demux_resp (
     .src_clk_i   ( clk_i                    ),
     .src_rst_ni  ( rst_ni                   ),
@@ -379,6 +384,7 @@ module snitch_cc #(
     );
   end else begin : gen_no_ipu
     assign ipu_resp = '0;
+    assign ipu_qready = 1'b0;
     assign ipu_pvalid = '0;
   end
 
@@ -463,7 +469,7 @@ module snitch_cc #(
       .rsp_t (drsp_t),
       // TODO(zarubaf): Wire-up to top-level.
       .RespDepth (8),
-      .RegisterReq (0)
+      .RegisterReq ({RegisterFPUReq, 1'b0})
     ) i_reqrsp_mux (
       .clk_i,
       .rst_ni,
@@ -581,6 +587,7 @@ module snitch_cc #(
     `FF(cfg_req_valid_q, cfg_req_valid, 0)
     `FF(cfg_rsp.id, ssr_cfg_req.id, 0)
 
+    assign ssr_cfg_req.id = acc_snitch_demux_q.id;
     assign ssr_cfg_req.word = acc_snitch_demux_q.data_op[31:20];
     assign ssr_cfg_req.write = acc_snitch_demux_q.data_op ==? riscv_instr::SCFGW;
     assign ssr_cfg_req.data = acc_snitch_demux_q.data_argb[31:0];
