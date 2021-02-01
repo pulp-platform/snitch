@@ -113,14 +113,6 @@ struct GlobalMemory {
 };
 
 // The global memory all memory ports write into.
-GlobalMemory MEM;
-
-void Sim::read_chunk(addr_t taddr, size_t len, void *dst) {
-    MEM.read(taddr, len, reinterpret_cast<uint8_t *>(dst));
-}
-void Sim::write_chunk(addr_t taddr, size_t len, const void *src) {
-    uint8_t strb[8] = {1, 1, 1, 1, 1, 1, 1, 1};
-    MEM.write(taddr, len, reinterpret_cast<const uint8_t *>(src), strb);
-}
+extern GlobalMemory MEM;
 
 }  // namespace sim
