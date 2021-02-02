@@ -131,7 +131,8 @@ COMMENT_CHARS = [
     ([".do"], SLASH_SLASH),  # Cadence LEC dofile
 
     # Software Files
-    ([".c", ".c.tpl", ".h", ".h.tpl", ".cc", ".cpp"], SLASH_SLASH),  # C, C++
+    ([".c", ".c.tpl", ".h", ".h.tpl", ".cc", ".cpp", ".cc.tpl",
+      ".cpp.tpl"], SLASH_SLASH),  # C, C++
     ([".def"], SLASH_SLASH),  # C, C++ X-Include List Declaration Files
     ([".S"], [SLASH_SLASH, SLASH_STAR, HASH]),  # Assembly (With Preprocessing)
     ([".s"], [SLASH_STAR, HASH]),  # Assembly (Without Preprocessing)
