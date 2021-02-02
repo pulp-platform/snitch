@@ -1,0 +1,26 @@
+From ca1b2eb329478c53364bd9a158f64ad2bc22c71d Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Tue, 2 Feb 2021 11:08:45 +0100
+Subject: [PATCH] Allow tpl extension for C++ files
+
+---
+ licence-checker/licence-checker.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/licence-checker/licence-checker.py b/licence-checker/licence-checker.py
+index 327a30f..f830b6a 100755
+--- a/licence-checker/licence-checker.py
++++ b/licence-checker/licence-checker.py
+@@ -131,7 +131,8 @@ COMMENT_CHARS = [
+     ([".do"], SLASH_SLASH),  # Cadence LEC dofile
+ 
+     # Software Files
+-    ([".c", ".c.tpl", ".h", ".h.tpl", ".cc", ".cpp"], SLASH_SLASH),  # C, C++
++    ([".c", ".c.tpl", ".h", ".h.tpl", ".cc", ".cpp", ".cc.tpl",
++      ".cpp.tpl"], SLASH_SLASH),  # C, C++
+     ([".def"], SLASH_SLASH),  # C, C++ X-Include List Declaration Files
+     ([".S"], [SLASH_SLASH, SLASH_STAR, HASH]),  # Assembly (With Preprocessing)
+     ([".s"], [SLASH_STAR, HASH]),  # Assembly (Without Preprocessing)
+-- 
+2.25.1.377.g2d2118b814
+
