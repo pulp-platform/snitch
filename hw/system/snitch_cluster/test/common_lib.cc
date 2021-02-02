@@ -11,8 +11,8 @@ namespace sim {
 
 // Bootloader
 extern "C" {
-    extern const uint8_t tb_bootrom_start;
-    extern const uint8_t tb_bootrom_end;
+extern const uint8_t tb_bootrom_start;
+extern const uint8_t tb_bootrom_end;
 }
 
 asm(".global tb_bootrom_start \n"
@@ -29,22 +29,25 @@ void Sim::start() {
     htif_t::start();
 
     // Write the bootloader into memory.
-    size_t bllen = (&tb_bootrom_end-&tb_bootrom_start);
+    size_t bllen = (&tb_bootrom_end - &tb_bootrom_start);
     MEM.write(BOOTDATA.boot_addr, bllen, &tb_bootrom_start, nullptr);
-    std::cerr << "Wrote " << bllen << " bytes of bootrom to " << BOOTDATA.boot_addr << "\n";
+    std::cerr << "Wrote " << bllen << " bytes of bootrom to "
+              << BOOTDATA.boot_addr << "\n";
 
     // Write the entry point of the binary to the last word in the bootloader
     // (which is a placeholder for this data).
     uint32_t e = get_entry_point();
     size_t ep = BOOTDATA.boot_addr + bllen - 4;
     MEM.write(ep, 4, reinterpret_cast<const uint8_t *>(&e), nullptr);
-    std::cerr << "Wrote entry point " << e << " to bootloader slot " << ep << "\n";
+    std::cerr << "Wrote entry point " << e << " to bootloader slot " << ep
+              << "\n";
 
     // Write the boot data to the end of the bootloader. This address will be
     // passed to the binary in register a1.
     size_t bdlen = sizeof(BootData);
     size_t bdp = BOOTDATA.boot_addr + bllen;
-    MEM.write(bdp, bdlen, reinterpret_cast<const uint8_t *>(&BOOTDATA), nullptr);
+    MEM.write(bdp, bdlen, reinterpret_cast<const uint8_t *>(&BOOTDATA),
+              nullptr);
     std::cerr << "Wrote " << bdlen << " bytes of bootdata to " << bdp << "\n";
 }
 
