@@ -14,7 +14,7 @@ void *const _snrt_banshee_global_end = (void *)0x100000000;
 const uint32_t snrt_stack_size __attribute__((weak)) = 10;
 
 void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
-                     void *spm_start, void *spm_end,
+                     void *spm_start, void *spm_end, void *device_tree,
                      struct snrt_team_root *team) {
     team->base.root = team;
     team->global_core_base_hartid =

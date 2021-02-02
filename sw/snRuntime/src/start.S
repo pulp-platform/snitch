@@ -5,6 +5,10 @@
 # This file defines the `_start` symbol and initializes the global pointer. This
 # is common among all bare runtimes.
 
+
+# Expected from bootloader:
+# - a0: mhartid
+# - a1: device tree ptr
 .section .init
 _start:
     .globl _start
@@ -17,12 +21,17 @@ snrt.crt0.init_global_pointer:
     addi      gp, gp, %pcrel_lo(1b)
     .option pop
 
-    # Read hartid and number of cores in the cluster.
 snrt.crt0.init_core_info:
-    lw        t0, cluster_base_hart_id_reg  # load cluster's hartid offset
-    csrr      a0, mhartid  # shift core's hartid such that first core is 0
-    sub       a0, a0, t0
-    lw        a1, nr_cores_address_reg  # load the number of cores per cluster
+    # Information passed into the call:
+    # - a0: mhartid (from bootloader)
+    # - a1: device tree ptr (from bootloader)
+    call      _snrt_init_core_info
+    # Information needed after the call:
+    # - a0: cluster-local core id
+    # - a1: cluster-local core count
+    # - a2: TCDM start ptr
+    # - a3: TCDM end ptr
+    # - a4: device tree ptr
 
     # Clear the bss segment.
 snrt.crt0.init_bss:
@@ -37,9 +46,6 @@ snrt.crt0.init_bss:
 
     # Read hartid and number of cores in the cluster.
 snrt.crt0.init_stack:
-    # Load TCDM start and end addresses.
-    lw        a2, tcdm_start_address_reg
-    lw        a3, tcdm_end_address_reg
 
     # Set 8 bytes aside for the main return value and clear that to zero.
     addi      a3, a3, -8
@@ -48,7 +54,7 @@ snrt.crt0.init_stack:
     # Set space aside for the root team structure.
     lw        t0, _snrt_team_size
     sub       a3, a3, t0
-    mv        a4, a3
+    mv        a5, a3
 
     # Compute the stack top for this hart, and the cluster-wide stack bottom.
     lw        t2, snrt_stack_size  # load stack size (overridable by binary)
@@ -93,17 +99,19 @@ snrt.crt0.init_tls:
 
     # Initialize the root team.
 snrt.crt0.init_team:
-    addi      sp, sp, -16
+    addi      sp, sp, -20
     sw        a0, 0(sp)
     sw        a1, 4(sp)
     sw        a2, 8(sp)
     sw        a3, 12(sp)
+    sw        a4, 16(sp)
     call      _snrt_init_team
     lw        a0, 0(sp)
     lw        a1, 4(sp)
     lw        a2, 8(sp)
     lw        a3, 12(sp)
-    addi      sp, sp, 16
+    lw        a4, 16(sp)
+    addi      sp, sp, 20
 
     # Synchronize cores.
 snrt.crt0.pre_barrier:
@@ -142,3 +150,5 @@ __tdata_end:
 .section ".tbss"
 __tbss_end:
     .globl __tbss_end
+
+.section .text

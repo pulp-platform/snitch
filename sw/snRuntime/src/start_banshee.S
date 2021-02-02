@@ -4,6 +4,22 @@
 
 #include "start.S"
 
+# Function to determine the initial cluster layout to setup the initial stack.
+#
+# Expecting:
+# - a0: mhartid
+# - a1: device tree ptr
+_snrt_init_core_info:
+    .globl _snrt_init_core_info
+    mv        a4, a1
+    lw        t0, cluster_base_hart_id_reg  # load cluster's hartid offset
+    csrr      a0, mhartid  # shift core's hartid such that first core is 0
+    sub       a0, a0, t0
+    lw        a1, nr_cores_address_reg   # load the number of cores per cluster
+    lw        a2, tcdm_start_address_reg # start address of the TCDM
+    lw        a3, tcdm_end_address_reg   # end address of the TCDM
+    ret
+
 .set tcdm_start_address_reg, 0x40000000
 .set tcdm_end_address_reg, 0x40000008
 .set nr_cores_address_reg, 0x40000010
