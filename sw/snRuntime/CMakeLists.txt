@@ -34,6 +34,7 @@ add_snitch_library(snRuntime src/start.S ${sources})
 
 # Bare Runtimes (with startup code)
 add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources})
+add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources})
 add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources})
 add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S ${sources})
 add_snitch_library(snRuntime-lethifold src/start_lethifold.S ${sources})

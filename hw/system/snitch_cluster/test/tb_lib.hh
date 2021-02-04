@@ -118,6 +118,10 @@ extern GlobalMemory MEM;
 // The boot data generated along with the system RTL.
 struct BootData {
     uint32_t boot_addr;
+    uint32_t core_count;
+    uint32_t hartid_base;
+    uint32_t tcdm_start;
+    uint32_t tcdm_end;
 };
 extern const BootData BOOTDATA;
 
