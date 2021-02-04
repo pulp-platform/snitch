@@ -42,20 +42,21 @@
                     cacheline: 128 // word size in bits
                 },
                 cores: [
+                    { $ref: "#/dma_core_template" },
                     { $ref: "#/compute_core_template" },
                     { $ref: "#/compute_core_template" },
                     { $ref: "#/compute_core_template" },
                     { $ref: "#/compute_core_template" },
-                    { $ref: "#/compute_core_template" },
-                    { $ref: "#/compute_core_template" },
-                    { $ref: "#/dma_core_template" }
                 ]
             },
             // Hive 0
             {
                 cores: [
-                    // { $ref: "#/compute_core_template" },
                     { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    # { $ref: "#/compute_core_template" },
                 ]
             }
         ]
@@ -81,7 +82,8 @@
         num_itlb_entries: 1,
     },
     dma_core_template: {
-        isa: "rv32ema",
+        isa: "rv32imafd",
+        # isa: "rv32ema",
         xdma: true
     }
 }
