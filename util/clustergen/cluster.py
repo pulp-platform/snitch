@@ -195,11 +195,12 @@ class SnitchCluster(Generator):
 
         cores = list()
         for i, core_list in enumerate(self.cfg['hives']):
-            for j, _ in enumerate(core_list['cores']):
-                core_list['cores'][j]['hive'] = i
-                core_list['cores'][j]['isa_parsed'] = parse_isa_string(
-                    core_list['cores'][j]['isa'])
-            cores.extend(core_list['cores'])
+            for core in core_list['cores']:
+                core['hive'] = i
+                core['isa_parsed'] = parse_isa_string(
+                    core['isa'])
+
+                cores.append(dict(core))
 
         self.cfg['nr_hives'] = len(self.cfg['hives'])
         self.cfg['nr_cores'] = len(cores)
