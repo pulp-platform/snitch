@@ -115,8 +115,7 @@ snrt.crt0.init_team:
 
     # Synchronize cores.
 snrt.crt0.pre_barrier:
-    lw        t0, barrier_reg
-    mv        zero, t0
+    call      _snrt_cluster_barrier
 
     # Execute the main function.
 snrt.crt0.main:
@@ -127,8 +126,7 @@ snrt.crt0.main:
 
     # Synchronize cores.
 snrt.crt0.post_barrier:
-    lw        t0, barrier_reg
-    mv        zero, t0
+    call      _snrt_cluster_barrier
 
     # Write execution result to EOC register.
 snrt.crt0.end:

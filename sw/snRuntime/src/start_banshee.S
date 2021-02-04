@@ -20,6 +20,12 @@ _snrt_init_core_info:
     lw        a3, tcdm_end_address_reg   # end address of the TCDM
     ret
 
+_snrt_cluster_barrier:
+    .globl _snrt_cluster_barrier
+    lw        t0, barrier_reg
+    mv        zero, t0
+    ret
+
 .set tcdm_start_address_reg, 0x40000000
 .set tcdm_end_address_reg, 0x40000008
 .set nr_cores_address_reg, 0x40000010

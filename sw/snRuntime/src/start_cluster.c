@@ -29,10 +29,8 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
                      struct snrt_team_root *team) {
     team->base.root = team;
     team->global_core_base_hartid =
-        bootdata->hartid_base -
-        _snrt_cluster_cluster_id * bootdata->core_count;
-    team->global_core_num =
-        _snrt_cluster_cluster_num * bootdata->core_count;
+        bootdata->hartid_base - _snrt_cluster_cluster_id * bootdata->core_count;
+    team->global_core_num = _snrt_cluster_cluster_num * bootdata->core_count;
     team->cluster_idx = _snrt_cluster_cluster_id;
     team->cluster_num = _snrt_cluster_cluster_num;
     team->cluster_core_base_hartid = bootdata->hartid_base;
