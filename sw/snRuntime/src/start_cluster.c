@@ -50,3 +50,8 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
 
     _snrt_team_current = &team->base;
 }
+
+// Provide an implementation for putchar.
+void snrt_putchar(char character) {
+    // *(volatile uint32_t *)0xF00B8000 = character;
+}

@@ -3,10 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "snrt.h"
 
-// Provide an implementation for putchar.
-void snrt_putchar(char character) {
-    *(volatile uint32_t *)0xF00B8000 = character;
-}
+void snrt_putchar(char character);
 
 // Generator symbols with the proper names.
 #define printf_ printf
