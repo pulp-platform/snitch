@@ -21,11 +21,36 @@ _snrt_init_core_info:
     sub       a0, a0, t0
     ret
 
+# Must leave a0 untouched.
 _snrt_cluster_barrier:
     .globl _snrt_cluster_barrier
     lw        t0, barrier_reg
     mv        zero, t0
     ret
+
+# Function to terminate execution.
+#
+# Expecting:
+# - a0: exit code
+# - a1: device tree ptr
+_snrt_exit:
+    .globl _snrt_exit
+    # Determine global core index.
+    addi      sp, sp, -8
+    sw        a0, 0(sp)
+    sw        ra, 4(sp)
+    call      snrt_global_core_idx
+    lw        t0, 0(sp)
+    lw        ra, 4(sp)
+    addi      sp, sp, 8
+
+    # Only first core triggers exit.
+    bnez      a0, 1f
+    slli      t0, t0, 1
+    ori       t0, t0, 1
+    la        t1, .tohost
+    sw        t0, 0(t1)
+1:  ret
 
 .set tcdm_start_address_reg, 0x40000000
 .set tcdm_end_address_reg, 0x40000008
@@ -49,3 +74,8 @@ _snrt_cluster_barrier:
 # platform-specific code where stuff like this can go, together with a proper
 # symbol name like `_snrt_cluster_barrier_reg`.
 .globl barrier_reg
+
+# HTIF sections
+.pushsection .tohost,"aw",@progbits;
+.align 6; .global tohost; tohost: .dword 0;
+.align 6; .global fromhost; fromhost: .dword 0;

@@ -130,13 +130,7 @@ snrt.crt0.post_barrier:
 
     # Write execution result to EOC register.
 snrt.crt0.end:
-    lw        t0, cluster_base_hart_id_reg
-    csrr      t1, mhartid
-    bne       t0, t1, 1f  # only first core writes to EOC address
-    slli      a0, a0, 1
-    ori       a0, a0, 1
-    la        t0, scratch_reg
-    sw        a0, 0(t0)
+    call      _snrt_exit
 1:
     wfi
     j       1b

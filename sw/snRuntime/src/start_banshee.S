@@ -20,11 +20,27 @@ _snrt_init_core_info:
     lw        a3, tcdm_end_address_reg   # end address of the TCDM
     ret
 
+# Must leave a0 untouched.
 _snrt_cluster_barrier:
     .globl _snrt_cluster_barrier
     lw        t0, barrier_reg
     mv        zero, t0
     ret
+
+# Function to terminate execution.
+#
+# Expecting:
+# - a0: exit code
+_snrt_exit:
+    .globl _snrt_exit
+    lw        t0, cluster_base_hart_id_reg
+    csrr      t1, mhartid
+    bne       t0, t1, 1f  # only first core writes to EOC address
+    slli      a0, a0, 1
+    ori       a0, a0, 1
+    la        t0, scratch_reg
+    sw        a0, 0(t0)
+1:  ret
 
 .set tcdm_start_address_reg, 0x40000000
 .set tcdm_end_address_reg, 0x40000008
