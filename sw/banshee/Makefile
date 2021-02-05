@@ -2,6 +2,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
+SHELL := /bin/bash
 RISCV_OPCODES ?= ../../sw/vendor/riscv-opcodes
 PARSE_OPCODES ?= $(RISCV_OPCODES)/parse-opcodes
 OPCODES := opcodes opcodes-rep opcodes-dma
@@ -33,7 +34,6 @@ LOG_TOTAL ?= /tmp/banshee_tests_total
 TARGET_DIR ?= $(shell cargo metadata --format-version 1 | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')
 BANSHEE ?= $(TARGET_DIR)/debug/banshee
 
-test: TEST_SUFFIX=&>/dev/null
 test: test-info $(TEST_TARGETS)
 	@echo
 	@echo -n "test result: `tput bold`"
@@ -43,6 +43,7 @@ test: test-info $(TEST_TARGETS)
 		echo -n "`tput setaf 2`PASSED"; \
 	fi
 	@echo "`tput sgr0`. $$(wc -l $(LOG_FAILED) | cut -f1 -d" ") tests failed, $$(wc -l $(LOG_TOTAL) | cut -f1 -d" ") executed."
+	@[ ! -s $(LOG_FAILED) ]
 
 .PHONY: test test-info
 
@@ -60,10 +61,12 @@ define test_template
 	ARGS=$(patsubst $(TESTS_DIR)/%,$(TESTS_DIR)/../args/%,$(3)); \
 	(cat $$ARGS 2>/dev/null || echo) | while read ARG; do \
 		CMD=`echo $(2) $(3) $(4) $$ARG`; \
+		LOGFILE=`mktemp`; \
 		if [ ! -z $(filter $(1),$(TESTS_BLACKLIST)) ]; then \
 			echo "$$CMD ... `tput setaf 3`ignored`tput sgr0`"; \
-		elif ! { env SNITCH_LOG=warn $$CMD; } $(TEST_SUFFIX); then \
+		elif ! env SNITCH_LOG=debug $$CMD &> $$LOGFILE; then \
 			echo "$$CMD ... `tput setaf 1`FAILED`tput sgr0`"; \
+			cat $$LOGFILE; \
 			echo $$CMD >>$(LOG_FAILED); \
 		else \
 			echo "$$CMD ... `tput setaf 2`passed`tput sgr0`"; \
