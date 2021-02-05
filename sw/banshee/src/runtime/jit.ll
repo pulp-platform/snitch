@@ -18,6 +18,7 @@
 ; Forward declarations.
 declare i32 @banshee_load(%Cpu* %cpu, i32 %addr, i8 %size)
 declare void @banshee_store(%Cpu* %cpu, i32 %addr, i32 %value, i32 %mask, i8 %size)
+declare i32 @banshee_rmw(%Cpu* %cpu, i32 %addr, i32 %value, i8 %op)
 declare i32 @banshee_csr_read(%Cpu* %cpu, i16 %csr)
 declare void @banshee_csr_write(%Cpu* %cpu, i16 %csr, i32 %value)
 declare void @banshee_abort_escape(%Cpu* %cpu, i32 %addr)

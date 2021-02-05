@@ -5,11 +5,14 @@
 //! Binary translation
 
 use crate::{
-    engine::{Engine, TraceAccess},
+    engine::{AtomicOp, Engine, TraceAccess},
     riscv,
 };
 use anyhow::{anyhow, bail, Context, Result};
-use llvm_sys::{core::*, debuginfo::*, prelude::*, LLVMIntPredicate::*, LLVMRealPredicate::*};
+use llvm_sys::{
+    core::*, debuginfo::*, prelude::*, LLVMAtomicOrdering::*, LLVMAtomicRMWBinOp::*,
+    LLVMIntPredicate::*, LLVMRealPredicate::*,
+};
 use std::{
     cell::{Cell, RefCell},
     collections::{BTreeSet, HashMap},
@@ -828,6 +831,8 @@ impl<'a> InstructionTranslator<'a> {
 
         // Emit the code for the instruction itself.
         match self.inst {
+            //  riscv::Format::AqrlRdRs1(x) => self.emit_aqrl_rd_rs1(x),
+            riscv::Format::AqrlRdRs1Rs2(x) => self.emit_aqrl_rd_rs1_rs2(x),
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
             riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
@@ -849,6 +854,199 @@ impl<'a> InstructionTranslator<'a> {
 
         // Emit the tracing code if requested.
         self.emit_trace();
+        Ok(())
+    }
+    unsafe fn emit_aqrl_rd_rs1_rs2(&self, data: riscv::FormatAqrlRdRs1Rs2) -> Result<()> {
+        trace!("{} x{} = x{}, x{}", data.op, data.rd, data.rs1, data.rs2);
+
+        // AMOs are not freppable
+        self.was_freppable.set(false);
+
+        // Ordering
+        let ordering = match data.aqrl {
+            0x0 => LLVMAtomicOrderingMonotonic,
+            0x1 => LLVMAtomicOrderingRelease,
+            0x2 => LLVMAtomicOrderingAcquire,
+            0x3 => LLVMAtomicOrderingAcquireRelease,
+            _ => LLVMAtomicOrderingAcquireRelease,
+        };
+
+        // Decoding
+        let op = match data.op {
+            riscv::OpcodeAqrlRdRs1Rs2::AmoaddW => AtomicOp::Amoadd,
+            riscv::OpcodeAqrlRdRs1Rs2::AmoandW => AtomicOp::Amoand,
+            riscv::OpcodeAqrlRdRs1Rs2::AmoorW => AtomicOp::Amoor,
+            riscv::OpcodeAqrlRdRs1Rs2::AmoswapW => AtomicOp::Amoswap,
+            riscv::OpcodeAqrlRdRs1Rs2::AmoxorW => AtomicOp::Amoxor,
+            riscv::OpcodeAqrlRdRs1Rs2::AmomaxuW => AtomicOp::Amomaxu,
+            riscv::OpcodeAqrlRdRs1Rs2::AmomaxW => AtomicOp::Amomax,
+            riscv::OpcodeAqrlRdRs1Rs2::AmominuW => AtomicOp::Amominu,
+            riscv::OpcodeAqrlRdRs1Rs2::AmominW => AtomicOp::Amomin,
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
+
+        // Extract the values
+        let addr = self.read_reg(data.rs1);
+        let value = self.read_reg(data.rs2);
+
+        self.trace_access(TraceAccess::RMWMem, addr);
+
+        // Start emitting LLVM IR
+        let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
+
+        // Make sure the access is aligned
+        let is_aligned = LLVMBuildAnd(
+            self.builder,
+            addr,
+            LLVMConstInt(LLVMInt32Type(), 3, 0),
+            NONAME,
+        );
+        let is_aligned = LLVMBuildICmp(
+            self.builder,
+            LLVMIntEQ,
+            is_aligned,
+            LLVMConstInt(LLVMInt32Type(), 0, 0),
+            NONAME,
+        );
+        let bb_valid = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_invalid = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_valid);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_invalid);
+        LLVMBuildCondBr(self.builder, is_aligned, bb_valid, bb_invalid);
+
+        // Abort due to unaligned AMO
+        LLVMPositionBuilderAtEnd(self.builder, bb_invalid);
+        self.section.emit_call(
+            "banshee_abort_illegal_inst",
+            [
+                self.section.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), addr as u64, 0),
+                LLVMConstInt(LLVMInt32Type(), self.inst.raw() as u64, 0),
+            ],
+        );
+        LLVMBuildRetVoid(self.builder);
+
+        // Check if the address is in the TCDM, and emit a fast access.
+        LLVMPositionBuilderAtEnd(self.builder, bb_valid);
+        let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(addr);
+        let bb_tcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_notcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_tcdm);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_notcdm);
+        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_notcdm);
+
+        // Emit the TCDM fast case.
+        LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
+        let value_tcdm = match op {
+            AtomicOp::Amoadd => LLVMBuildAtomicRMW(
+                self.builder,
+                LLVMAtomicRMWBinOpAdd,
+                tcdm_ptr,
+                value,
+                ordering,
+                0,
+            ),
+            AtomicOp::Amoxor => LLVMBuildAtomicRMW(
+                self.builder,
+                LLVMAtomicRMWBinOpXor,
+                tcdm_ptr,
+                value,
+                ordering,
+                0,
+            ),
+            AtomicOp::Amoor => LLVMBuildAtomicRMW(
+                self.builder,
+                LLVMAtomicRMWBinOpOr,
+                tcdm_ptr,
+                value,
+                ordering,
+                0,
+            ),
+            AtomicOp::Amoand => LLVMBuildAtomicRMW(
+                self.builder,
+                LLVMAtomicRMWBinOpAnd,
+                tcdm_ptr,
+                value,
+                ordering,
+                0,
+            ),
+            AtomicOp::Amomin => LLVMBuildAtomicRMW(
+                self.builder,
+                LLVMAtomicRMWBinOpMin,
+                tcdm_ptr,
+                value,
+                ordering,
+                0,
+            ),
+            AtomicOp::Amomax => LLVMBuildAtomicRMW(
+                self.builder,
+                LLVMAtomicRMWBinOpMax,
+                tcdm_ptr,
+                value,
+                ordering,
+                0,
+            ),
+            AtomicOp::Amominu => LLVMBuildAtomicRMW(
+                self.builder,
+                LLVMAtomicRMWBinOpUMin,
+                tcdm_ptr,
+                value,
+                ordering,
+                0,
+            ),
+            AtomicOp::Amomaxu => LLVMBuildAtomicRMW(
+                self.builder,
+                LLVMAtomicRMWBinOpUMax,
+                tcdm_ptr,
+                value,
+                ordering,
+                0,
+            ),
+            AtomicOp::Amoswap => LLVMBuildAtomicRMW(
+                self.builder,
+                LLVMAtomicRMWBinOpXchg,
+                tcdm_ptr,
+                value,
+                ordering,
+                0,
+            ),
+        };
+        LLVMBuildBr(self.builder, bb_end);
+
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+
+        // Emit the regular slow case.
+        LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
+        let value_slow = LLVMBuildCall(
+            self.builder,
+            LLVMGetNamedFunction(
+                self.section.engine.module,
+                "banshee_rmw\0".as_ptr() as *const _,
+            ),
+            [self.section.state_ptr, addr, value, op].as_mut_ptr(),
+            4,
+            NONAME,
+        );
+        LLVMBuildBr(self.builder, bb_end);
+
+        let bb_notcdm = LLVMGetInsertBlock(self.builder);
+
+        // Build the PHI node to bring the two together.
+        LLVMPositionBuilderAtEnd(self.builder, bb_end);
+        let phi = LLVMBuildPhi(self.builder, LLVMInt32Type(), NONAME);
+        LLVMAddIncoming(
+            phi,
+            [value_tcdm, value_slow].as_mut_ptr(),
+            [bb_tcdm, bb_notcdm].as_mut_ptr(),
+            2,
+        );
+
+        // Write the final result to the register
+        self.write_reg(data.rd, phi);
+
         Ok(())
     }
 
