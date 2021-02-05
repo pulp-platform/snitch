@@ -17,6 +17,12 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    - name: Build
+    - name: Build Hardware
       run: |
         cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
+    - name: Build Software
+      run: |
+        cd hw/system/snitch_cluster/sw && mkdir build && cd build && cmake .. && make
+    - name: Run Unit Tests
+      run: |
+        cd hw/system/snitch_cluster/sw/build && make test
