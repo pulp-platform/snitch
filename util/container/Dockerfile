@@ -47,6 +47,7 @@ FROM ubuntu:18.04 AS snitch
 ARG RISCV_GCC_VERSION=8.3.0-2020.04.0
 ARG VERIBLE_VERSION=0.0-776-g09e0b87
 ARG VERILATOR_VERSION=4.100
+ARG CMAKE_VERSION=3.19.4
 
 LABEL version="0.1"
 LABEL description="Snitch container for hardware and software development."
@@ -78,6 +79,11 @@ RUN echo 'deb http://download.opensuse.org/repositories/home:/phiwag:/edatools/x
     apt-get clean ; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
+# Install a newer version of cmake (we need this for cross compiling)
+RUN wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz && \
+    tar -x -f cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz --strip-components=1 -C . && \
+    rm -rf cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz
+
 # Copy repository into tmp directory to execute additional install steps.
 COPY python-requirements.txt /tmp/python-requirements.txt
 RUN pip3 install -r /tmp/python-requirements.txt
@@ -93,6 +99,9 @@ RUN wget https://github.com/google/verible/releases/download/v${VERIBLE_VERSION}
     tar -x -f verible-v${VERIBLE_VERSION}-Ubuntu-18.04-bionic-x86_64.tar.gz --strip-components=1 -C . && \
     rm -rf verible-v${VERIBLE_VERSION}-Ubuntu-18.04-bionic-x86_64.tar.gz
 ENV PATH "/tools/bin:${PATH}"
+
+# Alias the RISC-V toolchain from riscv64- to riscv32-
+RUN cd /tools/riscv/bin && for file in riscv64-*; do ln -s $file $(echo "$file" | sed 's/^riscv64/riscv32/g'); done
 
 COPY --from=builder /root/.cargo/bin/banshee bin/
 COPY --from=builder /root/.cargo/bin/bender bin/
