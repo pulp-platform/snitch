@@ -51,10 +51,13 @@ add_snitch_test(barrier tests/barrier.c)
 
 add_snitch_test_executable(printf_simple tests/printf_simple.c)
 add_snitch_test_executable(printf_fmtint tests/printf_fmtint.c)
+add_snitch_test_rtl(printf_simple)
+add_snitch_test_rtl(printf_fmtint)
 add_snitch_test_args(printf_simple printf_simple --no-opt-llvm --base-hartid=3)
 add_snitch_test_args(printf_fmtint printf_fmtint-core --no-opt-llvm --base-hartid=3)
 add_snitch_test_args(printf_fmtint printf_fmtint-cluster --no-opt-llvm --base-hartid=3 --num-cores=8)
 add_snitch_test_args(printf_fmtint printf_fmtint-system --no-opt-llvm --base-hartid=3 --num-cores=8 --num-clusters=4)
 
 add_snitch_test_executable(team_global tests/team_global.c)
+add_snitch_test_rtl(team_global)
 add_snitch_test_args(team_global team_global --base-hartid=3 --num-cores=4 --num-clusters=2)
