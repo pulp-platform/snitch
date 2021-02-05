@@ -29,15 +29,14 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
                      struct snrt_team_root *team) {
     team->base.root = team;
     team->device_tree = (void *)bootdata;
-    team->global_core_base_hartid =
-        bootdata->hartid_base - _snrt_cluster_cluster_id * bootdata->core_count;
-    team->global_core_num = _snrt_cluster_cluster_num * bootdata->core_count;
-    team->cluster_idx = _snrt_cluster_cluster_id;
-    team->cluster_num = _snrt_cluster_cluster_num;
+    team->global_core_base_hartid = bootdata->hartid_base;
+    team->global_core_num = bootdata->core_count;
+    team->cluster_idx = 0;
+    team->cluster_num = 1;
     team->cluster_core_base_hartid = bootdata->hartid_base;
     team->cluster_core_num = bootdata->core_count;
-    team->global_mem.start = _snrt_cluster_global_start;
-    team->global_mem.end = _snrt_cluster_global_end;
+    team->global_mem.start = (void *)0x90000000; // TODO: Read this from bootdata
+    team->global_mem.end = (void *)0x100000000;  // TODO: Read this from bootdata
     team->cluster_mem.start = spm_start;
     team->cluster_mem.end = spm_end;
 
