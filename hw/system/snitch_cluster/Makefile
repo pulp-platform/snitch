@@ -116,10 +116,10 @@ bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/comm
 ############
 # Modelsim #
 ############
-${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} test/rtl_lib.cc test/common_lib.cc
+${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc
 	vlib $(dir $@)
 	${BENDER} script vsim ${VSIM_BENDER} --vlog-arg="${VLOG_FLAGS} -work $(dir $@) " > $@
-	echo 'vlog -work $(dir $@) test/rtl_lib.cc test/common_lib.cc -ccflags "-std=c++14 -I${FESVR}/include"' >> $@
+	echo 'vlog -work $(dir $@) test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc -ccflags "-std=c++14 -I${MKFILE_DIR}/test -I${FESVR}/include"' >> $@
 	echo 'return 0' >> $@
 
 bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
@@ -142,10 +142,10 @@ work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
 	chmod +x $@
 	$@
 
-bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch_cluster_wrapper.sv
+bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch_cluster_wrapper.sv test/common_lib.cc generated/bootdata.cc
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/snitch_cluster.vcs -cc $(CC) -cpp $(CXX) \
-		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin test/rtl_lib.cc test/common_lib.cc \
-		-CFLAGS "-std=c++14 -I${FESVR}/include" -LDFLAGS "-L${FESVR}/lib" -lfesvr
+		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc \
+		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include" -LDFLAGS "-L${FESVR}/lib" -lfesvr
 
 #########
 # Phony #

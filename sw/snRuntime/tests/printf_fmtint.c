@@ -5,8 +5,13 @@
 #include <stdio.h>
 
 int main() {
-    int x = snrt_global_core_idx();
-    int y = snrt_global_core_num();
-    printf("Hello from core %i of %i\n", x, y);
+    uint32_t x = snrt_global_core_idx();
+    uint32_t y = snrt_global_core_num();
+    for (uint32_t i = 0; i < y; i++) {
+        snrt_barrier();
+        if (i == x) {
+            printf("Hello from core %i of %i\n", x, y);
+        }
+    }
     return 0;
 }

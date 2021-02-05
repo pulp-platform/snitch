@@ -4,9 +4,10 @@
 
 .global _start
 _start:
-    lw    a0, entry_addr
+    csrr  a0, mhartid
     la    a1, device_tree
-    jalr  a0
+    lw    t0, entry_addr
+    jalr  t0
 no_payload:
     wfi
     j     no_payload
