@@ -159,7 +159,4 @@ trace_hart_%.txt: trace_hart_%.dasm ${ROOT}/util/gen_trace.py
 
 traces: $(shell ls trace_hart_*.dasm | sed 's/\.dasm/\.txt/')
 
-sw/alive: sw/alive.S generated/link.ld
-	riscv64-unknown-elf-gcc -mabi=ilp32d -march=rv32imafd -static -nostartfiles $< -T generated/link.ld -o $@
-
 .PHONY: clean vlt.build vsim.build all
