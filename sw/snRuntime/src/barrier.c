@@ -3,13 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "snrt.h"
 
-static void snrt_barrier_cluster() {
-    asm volatile(
-        " \
-        lw t0, barrier_reg; \
-        mv zero, t0; \
-    " ::
-            : "t0");
-}
+extern void _snrt_cluster_barrier();
 
-void snrt_barrier() { snrt_barrier_cluster(); }
+void snrt_barrier() { _snrt_cluster_barrier(); }

@@ -23,6 +23,7 @@ struct snrt_mailbox {
 
 struct snrt_team_root {
     struct snrt_team base;
+    const void *device_tree;
     uint32_t global_core_base_hartid;
     uint32_t global_core_num;
     uint32_t cluster_idx;

@@ -28,6 +28,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
                      const struct snrt_cluster_bootdata *bootdata,
                      struct snrt_team_root *team) {
     team->base.root = team;
+    team->device_tree = (void *)bootdata;
     team->global_core_base_hartid =
         bootdata->hartid_base - _snrt_cluster_cluster_id * bootdata->core_count;
     team->global_core_num = _snrt_cluster_cluster_num * bootdata->core_count;
@@ -49,6 +50,11 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->cluster_mailbox = team->cluster_mem.end;
 
     _snrt_team_current = &team->base;
+}
+
+uint32_t _snrt_barrier_reg_ptr() {
+    const struct snrt_cluster_bootdata *bd = _snrt_team_current->root->device_tree;
+    return bd->tcdm_end + 0x28;
 }
 
 // Provide an implementation for putchar.

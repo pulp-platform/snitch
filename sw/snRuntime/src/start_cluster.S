@@ -24,8 +24,13 @@ _snrt_init_core_info:
 # Must leave a0 untouched.
 _snrt_cluster_barrier:
     .globl _snrt_cluster_barrier
-    lw        t0, barrier_reg
-    mv        zero, t0
+    addi      sp, sp, -4
+    sw        ra, 0(sp)
+    call      _snrt_barrier_reg_ptr
+    lw        a0, 0(a0)
+    mv        zero, a0
+    lw        ra, 0(sp)
+    addi      sp, sp, 4
     ret
 
 # Function to terminate execution.
