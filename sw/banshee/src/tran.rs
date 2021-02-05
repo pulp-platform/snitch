@@ -1903,7 +1903,21 @@ impl<'a> InstructionTranslator<'a> {
         match data.op {
             riscv::OpcodeUnit::Wfi => {
                 self.emit_trace();
-                LLVMBuildRetVoid(self.builder)
+                let terminate = self
+                    .section
+                    .emit_call("banshee_wfi", [self.section.state_ptr]);
+                let terminate = LLVMBuildIntCast(self.builder, terminate, LLVMInt1Type(), NONAME);
+                let bb_terminate =
+                    LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+                let bb_wake_up = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+                LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_terminate);
+                LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_wake_up);
+                LLVMBuildCondBr(self.builder, terminate, bb_terminate, bb_wake_up);
+                // Terminate
+                LLVMPositionBuilderAtEnd(self.builder, bb_terminate);
+                LLVMBuildRetVoid(self.builder);
+                // Continue
+                LLVMPositionBuilderAtEnd(self.builder, bb_wake_up);
             }
             _ => bail!("Unsupported opcode {}", data.op),
         };

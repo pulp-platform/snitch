@@ -76,6 +76,7 @@ impl std::fmt::Debug for CpuState {
             .field("instret", &self.instret)
             .field("ssrs", &self.ssrs)
             .field("dma", &self.dma)
+            .field("wfi", &self.wfi)
             .finish()
     }
 }
