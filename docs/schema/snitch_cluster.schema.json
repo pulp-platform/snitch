@@ -142,7 +142,7 @@
                     ],
                     "default": "CUT_ALL_PORTS"
                 },
-                "register_offload": {
+                "register_offload_req": {
                     "type": "boolean",
                     "description": "Insert Pipeline registers into off-loading path (request).",
                     "default": false
@@ -152,9 +152,19 @@
                     "description": "Insert Pipeline registers into off-loading path (response).",
                     "default": false
                 },
-                "register_tcdm_req": {
+                "register_core_req": {
                     "type": "boolean",
                     "description": "Insert Pipeline registers into data memory request path.",
+                    "default": false
+                },
+                "register_core_rsp": {
+                    "type": "boolean",
+                    "description": "Insert Pipeline registers into data memory response path.",
+                    "default": false
+                },
+                "register_fpu_req": {
+                    "type": "boolean",
+                    "description": "Insert Pipeline register into the FPU request data path",
                     "default": false
                 },
                 "register_tcdm_cuts": {

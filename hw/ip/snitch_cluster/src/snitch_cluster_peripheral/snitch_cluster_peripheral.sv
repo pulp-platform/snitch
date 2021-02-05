@@ -32,6 +32,8 @@ module snitch_cluster_peripheral
   input  core_events_t [NrCores-1:0] core_events_i,
   input  tcdm_events_t               tcdm_events_i
 );
+  // Deprecate in favor of RISC-V interrupts.
+  assign wake_up_o = '0;
 
   // Pipeline register to ease timing.
   tcdm_events_t tcdm_events_q;

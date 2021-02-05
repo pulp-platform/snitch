@@ -145,6 +145,8 @@ class SnitchCluster(Generator):
         to the cluster schema and constructs a `cfg` object.
         """
         super().__init__("snitch_cluster.schema.json")
+        self.mems = set()
+        self.mems_desc = dict()
         self.validate(cfg)
         self.cfg = cfg
         # Perform configuration validation.
@@ -167,6 +169,63 @@ class SnitchCluster(Generator):
         return cfg_template.render_unicode(cfg=self.cfg,
                                            to_sv_hex=to_sv_hex,
                                            disclaimer=self.DISCLAIMER)
+
+    def add_mem(self,
+                words,
+                width,
+                byte_enable=True,
+                desc=None,
+                speed_optimized=True,
+                density_optimized=False):
+        mem = (
+            width,  # width
+            words,  # words
+            8,  # byte_width
+            1,  # ports
+            1,  # latency
+            byte_enable,  # byte_enable
+            speed_optimized,  # speed optimized
+            density_optimized,  # density optimized
+        )
+        self.mems.add(mem)
+        if mem in self.mems_desc:
+            self.mems_desc[mem] += [desc]
+        else:
+            self.mems_desc[mem] = [desc or ""]
+
+    def memory_cfg(self):
+        # Add TCDMs
+        self.add_mem(self.cfg['tcdm']['depth'],
+                     self.cfg['data_width'],
+                     desc='tcdm')
+        # Add instruction caches
+        for i, h in enumerate(self.cfg['hives']):
+            icache = h['icache']
+            self.add_mem(icache['depth'],
+                         icache['cacheline'],
+                         desc='icache data (hive {})'.format(i),
+                         byte_enable=False)
+            tag_width = self.cfg['addr_width'] - clog2(
+                icache['cacheline'] // 8) - clog2(icache['depth']) + 3
+            self.add_mem(icache['depth'],
+                         tag_width,
+                         desc='icache tag (hive {})'.format(i),
+                         byte_enable=False)
+
+        cfg = list()
+        for mem in self.mems:
+            cfg.append({
+                'description': self.mems_desc[mem],
+                'width': mem[0],
+                'words': mem[1],
+                'byte_width': mem[2],
+                'ports': mem[3],
+                'latency': mem[4],
+                'byte_enable': mem[5],
+                'speed_optimized': mem[6],
+                'density_optimized': mem[7],
+            })
+        return json.dumps(cfg, sort_keys=True, indent=4)
 
     def calc_cache_sizes(self):
         # Calculate TCDM parameters

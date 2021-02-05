@@ -55,6 +55,9 @@ def main():
     with open(outdir / "bootdata.cc", "w") as f:
         f.write(cluster_tb.render_bootdata())
 
+    with open(outdir / "memories.json", "w") as f:
+        f.write(cluster_tb.cluster.memory_cfg())
+
 
 if __name__ == "__main__":
     main()

@@ -109,17 +109,21 @@ module snitch_cluster
   parameter int unsigned Radix              = 32'd2,
   /// ## Timing Tuning Parameters
   /// Insert Pipeline registers into off-loading path (request)
-  parameter bit          RegisterOffload    = 1'b1,
+  parameter bit          RegisterOffloadReq = 1'b0,
   /// Insert Pipeline registers into off-loading path (response)
   parameter bit          RegisterOffloadRsp = 1'b0,
-  /// Insert Pipeline registers into data memory request path
-  parameter bit          RegisterTCDMReq    = 1'b1,
+  /// Insert Pipeline registers into data memory path (request)
+  parameter bit          RegisterCoreReq    = 1'b0,
+  /// Insert Pipeline registers into data memory path (response)
+  parameter bit          RegisterCoreRsp    = 1'b0,
   /// Insert Pipeline registers after each memory cut
   parameter bit          RegisterTCDMCuts   = 1'b0,
   /// Decouple wide external AXI plug
   parameter bit          RegisterExtWide    = 1'b0,
   /// Decouple narrow external AXI plug
   parameter bit          RegisterExtNarrow  = 1'b0,
+  /// Insert Pipeline register into the FPU data path (request)
+  parameter bit          RegisterFPUReq     = 1'b0,
   /// Insert Pipeline registers after sequencer
   parameter bit          RegisterSequencer  = 1'b0,
   /// Run Snitch (the integer part) at half of the clock frequency
@@ -708,9 +712,11 @@ module snitch_cluster
         .NumITLBEntries (NumITLBEntries[i]),
         .NumSequencerInstr (NumSequencerInstr[i]),
         .SSRNrCredits (SSRNrCredits[i]),
-        .RegisterOffload (RegisterOffload),
+        .RegisterOffloadReq (RegisterOffloadReq),
         .RegisterOffloadRsp (RegisterOffloadRsp),
-        .RegisterTCDMReq (RegisterTCDMReq),
+        .RegisterCoreReq (RegisterCoreReq),
+        .RegisterCoreRsp (RegisterCoreRsp),
+        .RegisterFPUReq (RegisterFPUReq),
         .RegisterSequencer (RegisterSequencer)
       ) i_snitch_cc (
         .clk_i,
@@ -973,7 +979,9 @@ module snitch_cluster
   axi_to_reg #(
     .ADDR_WIDTH (PhysicalAddrWidth),
     .DATA_WIDTH (NarrowDataWidth),
-    .DECOUPLE_W (1),
+    .AXI_MAX_WRITE_TXNS (1),
+    .AXI_MAX_READ_TXNS (1),
+    .DECOUPLE_W (0),
     .ID_WIDTH (IdWidthOut),
     .USER_WIDTH (UserWidth),
     .axi_req_t (axi_slv_req_t),
@@ -990,13 +998,6 @@ module snitch_cluster
     .reg_rsp_i (reg_rsp)
   );
 
-  // local signals
-  logic [NrCores-1:0] wake_up_cluster;
-  core_events_t [NrCores-1:0] core_events_cluster;
-
-  assign wake_up_sync = wake_up_cluster;
-  assign core_events_cluster = core_events;
-
   snitch_cluster_peripheral #(
     .AddrWidth (PhysicalAddrWidth),
     .reg_req_t (reg_req_t),
@@ -1011,9 +1012,9 @@ module snitch_cluster
     /// The TCDM always starts at the cluster base.
     .tcdm_start_address_i (tcdm_start_address),
     .tcdm_end_address_i (tcdm_end_address),
-    .wake_up_o (wake_up_cluster),
+    .wake_up_o (wake_up_sync),
     .cluster_hart_base_id_i (hart_base_id_i),
-    .core_events_i (core_events_cluster),
+    .core_events_i (core_events),
     .tcdm_events_i (tcdm_events)
   );
 

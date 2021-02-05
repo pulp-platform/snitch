@@ -21,9 +21,11 @@ http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing
 | [iso_crossings](#iso_crossings)               | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-iso_crossings.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/iso_crossings")               |
 | [narrow_xbar_latency](#narrow_xbar_latency)   | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-narrow_xbar_latency.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/narrow_xbar_latency")   |
 | [wide_xbar_latency](#wide_xbar_latency)       | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-wide_xbar_latency.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/wide_xbar_latency")       |
-| [register_offload](#register_offload)         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload")         |
+| [register_offload_req](#register_offload_req) | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload_req") |
 | [register_offload_rsp](#register_offload_rsp) | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload_rsp.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload_rsp") |
-| [register_tcdm_req](#register_tcdm_req)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_req")       |
+| [register_core_req](#register_core_req)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_core_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_core_req")       |
+| [register_core_rsp](#register_core_rsp)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_core_rsp.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_core_rsp")       |
+| [register_fpu_req](#register_fpu_req)         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_fpu_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_fpu_req")         |
 | [register_tcdm_cuts](#register_tcdm_cuts)     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_cuts.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_cuts")     |
 | [register_ext_wide](#register_ext_wide)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_wide.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_wide")       |
 | [register_ext_narrow](#register_ext_narrow)   | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_narrow.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_narrow")   |
@@ -135,11 +137,11 @@ The default value is:
 "CUT_ALL_PORTS"
 ```
 
-## register_offload
+## register_offload_req
 
 Insert Pipeline registers into off-loading path (request).
 
-`register_offload`
+`register_offload_req`
 
 *   is optional
 
@@ -147,9 +149,9 @@ Insert Pipeline registers into off-loading path (request).
 
 *   cannot be null
 
-*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload")
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_offload_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_offload_req")
 
-### register_offload Type
+### register_offload_req Type
 
 `boolean`
 
@@ -171,11 +173,11 @@ Insert Pipeline registers into off-loading path (response).
 
 `boolean`
 
-## register_tcdm_req
+## register_core_req
 
 Insert Pipeline registers into data memory request path.
 
-`register_tcdm_req`
+`register_core_req`
 
 *   is optional
 
@@ -183,9 +185,45 @@ Insert Pipeline registers into data memory request path.
 
 *   cannot be null
 
-*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_req")
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_core_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_core_req")
 
-### register_tcdm_req Type
+### register_core_req Type
+
+`boolean`
+
+## register_core_rsp
+
+Insert Pipeline registers into data memory response path.
+
+`register_core_rsp`
+
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_core_rsp.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_core_rsp")
+
+### register_core_rsp Type
+
+`boolean`
+
+## register_fpu_req
+
+Insert Pipeline register into the FPU request data path
+
+`register_fpu_req`
+
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_fpu_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_fpu_req")
+
+### register_fpu_req Type
 
 `boolean`
 
