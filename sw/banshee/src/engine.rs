@@ -388,6 +388,10 @@ pub unsafe fn add_llvm_symbols() {
         Cpu::binary_store as *mut _,
     );
     LLVMAddSymbol(
+        b"banshee_rmw\0".as_ptr() as *const _,
+        Cpu::binary_rmw as *mut _,
+    );
+    LLVMAddSymbol(
         b"banshee_csr_read\0".as_ptr() as *const _,
         Cpu::binary_csr_read as *mut _,
     );
@@ -502,6 +506,26 @@ impl<'a, 'b> Cpu<'a, 'b> {
         }
     }
 
+    fn binary_rmw(&self, addr: u32, value: u32, op: AtomicOp) -> u32 {
+        trace!("RMW 0x{:x} (op={})= 0x{:x} (32B)", addr, op as u8, value);
+        let mut data = self.engine.memory.lock().unwrap();
+        let prev = data.get(&(addr as u64)).copied().unwrap_or(0);
+        // Atomics
+        let result = match op {
+            AtomicOp::Amoadd => prev + value,
+            AtomicOp::Amoxor => prev ^ value,
+            AtomicOp::Amoor => prev | value,
+            AtomicOp::Amoand => prev & value,
+            AtomicOp::Amomin => std::cmp::min(prev as i32, value as i32) as u32,
+            AtomicOp::Amomax => std::cmp::max(prev as i32, value as i32) as u32,
+            AtomicOp::Amominu => std::cmp::min(prev as u32, value as u32),
+            AtomicOp::Amomaxu => std::cmp::max(prev as u32, value as u32),
+            AtomicOp::Amoswap => value,
+        };
+        data.insert(addr as u64, result);
+        prev as u32
+    }
+
     fn binary_csr_read(&self, csr: u16) -> u32 {
         trace!("Read CSR 0x{:x}", csr);
         match csr {
@@ -547,6 +571,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         let mut args = args.map(|(access, data)| match access {
             TraceAccess::ReadMem => format!("RA:{:08x}", data as u32),
             TraceAccess::WriteMem => format!("WA:{:08x}", data as u32),
+            TraceAccess::RMWMem => format!("AMO:{:08x}", data as u32),
             TraceAccess::ReadReg(x) => format!("x{}:{:08x}", x, data as u32),
             TraceAccess::WriteReg(x) => format!("x{}={:08x}", x, data as u32),
             TraceAccess::ReadFReg(x) => format!("f{}:{:016x}", x, data),
@@ -603,4 +628,20 @@ pub enum TraceAccess {
     WriteMem,
     WriteReg(u8),
     WriteFReg(u8),
+    RMWMem,
+}
+
+/// Which type of AMO to execute.
+#[derive(Debug, Clone, Copy)]
+#[repr(C)]
+pub enum AtomicOp {
+    Amoadd,
+    Amoxor,
+    Amoor,
+    Amoand,
+    Amomin,
+    Amomax,
+    Amominu,
+    Amomaxu,
+    Amoswap,
 }
