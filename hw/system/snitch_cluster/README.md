@@ -76,3 +76,7 @@ The runtime and additional software libraries for the cluster configuration can 
     cd sw/build
     cmake ..
     make
+
+If you have compiled the Verilator model as described above, you can run the unit tests on your system as follows:
+
+    make test

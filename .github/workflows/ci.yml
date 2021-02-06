@@ -7,6 +7,34 @@ name: ci
 on: [push]
 
 jobs:
+  #############
+  # snRuntime #
+  #############
+  snRuntime:
+    container:
+      image: ghcr.io/pulp-platform/snitch
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cd sw/snRuntime && mkdir build && cd build && cmake .. && make
+    - name: Test
+      run: cd sw/snRuntime/build && make test
+
+  #############
+  # snBLAS #
+  #############
+  snBLAS:
+    container:
+      image: ghcr.io/pulp-platform/snitch
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cd sw/snBLAS && mkdir build && cd build && cmake .. && make
+    - name: Test
+      run: cd sw/snBLAS/build && make test
+
   ##################
   # Snitch Cluster #
   ##################
@@ -17,6 +45,12 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    - name: Build
+    - name: Build Hardware
       run: |
         cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
+    - name: Build Software
+      run: |
+        cd hw/system/snitch_cluster/sw && mkdir build && cd build && cmake .. && make
+    - name: Run Unit Tests
+      run: |
+        cd hw/system/snitch_cluster/sw/build && make test

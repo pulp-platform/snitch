@@ -8,6 +8,7 @@ set(SNITCH_SOFTWARE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../sw)
 list(APPEND CMAKE_MODULE_PATH ${SNITCH_SOFTWARE_DIR}/cmake)
 set(CMAKE_TOOLCHAIN_FILE toolchain-gcc)
 set(SNITCH_RUNTIME snRuntime-cluster)
+set(SNITCH_SIMULATOR ${CMAKE_CURRENT_SOURCE_DIR}/../bin/snitch_cluster.vlt)
 
 project(snitch_cluster LANGUAGES C ASM)
 include(SnitchUtilities)
