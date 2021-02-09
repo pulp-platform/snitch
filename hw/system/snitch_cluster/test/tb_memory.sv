@@ -26,18 +26,6 @@ module tb_memory #(
   output rsp_t rsp_o
 );
 
-  typedef logic [AxiAddrWidth-1:0] axi_addr_t;
-  typedef logic [AxiDataWidth-1:0] axi_data_t;
-  typedef logic [AxiDataWidth/8-1:0] axi_strb_t;
-  typedef logic [AxiIdWidth-1:0] axi_id_t;
-  typedef logic [AxiUserWidth-1:0] axi_user_t;
-
-  `AXI_TYPEDEF_AW_CHAN_T(axi_aw_t, axi_addr_t, axi_id_t, axi_user_t)
-  `AXI_TYPEDEF_W_CHAN_T(axi_w_t, axi_data_t, axi_strb_t, axi_user_t)
-  `AXI_TYPEDEF_B_CHAN_T(axi_b_t, axi_id_t, axi_user_t)
-  `AXI_TYPEDEF_AR_CHAN_T(axi_ar_t, axi_addr_t, axi_id_t, axi_user_t)
-  `AXI_TYPEDEF_R_CHAN_T(axi_r_t, axi_data_t, axi_id_t, axi_user_t)
-
   import "DPI-C" function void tb_memory_read(
     input longint addr,
     input int len,
@@ -50,46 +38,56 @@ module tb_memory #(
     input bit strb[]
   );
 
-  localparam int NumBytes = $bits(axi_strb_t);
+  localparam int NumBytes = AxiDataWidth/8;
   localparam int BusAlign = $clog2(NumBytes);
 
-  // Ensure the AXI interface has not feedthrough signals.
-  req_t req_cut;
-  rsp_t rsp_cut;
-
-  axi_cut #(
-    .aw_chan_t ( axi_aw_t ),
-    .w_chan_t  ( axi_w_t  ),
-    .b_chan_t  ( axi_b_t  ),
-    .ar_chan_t ( axi_ar_t ),
-    .r_chan_t  ( axi_r_t  ),
-    .req_t     ( req_t    ),
-    .resp_t    ( rsp_t    )
-  ) i_cut (
-    .clk_i,
-    .rst_ni,
-    .slv_req_i  ( req_i   ),
-    .slv_resp_o ( rsp_o   ),
-    .mst_req_o  ( req_cut ),
-    .mst_resp_i ( rsp_cut )
-  );
-
-  // Convert AXI to a trivial register interface.
   AXI_BUS #(
     .AXI_ADDR_WIDTH ( AxiAddrWidth ),
     .AXI_DATA_WIDTH ( AxiDataWidth ),
     .AXI_ID_WIDTH   ( AxiIdWidth   ),
     .AXI_USER_WIDTH ( AxiUserWidth )
-  ) axi();
+  ) axi(),
+    axi_wo_atomics(),
+    axi_wo_atomics_cut();
 
-  `AXI_ASSIGN_FROM_REQ(axi, req_cut)
-  `AXI_ASSIGN_TO_RESP(rsp_cut, axi)
+  `AXI_ASSIGN_FROM_REQ(axi, req_i)
+  `AXI_ASSIGN_TO_RESP(rsp_o, axi)
 
   REG_BUS #(
     .ADDR_WIDTH ( AxiAddrWidth ),
     .DATA_WIDTH ( AxiDataWidth )
   ) regb(clk_i);
 
+  // Filter atomic operations.
+  axi_riscv_atomics_wrap #(
+    .AXI_ADDR_WIDTH (AxiAddrWidth),
+    .AXI_DATA_WIDTH (AxiDataWidth),
+    .AXI_ID_WIDTH (AxiIdWidth),
+    .AXI_USER_WIDTH (AxiUserWidth),
+    .AXI_MAX_WRITE_TXNS (2),
+    .RISCV_WORD_WIDTH (32)
+  ) i_axi_riscv_atomics_wrap (
+    .clk_i (clk_i),
+    .rst_ni (rst_ni),
+    .slv (axi),
+    .mst (axi_wo_atomics)
+  );
+
+  // Ensure the AXI interface has not feedthrough signals.
+  axi_cut_intf #(
+    .BYPASS     (1'b0),
+    .ADDR_WIDTH (AxiAddrWidth),
+    .DATA_WIDTH (AxiDataWidth),
+    .ID_WIDTH   (AxiIdWidth),
+    .USER_WIDTH (AxiUserWidth)
+  ) i_cut (
+    .clk_i (clk_i),
+    .rst_ni (rst_ni),
+    .in (axi_wo_atomics),
+    .out (axi_wo_atomics_cut)
+  );
+
+  // Convert AXI to a trivial register interface.
   axi_to_reg_intf #(
     .ADDR_WIDTH ( AxiAddrWidth ),
     .DATA_WIDTH ( AxiDataWidth ),
@@ -100,7 +98,7 @@ module tb_memory #(
     .clk_i,
     .rst_ni,
     .testmode_i ( 1'b0 ),
-    .in         ( axi  ),
+    .in         ( axi_wo_atomics_cut ),
     .reg_o      ( regb )
   );
 

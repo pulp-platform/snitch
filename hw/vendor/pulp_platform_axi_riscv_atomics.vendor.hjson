@@ -1,0 +1,21 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "pulp_platform_axi_riscv_atomics",
+  target_dir: "pulp_platform_axi_riscv_atomics",
+
+  upstream: {
+    url: "https://github.com/pulp-platform/axi_riscv_atomics.git",
+    rev: "master",
+  },
+
+//   patch_dir: "patches/pulp_platform_axi_riscv_atomics",
+
+//   exclude_from_upstream: [
+//     ".ci",
+//     ".github",
+//     "ips_list.yml",
+//     "src_files.yml"
+//   ]
+}

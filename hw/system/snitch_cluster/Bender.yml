@@ -9,6 +9,7 @@ package:
   - Thomas Benz <tbenz@iis.ee.ethz.ch>
 
 dependencies:
+  axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
   snitch-cluster: {path: ../../ip/snitch_cluster}
 
 sources:
