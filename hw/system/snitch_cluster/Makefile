@@ -138,7 +138,7 @@ bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
 #######
 work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
 	mkdir -p work-vcs
-	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover" >> $@
+	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover" > $@
 	chmod +x $@
 	$@
 
