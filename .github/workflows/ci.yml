@@ -7,6 +7,37 @@ name: ci
 on: [push]
 
 jobs:
+  ###########
+  # Banshee #
+  ###########
+  Banshee:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+        - stable
+        - beta
+        - nightly
+        - 1.46.0    # minimum supported version
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        override: true
+        components: rustfmt
+    - uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: '10.0'
+        directory: ${{ runner.temp }}/llvm
+    - working-directory: sw/banshee
+      run: cargo build
+    - working-directory: sw/banshee
+      run: cargo test --all
+    - working-directory: sw/banshee
+      run: make test TERM=xterm-256color LOG_FAILED=`mktemp` LOG_TOTAL=`mktemp`
+
   #############
   # snRuntime #
   #############
@@ -21,9 +52,9 @@ jobs:
     - name: Test
       run: cd sw/snRuntime/build && make test
 
-  #############
+  ##########
   # snBLAS #
-  #############
+  ##########
   snBLAS:
     container:
       image: ghcr.io/pulp-platform/snitch
