@@ -118,7 +118,9 @@ module ${cfg['name']}_wrapper (
   output ${cfg['pkg_name']}::narrow_out_req_t    narrow_out_req_o,
   input  ${cfg['pkg_name']}::narrow_out_resp_t   narrow_out_resp_i,
   output ${cfg['pkg_name']}::wide_out_req_t      wide_out_req_o,
-  input  ${cfg['pkg_name']}::wide_out_resp_t     wide_out_resp_i
+  input  ${cfg['pkg_name']}::wide_out_resp_t     wide_out_resp_i,
+  input  ${cfg['pkg_name']}::wide_in_req_t       wide_in_req_i,
+  output ${cfg['pkg_name']}::wide_in_resp_t      wide_in_resp_o
 );
 
   localparam int unsigned NumIntOutstandingLoads [${cfg['nr_cores']}] = '{${core_cfg('num_int_outstanding_loads')}};
@@ -145,6 +147,8 @@ module ${cfg['name']}_wrapper (
     .narrow_out_resp_t (${cfg['pkg_name']}::narrow_out_resp_t),
     .wide_out_req_t (${cfg['pkg_name']}::wide_out_req_t),
     .wide_out_resp_t (${cfg['pkg_name']}::wide_out_resp_t),
+    .wide_in_req_t (${cfg['pkg_name']}::wide_in_req_t),
+    .wide_in_resp_t (${cfg['pkg_name']}::wide_in_resp_t),
     .NrHives (${cfg['nr_hives']}),
     .NrCores (${cfg['nr_cores']}),
     .TCDMDepth (${cfg['tcdm']['depth']}),
@@ -204,6 +208,8 @@ module ${cfg['name']}_wrapper (
     .narrow_out_req_o,
     .narrow_out_resp_i,
     .wide_out_req_o,
-    .wide_out_resp_i
+    .wide_out_resp_i,
+    .wide_in_req_i,
+    .wide_in_resp_o
   );
 endmodule

@@ -138,6 +138,8 @@ module snitch_cluster
   parameter type         narrow_out_resp_t = logic,
   parameter type         wide_out_req_t    = logic,
   parameter type         wide_out_resp_t   = logic,
+  parameter type         wide_in_req_t     = logic,
+  parameter type         wide_in_resp_t    = logic,
   // Memory latency parameter. Most of the memories have a read latency of 1. In
   // case you have memory macros which are pipelined you want to adjust this
   // value here. This only applies to the TCDM. The instruction cache macros will break!
@@ -183,7 +185,10 @@ module snitch_cluster
   /// AXI DMA cluster out-port. Usually wider than the cluster ports so that the
   /// DMA engine can efficiently transfer bulk of data.
   output wide_out_req_t                 wide_out_req_o,
-  input  wide_out_resp_t                wide_out_resp_i
+  input  wide_out_resp_t                wide_out_resp_i,
+  /// AXI DMA cluster in-port.
+  input  wide_in_req_t                  wide_in_req_i,
+  output wide_in_resp_t                 wide_in_resp_o
 );
   // ---------
   // Constants
@@ -205,7 +210,7 @@ module snitch_cluster
   localparam int unsigned NrSlaves = 3;
   localparam int unsigned NrRules = NrSlaves - 1;
 
-  localparam int unsigned NrDmaMasters = 1;
+  localparam int unsigned NrDmaMasters = 2;
   localparam int unsigned IdWidthDMAOut = $clog2(NrDmaMasters) + WideIdWidthIn;
   // DMA X-BAR configuration
   localparam int unsigned NrDmaSlaves = 2;
@@ -427,19 +432,37 @@ module snitch_cluster
     .r_chan_t (axi_slv_dma_r_chan_t),
     .req_t (axi_slv_dma_req_t),
     .resp_t (axi_slv_dma_resp_t)
-  ) i_cut_ext_wide_mst (
+  ) i_cut_ext_wide_out (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
-    .slv_req_i (axi_dma_slv_req[SoCDMA]),
-    .slv_resp_o (axi_dma_slv_res[SoCDMA]),
+    .slv_req_i (axi_dma_slv_req[SoCDMAOut]),
+    .slv_resp_o (axi_dma_slv_res[SoCDMAOut]),
     .mst_req_o (wide_out_req_o),
     .mst_resp_i (wide_out_resp_i)
+  );
+
+  axi_cut #(
+    .Bypass (!RegisterExtWide),
+    .aw_chan_t (axi_mst_dma_aw_chan_t),
+    .w_chan_t (axi_mst_dma_w_chan_t),
+    .b_chan_t (axi_mst_dma_b_chan_t),
+    .ar_chan_t (axi_mst_dma_ar_chan_t),
+    .r_chan_t (axi_mst_dma_r_chan_t),
+    .req_t (axi_mst_dma_req_t),
+    .resp_t (axi_mst_dma_resp_t)
+  ) i_cut_ext_wide_in (
+    .clk_i (clk_i),
+    .rst_ni (rst_ni),
+    .slv_req_i (wide_in_req_i),
+    .slv_resp_o (wide_in_resp_o),
+    .mst_req_o (axi_dma_mst_req[SoCDMAIn]),
+    .mst_resp_i (axi_dma_mst_res[SoCDMAIn])
   );
 
   logic [DmaXbarCfg.NoSlvPorts-1:0][$clog2(DmaXbarCfg.NoMstPorts)-1:0] dma_xbar_default_port;
   xbar_rule_t [DmaXbarCfg.NoAddrRules-1:0] dma_xbar_rule;
 
-  assign dma_xbar_default_port = '{default: SoCDMA};
+  assign dma_xbar_default_port = '{default: SoCDMAOut};
   assign dma_xbar_rule = '{
     '{
       idx:        TCDMDMA,
