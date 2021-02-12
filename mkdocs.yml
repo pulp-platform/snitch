@@ -14,7 +14,9 @@ repo_name: pulp-platform/snitch
 markdown_extensions:
 - admonition
 - def_list
+- pymdownx.highlight
 - pymdownx.superfences
+- pymdownx.tabbed
 - pymdownx.emoji:
     emoji_index: !!python/name:materialx.emoji.twemoji
     emoji_generator: !!python/name:materialx.emoji.to_svg
@@ -25,12 +27,13 @@ nav:
   - Docker: ug/docker.md
   - Directory Structure: ug/directory_structure.md
   - Documentation: ug/documentation.md
+- Systems:
+  - Snitch Cluster:
+    - Guide: ug/snitch_cluster.md
+    - Schema: schema-doc/snitch_cluster.md
 - Reference Manual:
   - Snitch: rm/snitch/index.md
   - Snitch Cluster: rm/snitch_cluster/index.md
   - Reqrsp Interface: rm/reqrsp_interface/index.md
   - Custom Instructions: rm/custom_instructions.md
-  - Solder: rm/solder.md
-- Schema Docs:
-  - Manticore: schema-doc/manticore.md
-  - Snitch Cluster: schema-doc/snitch_cluster.md
+  # - Solder: rm/solder.md

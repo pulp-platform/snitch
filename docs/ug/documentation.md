@@ -36,7 +36,7 @@ The `docs` folder is organized as follows:
 
 ## Re-generate Documentation
 
-Unfortunately there isn't a good Python tool that generates schema to markdown
+Unfortunately, there isn't a good Python tool that generates schema to markdown
 documents, hence, we rely on `adobe/jsonschema2md` which requires `node` and
 `npm`. To re-generate the documentation execute (in the repository root):
 
