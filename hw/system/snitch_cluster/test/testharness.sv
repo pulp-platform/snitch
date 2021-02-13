@@ -39,12 +39,11 @@ module testharness import snitch_cluster_pkg::*; (
     .wide_in_resp_o (wide_in_resp)
   );
 
-  // Tie-off unused ports.
+  // Tie-off unused input ports.
   assign narrow_in_req = '0;
-  assign wide_out_resp = '0;
   assign wide_in_req = '0;
 
-  // Simulation memory.
+  // Narrow port into simulation memory.
   tb_memory #(
     .AxiAddrWidth (AddrWidth),
     .AxiDataWidth (NarrowDataWidth),
@@ -57,6 +56,21 @@ module testharness import snitch_cluster_pkg::*; (
     .rst_ni,
     .req_i (narrow_out_req),
     .rsp_o (narrow_out_resp)
+  );
+
+  // Wide port into simulation memory.
+  tb_memory #(
+    .AxiAddrWidth (AddrWidth),
+    .AxiDataWidth (WideDataWidth),
+    .AxiIdWidth (WideIdWidthOut),
+    .AxiUserWidth (UserWidth),
+    .req_t (wide_out_req_t),
+    .rsp_t (wide_out_resp_t)
+  ) i_dma (
+    .clk_i,
+    .rst_ni,
+    .req_i (wide_out_req),
+    .rsp_o (wide_out_resp)
   );
 
 endmodule
