@@ -7,6 +7,8 @@
 // Implements the tightly-coupled frontend. This module can directly be connected
 // to an accelerator bus in the snitch system
 
+`include "common_cells/registers.svh"
+
 module axi_dma_tc_snitch_fe #(
     parameter int unsigned AddrWidth     = 0,
     parameter int unsigned DataWidth     = 0,
@@ -76,12 +78,11 @@ module axi_dma_tc_snitch_fe #(
     //--------------------------------------
     // Backend Instanciation
     //--------------------------------------
-    logic                    backend_idle;
-    logic                    trans_complete;
+    logic backend_idle;
     burst_req_t burst_req;
-    logic                    burst_req_valid;
-    logic                    burst_req_ready;
-    logic                    oned_trans_complete;
+    logic burst_req_valid;
+    logic burst_req_ready;
+    logic oned_trans_complete;
 
     axi_dma_backend #(
         .DataWidth       ( DMADataWidth ),
@@ -162,16 +163,8 @@ module axi_dma_tc_snitch_fe #(
     logic [31:0] next_id;
     logic [31:0] completed_id;
 
-    axi_dma_tc_snitch_fe_id_gen #(
-        .ID_WIDTH     ( 32     )
-    ) i_axi_dma_tc_snitch_fe_id_gen (
-        .clk_i        ( clk_i                                          ),
-        .rst_ni       ( rst_ni                                         ),
-        .issue_i      ( twod_req_valid && twod_req_ready               ),
-        .retire_i     ( oned_trans_complete && twod_req_last_realigned ),
-        .next_o       ( next_id                                        ),
-        .completed_o  ( completed_id                                   )
-    );
+    `FFL(next_id, next_id + 'h1, twod_req_valid & twod_req_ready, 0)
+    `FFL(completed_id, completed_id + 'h1, oned_trans_complete & twod_req_last_realigned, 0)
 
     // dma is busy when it is not idle
     assign dma_busy_o = next_id != completed_id;
@@ -241,125 +234,121 @@ module axi_dma_tc_snitch_fe #(
         dma_op_name      = "Invalid";
 
         // decode
-        if (acc_qvalid_i == 1'b1) unique casez (acc_qdata_op_i)
+        if (acc_qvalid_i == 1'b1) begin
+          unique casez (acc_qdata_op_i)
 
-            // manipulate the source register
-            riscv_instr::DMSRC : begin
-                twod_req_d.src[31: 0] = acc_qdata_arga_i[31:0];
-                twod_req_d.src[AddrWidth-1:32] = acc_qdata_argb_i[AddrWidth-1-32: 0];
-                acc_qready_o = 1'b1;
-                is_dma_op    = 1'b1;
-                dma_op_name  = "DMSRC";
-            end
+              // manipulate the source register
+              riscv_instr::DMSRC : begin
+                  twod_req_d.src[31: 0] = acc_qdata_arga_i[31:0];
+                  twod_req_d.src[AddrWidth-1:32] = acc_qdata_argb_i[AddrWidth-1-32: 0];
+                  acc_qready_o = 1'b1;
+                  is_dma_op    = 1'b1;
+                  dma_op_name  = "DMSRC";
+              end
 
-            // manipulate the destination register
-            riscv_instr::DMDST : begin
-                twod_req_d.dst[31: 0] = acc_qdata_arga_i[31:0];
-                twod_req_d.dst[AddrWidth-1:32] = acc_qdata_argb_i[AddrWidth-1-32: 0];
-                acc_qready_o = 1'b1;
-                is_dma_op    = 1'b1;
-                dma_op_name  = "DMDST";
-            end
+              // manipulate the destination register
+              riscv_instr::DMDST : begin
+                  twod_req_d.dst[31: 0] = acc_qdata_arga_i[31:0];
+                  twod_req_d.dst[AddrWidth-1:32] = acc_qdata_argb_i[AddrWidth-1-32: 0];
+                  acc_qready_o = 1'b1;
+                  is_dma_op    = 1'b1;
+                  dma_op_name  = "DMDST";
+              end
 
-            // start the DMA
-            riscv_instr::DMCPYI,
-            riscv_instr::DMCPY : begin
-                automatic logic [1:0] cfg;
+              // start the DMA
+              riscv_instr::DMCPYI,
+              riscv_instr::DMCPY : begin
+                  automatic logic [1:0] cfg;
 
-                // Parse the transfer parameters from the register or immediate.
-                unique casez (acc_qdata_op_i)
-                    riscv_instr::DMCPYI : cfg = acc_qdata_op_i[24:20];
-                    riscv_instr::DMCPY :  cfg = acc_qdata_argb_i;
-                    default:;
-                endcase
-                dma_op_name = "DMCPY";
-                is_dma_op   = 1'b1;
+                  // Parse the transfer parameters from the register or immediate.
+                  unique casez (acc_qdata_op_i)
+                      riscv_instr::DMCPYI : cfg = acc_qdata_op_i[24:20];
+                      riscv_instr::DMCPY :  cfg = acc_qdata_argb_i;
+                      default:;
+                  endcase
+                  dma_op_name = "DMCPY";
+                  is_dma_op   = 1'b1;
 
-                twod_req_d.num_bytes   = acc_qdata_arga_i;
-                twod_req_d.decouple_rw = cfg[0];
-                twod_req_d.is_twod     = cfg[1];
+                  twod_req_d.num_bytes   = acc_qdata_arga_i;
+                  twod_req_d.decouple_rw = cfg[0];
+                  twod_req_d.is_twod     = cfg[1];
 
-                // Perform the following sequence:
-                // 1. wait for acc response channel to be ready (pready)
-                // 2. request twod transfer (valid)
-                // 3. wait for twod transfer to be accepted (ready)
-                // 4. send acc response (pvalid)
-                // 5. acknowledge acc request (qready)
-                if (acc_pready_spill) begin
-                    twod_req_valid = 1'b1;
-                    if (twod_req_ready) begin
-                        acc_pdata_spill.id    = acc_qid_i;
-                        acc_pdata_spill.data  = next_id;
-                        acc_pdata_spill.error = 1'b0;
-                        acc_pvalid_spill      = 1'b1;
-                        acc_qready_o          = twod_req_ready;
-                    end
-                end
-            end
+                  // Perform the following sequence:
+                  // 1. wait for acc response channel to be ready (pready)
+                  // 2. request twod transfer (valid)
+                  // 3. wait for twod transfer to be accepted (ready)
+                  // 4. send acc response (pvalid)
+                  // 5. acknowledge acc request (qready)
+                  if (acc_pready_spill) begin
+                      twod_req_valid = 1'b1;
+                      if (twod_req_ready) begin
+                          acc_pdata_spill.id    = acc_qid_i;
+                          acc_pdata_spill.data  = next_id;
+                          acc_pdata_spill.error = 1'b0;
+                          acc_pvalid_spill      = 1'b1;
+                          acc_qready_o          = twod_req_ready;
+                      end
+                  end
+              end
 
-            // status of the DMA
-            riscv_instr::DMSTATI,
-            riscv_instr::DMSTAT : begin
-                automatic logic [1:0] status;
+              // status of the DMA
+              riscv_instr::DMSTATI,
+              riscv_instr::DMSTAT: begin
+                  automatic logic [1:0] status;
 
-                // Parse the status index from the register or immediate.
-                unique casez (acc_qdata_op_i)
-                    riscv_instr::DMSTATI : status = acc_qdata_op_i[24:20];
-                    riscv_instr::DMSTAT :  status = acc_qdata_argb_i;
-                    default:;
-                endcase
-                dma_op_name = "DMSTAT";
-                is_dma_op   = 1'b1;
+                  // Parse the status index from the register or immediate.
+                  unique casez (acc_qdata_op_i)
+                      riscv_instr::DMSTATI: status = acc_qdata_op_i[24:20];
+                      riscv_instr::DMSTAT:  status = acc_qdata_argb_i;
+                      default:;
+                  endcase
+                  dma_op_name = "DMSTAT";
+                  is_dma_op   = 1'b1;
 
-                // Compose the response.
-                acc_pdata_spill.id    = acc_qid_i;
-                acc_pdata_spill.error = 1'b0;
-                case (status)
-                    2'b00 : acc_pdata_spill.data = completed_id;
-                    2'b01 : acc_pdata_spill.data = next_id;
-                    2'b10 : acc_pdata_spill.data = {{{8'd63}{1'b0}}, dma_busy_o};
-                    2'b11 : acc_pdata_spill.data = {{{8'd63}{1'b0}}, !twod_req_ready};
-                    default:;
-                endcase
+                  // Compose the response.
+                  acc_pdata_spill.id    = acc_qid_i;
+                  acc_pdata_spill.error = 1'b0;
+                  case (status)
+                      2'b00 : acc_pdata_spill.data = completed_id;
+                      2'b01 : acc_pdata_spill.data = next_id;
+                      2'b10 : acc_pdata_spill.data = {{{8'd63}{1'b0}}, dma_busy_o};
+                      2'b11 : acc_pdata_spill.data = {{{8'd63}{1'b0}}, !twod_req_ready};
+                      default:;
+                  endcase
 
-                // Wait for acc response channel to become ready, then ack the
-                // request.
-                if (acc_pready_spill) begin
-                    acc_pvalid_spill = 1'b1;
-                    acc_qready_o     = 1'b1;
-                end
-            end
+                  // Wait for acc response channel to become ready, then ack the
+                  // request.
+                  if (acc_pready_spill) begin
+                      acc_pvalid_spill = 1'b1;
+                      acc_qready_o     = 1'b1;
+                  end
+              end
 
-            // manipulate the strides
-            riscv_instr::DMSTR : begin
-                twod_req_d.stride_src = acc_qdata_arga_i;
-                twod_req_d.stride_dst = acc_qdata_argb_i;
-                acc_qready_o = 1'b1;
-                is_dma_op    = 1'b1;
-                dma_op_name  = "DMSTR";
-            end
+              // manipulate the strides
+              riscv_instr::DMSTR : begin
+                  twod_req_d.stride_src = acc_qdata_arga_i;
+                  twod_req_d.stride_dst = acc_qdata_argb_i;
+                  acc_qready_o = 1'b1;
+                  is_dma_op    = 1'b1;
+                  dma_op_name  = "DMSTR";
+              end
 
-            // manipulate the strides
-            riscv_instr::DMREP : begin
-                twod_req_d.num_repetitions = acc_qdata_arga_i;
-                acc_qready_o = 1'b1;
-                is_dma_op    = 1'b1;
-                dma_op_name  = "DMREP";
-            end
+              // manipulate the strides
+              riscv_instr::DMREP : begin
+                  twod_req_d.num_repetitions = acc_qdata_arga_i;
+                  acc_qready_o = 1'b1;
+                  is_dma_op    = 1'b1;
+                  dma_op_name  = "DMREP";
+              end
 
-            default:;
-        endcase
+              default:;
+          endcase
+        end
     end
 
     //--------------------------------------
     // State
     //--------------------------------------
-    always_ff @(posedge clk_i or negedge rst_ni) begin : proc_modifiable_request
-        if(!rst_ni) begin
-            twod_req_q <= '0;
-        end else begin
-            twod_req_q <= twod_req_d;
-        end
-    end
+    `FF(twod_req_q, twod_req_d, '0)
 
-endmodule : axi_dma_tc_snitch_fe
+endmodule

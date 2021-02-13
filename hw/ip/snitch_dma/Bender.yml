@@ -18,6 +18,5 @@ sources:
 - src/axi_dma_error_handler.sv
 - src/axi_dma_perf_counters.sv
 - src/axi_dma_twod_ext.sv
-- src/axi_dma_tc_snitch_fe_id_gen.sv
 # Level 2:
 - src/axi_dma_tc_snitch_fe.sv
