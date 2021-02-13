@@ -5,7 +5,7 @@ set(CMAKE_OBJDUMP riscv32-unknown-elf-objdump)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION true)
 
 add_compile_options(-march=rv32imafd -mabi=ilp32d -mcmodel=medany -mno-fdiv -ffast-math -fno-builtin-printf -fno-common)
-add_link_options(-march=rv32imafd -mabi=ilp32d -nostdlib -Wl,-Ttext-segment=0x80000000)
+add_link_options(-march=rv32imafd -mabi=ilp32d -nostartfiles -Wl,-Ttext-segment=0x80000000)
 # add_link_options(-Wl,--verbose)
 
 link_libraries(-lm -lgcc)
