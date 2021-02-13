@@ -223,6 +223,8 @@ module axi_dma_tc_snitch_fe #(
         twod_req_d            = twod_req_q;
         twod_req_d.burst_src  = axi_pkg::BURST_INCR;
         twod_req_d.burst_dst  = axi_pkg::BURST_INCR;
+        twod_req_d.cache_src  = axi_pkg::CACHE_MODIFIABLE;
+        twod_req_d.cache_dst  = axi_pkg::CACHE_MODIFIABLE;
         twod_req_valid        = 1'b0;
         acc_qready_o          = 1'b0;
         acc_pdata_spill       = '0;
