@@ -264,14 +264,14 @@ module snitch_cluster
   // Typedefs
   // --------
   typedef logic [PhysicalAddrWidth-1:0] addr_t;
-  typedef logic [NarrowDataWidth-1:0]         data_t;
-  typedef logic [NarrowDataWidth/8-1:0]       strb_t;
-  typedef logic [WideDataWidth-1:0]      data_dma_t;
-  typedef logic [WideDataWidth/8-1:0]    strb_dma_t;
-  typedef logic [NarrowIdWidthIn-1:0]         id_mst_t;
-  typedef logic [IdWidthOut-1:0]      id_slv_t;
-  typedef logic [WideIdWidthIn-1:0]      id_dma_mst_t;
-  typedef logic [IdWidthDMAOut-1:0]   id_dma_slv_t;
+  typedef logic [NarrowDataWidth-1:0]   data_t;
+  typedef logic [NarrowDataWidth/8-1:0] strb_t;
+  typedef logic [WideDataWidth-1:0]     data_dma_t;
+  typedef logic [WideDataWidth/8-1:0]   strb_dma_t;
+  typedef logic [NarrowIdWidthIn-1:0]   id_mst_t;
+  typedef logic [IdWidthOut-1:0]        id_slv_t;
+  typedef logic [WideIdWidthIn-1:0]     id_dma_mst_t;
+  typedef logic [IdWidthDMAOut-1:0]     id_dma_slv_t;
   typedef logic [UserWidth-1:0]         user_t;
 
   typedef logic [TCDMAddrWidth-1:0]     tcdm_addr_t;
