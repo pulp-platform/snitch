@@ -5,7 +5,7 @@
 // Thomas Benz <tbenz@ethz.ch>
 
 // Sample implementation to report errors from the AXI bus.
-// This module provides the adress of errors on a handshacked interface
+// This module provides the address of errors on a handshaked interface
 
 module axi_dma_error_handler #(
     parameter int unsigned ADDR_WIDTH         = -1,
@@ -193,4 +193,4 @@ module axi_dma_error_handler #(
 
     end
 
-endmodule : axi_dma_error_handler
+endmodule

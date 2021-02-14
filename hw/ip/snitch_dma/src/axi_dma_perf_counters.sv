@@ -5,7 +5,6 @@
 // Thomas Benz <tbenz@ethz.ch>
 
 // Sample implementation of performance counters.
-
 module axi_dma_perf_counters #(
     parameter int unsigned TRANSFER_ID_WIDTH  = -1,
     parameter int unsigned DATA_WIDTH         = -1,
@@ -148,14 +147,7 @@ module axi_dma_perf_counters #(
         if (dma_busy_i) dma_perf_d.dma_busy_cnt = dma_perf_q.dma_busy_cnt + 'h1;
     end
 
-    always_ff @(posedge clk_i or negedge rst_ni) begin : proc_counter
-        if(~rst_ni) begin
-            dma_perf_q <= '0;
-        end else begin
-            dma_perf_q <= dma_perf_d;
-        end
-    end
-
+    `FF(dma_perf_q, dma_perf_d, 0);
     assign dma_perf_o = dma_perf_q;
 
 endmodule

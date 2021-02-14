@@ -4,8 +4,7 @@
 
 // Thomas Benz <tbenz@ethz.ch>
 
-// Accept 2D requests and flatten them to 1D requests
-
+/// Accept 2D requests and flatten them to 1D requests.
 module axi_dma_twod_ext #(
     parameter int unsigned ADDR_WIDTH      = -1,
     parameter int unsigned REQ_FIFO_DEPTH  = -1,
@@ -14,15 +13,15 @@ module axi_dma_twod_ext #(
 ) (
     input  logic                     clk_i,
     input  logic                     rst_ni,
-    // arbitrary burst request
+    /// Arbitrary burst request
     output burst_req_t               burst_req_o,
     output logic                     burst_req_valid_o,
     input  logic                     burst_req_ready_i,
-    // 2D request request
+    /// 2D Request
     input  twod_req_t                twod_req_i,
     input  logic                     twod_req_valid_i,
     output logic                     twod_req_ready_o,
-    // 2D request completed
+    /// 2D Request Completed
     output logic                     twod_req_last_o
 );
 
@@ -66,7 +65,7 @@ module axi_dma_twod_ext #(
     logic [ADDR_WIDTH-1:0] dst_address_d, dst_address_q;
 
     //--------------------------------------
-    // 2D extension
+    // 2D Extension
     //--------------------------------------
     always_comb begin : proc_twod_ext
         // defaults
@@ -75,13 +74,13 @@ module axi_dma_twod_ext #(
         burst_req_valid_o = 1'b0;
         twod_req_last_o   = 1'b0;
 
-        // conter keeps its value
+        // counter keeps its value
         num_bursts_d  = num_bursts_q;
         src_address_d = src_address_q;
         dst_address_d = dst_address_q;
 
         //--------------------------------------
-        // 1D case
+        // 1D Case
         //--------------------------------------
         // in the case that we have a 1D transfer, hand the transfer out
         if (!twod_req_current.is_twod) begin
@@ -103,7 +102,7 @@ module axi_dma_twod_ext #(
             twod_req_last_o   = 1'b1;
 
         //--------------------------------------
-        // 2D case - counter management
+        // 2D Case - Counter Management
         //--------------------------------------
         // in the 2D case: we need to work with a counter
         end else begin
@@ -157,18 +156,10 @@ module axi_dma_twod_ext #(
     end
 
     //--------------------------------------
-    // Update Conters
+    // Update Counters
     //--------------------------------------
-    always_ff @(posedge clk_i or negedge rst_ni) begin : proc_update_counters
-        if(!rst_ni) begin
-            num_bursts_q  <= '0;
-            src_address_q <= '0;
-            dst_address_q <= '0;
-        end else begin
-            num_bursts_q  <= num_bursts_d;
-            src_address_q <= src_address_d;
-            dst_address_q <= dst_address_d;
-        end
-    end
+    `FF(num_bursts_q, num_bursts_d, '0)
+    `FF(src_address_q, src_address_d, '0)
+    `FF(dst_address_q, dst_address_d, '0)
 
-endmodule : axi_dma_twod_ext
+endmodule
