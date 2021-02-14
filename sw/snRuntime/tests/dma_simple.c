@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-#include <dma.h>
 #include <snrt.h>
 
 // Allocate a buffer in the main memory which we will use to copy data around
@@ -22,8 +21,8 @@ int main() {
     }
 
     // Copy data to main memory.
-    dma_start_1d(buffer, buffer_src, sizeof(buffer));
-    dma_wait_all();
+    snrt_dma_start_1d(buffer, buffer_src, sizeof(buffer));
+    snrt_dma_wait_all();
 
     // Check that the main memory buffer contains the correct data.
     for (uint32_t i = 0; i < 32; i++) {
@@ -31,8 +30,8 @@ int main() {
     }
 
     // Copy data to L1.
-    dma_start_1d(buffer_dst, buffer, sizeof(buffer));
-    dma_wait_all();
+    snrt_dma_start_1d(buffer_dst, buffer, sizeof(buffer));
+    snrt_dma_wait_all();
 
     // Check that the L1 buffer contains the correct data.
     for (uint32_t i = 0; i < 32; i++) {
