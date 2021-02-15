@@ -24,6 +24,7 @@ endmacro()
 
 macro(add_snitch_executable name)
     add_executable(${ARGV})
+    target_link_libraries(${name} ${SNITCH_RUNTIME})
     add_custom_command(
         TARGET ${name}
         POST_BUILD
@@ -32,7 +33,6 @@ endmacro()
 
 macro(add_snitch_test_executable name)
     add_snitch_executable(test-${SNITCH_TEST_PREFIX}${name} ${ARGN})
-    target_link_libraries(test-${SNITCH_TEST_PREFIX}${name} ${SNITCH_RUNTIME})
 endmacro()
 
 macro(add_snitch_test_args executable_name test_name)
