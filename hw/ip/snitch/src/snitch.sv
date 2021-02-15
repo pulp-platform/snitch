@@ -1930,9 +1930,24 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      SCFGRI: begin
+        if (Xssr) begin
+          acc_qreq_o.addr = SSR_CFG;
+          acc_qvalid_o = valid_instr;
+        end else illegal_inst = 1'b1;
+      end
+      SCFGWI: begin
+        if (Xssr) begin
+          acc_qreq_o.addr = SSR_CFG;
+          opa_select = Reg;
+          acc_qvalid_o = valid_instr;
+          write_rd = 1'b0;
+        end else illegal_inst = 1'b1;
+      end
       SCFGR: begin
         if (Xssr) begin
           acc_qreq_o.addr = SSR_CFG;
+          opb_select = Reg;
           acc_qvalid_o = valid_instr;
         end else illegal_inst = 1'b1;
       end
@@ -1940,6 +1955,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         if (Xssr) begin
           acc_qreq_o.addr = SSR_CFG;
           opa_select = Reg;
+          opb_select = Reg;
           acc_qvalid_o = valid_instr;
           write_rd = 1'b0;
         end else illegal_inst = 1'b1;

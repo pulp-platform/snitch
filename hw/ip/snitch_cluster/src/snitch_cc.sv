@@ -587,10 +587,44 @@ module snitch_cc #(
     `FF(cfg_req_valid_q, cfg_req_valid, 0)
     `FF(cfg_rsp.id, ssr_cfg_req.id, 0)
 
-    assign ssr_cfg_req.id = acc_snitch_demux_q.id;
-    assign ssr_cfg_req.word = acc_snitch_demux_q.data_op[31:20];
-    assign ssr_cfg_req.write = acc_snitch_demux_q.data_op ==? riscv_instr::SCFGW;
-    assign ssr_cfg_req.data = acc_snitch_demux_q.data_argb[31:0];
+    always_comb begin
+      import riscv_instr::*;
+      automatic logic [11:0] addr;
+      automatic logic [4:0] addr_dm;
+      automatic logic [4:0] addr_reg;
+
+      ssr_cfg_req.id = acc_snitch_demux_q.id;
+      ssr_cfg_req.data = acc_snitch_demux_q.data_arga[31:0];
+      ssr_cfg_req.word = '0;
+      ssr_cfg_req.write = '0;
+
+      unique casez (acc_snitch_demux_q.data_op)
+        SCFGRI,
+        SCFGWI: begin
+          addr = acc_snitch_demux_q.data_op[31:20];
+        end
+        SCFGR,
+        SCFGW: begin
+          addr = acc_snitch_demux_q.data_argb[31:0];
+        end
+        default: ;
+      endcase
+
+      {addr_reg, addr_dm} = addr;
+      ssr_cfg_req.word = {addr_dm, addr_reg};
+
+      unique casez (acc_snitch_demux_q.data_op)
+        SCFGRI,
+        SCFGR:
+          ssr_cfg_req.write = '0;
+        SCFGWI,
+        SCFGW: begin
+          ssr_cfg_req.write = '1;
+          ssr_cfg_req.id = '0; // prevent write-back of result
+        end
+        default: ;
+      endcase
+    end
 
     assign ssr_resp.id = ssr_cfg_rsp.id;
     assign ssr_resp.error = 1'b0;

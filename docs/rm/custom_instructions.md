@@ -9,13 +9,21 @@ The "Xssr" extension assigns stream semantics to a handful of the processor's re
 
 ### Configuration Register Operations
 
-| imm[11:4] | imm[4:0] | rs1    | funct3 | rd    | opcode     | operation |
-|:---------:|:--------:|:------:|:------:|:-----:|:----------:|:---------:|
-| 7         | 5        | 5      | 3      | 5     | 7          |           |
-| addr      | ssr      | 000000 | 100    | dest  | OP-CUSTOM1 | SCFGR     |
-| addr      | ssr      | value  | 101    | 00000 | OP-CUSTOM1 | SCFGW     |
+| imm[11:4] | imm[4:0] | rs1   | funct3 | rd    | opcode     | operation |
+|:---------:|:--------:|:-----:|:------:|:-----:|:----------:|:---------:|
+| 7         | 5        | 5     | 3      | 5     | 7          |           |
+| reg       | ssr      | 00000 | 001    | dest  | OP-CUSTOM1 | SCFGRI    |
+| reg       | ssr      | value | 010    | 00000 | OP-CUSTOM1 | SCFGWI    |
 
-SCFGR reads a value from an SSR configuration register, and SCFGW writes a value to an SSR configuration register. The argument *addr* specifies the index of the register, *ssr* specifies which SSR should be accessed. SCFGR places the read value in *rd*. SCFGW moves the value in *rs1* to the selected SSR configuration register.
+SCFGRI and SCFGWI read and write a value from or to an SSR configuration register. The immediate argument *reg* specifies the index of the register, *ssr* specifies which SSR should be accessed. SCFGRI places the read value in *rd*. SCFGWI moves the value in *rs1* to the selected SSR configuration register.
+
+| funct7  | rs2   | rs1   | funct3 | rd    | opcode     | operation |
+|:-------:|:-----:|:-----:|:------:|:-----:|:----------:|:---------:|
+| 7       | 5     | 5     | 3      | 5     | 7          |           |
+| 0000000 | addr  | 00001 | 001    | dest  | OP-CUSTOM1 | SCFGR     |
+| 0000000 | addr  | value | 010    | 00001 | OP-CUSTOM1 | SCFGW     |
+
+SCFGR and SCFGW read and write a value from or to an SSR configuration register. The value in register *rs2* specifies specifies the address of the register as follows: bits 4 to 0 correspond to *ssr* and indicate the SSR to be used, and the bits 11 to 4 correspond to *reg* and indicate the index of the register. SCFGR places the read value in *rd*. SCFGW moves the value in *rs1* to the selected SSR configuration register.
 
 ## "Xfrep" Extension for Floating-Point Repetition
 

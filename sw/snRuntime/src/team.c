@@ -34,6 +34,36 @@ uint32_t snrt_cluster_core_num() {
     return _snrt_team_current->root->cluster_core_num;
 }
 
+uint32_t snrt_cluster_compute_core_idx() {
+    // TODO: Actually derive this from the device tree!
+    return snrt_cluster_core_idx();
+}
+
+uint32_t snrt_cluster_compute_core_num() {
+    // TODO: Actually derive this from the device tree!
+    return snrt_cluster_core_num() - 1;
+}
+
+uint32_t snrt_cluster_dm_core_idx() {
+    // TODO: Actually derive this from the device tree!
+    return 0;
+}
+
+uint32_t snrt_cluster_dm_core_num() {
+    // TODO: Actually derive this from the device tree!
+    return 1;
+}
+
+int snrt_is_compute_core() {
+    // TODO: Actually derive this from the device tree!
+    return snrt_cluster_core_idx() < snrt_cluster_core_num() - 1;
+}
+
+int snrt_is_dm_core() {
+    // TODO: Actually derive this from the device tree!
+    return !snrt_is_compute_core();
+}
+
 snrt_slice_t snrt_global_memory() {
     return _snrt_team_current->root->global_mem;
 }

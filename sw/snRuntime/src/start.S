@@ -77,6 +77,8 @@ snrt.crt0.init_tls:
     la        t2, __tbss_end
     add       sp, sp, t0
     sub       sp, sp, t2
+    li        t3, ~0x7
+    and       sp, sp, t3  # align stack to 8B
     mv        tp, sp
 
     # Copy __tdata_start to __tdata_end.

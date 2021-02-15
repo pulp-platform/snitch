@@ -39,6 +39,8 @@ extern uint32_t snrt_cluster_dm_core_idx();
 extern uint32_t snrt_cluster_dm_core_num();
 extern uint32_t snrt_cluster_idx();
 extern uint32_t snrt_cluster_num();
+extern int snrt_is_compute_core();
+extern int snrt_is_dm_core();
 
 extern snrt_slice_t snrt_global_memory();
 extern snrt_slice_t snrt_cluster_memory();
@@ -70,3 +72,35 @@ extern snrt_dma_txid_t snrt_dma_start_2d(void *dst, const void *src,
 extern void snrt_dma_wait(snrt_dma_txid_t tid);
 /// Block until all operation on the DMA ceases.
 extern void snrt_dma_wait_all();
+
+/// The different SSR data movers.
+enum snrt_ssr_dm {
+    SNRT_SSR_DM0 = 0,
+    SNRT_SSR_DM1 = 1,
+    SNRT_SSR_DM2 = 2,
+};
+
+/// The different dimensions.
+enum snrt_ssr_dim {
+    SNRT_SSR_1D = 0,
+    SNRT_SSR_2D = 1,
+    SNRT_SSR_3D = 2,
+    SNRT_SSR_4D = 3,
+};
+
+extern void snrt_ssr_loop_1d(enum snrt_ssr_dm dm, size_t b0, size_t i0);
+extern void snrt_ssr_loop_2d(enum snrt_ssr_dm dm, size_t b0, size_t b1,
+                             size_t i0, size_t i1);
+extern void snrt_ssr_loop_3d(enum snrt_ssr_dm dm, size_t b0, size_t b1,
+                             size_t b2, size_t i0, size_t i1, size_t i2);
+extern void snrt_ssr_loop_4d(enum snrt_ssr_dm dm, size_t b0, size_t b1,
+                             size_t b2, size_t b3, size_t i0, size_t i1,
+                             size_t i2, size_t i3);
+extern void snrt_ssr_repeat(enum snrt_ssr_dm dm, size_t count);
+extern void snrt_ssr_enable();
+extern void snrt_ssr_disable();
+extern void snrt_ssr_read(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
+                          volatile void *ptr);
+extern void snrt_ssr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
+                           volatile void *ptr);
+extern void snrt_fpu_fence();

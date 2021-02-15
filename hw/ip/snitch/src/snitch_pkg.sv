@@ -122,7 +122,7 @@ package snitch_pkg;
   localparam [4:0] FT0 = 5'd0;
   localparam [4:0] FT1 = 5'd1;
   localparam [4:0] FT2 = 5'd2;
-  localparam [1:0][4:0] SSRRegs = {FT2, FT1, FT0};
+  localparam [2:0][4:0] SSRRegs = {FT2, FT1, FT0};
   function automatic logic is_ssr(logic [4:0] register);
     unique case (register)
       FT0, FT1, FT2: return 1'b1;
