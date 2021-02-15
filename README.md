@@ -2,6 +2,23 @@
 
 This monolithic repository hosts software and hardware for the Snitch generator and generated systems.
 
+## Getting Started
+
+To get started, check out the [getting started guide](https://pulp-platform.github.io/snitch/ug/getting_started/).
+
+## Content
+
+What can you expect to find in this repository?
+
+- The [Snitch integer core](https://pulp-platform.github.io/snitch/rm/snitch/). This can be useful stand-alone if you are just
+  interested in re-using the core for your project, e.g., as a tiny control core
+  or you want to make a peripheral smart. The sky is the limit.
+- The [Snitch cluster](https://pulp-platform.github.io/snitch/ug/snitch_cluster/). A highly configurable cluster containing one to many
+  integer cores with optional floating-point capabilities as well as our custom
+  ISA extensions `Xssr`, `Xfrep`, and `Xdma`.
+- Any other system that is based on Snitch compute elements. Right now, we do not
+  have any open-sourced yet, but be sure that this is going to change.
+
 ## Tool Requirements
 
 * `verilator = v4.100`
@@ -20,14 +37,14 @@ The following files are released under Solderpad v0.51 (`SHL-0.51`) see `hw/LICE
 
 - `hw/`
 
-The `sw/vendor` directory contains third party sources which come with their own
+The `sw/vendor` directory contains third-party sources that come with their own
 licenses. See the respective folder for the licenses used.
 
 - `sw/vendor/`
 
 ## Publication
 
-If you use Snitch in your work you can cite us:
+If you use Snitch in your work, you can cite us:
 
 ```
 @article{zaruba2020snitch,

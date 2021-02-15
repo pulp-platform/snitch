@@ -1,108 +1,90 @@
 # Getting Started
 
-We recommend using the [Docker](ug/../docker.md) container if possible:
+## Quick Start
 
-```
-$ docker run -it -v $REPO_TOP:/repo -w /repo ghcr.io/pulp-platform/snitch
-```
+This will take you through the necessary steps to get a sample program running on a cluster of Snitch cores.
 
-`$REPO_TOP` should point to the base of the cloned repository.
-
-If that should not be possible (because of missing privileges for example) you
-can install the required tools and components yourself. See [prerequisites]( Prerequisites).
-
-Besides containing the sources for the Snitch core and surrounding cluster
-infrastructure this repository also hosts systems, testbenches and related
-infrastructure.
-
-All Snitch-based systems in this repository can be found in `hw/system`. To get
-accommodated with the system we recommend getting started with the cluster
-testbench system. This testbench instantiates a cluster and an "infinite"
-simulation memory which the cluster can access, see `hw/system/README.md`.
-
-To build the Verilator executable of this system:
-
-```
-    cd $REPO_TOP/hw/system
+1. Clone the repository.
+   ```
+   git clone https://github.com/pulp-platform/snitch.git
+   ```
+2. Start the Docker container containing all necessary development tools. If you
+   do not want (or can not) use Docker please see the
+   [prerequisites](#prerequisites) sections on how to obtain all required tools.
+    ```
+    docker run -it -v `pwd`/snitch:/repo -w /repo ghcr.io/pulp-platform/snitch
+    ```
+3. To simulate a cluster of Snitch cores go to `hw/system/snitch_cluster` and build the Verilator model for the Snitch cluster.
+    ```
+    cd hw/system/snitch_cluster
     make bin/snitch_cluster.vlt
-```
-
-This places a binary called `snitch_cluster.vlt` in the `bin` folder. You can
-then execute a suitable ELF file by appending it as a positional argument to the
-binary:
-
-```
-    bin/snitch_cluster.vlt <path/to/riscv-elf>
-```
+    ```
+4. Build the software.
+    ```
+    mkdir sw/build
+    cd sw/build
+    cmake ..
+    make
+    ```
+5. Run a sample application on the Verilator model.
+    ```
+    ./bin/snitch_cluster.vlt sw/build/snRuntime/test-snRuntime-printf_simple
+    ```
+6. Generate the annotated traces and inspect the trace for core 0.
+    ```
+    make traces
+    less trace_hart_00000000.txt
+    ```
+    Optionally you can inspect the dumped waveforms (`snitch_cluster.vcd`).
 
 ## Prerequisites
 
-We recommend a reasonable new Linux distribution, for example Ubuntu 18.04 with
-developer tools (`build-essential`) installed.
+We recommend using the Docker container. If that should not be possible (because
+of missing privileges for example) you can install the required tools and
+components yourself.
 
-Install the Python requirements using:
+We recommend a reasonable new Linux distribution, for example, Ubuntu 18.04:
 
-```
-pip3 install --user -r python-requirements.txt
-```
+- Install essential packages:
+    ```
+    sudo apt-get install build-essential python3 python3-pip python3-setuptools python3-wheel
+    ```
+- Install the Python requirements using:
+    ```
+    pip3 install --user -r python-requirements.txt
+    ```
+- We are using `Bender` for file list generation. The easiest way to obtain `Bender` is through its binary release channel:
+    ```
+    curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh
+    ```
+- Finally, get a RISC-V toolchain. We recommend obtaining binary releases for your operating system from [SiFive's SW site](https://www.sifive.com/software).
+    - Unpack the toolchain to a location of your choice (assuming `$RISCV` here). For example for Ubuntu you do:
+      ```
+      mkdir -p $RISCV && tar -x -f riscv64-unknown-elf-gcc-8.3.0-2020.04.0-x86_64-linux-ubuntu14.tar.gz --strip-components=1 -C $RISCV
+      ```
+    - Add the `$RISCV/bin` folder to your path variable.
+      ```
+      export PATH=$RISCV/bin:$PATH
+      ```
+    - The downloaded toolchain is a multi-lib toolchain, nevertheless our SW scripts currently expect binaries named `riscv32-*`. You can just alias `riscv64-*` to `riscv32-*` using:
+      ```
+      cd $RISCV/bin && for file in riscv64-*; do ln -s $file $(echo "$file" | sed 's/^riscv64/riscv32/g'); done
+      ```
 
-We are using `Bender` for file list generation. The easiest way to obtain
-`Bender` is through its binary release channel:
-
-```
-curl --proto '=https' --tlsv1.2 https://fabianschuiki.github.io/bender/init -sSf | sh
-```
-
-An alternative way, if you have Rust installed is `cargo install bender`.
+An alternative way, if you have Rust installed, is `cargo install bender`.
 
 ### Tool Requirements
 
 - `bender >= 0.21`
 - `verilator >= 4.100`
 
+### Software Development
+
+- The `banshee` simulator is built using Rust. We recommend [`rustup`](https://rustup.rs/) if you haven't installed Rust already.
+- C/C++ code is formatted using `clang-format`.
+
 ### Hardware Development
 
-We use `verible` for style linting. Either build it from
-[source](https://github.com/google/verible) or - if available for your platform
-- use one of the [pre-built images](https://github.com/google/verible/releases).
+- We use `verible` for style linting. Either build it from [source](https://github.com/google/verible) or, if available for your platform,  use one of the [pre-built images](https://github.com/google/verible/releases).
+- We support simulation with Verilator, VCS and Modelsim.
 
-# Vendored Source Directories
-
-This repo is organized in a monolithic fashion, i.e., all resources are checked
-in, we do not use git submodules or other ways of obtaining (HW) source files.
-But not all IPs are developed with this repository. We rely on the `vendor` tool
-to copy data from other repositories into the tree. We keep separate patches if
-changes are necessary. Ideally, patches should be upstreamed to the originating
-repository once things stabilize.
-
-## Creating Patches
-
-If you need to make changes to one of the IPs in the `hw/vendor` subdirectory
-you need to obtain a set of patches which should be applied. CI will check
-whether there are any changes without patches. Upon obtaining the sources the
-vendor tool can automatically apply the patches for you.
-
-To create patches you first need to commit the changes. Then, in the current
-directory create a set of patches (it will create a file for each commit) for
-the commit (range) you are interested:
-
-```
-git format-patch --relative -o <path/to/patch/folder> HEAD^1
-```
-
-In the vendor file specify the path to the patches:
-
-```
-patch_dir: "<path/to/patch/folder>"
-```
-
-## Updating Sources
-
-The vendor tool supports updating the sources. If you are in a clean directory
-with no changes (you can `git stash` to achieve this), the vendor tool can
-automatically commit the updates (`--commit`). For the `common_cells` for
-example:
-
-```
-./util/vendor.py hw/vendor/pulp_platform_common_cells.vendor.hjson --update --commit
-```
