@@ -39,6 +39,8 @@ extern uint32_t snrt_cluster_dm_core_idx();
 extern uint32_t snrt_cluster_dm_core_num();
 extern uint32_t snrt_cluster_idx();
 extern uint32_t snrt_cluster_num();
+extern int snrt_is_compute_core();
+extern int snrt_is_dm_core();
 
 extern snrt_slice_t snrt_global_memory();
 extern snrt_slice_t snrt_cluster_memory();
