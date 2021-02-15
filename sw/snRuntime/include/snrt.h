@@ -88,41 +88,19 @@ enum snrt_ssr_dim {
     SNRT_SSR_4D = 3,
 };
 
-extern void snrt_ssr_loop_1d(
-    enum snrt_ssr_dm dm,
-    size_t b0,
-    size_t i0
-);
-extern void snrt_ssr_loop_2d(
-    enum snrt_ssr_dm dm,
-    size_t b0,
-    size_t b1,
-    size_t i0,
-    size_t i1
-);
-extern void snrt_ssr_loop_3d(
-    enum snrt_ssr_dm dm,
-    size_t b0,
-    size_t b1,
-    size_t b2,
-    size_t i0,
-    size_t i1,
-    size_t i2
-);
-extern void snrt_ssr_loop_4d(
-    enum snrt_ssr_dm dm,
-    size_t b0,
-    size_t b1,
-    size_t b2,
-    size_t b3,
-    size_t i0,
-    size_t i1,
-    size_t i2,
-    size_t i3
-);
+extern void snrt_ssr_loop_1d(enum snrt_ssr_dm dm, size_t b0, size_t i0);
+extern void snrt_ssr_loop_2d(enum snrt_ssr_dm dm, size_t b0, size_t b1,
+                             size_t i0, size_t i1);
+extern void snrt_ssr_loop_3d(enum snrt_ssr_dm dm, size_t b0, size_t b1,
+                             size_t b2, size_t i0, size_t i1, size_t i2);
+extern void snrt_ssr_loop_4d(enum snrt_ssr_dm dm, size_t b0, size_t b1,
+                             size_t b2, size_t b3, size_t i0, size_t i1,
+                             size_t i2, size_t i3);
 extern void snrt_ssr_repeat(enum snrt_ssr_dm dm, size_t count);
 extern void snrt_ssr_enable();
 extern void snrt_ssr_disable();
-extern void snrt_ssr_read(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim, volatile void *ptr);
-extern void snrt_ssr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim, volatile void *ptr);
+extern void snrt_ssr_read(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
+                          volatile void *ptr);
+extern void snrt_ssr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
+                           volatile void *ptr);
 extern void snrt_fpu_fence();
