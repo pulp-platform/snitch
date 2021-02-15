@@ -24,9 +24,10 @@ include_directories(include)
 # Common sources
 set(sources
     src/barrier.c
-    src/team.c
-    src/printf.c
+    src/dma.c
     src/memcpy.c
+    src/printf.c
+    src/team.c
 )
 
 # Generic Runtime (requiring bootloader/OS)
@@ -49,8 +50,10 @@ add_snitch_test(varargs_1 tests/varargs_1.c)
 add_snitch_test(varargs_2 tests/varargs_2.c)
 add_snitch_test(barrier tests/barrier.c)
 
+add_snitch_test_executable(dma_simple tests/dma_simple.c)
 add_snitch_test_executable(printf_simple tests/printf_simple.c)
 add_snitch_test_executable(printf_fmtint tests/printf_fmtint.c)
+add_snitch_test_rtl(dma_simple)
 add_snitch_test_rtl(printf_simple)
 add_snitch_test_rtl(printf_fmtint)
 add_snitch_test_args(printf_simple printf_simple --no-opt-llvm --base-hartid=3)
