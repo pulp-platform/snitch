@@ -28,7 +28,7 @@ This will take you through the necessary steps to get a sample program running o
     ```
 5. Run a sample application on the Verilator model.
     ```
-    ./bin/snitch_cluster.vlt sw/build/snRuntime/test-snRuntime-printf_simple
+    ./bin/snitch_cluster.vlt sw/build/benchmark/benchmark-matmul-all
     ```
 6. Generate the annotated traces and inspect the trace for core 0.
     ```
