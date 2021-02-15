@@ -28,18 +28,19 @@ set(sources
     src/memcpy.c
     src/printf.c
     src/team.c
+    src/ssr.c
 )
 
 # Generic Runtime (requiring bootloader/OS)
-add_snitch_library(snRuntime src/start.S ${sources})
+add_snitch_library(snRuntime src/start.S ${sources} src/ssr_v2.c)
 
 # Bare Runtimes (with startup code)
-add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources})
-add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources})
-add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources})
-add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S ${sources})
-add_snitch_library(snRuntime-lethifold src/start_lethifold.S ${sources})
-add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources})
+add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v1.c)
+add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v2.c)
+add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources} src/ssr_v1.c)
+add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S ${sources} src/ssr_v1.c)
+add_snitch_library(snRuntime-lethifold src/start_lethifold.S ${sources} src/ssr_v1.c)
+add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources} src/ssr_v1.c)
 
 # Tests
 enable_testing()
