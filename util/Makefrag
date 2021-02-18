@@ -1,0 +1,38 @@
+BENDER		   ?= bender
+VLT			   ?= verilator
+# Support for local override
+VERILATOR_ROOT ?= $$(dirname $$(which $(VLT)))/../share/verilator
+VLT_ROOT	   ?= ${VERILATOR_ROOT}
+
+MATCH_END := '/+incdir+/ s/$$/\/*\/*/'
+MATCH_BGN := 's/+incdir+//g'
+SED_SRCS  := sed -e ${MATCH_END} -e ${MATCH_BGN}
+TB_SRCS   := $(wildcard test/*.sv)
+
+VLT_BUILDDIR := work-vlt
+VLT_FLAGS    += -Wno-BLKANDNBLK
+VLT_FLAGS    += -Wno-LITENDIAN
+VLT_FLAGS    += -Wno-CASEINCOMPLETE
+VLT_FLAGS    += -Wno-CMPCONST
+VLT_FLAGS    += -Wno-WIDTH
+VLT_FLAGS    += -Wno-WIDTHCONCAT
+VLT_FLAGS    += -Wno-UNSIGNED
+VLT_FLAGS    += -Wno-UNOPTFLAT
+VLT_FLAGS    += -Wno-fatal
+VLT_FLAGS    += --unroll-count 1024
+VLT_BENDER   += -t rtl
+VLT_SOURCES  := $(shell ${BENDER} script flist ${VLT_BENDER} | ${SED_SRCS})
+VLT_CFLAGS   ?= -std=c++14 -pthread -I ${VLT_BUILDDIR} -I $(VLT_ROOT)/include -I $(VLT_ROOT)/include/vltstd -I $(FESVR)/include
+
+#############
+# Verilator #
+#############
+# Takes the top module name as an argument.
+define VERILATE
+	mkdir -p $(dir $@)
+	$(BENDER) script verilator ${VLT_BENDER} > $(dir $@)files
+	$(VLT) \
+		--Mdir $(dir $@) -f $(dir $@)files $(VLT_FLAGS) \
+		-j $(shell nproc) --cc --build --top-module $(1)
+	touch $@
+endef
