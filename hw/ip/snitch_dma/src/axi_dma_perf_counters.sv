@@ -4,6 +4,8 @@
 
 // Thomas Benz <tbenz@ethz.ch>
 
+`include "common_cells/registers.svh"
+
 // Sample implementation of performance counters.
 module axi_dma_perf_counters #(
     parameter int unsigned TRANSFER_ID_WIDTH  = -1,
