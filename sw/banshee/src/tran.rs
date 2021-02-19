@@ -2152,22 +2152,28 @@ impl<'a> InstructionTranslator<'a> {
             LLVMBuildStore(self.builder, max_cycle, self.cycle_ptr());
 
             // Check if instruction is a memory access
-            let mem_access = accesses.iter().any(|(s, _)| match s {
+            let mem_access = accesses.iter().find(|(a, _)| match a {
                 TraceAccess::ReadMem => true,
                 TraceAccess::RMWMem => true,
                 _ => false,
             });
 
-            // TODO: Latency should depend on instruction
-            let latency = if mem_access { 3 } else { 1 };
+            let latency = if let Some(access) = mem_access {
+                let (is_tcdm, _tcdm_ptr) = self.emit_tcdm_check(access.1);
+                LLVMBuildSelect(
+                    self.builder,
+                    is_tcdm,
+                    LLVMConstInt(LLVMTypeOf(max_cycle), 3, 0),
+                    LLVMConstInt(LLVMTypeOf(max_cycle), 10, 0),
+                    NONAME,
+                )
+            } else {
+                // TODO differentiate between different instructions
+                LLVMConstInt(LLVMTypeOf(max_cycle), 1, 0)
+            };
 
             // Add latency of this instruction
-            let cycle = LLVMBuildAdd(
-                self.builder,
-                max_cycle,
-                LLVMConstInt(LLVMTypeOf(max_cycle), latency, 0),
-                NONAME,
-            );
+            let cycle = LLVMBuildAdd(self.builder, max_cycle, latency, NONAME);
 
             // Write new dependencies
             for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
