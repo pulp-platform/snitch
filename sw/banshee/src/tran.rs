@@ -2162,11 +2162,21 @@ impl<'a> InstructionTranslator<'a> {
         // Store the cycle at which all dependencies are ready and the inst is executed
         LLVMBuildStore(self.builder, max_cycle, self.cycle_ptr());
 
+        // Check if instruction is a memory access
+        let mem_access = accesses.iter().any(|(s, _)| match s {
+            TraceAccess::ReadMem => true,
+            TraceAccess::RMWMem => true,
+            _ => false,
+        });
+
+        // TODO: Latency should depend on instruction
+        let latency = if mem_access { 3 } else { 1 };
+
         // Add latency of this instruction
         let cycle = LLVMBuildAdd(
             self.builder,
             max_cycle,
-            LLVMConstInt(LLVMTypeOf(max_cycle), 3, 0),
+            LLVMConstInt(LLVMTypeOf(max_cycle), latency, 0),
             NONAME,
         );
 
