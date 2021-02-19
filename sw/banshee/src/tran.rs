@@ -2142,6 +2142,23 @@ impl<'a> InstructionTranslator<'a> {
             NONAME,
         );
 
+        // // Calculate the maximum
+        // let name = "llvm.umax";
+        // let id = LLVMLookupIntrinsicID(name.as_ptr() as *const _, name.len());
+        // debug!("ID {}, name {}", id, name);
+        // let decl = LLVMGetIntrinsicDeclaration(
+        //     self.section.engine.module,
+        //     id,
+        //     [LLVMTypeOf(max_cycle)].as_mut_ptr(),
+        //     2,
+        // );
+        // for c in cycles {
+        //     max_cycle = LLVMBuildCall(self.builder, decl, [max_cycle, c].as_mut_ptr(), 2, NONAME);
+        // }
+        for c in cycles {
+            max_cycle = self.section.emit_call("banshee_umax", [max_cycle, c]);
+        }
+
         // Store the cycle at which all dependencies are ready and the inst is executed
         LLVMBuildStore(self.builder, max_cycle, self.cycle_ptr());
 
