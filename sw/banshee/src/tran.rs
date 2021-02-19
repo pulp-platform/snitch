@@ -2104,6 +2104,69 @@ impl<'a> InstructionTranslator<'a> {
         }
         self.trace_emitted.set(true);
 
+        // Check for read dependencies
+        let accesses = self.trace_accesses.borrow();
+
+        for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
+            debug!("Trace accesses: {:?}", access);
+        }
+        // Handle this in the engine
+        // if is_wfi {
+        //     cycles.push(max_of_waking_core);
+        // }
+        let mut cycles = Vec::new();
+        for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
+            let cycle = match access {
+                TraceAccess::ReadReg(i) => LLVMBuildLoad(
+                    self.builder,
+                    self.reg_cycle_ptr(i as u32),
+                    format!("x{}\0", i).as_ptr() as *const _,
+                ),
+                TraceAccess::ReadFReg(i) => LLVMBuildLoad(
+                    self.builder,
+                    self.freg_cycle_ptr(i as u32),
+                    format!("f{}\0", i).as_ptr() as *const _,
+                ),
+                _ => continue,
+            };
+            cycles.push(cycle);
+        }
+
+        // Load the current cycle counter.
+        let mut max_cycle = LLVMBuildLoad(self.builder, self.cycle_ptr(), NONAME);
+        // Instruction takes at least one cycle even if all dependencies are ready
+        max_cycle = LLVMBuildAdd(
+            self.builder,
+            max_cycle,
+            LLVMConstInt(LLVMTypeOf(max_cycle), 1, 0),
+            NONAME,
+        );
+
+        // Store the cycle at which all dependencies are ready and the inst is executed
+        LLVMBuildStore(self.builder, max_cycle, self.cycle_ptr());
+
+        // Add latency of this instruction
+        let cycle = LLVMBuildAdd(
+            self.builder,
+            max_cycle,
+            LLVMConstInt(LLVMTypeOf(max_cycle), 3, 0),
+            NONAME,
+        );
+
+        // Write new dependencies
+        for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
+            match access {
+                // ReadMem => random latency,
+                TraceAccess::WriteReg(i) => {
+                    LLVMBuildStore(self.builder, cycle, self.reg_cycle_ptr(i as u32))
+                }
+                TraceAccess::WriteFReg(i) => {
+                    LLVMBuildStore(self.builder, cycle, self.freg_cycle_ptr(i as u32))
+                }
+                _ => continue,
+            };
+        }
+
         // Compose a list of accesses.
         let accesses = self.trace_accesses.borrow();
         let mut val_access = LLVMConstNull(LLVMArrayType(LLVMInt16Type(), accesses.len() as u32));

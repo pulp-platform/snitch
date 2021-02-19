@@ -611,8 +611,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
 
         // Assemble the trace line.
         let line = format!(
-            "{:08} {:04} {:08x}  {:38}  # DASM({:08x})",
-            self.state.instret, self.hartid, addr, args, inst
+            "{:08} {:08} {:04} {:08x}  {:38}  # DASM({:08x})",
+            self.state.cycle, self.state.instret, self.hartid, addr, args, inst
         );
         println!("{}", line);
     }
