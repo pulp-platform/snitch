@@ -2673,6 +2673,18 @@ impl<'a> InstructionTranslator<'a> {
         )
     }
 
+    unsafe fn reg_cycle_ptr(&self, r: u32) -> LLVMValueRef {
+        assert!(r < 32);
+        self.section.emit_call_with_name(
+            "banshee_reg_cycle_ptr",
+            [
+                self.section.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), r as u64, 0),
+            ],
+            &format!("ptr_x{}", r),
+        )
+    }
+
     unsafe fn freg_ptr(&self, r: u32) -> LLVMValueRef {
         assert!(r < 32);
         self.section.emit_call_with_name(
@@ -2685,9 +2697,26 @@ impl<'a> InstructionTranslator<'a> {
         )
     }
 
+    unsafe fn freg_cycle_ptr(&self, r: u32) -> LLVMValueRef {
+        assert!(r < 32);
+        self.section.emit_call_with_name(
+            "banshee_freg_cycle_ptr",
+            [
+                self.section.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), r as u64, 0),
+            ],
+            &format!("ptr_f{}", r),
+        )
+    }
+
     unsafe fn pc_ptr(&self) -> LLVMValueRef {
         self.section
             .emit_call_with_name("banshee_pc_ptr", [self.section.state_ptr], "ptr_pc")
+    }
+
+    unsafe fn cycle_ptr(&self) -> LLVMValueRef {
+        self.section
+            .emit_call_with_name("banshee_cycle_ptr", [self.section.state_ptr], "ptr_cycle")
     }
 
     unsafe fn instret_ptr(&self) -> LLVMValueRef {
