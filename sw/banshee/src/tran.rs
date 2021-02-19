@@ -143,6 +143,8 @@ pub struct ElfTranslator<'a> {
     pub inst_bbs: HashMap<u64, LLVMBasicBlockRef>,
     /// Generate instruction tracing code.
     pub trace: bool,
+    /// Generate instruction tracing code.
+    pub latency: bool,
     /// Start address of the fast local scratchpad.
     pub tcdm_start: u32,
     /// End address of the fast local scratchpad.
@@ -196,6 +198,7 @@ impl<'a> ElfTranslator<'a> {
             symbol_hints: Default::default(),
             inst_bbs: Default::default(),
             trace: engine.trace,
+            latency: engine.latency,
             tcdm_start: 0x000000,
             tcdm_end: 0x020000,
         }
@@ -2104,94 +2107,81 @@ impl<'a> InstructionTranslator<'a> {
         }
         self.trace_emitted.set(true);
 
-        // Check for read dependencies
-        let accesses = self.trace_accesses.borrow();
+        if self.section.elf.latency {
+            // Check for read dependencies
+            let accesses = self.trace_accesses.borrow();
 
-        for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
-            debug!("Trace accesses: {:?}", access);
-        }
-        // Handle this in the engine
-        // if is_wfi {
-        //     cycles.push(max_of_waking_core);
-        // }
-        let mut cycles = Vec::new();
-        for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
-            let cycle = match access {
-                TraceAccess::ReadReg(i) => LLVMBuildLoad(
-                    self.builder,
-                    self.reg_cycle_ptr(i as u32),
-                    format!("x{}\0", i).as_ptr() as *const _,
-                ),
-                TraceAccess::ReadFReg(i) => LLVMBuildLoad(
-                    self.builder,
-                    self.freg_cycle_ptr(i as u32),
-                    format!("f{}\0", i).as_ptr() as *const _,
-                ),
-                _ => continue,
-            };
-            cycles.push(cycle);
-        }
+            // Handle this in the engine
+            // if is_wfi {
+            //     cycles.push(max_of_waking_core);
+            // }
+            let mut cycles = Vec::new();
+            for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
+                let cycle = match access {
+                    TraceAccess::ReadReg(i) => LLVMBuildLoad(
+                        self.builder,
+                        self.reg_cycle_ptr(i as u32),
+                        format!("x{}\0", i).as_ptr() as *const _,
+                    ),
+                    TraceAccess::ReadFReg(i) => LLVMBuildLoad(
+                        self.builder,
+                        self.freg_cycle_ptr(i as u32),
+                        format!("f{}\0", i).as_ptr() as *const _,
+                    ),
+                    _ => continue,
+                };
+                cycles.push(cycle);
+            }
 
-        // Load the current cycle counter.
-        let mut max_cycle = LLVMBuildLoad(self.builder, self.cycle_ptr(), NONAME);
-        // Instruction takes at least one cycle even if all dependencies are ready
-        max_cycle = LLVMBuildAdd(
-            self.builder,
-            max_cycle,
-            LLVMConstInt(LLVMTypeOf(max_cycle), 1, 0),
-            NONAME,
-        );
+            // Load the current cycle counter.
+            let mut max_cycle = LLVMBuildLoad(self.builder, self.cycle_ptr(), NONAME);
+            // Instruction takes at least one cycle even if all dependencies are ready
+            max_cycle = LLVMBuildAdd(
+                self.builder,
+                max_cycle,
+                LLVMConstInt(LLVMTypeOf(max_cycle), 1, 0),
+                NONAME,
+            );
 
-        // // Calculate the maximum
-        // let name = "llvm.umax";
-        // let id = LLVMLookupIntrinsicID(name.as_ptr() as *const _, name.len());
-        // debug!("ID {}, name {}", id, name);
-        // let decl = LLVMGetIntrinsicDeclaration(
-        //     self.section.engine.module,
-        //     id,
-        //     [LLVMTypeOf(max_cycle)].as_mut_ptr(),
-        //     2,
-        // );
-        // for c in cycles {
-        //     max_cycle = LLVMBuildCall(self.builder, decl, [max_cycle, c].as_mut_ptr(), 2, NONAME);
-        // }
-        for c in cycles {
-            max_cycle = self.section.emit_call("banshee_umax", [max_cycle, c]);
-        }
+            // Calculate the maximum
+            for c in cycles {
+                max_cycle = self.section.emit_call("banshee_umax", [max_cycle, c]);
+            }
 
-        // Store the cycle at which all dependencies are ready and the inst is executed
-        LLVMBuildStore(self.builder, max_cycle, self.cycle_ptr());
+            // Store the cycle at which all dependencies are ready and the inst is executed
+            LLVMBuildStore(self.builder, max_cycle, self.cycle_ptr());
 
-        // Check if instruction is a memory access
-        let mem_access = accesses.iter().any(|(s, _)| match s {
-            TraceAccess::ReadMem => true,
-            TraceAccess::RMWMem => true,
-            _ => false,
-        });
+            // Check if instruction is a memory access
+            let mem_access = accesses.iter().any(|(s, _)| match s {
+                TraceAccess::ReadMem => true,
+                TraceAccess::RMWMem => true,
+                _ => false,
+            });
 
-        // TODO: Latency should depend on instruction
-        let latency = if mem_access { 3 } else { 1 };
+            // TODO: Latency should depend on instruction
+            let latency = if mem_access { 3 } else { 1 };
 
-        // Add latency of this instruction
-        let cycle = LLVMBuildAdd(
-            self.builder,
-            max_cycle,
-            LLVMConstInt(LLVMTypeOf(max_cycle), latency, 0),
-            NONAME,
-        );
+            // Add latency of this instruction
+            let cycle = LLVMBuildAdd(
+                self.builder,
+                max_cycle,
+                LLVMConstInt(LLVMTypeOf(max_cycle), latency, 0),
+                NONAME,
+            );
 
-        // Write new dependencies
-        for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
-            match access {
-                // ReadMem => random latency,
-                TraceAccess::WriteReg(i) => {
-                    LLVMBuildStore(self.builder, cycle, self.reg_cycle_ptr(i as u32))
-                }
-                TraceAccess::WriteFReg(i) => {
-                    LLVMBuildStore(self.builder, cycle, self.freg_cycle_ptr(i as u32))
-                }
-                _ => continue,
-            };
+            // Write new dependencies
+            for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
+                match access {
+                    // ReadMem => random latency,
+                    TraceAccess::WriteReg(i) => {
+                        LLVMBuildStore(self.builder, cycle, self.reg_cycle_ptr(i as u32))
+                    }
+                    TraceAccess::WriteFReg(i) => {
+                        LLVMBuildStore(self.builder, cycle, self.freg_cycle_ptr(i as u32))
+                    }
+                    _ => continue,
+                };
+            }
         }
 
         // Compose a list of accesses.

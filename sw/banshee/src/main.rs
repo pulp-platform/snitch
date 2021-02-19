@@ -76,6 +76,12 @@ fn main() -> Result<()> {
                 .help("Enable instruction tracing"),
         )
         .arg(
+            Arg::with_name("latency")
+                .long("latency")
+                .short("l")
+                .help("Enable instruction latency modeling"),
+        )
+        .arg(
             Arg::with_name("num-cores")
                 .long("num-cores")
                 .takes_value(true)
@@ -153,6 +159,7 @@ fn main() -> Result<()> {
     engine.opt_llvm = !matches.is_present("no-opt-llvm");
     engine.opt_jit = !matches.is_present("no-opt-jit");
     engine.trace = matches.is_present("trace");
+    engine.latency = matches.is_present("latency");
     matches
         .value_of("num-cores")
         .map(|x| engine.num_cores = x.parse().unwrap());

@@ -37,6 +37,8 @@ pub struct Engine {
     pub opt_jit: bool,
     /// Enable instruction tracing.
     pub trace: bool,
+    /// Enable instruction latency.
+    pub latency: bool,
     /// The base hartid.
     pub base_hartid: usize,
     /// The number of cores.
@@ -95,6 +97,7 @@ impl Engine {
             opt_llvm: true,
             opt_jit: true,
             trace: false,
+            latency: false,
             base_hartid: 0,
             num_cores: 1,
             num_clusters: 1,
