@@ -94,13 +94,6 @@ pub unsafe fn banshee_dma_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut DmaState {
     &mut cpu.state.dma
 }
 
-/// Get a pointer to the DMA state.
-#[no_mangle]
-#[inline(always)]
-pub unsafe fn banshee_umax<'a>(a: u64, b: u64) -> u64 {
-    std::cmp::max(a, b)
-}
-
 /// Write to an SSR control register.
 #[no_mangle]
 pub unsafe fn banshee_ssr_write_cfg(ssr: &mut SsrState, addr: u32, value: u32, mask: u32) {

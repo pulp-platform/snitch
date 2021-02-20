@@ -47,5 +47,3 @@ declare i32* @banshee_tcdm_ptr(%Cpu* %cpu)
 declare %SsrState* @banshee_ssr_ptr(%Cpu* %cpu, i32 %ssr)
 declare i32* @banshee_ssr_enabled_ptr(%Cpu* %cpu)
 declare %DmaState* @banshee_dma_ptr(%Cpu* %cpu)
-
-declare i64 @banshee_umax(i64 %a, i64 %b)

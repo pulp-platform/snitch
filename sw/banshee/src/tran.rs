@@ -2145,7 +2145,8 @@ impl<'a> InstructionTranslator<'a> {
 
             // Calculate the maximum
             for c in cycles {
-                max_cycle = self.section.emit_call("banshee_umax", [max_cycle, c]);
+                let is_umax = LLVMBuildICmp(self.builder, LLVMIntUGT, max_cycle, c, NONAME);
+                max_cycle = LLVMBuildSelect(self.builder, is_umax, max_cycle, c, NONAME);
             }
 
             // Store the cycle at which all dependencies are ready and the inst is executed
