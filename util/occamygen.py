@@ -43,12 +43,14 @@ def main():
     if not args.outdir.is_dir():
         exit("Out directory is not a valid path.")
 
-    outdir = args.outdir / "generated"
+    outdir = args.outdir / "src"
     outdir.mkdir(parents=True, exist_ok=True)
 
     with open(outdir / "occamy_cluster_wrapper.sv", "w") as f:
         f.write(occamy.render_wrapper())
 
+    with open(outdir / "memories.json", "w") as f:
+        f.write(occamy.cluster.memory_cfg())
 
 if __name__ == "__main__":
     main()

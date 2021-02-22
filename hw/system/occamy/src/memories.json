@@ -1,0 +1,41 @@
+[
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "icache data (hive 0)"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 128,
+        "words": 256
+    },
+    {
+        "byte_enable": true,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "tcdm"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 64,
+        "words": 512
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "icache tag (hive 0)"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 39,
+        "words": 256
+    }
+]
