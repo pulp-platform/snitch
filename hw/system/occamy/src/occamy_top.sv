@@ -37,8 +37,8 @@ module occamy_top
   axi_narrow_req_t axi_narrow_to_wide_id_remap_req;
   axi_narrow_resp_t axi_narrow_to_wide_id_remap_rsp;
 
-  localparam WideNumMstPorts = NrS1Quadrants + 1;
-  localparam WideNumSlvPorts = NrS1Quadrants + 2;
+  localparam int unsigned WideNumMstPorts = NrS1Quadrants + 1;
+  localparam int unsigned WideNumSlvPorts = NrS1Quadrants + 2;
   localparam bit [WideNumSlvPorts-1:0][WideNumMstPorts-1:0] WideConnectivity = '1;
 
 
@@ -141,8 +141,8 @@ module occamy_top
     .mst_resp_i (axi_narrow_wide_id_rsp)
   );
 
-  localparam NarrowNumMstPorts = NrS1Quadrants + 1;
-  localparam NarrowNumSlvPorts = NrS1Quadrants;
+  localparam int unsigned NarrowNumMstPorts = NrS1Quadrants + 1;
+  localparam int unsigned NarrowNumSlvPorts = NrS1Quadrants;
   localparam bit [NarrowNumSlvPorts-1:0][NarrowNumMstPorts-1:0] NarrowConnectivity = '1;
 
   xbar_rule_t [NrS1Quadrants-1:0] narrow_addr_map;
@@ -157,7 +157,9 @@ module occamy_top
 
   // The last master is the default port.
   logic [NarrowNumSlvPorts-1:0][$clog2(NarrowNumMstPorts)-1:0] narrow_default_port;
-  for (genvar i = 0; i < NarrowNumSlvPorts; i++) assign narrow_default_port[i] = NarrowNumMstPorts - 1;
+  for (genvar i = 0; i < NarrowNumSlvPorts; i++) begin : gen_narrow_default_port
+    assign narrow_default_port[i] = NarrowNumMstPorts - 1;
+  end
 
   /// Narrow crossbar.
   axi_xp #(

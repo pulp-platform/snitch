@@ -7,18 +7,18 @@
 package occamy_pkg;
 
   // Re-exports
-  localparam AddrWidth = occamy_cluster_pkg::AddrWidth;
-  localparam NarrowDataWidth = occamy_cluster_pkg::NarrowDataWidth;
-  localparam NarrowIdWidth = occamy_cluster_pkg::NarrowIdWidthOut;
-  localparam WideDataWidth = occamy_cluster_pkg::WideDataWidth;
-  localparam WideIdWidth = occamy_cluster_pkg::WideIdWidthOut;
-  localparam UserWidth = occamy_cluster_pkg::UserWidth;
+  localparam int unsigned AddrWidth = occamy_cluster_pkg::AddrWidth;
+  localparam int unsigned NarrowDataWidth = occamy_cluster_pkg::NarrowDataWidth;
+  localparam int unsigned NarrowIdWidth = occamy_cluster_pkg::NarrowIdWidthOut;
+  localparam int unsigned WideDataWidth = occamy_cluster_pkg::WideDataWidth;
+  localparam int unsigned WideIdWidth = occamy_cluster_pkg::WideIdWidthOut;
+  localparam int unsigned UserWidth = occamy_cluster_pkg::UserWidth;
 
-  localparam NrClustersS1Quadrant = 4;
-  localparam NrCoresCluster = occamy_cluster_pkg::NrCores;
-  localparam NrCoresS1Quadrant = NrClustersS1Quadrant * NrCoresCluster;
+  localparam int unsigned NrClustersS1Quadrant = 4;
+  localparam int unsigned NrCoresCluster = occamy_cluster_pkg::NrCores;
+  localparam int unsigned NrCoresS1Quadrant = NrClustersS1Quadrant * NrCoresCluster;
 
-  localparam NrS1Quadrants = 8;
+  localparam int unsigned NrS1Quadrants = 8;
 
   typedef logic [5:0] tile_id_t;
 

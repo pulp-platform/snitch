@@ -52,5 +52,6 @@ def main():
     with open(outdir / "memories.json", "w") as f:
         f.write(occamy.cluster.memory_cfg())
 
+
 if __name__ == "__main__":
     main()

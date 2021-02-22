@@ -12,7 +12,7 @@ dependencies:
   snitch-cluster: {path: ../../ip/snitch_cluster}
 
 export_include_dirs:
-  - include
+- include
 
 sources:
 # Level 0:

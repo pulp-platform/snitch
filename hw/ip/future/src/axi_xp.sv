@@ -1,13 +1,6 @@
-// Copyright (c) 2020 ETH Zurich, University of Bologna
-//
-// Copyright and related rights are licensed under the Solderpad Hardware
-// License, Version 0.51 (the "License"); you may not use this file except in
-// compliance with the License.  You may obtain a copy of the License at
-// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
-// or agreed to in writing, software, hardware and materials distributed under
-// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
 //
 // Authors:
 // - Andreas Kurth <akurth@iis.ee.ethz.ch>
@@ -109,7 +102,7 @@ module axi_xp #(
   xbar_req_t  [NumMstPorts-1:0] xbar_req;
   xbar_resp_t [NumMstPorts-1:0] xbar_resp;
 
-  localparam axi_pkg::xbar_cfg_t xbar_cfg = '{
+  localparam axi_pkg::xbar_cfg_t XbarCfg = '{
     NoSlvPorts:         NumSlvPorts,
     NoMstPorts:         NumMstPorts,
     MaxMstTrans:        AxiMaxTxnsPerId,
@@ -124,7 +117,7 @@ module axi_xp #(
   };
 
   axi_xbar #(
-    .Cfg            ( xbar_cfg      ),
+    .Cfg            ( XbarCfg       ),
     .Connectivity   ( Connectivity  ),
     .slv_aw_chan_t  ( aw_t          ),
     .mst_aw_chan_t  ( xbar_aw_t     ),

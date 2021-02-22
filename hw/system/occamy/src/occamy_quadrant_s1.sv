@@ -21,7 +21,8 @@ module occamy_quadrant_s1
 );
 
   /// Disable the loopback.
-  function bit [NrClustersS1Quadrant:0][NrClustersS1Quadrant:0] disable_loopback(int unsigned n);
+  function automatic bit [NrClustersS1Quadrant:0][NrClustersS1Quadrant:0]
+            disable_loopback(int unsigned n);
     bit [NrClustersS1Quadrant:0][NrClustersS1Quadrant:0] Connectivity;
     // Disable loop-back.
     for (int i = 0; i < NrClustersS1Quadrant+1; i++) begin
@@ -33,7 +34,8 @@ module occamy_quadrant_s1
     return Connectivity;
   endfunction
 
-  localparam bit [NrClustersS1Quadrant:0][NrClustersS1Quadrant:0] Connectivity = disable_loopback(NrClustersS1Quadrant+1);
+  localparam bit [NrClustersS1Quadrant:0][NrClustersS1Quadrant:0] Connectivity
+                                        = disable_loopback(NrClustersS1Quadrant+1);
 
   axi_wide_req_t [NrClustersS1Quadrant-1:0] wide_in_req;
   axi_wide_resp_t [NrClustersS1Quadrant-1:0] wide_in_resp;

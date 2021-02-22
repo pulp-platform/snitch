@@ -1,13 +1,6 @@
-// Copyright (c) 2014-2019 ETH Zurich, University of Bologna
-//
-// Copyright and related rights are licensed under the Solderpad Hardware
-// License, Version 0.51 (the "License"); you may not use this file except in
-// compliance with the License.  You may obtain a copy of the License at
-// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
-// or agreed to in writing, software, hardware and materials distributed under
-// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
 //
 // Andreas Kurth <akurth@iis.ee.ethz.ch>
 // Florian Zaruba <zarubaf@iis.ee.ethz.ch>
@@ -193,12 +186,13 @@ module axi_id_remap #(
   );
 
   // Zero-extend output IDs if the output IDs is are wider than the IDs from the tables.
-  localparam ZeroWidth = AxiMstPortIdWidth - IdxWidth;
+  localparam int unsigned ZeroWidth = AxiMstPortIdWidth - IdxWidth;
   assign mst_req_o.ar.id = {{ZeroWidth{1'b0}}, rd_push_oup_id};
   assign mst_req_o.aw.id = {{ZeroWidth{1'b0}}, wr_push_oup_id};
 
   // Handle requests.
-  enum logic [1:0] {Ready, HoldAR, HoldAW, HoldAx} state_d, state_q;
+  typedef enum logic [1:0] {Ready, HoldAR, HoldAW, HoldAx} state_t;
+  state_t state_d, state_q;
   idx_t ar_id_d, ar_id_q,
         aw_id_d, aw_id_q;
   always_comb begin

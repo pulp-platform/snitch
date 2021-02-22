@@ -1,13 +1,6 @@
-// Copyright (c) 2020 ETH Zurich, University of Bologna
-//
-// Copyright and related rights are licensed under the Solderpad Hardware
-// License, Version 0.51 (the "License"); you may not use this file except in
-// compliance with the License.  You may obtain a copy of the License at
-// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
-// or agreed to in writing, software, hardware and materials distributed under
-// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
 //
 // Authors:
 // - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
@@ -143,7 +136,8 @@ module axi_id_serialize #(
   `AXI_TYPEDEF_R_CHAN_T(mst_r_t, data_t, mst_id_t, user_t)
 
   select_t slv_aw_select, slv_ar_select;
-  assign slv_aw_select = select_t'(slv_req_i.aw.id % AxiMstPortMaxUniqIds); // TODO: customizable base
+  // TODO: customizable base
+  assign slv_aw_select = select_t'(slv_req_i.aw.id % AxiMstPortMaxUniqIds);
   assign slv_ar_select = select_t'(slv_req_i.ar.id % AxiMstPortMaxUniqIds);
 
   slv_req_t  [AxiMstPortMaxUniqIds-1:0] to_serializer_reqs;
