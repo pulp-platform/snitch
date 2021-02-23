@@ -12,7 +12,7 @@ Disassembly of section .text:
 
 80010000 <_start>:
 80010000:	00001197          	auipc	gp,0x1
-80010004:	8c018193          	addi	gp,gp,-1856 # 800108c0 <__global_pointer$>
+80010004:	8d018193          	addi	gp,gp,-1840 # 800108d0 <__global_pointer$>
 80010008:	0040006f          	j	8001000c <reset_vector>
 
 8001000c <reset_vector>:
@@ -58,35 +58,36 @@ Disassembly of section .text:
 Disassembly of section .text.startup:
 
 8001008c <main>:
-8001008c:	00000797          	auipc	a5,0x0
-80010090:	0347b707          	fld	fa4,52(a5) # 800100c0 <main+0x34>
-80010094:	00000797          	auipc	a5,0x0
-80010098:	0347b687          	fld	fa3,52(a5) # 800100c8 <main+0x3c>
-8001009c:	d20007d3          	fcvt.d.w	fa5,zero
-800100a0:	0012808b          	0x12808b
-800100a4:	02e7f7d3          	fadd.d	fa5,fa5,fa4
-800100a8:	12d7f7d3          	fmul.d	fa5,fa5,fa3
-800100ac:	00000797          	auipc	a5,0x0
-800100b0:	0247b707          	fld	fa4,36(a5) # 800100d0 <main+0x44>
-800100b4:	a2e7a553          	feq.d	a0,fa5,fa4
-800100b8:	00154513          	xori	a0,a0,1
-800100bc:	00008067          	ret
+8001008c:	00300293          	li	t0,3
+80010090:	00000797          	auipc	a5,0x0
+80010094:	0407b707          	fld	fa4,64(a5) # 800100d0 <main+0x44>
+80010098:	00000797          	auipc	a5,0x0
+8001009c:	0407b687          	fld	fa3,64(a5) # 800100d8 <main+0x4c>
+800100a0:	d20007d3          	fcvt.d.w	fa5,zero
+800100a4:	0012808b          	0x12808b
+800100a8:	02e7f7d3          	fadd.d	fa5,fa5,fa4
+800100ac:	12d7f7d3          	fmul.d	fa5,fa5,fa3
+800100b0:	00000797          	auipc	a5,0x0
+800100b4:	0307b707          	fld	fa4,48(a5) # 800100e0 <main+0x54>
+800100b8:	a2e7a553          	feq.d	a0,fa5,fa4
+800100bc:	00154513          	xori	a0,a0,1
+800100c0:	00008067          	ret
 
 Disassembly of section .sdata:
 
-800100c0 <__bss_end-0x18>:
-800100c0:	0000                	unimp
-800100c2:	0000                	unimp
-800100c4:	0000                	unimp
-800100c6:	3ff0                	fld	fa2,248(a5)
-800100c8:	0000                	unimp
-800100ca:	0000                	unimp
-800100cc:	0000                	unimp
-800100ce:	4000                	lw	s0,0(s0)
+800100d0 <__bss_end-0x18>:
 800100d0:	0000                	unimp
 800100d2:	0000                	unimp
 800100d4:	0000                	unimp
-800100d6:	403e                	0x403e
+800100d6:	3ff0                	fld	fa2,248(a5)
+800100d8:	0000                	unimp
+800100da:	0000                	unimp
+800100dc:	0000                	unimp
+800100de:	4000                	lw	s0,0(s0)
+800100e0:	0000                	unimp
+800100e2:	0000                	unimp
+800100e4:	0000                	unimp
+800100e6:	403e                	0x403e
 
 Disassembly of section .comment:
 
@@ -96,18 +97,18 @@ Disassembly of section .comment:
    6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
    a:	3120                	fld	fs0,96(a0)
    c:	2e30                	fld	fa2,88(a2)
-   e:	2e32                	fld	ft8,264(sp)
+   e:	2e31                	jal	32a <l1_alloc_base+0x31a>
   10:	0030                	addi	a2,sp,8
 
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-   0:	3341                	jal	fffffd80 <fake_uart+0x3ffffd80>
+   0:	2f41                	jal	790 <l1_alloc_base+0x780>
    2:	0000                	unimp
    4:	7200                	flw	fs0,32(a2)
    6:	7369                	lui	t1,0xffffa
    8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
-   c:	0029                	c.nop	10
+   c:	0025                	c.nop	9
    e:	0000                	unimp
   10:	1004                	addi	s1,sp,32
   12:	7205                	lui	tp,0xfffe1
@@ -121,5 +122,3 @@ Disassembly of section .riscv.attributes:
   26:	3266                	fld	ft4,120(sp)
   28:	3070                	fld	fa2,224(s0)
   2a:	645f 7032 0030      	0x307032645f
-  30:	0108                	addi	a0,sp,128
-  32:	0b0a                	slli	s6,s6,0x2

@@ -99,12 +99,12 @@ Disassembly of section .text:
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-   0:	3141                	jal	fffffc80 <fake_uart+0x3ffffc80>
+   0:	2d41                	jal	690 <l1_alloc_base+0x690>
    2:	0000                	unimp
    4:	7200                	flw	fs0,32(a2)
    6:	7369                	lui	t1,0xffffa
    8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x14>
-   c:	00000027          	0x27
+   c:	00000023          	sb	zero,0(zero) # 0 <l1_alloc_base>
   10:	7205                	lui	tp,0xfffe1
   12:	3376                	fld	ft6,376(sp)
   14:	6932                	flw	fs2,12(sp)
@@ -116,5 +116,3 @@ Disassembly of section .riscv.attributes:
   24:	3266                	fld	ft4,120(sp)
   26:	3070                	fld	fa2,224(s0)
   28:	645f 7032 0030      	0x307032645f
-  2e:	0108                	addi	a0,sp,128
-  30:	0b0a                	slli	s6,s6,0x2
