@@ -9,10 +9,11 @@ set(SNITCH_SIMULATOR "" CACHE PATH "Command to run a binary in an RTL simulation
 set(SNITCH_TEST_PREFIX "")
 message(STATUS "Check for Banshee")
 execute_process(COMMAND ${SNITCH_BANSHEE} --version OUTPUT_VARIABLE SNITCH_BANSHEE_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-message(STATUS "Using simulator: ${SNITCH_BANSHEE} - version ${SNITCH_BANSHEE_VERSION}")
+message(STATUS "Using Banshee simulator: ${SNITCH_BANSHEE} - version ${SNITCH_BANSHEE_VERSION}")
 if (SNITCH_SIMULATOR)
     message(STATUS "Using RTL simulator: ${SNITCH_SIMULATOR}")
 endif()
+message(STATUS "Using runtime: ${SNITCH_RUNTIME}")
 
 macro(add_snitch_library name)
     add_library(${ARGV})
