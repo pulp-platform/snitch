@@ -22,6 +22,11 @@ DASM 	       ?= spike-dasm
 FESVR          ?= ${MKFILE_DIR}work
 FESVR_VERSION  ?= 35d50bc40e59ea1d5566fbd3d9226023821b1bb6
 
+# uncomment, if questasim should be run in 64-bit mode
+QUESTA_64BIT	= -64
+VSIM      		= vsim ${QUESTA_64BIT}
+VLOG      		= vlog ${QUESTA_64BIT}
+
 # Source code management. Prepare a file of all input source files.
 MATCH_END := '/+incdir+/ s/$$/\/*\/*/'
 MATCH_BGN := 's/+incdir+//g'
@@ -49,6 +54,7 @@ VLOG_FLAGS 	  += -svinputport=compat
 VLOG_FLAGS 	  += -override_timescale 1ns/1ps
 VLOG_FLAGS 	  += -suppress 2583
 VLOG_FLAGS 	  += -suppress 13314
+VLOG_FLAGS 	  += ${QUESTA_64BIT}
 VSIM_BENDER   += -t test -t rtl -t simulation -t vsim
 VSIM_SOURCES  := $(shell ${BENDER} script flist ${VSIM_BENDER} | ${SED_SRCS})
 
@@ -119,15 +125,15 @@ bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/comm
 ${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc
 	vlib $(dir $@)
 	${BENDER} script vsim ${VSIM_BENDER} --vlog-arg="${VLOG_FLAGS} -work $(dir $@) " > $@
-	echo 'vlog -work $(dir $@) test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc -ccflags "-std=c++14 -I${MKFILE_DIR}/test -I${FESVR}/include"' >> $@
+	echo '${VLOG} -work $(dir $@) test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc -ccflags "-std=c++14 -I${MKFILE_DIR}/test -I${FESVR}/include"' >> $@
 	echo 'return 0' >> $@
 
 bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
-	vsim -c -do "source $<; quit" | tee $(dir $<)vsim.log
+	${VSIM} -c -do "source $<; quit" | tee $(dir $<)vsim.log
 	@! grep -P "Errors: [1-9]*," $(dir $<)vsim.log
 	@mkdir -p bin
 	@echo "#!/bin/bash" > $@
-	@echo 'vsim +permissive -work ${VSIM_BUILDDIR} -c \
+	@echo '${VSIM} +permissive -work ${VSIM_BUILDDIR} -c \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr" \
 				-t 1ps -voptargs=+acc tb_bin +permissive-off ++$$1 \
 				-do "log -r /*; run -a"' >> $@
