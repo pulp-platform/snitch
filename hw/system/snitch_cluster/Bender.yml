@@ -14,9 +14,14 @@ dependencies:
 
 sources:
 # Level 0:
-- generated/snitch_cluster_wrapper.sv
+- include_dirs:
+  - ../../vendor/pulp_platform_axi/include
+  files:
+  - generated/snitch_cluster_wrapper.sv
 # Level 1:
 - target: any(simulation, verilator)
+  include_dirs:
+  - ../../vendor/pulp_platform_axi/include
   files:
   - test/tb_memory.sv
   - test/testharness.sv
