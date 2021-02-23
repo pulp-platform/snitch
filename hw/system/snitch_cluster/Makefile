@@ -8,15 +8,14 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../..
+
+include $(ROOT)/util/Makefrag
+
 CFG 		?= cfg/cluster.default.hjson
 CLUSTER_GEN ?= $(ROOT)/util/clustergen.py
 CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
 
-BENDER		   ?= bender
-VLT			   ?= verilator
 # Support for local override
-VERILATOR_ROOT ?= $$(dirname $$(which $(VLT)))/../share/verilator
-VLT_ROOT	   ?= ${VERILATOR_ROOT}
 DASM 	       ?= spike-dasm
 # fesvr is being installed here
 FESVR          ?= ${MKFILE_DIR}work
@@ -27,27 +26,7 @@ QUESTA_64BIT	= -64
 VSIM      		= vsim ${QUESTA_64BIT}
 VLOG      		= vlog ${QUESTA_64BIT}
 
-# Source code management. Prepare a file of all input source files.
-MATCH_END := '/+incdir+/ s/$$/\/*\/*/'
-MATCH_BGN := 's/+incdir+//g'
-SED_SRCS  := sed -e ${MATCH_END} -e ${MATCH_BGN}
-TB_SRCS   := $(wildcard test/*.sv)
-
-VLT_BUILDDIR := work-vlt
-VLT_FLAGS    += -Wno-BLKANDNBLK
-VLT_FLAGS    += -Wno-LITENDIAN
-VLT_FLAGS    += -Wno-CASEINCOMPLETE
-VLT_FLAGS    += -Wno-CMPCONST
-VLT_FLAGS    += -Wno-WIDTH
-VLT_FLAGS    += -Wno-WIDTHCONCAT
-VLT_FLAGS    += -Wno-UNSIGNED
-VLT_FLAGS    += -Wno-UNOPTFLAT
-VLT_FLAGS    += -Wno-fatal
 VLT_FLAGS    += --trace
-VLT_FLAGS    += --unroll-count 1024
-VLT_BENDER   += -t rtl
-VLT_SOURCES  := $(shell ${BENDER} script flist ${VLT_BENDER} | ${SED_SRCS})
-VLT_CFLAGS   ?= -std=c++14 -pthread -I ${VLT_BUILDDIR} -I $(VLT_ROOT)/include -I $(VLT_ROOT)/include/vltstd -I $(FESVR)/include
 
 VSIM_BUILDDIR := work-vsim
 VLOG_FLAGS 	  += -svinputport=compat
@@ -88,12 +67,7 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 # Verilator #
 #############
 ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
-	mkdir -p $(dir $@)
-	bender script verilator ${VLT_BENDER} > $(dir $@)files
-	$(VLT) \
-		--Mdir $(dir $@) -f $(dir $@)files $(VLT_FLAGS) \
-		-j $(shell nproc) --cc --build --top-module testharness
-	touch $@
+	$(call VERILATE,testharness)
 
 verilate: ${VLT_BUILDDIR}/verilate
 
@@ -149,6 +123,7 @@ work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
 	$@
 
 bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch_cluster_wrapper.sv test/common_lib.cc generated/bootdata.cc
+	mkdir -p bin
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/snitch_cluster.vcs -cc $(CC) -cpp $(CXX) \
 		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc \
 		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include" -LDFLAGS "-L${FESVR}/lib" -lfesvr

@@ -11,3 +11,8 @@ dependencies:
 sources:
 # Level 0:
 - src/axi_to_mem.sv
+- src/axi_id_remap.sv
+- src/axi_id_serialize.sv
+# Level 1:
+- src/axi_iw_converter.sv
+- src/axi_xp.sv
