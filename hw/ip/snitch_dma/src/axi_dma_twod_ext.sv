@@ -4,6 +4,8 @@
 
 // Thomas Benz <tbenz@ethz.ch>
 
+`include "common_cells/registers.svh"
+
 /// Accept 2D requests and flatten them to 1D requests.
 module axi_dma_twod_ext #(
     parameter int unsigned ADDR_WIDTH      = -1,
