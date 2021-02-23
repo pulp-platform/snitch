@@ -9,13 +9,19 @@ MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../..
 
+include $(ROOT)/util/Makefrag
+
 VSIM_BENDER   += -t test -t rtl -t simulation -t vsim
 VSIM_SOURCES  := $(shell ${BENDER} script flist ${VSIM_BENDER} | ${SED_SRCS})
 
-include $(ROOT)/util/Makefrag
-
 ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 	$(call VERILATE,occamy_top)
+
+##########
+# Source #
+##########
+src/occamy_top.sv src/occamy_pkg.sv:
+	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --outdir . src/occamy_top.sv src/occamy_pkg.sv
 
 #############
 # Verilator #

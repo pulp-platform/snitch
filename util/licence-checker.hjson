@@ -15,6 +15,9 @@
         # Exclude anything in vendored directories
         '*/vendor/*',
         'util/lowrisc_misc-linters/*',
-        'sw/banshee/tests/runtime/printf.*'
+        'sw/banshee/tests/runtime/printf.*',
+        // Do not check solder snippets, they generally do not contain valid
+        // stand-alone code.
+        'util/solder/*.sv.tpl'
     ],
 }
