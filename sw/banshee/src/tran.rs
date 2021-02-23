@@ -59,7 +59,7 @@ impl SequencerContext {
         SequencerContext {
             active: false,
             max_inst: 0,
-            max_rpt_ref: unsafe {LLVMConstInt(LLVMInt32Type(), 0 as u64, 0)},
+            max_rpt_ref: unsafe { LLVMConstInt(LLVMInt32Type(), 0 as u64, 0) },
             is_outer: false,
             stagger_max: 0,
             stagger_mask: 0,
@@ -419,9 +419,7 @@ impl<'a> ElfTranslator<'a> {
         let const_zero_32 = LLVMConstInt(LLVMInt32Type(), 0, 0);
         let rpt_ptr_ref = LLVMBuildAlloca(builder, LLVMInt32Type(), NONAME);
         LLVMBuildStore(builder, const_zero_32, rpt_ptr_ref);
-        let fseq_iter = SequencerIterators {
-            rpt_ptr_ref,
-        };
+        let fseq_iter = SequencerIterators { rpt_ptr_ref };
 
         // Gather the set of executable addresses.
         let inst_addrs: BTreeSet<u64> = self
@@ -655,12 +653,16 @@ impl<'a> SectionTranslator<'a> {
     }
 
     /// Emit the code for the remaining iterations of a buffered FREP loop.
-    unsafe fn emit_frep(&self,  inst_index: &mut u32, fseq: &SequencerContext, curr_addr: u64) -> Result<()> {
+    unsafe fn emit_frep(
+        &self,
+        inst_index: &mut u32,
+        fseq: &SequencerContext,
+        curr_addr: u64,
+    ) -> Result<()> {
         // Create dummy sequencer context for inner use
         let mut fseq_inner = SequencerContext::new();
 
         if fseq.is_outer {
-
             // Create basic block for first increment-and-branch ahead of time
             let mut bb_incr_branch = LLVMCreateBasicBlockInContext(self.engine.context, NONAME);
 
@@ -701,19 +703,28 @@ impl<'a> SectionTranslator<'a> {
                 for &(addr, inst_nonstag) in fseq.inst_buffer[0..=(fseq.max_inst as usize)].iter() {
                     // Read register fields
                     let inst_raw = inst_nonstag.raw();
-                    let mut rd =  (inst_raw >> 7) & 0x1f;
+                    let mut rd = (inst_raw >> 7) & 0x1f;
                     let mut rs1 = (inst_raw >> 15) & 0x1f;
                     let mut rs2 = (inst_raw >> 20) & 0x1f;
                     let mut rs3 = (inst_raw >> 27) & 0x1f;
                     // Stagger register fields
-                    if fseq.stagger_mask & 0b0001 != 0 {rd  = (rd  + stg_offs) & 0x1f;}
-                    if fseq.stagger_mask & 0b0010 != 0 {rs1 = (rs1 + stg_offs) & 0x1f;}
-                    if fseq.stagger_mask & 0b0100 != 0 {rs2 = (rs2 + stg_offs) & 0x1f;}
-                    if fseq.stagger_mask & 0b1000 != 0 {rs3 = (rs3 + stg_offs) & 0x1f;}
+                    if fseq.stagger_mask & 0b0001 != 0 {
+                        rd = (rd + stg_offs) & 0x1f;
+                    }
+                    if fseq.stagger_mask & 0b0010 != 0 {
+                        rs1 = (rs1 + stg_offs) & 0x1f;
+                    }
+                    if fseq.stagger_mask & 0b0100 != 0 {
+                        rs2 = (rs2 + stg_offs) & 0x1f;
+                    }
+                    if fseq.stagger_mask & 0b1000 != 0 {
+                        rs3 = (rs3 + stg_offs) & 0x1f;
+                    }
                     // Assemble, return new instruction
-                    const MREST : u32 = 0xffff_ffff ^ ( (0x1f << 7) | (0x1f << 15) | (0x1f << 20) | (0x1f << 27) );
+                    const MREST: u32 =
+                        0xffff_ffff ^ ((0x1f << 7) | (0x1f << 15) | (0x1f << 20) | (0x1f << 27));
                     let inst = riscv::parse_u32(
-                        (inst_raw & MREST) | (rd << 7) | (rs1 << 15) | (rs2 << 20) | (rs3 << 27)
+                        (inst_raw & MREST) | (rd << 7) | (rs1 << 15) | (rs2 << 20) | (rs3 << 27),
                     );
 
                     // Create translator for staggered instruction
