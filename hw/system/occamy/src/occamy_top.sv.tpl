@@ -69,34 +69,7 @@ module occamy_top
   //   CROSSBARS   //
   ///////////////////
 
-  axi_lite_a34_d32_req_t [0:0] io_periph_xbar_in_req;
-  axi_lite_a34_d32_rsp_t [0:0] io_periph_xbar_in_rsp;
-  axi_lite_a34_d32_req_t [7:0] io_periph_xbar_out_req;
-  axi_lite_a34_d32_rsp_t [7:0] io_periph_xbar_out_rsp;
-
-  // The `io_periph_xbar` crossbar.
-  axi_lite_xbar #(
-    .Cfg       ( IoPeriphXbarCfg ),
-    .aw_chan_t ( axi_lite_a34_d32_aw_t ),
-    .w_chan_t  ( axi_lite_a34_d32_w_t ),
-    .b_chan_t  ( axi_lite_a34_d32_b_t ),
-    .ar_chan_t ( axi_lite_a34_d32_ar_t ),
-    .r_chan_t  ( axi_lite_a34_d32_r_t ),
-    .req_t     ( axi_lite_a34_d32_req_t ),
-    .resp_t    ( axi_lite_a34_d32_rsp_t ),
-    .rule_t    ( xbar_rule_34_t )
-  ) i_io_periph_xbar (
-    .clk_i  ( clk_periph ),
-    .rst_ni ( rst_periph_n ),
-    .test_i ( test_mode_i ),
-    .slv_ports_req_i  ( io_periph_xbar_in_req  ),
-    .slv_ports_resp_o ( io_periph_xbar_in_rsp  ),
-    .mst_ports_req_o  ( io_periph_xbar_out_req ),
-    .mst_ports_resp_i ( io_periph_xbar_out_rsp ),
-    .addr_map_i       ( IoPeriphXbarAddrmap ),
-    .en_default_mst_port_i ( '1 ),
-    .default_mst_port_i    ( '0 )
-  );
+  ${module}
 
   /// Wide crossbar.
   axi_xp #(

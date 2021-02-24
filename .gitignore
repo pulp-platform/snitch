@@ -7,3 +7,5 @@ __pycache__
 modelsim.ini
 *stacktrace*
 transcript
+
+gmon.out
