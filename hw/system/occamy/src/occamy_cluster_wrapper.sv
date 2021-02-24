@@ -175,7 +175,7 @@ module occamy_cluster_wrapper (
     .RegisterTCDMCuts (0),
     .RegisterExtWide (0),
     .RegisterExtNarrow (0),
-    .RegisterFPUReq (0),
+    .RegisterFPUReq (1),
     .RegisterSequencer (0),
     .IsoCrossing (0),
     .NarrowXbarLatency (axi_pkg::CUT_ALL_PORTS),
