@@ -25,7 +25,7 @@ src/riscv.rs: $(OPCODES_PATH) $(PARSE_OPCODES)
 ###########################
 
 TESTS_DIR ?= tests/bin
-TESTS_BLACKLIST += dma_simple frep_multiple matmul_ssr_frep
+TESTS_BLACKLIST += dma_simple matmul_ssr_frep
 TESTS += $(patsubst $(TESTS_DIR)/%,%,$(wildcard $(TESTS_DIR)/*))
 TEST_TARGETS = $(patsubst %,test-%,$(TESTS))
 LOG_FAILED ?= /tmp/banshee_tests_failed
@@ -33,6 +33,8 @@ LOG_TOTAL ?= /tmp/banshee_tests_total
 
 TARGET_DIR ?= $(shell cargo metadata --format-version 1 | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')
 BANSHEE ?= $(TARGET_DIR)/debug/banshee
+
+SNITCH_LOG ?= info
 
 test: test-info $(TEST_TARGETS)
 	@echo
@@ -64,7 +66,7 @@ define test_template
 		LOGFILE=`mktemp`; \
 		if [ ! -z $(filter $(1),$(TESTS_BLACKLIST)) ]; then \
 			echo "$$CMD ... `tput setaf 3`ignored`tput sgr0`"; \
-		elif ! env SNITCH_LOG=debug $$CMD &> $$LOGFILE; then \
+		elif ! env SNITCH_LOG=$(SNITCH_LOG) $$CMD &> $$LOGFILE; then \
 			echo "$$CMD ... `tput setaf 1`FAILED`tput sgr0`"; \
 			cat $$LOGFILE; \
 			echo $$CMD >>$(LOG_FAILED); \

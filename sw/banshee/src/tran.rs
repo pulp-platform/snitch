@@ -29,8 +29,6 @@ const SEQ_BUFFER_LEN: u8 = 16;
 
 /// The sequencer's JIT iterators for loop emulation.
 struct SequencerIterators {
-    /// A u8* pointing to the current stagger offset.
-    stg_ptr_ref: LLVMValueRef,
     /// A u32* pointing to the repetition index.
     rpt_ptr_ref: LLVMValueRef,
 }
@@ -50,12 +48,26 @@ struct SequencerContext {
     /// A mask indicating which register numbers to stagger.
     stagger_mask: u8,
     /// The addresses for the instruction basic blocks buffered.
-    inst_buffer: [u64; SEQ_BUFFER_LEN as usize],
+    inst_buffer: [(u64, riscv::Format); SEQ_BUFFER_LEN as usize],
     /// The current buffer insertion point.
     buffer_pos: u8,
 }
 
 impl SequencerContext {
+    /// Create a new sequencer context.
+    fn new() -> Self {
+        SequencerContext {
+            active: false,
+            max_inst: 0,
+            max_rpt_ref: unsafe { LLVMConstInt(LLVMInt32Type(), 0 as u64, 0) },
+            is_outer: false,
+            stagger_max: 0,
+            stagger_mask: 0,
+            inst_buffer: [(0, riscv::Format::Illegal(0)); SEQ_BUFFER_LEN as usize],
+            buffer_pos: 0,
+        }
+    }
+
     /// Initialize a sequence job.
     fn init_rep(
         &mut self,
@@ -88,10 +100,10 @@ impl SequencerContext {
     }
 
     /// Push an instruction into the sequence buffer.
-    fn push_rep_instruction(&mut self, inst_bb_addr: u64) -> Result<()> {
+    fn push_rep_instruction(&mut self, addr: u64, inst: riscv::Format) -> Result<()> {
         if self.active {
             if self.buffer_pos <= self.max_inst {
-                self.inst_buffer[self.buffer_pos as usize] = inst_bb_addr;
+                self.inst_buffer[self.buffer_pos as usize] = (addr, inst);
                 self.buffer_pos += 1;
                 Ok(())
             } else {
@@ -106,7 +118,7 @@ impl SequencerContext {
         }
     }
 
-    // Whether repetition body is complete and ready for loop emission.
+    /// Whether repetition body is complete and ready for loop emission.
     fn is_body_complete(&self) -> bool {
         self.buffer_pos == self.max_inst + 1
     }
@@ -407,10 +419,7 @@ impl<'a> ElfTranslator<'a> {
         let const_zero_32 = LLVMConstInt(LLVMInt32Type(), 0, 0);
         let rpt_ptr_ref = LLVMBuildAlloca(builder, LLVMInt32Type(), NONAME);
         LLVMBuildStore(builder, const_zero_32, rpt_ptr_ref);
-        let fseq_iter = SequencerIterators {
-            stg_ptr_ref,
-            rpt_ptr_ref,
-        };
+        let fseq_iter = SequencerIterators { rpt_ptr_ref };
 
         // Gather the set of executable addresses.
         let inst_addrs: BTreeSet<u64> = self
@@ -644,27 +653,139 @@ impl<'a> SectionTranslator<'a> {
     }
 
     /// Emit the code for the remaining iterations of a buffered FREP loop.
-    unsafe fn emit_frep(&self, fseq: &SequencerContext, curr_addr: u64) -> Result<()> {
-        // TODO: Handle staggering by loading stagger aloca, adding to reg indices directly in instuction IR emission.
+    unsafe fn emit_frep(
+        &self,
+        inst_index: &mut u32,
+        fseq: &SequencerContext,
+        curr_addr: u64,
+    ) -> Result<()> {
+        // Create dummy sequencer context for inner use
+        let mut fseq_inner = SequencerContext::new();
+
         if fseq.is_outer {
+            // Create basic block for first increment-and-branch ahead of time
+            let mut bb_incr_branch = LLVMCreateBasicBlockInContext(self.engine.context, NONAME);
+
+            // Jump to first increment-and-branch block from unterminated last frep instruction block
+            if LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null() {
+                LLVMBuildBr(self.builder, bb_incr_branch);
+            } else {
+                error!("Cannot add branch to FREP to already terminated instruction");
+            }
+
+            // Create staggered loop bodies if any
+            for stg_offs in 1..=(fseq.stagger_max as u32) {
+                // Place and start inserting into block for increment-and-branch
+                LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_incr_branch);
+                LLVMPositionBuilderAtEnd(self.builder, bb_incr_branch);
+
+                // Load repetition counter from stack.
+                let rpt_cnt = LLVMBuildLoad(self.builder, self.fseq_iter.rpt_ptr_ref, NONAME);
+                // Compare to repetition maximum: repeat if less than maximum iteration.
+                let rpt_cmp =
+                    LLVMBuildICmp(self.builder, LLVMIntULT, rpt_cnt, fseq.max_rpt_ref, NONAME);
+                // Increment rep counter, store
+                let const_one = LLVMConstInt(LLVMTypeOf(rpt_cnt), 1, 0);
+                let rpt_cnt_inc = LLVMBuildAdd(self.builder, rpt_cnt, const_one, NONAME);
+                LLVMBuildStore(self.builder, rpt_cnt_inc, self.fseq_iter.rpt_ptr_ref);
+
+                // Create basic block for first loop instruction ahead of time
+                let mut bb_loop_inst = LLVMCreateBasicBlockInContext(self.engine.context, NONAME);
+                // Insert branch terminating the FREP iterations or going to next loop body (following terminator will be omitted).
+                LLVMBuildCondBr(
+                    self.builder,
+                    rpt_cmp,
+                    bb_loop_inst,
+                    self.elf.inst_bbs[&(curr_addr + 4)],
+                );
+
+                // Emit loop body for current stagger offset
+                for &(addr, inst_nonstag) in fseq.inst_buffer[0..=(fseq.max_inst as usize)].iter() {
+                    // Read register fields
+                    let inst_raw = inst_nonstag.raw();
+                    let mut rd = (inst_raw >> 7) & 0x1f;
+                    let mut rs1 = (inst_raw >> 15) & 0x1f;
+                    let mut rs2 = (inst_raw >> 20) & 0x1f;
+                    let mut rs3 = (inst_raw >> 27) & 0x1f;
+                    // Stagger register fields
+                    if fseq.stagger_mask & 0b0001 != 0 {
+                        rd = (rd + stg_offs) & 0x1f;
+                    }
+                    if fseq.stagger_mask & 0b0010 != 0 {
+                        rs1 = (rs1 + stg_offs) & 0x1f;
+                    }
+                    if fseq.stagger_mask & 0b0100 != 0 {
+                        rs2 = (rs2 + stg_offs) & 0x1f;
+                    }
+                    if fseq.stagger_mask & 0b1000 != 0 {
+                        rs3 = (rs3 + stg_offs) & 0x1f;
+                    }
+                    // Assemble, return new instruction
+                    const MREST: u32 =
+                        0xffff_ffff ^ ((0x1f << 7) | (0x1f << 15) | (0x1f << 20) | (0x1f << 27));
+                    let inst = riscv::parse_u32(
+                        (inst_raw & MREST) | (rd << 7) | (rs1 << 15) | (rs2 << 20) | (rs3 << 27),
+                    );
+
+                    // Create translator for staggered instruction
+                    let tran = InstructionTranslator {
+                        section: self,
+                        builder: self.builder,
+                        addr,
+                        inst,
+                        was_terminator: Default::default(),
+                        trace_accesses: Default::default(),
+                        trace_emitted: Default::default(),
+                        trace_disabled: Default::default(),
+                        was_freppable: Default::default(),
+                    };
+                    // Place and start inserting into premade loop instruction block
+                    LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_loop_inst);
+                    LLVMPositionBuilderAtEnd(self.builder, bb_loop_inst);
+                    // Emit instruction into loop instruction block
+                    match tran.emit(inst_index, &mut fseq_inner) {
+                        Ok(()) => (),
+                        Err(e) => {
+                            error!("{}", e);
+                            self.emit_illegal_abort(addr, inst);
+                        }
+                    }
+                    // Create next loop instruction block ahead of time
+                    bb_loop_inst = LLVMCreateBasicBlockInContext(self.engine.context, NONAME);
+                    // Terminate with branch to next loop instruction block
+                    if LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null() {
+                        LLVMBuildBr(self.builder, bb_loop_inst);
+                    } else {
+                        error!("Cannot use terminating instruction inside an FREP");
+                    }
+                }
+
+                // Use left-over loop instruction block as next increment-and-branch block
+                bb_incr_branch = bb_loop_inst;
+            }
+
+            // Place and start inserting into final branch-and-increment block pointing back to original loop body
+            LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_incr_branch);
+            LLVMPositionBuilderAtEnd(self.builder, bb_incr_branch);
+
             // Load repetition counter from stack.
             let rpt_cnt = LLVMBuildLoad(self.builder, self.fseq_iter.rpt_ptr_ref, NONAME);
             // Compare to repetition maximum: repeat if less than maximum iteration.
             let rpt_cmp =
                 LLVMBuildICmp(self.builder, LLVMIntULT, rpt_cnt, fseq.max_rpt_ref, NONAME);
-            // Jump back to beginning of loop body if repetitions left, else go to next PC.
-            let target = fseq.inst_buffer[0];
             // Increment rep counter, store
             let const_one = LLVMConstInt(LLVMTypeOf(rpt_cnt), 1, 0);
             let rpt_cnt_inc = LLVMBuildAdd(self.builder, rpt_cnt, const_one, NONAME);
             LLVMBuildStore(self.builder, rpt_cnt_inc, self.fseq_iter.rpt_ptr_ref);
-            // Insert branch as terminator (following terminator will be omitted).
+
+            // Insert branch terminating the FREP iterations or going to original loop body (following terminator will be omitted).
             LLVMBuildCondBr(
                 self.builder,
                 rpt_cmp,
-                self.elf.inst_bbs[&target],
+                self.elf.inst_bbs[&(fseq.inst_buffer[0].0)],
                 self.elf.inst_bbs[&(curr_addr + 4)],
             );
+
             Ok(())
         } else {
             Err(anyhow!("Inner FREP not yet supported"))
@@ -674,16 +795,7 @@ impl<'a> SectionTranslator<'a> {
     /// Emit the code for the entire section.
     unsafe fn emit(&self, inst_index: &mut u32) -> Result<()> {
         // Initialize floating point sequencer context.
-        let mut fseq = SequencerContext {
-            active: false,
-            max_inst: 0,
-            max_rpt_ref: LLVMConstInt(LLVMInt32Type(), 0 as u64, 0),
-            is_outer: false,
-            stagger_max: 0,
-            stagger_mask: 0,
-            inst_buffer: [0; SEQ_BUFFER_LEN as usize],
-            buffer_pos: 0,
-        };
+        let mut fseq = SequencerContext::new();
         // iterate over section instructions
         for (addr, inst) in self.elf.instructions(self.section) {
             let tran = InstructionTranslator {
@@ -707,9 +819,9 @@ impl<'a> SectionTranslator<'a> {
             }
             // Note that FREP itself is not freppable.
             if fseq.active && tran.was_freppable.get() {
-                fseq.push_rep_instruction(addr)?;
+                fseq.push_rep_instruction(addr, inst)?;
                 if !fseq.is_outer || fseq.is_body_complete() {
-                    self.emit_frep(&fseq, addr)?;
+                    self.emit_frep(inst_index, &fseq, addr)?;
                     fseq.active = false;
                 }
             }
@@ -1483,9 +1595,9 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12RdRmRs1::Frep => fseq.init_rep(
                 data.imm12 as u8,
                 self.read_reg(data.rs1),
-                data.rd != 0,
-                (data.rd & 1) as u8,
-                (data.rs1) as u8,
+                data.rd & 1 != 0,
+                data.rm as u8,
+                (data.rd >> 1) as u8,
             ),
             _ => bail!("Unsupported opcode {}", data.op),
         }
