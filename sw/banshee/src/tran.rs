@@ -560,10 +560,8 @@ impl<'a> ElfTranslator<'a> {
     }
 
     unsafe fn lookup_func(&self, name: &str) -> LLVMValueRef {
-        let ptr = LLVMGetNamedFunction(
-            self.engine.module,
-            CString::new(name).unwrap().as_ptr() as *const _,
-        );
+        let n = CString::new(name).unwrap();
+        let ptr = LLVMGetNamedFunction(self.engine.module, n.as_ptr() as *const _);
         assert!(
             !ptr.is_null(),
             "function `{}` not found in LLVM module",
