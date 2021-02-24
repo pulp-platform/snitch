@@ -26,6 +26,8 @@ pub struct Cpu<'a, 'b> {
     pub cluster_id: usize,
     /// The cluster's shared barrier state.
     pub barrier: &'b AtomicUsize,
+    pub num_sleep: &'b AtomicUsize,
+    pub wake_up: &'b Vec<AtomicUsize>,
 }
 
 /// A representation of a single CPU core's state.
@@ -39,6 +41,7 @@ pub struct CpuState {
     pub ssrs: [SsrState; 2],
     pub ssr_enable: u32,
     pub dma: DmaState,
+    pub wfi: bool,
 }
 
 /// A representation of a single SSR address generator's state.

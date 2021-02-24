@@ -316,6 +316,12 @@ impl Engine {
             .map(|_| AtomicUsize::new(0))
             .collect();
 
+        // Allocate global variables to keep track of sleeping cores.
+        let num_sleep = AtomicUsize::new(0);
+        let wake_up: Vec<_> = (0..self.num_clusters * self.num_cores)
+            .map(|_| AtomicUsize::new(0))
+            .collect();
+
         // Create the CPUs.
         let cpus: Vec<_> = (0..self.num_clusters)
             .flat_map(|j| (0..self.num_cores).map(move |i| (j, i)))
@@ -329,6 +335,8 @@ impl Engine {
                     base_hartid,
                     j,
                     &barriers[j],
+                    &num_sleep,
+                    &wake_up,
                 )
             })
             .collect();
@@ -415,6 +423,10 @@ pub unsafe fn add_llvm_symbols() {
         b"banshee_trace\0".as_ptr() as *const _,
         Cpu::binary_trace as *mut _,
     );
+    LLVMAddSymbol(
+        b"banshee_wfi\0".as_ptr() as *const _,
+        Cpu::binary_wfi as *mut _,
+    );
 }
 
 // /// A representation of the system state.
@@ -431,6 +443,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
         cluster_base_hartid: usize,
         cluster_id: usize,
         barrier: &'b AtomicUsize,
+        num_sleep: &'b AtomicUsize,
+        wake_up: &'b Vec<AtomicUsize>,
     ) -> Self {
         Self {
             engine,
@@ -441,6 +455,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
             cluster_base_hartid,
             cluster_id,
             barrier,
+            num_sleep,
+            wake_up,
         }
     }
 
@@ -476,7 +492,20 @@ impl<'a, 'b> Cpu<'a, 'b> {
             0x40000008 => (),                                                   // tcdm_end
             0x40000010 => (),                                                   // nr_cores
             0x40000020 => self.engine.exit_code.store(value, Ordering::SeqCst), // scratch_reg
-            0x40000038 => (),                                                   // barrier_reg
+            0x40000028 => {
+                // wake_up
+                if value as i32 == -1 {
+                    self.num_sleep
+                        .fetch_sub(self.wake_up.len(), Ordering::Relaxed);
+                    for x in self.wake_up {
+                        x.fetch_add(1, Ordering::Relaxed);
+                    }
+                } else if (value as usize) < self.wake_up.len() {
+                    self.num_sleep.fetch_sub(1, Ordering::Relaxed);
+                    self.wake_up[value as usize].fetch_add(1, Ordering::Relaxed);
+                }
+            }
+            0x40000038 => (), // barrier_reg
             0x40000040 => (), // cluster_base_hartid
             0x40000048 => (), // cluster_num
             0x40000050 => (), // cluster_id
@@ -585,6 +614,25 @@ impl<'a, 'b> Cpu<'a, 'b> {
             self.state.instret, self.hartid, addr, args, inst
         );
         println!("{}", line);
+    }
+
+    fn binary_wfi(&mut self) -> u32 {
+        // Set own wfi.
+        self.state.wfi = true;
+        self.num_sleep.fetch_add(1, Ordering::Relaxed);
+        // Wait for the wake up call
+        while self.wake_up[self.hartid as usize].load(Ordering::Relaxed) == 0 {
+            // Check if everyone is sleeping
+            if self.num_sleep.load(Ordering::Relaxed) == self.wake_up.len() {
+                return 1;
+            }
+            std::thread::yield_now();
+        }
+        // Someone woke us up --> Clear the flag
+        self.wake_up[self.hartid as usize].fetch_sub(1, Ordering::Relaxed);
+        self.state.wfi = false;
+        // The core waking us up, already decremented the `num_sleep` counter for us
+        return 0;
     }
 
     /// A simple barrier across all cores in the cluster.
