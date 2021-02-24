@@ -66,7 +66,7 @@ define test_template
 		LOGFILE=`mktemp`; \
 		if [ ! -z $(filter $(1),$(TESTS_BLACKLIST)) ]; then \
 			echo "$$CMD ... `tput setaf 3`ignored`tput sgr0`"; \
-		elif ! { env SNITCH_LOG=$(SNITCH_LOG) $$CMD; } $(TEST_SUFFIX); then \
+		elif ! env SNITCH_LOG=$(SNITCH_LOG) $$CMD &> $$LOGFILE; then \
 			echo "$$CMD ... `tput setaf 1`FAILED`tput sgr0`"; \
 			cat $$LOGFILE; \
 			echo $$CMD >>$(LOG_FAILED); \
