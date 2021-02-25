@@ -64,14 +64,15 @@ define test_template
 	(cat $$ARGS 2>/dev/null || echo) | while read ARG; do \
 		CMD=`echo $(2) $(3) $(4) $$ARG`; \
 		LOGFILE=`mktemp`; \
+		echo -n "$$CMD ... "; \
 		if [ ! -z $(filter $(1),$(TESTS_BLACKLIST)) ]; then \
-			echo "$$CMD ... `tput setaf 3`ignored`tput sgr0`"; \
+			echo "`tput setaf 3`ignored`tput sgr0`"; \
 		elif ! env SNITCH_LOG=$(SNITCH_LOG) $$CMD &> $$LOGFILE; then \
-			echo "$$CMD ... `tput setaf 1`FAILED`tput sgr0`"; \
+			echo "`tput setaf 1`FAILED`tput sgr0`"; \
 			cat $$LOGFILE; \
 			echo $$CMD >>$(LOG_FAILED); \
 		else \
-			echo "$$CMD ... `tput setaf 2`passed`tput sgr0`"; \
+			echo "`tput setaf 2`passed`tput sgr0`"; \
 		fi; \
 		echo $$CMD >>$(LOG_TOTAL); \
 	done
