@@ -22,6 +22,7 @@ all: bin/unpred_jr_2
 all: bin/far_jump
 all: bin/atomics
 all: bin/wfi
+all: bin/fmv
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump

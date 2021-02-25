@@ -1658,6 +1658,51 @@ impl<'a> InstructionTranslator<'a> {
         trace!("{} x{} = x{}", data.op, data.rd, data.rs1);
         let name = format!("{}\0", data.op);
         let _name = name.as_ptr() as *const _;
+
+        // Handle floating-point operations
+        match data.op {
+            riscv::OpcodeRdRs1::FmvXW => {
+                // float (rs1) to integer (rd) register, bits are not modified
+                let rs1 = self.read_freg_f32(data.rs1);
+                // cast the integer reg pointer to a float pointer
+                let raw_ptr = self.reg_ptr(data.rd);
+                let ptr = LLVMBuildBitCast(
+                    self.builder,
+                    raw_ptr,
+                    LLVMPointerType(LLVMFloatType(), 0),
+                    NONAME,
+                );
+                // build the actual store and add trace
+                LLVMBuildStore(self.builder, rs1, ptr);
+                self.trace_access(
+                    TraceAccess::WriteReg(data.rd as u8),
+                    LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1::FmvWX => {
+                // integer (rs1) to float (rd) register, bits are not modified
+                let rs1 = self.read_reg(data.rs1);
+                // cast the float reg pointer to an integer pointer
+                let raw_ptr = self.freg_ptr(data.rd);
+                let ptr = LLVMBuildBitCast(
+                    self.builder,
+                    raw_ptr,
+                    LLVMPointerType(LLVMInt32Type(), 0),
+                    NONAME,
+                );
+                // build the actual store and add trace
+                LLVMBuildStore(self.builder, rs1, ptr);
+                self.trace_access(
+                    TraceAccess::WriteFReg(data.rd as u8),
+                    LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+                );
+                return Ok(());
+            }
+            _ => (),
+        }
+
+        // Handle DMA operations
         let rs1 = self.read_reg(data.rs1);
         let value = match data.op {
             riscv::OpcodeRdRs1::DmStat => self
