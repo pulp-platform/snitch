@@ -16,10 +16,10 @@ Description for a very simple single-cluster testbench. That is the most minimal
 
 # Snitch Cluster TB Schema Properties
 
-| Property            | Type     | Required | Nullable       | Defined by                                                                                                                                                         |
-| :------------------ | :------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [cluster](#cluster) | `object` | Required | cannot be null | [Snitch Cluster TB Schema](snitch_cluster_tb-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster") |
-| [dram](#dram)       | `object` | Required | cannot be null | [Snitch Cluster TB Schema](snitch_cluster_tb-properties-dram.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/dram")                  |
+| Property            | Type     | Required | Nullable       | Defined by                                                                                                                                              |
+| :------------------ | :------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [cluster](#cluster) | `object` | Required | cannot be null | [Snitch Cluster TB Schema](occamy-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster") |
+| [dram](#dram)       | `object` | Required | cannot be null | [Snitch Cluster TB Schema](snitch_cluster_tb-properties-dram.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/dram")       |
 
 ## cluster
 
@@ -29,15 +29,15 @@ Base description of a Snitch cluster and its internal structure and configuratio
 
 *   is required
 
-*   Type: `object` ([Snitch Cluster Schema](snitch_cluster_tb-properties-snitch-cluster-schema.md))
+*   Type: `object` ([Snitch Cluster Schema](occamy-properties-snitch-cluster-schema.md))
 
 *   cannot be null
 
-*   defined in: [Snitch Cluster TB Schema](snitch_cluster_tb-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster")
+*   defined in: [Snitch Cluster TB Schema](occamy-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster")
 
 ### cluster Type
 
-`object` ([Snitch Cluster Schema](snitch_cluster_tb-properties-snitch-cluster-schema.md))
+`object` ([Snitch Cluster Schema](occamy-properties-snitch-cluster-schema.md))
 
 ## dram
 

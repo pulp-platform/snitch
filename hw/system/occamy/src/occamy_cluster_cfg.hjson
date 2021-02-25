@@ -7,11 +7,12 @@
     nr_s1_quadrant: 8,
     s1_quadrant: {
         nr_clusters: 4,
-        const_cache: {
-            width: 512,
-            count: 256,
-            sets: 2
-        }
+        // Disable for easier flow trials.
+        // const_cache: {
+        //     width: 512,
+        //     count: 256,
+        //     sets: 2
+        // }
     },
     cluster: {
         name: "occamy_cluster"

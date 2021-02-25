@@ -25,15 +25,20 @@ class Occamy(Generator):
         self.cluster = SnitchCluster(cfg["cluster"], pma_cfg)
         self.cluster.cfg['tie_ports'] = False
 
-        const_cache = self.cfg["s1_quadrant"]["const_cache"]
-        self.cluster.add_mem(const_cache["count"],
-                             const_cache["width"],
-                             desc="const cache data",
-                             byte_enable=False)
-        self.cluster.add_mem(const_cache["count"],
-                             self.cluster.tag_width,
-                             desc="const_cache tag",
-                             byte_enable=False)
+        if "const_cache" in self.cfg["s1_quadrant"]:
+            const_cache = self.cfg["s1_quadrant"]["const_cache"]
+            self.cluster.add_mem(const_cache["count"],
+                                 const_cache["width"],
+                                 desc="const cache data",
+                                 byte_enable=False,
+                                 speed_optimized=True,
+                                 density_optimized=True)
+            self.cluster.add_mem(const_cache["count"],
+                                 self.cluster.tag_width,
+                                 desc="const_cache tag",
+                                 byte_enable=False,
+                                 speed_optimized=True,
+                                 density_optimized=True)
 
     def render_wrapper(self):
         return self.cluster.render_wrapper()

@@ -67,9 +67,14 @@ module occamy_quadrant_s1
   addr_t const_cache_start_addr, const_cache_end_addr;
   assign const_cache_start_addr = '0;
   assign const_cache_end_addr = '1;
-  <% wide_cluster_out_iwc = wide_xbar_quadrant_s1.out_top \
-      .add_const_cache(context, "snitch_const_cache", const_cache_cfg["width"], const_cache_cfg["count"], const_cache_cfg["sets"]) \
-      .change_iw(context, 3, "wide_cluster_out_iwc") %>
+  <%
+    if const_cache_cfg:
+      wide_cluster_out_const_cache = wide_xbar_quadrant_s1.out_top \
+      .add_const_cache(context, "snitch_const_cache", const_cache_cfg["width"], const_cache_cfg["count"], const_cache_cfg["sets"])
+    else:
+      wide_cluster_out_const_cache = wide_xbar_quadrant_s1.out_top
+      wide_cluster_out_iwc = wide_cluster_out_const_cache.change_iw(context, 3, "wide_cluster_out_iwc")
+  %>
 
   assign quadrant_wide_out_req_o = ${wide_cluster_out_iwc.req_name()};
   assign ${wide_cluster_out_iwc.rsp_name()} = quadrant_wide_out_rsp_i;

@@ -241,7 +241,7 @@ def main():
             wide_xbar_quadrant_s1=wide_xbar_quadrant_s1,
             narrow_xbar_quadrant_s1=narrow_xbar_quadrant_s1,
             nr_clusters=nr_s1_clusters,
-            const_cache_cfg=occamy.cfg["s1_quadrant"]["const_cache"])
+            const_cache_cfg=occamy.cfg["s1_quadrant"].get("const_cache"))
         code = re_trailws.sub("", code)
         file.write(code)
 

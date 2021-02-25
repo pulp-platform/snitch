@@ -191,54 +191,23 @@ module occamy_quadrant_s1
   addr_t const_cache_start_addr, const_cache_end_addr;
   assign const_cache_start_addr = '0;
   assign const_cache_end_addr   = '1;
-  axi_a48_d512_i7_u0_req_t  snitch_const_cache_req;
-  axi_a48_d512_i7_u0_resp_t snitch_const_cache_rsp;
-
-  snitch_const_cache #(
-      .LineWidth(512),
-      .LineCount(256),
-      .SetCount(2),
-      .AxiAddrWidth(48),
-      .AxiDataWidth(512),
-      .AxiIdWidth(6),
-      .AxiUserWidth(1),
-      .MaxTrans(MaxTransaction),
-      .NrAddrRules(1),
-      .slv_req_t(axi_a48_d512_i6_u0_req_t),
-      .slv_rsp_t(axi_a48_d512_i6_u0_resp_t),
-      .mst_req_t(axi_a48_d512_i7_u0_req_t),
-      .mst_rsp_t(axi_a48_d512_i7_u0_resp_t)
-  ) i_snitch_const_cache (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
-      // TODO(zarubaf): Fix
-      .flush_valid_i(1'b0),
-      .flush_ready_o(),
-      .start_addr_i('0),
-      .end_addr_i('1),
-      .axi_slv_req_i(wide_xbar_quadrant_s1_out_req[WIDE_XBAR_QUADRANT_S1_OUT_TOP]),
-      .axi_slv_rsp_o(wide_xbar_quadrant_s1_out_rsp[WIDE_XBAR_QUADRANT_S1_OUT_TOP]),
-      .axi_mst_req_o(snitch_const_cache_req),
-      .axi_mst_rsp_i(snitch_const_cache_rsp)
-  );
-
   axi_a48_d512_i3_u0_req_t  wide_cluster_out_iwc_req;
   axi_a48_d512_i3_u0_resp_t wide_cluster_out_iwc_rsp;
 
   axi_id_remap #(
-      .AxiSlvPortIdWidth(7),
+      .AxiSlvPortIdWidth(6),
       .AxiSlvPortMaxUniqIds(4),
       .AxiMaxTxnsPerId(4),
       .AxiMstPortIdWidth(3),
-      .slv_req_t(axi_a48_d512_i7_u0_req_t),
-      .slv_resp_t(axi_a48_d512_i7_u0_resp_t),
+      .slv_req_t(axi_a48_d512_i6_u0_req_t),
+      .slv_resp_t(axi_a48_d512_i6_u0_resp_t),
       .mst_req_t(axi_a48_d512_i3_u0_req_t),
       .mst_resp_t(axi_a48_d512_i3_u0_resp_t)
   ) i_wide_cluster_out_iwc (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(snitch_const_cache_req),
-      .slv_resp_o(snitch_const_cache_rsp),
+      .slv_req_i(wide_xbar_quadrant_s1_out_req[WIDE_XBAR_QUADRANT_S1_OUT_TOP]),
+      .slv_resp_o(wide_xbar_quadrant_s1_out_rsp[WIDE_XBAR_QUADRANT_S1_OUT_TOP]),
       .mst_req_o(wide_cluster_out_iwc_req),
       .mst_resp_i(wide_cluster_out_iwc_rsp)
   );
