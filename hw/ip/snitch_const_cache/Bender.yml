@@ -1,0 +1,16 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+package:
+  name: snitch_const_cache
+  authors:
+  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+
+dependencies:
+  axi: {path: ../../vendor/pulp_axi}
+  snitch_icache: {path: ../snitch_icache}
+
+sources:
+# Level 0:
+- src/snitch_const_cache.sv

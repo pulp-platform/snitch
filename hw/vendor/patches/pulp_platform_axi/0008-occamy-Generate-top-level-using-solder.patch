@@ -1,0 +1,74 @@
+From 67d001515cbff247a06133a2e87ef742d61bbb2c Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Thu, 25 Feb 2021 19:11:40 +0100
+Subject: [PATCH] occamy: Generate top-level using solder
+
+---
+ include/axi/typedef.svh |  8 ++++++++
+ src/axi_lite_demux.sv   | 25 ++++++++++++-------------
+ 2 files changed, 20 insertions(+), 13 deletions(-)
+
+diff --git a/include/axi/typedef.svh b/include/axi/typedef.svh
+index a476ee8..cd85660 100644
+--- a/include/axi/typedef.svh
++++ b/include/axi/typedef.svh
+@@ -168,5 +168,13 @@
+   } resp_lite_t;
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
+ 
++`define AXI_LITE_TYPEDEF_ALL(__name, __addr_t, __data_t, __strb_t)                                   \
++  `AXI_LITE_TYPEDEF_AW_CHAN_T(__name``_aw_chan_t, __addr_t)                                          \
++  `AXI_LITE_TYPEDEF_W_CHAN_T(__name``_w_chan_t, __data_t, __strb_t)                                  \
++  `AXI_LITE_TYPEDEF_B_CHAN_T(__name``_b_chan_t)                                                      \
++  `AXI_LITE_TYPEDEF_AR_CHAN_T(__name``_ar_chan_t, __addr_t)                                          \
++  `AXI_LITE_TYPEDEF_R_CHAN_T(__name``_r_chan_t, __data_t)                                            \
++  `AXI_LITE_TYPEDEF_REQ_T(__name``_req_t, __name``_aw_chan_t, __name``_w_chan_t, __name``_ar_chan_t) \
++  `AXI_LITE_TYPEDEF_RESP_T(__name``_rsp_t, __name``_b_chan_t, __name``_r_chan_t)
+ 
+ `endif
+diff --git a/src/axi_lite_demux.sv b/src/axi_lite_demux.sv
+index b38a407..b92c7e8 100644
+--- a/src/axi_lite_demux.sv
++++ b/src/axi_lite_demux.sv
+@@ -48,6 +48,18 @@ module axi_lite_demux #(
+   input  resp_t [NoMstPorts-1:0] mst_resps_i
+ );
+ 
++  //--------------------------------------
++  // Typedefs for the spill registers
++  //--------------------------------------
++  typedef struct packed {
++    aw_chan_t aw;
++    select_t  select;
++  } aw_chan_select_t;
++  typedef struct packed {
++    ar_chan_t ar;
++    select_t  select;
++  } ar_chan_select_t;
++
+   if (NoMstPorts == 32'd1) begin : gen_no_demux
+     // degenerate case, connect slave to master port
+     // AW channel
+@@ -55,19 +67,6 @@ module axi_lite_demux #(
+     assign slv_resp_o    = mst_resps_i[0];
+   end else begin : gen_demux
+     // normal non degenerate case
+-
+-    //--------------------------------------
+-    // Typedefs for the spill registers
+-    //--------------------------------------
+-    typedef struct packed {
+-      aw_chan_t aw;
+-      select_t  select;
+-    } aw_chan_select_t;
+-    typedef struct packed {
+-      ar_chan_t ar;
+-      select_t  select;
+-    } ar_chan_select_t;
+-
+     //--------------------------------------
+     //--------------------------------------
+     // Signal Declarations
+-- 
+2.25.1.377.g2d2118b814
+

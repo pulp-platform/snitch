@@ -1,9 +1,9 @@
   axi_cdc #(
-    .aw_chan_t  ( ${bus_in.type_prefix}_aw_t ),
-    .w_chan_t   ( ${bus_in.type_prefix}_w_t ),
-    .b_chan_t   ( ${bus_in.type_prefix}_b_t ),
-    .ar_chan_t  ( ${bus_in.type_prefix}_ar_t ),
-    .r_chan_t   ( ${bus_in.type_prefix}_r_t ),
+    .aw_chan_t  ( ${bus_in.type_prefix}_aw_chan_t ),
+    .w_chan_t   ( ${bus_in.type_prefix}_w_chan_t ),
+    .b_chan_t   ( ${bus_in.type_prefix}_b_chan_t ),
+    .ar_chan_t  ( ${bus_in.type_prefix}_ar_chan_t ),
+    .r_chan_t   ( ${bus_in.type_prefix}_r_chan_t ),
     .axi_req_t  ( ${bus_in.req_type()} ),
     .axi_resp_t ( ${bus_in.rsp_type()} ),
     .LogDepth   ( ${log_depth} )

@@ -10,7 +10,7 @@ class Occamy(Generator):
     Generate an Occamy system.
     """
     def __init__(self, cfg):
-        super().__init__("snitch_cluster.schema.json")
+        super().__init__("occamy.schema.json")
         # Validate the schema.
         self.validate(cfg)
         # from here we know that we have a valid object.
@@ -20,9 +20,20 @@ class Occamy(Generator):
         # TODO(zarubaf): Check dram start address is aligned to its length.
         # For this example system make the entire dram cacheable.
         pma_cfg.add_region(PMA.CACHED, 0, 0)
+
         # Store Snitch cluster config in separate variable
-        self.cluster = SnitchCluster(cfg, pma_cfg)
-        self.cfg['tie_ports'] = False
+        self.cluster = SnitchCluster(cfg["cluster"], pma_cfg)
+        self.cluster.cfg['tie_ports'] = False
+
+        const_cache = self.cfg["s1_quadrant"]["const_cache"]
+        self.cluster.add_mem(const_cache["count"],
+                             const_cache["width"],
+                             desc="const cache data",
+                             byte_enable=False)
+        self.cluster.add_mem(const_cache["count"],
+                             self.cluster.tag_width,
+                             desc="const_cache tag",
+                             byte_enable=False)
 
     def render_wrapper(self):
         return self.cluster.render_wrapper()

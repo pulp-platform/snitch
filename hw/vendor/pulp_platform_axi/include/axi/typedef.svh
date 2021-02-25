@@ -168,5 +168,13 @@
   } resp_lite_t;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+`define AXI_LITE_TYPEDEF_ALL(__name, __addr_t, __data_t, __strb_t)                                   \
+  `AXI_LITE_TYPEDEF_AW_CHAN_T(__name``_aw_chan_t, __addr_t)                                          \
+  `AXI_LITE_TYPEDEF_W_CHAN_T(__name``_w_chan_t, __data_t, __strb_t)                                  \
+  `AXI_LITE_TYPEDEF_B_CHAN_T(__name``_b_chan_t)                                                      \
+  `AXI_LITE_TYPEDEF_AR_CHAN_T(__name``_ar_chan_t, __addr_t)                                          \
+  `AXI_LITE_TYPEDEF_R_CHAN_T(__name``_r_chan_t, __data_t)                                            \
+  `AXI_LITE_TYPEDEF_REQ_T(__name``_req_t, __name``_aw_chan_t, __name``_w_chan_t, __name``_ar_chan_t) \
+  `AXI_LITE_TYPEDEF_RESP_T(__name``_rsp_t, __name``_b_chan_t, __name``_r_chan_t)
 
 `endif

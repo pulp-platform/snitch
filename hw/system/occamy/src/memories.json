@@ -4,6 +4,33 @@
         "byte_width": 8,
         "density_optimized": false,
         "description": [
+            "const_cache tag",
+            "icache tag (hive 0)"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 39,
+        "words": 256
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "const cache data"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 512,
+        "words": 256
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
             "icache data (hive 0)"
         ],
         "latency": 1,
@@ -24,18 +51,5 @@
         "speed_optimized": true,
         "width": 64,
         "words": 512
-    },
-    {
-        "byte_enable": false,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
-            "icache tag (hive 0)"
-        ],
-        "latency": 1,
-        "ports": 1,
-        "speed_optimized": true,
-        "width": 39,
-        "words": 256
     }
 ]

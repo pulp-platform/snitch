@@ -9,6 +9,7 @@ package:
 
 dependencies:
   # axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
+  snitch_const_cache: {path: ../../ip/snitch_const_cache}
   snitch-cluster: {path: ../../ip/snitch_cluster}
 
 export_include_dirs:
