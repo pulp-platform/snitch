@@ -739,6 +739,7 @@ impl<'a> SectionTranslator<'a> {
                         trace_emitted: Default::default(),
                         trace_disabled: Default::default(),
                         was_freppable: Default::default(),
+                        latency: Cell::new(1),
                     };
                     // Place and start inserting into premade loop instruction block
                     LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_loop_inst);
@@ -809,6 +810,7 @@ impl<'a> SectionTranslator<'a> {
                 trace_emitted: Default::default(),
                 trace_disabled: Default::default(),
                 was_freppable: Default::default(),
+                latency: Cell::new(1),
             };
             LLVMPositionBuilderAtEnd(self.builder, self.elf.inst_bbs[&addr]);
             match tran.emit(inst_index, &mut fseq) {
@@ -878,6 +880,7 @@ pub struct InstructionTranslator<'a> {
     trace_emitted: Cell<bool>,
     trace_disabled: Cell<bool>,
     was_freppable: Cell<bool>,
+    latency: Cell<usize>,
 }
 
 impl<'a> InstructionTranslator<'a> {
@@ -2170,7 +2173,7 @@ impl<'a> InstructionTranslator<'a> {
                 )
             } else {
                 // TODO differentiate between different instructions
-                LLVMConstInt(LLVMTypeOf(max_cycle), 1, 0)
+                LLVMConstInt(LLVMTypeOf(max_cycle), self.latency.get() as u64, 0)
             };
 
             // Add latency of this instruction
