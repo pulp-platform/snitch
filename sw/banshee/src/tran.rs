@@ -2100,24 +2100,19 @@ impl<'a> InstructionTranslator<'a> {
     /// Only emits the code once if called multiple times. Does nothing if the
     /// parent `ElfTranslator` has tracing disabled.
     unsafe fn emit_trace(&self) {
-        // Don't emit tracing twice, or if disabled, or if the current basic
-        // block has already been terminated.
+        // Don't emit tracing twice, or if the current basic block has already been terminated.
         if self.trace_emitted.get()
-            || !self.section.elf.trace
             || !LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null()
         {
             return;
         }
         self.trace_emitted.set(true);
 
+        // Track the cycle counter if enabled
         if self.section.elf.latency {
             // Check for read dependencies
             let accesses = self.trace_accesses.borrow();
 
-            // Handle this in the engine
-            // if is_wfi {
-            //     cycles.push(max_of_waking_core);
-            // }
             let mut cycles = Vec::new();
             for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
                 let cycle = match access {
@@ -2192,6 +2187,11 @@ impl<'a> InstructionTranslator<'a> {
                     _ => continue,
                 };
             }
+        }
+
+        // Don't emit tracing if disabled
+        if !self.section.elf.trace {
+            return;
         }
 
         // Compose a list of accesses.
