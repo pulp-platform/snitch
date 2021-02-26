@@ -38,41 +38,81 @@ jobs:
     - working-directory: sw/banshee
       run: make test TERM=xterm-256color LOG_FAILED=`mktemp` LOG_TOTAL=`mktemp`
 
-  #############
-  # snRuntime #
-  #############
+  #################
+  # SW on Banshee #
+  #################
+  sw-banshee:
+    runs-on: ubuntu-latest
+    name: SW on Banshee
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    - uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: '10.0'
+        directory: ${{ runner.temp }}/llvm
+    - working-directory: sw/banshee
+      run: cargo install --path .
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v1.8
+      with:
+        cmake-version: 3.19.x
+    - name: Install RISC-V Toolchain
+      run: |
+        curl -Ls -o riscv-gcc.tar.gz https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-${RISCV_GCC_VERSION}-x86_64-linux-ubuntu14.tar.gz
+        sudo mkdir -p /tools/riscv && sudo chmod 777 /tools/riscv
+        tar -C /tools/riscv -xf riscv-gcc.tar.gz --strip-components=1
+        cd /tools/riscv/bin && for file in riscv64-*; do ln -s $file $(echo "$file" | sed 's/^riscv64/riscv32/g'); done
+        echo "PATH=$PATH:/tools/riscv/bin" >> $GITHUB_ENV
+      env:
+        RISCV_GCC_VERSION: 8.3.0-2020.04.0
+    - name: Build runtime
+      working-directory: sw/snRuntime
+      run: mkdir build && cd build && cmake .. && make
+    - name: Test snRuntime
+      working-directory: sw/snRuntime/build
+      run: make test
+    - name: Build snBLAS
+      working-directory: sw/snBLAS
+      run: mkdir build && cd build && cmake .. && make
+    - name: Test snBLAS
+      working-directory: sw/snBLAS/build
+      run: make test
+
+  #############################
+  # SW on Banshee (Container) #
+  #############################
   snRuntime:
     container:
       image: ghcr.io/pulp-platform/snitch
     runs-on: ubuntu-18.04
+    name: SW on Banshee (Container)
     steps:
     - uses: actions/checkout@v2
-    - name: Build
-      run: cd sw/snRuntime && mkdir build && cd build && cmake .. && make
-    - name: Test
-      run: cd sw/snRuntime/build && make test
+    - name: Build runtime
+      working-directory: sw/snRuntime
+      run: mkdir build && cd build && cmake .. && make
+    - name: Test snRuntime
+      working-directory: sw/snRuntime/build
+      run: make test
+    - name: Build snBLAS
+      working-directory: sw/snBLAS
+      run: mkdir build && cd build && cmake .. && make
+    - name: Test snBLAS
+      working-directory: sw/snBLAS/build
+      run: make test
 
-  ##########
-  # snBLAS #
-  ##########
-  snBLAS:
+  ################################
+  # SW on Default Snitch Cluster #
+  ################################
+  sw-snitch-cluster-default:
     container:
       image: ghcr.io/pulp-platform/snitch
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build
-      run: cd sw/snBLAS && mkdir build && cd build && cmake .. && make
-    - name: Test
-      run: cd sw/snBLAS/build && make test
-
-  ##################
-  # Snitch Cluster #
-  ##################
-  snitch_cluster_default:
-    container:
-      image: ghcr.io/pulp-platform/snitch
-    name: Snitch Cluster Default Config
+    name: SW on Default Snitch Cluster Config
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
