@@ -563,7 +563,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
         trace!("Read CSR 0x{:x}", csr);
         match csr {
             0x7C0 => self.state.ssr_enable,
-            0xF14 => self.hartid as u32, // mhartid
+            0xB00 => self.state.cycle as u32,         // csr_mcycle
+            0xB80 => (self.state.cycle >> 32) as u32, // csr_mcycleh
+            0xF14 => self.hartid as u32,              // mhartid
             _ => 0,
         }
     }
