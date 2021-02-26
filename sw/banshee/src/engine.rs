@@ -502,7 +502,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     }
                 } else if (value as usize) < self.wake_up.len() {
                     self.num_sleep.fetch_sub(1, Ordering::Relaxed);
-                    self.wake_up[value as usize].fetch_add(1, Ordering::Relaxed);
+                    self.wake_up[value as usize - self.engine.base_hartid]
+                        .fetch_add(1, Ordering::Relaxed);
                 }
             }
             0x40000038 => (), // barrier_reg
@@ -621,7 +622,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
         self.state.wfi = true;
         self.num_sleep.fetch_add(1, Ordering::Relaxed);
         // Wait for the wake up call
-        while self.wake_up[self.hartid as usize].load(Ordering::Relaxed) == 0 {
+        while self.wake_up[self.hartid - self.engine.base_hartid as usize].load(Ordering::Relaxed)
+            == 0
+        {
             // Check if everyone is sleeping
             if self.num_sleep.load(Ordering::Relaxed) == self.wake_up.len() {
                 return 1;
@@ -629,7 +632,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
             std::thread::yield_now();
         }
         // Someone woke us up --> Clear the flag
-        self.wake_up[self.hartid as usize].fetch_sub(1, Ordering::Relaxed);
+        self.wake_up[self.hartid - self.engine.base_hartid as usize]
+            .fetch_sub(1, Ordering::Relaxed);
         self.state.wfi = false;
         // The core waking us up, already decremented the `num_sleep` counter for us
         return 0;
