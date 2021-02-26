@@ -1,3 +1,6 @@
+![CI](https://github.com/pulp-platform/snitch/actions/workflows/ci.yml/badge.svg)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # Snitch System
 
 This monolithic repository hosts software and hardware for the Snitch generator and generated systems.
@@ -46,6 +49,10 @@ licenses. See the respective folder for the licenses used.
 
 If you use Snitch in your work, you can cite us:
 
+<details>
+<summary>Snitch Publication</summary>
+<p>
+
 ```
 @article{zaruba2020snitch,
   title={Snitch: A tiny Pseudo Dual-Issue Processor for Area and Energy Efficient Execution of Floating-Point Intensive Workloads},
@@ -55,3 +62,28 @@ If you use Snitch in your work, you can cite us:
   publisher={IEEE}
 }
 ```
+
+</p>
+</details>
+
+<details>
+<summary>SSR Publication</summary>
+<p>
+
+```
+@article{schuiki2020stream,
+  title={Stream semantic registers: A lightweight risc-v isa extension achieving full compute utilization in single-issue cores},
+  author={Schuiki, Fabian and Zaruba, Florian and Hoefler, Torsten and Benini, Luca},
+  journal={IEEE Transactions on Computers},
+  volume={70},
+  number={2},
+  pages={212--227},
+  year={2020},
+  publisher={IEEE}
+}
+```
+
+</p>
+</details>
+
+
