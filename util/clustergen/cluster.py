@@ -80,6 +80,7 @@ class Generator(object):
             DefaultValidatingDraft7Validator(
                 self.root_schema, resolver=self.resolver).validate(cfg)
         except ValidationError as e:
+            print(e)
             exit(e)
 
 
@@ -200,15 +201,13 @@ class SnitchCluster(Generator):
                      desc='tcdm')
         # Add instruction caches
         for i, h in enumerate(self.cfg['hives']):
-            icache = h['icache']
-            self.add_mem(icache['depth'],
-                         icache['cacheline'],
+            self.add_mem(h['icache']['depth'],
+                         h['icache']['cacheline'],
                          desc='icache data (hive {})'.format(i),
                          byte_enable=False)
-            tag_width = self.cfg['addr_width'] - clog2(
-                icache['cacheline'] // 8) - clog2(icache['depth']) + 3
-            self.add_mem(icache['depth'],
-                         tag_width,
+
+            self.add_mem(h['icache']['depth'],
+                         self.tag_width,
                          desc='icache tag (hive {})'.format(i),
                          byte_enable=False)
 
@@ -238,6 +237,9 @@ class SnitchCluster(Generator):
             self.cfg['hives'][i]['icache']['depth'] = self.cfg['hives'][i][
                 'icache']['size'] * 1024 // self.cfg['hives'][i]['icache'][
                     'sets'] // cl_bytes
+            # tag width
+            self.tag_width = self.cfg['addr_width'] - clog2(
+                    hive['icache']['cacheline'] // 8) - clog2(hive['icache']['depth']) + 3
 
     def parse_pma_cfg(self, pma_cfg):
         self.cfg['pmas'] = dict()

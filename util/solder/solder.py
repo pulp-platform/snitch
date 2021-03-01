@@ -4,10 +4,6 @@
 #
 # Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 # Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-# Stefan Mach <smach@iis.ee.ethz.ch>
-# Thomas Benz <tbenz@iis.ee.ethz.ch>
-# Paul Scheffler <paulsc@iis.ee.ethz.ch>
-# Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
 
 import math
 import pathlib
@@ -20,7 +16,7 @@ templates = TemplateLookup(directories=[pathlib.Path(__file__).parent],
 
 xbars = list()
 code_package = ""
-code_module = ""
+code_module = dict()
 
 
 # An address map.
@@ -316,7 +312,7 @@ class AxiStruct:
         code = "// AXI bus with {} bit address, {} bit data, {} bit IDs, and {} bit user data.\n".format(
             *key)
         code += "`AXI_TYPEDEF_ALL({}, logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])\n".format(
-            name, aw - 1, dw - 1, (dw + 7) // 8 - 1, iw - 1, max(0, uw - 1))
+            name, aw - 1, iw - 1, dw - 1, (dw + 7) // 8 - 1, max(0, uw - 1))
         code_package += "\n" + code
         AxiStruct.configs[key] = name
         return name
@@ -384,6 +380,10 @@ class AxiBus(object):
         self.name_suffix = name_suffix
         self.declared = declared
 
+    def copy(self, name=None):
+        return AxiBus(self.clk, self.rst, self.aw, self.dw, self.iw, self.uw,
+                      name or self.name)
+
     def emit_struct(self):
         return AxiStruct.emit(self.aw, self.dw, self.iw, self.uw)
 
@@ -405,7 +405,7 @@ class AxiBus(object):
         return "{}_req_t".format(self.type_prefix)
 
     def rsp_type(self):
-        return "{}_rsp_t".format(self.type_prefix)
+        return "{}_resp_t".format(self.type_prefix)
 
     def change_iw(self, context, target_iw, name, inst_name=None, to=None):
         if self.iw == target_iw:
@@ -581,6 +581,55 @@ class AxiBus(object):
                 bus_in=self,
                 bus_out=bus,
                 name=inst_name or "i_{}_pc".format(name),
+            ) + "\n")
+        return bus
+
+    def add_const_cache(self,
+                        context,
+                        name,
+                        line_width,
+                        line_count,
+                        set_count,
+                        flush_valid=None,
+                        flush_ready=None,
+                        start_addr=None,
+                        end_addr=None,
+                        inst_name=None,
+                        to=None):
+        # Generate the new bus.
+        if to is None:
+            bus = copy(self)
+            bus.declared = False
+            bus.iw = self.iw + 1
+            bus.type_prefix = bus.emit_struct()
+            bus.name = name
+            bus.name_suffix = None
+        else:
+            bus = to
+
+        # Check bus properties.
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+        assert (bus.iw == self.iw + 1)
+        assert (bus.uw == self.uw)
+
+        # Emit the remapper instance.
+        bus.declare(context)
+        tpl = templates.get_template("solder.snitch_const_cache.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                axi_in=self,
+                axi_out=bus,
+                line_width=line_width,
+                line_count=line_count,
+                set_count=set_count,
+                flush_valid=flush_valid or "1'b0",
+                flush_ready=flush_ready or "",
+                start_addr=start_addr or "'0",
+                end_addr=end_addr or "'1",
+                name=inst_name or "i_{}".format(name),
             ) + "\n")
         return bus
 
@@ -792,7 +841,12 @@ class RegBus(object):
 class Xbar(object):
     count = 0
 
-    def __init__(self, name=None, clk="clk_i", rst="rst_ni", node=None):
+    def __init__(self,
+                 name=None,
+                 clk="clk_i",
+                 rst="rst_ni",
+                 node=None,
+                 context="default"):
         self.emitted = False
         self.inputs = list()
         self.outputs = list()
@@ -801,6 +855,7 @@ class Xbar(object):
         self.name = name or "xbar_{}".format(self.count)
         self.count += 1
         self.node = node
+        self.context = context
         xbars.append(self)
 
 
@@ -808,12 +863,14 @@ class Xbar(object):
 class AxiXbar(Xbar):
     configs = dict()
 
-    def __init__(self, aw, dw, iw, uw=0, **kwargs):
+    def __init__(self, aw, dw, iw, uw=0, no_loopback=False, **kwargs):
         super().__init__(**kwargs)
         self.aw = aw
         self.dw = dw
         self.iw = iw
         self.uw = uw
+        self.no_loopback = no_loopback
+        self.symbolic_addrmap = list()
         self.addrmap = list()
 
     def add_input(self, name):
@@ -827,10 +884,18 @@ class AxiXbar(Xbar):
             self.addrmap.append((idx, lo, hi))
         self.outputs.append(name)
 
+    def add_output_symbolic(self, name, base, length):
+        idx = len(self.outputs)
+        self.symbolic_addrmap.append((idx, base, length))
+        self.outputs.append(name)
+
     def add_output_entry(self, name, entry):
         self.add_output(name,
                         [(r.lo, r.hi)
                          for r in self.node.get_routes() if r.port == entry])
+
+    def addr_map_len(self):
+        return len(self.addrmap) + len(self.symbolic_addrmap)
 
     def emit(self):
         global code_module
@@ -838,7 +903,7 @@ class AxiXbar(Xbar):
         if self.emitted:
             return
         self.emitted = True
-
+        code_module.setdefault(self.context, "")
         # Compute the ID widths.
         iw_in = self.iw
         iw_out = self.iw + int(math.ceil(math.log2(max(1, len(self.inputs)))))
@@ -870,9 +935,10 @@ class AxiXbar(Xbar):
         code_package += "\n" + output_enum
 
         # Emit the configuration struct into the package.
-        cfg_name = util.pascalize("{}_cfg".format(self.name))
+        self.cfg_name = util.pascalize("{}_cfg".format(self.name))
         cfg = "/// Configuration of the `{}` crossbar.\n".format(self.name)
-        cfg += "localparam axi_pkg::xbar_cfg_t {} = '{{\n".format(cfg_name)
+        cfg += "localparam axi_pkg::xbar_cfg_t {} = '{{\n".format(
+            self.cfg_name)
         cfg += "  NoSlvPorts:         {}_NUM_INPUTS,\n".format(
             self.name.upper())
         cfg += "  NoMstPorts:         {}_NUM_OUTPUTS,\n".format(
@@ -885,43 +951,56 @@ class AxiXbar(Xbar):
         cfg += "  AxiIdUsedSlvPorts:  {},\n".format(self.iw)
         cfg += "  AxiAddrWidth:       {},\n".format(self.aw)
         cfg += "  AxiDataWidth:       {},\n".format(self.dw)
-        cfg += "  NoAddrRules:        {}\n".format(len(self.addrmap))
+        cfg += "  NoAddrRules:        {}\n".format(self.addr_map_len())
         cfg += "};\n"
+
         code_package += "\n" + cfg
 
         # Emit the address map into the package.
         addrmap_name = util.pascalize("{}_addrmap".format(self.name))
         addrmap = "/// Address map of the `{}` crossbar.\n".format(self.name)
-        addrmap += "localparam xbar_rule_{}_t [{}:0] {} = '{{\n".format(
+        addrmap += "xbar_rule_{}_t [{}:0] {};\n".format(
             self.aw,
-            len(self.addrmap) - 1,
-            addrmap_name,
-        )
+            self.addr_map_len() - 1, addrmap_name)
+        addrmap += "assign {} = '{{\n".format(addrmap_name)
         for i in range(len(self.addrmap)):
             addrmap += "  '{{ idx: {}, start_addr: {aw}'h{:08x}, end_addr: {aw}'h{:08x} }}".format(
                 *self.addrmap[i], aw=self.aw)
-            if i != len(self.addrmap) - 1:
+            if i != len(self.addrmap) - 1 or len(self.symbolic_addrmap) > 0:
+                addrmap += ",\n"
+            else:
+                addrmap += "\n"
+        for i, (idx, base, length) in enumerate(self.symbolic_addrmap):
+            addrmap += "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
+                idx, base, base, length, i=i)
+            if i != len(self.symbolic_addrmap) - 1:
                 addrmap += ",\n"
             else:
                 addrmap += "\n"
         addrmap += "};\n"
-        code_package += "\n" + addrmap
+
+        code_module[self.context] += "\n" + addrmap
 
         # Emit the AXI structs into the package.
-        input_struct = AxiStruct.emit(self.aw, self.dw, iw_in, self.uw)
-        output_struct = AxiStruct.emit(self.aw, self.dw, iw_out, self.uw)
+        self.input_struct = AxiStruct.emit(self.aw, self.dw, iw_in, self.uw)
+        self.output_struct = AxiStruct.emit(self.aw, self.dw, iw_out, self.uw)
 
         code_package += "\n"
-        for tds in ["req", "rsp", "aw", "w", "b", "ar", "r"]:
+        for tds in [
+                "req", "resp", "aw_chan", "w_chan", "b_chan", "ar_chan",
+                "r_chan"
+        ]:
             code_package += "typedef {}_{tds}_t {}_in_{tds}_t;\n".format(
-                input_struct, self.name, tds=tds)
+                self.input_struct, self.name, tds=tds)
             code_package += "typedef {}_{tds}_t {}_out_{tds}_t;\n".format(
-                output_struct, self.name, tds=tds)
+                self.output_struct, self.name, tds=tds)
 
         # Emit the characteristics of the AXI plugs into the package.
         code_package += "\n"
+        code_package += "// verilog_lint: waive parameter-name-style \n"
         code_package += "localparam int {}_IW_IN = {};\n".format(
             self.name.upper(), iw_in)
+        code_package += "// verilog_lint: waive parameter-name-style \n"
         code_package += "localparam int {}_IW_OUT = {};\n".format(
             self.name.upper(), iw_out)
 
@@ -930,16 +1009,16 @@ class AxiXbar(Xbar):
         code += "{}_in_req_t [{}:0] {}_in_req;\n".format(
             self.name,
             len(self.inputs) - 1, self.name)
-        code += "{}_in_rsp_t [{}:0] {}_in_rsp;\n".format(
+        code += "{}_in_resp_t [{}:0] {}_in_rsp;\n".format(
             self.name,
             len(self.inputs) - 1, self.name)
         code += "{}_out_req_t [{}:0] {}_out_req;\n".format(
             self.name,
             len(self.outputs) - 1, self.name)
-        code += "{}_out_rsp_t [{}:0] {}_out_rsp;\n".format(
+        code += "{}_out_resp_t [{}:0] {}_out_rsp;\n".format(
             self.name,
             len(self.outputs) - 1, self.name)
-        code_module += "\n" + code
+        code_module[self.context] += "\n" + code
 
         for name, enum in zip(self.inputs, input_enums):
             bus = AxiBus(
@@ -951,7 +1030,7 @@ class AxiXbar(Xbar):
                 self.uw,
                 "{}_in".format(self.name),
                 "[{}]".format(enum),
-                type_prefix=input_struct,
+                type_prefix=self.input_struct,
                 declared=True,
             )
             self.__dict__["in_" + name] = bus
@@ -966,27 +1045,35 @@ class AxiXbar(Xbar):
                 self.uw,
                 "{}_out".format(self.name),
                 "[{}]".format(enum),
-                type_prefix=output_struct,
+                type_prefix=self.output_struct,
                 declared=True,
             )
             self.__dict__["out_" + name] = bus
 
         # Emit the crossbar instance itself.
         code = "axi_xbar #(\n"
-        code += "  .Cfg           ( {cfg_name} ),\n".format(cfg_name=cfg_name)
-        code += "  .slv_aw_chan_t ( {}_aw_t ),\n".format(input_struct)
-        code += "  .mst_aw_chan_t ( {}_aw_t ),\n".format(output_struct)
-        code += "  .w_chan_t      ( {}_w_t ),\n".format(input_struct)
-        code += "  .slv_b_chan_t  ( {}_b_t ),\n".format(input_struct)
-        code += "  .mst_b_chan_t  ( {}_b_t ),\n".format(output_struct)
-        code += "  .slv_ar_chan_t ( {}_ar_t ),\n".format(input_struct)
-        code += "  .mst_ar_chan_t ( {}_ar_t ),\n".format(output_struct)
-        code += "  .slv_r_chan_t  ( {}_r_t ),\n".format(input_struct)
-        code += "  .mst_r_chan_t  ( {}_r_t ),\n".format(output_struct)
-        code += "  .slv_req_t     ( {}_req_t ),\n".format(input_struct)
-        code += "  .slv_resp_t    ( {}_rsp_t ),\n".format(input_struct)
-        code += "  .mst_req_t     ( {}_req_t ),\n".format(output_struct)
-        code += "  .mst_resp_t    ( {}_rsp_t ),\n".format(output_struct)
+        code += "  .Cfg           ( {cfg_name} ),\n".format(
+            cfg_name=self.cfg_name)
+        code += "  .Connectivity  ( {} ), \n".format(self.connectivity())
+        code += "  .slv_aw_chan_t ( {}_aw_chan_t ),\n".format(
+            self.input_struct)
+        code += "  .mst_aw_chan_t ( {}_aw_chan_t ),\n".format(
+            self.output_struct)
+        code += "  .w_chan_t      ( {}_w_chan_t ),\n".format(self.input_struct)
+        code += "  .slv_b_chan_t  ( {}_b_chan_t ),\n".format(self.input_struct)
+        code += "  .mst_b_chan_t  ( {}_b_chan_t ),\n".format(
+            self.output_struct)
+        code += "  .slv_ar_chan_t ( {}_ar_chan_t ),\n".format(
+            self.input_struct)
+        code += "  .mst_ar_chan_t ( {}_ar_chan_t ),\n".format(
+            self.output_struct)
+        code += "  .slv_r_chan_t  ( {}_r_chan_t ),\n".format(self.input_struct)
+        code += "  .mst_r_chan_t  ( {}_r_chan_t ),\n".format(
+            self.output_struct)
+        code += "  .slv_req_t     ( {}_req_t ),\n".format(self.input_struct)
+        code += "  .slv_resp_t    ( {}_resp_t ),\n".format(self.input_struct)
+        code += "  .mst_req_t     ( {}_req_t ),\n".format(self.output_struct)
+        code += "  .mst_resp_t    ( {}_resp_t ),\n".format(self.output_struct)
         code += "  .rule_t        ( xbar_rule_{}_t )\n".format(self.aw)
         code += ") i_{name} (\n".format(name=self.name)
         code += "  .clk_i  ( {clk} ),\n".format(clk=self.clk)
@@ -1005,7 +1092,27 @@ class AxiXbar(Xbar):
         code += "  .en_default_mst_port_i ( '1 ),\n"
         code += "  .default_mst_port_i    ( '0 )\n"
         code += ");\n"
-        code_module += "\n" + code
+
+        code_module[self.context] += "\n" + code
+
+    def connectivity(self):
+        """Generate a connectivity matrix"""
+        length = len(self.outputs) * len(self.inputs)
+        connectivity = ""
+        # check if port names match and disable that route
+        if self.no_loopback:
+            for i in self.inputs:
+                for o in self.outputs:
+                    if (i == o):
+                        connectivity += "0"
+                    else:
+                        connectivity += "1"
+        else:
+            connectivity += "1" * length
+
+        connectivity = "{}'b{}".format(length, connectivity[::-1])
+
+        return connectivity
 
 
 # An AXI-Lite crossbar.
@@ -1040,14 +1147,14 @@ class AxiLiteXbar(Xbar):
         if self.emitted:
             return
         self.emitted = True
-        (pkg, mod) = self.tpl.render_unicode(
-            xbar=self,
-            AxiLiteBus=AxiLiteBus,
-            AxiLiteStruct=AxiLiteStruct,
-            util=util
-        ).split("// ----- 8< -----")
+        code_module.setdefault(self.context, "")
+        (pkg,
+         mod) = self.tpl.render_unicode(xbar=self,
+                                        AxiLiteBus=AxiLiteBus,
+                                        AxiLiteStruct=AxiLiteStruct,
+                                        util=util).split("// ----- 8< -----")
         code_package += "\n" + pkg.strip() + "\n"
-        code_module += "\n" + mod.strip() + "\n"
+        code_module[self.context] += "\n" + mod.strip() + "\n"
 
 
 # Generate the code.
@@ -1056,11 +1163,11 @@ def render():
     global code_module
 
     code_package = ""
-    code_module = ""
+    code_module = dict()
 
     for xbar in xbars:
         xbar.emit()
 
     # Clean things up.
-    code_module = code_module.strip()
+    # code_module = code_module.strip()
     code_package = code_package.strip()

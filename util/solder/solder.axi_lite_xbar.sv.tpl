@@ -58,7 +58,7 @@ localparam xbar_rule_${xbar.aw}_t [${len(xbar.addrmap) - 1}:0] ${addrmap_name} =
 
 // AXI plugs of the `${xbar.name}` crossbar.
 <% struct = AxiLiteStruct.emit(xbar.aw, xbar.dw) %>
-% for tds in ["req", "rsp", "aw", "w", "b", "ar", "r"]:
+% for tds in ["req", "rsp", "aw_chan", "w_chan", "b_chan", "ar_chan", "r_chan"]:
 typedef ${struct}_${tds}_t ${xbar.name}_in_${tds}_t;
 typedef ${struct}_${tds}_t ${xbar.name}_out_${tds}_t;
 % endfor
@@ -73,11 +73,11 @@ ${struct}_rsp_t [${len(xbar.outputs)-1}:0] ${xbar.name}_out_rsp;
 // The `${xbar.name}` crossbar.
 axi_lite_xbar #(
   .Cfg       ( ${cfg_name} ),
-  .aw_chan_t ( ${struct}_aw_t ),
-  .w_chan_t  ( ${struct}_w_t ),
-  .b_chan_t  ( ${struct}_b_t ),
-  .ar_chan_t ( ${struct}_ar_t ),
-  .r_chan_t  ( ${struct}_r_t ),
+  .aw_chan_t ( ${struct}_aw_chan_t ),
+  .w_chan_t  ( ${struct}_w_chan_t ),
+  .b_chan_t  ( ${struct}_b_chan_t ),
+  .ar_chan_t ( ${struct}_ar_chan_t ),
+  .r_chan_t  ( ${struct}_r_chan_t ),
   .req_t     ( ${struct}_req_t ),
   .resp_t    ( ${struct}_rsp_t ),
   .rule_t    ( xbar_rule_${xbar.aw}_t )

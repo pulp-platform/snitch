@@ -21,7 +21,9 @@ ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 # Source #
 ##########
 src/occamy_top.sv src/occamy_pkg.sv:
-	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --outdir . src/occamy_top.sv src/occamy_pkg.sv
+	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . src/occamy_top.sv src/occamy_pkg.sv src/occamy_quadrant_s1.sv
+	dot -Tpng addrmap.dot > addrmap.png
+	verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv
 
 #############
 # Verilator #
@@ -37,8 +39,8 @@ work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
 	chmod +x $@
 	$@
 
-bin/snitch_cluster.vcs: work-vcs/compile.sh
+bin/occamy_top.vcs: work-vcs/compile.sh
 	mkdir -p bin
-	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/occamy_quadrant_s1.vcs  \
+	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/occamy_top.vcs  \
 		-assert disable_cover -override_timescale=1ns/1ps -full64 occamy_top
 
