@@ -24,6 +24,13 @@ pub unsafe fn banshee_reg_ptr<'a>(cpu: &'a mut Cpu, reg: u32) -> &'a mut u32 {
     cpu.state.regs.get_unchecked_mut(reg as usize)
 }
 
+/// Get a pointer to a register's cycle.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_reg_cycle_ptr<'a>(cpu: &'a mut Cpu, reg: u32) -> &'a mut u64 {
+    cpu.state.regs_cycle.get_unchecked_mut(reg as usize)
+}
+
 /// Get a pointer to a float register.
 #[no_mangle]
 #[inline(always)]
@@ -31,11 +38,25 @@ pub unsafe fn banshee_freg_ptr<'a>(cpu: &'a mut Cpu, reg: u32) -> &'a mut u64 {
     cpu.state.fregs.get_unchecked_mut(reg as usize)
 }
 
+/// Get a pointer to a float register.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_freg_cycle_ptr<'a>(cpu: &'a mut Cpu, reg: u32) -> &'a mut u64 {
+    cpu.state.fregs_cycle.get_unchecked_mut(reg as usize)
+}
+
 /// Get a pointer to the program counter register.
 #[no_mangle]
 #[inline(always)]
 pub unsafe fn banshee_pc_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut u32 {
     &mut cpu.state.pc
+}
+
+/// Get a pointer to the cycle counter.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_cycle_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut u64 {
+    &mut cpu.state.cycle
 }
 
 /// Get a pointer to the instret counter.

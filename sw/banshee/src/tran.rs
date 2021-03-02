@@ -143,6 +143,8 @@ pub struct ElfTranslator<'a> {
     pub inst_bbs: HashMap<u64, LLVMBasicBlockRef>,
     /// Generate instruction tracing code.
     pub trace: bool,
+    /// Generate instruction tracing code.
+    pub latency: bool,
     /// Start address of the fast local scratchpad.
     pub tcdm_start: u32,
     /// End address of the fast local scratchpad.
@@ -196,6 +198,7 @@ impl<'a> ElfTranslator<'a> {
             symbol_hints: Default::default(),
             inst_bbs: Default::default(),
             trace: engine.trace,
+            latency: engine.latency,
             tcdm_start: 0x000000,
             tcdm_end: 0x020000,
         }
@@ -736,6 +739,7 @@ impl<'a> SectionTranslator<'a> {
                         trace_emitted: Default::default(),
                         trace_disabled: Default::default(),
                         was_freppable: Default::default(),
+                        latency: Cell::new(1),
                     };
                     // Place and start inserting into premade loop instruction block
                     LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_loop_inst);
@@ -806,6 +810,7 @@ impl<'a> SectionTranslator<'a> {
                 trace_emitted: Default::default(),
                 trace_disabled: Default::default(),
                 was_freppable: Default::default(),
+                latency: Cell::new(1),
             };
             LLVMPositionBuilderAtEnd(self.builder, self.elf.inst_bbs[&addr]);
             match tran.emit(inst_index, &mut fseq) {
@@ -875,6 +880,7 @@ pub struct InstructionTranslator<'a> {
     trace_emitted: Cell<bool>,
     trace_disabled: Cell<bool>,
     was_freppable: Cell<bool>,
+    latency: Cell<usize>,
 }
 
 impl<'a> InstructionTranslator<'a> {
@@ -2094,15 +2100,99 @@ impl<'a> InstructionTranslator<'a> {
     /// Only emits the code once if called multiple times. Does nothing if the
     /// parent `ElfTranslator` has tracing disabled.
     unsafe fn emit_trace(&self) {
-        // Don't emit tracing twice, or if disabled, or if the current basic
-        // block has already been terminated.
+        // Don't emit tracing twice, or if the current basic block has already been terminated.
         if self.trace_emitted.get()
-            || !self.section.elf.trace
             || !LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null()
         {
             return;
         }
         self.trace_emitted.set(true);
+
+        // Track the cycle counter if enabled
+        if self.section.elf.latency {
+            // Check for read dependencies
+            let accesses = self.trace_accesses.borrow();
+
+            let mut cycles = Vec::new();
+            for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
+                let cycle = match access {
+                    TraceAccess::ReadReg(i) => LLVMBuildLoad(
+                        self.builder,
+                        self.reg_cycle_ptr(i as u32),
+                        format!("x{}\0", i).as_ptr() as *const _,
+                    ),
+                    TraceAccess::ReadFReg(i) => LLVMBuildLoad(
+                        self.builder,
+                        self.freg_cycle_ptr(i as u32),
+                        format!("f{}\0", i).as_ptr() as *const _,
+                    ),
+                    _ => continue,
+                };
+                cycles.push(cycle);
+            }
+
+            // Load the current cycle counter.
+            let mut max_cycle = LLVMBuildLoad(self.builder, self.cycle_ptr(), NONAME);
+            // Instruction takes at least one cycle even if all dependencies are ready
+            max_cycle = LLVMBuildAdd(
+                self.builder,
+                max_cycle,
+                LLVMConstInt(LLVMTypeOf(max_cycle), 1, 0),
+                NONAME,
+            );
+
+            // Calculate the maximum
+            for c in cycles {
+                let is_umax = LLVMBuildICmp(self.builder, LLVMIntUGT, max_cycle, c, NONAME);
+                max_cycle = LLVMBuildSelect(self.builder, is_umax, max_cycle, c, NONAME);
+            }
+
+            // Store the cycle at which all dependencies are ready and the inst is executed
+            LLVMBuildStore(self.builder, max_cycle, self.cycle_ptr());
+
+            // Check if instruction is a memory access
+            let mem_access = accesses.iter().find(|(a, _)| match a {
+                TraceAccess::ReadMem => true,
+                TraceAccess::RMWMem => true,
+                _ => false,
+            });
+
+            let latency = if let Some(access) = mem_access {
+                let (is_tcdm, _tcdm_ptr) = self.emit_tcdm_check(access.1);
+                LLVMBuildSelect(
+                    self.builder,
+                    is_tcdm,
+                    LLVMConstInt(LLVMTypeOf(max_cycle), 3, 0),
+                    LLVMConstInt(LLVMTypeOf(max_cycle), 10, 0),
+                    NONAME,
+                )
+            } else {
+                // TODO differentiate between different instructions
+                LLVMConstInt(LLVMTypeOf(max_cycle), self.latency.get() as u64, 0)
+            };
+
+            // Add latency of this instruction
+            let cycle = LLVMBuildAdd(self.builder, max_cycle, latency, NONAME);
+
+            // Write new dependencies
+            for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
+                match access {
+                    // ReadMem => random latency,
+                    TraceAccess::WriteReg(i) => {
+                        LLVMBuildStore(self.builder, cycle, self.reg_cycle_ptr(i as u32))
+                    }
+                    TraceAccess::WriteFReg(i) => {
+                        LLVMBuildStore(self.builder, cycle, self.freg_cycle_ptr(i as u32))
+                    }
+                    _ => continue,
+                };
+            }
+        }
+
+        // Don't emit tracing if disabled
+        if !self.section.elf.trace {
+            return;
+        }
 
         // Compose a list of accesses.
         let accesses = self.trace_accesses.borrow();
@@ -2673,6 +2763,18 @@ impl<'a> InstructionTranslator<'a> {
         )
     }
 
+    unsafe fn reg_cycle_ptr(&self, r: u32) -> LLVMValueRef {
+        assert!(r < 32);
+        self.section.emit_call_with_name(
+            "banshee_reg_cycle_ptr",
+            [
+                self.section.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), r as u64, 0),
+            ],
+            &format!("ptr_x{}", r),
+        )
+    }
+
     unsafe fn freg_ptr(&self, r: u32) -> LLVMValueRef {
         assert!(r < 32);
         self.section.emit_call_with_name(
@@ -2685,9 +2787,26 @@ impl<'a> InstructionTranslator<'a> {
         )
     }
 
+    unsafe fn freg_cycle_ptr(&self, r: u32) -> LLVMValueRef {
+        assert!(r < 32);
+        self.section.emit_call_with_name(
+            "banshee_freg_cycle_ptr",
+            [
+                self.section.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), r as u64, 0),
+            ],
+            &format!("ptr_f{}", r),
+        )
+    }
+
     unsafe fn pc_ptr(&self) -> LLVMValueRef {
         self.section
             .emit_call_with_name("banshee_pc_ptr", [self.section.state_ptr], "ptr_pc")
+    }
+
+    unsafe fn cycle_ptr(&self) -> LLVMValueRef {
+        self.section
+            .emit_call_with_name("banshee_cycle_ptr", [self.section.state_ptr], "ptr_cycle")
     }
 
     unsafe fn instret_ptr(&self) -> LLVMValueRef {

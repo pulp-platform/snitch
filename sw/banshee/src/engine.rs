@@ -14,7 +14,7 @@ use llvm_sys::{
 use std::{
     collections::HashMap,
     sync::{
-        atomic::{AtomicBool, AtomicU32, AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering},
         Mutex,
     },
 };
@@ -37,6 +37,8 @@ pub struct Engine {
     pub opt_jit: bool,
     /// Enable instruction tracing.
     pub trace: bool,
+    /// Enable instruction latency.
+    pub latency: bool,
     /// The base hartid.
     pub base_hartid: usize,
     /// The number of cores.
@@ -95,6 +97,7 @@ impl Engine {
             opt_llvm: true,
             opt_jit: true,
             trace: false,
+            latency: false,
             base_hartid: 0,
             num_cores: 1,
             num_clusters: 1,
@@ -319,7 +322,7 @@ impl Engine {
         // Allocate global variables to keep track of sleeping cores.
         let num_sleep = AtomicUsize::new(0);
         let wake_up: Vec<_> = (0..self.num_clusters * self.num_cores)
-            .map(|_| AtomicUsize::new(0))
+            .map(|_| AtomicU64::new(0))
             .collect();
 
         // Create the CPUs.
@@ -444,7 +447,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         cluster_id: usize,
         barrier: &'b AtomicUsize,
         num_sleep: &'b AtomicUsize,
-        wake_up: &'b Vec<AtomicUsize>,
+        wake_up: &'b Vec<AtomicU64>,
     ) -> Self {
         Self {
             engine,
@@ -498,12 +501,12 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     self.num_sleep
                         .fetch_sub(self.wake_up.len(), Ordering::Relaxed);
                     for x in self.wake_up {
-                        x.fetch_add(1, Ordering::Relaxed);
+                        x.fetch_max(self.state.cycle + 1, Ordering::Release);
                     }
                 } else if (value as usize) < self.wake_up.len() {
                     self.num_sleep.fetch_sub(1, Ordering::Relaxed);
                     self.wake_up[value as usize - self.engine.base_hartid]
-                        .fetch_add(1, Ordering::Relaxed);
+                        .fetch_max(self.state.cycle + 1, Ordering::Release);
                 }
             }
             0x40000038 => (), // barrier_reg
@@ -560,7 +563,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
         trace!("Read CSR 0x{:x}", csr);
         match csr {
             0x7C0 => self.state.ssr_enable,
-            0xF14 => self.hartid as u32, // mhartid
+            0xB00 => self.state.cycle as u32,         // csr_mcycle
+            0xB80 => (self.state.cycle >> 32) as u32, // csr_mcycleh
+            0xF14 => self.hartid as u32,              // mhartid
             _ => 0,
         }
     }
@@ -611,8 +616,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
 
         // Assemble the trace line.
         let line = format!(
-            "{:08} {:04} {:08x}  {:38}  # DASM({:08x})",
-            self.state.instret, self.hartid, addr, args, inst
+            "{:08} {:08} {:04} {:08x}  {:38}  # DASM({:08x})",
+            self.state.cycle, self.state.instret, self.hartid, addr, args, inst
         );
         println!("{}", line);
     }
@@ -620,11 +625,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
     fn binary_wfi(&mut self) -> u32 {
         // Set own wfi.
         self.state.wfi = true;
-        self.num_sleep.fetch_add(1, Ordering::Relaxed);
+        self.num_sleep.fetch_add(1, Ordering::Release);
         // Wait for the wake up call
-        while self.wake_up[self.hartid - self.engine.base_hartid as usize].load(Ordering::Relaxed)
-            == 0
-        {
+        let hartid = self.hartid - self.engine.base_hartid;
+        while self.wake_up[hartid].load(Ordering::Relaxed) == 0 {
             // Check if everyone is sleeping
             if self.num_sleep.load(Ordering::Relaxed) == self.wake_up.len() {
                 return 1;
@@ -632,8 +636,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
             std::thread::yield_now();
         }
         // Someone woke us up --> Clear the flag
-        self.wake_up[self.hartid - self.engine.base_hartid as usize]
-            .fetch_sub(1, Ordering::Relaxed);
+        let cycle = self.wake_up[hartid].swap(0, Ordering::Relaxed);
+        self.state.cycle = std::cmp::max(self.state.cycle, cycle as u64);
         self.state.wfi = false;
         // The core waking us up, already decremented the `num_sleep` counter for us
         return 0;

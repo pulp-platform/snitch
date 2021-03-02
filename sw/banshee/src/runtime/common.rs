@@ -11,7 +11,7 @@
 // Try to pack as much as possible into `mod.rs` (for banshee) or `jit.rs` (for
 // the translated binary).
 
-use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::{AtomicU64, AtomicUsize};
 
 /// A CPU pointer to be passed to the binary code.
 #[repr(C)]
@@ -27,7 +27,7 @@ pub struct Cpu<'a, 'b> {
     /// The cluster's shared barrier state.
     pub barrier: &'b AtomicUsize,
     pub num_sleep: &'b AtomicUsize,
-    pub wake_up: &'b Vec<AtomicUsize>,
+    pub wake_up: &'b Vec<AtomicU64>,
 }
 
 /// A representation of a single CPU core's state.
@@ -35,8 +35,11 @@ pub struct Cpu<'a, 'b> {
 #[repr(C)]
 pub struct CpuState {
     pub regs: [u32; 32],
+    pub regs_cycle: [u64; 32],
     pub fregs: [u64; 32],
+    pub fregs_cycle: [u64; 32],
     pub pc: u32,
+    pub cycle: u64,
     pub instret: u64,
     pub ssrs: [SsrState; 2],
     pub ssr_enable: u32,

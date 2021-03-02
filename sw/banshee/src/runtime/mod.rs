@@ -73,6 +73,7 @@ impl std::fmt::Debug for CpuState {
             .field("regs", &format_args!("\n{}", regs))
             .field("fregs", &format_args!("\n{}", fregs))
             .field("pc", &format_args!("0x{:x}", self.pc))
+            .field("cycle", &self.cycle)
             .field("instret", &self.instret)
             .field("ssrs", &self.ssrs)
             .field("dma", &self.dma)
