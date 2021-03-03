@@ -64,7 +64,7 @@ module snitch_shared_muldiv #(
   end
 
   // Multiplication
-  multiplier #(
+  snitch_shared_muldiv_multiplier #(
     .Width     (32),
     .IdWidth   (IdWidth)
   ) i_multiplier (
@@ -82,7 +82,7 @@ module snitch_shared_muldiv #(
     .id_o       (mul.id)
   );
   // Serial Divider
-  serdiv #(
+  snitch_shared_muldiv_serdiv #(
     .WIDTH     (32),
     .IdWidth   (IdWidth)
   ) i_div (
@@ -117,7 +117,7 @@ module snitch_shared_muldiv #(
   assign acc_pid_o   = oup.id;
 endmodule
 
-module multiplier #(
+module snitch_shared_muldiv_multiplier #(
   parameter int unsigned Width   = 64,
   parameter int unsigned IdWidth = 5
 ) (
@@ -206,7 +206,7 @@ module multiplier #(
 endmodule
 
 
-module serdiv #(
+module snitch_shared_muldiv_serdiv #(
   parameter int unsigned WIDTH   = 64,
   parameter int unsigned IdWidth = 5
 ) (
