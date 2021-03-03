@@ -164,9 +164,10 @@ import std_cache_pkg::*;
     // Memory Arrays
     // --------------
     for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
-        sram #(
-            .DATA_WIDTH ( DCACHE_LINE_WIDTH                 ),
-            .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
+        tc_sram #(
+            .DataWidth ( DCACHE_LINE_WIDTH                  ),
+            .NumWords  ( DCACHE_NUM_WORDS                   ),
+            .NumPorts  ( 1                                  )
         ) data_sram (
             .req_i   ( req_ram [i]                          ),
             .rst_ni  ( rst_ni                               ),
@@ -178,9 +179,10 @@ import std_cache_pkg::*;
             .*
         );
 
-        sram #(
-            .DATA_WIDTH ( DCACHE_TAG_WIDTH                  ),
-            .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
+        tc_sram #(
+            .DataWidth ( DCACHE_TAG_WIDTH                   ),
+            .NumWords  ( DCACHE_NUM_WORDS                   ),
+            .NumPorts  ( 1                                  )
         ) tag_sram (
             .req_i   ( req_ram [i]                          ),
             .rst_ni  ( rst_ni                               ),
@@ -210,9 +212,10 @@ import std_cache_pkg::*;
         assign rdata_ram[i].valid = dirty_rdata[8*i+1];
     end
 
-    sram #(
-        .DATA_WIDTH ( 4*DCACHE_DIRTY_WIDTH             ),
-        .NUM_WORDS  ( DCACHE_NUM_WORDS                 )
+    tc_sram #(
+        .DataWidth ( 4*DCACHE_DIRTY_WIDTH             ),
+        .NumWords  ( DCACHE_NUM_WORDS                 ),
+        .NumPorts  ( 1                                )
     ) valid_dirty_sram (
         .clk_i   ( clk_i                               ),
         .rst_ni  ( rst_ni                              ),
