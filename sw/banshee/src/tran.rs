@@ -953,9 +953,13 @@ impl<'a> InstructionTranslator<'a> {
             //  riscv::Format::AqrlRdRs1(x) => self.emit_aqrl_rd_rs1(x),
             riscv::Format::AqrlRdRs1Rs2(x) => self.emit_aqrl_rd_rs1_rs2(x),
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
+            riscv::Format::Imm5Rd(x) => self.emit_imm5_rd(x),
             riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
+            riscv::Format::Imm5RdRs1(x) => self.emit_imm5_rd_rs1(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
-            riscv::Format::Imm12RdRmRs1(x) => self.emit_imm12_rd_rm_rs1(x, fseq),
+            riscv::Format::Imm12Rs1Stagger_maskStagger_max(x) => {
+                self.emit_imm12_rs1_staggermask_staggermax(x, fseq)
+            }
             riscv::Format::Imm12Rs1(x) => self.emit_imm12_rs1(x),
             riscv::Format::Imm12hiImm12loRs1Rs2(x) => self.emit_imm12hi_imm12lo_rs1_rs2(x),
             riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
@@ -1280,6 +1284,22 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
+    unsafe fn emit_imm5_rd(&self, data: riscv::FormatImm5Rd) -> Result<()> {
+        let imm = data.imm5;
+        trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
+        let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
+        let name = format!("{}\0", data.op);
+        let _name = name.as_ptr() as *const _;
+
+        let value = match data.op {
+            riscv::OpcodeImm5Rd::Dmstati => self
+                .section
+                .emit_call("banshee_dma_stat", [self.dma_ptr(), imm]),
+        };
+        self.write_reg(data.rd, value);
+        Ok(())
+    }
+
     unsafe fn emit_imm12_rd(&self, data: riscv::FormatImm12Rd) -> Result<()> {
         let imm = data.imm();
         trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
@@ -1290,12 +1310,34 @@ impl<'a> InstructionTranslator<'a> {
         let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
 
         let value = match data.op {
-            riscv::OpcodeImm12Rd::DmStati => self
-                .section
-                .emit_call("banshee_dma_stat", [self.dma_ptr(), imm]),
             // srr loar immediate from iffset in imm12
             riscv::OpcodeImm12Rd::Scfgri => self.emit_load(ssr_start, imm, 2, true),
-            _ => bail!("Unsupported opcode {}", data.op),
+            // _ => bail!("Unsupported opcode {}", data.op),
+        };
+        self.write_reg(data.rd, value);
+        Ok(())
+    }
+
+    unsafe fn emit_imm5_rd_rs1(&self, data: riscv::FormatImm5RdRs1) -> Result<()> {
+        let imm = data.imm5;
+        let rs1 = self.read_reg(data.rs1);
+        let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
+        let value = match data.op {
+            riscv::OpcodeImm5RdRs1::Dmcpyi => self.section.emit_call(
+                "banshee_dma_strt",
+                [
+                    self.dma_ptr(),
+                    LLVMBuildBitCast(
+                        self.builder,
+                        self.section.state_ptr,
+                        LLVMPointerType(LLVMInt8Type(), 0),
+                        NONAME,
+                    ),
+                    rs1,
+                    imm,
+                ],
+            ),
+            // _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
         Ok(())
@@ -1385,20 +1427,6 @@ impl<'a> InstructionTranslator<'a> {
                 self.emit_fld(data.rd, LLVMBuildAdd(self.builder, rs1, imm, NONAME));
                 return Ok(());
             }
-            riscv::OpcodeImm12RdRs1::DmStrti => self.section.emit_call(
-                "banshee_dma_strt",
-                [
-                    self.dma_ptr(),
-                    LLVMBuildBitCast(
-                        self.builder,
-                        self.section.state_ptr,
-                        LLVMPointerType(LLVMInt8Type(), 0),
-                        NONAME,
-                    ),
-                    rs1,
-                    imm,
-                ],
-            ),
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
@@ -1499,7 +1527,11 @@ impl<'a> InstructionTranslator<'a> {
             // ssr read from offset rs2 to rd
             riscv::OpcodeRdRs2::Scfgr => {
                 self.emit_load(LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0), rs2, 2, true)
-            } // _ => bail!("Unsupported opcode {}", data.op),
+            }
+            riscv::OpcodeRdRs2::Dmstat => self
+                .section
+                .emit_call("banshee_dma_stat", [self.dma_ptr(), rs2]),
+            // _ => bail!("Unsupported opcode {}", data.op),
         };
 
         self.write_reg(data.rd, value);
@@ -1630,29 +1662,35 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
-    unsafe fn emit_imm12_rd_rm_rs1(
+    unsafe fn emit_imm12_rs1_staggermask_staggermax(
         &self,
-        data: riscv::FormatImm12RdRmRs1,
+        data: riscv::FormatImm12Rs1Stagger_maskStagger_max,
         fseq: &mut SequencerContext,
     ) -> Result<()> {
         trace!(
-            "{} x{}, {}, 0b{:b}, {}, {}",
+            "{} x{}, {}, 0b{:b}, {}",
             data.op,
-            data.rs1,     // register containing max repetition
-            data.imm12,   // max instruction
-            data.rd >> 1, // stagger mask
-            data.rm,      // stagger max
-            data.rd & 1   // whether outer loop
+            data.rs1,          // register containing max repetition
+            data.imm12,        // max instruction
+            data.stagger_mask, // stagger mask
+            data.stagger_max   // stagger max
         );
         match data.op {
-            riscv::OpcodeImm12RdRmRs1::Frep => fseq.init_rep(
+            riscv::OpcodeImm12Rs1Stagger_maskStagger_max::FrepO => fseq.init_rep(
                 data.imm12 as u8,
                 self.read_reg(data.rs1),
-                data.rd & 1 != 0,
-                data.rm as u8,
-                (data.rd >> 1) as u8,
+                true,
+                data.stagger_max as u8,
+                data.stagger_mask as u8,
             ),
-            _ => bail!("Unsupported opcode {}", data.op),
+            riscv::OpcodeImm12Rs1Stagger_maskStagger_max::FrepI => fseq.init_rep(
+                data.imm12 as u8,
+                self.read_reg(data.rs1),
+                false,
+                data.stagger_max as u8,
+                data.stagger_mask as u8,
+            ),
+            // _ => bail!("Unsupported opcode {}", data.op),
         }
     }
 
@@ -1756,16 +1794,6 @@ impl<'a> InstructionTranslator<'a> {
             }
             _ => (),
         }
-
-        // Handle DMA operations
-        let rs1 = self.read_reg(data.rs1);
-        let value = match data.op {
-            riscv::OpcodeRdRs1::DmStat => self
-                .section
-                .emit_call("banshee_dma_stat", [self.dma_ptr(), rs1]),
-            _ => bail!("Unsupported opcode {}", data.op),
-        };
-        self.write_reg(data.rd, value);
         Ok(())
     }
 
@@ -2016,7 +2044,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeRdRs1Rs2::Sll => LLVMBuildShl(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Srl => LLVMBuildLShr(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Sra => LLVMBuildAShr(self.builder, rs1, rs2, name),
-            riscv::OpcodeRdRs1Rs2::DmStrt => self
+            riscv::OpcodeRdRs1Rs2::Dmcpy => self
                 .section
                 .emit_call("banshee_dma_strt", [self.dma_ptr(), rs1, rs2]),
             _ => bail!("Unsupported opcode {}", data.op),
@@ -2113,10 +2141,10 @@ impl<'a> InstructionTranslator<'a> {
         };
 
         match data.op {
-            riscv::OpcodeRs1Rs2::DmSrc => self
+            riscv::OpcodeRs1Rs2::Dmsrc => self
                 .section
                 .emit_call("banshee_dma_src", [self.dma_ptr(), rs1, rs2]),
-            riscv::OpcodeRs1Rs2::DmDst => self
+            riscv::OpcodeRs1Rs2::Dmdst => self
                 .section
                 .emit_call("banshee_dma_dst", [self.dma_ptr(), rs1, rs2]),
             _ => bail!("Unsupported opcode {}", data.op),
