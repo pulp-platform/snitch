@@ -21,6 +21,9 @@ use std::{
 
 static NONAME: &'static i8 = unsafe { std::mem::transmute("\0".as_ptr()) };
 
+/// Base address of the stream semantic regsiters
+static SSR_BASE: u64 = 0x204800;
+
 /// Number of arguments the trace maximally shows per instruction.
 const TRACE_BUFFER_LEN: u32 = 8;
 
@@ -953,6 +956,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
             riscv::Format::Imm12RdRmRs1(x) => self.emit_imm12_rd_rm_rs1(x, fseq),
+            riscv::Format::Imm12Rs1(x) => self.emit_imm12_rs1(x),
             riscv::Format::Imm12hiImm12loRs1Rs2(x) => self.emit_imm12hi_imm12lo_rs1_rs2(x),
             riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
             riscv::Format::Jimm20Rd(x) => self.emit_jimm20_rd(x),
@@ -963,6 +967,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
             riscv::Format::RdRs1Shamt(x) => self.emit_rd_rs1_shamt(x),
             riscv::Format::Rs1Rs2(x) => self.emit_rs1_rs2(x),
+            riscv::Format::RdRs2(x) => self.emit_rd_rs2(x),
             riscv::Format::Unit(x) => self.emit_unit(x),
             _ => Err(anyhow!("Unsupported instruction format")),
         }
@@ -1194,6 +1199,30 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
+    unsafe fn emit_imm12_rs1(&self, data: riscv::FormatImm12Rs1) -> Result<()> {
+        let imm = data.imm();
+        trace!("{} x{}, x{}", data.op, data.rs1, imm);
+
+        // Compute the address.
+        let rs1 = self.read_reg(data.rs1);
+        let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
+
+        // Perform the operation.
+        match data.op {
+            riscv::OpcodeImm12Rs1::Scfgwi => {
+                // ssr write immediate holds address offset in imm12, content in rs1
+                let addr = LLVMBuildAdd(
+                    self.builder,
+                    LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
+                    imm,
+                    NONAME,
+                );
+                self.write_mem(addr, rs1, 2);
+            } // _ => bail!("Unsupported opcode {}", data.op),
+        };
+        Ok(())
+    }
+
     unsafe fn emit_imm12hi_imm12lo_rs1_rs2(
         &self,
         data: riscv::FormatImm12hiImm12loRs1Rs2,
@@ -1257,10 +1286,15 @@ impl<'a> InstructionTranslator<'a> {
         let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
         let name = format!("{}\0", data.op);
         let _name = name.as_ptr() as *const _;
+
+        let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
+
         let value = match data.op {
             riscv::OpcodeImm12Rd::DmStati => self
                 .section
                 .emit_call("banshee_dma_stat", [self.dma_ptr(), imm]),
+            // srr loar immediate from iffset in imm12
+            riscv::OpcodeImm12Rd::Scfgri => self.emit_load(ssr_start, imm, 2, true),
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
@@ -1454,6 +1488,21 @@ impl<'a> InstructionTranslator<'a> {
             }
             _ => bail!("Unsupported opcode {}", data.op),
         };
+        Ok(())
+    }
+
+    unsafe fn emit_rd_rs2(&self, data: riscv::FormatRdRs2) -> Result<()> {
+        trace!("{} x{}, f{}", data.op, data.rd, data.rs2);
+        let rs2 = self.read_reg(data.rs2);
+
+        let value = match data.op {
+            // ssr read from offset rs2 to rd
+            riscv::OpcodeRdRs2::Scfgr => {
+                self.emit_load(LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0), rs2, 2, true)
+            } // _ => bail!("Unsupported opcode {}", data.op),
+        };
+
+        self.write_reg(data.rd, value);
         Ok(())
     }
 
@@ -2047,6 +2096,22 @@ impl<'a> InstructionTranslator<'a> {
         let _name = name.as_ptr() as *const _;
         let rs1 = self.read_reg(data.rs1);
         let rs2 = self.read_reg(data.rs2);
+
+        // Perform the SSR write op
+        match data.op {
+            riscv::OpcodeRs1Rs2::Scfgw => {
+                let addr = LLVMBuildAdd(
+                    self.builder,
+                    LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
+                    rs2,
+                    NONAME,
+                );
+                self.write_mem(addr, rs1, 2);
+                return Ok(());
+            }
+            _ => (),
+        };
+
         match data.op {
             riscv::OpcodeRs1Rs2::DmSrc => self
                 .section
@@ -2537,8 +2602,8 @@ impl<'a> InstructionTranslator<'a> {
         &self,
         addr: LLVMValueRef,
     ) -> (LLVMValueRef, LLVMValueRef, LLVMValueRef) {
-        let ssr_start = LLVMConstInt(LLVMInt32Type(), 0x204800, 0);
-        let ssr_end = LLVMConstInt(LLVMInt32Type(), 0x204800 + 32 * 8 * 2, 0);
+        let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
+        let ssr_end = LLVMConstInt(LLVMInt32Type(), SSR_BASE + 32 * 8 * 2, 0);
         let ssr_size = LLVMConstInt(LLVMInt32Type(), 32 * 8, 0);
         let in_range = LLVMBuildAnd(
             self.builder,

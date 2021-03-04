@@ -5,7 +5,7 @@
 SHELL := /bin/bash
 RISCV_OPCODES ?= ../../sw/vendor/riscv-opcodes
 PARSE_OPCODES ?= $(RISCV_OPCODES)/parse-opcodes
-OPCODES := opcodes opcodes-rep opcodes-dma
+OPCODES := opcodes opcodes-rep opcodes-dma opcodes-ssr
 OPCODES_PATH := $(patsubst %,$(RISCV_OPCODES)/%,$(OPCODES))
 
 all:: src/riscv.rs

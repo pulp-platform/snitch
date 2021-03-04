@@ -16,6 +16,7 @@ pub enum Format {
     Imm12Rd(FormatImm12Rd),
     Imm12RdRmRs1(FormatImm12RdRmRs1),
     Imm12RdRs1(FormatImm12RdRs1),
+    Imm12Rs1(FormatImm12Rs1),
     Imm12hiImm12loRs1Rs2(FormatImm12hiImm12loRs1Rs2),
     Imm20Rd(FormatImm20Rd),
     Jimm20Rd(FormatJimm20Rd),
@@ -28,6 +29,7 @@ pub enum Format {
     RdRs1Rs3Shamt(FormatRdRs1Rs3Shamt),
     RdRs1Shamt(FormatRdRs1Shamt),
     RdRs1Shamtw(FormatRdRs1Shamtw),
+    RdRs2(FormatRdRs2),
     Rs1(FormatRs1),
     Rs1Rs2(FormatRs1Rs2),
 }
@@ -44,6 +46,7 @@ impl Format {
             Self::Imm12Rd(x) => x.raw,
             Self::Imm12RdRmRs1(x) => x.raw,
             Self::Imm12RdRs1(x) => x.raw,
+            Self::Imm12Rs1(x) => x.raw,
             Self::Imm12hiImm12loRs1Rs2(x) => x.raw,
             Self::Imm20Rd(x) => x.raw,
             Self::Jimm20Rd(x) => x.raw,
@@ -56,6 +59,7 @@ impl Format {
             Self::RdRs1Rs3Shamt(x) => x.raw,
             Self::RdRs1Shamt(x) => x.raw,
             Self::RdRs1Shamtw(x) => x.raw,
+            Self::RdRs2(x) => x.raw,
             Self::Rs1(x) => x.raw,
             Self::Rs1Rs2(x) => x.raw,
         }
@@ -74,6 +78,7 @@ impl std::fmt::Display for Format {
             Self::Imm12Rd(x) => write!(f, "{}", x),
             Self::Imm12RdRmRs1(x) => write!(f, "{}", x),
             Self::Imm12RdRs1(x) => write!(f, "{}", x),
+            Self::Imm12Rs1(x) => write!(f, "{}", x),
             Self::Imm12hiImm12loRs1Rs2(x) => write!(f, "{}", x),
             Self::Imm20Rd(x) => write!(f, "{}", x),
             Self::Jimm20Rd(x) => write!(f, "{}", x),
@@ -86,6 +91,7 @@ impl std::fmt::Display for Format {
             Self::RdRs1Rs3Shamt(x) => write!(f, "{}", x),
             Self::RdRs1Shamt(x) => write!(f, "{}", x),
             Self::RdRs1Shamtw(x) => write!(f, "{}", x),
+            Self::RdRs2(x) => write!(f, "{}", x),
             Self::Rs1(x) => write!(f, "{}", x),
             Self::Rs1Rs2(x) => write!(f, "{}", x),
         }
@@ -365,6 +371,7 @@ impl FormatImm12Rd {
 pub enum OpcodeImm12Rd {
     DmStati,
     DmErri,
+    Scfgri,
 }
 
 impl std::fmt::Display for FormatImm12Rd {
@@ -381,6 +388,7 @@ impl std::fmt::Display for OpcodeImm12Rd {
         match self {
             Self::DmStati => write!(f, "dm.stati"),
             Self::DmErri => write!(f, "dm.erri"),
+            Self::Scfgri => write!(f, "scfgri"),
         }
     }
 }
@@ -515,6 +523,44 @@ impl std::fmt::Display for OpcodeImm12RdRs1 {
             Self::Fld => write!(f, "fld"),
             Self::Flq => write!(f, "flq"),
             Self::DmStrti => write!(f, "dm.strti"),
+        }
+    }
+}
+
+/// The `Imm12Rs1` instruction format.
+#[derive(Debug, Copy, Clone)]
+pub struct FormatImm12Rs1 {
+    pub op: OpcodeImm12Rs1,
+    pub raw: u32,
+    pub imm12: u32,
+    pub rs1: u32,
+}
+
+impl FormatImm12Rs1 {
+    pub fn imm(&self) -> i32 {
+        ((self.imm12 << 20) as i32) >> 20
+    }
+}
+
+/// Opcodes with the `Imm12Rs1` instruction format.
+#[derive(Debug, Copy, Clone)]
+pub enum OpcodeImm12Rs1 {
+    Scfgwi,
+}
+
+impl std::fmt::Display for FormatImm12Rs1 {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.op)?;
+        write!(f, " imm12={:x}", self.imm12)?;
+        write!(f, " rs1={:x}", self.rs1)?;
+        Ok(())
+    }
+}
+
+impl std::fmt::Display for OpcodeImm12Rs1 {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Self::Scfgwi => write!(f, "scfgwi"),
         }
     }
 }
@@ -1337,6 +1383,40 @@ impl std::fmt::Display for OpcodeRdRs1Shamtw {
     }
 }
 
+/// The `RdRs2` instruction format.
+#[derive(Debug, Copy, Clone)]
+pub struct FormatRdRs2 {
+    pub op: OpcodeRdRs2,
+    pub raw: u32,
+    pub rd: u32,
+    pub rs2: u32,
+}
+
+impl FormatRdRs2 {}
+
+/// Opcodes with the `RdRs2` instruction format.
+#[derive(Debug, Copy, Clone)]
+pub enum OpcodeRdRs2 {
+    Scfgr,
+}
+
+impl std::fmt::Display for FormatRdRs2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.op)?;
+        write!(f, " rd={:x}", self.rd)?;
+        write!(f, " rs2={:x}", self.rs2)?;
+        Ok(())
+    }
+}
+
+impl std::fmt::Display for OpcodeRdRs2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Self::Scfgr => write!(f, "scfgr"),
+        }
+    }
+}
+
 /// The `Rs1` instruction format.
 #[derive(Debug, Copy, Clone)]
 pub struct FormatRs1 {
@@ -1389,6 +1469,7 @@ pub enum OpcodeRs1Rs2 {
     DmSrc,
     DmDst,
     DmTwodStrd,
+    Scfgw,
 }
 
 impl std::fmt::Display for FormatRs1Rs2 {
@@ -1409,6 +1490,7 @@ impl std::fmt::Display for OpcodeRs1Rs2 {
             Self::DmSrc => write!(f, "dm.src"),
             Self::DmDst => write!(f, "dm.dst"),
             Self::DmTwodStrd => write!(f, "dm.twod.strd"),
+            Self::Scfgw => write!(f, "scfgw"),
         }
     }
 }
@@ -1463,16 +1545,20 @@ pub fn parse_u32(raw: u32) -> Format {
         0x2027 => return parse_imm12hi_imm12lo_rs1_rs2(OpcodeImm12hiImm12loRs1Rs2::Fsw, raw),
         0x3027 => return parse_imm12hi_imm12lo_rs1_rs2(OpcodeImm12hiImm12loRs1Rs2::Fsd, raw),
         0x4027 => return parse_imm12hi_imm12lo_rs1_rs2(OpcodeImm12hiImm12loRs1Rs2::Fsq, raw),
-        0x102b => return parse_imm12_rd_rs1(OpcodeImm12RdRs1::DmStrti, raw),
+        0x002b => return parse_imm12_rd_rs1(OpcodeImm12RdRs1::DmStrti, raw),
         _ => (),
     }
     match raw & 0xff07f {
-        0x202b => return parse_imm12_rd(OpcodeImm12Rd::DmStati, raw),
         0x302b => return parse_imm12_rd(OpcodeImm12Rd::DmErri, raw),
+        0x102b => return parse_imm12_rd(OpcodeImm12Rd::Scfgri, raw),
         _ => (),
     }
     match raw & 0x400707f {
         0x4005013 => return parse_rd_rs1_rs3_shamt(OpcodeRdRs1Rs3Shamt::Fsri, raw),
+        _ => (),
+    }
+    match raw & 0x7fff {
+        0x202b => return parse_imm12_rs1(OpcodeImm12Rs1::Scfgwi, raw),
         _ => (),
     }
     match raw & 0x600007f {
@@ -1654,6 +1740,13 @@ pub fn parse_u32(raw: u32) -> Format {
         0x2b => return parse_rs1_rs2(OpcodeRs1Rs2::DmSrc, raw),
         0x200002b => return parse_rs1_rs2(OpcodeRs1Rs2::DmDst, raw),
         0xa00002b => return parse_rs1_rs2(OpcodeRs1Rs2::DmTwodStrd, raw),
+        0x20ab => return parse_rs1_rs2(OpcodeRs1Rs2::Scfgw, raw),
+        _ => (),
+    }
+    match raw & 0xfe0ff07f {
+        0x800002b => return parse_imm12_rd(OpcodeImm12Rd::DmStati, raw),
+        0xa00002b => return parse_rd_rs1(OpcodeRdRs1::DmStat, raw),
+        0x902b => return parse_rd_rs2(OpcodeRdRs2::Scfgr, raw),
         _ => (),
     }
     match raw & 0xfff0007f {
@@ -1713,7 +1806,6 @@ pub fn parse_u32(raw: u32) -> Format {
         0xf0000053 => return parse_rd_rs1(OpcodeRdRs1::FmvWX, raw),
         0xf2000053 => return parse_rd_rs1(OpcodeRdRs1::FmvDX, raw),
         0xf6000053 => return parse_rd_rs1(OpcodeRdRs1::FmvQX, raw),
-        0x600002b => return parse_rd_rs1(OpcodeRdRs1::DmStat, raw),
         0x800002b => return parse_rd_rs1(OpcodeRdRs1::DmErr, raw),
         _ => (),
     }
@@ -1824,6 +1916,16 @@ pub fn parse_imm12_rd_rs1(op: OpcodeImm12RdRs1, raw: u32) -> Format {
         raw,
         imm12: (raw >> 20) & 0xfff,
         rd: (raw >> 7) & 0x1f,
+        rs1: (raw >> 15) & 0x1f,
+    })
+}
+
+/// Parse an instruction with the `Imm12Rs1` format.
+pub fn parse_imm12_rs1(op: OpcodeImm12Rs1, raw: u32) -> Format {
+    Format::Imm12Rs1(FormatImm12Rs1 {
+        op,
+        raw,
+        imm12: (raw >> 20) & 0xfff,
         rs1: (raw >> 15) & 0x1f,
     })
 }
@@ -1960,6 +2062,16 @@ pub fn parse_rd_rs1_shamtw(op: OpcodeRdRs1Shamtw, raw: u32) -> Format {
         rd: (raw >> 7) & 0x1f,
         rs1: (raw >> 15) & 0x1f,
         shamtw: (raw >> 20) & 0x1f,
+    })
+}
+
+/// Parse an instruction with the `RdRs2` format.
+pub fn parse_rd_rs2(op: OpcodeRdRs2, raw: u32) -> Format {
+    Format::RdRs2(FormatRdRs2 {
+        op,
+        raw,
+        rd: (raw >> 7) & 0x1f,
+        rs2: (raw >> 20) & 0x1f,
     })
 }
 
