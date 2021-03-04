@@ -34,6 +34,8 @@ const SEQ_BUFFER_LEN: u8 = 16;
 struct SequencerIterators {
     /// A u32* pointing to the repetition index.
     rpt_ptr_ref: LLVMValueRef,
+    /// A u32* pointing to the repetition maximum.
+    max_rpt_ref: LLVMValueRef,
 }
 
 /// The sequencer's context during section-level translation.
@@ -42,8 +44,6 @@ struct SequencerContext {
     active: bool,
     /// The biggest instruction index to buffer.
     max_inst: u8,
-    /// A u32 repetition index until which the block is iterated.
-    max_rpt_ref: LLVMValueRef,
     /// Whether repetition is block-first or instruction-first.
     is_outer: bool,
     /// The maximum stagger index.
@@ -62,7 +62,6 @@ impl SequencerContext {
         SequencerContext {
             active: false,
             max_inst: 0,
-            max_rpt_ref: unsafe { LLVMConstInt(LLVMInt32Type(), 0 as u64, 0) },
             is_outer: false,
             stagger_max: 0,
             stagger_mask: 0,
@@ -75,7 +74,6 @@ impl SequencerContext {
     fn init_rep(
         &mut self,
         max_inst: u8,
-        max_rpt_ref: LLVMValueRef,
         is_outer: bool,
         stagger_max: u8,
         stagger_mask: u8,
@@ -83,7 +81,6 @@ impl SequencerContext {
         if !self.active {
             self.active = true;
             self.max_inst = max_inst;
-            self.max_rpt_ref = max_rpt_ref;
             self.is_outer = is_outer;
             self.stagger_mask = stagger_mask;
             self.stagger_max = stagger_max;
@@ -419,13 +416,15 @@ impl<'a> ElfTranslator<'a> {
         };
 
         // Allocate the sequencer iterators and init them as pointing to a zero constant.
-        let const_zero_8 = LLVMConstInt(LLVMInt8Type(), 0, 0);
-        let stg_ptr_ref = LLVMBuildAlloca(builder, LLVMInt8Type(), NONAME);
-        LLVMBuildStore(builder, const_zero_8, stg_ptr_ref);
         let const_zero_32 = LLVMConstInt(LLVMInt32Type(), 0, 0);
         let rpt_ptr_ref = LLVMBuildAlloca(builder, LLVMInt32Type(), NONAME);
         LLVMBuildStore(builder, const_zero_32, rpt_ptr_ref);
-        let fseq_iter = SequencerIterators { rpt_ptr_ref };
+        let max_rpt_ref = LLVMBuildAlloca(builder, LLVMInt32Type(), NONAME);
+        LLVMBuildStore(builder, const_zero_32, max_rpt_ref);
+        let fseq_iter = SequencerIterators {
+            rpt_ptr_ref,
+            max_rpt_ref,
+        };
 
         // Gather the set of executable addresses.
         let inst_addrs: BTreeSet<u64> = self
@@ -685,9 +684,10 @@ impl<'a> SectionTranslator<'a> {
 
                 // Load repetition counter from stack.
                 let rpt_cnt = LLVMBuildLoad(self.builder, self.fseq_iter.rpt_ptr_ref, NONAME);
+                // Load max repetition from stack.
+                let max_rpt = LLVMBuildLoad(self.builder, self.fseq_iter.max_rpt_ref, NONAME);
                 // Compare to repetition maximum: repeat if less than maximum iteration.
-                let rpt_cmp =
-                    LLVMBuildICmp(self.builder, LLVMIntULT, rpt_cnt, fseq.max_rpt_ref, NONAME);
+                let rpt_cmp = LLVMBuildICmp(self.builder, LLVMIntULT, rpt_cnt, max_rpt, NONAME);
                 // Increment rep counter, store
                 let const_one = LLVMConstInt(LLVMTypeOf(rpt_cnt), 1, 0);
                 let rpt_cnt_inc = LLVMBuildAdd(self.builder, rpt_cnt, const_one, NONAME);
@@ -775,9 +775,10 @@ impl<'a> SectionTranslator<'a> {
 
             // Load repetition counter from stack.
             let rpt_cnt = LLVMBuildLoad(self.builder, self.fseq_iter.rpt_ptr_ref, NONAME);
+            // Load max repetition from stack.
+            let max_rpt = LLVMBuildLoad(self.builder, self.fseq_iter.max_rpt_ref, NONAME);
             // Compare to repetition maximum: repeat if less than maximum iteration.
-            let rpt_cmp =
-                LLVMBuildICmp(self.builder, LLVMIntULT, rpt_cnt, fseq.max_rpt_ref, NONAME);
+            let rpt_cmp = LLVMBuildICmp(self.builder, LLVMIntULT, rpt_cnt, max_rpt, NONAME);
             // Increment rep counter, store
             let const_one = LLVMConstInt(LLVMTypeOf(rpt_cnt), 1, 0);
             let rpt_cnt_inc = LLVMBuildAdd(self.builder, rpt_cnt, const_one, NONAME);
@@ -1705,17 +1706,20 @@ impl<'a> InstructionTranslator<'a> {
             data.stagger_mask, // stagger mask
             data.stagger_max   // stagger max
         );
+        LLVMBuildStore(
+            self.builder,
+            self.read_reg(data.rs1),
+            self.section.fseq_iter.max_rpt_ref,
+        );
         match data.op {
             riscv::OpcodeImm12Rs1Stagger_maskStagger_max::FrepO => fseq.init_rep(
                 data.imm12 as u8,
-                self.read_reg(data.rs1),
                 true,
                 data.stagger_max as u8,
                 data.stagger_mask as u8,
             ),
             riscv::OpcodeImm12Rs1Stagger_maskStagger_max::FrepI => fseq.init_rep(
                 data.imm12 as u8,
-                self.read_reg(data.rs1),
                 false,
                 data.stagger_max as u8,
                 data.stagger_mask as u8,
