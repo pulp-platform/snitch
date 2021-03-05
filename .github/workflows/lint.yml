@@ -56,6 +56,24 @@ jobs:
             | xargs -n1 util/vendor.py --verbose \
             && util/git-diff.py --error-msg "::error ::Found differences, please re-vendor."
 
+  ######################
+  # Opcodes Up-to-Date #
+  ######################
+  check-opcodes:
+    name: Check Opcodes Up-to-Date
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install requirements
+      run: pip install -r python-requirements.txt
+    - name: Update opcodes and diff
+      run: |
+        ./util/generate-opcodes.sh
+            && util/git-diff.py --error-msg "::error ::Found differences, please update all opcodes."
+
   ########################
   # Check Doc up-to-date #
   ########################
