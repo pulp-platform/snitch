@@ -20,8 +20,6 @@ cat > $INSTR_RS <<- EOM
 // SPDX-License-Identifier: Apache-2.0
 
 EOM
-INSTR_RS=$ROOT/sw/banshee/src/riscv.rs
-echo -e $HEADER_RS > $INSTR_RS
 
 cd $RISCV_OPCODES && cat ${OPCODES[@]} | ./parse-opcodes -rust >> $INSTR_RS
 rustfmt $INSTR_RS
