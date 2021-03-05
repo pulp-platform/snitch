@@ -71,7 +71,7 @@ jobs:
       run: pip install -r python-requirements.txt
     - name: Update opcodes and diff
       run: |
-        ./util/generate-opcodes.sh
+        ./util/generate-opcodes.sh \
             && util/git-diff.py --error-msg "::error ::Found differences, please update all opcodes."
 
   ########################
