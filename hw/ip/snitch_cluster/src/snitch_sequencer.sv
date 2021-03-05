@@ -237,7 +237,8 @@ module snitch_sequencer import snitch_pkg::*; #(
 
     unique casez (inp_qdata_op_i)
       // frep instructions are pushed into the sequencer control branch
-      riscv_instr::FREP, riscv_instr::IREP: begin
+      riscv_instr::FREP_O,
+      riscv_instr::FREP_I, riscv_instr::IREP: begin
         inp_qready_o   = core_rpt_ready;
         core_rpt_valid = inp_qvalid_i;
       end

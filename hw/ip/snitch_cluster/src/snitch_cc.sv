@@ -770,7 +770,7 @@ module snitch_cc #(
           // FPU offload
           fpu_offload:
             (i_snitch.acc_qready_i && i_snitch.acc_qvalid_o && i_snitch.acc_qreq_o.addr == 0),
-          is_seq_insn:  (i_snitch.inst_data_i ==? riscv_instr::FREP)
+          is_seq_insn:  (i_snitch.inst_data_i inside {riscv_instr::FREP_I, riscv_instr::FREP_O})
         };
 
         if (FPEn) begin
