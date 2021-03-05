@@ -43,7 +43,9 @@
             register_core_rsp: true,
             register_offload_req: true,
             register_offload_rsp: true,
-            register_fpu_req: true
+            register_fpu_req: true,
+            register_ext_narrow: true,
+            register_ext_wide: true
         },
         hives: [
             // Hive 0

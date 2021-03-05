@@ -15,4 +15,7 @@ find $ROOT/hw/ \
     -name '*.sv' \
     | xargs verible-verilog-lint \
     --rules=-interface-name-style --lint_fatal --parse_fatal \
-    --waiver_files $ROOT/hw/ip/snitch_cluster/lint/waiver.verible
+    --waiver_files \
+$ROOT/hw/ip/snitch_cluster/lint/waiver.verible,\
+$ROOT/hw/system/occamy/lint/waiver.verible
+

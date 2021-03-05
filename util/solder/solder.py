@@ -382,7 +382,7 @@ class AxiBus(object):
 
     def copy(self, name=None):
         return AxiBus(self.clk, self.rst, self.aw, self.dw, self.iw, self.uw,
-                      name or self.name)
+                      name or self.name, declared=False)
 
     def emit_struct(self):
         return AxiStruct.emit(self.aw, self.dw, self.iw, self.uw)
@@ -471,6 +471,41 @@ class AxiBus(object):
             tpl.render_unicode(
                 axi_in=self,
                 axi_out=bus,
+                name=inst_name or "i_{}".format(name),
+            ) + "\n")
+        return bus
+
+    def cut(self, context, nr_cuts=1, name=None, inst_name=None, to=None):
+        if nr_cuts == 0:
+            return self
+
+        name = name or "{}_cut".format(self.name)
+
+        # Generate the new bus.
+        if to is None:
+            bus = copy(self)
+            bus.declared = False
+            bus.type_prefix = bus.emit_struct()
+            bus.name = name
+            bus.name_suffix = None
+        else:
+            bus = to
+
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+        assert (bus.iw == self.iw)
+        assert (bus.uw == self.uw)
+
+        # Emit the cut instance.
+        bus.declare(context)
+        tpl = templates.get_template("solder.axi_multicut.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                bus_in=self,
+                bus_out=bus,
+                nr_cuts=nr_cuts,
                 name=inst_name or "i_{}".format(name),
             ) + "\n")
         return bus

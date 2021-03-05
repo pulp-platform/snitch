@@ -7,3 +7,5 @@ overrides:
     tech_cells_generic: { path: hw/vendor/pulp_platform_tech_cells_generic }
     common_cells: { path: hw/vendor/pulp_platform_common_cells }
     axi: { path: hw/vendor/pulp_platform_axi }
+    fpnew: { path: hw/vendor/pulp_platform_fpnew }
+    riscv-dbg: { path: hw/vendor/pulp_platform_riscv_dbg }

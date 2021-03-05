@@ -1,0 +1,25 @@
+From 1f82a9e48c997d977e363b2470b6d9c901ad858e Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Wed, 3 Mar 2021 11:00:16 +0100
+Subject: [PATCH 2/2] cva6: Change address width to 64 bit
+
+---
+ include/ariane_axi_pkg.sv | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/ariane_axi_pkg.sv b/include/ariane_axi_pkg.sv
+index 86ba323..6641af6 100644
+--- a/include/ariane_axi_pkg.sv
++++ b/include/ariane_axi_pkg.sv
+@@ -22,7 +22,7 @@ package ariane_axi;
+ 
+     localparam IdWidth   = 4; // Recommended by AXI standard
+     localparam UserWidth = 1;
+-    localparam AddrWidth = 64;
++    localparam AddrWidth = 48;
+     localparam DataWidth = 64;
+     localparam StrbWidth = DataWidth / 8;
+ 
+-- 
+2.25.1.377.g2d2118b814
+

@@ -10,7 +10,7 @@
     rev: "master",
   },
 
-//   patch_dir: "patches/openhwgroup_cva6",
+  patch_dir: "patches/openhwgroup_cva6",
 
   exclude_from_upstream: [
     "ci",
