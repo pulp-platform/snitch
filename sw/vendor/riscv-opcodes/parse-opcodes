@@ -37,6 +37,8 @@ arglut['vseglen'] = (31,29)
 arglut['L'] = (7,7)
 arglut['uimms'] = (19,15)
 arglut['imm5'] = (24,20)
+arglut['stagger_max'] = (14,12)
+arglut['stagger_mask'] = (11,8)
 
 bits_imm12 = [
   ("imm12lo", 4, 0, 0), # imm12lo[4:0]  -> imm[4:0]
