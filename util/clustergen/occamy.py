@@ -41,23 +41,23 @@ class Occamy(Generator):
                                  density_optimized=True)
         # CVA6
         self.cluster.add_mem(256,
-                            128,
-                            desc="cva6 instruction/data cache array",
-                            byte_enable=True,
-                            speed_optimized=True,
-                            density_optimized=False)
+                             128,
+                             desc="cva6 instruction/data cache array",
+                             byte_enable=True,
+                             speed_optimized=True,
+                             density_optimized=False)
         self.cluster.add_mem(256,
-                            44,
-                            desc="cva6 data cache tag",
-                            byte_enable=True,
-                            speed_optimized=True,
-                            density_optimized=False)
+                             44,
+                             desc="cva6 data cache tag",
+                             byte_enable=True,
+                             speed_optimized=True,
+                             density_optimized=False)
         self.cluster.add_mem(256,
-                            45,
-                            desc="cva6 instruction cache tag",
-                            byte_enable=True,
-                            speed_optimized=True,
-                            density_optimized=False)
+                             45,
+                             desc="cva6 instruction cache tag",
+                             byte_enable=True,
+                             speed_optimized=True,
+                             density_optimized=False)
 
     def render_wrapper(self):
         return self.cluster.render_wrapper()
