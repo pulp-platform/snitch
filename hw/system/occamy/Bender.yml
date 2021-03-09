@@ -13,9 +13,6 @@ dependencies:
   snitch-cluster: {path: ../../ip/snitch_cluster}
   cva6: {path: ../../vendor/openhwgroup_cva6}
 
-export_include_dirs:
-- include
-
 sources:
 # Level 0:
 - src/occamy_cluster_wrapper.sv
