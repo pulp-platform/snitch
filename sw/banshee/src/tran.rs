@@ -1514,6 +1514,36 @@ impl<'a> InstructionTranslator<'a> {
                 let value = LLVMBuildUIToFP(self.builder, rs1, LLVMFloatType(), name);
                 self.write_freg_f32(data.rd, value);
             }
+            riscv::OpcodeRdRmRs1::FcvtWD => {
+                let rs1 = self.read_freg_f64(data.rs1);
+                let value = LLVMBuildFPToSI(self.builder, rs1, LLVMInt32Type(), name);
+                self.write_reg(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtWS => {
+                let rs1 = self.read_freg_f32(data.rs1);
+                let value = LLVMBuildFPToSI(self.builder, rs1, LLVMInt32Type(), name);
+                self.write_reg(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtWuS => {
+                let rs1 = self.read_freg_f32(data.rs1);
+                let value = LLVMBuildFPToUI(self.builder, rs1, LLVMInt32Type(), name);
+                self.write_reg(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtWuD => {
+                let rs1 = self.read_freg_f64(data.rs1);
+                let value = LLVMBuildFPToUI(self.builder, rs1, LLVMInt32Type(), name);
+                self.write_reg(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtDS => {
+                let rs1 = self.read_freg_f32(data.rs1);
+                let value = LLVMBuildFPCast(self.builder, rs1, LLVMDoubleType(), name);
+                self.write_freg_f64(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtSD => {
+                let rs1 = self.read_freg_f64(data.rs1);
+                let value = LLVMBuildFPCast(self.builder, rs1, LLVMFloatType(), name);
+                self.write_freg_f32(data.rd, value);
+            }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())

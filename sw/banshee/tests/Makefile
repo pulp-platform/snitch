@@ -24,6 +24,7 @@ all: bin/atomics
 all: bin/wfi
 all: bin/fmv
 all: bin/ssr_inst_check
+all: bin/fcvt
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump
