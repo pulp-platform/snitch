@@ -405,7 +405,7 @@ def make_camel_case(name):
     return "".join([name.capitalize() for name in name.split('.')])
 
 def make_camel_case_arg(arg):
-    return make_camel_case(".".join(arg) or "Unit")
+    return make_camel_case(".".join(".".join(arg).split('_')) or "Unit")
 
 def make_func_case_arg(arg):
     return "_".join((a.lower() for a in arg)) or "unit"
