@@ -1206,20 +1206,23 @@ impl<'a> InstructionTranslator<'a> {
 
     unsafe fn emit_imm12_rs1(&self, data: riscv::FormatImm12Rs1) -> Result<()> {
         let imm = data.imm();
-        trace!("{} x{}, x{}", data.op, data.rs1, imm);
+        trace!("{} x{}, x{:x}", data.op, data.rs1, imm);
 
         // Compute the address.
         let rs1 = self.read_reg(data.rs1);
-        let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
 
         // Perform the operation.
         match data.op {
             riscv::OpcodeImm12Rs1::Scfgwi => {
                 // ssr write immediate holds address offset in imm12, content in rs1
+                let dm = (imm as u64) & 0x1f;
+                let reg_word = ((imm as u64) >> 5) & 0x7f;
+                let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
+                trace!("ssr dm: {} reg: {} offset: {}", dm, reg_word, (dm << 8) | (reg_word << 3));
                 let addr = LLVMBuildAdd(
                     self.builder,
                     LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
-                    imm,
+                    addr_off,
                     NONAME,
                 );
                 self.write_mem(addr, rs1, 2);
@@ -1304,18 +1307,23 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn emit_imm12_rd(&self, data: riscv::FormatImm12Rd) -> Result<()> {
         let imm = data.imm();
         trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
-        let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
         let name = format!("{}\0", data.op);
         let _name = name.as_ptr() as *const _;
 
         let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
 
-        let value = match data.op {
-            // srr loar immediate from iffset in imm12
-            riscv::OpcodeImm12Rd::Scfgri => self.emit_load(ssr_start, imm, 2, true),
+        match data.op {
+            riscv::OpcodeImm12Rd::Scfgri => {
+                // srr load immediate from offset in imm12
+                let dm = (imm as u64) & 0x1f;
+                let reg_word = ((imm as u64) >> 5) & 0x7f;
+                let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
+                trace!("ssr dm: {} reg: {} offset: {}", dm, reg_word, (dm << 8) | (reg_word << 3));
+                let value = self.emit_load(ssr_start, addr_off, 2, true);
+                self.write_reg(data.rd, value);
+            }
             // _ => bail!("Unsupported opcode {}", data.op),
         };
-        self.write_reg(data.rd, value);
         Ok(())
     }
 
