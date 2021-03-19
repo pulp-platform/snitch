@@ -591,7 +591,7 @@ module snitch_cc #(
       import riscv_instr::*;
       automatic logic [11:0] addr;
       automatic logic [4:0] addr_dm;
-      automatic logic [4:0] addr_reg;
+      automatic logic [6:0] addr_reg;
 
       ssr_cfg_req.id = acc_snitch_demux_q.id;
       ssr_cfg_req.data = acc_snitch_demux_q.data_arga[31:0];
@@ -610,7 +610,8 @@ module snitch_cc #(
         default: ;
       endcase
 
-      {addr_reg, addr_dm} = addr;
+      addr_reg = addr[11:5];
+      addr_dm = addr[4:0];
       ssr_cfg_req.word = {addr_dm, addr_reg};
 
       unique casez (acc_snitch_demux_q.data_op)

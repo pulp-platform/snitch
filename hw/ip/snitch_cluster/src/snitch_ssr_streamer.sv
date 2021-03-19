@@ -47,6 +47,7 @@ module snitch_ssr_streamer import snitch_pkg::*; #(
   logic  [2:0] lane_ready;
 
   logic [4:0]       dmcfg_word;
+  logic [7:0]       dmcfg_upper_addr;
   logic [2:0][31:0] dmcfg_rdata;
   logic [2:0]       dmcfg_strobe; // which data mover is currently addressed
 
@@ -173,10 +174,10 @@ module snitch_ssr_streamer import snitch_pkg::*; #(
   // use the upper address bits to select one of the data movers, or select
   // all if the bits are all 1.
   always_comb begin
-    logic [11:4] upper_addr;
-    {upper_addr, dmcfg_word} = cfg_word_i;
-    dmcfg_strobe = (upper_addr == '1 ? '1 : (1 << upper_addr));
-    cfg_rdata_o = dmcfg_rdata[upper_addr];
+    dmcfg_word = cfg_word_i[4:0];
+    dmcfg_upper_addr = cfg_word_i[11:7];
+    dmcfg_strobe = (dmcfg_upper_addr == '1 ? '1 : (1 << dmcfg_upper_addr));
+    cfg_rdata_o = dmcfg_rdata[dmcfg_upper_addr];
   end
 
 endmodule
