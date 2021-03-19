@@ -1218,7 +1218,6 @@ impl<'a> InstructionTranslator<'a> {
                 let dm = (imm as u64) & 0x1f;
                 let reg_word = ((imm as u64) >> 5) & 0x7f;
                 let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
-                trace!("ssr dm: {} reg: {} offset: {}", dm, reg_word, (dm << 8) | (reg_word << 3));
                 let addr = LLVMBuildAdd(
                     self.builder,
                     LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
@@ -1318,11 +1317,9 @@ impl<'a> InstructionTranslator<'a> {
                 let dm = (imm as u64) & 0x1f;
                 let reg_word = ((imm as u64) >> 5) & 0x7f;
                 let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
-                trace!("ssr dm: {} reg: {} offset: {}", dm, reg_word, (dm << 8) | (reg_word << 3));
                 let value = self.emit_load(ssr_start, addr_off, 2, true);
                 self.write_reg(data.rd, value);
-            }
-            // _ => bail!("Unsupported opcode {}", data.op),
+            } // _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
     }
@@ -1562,15 +1559,55 @@ impl<'a> InstructionTranslator<'a> {
         trace!("{} x{}, f{}", data.op, data.rd, data.rs2);
         let rs2 = self.read_reg(data.rs2);
 
-        let value = match data.op {
-            // ssr read from offset rs2 to rd
+        // first, check for ssr config read operation
+        match data.op {
             riscv::OpcodeRdRs2::Scfgr => {
-                self.emit_load(LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0), rs2, 2, true)
+                // reorder rs2 to form address
+                // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+                let reg = LLVMBuildLShr(
+                    self.builder,
+                    rs2,
+                    LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
+                    NONAME,
+                );
+                let reg_masked = LLVMBuildAnd(
+                    self.builder,
+                    reg,
+                    LLVMConstInt(LLVMInt32Type(), 0xf8 as u64, 0),
+                    NONAME,
+                );
+                let rs2_dm = LLVMBuildAnd(
+                    self.builder,
+                    rs2,
+                    LLVMConstInt(LLVMInt32Type(), 0x1f as u64, 0),
+                    NONAME,
+                );
+                let rs2_dm_shifted = LLVMBuildShl(
+                    self.builder,
+                    rs2_dm,
+                    LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
+                    NONAME,
+                );
+                let addr_off = LLVMBuildOr(self.builder, rs2_dm_shifted, reg_masked, NONAME);
+                // perform load
+                let value = self.emit_load(
+                    LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
+                    addr_off,
+                    2,
+                    true,
+                );
+                // and write
+                self.write_reg(data.rd, value);
+                return Ok(());
             }
+            _ => {}
+        }
+
+        let value = match data.op {
             riscv::OpcodeRdRs2::Dmstat => self
                 .section
                 .emit_call("banshee_dma_stat", [self.dma_ptr(), rs2]),
-            // _ => bail!("Unsupported opcode {}", data.op),
+            _ => bail!("Unsupported opcode {}", data.op),
         };
 
         self.write_reg(data.rd, value);
@@ -2170,10 +2207,38 @@ impl<'a> InstructionTranslator<'a> {
         // Perform the SSR write op
         match data.op {
             riscv::OpcodeRs1Rs2::Scfgw => {
+                // reorder rs2 to form address
+                // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+                let reg = LLVMBuildLShr(
+                    self.builder,
+                    rs2,
+                    LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
+                    NONAME,
+                );
+                let reg_masked = LLVMBuildAnd(
+                    self.builder,
+                    reg,
+                    LLVMConstInt(LLVMInt32Type(), 0xf8 as u64, 0),
+                    NONAME,
+                );
+                let rs2_dm = LLVMBuildAnd(
+                    self.builder,
+                    rs2,
+                    LLVMConstInt(LLVMInt32Type(), 0x1f as u64, 0),
+                    NONAME,
+                );
+                let rs2_dm_shifted = LLVMBuildShl(
+                    self.builder,
+                    rs2_dm,
+                    LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
+                    NONAME,
+                );
+                let addr_off = LLVMBuildOr(self.builder, rs2_dm_shifted, reg_masked, NONAME);
+
                 let addr = LLVMBuildAdd(
                     self.builder,
                     LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
-                    rs2,
+                    addr_off,
                     NONAME,
                 );
                 self.write_mem(addr, rs1, 2);
