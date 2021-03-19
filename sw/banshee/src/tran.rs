@@ -958,7 +958,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
             riscv::Format::Imm5RdRs1(x) => self.emit_imm5_rd_rs1(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
-            riscv::Format::Imm12Rs1Stagger_maskStagger_max(x) => {
+            riscv::Format::Imm12Rs1StaggerMaskStaggerMax(x) => {
                 self.emit_imm12_rs1_staggermask_staggermax(x, fseq)
             }
             riscv::Format::Imm12Rs1(x) => self.emit_imm12_rs1(x),
@@ -1695,7 +1695,7 @@ impl<'a> InstructionTranslator<'a> {
 
     unsafe fn emit_imm12_rs1_staggermask_staggermax(
         &self,
-        data: riscv::FormatImm12Rs1Stagger_maskStagger_max,
+        data: riscv::FormatImm12Rs1StaggerMaskStaggerMax,
         fseq: &mut SequencerContext,
     ) -> Result<()> {
         trace!(
@@ -1712,13 +1712,13 @@ impl<'a> InstructionTranslator<'a> {
             self.section.fseq_iter.max_rpt_ref,
         );
         match data.op {
-            riscv::OpcodeImm12Rs1Stagger_maskStagger_max::FrepO => fseq.init_rep(
+            riscv::OpcodeImm12Rs1StaggerMaskStaggerMax::FrepO => fseq.init_rep(
                 data.imm12 as u8,
                 true,
                 data.stagger_max as u8,
                 data.stagger_mask as u8,
             ),
-            riscv::OpcodeImm12Rs1Stagger_maskStagger_max::FrepI => fseq.init_rep(
+            riscv::OpcodeImm12Rs1StaggerMaskStaggerMax::FrepI => fseq.init_rep(
                 data.imm12 as u8,
                 false,
                 data.stagger_max as u8,

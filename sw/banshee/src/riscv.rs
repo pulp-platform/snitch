@@ -17,7 +17,7 @@ pub enum Format {
     Imm12RdRmRs1(FormatImm12RdRmRs1),
     Imm12RdRs1(FormatImm12RdRs1),
     Imm12Rs1(FormatImm12Rs1),
-    Imm12Rs1Stagger_maskStagger_max(FormatImm12Rs1Stagger_maskStagger_max),
+    Imm12Rs1StaggerMaskStaggerMax(FormatImm12Rs1StaggerMaskStaggerMax),
     Imm12hiImm12loRs1Rs2(FormatImm12hiImm12loRs1Rs2),
     Imm20Rd(FormatImm20Rd),
     Imm5Rd(FormatImm5Rd),
@@ -50,7 +50,7 @@ impl Format {
             Self::Imm12RdRmRs1(x) => x.raw,
             Self::Imm12RdRs1(x) => x.raw,
             Self::Imm12Rs1(x) => x.raw,
-            Self::Imm12Rs1Stagger_maskStagger_max(x) => x.raw,
+            Self::Imm12Rs1StaggerMaskStaggerMax(x) => x.raw,
             Self::Imm12hiImm12loRs1Rs2(x) => x.raw,
             Self::Imm20Rd(x) => x.raw,
             Self::Imm5Rd(x) => x.raw,
@@ -85,7 +85,7 @@ impl std::fmt::Display for Format {
             Self::Imm12RdRmRs1(x) => write!(f, "{}", x),
             Self::Imm12RdRs1(x) => write!(f, "{}", x),
             Self::Imm12Rs1(x) => write!(f, "{}", x),
-            Self::Imm12Rs1Stagger_maskStagger_max(x) => write!(f, "{}", x),
+            Self::Imm12Rs1StaggerMaskStaggerMax(x) => write!(f, "{}", x),
             Self::Imm12hiImm12loRs1Rs2(x) => write!(f, "{}", x),
             Self::Imm20Rd(x) => write!(f, "{}", x),
             Self::Imm5Rd(x) => write!(f, "{}", x),
@@ -566,10 +566,10 @@ impl std::fmt::Display for OpcodeImm12Rs1 {
     }
 }
 
-/// The `Imm12Rs1Stagger_maskStagger_max` instruction format.
+/// The `Imm12Rs1StaggerMaskStaggerMax` instruction format.
 #[derive(Debug, Copy, Clone)]
-pub struct FormatImm12Rs1Stagger_maskStagger_max {
-    pub op: OpcodeImm12Rs1Stagger_maskStagger_max,
+pub struct FormatImm12Rs1StaggerMaskStaggerMax {
+    pub op: OpcodeImm12Rs1StaggerMaskStaggerMax,
     pub raw: u32,
     pub imm12: u32,
     pub rs1: u32,
@@ -577,20 +577,20 @@ pub struct FormatImm12Rs1Stagger_maskStagger_max {
     pub stagger_max: u32,
 }
 
-impl FormatImm12Rs1Stagger_maskStagger_max {
+impl FormatImm12Rs1StaggerMaskStaggerMax {
     pub fn imm(&self) -> i32 {
         ((self.imm12 << 20) as i32) >> 20
     }
 }
 
-/// Opcodes with the `Imm12Rs1Stagger_maskStagger_max` instruction format.
+/// Opcodes with the `Imm12Rs1StaggerMaskStaggerMax` instruction format.
 #[derive(Debug, Copy, Clone)]
-pub enum OpcodeImm12Rs1Stagger_maskStagger_max {
+pub enum OpcodeImm12Rs1StaggerMaskStaggerMax {
     FrepO,
     FrepI,
 }
 
-impl std::fmt::Display for FormatImm12Rs1Stagger_maskStagger_max {
+impl std::fmt::Display for FormatImm12Rs1StaggerMaskStaggerMax {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.op)?;
         write!(f, " imm12={:x}", self.imm12)?;
@@ -601,7 +601,7 @@ impl std::fmt::Display for FormatImm12Rs1Stagger_maskStagger_max {
     }
 }
 
-impl std::fmt::Display for OpcodeImm12Rs1Stagger_maskStagger_max {
+impl std::fmt::Display for OpcodeImm12Rs1StaggerMaskStaggerMax {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Self::FrepO => write!(f, "frep.o"),
@@ -1620,13 +1620,13 @@ pub fn parse_u32(raw: u32) -> Format {
     match raw & 0xff {
         0x8b => {
             return parse_imm12_rs1_stagger_mask_stagger_max(
-                OpcodeImm12Rs1Stagger_maskStagger_max::FrepO,
+                OpcodeImm12Rs1StaggerMaskStaggerMax::FrepO,
                 raw,
             )
         }
         0xb => {
             return parse_imm12_rs1_stagger_mask_stagger_max(
-                OpcodeImm12Rs1Stagger_maskStagger_max::FrepI,
+                OpcodeImm12Rs1StaggerMaskStaggerMax::FrepI,
                 raw,
             )
         }
@@ -2055,12 +2055,12 @@ pub fn parse_imm12_rs1(op: OpcodeImm12Rs1, raw: u32) -> Format {
     })
 }
 
-/// Parse an instruction with the `Imm12Rs1Stagger_maskStagger_max` format.
+/// Parse an instruction with the `Imm12Rs1StaggerMaskStaggerMax` format.
 pub fn parse_imm12_rs1_stagger_mask_stagger_max(
-    op: OpcodeImm12Rs1Stagger_maskStagger_max,
+    op: OpcodeImm12Rs1StaggerMaskStaggerMax,
     raw: u32,
 ) -> Format {
-    Format::Imm12Rs1Stagger_maskStagger_max(FormatImm12Rs1Stagger_maskStagger_max {
+    Format::Imm12Rs1StaggerMaskStaggerMax(FormatImm12Rs1StaggerMaskStaggerMax {
         op,
         raw,
         imm12: (raw >> 20) & 0xfff,
