@@ -9,8 +9,10 @@ package:
 
 dependencies:
   common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  register_interface: {path: ../../vendor/pulp_platform_register_interface}
   # Local dependencies.
   tcdm_interface: {path: ../../ip/tcdm_interface}
+  # TODO: this is a false dependency: snitch_pkg is included, but not required
   snitch: {path: ../../ip/snitch}
   # TODO: This is necessary due to a circular dependency on snitch_vm in snitch/test/snitch_l0_tlb_tb.sv
   snitch_vm: {path: ../../ip/snitch_vm}
@@ -25,6 +27,8 @@ sources:
 - src/snitch_ssr_streamer.sv
 - target: test
   files:
+  # TODO: Integrate this into tcdm_interface
+  - test/future/tcdm_test_extra.sv
   # Level 0
   - test/fixture_ssr.sv
   # Level 1

@@ -9,6 +9,8 @@ module tb_simple_ssr;
   fixture_ssr fix();
 
   initial begin
+    fix.wait_for_reset_start();
+    fix.wait_for_reset_end();
     // TODO: Test basic SSR functionality here
     #1000ns;
     $finish;
