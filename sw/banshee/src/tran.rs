@@ -1206,7 +1206,7 @@ impl<'a> InstructionTranslator<'a> {
 
     unsafe fn emit_imm12_rs1(&self, data: riscv::FormatImm12Rs1) -> Result<()> {
         let imm = data.imm();
-        trace!("{} x{}, x{:x}", data.op, data.rs1, imm);
+        trace!("{} x{}, {}", data.op, data.rs1, imm);
 
         // Compute the address.
         let rs1 = self.read_reg(data.rs1);
