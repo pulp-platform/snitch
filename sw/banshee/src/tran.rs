@@ -1225,7 +1225,9 @@ impl<'a> InstructionTranslator<'a> {
                     NONAME,
                 );
                 self.write_mem(addr, rs1, 2);
-            } // _ => bail!("Unsupported opcode {}", data.op),
+            } 
+            // Not bailing to suppress compiler warning
+            // _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
     }
