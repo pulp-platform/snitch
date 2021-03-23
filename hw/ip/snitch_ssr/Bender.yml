@@ -18,4 +18,6 @@ sources:
 - src/snitch_ssr_addr_gen.sv
 - src/snitch_ssr_switch.sv
 # Level 1:
+- src/snitch_ssr.sv
+# Level 2:
 - src/snitch_ssr_streamer.sv
