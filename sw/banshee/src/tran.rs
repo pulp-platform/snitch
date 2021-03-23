@@ -1215,6 +1215,7 @@ impl<'a> InstructionTranslator<'a> {
         match data.op {
             riscv::OpcodeImm12Rs1::Scfgwi => {
                 // ssr write immediate holds address offset in imm12, content in rs1
+                // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
                 let dm = (imm as u64) & 0x1f;
                 let reg_word = ((imm as u64) >> 5) & 0x7f;
                 let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
@@ -1225,7 +1226,7 @@ impl<'a> InstructionTranslator<'a> {
                     NONAME,
                 );
                 self.write_mem(addr, rs1, 2);
-            } 
+            }
             // Not bailing to suppress compiler warning
             // _ => bail!("Unsupported opcode {}", data.op),
         };
