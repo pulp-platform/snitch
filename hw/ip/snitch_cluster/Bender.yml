@@ -23,6 +23,7 @@ dependencies:
   snitch_icache: {path: ../../ip/snitch_icache}
   snitch_ipu: {path: ../../ip/snitch_ipu}
   snitch_vm: {path: ../../ip/snitch_vm}
+  snitch_ssr: {path: ../../ip/snitch_ssr}
   snitch: {path: ../../ip/snitch}
 
 sources:
@@ -33,13 +34,10 @@ sources:
 - src/snitch_cluster_peripheral/snitch_cluster_peripheral.sv
 - src/snitch_fpu.sv
 - src/snitch_sequencer.sv
-- src/snitch_ssr_addr_gen.sv
-- src/snitch_ssr_switch.sv
 - src/snitch_tcdm_interconnect.sv
 # Level 1:
 - src/snitch_barrier.sv
 - src/snitch_fp_ss.sv
-- src/snitch_ssr_streamer.sv
 - src/snitch_shared_muldiv.sv
 # Level 2:
 - src/snitch_cc.sv
