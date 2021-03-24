@@ -1213,6 +1213,9 @@ impl<'a> InstructionTranslator<'a> {
 
         // Perform the operation.
         match data.op {
+            // suppress compiler warning that detects the bail! statement as unrechable
+            // Scfgwi is currently the OpcodeImm12Rs1 but this might change
+            #![allow(unreachable_patterns)]
             riscv::OpcodeImm12Rs1::Scfgwi => {
                 // ssr write immediate holds address offset in imm12, content in rs1
                 // imm12[11:5]=reg_word imm12[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
@@ -1227,8 +1230,7 @@ impl<'a> InstructionTranslator<'a> {
                 );
                 self.write_mem(addr, rs1, 2);
             }
-            // Not bailing to suppress compiler warning
-            // _ => bail!("Unsupported opcode {}", data.op),
+            _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
     }
@@ -1315,6 +1317,9 @@ impl<'a> InstructionTranslator<'a> {
         let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
 
         match data.op {
+            // suppress compiler warning that detects the bail! statement as unrechable
+            // Scfgri is currently the OpcodeImm12Rd but this might change
+            #![allow(unreachable_patterns)]
             riscv::OpcodeImm12Rd::Scfgri => {
                 // srr load immediate from offset in imm12
                 // reorder imm12 to form address
@@ -1324,7 +1329,8 @@ impl<'a> InstructionTranslator<'a> {
                 let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
                 let value = self.emit_load(ssr_start, addr_off, 2, true);
                 self.write_reg(data.rd, value);
-            } // _ => bail!("Unsupported opcode {}", data.op),
+            }
+            _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
     }
@@ -1762,6 +1768,9 @@ impl<'a> InstructionTranslator<'a> {
             self.section.fseq_iter.max_rpt_ref,
         );
         match data.op {
+            // suppress compiler warning that detects the bail! statement as unrechable
+            // Frep* are currently the only OpcodeImm12Rs1Stagger_maskStagger_max but this might change
+            #![allow(unreachable_patterns)]
             riscv::OpcodeImm12Rs1StaggerMaskStaggerMax::FrepO => fseq.init_rep(
                 data.imm12 as u8,
                 true,
@@ -1774,7 +1783,7 @@ impl<'a> InstructionTranslator<'a> {
                 data.stagger_max as u8,
                 data.stagger_mask as u8,
             ),
-            // _ => bail!("Unsupported opcode {}", data.op),
+            _ => bail!("Unsupported opcode {}", data.op),
         }
     }
 
