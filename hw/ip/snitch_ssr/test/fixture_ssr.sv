@@ -317,17 +317,27 @@ module fixture_ssr;
   end
 
   // Read from SSR
-  // TODO: builtin timout, but watch out for verify_done
-  task automatic ssr_read (output data_t data);
+  task automatic ssr_read (output data_t data, input logic timeout = 1);
     logic error;
-    ssr_drv.send_read(1'b0, data, error);
+    fork begin
+      ssr_drv.send_read(1'b0, data, error);
+    end begin
+      #Timeout;
+      if (timeout) $fatal(1, "SSR read timed out");
+    end join_any
+    disable fork;
   endtask
 
   // Write to SSR
-  // TODO: builtin timout, but watch out for verify_done
-  task automatic ssr_write (input data_t data);
+  task automatic ssr_write (input data_t data, input logic timeout = 1);
     logic error;
-    ssr_drv.send_write(1'b0, data, '1, error);
+    fork begin
+      ssr_drv.send_write(1'b0, data, '1, error);
+    end begin
+      #Timeout;
+      if (timeout) $fatal(1, "SSR write timed out");
+    end join_any
+    disable fork;
   endtask
 
   // Deassert SSR lane readiness manually, e.g. if read or write killed in a timeout fork
@@ -349,14 +359,14 @@ module fixture_ssr;
       #Timeout;
       // Ensure we signal done
       cfg_read_done(done);
-      if (done !== 1) $fatal(1, "read job should be done by now");
+      if (done !== 1) $fatal(1, "write job should be done by now");
     end else begin
-      fork forever begin
+      fork begin
         // Ensure we signal done
         cfg_read_done(done);
         if (done !== 1) $fatal(1, "read job should be done by now");
-        // Ensure no additional data can be read
-        ssr_read(data_dummy);
+        // Ensure no additional data can be read (do not time out here)
+        ssr_read(data_dummy, 0);
         $fatal(1, "Read additional value: %f", $bitstoreal(data_dummy));
       end begin
         #Timeout;
@@ -437,7 +447,6 @@ module fixture_ssr;
   endtask
 
   // Verify a given natural iteration read job
-  // TODO: Separate writing and readback of config into own task
   task automatic verify_nat_job(
     input logic                       write,
     input logic                       alias_launch,
