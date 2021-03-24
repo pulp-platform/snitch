@@ -95,9 +95,7 @@ module occamy_top
   cva6 = soc_narrow_xbar.in_cva6.copy(name="cva6_axi").declare(context)
   cva6.cut(context, to=soc_narrow_xbar.in_cva6)
   %>
-  ariane #(
-    .ArianeCfg (ariane_pkg::ArianeDefaultConfig)
-  ) i_cva6 (
+  occamy_cva6 i_occamy_cva6 (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
     .boot_addr_i (BootAddr),

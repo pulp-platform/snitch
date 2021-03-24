@@ -287,9 +287,7 @@ module occamy_top
       .mst_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6])
   );
 
-  ariane #(
-      .ArianeCfg(ariane_pkg::ArianeDefaultConfig)
-  ) i_cva6 (
+  occamy_cva6 i_occamy_cva6 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .boot_addr_i(BootAddr),
