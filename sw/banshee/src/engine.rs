@@ -386,7 +386,7 @@ impl Engine {
         );
         if self.had_error.load(Ordering::SeqCst) {
             Err(anyhow!("Encountered an error during execution"))
-        } else if (ret & 0x1) == 0x1 {
+        } else if (ret & 0x1) != 0x1 {
             // Call the police if no return value was specified
             Ok(117)
         } else {

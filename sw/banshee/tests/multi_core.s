@@ -10,4 +10,7 @@ _start:
     li      t1, 0x20000000
     add     t0, t0, t1
     sw      a0, 0(t0)
+    la      t0, scratch_reg
+    li      t1, 1
+    sw      t1, 0(t0)
     wfi
