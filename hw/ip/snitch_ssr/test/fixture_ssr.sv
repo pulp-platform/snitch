@@ -116,7 +116,7 @@ module fixture_ssr;
   tcdm_rsp_t    mem_rsp_i;
   logic [DataWidth-1:0] lane_rdata_o;
   logic [DataWidth-1:0] lane_wdata_i;
-  logic [AddrWidth-1:0] tcdm_start_address_i = '0;
+  logic [AddrWidth-1:0] tcdm_start_address_i = '0;    // (currently) required for test flow
 
   // Device Under Test (DUT)
   snitch_ssr #(
@@ -140,11 +140,6 @@ module fixture_ssr;
     .mem_rsp_i,
     .tcdm_start_address_i
   );
-
-  // Dynamically change TCDM base address
-  task automatic set_tcdm_start_address (addr_t val);
-    tcdm_start_address_i = val;
-  endtask
 
   // ----------------
   //  TCDM interface
@@ -322,12 +317,14 @@ module fixture_ssr;
   end
 
   // Read from SSR
+  // TODO: builtin timout, but watch out for verify_done
   task automatic ssr_read (output data_t data);
     logic error;
     ssr_drv.send_read(1'b0, data, error);
   endtask
 
   // Write to SSR
+  // TODO: builtin timout, but watch out for verify_done
   task automatic ssr_write (input data_t data);
     logic error;
     ssr_drv.send_write(1'b0, data, '1, error);
@@ -342,30 +339,39 @@ module fixture_ssr;
   //  Verification
   // --------------
 
-  // TODO: we assume floating point data when using $bitstoreal. Find a better option?
-
   // Check whether SSR job is done, then try to obtain additional read to be sure
-  task automatic verify_done(input logic read);
+  task automatic verify_done(input logic write);
     logic done;
     data_t data_dummy;
-    // Ensure we signal done
-    cfg_read_done(done);
-    if (done !== 1) $fatal(1, "Address generator should be done by now");
     // Give ample timeout to make sure no more values are provided
-    if (read) begin
+    if (write) begin
+      // Give some time for writes to complete
+      #Timeout;
+      // Ensure we signal done
+      cfg_read_done(done);
+      if (done !== 1) $fatal(1, "read job should be done by now");
+    end else begin
       fork forever begin
+        // Ensure we signal done
+        cfg_read_done(done);
+        if (done !== 1) $fatal(1, "read job should be done by now");
+        // Ensure no additional data can be read
         ssr_read(data_dummy);
         $fatal(1, "Read additional value: %f", $bitstoreal(data_dummy));
       end begin
         #Timeout;
       end join_any
       disable fork;
+      // Terminate attempted read
       ssr_ready_kill();
     end
   endtask
 
   // Verify reads of one loop level; used recursively
-  task automatic verify_nat_read_loop(
+  // TODO: we assume floating point data when using $bitstoreal. Find a better option?
+  task automatic verify_nat_job_loop(
+    input logic                       write,
+    input logic                       write_check,
     input logic [RepWidth-1:0]        rep,
     input logic [NumLoops-1:0][31:0]  bound,
     input logic [NumLoops-1:0][31:0]  stride,
@@ -373,22 +379,46 @@ module fixture_ssr;
     input logic [DimWidth-1:0]        loop_top_idx,
     ref   logic [NumLoops-1:0][31:0]  loop_idcs,
     ref   addr_t                      ptr,
-    ref   addr_t                      ptr_next
+    ref   addr_t                      ptr_next,
+    ref   addr_t                      ptr_source
   );
     data_t data_actual, data_golden;
     // Lowestmost loop: read from SSR and memory to compare
     if (loop_top_idx == '0) begin
       for (loop_idcs[0] = 0; loop_idcs[0] <= bound[0]; ++loop_idcs[0]) begin
         ptr = ptr_next;
-        data_golden = fix.memory[ptr >> 3];
-        for (int r = 0; r <= rep; ++r) begin
-          fix.ssr_read(data_actual);
-          if (data_actual !== data_golden)
-            $fatal(1, "Direct read mismatch @ %p, 0x%8x, rep %0d: Actual %f vs Golden %f",
-                loop_idcs, ptr, r, $bitstoreal(data_actual), $bitstoreal(data_golden));
-          else if (MatchLog)
-            $display("Direct read match @ %p, 0x%8x, rep %0d: %f",
-                loop_idcs, ptr, r, $bitstoreal(data_actual));
+        if (write) begin
+          if (write_check) begin
+            // NOTE: we assume no write overlaps with read data or other written data here!
+            data_actual = memory[ptr >> WordAddrBits];
+            data_golden = memory[ptr_source >> WordAddrBits];
+            if (data_actual !== data_golden)
+              $fatal(1, "Direct write mismatch @ %p, 0x%8x Actual %f vs Golden %f",
+                  loop_idcs, ptr, $bitstoreal(data_actual), $bitstoreal(data_golden));
+            else if (MatchLog)
+              $display("Direct write match @ %p, 0x%8x: %f",
+                  loop_idcs, ptr, $bitstoreal(data_actual));
+          end else begin
+            // SSR reads from ptr_source and writes without immediate check (done later)
+            data_golden = memory[ptr_source >> WordAddrBits];
+            ssr_write(data_golden);
+            if (MatchLog)
+                $display("Direct write @ %p, 0x%8x: %f",
+                    loop_idcs, ptr, $bitstoreal(data_golden));
+          end
+          // Linearly advance source pointer
+          ptr_source += WordBytes;
+        end else begin
+          data_golden = memory[ptr >> WordAddrBits];
+          for (int r = 0; r <= rep; ++r) begin
+            ssr_read(data_actual);
+            if (data_actual !== data_golden)
+              $fatal(1, "Direct read mismatch @ %p, 0x%8x, rep %0d: Actual %f vs Golden %f",
+                  loop_idcs, ptr, r, $bitstoreal(data_actual), $bitstoreal(data_golden));
+            else if (MatchLog)
+              $display("Direct read match @ %p, 0x%8x, rep %0d: %f",
+                  loop_idcs, ptr, r, $bitstoreal(data_actual));
+          end
         end
         ptr_next = ptr + stride[0];
       end
@@ -398,8 +428,8 @@ module fixture_ssr;
           loop_idcs[loop_top_idx] <= bound[loop_top_idx] || ~loop_ena[loop_top_idx];
           ++loop_idcs[loop_top_idx])
       begin
-        verify_nat_read_loop(rep, bound, stride, loop_ena,
-            loop_top_idx-1, loop_idcs, ptr, ptr_next);
+        verify_nat_job_loop(write, write_check, rep, bound, stride,
+            loop_ena, loop_top_idx-1, loop_idcs, ptr, ptr_next, ptr_source);
         ptr_next = ptr + stride[loop_top_idx];
         if (~loop_ena[loop_top_idx]) break;
       end
@@ -408,13 +438,16 @@ module fixture_ssr;
 
   // Verify a given natural iteration read job
   // TODO: Separate writing and readback of config into own task
-  task automatic verify_nat_read(
+  task automatic verify_nat_job(
+    input logic                       write,
     input logic                       alias_launch,
     input logic [31:0]                start_elem,
     input logic [DimWidth-1:0]        num_loops,
     input logic [RepWidth-1:0]        rep,
     input logic [NumLoops-1:0][31:0]  bound,
-    input logic [NumLoops-1:0][31:0]  stride_elems
+    input logic [NumLoops-1:0][31:0]  stride_elems,
+    input addr_t ptr_source = '0,   // For writes only: pointer to linearly-read SSR input data
+    input addr_t offs_dest  = '0    // For writes only: pointer to target region for writes
   );
     cfg_regs_t          regs;
     cfg_status_t        status;
@@ -422,7 +455,8 @@ module fixture_ssr;
     logic [NumLoops-1:0][31:0]  stride;
     logic [NumLoops-1:0][31:0]  loop_idcs;
     addr_t ptr;
-    addr_t ptr_next = WordBytes * start_elem;
+    addr_t ptr_next       = WordBytes * start_elem + (write ? offs_dest : '0);
+    addr_t ptr_source_mut = ptr_source;
     // Determine whether each loop is activated and byte stride
     for (int i = 0; unsigned'(i) < NumLoops; ++i) begin
       loop_ena [i]  = (num_loops >= i);
@@ -432,7 +466,7 @@ module fixture_ssr;
     regs = {stride, bound, 32'(rep)};
     cfg_write_regs(regs);
     // Launch
-    status.upper.al   = {1'b0, num_loops};
+    status.upper.al   = {write, num_loops};
     status.upper.done = 1'b0;
     status.ptr        = ptr_next;
     if (alias_launch) cfg_launch_alias(status);
@@ -442,10 +476,23 @@ module fixture_ssr;
     cfg_read_status(status);
     $display("Read Regs: %p Status: %p", regs, status);
     // Do loops
-    verify_nat_read_loop(rep, bound, stride, loop_ena, NumLoops-1, loop_idcs, ptr, ptr_next);
-    // Ensure HSSR is done
-    verify_done(1);
-    $display("%t: Direct read success", $time);
+    verify_nat_job_loop(write, 0, rep, bound, stride,
+        loop_ena, NumLoops-1, loop_idcs, ptr, ptr_next, ptr_source_mut);
+    // Ensure SSR is done after some time to write back
+    verify_done(write);
+    #Timeout;
+    // Check data written to memory if write in separate iteration
+    if (write) begin
+        // Reset pointers
+        ptr_next        = WordBytes * start_elem + (write ? offs_dest : '0);
+        ptr_source_mut  = ptr_source;
+        // Reiterate with checking
+        verify_nat_job_loop(1, 1, rep, bound, stride,
+            loop_ena, NumLoops-1, loop_idcs, ptr, ptr_next, ptr_source_mut);
+        $display("%t: Direct write success", $time);
+    end else begin
+      $display("%t: Direct read success", $time);
+    end
   endtask
 
 endmodule
