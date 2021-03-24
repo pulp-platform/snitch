@@ -13,8 +13,10 @@ module fixture_ssr;
   //  Parameters
   // ------------
 
-  // Testbench parameters
-  localparam bit DebugLog = 0;
+  // Fixture parameters
+  localparam bit  TcdmLog   = 0;
+  localparam bit  MatchLog  = 1;
+  localparam time Timeout   = 200ns;
 
   // Timing parameters
   localparam time TCK = 10ns;
@@ -23,14 +25,13 @@ module fixture_ssr;
   localparam int unsigned RstCycles = 10;
 
   // TCDM parameters
-  parameter int unsigned AddrWidth    = 64;
-  parameter int unsigned DataWidth    = 32;
-  parameter int unsigned SSRNrCredits = 4;
+  localparam int unsigned AddrWidth = 32;
+  localparam int unsigned DataWidth = 64;
 
   // TCDM derived parameters
-  localparam int unsigned MemWordBytes      = DataWidth/8;
-  localparam int unsigned MemWordAddrBits   = $clog2(MemWordBytes);
-  localparam int unsigned MemWordAddrWidth  = AddrWidth - MemWordAddrBits;
+  localparam int unsigned WordBytes      = DataWidth/8;
+  localparam int unsigned WordAddrBits   = $clog2(WordBytes);
+  localparam int unsigned WordAddrWidth  = AddrWidth - WordAddrBits;
 
   // TCDM types
   typedef logic [AddrWidth-1:0]   addr_t;
@@ -38,6 +39,40 @@ module fixture_ssr;
   typedef logic [DataWidth/8-1:0] strb_t;
   typedef logic                   user_t;
   `TCDM_TYPEDEF_ALL(tcdm, addr_t, data_t, strb_t, user_t);
+
+  // SSR parameters
+  // TODO: Too little, and not fully exposed
+  localparam int unsigned NumLoops      = 4;
+  localparam int unsigned SSRNrCredits  = 4;
+  localparam int unsigned RepWidth      = 4;
+
+  // SSR derived parameters
+  localparam int unsigned DimWidth =  $clog2(NumLoops);
+
+  // Configuration written through proper registers
+  typedef struct packed {
+    logic [NumLoops-1:0][31:0] stride;
+    logic [NumLoops-1:0][31:0] bound;
+    logic [31:0] rep;
+  } cfg_regs_t;
+
+  // Fields describing addresses of upper alias registers
+  typedef struct packed {
+    logic write;
+    logic [DimWidth-1:0] dims;
+  } cfg_alias_fields_t;
+
+  // Upper fields accessible on status register
+  typedef struct packed {
+    logic done;
+    cfg_alias_fields_t al;
+  } cfg_status_upper_t;
+
+  // Status register type
+  typedef struct packed {
+    cfg_status_upper_t upper;
+    logic [31-$bits(cfg_status_upper_t):0] ptr;
+  } cfg_status_t;
 
   // -----------------
   //  Clock and reset
@@ -107,7 +142,7 @@ module fixture_ssr;
   );
 
   // Dynamically change TCDM base address
-  task automatic set_tcdm_start_address(addr_t val);
+  task automatic set_tcdm_start_address (addr_t val);
     tcdm_start_address_i = val;
   endtask
 
@@ -116,7 +151,7 @@ module fixture_ssr;
   // ----------------
 
   // Associative (maximum-size) TCDM: models full memory space
-  data_t memory [bit [MemWordAddrWidth-1:0]];
+  data_t memory [bit [WordAddrWidth-1:0]];
 
   // TCDM (memory) bus interface
   TCDM_BUS_DV #(
@@ -154,18 +189,18 @@ module fixture_ssr;
       tcdm_drv.recv_req(req.q);
       // Process Write
       if (req.q.write) begin
-        if (DebugLog) $write("Write to 0x%x: 0x%x, strobe 0b%b ... ",
+        if (TcdmLog) $write("Write to 0x%x: 0x%x, strobe 0b%b ... ",
             req.q.addr, req.q.data, req.q.strb);
         for (int i = 0; i < DataWidth/8; i++) begin
           if (req.q.strb[i])
-            memory[req.q.addr >> MemWordAddrBits][i*8 +: 8] = req.q.data[i*8 +: 8];
+            memory[req.q.addr >> WordAddrBits][i*8 +: 8] = req.q.data[i*8 +: 8];
         end
       // Process Read
       end else begin
-        rsp.p.data = memory[req.q.addr >> MemWordAddrBits];
-        if (DebugLog) $write("Read from 0x%x: data 0x%x ... ", req.q.addr, rsp.p.data);
+        rsp.p.data = memory[req.q.addr >> WordAddrBits];
+        if (TcdmLog) $write("Read from 0x%x: data 0x%x ... ", req.q.addr, rsp.p.data);
         tcdm_drv.send_rsp(rsp.p);
-        if (DebugLog) $display("OK");
+        if (TcdmLog) $display("OK");
       end
     end
   end
@@ -176,8 +211,8 @@ module fixture_ssr;
 
   // Register bus interface for configuration
   REG_BUS #(
-    .ADDR_WIDTH ( 5   ),
-    .DATA_WIDTH ( 32  )
+    .ADDR_WIDTH ( 5  ),
+    .DATA_WIDTH ( 32 )
   ) cfg_bus (clk);
 
   // Connect DUT to config bus
@@ -201,6 +236,58 @@ module fixture_ssr;
     cfg_drv.reset_master();
     @(posedge rst_n);
   end
+
+  // Wrapped read and write tasks
+  task automatic cfg_write (input logic [4:0] addr, input logic [31:0] data);
+    logic error;
+    cfg_drv.send_write(addr, data, '1, error);
+  endtask
+
+  // Wrapped read task
+  task automatic cfg_read (input logic [4:0] addr, output logic [31:0] data);
+    logic error;
+    cfg_drv.send_read(addr, data, error);
+  endtask
+
+  // Ignores status field: use launch task to launch job
+  task automatic cfg_write_regs (input cfg_regs_t cfg);
+    cfg_write(5'h1, cfg.rep);
+    for (int i = 0; i < NumLoops; ++i) begin
+      cfg_write(i+2, cfg.bound[i]);
+      cfg_write(i+2+NumLoops, cfg.stride[i]);
+    end
+  endtask
+
+  task automatic cfg_launch_status (input cfg_status_t cfg);
+    cfg_write(0, cfg);
+  endtask
+
+  task automatic cfg_launch_alias (input cfg_status_t cfg);
+    // NOTE: SSRs will mask the `done` bit on alias launch, but *not* on status launch. Revise?
+    logic [4:0] addr;
+    addr = '1;
+    addr [$bits(cfg_alias_fields_t)-1:0] = cfg.upper.al;
+    cfg_write(addr, cfg.ptr);
+  endtask
+
+  // Interface reads
+  task automatic cfg_read_regs (output cfg_regs_t cfg);
+    cfg_read(5'h1, cfg.rep);
+    for (int i = 0; i < 4; ++i) begin
+      cfg_read(i+2,  cfg.bound[i]);
+      cfg_read(i+2+NumLoops, cfg.stride[i]);
+    end
+  endtask
+
+  task automatic cfg_read_status (output cfg_status_t status);
+    cfg_read(5'h0, status);
+  endtask
+
+  task automatic cfg_read_done (output logic done);
+    cfg_status_t status;
+    cfg_read_status(status);
+    done = status.upper.done;
+  endtask
 
   // --------------------
   //  Register interface
@@ -233,5 +320,132 @@ module fixture_ssr;
     ssr_drv.reset_master();
     @(posedge rst_n);
   end
+
+  // Read from SSR
+  task automatic ssr_read (output data_t data);
+    logic error;
+    ssr_drv.send_read(1'b0, data, error);
+  endtask
+
+  // Write to SSR
+  task automatic ssr_write (input data_t data);
+    logic error;
+    ssr_drv.send_write(1'b0, data, '1, error);
+  endtask
+
+  // Deassert SSR lane readiness manually, e.g. if read or write killed in a timeout fork
+  task automatic ssr_ready_kill();
+    ssr_bus.valid = 0;
+  endtask
+
+  // --------------
+  //  Verification
+  // --------------
+
+  // TODO: we assume floating point data when using $bitstoreal. Find a better option?
+
+  // Check whether SSR job is done, then try to obtain additional read to be sure
+  task automatic verify_done(input logic read);
+    logic done;
+    data_t data_dummy;
+    // Ensure we signal done
+    cfg_read_done(done);
+    if (done !== 1) $fatal(1, "Address generator should be done by now");
+    // Give ample timeout to make sure no more values are provided
+    if (read) begin
+      fork forever begin
+        ssr_read(data_dummy);
+        $fatal(1, "Read additional value: %f", $bitstoreal(data_dummy));
+      end begin
+        #Timeout;
+      end join_any
+      disable fork;
+      ssr_ready_kill();
+    end
+  endtask
+
+  // Verify reads of one loop level; used recursively
+  task automatic verify_nat_read_loop(
+    input logic [RepWidth-1:0]        rep,
+    input logic [NumLoops-1:0][31:0]  bound,
+    input logic [NumLoops-1:0][31:0]  stride,
+    input logic [NumLoops-1:0]        loop_ena,
+    input logic [DimWidth-1:0]        loop_top_idx,
+    ref   logic [NumLoops-1:0][31:0]  loop_idcs,
+    ref   addr_t                      ptr,
+    ref   addr_t                      ptr_next
+  );
+    data_t data_actual, data_golden;
+    // Lowestmost loop: read from SSR and memory to compare
+    if (loop_top_idx == '0) begin
+      for (loop_idcs[0] = 0; loop_idcs[0] <= bound[0]; ++loop_idcs[0]) begin
+        ptr = ptr_next;
+        data_golden = fix.memory[ptr >> 3];
+        for (int r = 0; r <= rep; ++r) begin
+          fix.ssr_read(data_actual);
+          if (data_actual !== data_golden)
+            $fatal(1, "Direct read mismatch @ %p, 0x%8x, rep %0d: Actual %f vs Golden %f",
+                loop_idcs, ptr, r, $bitstoreal(data_actual), $bitstoreal(data_golden));
+          else if (MatchLog)
+            $display("Direct read match @ %p, 0x%8x, rep %0d: %f",
+                loop_idcs, ptr, r, $bitstoreal(data_actual));
+        end
+        ptr_next = ptr + stride[0];
+      end
+    // Higher loop: recurse
+    end else begin
+      for (loop_idcs[loop_top_idx] = 0;
+          loop_idcs[loop_top_idx] <= bound[loop_top_idx] || ~loop_ena[loop_top_idx];
+          ++loop_idcs[loop_top_idx])
+      begin
+        verify_nat_read_loop(rep, bound, stride, loop_ena,
+            loop_top_idx-1, loop_idcs, ptr, ptr_next);
+        ptr_next = ptr + stride[loop_top_idx];
+        if (~loop_ena[loop_top_idx]) break;
+      end
+    end
+  endtask
+
+  // Verify a given natural iteration read job
+  // TODO: Separate writing and readback of config into own task
+  task automatic verify_nat_read(
+    input logic                       alias_launch,
+    input logic [31:0]                start_elem,
+    input logic [DimWidth-1:0]        num_loops,
+    input logic [RepWidth-1:0]        rep,
+    input logic [NumLoops-1:0][31:0]  bound,
+    input logic [NumLoops-1:0][31:0]  stride_elems
+  );
+    cfg_regs_t          regs;
+    cfg_status_t        status;
+    logic [NumLoops-1:0]        loop_ena;
+    logic [NumLoops-1:0][31:0]  stride;
+    logic [NumLoops-1:0][31:0]  loop_idcs;
+    addr_t ptr;
+    addr_t ptr_next = WordBytes * start_elem;
+    // Determine whether each loop is activated and byte stride
+    for (int i = 0; unsigned'(i) < NumLoops; ++i) begin
+      loop_ena [i]  = (num_loops >= i);
+      stride   [i]  = WordBytes * stride_elems[i];
+    end
+    // Write config regs
+    regs = {stride, bound, 32'(rep)};
+    cfg_write_regs(regs);
+    // Launch
+    status.upper.al   = {1'b0, num_loops};
+    status.upper.done = 1'b0;
+    status.ptr        = ptr_next;
+    if (alias_launch) cfg_launch_alias(status);
+    else cfg_launch_status(status);
+    // Read back, show config regs and status
+    cfg_read_regs(regs);
+    cfg_read_status(status);
+    $display("Read Regs: %p Status: %p", regs, status);
+    // Do loops
+    verify_nat_read_loop(rep, bound, stride, loop_ena, NumLoops-1, loop_idcs, ptr, ptr_next);
+    // Ensure HSSR is done
+    verify_done(1);
+    $display("%t: Direct read success", $time);
+  endtask
 
 endmodule
