@@ -1570,8 +1570,7 @@ impl<'a> InstructionTranslator<'a> {
         trace!("{} x{}, f{}", data.op, data.rd, data.rs2);
         let rs2 = self.read_reg(data.rs2);
 
-        // first, check for ssr config read operation
-        match data.op {
+        let value = match data.op {
             riscv::OpcodeRdRs2::Scfgr => {
                 // reorder rs2 to form address
                 // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
@@ -1601,24 +1600,17 @@ impl<'a> InstructionTranslator<'a> {
                 );
                 let addr_off = LLVMBuildOr(self.builder, rs2_dm_shifted, reg_masked, NONAME);
                 // perform load
-                let value = self.emit_load(
+                self.emit_load(
                     LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
                     addr_off,
                     2,
                     true,
-                );
-                // and write
-                self.write_reg(data.rd, value);
-                return Ok(());
+                )
             }
-            _ => {}
-        }
-
-        let value = match data.op {
             riscv::OpcodeRdRs2::Dmstat => self
                 .section
                 .emit_call("banshee_dma_stat", [self.dma_ptr(), rs2]),
-            _ => bail!("Unsupported opcode {}", data.op),
+            // _ => bail!("Unsupported opcode {}", data.op),
         };
 
         self.write_reg(data.rd, value);
