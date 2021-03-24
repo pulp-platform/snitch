@@ -13,4 +13,7 @@ _start:
     add     t0, t0, t1
     sw      a0, 0(t0)
     sw      a1, 8(t0)
+    la      t0, scratch_reg
+    li      t1, 1
+    sw      t1, 0(t0)
     wfi

@@ -15,6 +15,9 @@ _start:
     lw   t4, 0(t1)
     la   t1, magic2
     lw   t5, 0(t1)
+    la   t0, scratch_reg
+    li   t1, 1
+    sw   t1, 0(t0)
     wfi
 
 .section .l1,"aw",@progbits

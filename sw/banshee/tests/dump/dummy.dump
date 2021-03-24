@@ -26,17 +26,21 @@ Disassembly of section .text:
 80010020:	00032e83          	lw	t4,0(t1)
 80010024:	00400313          	li	t1,4
 80010028:	00032f03          	lw	t5,0(t1)
-8001002c:	10500073          	wfi
+8001002c:	bfff0297          	auipc	t0,0xbfff0
+80010030:	ff428293          	addi	t0,t0,-12 # 40000020 <scratch_reg>
+80010034:	00100313          	li	t1,1
+80010038:	0062a023          	sw	t1,0(t0)
+8001003c:	10500073          	wfi
 
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-   0:	2d41                	jal	690 <l1_alloc_base+0x680>
+   0:	3141                	jal	fffffc80 <fake_uart+0x3ffffc80>
    2:	0000                	unimp
    4:	7200                	flw	fs0,32(a2)
    6:	7369                	lui	t1,0xffffa
    8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
-   c:	00000023          	sb	zero,0(zero) # 0 <magic>
+   c:	00000027          	0x27
   10:	7205                	lui	tp,0xfffe1
   12:	3376                	fld	ft6,376(sp)
   14:	6932                	flw	fs2,12(sp)
@@ -48,3 +52,5 @@ Disassembly of section .riscv.attributes:
   24:	3266                	fld	ft4,120(sp)
   26:	3070                	fld	fa2,224(s0)
   28:	645f 7032 0030      	0x307032645f
+  2e:	0108                	addi	a0,sp,128
+  30:	0b0a                	slli	s6,s6,0x2
