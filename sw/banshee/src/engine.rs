@@ -370,10 +370,13 @@ impl Engine {
 
         // Print some final statistics.
         trace!("Final state hart {}: {:#?}", cpus[0].hartid, cpus[0].state);
-        info!(
-            "Exit code is 0x{:x}",
-            self.exit_code.load(Ordering::SeqCst) >> 1
-        );
+        // Fetch the return value {ret[31:1] = exit_code, ret[0] = exit_code_valid}
+        let ret = self.exit_code.load(Ordering::SeqCst);
+        if (ret & 0x1) == 0x1 {
+            info!("Exit code is 0x{:x}", ret >> 1);
+        } else {
+            warn!("Exit code register was empty.")
+        }
         info!(
             "Retired {} ({}) in {}, {}",
             instret,
@@ -383,8 +386,11 @@ impl Engine {
         );
         if self.had_error.load(Ordering::SeqCst) {
             Err(anyhow!("Encountered an error during execution"))
+        } else if (ret & 0x1) == 0x1 {
+            // Call the police if no return value was specified
+            Ok(117)
         } else {
-            Ok(self.exit_code.load(Ordering::SeqCst) >> 1)
+            Ok(ret >> 1)
         }
     }
 }
