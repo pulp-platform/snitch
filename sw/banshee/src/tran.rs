@@ -1323,7 +1323,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12Rd::Scfgri => {
                 // srr load immediate from offset in imm12
                 // reorder imm12 to form address
-                // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+                // imm12[11:5]=reg_word imm12[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
                 let dm = (imm as u64) & 0x1f;
                 let reg_word = ((imm as u64) >> 5) & 0x1f;
                 let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
