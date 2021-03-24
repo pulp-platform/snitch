@@ -1,0 +1,23 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+package:
+  name: snitch_ssr
+  authors:
+  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+
+dependencies:
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  # Local dependencies.
+  tcdm_interface: {path: ../../ip/tcdm_interface}
+  snitch: {path: ../../ip/snitch}
+
+sources:
+# Level 0:
+- src/snitch_ssr_addr_gen.sv
+- src/snitch_ssr_switch.sv
+# Level 1:
+- src/snitch_ssr.sv
+# Level 2:
+- src/snitch_ssr_streamer.sv
