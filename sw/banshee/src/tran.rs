@@ -1206,24 +1206,31 @@ impl<'a> InstructionTranslator<'a> {
 
     unsafe fn emit_imm12_rs1(&self, data: riscv::FormatImm12Rs1) -> Result<()> {
         let imm = data.imm();
-        trace!("{} x{}, x{}", data.op, data.rs1, imm);
+        trace!("{} x{}, {}", data.op, data.rs1, imm);
 
         // Compute the address.
         let rs1 = self.read_reg(data.rs1);
-        let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
 
         // Perform the operation.
         match data.op {
+            // suppress compiler warning that detects the bail! statement as unrechable
+            // Scfgwi is currently the OpcodeImm12Rs1 but this might change
+            #![allow(unreachable_patterns)]
             riscv::OpcodeImm12Rs1::Scfgwi => {
                 // ssr write immediate holds address offset in imm12, content in rs1
+                // imm12[11:5]=reg_word imm12[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+                let dm = (imm as u64) & 0x1f;
+                let reg_word = ((imm as u64) >> 5) & 0x1f;
+                let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
                 let addr = LLVMBuildAdd(
                     self.builder,
                     LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
-                    imm,
+                    addr_off,
                     NONAME,
                 );
                 self.write_mem(addr, rs1, 2);
-            } // _ => bail!("Unsupported opcode {}", data.op),
+            }
+            _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
     }
@@ -1304,18 +1311,27 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn emit_imm12_rd(&self, data: riscv::FormatImm12Rd) -> Result<()> {
         let imm = data.imm();
         trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
-        let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
         let name = format!("{}\0", data.op);
         let _name = name.as_ptr() as *const _;
 
         let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
 
-        let value = match data.op {
-            // srr loar immediate from iffset in imm12
-            riscv::OpcodeImm12Rd::Scfgri => self.emit_load(ssr_start, imm, 2, true),
-            // _ => bail!("Unsupported opcode {}", data.op),
+        match data.op {
+            // suppress compiler warning that detects the bail! statement as unrechable
+            // Scfgri is currently the OpcodeImm12Rd but this might change
+            #![allow(unreachable_patterns)]
+            riscv::OpcodeImm12Rd::Scfgri => {
+                // srr load immediate from offset in imm12
+                // reorder imm12 to form address
+                // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+                let dm = (imm as u64) & 0x1f;
+                let reg_word = ((imm as u64) >> 5) & 0x1f;
+                let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
+                let value = self.emit_load(ssr_start, addr_off, 2, true);
+                self.write_reg(data.rd, value);
+            }
+            _ => bail!("Unsupported opcode {}", data.op),
         };
-        self.write_reg(data.rd, value);
         Ok(())
     }
 
@@ -1555,9 +1571,41 @@ impl<'a> InstructionTranslator<'a> {
         let rs2 = self.read_reg(data.rs2);
 
         let value = match data.op {
-            // ssr read from offset rs2 to rd
             riscv::OpcodeRdRs2::Scfgr => {
-                self.emit_load(LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0), rs2, 2, true)
+                // reorder rs2 to form address
+                // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+                let reg = LLVMBuildLShr(
+                    self.builder,
+                    rs2,
+                    LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
+                    NONAME,
+                );
+                let reg_masked = LLVMBuildAnd(
+                    self.builder,
+                    reg,
+                    LLVMConstInt(LLVMInt32Type(), 0xf8 as u64, 0),
+                    NONAME,
+                );
+                let rs2_dm = LLVMBuildAnd(
+                    self.builder,
+                    rs2,
+                    LLVMConstInt(LLVMInt32Type(), 0x1f as u64, 0),
+                    NONAME,
+                );
+                let rs2_dm_shifted = LLVMBuildShl(
+                    self.builder,
+                    rs2_dm,
+                    LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
+                    NONAME,
+                );
+                let addr_off = LLVMBuildOr(self.builder, rs2_dm_shifted, reg_masked, NONAME);
+                // perform load
+                self.emit_load(
+                    LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
+                    addr_off,
+                    2,
+                    true,
+                )
             }
             riscv::OpcodeRdRs2::Dmstat => self
                 .section
@@ -1712,6 +1760,9 @@ impl<'a> InstructionTranslator<'a> {
             self.section.fseq_iter.max_rpt_ref,
         );
         match data.op {
+            // suppress compiler warning that detects the bail! statement as unrechable
+            // Frep* are currently the only OpcodeImm12Rs1Stagger_maskStagger_max but this might change
+            #![allow(unreachable_patterns)]
             riscv::OpcodeImm12Rs1StaggerMaskStaggerMax::FrepO => fseq.init_rep(
                 data.imm12 as u8,
                 true,
@@ -1724,7 +1775,7 @@ impl<'a> InstructionTranslator<'a> {
                 data.stagger_max as u8,
                 data.stagger_mask as u8,
             ),
-            // _ => bail!("Unsupported opcode {}", data.op),
+            _ => bail!("Unsupported opcode {}", data.op),
         }
     }
 
@@ -2162,10 +2213,38 @@ impl<'a> InstructionTranslator<'a> {
         // Perform the SSR write op
         match data.op {
             riscv::OpcodeRs1Rs2::Scfgw => {
+                // reorder rs2 to form address
+                // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+                let reg = LLVMBuildLShr(
+                    self.builder,
+                    rs2,
+                    LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
+                    NONAME,
+                );
+                let reg_masked = LLVMBuildAnd(
+                    self.builder,
+                    reg,
+                    LLVMConstInt(LLVMInt32Type(), 0xf8 as u64, 0),
+                    NONAME,
+                );
+                let rs2_dm = LLVMBuildAnd(
+                    self.builder,
+                    rs2,
+                    LLVMConstInt(LLVMInt32Type(), 0x1f as u64, 0),
+                    NONAME,
+                );
+                let rs2_dm_shifted = LLVMBuildShl(
+                    self.builder,
+                    rs2_dm,
+                    LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
+                    NONAME,
+                );
+                let addr_off = LLVMBuildOr(self.builder, rs2_dm_shifted, reg_masked, NONAME);
+
                 let addr = LLVMBuildAdd(
                     self.builder,
                     LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
-                    rs2,
+                    addr_off,
                     NONAME,
                 );
                 self.write_mem(addr, rs1, 2);
