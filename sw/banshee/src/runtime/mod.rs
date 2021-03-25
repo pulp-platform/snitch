@@ -89,6 +89,7 @@ impl std::fmt::Debug for SsrState {
             .field("bound", &format_args!("{:?}", self.bound))
             .field("stride", &format_args!("{:08x?}", self.stride))
             .field("ptr", &format_args!("{:08x}", self.ptr))
+            .field("ptr_next", &format_args!("{:08x}", self.ptr_next))
             .field(
                 "repeat",
                 &format_args!("{} of {}", self.repeat_count, self.repeat_bound),
@@ -100,6 +101,7 @@ impl std::fmt::Debug for SsrState {
                     self.done, self.write, self.dims
                 ),
             )
+            .field("accessed", &format_args!("{}", self.accessed))
             .finish()
     }
 }

@@ -101,7 +101,7 @@ pub unsafe fn banshee_ssr_write_cfg(ssr: &mut SsrState, addr: u32, value: u32, m
     let addr = addr as usize / 8;
     match addr {
         0 => {
-            ssr.ptr = value & ((1 << 28) - 1);
+            ssr.ptr_next = value & ((1 << 28) - 1);
             ssr.done = ((value >> 31) & 1) != 0;
             ssr.write = ((value >> 30) & 1) != 0;
             ssr.dims = ((value >> 28) & 3) as u8;
@@ -110,13 +110,13 @@ pub unsafe fn banshee_ssr_write_cfg(ssr: &mut SsrState, addr: u32, value: u32, m
         2..=5 => *ssr.bound.get_unchecked_mut(addr - 2) = value,
         6..=9 => *ssr.stride.get_unchecked_mut(addr - 6) = value,
         24..=27 => {
-            ssr.ptr = value;
+            ssr.ptr_next = value;
             ssr.done = false;
             ssr.write = false;
             ssr.dims = (addr - 24) as u8;
         }
         28..=31 => {
-            ssr.ptr = value;
+            ssr.ptr_next = value;
             ssr.done = false;
             ssr.write = true;
             ssr.dims = (addr - 28) as u8;
@@ -145,25 +145,39 @@ pub unsafe fn banshee_ssr_read_cfg(ssr: &mut SsrState, addr: u32) -> u32 {
 pub unsafe fn banshee_ssr_next(ssr: &mut SsrState) -> u32 {
     // TODO: Assert that the SSR is not done.
     let ptr = ssr.ptr;
-    if ssr.repeat_count == ssr.repeat_bound {
-        ssr.repeat_count = 0;
-        let mut stride = 0;
-        ssr.done = true;
-        for i in 0..=(ssr.dims as usize) {
-            stride = *ssr.stride.get_unchecked(i);
-            if *ssr.index.get_unchecked(i) == *ssr.bound.get_unchecked(i) {
-                *ssr.index.get_unchecked_mut(i) = 0;
-            } else {
-                *ssr.index.get_unchecked_mut(i) += 1;
-                ssr.done = false;
-                break;
+    // execute increment only, if SSR register has not been previously 
+    // accessed. The ssr.accessed flag is cleared after an instruction 
+    // is retired. This prohibits that an instruction using ftX multiple
+    // times (e.g. fmul.d ft3, ft0, ft0) from being served different values
+    if !ssr.accessed {
+        if ssr.repeat_count == ssr.repeat_bound {
+            ssr.repeat_count = 0;
+            let mut stride = 0;
+            ssr.done = true;
+            for i in 0..=(ssr.dims as usize) {
+                stride = *ssr.stride.get_unchecked(i);
+                if *ssr.index.get_unchecked(i) == *ssr.bound.get_unchecked(i) {
+                    *ssr.index.get_unchecked_mut(i) = 0;
+                } else {
+                    *ssr.index.get_unchecked_mut(i) += 1;
+                    ssr.done = false;
+                    break;
+                }
             }
+            ssr.ptr_next = ssr.ptr.wrapping_add(stride);
+        } else {
+            ssr.repeat_count += 1;
         }
-        ssr.ptr = ssr.ptr.wrapping_add(stride);
-    } else {
-        ssr.repeat_count += 1;
     }
+    ssr.accessed = true;
     ptr
+}
+
+/// Deassert the accessed flag at the end of instruction parsing
+#[no_mangle]
+pub unsafe fn banshee_ssr_eoi(ssr: &mut SsrState) {
+    ssr.accessed = false;
+    ssr.ptr = ssr.ptr_next;
 }
 
 /// Implementation of the `dm.src` instruction.
