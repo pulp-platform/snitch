@@ -947,8 +947,8 @@ Disassembly of section .debug_line:
       38: 0c 00        	<unknown>
       3a: 00 80        	<unknown>
       3c: 19 05        	<unknown>
-      3e: 03 0a 03 02  	lb	s4, 32(t1)
-      42: 09 28        	<unknown>
+      3e: 05 0a        	<unknown>
+      40: 03 02 09 28  	lb	tp, 640(s2)
       44: 00 01        	<unknown>
       46: 06 03        	<unknown>
       48: 76 09        	<unknown>
@@ -960,70 +960,70 @@ Disassembly of section .debug_line:
       58: 00 01        	<unknown>
       5a: 03 04 09 04  	lb	s0, 64(s2)
       5e: 00 01        	<unknown>
-      60: 05 17        	<unknown>
+      60: 05 19        	<unknown>
       62: 03 d0 00 09  	lhu	zero, 144(ra)
       66: 08 00        	<unknown>
       68: 01 05        	<unknown>
-      6a: 25 06        	<unknown>
-      6c: 03 00 09 04  	lb	zero, 64(s2)
+      6a: 27 06 03 00  	<unknown>
+      6e: 09 04        	<unknown>
       70: 00 01        	<unknown>
-      72: 05 2a        	<unknown>
+      72: 05 2c        	<unknown>
       74: 03 00 09 04  	lb	zero, 64(s2)
       78: 00 01        	<unknown>
-      7a: 05 23        	<unknown>
+      7a: 05 25        	<unknown>
       7c: 03 00 09 04  	lb	zero, 64(s2)
       80: 00 01        	<unknown>
-      82: 05 33        	<unknown>
+      82: 05 35        	<unknown>
       84: 03 00 09 04  	lb	zero, 64(s2)
       88: 00 01        	<unknown>
-      8a: 05 31        	<unknown>
+      8a: 05 33        	<unknown>
       8c: 03 00 09 04  	lb	zero, 64(s2)
       90: 00 01        	<unknown>
-      92: 05 41        	<unknown>
+      92: 05 43        	<unknown>
       94: 03 00 09 04  	lb	zero, 64(s2)
       98: 00 01        	<unknown>
-      9a: 05 3f        	<unknown>
+      9a: 05 41        	<unknown>
       9c: 03 00 09 04  	lb	zero, 64(s2)
       a0: 00 01        	<unknown>
-      a2: 05 17        	<unknown>
+      a2: 05 19        	<unknown>
       a4: 06 03        	<unknown>
       a6: 01 09        	<unknown>
       a8: 04 00        	<unknown>
       aa: 01 05        	<unknown>
-      ac: 25 06        	<unknown>
-      ae: 03 00 09 04  	lb	zero, 64(s2)
+      ac: 27 06 03 00  	<unknown>
+      b0: 09 04        	<unknown>
       b2: 00 01        	<unknown>
-      b4: 05 2a        	<unknown>
+      b4: 05 2c        	<unknown>
       b6: 03 00 09 04  	lb	zero, 64(s2)
       ba: 00 01        	<unknown>
-      bc: 05 23        	<unknown>
+      bc: 05 25        	<unknown>
       be: 03 00 09 04  	lb	zero, 64(s2)
       c2: 00 01        	<unknown>
-      c4: 05 33        	<unknown>
+      c4: 05 35        	<unknown>
       c6: 03 00 09 04  	lb	zero, 64(s2)
       ca: 00 01        	<unknown>
-      cc: 05 31        	<unknown>
+      cc: 05 33        	<unknown>
       ce: 03 00 09 04  	lb	zero, 64(s2)
       d2: 00 01        	<unknown>
-      d4: 05 41        	<unknown>
+      d4: 05 43        	<unknown>
       d6: 03 00 09 04  	lb	zero, 64(s2)
       da: 00 01        	<unknown>
-      dc: 05 3f        	<unknown>
+      dc: 05 41        	<unknown>
       de: 03 00 09 04  	lb	zero, 64(s2)
       e2: 00 01        	<unknown>
-      e4: 05 03        	<unknown>
+      e4: 05 05        	<unknown>
       e6: 06 03        	<unknown>
       e8: af 7f 09 04  	<unknown>
       ec: 00 01        	<unknown>
       ee: 03 d3 00 09  	lhu	t1, 144(ra)
       f2: b4 00        	<unknown>
       f4: 01 05        	<unknown>
-      f6: 0a 03        	<unknown>
+      f6: 0c 03        	<unknown>
       f8: 02 09        	<unknown>
       fa: 04 00        	<unknown>
       fc: 01 05        	<unknown>
-      fe: 03 06 03 00  	lb	a2, 0(t1)
-     102: 09 04        	<unknown>
+      fe: 05 06        	<unknown>
+     100: 03 00 09 04  	lb	zero, 64(s2)
      104: 00 01        	<unknown>
      106: 09 10        	<unknown>
      108: 00 00        	<unknown>
