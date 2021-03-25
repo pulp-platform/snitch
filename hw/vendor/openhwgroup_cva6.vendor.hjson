@@ -1,0 +1,44 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "openhwgroup_cva6",
+  target_dir: "openhwgroup_cva6",
+
+  upstream: {
+    url: "https://github.com/openhwgroup/cva6.git",
+    rev: "master",
+  },
+
+  patch_dir: "patches/openhwgroup_cva6",
+
+  exclude_from_upstream: [
+    "ci",
+    "bootrom",
+    "docs",
+    "fpga"
+    "openpiton"
+    "scripts"
+    "tb"
+    "src/axi"
+    "src/axi_mem_if"
+    "src/axi_node"
+    "src/axi_riscv_atomics"
+    "src/common_cells"
+    "src/fpga-support"
+    "src/fpu"
+    "src/register_interface"
+    "src/riscv-dbg"
+    "src/rv_plic"
+    "src/tech_cells_generic"
+    ".*"
+    "LICENSE*"
+    "src_files.yml"
+    "Makefile"
+    "*.md"
+    "CODEOWNERS"
+    "Flist.ariane"
+    "ariane.core"
+    "Bender.yml"
+  ]
+}

@@ -11,13 +11,14 @@ dependencies:
   # axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
   snitch_const_cache: {path: ../../ip/snitch_const_cache}
   snitch-cluster: {path: ../../ip/snitch_cluster}
-
-export_include_dirs:
-- include
+  cva6: {path: ../../vendor/openhwgroup_cva6}
 
 sources:
 # Level 0:
 - src/occamy_cluster_wrapper.sv
+- src/occamy_cva6.sv
+- src/occamy_soc_reg/occamy_soc_reg_pkg.sv
+- src/occamy_soc_reg/occamy_soc_reg_top.sv
 # Level 1:
 - src/occamy_pkg.sv
 # Level 2:

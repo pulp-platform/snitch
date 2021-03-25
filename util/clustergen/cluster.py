@@ -204,7 +204,7 @@ class SnitchCluster(Generator):
             self.add_mem(h['icache']['depth'],
                          h['icache']['cacheline'],
                          desc='icache data (hive {})'.format(i),
-                         byte_enable=False)
+                         byte_enable=True)
 
             self.add_mem(h['icache']['depth'],
                          self.tag_width,

@@ -177,6 +177,8 @@ def main():
     soc_narrow_xbar.add_output_entry("periph", am_soc_periph_regbus_xbar)
     soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
 
+    soc_narrow_xbar.add_input("cva6")
+
     ################
     # S1 Quadrants #
     ################
