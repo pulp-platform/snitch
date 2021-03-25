@@ -105,8 +105,8 @@ interface TCDM_BUS_DV #(
   assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_addr)));
   assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_write)));
   assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_amo)));
-  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_data)));
-  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_strb)));
+  assert property (@(posedge clk_i) (q_valid && !q_ready && q_write |=> $stable(q_data)));
+  assert property (@(posedge clk_i) (q_valid && !q_ready && q_write |=> $stable(q_strb)));
   assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_user)));
   assert property (@(posedge clk_i) (q_valid && !q_ready |=> q_valid));
   `endif
