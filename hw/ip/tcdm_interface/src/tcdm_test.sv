@@ -50,7 +50,7 @@ package tcdm_test;
     }
 
     /// Compare objects of same type.
-    function do_compare(req_t rhs);
+    function do_compare(req_t #(.AW(AW), .DW(DW), .user_t(user_t)) rhs);
       return addr == rhs.addr &
              write == rhs.write &
              amo == rhs.amo &
@@ -66,7 +66,7 @@ package tcdm_test;
     rand logic [DW-1:0]   data;
 
     /// Compare objects of same type.
-    function do_compare(rsp_t rhs);
+    function do_compare(rsp_t #(.DW(DW)) rhs);
       return data == rhs.data;
     endfunction
 
@@ -122,7 +122,7 @@ package tcdm_test;
     endtask
 
     /// Send a request.
-    task send_req (input req_t req);
+    task send_req (input req_t #(.AW(AW), .DW(DW), .user_t(user_t)) req);
       bus.q_addr  <= #TA req.addr;
       bus.q_write <= #TA req.write;
       bus.q_amo   <= #TA req.amo;
@@ -142,7 +142,7 @@ package tcdm_test;
     endtask
 
     /// Send a response.
-    task send_rsp (input rsp_t rsp);
+    task send_rsp (input rsp_t #(.DW(DW)) rsp);
       bus.p_data  <= #TA rsp.data;
       bus.p_valid <= #TA 1;
       cycle_start();
@@ -152,7 +152,7 @@ package tcdm_test;
     endtask
 
     /// Receive a request.
-    task recv_req (output req_t req);
+    task recv_req (output req_t #(.AW(AW), .DW(DW), .user_t(user_t)) req);
       bus.q_ready <= #TA 1;
       cycle_start();
       while (bus.q_valid != 1) begin cycle_end(); cycle_start(); end
@@ -168,7 +168,7 @@ package tcdm_test;
     endtask
 
     /// Receive a response.
-    task recv_rsp (output rsp_t rsp);
+    task recv_rsp (output rsp_t #(.DW(DW)) rsp);
       cycle_start();
       while (bus.p_valid != 1) begin cycle_end(); cycle_start(); end
       rsp = new;
@@ -177,7 +177,7 @@ package tcdm_test;
     endtask
 
     /// Monitor request.
-    task mon_req (output req_t req);
+    task mon_req (output req_t #(.AW(AW), .DW(DW), .user_t(user_t)) req);
       cycle_start();
       while (!(bus.q_valid && bus.q_ready)) begin cycle_end(); cycle_start(); end
       req = new;
@@ -191,7 +191,7 @@ package tcdm_test;
     endtask
 
     /// Monitor response.
-    task mon_rsp (output rsp_t rsp);
+    task mon_rsp (output rsp_t #(.DW(DW)) rsp);
       cycle_start();
       while (!(bus.p_valid)) begin cycle_end(); cycle_start(); end
       rsp = new;
@@ -286,7 +286,7 @@ package tcdm_test;
 
     /// Send random requests.
     task send_requests (input int n);
-      automatic req_t r = new;
+      automatic req_t #(.AW(AW), .DW(DW), .user_t(user_t)) r = new;
 
       repeat (n) begin
         this.cnt++;
@@ -300,7 +300,7 @@ package tcdm_test;
     /// Receive random responses.
     task recv_response;
       while (!this.req_done || this.cnt > 0) begin
-        automatic rsp_t rsp;
+        automatic rsp_t #(.DW(DW)) rsp;
         this.cnt--;
         this.drv.recv_rsp(rsp);
       end
@@ -346,7 +346,7 @@ package tcdm_test;
 
     task recv_requests();
       forever begin
-        automatic req_t req;
+        automatic req_t #(.AW(AW), .DW(DW), .user_t(user_t)) req;
         rand_wait(REQ_MIN_WAIT_CYCLES, REQ_MAX_WAIT_CYCLES);
         this.drv.recv_req(req);
         req_mbx.put(req);
@@ -354,8 +354,8 @@ package tcdm_test;
     endtask
 
     task send_responses();
-      automatic rsp_t rsp = new;
-      automatic req_t req;
+      automatic rsp_t #(.DW(DW)) rsp = new;
+      automatic req_t #(.AW(AW), .DW(DW), .user_t(user_t)) req;
       forever begin
         req_mbx.get(req);
         assert(rsp.randomize());
@@ -391,12 +391,12 @@ package tcdm_test;
     task monitor;
       fork
         forever begin
-          automatic tcdm_test::req_t req;
+          automatic tcdm_test::req_t #(.AW(AW), .DW(DW), .user_t(user_t)) req;
           this.drv.mon_req(req);
           req_mbx.put(req);
         end
         forever begin
-          automatic tcdm_test::rsp_t rsp;
+          automatic tcdm_test::rsp_t #(.DW(DW)) rsp;
           this.drv.mon_rsp(rsp);
           rsp_mbx.put(rsp);
         end
