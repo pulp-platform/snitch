@@ -160,14 +160,12 @@ module fixture_ssr;
   `TCDM_ASSIGN_TO_RESP(mem_rsp_i, tcdm_bus)
 
   // TCDM driver
-  tcdm_test_extra::tcdm_driver_nonrand #(
+  tcdm_test::tcdm_driver #(
     .AW     ( AddrWidth ),
     .DW     ( DataWidth ),
     .user_t ( user_t    ),
     .TA     ( TA        ),
-    .TT     ( TT        ),
-    .req_chan_t ( tcdm_req_chan_t ),
-    .rsp_chan_t ( tcdm_rsp_chan_t )
+    .TT     ( TT        )
   ) tcdm_drv = new(tcdm_bus);
 
   // Receive and process TCDM requests
@@ -178,23 +176,24 @@ module fixture_ssr;
     @(posedge rst_n);
     // Serve TCDM until testbench ends
     forever begin
-      automatic tcdm_req_t req;
-      automatic tcdm_rsp_t rsp;
+      automatic tcdm_test::req_t #(.AW(AddrWidth), .DW(DataWidth), .user_t(user_t)) req;
+      automatic tcdm_test::rsp_t #(.DW(DataWidth)) rsp;
       // Receive request
-      tcdm_drv.recv_req(req.q);
+      tcdm_drv.recv_req(req);
       // Process Write
-      if (req.q.write) begin
+      if (req.write) begin
         if (TcdmLog) $write("Write to 0x%x: 0x%x, strobe 0b%b ... ",
-            req.q.addr, req.q.data, req.q.strb);
+            req.addr, req.data, req.strb);
         for (int i = 0; i < DataWidth/8; i++) begin
-          if (req.q.strb[i])
-            memory[req.q.addr >> WordAddrBits][i*8 +: 8] = req.q.data[i*8 +: 8];
+          if (req.strb[i])
+            memory[req.addr >> WordAddrBits][i*8 +: 8] = req.data[i*8 +: 8];
         end
       // Process Read
       end else begin
-        rsp.p.data = memory[req.q.addr >> WordAddrBits];
-        if (TcdmLog) $write("Read from 0x%x: data 0x%x ... ", req.q.addr, rsp.p.data);
-        tcdm_drv.send_rsp(rsp.p);
+        rsp = new;
+        rsp.data = memory[req.addr >> WordAddrBits];
+        if (TcdmLog) $write("Read from 0x%x: data 0x%x ... ", req.addr, rsp.data);
+        tcdm_drv.send_rsp(rsp);
         if (TcdmLog) $display("OK");
       end
     end
