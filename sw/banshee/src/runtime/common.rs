@@ -55,11 +55,13 @@ pub struct SsrState {
     bound: [u32; 4],
     stride: [u32; 4],
     ptr: u32,
+    ptr_next: u32,
     repeat_count: u16,
     repeat_bound: u16,
     write: bool,
     dims: u8,
     done: bool,
+    accessed: bool,
 }
 
 /// A representation of a DMA backend's state.

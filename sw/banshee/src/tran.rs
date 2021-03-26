@@ -23,6 +23,7 @@ static NONAME: &'static i8 = unsafe { std::mem::transmute("\0".as_ptr()) };
 
 /// Base address of the stream semantic regsiters
 static SSR_BASE: u64 = 0x204800;
+static SSR_N_STREAMERS: u32 = 2;
 
 /// Number of arguments the trace maximally shows per instruction.
 const TRACE_BUFFER_LEN: u32 = 8;
@@ -948,6 +949,11 @@ impl<'a> InstructionTranslator<'a> {
             NONAME,
         );
         LLVMBuildStore(self.builder, instret, self.instret_ptr());
+
+        // reset ssr streamer flags to serve new values for SSR registers
+        for i in 0..SSR_N_STREAMERS {
+            self.section.emit_call("banshee_ssr_eoi", [self.ssr_ptr(i)]);
+        }
 
         // Emit the code for the instruction itself.
         match self.inst {
@@ -2744,7 +2750,11 @@ impl<'a> InstructionTranslator<'a> {
         addr: LLVMValueRef,
     ) -> (LLVMValueRef, LLVMValueRef, LLVMValueRef) {
         let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
-        let ssr_end = LLVMConstInt(LLVMInt32Type(), SSR_BASE + 32 * 8 * 2, 0);
+        let ssr_end = LLVMConstInt(
+            LLVMInt32Type(),
+            SSR_BASE + 32 * 8 * SSR_N_STREAMERS as u64,
+            0,
+        );
         let ssr_size = LLVMConstInt(LLVMInt32Type(), 32 * 8, 0);
         let in_range = LLVMBuildAnd(
             self.builder,
@@ -3029,7 +3039,7 @@ impl<'a> InstructionTranslator<'a> {
     }
 
     unsafe fn ssr_ptr(&self, ssr: u32) -> LLVMValueRef {
-        assert!(ssr < 2);
+        assert!(ssr < SSR_N_STREAMERS);
         self.ssr_dyn_ptr(LLVMConstInt(LLVMInt32Type(), ssr as u64, 0))
     }
 

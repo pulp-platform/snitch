@@ -30,6 +30,7 @@ declare i32 @banshee_wfi(%Cpu* %cpu)
 declare void @banshee_ssr_write_cfg(%SsrState* writeonly %ssr, i32 %addr, i32 %value, i32 %mask)
 declare i32 @banshee_ssr_read_cfg(%SsrState* readonly %ssr, i32 %addr)
 declare i32 @banshee_ssr_next(%SsrState* %ssr)
+declare void @banshee_ssr_eoi(%SsrState* %ssr)
 
 declare void @banshee_dma_src(%DmaState* writeonly %dma, i32 %lo, i32 %hi)
 declare void @banshee_dma_dst(%DmaState* writeonly %dma, i32 %lo, i32 %hi)

@@ -25,6 +25,7 @@ all: bin/wfi
 all: bin/fmv
 all: bin/ssr_inst_check
 all: bin/fcvt
+all: bin/ssr_multi_use
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump
