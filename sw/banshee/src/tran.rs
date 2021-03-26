@@ -2750,7 +2750,7 @@ impl<'a> InstructionTranslator<'a> {
         addr: LLVMValueRef,
     ) -> (LLVMValueRef, LLVMValueRef, LLVMValueRef) {
         let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
-        let ssr_end = LLVMConstInt(LLVMInt32Type(), SSR_BASE + 32 * 8 * 2, 0);
+        let ssr_end = LLVMConstInt(LLVMInt32Type(), SSR_BASE + 32 * 8 * SSR_N_STREAMERS as u64, 0);
         let ssr_size = LLVMConstInt(LLVMInt32Type(), 32 * 8, 0);
         let in_range = LLVMBuildAnd(
             self.builder,
