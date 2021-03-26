@@ -60,11 +60,22 @@ module snitch_ssr import snitch_pkg::*; #(
 
   logic mem_req_qvalid;
 
+  // TODO: indirection integration
+
   snitch_ssr_addr_gen #(
-    .AddrWidth (AddrWidth)
+    .Indirection      ( 0           ),
+    .IndirOutSpill    ( 0           ),
+    .AddrWidth        ( AddrWidth   ),
+    .DataWidth        ( DataWidth   ),
+    .NumIndexCredits  ( 4           ),
+    .tcdm_req_t       ( tcdm_req_t  ),
+    .tcdm_rsp_t       ( tcdm_rsp_t  ),
+    .tcdm_user_t      ( logic       )
   ) i_addr_gen (
     .clk_i,
     .rst_ni,
+    .idx_req_o      (  ),
+    .idx_rsp_i      ( '0 ),
     .cfg_word_i,
     .cfg_rdata_o,
     .cfg_wdata_i,

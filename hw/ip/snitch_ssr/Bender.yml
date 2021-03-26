@@ -18,12 +18,13 @@ dependencies:
   snitch_vm: {path: ../../ip/snitch_vm}
 
 sources:
-# Level 0:
+- src/snitch_ssr_indirector.sv
+# Level 1:
 - src/snitch_ssr_addr_gen.sv
 - src/snitch_ssr_switch.sv
-# Level 1:
-- src/snitch_ssr.sv
 # Level 2:
+- src/snitch_ssr.sv
+# Level 3:
 - src/snitch_ssr_streamer.sv
 - target: test
   files:

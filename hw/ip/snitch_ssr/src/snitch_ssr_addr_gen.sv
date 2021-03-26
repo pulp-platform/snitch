@@ -3,14 +3,27 @@
 // SPDX-License-Identifier: SHL-0.51
 
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
 module snitch_ssr_addr_gen import snitch_pkg::*; #(
+  parameter bit Indirection = 0,
+  parameter bit IndirOutSpill = 0,
   parameter int unsigned AddrWidth = 0,
-  /// Derived parameter *Do not override*
-  parameter type addr_t = logic [AddrWidth-1:0]
+  parameter int unsigned DataWidth = 0,
+  parameter int unsigned NumIndexCredits = 0,
+  parameter type tcdm_req_t   = logic,
+  parameter type tcdm_rsp_t   = logic,
+  parameter type tcdm_user_t  = logic,
+  /// Derived parameters *Do not override*
+  parameter type addr_t = logic [AddrWidth-1:0],
+  parameter type data_t = logic [DataWidth-1:0]
 ) (
   input  logic        clk_i,
   input  logic        rst_ni,
+
+  // Index fetch ports
+  output tcdm_req_t   idx_req_o,
+  input  tcdm_rsp_t   idx_rsp_i,
 
   input  logic [4:0]  cfg_word_i,
   output logic [31:0] cfg_rdata_o,
@@ -43,6 +56,9 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   logic enable, done;
 
   typedef struct packed {
+    logic idx_shift;
+    logic idx_base;
+    logic idx_size;
     logic [NL-1:0] stride;
     logic [NL-1:0] bound;
     logic rep;
@@ -56,22 +72,187 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     logic done;
     logic write;
     logic [DW-1:0] dims;
+    logic indir;
   } config_t;
   config_t config_q, config_sd, config_sq;
 
   typedef struct packed {
+    logic no_indir;       // Inverted as aliases aligned at upper address edge
     logic write;
     logic [DW-1:0] dims;
   } alias_fields_t;
 
   alias_fields_t alias_fields;
 
-  // Enable the overall count operation if we're not done and the memory
-  // interface can make progress.
-  assign enable = ~config_q.done & mem_valid_o & mem_ready_i;
-  assign mem_valid_o = ~config_q.done;
+  // Read map for added indirection registers
+  typedef struct packed {
+    logic [31:0]  idx_shift;
+    logic [31:0]  idx_base;
+    logic [31:0]  idx_size;
+  } indir_read_map_t;
+
+  // Signals interfacing with indirection datapath
+  indir_read_map_t indir_read_map;
+  pointer_t mem_pointer;
+  logic mem_last;
+
+  if (Indirection) begin : gen_indirection
+
+    // TODO: expose at top
+    localparam int unsigned IndexWidth    = IW;
+    localparam int unsigned PointerWidth  = AW;
+    localparam int unsigned ShiftWidth    = 12;
+    localparam int unsigned IndexCredits  = 2;
+    localparam type         size_t        = logic [1:0];
+
+    // Type for output spill register
+    typedef struct packed {
+      pointer_t pointer;
+      logic     last;
+    } out_spill_t;
+
+    // Interface between Natural iterator 0 and indirector
+    logic natit_enable;
+    logic [DataWidth/8-1:0] natit_boundoffs;
+    logic natit_extraword;
+    logic natit_done;
+
+    // Address generation output of indirector
+    logic indir_valid;
+    pointer_t indir_pointer;
+    logic indir_last;
+
+    // Indirector configuration registers
+    logic [ShiftWidth-1:0]    idx_shift_q, idx_shift_sd, idx_shift_sq;
+    logic [PointerWidth-1:0]  idx_base_q, idx_base_sd, idx_base_sq;
+    size_t                    idx_size_q, idx_size_sd, idx_size_sq;
+
+    // Output spill register, if it exists
+    out_spill_t spill_in_data;
+    logic spill_in_valid, spill_in_ready;
+
+    // Register write
+    always_comb begin
+      idx_shift_sd  = idx_shift_sq;
+      idx_base_sd   = idx_base_sq;
+      idx_size_sd   = idx_size_sq;
+      if (write_strobe.idx_shift) idx_shift_sd = cfg_wdata_i;
+      // TODO: the masking here (and elsewhere) is an artifact of prior fixed 64-bit data_t
+      if (write_strobe.idx_base)  idx_base_sd  = cfg_wdata_i & ~32'h3;
+      if (write_strobe.idx_size)  idx_size_sd  = cfg_wdata_i;
+    end
+
+    // Register read
+    assign indir_read_map.idx_shift = idx_shift_q;
+    assign indir_read_map.idx_base  = idx_base_q;
+    assign indir_read_map.idx_size  = idx_size_q;
+
+    // Register process
+    always_ff @(posedge clk_i, negedge rst_ni) begin
+      if (~rst_ni) begin
+        idx_shift_q   <= '0;
+        idx_base_q    <= '0;
+        idx_size_q    <= '0;
+        idx_shift_sq  <= '0;
+        idx_base_sq   <= '0;
+        idx_size_sq   <= '0;
+      end else begin
+        idx_shift_sq  <= idx_shift_sd;
+        idx_base_sq   <= idx_base_sd;
+        idx_size_sq   <= idx_size_sd;
+        if (config_q.done) begin
+          idx_shift_q <= idx_shift_sd;
+          idx_base_q  <= idx_base_sd;
+          idx_size_q  <= idx_size_sd;
+        end
+      end
+    end
+
+    // Encapsulated indirection datapath
+    snitch_ssr_indirector #(
+      .AddrWidth    ( AddrWidth     ),
+      .DataWidth    ( DataWidth     ),
+      .IndexWidth   ( IndexWidth    ),
+      .PointerWidth ( PointerWidth  ),
+      .ShiftWidth   ( ShiftWidth    ),
+      .IndexCredits ( IndexCredits  ),
+      .tcdm_req_t   ( tcdm_req_t    ),
+      .tcdm_rsp_t   ( tcdm_rsp_t    ),
+      .tcdm_user_t  ( tcdm_user_t   ),
+      .size_t       ( size_t        )
+    ) i_snitch_ssr_indirector (
+      .clk_i,
+      .rst_ni,
+      .idx_req_o,
+      .idx_rsp_i,
+      .cfg_size_i          ( idx_size_q       ),
+      .cfg_base_i          ( idx_base_q       ),
+      .cfg_shift_i         ( idx_shift_q      ),
+      .cfg_done_i          ( config_q.done    ),
+      .natit_pointer_i     ( pointer_q        ),
+      .natit_last_i        ( done             ),
+      .natit_enable_o      ( natit_enable     ),
+      .natit_done_o        ( natit_done       ),
+      .natit_boundoffs_i   ( natit_boundoffs  ),  // TODO: use in natural it. iff config_q.indir
+      .natit_extraword_o   ( natit_extraword  ),  // TODO: use in natural it. iff config_q.indir
+      .mem_pointer_o       ( indir_pointer    ),
+      .mem_last_o          ( indir_last       ),
+      .mem_valid_o         ( indir_valid      ),
+      .mem_ready_i         ( spill_in_ready   ),
+      .tcdm_start_address_i
+    );
+
+    // Multiplex natural and indirection datapaths into spill register (if
+    // generated) or directly to address output port.
+    always_comb begin
+      if (config_q.indir) begin
+        enable          = natit_enable;
+        spill_in_data   = {indir_pointer, indir_last};
+        spill_in_valid  = indir_valid;
+      end else begin
+        enable          = natit_done & spill_in_valid & spill_in_ready;
+        spill_in_data   = {pointer_q, done};
+        spill_in_valid  = ~natit_done;
+      end
+    end
+
+    // Generate spill register at output to cut timing paths if desired.
+    if (IndirOutSpill) begin : gen_indir_out_spill
+      spill_register #(
+        .T      ( out_spill_t ),
+        .Bypass ( 1'b0        )
+      ) i_out_spill (
+        .clk_i,
+        .rst_ni,
+        .valid_i ( spill_in_valid ),
+        .ready_o ( spill_in_ready ),
+        .data_i  ( spill_in_data  ),
+        .valid_o ( mem_valid_o    ),
+        .ready_i ( mem_ready_i    ),
+        .data_o  ( {mem_pointer, mem_last} )
+      );
+    end else begin : gen_no_indir_out_spill
+      assign {mem_pointer, mem_last} = spill_in_data;
+      assign mem_valid_o    = spill_in_valid;
+      assign spill_in_ready = mem_ready_i;
+    end
+
+  end else begin : gen_no_indirection
+
+    // Enable the overall count operation if we're not done and the memory
+    // interface can make progress.
+    assign enable = ~config_q.done & mem_valid_o & mem_ready_i;
+    assign mem_valid_o = ~config_q.done;
+    assign mem_pointer = pointer_q;
+    assign mem_last    = done;
+
+    // Tie off the index request port as no indirection
+    assign idx_req_o = '0;
+
+  end
+
   assign mem_write_o = config_q.write;
-  assign mem_addr_o = {tcdm_start_address_i[AddrWidth-1:AW], pointer_q};
+  assign mem_addr_o = {tcdm_start_address_i[AddrWidth-1:AW], mem_pointer};
 
   // Unpack the configuration address and write signal into a write strobe for
   // the individual registers. Also assign the alias strobe if the address is
@@ -165,6 +346,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       config_sd.done = 0;
       config_sd.write = alias_fields.write;
       config_sd.dims = alias_fields.dims;
+      config_sd.indir = ~alias_fields.no_indir;
     end
   end
 
@@ -185,12 +367,13 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
         config_sq.done <= 1;
       end else if (enable) begin
         pointer_q <= pointer_q + selected_stride;
-        config_q.done <= done;
+        config_q.done <= mem_last;
       end
     end
   end
 
   typedef struct packed {
+    indir_read_map_t indir_read_map;
     logic [NL-1:0][31:0] stride;
     logic [NL-1:0][31:0] bound;
     logic [31:0] rep;
@@ -201,6 +384,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   always_comb begin
     read_map_t read_map;
 
+    read_map.indir_read_map = Indirection ? indir_read_map : '0;
     read_map.status = pointer_q;
     read_map.status[31-:$bits(config_q)] = config_q;
     read_map.rep = rep_q;
