@@ -30,19 +30,23 @@ impl Default for Configuration {
 
 impl std::fmt::Display for Configuration {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", serde_json::to_string_pretty(self).unwrap())
+        write!(f, "{}", serde_yaml::to_string(self).unwrap())
     }
 }
 
 impl Configuration {
-    /// Parse a json file into a `Configuration` struct
+    /// Parse a json/yaml file into a `Configuration` struct
     pub fn parse(name: &str) -> Configuration {
         let config: String = std::fs::read_to_string(name)
             .unwrap_or_else(|_| panic!("Could not open file {}", name))
             .parse()
             .unwrap_or_else(|_| panic!("Could not parse file {}", name));
         // Parse the configuration file based on it's name
-        serde_json::from_str(&config).expect("Error while reading json")
+        if name.to_lowercase().contains("json") {
+            serde_json::from_str(&config).expect("Error while reading json")
+        } else {
+            serde_yaml::from_str(&config).expect("Error while reading yaml")
+        }
     }
 }
 
