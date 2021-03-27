@@ -145,8 +145,8 @@ pub unsafe fn banshee_ssr_read_cfg(ssr: &mut SsrState, addr: u32) -> u32 {
 pub unsafe fn banshee_ssr_next(ssr: &mut SsrState) -> u32 {
     // TODO: Assert that the SSR is not done.
     let ptr = ssr.ptr;
-    // execute increment only, if SSR register has not been previously 
-    // accessed. The ssr.accessed flag is cleared after an instruction 
+    // execute increment only, if SSR register has not been previously
+    // accessed. The ssr.accessed flag is cleared after an instruction
     // is retired. This prohibits that an instruction using ftX multiple
     // times (e.g. fmul.d ft3, ft0, ft0) from being served different values
     if !ssr.accessed {
