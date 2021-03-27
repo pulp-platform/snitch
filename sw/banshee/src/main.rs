@@ -102,6 +102,12 @@ fn main() -> Result<()> {
                 .help("A configuration file describing the architecture"),
         )
         .arg(
+            Arg::with_name("create-configuration")
+                .long("create-configuration")
+                .takes_value(true)
+                .help("Write the default configuration to this file"),
+        )
+        .arg(
             Arg::with_name("base-hartid")
                 .long("base-hartid")
                 .takes_value(true)
@@ -177,6 +183,10 @@ fn main() -> Result<()> {
     matches
         .value_of("base-hartid")
         .map(|x| engine.base_hartid = x.parse().unwrap());
+
+    if let Some(file) = matches.value_of("create-configuration") {
+        Configuration::print_default(file)?;
+    }
 
     engine.config = if let Some(config_file) = matches.value_of("configuration") {
         Configuration::parse(config_file)

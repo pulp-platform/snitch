@@ -7,6 +7,8 @@
 //! Some care is required when changing this structure, as it requires the
 //! `engine.rs` and the `tran.rs` to be adapted accordingly.
 
+use std::io::prelude::*;
+
 /// A struct to store the whole system configuration
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Configuration {
@@ -47,6 +49,23 @@ impl Configuration {
         } else {
             serde_yaml::from_str(&config).expect("Error while reading yaml")
         }
+    }
+
+    /// Write the default `Configuration` struct into a json/yaml file
+    pub fn print_default(name: &str) -> std::io::Result<()> {
+        let mut f = std::fs::File::create(name)?;
+        let mut c = serde_json::to_value(Configuration::default()).unwrap();
+        let i = c.get_mut("inst_latency").unwrap();
+        let l = crate::riscv::Latency::default();
+        *i = serde_json::to_value(l).unwrap();
+        warn!("{:?}", c);
+
+        if name.to_lowercase().contains("json") {
+            f.write_all(serde_json::to_string_pretty(&c).unwrap().as_bytes())?;
+        } else {
+            f.write_all(serde_yaml::to_string(&c).unwrap().as_bytes())?;
+        }
+        Ok(())
     }
 }
 
