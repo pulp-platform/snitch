@@ -16,6 +16,7 @@ use llvm_sys::{
 };
 use std::{ffi::CString, os::raw::c_int, path::Path, ptr::null_mut};
 
+pub mod configuration;
 pub mod engine;
 pub mod riscv;
 mod runtime;
@@ -23,6 +24,7 @@ mod softfloat;
 pub mod tran;
 pub mod util;
 
+use crate::configuration::*;
 use crate::engine::*;
 
 fn main() -> Result<()> {
@@ -92,6 +94,12 @@ fn main() -> Result<()> {
                 .long("num-clusters")
                 .takes_value(true)
                 .help("Number of clusters to simulate"),
+        )
+        .arg(
+            Arg::with_name("configuration")
+                .long("configuration")
+                .takes_value(true)
+                .help("A configuration file describing the architecture"),
         )
         .arg(
             Arg::with_name("base-hartid")
@@ -169,6 +177,13 @@ fn main() -> Result<()> {
     matches
         .value_of("base-hartid")
         .map(|x| engine.base_hartid = x.parse().unwrap());
+
+    engine.config = if let Some(config_file) = matches.value_of("configuration") {
+        Configuration::parse(config_file)
+    } else {
+        Configuration::default()
+    };
+    debug!("Configuration used:\n{}", engine.config);
 
     // Read the binary.
     let path = Path::new(matches.value_of("binary").unwrap());

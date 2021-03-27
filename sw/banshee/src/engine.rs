@@ -4,7 +4,7 @@
 
 //! Engine for dynamic binary translation and execution
 
-use crate::{riscv, tran::ElfTranslator, util::SiUnit};
+use crate::{riscv, tran::ElfTranslator, util::SiUnit, Configuration};
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
@@ -45,6 +45,9 @@ pub struct Engine {
     pub num_cores: usize,
     /// The number of clusters.
     pub num_clusters: usize,
+    /// The system configuration.
+    pub config: Configuration,
+    // pub config: Configuration,
     /// The global memory.
     pub memory: Mutex<HashMap<u64, u32>>,
     /// The per-core putchar buffers (per hartid).
@@ -101,6 +104,7 @@ impl Engine {
             base_hartid: 0,
             num_cores: 1,
             num_clusters: 1,
+            config: Default::default(),
             memory: Default::default(),
             putchar_buffer: Default::default(),
         }
@@ -305,9 +309,15 @@ impl Engine {
 
         // Allocate some TCDM memories.
         let tcdms: Vec<_> = {
-            let mut tcdm = vec![0u32; 128 * 1024 / 4];
+            let mut tcdm = vec![
+                0u32;
+                ((self.config.memory.tcdm.end - self.config.memory.tcdm.start) / 4)
+                    as usize
+            ];
             for (&addr, &value) in self.memory.lock().unwrap().iter() {
-                if addr < 0x020000 {
+                if (addr as u32) >= self.config.memory.tcdm.start
+                    && (addr as u32) < self.config.memory.tcdm.end
+                {
                     tcdm[(addr / 4) as usize] = value;
                 }
             }
@@ -471,17 +481,21 @@ impl<'a, 'b> Cpu<'a, 'b> {
 
     fn binary_load(&self, addr: u32, size: u8) -> u32 {
         match addr {
-            0x40000000 => 0x000000,                                     // tcdm_start
-            0x40000008 => 0x020000,                                     // tcdm_end
-            0x40000010 => self.num_cores as u32,                        // nr_cores
-            0x40000020 => self.engine.exit_code.load(Ordering::SeqCst), // scratch_reg
-            0x40000038 => {
+            x if x == self.engine.config.address.tcdm_start => self.engine.config.memory.tcdm.start, // tcdm_start
+            x if x == self.engine.config.address.tcdm_end => self.engine.config.memory.tcdm.end, // tcdm_end
+            x if x == self.engine.config.address.nr_cores => self.num_cores as u32, // nr_cores
+            x if x == self.engine.config.address.scratch_reg => {
+                self.engine.exit_code.load(Ordering::SeqCst)
+            } // scratch_reg
+            x if x == self.engine.config.address.barrier_reg => {
                 self.cluster_barrier();
                 0
             } // barrier_reg
-            0x40000040 => self.cluster_base_hartid as u32,              // cluster_base_hartid
-            0x40000048 => self.engine.num_clusters as u32,              // cluster_num
-            0x40000050 => self.cluster_id as u32,                       // cluster_id
+            x if x == self.engine.config.address.cluster_base_hartid => {
+                self.cluster_base_hartid as u32
+            } // cluster_base_hartid
+            x if x == self.engine.config.address.cluster_num => self.engine.num_clusters as u32, // cluster_num
+            x if x == self.engine.config.address.cluster_id => self.cluster_id as u32, // cluster_id
             _ => {
                 trace!("Load 0x{:x} ({}B)", addr, 8 << size);
                 self.engine
@@ -497,11 +511,13 @@ impl<'a, 'b> Cpu<'a, 'b> {
 
     fn binary_store(&self, addr: u32, value: u32, mask: u32, size: u8) {
         match addr {
-            0x40000000 => (),                                                   // tcdm_start
-            0x40000008 => (),                                                   // tcdm_end
-            0x40000010 => (),                                                   // nr_cores
-            0x40000020 => self.engine.exit_code.store(value, Ordering::SeqCst), // scratch_reg
-            0x40000028 => {
+            x if x == self.engine.config.address.tcdm_start => (), // tcdm_start
+            x if x == self.engine.config.address.tcdm_end => (),   // tcdm_end
+            x if x == self.engine.config.address.nr_cores => (),   // nr_cores
+            x if x == self.engine.config.address.scratch_reg => {
+                self.engine.exit_code.store(value, Ordering::SeqCst)
+            } // scratch_reg
+            x if x == self.engine.config.address.wakeup_reg => {
                 // wake_up
                 if value as i32 == -1 {
                     self.num_sleep
@@ -514,12 +530,12 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     self.wake_up[value as usize - self.engine.base_hartid]
                         .fetch_max(self.state.cycle + 1, Ordering::Release);
                 }
-            }
-            0x40000038 => (), // barrier_reg
-            0x40000040 => (), // cluster_base_hartid
-            0x40000048 => (), // cluster_num
-            0x40000050 => (), // cluster_id
-            0xF00B8000 => {
+            } // wakeup_reg
+            x if x == self.engine.config.address.barrier_reg => (), // barrier_reg
+            x if x == self.engine.config.address.cluster_base_hartid => (), // cluster_base_hartid
+            x if x == self.engine.config.address.cluster_num => (), // cluster_num
+            x if x == self.engine.config.address.cluster_id => (), // cluster_id
+            x if x == self.engine.config.address.uart => {
                 let mut buffer = self.engine.putchar_buffer.lock().unwrap();
                 let buffer = buffer.entry(self.hartid).or_default();
                 if value == '\n' as u32 {

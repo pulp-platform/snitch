@@ -200,8 +200,8 @@ impl<'a> ElfTranslator<'a> {
             inst_bbs: Default::default(),
             trace: engine.trace,
             latency: engine.latency,
-            tcdm_start: 0x000000,
-            tcdm_end: 0x020000,
+            tcdm_start: engine.config.memory.tcdm.start,
+            tcdm_end: engine.config.memory.tcdm.end,
         }
     }
 
@@ -2370,12 +2370,21 @@ impl<'a> InstructionTranslator<'a> {
             });
 
             let latency = if let Some(access) = mem_access {
+                // Check config
                 let (is_tcdm, _tcdm_ptr) = self.emit_tcdm_check(access.1);
                 LLVMBuildSelect(
                     self.builder,
                     is_tcdm,
-                    LLVMConstInt(LLVMTypeOf(max_cycle), 3, 0),
-                    LLVMConstInt(LLVMTypeOf(max_cycle), 10, 0),
+                    LLVMConstInt(
+                        LLVMTypeOf(max_cycle),
+                        self.section.engine.config.memory.tcdm.latency,
+                        0,
+                    ),
+                    LLVMConstInt(
+                        LLVMTypeOf(max_cycle),
+                        self.section.engine.config.memory.dram.latency,
+                        0,
+                    ),
                     NONAME,
                 )
             } else {

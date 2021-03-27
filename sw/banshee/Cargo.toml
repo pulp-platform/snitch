@@ -20,6 +20,8 @@ itertools = "0.9"
 llvm-sys = "100"
 log = { version = "0.4", features = ["release_max_level_info"] }
 pretty_env_logger = "0.4"
+serde = { version = "1.0.123", features = ["derive"] }
+serde_json = "1.0.63"
 
 [build-dependencies]
 cc = "1.0"
