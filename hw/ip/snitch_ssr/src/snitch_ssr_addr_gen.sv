@@ -114,13 +114,16 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     // Interface between Natural iterator 0 and indirector
     logic natit_enable;
     logic [DataWidth/8-1:0] natit_boundoffs;
+    logic natit_ready;
     logic natit_extraword;
+    logic natit_last_word_inflight_q;
     logic natit_done;
 
     // Address generation output of indirector
     logic indir_valid;
     pointer_t indir_pointer;
     logic indir_last;
+
 
     // Indirector configuration registers
     logic [ShiftWidth-1:0]    idx_shift_q, idx_shift_sd, idx_shift_sq;
@@ -168,6 +171,18 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       end
     end
 
+    // TODO
+    assign natit_boundoffs = '0;
+
+    // Track last index word to set downstream last signal and handle word misalignment at end.
+    always_ff @(posedge clk_i, negedge rst_ni) begin
+      if (~rst_ni)            natit_last_word_inflight_q <= 1'b0;
+      else if (config_q.done) natit_last_word_inflight_q <= 1'b0;
+      else if (enable & done) natit_last_word_inflight_q <= 1'b1;
+    end
+
+    assign natit_done = natit_last_word_inflight_q | config_q.done;
+
     // Encapsulated indirection datapath
     snitch_ssr_indirector #(
       .AddrWidth    ( AddrWidth     ),
@@ -185,20 +200,23 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       .rst_ni,
       .idx_req_o,
       .idx_rsp_i,
+
       .cfg_size_i          ( idx_size_q       ),
       .cfg_base_i          ( idx_base_q       ),
       .cfg_shift_i         ( idx_shift_q      ),
       .cfg_done_i          ( config_q.done    ),
+
       .natit_pointer_i     ( pointer_q        ),
-      .natit_last_i        ( done             ),
-      .natit_enable_o      ( natit_enable     ),
-      .natit_done_o        ( natit_done       ),
+      .natit_ready_o       ( natit_ready      ),
+      .natit_done_i        ( natit_done       ),
       .natit_boundoffs_i   ( natit_boundoffs  ),  // TODO: use in natural it. iff config_q.indir
       .natit_extraword_o   ( natit_extraword  ),  // TODO: use in natural it. iff config_q.indir
+
       .mem_pointer_o       ( indir_pointer    ),
       .mem_last_o          ( indir_last       ),
       .mem_valid_o         ( indir_valid      ),
       .mem_ready_i         ( spill_in_ready   ),
+
       .tcdm_start_address_i
     );
 
@@ -206,13 +224,13 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     // generated) or directly to address output port.
     always_comb begin
       if (config_q.indir) begin
-        enable          = natit_enable;
-        spill_in_data   = {indir_pointer, indir_last};
         spill_in_valid  = indir_valid;
+        spill_in_data   = {indir_pointer, indir_last};
+        enable          = ~natit_done & natit_ready;
       end else begin
-        enable          = natit_done & spill_in_valid & spill_in_ready;
-        spill_in_data   = {pointer_q, done};
         spill_in_valid  = ~natit_done;
+        spill_in_data   = {pointer_q, done};
+        enable          = ~natit_done & spill_in_ready;
       end
     end
 
@@ -251,8 +269,8 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
 
   end
 
-  assign mem_write_o = config_q.write;
-  assign mem_addr_o = {tcdm_start_address_i[AddrWidth-1:AW], mem_pointer};
+  assign mem_write_o  = config_q.write;
+  assign mem_addr_o   = {tcdm_start_address_i[AddrWidth-1:AW], mem_pointer};
 
   // Unpack the configuration address and write signal into a write strobe for
   // the individual registers. Also assign the alias strobe if the address is
@@ -365,9 +383,12 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
         pointer_q <= pointer_sd;
         config_q <= config_sd;
         config_sq.done <= 1;
-      end else if (enable) begin
-        pointer_q <= pointer_q + selected_stride;
-        config_q.done <= mem_last;
+      end else begin
+        if (enable) begin
+          pointer_q <= pointer_q + selected_stride;
+        end if (mem_ready_i & mem_valid_o) begin
+          config_q.done <= mem_last;
+        end
       end
     end
   end

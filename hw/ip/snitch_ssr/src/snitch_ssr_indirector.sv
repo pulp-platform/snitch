@@ -37,9 +37,8 @@ module snitch_ssr_indirector #(
   input  logic      cfg_done_i,         // Set only once last address *emitted* from generator
   // With natural iterator level 0 (upstream)
   input  pointer_t  natit_pointer_i,
-  input  logic      natit_last_i,
-  output logic      natit_enable_o,
-  output logic      natit_done_o,
+  output logic      natit_ready_o,
+  input  logic      natit_done_i,       // Keep high, deassert with cfg_done_i (TODO: assert)
   input  bytecnt_t  natit_boundoffs_i,  // Additional byte offset incurred by subword bound
   output logic      natit_extraword_o,  // Emit additional index word address if bounds require it
   // To address generator output (downstream)
@@ -66,7 +65,6 @@ module snitch_ssr_indirector #(
   logic idx_cred_left;
 
   // Last word & index tracking
-  logic last_word_inflight_q;
   logic last_word;
   bytecnt_t first_idx_byteoffs;
   bytecnt_t last_idx_byteoffs;
@@ -80,14 +78,16 @@ module snitch_ssr_indirector #(
   bytecnt_t idx_bytecnt_d, idx_bytecnt_q;
 
   // Index TCDM request (read-only)
-  assign idx_req_o.q.addr = {tcdm_start_address_i[AddrWidth-1:PointerWidth], natit_pointer_i};
-  assign idx_req_o.q.data = '0;
-  assign idx_req_o.q.strb = '0;
+  assign idx_req_o.q.addr   = {tcdm_start_address_i[AddrWidth-1:PointerWidth], natit_pointer_i};
+  assign idx_req_o.q.write  = '0;
+  assign idx_req_o.q.data   = '0;
+  assign idx_req_o.q.strb   = '0;
+  assign idx_req_o.q.user   = '0;
+  assign idx_req_o.q.amo    = '0;
 
   // Index handshaking
-  assign natit_done_o       = cfg_done_i | last_word_inflight_q;
-  assign idx_req_o.q_valid  = idx_cred_left & ~natit_done_o;
-  assign natit_enable_o     = ~natit_done_o & idx_cred_left & idx_rsp_i.q_ready;
+  assign idx_req_o.q_valid  = idx_cred_left & ~natit_done_i;
+  assign natit_ready_o      = idx_cred_left & idx_rsp_i.q_ready;
 
   // Index FIFO: stores full unserialized words.
   fifo_v3 #(
@@ -120,16 +120,9 @@ module snitch_ssr_indirector #(
   assign idx_cred_take = idx_req_o.q_valid & idx_rsp_i.q_ready;
   assign idx_cred_give = idx_fifo_pop;
 
-  // Track last index word to set downstream last signal and handle word misalignment at end.
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (~rst_ni)                            last_word_inflight_q <= 1'b0;
-    else if (cfg_done_i)                    last_word_inflight_q <= 1'b0;
-    else if (idx_cred_take & natit_last_i)  last_word_inflight_q <= 1'b1;
-  end
-
   // The initial byte offset and byte offset of the index array bound determine
   // the final index offset and whether an additional index word is needed.
-  assign last_word          = (idx_cred_q == 1) & last_word_inflight_q;
+  assign last_word          = (idx_cred_q == 1) & natit_done_i;
   assign first_idx_byteoffs = cfg_base_i[DataWidth/8-1:0];
   assign {natit_extraword_o, last_idx_byteoffs} = first_idx_byteoffs + natit_boundoffs_i;
 
@@ -138,7 +131,7 @@ module snitch_ssr_indirector #(
   assign idx_ser_out  = (idx_fifo_out >> (idx_bytecnt_q << 3)) & idx_ser_mask;
 
   // Shift and emit indices
-  assign mem_pointer_o = pointer_t'(idx_ser_out) << cfg_shift_i;
+  assign mem_pointer_o = cfg_base_i + (pointer_t'(idx_ser_out) << cfg_shift_i);
   assign mem_last_o    = last_word & idx_fifo_pop;
   assign mem_valid_o   = ~idx_fifo_empty;
 
