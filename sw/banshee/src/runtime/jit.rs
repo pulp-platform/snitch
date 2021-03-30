@@ -215,6 +215,7 @@ pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: &mut Cpu, size: u32, fla
 
     let id = dma.done_id;
     dma.done_id += 1;
+    dma.size = size;
 
     // assert_eq!(
     //     size % 4,
