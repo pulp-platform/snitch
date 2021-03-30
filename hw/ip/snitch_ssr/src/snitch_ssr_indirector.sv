@@ -20,7 +20,7 @@ module snitch_ssr_indirector #(
   /// Derived parameters *Do not override*
   parameter type addr_t     = logic [AddrWidth-1:0],
   parameter type data_t     = logic [DataWidth-1:0],
-  parameter type bytecnt_t  = logic [DataWidth/8-1:0],
+  parameter type bytecnt_t  = logic [$clog2(DataWidth/8)-1:0],
   parameter type index_t    = logic [IndexWidth-1:0],
   parameter type pointer_t  = logic [PointerWidth-1:0],
   parameter type shift_t    = logic [ShiftWidth-1:0]
@@ -31,6 +31,7 @@ module snitch_ssr_indirector #(
   output tcdm_req_t idx_req_o,
   input  tcdm_rsp_t idx_rsp_i,
   // From config registers
+  input  logic      cfg_indir_i,
   input  size_t     cfg_size_i,
   input  pointer_t  cfg_base_i,
   input  shift_t    cfg_shift_i,
@@ -78,16 +79,16 @@ module snitch_ssr_indirector #(
   bytecnt_t idx_bytecnt_d, idx_bytecnt_q;
 
   // Index TCDM request (read-only)
-  assign idx_req_o.q.addr   = {tcdm_start_address_i[AddrWidth-1:PointerWidth], natit_pointer_i};
-  assign idx_req_o.q.write  = '0;
-  assign idx_req_o.q.data   = '0;
-  assign idx_req_o.q.strb   = '0;
-  assign idx_req_o.q.user   = '0;
-  assign idx_req_o.q.amo    = '0;
+  assign idx_req_o.q = '{
+      // Mask lower bits to fetch only entire, aligned words
+      addr: {tcdm_start_address_i[AddrWidth-1:PointerWidth],
+          natit_pointer_i[PointerWidth-1:DataWidth/8], {(DataWidth/8){1'b0}}},
+      default: '0
+    };
 
   // Index handshaking
-  assign idx_req_o.q_valid  = idx_cred_left & ~natit_done_i;
-  assign natit_ready_o      = idx_cred_left & idx_rsp_i.q_ready;
+  assign idx_req_o.q_valid  = cfg_indir_i & idx_cred_left & ~natit_done_i;
+  assign natit_ready_o      = cfg_indir_i & idx_cred_left & idx_rsp_i.q_ready;
 
   // Index FIFO: stores full unserialized words.
   fifo_v3 #(
@@ -123,7 +124,7 @@ module snitch_ssr_indirector #(
   // The initial byte offset and byte offset of the index array bound determine
   // the final index offset and whether an additional index word is needed.
   assign last_word          = (idx_cred_q == 1) & natit_done_i;
-  assign first_idx_byteoffs = cfg_base_i[DataWidth/8-1:0];
+  assign first_idx_byteoffs = bytecnt_t'(natit_pointer_i);
   assign {natit_extraword_o, last_idx_byteoffs} = first_idx_byteoffs + natit_boundoffs_i;
 
   // Serialize indices: shift left by current byte offset, then mask out index of given size.

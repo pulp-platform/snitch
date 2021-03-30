@@ -111,19 +111,22 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       logic     last;
     } out_spill_t;
 
+    // Type for byte offset within word
+    typedef logic [$clog2(DataWidth/8)-1:0] bytecnt_t;
+
     // Interface between Natural iterator 0 and indirector
-    logic natit_enable;
-    logic [DataWidth/8-1:0] natit_boundoffs;
+    logic natit_base_last_d, natit_base_last_q;
     logic natit_ready;
     logic natit_extraword;
     logic natit_last_word_inflight_q;
     logic natit_done;
+    bytecnt_t natit_boundoffs;
+    index_t natit_base_bound;
 
     // Address generation output of indirector
     logic indir_valid;
     pointer_t indir_pointer;
     logic indir_last;
-
 
     // Indirector configuration registers
     logic [ShiftWidth-1:0]    idx_shift_q, idx_shift_sd, idx_shift_sq;
@@ -171,8 +174,17 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       end
     end
 
-    // TODO
-    assign natit_boundoffs = '0;
+    // Delay register for last iteration of base loop, in case additional iteration needed.
+    always_ff @(posedge clk_i, negedge rst_ni) begin
+      if(~rst_ni)           natit_base_last_q <= 1'b0;
+      else if (enable)      natit_base_last_q <= natit_base_last_d;
+      else if (natit_done)  natit_base_last_q <= 1'b0;
+    end
+
+    // Indicate last iteration (loop 0)
+    assign natit_base_bound   = bound_q[0] >> (config_q.indir ? idx_size_q : '0);
+    assign natit_base_last_d  = (index_q[0] == natit_base_bound);
+    assign loop_last[0]       = (natit_extraword ? natit_base_last_q : natit_base_last_d);
 
     // Track last index word to set downstream last signal and handle word misalignment at end.
     always_ff @(posedge clk_i, negedge rst_ni) begin
@@ -181,7 +193,11 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       else if (enable & done) natit_last_word_inflight_q <= 1'b1;
     end
 
+    // Natural iteration loop 0 is done when last word inflight or address gen done.
     assign natit_done = natit_last_word_inflight_q | config_q.done;
+
+    // Determine word offset incurred by indirect loop bound on loop 0.
+    assign natit_boundoffs = bytecnt_t'(bound_q[0]) << idx_size_q;
 
     // Encapsulated indirection datapath
     snitch_ssr_indirector #(
@@ -200,23 +216,20 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       .rst_ni,
       .idx_req_o,
       .idx_rsp_i,
-
+      .cfg_indir_i         ( config_q.indir   ),
       .cfg_size_i          ( idx_size_q       ),
       .cfg_base_i          ( idx_base_q       ),
       .cfg_shift_i         ( idx_shift_q      ),
       .cfg_done_i          ( config_q.done    ),
-
       .natit_pointer_i     ( pointer_q        ),
       .natit_ready_o       ( natit_ready      ),
       .natit_done_i        ( natit_done       ),
-      .natit_boundoffs_i   ( natit_boundoffs  ),  // TODO: use in natural it. iff config_q.indir
-      .natit_extraword_o   ( natit_extraword  ),  // TODO: use in natural it. iff config_q.indir
-
+      .natit_boundoffs_i   ( natit_boundoffs  ),
+      .natit_extraword_o   ( natit_extraword  ),
       .mem_pointer_o       ( indir_pointer    ),
       .mem_last_o          ( indir_last       ),
       .mem_valid_o         ( indir_valid      ),
       .mem_ready_i         ( spill_in_ready   ),
-
       .tcdm_start_address_i
     );
 
@@ -267,6 +280,9 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     // Tie off the index request port as no indirection
     assign idx_req_o = '0;
 
+    // Loop 0 behaves like all other levels
+    assign loop_last[0] = (index_q[0] == bound_q[0]);
+
   end
 
   assign mem_write_o  = config_q.write;
@@ -309,7 +325,10 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       end
     end
 
-    assign loop_last[i] = (index_q[i] == bound_q[i] || config_q.dims < i);
+    // Indicate last iteration (loops > 0); base loop handled differently in indirection
+    if (i > 0) begin : gen_loop_last_upper
+      assign loop_last[i] = (index_q[i] == bound_q[i] || config_q.dims < i);
+    end
   end
 
   // Remaining registers.
