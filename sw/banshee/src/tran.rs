@@ -974,6 +974,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::RdRs1(x) => self.emit_rd_rs1(x),
             riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
             riscv::Format::RdRs1Shamt(x) => self.emit_rd_rs1_shamt(x),
+            riscv::Format::Rs1(x) => self.emit_rs1(x),
             riscv::Format::Rs1Rs2(x) => self.emit_rs1_rs2(x),
             riscv::Format::RdRs2(x) => self.emit_rd_rs2(x),
             riscv::Format::Unit(x) => self.emit_unit(x),
@@ -2197,6 +2198,24 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
+    unsafe fn emit_rs1(&self, data: riscv::FormatRs1) -> Result<()> {
+        trace!("{} x{}", data.op, data.rs1);
+        let name = format!("{}\0", data.op);
+        let _name = name.as_ptr() as *const _;
+        let rs1 = self.read_reg(data.rs1);
+
+        match data.op {
+            // suppress compiler warning that detects the bail! statement as unrechable
+            // Dmrep is currently the OpcodeRs1 but this might change
+            #![allow(unreachable_patterns)]
+            riscv::OpcodeRs1::Dmrep => self
+                .section
+                .emit_call("banshee_dma_rep", [self.dma_ptr(), rs1]),
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
+        Ok(())
+    }
+
     unsafe fn emit_rs1_rs2(&self, data: riscv::FormatRs1Rs2) -> Result<()> {
         trace!("{} x{}, x{}", data.op, data.rs1, data.rs2);
         let name = format!("{}\0", data.op);
@@ -2254,6 +2273,9 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeRs1Rs2::Dmdst => self
                 .section
                 .emit_call("banshee_dma_dst", [self.dma_ptr(), rs1, rs2]),
+            riscv::OpcodeRs1Rs2::Dmstr => self
+                .section
+                .emit_call("banshee_dma_str", [self.dma_ptr(), rs1, rs2]),
             _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
