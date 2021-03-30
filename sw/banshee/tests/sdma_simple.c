@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
+// Requires LLVM toolchain with builtins support for the Xdma extension
+
 #include <stdint.h>
 
 #define NELEM 1024
