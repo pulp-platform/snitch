@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
+// Requires LLVM toolchain with support for the Xssr extension
+
 int main() {
     unsigned errs = 0;
     asm volatile(

@@ -1345,17 +1345,7 @@ impl<'a> InstructionTranslator<'a> {
         let value = match data.op {
             riscv::OpcodeImm5RdRs1::Dmcpyi => self.section.emit_call(
                 "banshee_dma_strt",
-                [
-                    self.dma_ptr(),
-                    LLVMBuildBitCast(
-                        self.builder,
-                        self.section.state_ptr,
-                        LLVMPointerType(LLVMInt8Type(), 0),
-                        NONAME,
-                    ),
-                    rs1,
-                    imm,
-                ],
+                [self.dma_ptr(), self.section.state_ptr, rs1, imm],
             ),
             // _ => bail!("Unsupported opcode {}", data.op),
         };
@@ -2132,9 +2122,10 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeRdRs1Rs2::Sll => LLVMBuildShl(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Srl => LLVMBuildLShr(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Sra => LLVMBuildAShr(self.builder, rs1, rs2, name),
-            riscv::OpcodeRdRs1Rs2::Dmcpy => self
-                .section
-                .emit_call("banshee_dma_strt", [self.dma_ptr(), rs1, rs2]),
+            riscv::OpcodeRdRs1Rs2::Dmcpy => self.section.emit_call(
+                "banshee_dma_strt",
+                [self.dma_ptr(), self.section.state_ptr, rs1, rs2],
+            ),
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
