@@ -101,7 +101,7 @@ int main(int hartid) {
         "li        t0, 0x40000020\n"
         "sw        t2, 0(t0)\n"
         :
-        : [errs] "r"(errs)
+        : [ errs ] "r"(errs)
         : "t0", "t1", "t2");
 #endif
 
