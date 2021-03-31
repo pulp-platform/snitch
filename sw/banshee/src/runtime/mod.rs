@@ -111,6 +111,10 @@ impl std::fmt::Debug for DmaState {
         f.debug_struct("DmaState")
             .field("src", &format_args!("{:08x}", self.src))
             .field("dst", &format_args!("{:08x}", self.dst))
+            .field("src stride", &format_args!("{:08x}", self.src_stride))
+            .field("dst stride", &format_args!("{:08x}", self.dst_stride))
+            .field("reps", &self.reps)
+            .field("size", &self.size)
             .field("done_id", &self.done_id)
             .finish()
     }

@@ -35,6 +35,8 @@ declare void @banshee_ssr_eoi(%SsrState* %ssr)
 declare void @banshee_dma_src(%DmaState* writeonly %dma, i32 %lo, i32 %hi)
 declare void @banshee_dma_dst(%DmaState* writeonly %dma, i32 %lo, i32 %hi)
 declare i32 @banshee_dma_strt(%DmaState* %dma, %Cpu* %cpu, i32 %size, i32 %flags)
+declare void @banshee_dma_str(%DmaState* writeonly %dma, i32 %src, i32 %dst)
+declare void @banshee_dma_rep(%DmaState* writeonly %dma, i32 %reps)
 declare i32 @banshee_dma_stat(%DmaState* readonly %dma, i32 %addr)
 
 declare i32* @banshee_reg_ptr(%Cpu* %cpu, i32 %reg)

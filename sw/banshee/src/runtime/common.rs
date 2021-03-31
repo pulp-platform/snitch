@@ -73,5 +73,6 @@ pub struct DmaState {
     src_stride: u32,
     dst_stride: u32,
     reps: u32,
+    size: u32,
     done_id: u32,
 }

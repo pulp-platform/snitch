@@ -192,6 +192,19 @@ pub unsafe fn banshee_dma_dst(dma: &mut DmaState, lo: u32, hi: u32) {
     dma.dst = (hi as u64) << 32 | (lo as u64);
 }
 
+/// Implementation of the `dm.str` instruction.
+#[no_mangle]
+pub unsafe fn banshee_dma_str(dma: &mut DmaState, src: u32, dst: u32) {
+    dma.src_stride = src;
+    dma.dst_stride = dst;
+}
+
+/// Implementation of the `dm.rep` instruction.
+#[no_mangle]
+pub unsafe fn banshee_dma_rep(dma: &mut DmaState, reps: u32) {
+    dma.reps = reps;
+}
+
 /// Implementation of the `dm.strt` and `dm.strti` instructions.
 #[no_mangle]
 pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: &mut Cpu, size: u32, flags: u32) -> u32 {
@@ -202,6 +215,7 @@ pub unsafe fn banshee_dma_strt(dma: &mut DmaState, cpu: &mut Cpu, size: u32, fla
 
     let id = dma.done_id;
     dma.done_id += 1;
+    dma.size = size;
 
     // assert_eq!(
     //     size % 4,
