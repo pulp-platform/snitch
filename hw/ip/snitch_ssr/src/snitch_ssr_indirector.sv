@@ -18,9 +18,10 @@ module snitch_ssr_indirector #(
   parameter type tcdm_user_t  = logic,
   parameter type size_t       = logic,    // AXI-like size type, but narrower (e.g. 8b to 64b)
   /// Derived parameters *Do not override*
+  parameter int unsigned BytecntWidth = $clog2(DataWidth/8),
   parameter type addr_t     = logic [AddrWidth-1:0],
   parameter type data_t     = logic [DataWidth-1:0],
-  parameter type bytecnt_t  = logic [$clog2(DataWidth/8)-1:0],
+  parameter type bytecnt_t  = logic [BytecntWidth-1:0],
   parameter type index_t    = logic [IndexWidth-1:0],
   parameter type pointer_t  = logic [PointerWidth-1:0],
   parameter type shift_t    = logic [ShiftWidth-1:0]
@@ -72,6 +73,7 @@ module snitch_ssr_indirector #(
 
   // Index serializer
   data_t  idx_ser_mask;
+  data_t  idx_ser_shft;
   index_t idx_ser_out;
 
   // Index serializer counter
@@ -82,7 +84,7 @@ module snitch_ssr_indirector #(
   assign idx_req_o.q = '{
       // Mask lower bits to fetch only entire, aligned words
       addr: {tcdm_start_address_i[AddrWidth-1:PointerWidth],
-          natit_pointer_i[PointerWidth-1:DataWidth/8], {(DataWidth/8){1'b0}}},
+          natit_pointer_i[PointerWidth-1:BytecntWidth], {BytecntWidth{1'b0}}},
       default: '0
     };
 
@@ -129,7 +131,8 @@ module snitch_ssr_indirector #(
 
   // Serialize indices: shift left by current byte offset, then mask out index of given size.
   assign idx_ser_mask = ~(data_t'('1) << (8 << cfg_size_i));
-  assign idx_ser_out  = (idx_fifo_out >> (idx_bytecnt_q << 3)) & idx_ser_mask;
+  assign idx_ser_shft = (idx_fifo_out >> (BytecntWidth+3)'(idx_bytecnt_q << 3));
+  assign idx_ser_out  = idx_ser_shft & idx_ser_mask;
 
   // Shift and emit indices
   assign mem_pointer_o = cfg_base_i + (pointer_t'(idx_ser_out) << cfg_shift_i);

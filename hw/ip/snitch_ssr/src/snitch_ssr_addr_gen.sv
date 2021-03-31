@@ -114,7 +114,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     // Type for byte offset within word
     typedef logic [$clog2(DataWidth/8)-1:0] bytecnt_t;
 
-    // Interface between Natural iterator 0 and indirector
+    // Interface between natural iterator 0 and indirector
     logic natit_base_last_d, natit_base_last_q;
     logic natit_ready;
     logic natit_extraword;
@@ -137,7 +137,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     out_spill_t spill_in_data;
     logic spill_in_valid, spill_in_ready;
 
-    // Register write
+    // Config register write
     always_comb begin
       idx_shift_sd  = idx_shift_sq;
       idx_base_sd   = idx_base_sq;
@@ -148,12 +148,10 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       if (write_strobe.idx_size)  idx_size_sd  = cfg_wdata_i;
     end
 
-    // Register read
-    assign indir_read_map.idx_shift = idx_shift_q;
-    assign indir_read_map.idx_base  = idx_base_q;
-    assign indir_read_map.idx_size  = idx_size_q;
+    // Config register read
+    assign indir_read_map = '{idx_shift_q, idx_base_q, idx_size_q};
 
-    // Register process
+    // Config registers
     always_ff @(posedge clk_i, negedge rst_ni) begin
       if (~rst_ni) begin
         idx_shift_q   <= '0;
@@ -182,7 +180,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     end
 
     // Indicate last iteration (loop 0)
-    assign natit_base_bound   = bound_q[0] >> (config_q.indir ? idx_size_q : '0);
+    assign natit_base_bound   = bound_q[0] >> (config_q.indir ? size_t'('1) - idx_size_q : '0);
     assign natit_base_last_d  = (index_q[0] == natit_base_bound);
     assign loop_last[0]       = (natit_extraword ? natit_base_last_q : natit_base_last_d);
 

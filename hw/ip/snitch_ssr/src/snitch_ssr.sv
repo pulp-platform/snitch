@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: SHL-0.51
 
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
+
+// TODO: Indirection integration
 
 module snitch_ssr import snitch_pkg::*; #(
   parameter int unsigned AddrWidth = 0,
@@ -58,62 +61,95 @@ module snitch_ssr import snitch_pkg::*; #(
     .pop_i      ( fifo_pop   )
   );
 
-  logic mem_req_qvalid;
+  logic data_req_qvalid;
+  tcdm_req_t idx_req, data_req;
+  tcdm_rsp_t idx_rsp, data_rsp;
 
-  // TODO: indirection integration
+  // TODO: expose at top
+  localparam bit Indirection    = 1;
+  localparam bit IndirOutSpill  = 1;
+  localparam int unsigned NumIndexCredits = 2;
+  localparam int unsigned MuxRespDepth = 2;
+  localparam type tcdm_user_t  = logic;
+
+  localparam bit DebugLog = 0;
 
   snitch_ssr_addr_gen #(
-    .Indirection      ( 0           ),
-    .IndirOutSpill    ( 0           ),
-    .AddrWidth        ( AddrWidth   ),
-    .DataWidth        ( DataWidth   ),
-    .NumIndexCredits  ( 4           ),
-    .tcdm_req_t       ( tcdm_req_t  ),
-    .tcdm_rsp_t       ( tcdm_rsp_t  ),
-    .tcdm_user_t      ( logic       )
+    .Indirection      ( Indirection     ),
+    .IndirOutSpill    ( IndirOutSpill   ),
+    .AddrWidth        ( AddrWidth       ),
+    .DataWidth        ( DataWidth       ),
+    .NumIndexCredits  ( NumIndexCredits ),
+    .tcdm_req_t       ( tcdm_req_t      ),
+    .tcdm_rsp_t       ( tcdm_rsp_t      ),
+    .tcdm_user_t      ( tcdm_user_t     )
   ) i_addr_gen (
     .clk_i,
     .rst_ni,
-    .idx_req_o      (  ),
-    .idx_rsp_i      ( '0 ),
+    .idx_req_o      ( idx_req ),
+    .idx_rsp_i      ( idx_rsp ),
     .cfg_word_i,
     .cfg_rdata_o,
     .cfg_wdata_i,
     .cfg_write_i,
-    .reg_rep_o      ( rep_max                     ),
-    .mem_addr_o     ( mem_req_o.q.addr            ),
-    .mem_write_o    ( mem_req_o.q.write           ),
-    .mem_valid_o    ( mover_valid                 ),
-    .mem_ready_i    ( mem_req_qvalid & mem_rsp_i.q_ready ),
+    .reg_rep_o      ( rep_max           ),
+    .mem_addr_o     ( data_req.q.addr   ),
+    .mem_write_o    ( data_req.q.write  ),
+    .mem_valid_o    ( mover_valid       ),
+    .mem_ready_i    ( data_req_qvalid & data_rsp.q_ready ),
     .tcdm_start_address_i
   );
 
-  assign mem_req_o.q_valid = mem_req_qvalid;
-  assign mem_req_o.q.amo = reqrsp_pkg::AMONone;
-  assign mem_req_o.q.user = '0;
+  if (Indirection) begin : gen_demux
+    tcdm_mux #(
+      .NrPorts    ( 2             ),
+      .AddrWidth  ( AddrWidth     ),
+      .DataWidth  ( DataWidth     ),
+      .user_t     ( tcdm_user_t   ),
+      .RespDepth  ( MuxRespDepth  ),
+      .tcdm_req_t ( tcdm_req_t    ),
+      .tcdm_rsp_t ( tcdm_rsp_t    )
+    ) i_tcdm_mux (
+      .clk_i,
+      .rst_ni,
+      .slv_req_i  ( {idx_req, data_req} ),
+      .slv_rsp_o  ( {idx_rsp, data_rsp} ),
+      .mst_req_o  ( mem_req_o ),
+      .mst_rsp_i  ( mem_rsp_i )
+    );
+  end else begin : gen_no_demux
+    assign mem_req_o = data_req;
+    assign data_rsp  = mem_rsp_i;
+    // Tie off Index responses
+    assign idx_rsp = '0;
+  end
+
+  assign data_req.q_valid = data_req_qvalid;
+  assign data_req.q.amo = reqrsp_pkg::AMONone;
+  assign data_req.q.user = '0;
 
   assign lane_rdata_o = fifo_out;
-  assign mem_req_o.q.data = fifo_out;
-  assign mem_req_o.q.strb = '1;
+  assign data_req.q.data = fifo_out;
+  assign data_req.q.strb = '1;
 
   always_comb begin
-    if (mem_req_o.q.write) begin
+    if (data_req.q.write) begin
       lane_valid_o = ~fifo_full;
-      mem_req_qvalid = mover_valid & ~fifo_empty;
+      data_req_qvalid = mover_valid & ~fifo_empty;
       fifo_push = lane_ready_i & ~fifo_full;
       fifo_in = lane_wdata_i;
       rep_enable = 0;
-      fifo_pop = mem_req_qvalid & mem_rsp_i.q_ready;
+      fifo_pop = data_req_qvalid & data_rsp.q_ready;
       credit_take = fifo_push;
-      credit_give = mem_rsp_i.p_valid;
+      credit_give = data_rsp.p_valid;
     end else begin
       lane_valid_o = ~fifo_empty;
-      mem_req_qvalid = mover_valid & ~fifo_full & has_credit;
-      fifo_push = mem_rsp_i.p_valid;
-      fifo_in = mem_rsp_i.p.data;
+      data_req_qvalid = mover_valid & ~fifo_full & has_credit;
+      fifo_push = data_rsp.p_valid;
+      fifo_in = data_rsp.p.data;
       rep_enable = lane_ready_i & ~fifo_empty;
       fifo_pop = rep_enable & rep_done;
-      credit_take = mem_req_qvalid & mem_rsp_i.q_ready;
+      credit_take = data_req_qvalid & data_rsp.q_ready;
       credit_give = fifo_pop;
     end
   end
@@ -138,5 +174,17 @@ module snitch_ssr import snitch_pkg::*; #(
       rep_q <= rep_done ? '0 : rep_q + 1;
   end
   assign rep_done = (rep_q == rep_max);
+
+  // pragma translate_off
+  if (DebugLog) begin : gen_debug_log
+    always_ff @(posedge clk_i) begin
+      if (i_addr_gen.mem_valid_o & i_addr_gen.mem_ready_i)
+        $display("%m: %t: Emit Address 0x%0x,\tRpt %0d,\tWrite %0d", $time,
+            data_req.q.addr, rep_max, data_req.q.write);
+      if (idx_req.q_valid & idx_rsp.q_ready)
+        $display("%m: %t: Fetch Index Word 0x%0x", $time, idx_req.q.addr);
+    end
+  end
+  // pragma translate_on
 
 endmodule
