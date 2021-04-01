@@ -40,6 +40,11 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   input  addr_t       tcdm_start_address_i
 );
 
+  // Type for byte offset within word
+  localparam int unsigned BytecntWidth = $clog2(DataWidth/8);
+  localparam logic [31:0] WordAddrMask = {{(32-BytecntWidth){1'b1}}, {(BytecntWidth){1'b0}}};
+  typedef logic [BytecntWidth-1:0] bytecnt_t;
+
   localparam int AW = 18; // address pointer width
   localparam int IW = 16; // loop index width
   localparam int NL = 4;  // number of nested loops
@@ -111,9 +116,6 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       logic     last;
     } out_spill_t;
 
-    // Type for byte offset within word
-    typedef logic [$clog2(DataWidth/8)-1:0] bytecnt_t;
-
     // Interface between natural iterator 0 and indirector
     logic natit_base_last_d, natit_base_last_q;
     logic natit_ready;
@@ -143,8 +145,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       idx_base_sd   = idx_base_sq;
       idx_size_sd   = idx_size_sq;
       if (write_strobe.idx_shift) idx_shift_sd = cfg_wdata_i;
-      // TODO: the masking here (and elsewhere) is an artifact of prior fixed 64-bit data_t
-      if (write_strobe.idx_base)  idx_base_sd  = cfg_wdata_i & ~32'h3;
+      if (write_strobe.idx_base)  idx_base_sd  = cfg_wdata_i & WordAddrMask;
       if (write_strobe.idx_size)  idx_size_sd  = cfg_wdata_i;
     end
 
@@ -214,6 +215,8 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       .rst_ni,
       .idx_req_o,
       .idx_rsp_i,
+      .cfg_launch_i        ( write_strobe.status | alias_strobe ),
+      .cfg_wdata_lo_i      ( cfg_wdata_i[BytecntWidth-1:0]      ),
       .cfg_indir_i         ( config_q.indir   ),
       .cfg_size_i          ( idx_size_q       ),
       .cfg_base_i          ( idx_base_q       ),
@@ -299,7 +302,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       stride_sd[i] = stride_sq[i];
       bound_sd[i] = bound_sq[i];
       if (write_strobe.stride[i])
-        stride_sd[i] = cfg_wdata_i & ~32'h3;
+        stride_sd[i] = cfg_wdata_i & WordAddrMask;
       if (write_strobe.bound[i])
         bound_sd[i] = cfg_wdata_i;
     end
@@ -374,10 +377,10 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     pointer_sd = pointer_sq;
     config_sd = config_sq;
     if (write_strobe.status) begin
-      pointer_sd = cfg_wdata_i & ~32'h3;
+      pointer_sd = cfg_wdata_i;
       config_sd = cfg_wdata_i[31-:$bits(config_sq)];
     end else if (alias_strobe) begin
-      pointer_sd = cfg_wdata_i & ~32'h3;
+      pointer_sd = cfg_wdata_i;
       config_sd.done = 0;
       config_sd.write = alias_fields.write;
       config_sd.dims = alias_fields.dims;

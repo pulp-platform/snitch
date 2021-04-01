@@ -31,6 +31,9 @@ module snitch_ssr_indirector #(
   // Index fetch ports
   output tcdm_req_t idx_req_o,
   input  tcdm_rsp_t idx_rsp_i,
+  // From config interface
+  input  bytecnt_t  cfg_wdata_lo_i,
+  input  logic      cfg_launch_i,
   // From config registers
   input  logic      cfg_indir_i,
   input  size_t     cfg_size_i,
@@ -143,7 +146,7 @@ module snitch_ssr_indirector #(
   always_ff @(posedge clk_i, negedge rst_ni) begin
     if (~rst_ni)              idx_bytecnt_q <= '0;
     // Set the initial byte offset (upbeat) before job starts, i.e. while done register set.
-    else if (cfg_done_i)      idx_bytecnt_q <= first_idx_byteoffs;
+    else if (cfg_launch_i)    idx_bytecnt_q <= cfg_wdata_lo_i;
     else if (idx_bytecnt_ena) idx_bytecnt_q <= idx_bytecnt_d;
   end
 
