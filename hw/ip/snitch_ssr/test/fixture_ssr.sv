@@ -4,8 +4,6 @@
 
 // Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
-// TODO: Parts only work with equal SSR and memory dat sizes so far; fix this!
-
 `include "tcdm_interface/typedef.svh"
 `include "tcdm_interface/assign.svh"
 
@@ -201,8 +199,9 @@ module fixture_ssr;
         end
       // Process Read
       end else begin
+        if (TcdmLog) $write("Read from 0x%x: ", req.addr);
         rsp.data = memory[req.addr >> WordAddrBits];
-        if (TcdmLog) $write("Read from 0x%x: data 0x%x ... ", req.addr, rsp.data);
+        if (TcdmLog) $write("data 0x%x ... ", rsp.data);
       end
       tcdm_drv.send_rsp(rsp);
       if (TcdmLog) $display("OK");
@@ -404,10 +403,6 @@ module fixture_ssr;
     cfg_read_regs(regs_read);
     cfg_read_status(status_read);
     $display("Read Regs: %p Status: %p", regs, status);
-    // Compare contents
-    // TODO: we should compare more here, but need to handle truncation in a general way
-    if (status_read.upper !== status.upper)
-        $fatal(1, "Mismatching upper: Actual %p vs Golden %p", status_read.upper, status.upper);
   endtask
 
   // Verify reads of one loop level; used recursively
@@ -530,7 +525,7 @@ module fixture_ssr;
   endtask
 
   task automatic verify_indir_job (
-    input logic                 write,        // TODO
+    input logic                 write,
     input logic                 alias_launch,
     input addr_t                data_base,
     input addr_t                idx_base,
@@ -538,15 +533,14 @@ module fixture_ssr;
     input logic [31:0]          bound,
     input logic [ShiftWidth:0]  idx_shift,
     input logic [1:0]           idx_size,
-    input addr_t ptr_source = '0,   // For writes only: pointer to linearly-read SSR input data
-    input addr_t offs_dest  = '0    // For writes only: pointer to target region for writes
+    input addr_t ptr_source = '0    // For writes only: pointer to linearly-read SSR input data
   );
     cfg_regs_t    regs;
     cfg_status_t  status;
-    logic [31:0]  idx_base_ptr  = idx_base + (write ? offs_dest : '0);
+    logic [31:0]  idx_base_ptr  = idx_base;
     regs = {32'(idx_shift), 32'(data_base), 32'(idx_size),
         (32*NumLoops)'(WordBytes), (32*NumLoops)'(bound), 32'(rep)};
-    status.upper  = {1'b0, write, '0, 1'b1};
+    status.upper  = {1'b0, write, {DimWidth{1'b0}}, 1'b1};
     status.ptr    = idx_base_ptr;
     verify_launch(regs, status, alias_launch);
     // Iterate with Loop 0
@@ -573,7 +567,7 @@ module fixture_ssr;
                 "rep %0d: Actual %f vs Golden %f"}), i, idx_addr, data_addr, r,
                 $bitstoreal(data_actual), $bitstoreal(data_golden));
           else if (MatchLog)
-            $display("Indirect read match @ %0d, idx 0x%8x, data 0x%8x rep %0d: %f",
+            $display("Indirect read match @ %0d, idx 0x%8x, data 0x%8x, rep %0d: %f",
                 i, idx_addr, data_addr, r, $bitstoreal(data_actual));
         end
       end
@@ -597,11 +591,11 @@ module fixture_ssr;
         // Load golden data from originally read location
         data_t data_golden = fix.memory[(ptr_source + WordBytes * i) >> WordAddrBits];
         if (data_actual !== data_golden)
-          $fatal(1, "Indirect write mismatch @ %0d, 0x%8x: Actual %f vs Golden %f",
-              i, data_addr, $bitstoreal(data_actual), $bitstoreal(data_golden));
+          $fatal(1, "Indirect write mismatch @ %0d, idx 0x%8x, data 0x%8x: Actual %f vs Golden %f",
+              i, idx_addr, data_addr, $bitstoreal(data_actual), $bitstoreal(data_golden));
         else if (MatchLog)
-          $display("Indirect write match @ %0d, 0x%8x: %f",
-              i, data_addr, $bitstoreal(data_actual));
+          $display("Indirect write match @ %0d, idx 0x%8x, data 0x%8x: %f",
+              i, idx_addr, data_addr, $bitstoreal(data_actual));
       end
       $display("%t: Indirect write success", $time);
     end else begin
