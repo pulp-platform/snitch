@@ -16,7 +16,6 @@ module snitch_ssr_indirector #(
   parameter type tcdm_req_t   = logic,
   parameter type tcdm_rsp_t   = logic,
   parameter type tcdm_user_t  = logic,
-  parameter type size_t       = logic,    // AXI-like size type, but narrower (e.g. 8b to 64b)
   /// Derived parameters *Do not override*
   parameter int unsigned BytecntWidth = $clog2(DataWidth/8),
   parameter type addr_t     = logic [AddrWidth-1:0],
@@ -24,7 +23,8 @@ module snitch_ssr_indirector #(
   parameter type bytecnt_t  = logic [BytecntWidth-1:0],
   parameter type index_t    = logic [IndexWidth-1:0],
   parameter type pointer_t  = logic [PointerWidth-1:0],
-  parameter type shift_t    = logic [ShiftWidth-1:0]
+  parameter type shift_t    = logic [ShiftWidth-1:0],
+  parameter type idx_size_t = logic [$clog2($clog2(DataWidth/8))-1:0]
 ) (
   input  logic      clk_i,
   input  logic      rst_ni,
@@ -36,14 +36,13 @@ module snitch_ssr_indirector #(
   input  logic      cfg_launch_i,
   // From config registers
   input  logic      cfg_indir_i,
-  input  size_t     cfg_size_i,
+  input  idx_size_t cfg_size_i,
   input  pointer_t  cfg_base_i,
   input  shift_t    cfg_shift_i,
-  input  logic      cfg_done_i,         // Set only once last address *emitted* from generator
   // With natural iterator level 0 (upstream)
   input  pointer_t  natit_pointer_i,
   output logic      natit_ready_o,
-  input  logic      natit_done_i,       // Keep high, deassert with cfg_done_i (TODO: assert)
+  input  logic      natit_done_i,       // Keep high, deassert with cfg_done_i
   input  bytecnt_t  natit_boundoffs_i,  // Additional byte offset incurred by subword bound
   output logic      natit_extraword_o,  // Emit additional index word address if bounds require it
   // To address generator output (downstream)
@@ -54,10 +53,6 @@ module snitch_ssr_indirector #(
   // TCDM base
   input  addr_t     tcdm_start_address_i
 );
-
-  // TODO: Assert that DataWidth is 2^n bytes
-
-  // TODO: Cease all switching/counting when not indirecting
 
   // Index FIFO signals
   logic idx_fifo_empty;

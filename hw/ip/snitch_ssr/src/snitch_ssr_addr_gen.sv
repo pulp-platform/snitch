@@ -6,17 +6,27 @@
 // Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
 module snitch_ssr_addr_gen import snitch_pkg::*; #(
-  parameter bit Indirection = 0,
+  parameter bit Indirection   = 0,
   parameter bit IndirOutSpill = 0,
-  parameter int unsigned AddrWidth = 0,
-  parameter int unsigned DataWidth = 0,
-  parameter int unsigned NumIndexCredits = 0,
+  parameter int unsigned AddrWidth    = 0,
+  parameter int unsigned DataWidth    = 0,
+  parameter int unsigned IndexWidth   = 16,     // TODO: proper parametrization upstream
+  parameter int unsigned PointerWidth = 18,     // TODO: proper parametrization upstream
+  parameter int unsigned ShiftWidth   = 12,     // TODO: proper parametrization upstream
+  parameter int unsigned IndexCredits = 2,      // TODO: proper parametrization upstream
+  parameter int unsigned NumLoops     = 4,      // TODO: proper parametrization upstream
   parameter type tcdm_req_t   = logic,
   parameter type tcdm_rsp_t   = logic,
   parameter type tcdm_user_t  = logic,
   /// Derived parameters *Do not override*
-  parameter type addr_t = logic [AddrWidth-1:0],
-  parameter type data_t = logic [DataWidth-1:0]
+  parameter int unsigned DimWidth     = $clog2(NumLoops),
+  parameter int unsigned BytecntWidth = $clog2(DataWidth/8),
+  parameter type addr_t     = logic [AddrWidth-1:0],
+  parameter type data_t     = logic [DataWidth-1:0],
+  parameter type pointer_t  = logic [PointerWidth-1:0],
+  parameter type index_t    = logic [IndexWidth-1:0],
+  parameter type bytecnt_t  = logic [BytecntWidth-1:0],
+  parameter type idx_size_t = logic [$clog2($clog2(DataWidth/8))-1:0]
 ) (
   input  logic        clk_i,
   input  logic        rst_ni,
@@ -40,32 +50,23 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   input  addr_t       tcdm_start_address_i
 );
 
-  // Type for byte offset within word
-  localparam int unsigned BytecntWidth = $clog2(DataWidth/8);
+  // Mask for word-aligned address fields
   localparam logic [31:0] WordAddrMask = {{(32-BytecntWidth){1'b1}}, {(BytecntWidth){1'b0}}};
-  typedef logic [BytecntWidth-1:0] bytecnt_t;
 
-  localparam int AW = 18; // address pointer width
-  localparam int IW = 16; // loop index width
-  localparam int NL = 4;  // number of nested loops
-  localparam int DW = $clog2(NL); // width of the dimension field
-  typedef logic [AW-1:0] pointer_t;
-  typedef logic [IW-1:0] index_t;
-
-  pointer_t [NL-1:0] stride_q, stride_sd, stride_sq;
+  pointer_t [NumLoops-1:0] stride_q, stride_sd, stride_sq;
   pointer_t pointer_q, pointer_sd, pointer_sq, selected_stride;
-  index_t [NL-1:0] index_q, bound_q, bound_sd, bound_sq;
+  index_t [NumLoops-1:0] index_q, bound_q, bound_sd, bound_sq;
   logic [3:0] rep_q, rep_sd, rep_sq;
-  logic [NL-1:0] loop_enabled;
-  logic [NL-1:0] loop_last;
+  logic [NumLoops-1:0] loop_enabled;
+  logic [NumLoops-1:0] loop_last;
   logic enable, done;
 
   typedef struct packed {
     logic idx_shift;
     logic idx_base;
     logic idx_size;
-    logic [NL-1:0] stride;
-    logic [NL-1:0] bound;
+    logic [NumLoops-1:0] stride;
+    logic [NumLoops-1:0] bound;
     logic rep;
     logic status;
   } write_strobe_t;
@@ -76,7 +77,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   typedef struct packed {
     logic done;
     logic write;
-    logic [DW-1:0] dims;
+    logic [DimWidth-1:0] dims;
     logic indir;
   } config_t;
   config_t config_q, config_sd, config_sq;
@@ -84,7 +85,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   typedef struct packed {
     logic no_indir;       // Inverted as aliases aligned at upper address edge
     logic write;
-    logic [DW-1:0] dims;
+    logic [DimWidth-1:0] dims;
   } alias_fields_t;
 
   alias_fields_t alias_fields;
@@ -102,13 +103,6 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   logic mem_last;
 
   if (Indirection) begin : gen_indirection
-
-    // TODO: expose at top
-    localparam int unsigned IndexWidth    = IW;
-    localparam int unsigned PointerWidth  = AW;
-    localparam int unsigned ShiftWidth    = 12;
-    localparam int unsigned IndexCredits  = 2;
-    localparam type         size_t        = logic [1:0];
 
     // Type for output spill register
     typedef struct packed {
@@ -133,7 +127,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     // Indirector configuration registers
     logic [ShiftWidth-1:0]    idx_shift_q, idx_shift_sd, idx_shift_sq;
     logic [PointerWidth-1:0]  idx_base_q, idx_base_sd, idx_base_sq;
-    size_t                    idx_size_q, idx_size_sd, idx_size_sq;
+    idx_size_t                idx_size_q, idx_size_sd, idx_size_sq;
 
     // Output spill register, if it exists
     out_spill_t spill_in_data;
@@ -181,7 +175,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     end
 
     // Indicate last iteration (loop 0)
-    assign natit_base_bound   = bound_q[0] >> (config_q.indir ? size_t'('1) - idx_size_q : '0);
+    assign natit_base_bound   = bound_q[0] >> (config_q.indir ? idx_size_t'('1) - idx_size_q : '0);
     assign natit_base_last_d  = (index_q[0] == natit_base_bound);
     assign loop_last[0]       = (natit_extraword ? natit_base_last_q : natit_base_last_d);
 
@@ -208,8 +202,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       .IndexCredits ( IndexCredits  ),
       .tcdm_req_t   ( tcdm_req_t    ),
       .tcdm_rsp_t   ( tcdm_rsp_t    ),
-      .tcdm_user_t  ( tcdm_user_t   ),
-      .size_t       ( size_t        )
+      .tcdm_user_t  ( tcdm_user_t   )
     ) i_snitch_ssr_indirector (
       .clk_i,
       .rst_ni,
@@ -221,7 +214,6 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       .cfg_size_i          ( idx_size_q       ),
       .cfg_base_i          ( idx_base_q       ),
       .cfg_shift_i         ( idx_shift_q      ),
-      .cfg_done_i          ( config_q.done    ),
       .natit_pointer_i     ( pointer_q        ),
       .natit_ready_o       ( natit_ready      ),
       .natit_done_i        ( natit_done       ),
@@ -287,7 +279,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   end
 
   assign mem_write_o  = config_q.write;
-  assign mem_addr_o   = {tcdm_start_address_i[AddrWidth-1:AW], mem_pointer};
+  assign mem_addr_o   = {tcdm_start_address_i[AddrWidth-1:PointerWidth], mem_pointer};
 
   // Unpack the configuration address and write signal into a write strobe for
   // the individual registers. Also assign the alias strobe if the address is
@@ -297,7 +289,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   assign alias_fields = cfg_word_i[0+:$bits(alias_fields)];
 
   // Generate the loop counters.
-  for (genvar i = 0; i < NL; i++) begin : gen_loop_counter
+  for (genvar i = 0; i < NumLoops; i++) begin : gen_loop_counter
     always_comb begin
       stride_sd[i] = stride_sq[i];
       bound_sd[i] = bound_sq[i];
@@ -356,7 +348,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   always_comb begin
     logic e;
     e = 1;
-    for (int i = 0; i < NL; i++) begin
+    for (int i = 0; i < NumLoops; i++) begin
       loop_enabled[i] = e;
       e &= loop_last[i];
     end
@@ -365,10 +357,10 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
 
   // Pick the stride of the highest enabled loop.
   always_comb begin
-    logic [NL-1:0] outermost;
+    logic [NumLoops-1:0] outermost;
     outermost = loop_enabled & ~(loop_enabled >> 1);
     selected_stride = '0;
-    for (int i = 0; i < NL; i++)
+    for (int i = 0; i < NumLoops; i++)
       selected_stride |= outermost[i] ? stride_q[i] : '0;
   end
 
@@ -415,8 +407,8 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
 
   typedef struct packed {
     indir_read_map_t indir_read_map;
-    logic [NL-1:0][31:0] stride;
-    logic [NL-1:0][31:0] bound;
+    logic [NumLoops-1:0][31:0] stride;
+    logic [NumLoops-1:0][31:0] bound;
     logic [31:0] rep;
     logic [31:0] status;
   } read_map_t;
@@ -429,7 +421,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     read_map.status = pointer_q;
     read_map.status[31-:$bits(config_q)] = config_q;
     read_map.rep = rep_q;
-    for (int i = 0; i < NL; i++) begin
+    for (int i = 0; i < NumLoops; i++) begin
       read_map.bound[i] = bound_q[i];
       read_map.stride[i] = stride_q[i];
     end

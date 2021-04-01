@@ -12,11 +12,15 @@ module tb_simple_ssr;
   localparam int unsigned IdxBase   = 'h1000;
   localparam int unsigned IdxStride = 'h800;  // Stride of index arrays of different sizes
 
-  // TODO: DUT parameters, forward through fixture
-  localparam bit Indirection = 1;
+  // DUT parameters
+  localparam bit Indirection    = 1;
+  localparam bit IndirOutSpill  = 1;
 
   // Instantiate fixture
-  fixture_ssr fix();
+  fixture_ssr #(
+    .Indirection    ( Indirection   ),
+    .IndirOutSpill  ( IndirOutSpill )
+  ) fix();
 
   initial begin
     fix.wait_for_reset_start();

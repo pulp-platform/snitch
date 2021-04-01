@@ -7,7 +7,19 @@
 `include "tcdm_interface/typedef.svh"
 `include "tcdm_interface/assign.svh"
 
-module fixture_ssr;
+module fixture_ssr #(
+  parameter bit           Indirection   = 1,
+  parameter bit           IndirOutSpill = 1,
+  parameter int unsigned  AddrWidth     = 32,
+  parameter int unsigned  DataWidth     = 64,
+  parameter int unsigned  NumLoops      = 4,
+  parameter int unsigned  SSRNrCredits  = 4,
+  parameter int unsigned  IndexCredits  = 2,
+  parameter int unsigned  IndexWidth    = 16,
+  parameter int unsigned  PointerWidth  = 18,
+  parameter int unsigned  ShiftWidth    = 12,
+  parameter int unsigned  MuxRespDepth  = 2
+);
 
   // ------------
   //  Parameters
@@ -24,31 +36,22 @@ module fixture_ssr;
   localparam time TT  = 8ns;
   localparam int unsigned RstCycles = 10;
 
-  // TCDM parameters
-  localparam int unsigned AddrWidth = 32;
-  localparam int unsigned DataWidth = 64;
-
   // TCDM derived parameters
   localparam int unsigned WordBytes      = DataWidth/8;
   localparam int unsigned WordAddrBits   = $clog2(WordBytes);
   localparam int unsigned WordAddrWidth  = AddrWidth - WordAddrBits;
 
-  // TCDM types
+  // TCDM derived types
   typedef logic [AddrWidth-1:0]   addr_t;
   typedef logic [DataWidth-1:0]   data_t;
   typedef logic [DataWidth/8-1:0] strb_t;
   typedef logic                   user_t;
   `TCDM_TYPEDEF_ALL(tcdm, addr_t, data_t, strb_t, user_t);
 
-  // SSR parameters
-  // TODO: Too little, and not fully exposed
-  localparam int unsigned NumLoops      = 4;
-  localparam int unsigned SSRNrCredits  = 4;
-  localparam int unsigned RepWidth      = 4;
-  localparam int unsigned ShiftWidth    = 12;
-
-  // SSR derived parameters
-  localparam int unsigned DimWidth =  $clog2(NumLoops);
+  // SSR constant / derived parameters
+  localparam int unsigned RepWidth = 4;
+  localparam int unsigned DimWidth = $clog2(NumLoops);
+  typedef logic [$clog2($clog2(DataWidth/8))-1:0] idx_size_t;
 
   // Configuration written through proper registers
   typedef struct packed {
@@ -128,11 +131,20 @@ module fixture_ssr;
 
   // Device Under Test (DUT)
   snitch_ssr #(
-    .AddrWidth    ( AddrWidth    ),
-    .DataWidth    ( DataWidth    ),
-    .SSRNrCredits ( SSRNrCredits ),
-    .tcdm_req_t   ( tcdm_req_t   ),
-    .tcdm_rsp_t   ( tcdm_rsp_t   )
+    .Indirection   ( Indirection   ),
+    .IndirOutSpill ( IndirOutSpill ),
+    .AddrWidth     ( AddrWidth     ),
+    .DataWidth     ( DataWidth     ),
+    .IndexWidth    ( IndexWidth    ),
+    .PointerWidth  ( PointerWidth  ),
+    .ShiftWidth    ( ShiftWidth    ),
+    .IndexCredits  ( IndexCredits  ),
+    .NumLoops      ( NumLoops      ),
+    .MuxRespDepth  ( MuxRespDepth  ),
+    .SSRNrCredits  ( SSRNrCredits  ),
+    .tcdm_user_t   ( user_t        ),
+    .tcdm_req_t    ( tcdm_req_t    ),
+    .tcdm_rsp_t    ( tcdm_rsp_t    )
   ) i_snitch_ssr (
     .clk_i          ( clk       ),
     .rst_ni         ( rst_n     ),

@@ -5,14 +5,21 @@
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 // Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
-// TODO: Indirection integration
-
 module snitch_ssr import snitch_pkg::*; #(
-  parameter int unsigned AddrWidth = 0,
-  parameter int unsigned DataWidth = 0,
+  parameter bit Indirection    = 0,           // TODO: propagate, add to config
+  parameter bit IndirOutSpill  = 0,           // TODO: propagate, add to config
+  parameter int unsigned AddrWidth    = 0,
+  parameter int unsigned DataWidth    = 0,
+  parameter int unsigned IndexWidth   = 16,   // TODO: propagate, add to config
+  parameter int unsigned PointerWidth = 18,   // TODO: propagate, add to config
+  parameter int unsigned ShiftWidth   = 12,   // TODO: propagate, add to config
+  parameter int unsigned IndexCredits = 2,    // TODO: propagate, add to config
+  parameter int unsigned NumLoops     = 4,    // TODO: propagate, add to config
+  parameter int unsigned MuxRespDepth = 2,    // TODO: propagate, add to config
   parameter int unsigned SSRNrCredits = 0,
-  parameter type tcdm_req_t = logic,
-  parameter type tcdm_rsp_t = logic,
+  parameter type tcdm_user_t  = logic,
+  parameter type tcdm_req_t   = logic,
+  parameter type tcdm_rsp_t   = logic,
   /// Derived parameter *Do not override*
   parameter type addr_t = logic [AddrWidth-1:0],
   parameter type data_t = logic [DataWidth-1:0]
@@ -65,24 +72,19 @@ module snitch_ssr import snitch_pkg::*; #(
   tcdm_req_t idx_req, data_req;
   tcdm_rsp_t idx_rsp, data_rsp;
 
-  // TODO: expose at top
-  localparam bit Indirection    = 1;
-  localparam bit IndirOutSpill  = 1;
-  localparam int unsigned NumIndexCredits = 2;
-  localparam int unsigned MuxRespDepth = 2;
-  localparam type tcdm_user_t  = logic;
-
-  localparam bit DebugLog = 0;
-
   snitch_ssr_addr_gen #(
-    .Indirection      ( Indirection     ),
-    .IndirOutSpill    ( IndirOutSpill   ),
-    .AddrWidth        ( AddrWidth       ),
-    .DataWidth        ( DataWidth       ),
-    .NumIndexCredits  ( NumIndexCredits ),
-    .tcdm_req_t       ( tcdm_req_t      ),
-    .tcdm_rsp_t       ( tcdm_rsp_t      ),
-    .tcdm_user_t      ( tcdm_user_t     )
+    .Indirection      ( Indirection   ),
+    .IndirOutSpill    ( IndirOutSpill ),
+    .AddrWidth        ( AddrWidth     ),
+    .DataWidth        ( DataWidth     ),
+    .IndexWidth       ( IndexWidth    ),
+    .PointerWidth     ( PointerWidth  ),
+    .ShiftWidth       ( ShiftWidth    ),
+    .IndexCredits     ( IndexCredits  ),
+    .NumLoops         ( NumLoops      ),
+    .tcdm_req_t       ( tcdm_req_t    ),
+    .tcdm_rsp_t       ( tcdm_rsp_t    ),
+    .tcdm_user_t      ( tcdm_user_t   )
   ) i_addr_gen (
     .clk_i,
     .rst_ni,
@@ -174,17 +176,5 @@ module snitch_ssr import snitch_pkg::*; #(
       rep_q <= rep_done ? '0 : rep_q + 1;
   end
   assign rep_done = (rep_q == rep_max);
-
-  // pragma translate_off
-  if (DebugLog) begin : gen_debug_log
-    always_ff @(posedge clk_i) begin
-      if (i_addr_gen.mem_valid_o & i_addr_gen.mem_ready_i)
-        $display("%m: %t: Emit Address 0x%0x,\tRpt %0d,\tWrite %0d", $time,
-            data_req.q.addr, rep_max, data_req.q.write);
-      if (idx_req.q_valid & idx_rsp.q_ready)
-        $display("%m: %t: Fetch Index Word 0x%0x", $time, idx_req.q.addr);
-    end
-  end
-  // pragma translate_on
 
 endmodule
