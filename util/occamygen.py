@@ -42,6 +42,7 @@ def main():
                         help="Name of top-level package file (output)")
     parser.add_argument("QUADRANT_S1",
                         help="Name of S1 quadrant file (output)")
+    parser.add_argument("XILINX_SV", help="Name of the Xilinx wrapper file (output).")
     parser.add_argument("--graph", "-g", metavar="DOT")
     parser.add_argument("--cheader", "-D", metavar="CHEADER")
 
@@ -80,6 +81,7 @@ def main():
     tpl_top = templates.get_template("occamy_top.sv.tpl")
     tpl_quadrant_s1 = templates.get_template("occamy_quadrant_s1.sv.tpl")
     tpl_pkg = templates.get_template("occamy_pkg.sv.tpl")
+    tpl_xilinx = templates.get_template("occamy_xilinx.sv.tpl")
 
     # Create the address map.
     am = solder.AddrMap()
@@ -251,6 +253,15 @@ def main():
         code = tpl_pkg.render_unicode(
             package=solder.code_package.replace("\n", "\n  "),
             solder=solder,
+        )
+        code = re_trailws.sub("", code)
+        file.write(code)
+
+    with open(args.XILINX_SV, "w") as file:
+        code = tpl_xilinx.render_unicode(
+            module=solder.code_module['default'].replace("\n", "\n  "),
+            solder=solder,
+            soc_wide_xbar=soc_wide_xbar,
         )
         code = re_trailws.sub("", code)
         file.write(code)

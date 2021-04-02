@@ -23,7 +23,7 @@ ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 # Source #
 ##########
 update-source:
-	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . src/occamy_top.sv src/occamy_pkg.sv src/occamy_quadrant_s1.sv
+	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . src/occamy_top.sv src/occamy_pkg.sv src/occamy_quadrant_s1.sv src/occamy_xilinx.sv
 	dot -Tpng addrmap.dot > addrmap.png
 	verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv
 

@@ -318,6 +318,20 @@ class AxiStruct:
         return name
 
 
+# AXI flat master port emission.
+class AxiFlatMasterPort:
+    def emit(name, aw, dw, iw, uw):
+        return "`AXI_FLAT_MASTER_PORT({}, logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])".format(
+            name, aw - 1, iw - 1, dw - 1, (dw + 7) // 8 - 1, max(0, uw - 1))
+
+
+# AXI flat slave port emission.
+class AxiFlatSlavePort:
+    def emit(name, aw, dw, iw, uw):
+        return "`AXI_FLAT_SLAVE_PORT({}, logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])".format(
+            name, aw - 1, iw - 1, dw - 1, (dw + 7) // 8 - 1, max(0, uw - 1))
+
+
 # AXI-Lite struct emission.
 class AxiLiteStruct:
     configs = dict()
@@ -386,6 +400,12 @@ class AxiBus(object):
 
     def emit_struct(self):
         return AxiStruct.emit(self.aw, self.dw, self.iw, self.uw)
+
+    def emit_flat_master_port(self, name=None):
+        return AxiFlatMasterPort.emit(name, self.aw, self.dw, self.iw, self.uw)
+
+    def emit_flat_slave_port(self, name=None):
+        return AxiFlatSlavePort.emit(name, self.aw, self.dw, self.iw, self.uw)
 
     def declare(self, context):
         if self.declared:
