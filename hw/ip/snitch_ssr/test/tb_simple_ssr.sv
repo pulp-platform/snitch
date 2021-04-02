@@ -9,7 +9,7 @@ module tb_simple_ssr;
   // Test data parameters
   localparam string       DataFile = "../test/tb_simple_ssr.hex";
   localparam int unsigned ValBase   = 'h0;
-  localparam int unsigned IdxBase   = 'h1000;
+  localparam int unsigned IdxBase   = 'h2000;
   localparam int unsigned IdxStride = 'h800;  // Stride of index arrays of different sizes
 
   // DUT parameters
@@ -44,7 +44,7 @@ module tb_simple_ssr;
     // Note that overlaps with source and other destination data may lead to mismatches;
     // To this end, we use only positive strides and sufficient offsets.
     for (int a = 0; a < 2; ++a) begin
-      automatic logic [31:0] wbase = (a + 1)*'h4000;
+      automatic logic [31:0] wbase = (a + 2)*'h4000;
       $info("Direct tests: write 1, alias %0d, wbase %x", a, wbase);
       fix.verify_nat_job(1, a, ValBase + 8*0,  0, 0, '{0, 0, 0, 36}, '{0, 0, 0, 1},    8*54, wbase);
       fix.verify_nat_job(1, a, ValBase + 8*17, 0, 3, '{0, 0, 0, 9},  '{0, 0, 0, 3},    8*71, wbase);
@@ -56,27 +56,29 @@ module tb_simple_ssr;
     end
 
     if (Indirection) begin
-      // Indirect 32-bit iteration read and write checks.
+      // Indirect iteration read and write checks.
       // The notes above on writes also apply here, which is why we write to dedicated sections.
       for (int i = 1'b0; i < (1 << 4); ++i) begin
         automatic logic w = i[3];
         automatic logic a = i[2];
         automatic logic [1:0] s = i[1:0];
-        automatic logic [31:0] wbase = w ? ({a, s} + 2)*'h4000 : ValBase;
+        automatic logic [31:0] wbase = w ? ({a, s} + 3)*'h4000 : ValBase;
         automatic logic [31:0] ibase = IdxBase + s*IdxStride;
         $info("Indirect tests: write %0d, alias %0d, size %0d, wbase %x, ibase %x",
             w, a, s, wbase, ibase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*0,  0, 36, 3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*1,  0, 35, 3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*20, 2, 12, 3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*26, 7, 7,  3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*1,  0, 35, 3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*30, 0, 4,  3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*31, 0, 4,  3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*14, 0, 0,  3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*15, 0, 0,  3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*14, 0, 1,  3, s, ValBase);
-        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*15, 0, 1,  3, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*1,  0, 3,  4, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*3,  0, 7,  3, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*0,  0, 36, 0, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*1,  0, 35, 2, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*20, 2, 12, 2, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*26, 7, 7,  2, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*1,  0, 35, 1, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*30, 0, 4,  2, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*31, 0, 4,  0, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*14, 0, 0,  0, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*15, 0, 0,  1, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*14, 0, 1,  2, s, ValBase);
+        fix.verify_indir_job(w, a, wbase, ibase + (1<<s)*15, 0, 1,  1, s, ValBase);
       end
     end
 

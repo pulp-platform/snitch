@@ -567,7 +567,7 @@ module fixture_ssr #(
         data_t idx_word     = memory[idx_addr >> WordAddrBits];
         data_t idx_mask     = ~(data_t'('1) << (8 << idx_size));
         data_t idx_shft     = idx_word >> (WordAddrBits+3)'(idx_addr[WordAddrBits-1:0] << 3);
-        data_t idx          = idx_shft & idx_mask;
+        data_t idx          = (idx_shft & idx_mask) << idx_shift;
         addr_t data_addr    = data_base + WordBytes * idx;
         data_t data_golden  = memory[data_addr >> WordAddrBits];
         // Model repetitions
@@ -596,7 +596,7 @@ module fixture_ssr #(
         data_t idx_word   = memory[idx_addr >> WordAddrBits];
         data_t idx_mask   = ~(data_t'('1) << (8 << idx_size));
         data_t idx_shft   = idx_word >> (WordAddrBits+3)'(idx_addr[WordAddrBits-1:0] << 3);
-        data_t idx        = idx_shft & idx_mask;
+        data_t idx        = (idx_shft & idx_mask) << idx_shift;
         addr_t data_addr  = data_base + WordBytes * idx;
         // Load data at this location
         data_t data_actual = fix.memory[data_addr >> WordAddrBits];

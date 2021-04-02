@@ -70,9 +70,9 @@ module snitch_ssr_indirector #(
   bytecnt_t last_idx_byteoffs;
 
   // Index serializer
-  data_t  idx_ser_mask;
-  data_t  idx_ser_shft;
-  index_t idx_ser_out;
+  data_t    idx_ser_mask;
+  index_t   idx_ser_out;
+  pointer_t idx_ser_offs;
 
   // Index serializer counter
   logic     idx_bytecnt_ena;
@@ -128,12 +128,12 @@ module snitch_ssr_indirector #(
   assign {natit_extraword_o, last_idx_byteoffs} = first_idx_byteoffs + natit_boundoffs_i;
 
   // Serialize indices: shift left by current byte offset, then mask out index of given size.
-  assign idx_ser_mask = ~(data_t'('1) << (8 << cfg_size_i));
-  assign idx_ser_shft = (idx_fifo_out >> (BytecntWidth+3)'(idx_bytecnt_q << 3));
-  assign idx_ser_out  = idx_ser_shft & idx_ser_mask;
+  assign idx_ser_mask = ~({DataWidth{1'b1}} << (8 << cfg_size_i));
+  assign idx_ser_out  = (idx_fifo_out >> (BytecntWidth+3)'(idx_bytecnt_q << 3)) & idx_ser_mask;
+  assign idx_ser_offs = pointer_t'(idx_ser_out) << BytecntWidth;
 
   // Shift and emit indices
-  assign mem_pointer_o = cfg_base_i + (pointer_t'(idx_ser_out) << cfg_shift_i);
+  assign mem_pointer_o = cfg_base_i + (idx_ser_offs << cfg_shift_i);
   assign mem_last_o    = last_word & idx_fifo_pop;
   assign mem_valid_o   = ~idx_fifo_empty;
 
