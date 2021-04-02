@@ -184,7 +184,7 @@
   assign req.aw.prot   = s_axi_``pat``_awprot;   \
   assign req.aw.qos    = s_axi_``pat``_awqos;    \
   assign req.aw.region = s_axi_``pat``_awregion; \
-  // assign req.aw.atop   = s_axi_``pat``_awatop;   \
+  assign req.aw.atop   = '0;                     \
   assign req.aw.user   = s_axi_``pat``_awuser;   \
                                                  \
   assign req.w_valid   = s_axi_``pat``_wvalid;   \
