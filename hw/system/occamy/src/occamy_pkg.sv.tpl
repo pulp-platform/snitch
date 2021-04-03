@@ -29,8 +29,8 @@ package occamy_pkg;
 
   typedef struct packed {
     logic [31:0] idx;
-    logic [33:0] start_addr;
-    logic [33:0] end_addr;
+    logic [47:0] start_addr;
+    logic [47:0] end_addr;
   } xbar_rule_48_t;
 
   typedef xbar_rule_48_t xbar_rule_t;

@@ -55,6 +55,7 @@ module occamy_top
   input  ${soc_wide_xbar.in_pcie.req_type()} pcie_axi_req_i,
   output ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o
   /// HBM2e Ports
+
   /// HBI Ports
 );
 
@@ -145,21 +146,20 @@ module occamy_top
   /////////////////
   // Peripherals //
   /////////////////
-  <% soc_narrow_xbar.out_periph.to_axi_lite(context, "soc_narrow_periph", to=soc_periph_xbar.in_soc) %>
+  <% soc_narrow_xbar.out_periph.change_dw(context, 32, "axi_to_axi_lite_dw").to_axi_lite(context, "axi_to_axi_lite_periph", to=soc_periph_xbar.in_soc) %>
+  <% soc_periph_xbar.out_regbus_periph.to_reg(context, "axi_lite_to_reg_periph", to=soc_regbus_periph_xbar.in_axi_lite_periph_xbar) %>
 
   /////////////////////
   //   SOC CONTROL   //
   /////////////////////
-  <% regbus_soc_ctrl = soc_periph_xbar.out_soc_ctrl.to_reg(context, "regbus_soc_ctrl") %>
-
   occamy_soc_reg_top #(
-    .reg_req_t ( ${regbus_soc_ctrl.req_type()} ),
-    .reg_rsp_t ( ${regbus_soc_ctrl.rsp_type()} )
+    .reg_req_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.req_type()} ),
+    .reg_rsp_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.rsp_type()} )
   ) i_soc_ctrl (
     .clk_i     ( clk_i  ),
     .rst_ni    ( rst_ni ),
-    .reg_req_i ( ${regbus_soc_ctrl.req_name()} ),
-    .reg_rsp_o ( ${regbus_soc_ctrl.rsp_name()} ),
+    .reg_req_i ( ${soc_regbus_periph_xbar.out_soc_ctrl.req_name()} ),
+    .reg_rsp_o ( ${soc_regbus_periph_xbar.out_soc_ctrl.rsp_name()} ),
     .reg2hw    ( soc_ctrl_in ),
     .hw2reg    ( soc_ctrl_out ),
     `ifdef SYNTHESIS

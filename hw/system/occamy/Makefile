@@ -45,8 +45,8 @@ work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
 	chmod +x $@
 	$@
 
-bin/occamy_chip.vcs: work-vcs/compile.sh
+bin/occamy_top.vcs: work-vcs/compile.sh
 	mkdir -p bin
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/occamy_top.vcs  \
-		-assert disable_cover -override_timescale=1ns/1ps -full64 occamy_chip
+		-assert disable_cover -override_timescale=1ns/1ps -full64 occamy_top
 
