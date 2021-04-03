@@ -1,0 +1,11 @@
+package:
+  name: lowrisc_rv_plic
+  description: "lowRISC RISC-V Platform Level Interrupt Controller"
+  authors: ["lowRISC Contributors"]
+
+dependencies:
+  lowrisc_prim: {path: ../prim}
+
+sources:
+- rtl/rv_plic_gateway.sv
+- rtl/rv_plic_target.sv

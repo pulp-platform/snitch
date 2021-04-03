@@ -15,6 +15,8 @@
 //   MAX_PRIO: Maximum value of interrupt priority
 
 module rv_plic import rv_plic_reg_pkg::*; #(
+  parameter type reg_req_t = logic,
+  parameter type reg_rsp_t = logic,
   // derived parameter
   localparam int SRCW    = $clog2(NumSrc)
 ) (
@@ -22,8 +24,8 @@ module rv_plic import rv_plic_reg_pkg::*; #(
   input     rst_ni,
 
   // Bus Interface (device)
-  input  tlul_pkg::tl_h2d_t tl_i,
-  output tlul_pkg::tl_d2h_t tl_o,
+  input  reg_req_t reg_req_i,
+  output reg_rsp_t reg_rsp_o,
 
   // Interrupt Sources
   input  [NumSrc-1:0] intr_src_i,
@@ -185,23 +187,23 @@ module rv_plic import rv_plic_reg_pkg::*; #(
   ////////////////////////
   //  Limitation of register tool prevents the module from having flexibility to parameters
   //  So, signals are manually tied at the top.
-  rv_plic_reg_top u_reg (
+  rv_plic_reg_top #(
+    .reg_req_t (reg_req_t),
+    .reg_rsp_t (reg_rsp_t)
+  ) u_reg (
     .clk_i,
     .rst_ni,
 
-    .tl_i,
-    .tl_o,
+    .reg_req_i,
+    .reg_rsp_o,
 
     .reg2hw,
     .hw2reg,
 
-    .intg_err_o (),
     .devmode_i  (1'b1)
   );
 
   // Assertions
-  `ASSERT_KNOWN(TlDValidKnownO_A, tl_o.d_valid)
-  `ASSERT_KNOWN(TlAReadyKnownO_A, tl_o.a_ready)
   `ASSERT_KNOWN(IrqKnownO_A, irq_o)
   `ASSERT_KNOWN(MsipKnownO_A, msip_o)
   for (genvar k = 0; k < NumTarget; k++) begin : gen_irq_id_known
