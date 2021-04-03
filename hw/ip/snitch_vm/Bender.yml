@@ -11,9 +11,6 @@ dependencies:
   common_cells: {path: ../../vendor/pulp_platform_common_cells}
   snitch: {path: ../../ip/snitch}
 
-export_include_dirs:
-- include
-
 sources:
 # Level 0:
 - src/snitch_ptw.sv
