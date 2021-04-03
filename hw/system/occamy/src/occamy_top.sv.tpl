@@ -62,6 +62,8 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_in;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_out;
 
+  logic [1:0] mip;
+
   addr_t [${nr_s1_quadrants-1}:0] s1_quadrant_base_addr;
   % for i in range(nr_s1_quadrants):
   assign s1_quadrant_base_addr[${i}] = ClusterBaseOffset + ${i} * S1QuadrantAddressSpace;
@@ -101,7 +103,7 @@ module occamy_top
     .rst_ni (rst_ni),
     .boot_addr_i (BootAddr),
     .hart_id_i ('0),
-    .irq_i ('0),
+    .irq_i (mip),
     .ipi_i ('0),
     .time_irq_i ('0),
     .debug_req_i ('0),
@@ -176,8 +178,8 @@ module occamy_top
     .reg_req_t (${soc_regbus_periph_xbar.out_uart.req_type()} ),
     .reg_rsp_t (${soc_regbus_periph_xbar.out_uart.rsp_type()} )
   ) i_uart (
-    .clk_i (clk_i),
-    .rst_ni (rst_ni),
+    .clk_i (${soc_regbus_periph_xbar.out_uart.clk}),
+    .rst_ni (${soc_regbus_periph_xbar.out_uart.rst}),
     .reg_req_i (${soc_regbus_periph_xbar.out_uart.req_name()}),
     .reg_rsp_o (${soc_regbus_periph_xbar.out_uart.rsp_name()}),
     .cio_tx_o (uart_tx_o),
@@ -192,5 +194,41 @@ module occamy_top
     .intr_rx_timeout_o (),
     .intr_rx_parity_err_o ()
   );
+
+  /////////////
+  //   ROM   //
+  /////////////
+
+  // TODO(zarubaf): This is very system specific, so we might be better off
+  // placing it outside the top-level.
+
+  //////////////
+  //   PLIC   //
+  //////////////
+  rv_plic #(
+    .reg_req_t (${soc_regbus_periph_xbar.out_plic.req_type()}),
+    .reg_rsp_t (${soc_regbus_periph_xbar.out_plic.rsp_type()})
+  ) i_rv_plic (
+    .clk_i (${soc_regbus_periph_xbar.out_plic.clk}),
+    .rst_ni (${soc_regbus_periph_xbar.out_plic.rst}),
+    .reg_req_i (${soc_regbus_periph_xbar.out_plic.req_name()}),
+    .reg_rsp_o (${soc_regbus_periph_xbar.out_plic.rsp_name()}),
+    .intr_src_i ('0),
+    .irq_o (mip),
+    .irq_id_o (),
+    .msip_o ()
+  );
+
+  //////////////////
+  //   SPI Host   //
+  //////////////////
+
+  //////////////
+  //   GPIO   //
+  //////////////
+
+  /////////////
+  //   I2C   //
+  /////////////
 
 endmodule

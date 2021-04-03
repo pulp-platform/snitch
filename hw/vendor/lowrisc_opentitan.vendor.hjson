@@ -13,12 +13,15 @@
   patch_dir: "patches/lowrisc_opentitan",
 
   mapping: [
-    {from: 'hw/ip/prim/rtl', to: 'prim/rtl', patch_dir: 'prim'},
+    {from: 'hw/ip/prim', to: 'prim', patch_dir: 'prim'},
     {from: 'hw/ip/uart', to: 'uart', patch_dir: 'uart'},
     {from: 'hw/ip/gpio', to: 'gpio'},
     {from: 'hw/ip/i2c', to: 'i2c'},
     {from: 'hw/ip/spi_host', to: 'spi_host'},
-    {from: 'hw/ip/rv_plic', to: 'rv_plic'},
-    {from: 'hw/ip/rv_timer', to: 'rv_timer'},
+    {from: 'hw/ip/rv_plic', to: 'rv_plic', patch_dir: 'rv_plic'}
+  ]
+
+  exclude_from_upstream: [
+    "*.core",
   ]
 }

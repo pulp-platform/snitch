@@ -27,6 +27,12 @@ update-source:
 	dot -Tpng addrmap.dot > addrmap.png
 	verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv
 
+update-plic:
+	mkdir -p src/rv_plic
+	$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 10 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv
+	$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 10 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
+	$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
+
 # Regenerate the SoC register.
 update-socreg: src/occamy_soc_reg/occamy_soc_reg.hjson
 	$(REGGEN) -r src/occamy_soc_reg/occamy_soc_reg.hjson --outdir src/occamy_soc_reg/

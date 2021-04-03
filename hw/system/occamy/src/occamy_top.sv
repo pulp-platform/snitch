@@ -62,6 +62,8 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_in;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_out;
 
+  logic [1:0] mip;
+
   addr_t [7:0] s1_quadrant_base_addr;
   assign s1_quadrant_base_addr[0] = ClusterBaseOffset + 0 * S1QuadrantAddressSpace;
   assign s1_quadrant_base_addr[1] = ClusterBaseOffset + 1 * S1QuadrantAddressSpace;
@@ -331,7 +333,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .rst_ni(rst_ni),
       .boot_addr_i(BootAddr),
       .hart_id_i('0),
-      .irq_i('0),
+      .irq_i(mip),
       .ipi_i('0),
       .time_irq_i('0),
       .debug_req_i('0),
@@ -1279,5 +1281,41 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .intr_rx_timeout_o(),
       .intr_rx_parity_err_o()
   );
+
+  /////////////
+  //   ROM   //
+  /////////////
+
+  // TODO(zarubaf): This is very system specific, so we might be better off
+  // placing it outside the top-level.
+
+  //////////////
+  //   PLIC   //
+  //////////////
+  rv_plic #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t)
+  ) i_rv_plic (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_PLIC]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_PLIC]),
+      .intr_src_i('0),
+      .irq_o(mip),
+      .irq_id_o(),
+      .msip_o()
+  );
+
+  //////////////////
+  //   SPI Host   //
+  //////////////////
+
+  //////////////
+  //   GPIO   //
+  //////////////
+
+  /////////////
+  //   I2C   //
+  /////////////
 
 endmodule
