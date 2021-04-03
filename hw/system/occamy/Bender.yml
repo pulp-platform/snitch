@@ -12,6 +12,7 @@ dependencies:
   snitch_const_cache: {path: ../../ip/snitch_const_cache}
   snitch-cluster: {path: ../../ip/snitch_cluster}
   cva6: {path: ../../vendor/openhwgroup_cva6}
+  lowrisc_uart: {path: ../../vendor/lowrisc_opentitan/uart}
 
 sources:
 # Level 0:

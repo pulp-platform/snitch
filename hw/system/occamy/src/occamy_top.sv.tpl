@@ -169,4 +169,28 @@ module occamy_top
     `endif
   );
 
+  //////////////
+  //   UART   //
+  //////////////
+  uart #(
+    .reg_req_t (${soc_regbus_periph_xbar.out_uart.req_type()} ),
+    .reg_rsp_t (${soc_regbus_periph_xbar.out_uart.rsp_type()} )
+  ) i_uart (
+    .clk_i (clk_i),
+    .rst_ni (rst_ni),
+    .reg_req_i (${soc_regbus_periph_xbar.out_uart.req_name()}),
+    .reg_rsp_o (${soc_regbus_periph_xbar.out_uart.rsp_name()}),
+    .cio_tx_o (uart_tx_o),
+    .cio_rx_i (uart_rx_i),
+    .cio_tx_en_o (),
+    .intr_tx_watermark_o (),
+    .intr_rx_watermark_o (),
+    .intr_tx_empty_o (),
+    .intr_rx_overflow_o (),
+    .intr_rx_frame_err_o (),
+    .intr_rx_break_err_o (),
+    .intr_rx_timeout_o (),
+    .intr_rx_parity_err_o ()
+  );
+
 endmodule

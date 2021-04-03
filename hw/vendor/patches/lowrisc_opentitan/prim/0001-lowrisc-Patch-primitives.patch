@@ -1,0 +1,42 @@
+From eb5d7f8b55073edaa3a35308d12a0e347eaac3ae Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Sat, 3 Apr 2021 15:34:08 +0200
+Subject: [PATCH] lowrisc: Patch primitives
+
+---
+ Bender.yml            | 9 +++++++++
+ rtl/prim_fifo_sync.sv | 2 +-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+ create mode 100644 hw/vendor/lowrisc_opentitan/prim/Bender.yml
+
+diff --git a/Bender.yml b/Bender.yml
+new file mode 100644
+index 0000000..1454c78
+--- /dev/null
++++ b/Bender.yml
+@@ -0,0 +1,9 @@
++package:
++  name: lowrisc_prim
++  description: "lowRISC RTL primitives"
++  authors: ["lowRISC Contributors"]
++
++sources:
++- rtl/prim_util_pkg.sv
++- rtl/prim_intr_hw.sv
++- rtl/prim_fifo_sync.sv
+diff --git a/rtl/prim_fifo_sync.sv b/rtl/prim_fifo_sync.sv
+index 77b8230..c69be23 100644
+--- a/rtl/prim_fifo_sync.sv
++++ b/rtl/prim_fifo_sync.sv
+@@ -4,7 +4,7 @@
+ //
+ // Generic synchronous fifo for use in a variety of devices.
+ 
+-`include "prim_assert.sv"
++`include "common_cells/assertions.svh"
+ 
+ module prim_fifo_sync #(
+   parameter int unsigned Width       = 16,
+-- 
+2.25.1.377.g2d2118b814
+

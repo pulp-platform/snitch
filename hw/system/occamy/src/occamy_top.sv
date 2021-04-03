@@ -1256,4 +1256,28 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 `endif
   );
 
+  //////////////
+  //   UART   //
+  //////////////
+  uart #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t)
+  ) i_uart (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_UART]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_UART]),
+      .cio_tx_o(uart_tx_o),
+      .cio_rx_i(uart_rx_i),
+      .cio_tx_en_o(),
+      .intr_tx_watermark_o(),
+      .intr_rx_watermark_o(),
+      .intr_tx_empty_o(),
+      .intr_rx_overflow_o(),
+      .intr_rx_frame_err_o(),
+      .intr_rx_break_err_o(),
+      .intr_rx_timeout_o(),
+      .intr_rx_parity_err_o()
+  );
+
 endmodule
