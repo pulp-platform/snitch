@@ -4,15 +4,18 @@
 //
 // Description: UART top level wrapper file
 
-`include "prim_assert.sv"
+`include "common_cells/assertions.svh"
 
-module uart (
+module uart #(
+  parameter type reg_req_t = logic,
+  parameter type reg_rsp_t = logic
+) (
   input           clk_i,
   input           rst_ni,
 
   // Bus Interface
-  input  tlul_pkg::tl_h2d_t tl_i,
-  output tlul_pkg::tl_d2h_t tl_o,
+  input  reg_req_t reg_req_i,
+  output reg_rsp_t reg_rsp_o,
 
   // Generic IO
   input           cio_rx_i,
@@ -35,14 +38,16 @@ module uart (
   uart_reg2hw_t reg2hw;
   uart_hw2reg_t hw2reg;
 
-  uart_reg_top u_reg (
+  uart_reg_top #(
+    .reg_req_t (reg_req_t),
+    .reg_rsp_t (reg_rsp_t)
+  ) u_reg (
     .clk_i,
     .rst_ni,
-    .tl_i,
-    .tl_o,
+    .reg_req_i,
+    .reg_rsp_o,
     .reg2hw,
     .hw2reg,
-    .intg_err_o (),
     .devmode_i  (1'b1)
   );
 

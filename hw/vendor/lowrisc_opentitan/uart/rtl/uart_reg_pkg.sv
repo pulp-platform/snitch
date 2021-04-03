@@ -6,13 +6,9 @@
 
 package uart_reg_pkg;
 
-  // Address widths within the block
-  parameter int BlockAw = 6;
-
   ////////////////////////////
   // Typedefs for registers //
   ////////////////////////////
-
   typedef struct packed {
     struct packed {
       logic        q;
@@ -206,6 +202,7 @@ package uart_reg_pkg;
     } en;
   } uart_reg2hw_timeout_ctrl_reg_t;
 
+
   typedef struct packed {
     struct packed {
       logic        d;
@@ -290,64 +287,51 @@ package uart_reg_pkg;
     logic [15:0] d;
   } uart_hw2reg_val_reg_t;
 
-  // Register -> HW type
+
+  ///////////////////////////////////////
+  // Register to internal design logic //
+  ///////////////////////////////////////
   typedef struct packed {
-    uart_reg2hw_intr_state_reg_t intr_state; // [124:117]
-    uart_reg2hw_intr_enable_reg_t intr_enable; // [116:109]
-    uart_reg2hw_intr_test_reg_t intr_test; // [108:93]
-    uart_reg2hw_ctrl_reg_t ctrl; // [92:68]
-    uart_reg2hw_status_reg_t status; // [67:56]
-    uart_reg2hw_rdata_reg_t rdata; // [55:47]
-    uart_reg2hw_wdata_reg_t wdata; // [46:38]
-    uart_reg2hw_fifo_ctrl_reg_t fifo_ctrl; // [37:27]
-    uart_reg2hw_ovrd_reg_t ovrd; // [26:25]
-    uart_reg2hw_timeout_ctrl_reg_t timeout_ctrl; // [24:0]
+    uart_reg2hw_intr_state_reg_t intr_state; // [125:118]
+    uart_reg2hw_intr_enable_reg_t intr_enable; // [117:110]
+    uart_reg2hw_intr_test_reg_t intr_test; // [109:94]
+    uart_reg2hw_ctrl_reg_t ctrl; // [93:69]
+    uart_reg2hw_status_reg_t status; // [68:57]
+    uart_reg2hw_rdata_reg_t rdata; // [56:48]
+    uart_reg2hw_wdata_reg_t wdata; // [47:39]
+    uart_reg2hw_fifo_ctrl_reg_t fifo_ctrl; // [38:28]
+    uart_reg2hw_ovrd_reg_t ovrd; // [27:26]
+    uart_reg2hw_timeout_ctrl_reg_t timeout_ctrl; // [25:1]
   } uart_reg2hw_t;
 
-  // HW -> register type
+  ///////////////////////////////////////
+  // Internal design logic to register //
+  ///////////////////////////////////////
   typedef struct packed {
-    uart_hw2reg_intr_state_reg_t intr_state; // [64:49]
-    uart_hw2reg_status_reg_t status; // [48:43]
-    uart_hw2reg_rdata_reg_t rdata; // [42:35]
-    uart_hw2reg_fifo_ctrl_reg_t fifo_ctrl; // [34:28]
-    uart_hw2reg_fifo_status_reg_t fifo_status; // [27:16]
-    uart_hw2reg_val_reg_t val; // [15:0]
+    uart_hw2reg_intr_state_reg_t intr_state; // [65:58]
+    uart_hw2reg_status_reg_t status; // [57:46]
+    uart_hw2reg_rdata_reg_t rdata; // [45:37]
+    uart_hw2reg_fifo_ctrl_reg_t fifo_ctrl; // [36:26]
+    uart_hw2reg_fifo_status_reg_t fifo_status; // [25:26]
+    uart_hw2reg_val_reg_t val; // [25:26]
   } uart_hw2reg_t;
 
-  // Register offsets
-  parameter logic [BlockAw-1:0] UART_INTR_STATE_OFFSET = 6'h 0;
-  parameter logic [BlockAw-1:0] UART_INTR_ENABLE_OFFSET = 6'h 4;
-  parameter logic [BlockAw-1:0] UART_INTR_TEST_OFFSET = 6'h 8;
-  parameter logic [BlockAw-1:0] UART_CTRL_OFFSET = 6'h c;
-  parameter logic [BlockAw-1:0] UART_STATUS_OFFSET = 6'h 10;
-  parameter logic [BlockAw-1:0] UART_RDATA_OFFSET = 6'h 14;
-  parameter logic [BlockAw-1:0] UART_WDATA_OFFSET = 6'h 18;
-  parameter logic [BlockAw-1:0] UART_FIFO_CTRL_OFFSET = 6'h 1c;
-  parameter logic [BlockAw-1:0] UART_FIFO_STATUS_OFFSET = 6'h 20;
-  parameter logic [BlockAw-1:0] UART_OVRD_OFFSET = 6'h 24;
-  parameter logic [BlockAw-1:0] UART_VAL_OFFSET = 6'h 28;
-  parameter logic [BlockAw-1:0] UART_TIMEOUT_CTRL_OFFSET = 6'h 2c;
+  // Register Address
+  parameter logic [5:0] UART_INTR_STATE_OFFSET = 6'h 0;
+  parameter logic [5:0] UART_INTR_ENABLE_OFFSET = 6'h 4;
+  parameter logic [5:0] UART_INTR_TEST_OFFSET = 6'h 8;
+  parameter logic [5:0] UART_CTRL_OFFSET = 6'h c;
+  parameter logic [5:0] UART_STATUS_OFFSET = 6'h 10;
+  parameter logic [5:0] UART_RDATA_OFFSET = 6'h 14;
+  parameter logic [5:0] UART_WDATA_OFFSET = 6'h 18;
+  parameter logic [5:0] UART_FIFO_CTRL_OFFSET = 6'h 1c;
+  parameter logic [5:0] UART_FIFO_STATUS_OFFSET = 6'h 20;
+  parameter logic [5:0] UART_OVRD_OFFSET = 6'h 24;
+  parameter logic [5:0] UART_VAL_OFFSET = 6'h 28;
+  parameter logic [5:0] UART_TIMEOUT_CTRL_OFFSET = 6'h 2c;
 
-  // Reset values for hwext registers and their fields
-  parameter logic [7:0] UART_INTR_TEST_RESVAL = 8'h 0;
-  parameter logic [0:0] UART_INTR_TEST_TX_WATERMARK_RESVAL = 1'h 0;
-  parameter logic [0:0] UART_INTR_TEST_RX_WATERMARK_RESVAL = 1'h 0;
-  parameter logic [0:0] UART_INTR_TEST_TX_EMPTY_RESVAL = 1'h 0;
-  parameter logic [0:0] UART_INTR_TEST_RX_OVERFLOW_RESVAL = 1'h 0;
-  parameter logic [0:0] UART_INTR_TEST_RX_FRAME_ERR_RESVAL = 1'h 0;
-  parameter logic [0:0] UART_INTR_TEST_RX_BREAK_ERR_RESVAL = 1'h 0;
-  parameter logic [0:0] UART_INTR_TEST_RX_TIMEOUT_RESVAL = 1'h 0;
-  parameter logic [0:0] UART_INTR_TEST_RX_PARITY_ERR_RESVAL = 1'h 0;
-  parameter logic [5:0] UART_STATUS_RESVAL = 6'h 3c;
-  parameter logic [0:0] UART_STATUS_TXEMPTY_RESVAL = 1'h 1;
-  parameter logic [0:0] UART_STATUS_TXIDLE_RESVAL = 1'h 1;
-  parameter logic [0:0] UART_STATUS_RXIDLE_RESVAL = 1'h 1;
-  parameter logic [0:0] UART_STATUS_RXEMPTY_RESVAL = 1'h 1;
-  parameter logic [7:0] UART_RDATA_RESVAL = 8'h 0;
-  parameter logic [21:0] UART_FIFO_STATUS_RESVAL = 22'h 0;
-  parameter logic [15:0] UART_VAL_RESVAL = 16'h 0;
 
-  // Register index
+  // Register Index
   typedef enum int {
     UART_INTR_STATE,
     UART_INTR_ENABLE,
@@ -378,6 +362,5 @@ package uart_reg_pkg;
     4'b 0011, // index[10] UART_VAL
     4'b 1111  // index[11] UART_TIMEOUT_CTRL
   };
-
 endpackage
 

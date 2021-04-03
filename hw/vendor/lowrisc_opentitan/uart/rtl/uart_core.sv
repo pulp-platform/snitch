@@ -218,14 +218,14 @@ module uart_core (
   //////////////
 
   //      sync the incoming data
-  prim_flop_2sync #(
-    .Width(1),
+  sync #(
+    .STAGES(2),
     .ResetValue(1'b1)
   ) sync_rx (
     .clk_i,
     .rst_ni,
-    .d_i(rx),
-    .q_o(rx_sync)
+    .serial_i(rx),
+    .serial_o(rx_sync)
   );
 
   // Based on: en.wikipedia.org/wiki/Repetition_code mentions the use of a majority filter
