@@ -10,8 +10,11 @@
     rev: "master",
   },
 
+  patch_dir: "patches/lowrisc_opentitan",
+
   mapping: [
-    {from: 'hw/ip/uart', to: 'uart'},
+    {from: 'hw/ip/prim/rtl', to: 'prim/rtl', patch_dir: 'prim'},
+    {from: 'hw/ip/uart', to: 'uart', patch_dir: 'uart'},
     {from: 'hw/ip/gpio', to: 'gpio'},
     {from: 'hw/ip/i2c', to: 'i2c'},
     {from: 'hw/ip/spi_host', to: 'spi_host'},
