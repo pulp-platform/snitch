@@ -4,7 +4,6 @@
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "cva6 instruction/data cache array",
             "icache data (hive 0)"
         ],
         "latency": 1,
@@ -24,6 +23,19 @@
         "ports": 1,
         "speed_optimized": true,
         "width": 45,
+        "words": 256
+    },
+    {
+        "byte_enable": true,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "cva6 instruction/data cache array"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 512,
         "words": 256
     },
     {

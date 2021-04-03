@@ -15,8 +15,32 @@ module occamy_cva6 (
   input  ariane_axi::resp_t axi_resp_i
 );
 
+  localparam ariane_pkg::ariane_cfg_t CVA6OccamyConfig = '{
+    RASDepth: 2,
+    BTBEntries: 32,
+    BHTEntries: 128,
+    // idempotent region
+    NrNonIdempotentRules: 2,
+    NonIdempotentAddrBase: {64'b0, 64'b0},
+    NonIdempotentLength:   {64'b0, 64'b0},
+    NrExecuteRegionRules: 3,
+    //                      DRAM,          Boot ROM,   Debug Module
+    ExecuteRegionAddrBase: {64'h8000_0000, 64'h1_0000, 64'h0},
+    ExecuteRegionLength:   {64'h40000000,  64'h10000,  64'h1000},
+    // cached region
+    NrCachedRegionRules:    1,
+    CachedRegionAddrBase:  {64'h8000_0000},
+    CachedRegionLength:    {64'h40000000},
+    //  cache config
+    Axi64BitCompliant:      1'b1,
+    SwapEndianess:          1'b0,
+    // debug
+    DmBaseAddress:          64'h0,
+    NrPMPEntries:           8
+  };
+
   ariane #(
-    .ArianeCfg (ariane_pkg::ArianeDefaultConfig)
+    .ArianeCfg (CVA6OccamyConfig)
   ) i_cva6 (
     .clk_i,
     .rst_ni,
