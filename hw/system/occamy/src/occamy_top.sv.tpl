@@ -13,8 +13,12 @@ module occamy_top
   import occamy_pkg::*;
 (
   input  logic        clk_i,
-  input  logic        rtc_i,
   input  logic        rst_ni,
+  /// Peripheral clock
+  input  logic        clk_periph_i,
+  input  logic        rst_periph_ni,
+  /// Real-time clock (for time keeping)
+  input  logic        rtc_i,
   input  logic        test_mode_i,
   input  logic [1:0]  chip_id_i,
   input  logic [1:0]  boot_mode_i,
@@ -61,15 +65,28 @@ module occamy_top
   output ${soc_regbus_periph_xbar.out_plic.req_type()} bootrom_req_o,
   input  ${soc_regbus_periph_xbar.out_plic.rsp_type()} bootrom_rsp_i,
 
+  /// Clk manager
+  output ${soc_regbus_periph_xbar.out_clk_mgr.req_type()} clk_mgr_req_o,
+  input  ${soc_regbus_periph_xbar.out_clk_mgr.rsp_type()} clk_mgr_rsp_i,
+
+  /// HBM2e Ports
+% for i in range(8):
+  output  ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].req_type()} hbm_${i}_req_o,
+  input   ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].rsp_type()} hbm_${i}_rsp_i,
+% endfor
+
+  /// HBI Ports
+% for i in range(nr_s1_quadrants):
+  input   ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_type()} hbi_${i}_req_i,
+  output  ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_type()} hbi_${i}_rsp_o,
+% endfor
+
   /// PCIe Ports
   output  ${soc_wide_xbar.out_pcie.req_type()} pcie_axi_req_o,
   input   ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i,
 
   input  ${soc_wide_xbar.in_pcie.req_type()} pcie_axi_req_i,
   output ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o
-  /// HBM2e Ports
-
-  /// HBI Ports
 );
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_in;
@@ -162,12 +179,37 @@ module occamy_top
 
   % endfor
 
+  /// HBM2e Ports
+% for i in range(8):
+  assign hbm_${i}_req_o = ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].req_name()};
+  assign ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].rsp_name()} = hbm_${i}_rsp_i;
+% endfor
+
+  /// HBI Ports
+  // TODO(zarubaf): Truncate address.
+% for i in range(nr_s1_quadrants):
+  assign ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_name()} = hbi_${i}_req_i;
+  assign hbi_${i}_rsp_o = ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_name()};
+% endfor
+
+  /////////////////
+  // Peripherals //
+  /////////////////
+  <% soc_narrow_xbar.out_periph \
+      .cdc(context, "clk_periph_i", "rst_periph_ni", "axi_lite_cdc") \
+      .to_axi_lite(context, "axi_to_axi_lite_periph", to=soc_periph_xbar.in_soc) %>
+
+  <% soc_narrow_xbar.out_regbus_periph \
+      .cdc(context, "clk_periph_i", "rst_periph_ni", "periph_cdc") \
+      .change_dw(context, 32, "axi_to_axi_lite_dw") \
+      .to_axi_lite(context, "axi_to_axi_lite_regbus_periph") \
+      .to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_axi_lite_periph_xbar) %>
+
+
   ///////////
   // Debug //
   ///////////
-
   <% regbus_debug = soc_periph_xbar.out_debug.to_reg(context, "axi_lite_to_reg_debug") %>
-
   dm::hartinfo_t [0:0] hartinfo;
   assign hartinfo = ariane_pkg::DebugHartInfo;
 
@@ -310,13 +352,7 @@ module occamy_top
   /////////
   // SPM //
   /////////
-
-  /////////////////
-  // Peripherals //
-  /////////////////
-  <% soc_narrow_xbar.out_periph.to_axi_lite(context, "axi_to_axi_lite_periph", to=soc_periph_xbar.in_soc) %>
-
-  <% soc_narrow_xbar.out_regbus_periph.change_dw(context, 32, "axi_to_axi_lite_dw").to_axi_lite(context, "axi_to_axi_lite_regbus_periph").to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_axi_lite_periph_xbar) %>
+  // TODO(zarubaf): Add a tiny bit of SPM
 
   ///////////////
   //   CLINT   //
@@ -387,6 +423,13 @@ module occamy_top
   // placing it outside the top-level.
   assign bootrom_req_o = ${soc_regbus_periph_xbar.out_bootrom.req_name()};
   assign ${soc_regbus_periph_xbar.out_bootrom.rsp_name()} = bootrom_rsp_i;
+
+  /////////////////
+  //   Clk Mgr   //
+  /////////////////
+
+  assign clk_mgr_req_o = ${soc_regbus_periph_xbar.out_clk_mgr.req_name()};
+  assign ${soc_regbus_periph_xbar.out_clk_mgr.rsp_name()} = clk_mgr_rsp_i;
 
   //////////////
   //   PLIC   //

@@ -96,8 +96,13 @@ def main():
                              0x00010000).attach_to(am_soc_regbus_periph_xbar)
     am_soc_ctrl = am.new_leaf("soc_ctrl", 0x1000,
                               0x00020000).attach_to(am_soc_regbus_periph_xbar)
+    am_clk_mgr = am.new_leaf("clk_mgr", 0x1000,
+                             0x00021000).attach_to(am_soc_regbus_periph_xbar)
+
+    # TODO(zarubaf): I am pretty sure the address map is too small.
     am_plic = am.new_leaf("plic", 0x1000,
                           0x00024000).attach_to(am_soc_regbus_periph_xbar)
+
     am_uart = am.new_leaf("uart", 0x1000,
                           0x00030000).attach_to(am_soc_regbus_periph_xbar)
     am_gpio = am.new_leaf("gpio", 0x1000,
@@ -114,7 +119,17 @@ def main():
                            0x00040000).attach_to(am_soc_axi_lite_periph_xbar)
 
     am_pcie = am.new_leaf("pcie", 0x80000000,
-                          0x80000000).attach_to(am_soc_wide_xbar)
+                          0x10000000).attach_to(am_soc_wide_xbar)
+
+    # HBM
+    am_hbm = list()
+    HBM_CHANNEL_SIZE = 0x100000
+
+    for i in range(8):
+        am_hbm.append(
+            am.new_leaf("hbm_{}".format(i), HBM_CHANNEL_SIZE,
+                        (0x90000000 +
+                         i * HBM_CHANNEL_SIZE)).attach_to(am_soc_wide_xbar))
 
     am_soc_narrow_xbar.attach(am_soc_axi_lite_periph_xbar)
     am_soc_narrow_xbar.attach(am_soc_regbus_periph_xbar)
@@ -128,8 +143,8 @@ def main():
     soc_periph_xbar = solder.AxiLiteXbar(48,
                                          64,
                                          name="soc_axi_lite_periph_xbar",
-                                         clk="clk_i",
-                                         rst="rst_ni",
+                                         clk="clk_periph_i",
+                                         rst="rst_periph_ni",
                                          node=am_soc_axi_lite_periph_xbar)
 
     soc_periph_xbar.add_input("soc")
@@ -143,13 +158,14 @@ def main():
     soc_regbus_periph_xbar = solder.RegBusXbar(48,
                                                32,
                                                name="soc_regbus_periph_xbar",
-                                               clk="clk_i",
-                                               rst="rst_ni",
+                                               clk="clk_periph_i",
+                                               rst="rst_periph_ni",
                                                node=am_soc_regbus_periph_xbar)
 
     soc_regbus_periph_xbar.add_input("axi_lite_periph_xbar")
 
     soc_regbus_periph_xbar.add_output_entry("soc_ctrl", am_soc_ctrl)
+    soc_regbus_periph_xbar.add_output_entry("clk_mgr", am_clk_mgr)
     soc_regbus_periph_xbar.add_output_entry("bootrom", am_bootrom)
     soc_regbus_periph_xbar.add_output_entry("plic", am_plic)
     soc_regbus_periph_xbar.add_output_entry("uart", am_uart)
@@ -175,7 +191,14 @@ def main():
                                           "S1QuadrantAddressSpace")
         soc_wide_xbar.add_input("s1_quadrant_{}".format(i))
 
+    for i in range(8):
+        soc_wide_xbar.add_output_entry("hbm_{}".format(i), am_hbm[i])
+
+    for i in range(nr_s1_quadrants):
+        soc_wide_xbar.add_input("hbi_{}".format(i))
+
     soc_wide_xbar.add_input("soc_narrow")
+
     # TODO(zarubaf): PCIe should probably go into the small crossbar.
     soc_wide_xbar.add_input("pcie")
     soc_wide_xbar.add_output_entry("pcie", am_pcie)

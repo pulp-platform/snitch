@@ -9,7 +9,7 @@
 `include "axi_flat.sv"
 
 module occamy_xilinx
-import occamy_pkg::*;
+  import occamy_pkg::*;
 (
     input  logic             clk_i,
     input  logic             rst_ni,
@@ -51,7 +51,7 @@ import occamy_pkg::*;
     /// PCIe Ports
     input  logic                     m_axi_pcie_awready,
     output logic                     m_axi_pcie_awvalid,
-    output logic             [  6:0] m_axi_pcie_awid,
+    output logic             [  7:0] m_axi_pcie_awid,
     output logic             [ 47:0] m_axi_pcie_awaddr,
     output axi_pkg::len_t            m_axi_pcie_awlen,
     output axi_pkg::size_t           m_axi_pcie_awsize,
@@ -71,7 +71,7 @@ import occamy_pkg::*;
     output logic             [  0:0] m_axi_pcie_wuser,
     input  logic                     m_axi_pcie_arready,
     output logic                     m_axi_pcie_arvalid,
-    output logic             [  6:0] m_axi_pcie_arid,
+    output logic             [  7:0] m_axi_pcie_arid,
     output logic             [ 47:0] m_axi_pcie_araddr,
     output axi_pkg::len_t            m_axi_pcie_arlen,
     output axi_pkg::size_t           m_axi_pcie_arsize,
@@ -84,14 +84,14 @@ import occamy_pkg::*;
     output logic             [  0:0] m_axi_pcie_aruser,
     output logic                     m_axi_pcie_rready,
     input  logic                     m_axi_pcie_rvalid,
-    input  logic             [  6:0] m_axi_pcie_rid,
+    input  logic             [  7:0] m_axi_pcie_rid,
     input  logic             [511:0] m_axi_pcie_rdata,
     input  axi_pkg::resp_t           m_axi_pcie_rresp,
     input  logic                     m_axi_pcie_rlast,
     input  logic             [  0:0] m_axi_pcie_ruser,
     output logic                     m_axi_pcie_bready,
     input  logic                     m_axi_pcie_bvalid,
-    input  logic             [  6:0] m_axi_pcie_bid,
+    input  logic             [  7:0] m_axi_pcie_bid,
     input  axi_pkg::resp_t           m_axi_pcie_bresp,
     input  logic             [  0:0] m_axi_pcie_buser,
 
@@ -146,8 +146,8 @@ import occamy_pkg::*;
 );
 
   // AXI ports of Occamy top-level
-  axi_a48_d512_i7_u0_req_t  pcie_axi_req_o;
-  axi_a48_d512_i7_u0_resp_t pcie_axi_rsp_i;
+  axi_a48_d512_i8_u0_req_t  pcie_axi_req_o;
+  axi_a48_d512_i8_u0_resp_t pcie_axi_rsp_i;
 
   axi_a48_d512_i3_u0_req_t  pcie_axi_req_i;
   axi_a48_d512_i3_u0_resp_t pcie_axi_rsp_o;
