@@ -259,7 +259,6 @@ def main():
 
     with open(args.XILINX_SV, "w") as file:
         code = tpl_xilinx.render_unicode(
-            module=solder.code_module['default'].replace("\n", "\n  "),
             solder=solder,
             soc_wide_xbar=soc_wide_xbar,
         )
