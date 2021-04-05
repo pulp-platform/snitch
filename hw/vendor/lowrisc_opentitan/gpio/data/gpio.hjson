@@ -4,9 +4,7 @@
 {
   name: "gpio",
   clock_primary: "clk_i",
-  bus_interfaces: [
-    { protocol: "tlul", direction: "device" }
-  ],
+  bus_device: "reg",
   available_inout_list: [
     { name: "gpio",
       width: 32,
