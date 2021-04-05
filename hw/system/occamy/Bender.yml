@@ -14,6 +14,7 @@ dependencies:
   cva6: {path: ../../vendor/openhwgroup_cva6}
   lowrisc_uart: {path: ../../vendor/lowrisc_opentitan/uart}
   lowrisc_rv_plic: {path: ../../vendor/lowrisc_opentitan/rv_plic}
+  lowrisc_gpio: {path: ../../vendor/lowrisc_opentitan/gpio}
 
 sources:
 # Level 0:

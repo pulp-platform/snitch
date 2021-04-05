@@ -1,0 +1,483 @@
+From 1485086b2e447d2f92eeb8b22f8e33ce62f15200 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Mon, 5 Apr 2021 11:24:02 +0200
+Subject: [PATCH] occamy: Add lowRISC GPIO
+
+---
+ Bender.yml          |  14 ++++
+ data/gpio.hjson     |   4 +-
+ rtl/gpio.sv         |  21 +++---
+ rtl/gpio_reg_pkg.sv | 110 +++++++++++++++-----------------
+ rtl/gpio_reg_top.sv | 151 ++++++++++++++------------------------------
+ 5 files changed, 127 insertions(+), 173 deletions(-)
+ create mode 100644 hw/vendor/lowrisc_opentitan/gpio/Bender.yml
+
+diff --git a/Bender.yml b/Bender.yml
+new file mode 100644
+index 0000000..dcac4ae
+--- /dev/null
++++ b/Bender.yml
+@@ -0,0 +1,14 @@
++package:
++  name: lowrisc_gpio
++  description: "lowRISC GPIO"
++  authors: ["lowRISC Contributors"]
++
++dependencies:
++  lowrisc_prim: {path: ../prim}
++
++sources:
++# Level 0
++- rtl/gpio_reg_pkg.sv
++# Level 1
++- rtl/gpio_reg_top.sv
++- rtl/gpio.sv
+diff --git a/data/gpio.hjson b/data/gpio.hjson
+index 6d13901..8f398fe 100644
+--- a/data/gpio.hjson
++++ b/data/gpio.hjson
+@@ -4,9 +4,7 @@
+ {
+   name: "gpio",
+   clock_primary: "clk_i",
+-  bus_interfaces: [
+-    { protocol: "tlul", direction: "device" }
+-  ],
++  bus_device: "reg",
+   available_inout_list: [
+     { name: "gpio",
+       width: 32,
+diff --git a/rtl/gpio.sv b/rtl/gpio.sv
+index 83edc88..8d1e59b 100644
+--- a/rtl/gpio.sv
++++ b/rtl/gpio.sv
+@@ -4,15 +4,18 @@
+ //
+ // General Purpose Input/Output module
+ 
+-`include "prim_assert.sv"
++`include "common_cells/assertions.svh"
+ 
+-module gpio (
++module gpio #(
++  parameter type reg_req_t = logic,
++  parameter type reg_rsp_t = logic
++) (
+   input clk_i,
+   input rst_ni,
+ 
+   // Below Regster interface can be changed
+-  input  tlul_pkg::tl_h2d_t tl_i,
+-  output tlul_pkg::tl_d2h_t tl_o,
++  input  reg_req_t reg_req_i,
++  output reg_rsp_t reg_rsp_o,
+ 
+   input        [31:0] cio_gpio_i,
+   output logic [31:0] cio_gpio_o,
+@@ -131,17 +134,19 @@ module gpio (
+ 
+ 
+   // Register module
+-  gpio_reg_top u_reg (
++  gpio_reg_top #(
++    .reg_req_t (reg_req_t),
++    .reg_rsp_t (reg_rsp_t)
++  ) u_reg (
+     .clk_i,
+     .rst_ni,
+ 
+-    .tl_i,
+-    .tl_o,
++    .reg_req_i,
++    .reg_rsp_o,
+ 
+     .reg2hw,
+     .hw2reg,
+ 
+-    .intg_err_o (),
+     .devmode_i  (1'b1)
+   );
+ 
+diff --git a/rtl/gpio_reg_pkg.sv b/rtl/gpio_reg_pkg.sv
+index 55b20f0..737499d 100644
+--- a/rtl/gpio_reg_pkg.sv
++++ b/rtl/gpio_reg_pkg.sv
+@@ -6,13 +6,9 @@
+ 
+ package gpio_reg_pkg;
+ 
+-  // Address widths within the block
+-  parameter int BlockAw = 6;
+-
+   ////////////////////////////
+   // Typedefs for registers //
+   ////////////////////////////
+-
+   typedef struct packed {
+     logic [31:0] q;
+   } gpio_reg2hw_intr_state_reg_t;
+@@ -100,6 +96,7 @@ package gpio_reg_pkg;
+     logic [31:0] q;
+   } gpio_reg2hw_ctrl_en_input_filter_reg_t;
+ 
++
+   typedef struct packed {
+     logic [31:0] d;
+     logic        de;
+@@ -154,64 +151,60 @@ package gpio_reg_pkg;
+     } mask;
+   } gpio_hw2reg_masked_oe_upper_reg_t;
+ 
+-  // Register -> HW type
+-  typedef struct packed {
+-    gpio_reg2hw_intr_state_reg_t intr_state; // [458:427]
+-    gpio_reg2hw_intr_enable_reg_t intr_enable; // [426:395]
+-    gpio_reg2hw_intr_test_reg_t intr_test; // [394:362]
+-    gpio_reg2hw_direct_out_reg_t direct_out; // [361:329]
+-    gpio_reg2hw_masked_out_lower_reg_t masked_out_lower; // [328:295]
+-    gpio_reg2hw_masked_out_upper_reg_t masked_out_upper; // [294:261]
+-    gpio_reg2hw_direct_oe_reg_t direct_oe; // [260:228]
+-    gpio_reg2hw_masked_oe_lower_reg_t masked_oe_lower; // [227:194]
+-    gpio_reg2hw_masked_oe_upper_reg_t masked_oe_upper; // [193:160]
+-    gpio_reg2hw_intr_ctrl_en_rising_reg_t intr_ctrl_en_rising; // [159:128]
+-    gpio_reg2hw_intr_ctrl_en_falling_reg_t intr_ctrl_en_falling; // [127:96]
+-    gpio_reg2hw_intr_ctrl_en_lvlhigh_reg_t intr_ctrl_en_lvlhigh; // [95:64]
+-    gpio_reg2hw_intr_ctrl_en_lvllow_reg_t intr_ctrl_en_lvllow; // [63:32]
+-    gpio_reg2hw_ctrl_en_input_filter_reg_t ctrl_en_input_filter; // [31:0]
++
++  ///////////////////////////////////////
++  // Register to internal design logic //
++  ///////////////////////////////////////
++  typedef struct packed {
++    gpio_reg2hw_intr_state_reg_t intr_state; // [459:428]
++    gpio_reg2hw_intr_enable_reg_t intr_enable; // [427:396]
++    gpio_reg2hw_intr_test_reg_t intr_test; // [395:363]
++    gpio_reg2hw_direct_out_reg_t direct_out; // [362:330]
++    gpio_reg2hw_masked_out_lower_reg_t masked_out_lower; // [329:296]
++    gpio_reg2hw_masked_out_upper_reg_t masked_out_upper; // [295:262]
++    gpio_reg2hw_direct_oe_reg_t direct_oe; // [261:229]
++    gpio_reg2hw_masked_oe_lower_reg_t masked_oe_lower; // [228:195]
++    gpio_reg2hw_masked_oe_upper_reg_t masked_oe_upper; // [194:161]
++    gpio_reg2hw_intr_ctrl_en_rising_reg_t intr_ctrl_en_rising; // [160:129]
++    gpio_reg2hw_intr_ctrl_en_falling_reg_t intr_ctrl_en_falling; // [128:97]
++    gpio_reg2hw_intr_ctrl_en_lvlhigh_reg_t intr_ctrl_en_lvlhigh; // [96:65]
++    gpio_reg2hw_intr_ctrl_en_lvllow_reg_t intr_ctrl_en_lvllow; // [64:33]
++    gpio_reg2hw_ctrl_en_input_filter_reg_t ctrl_en_input_filter; // [32:1]
+   } gpio_reg2hw_t;
+ 
+-  // HW -> register type
+-  typedef struct packed {
+-    gpio_hw2reg_intr_state_reg_t intr_state; // [257:225]
+-    gpio_hw2reg_data_in_reg_t data_in; // [224:192]
+-    gpio_hw2reg_direct_out_reg_t direct_out; // [191:160]
+-    gpio_hw2reg_masked_out_lower_reg_t masked_out_lower; // [159:128]
+-    gpio_hw2reg_masked_out_upper_reg_t masked_out_upper; // [127:96]
+-    gpio_hw2reg_direct_oe_reg_t direct_oe; // [95:64]
+-    gpio_hw2reg_masked_oe_lower_reg_t masked_oe_lower; // [63:32]
+-    gpio_hw2reg_masked_oe_upper_reg_t masked_oe_upper; // [31:0]
++  ///////////////////////////////////////
++  // Internal design logic to register //
++  ///////////////////////////////////////
++  typedef struct packed {
++    gpio_hw2reg_intr_state_reg_t intr_state; // [258:227]
++    gpio_hw2reg_data_in_reg_t data_in; // [226:227]
++    gpio_hw2reg_direct_out_reg_t direct_out; // [226:194]
++    gpio_hw2reg_masked_out_lower_reg_t masked_out_lower; // [193:160]
++    gpio_hw2reg_masked_out_upper_reg_t masked_out_upper; // [159:126]
++    gpio_hw2reg_direct_oe_reg_t direct_oe; // [125:93]
++    gpio_hw2reg_masked_oe_lower_reg_t masked_oe_lower; // [92:59]
++    gpio_hw2reg_masked_oe_upper_reg_t masked_oe_upper; // [58:25]
+   } gpio_hw2reg_t;
+ 
+-  // Register offsets
+-  parameter logic [BlockAw-1:0] GPIO_INTR_STATE_OFFSET = 6'h 0;
+-  parameter logic [BlockAw-1:0] GPIO_INTR_ENABLE_OFFSET = 6'h 4;
+-  parameter logic [BlockAw-1:0] GPIO_INTR_TEST_OFFSET = 6'h 8;
+-  parameter logic [BlockAw-1:0] GPIO_DATA_IN_OFFSET = 6'h c;
+-  parameter logic [BlockAw-1:0] GPIO_DIRECT_OUT_OFFSET = 6'h 10;
+-  parameter logic [BlockAw-1:0] GPIO_MASKED_OUT_LOWER_OFFSET = 6'h 14;
+-  parameter logic [BlockAw-1:0] GPIO_MASKED_OUT_UPPER_OFFSET = 6'h 18;
+-  parameter logic [BlockAw-1:0] GPIO_DIRECT_OE_OFFSET = 6'h 1c;
+-  parameter logic [BlockAw-1:0] GPIO_MASKED_OE_LOWER_OFFSET = 6'h 20;
+-  parameter logic [BlockAw-1:0] GPIO_MASKED_OE_UPPER_OFFSET = 6'h 24;
+-  parameter logic [BlockAw-1:0] GPIO_INTR_CTRL_EN_RISING_OFFSET = 6'h 28;
+-  parameter logic [BlockAw-1:0] GPIO_INTR_CTRL_EN_FALLING_OFFSET = 6'h 2c;
+-  parameter logic [BlockAw-1:0] GPIO_INTR_CTRL_EN_LVLHIGH_OFFSET = 6'h 30;
+-  parameter logic [BlockAw-1:0] GPIO_INTR_CTRL_EN_LVLLOW_OFFSET = 6'h 34;
+-  parameter logic [BlockAw-1:0] GPIO_CTRL_EN_INPUT_FILTER_OFFSET = 6'h 38;
+-
+-  // Reset values for hwext registers and their fields
+-  parameter logic [31:0] GPIO_INTR_TEST_RESVAL = 32'h 0;
+-  parameter logic [31:0] GPIO_INTR_TEST_GPIO_RESVAL = 32'h 0;
+-  parameter logic [31:0] GPIO_DIRECT_OUT_RESVAL = 32'h 0;
+-  parameter logic [31:0] GPIO_MASKED_OUT_LOWER_RESVAL = 32'h 0;
+-  parameter logic [31:0] GPIO_MASKED_OUT_UPPER_RESVAL = 32'h 0;
+-  parameter logic [31:0] GPIO_DIRECT_OE_RESVAL = 32'h 0;
+-  parameter logic [31:0] GPIO_MASKED_OE_LOWER_RESVAL = 32'h 0;
+-  parameter logic [31:0] GPIO_MASKED_OE_UPPER_RESVAL = 32'h 0;
+-
+-  // Register index
++  // Register Address
++  parameter logic [5:0] GPIO_INTR_STATE_OFFSET = 6'h 0;
++  parameter logic [5:0] GPIO_INTR_ENABLE_OFFSET = 6'h 4;
++  parameter logic [5:0] GPIO_INTR_TEST_OFFSET = 6'h 8;
++  parameter logic [5:0] GPIO_DATA_IN_OFFSET = 6'h c;
++  parameter logic [5:0] GPIO_DIRECT_OUT_OFFSET = 6'h 10;
++  parameter logic [5:0] GPIO_MASKED_OUT_LOWER_OFFSET = 6'h 14;
++  parameter logic [5:0] GPIO_MASKED_OUT_UPPER_OFFSET = 6'h 18;
++  parameter logic [5:0] GPIO_DIRECT_OE_OFFSET = 6'h 1c;
++  parameter logic [5:0] GPIO_MASKED_OE_LOWER_OFFSET = 6'h 20;
++  parameter logic [5:0] GPIO_MASKED_OE_UPPER_OFFSET = 6'h 24;
++  parameter logic [5:0] GPIO_INTR_CTRL_EN_RISING_OFFSET = 6'h 28;
++  parameter logic [5:0] GPIO_INTR_CTRL_EN_FALLING_OFFSET = 6'h 2c;
++  parameter logic [5:0] GPIO_INTR_CTRL_EN_LVLHIGH_OFFSET = 6'h 30;
++  parameter logic [5:0] GPIO_INTR_CTRL_EN_LVLLOW_OFFSET = 6'h 34;
++  parameter logic [5:0] GPIO_CTRL_EN_INPUT_FILTER_OFFSET = 6'h 38;
++
++
++  // Register Index
+   typedef enum int {
+     GPIO_INTR_STATE,
+     GPIO_INTR_ENABLE,
+@@ -248,6 +241,5 @@ package gpio_reg_pkg;
+     4'b 1111, // index[13] GPIO_INTR_CTRL_EN_LVLLOW
+     4'b 1111  // index[14] GPIO_CTRL_EN_INPUT_FILTER
+   };
+-
+ endpackage
+ 
+diff --git a/rtl/gpio_reg_top.sv b/rtl/gpio_reg_top.sv
+index 1e30e61..1483e9b 100644
+--- a/rtl/gpio_reg_top.sv
++++ b/rtl/gpio_reg_top.sv
+@@ -4,21 +4,22 @@
+ //
+ // Register Top module auto-generated by `reggen`
+ 
+-`include "prim_assert.sv"
++`include "common_cells/assertions.svh"
+ 
+-module gpio_reg_top (
++module gpio_reg_top #(
++  parameter type reg_req_t = logic,
++  parameter type reg_rsp_t = logic
++) (
+   input clk_i,
+   input rst_ni,
+ 
+-  input  tlul_pkg::tl_h2d_t tl_i,
+-  output tlul_pkg::tl_d2h_t tl_o,
++  // Below Register interface can be changed
++  input  reg_req_t reg_req_i,
++  output reg_rsp_t reg_rsp_o,
+   // To HW
+   output gpio_reg_pkg::gpio_reg2hw_t reg2hw, // Write
+   input  gpio_reg_pkg::gpio_hw2reg_t hw2reg, // Read
+ 
+-  // Integrity check errors
+-  output logic intg_err_o,
+-
+   // Config
+   input devmode_i // If 1, explicit error return for unmapped register access
+ );
+@@ -42,64 +43,23 @@ module gpio_reg_top (
+ 
+   logic [DW-1:0] reg_rdata_next;
+ 
+-  tlul_pkg::tl_h2d_t tl_reg_h2d;
+-  tlul_pkg::tl_d2h_t tl_reg_d2h;
+-
+-  // incoming payload check
+-  logic intg_err;
+-  tlul_cmd_intg_chk u_chk (
+-    .tl_i,
+-    .err_o(intg_err)
+-  );
++  reg_req_t reg_intf_req;
++  reg_rsp_t reg_intf_rsp;
+ 
+-  logic intg_err_q;
+-  always_ff @(posedge clk_i or negedge rst_ni) begin
+-    if (!rst_ni) begin
+-      intg_err_q <= '0;
+-    end else if (intg_err) begin
+-      intg_err_q <= 1'b1;
+-    end
+-  end
++  assign reg_intf_req = reg_req_i;
++  assign reg_rsp_o = reg_intf_rsp;
+ 
+-  // integrity error output is permanent and should be used for alert generation
+-  // register errors are transactional
+-  assign intg_err_o = intg_err_q | intg_err;
+-
+-  // outgoing integrity generation
+-  tlul_pkg::tl_d2h_t tl_o_pre;
+-  tlul_rsp_intg_gen #(
+-    .EnableRspIntgGen(1),
+-    .EnableDataIntgGen(1)
+-  ) u_rsp_intg_gen (
+-    .tl_i(tl_o_pre),
+-    .tl_o
+-  );
+-
+-  assign tl_reg_h2d = tl_i;
+-  assign tl_o_pre   = tl_reg_d2h;
+-
+-  tlul_adapter_reg #(
+-    .RegAw(AW),
+-    .RegDw(DW),
+-    .EnableDataIntgGen(0)
+-  ) u_reg_if (
+-    .clk_i,
+-    .rst_ni,
+-
+-    .tl_i (tl_reg_h2d),
+-    .tl_o (tl_reg_d2h),
+-
+-    .we_o    (reg_we),
+-    .re_o    (reg_re),
+-    .addr_o  (reg_addr),
+-    .wdata_o (reg_wdata),
+-    .be_o    (reg_be),
+-    .rdata_i (reg_rdata),
+-    .error_i (reg_error)
+-  );
++  assign reg_we = reg_intf_req.valid & reg_intf_req.write;
++  assign reg_re = reg_intf_req.valid & ~reg_intf_req.write;
++  assign reg_addr = reg_intf_req.addr;
++  assign reg_wdata = reg_intf_req.wdata;
++  assign reg_be = reg_intf_req.wstrb;
++  assign reg_intf_rsp.rdata = reg_rdata;
++  assign reg_intf_rsp.error = reg_error;
++  assign reg_intf_rsp.ready = 1'b1;
+ 
+   assign reg_rdata = reg_rdata_next ;
+-  assign reg_error = (devmode_i & addrmiss) | wr_err | intg_err;
++  assign reg_error = (devmode_i & addrmiss) | wr_err ;
+ 
+   // Define SW related signals
+   // Format: <reg>_<field>_{wd|we|qs}
+@@ -601,66 +561,67 @@ module gpio_reg_top (
+     if (addr_hit[14] && reg_we && (GPIO_PERMIT[14] != (GPIO_PERMIT[14] & reg_be))) wr_err = 1'b1 ;
+   end
+ 
+-  assign intr_state_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_wd = reg_wdata[31:0];
+ 
+-  assign intr_enable_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_wd = reg_wdata[31:0];
+ 
+-  assign intr_test_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_wd = reg_wdata[31:0];
+ 
+-  assign direct_out_we = addr_hit[4] & reg_we & !reg_error;
++
++  assign direct_out_we = addr_hit[4] & reg_we & ~wr_err;
+   assign direct_out_wd = reg_wdata[31:0];
+-  assign direct_out_re = addr_hit[4] & reg_re & !reg_error;
++  assign direct_out_re = addr_hit[4] && reg_re;
+ 
+-  assign masked_out_lower_data_we = addr_hit[5] & reg_we & !reg_error;
++  assign masked_out_lower_data_we = addr_hit[5] & reg_we & ~wr_err;
+   assign masked_out_lower_data_wd = reg_wdata[15:0];
+-  assign masked_out_lower_data_re = addr_hit[5] & reg_re & !reg_error;
++  assign masked_out_lower_data_re = addr_hit[5] && reg_re;
+ 
+-  assign masked_out_lower_mask_we = addr_hit[5] & reg_we & !reg_error;
++  assign masked_out_lower_mask_we = addr_hit[5] & reg_we & ~wr_err;
+   assign masked_out_lower_mask_wd = reg_wdata[31:16];
+ 
+-  assign masked_out_upper_data_we = addr_hit[6] & reg_we & !reg_error;
++  assign masked_out_upper_data_we = addr_hit[6] & reg_we & ~wr_err;
+   assign masked_out_upper_data_wd = reg_wdata[15:0];
+-  assign masked_out_upper_data_re = addr_hit[6] & reg_re & !reg_error;
++  assign masked_out_upper_data_re = addr_hit[6] && reg_re;
+ 
+-  assign masked_out_upper_mask_we = addr_hit[6] & reg_we & !reg_error;
++  assign masked_out_upper_mask_we = addr_hit[6] & reg_we & ~wr_err;
+   assign masked_out_upper_mask_wd = reg_wdata[31:16];
+ 
+-  assign direct_oe_we = addr_hit[7] & reg_we & !reg_error;
++  assign direct_oe_we = addr_hit[7] & reg_we & ~wr_err;
+   assign direct_oe_wd = reg_wdata[31:0];
+-  assign direct_oe_re = addr_hit[7] & reg_re & !reg_error;
++  assign direct_oe_re = addr_hit[7] && reg_re;
+ 
+-  assign masked_oe_lower_data_we = addr_hit[8] & reg_we & !reg_error;
++  assign masked_oe_lower_data_we = addr_hit[8] & reg_we & ~wr_err;
+   assign masked_oe_lower_data_wd = reg_wdata[15:0];
+-  assign masked_oe_lower_data_re = addr_hit[8] & reg_re & !reg_error;
++  assign masked_oe_lower_data_re = addr_hit[8] && reg_re;
+ 
+-  assign masked_oe_lower_mask_we = addr_hit[8] & reg_we & !reg_error;
++  assign masked_oe_lower_mask_we = addr_hit[8] & reg_we & ~wr_err;
+   assign masked_oe_lower_mask_wd = reg_wdata[31:16];
+-  assign masked_oe_lower_mask_re = addr_hit[8] & reg_re & !reg_error;
++  assign masked_oe_lower_mask_re = addr_hit[8] && reg_re;
+ 
+-  assign masked_oe_upper_data_we = addr_hit[9] & reg_we & !reg_error;
++  assign masked_oe_upper_data_we = addr_hit[9] & reg_we & ~wr_err;
+   assign masked_oe_upper_data_wd = reg_wdata[15:0];
+-  assign masked_oe_upper_data_re = addr_hit[9] & reg_re & !reg_error;
++  assign masked_oe_upper_data_re = addr_hit[9] && reg_re;
+ 
+-  assign masked_oe_upper_mask_we = addr_hit[9] & reg_we & !reg_error;
++  assign masked_oe_upper_mask_we = addr_hit[9] & reg_we & ~wr_err;
+   assign masked_oe_upper_mask_wd = reg_wdata[31:16];
+-  assign masked_oe_upper_mask_re = addr_hit[9] & reg_re & !reg_error;
++  assign masked_oe_upper_mask_re = addr_hit[9] && reg_re;
+ 
+-  assign intr_ctrl_en_rising_we = addr_hit[10] & reg_we & !reg_error;
++  assign intr_ctrl_en_rising_we = addr_hit[10] & reg_we & ~wr_err;
+   assign intr_ctrl_en_rising_wd = reg_wdata[31:0];
+ 
+-  assign intr_ctrl_en_falling_we = addr_hit[11] & reg_we & !reg_error;
++  assign intr_ctrl_en_falling_we = addr_hit[11] & reg_we & ~wr_err;
+   assign intr_ctrl_en_falling_wd = reg_wdata[31:0];
+ 
+-  assign intr_ctrl_en_lvlhigh_we = addr_hit[12] & reg_we & !reg_error;
++  assign intr_ctrl_en_lvlhigh_we = addr_hit[12] & reg_we & ~wr_err;
+   assign intr_ctrl_en_lvlhigh_wd = reg_wdata[31:0];
+ 
+-  assign intr_ctrl_en_lvllow_we = addr_hit[13] & reg_we & !reg_error;
++  assign intr_ctrl_en_lvllow_we = addr_hit[13] & reg_we & ~wr_err;
+   assign intr_ctrl_en_lvllow_wd = reg_wdata[31:0];
+ 
+-  assign ctrl_en_input_filter_we = addr_hit[14] & reg_we & !reg_error;
++  assign ctrl_en_input_filter_we = addr_hit[14] & reg_we & ~wr_err;
+   assign ctrl_en_input_filter_wd = reg_wdata[31:0];
+ 
+   // Read data return
+@@ -737,25 +698,9 @@ module gpio_reg_top (
+     endcase
+   end
+ 
+-  // Unused signal tieoff
+-
+-  // wdata / byte enable are not always fully used
+-  // add a blanket unused statement to handle lint waivers
+-  logic unused_wdata;
+-  logic unused_be;
+-  assign unused_wdata = ^reg_wdata;
+-  assign unused_be = ^reg_be;
+-
+   // Assertions for Register Interface
+-  `ASSERT_PULSE(wePulse, reg_we)
+-  `ASSERT_PULSE(rePulse, reg_re)
+-
+-  `ASSERT(reAfterRv, $rose(reg_re || reg_we) |=> tl_o.d_valid)
+ 
+   `ASSERT(en2addrHit, (reg_we || reg_re) |-> $onehot0(addr_hit))
+ 
+-  // this is formulated as an assumption such that the FPV testbenches do disprove this
+-  // property by mistake
+-  //`ASSUME(reqParity, tl_reg_h2d.a_valid |-> tl_reg_h2d.a_user.chk_en == tlul_pkg::CheckDis)
+ 
+ endmodule
+-- 
+2.25.1.377.g2d2118b814
+

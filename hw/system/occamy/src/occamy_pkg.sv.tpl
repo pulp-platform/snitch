@@ -22,6 +22,18 @@ package occamy_pkg;
   localparam int unsigned NrCoresCluster = occamy_cluster_pkg::NrCores;
   localparam int unsigned NrCoresS1Quadrant = NrClustersS1Quadrant * NrCoresCluster;
 
+  typedef struct packed {
+    logic [31:0] gpio;
+    logic uart_tx_watermark;
+    logic uart_rx_watermark;
+    logic uart_tx_empty;
+    logic uart_rx_overflow;
+    logic uart_rx_frame_err;
+    logic uart_rx_break_err;
+    logic uart_rx_timeout;
+    logic uart_rx_parity_err;
+  } occamy_interrupt_t;
+
   typedef logic [5:0] tile_id_t;
 
   typedef logic [AddrWidth-1:0] addr_t;
@@ -32,6 +44,7 @@ package occamy_pkg;
     logic [47:0] start_addr;
     logic [47:0] end_addr;
   } xbar_rule_48_t;
+
 
   typedef xbar_rule_48_t xbar_rule_t;
 

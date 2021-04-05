@@ -67,6 +67,7 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_out;
 
   logic [1:0] mip;
+  occamy_interrupt_t irq;
 
   addr_t [7:0] s1_quadrant_base_addr;
   assign s1_quadrant_base_addr[0] = ClusterBaseOffset + 0 * S1QuadrantAddressSpace;
@@ -1276,14 +1277,14 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .cio_tx_o(uart_tx_o),
       .cio_rx_i(uart_rx_i),
       .cio_tx_en_o(),
-      .intr_tx_watermark_o(),
-      .intr_rx_watermark_o(),
-      .intr_tx_empty_o(),
-      .intr_rx_overflow_o(),
-      .intr_rx_frame_err_o(),
-      .intr_rx_break_err_o(),
-      .intr_rx_timeout_o(),
-      .intr_rx_parity_err_o()
+      .intr_tx_watermark_o(irq.uart_tx_watermark),
+      .intr_rx_watermark_o(irq.uart_rx_watermark),
+      .intr_tx_empty_o(irq.uart_tx_empty),
+      .intr_rx_overflow_o(irq.uart_rx_overflow),
+      .intr_rx_frame_err_o(irq.uart_rx_frame_err),
+      .intr_rx_break_err_o(irq.uart_rx_break_err),
+      .intr_rx_timeout_o(irq.uart_rx_timeout),
+      .intr_rx_parity_err_o(irq.uart_rx_parity_err)
   );
 
   /////////////
@@ -1306,6 +1307,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .rst_ni(rst_ni),
       .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_PLIC]),
       .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_PLIC]),
+      // TODO(zarubaf): Hook up to interrupt sources.
       .intr_src_i('0),
       .irq_o(mip),
       .irq_id_o(),
@@ -1319,6 +1321,20 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   //////////////
   //   GPIO   //
   //////////////
+
+  gpio #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t)
+  ) i_gpio (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_GPIO]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_GPIO]),
+      .cio_gpio_i(gpio_d_i),
+      .cio_gpio_o(gpio_d_o),
+      .cio_gpio_en_o(gpio_oe_o),
+      .intr_gpio_o(irq.gpio)
+  );
 
   /////////////
   //   I2C   //
