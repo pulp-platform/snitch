@@ -48,6 +48,10 @@ module occamy_top
   input  logic        i2c_scl_i,
   output logic        i2c_scl_en_o,
 
+  /// Boot ROM
+  output ${soc_regbus_periph_xbar.out_plic.req_type()} bootrom_req_o,
+  input  ${soc_regbus_periph_xbar.out_plic.rsp_type()} bootrom_rsp_i,
+
   /// PCIe Ports
   output  ${soc_wide_xbar.out_pcie.req_type()} pcie_axi_req_o,
   input   ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i,
@@ -199,8 +203,10 @@ module occamy_top
   //   ROM   //
   /////////////
 
-  // TODO(zarubaf): This is very system specific, so we might be better off
+  // This is very system specific, so we might be better off
   // placing it outside the top-level.
+  assign bootrom_req_o = ${soc_regbus_periph_xbar.out_bootrom.req_name()};
+  assign ${soc_regbus_periph_xbar.out_bootrom.rsp_name()} = bootrom_rsp_i;
 
   //////////////
   //   PLIC   //
