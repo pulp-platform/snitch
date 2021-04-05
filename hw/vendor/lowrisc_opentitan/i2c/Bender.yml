@@ -1,0 +1,14 @@
+package:
+  name: lowrisc_i2c
+  description: "lowRISC I2C"
+  authors: ["lowRISC Contributors"]
+
+dependencies:
+  lowrisc_prim: {path: ../prim}
+
+sources:
+- rtl/i2c_reg_pkg.sv
+- rtl/i2c_reg_top.sv
+- rtl/i2c_fsm.sv
+- rtl/i2c_core.sv
+- rtl/i2c.sv

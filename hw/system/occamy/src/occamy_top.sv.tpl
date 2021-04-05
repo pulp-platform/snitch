@@ -164,6 +164,10 @@ module occamy_top
   <% soc_narrow_xbar.out_periph.change_dw(context, 32, "axi_to_axi_lite_dw").to_axi_lite(context, "axi_to_axi_lite_periph", to=soc_periph_xbar.in_soc) %>
   <% soc_periph_xbar.out_regbus_periph.to_reg(context, "axi_lite_to_reg_periph", to=soc_regbus_periph_xbar.in_axi_lite_periph_xbar) %>
 
+  ///////////////
+  //   CLINT   //
+  ///////////////
+
   /////////////////////
   //   SOC CONTROL   //
   /////////////////////
@@ -280,5 +284,37 @@ module occamy_top
   /////////////
   //   I2C   //
   /////////////
+
+  gpio #(
+    .reg_req_t (${soc_regbus_periph_xbar.out_i2c.req_type()}),
+    .reg_rsp_t (${soc_regbus_periph_xbar.out_i2c.rsp_type()})
+  ) i_gpio (
+    .clk_i (${soc_regbus_periph_xbar.out_i2c.clk}),
+    .rst_ni (${soc_regbus_periph_xbar.out_i2c.rst}),
+    .reg_req_i (${soc_regbus_periph_xbar.out_i2c.req_name()}),
+    .reg_rsp_o (${soc_regbus_periph_xbar.out_i2c.rsp_name()}),
+    .cio_scl_i (i2c_scl_i),
+    .cio_scl_o (i2c_scl_o),
+    .cio_scl_en_o (i2c_scl_en_o),
+    .cio_sda_i (i2c_sda_i),
+    .cio_sda_o (i2c_sda_o),
+    .cio_sda_en_o (i2c_sda_en_o),
+    .intr_fmt_watermark_o (irq.i2c_fmt_watermark),
+    .intr_rx_watermark_o (irq.i2c_rx_watermark),
+    .intr_fmt_overflow_o (irq.i2c_fmt_overflow),
+    .intr_rx_overflow_o (irq.i2c_rx_overflow),
+    .intr_nak_o (irq.i2c_nak),
+    .intr_scl_interference_o (irq.i2c_scl_interference),
+    .intr_sda_interference_o (irq.i2c_sda_interference),
+    .intr_stretch_timeout_o (irq.i2c_stretch_timeout),
+    .intr_sda_unstable_o (irq.i2c_sda_unstable),
+    .intr_trans_complete_o (irq.i2c_trans_complete),
+    .intr_tx_empty_o (irq.i2c_tx_empty),
+    .intr_tx_nonempty_o (irq.i2c_tx_nonempty),
+    .intr_tx_overflow_o (irq.i2c_tx_overflow),
+    .intr_acq_overflow_o (irq.i2c_acq_overflow),
+    .intr_ack_stop_o (irq.i2c_ack_stop),
+    .intr_host_timeout_o (irq.i2c_host_timeout)
+  );
 
 endmodule

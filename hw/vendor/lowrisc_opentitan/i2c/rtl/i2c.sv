@@ -4,15 +4,18 @@
 //
 // Description: I2C top level wrapper file
 
-`include "prim_assert.sv"
+`include "common_cells/assertions.svh"
 
-module i2c (
+module i2c #(
+  parameter type reg_req_t = logic,
+  parameter type reg_rsp_t = logic
+) (
   input                     clk_i,
   input                     rst_ni,
 
   // Bus Interface
-  input  tlul_pkg::tl_h2d_t tl_i,
-  output tlul_pkg::tl_d2h_t tl_o,
+  input  reg_req_t reg_req_i,
+  output reg_rsp_t reg_rsp_o,
 
   // Generic IO
   input                     cio_scl_i,
@@ -46,14 +49,16 @@ module i2c (
   i2c_reg2hw_t reg2hw;
   i2c_hw2reg_t hw2reg;
 
-  i2c_reg_top u_reg (
+  i2c_reg_top #(
+    .reg_req_t (reg_req_t),
+    .reg_rsp_t (reg_rsp_t)
+  ) u_reg (
     .clk_i,
     .rst_ni,
-    .tl_i,
-    .tl_o,
+    .reg_req_i,
+    .reg_rsp_o,
     .reg2hw,
     .hw2reg,
-    .intg_err_o(),
     .devmode_i(1'b1)
   );
 
@@ -99,8 +104,6 @@ module i2c (
   assign cio_scl_en_o = ~scl_int;
   assign cio_sda_en_o = ~sda_int;
 
-  `ASSERT_KNOWN(TlDValidKnownO_A, tl_o.d_valid)
-  `ASSERT_KNOWN(TlAReadyKnownO_A, tl_o.a_ready)
   `ASSERT_KNOWN(CioSclKnownO_A, cio_scl_o)
   `ASSERT_KNOWN(CioSclEnKnownO_A, cio_scl_en_o)
   `ASSERT_KNOWN(CioSdaKnownO_A, cio_sda_o)

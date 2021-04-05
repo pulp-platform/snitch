@@ -16,7 +16,7 @@
     {from: 'hw/ip/prim', to: 'prim', patch_dir: 'prim'},
     {from: 'hw/ip/uart', to: 'uart', patch_dir: 'uart'},
     {from: 'hw/ip/gpio', to: 'gpio', patch_dir: 'gpio'},
-    {from: 'hw/ip/i2c', to: 'i2c'},
+    {from: 'hw/ip/i2c', to: 'i2c', patch_dir: 'i2c'},
     {from: 'hw/ip/spi_host', to: 'spi_host', patch_dir: 'spi_host'},
     {from: 'hw/ip/rv_plic', to: 'rv_plic', patch_dir: 'rv_plic'}
   ]

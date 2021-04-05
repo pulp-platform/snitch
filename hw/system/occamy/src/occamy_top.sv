@@ -1251,6 +1251,10 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
 
+  ///////////////
+  //   CLINT   //
+  ///////////////
+
   /////////////////////
   //   SOC CONTROL   //
   /////////////////////
@@ -1367,5 +1371,37 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   /////////////
   //   I2C   //
   /////////////
+
+  i2c #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t)
+  ) i_i2c (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_I2C]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_I2C]),
+      .cio_scl_i(i2c_scl_i),
+      .cio_scl_o(i2c_scl_o),
+      .cio_scl_en_o(i2c_scl_en_o),
+      .cio_sda_i(i2c_sda_i),
+      .cio_sda_o(i2c_sda_o),
+      .cio_sda_en_o(i2c_sda_en_o),
+      .intr_fmt_watermark_o(irq.i2c_fmt_watermark),
+      .intr_rx_watermark_o(irq.i2c_rx_watermark),
+      .intr_fmt_overflow_o(irq.i2c_fmt_overflow),
+      .intr_rx_overflow_o(irq.i2c_rx_overflow),
+      .intr_nak_o(irq.i2c_nak),
+      .intr_scl_interference_o(irq.i2c_scl_interference),
+      .intr_sda_interference_o(irq.i2c_sda_interference),
+      .intr_stretch_timeout_o(irq.i2c_stretch_timeout),
+      .intr_sda_unstable_o(irq.i2c_sda_unstable),
+      .intr_trans_complete_o(irq.i2c_trans_complete),
+      .intr_tx_empty_o(irq.i2c_tx_empty),
+      .intr_tx_nonempty_o(irq.i2c_tx_nonempty),
+      .intr_tx_overflow_o(irq.i2c_tx_overflow),
+      .intr_acq_overflow_o(irq.i2c_acq_overflow),
+      .intr_ack_stop_o(irq.i2c_ack_stop),
+      .intr_host_timeout_o(irq.i2c_host_timeout)
+  );
 
 endmodule

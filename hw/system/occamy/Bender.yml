@@ -16,6 +16,7 @@ dependencies:
   lowrisc_rv_plic: {path: ../../vendor/lowrisc_opentitan/rv_plic}
   lowrisc_gpio: {path: ../../vendor/lowrisc_opentitan/gpio}
   lowrisc_spi_host: {path: ../../vendor/lowrisc_opentitan/spi_host}
+  lowrisc_i2c: {path: ../../vendor/lowrisc_opentitan/i2c}
 
 sources:
 # Level 0:
