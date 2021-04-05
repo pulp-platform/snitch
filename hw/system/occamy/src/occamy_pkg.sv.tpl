@@ -53,7 +53,7 @@ package occamy_pkg;
   } occamy_interrupt_t;
 
   localparam logic [15:0] PartNum = 2;
-  localparam logic [31:0] IDCode = (dm::DbgVersion013 << 28) | (PartNum << 12) | 32'b1;
+  localparam logic [31:0] IDCode = (dm::DbgVersion013 << 28) | (PartNum << 12) | 32'h1;
 
   typedef logic [5:0] tile_id_t;
 

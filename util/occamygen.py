@@ -105,7 +105,7 @@ def main():
     am_i2c = am.new_leaf("i2c", 0x1000,
                          0x00033000).attach_to(am_soc_regbus_periph_xbar)
     am_spim = am.new_leaf("spim", 0x1000,
-                         0x00034000).attach_to(am_soc_regbus_periph_xbar)
+                          0x00034000).attach_to(am_soc_regbus_periph_xbar)
 
     am_debug = am.new_leaf("debug", 0x1000,
                            0x00000000).attach_to(am_soc_axi_lite_periph_xbar)
@@ -140,14 +140,12 @@ def main():
     ##########
     # RegBus #
     ##########
-    soc_regbus_periph_xbar = solder.RegBusXbar(
-        48,
-        32,
-        name="soc_regbus_periph_xbar",
-        clk="clk_i",
-        rst="rst_ni",
-        node=am_soc_regbus_periph_xbar
-    )
+    soc_regbus_periph_xbar = solder.RegBusXbar(48,
+                                               32,
+                                               name="soc_regbus_periph_xbar",
+                                               clk="clk_i",
+                                               rst="rst_ni",
+                                               node=am_soc_regbus_periph_xbar)
 
     soc_regbus_periph_xbar.add_input("axi_lite_periph_xbar")
 
@@ -202,7 +200,8 @@ def main():
 
     soc_narrow_xbar.add_output_entry("periph", am_soc_regbus_periph_xbar)
     soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
-    soc_narrow_xbar.add_output_entry("regbus_periph", am_soc_regbus_periph_xbar)
+    soc_narrow_xbar.add_output_entry("regbus_periph",
+                                     am_soc_regbus_periph_xbar)
 
     soc_narrow_xbar.add_input("cva6")
 

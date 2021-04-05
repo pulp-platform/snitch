@@ -381,8 +381,14 @@ class AxiBus(object):
         self.declared = declared
 
     def copy(self, name=None):
-        return AxiBus(self.clk, self.rst, self.aw, self.dw, self.iw, self.uw,
-                      name or self.name, declared=False)
+        return AxiBus(self.clk,
+                      self.rst,
+                      self.aw,
+                      self.dw,
+                      self.iw,
+                      self.uw,
+                      name or self.name,
+                      declared=False)
 
     def emit_struct(self):
         return AxiStruct.emit(self.aw, self.dw, self.iw, self.uw)
@@ -1227,6 +1233,7 @@ class AxiLiteXbar(Xbar):
         code_package += "\n" + pkg.strip() + "\n"
         code_module[self.context] += "\n" + mod.strip() + "\n"
 
+
 # Register bus "XBar" (well, not really - just one master to n slaves)
 class RegBusXbar(Xbar):
     tpl = templates.get_template("solder.regbus_xbar.sv.tpl")
@@ -1239,7 +1246,7 @@ class RegBusXbar(Xbar):
 
     def add_input(self, name):
         # For now the limitation is one input per regbus
-        assert(len(self.inputs) == 0)
+        assert (len(self.inputs) == 0)
         self.inputs.append(name)
 
     def add_output(self, name, addrs, default=False):
@@ -1263,11 +1270,11 @@ class RegBusXbar(Xbar):
         self.emitted = True
         code_module.setdefault(self.context, "")
         (pkg,
-         mod) = self.tpl.render_unicode(xbar=self,
-                                        RegBus=RegBus,
+         mod) = self.tpl.render_unicode(xbar=self, RegBus=RegBus,
                                         util=util).split("// ----- 8< -----")
         code_package += "\n" + pkg.strip() + "\n"
         code_module[self.context] += "\n" + mod.strip() + "\n"
+
 
 # Generate the code.
 def render():
