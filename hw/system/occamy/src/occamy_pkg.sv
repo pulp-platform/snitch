@@ -52,6 +52,9 @@ package occamy_pkg;
     logic i2c_host_timeout;
   } occamy_interrupt_t;
 
+  localparam logic [15:0] PartNum = 2;
+  localparam logic [31:0] IDCode = (dm::DbgVersion013 << 28) | (PartNum << 12) | 32'b1;
+
   typedef logic [5:0] tile_id_t;
 
   typedef logic [AddrWidth-1:0] addr_t;
@@ -79,12 +82,14 @@ package occamy_pkg;
   /// Inputs of the `soc_axi_lite_periph_xbar` crossbar.
   typedef enum int {
     SOC_AXI_LITE_PERIPH_XBAR_IN_SOC,
+    SOC_AXI_LITE_PERIPH_XBAR_IN_DEBUG,
     SOC_AXI_LITE_PERIPH_XBAR_NUM_INPUTS
   } soc_axi_lite_periph_xbar_inputs_e;
 
   /// Outputs of the `soc_axi_lite_periph_xbar` crossbar.
   typedef enum int {
     SOC_AXI_LITE_PERIPH_XBAR_OUT_CLINT,
+    SOC_AXI_LITE_PERIPH_XBAR_OUT_DEBUG,
     SOC_AXI_LITE_PERIPH_XBAR_NUM_OUTPUTS
   } soc_axi_lite_periph_xbar_outputs_e;
 
@@ -100,12 +105,13 @@ package occamy_pkg;
     AxiIdUsedSlvPorts:  0,
     AxiAddrWidth:       48,
     AxiDataWidth:       64,
-    NoAddrRules:        1
+    NoAddrRules:        2
   };
 
   /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [0:0] SocAxiLitePeriphXbarAddrmap = '{
-    '{ idx: 0, start_addr: 48'h00040000, end_addr: 48'h00050000 }
+  localparam xbar_rule_48_t [1:0] SocAxiLitePeriphXbarAddrmap = '{
+    '{ idx: 0, start_addr: 48'h00040000, end_addr: 48'h00050000 },
+    '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 }
   };
 
   // AXI plugs of the `soc_axi_lite_periph_xbar` crossbar.
@@ -137,7 +143,6 @@ package occamy_pkg;
   /// Outputs of the `soc_regbus_periph_xbar` crossbar.
   typedef enum int {
     SOC_REGBUS_PERIPH_XBAR_OUT_SOC_CTRL,
-    SOC_REGBUS_PERIPH_XBAR_OUT_DEBUG,
     SOC_REGBUS_PERIPH_XBAR_OUT_BOOTROM,
     SOC_REGBUS_PERIPH_XBAR_OUT_PLIC,
     SOC_REGBUS_PERIPH_XBAR_OUT_UART,
@@ -148,15 +153,14 @@ package occamy_pkg;
   } soc_regbus_periph_xbar_outputs_e;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [7:0] SocRegbusPeriphXbarAddrmap = '{
+  localparam xbar_rule_48_t [6:0] SocRegbusPeriphXbarAddrmap = '{
     '{ idx: 0, start_addr: 48'h00020000, end_addr: 48'h00021000 },
-    '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-    '{ idx: 2, start_addr: 48'h00010000, end_addr: 48'h00020000 },
-    '{ idx: 3, start_addr: 48'h00024000, end_addr: 48'h00025000 },
-    '{ idx: 4, start_addr: 48'h00030000, end_addr: 48'h00031000 },
-    '{ idx: 5, start_addr: 48'h00031000, end_addr: 48'h00032000 },
-    '{ idx: 6, start_addr: 48'h00033000, end_addr: 48'h00034000 },
-    '{ idx: 7, start_addr: 48'h00034000, end_addr: 48'h00035000 }
+    '{ idx: 1, start_addr: 48'h00010000, end_addr: 48'h00020000 },
+    '{ idx: 2, start_addr: 48'h00024000, end_addr: 48'h00025000 },
+    '{ idx: 3, start_addr: 48'h00030000, end_addr: 48'h00031000 },
+    '{ idx: 4, start_addr: 48'h00031000, end_addr: 48'h00032000 },
+    '{ idx: 5, start_addr: 48'h00033000, end_addr: 48'h00034000 },
+    '{ idx: 6, start_addr: 48'h00034000, end_addr: 48'h00035000 }
   };
 
   /// Inputs of the `soc_wide_xbar` crossbar.
@@ -424,6 +428,9 @@ package occamy_pkg;
   // AXI bus with 48 bit address, 64 bit data, 3 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d64_i3_u0, logic [47:0], logic [2:0], logic [63:0], logic [7:0],
                    logic [0:0])
+
+  // Register bus with 48 bit address and 64 bit data.
+  `REG_BUS_TYPEDEF_ALL(reg_a48_d64, logic [47:0], logic [63:0], logic [7:0])
 
   // AXI bus with 48 bit address, 32 bit data, 8 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d32_i8_u0, logic [47:0], logic [7:0], logic [31:0], logic [3:0],

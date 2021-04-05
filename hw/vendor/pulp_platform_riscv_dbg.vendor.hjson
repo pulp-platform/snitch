@@ -10,7 +10,7 @@
     rev: "master",
   },
 
-//   patch_dir: "patches/pulp_platform_riscv_dbg",
+  patch_dir: "patches/pulp_platform_riscv_dbg",
 
   exclude_from_upstream: [
     "ci",

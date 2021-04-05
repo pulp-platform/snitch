@@ -78,6 +78,7 @@ module occamy_top
   logic mtip, msip;
   // Supervisor and machine-mode external interrupt pending.
   logic [1:0] eip;
+  logic debug_req;
   occamy_interrupt_t irq;
 
   addr_t [7:0] s1_quadrant_base_addr;
@@ -94,10 +95,10 @@ module occamy_top
   //   CROSSBARS   //
   ///////////////////
 
-  axi_lite_a48_d64_req_t [0:0] soc_axi_lite_periph_xbar_in_req;
-  axi_lite_a48_d64_rsp_t [0:0] soc_axi_lite_periph_xbar_in_rsp;
-  axi_lite_a48_d64_req_t [0:0] soc_axi_lite_periph_xbar_out_req;
-  axi_lite_a48_d64_rsp_t [0:0] soc_axi_lite_periph_xbar_out_rsp;
+  axi_lite_a48_d64_req_t [1:0] soc_axi_lite_periph_xbar_in_req;
+  axi_lite_a48_d64_rsp_t [1:0] soc_axi_lite_periph_xbar_in_rsp;
+  axi_lite_a48_d64_req_t [1:0] soc_axi_lite_periph_xbar_out_req;
+  axi_lite_a48_d64_rsp_t [1:0] soc_axi_lite_periph_xbar_out_rsp;
 
   // The `soc_axi_lite_periph_xbar` crossbar.
   axi_lite_xbar #(
@@ -125,8 +126,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [7:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [7:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [6:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [6:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -149,7 +150,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(8),
+      .NoRules(7),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -214,9 +215,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   /// Address map of the `soc_narrow_xbar` crossbar.
   xbar_rule_48_t [10:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
-    '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00035000 },
+    '{ idx: 8, start_addr: 48'h00010000, end_addr: 48'h00035000 },
     '{ idx: 9, start_addr: 48'h80000000, end_addr: 48'h100000000 },
-    '{ idx: 10, start_addr: 48'h00000000, end_addr: 48'h00035000 },
+    '{ idx: 10, start_addr: 48'h00010000, end_addr: 48'h00035000 },
     '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
     '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
     '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
@@ -354,7 +355,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .irq_i(eip),
       .ipi_i(msip),
       .time_irq_i(mtip),
-      .debug_req_i('0),
+      .debug_req_i(debug_req),
       .axi_req_o(cva6_axi_req),
       .axi_resp_i(cva6_axi_rsp)
   );
@@ -1184,6 +1185,174 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
 
+  ///////////
+  // Debug //
+  ///////////
+
+  reg_a48_d64_req_t axi_lite_to_reg_debug_req;
+  reg_a48_d64_rsp_t axi_lite_to_reg_debug_rsp;
+
+  axi_lite_to_reg #(
+      .ADDR_WIDTH    (48),
+      .DATA_WIDTH    (64),
+      .axi_lite_req_t(axi_lite_a48_d64_req_t),
+      .axi_lite_rsp_t(axi_lite_a48_d64_rsp_t),
+      .reg_req_t     (reg_a48_d64_req_t),
+      .reg_rsp_t     (reg_a48_d64_rsp_t)
+  ) i_axi_lite_to_reg_debug_pc (
+      .clk_i         (clk_i),
+      .rst_ni        (rst_ni),
+      .axi_lite_req_i(soc_axi_lite_periph_xbar_out_req[SOC_AXI_LITE_PERIPH_XBAR_OUT_DEBUG]),
+      .axi_lite_rsp_o(soc_axi_lite_periph_xbar_out_rsp[SOC_AXI_LITE_PERIPH_XBAR_OUT_DEBUG]),
+      .reg_req_o     (axi_lite_to_reg_debug_req),
+      .reg_rsp_i     (axi_lite_to_reg_debug_rsp)
+  );
+
+
+
+  dm::hartinfo_t [0:0] hartinfo;
+  assign hartinfo = ariane_pkg::DebugHartInfo;
+
+  logic                 dmi_rst_n;
+  dm::dmi_req_t         dmi_req;
+  logic                 dmi_req_valid;
+  logic                 dmi_req_ready;
+  dm::dmi_resp_t        dmi_resp;
+  logic                 dmi_resp_ready;
+  logic                 dmi_resp_valid;
+
+  logic                 dbg_req;
+  logic                 dbg_we;
+  logic          [47:0] dbg_addr;
+  logic          [63:0] dbg_wdata;
+  logic          [ 7:0] dbg_wstrb;
+  logic          [63:0] dbg_rdata;
+  logic                 dbg_rvalid;
+
+  reg_to_mem #(
+      .AW(48),
+      .DW(64),
+      .req_t(reg_a48_d64_req_t),
+      .rsp_t(reg_a48_d64_rsp_t)
+  ) i_reg_to_mem_dbg (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .reg_req_i(axi_lite_to_reg_debug_req),
+      .reg_rsp_o(axi_lite_to_reg_debug_rsp),
+      .req_o(dbg_req),
+      .gnt_i(dbg_req),
+      .we_o(dbg_we),
+      .addr_o(dbg_addr),
+      .wdata_o(dbg_wdata),
+      .wstrb_o(dbg_wstrb),
+      .rdata_i(dbg_rdata),
+      .rvalid_i(dbg_rvalid),
+      .rerror_i(1'b0)
+  );
+
+  `FFARN(dbg_rvalid, dbg_req, 1'b0, clk_i, rst_ni)
+
+  logic        sba_req;
+  logic [47:0] sba_addr;
+  logic        sba_we;
+  logic [63:0] sba_wdata;
+  logic [ 7:0] sba_strb;
+  logic        sba_gnt;
+
+  logic [63:0] sba_rdata;
+  logic        sba_rvalid;
+
+  logic [63:0] sba_addr_long;
+
+  dm_top #(
+      .NrHarts(1),
+      .BusWidth(64),
+      .DmBaseAddress('h0)
+  ) i_dm_top (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .testmode_i(1'b0),
+      .ndmreset_o(),
+      .dmactive_o(),
+      .debug_req_o(debug_req),
+      .unavailable_i('0),
+      .hartinfo_i(hartinfo),
+      .slave_req_i(dbg_req),
+      .slave_we_i(dbg_we),
+      .slave_addr_i({16'b0, dbg_addr}),
+      .slave_be_i(dbg_wstrb),
+      .slave_wdata_i(dbg_wdata),
+      .slave_rdata_o(dbg_rdata),
+      .master_req_o(sba_req),
+      .master_add_o(sba_addr_long),
+      .master_we_o(sba_we),
+      .master_wdata_o(sba_wdata),
+      .master_be_o(sba_strb),
+      .master_gnt_i(sba_gnt),
+      .master_r_valid_i(sba_rvalid),
+      .master_r_rdata_i(sba_rdata),
+      .dmi_rst_ni(dmi_rst_n),
+      .dmi_req_valid_i(dmi_req_valid),
+      .dmi_req_ready_o(dmi_req_ready),
+      .dmi_req_i(dmi_req),
+      .dmi_resp_valid_o(dmi_resp_valid),
+      .dmi_resp_ready_i(dmi_resp_ready),
+      .dmi_resp_o(dmi_resp)
+  );
+
+  assign sba_addr = sba_addr_long[47:0];
+
+  mem_to_axi_lite #(
+      .MemAddrWidth(48),
+      .AxiAddrWidth(48),
+      .DataWidth(64),
+      .MaxRequests(2),
+      .AxiProt('0),
+      .axi_req_t(axi_lite_a48_d64_req_t),
+      .axi_rsp_t(axi_lite_a48_d64_rsp_t)
+  ) i_mem_to_axi_lite (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .mem_req_i(sba_req),
+      .mem_addr_i(sba_addr),
+      .mem_we_i(sba_we),
+      .mem_wdata_i(sba_wdata),
+      .mem_be_i(sba_strb),
+      .mem_gnt_o(sba_gnt),
+      .mem_rsp_valid_o(sba_rvalid),
+      .mem_rsp_rdata_o(sba_rdata),
+      .mem_rsp_error_o(  /* left open */),
+      .axi_req_o(soc_axi_lite_periph_xbar_in_req[SOC_AXI_LITE_PERIPH_XBAR_IN_DEBUG]),
+      .axi_rsp_i(soc_axi_lite_periph_xbar_in_rsp[SOC_AXI_LITE_PERIPH_XBAR_IN_DEBUG])
+
+  );
+
+  dmi_jtag #(
+      .IdcodeValue(occamy_pkg::IDCode)
+  ) i_dmi_jtag (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .testmode_i(1'b0),
+      .dmi_rst_no(dmi_rst_n),
+      .dmi_req_o(dmi_req),
+      .dmi_req_valid_o(dmi_req_valid),
+      .dmi_req_ready_i(dmi_req_ready),
+      .dmi_resp_i(dmi_resp),
+      .dmi_resp_ready_o(dmi_resp_ready),
+      .dmi_resp_valid_i(dmi_resp_valid),
+      .tck_i(jtag_tck_i),
+      .tms_i(jtag_tms_i),
+      .trst_ni(jtag_trst_ni),
+      .td_i(jtag_tdi_i),
+      .td_o(jtag_tdo_o),
+      .tdo_oe_o()
+  );
+
+
+  /////////
+  // SPM //
+  /////////
+
   /////////////////
   // Peripherals //
   /////////////////
@@ -1316,11 +1485,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_SOC_CTRL]),
       .reg2hw   (soc_ctrl_in),
       .hw2reg   (soc_ctrl_out),
-`ifdef SYNTHESIS
-      .devmode_i(1'b0)
-`else
       .devmode_i(1'b1)
-`endif
   );
 
   //////////////
@@ -1367,8 +1532,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .rst_ni(rst_ni),
       .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_PLIC]),
       .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_PLIC]),
-      // TODO(zarubaf): Hook up to interrupt sources.
-      .intr_src_i('0),
+      .intr_src_i(irq),
       .irq_o(eip),
       .irq_id_o(),
       .msip_o()
@@ -1419,7 +1583,6 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   /////////////
   //   I2C   //
   /////////////
-
   i2c #(
       .reg_req_t(reg_a48_d32_req_t),
       .reg_rsp_t(reg_a48_d32_rsp_t)

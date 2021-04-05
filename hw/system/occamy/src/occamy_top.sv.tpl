@@ -78,6 +78,7 @@ module occamy_top
   logic mtip, msip;
   // Supervisor and machine-mode external interrupt pending.
   logic [1:0] eip;
+  logic debug_req;
   occamy_interrupt_t irq;
 
   addr_t [${nr_s1_quadrants-1}:0] s1_quadrant_base_addr;
@@ -122,7 +123,7 @@ module occamy_top
     .irq_i (eip),
     .ipi_i (msip),
     .time_irq_i (mtip),
-    .debug_req_i ('0),
+    .debug_req_i (debug_req),
     .axi_req_o (${cva6.req_name()}),
     .axi_resp_i (${cva6.rsp_name()})
   );
@@ -164,6 +165,147 @@ module occamy_top
   ///////////
   // Debug //
   ///////////
+
+  <% regbus_debug = soc_periph_xbar.out_debug.to_reg(context, "axi_lite_to_reg_debug") %>
+
+  dm::hartinfo_t [0:0] hartinfo;
+  assign hartinfo = ariane_pkg::DebugHartInfo;
+
+  logic          dmi_rst_n;
+  dm::dmi_req_t  dmi_req;
+  logic          dmi_req_valid;
+  logic          dmi_req_ready;
+  dm::dmi_resp_t dmi_resp;
+  logic          dmi_resp_ready;
+  logic          dmi_resp_valid;
+
+  logic dbg_req;
+  logic dbg_we;
+  logic [${regbus_debug.aw-1}:0] dbg_addr;
+  logic [${regbus_debug.dw-1}:0] dbg_wdata;
+  logic [${regbus_debug.dw//8-1}:0] dbg_wstrb;
+  logic [${regbus_debug.dw-1}:0] dbg_rdata;
+  logic dbg_rvalid;
+
+  reg_to_mem #(
+    .AW(${regbus_debug.aw}),
+    .DW(${regbus_debug.dw}),
+    .req_t (${regbus_debug.req_type()}),
+    .rsp_t (${regbus_debug.rsp_type()})
+  ) i_reg_to_mem_dbg (
+    .clk_i (${regbus_debug.clk}),
+    .rst_ni (${regbus_debug.rst}),
+    .reg_req_i (${regbus_debug.req_name()}),
+    .reg_rsp_o (${regbus_debug.rsp_name()}),
+    .req_o (dbg_req),
+    .gnt_i (dbg_req),
+    .we_o (dbg_we),
+    .addr_o (dbg_addr),
+    .wdata_o (dbg_wdata),
+    .wstrb_o (dbg_wstrb),
+    .rdata_i (dbg_rdata),
+    .rvalid_i (dbg_rvalid),
+    .rerror_i (1'b0)
+  );
+
+  `FFARN(dbg_rvalid, dbg_req, 1'b0, ${regbus_debug.clk}, ${regbus_debug.rst})
+
+  logic        sba_req;
+  logic [${regbus_debug.aw-1}:0] sba_addr;
+  logic        sba_we;
+  logic [${regbus_debug.dw-1}:0] sba_wdata;
+  logic [${regbus_debug.dw//8-1}:0]  sba_strb;
+  logic        sba_gnt;
+
+  logic [${regbus_debug.dw-1}:0] sba_rdata;
+  logic        sba_rvalid;
+
+  logic [${regbus_debug.dw-1}:0] sba_addr_long;
+
+  dm_top #(
+    .NrHarts (1),
+    .BusWidth (${regbus_debug.dw}),
+    .DmBaseAddress ('h0)
+  ) i_dm_top (
+    .clk_i (${regbus_debug.clk}),
+    .rst_ni (${regbus_debug.rst}),
+    .testmode_i (1'b0),
+    .ndmreset_o (),
+    .dmactive_o (),
+    .debug_req_o (debug_req),
+    .unavailable_i ('0),
+    .hartinfo_i (hartinfo),
+    .slave_req_i (dbg_req),
+    .slave_we_i (dbg_we),
+    .slave_addr_i ({${regbus_debug.dw-regbus_debug.aw}'b0, dbg_addr}),
+    .slave_be_i (dbg_wstrb),
+    .slave_wdata_i (dbg_wdata),
+    .slave_rdata_o (dbg_rdata),
+    .master_req_o (sba_req),
+    .master_add_o (sba_addr_long),
+    .master_we_o (sba_we),
+    .master_wdata_o (sba_wdata),
+    .master_be_o (sba_strb),
+    .master_gnt_i (sba_gnt),
+    .master_r_valid_i (sba_rvalid),
+    .master_r_rdata_i (sba_rdata),
+    .dmi_rst_ni (dmi_rst_n),
+    .dmi_req_valid_i (dmi_req_valid),
+    .dmi_req_ready_o (dmi_req_ready),
+    .dmi_req_i (dmi_req),
+    .dmi_resp_valid_o (dmi_resp_valid),
+    .dmi_resp_ready_i (dmi_resp_ready),
+    .dmi_resp_o (dmi_resp)
+  );
+
+  assign sba_addr = sba_addr_long[${regbus_debug.aw-1}:0];
+
+  mem_to_axi_lite #(
+    .MemAddrWidth (${regbus_debug.aw}),
+    .AxiAddrWidth (${regbus_debug.aw}),
+    .DataWidth (${regbus_debug.dw}),
+    .MaxRequests (2),
+    .AxiProt ('0),
+    .axi_req_t (${soc_periph_xbar.in_debug.req_type()}),
+    .axi_rsp_t (${soc_periph_xbar.in_debug.rsp_type()})
+  ) i_mem_to_axi_lite (
+    .clk_i (${regbus_debug.clk}),
+    .rst_ni (${regbus_debug.rst}),
+    .mem_req_i (sba_req),
+    .mem_addr_i (sba_addr),
+    .mem_we_i (sba_we),
+    .mem_wdata_i (sba_wdata),
+    .mem_be_i (sba_strb),
+    .mem_gnt_o (sba_gnt),
+    .mem_rsp_valid_o (sba_rvalid),
+    .mem_rsp_rdata_o (sba_rdata),
+    .mem_rsp_error_o (/* left open */),
+    .axi_req_o (${soc_periph_xbar.in_debug.req_name()}),
+    .axi_rsp_i (${soc_periph_xbar.in_debug.rsp_name()})
+
+  );
+
+  dmi_jtag #(
+    .IdcodeValue (occamy_pkg::IDCode)
+  ) i_dmi_jtag (
+    .clk_i (${regbus_debug.clk}),
+    .rst_ni (${regbus_debug.rst}),
+    .testmode_i (1'b0),
+    .dmi_rst_no (dmi_rst_n),
+    .dmi_req_o (dmi_req),
+    .dmi_req_valid_o (dmi_req_valid),
+    .dmi_req_ready_i (dmi_req_ready),
+    .dmi_resp_i (dmi_resp),
+    .dmi_resp_ready_o (dmi_resp_ready),
+    .dmi_resp_valid_i (dmi_resp_valid),
+    .tck_i (jtag_tck_i),
+    .tms_i (jtag_tms_i),
+    .trst_ni (jtag_trst_ni),
+    .td_i (jtag_tdi_i),
+    .td_o (jtag_tdo_o),
+    .tdo_oe_o ()
+  );
+
 
   /////////
   // SPM //
@@ -257,8 +399,7 @@ module occamy_top
     .rst_ni (${soc_regbus_periph_xbar.out_plic.rst}),
     .reg_req_i (${soc_regbus_periph_xbar.out_plic.req_name()}),
     .reg_rsp_o (${soc_regbus_periph_xbar.out_plic.rsp_name()}),
-    // TODO(zarubaf): Hook up to interrupt sources.
-    .intr_src_i ('0),
+    .intr_src_i (irq),
     .irq_o (eip),
     .irq_id_o (),
     .msip_o ()

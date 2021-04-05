@@ -1,0 +1,31 @@
+From 5f3fec5fc7f491612e59bdaf2e9213ad8905b684 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Mon, 5 Apr 2021 16:53:21 +0200
+Subject: [PATCH] Use tc generic
+
+---
+ src/dmi_jtag_tap.sv | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/dmi_jtag_tap.sv b/src/dmi_jtag_tap.sv
+index c2e8d6e..67a58c8 100644
+--- a/src/dmi_jtag_tap.sv
++++ b/src/dmi_jtag_tap.sv
+@@ -218,12 +218,12 @@ module dmi_jtag_tap #(
+   // ----------------
+   logic tck_n, tck_ni;
+ 
+-  cluster_clock_inverter i_tck_inv (
++  tc_clk_inverter i_tck_inv (
+     .clk_i ( tck_i  ),
+     .clk_o ( tck_ni )
+   );
+ 
+-  pulp_clock_mux2 i_dft_tck_mux (
++  tc_clk_mux2 i_dft_tck_mux (
+     .clk0_i    ( tck_ni     ),
+     .clk1_i    ( tck_i      ), // bypass the inverted clock for testing
+     .clk_sel_i ( testmode_i ),
+-- 
+2.25.1.377.g2d2118b814
+

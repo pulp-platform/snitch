@@ -52,6 +52,9 @@ package occamy_pkg;
     logic i2c_host_timeout;
   } occamy_interrupt_t;
 
+  localparam logic [15:0] PartNum = 2;
+  localparam logic [31:0] IDCode = (dm::DbgVersion013 << 28) | (PartNum << 12) | 32'b1;
+
   typedef logic [5:0] tile_id_t;
 
   typedef logic [AddrWidth-1:0] addr_t;
