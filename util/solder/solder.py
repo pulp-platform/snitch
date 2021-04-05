@@ -318,20 +318,6 @@ class AxiStruct:
         return name
 
 
-# AXI flat master port emission.
-class AxiFlatMasterPort:
-    def emit(name, aw, dw, iw, uw):
-        return "`AXI_FLAT_MASTER_PORT({}, logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])".format(
-            name, aw - 1, iw - 1, dw - 1, (dw + 7) // 8 - 1, max(0, uw - 1))
-
-
-# AXI flat slave port emission.
-class AxiFlatSlavePort:
-    def emit(name, aw, dw, iw, uw):
-        return "`AXI_FLAT_SLAVE_PORT({}, logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])".format(
-            name, aw - 1, iw - 1, dw - 1, (dw + 7) // 8 - 1, max(0, uw - 1))
-
-
 # AXI-Lite struct emission.
 class AxiLiteStruct:
     configs = dict()
@@ -401,11 +387,27 @@ class AxiBus(object):
     def emit_struct(self):
         return AxiStruct.emit(self.aw, self.dw, self.iw, self.uw)
 
-    def emit_flat_master_port(self, name=None):
-        return AxiFlatMasterPort.emit(name, self.aw, self.dw, self.iw, self.uw)
+    def emit_flat_master_port(self, context, name=None, terminus="\n"):
+        tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                mst_dir="output",
+                slv_dir="input",
+                prefix="m_axi_{}".format(name or ""),
+                bus=self
+            ) + terminus)
+        return self
 
-    def emit_flat_slave_port(self, name=None):
-        return AxiFlatSlavePort.emit(name, self.aw, self.dw, self.iw, self.uw)
+    def emit_flat_slave_port(self, context, name=None, terminus="\n"):
+        tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                mst_dir="input",
+                slv_dir="output",
+                prefix="s_axi_{}".format(name or ""),
+                bus=self
+            ) + terminus)
+        return self
 
     def declare(self, context):
         if self.declared:
@@ -426,6 +428,21 @@ class AxiBus(object):
 
     def rsp_type(self):
         return "{}_resp_t".format(self.type_prefix)
+
+    def addr_type(self):
+        return "logic [{}:0]".format(self.aw - 1)
+
+    def id_type(self):
+        return "logic [{}:0]".format(self.iw - 1)
+
+    def data_type(self):
+        return "logic [{}:0]".format(self.dw - 1)
+
+    def strb_type(self):
+        return "logic [{}:0]".format((self.dw + 7) // 8 - 1)
+
+    def user_type(self):
+        return "logic [{}:0]".format(max(0, self.uw - 1))
 
     def change_iw(self, context, target_iw, name, inst_name=None, to=None):
         if self.iw == target_iw:
