@@ -4,6 +4,9 @@ package:
   authors: ["lowRISC Contributors"]
 
 sources:
+# Level 0
 - rtl/prim_util_pkg.sv
-- rtl/prim_intr_hw.sv
+# Level 1
 - rtl/prim_fifo_sync.sv
+- rtl/prim_filter_ctr.sv
+- rtl/prim_intr_hw.sv
