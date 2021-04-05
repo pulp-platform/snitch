@@ -633,8 +633,7 @@ class AxiBus(object):
     def to_axi_lite(self, context, name, inst_name=None, to=None):
         # Generate the new bus.
         if to is None:
-            bus = AxiLiteBus(self.aw, self.dw)
-            bus.name = name
+            bus = AxiLiteBus(self.clk, self.rst, self.aw, self.dw, name)
             bus.name_suffix = None
         else:
             bus = to

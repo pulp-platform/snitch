@@ -13,6 +13,7 @@ module occamy_top
   import occamy_pkg::*;
 (
     input  logic             clk_i,
+    input  logic             rtc_i,
     input  logic             rst_ni,
     input  logic             test_mode_i,
     input  logic [ 1:0]      chip_id_i,
@@ -73,8 +74,10 @@ module occamy_top
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_in;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_out;
-
-  logic [1:0] mip;
+  // Machine timer and machine software interrupt pending.
+  logic mtip, msip;
+  // Supervisor and machine-mode external interrupt pending.
+  logic [1:0] eip;
   occamy_interrupt_t irq;
 
   addr_t [7:0] s1_quadrant_base_addr;
@@ -91,21 +94,21 @@ module occamy_top
   //   CROSSBARS   //
   ///////////////////
 
-  axi_lite_a48_d32_req_t [0:0] soc_axi_lite_periph_xbar_in_req;
-  axi_lite_a48_d32_rsp_t [0:0] soc_axi_lite_periph_xbar_in_rsp;
-  axi_lite_a48_d32_req_t [0:0] soc_axi_lite_periph_xbar_out_req;
-  axi_lite_a48_d32_rsp_t [0:0] soc_axi_lite_periph_xbar_out_rsp;
+  axi_lite_a48_d64_req_t [0:0] soc_axi_lite_periph_xbar_in_req;
+  axi_lite_a48_d64_rsp_t [0:0] soc_axi_lite_periph_xbar_in_rsp;
+  axi_lite_a48_d64_req_t [0:0] soc_axi_lite_periph_xbar_out_req;
+  axi_lite_a48_d64_rsp_t [0:0] soc_axi_lite_periph_xbar_out_rsp;
 
   // The `soc_axi_lite_periph_xbar` crossbar.
   axi_lite_xbar #(
       .Cfg      (SocAxiLitePeriphXbarCfg),
-      .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
-      .w_chan_t (axi_lite_a48_d32_w_chan_t),
-      .b_chan_t (axi_lite_a48_d32_b_chan_t),
-      .ar_chan_t(axi_lite_a48_d32_ar_chan_t),
-      .r_chan_t (axi_lite_a48_d32_r_chan_t),
-      .req_t    (axi_lite_a48_d32_req_t),
-      .resp_t   (axi_lite_a48_d32_rsp_t),
+      .aw_chan_t(axi_lite_a48_d64_aw_chan_t),
+      .w_chan_t (axi_lite_a48_d64_w_chan_t),
+      .b_chan_t (axi_lite_a48_d64_b_chan_t),
+      .ar_chan_t(axi_lite_a48_d64_ar_chan_t),
+      .r_chan_t (axi_lite_a48_d64_r_chan_t),
+      .req_t    (axi_lite_a48_d64_req_t),
+      .resp_t   (axi_lite_a48_d64_rsp_t),
       .rule_t   (xbar_rule_48_t)
   ) i_soc_axi_lite_periph_xbar (
       .clk_i                (clk_i),
@@ -122,8 +125,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [8:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [8:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [7:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [7:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -146,7 +149,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(9),
+      .NoRules(8),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -209,9 +212,11 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
   /// Address map of the `soc_narrow_xbar` crossbar.
-  xbar_rule_48_t [8:0] SocNarrowXbarAddrmap;
+  xbar_rule_48_t [10:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
+    '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00035000 },
     '{ idx: 9, start_addr: 48'h80000000, end_addr: 48'h100000000 },
+    '{ idx: 10, start_addr: 48'h00000000, end_addr: 48'h00035000 },
     '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
     '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
     '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
@@ -222,14 +227,14 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
     '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
   };
 
-  soc_narrow_xbar_in_req_t   [8:0] soc_narrow_xbar_in_req;
-  soc_narrow_xbar_in_resp_t  [8:0] soc_narrow_xbar_in_rsp;
-  soc_narrow_xbar_out_req_t  [9:0] soc_narrow_xbar_out_req;
-  soc_narrow_xbar_out_resp_t [9:0] soc_narrow_xbar_out_rsp;
+  soc_narrow_xbar_in_req_t   [ 8:0] soc_narrow_xbar_in_req;
+  soc_narrow_xbar_in_resp_t  [ 8:0] soc_narrow_xbar_in_rsp;
+  soc_narrow_xbar_out_req_t  [10:0] soc_narrow_xbar_out_req;
+  soc_narrow_xbar_out_resp_t [10:0] soc_narrow_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg(SocNarrowXbarCfg),
-      .Connectivity  ( 90'b111111111111011111111110111111111101111111111011111111110111111111101111111111011111111110 ),
+      .Connectivity  ( 99'b111111111111110111111111110111111111110111111111110111111111110111111111110111111111110111111111110 ),
       .slv_aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d64_i8_u0_aw_chan_t),
       .w_chan_t(axi_a48_d64_i4_u0_w_chan_t),
@@ -346,9 +351,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .rst_ni(rst_ni),
       .boot_addr_i(BootAddr),
       .hart_id_i('0),
-      .irq_i(mip),
-      .ipi_i('0),
-      .time_irq_i('0),
+      .irq_i(eip),
+      .ipi_i(msip),
+      .time_irq_i(mtip),
       .debug_req_i('0),
       .axi_req_o(cva6_axi_req),
       .axi_resp_i(cva6_axi_rsp)
@@ -1182,6 +1187,30 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   /////////////////
   // Peripherals //
   /////////////////
+  axi_to_axi_lite #(
+      .AxiAddrWidth(48),
+      .AxiDataWidth(64),
+      .AxiIdWidth(8),
+      .AxiUserWidth(1),
+      .AxiMaxWriteTxns(4),
+      .AxiMaxReadTxns(4),
+      .FallThrough(0),
+      .full_req_t(axi_a48_d64_i8_u0_req_t),
+      .full_resp_t(axi_a48_d64_i8_u0_resp_t),
+      .lite_req_t(axi_lite_a48_d64_req_t),
+      .lite_resp_t(axi_lite_a48_d64_rsp_t)
+  ) i_axi_to_axi_lite_periph_pc (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .test_i(test_mode_i),
+      .slv_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_PERIPH]),
+      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_PERIPH]),
+      .mst_req_o(soc_axi_lite_periph_xbar_in_req[SOC_AXI_LITE_PERIPH_XBAR_IN_SOC]),
+      .mst_resp_i(soc_axi_lite_periph_xbar_in_rsp[SOC_AXI_LITE_PERIPH_XBAR_IN_SOC])
+  );
+
+
+
   axi_a48_d32_i8_u0_req_t  axi_to_axi_lite_dw_req;
   axi_a48_d32_i8_u0_resp_t axi_to_axi_lite_dw_rsp;
 
@@ -1204,11 +1233,14 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   ) i_axi_to_axi_lite_dw (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_PERIPH]),
-      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_PERIPH]),
+      .slv_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_REGBUS_PERIPH]),
+      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_REGBUS_PERIPH]),
       .mst_req_o(axi_to_axi_lite_dw_req),
       .mst_resp_i(axi_to_axi_lite_dw_rsp)
   );
+
+  axi_lite_a48_d32_req_t axi_to_axi_lite_regbus_periph_req;
+  axi_lite_a48_d32_rsp_t axi_to_axi_lite_regbus_periph_rsp;
 
   axi_to_axi_lite #(
       .AxiAddrWidth(48),
@@ -1222,16 +1254,15 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .full_resp_t(axi_a48_d32_i8_u0_resp_t),
       .lite_req_t(axi_lite_a48_d32_req_t),
       .lite_resp_t(axi_lite_a48_d32_rsp_t)
-  ) i_axi_to_axi_lite_periph_pc (
+  ) i_axi_to_axi_lite_regbus_periph_pc (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_i(test_mode_i),
       .slv_req_i(axi_to_axi_lite_dw_req),
       .slv_resp_o(axi_to_axi_lite_dw_rsp),
-      .mst_req_o(soc_axi_lite_periph_xbar_in_req[SOC_AXI_LITE_PERIPH_XBAR_IN_SOC]),
-      .mst_resp_i(soc_axi_lite_periph_xbar_in_rsp[SOC_AXI_LITE_PERIPH_XBAR_IN_SOC])
+      .mst_req_o(axi_to_axi_lite_regbus_periph_req),
+      .mst_resp_i(axi_to_axi_lite_regbus_periph_rsp)
   );
-
 
   axi_lite_to_reg #(
       .ADDR_WIDTH    (48),
@@ -1240,11 +1271,11 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .axi_lite_rsp_t(axi_lite_a48_d32_rsp_t),
       .reg_req_t     (reg_a48_d32_req_t),
       .reg_rsp_t     (reg_a48_d32_rsp_t)
-  ) i_axi_lite_to_reg_periph_pc (
+  ) i_axi_lite_to_regbus_periph_pc (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .axi_lite_req_i(soc_axi_lite_periph_xbar_out_req[SOC_AXI_LITE_PERIPH_XBAR_OUT_REGBUS_PERIPH]),
-      .axi_lite_rsp_o(soc_axi_lite_periph_xbar_out_rsp[SOC_AXI_LITE_PERIPH_XBAR_OUT_REGBUS_PERIPH]),
+      .axi_lite_req_i(axi_to_axi_lite_regbus_periph_req),
+      .axi_lite_rsp_o(axi_to_axi_lite_regbus_periph_rsp),
       .reg_req_o(soc_regbus_periph_xbar_in_req[SOC_REGBUS_PERIPH_XBAR_IN_AXI_LITE_PERIPH_XBAR]),
       .reg_rsp_i(soc_regbus_periph_xbar_in_rsp[SOC_REGBUS_PERIPH_XBAR_IN_AXI_LITE_PERIPH_XBAR])
   );
@@ -1254,6 +1285,23 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   ///////////////
   //   CLINT   //
   ///////////////
+  clint #(
+      .AXI_ADDR_WIDTH(48),
+      .AXI_DATA_WIDTH(64),
+      .AXI_ID_WIDTH(0),
+      .NR_CORES(1),
+      .axi_req_t(axi_lite_a48_d64_req_t),
+      .axi_resp_t(axi_lite_a48_d64_rsp_t)
+  ) i_clint (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .testmode_i(1'b0),
+      .axi_req_i(soc_axi_lite_periph_xbar_out_req[SOC_AXI_LITE_PERIPH_XBAR_OUT_CLINT]),
+      .axi_resp_o(soc_axi_lite_periph_xbar_out_rsp[SOC_AXI_LITE_PERIPH_XBAR_OUT_CLINT]),
+      .rtc_i(rtc_i),
+      .timer_irq_o(mtip),
+      .ipi_o(msip)
+  );
 
   /////////////////////
   //   SOC CONTROL   //
@@ -1321,7 +1369,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_PLIC]),
       // TODO(zarubaf): Hook up to interrupt sources.
       .intr_src_i('0),
-      .irq_o(mip),
+      .irq_o(eip),
       .irq_id_o(),
       .msip_o()
   );

@@ -108,14 +108,15 @@ def main():
                          0x00033000).attach_to(am_soc_regbus_periph_xbar)
     am_spim = am.new_leaf("spim", 0x1000,
                          0x00034000).attach_to(am_soc_regbus_periph_xbar)
+
     am_clint = am.new_leaf("clint", 0x10000,
-                           0x00040000).attach_to(am_soc_regbus_periph_xbar)
+                           0x00040000).attach_to(am_soc_axi_lite_periph_xbar)
 
     am_pcie = am.new_leaf("pcie", 0x80000000,
                           0x80000000).attach_to(am_soc_wide_xbar)
 
     am_soc_narrow_xbar.attach(am_soc_axi_lite_periph_xbar)
-    am_soc_axi_lite_periph_xbar.attach(am_soc_regbus_periph_xbar)
+    am_soc_narrow_xbar.attach(am_soc_regbus_periph_xbar)
     am_soc_narrow_xbar.attach(am_soc_wide_xbar)
     # Generate crossbars.
 
@@ -124,17 +125,19 @@ def main():
     #######################
     # AXI-Lite
     soc_periph_xbar = solder.AxiLiteXbar(48,
-                                         32,
+                                         64,
                                          name="soc_axi_lite_periph_xbar",
                                          clk="clk_i",
                                          rst="rst_ni",
                                          node=am_soc_axi_lite_periph_xbar)
 
-    # Peripherals crossbar (peripheral clock domain).
     soc_periph_xbar.add_input("soc")
-    soc_periph_xbar.add_output_entry("regbus_periph", am_soc_regbus_periph_xbar)
+    soc_periph_xbar.add_output_entry("clint", am_clint)
 
-    # RegBus
+
+    ##########
+    # RegBus #
+    ##########
     soc_regbus_periph_xbar = solder.RegBusXbar(
         48,
         32,
@@ -149,7 +152,6 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("soc_ctrl", am_soc_ctrl)
     soc_regbus_periph_xbar.add_output_entry("debug", am_debug)
     soc_regbus_periph_xbar.add_output_entry("bootrom", am_bootrom)
-    soc_regbus_periph_xbar.add_output_entry("clint", am_clint)
     soc_regbus_periph_xbar.add_output_entry("plic", am_plic)
     soc_regbus_periph_xbar.add_output_entry("uart", am_uart)
     soc_regbus_periph_xbar.add_output_entry("gpio", am_gpio)
@@ -178,6 +180,7 @@ def main():
     # TODO(zarubaf): PCIe should probably go into the small crossbar.
     soc_wide_xbar.add_input("pcie")
     soc_wide_xbar.add_output_entry("pcie", am_pcie)
+
     ###################
     # SoC Narrow Xbar #
     ###################
@@ -198,6 +201,7 @@ def main():
 
     soc_narrow_xbar.add_output_entry("periph", am_soc_regbus_periph_xbar)
     soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
+    soc_narrow_xbar.add_output_entry("regbus_periph", am_soc_regbus_periph_xbar)
 
     soc_narrow_xbar.add_input("cva6")
 

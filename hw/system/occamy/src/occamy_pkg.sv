@@ -73,8 +73,8 @@ package occamy_pkg;
   /// The address space of a single S1 quadrant.
   localparam addr_t S1QuadrantAddressSpace = ClusterAddressSpace * NrClustersS1Quadrant;
 
-  // AXI-Lite bus with 48 bit address and 32 bit data.
-  `AXI_LITE_TYPEDEF_ALL(axi_lite_a48_d32, logic [47:0], logic [31:0], logic [3:0])
+  // AXI-Lite bus with 48 bit address and 64 bit data.
+  `AXI_LITE_TYPEDEF_ALL(axi_lite_a48_d64, logic [47:0], logic [63:0], logic [7:0])
 
   /// Inputs of the `soc_axi_lite_periph_xbar` crossbar.
   typedef enum int {
@@ -84,7 +84,7 @@ package occamy_pkg;
 
   /// Outputs of the `soc_axi_lite_periph_xbar` crossbar.
   typedef enum int {
-    SOC_AXI_LITE_PERIPH_XBAR_OUT_REGBUS_PERIPH,
+    SOC_AXI_LITE_PERIPH_XBAR_OUT_CLINT,
     SOC_AXI_LITE_PERIPH_XBAR_NUM_OUTPUTS
   } soc_axi_lite_periph_xbar_outputs_e;
 
@@ -99,31 +99,31 @@ package occamy_pkg;
     AxiIdWidthSlvPorts: 0,
     AxiIdUsedSlvPorts:  0,
     AxiAddrWidth:       48,
-    AxiDataWidth:       32,
+    AxiDataWidth:       64,
     NoAddrRules:        1
   };
 
   /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
   localparam xbar_rule_48_t [0:0] SocAxiLitePeriphXbarAddrmap = '{
-    '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h00050000 }
+    '{ idx: 0, start_addr: 48'h00040000, end_addr: 48'h00050000 }
   };
 
   // AXI plugs of the `soc_axi_lite_periph_xbar` crossbar.
 
-  typedef axi_lite_a48_d32_req_t soc_axi_lite_periph_xbar_in_req_t;
-  typedef axi_lite_a48_d32_req_t soc_axi_lite_periph_xbar_out_req_t;
-  typedef axi_lite_a48_d32_rsp_t soc_axi_lite_periph_xbar_in_rsp_t;
-  typedef axi_lite_a48_d32_rsp_t soc_axi_lite_periph_xbar_out_rsp_t;
-  typedef axi_lite_a48_d32_aw_chan_t soc_axi_lite_periph_xbar_in_aw_chan_t;
-  typedef axi_lite_a48_d32_aw_chan_t soc_axi_lite_periph_xbar_out_aw_chan_t;
-  typedef axi_lite_a48_d32_w_chan_t soc_axi_lite_periph_xbar_in_w_chan_t;
-  typedef axi_lite_a48_d32_w_chan_t soc_axi_lite_periph_xbar_out_w_chan_t;
-  typedef axi_lite_a48_d32_b_chan_t soc_axi_lite_periph_xbar_in_b_chan_t;
-  typedef axi_lite_a48_d32_b_chan_t soc_axi_lite_periph_xbar_out_b_chan_t;
-  typedef axi_lite_a48_d32_ar_chan_t soc_axi_lite_periph_xbar_in_ar_chan_t;
-  typedef axi_lite_a48_d32_ar_chan_t soc_axi_lite_periph_xbar_out_ar_chan_t;
-  typedef axi_lite_a48_d32_r_chan_t soc_axi_lite_periph_xbar_in_r_chan_t;
-  typedef axi_lite_a48_d32_r_chan_t soc_axi_lite_periph_xbar_out_r_chan_t;
+  typedef axi_lite_a48_d64_req_t soc_axi_lite_periph_xbar_in_req_t;
+  typedef axi_lite_a48_d64_req_t soc_axi_lite_periph_xbar_out_req_t;
+  typedef axi_lite_a48_d64_rsp_t soc_axi_lite_periph_xbar_in_rsp_t;
+  typedef axi_lite_a48_d64_rsp_t soc_axi_lite_periph_xbar_out_rsp_t;
+  typedef axi_lite_a48_d64_aw_chan_t soc_axi_lite_periph_xbar_in_aw_chan_t;
+  typedef axi_lite_a48_d64_aw_chan_t soc_axi_lite_periph_xbar_out_aw_chan_t;
+  typedef axi_lite_a48_d64_w_chan_t soc_axi_lite_periph_xbar_in_w_chan_t;
+  typedef axi_lite_a48_d64_w_chan_t soc_axi_lite_periph_xbar_out_w_chan_t;
+  typedef axi_lite_a48_d64_b_chan_t soc_axi_lite_periph_xbar_in_b_chan_t;
+  typedef axi_lite_a48_d64_b_chan_t soc_axi_lite_periph_xbar_out_b_chan_t;
+  typedef axi_lite_a48_d64_ar_chan_t soc_axi_lite_periph_xbar_in_ar_chan_t;
+  typedef axi_lite_a48_d64_ar_chan_t soc_axi_lite_periph_xbar_out_ar_chan_t;
+  typedef axi_lite_a48_d64_r_chan_t soc_axi_lite_periph_xbar_in_r_chan_t;
+  typedef axi_lite_a48_d64_r_chan_t soc_axi_lite_periph_xbar_out_r_chan_t;
 
   // Register bus with 48 bit address and 32 bit data.
   `REG_BUS_TYPEDEF_ALL(reg_a48_d32, logic [47:0], logic [31:0], logic [3:0])
@@ -139,7 +139,6 @@ package occamy_pkg;
     SOC_REGBUS_PERIPH_XBAR_OUT_SOC_CTRL,
     SOC_REGBUS_PERIPH_XBAR_OUT_DEBUG,
     SOC_REGBUS_PERIPH_XBAR_OUT_BOOTROM,
-    SOC_REGBUS_PERIPH_XBAR_OUT_CLINT,
     SOC_REGBUS_PERIPH_XBAR_OUT_PLIC,
     SOC_REGBUS_PERIPH_XBAR_OUT_UART,
     SOC_REGBUS_PERIPH_XBAR_OUT_GPIO,
@@ -149,16 +148,15 @@ package occamy_pkg;
   } soc_regbus_periph_xbar_outputs_e;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [8:0] SocRegbusPeriphXbarAddrmap = '{
+  localparam xbar_rule_48_t [7:0] SocRegbusPeriphXbarAddrmap = '{
     '{ idx: 0, start_addr: 48'h00020000, end_addr: 48'h00021000 },
     '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 },
     '{ idx: 2, start_addr: 48'h00010000, end_addr: 48'h00020000 },
-    '{ idx: 3, start_addr: 48'h00040000, end_addr: 48'h00050000 },
-    '{ idx: 4, start_addr: 48'h00024000, end_addr: 48'h00025000 },
-    '{ idx: 5, start_addr: 48'h00030000, end_addr: 48'h00031000 },
-    '{ idx: 6, start_addr: 48'h00031000, end_addr: 48'h00032000 },
-    '{ idx: 7, start_addr: 48'h00033000, end_addr: 48'h00034000 },
-    '{ idx: 8, start_addr: 48'h00034000, end_addr: 48'h00035000 }
+    '{ idx: 3, start_addr: 48'h00024000, end_addr: 48'h00025000 },
+    '{ idx: 4, start_addr: 48'h00030000, end_addr: 48'h00031000 },
+    '{ idx: 5, start_addr: 48'h00031000, end_addr: 48'h00032000 },
+    '{ idx: 6, start_addr: 48'h00033000, end_addr: 48'h00034000 },
+    '{ idx: 7, start_addr: 48'h00034000, end_addr: 48'h00035000 }
   };
 
   /// Inputs of the `soc_wide_xbar` crossbar.
@@ -259,6 +257,7 @@ package occamy_pkg;
     SOC_NARROW_XBAR_OUT_S1_QUADRANT_7,
     SOC_NARROW_XBAR_OUT_PERIPH,
     SOC_NARROW_XBAR_OUT_SOC_WIDE,
+    SOC_NARROW_XBAR_OUT_REGBUS_PERIPH,
     SOC_NARROW_XBAR_NUM_OUTPUTS
   } soc_narrow_xbar_outputs_e;
 
@@ -274,7 +273,7 @@ package occamy_pkg;
     AxiIdUsedSlvPorts:  4,
     AxiAddrWidth:       48,
     AxiDataWidth:       64,
-    NoAddrRules:        9
+    NoAddrRules:        11
   };
 
   // AXI bus with 48 bit address, 64 bit data, 4 bit IDs, and 0 bit user data.
@@ -429,6 +428,9 @@ package occamy_pkg;
   // AXI bus with 48 bit address, 32 bit data, 8 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d32_i8_u0, logic [47:0], logic [7:0], logic [31:0], logic [3:0],
                    logic [0:0])
+
+  // AXI-Lite bus with 48 bit address and 32 bit data.
+  `AXI_LITE_TYPEDEF_ALL(axi_lite_a48_d32, logic [47:0], logic [31:0], logic [3:0])
 
   // AXI bus with 48 bit address, 64 bit data, 2 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d64_i2_u0, logic [47:0], logic [1:0], logic [63:0], logic [7:0],

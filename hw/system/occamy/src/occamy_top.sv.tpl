@@ -13,6 +13,7 @@ module occamy_top
   import occamy_pkg::*;
 (
   input  logic        clk_i,
+  input  logic        rtc_i,
   input  logic        rst_ni,
   input  logic        test_mode_i,
   input  logic [1:0]  chip_id_i,
@@ -73,8 +74,10 @@ module occamy_top
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_in;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_out;
-
-  logic [1:0] mip;
+  // Machine timer and machine software interrupt pending.
+  logic mtip, msip;
+  // Supervisor and machine-mode external interrupt pending.
+  logic [1:0] eip;
   occamy_interrupt_t irq;
 
   addr_t [${nr_s1_quadrants-1}:0] s1_quadrant_base_addr;
@@ -116,9 +119,9 @@ module occamy_top
     .rst_ni (rst_ni),
     .boot_addr_i (BootAddr),
     .hart_id_i ('0),
-    .irq_i (mip),
-    .ipi_i ('0),
-    .time_irq_i ('0),
+    .irq_i (eip),
+    .ipi_i (msip),
+    .time_irq_i (mtip),
     .debug_req_i ('0),
     .axi_req_o (${cva6.req_name()}),
     .axi_resp_i (${cva6.rsp_name()})
@@ -158,15 +161,41 @@ module occamy_top
 
   % endfor
 
+  ///////////
+  // Debug //
+  ///////////
+
+  /////////
+  // SPM //
+  /////////
+
   /////////////////
   // Peripherals //
   /////////////////
-  <% soc_narrow_xbar.out_periph.change_dw(context, 32, "axi_to_axi_lite_dw").to_axi_lite(context, "axi_to_axi_lite_periph", to=soc_periph_xbar.in_soc) %>
-  <% soc_periph_xbar.out_regbus_periph.to_reg(context, "axi_lite_to_reg_periph", to=soc_regbus_periph_xbar.in_axi_lite_periph_xbar) %>
+  <% soc_narrow_xbar.out_periph.to_axi_lite(context, "axi_to_axi_lite_periph", to=soc_periph_xbar.in_soc) %>
+
+  <% soc_narrow_xbar.out_regbus_periph.change_dw(context, 32, "axi_to_axi_lite_dw").to_axi_lite(context, "axi_to_axi_lite_regbus_periph").to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_axi_lite_periph_xbar) %>
 
   ///////////////
   //   CLINT   //
   ///////////////
+  clint #(
+    .AXI_ADDR_WIDTH (${soc_periph_xbar.out_clint.aw}),
+    .AXI_DATA_WIDTH (${soc_periph_xbar.out_clint.dw}),
+    .AXI_ID_WIDTH (0),
+    .NR_CORES (1),
+    .axi_req_t (${soc_periph_xbar.out_clint.req_type()}),
+    .axi_resp_t (${soc_periph_xbar.out_clint.rsp_type()})
+  ) i_clint (
+    .clk_i (${soc_periph_xbar.out_clint.clk}),
+    .rst_ni (${soc_periph_xbar.out_clint.rst}),
+    .testmode_i (1'b0),
+    .axi_req_i (${soc_periph_xbar.out_clint.req_name()}),
+    .axi_resp_o (${soc_periph_xbar.out_clint.rsp_name()}),
+    .rtc_i (rtc_i),
+    .timer_irq_o (mtip),
+    .ipi_o (msip)
+  );
 
   /////////////////////
   //   SOC CONTROL   //
@@ -181,11 +210,7 @@ module occamy_top
     .reg_rsp_o ( ${soc_regbus_periph_xbar.out_soc_ctrl.rsp_name()} ),
     .reg2hw    ( soc_ctrl_in ),
     .hw2reg    ( soc_ctrl_out ),
-    `ifdef SYNTHESIS
-    .devmode_i ( 1'b0 )
-    `else
     .devmode_i ( 1'b1 )
-    `endif
   );
 
   //////////////
@@ -234,7 +259,7 @@ module occamy_top
     .reg_rsp_o (${soc_regbus_periph_xbar.out_plic.rsp_name()}),
     // TODO(zarubaf): Hook up to interrupt sources.
     .intr_src_i ('0),
-    .irq_o (mip),
+    .irq_o (eip),
     .irq_id_o (),
     .msip_o ()
   );
@@ -284,11 +309,10 @@ module occamy_top
   /////////////
   //   I2C   //
   /////////////
-
-  gpio #(
+  i2c #(
     .reg_req_t (${soc_regbus_periph_xbar.out_i2c.req_type()}),
     .reg_rsp_t (${soc_regbus_periph_xbar.out_i2c.rsp_type()})
-  ) i_gpio (
+  ) i_i2c (
     .clk_i (${soc_regbus_periph_xbar.out_i2c.clk}),
     .rst_ni (${soc_regbus_periph_xbar.out_i2c.rst}),
     .reg_req_i (${soc_regbus_periph_xbar.out_i2c.req_name()}),
