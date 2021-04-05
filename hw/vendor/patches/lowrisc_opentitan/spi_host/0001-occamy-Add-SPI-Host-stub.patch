@@ -1,0 +1,1926 @@
+From a95ec958cae99f44b7ab68f44bed34fd07510eeb Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Mon, 5 Apr 2021 14:31:51 +0200
+Subject: [PATCH] occamy: Add SPI Host stub
+
+---
+ Bender.yml              |   14 +
+ data/spi_host.hjson     |    6 +-
+ rtl/spi_host.sv         |   60 +--
+ rtl/spi_host_reg_pkg.sv |  106 ++--
+ rtl/spi_host_reg_top.sv | 1104 ++++++++++++++++++++++++++++-----------
+ 5 files changed, 882 insertions(+), 408 deletions(-)
+ create mode 100644 hw/vendor/lowrisc_opentitan/spi_host/Bender.yml
+
+diff --git a/Bender.yml b/Bender.yml
+new file mode 100644
+index 0000000..d43352e
+--- /dev/null
++++ b/Bender.yml
+@@ -0,0 +1,14 @@
++package:
++  name: lowrisc_spi_host
++  description: "lowRISC RISC-V Platform Level Interrupt Controller"
++  authors: ["lowRISC Contributors"]
++
++dependencies:
++  lowrisc_prim: {path: ../prim}
++
++sources:
++# Level 0:
++- rtl/spi_host_reg_pkg.sv
++# Level 1:
++- rtl/spi_host_reg_top.sv
++- rtl/spi_host.sv
+diff --git a/data/spi_host.hjson b/data/spi_host.hjson
+index 1c8f432..e6a0828 100644
+--- a/data/spi_host.hjson
++++ b/data/spi_host.hjson
+@@ -6,9 +6,7 @@
+   other_clock_list: [ "clk_core_i" ],
+   reset_primary: "rst_ni",
+   other_reset_list: [ "rst_core_ni" ],
+-  bus_interfaces: [
+-    { protocol: "tlul", direction: "device" }
+-  ],
++  bus_device: "reg",
+   regwidth: "32",
+   scan: "true",
+   param_list: [
+@@ -25,7 +23,7 @@
+     { name: "MaxCS",
+       desc: "The number of active-low chip select (cs_n) lines to create.",
+       type: "int",
+-      default: "1"
++      default: "2"
+     },
+   ],
+   available_output_list: [
+diff --git a/rtl/spi_host.sv b/rtl/spi_host.sv
+index 33fa7bb..187349c 100644
+--- a/rtl/spi_host.sv
++++ b/rtl/spi_host.sv
+@@ -6,21 +6,22 @@
+ //
+ //
+ 
+-`include "prim_assert.sv"
++`include "common_cells/assertions.svh"
+ 
+ module spi_host
+   import spi_host_reg_pkg::*;
+- (
++#(
++  parameter type reg_req_t = logic,
++  parameter type reg_rsp_t = logic
++) (
+   input              clk_i,
+   input              rst_ni,
+   input              clk_core_i,
+   input              rst_core_ni,
+ 
+-  input              lc_ctrl_pkg::lc_tx_t scanmode_i,
+-
+   // Register interface
+-  input              tlul_pkg::tl_h2d_t tl_i,
+-  output             tlul_pkg::tl_d2h_t tl_o,
++  input  reg_req_t reg_req_i,
++  output reg_rsp_t reg_rsp_o,
+ 
+   // SPI Interface
+   output logic             cio_sck_o,
+@@ -41,24 +42,23 @@ module spi_host
+   spi_host_reg2hw_t reg2hw;
+   spi_host_hw2reg_t hw2reg;
+ 
+-  tlul_pkg::tl_h2d_t txfifo_win_h2d [1];
+-  tlul_pkg::tl_d2h_t txfifo_win_d2h [1];
+-
+   // Register module
+-  spi_host_reg_top u_reg (
++  spi_host_reg_top #(
++    .reg_req_t (reg_req_t),
++    .reg_rsp_t (reg_rsp_t)
++  ) u_reg (
+     .clk_i,
+     .rst_ni,
+ 
+-    .tl_i (tl_i),
+-    .tl_o (tl_o),
++    .reg_req_i,
++    .reg_rsp_o,
+ 
+-    .tl_win_o (txfifo_win_h2d),
+-    .tl_win_i (txfifo_win_d2h),
++    .reg_req_win_o (),
++    .reg_rsp_win_i ('0),
+ 
+     .reg2hw,
+     .hw2reg,
+ 
+-    .intg_err_o (),
+     .devmode_i  (1'b1)
+   );
+ 
+@@ -100,16 +100,6 @@ module spi_host
+     assign hw2reg.command[ii].go.d = 1'b0;
+     assign hw2reg.command[ii].go.de = 1'b0;
+   end
+-  assign txfifo_win_d2h[0].d_valid = 1'b0;
+-  assign txfifo_win_d2h[0].d_opcode = tlul_pkg::AccessAck;
+-  assign txfifo_win_d2h[0].d_param = 3'h0;
+-  assign txfifo_win_d2h[0].d_size = {top_pkg::TL_SZW{1'b0}};
+-  assign txfifo_win_d2h[0].d_source = {top_pkg::TL_AIW{1'b0}};
+-  assign txfifo_win_d2h[0].d_sink = {top_pkg::TL_DIW{1'b0}};
+-  assign txfifo_win_d2h[0].d_data = {top_pkg::TL_DW{1'b0}};
+-  assign txfifo_win_d2h[0].d_user = {top_pkg::TL_DUW{1'b0}};
+-  assign txfifo_win_d2h[0].d_error = 1'b0;
+-  assign txfifo_win_d2h[0].a_ready = 1'b0;
+   assign hw2reg.rxdata.d = 32'h0;
+   assign hw2reg.error_status.cmderr.d = 1'b0;
+   assign hw2reg.error_status.cmderr.de = 1'b0;
+@@ -118,24 +108,6 @@ module spi_host
+   assign hw2reg.error_status.underflow.d = 1'b0;
+   assign hw2reg.error_status.underflow.de = 1'b0;
+ 
+-  // TODO: REMOVE THIS CODE
+-  // Temp tie-off to silence lint warnings
+-  logic unused_reg;
+-  logic unused_tl;
+-  logic unused_flop;
+-  logic unused_scan;
+-  assign unused_reg = ^reg2hw;
+-  assign unused_tl = ^txfifo_win_h2d[0];
+-  assign unused_scan = ^scanmode_i;
+-
+-  always_ff @(posedge clk_core_i or negedge rst_core_ni) begin
+-    if (!rst_core_ni) begin
+-      unused_flop <= '0;
+-    end else begin
+-      unused_flop <= ^cio_sd_i;
+-    end
+-  end
+-
+   prim_intr_hw #(.Width(1)) intr_hw_spi_event (
+     .clk_i,
+     .rst_ni,
+@@ -162,8 +134,6 @@ module spi_host
+     .intr_o                 (intr_error_o)
+   );
+ 
+-  `ASSERT_KNOWN(TlDValidKnownO_A, tl_o.d_valid)
+-  `ASSERT_KNOWN(TlAReadyKnownO_A, tl_o.a_ready)
+   `ASSERT_KNOWN(CioSckKnownO_A, cio_sck_o)
+   `ASSERT_KNOWN(CioSckEnKnownO_A, cio_sck_en_o)
+   `ASSERT_KNOWN(CioCsbKnownO_A, cio_csb_o)
+diff --git a/rtl/spi_host_reg_pkg.sv b/rtl/spi_host_reg_pkg.sv
+index 7fc40f3..3562b8d 100644
+--- a/rtl/spi_host_reg_pkg.sv
++++ b/rtl/spi_host_reg_pkg.sv
+@@ -8,15 +8,11 @@ package spi_host_reg_pkg;
+ 
+   // Param list
+   parameter int ByteOrder = 0;
+-  parameter int MaxCS = 1;
+-
+-  // Address widths within the block
+-  parameter int BlockAw = 6;
++  parameter int MaxCS = 2;
+ 
+   ////////////////////////////
+   // Typedefs for registers //
+   ////////////////////////////
+-
+   typedef struct packed {
+     struct packed {
+       logic        q;
+@@ -171,6 +167,7 @@ package spi_host_reg_pkg;
+     } idle;
+   } spi_host_reg2hw_event_enable_reg_t;
+ 
++
+   typedef struct packed {
+     struct packed {
+       logic        d;
+@@ -263,60 +260,62 @@ package spi_host_reg_pkg;
+     } underflow;
+   } spi_host_hw2reg_error_status_reg_t;
+ 
+-  // Register -> HW type
++
++  ///////////////////////////////////////
++  // Register to internal design logic //
++  ///////////////////////////////////////
+   typedef struct packed {
+-    spi_host_reg2hw_intr_state_reg_t intr_state; // [117:116]
+-    spi_host_reg2hw_intr_enable_reg_t intr_enable; // [115:114]
+-    spi_host_reg2hw_intr_test_reg_t intr_test; // [113:110]
+-    spi_host_reg2hw_control_reg_t control; // [109:80]
+-    spi_host_reg2hw_configopts_mreg_t [0:0] configopts; // [79:48]
+-    spi_host_reg2hw_command_mreg_t [0:0] command; // [47:9]
+-    spi_host_reg2hw_error_enable_reg_t error_enable; // [8:6]
+-    spi_host_reg2hw_event_enable_reg_t event_enable; // [5:0]
++    spi_host_reg2hw_intr_state_reg_t intr_state; // [189:188]
++    spi_host_reg2hw_intr_enable_reg_t intr_enable; // [187:186]
++    spi_host_reg2hw_intr_test_reg_t intr_test; // [185:182]
++    spi_host_reg2hw_control_reg_t control; // [181:152]
++    spi_host_reg2hw_configopts_mreg_t [1:0] configopts; // [151:88]
++    spi_host_reg2hw_command_mreg_t [1:0] command; // [87:10]
++    spi_host_reg2hw_error_enable_reg_t error_enable; // [9:7]
++    spi_host_reg2hw_event_enable_reg_t event_enable; // [6:1]
+   } spi_host_reg2hw_t;
+ 
+-  // HW -> register type
++  ///////////////////////////////////////
++  // Internal design logic to register //
++  ///////////////////////////////////////
+   typedef struct packed {
+-    spi_host_hw2reg_intr_state_reg_t intr_state; // [85:82]
+-    spi_host_hw2reg_status_reg_t status; // [81:40]
+-    spi_host_hw2reg_command_mreg_t [0:0] command; // [39:38]
+-    spi_host_hw2reg_rxdata_reg_t rxdata; // [37:6]
+-    spi_host_hw2reg_error_status_reg_t error_status; // [5:0]
++    spi_host_hw2reg_intr_state_reg_t intr_state; // [88:87]
++    spi_host_hw2reg_status_reg_t status; // [86:87]
++    spi_host_hw2reg_command_mreg_t [1:0] command; // [86:83]
++    spi_host_hw2reg_rxdata_reg_t rxdata; // [82:83]
++    spi_host_hw2reg_error_status_reg_t error_status; // [82:83]
+   } spi_host_hw2reg_t;
+ 
+-  // Register offsets
+-  parameter logic [BlockAw-1:0] SPI_HOST_INTR_STATE_OFFSET = 6'h 0;
+-  parameter logic [BlockAw-1:0] SPI_HOST_INTR_ENABLE_OFFSET = 6'h 4;
+-  parameter logic [BlockAw-1:0] SPI_HOST_INTR_TEST_OFFSET = 6'h 8;
+-  parameter logic [BlockAw-1:0] SPI_HOST_CONTROL_OFFSET = 6'h c;
+-  parameter logic [BlockAw-1:0] SPI_HOST_STATUS_OFFSET = 6'h 10;
+-  parameter logic [BlockAw-1:0] SPI_HOST_CONFIGOPTS_OFFSET = 6'h 14;
+-  parameter logic [BlockAw-1:0] SPI_HOST_COMMAND_OFFSET = 6'h 18;
+-  parameter logic [BlockAw-1:0] SPI_HOST_RXDATA_OFFSET = 6'h 20;
+-  parameter logic [BlockAw-1:0] SPI_HOST_ERROR_ENABLE_OFFSET = 6'h 24;
+-  parameter logic [BlockAw-1:0] SPI_HOST_ERROR_STATUS_OFFSET = 6'h 28;
+-  parameter logic [BlockAw-1:0] SPI_HOST_EVENT_ENABLE_OFFSET = 6'h 2c;
+-
+-  // Reset values for hwext registers and their fields
+-  parameter logic [1:0] SPI_HOST_INTR_TEST_RESVAL = 2'h 0;
+-  parameter logic [0:0] SPI_HOST_INTR_TEST_ERROR_RESVAL = 1'h 0;
+-  parameter logic [0:0] SPI_HOST_INTR_TEST_SPI_EVENT_RESVAL = 1'h 0;
+-  parameter logic [31:0] SPI_HOST_RXDATA_RESVAL = 32'h 0;
+-  parameter logic [31:0] SPI_HOST_RXDATA_DATA_RESVAL = 32'h 0;
++  // Register Address
++  parameter logic [5:0] SPI_HOST_INTR_STATE_OFFSET = 6'h 0;
++  parameter logic [5:0] SPI_HOST_INTR_ENABLE_OFFSET = 6'h 4;
++  parameter logic [5:0] SPI_HOST_INTR_TEST_OFFSET = 6'h 8;
++  parameter logic [5:0] SPI_HOST_CONTROL_OFFSET = 6'h c;
++  parameter logic [5:0] SPI_HOST_STATUS_OFFSET = 6'h 10;
++  parameter logic [5:0] SPI_HOST_CONFIGOPTS_0_OFFSET = 6'h 14;
++  parameter logic [5:0] SPI_HOST_CONFIGOPTS_1_OFFSET = 6'h 18;
++  parameter logic [5:0] SPI_HOST_COMMAND_0_OFFSET = 6'h 1c;
++  parameter logic [5:0] SPI_HOST_COMMAND_1_OFFSET = 6'h 20;
++  parameter logic [5:0] SPI_HOST_RXDATA_OFFSET = 6'h 28;
++  parameter logic [5:0] SPI_HOST_ERROR_ENABLE_OFFSET = 6'h 2c;
++  parameter logic [5:0] SPI_HOST_ERROR_STATUS_OFFSET = 6'h 30;
++  parameter logic [5:0] SPI_HOST_EVENT_ENABLE_OFFSET = 6'h 34;
+ 
+-  // Window parameters
+-  parameter logic [BlockAw-1:0] SPI_HOST_TXDATA_OFFSET = 6'h 1c;
+-  parameter int unsigned        SPI_HOST_TXDATA_SIZE   = 'h 4;
++  // Window parameter
++  parameter logic [5:0] SPI_HOST_TXDATA_OFFSET = 6'h 24;
++  parameter logic [5:0] SPI_HOST_TXDATA_SIZE   = 6'h 4;
+ 
+-  // Register index
++  // Register Index
+   typedef enum int {
+     SPI_HOST_INTR_STATE,
+     SPI_HOST_INTR_ENABLE,
+     SPI_HOST_INTR_TEST,
+     SPI_HOST_CONTROL,
+     SPI_HOST_STATUS,
+-    SPI_HOST_CONFIGOPTS,
+-    SPI_HOST_COMMAND,
++    SPI_HOST_CONFIGOPTS_0,
++    SPI_HOST_CONFIGOPTS_1,
++    SPI_HOST_COMMAND_0,
++    SPI_HOST_COMMAND_1,
+     SPI_HOST_RXDATA,
+     SPI_HOST_ERROR_ENABLE,
+     SPI_HOST_ERROR_STATUS,
+@@ -324,19 +323,20 @@ package spi_host_reg_pkg;
+   } spi_host_id_e;
+ 
+   // Register width information to check illegal writes
+-  parameter logic [3:0] SPI_HOST_PERMIT [11] = '{
++  parameter logic [3:0] SPI_HOST_PERMIT [13] = '{
+     4'b 0001, // index[ 0] SPI_HOST_INTR_STATE
+     4'b 0001, // index[ 1] SPI_HOST_INTR_ENABLE
+     4'b 0001, // index[ 2] SPI_HOST_INTR_TEST
+     4'b 1111, // index[ 3] SPI_HOST_CONTROL
+     4'b 1111, // index[ 4] SPI_HOST_STATUS
+-    4'b 1111, // index[ 5] SPI_HOST_CONFIGOPTS
+-    4'b 1111, // index[ 6] SPI_HOST_COMMAND
+-    4'b 1111, // index[ 7] SPI_HOST_RXDATA
+-    4'b 0001, // index[ 8] SPI_HOST_ERROR_ENABLE
+-    4'b 0001, // index[ 9] SPI_HOST_ERROR_STATUS
+-    4'b 0001  // index[10] SPI_HOST_EVENT_ENABLE
++    4'b 1111, // index[ 5] SPI_HOST_CONFIGOPTS_0
++    4'b 1111, // index[ 6] SPI_HOST_CONFIGOPTS_1
++    4'b 1111, // index[ 7] SPI_HOST_COMMAND_0
++    4'b 1111, // index[ 8] SPI_HOST_COMMAND_1
++    4'b 1111, // index[ 9] SPI_HOST_RXDATA
++    4'b 0001, // index[10] SPI_HOST_ERROR_ENABLE
++    4'b 0001, // index[11] SPI_HOST_ERROR_STATUS
++    4'b 0001  // index[12] SPI_HOST_EVENT_ENABLE
+   };
+-
+ endpackage
+ 
+diff --git a/rtl/spi_host_reg_top.sv b/rtl/spi_host_reg_top.sv
+index 8c761d1..25e1e44 100644
+--- a/rtl/spi_host_reg_top.sv
++++ b/rtl/spi_host_reg_top.sv
+@@ -4,26 +4,26 @@
+ //
+ // Register Top module auto-generated by `reggen`
+ 
+-`include "prim_assert.sv"
++`include "common_cells/assertions.svh"
+ 
+-module spi_host_reg_top (
++module spi_host_reg_top #(
++  parameter type reg_req_t = logic,
++  parameter type reg_rsp_t = logic
++) (
+   input clk_i,
+   input rst_ni,
+ 
+-  input  tlul_pkg::tl_h2d_t tl_i,
+-  output tlul_pkg::tl_d2h_t tl_o,
++  // Below Register interface can be changed
++  input  reg_req_t reg_req_i,
++  output reg_rsp_t reg_rsp_o,
+ 
+   // Output port for window
+-  output tlul_pkg::tl_h2d_t tl_win_o  [1],
+-  input  tlul_pkg::tl_d2h_t tl_win_i  [1],
+-
++  output reg_req_t [1-1:0] reg_req_win_o,
++  input  reg_rsp_t [1-1:0] reg_rsp_win_i,
+   // To HW
+   output spi_host_reg_pkg::spi_host_reg2hw_t reg2hw, // Write
+   input  spi_host_reg_pkg::spi_host_hw2reg_t hw2reg, // Read
+ 
+-  // Integrity check errors
+-  output logic intg_err_o,
+-
+   // Config
+   input devmode_i // If 1, explicit error return for unmapped register access
+ );
+@@ -47,107 +47,58 @@ module spi_host_reg_top (
+ 
+   logic [DW-1:0] reg_rdata_next;
+ 
+-  tlul_pkg::tl_h2d_t tl_reg_h2d;
+-  tlul_pkg::tl_d2h_t tl_reg_d2h;
+-
+-  // incoming payload check
+-  logic intg_err;
+-  tlul_cmd_intg_chk u_chk (
+-    .tl_i,
+-    .err_o(intg_err)
+-  );
+-
+-  logic intg_err_q;
+-  always_ff @(posedge clk_i or negedge rst_ni) begin
+-    if (!rst_ni) begin
+-      intg_err_q <= '0;
+-    end else if (intg_err) begin
+-      intg_err_q <= 1'b1;
+-    end
+-  end
+-
+-  // integrity error output is permanent and should be used for alert generation
+-  // register errors are transactional
+-  assign intg_err_o = intg_err_q | intg_err;
+-
+-  // outgoing integrity generation
+-  tlul_pkg::tl_d2h_t tl_o_pre;
+-  tlul_rsp_intg_gen #(
+-    .EnableRspIntgGen(1),
+-    .EnableDataIntgGen(1)
+-  ) u_rsp_intg_gen (
+-    .tl_i(tl_o_pre),
+-    .tl_o
+-  );
++  reg_req_t reg_intf_req;
++  reg_rsp_t reg_intf_rsp;
+ 
+-  tlul_pkg::tl_h2d_t tl_socket_h2d [2];
+-  tlul_pkg::tl_d2h_t tl_socket_d2h [2];
++  logic [0:0] reg_steer;
+ 
+-  logic [1:0] reg_steer;
++  reg_req_t [2-1:0] reg_intf_demux_req;
++  reg_rsp_t [2-1:0] reg_intf_demux_rsp;
+ 
+-  // socket_1n connection
+-  assign tl_reg_h2d = tl_socket_h2d[1];
+-  assign tl_socket_d2h[1] = tl_reg_d2h;
++  // demux connection
++  assign reg_intf_req = reg_intf_demux_req[1];
++  assign reg_intf_demux_rsp[1] = reg_intf_rsp;
+ 
+-  assign tl_win_o[0] = tl_socket_h2d[0];
+-  assign tl_socket_d2h[0] = tl_win_i[0];
++  assign reg_req_win_o[0] = reg_intf_demux_req[0];
++  assign reg_intf_demux_rsp[0] = reg_rsp_win_i[0];
+ 
+   // Create Socket_1n
+-  tlul_socket_1n #(
+-    .N          (2),
+-    .HReqPass   (1'b1),
+-    .HRspPass   (1'b1),
+-    .DReqPass   ({2{1'b1}}),
+-    .DRspPass   ({2{1'b1}}),
+-    .HReqDepth  (4'h0),
+-    .HRspDepth  (4'h0),
+-    .DReqDepth  ({2{4'h0}}),
+-    .DRspDepth  ({2{4'h0}})
+-  ) u_socket (
++  reg_demux #(
++    .NoPorts  (2),
++    .req_t    (reg_req_t),
++    .rsp_t    (reg_rsp_t)
++  ) i_reg_demux (
+     .clk_i,
+     .rst_ni,
+-    .tl_h_i (tl_i),
+-    .tl_h_o (tl_o_pre),
+-    .tl_d_o (tl_socket_h2d),
+-    .tl_d_i (tl_socket_d2h),
+-    .dev_select_i (reg_steer)
++    .in_req_i (reg_req_i),
++    .in_rsp_o (reg_rsp_o),
++    .out_req_o (reg_intf_demux_req),
++    .out_rsp_i (reg_intf_demux_rsp),
++    .in_select_i (reg_steer)
+   );
+ 
++
+   // Create steering logic
+   always_comb begin
+     reg_steer = 1;       // Default set to register
+ 
+     // TODO: Can below codes be unique case () inside ?
+-    if (tl_i.a_address[AW-1:0] >= 28 && tl_i.a_address[AW-1:0] < 32) begin
++    if (reg_req_i.addr[AW-1:0] >= 36 && reg_req_i.addr[AW-1:0] < 40) begin
+       reg_steer = 0;
+     end
+-    if (intg_err) begin
+-      reg_steer = 1;
+-    end
+   end
+ 
+-  tlul_adapter_reg #(
+-    .RegAw(AW),
+-    .RegDw(DW),
+-    .EnableDataIntgGen(0)
+-  ) u_reg_if (
+-    .clk_i,
+-    .rst_ni,
+-
+-    .tl_i (tl_reg_h2d),
+-    .tl_o (tl_reg_d2h),
+-
+-    .we_o    (reg_we),
+-    .re_o    (reg_re),
+-    .addr_o  (reg_addr),
+-    .wdata_o (reg_wdata),
+-    .be_o    (reg_be),
+-    .rdata_i (reg_rdata),
+-    .error_i (reg_error)
+-  );
++  assign reg_we = reg_intf_req.valid & reg_intf_req.write;
++  assign reg_re = reg_intf_req.valid & ~reg_intf_req.write;
++  assign reg_addr = reg_intf_req.addr;
++  assign reg_wdata = reg_intf_req.wdata;
++  assign reg_be = reg_intf_req.wstrb;
++  assign reg_intf_rsp.rdata = reg_rdata;
++  assign reg_intf_rsp.error = reg_error;
++  assign reg_intf_rsp.ready = 1'b1;
+ 
+   assign reg_rdata = reg_rdata_next ;
+-  assign reg_error = (devmode_i & addrmiss) | wr_err | intg_err;
++  assign reg_error = (devmode_i & addrmiss) | wr_err ;
+ 
+   // Define SW related signals
+   // Format: <reg>_<field>_{wd|we|qs}
+@@ -208,54 +159,102 @@ module spi_host_reg_top (
+   logic status_txfull_qs;
+   logic status_active_qs;
+   logic status_ready_qs;
+-  logic [15:0] configopts_clkdiv_0_qs;
+-  logic [15:0] configopts_clkdiv_0_wd;
+-  logic configopts_clkdiv_0_we;
+-  logic [3:0] configopts_csnidle_0_qs;
+-  logic [3:0] configopts_csnidle_0_wd;
+-  logic configopts_csnidle_0_we;
+-  logic [3:0] configopts_csntrail_0_qs;
+-  logic [3:0] configopts_csntrail_0_wd;
+-  logic configopts_csntrail_0_we;
+-  logic [3:0] configopts_csnlead_0_qs;
+-  logic [3:0] configopts_csnlead_0_wd;
+-  logic configopts_csnlead_0_we;
+-  logic configopts_csaat_0_qs;
+-  logic configopts_csaat_0_wd;
+-  logic configopts_csaat_0_we;
+-  logic configopts_fullcyc_0_qs;
+-  logic configopts_fullcyc_0_wd;
+-  logic configopts_fullcyc_0_we;
+-  logic configopts_cpha_0_qs;
+-  logic configopts_cpha_0_wd;
+-  logic configopts_cpha_0_we;
+-  logic configopts_cpol_0_qs;
+-  logic configopts_cpol_0_wd;
+-  logic configopts_cpol_0_we;
+-  logic [3:0] command_tx1_cnt_0_qs;
+-  logic [3:0] command_tx1_cnt_0_wd;
+-  logic command_tx1_cnt_0_we;
+-  logic [8:0] command_txn_cnt_0_qs;
+-  logic [8:0] command_txn_cnt_0_wd;
+-  logic command_txn_cnt_0_we;
+-  logic [3:0] command_dummy_cycles_0_qs;
+-  logic [3:0] command_dummy_cycles_0_wd;
+-  logic command_dummy_cycles_0_we;
+-  logic [8:0] command_rx_cnt_0_qs;
+-  logic [8:0] command_rx_cnt_0_wd;
+-  logic command_rx_cnt_0_we;
+-  logic command_fulldplx_0_qs;
+-  logic command_fulldplx_0_wd;
+-  logic command_fulldplx_0_we;
+-  logic command_highz_0_qs;
+-  logic command_highz_0_wd;
+-  logic command_highz_0_we;
+-  logic [1:0] command_speed_0_qs;
+-  logic [1:0] command_speed_0_wd;
+-  logic command_speed_0_we;
+-  logic command_go_0_qs;
+-  logic command_go_0_wd;
+-  logic command_go_0_we;
++  logic [15:0] configopts_0_clkdiv_0_qs;
++  logic [15:0] configopts_0_clkdiv_0_wd;
++  logic configopts_0_clkdiv_0_we;
++  logic [3:0] configopts_0_csnidle_0_qs;
++  logic [3:0] configopts_0_csnidle_0_wd;
++  logic configopts_0_csnidle_0_we;
++  logic [3:0] configopts_0_csntrail_0_qs;
++  logic [3:0] configopts_0_csntrail_0_wd;
++  logic configopts_0_csntrail_0_we;
++  logic [3:0] configopts_0_csnlead_0_qs;
++  logic [3:0] configopts_0_csnlead_0_wd;
++  logic configopts_0_csnlead_0_we;
++  logic configopts_0_csaat_0_qs;
++  logic configopts_0_csaat_0_wd;
++  logic configopts_0_csaat_0_we;
++  logic configopts_0_fullcyc_0_qs;
++  logic configopts_0_fullcyc_0_wd;
++  logic configopts_0_fullcyc_0_we;
++  logic configopts_0_cpha_0_qs;
++  logic configopts_0_cpha_0_wd;
++  logic configopts_0_cpha_0_we;
++  logic configopts_0_cpol_0_qs;
++  logic configopts_0_cpol_0_wd;
++  logic configopts_0_cpol_0_we;
++  logic [15:0] configopts_1_clkdiv_1_qs;
++  logic [15:0] configopts_1_clkdiv_1_wd;
++  logic configopts_1_clkdiv_1_we;
++  logic [3:0] configopts_1_csnidle_1_qs;
++  logic [3:0] configopts_1_csnidle_1_wd;
++  logic configopts_1_csnidle_1_we;
++  logic [3:0] configopts_1_csntrail_1_qs;
++  logic [3:0] configopts_1_csntrail_1_wd;
++  logic configopts_1_csntrail_1_we;
++  logic [3:0] configopts_1_csnlead_1_qs;
++  logic [3:0] configopts_1_csnlead_1_wd;
++  logic configopts_1_csnlead_1_we;
++  logic configopts_1_csaat_1_qs;
++  logic configopts_1_csaat_1_wd;
++  logic configopts_1_csaat_1_we;
++  logic configopts_1_fullcyc_1_qs;
++  logic configopts_1_fullcyc_1_wd;
++  logic configopts_1_fullcyc_1_we;
++  logic configopts_1_cpha_1_qs;
++  logic configopts_1_cpha_1_wd;
++  logic configopts_1_cpha_1_we;
++  logic configopts_1_cpol_1_qs;
++  logic configopts_1_cpol_1_wd;
++  logic configopts_1_cpol_1_we;
++  logic [3:0] command_0_tx1_cnt_0_qs;
++  logic [3:0] command_0_tx1_cnt_0_wd;
++  logic command_0_tx1_cnt_0_we;
++  logic [8:0] command_0_txn_cnt_0_qs;
++  logic [8:0] command_0_txn_cnt_0_wd;
++  logic command_0_txn_cnt_0_we;
++  logic [3:0] command_0_dummy_cycles_0_qs;
++  logic [3:0] command_0_dummy_cycles_0_wd;
++  logic command_0_dummy_cycles_0_we;
++  logic [8:0] command_0_rx_cnt_0_qs;
++  logic [8:0] command_0_rx_cnt_0_wd;
++  logic command_0_rx_cnt_0_we;
++  logic command_0_fulldplx_0_qs;
++  logic command_0_fulldplx_0_wd;
++  logic command_0_fulldplx_0_we;
++  logic command_0_highz_0_qs;
++  logic command_0_highz_0_wd;
++  logic command_0_highz_0_we;
++  logic [1:0] command_0_speed_0_qs;
++  logic [1:0] command_0_speed_0_wd;
++  logic command_0_speed_0_we;
++  logic command_0_go_0_qs;
++  logic command_0_go_0_wd;
++  logic command_0_go_0_we;
++  logic [3:0] command_1_tx1_cnt_1_qs;
++  logic [3:0] command_1_tx1_cnt_1_wd;
++  logic command_1_tx1_cnt_1_we;
++  logic [8:0] command_1_txn_cnt_1_qs;
++  logic [8:0] command_1_txn_cnt_1_wd;
++  logic command_1_txn_cnt_1_we;
++  logic [3:0] command_1_dummy_cycles_1_qs;
++  logic [3:0] command_1_dummy_cycles_1_wd;
++  logic command_1_dummy_cycles_1_we;
++  logic [8:0] command_1_rx_cnt_1_qs;
++  logic [8:0] command_1_rx_cnt_1_wd;
++  logic command_1_rx_cnt_1_we;
++  logic command_1_fulldplx_1_qs;
++  logic command_1_fulldplx_1_wd;
++  logic command_1_fulldplx_1_we;
++  logic command_1_highz_1_qs;
++  logic command_1_highz_1_wd;
++  logic command_1_highz_1_we;
++  logic [1:0] command_1_speed_1_qs;
++  logic [1:0] command_1_speed_1_wd;
++  logic command_1_speed_1_we;
++  logic command_1_go_1_qs;
++  logic command_1_go_1_wd;
++  logic command_1_go_1_we;
+   logic [31:0] rxdata_qs;
+   logic rxdata_re;
+   logic error_enable_cmderr_qs;
+@@ -1001,20 +1000,20 @@ module spi_host_reg_top (
+ 
+ 
+   // Subregister 0 of Multireg configopts
+-  // R[configopts]: V(False)
++  // R[configopts_0]: V(False)
+ 
+   // F[clkdiv_0]: 15:0
+   prim_subreg #(
+     .DW      (16),
+     .SWACCESS("RW"),
+     .RESVAL  (16'h0)
+-  ) u_configopts_clkdiv_0 (
++  ) u_configopts_0_clkdiv_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (configopts_clkdiv_0_we),
+-    .wd     (configopts_clkdiv_0_wd),
++    .we     (configopts_0_clkdiv_0_we),
++    .wd     (configopts_0_clkdiv_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1025,7 +1024,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.configopts[0].clkdiv.q ),
+ 
+     // to register interface (read)
+-    .qs     (configopts_clkdiv_0_qs)
++    .qs     (configopts_0_clkdiv_0_qs)
+   );
+ 
+ 
+@@ -1034,13 +1033,13 @@ module spi_host_reg_top (
+     .DW      (4),
+     .SWACCESS("RW"),
+     .RESVAL  (4'h0)
+-  ) u_configopts_csnidle_0 (
++  ) u_configopts_0_csnidle_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (configopts_csnidle_0_we),
+-    .wd     (configopts_csnidle_0_wd),
++    .we     (configopts_0_csnidle_0_we),
++    .wd     (configopts_0_csnidle_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1051,7 +1050,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.configopts[0].csnidle.q ),
+ 
+     // to register interface (read)
+-    .qs     (configopts_csnidle_0_qs)
++    .qs     (configopts_0_csnidle_0_qs)
+   );
+ 
+ 
+@@ -1060,13 +1059,13 @@ module spi_host_reg_top (
+     .DW      (4),
+     .SWACCESS("RW"),
+     .RESVAL  (4'h0)
+-  ) u_configopts_csntrail_0 (
++  ) u_configopts_0_csntrail_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (configopts_csntrail_0_we),
+-    .wd     (configopts_csntrail_0_wd),
++    .we     (configopts_0_csntrail_0_we),
++    .wd     (configopts_0_csntrail_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1077,7 +1076,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.configopts[0].csntrail.q ),
+ 
+     // to register interface (read)
+-    .qs     (configopts_csntrail_0_qs)
++    .qs     (configopts_0_csntrail_0_qs)
+   );
+ 
+ 
+@@ -1086,13 +1085,13 @@ module spi_host_reg_top (
+     .DW      (4),
+     .SWACCESS("RW"),
+     .RESVAL  (4'h0)
+-  ) u_configopts_csnlead_0 (
++  ) u_configopts_0_csnlead_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (configopts_csnlead_0_we),
+-    .wd     (configopts_csnlead_0_wd),
++    .we     (configopts_0_csnlead_0_we),
++    .wd     (configopts_0_csnlead_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1103,7 +1102,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.configopts[0].csnlead.q ),
+ 
+     // to register interface (read)
+-    .qs     (configopts_csnlead_0_qs)
++    .qs     (configopts_0_csnlead_0_qs)
+   );
+ 
+ 
+@@ -1112,13 +1111,13 @@ module spi_host_reg_top (
+     .DW      (1),
+     .SWACCESS("RW"),
+     .RESVAL  (1'h0)
+-  ) u_configopts_csaat_0 (
++  ) u_configopts_0_csaat_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (configopts_csaat_0_we),
+-    .wd     (configopts_csaat_0_wd),
++    .we     (configopts_0_csaat_0_we),
++    .wd     (configopts_0_csaat_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1129,7 +1128,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.configopts[0].csaat.q ),
+ 
+     // to register interface (read)
+-    .qs     (configopts_csaat_0_qs)
++    .qs     (configopts_0_csaat_0_qs)
+   );
+ 
+ 
+@@ -1138,13 +1137,13 @@ module spi_host_reg_top (
+     .DW      (1),
+     .SWACCESS("RW"),
+     .RESVAL  (1'h0)
+-  ) u_configopts_fullcyc_0 (
++  ) u_configopts_0_fullcyc_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (configopts_fullcyc_0_we),
+-    .wd     (configopts_fullcyc_0_wd),
++    .we     (configopts_0_fullcyc_0_we),
++    .wd     (configopts_0_fullcyc_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1155,7 +1154,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.configopts[0].fullcyc.q ),
+ 
+     // to register interface (read)
+-    .qs     (configopts_fullcyc_0_qs)
++    .qs     (configopts_0_fullcyc_0_qs)
+   );
+ 
+ 
+@@ -1164,13 +1163,13 @@ module spi_host_reg_top (
+     .DW      (1),
+     .SWACCESS("RW"),
+     .RESVAL  (1'h0)
+-  ) u_configopts_cpha_0 (
++  ) u_configopts_0_cpha_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (configopts_cpha_0_we),
+-    .wd     (configopts_cpha_0_wd),
++    .we     (configopts_0_cpha_0_we),
++    .wd     (configopts_0_cpha_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1181,7 +1180,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.configopts[0].cpha.q ),
+ 
+     // to register interface (read)
+-    .qs     (configopts_cpha_0_qs)
++    .qs     (configopts_0_cpha_0_qs)
+   );
+ 
+ 
+@@ -1190,13 +1189,13 @@ module spi_host_reg_top (
+     .DW      (1),
+     .SWACCESS("RW"),
+     .RESVAL  (1'h0)
+-  ) u_configopts_cpol_0 (
++  ) u_configopts_0_cpol_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (configopts_cpol_0_we),
+-    .wd     (configopts_cpol_0_wd),
++    .we     (configopts_0_cpol_0_we),
++    .wd     (configopts_0_cpol_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1207,27 +1206,238 @@ module spi_host_reg_top (
+     .q      (reg2hw.configopts[0].cpol.q ),
+ 
+     // to register interface (read)
+-    .qs     (configopts_cpol_0_qs)
++    .qs     (configopts_0_cpol_0_qs)
++  );
++
++
++  // Subregister 1 of Multireg configopts
++  // R[configopts_1]: V(False)
++
++  // F[clkdiv_1]: 15:0
++  prim_subreg #(
++    .DW      (16),
++    .SWACCESS("RW"),
++    .RESVAL  (16'h0)
++  ) u_configopts_1_clkdiv_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (configopts_1_clkdiv_1_we),
++    .wd     (configopts_1_clkdiv_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (),
++    .q      (reg2hw.configopts[1].clkdiv.q ),
++
++    // to register interface (read)
++    .qs     (configopts_1_clkdiv_1_qs)
++  );
++
++
++  // F[csnidle_1]: 19:16
++  prim_subreg #(
++    .DW      (4),
++    .SWACCESS("RW"),
++    .RESVAL  (4'h0)
++  ) u_configopts_1_csnidle_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (configopts_1_csnidle_1_we),
++    .wd     (configopts_1_csnidle_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (),
++    .q      (reg2hw.configopts[1].csnidle.q ),
++
++    // to register interface (read)
++    .qs     (configopts_1_csnidle_1_qs)
++  );
++
++
++  // F[csntrail_1]: 23:20
++  prim_subreg #(
++    .DW      (4),
++    .SWACCESS("RW"),
++    .RESVAL  (4'h0)
++  ) u_configopts_1_csntrail_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (configopts_1_csntrail_1_we),
++    .wd     (configopts_1_csntrail_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (),
++    .q      (reg2hw.configopts[1].csntrail.q ),
++
++    // to register interface (read)
++    .qs     (configopts_1_csntrail_1_qs)
++  );
++
++
++  // F[csnlead_1]: 27:24
++  prim_subreg #(
++    .DW      (4),
++    .SWACCESS("RW"),
++    .RESVAL  (4'h0)
++  ) u_configopts_1_csnlead_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (configopts_1_csnlead_1_we),
++    .wd     (configopts_1_csnlead_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (),
++    .q      (reg2hw.configopts[1].csnlead.q ),
++
++    // to register interface (read)
++    .qs     (configopts_1_csnlead_1_qs)
++  );
++
++
++  // F[csaat_1]: 28:28
++  prim_subreg #(
++    .DW      (1),
++    .SWACCESS("RW"),
++    .RESVAL  (1'h0)
++  ) u_configopts_1_csaat_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (configopts_1_csaat_1_we),
++    .wd     (configopts_1_csaat_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (),
++    .q      (reg2hw.configopts[1].csaat.q ),
++
++    // to register interface (read)
++    .qs     (configopts_1_csaat_1_qs)
++  );
++
++
++  // F[fullcyc_1]: 29:29
++  prim_subreg #(
++    .DW      (1),
++    .SWACCESS("RW"),
++    .RESVAL  (1'h0)
++  ) u_configopts_1_fullcyc_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (configopts_1_fullcyc_1_we),
++    .wd     (configopts_1_fullcyc_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (),
++    .q      (reg2hw.configopts[1].fullcyc.q ),
++
++    // to register interface (read)
++    .qs     (configopts_1_fullcyc_1_qs)
++  );
++
++
++  // F[cpha_1]: 30:30
++  prim_subreg #(
++    .DW      (1),
++    .SWACCESS("RW"),
++    .RESVAL  (1'h0)
++  ) u_configopts_1_cpha_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (configopts_1_cpha_1_we),
++    .wd     (configopts_1_cpha_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (),
++    .q      (reg2hw.configopts[1].cpha.q ),
++
++    // to register interface (read)
++    .qs     (configopts_1_cpha_1_qs)
++  );
++
++
++  // F[cpol_1]: 31:31
++  prim_subreg #(
++    .DW      (1),
++    .SWACCESS("RW"),
++    .RESVAL  (1'h0)
++  ) u_configopts_1_cpol_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (configopts_1_cpol_1_we),
++    .wd     (configopts_1_cpol_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (),
++    .q      (reg2hw.configopts[1].cpol.q ),
++
++    // to register interface (read)
++    .qs     (configopts_1_cpol_1_qs)
+   );
+ 
+ 
+ 
+ 
+   // Subregister 0 of Multireg command
+-  // R[command]: V(False)
++  // R[command_0]: V(False)
+ 
+   // F[tx1_cnt_0]: 3:0
+   prim_subreg #(
+     .DW      (4),
+     .SWACCESS("RW"),
+     .RESVAL  (4'h0)
+-  ) u_command_tx1_cnt_0 (
++  ) u_command_0_tx1_cnt_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (command_tx1_cnt_0_we),
+-    .wd     (command_tx1_cnt_0_wd),
++    .we     (command_0_tx1_cnt_0_we),
++    .wd     (command_0_tx1_cnt_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1238,7 +1448,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.command[0].tx1_cnt.q ),
+ 
+     // to register interface (read)
+-    .qs     (command_tx1_cnt_0_qs)
++    .qs     (command_0_tx1_cnt_0_qs)
+   );
+ 
+ 
+@@ -1247,13 +1457,13 @@ module spi_host_reg_top (
+     .DW      (9),
+     .SWACCESS("RW"),
+     .RESVAL  (9'h0)
+-  ) u_command_txn_cnt_0 (
++  ) u_command_0_txn_cnt_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (command_txn_cnt_0_we),
+-    .wd     (command_txn_cnt_0_wd),
++    .we     (command_0_txn_cnt_0_we),
++    .wd     (command_0_txn_cnt_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1264,7 +1474,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.command[0].txn_cnt.q ),
+ 
+     // to register interface (read)
+-    .qs     (command_txn_cnt_0_qs)
++    .qs     (command_0_txn_cnt_0_qs)
+   );
+ 
+ 
+@@ -1273,13 +1483,13 @@ module spi_host_reg_top (
+     .DW      (4),
+     .SWACCESS("RW"),
+     .RESVAL  (4'h0)
+-  ) u_command_dummy_cycles_0 (
++  ) u_command_0_dummy_cycles_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (command_dummy_cycles_0_we),
+-    .wd     (command_dummy_cycles_0_wd),
++    .we     (command_0_dummy_cycles_0_we),
++    .wd     (command_0_dummy_cycles_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1290,7 +1500,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.command[0].dummy_cycles.q ),
+ 
+     // to register interface (read)
+-    .qs     (command_dummy_cycles_0_qs)
++    .qs     (command_0_dummy_cycles_0_qs)
+   );
+ 
+ 
+@@ -1299,13 +1509,13 @@ module spi_host_reg_top (
+     .DW      (9),
+     .SWACCESS("RW"),
+     .RESVAL  (9'h0)
+-  ) u_command_rx_cnt_0 (
++  ) u_command_0_rx_cnt_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (command_rx_cnt_0_we),
+-    .wd     (command_rx_cnt_0_wd),
++    .we     (command_0_rx_cnt_0_we),
++    .wd     (command_0_rx_cnt_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1316,7 +1526,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.command[0].rx_cnt.q ),
+ 
+     // to register interface (read)
+-    .qs     (command_rx_cnt_0_qs)
++    .qs     (command_0_rx_cnt_0_qs)
+   );
+ 
+ 
+@@ -1325,13 +1535,13 @@ module spi_host_reg_top (
+     .DW      (1),
+     .SWACCESS("RW"),
+     .RESVAL  (1'h0)
+-  ) u_command_fulldplx_0 (
++  ) u_command_0_fulldplx_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (command_fulldplx_0_we),
+-    .wd     (command_fulldplx_0_wd),
++    .we     (command_0_fulldplx_0_we),
++    .wd     (command_0_fulldplx_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1342,7 +1552,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.command[0].fulldplx.q ),
+ 
+     // to register interface (read)
+-    .qs     (command_fulldplx_0_qs)
++    .qs     (command_0_fulldplx_0_qs)
+   );
+ 
+ 
+@@ -1351,13 +1561,13 @@ module spi_host_reg_top (
+     .DW      (1),
+     .SWACCESS("RW"),
+     .RESVAL  (1'h0)
+-  ) u_command_highz_0 (
++  ) u_command_0_highz_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (command_highz_0_we),
+-    .wd     (command_highz_0_wd),
++    .we     (command_0_highz_0_we),
++    .wd     (command_0_highz_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1368,7 +1578,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.command[0].highz.q ),
+ 
+     // to register interface (read)
+-    .qs     (command_highz_0_qs)
++    .qs     (command_0_highz_0_qs)
+   );
+ 
+ 
+@@ -1377,13 +1587,13 @@ module spi_host_reg_top (
+     .DW      (2),
+     .SWACCESS("RW"),
+     .RESVAL  (2'h0)
+-  ) u_command_speed_0 (
++  ) u_command_0_speed_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (command_speed_0_we),
+-    .wd     (command_speed_0_wd),
++    .we     (command_0_speed_0_we),
++    .wd     (command_0_speed_0_wd),
+ 
+     // from internal hardware
+     .de     (1'b0),
+@@ -1394,7 +1604,7 @@ module spi_host_reg_top (
+     .q      (reg2hw.command[0].speed.q ),
+ 
+     // to register interface (read)
+-    .qs     (command_speed_0_qs)
++    .qs     (command_0_speed_0_qs)
+   );
+ 
+ 
+@@ -1403,13 +1613,13 @@ module spi_host_reg_top (
+     .DW      (1),
+     .SWACCESS("RW"),
+     .RESVAL  (1'h0)
+-  ) u_command_go_0 (
++  ) u_command_0_go_0 (
+     .clk_i   (clk_i    ),
+     .rst_ni  (rst_ni  ),
+ 
+     // from register interface
+-    .we     (command_go_0_we),
+-    .wd     (command_go_0_wd),
++    .we     (command_0_go_0_we),
++    .wd     (command_0_go_0_wd),
+ 
+     // from internal hardware
+     .de     (hw2reg.command[0].go.de),
+@@ -1420,7 +1630,218 @@ module spi_host_reg_top (
+     .q      (reg2hw.command[0].go.q ),
+ 
+     // to register interface (read)
+-    .qs     (command_go_0_qs)
++    .qs     (command_0_go_0_qs)
++  );
++
++
++  // Subregister 1 of Multireg command
++  // R[command_1]: V(False)
++
++  // F[tx1_cnt_1]: 3:0
++  prim_subreg #(
++    .DW      (4),
++    .SWACCESS("RW"),
++    .RESVAL  (4'h0)
++  ) u_command_1_tx1_cnt_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (command_1_tx1_cnt_1_we),
++    .wd     (command_1_tx1_cnt_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (reg2hw.command[1].tx1_cnt.qe),
++    .q      (reg2hw.command[1].tx1_cnt.q ),
++
++    // to register interface (read)
++    .qs     (command_1_tx1_cnt_1_qs)
++  );
++
++
++  // F[txn_cnt_1]: 12:4
++  prim_subreg #(
++    .DW      (9),
++    .SWACCESS("RW"),
++    .RESVAL  (9'h0)
++  ) u_command_1_txn_cnt_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (command_1_txn_cnt_1_we),
++    .wd     (command_1_txn_cnt_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (reg2hw.command[1].txn_cnt.qe),
++    .q      (reg2hw.command[1].txn_cnt.q ),
++
++    // to register interface (read)
++    .qs     (command_1_txn_cnt_1_qs)
++  );
++
++
++  // F[dummy_cycles_1]: 16:13
++  prim_subreg #(
++    .DW      (4),
++    .SWACCESS("RW"),
++    .RESVAL  (4'h0)
++  ) u_command_1_dummy_cycles_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (command_1_dummy_cycles_1_we),
++    .wd     (command_1_dummy_cycles_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (reg2hw.command[1].dummy_cycles.qe),
++    .q      (reg2hw.command[1].dummy_cycles.q ),
++
++    // to register interface (read)
++    .qs     (command_1_dummy_cycles_1_qs)
++  );
++
++
++  // F[rx_cnt_1]: 25:17
++  prim_subreg #(
++    .DW      (9),
++    .SWACCESS("RW"),
++    .RESVAL  (9'h0)
++  ) u_command_1_rx_cnt_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (command_1_rx_cnt_1_we),
++    .wd     (command_1_rx_cnt_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (reg2hw.command[1].rx_cnt.qe),
++    .q      (reg2hw.command[1].rx_cnt.q ),
++
++    // to register interface (read)
++    .qs     (command_1_rx_cnt_1_qs)
++  );
++
++
++  // F[fulldplx_1]: 26:26
++  prim_subreg #(
++    .DW      (1),
++    .SWACCESS("RW"),
++    .RESVAL  (1'h0)
++  ) u_command_1_fulldplx_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (command_1_fulldplx_1_we),
++    .wd     (command_1_fulldplx_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (reg2hw.command[1].fulldplx.qe),
++    .q      (reg2hw.command[1].fulldplx.q ),
++
++    // to register interface (read)
++    .qs     (command_1_fulldplx_1_qs)
++  );
++
++
++  // F[highz_1]: 27:27
++  prim_subreg #(
++    .DW      (1),
++    .SWACCESS("RW"),
++    .RESVAL  (1'h0)
++  ) u_command_1_highz_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (command_1_highz_1_we),
++    .wd     (command_1_highz_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (reg2hw.command[1].highz.qe),
++    .q      (reg2hw.command[1].highz.q ),
++
++    // to register interface (read)
++    .qs     (command_1_highz_1_qs)
++  );
++
++
++  // F[speed_1]: 30:29
++  prim_subreg #(
++    .DW      (2),
++    .SWACCESS("RW"),
++    .RESVAL  (2'h0)
++  ) u_command_1_speed_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (command_1_speed_1_we),
++    .wd     (command_1_speed_1_wd),
++
++    // from internal hardware
++    .de     (1'b0),
++    .d      ('0  ),
++
++    // to internal hardware
++    .qe     (reg2hw.command[1].speed.qe),
++    .q      (reg2hw.command[1].speed.q ),
++
++    // to register interface (read)
++    .qs     (command_1_speed_1_qs)
++  );
++
++
++  // F[go_1]: 31:31
++  prim_subreg #(
++    .DW      (1),
++    .SWACCESS("RW"),
++    .RESVAL  (1'h0)
++  ) u_command_1_go_1 (
++    .clk_i   (clk_i    ),
++    .rst_ni  (rst_ni  ),
++
++    // from register interface
++    .we     (command_1_go_1_we),
++    .wd     (command_1_go_1_wd),
++
++    // from internal hardware
++    .de     (hw2reg.command[1].go.de),
++    .d      (hw2reg.command[1].go.d ),
++
++    // to internal hardware
++    .qe     (reg2hw.command[1].go.qe),
++    .q      (reg2hw.command[1].go.q ),
++
++    // to register interface (read)
++    .qs     (command_1_go_1_qs)
+   );
+ 
+ 
+@@ -1761,7 +2182,7 @@ module spi_host_reg_top (
+ 
+ 
+ 
+-  logic [10:0] addr_hit;
++  logic [12:0] addr_hit;
+   always_comb begin
+     addr_hit = '0;
+     addr_hit[ 0] = (reg_addr == SPI_HOST_INTR_STATE_OFFSET);
+@@ -1769,12 +2190,14 @@ module spi_host_reg_top (
+     addr_hit[ 2] = (reg_addr == SPI_HOST_INTR_TEST_OFFSET);
+     addr_hit[ 3] = (reg_addr == SPI_HOST_CONTROL_OFFSET);
+     addr_hit[ 4] = (reg_addr == SPI_HOST_STATUS_OFFSET);
+-    addr_hit[ 5] = (reg_addr == SPI_HOST_CONFIGOPTS_OFFSET);
+-    addr_hit[ 6] = (reg_addr == SPI_HOST_COMMAND_OFFSET);
+-    addr_hit[ 7] = (reg_addr == SPI_HOST_RXDATA_OFFSET);
+-    addr_hit[ 8] = (reg_addr == SPI_HOST_ERROR_ENABLE_OFFSET);
+-    addr_hit[ 9] = (reg_addr == SPI_HOST_ERROR_STATUS_OFFSET);
+-    addr_hit[10] = (reg_addr == SPI_HOST_EVENT_ENABLE_OFFSET);
++    addr_hit[ 5] = (reg_addr == SPI_HOST_CONFIGOPTS_0_OFFSET);
++    addr_hit[ 6] = (reg_addr == SPI_HOST_CONFIGOPTS_1_OFFSET);
++    addr_hit[ 7] = (reg_addr == SPI_HOST_COMMAND_0_OFFSET);
++    addr_hit[ 8] = (reg_addr == SPI_HOST_COMMAND_1_OFFSET);
++    addr_hit[ 9] = (reg_addr == SPI_HOST_RXDATA_OFFSET);
++    addr_hit[10] = (reg_addr == SPI_HOST_ERROR_ENABLE_OFFSET);
++    addr_hit[11] = (reg_addr == SPI_HOST_ERROR_STATUS_OFFSET);
++    addr_hit[12] = (reg_addr == SPI_HOST_EVENT_ENABLE_OFFSET);
+   end
+ 
+   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
+@@ -1793,137 +2216,200 @@ module spi_host_reg_top (
+     if (addr_hit[ 8] && reg_we && (SPI_HOST_PERMIT[ 8] != (SPI_HOST_PERMIT[ 8] & reg_be))) wr_err = 1'b1 ;
+     if (addr_hit[ 9] && reg_we && (SPI_HOST_PERMIT[ 9] != (SPI_HOST_PERMIT[ 9] & reg_be))) wr_err = 1'b1 ;
+     if (addr_hit[10] && reg_we && (SPI_HOST_PERMIT[10] != (SPI_HOST_PERMIT[10] & reg_be))) wr_err = 1'b1 ;
++    if (addr_hit[11] && reg_we && (SPI_HOST_PERMIT[11] != (SPI_HOST_PERMIT[11] & reg_be))) wr_err = 1'b1 ;
++    if (addr_hit[12] && reg_we && (SPI_HOST_PERMIT[12] != (SPI_HOST_PERMIT[12] & reg_be))) wr_err = 1'b1 ;
+   end
+ 
+-  assign intr_state_error_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_error_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_error_wd = reg_wdata[0];
+ 
+-  assign intr_state_spi_event_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_spi_event_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_spi_event_wd = reg_wdata[1];
+ 
+-  assign intr_enable_error_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_error_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_error_wd = reg_wdata[0];
+ 
+-  assign intr_enable_spi_event_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_spi_event_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_spi_event_wd = reg_wdata[1];
+ 
+-  assign intr_test_error_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_error_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_error_wd = reg_wdata[0];
+ 
+-  assign intr_test_spi_event_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_spi_event_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_spi_event_wd = reg_wdata[1];
+ 
+-  assign control_manual_cs_we = addr_hit[3] & reg_we & !reg_error;
++  assign control_manual_cs_we = addr_hit[3] & reg_we & ~wr_err;
+   assign control_manual_cs_wd = reg_wdata[7:0];
+ 
+-  assign control_mancs_en_we = addr_hit[3] & reg_we & !reg_error;
++  assign control_mancs_en_we = addr_hit[3] & reg_we & ~wr_err;
+   assign control_mancs_en_wd = reg_wdata[8];
+ 
+-  assign control_rx_watermark_we = addr_hit[3] & reg_we & !reg_error;
++  assign control_rx_watermark_we = addr_hit[3] & reg_we & ~wr_err;
+   assign control_rx_watermark_wd = reg_wdata[15:9];
+ 
+-  assign control_tx_watermark_we = addr_hit[3] & reg_we & !reg_error;
++  assign control_tx_watermark_we = addr_hit[3] & reg_we & ~wr_err;
+   assign control_tx_watermark_wd = reg_wdata[24:16];
+ 
+-  assign control_passthru_we = addr_hit[3] & reg_we & !reg_error;
++  assign control_passthru_we = addr_hit[3] & reg_we & ~wr_err;
+   assign control_passthru_wd = reg_wdata[27];
+ 
+-  assign control_rst_rxfifo_we = addr_hit[3] & reg_we & !reg_error;
++  assign control_rst_rxfifo_we = addr_hit[3] & reg_we & ~wr_err;
+   assign control_rst_rxfifo_wd = reg_wdata[28];
+ 
+-  assign control_rst_txfifo_we = addr_hit[3] & reg_we & !reg_error;
++  assign control_rst_txfifo_we = addr_hit[3] & reg_we & ~wr_err;
+   assign control_rst_txfifo_wd = reg_wdata[29];
+ 
+-  assign control_rst_fsm_we = addr_hit[3] & reg_we & !reg_error;
++  assign control_rst_fsm_we = addr_hit[3] & reg_we & ~wr_err;
+   assign control_rst_fsm_wd = reg_wdata[30];
+ 
+-  assign control_spien_we = addr_hit[3] & reg_we & !reg_error;
++  assign control_spien_we = addr_hit[3] & reg_we & ~wr_err;
+   assign control_spien_wd = reg_wdata[31];
+ 
+-  assign configopts_clkdiv_0_we = addr_hit[5] & reg_we & !reg_error;
+-  assign configopts_clkdiv_0_wd = reg_wdata[15:0];
+ 
+-  assign configopts_csnidle_0_we = addr_hit[5] & reg_we & !reg_error;
+-  assign configopts_csnidle_0_wd = reg_wdata[19:16];
+ 
+-  assign configopts_csntrail_0_we = addr_hit[5] & reg_we & !reg_error;
+-  assign configopts_csntrail_0_wd = reg_wdata[23:20];
+ 
+-  assign configopts_csnlead_0_we = addr_hit[5] & reg_we & !reg_error;
+-  assign configopts_csnlead_0_wd = reg_wdata[27:24];
+ 
+-  assign configopts_csaat_0_we = addr_hit[5] & reg_we & !reg_error;
+-  assign configopts_csaat_0_wd = reg_wdata[28];
+ 
+-  assign configopts_fullcyc_0_we = addr_hit[5] & reg_we & !reg_error;
+-  assign configopts_fullcyc_0_wd = reg_wdata[29];
+ 
+-  assign configopts_cpha_0_we = addr_hit[5] & reg_we & !reg_error;
+-  assign configopts_cpha_0_wd = reg_wdata[30];
+ 
+-  assign configopts_cpol_0_we = addr_hit[5] & reg_we & !reg_error;
+-  assign configopts_cpol_0_wd = reg_wdata[31];
+ 
+-  assign command_tx1_cnt_0_we = addr_hit[6] & reg_we & !reg_error;
+-  assign command_tx1_cnt_0_wd = reg_wdata[3:0];
+ 
+-  assign command_txn_cnt_0_we = addr_hit[6] & reg_we & !reg_error;
+-  assign command_txn_cnt_0_wd = reg_wdata[12:4];
+ 
+-  assign command_dummy_cycles_0_we = addr_hit[6] & reg_we & !reg_error;
+-  assign command_dummy_cycles_0_wd = reg_wdata[16:13];
+ 
+-  assign command_rx_cnt_0_we = addr_hit[6] & reg_we & !reg_error;
+-  assign command_rx_cnt_0_wd = reg_wdata[25:17];
+ 
+-  assign command_fulldplx_0_we = addr_hit[6] & reg_we & !reg_error;
+-  assign command_fulldplx_0_wd = reg_wdata[26];
+ 
+-  assign command_highz_0_we = addr_hit[6] & reg_we & !reg_error;
+-  assign command_highz_0_wd = reg_wdata[27];
++  assign configopts_0_clkdiv_0_we = addr_hit[5] & reg_we & ~wr_err;
++  assign configopts_0_clkdiv_0_wd = reg_wdata[15:0];
++
++  assign configopts_0_csnidle_0_we = addr_hit[5] & reg_we & ~wr_err;
++  assign configopts_0_csnidle_0_wd = reg_wdata[19:16];
++
++  assign configopts_0_csntrail_0_we = addr_hit[5] & reg_we & ~wr_err;
++  assign configopts_0_csntrail_0_wd = reg_wdata[23:20];
++
++  assign configopts_0_csnlead_0_we = addr_hit[5] & reg_we & ~wr_err;
++  assign configopts_0_csnlead_0_wd = reg_wdata[27:24];
++
++  assign configopts_0_csaat_0_we = addr_hit[5] & reg_we & ~wr_err;
++  assign configopts_0_csaat_0_wd = reg_wdata[28];
++
++  assign configopts_0_fullcyc_0_we = addr_hit[5] & reg_we & ~wr_err;
++  assign configopts_0_fullcyc_0_wd = reg_wdata[29];
++
++  assign configopts_0_cpha_0_we = addr_hit[5] & reg_we & ~wr_err;
++  assign configopts_0_cpha_0_wd = reg_wdata[30];
++
++  assign configopts_0_cpol_0_we = addr_hit[5] & reg_we & ~wr_err;
++  assign configopts_0_cpol_0_wd = reg_wdata[31];
++
++  assign configopts_1_clkdiv_1_we = addr_hit[6] & reg_we & ~wr_err;
++  assign configopts_1_clkdiv_1_wd = reg_wdata[15:0];
++
++  assign configopts_1_csnidle_1_we = addr_hit[6] & reg_we & ~wr_err;
++  assign configopts_1_csnidle_1_wd = reg_wdata[19:16];
++
++  assign configopts_1_csntrail_1_we = addr_hit[6] & reg_we & ~wr_err;
++  assign configopts_1_csntrail_1_wd = reg_wdata[23:20];
++
++  assign configopts_1_csnlead_1_we = addr_hit[6] & reg_we & ~wr_err;
++  assign configopts_1_csnlead_1_wd = reg_wdata[27:24];
++
++  assign configopts_1_csaat_1_we = addr_hit[6] & reg_we & ~wr_err;
++  assign configopts_1_csaat_1_wd = reg_wdata[28];
++
++  assign configopts_1_fullcyc_1_we = addr_hit[6] & reg_we & ~wr_err;
++  assign configopts_1_fullcyc_1_wd = reg_wdata[29];
++
++  assign configopts_1_cpha_1_we = addr_hit[6] & reg_we & ~wr_err;
++  assign configopts_1_cpha_1_wd = reg_wdata[30];
++
++  assign configopts_1_cpol_1_we = addr_hit[6] & reg_we & ~wr_err;
++  assign configopts_1_cpol_1_wd = reg_wdata[31];
++
++  assign command_0_tx1_cnt_0_we = addr_hit[7] & reg_we & ~wr_err;
++  assign command_0_tx1_cnt_0_wd = reg_wdata[3:0];
++
++  assign command_0_txn_cnt_0_we = addr_hit[7] & reg_we & ~wr_err;
++  assign command_0_txn_cnt_0_wd = reg_wdata[12:4];
++
++  assign command_0_dummy_cycles_0_we = addr_hit[7] & reg_we & ~wr_err;
++  assign command_0_dummy_cycles_0_wd = reg_wdata[16:13];
++
++  assign command_0_rx_cnt_0_we = addr_hit[7] & reg_we & ~wr_err;
++  assign command_0_rx_cnt_0_wd = reg_wdata[25:17];
+ 
+-  assign command_speed_0_we = addr_hit[6] & reg_we & !reg_error;
+-  assign command_speed_0_wd = reg_wdata[30:29];
++  assign command_0_fulldplx_0_we = addr_hit[7] & reg_we & ~wr_err;
++  assign command_0_fulldplx_0_wd = reg_wdata[26];
+ 
+-  assign command_go_0_we = addr_hit[6] & reg_we & !reg_error;
+-  assign command_go_0_wd = reg_wdata[31];
++  assign command_0_highz_0_we = addr_hit[7] & reg_we & ~wr_err;
++  assign command_0_highz_0_wd = reg_wdata[27];
+ 
+-  assign rxdata_re = addr_hit[7] & reg_re & !reg_error;
++  assign command_0_speed_0_we = addr_hit[7] & reg_we & ~wr_err;
++  assign command_0_speed_0_wd = reg_wdata[30:29];
+ 
+-  assign error_enable_cmderr_we = addr_hit[8] & reg_we & !reg_error;
++  assign command_0_go_0_we = addr_hit[7] & reg_we & ~wr_err;
++  assign command_0_go_0_wd = reg_wdata[31];
++
++  assign command_1_tx1_cnt_1_we = addr_hit[8] & reg_we & ~wr_err;
++  assign command_1_tx1_cnt_1_wd = reg_wdata[3:0];
++
++  assign command_1_txn_cnt_1_we = addr_hit[8] & reg_we & ~wr_err;
++  assign command_1_txn_cnt_1_wd = reg_wdata[12:4];
++
++  assign command_1_dummy_cycles_1_we = addr_hit[8] & reg_we & ~wr_err;
++  assign command_1_dummy_cycles_1_wd = reg_wdata[16:13];
++
++  assign command_1_rx_cnt_1_we = addr_hit[8] & reg_we & ~wr_err;
++  assign command_1_rx_cnt_1_wd = reg_wdata[25:17];
++
++  assign command_1_fulldplx_1_we = addr_hit[8] & reg_we & ~wr_err;
++  assign command_1_fulldplx_1_wd = reg_wdata[26];
++
++  assign command_1_highz_1_we = addr_hit[8] & reg_we & ~wr_err;
++  assign command_1_highz_1_wd = reg_wdata[27];
++
++  assign command_1_speed_1_we = addr_hit[8] & reg_we & ~wr_err;
++  assign command_1_speed_1_wd = reg_wdata[30:29];
++
++  assign command_1_go_1_we = addr_hit[8] & reg_we & ~wr_err;
++  assign command_1_go_1_wd = reg_wdata[31];
++
++  assign rxdata_re = addr_hit[9] && reg_re;
++
++  assign error_enable_cmderr_we = addr_hit[10] & reg_we & ~wr_err;
+   assign error_enable_cmderr_wd = reg_wdata[0];
+ 
+-  assign error_enable_overflow_we = addr_hit[8] & reg_we & !reg_error;
++  assign error_enable_overflow_we = addr_hit[10] & reg_we & ~wr_err;
+   assign error_enable_overflow_wd = reg_wdata[1];
+ 
+-  assign error_enable_underflow_we = addr_hit[8] & reg_we & !reg_error;
++  assign error_enable_underflow_we = addr_hit[10] & reg_we & ~wr_err;
+   assign error_enable_underflow_wd = reg_wdata[2];
+ 
+-  assign error_status_cmderr_we = addr_hit[9] & reg_we & !reg_error;
++  assign error_status_cmderr_we = addr_hit[11] & reg_we & ~wr_err;
+   assign error_status_cmderr_wd = reg_wdata[0];
+ 
+-  assign error_status_overflow_we = addr_hit[9] & reg_we & !reg_error;
++  assign error_status_overflow_we = addr_hit[11] & reg_we & ~wr_err;
+   assign error_status_overflow_wd = reg_wdata[1];
+ 
+-  assign error_status_underflow_we = addr_hit[9] & reg_we & !reg_error;
++  assign error_status_underflow_we = addr_hit[11] & reg_we & ~wr_err;
+   assign error_status_underflow_wd = reg_wdata[2];
+ 
+-  assign event_enable_rxfull_we = addr_hit[10] & reg_we & !reg_error;
++  assign event_enable_rxfull_we = addr_hit[12] & reg_we & ~wr_err;
+   assign event_enable_rxfull_wd = reg_wdata[2];
+ 
+-  assign event_enable_txempty_we = addr_hit[10] & reg_we & !reg_error;
++  assign event_enable_txempty_we = addr_hit[12] & reg_we & ~wr_err;
+   assign event_enable_txempty_wd = reg_wdata[3];
+ 
+-  assign event_enable_rxwm_we = addr_hit[10] & reg_we & !reg_error;
++  assign event_enable_rxwm_we = addr_hit[12] & reg_we & ~wr_err;
+   assign event_enable_rxwm_wd = reg_wdata[4];
+ 
+-  assign event_enable_txwm_we = addr_hit[10] & reg_we & !reg_error;
++  assign event_enable_txwm_we = addr_hit[12] & reg_we & ~wr_err;
+   assign event_enable_txwm_wd = reg_wdata[5];
+ 
+-  assign event_enable_ready_we = addr_hit[10] & reg_we & !reg_error;
++  assign event_enable_ready_we = addr_hit[12] & reg_we & ~wr_err;
+   assign event_enable_ready_wd = reg_wdata[6];
+ 
+-  assign event_enable_idle_we = addr_hit[10] & reg_we & !reg_error;
++  assign event_enable_idle_we = addr_hit[12] & reg_we & ~wr_err;
+   assign event_enable_idle_wd = reg_wdata[7];
+ 
+   // Read data return
+@@ -1974,44 +2460,66 @@ module spi_host_reg_top (
+       end
+ 
+       addr_hit[5]: begin
+-        reg_rdata_next[15:0] = configopts_clkdiv_0_qs;
+-        reg_rdata_next[19:16] = configopts_csnidle_0_qs;
+-        reg_rdata_next[23:20] = configopts_csntrail_0_qs;
+-        reg_rdata_next[27:24] = configopts_csnlead_0_qs;
+-        reg_rdata_next[28] = configopts_csaat_0_qs;
+-        reg_rdata_next[29] = configopts_fullcyc_0_qs;
+-        reg_rdata_next[30] = configopts_cpha_0_qs;
+-        reg_rdata_next[31] = configopts_cpol_0_qs;
++        reg_rdata_next[15:0] = configopts_0_clkdiv_0_qs;
++        reg_rdata_next[19:16] = configopts_0_csnidle_0_qs;
++        reg_rdata_next[23:20] = configopts_0_csntrail_0_qs;
++        reg_rdata_next[27:24] = configopts_0_csnlead_0_qs;
++        reg_rdata_next[28] = configopts_0_csaat_0_qs;
++        reg_rdata_next[29] = configopts_0_fullcyc_0_qs;
++        reg_rdata_next[30] = configopts_0_cpha_0_qs;
++        reg_rdata_next[31] = configopts_0_cpol_0_qs;
+       end
+ 
+       addr_hit[6]: begin
+-        reg_rdata_next[3:0] = command_tx1_cnt_0_qs;
+-        reg_rdata_next[12:4] = command_txn_cnt_0_qs;
+-        reg_rdata_next[16:13] = command_dummy_cycles_0_qs;
+-        reg_rdata_next[25:17] = command_rx_cnt_0_qs;
+-        reg_rdata_next[26] = command_fulldplx_0_qs;
+-        reg_rdata_next[27] = command_highz_0_qs;
+-        reg_rdata_next[30:29] = command_speed_0_qs;
+-        reg_rdata_next[31] = command_go_0_qs;
++        reg_rdata_next[15:0] = configopts_1_clkdiv_1_qs;
++        reg_rdata_next[19:16] = configopts_1_csnidle_1_qs;
++        reg_rdata_next[23:20] = configopts_1_csntrail_1_qs;
++        reg_rdata_next[27:24] = configopts_1_csnlead_1_qs;
++        reg_rdata_next[28] = configopts_1_csaat_1_qs;
++        reg_rdata_next[29] = configopts_1_fullcyc_1_qs;
++        reg_rdata_next[30] = configopts_1_cpha_1_qs;
++        reg_rdata_next[31] = configopts_1_cpol_1_qs;
+       end
+ 
+       addr_hit[7]: begin
+-        reg_rdata_next[31:0] = rxdata_qs;
++        reg_rdata_next[3:0] = command_0_tx1_cnt_0_qs;
++        reg_rdata_next[12:4] = command_0_txn_cnt_0_qs;
++        reg_rdata_next[16:13] = command_0_dummy_cycles_0_qs;
++        reg_rdata_next[25:17] = command_0_rx_cnt_0_qs;
++        reg_rdata_next[26] = command_0_fulldplx_0_qs;
++        reg_rdata_next[27] = command_0_highz_0_qs;
++        reg_rdata_next[30:29] = command_0_speed_0_qs;
++        reg_rdata_next[31] = command_0_go_0_qs;
+       end
+ 
+       addr_hit[8]: begin
++        reg_rdata_next[3:0] = command_1_tx1_cnt_1_qs;
++        reg_rdata_next[12:4] = command_1_txn_cnt_1_qs;
++        reg_rdata_next[16:13] = command_1_dummy_cycles_1_qs;
++        reg_rdata_next[25:17] = command_1_rx_cnt_1_qs;
++        reg_rdata_next[26] = command_1_fulldplx_1_qs;
++        reg_rdata_next[27] = command_1_highz_1_qs;
++        reg_rdata_next[30:29] = command_1_speed_1_qs;
++        reg_rdata_next[31] = command_1_go_1_qs;
++      end
++
++      addr_hit[9]: begin
++        reg_rdata_next[31:0] = rxdata_qs;
++      end
++
++      addr_hit[10]: begin
+         reg_rdata_next[0] = error_enable_cmderr_qs;
+         reg_rdata_next[1] = error_enable_overflow_qs;
+         reg_rdata_next[2] = error_enable_underflow_qs;
+       end
+ 
+-      addr_hit[9]: begin
++      addr_hit[11]: begin
+         reg_rdata_next[0] = error_status_cmderr_qs;
+         reg_rdata_next[1] = error_status_overflow_qs;
+         reg_rdata_next[2] = error_status_underflow_qs;
+       end
+ 
+-      addr_hit[10]: begin
++      addr_hit[12]: begin
+         reg_rdata_next[2] = event_enable_rxfull_qs;
+         reg_rdata_next[3] = event_enable_txempty_qs;
+         reg_rdata_next[4] = event_enable_rxwm_qs;
+@@ -2026,25 +2534,9 @@ module spi_host_reg_top (
+     endcase
+   end
+ 
+-  // Unused signal tieoff
+-
+-  // wdata / byte enable are not always fully used
+-  // add a blanket unused statement to handle lint waivers
+-  logic unused_wdata;
+-  logic unused_be;
+-  assign unused_wdata = ^reg_wdata;
+-  assign unused_be = ^reg_be;
+-
+   // Assertions for Register Interface
+-  `ASSERT_PULSE(wePulse, reg_we)
+-  `ASSERT_PULSE(rePulse, reg_re)
+-
+-  `ASSERT(reAfterRv, $rose(reg_re || reg_we) |=> tl_o.d_valid)
+ 
+   `ASSERT(en2addrHit, (reg_we || reg_re) |-> $onehot0(addr_hit))
+ 
+-  // this is formulated as an assumption such that the FPV testbenches do disprove this
+-  // property by mistake
+-  //`ASSUME(reqParity, tl_reg_h2d.a_valid |-> tl_reg_h2d.a_user.chk_en == tlul_pkg::CheckDis)
+ 
+ endmodule
+-- 
+2.25.1.377.g2d2118b814
+

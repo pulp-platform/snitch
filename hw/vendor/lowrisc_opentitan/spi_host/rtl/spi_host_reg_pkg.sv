@@ -8,15 +8,11 @@ package spi_host_reg_pkg;
 
   // Param list
   parameter int ByteOrder = 0;
-  parameter int MaxCS = 1;
-
-  // Address widths within the block
-  parameter int BlockAw = 6;
+  parameter int MaxCS = 2;
 
   ////////////////////////////
   // Typedefs for registers //
   ////////////////////////////
-
   typedef struct packed {
     struct packed {
       logic        q;
@@ -171,6 +167,7 @@ package spi_host_reg_pkg;
     } idle;
   } spi_host_reg2hw_event_enable_reg_t;
 
+
   typedef struct packed {
     struct packed {
       logic        d;
@@ -263,60 +260,62 @@ package spi_host_reg_pkg;
     } underflow;
   } spi_host_hw2reg_error_status_reg_t;
 
-  // Register -> HW type
+
+  ///////////////////////////////////////
+  // Register to internal design logic //
+  ///////////////////////////////////////
   typedef struct packed {
-    spi_host_reg2hw_intr_state_reg_t intr_state; // [117:116]
-    spi_host_reg2hw_intr_enable_reg_t intr_enable; // [115:114]
-    spi_host_reg2hw_intr_test_reg_t intr_test; // [113:110]
-    spi_host_reg2hw_control_reg_t control; // [109:80]
-    spi_host_reg2hw_configopts_mreg_t [0:0] configopts; // [79:48]
-    spi_host_reg2hw_command_mreg_t [0:0] command; // [47:9]
-    spi_host_reg2hw_error_enable_reg_t error_enable; // [8:6]
-    spi_host_reg2hw_event_enable_reg_t event_enable; // [5:0]
+    spi_host_reg2hw_intr_state_reg_t intr_state; // [189:188]
+    spi_host_reg2hw_intr_enable_reg_t intr_enable; // [187:186]
+    spi_host_reg2hw_intr_test_reg_t intr_test; // [185:182]
+    spi_host_reg2hw_control_reg_t control; // [181:152]
+    spi_host_reg2hw_configopts_mreg_t [1:0] configopts; // [151:88]
+    spi_host_reg2hw_command_mreg_t [1:0] command; // [87:10]
+    spi_host_reg2hw_error_enable_reg_t error_enable; // [9:7]
+    spi_host_reg2hw_event_enable_reg_t event_enable; // [6:1]
   } spi_host_reg2hw_t;
 
-  // HW -> register type
+  ///////////////////////////////////////
+  // Internal design logic to register //
+  ///////////////////////////////////////
   typedef struct packed {
-    spi_host_hw2reg_intr_state_reg_t intr_state; // [85:82]
-    spi_host_hw2reg_status_reg_t status; // [81:40]
-    spi_host_hw2reg_command_mreg_t [0:0] command; // [39:38]
-    spi_host_hw2reg_rxdata_reg_t rxdata; // [37:6]
-    spi_host_hw2reg_error_status_reg_t error_status; // [5:0]
+    spi_host_hw2reg_intr_state_reg_t intr_state; // [88:87]
+    spi_host_hw2reg_status_reg_t status; // [86:87]
+    spi_host_hw2reg_command_mreg_t [1:0] command; // [86:83]
+    spi_host_hw2reg_rxdata_reg_t rxdata; // [82:83]
+    spi_host_hw2reg_error_status_reg_t error_status; // [82:83]
   } spi_host_hw2reg_t;
 
-  // Register offsets
-  parameter logic [BlockAw-1:0] SPI_HOST_INTR_STATE_OFFSET = 6'h 0;
-  parameter logic [BlockAw-1:0] SPI_HOST_INTR_ENABLE_OFFSET = 6'h 4;
-  parameter logic [BlockAw-1:0] SPI_HOST_INTR_TEST_OFFSET = 6'h 8;
-  parameter logic [BlockAw-1:0] SPI_HOST_CONTROL_OFFSET = 6'h c;
-  parameter logic [BlockAw-1:0] SPI_HOST_STATUS_OFFSET = 6'h 10;
-  parameter logic [BlockAw-1:0] SPI_HOST_CONFIGOPTS_OFFSET = 6'h 14;
-  parameter logic [BlockAw-1:0] SPI_HOST_COMMAND_OFFSET = 6'h 18;
-  parameter logic [BlockAw-1:0] SPI_HOST_RXDATA_OFFSET = 6'h 20;
-  parameter logic [BlockAw-1:0] SPI_HOST_ERROR_ENABLE_OFFSET = 6'h 24;
-  parameter logic [BlockAw-1:0] SPI_HOST_ERROR_STATUS_OFFSET = 6'h 28;
-  parameter logic [BlockAw-1:0] SPI_HOST_EVENT_ENABLE_OFFSET = 6'h 2c;
+  // Register Address
+  parameter logic [5:0] SPI_HOST_INTR_STATE_OFFSET = 6'h 0;
+  parameter logic [5:0] SPI_HOST_INTR_ENABLE_OFFSET = 6'h 4;
+  parameter logic [5:0] SPI_HOST_INTR_TEST_OFFSET = 6'h 8;
+  parameter logic [5:0] SPI_HOST_CONTROL_OFFSET = 6'h c;
+  parameter logic [5:0] SPI_HOST_STATUS_OFFSET = 6'h 10;
+  parameter logic [5:0] SPI_HOST_CONFIGOPTS_0_OFFSET = 6'h 14;
+  parameter logic [5:0] SPI_HOST_CONFIGOPTS_1_OFFSET = 6'h 18;
+  parameter logic [5:0] SPI_HOST_COMMAND_0_OFFSET = 6'h 1c;
+  parameter logic [5:0] SPI_HOST_COMMAND_1_OFFSET = 6'h 20;
+  parameter logic [5:0] SPI_HOST_RXDATA_OFFSET = 6'h 28;
+  parameter logic [5:0] SPI_HOST_ERROR_ENABLE_OFFSET = 6'h 2c;
+  parameter logic [5:0] SPI_HOST_ERROR_STATUS_OFFSET = 6'h 30;
+  parameter logic [5:0] SPI_HOST_EVENT_ENABLE_OFFSET = 6'h 34;
 
-  // Reset values for hwext registers and their fields
-  parameter logic [1:0] SPI_HOST_INTR_TEST_RESVAL = 2'h 0;
-  parameter logic [0:0] SPI_HOST_INTR_TEST_ERROR_RESVAL = 1'h 0;
-  parameter logic [0:0] SPI_HOST_INTR_TEST_SPI_EVENT_RESVAL = 1'h 0;
-  parameter logic [31:0] SPI_HOST_RXDATA_RESVAL = 32'h 0;
-  parameter logic [31:0] SPI_HOST_RXDATA_DATA_RESVAL = 32'h 0;
+  // Window parameter
+  parameter logic [5:0] SPI_HOST_TXDATA_OFFSET = 6'h 24;
+  parameter logic [5:0] SPI_HOST_TXDATA_SIZE   = 6'h 4;
 
-  // Window parameters
-  parameter logic [BlockAw-1:0] SPI_HOST_TXDATA_OFFSET = 6'h 1c;
-  parameter int unsigned        SPI_HOST_TXDATA_SIZE   = 'h 4;
-
-  // Register index
+  // Register Index
   typedef enum int {
     SPI_HOST_INTR_STATE,
     SPI_HOST_INTR_ENABLE,
     SPI_HOST_INTR_TEST,
     SPI_HOST_CONTROL,
     SPI_HOST_STATUS,
-    SPI_HOST_CONFIGOPTS,
-    SPI_HOST_COMMAND,
+    SPI_HOST_CONFIGOPTS_0,
+    SPI_HOST_CONFIGOPTS_1,
+    SPI_HOST_COMMAND_0,
+    SPI_HOST_COMMAND_1,
     SPI_HOST_RXDATA,
     SPI_HOST_ERROR_ENABLE,
     SPI_HOST_ERROR_STATUS,
@@ -324,19 +323,20 @@ package spi_host_reg_pkg;
   } spi_host_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] SPI_HOST_PERMIT [11] = '{
+  parameter logic [3:0] SPI_HOST_PERMIT [13] = '{
     4'b 0001, // index[ 0] SPI_HOST_INTR_STATE
     4'b 0001, // index[ 1] SPI_HOST_INTR_ENABLE
     4'b 0001, // index[ 2] SPI_HOST_INTR_TEST
     4'b 1111, // index[ 3] SPI_HOST_CONTROL
     4'b 1111, // index[ 4] SPI_HOST_STATUS
-    4'b 1111, // index[ 5] SPI_HOST_CONFIGOPTS
-    4'b 1111, // index[ 6] SPI_HOST_COMMAND
-    4'b 1111, // index[ 7] SPI_HOST_RXDATA
-    4'b 0001, // index[ 8] SPI_HOST_ERROR_ENABLE
-    4'b 0001, // index[ 9] SPI_HOST_ERROR_STATUS
-    4'b 0001  // index[10] SPI_HOST_EVENT_ENABLE
+    4'b 1111, // index[ 5] SPI_HOST_CONFIGOPTS_0
+    4'b 1111, // index[ 6] SPI_HOST_CONFIGOPTS_1
+    4'b 1111, // index[ 7] SPI_HOST_COMMAND_0
+    4'b 1111, // index[ 8] SPI_HOST_COMMAND_1
+    4'b 1111, // index[ 9] SPI_HOST_RXDATA
+    4'b 0001, // index[10] SPI_HOST_ERROR_ENABLE
+    4'b 0001, // index[11] SPI_HOST_ERROR_STATUS
+    4'b 0001  // index[12] SPI_HOST_EVENT_ENABLE
   };
-
 endpackage
 

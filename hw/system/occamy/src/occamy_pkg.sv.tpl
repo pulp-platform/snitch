@@ -32,6 +32,8 @@ package occamy_pkg;
     logic uart_rx_break_err;
     logic uart_rx_timeout;
     logic uart_rx_parity_err;
+    logic spim_error;
+    logic spim_spi_event;
   } occamy_interrupt_t;
 
   typedef logic [5:0] tile_id_t;

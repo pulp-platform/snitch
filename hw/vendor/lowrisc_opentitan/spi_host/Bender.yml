@@ -1,0 +1,14 @@
+package:
+  name: lowrisc_spi_host
+  description: "lowRISC RISC-V Platform Level Interrupt Controller"
+  authors: ["lowRISC Contributors"]
+
+dependencies:
+  lowrisc_prim: {path: ../prim}
+
+sources:
+# Level 0:
+- rtl/spi_host_reg_pkg.sv
+# Level 1:
+- rtl/spi_host_reg_top.sv
+- rtl/spi_host.sv

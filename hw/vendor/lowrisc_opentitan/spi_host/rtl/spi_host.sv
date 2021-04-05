@@ -6,21 +6,22 @@
 //
 //
 
-`include "prim_assert.sv"
+`include "common_cells/assertions.svh"
 
 module spi_host
   import spi_host_reg_pkg::*;
- (
+#(
+  parameter type reg_req_t = logic,
+  parameter type reg_rsp_t = logic
+) (
   input              clk_i,
   input              rst_ni,
   input              clk_core_i,
   input              rst_core_ni,
 
-  input              lc_ctrl_pkg::lc_tx_t scanmode_i,
-
   // Register interface
-  input              tlul_pkg::tl_h2d_t tl_i,
-  output             tlul_pkg::tl_d2h_t tl_o,
+  input  reg_req_t reg_req_i,
+  output reg_rsp_t reg_rsp_o,
 
   // SPI Interface
   output logic             cio_sck_o,
@@ -41,24 +42,23 @@ module spi_host
   spi_host_reg2hw_t reg2hw;
   spi_host_hw2reg_t hw2reg;
 
-  tlul_pkg::tl_h2d_t txfifo_win_h2d [1];
-  tlul_pkg::tl_d2h_t txfifo_win_d2h [1];
-
   // Register module
-  spi_host_reg_top u_reg (
+  spi_host_reg_top #(
+    .reg_req_t (reg_req_t),
+    .reg_rsp_t (reg_rsp_t)
+  ) u_reg (
     .clk_i,
     .rst_ni,
 
-    .tl_i (tl_i),
-    .tl_o (tl_o),
+    .reg_req_i,
+    .reg_rsp_o,
 
-    .tl_win_o (txfifo_win_h2d),
-    .tl_win_i (txfifo_win_d2h),
+    .reg_req_win_o (),
+    .reg_rsp_win_i ('0),
 
     .reg2hw,
     .hw2reg,
 
-    .intg_err_o (),
     .devmode_i  (1'b1)
   );
 
@@ -100,16 +100,6 @@ module spi_host
     assign hw2reg.command[ii].go.d = 1'b0;
     assign hw2reg.command[ii].go.de = 1'b0;
   end
-  assign txfifo_win_d2h[0].d_valid = 1'b0;
-  assign txfifo_win_d2h[0].d_opcode = tlul_pkg::AccessAck;
-  assign txfifo_win_d2h[0].d_param = 3'h0;
-  assign txfifo_win_d2h[0].d_size = {top_pkg::TL_SZW{1'b0}};
-  assign txfifo_win_d2h[0].d_source = {top_pkg::TL_AIW{1'b0}};
-  assign txfifo_win_d2h[0].d_sink = {top_pkg::TL_DIW{1'b0}};
-  assign txfifo_win_d2h[0].d_data = {top_pkg::TL_DW{1'b0}};
-  assign txfifo_win_d2h[0].d_user = {top_pkg::TL_DUW{1'b0}};
-  assign txfifo_win_d2h[0].d_error = 1'b0;
-  assign txfifo_win_d2h[0].a_ready = 1'b0;
   assign hw2reg.rxdata.d = 32'h0;
   assign hw2reg.error_status.cmderr.d = 1'b0;
   assign hw2reg.error_status.cmderr.de = 1'b0;
@@ -117,24 +107,6 @@ module spi_host
   assign hw2reg.error_status.overflow.de = 1'b0;
   assign hw2reg.error_status.underflow.d = 1'b0;
   assign hw2reg.error_status.underflow.de = 1'b0;
-
-  // TODO: REMOVE THIS CODE
-  // Temp tie-off to silence lint warnings
-  logic unused_reg;
-  logic unused_tl;
-  logic unused_flop;
-  logic unused_scan;
-  assign unused_reg = ^reg2hw;
-  assign unused_tl = ^txfifo_win_h2d[0];
-  assign unused_scan = ^scanmode_i;
-
-  always_ff @(posedge clk_core_i or negedge rst_core_ni) begin
-    if (!rst_core_ni) begin
-      unused_flop <= '0;
-    end else begin
-      unused_flop <= ^cio_sd_i;
-    end
-  end
 
   prim_intr_hw #(.Width(1)) intr_hw_spi_event (
     .clk_i,
@@ -162,8 +134,6 @@ module spi_host
     .intr_o                 (intr_error_o)
   );
 
-  `ASSERT_KNOWN(TlDValidKnownO_A, tl_o.d_valid)
-  `ASSERT_KNOWN(TlAReadyKnownO_A, tl_o.a_ready)
   `ASSERT_KNOWN(CioSckKnownO_A, cio_sck_o)
   `ASSERT_KNOWN(CioSckEnKnownO_A, cio_sck_en_o)
   `ASSERT_KNOWN(CioCsbKnownO_A, cio_csb_o)

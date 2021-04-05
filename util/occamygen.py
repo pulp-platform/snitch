@@ -106,6 +106,8 @@ def main():
                           0x00031000).attach_to(am_soc_regbus_periph_xbar)
     am_i2c = am.new_leaf("i2c", 0x1000,
                          0x00033000).attach_to(am_soc_regbus_periph_xbar)
+    am_spim = am.new_leaf("spim", 0x1000,
+                         0x00034000).attach_to(am_soc_regbus_periph_xbar)
     am_clint = am.new_leaf("clint", 0x10000,
                            0x00040000).attach_to(am_soc_regbus_periph_xbar)
 
@@ -152,6 +154,7 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("uart", am_uart)
     soc_regbus_periph_xbar.add_output_entry("gpio", am_gpio)
     soc_regbus_periph_xbar.add_output_entry("i2c", am_i2c)
+    soc_regbus_periph_xbar.add_output_entry("spim", am_spim)
 
     #################
     # SoC Wide Xbar #

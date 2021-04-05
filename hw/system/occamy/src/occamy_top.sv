@@ -47,6 +47,14 @@ module occamy_top
     output logic             i2c_scl_o,
     input  logic             i2c_scl_i,
     output logic             i2c_scl_en_o,
+    // `SPI Host` Interface
+    output logic             spim_sck_o,
+    output logic             spim_sck_en_o,
+    output logic [ 1:0]      spim_csb_o,
+    output logic [ 1:0]      spim_csb_en_o,
+    output logic [ 3:0]      spim_sd_o,
+    output logic [ 3:0]      spim_sd_en_o,
+    input        [ 3:0]      spim_sd_i,
 
     /// Boot ROM
     output reg_a48_d32_req_t bootrom_req_o,
@@ -114,8 +122,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [7:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [7:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [8:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [8:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -138,7 +146,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(8),
+      .NoRules(9),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -1317,11 +1325,31 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   //////////////////
   //   SPI Host   //
   //////////////////
+  spi_host #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t)
+  ) i_spi_host (
+      // TODO(zarubaf): Fix clock assignment
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .clk_core_i(clk_i),
+      .rst_core_ni(rst_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_SPIM]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_SPIM]),
+      .cio_sck_o(spim_sck_o),
+      .cio_sck_en_o(spim_sck_en_o),
+      .cio_csb_o(spim_csb_o),
+      .cio_csb_en_o(spim_csb_en_o),
+      .cio_sd_o(spim_sd_o),
+      .cio_sd_en_o(spim_sd_en_o),
+      .cio_sd_i(spim_sd_i),
+      .intr_error_o(irq.spim_error),
+      .intr_spi_event_o(irq.spim_spi_event)
+  );
 
   //////////////
   //   GPIO   //
   //////////////
-
   gpio #(
       .reg_req_t(reg_a48_d32_req_t),
       .reg_rsp_t(reg_a48_d32_rsp_t)

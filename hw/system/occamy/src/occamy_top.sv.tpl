@@ -47,6 +47,14 @@ module occamy_top
   output logic        i2c_scl_o,
   input  logic        i2c_scl_i,
   output logic        i2c_scl_en_o,
+  // `SPI Host` Interface
+  output logic        spim_sck_o,
+  output logic        spim_sck_en_o,
+  output logic [1:0]  spim_csb_o,
+  output logic [1:0]  spim_csb_en_o,
+  output logic [3:0]  spim_sd_o,
+  output logic [3:0]  spim_sd_en_o,
+  input        [3:0]  spim_sd_i,
 
   /// Boot ROM
   output ${soc_regbus_periph_xbar.out_plic.req_type()} bootrom_req_o,
@@ -230,14 +238,34 @@ module occamy_top
   //////////////////
   //   SPI Host   //
   //////////////////
+  spi_host #(
+    .reg_req_t (${soc_regbus_periph_xbar.out_spim.req_type()}),
+    .reg_rsp_t (${soc_regbus_periph_xbar.out_spim.rsp_type()})
+  ) i_spi_host (
+    // TODO(zarubaf): Fix clock assignment
+    .clk_i  (${soc_regbus_periph_xbar.out_spim.clk}),
+    .rst_ni (${soc_regbus_periph_xbar.out_spim.rst}),
+    .clk_core_i (${soc_regbus_periph_xbar.out_spim.clk}),
+    .rst_core_ni (${soc_regbus_periph_xbar.out_spim.rst}),
+    .reg_req_i (${soc_regbus_periph_xbar.out_spim.req_name()}),
+    .reg_rsp_o (${soc_regbus_periph_xbar.out_spim.rsp_name()}),
+    .cio_sck_o (spim_sck_o),
+    .cio_sck_en_o (spim_sck_en_o),
+    .cio_csb_o (spim_csb_o),
+    .cio_csb_en_o (spim_csb_en_o),
+    .cio_sd_o (spim_sd_o),
+    .cio_sd_en_o (spim_sd_en_o),
+    .cio_sd_i (spim_sd_i),
+    .intr_error_o (irq.spim_error),
+    .intr_spi_event_o (irq.spim_spi_event)
+  );
 
   //////////////
   //   GPIO   //
   //////////////
-
   gpio #(
-    .reg_req_t (${soc_regbus_periph_xbar.out_plic.req_type()}),
-    .reg_rsp_t (${soc_regbus_periph_xbar.out_plic.rsp_type()})
+    .reg_req_t (${soc_regbus_periph_xbar.out_gpio.req_type()}),
+    .reg_rsp_t (${soc_regbus_periph_xbar.out_gpio.rsp_type()})
   ) i_gpio (
     .clk_i (${soc_regbus_periph_xbar.out_gpio.clk}),
     .rst_ni (${soc_regbus_periph_xbar.out_gpio.rst}),

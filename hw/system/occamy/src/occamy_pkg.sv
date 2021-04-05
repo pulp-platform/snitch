@@ -32,6 +32,8 @@ package occamy_pkg;
     logic uart_rx_break_err;
     logic uart_rx_timeout;
     logic uart_rx_parity_err;
+    logic spim_error;
+    logic spim_spi_event;
   } occamy_interrupt_t;
 
   typedef logic [5:0] tile_id_t;
@@ -126,11 +128,12 @@ package occamy_pkg;
     SOC_REGBUS_PERIPH_XBAR_OUT_UART,
     SOC_REGBUS_PERIPH_XBAR_OUT_GPIO,
     SOC_REGBUS_PERIPH_XBAR_OUT_I2C,
+    SOC_REGBUS_PERIPH_XBAR_OUT_SPIM,
     SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   } soc_regbus_periph_xbar_outputs_e;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [7:0] SocRegbusPeriphXbarAddrmap = '{
+  localparam xbar_rule_48_t [8:0] SocRegbusPeriphXbarAddrmap = '{
     '{ idx: 0, start_addr: 48'h00020000, end_addr: 48'h00021000 },
     '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 },
     '{ idx: 2, start_addr: 48'h00010000, end_addr: 48'h00020000 },
@@ -138,7 +141,8 @@ package occamy_pkg;
     '{ idx: 4, start_addr: 48'h00024000, end_addr: 48'h00025000 },
     '{ idx: 5, start_addr: 48'h00030000, end_addr: 48'h00031000 },
     '{ idx: 6, start_addr: 48'h00031000, end_addr: 48'h00032000 },
-    '{ idx: 7, start_addr: 48'h00033000, end_addr: 48'h00034000 }
+    '{ idx: 7, start_addr: 48'h00033000, end_addr: 48'h00034000 },
+    '{ idx: 8, start_addr: 48'h00034000, end_addr: 48'h00035000 }
   };
 
   /// Inputs of the `soc_wide_xbar` crossbar.
