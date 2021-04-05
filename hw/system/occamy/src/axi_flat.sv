@@ -59,7 +59,7 @@
   assign rsp.r.data   = m_axi_``pat``_rdata;     \
   assign rsp.r.resp   = m_axi_``pat``_rresp;     \
   assign rsp.r.last   = m_axi_``pat``_rlast;     \
-  assign rsp.r.user   = m_axi_``pat``_ruser
+  assign rsp.r.user   = m_axi_``pat``_ruser;
 
 
 `define AXI_FLATTEN_SLAVE(pat, req, rsp)         \
@@ -114,4 +114,4 @@
   assign s_axi_``pat``_rdata   = rsp.r.data;     \
   assign s_axi_``pat``_rresp   = rsp.r.resp;     \
   assign s_axi_``pat``_rlast   = rsp.r.last;     \
-  assign s_axi_``pat``_ruser   = rsp.r.user
+  assign s_axi_``pat``_ruser   = rsp.r.user;
