@@ -52,8 +52,8 @@ module occamy_top
     output axi_a48_d512_i7_u0_req_t  pcie_axi_req_o,
     input  axi_a48_d512_i7_u0_resp_t pcie_axi_rsp_i,
 
-    input  axi_a48_d512_i7_u0_req_t  pcie_axi_req_i,
-    output axi_a48_d512_i7_u0_resp_t pcie_axi_rsp_o
+    input  axi_a48_d512_i3_u0_req_t  pcie_axi_req_i,
+    output axi_a48_d512_i3_u0_resp_t pcie_axi_rsp_o
     /// HBM2e Ports
     /// HBI Ports
 );

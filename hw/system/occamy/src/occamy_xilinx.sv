@@ -51,7 +51,7 @@ import occamy_pkg::*;
     /// PCIe Ports
     input  logic                     m_axi_pcie_awready,
     output logic                     m_axi_pcie_awvalid,
-    output logic             [  4:0] m_axi_pcie_awid,
+    output logic             [  6:0] m_axi_pcie_awid,
     output logic             [ 47:0] m_axi_pcie_awaddr,
     output axi_pkg::len_t            m_axi_pcie_awlen,
     output axi_pkg::size_t           m_axi_pcie_awsize,
@@ -71,7 +71,7 @@ import occamy_pkg::*;
     output logic             [  0:0] m_axi_pcie_wuser,
     input  logic                     m_axi_pcie_arready,
     output logic                     m_axi_pcie_arvalid,
-    output logic             [  4:0] m_axi_pcie_arid,
+    output logic             [  6:0] m_axi_pcie_arid,
     output logic             [ 47:0] m_axi_pcie_araddr,
     output axi_pkg::len_t            m_axi_pcie_arlen,
     output axi_pkg::size_t           m_axi_pcie_arsize,
@@ -84,20 +84,20 @@ import occamy_pkg::*;
     output logic             [  0:0] m_axi_pcie_aruser,
     output logic                     m_axi_pcie_rready,
     input  logic                     m_axi_pcie_rvalid,
-    input  logic             [  4:0] m_axi_pcie_rid,
+    input  logic             [  6:0] m_axi_pcie_rid,
     input  logic             [511:0] m_axi_pcie_rdata,
     input  axi_pkg::resp_t           m_axi_pcie_rresp,
     input  logic                     m_axi_pcie_rlast,
     input  logic             [  0:0] m_axi_pcie_ruser,
     output logic                     m_axi_pcie_bready,
     input  logic                     m_axi_pcie_bvalid,
-    input  logic             [  4:0] m_axi_pcie_bid,
+    input  logic             [  6:0] m_axi_pcie_bid,
     input  axi_pkg::resp_t           m_axi_pcie_bresp,
     input  logic             [  0:0] m_axi_pcie_buser,
 
     output logic                     s_axi_pcie_awready,
     input  logic                     s_axi_pcie_awvalid,
-    input  logic             [  4:0] s_axi_pcie_awid,
+    input  logic             [  2:0] s_axi_pcie_awid,
     input  logic             [ 47:0] s_axi_pcie_awaddr,
     input  axi_pkg::len_t            s_axi_pcie_awlen,
     input  axi_pkg::size_t           s_axi_pcie_awsize,
@@ -117,7 +117,7 @@ import occamy_pkg::*;
     input  logic             [  0:0] s_axi_pcie_wuser,
     output logic                     s_axi_pcie_arready,
     input  logic                     s_axi_pcie_arvalid,
-    input  logic             [  4:0] s_axi_pcie_arid,
+    input  logic             [  2:0] s_axi_pcie_arid,
     input  logic             [ 47:0] s_axi_pcie_araddr,
     input  axi_pkg::len_t            s_axi_pcie_arlen,
     input  axi_pkg::size_t           s_axi_pcie_arsize,
@@ -130,14 +130,14 @@ import occamy_pkg::*;
     input  logic             [  0:0] s_axi_pcie_aruser,
     input  logic                     s_axi_pcie_rready,
     output logic                     s_axi_pcie_rvalid,
-    output logic             [  4:0] s_axi_pcie_rid,
+    output logic             [  2:0] s_axi_pcie_rid,
     output logic             [511:0] s_axi_pcie_rdata,
     output axi_pkg::resp_t           s_axi_pcie_rresp,
     output logic                     s_axi_pcie_rlast,
     output logic             [  0:0] s_axi_pcie_ruser,
     input  logic                     s_axi_pcie_bready,
     output logic                     s_axi_pcie_bvalid,
-    output logic             [  4:0] s_axi_pcie_bid,
+    output logic             [  2:0] s_axi_pcie_bid,
     output axi_pkg::resp_t           s_axi_pcie_bresp,
     output logic             [  0:0] s_axi_pcie_buser
 
@@ -146,15 +146,15 @@ import occamy_pkg::*;
 );
 
   // AXI ports of Occamy top-level
-  axi_a48_d512_i5_u0_req_t  pcie_axi_req_o;
-  axi_a48_d512_i5_u0_resp_t pcie_axi_rsp_i;
+  axi_a48_d512_i7_u0_req_t  pcie_axi_req_o;
+  axi_a48_d512_i7_u0_resp_t pcie_axi_rsp_i;
 
-  axi_a48_d512_i5_u0_req_t  pcie_axi_req_i;
-  axi_a48_d512_i5_u0_resp_t pcie_axi_rsp_o;
+  axi_a48_d512_i3_u0_req_t  pcie_axi_req_i;
+  axi_a48_d512_i3_u0_resp_t pcie_axi_rsp_o;
 
   // Assign structs to flattened ports
-  `AXI_FLATTEN_MASTER(pcie, pcie_axi_req_o, pcie_axi_rsp_i);
-  `AXI_FLATTEN_SLAVE(pcie, pcie_axi_req_i, pcie_axi_rsp_o);
+  `AXI_FLATTEN_MASTER(pcie, pcie_axi_req_o, pcie_axi_rsp_i)
+  `AXI_FLATTEN_SLAVE(pcie, pcie_axi_req_i, pcie_axi_rsp_o)
 
   // Occamy top-level
   occamy_top i_occamy (.*);

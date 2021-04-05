@@ -49,9 +49,9 @@ import occamy_pkg::*;
 
 
   /// PCIe Ports
-  <% soc_wide_xbar.out_pcie \
-        .emit_flat_master_port(context, "pcie", ",\n\n") \
-        .emit_flat_slave_port(context, "pcie", "\n")
+  <%
+  soc_wide_xbar.out_pcie.emit_flat_master_port(context, "pcie", ",\n\n")
+  soc_wide_xbar.in_pcie.emit_flat_slave_port(context, "pcie", "\n")
   %>
   /// HBM2e Ports
   /// HBI Ports
@@ -61,8 +61,8 @@ import occamy_pkg::*;
   ${soc_wide_xbar.out_pcie.req_type()} pcie_axi_req_o;
   ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i;
 
-  ${soc_wide_xbar.out_pcie.req_type()} pcie_axi_req_i;
-  ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_o;
+  ${soc_wide_xbar.in_pcie.req_type()} pcie_axi_req_i;
+  ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(pcie, pcie_axi_req_o, pcie_axi_rsp_i)
