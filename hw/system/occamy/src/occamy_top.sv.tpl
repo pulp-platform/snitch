@@ -62,8 +62,8 @@ module occamy_top
   input        [3:0]  spim_sd_i,
 
   /// Boot ROM
-  output ${soc_regbus_periph_xbar.out_plic.req_type()} bootrom_req_o,
-  input  ${soc_regbus_periph_xbar.out_plic.rsp_type()} bootrom_rsp_i,
+  output ${soc_regbus_periph_xbar.out_bootrom.req_type()} bootrom_req_o,
+  input  ${soc_regbus_periph_xbar.out_bootrom.rsp_type()} bootrom_rsp_i,
 
   /// Clk manager
   output ${soc_regbus_periph_xbar.out_clk_mgr.req_type()} clk_mgr_req_o,

@@ -309,6 +309,7 @@ def main():
         code = tpl_xilinx.render_unicode(
             solder=solder,
             soc_wide_xbar=soc_wide_xbar,
+            soc_regbus_periph_xbar=soc_regbus_periph_xbar
         )
         code = re_trailws.sub("", code)
         file.write(code)

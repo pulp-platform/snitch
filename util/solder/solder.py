@@ -393,27 +393,23 @@ class AxiBus(object):
     def emit_struct(self):
         return AxiStruct.emit(self.aw, self.dw, self.iw, self.uw)
 
-    def emit_flat_master_port(self, context, name=None, terminus="\n"):
+    def emit_flat_master_port(self, name=None):
         tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
-        context.write(
-            tpl.render_unicode(
+        return tpl.render_unicode(
                 mst_dir="output",
                 slv_dir="input",
                 prefix="m_axi_{}".format(name or ""),
                 bus=self
-            ) + terminus)
-        return self
+            )
 
-    def emit_flat_slave_port(self, context, name=None, terminus="\n"):
+    def emit_flat_slave_port(self, name=None):
         tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
-        context.write(
-            tpl.render_unicode(
+        return tpl.render_unicode(
                 mst_dir="input",
                 slv_dir="output",
                 prefix="s_axi_{}".format(name or ""),
                 bus=self
-            ) + terminus)
-        return self
+            )
 
     def declare(self, context):
         if self.declared:
