@@ -12,8 +12,6 @@ ROOT        := ${MKFILE_DIR}../../..
 include $(ROOT)/util/Makefrag
 
 VLT_FLAGS 	  += -Wno-SYMRSVDWORD
-VSIM_BENDER   += -t test -t rtl -t simulation -t vsim
-VSIM_SOURCES  := $(shell ${BENDER} script flist ${VSIM_BENDER} | ${SED_SRCS})
 REGGEN        ?= ${ROOT}/util/regtool.py
 
 ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
@@ -21,11 +19,27 @@ ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 
 all: update-source update-plic update-socreg
 
+test: ${VSIM_SOURCES} ${TB_SRCS}
+	echo ${VSIM_SOURCES}
+	touch test
+#################
+# Prerequisites #
+#################
+test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom.ld
+	riscv64-unknown-elf-gcc -mabi=ilp32d -march=rv32imafd -static -nostartfiles -Ttest/bootrom.ld $< -o test/bootrom.elf
+	riscv64-unknown-elf-objdump -d test/bootrom.elf > test/bootrom.dump
+	riscv64-unknown-elf-objcopy -j .text -O binary test/bootrom.elf test/bootrom.bin
+
 ##########
 # Source #
 ##########
 update-source:
-	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . src/occamy_top.sv src/occamy_pkg.sv src/occamy_quadrant_s1.sv src/occamy_xilinx.sv
+	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . \
+		src/occamy_top.sv \
+		src/occamy_pkg.sv \
+		src/occamy_quadrant_s1.sv \
+		src/occamy_xilinx.sv \
+		test/testharness.sv
 	verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv
 
 update-plic:
@@ -49,14 +63,9 @@ verilate: ${VLT_BUILDDIR}/verilate
 #######
 # VCS #
 #######
-work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
-	mkdir -p work-vcs
-	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover" > $@
-	chmod +x $@
-	$@
-
-bin/occamy_top.vcs: work-vcs/compile.sh
+bin/occamy_top.vcs: work-vcs/compile.sh work/lib/libfesvr.a ${TB_DIR}/common_lib.cc test/bootdata.cc test/bootrom.bin
 	mkdir -p bin
-	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/occamy_top.vcs  \
-		-assert disable_cover -override_timescale=1ns/1ps -full64 occamy_top
+	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/occamy_top.vcs -cc $(CC) -cpp $(CXX) \
+		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc test/bootdata.cc \
+		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}" -LDFLAGS "-L${FESVR}/lib" -lfesvr
 

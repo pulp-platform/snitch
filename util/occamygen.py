@@ -17,7 +17,7 @@ from mako.lookup import TemplateLookup
 from solder import solder
 
 templates = TemplateLookup(
-    directories=[pathlib.Path(__file__).parent / "../hw/system/occamy/src"],
+    directories=[pathlib.Path(__file__).parent / "../hw/system/occamy"],
     output_encoding="utf-8")
 
 
@@ -43,6 +43,7 @@ def main():
     parser.add_argument("QUADRANT_S1",
                         help="Name of S1 quadrant file (output)")
     parser.add_argument("XILINX_SV", help="Name of the Xilinx wrapper file (output).")
+    parser.add_argument("TESTHARNESS_SV", help="Name of the testharness wrapper file (output).")
     parser.add_argument("--graph", "-g", metavar="DOT")
     parser.add_argument("--cheader", "-D", metavar="CHEADER")
 
@@ -78,10 +79,11 @@ def main():
     re_trailws = re.compile(r'[ \t\r]+$', re.MULTILINE)
 
     # Setup the templating engine.
-    tpl_top = templates.get_template("occamy_top.sv.tpl")
-    tpl_quadrant_s1 = templates.get_template("occamy_quadrant_s1.sv.tpl")
-    tpl_pkg = templates.get_template("occamy_pkg.sv.tpl")
-    tpl_xilinx = templates.get_template("occamy_xilinx.sv.tpl")
+    tpl_top = templates.get_template("src/occamy_top.sv.tpl")
+    tpl_quadrant_s1 = templates.get_template("src/occamy_quadrant_s1.sv.tpl")
+    tpl_pkg = templates.get_template("src/occamy_pkg.sv.tpl")
+    tpl_xilinx = templates.get_template("src/occamy_xilinx.sv.tpl")
+    tpl_testharness = templates.get_template("test/testharness.sv.tpl")
 
     # Create the address map.
     am = solder.AddrMap()
@@ -310,6 +312,16 @@ def main():
             solder=solder,
             soc_wide_xbar=soc_wide_xbar,
             soc_regbus_periph_xbar=soc_regbus_periph_xbar
+        )
+        code = re_trailws.sub("", code)
+        file.write(code)
+
+    with open(args.TESTHARNESS_SV, "w") as file:
+        code = tpl_testharness.render_unicode(
+            solder=solder,
+            soc_wide_xbar=soc_wide_xbar,
+            soc_regbus_periph_xbar=soc_regbus_periph_xbar,
+            nr_s1_quadrants=nr_s1_quadrants
         )
         code = re_trailws.sub("", code)
         file.write(code)

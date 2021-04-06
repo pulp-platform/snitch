@@ -10,6 +10,7 @@ package:
 dependencies:
   axi: {path: ../../vendor/pulp_platform_axi}
   reqrsp_interface: {path: ../reqrsp_interface}
+  axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
 
 sources:
 # Level 1:

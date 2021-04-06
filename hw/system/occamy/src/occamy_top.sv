@@ -35,10 +35,6 @@ module occamy_top
     output logic [31:0]      gpio_oe_o,
     output logic [31:0]      gpio_puen_o,
     output logic [31:0]      gpio_pden_o,
-    // `serial` Interface
-    input  logic             serial_clk_i,
-    input  logic [ 3:0]      serial_data_i,
-    output logic [ 3:0]      serial_data_o,
     // `jtag` Interface
     input  logic             jtag_trst_ni,
     input  logic             jtag_tck_i,

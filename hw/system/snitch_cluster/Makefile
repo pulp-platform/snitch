@@ -17,9 +17,6 @@ CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
 
 # Support for local override
 DASM 	       ?= spike-dasm
-# fesvr is being installed here
-FESVR          ?= ${MKFILE_DIR}work
-FESVR_VERSION  ?= 35d50bc40e59ea1d5566fbd3d9226023821b1bb6
 
 # uncomment, if questasim should be run in 64-bit mode
 QUESTA_64BIT	= -64
@@ -34,8 +31,6 @@ VLOG_FLAGS 	  += -override_timescale 1ns/1ps
 VLOG_FLAGS 	  += -suppress 2583
 VLOG_FLAGS 	  += -suppress 13314
 VLOG_FLAGS 	  += ${QUESTA_64BIT}
-VSIM_BENDER   += -t test -t rtl -t simulation -t vsim
-VSIM_SOURCES  := $(shell ${BENDER} script flist ${VSIM_BENDER} | ${SED_SRCS})
 
 #######
 # RTL #
@@ -46,18 +41,6 @@ ${MKFILE_DIR}generated/snitch_cluster_wrapper.sv: ${CFG} ${CLUSTER_GEN} ${CLUSTE
 #################
 # Prerequisites #
 #################
-work/${FESVR_VERSION}_unzip:
-	mkdir -p $(dir $@)
-	wget -O $(dir $@)/${FESVR_VERSION} https://github.com/riscv/riscv-isa-sim/tarball/${FESVR_VERSION}
-	tar xfm $(dir $@)${FESVR_VERSION} --strip-components=1 -C $(dir $@)
-	touch $@
-
-work/lib/libfesvr.a: work/${FESVR_VERSION}_unzip
-	cd $(dir $<)/ && ./configure --prefix `pwd`
-	make -C $(dir $<) install-config-hdrs install-hdrs libfesvr.a
-	mkdir -p $(dir $@)
-	cp $(dir $<)libfesvr.a $@
-
 test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom.ld
 	riscv64-unknown-elf-gcc -mabi=ilp32d -march=rv32imafd -static -nostartfiles -Ttest/bootrom.ld $< -o test/bootrom.elf
 	riscv64-unknown-elf-objdump -d test/bootrom.elf > test/bootrom.dump
@@ -116,12 +99,6 @@ bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
 #######
 # VCS #
 #######
-work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
-	mkdir -p work-vcs
-	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover" > $@
-	chmod +x $@
-	$@
-
 bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch_cluster_wrapper.sv ${TB_DIR}/common_lib.cc generated/bootdata.cc
 	mkdir -p bin
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/snitch_cluster.vcs -cc $(CC) -cpp $(CXX) \
