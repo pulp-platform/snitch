@@ -41,7 +41,7 @@ void Sim::main() {
 
     // Trace 8 levels of hierarchy.
     top->trace(vcd.get(), 8);
-    vcd->open("snitch_cluster.vcd");
+    vcd->open("sim.vcd");
     vcd->dump(TIME);
     TIME += 2;
 

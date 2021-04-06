@@ -2,20 +2,21 @@
 # Solderpad Hardware License, Version 0.51, see LICENSE for details.
 # SPDX-License-Identifier: SHL-0.51
 package:
-  name: system-snitch-cluster
+  name: test
   authors:
   - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
   - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
-  - Thomas Benz <tbenz@iis.ee.ethz.ch>
 
 dependencies:
-  axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
-  snitch-cluster: {path: ../../ip/snitch_cluster}
-  test: {path: ../../ip/test}
+  axi: {path: ../../vendor/pulp_platform_axi}
+  reqrsp_interface: {path: ../reqrsp_interface}
+
 sources:
-# Level 0:
-- generated/snitch_cluster_wrapper.sv
 # Level 1:
 - target: any(simulation, verilator)
   files:
-  - test/testharness.sv
+  - src/tb_memory.sv
+# Level 2:
+- target: test
+  files:
+  - src/tb_bin.sv

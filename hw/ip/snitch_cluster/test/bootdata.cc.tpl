@@ -2,7 +2,7 @@
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
 
-#include "tb_lib.hh"
+#include <tb_lib.hh>
 
 namespace sim {
 

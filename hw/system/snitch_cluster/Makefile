@@ -71,10 +71,10 @@ ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 
 verilate: ${VLT_BUILDDIR}/verilate
 
-bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/common_lib.cc test/tb_bin.cc work/lib/libfesvr.a test/bootrom.bin generated/bootdata.cc
-	$(CXX) $(VLT_CFLAGS) -c test/common_lib.cc -o ${VLT_BUILDDIR}/common_lib.o -Itest
+bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate ${TB_DIR}/verilator_lib.cc ${TB_DIR}/common_lib.cc ${TB_DIR}/tb_bin.cc work/lib/libfesvr.a test/bootrom.bin generated/bootdata.cc
+	$(CXX) $(VLT_CFLAGS) -c ${TB_DIR}/common_lib.cc -o ${VLT_BUILDDIR}/common_lib.o -Itest
 	$(CXX) $(VLT_CFLAGS) -c generated/bootdata.cc -o ${VLT_BUILDDIR}/bootdata.o -Itest
-	$(CXX) $(VLT_CFLAGS) -c test/verilator_lib.cc -o ${VLT_BUILDDIR}/verilator_lib.o
+	$(CXX) $(VLT_CFLAGS) -c ${TB_DIR}/verilator_lib.cc -o ${VLT_BUILDDIR}/verilator_lib.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated.cpp -o ${VLT_BUILDDIR}/verilated.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated_dpi.cpp -o ${VLT_BUILDDIR}/verilated_dpi.o
 	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated_vcd_c.cpp -o ${VLT_BUILDDIR}/verilated_vcd_c.o
@@ -91,15 +91,15 @@ bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate test/verilator_lib.cc test/comm
 		-L ${VLT_BUILDDIR} \
 		-L $(FESVR)/lib
 	$(AR) rcs bin/libsnitch_cluster.a ${VLT_BUILDDIR}/snitch_cluster.o
-	$(CXX) $(VLT_CFLAGS) test/tb_bin.cc -L bin -lsnitch_cluster -o $@
+	$(CXX) $(VLT_CFLAGS) ${TB_DIR}/tb_bin.cc -L bin -lsnitch_cluster -o $@
 
 ############
 # Modelsim #
 ############
-${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc
+${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc
 	vlib $(dir $@)
 	${BENDER} script vsim ${VSIM_BENDER} --vlog-arg="${VLOG_FLAGS} -work $(dir $@) " > $@
-	echo '${VLOG} -work $(dir $@) test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc -ccflags "-std=c++14 -I${MKFILE_DIR}/test -I${FESVR}/include"' >> $@
+	echo '${VLOG} -work $(dir $@) ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc -ccflags "-std=c++14 -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}"' >> $@
 	echo 'return 0' >> $@
 
 bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
@@ -122,11 +122,11 @@ work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
 	chmod +x $@
 	$@
 
-bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch_cluster_wrapper.sv test/common_lib.cc generated/bootdata.cc
+bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch_cluster_wrapper.sv ${TB_DIR}/common_lib.cc generated/bootdata.cc
 	mkdir -p bin
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/snitch_cluster.vcs -cc $(CC) -cpp $(CXX) \
-		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin test/rtl_lib.cc test/common_lib.cc generated/bootdata.cc \
-		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include" -LDFLAGS "-L${FESVR}/lib" -lfesvr
+		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc \
+		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}" -LDFLAGS "-L${FESVR}/lib" -lfesvr
 
 #########
 # Phony #
