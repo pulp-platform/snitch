@@ -40,7 +40,7 @@ module testharness import snitch_cluster_pkg::*; (
   assign wide_in_req = '0;
 
   // Narrow port into simulation memory.
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (AddrWidth),
     .AxiDataWidth (NarrowDataWidth),
     .AxiIdWidth (NarrowIdWidthOut),
@@ -55,7 +55,7 @@ module testharness import snitch_cluster_pkg::*; (
   );
 
   // Wide port into simulation memory.
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (AddrWidth),
     .AxiDataWidth (WideDataWidth),
     .AxiIdWidth (WideIdWidthOut),

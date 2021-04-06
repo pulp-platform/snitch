@@ -9,17 +9,23 @@ module testharness import occamy_pkg::*; (
   input  logic        rst_ni
 );
 
-<%def name="tb_memory(hbm_channel, name)">
-  ${hbm_channel.req_type()} ${name}_req;
-  ${hbm_channel.rsp_type()} ${name}_rsp;
+<%def name="tb_memory(bus, name)">
+  ${bus.req_type()} ${name}_req;
+  ${bus.rsp_type()} ${name}_rsp;
 
-  tb_memory #(
-    .AxiAddrWidth (${hbm_channel.aw}),
-    .AxiDataWidth (${hbm_channel.dw}),
-    .AxiIdWidth (${hbm_channel.iw}),
-    .AxiUserWidth (${hbm_channel.uw + 1}),
-    .req_t (${hbm_channel.req_type()}),
-    .rsp_t (${hbm_channel.rsp_type()})
+  % if isinstance(bus, solder.AxiBus):
+  tb_memory_axi #(
+    .AxiAddrWidth (${bus.aw}),
+    .AxiDataWidth (${bus.dw}),
+    .AxiIdWidth (${bus.iw}),
+    .AxiUserWidth (${bus.uw + 1}),
+  % else:
+  tb_memory_regbus #(
+    .AddrWidth (${bus.aw}),
+    .DataWidth (${bus.dw}),
+  % endif
+    .req_t (${bus.req_type()}),
+    .rsp_t (${bus.rsp_type()})
   ) i_${name}_channel (
     .clk_i,
     .rst_ni,
@@ -29,11 +35,12 @@ module testharness import occamy_pkg::*; (
 </%def>
 
 % for i in range(8):
-${tb_memory(soc_wide_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i))}
+  ${tb_memory(soc_wide_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i))}
 % endfor
 
   ${tb_memory(soc_wide_xbar.out_pcie, "pcie_axi")}
-
+  ${tb_memory(soc_regbus_periph_xbar.out_bootrom, "bootrom_regbus")}
+  ${tb_memory(soc_regbus_periph_xbar.out_clk_mgr, "clk_mgr")}
   occamy_top i_occamy (
     .clk_i,
     .rst_ni,
@@ -71,10 +78,10 @@ ${tb_memory(soc_wide_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".for
     .spim_sd_o (),
     .spim_sd_en_o (),
     .spim_sd_i ('0),
-    .bootrom_req_o (),
-    .bootrom_rsp_i (),
-    .clk_mgr_req_o (),
-    .clk_mgr_rsp_i (),
+    .bootrom_req_o (bootrom_regbus_req),
+    .bootrom_rsp_i (bootrom_regbus_rsp),
+    .clk_mgr_req_o (clk_mgr_req),
+    .clk_mgr_rsp_i (clk_mgr_rsp),
 % for i in range(8):
     .hbm_${i}_req_o (hbm_channel_${i}_req),
     .hbm_${i}_rsp_i (hbm_channel_${i}_rsp),

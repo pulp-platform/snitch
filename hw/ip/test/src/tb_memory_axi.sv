@@ -5,10 +5,7 @@
 // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 // Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
-
-module tb_memory #(
+module tb_memory_axi #(
   /// AXI4+ATOP address width.
   parameter int unsigned AxiAddrWidth  = 0,
   /// AXI4+ATOP data width.
@@ -26,20 +23,19 @@ module tb_memory #(
   output rsp_t rsp_o
 );
 
-  import "DPI-C" function void tb_memory_read(
-    input longint addr,
-    input int len,
-    output byte data[]
-  );
-  import "DPI-C" function void tb_memory_write(
-    input longint addr,
-    input int len,
-    input byte data[],
-    input bit strb[]
-  );
+  `include "axi/assign.svh"
+  `include "axi/typedef.svh"
+
+  `include "register_interface/typedef.svh"
+  `include "register_interface/assign.svh"
 
   localparam int NumBytes = AxiDataWidth/8;
   localparam int BusAlign = $clog2(NumBytes);
+
+  REG_BUS #(
+    .ADDR_WIDTH ( AxiAddrWidth ),
+    .DATA_WIDTH ( AxiDataWidth )
+  ) regb(clk_i);
 
   AXI_BUS #(
     .AXI_ADDR_WIDTH ( AxiAddrWidth ),
@@ -52,11 +48,6 @@ module tb_memory #(
 
   `AXI_ASSIGN_FROM_REQ(axi, req_i)
   `AXI_ASSIGN_TO_RESP(rsp_o, axi)
-
-  REG_BUS #(
-    .ADDR_WIDTH ( AxiAddrWidth ),
-    .DATA_WIDTH ( AxiDataWidth )
-  ) regb(clk_i);
 
   // Filter atomic operations.
   axi_riscv_atomics_wrap #(
@@ -102,35 +93,24 @@ module tb_memory #(
     .reg_o      ( regb )
   );
 
-  assign regb.error = 0;
-  assign regb.ready = 1;
+  `REG_BUS_TYPEDEF_ALL(regbus, logic [AxiAddrWidth-1:0], logic [AxiDataWidth-1:0], logic [NumBytes-1:0])
 
-  // Handle write requests on the register bus.
-  always_ff @(posedge clk_i) begin
-    if (rst_ni && regb.valid) begin
-      automatic byte data[NumBytes];
-      automatic bit  strb[NumBytes];
-      if (regb.write) begin
-        for (int i = 0; i < NumBytes; i++) begin
-          // verilog_lint: waive-start always-ff-non-blocking
-          data[i] = regb.wdata[i*8+:8];
-          strb[i] = regb.wstrb[i];
-          // verilog_lint: waive-start always-ff-non-blocking
-        end
-        tb_memory_write((regb.addr >> BusAlign) << BusAlign, NumBytes, data, strb);
-      end
-    end
-  end
+  regbus_req_t regbus_req;
+  regbus_rsp_t regbus_rsp;
 
-  // Handle read requests combinatorial on the register bus.
-  always_comb begin
-    if (regb.valid) begin
-      automatic byte data[NumBytes];
-      tb_memory_read((regb.addr >> BusAlign) << BusAlign, NumBytes, data);
-      for (int i = 0; i < NumBytes; i++) begin
-        regb.rdata[i*8+:8] = data[i];
-      end
-    end
-  end
+  `REG_BUS_ASSIGN_TO_REQ(regbus_req, regb)
+  `REG_BUS_ASSIGN_FROM_RSP(regb, regbus_rsp)
+
+  tb_memory_regbus #(
+    .AddrWidth (AxiAddrWidth),
+    .DataWidth (AxiDataWidth),
+    .req_t (regbus_req_t),
+    .rsp_t (regbus_rsp_t)
+  ) i_tb_memory_regbus (
+    .clk_i,
+    .rst_ni,
+    .req_i (regbus_req),
+    .rsp_o (regbus_rsp)
+  );
 
 endmodule

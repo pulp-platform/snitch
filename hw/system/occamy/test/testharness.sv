@@ -15,7 +15,7 @@ module testharness import occamy_pkg::*; (
   axi_a48_d512_i8_u0_req_t hbm_channel_0_req;
   axi_a48_d512_i8_u0_resp_t hbm_channel_0_rsp;
 
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
     .AxiIdWidth (8),
@@ -33,7 +33,7 @@ module testharness import occamy_pkg::*; (
   axi_a48_d512_i8_u0_req_t hbm_channel_1_req;
   axi_a48_d512_i8_u0_resp_t hbm_channel_1_rsp;
 
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
     .AxiIdWidth (8),
@@ -51,7 +51,7 @@ module testharness import occamy_pkg::*; (
   axi_a48_d512_i8_u0_req_t hbm_channel_2_req;
   axi_a48_d512_i8_u0_resp_t hbm_channel_2_rsp;
 
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
     .AxiIdWidth (8),
@@ -69,7 +69,7 @@ module testharness import occamy_pkg::*; (
   axi_a48_d512_i8_u0_req_t hbm_channel_3_req;
   axi_a48_d512_i8_u0_resp_t hbm_channel_3_rsp;
 
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
     .AxiIdWidth (8),
@@ -87,7 +87,7 @@ module testharness import occamy_pkg::*; (
   axi_a48_d512_i8_u0_req_t hbm_channel_4_req;
   axi_a48_d512_i8_u0_resp_t hbm_channel_4_rsp;
 
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
     .AxiIdWidth (8),
@@ -105,7 +105,7 @@ module testharness import occamy_pkg::*; (
   axi_a48_d512_i8_u0_req_t hbm_channel_5_req;
   axi_a48_d512_i8_u0_resp_t hbm_channel_5_rsp;
 
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
     .AxiIdWidth (8),
@@ -123,7 +123,7 @@ module testharness import occamy_pkg::*; (
   axi_a48_d512_i8_u0_req_t hbm_channel_6_req;
   axi_a48_d512_i8_u0_resp_t hbm_channel_6_rsp;
 
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
     .AxiIdWidth (8),
@@ -141,7 +141,7 @@ module testharness import occamy_pkg::*; (
   axi_a48_d512_i8_u0_req_t hbm_channel_7_req;
   axi_a48_d512_i8_u0_resp_t hbm_channel_7_rsp;
 
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
     .AxiIdWidth (8),
@@ -160,7 +160,7 @@ module testharness import occamy_pkg::*; (
   axi_a48_d512_i8_u0_req_t pcie_axi_req;
   axi_a48_d512_i8_u0_resp_t pcie_axi_rsp;
 
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
     .AxiIdWidth (8),
@@ -174,6 +174,37 @@ module testharness import occamy_pkg::*; (
     .rsp_o (pcie_axi_rsp)
   );
 
+
+  reg_a48_d32_req_t bootrom_regbus_req;
+  reg_a48_d32_rsp_t bootrom_regbus_rsp;
+
+  tb_memory_regbus #(
+    .AddrWidth (48),
+    .DataWidth (32),
+    .req_t (reg_a48_d32_req_t),
+    .rsp_t (reg_a48_d32_rsp_t)
+  ) i_bootrom_regbus_channel (
+    .clk_i,
+    .rst_ni,
+    .req_i (bootrom_regbus_req),
+    .rsp_o (bootrom_regbus_rsp)
+  );
+
+
+  reg_a48_d32_req_t clk_mgr_req;
+  reg_a48_d32_rsp_t clk_mgr_rsp;
+
+  tb_memory_regbus #(
+    .AddrWidth (48),
+    .DataWidth (32),
+    .req_t (reg_a48_d32_req_t),
+    .rsp_t (reg_a48_d32_rsp_t)
+  ) i_clk_mgr_channel (
+    .clk_i,
+    .rst_ni,
+    .req_i (clk_mgr_req),
+    .rsp_o (clk_mgr_rsp)
+  );
 
   occamy_top i_occamy (
     .clk_i,
@@ -212,10 +243,10 @@ module testharness import occamy_pkg::*; (
     .spim_sd_o (),
     .spim_sd_en_o (),
     .spim_sd_i ('0),
-    .bootrom_req_o (),
-    .bootrom_rsp_i (),
-    .clk_mgr_req_o (),
-    .clk_mgr_rsp_i (),
+    .bootrom_req_o (bootrom_regbus_req),
+    .bootrom_rsp_i (bootrom_regbus_rsp),
+    .clk_mgr_req_o (clk_mgr_req),
+    .clk_mgr_rsp_i (clk_mgr_rsp),
     .hbm_0_req_o (hbm_channel_0_req),
     .hbm_0_rsp_i (hbm_channel_0_rsp),
     .hbm_1_req_o (hbm_channel_1_req),

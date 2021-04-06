@@ -16,8 +16,10 @@ sources:
 # Level 1:
 - target: any(simulation, verilator)
   files:
-  - src/tb_memory.sv
-# Level 2:
+  - src/tb_memory_regbus.sv
+  # Level 2
+  - src/tb_memory_axi.sv
+# Level 3:
 - target: test
   files:
   - src/tb_bin.sv
