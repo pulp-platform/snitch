@@ -5,6 +5,8 @@
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 // Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
+`include "common_cells/registers.svh"
+
 module snitch_ssr import snitch_pkg::*; #(
   parameter bit Indirection    = 0,           // TODO: propagate, add to config
   parameter bit IndirOutSpill  = 0,           // TODO: propagate, add to config
@@ -46,7 +48,7 @@ module snitch_ssr import snitch_pkg::*; #(
   data_t fifo_out, fifo_in;
   logic fifo_push, fifo_pop, fifo_full, fifo_empty;
   logic mover_valid;
-  logic [$clog2(SSRNrCredits):0] credit_q;
+  logic [$clog2(SSRNrCredits):0] credit_d, credit_q;
   logic has_credit, credit_take, credit_give;
   logic [3:0] rep_max, rep_q, rep_done, rep_enable;
 
@@ -158,23 +160,20 @@ module snitch_ssr import snitch_pkg::*; #(
 
   // Credit counter that keeps track of the number of memory requests issued
   // to ensure that the FIFO does not overfill.
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni)
-      credit_q <= SSRNrCredits;
-    else if (credit_take & ~credit_give)
-      credit_q <= credit_q - 1;
+  always_comb begin
+    credit_d = credit_q;
+    if (credit_take & ~credit_give)
+      credit_d = credit_q - 1;
     else if (!credit_take & credit_give)
-      credit_q <= credit_q + 1;
+      credit_d = credit_q + 1;
   end
   assign has_credit = (credit_q != '0);
 
+  `FFARN(credit_q, credit_d, SSRNrCredits, clk_i, rst_ni)
+
   // Repetition counter.
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni)
-      rep_q <= '0;
-    else if (rep_enable)
-      rep_q <= rep_done ? '0 : rep_q + 1;
-  end
+  `FFLARNC(rep_q, rep_q + 1, rep_enable, rep_enable & rep_done, '0, clk_i, rst_ni)
+
   assign rep_done = (rep_q == rep_max);
 
 endmodule

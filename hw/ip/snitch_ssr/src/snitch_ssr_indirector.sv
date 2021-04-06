@@ -6,6 +6,8 @@
 
 // Indirection datapath for the SSR address generator.
 
+`include "common_cells/registers.svh"
+
 module snitch_ssr_indirector #(
   parameter int unsigned AddrWidth = 0,
   parameter int unsigned DataWidth = 0,
@@ -60,7 +62,7 @@ module snitch_ssr_indirector #(
   data_t idx_fifo_out;
 
   // Index credit counter
-  logic [$clog2(IndexCredits):0] idx_cred_q;
+  logic [$clog2(IndexCredits):0] idx_cred_d, idx_cred_q;
   logic idx_cred_take, idx_cred_give;
   logic idx_cred_left;
 
@@ -77,6 +79,7 @@ module snitch_ssr_indirector #(
   // Index serializer counter
   logic     idx_bytecnt_ena;
   bytecnt_t idx_bytecnt_d, idx_bytecnt_q;
+  bytecnt_t idx_bytecnt_next;
 
   // Index TCDM request (read-only)
   assign idx_req_o.q = '{
@@ -111,11 +114,13 @@ module snitch_ssr_indirector #(
 
   // Credit counter that keeps track of the number of memory requests in flight
   // to ensure that the FIFO does not overfill.
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (~rst_ni)                              idx_cred_q <= IndexCredits;
-    else if (idx_cred_take & ~idx_cred_give)  idx_cred_q <= idx_cred_q - 1;
-    else if (~idx_cred_take & idx_cred_give)  idx_cred_q <= idx_cred_q + 1;
+  always_comb begin
+    idx_cred_d = idx_cred_q;
+    if (idx_cred_take & ~idx_cred_give)       idx_cred_d = idx_cred_q - 1;
+    else if (~idx_cred_take & idx_cred_give)  idx_cred_d = idx_cred_q + 1;
   end
+
+  `FFARN(idx_cred_q, idx_cred_d, IndexCredits, clk_i, rst_ni)
 
   assign idx_cred_left = (idx_cred_q != '0);
   assign idx_cred_take = idx_req_o.q_valid & idx_rsp_i.q_ready;
@@ -138,18 +143,20 @@ module snitch_ssr_indirector #(
   assign mem_valid_o   = ~idx_fifo_empty;
 
   // Serializer counter advancing the byte offset
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (~rst_ni)              idx_bytecnt_q <= '0;
+  always_comb begin
+    idx_bytecnt_d = idx_bytecnt_q;
     // Set the initial byte offset (upbeat) before job starts, i.e. while done register set.
-    else if (cfg_launch_i)    idx_bytecnt_q <= cfg_wdata_lo_i;
-    else if (idx_bytecnt_ena) idx_bytecnt_q <= idx_bytecnt_d;
+    if (cfg_launch_i)         idx_bytecnt_d = cfg_wdata_lo_i;
+    else if (idx_bytecnt_ena) idx_bytecnt_d = idx_bytecnt_next;
   end
 
-  assign idx_bytecnt_d = idx_bytecnt_q + bytecnt_t'(1 << cfg_size_i);
+  `FFARN(idx_bytecnt_q, idx_bytecnt_d, '0, clk_i, rst_ni)
+
+  assign idx_bytecnt_next = idx_bytecnt_q + bytecnt_t'(1 << cfg_size_i);
 
   // Move on to next FIFO word if not stalled and at last index in word
   assign idx_fifo_pop = idx_bytecnt_ena &
-      (last_word ? idx_bytecnt_q == last_idx_byteoffs : idx_bytecnt_d == '0);
+      (last_word ? idx_bytecnt_q == last_idx_byteoffs : idx_bytecnt_next == '0);
 
   // Serialize whenever words are available and downstream ready
   assign idx_bytecnt_ena  = ~idx_fifo_empty & mem_ready_i;

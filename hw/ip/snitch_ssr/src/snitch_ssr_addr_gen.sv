@@ -5,6 +5,8 @@
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 // Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
+`include "common_cells/registers.svh"
+
 module snitch_ssr_addr_gen import snitch_pkg::*; #(
   parameter bit Indirection   = 0,
   parameter bit IndirOutSpill = 0,
@@ -54,7 +56,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   localparam logic [31:0] WordAddrMask = {{(32-BytecntWidth){1'b1}}, {(BytecntWidth){1'b0}}};
 
   pointer_t [NumLoops-1:0] stride_q, stride_sd, stride_sq;
-  pointer_t pointer_q, pointer_sd, pointer_sq, selected_stride;
+  pointer_t pointer_q, pointer_qn, pointer_sd, pointer_sq, pointer_sqn, selected_stride;
   index_t [NumLoops-1:0] index_q, bound_q, bound_sd, bound_sq;
   logic [3:0] rep_q, rep_sd, rep_sq;
   logic [NumLoops-1:0] loop_enabled;
@@ -80,7 +82,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     logic [DimWidth-1:0] dims;
     logic indir;
   } config_t;
-  config_t config_q, config_sd, config_sq;
+  config_t config_q, config_qn, config_sd, config_sq, config_sqn;
 
   typedef struct packed {
     logic no_indir;       // Inverted as aliases aligned at upper address edge
@@ -147,32 +149,15 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     assign indir_read_map = '{idx_shift_q, idx_base_q, idx_size_q};
 
     // Config registers
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-      if (~rst_ni) begin
-        idx_shift_q   <= '0;
-        idx_base_q    <= '0;
-        idx_size_q    <= '0;
-        idx_shift_sq  <= '0;
-        idx_base_sq   <= '0;
-        idx_size_sq   <= '0;
-      end else begin
-        idx_shift_sq  <= idx_shift_sd;
-        idx_base_sq   <= idx_base_sd;
-        idx_size_sq   <= idx_size_sd;
-        if (config_q.done) begin
-          idx_shift_q <= idx_shift_sd;
-          idx_base_q  <= idx_base_sd;
-          idx_size_q  <= idx_size_sd;
-        end
-      end
-    end
+    `FFARN(idx_shift_sq, idx_shift_sd, '0, clk_i, rst_ni)
+    `FFLARN(idx_shift_q, idx_shift_sd, config_q.done, '0, clk_i, rst_ni)
+    `FFARN(idx_base_sq, idx_base_sd, '0, clk_i, rst_ni)
+    `FFLARN(idx_base_q, idx_base_sd, config_q.done, '0, clk_i, rst_ni)
+    `FFARN(idx_size_sq, idx_size_sd, '0, clk_i, rst_ni)
+    `FFLARN(idx_size_q, idx_size_sd, config_q.done, '0, clk_i, rst_ni)
 
     // Delay register for last iteration of base loop, in case additional iteration needed.
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-      if(~rst_ni)           natit_base_last_q <= 1'b0;
-      else if (enable)      natit_base_last_q <= natit_base_last_d;
-      else if (natit_done)  natit_base_last_q <= 1'b0;
-    end
+    `FFLARNC(natit_base_last_q, natit_base_last_d, enable, natit_done, 1'b0, clk_i, rst_ni)
 
     // Indicate last iteration (loop 0)
     assign natit_base_bound   = bound_q[0] >> (config_q.indir ? idx_size_t'('1) - idx_size_q : '0);
@@ -180,11 +165,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     assign loop_last[0]       = (natit_extraword ? natit_base_last_q : natit_base_last_d);
 
     // Track last index word to set downstream last signal and handle word misalignment at end.
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-      if (~rst_ni)            natit_last_word_inflight_q <= 1'b0;
-      else if (config_q.done) natit_last_word_inflight_q <= 1'b0;
-      else if (enable & done) natit_last_word_inflight_q <= 1'b1;
-    end
+    `FFLARNC(natit_last_word_inflight_q, 1'b1, enable & done, config_q.done, 1'b0, clk_i, rst_ni)
 
     // Natural iteration loop 0 is done when last word inflight or address gen done.
     assign natit_done = natit_last_word_inflight_q | config_q.done;
@@ -290,6 +271,8 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
 
   // Generate the loop counters.
   for (genvar i = 0; i < NumLoops; i++) begin : gen_loop_counter
+    logic index_ena;
+
     always_comb begin
       stride_sd[i] = stride_sq[i];
       bound_sd[i] = bound_sq[i];
@@ -299,24 +282,13 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
         bound_sd[i] = cfg_wdata_i;
     end
 
-    always_ff @(posedge clk_i, negedge rst_ni) begin
-      if (!rst_ni) begin
-        stride_q[i]  <= '0;
-        bound_q[i]   <= '0;
-        index_q[i]   <= '0;
-        stride_sq[i] <= '0;
-        bound_sq[i]  <= '0;
-      end else begin
-        stride_sq[i] <= stride_sd[i];
-        bound_sq[i]  <= bound_sd[i];
-        if (config_q.done) begin
-          stride_q[i] <= stride_sd[i];
-          bound_q[i]  <= bound_sd[i];
-        end
-        if (enable & loop_enabled[i])
-          index_q[i] <= loop_last[i] ? '0 : index_q[i] + 1;
-      end
-    end
+    `FFARN(stride_sq[i], stride_sd[i], '0, clk_i, rst_ni)
+    `FFLARN(stride_q[i], stride_sd[i], config_q.done, '0, clk_i, rst_ni)
+    `FFARN(bound_sq[i], bound_sd[i], '0, clk_i, rst_ni)
+    `FFLARN(bound_q[i], bound_sd[i], config_q.done, '0, clk_i, rst_ni)
+
+    assign index_ena = enable & loop_enabled[i];
+    `FFLARNC(index_q[i], index_q[i] + 1, index_ena, index_ena & loop_last[i], '0, clk_i, rst_ni)
 
     // Indicate last iteration (loops > 0); base loop handled differently in indirection
     if (i > 0) begin : gen_loop_last_upper
@@ -331,16 +303,9 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
       rep_sd = cfg_wdata_i;
   end
 
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni) begin
-      rep_q <= '0;
-      rep_sq <= '0;
-    end else begin
-      rep_sq <= rep_sd;
-      if (config_q.done)
-        rep_q <= rep_sd;
-    end
-  end
+  `FFARN(rep_sq, rep_sd, '0, clk_i, rst_ni)
+  `FFLARN(rep_q, rep_sd, config_q.done, '0, clk_i, rst_ni)
+
   assign reg_rep_o = rep_q;
 
   // Enable a loop if they are enabled globally, and the next inner loop is at
@@ -380,28 +345,25 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     end
   end
 
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni) begin
-      pointer_q  <= '0;
-      pointer_sq <= '0;
-      config_q  <= '0;
-      config_sq <= '0;
-      config_q.done  <= 1;
-      config_sq.done <= 1;
+  `FFARN(pointer_q, pointer_qn, '0, clk_i, rst_ni)
+  `FFARN(pointer_sq, pointer_sqn, '0, clk_i, rst_ni)
+  `FFARN(config_q, config_qn, '{done: 1, default: '0}, clk_i, rst_ni)
+  `FFARN(config_sq, config_sqn, '{done: 1, default: '0}, clk_i, rst_ni)
+
+  always_comb begin
+    pointer_qn  = pointer_q;
+    config_qn   = config_q;
+    pointer_sqn = pointer_sd;
+    config_sqn  = config_sd;
+    if (config_q.done) begin
+      pointer_qn  = pointer_sd;
+      config_qn   = config_sd;
+      config_sqn.done = 1;
     end else begin
-      pointer_sq <= pointer_sd;
-      config_sq <= config_sd;
-      if (config_q.done) begin
-        pointer_q <= pointer_sd;
-        config_q <= config_sd;
-        config_sq.done <= 1;
-      end else begin
-        if (enable) begin
-          pointer_q <= pointer_q + selected_stride;
-        end if (mem_ready_i & mem_valid_o) begin
-          config_q.done <= mem_last;
-        end
-      end
+      if (enable)
+        pointer_qn = pointer_q + selected_stride;
+      if (mem_ready_i & mem_valid_o)
+        config_qn.done = mem_last;
     end
   end
 
