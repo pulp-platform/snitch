@@ -95,7 +95,7 @@ module snitch_ssr_indirector #(
     .FALL_THROUGH ( 1'b0          ),
     .DATA_WIDTH   ( DataWidth     ),
     .DEPTH        ( IndexCredits  )
-    ) i_idx_fifo (
+  ) i_idx_fifo (
     .clk_i,
     .rst_ni,
     .flush_i    ( 1'b0              ),
