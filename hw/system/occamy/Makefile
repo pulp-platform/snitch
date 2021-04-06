@@ -19,12 +19,13 @@ REGGEN        ?= ${ROOT}/util/regtool.py
 ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 	$(call VERILATE,occamy_top)
 
+all: update-source update-plic update-socreg
+
 ##########
 # Source #
 ##########
 update-source:
 	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . src/occamy_top.sv src/occamy_pkg.sv src/occamy_quadrant_s1.sv src/occamy_xilinx.sv
-	dot -Tpng addrmap.dot > addrmap.png
 	verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv
 
 update-plic:
@@ -36,6 +37,9 @@ update-plic:
 # Regenerate the SoC register.
 update-socreg: src/occamy_soc_reg/occamy_soc_reg.hjson
 	$(REGGEN) -r src/occamy_soc_reg/occamy_soc_reg.hjson --outdir src/occamy_soc_reg/
+
+addrmap.png: update-source
+	dot -Tpng addrmap.dot > addrmap.png
 
 #############
 # Verilator #
