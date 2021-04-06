@@ -1,0 +1,601 @@
+From 5b1590c41c779d64be4a93ca12460cdfc4f70011 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Sat, 3 Apr 2021 15:03:32 +0200
+Subject: [PATCH 1/4] uart: Patches for local usage
+
+---
+ Bender.yml          |  15 ++++
+ data/uart.hjson     |   4 +-
+ rtl/uart.sv         |  21 +++--
+ rtl/uart_core.sv    |   8 +-
+ rtl/uart_reg_pkg.sv |  93 +++++++++-----------
+ rtl/uart_reg_top.sv | 202 ++++++++++++++++----------------------------
+ 6 files changed, 144 insertions(+), 199 deletions(-)
+ create mode 100644 hw/vendor/lowrisc_opentitan/uart/Bender.yml
+
+diff --git a/Bender.yml b/Bender.yml
+new file mode 100644
+index 0000000..9906d57
+--- /dev/null
++++ b/Bender.yml
+@@ -0,0 +1,15 @@
++package:
++  name: lowrisc_uart
++  description: "lowRISC UART"
++  authors: ["lowRISC Contributors"]
++
++dependencies:
++  lowrisc_prim: {path: ../prim}
++
++sources:
++- rtl/uart_reg_pkg.sv
++- rtl/uart_reg_top.sv
++- rtl/uart_rx.sv
++- rtl/uart_tx.sv
++- rtl/uart_core.sv
++- rtl/uart.sv
+diff --git a/data/uart.hjson b/data/uart.hjson
+index 3f72908..c0d13f1 100644
+--- a/data/uart.hjson
++++ b/data/uart.hjson
+@@ -3,9 +3,7 @@
+ // SPDX-License-Identifier: Apache-2.0
+ { name: "uart",
+   clock_primary: "clk_i",
+-  bus_interfaces: [
+-    { protocol: "tlul", direction: "device" }
+-  ],
++  bus_device: "reg",
+   available_input_list: [
+     { name: "rx", desc: "Serial receive bit" }
+   ],
+diff --git a/rtl/uart.sv b/rtl/uart.sv
+index 6a43618..73f1890 100644
+--- a/rtl/uart.sv
++++ b/rtl/uart.sv
+@@ -4,15 +4,18 @@
+ //
+ // Description: UART top level wrapper file
+ 
+-`include "prim_assert.sv"
++`include "common_cells/assertions.svh"
+ 
+-module uart (
++module uart #(
++  parameter type reg_req_t = logic,
++  parameter type reg_rsp_t = logic
++) (
+   input           clk_i,
+   input           rst_ni,
+ 
+   // Bus Interface
+-  input  tlul_pkg::tl_h2d_t tl_i,
+-  output tlul_pkg::tl_d2h_t tl_o,
++  input  reg_req_t reg_req_i,
++  output reg_rsp_t reg_rsp_o,
+ 
+   // Generic IO
+   input           cio_rx_i,
+@@ -35,14 +38,16 @@ module uart (
+   uart_reg2hw_t reg2hw;
+   uart_hw2reg_t hw2reg;
+ 
+-  uart_reg_top u_reg (
++  uart_reg_top #(
++    .reg_req_t (reg_req_t),
++    .reg_rsp_t (reg_rsp_t)
++  ) u_reg (
+     .clk_i,
+     .rst_ni,
+-    .tl_i,
+-    .tl_o,
++    .reg_req_i,
++    .reg_rsp_o,
+     .reg2hw,
+     .hw2reg,
+-    .intg_err_o (),
+     .devmode_i  (1'b1)
+   );
+ 
+diff --git a/rtl/uart_core.sv b/rtl/uart_core.sv
+index 11235ad..38bcc71 100644
+--- a/rtl/uart_core.sv
++++ b/rtl/uart_core.sv
+@@ -218,14 +218,14 @@ module uart_core (
+   //////////////
+ 
+   //      sync the incoming data
+-  prim_flop_2sync #(
+-    .Width(1),
++  sync #(
++    .STAGES(2),
+     .ResetValue(1'b1)
+   ) sync_rx (
+     .clk_i,
+     .rst_ni,
+-    .d_i(rx),
+-    .q_o(rx_sync)
++    .serial_i(rx),
++    .serial_o(rx_sync)
+   );
+ 
+   // Based on: en.wikipedia.org/wiki/Repetition_code mentions the use of a majority filter
+diff --git a/rtl/uart_reg_pkg.sv b/rtl/uart_reg_pkg.sv
+index f874558..e10ab25 100644
+--- a/rtl/uart_reg_pkg.sv
++++ b/rtl/uart_reg_pkg.sv
+@@ -6,13 +6,9 @@
+ 
+ package uart_reg_pkg;
+ 
+-  // Address widths within the block
+-  parameter int BlockAw = 6;
+-
+   ////////////////////////////
+   // Typedefs for registers //
+   ////////////////////////////
+-
+   typedef struct packed {
+     struct packed {
+       logic        q;
+@@ -206,6 +202,7 @@ package uart_reg_pkg;
+     } en;
+   } uart_reg2hw_timeout_ctrl_reg_t;
+ 
++
+   typedef struct packed {
+     struct packed {
+       logic        d;
+@@ -290,64 +287,51 @@ package uart_reg_pkg;
+     logic [15:0] d;
+   } uart_hw2reg_val_reg_t;
+ 
+-  // Register -> HW type
++
++  ///////////////////////////////////////
++  // Register to internal design logic //
++  ///////////////////////////////////////
+   typedef struct packed {
+-    uart_reg2hw_intr_state_reg_t intr_state; // [124:117]
+-    uart_reg2hw_intr_enable_reg_t intr_enable; // [116:109]
+-    uart_reg2hw_intr_test_reg_t intr_test; // [108:93]
+-    uart_reg2hw_ctrl_reg_t ctrl; // [92:68]
+-    uart_reg2hw_status_reg_t status; // [67:56]
+-    uart_reg2hw_rdata_reg_t rdata; // [55:47]
+-    uart_reg2hw_wdata_reg_t wdata; // [46:38]
+-    uart_reg2hw_fifo_ctrl_reg_t fifo_ctrl; // [37:27]
+-    uart_reg2hw_ovrd_reg_t ovrd; // [26:25]
+-    uart_reg2hw_timeout_ctrl_reg_t timeout_ctrl; // [24:0]
++    uart_reg2hw_intr_state_reg_t intr_state; // [125:118]
++    uart_reg2hw_intr_enable_reg_t intr_enable; // [117:110]
++    uart_reg2hw_intr_test_reg_t intr_test; // [109:94]
++    uart_reg2hw_ctrl_reg_t ctrl; // [93:69]
++    uart_reg2hw_status_reg_t status; // [68:57]
++    uart_reg2hw_rdata_reg_t rdata; // [56:48]
++    uart_reg2hw_wdata_reg_t wdata; // [47:39]
++    uart_reg2hw_fifo_ctrl_reg_t fifo_ctrl; // [38:28]
++    uart_reg2hw_ovrd_reg_t ovrd; // [27:26]
++    uart_reg2hw_timeout_ctrl_reg_t timeout_ctrl; // [25:1]
+   } uart_reg2hw_t;
+ 
+-  // HW -> register type
++  ///////////////////////////////////////
++  // Internal design logic to register //
++  ///////////////////////////////////////
+   typedef struct packed {
+-    uart_hw2reg_intr_state_reg_t intr_state; // [64:49]
+-    uart_hw2reg_status_reg_t status; // [48:43]
+-    uart_hw2reg_rdata_reg_t rdata; // [42:35]
+-    uart_hw2reg_fifo_ctrl_reg_t fifo_ctrl; // [34:28]
+-    uart_hw2reg_fifo_status_reg_t fifo_status; // [27:16]
+-    uart_hw2reg_val_reg_t val; // [15:0]
++    uart_hw2reg_intr_state_reg_t intr_state; // [65:58]
++    uart_hw2reg_status_reg_t status; // [57:46]
++    uart_hw2reg_rdata_reg_t rdata; // [45:37]
++    uart_hw2reg_fifo_ctrl_reg_t fifo_ctrl; // [36:26]
++    uart_hw2reg_fifo_status_reg_t fifo_status; // [25:26]
++    uart_hw2reg_val_reg_t val; // [25:26]
+   } uart_hw2reg_t;
+ 
+-  // Register offsets
+-  parameter logic [BlockAw-1:0] UART_INTR_STATE_OFFSET = 6'h 0;
+-  parameter logic [BlockAw-1:0] UART_INTR_ENABLE_OFFSET = 6'h 4;
+-  parameter logic [BlockAw-1:0] UART_INTR_TEST_OFFSET = 6'h 8;
+-  parameter logic [BlockAw-1:0] UART_CTRL_OFFSET = 6'h c;
+-  parameter logic [BlockAw-1:0] UART_STATUS_OFFSET = 6'h 10;
+-  parameter logic [BlockAw-1:0] UART_RDATA_OFFSET = 6'h 14;
+-  parameter logic [BlockAw-1:0] UART_WDATA_OFFSET = 6'h 18;
+-  parameter logic [BlockAw-1:0] UART_FIFO_CTRL_OFFSET = 6'h 1c;
+-  parameter logic [BlockAw-1:0] UART_FIFO_STATUS_OFFSET = 6'h 20;
+-  parameter logic [BlockAw-1:0] UART_OVRD_OFFSET = 6'h 24;
+-  parameter logic [BlockAw-1:0] UART_VAL_OFFSET = 6'h 28;
+-  parameter logic [BlockAw-1:0] UART_TIMEOUT_CTRL_OFFSET = 6'h 2c;
++  // Register Address
++  parameter logic [5:0] UART_INTR_STATE_OFFSET = 6'h 0;
++  parameter logic [5:0] UART_INTR_ENABLE_OFFSET = 6'h 4;
++  parameter logic [5:0] UART_INTR_TEST_OFFSET = 6'h 8;
++  parameter logic [5:0] UART_CTRL_OFFSET = 6'h c;
++  parameter logic [5:0] UART_STATUS_OFFSET = 6'h 10;
++  parameter logic [5:0] UART_RDATA_OFFSET = 6'h 14;
++  parameter logic [5:0] UART_WDATA_OFFSET = 6'h 18;
++  parameter logic [5:0] UART_FIFO_CTRL_OFFSET = 6'h 1c;
++  parameter logic [5:0] UART_FIFO_STATUS_OFFSET = 6'h 20;
++  parameter logic [5:0] UART_OVRD_OFFSET = 6'h 24;
++  parameter logic [5:0] UART_VAL_OFFSET = 6'h 28;
++  parameter logic [5:0] UART_TIMEOUT_CTRL_OFFSET = 6'h 2c;
+ 
+-  // Reset values for hwext registers and their fields
+-  parameter logic [7:0] UART_INTR_TEST_RESVAL = 8'h 0;
+-  parameter logic [0:0] UART_INTR_TEST_TX_WATERMARK_RESVAL = 1'h 0;
+-  parameter logic [0:0] UART_INTR_TEST_RX_WATERMARK_RESVAL = 1'h 0;
+-  parameter logic [0:0] UART_INTR_TEST_TX_EMPTY_RESVAL = 1'h 0;
+-  parameter logic [0:0] UART_INTR_TEST_RX_OVERFLOW_RESVAL = 1'h 0;
+-  parameter logic [0:0] UART_INTR_TEST_RX_FRAME_ERR_RESVAL = 1'h 0;
+-  parameter logic [0:0] UART_INTR_TEST_RX_BREAK_ERR_RESVAL = 1'h 0;
+-  parameter logic [0:0] UART_INTR_TEST_RX_TIMEOUT_RESVAL = 1'h 0;
+-  parameter logic [0:0] UART_INTR_TEST_RX_PARITY_ERR_RESVAL = 1'h 0;
+-  parameter logic [5:0] UART_STATUS_RESVAL = 6'h 3c;
+-  parameter logic [0:0] UART_STATUS_TXEMPTY_RESVAL = 1'h 1;
+-  parameter logic [0:0] UART_STATUS_TXIDLE_RESVAL = 1'h 1;
+-  parameter logic [0:0] UART_STATUS_RXIDLE_RESVAL = 1'h 1;
+-  parameter logic [0:0] UART_STATUS_RXEMPTY_RESVAL = 1'h 1;
+-  parameter logic [7:0] UART_RDATA_RESVAL = 8'h 0;
+-  parameter logic [21:0] UART_FIFO_STATUS_RESVAL = 22'h 0;
+-  parameter logic [15:0] UART_VAL_RESVAL = 16'h 0;
+ 
+-  // Register index
++  // Register Index
+   typedef enum int {
+     UART_INTR_STATE,
+     UART_INTR_ENABLE,
+@@ -378,6 +362,5 @@ package uart_reg_pkg;
+     4'b 0011, // index[10] UART_VAL
+     4'b 1111  // index[11] UART_TIMEOUT_CTRL
+   };
+-
+ endpackage
+ 
+diff --git a/rtl/uart_reg_top.sv b/rtl/uart_reg_top.sv
+index ddd78c0..8144368 100644
+--- a/rtl/uart_reg_top.sv
++++ b/rtl/uart_reg_top.sv
+@@ -4,21 +4,22 @@
+ //
+ // Register Top module auto-generated by `reggen`
+ 
+-`include "prim_assert.sv"
++`include "common_cells/assertions.svh"
+ 
+-module uart_reg_top (
++module uart_reg_top #(
++  parameter type reg_req_t = logic,
++  parameter type reg_rsp_t = logic
++) (
+   input clk_i,
+   input rst_ni,
+ 
+-  input  tlul_pkg::tl_h2d_t tl_i,
+-  output tlul_pkg::tl_d2h_t tl_o,
++  // Below Register interface can be changed
++  input  reg_req_t reg_req_i,
++  output reg_rsp_t reg_rsp_o,
+   // To HW
+   output uart_reg_pkg::uart_reg2hw_t reg2hw, // Write
+   input  uart_reg_pkg::uart_hw2reg_t hw2reg, // Read
+ 
+-  // Integrity check errors
+-  output logic intg_err_o,
+-
+   // Config
+   input devmode_i // If 1, explicit error return for unmapped register access
+ );
+@@ -42,64 +43,23 @@ module uart_reg_top (
+ 
+   logic [DW-1:0] reg_rdata_next;
+ 
+-  tlul_pkg::tl_h2d_t tl_reg_h2d;
+-  tlul_pkg::tl_d2h_t tl_reg_d2h;
+-
+-  // incoming payload check
+-  logic intg_err;
+-  tlul_cmd_intg_chk u_chk (
+-    .tl_i,
+-    .err_o(intg_err)
+-  );
+-
+-  logic intg_err_q;
+-  always_ff @(posedge clk_i or negedge rst_ni) begin
+-    if (!rst_ni) begin
+-      intg_err_q <= '0;
+-    end else if (intg_err) begin
+-      intg_err_q <= 1'b1;
+-    end
+-  end
++  reg_req_t reg_intf_req;
++  reg_rsp_t reg_intf_rsp;
+ 
+-  // integrity error output is permanent and should be used for alert generation
+-  // register errors are transactional
+-  assign intg_err_o = intg_err_q | intg_err;
+-
+-  // outgoing integrity generation
+-  tlul_pkg::tl_d2h_t tl_o_pre;
+-  tlul_rsp_intg_gen #(
+-    .EnableRspIntgGen(1),
+-    .EnableDataIntgGen(1)
+-  ) u_rsp_intg_gen (
+-    .tl_i(tl_o_pre),
+-    .tl_o
+-  );
++  assign reg_intf_req = reg_req_i;
++  assign reg_rsp_o = reg_intf_rsp;
+ 
+-  assign tl_reg_h2d = tl_i;
+-  assign tl_o_pre   = tl_reg_d2h;
+-
+-  tlul_adapter_reg #(
+-    .RegAw(AW),
+-    .RegDw(DW),
+-    .EnableDataIntgGen(0)
+-  ) u_reg_if (
+-    .clk_i,
+-    .rst_ni,
+-
+-    .tl_i (tl_reg_h2d),
+-    .tl_o (tl_reg_d2h),
+-
+-    .we_o    (reg_we),
+-    .re_o    (reg_re),
+-    .addr_o  (reg_addr),
+-    .wdata_o (reg_wdata),
+-    .be_o    (reg_be),
+-    .rdata_i (reg_rdata),
+-    .error_i (reg_error)
+-  );
++  assign reg_we = reg_intf_req.valid & reg_intf_req.write;
++  assign reg_re = reg_intf_req.valid & ~reg_intf_req.write;
++  assign reg_addr = reg_intf_req.addr;
++  assign reg_wdata = reg_intf_req.wdata;
++  assign reg_be = reg_intf_req.wstrb;
++  assign reg_intf_rsp.rdata = reg_rdata;
++  assign reg_intf_rsp.error = reg_error;
++  assign reg_intf_rsp.ready = 1'b1;
+ 
+   assign reg_rdata = reg_rdata_next ;
+-  assign reg_error = (devmode_i & addrmiss) | wr_err | intg_err;
++  assign reg_error = (devmode_i & addrmiss) | wr_err ;
+ 
+   // Define SW related signals
+   // Format: <reg>_<field>_{wd|we|qs}
+@@ -1451,150 +1411,150 @@ module uart_reg_top (
+     if (addr_hit[11] && reg_we && (UART_PERMIT[11] != (UART_PERMIT[11] & reg_be))) wr_err = 1'b1 ;
+   end
+ 
+-  assign intr_state_tx_watermark_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_tx_watermark_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_tx_watermark_wd = reg_wdata[0];
+ 
+-  assign intr_state_rx_watermark_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_rx_watermark_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_rx_watermark_wd = reg_wdata[1];
+ 
+-  assign intr_state_tx_empty_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_tx_empty_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_tx_empty_wd = reg_wdata[2];
+ 
+-  assign intr_state_rx_overflow_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_rx_overflow_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_rx_overflow_wd = reg_wdata[3];
+ 
+-  assign intr_state_rx_frame_err_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_rx_frame_err_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_rx_frame_err_wd = reg_wdata[4];
+ 
+-  assign intr_state_rx_break_err_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_rx_break_err_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_rx_break_err_wd = reg_wdata[5];
+ 
+-  assign intr_state_rx_timeout_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_rx_timeout_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_rx_timeout_wd = reg_wdata[6];
+ 
+-  assign intr_state_rx_parity_err_we = addr_hit[0] & reg_we & !reg_error;
++  assign intr_state_rx_parity_err_we = addr_hit[0] & reg_we & ~wr_err;
+   assign intr_state_rx_parity_err_wd = reg_wdata[7];
+ 
+-  assign intr_enable_tx_watermark_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_tx_watermark_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_tx_watermark_wd = reg_wdata[0];
+ 
+-  assign intr_enable_rx_watermark_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_rx_watermark_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_rx_watermark_wd = reg_wdata[1];
+ 
+-  assign intr_enable_tx_empty_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_tx_empty_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_tx_empty_wd = reg_wdata[2];
+ 
+-  assign intr_enable_rx_overflow_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_rx_overflow_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_rx_overflow_wd = reg_wdata[3];
+ 
+-  assign intr_enable_rx_frame_err_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_rx_frame_err_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_rx_frame_err_wd = reg_wdata[4];
+ 
+-  assign intr_enable_rx_break_err_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_rx_break_err_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_rx_break_err_wd = reg_wdata[5];
+ 
+-  assign intr_enable_rx_timeout_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_rx_timeout_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_rx_timeout_wd = reg_wdata[6];
+ 
+-  assign intr_enable_rx_parity_err_we = addr_hit[1] & reg_we & !reg_error;
++  assign intr_enable_rx_parity_err_we = addr_hit[1] & reg_we & ~wr_err;
+   assign intr_enable_rx_parity_err_wd = reg_wdata[7];
+ 
+-  assign intr_test_tx_watermark_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_tx_watermark_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_tx_watermark_wd = reg_wdata[0];
+ 
+-  assign intr_test_rx_watermark_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_rx_watermark_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_rx_watermark_wd = reg_wdata[1];
+ 
+-  assign intr_test_tx_empty_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_tx_empty_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_tx_empty_wd = reg_wdata[2];
+ 
+-  assign intr_test_rx_overflow_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_rx_overflow_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_rx_overflow_wd = reg_wdata[3];
+ 
+-  assign intr_test_rx_frame_err_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_rx_frame_err_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_rx_frame_err_wd = reg_wdata[4];
+ 
+-  assign intr_test_rx_break_err_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_rx_break_err_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_rx_break_err_wd = reg_wdata[5];
+ 
+-  assign intr_test_rx_timeout_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_rx_timeout_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_rx_timeout_wd = reg_wdata[6];
+ 
+-  assign intr_test_rx_parity_err_we = addr_hit[2] & reg_we & !reg_error;
++  assign intr_test_rx_parity_err_we = addr_hit[2] & reg_we & ~wr_err;
+   assign intr_test_rx_parity_err_wd = reg_wdata[7];
+ 
+-  assign ctrl_tx_we = addr_hit[3] & reg_we & !reg_error;
++  assign ctrl_tx_we = addr_hit[3] & reg_we & ~wr_err;
+   assign ctrl_tx_wd = reg_wdata[0];
+ 
+-  assign ctrl_rx_we = addr_hit[3] & reg_we & !reg_error;
++  assign ctrl_rx_we = addr_hit[3] & reg_we & ~wr_err;
+   assign ctrl_rx_wd = reg_wdata[1];
+ 
+-  assign ctrl_nf_we = addr_hit[3] & reg_we & !reg_error;
++  assign ctrl_nf_we = addr_hit[3] & reg_we & ~wr_err;
+   assign ctrl_nf_wd = reg_wdata[2];
+ 
+-  assign ctrl_slpbk_we = addr_hit[3] & reg_we & !reg_error;
++  assign ctrl_slpbk_we = addr_hit[3] & reg_we & ~wr_err;
+   assign ctrl_slpbk_wd = reg_wdata[4];
+ 
+-  assign ctrl_llpbk_we = addr_hit[3] & reg_we & !reg_error;
++  assign ctrl_llpbk_we = addr_hit[3] & reg_we & ~wr_err;
+   assign ctrl_llpbk_wd = reg_wdata[5];
+ 
+-  assign ctrl_parity_en_we = addr_hit[3] & reg_we & !reg_error;
++  assign ctrl_parity_en_we = addr_hit[3] & reg_we & ~wr_err;
+   assign ctrl_parity_en_wd = reg_wdata[6];
+ 
+-  assign ctrl_parity_odd_we = addr_hit[3] & reg_we & !reg_error;
++  assign ctrl_parity_odd_we = addr_hit[3] & reg_we & ~wr_err;
+   assign ctrl_parity_odd_wd = reg_wdata[7];
+ 
+-  assign ctrl_rxblvl_we = addr_hit[3] & reg_we & !reg_error;
++  assign ctrl_rxblvl_we = addr_hit[3] & reg_we & ~wr_err;
+   assign ctrl_rxblvl_wd = reg_wdata[9:8];
+ 
+-  assign ctrl_nco_we = addr_hit[3] & reg_we & !reg_error;
++  assign ctrl_nco_we = addr_hit[3] & reg_we & ~wr_err;
+   assign ctrl_nco_wd = reg_wdata[31:16];
+ 
+-  assign status_txfull_re = addr_hit[4] & reg_re & !reg_error;
++  assign status_txfull_re = addr_hit[4] && reg_re;
+ 
+-  assign status_rxfull_re = addr_hit[4] & reg_re & !reg_error;
++  assign status_rxfull_re = addr_hit[4] && reg_re;
+ 
+-  assign status_txempty_re = addr_hit[4] & reg_re & !reg_error;
++  assign status_txempty_re = addr_hit[4] && reg_re;
+ 
+-  assign status_txidle_re = addr_hit[4] & reg_re & !reg_error;
++  assign status_txidle_re = addr_hit[4] && reg_re;
+ 
+-  assign status_rxidle_re = addr_hit[4] & reg_re & !reg_error;
++  assign status_rxidle_re = addr_hit[4] && reg_re;
+ 
+-  assign status_rxempty_re = addr_hit[4] & reg_re & !reg_error;
++  assign status_rxempty_re = addr_hit[4] && reg_re;
+ 
+-  assign rdata_re = addr_hit[5] & reg_re & !reg_error;
++  assign rdata_re = addr_hit[5] && reg_re;
+ 
+-  assign wdata_we = addr_hit[6] & reg_we & !reg_error;
++  assign wdata_we = addr_hit[6] & reg_we & ~wr_err;
+   assign wdata_wd = reg_wdata[7:0];
+ 
+-  assign fifo_ctrl_rxrst_we = addr_hit[7] & reg_we & !reg_error;
++  assign fifo_ctrl_rxrst_we = addr_hit[7] & reg_we & ~wr_err;
+   assign fifo_ctrl_rxrst_wd = reg_wdata[0];
+ 
+-  assign fifo_ctrl_txrst_we = addr_hit[7] & reg_we & !reg_error;
++  assign fifo_ctrl_txrst_we = addr_hit[7] & reg_we & ~wr_err;
+   assign fifo_ctrl_txrst_wd = reg_wdata[1];
+ 
+-  assign fifo_ctrl_rxilvl_we = addr_hit[7] & reg_we & !reg_error;
++  assign fifo_ctrl_rxilvl_we = addr_hit[7] & reg_we & ~wr_err;
+   assign fifo_ctrl_rxilvl_wd = reg_wdata[4:2];
+ 
+-  assign fifo_ctrl_txilvl_we = addr_hit[7] & reg_we & !reg_error;
++  assign fifo_ctrl_txilvl_we = addr_hit[7] & reg_we & ~wr_err;
+   assign fifo_ctrl_txilvl_wd = reg_wdata[6:5];
+ 
+-  assign fifo_status_txlvl_re = addr_hit[8] & reg_re & !reg_error;
++  assign fifo_status_txlvl_re = addr_hit[8] && reg_re;
+ 
+-  assign fifo_status_rxlvl_re = addr_hit[8] & reg_re & !reg_error;
++  assign fifo_status_rxlvl_re = addr_hit[8] && reg_re;
+ 
+-  assign ovrd_txen_we = addr_hit[9] & reg_we & !reg_error;
++  assign ovrd_txen_we = addr_hit[9] & reg_we & ~wr_err;
+   assign ovrd_txen_wd = reg_wdata[0];
+ 
+-  assign ovrd_txval_we = addr_hit[9] & reg_we & !reg_error;
++  assign ovrd_txval_we = addr_hit[9] & reg_we & ~wr_err;
+   assign ovrd_txval_wd = reg_wdata[1];
+ 
+-  assign val_re = addr_hit[10] & reg_re & !reg_error;
++  assign val_re = addr_hit[10] && reg_re;
+ 
+-  assign timeout_ctrl_val_we = addr_hit[11] & reg_we & !reg_error;
++  assign timeout_ctrl_val_we = addr_hit[11] & reg_we & ~wr_err;
+   assign timeout_ctrl_val_wd = reg_wdata[23:0];
+ 
+-  assign timeout_ctrl_en_we = addr_hit[11] & reg_we & !reg_error;
++  assign timeout_ctrl_en_we = addr_hit[11] & reg_we & ~wr_err;
+   assign timeout_ctrl_en_wd = reg_wdata[31];
+ 
+   // Read data return
+@@ -1695,25 +1655,9 @@ module uart_reg_top (
+     endcase
+   end
+ 
+-  // Unused signal tieoff
+-
+-  // wdata / byte enable are not always fully used
+-  // add a blanket unused statement to handle lint waivers
+-  logic unused_wdata;
+-  logic unused_be;
+-  assign unused_wdata = ^reg_wdata;
+-  assign unused_be = ^reg_be;
+-
+   // Assertions for Register Interface
+-  `ASSERT_PULSE(wePulse, reg_we)
+-  `ASSERT_PULSE(rePulse, reg_re)
+-
+-  `ASSERT(reAfterRv, $rose(reg_re || reg_we) |=> tl_o.d_valid)
+ 
+   `ASSERT(en2addrHit, (reg_we || reg_re) |-> $onehot0(addr_hit))
+ 
+-  // this is formulated as an assumption such that the FPV testbenches do disprove this
+-  // property by mistake
+-  //`ASSUME(reqParity, tl_reg_h2d.a_valid |-> tl_reg_h2d.a_user.chk_en == tlul_pkg::CheckDis)
+ 
+ endmodule
+-- 
+2.25.1.377.g2d2118b814
+

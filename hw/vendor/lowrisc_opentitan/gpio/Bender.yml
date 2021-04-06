@@ -1,0 +1,14 @@
+package:
+  name: lowrisc_gpio
+  description: "lowRISC GPIO"
+  authors: ["lowRISC Contributors"]
+
+dependencies:
+  lowrisc_prim: {path: ../prim}
+
+sources:
+# Level 0
+- rtl/gpio_reg_pkg.sv
+# Level 1
+- rtl/gpio_reg_top.sv
+- rtl/gpio.sv

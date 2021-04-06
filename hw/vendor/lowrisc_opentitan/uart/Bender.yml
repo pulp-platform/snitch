@@ -1,0 +1,15 @@
+package:
+  name: lowrisc_uart
+  description: "lowRISC UART"
+  authors: ["lowRISC Contributors"]
+
+dependencies:
+  lowrisc_prim: {path: ../prim}
+
+sources:
+- rtl/uart_reg_pkg.sv
+- rtl/uart_reg_top.sv
+- rtl/uart_rx.sv
+- rtl/uart_tx.sv
+- rtl/uart_core.sv
+- rtl/uart.sv

@@ -19,17 +19,27 @@ REGGEN        ?= ${ROOT}/util/regtool.py
 ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 	$(call VERILATE,occamy_top)
 
+all: update-source update-plic update-socreg
+
 ##########
 # Source #
 ##########
 update-source:
 	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . src/occamy_top.sv src/occamy_pkg.sv src/occamy_quadrant_s1.sv src/occamy_xilinx.sv
-	dot -Tpng addrmap.dot > addrmap.png
 	verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv
+
+update-plic:
+	mkdir -p src/rv_plic
+	$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 58 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv
+	$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 58 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
+	$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
 
 # Regenerate the SoC register.
 update-socreg: src/occamy_soc_reg/occamy_soc_reg.hjson
 	$(REGGEN) -r src/occamy_soc_reg/occamy_soc_reg.hjson --outdir src/occamy_soc_reg/
+
+addrmap.png: update-source
+	dot -Tpng addrmap.dot > addrmap.png
 
 #############
 # Verilator #
@@ -45,8 +55,8 @@ work-vcs/compile.sh: $(VSIM_SOURCES) ${TB_SRCS}
 	chmod +x $@
 	$@
 
-bin/occamy_chip.vcs: work-vcs/compile.sh
+bin/occamy_top.vcs: work-vcs/compile.sh
 	mkdir -p bin
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/occamy_top.vcs  \
-		-assert disable_cover -override_timescale=1ns/1ps -full64 occamy_chip
+		-assert disable_cover -override_timescale=1ns/1ps -full64 occamy_top
 

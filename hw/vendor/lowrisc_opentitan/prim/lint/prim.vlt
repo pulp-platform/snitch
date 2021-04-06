@@ -1,0 +1,9 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+`verilator_config
+
+// prim_lfsr
+// lfsr_perm_test is just used for an SVA
+lint_off -rule UNUSED -file "*/rtl/prim_lfsr.sv" -match "*lfsr_perm_test*"

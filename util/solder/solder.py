@@ -381,33 +381,35 @@ class AxiBus(object):
         self.declared = declared
 
     def copy(self, name=None):
-        return AxiBus(self.clk, self.rst, self.aw, self.dw, self.iw, self.uw,
-                      name or self.name, declared=False)
+        return AxiBus(self.clk,
+                      self.rst,
+                      self.aw,
+                      self.dw,
+                      self.iw,
+                      self.uw,
+                      name or self.name,
+                      declared=False)
 
     def emit_struct(self):
         return AxiStruct.emit(self.aw, self.dw, self.iw, self.uw)
 
-    def emit_flat_master_port(self, context, name=None, terminus="\n"):
+    def emit_flat_master_port(self, name=None):
         tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
-        context.write(
-            tpl.render_unicode(
+        return tpl.render_unicode(
                 mst_dir="output",
                 slv_dir="input",
                 prefix="m_axi_{}".format(name or ""),
                 bus=self
-            ) + terminus)
-        return self
+            )
 
-    def emit_flat_slave_port(self, context, name=None, terminus="\n"):
+    def emit_flat_slave_port(self, name=None):
         tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
-        context.write(
-            tpl.render_unicode(
+        return tpl.render_unicode(
                 mst_dir="input",
                 slv_dir="output",
                 prefix="s_axi_{}".format(name or ""),
                 bus=self
-            ) + terminus)
-        return self
+            )
 
     def declare(self, context):
         if self.declared:
@@ -633,8 +635,7 @@ class AxiBus(object):
     def to_axi_lite(self, context, name, inst_name=None, to=None):
         # Generate the new bus.
         if to is None:
-            bus = AxiLiteBus(self.aw, self.dw)
-            bus.name = name
+            bus = AxiLiteBus(self.clk, self.rst, self.aw, self.dw, name)
             bus.name_suffix = None
         else:
             bus = to
@@ -1224,6 +1225,48 @@ class AxiLiteXbar(Xbar):
          mod) = self.tpl.render_unicode(xbar=self,
                                         AxiLiteBus=AxiLiteBus,
                                         AxiLiteStruct=AxiLiteStruct,
+                                        util=util).split("// ----- 8< -----")
+        code_package += "\n" + pkg.strip() + "\n"
+        code_module[self.context] += "\n" + mod.strip() + "\n"
+
+
+# Register bus "XBar" (well, not really - just one master to n slaves)
+class RegBusXbar(Xbar):
+    tpl = templates.get_template("solder.regbus_xbar.sv.tpl")
+
+    def __init__(self, aw, dw, **kwargs):
+        super().__init__(**kwargs)
+        self.aw = aw
+        self.dw = dw
+        self.addrmap = list()
+
+    def add_input(self, name):
+        # For now the limitation is one input per regbus
+        assert (len(self.inputs) == 0)
+        self.inputs.append(name)
+
+    def add_output(self, name, addrs, default=False):
+        idx = len(self.outputs)
+        for lo, hi in addrs:
+            if hi >> self.aw == 1:
+                hi -= 1
+            self.addrmap.append((idx, lo, hi))
+        self.outputs.append(name)
+
+    def add_output_entry(self, name, entry):
+        self.add_output(name,
+                        [(r.lo, r.hi)
+                         for r in self.node.get_routes() if r.port == entry])
+
+    def emit(self):
+        global code_module
+        global code_package
+        if self.emitted:
+            return
+        self.emitted = True
+        code_module.setdefault(self.context, "")
+        (pkg,
+         mod) = self.tpl.render_unicode(xbar=self, RegBus=RegBus,
                                         util=util).split("// ----- 8< -----")
         code_package += "\n" + pkg.strip() + "\n"
         code_module[self.context] += "\n" + mod.strip() + "\n"

@@ -1,0 +1,13 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+package:
+  name: clint
+  description: "RISC-V Core-local Interrupt Controller"
+  authors: ["Florian Zaruba <zarubaf@iis.ee.ethz.ch>"]
+
+sources:
+# Level 0:
+- src/axi_lite_interface.sv
+# Level 1:
+- src/clint.sv

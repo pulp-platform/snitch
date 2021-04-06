@@ -22,6 +22,39 @@ package occamy_pkg;
   localparam int unsigned NrCoresCluster = occamy_cluster_pkg::NrCores;
   localparam int unsigned NrCoresS1Quadrant = NrClustersS1Quadrant * NrCoresCluster;
 
+  typedef struct packed {
+    logic [31:0] gpio;
+    logic uart_tx_watermark;
+    logic uart_rx_watermark;
+    logic uart_tx_empty;
+    logic uart_rx_overflow;
+    logic uart_rx_frame_err;
+    logic uart_rx_break_err;
+    logic uart_rx_timeout;
+    logic uart_rx_parity_err;
+    logic spim_error;
+    logic spim_spi_event;
+    logic i2c_fmt_watermark;
+    logic i2c_rx_watermark;
+    logic i2c_fmt_overflow;
+    logic i2c_rx_overflow;
+    logic i2c_nak;
+    logic i2c_scl_interference;
+    logic i2c_sda_interference;
+    logic i2c_stretch_timeout;
+    logic i2c_sda_unstable;
+    logic i2c_trans_complete;
+    logic i2c_tx_empty;
+    logic i2c_tx_nonempty;
+    logic i2c_tx_overflow;
+    logic i2c_acq_overflow;
+    logic i2c_ack_stop;
+    logic i2c_host_timeout;
+  } occamy_interrupt_t;
+
+  localparam logic [15:0] PartNum = 2;
+  localparam logic [31:0] IDCode = (dm::DbgVersion013 << 28) | (PartNum << 12) | 32'h1;
+
   typedef logic [5:0] tile_id_t;
 
   typedef logic [AddrWidth-1:0] addr_t;
@@ -29,9 +62,10 @@ package occamy_pkg;
 
   typedef struct packed {
     logic [31:0] idx;
-    logic [33:0] start_addr;
-    logic [33:0] end_addr;
+    logic [47:0] start_addr;
+    logic [47:0] end_addr;
   } xbar_rule_48_t;
+
 
   typedef xbar_rule_48_t xbar_rule_t;
 
@@ -45,29 +79,24 @@ package occamy_pkg;
   // AXI-Lite bus with 48 bit address and 64 bit data.
   `AXI_LITE_TYPEDEF_ALL(axi_lite_a48_d64, logic [47:0], logic [63:0], logic [7:0])
 
-  /// Inputs of the `soc_periph_xbar` crossbar.
+  /// Inputs of the `soc_axi_lite_periph_xbar` crossbar.
   typedef enum int {
-    SOC_PERIPH_XBAR_IN_SOC,
-    SOC_PERIPH_XBAR_NUM_INPUTS
-  } soc_periph_xbar_inputs_e;
+    SOC_AXI_LITE_PERIPH_XBAR_IN_SOC,
+    SOC_AXI_LITE_PERIPH_XBAR_IN_DEBUG,
+    SOC_AXI_LITE_PERIPH_XBAR_NUM_INPUTS
+  } soc_axi_lite_periph_xbar_inputs_e;
 
-  /// Outputs of the `soc_periph_xbar` crossbar.
+  /// Outputs of the `soc_axi_lite_periph_xbar` crossbar.
   typedef enum int {
-    SOC_PERIPH_XBAR_OUT_SOC_CTRL,
-    SOC_PERIPH_XBAR_OUT_DEBUG,
-    SOC_PERIPH_XBAR_OUT_BOOTROM,
-    SOC_PERIPH_XBAR_OUT_CLINT,
-    SOC_PERIPH_XBAR_OUT_PLIC,
-    SOC_PERIPH_XBAR_OUT_UART,
-    SOC_PERIPH_XBAR_OUT_GPIO,
-    SOC_PERIPH_XBAR_OUT_I2C,
-    SOC_PERIPH_XBAR_NUM_OUTPUTS
-  } soc_periph_xbar_outputs_e;
+    SOC_AXI_LITE_PERIPH_XBAR_OUT_CLINT,
+    SOC_AXI_LITE_PERIPH_XBAR_OUT_DEBUG,
+    SOC_AXI_LITE_PERIPH_XBAR_NUM_OUTPUTS
+  } soc_axi_lite_periph_xbar_outputs_e;
 
-  /// Configuration of the `soc_periph_xbar` crossbar.
-  localparam axi_pkg::xbar_cfg_t SocPeriphXbarCfg = '{
-    NoSlvPorts:         SOC_PERIPH_XBAR_NUM_INPUTS,
-    NoMstPorts:         SOC_PERIPH_XBAR_NUM_OUTPUTS,
+  /// Configuration of the `soc_axi_lite_periph_xbar` crossbar.
+  localparam axi_pkg::xbar_cfg_t SocAxiLitePeriphXbarCfg = '{
+    NoSlvPorts:         SOC_AXI_LITE_PERIPH_XBAR_NUM_INPUTS,
+    NoMstPorts:         SOC_AXI_LITE_PERIPH_XBAR_NUM_OUTPUTS,
     MaxSlvTrans:        4,
     MaxMstTrans:        4,
     FallThrough:        0,
@@ -76,37 +105,65 @@ package occamy_pkg;
     AxiIdUsedSlvPorts:  0,
     AxiAddrWidth:       48,
     AxiDataWidth:       64,
-    NoAddrRules:        8
+    NoAddrRules:        2
   };
 
-  /// Address map of the `soc_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [7:0] SocPeriphXbarAddrmap = '{
+  /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
+  localparam xbar_rule_48_t [1:0] SocAxiLitePeriphXbarAddrmap = '{
+    '{ idx: 0, start_addr: 48'h00040000, end_addr: 48'h00050000 },
+    '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 }
+  };
+
+  // AXI plugs of the `soc_axi_lite_periph_xbar` crossbar.
+
+  typedef axi_lite_a48_d64_req_t soc_axi_lite_periph_xbar_in_req_t;
+  typedef axi_lite_a48_d64_req_t soc_axi_lite_periph_xbar_out_req_t;
+  typedef axi_lite_a48_d64_rsp_t soc_axi_lite_periph_xbar_in_rsp_t;
+  typedef axi_lite_a48_d64_rsp_t soc_axi_lite_periph_xbar_out_rsp_t;
+  typedef axi_lite_a48_d64_aw_chan_t soc_axi_lite_periph_xbar_in_aw_chan_t;
+  typedef axi_lite_a48_d64_aw_chan_t soc_axi_lite_periph_xbar_out_aw_chan_t;
+  typedef axi_lite_a48_d64_w_chan_t soc_axi_lite_periph_xbar_in_w_chan_t;
+  typedef axi_lite_a48_d64_w_chan_t soc_axi_lite_periph_xbar_out_w_chan_t;
+  typedef axi_lite_a48_d64_b_chan_t soc_axi_lite_periph_xbar_in_b_chan_t;
+  typedef axi_lite_a48_d64_b_chan_t soc_axi_lite_periph_xbar_out_b_chan_t;
+  typedef axi_lite_a48_d64_ar_chan_t soc_axi_lite_periph_xbar_in_ar_chan_t;
+  typedef axi_lite_a48_d64_ar_chan_t soc_axi_lite_periph_xbar_out_ar_chan_t;
+  typedef axi_lite_a48_d64_r_chan_t soc_axi_lite_periph_xbar_in_r_chan_t;
+  typedef axi_lite_a48_d64_r_chan_t soc_axi_lite_periph_xbar_out_r_chan_t;
+
+  // Register bus with 48 bit address and 32 bit data.
+  `REG_BUS_TYPEDEF_ALL(reg_a48_d32, logic [47:0], logic [31:0], logic [3:0])
+
+  /// Inputs of the `soc_regbus_periph_xbar` crossbar.
+  typedef enum int {
+    SOC_REGBUS_PERIPH_XBAR_IN_AXI_LITE_PERIPH_XBAR,
+    SOC_REGBUS_PERIPH_XBAR_NUM_INPUTS
+  } soc_regbus_periph_xbar_inputs_e;
+
+  /// Outputs of the `soc_regbus_periph_xbar` crossbar.
+  typedef enum int {
+    SOC_REGBUS_PERIPH_XBAR_OUT_SOC_CTRL,
+    SOC_REGBUS_PERIPH_XBAR_OUT_CLK_MGR,
+    SOC_REGBUS_PERIPH_XBAR_OUT_BOOTROM,
+    SOC_REGBUS_PERIPH_XBAR_OUT_PLIC,
+    SOC_REGBUS_PERIPH_XBAR_OUT_UART,
+    SOC_REGBUS_PERIPH_XBAR_OUT_GPIO,
+    SOC_REGBUS_PERIPH_XBAR_OUT_I2C,
+    SOC_REGBUS_PERIPH_XBAR_OUT_SPIM,
+    SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
+  } soc_regbus_periph_xbar_outputs_e;
+
+  /// Address map of the `soc_regbus_periph_xbar` crossbar.
+  localparam xbar_rule_48_t [7:0] SocRegbusPeriphXbarAddrmap = '{
     '{ idx: 0, start_addr: 48'h00020000, end_addr: 48'h00021000 },
-    '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 },
+    '{ idx: 1, start_addr: 48'h00021000, end_addr: 48'h00022000 },
     '{ idx: 2, start_addr: 48'h00010000, end_addr: 48'h00020000 },
-    '{ idx: 3, start_addr: 48'h00040000, end_addr: 48'h00050000 },
-    '{ idx: 4, start_addr: 48'h00024000, end_addr: 48'h00025000 },
-    '{ idx: 5, start_addr: 48'h00030000, end_addr: 48'h00031000 },
-    '{ idx: 6, start_addr: 48'h00031000, end_addr: 48'h00032000 },
-    '{ idx: 7, start_addr: 48'h00033000, end_addr: 48'h00034000 }
+    '{ idx: 3, start_addr: 48'h00024000, end_addr: 48'h00025000 },
+    '{ idx: 4, start_addr: 48'h00030000, end_addr: 48'h00031000 },
+    '{ idx: 5, start_addr: 48'h00031000, end_addr: 48'h00032000 },
+    '{ idx: 6, start_addr: 48'h00033000, end_addr: 48'h00034000 },
+    '{ idx: 7, start_addr: 48'h00034000, end_addr: 48'h00035000 }
   };
-
-  // AXI plugs of the `soc_periph_xbar` crossbar.
-
-  typedef axi_lite_a48_d64_req_t soc_periph_xbar_in_req_t;
-  typedef axi_lite_a48_d64_req_t soc_periph_xbar_out_req_t;
-  typedef axi_lite_a48_d64_rsp_t soc_periph_xbar_in_rsp_t;
-  typedef axi_lite_a48_d64_rsp_t soc_periph_xbar_out_rsp_t;
-  typedef axi_lite_a48_d64_aw_chan_t soc_periph_xbar_in_aw_chan_t;
-  typedef axi_lite_a48_d64_aw_chan_t soc_periph_xbar_out_aw_chan_t;
-  typedef axi_lite_a48_d64_w_chan_t soc_periph_xbar_in_w_chan_t;
-  typedef axi_lite_a48_d64_w_chan_t soc_periph_xbar_out_w_chan_t;
-  typedef axi_lite_a48_d64_b_chan_t soc_periph_xbar_in_b_chan_t;
-  typedef axi_lite_a48_d64_b_chan_t soc_periph_xbar_out_b_chan_t;
-  typedef axi_lite_a48_d64_ar_chan_t soc_periph_xbar_in_ar_chan_t;
-  typedef axi_lite_a48_d64_ar_chan_t soc_periph_xbar_out_ar_chan_t;
-  typedef axi_lite_a48_d64_r_chan_t soc_periph_xbar_in_r_chan_t;
-  typedef axi_lite_a48_d64_r_chan_t soc_periph_xbar_out_r_chan_t;
 
   /// Inputs of the `soc_wide_xbar` crossbar.
   typedef enum int {
@@ -118,6 +175,14 @@ package occamy_pkg;
     SOC_WIDE_XBAR_IN_S1_QUADRANT_5,
     SOC_WIDE_XBAR_IN_S1_QUADRANT_6,
     SOC_WIDE_XBAR_IN_S1_QUADRANT_7,
+    SOC_WIDE_XBAR_IN_HBI_0,
+    SOC_WIDE_XBAR_IN_HBI_1,
+    SOC_WIDE_XBAR_IN_HBI_2,
+    SOC_WIDE_XBAR_IN_HBI_3,
+    SOC_WIDE_XBAR_IN_HBI_4,
+    SOC_WIDE_XBAR_IN_HBI_5,
+    SOC_WIDE_XBAR_IN_HBI_6,
+    SOC_WIDE_XBAR_IN_HBI_7,
     SOC_WIDE_XBAR_IN_SOC_NARROW,
     SOC_WIDE_XBAR_IN_PCIE,
     SOC_WIDE_XBAR_NUM_INPUTS
@@ -133,6 +198,14 @@ package occamy_pkg;
     SOC_WIDE_XBAR_OUT_S1_QUADRANT_5,
     SOC_WIDE_XBAR_OUT_S1_QUADRANT_6,
     SOC_WIDE_XBAR_OUT_S1_QUADRANT_7,
+    SOC_WIDE_XBAR_OUT_HBM_0,
+    SOC_WIDE_XBAR_OUT_HBM_1,
+    SOC_WIDE_XBAR_OUT_HBM_2,
+    SOC_WIDE_XBAR_OUT_HBM_3,
+    SOC_WIDE_XBAR_OUT_HBM_4,
+    SOC_WIDE_XBAR_OUT_HBM_5,
+    SOC_WIDE_XBAR_OUT_HBM_6,
+    SOC_WIDE_XBAR_OUT_HBM_7,
     SOC_WIDE_XBAR_OUT_PCIE,
     SOC_WIDE_XBAR_NUM_OUTPUTS
   } soc_wide_xbar_outputs_e;
@@ -149,36 +222,36 @@ package occamy_pkg;
     AxiIdUsedSlvPorts:  3,
     AxiAddrWidth:       48,
     AxiDataWidth:       512,
-    NoAddrRules:        9
+    NoAddrRules:        17
   };
 
   // AXI bus with 48 bit address, 512 bit data, 3 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d512_i3_u0, logic [47:0], logic [2:0], logic [511:0], logic [63:0],
                    logic [0:0])
 
-  // AXI bus with 48 bit address, 512 bit data, 7 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i7_u0, logic [47:0], logic [6:0], logic [511:0], logic [63:0],
+  // AXI bus with 48 bit address, 512 bit data, 8 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d512_i8_u0, logic [47:0], logic [7:0], logic [511:0], logic [63:0],
                    logic [0:0])
 
   typedef axi_a48_d512_i3_u0_req_t soc_wide_xbar_in_req_t;
-  typedef axi_a48_d512_i7_u0_req_t soc_wide_xbar_out_req_t;
+  typedef axi_a48_d512_i8_u0_req_t soc_wide_xbar_out_req_t;
   typedef axi_a48_d512_i3_u0_resp_t soc_wide_xbar_in_resp_t;
-  typedef axi_a48_d512_i7_u0_resp_t soc_wide_xbar_out_resp_t;
+  typedef axi_a48_d512_i8_u0_resp_t soc_wide_xbar_out_resp_t;
   typedef axi_a48_d512_i3_u0_aw_chan_t soc_wide_xbar_in_aw_chan_t;
-  typedef axi_a48_d512_i7_u0_aw_chan_t soc_wide_xbar_out_aw_chan_t;
+  typedef axi_a48_d512_i8_u0_aw_chan_t soc_wide_xbar_out_aw_chan_t;
   typedef axi_a48_d512_i3_u0_w_chan_t soc_wide_xbar_in_w_chan_t;
-  typedef axi_a48_d512_i7_u0_w_chan_t soc_wide_xbar_out_w_chan_t;
+  typedef axi_a48_d512_i8_u0_w_chan_t soc_wide_xbar_out_w_chan_t;
   typedef axi_a48_d512_i3_u0_b_chan_t soc_wide_xbar_in_b_chan_t;
-  typedef axi_a48_d512_i7_u0_b_chan_t soc_wide_xbar_out_b_chan_t;
+  typedef axi_a48_d512_i8_u0_b_chan_t soc_wide_xbar_out_b_chan_t;
   typedef axi_a48_d512_i3_u0_ar_chan_t soc_wide_xbar_in_ar_chan_t;
-  typedef axi_a48_d512_i7_u0_ar_chan_t soc_wide_xbar_out_ar_chan_t;
+  typedef axi_a48_d512_i8_u0_ar_chan_t soc_wide_xbar_out_ar_chan_t;
   typedef axi_a48_d512_i3_u0_r_chan_t soc_wide_xbar_in_r_chan_t;
-  typedef axi_a48_d512_i7_u0_r_chan_t soc_wide_xbar_out_r_chan_t;
+  typedef axi_a48_d512_i8_u0_r_chan_t soc_wide_xbar_out_r_chan_t;
 
   // verilog_lint: waive parameter-name-style
   localparam int SOC_WIDE_XBAR_IW_IN = 3;
   // verilog_lint: waive parameter-name-style
-  localparam int SOC_WIDE_XBAR_IW_OUT = 7;
+  localparam int SOC_WIDE_XBAR_IW_OUT = 8;
 
   /// Inputs of the `soc_narrow_xbar` crossbar.
   typedef enum int {
@@ -206,6 +279,7 @@ package occamy_pkg;
     SOC_NARROW_XBAR_OUT_S1_QUADRANT_7,
     SOC_NARROW_XBAR_OUT_PERIPH,
     SOC_NARROW_XBAR_OUT_SOC_WIDE,
+    SOC_NARROW_XBAR_OUT_REGBUS_PERIPH,
     SOC_NARROW_XBAR_NUM_OUTPUTS
   } soc_narrow_xbar_outputs_e;
 
@@ -221,7 +295,7 @@ package occamy_pkg;
     AxiIdUsedSlvPorts:  4,
     AxiAddrWidth:       48,
     AxiDataWidth:       64,
-    NoAddrRules:        10
+    NoAddrRules:        11
   };
 
   // AXI bus with 48 bit address, 64 bit data, 4 bit IDs, and 0 bit user data.
@@ -372,6 +446,13 @@ package occamy_pkg;
   // AXI bus with 48 bit address, 64 bit data, 3 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d64_i3_u0, logic [47:0], logic [2:0], logic [63:0], logic [7:0],
                    logic [0:0])
+
+  // AXI bus with 48 bit address, 32 bit data, 8 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d32_i8_u0, logic [47:0], logic [7:0], logic [31:0], logic [3:0],
+                   logic [0:0])
+
+  // AXI-Lite bus with 48 bit address and 32 bit data.
+  `AXI_LITE_TYPEDEF_ALL(axi_lite_a48_d32, logic [47:0], logic [31:0], logic [3:0])
 
   // Register bus with 48 bit address and 64 bit data.
   `REG_BUS_TYPEDEF_ALL(reg_a48_d64, logic [47:0], logic [63:0], logic [7:0])

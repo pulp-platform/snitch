@@ -1,0 +1,27 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "lowrisc_opentitan",
+  target_dir: "lowrisc_opentitan",
+
+  upstream: {
+    url: "https://github.com/lowRISC/opentitan.git",
+    rev: "master",
+  },
+
+  patch_dir: "patches/lowrisc_opentitan",
+
+  mapping: [
+    {from: 'hw/ip/prim', to: 'prim', patch_dir: 'prim'},
+    {from: 'hw/ip/uart', to: 'uart', patch_dir: 'uart'},
+    {from: 'hw/ip/gpio', to: 'gpio', patch_dir: 'gpio'},
+    {from: 'hw/ip/i2c', to: 'i2c', patch_dir: 'i2c'},
+    {from: 'hw/ip/spi_host', to: 'spi_host', patch_dir: 'spi_host'},
+    {from: 'hw/ip/rv_plic', to: 'rv_plic', patch_dir: 'rv_plic'}
+  ]
+
+  exclude_from_upstream: [
+    "*.core",
+  ]
+}

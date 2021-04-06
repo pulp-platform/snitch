@@ -1,0 +1,115 @@
+From 74978d925d14ca20fd171ae0e49305b4540704f2 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Sat, 3 Apr 2021 20:05:23 +0200
+Subject: [PATCH] rv_plic: Add patches for Occamy
+
+---
+ Bender.yml             | 11 +++++++++++
+ data/rv_plic.hjson.tpl |  4 +---
+ data/rv_plic.sv.tpl    | 18 ++++++++++--------
+ rtl/rv_plic_target.sv  |  2 +-
+ 4 files changed, 23 insertions(+), 12 deletions(-)
+ create mode 100644 hw/vendor/lowrisc_opentitan/rv_plic/Bender.yml
+
+diff --git a/Bender.yml b/Bender.yml
+new file mode 100644
+index 0000000..fc2a332
+--- /dev/null
++++ b/Bender.yml
+@@ -0,0 +1,11 @@
++package:
++  name: lowrisc_rv_plic
++  description: "lowRISC RISC-V Platform Level Interrupt Controller"
++  authors: ["lowRISC Contributors"]
++
++dependencies:
++  lowrisc_prim: {path: ../prim}
++
++sources:
++- rtl/rv_plic_gateway.sv
++- rtl/rv_plic_target.sv
+diff --git a/data/rv_plic.hjson.tpl b/data/rv_plic.hjson.tpl
+index b73389a..7ef9fa1 100644
+--- a/data/rv_plic.hjson.tpl
++++ b/data/rv_plic.hjson.tpl
+@@ -12,9 +12,7 @@
+ {
+   name: "RV_PLIC",
+   clock_primary: "clk_i",
+-  bus_interfaces: [
+-    { protocol: "tlul", direction: "device" }
+-  ],
++  bus_device: "reg",
+ 
+   param_list: [
+     { name: "NumSrc",
+diff --git a/data/rv_plic.sv.tpl b/data/rv_plic.sv.tpl
+index 24b7398..75f5d65 100644
+--- a/data/rv_plic.sv.tpl
++++ b/data/rv_plic.sv.tpl
+@@ -15,6 +15,8 @@
+ //   MAX_PRIO: Maximum value of interrupt priority
+ 
+ module rv_plic import rv_plic_reg_pkg::*; #(
++  parameter type reg_req_t = logic,
++  parameter type reg_rsp_t = logic,
+   // derived parameter
+   localparam int SRCW    = $clog2(NumSrc)
+ ) (
+@@ -22,8 +24,8 @@ module rv_plic import rv_plic_reg_pkg::*; #(
+   input     rst_ni,
+ 
+   // Bus Interface (device)
+-  input  tlul_pkg::tl_h2d_t tl_i,
+-  output tlul_pkg::tl_d2h_t tl_o,
++  input  reg_req_t reg_req_i,
++  output reg_rsp_t reg_rsp_o,
+ 
+   // Interrupt Sources
+   input  [NumSrc-1:0] intr_src_i,
+@@ -185,23 +187,23 @@ module rv_plic import rv_plic_reg_pkg::*; #(
+   ////////////////////////
+   //  Limitation of register tool prevents the module from having flexibility to parameters
+   //  So, signals are manually tied at the top.
+-  rv_plic_reg_top u_reg (
++  rv_plic_reg_top #(
++    .reg_req_t (reg_req_t),
++    .reg_rsp_t (reg_rsp_t)
++  ) u_reg (
+     .clk_i,
+     .rst_ni,
+ 
+-    .tl_i,
+-    .tl_o,
++    .reg_req_i,
++    .reg_rsp_o,
+ 
+     .reg2hw,
+     .hw2reg,
+ 
+-    .intg_err_o (),
+     .devmode_i  (1'b1)
+   );
+ 
+   // Assertions
+-  `ASSERT_KNOWN(TlDValidKnownO_A, tl_o.d_valid)
+-  `ASSERT_KNOWN(TlAReadyKnownO_A, tl_o.a_ready)
+   `ASSERT_KNOWN(IrqKnownO_A, irq_o)
+   `ASSERT_KNOWN(MsipKnownO_A, msip_o)
+   for (genvar k = 0; k < NumTarget; k++) begin : gen_irq_id_known
+diff --git a/rtl/rv_plic_target.sv b/rtl/rv_plic_target.sv
+index 55b6381..c3dc3c3 100644
+--- a/rtl/rv_plic_target.sv
++++ b/rtl/rv_plic_target.sv
+@@ -12,7 +12,7 @@
+ // many input sources.
+ //
+ 
+-`include "prim_assert.sv"
++`include "common_cells/assertions.svh"
+ 
+ module rv_plic_target #(
+   parameter int N_SOURCE = 32,
+-- 
+2.25.1.377.g2d2118b814
+

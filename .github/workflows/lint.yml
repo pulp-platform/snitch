@@ -6,8 +6,10 @@
 name: lint
 on: [push, pull_request]
 
-jobs:
+env:
+  VERIBLE_VERSION: 0.0-807-g10e7c71
 
+jobs:
   ################
   # Verible Lint #
   ################
@@ -15,8 +17,6 @@ jobs:
     name: Verilog Sources
     # This job runs on Linux (fixed ubuntu version)
     runs-on: ubuntu-18.04
-    env:
-      VERIBLE_VERSION: 0.0-807-g10e7c71
     steps:
     - uses: actions/checkout@v2
     - name: Install Verible
@@ -236,3 +236,30 @@ jobs:
         components: rustfmt
     - working-directory: sw/banshee
       run: cargo fmt --all -- --check
+
+  ##########
+  # Occamy #
+  ##########
+  # Re-generate all files and detect any changes on the generated files.
+  Occamy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install requirements
+      run: pip install -r python-requirements.txt
+    - name: Install Verible
+      run: |
+        set -e
+        mkdir -p build/verible
+        cd build/verible
+        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-18.04-bionic-x86_64.tar.gz
+        sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
+        tar -C /tools/verible -xf verible.tar.gz --strip-components=1
+        echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
+    - name: Generated Files Up-to-Date
+      run: |
+        make -C hw/system/occamy all
+        util/git-diff.py --error-msg "::error ::Found differences, run util/yml-format before committing."

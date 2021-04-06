@@ -8,3 +8,5 @@
 waive --rule=line-length --location="snitch_cluster_peripheral_reg_top.sv"
 waive --rule=line-length --location="snitch_cluster_peripheral_reg_pkg.sv"
 waive --rule=typedef-structs-unions --location="snitch_cluster_peripheral_reg_pkg.sv"
+waive --rule=line-length --location="rv_plic_reg_top.sv"
+waive --rule=parameter-name-style --location="rv_plic.sv"

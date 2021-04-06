@@ -1,0 +1,12 @@
+package:
+  name: lowrisc_prim
+  description: "lowRISC RTL primitives"
+  authors: ["lowRISC Contributors"]
+
+sources:
+# Level 0
+- rtl/prim_util_pkg.sv
+# Level 1
+- rtl/prim_fifo_sync.sv
+- rtl/prim_filter_ctr.sv
+- rtl/prim_intr_hw.sv

@@ -1,0 +1,35 @@
+From 0c6cb9b0c545073ee8648e17edf9ba58466537a4 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Sat, 3 Apr 2021 15:32:09 +0200
+Subject: [PATCH] Make `sync` reset value parameterizable
+
+---
+ src/sync.sv | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/sync.sv b/src/sync.sv
+index ff2ef5b..7d8e0a1 100644
+--- a/src/sync.sv
++++ b/src/sync.sv
+@@ -11,7 +11,8 @@
+ // Antonio Pullini <pullinia@iis.ee.ethz.ch>
+ 
+ module sync #(
+-    parameter int unsigned STAGES = 2
++    parameter int unsigned STAGES = 2,
++    parameter bit ResetValue = 1'b0
+ ) (
+     input  logic clk_i,
+     input  logic rst_ni,
+@@ -23,7 +24,7 @@ module sync #(
+ 
+     always_ff @(posedge clk_i, negedge rst_ni) begin
+         if (!rst_ni) begin
+-            reg_q <= 'h0;
++            reg_q <= {STAGES{ResetValue}};
+         end else begin
+             reg_q <= {reg_q[STAGES-2:0], serial_i};
+         end
+-- 
+2.25.1.377.g2d2118b814
+

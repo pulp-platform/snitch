@@ -1,0 +1,27 @@
+From 018151480cdf15f254f0afa8fc4c6b49a5336d7c Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Mon, 5 Apr 2021 11:21:49 +0200
+Subject: [PATCH] prim: Add `prim_filter_ctr`
+
+---
+ Bender.yml | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/Bender.yml b/Bender.yml
+index 1454c78..e7660a4 100644
+--- a/Bender.yml
++++ b/Bender.yml
+@@ -4,6 +4,9 @@ package:
+   authors: ["lowRISC Contributors"]
+ 
+ sources:
++# Level 0
+ - rtl/prim_util_pkg.sv
+-- rtl/prim_intr_hw.sv
++# Level 1
+ - rtl/prim_fifo_sync.sv
++- rtl/prim_filter_ctr.sv
++- rtl/prim_intr_hw.sv
+-- 
+2.25.1.377.g2d2118b814
+

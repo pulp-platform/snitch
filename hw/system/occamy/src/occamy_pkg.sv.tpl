@@ -22,6 +22,39 @@ package occamy_pkg;
   localparam int unsigned NrCoresCluster = occamy_cluster_pkg::NrCores;
   localparam int unsigned NrCoresS1Quadrant = NrClustersS1Quadrant * NrCoresCluster;
 
+  typedef struct packed {
+    logic [31:0] gpio;
+    logic uart_tx_watermark;
+    logic uart_rx_watermark;
+    logic uart_tx_empty;
+    logic uart_rx_overflow;
+    logic uart_rx_frame_err;
+    logic uart_rx_break_err;
+    logic uart_rx_timeout;
+    logic uart_rx_parity_err;
+    logic spim_error;
+    logic spim_spi_event;
+    logic i2c_fmt_watermark;
+    logic i2c_rx_watermark;
+    logic i2c_fmt_overflow;
+    logic i2c_rx_overflow;
+    logic i2c_nak;
+    logic i2c_scl_interference;
+    logic i2c_sda_interference;
+    logic i2c_stretch_timeout;
+    logic i2c_sda_unstable;
+    logic i2c_trans_complete;
+    logic i2c_tx_empty;
+    logic i2c_tx_nonempty;
+    logic i2c_tx_overflow;
+    logic i2c_acq_overflow;
+    logic i2c_ack_stop;
+    logic i2c_host_timeout;
+  } occamy_interrupt_t;
+
+  localparam logic [15:0] PartNum = 2;
+  localparam logic [31:0] IDCode = (dm::DbgVersion013 << 28) | (PartNum << 12) | 32'h1;
+
   typedef logic [5:0] tile_id_t;
 
   typedef logic [AddrWidth-1:0] addr_t;
@@ -29,9 +62,10 @@ package occamy_pkg;
 
   typedef struct packed {
     logic [31:0] idx;
-    logic [33:0] start_addr;
-    logic [33:0] end_addr;
+    logic [47:0] start_addr;
+    logic [47:0] end_addr;
   } xbar_rule_48_t;
+
 
   typedef xbar_rule_48_t xbar_rule_t;
 

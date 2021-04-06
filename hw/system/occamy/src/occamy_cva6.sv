@@ -39,6 +39,22 @@ module occamy_cva6 (
     NrPMPEntries:           8
   };
 
+  logic [1:0]        irq;
+  logic              ipi;
+  logic              time_irq;
+  logic              debug_req;
+
+  sync #(.STAGES (2))
+    i_sync_debug (.clk_i, .rst_ni, .serial_i (debug_req_i), .serial_o (debug_req));
+  sync #(.STAGES (2))
+    i_sync_ipi  (.clk_i, .rst_ni, .serial_i (ipi_i), .serial_o (ipi));
+  sync #(.STAGES (2))
+    i_sync_time_irq  (.clk_i, .rst_ni, .serial_i (time_irq_i), .serial_o (time_irq));
+  sync #(.STAGES (2))
+    i_sync_irq_0  (.clk_i, .rst_ni, .serial_i (irq_i[0]), .serial_o (irq[0]));
+  sync #(.STAGES (2))
+    i_sync_irq_1  (.clk_i, .rst_ni, .serial_i (irq_i[1]), .serial_o (irq[1]));
+
   ariane #(
     .ArianeCfg (CVA6OccamyConfig)
   ) i_cva6 (
@@ -46,10 +62,10 @@ module occamy_cva6 (
     .rst_ni,
     .boot_addr_i,
     .hart_id_i,
-    .irq_i,
-    .ipi_i,
-    .time_irq_i,
-    .debug_req_i,
+    .irq_i (irq),
+    .ipi_i (ipi),
+    .time_irq_i (time_irq),
+    .debug_req_i (debug_req),
     .axi_req_o,
     .axi_resp_i
   );

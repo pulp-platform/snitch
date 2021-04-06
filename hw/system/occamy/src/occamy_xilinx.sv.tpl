@@ -46,18 +46,30 @@ import occamy_pkg::*;
   output logic             i2c_scl_o,
   input  logic             i2c_scl_i,
   output logic             i2c_scl_en_o,
+  // `SPI Host` Interface
+  output logic             spim_sck_o,
+  output logic             spim_sck_en_o,
+  output logic [ 1:0]      spim_csb_o,
+  output logic [ 1:0]      spim_csb_en_o,
+  output logic [ 3:0]      spim_sd_o,
+  output logic [ 3:0]      spim_sd_en_o,
+  input        [ 3:0]      spim_sd_i,
 
+  /// HBM2e Ports
+% for i in range(8):
+  ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].emit_flat_master_port("hbm_{}".format(i))},
+% endfor
 
   /// PCIe Ports
-  <%
-  soc_wide_xbar.out_pcie.emit_flat_master_port(context, "pcie", ",\n\n")
-  soc_wide_xbar.in_pcie.emit_flat_slave_port(context, "pcie", "\n")
-  %>
-  /// HBM2e Ports
+  ${soc_wide_xbar.out_pcie.emit_flat_master_port("pcie")},
+  ${soc_wide_xbar.in_pcie.emit_flat_slave_port("pcie")}
   /// HBI Ports
 );
 
   // AXI ports of Occamy top-level
+  //////////
+  // PCIe //
+  //////////
   ${soc_wide_xbar.out_pcie.req_type()} pcie_axi_req_o;
   ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i;
 
@@ -68,9 +80,35 @@ import occamy_pkg::*;
   `AXI_FLATTEN_MASTER(pcie, pcie_axi_req_o, pcie_axi_rsp_i)
   `AXI_FLATTEN_SLAVE(pcie, pcie_axi_req_i, pcie_axi_rsp_o)
 
+  /////////
+  // HBM //
+  /////////
+% for i in range(8):
+  ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].req_type()} hbm_${i}_req_o;
+  ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].rsp_type()} hbm_${i}_rsp_i;
+
+  // Assign structs to flattened ports
+  `AXI_FLATTEN_MASTER(hbm_${i}, hbm_${i}_req_o, hbm_${i}_rsp_i)
+% endfor
+
+  /// Boot ROM
+  ${soc_regbus_periph_xbar.out_bootrom.req_type()} bootrom_req;
+  ${soc_regbus_periph_xbar.out_bootrom.rsp_type()} bootrom_rsp;
+
+  /// Clk manager
+  ${soc_regbus_periph_xbar.out_clk_mgr.req_type()} clk_mgr_req;
+  ${soc_regbus_periph_xbar.out_clk_mgr.rsp_type()} clk_mgr_rsp;
+
   // Occamy top-level
   occamy_top i_occamy (
+    .bootrom_req_o (bootrom_req),
+    .bootrom_rsp_i (bootrom_rsp),
+    .clk_mgr_req_o (clk_mgr_req),
+    .clk_mgr_rsp_i (clk_mgr_rsp),
     .*
   );
+
+  assign bootrom_rsp = '0;
+  assign clk_mgr_rsp = '0;
 
 endmodule
