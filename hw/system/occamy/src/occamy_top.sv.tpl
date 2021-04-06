@@ -52,8 +52,8 @@ module occamy_top
   output  ${soc_wide_xbar.out_pcie.req_type()} pcie_axi_req_o,
   input   ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i,
 
-  input  ${soc_wide_xbar.out_pcie.req_type()} pcie_axi_req_i,
-  output ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_o
+  input  ${soc_wide_xbar.in_pcie.req_type()} pcie_axi_req_i,
+  output ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o
   /// HBM2e Ports
   /// HBI Ports
 );

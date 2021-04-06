@@ -26,6 +26,9 @@ sources:
 # Level 3:
 - src/occamy_top.sv
 # # Level 3:
+- target: xilinx
+  files:
+  - src/occamy_xilinx.sv
 # - target: any(simulation, verilator)
 #   files:
 #   - test/tb_memory.sv
