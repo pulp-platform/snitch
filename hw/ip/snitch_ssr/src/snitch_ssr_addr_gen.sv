@@ -28,7 +28,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   parameter type pointer_t  = logic [PointerWidth-1:0],
   parameter type index_t    = logic [IndexWidth-1:0],
   parameter type bytecnt_t  = logic [BytecntWidth-1:0],
-  parameter type idx_size_t = logic [$clog2($clog2(DataWidth/8))-1:0]
+  parameter type idx_size_t = logic [$clog2($clog2(DataWidth/8)+1)-1:0]
 ) (
   input  logic        clk_i,
   input  logic        rst_ni,

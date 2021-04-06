@@ -26,7 +26,7 @@ module snitch_ssr_indirector #(
   parameter type index_t    = logic [IndexWidth-1:0],
   parameter type pointer_t  = logic [PointerWidth-1:0],
   parameter type shift_t    = logic [ShiftWidth-1:0],
-  parameter type idx_size_t = logic [$clog2($clog2(DataWidth/8))-1:0]
+  parameter type idx_size_t = logic [$clog2($clog2(DataWidth/8)+1)-1:0]
 ) (
   input  logic      clk_i,
   input  logic      rst_ni,

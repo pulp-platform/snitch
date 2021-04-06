@@ -51,7 +51,6 @@ module fixture_ssr #(
   // SSR constant / derived parameters
   localparam int unsigned RepWidth = 4;
   localparam int unsigned DimWidth = $clog2(NumLoops);
-  typedef logic [$clog2($clog2(DataWidth/8))-1:0] idx_size_t;
 
   // Configuration written through proper registers
   typedef struct packed {
