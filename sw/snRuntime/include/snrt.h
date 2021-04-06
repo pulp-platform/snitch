@@ -6,9 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
-
 
 #ifndef snrt_min
 #define snrt_min(a, b) ((a) < (b) ? (a) : (b))
@@ -24,7 +23,9 @@ typedef struct snrt_slice {
     void *end;
 } snrt_slice_t;
 
-static inline size_t snrt_slice_len(snrt_slice_t s) { return (char*)s.end - (char*)s.start; }
+static inline size_t snrt_slice_len(snrt_slice_t s) {
+    return (char *)s.end - (char *)s.start;
+}
 
 extern void snrt_barrier();
 
