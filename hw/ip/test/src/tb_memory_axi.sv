@@ -93,7 +93,8 @@ module tb_memory_axi #(
     .reg_o      ( regb )
   );
 
-  `REG_BUS_TYPEDEF_ALL(regbus, logic [AxiAddrWidth-1:0], logic [AxiDataWidth-1:0], logic [NumBytes-1:0])
+  `REG_BUS_TYPEDEF_ALL(regbus,
+    logic [AxiAddrWidth-1:0], logic [AxiDataWidth-1:0], logic [NumBytes-1:0])
 
   regbus_req_t regbus_req;
   regbus_rsp_t regbus_rsp;

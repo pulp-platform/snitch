@@ -19,6 +19,7 @@ Description for a very simple single-cluster testbench. That is the most minimal
 | Property                          | Type          | Required | Nullable       | Defined by                                                                                                                                                     |
 | :-------------------------------- | :------------ | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [cluster](#cluster)               | `object`      | Required | cannot be null | [Occamy System Schema](occamy-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster")            |
+| [rom](#rom)                       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-rom.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/rom")                               |
 | [nr_s1_quadrant](#nr_s1_quadrant) | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/nr_s1_quadrant") |
 | [s1_quadrant](#s1_quadrant)       | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-object.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/s1_quadrant")                    |
 
@@ -39,6 +40,35 @@ Base description of a Snitch cluster and its internal structure and configuratio
 ### cluster Type
 
 `object` ([Snitch Cluster Schema](occamy-properties-snitch-cluster-schema.md))
+
+## rom
+
+Read-only memory from which *all* harts of the system start to boot.
+
+`rom`
+
+*   is optional
+
+*   Type: `object` ([Details](occamy-properties-rom.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-rom.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/rom")
+
+### rom Type
+
+`object` ([Details](occamy-properties-rom.md))
+
+### rom Default Value
+
+The default value is:
+
+```json
+{
+  "address": 16777216,
+  "length": 131072
+}
+```
 
 ## nr_s1\_quadrant
 
