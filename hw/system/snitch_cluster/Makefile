@@ -112,9 +112,9 @@ clean:
 	rm -rf ${VLT_BUILDDIR} Bender.lock .bender/
 	# work/
 
-trace_hart_%.txt: trace_hart_%.dasm ${ROOT}/util/gen_trace.py
+logs/trace_hart_%.txt: logs/trace_hart_%.dasm ${ROOT}/util/gen_trace.py
 	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py > $@
 
-traces: $(shell ls trace_hart_*.dasm | sed 's/\.dasm/\.txt/')
+traces: $(shell ls logs/trace_hart_*.dasm | sed 's/\.dasm/\.txt/')
 
 .PHONY: clean vlt.build vsim.build all

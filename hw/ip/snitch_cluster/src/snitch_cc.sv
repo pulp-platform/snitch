@@ -720,7 +720,8 @@ module snitch_cc #(
     /* verilator lint_off STMTDLY */
     #0;
     /* verilator lint_on STMTDLY */
-    $sformat(fn, "trace_hart_%05x.dasm", hart_id_i);
+    $system("mkdir logs -p");
+    $sformat(fn, "logs/trace_hart_%05x.dasm", hart_id_i);
     f = $fopen(fn, "w");
     $display("[Tracer] Logging Hart %d to %s", hart_id_i, fn);
   end
