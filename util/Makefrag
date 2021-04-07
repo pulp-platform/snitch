@@ -66,6 +66,14 @@ endef
 #######
 work-vcs/compile.sh: ${VSIM_SOURCES} ${TB_SRCS}
 	mkdir -p work-vcs
-	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover" > $@
+	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover -full64" > $@
 	chmod +x $@
 	$@ > work-vcs/compile.log
+
+########
+# Util #
+########
+logs/trace_hart_%.txt: logs/trace_hart_%.dasm ${ROOT}/util/gen_trace.py
+	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py > $@
+
+traces: $(shell ls logs/trace_hart_*.dasm | sed 's/\.dasm/\.txt/')

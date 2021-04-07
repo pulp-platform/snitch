@@ -39,8 +39,9 @@ update-source:
 		src/occamy_pkg.sv \
 		src/occamy_quadrant_s1.sv \
 		src/occamy_xilinx.sv \
-		test/testharness.sv
-	verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv
+		test/testharness.sv \
+		src/occamy_cva6.sv
+	verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
 update-plic:
 	mkdir -p src/rv_plic

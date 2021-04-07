@@ -201,17 +201,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
   /// Address map of the `soc_wide_xbar` crossbar.
-  xbar_rule_48_t [16:0] SocWideXbarAddrmap;
+  xbar_rule_48_t [18:0] SocWideXbarAddrmap;
   assign SocWideXbarAddrmap = '{
-    '{ idx: 8, start_addr: 48'h90000000, end_addr: 48'h90100000 },
-    '{ idx: 9, start_addr: 48'h90100000, end_addr: 48'h90200000 },
-    '{ idx: 10, start_addr: 48'h90200000, end_addr: 48'h90300000 },
-    '{ idx: 11, start_addr: 48'h90300000, end_addr: 48'h90400000 },
-    '{ idx: 12, start_addr: 48'h90400000, end_addr: 48'h90500000 },
-    '{ idx: 13, start_addr: 48'h90500000, end_addr: 48'h90600000 },
-    '{ idx: 14, start_addr: 48'h90600000, end_addr: 48'h90700000 },
-    '{ idx: 15, start_addr: 48'h90700000, end_addr: 48'h90800000 },
-    '{ idx: 16, start_addr: 48'h10000000, end_addr: 48'h90000000 },
+    '{ idx: 8, start_addr: 48'h80000000, end_addr: 48'hc0000000 },
+    '{ idx: 8, start_addr: 48'h1000000000, end_addr: 48'h1040000000 },
+    '{ idx: 9, start_addr: 48'hc0000000, end_addr: 48'h100000000 },
+    '{ idx: 9, start_addr: 48'h1040000000, end_addr: 48'h1080000000 },
+    '{ idx: 10, start_addr: 48'h1080000000, end_addr: 48'h10c0000000 },
+    '{ idx: 11, start_addr: 48'h10c0000000, end_addr: 48'h1100000000 },
+    '{ idx: 12, start_addr: 48'h1100000000, end_addr: 48'h1140000000 },
+    '{ idx: 13, start_addr: 48'h1140000000, end_addr: 48'h1180000000 },
+    '{ idx: 14, start_addr: 48'h1180000000, end_addr: 48'h11c0000000 },
+    '{ idx: 15, start_addr: 48'h11c0000000, end_addr: 48'h1200000000 },
+    '{ idx: 16, start_addr: 48'h20000000, end_addr: 48'h80000000 },
     '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
     '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
     '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
@@ -258,11 +260,13 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
   /// Address map of the `soc_narrow_xbar` crossbar.
-  xbar_rule_48_t [10:0] SocNarrowXbarAddrmap;
+  xbar_rule_48_t [12:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
-    '{ idx: 8, start_addr: 48'h00010000, end_addr: 48'h00035000 },
-    '{ idx: 9, start_addr: 48'h10000000, end_addr: 48'h90800000 },
-    '{ idx: 10, start_addr: 48'h00010000, end_addr: 48'h00035000 },
+    '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
+    '{ idx: 8, start_addr: 48'h04000000, end_addr: 48'h04100000 },
+    '{ idx: 9, start_addr: 48'h20000000, end_addr: 48'h1200000000 },
+    '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h03020000 },
+    '{ idx: 10, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
     '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
     '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
     '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
@@ -370,39 +374,16 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   //////////
   // CVA6 //
   //////////
-  localparam logic [63:0] BootAddr = 'h1000;
-  axi_a48_d64_i4_u0_req_t  cva6_axi_req;
-  axi_a48_d64_i4_u0_resp_t cva6_axi_rsp;
-
-  axi_multicut #(
-      .NoCuts(1),
-      .aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
-      .w_chan_t(axi_a48_d64_i4_u0_w_chan_t),
-      .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
-      .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
-      .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
-  ) i_cva6_axi_cut (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
-      .slv_req_i(cva6_axi_req),
-      .slv_resp_o(cva6_axi_rsp),
-      .mst_req_o(soc_narrow_xbar_in_req[SOC_NARROW_XBAR_IN_CVA6]),
-      .mst_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6])
-  );
 
   occamy_cva6 i_occamy_cva6 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .boot_addr_i(BootAddr),
-      .hart_id_i('0),
       .irq_i(eip),
       .ipi_i(msip),
       .time_irq_i(mtip),
       .debug_req_i(debug_req),
-      .axi_req_o(cva6_axi_req),
-      .axi_resp_i(cva6_axi_rsp)
+      .axi_req_o(soc_narrow_xbar_in_req[SOC_NARROW_XBAR_IN_CVA6]),
+      .axi_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6])
   );
 
   ////////////////////
@@ -1401,12 +1382,12 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .reg_req_t     (reg_a48_d32_req_t),
       .reg_rsp_t     (reg_a48_d32_rsp_t)
   ) i_axi_lite_to_regbus_periph_pc (
-      .clk_i(clk_periph_i),
-      .rst_ni(rst_periph_ni),
+      .clk_i         (clk_periph_i),
+      .rst_ni        (rst_periph_ni),
       .axi_lite_req_i(axi_to_axi_lite_regbus_periph_req),
       .axi_lite_rsp_o(axi_to_axi_lite_regbus_periph_rsp),
-      .reg_req_o(soc_regbus_periph_xbar_in_req[SOC_REGBUS_PERIPH_XBAR_IN_AXI_LITE_PERIPH_XBAR]),
-      .reg_rsp_i(soc_regbus_periph_xbar_in_rsp[SOC_REGBUS_PERIPH_XBAR_IN_AXI_LITE_PERIPH_XBAR])
+      .reg_req_o     (soc_regbus_periph_xbar_in_req[SOC_REGBUS_PERIPH_XBAR_IN_SOC]),
+      .reg_rsp_i     (soc_regbus_periph_xbar_in_rsp[SOC_REGBUS_PERIPH_XBAR_IN_SOC])
   );
 
 

@@ -23,7 +23,6 @@ dependencies:
 sources:
 # Level 0:
 - src/occamy_cluster_wrapper.sv
-- src/occamy_cva6.sv
 - src/occamy_soc_reg/occamy_soc_reg_pkg.sv
 - src/occamy_soc_reg/occamy_soc_reg_top.sv
 - src/rv_plic/rv_plic_reg_pkg.sv
@@ -32,6 +31,7 @@ sources:
 # Level 1:
 - src/occamy_pkg.sv
 # Level 2:
+- src/occamy_cva6.sv
 - src/occamy_quadrant_s1.sv
 # Level 3:
 - src/occamy_top.sv

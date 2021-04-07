@@ -368,7 +368,7 @@ module occamy_quadrant_s1
 
 
   logic [9:0] hart_base_id_0;
-  assign hart_base_id_0 = tile_id_i * NrCoresS1Quadrant + 0 * NrCoresCluster;
+  assign hart_base_id_0 = HartIdOffset + tile_id_i * NrCoresS1Quadrant + 0 * NrCoresCluster;
 
   occamy_cluster_wrapper i_occamy_cluster_0 (
       .clk_i(clk_i),
@@ -516,7 +516,7 @@ module occamy_quadrant_s1
 
 
   logic [9:0] hart_base_id_1;
-  assign hart_base_id_1 = tile_id_i * NrCoresS1Quadrant + 1 * NrCoresCluster;
+  assign hart_base_id_1 = HartIdOffset + tile_id_i * NrCoresS1Quadrant + 1 * NrCoresCluster;
 
   occamy_cluster_wrapper i_occamy_cluster_1 (
       .clk_i(clk_i),
@@ -664,7 +664,7 @@ module occamy_quadrant_s1
 
 
   logic [9:0] hart_base_id_2;
-  assign hart_base_id_2 = tile_id_i * NrCoresS1Quadrant + 2 * NrCoresCluster;
+  assign hart_base_id_2 = HartIdOffset + tile_id_i * NrCoresS1Quadrant + 2 * NrCoresCluster;
 
   occamy_cluster_wrapper i_occamy_cluster_2 (
       .clk_i(clk_i),
@@ -812,7 +812,7 @@ module occamy_quadrant_s1
 
 
   logic [9:0] hart_base_id_3;
-  assign hart_base_id_3 = tile_id_i * NrCoresS1Quadrant + 3 * NrCoresCluster;
+  assign hart_base_id_3 = HartIdOffset + tile_id_i * NrCoresS1Quadrant + 3 * NrCoresCluster;
 
   occamy_cluster_wrapper i_occamy_cluster_3 (
       .clk_i(clk_i),
