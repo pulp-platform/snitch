@@ -418,9 +418,17 @@ impl<'a> ElfTranslator<'a> {
 
         // Allocate the sequencer iterators and init them as pointing to a zero constant.
         let const_zero_32 = LLVMConstInt(LLVMInt32Type(), 0, 0);
-        let rpt_ptr_ref = LLVMBuildAlloca(builder, LLVMInt32Type(), b"frep_rpt_ptr\0".as_ptr() as *const _);
+        let rpt_ptr_ref = LLVMBuildAlloca(
+            builder,
+            LLVMInt32Type(),
+            b"frep_rpt_ptr\0".as_ptr() as *const _,
+        );
         LLVMBuildStore(builder, const_zero_32, rpt_ptr_ref);
-        let max_rpt_ref = LLVMBuildAlloca(builder, LLVMInt32Type(), b"frep_max_rpt\0".as_ptr() as *const _);
+        let max_rpt_ref = LLVMBuildAlloca(
+            builder,
+            LLVMInt32Type(),
+            b"frep_max_rpt\0".as_ptr() as *const _,
+        );
         LLVMBuildStore(builder, const_zero_32, max_rpt_ref);
         let fseq_iter = SequencerIterators {
             rpt_ptr_ref,
