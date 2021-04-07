@@ -5,7 +5,8 @@
 #
 # Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
-vsim tb_simple_ssr -t 1ps -voptargs=+acc
+# We treat accessing unwritten associative array (memory) locations as fatal
+vsim tb_simple_ssr -t 1ps -coverage -voptargs="+acc +cover=sbecft" -fatal vsim-3829
 
 set StdArithNoWarnings 1
 set NumericStdNoWarnings 1

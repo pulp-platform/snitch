@@ -3,13 +3,25 @@
 // SPDX-License-Identifier: SHL-0.51
 
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
+
+`include "common_cells/registers.svh"
 
 module snitch_ssr import snitch_pkg::*; #(
-  parameter int unsigned AddrWidth = 0,
-  parameter int unsigned DataWidth = 0,
+  parameter bit Indirection    = 0,           // TODO: propagate, add to config
+  parameter bit IndirOutSpill  = 0,           // TODO: propagate, add to config
+  parameter int unsigned AddrWidth    = 0,
+  parameter int unsigned DataWidth    = 0,
+  parameter int unsigned IndexWidth   = 16,   // TODO: propagate, add to config
+  parameter int unsigned PointerWidth = 18,   // TODO: propagate, add to config
+  parameter int unsigned ShiftWidth   = 12,   // TODO: propagate, add to config
+  parameter int unsigned IndexCredits = 2,    // TODO: propagate, add to config
+  parameter int unsigned NumLoops     = 4,    // TODO: propagate, add to config
+  parameter int unsigned MuxRespDepth = 2,    // TODO: propagate, add to config
   parameter int unsigned SSRNrCredits = 0,
-  parameter type tcdm_req_t = logic,
-  parameter type tcdm_rsp_t = logic,
+  parameter type tcdm_user_t  = logic,
+  parameter type tcdm_req_t   = logic,
+  parameter type tcdm_rsp_t   = logic,
   /// Derived parameter *Do not override*
   parameter type addr_t = logic [AddrWidth-1:0],
   parameter type data_t = logic [DataWidth-1:0]
@@ -36,7 +48,7 @@ module snitch_ssr import snitch_pkg::*; #(
   data_t fifo_out, fifo_in;
   logic fifo_push, fifo_pop, fifo_full, fifo_empty;
   logic mover_valid;
-  logic [$clog2(SSRNrCredits):0] credit_q;
+  logic [$clog2(SSRNrCredits):0] credit_d, credit_q;
   logic has_credit, credit_take, credit_give;
   logic [3:0] rep_max, rep_q, rep_done, rep_enable;
 
@@ -58,74 +70,110 @@ module snitch_ssr import snitch_pkg::*; #(
     .pop_i      ( fifo_pop   )
   );
 
-  logic mem_req_qvalid;
+  logic data_req_qvalid;
+  tcdm_req_t idx_req, data_req;
+  tcdm_rsp_t idx_rsp, data_rsp;
 
   snitch_ssr_addr_gen #(
-    .AddrWidth (AddrWidth)
+    .Indirection      ( Indirection   ),
+    .IndirOutSpill    ( IndirOutSpill ),
+    .AddrWidth        ( AddrWidth     ),
+    .DataWidth        ( DataWidth     ),
+    .IndexWidth       ( IndexWidth    ),
+    .PointerWidth     ( PointerWidth  ),
+    .ShiftWidth       ( ShiftWidth    ),
+    .IndexCredits     ( IndexCredits  ),
+    .NumLoops         ( NumLoops      ),
+    .tcdm_req_t       ( tcdm_req_t    ),
+    .tcdm_rsp_t       ( tcdm_rsp_t    ),
+    .tcdm_user_t      ( tcdm_user_t   )
   ) i_addr_gen (
     .clk_i,
     .rst_ni,
+    .idx_req_o      ( idx_req ),
+    .idx_rsp_i      ( idx_rsp ),
     .cfg_word_i,
     .cfg_rdata_o,
     .cfg_wdata_i,
     .cfg_write_i,
-    .reg_rep_o      ( rep_max                     ),
-    .mem_addr_o     ( mem_req_o.q.addr            ),
-    .mem_write_o    ( mem_req_o.q.write           ),
-    .mem_valid_o    ( mover_valid                 ),
-    .mem_ready_i    ( mem_req_qvalid & mem_rsp_i.q_ready ),
+    .reg_rep_o      ( rep_max           ),
+    .mem_addr_o     ( data_req.q.addr   ),
+    .mem_write_o    ( data_req.q.write  ),
+    .mem_valid_o    ( mover_valid       ),
+    .mem_ready_i    ( data_req_qvalid & data_rsp.q_ready ),
     .tcdm_start_address_i
   );
 
-  assign mem_req_o.q_valid = mem_req_qvalid;
-  assign mem_req_o.q.amo = reqrsp_pkg::AMONone;
-  assign mem_req_o.q.user = '0;
+  if (Indirection) begin : gen_demux
+    tcdm_mux #(
+      .NrPorts    ( 2             ),
+      .AddrWidth  ( AddrWidth     ),
+      .DataWidth  ( DataWidth     ),
+      .user_t     ( tcdm_user_t   ),
+      .RespDepth  ( MuxRespDepth  ),
+      .tcdm_req_t ( tcdm_req_t    ),
+      .tcdm_rsp_t ( tcdm_rsp_t    )
+    ) i_tcdm_mux (
+      .clk_i,
+      .rst_ni,
+      .slv_req_i  ( {idx_req, data_req} ),
+      .slv_rsp_o  ( {idx_rsp, data_rsp} ),
+      .mst_req_o  ( mem_req_o ),
+      .mst_rsp_i  ( mem_rsp_i )
+    );
+  end else begin : gen_no_demux
+    assign mem_req_o = data_req;
+    assign data_rsp  = mem_rsp_i;
+    // Tie off Index responses
+    assign idx_rsp = '0;
+  end
+
+  assign data_req.q_valid = data_req_qvalid;
+  assign data_req.q.amo = reqrsp_pkg::AMONone;
+  assign data_req.q.user = '0;
 
   assign lane_rdata_o = fifo_out;
-  assign mem_req_o.q.data = fifo_out;
-  assign mem_req_o.q.strb = '1;
+  assign data_req.q.data = fifo_out;
+  assign data_req.q.strb = '1;
 
   always_comb begin
-    if (mem_req_o.q.write) begin
+    if (data_req.q.write) begin
       lane_valid_o = ~fifo_full;
-      mem_req_qvalid = mover_valid & ~fifo_empty;
+      data_req_qvalid = mover_valid & ~fifo_empty;
       fifo_push = lane_ready_i & ~fifo_full;
       fifo_in = lane_wdata_i;
       rep_enable = 0;
-      fifo_pop = mem_req_qvalid & mem_rsp_i.q_ready;
+      fifo_pop = data_req_qvalid & data_rsp.q_ready;
       credit_take = fifo_push;
-      credit_give = mem_rsp_i.p_valid;
+      credit_give = data_rsp.p_valid;
     end else begin
       lane_valid_o = ~fifo_empty;
-      mem_req_qvalid = mover_valid & ~fifo_full & has_credit;
-      fifo_push = mem_rsp_i.p_valid;
-      fifo_in = mem_rsp_i.p.data;
+      data_req_qvalid = mover_valid & ~fifo_full & has_credit;
+      fifo_push = data_rsp.p_valid;
+      fifo_in = data_rsp.p.data;
       rep_enable = lane_ready_i & ~fifo_empty;
       fifo_pop = rep_enable & rep_done;
-      credit_take = mem_req_qvalid & mem_rsp_i.q_ready;
+      credit_take = data_req_qvalid & data_rsp.q_ready;
       credit_give = fifo_pop;
     end
   end
 
   // Credit counter that keeps track of the number of memory requests issued
   // to ensure that the FIFO does not overfill.
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni)
-      credit_q <= SSRNrCredits;
-    else if (credit_take & ~credit_give)
-      credit_q <= credit_q - 1;
+  always_comb begin
+    credit_d = credit_q;
+    if (credit_take & ~credit_give)
+      credit_d = credit_q - 1;
     else if (!credit_take & credit_give)
-      credit_q <= credit_q + 1;
+      credit_d = credit_q + 1;
   end
   assign has_credit = (credit_q != '0);
 
+  `FFARN(credit_q, credit_d, SSRNrCredits, clk_i, rst_ni)
+
   // Repetition counter.
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (!rst_ni)
-      rep_q <= '0;
-    else if (rep_enable)
-      rep_q <= rep_done ? '0 : rep_q + 1;
-  end
+  `FFLARNC(rep_q, rep_q + 1, rep_enable, rep_enable & rep_done, '0, clk_i, rst_ni)
+
   assign rep_done = (rep_q == rep_max);
 
 endmodule
