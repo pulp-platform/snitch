@@ -1,6 +1,8 @@
-BENDER		   ?= bender
-VLT			   ?= verilator
 # Support for local override
+BENDER		   ?= bender
+DASM 	       ?= spike-dasm
+VLT			   ?= verilator
+
 VERILATOR_ROOT ?= $$(dirname $$(which $(VLT)))/../share/verilator
 VLT_ROOT	   ?= ${VERILATOR_ROOT}
 
@@ -12,6 +14,7 @@ TB_DIR    := ${ROOT}/hw/ip/test/src
 
 VSIM_BENDER   += -t test -t rtl -t simulation -t vsim
 VSIM_SOURCES  := $(shell ${BENDER} script flist ${VSIM_BENDER} | ${SED_SRCS})
+VSIM_BUILDDIR := work-vsim
 
 # fesvr is being installed here
 FESVR          ?= ${MKFILE_DIR}work
@@ -59,6 +62,22 @@ define VERILATE
 		--Mdir $(dir $@) -f $(dir $@)files $(VLT_FLAGS) \
 		-j $(shell nproc) --cc --build --top-module $(1)
 	touch $@
+endef
+
+############
+# Modelsim #
+############
+
+define QUESTASIM
+	${VSIM} -c -do "source $<; quit" | tee $(dir $<)vsim.log
+	@! grep -P "Errors: [1-9]*," $(dir $<)vsim.log
+	@mkdir -p bin
+	@echo "#!/bin/bash" > $@
+	@echo '${VSIM} +permissive -work ${VSIM_BUILDDIR} -c \
+				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr" \
+				-t 1ps -voptargs=+acc tb_bin +permissive-off ++$$1 \
+				-do "log -r /*; run -a"' >> $@
+	@chmod +x $@
 endef
 
 #######

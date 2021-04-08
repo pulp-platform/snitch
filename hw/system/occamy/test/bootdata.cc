@@ -6,8 +6,9 @@
 
 namespace sim {
 
+// TODO(zarubaf): Auto-generate
 const BootData BOOTDATA = {
-    .boot_addr = 0x1000,
+    .boot_addr = 0x1000000,
     .core_count = 9,
     .hartid_base = 0,
     .tcdm_start = 0x100000,

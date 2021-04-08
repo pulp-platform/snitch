@@ -4,6 +4,7 @@
 ENTRY(_start)
 SECTIONS
 {
-  . = 0x1000;
+  /* TODO(zarubaf): Auto-generate from description */
+  . = 0x1000000;
   .text : { *(.text) }
 }

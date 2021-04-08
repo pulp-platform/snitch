@@ -15,9 +15,6 @@ CFG 		?= cfg/cluster.default.hjson
 CLUSTER_GEN ?= $(ROOT)/util/clustergen.py
 CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
 
-# Support for local override
-DASM 	       ?= spike-dasm
-
 # uncomment, if questasim should be run in 64-bit mode
 QUESTA_64BIT	= -64
 VSIM      		= vsim ${QUESTA_64BIT}
@@ -25,7 +22,6 @@ VLOG      		= vlog ${QUESTA_64BIT}
 
 VLT_FLAGS    += --trace
 
-VSIM_BUILDDIR := work-vsim
 VLOG_FLAGS 	  += -svinputport=compat
 VLOG_FLAGS 	  += -override_timescale 1ns/1ps
 VLOG_FLAGS 	  += -suppress 2583
@@ -86,15 +82,7 @@ ${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} ${TB_DIR}/rtl_lib.
 	echo 'return 0' >> $@
 
 bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
-	${VSIM} -c -do "source $<; quit" | tee $(dir $<)vsim.log
-	@! grep -P "Errors: [1-9]*," $(dir $<)vsim.log
-	@mkdir -p bin
-	@echo "#!/bin/bash" > $@
-	@echo '${VSIM} +permissive -work ${VSIM_BUILDDIR} -c \
-				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr" \
-				-t 1ps -voptargs=+acc tb_bin +permissive-off ++$$1 \
-				-do "log -r /*; run -a"' >> $@
-	@chmod +x $@
+	$(call QUESTASIM)
 
 #######
 # VCS #
