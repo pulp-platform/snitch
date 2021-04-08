@@ -9,6 +9,21 @@ module testharness import occamy_pkg::*; (
   input  logic        rst_ni
 );
 
+  // verilog_lint: waive explicit-parameter-storage-type
+  localparam RTC_TCK = 305ms; // 32.768 kHz
+
+  logic rtc_i;
+
+  // Generate reset and clock.
+  initial begin
+    forever begin
+      rtc_i = 1;
+      #(RTC_TCK/2);
+      rtc_i = 0;
+      #(RTC_TCK/2);
+    end
+  end
+
 
 
 
@@ -211,7 +226,7 @@ module testharness import occamy_pkg::*; (
     .rst_ni,
     .clk_periph_i (clk_i),
     .rst_periph_ni (rst_ni),
-    .rtc_i (),
+    .rtc_i,
     .test_mode_i (1'b0),
     .chip_id_i ('0),
     .boot_mode_i ('0),
@@ -220,7 +235,7 @@ module testharness import occamy_pkg::*; (
     .pad_drv_o (),
     .uart_tx_o (),
     .uart_rx_i ('0),
-    .gpio_d_i (),
+    .gpio_d_i ('0),
     .gpio_d_o (),
     .gpio_oe_o (),
     .gpio_puen_o (),

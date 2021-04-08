@@ -1,0 +1,34 @@
+From 928d1c610b7ebb3a0196292b227e520f89b1120f Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Thu, 8 Apr 2021 11:37:05 +0200
+Subject: [PATCH] cva6: Make AXI transactions modifiable
+
+---
+ src/axi_shim.sv | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/axi_shim.sv b/src/axi_shim.sv
+index 4c5cd70..1b29de5 100644
+--- a/src/axi_shim.sv
++++ b/src/axi_shim.sv
+@@ -91,7 +91,7 @@ module axi_shim #(
+   assign axi_req_o.aw.prot   = 3'b0;
+   assign axi_req_o.aw.region = 4'b0;
+   assign axi_req_o.aw.lock   = wr_lock_i;
+-  assign axi_req_o.aw.cache  = 4'b0;
++  assign axi_req_o.aw.cache  = axi_pkg::CACHE_MODIFIABLE;
+   assign axi_req_o.aw.qos    = 4'b0;
+   assign axi_req_o.aw.atop   = wr_atop_i;
+   assign axi_req_o.aw.user   = '0;
+@@ -250,7 +250,7 @@ module axi_shim #(
+   assign axi_req_o.ar.prot   = 3'b0;
+   assign axi_req_o.ar.region = 4'b0;
+   assign axi_req_o.ar.lock   = rd_lock_i;
+-  assign axi_req_o.ar.cache  = 4'b0;
++  assign axi_req_o.ar.cache  = axi_pkg::CACHE_MODIFIABLE;
+   assign axi_req_o.ar.qos    = 4'b0;
+   assign axi_req_o.ar.user   = '0;
+ 
+-- 
+2.25.1.377.g2d2118b814
+
