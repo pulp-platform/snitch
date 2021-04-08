@@ -105,7 +105,7 @@ module occamy_quadrant_s1
   %>
 
   logic [9:0] hart_base_id_${i};
-  assign hart_base_id_${i} = tile_id_i * NrCoresS1Quadrant + ${i} * NrCoresCluster;
+  assign hart_base_id_${i} = HartIdOffset + tile_id_i * NrCoresS1Quadrant + ${i} * NrCoresCluster;
 
   occamy_cluster_wrapper i_occamy_cluster_${i} (
     .clk_i (clk_i),

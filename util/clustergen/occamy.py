@@ -14,15 +14,18 @@ class Occamy(Generator):
         # Validate the schema.
         self.validate(cfg)
         # from here we know that we have a valid object.
-        # and construct a new SnitchClusterTB object.
+        # and construct a new Occamy object.
         self.cfg = cfg
         pma_cfg = PMACfg()
         # TODO(zarubaf): Check dram start address is aligned to its length.
         # For this example system make the entire dram cacheable.
-        pma_cfg.add_region(PMA.CACHED, 0, 0)
+        pma_cfg.add_region(PMA.CACHED, 0x80000000, 0x80000000)
 
         # Store Snitch cluster config in separate variable
         self.cluster = SnitchCluster(cfg["cluster"], pma_cfg)
+        # Overwrite boot address with base of bootrom
+        self.cluster.cfg["boot_addr"] = self.cfg["rom"]["address"]
+
         self.cluster.cfg['tie_ports'] = False
 
         if "const_cache" in self.cfg["s1_quadrant"]:

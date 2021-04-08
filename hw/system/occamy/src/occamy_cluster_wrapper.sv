@@ -63,7 +63,7 @@ package occamy_cluster_pkg;
   localparam snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{
       NrCachedRegionRules: 1,
       CachedRegion: '{
-          '{base: 48'h0, mask: 48'h0}
+          '{base: 48'h80000000, mask: 48'h80000000}
       },
       default: 0
   };
@@ -127,7 +127,7 @@ module occamy_cluster_wrapper (
     .NarrowIdWidthIn (occamy_cluster_pkg::NarrowIdWidthIn),
     .WideIdWidthIn (occamy_cluster_pkg::WideIdWidthIn),
     .UserWidth (occamy_cluster_pkg::UserWidth),
-    .BootAddr (32'h1000),
+    .BootAddr (32'h1000000),
     .narrow_in_req_t (occamy_cluster_pkg::narrow_in_req_t),
     .narrow_in_resp_t (occamy_cluster_pkg::narrow_in_resp_t),
     .narrow_out_req_t (occamy_cluster_pkg::narrow_out_req_t),

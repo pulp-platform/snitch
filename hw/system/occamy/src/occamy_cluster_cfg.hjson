@@ -4,6 +4,10 @@
 
 // Cluster configuration for Occamy.
 {
+    rom: {
+        address: 16777216,
+        length: 131072
+    },
     nr_s1_quadrant: 8,
     s1_quadrant: {
         nr_clusters: 4,

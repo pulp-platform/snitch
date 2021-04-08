@@ -35,10 +35,6 @@ module occamy_top
   output logic [31:0] gpio_oe_o,
   output logic [31:0] gpio_puen_o,
   output logic [31:0] gpio_pden_o,
-  // `serial` Interface
-  input  logic        serial_clk_i,
-  input  logic [3:0]  serial_data_i,
-  output logic [3:0]  serial_data_o,
   // `jtag` Interface
   input  logic        jtag_trst_ni,
   input  logic        jtag_tck_i,
@@ -127,22 +123,16 @@ module occamy_top
   //////////
   // CVA6 //
   //////////
-  localparam logic [63:0] BootAddr = 'h1000;
-  <%
-  cva6 = soc_narrow_xbar.in_cva6.copy(name="cva6_axi").declare(context)
-  cva6.cut(context, to=soc_narrow_xbar.in_cva6)
-  %>
+
   occamy_cva6 i_occamy_cva6 (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
-    .boot_addr_i (BootAddr),
-    .hart_id_i ('0),
     .irq_i (eip),
     .ipi_i (msip),
     .time_irq_i (mtip),
     .debug_req_i (debug_req),
-    .axi_req_o (${cva6.req_name()}),
-    .axi_resp_i (${cva6.rsp_name()})
+    .axi_req_o (${soc_narrow_xbar.in_cva6.req_name()}),
+    .axi_resp_i (${soc_narrow_xbar.in_cva6.rsp_name()})
   );
 
   % for i in range(nr_s1_quadrants):
@@ -203,7 +193,7 @@ module occamy_top
       .cdc(context, "clk_periph_i", "rst_periph_ni", "periph_cdc") \
       .change_dw(context, 32, "axi_to_axi_lite_dw") \
       .to_axi_lite(context, "axi_to_axi_lite_regbus_periph") \
-      .to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_axi_lite_periph_xbar) %>
+      .to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_soc) %>
 
 
   ///////////

@@ -15,11 +15,7 @@ module tb_bin;
 
   testharness i_dut (
     .clk_i,
-    .rst_ni,
-    .debug_req_i ('0),
-    .meip_i ('0),
-    .mtip_i ('0),
-    .msip_i ('0)
+    .rst_ni
   );
 
   initial begin

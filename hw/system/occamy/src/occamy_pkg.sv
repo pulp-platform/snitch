@@ -69,10 +69,12 @@ package occamy_pkg;
 
   typedef xbar_rule_48_t xbar_rule_t;
 
+  /// We reserve hartid `0` for CVA6.
+  localparam logic [9:0] HartIdOffset = 1;
   /// The base offset for each cluster.
   localparam addr_t ClusterBaseOffset = 'h1000_0000;
   /// The address space set aside for each slave.
-  localparam addr_t ClusterAddressSpace = 'h10_0000;
+  localparam addr_t ClusterAddressSpace = 'h4_0000;  // 256 kiB
   /// The address space of a single S1 quadrant.
   localparam addr_t S1QuadrantAddressSpace = ClusterAddressSpace * NrClustersS1Quadrant;
 
@@ -110,7 +112,7 @@ package occamy_pkg;
 
   /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
   localparam xbar_rule_48_t [1:0] SocAxiLitePeriphXbarAddrmap = '{
-    '{ idx: 0, start_addr: 48'h00040000, end_addr: 48'h00050000 },
+    '{ idx: 0, start_addr: 48'h04000000, end_addr: 48'h04100000 },
     '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 }
   };
 
@@ -136,7 +138,7 @@ package occamy_pkg;
 
   /// Inputs of the `soc_regbus_periph_xbar` crossbar.
   typedef enum int {
-    SOC_REGBUS_PERIPH_XBAR_IN_AXI_LITE_PERIPH_XBAR,
+    SOC_REGBUS_PERIPH_XBAR_IN_SOC,
     SOC_REGBUS_PERIPH_XBAR_NUM_INPUTS
   } soc_regbus_periph_xbar_inputs_e;
 
@@ -155,14 +157,14 @@ package occamy_pkg;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
   localparam xbar_rule_48_t [7:0] SocRegbusPeriphXbarAddrmap = '{
-    '{ idx: 0, start_addr: 48'h00020000, end_addr: 48'h00021000 },
-    '{ idx: 1, start_addr: 48'h00021000, end_addr: 48'h00022000 },
-    '{ idx: 2, start_addr: 48'h00010000, end_addr: 48'h00020000 },
-    '{ idx: 3, start_addr: 48'h00024000, end_addr: 48'h00025000 },
-    '{ idx: 4, start_addr: 48'h00030000, end_addr: 48'h00031000 },
-    '{ idx: 5, start_addr: 48'h00031000, end_addr: 48'h00032000 },
-    '{ idx: 6, start_addr: 48'h00033000, end_addr: 48'h00034000 },
-    '{ idx: 7, start_addr: 48'h00034000, end_addr: 48'h00035000 }
+    '{ idx: 0, start_addr: 48'h02000000, end_addr: 48'h02001000 },
+    '{ idx: 1, start_addr: 48'h02001000, end_addr: 48'h02002000 },
+    '{ idx: 2, start_addr: 48'h01000000, end_addr: 48'h01020000 },
+    '{ idx: 3, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
+    '{ idx: 4, start_addr: 48'h02002000, end_addr: 48'h02003000 },
+    '{ idx: 5, start_addr: 48'h02003000, end_addr: 48'h02004000 },
+    '{ idx: 6, start_addr: 48'h02004000, end_addr: 48'h02005000 },
+    '{ idx: 7, start_addr: 48'h03000000, end_addr: 48'h03020000 }
   };
 
   /// Inputs of the `soc_wide_xbar` crossbar.
@@ -222,7 +224,7 @@ package occamy_pkg;
     AxiIdUsedSlvPorts:  3,
     AxiAddrWidth:       48,
     AxiDataWidth:       512,
-    NoAddrRules:        17
+    NoAddrRules:        19
   };
 
   // AXI bus with 48 bit address, 512 bit data, 3 bit IDs, and 0 bit user data.
@@ -295,7 +297,7 @@ package occamy_pkg;
     AxiIdUsedSlvPorts:  4,
     AxiAddrWidth:       48,
     AxiDataWidth:       64,
-    NoAddrRules:        11
+    NoAddrRules:        13
   };
 
   // AXI bus with 48 bit address, 64 bit data, 4 bit IDs, and 0 bit user data.

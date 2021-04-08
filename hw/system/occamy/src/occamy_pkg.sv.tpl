@@ -69,10 +69,12 @@ package occamy_pkg;
 
   typedef xbar_rule_48_t xbar_rule_t;
 
+  /// We reserve hartid `0` for CVA6.
+  localparam logic [9:0] HartIdOffset = 1;
   /// The base offset for each cluster.
   localparam addr_t ClusterBaseOffset = 'h1000_0000;
   /// The address space set aside for each slave.
-  localparam addr_t ClusterAddressSpace = 'h10_0000;
+  localparam addr_t ClusterAddressSpace = 'h4_0000; // 256 kiB
   /// The address space of a single S1 quadrant.
   localparam addr_t S1QuadrantAddressSpace = ClusterAddressSpace * NrClustersS1Quadrant;
 

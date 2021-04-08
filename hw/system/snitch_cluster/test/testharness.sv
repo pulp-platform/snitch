@@ -6,11 +6,7 @@
 
 module testharness import snitch_cluster_pkg::*; (
   input  logic        clk_i,
-  input  logic        rst_ni,
-  input  logic [snitch_cluster_pkg::NrCores-1:0]  debug_req_i,
-  input  logic [snitch_cluster_pkg::NrCores-1:0]  meip_i,
-  input  logic [snitch_cluster_pkg::NrCores-1:0]  mtip_i,
-  input  logic [snitch_cluster_pkg::NrCores-1:0]  msip_i
+  input  logic        rst_ni
 );
 
   narrow_in_req_t narrow_in_req;
@@ -25,10 +21,10 @@ module testharness import snitch_cluster_pkg::*; (
   snitch_cluster_wrapper i_snitch_cluster (
     .clk_i,
     .rst_ni,
-    .debug_req_i,
-    .meip_i,
-    .mtip_i,
-    .msip_i,
+    .debug_req_i ('0),
+    .meip_i ('0),
+    .mtip_i ('0),
+    .msip_i ('0),
     .narrow_in_req_i (narrow_in_req),
     .narrow_in_resp_o (narrow_in_resp),
     .narrow_out_req_o (narrow_out_req),
@@ -44,7 +40,7 @@ module testharness import snitch_cluster_pkg::*; (
   assign wide_in_req = '0;
 
   // Narrow port into simulation memory.
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (AddrWidth),
     .AxiDataWidth (NarrowDataWidth),
     .AxiIdWidth (NarrowIdWidthOut),
@@ -59,7 +55,7 @@ module testharness import snitch_cluster_pkg::*; (
   );
 
   // Wide port into simulation memory.
-  tb_memory #(
+  tb_memory_axi #(
     .AxiAddrWidth (AddrWidth),
     .AxiDataWidth (WideDataWidth),
     .AxiIdWidth (WideIdWidthOut),

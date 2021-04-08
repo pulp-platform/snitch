@@ -18,11 +18,11 @@ dependencies:
   lowrisc_spi_host: {path: ../../vendor/lowrisc_opentitan/spi_host}
   lowrisc_i2c: {path: ../../vendor/lowrisc_opentitan/i2c}
   clint: {path: ../../vendor/pulp_platform_clint}
+  test: {path: ../../ip/test}
 
 sources:
 # Level 0:
 - src/occamy_cluster_wrapper.sv
-- src/occamy_cva6.sv
 - src/occamy_soc_reg/occamy_soc_reg_pkg.sv
 - src/occamy_soc_reg/occamy_soc_reg_top.sv
 - src/rv_plic/rv_plic_reg_pkg.sv
@@ -31,6 +31,7 @@ sources:
 # Level 1:
 - src/occamy_pkg.sv
 # Level 2:
+- src/occamy_cva6.sv
 - src/occamy_quadrant_s1.sv
 # Level 3:
 - src/occamy_top.sv
@@ -38,6 +39,10 @@ sources:
 - target: xilinx
   files:
   - src/occamy_xilinx.sv
+- target: any(simulation, verilator)
+  files:
+  - test/testharness.sv
+
 # - target: any(simulation, verilator)
 #   files:
 #   - test/tb_memory.sv

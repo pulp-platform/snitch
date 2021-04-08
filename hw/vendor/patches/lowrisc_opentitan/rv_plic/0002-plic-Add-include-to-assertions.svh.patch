@@ -1,0 +1,25 @@
+From 1624c8c4416bdc060f92419096d783661beefc2e Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Thu, 8 Apr 2021 11:34:04 +0200
+Subject: [PATCH] plic: Add include to `assertions.svh`
+
+---
+ data/rv_plic.sv.tpl | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/data/rv_plic.sv.tpl b/data/rv_plic.sv.tpl
+index 75f5d65..4af2c2a 100644
+--- a/data/rv_plic.sv.tpl
++++ b/data/rv_plic.sv.tpl
+@@ -14,6 +14,8 @@
+ // Verilog parameter
+ //   MAX_PRIO: Maximum value of interrupt priority
+ 
++`include "common_cells/assertions.svh"
++
+ module rv_plic import rv_plic_reg_pkg::*; #(
+   parameter type reg_req_t = logic,
+   parameter type reg_rsp_t = logic,
+-- 
+2.25.1.377.g2d2118b814
+

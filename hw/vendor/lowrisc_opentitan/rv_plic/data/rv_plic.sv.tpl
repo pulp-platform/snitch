@@ -14,6 +14,8 @@
 // Verilog parameter
 //   MAX_PRIO: Maximum value of interrupt priority
 
+`include "common_cells/assertions.svh"
+
 module rv_plic import rv_plic_reg_pkg::*; #(
   parameter type reg_req_t = logic,
   parameter type reg_rsp_t = logic,
