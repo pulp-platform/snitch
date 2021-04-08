@@ -6,6 +6,12 @@
 
 module tb_simple_ssr;
 
+  // Test parameters
+  localparam int unsigned AddrWidth     = 32;
+  localparam int unsigned DataWidth     = 64;
+  localparam bit          Indirection   = 1;
+  localparam bit          IndirOutSpill = 0;
+
   // Test data parameters
   localparam string       DataFile = "../test/tb_simple_ssr.hex";
   localparam int unsigned ValBase   = 'h0;
@@ -13,13 +19,23 @@ module tb_simple_ssr;
   localparam int unsigned IdxStride = 'h800;  // Stride of index arrays of different sizes
 
   // DUT parameters
-  localparam bit Indirection    = 1;
-  localparam bit IndirOutSpill  = 1;
+  localparam snitch_ssr_pkg::ssr_cfg_t Cfg = '{
+    Indirection:    Indirection,
+    IndirOutSpill:  IndirOutSpill,
+    NumLoops:       4,
+    IndexWidth:     16,
+    PointerWidth:   18,
+    ShiftWidth:     12,
+    IndexCredits:   2,
+    DataCredits:    4,
+    MuxRespDepth:   2
+  };
 
   // Instantiate fixture
   fixture_ssr #(
-    .Indirection    ( Indirection   ),
-    .IndirOutSpill  ( IndirOutSpill )
+    .AddrWidth ( AddrWidth  ),
+    .DataWidth ( DataWidth  ),
+    .Cfg       ( Cfg        )
   ) fix();
 
   initial begin

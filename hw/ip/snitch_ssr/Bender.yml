@@ -12,19 +12,18 @@ dependencies:
   register_interface: {path: ../../vendor/pulp_platform_register_interface}
   # Local dependencies.
   tcdm_interface: {path: ../../ip/tcdm_interface}
-  # TODO: this is a false dependency: snitch_pkg is included, but not required
-  snitch: {path: ../../ip/snitch}
-  # TODO: This is necessary due to a circular dependency on snitch_vm in snitch/test/snitch_l0_tlb_tb.sv
-  snitch_vm: {path: ../../ip/snitch_vm}
 
 sources:
-- src/snitch_ssr_indirector.sv
-# Level 1:
-- src/snitch_ssr_addr_gen.sv
+# Level 0:
+- src/snitch_ssr_pkg.sv
 - src/snitch_ssr_switch.sv
-# Level 2:
-- src/snitch_ssr.sv
+# Level 1:
+- src/snitch_ssr_indirector.sv
+# Level 2
+- src/snitch_ssr_addr_gen.sv
 # Level 3:
+- src/snitch_ssr.sv
+# Level 4:
 - src/snitch_ssr_streamer.sv
 - target: test
   files:

@@ -651,12 +651,30 @@ module snitch_cc #(
       .mem_resp_valid_i (cfg_req_valid_q)
     );
 
+  // TODO: propagate up and to config
+  localparam snitch_ssr_pkg::ssr_cfg_t SsrCfg = '{
+    Indirection:    0,
+    IndirOutSpill:  0,
+    NumLoops:       4,
+    IndexWidth:     16,
+    PointerWidth:   18,
+    ShiftWidth:     12,
+    IndexCredits:   2,
+    DataCredits:    4,
+    MuxRespDepth:   2
+  };
+
     snitch_ssr_streamer #(
+      .NumSsrs (3),
+      .RPorts (3),
+      .WPorts (1),
+      .SsrCfgs ({3{SsrCfg}}),
+      .SsrRegs (snitch_pkg::SSRRegs),
       .AddrWidth (AddrWidth),
       .DataWidth (DataWidth),
-      .SSRNrCredits (SSRNrCredits),
       .tcdm_req_t (tcdm_req_t),
-      .tcdm_rsp_t (tcdm_rsp_t)
+      .tcdm_rsp_t (tcdm_rsp_t),
+      .tcdm_user_t (tcdm_user_t)
     ) i_snitch_ssr_streamer (
       .clk_i,
       .rst_ni         ( rst_ni    ),

@@ -7,18 +7,24 @@
 `include "tcdm_interface/typedef.svh"
 `include "tcdm_interface/assign.svh"
 
-module fixture_ssr #(
-  parameter bit           Indirection   = 1,
-  parameter bit           IndirOutSpill = 1,
-  parameter int unsigned  AddrWidth     = 32,
-  parameter int unsigned  DataWidth     = 64,
-  parameter int unsigned  NumLoops      = 4,
-  parameter int unsigned  SSRNrCredits  = 4,
-  parameter int unsigned  IndexCredits  = 2,
-  parameter int unsigned  IndexWidth    = 16,
-  parameter int unsigned  PointerWidth  = 18,
-  parameter int unsigned  ShiftWidth    = 12,
-  parameter int unsigned  MuxRespDepth  = 2
+
+
+/*
+  parameter bit           Cfg.Indirection   = 1,
+  parameter bit           Cfg.IndirOutSpill = 1,
+  parameter int unsigned  Cfg.NumLoops      = 4,
+  parameter int unsigned  Cfg.DataCredits   = 4,
+  parameter int unsigned  Cfg.IndexCredits  = 2,
+  parameter int unsigned  Cfg.IndexWidth    = 16,
+  parameter int unsigned  Cfg.PointerWidth  = 18,
+  parameter int unsigned  Cfg.ShiftWidth    = 12,
+  parameter int unsigned  Cfg.MuxRespDepth  = 2
+*/
+
+module fixture_ssr import snitch_ssr_pkg::*; #(
+  parameter int unsigned  AddrWidth = 0,
+  parameter int unsigned  DataWidth = 0,
+  parameter ssr_cfg_t     Cfg       = '0
 );
 
   // ------------
@@ -50,15 +56,15 @@ module fixture_ssr #(
 
   // SSR constant / derived parameters
   localparam int unsigned RepWidth = 4;
-  localparam int unsigned DimWidth = $clog2(NumLoops);
+  localparam int unsigned DimWidth = $clog2(Cfg.NumLoops);
 
   // Configuration written through proper registers
   typedef struct packed {
     logic [31:0] idx_shift;
     logic [31:0] idx_base;
     logic [31:0] idx_size;
-    logic [NumLoops-1:0][31:0] stride;
-    logic [NumLoops-1:0][31:0] bound;
+    logic [Cfg.NumLoops-1:0][31:0] stride;
+    logic [Cfg.NumLoops-1:0][31:0] bound;
     logic [31:0] rep;
   } cfg_regs_t;
 
@@ -130,20 +136,12 @@ module fixture_ssr #(
 
   // Device Under Test (DUT)
   snitch_ssr #(
-    .Indirection   ( Indirection   ),
-    .IndirOutSpill ( IndirOutSpill ),
-    .AddrWidth     ( AddrWidth     ),
-    .DataWidth     ( DataWidth     ),
-    .IndexWidth    ( IndexWidth    ),
-    .PointerWidth  ( PointerWidth  ),
-    .ShiftWidth    ( ShiftWidth    ),
-    .IndexCredits  ( IndexCredits  ),
-    .NumLoops      ( NumLoops      ),
-    .MuxRespDepth  ( MuxRespDepth  ),
-    .SSRNrCredits  ( SSRNrCredits  ),
-    .tcdm_user_t   ( user_t        ),
-    .tcdm_req_t    ( tcdm_req_t    ),
-    .tcdm_rsp_t    ( tcdm_rsp_t    )
+    .Cfg          ( Cfg         ),
+    .AddrWidth    ( AddrWidth   ),
+    .DataWidth    ( DataWidth   ),
+    .tcdm_user_t  ( user_t      ),
+    .tcdm_req_t   ( tcdm_req_t  ),
+    .tcdm_rsp_t   ( tcdm_rsp_t  )
   ) i_snitch_ssr (
     .clk_i          ( clk       ),
     .rst_ni         ( rst_n     ),
@@ -266,13 +264,13 @@ module fixture_ssr #(
   // Ignores status field: use launch task to launch job
   task automatic cfg_write_regs (input cfg_regs_t cfg);
     cfg_write(5'h1, cfg.rep);
-    for (int i = 0; i < NumLoops; ++i) begin
+    for (int i = 0; i < Cfg.NumLoops; ++i) begin
       cfg_write(i+2, cfg.bound[i]);
-      cfg_write(i+2+NumLoops, cfg.stride[i]);
+      cfg_write(i+2+Cfg.NumLoops, cfg.stride[i]);
     end
-    cfg_write(2*NumLoops+2 + 0, cfg.idx_size);
-    cfg_write(2*NumLoops+2 + 1, cfg.idx_base);
-    cfg_write(2*NumLoops+2 + 2, cfg.idx_shift);
+    cfg_write(2*Cfg.NumLoops+2 + 0, cfg.idx_size);
+    cfg_write(2*Cfg.NumLoops+2 + 1, cfg.idx_base);
+    cfg_write(2*Cfg.NumLoops+2 + 2, cfg.idx_shift);
   endtask
 
   task automatic cfg_launch_status (input cfg_status_t cfg);
@@ -292,7 +290,7 @@ module fixture_ssr #(
     cfg_read(5'h1, cfg.rep);
     for (int i = 0; i < 4; ++i) begin
       cfg_read(i+2,  cfg.bound[i]);
-      cfg_read(i+2+NumLoops, cfg.stride[i]);
+      cfg_read(i+2+Cfg.NumLoops, cfg.stride[i]);
     end
   endtask
 
@@ -422,11 +420,11 @@ module fixture_ssr #(
     input logic                       write,
     input logic                       write_check,
     input logic [RepWidth-1:0]        rep,
-    input logic [NumLoops-1:0][31:0]  bound,
-    input logic [NumLoops-1:0][31:0]  stride,
-    input logic [NumLoops-1:0]        loop_ena,
+    input logic [Cfg.NumLoops-1:0][31:0]  bound,
+    input logic [Cfg.NumLoops-1:0][31:0]  stride,
+    input logic [Cfg.NumLoops-1:0]        loop_ena,
     input logic [DimWidth-1:0]        loop_top_idx,
-    ref   logic [NumLoops-1:0][31:0]  loop_idcs,
+    ref   logic [Cfg.NumLoops-1:0][31:0]  loop_idcs,
     ref   addr_t                      ptr,
     ref   addr_t                      ptr_next,
     ref   addr_t                      ptr_source
@@ -492,22 +490,22 @@ module fixture_ssr #(
     input addr_t                      data_base,
     input logic [DimWidth-1:0]        num_loops,
     input logic [RepWidth-1:0]        rep,
-    input logic [NumLoops-1:0][31:0]  bound,
-    input logic [NumLoops-1:0][31:0]  stride_elems,
+    input logic [Cfg.NumLoops-1:0][31:0]  bound,
+    input logic [Cfg.NumLoops-1:0][31:0]  stride_elems,
     input addr_t ptr_source = '0,   // For writes only: pointer to linearly-read SSR input data
     input addr_t offs_dest  = '0    // For writes only: pointer to target region for writes
   );
     cfg_regs_t    regs;
     cfg_status_t  status;
-    logic [NumLoops-1:0]        loop_ena;
-    logic [NumLoops-1:0][31:0]  stride;
-    logic [NumLoops-1:0][31:0]  loop_idcs;
+    logic [Cfg.NumLoops-1:0]        loop_ena;
+    logic [Cfg.NumLoops-1:0][31:0]  stride;
+    logic [Cfg.NumLoops-1:0][31:0]  loop_idcs;
     addr_t ptr;
     addr_t data_base_ptr  = data_base + (write ? offs_dest : '0);
     addr_t ptr_next       = data_base_ptr;
     addr_t ptr_source_mut = ptr_source;
     // Determine whether each loop is activated and byte stride
-    for (int i = 0; unsigned'(i) < NumLoops; ++i) begin
+    for (int i = 0; unsigned'(i) < Cfg.NumLoops; ++i) begin
       loop_ena [i]  = (num_loops >= i);
       stride   [i]  = WordBytes * stride_elems[i];
     end
@@ -517,7 +515,7 @@ module fixture_ssr #(
     verify_launch(regs, status, alias_launch);
     // Do loops
     verify_nat_job_loop(write, 0, rep, bound, stride,
-        loop_ena, NumLoops-1, loop_idcs, ptr, ptr_next, ptr_source_mut);
+        loop_ena, Cfg.NumLoops-1, loop_idcs, ptr, ptr_next, ptr_source_mut);
     // Ensure SSR is done after some time to write back
     verify_done(write);
     #Timeout;
@@ -528,7 +526,7 @@ module fixture_ssr #(
         ptr_source_mut  = ptr_source;
         // Reiterate with checking
         verify_nat_job_loop(1, 1, rep, bound, stride,
-            loop_ena, NumLoops-1, loop_idcs, ptr, ptr_next, ptr_source_mut);
+            loop_ena, Cfg.NumLoops-1, loop_idcs, ptr, ptr_next, ptr_source_mut);
         $display("%t: Direct write success", $time);
     end else begin
       $display("%t: Direct read success", $time);
@@ -542,7 +540,7 @@ module fixture_ssr #(
     input addr_t                idx_base,
     input logic [RepWidth-1:0]  rep,
     input logic [31:0]          bound,
-    input logic [ShiftWidth:0]  idx_shift,
+    input logic [Cfg.ShiftWidth:0]  idx_shift,
     input logic [1:0]           idx_size,
     input addr_t ptr_source = '0    // For writes only: pointer to linearly-read SSR input data
   );
@@ -550,7 +548,7 @@ module fixture_ssr #(
     cfg_status_t  status;
     logic [31:0]  idx_base_ptr  = idx_base;
     regs = {32'(idx_shift), 32'(data_base), 32'(idx_size),
-        (32*NumLoops)'(WordBytes), (32*NumLoops)'(bound), 32'(rep)};
+        (32*Cfg.NumLoops)'(WordBytes), (32*Cfg.NumLoops)'(bound), 32'(rep)};
     status.upper  = {1'b0, write, {DimWidth{1'b0}}, 1'b1};
     status.ptr    = idx_base_ptr;
     verify_launch(regs, status, alias_launch);

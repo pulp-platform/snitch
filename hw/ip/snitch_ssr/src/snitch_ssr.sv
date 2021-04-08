@@ -7,18 +7,10 @@
 
 `include "common_cells/registers.svh"
 
-module snitch_ssr import snitch_pkg::*; #(
-  parameter bit Indirection    = 0,           // TODO: propagate, add to config
-  parameter bit IndirOutSpill  = 0,           // TODO: propagate, add to config
-  parameter int unsigned AddrWidth    = 0,
-  parameter int unsigned DataWidth    = 0,
-  parameter int unsigned IndexWidth   = 16,   // TODO: propagate, add to config
-  parameter int unsigned PointerWidth = 18,   // TODO: propagate, add to config
-  parameter int unsigned ShiftWidth   = 12,   // TODO: propagate, add to config
-  parameter int unsigned IndexCredits = 2,    // TODO: propagate, add to config
-  parameter int unsigned NumLoops     = 4,    // TODO: propagate, add to config
-  parameter int unsigned MuxRespDepth = 2,    // TODO: propagate, add to config
-  parameter int unsigned SSRNrCredits = 0,
+module snitch_ssr import snitch_ssr_pkg::*; #(
+  parameter ssr_cfg_t Cfg = '0,
+  parameter int unsigned AddrWidth = 0,
+  parameter int unsigned DataWidth = 0,
   parameter type tcdm_user_t  = logic,
   parameter type tcdm_req_t   = logic,
   parameter type tcdm_rsp_t   = logic,
@@ -48,14 +40,14 @@ module snitch_ssr import snitch_pkg::*; #(
   data_t fifo_out, fifo_in;
   logic fifo_push, fifo_pop, fifo_full, fifo_empty;
   logic mover_valid;
-  logic [$clog2(SSRNrCredits):0] credit_d, credit_q;
+  logic [$clog2(Cfg.DataCredits):0] credit_d, credit_q;
   logic has_credit, credit_take, credit_give;
   logic [3:0] rep_max, rep_q, rep_done, rep_enable;
 
   fifo_v3 #(
     .FALL_THROUGH ( 0           ),
     .DATA_WIDTH   ( DataWidth   ),
-    .DEPTH        ( SSRNrCredits )
+    .DEPTH        ( Cfg.DataCredits )
   ) i_fifo (
     .clk_i,
     .rst_ni,
@@ -75,18 +67,12 @@ module snitch_ssr import snitch_pkg::*; #(
   tcdm_rsp_t idx_rsp, data_rsp;
 
   snitch_ssr_addr_gen #(
-    .Indirection      ( Indirection   ),
-    .IndirOutSpill    ( IndirOutSpill ),
-    .AddrWidth        ( AddrWidth     ),
-    .DataWidth        ( DataWidth     ),
-    .IndexWidth       ( IndexWidth    ),
-    .PointerWidth     ( PointerWidth  ),
-    .ShiftWidth       ( ShiftWidth    ),
-    .IndexCredits     ( IndexCredits  ),
-    .NumLoops         ( NumLoops      ),
-    .tcdm_req_t       ( tcdm_req_t    ),
-    .tcdm_rsp_t       ( tcdm_rsp_t    ),
-    .tcdm_user_t      ( tcdm_user_t   )
+    .Cfg          ( Cfg         ),
+    .AddrWidth    ( AddrWidth   ),
+    .DataWidth    ( DataWidth   ),
+    .tcdm_req_t   ( tcdm_req_t  ),
+    .tcdm_rsp_t   ( tcdm_rsp_t  ),
+    .tcdm_user_t  ( tcdm_user_t )
   ) i_addr_gen (
     .clk_i,
     .rst_ni,
@@ -104,13 +90,13 @@ module snitch_ssr import snitch_pkg::*; #(
     .tcdm_start_address_i
   );
 
-  if (Indirection) begin : gen_demux
+  if (Cfg.Indirection) begin : gen_demux
     tcdm_mux #(
       .NrPorts    ( 2             ),
       .AddrWidth  ( AddrWidth     ),
       .DataWidth  ( DataWidth     ),
       .user_t     ( tcdm_user_t   ),
-      .RespDepth  ( MuxRespDepth  ),
+      .RespDepth  ( Cfg.MuxRespDepth  ),
       .tcdm_req_t ( tcdm_req_t    ),
       .tcdm_rsp_t ( tcdm_rsp_t    )
     ) i_tcdm_mux (
@@ -129,7 +115,7 @@ module snitch_ssr import snitch_pkg::*; #(
   end
 
   assign data_req.q_valid = data_req_qvalid;
-  assign data_req.q.amo = reqrsp_pkg::AMONone;
+  assign data_req.q.amo = '0;
   assign data_req.q.user = '0;
 
   assign lane_rdata_o = fifo_out;
@@ -169,7 +155,7 @@ module snitch_ssr import snitch_pkg::*; #(
   end
   assign has_credit = (credit_q != '0);
 
-  `FFARN(credit_q, credit_d, SSRNrCredits, clk_i, rst_ni)
+  `FFARN(credit_q, credit_d, Cfg.DataCredits, clk_i, rst_ni)
 
   // Repetition counter.
   `FFLARNC(rep_q, rep_q + 1, rep_enable, rep_enable & rep_done, '0, clk_i, rst_ni)

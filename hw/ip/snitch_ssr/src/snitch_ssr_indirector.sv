@@ -8,13 +8,10 @@
 
 `include "common_cells/registers.svh"
 
-module snitch_ssr_indirector #(
+module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
+  parameter ssr_cfg_t Cfg = '0,
   parameter int unsigned AddrWidth = 0,
   parameter int unsigned DataWidth = 0,
-  parameter int unsigned IndexWidth = 0,
-  parameter int unsigned PointerWidth = 0,
-  parameter int unsigned ShiftWidth   = 0,
-  parameter int unsigned IndexCredits = 0,
   parameter type tcdm_req_t   = logic,
   parameter type tcdm_rsp_t   = logic,
   parameter type tcdm_user_t  = logic,
@@ -23,9 +20,9 @@ module snitch_ssr_indirector #(
   parameter type addr_t     = logic [AddrWidth-1:0],
   parameter type data_t     = logic [DataWidth-1:0],
   parameter type bytecnt_t  = logic [BytecntWidth-1:0],
-  parameter type index_t    = logic [IndexWidth-1:0],
-  parameter type pointer_t  = logic [PointerWidth-1:0],
-  parameter type shift_t    = logic [ShiftWidth-1:0],
+  parameter type index_t    = logic [Cfg.IndexWidth-1:0],
+  parameter type pointer_t  = logic [Cfg.PointerWidth-1:0],
+  parameter type shift_t    = logic [Cfg.ShiftWidth-1:0],
   parameter type idx_size_t = logic [$clog2($clog2(DataWidth/8)+1)-1:0]
 ) (
   input  logic      clk_i,
@@ -62,7 +59,7 @@ module snitch_ssr_indirector #(
   data_t idx_fifo_out;
 
   // Index credit counter
-  logic [$clog2(IndexCredits):0] idx_cred_d, idx_cred_q;
+  logic [$clog2(Cfg.IndexCredits):0] idx_cred_d, idx_cred_q;
   logic idx_cred_take, idx_cred_give;
   logic idx_cred_left;
 
@@ -84,8 +81,8 @@ module snitch_ssr_indirector #(
   // Index TCDM request (read-only)
   assign idx_req_o.q = '{
       // Mask lower bits to fetch only entire, aligned words
-      addr: {tcdm_start_address_i[AddrWidth-1:PointerWidth],
-          natit_pointer_i[PointerWidth-1:BytecntWidth], {BytecntWidth{1'b0}}},
+      addr: {tcdm_start_address_i[AddrWidth-1:Cfg.PointerWidth],
+          natit_pointer_i[Cfg.PointerWidth-1:BytecntWidth], {BytecntWidth{1'b0}}},
       default: '0
     };
 
@@ -95,9 +92,9 @@ module snitch_ssr_indirector #(
 
   // Index FIFO: stores full unserialized words.
   fifo_v3 #(
-    .FALL_THROUGH ( 1'b0          ),
-    .DATA_WIDTH   ( DataWidth     ),
-    .DEPTH        ( IndexCredits  )
+    .FALL_THROUGH ( 1'b0              ),
+    .DATA_WIDTH   ( DataWidth         ),
+    .DEPTH        ( Cfg.IndexCredits  )
   ) i_idx_fifo (
     .clk_i,
     .rst_ni,
@@ -120,7 +117,7 @@ module snitch_ssr_indirector #(
     else if (~idx_cred_take & idx_cred_give)  idx_cred_d = idx_cred_q + 1;
   end
 
-  `FFARN(idx_cred_q, idx_cred_d, IndexCredits, clk_i, rst_ni)
+  `FFARN(idx_cred_q, idx_cred_d, Cfg.IndexCredits, clk_i, rst_ni)
 
   assign idx_cred_left = (idx_cred_q != '0);
   assign idx_cred_take = idx_req_o.q_valid & idx_rsp_i.q_ready;
