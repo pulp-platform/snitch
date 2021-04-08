@@ -91,7 +91,7 @@ module axi_shim #(
   assign axi_req_o.aw.prot   = 3'b0;
   assign axi_req_o.aw.region = 4'b0;
   assign axi_req_o.aw.lock   = wr_lock_i;
-  assign axi_req_o.aw.cache  = 4'b0;
+  assign axi_req_o.aw.cache  = axi_pkg::CACHE_MODIFIABLE;
   assign axi_req_o.aw.qos    = 4'b0;
   assign axi_req_o.aw.atop   = wr_atop_i;
   assign axi_req_o.aw.user   = '0;
@@ -250,7 +250,7 @@ module axi_shim #(
   assign axi_req_o.ar.prot   = 3'b0;
   assign axi_req_o.ar.region = 4'b0;
   assign axi_req_o.ar.lock   = rd_lock_i;
-  assign axi_req_o.ar.cache  = 4'b0;
+  assign axi_req_o.ar.cache  = axi_pkg::CACHE_MODIFIABLE;
   assign axi_req_o.ar.qos    = 4'b0;
   assign axi_req_o.ar.user   = '0;
 
