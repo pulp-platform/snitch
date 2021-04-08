@@ -85,11 +85,11 @@ int main() {
         "li %[ret], 1\n"
 
         "2:\n"  // no error
-
-        : [tmp] "+fr"(tmp), [ret] "+r"(ret)
-        : [x] "r"(x), [y] "r"(y),
-          [prod_x] "fr"(x[4] * x[4] + x[5] * x[5] + x[6] * x[6] + x[7] * x[7]),
-          [prod_y] "fr"(y[4] * y[4] + y[5] * y[5] + y[6] * y[6] + y[7] * y[7])
+        : [ tmp ] "+fr"(tmp), [ ret ] "+r"(ret)
+        :
+        [ x ] "r"(x), [ y ] "r"(y),
+        [ prod_x ] "fr"(x[4] * x[4] + x[5] * x[5] + x[6] * x[6] + x[7] * x[7]),
+        [ prod_y ] "fr"(y[4] * y[4] + y[5] * y[5] + y[6] * y[6] + y[7] * y[7])
         : "ft0", "ft1", "ft3", "t0", "t1");
     __builtin_ssr_disable();
 
