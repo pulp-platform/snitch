@@ -10,7 +10,7 @@ module testharness import occamy_pkg::*; (
 );
 
   // verilog_lint: waive explicit-parameter-storage-type
-  localparam RTC_TCK = 305ms; // 32.768 kHz
+  localparam RTCTCK = 305ms; // 32.768 kHz
 
   logic rtc_i;
 
@@ -18,9 +18,9 @@ module testharness import occamy_pkg::*; (
   initial begin
     forever begin
       rtc_i = 1;
-      #(RTC_TCK/2);
+      #(RTCTCK/2);
       rtc_i = 0;
-      #(RTC_TCK/2);
+      #(RTCTCK/2);
     end
   end
 

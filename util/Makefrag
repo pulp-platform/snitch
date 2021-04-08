@@ -85,7 +85,7 @@ endef
 #######
 work-vcs/compile.sh: ${VSIM_SOURCES} ${TB_SRCS}
 	mkdir -p work-vcs
-	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover -full64" > $@
+	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover -full64 -kdb" > $@
 	chmod +x $@
 	$@ > work-vcs/compile.log
 
