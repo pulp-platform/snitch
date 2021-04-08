@@ -587,6 +587,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
             0x7C0 => self.state.ssr_enable,
             0xB00 => self.state.cycle as u32,         // csr_mcycle
             0xB80 => (self.state.cycle >> 32) as u32, // csr_mcycleh
+            0xB02 => self.state.instret as u32,       // csr_minstret
+            0xB82 => (self.state.instret >> 32) as u32, // csr_minstreth
             0xF14 => self.hartid as u32,              // mhartid
             _ => 0,
         }
