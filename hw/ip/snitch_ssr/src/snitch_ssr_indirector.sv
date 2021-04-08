@@ -128,7 +128,7 @@ module snitch_ssr_indirector #(
 
   // The initial byte offset and byte offset of the index array bound determine
   // the final index offset and whether an additional index word is needed.
-  assign last_word          = (idx_cred_q == 1) & natit_done_i;
+  assign last_word          = (idx_cred_q == Cfg.IndexCredits-1) & natit_done_i;
   assign first_idx_byteoffs = bytecnt_t'(natit_pointer_i);
   assign {natit_extraword_o, last_idx_byteoffs} = first_idx_byteoffs + natit_boundoffs_i;
 
