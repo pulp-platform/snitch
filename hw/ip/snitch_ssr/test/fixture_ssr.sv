@@ -7,20 +7,6 @@
 `include "tcdm_interface/typedef.svh"
 `include "tcdm_interface/assign.svh"
 
-
-
-/*
-  parameter bit           Cfg.Indirection   = 1,
-  parameter bit           Cfg.IndirOutSpill = 1,
-  parameter int unsigned  Cfg.NumLoops      = 4,
-  parameter int unsigned  Cfg.DataCredits   = 4,
-  parameter int unsigned  Cfg.IndexCredits  = 2,
-  parameter int unsigned  Cfg.IndexWidth    = 16,
-  parameter int unsigned  Cfg.PointerWidth  = 18,
-  parameter int unsigned  Cfg.ShiftWidth    = 12,
-  parameter int unsigned  Cfg.MuxRespDepth  = 2
-*/
-
 module fixture_ssr import snitch_ssr_pkg::*; #(
   parameter int unsigned  AddrWidth = 0,
   parameter int unsigned  DataWidth = 0,
@@ -417,17 +403,17 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   // Verify reads of one loop level; used recursively
   // TODO: we assume floating point data when using $bitstoreal. Find a better option?
   task automatic verify_nat_job_loop (
-    input logic                       write,
-    input logic                       write_check,
-    input logic [RepWidth-1:0]        rep,
+    input logic                           write,
+    input logic                           write_check,
+    input logic [RepWidth-1:0]            rep,
     input logic [Cfg.NumLoops-1:0][31:0]  bound,
     input logic [Cfg.NumLoops-1:0][31:0]  stride,
     input logic [Cfg.NumLoops-1:0]        loop_ena,
-    input logic [DimWidth-1:0]        loop_top_idx,
+    input logic [DimWidth-1:0]            loop_top_idx,
     ref   logic [Cfg.NumLoops-1:0][31:0]  loop_idcs,
-    ref   addr_t                      ptr,
-    ref   addr_t                      ptr_next,
-    ref   addr_t                      ptr_source
+    ref   addr_t                          ptr,
+    ref   addr_t                          ptr_next,
+    ref   addr_t                          ptr_source
   );
     data_t data_actual, data_golden;
     // Lowestmost loop: read from SSR and memory to compare
@@ -485,13 +471,13 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
 
   // Verify a given natural iteration job
   task automatic verify_nat_job (
-    input logic                       write,
-    input logic                       alias_launch,
-    input addr_t                      data_base,
-    input logic [DimWidth-1:0]        num_loops,
-    input logic [RepWidth-1:0]        rep,
-    input logic [Cfg.NumLoops-1:0][31:0]  bound,
-    input logic [Cfg.NumLoops-1:0][31:0]  stride_elems,
+    input logic                 write,
+    input logic                 alias_launch,
+    input addr_t                data_base,
+    input logic [DimWidth-1:0]  num_loops,
+    input logic [RepWidth-1:0]  rep,
+    input logic [3:0][31:0]     bound,
+    input logic [3:0][31:0]     stride_elems,
     input addr_t ptr_source = '0,   // For writes only: pointer to linearly-read SSR input data
     input addr_t offs_dest  = '0    // For writes only: pointer to target region for writes
   );
@@ -509,7 +495,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
       loop_ena [i]  = (num_loops >= i);
       stride   [i]  = WordBytes * stride_elems[i];
     end
-    regs          = {'0, {stride, bound, 32'(rep)}};
+    regs          = {'0, {stride[Cfg.NumLoops-1:0], bound[Cfg.NumLoops-1:0], 32'(rep)}};
     status.upper  = {1'b0, write, num_loops, 1'b0};
     status.ptr    = ptr_next;
     verify_launch(regs, status, alias_launch);
@@ -534,14 +520,14 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   endtask
 
   task automatic verify_indir_job (
-    input logic                 write,
-    input logic                 alias_launch,
-    input addr_t                data_base,
-    input addr_t                idx_base,
-    input logic [RepWidth-1:0]  rep,
-    input logic [31:0]          bound,
+    input logic                     write,
+    input logic                     alias_launch,
+    input addr_t                    data_base,
+    input addr_t                    idx_base,
+    input logic [RepWidth-1:0]      rep,
+    input logic [31:0]              bound,
     input logic [Cfg.ShiftWidth:0]  idx_shift,
-    input logic [1:0]           idx_size,
+    input logic [1:0]               idx_size,
     input addr_t ptr_source = '0    // For writes only: pointer to linearly-read SSR input data
   );
     cfg_regs_t    regs;
