@@ -103,6 +103,26 @@ package ${cfg['pkg_name']};
         PipeConfig: fpnew_pkg::${cfg['timing']['fpu_pipe_config']}
     };
 
+    localparam snitch_ssr_pkg::ssr_cfg_t [${cfg['num_ssrs_max']}-1:0] SsrCfgs [${cfg['nr_cores']}] = '{
+% for core in cfg['cores']:
+  % if 'ssrs' in core and len(core['ssrs']):
+      % for s in list(reversed(core['ssrs'])):
+      ${'\'{' if loop.first else ''}'{${int(s['indirection'])}, ${int(s['indir_out_spill'])}, ${s['num_loops']}, ${s['index_width']}, ${s['pointer_width']}, \
+${s['shift_width']}, ${s['index_credits']}, ${s['data_credits']}, ${s['mux_resp_depth']}}${',' if not loop.last else '}'}
+      % endfor
+  % else:
+      '0
+  % endif
+      ${', ' if not loop.last else ''}
+% endfor
+  };
+
+    localparam logic [${cfg['num_ssrs_max']}-1:0][4:0] SsrRegs [${cfg['nr_cores']}] = '{
+% for core in cfg['cores']:
+      ${('\'{' + ', '.join(str(s['reg_idx']) for s in reversed(core['ssrs'])) + '}' if 'ssrs' in core and len(core['ssrs']) else '\'0') + (',' if not loop.last else '')}
+% endfor
+  };
+
 endpackage
 // verilog_lint: waive-stop package-filename
 
@@ -135,28 +155,8 @@ module ${cfg['name']}_wrapper (
   localparam int unsigned NumDTLBEntries [${cfg['nr_cores']}] = '{${core_cfg('num_dtlb_entries')}};
   localparam int unsigned NumITLBEntries [${cfg['nr_cores']}] = '{${core_cfg('num_itlb_entries')}};
   localparam int unsigned NumSequencerInstr [${cfg['nr_cores']}] = '{${core_cfg('num_sequencer_instructions')}};
-
-  // TODO: propagate up and to config
-  localparam snitch_ssr_pkg::ssr_cfg_t SsrCfgDummy = '{
-    Indirection:    0,
-    IndirOutSpill:  0,
-    NumLoops:       4,
-    IndexWidth:     16,
-    PointerWidth:   18,
-    ShiftWidth:     12,
-    IndexCredits:   3,
-    DataCredits:    4,
-    MuxRespDepth:   3
-  };
-
-  localparam snitch_ssr_pkg::ssr_cfg_t  [2:0] SCD = {3{SsrCfgDummy}};
-  localparam logic [2:0][4:0] SRD = '{2, 1, 0};
-
-  localparam int unsigned                                    NumSsrsMax          = 3;
-  localparam int unsigned                                    NumSsrs         [9] = '{3, 3, 3, 3, 3, 3, 3, 3, 3};
-  localparam int unsigned                                    SsrMuxRespDepth [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 4};
-  localparam snitch_ssr_pkg::ssr_cfg_t [NumSsrsMax-1:0]      SsrCfgs         [9] = '{SCD, SCD, SCD, SCD, SCD, SCD, SCD, SCD, SCD};
-  localparam logic                     [NumSsrsMax-1:0][4:0] SsrRegs         [9] = '{SRD, SRD, SRD, SRD, SRD, SRD, SRD, SRD, SRD};
+  localparam int unsigned NumSsrs [${cfg['nr_cores']}] = '{${core_cfg('num_ssrs')}};
+  localparam int unsigned SsrMuxRespDepth [${cfg['nr_cores']}] = '{${core_cfg('ssr_mux_resp_depth')}};
 
   // Snitch cluster under test.
   snitch_cluster #(
@@ -202,14 +202,11 @@ module ${cfg['name']}_wrapper (
     .NumFPOutstandingMem (NumFPOutstandingMem),
     .NumDTLBEntries (NumDTLBEntries),
     .NumITLBEntries (NumITLBEntries),
-
-    // TODO: Configure using config tool
-    .NumSsrsMax (NumSsrsMax),
+    .NumSsrsMax (${cfg['num_ssrs_max']}),
     .NumSsrs (NumSsrs),
     .SsrMuxRespDepth (SsrMuxRespDepth),
-    .SsrRegs (SsrRegs),
-    .SsrCfgs (SsrCfgs),
-
+    .SsrRegs (${cfg['pkg_name']}::SsrRegs),
+    .SsrCfgs (${cfg['pkg_name']}::SsrCfgs),
     .NumSequencerInstr (NumSequencerInstr),
     .Hive (${cfg['pkg_name']}::Hive),
     .Topology (snitch_pkg::LogarithmicInterconnect),
