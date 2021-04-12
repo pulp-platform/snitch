@@ -17,6 +17,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
   parameter bit Xfrep = 1,
   parameter fpnew_pkg::fpu_implementation_t FPUImplementation = '0,
   parameter bit Xssr = 1,
+  parameter int unsigned NumSsrs = 0,
+  parameter logic [NumSsrs-1:0][4:0]  SsrRegs = '0,
   parameter type acc_req_t = logic,
   parameter type acc_resp_t = logic,
   parameter bit RVF = 1,
@@ -245,7 +247,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
     if (fpr_we) sb_d[fpr_waddr] = 1'b0;
     // don't track any dependencies for SSRs if enabled
     if (ssr_active_q) begin
-      for (int i = 0; i < $size(SSRRegs, 1); i++) sb_d[SSRRegs[i]] = 1'b0;
+      for (int i = 0; i < NumSsrs; i++) sb_d[SsrRegs[i]] = 1'b0;
     end
   end
 
@@ -2488,6 +2490,12 @@ module snitch_fp_ss import snitch_pkg::*; #(
   end
 
   for (genvar i = 0; i < 3; i++) begin: gen_operand_select
+    logic is_raddr_ssr;
+    always_comb begin
+      is_raddr_ssr = 1'b0;
+      for (int s = 0; s < NumSsrs; s++)
+        is_raddr_ssr |= (SsrRegs[s] == fpr_raddr[i]);
+    end
     always_comb begin
       ssr_rvalid_o[i] = 1'b0;
       unique case (op_select[i])
@@ -2502,7 +2510,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         // Scoreboard or SSR
         RegA, RegB, RegBRep, RegC, RegDest: begin
           // map register 0 and 1 to SSRs
-          ssr_rvalid_o[i] = ssr_active_q & snitch_pkg::is_ssr(fpr_raddr[i]);
+          ssr_rvalid_o[i] = ssr_active_q & is_raddr_ssr;
           op[i] = ssr_rvalid_o[i] ? ssr_rdata_i[i] : fpr_rdata[i];
           // the operand is ready if it is not marked in the scoreboard
           // and in case of it being an SSR it need to be ready as well
@@ -2564,6 +2572,13 @@ module snitch_fp_ss import snitch_pkg::*; #(
   logic [63:0] nan_boxed_arga;
   assign nan_boxed_arga = {{32{1'b1}}, acc_req_q.data_arga[31:0]};
 
+  logic is_tag_out_rd_ssr;
+  always_comb begin
+    is_tag_out_rd_ssr = 1'b0;
+    for (int s = 0; s < NumSsrs; s++)
+      is_tag_out_rd_ssr |= (SsrRegs[s] == fpu_tag_out.rd);
+  end
+
   // Arbitrate Register File Write Port
   always_comb begin
     fpr_we = 1'b0;
@@ -2584,7 +2599,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
       fpr_wready = 1'b0;
     end else if (fpu_out_valid && !fpu_tag_out.acc) begin
       fpr_we = 1'b1;
-      if (ssr_active_q && is_ssr(fpu_tag_out.rd)) begin
+      if (ssr_active_q && is_tag_out_rd_ssr) begin
         ssr_wvalid_o = 1'b1;
         // stall write-back to SSR
         if (!ssr_wready_i) begin

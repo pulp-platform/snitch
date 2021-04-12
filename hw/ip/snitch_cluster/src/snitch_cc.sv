@@ -64,7 +64,10 @@ module snitch_cc #(
   parameter int unsigned NumDTLBEntries = 0,
   parameter int unsigned NumITLBEntries = 0,
   parameter int unsigned NumSequencerInstr = 0,
-  parameter int unsigned SSRNrCredits = 0,
+  parameter int unsigned NumSsrs = 0,
+  parameter int unsigned SsrMuxRespDepth = 0,
+  parameter snitch_ssr_pkg::ssr_cfg_t [NumSsrs-1:0] SsrCfgs = '0,
+  parameter logic [NumSsrs-1:0][4:0] SsrRegs = '0,
   /// Add isochronous clock-domain crossings e.g., make it possible to operate
   /// the core in a slower clock domain.
   parameter bit          IsoCrossing        = 0,
@@ -83,7 +86,7 @@ module snitch_cc #(
   parameter bit          RegisterSequencer  = 0,
   snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
   /// Derived parameter *Do not override*
-  parameter int unsigned TCDMPorts          = 3,
+  parameter int unsigned TCDMPorts = (NumSsrs > 1 ? NumSsrs : 1),
   parameter type addr_t = logic [AddrWidth-1:0],
   parameter type data_t = logic [DataWidth-1:0]
 ) (
@@ -417,6 +420,8 @@ module snitch_cc #(
       .NumFPOutstandingMem (NumFPOutstandingMem),
       .NumFPUSequencerInstr (NumSequencerInstr),
       .FPUImplementation (FPUImplementation),
+      .NumSsrs (NumSsrs),
+      .SsrRegs (SsrRegs),
       .dreq_t (dreq_t),
       .drsp_t (drsp_t),
       .acc_req_t (acc_req_t),
@@ -577,6 +582,8 @@ module snitch_cc #(
   // SSRs
   // ----
   if (Xssr) begin : gen_ssrs
+    tcdm_req_t [NumSsrs-1:0] ssr_req;
+    tcdm_rsp_t [NumSsrs-1:0] ssr_rsp;
     tcdm_req_t tcdm_req;
     tcdm_rsp_t tcdm_rsp;
 
@@ -651,25 +658,14 @@ module snitch_cc #(
       .mem_resp_valid_i (cfg_req_valid_q)
     );
 
-  // TODO: propagate up and to config
-  localparam snitch_ssr_pkg::ssr_cfg_t SsrCfg = '{
-    Indirection:    0,
-    IndirOutSpill:  0,
-    NumLoops:       4,
-    IndexWidth:     16,
-    PointerWidth:   18,
-    ShiftWidth:     12,
-    IndexCredits:   2,
-    DataCredits:    4,
-    MuxRespDepth:   2
-  };
+    // TODO: Assert that NumSsrs is at least 1 in any case
 
     snitch_ssr_streamer #(
-      .NumSsrs (3),
+      .NumSsrs (NumSsrs),
       .RPorts (3),
       .WPorts (1),
-      .SsrCfgs ({3{SsrCfg}}),
-      .SsrRegs (snitch_pkg::SSRRegs),
+      .SsrCfgs (SsrCfgs),
+      .SsrRegs (SsrRegs),
       .AddrWidth (AddrWidth),
       .DataWidth (DataWidth),
       .tcdm_req_t (tcdm_req_t),
@@ -693,17 +689,24 @@ module snitch_cc #(
       .ssr_wvalid_i   ( ssr_wvalid ),
       .ssr_wready_o   ( ssr_wready ),
       .ssr_wdone_i    ( ssr_wdone  ),
-      .mem_req_o      ( {tcdm_req_o[2:1], tcdm_req} ),
-      .mem_rsp_i      ( {tcdm_rsp_i[2:1], tcdm_rsp} ),
+      .mem_req_o      ( ssr_req    ),
+      .mem_rsp_i      ( ssr_rsp    ),
       .tcdm_start_address_i (tcdm_addr_base_i)
     );
+
+  if (NumSsrs > 1) begin : gen_multi_ssr
+    assign ssr_rsp = {tcdm_rsp_i[NumSsrs-1:1], tcdm_rsp};
+    assign {tcdm_req_o[NumSsrs-1:1], tcdm_req} = ssr_req;
+  end else begin : gen_one_ssr
+    assign ssr_rsp = tcdm_rsp;
+    assign tcdm_req = ssr_req;
+  end
 
   tcdm_mux #(
     .NrPorts (2),
     .AddrWidth (AddrWidth),
     .DataWidth (DataWidth),
-    // TODO(zarubaf): Make parameter
-    .RespDepth (4),
+    .RespDepth (SsrMuxRespDepth),
     // TODO(zarubaf): USer type
     .tcdm_req_t (tcdm_req_t),
     .tcdm_rsp_t (tcdm_rsp_t),
@@ -720,8 +723,7 @@ module snitch_cc #(
   end else begin : gen_no_ssrs
     assign tcdm_req_o[0] = core_tcdm_req;
     assign core_tcdm_rsp = tcdm_rsp_i[0];
-    // Tie-off the rest/
-    assign tcdm_req_o[2:1] = '0;
+    // No need to tie off any upper ports, as only one port
   end
 
   // --------------------------

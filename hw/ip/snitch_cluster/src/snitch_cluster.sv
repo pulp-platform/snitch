@@ -694,6 +694,22 @@ module snitch_cluster
 
       tcdm_req_t [2:0] tcdm_req_wo_user;
 
+      // TODO: propagate up and to config
+      localparam snitch_ssr_pkg::ssr_cfg_t SsrCfgDummy = '{
+        Indirection:    0,
+        IndirOutSpill:  0,
+        NumLoops:       4,
+        IndexWidth:     16,
+        PointerWidth:   18,
+        ShiftWidth:     12,
+        IndexCredits:   3,
+        DataCredits:    4,
+        MuxRespDepth:   3
+      };
+
+      localparam logic [2:0][4:0] SsrRegsDummy = '{2, 1, 0};
+
+
       snitch_cc #(
         .AddrWidth (PhysicalAddrWidth),
         .DataWidth (NarrowDataWidth),
@@ -734,7 +750,13 @@ module snitch_cluster
         .NumDTLBEntries (NumDTLBEntries[i]),
         .NumITLBEntries (NumITLBEntries[i]),
         .NumSequencerInstr (NumSequencerInstr[i]),
-        .SSRNrCredits (SSRNrCredits[i]),
+
+        //.SSRNrCredits (SSRNrCredits[i]),
+        .NumSsrs               (3),
+        .SsrMuxRespDepth       (4),
+        .SsrCfgs               ({3{SsrCfgDummy}}),
+        .SsrRegs               (SsrRegsDummy),
+
         .RegisterOffloadReq (RegisterOffloadReq),
         .RegisterOffloadRsp (RegisterOffloadRsp),
         .RegisterCoreReq (RegisterCoreReq),
