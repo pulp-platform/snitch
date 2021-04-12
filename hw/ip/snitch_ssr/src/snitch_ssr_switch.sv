@@ -24,17 +24,17 @@ module snitch_ssr_switch #(
   output logic  [RPorts-1:0]      ssr_rready_o,
   input  logic  [RPorts-1:0]      ssr_rdone_i,
 
-  input  logic  [WPorts:0][4:0]   ssr_waddr_i,
-  input  data_t [WPorts:0]        ssr_wdata_i,
-  input  logic  [WPorts:0]        ssr_wvalid_i,
-  output logic  [WPorts:0]        ssr_wready_o,
-  input  logic  [WPorts:0]        ssr_wdone_i,
+  input  logic  [WPorts-1:0][4:0] ssr_waddr_i,
+  input  data_t [WPorts-1:0]      ssr_wdata_i,
+  input  logic  [WPorts-1:0]      ssr_wvalid_i,
+  output logic  [WPorts-1:0]      ssr_wready_o,
+  input  logic  [WPorts-1:0]      ssr_wdone_i,
   // Ports into memory.
-  input  data_t [NumSsrs:0]       lane_rdata_i,
-  output data_t [NumSsrs:0]       lane_wdata_o,
-  output logic  [NumSsrs:0]       lane_write_o,
-  input  logic  [NumSsrs:0]       lane_valid_i,
-  output logic  [NumSsrs:0]       lane_ready_o
+  input  data_t [NumSsrs-1:0]     lane_rdata_i,
+  output data_t [NumSsrs-1:0]     lane_wdata_o,
+  output logic  [NumSsrs-1:0]     lane_write_o,
+  input  logic  [NumSsrs-1:0]     lane_valid_i,
+  output logic  [NumSsrs-1:0]     lane_ready_o
 );
 
   logic   [Ports-1:0][4:0] ssr_addr;
