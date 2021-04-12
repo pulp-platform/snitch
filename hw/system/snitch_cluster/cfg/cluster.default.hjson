@@ -72,7 +72,6 @@
         isa: "rv32imafd",
         xssr: true
         xfrep: true
-        ssr_nr_credits: 4,
         num_int_outstanding_loads: 1,
         num_int_outstanding_mem: 4,
         num_fp_outstanding_loads: 4,
