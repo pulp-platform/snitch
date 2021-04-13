@@ -721,9 +721,19 @@ module snitch_cc #(
   );
 
   end else begin : gen_no_ssrs
+    // Connect single TCDM port
     assign tcdm_req_o[0] = core_tcdm_req;
     assign core_tcdm_rsp = tcdm_rsp_i[0];
-    // No need to tie off any upper ports, as only one port
+    // Tie off SSR insruction stream
+    assign ssr_qready     = '0;
+    assign ssr_cfg_rsp    = '0;
+    assign ssr_pvalid     = '0;
+    assign cfg_req        = '0;
+    assign cfg_req_valid  = '0;
+    // Tie off SSR data stream
+    assign ssr_rdata      = '0;
+    assign ssr_rready     = '0;
+    assign ssr_wready     = '0;
   end
 
   // --------------------------
