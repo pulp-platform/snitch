@@ -34,21 +34,6 @@
             register_offload_rsp: true
         },
         hives: [
-            // Hive 1
-            {
-                icache: {
-                    size: 8, // total instruction cache size in kByte
-                    sets: 2, // number of ways
-                    cacheline: 128 // word size in bits
-                },
-                cores: [
-                    { $ref: "#/dma_core_template" },
-                    { $ref: "#/compute_core_template" },
-                    { $ref: "#/compute_core_template" },
-                    { $ref: "#/compute_core_template" },
-                    { $ref: "#/compute_core_template" },
-                ]
-            },
             // Hive 0
             {
                 cores: [
@@ -59,6 +44,21 @@
                     # { $ref: "#/compute_core_template" },
                 ]
             }
+            // Hive 1
+            {
+                icache: {
+                    size: 8, // total instruction cache size in kByte
+                    sets: 2, // number of ways
+                    cacheline: 128 // word size in bits
+                },
+                cores: [
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/dma_core_template" },
+                ]
+            },
         ]
     },
     dram: {
