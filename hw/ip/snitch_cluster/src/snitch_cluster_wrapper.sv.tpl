@@ -18,7 +18,7 @@ ${c[prop]}${', ' if not loop.last else ''}\
 
 <%def name="core_cfg_flat(prop)">\
 ${cfg['nr_cores']}'b\
-  % for c in cfg['cores']:
+  % for c in reversed(cfg['cores']):
 ${int(c[prop])}\
   % endfor
 </%def>\
