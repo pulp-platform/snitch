@@ -254,29 +254,33 @@ class SnitchCluster(Generator):
         def gen_mask(c, s):
             return "{}'b{}".format(c, ''.join(reversed(s)))
 
-        num_ssrs_max = 1
-        reg_idx_curr = 0
         cores = list()
         for i, core_list in enumerate(self.cfg['hives']):
             for core in core_list['cores']:
                 core['hive'] = i
                 core['isa_parsed'] = parse_isa_string(
                     core['isa'])
-                num_ssrs = max(len(core['ssrs']) if 'ssrs' in core else 0, 1)
-                if 'ssrs' in core:
-                    for ssr in core['ssrs']:
-                        # If no register specified or next available used: advance available reg
-                        if ssr['reg_idx'] in (None, reg_idx_curr):
-                            ssr['reg_idx'] = reg_idx_curr
-                            reg_idx_curr += 1
-                core['num_ssrs'] = num_ssrs
-                num_ssrs_max = max(num_ssrs, num_ssrs_max)
+
+                # Enforce consistent config if no SSRs
+                if not core['xssr'] or 'ssrs' not in core or not len(core['ssrs']):
+                    core['xssr'] = False
+                    core['ssrs'] = []
+                # Assign SSR register indices
+                next_free_reg = 0
+                for ssr in core['ssrs']:
+                    if ssr['reg_idx'] in (None, next_free_reg):
+                        ssr['reg_idx'] = next_free_reg
+                        next_free_reg += 1
+                # Sort SSRs by register indices (required by decoding logic)
+                core['ssrs'].sort(key=lambda x: x['reg_idx'])
+                # Minimum 1 element to avoid illegal ranges (Xssr prevents generation)
+                core['num_ssrs'] = max(len(core['ssrs']), 1)
 
                 cores.append(dict(core))
 
         self.cfg['nr_hives'] = len(self.cfg['hives'])
         self.cfg['nr_cores'] = len(cores)
-        self.cfg['num_ssrs_max'] = num_ssrs_max
+        self.cfg['num_ssrs_max'] = max(len(core['ssrs']) for core in cores)
         self.cfg['cores'] = cores
 
     def cfg_validate(self):

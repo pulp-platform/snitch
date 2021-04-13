@@ -30,6 +30,17 @@ ${int(getattr(c['isa_parsed'], isa))}\
   % endfor
 </%def>\
 
+<%def name="ssr_cfg(core, ssr_fmt_str, none_str, inner_sep)">\
+% for core in cfg['cores']:
+  % for s in list(reversed(core['ssrs'] + [None]*(cfg['num_ssrs_max']-len(core['ssrs'])))):
+${("    '{" if loop.first else ' ') + \
+    (ssr_fmt_str.format(**s) if s is not None else none_str) \
+    + (inner_sep if not loop.last else '}')}\
+  % endfor
+${',' if not loop.last else ''}
+% endfor
+</%def>\
+
 `include "axi/typedef.svh"
 
 // verilog_lint: waive-start package-filename
@@ -103,24 +114,13 @@ package ${cfg['pkg_name']};
         PipeConfig: fpnew_pkg::${cfg['timing']['fpu_pipe_config']}
     };
 
-    localparam snitch_ssr_pkg::ssr_cfg_t [${cfg['num_ssrs_max']}-1:0] SsrCfgs [${cfg['nr_cores']}] = '{
-% for core in cfg['cores']:
-  % if 'ssrs' in core and len(core['ssrs']):
-      % for s in list(reversed(core['ssrs'])):
-      ${'\'{' if loop.first else ''}'{${int(s['indirection'])}, ${int(s['indir_out_spill'])}, ${s['num_loops']}, ${s['index_width']}, ${s['pointer_width']}, \
-${s['shift_width']}, ${s['index_credits']}, ${s['data_credits']}, ${s['mux_resp_depth']}}${',' if not loop.last else '}'}
-      % endfor
-  % else:
-      '0
-  % endif
-      ${', ' if not loop.last else ''}
-% endfor
+  localparam snitch_ssr_pkg::ssr_cfg_t [${cfg['num_ssrs_max']}-1:0] SsrCfgs [${cfg['nr_cores']}] = '{
+${ssr_cfg(core, "'{{{indirection:d}, {indir_out_spill:d}, {num_loops}, {index_width}, {pointer_width}, "\
+  "{shift_width}, {index_credits}, {data_credits}, {mux_resp_depth}}}", "/*None*/ '0", ',\n     ')}\
   };
 
-    localparam logic [${cfg['num_ssrs_max']}-1:0][4:0] SsrRegs [${cfg['nr_cores']}] = '{
-% for core in cfg['cores']:
-      ${('\'{' + ', '.join(str(s['reg_idx']) for s in reversed(core['ssrs'])) + '}' if 'ssrs' in core and len(core['ssrs']) else '\'0') + (',' if not loop.last else '')}
-% endfor
+  localparam logic [${cfg['num_ssrs_max']}-1:0][4:0] SsrRegs [${cfg['nr_cores']}] = '{
+${ssr_cfg(core, '{reg_idx}', '/*None*/ 0', ',')}\
   };
 
 endpackage
