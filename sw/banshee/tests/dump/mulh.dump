@@ -1,0 +1,158 @@
+
+bin/mulh:     file format elf32-littleriscv
+
+
+Disassembly of section .l1:
+
+00000000 <atomic_barrier>:
+   0:	0000                	unimp
+	...
+
+Disassembly of section .text:
+
+80010000 <_start>:
+80010000:	00001197          	auipc	gp,0x1
+80010004:	98018193          	addi	gp,gp,-1664 # 80010980 <__global_pointer$>
+80010008:	0040006f          	j	8001000c <reset_vector>
+
+8001000c <reset_vector>:
+8001000c:	bfff0117          	auipc	sp,0xbfff0
+80010010:	ffc10113          	addi	sp,sp,-4 # 40000008 <tcdm_end_address_reg>
+80010014:	00012103          	lw	sp,0(sp)
+80010018:	f1402573          	csrr	a0,mhartid
+8001001c:	bfff0297          	auipc	t0,0xbfff0
+80010020:	0242a283          	lw	t0,36(t0) # 40000040 <cluster_base_hart_id_reg>
+80010024:	40550533          	sub	a0,a0,t0
+80010028:	00351293          	slli	t0,a0,0x3
+8001002c:	40510133          	sub	sp,sp,t0
+80010030:	00629293          	slli	t0,t0,0x6
+80010034:	40510133          	sub	sp,sp,t0
+80010038:	00010213          	mv	tp,sp
+8001003c:	00100293          	li	t0,1
+80010040:	00929293          	slli	t0,t0,0x9
+80010044:	40520233          	sub	tp,tp,t0
+80010048:	bfff0297          	auipc	t0,0xbfff0
+8001004c:	fc828293          	addi	t0,t0,-56 # 40000010 <nr_cores_address_reg>
+80010050:	0002a583          	lw	a1,0(t0)
+80010054:	038000ef          	jal	ra,8001008c <main>
+80010058:	00151513          	slli	a0,a0,0x1
+8001005c:	00156513          	ori	a0,a0,1
+80010060:	0100006f          	j	80010070 <eoc>
+
+80010064 <fail>:
+80010064:	fff00293          	li	t0,-1
+80010068:	00554533          	xor	a0,a0,t0
+8001006c:	0040006f          	j	80010070 <eoc>
+
+80010070 <eoc>:
+80010070:	f14022f3          	csrr	t0,mhartid
+80010074:	00029863          	bnez	t0,80010084 <halt>
+80010078:	bfff0297          	auipc	t0,0xbfff0
+8001007c:	fa828293          	addi	t0,t0,-88 # 40000020 <scratch_reg>
+80010080:	00a2a023          	sw	a0,0(t0)
+
+80010084 <halt>:
+80010084:	10500073          	wfi
+80010088:	ffdff06f          	j	80010084 <halt>
+
+Disassembly of section .text.startup:
+
+8001008c <main>:
+8001008c:	800002b7          	lui	t0,0x80000
+80010090:	00328293          	addi	t0,t0,3 # 80000003 <fake_uart+0xc0000003>
+80010094:	00200313          	li	t1,2
+80010098:	00100393          	li	t2,1
+8001009c:	0262be33          	mulhu	t3,t0,t1
+800100a0:	0dc39863          	bne	t2,t3,80010170 <main+0xe4>
+800100a4:	deadc2b7          	lui	t0,0xdeadc
+800100a8:	eef28293          	addi	t0,t0,-273 # deadbeef <fake_uart+0x1eadbeef>
+800100ac:	deadc337          	lui	t1,0xdeadc
+800100b0:	eef30313          	addi	t1,t1,-273 # deadbeef <fake_uart+0x1eadbeef>
+800100b4:	c1b1d3b7          	lui	t2,0xc1b1d
+800100b8:	d1238393          	addi	t2,t2,-750 # c1b1cd12 <fake_uart+0x1b1cd12>
+800100bc:	0262be33          	mulhu	t3,t0,t1
+800100c0:	0bc39863          	bne	t2,t3,80010170 <main+0xe4>
+800100c4:	fff00293          	li	t0,-1
+800100c8:	fff00313          	li	t1,-1
+800100cc:	ffe00393          	li	t2,-2
+800100d0:	0262be33          	mulhu	t3,t0,t1
+800100d4:	09c39e63          	bne	t2,t3,80010170 <main+0xe4>
+800100d8:	fff00293          	li	t0,-1
+800100dc:	fff00313          	li	t1,-1
+800100e0:	00000393          	li	t2,0
+800100e4:	02629e33          	mulh	t3,t0,t1
+800100e8:	09c39463          	bne	t2,t3,80010170 <main+0xe4>
+800100ec:	800002b7          	lui	t0,0x80000
+800100f0:	00200313          	li	t1,2
+800100f4:	fff00393          	li	t2,-1
+800100f8:	02629e33          	mulh	t3,t0,t1
+800100fc:	07c39a63          	bne	t2,t3,80010170 <main+0xe4>
+80010100:	deadc2b7          	lui	t0,0xdeadc
+80010104:	eef28293          	addi	t0,t0,-273 # deadbeef <fake_uart+0x1eadbeef>
+80010108:	deadc337          	lui	t1,0xdeadc
+8001010c:	eef30313          	addi	t1,t1,-273 # deadbeef <fake_uart+0x1eadbeef>
+80010110:	045653b7          	lui	t2,0x4565
+80010114:	f3438393          	addi	t2,t2,-204 # 4564f34 <ssr_config_reg+0x4360734>
+80010118:	02629e33          	mulh	t3,t0,t1
+8001011c:	05c39a63          	bne	t2,t3,80010170 <main+0xe4>
+80010120:	800002b7          	lui	t0,0x80000
+80010124:	ffff8337          	lui	t1,0xffff8
+80010128:	800043b7          	lui	t2,0x80004
+8001012c:	0262ae33          	mulhsu	t3,t0,t1
+80010130:	05c39063          	bne	t2,t3,80010170 <main+0xe4>
+80010134:	000302b7          	lui	t0,0x30
+80010138:	e7d28293          	addi	t0,t0,-387 # 2fe7d <l1_alloc_base+0x2fe6d>
+8001013c:	aaaab337          	lui	t1,0xaaaab
+80010140:	aab30313          	addi	t1,t1,-1365 # aaaaaaab <fake_uart+0xeaaaaaab>
+80010144:	000203b7          	lui	t2,0x20
+80010148:	efe38393          	addi	t2,t2,-258 # 1fefe <l1_alloc_base+0x1feee>
+8001014c:	0262ae33          	mulhsu	t3,t0,t1
+80010150:	03c39063          	bne	t2,t3,80010170 <main+0xe4>
+80010154:	fff00293          	li	t0,-1
+80010158:	fff00313          	li	t1,-1
+8001015c:	fff00393          	li	t2,-1
+80010160:	0262ae33          	mulhsu	t3,t0,t1
+80010164:	01c39663          	bne	t2,t3,80010170 <main+0xe4>
+80010168:	00000513          	li	a0,0
+8001016c:	00c0006f          	j	80010178 <exit>
+80010170:	00100513          	li	a0,1
+80010174:	0040006f          	j	80010178 <exit>
+
+80010178 <exit>:
+80010178:	00008067          	ret
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	3a434347          	fmsub.d	ft6,ft6,ft4,ft7,rmm
+   4:	2820                	fld	fs0,80(s0)
+   6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
+   a:	3120                	fld	fs0,96(a0)
+   c:	2e30                	fld	fa2,88(a2)
+   e:	2e32                	fld	ft8,264(sp)
+  10:	0030                	addi	a2,sp,8
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	3341                	jal	fffffd80 <fake_uart+0x3ffffd80>
+   2:	0000                	unimp
+   4:	7200                	flw	fs0,32(a2)
+   6:	7369                	lui	t1,0xffffa
+   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
+   c:	0029                	c.nop	10
+   e:	0000                	unimp
+  10:	1004                	addi	s1,sp,32
+  12:	7205                	lui	tp,0xfffe1
+  14:	3376                	fld	ft6,376(sp)
+  16:	6932                	flw	fs2,12(sp)
+  18:	7032                	flw	ft0,44(sp)
+  1a:	5f30                	lw	a2,120(a4)
+  1c:	326d                	jal	fffff9c6 <fake_uart+0x3ffff9c6>
+  1e:	3070                	fld	fa2,224(s0)
+  20:	615f 7032 5f30      	0x5f307032615f
+  26:	3266                	fld	ft4,120(sp)
+  28:	3070                	fld	fa2,224(s0)
+  2a:	645f 7032 0030      	0x307032645f
+  30:	0108                	addi	a0,sp,128
+  32:	0b0a                	slli	s6,s6,0x2
