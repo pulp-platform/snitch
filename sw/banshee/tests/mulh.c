@@ -1,3 +1,6 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
 
 #include <stdint.h>
 
@@ -68,7 +71,7 @@ int main() {
 
         "exit:\n"
 
-        : [ret] "=r"(ret)::"t0", "t1", "t2", "t3");
+        : [ ret ] "=r"(ret)::"t0", "t1", "t2", "t3");
 
     return ret;
 }
