@@ -28,7 +28,7 @@ int main() {
         "mulhu t3, t0, t1\n"
         "bne   t2, t3, 1f\n"
 
-        // signed MSB(0xffffffff * 0xffffffff) = 0xFFFFFFFE
+        // unsigned MSB(0xffffffff * 0xffffffff) = 0xFFFFFFFE
         "li t0, 0xffffffff\n"
         "li t1, 0xffffffff\n"
         "li t2, 0xFFFFFFFE\n"
@@ -53,13 +53,37 @@ int main() {
         "mulh  t3, t0, t1\n"
         "bne   t2, t3, 1f\n"
 
-        // unsigned MSB(0xdeadbeef*0xdeadbeef) = 0x4564f34
+        // signed MSB(0xdeadbeef*0xdeadbeef) = 0x4564f34
         "li t0, 0xdeadbeef\n"
         "li t1, 0xdeadbeef\n"
         "li t2, 0x04564f34\n"
 
         "mulh  t3, t0, t1\n"
         "bne   t2, t3, 1f\n"
+
+        // signed(0x80000000) * unsigned(0xffff8000) = 0x80004000
+        "li t0, 0x80000000\n"
+        "li t1, 0xffff8000\n"
+        "li t2, 0x80004000\n"
+
+        "mulhsu t3, t0, t1\n"
+        "bne    t2, t3, 1f\n"
+
+        // signed(0x0002fe7d) * unsigned(0xaaaaaaab) = 0x0001fefe
+        "li t0, 0x0002fe7d\n"
+        "li t1, 0xaaaaaaab\n"
+        "li t2, 0x0001fefe\n"
+
+        "mulhsu t3, t0, t1\n"
+        "bne    t2, t3, 1f\n"
+
+        // signed(0xffffffff) * unsigned(0xffffffff) = 0xffffffff
+        "li t0, 0xffffffff\n"
+        "li t1, 0xffffffff\n"
+        "li t2, 0xffffffff\n"
+
+        "mulhsu t3, t0, t1\n"
+        "bne    t2, t3, 1f\n"
 
         "2:\n"  // no error
         "li %[ret], 0\n"
