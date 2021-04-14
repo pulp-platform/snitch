@@ -2149,6 +2149,21 @@ impl<'a> InstructionTranslator<'a> {
                 );
                 LLVMBuildTrunc(self.builder, tmp, LLVMInt32Type(), NONAME)
             }
+            riscv::OpcodeRdRs1Rs2::Mulhsu => {
+                let tmp = LLVMBuildMul(
+                    self.builder,
+                    LLVMBuildSExt(self.builder, rs1, LLVMInt64Type(), NONAME),
+                    LLVMBuildZExt(self.builder, rs2, LLVMInt64Type(), NONAME),
+                    name,
+                );
+                let tmp = LLVMBuildLShr(
+                    self.builder,
+                    tmp,
+                    LLVMConstInt(LLVMInt64Type(), 32 as u64, 0),
+                    NONAME,
+                );
+                LLVMBuildTrunc(self.builder, tmp, LLVMInt32Type(), NONAME)
+            }
             riscv::OpcodeRdRs1Rs2::Div => LLVMBuildSDiv(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Divu => LLVMBuildUDiv(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Rem => LLVMBuildSRem(self.builder, rs1, rs2, name),
