@@ -41,7 +41,6 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   `TCDM_TYPEDEF_ALL(tcdm, addr_t, data_t, strb_t, user_t);
 
   // SSR constant / derived parameters
-  localparam int unsigned RepWidth = 4;
   localparam int unsigned DimWidth = $clog2(Cfg.NumLoops);
 
   // Configuration written through proper registers
@@ -405,7 +404,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   task automatic verify_nat_job_loop (
     input logic                           write,
     input logic                           write_check,
-    input logic [RepWidth-1:0]            rep,
+    input logic [Cfg.RptWidth-1:0]        rep,
     input logic [Cfg.NumLoops-1:0][31:0]  bound,
     input logic [Cfg.NumLoops-1:0][31:0]  stride,
     input logic [Cfg.NumLoops-1:0]        loop_ena,
@@ -471,13 +470,13 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
 
   // Verify a given natural iteration job
   task automatic verify_nat_job (
-    input logic                 write,
-    input logic                 alias_launch,
-    input addr_t                data_base,
-    input logic [DimWidth-1:0]  num_loops,
-    input logic [RepWidth-1:0]  rep,
-    input logic [3:0][31:0]     bound,
-    input logic [3:0][31:0]     stride_elems,
+    input logic                     write,
+    input logic                     alias_launch,
+    input addr_t                    data_base,
+    input logic [DimWidth-1:0]      num_loops,
+    input logic [Cfg.RptWidth-1:0]  rep,
+    input logic [3:0][31:0]         bound,
+    input logic [3:0][31:0]         stride_elems,
     input addr_t ptr_source = '0,   // For writes only: pointer to linearly-read SSR input data
     input addr_t offs_dest  = '0    // For writes only: pointer to target region for writes
   );
@@ -524,7 +523,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     input logic                     alias_launch,
     input addr_t                    data_base,
     input addr_t                    idx_base,
-    input logic [RepWidth-1:0]      rep,
+    input logic [Cfg.RptWidth-1:0]  rep,
     input logic [31:0]              bound,
     input logic [Cfg.ShiftWidth:0]  idx_shift,
     input logic [1:0]               idx_size,

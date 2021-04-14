@@ -15,6 +15,7 @@ package snitch_ssr_pkg;
     int unsigned  IndexWidth;
     int unsigned  PointerWidth;
     int unsigned  ShiftWidth;
+    int unsigned  RptWidth;
     int unsigned  IndexCredits;
     int unsigned  DataCredits;
     int unsigned  MuxRespDepth;

@@ -36,7 +36,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   input  logic [31:0] cfg_wdata_i,
   input  logic        cfg_write_i,
 
-  output logic [3:0]  reg_rep_o,
+  output logic [Cfg.RptWidth-1:0] reg_rep_o,
 
   output addr_t       mem_addr_o,
   output logic        mem_write_o,
@@ -52,7 +52,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   pointer_t [Cfg.NumLoops-1:0] stride_q, stride_sd, stride_sq;
   pointer_t pointer_q, pointer_qn, pointer_sd, pointer_sq, pointer_sqn, selected_stride;
   index_t [Cfg.NumLoops-1:0] index_q, bound_q, bound_sd, bound_sq;
-  logic [3:0] rep_q, rep_sd, rep_sq;
+  logic [Cfg.RptWidth-1:0] rep_q, rep_sd, rep_sq;
   logic [Cfg.NumLoops-1:0] loop_enabled;
   logic [Cfg.NumLoops-1:0] loop_last;
   logic enable, done;

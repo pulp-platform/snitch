@@ -396,7 +396,7 @@
                                             "indir_out_spill": {
                                                 "type": "boolean",
                                                 "description": "Whether to cut timing paths with a spill register at the address generator output; added only if indirection extension enabled.",
-                                                "default": false
+                                                "default": true
                                             },
                                             "num_loops": {
                                                 "type": "number",
@@ -438,10 +438,17 @@
                                             },
                                             "shift_width": {
                                                 "type": "number",
-                                                "description": "Internal bitwidth of additional left shift amount for indirect indices;",
+                                                "description": "Internal bitwidth of additional left shift amount for indirect indices.",
                                                 "minimum": 1,
                                                 "maximum": 32,
                                                 "default": 3
+                                            },
+                                            "rpt_width": {
+                                                "type": "number",
+                                                "description": "Internal bitwidth of repetition counter for read streams.",
+                                                "minimum": 1,
+                                                "maximum": 32,
+                                                "default": 4
                                             }
                                         }
                                     }

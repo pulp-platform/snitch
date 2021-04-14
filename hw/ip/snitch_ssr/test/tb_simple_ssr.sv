@@ -26,10 +26,11 @@ module tb_simple_ssr;
     NumLoops:       NumLoops,
     IndexWidth:     16,
     PointerWidth:   18,
-    ShiftWidth:     12,
-    IndexCredits:   2,
+    ShiftWidth:     3,
+    IndexCredits:   3,
     DataCredits:    4,
-    MuxRespDepth:   2
+    MuxRespDepth:   3,
+    RptWidth:       4
   };
 
   // Instantiate fixture

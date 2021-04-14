@@ -116,7 +116,7 @@ package ${cfg['pkg_name']};
 
   localparam snitch_ssr_pkg::ssr_cfg_t [${cfg['num_ssrs_max']}-1:0] SsrCfgs [${cfg['nr_cores']}] = '{
 ${ssr_cfg(core, "'{{{indirection:d}, {indir_out_spill:d}, {num_loops}, {index_width}, {pointer_width}, "\
-  "{shift_width}, {index_credits}, {data_credits}, {mux_resp_depth}}}", "/*None*/ '0", ',\n     ')}\
+  "{shift_width}, {rpt_width}, {index_credits}, {data_credits}, {mux_resp_depth}}}", "/*None*/ '0", ',\n     ')}\
   };
 
   localparam logic [${cfg['num_ssrs_max']}-1:0][4:0] SsrRegs [${cfg['nr_cores']}] = '{

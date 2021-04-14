@@ -42,7 +42,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   logic mover_valid;
   logic [$clog2(Cfg.DataCredits):0] credit_d, credit_q;
   logic has_credit, credit_take, credit_give;
-  logic [3:0] rep_max, rep_q, rep_done, rep_enable;
+  logic [Cfg.RptWidth-1:0] rep_max, rep_q, rep_done, rep_enable;
 
   fifo_v3 #(
     .FALL_THROUGH ( 0           ),
