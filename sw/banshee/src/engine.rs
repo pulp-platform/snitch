@@ -320,7 +320,7 @@ impl Engine {
                 if (addr as u32) >= self.config.memory.tcdm.start
                     && (addr as u32) < self.config.memory.tcdm.end
                 {
-                    tcdm[(addr / 4) as usize] = value;
+                    tcdm[((addr - (self.config.memory.tcdm.start as u64)) / 4) as usize] = value;
                 }
             }
             (0..self.num_clusters).map(|_| tcdm.clone()).collect()
