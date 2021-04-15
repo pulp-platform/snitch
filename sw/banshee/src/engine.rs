@@ -5,6 +5,7 @@
 //! Engine for dynamic binary translation and execution
 
 use crate::{riscv, tran::ElfTranslator, util::SiUnit, Configuration};
+extern crate termion;
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
@@ -18,6 +19,7 @@ use std::{
         Mutex,
     },
 };
+use termion::{color, style};
 
 pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState};
 
@@ -539,7 +541,14 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 let mut buffer = self.engine.putchar_buffer.lock().unwrap();
                 let buffer = buffer.entry(self.hartid).or_default();
                 if value == '\n' as u32 {
-                    println!("{}", String::from_utf8_lossy(buffer));
+                    eprintln!(
+                        "{}{} hart-{:03} {} {}",
+                        style::Invert,
+                        color::Fg(color::White),
+                        self.hartid,
+                        style::Reset,
+                        String::from_utf8_lossy(buffer)
+                    );
                     buffer.clear();
                 } else {
                     buffer.push(value as u8);
