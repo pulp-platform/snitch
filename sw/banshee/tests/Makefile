@@ -8,7 +8,7 @@ all: bin/large_lfsr
 all: bin/dummy
 all: bin/frep_single
 all: bin/frep_multiple
-all: bin/dma_simple
+all: bin/sdma_single_tcdm
 all: bin/matmul_baseline
 all: bin/matmul_ssr
 all: bin/matmul_ssr_frep

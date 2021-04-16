@@ -1,5 +1,5 @@
 
-bin/dma_simple:     file format elf32-littleriscv
+bin/sdma_single_tcdm:     file format elf32-littleriscv
 
 
 Disassembly of section .l1:
@@ -77,8 +77,8 @@ Disassembly of section .text.startup:
 800100cc:	00400b93          	li	s7,4
 800100d0:	0129802b          	0x129802b
 800100d4:	034a802b          	0x34a802b
-800100d8:	280b9b2b          	0x280b9b2b
-800100dc:	280022ab          	0x280022ab
+800100d8:	040b8b2b          	0x40b8b2b
+800100dc:	082002ab          	0x82002ab
 800100e0:	00812783          	lw	a5,8(sp)
 800100e4:	00c12703          	lw	a4,12(sp)
 800100e8:	00129513          	slli	a0,t0,0x1
