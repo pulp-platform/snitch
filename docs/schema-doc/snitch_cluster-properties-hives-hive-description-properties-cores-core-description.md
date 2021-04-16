@@ -26,7 +26,6 @@ Description of a single core.
 | [xf16](#xf16)                                             | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16-16-bit-float-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16")                      |
 | [xf16alt](#xf16alt)                                       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf16alt-16-bit-brain-float-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf16alt")          |
 | [xfvec](#xfvec)                                           | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xfvec-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfvec")                                 |
-| [ssr_nr_credits](#ssr_nr_credits)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr_nr_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_nr_credits")                         |
 | [num_int_outstanding_loads](#num_int_outstanding_loads)   | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_loads.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_loads")   |
 | [num_int_outstanding_mem](#num_int_outstanding_mem)       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_int_outstanding_mem.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_int_outstanding_mem")       |
 | [num_fp_outstanding_loads](#num_fp_outstanding_loads)     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_fp_outstanding_loads.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_fp_outstanding_loads")     |
@@ -34,6 +33,8 @@ Description of a single core.
 | [num_sequencer_instructions](#num_sequencer_instructions) | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_sequencer_instructions.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_sequencer_instructions") |
 | [num_itlb_entries](#num_itlb_entries)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_itlb_entries.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_itlb_entries")                     |
 | [num_dtlb_entries](#num_dtlb_entries)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_dtlb_entries.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_dtlb_entries")                     |
+| [ssr_mux_resp_depth](#ssr_mux_resp_depth)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr_mux_resp_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_mux_resp_depth")                 |
+| [ssrs](#ssrs)                                             | `array`   | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs")                                             |
 
 ## isa
 
@@ -208,32 +209,6 @@ Enable Smallfloat vector extension (SIMD).
 ### xfvec Type
 
 `boolean` ([Xfvec Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xfvec-extension.md))
-
-## ssr_nr_credits
-
-Number of credits and buffer depth of SSR FIFOs.
-
-`ssr_nr_credits`
-
-*   is optional
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr_nr_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_nr_credits")
-
-### ssr_nr_credits Type
-
-`number`
-
-### ssr_nr_credits Default Value
-
-The default value is:
-
-```json
-4
-```
 
 ## num_int_outstanding_loads
 
@@ -415,4 +390,64 @@ The default value is:
 
 ```json
 2
+```
+
+## ssr_mux_resp_depth
+
+Depth of response buffer in the TCDM multiplexer arbitrating between core and SSR 0.
+
+`ssr_mux_resp_depth`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr_mux_resp_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_mux_resp_depth")
+
+### ssr_mux_resp_depth Type
+
+`number`
+
+### ssr_mux_resp_depth Default Value
+
+The default value is:
+
+```json
+4
+```
+
+## ssrs
+
+List of all SSRs in the respective core.
+
+`ssrs`
+
+*   is optional
+
+*   Type: `object[]` ([SSR Description](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs")
+
+### ssrs Type
+
+`object[]` ([SSR Description](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description.md))
+
+### ssrs Constraints
+
+**minimum number of items**: the minimum number of items for this array is: `0`
+
+### ssrs Default Value
+
+The default value is:
+
+```json
+[
+  {},
+  {},
+  {}
+]
 ```
