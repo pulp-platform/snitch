@@ -7,26 +7,20 @@
 
 `include "common_cells/registers.svh"
 
-module snitch_ssr_addr_gen import snitch_pkg::*; #(
-  parameter bit Indirection   = 0,
-  parameter bit IndirOutSpill = 0,
-  parameter int unsigned AddrWidth    = 0,
-  parameter int unsigned DataWidth    = 0,
-  parameter int unsigned IndexWidth   = 16,     // TODO: proper parametrization upstream
-  parameter int unsigned PointerWidth = 18,     // TODO: proper parametrization upstream
-  parameter int unsigned ShiftWidth   = 12,     // TODO: proper parametrization upstream
-  parameter int unsigned IndexCredits = 2,      // TODO: proper parametrization upstream
-  parameter int unsigned NumLoops     = 4,      // TODO: proper parametrization upstream
+module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
+  parameter ssr_cfg_t Cfg = '0,
+  parameter int unsigned AddrWidth = 0,
+  parameter int unsigned DataWidth = 0,
   parameter type tcdm_req_t   = logic,
   parameter type tcdm_rsp_t   = logic,
   parameter type tcdm_user_t  = logic,
   /// Derived parameters *Do not override*
-  parameter int unsigned DimWidth     = $clog2(NumLoops),
+  parameter int unsigned DimWidth     = $clog2(Cfg.NumLoops),
   parameter int unsigned BytecntWidth = $clog2(DataWidth/8),
   parameter type addr_t     = logic [AddrWidth-1:0],
   parameter type data_t     = logic [DataWidth-1:0],
-  parameter type pointer_t  = logic [PointerWidth-1:0],
-  parameter type index_t    = logic [IndexWidth-1:0],
+  parameter type pointer_t  = logic [Cfg.PointerWidth-1:0],
+  parameter type index_t    = logic [Cfg.IndexWidth-1:0],
   parameter type bytecnt_t  = logic [BytecntWidth-1:0],
   parameter type idx_size_t = logic [$clog2($clog2(DataWidth/8)+1)-1:0]
 ) (
@@ -42,7 +36,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   input  logic [31:0] cfg_wdata_i,
   input  logic        cfg_write_i,
 
-  output logic [3:0]  reg_rep_o,
+  output logic [Cfg.RptWidth-1:0] reg_rep_o,
 
   output addr_t       mem_addr_o,
   output logic        mem_write_o,
@@ -55,20 +49,20 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   // Mask for word-aligned address fields
   localparam logic [31:0] WordAddrMask = {{(32-BytecntWidth){1'b1}}, {(BytecntWidth){1'b0}}};
 
-  pointer_t [NumLoops-1:0] stride_q, stride_sd, stride_sq;
+  pointer_t [Cfg.NumLoops-1:0] stride_q, stride_sd, stride_sq;
   pointer_t pointer_q, pointer_qn, pointer_sd, pointer_sq, pointer_sqn, selected_stride;
-  index_t [NumLoops-1:0] index_q, bound_q, bound_sd, bound_sq;
-  logic [3:0] rep_q, rep_sd, rep_sq;
-  logic [NumLoops-1:0] loop_enabled;
-  logic [NumLoops-1:0] loop_last;
+  index_t [Cfg.NumLoops-1:0] index_q, bound_q, bound_sd, bound_sq;
+  logic [Cfg.RptWidth-1:0] rep_q, rep_sd, rep_sq;
+  logic [Cfg.NumLoops-1:0] loop_enabled;
+  logic [Cfg.NumLoops-1:0] loop_last;
   logic enable, done;
 
   typedef struct packed {
     logic idx_shift;
     logic idx_base;
     logic idx_size;
-    logic [NumLoops-1:0] stride;
-    logic [NumLoops-1:0] bound;
+    logic [Cfg.NumLoops-1:0] stride;
+    logic [Cfg.NumLoops-1:0] bound;
     logic rep;
     logic status;
   } write_strobe_t;
@@ -104,7 +98,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   pointer_t mem_pointer;
   logic mem_last;
 
-  if (Indirection) begin : gen_indirection
+  if (Cfg.Indirection) begin : gen_indirection
 
     // Type for output spill register
     typedef struct packed {
@@ -127,9 +121,9 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     logic indir_last;
 
     // Indirector configuration registers
-    logic [ShiftWidth-1:0]    idx_shift_q, idx_shift_sd, idx_shift_sq;
-    logic [PointerWidth-1:0]  idx_base_q, idx_base_sd, idx_base_sq;
-    idx_size_t                idx_size_q, idx_size_sd, idx_size_sq;
+    logic [Cfg.ShiftWidth-1:0]    idx_shift_q, idx_shift_sd, idx_shift_sq;
+    logic [Cfg.PointerWidth-1:0]  idx_base_q, idx_base_sd, idx_base_sq;
+    idx_size_t                    idx_size_q, idx_size_sd, idx_size_sq;
 
     // Output spill register, if it exists
     out_spill_t spill_in_data;
@@ -175,15 +169,12 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
 
     // Encapsulated indirection datapath
     snitch_ssr_indirector #(
-      .AddrWidth    ( AddrWidth     ),
-      .DataWidth    ( DataWidth     ),
-      .IndexWidth   ( IndexWidth    ),
-      .PointerWidth ( PointerWidth  ),
-      .ShiftWidth   ( ShiftWidth    ),
-      .IndexCredits ( IndexCredits  ),
-      .tcdm_req_t   ( tcdm_req_t    ),
-      .tcdm_rsp_t   ( tcdm_rsp_t    ),
-      .tcdm_user_t  ( tcdm_user_t   )
+      .Cfg          ( Cfg         ),
+      .AddrWidth    ( AddrWidth   ),
+      .DataWidth    ( DataWidth   ),
+      .tcdm_req_t   ( tcdm_req_t  ),
+      .tcdm_rsp_t   ( tcdm_rsp_t  ),
+      .tcdm_user_t  ( tcdm_user_t )
     ) i_snitch_ssr_indirector (
       .clk_i,
       .rst_ni,
@@ -222,7 +213,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
     end
 
     // Generate spill register at output to cut timing paths if desired.
-    if (IndirOutSpill) begin : gen_indir_out_spill
+    if (Cfg.IndirOutSpill) begin : gen_indir_out_spill
       spill_register #(
         .T      ( out_spill_t ),
         .Bypass ( 1'b0        )
@@ -260,7 +251,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   end
 
   assign mem_write_o  = config_q.write;
-  assign mem_addr_o   = {tcdm_start_address_i[AddrWidth-1:PointerWidth], mem_pointer};
+  assign mem_addr_o   = {tcdm_start_address_i[AddrWidth-1:Cfg.PointerWidth], mem_pointer};
 
   // Unpack the configuration address and write signal into a write strobe for
   // the individual registers. Also assign the alias strobe if the address is
@@ -270,7 +261,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   assign alias_fields = cfg_word_i[0+:$bits(alias_fields)];
 
   // Generate the loop counters.
-  for (genvar i = 0; i < NumLoops; i++) begin : gen_loop_counter
+  for (genvar i = 0; i < Cfg.NumLoops; i++) begin : gen_loop_counter
     logic index_ena;
 
     always_comb begin
@@ -313,7 +304,7 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   always_comb begin
     logic e;
     e = 1;
-    for (int i = 0; i < NumLoops; i++) begin
+    for (int i = 0; i < Cfg.NumLoops; i++) begin
       loop_enabled[i] = e;
       e &= loop_last[i];
     end
@@ -322,10 +313,10 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
 
   // Pick the stride of the highest enabled loop.
   always_comb begin
-    logic [NumLoops-1:0] outermost;
+    logic [Cfg.NumLoops-1:0] outermost;
     outermost = loop_enabled & ~(loop_enabled >> 1);
     selected_stride = '0;
-    for (int i = 0; i < NumLoops; i++)
+    for (int i = 0; i < Cfg.NumLoops; i++)
       selected_stride |= outermost[i] ? stride_q[i] : '0;
   end
 
@@ -369,8 +360,8 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
 
   typedef struct packed {
     indir_read_map_t indir_read_map;
-    logic [NumLoops-1:0][31:0] stride;
-    logic [NumLoops-1:0][31:0] bound;
+    logic [Cfg.NumLoops-1:0][31:0] stride;
+    logic [Cfg.NumLoops-1:0][31:0] bound;
     logic [31:0] rep;
     logic [31:0] status;
   } read_map_t;
@@ -379,11 +370,11 @@ module snitch_ssr_addr_gen import snitch_pkg::*; #(
   always_comb begin
     read_map_t read_map;
 
-    read_map.indir_read_map = Indirection ? indir_read_map : '0;
+    read_map.indir_read_map = Cfg.Indirection ? indir_read_map : '0;
     read_map.status = pointer_q;
     read_map.status[31-:$bits(config_q)] = config_q;
     read_map.rep = rep_q;
-    for (int i = 0; i < NumLoops; i++) begin
+    for (int i = 0; i < Cfg.NumLoops; i++) begin
       read_map.bound[i] = bound_q[i];
       read_map.stride[i] = stride_q[i];
     end

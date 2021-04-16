@@ -6,6 +6,13 @@
 
 module tb_simple_ssr;
 
+  // Test parameters
+  localparam int unsigned AddrWidth     = 32;
+  localparam int unsigned DataWidth     = 64;
+  localparam bit          Indirection   = 1;
+  // TODO: Indirect writes fail with one loop level. Why?
+  localparam int unsigned NumLoops      = 4;
+
   // Test data parameters
   localparam string       DataFile = "../test/tb_simple_ssr.hex";
   localparam int unsigned ValBase   = 'h0;
@@ -13,13 +20,24 @@ module tb_simple_ssr;
   localparam int unsigned IdxStride = 'h800;  // Stride of index arrays of different sizes
 
   // DUT parameters
-  localparam bit Indirection    = 1;
-  localparam bit IndirOutSpill  = 1;
+  localparam snitch_ssr_pkg::ssr_cfg_t Cfg = '{
+    Indirection:    Indirection,
+    IndirOutSpill:  1,
+    NumLoops:       NumLoops,
+    IndexWidth:     16,
+    PointerWidth:   18,
+    ShiftWidth:     3,
+    IndexCredits:   3,
+    DataCredits:    4,
+    MuxRespDepth:   3,
+    RptWidth:       4
+  };
 
   // Instantiate fixture
   fixture_ssr #(
-    .Indirection    ( Indirection   ),
-    .IndirOutSpill  ( IndirOutSpill )
+    .AddrWidth ( AddrWidth  ),
+    .DataWidth ( DataWidth  ),
+    .Cfg       ( Cfg        )
   ) fix();
 
   initial begin
@@ -33,11 +51,16 @@ module tb_simple_ssr;
       $info("Direct tests: write 0, alias %0d", a);
       fix.verify_nat_job(0, a, ValBase + 8*0,  0, 0, '{0, 0, 0, 36}, '{0, 0, 0, 1});
       fix.verify_nat_job(0, a, ValBase + 8*17, 0, 3, '{0, 0, 0, 9},  '{0, 0, 0, 3});
-      fix.verify_nat_job(0, a, ValBase + 8*7,  1, 0, '{0, 0, 0, 9},  '{0, 0, 4, 1});
-      fix.verify_nat_job(0, a, ValBase + 8*2,  2, 0, '{0, 3, 0, 2},  '{0, 7, 4, 3});
-      fix.verify_nat_job(0, a, ValBase + 8*7,  2, 0, '{0, 3, 1, 2},  '{0, 1, -4, 5});
-      fix.verify_nat_job(0, a, ValBase + 8*18, 3, 0, '{3, 1, 3, 9},  '{-53, -51, -43, 5});
-      fix.verify_nat_job(0, a, ValBase + 8*9,  3, 5, '{3, 1, 3, 9},  '{-53, -51, -43, 5});
+      if (Cfg.NumLoops >= 2) begin
+        fix.verify_nat_job(0, a, ValBase + 8*7,  1, 0, '{0, 0, 1, 9}, '{0, 0, 4, 1});
+        fix.verify_nat_job(0, a, ValBase + 8*7,  1, 0, '{0, 0, 3, 9}, '{0, 0, 2, 3});
+      end if (Cfg.NumLoops >= 3) begin
+        fix.verify_nat_job(0, a, ValBase + 8*2,  2, 0, '{0, 3, 0, 2}, '{0, 7, 4, 3});
+        fix.verify_nat_job(0, a, ValBase + 8*7,  2, 0, '{0, 3, 1, 2}, '{0, 1, -4, 5});
+      end if (Cfg.NumLoops >= 4) begin
+        fix.verify_nat_job(0, a, ValBase + 8*18, 3, 0, '{3, 1, 3, 9}, '{-53, -51, -43, 5});
+        fix.verify_nat_job(0, a, ValBase + 8*9,  3, 5, '{3, 1, 3, 9}, '{-53, -51, -43, 5});
+      end
     end
 
     // Natural iteration write checks (using both launch methods).
@@ -48,11 +71,16 @@ module tb_simple_ssr;
       $info("Direct tests: write 1, alias %0d, wbase %x", a, wbase);
       fix.verify_nat_job(1, a, ValBase + 8*0,  0, 0, '{0, 0, 0, 36}, '{0, 0, 0, 1},    8*54, wbase);
       fix.verify_nat_job(1, a, ValBase + 8*17, 0, 3, '{0, 0, 0, 9},  '{0, 0, 0, 3},    8*71, wbase);
-      fix.verify_nat_job(1, a, ValBase + 8*7,  1, 0, '{0, 0, 0, 9},  '{0, 0, 4, 1},    8*83, wbase);
-      fix.verify_nat_job(1, a, ValBase + 8*2,  2, 0, '{0, 3, 0, 2},  '{0, 7, 4, 3},    8*31, wbase);
-      fix.verify_nat_job(1, a, ValBase + 8*7,  2, 0, '{0, 3, 1, 2},  '{0, 1, 17, 5},   8*27, wbase);
-      fix.verify_nat_job(1, a, ValBase + 8*18, 3, 0, '{2, 1, 2, 3},  '{101, 17, 2, 5}, 8*13, wbase);
-      fix.verify_nat_job(1, a, ValBase + 8*9,  3, 5, '{3, 2, 1, 1},  '{57, 19, 1, 3},  8*9,  wbase);
+      if (Cfg.NumLoops >= 2) begin
+        fix.verify_nat_job(1, a, ValBase + 8*7,  1, 0, '{0, 0, 1, 9}, '{0, 0, 4, 1},   8*83, wbase);
+        fix.verify_nat_job(1, a, ValBase + 8*7,  1, 0, '{0, 0, 3, 9}, '{0, 0, 2, 3},   8*83, wbase);
+      end if (Cfg.NumLoops >= 3) begin
+        fix.verify_nat_job(1, a, ValBase + 8*2,  2, 0, '{0, 3, 0, 2}, '{0, 7, 4, 3},   8*31, wbase);
+        fix.verify_nat_job(1, a, ValBase + 8*7,  2, 0, '{0, 3, 1, 2}, '{0, 1, 17, 5},  8*27, wbase);
+      end if (Cfg.NumLoops >= 4) begin
+        fix.verify_nat_job(1, a, ValBase + 8*18, 3, 0, '{2, 1, 2, 3}, '{93, 17, 2, 5}, 8*13, wbase);
+        fix.verify_nat_job(1, a, ValBase + 8*9,  3, 5, '{3, 2, 1, 1}, '{57, 19, 1, 3}, 8*9,  wbase);
+      end
     end
 
     if (Indirection) begin

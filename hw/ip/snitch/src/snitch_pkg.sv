@@ -118,18 +118,6 @@ package snitch_pkg;
   localparam logic [3:0] STI = 5;
   localparam logic [3:0] SEI = 9;
 
-  // Registers which are used as SSRs
-  localparam [4:0] FT0 = 5'd0;
-  localparam [4:0] FT1 = 5'd1;
-  localparam [4:0] FT2 = 5'd2;
-  localparam [2:0][4:0] SSRRegs = {FT2, FT1, FT0};
-  function automatic logic is_ssr(logic [4:0] register);
-    unique case (register)
-      FT0, FT1, FT2: return 1'b1;
-      default : return 0;
-    endcase
-  endfunction
-
   // Slaves on Cluster AXI Bus
   typedef enum integer {
     TCDM               = 0,

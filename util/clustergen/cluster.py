@@ -261,10 +261,26 @@ class SnitchCluster(Generator):
                 core['isa_parsed'] = parse_isa_string(
                     core['isa'])
 
+                # Enforce consistent config if no SSRs
+                if not core['xssr'] or 'ssrs' not in core or not len(core['ssrs']):
+                    core['xssr'] = False
+                    core['ssrs'] = []
+                # Assign SSR register indices
+                next_free_reg = 0
+                for ssr in core['ssrs']:
+                    if ssr['reg_idx'] in (None, next_free_reg):
+                        ssr['reg_idx'] = next_free_reg
+                        next_free_reg += 1
+                # Sort SSRs by register indices (required by decoding logic)
+                core['ssrs'].sort(key=lambda x: x['reg_idx'])
+                # Minimum 1 element to avoid illegal ranges (Xssr prevents generation)
+                core['num_ssrs'] = max(len(core['ssrs']), 1)
+
                 cores.append(dict(core))
 
         self.cfg['nr_hives'] = len(self.cfg['hives'])
         self.cfg['nr_cores'] = len(cores)
+        self.cfg['num_ssrs_max'] = max(len(core['ssrs']) for core in cores)
         self.cfg['cores'] = cores
 
     def cfg_validate(self):

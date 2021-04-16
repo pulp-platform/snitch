@@ -10,6 +10,7 @@
 
 
 
+
 `include "axi/typedef.svh"
 
 // verilog_lint: waive-start package-filename
@@ -87,6 +88,48 @@ package occamy_cluster_pkg;
         PipeConfig: fpnew_pkg::BEFORE
     };
 
+  localparam snitch_ssr_pkg::ssr_cfg_t [3-1:0] SsrCfgs [9] = '{
+    '{'{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3}},
+    '{'{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3}},
+    '{'{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3}},
+    '{'{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3}},
+    '{'{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3}},
+    '{'{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3}},
+    '{'{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3}},
+    '{'{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3}},
+    '{'{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3},
+      '{0, 1, 4, 16, 18, 3, 4, 3, 4, 3}}
+  };
+
+  localparam logic [3-1:0][4:0] SsrRegs [9] = '{
+    '{2, 1, 0},
+    '{2, 1, 0},
+    '{2, 1, 0},
+    '{2, 1, 0},
+    '{2, 1, 0},
+    '{2, 1, 0},
+    '{2, 1, 0},
+    '{2, 1, 0},
+    '{2, 1, 0}
+  };
+
 endpackage
 // verilog_lint: waive-stop package-filename
 
@@ -116,8 +159,9 @@ module occamy_cluster_wrapper (
   localparam int unsigned NumFPOutstandingMem [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 1};
   localparam int unsigned NumDTLBEntries [9] = '{1, 1, 1, 1, 1, 1, 1, 1, 2};
   localparam int unsigned NumITLBEntries [9] = '{1, 1, 1, 1, 1, 1, 1, 1, 1};
-  localparam int unsigned SSRNrCredits [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 4};
   localparam int unsigned NumSequencerInstr [9] = '{16, 16, 16, 16, 16, 16, 16, 16, 16};
+  localparam int unsigned NumSsrs [9] = '{3, 3, 3, 3, 3, 3, 3, 3, 3};
+  localparam int unsigned SsrMuxRespDepth [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 4};
 
   // Snitch cluster under test.
   snitch_cluster #(
@@ -163,7 +207,11 @@ module occamy_cluster_wrapper (
     .NumFPOutstandingMem (NumFPOutstandingMem),
     .NumDTLBEntries (NumDTLBEntries),
     .NumITLBEntries (NumITLBEntries),
-    .SSRNrCredits (SSRNrCredits),
+    .NumSsrsMax (3),
+    .NumSsrs (NumSsrs),
+    .SsrMuxRespDepth (SsrMuxRespDepth),
+    .SsrRegs (occamy_cluster_pkg::SsrRegs),
+    .SsrCfgs (occamy_cluster_pkg::SsrCfgs),
     .NumSequencerInstr (NumSequencerInstr),
     .Hive (occamy_cluster_pkg::Hive),
     .Topology (snitch_pkg::LogarithmicInterconnect),

@@ -30,6 +30,17 @@ ${int(getattr(c['isa_parsed'], isa))}\
   % endfor
 </%def>\
 
+<%def name="ssr_cfg(core, ssr_fmt_str, none_str, inner_sep)">\
+% for core in cfg['cores']:
+  % for s in list(reversed(core['ssrs'] + [None]*(cfg['num_ssrs_max']-len(core['ssrs'])))):
+${("    '{" if loop.first else ' ') + \
+    (ssr_fmt_str.format(**s) if s is not None else none_str) \
+    + (inner_sep if not loop.last else '}')}\
+  % endfor
+${',' if not loop.last else ''}
+% endfor
+</%def>\
+
 `include "axi/typedef.svh"
 
 // verilog_lint: waive-start package-filename
@@ -103,6 +114,15 @@ package ${cfg['pkg_name']};
         PipeConfig: fpnew_pkg::${cfg['timing']['fpu_pipe_config']}
     };
 
+  localparam snitch_ssr_pkg::ssr_cfg_t [${cfg['num_ssrs_max']}-1:0] SsrCfgs [${cfg['nr_cores']}] = '{
+${ssr_cfg(core, "'{{{indirection:d}, {indir_out_spill:d}, {num_loops}, {index_width}, {pointer_width}, "\
+  "{shift_width}, {rpt_width}, {index_credits}, {data_credits}, {mux_resp_depth}}}", "/*None*/ '0", ',\n     ')}\
+  };
+
+  localparam logic [${cfg['num_ssrs_max']}-1:0][4:0] SsrRegs [${cfg['nr_cores']}] = '{
+${ssr_cfg(core, '{reg_idx}', '/*None*/ 0', ',')}\
+  };
+
 endpackage
 // verilog_lint: waive-stop package-filename
 
@@ -134,8 +154,9 @@ module ${cfg['name']}_wrapper (
   localparam int unsigned NumFPOutstandingMem [${cfg['nr_cores']}] = '{${core_cfg('num_fp_outstanding_mem')}};
   localparam int unsigned NumDTLBEntries [${cfg['nr_cores']}] = '{${core_cfg('num_dtlb_entries')}};
   localparam int unsigned NumITLBEntries [${cfg['nr_cores']}] = '{${core_cfg('num_itlb_entries')}};
-  localparam int unsigned SSRNrCredits [${cfg['nr_cores']}] = '{${core_cfg('ssr_nr_credits')}};
   localparam int unsigned NumSequencerInstr [${cfg['nr_cores']}] = '{${core_cfg('num_sequencer_instructions')}};
+  localparam int unsigned NumSsrs [${cfg['nr_cores']}] = '{${core_cfg('num_ssrs')}};
+  localparam int unsigned SsrMuxRespDepth [${cfg['nr_cores']}] = '{${core_cfg('ssr_mux_resp_depth')}};
 
   // Snitch cluster under test.
   snitch_cluster #(
@@ -181,7 +202,11 @@ module ${cfg['name']}_wrapper (
     .NumFPOutstandingMem (NumFPOutstandingMem),
     .NumDTLBEntries (NumDTLBEntries),
     .NumITLBEntries (NumITLBEntries),
-    .SSRNrCredits (SSRNrCredits),
+    .NumSsrsMax (${cfg['num_ssrs_max']}),
+    .NumSsrs (NumSsrs),
+    .SsrMuxRespDepth (SsrMuxRespDepth),
+    .SsrRegs (${cfg['pkg_name']}::SsrRegs),
+    .SsrCfgs (${cfg['pkg_name']}::SsrCfgs),
     .NumSequencerInstr (NumSequencerInstr),
     .Hive (${cfg['pkg_name']}::Hive),
     .Topology (snitch_pkg::LogarithmicInterconnect),

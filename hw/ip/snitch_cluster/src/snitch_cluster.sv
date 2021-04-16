@@ -96,8 +96,16 @@ module snitch_cluster
   parameter int unsigned NumDTLBEntries [NrCores] = '{default: 0},
   /// Per-core number of instruction TLB entries.
   parameter int unsigned NumITLBEntries [NrCores] = '{default: 0},
-  /// Per-core SSR credits.
-  parameter int unsigned SSRNrCredits [NrCores] = '{default: 0},
+  /// Maximum number of SSRs per core.
+  parameter int unsigned NumSsrsMax = 0,
+  /// Per-core number of SSRs.
+  parameter int unsigned NumSsrs [NrCores] = '{default: 0},
+  /// Per-core depth of TCDM Mux unifying SSR 0 and Snitch requests.
+  parameter int unsigned SsrMuxRespDepth [NrCores] = '{default: 0},
+  /// Per-core internal parameters for each SSR.
+  parameter snitch_ssr_pkg::ssr_cfg_t [NumSsrsMax-1:0] SsrCfgs [NrCores] = '{default: '0},
+  /// Per-core register indices for each SSR.
+  parameter logic [NumSsrsMax-1:0][4:0]  SsrRegs [NrCores] = '{default: 0},
   /// Per-core amount of sequencer instructions for IPU and FPU if enabled.
   parameter int unsigned NumSequencerInstr [NrCores] = '{default: 0},
   /// Parent Hive id, a.k.a a mapping which core is assigned to which Hive.
@@ -199,7 +207,18 @@ module snitch_cluster
   localparam int unsigned TCDMSize = NrBanks * TCDMDepth * (NarrowDataWidth/8);
   localparam int unsigned BanksPerSuperBank = WideDataWidth / NarrowDataWidth;
   localparam int unsigned NrSuperBanks = NrBanks / BanksPerSuperBank;
-  localparam int unsigned NrTCDMPortsCores = NrCores * 3;
+
+  function automatic int unsigned get_tcdm_ports(int unsigned core);
+    return (NumSsrs[core] > 1 ? NumSsrs[core] : 1);
+  endfunction
+
+  function automatic int unsigned get_tcdm_port_offs(int unsigned core_idx);
+    automatic int n = 0;
+    for (int i = 0; i < core_idx; i++) n += get_tcdm_ports(i);
+    return n;
+  endfunction
+
+  localparam int unsigned NrTCDMPortsCores = get_tcdm_port_offs(NrCores);
   localparam int unsigned NumTCDMIn = NrTCDMPortsCores + 1;
   localparam logic [PhysicalAddrWidth-1:0] TCDMMask = ~(TCDMSize-1);
 
@@ -400,8 +419,8 @@ module snitch_cluster
   tcdm_req_t axi_soc_req;
   tcdm_rsp_t axi_soc_rsp;
 
-  tcdm_req_t [3*NrCores-1:0] tcdm_req;
-  tcdm_rsp_t [3*NrCores-1:0] tcdm_rsp;
+  tcdm_req_t [NrTCDMPortsCores-1:0] tcdm_req;
+  tcdm_rsp_t [NrTCDMPortsCores-1:0] tcdm_rsp;
 
   core_events_t [NrCores-1:0] core_events;
   tcdm_events_t               tcdm_events;
@@ -678,9 +697,11 @@ module snitch_cluster
   hive_rsp_t [NrCores-1:0] hive_rsp;
 
   for (genvar i = 0; i < NrCores; i++) begin : gen_core
-      axi_mst_dma_req_t   axi_dma_req;
-      axi_mst_dma_resp_t  axi_dma_res;
+    localparam int unsigned TcdmPorts = get_tcdm_ports(i);
+    localparam int unsigned TcdmPortsOffs = get_tcdm_port_offs(i);
 
+    axi_mst_dma_req_t   axi_dma_req;
+    axi_mst_dma_resp_t  axi_dma_res;
     interrupts_t irq;
 
     sync #(.STAGES (2))
@@ -692,7 +713,7 @@ module snitch_cluster
     sync #(.STAGES (2))
       i_sync_msip  (.clk_i, .rst_ni, .serial_i (msip_i[i]), .serial_o (irq.msip));
 
-      tcdm_req_t [2:0] tcdm_req_wo_user;
+      tcdm_req_t [TcdmPorts-1:0] tcdm_req_wo_user;
 
       snitch_cc #(
         .AddrWidth (PhysicalAddrWidth),
@@ -734,7 +755,10 @@ module snitch_cluster
         .NumDTLBEntries (NumDTLBEntries[i]),
         .NumITLBEntries (NumITLBEntries[i]),
         .NumSequencerInstr (NumSequencerInstr[i]),
-        .SSRNrCredits (SSRNrCredits[i]),
+        .NumSsrs (NumSsrs[i]),
+        .SsrMuxRespDepth (SsrMuxRespDepth[i]),
+        .SsrCfgs (SsrCfgs[i][NumSsrs[i]-1:0]),
+        .SsrRegs (SsrRegs[i][NumSsrs[i]-1:0]),
         .RegisterOffloadReq (RegisterOffloadReq),
         .RegisterOffloadRsp (RegisterOffloadRsp),
         .RegisterCoreReq (RegisterCoreReq),
@@ -754,7 +778,7 @@ module snitch_cluster
         .data_req_o (core_req[i]),
         .data_rsp_i (core_rsp[i]),
         .tcdm_req_o (tcdm_req_wo_user),
-        .tcdm_rsp_i (tcdm_rsp[3*i+:3]),
+        .tcdm_rsp_i (tcdm_rsp[TcdmPortsOffs+:TcdmPorts]),
         .wake_up_sync_i (wake_up_sync[i]),
         .axi_dma_req_o (axi_dma_req),
         .axi_dma_res_i (axi_dma_res),
@@ -764,11 +788,11 @@ module snitch_cluster
         .tcdm_addr_base_i (tcdm_start_address),
         .tcdm_addr_mask_i (TCDMMask)
       );
-      for (genvar j = 0; j < 3; j++) begin : gen_tcdm_user
+      for (genvar j = 0; j < TcdmPorts; j++) begin : gen_tcdm_user
         always_comb begin
-          tcdm_req[3*i+j] = tcdm_req_wo_user[j];
-          tcdm_req[3*i+j].q.user.core_id = i;
-          tcdm_req[3*i+j].q.user.is_core = 1;
+          tcdm_req[TcdmPortsOffs+j] = tcdm_req_wo_user[j];
+          tcdm_req[TcdmPortsOffs+j].q.user.core_id = i;
+          tcdm_req[TcdmPortsOffs+j].q.user.is_core = 1;
         end
       end
       if (Xdma[i]) begin : gen_dma_connection
