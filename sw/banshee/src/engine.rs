@@ -502,8 +502,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x >= self.engine.config.memory.tcdm.start
                 && x < self.engine.config.memory.tcdm.end =>
             {
-                let word_addr = addr / 4;
-                let word_offs = addr - 4 * word_addr;
+                let tcdm_addr = addr - self.engine.config.memory.tcdm.start;
+                let word_addr = tcdm_addr / 4;
+                let word_offs = tcdm_addr - 4 * word_addr;
                 let ptr: *const u32 = self.tcdm_ptr;
                 let word = unsafe { *ptr.offset(word_addr as isize) };
                 (word >> (8 * word_offs)) & ((((1 as u64) << (8 << size)) - 1) as u32)
@@ -570,8 +571,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x >= self.engine.config.memory.tcdm.start
                 && x < self.engine.config.memory.tcdm.end =>
             {
-                let word_addr = addr / 4;
-                let word_offs = addr - 4 * word_addr;
+                let tcdm_addr = addr - self.engine.config.memory.tcdm.start;
+                let word_addr = tcdm_addr / 4;
+                let word_offs = tcdm_addr - 4 * word_addr;
                 let ptr = self.tcdm_ptr as *const u32;
                 let ptr_mut = ptr as *mut u32;
                 let wmask = ((((1 as u64) << (8 << size)) - 1) as u32) << (8 * word_offs);
