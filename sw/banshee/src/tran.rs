@@ -2778,7 +2778,7 @@ impl<'a> InstructionTranslator<'a> {
         // Emit the SSR case.
         LLVMPositionBuilderAtEnd(self.builder, bb_ssr);
         self.section
-            .emit_call("banshee_ssr_write_cfg", [ssr_ptr, ssr_addr, value, mask]);
+            .emit_call("banshee_ssr_write_cfg", [ssr_ptr, self.section.state_ptr, ssr_addr, value, mask]);
         LLVMBuildBr(self.builder, bb_end);
         LLVMPositionBuilderAtEnd(self.builder, bb_nossr);
 
@@ -3007,7 +3007,7 @@ impl<'a> InstructionTranslator<'a> {
         let td = self.trace_disabled.replace(true);
         let addr = self
             .section
-            .emit_call("banshee_ssr_next", [self.ssr_ptr(rs)]);
+            .emit_call("banshee_ssr_next", [self.ssr_ptr(rs), self.section.state_ptr]);
         self.emit_fld(rs, addr);
         self.trace_disabled.set(td);
         LLVMBuildBr(self.builder, bb_ssroff);
