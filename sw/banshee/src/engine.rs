@@ -498,6 +498,17 @@ impl<'a, 'b> Cpu<'a, 'b> {
             } // cluster_base_hartid
             x if x == self.engine.config.address.cluster_num => self.engine.num_clusters as u32, // cluster_num
             x if x == self.engine.config.address.cluster_id => self.cluster_id as u32, // cluster_id
+            // TCDM
+            x if x >= self.engine.config.memory.tcdm.start
+                && x < self.engine.config.memory.tcdm.end =>
+            {
+                let tcdm_addr = addr - self.engine.config.memory.tcdm.start;
+                let word_addr = tcdm_addr / 4;
+                let word_offs = tcdm_addr - 4 * word_addr;
+                let ptr: *const u32 = self.tcdm_ptr;
+                let word = unsafe { *ptr.offset(word_addr as isize) };
+                (word >> (8 * word_offs)) & ((((1 as u64) << (8 << size)) - 1) as u32)
+            }
             _ => {
                 trace!("Load 0x{:x} ({}B)", addr, 8 << size);
                 self.engine
@@ -552,6 +563,24 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     buffer.clear();
                 } else {
                     buffer.push(value as u8);
+                }
+            }
+            // TCDM
+            // TODO: this is *not* thread-safe and *will* lead to undefined behavior on simultaneous access
+            // by 2 harts. However, changing `tcdm_ptr` to a locked structure would require pervasive redesign.
+            x if x >= self.engine.config.memory.tcdm.start
+                && x < self.engine.config.memory.tcdm.end =>
+            {
+                let tcdm_addr = addr - self.engine.config.memory.tcdm.start;
+                let word_addr = tcdm_addr / 4;
+                let word_offs = tcdm_addr - 4 * word_addr;
+                let ptr = self.tcdm_ptr as *const u32;
+                let ptr_mut = ptr as *mut u32;
+                let wmask = ((((1 as u64) << (8 << size)) - 1) as u32) << (8 * word_offs);
+                unsafe {
+                    let word_ptr = ptr_mut.offset(word_addr as isize);
+                    let word = *word_ptr;
+                    *word_ptr = (word & !wmask) | ((value << (8 * word_offs)) & wmask);
                 }
             }
             _ => {
