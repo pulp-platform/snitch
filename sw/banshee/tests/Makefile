@@ -27,6 +27,8 @@ all: bin/ssr_inst_check
 all: bin/fcvt
 all: bin/ssr_multi_use
 all: bin/sdma_simple
+all: bin/dotp_ssr_frep
+all: bin/spvv_issr_frep
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump

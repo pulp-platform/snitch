@@ -96,33 +96,59 @@ pub unsafe fn banshee_dma_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut DmaState {
 
 /// Write to an SSR control register.
 #[no_mangle]
-pub unsafe fn banshee_ssr_write_cfg(ssr: &mut SsrState, addr: u32, value: u32, mask: u32) {
+pub unsafe fn banshee_ssr_write_cfg(
+    ssr: &mut SsrState,
+    cpu: &mut Cpu,
+    addr: u32,
+    value: u32,
+    mask: u32,
+) {
+    extern "C" {
+        fn banshee_load(cpu: &mut Cpu, addr: u32, size: u8) -> u32;
+    }
     // TODO: Handle the mask!
     let addr = addr as usize / 8;
+    let mut set_ptr = 0;
     match addr {
         0 => {
-            ssr.ptr_next = value & ((1 << 28) - 1);
+            set_ptr = value & ((1 << 28) - 1);
             ssr.done = ((value >> 31) & 1) != 0;
             ssr.write = ((value >> 30) & 1) != 0;
             ssr.dims = ((value >> 28) & 3) as u8;
+            ssr.indir = ((value >> 27) & 1) != 0;
         }
         1 => ssr.repeat_count = value as u16,
         2..=5 => *ssr.bound.get_unchecked_mut(addr - 2) = value,
         6..=9 => *ssr.stride.get_unchecked_mut(addr - 6) = value,
-        24..=27 => {
-            ssr.ptr_next = value;
+        10 => ssr.idx_size = value,
+        11 => ssr.idx_base = value,
+        12 => ssr.idx_shift = value,
+        // Indirection supports 1 loop only, but dimension fields are kept for future use.
+        16..=19 | 24..=27 => {
+            set_ptr = value;
             ssr.done = false;
             ssr.write = false;
             ssr.dims = (addr - 24) as u8;
+            ssr.indir = addr < 20;
         }
-        28..=31 => {
-            ssr.ptr_next = value;
+        20..=23 | 28..=31 => {
+            set_ptr = value;
             ssr.done = false;
             ssr.write = true;
             ssr.dims = (addr - 28) as u8;
+            ssr.indir = addr < 24;
         }
         // TODO: Issue an error
         _ => (),
+    }
+    if ssr.indir {
+        ssr.idx_ptr = set_ptr;
+        let idx = banshee_load(cpu, ssr.idx_ptr, ssr.idx_size as u8);
+        ssr.ptr_next = ssr
+            .idx_base
+            .wrapping_add((idx << ssr.idx_shift) * ssr.stride.get_unchecked(0))
+    } else {
+        ssr.ptr_next = set_ptr;
     }
 }
 
@@ -130,11 +156,26 @@ pub unsafe fn banshee_ssr_write_cfg(ssr: &mut SsrState, addr: u32, value: u32, m
 #[no_mangle]
 pub unsafe fn banshee_ssr_read_cfg(ssr: &mut SsrState, addr: u32) -> u32 {
     let addr = addr as usize / 8;
+    // TODO: we assume the TCDM word size is equal to the configured indirection stride here;
+    //       this is (currently) a requirement for correct index word fetching.
+    let status_ptr = match ssr.indir {
+        true => ssr.idx_ptr & (*ssr.stride.get_unchecked(0) - 1),
+        false => ssr.ptr,
+    };
     match addr {
-        0 => ssr.ptr | (ssr.done as u32) << 31 | (ssr.write as u32) << 30 | (ssr.dims as u32) << 28,
+        0 => {
+            status_ptr
+                | (ssr.done as u32) << 31
+                | (ssr.write as u32) << 30
+                | (ssr.dims as u32) << 28
+                | (ssr.indir as u32) << 27
+        }
         1 => ssr.repeat_count as u32,
         2..=5 => *ssr.bound.get_unchecked(addr - 2),
         6..=9 => *ssr.stride.get_unchecked(addr - 6),
+        10 => ssr.idx_size,
+        11 => ssr.idx_base,
+        12 => ssr.idx_shift,
         // TODO: Issue an error
         _ => 0,
     }
@@ -142,7 +183,10 @@ pub unsafe fn banshee_ssr_read_cfg(ssr: &mut SsrState, addr: u32) -> u32 {
 
 /// Generate the next address from an SSR.
 #[no_mangle]
-pub unsafe fn banshee_ssr_next(ssr: &mut SsrState) -> u32 {
+pub unsafe fn banshee_ssr_next(ssr: &mut SsrState, cpu: &mut Cpu) -> u32 {
+    extern "C" {
+        fn banshee_load(cpu: &mut Cpu, addr: u32, size: u8) -> u32;
+    }
     // TODO: Assert that the SSR is not done.
     let ptr = ssr.ptr;
     // execute increment only, if SSR register has not been previously
@@ -164,7 +208,15 @@ pub unsafe fn banshee_ssr_next(ssr: &mut SsrState) -> u32 {
                     break;
                 }
             }
-            ssr.ptr_next = ssr.ptr.wrapping_add(stride);
+            if ssr.indir {
+                ssr.idx_ptr = ssr.idx_ptr.wrapping_add(1 << ssr.idx_size);
+                let idx = banshee_load(cpu, ssr.idx_ptr, ssr.idx_size as u8);
+                ssr.ptr_next = ssr
+                    .idx_base
+                    .wrapping_add((idx << ssr.idx_shift) * ssr.stride.get_unchecked(0))
+            } else {
+                ssr.ptr_next = ssr.ptr.wrapping_add(stride);
+            }
         } else {
             ssr.repeat_count += 1;
         }

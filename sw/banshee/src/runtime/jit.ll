@@ -27,9 +27,9 @@ declare void @banshee_abort_illegal_branch(%Cpu* %cpu, i32 %addr, i32 %target)
 declare void @banshee_trace(%Cpu* %cpu, i32 %addr, i32 %raw, [2 x i64] %access_slice, [2 x i64] %data_slice)
 declare i32 @banshee_wfi(%Cpu* %cpu)
 
-declare void @banshee_ssr_write_cfg(%SsrState* writeonly %ssr, i32 %addr, i32 %value, i32 %mask)
+declare void @banshee_ssr_write_cfg(%SsrState* %ssr,  %Cpu* %cpu, i32 %addr, i32 %value, i32 %mask)
 declare i32 @banshee_ssr_read_cfg(%SsrState* readonly %ssr, i32 %addr)
-declare i32 @banshee_ssr_next(%SsrState* %ssr)
+declare i32 @banshee_ssr_next(%SsrState* %ssr, %Cpu* %cpu)
 declare void @banshee_ssr_eoi(%SsrState* %ssr)
 
 declare void @banshee_dma_src(%DmaState* writeonly %dma, i32 %lo, i32 %hi)

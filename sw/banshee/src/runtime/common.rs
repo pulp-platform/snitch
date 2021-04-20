@@ -54,6 +54,10 @@ pub struct SsrState {
     index: [u32; 4],
     bound: [u32; 4],
     stride: [u32; 4],
+    idx_shift: u32,
+    idx_base: u32,
+    idx_size: u32,
+    idx_ptr: u32,
     ptr: u32,
     ptr_next: u32,
     repeat_count: u16,
@@ -61,6 +65,7 @@ pub struct SsrState {
     write: bool,
     dims: u8,
     done: bool,
+    indir: bool,
     accessed: bool,
 }
 
