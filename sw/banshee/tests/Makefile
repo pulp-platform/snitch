@@ -54,6 +54,7 @@ bin/ssr_multi_use \
 bin/sdma_simple \
 bin/dotp_ssr_frep \
 bin/spvv_issr_frep \
+bin/spmv_issr_frep \
 
 all: $(LLVM_TESTS)
 
