@@ -22,11 +22,6 @@ all: bin/unpred_jr_2
 all: bin/far_jump
 all: bin/atomics
 all: bin/wfi
-all: bin/fmv
-all: bin/ssr_inst_check
-all: bin/fcvt
-all: bin/ssr_multi_use
-all: bin/sdma_simple
 all: bin/dotp_ssr_frep
 all: bin/spvv_issr_frep
 
@@ -48,3 +43,22 @@ matmul/data.S: matmul/gen_data.py
 bin/matmul_baseline: matmul/data.S
 bin/matmul_ssr: matmul/data.S
 bin/matmul_ssr_frep: matmul/data.S
+
+# LLVM Tests: require snitch-llvm extensions
+# TODO: Some binaries are not reproducible, with optimizations removing instructions
+include runtime/runtime.llvm.mk
+
+LLVM_TESTS = \
+bin/fmv \
+bin/fcvt \
+bin/ssr_inst_check \
+bin/ssr_multi_use \
+bin/sdma_simple \
+
+all: $(LLVM_TESTS)
+
+$(LLVM_TESTS): bin/%: %.c
+	mkdir -p $(shell dirname $@) dump
+	$(RISCV_LLVM_CC) $(RISCV_LLVM_CCFLAGS) -Iinclude $(RISCV_LLVM_LDFLAGS) -o $@ $^ -Truntime/link.ld runtime/billywig_crt0.S
+	$(RISCV_LLVM_STRIP) $@ $(RISCV_LLVM_STRIP_FLAGS)
+	$(RISCV_LLVM_OBJDUMP) $(RISCV_LLVM_OBJDUMP_FLAGS) -D $@ > dump/$*.dump
