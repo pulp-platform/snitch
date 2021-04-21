@@ -22,7 +22,6 @@ all: bin/unpred_jr_2
 all: bin/far_jump
 all: bin/atomics
 all: bin/wfi
-all: bin/spvv_issr_frep
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump
@@ -54,6 +53,7 @@ bin/ssr_inst_check \
 bin/ssr_multi_use \
 bin/sdma_simple \
 bin/dotp_ssr_frep \
+bin/spvv_issr_frep \
 
 all: $(LLVM_TESTS)
 
