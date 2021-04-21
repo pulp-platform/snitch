@@ -520,7 +520,7 @@ Disassembly of section .text.main:
 800100e4: d3 02 21 22  	fmv.d	ft5, ft2
 800100e8: 53 03 21 22  	fmv.d	ft6, ft2
 800100ec: d3 03 21 22  	fmv.d	ft7, ft2
-800100f0: 8b 09 07 00  	frep.o	a4, 1, 0, 9
+800100f0: 8b 59 07 00  	frep.o	a4, 1, 5, 9
 800100f4: 43 f1 00 12  	fmadd.d	ft2, ft1, ft0, ft2
 800100f8: d3 7e 73 02  	fadd.d	ft9, ft6, ft7
 800100fc: 53 73 52 02  	fadd.d	ft6, ft4, ft5

@@ -49,7 +49,7 @@ static inline void svec16_dvec_dotp_opt_issr(const double* vals_a,
         "fmv.d      ft6, ft2            \n"
         "fmv.d      ft7, ft2            \n"
         // Computation
-        "frep.o %[ldec], 1, 0, 0b1001   \n"
+        "frep.o %[ldec], 1, 5, 0b1001   \n"
         "fmadd.d    ft2, ft1, ft0, ft2  \n"
         // Reduction
         "fadd.d     ft9, ft6, ft7       \n"
