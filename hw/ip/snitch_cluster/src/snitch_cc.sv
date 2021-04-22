@@ -167,6 +167,7 @@ module snitch_cc #(
   dreq_t snitch_dreq_d, snitch_dreq_q, merged_dreq;
   drsp_t snitch_drsp_d, snitch_drsp_q, merged_drsp;
 
+  logic wake_up;
 
   `SNITCH_VM_TYPEDEF(AddrWidth)
 

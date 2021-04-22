@@ -1,6 +1,7 @@
 // Copyright 2020 ETH Zurich and University of Bologna.
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
+// Licensed under Solderpad Hardware License, Version 0.51, see LICENSE for details.
 {
     param_list: [
         { name: "NumPerfCounters",
@@ -115,7 +116,23 @@
                 desc: "Performance counter"
             }]
         }
-    }
+    },
+    {
+        name: "WAKE_UP"
+        desc: '''
+        (Legcay) Writing the hartid wakes up the corresponding core of the cluster (always starting at 0).
+        Writing `-1` (all ones) wakes up all cores of the cluster.
+        '''
+        hwext: "true",
+        hwqe: "true",
+        swaccess: "wo",
+        hwaccess: "hro",
+        fields: [{
+            bits: "31:0",
+            name: "WAKE_UP",
+            desc: "Wake up specifc core with the written id, or all cores (`-1`)."
+        }]
+    },
     {
         name: "HW_BARRIER",
         desc: '''Hardware barrier register. Loads to this register will block until all cores have
@@ -123,7 +140,7 @@
         i.e., the cores are synchronized.'''
         swaccess: "ro",
         hwaccess: "hrw",
-        hwext: true,
+        hwext: "true",
         fields: [{
             bits: "31:0",
             name: "HW_BARRIER",
