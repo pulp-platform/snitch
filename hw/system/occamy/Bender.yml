@@ -29,6 +29,7 @@ sources:
 - src/rv_plic/rv_plic_reg_pkg.sv
 - src/rv_plic/rv_plic_reg_top.sv
 - src/rv_plic/rv_plic.sv
+- src/reg_to_apb.sv
 # Level 1:
 - src/occamy_pkg.sv
 # Level 2:
