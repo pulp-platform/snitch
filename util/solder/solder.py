@@ -337,6 +337,27 @@ class AxiLiteStruct:
         return name
 
 
+# APB struct emission.
+class ApbStruct:
+    configs = dict()
+
+    def emit(aw, dw):
+        global code_package
+        key = (aw, dw)
+        if key in ApbStruct.configs:
+            return ApbStruct.configs[key]
+        name = "apb_a{}_d{}".format(*key)
+        code = "// APB bus with {} bit address, {} bit data.\n".format(
+            *key)
+        code += "`APB_TYPEDEF_REQ_T({}_req_t, logic [{}:0], logic [{}:0], logic [{}:0])\n".format(
+            name, aw - 1, dw - 1, (dw + 7) // 8 - 1)
+        code += "`APB_TYPEDEF_RESP_T({}_rsp_t, logic [{}:0])\n".format(
+            name, dw - 1)
+        code_package += "\n\n" + code
+        ApbStruct.configs[key] = name
+        return name
+
+
 # Register bus struct emission
 class RegStruct:
     configs = dict()
@@ -842,6 +863,77 @@ class AxiLiteBus(object):
         return bus
 
 
+# An advanced peripheral bus.
+class ApbBus(object):
+    def __init__(self,
+                 clk,
+                 rst,
+                 aw,
+                 dw,
+                 name,
+                 name_suffix=None,
+                 type_prefix=None,
+                 declared=False):
+        self.clk = clk
+        self.rst = rst
+        self.aw = aw
+        self.dw = dw
+        self.type_prefix = type_prefix or self.emit_struct()
+        self.name = name
+        self.name_suffix = name_suffix
+        self.declared = declared
+
+    def emit_struct(self):
+        return ApbStruct.emit(self.aw, self.dw)
+
+    def emit_flat_master_port(self, name=None):
+        tpl = templates.get_template("solder.apb_flatten_port.sv.tpl")
+        return tpl.render_unicode(
+                mst_dir="output",
+                slv_dir="input",
+                prefix="m_apb_{}".format(name or ""),
+                bus=self
+            )
+
+    def emit_flat_slave_port(self, name=None):
+        tpl = templates.get_template("solder.apb_flatten_port.sv.tpl")
+        return tpl.render_unicode(
+                mst_dir="input",
+                slv_dir="output",
+                prefix="s_apb_{}".format(name or ""),
+                bus=self
+            )
+
+    def declare(self, context):
+        if self.declared:
+            return
+        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
+        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
+        self.declared = True
+        return self
+
+    def req_name(self):
+        return "{}_req{}".format(self.name, self.name_suffix or "")
+
+    def rsp_name(self):
+        return "{}_rsp{}".format(self.name, self.name_suffix or "")
+
+    def req_type(self):
+        return "{}_req_t".format(self.type_prefix)
+
+    def rsp_type(self):
+        return "{}_rsp_t".format(self.type_prefix)
+
+    def addr_type(self):
+        return "logic [{}:0]".format(self.aw - 1)
+
+    def data_type(self):
+        return "logic [{}:0]".format(self.dw - 1)
+
+    def strb_type(self):
+        return "logic [{}:0]".format((self.dw + 7) // 8 - 1)
+
+
 # A register bus.
 class RegBus(object):
     def __init__(self,
@@ -901,6 +993,30 @@ class RegBus(object):
         # Emit the converter instance.
         bus.declare(context)
         tpl = templates.get_template("solder.reg_to_axi_lite.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                bus_in=self,
+                bus_out=bus,
+                name=inst_name or "i_{}_pc".format(name),
+            ) + "\n")
+        return bus
+
+    def to_apb(self, context, name, inst_name=None, to=None):
+        # Generate the new bus.
+        if to is None:
+            bus = ApbBus(self.clk, self.rst, self.aw, self.dw, name=name)
+        else:
+            bus = to
+
+        # Check bus properties.
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+
+        # Emit the converter instance.
+        bus.declare(context)
+        tpl = templates.get_template("solder.reg_to_apb.sv.tpl")
         context.write(
             tpl.render_unicode(
                 bus_in=self,
