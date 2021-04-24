@@ -83,6 +83,9 @@ module occamy_top
     output axi_a48_d512_i8_u0_req_t  hbm_7_req_o,
     input  axi_a48_d512_i8_u0_resp_t hbm_7_rsp_i,
 
+    output apb_a48_d32_req_t apb_hbm_ctrl_req_o,
+    input  apb_a48_d32_rsp_t apb_hbm_ctrl_rsp_i,
+
     /// HBI Ports
     input  axi_a48_d512_i3_u0_req_t  hbi_0_req_i,
     output axi_a48_d512_i3_u0_resp_t hbi_0_rsp_o,
@@ -163,8 +166,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [7:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [7:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [8:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [8:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -187,7 +190,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(8),
+      .NoRules(9),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -1730,5 +1733,28 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .intr_ack_stop_o(irq.i2c_ack_stop),
       .intr_host_timeout_o(irq.i2c_host_timeout)
   );
+
+  //////////////////
+  //   HBM CTRL   //
+  //////////////////
+  apb_a48_d32_req_t apb_hbm_ctrl_req;
+  apb_a48_d32_rsp_t apb_hbm_ctrl_rsp;
+
+  reg_to_apb #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t),
+      .apb_req_t(apb_a48_d32_req_t),
+      .apb_rsp_t(apb_a48_d32_rsp_t)
+  ) i_apb_hbm_ctrl_pc (
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_CTRL]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_CTRL]),
+      .apb_req_o(apb_hbm_ctrl_req),
+      .apb_rsp_i(apb_hbm_ctrl_rsp)
+  );
+
+  assign apb_hbm_ctrl_req_o = apb_hbm_ctrl_req;
+  assign apb_hbm_ctrl_rsp   = apb_hbm_ctrl_rsp_i;
 
 endmodule

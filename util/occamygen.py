@@ -108,6 +108,8 @@ def main():
                           0x02003000).attach_to(am_soc_regbus_periph_xbar)
     am_i2c = am.new_leaf("i2c", 0x1000,
                          0x02004000).attach_to(am_soc_regbus_periph_xbar)
+    am_hbm_ctrl = am.new_leaf("hbm_ctrl", 0x1000,
+                              0x02005000).attach_to(am_soc_regbus_periph_xbar)
 
     am_spim = am.new_leaf("spim", 0x20000,
                           0x03000000).attach_to(am_soc_regbus_periph_xbar)
@@ -176,6 +178,7 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("uart", am_uart)
     soc_regbus_periph_xbar.add_output_entry("gpio", am_gpio)
     soc_regbus_periph_xbar.add_output_entry("i2c", am_i2c)
+    soc_regbus_periph_xbar.add_output_entry("hbm_ctrl", am_hbm_ctrl)
     soc_regbus_periph_xbar.add_output_entry("spim", am_spim)
 
     #################
@@ -275,6 +278,15 @@ def main():
     # Generate the Verilog code.
     solder.render()
 
+    ############
+    # HBM CTRL #
+    ############
+    apb_hbm_ctrl = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
+                                 rst=soc_regbus_periph_xbar.rst,
+                                 aw=soc_regbus_periph_xbar.aw,
+                                 dw=soc_regbus_periph_xbar.dw,
+                                 name="apb_hbm_ctrl")
+
     # Emit the code.
     #############
     # Top-Level #
@@ -289,6 +301,7 @@ def main():
             soc_regbus_periph_xbar=soc_regbus_periph_xbar,
             soc_wide_xbar=soc_wide_xbar,
             soc_narrow_xbar=soc_narrow_xbar,
+            apb_hbm_ctrl=apb_hbm_ctrl,
             nr_s1_quadrants=nr_s1_quadrants)
         code = re_trailws.sub("", code)
         file.write(code)
@@ -333,7 +346,8 @@ def main():
         code = tpl_xilinx.render_unicode(
             solder=solder,
             soc_wide_xbar=soc_wide_xbar,
-            soc_regbus_periph_xbar=soc_regbus_periph_xbar)
+            soc_regbus_periph_xbar=soc_regbus_periph_xbar,
+            apb_hbm_ctrl=apb_hbm_ctrl)
         code = re_trailws.sub("", code)
         file.write(code)
 

@@ -71,6 +71,9 @@ module occamy_top
   input   ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].rsp_type()} hbm_${i}_rsp_i,
 % endfor
 
+  output ${apb_hbm_ctrl.req_type()} apb_hbm_ctrl_req_o,
+  input  ${apb_hbm_ctrl.rsp_type()} apb_hbm_ctrl_rsp_i,
+
   /// HBI Ports
 % for i in range(nr_s1_quadrants):
   input   ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_type()} hbi_${i}_req_i,
@@ -514,5 +517,12 @@ module occamy_top
     .intr_ack_stop_o (irq.i2c_ack_stop),
     .intr_host_timeout_o (irq.i2c_host_timeout)
   );
+
+  //////////////////
+  //   HBM CTRL   //
+  //////////////////
+  <% soc_regbus_periph_xbar.out_hbm_ctrl.to_apb(context, "apb_hbm_ctrl", to=apb_hbm_ctrl) %>
+  assign apb_hbm_ctrl_req_o = ${apb_hbm_ctrl.req_name()};
+  assign ${apb_hbm_ctrl.rsp_name()} = apb_hbm_ctrl_rsp_i;
 
 endmodule
