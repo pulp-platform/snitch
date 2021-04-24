@@ -31,6 +31,7 @@ sources:
 - src/clint/clint_reg_pkg.sv
 - src/clint/clint_reg_top.sv
 - src/clint/clint.sv
+- src/reg_to_apb.sv
 # Level 1:
 - src/occamy_pkg.sv
 # Level 2:
