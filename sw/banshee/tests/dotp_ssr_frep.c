@@ -4,40 +4,24 @@
 
 #include "dotp_ssr_frep.h"
 
-#include "runtime.h"
-
-// Assembly macros
-#define SLA_FREP_ITER(max_inst, max_rep_rnum, stagger_max, stagger_mask, \
-                      is_outer)                                          \
-    ".word   (" #max_inst                                                \
-    "<< 20) \
-            |(" #max_rep_rnum                                            \
-    "<< 15) \
-            |(" #stagger_max                                             \
-    "<< 12) \
-            |(" #stagger_mask                                            \
-    "<< 8)  \
-            |(" #is_outer                                                \
-    "<< 7)  \
-            |0b0001011\n"
+#include "stdint.h"
 
 // Simple 1D dot product using SSRs
 static inline void ssr_dvec_dvec_dotp(const double* const vals_a,
                                       const double* const vals_b,
-                                      const uint32_t const len,
+                                      const uint32_t len,
                                       volatile double* const res) {
     if (len == 0) return;
-    const volatile register uint32_t frepCount asm("t0") = len - 1;
     asm volatile(
         // Setup zero register
         "fcvt.d.w   ft2, zero           \n"
         // SSR setup
-        "sw         %[c8],  48(%[scfg]) \n"  // stride_0[0]
-        "sw         %[c8], 304(%[scfg]) \n"  // stride_0[1]
-        "sw         t0,     16(%[scfg]) \n"  // bounds_0[0]
-        "sw         t0,    272(%[scfg]) \n"  // bounds_0[1]
-        "sw         %[va], 192(%[scfg]) \n"  // rptr_0[0]
-        "sw         %[vb], 448(%[scfg]) \n"  // rptr_0[1]
+        "scfgwi %[ldec], 0 |  2<<5      \n"  // bounds_0[0]
+        "scfgwi %[ldec], 1 |  2<<5      \n"  // bounds_0[1]
+        "scfgwi %[c8],   0 |  6<<5      \n"  // stride_0[0]
+        "scfgwi %[c8],   1 |  6<<5      \n"  // stride_0[1]
+        "scfgwi %[vala], 0 | 24<<5      \n"  // rptr_0[0]
+        "scfgwi %[valb], 1 | 24<<5      \n"  // rptr_0[1]
         // Enable SSRs
         "csrsi      0x7C0, 1            \n"
         // Init target registers
@@ -47,7 +31,7 @@ static inline void ssr_dvec_dvec_dotp(const double* const vals_a,
         "fmv.d      ft6, ft2            \n"
         "fmv.d      ft7, ft2            \n"
         // Computation
-        SLA_FREP_ITER(0, 5, 5, 0b1001, 1)  // t0 == x5
+        "frep.o %[ldec], 1, 5, 0b1001   \n"
         "fmadd.d    ft2, ft1, ft0, ft2  \n"
         // Reduction
         "fadd.d     ft9, ft6, ft7       \n"
@@ -57,12 +41,14 @@ static inline void ssr_dvec_dvec_dotp(const double* const vals_a,
         "fadd.d     ft8, ft4, ft9       \n"
         // Writeback
         "fsd        ft8, 0(%[res])      \n"
-        // Disable SSRs
-        "csrci      0x7C0, 1            \n" ::"r"(frepCount),
-        [ scfg ] "r"(ssr_config_reg), [ c8 ] "r"(8), [ va ] "r"(vals_a),
-        [ vb ] "r"(vals_b), [ res ] "r"(res)
-        : "memory", "ft0", "ft1", "ft2", "ft3", "ft4", "ft5", "ft6", "ft7",
-          "ft8", "ft9");
+        // Fence, disable SSRs
+        "fmv.x.w    t0, fa0             \n"
+        "csrci      0x7C0, 1            \n"
+        "bne t0,    zero, 9f            \n9:" ::[res] "r"(res),
+        [ c8 ] "r"(8), [ vala ] "r"(vals_a), [ valb ] "r"(vals_b),
+        [ ldec ] "r"(len - 1)
+        : "memory", "t0", "ft0", "ft1", "ft2", "ft3", "ft4", "ft5", "ft6",
+          "ft7", "ft8", "ft9");
 }
 
 int main() {
