@@ -31,8 +31,8 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   output tcdm_req_t idx_req_o,
   input  tcdm_rsp_t idx_rsp_i,
   // From config interface
-  input  bytecnt_t  cfg_wdata_lo_i,
-  input  logic      cfg_launch_i,
+  input  bytecnt_t  cfg_offs_next_i,
+  input  logic      cfg_done_i,
   // From config registers
   input  logic      cfg_indir_i,
   input  idx_size_t cfg_size_i,
@@ -143,7 +143,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   always_comb begin
     idx_bytecnt_d = idx_bytecnt_q;
     // Set the initial byte offset (upbeat) before job starts, i.e. while done register set.
-    if (cfg_launch_i)         idx_bytecnt_d = cfg_wdata_lo_i;
+    if (cfg_done_i)           idx_bytecnt_d = cfg_offs_next_i;
     else if (idx_bytecnt_ena) idx_bytecnt_d = idx_bytecnt_next;
   end
 
