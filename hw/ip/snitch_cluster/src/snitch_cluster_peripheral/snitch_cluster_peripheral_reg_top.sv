@@ -112,7 +112,10 @@ module snitch_cluster_peripheral_reg_top #(
   logic [47:0] perf_counter_1_qs;
   logic [47:0] perf_counter_1_wd;
   logic perf_counter_1_we;
+  logic [31:0] wake_up_wd;
+  logic wake_up_we;
   logic [31:0] hw_barrier_qs;
+  logic hw_barrier_re;
 
   // Register instances
 
@@ -548,35 +551,41 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // R[hw_barrier]: V(False)
+  // R[wake_up]: V(True)
 
-  prim_subreg #(
-    .DW      (32),
-    .SWACCESS("RO"),
-    .RESVAL  (32'h0)
+  prim_subreg_ext #(
+    .DW    (32)
+  ) u_wake_up (
+    .re     (1'b0),
+    .we     (wake_up_we),
+    .wd     (wake_up_wd),
+    .d      ('0),
+    .qre    (),
+    .qe     (reg2hw.wake_up.qe),
+    .q      (reg2hw.wake_up.q ),
+    .qs     ()
+  );
+
+
+  // R[hw_barrier]: V(True)
+
+  prim_subreg_ext #(
+    .DW    (32)
   ) u_hw_barrier (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
-
+    .re     (hw_barrier_re),
     .we     (1'b0),
-    .wd     ('0  ),
-
-    // from internal hardware
-    .de     (hw2reg.hw_barrier.de),
-    .d      (hw2reg.hw_barrier.d ),
-
-    // to internal hardware
+    .wd     ('0),
+    .d      (hw2reg.hw_barrier.d),
+    .qre    (),
     .qe     (),
     .q      (reg2hw.hw_barrier.q ),
-
-    // to register interface (read)
     .qs     (hw_barrier_qs)
   );
 
 
 
 
-  logic [5:0] addr_hit;
+  logic [6:0] addr_hit;
   always_comb begin
     addr_hit = '0;
     addr_hit[0] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET);
@@ -584,7 +593,8 @@ module snitch_cluster_peripheral_reg_top #(
     addr_hit[2] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_OFFSET);
     addr_hit[3] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET);
     addr_hit[4] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET);
-    addr_hit[5] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET);
+    addr_hit[5] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_WAKE_UP_OFFSET);
+    addr_hit[6] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -598,6 +608,7 @@ module snitch_cluster_peripheral_reg_top #(
     if (addr_hit[3] && reg_we && (SNITCH_CLUSTER_PERIPHERAL_PERMIT[3] != (SNITCH_CLUSTER_PERIPHERAL_PERMIT[3] & reg_be))) wr_err = 1'b1 ;
     if (addr_hit[4] && reg_we && (SNITCH_CLUSTER_PERIPHERAL_PERMIT[4] != (SNITCH_CLUSTER_PERIPHERAL_PERMIT[4] & reg_be))) wr_err = 1'b1 ;
     if (addr_hit[5] && reg_we && (SNITCH_CLUSTER_PERIPHERAL_PERMIT[5] != (SNITCH_CLUSTER_PERIPHERAL_PERMIT[5] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[6] && reg_we && (SNITCH_CLUSTER_PERIPHERAL_PERMIT[6] != (SNITCH_CLUSTER_PERIPHERAL_PERMIT[6] & reg_be))) wr_err = 1'b1 ;
   end
 
   assign perf_counter_enable_0_cycle_0_we = addr_hit[0] & reg_we & ~wr_err;
@@ -648,6 +659,10 @@ module snitch_cluster_peripheral_reg_top #(
   assign perf_counter_1_we = addr_hit[4] & reg_we & ~wr_err;
   assign perf_counter_1_wd = reg_wdata[47:0];
 
+  assign wake_up_we = addr_hit[5] & reg_we & ~wr_err;
+  assign wake_up_wd = reg_wdata[31:0];
+
+  assign hw_barrier_re = addr_hit[6] && reg_re;
 
   // Read data return
   always_comb begin
@@ -685,6 +700,10 @@ module snitch_cluster_peripheral_reg_top #(
       end
 
       addr_hit[5]: begin
+        reg_rdata_next[31:0] = '0;
+      end
+
+      addr_hit[6]: begin
         reg_rdata_next[31:0] = hw_barrier_qs;
       end
 

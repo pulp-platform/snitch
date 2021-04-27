@@ -32,8 +32,6 @@ module snitch_cluster_peripheral
   input  core_events_t [NrCores-1:0] core_events_i,
   input  tcdm_events_t               tcdm_events_i
 );
-  // Deprecate in favor of RISC-V interrupts.
-  assign wake_up_o = '0;
 
   // Pipeline register to ease timing.
   tcdm_events_t tcdm_events_q;
@@ -57,6 +55,19 @@ module snitch_cluster_peripheral
 
   logic [47:0][NumPerfCounters-1:0] perf_counter_d, perf_counter_q;
 
+  // Wake-up logic.
+  // Deprecate in favor of RISC-V interrupts.
+  always_comb begin
+    wake_up_o = '0;
+    if (reg2hw.wake_up.qe) begin
+      if (reg2hw.wake_up.q == '1) begin
+        wake_up_o = '1;
+      end else begin
+        wake_up_o[reg2hw.wake_up.q] = 1'b1;
+      end
+    end
+  end
+
   // Continuously assign the perf values.
   for (genvar i = 0; i < NumPerfCounters; i++) begin : gen_perf_assign
     assign hw2reg.perf_counter[i].d = perf_counter_q[i];
@@ -65,7 +76,6 @@ module snitch_cluster_peripheral
 
   // The hardware barrier is external and always reads `0`.
   assign hw2reg.hw_barrier.d = 0;
-  assign hw2reg.hw_barrier.de = 1;
 
   always_comb begin
     perf_counter_d = perf_counter_q;
