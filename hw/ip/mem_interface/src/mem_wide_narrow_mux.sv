@@ -113,7 +113,7 @@ module mem_wide_narrow_mux #(
     assign q_valid_flat[i] = out_req_o[i].q_valid;
     assign q_data[i] = out_req_o[i].q.data;
     assign q_strb[i] = out_req_o[i].q.strb;
-    `ASSERT(ImmediateGrantOut, out_req_o[i].q_valid |-> out_rsp_i[i].q_ready)
+    `ASSERT(ImmediateGrantOut, sel_wide_i & out_req_o[i].q_valid |-> out_rsp_i[i].q_ready)
     `ASSERT(SilentNarrow, sel_wide_i |-> !in_narrow_rsp_o[i].q_ready)
     `ASSERT(NarrowPassThrough, !sel_wide_i & in_narrow_req_i[i].q_valid |-> out_req_o[i].q_valid)
   end
