@@ -7,7 +7,7 @@ Based on the Manticore architecture.
 To do elaboration using VCS:
 
 ```
-bin/occamy_top.vcs
+make bin/occamy_top.vcs
 ```
 
 ## Notes
