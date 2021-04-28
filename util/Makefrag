@@ -95,4 +95,4 @@ work-vcs/compile.sh: ${VSIM_SOURCES} ${TB_SRCS}
 logs/trace_hart_%.txt: logs/trace_hart_%.dasm ${ROOT}/util/gen_trace.py
 	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py > $@
 
-traces: $((shell ls logs/trace_hart_*.dasm | sed 's/\.dasm/\.txt/') || echo "")
+traces: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.txt/') || echo "")

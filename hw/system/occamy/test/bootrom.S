@@ -5,12 +5,16 @@
 .global _start
 _start:
     csrr  a0, mhartid
+    # write exception vector
+    la    t0, exception
+    csrw  mtvec, t0
     la    a1, device_tree
-    lw    t0, entry_addr
+    # That will park all 32-bit cores since it isn't a supported instruction.
+    lwu   t0, entry_addr
     jalr  t0
-no_payload:
+exception:
     wfi
-    j     no_payload
+    j     exception
 entry_addr:
-    .word no_payload
+    .word exception
 device_tree:
