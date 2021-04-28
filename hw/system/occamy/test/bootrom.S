@@ -18,3 +18,4 @@ exception:
 entry_addr:
     .word exception
 device_tree:
+    .incbin "test/occamy.dtb"
