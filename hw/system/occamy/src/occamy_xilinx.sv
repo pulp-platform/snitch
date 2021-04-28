@@ -13,6 +13,11 @@ module occamy_xilinx
 (
     input  logic             clk_i,
     input  logic             rst_ni,
+    /// Peripheral clock
+    input  logic             clk_periph_i,
+    input  logic             rst_periph_ni,
+    /// Real-time clock (for time keeping)
+    input  logic             rtc_i,
     input  logic             test_mode_i,
     input  logic [ 1:0]      chip_id_i,
     input  logic [ 1:0]      boot_mode_i,
