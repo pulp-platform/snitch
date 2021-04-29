@@ -42,14 +42,17 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 # Source #
 ##########
 update-source:
-	$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . \
+	@echo "[SOLDER]  Generating sources"
+	@$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . \
+		--dts test/occamy.dts \
 		src/occamy_top.sv \
 		src/occamy_pkg.sv \
 		src/occamy_quadrant_s1.sv \
 		src/occamy_xilinx.sv \
 		test/testharness.sv \
 		src/occamy_cva6.sv
-	verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
+	@echo "[VERIBLE] Formatting"
+	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
 update-plic:
 	mkdir -p src/rv_plic
