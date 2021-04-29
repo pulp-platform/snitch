@@ -201,12 +201,10 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
   /// Address map of the `soc_wide_xbar` crossbar.
-  xbar_rule_48_t [18:0] SocWideXbarAddrmap;
+  xbar_rule_48_t [16:0] SocWideXbarAddrmap;
   assign SocWideXbarAddrmap = '{
     '{ idx: 8, start_addr: 48'h80000000, end_addr: 48'hc0000000 },
-    '{ idx: 8, start_addr: 48'h1000000000, end_addr: 48'h1040000000 },
     '{ idx: 9, start_addr: 48'hc0000000, end_addr: 48'h100000000 },
-    '{ idx: 9, start_addr: 48'h1040000000, end_addr: 48'h1080000000 },
     '{ idx: 10, start_addr: 48'h1080000000, end_addr: 48'h10c0000000 },
     '{ idx: 11, start_addr: 48'h10c0000000, end_addr: 48'h1100000000 },
     '{ idx: 12, start_addr: 48'h1100000000, end_addr: 48'h1140000000 },

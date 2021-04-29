@@ -156,7 +156,8 @@ def main():
         bases = list()
         if i < 2:
             bases.append(HBM_BASE + i * HBM_CHANNEL_SIZE)
-        bases.append(0x1000000000 + i * HBM_CHANNEL_SIZE)
+        else:
+            bases.append(0x1000000000 + i * HBM_CHANNEL_SIZE)
         am_hbm.append(
             am.new_leaf("hbm_{}".format(i), HBM_CHANNEL_SIZE,
                         *bases).attach_to(am_soc_wide_xbar))
