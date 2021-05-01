@@ -1,0 +1,996 @@
+From a82321828826c409434f6383d38b0e7b2fc2d398 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Fri, 30 Apr 2021 14:02:22 +0200
+Subject: [PATCH] Update DMI with BSCANE2
+
+---
+ src/dm_pkg.sv         |  11 ++
+ src/dmi_bscane_tap.sv |  84 +++++++++++
+ src/dmi_intf.sv       |  59 ++++++++
+ src/dmi_jtag.sv       | 132 +++++++++++------
+ src/dmi_jtag_tap.sv   | 108 +++++---------
+ src/dmi_test.sv       | 337 ++++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 612 insertions(+), 119 deletions(-)
+ create mode 100644 hw/vendor/pulp_platform_riscv_dbg/src/dmi_bscane_tap.sv
+ create mode 100644 hw/vendor/pulp_platform_riscv_dbg/src/dmi_intf.sv
+ create mode 100644 hw/vendor/pulp_platform_riscv_dbg/src/dmi_test.sv
+
+diff --git a/src/dm_pkg.sv b/src/dm_pkg.sv
+index 971f128..1c2b619 100644
+--- a/src/dm_pkg.sv
++++ b/src/dm_pkg.sv
+@@ -228,6 +228,17 @@ package dm;
+     logic [1:0]  resp;
+   } dmi_resp_t;
+ 
++  typedef struct packed {
++    logic [31:18] zero1;
++    logic         dmihardreset;
++    logic         dmireset;
++    logic         zero0;
++    logic [14:12] idle;
++    logic [11:10] dmistat;
++    logic [9:4]   abits;
++    logic [3:0]   version;
++  } dtmcs_t;
++
+   // privilege levels
+   typedef enum logic[1:0] {
+     PRIV_LVL_M = 2'b11,
+diff --git a/src/dmi_bscane_tap.sv b/src/dmi_bscane_tap.sv
+new file mode 100644
+index 0000000..b1c12a8
+--- /dev/null
++++ b/src/dmi_bscane_tap.sv
+@@ -0,0 +1,84 @@
++// Copyright 2020 ETH Zurich and University of Bologna.
++// Solderpad Hardware License, Version 0.51, see LICENSE for details.
++// SPDX-License-Identifier: SHL-0.51
++
++// Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
++
++/// Replacement for the full JTAG tap with `BSCANE2` Xilinx elements which hook
++/// into the FPGA native scan chain. Meant for FPGA boards which do not expose a
++/// usable pin-header or a separate, programmable FTDI chip.
++
++/// They replace the functionality of `dmi_jtag_tap.sv`. The file is
++/// pin-compatible so that by selecting the appropriate file for the target it
++/// can be transparently managed without relying on tick defines.
++module dmi_jtag_tap #(
++  // Ignored, defined by the FPGA model.
++  parameter int unsigned IrLength = 5,
++  // JTAG IDCODE Value
++  parameter logic [31:0] IdcodeValue = 32'h00000001
++  // xxxx             version
++  // xxxxxxxxxxxxxxxx part number
++  // xxxxxxxxxxx      manufacturer id
++  // 1                required by standard
++) (
++  /// Unused. Here to maintain pin compatibility with `dmi_jtag_tap` so that it
++  /// can be used as a drop-in replacement.
++  input  logic        tck_i,
++  input  logic        tms_i,
++  input  logic        trst_ni,
++  input  logic        td_i,
++  output logic        td_o,
++  output logic        tdo_oe_o,
++  input  logic        testmode_i,
++
++  output logic        tck_o,
++  output logic        trst_no,
++  output logic        update_o,
++  output logic        capture_o,
++  output logic        shift_o,
++  output logic        tdi_o,
++  output logic        dtmcs_select_o,
++  input  logic        dtmcs_tdo_i,
++  // we want to access DMI register
++  output logic        dmi_select_o,
++  input  logic        dmi_tdo_i
++);
++
++  /// DTMCS Register
++  logic trst;
++  assign trst_no = ~trst;
++
++  BSCANE2 #(
++    .JTAG_CHAIN (3)
++  ) i_tap_dtmcs (
++    .CAPTURE (capture_o),
++    .DRCK (),
++    .RESET (trst),
++    .RUNTEST (),
++    .SEL (dtmcs_select_o),
++    .SHIFT (shift_o),
++    .TCK (tck_o),
++    .TDI (tdi_o),
++    .TMS (),
++    .TDO (dtmcs_tdo_i),
++    .UPDATE (update_o)
++  );
++
++  /// DMI Register
++  BSCANE2 #(
++    .JTAG_CHAIN (4)
++  ) i_tap_dmi (
++    .CAPTURE (),
++    .DRCK (),
++    .RESET (),
++    .RUNTEST (),
++    .SEL (dmi_select_o),
++    .SHIFT (),
++    .TCK (),
++    .TDI (),
++    .TMS (),
++    .TDO (dmi_tdo_i),
++    .UPDATE ()
++  );
++
++endmodule
+diff --git a/src/dmi_intf.sv b/src/dmi_intf.sv
+new file mode 100644
+index 0000000..2593ef0
+--- /dev/null
++++ b/src/dmi_intf.sv
+@@ -0,0 +1,59 @@
++// Copyright 2021 ETH Zurich and University of Bologna.
++// Solderpad Hardware License, Version 0.51, see LICENSE for details.
++// SPDX-License-Identifier: SHL-0.51
++
++// Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
++
++
++// The DV interface additionally caries a clock signal.
++interface DMI_BUS_DV #(
++  /// The width of the address.
++  parameter int ADDR_WIDTH = -1
++) (
++  input logic clk_i
++);
++
++  import dm::*;
++
++  typedef logic [ADDR_WIDTH-1:0] addr_t;
++  typedef logic [31:0] data_t;
++  /// The request channel (Q).
++  addr_t   q_addr;
++  dtm_op_e q_op;
++  data_t   q_data;
++  logic    q_valid;
++  logic    q_ready;
++
++  /// The response channel (P).
++  data_t   p_data;
++  logic    p_resp;
++  logic    p_valid;
++  logic    p_ready;
++
++  modport in  (
++    input  q_addr, q_op, q_data, q_valid, p_ready,
++    output q_ready, p_data, p_resp, p_valid
++  );
++  modport out (
++    output q_addr, q_op, q_data, q_valid, p_ready,
++    input  q_ready, p_data, p_resp, p_valid
++  );
++  modport monitor (
++    input q_addr, q_op, q_data, q_valid, p_ready,
++          q_ready, p_data, p_resp, p_valid
++  );
++
++  // pragma translate_off
++  `ifndef VERILATOR
++  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_addr)));
++  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_op)));
++  assert property (@(posedge clk_i) (q_valid && !q_ready |=> $stable(q_data)));
++  assert property (@(posedge clk_i) (q_valid && !q_ready |=> q_valid));
++
++  assert property (@(posedge clk_i) (p_valid && !p_ready |=> $stable(p_data)));
++  assert property (@(posedge clk_i) (p_valid && !p_ready |=> $stable(p_resp)));
++  assert property (@(posedge clk_i) (p_valid && !p_ready |=> p_valid));
++  `endif
++  // pragma translate_on
++
++endinterface
+diff --git a/src/dmi_jtag.sv b/src/dmi_jtag.sv
+index c4c7b52..70ee776 100644
+--- a/src/dmi_jtag.sv
++++ b/src/dmi_jtag.sv
+@@ -39,16 +39,66 @@ module dmi_jtag #(
+   output logic         td_o,     // JTAG test data output pad
+   output logic         tdo_oe_o  // Data out output enable
+ );
+-  assign       dmi_rst_no = rst_ni;
+-
+-  logic        test_logic_reset;
+-  logic        shift_dr;
+-  logic        update_dr;
+-  logic        capture_dr;
+-  logic        dmi_access;
+-  logic        dtmcs_select;
+-  logic        dmi_reset;
+-  logic        dmi_tdi;
++
++  typedef enum logic [1:0] {
++    DMINoError = 2'h0, DMIReservedError = 2'h1,
++    DMIOPFailed = 2'h2, DMIBusy = 2'h3
++  } dmi_error_e;
++  dmi_error_e error_d, error_q;
++
++  logic tck;
++  logic trst_n;
++  logic update;
++  logic capture;
++  logic shift;
++  logic tdi;
++
++  // -------------------------------
++  // Debug Module Control and Status
++  // -------------------------------
++  logic dtmcs_select;
++
++  dm::dtmcs_t dtmcs_d, dtmcs_q;
++
++  always_comb begin
++    dtmcs_d  = dtmcs_q;
++
++    if (capture) begin
++      if (dtmcs_select) begin
++        dtmcs_d  = '{
++                      zero1        : '0,
++                      dmihardreset : 1'b0,
++                      dmireset     : 1'b0,
++                      zero0        : '0,
++                      idle         : 3'd1, // 1: Enter Run-Test/Idle and leave it immediately
++                      dmistat      : error_q, // 0: No error, 2: Op failed, 3: too fast
++                      abits        : 6'd7, // The size of address in dmi
++                      version      : 4'd1  // Version described in spec version 0.13 (and later?)
++                    };
++      end
++    end
++
++    if (shift) begin
++      if (dtmcs_select) dtmcs_d  = {tdi, 31'(dtmcs_q >> 1)};
++    end
++  end
++
++  always_ff @(posedge tck or negedge trst_n) begin
++    if (!trst_n) begin
++      dtmcs_q <= '0;
++    end else begin
++      dtmcs_q <= dtmcs_d;
++    end
++  end
++
++  // ----------------------------
++  // DMI (Debug Module Interface)
++  // ----------------------------
++  // TODO(zarubaf): Might need to be connected to the `dtmcs_q.dmihardreset`
++  // signal.
++  assign dmi_rst_no = rst_ni;
++
++  logic        dmi_select;
+   logic        dmi_tdo;
+ 
+   dm::dmi_req_t  dmi_req;
+@@ -65,11 +115,6 @@ module dmi_jtag #(
+     logic [1:0]  op;
+   } dmi_t;
+ 
+-  typedef enum logic [1:0] {
+-    DMINoError = 2'h0, DMIReservedError = 2'h1,
+-    DMIOPFailed = 2'h2, DMIBusy = 2'h3
+-  } dmi_error_e;
+-
+   typedef enum logic [2:0] { Idle, Read, WaitReadValid, Write, WaitWriteValid } state_e;
+   state_e state_d, state_q;
+ 
+@@ -82,11 +127,10 @@ module dmi_jtag #(
+   assign dmi_req.addr = address_q;
+   assign dmi_req.data = data_q;
+   assign dmi_req.op   = (state_q == Write) ? dm::DTM_WRITE : dm::DTM_READ;
+-  // we'will always be ready to accept the data we requested
++  // We will always be ready to accept the data we requested.
+   assign dmi_resp_ready = 1'b1;
+ 
+   logic error_dmi_busy;
+-  dmi_error_e error_d, error_q;
+ 
+   always_comb begin : p_fsm
+     error_dmi_busy = 1'b0;
+@@ -101,7 +145,7 @@ module dmi_jtag #(
+     unique case (state_q)
+       Idle: begin
+         // make sure that no error is sticky
+-        if (dmi_access && update_dr && (error_q == DMINoError)) begin
++        if (dmi_select && update && (error_q == DMINoError)) begin
+           // save address and value
+           address_d = dmi.address;
+           data_d = dmi.data;
+@@ -152,16 +196,16 @@ module dmi_jtag #(
+       end
+     endcase
+ 
+-    // update_dr means we got another request but we didn't finish
++    // update means we got another request but we didn't finish
+     // the one in progress, this state is sticky
+-    if (update_dr && state_q != Idle) begin
++    if (update && state_q != Idle) begin
+       error_dmi_busy = 1'b1;
+     end
+ 
+-    // if capture_dr goes high while we are in the read state
++    // if capture goes high while we are in the read state
+     // or in the corresponding wait state we are not giving back a valid word
+     // -> throw an error
+-    if (capture_dr && state_q inside {Read, WaitReadValid}) begin
++    if (capture && state_q inside {Read, WaitReadValid}) begin
+       error_dmi_busy = 1'b1;
+     end
+ 
+@@ -169,7 +213,7 @@ module dmi_jtag #(
+       error_d = DMIBusy;
+     end
+     // clear sticky error flag
+-    if (update_dr && dmi_reset && dtmcs_select) begin
++    if (update && dtmcs_q.dmireset && dtmcs_select) begin
+       error_d = DMINoError;
+     end
+   end
+@@ -180,8 +224,8 @@ module dmi_jtag #(
+   always_comb begin : p_shift
+     dr_d    = dr_q;
+ 
+-    if (capture_dr) begin
+-      if (dmi_access) begin
++    if (capture) begin
++      if (dmi_select) begin
+         if (error_q == DMINoError && !error_dmi_busy) begin
+           dr_d = {address_q, data_q, DMINoError};
+         // DMI was busy, report an error
+@@ -191,19 +235,15 @@ module dmi_jtag #(
+       end
+     end
+ 
+-    if (shift_dr) begin
+-      if (dmi_access) begin
+-        dr_d = {dmi_tdi, dr_q[$bits(dr_q)-1:1]};
++    if (shift) begin
++      if (dmi_select) begin
++        dr_d = {tdi, dr_q[$bits(dr_q)-1:1]};
+       end
+     end
+-
+-    if (test_logic_reset) begin
+-      dr_d = '0;
+-    end
+   end
+ 
+-  always_ff @(posedge tck_i or negedge trst_ni) begin : p_regs
+-    if (!trst_ni) begin
++  always_ff @(posedge tck or negedge trst_n) begin
++    if (!trst_n) begin
+       dr_q      <= '0;
+       state_q   <= Idle;
+       address_q <= '0;
+@@ -232,16 +272,16 @@ module dmi_jtag #(
+     .td_o,
+     .tdo_oe_o,
+     .testmode_i,
+-    .test_logic_reset_o ( test_logic_reset ),
+-    .shift_dr_o         ( shift_dr         ),
+-    .update_dr_o        ( update_dr        ),
+-    .capture_dr_o       ( capture_dr       ),
+-    .dmi_access_o       ( dmi_access       ),
+-    .dtmcs_select_o     ( dtmcs_select     ),
+-    .dmi_reset_o        ( dmi_reset        ),
+-    .dmi_error_i        ( error_q          ),
+-    .dmi_tdi_o          ( dmi_tdi          ),
+-    .dmi_tdo_i          ( dmi_tdo          )
++    .tck_o          ( tck              ),
++    .trst_no        ( trst_n           ),
++    .update_o       ( update           ),
++    .capture_o      ( capture          ),
++    .shift_o        ( shift            ),
++    .tdi_o          ( tdi              ),
++    .dtmcs_select_o ( dtmcs_select     ),
++    .dtmcs_tdo_i    ( dtmcs_q[0]       ),
++    .dmi_select_o   ( dmi_select       ),
++    .dmi_tdo_i      ( dmi_tdo          )
+   );
+ 
+   // ---------
+@@ -249,8 +289,8 @@ module dmi_jtag #(
+   // ---------
+   dmi_cdc i_dmi_cdc (
+     // JTAG side (master side)
+-    .tck_i,
+-    .trst_ni,
++    .tck_i             ( tck              ),
++    .trst_ni           ( trst_n           ),
+     .jtag_dmi_req_i    ( dmi_req          ),
+     .jtag_dmi_ready_o  ( dmi_req_ready    ),
+     .jtag_dmi_valid_i  ( dmi_req_valid    ),
+diff --git a/src/dmi_jtag_tap.sv b/src/dmi_jtag_tap.sv
+index 67a58c8..b986837 100644
+--- a/src/dmi_jtag_tap.sv
++++ b/src/dmi_jtag_tap.sv
+@@ -32,27 +32,20 @@ module dmi_jtag_tap #(
+   output logic        td_o,     // JTAG test data output pad
+   output logic        tdo_oe_o, // Data out output enable
+   input  logic        testmode_i,
+-  output logic        test_logic_reset_o,
+-  output logic        shift_dr_o,
+-  output logic        update_dr_o,
+-  output logic        capture_dr_o,
+-
+-  // we want to access DMI register
+-  output logic        dmi_access_o,
+   // JTAG is interested in writing the DTM CSR register
++  output logic        tck_o,
++  output logic        trst_no,
++  output logic        update_o,
++  output logic        capture_o,
++  output logic        shift_o,
++  output logic        tdi_o,
+   output logic        dtmcs_select_o,
+-  // clear error state
+-  output logic        dmi_reset_o,
+-  input  logic [1:0]  dmi_error_i,
+-  // test data to submodule
+-  output logic        dmi_tdi_o,
+-  // test data in from submodule
++  input  logic        dtmcs_tdo_i,
++  // we want to access DMI register
++  output logic        dmi_select_o,
+   input  logic        dmi_tdo_i
+ );
+ 
+-  // to submodule
+-  assign dmi_tdi_o = td_i;
+-
+   typedef enum logic [3:0] {
+     TestLogicReset, RunTestIdle, SelectDrScan,
+     CaptureDr, ShiftDr, Exit1Dr, PauseDr, Exit2Dr,
+@@ -61,6 +54,7 @@ module dmi_jtag_tap #(
+   } tap_state_e;
+ 
+   tap_state_e tap_state_q, tap_state_d;
++  logic update_dr, shift_dr, capture_dr;
+ 
+   typedef enum logic [IrLength-1:0] {
+     BYPASS0   = 'h0,
+@@ -70,17 +64,6 @@ module dmi_jtag_tap #(
+     BYPASS1   = 'h1f
+   } ir_reg_e;
+ 
+-  typedef struct packed {
+-    logic [31:18] zero1;
+-    logic         dmihardreset;
+-    logic         dmireset;
+-    logic         zero0;
+-    logic [14:12] idle;
+-    logic [11:10] dmistat;
+-    logic [9:4]   abits;
+-    logic [3:0]   version;
+-  } dtmcs_t;
+-
+   // ----------------
+   // IR logic
+   // ----------------
+@@ -109,12 +92,6 @@ module dmi_jtag_tap #(
+     if (update_ir) begin
+       jtag_ir_d = ir_reg_e'(jtag_ir_shift_q);
+     end
+-
+-    // synchronous test-logic reset
+-    if (test_logic_reset_o) begin
+-      jtag_ir_shift_d = '0;
+-      jtag_ir_d       = IDCODE;
+-    end
+   end
+ 
+   always_ff @(posedge tck_i, negedge trst_ni) begin : p_jtag_ir_reg
+@@ -136,42 +113,21 @@ module dmi_jtag_tap #(
+   logic [31:0] idcode_d, idcode_q;
+   logic        idcode_select;
+   logic        bypass_select;
+-  dtmcs_t      dtmcs_d, dtmcs_q;
+-  logic        bypass_d, bypass_q;  // this is a 1-bit register
+ 
+-  assign dmi_reset_o = dtmcs_q.dmireset;
++  logic        bypass_d, bypass_q;  // this is a 1-bit register
+ 
+   always_comb begin
+     idcode_d = idcode_q;
+     bypass_d = bypass_q;
+-    dtmcs_d  = dtmcs_q;
+ 
+-    if (capture_dr_o) begin
++    if (capture_dr) begin
+       if (idcode_select) idcode_d = IdcodeValue;
+       if (bypass_select) bypass_d = 1'b0;
+-      if (dtmcs_select_o) begin
+-        dtmcs_d  = '{
+-                      zero1        : '0,
+-                      dmihardreset : 1'b0,
+-                      dmireset     : 1'b0,
+-                      zero0        : '0,
+-                      idle         : 3'd1, // 1: Enter Run-Test/Idle and leave it immediately
+-                      dmistat      : dmi_error_i, // 0: No error, 2: Op failed, 3: too fast
+-                      abits        : 6'd7, // The size of address in dmi
+-                      version      : 4'd1  // Version described in spec version 0.13 (and later?)
+-                    };
+-      end
+     end
+ 
+-    if (shift_dr_o) begin
++    if (shift_dr) begin
+       if (idcode_select)  idcode_d = {td_i, 31'(idcode_q >> 1)};
+       if (bypass_select)  bypass_d = td_i;
+-      if (dtmcs_select_o) dtmcs_d  = {td_i, 31'(dtmcs_q >> 1)};
+-    end
+-
+-    if (test_logic_reset_o) begin
+-      idcode_d = IdcodeValue;
+-      bypass_d = 1'b0;
+     end
+   end
+ 
+@@ -179,7 +135,7 @@ module dmi_jtag_tap #(
+   // Data reg select
+   // ----------------
+   always_comb begin : p_data_reg_sel
+-    dmi_access_o   = 1'b0;
++    dmi_select_o   = 1'b0;
+     dtmcs_select_o = 1'b0;
+     idcode_select  = 1'b0;
+     bypass_select  = 1'b0;
+@@ -187,7 +143,7 @@ module dmi_jtag_tap #(
+       BYPASS0:   bypass_select  = 1'b1;
+       IDCODE:    idcode_select  = 1'b1;
+       DTMCSR:    dtmcs_select_o = 1'b1;
+-      DMIACCESS: dmi_access_o   = 1'b1;
++      DMIACCESS: dmi_select_o   = 1'b1;
+       BYPASS1:   bypass_select  = 1'b1;
+       default:   bypass_select  = 1'b1;
+     endcase
+@@ -205,9 +161,9 @@ module dmi_jtag_tap #(
+     // here we are shifting the DR register
+     end else begin
+       unique case (jtag_ir_q)
+-        IDCODE:         tdo_mux = idcode_q[0];     // Reading ID code
+-        DTMCSR:         tdo_mux = dtmcs_q.version[0];
+-        DMIACCESS:      tdo_mux = dmi_tdo_i;       // Read from DMI TDO
++        IDCODE:         tdo_mux = idcode_q[0];   // Reading ID code
++        DTMCSR:         tdo_mux = dtmcs_tdo_i;   // Read from DTMCS TDO
++        DMIACCESS:      tdo_mux = dmi_tdo_i;     // Read from DMI TDO
+         default:        tdo_mux = bypass_q;      // BYPASS instruction
+       endcase
+     end
+@@ -237,7 +193,7 @@ module dmi_jtag_tap #(
+       tdo_oe_o <= 1'b0;
+     end else begin
+       td_o     <= tdo_mux;
+-      tdo_oe_o <= (shift_ir | shift_dr_o);
++      tdo_oe_o <= (shift_ir | shift_dr);
+     end
+   end
+   // ----------------
+@@ -246,11 +202,11 @@ module dmi_jtag_tap #(
+   // Determination of next state; purely combinatorial
+   always_comb begin : p_tap_fsm
+ 
+-    test_logic_reset_o = 1'b0;
++    trst_no            = trst_ni;
+ 
+-    capture_dr_o       = 1'b0;
+-    shift_dr_o         = 1'b0;
+-    update_dr_o        = 1'b0;
++    capture_dr         = 1'b0;
++    shift_dr           = 1'b0;
++    update_dr          = 1'b0;
+ 
+     capture_ir         = 1'b0;
+     shift_ir           = 1'b0;
+@@ -260,7 +216,7 @@ module dmi_jtag_tap #(
+     unique case (tap_state_q)
+       TestLogicReset: begin
+         tap_state_d = (tms_i) ? TestLogicReset : RunTestIdle;
+-        test_logic_reset_o = 1'b1;
++        trst_no = 1'b1;
+       end
+       RunTestIdle: begin
+         tap_state_d = (tms_i) ? SelectDrScan : RunTestIdle;
+@@ -270,11 +226,11 @@ module dmi_jtag_tap #(
+         tap_state_d = (tms_i) ? SelectIrScan : CaptureDr;
+       end
+       CaptureDr: begin
+-        capture_dr_o = 1'b1;
++        capture_dr = 1'b1;
+         tap_state_d = (tms_i) ? Exit1Dr : ShiftDr;
+       end
+       ShiftDr: begin
+-        shift_dr_o = 1'b1;
++        shift_dr = 1'b1;
+         tap_state_d = (tms_i) ? Exit1Dr : ShiftDr;
+       end
+       Exit1Dr: begin
+@@ -287,7 +243,7 @@ module dmi_jtag_tap #(
+         tap_state_d = (tms_i) ? UpdateDr : ShiftDr;
+       end
+       UpdateDr: begin
+-        update_dr_o = 1'b1;
++        update_dr = 1'b1;
+         tap_state_d = (tms_i) ? SelectDrScan : RunTestIdle;
+       end
+       // IR Path
+@@ -337,13 +293,19 @@ module dmi_jtag_tap #(
+       tap_state_q <= RunTestIdle;
+       idcode_q    <= IdcodeValue;
+       bypass_q    <= 1'b0;
+-      dtmcs_q     <= '0;
+     end else begin
+       tap_state_q <= tap_state_d;
+       idcode_q    <= idcode_d;
+       bypass_q    <= bypass_d;
+-      dtmcs_q     <= dtmcs_d;
+     end
+   end
+ 
++  // Pass through JTAG signals to debug custom DR logic.
++  // In case of a single TAP those are just feed-through.
++  assign tck_o = tck_i;
++  assign tdi_o = td_i;
++  assign update_o = update_dr;
++  assign shift_o = shift_dr;
++  assign capture_o = capture_dr;
++
+ endmodule : dmi_jtag_tap
+diff --git a/src/dmi_test.sv b/src/dmi_test.sv
+new file mode 100644
+index 0000000..06fb8cc
+--- /dev/null
++++ b/src/dmi_test.sv
+@@ -0,0 +1,337 @@
++// Copyright 2021 ETH Zurich and University of Bologna.
++// Solderpad Hardware License, Version 0.51, see LICENSE for details.
++// SPDX-License-Identifier: SHL-0.51
++
++// Florian Zaruba <zarubaf@iis.ee.ethz.ch>
++
++/// A set of testbench utilities for the DMI interfaces.
++package dmi_test;
++
++  import dm::*;
++
++  class req_t #(
++    parameter int AW = 7
++  );
++    rand logic [AW-1:0] addr;
++    rand dtm_op_e       op;
++    rand logic [31:0]   data;
++
++    /// Compare objects of same type.
++    function do_compare(req_t rhs);
++      return addr == rhs.addr &
++             op == rhs.op &
++             data == rhs.data;
++    endfunction
++
++  endclass
++
++  class rsp_t;
++    rand logic [31:0]   data;
++    rand logic [1:0]    resp;
++
++    /// Compare objects of same type.
++    function do_compare(rsp_t rhs);
++      return data == rhs.data &
++             resp == rhs.resp;
++    endfunction
++
++  endclass
++
++  /// A driver for the DMI interface.
++  class dmi_driver #(
++    parameter int  AW = -1,
++    parameter time TA = 0 , // stimuli application time
++    parameter time TT = 0   // stimuli test time
++  );
++    virtual DMI_BUS_DV #(
++      .ADDR_WIDTH(AW)
++    ) bus;
++
++    function new(
++      virtual DMI_BUS_DV #(
++        .ADDR_WIDTH(AW)
++      ) bus
++    );
++      this.bus = bus;
++    endfunction
++
++    task reset_master;
++      bus.q_addr  <= '0;
++      bus.q_op    <= DTM_NOP;
++      bus.q_data  <= '0;
++      bus.q_valid <= '0;
++      bus.p_ready <= '0;
++    endtask
++
++    task reset_slave;
++      bus.q_ready <= '0;
++      bus.p_data  <= '0;
++      bus.p_resp  <= '0;
++      bus.p_valid <= '0;
++    endtask
++
++    task cycle_start;
++      #TT;
++    endtask
++
++    task cycle_end;
++      @(posedge bus.clk_i);
++    endtask
++
++    /// Send a request.
++    task send_req (input req_t req);
++      bus.q_addr  <= #TA req.addr;
++      bus.q_op    <= #TA req.op;
++      bus.q_data  <= #TA req.data;
++      bus.q_valid <= #TA 1;
++      cycle_start();
++      while (bus.q_ready != 1) begin cycle_end(); cycle_start(); end
++      cycle_end();
++      bus.q_addr  <= #TA '0;
++      bus.q_op    <= #TA DTM_NOP;
++      bus.q_data  <= #TA '0;
++      bus.q_valid <= #TA 0;
++    endtask
++
++    /// Send a response.
++    task send_rsp (input rsp_t rsp);
++      bus.p_data  <= #TA rsp.data;
++      bus.p_resp   <= #TA rsp.resp;
++      bus.p_valid <= #TA 1;
++      cycle_start();
++      while (bus.p_ready != 1) begin cycle_end(); cycle_start(); end
++      cycle_end();
++      bus.p_data  <= #TA '0;
++      bus.p_resp  <= #TA '0;
++      bus.p_valid <= #TA 0;
++    endtask
++
++    /// Receive a request.
++    task recv_req (output req_t req);
++      bus.q_ready <= #TA 1;
++      cycle_start();
++      while (bus.q_valid != 1) begin cycle_end(); cycle_start(); end
++      req = new;
++      req.addr  = bus.q_addr;
++      req.op    = bus.q_op;
++      req.data  = bus.q_data;
++      cycle_end();
++      bus.q_ready <= #TA 0;
++    endtask
++
++    /// Receive a response.
++    task recv_rsp (output rsp_t rsp);
++      bus.p_ready <= #TA 1;
++      cycle_start();
++      while (bus.p_valid != 1) begin cycle_end(); cycle_start(); end
++      rsp = new;
++      rsp.data  = bus.p_data;
++      rsp.resp = bus.p_resp;
++      cycle_end();
++      bus.p_ready <= #TA 0;
++    endtask
++
++    /// Monitor request.
++    task mon_req (output req_t req);
++      cycle_start();
++      while (!(bus.q_valid && bus.q_ready)) begin cycle_end(); cycle_start(); end
++      req = new;
++      req.addr  = bus.q_addr;
++      req.op    = bus.q_op;
++      req.data  = bus.q_data;
++      cycle_end();
++    endtask
++
++    /// Monitor response.
++    task mon_rsp (output rsp_t rsp);
++      cycle_start();
++      while (!(bus.p_valid && bus.p_ready)) begin cycle_end(); cycle_start(); end
++      rsp = new;
++      rsp.data  = bus.p_data;
++      rsp.resp = bus.p_resp;
++      cycle_end();
++    endtask
++
++  endclass
++
++  // Super class for random dmi drivers.
++  virtual class rand_dmi #(
++    // dmi interface parameters
++    parameter int   AW = 32,
++    // Stimuli application and test time
++    parameter time  TA = 0ps,
++    parameter time  TT = 0ps
++  );
++
++    typedef dmi_test::dmi_driver #(
++      // dmi bus interface parameters;
++      .AW ( AW ),
++      // Stimuli application and test time
++      .TA ( TA ),
++      .TT ( TT )
++    ) dmi_driver_t;
++
++    dmi_driver_t drv;
++
++    function new(virtual DMI_BUS_DV #( .ADDR_WIDTH (AW)) bus);
++      this.drv = new (bus);
++    endfunction
++
++    task automatic rand_wait(input int unsigned min, input int unsigned max);
++      int unsigned rand_success, cycles;
++      rand_success = std::randomize(cycles) with {
++        cycles >= min;
++        cycles <= max;
++        // Weigh the distribution so that the minimum cycle time is the common
++        // case.
++        cycles dist {min := 10, [min+1:max] := 1};
++      };
++      assert (rand_success) else $error("Failed to randomize wait cycles!");
++      repeat (cycles) @(posedge this.drv.bus.clk_i);
++    endtask
++
++  endclass
++
++  /// Generate random requests as a master device.
++  class rand_dmi_master #(
++    // dmi interface parameters
++    parameter int   AW = 32,
++    // Stimuli application and test time
++    parameter time  TA = 0ps,
++    parameter time  TT = 0ps,
++    parameter int unsigned REQ_MIN_WAIT_CYCLES = 1,
++    parameter int unsigned REQ_MAX_WAIT_CYCLES = 20,
++    parameter int unsigned RSP_MIN_WAIT_CYCLES = 1,
++    parameter int unsigned RSP_MAX_WAIT_CYCLES = 20
++  ) extends rand_dmi #(.AW(AW), .TA(TA), .TT(TT));
++
++    int unsigned cnt = 0;
++    bit req_done = 0;
++
++    /// Reset the driver.
++    task reset();
++      drv.reset_master();
++    endtask
++
++    /// Constructor.
++    function new(virtual DMI_BUS_DV #( .ADDR_WIDTH (AW)) bus);
++      super.new(bus);
++    endfunction
++
++    task run(input int n);
++      fork
++        send_requests(n);
++        recv_response();
++      join
++    endtask
++
++    /// Send random requests.
++    task send_requests (input int n);
++      automatic req_t r = new;
++
++      repeat (n) begin
++        this.cnt++;
++        assert(r.randomize());
++        rand_wait(REQ_MIN_WAIT_CYCLES, REQ_MAX_WAIT_CYCLES);
++        this.drv.send_req(r);
++      end
++      this.req_done = 1;
++    endtask
++
++    /// Receive random responses.
++    task recv_response;
++      while (!this.req_done || this.cnt > 0) begin
++        automatic rsp_t rsp;
++        this.cnt--;
++        rand_wait(RSP_MIN_WAIT_CYCLES, RSP_MAX_WAIT_CYCLES);
++        this.drv.recv_rsp(rsp);
++      end
++    endtask
++  endclass
++
++  class rand_dmi_slave #(
++    // dmi interface parameters
++    parameter int   AW = 32,
++    // Stimuli application and test time
++    parameter time  TA = 0ps,
++    parameter time  TT = 0ps,
++    parameter int unsigned REQ_MIN_WAIT_CYCLES = 0,
++    parameter int unsigned REQ_MAX_WAIT_CYCLES = 10,
++    parameter int unsigned RSP_MIN_WAIT_CYCLES = 0,
++    parameter int unsigned RSP_MAX_WAIT_CYCLES = 10
++  ) extends rand_dmi #(.AW(AW), .TA(TA), .TT(TT));
++
++    mailbox req_mbx = new();
++
++    /// Reset the driver.
++    task reset();
++      drv.reset_slave();
++    endtask
++
++    task run();
++      fork
++        recv_requests();
++        send_responses();
++      join
++    endtask
++
++    /// Constructor.
++    function new(virtual DMI_BUS_DV #( .ADDR_WIDTH (AW)) bus);
++      super.new(bus);
++    endfunction
++
++    task recv_requests();
++      forever begin
++        automatic req_t req;
++        rand_wait(REQ_MIN_WAIT_CYCLES, REQ_MAX_WAIT_CYCLES);
++        this.drv.recv_req(req);
++        req_mbx.put(req);
++      end
++    endtask
++
++    task send_responses();
++      automatic rsp_t rsp = new;
++      automatic req_t req;
++      forever begin
++        req_mbx.get(req);
++        assert(rsp.randomize());
++        @(posedge this.drv.bus.clk_i);
++        rand_wait(RSP_MIN_WAIT_CYCLES, RSP_MAX_WAIT_CYCLES);
++        this.drv.send_rsp(rsp);
++      end
++    endtask
++  endclass
++
++  class dmi_monitor #(
++    // dmi interface parameters
++    parameter int   AW = 32,
++    // Stimuli application and test time
++    parameter time  TA = 0ps,
++    parameter time  TT = 0ps
++  ) extends rand_dmi #(.AW(AW), .TA(TA), .TT(TT));
++
++    mailbox req_mbx = new, rsp_mbx = new;
++
++    /// Constructor.
++    function new(virtual DMI_BUS_DV #( .ADDR_WIDTH (AW)) bus);
++      super.new(bus);
++    endfunction
++
++    // dmi Monitor.
++    task monitor;
++      fork
++        forever begin
++          automatic dmi_test::req_t req;
++          this.drv.mon_req(req);
++          req_mbx.put(req);
++        end
++        forever begin
++          automatic dmi_test::rsp_t rsp;
++          this.drv.mon_rsp(rsp);
++          rsp_mbx.put(rsp);
++        end
++      join
++    endtask
++  endclass
++
++endpackage
+\ No newline at end of file
+-- 
+2.25.1.377.g2d2118b814
+

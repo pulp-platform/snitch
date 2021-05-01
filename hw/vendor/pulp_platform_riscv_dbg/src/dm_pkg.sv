@@ -215,7 +215,7 @@ package dm;
     logic         sbaccess8;
   } sbcs_t;
 
-  localparam logic[1:0] DTM_SUCCESS = 2'h0;
+  localparam logic [1:0] DTM_SUCCESS = 2'h0;
 
   typedef struct packed {
     logic [6:0]  addr;
@@ -227,6 +227,17 @@ package dm;
     logic [31:0] data;
     logic [1:0]  resp;
   } dmi_resp_t;
+
+  typedef struct packed {
+    logic [31:18] zero1;
+    logic         dmihardreset;
+    logic         dmireset;
+    logic         zero0;
+    logic [14:12] idle;
+    logic [11:10] dmistat;
+    logic [9:4]   abits;
+    logic [3:0]   version;
+  } dtmcs_t;
 
   // privilege levels
   typedef enum logic[1:0] {
