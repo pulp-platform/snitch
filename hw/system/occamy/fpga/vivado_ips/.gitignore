@@ -1,0 +1,7 @@
+occamy_xilinx/
+.Xil/
+component.xml
+define-sources.tcl
+*.jou
+*.zip
+*.str
