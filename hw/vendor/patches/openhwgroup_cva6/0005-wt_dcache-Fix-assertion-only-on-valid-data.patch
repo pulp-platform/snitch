@@ -1,0 +1,28 @@
+From cea66cbdc4d3fabe03a7577e2dd20a1fe9e2dcc7 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Mon, 3 May 2021 16:53:03 +0200
+Subject: [PATCH] wt_dcache: Fix assertion only on valid data
+
+If the tag request is being killed it might be the case that the
+cache's SRAM macros return an unkown value. As the value will never be
+saved anywhere the assertion triggering just produces noise.
+---
+ src/cache_subsystem/wt_cache_subsystem.sv | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/cache_subsystem/wt_cache_subsystem.sv b/src/cache_subsystem/wt_cache_subsystem.sv
+index d747d40..f8c233a 100644
+--- a/src/cache_subsystem/wt_cache_subsystem.sv
++++ b/src/cache_subsystem/wt_cache_subsystem.sv
+@@ -197,7 +197,7 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+ 
+   for (genvar j=0; j<2; j++) begin : gen_assertion
+     a_invalid_read_data: assert property (
+-      @(posedge clk_i) disable iff (!rst_ni) dcache_req_ports_o[j].data_rvalid |-> (|dcache_req_ports_o[j].data_rdata) !== 1'hX)
++      @(posedge clk_i) disable iff (!rst_ni) dcache_req_ports_o[j].data_rvalid && ~dcache_req_ports_i[j].kill_req |-> (|dcache_req_ports_o[j].data_rdata) !== 1'hX)
+     else $warning(1,"[l1 dcache] reading invalid data on port %01d: data=%016X",
+       j, dcache_req_ports_o[j].data_rdata);
+   end
+-- 
+2.25.1.377.g2d2118b814
+
