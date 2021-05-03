@@ -41,6 +41,7 @@ sources:
   - src/occamy_xilinx.sv
 - target: any(simulation, verilator)
   files:
+  - test/uartdpi/uartdpi.sv
   - test/testharness.sv
 
 # - target: any(simulation, verilator)
