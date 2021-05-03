@@ -122,7 +122,7 @@ def main():
 
     am_uart = am.new_leaf("uart", 0x1000,
                           0x02002000).attach_to(am_soc_regbus_periph_xbar)
-    dts_uart = dts.add_device("serial", "lowrisc,serial", am_uart, [
+    dts.add_device("serial", "lowrisc,serial", am_uart, [
         "clock-frequency = <50000000>", "current-speed = <115200>",
         "interrupt-parent = <&PLIC0>", "interrupts = <1>"
     ])

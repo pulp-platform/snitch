@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module uartdpi #(
-  parameter BAUD = 'x,
-  parameter FREQ = 'x,
+  parameter int BAUD = 'x,
+  parameter int FREQ = 'x,
   parameter string NAME = "uart0"
 )(
   input  logic clk_i,
@@ -14,10 +14,10 @@ module uartdpi #(
   input  logic rx_i
 );
   // Path to a log file. Used if none is specified through the `UARTDPI_LOG_<name>` plusarg.
-  localparam string DEFAULT_LOG_FILE = {NAME, ".log"};
+  localparam string DefaultLogFile = {NAME, ".log"};
 
   // Min cycles is 2 for fast test mode
-  localparam int CYCLES_PER_SYMBOL = FREQ / BAUD;
+  localparam int CyclesPerSymbol = FREQ / BAUD;
 
   import "DPI-C" function
     chandle uartdpi_create(input string name, input string log_file_path);
@@ -35,7 +35,7 @@ module uartdpi #(
     void uartdpi_write(input chandle ctx, int data);
 
   chandle ctx;
-  string log_file_path = DEFAULT_LOG_FILE;
+  string log_file_path = DefaultLogFile;
 
   initial begin
     $value$plusargs({"UARTDPI_LOG_", NAME, "=%s"}, log_file_path);
@@ -71,7 +71,7 @@ module uartdpi #(
       end else begin
         txcyccount <= txcyccount + 1;
         tx_o <= txsymbol[txcount];
-        if (txcyccount == CYCLES_PER_SYMBOL - 1) begin
+        if (txcyccount == CyclesPerSymbol - 1) begin
           txcyccount <= 0;
           if (txcount == 9)
             txactive <= 0;
@@ -103,7 +103,7 @@ module uartdpi #(
         end
       end else begin
         if (rxcount == 0) begin
-          if (rxcyccount == CYCLES_PER_SYMBOL/2 - 1) begin
+          if (rxcyccount == CyclesPerSymbol/2 - 1) begin
             if (rx_i) begin
               rxactive <= 0;
             end else begin
@@ -112,13 +112,13 @@ module uartdpi #(
             end
           end
         end else if (rxcount <= 8) begin
-          if (rxcyccount == CYCLES_PER_SYMBOL - 1) begin
+          if (rxcyccount == CyclesPerSymbol - 1) begin
             rxsymbol[rxcount-1] <= rx_i;
             rxcount <= rxcount + 1;
             rxcyccount <= 0;
           end
         end else begin
-          if (rxcyccount == CYCLES_PER_SYMBOL - 1) begin
+          if (rxcyccount == CyclesPerSymbol - 1) begin
             rxactive <= 0;
             if (rx_i) begin
               uartdpi_write(ctx, rxsymbol);

@@ -36,7 +36,8 @@ class DeviceTree(object):
             (am.size & (2**32 - 1)))
 
     def string_property(self, name, *string_list):
-        string_list = ", ".join(["\"{}\"".format(string) for string in string_list])
+        string_list = ", ".join(
+            ["\"{}\"".format(string) for string in string_list])
         return "{} = {};\n".format(name, string_list)
 
     def u32_property(self, name, value):
@@ -51,10 +52,13 @@ class DeviceTree(object):
         """Add a CPU node"""
         cpu = "      {}".format(self.string_property("device_type", "cpu"))
         cpu += "      {}".format(self.string_property("status", "okay"))
-        cpu += "      {}".format(self.string_property("compatible", "riscv", compatible))
-        cpu += "      {}".format(self.u32_property("clock-frequency", clock_freq))
+        cpu += "      {}".format(
+            self.string_property("compatible", "riscv", compatible))
+        cpu += "      {}".format(
+            self.u32_property("clock-frequency", clock_freq))
         cpu += "      {}".format(self.string_property("riscv,isa", isa))
-        cpu += "      {}".format(self.string_property("mmu-type", "riscv,{}".format(mmu)))
+        cpu += "      {}".format(
+            self.string_property("mmu-type", "riscv,{}".format(mmu)))
         cpu += "      tlb-split;\n"
         self.cpus.append(cpu)
 
@@ -65,7 +69,8 @@ class DeviceTree(object):
         name = "{}@{:x}".format(name, am.bases[0])
         dev = ""
         dev += "    {}{} {{\n".format(phandle or "", name)
-        dev += "      {}".format(self.string_property("compatible",compatible))
+        dev += "      {}".format(self.string_property("compatible",
+                                                      compatible))
         for prop in props:
             dev += "      {};\n".format(prop)
         dev += "      {}".format(self.get_reg(am))
@@ -118,7 +123,8 @@ class DeviceTree(object):
     def add_node(self, name, *compatible):
         """Add a node to the device tree"""
         node = "  {} {{\n".format(name)
-        node += "    {}".format(self.string_property("compatible", *compatible))
+        node += "    {}".format(self.string_property("compatible",
+                                                     *compatible))
         node += "  };\n"
         self.nodes.append(node)
         return "/{}".format(name)
@@ -150,13 +156,15 @@ class DeviceTree(object):
             dts += "      CPU{}_intc: interrupt-controller {{\n".format(i)
             dts += "        #interrupt-cells = <1>;\n"
             dts += "        interrupt-controller;\n"
-            dts += "        {}\n".format(self.string_property("compatible", "riscv,cpu-intc"))
+            dts += "        {}\n".format(
+                self.string_property("compatible", "riscv,cpu-intc"))
             dts += "      };\n"
             dts += "    };\n"
         dts += "  };\n"
         dts += "  soc: soc {\n"
         dts += self.addr_cells(4)
-        dts += "    {}".format(self.string_property("compatible", "simple-bus"))
+        dts += "    {}".format(self.string_property("compatible",
+                                                    "simple-bus"))
         dts += "    ranges;\n"
         for device in self.devices:
             dts += device

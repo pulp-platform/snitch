@@ -8,11 +8,11 @@
 #include <stdio.h>
 
 struct uartdpi_ctx {
-  char ptyname[64];
-  int host;
-  int device;
-  char tmp_read;
-  FILE *log_file;
+    char ptyname[64];
+    int host;
+    int device;
+    char tmp_read;
+    FILE *log_file;
 };
 
 void *uartdpi_create(const char *name, const char *log_file_path);
