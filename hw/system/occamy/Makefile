@@ -43,7 +43,7 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 ##########
 update-source:
 	@echo "[SOLDER]  Generating sources"
-	@$(ROOT)/util/occamygen.py --clustercfg src/occamy_cluster_cfg.hjson --graph addrmap.dot --outdir . \
+	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --graph addrmap.dot --outdir . \
 		--dts test/occamy.dts \
 		src/occamy_top.sv \
 		src/occamy_pkg.sv \

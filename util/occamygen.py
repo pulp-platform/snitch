@@ -26,7 +26,7 @@ templates = TemplateLookup(
 def main():
     """Generate the Occamy system and all corresponding configuration files."""
     parser = argparse.ArgumentParser(prog="clustergen")
-    parser.add_argument("--clustercfg",
+    parser.add_argument("--cfg",
                         "-c",
                         metavar="file",
                         type=argparse.FileType('r'),
@@ -65,7 +65,7 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
 
     # Read HJSON description of System.
-    with args.clustercfg as file:
+    with args.cfg as file:
         try:
             srcfull = file.read()
             obj = hjson.loads(srcfull, use_decimal=True)
