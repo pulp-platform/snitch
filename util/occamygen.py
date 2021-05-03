@@ -122,7 +122,7 @@ def main():
 
     am_uart = am.new_leaf("uart", 0x1000,
                           0x02002000).attach_to(am_soc_regbus_periph_xbar)
-    dts_uart = dts.add_device("uart", "lowrisc,uart", am_uart, [
+    dts_uart = dts.add_device("serial", "lowrisc,serial", am_uart, [
         "clock-frequency = <50000000>", "current-speed = <115200>",
         "interrupt-parent = <&PLIC0>", "interrupts = <1>"
     ])
@@ -404,10 +404,22 @@ def main():
     #######
     # DTS #
     #######
-    dts.add_chosen("stdout-path = \"{}\";".format(dts_uart))
+    # TODO(niwis, zarubaf): We probably need to think about genrating a couple
+    # of different systems here. I can at least think about two in that context:
+    # 1. RTL sim
+    # 2. FPGA
+    # 3. (ASIC) in the private wrapper repo
+    # I think we have all the necessary ingredients for this. What is missing is:
+    # - Create a second(/third) configuration file.
+    # - Generate the RTL into dedicated directories
+    # - (Manually) adapt the `Bender.yml` to include the appropriate files.
+    htif = dts.add_node("htif", "ucb,htif0")
+    dts.add_chosen("stdout-path = \"{}\";".format(htif))
 
     if args.dts:
-        dts_str = dts.emit()
+        # TODO(zarubaf): Figure out whether there are any requirements on the
+        # model and compatability.
+        dts_str = dts.emit("eth,occamy-dev", "eth,occamy")
         with open(args.dts, "w") as file:
             file.write(dts_str)
         # Compile to DTB and save to a file with `.dtb` extension.

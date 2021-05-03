@@ -7,4 +7,5 @@ SECTIONS
   /* TODO(zarubaf): Auto-generate from description */
   . = 0x1000000;
   .text : { *(.text) }
+  .bootdata : { *(.boot_section) }
 }

@@ -2,13 +2,15 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-// Auto-generated, please edit script instead.
+// Auto-generated, please edit the script instead.
 /dts-v1/;
 / {
   #address-cells = <2>;
   #size-cells = <2>;
+  compatible = "eth,occamy-dev";
+  model = "eth,occamy";
   chosen {
-    stdout-path = "/soc/uart@2002000";
+    stdout-path = "/htif";
   };
   memory@80000000 {
     device_type = "memory";
@@ -21,7 +23,7 @@
     CPU0: cpu@0 {
       device_type = "cpu";
       status = "okay";
-      compatible = "eth,ariane", "riscv";
+      compatible = "riscv", "eth,ariane";
       clock-frequency = <50000000>;
       riscv,isa = "rv64fimafd";
       mmu-type = "riscv,sv39";
@@ -31,6 +33,7 @@
         #interrupt-cells = <1>;
         interrupt-controller;
         compatible = "riscv,cpu-intc";
+
       };
     };
   };
@@ -45,8 +48,8 @@
       reg-names = "control";
       reg = <0x0 0x0 0x0 0x1000>;
     };
-    uart@2002000 {
-      compatible = "lowrisc,uart";
+    serial@2002000 {
+      compatible = "lowrisc,serial";
       clock-frequency = <50000000>;
       current-speed = <115200>;
       interrupt-parent = <&PLIC0>;
@@ -69,5 +72,8 @@
       riscv,ndev = <30>;
       reg = <0x0 0xc000000 0x0 0x4000000>;
     };
+  };
+  htif {
+    compatible = "ucb,htif0";
   };
 };
