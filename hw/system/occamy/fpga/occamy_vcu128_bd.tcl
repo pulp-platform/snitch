@@ -334,17 +334,6 @@ proc create_root_design { parentCell } {
    CONFIG.NUM_SI {9} \
  ] $smartconnect_0
 
-  # [Manual Edit] Occamy AXI interface frequency
-  set_property CONFIG.FREQ_HZ [get_property CONFIG.FREQ_HZ [get_bd_pins /clk_wiz/clk_out2]] [get_bd_intf_pins /occamy_xilinx_0/m_axi_hbm_0]
-  set_property CONFIG.FREQ_HZ [get_property CONFIG.FREQ_HZ [get_bd_pins /clk_wiz/clk_out2]] [get_bd_intf_pins /occamy_xilinx_0/m_axi_hbm_1]
-  set_property CONFIG.FREQ_HZ [get_property CONFIG.FREQ_HZ [get_bd_pins /clk_wiz/clk_out2]] [get_bd_intf_pins /occamy_xilinx_0/m_axi_hbm_2]
-  set_property CONFIG.FREQ_HZ [get_property CONFIG.FREQ_HZ [get_bd_pins /clk_wiz/clk_out2]] [get_bd_intf_pins /occamy_xilinx_0/m_axi_hbm_3]
-  set_property CONFIG.FREQ_HZ [get_property CONFIG.FREQ_HZ [get_bd_pins /clk_wiz/clk_out2]] [get_bd_intf_pins /occamy_xilinx_0/m_axi_hbm_4]
-  set_property CONFIG.FREQ_HZ [get_property CONFIG.FREQ_HZ [get_bd_pins /clk_wiz/clk_out2]] [get_bd_intf_pins /occamy_xilinx_0/m_axi_hbm_5]
-  set_property CONFIG.FREQ_HZ [get_property CONFIG.FREQ_HZ [get_bd_pins /clk_wiz/clk_out2]] [get_bd_intf_pins /occamy_xilinx_0/m_axi_hbm_6]
-  set_property CONFIG.FREQ_HZ [get_property CONFIG.FREQ_HZ [get_bd_pins /clk_wiz/clk_out2]] [get_bd_intf_pins /occamy_xilinx_0/m_axi_hbm_7]
-  set_property CONFIG.FREQ_HZ [get_property CONFIG.FREQ_HZ [get_bd_pins /clk_wiz/clk_out2]] [get_bd_intf_pins /occamy_xilinx_0/m_axi_pcie]
-
   # Create interface connections
   connect_bd_intf_net -intf_net axi_apb_bridge_0_APB_M [get_bd_intf_pins axi_apb_bridge_0/APB_M] [get_bd_intf_pins hbm_0/SAPB_0]
   connect_bd_intf_net -intf_net axi_apb_bridge_0_APB_M2 [get_bd_intf_pins axi_apb_bridge_0/APB_M2] [get_bd_intf_pins hbm_0/SAPB_1]
