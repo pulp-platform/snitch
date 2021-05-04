@@ -234,9 +234,17 @@ proc create_root_design { parentCell } {
    CONFIG.CLKOUT2_PHASE_ERROR {87.180} \
    CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {50} \
    CONFIG.CLKOUT2_USED {true} \
+   CONFIG.CLKOUT3_JITTER {154.057} \
+   CONFIG.CLKOUT3_PHASE_ERROR {87.180} \
+   CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {25} \
+   CONFIG.CLKOUT3_REQUESTED_PHASE {90} \
+   CONFIG.CLKOUT3_USED {true} \
+   CONFIG.CLK_OUT2_PORT {clk_out2} \
    CONFIG.MMCM_CLKOUT0_DIVIDE_F {12.000} \
    CONFIG.MMCM_CLKOUT1_DIVIDE {24} \
-   CONFIG.NUM_OUT_CLKS {2} \
+   CONFIG.MMCM_CLKOUT2_DIVIDE {48} \
+   CONFIG.MMCM_CLKOUT2_PHASE {90.000} \
+   CONFIG.NUM_OUT_CLKS {3} \
    CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
    CONFIG.RESET_BOARD_INTERFACE {reset} \
    CONFIG.USE_BOARD_FLOW {true} \
@@ -364,7 +372,8 @@ proc create_root_design { parentCell } {
   connect_bd_net -net clk_100MHz_n_1 [get_bd_ports clk_100MHz_n] [get_bd_pins clk_wiz/clk_in1_n]
   connect_bd_net -net clk_100MHz_p_1 [get_bd_ports clk_100MHz_p] [get_bd_pins clk_wiz/clk_in1_p]
   connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins clk_wiz/clk_out1] [get_bd_pins hbm_0/AXI_00_ACLK] [get_bd_pins hbm_0/AXI_00_WDATA_PARITY] [get_bd_pins hbm_0/AXI_01_ACLK] [get_bd_pins hbm_0/AXI_04_ACLK] [get_bd_pins hbm_0/AXI_05_ACLK] [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins hbm_0/AXI_12_ACLK] [get_bd_pins hbm_0/AXI_16_ACLK] [get_bd_pins hbm_0/AXI_20_ACLK] [get_bd_pins hbm_0/AXI_24_ACLK] [get_bd_pins hbm_0/AXI_28_ACLK] [get_bd_pins hbm_0/HBM_REF_CLK_0] [get_bd_pins hbm_0/HBM_REF_CLK_1] [get_bd_pins smartconnect_0/aclk1]
-  connect_bd_net -net clk_wiz_clk_out2 [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins clk_wiz/clk_out2] [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins occamy_xilinx_0/clk_i] [get_bd_pins occamy_xilinx_0/clk_periph_i] [get_bd_pins occamy_xilinx_0/rtc_i] [get_bd_pins smartconnect_0/aclk]
+  connect_bd_net -net clk_wiz_clk_out2 [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins clk_wiz/clk_out2] [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins occamy_xilinx_0/clk_i] [get_bd_pins occamy_xilinx_0/clk_periph_i] [get_bd_pins smartconnect_0/aclk]
+  connect_bd_net -net clk_wiz_clk_out3 [get_bd_pins clk_wiz/clk_out3] [get_bd_pins occamy_xilinx_0/rtc_i]
   connect_bd_net -net inv_Res [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins axi_uart16550_0/s_axi_aresetn] [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins hbm_0/AXI_00_ARESET_N] [get_bd_pins hbm_0/AXI_01_ARESET_N] [get_bd_pins hbm_0/AXI_04_ARESET_N] [get_bd_pins hbm_0/AXI_05_ARESET_N] [get_bd_pins hbm_0/AXI_08_ARESET_N] [get_bd_pins hbm_0/AXI_12_ARESET_N] [get_bd_pins hbm_0/AXI_16_ARESET_N] [get_bd_pins hbm_0/AXI_20_ARESET_N] [get_bd_pins hbm_0/AXI_24_ARESET_N] [get_bd_pins hbm_0/AXI_28_ARESET_N] [get_bd_pins inv/Res] [get_bd_pins occamy_xilinx_0/rst_ni] [get_bd_pins occamy_xilinx_0/rst_periph_ni] [get_bd_pins smartconnect_0/aresetn]
   connect_bd_net -net reset_1 [get_bd_ports reset] [get_bd_pins clk_wiz/reset] [get_bd_pins inv/Op1]
 
