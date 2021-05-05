@@ -4,7 +4,9 @@
 #
 # Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
-# Utility function to generate a device tree based on Solder AddressMap.
+# Utility function to generate a device tree based on Solder AddressMap. Pretty
+# hacky at this stage, this will need some more structure and logic underneath
+# and then only rendering on-top.
 
 
 class DeviceTree(object):
@@ -13,6 +15,8 @@ class DeviceTree(object):
         self.mem = ""
         self.chosen = list()
         self.devices = list()
+        # List of extra nodes
+        self.nodes = list()
 
     def license(self):
         """Print license"""
@@ -24,11 +28,20 @@ class DeviceTree(object):
         license = license.split("\n")
         return "\n".join([lic.strip() for lic in license[1:]])
 
+    # That is actually a `prop-encoded-array`.
     def get_reg(self, am):
         """Get a 'reg' device tree entry"""
         return "reg = <{:#x} {:#x} {:#x} {:#x}>;\n".format(
             (am.bases[0] >> 32), (am.bases[0] & (2**32 - 1)), (am.size >> 32),
             (am.size & (2**32 - 1)))
+
+    def string_property(self, name, *string_list):
+        string_list = ", ".join(
+            ["\"{}\"".format(string) for string in string_list])
+        return "{} = {};\n".format(name, string_list)
+
+    def u32_property(self, name, value):
+        return "{} = <{:#d}>;\n".format(name, value)
 
     def add_cpu(self,
                 compatible,
@@ -37,12 +50,15 @@ class DeviceTree(object):
                 status="okay",
                 clock_freq=50000000):
         """Add a CPU node"""
-        cpu = "      device_type = \"cpu\";\n"
-        cpu += "      status = \"{}\";\n".format(status)
-        cpu += "      compatible = \"{}\", \"riscv\";\n".format(compatible)
-        cpu += "      clock-frequency = <{}>;\n".format(clock_freq)
-        cpu += "      riscv,isa = \"{}\";\n".format(isa)
-        cpu += "      mmu-type = \"riscv,{}\";\n".format(mmu)
+        cpu = "      {}".format(self.string_property("device_type", "cpu"))
+        cpu += "      {}".format(self.string_property("status", "okay"))
+        cpu += "      {}".format(
+            self.string_property("compatible", "riscv", compatible))
+        cpu += "      {}".format(
+            self.u32_property("clock-frequency", clock_freq))
+        cpu += "      {}".format(self.string_property("riscv,isa", isa))
+        cpu += "      {}".format(
+            self.string_property("mmu-type", "riscv,{}".format(mmu)))
         cpu += "      tlb-split;\n"
         self.cpus.append(cpu)
 
@@ -53,7 +69,8 @@ class DeviceTree(object):
         name = "{}@{:x}".format(name, am.bases[0])
         dev = ""
         dev += "    {}{} {{\n".format(phandle or "", name)
-        dev += "      compatible = \"{}\";\n".format(compatible)
+        dev += "      {}".format(self.string_property("compatible",
+                                                      compatible))
         for prop in props:
             dev += "      {};\n".format(prop)
         dev += "      {}".format(self.get_reg(am))
@@ -103,14 +120,26 @@ class DeviceTree(object):
         """Add choice to chosen"""
         self.chosen.append(choice)
 
-    def emit(self):
+    def add_node(self, name, *compatible):
+        """Add a node to the device tree"""
+        node = "  {} {{\n".format(name)
+        node += "    {}".format(self.string_property("compatible",
+                                                     *compatible))
+        node += "  };\n"
+        self.nodes.append(node)
+        return "/{}".format(name)
+
+    def emit(self, compatible, model):
         """Emit the device tree."""
         dts = self.license()
         dts += "\n"
-        dts += "// Auto-generated, please edit script instead.\n"
+        dts += "// Auto-generated, please edit the script instead.\n"
         dts += "/dts-v1/;\n"
         dts += "/ {\n"
         dts += self.addr_cells()
+        # Platform model and compatability
+        dts += "  {}".format(self.string_property("compatible", compatible))
+        dts += "  {}".format(self.string_property("model", model))
         dts += "  chosen {\n"
         for choice in self.chosen:
             dts += "    {}\n".format(choice)
@@ -127,16 +156,20 @@ class DeviceTree(object):
             dts += "      CPU{}_intc: interrupt-controller {{\n".format(i)
             dts += "        #interrupt-cells = <1>;\n"
             dts += "        interrupt-controller;\n"
-            dts += "        compatible = \"riscv,cpu-intc\";\n"
+            dts += "        {}\n".format(
+                self.string_property("compatible", "riscv,cpu-intc"))
             dts += "      };\n"
             dts += "    };\n"
         dts += "  };\n"
         dts += "  soc: soc {\n"
         dts += self.addr_cells(4)
-        dts += "    compatible = \"simple-bus\";\n"
+        dts += "    {}".format(self.string_property("compatible",
+                                                    "simple-bus"))
         dts += "    ranges;\n"
         for device in self.devices:
             dts += device
         dts += "  };\n"
+        for node in self.nodes:
+            dts += node
         dts += "};\n"
         return dts

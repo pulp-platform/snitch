@@ -15,7 +15,11 @@ _start:
 exception:
     wfi
     j     exception
-entry_addr:
-    .word exception
+.align 3
 device_tree:
     .incbin "test/occamy.dtb"
+
+.pushsection .boot_section,"aw",@progbits;
+entry_addr:
+    .word exception
+boot_data:

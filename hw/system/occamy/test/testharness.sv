@@ -171,6 +171,7 @@ module testharness import occamy_pkg::*; (
   );
 
 
+  logic tx, rx;
 
   axi_a48_d512_i8_u0_req_t pcie_axi_req;
   axi_a48_d512_i8_u0_resp_t pcie_axi_rsp;
@@ -233,8 +234,8 @@ module testharness import occamy_pkg::*; (
     .pad_slw_o (),
     .pad_smt_o (),
     .pad_drv_o (),
-    .uart_tx_o (),
-    .uart_rx_i ('0),
+    .uart_tx_o (tx),
+    .uart_rx_i (rx),
     .gpio_d_i ('0),
     .gpio_d_o (),
     .gpio_oe_o (),
@@ -298,6 +299,18 @@ module testharness import occamy_pkg::*; (
     .pcie_axi_rsp_i (pcie_axi_rsp),
     .pcie_axi_req_i ('0),
     .pcie_axi_rsp_o ()
+  );
+
+  uartdpi #(
+    .BAUD ('d115_200),
+    // Frequency shouldn't matter since we are sending with the same clock.
+    .FREQ ('d500_000),
+    .NAME("uart0")
+  ) i_uart0 (
+    .clk_i (clk_i),
+    .rst_ni (rst_ni),
+    .tx_o (rx),
+    .rx_i (tx)
   );
 
 endmodule

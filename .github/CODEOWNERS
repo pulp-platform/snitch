@@ -1,9 +1,12 @@
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence,
 
-*       @zarubaf @fabianschuiki
+*       @zarubaf
 
 # The DMA is owned by @thommythomaso
 hw/ip/snitch_dma @thommythomaso
 
 sw/banshee @SamuelRiedel @paulsc96
+
+# Occamy RTL is also owned by @niwis
+hw/system/occamy @niwis @zarubaf

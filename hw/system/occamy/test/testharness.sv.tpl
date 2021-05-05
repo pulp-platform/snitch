@@ -53,6 +53,7 @@ module testharness import occamy_pkg::*; (
   ${tb_memory(soc_wide_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i))}
 % endfor
 
+  logic tx, rx;
   ${tb_memory(soc_wide_xbar.out_pcie, "pcie_axi")}
   ${tb_memory(soc_regbus_periph_xbar.out_bootrom, "bootrom_regbus")}
   ${tb_memory(soc_regbus_periph_xbar.out_clk_mgr, "clk_mgr")}
@@ -68,8 +69,8 @@ module testharness import occamy_pkg::*; (
     .pad_slw_o (),
     .pad_smt_o (),
     .pad_drv_o (),
-    .uart_tx_o (),
-    .uart_rx_i ('0),
+    .uart_tx_o (tx),
+    .uart_rx_i (rx),
     .gpio_d_i ('0),
     .gpio_d_o (),
     .gpio_oe_o (),
@@ -109,6 +110,18 @@ module testharness import occamy_pkg::*; (
     .pcie_axi_rsp_i (pcie_axi_rsp),
     .pcie_axi_req_i ('0),
     .pcie_axi_rsp_o ()
+  );
+
+  uartdpi #(
+    .BAUD ('d115_200),
+    // Frequency shouldn't matter since we are sending with the same clock.
+    .FREQ ('d500_000),
+    .NAME("uart0")
+  ) i_uart0 (
+    .clk_i (clk_i),
+    .rst_ni (rst_ni),
+    .tx_o (rx),
+    .rx_i (tx)
   );
 
 endmodule

@@ -11,6 +11,7 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 find $ROOT/hw/ \
     -not \( -path '*.bender' -prune \) \
     -not \( -path $ROOT'/hw/vendor' -prune \) \
+    -not \( -path $ROOT'/hw/system/occamy/fpga' -prune \) \
     -not \( -name 'snitch_pkg.sv' \) \
     -name '*.sv' \
     | xargs verible-verilog-lint \
