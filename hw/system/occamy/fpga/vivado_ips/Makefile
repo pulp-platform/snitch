@@ -16,7 +16,7 @@ occamy_xilinx: define-sources.tcl
 	${VIVADO} -mode batch -source occamy_xilinx.tcl
 
 define-sources.tcl:
-	${BENDER} script vivado > $@
+	${BENDER} script vivado -t bscane > $@
 
 clean:
 	rm -rf .Xil occamy_xilinx vivado* define-sources.tcl component.xml

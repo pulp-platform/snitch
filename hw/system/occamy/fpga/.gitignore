@@ -1,4 +1,5 @@
 occamy_vcu128/
+vivado_ips/xgui
 .Xil/
 xgui/
 define_defines_includes_no_simset.tcl
