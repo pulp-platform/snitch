@@ -132,6 +132,7 @@ set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 xilinx.com:ip:axi_apb_bridge:3.0\
+xilinx.com:ip:axi_bram_ctrl:4.1\
 xilinx.com:ip:axi_uart16550:2.0\
 xilinx.com:ip:blk_mem_gen:8.4\
 xilinx.com:ip:clk_wiz:6.0\
@@ -219,6 +220,14 @@ proc create_root_design { parentCell } {
    CONFIG.C_APB_NUM_SLAVES {2} \
  ] $axi_apb_bridge_0
 
+  # Create instance: axi_bram_ctrl_0, and set properties
+  set axi_bram_ctrl_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_0 ]
+  set_property -dict [ list \
+   CONFIG.DATA_WIDTH {64} \
+   CONFIG.ECC_TYPE {0} \
+   CONFIG.SINGLE_PORT_BRAM {1} \
+ ] $axi_bram_ctrl_0
+
   # Create instance: axi_uart16550_0, and set properties
   set axi_uart16550_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uart16550:2.0 axi_uart16550_0 ]
   set_property -dict [ list \
@@ -249,6 +258,23 @@ proc create_root_design { parentCell } {
    CONFIG.Write_Width_B {32} \
    CONFIG.use_bram_block {Stand_Alone} \
  ] $blk_mem_gen_0
+
+  # Create instance: blk_mem_gen_1, and set properties
+  set blk_mem_gen_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_1 ]
+  set_property -dict [ list \
+   CONFIG.Byte_Size {8} \
+   CONFIG.EN_SAFETY_CKT {false} \
+   CONFIG.Enable_32bit_Address {true} \
+   CONFIG.Fill_Remaining_Memory_Locations {false} \
+   CONFIG.Read_Width_A {64} \
+   CONFIG.Read_Width_B {64} \
+   CONFIG.Register_PortA_Output_of_Memory_Primitives {false} \
+   CONFIG.Use_Byte_Write_Enable {true} \
+   CONFIG.Use_RSTA_Pin {true} \
+   CONFIG.Write_Width_A {64} \
+   CONFIG.Write_Width_B {64} \
+   CONFIG.use_bram_block {BRAM_Controller} \
+ ] $blk_mem_gen_1
 
   # Create instance: clk_wiz, and set properties
   set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz ]
@@ -282,7 +308,7 @@ proc create_root_design { parentCell } {
    CONFIG.USER_APB_PCLK_1 {50} \
    CONFIG.USER_APB_PCLK_PERIOD_0 {20.0} \
    CONFIG.USER_APB_PCLK_PERIOD_1 {20.0} \
-   CONFIG.USER_CLK_SEL_LIST0 {AXI_04_ACLK} \
+   CONFIG.USER_CLK_SEL_LIST0 {AXI_00_ACLK} \
    CONFIG.USER_CLK_SEL_LIST1 {AXI_16_ACLK} \
    CONFIG.USER_HBM_CP_1 {6} \
    CONFIG.USER_HBM_DENSITY {8GB} \
@@ -363,50 +389,125 @@ proc create_root_design { parentCell } {
   set_property -dict [ list \
    CONFIG.ADVANCED_PROPERTIES {  __view__ { } } \
    CONFIG.NUM_CLKS {2} \
-   CONFIG.NUM_MI {12} \
-   CONFIG.NUM_SI {9} \
+   CONFIG.NUM_MI {2} \
+   CONFIG.NUM_SI {1} \
  ] $smartconnect_0
+
+  # Create instance: smartconnect_1, and set properties
+  set smartconnect_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_1 ]
+  set_property -dict [ list \
+   CONFIG.ADVANCED_PROPERTIES {  __view__ { } } \
+   CONFIG.NUM_CLKS {2} \
+   CONFIG.NUM_MI {2} \
+   CONFIG.NUM_SI {1} \
+ ] $smartconnect_1
+
+  # Create instance: smartconnect_2, and set properties
+  set smartconnect_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_2 ]
+  set_property -dict [ list \
+   CONFIG.ADVANCED_PROPERTIES {  __view__ { } } \
+   CONFIG.NUM_CLKS {2} \
+   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_SI {1} \
+ ] $smartconnect_2
+
+  # Create instance: smartconnect_3, and set properties
+  set smartconnect_3 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_3 ]
+  set_property -dict [ list \
+   CONFIG.ADVANCED_PROPERTIES {  __view__ { } } \
+   CONFIG.NUM_CLKS {2} \
+   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_SI {1} \
+ ] $smartconnect_3
+
+  # Create instance: smartconnect_4, and set properties
+  set smartconnect_4 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_4 ]
+  set_property -dict [ list \
+   CONFIG.ADVANCED_PROPERTIES {  __view__ { } } \
+   CONFIG.NUM_CLKS {2} \
+   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_SI {1} \
+ ] $smartconnect_4
+
+  # Create instance: smartconnect_5, and set properties
+  set smartconnect_5 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_5 ]
+  set_property -dict [ list \
+   CONFIG.ADVANCED_PROPERTIES {  __view__ { } } \
+   CONFIG.NUM_CLKS {2} \
+   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_SI {1} \
+ ] $smartconnect_5
+
+  # Create instance: smartconnect_6, and set properties
+  set smartconnect_6 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_6 ]
+  set_property -dict [ list \
+   CONFIG.ADVANCED_PROPERTIES {  __view__ { } } \
+   CONFIG.NUM_CLKS {2} \
+   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_SI {1} \
+ ] $smartconnect_6
+
+  # Create instance: smartconnect_7, and set properties
+  set smartconnect_7 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_7 ]
+  set_property -dict [ list \
+   CONFIG.ADVANCED_PROPERTIES {  __view__ { } } \
+   CONFIG.NUM_CLKS {2} \
+   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_SI {1} \
+ ] $smartconnect_7
+
+  # Create instance: smartconnect_8, and set properties
+  set smartconnect_8 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_8 ]
+  set_property -dict [ list \
+   CONFIG.ADVANCED_PROPERTIES {  __view__ { } } \
+   CONFIG.NUM_CLKS {1} \
+   CONFIG.NUM_MI {3} \
+   CONFIG.NUM_SI {1} \
+ ] $smartconnect_8
 
   # Create interface connections
   connect_bd_intf_net -intf_net axi_apb_bridge_0_APB_M [get_bd_intf_pins axi_apb_bridge_0/APB_M] [get_bd_intf_pins hbm_0/SAPB_0]
   connect_bd_intf_net -intf_net axi_apb_bridge_0_APB_M2 [get_bd_intf_pins axi_apb_bridge_0/APB_M2] [get_bd_intf_pins hbm_0/SAPB_1]
+  connect_bd_intf_net -intf_net axi_bram_ctrl_0_BRAM_PORTA [get_bd_intf_pins axi_bram_ctrl_0/BRAM_PORTA] [get_bd_intf_pins blk_mem_gen_1/BRAM_PORTA]
   connect_bd_intf_net -intf_net axi_uart16550_0_UART [get_bd_intf_ports rs232_uart_0] [get_bd_intf_pins axi_uart16550_0/UART]
   connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_0 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_0] [get_bd_intf_pins smartconnect_0/S00_AXI]
-  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_1 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_1] [get_bd_intf_pins smartconnect_0/S01_AXI]
-  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_2 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_2] [get_bd_intf_pins smartconnect_0/S02_AXI]
-  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_3 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_3] [get_bd_intf_pins smartconnect_0/S03_AXI]
-  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_4 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_4] [get_bd_intf_pins smartconnect_0/S04_AXI]
-  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_5 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_5] [get_bd_intf_pins smartconnect_0/S05_AXI]
-  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_6 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_6] [get_bd_intf_pins smartconnect_0/S06_AXI]
-  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_7 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_7] [get_bd_intf_pins smartconnect_0/S07_AXI]
-  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_pcie [get_bd_intf_pins occamy_xilinx_0/m_axi_pcie] [get_bd_intf_pins smartconnect_0/S08_AXI]
+  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_1 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_1] [get_bd_intf_pins smartconnect_1/S00_AXI]
+  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_2 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_2] [get_bd_intf_pins smartconnect_2/S00_AXI]
+  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_3 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_3] [get_bd_intf_pins smartconnect_3/S00_AXI]
+  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_4 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_4] [get_bd_intf_pins smartconnect_4/S00_AXI]
+  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_5 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_5] [get_bd_intf_pins smartconnect_5/S00_AXI]
+  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_6 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_6] [get_bd_intf_pins smartconnect_6/S00_AXI]
+  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_7 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_7] [get_bd_intf_pins smartconnect_7/S00_AXI]
+  connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_pcie [get_bd_intf_pins occamy_xilinx_0/m_axi_pcie] [get_bd_intf_pins smartconnect_8/S00_AXI]
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins hbm_0/SAXI_00] [get_bd_intf_pins smartconnect_0/M00_AXI]
   connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_pins hbm_0/SAXI_01] [get_bd_intf_pins smartconnect_0/M01_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M02_AXI [get_bd_intf_pins hbm_0/SAXI_04] [get_bd_intf_pins smartconnect_0/M02_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M03_AXI [get_bd_intf_pins hbm_0/SAXI_05] [get_bd_intf_pins smartconnect_0/M03_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M04_AXI [get_bd_intf_pins hbm_0/SAXI_08] [get_bd_intf_pins smartconnect_0/M04_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M05_AXI [get_bd_intf_pins hbm_0/SAXI_12] [get_bd_intf_pins smartconnect_0/M05_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M06_AXI [get_bd_intf_pins hbm_0/SAXI_16] [get_bd_intf_pins smartconnect_0/M06_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M07_AXI [get_bd_intf_pins hbm_0/SAXI_20] [get_bd_intf_pins smartconnect_0/M07_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M08_AXI [get_bd_intf_pins hbm_0/SAXI_24] [get_bd_intf_pins smartconnect_0/M08_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M09_AXI [get_bd_intf_pins hbm_0/SAXI_28] [get_bd_intf_pins smartconnect_0/M09_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M10_AXI [get_bd_intf_pins axi_apb_bridge_0/AXI4_LITE] [get_bd_intf_pins smartconnect_0/M10_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M11_AXI [get_bd_intf_pins axi_uart16550_0/S_AXI] [get_bd_intf_pins smartconnect_0/M11_AXI]
+  connect_bd_intf_net -intf_net smartconnect_1_M00_AXI [get_bd_intf_pins hbm_0/SAXI_04] [get_bd_intf_pins smartconnect_1/M00_AXI]
+  connect_bd_intf_net -intf_net smartconnect_1_M01_AXI [get_bd_intf_pins hbm_0/SAXI_05] [get_bd_intf_pins smartconnect_1/M01_AXI]
+  connect_bd_intf_net -intf_net smartconnect_2_M00_AXI [get_bd_intf_pins hbm_0/SAXI_08] [get_bd_intf_pins smartconnect_2/M00_AXI]
+  connect_bd_intf_net -intf_net smartconnect_3_M00_AXI [get_bd_intf_pins hbm_0/SAXI_12] [get_bd_intf_pins smartconnect_3/M00_AXI]
+  connect_bd_intf_net -intf_net smartconnect_4_M00_AXI [get_bd_intf_pins hbm_0/SAXI_16] [get_bd_intf_pins smartconnect_4/M00_AXI]
+  connect_bd_intf_net -intf_net smartconnect_5_M00_AXI [get_bd_intf_pins hbm_0/SAXI_20] [get_bd_intf_pins smartconnect_5/M00_AXI]
+  connect_bd_intf_net -intf_net smartconnect_6_M00_AXI [get_bd_intf_pins hbm_0/SAXI_24] [get_bd_intf_pins smartconnect_6/M00_AXI]
+  connect_bd_intf_net -intf_net smartconnect_7_M00_AXI [get_bd_intf_pins hbm_0/SAXI_28] [get_bd_intf_pins smartconnect_7/M00_AXI]
+  connect_bd_intf_net -intf_net smartconnect_8_M00_AXI [get_bd_intf_pins axi_apb_bridge_0/AXI4_LITE] [get_bd_intf_pins smartconnect_8/M00_AXI]
+  connect_bd_intf_net -intf_net smartconnect_8_M01_AXI [get_bd_intf_pins axi_uart16550_0/S_AXI] [get_bd_intf_pins smartconnect_8/M01_AXI]
+  connect_bd_intf_net -intf_net smartconnect_8_M02_AXI [get_bd_intf_pins axi_bram_ctrl_0/S_AXI] [get_bd_intf_pins smartconnect_8/M02_AXI]
 
   # Create port connections
   connect_bd_net -net blk_mem_gen_0_douta [get_bd_pins blk_mem_gen_0/douta] [get_bd_pins occamy_xilinx_0/bootrom_data_i]
   connect_bd_net -net clk_100MHz_n_1 [get_bd_ports clk_100MHz_n] [get_bd_pins clk_wiz/clk_in1_n]
   connect_bd_net -net clk_100MHz_p_1 [get_bd_ports clk_100MHz_p] [get_bd_pins clk_wiz/clk_in1_p]
-  connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins clk_wiz/clk_out1] [get_bd_pins hbm_0/AXI_00_ACLK] [get_bd_pins hbm_0/AXI_00_WDATA_PARITY] [get_bd_pins hbm_0/AXI_01_ACLK] [get_bd_pins hbm_0/AXI_04_ACLK] [get_bd_pins hbm_0/AXI_05_ACLK] [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins hbm_0/AXI_12_ACLK] [get_bd_pins hbm_0/AXI_16_ACLK] [get_bd_pins hbm_0/AXI_20_ACLK] [get_bd_pins hbm_0/AXI_24_ACLK] [get_bd_pins hbm_0/AXI_28_ACLK] [get_bd_pins hbm_0/HBM_REF_CLK_0] [get_bd_pins hbm_0/HBM_REF_CLK_1] [get_bd_pins smartconnect_0/aclk1]
-  connect_bd_net -net clk_wiz_clk_out2 [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins blk_mem_gen_0/clka] [get_bd_pins clk_wiz/clk_out2] [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins occamy_xilinx_0/clk_i] [get_bd_pins occamy_xilinx_0/clk_periph_i] [get_bd_pins smartconnect_0/aclk]
+  connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins clk_wiz/clk_out1] [get_bd_pins hbm_0/AXI_00_ACLK] [get_bd_pins hbm_0/AXI_00_WDATA_PARITY] [get_bd_pins hbm_0/AXI_01_ACLK] [get_bd_pins hbm_0/AXI_04_ACLK] [get_bd_pins hbm_0/AXI_05_ACLK] [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins hbm_0/AXI_12_ACLK] [get_bd_pins hbm_0/AXI_16_ACLK] [get_bd_pins hbm_0/AXI_20_ACLK] [get_bd_pins hbm_0/AXI_24_ACLK] [get_bd_pins hbm_0/AXI_28_ACLK] [get_bd_pins hbm_0/HBM_REF_CLK_0] [get_bd_pins hbm_0/HBM_REF_CLK_1] [get_bd_pins smartconnect_0/aclk1] [get_bd_pins smartconnect_1/aclk1] [get_bd_pins smartconnect_2/aclk1] [get_bd_pins smartconnect_3/aclk1] [get_bd_pins smartconnect_4/aclk1] [get_bd_pins smartconnect_5/aclk1] [get_bd_pins smartconnect_6/aclk1] [get_bd_pins smartconnect_7/aclk1]
+  connect_bd_net -net clk_wiz_clk_out2 [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins blk_mem_gen_0/clka] [get_bd_pins clk_wiz/clk_out2] [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins occamy_xilinx_0/clk_i] [get_bd_pins occamy_xilinx_0/clk_periph_i] [get_bd_pins smartconnect_0/aclk] [get_bd_pins smartconnect_1/aclk] [get_bd_pins smartconnect_2/aclk] [get_bd_pins smartconnect_3/aclk] [get_bd_pins smartconnect_4/aclk] [get_bd_pins smartconnect_5/aclk] [get_bd_pins smartconnect_6/aclk] [get_bd_pins smartconnect_7/aclk] [get_bd_pins smartconnect_8/aclk]
   connect_bd_net -net clk_wiz_clk_out3 [get_bd_pins clk_wiz/clk_out3] [get_bd_pins occamy_xilinx_0/rtc_i]
-  connect_bd_net -net inv_Res [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins axi_uart16550_0/s_axi_aresetn] [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins hbm_0/AXI_00_ARESET_N] [get_bd_pins hbm_0/AXI_01_ARESET_N] [get_bd_pins hbm_0/AXI_04_ARESET_N] [get_bd_pins hbm_0/AXI_05_ARESET_N] [get_bd_pins hbm_0/AXI_08_ARESET_N] [get_bd_pins hbm_0/AXI_12_ARESET_N] [get_bd_pins hbm_0/AXI_16_ARESET_N] [get_bd_pins hbm_0/AXI_20_ARESET_N] [get_bd_pins hbm_0/AXI_24_ARESET_N] [get_bd_pins hbm_0/AXI_28_ARESET_N] [get_bd_pins inv/Res] [get_bd_pins occamy_xilinx_0/rst_ni] [get_bd_pins occamy_xilinx_0/rst_periph_ni] [get_bd_pins smartconnect_0/aresetn]
+  connect_bd_net -net inv_Res [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins axi_uart16550_0/s_axi_aresetn] [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins hbm_0/AXI_00_ARESET_N] [get_bd_pins hbm_0/AXI_01_ARESET_N] [get_bd_pins hbm_0/AXI_04_ARESET_N] [get_bd_pins hbm_0/AXI_05_ARESET_N] [get_bd_pins hbm_0/AXI_08_ARESET_N] [get_bd_pins hbm_0/AXI_12_ARESET_N] [get_bd_pins hbm_0/AXI_16_ARESET_N] [get_bd_pins hbm_0/AXI_20_ARESET_N] [get_bd_pins hbm_0/AXI_24_ARESET_N] [get_bd_pins hbm_0/AXI_28_ARESET_N] [get_bd_pins inv/Res] [get_bd_pins occamy_xilinx_0/rst_ni] [get_bd_pins occamy_xilinx_0/rst_periph_ni] [get_bd_pins smartconnect_0/aresetn] [get_bd_pins smartconnect_1/aresetn] [get_bd_pins smartconnect_2/aresetn] [get_bd_pins smartconnect_3/aresetn] [get_bd_pins smartconnect_4/aresetn] [get_bd_pins smartconnect_5/aresetn] [get_bd_pins smartconnect_6/aresetn] [get_bd_pins smartconnect_7/aresetn] [get_bd_pins smartconnect_8/aresetn]
   connect_bd_net -net occamy_xilinx_0_bootrom_addr_o [get_bd_pins blk_mem_gen_0/addra] [get_bd_pins occamy_xilinx_0/bootrom_addr_o]
   connect_bd_net -net occamy_xilinx_0_bootrom_en_o [get_bd_pins blk_mem_gen_0/ena] [get_bd_pins occamy_xilinx_0/bootrom_en_o]
   connect_bd_net -net reset_1 [get_bd_ports reset] [get_bd_pins clk_wiz/reset] [get_bd_pins inv/Op1]
 
   # Create address segments
-  assign_bd_address -offset 0x70000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_pcie] [get_bd_addr_segs axi_uart16550_0/S_AXI/Reg] -force
+  assign_bd_address -offset 0x30000000 -range 0x00002000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_pcie] [get_bd_addr_segs axi_bram_ctrl_0/S_AXI/Mem0] -force
+  assign_bd_address -offset 0x40000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_pcie] [get_bd_addr_segs axi_uart16550_0/S_AXI/Reg] -force
   assign_bd_address -offset 0x001000000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM00] -force
   assign_bd_address -offset 0x80000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM00] -force
   assign_bd_address -offset 0x001010000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM01] -force
@@ -447,8 +548,293 @@ proc create_root_design { parentCell } {
   assign_bd_address -offset 0x0011D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM29] -force
   assign_bd_address -offset 0x0011E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM30] -force
   assign_bd_address -offset 0x0011F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM31] -force
-  assign_bd_address -offset 0x70400000 -range 0x00400000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_pcie] [get_bd_addr_segs hbm_0/SAPB_0/Reg] -force
-  assign_bd_address -offset 0x70800000 -range 0x00400000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_pcie] [get_bd_addr_segs hbm_0/SAPB_1/Reg] -force
+  assign_bd_address -offset 0x40400000 -range 0x00400000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_pcie] [get_bd_addr_segs hbm_0/SAPB_0/Reg] -force
+  assign_bd_address -offset 0x40800000 -range 0x00400000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_pcie] [get_bd_addr_segs hbm_0/SAPB_1/Reg] -force
+
+  # Exclude Address Segments
+  # TODO(niwis) Look into more generic solutions for this.
+  # Unfortunately, there does not seem to be a tcl command sequence to get all connected but unassigned slave segments of an address space.
+  # For now, manually update the address map in Vivado's Address Editor and export the Block Design tcl.
+  exclude_bd_addr_seg -offset 0x001040000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM04]
+  exclude_bd_addr_seg -offset 0x40000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM04]
+  exclude_bd_addr_seg -offset 0x001050000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM05]
+  exclude_bd_addr_seg -offset 0x50000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM05]
+  exclude_bd_addr_seg -offset 0x001060000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM06]
+  exclude_bd_addr_seg -offset 0x60000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM06]
+  exclude_bd_addr_seg -offset 0x001070000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM07]
+  exclude_bd_addr_seg -offset 0x70000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM07]
+  exclude_bd_addr_seg -offset 0x001080000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM08]
+  exclude_bd_addr_seg -offset 0x001080000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM08]
+  exclude_bd_addr_seg -offset 0x001090000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM09]
+  exclude_bd_addr_seg -offset 0x001090000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM09]
+  exclude_bd_addr_seg -offset 0x0010A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM10]
+  exclude_bd_addr_seg -offset 0x0010A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM10]
+  exclude_bd_addr_seg -offset 0x0010B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM11]
+  exclude_bd_addr_seg -offset 0x0010B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM11]
+  exclude_bd_addr_seg -offset 0x0010C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM12]
+  exclude_bd_addr_seg -offset 0xC0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM12]
+  exclude_bd_addr_seg -offset 0x0010D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM13]
+  exclude_bd_addr_seg -offset 0xD0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM13]
+  exclude_bd_addr_seg -offset 0x0010E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM14]
+  exclude_bd_addr_seg -offset 0xE0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM14]
+  exclude_bd_addr_seg -offset 0x0010F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM15]
+  exclude_bd_addr_seg -offset 0xF0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM15]
+  exclude_bd_addr_seg -offset 0x001100000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM16]
+  exclude_bd_addr_seg -offset 0x000100000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM16]
+  exclude_bd_addr_seg -offset 0x001110000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM17]
+  exclude_bd_addr_seg -offset 0x000110000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM17]
+  exclude_bd_addr_seg -offset 0x001120000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM18]
+  exclude_bd_addr_seg -offset 0x000120000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM18]
+  exclude_bd_addr_seg -offset 0x001130000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM19]
+  exclude_bd_addr_seg -offset 0x000130000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM19]
+  exclude_bd_addr_seg -offset 0x001140000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM20]
+  exclude_bd_addr_seg -offset 0x000140000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM20]
+  exclude_bd_addr_seg -offset 0x001150000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM21]
+  exclude_bd_addr_seg -offset 0x000150000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM21]
+  exclude_bd_addr_seg -offset 0x001160000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM22]
+  exclude_bd_addr_seg -offset 0x000160000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM22]
+  exclude_bd_addr_seg -offset 0x001170000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM23]
+  exclude_bd_addr_seg -offset 0x000170000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM23]
+  exclude_bd_addr_seg -offset 0x001180000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM24]
+  exclude_bd_addr_seg -offset 0x000180000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM24]
+  exclude_bd_addr_seg -offset 0x001190000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM25]
+  exclude_bd_addr_seg -offset 0x000190000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM25]
+  exclude_bd_addr_seg -offset 0x0011A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM26]
+  exclude_bd_addr_seg -offset 0x0001A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM26]
+  exclude_bd_addr_seg -offset 0x0011B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM27]
+  exclude_bd_addr_seg -offset 0x0001B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM27]
+  exclude_bd_addr_seg -offset 0x0011C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM28]
+  exclude_bd_addr_seg -offset 0x0001C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM28]
+  exclude_bd_addr_seg -offset 0x0011D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM29]
+  exclude_bd_addr_seg -offset 0x0001D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM29]
+  exclude_bd_addr_seg -offset 0x0011E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM30]
+  exclude_bd_addr_seg -offset 0x0001E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM30]
+  exclude_bd_addr_seg -offset 0x0011F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM31]
+  exclude_bd_addr_seg -offset 0x0001F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_01/HBM_MEM31]
+  exclude_bd_addr_seg -offset 0x001000000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM00]
+  exclude_bd_addr_seg -offset 0x001010000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM00]
+  exclude_bd_addr_seg -offset 0x10000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM01]
+  exclude_bd_addr_seg -offset 0x10000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM01]
+  exclude_bd_addr_seg -offset 0x001020000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM02]
+  exclude_bd_addr_seg -offset 0x20000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM02]
+  exclude_bd_addr_seg -offset 0x001030000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM03]
+  exclude_bd_addr_seg -offset 0x30000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM03]
+  exclude_bd_addr_seg -offset 0x001080000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM08]
+  exclude_bd_addr_seg -offset 0x001080000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM08]
+  exclude_bd_addr_seg -offset 0x001090000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM09]
+  exclude_bd_addr_seg -offset 0x001090000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM09]
+  exclude_bd_addr_seg -offset 0x0010A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM10]
+  exclude_bd_addr_seg -offset 0x0010A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM10]
+  exclude_bd_addr_seg -offset 0x0010B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM11]
+  exclude_bd_addr_seg -offset 0x0010B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM11]
+  exclude_bd_addr_seg -offset 0xC0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM12]
+  exclude_bd_addr_seg -offset 0xC0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM12]
+  exclude_bd_addr_seg -offset 0xD0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM13]
+  exclude_bd_addr_seg -offset 0xD0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM13]
+  exclude_bd_addr_seg -offset 0xE0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM14]
+  exclude_bd_addr_seg -offset 0xE0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM14]
+  exclude_bd_addr_seg -offset 0xF0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM15]
+  exclude_bd_addr_seg -offset 0xF0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM15]
+  exclude_bd_addr_seg -offset 0x000100000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM16]
+  exclude_bd_addr_seg -offset 0x000100000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM16]
+  exclude_bd_addr_seg -offset 0x000110000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM17]
+  exclude_bd_addr_seg -offset 0x000110000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM17]
+  exclude_bd_addr_seg -offset 0x000120000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM18]
+  exclude_bd_addr_seg -offset 0x000120000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM18]
+  exclude_bd_addr_seg -offset 0x000130000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM19]
+  exclude_bd_addr_seg -offset 0x000130000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM19]
+  exclude_bd_addr_seg -offset 0x000140000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM20]
+  exclude_bd_addr_seg -offset 0x000140000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM20]
+  exclude_bd_addr_seg -offset 0x000150000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM21]
+  exclude_bd_addr_seg -offset 0x000150000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM21]
+  exclude_bd_addr_seg -offset 0x000160000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM22]
+  exclude_bd_addr_seg -offset 0x000160000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM22]
+  exclude_bd_addr_seg -offset 0x000170000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM23]
+  exclude_bd_addr_seg -offset 0x000170000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM23]
+  exclude_bd_addr_seg -offset 0x000180000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM24]
+  exclude_bd_addr_seg -offset 0x000180000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM24]
+  exclude_bd_addr_seg -offset 0x000190000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM25]
+  exclude_bd_addr_seg -offset 0x000190000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM25]
+  exclude_bd_addr_seg -offset 0x0001A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM26]
+  exclude_bd_addr_seg -offset 0x0001A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM26]
+  exclude_bd_addr_seg -offset 0x0001B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM27]
+  exclude_bd_addr_seg -offset 0x0001B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM27]
+  exclude_bd_addr_seg -offset 0x0001C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM28]
+  exclude_bd_addr_seg -offset 0x0001C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM28]
+  exclude_bd_addr_seg -offset 0x0001D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM29]
+  exclude_bd_addr_seg -offset 0x0001D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM29]
+  exclude_bd_addr_seg -offset 0x0001E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM30]
+  exclude_bd_addr_seg -offset 0x0001E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM30]
+  exclude_bd_addr_seg -offset 0x0001F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_04/HBM_MEM31]
+  exclude_bd_addr_seg -offset 0x0001F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_1] [get_bd_addr_segs hbm_0/SAXI_05/HBM_MEM31]
+  exclude_bd_addr_seg -offset 0x001000000000 -range 0x20000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM00]
+  exclude_bd_addr_seg -offset 0x10000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM01]
+  exclude_bd_addr_seg -offset 0x20000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM02]
+  exclude_bd_addr_seg -offset 0x30000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM03]
+  exclude_bd_addr_seg -offset 0x40000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM04]
+  exclude_bd_addr_seg -offset 0x50000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM05]
+  exclude_bd_addr_seg -offset 0x60000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM06]
+  exclude_bd_addr_seg -offset 0x70000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM07]
+  exclude_bd_addr_seg -offset 0xC0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM12]
+  exclude_bd_addr_seg -offset 0xD0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM13]
+  exclude_bd_addr_seg -offset 0xE0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM14]
+  exclude_bd_addr_seg -offset 0xF0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM15]
+  exclude_bd_addr_seg -offset 0x000100000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM16]
+  exclude_bd_addr_seg -offset 0x000110000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM17]
+  exclude_bd_addr_seg -offset 0x000120000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM18]
+  exclude_bd_addr_seg -offset 0x000130000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM19]
+  exclude_bd_addr_seg -offset 0x000140000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM20]
+  exclude_bd_addr_seg -offset 0x000150000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM21]
+  exclude_bd_addr_seg -offset 0x000160000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM22]
+  exclude_bd_addr_seg -offset 0x000170000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM23]
+  exclude_bd_addr_seg -offset 0x000180000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM24]
+  exclude_bd_addr_seg -offset 0x000190000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM25]
+  exclude_bd_addr_seg -offset 0x0001A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM26]
+  exclude_bd_addr_seg -offset 0x0001B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM27]
+  exclude_bd_addr_seg -offset 0x0001C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM28]
+  exclude_bd_addr_seg -offset 0x0001D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM29]
+  exclude_bd_addr_seg -offset 0x0001E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM30]
+  exclude_bd_addr_seg -offset 0x0001F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_2] [get_bd_addr_segs hbm_0/SAXI_08/HBM_MEM31]
+  exclude_bd_addr_seg -offset 0x001000000000 -range 0x20000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM00]
+  exclude_bd_addr_seg -offset 0x10000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM01]
+  exclude_bd_addr_seg -offset 0x20000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM02]
+  exclude_bd_addr_seg -offset 0x30000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM03]
+  exclude_bd_addr_seg -offset 0x40000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM04]
+  exclude_bd_addr_seg -offset 0x50000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM05]
+  exclude_bd_addr_seg -offset 0x60000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM06]
+  exclude_bd_addr_seg -offset 0x70000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM07]
+  exclude_bd_addr_seg -offset 0x001080000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM08]
+  exclude_bd_addr_seg -offset 0x001090000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM09]
+  exclude_bd_addr_seg -offset 0x0010A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM10]
+  exclude_bd_addr_seg -offset 0x0010B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM11]
+  exclude_bd_addr_seg -offset 0x000100000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM16]
+  exclude_bd_addr_seg -offset 0x000110000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM17]
+  exclude_bd_addr_seg -offset 0x000120000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM18]
+  exclude_bd_addr_seg -offset 0x000130000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM19]
+  exclude_bd_addr_seg -offset 0x000140000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM20]
+  exclude_bd_addr_seg -offset 0x000150000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM21]
+  exclude_bd_addr_seg -offset 0x000160000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM22]
+  exclude_bd_addr_seg -offset 0x000170000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM23]
+  exclude_bd_addr_seg -offset 0x000180000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM24]
+  exclude_bd_addr_seg -offset 0x000190000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM25]
+  exclude_bd_addr_seg -offset 0x0001A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM26]
+  exclude_bd_addr_seg -offset 0x0001B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM27]
+  exclude_bd_addr_seg -offset 0x0001C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM28]
+  exclude_bd_addr_seg -offset 0x0001D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM29]
+  exclude_bd_addr_seg -offset 0x0001E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM30]
+  exclude_bd_addr_seg -offset 0x0001F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_3] [get_bd_addr_segs hbm_0/SAXI_12/HBM_MEM31]
+  exclude_bd_addr_seg -offset 0x001000000000 -range 0x20000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM00]
+  exclude_bd_addr_seg -offset 0x10000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM01]
+  exclude_bd_addr_seg -offset 0x20000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM02]
+  exclude_bd_addr_seg -offset 0x30000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM03]
+  exclude_bd_addr_seg -offset 0x40000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM04]
+  exclude_bd_addr_seg -offset 0x50000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM05]
+  exclude_bd_addr_seg -offset 0x60000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM06]
+  exclude_bd_addr_seg -offset 0x70000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM07]
+  exclude_bd_addr_seg -offset 0x001080000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM08]
+  exclude_bd_addr_seg -offset 0x001090000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM09]
+  exclude_bd_addr_seg -offset 0x0010A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM10]
+  exclude_bd_addr_seg -offset 0x0010B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM11]
+  exclude_bd_addr_seg -offset 0xC0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM12]
+  exclude_bd_addr_seg -offset 0xD0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM13]
+  exclude_bd_addr_seg -offset 0xE0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM14]
+  exclude_bd_addr_seg -offset 0xF0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM15]
+  exclude_bd_addr_seg -offset 0x000140000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM20]
+  exclude_bd_addr_seg -offset 0x000150000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM21]
+  exclude_bd_addr_seg -offset 0x000160000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM22]
+  exclude_bd_addr_seg -offset 0x000170000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM23]
+  exclude_bd_addr_seg -offset 0x000180000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM24]
+  exclude_bd_addr_seg -offset 0x000190000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM25]
+  exclude_bd_addr_seg -offset 0x0001A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM26]
+  exclude_bd_addr_seg -offset 0x0001B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM27]
+  exclude_bd_addr_seg -offset 0x0001C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM28]
+  exclude_bd_addr_seg -offset 0x0001D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM29]
+  exclude_bd_addr_seg -offset 0x0001E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM30]
+  exclude_bd_addr_seg -offset 0x0001F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_4] [get_bd_addr_segs hbm_0/SAXI_16/HBM_MEM31]
+  exclude_bd_addr_seg -offset 0x001000000000 -range 0x20000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM00]
+  exclude_bd_addr_seg -offset 0x10000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM01]
+  exclude_bd_addr_seg -offset 0x20000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM02]
+  exclude_bd_addr_seg -offset 0x30000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM03]
+  exclude_bd_addr_seg -offset 0x40000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM04]
+  exclude_bd_addr_seg -offset 0x50000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM05]
+  exclude_bd_addr_seg -offset 0x60000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM06]
+  exclude_bd_addr_seg -offset 0x70000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM07]
+  exclude_bd_addr_seg -offset 0x001080000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM08]
+  exclude_bd_addr_seg -offset 0x001090000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM09]
+  exclude_bd_addr_seg -offset 0x0010A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM10]
+  exclude_bd_addr_seg -offset 0x0010B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM11]
+  exclude_bd_addr_seg -offset 0xC0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM12]
+  exclude_bd_addr_seg -offset 0xD0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM13]
+  exclude_bd_addr_seg -offset 0xE0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM14]
+  exclude_bd_addr_seg -offset 0xF0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM15]
+  exclude_bd_addr_seg -offset 0x000100000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM16]
+  exclude_bd_addr_seg -offset 0x000110000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM17]
+  exclude_bd_addr_seg -offset 0x000120000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM18]
+  exclude_bd_addr_seg -offset 0x000130000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM19]
+  exclude_bd_addr_seg -offset 0x000180000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM24]
+  exclude_bd_addr_seg -offset 0x000190000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM25]
+  exclude_bd_addr_seg -offset 0x0001A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM26]
+  exclude_bd_addr_seg -offset 0x0001B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM27]
+  exclude_bd_addr_seg -offset 0x0001C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM28]
+  exclude_bd_addr_seg -offset 0x0001D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM29]
+  exclude_bd_addr_seg -offset 0x0001E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM30]
+  exclude_bd_addr_seg -offset 0x0001F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_5] [get_bd_addr_segs hbm_0/SAXI_20/HBM_MEM31]
+  exclude_bd_addr_seg -offset 0x001000000000 -range 0x20000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM00]
+  exclude_bd_addr_seg -offset 0x10000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM01]
+  exclude_bd_addr_seg -offset 0x20000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM02]
+  exclude_bd_addr_seg -offset 0x30000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM03]
+  exclude_bd_addr_seg -offset 0x40000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM04]
+  exclude_bd_addr_seg -offset 0x50000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM05]
+  exclude_bd_addr_seg -offset 0x60000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM06]
+  exclude_bd_addr_seg -offset 0x70000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM07]
+  exclude_bd_addr_seg -offset 0x001080000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM08]
+  exclude_bd_addr_seg -offset 0x001090000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM09]
+  exclude_bd_addr_seg -offset 0x0010A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM10]
+  exclude_bd_addr_seg -offset 0x0010B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM11]
+  exclude_bd_addr_seg -offset 0xC0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM12]
+  exclude_bd_addr_seg -offset 0xD0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM13]
+  exclude_bd_addr_seg -offset 0xE0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM14]
+  exclude_bd_addr_seg -offset 0xF0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM15]
+  exclude_bd_addr_seg -offset 0x000100000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM16]
+  exclude_bd_addr_seg -offset 0x000110000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM17]
+  exclude_bd_addr_seg -offset 0x000120000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM18]
+  exclude_bd_addr_seg -offset 0x000130000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM19]
+  exclude_bd_addr_seg -offset 0x000140000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM20]
+  exclude_bd_addr_seg -offset 0x000150000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM21]
+  exclude_bd_addr_seg -offset 0x000160000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM22]
+  exclude_bd_addr_seg -offset 0x000170000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM23]
+  exclude_bd_addr_seg -offset 0x0001C0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM28]
+  exclude_bd_addr_seg -offset 0x0001D0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM29]
+  exclude_bd_addr_seg -offset 0x0001E0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM30]
+  exclude_bd_addr_seg -offset 0x0001F0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_6] [get_bd_addr_segs hbm_0/SAXI_24/HBM_MEM31]
+  exclude_bd_addr_seg -offset 0x001000000000 -range 0x20000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM00]
+  exclude_bd_addr_seg -offset 0x10000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM01]
+  exclude_bd_addr_seg -offset 0x20000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM02]
+  exclude_bd_addr_seg -offset 0x30000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM03]
+  exclude_bd_addr_seg -offset 0x40000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM04]
+  exclude_bd_addr_seg -offset 0x50000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM05]
+  exclude_bd_addr_seg -offset 0x60000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM06]
+  exclude_bd_addr_seg -offset 0x70000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM07]
+  exclude_bd_addr_seg -offset 0x001080000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM08]
+  exclude_bd_addr_seg -offset 0x001090000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM09]
+  exclude_bd_addr_seg -offset 0x0010A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM10]
+  exclude_bd_addr_seg -offset 0x0010B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM11]
+  exclude_bd_addr_seg -offset 0xC0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM12]
+  exclude_bd_addr_seg -offset 0xD0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM13]
+  exclude_bd_addr_seg -offset 0xE0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM14]
+  exclude_bd_addr_seg -offset 0xF0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM15]
+  exclude_bd_addr_seg -offset 0x000100000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM16]
+  exclude_bd_addr_seg -offset 0x000110000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM17]
+  exclude_bd_addr_seg -offset 0x000120000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM18]
+  exclude_bd_addr_seg -offset 0x000130000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM19]
+  exclude_bd_addr_seg -offset 0x000140000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM20]
+  exclude_bd_addr_seg -offset 0x000150000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM21]
+  exclude_bd_addr_seg -offset 0x000160000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM22]
+  exclude_bd_addr_seg -offset 0x000170000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM23]
+  exclude_bd_addr_seg -offset 0x000180000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM24]
+  exclude_bd_addr_seg -offset 0x000190000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM25]
+  exclude_bd_addr_seg -offset 0x0001A0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM26]
+  exclude_bd_addr_seg -offset 0x0001B0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy_xilinx_0/m_axi_hbm_7] [get_bd_addr_segs hbm_0/SAXI_28/HBM_MEM27]
 
 
   # Restore current instance
