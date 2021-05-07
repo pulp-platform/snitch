@@ -1,0 +1,48 @@
+diff --git a/src/frontend/bht.sv b/src/frontend/bht.sv
+index 9eae69d..ede29af 100644
+--- a/src/frontend/bht.sv
++++ b/src/frontend/bht.sv
+@@ -35,7 +35,7 @@ module bht #(
+     // number of bits we should use for prediction
+     localparam PREDICTION_BITS = $clog2(NR_ROWS) + OFFSET + ROW_ADDR_BITS;
+     // we are not interested in all bits of the address
+-    unread i_unread (.d_i(|vpc_i));
++    // unread i_unread (.d_i(|vpc_i));
+ 
+     struct packed {
+         logic       valid;
+diff --git a/src/frontend/btb.sv b/src/frontend/btb.sv
+index 86eeadc..712ada7 100644
+--- a/src/frontend/btb.sv
++++ b/src/frontend/btb.sv
+@@ -37,7 +37,7 @@ module btb #(
+     // prevent aliasing to degrade performance
+     localparam ANTIALIAS_BITS = 8;
+     // we are not interested in all bits of the address
+-    unread i_unread (.d_i(|vpc_i));
++    // unread i_unread (.d_i(|vpc_i));
+ 
+     // typedef for all branch target entries
+     // we may want to try to put a tag field that fills the rest of the PC in-order to mitigate aliasing effects
+diff --git a/src/frontend/instr_queue.sv b/src/frontend/instr_queue.sv
+index a12fca3..f46cc4f 100644
+--- a/src/frontend/instr_queue.sv
++++ b/src/frontend/instr_queue.sv
+@@ -320,11 +320,12 @@ module instr_queue (
+     .pop_i      ( pop_address                  )
+   );
+ 
+-  unread i_unread_address_fifo (.d_i(|{empty_address, address_queue_usage}));
+-  unread i_unread_branch_mask (.d_i(|branch_mask_extended));
+-  unread i_unread_lzc (.d_i(|{branch_empty}));
+-  unread i_unread_fifo_pos (.d_i(|fifo_pos_extended)); // we don't care about the lower signals
+-  unread i_unread_instr_fifo (.d_i(|instr_queue_usage));
++  // Vivado interprets these as blackboxes when adding debug constraints
++  // unread i_unread_address_fifo (.d_i(|{empty_address, address_queue_usage}));
++  // unread i_unread_branch_mask (.d_i(|branch_mask_extended));
++  // unread i_unread_lzc (.d_i(|{branch_empty}));
++  // unread i_unread_fifo_pos (.d_i(|fifo_pos_extended)); // we don't care about the lower signals
++  // unread i_unread_instr_fifo (.d_i(|instr_queue_usage));
+ 
+   always_ff @(posedge clk_i or negedge rst_ni) begin
+     if (!rst_ni) begin

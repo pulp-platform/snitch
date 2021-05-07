@@ -17,6 +17,10 @@ source define-sources.tcl
 set_property IS_ENABLED 0 [get_files $ROOT/../../vendor/pulp_platform_axi/src/axi_intf.sv]
 set_property IS_ENABLED 0 [get_files $ROOT/../../vendor/pulp_platform_register_interface/src/reg_intf.sv]
 
+# Add constraint files
+add_files -fileset constrs_1 -norecurse occamy_xilinx_debug.xdc
+import_files -fileset constrs_1 occamy_xilinx_debug.xdc
+
 # Package IP
 set_property top occamy_xilinx [current_fileset]
 

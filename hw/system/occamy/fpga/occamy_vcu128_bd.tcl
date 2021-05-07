@@ -479,6 +479,7 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_6 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_6] [get_bd_intf_pins smartconnect_6/S00_AXI]
   connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_hbm_7 [get_bd_intf_pins occamy_xilinx_0/m_axi_hbm_7] [get_bd_intf_pins smartconnect_7/S00_AXI]
   connect_bd_intf_net -intf_net occamy_xilinx_0_m_axi_pcie [get_bd_intf_pins occamy_xilinx_0/m_axi_pcie] [get_bd_intf_pins smartconnect_8/S00_AXI]
+  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_intf_nets occamy_xilinx_0_m_axi_pcie]
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins hbm_0/SAXI_00] [get_bd_intf_pins smartconnect_0/M00_AXI]
   connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_pins hbm_0/SAXI_01] [get_bd_intf_pins smartconnect_0/M01_AXI]
   connect_bd_intf_net -intf_net smartconnect_1_M00_AXI [get_bd_intf_pins hbm_0/SAXI_04] [get_bd_intf_pins smartconnect_1/M00_AXI]
@@ -495,6 +496,7 @@ proc create_root_design { parentCell } {
 
   # Create port connections
   connect_bd_net -net blk_mem_gen_0_douta [get_bd_pins blk_mem_gen_0/douta] [get_bd_pins occamy_xilinx_0/bootrom_data_i]
+  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets blk_mem_gen_0_douta]
   connect_bd_net -net clk_100MHz_n_1 [get_bd_ports clk_100MHz_n] [get_bd_pins clk_wiz/clk_in1_n]
   connect_bd_net -net clk_100MHz_p_1 [get_bd_ports clk_100MHz_p] [get_bd_pins clk_wiz/clk_in1_p]
   connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins clk_wiz/clk_out1] [get_bd_pins hbm_0/AXI_00_ACLK] [get_bd_pins hbm_0/AXI_00_WDATA_PARITY] [get_bd_pins hbm_0/AXI_01_ACLK] [get_bd_pins hbm_0/AXI_04_ACLK] [get_bd_pins hbm_0/AXI_05_ACLK] [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins hbm_0/AXI_12_ACLK] [get_bd_pins hbm_0/AXI_16_ACLK] [get_bd_pins hbm_0/AXI_20_ACLK] [get_bd_pins hbm_0/AXI_24_ACLK] [get_bd_pins hbm_0/AXI_28_ACLK] [get_bd_pins hbm_0/HBM_REF_CLK_0] [get_bd_pins hbm_0/HBM_REF_CLK_1] [get_bd_pins smartconnect_0/aclk1] [get_bd_pins smartconnect_1/aclk1] [get_bd_pins smartconnect_2/aclk1] [get_bd_pins smartconnect_3/aclk1] [get_bd_pins smartconnect_4/aclk1] [get_bd_pins smartconnect_5/aclk1] [get_bd_pins smartconnect_6/aclk1] [get_bd_pins smartconnect_7/aclk1]
@@ -502,7 +504,9 @@ proc create_root_design { parentCell } {
   connect_bd_net -net clk_wiz_clk_out3 [get_bd_pins clk_wiz/clk_out3] [get_bd_pins occamy_xilinx_0/rtc_i]
   connect_bd_net -net inv_Res [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins axi_uart16550_0/s_axi_aresetn] [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins hbm_0/AXI_00_ARESET_N] [get_bd_pins hbm_0/AXI_01_ARESET_N] [get_bd_pins hbm_0/AXI_04_ARESET_N] [get_bd_pins hbm_0/AXI_05_ARESET_N] [get_bd_pins hbm_0/AXI_08_ARESET_N] [get_bd_pins hbm_0/AXI_12_ARESET_N] [get_bd_pins hbm_0/AXI_16_ARESET_N] [get_bd_pins hbm_0/AXI_20_ARESET_N] [get_bd_pins hbm_0/AXI_24_ARESET_N] [get_bd_pins hbm_0/AXI_28_ARESET_N] [get_bd_pins inv/Res] [get_bd_pins occamy_xilinx_0/rst_ni] [get_bd_pins occamy_xilinx_0/rst_periph_ni] [get_bd_pins smartconnect_0/aresetn] [get_bd_pins smartconnect_1/aresetn] [get_bd_pins smartconnect_2/aresetn] [get_bd_pins smartconnect_3/aresetn] [get_bd_pins smartconnect_4/aresetn] [get_bd_pins smartconnect_5/aresetn] [get_bd_pins smartconnect_6/aresetn] [get_bd_pins smartconnect_7/aresetn] [get_bd_pins smartconnect_8/aresetn]
   connect_bd_net -net occamy_xilinx_0_bootrom_addr_o [get_bd_pins blk_mem_gen_0/addra] [get_bd_pins occamy_xilinx_0/bootrom_addr_o]
+  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets occamy_xilinx_0_bootrom_addr_o]
   connect_bd_net -net occamy_xilinx_0_bootrom_en_o [get_bd_pins blk_mem_gen_0/ena] [get_bd_pins occamy_xilinx_0/bootrom_en_o]
+  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets occamy_xilinx_0_bootrom_en_o]
   connect_bd_net -net reset_1 [get_bd_ports reset] [get_bd_pins clk_wiz/reset] [get_bd_pins inv/Op1]
 
   # Create address segments
