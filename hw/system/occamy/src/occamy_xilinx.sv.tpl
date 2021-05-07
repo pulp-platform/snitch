@@ -56,6 +56,13 @@ import occamy_pkg::*;
   output logic [3:0]  spim_sd_en_o,
   input        [3:0]  spim_sd_i,
 
+  // Boot ROM
+  output logic                                             bootrom_en_o,
+  // This is actually too wide. But the address width depends on the ROM size, so let Vivado handle
+  // this for now
+  output ${soc_regbus_periph_xbar.out_bootrom.addr_type()} bootrom_addr_o,
+  input  ${soc_regbus_periph_xbar.out_bootrom.data_type()} bootrom_data_i,
+
   /// HBM2e Ports
 % for i in range(8):
   ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].emit_flat_master_port("hbm_{}".format(i))},
@@ -93,8 +100,27 @@ import occamy_pkg::*;
 % endfor
 
   /// Boot ROM
+  // TODO(niwis, aottaviano) This is a temporary solution. Either put this in a dedicated module for
+  // regbus <-> Xilinx memory conversion and add support to solder, or replace by a different ROM
   ${soc_regbus_periph_xbar.out_bootrom.req_type()} bootrom_req;
   ${soc_regbus_periph_xbar.out_bootrom.rsp_type()} bootrom_rsp;
+
+  logic bootrom_req_ready_d, bootrom_req_ready_q;
+
+  assign bootrom_en_o        = bootrom_req.valid;
+  assign bootrom_addr_o      = bootrom_req.addr >> 2; // 32-bit addressed
+  assign bootrom_rsp.ready   = bootrom_req_ready_q;
+  assign bootrom_rsp.rdata   = bootrom_data_i;
+  assign bootrom_rsp.error   = '0;
+  assign bootrom_req_ready_d = bootrom_req.valid & ~bootrom_req_ready_q;
+
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if (!rst_ni) begin
+      bootrom_req_ready_q <= 1'b0;
+    end else begin
+      bootrom_req_ready_q <= bootrom_req_ready_d;
+    end
+  end
 
   /// Clk manager
   ${soc_regbus_periph_xbar.out_clk_mgr.req_type()} clk_mgr_req;
@@ -109,7 +135,6 @@ import occamy_pkg::*;
     .*
   );
 
-  assign bootrom_rsp = '0;
   assign clk_mgr_rsp = '0;
 
 endmodule

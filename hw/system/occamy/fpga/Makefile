@@ -15,7 +15,10 @@ include $(ROOT)/util/Makefrag
 vivado_ips/occamy_xilinx:
 	${MAKE} -C vivado_ips occamy_xilinx
 
-occamy_vcu128: vivado_ips/occamy_xilinx define_defines_includes_no_simset.tcl
+bootrom/bootrom.coe:
+	${MAKE} -C bootrom bootrom.coe
+
+occamy_vcu128: vivado_ips/occamy_xilinx define_defines_includes_no_simset.tcl bootrom/bootrom.coe
 	${VIVADO} -source occamy_vcu128.tcl
 
 define_defines_includes_no_simset.tcl: $(BENDER_FILES)

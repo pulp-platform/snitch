@@ -133,6 +133,7 @@ if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 xilinx.com:ip:axi_apb_bridge:3.0\
 xilinx.com:ip:axi_uart16550:2.0\
+xilinx.com:ip:blk_mem_gen:8.4\
 xilinx.com:ip:clk_wiz:6.0\
 xilinx.com:ip:hbm:1.0\
 xilinx.com:ip:util_vector_logic:2.0\
@@ -224,6 +225,30 @@ proc create_root_design { parentCell } {
    CONFIG.UART_BOARD_INTERFACE {rs232_uart_0} \
    CONFIG.USE_BOARD_FLOW {true} \
  ] $axi_uart16550_0
+
+  # Create instance: blk_mem_gen_0, and set properties
+  set blk_mem_gen_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_0 ]
+  set_property -dict [ list \
+   CONFIG.Assume_Synchronous_Clk {false} \
+   CONFIG.Byte_Size {9} \
+   CONFIG.Coe_File {../../../../../../../bootrom/bootrom.coe} \
+   CONFIG.EN_SAFETY_CKT {false} \
+   CONFIG.Enable_32bit_Address {false} \
+   CONFIG.Fill_Remaining_Memory_Locations {true} \
+   CONFIG.Load_Init_File {true} \
+   CONFIG.Memory_Type {Single_Port_ROM} \
+   CONFIG.PRIM_type_to_Implement {BRAM} \
+   CONFIG.Port_A_Write_Rate {0} \
+   CONFIG.Read_Width_A {32} \
+   CONFIG.Read_Width_B {32} \
+   CONFIG.Register_PortA_Output_of_Memory_Primitives {false} \
+   CONFIG.Use_Byte_Write_Enable {false} \
+   CONFIG.Use_RSTA_Pin {false} \
+   CONFIG.Write_Depth_A {256} \
+   CONFIG.Write_Width_A {32} \
+   CONFIG.Write_Width_B {32} \
+   CONFIG.use_bram_block {Stand_Alone} \
+ ] $blk_mem_gen_0
 
   # Create instance: clk_wiz, and set properties
   set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz ]
@@ -369,12 +394,15 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net smartconnect_0_M11_AXI [get_bd_intf_pins axi_uart16550_0/S_AXI] [get_bd_intf_pins smartconnect_0/M11_AXI]
 
   # Create port connections
+  connect_bd_net -net blk_mem_gen_0_douta [get_bd_pins blk_mem_gen_0/douta] [get_bd_pins occamy_xilinx_0/bootrom_data_i]
   connect_bd_net -net clk_100MHz_n_1 [get_bd_ports clk_100MHz_n] [get_bd_pins clk_wiz/clk_in1_n]
   connect_bd_net -net clk_100MHz_p_1 [get_bd_ports clk_100MHz_p] [get_bd_pins clk_wiz/clk_in1_p]
   connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins clk_wiz/clk_out1] [get_bd_pins hbm_0/AXI_00_ACLK] [get_bd_pins hbm_0/AXI_00_WDATA_PARITY] [get_bd_pins hbm_0/AXI_01_ACLK] [get_bd_pins hbm_0/AXI_04_ACLK] [get_bd_pins hbm_0/AXI_05_ACLK] [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins hbm_0/AXI_12_ACLK] [get_bd_pins hbm_0/AXI_16_ACLK] [get_bd_pins hbm_0/AXI_20_ACLK] [get_bd_pins hbm_0/AXI_24_ACLK] [get_bd_pins hbm_0/AXI_28_ACLK] [get_bd_pins hbm_0/HBM_REF_CLK_0] [get_bd_pins hbm_0/HBM_REF_CLK_1] [get_bd_pins smartconnect_0/aclk1]
-  connect_bd_net -net clk_wiz_clk_out2 [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins clk_wiz/clk_out2] [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins occamy_xilinx_0/clk_i] [get_bd_pins occamy_xilinx_0/clk_periph_i] [get_bd_pins smartconnect_0/aclk]
+  connect_bd_net -net clk_wiz_clk_out2 [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins blk_mem_gen_0/clka] [get_bd_pins clk_wiz/clk_out2] [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins occamy_xilinx_0/clk_i] [get_bd_pins occamy_xilinx_0/clk_periph_i] [get_bd_pins smartconnect_0/aclk]
   connect_bd_net -net clk_wiz_clk_out3 [get_bd_pins clk_wiz/clk_out3] [get_bd_pins occamy_xilinx_0/rtc_i]
   connect_bd_net -net inv_Res [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins axi_uart16550_0/s_axi_aresetn] [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins hbm_0/AXI_00_ARESET_N] [get_bd_pins hbm_0/AXI_01_ARESET_N] [get_bd_pins hbm_0/AXI_04_ARESET_N] [get_bd_pins hbm_0/AXI_05_ARESET_N] [get_bd_pins hbm_0/AXI_08_ARESET_N] [get_bd_pins hbm_0/AXI_12_ARESET_N] [get_bd_pins hbm_0/AXI_16_ARESET_N] [get_bd_pins hbm_0/AXI_20_ARESET_N] [get_bd_pins hbm_0/AXI_24_ARESET_N] [get_bd_pins hbm_0/AXI_28_ARESET_N] [get_bd_pins inv/Res] [get_bd_pins occamy_xilinx_0/rst_ni] [get_bd_pins occamy_xilinx_0/rst_periph_ni] [get_bd_pins smartconnect_0/aresetn]
+  connect_bd_net -net occamy_xilinx_0_bootrom_addr_o [get_bd_pins blk_mem_gen_0/addra] [get_bd_pins occamy_xilinx_0/bootrom_addr_o]
+  connect_bd_net -net occamy_xilinx_0_bootrom_en_o [get_bd_pins blk_mem_gen_0/ena] [get_bd_pins occamy_xilinx_0/bootrom_en_o]
   connect_bd_net -net reset_1 [get_bd_ports reset] [get_bd_pins clk_wiz/reset] [get_bd_pins inv/Op1]
 
   # Create address segments
