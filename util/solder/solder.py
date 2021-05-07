@@ -887,6 +887,15 @@ class RegBus(object):
     def rsp_type(self):
         return "{}_rsp_t".format(self.type_prefix)
 
+    def addr_type(self):
+        return "logic [{}:0]".format(self.aw - 1)
+
+    def data_type(self):
+        return "logic [{}:0]".format(self.dw - 1)
+
+    def strb_type(self):
+        return "logic [{}:0]".format((self.dw + 7) // 8 - 1)
+
     def to_axi_lite(self, context, name, inst_name=None, to=None):
         # Generate the new bus.
         if to is None:

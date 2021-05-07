@@ -20,7 +20,7 @@ source occamy_vcu128_bd.tcl
 # Add constraint files
 add_files -fileset constrs_1 -norecurse occamy_vcu128_impl.xdc
 import_files -fileset constrs_1 occamy_vcu128_impl.xdc
-set_property used_in_synthesis false [get_files  occamy_vcu128/occamy_vcu128.srcs/constrs_1/imports/fpga/occamy_vcu128_impl.xdc]
+set_property used_in_synthesis false [get_files occamy_vcu128/occamy_vcu128.srcs/constrs_1/imports/fpga/occamy_vcu128_impl.xdc]
 
 # Generate wrapper
 make_wrapper -files [get_files ./occamy_vcu128/occamy_vcu128.srcs/sources_1/bd/occamy_vcu128/occamy_vcu128.bd] -top
@@ -36,6 +36,10 @@ create_ip_run [get_files -of_objects [get_fileset sources_1] ./occamy_vcu128/occ
 export_ip_user_files -of_objects [get_ips occamy_vcu128_occamy_xilinx_0_0] -no_script -sync -force -quiet
 eval [exec sed {s/current_fileset/get_filesets occamy_vcu128_occamy_xilinx_0_0/} define_defines_includes_no_simset.tcl]
 
+# Debug settings
+add_files -fileset constrs_1 occamy_vcu128_debug.xdc
+set_property target_constrs_file occamy_vcu128_debug.xdc [current_fileset -constrset]
+
 # Do NOT insert BUFGs on high-fanout nets (e.g. reset). This will backfire during placement.
 set_param logicopt.enableBUFGinsertHFN no
 
@@ -44,12 +48,12 @@ foreach run [list synth_1 occamy_vcu128_occamy_xilinx_0_0_synth_1] {
  set_property strategy Flow_AlternateRoutability [get_runs $run]
  set_property STEPS.SYNTH_DESIGN.ARGS.RETIMING true [get_runs $run]
 }
-launch_runs synth_1 -jobs 6
+launch_runs synth_1 -jobs 12
 wait_on_run synth_1
 
 # Implement
 set_property strategy Congestion_SpreadLogic_low [get_runs impl_1]
-launch_runs impl_1 -jobs 6
+launch_runs impl_1 -jobs 12
 wait_on_run impl_1
 
 # Generate Bitstream

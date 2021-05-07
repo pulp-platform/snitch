@@ -37,7 +37,7 @@ module btb #(
     // prevent aliasing to degrade performance
     localparam ANTIALIAS_BITS = 8;
     // we are not interested in all bits of the address
-    unread i_unread (.d_i(|vpc_i));
+    // unread i_unread (.d_i(|vpc_i));
 
     // typedef for all branch target entries
     // we may want to try to put a tag field that fills the rest of the PC in-order to mitigate aliasing effects

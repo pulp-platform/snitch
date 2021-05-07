@@ -1,6 +1,8 @@
 occamy_vcu128/
 .Xil/
+xgui/
 define_defines_includes_no_simset.tcl
 *.jou
 *.zip
 *.str
+*.mif

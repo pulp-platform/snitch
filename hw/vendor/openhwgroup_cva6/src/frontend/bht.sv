@@ -35,7 +35,7 @@ module bht #(
     // number of bits we should use for prediction
     localparam PREDICTION_BITS = $clog2(NR_ROWS) + OFFSET + ROW_ADDR_BITS;
     // we are not interested in all bits of the address
-    unread i_unread (.d_i(|vpc_i));
+    // unread i_unread (.d_i(|vpc_i));
 
     struct packed {
         logic       valid;

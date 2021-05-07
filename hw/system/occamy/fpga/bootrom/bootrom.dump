@@ -1,0 +1,179 @@
+
+bootrom.elf:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+0000000001000000 <_start>:
+ 1000000:	30002137          	lui	sp,0x30002
+ 1000004:	e001011b          	addiw	sp,sp,-512
+ 1000008:	00000297          	auipc	t0,0x0
+ 100000c:	01828293          	addi	t0,t0,24 # 1000020 <exception>
+ 1000010:	30529073          	csrw	mtvec,t0
+ 1000014:	00000297          	auipc	t0,0x0
+ 1000018:	1e82e283          	lwu	t0,488(t0) # 10001fc <main>
+ 100001c:	1e0000ef          	jal	ra,10001fc <main>
+
+0000000001000020 <exception>:
+ 1000020:	10500073          	wfi
+ 1000024:	ffdff06f          	j	1000020 <exception>
+
+0000000001000028 <entry_addr>:
+ 1000028:	0020                	addi	s0,sp,8
+ 100002a:	0100                	addi	s0,sp,128
+
+000000000100002c <handle_trap>:
+ 100002c:	00008067          	ret
+
+0000000001000030 <write_reg_u8>:
+ 1000030:	00b50023          	sb	a1,0(a0)
+ 1000034:	00008067          	ret
+
+0000000001000038 <read_reg_u8>:
+ 1000038:	00054503          	lbu	a0,0(a0)
+ 100003c:	00008067          	ret
+
+0000000001000040 <is_transmit_empty>:
+ 1000040:	400007b7          	lui	a5,0x40000
+ 1000044:	0147c503          	lbu	a0,20(a5) # 40000014 <bin_to_hex_table+0x3efffdcc>
+ 1000048:	02057513          	andi	a0,a0,32
+ 100004c:	00008067          	ret
+
+0000000001000050 <write_serial>:
+ 1000050:	40000737          	lui	a4,0x40000
+ 1000054:	01474783          	lbu	a5,20(a4) # 40000014 <bin_to_hex_table+0x3efffdcc>
+ 1000058:	0207f793          	andi	a5,a5,32
+ 100005c:	fe078ce3          	beqz	a5,1000054 <write_serial+0x4>
+ 1000060:	00a70023          	sb	a0,0(a4)
+ 1000064:	00008067          	ret
+
+0000000001000068 <init_uart>:
+ 1000068:	0045959b          	slliw	a1,a1,0x4
+ 100006c:	02b5553b          	divuw	a0,a0,a1
+ 1000070:	400007b7          	lui	a5,0x40000
+ 1000074:	00078223          	sb	zero,4(a5) # 40000004 <bin_to_hex_table+0x3efffdbc>
+ 1000078:	f8000713          	li	a4,-128
+ 100007c:	00e78623          	sb	a4,12(a5)
+ 1000080:	0ff57713          	andi	a4,a0,255
+ 1000084:	0085551b          	srliw	a0,a0,0x8
+ 1000088:	00e78023          	sb	a4,0(a5)
+ 100008c:	0ff57513          	andi	a0,a0,255
+ 1000090:	00a78223          	sb	a0,4(a5)
+ 1000094:	00300713          	li	a4,3
+ 1000098:	00e78623          	sb	a4,12(a5)
+ 100009c:	fc700713          	li	a4,-57
+ 10000a0:	00e78423          	sb	a4,8(a5)
+ 10000a4:	02000713          	li	a4,32
+ 10000a8:	00e78823          	sb	a4,16(a5)
+ 10000ac:	00008067          	ret
+
+00000000010000b0 <print_uart>:
+ 10000b0:	ff010113          	addi	sp,sp,-16 # 30001ff0 <bin_to_hex_table+0x2f001da8>
+ 10000b4:	00813023          	sd	s0,0(sp)
+ 10000b8:	00113423          	sd	ra,8(sp)
+ 10000bc:	00050413          	mv	s0,a0
+ 10000c0:	00044503          	lbu	a0,0(s0)
+ 10000c4:	00051a63          	bnez	a0,10000d8 <print_uart+0x28>
+ 10000c8:	00813083          	ld	ra,8(sp)
+ 10000cc:	00013403          	ld	s0,0(sp)
+ 10000d0:	01010113          	addi	sp,sp,16
+ 10000d4:	00008067          	ret
+ 10000d8:	f79ff0ef          	jal	ra,1000050 <write_serial>
+ 10000dc:	00140413          	addi	s0,s0,1
+ 10000e0:	fe1ff06f          	j	10000c0 <print_uart+0x10>
+
+00000000010000e4 <bin_to_hex>:
+ 10000e4:	00000797          	auipc	a5,0x0
+ 10000e8:	16478793          	addi	a5,a5,356 # 1000248 <bin_to_hex_table>
+ 10000ec:	00f57713          	andi	a4,a0,15
+ 10000f0:	00e78733          	add	a4,a5,a4
+ 10000f4:	00074703          	lbu	a4,0(a4)
+ 10000f8:	00455513          	srli	a0,a0,0x4
+ 10000fc:	00a787b3          	add	a5,a5,a0
+ 1000100:	00e580a3          	sb	a4,1(a1)
+ 1000104:	0007c783          	lbu	a5,0(a5)
+ 1000108:	00f58023          	sb	a5,0(a1)
+ 100010c:	00008067          	ret
+
+0000000001000110 <print_uart_int>:
+ 1000110:	fd010113          	addi	sp,sp,-48
+ 1000114:	02813023          	sd	s0,32(sp)
+ 1000118:	00913c23          	sd	s1,24(sp)
+ 100011c:	01213823          	sd	s2,16(sp)
+ 1000120:	02113423          	sd	ra,40(sp)
+ 1000124:	00050913          	mv	s2,a0
+ 1000128:	01800413          	li	s0,24
+ 100012c:	ff800493          	li	s1,-8
+ 1000130:	0089553b          	srlw	a0,s2,s0
+ 1000134:	00810593          	addi	a1,sp,8
+ 1000138:	0ff57513          	andi	a0,a0,255
+ 100013c:	fa9ff0ef          	jal	ra,10000e4 <bin_to_hex>
+ 1000140:	00814503          	lbu	a0,8(sp)
+ 1000144:	ff84041b          	addiw	s0,s0,-8
+ 1000148:	f09ff0ef          	jal	ra,1000050 <write_serial>
+ 100014c:	00914503          	lbu	a0,9(sp)
+ 1000150:	f01ff0ef          	jal	ra,1000050 <write_serial>
+ 1000154:	fc941ee3          	bne	s0,s1,1000130 <print_uart_int+0x20>
+ 1000158:	02813083          	ld	ra,40(sp)
+ 100015c:	02013403          	ld	s0,32(sp)
+ 1000160:	01813483          	ld	s1,24(sp)
+ 1000164:	01013903          	ld	s2,16(sp)
+ 1000168:	03010113          	addi	sp,sp,48
+ 100016c:	00008067          	ret
+
+0000000001000170 <print_uart_addr>:
+ 1000170:	fd010113          	addi	sp,sp,-48
+ 1000174:	02813023          	sd	s0,32(sp)
+ 1000178:	00913c23          	sd	s1,24(sp)
+ 100017c:	01213823          	sd	s2,16(sp)
+ 1000180:	02113423          	sd	ra,40(sp)
+ 1000184:	00050913          	mv	s2,a0
+ 1000188:	03800413          	li	s0,56
+ 100018c:	ff800493          	li	s1,-8
+ 1000190:	00895533          	srl	a0,s2,s0
+ 1000194:	00810593          	addi	a1,sp,8
+ 1000198:	0ff57513          	andi	a0,a0,255
+ 100019c:	f49ff0ef          	jal	ra,10000e4 <bin_to_hex>
+ 10001a0:	00814503          	lbu	a0,8(sp)
+ 10001a4:	ff84041b          	addiw	s0,s0,-8
+ 10001a8:	ea9ff0ef          	jal	ra,1000050 <write_serial>
+ 10001ac:	00914503          	lbu	a0,9(sp)
+ 10001b0:	ea1ff0ef          	jal	ra,1000050 <write_serial>
+ 10001b4:	fc941ee3          	bne	s0,s1,1000190 <print_uart_addr+0x20>
+ 10001b8:	02813083          	ld	ra,40(sp)
+ 10001bc:	02013403          	ld	s0,32(sp)
+ 10001c0:	01813483          	ld	s1,24(sp)
+ 10001c4:	01013903          	ld	s2,16(sp)
+ 10001c8:	03010113          	addi	sp,sp,48
+ 10001cc:	00008067          	ret
+
+00000000010001d0 <print_uart_byte>:
+ 10001d0:	fe010113          	addi	sp,sp,-32
+ 10001d4:	00810593          	addi	a1,sp,8
+ 10001d8:	00113c23          	sd	ra,24(sp)
+ 10001dc:	f09ff0ef          	jal	ra,10000e4 <bin_to_hex>
+ 10001e0:	00814503          	lbu	a0,8(sp)
+ 10001e4:	e6dff0ef          	jal	ra,1000050 <write_serial>
+ 10001e8:	00914503          	lbu	a0,9(sp)
+ 10001ec:	e65ff0ef          	jal	ra,1000050 <write_serial>
+ 10001f0:	01813083          	ld	ra,24(sp)
+ 10001f4:	02010113          	addi	sp,sp,32
+ 10001f8:	00008067          	ret
+
+Disassembly of section .text.startup:
+
+00000000010001fc <main>:
+ 10001fc:	0001c5b7          	lui	a1,0x1c
+ 1000200:	02faf537          	lui	a0,0x2faf
+ 1000204:	ff010113          	addi	sp,sp,-16
+ 1000208:	20058593          	addi	a1,a1,512 # 1c200 <device_tree+0x1c200>
+ 100020c:	08050513          	addi	a0,a0,128 # 2faf080 <bin_to_hex_table+0x1faee38>
+ 1000210:	00113423          	sd	ra,8(sp)
+ 1000214:	e55ff0ef          	jal	ra,1000068 <init_uart>
+ 1000218:	00000517          	auipc	a0,0x0
+ 100021c:	02050513          	addi	a0,a0,32 # 1000238 <main+0x3c>
+ 1000220:	e91ff0ef          	jal	ra,10000b0 <print_uart>
+ 1000224:	f1402573          	csrr	a0,mhartid
+ 1000228:	00000593          	li	a1,0
+ 100022c:	00100073          	ebreak
+ 1000230:	0000006f          	j	1000230 <main+0x34>
