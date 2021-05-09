@@ -1,0 +1,76 @@
+From 250902e585d319b95777acef8b7cd14b076812d9 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Wed, 5 May 2021 16:33:58 +0200
+Subject: [PATCH] riscv-dbg: Update Bender.yml
+
+---
+ Bender.yml | 53 +++++++++++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 43 insertions(+), 10 deletions(-)
+
+diff --git a/Bender.yml b/Bender.yml
+index eb52d1d..7178d56 100644
+--- a/Bender.yml
++++ b/Bender.yml
+@@ -1,16 +1,49 @@
++# Copyright 2020-2021 ETH Zurich and University of Bologna.
++# Solderpad Hardware License, Version 0.51, see LICENSE for details.
++# SPDX-License-Identifier: SHL-0.51
++
+ package:
+   name: riscv-dbg
++  authors:
++  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
++  - Robert Balas <balasr@iis.ee.ethz.ch>
++
++dependencies:
++  tech_cells_generic: { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
++  common_cells: {git: https://github.com/pulp-platform/common_cells.git, version: 1.21.0}
+ 
+ sources:
+   files:
+-    - src/dm_pkg.sv
+-    - debug_rom/debug_rom.sv
+-    - debug_rom/debug_rom_one_scratch.sv
+-    - src/dm_csrs.sv
+-    - src/dm_mem.sv
+-    - src/dm_top.sv
+-    - src/dm_obi_top.sv
+-    - src/dmi_cdc.sv
+-    - src/dmi_jtag.sv
++  # Level 1:
++  - src/dm_pkg.sv
++  - debug_rom/debug_rom.sv
++  - debug_rom/debug_rom_one_scratch.sv
++  # Level 2:
++  - src/dm_csrs.sv
++  - src/dm_mem.sv
++  - src/dmi_cdc.sv
++  - target: not(all(xilinx, bscane))
++    files:
+     - src/dmi_jtag_tap.sv
+-    - src/dm_sba.sv
++  - target: all(xilinx, bscane)
++    files:
++    - src/dmi_bscane_tap.sv
++  # Level 3:
++  - src/dm_sba.sv
++  - src/dm_top.sv
++  - src/dmi_jtag.sv
++  # Level 4:
++  - src/dm_obi_top.sv
++
++  - target: simulation
++    files:
++    - src/dmi_test.sv
++
++  - target: test
++    files:
++    # Level 1
++    - src/dmi_intf.sv
++    - tb/jtag_dmi/jtag_intf.sv
++    - tb/jtag_dmi/jtag_test.sv
++    # Level 3
++    - tb/jtag_dmi/tb_jtag_dmi.sv
+-- 
+2.25.1.377.g2d2118b814
+
