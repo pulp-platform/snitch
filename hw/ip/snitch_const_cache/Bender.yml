@@ -9,8 +9,12 @@ package:
 
 dependencies:
   axi: {path: ../../vendor/pulp_axi}
+  tech_cells_generic: {path: ../../vendor/pulp_tech_cells_generic}
   snitch_icache: {path: ../snitch_icache}
 
 sources:
 # Level 0:
 - src/snitch_const_cache.sv
+- target: test
+  files:
+  - test/snitch_const_cache_tb.sv

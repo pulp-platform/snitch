@@ -43,8 +43,8 @@ module snitch_const_cache #(
   input  logic rst_ni,
   input  logic flush_valid_i,
   output logic flush_ready_o,
-  input  logic [AxiAddrWidth-1:0][NrAddrRules-1:0] start_addr_i,
-  input  logic [AxiAddrWidth-1:0][NrAddrRules-1:0] end_addr_i,
+  input  logic [AxiAddrWidth-1:0] start_addr_i [NrAddrRules],
+  input  logic [AxiAddrWidth-1:0] end_addr_i [NrAddrRules],
   input  slv_req_t axi_slv_req_i,
   output slv_rsp_t axi_slv_rsp_o,
   output mst_req_t axi_mst_req_o,
@@ -165,67 +165,139 @@ module snitch_const_cache #(
     slv_ar_select = dec_ar;
   end
 
+  localparam PendingCount = 2;
 
   localparam snitch_icache_pkg::config_t CFG = '{
-      LINE_WIDTH:        LineWidth,
-      LINE_COUNT:        LineCount,
-      SET_COUNT:         SetCount,
-      PENDING_COUNT:     2,
-      FETCH_AW:          AxiAddrWidth,
-      FETCH_DW:          AxiDataWidth,
-      FILL_AW:           AxiAddrWidth,
-      FILL_DW:           AxiDataWidth,
+      LINE_WIDTH:    LineWidth,
+      LINE_COUNT:    LineCount,
+      SET_COUNT:     SetCount,
+      PENDING_COUNT: PendingCount,
+      FETCH_AW:      AxiAddrWidth,
+      FETCH_DW:      AxiDataWidth,
+      FILL_AW:       AxiAddrWidth,
+      FILL_DW:       AxiDataWidth,
 
-      FETCH_ALIGN: $clog2(AxiDataWidth/8),
-      FILL_ALIGN:  $clog2(AxiDataWidth/8),
-      LINE_ALIGN:  $clog2(LineWidth/8),
-      COUNT_ALIGN: $clog2(LineCount),
-      SET_ALIGN:   $clog2(SetCount),
-      TAG_WIDTH:   AxiAddrWidth - $clog2(LineWidth/8) - $clog2(LineCount) + 1,
-      ID_WIDTH_REQ: 1,
-      ID_WIDTH_RESP: 1,
-      PENDING_IW:  $clog2(2),
-      default: 0
+      FETCH_ALIGN:   $clog2(AxiDataWidth/8),
+      FILL_ALIGN:    $clog2(AxiDataWidth/8),
+      LINE_ALIGN:    $clog2(LineWidth/8),
+      COUNT_ALIGN:   cf_math_pkg::idx_width(LineCount),
+      SET_ALIGN:     cf_math_pkg::idx_width(SetCount),
+      TAG_WIDTH:     AxiAddrWidth - $clog2(LineWidth/8) - $clog2(LineCount) + 1,
+      ID_WIDTH_REQ:  AxiIdWidth,
+      ID_WIDTH_RESP: AxiIdWidth,
+      PENDING_IW:    $clog2(PendingCount),
+      default:       0
   };
 
   // The lookup module contains the actual cache RAMs and performs lookups.
-  logic [CFG.FETCH_AW-1:0]     lookup_addr  ;
-  logic [CFG.ID_WIDTH_REQ-1:0] lookup_id    ;
-  logic [CFG.SET_ALIGN-1:0]    lookup_set   ;
-  logic                        lookup_hit   ;
-  logic [CFG.LINE_WIDTH-1:0]   lookup_data  ;
-  logic                        lookup_error ;
-  logic                        lookup_valid ;
-  logic                        lookup_ready ;
+  logic [CFG.FETCH_AW-1:0]     lookup_addr;
+  logic [CFG.ID_WIDTH_REQ-1:0] lookup_id;
+  logic [CFG.SET_ALIGN-1:0]    lookup_set;
+  logic                        lookup_hit;
+  logic [CFG.LINE_WIDTH-1:0]   lookup_data;
+  logic                        lookup_error;
+  logic                        lookup_valid;
+  logic                        lookup_ready;
 
-  logic [CFG.COUNT_ALIGN-1:0]  write_addr  ;
-  logic [CFG.SET_ALIGN-1:0]    write_set   ;
-  logic [CFG.LINE_WIDTH-1:0]   write_data  ;
-  logic [CFG.TAG_WIDTH-1:0]    write_tag   ;
-  logic                        write_error ;
-  logic                        write_valid ;
-  logic                        write_ready ;
+  logic [CFG.COUNT_ALIGN-1:0]  write_addr;
+  logic [CFG.SET_ALIGN-1:0]    write_set;
+  logic [CFG.LINE_WIDTH-1:0]   write_data;
+  logic [CFG.TAG_WIDTH-1:0]    write_tag;
+  logic                        write_error;
+  logic                        write_valid;
+  logic                        write_ready;
 
   logic [CFG.FETCH_AW-1:0]     in_addr;
   logic [CFG.ID_WIDTH_REQ-1:0] in_id;
   logic                        in_valid;
   logic                        in_ready;
 
+  logic                         handler_req_valid;
+  logic                         handler_req_ready;
+  logic [CFG.FETCH_AW-1:0]      handler_req_addr;
+  logic [CFG.PENDING_IW-1:0]    handler_req_id;
+
+  logic [CFG.LINE_WIDTH-1:0]    handler_rsp_data;
+  logic                         handler_rsp_error;
+  logic [CFG.PENDING_IW-1:0]    handler_rsp_id;
+  logic                         handler_rsp_valid;
+  logic                         handler_rsp_ready;
+
+  logic [CFG.LINE_WIDTH-1:0]    in_rsp_data;
+  logic                         in_rsp_error;
+  logic [CFG.ID_WIDTH_RESP-1:0] in_rsp_id;
+  logic                         in_rsp_valid;
+  logic                         in_rsp_ready;
+
+  logic                         ar_ready;
+  logic                         axi_id_fifo_full;
+
+  assign ar_ready = in_ready & ~axi_id_fifo_full;
+
+  // TODO
+  // id_t id_queue[$];
+
+  // AW, W, B channel --> Never used tie off
+  assign demux_rsp[1].aw_ready = 1'b0;
+  assign demux_rsp[1].w_ready = 1'b0;
+  assign demux_rsp[1].b_valid = 1'b0;
+  assign demux_rsp[1].b = '0;
+  // AR channel --> Ready if cache is ready
   assign in_addr = demux_req[1].ar.addr;
-  assign in_id = 1'b0;
+  assign in_id = demux_req[1].ar.id;
+  // TODO we need to store the ID somehow
   assign in_valid = demux_req[1].ar_valid;
-  assign demux_rsp[1].ar_ready = in_ready;
+  assign demux_rsp[1].ar_ready = ar_ready;
+  // R channel
+  assign demux_rsp[1].r_valid = in_rsp_valid;
+  // assign demux_rsp[1].r.id = in_rsp_id;
+  assign demux_rsp[1].r.data = in_rsp_data;
+  assign demux_rsp[1].r.resp = axi_pkg::RESP_OKAY; // in_rsp_error
+  assign demux_rsp[1].r.last = 1'b1;
+  assign demux_rsp[1].r.user = '0;
+  assign in_rsp_ready = demux_req[1].r_ready; // Cache assumes it's always one?
+
+  // Store the AXI ID for the response
+  fifo_v3 #(
+    .DEPTH ( 8    ),
+    .dtype ( id_t )
+  ) i_axi_id_fifo (
+    .clk_i      ( clk_i                        ),
+    .rst_ni     ( rst_ni                       ),
+    .flush_i    ( 1'b0                         ),
+    .testmode_i ( 1'b0                         ),
+    .full_o     ( axi_id_fifo_full             ),
+    .empty_o    ( /* unused */                 ),
+    .usage_o    ( /* unused */                 ),
+    .data_i     ( demux_req[1].ar.id           ),
+    .push_i     ( in_valid & ar_ready          ),
+    .data_o     ( demux_rsp[1].r.id            ),
+    .pop_i      ( in_rsp_valid && in_rsp_ready )   // demux_rsp[1].r.last has to be considered when bursts are supported
+  );
+  // always_ff @(posedge clk_i) begin : proc_queue
+  //   if (~rst_ni) begin
+  //     demux_rsp[1].r.id = '0;
+  //   end else begin
+  //     if (in_valid && in_ready) begin
+  //       id_queue.push_back(demux_req[1].ar.id);
+  //       demux_rsp[1].r.id = id_queue[0];
+  //     end
+  //     if (in_rsp_valid && in_rsp_ready) begin
+  //       demux_rsp[1].r.id = id_queue.pop_front();
+  //     end
+  //   end
+  // end : proc_queue
 
   snitch_icache_lookup #(CFG) i_lookup (
     .clk_i,
     .rst_ni,
 
-    .flush_valid_i,
-    .flush_ready_o,
+    .flush_valid_i ( 1'b0          ),
+    .flush_ready_o ( flush_ready_o ),
 
     // TODO(zarubaf): This is wrong, just for initial estimates.
-    .in_addr_i     ( in_addr  ),
-    .in_id_i       ( in_id  ),
+    .in_addr_i     ( in_addr   ),
+    .in_id_i       ( in_id     ),
     .in_valid_i    ( in_valid  ),
     .in_ready_o    ( in_ready  ),
 
@@ -247,27 +319,6 @@ module snitch_const_cache #(
     .write_ready_o ( write_ready        )
   );
 
-  logic                         handler_req_valid;
-  logic                         handler_req_ready;
-  logic [CFG.FETCH_AW-1:0]      handler_req_addr;
-  logic [CFG.PENDING_IW-1:0]    handler_req_id;
-
-  logic [CFG.LINE_WIDTH-1:0]    handler_rsp_data;
-  logic                         handler_rsp_error;
-  logic [CFG.ID_WIDTH_RESP-1:0] handler_rsp_id;
-  logic                         handler_rsp_valid;
-  logic                         handler_rsp_ready;
-
-  logic [CFG.LINE_WIDTH-1:0]    in_rsp_data;
-  logic                         in_rsp_error;
-  logic [CFG.ID_WIDTH_RESP-1:0] in_rsp_id;
-  logic                         in_rsp_valid;
-  logic                         in_rsp_ready;
-
-  assign demux_rsp[1].r.data = in_rsp_data;
-  assign demux_rsp[1].r_valid = in_rsp_valid;
-  assign in_rsp_ready = demux_req[1].r_ready;
-
   snitch_icache_handler #(CFG) i_handler (
     .clk_i,
     .rst_ni,
@@ -282,11 +333,11 @@ module snitch_const_cache #(
     .in_req_ready_o  ( lookup_ready       ),
 
     // TODO(zarubaf): This is wrong, just for initial estimates.
-    .in_rsp_data_o   ( in_rsp_data ),
-    .in_rsp_error_o  ( in_rsp_error  ),
-    .in_rsp_id_o     ( in_rsp_id  ),
-    .in_rsp_valid_o  ( in_rsp_valid ),
-    .in_rsp_ready_i  ( in_rsp_ready ),
+    .in_rsp_data_o   ( in_rsp_data        ),
+    .in_rsp_error_o  ( in_rsp_error       ),
+    .in_rsp_id_o     ( in_rsp_id          ),
+    .in_rsp_valid_o  ( in_rsp_valid       ),
+    .in_rsp_ready_i  ( in_rsp_ready       ),
 
     .write_addr_o    ( write_addr         ),
     .write_set_o     ( write_set          ),
@@ -296,74 +347,74 @@ module snitch_const_cache #(
     .write_valid_o   ( write_valid        ),
     .write_ready_i   ( write_ready        ),
 
-    .out_req_addr_o  ( handler_req_addr    ),
-    .out_req_id_o    ( handler_req_id      ),
-    .out_req_valid_o ( handler_req_valid   ),
-    .out_req_ready_i ( handler_req_ready   ),
+    .out_req_addr_o  ( handler_req_addr   ),
+    .out_req_id_o    ( handler_req_id     ),
+    .out_req_valid_o ( handler_req_valid  ),
+    .out_req_ready_i ( handler_req_ready  ),
 
-    .out_rsp_data_i  ( handler_rsp_data    ),
-    .out_rsp_error_i ( handler_rsp_error   ),
-    .out_rsp_id_i    ( handler_rsp_id      ),
-    .out_rsp_valid_i ( handler_rsp_valid   ),
-    .out_rsp_ready_o ( handler_rsp_ready   )
+    .out_rsp_data_i  ( handler_rsp_data   ),
+    .out_rsp_error_i ( handler_rsp_error  ),
+    .out_rsp_id_i    ( handler_rsp_id     ),
+    .out_rsp_valid_i ( handler_rsp_valid  ),
+    .out_rsp_ready_o ( handler_rsp_ready  )
   );
 
-    // Instantiate the cache refill module which emits AXI transactions.
-    snitch_icache_refill #(
-      .CFG(CFG),
-      .axi_req_t (axi_req_t),
-      .axi_rsp_t (axi_resp_t)
-    ) i_refill (
-      .clk_i,
-      .rst_ni,
+  // Instantiate the cache refill module which emits AXI transactions.
+  snitch_icache_refill #(
+    .CFG(CFG),
+    .axi_req_t (axi_req_t),
+    .axi_rsp_t (axi_resp_t)
+  ) i_refill (
+    .clk_i,
+    .rst_ni,
 
-      .in_req_addr_i   ( handler_req_addr  ),
-      .in_req_id_i     ( handler_req_id    ),
-      .in_req_bypass_i ( 1'b0              ),
-      .in_req_valid_i  ( handler_req_valid ),
-      .in_req_ready_o  ( handler_req_ready ),
+    .in_req_addr_i   ( handler_req_addr  ),
+    .in_req_id_i     ( handler_req_id    ),
+    .in_req_bypass_i ( 1'b0              ),
+    .in_req_valid_i  ( handler_req_valid ),
+    .in_req_ready_o  ( handler_req_ready ),
 
-      .in_rsp_data_o   ( handler_rsp_data   ),
-      .in_rsp_error_o  ( handler_rsp_error  ),
-      .in_rsp_id_o     ( handler_rsp_id     ),
-      .in_rsp_bypass_o ( /* left open */    ),
-      .in_rsp_valid_o  ( handler_rsp_valid  ),
-      .in_rsp_ready_i  ( handler_rsp_ready  ),
-      .axi_req_o (refill_req),
-      .axi_rsp_i (refill_rsp)
-    );
+    .in_rsp_data_o   ( handler_rsp_data   ),
+    .in_rsp_error_o  ( handler_rsp_error  ),
+    .in_rsp_id_o     ( handler_rsp_id     ),
+    .in_rsp_bypass_o ( /* left open */    ),
+    .in_rsp_valid_o  ( handler_rsp_valid  ),
+    .in_rsp_ready_i  ( handler_rsp_ready  ),
+    .axi_req_o (refill_req),
+    .axi_rsp_i (refill_rsp)
+  );
 
-    axi_mux #(
-      .SlvAxiIDWidth ( AxiIdWidth ),
-      .slv_aw_chan_t ( axi_aw_chan_t ),
-      .mst_aw_chan_t ( axi_mst_aw_chan_t ),
-      .w_chan_t      ( axi_w_chan_t ),
-      .slv_b_chan_t  ( axi_b_chan_t ),
-      .mst_b_chan_t  ( axi_mst_b_chan_t ),
-      .slv_ar_chan_t ( axi_ar_chan_t ),
-      .mst_ar_chan_t ( axi_mst_ar_chan_t ),
-      .slv_r_chan_t  ( axi_r_chan_t ),
-      .mst_r_chan_t  ( axi_mst_r_chan_t ),
-      .slv_req_t     ( axi_req_t ),
-      .slv_resp_t    ( axi_resp_t ),
-      .mst_req_t     ( axi_mst_req_t ),
-      .mst_resp_t    ( axi_mst_resp_t ),
-      .NoSlvPorts    ( 2 ),
-      .MaxWTrans     ( MaxTrans ),
-      .FallThrough   ( 1'b1 ),
-      .SpillAw       ( 1'b0 ),
-      .SpillW        ( 1'b0 ),
-      .SpillB        ( 1'b0 ),
-      .SpillAr       ( 1'b0 ),
-      .SpillR        ( 1'b0 )
-    ) i_axi_mux (
-      .clk_i,   // Clock
-      .rst_ni,  // Asynchronous reset active low
-      .test_i (1'b0),  // Test Mode enable
-      .slv_reqs_i  ({demux_req[2], refill_req}),
-      .slv_resps_o ({demux_rsp[2], refill_rsp}),
-      .mst_req_o   (axi_mst_req_o),
-      .mst_resp_i  (axi_mst_rsp_i)
-    );
+  axi_mux #(
+    .SlvAxiIDWidth ( AxiIdWidth ),
+    .slv_aw_chan_t ( axi_aw_chan_t ),
+    .mst_aw_chan_t ( axi_mst_aw_chan_t ),
+    .w_chan_t      ( axi_w_chan_t ),
+    .slv_b_chan_t  ( axi_b_chan_t ),
+    .mst_b_chan_t  ( axi_mst_b_chan_t ),
+    .slv_ar_chan_t ( axi_ar_chan_t ),
+    .mst_ar_chan_t ( axi_mst_ar_chan_t ),
+    .slv_r_chan_t  ( axi_r_chan_t ),
+    .mst_r_chan_t  ( axi_mst_r_chan_t ),
+    .slv_req_t     ( axi_req_t ),
+    .slv_resp_t    ( axi_resp_t ),
+    .mst_req_t     ( axi_mst_req_t ),
+    .mst_resp_t    ( axi_mst_resp_t ),
+    .NoSlvPorts    ( 2 ),
+    .MaxWTrans     ( MaxTrans ),
+    .FallThrough   ( 1'b1 ),
+    .SpillAw       ( 1'b0 ),
+    .SpillW        ( 1'b0 ),
+    .SpillB        ( 1'b0 ),
+    .SpillAr       ( 1'b0 ),
+    .SpillR        ( 1'b0 )
+  ) i_axi_mux (
+    .clk_i,   // Clock
+    .rst_ni,  // Asynchronous reset active low
+    .test_i (1'b0),  // Test Mode enable
+    .slv_reqs_i  ({demux_req[2], refill_req}),
+    .slv_resps_o ({demux_rsp[2], refill_rsp}),
+    .mst_req_o   (axi_mst_req_o),
+    .mst_resp_i  (axi_mst_rsp_i)
+  );
 
 endmodule
