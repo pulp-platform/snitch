@@ -48,6 +48,74 @@ class riscv_inst;
   }
 endclass
 
+// Inherit from the random AXI master, but modify the request to emulate a core requesting intstructions.
+class semirand_axi_master #(
+  // AXI interface parameters
+  parameter int   AW = 32,
+  parameter int   DW = 32,
+  parameter int   IW = 8,
+  parameter int   UW = 1,
+  // Stimuli application and test time
+  parameter time  TA = 0ps,
+  parameter time  TT = 0ps,
+  // Maximum number of read and write transactions in flight
+  parameter int   MAX_READ_TXNS = 1,
+  parameter int   MAX_WRITE_TXNS = 1,
+  // Upper and lower bounds on wait cycles on Ax, W, and resp (R and B) channels
+  parameter int   AX_MIN_WAIT_CYCLES = 0,
+  parameter int   AX_MAX_WAIT_CYCLES = 100,
+  parameter int   W_MIN_WAIT_CYCLES = 0,
+  parameter int   W_MAX_WAIT_CYCLES = 5,
+  parameter int   RESP_MIN_WAIT_CYCLES = 0,
+  parameter int   RESP_MAX_WAIT_CYCLES = 20,
+  // AXI feature usage
+  parameter int   AXI_MAX_BURST_LEN = 0, // maximum number of beats in burst; 0 = AXI max (256)
+  parameter int   TRAFFIC_SHAPING   = 0,
+  parameter bit   AXI_EXCLS         = 1'b0,
+  parameter bit   AXI_ATOPS         = 1'b0,
+  parameter bit   AXI_BURST_FIXED   = 1'b1,
+  parameter bit   AXI_BURST_INCR    = 1'b1,
+  parameter bit   AXI_BURST_WRAP    = 1'b0,
+  // Dependent parameters, do not override.
+  parameter int   AXI_STRB_WIDTH = DW/8,
+  parameter int   N_AXI_IDS = 2**IW
+) extends axi_test::rand_axi_master #(
+  .AW                   ( AW                   ),
+  .DW                   ( DW                   ),
+  .IW                   ( IW                   ),
+  .UW                   ( UW                   ),
+  .TA                   ( TA                   ),
+  .TT                   ( TT                   ),
+  .MAX_READ_TXNS        ( MAX_READ_TXNS        ),
+  .MAX_WRITE_TXNS       ( MAX_WRITE_TXNS       ),
+  .AX_MIN_WAIT_CYCLES   ( AX_MIN_WAIT_CYCLES   ),
+  .AX_MAX_WAIT_CYCLES   ( AX_MAX_WAIT_CYCLES   ),
+  .W_MIN_WAIT_CYCLES    ( W_MIN_WAIT_CYCLES    ),
+  .W_MAX_WAIT_CYCLES    ( W_MAX_WAIT_CYCLES    ),
+  .RESP_MIN_WAIT_CYCLES ( RESP_MIN_WAIT_CYCLES ),
+  .RESP_MAX_WAIT_CYCLES ( RESP_MAX_WAIT_CYCLES ),
+  .AXI_MAX_BURST_LEN    ( AXI_MAX_BURST_LEN    ),
+  .TRAFFIC_SHAPING      ( TRAFFIC_SHAPING      ),
+  .AXI_EXCLS            ( AXI_EXCLS            ),
+  .AXI_ATOPS            ( AXI_ATOPS            ),
+  .AXI_BURST_FIXED      ( AXI_BURST_FIXED      ),
+  .AXI_BURST_INCR       ( AXI_BURST_INCR       ),
+  .AXI_BURST_WRAP       ( AXI_BURST_WRAP       )
+);
+
+  function new(
+    virtual AXI_BUS_DV #(
+      .AXI_ADDR_WIDTH(AW),
+      .AXI_DATA_WIDTH(DW),
+      .AXI_ID_WIDTH(IW),
+      .AXI_USER_WIDTH(UW)
+    ) axi
+  );
+    super.new(axi);
+  endfunction
+
+endclass
+
 // Inherit from the random AXI slave, but return the same data for reads from the same address.
 // --> Emulate a random ROM
 class const_axi_slave #(
@@ -139,9 +207,9 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     parameter int unsigned AddrWidth = 32,
     parameter type addr_t = logic [AddrWidth-1:0],
     parameter int NR_FETCH_PORTS = 1,
-    parameter int LINE_WIDTH = 128,
-    parameter int LINE_COUNT = 128,
-    parameter int SET_COUNT = 1,
+    parameter int LINE_WIDTH = 256,
+    parameter int LINE_COUNT = 8,
+    parameter int SET_COUNT = 2, // TODO Case with one set not working
     parameter int FETCH_AW = AddrWidth,
     parameter int FETCH_DW = 32,
     parameter int FILL_AW = AddrWidth,
@@ -178,7 +246,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
 
   // Address regions
   localparam axi_addr_t CachedRegionStart = axi_addr_t'(32'h8000_0000);
-  localparam axi_addr_t CachedRegionEnd   = axi_addr_t'(32'h8000_0040);
+  localparam axi_addr_t CachedRegionEnd   = axi_addr_t'(32'h8000_0200);
 
   // backing memory
   logic [LINE_WIDTH-1:0] memory [logic [AddrWidth-1:0]];
@@ -205,7 +273,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   //   logic [IdWidthReq-1:0] id;
   // } dut_out_t;
 
-  typedef axi_test::rand_axi_master #(
+  typedef semirand_axi_master #(
     .AW                   ( AddrWidth    ),
     .DW                   ( AxiDataWidth ),
     .IW                   ( AxiInIdWidth ),
