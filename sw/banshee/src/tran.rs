@@ -1224,10 +1224,10 @@ impl<'a> InstructionTranslator<'a> {
         let rs1 = self.read_reg(data.rs1);
 
         // Perform the operation.
+        // suppress compiler warning that detects the bail! statement as unrechable
+        // Scfgwi is currently the OpcodeImm12Rs1 but this might change
+        #[allow(unreachable_patterns)]
         match data.op {
-            // suppress compiler warning that detects the bail! statement as unrechable
-            // Scfgwi is currently the OpcodeImm12Rs1 but this might change
-            #![allow(unreachable_patterns)]
             riscv::OpcodeImm12Rs1::Scfgwi => {
                 // ssr write immediate holds address offset in imm12, content in rs1
                 // imm12[11:5]=reg_word imm12[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
@@ -1328,10 +1328,10 @@ impl<'a> InstructionTranslator<'a> {
 
         let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
 
+        // suppress compiler warning that detects the bail! statement as unrechable
+        // Scfgri is currently the OpcodeImm12Rd but this might change
+        #[allow(unreachable_patterns)]
         match data.op {
-            // suppress compiler warning that detects the bail! statement as unrechable
-            // Scfgri is currently the OpcodeImm12Rd but this might change
-            #![allow(unreachable_patterns)]
             riscv::OpcodeImm12Rd::Scfgri => {
                 // srr load immediate from offset in imm12
                 // reorder imm12 to form address
@@ -1768,10 +1768,10 @@ impl<'a> InstructionTranslator<'a> {
             self.read_reg(data.rs1),
             self.section.fseq_iter.max_rpt_ref,
         );
+        // suppress compiler warning that detects the bail! statement as unrechable
+        // Frep* are currently the only OpcodeImm12Rs1Stagger_maskStagger_max but this might change
+        #[allow(unreachable_patterns)]
         match data.op {
-            // suppress compiler warning that detects the bail! statement as unrechable
-            // Frep* are currently the only OpcodeImm12Rs1Stagger_maskStagger_max but this might change
-            #![allow(unreachable_patterns)]
             riscv::OpcodeImm12Rs1StaggerMaskStaggerMax::FrepO => fseq.init_rep(
                 data.imm12 as u8,
                 true,
@@ -2264,10 +2264,10 @@ impl<'a> InstructionTranslator<'a> {
         let _name = name.as_ptr() as *const _;
         let rs1 = self.read_reg(data.rs1);
 
+        // suppress compiler warning that detects the bail! statement as unrechable
+        // Dmrep is currently the OpcodeRs1 but this might change
+        #[allow(unreachable_patterns)]
         match data.op {
-            // suppress compiler warning that detects the bail! statement as unrechable
-            // Dmrep is currently the OpcodeRs1 but this might change
-            #![allow(unreachable_patterns)]
             riscv::OpcodeRs1::Dmrep => self
                 .section
                 .emit_call("banshee_dma_rep", [self.dma_ptr(), rs1]),
