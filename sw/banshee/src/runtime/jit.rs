@@ -117,7 +117,7 @@ pub unsafe fn banshee_ssr_write_cfg(
             ssr.dims = ((value >> 28) & 3) as u8;
             ssr.indir = ((value >> 27) & 1) != 0;
         }
-        1 => ssr.repeat_count = value as u16,
+        1 => ssr.repeat_bound = value as u16,
         2..=5 => *ssr.bound.get_unchecked_mut(addr - 2) = value,
         6..=9 => *ssr.stride.get_unchecked_mut(addr - 6) = value,
         10 => ssr.idx_size = value,
@@ -170,7 +170,7 @@ pub unsafe fn banshee_ssr_read_cfg(ssr: &mut SsrState, addr: u32) -> u32 {
                 | (ssr.dims as u32) << 28
                 | (ssr.indir as u32) << 27
         }
-        1 => ssr.repeat_count as u32,
+        1 => ssr.repeat_bound as u32,
         2..=5 => *ssr.bound.get_unchecked(addr - 2),
         6..=9 => *ssr.stride.get_unchecked(addr - 6),
         10 => ssr.idx_size,
