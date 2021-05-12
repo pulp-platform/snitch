@@ -392,7 +392,7 @@ module axi_riscv_amos #(
                     mst_aw_len_o    = 8'h00;
                     mst_aw_id_o     = id_q;
                     mst_aw_size_o   = size_q;
-                    mst_aw_burst_o  = 2'b00;
+                    mst_aw_burst_o  = axi_pkg::BURST_INCR;
                     mst_aw_lock_o   = 1'b0;
                     mst_aw_cache_o  = cache_q;
                     mst_aw_prot_o   = prot_q;
@@ -732,7 +732,7 @@ module axi_riscv_amos #(
                             mst_ar_id_o     = slv_aw_id_i;
                             mst_ar_len_o    = 8'h00;
                             mst_ar_size_o   = slv_aw_size_i;
-                            mst_ar_burst_o  = 2'b00;
+                            mst_ar_burst_o  = axi_pkg::BURST_INCR;
                             mst_ar_lock_o   = 1'h0;
                             mst_ar_cache_o  = slv_aw_cache_i;
                             mst_ar_prot_o   = slv_aw_prot_i;
@@ -760,7 +760,7 @@ module axi_riscv_amos #(
                     mst_ar_id_o     = id_q;
                     mst_ar_len_o    = 8'h00;
                     mst_ar_size_o   = size_q;
-                    mst_ar_burst_o  = 2'b00;
+                    mst_ar_burst_o  = axi_pkg::BURST_INCR;
                     mst_ar_lock_o   = 1'h0;
                     mst_ar_cache_o  = cache_q;
                     mst_ar_prot_o   = prot_q;
