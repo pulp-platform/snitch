@@ -634,6 +634,39 @@ class AxiBus(object):
                                num_pending=num_pending) + "\n")
         return bus
 
+    def atomic_adapter(self, context, max_trans=1, name=None, inst_name=None, to=None):
+
+        name = name or "{}_atomic_adapter".format(self.name)
+
+        # Generate the new bus.
+        if to is None:
+            bus = copy(self)
+            bus.declared = False
+            bus.type_prefix = bus.emit_struct()
+            bus.name = name
+            bus.name_suffix = None
+        else:
+            bus = to
+
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+        assert (bus.iw == self.iw)
+        assert (bus.uw == self.uw)
+
+        # Emit the cut instance.
+        bus.declare(context)
+        tpl = templates.get_template("solder.axi_atomic_adapter.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                bus_in=self,
+                bus_out=bus,
+                max_trans=max_trans,
+                name=inst_name or "i_{}".format(name),
+            ) + "\n")
+        return bus
+
     def to_axi_lite(self, context, name, inst_name=None, to=None):
         # Generate the new bus.
         if to is None:
