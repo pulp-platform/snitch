@@ -9,7 +9,7 @@ SRCS_C = src/main.c src/uart.c
 OBJS_C = $(SRCS_C:.c=.o)
 
 bootrom.coe: bootrom.bin
-	 bin2coe -i $< -o $@ -w 32
+	bin2coe -i $< -o $@ -w 32
 
 bootrom.elf bootrom.dump bootrom.bin: bootrom.S $(OBJS_C) bootrom.ld
 	riscv64-unknown-elf-gcc -mabi=lp64d -march=rv64imafd -static -nostartfiles $(INCLUDES) -Tbootrom.ld $< $(OBJS_C) -o bootrom.elf
