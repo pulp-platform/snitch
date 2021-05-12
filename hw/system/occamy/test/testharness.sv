@@ -35,6 +35,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (512),
     .AxiIdWidth (8),
     .AxiUserWidth (1),
+    .ATOPSupport (0),
     .req_t (axi_a48_d512_i8_u0_req_t),
     .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_0_channel (
@@ -53,6 +54,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (512),
     .AxiIdWidth (8),
     .AxiUserWidth (1),
+    .ATOPSupport (0),
     .req_t (axi_a48_d512_i8_u0_req_t),
     .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_1_channel (
@@ -71,6 +73,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (512),
     .AxiIdWidth (8),
     .AxiUserWidth (1),
+    .ATOPSupport (0),
     .req_t (axi_a48_d512_i8_u0_req_t),
     .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_2_channel (
@@ -89,6 +92,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (512),
     .AxiIdWidth (8),
     .AxiUserWidth (1),
+    .ATOPSupport (0),
     .req_t (axi_a48_d512_i8_u0_req_t),
     .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_3_channel (
@@ -107,6 +111,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (512),
     .AxiIdWidth (8),
     .AxiUserWidth (1),
+    .ATOPSupport (0),
     .req_t (axi_a48_d512_i8_u0_req_t),
     .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_4_channel (
@@ -125,6 +130,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (512),
     .AxiIdWidth (8),
     .AxiUserWidth (1),
+    .ATOPSupport (0),
     .req_t (axi_a48_d512_i8_u0_req_t),
     .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_5_channel (
@@ -143,6 +149,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (512),
     .AxiIdWidth (8),
     .AxiUserWidth (1),
+    .ATOPSupport (0),
     .req_t (axi_a48_d512_i8_u0_req_t),
     .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_6_channel (
@@ -161,6 +168,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (512),
     .AxiIdWidth (8),
     .AxiUserWidth (1),
+    .ATOPSupport (0),
     .req_t (axi_a48_d512_i8_u0_req_t),
     .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_7_channel (
@@ -181,6 +189,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (512),
     .AxiIdWidth (8),
     .AxiUserWidth (1),
+    .ATOPSupport (0),
     .req_t (axi_a48_d512_i8_u0_req_t),
     .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_pcie_axi_channel (
