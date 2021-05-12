@@ -14,6 +14,8 @@ module tb_memory_axi #(
   parameter int unsigned AxiIdWidth  = 0,
   /// AXI4+ATOP User width.
   parameter int unsigned AxiUserWidth  = 0,
+  /// Atomic memory support.
+  parameter bit unsigned ATOPSupport = 1,
   parameter type req_t = logic,
   parameter type rsp_t = logic
 )(
@@ -28,6 +30,8 @@ module tb_memory_axi #(
 
   `include "register_interface/typedef.svh"
   `include "register_interface/assign.svh"
+
+  `include "common_cells/assertions.svh"
 
   localparam int NumBytes = AxiDataWidth/8;
   localparam int BusAlign = $clog2(NumBytes);
@@ -50,19 +54,24 @@ module tb_memory_axi #(
   `AXI_ASSIGN_TO_RESP(rsp_o, axi)
 
   // Filter atomic operations.
-  axi_riscv_atomics_wrap #(
-    .AXI_ADDR_WIDTH (AxiAddrWidth),
-    .AXI_DATA_WIDTH (AxiDataWidth),
-    .AXI_ID_WIDTH (AxiIdWidth),
-    .AXI_USER_WIDTH (AxiUserWidth),
-    .AXI_MAX_WRITE_TXNS (2),
-    .RISCV_WORD_WIDTH (32)
-  ) i_axi_riscv_atomics_wrap (
-    .clk_i (clk_i),
-    .rst_ni (rst_ni),
-    .slv (axi),
-    .mst (axi_wo_atomics)
-  );
+  if (ATOPSupport) begin : gen_atop_support
+    axi_riscv_atomics_wrap #(
+      .AXI_ADDR_WIDTH (AxiAddrWidth),
+      .AXI_DATA_WIDTH (AxiDataWidth),
+      .AXI_ID_WIDTH (AxiIdWidth),
+      .AXI_USER_WIDTH (AxiUserWidth),
+      .AXI_MAX_WRITE_TXNS (2),
+      .RISCV_WORD_WIDTH (32)
+    ) i_axi_riscv_atomics_wrap (
+      .clk_i (clk_i),
+      .rst_ni (rst_ni),
+      .slv (axi),
+      .mst (axi_wo_atomics)
+    );
+  end else begin : gen_no_atop_support
+    `AXI_ASSIGN(axi_wo_atomics, axi)
+    `ASSERT(NoAtomicOperation, axi.aw_valid & axi.aw_ready |-> (axi.aw_atop == axi_pkg::ATOP_NONE))
+  end
 
   // Ensure the AXI interface has not feedthrough signals.
   axi_cut_intf #(

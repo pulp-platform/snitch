@@ -34,6 +34,7 @@ module testharness import occamy_pkg::*; (
     .AxiDataWidth (${bus.dw}),
     .AxiIdWidth (${bus.iw}),
     .AxiUserWidth (${bus.uw + 1}),
+    .ATOPSupport (0),
   % else:
   tb_memory_regbus #(
     .AddrWidth (${bus.aw}),

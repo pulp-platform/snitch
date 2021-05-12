@@ -109,6 +109,7 @@ module occamy_top
   /////////////////////////////
   <% soc_narrow_xbar.out_soc_wide \
         .change_iw(context, 3, "soc_narrow_wide_iwc") \
+        .atomic_adapter(context, 16, "soc_narrow_wide_amo_adapter") \
         .change_dw(context, 512, "soc_narrow_wide_dw", to=soc_wide_xbar.in_soc_narrow)
   %>
 

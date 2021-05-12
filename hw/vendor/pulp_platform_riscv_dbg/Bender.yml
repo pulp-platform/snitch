@@ -38,12 +38,3 @@ sources:
   - target: simulation
     files:
     - src/dmi_test.sv
-
-  - target: test
-    files:
-    # Level 1
-    - src/dmi_intf.sv
-    - tb/jtag_dmi/jtag_intf.sv
-    - tb/jtag_dmi/jtag_test.sv
-    # Level 3
-    - tb/jtag_dmi/tb_jtag_dmi.sv
