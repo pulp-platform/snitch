@@ -11,7 +11,7 @@ diff --git a/Bender.yml b/Bender.yml
 index eb52d1d..7178d56 100644
 --- a/Bender.yml
 +++ b/Bender.yml
-@@ -1,16 +1,49 @@
+@@ -1,16 +1,40 @@
 +# Copyright 2020-2021 ETH Zurich and University of Bologna.
 +# Solderpad Hardware License, Version 0.51, see LICENSE for details.
 +# SPDX-License-Identifier: SHL-0.51
@@ -25,7 +25,7 @@ index eb52d1d..7178d56 100644
 +dependencies:
 +  tech_cells_generic: { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
 +  common_cells: {git: https://github.com/pulp-platform/common_cells.git, version: 1.21.0}
- 
+
  sources:
    files:
 -    - src/dm_pkg.sv
@@ -62,15 +62,6 @@ index eb52d1d..7178d56 100644
 +  - target: simulation
 +    files:
 +    - src/dmi_test.sv
-+
-+  - target: test
-+    files:
-+    # Level 1
-+    - src/dmi_intf.sv
-+    - tb/jtag_dmi/jtag_intf.sv
-+    - tb/jtag_dmi/jtag_test.sv
-+    # Level 3
-+    - tb/jtag_dmi/tb_jtag_dmi.sv
--- 
+--
 2.25.1.377.g2d2118b814
 
