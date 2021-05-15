@@ -38,6 +38,7 @@ pub struct CpuState {
     pub regs_cycle: [u64; 32],
     pub fregs: [u64; 32],
     pub fregs_cycle: [u64; 32],
+    pub cas_value: u32,
     pub pc: u32,
     pub cycle: u64,
     pub instret: u64,

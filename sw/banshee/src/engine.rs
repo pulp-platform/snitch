@@ -602,7 +602,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     fn binary_rmw(&self, addr: u32, value: u32, op: AtomicOp) -> u32 {
         trace!("RMW 0x{:x} (op={})= 0x{:x} (32B)", addr, op as u8, value);
         let mut data = self.engine.memory.lock().unwrap();
-        let prev = data.get(&(addr as u64)).copied().unwrap_or(0);
+        let mut prev = data.get(&(addr as u64)).copied().unwrap_or(0);
         // Atomics
         let result = match op {
             AtomicOp::Amoadd => prev + value,
@@ -614,6 +614,14 @@ impl<'a, 'b> Cpu<'a, 'b> {
             AtomicOp::Amominu => std::cmp::min(prev as u32, value as u32),
             AtomicOp::Amomaxu => std::cmp::max(prev as u32, value as u32),
             AtomicOp::Amoswap => value,
+            AtomicOp::ScW => {
+                if prev == self.state.cas_value {
+                    prev = 0; // Store-conditional success
+                    value
+                } else {
+                    return 1 as u32; // Store-conditional failed
+                }
+            }
         };
         data.insert(addr as u64, result);
         prev as u32
@@ -762,4 +770,5 @@ pub enum AtomicOp {
     Amominu,
     Amomaxu,
     Amoswap,
+    ScW,
 }

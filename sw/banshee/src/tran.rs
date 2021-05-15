@@ -962,7 +962,7 @@ impl<'a> InstructionTranslator<'a> {
 
         // Emit the code for the instruction itself.
         match self.inst {
-            //  riscv::Format::AqrlRdRs1(x) => self.emit_aqrl_rd_rs1(x),
+            riscv::Format::AqrlRdRs1(x) => self.emit_aqrl_rd_rs1(x),
             riscv::Format::AqrlRdRs1Rs2(x) => self.emit_aqrl_rd_rs1_rs2(x),
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
             riscv::Format::Imm5Rd(x) => self.emit_imm5_rd(x),
@@ -994,6 +994,122 @@ impl<'a> InstructionTranslator<'a> {
         self.emit_trace();
         Ok(())
     }
+
+    unsafe fn emit_aqrl_rd_rs1(&self, data: riscv::FormatAqrlRdRs1) -> Result<()> {
+        trace!("{} x{} = x{}", data.op, data.rd, data.rs1);
+
+        // LR is not freppable
+        self.was_freppable.set(false);
+
+        // Ordering
+        let _ordering = match data.aqrl {
+            0x0 => LLVMAtomicOrderingMonotonic,
+            0x1 => LLVMAtomicOrderingRelease,
+            0x2 => LLVMAtomicOrderingAcquire,
+            0x3 => LLVMAtomicOrderingAcquireRelease,
+            _ => LLVMAtomicOrderingAcquireRelease,
+        };
+
+        // Decoding: Only support LrW at the moment
+        match data.op {
+            riscv::OpcodeAqrlRdRs1::LrW => (),
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
+
+        // Get the address from the register
+        let addr = self.read_reg(data.rs1);
+
+        self.trace_access(TraceAccess::ReadMem, addr);
+
+        // Start emitting LLVM IR
+        let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
+
+        // Make sure the access is aligned
+        let is_aligned = LLVMBuildAnd(
+            self.builder,
+            addr,
+            LLVMConstInt(LLVMInt32Type(), 3, 0),
+            NONAME,
+        );
+        let is_aligned = LLVMBuildICmp(
+            self.builder,
+            LLVMIntEQ,
+            is_aligned,
+            LLVMConstInt(LLVMInt32Type(), 0, 0),
+            NONAME,
+        );
+        let bb_valid = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_invalid = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_valid);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_invalid);
+        LLVMBuildCondBr(self.builder, is_aligned, bb_valid, bb_invalid);
+
+        // Abort due to unaligned LR
+        LLVMPositionBuilderAtEnd(self.builder, bb_invalid);
+        self.section.emit_call(
+            "banshee_abort_illegal_inst",
+            [
+                self.section.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), addr as u64, 0),
+                LLVMConstInt(LLVMInt32Type(), self.inst.raw() as u64, 0),
+            ],
+        );
+        LLVMBuildRetVoid(self.builder);
+
+        // Check if the address is in the TCDM, and emit a fast access.
+        LLVMPositionBuilderAtEnd(self.builder, bb_valid);
+        let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(addr);
+        let bb_tcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_notcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_tcdm);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_notcdm);
+        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_notcdm);
+
+        // Emit the TCDM fast case.
+        LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
+        let value_tcdm = LLVMBuildLoad(self.builder, tcdm_ptr, NONAME);
+
+        LLVMBuildBr(self.builder, bb_end);
+
+        // Emit the regular slow case.
+        LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
+        let value_slow = LLVMBuildCall(
+            self.builder,
+            LLVMGetNamedFunction(
+                self.section.engine.module,
+                "banshee_load\0".as_ptr() as *const _,
+            ),
+            [
+                self.section.state_ptr,
+                addr,
+                LLVMConstInt(LLVMInt8Type(), 4 as u64, 0),
+            ]
+            .as_mut_ptr(),
+            3,
+            NONAME,
+        );
+        LLVMBuildBr(self.builder, bb_end);
+
+        let bb_notcdm = LLVMGetInsertBlock(self.builder);
+
+        // Build the PHI node to bring the two together.
+        LLVMPositionBuilderAtEnd(self.builder, bb_end);
+        let phi = LLVMBuildPhi(self.builder, LLVMInt32Type(), NONAME);
+        LLVMAddIncoming(
+            phi,
+            [value_tcdm, value_slow].as_mut_ptr(),
+            [bb_tcdm, bb_notcdm].as_mut_ptr(),
+            2,
+        );
+
+        // Write the final result to the register
+        self.write_reg(data.rd, phi);
+        LLVMBuildStore(self.builder, phi, self.cas_value_ptr());
+
+        Ok(())
+    }
+
     unsafe fn emit_aqrl_rd_rs1_rs2(&self, data: riscv::FormatAqrlRdRs1Rs2) -> Result<()> {
         trace!("{} x{} = x{}, x{}", data.op, data.rd, data.rs1, data.rs2);
 
@@ -1020,6 +1136,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeAqrlRdRs1Rs2::AmomaxW => AtomicOp::Amomax,
             riscv::OpcodeAqrlRdRs1Rs2::AmominuW => AtomicOp::Amominu,
             riscv::OpcodeAqrlRdRs1Rs2::AmominW => AtomicOp::Amomin,
+            riscv::OpcodeAqrlRdRs1Rs2::ScW => AtomicOp::ScW,
             _ => bail!("Unsupported opcode {}", data.op),
         };
 
@@ -1149,6 +1266,20 @@ impl<'a> InstructionTranslator<'a> {
                 ordering,
                 0,
             ),
+            AtomicOp::ScW => {
+                let val_success = LLVMBuildAtomicCmpXchg(
+                    self.builder,
+                    tcdm_ptr,
+                    LLVMBuildLoad(self.builder, self.cas_value_ptr(), NONAME),
+                    value,
+                    ordering,
+                    ordering,
+                    0,
+                );
+                let success = LLVMBuildExtractValue(self.builder, val_success, 1, NONAME);
+                let success = LLVMBuildNot(self.builder, success, NONAME);
+                LLVMBuildZExtOrBitCast(self.builder, success, LLVMInt32Type(), NONAME)
+            }
         };
         LLVMBuildBr(self.builder, bb_end);
 
@@ -3101,6 +3232,14 @@ impl<'a> InstructionTranslator<'a> {
                 LLVMConstInt(LLVMInt32Type(), r as u64, 0),
             ],
             &format!("ptr_f{}", r),
+        )
+    }
+
+    unsafe fn cas_value_ptr(&self) -> LLVMValueRef {
+        self.section.emit_call_with_name(
+            "banshee_cas_value_ptr",
+            [self.section.state_ptr],
+            "ptr_cas_value",
         )
     }
 
