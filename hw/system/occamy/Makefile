@@ -54,6 +54,12 @@ update-source:
 	@echo "[VERIBLE] Formatting"
 	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
+update-clint:
+	mkdir -p src/clint
+	$(ROOT)/hw/ip/clint/util/gen_clint.py -c 1 $(ROOT)/hw/ip/clint/data/clint.sv.tpl > src/clint/clint.sv
+	$(ROOT)/hw/ip/clint/util/gen_clint.py -c 1 $(ROOT)/hw/ip/clint/data/clint.hjson.tpl > src/clint/clint.hjson
+	$(ROOT)/util/regtool.py -r -t src/clint src/clint/clint.hjson
+
 update-plic:
 	mkdir -p src/rv_plic
 	$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 63 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv

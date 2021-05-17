@@ -1,0 +1,22 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+package:
+  name: clint
+  description: RISC-V Core-local Interrupt Controller
+  authors: [Florian Zaruba <zarubaf@iis.ee.ethz.ch>]
+
+dependencies:
+  register_interface: {path: ../../vendor/pulp_platform_register_interface}
+
+sources:
+# Level 0:
+- src/clint_reg_pkg.sv
+# Level 1:
+- src/clint_reg_top.sv
+# Level 2:
+- src/clint.sv
+
+- target: test
+  files:
+  - test/clint_tb.sv

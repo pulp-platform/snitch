@@ -354,18 +354,14 @@ module occamy_top
   //   CLINT   //
   ///////////////
   clint #(
-    .AXI_ADDR_WIDTH (${soc_periph_xbar.out_clint.aw}),
-    .AXI_DATA_WIDTH (${soc_periph_xbar.out_clint.dw}),
-    .AXI_ID_WIDTH (0),
-    .NR_CORES (1),
-    .axi_req_t (${soc_periph_xbar.out_clint.req_type()}),
-    .axi_resp_t (${soc_periph_xbar.out_clint.rsp_type()})
+    .reg_req_t ( ${soc_regbus_periph_xbar.out_clint.req_type()} ),
+    .reg_rsp_t ( ${soc_regbus_periph_xbar.out_clint.rsp_type()} )
   ) i_clint (
-    .clk_i (${soc_periph_xbar.out_clint.clk}),
-    .rst_ni (${soc_periph_xbar.out_clint.rst}),
+    .clk_i (${soc_regbus_periph_xbar.out_clint.clk}),
+    .rst_ni (${soc_regbus_periph_xbar.out_clint.rst}),
     .testmode_i (1'b0),
-    .axi_req_i (${soc_periph_xbar.out_clint.req_name()}),
-    .axi_resp_o (${soc_periph_xbar.out_clint.rsp_name()}),
+    .reg_req_i (${soc_regbus_periph_xbar.out_clint.req_name()}),
+    .reg_rsp_o (${soc_regbus_periph_xbar.out_clint.rsp_name()}),
     .rtc_i (rtc_i),
     .timer_irq_o (mtip),
     .ipi_o (msip)

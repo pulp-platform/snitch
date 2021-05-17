@@ -19,6 +19,9 @@ indent_size = 2
 [*.{yaml,yml}]
 indent_size = 2
 
+[*.hjson]
+indent_size = 2
+
 # Use tabs for Makefiles.
 [Makefile]
 indent_style = tab
