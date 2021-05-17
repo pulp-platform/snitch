@@ -272,6 +272,7 @@ module testharness import occamy_pkg::*; (
     .bootrom_rsp_i (bootrom_regbus_rsp),
     .clk_mgr_req_o (clk_mgr_req),
     .clk_mgr_rsp_i (clk_mgr_rsp),
+    .ext_irq_i ('0),
     .hbm_0_req_o (hbm_channel_0_req),
     .hbm_0_rsp_i (hbm_channel_0_rsp),
     .hbm_1_req_o (hbm_channel_1_req),

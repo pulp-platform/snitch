@@ -65,6 +65,9 @@ module occamy_top
     output reg_a48_d32_req_t clk_mgr_req_o,
     input  reg_a48_d32_rsp_t clk_mgr_rsp_i,
 
+    // "external interrupts from uncore - "programmable"
+    input logic [3:0] ext_irq_i,
+
     /// HBM2e Ports
     output axi_a48_d512_i8_u0_req_t  hbm_0_req_o,
     input  axi_a48_d512_i8_u0_resp_t hbm_0_rsp_i,
@@ -117,6 +120,8 @@ module occamy_top
   logic [1:0] eip;
   logic debug_req;
   occamy_interrupt_t irq;
+
+  assign irq.ext_irq = ext_irq_i;
 
   addr_t [7:0] s1_quadrant_base_addr;
   assign s1_quadrant_base_addr[0] = ClusterBaseOffset + 0 * S1QuadrantAddressSpace;
@@ -1759,6 +1764,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .irq_id_o(),
       .msip_o()
   );
+
+  assign irq.zero = 1'b0;
 
   //////////////////
   //   SPI Host   //

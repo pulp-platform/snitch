@@ -65,6 +65,9 @@ module occamy_top
   output ${soc_regbus_periph_xbar.out_clk_mgr.req_type()} clk_mgr_req_o,
   input  ${soc_regbus_periph_xbar.out_clk_mgr.rsp_type()} clk_mgr_rsp_i,
 
+  // "external interrupts from uncore - "programmable"
+  input logic [3:0] ext_irq_i,
+
   /// HBM2e Ports
 % for i in range(8):
   output  ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].req_type()} hbm_${i}_req_o,
@@ -93,6 +96,8 @@ module occamy_top
   logic [1:0] eip;
   logic debug_req;
   occamy_interrupt_t irq;
+
+  assign irq.ext_irq = ext_irq_i;
 
   addr_t [${nr_s1_quadrants-1}:0] s1_quadrant_base_addr;
   % for i in range(nr_s1_quadrants):
@@ -438,6 +443,8 @@ module occamy_top
     .irq_id_o (),
     .msip_o ()
   );
+
+  assign irq.zero = 1'b0;
 
   //////////////////
   //   SPI Host   //

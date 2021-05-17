@@ -56,6 +56,8 @@ import occamy_pkg::*;
   output logic [3:0]  spim_sd_en_o,
   input        [3:0]  spim_sd_i,
 
+  input  logic [3:0]  ext_irq_i,
+
   // Boot ROM
   output logic                                             bootrom_en_o,
   // This is actually too wide. But the address width depends on the ROM size, so let Vivado handle
