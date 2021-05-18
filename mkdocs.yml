@@ -31,6 +31,9 @@ nav:
   - Snitch Cluster:
     - Guide: ug/snitch_cluster.md
     - Schema: schema-doc/snitch_cluster.md
+  - Occamy:
+    - Guide: ug/occamy.md
+    - Schema: schema-doc/occamy.md
 - Reference Manual:
   - Snitch: rm/snitch/index.md
   - Snitch Cluster: rm/snitch_cluster/index.md

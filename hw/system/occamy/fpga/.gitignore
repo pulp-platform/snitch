@@ -7,3 +7,4 @@ define_defines_includes_no_simset.tcl
 *.zip
 *.str
 *.mif
+*.html*

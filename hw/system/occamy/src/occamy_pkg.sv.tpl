@@ -50,6 +50,8 @@ package occamy_pkg;
     logic i2c_acq_overflow;
     logic i2c_ack_stop;
     logic i2c_host_timeout;
+    logic [3:0] ext_irq;
+    logic zero;
   } occamy_interrupt_t;
 
   localparam logic [15:0] PartNum = 2;

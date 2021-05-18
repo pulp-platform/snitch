@@ -24,6 +24,11 @@ occamy_vcu128: vivado_ips/occamy_xilinx define_defines_includes_no_simset.tcl bo
 define_defines_includes_no_simset.tcl: $(BENDER_FILES)
 	${BENDER} script vivado --only-defines --only-includes --no-simset > $@
 
+program:
+	vivado -mode batch -source occamy_vcu128_program.tcl
+
 clean:
 	${MAKE} -C vivado_ips clean
 	rm -rf .Xil occamy_vcu128 define_defines_includes_no_simset.tcl *.jou *.log *.str
+
+.PHONY: program clean

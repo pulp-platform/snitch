@@ -1,0 +1,71 @@
+From 87951fcfa7cfc4eecec7d85304f1820824cc66c8 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Mon, 17 May 2021 09:52:00 +0200
+Subject: [PATCH] Re-work PLIC register map
+
+---
+ data/rv_plic.hjson.tpl | 28 ++++++++++++++++------------
+ 1 file changed, 16 insertions(+), 12 deletions(-)
+
+diff --git a/data/rv_plic.hjson.tpl b/data/rv_plic.hjson.tpl
+index 7ef9fa1..84a2d8e 100644
+--- a/data/rv_plic.hjson.tpl
++++ b/data/rv_plic.hjson.tpl
+@@ -36,6 +36,17 @@
+   ],
+   regwidth: "32",
+   registers: [
++% for i in range(src):
++    { name: "PRIO${i}",
++      desc: "Interrupt Source ${i} Priority",
++      swaccess: "rw",
++      hwaccess: "hro",
++      fields: [
++        { bits: "${(prio).bit_length()-1}:0" }
++      ],
++    },
++% endfor
++    { skipto: "0x1000" }
+     { multireg: {
+         name: "IP",
+         desc: "Interrupt Pending",
+@@ -62,18 +73,8 @@
+         ],
+       }
+     },
+-% for i in range(src):
+-    { name: "PRIO${i}",
+-      desc: "Interrupt Source ${i} Priority",
+-      swaccess: "rw",
+-      hwaccess: "hro",
+-      fields: [
+-        { bits: "${(prio).bit_length()-1}:0" }
+-      ],
+-    }
+-% endfor
+ % for i in range(target):
+-    { skipto: "${0x100*(math.ceil((src*4+8*math.ceil(src/32))/0x100)) + i*0x100 | x}" }
++    { skipto: "${0x2000 + i * 0x80}" }
+     { multireg: {
+         name: "IE${i}",
+         desc: "Interrupt Enable for Target ${i}",
+@@ -86,6 +87,9 @@
+         ],
+       }
+     }
++% endfor
++% for i in range(target):
++    { skipto: "${0x200000 + 0x1000 * i}" }
+     { name: "THRESHOLD${i}",
+       desc: "Threshold of priority for Target ${i}",
+       swaccess: "rw",
+@@ -120,5 +124,5 @@
+       ],
+     }
+ % endfor
+-  ],
++  ]
+ }
+-- 
+2.25.1.377.g2d2118b814
+

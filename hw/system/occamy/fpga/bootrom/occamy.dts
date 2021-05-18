@@ -46,25 +46,60 @@
       reg = <0x0 0x0 0x0 0x1000>;
     };
     serial@2002000 {
-      compatible = "lowrisc,serial";
+      compatible = "lowrisc,uart0";
+      reg = <0x0 0x2002000 0x0 0x1000>;
       clock-frequency = <50000000>;
       current-speed = <115200>;
-      interrupt-parent = <&PLIC0>;
-      interrupts = <1>;
-      reg = <0x0 0x2002000 0x0 0x1000>;
     };
     axi_uart0: serial@40000000 {
       clock-frequency = <50000000>;
       compatible = "xlnx,axi-uart16550-1.01.a", "xlnx,xps-uart16550-2.00.a", "ns16550";
       current-speed = <115200>;
       interrupt-parent = <&PLIC0>;
-      interrupts = <2>;
+      interrupts = <1>;
       reg = <0x0 0x40000000 0x0 0x10000>;
       reg-offset = <0x1000>;
       reg-shift = <2>;
       xlnx,is-a-16550 = <0x1>;
       xlnx,use-modem-ports = <0x0>;
       xlnx,use-user-ports = <0x0>;
+    };
+    axi_quad_spi_1: spi@4c000000 {
+      compatible = "xlnx,axi-quad-spi-3.2", "xlnx,xps-spi-2.00.a";
+      interrupt-parent = <&PLIC0>;
+      interrupts = <1 0>;
+      reg = <0x0 0x4c000000 0x0 0x10000>;
+      xlnx,fifo-depth = <16>;
+      xlnx,num-ss-bits = <1>;
+      xlnx,num-transfer-bits = <0x8>;
+      xlnx,s-axi4-addr-width = <0x18>;
+      xlnx,s-axi4-data-width = <0x20>;
+      xlnx,s-axi4-id-width = <0x0>;
+      xlnx,sck-ratio = <0x2>;
+      xlnx,spi-mem-addr-bits = <0x18>;
+      xlnx,spi-memory = <0x2>;
+      xlnx,spi-mode = <0x2>;
+      xlnx,sub-family = "ultrascale+";
+      xlnx,type-of-axi4-interface = <0x1>;
+      xlnx,use-startup = <0x1>;
+      xlnx,xip-mode = <0x0>;
+      is-dual = <0>;
+      #address-cells = <1>;
+      #size-cells = <0>;
+      nor@0 {
+        #address-cells = <0x1>;
+        #size-cells = <0x1>;
+        compatible = "micron,m25p80";
+        reg = <0x0 0x0>;
+        spi-max-frequency = <25000000>;
+        spi-rx-bus-width = <0x4>;
+        spi-tx-bus-width = <0x4>;
+        m25p,fast-read;
+        // partition@test {
+        //   label = "spi-flash";
+        //   reg = <0x0 0x800000>;
+        // };
+      };
     };
     clint@4000000 {
       compatible = "riscv,clint0";
@@ -78,8 +113,8 @@
       #interrupt-cells = <1>;
       interrupt-controller;
       interrupts-extended = <&CPU0_intc 11 &CPU0_intc 9>;
-      riscv,max-priority = <7>;
-      riscv,ndev = <30>;
+      riscv,max-priority = <6>;
+      riscv,ndev = <62>;
       reg = <0x0 0xc000000 0x0 0x4000000>;
     };
   };
