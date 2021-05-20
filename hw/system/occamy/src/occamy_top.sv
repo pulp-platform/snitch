@@ -139,8 +139,8 @@ module occamy_top
 
   axi_lite_a48_d64_req_t [1:0] soc_axi_lite_periph_xbar_in_req;
   axi_lite_a48_d64_rsp_t [1:0] soc_axi_lite_periph_xbar_in_rsp;
-  axi_lite_a48_d64_req_t [1:0] soc_axi_lite_periph_xbar_out_req;
-  axi_lite_a48_d64_rsp_t [1:0] soc_axi_lite_periph_xbar_out_rsp;
+  axi_lite_a48_d64_req_t [0:0] soc_axi_lite_periph_xbar_out_req;
+  axi_lite_a48_d64_rsp_t [0:0] soc_axi_lite_periph_xbar_out_rsp;
 
   // The `soc_axi_lite_periph_xbar` crossbar.
   axi_lite_xbar #(
@@ -168,8 +168,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [7:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [7:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [8:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [8:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -192,7 +192,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(8),
+      .NoRules(9),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -265,13 +265,11 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
   /// Address map of the `soc_narrow_xbar` crossbar.
-  xbar_rule_48_t [12:0] SocNarrowXbarAddrmap;
+  xbar_rule_48_t [10:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
     '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-    '{ idx: 8, start_addr: 48'h04000000, end_addr: 48'h04100000 },
     '{ idx: 9, start_addr: 48'h20000000, end_addr: 48'h1200000000 },
-    '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h03020000 },
-    '{ idx: 10, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
+    '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h10000000 },
     '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
     '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
     '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
@@ -1675,18 +1673,14 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   //   CLINT   //
   ///////////////
   clint #(
-      .AXI_ADDR_WIDTH(48),
-      .AXI_DATA_WIDTH(64),
-      .AXI_ID_WIDTH(0),
-      .NR_CORES(1),
-      .axi_req_t(axi_lite_a48_d64_req_t),
-      .axi_resp_t(axi_lite_a48_d64_rsp_t)
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t)
   ) i_clint (
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
       .testmode_i(1'b0),
-      .axi_req_i(soc_axi_lite_periph_xbar_out_req[SOC_AXI_LITE_PERIPH_XBAR_OUT_CLINT]),
-      .axi_resp_o(soc_axi_lite_periph_xbar_out_rsp[SOC_AXI_LITE_PERIPH_XBAR_OUT_CLINT]),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_CLINT]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_CLINT]),
       .rtc_i(rtc_i),
       .timer_irq_o(mtip),
       .ipi_o(msip)

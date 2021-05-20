@@ -136,7 +136,7 @@ def main():
                           0x03000000).attach_to(am_soc_regbus_periph_xbar)
 
     am_clint = am.new_leaf("clint", 0x0100000,
-                           0x04000000).attach_to(am_soc_axi_lite_periph_xbar)
+                           0x04000000).attach_to(am_soc_regbus_periph_xbar)
     dts.add_clint([0], am_clint)
 
     am_plic = am.new_leaf("plic", 0x4000000,
@@ -183,7 +183,6 @@ def main():
 
     soc_axi_lite_periph_xbar.add_input("soc")
     soc_axi_lite_periph_xbar.add_input("debug")
-    soc_axi_lite_periph_xbar.add_output_entry("clint", am_clint)
     soc_axi_lite_periph_xbar.add_output_entry("debug", am_debug)
 
     ##########
@@ -198,6 +197,7 @@ def main():
 
     soc_regbus_periph_xbar.add_input("soc")
 
+    soc_regbus_periph_xbar.add_output_entry("clint", am_clint)
     soc_regbus_periph_xbar.add_output_entry("soc_ctrl", am_soc_ctrl)
     soc_regbus_periph_xbar.add_output_entry("clk_mgr", am_clk_mgr)
     soc_regbus_periph_xbar.add_output_entry("bootrom", am_bootrom)

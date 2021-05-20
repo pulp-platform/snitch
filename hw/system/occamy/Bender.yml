@@ -17,7 +17,6 @@ dependencies:
   lowrisc_gpio: {path: ../../vendor/lowrisc_opentitan/gpio}
   lowrisc_spi_host: {path: ../../vendor/lowrisc_opentitan/spi_host}
   lowrisc_i2c: {path: ../../vendor/lowrisc_opentitan/i2c}
-  clint: {path: ../../vendor/pulp_platform_clint}
   test: {path: ../../ip/test}
 
 sources:
@@ -28,6 +27,9 @@ sources:
 - src/rv_plic/rv_plic_reg_pkg.sv
 - src/rv_plic/rv_plic_reg_top.sv
 - src/rv_plic/rv_plic.sv
+- src/clint/clint_reg_pkg.sv
+- src/clint/clint_reg_top.sv
+- src/clint/clint.sv
 # Level 1:
 - src/occamy_pkg.sv
 # Level 2:
