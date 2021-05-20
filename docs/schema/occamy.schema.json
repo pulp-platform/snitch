@@ -29,6 +29,30 @@
                 "minimum": 0
             }
         },
+        "spm": {
+            "default": {
+                "size": 128,
+                "banks": 8
+            },
+            "properties": {
+                "size": {
+                    "type": "number",
+                    "description": "Size of SPM in KiByte. Divided in `n` banks. The total size must be divisible by the number of banks.",
+                    "examples": [
+                        128,
+                        64
+                    ]
+                },
+                "banks": {
+                    "type": "number",
+                    "description": "Number of banks.",
+                    "examples": [
+                        16,
+                        32
+                    ]
+                }
+            }
+        },
         "nr_s1_quadrant": {
             "title": "Number of S1 Quadrants",
             "type": "integer",

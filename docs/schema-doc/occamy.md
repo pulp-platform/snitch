@@ -20,6 +20,7 @@ Description for a very simple single-cluster testbench. That is the most minimal
 | :-------------------------------- | :------------ | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [cluster](#cluster)               | `object`      | Required | cannot be null | [Occamy System Schema](occamy-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster")            |
 | [rom](#rom)                       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-rom.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/rom")                               |
+| [spm](#spm)                       | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm")                               |
 | [nr_s1_quadrant](#nr_s1_quadrant) | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/nr_s1_quadrant") |
 | [s1_quadrant](#s1_quadrant)       | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-object.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/s1_quadrant")                    |
 
@@ -67,6 +68,35 @@ The default value is:
 {
   "address": 16777216,
   "length": 131072
+}
+```
+
+## spm
+
+
+
+`spm`
+
+*   is optional
+
+*   Type: unknown
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-spm.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm")
+
+### spm Type
+
+unknown
+
+### spm Default Value
+
+The default value is:
+
+```json
+{
+  "size": 128,
+  "banks": 8
 }
 ```
 

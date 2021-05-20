@@ -8,6 +8,10 @@
         address: 16777216,
         length: 131072
     },
+    spm: {
+      size: 128,
+      latency: 1
+    },
     nr_s1_quadrant: 8,
     s1_quadrant: {
         nr_clusters: 4,

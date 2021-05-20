@@ -76,5 +76,18 @@
         "speed_optimized": true,
         "width": 44,
         "words": 256
+    },
+    {
+        "byte_enable": true,
+        "byte_width": 8,
+        "density_optimized": true,
+        "description": [
+            "SPM"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 64,
+        "words": 16384
     }
 ]

@@ -175,6 +175,70 @@ module occamy_top
 
   % endfor
 
+
+  //////////
+  // SPM //
+  //////////
+  <% spm_words = spm["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
+
+  typedef logic [$clog2(${spm_words})-1:0] mem_addr_t;
+  typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;
+  typedef logic [${soc_narrow_xbar.out_spm.dw//8-1}:0] mem_strb_t;
+
+  logic spm_req, spm_we, spm_rvalid;
+  mem_addr_t spm_addr;
+  mem_data_t spm_wdata, spm_rdata;
+  mem_strb_t spm_strb;
+
+  axi_to_mem #(
+    .axi_req_t (${soc_narrow_xbar.out_spm.req_type()}),
+    .axi_resp_t (${soc_narrow_xbar.out_spm.rsp_type()}),
+    .AddrWidth ($clog2(${spm_words})),
+    .DataWidth (${soc_narrow_xbar.out_spm.dw}),
+    .IdWidth (${soc_narrow_xbar.out_spm.iw}),
+    .NumBanks (1),
+    .BufDepth (1)
+  ) i_axi_to_mem (
+    .clk_i (${soc_narrow_xbar.out_spm.clk}),
+    .rst_ni (${soc_narrow_xbar.out_spm.rst}),
+    .busy_o (),
+    .axi_req_i (${soc_narrow_xbar.out_spm.req_name()}),
+    .axi_resp_o (${soc_narrow_xbar.out_spm.rsp_name()}),
+    .mem_req_o (spm_req),
+    .mem_gnt_i (spm_req), // always granted - it's an SPM.
+    .mem_addr_o (spm_addr),
+    .mem_wdata_o (spm_wdata),
+    .mem_strb_o (spm_strb),
+    .mem_atop_o (),
+    .mem_we_o (spm_we),
+    .mem_rvalid_i (spm_rvalid),
+    .mem_rdata_i (spm_rdata)
+  );
+
+  tc_sram #(
+    .NumWords (${spm_words}),
+    .DataWidth (${soc_narrow_xbar.out_spm.dw}),
+    .ByteWidth (8),
+    .NumPorts (1),
+    .Latency (${spm["latency"]})
+  ) i_spm_cut (
+    .clk_i (${soc_narrow_xbar.out_spm.clk}),
+    .rst_ni (${soc_narrow_xbar.out_spm.rst}),
+    .req_i (spm_req),
+    .we_i (spm_we),
+    .addr_i (spm_addr),
+    .wdata_i (spm_wdata),
+    .be_i (spm_strb),
+    .rdata_o (spm_rdata)
+  );
+
+  shift_reg #(.Depth(${spm["latency"]})) i_shift_reg (
+    .clk_i (${soc_narrow_xbar.out_spm.clk}),
+    .rst_ni (${soc_narrow_xbar.out_spm.rst}),
+    .d_i (spm_req),
+    .d_o (spm_rvalid)
+  );
+
   /// HBM2e Ports
 % for i in range(8):
   assign hbm_${i}_req_o = ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].req_name()};
@@ -344,11 +408,6 @@ module occamy_top
     .tdo_oe_o ()
   );
 
-
-  /////////
-  // SPM //
-  /////////
-  // TODO(zarubaf): Add a tiny bit of SPM
 
   ///////////////
   //   CLINT   //

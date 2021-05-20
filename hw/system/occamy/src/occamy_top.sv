@@ -218,7 +218,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
     '{ idx: 13, start_addr: 48'h1140000000, end_addr: 48'h1180000000 },
     '{ idx: 14, start_addr: 48'h1180000000, end_addr: 48'h11c0000000 },
     '{ idx: 15, start_addr: 48'h11c0000000, end_addr: 48'h1200000000 },
-    '{ idx: 16, start_addr: 48'h20000000, end_addr: 48'h80000000 },
+    '{ idx: 16, start_addr: 48'h20000000, end_addr: 48'h70000000 },
     '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
     '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
     '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
@@ -265,11 +265,13 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
   /// Address map of the `soc_narrow_xbar` crossbar.
-  xbar_rule_48_t [10:0] SocNarrowXbarAddrmap;
+  xbar_rule_48_t [12:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
     '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-    '{ idx: 9, start_addr: 48'h20000000, end_addr: 48'h1200000000 },
-    '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h10000000 },
+    '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h80000000 },
+    '{ idx: 10, start_addr: 48'h20000000, end_addr: 48'h70000000 },
+    '{ idx: 10, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
+    '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h10000000 },
     '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
     '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
     '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
@@ -282,12 +284,12 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   soc_narrow_xbar_in_req_t   [ 8:0] soc_narrow_xbar_in_req;
   soc_narrow_xbar_in_resp_t  [ 8:0] soc_narrow_xbar_in_rsp;
-  soc_narrow_xbar_out_req_t  [10:0] soc_narrow_xbar_out_req;
-  soc_narrow_xbar_out_resp_t [10:0] soc_narrow_xbar_out_rsp;
+  soc_narrow_xbar_out_req_t  [11:0] soc_narrow_xbar_out_req;
+  soc_narrow_xbar_out_resp_t [11:0] soc_narrow_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg(SocNarrowXbarCfg),
-      .Connectivity  ( 99'b111111111111110111111111110111111111110111111111110111111111110111111111110111111111110111111111110 ),
+      .Connectivity  ( 108'b111111111111111101111111111110111111111111011111111111101111111111110111111111111011111111111101111111111110 ),
       .slv_aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d64_i8_u0_aw_chan_t),
       .w_chan_t(axi_a48_d64_i4_u0_w_chan_t),
@@ -1320,6 +1322,72 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
 
+
+  //////////
+  // SPM //
+  //////////
+
+
+  typedef logic [$clog2(16384)-1:0] mem_addr_t;
+  typedef logic [63:0] mem_data_t;
+  typedef logic [7:0] mem_strb_t;
+
+  logic spm_req, spm_we, spm_rvalid;
+  mem_addr_t spm_addr;
+  mem_data_t spm_wdata, spm_rdata;
+  mem_strb_t spm_strb;
+
+  axi_to_mem #(
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t),
+      .AddrWidth($clog2(16384)),
+      .DataWidth(64),
+      .IdWidth(8),
+      .NumBanks(1),
+      .BufDepth(1)
+  ) i_axi_to_mem (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .busy_o(),
+      .axi_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM]),
+      .axi_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM]),
+      .mem_req_o(spm_req),
+      .mem_gnt_i(spm_req),  // always granted - it's an SPM.
+      .mem_addr_o(spm_addr),
+      .mem_wdata_o(spm_wdata),
+      .mem_strb_o(spm_strb),
+      .mem_atop_o(),
+      .mem_we_o(spm_we),
+      .mem_rvalid_i(spm_rvalid),
+      .mem_rdata_i(spm_rdata)
+  );
+
+  tc_sram #(
+      .NumWords (16384),
+      .DataWidth(64),
+      .ByteWidth(8),
+      .NumPorts (1),
+      .Latency  (1)
+  ) i_spm_cut (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .req_i(spm_req),
+      .we_i(spm_we),
+      .addr_i(spm_addr),
+      .wdata_i(spm_wdata),
+      .be_i(spm_strb),
+      .rdata_o(spm_rdata)
+  );
+
+  shift_reg #(
+      .Depth(1)
+  ) i_shift_reg (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .d_i(spm_req),
+      .d_o(spm_rvalid)
+  );
+
   /// HBM2e Ports
   assign hbm_0_req_o = soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_HBM_0];
   assign soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_HBM_0] = hbm_0_rsp_i;
@@ -1663,11 +1731,6 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .tdo_oe_o()
   );
 
-
-  /////////
-  // SPM //
-  /////////
-  // TODO(zarubaf): Add a tiny bit of SPM
 
   ///////////////
   //   CLINT   //

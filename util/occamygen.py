@@ -144,8 +144,10 @@ def main():
 
     dts.add_plic([0], am_plic)
 
-    am_pcie = am.new_leaf("pcie", 0x30000000, 0x20000000,
-                          0x50000000).attach_to(am_soc_wide_xbar)
+    am_pcie = am.new_leaf("pcie", 0x28000000, 0x20000000,
+                          0x48000000).attach_to(am_soc_wide_xbar)
+
+    am_spm = am.new_leaf("spm", 0x10000000, 0x70000000)
 
     # HBM
     am_hbm = list()
@@ -166,6 +168,7 @@ def main():
     am_soc_narrow_xbar.attach(am_soc_axi_lite_periph_xbar)
     am_soc_narrow_xbar.attach(am_soc_regbus_periph_xbar)
     am_soc_narrow_xbar.attach(am_soc_wide_xbar)
+    am_soc_narrow_xbar.attach(am_spm)
 
     # Generate crossbars.
 
@@ -259,6 +262,7 @@ def main():
     dts.add_cpu("eth,ariane")
 
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
+    soc_narrow_xbar.add_output_entry("spm", am_spm)
     soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)
@@ -320,7 +324,8 @@ def main():
             soc_regbus_periph_xbar=soc_regbus_periph_xbar,
             soc_wide_xbar=soc_wide_xbar,
             soc_narrow_xbar=soc_narrow_xbar,
-            nr_s1_quadrants=nr_s1_quadrants)
+            nr_s1_quadrants=nr_s1_quadrants,
+            spm=occamy.cfg["spm"])
         code = re_trailws.sub("", code)
         file.write(code)
 
