@@ -65,6 +65,10 @@ module occamy_top
   output ${soc_regbus_periph_xbar.out_clk_mgr.req_type()} clk_mgr_req_o,
   input  ${soc_regbus_periph_xbar.out_clk_mgr.rsp_type()} clk_mgr_rsp_i,
 
+  /// PCIe/DDR Config
+  output ${soc_regbus_periph_xbar.out_pcie_cfg.req_type()} pcie_cfg_req_o,
+  input  ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_type()} pcie_cfg_rsp_i,
+
   // "external interrupts from uncore - "programmable"
   input logic [3:0] ext_irq_i,
 

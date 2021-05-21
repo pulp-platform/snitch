@@ -43,14 +43,18 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 ##########
 update-source:
 	@echo "[SOLDER]  Generating sources"
-	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --graph addrmap.dot --outdir . \
-		--dts test/occamy.dts \
-		src/occamy_top.sv \
-		src/occamy_pkg.sv \
-		src/occamy_quadrant_s1.sv \
-		src/occamy_xilinx.sv \
-		test/testharness.sv \
-		src/occamy_cva6.sv
+	@echo "[SOLDER]  RTL"
+	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --graph addrmap.dot --outdir src --wrapper --memories \
+		--top-sv src/occamy_top.sv.tpl \
+		--pkg-sv src/occamy_pkg.sv.tpl \
+		--quadrant-s1 src/occamy_quadrant_s1.sv.tpl \
+		--xilinx-sv src/occamy_xilinx.sv.tpl \
+		--cva6-sv src/occamy_cva6.sv.tpl
+	@echo "[SOLDER]  Testbench"
+	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --graph addrmap.dot --outdir test \
+		--testharness-sv test/testharness.sv.tpl
+	@echo "[SOLDER]  Device Tree"
+	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --outdir . --dts test/occamy.dts
 	@echo "[VERIBLE] Formatting"
 	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 

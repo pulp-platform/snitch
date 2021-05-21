@@ -43,11 +43,11 @@ module occamy_quadrant_s1
   /// Address map of the `wide_xbar_quadrant_s1` crossbar.
   xbar_rule_48_t [3:0] WideXbarQuadrantS1Addrmap;
   assign WideXbarQuadrantS1Addrmap = '{
-    '{ idx: 1, start_addr: cluster_base_addr[0], end_addr: cluster_base_addr[0] + ClusterAddressSpace },
-    '{ idx: 2, start_addr: cluster_base_addr[1], end_addr: cluster_base_addr[1] + ClusterAddressSpace },
-    '{ idx: 3, start_addr: cluster_base_addr[2], end_addr: cluster_base_addr[2] + ClusterAddressSpace },
-    '{ idx: 4, start_addr: cluster_base_addr[3], end_addr: cluster_base_addr[3] + ClusterAddressSpace }
-  };
+  '{ idx: 1, start_addr: cluster_base_addr[0], end_addr: cluster_base_addr[0] + ClusterAddressSpace },
+  '{ idx: 2, start_addr: cluster_base_addr[1], end_addr: cluster_base_addr[1] + ClusterAddressSpace },
+  '{ idx: 3, start_addr: cluster_base_addr[2], end_addr: cluster_base_addr[2] + ClusterAddressSpace },
+  '{ idx: 4, start_addr: cluster_base_addr[3], end_addr: cluster_base_addr[3] + ClusterAddressSpace }
+};
 
   wide_xbar_quadrant_s1_in_req_t   [4:0] wide_xbar_quadrant_s1_in_req;
   wide_xbar_quadrant_s1_in_resp_t  [4:0] wide_xbar_quadrant_s1_in_rsp;
@@ -87,11 +87,11 @@ module occamy_quadrant_s1
   /// Address map of the `narrow_xbar_quadrant_s1` crossbar.
   xbar_rule_48_t [3:0] NarrowXbarQuadrantS1Addrmap;
   assign NarrowXbarQuadrantS1Addrmap = '{
-    '{ idx: 1, start_addr: cluster_base_addr[0], end_addr: cluster_base_addr[0] + ClusterAddressSpace },
-    '{ idx: 2, start_addr: cluster_base_addr[1], end_addr: cluster_base_addr[1] + ClusterAddressSpace },
-    '{ idx: 3, start_addr: cluster_base_addr[2], end_addr: cluster_base_addr[2] + ClusterAddressSpace },
-    '{ idx: 4, start_addr: cluster_base_addr[3], end_addr: cluster_base_addr[3] + ClusterAddressSpace }
-  };
+  '{ idx: 1, start_addr: cluster_base_addr[0], end_addr: cluster_base_addr[0] + ClusterAddressSpace },
+  '{ idx: 2, start_addr: cluster_base_addr[1], end_addr: cluster_base_addr[1] + ClusterAddressSpace },
+  '{ idx: 3, start_addr: cluster_base_addr[2], end_addr: cluster_base_addr[2] + ClusterAddressSpace },
+  '{ idx: 4, start_addr: cluster_base_addr[3], end_addr: cluster_base_addr[3] + ClusterAddressSpace }
+};
 
   narrow_xbar_quadrant_s1_in_req_t   [4:0] narrow_xbar_quadrant_s1_in_req;
   narrow_xbar_quadrant_s1_in_resp_t  [4:0] narrow_xbar_quadrant_s1_in_rsp;

@@ -65,6 +65,10 @@ module occamy_top
     output reg_a48_d32_req_t clk_mgr_req_o,
     input  reg_a48_d32_rsp_t clk_mgr_rsp_i,
 
+    /// PCIe/DDR Config
+    output reg_a48_d32_req_t pcie_cfg_req_o,
+    input  reg_a48_d32_rsp_t pcie_cfg_rsp_i,
+
     // "external interrupts from uncore - "programmable"
     input logic [3:0] ext_irq_i,
 
@@ -168,8 +172,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [8:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [8:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [9:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [9:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -192,7 +196,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(9),
+      .NoRules(10),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -208,26 +212,26 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   /// Address map of the `soc_wide_xbar` crossbar.
   xbar_rule_48_t [18:0] SocWideXbarAddrmap;
   assign SocWideXbarAddrmap = '{
-    '{ idx: 8, start_addr: 48'h80000000, end_addr: 48'hc0000000 },
-    '{ idx: 8, start_addr: 48'h1000000000, end_addr: 48'h1040000000 },
-    '{ idx: 9, start_addr: 48'hc0000000, end_addr: 48'h100000000 },
-    '{ idx: 9, start_addr: 48'h1040000000, end_addr: 48'h1080000000 },
-    '{ idx: 10, start_addr: 48'h1080000000, end_addr: 48'h10c0000000 },
-    '{ idx: 11, start_addr: 48'h10c0000000, end_addr: 48'h1100000000 },
-    '{ idx: 12, start_addr: 48'h1100000000, end_addr: 48'h1140000000 },
-    '{ idx: 13, start_addr: 48'h1140000000, end_addr: 48'h1180000000 },
-    '{ idx: 14, start_addr: 48'h1180000000, end_addr: 48'h11c0000000 },
-    '{ idx: 15, start_addr: 48'h11c0000000, end_addr: 48'h1200000000 },
-    '{ idx: 16, start_addr: 48'h20000000, end_addr: 48'h70000000 },
-    '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
-    '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
-    '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
-    '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantAddressSpace },
-    '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantAddressSpace },
-    '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantAddressSpace },
-    '{ idx: 6, start_addr: s1_quadrant_base_addr[6], end_addr: s1_quadrant_base_addr[6] + S1QuadrantAddressSpace },
-    '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
-  };
+  '{ idx: 8, start_addr: 48'h80000000, end_addr: 48'hc0000000 },
+  '{ idx: 8, start_addr: 48'h1000000000, end_addr: 48'h1040000000 },
+  '{ idx: 9, start_addr: 48'hc0000000, end_addr: 48'h100000000 },
+  '{ idx: 9, start_addr: 48'h1040000000, end_addr: 48'h1080000000 },
+  '{ idx: 10, start_addr: 48'h1080000000, end_addr: 48'h10c0000000 },
+  '{ idx: 11, start_addr: 48'h10c0000000, end_addr: 48'h1100000000 },
+  '{ idx: 12, start_addr: 48'h1100000000, end_addr: 48'h1140000000 },
+  '{ idx: 13, start_addr: 48'h1140000000, end_addr: 48'h1180000000 },
+  '{ idx: 14, start_addr: 48'h1180000000, end_addr: 48'h11c0000000 },
+  '{ idx: 15, start_addr: 48'h11c0000000, end_addr: 48'h1200000000 },
+  '{ idx: 16, start_addr: 48'h20000000, end_addr: 48'h70000000 },
+  '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
+  '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
+  '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
+  '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantAddressSpace },
+  '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantAddressSpace },
+  '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantAddressSpace },
+  '{ idx: 6, start_addr: s1_quadrant_base_addr[6], end_addr: s1_quadrant_base_addr[6] + S1QuadrantAddressSpace },
+  '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
+};
 
   soc_wide_xbar_in_req_t   [17:0] soc_wide_xbar_in_req;
   soc_wide_xbar_in_resp_t  [17:0] soc_wide_xbar_in_rsp;
@@ -267,20 +271,20 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   /// Address map of the `soc_narrow_xbar` crossbar.
   xbar_rule_48_t [12:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
-    '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-    '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h80000000 },
-    '{ idx: 10, start_addr: 48'h20000000, end_addr: 48'h70000000 },
-    '{ idx: 10, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
-    '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h10000000 },
-    '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
-    '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
-    '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
-    '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantAddressSpace },
-    '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantAddressSpace },
-    '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantAddressSpace },
-    '{ idx: 6, start_addr: s1_quadrant_base_addr[6], end_addr: s1_quadrant_base_addr[6] + S1QuadrantAddressSpace },
-    '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
-  };
+  '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
+  '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h80000000 },
+  '{ idx: 10, start_addr: 48'h20000000, end_addr: 48'h70000000 },
+  '{ idx: 10, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
+  '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h10000000 },
+  '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
+  '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
+  '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
+  '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantAddressSpace },
+  '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantAddressSpace },
+  '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantAddressSpace },
+  '{ idx: 6, start_addr: s1_quadrant_base_addr[6], end_addr: s1_quadrant_base_addr[6] + S1QuadrantAddressSpace },
+  '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
+};
 
   soc_narrow_xbar_in_req_t   [ 8:0] soc_narrow_xbar_in_req;
   soc_narrow_xbar_in_resp_t  [ 8:0] soc_narrow_xbar_in_rsp;

@@ -134,6 +134,8 @@ import occamy_pkg::*;
     .bootrom_rsp_i (bootrom_rsp),
     .clk_mgr_req_o (clk_mgr_req),
     .clk_mgr_rsp_i (clk_mgr_rsp),
+    .pcie_cfg_req_o (),
+    .pcie_cfg_rsp_i ('0),
     .*
   );
 
