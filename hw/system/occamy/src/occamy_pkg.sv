@@ -282,6 +282,7 @@ package occamy_pkg;
     SOC_NARROW_XBAR_OUT_S1_QUADRANT_6,
     SOC_NARROW_XBAR_OUT_S1_QUADRANT_7,
     SOC_NARROW_XBAR_OUT_PERIPH,
+    SOC_NARROW_XBAR_OUT_SPM,
     SOC_NARROW_XBAR_OUT_SOC_WIDE,
     SOC_NARROW_XBAR_OUT_REGBUS_PERIPH,
     SOC_NARROW_XBAR_NUM_OUTPUTS
@@ -299,7 +300,7 @@ package occamy_pkg;
     AxiIdUsedSlvPorts:  4,
     AxiAddrWidth:       48,
     AxiDataWidth:       64,
-    NoAddrRules:        11
+    NoAddrRules:        13
   };
 
   // AXI bus with 48 bit address, 64 bit data, 4 bit IDs, and 0 bit user data.
