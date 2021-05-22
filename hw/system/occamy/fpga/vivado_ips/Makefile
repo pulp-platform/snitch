@@ -7,13 +7,14 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../../../..
+DEBUG       ?= 0
 
 VIVADO := vivado
 
 include $(ROOT)/util/Makefrag
 
 occamy_xilinx: define-sources.tcl
-	${VIVADO} -mode batch -source occamy_xilinx.tcl
+	${VIVADO} -mode batch -source occamy_xilinx.tcl -tclargs $(DEBUG)
 
 define-sources.tcl:
 	${BENDER} script vivado -t bscane > $@

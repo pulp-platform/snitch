@@ -4,6 +4,15 @@
 #
 # Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 
+# Parse arguments
+set DEBUG false
+if {$argc > 0} {
+    # Vivado's boolean properties are not compatible with all tcl boolean variables.
+    if {[lindex $argv 0]} {
+        set DEBUG true
+    }
+}
+
 # Create project
 set project occamy_vcu128
 
@@ -37,8 +46,10 @@ export_ip_user_files -of_objects [get_ips occamy_vcu128_occamy_xilinx_0_0] -no_s
 eval [exec sed {s/current_fileset/get_filesets occamy_vcu128_occamy_xilinx_0_0/} define_defines_includes_no_simset.tcl]
 
 # Debug settings
-add_files -fileset constrs_1 occamy_vcu128_debug.xdc
-set_property target_constrs_file occamy_vcu128_debug.xdc [current_fileset -constrset]
+if {$DEBUG} {
+    add_files -fileset constrs_1 occamy_vcu128_debug.xdc
+    set_property target_constrs_file occamy_vcu128_debug.xdc [current_fileset -constrset]
+}
 
 # Do NOT insert BUFGs on high-fanout nets (e.g. reset). This will backfire during placement.
 set_param logicopt.enableBUFGinsertHFN no
