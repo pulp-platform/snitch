@@ -4,7 +4,7 @@
 
 .global _start
 _start:
-    li    sp, 0x30001E00
+    li    sp, 0x84000000
     # write exception vector
     la    t0, exception
     csrw  mtvec, t0
@@ -17,7 +17,7 @@ exception:
 entry_addr:
     .word exception
 
-    .section .device_tree
-    .globl device_tree
+.align 3
+.globl device_tree
 device_tree:
     .incbin "occamy.dtb"
