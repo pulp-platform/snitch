@@ -608,10 +608,12 @@ module occamy_xilinx
 
   // Occamy top-level
   occamy_top i_occamy (
-      .bootrom_req_o(bootrom_req),
-      .bootrom_rsp_i(bootrom_rsp),
-      .clk_mgr_req_o(clk_mgr_req),
-      .clk_mgr_rsp_i(clk_mgr_rsp),
+      .bootrom_req_o (bootrom_req),
+      .bootrom_rsp_i (bootrom_rsp),
+      .clk_mgr_req_o (clk_mgr_req),
+      .clk_mgr_rsp_i (clk_mgr_rsp),
+      .pcie_cfg_req_o(),
+      .pcie_cfg_rsp_i('0),
       .*
   );
 

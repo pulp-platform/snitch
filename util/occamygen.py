@@ -14,13 +14,25 @@ from subprocess import run
 
 from jsonref import JsonRef
 from clustergen.occamy import Occamy
-from mako.lookup import TemplateLookup
+from mako.template import Template
 
 from solder import solder, device_tree
 
-templates = TemplateLookup(
-    directories=[pathlib.Path(__file__).parent / "../hw/system/occamy"],
-    output_encoding="utf-8")
+# Compile a regex to trim trailing whitespaces on lines.
+re_trailws = re.compile(r'[ \t\r]+$', re.MULTILINE)
+
+
+def write_template(tpl_path, outdir, **kwargs):
+    if tpl_path:
+        tpl_path = pathlib.Path(tpl_path).absolute()
+        if tpl_path.exists():
+            tpl = Template(filename=str(tpl_path))
+            with open(outdir / tpl_path.with_suffix("").name, "w") as file:
+                code = tpl.render_unicode(**kwargs)
+                code = re_trailws.sub("", code)
+                file.write(code)
+        else:
+            raise FileNotFoundError
 
 
 def main():
@@ -37,20 +49,31 @@ def main():
                         type=pathlib.Path,
                         required=True,
                         help="Target directory.")
-
     # Parse arguments.
-    parser.add_argument("TOP_SV", help="Name of top-level file (output).")
-    parser.add_argument("PKG_SV",
+    parser.add_argument("--top-sv",
+                        metavar="TOP_SV",
+                        help="Name of top-level file (output).")
+    parser.add_argument("--pkg-sv",
+                        metavar="PKG_SV",
                         help="Name of top-level package file (output)")
-    parser.add_argument("QUADRANT_S1",
-                        help="Name of S1 quadrant file (output)")
-    parser.add_argument("XILINX_SV",
+    parser.add_argument("--quadrant-s1",
+                        metavar="QUADRANT_S1",
+                        help="Name of S1 quadrant template file (output)")
+    parser.add_argument("--xilinx-sv",
+                        metavar="XILINX_SV",
                         help="Name of the Xilinx wrapper file (output).")
-    parser.add_argument("TESTHARNESS_SV",
+    parser.add_argument("--testharness-sv",
+                        metavar="TESTHARNESS_SV",
                         help="Name of the testharness wrapper file (output).")
-    parser.add_argument("CVA6_SV",
+    parser.add_argument("--cva6-sv",
+                        metavar="CVA6_SV",
                         help="Name of the CVA6 wrapper file (output).")
+    parser.add_argument("--chip",
+                        metavar="CHIP_TOP",
+                        help="(Optional) Chip Top-level")
     parser.add_argument("--graph", "-g", metavar="DOT")
+    parser.add_argument("--memories", "-m", action="store_true")
+    parser.add_argument("--wrapper", "-w", action="store_true")
     parser.add_argument("--cheader", "-D", metavar="CHEADER")
     parser.add_argument("--dts", metavar="DTS", help="System's device tree.")
 
@@ -82,17 +105,16 @@ def main():
     if not args.outdir.is_dir():
         exit("Out directory is not a valid path.")
 
-    outdir = args.outdir / "src"
+    outdir = args.outdir
     outdir.mkdir(parents=True, exist_ok=True)
 
-    with open(outdir / "occamy_cluster_wrapper.sv", "w") as f:
-        f.write(occamy.render_wrapper())
+    if args.wrapper:
+        with open(outdir / "occamy_cluster_wrapper.sv", "w") as f:
+            f.write(occamy.render_wrapper())
 
-    with open(outdir / "memories.json", "w") as f:
-        f.write(occamy.cluster.memory_cfg())
-
-    # Compile a regex to trim trailing whitespaces on lines.
-    re_trailws = re.compile(r'[ \t\r]+$', re.MULTILINE)
+    if args.memories:
+        with open(outdir / "memories.json", "w") as f:
+            f.write(occamy.cluster.memory_cfg())
 
     # Create the address map.
     am = solder.AddrMap()
@@ -138,6 +160,9 @@ def main():
     am_clint = am.new_leaf("clint", 0x0100000,
                            0x04000000).attach_to(am_soc_regbus_periph_xbar)
     dts.add_clint([0], am_clint)
+
+    am_pcie_cfg = am.new_leaf("pcie_cfg", 0x20000,
+                              0x05000000).attach_to(am_soc_regbus_periph_xbar)
 
     am_plic = am.new_leaf("plic", 0x4000000,
                           0x0C000000).attach_to(am_soc_regbus_periph_xbar)
@@ -209,6 +234,7 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("gpio", am_gpio)
     soc_regbus_periph_xbar.add_output_entry("i2c", am_i2c)
     soc_regbus_periph_xbar.add_output_entry("spim", am_spim)
+    soc_regbus_periph_xbar.add_output_entry("pcie_cfg", am_pcie_cfg)
 
     #################
     # SoC Wide Xbar #
@@ -314,90 +340,69 @@ def main():
     #############
     # Top-Level #
     #############
-    tpl_top = templates.get_template("src/occamy_top.sv.tpl")
-
-    with open(args.TOP_SV, "w") as file:
-        code = tpl_top.render_unicode(
-            module=solder.code_module['default'].replace("\n", "\n  "),
-            solder=solder,
-            soc_periph_xbar=soc_axi_lite_periph_xbar,
-            soc_regbus_periph_xbar=soc_regbus_periph_xbar,
-            soc_wide_xbar=soc_wide_xbar,
-            soc_narrow_xbar=soc_narrow_xbar,
-            nr_s1_quadrants=nr_s1_quadrants,
-            spm=occamy.cfg["spm"])
-        code = re_trailws.sub("", code)
-        file.write(code)
+    write_template(args.top_sv,
+                   outdir,
+                   module=solder.code_module['default'],
+                   solder=solder,
+                   soc_periph_xbar=soc_axi_lite_periph_xbar,
+                   soc_regbus_periph_xbar=soc_regbus_periph_xbar,
+                   soc_wide_xbar=soc_wide_xbar,
+                   soc_narrow_xbar=soc_narrow_xbar,
+                   nr_s1_quadrants=nr_s1_quadrants,
+                   spm=occamy.cfg["spm"])
 
     ###############
     # S1 Quadrant #
     ###############
-    tpl_quadrant_s1 = templates.get_template("src/occamy_quadrant_s1.sv.tpl")
-
-    with open(args.QUADRANT_S1, "w") as file:
-        code = tpl_quadrant_s1.render_unicode(
-            module=solder.code_module['quadrant_s1'].replace("\n", "\n  "),
-            solder=solder,
-            soc_wide_xbar=soc_wide_xbar,
-            soc_narrow_xbar=soc_narrow_xbar,
-            wide_xbar_quadrant_s1=wide_xbar_quadrant_s1,
-            narrow_xbar_quadrant_s1=narrow_xbar_quadrant_s1,
-            nr_clusters=nr_s1_clusters,
-            const_cache_cfg=occamy.cfg["s1_quadrant"].get("const_cache"))
-        code = re_trailws.sub("", code)
-        file.write(code)
+    write_template(
+        args.quadrant_s1,
+        outdir,
+        module=solder.code_module['quadrant_s1'],
+        solder=solder,
+        soc_wide_xbar=soc_wide_xbar,
+        soc_narrow_xbar=soc_narrow_xbar,
+        wide_xbar_quadrant_s1=wide_xbar_quadrant_s1,
+        narrow_xbar_quadrant_s1=narrow_xbar_quadrant_s1,
+        nr_clusters=nr_s1_clusters,
+        const_cache_cfg=occamy.cfg["s1_quadrant"].get("const_cache"))
 
     ###########
     # Package #
     ###########
-    tpl_pkg = templates.get_template("src/occamy_pkg.sv.tpl")
-
-    with open(args.PKG_SV, "w") as file:
-        code = tpl_pkg.render_unicode(
-            package=solder.code_package.replace("\n", "\n  "),
-            solder=solder,
-        )
-        code = re_trailws.sub("", code)
-        file.write(code)
+    write_template(args.pkg_sv,
+                   outdir,
+                   solder=solder,
+                   package=solder.code_package)
 
     ##################
     # Xilinx Wrapper #
     ##################
-    tpl_xilinx = templates.get_template("src/occamy_xilinx.sv.tpl")
-
-    with open(args.XILINX_SV, "w") as file:
-        code = tpl_xilinx.render_unicode(
-            solder=solder,
-            soc_wide_xbar=soc_wide_xbar,
-            soc_regbus_periph_xbar=soc_regbus_periph_xbar)
-        code = re_trailws.sub("", code)
-        file.write(code)
+    write_template(
+        args.xilinx_sv,
+        outdir,
+        solder=solder,
+        soc_wide_xbar=soc_wide_xbar,
+        soc_regbus_periph_xbar=soc_regbus_periph_xbar,
+    )
 
     ###############
     # Testharness #
     ###############
-    tpl_testharness = templates.get_template("test/testharness.sv.tpl")
-
-    with open(args.TESTHARNESS_SV, "w") as file:
-        code = tpl_testharness.render_unicode(
-            solder=solder,
-            soc_wide_xbar=soc_wide_xbar,
-            soc_regbus_periph_xbar=soc_regbus_periph_xbar,
-            nr_s1_quadrants=nr_s1_quadrants)
-        code = re_trailws.sub("", code)
-        file.write(code)
+    write_template(args.testharness_sv,
+                   outdir,
+                   solder=solder,
+                   soc_wide_xbar=soc_wide_xbar,
+                   soc_regbus_periph_xbar=soc_regbus_periph_xbar,
+                   nr_s1_quadrants=nr_s1_quadrants)
 
     ################
     # CVA6 Wrapper #
     ################
-    tpl_cva6 = templates.get_template("src/occamy_cva6.sv.tpl")
-
-    with open(args.CVA6_SV, "w") as file:
-        code = tpl_cva6.render_unicode(solder=solder,
-                                       soc_narrow_xbar=soc_narrow_xbar,
-                                       cfg=occamy.cfg)
-        code = re_trailws.sub("", code)
-        file.write(code)
+    write_template(args.cva6_sv,
+                   outdir,
+                   solder=solder,
+                   soc_narrow_xbar=soc_narrow_xbar,
+                   cfg=occamy.cfg)
 
     ###########
     # CHEADER #
@@ -405,6 +410,16 @@ def main():
     if args.cheader:
         with open(args.cheader, "w") as file:
             file.write(am.print_cheader())
+
+    ############
+    # CHIP TOP #
+    ############
+    write_template(args.chip,
+                   outdir,
+                   solder=solder,
+                   soc_wide_xbar=soc_wide_xbar,
+                   soc_narrow_xbar=soc_narrow_xbar,
+                   soc_regbus_periph_xbar=soc_regbus_periph_xbar)
 
     #######
     # DTS #
