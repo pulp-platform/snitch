@@ -75,7 +75,7 @@ define QUESTASIM
 	@echo "#!/bin/bash" > $@
 	@echo '${VSIM} +permissive -work ${VSIM_BUILDDIR} -c \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr -lutil" \
-				-t 1ps -voptargs=+acc tb_bin +permissive-off ++$$1 \
+				-t 1ps -voptargs=+acc $1 +permissive-off ++$$1 \
 				-do "log -r /*; run -a"' >> $@
 	@chmod +x $@
 endef
