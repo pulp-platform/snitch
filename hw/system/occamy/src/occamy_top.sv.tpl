@@ -92,8 +92,23 @@ module occamy_top
   output ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o
 );
 
-  occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_in;
-  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_out;
+  // TODO: Pull to top-level for system to influence configuration.
+  occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
+  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
+  always_comb soc_ctrl_in = '0;
+
+  <% spm_words = spm["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
+
+  typedef logic [${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)-1}:0] mem_addr_t;
+  typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;
+  typedef logic [${soc_narrow_xbar.out_spm.dw//8-1}:0] mem_strb_t;
+
+  logic spm_req, spm_we, spm_rvalid;
+  logic [1:0] spm_rerror;
+  mem_addr_t spm_addr;
+  mem_data_t spm_wdata, spm_rdata;
+  mem_strb_t spm_strb;
+
   // Machine timer and machine software interrupt pending.
   logic mtip, msip;
   // Supervisor and machine-mode external interrupt pending.
@@ -183,21 +198,10 @@ module occamy_top
   //////////
   // SPM //
   //////////
-  <% spm_words = spm["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
-
-  typedef logic [$clog2(${spm_words})-1:0] mem_addr_t;
-  typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;
-  typedef logic [${soc_narrow_xbar.out_spm.dw//8-1}:0] mem_strb_t;
-
-  logic spm_req, spm_we, spm_rvalid;
-  mem_addr_t spm_addr;
-  mem_data_t spm_wdata, spm_rdata;
-  mem_strb_t spm_strb;
-
   axi_to_mem #(
     .axi_req_t (${soc_narrow_xbar.out_spm.req_type()}),
     .axi_resp_t (${soc_narrow_xbar.out_spm.rsp_type()}),
-    .AddrWidth ($clog2(${spm_words})),
+    .AddrWidth (${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)}),
     .DataWidth (${soc_narrow_xbar.out_spm.dw}),
     .IdWidth (${soc_narrow_xbar.out_spm.iw}),
     .NumBanks (1),
@@ -219,28 +223,23 @@ module occamy_top
     .mem_rdata_i (spm_rdata)
   );
 
-  tc_sram #(
+  cc_ram_1p_adv #(
     .NumWords (${spm_words}),
     .DataWidth (${soc_narrow_xbar.out_spm.dw}),
     .ByteWidth (8),
-    .NumPorts (1),
-    .Latency (${spm["latency"]})
+    .EnableInputPipeline (1'b1),
+    .EnableOutputPipeline (1'b1)
   ) i_spm_cut (
     .clk_i (${soc_narrow_xbar.out_spm.clk}),
     .rst_ni (${soc_narrow_xbar.out_spm.rst}),
     .req_i (spm_req),
     .we_i (spm_we),
-    .addr_i (spm_addr),
+    .addr_i (spm_addr[${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)-1}:${util.clog2(soc_narrow_xbar.out_spm.dw//8)}]),
     .wdata_i (spm_wdata),
     .be_i (spm_strb),
-    .rdata_o (spm_rdata)
-  );
-
-  shift_reg #(.Depth(${spm["latency"]})) i_shift_reg (
-    .clk_i (${soc_narrow_xbar.out_spm.clk}),
-    .rst_ni (${soc_narrow_xbar.out_spm.rst}),
-    .d_i (spm_req),
-    .d_o (spm_rvalid)
+    .rdata_o (spm_rdata),
+    .rvalid_o (spm_rvalid),
+    .rerror_o (spm_rerror)
   );
 
   /// HBM2e Ports
@@ -433,7 +432,7 @@ module occamy_top
   /////////////////////
   //   SOC CONTROL   //
   /////////////////////
-  occamy_soc_reg_top #(
+  occamy_soc_ctrl #(
     .reg_req_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.req_type()} ),
     .reg_rsp_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.rsp_type()} )
   ) i_soc_ctrl (
@@ -441,9 +440,11 @@ module occamy_top
     .rst_ni    ( rst_ni ),
     .reg_req_i ( ${soc_regbus_periph_xbar.out_soc_ctrl.req_name()} ),
     .reg_rsp_o ( ${soc_regbus_periph_xbar.out_soc_ctrl.rsp_name()} ),
-    .reg2hw    ( soc_ctrl_in ),
-    .hw2reg    ( soc_ctrl_out ),
-    .devmode_i ( 1'b1 )
+    .reg2hw_o  ( soc_ctrl_out ),
+    .hw2reg_i  ( soc_ctrl_in ),
+    .event_ecc_rerror_i (spm_rerror),
+    .intr_ecc_uncorrectable_o (irq.ecc_uncorrectable),
+    .intr_ecc_correctable_o (irq.ecc_correctable)
   );
 
   //////////////

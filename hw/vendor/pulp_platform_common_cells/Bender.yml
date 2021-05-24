@@ -60,6 +60,7 @@ sources:
   - src/addr_decode_napot.sv
   - src/addr_decode.sv
   - src/cb_filter.sv
+  - src/cc_ram_1p_adv.sv
   - src/cdc_fifo_2phase.sv
   - src/cdc_fifo_gray.sv
   - src/counter.sv

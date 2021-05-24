@@ -116,8 +116,23 @@ module occamy_top
     output axi_a48_d512_i3_u0_resp_t pcie_axi_rsp_o
 );
 
-  occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_in;
-  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_out;
+  // TODO: Pull to top-level for system to influence configuration.
+  occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
+  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
+  always_comb soc_ctrl_in = '0;
+
+
+
+  typedef logic [16:0] mem_addr_t;
+  typedef logic [63:0] mem_data_t;
+  typedef logic [7:0] mem_strb_t;
+
+  logic spm_req, spm_we, spm_rvalid;
+  logic [1:0] spm_rerror;
+  mem_addr_t spm_addr;
+  mem_data_t spm_wdata, spm_rdata;
+  mem_strb_t spm_strb;
+
   // Machine timer and machine software interrupt pending.
   logic mtip, msip;
   // Supervisor and machine-mode external interrupt pending.
@@ -1330,21 +1345,10 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   //////////
   // SPM //
   //////////
-
-
-  typedef logic [$clog2(16384)-1:0] mem_addr_t;
-  typedef logic [63:0] mem_data_t;
-  typedef logic [7:0] mem_strb_t;
-
-  logic spm_req, spm_we, spm_rvalid;
-  mem_addr_t spm_addr;
-  mem_data_t spm_wdata, spm_rdata;
-  mem_strb_t spm_strb;
-
   axi_to_mem #(
       .axi_req_t(axi_a48_d64_i8_u0_req_t),
       .axi_resp_t(axi_a48_d64_i8_u0_resp_t),
-      .AddrWidth($clog2(16384)),
+      .AddrWidth(17),
       .DataWidth(64),
       .IdWidth(8),
       .NumBanks(1),
@@ -1366,30 +1370,23 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .mem_rdata_i(spm_rdata)
   );
 
-  tc_sram #(
-      .NumWords (16384),
+  cc_ram_1p_adv #(
+      .NumWords(16384),
       .DataWidth(64),
       .ByteWidth(8),
-      .NumPorts (1),
-      .Latency  (1)
+      .EnableInputPipeline(1'b1),
+      .EnableOutputPipeline(1'b1)
   ) i_spm_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .req_i(spm_req),
       .we_i(spm_we),
-      .addr_i(spm_addr),
+      .addr_i(spm_addr[16:3]),
       .wdata_i(spm_wdata),
       .be_i(spm_strb),
-      .rdata_o(spm_rdata)
-  );
-
-  shift_reg #(
-      .Depth(1)
-  ) i_shift_reg (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
-      .d_i(spm_req),
-      .d_o(spm_rvalid)
+      .rdata_o(spm_rdata),
+      .rvalid_o(spm_rvalid),
+      .rerror_o(spm_rerror)
   );
 
   /// HBM2e Ports
@@ -1756,17 +1753,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   /////////////////////
   //   SOC CONTROL   //
   /////////////////////
-  occamy_soc_reg_top #(
+  occamy_soc_ctrl #(
       .reg_req_t(reg_a48_d32_req_t),
       .reg_rsp_t(reg_a48_d32_rsp_t)
   ) i_soc_ctrl (
-      .clk_i    (clk_i),
-      .rst_ni   (rst_ni),
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
       .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_SOC_CTRL]),
       .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_SOC_CTRL]),
-      .reg2hw   (soc_ctrl_in),
-      .hw2reg   (soc_ctrl_out),
-      .devmode_i(1'b1)
+      .reg2hw_o(soc_ctrl_out),
+      .hw2reg_i(soc_ctrl_in),
+      .event_ecc_rerror_i(spm_rerror),
+      .intr_ecc_uncorrectable_o(irq.ecc_uncorrectable),
+      .intr_ecc_correctable_o(irq.ecc_correctable)
   );
 
   //////////////

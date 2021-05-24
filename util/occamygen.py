@@ -16,7 +16,7 @@ from jsonref import JsonRef
 from clustergen.occamy import Occamy
 from mako.template import Template
 
-from solder import solder, device_tree
+from solder import solder, device_tree, util
 
 # Compile a regex to trim trailing whitespaces on lines.
 re_trailws = re.compile(r'[ \t\r]+$', re.MULTILINE)
@@ -344,6 +344,7 @@ def main():
                    outdir,
                    module=solder.code_module['default'],
                    solder=solder,
+                   util=util,
                    soc_periph_xbar=soc_axi_lite_periph_xbar,
                    soc_regbus_periph_xbar=soc_regbus_periph_xbar,
                    soc_wide_xbar=soc_wide_xbar,
