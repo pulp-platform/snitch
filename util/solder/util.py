@@ -50,3 +50,7 @@ def camelize(s):
         s[0].lower() if not s[:2].isupper() else s[0],
         UNDERSCORE_RE.sub(lambda m: m.group(1) + m.group(2).upper(), s[1:]),
     ])
+
+
+def clog2(x):
+    return x.bit_length() - 1

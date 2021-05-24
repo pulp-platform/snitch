@@ -17,7 +17,7 @@
     { name: "NumSrc",
       desc: "Number of interrupt sources",
       type: "int",
-      default: "63",
+      default: "65",
       local: "true"
     },
     { name: "NumTarget",
@@ -539,6 +539,22 @@
         { bits: "2:0" }
       ],
     },
+    { name: "PRIO63",
+      desc: "Interrupt Source 63 Priority",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "2:0" }
+      ],
+    },
+    { name: "PRIO64",
+      desc: "Interrupt Source 64 Priority",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "2:0" }
+      ],
+    },
     { skipto: "0x1000" }
     { multireg: {
         name: "IP",
@@ -610,7 +626,7 @@
       hwqe: "true",
       hwre: "true",
       fields: [
-        { bits: "5:0" }
+        { bits: "6:0" }
       ],
       tags: [// CC register value is related to IP
              "excl:CsrNonInitTests:CsrExclCheck"],
@@ -644,7 +660,7 @@
       hwqe: "true",
       hwre: "true",
       fields: [
-        { bits: "5:0" }
+        { bits: "6:0" }
       ],
       tags: [// CC register value is related to IP
              "excl:CsrNonInitTests:CsrExclCheck"],

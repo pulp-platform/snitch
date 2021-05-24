@@ -43,7 +43,7 @@ class Occamy(Generator):
                                  speed_optimized=True,
                                  density_optimized=True)
 
-        self.cluster.add_mem(cfg["spm"]["size"]*1024//8, 64, desc="SPM", density_optimized=True)
+        self.cluster.add_mem(cfg["spm"]["size"]*1024//8, 64, desc="SPM", speed_optimized=False, density_optimized=True)
 
         # CVA6
         self.cluster.add_mem(256,
