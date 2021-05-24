@@ -418,6 +418,7 @@ def main():
     write_template(args.chip,
                    outdir,
                    solder=solder,
+                   nr_s1_quadrants=nr_s1_quadrants,
                    soc_wide_xbar=soc_wide_xbar,
                    soc_narrow_xbar=soc_narrow_xbar,
                    soc_regbus_periph_xbar=soc_regbus_periph_xbar)

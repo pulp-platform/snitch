@@ -97,7 +97,7 @@ ${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} ${TB_DIR}/rtl_lib.
 	echo 'return 0' >> $@
 
 bin/occamy_top.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
-	$(call QUESTASIM)
+	$(call QUESTASIM,tb_bin)
 
 #######
 # VCS #
