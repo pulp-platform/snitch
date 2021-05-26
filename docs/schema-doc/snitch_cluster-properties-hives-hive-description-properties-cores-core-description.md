@@ -19,6 +19,7 @@ Description of a single core.
 | Property                                                  | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                                                                             |
 | :-------------------------------------------------------- | :-------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [isa](#isa)                                               | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-isa-string-containing-risc-v-standard-extensions.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/isa")  |
+| [Xdiv_sqrt](#xdiv_sqrt)                                   | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xdiv_sqrt.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/Xdiv_sqrt")                                   |
 | [xssr](#xssr)                                             | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xssr-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xssr")                            |
 | [xfrep](#xfrep)                                           | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-enable-xfrep-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xfrep")                          |
 | [xdma](#xdma)                                             | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xdma-extension.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xdma")                                   |
@@ -67,6 +68,24 @@ The default value is:
 ```json
 "rv32imafd"
 ```
+
+## Xdiv_sqrt
+
+Enable hardware support for floating-point division and square-root
+
+`Xdiv_sqrt`
+
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xdiv_sqrt.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/Xdiv_sqrt")
+
+### Xdiv_sqrt Type
+
+`boolean`
 
 ## xssr
 
