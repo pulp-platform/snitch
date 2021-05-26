@@ -1,18 +1,16 @@
-From 791cc2b3026f87017c6055f6ee1f1944cffea2e2 Mon Sep 17 00:00:00 2001
+From c6611c9ee464a1438cab17ad1f45ea854dba6dc5 Mon Sep 17 00:00:00 2001
 From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-Date: Wed, 6 Jan 2021 19:59:22 +0100
-Subject: [PATCH] vendor: VCS patches
+Date: Wed, 26 May 2021 12:28:59 +0200
+Subject: [PATCH] vendor VCS patches
 
 ---
  test/cb_filter_tb.sv       | 324 ++++++++++++++++++-------------------
- test/cdc_2phase_tb.sv      |   2 -
- test/cdc_fifo_tb.sv        |   2 -
  test/stream_register_tb.sv | 159 +++++++++---------
  test/sub_per_hash_tb.sv    |  62 ++++---
- 5 files changed, 269 insertions(+), 280 deletions(-)
+ 3 files changed, 269 insertions(+), 276 deletions(-)
 
 diff --git a/test/cb_filter_tb.sv b/test/cb_filter_tb.sv
-index 22dd7d4..4f9f7f1 100644
+index becf859..bce4a28 100644
 --- a/test/cb_filter_tb.sv
 +++ b/test/cb_filter_tb.sv
 @@ -93,192 +93,190 @@ module cb_filter_tb;
@@ -369,32 +367,6 @@ index 22dd7d4..4f9f7f1 100644
  
    cb_filter #(
      .KHashes       ( NoHashes    ), // Number of hash functions
-diff --git a/test/cdc_2phase_tb.sv b/test/cdc_2phase_tb.sv
-index 77b5b76..273c614 100644
---- a/test/cdc_2phase_tb.sv
-+++ b/test/cdc_2phase_tb.sv
-@@ -11,8 +11,6 @@
- //
- // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
- 
--timeunit 0.1ns/1ps;
--
- module cdc_2phase_tb;
- 
-   parameter int UNTIL = 100000;
-diff --git a/test/cdc_fifo_tb.sv b/test/cdc_fifo_tb.sv
-index 3e6eac5..63255ef 100644
---- a/test/cdc_fifo_tb.sv
-+++ b/test/cdc_fifo_tb.sv
-@@ -11,8 +11,6 @@
- //
- // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
- 
--timeunit 0.1ns/1ps;
--
- module cdc_fifo_tb;
- 
-   parameter bit INJECT_SRC_STALLS = 0;
 diff --git a/test/stream_register_tb.sv b/test/stream_register_tb.sv
 index 3645fa2..7c9eba2 100644
 --- a/test/stream_register_tb.sv
@@ -574,7 +546,7 @@ index 3645fa2..7c9eba2 100644
 -    testbench tb();
  endmodule
 diff --git a/test/sub_per_hash_tb.sv b/test/sub_per_hash_tb.sv
-index 2f40567..abcbe2f 100644
+index f6d68c1..bd9b2b5 100644
 --- a/test/sub_per_hash_tb.sv
 +++ b/test/sub_per_hash_tb.sv
 @@ -59,45 +59,43 @@ module sub_per_hash_tb;
