@@ -32,7 +32,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   parameter bit          XF16ALT   = 0,
   parameter bit          XF8       = 0,
   /// Enable div/sqrt unit (buggy - use with caution)
-  parameter bit          Xdiv_sqrt = 0,
+  parameter bit          XDivSqrt  = 0,
   parameter bit          XFVEC     = 0,
   int unsigned           FLEN      = DataWidth,
   /// Enable experimental IPU extension.
@@ -1047,7 +1047,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FNMSUB_S,
       FNMADD_S: begin
         if (FP_EN && RVF
-          && (!(inst_data_i inside {FDIV_S, FSQRT_S}) || Xdiv_sqrt)) begin
+          && (!(inst_data_i inside {FDIV_S, FSQRT_S}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1081,7 +1081,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCPKA_S_S,
       VFCPKA_S_D: begin
         if (FP_EN && XFVEC && RVF && RVD
-            && (!(inst_data_i inside {VFDIV_S, VFDIV_R_S, VFSQRT_S}) || Xdiv_sqrt)) begin
+            && (!(inst_data_i inside {VFDIV_S, VFDIV_R_S, VFSQRT_S}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1103,7 +1103,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMSUB_D,
       FNMSUB_D,
       FNMADD_D: begin
-        if (FP_EN && RVD && (!(inst_data_i inside {FDIV_D, FSQRT_D}) || Xdiv_sqrt)) begin
+        if (FP_EN && RVD && (!(inst_data_i inside {FDIV_D, FSQRT_D}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1131,7 +1131,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FNMADD_H: begin
         if (FP_EN && (XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
             (XF16ALT && inst_data_i[14:12] == 3'b101)
-            && (!(inst_data_i inside {FDIV_H, FSQRT_H}) || Xdiv_sqrt)) begin
+            && (!(inst_data_i inside {FDIV_H, FSQRT_H}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1204,7 +1204,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFSGNJX_H,
       VFSGNJX_R_H,
       VFCPKA_H_S: begin
-        if (FP_EN && XFVEC && XF16 && RVF && (!(inst_data_i inside {VFDIV_H, VFDIV_R_H, VFSQRT_H}) || Xdiv_sqrt)) begin
+        if (FP_EN && XFVEC && XF16 && RVF
+          && (!(inst_data_i inside {VFDIV_H, VFDIV_R_H, VFSQRT_H}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1289,7 +1290,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFSGNJX_R_AH,
       VFCPKA_AH_S: begin
         if (FP_EN && XFVEC && XF16ALT && RVF
-          && (!(inst_data_i inside {VFDIV_AH, VFDIV_R_AH, VFSQRT_AH}) || Xdiv_sqrt)) begin
+          && (!(inst_data_i inside {VFDIV_AH, VFDIV_R_AH, VFSQRT_AH}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1336,7 +1337,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMSUB_B,
       FNMSUB_B,
       FNMADD_B: begin
-        if (FP_EN && XF8 && (!(inst_data_i inside {FDIV_B, FSQRT_B}) || Xdiv_sqrt)) begin
+        if (FP_EN && XF8 && (!(inst_data_i inside {FDIV_B, FSQRT_B}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1404,7 +1405,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFSGNJX_B,
       VFSGNJX_R_B: begin
         if (FP_EN && XFVEC && XF8 && FLEN >= 16
-          && (!(inst_data_i inside {VFDIV_B, VFDIV_R_B, VFSQRT_B}) || Xdiv_sqrt)) begin
+          && (!(inst_data_i inside {VFDIV_B, VFDIV_R_B, VFSQRT_B}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin

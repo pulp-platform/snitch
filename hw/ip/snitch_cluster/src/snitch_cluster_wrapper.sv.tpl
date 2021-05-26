@@ -118,7 +118,7 @@ package ${cfg['pkg_name']};
                     '{default: fpnew_pkg::PARALLEL}, // NONCOMP
                     '{default: fpnew_pkg::MERGED}},  // CONV
         PipeConfig: fpnew_pkg::${cfg['timing']['fpu_pipe_config']}
-    }${', ' if not loop.last else ''}
+    }${',\n' if not loop.last else '\n'}\
   % endfor
   };
 
@@ -195,7 +195,7 @@ module ${cfg['name']}_wrapper (
     .RVE (${core_isa('e')}),
     .RVF (${core_isa('f')}),
     .RVD (${core_isa('d')}),
-    .Xdiv_sqrt (${core_cfg_flat('Xdiv_sqrt')}),
+    .XDivSqrt (${core_cfg_flat('Xdiv_sqrt')}),
     .XF16 (${core_cfg_flat('xf16')}),
     .XF16ALT (${core_cfg_flat('xf16alt')}),
     .XF8 (${core_cfg_flat('xf8')}),

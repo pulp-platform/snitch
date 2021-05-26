@@ -63,8 +63,8 @@ module snitch_cluster
   parameter bit [NrCores-1:0] RVF           = '0,
   /// Per-core enabling of the standard `D` ISA extensions.
   parameter bit [NrCores-1:0] RVD           = '0,
-  /// Per-core enabling of `Xdiv_sqrt` ISA extensions.
-  parameter bit [NrCores-1:0] Xdiv_sqrt     = '0,
+  /// Per-core enabling of `XDivSqrt` ISA extensions.
+  parameter bit [NrCores-1:0] XDivSqrt      = '0,
   // Small-float extensions
   /// FP 16-bit
   parameter bit [NrCores-1:0] XF16          = '0,
@@ -742,7 +742,7 @@ module snitch_cluster
         .RVE (RVE[i]),
         .RVF (RVF[i]),
         .RVD (RVD[i]),
-        .Xdiv_sqrt (Xdiv_sqrt[i]),
+        .XDivSqrt (XDivSqrt[i]),
         .XF16 (XF16[i]),
         .XF16ALT (XF16ALT[i]),
         .XF8 (XF8[i]),
