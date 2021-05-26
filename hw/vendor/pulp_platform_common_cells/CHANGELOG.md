@@ -5,6 +5,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- `registers.svh`: Merge explicit and implicit register variants into `` `FF `` and `` `FFL `` macros
+
+## 1.21.0 - 2021-01-28
+### Changed
+- Remove `timeprecision/timeunit` arguments
+- Update `common_verification` to `0.2.0`
+- Update `tech_cells_generic` to `0.2.3`
+
+## 1.20.1 - 2021-01-21
+### Changed
+- `id_queue`: Replace default or reset value of signals that were assigned `'x` with `'0`.
+- `id_queue`: Use `cf_math_pkg::idx_width()` for computation of localparams.
+
+### Fixed
+- Add `XSIM` define guard for statements incompatible with `xsim`.
 
 ## 1.20.0 - 2020-11-04
 ### Added
