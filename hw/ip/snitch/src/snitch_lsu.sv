@@ -29,8 +29,8 @@ module snitch_lsu #(
   input  logic                 rst_i,
   // request channel
   input  tag_t                 lsu_qtag_i,
-  input  logic                 lsu_qwrite,
-  input  logic                 lsu_qsigned,
+  input  logic                 lsu_qwrite_i,
+  input  logic                 lsu_qsigned_i,
   input  addr_t                lsu_qaddr_i,
   input  data_t                lsu_qdata_i,
   input  logic [1:0]           lsu_qsize_i,
@@ -99,7 +99,7 @@ module snitch_lsu #(
     .full_o (mem_full),
     .empty_o (lsu_empty_o),
     .usage_o ( /* open */ ),
-    .data_i (lsu_qwrite),
+    .data_i (lsu_qwrite_i),
     .push_i (data_req_o.q_valid & data_rsp_i.q_ready),
     .data_o (mem_out),
     .pop_i (data_rsp_i.p_valid & data_req_o.p_ready)
@@ -107,7 +107,7 @@ module snitch_lsu #(
 
   assign laq_in = '{
     tag:      lsu_qtag_i,
-    sign_ext: lsu_qsigned,
+    sign_ext: lsu_qsigned_i,
     offset:   lsu_qaddr_i[DataAlign-1:0],
     size:     lsu_qsize_i
   };
@@ -115,8 +115,8 @@ module snitch_lsu #(
   // Only make a request when we got a valid request and if it is a load also
   // check that we can actually store the necessary information to process it in
   // the upcoming cycle(s).
-  assign data_req_o.q_valid = lsu_qvalid_i & (lsu_qwrite | ~laq_full) & ~mem_full;
-  assign data_req_o.q.write = lsu_qwrite;
+  assign data_req_o.q_valid = lsu_qvalid_i & (lsu_qwrite_i | ~laq_full) & ~mem_full;
+  assign data_req_o.q.write = lsu_qwrite_i;
   assign data_req_o.q.addr = lsu_qaddr_i;
   assign data_req_o.q.amo  = lsu_qamo_i;
   assign data_req_o.q.size = lsu_qsize_i;
@@ -153,8 +153,8 @@ module snitch_lsu #(
 
   // The interface didn't accept our request yet
   assign lsu_qready_o = ~(data_req_o.q_valid & ~data_rsp_i.q_ready)
-                      & (lsu_qwrite | ~laq_full) & ~mem_full;
-  assign laq_push = ~lsu_qwrite & data_rsp_i.q_ready & data_req_o.q_valid & ~laq_full;
+                      & (lsu_qwrite_i | ~laq_full) & ~mem_full;
+  assign laq_push = ~lsu_qwrite_i & data_rsp_i.q_ready & data_req_o.q_valid & ~laq_full;
 
   // Return Path
   // shift the load data back

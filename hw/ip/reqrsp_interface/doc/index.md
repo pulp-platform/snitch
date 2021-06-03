@@ -58,12 +58,12 @@ Atomic memory operations supported are:
 | `Max`, `Maxu`      | Signed and unsigned maximum operation.                                    |
 | `Min`, `Minu`      | Signed and unsigned minimum operation.                                    |
 | `Lr`               | Places a reservation on the given memory address                          |
-| `Sc`               | Conditional store, returns `0` on `q.data` if successfull, `1` otherwise. |
+| `Sc`               | Conditional store, returns `0` on `q.data` if successful, `1` otherwise.  |
 
 
 The operation reads the value at the given address and returns the read value on
 the `p` channel. The same memory location is updated with the data and operation
-supplied on the `q.amo` and `q.data` signals. The `q.write` signal must be set.
+supplied on the `q.amo` and `q.data` signals. The `q.write` signal must be set to `1'b0`.
 
 ## Load-Reserved/Store-conditional
 
@@ -73,10 +73,9 @@ LR/SC.
 | Operation    | Description                                                               |
 | ------------ | ------------------------------------------------------------------------- |
 | Lr           | Places a reservation on the given memory address                          |
-| Sc           | Conditional store, returns `0` on `q.data` if successfull, `1` otherwise. |
+| Sc           | Conditional store, returns `0` on `q.data` if successful, `1` otherwise.  |
 
-For `Sc` the `q.write = 0` signal must be set. `Lr` is signalled as a read with
-`q.write = 0`.
+For `Sc` and `LR` the `q.write` signal must be set to `0`.
 
 ## Error
 

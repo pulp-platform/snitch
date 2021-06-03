@@ -206,7 +206,7 @@ module snitch_amo_shim
     core_valid = valid_i;
     core_ready = 1'b1;
     core_add = addr_i;
-    core_wen = write_i;
+    core_wen = write_i | (sc_successful & (amo_i == AMOSC));
     core_wdata = wdata_i;
     core_be = wstrb_i;
 
