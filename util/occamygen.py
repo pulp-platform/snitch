@@ -197,7 +197,7 @@ def main():
     am_soc_narrow_xbar.attach(am_spm)
 
     # HBI
-    am_hbi = am.new_leaf("hbi".format(i), 0x10000000000,
+    am_hbi = am.new_leaf("hbi", 0x10000000000,
                          0x10000000000).attach_to(am_wide_xbar_quadrant_s1)
 
     # Generate crossbars.
