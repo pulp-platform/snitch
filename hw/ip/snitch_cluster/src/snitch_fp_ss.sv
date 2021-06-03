@@ -2640,8 +2640,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
     .clk_i (clk_i),
     .rst_i (rst_i),
     .lsu_qtag_i (rd),
-    .lsu_qwrite (is_store),
-    .lsu_qsigned (1'b1), // all floating point loads are signed
+    .lsu_qwrite_i (is_store),
+    .lsu_qsigned_i (1'b1), // all floating point loads are signed
     .lsu_qaddr_i (acc_req_q.data_argc[AddrWidth-1:0]),
     .lsu_qdata_i (op[1]),
     .lsu_qsize_i (ls_size),

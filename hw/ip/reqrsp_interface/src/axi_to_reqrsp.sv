@@ -8,6 +8,7 @@
 // - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
 
 `include "common_cells/registers.svh"
+`include "common_cells/assertions.svh"
 
 /// AXI4+ATOP slave module which translates AXI bursts to reqrsp. This module
 /// fully supports the Atomic + LR/SC semantic of the reqrsp interface.
@@ -297,7 +298,7 @@ module axi_to_reqrsp #(
 
   assign reqrsp_req_o.q = '{
     addr: meta.addr,
-    write: meta.write,
+    write: meta.write & (amo == reqrsp_pkg::AMONone),
     amo: amo,
     // Silence those channels in case of a read.
     data: data & {DataWidth{meta.write}},
@@ -378,6 +379,9 @@ module axi_to_reqrsp #(
   `FFARN(w_cnt_q, w_cnt_d, '0, clk_i, rst_ni)
 
   // Assertions
+  // Make sure that write is never set for AMOs.
+  `ASSERT(AMOWriteEnable, reqrsp_req_o.q_valid &&
+    (reqrsp_req_o.q.amo != reqrsp_pkg::AMONone) |-> !reqrsp_req_o.q.write)
   // pragma translate_off
   `ifndef VERILATOR
   default disable iff (!rst_ni);

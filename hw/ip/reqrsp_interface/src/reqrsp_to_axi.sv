@@ -64,6 +64,8 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   localparam int unsigned CounterWidth = cf_math_pkg::idx_width(MaxTrans);
   typedef logic [CounterWidth-1:0] cnt_t;
   logic req_is_amo;
+  logic is_write;
+
   logic atomic_in_flight_d, atomic_in_flight_q;
   cnt_t read_cnt_d, read_cnt_q;
   cnt_t write_cnt_d, write_cnt_q;
@@ -86,6 +88,7 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   logic stall_amo;
 
   assign req_is_amo = is_amo(reqrsp_req_i.q.amo);
+  assign is_write = reqrsp_req_i.q.write | req_is_amo | (reqrsp_req_i.q.amo == AMOSC);
 
   assign dec_read_cnt = r_valid & r_ready;
   assign dec_write_cnt = axi_rsp_i.b_valid & axi_req_o.b_ready;
@@ -96,8 +99,8 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   assign write_cnt_not_zero = write_cnt_q > 1 | (write_cnt_q == 1 & ~dec_write_cnt);
   // Reads and writes stall iff there are transactions of the othter type in place.
   // See ordering rules above.
-  assign stall_write = reqrsp_req_i.q.write & (write_cnt_q == MaxTrans-1 | read_cnt_not_zero);
-  assign stall_read = !reqrsp_req_i.q.write & (read_cnt_q == MaxTrans-1 | write_cnt_not_zero);
+  assign stall_write = is_write & (write_cnt_q == MaxTrans-1 | read_cnt_not_zero);
+  assign stall_read = !is_write & (read_cnt_q == MaxTrans-1 | write_cnt_not_zero);
   // For atomics we additionally need to check whether there are any in-flight
   // writes, as atomci are already write transactions this wouldn't be captured
   // by the regular case. This makes sure that neither read nor writes are
@@ -116,8 +119,8 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
     end
   end
 
-  assign q_valid_read = q_valid & ~reqrsp_req_i.q.write;
-  assign q_valid_write = q_valid & reqrsp_req_i.q.write;
+  assign q_valid_read = q_valid & ~is_write;
+  assign q_valid_write = q_valid & is_write;
   assign q_ready = (q_valid_read & q_ready_read) | (q_valid_write & q_ready_write);
 
   // ------------------
@@ -141,7 +144,7 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
         read_cnt_d++;
       end
 
-      if (!reqrsp_req_i.q.write) read_cnt_d++;
+      if (!is_write) read_cnt_d++;
       else write_cnt_d++;
     end
 
@@ -272,6 +275,9 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   assign axi_req_o.w.user = '0;
 
   // Assertions:
+  // Make sure that write is never set for AMOs.
+  `ASSERT(AMOWriteEnable, reqrsp_req_i.q_valid &&
+    (reqrsp_req_i.q.amo != reqrsp_pkg::AMONone) |-> !reqrsp_req_i.q.write)
   // Check that the data width is in the range of 32 or 64 bit. We didn't define
   // any other bus widths so far.
   `ASSERT_INIT(check_DataWidth, DataWidth inside {32, 64})
