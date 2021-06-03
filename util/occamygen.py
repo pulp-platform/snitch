@@ -123,6 +123,7 @@ def main():
 
     am_soc_narrow_xbar = am.new_node("soc_narrow_xbar")
     am_soc_wide_xbar = am.new_node("soc_wide_xbar")
+    am_wide_xbar_quadrant_s1 = am.new_node("wide_xbar_quadrant_s1")
 
     am_soc_axi_lite_periph_xbar = am.new_node("soc_axi_lite_periph_xbar")
     am_soc_regbus_periph_xbar = am.new_node("soc_periph_regbus_xbar")
@@ -194,6 +195,10 @@ def main():
     am_soc_narrow_xbar.attach(am_soc_regbus_periph_xbar)
     am_soc_narrow_xbar.attach(am_soc_wide_xbar)
     am_soc_narrow_xbar.attach(am_spm)
+
+    # HBI
+    am_hbi = am.new_leaf("hbi".format(i), 0x10000000000,
+                         0x10000000000).attach_to(am_wide_xbar_quadrant_s1)
 
     # Generate crossbars.
 
@@ -305,7 +310,8 @@ def main():
         clk="clk_i",
         rst="rst_ni",
         no_loopback=True,
-        context="quadrant_s1")
+        context="quadrant_s1",
+        node=am_wide_xbar_quadrant_s1)
 
     narrow_xbar_quadrant_s1 = solder.AxiXbar(
         48,
@@ -318,7 +324,9 @@ def main():
         context="quadrant_s1")
 
     wide_xbar_quadrant_s1.add_output("top", [])
+    wide_xbar_quadrant_s1.add_output_entry("hbi", am_hbi)
     wide_xbar_quadrant_s1.add_input("top")
+
     narrow_xbar_quadrant_s1.add_output("top", [])
     narrow_xbar_quadrant_s1.add_input("top")
 
@@ -336,6 +344,18 @@ def main():
     # Generate the Verilog code.
     solder.render()
 
+    kwargs = {
+        "solder": solder,
+        "util": util,
+        "soc_narrow_xbar": soc_narrow_xbar,
+        "soc_wide_xbar": soc_wide_xbar,
+        "wide_xbar_quadrant_s1": wide_xbar_quadrant_s1,
+        "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
+        "soc_regbus_periph_xbar": soc_regbus_periph_xbar,
+        "nr_s1_quadrants": nr_s1_quadrants,
+        "cfg": occamy.cfg
+    }
+
     # Emit the code.
     #############
     # Top-Level #
@@ -343,67 +363,36 @@ def main():
     write_template(args.top_sv,
                    outdir,
                    module=solder.code_module['default'],
-                   solder=solder,
-                   util=util,
                    soc_periph_xbar=soc_axi_lite_periph_xbar,
-                   soc_regbus_periph_xbar=soc_regbus_periph_xbar,
-                   soc_wide_xbar=soc_wide_xbar,
-                   soc_narrow_xbar=soc_narrow_xbar,
-                   nr_s1_quadrants=nr_s1_quadrants,
-                   spm=occamy.cfg["spm"])
+                   **kwargs)
 
     ###############
     # S1 Quadrant #
     ###############
-    write_template(
-        args.quadrant_s1,
-        outdir,
-        module=solder.code_module['quadrant_s1'],
-        solder=solder,
-        soc_wide_xbar=soc_wide_xbar,
-        soc_narrow_xbar=soc_narrow_xbar,
-        wide_xbar_quadrant_s1=wide_xbar_quadrant_s1,
-        narrow_xbar_quadrant_s1=narrow_xbar_quadrant_s1,
-        nr_clusters=nr_s1_clusters,
-        const_cache_cfg=occamy.cfg["s1_quadrant"].get("const_cache"))
+    write_template(args.quadrant_s1,
+                   outdir,
+                   module=solder.code_module['quadrant_s1'],
+                   **kwargs)
 
     ###########
     # Package #
     ###########
-    write_template(args.pkg_sv,
-                   outdir,
-                   solder=solder,
-                   package=solder.code_package)
+    write_template(args.pkg_sv, outdir, **kwargs, package=solder.code_package)
 
     ##################
     # Xilinx Wrapper #
     ##################
-    write_template(
-        args.xilinx_sv,
-        outdir,
-        solder=solder,
-        soc_wide_xbar=soc_wide_xbar,
-        soc_regbus_periph_xbar=soc_regbus_periph_xbar,
-    )
+    write_template(args.xilinx_sv, outdir, **kwargs)
 
     ###############
     # Testharness #
     ###############
-    write_template(args.testharness_sv,
-                   outdir,
-                   solder=solder,
-                   soc_wide_xbar=soc_wide_xbar,
-                   soc_regbus_periph_xbar=soc_regbus_periph_xbar,
-                   nr_s1_quadrants=nr_s1_quadrants)
+    write_template(args.testharness_sv, outdir, **kwargs)
 
     ################
     # CVA6 Wrapper #
     ################
-    write_template(args.cva6_sv,
-                   outdir,
-                   solder=solder,
-                   soc_narrow_xbar=soc_narrow_xbar,
-                   cfg=occamy.cfg)
+    write_template(args.cva6_sv, outdir, **kwargs)
 
     ###########
     # CHEADER #
@@ -415,13 +404,7 @@ def main():
     ############
     # CHIP TOP #
     ############
-    write_template(args.chip,
-                   outdir,
-                   solder=solder,
-                   nr_s1_quadrants=nr_s1_quadrants,
-                   soc_wide_xbar=soc_wide_xbar,
-                   soc_narrow_xbar=soc_narrow_xbar,
-                   soc_regbus_periph_xbar=soc_regbus_periph_xbar)
+    write_template(args.chip, outdir, **kwargs)
 
     #######
     # DTS #

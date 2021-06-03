@@ -348,6 +348,7 @@ package occamy_pkg;
   /// Outputs of the `wide_xbar_quadrant_s1` crossbar.
   typedef enum int {
     WIDE_XBAR_QUADRANT_S1_OUT_TOP,
+    WIDE_XBAR_QUADRANT_S1_OUT_HBI,
     WIDE_XBAR_QUADRANT_S1_OUT_CLUSTER_0,
     WIDE_XBAR_QUADRANT_S1_OUT_CLUSTER_1,
     WIDE_XBAR_QUADRANT_S1_OUT_CLUSTER_2,
@@ -367,7 +368,7 @@ package occamy_pkg;
   AxiIdUsedSlvPorts:  3,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        4
+  NoAddrRules:        5
 };
 
   // AXI bus with 48 bit address, 512 bit data, 6 bit IDs, and 0 bit user data.
