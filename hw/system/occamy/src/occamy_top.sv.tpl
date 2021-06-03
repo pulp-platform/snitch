@@ -82,6 +82,8 @@ module occamy_top
 % for i in range(nr_s1_quadrants):
   input   ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_type()} hbi_${i}_req_i,
   output  ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_type()} hbi_${i}_rsp_o,
+  output  ${wide_xbar_quadrant_s1.out_hbi.req_type()} hbi_${i}_req_o,
+  input   ${wide_xbar_quadrant_s1.out_hbi.rsp_type()} hbi_${i}_rsp_i,
 % endfor
 
   /// PCIe Ports
@@ -97,7 +99,7 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   always_comb soc_ctrl_in = '0;
 
-  <% spm_words = spm["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
+  <% spm_words = cfg["spm"]["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
 
   typedef logic [${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)-1}:0] mem_addr_t;
   typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;
@@ -172,7 +174,12 @@ module occamy_top
     wide_in = soc_wide_xbar.__dict__["out_s1_quadrant_{}".format(i)].cut(context, cut_width, name="wide_in_cut_{}".format(i))
     wide_out = soc_wide_xbar.__dict__["in_s1_quadrant_{}".format(i)].copy(name="wide_out_cut_{}".format(i)).declare(context)
     wide_out.cut(context, cut_width, to=soc_wide_xbar.__dict__["in_s1_quadrant_{}".format(i)])
+    wide_hbi_out = wide_xbar_quadrant_s1.out_hbi.copy(name="wide_hbi_out_cut_{}".format(i)).declare(context)
+    wide_hbi_cut_out = wide_hbi_out.cut(context, cut_width)
   %>
+  assign hbi_${i}_req_o = ${wide_hbi_cut_out.req_name()};
+  assign ${wide_hbi_cut_out.rsp_name()} = hbi_${i}_rsp_i;
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_${i} (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
@@ -182,6 +189,8 @@ module occamy_top
     .meip_i ('0),
     .mtip_i ('0),
     .msip_i ('0),
+    .quadrant_hbi_out_req_o (${wide_hbi_out.req_name()}),
+    .quadrant_hbi_out_rsp_i (${wide_hbi_out.rsp_name()}),
     .quadrant_narrow_out_req_o (${narrow_out.req_name()}),
     .quadrant_narrow_out_rsp_i (${narrow_out.rsp_name()}),
     .quadrant_narrow_in_req_i (${narrow_in.req_name()}),
