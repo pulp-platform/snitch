@@ -65,6 +65,12 @@ module occamy_top
   output ${soc_regbus_periph_xbar.out_clk_mgr.req_type()} clk_mgr_req_o,
   input  ${soc_regbus_periph_xbar.out_clk_mgr.rsp_type()} clk_mgr_rsp_i,
 
+  /// HBI Config and APB Control
+  output ${soc_regbus_periph_xbar.out_hbi_cfg.req_type()} hbi_cfg_req_o,
+  input  ${soc_regbus_periph_xbar.out_hbi_cfg.rsp_type()} hbi_cfg_rsp_i,
+  output ${apb_hbi_ctl.req_type()} apb_hbi_ctl_req_o,
+  input  ${apb_hbi_ctl.rsp_type()} apb_hbi_ctl_rsp_i,
+
   /// PCIe/DDR Config
   output ${soc_regbus_periph_xbar.out_pcie_cfg.req_type()} pcie_cfg_req_o,
   input  ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_type()} pcie_cfg_rsp_i,
@@ -98,6 +104,10 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   always_comb soc_ctrl_in = '0;
+
+  occamy_chip_reg_pkg::occamy_chip_reg2hw_t chip_ctrl_out;
+  occamy_chip_reg_pkg::occamy_chip_hw2reg_t chip_ctrl_in;
+  always_comb chip_ctrl_in = '0;
 
   <% spm_words = cfg["spm"]["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
 
@@ -263,6 +273,11 @@ module occamy_top
   assign ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_name()} = hbi_${i}_req_i;
   assign hbi_${i}_rsp_o = ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_name()};
 % endfor
+
+  // APB port for HBI
+  <% soc_regbus_periph_xbar.out_hbi_ctl.to_apb(context, "apb_hbi_ctl", to=apb_hbi_ctl) %>
+  assign apb_hbi_ctl_req_o = ${apb_hbi_ctl.req_name()};
+  assign ${apb_hbi_ctl.rsp_name()} = apb_hbi_ctl_rsp_i;
 
   /////////////////
   // Peripherals //
@@ -455,6 +470,22 @@ module occamy_top
     .intr_ecc_uncorrectable_o (irq.ecc_uncorrectable),
     .intr_ecc_correctable_o (irq.ecc_correctable)
   );
+
+  //////////////////////
+  //   CHIP CONTROL   //
+  //////////////////////
+  occamy_chip_ctrl #(
+    .reg_req_t ( ${soc_regbus_periph_xbar.out_chip_ctrl.req_type()} ),
+    .reg_rsp_t ( ${soc_regbus_periph_xbar.out_chip_ctrl.rsp_type()} )
+  ) i_chip_ctrl (
+    .clk_i     ( clk_i  ),
+    .rst_ni    ( rst_ni ),
+    .reg_req_i ( ${soc_regbus_periph_xbar.out_chip_ctrl.req_name()} ),
+    .reg_rsp_o ( ${soc_regbus_periph_xbar.out_chip_ctrl.rsp_name()} ),
+    .reg2hw_o  ( chip_ctrl_out ),
+    .hw2reg_i  ( chip_ctrl_in )
+  );
+
 
   //////////////
   //   UART   //

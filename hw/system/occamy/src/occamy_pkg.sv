@@ -10,6 +10,7 @@
 
 `include "axi/typedef.svh"
 `include "register_interface/typedef.svh"
+`include "apb/typedef.svh"
 
 package occamy_pkg;
   localparam int unsigned MaxTransaction = 16;
@@ -148,6 +149,7 @@ package occamy_pkg;
   typedef enum int {
     SOC_REGBUS_PERIPH_XBAR_OUT_CLINT,
     SOC_REGBUS_PERIPH_XBAR_OUT_SOC_CTRL,
+    SOC_REGBUS_PERIPH_XBAR_OUT_CHIP_CTRL,
     SOC_REGBUS_PERIPH_XBAR_OUT_CLK_MGR,
     SOC_REGBUS_PERIPH_XBAR_OUT_BOOTROM,
     SOC_REGBUS_PERIPH_XBAR_OUT_PLIC,
@@ -156,21 +158,26 @@ package occamy_pkg;
     SOC_REGBUS_PERIPH_XBAR_OUT_I2C,
     SOC_REGBUS_PERIPH_XBAR_OUT_SPIM,
     SOC_REGBUS_PERIPH_XBAR_OUT_PCIE_CFG,
+    SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CFG,
+    SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CTL,
     SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   } soc_regbus_periph_xbar_outputs_e;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [9:0] SocRegbusPeriphXbarAddrmap = '{
+  localparam xbar_rule_48_t [12:0] SocRegbusPeriphXbarAddrmap = '{
   '{ idx: 0, start_addr: 48'h04000000, end_addr: 48'h04100000 },
   '{ idx: 1, start_addr: 48'h02000000, end_addr: 48'h02001000 },
-  '{ idx: 2, start_addr: 48'h02001000, end_addr: 48'h02002000 },
-  '{ idx: 3, start_addr: 48'h01000000, end_addr: 48'h01020000 },
-  '{ idx: 4, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
-  '{ idx: 5, start_addr: 48'h02002000, end_addr: 48'h02003000 },
-  '{ idx: 6, start_addr: 48'h02003000, end_addr: 48'h02004000 },
-  '{ idx: 7, start_addr: 48'h02004000, end_addr: 48'h02005000 },
-  '{ idx: 8, start_addr: 48'h03000000, end_addr: 48'h03020000 },
-  '{ idx: 9, start_addr: 48'h05000000, end_addr: 48'h05020000 }
+  '{ idx: 2, start_addr: 48'h02005000, end_addr: 48'h02006000 },
+  '{ idx: 3, start_addr: 48'h02001000, end_addr: 48'h02002000 },
+  '{ idx: 4, start_addr: 48'h01000000, end_addr: 48'h01020000 },
+  '{ idx: 5, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
+  '{ idx: 6, start_addr: 48'h02002000, end_addr: 48'h02003000 },
+  '{ idx: 7, start_addr: 48'h02003000, end_addr: 48'h02004000 },
+  '{ idx: 8, start_addr: 48'h02004000, end_addr: 48'h02005000 },
+  '{ idx: 9, start_addr: 48'h03000000, end_addr: 48'h03020000 },
+  '{ idx: 10, start_addr: 48'h05000000, end_addr: 48'h05020000 },
+  '{ idx: 11, start_addr: 48'h06000000, end_addr: 48'h06010000 },
+  '{ idx: 12, start_addr: 48'h07000000, end_addr: 48'h07010000 }
 };
 
   /// Inputs of the `soc_wide_xbar` crossbar.
@@ -453,6 +460,11 @@ package occamy_pkg;
   localparam int NARROW_XBAR_QUADRANT_S1_IW_IN = 4;
   // verilog_lint: waive parameter-name-style
   localparam int NARROW_XBAR_QUADRANT_S1_IW_OUT = 7;
+
+  // APB bus with 48 bit address, 32 bit data.
+  `APB_TYPEDEF_REQ_T(apb_a48_d32_req_t, logic [47:0], logic [31:0], logic [3:0])
+  `APB_TYPEDEF_RESP_T(apb_a48_d32_rsp_t, logic [31:0])
+
   // AXI bus with 48 bit address, 64 bit data, 3 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d64_i3_u0, logic [47:0], logic [2:0], logic [63:0], logic [7:0],
                    logic [0:0])

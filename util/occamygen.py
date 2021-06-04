@@ -155,6 +155,9 @@ def main():
     am_i2c = am.new_leaf("i2c", 0x1000,
                          0x02004000).attach_to(am_soc_regbus_periph_xbar)
 
+    am_chip_ctrl = am.new_leaf("chip_ctrl", 0x1000,
+                              0x02005000).attach_to(am_soc_regbus_periph_xbar)
+
     am_spim = am.new_leaf("spim", 0x20000,
                           0x03000000).attach_to(am_soc_regbus_periph_xbar)
 
@@ -164,6 +167,13 @@ def main():
 
     am_pcie_cfg = am.new_leaf("pcie_cfg", 0x20000,
                               0x05000000).attach_to(am_soc_regbus_periph_xbar)
+   
+    # TODO: Revise address map for HBI config and APB control
+    am_hbi_cfg = am.new_leaf("hbi_cfg", 0x10000,
+                              0x06000000).attach_to(am_soc_regbus_periph_xbar)
+
+    am_hbi_ctl = am.new_leaf("hbi_ctl", 0x10000,
+                              0x07000000).attach_to(am_soc_regbus_periph_xbar)
 
     am_plic = am.new_leaf("plic", 0x4000000,
                           0x0C000000).attach_to(am_soc_regbus_periph_xbar)
@@ -232,6 +242,7 @@ def main():
 
     soc_regbus_periph_xbar.add_output_entry("clint", am_clint)
     soc_regbus_periph_xbar.add_output_entry("soc_ctrl", am_soc_ctrl)
+    soc_regbus_periph_xbar.add_output_entry("chip_ctrl", am_chip_ctrl)
     soc_regbus_periph_xbar.add_output_entry("clk_mgr", am_clk_mgr)
     soc_regbus_periph_xbar.add_output_entry("bootrom", am_bootrom)
     soc_regbus_periph_xbar.add_output_entry("plic", am_plic)
@@ -240,6 +251,8 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("i2c", am_i2c)
     soc_regbus_periph_xbar.add_output_entry("spim", am_spim)
     soc_regbus_periph_xbar.add_output_entry("pcie_cfg", am_pcie_cfg)
+    soc_regbus_periph_xbar.add_output_entry("hbi_cfg", am_hbi_cfg)
+    soc_regbus_periph_xbar.add_output_entry("hbi_ctl", am_hbi_ctl)
 
     #################
     # SoC Wide Xbar #
@@ -344,6 +357,15 @@ def main():
     # Generate the Verilog code.
     solder.render()
 
+    ###############
+    # HBI APB CTL #
+    ###############
+    apb_hbi_ctl = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
+                                 rst=soc_regbus_periph_xbar.rst,
+                                 aw=soc_regbus_periph_xbar.aw,
+                                 dw=soc_regbus_periph_xbar.dw,
+                                 name="apb_hbi_ctl")
+
     kwargs = {
         "solder": solder,
         "util": util,
@@ -352,6 +374,7 @@ def main():
         "wide_xbar_quadrant_s1": wide_xbar_quadrant_s1,
         "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
         "soc_regbus_periph_xbar": soc_regbus_periph_xbar,
+        "apb_hbi_ctl": apb_hbi_ctl,
         "nr_s1_quadrants": nr_s1_quadrants,
         "cfg": occamy.cfg
     }
