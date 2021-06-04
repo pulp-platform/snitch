@@ -10,6 +10,7 @@
 
 `include "axi/typedef.svh"
 `include "register_interface/typedef.svh"
+`include "apb/typedef.svh"
 
 package occamy_pkg;
   localparam int unsigned MaxTransaction = 16;

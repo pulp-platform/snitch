@@ -65,6 +65,12 @@ module occamy_top
     output reg_a48_d32_req_t clk_mgr_req_o,
     input  reg_a48_d32_rsp_t clk_mgr_rsp_i,
 
+    /// HBI Config and APB Control
+    output reg_a48_d32_req_t hbi_cfg_req_o,
+    input  reg_a48_d32_rsp_t hbi_cfg_rsp_i,
+    output apb_a48_d32_req_t apb_hbi_ctl_req_o,
+    input  apb_a48_d32_rsp_t apb_hbi_ctl_rsp_i,
+
     /// PCIe/DDR Config
     output reg_a48_d32_req_t pcie_cfg_req_o,
     input  reg_a48_d32_rsp_t pcie_cfg_rsp_i,
@@ -137,6 +143,10 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   always_comb soc_ctrl_in = '0;
 
+  occamy_chip_reg_pkg::occamy_chip_reg2hw_t chip_ctrl_out;
+  occamy_chip_reg_pkg::occamy_chip_hw2reg_t chip_ctrl_in;
+  always_comb chip_ctrl_in = '0;
+
 
 
   typedef logic [16:0] mem_addr_t;
@@ -203,8 +213,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [9:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [9:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [12:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [12:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -227,7 +237,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(10),
+      .NoRules(13),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -1666,6 +1676,27 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign soc_wide_xbar_in_req[SOC_WIDE_XBAR_IN_HBI_7] = hbi_7_req_i;
   assign hbi_7_rsp_o = soc_wide_xbar_in_rsp[SOC_WIDE_XBAR_IN_HBI_7];
 
+  // APB port for HBI
+  apb_a48_d32_req_t apb_hbi_ctl_req;
+  apb_a48_d32_rsp_t apb_hbi_ctl_rsp;
+
+  reg_to_apb #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t),
+      .apb_req_t(apb_a48_d32_req_t),
+      .apb_rsp_t(apb_a48_d32_rsp_t)
+  ) i_apb_hbi_ctl_pc (
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CTL]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CTL]),
+      .apb_req_o(apb_hbi_ctl_req),
+      .apb_rsp_i(apb_hbi_ctl_rsp)
+  );
+
+  assign apb_hbi_ctl_req_o = apb_hbi_ctl_req;
+  assign apb_hbi_ctl_rsp   = apb_hbi_ctl_rsp_i;
+
   /////////////////
   // Peripherals //
   /////////////////
@@ -2007,6 +2038,22 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .intr_ecc_uncorrectable_o(irq.ecc_uncorrectable),
       .intr_ecc_correctable_o(irq.ecc_correctable)
   );
+
+  //////////////////////
+  //   CHIP CONTROL   //
+  //////////////////////
+  occamy_chip_ctrl #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t)
+  ) i_chip_ctrl (
+      .clk_i    (clk_i),
+      .rst_ni   (rst_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_CHIP_CTRL]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_CHIP_CTRL]),
+      .reg2hw_o (chip_ctrl_out),
+      .hw2reg_i (chip_ctrl_in)
+  );
+
 
   //////////////
   //   UART   //
