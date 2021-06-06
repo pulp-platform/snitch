@@ -65,6 +65,20 @@ static int check_amos(volatile uint32_t* const addr) {
     __atomic_fetch_xor(addr, (0x1 << (core_id % 6)), __ATOMIC_RELAXED);
     if (check_result(addr, 0x3C)) return 1;
 
+    uint32_t const n_iter = 100;
+    for (int i = 0; i < n_iter; ++i) {
+        uint32_t counter;
+        uint32_t result;
+        do {
+            asm volatile("lr.w %0, (%1)" : "=r"(counter) : "r"(addr));
+            counter++;
+            asm volatile("sc.w %0, %1, (%2)"
+                         : "=r"(result)
+                         : "r"(counter), "r"(addr));
+        } while (result);
+    }
+    if (check_result(addr, 0x3C + 8 * n_iter)) return 1;
+
     return 0;
 }
 
