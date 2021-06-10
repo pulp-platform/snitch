@@ -1595,6 +1595,31 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   //////////
   // SPM //
   //////////
+  axi_a48_d64_i8_u0_req_t  spm_cdc_req;
+  axi_a48_d64_i8_u0_resp_t spm_cdc_rsp;
+
+  axi_cdc #(
+      .aw_chan_t (axi_a48_d64_i8_u0_aw_chan_t),
+      .w_chan_t  (axi_a48_d64_i8_u0_w_chan_t),
+      .b_chan_t  (axi_a48_d64_i8_u0_b_chan_t),
+      .ar_chan_t (axi_a48_d64_i8_u0_ar_chan_t),
+      .r_chan_t  (axi_a48_d64_i8_u0_r_chan_t),
+      .axi_req_t (axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t),
+      .LogDepth  (2)
+  ) i_spm_cdc (
+      .src_clk_i (clk_i),
+      .src_rst_ni(rst_ni),
+      .src_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM]),
+      .src_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM]),
+      .dst_clk_i (clk_periph_i),
+      .dst_rst_ni(rst_periph_ni),
+      .dst_req_o (spm_cdc_req),
+      .dst_resp_i(spm_cdc_rsp)
+  );
+
+
+
   axi_to_mem #(
       .axi_req_t(axi_a48_d64_i8_u0_req_t),
       .axi_resp_t(axi_a48_d64_i8_u0_resp_t),
@@ -1604,11 +1629,11 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .NumBanks(1),
       .BufDepth(1)
   ) i_axi_to_mem (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
       .busy_o(),
-      .axi_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM]),
-      .axi_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM]),
+      .axi_req_i(spm_cdc_req),
+      .axi_resp_o(spm_cdc_rsp),
       .mem_req_o(spm_req),
       .mem_gnt_i(spm_req),  // always granted - it's an SPM.
       .mem_addr_o(spm_addr),
@@ -1627,8 +1652,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .EnableInputPipeline(1'b1),
       .EnableOutputPipeline(1'b1)
   ) i_spm_cut (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
       .req_i(spm_req),
       .we_i(spm_we),
       .addr_i(spm_addr[16:3]),
