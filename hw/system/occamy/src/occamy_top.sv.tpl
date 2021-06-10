@@ -217,20 +217,22 @@ module occamy_top
   //////////
   // SPM //
   //////////
+  <% narrow_spm_cdc = soc_narrow_xbar.out_spm.cdc(context, "clk_periph_i", "rst_periph_ni", "spm_cdc") %>
+
   axi_to_mem #(
-    .axi_req_t (${soc_narrow_xbar.out_spm.req_type()}),
-    .axi_resp_t (${soc_narrow_xbar.out_spm.rsp_type()}),
-    .AddrWidth (${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)}),
-    .DataWidth (${soc_narrow_xbar.out_spm.dw}),
-    .IdWidth (${soc_narrow_xbar.out_spm.iw}),
+    .axi_req_t (${narrow_spm_cdc.req_type()}),
+    .axi_resp_t (${narrow_spm_cdc.rsp_type()}),
+    .AddrWidth (${util.clog2(spm_words) + util.clog2(narrow_spm_cdc.dw//8)}),
+    .DataWidth (${narrow_spm_cdc.dw}),
+    .IdWidth (${narrow_spm_cdc.iw}),
     .NumBanks (1),
     .BufDepth (1)
   ) i_axi_to_mem (
-    .clk_i (${soc_narrow_xbar.out_spm.clk}),
-    .rst_ni (${soc_narrow_xbar.out_spm.rst}),
+    .clk_i (${narrow_spm_cdc.clk}),
+    .rst_ni (${narrow_spm_cdc.rst}),
     .busy_o (),
-    .axi_req_i (${soc_narrow_xbar.out_spm.req_name()}),
-    .axi_resp_o (${soc_narrow_xbar.out_spm.rsp_name()}),
+    .axi_req_i (${narrow_spm_cdc.req_name()}),
+    .axi_resp_o (${narrow_spm_cdc.rsp_name()}),
     .mem_req_o (spm_req),
     .mem_gnt_i (spm_req), // always granted - it's an SPM.
     .mem_addr_o (spm_addr),
@@ -244,16 +246,16 @@ module occamy_top
 
   cc_ram_1p_adv #(
     .NumWords (${spm_words}),
-    .DataWidth (${soc_narrow_xbar.out_spm.dw}),
+    .DataWidth (${narrow_spm_cdc.dw}),
     .ByteWidth (8),
     .EnableInputPipeline (1'b1),
     .EnableOutputPipeline (1'b1)
   ) i_spm_cut (
-    .clk_i (${soc_narrow_xbar.out_spm.clk}),
-    .rst_ni (${soc_narrow_xbar.out_spm.rst}),
+    .clk_i (${narrow_spm_cdc.clk}),
+    .rst_ni (${narrow_spm_cdc.rst}),
     .req_i (spm_req),
     .we_i (spm_we),
-    .addr_i (spm_addr[${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)-1}:${util.clog2(soc_narrow_xbar.out_spm.dw//8)}]),
+    .addr_i (spm_addr[${util.clog2(spm_words) + util.clog2(narrow_spm_cdc.dw//8)-1}:${util.clog2(narrow_spm_cdc.dw//8)}]),
     .wdata_i (spm_wdata),
     .be_i (spm_strb),
     .rdata_o (spm_rdata),
