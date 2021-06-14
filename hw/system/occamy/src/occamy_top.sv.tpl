@@ -74,6 +74,9 @@ module occamy_top
   /// PCIe/DDR Config
   output ${soc_regbus_periph_xbar.out_pcie_cfg.req_type()} pcie_cfg_req_o,
   input  ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_type()} pcie_cfg_rsp_i,
+  /// Chip specific control registers
+  output ${soc_regbus_periph_xbar.out_chip_ctrl.req_type()} chip_ctrl_req_o,
+  input  ${soc_regbus_periph_xbar.out_chip_ctrl.rsp_type()} chip_ctrl_rsp_i,
 
   // "external interrupts from uncore - "programmable"
   input logic [3:0] ext_irq_i,
@@ -100,14 +103,9 @@ module occamy_top
   output ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o
 );
 
-  // TODO: Pull to top-level for system to influence configuration.
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   always_comb soc_ctrl_in = '0;
-
-  occamy_chip_reg_pkg::occamy_chip_reg2hw_t chip_ctrl_out;
-  occamy_chip_reg_pkg::occamy_chip_hw2reg_t chip_ctrl_in;
-  always_comb chip_ctrl_in = '0;
 
   <% spm_words = cfg["spm"]["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
 
@@ -476,18 +474,9 @@ module occamy_top
   //////////////////////
   //   CHIP CONTROL   //
   //////////////////////
-  occamy_chip_ctrl #(
-    .reg_req_t ( ${soc_regbus_periph_xbar.out_chip_ctrl.req_type()} ),
-    .reg_rsp_t ( ${soc_regbus_periph_xbar.out_chip_ctrl.rsp_type()} )
-  ) i_chip_ctrl (
-    .clk_i     ( clk_i  ),
-    .rst_ni    ( rst_ni ),
-    .reg_req_i ( ${soc_regbus_periph_xbar.out_chip_ctrl.req_name()} ),
-    .reg_rsp_o ( ${soc_regbus_periph_xbar.out_chip_ctrl.rsp_name()} ),
-    .reg2hw_o  ( chip_ctrl_out ),
-    .hw2reg_i  ( chip_ctrl_in )
-  );
-
+  // Contains NDA and chip specific information.
+  assign chip_ctrl_req_o = ${soc_regbus_periph_xbar.out_chip_ctrl.req_name()};
+  assign ${soc_regbus_periph_xbar.out_chip_ctrl.rsp_name()} = chip_ctrl_rsp_i;
 
   //////////////
   //   UART   //

@@ -74,6 +74,9 @@ module occamy_top
     /// PCIe/DDR Config
     output reg_a48_d32_req_t pcie_cfg_req_o,
     input  reg_a48_d32_rsp_t pcie_cfg_rsp_i,
+    /// Chip specific control registers
+    output reg_a48_d32_req_t chip_ctrl_req_o,
+    input  reg_a48_d32_rsp_t chip_ctrl_rsp_i,
 
     // "external interrupts from uncore - "programmable"
     input logic [3:0] ext_irq_i,
@@ -138,14 +141,9 @@ module occamy_top
     output axi_a48_d512_i3_u0_resp_t pcie_axi_rsp_o
 );
 
-  // TODO: Pull to top-level for system to influence configuration.
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   always_comb soc_ctrl_in = '0;
-
-  occamy_chip_reg_pkg::occamy_chip_reg2hw_t chip_ctrl_out;
-  occamy_chip_reg_pkg::occamy_chip_hw2reg_t chip_ctrl_in;
-  always_comb chip_ctrl_in = '0;
 
 
 
@@ -2067,18 +2065,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   //////////////////////
   //   CHIP CONTROL   //
   //////////////////////
-  occamy_chip_ctrl #(
-      .reg_req_t(reg_a48_d32_req_t),
-      .reg_rsp_t(reg_a48_d32_rsp_t)
-  ) i_chip_ctrl (
-      .clk_i    (clk_i),
-      .rst_ni   (rst_ni),
-      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_CHIP_CTRL]),
-      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_CHIP_CTRL]),
-      .reg2hw_o (chip_ctrl_out),
-      .hw2reg_i (chip_ctrl_in)
-  );
-
+  // Contains NDA and chip specific information.
+  assign chip_ctrl_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_CHIP_CTRL];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_CHIP_CTRL] = chip_ctrl_rsp_i;
 
   //////////////
   //   UART   //
