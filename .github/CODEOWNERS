@@ -6,6 +6,9 @@
 # The DMA is owned by @thommythomaso
 hw/ip/snitch_dma @thommythomaso
 
+# SSRs are owned by @paulsc96
+hw/ip/snitch_ssr
+
 sw/banshee @SamuelRiedel @paulsc96
 
 # Occamy RTL is also owned by @niwis
