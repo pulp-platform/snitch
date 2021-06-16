@@ -8,6 +8,10 @@ on:
   push:
     branches:
     - master
+  workflow_dispatch:
+    snitchllvmversion:
+      description: 'LLVM Version'
+      default: 'latest'
 jobs:
   build-docker:
     runs-on: ubuntu-latest
@@ -27,3 +31,5 @@ jobs:
         file: util/container/Dockerfile
         push: true
         tags: ghcr.io/pulp-platform/snitch:latest
+        build-args: |
+          SNITCH_LLVM_VERSION=${{ env.snitchllvmversion }}
