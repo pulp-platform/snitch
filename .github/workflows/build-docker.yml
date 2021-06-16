@@ -10,8 +10,8 @@ on:
     - master
   workflow_dispatch:
     snitchllvmversion:
-      description: 'LLVM Version'
-      default: 'latest'
+      description: LLVM Version
+      default: latest
 jobs:
   build-docker:
     runs-on: ubuntu-latest
