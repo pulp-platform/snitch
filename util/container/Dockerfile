@@ -45,6 +45,7 @@ RUN cd riscv-isa-sim && git checkout ${SPIKE_VERSION} && ./configure --prefix=/r
 # 2. Stage
 FROM ubuntu:18.04 AS snitch
 ARG RISCV_GCC_VERSION=8.3.0-2020.04.0
+ARG SNITCH_LLVM_VERSION=latest
 ARG VERIBLE_VERSION=0.0-776-g09e0b87
 ARG VERILATOR_VERSION=4.100
 ARG CMAKE_VERSION=3.19.4
@@ -93,6 +94,17 @@ RUN wget https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-${RISCV
     mkdir -p riscv && tar -x -f riscv64-unknown-elf-gcc-${RISCV_GCC_VERSION}-x86_64-linux-ubuntu14.tar.gz --strip-components=1 -C riscv && \
     rm -rf riscv64-unknown-elf-gcc-${RISCV_GCC_VERSION}-x86_64-linux-ubuntu14.tar.gz
 ENV PATH "/tools/riscv/bin:${PATH}"
+
+# Get the precompiled LLVM toolchain
+RUN latest_tag=`curl -s -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/pulp-platform/snitch-llvm/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'` && \
+    echo "SNITCH_LLVM_VERSION=${SNITCH_LLVM_VERSION} LLVM_TAR=${LLVM_TAR} latest_tag=${latest_tag}" && \
+    test "${SNITCH_LLVM_VERSION}" = "latest" && SNITCH_LLVM_VERSION=${latest_tag} || : ; \
+    LLVM_TAR=riscv32-snitch-llvm-ubuntu1804-snitch-$(echo $SNITCH_LLVM_VERSION | cut -d '-' -f3-).tar.gz && \
+    mkdir -p riscv-llvm && \
+    echo "SNITCH_LLVM_VERSION=${SNITCH_LLVM_VERSION} LLVM_TAR=${LLVM_TAR} latest_tag=${latest_tag}" && \
+    wget -qO- https://github.com/pulp-platform/snitch-llvm/releases/download/${SNITCH_LLVM_VERSION}/${LLVM_TAR} | \
+    tar xvz --strip-components=1 -C riscv-llvm
+ENV PATH "/tools/riscv-llvm/bin:${PATH}"
 
 # Install Verible
 RUN wget https://github.com/google/verible/releases/download/v${VERIBLE_VERSION}/verible-v${VERIBLE_VERSION}-Ubuntu-18.04-bionic-x86_64.tar.gz && \
