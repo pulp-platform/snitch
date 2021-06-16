@@ -42,7 +42,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   logic mover_valid;
   logic [$clog2(Cfg.DataCredits):0] credit_d, credit_q;
   logic has_credit, credit_take, credit_give;
-  logic [Cfg.RptWidth-1:0] rep_max, rep_q, rep_done, rep_enable;
+  logic [Cfg.RptWidth-1:0] rep_max, rep_q, rep_d, rep_done, rep_enable, rep_clear;
 
   fifo_v3 #(
     .FALL_THROUGH ( 0           ),
@@ -158,7 +158,9 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   `FFARN(credit_q, credit_d, Cfg.DataCredits, clk_i, rst_ni)
 
   // Repetition counter.
-  `FFLARNC(rep_q, rep_q + 1, rep_enable, rep_enable & rep_done, '0, clk_i, rst_ni)
+  assign rep_d = rep_q + 1;
+  assign rep_clear = rep_enable & rep_done;
+  `FFLARNC(rep_q, rep_d, rep_enable, rep_clear, '0, clk_i, rst_ni)
 
   assign rep_done = (rep_q == rep_max);
 

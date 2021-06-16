@@ -51,7 +51,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
   pointer_t [Cfg.NumLoops-1:0] stride_q, stride_sd, stride_sq;
   pointer_t pointer_q, pointer_qn, pointer_sd, pointer_sq, pointer_sqn, selected_stride;
-  index_t [Cfg.NumLoops-1:0] index_q, bound_q, bound_sd, bound_sq;
+  index_t [Cfg.NumLoops-1:0] index_q, index_d, bound_q, bound_sd, bound_sq;
   logic [Cfg.RptWidth-1:0] rep_q, rep_sd, rep_sq;
   logic [Cfg.NumLoops-1:0] loop_enabled;
   logic [Cfg.NumLoops-1:0] loop_last;
@@ -159,7 +159,9 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     assign loop_last[0]       = (natit_extraword ? natit_base_last_q : natit_base_last_d);
 
     // Track last index word to set downstream last signal and handle word misalignment at end.
-    `FFLARNC(natit_last_word_inflight_q, 1'b1, enable & done, config_q.done, 1'b0, clk_i, rst_ni)
+    logic config_load;
+    assign config_load = enable & done;
+    `FFLARNC(natit_last_word_inflight_q, 1'b1, config_load, config_q.done, 1'b0, clk_i, rst_ni)
 
     // Natural iteration loop 0 is done when last word inflight or address gen done.
     assign natit_done = natit_last_word_inflight_q | config_q.done;
@@ -263,6 +265,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   // Generate the loop counters.
   for (genvar i = 0; i < Cfg.NumLoops; i++) begin : gen_loop_counter
     logic index_ena;
+    logic index_clear;
 
     always_comb begin
       stride_sd[i] = stride_sq[i];
@@ -279,7 +282,10 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     `FFLARN(bound_q[i], bound_sd[i], config_q.done, '0, clk_i, rst_ni)
 
     assign index_ena = enable & loop_enabled[i];
-    `FFLARNC(index_q[i], index_q[i] + 1, index_ena, index_ena & loop_last[i], '0, clk_i, rst_ni)
+
+    assign index_d[i] = index_q[i] + 1;
+    assign index_clear = index_ena & loop_last[i];
+    `FFLARNC(index_q[i], index_d[i], index_ena, index_clear, '0, clk_i, rst_ni)
 
     // Indicate last iteration (loops > 0); base loop handled differently in indirection
     if (i > 0) begin : gen_loop_last_upper
