@@ -592,8 +592,10 @@ module snitch_cc #(
     ssr_cfg_rsp_t ssr_cfg_rsp, cfg_rsp;
 
     logic cfg_req_valid, cfg_req_valid_q;
+    logic [31:0] cfg_rsp_data;
     `FF(cfg_req_valid_q, cfg_req_valid, 0)
     `FF(cfg_rsp.id, ssr_cfg_req.id, 0)
+    `FF(cfg_rsp.data, cfg_rsp_data, 0)
 
     always_comb begin
       import riscv_instr::*;
@@ -677,7 +679,7 @@ module snitch_cc #(
       .rst_ni         ( rst_ni    ),
       .cfg_word_i     ( cfg_req.word  ),
       .cfg_write_i    ( cfg_req.write & cfg_req_valid ),
-      .cfg_rdata_o    ( cfg_rsp.data  ),
+      .cfg_rdata_o    ( cfg_rsp_data ),
       .cfg_wdata_i    ( cfg_req.data ),
 
       .ssr_raddr_i    ( ssr_raddr  ),
