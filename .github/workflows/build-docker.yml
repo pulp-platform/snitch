@@ -29,3 +29,5 @@ jobs:
         file: util/container/Dockerfile
         push: true
         tags: ghcr.io/pulp-platform/snitch:latest
+        build-args: |
+          SNITCH_LLVM_VERSION=latest
