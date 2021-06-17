@@ -1936,6 +1936,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         if (Xssr) begin
           acc_qreq_o.addr = SSR_CFG;
           acc_qvalid_o = valid_instr;
+          acc_register_rd = 1'b1;
         end else illegal_inst = 1'b1;
       end
       SCFGWI: begin
@@ -1951,6 +1952,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           acc_qreq_o.addr = SSR_CFG;
           opb_select = Reg;
           acc_qvalid_o = valid_instr;
+          acc_register_rd = 1'b1;
         end else illegal_inst = 1'b1;
       end
       SCFGW: begin

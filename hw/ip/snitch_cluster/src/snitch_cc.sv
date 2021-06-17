@@ -591,9 +591,8 @@ module snitch_cc #(
     ssr_cfg_req_t ssr_cfg_req, cfg_req;
     ssr_cfg_rsp_t ssr_cfg_rsp, cfg_rsp;
 
-    logic cfg_req_valid, cfg_req_valid_q;
-    `FF(cfg_req_valid_q, cfg_req_valid, 0)
-    `FF(cfg_rsp.id, ssr_cfg_req.id, 0)
+    logic cfg_req_valid;
+    assign cfg_rsp.id = ssr_cfg_req.id;
 
     always_comb begin
       import riscv_instr::*;
@@ -656,7 +655,7 @@ module snitch_cc #(
       .mem_req_valid_o (cfg_req_valid),
       .mem_req_ready_i (1'b1),
       .mem_resp_i (cfg_rsp),
-      .mem_resp_valid_i (cfg_req_valid_q)
+      .mem_resp_valid_i (cfg_req_valid)
     );
 
     // TODO: Assert that NumSsrs is at least 1 in any case
