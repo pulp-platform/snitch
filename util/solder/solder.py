@@ -349,8 +349,7 @@ class ApbStruct:
         if key in ApbStruct.configs:
             return ApbStruct.configs[key]
         name = "apb_a{}_d{}".format(*key)
-        code = "// APB bus with {} bit address, {} bit data.\n".format(
-            *key)
+        code = "// APB bus with {} bit address, {} bit data.\n".format(*key)
         code += "`APB_TYPEDEF_REQ_T({}_req_t, logic [{}:0], logic [{}:0], logic [{}:0])\n".format(
             name, aw - 1, dw - 1, (dw + 7) // 8 - 1)
         code += "`APB_TYPEDEF_RESP_T({}_rsp_t, logic [{}:0])\n".format(
@@ -418,21 +417,17 @@ class AxiBus(object):
 
     def emit_flat_master_port(self, name=None):
         tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
-        return tpl.render_unicode(
-                mst_dir="output",
-                slv_dir="input",
-                prefix="m_axi_{}".format(name or ""),
-                bus=self
-            )
+        return tpl.render_unicode(mst_dir="output",
+                                  slv_dir="input",
+                                  prefix="m_axi_{}".format(name or ""),
+                                  bus=self)
 
     def emit_flat_slave_port(self, name=None):
         tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
-        return tpl.render_unicode(
-                mst_dir="input",
-                slv_dir="output",
-                prefix="s_axi_{}".format(name or ""),
-                bus=self
-            )
+        return tpl.render_unicode(mst_dir="input",
+                                  slv_dir="output",
+                                  prefix="s_axi_{}".format(name or ""),
+                                  bus=self)
 
     def declare(self, context):
         if self.declared:
@@ -655,7 +650,12 @@ class AxiBus(object):
                                num_pending=num_pending) + "\n")
         return bus
 
-    def atomic_adapter(self, context, max_trans=1, name=None, inst_name=None, to=None):
+    def atomic_adapter(self,
+                       context,
+                       max_trans=1,
+                       name=None,
+                       inst_name=None,
+                       to=None):
 
         name = name or "{}_atomic_adapter".format(self.name)
 
@@ -923,21 +923,17 @@ class ApbBus(object):
 
     def emit_flat_master_port(self, name=None):
         tpl = templates.get_template("solder.apb_flatten_port.sv.tpl")
-        return tpl.render_unicode(
-                mst_dir="output",
-                slv_dir="input",
-                prefix="m_apb_{}".format(name or ""),
-                bus=self
-            )
+        return tpl.render_unicode(mst_dir="output",
+                                  slv_dir="input",
+                                  prefix="m_apb_{}".format(name or ""),
+                                  bus=self)
 
     def emit_flat_slave_port(self, name=None):
         tpl = templates.get_template("solder.apb_flatten_port.sv.tpl")
-        return tpl.render_unicode(
-                mst_dir="input",
-                slv_dir="output",
-                prefix="s_apb_{}".format(name or ""),
-                bus=self
-            )
+        return tpl.render_unicode(mst_dir="input",
+                                  slv_dir="output",
+                                  prefix="s_apb_{}".format(name or ""),
+                                  bus=self)
 
     def declare(self, context):
         if self.declared:
@@ -1096,7 +1092,14 @@ class Xbar(object):
 class AxiXbar(Xbar):
     configs = dict()
 
-    def __init__(self, aw, dw, iw, uw=0, no_loopback=False, **kwargs):
+    def __init__(self,
+                 aw,
+                 dw,
+                 iw,
+                 uw=0,
+                 no_loopback=False,
+                 atop_support=True,
+                 **kwargs):
         super().__init__(**kwargs)
         self.aw = aw
         self.dw = dw
@@ -1104,6 +1107,7 @@ class AxiXbar(Xbar):
         self.uw = uw
         self.no_loopback = no_loopback
         self.symbolic_addrmap = list()
+        self.atop_support = atop_support
         self.addrmap = list()
 
     def add_input(self, name):
@@ -1288,6 +1292,7 @@ class AxiXbar(Xbar):
         code += "  .Cfg           ( {cfg_name} ),\n".format(
             cfg_name=self.cfg_name)
         code += "  .Connectivity  ( {} ), \n".format(self.connectivity())
+        code += "  .AtopSupport   ( {} ), \n".format(int(self.atop_support))
         code += "  .slv_aw_chan_t ( {}_aw_chan_t ),\n".format(
             self.input_struct)
         code += "  .mst_aw_chan_t ( {}_aw_chan_t ),\n".format(

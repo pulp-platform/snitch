@@ -1,0 +1,83 @@
+From 8810d64fec96ee6f587b707562a5a7ae233efda0 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Thu, 17 Jun 2021 18:11:07 +0200
+Subject: [PATCH] Remove atomics from DMA path
+
+---
+ src/axi_demux.sv | 10 +++++++---
+ src/axi_xbar.sv  |  2 ++
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/src/axi_demux.sv b/src/axi_demux.sv
+index 7ddc105..3e5688d 100644
+--- a/src/axi_demux.sv
++++ b/src/axi_demux.sv
+@@ -11,10 +11,12 @@
+ // Author: Wolfgang Roenninger <wroennin@ethz.ch>
+ 
+ `include "common_cells/registers.svh"
++`include "common_cells/assertions.svh"
+ 
+ // axi_demux: Demultiplex an AXI bus from one slave port to multiple master ports.
+ // See `doc/axi_demux.md` for the documentation, including the definition of parameters and ports.
+ module axi_demux #(
++  parameter bit          AtopSupport    = 1'b1,
+   parameter int unsigned AxiIdWidth     = 32'd0,
+   parameter type         aw_chan_t      = logic,
+   parameter type         w_chan_t       = logic,
+@@ -188,12 +190,12 @@ module axi_demux #(
+           slv_aw_ready    = 1'b1;
+           lock_aw_valid_d = 1'b0;
+           load_aw_lock    = 1'b1;
+-          atop_inject     = slv_aw_chan_select.aw_chan.atop[5]; // inject the ATOP if necessary
++          atop_inject     = slv_aw_chan_select.aw_chan.atop[5] & AtopSupport; // inject the ATOP if necessary
+         end
+       end else begin
+         // Process can start handling a transaction if its `i_aw_id_counter` and `w_fifo` have
+         // space in them. Further check if we could inject something on the AR channel.
+-        if (!aw_id_cnt_full && !w_fifo_full && !ar_id_cnt_full) begin
++        if (!aw_id_cnt_full && !w_fifo_full && (!AtopSupport || !ar_id_cnt_full)) begin
+           // there is a valid AW vector make the id lookup and go further, if it passes
+           if (slv_aw_valid && (!aw_select_occupied ||
+              (slv_aw_chan_select.aw_select == lookup_aw_select))) begin
+@@ -204,7 +206,7 @@ module axi_demux #(
+             // on AW transaction
+             if (aw_ready) begin
+               slv_aw_ready = 1'b1;
+-              atop_inject  = slv_aw_chan_select.aw_chan.atop[5];
++              atop_inject  = slv_aw_chan_select.aw_chan.atop[5] & AtopSupport;
+             // no AW transaction this cycle, lock the decision
+             end else begin
+               lock_aw_valid_d = 1'b1;
+@@ -526,6 +528,8 @@ module axi_demux #(
+ `endif
+ // pragma translate_on
+   end
++  // Check that we do not get atops when support for them is disabled.
++  `ASSERT(NoAtopAllowed, !AtopSupport & slv_req_i.aw_valid |-> slv_req_i.aw.atop == '0)
+ endmodule
+ 
+ module axi_demux_id_counters #(
+diff --git a/src/axi_xbar.sv b/src/axi_xbar.sv
+index 0af7401..a4131b4 100644
+--- a/src/axi_xbar.sv
++++ b/src/axi_xbar.sv
+@@ -13,6 +13,7 @@
+ // axi_xbar: Fully-connected AXI4+ATOP crossbar with an arbitrary number of slave and master ports.
+ // See `doc/axi_xbar.md` for the documentation, including the definition of parameters and ports.
+ module axi_xbar #(
++  parameter bit  AtopSupport                                          = 1'b1,
+   parameter axi_pkg::xbar_cfg_t Cfg                                   = '0,
+   parameter bit [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts-1:0] Connectivity = '1,
+   parameter type slv_aw_chan_t                                        = logic,
+@@ -122,6 +123,7 @@ module axi_xbar #(
+     `endif
+     // pragma translate_on
+     axi_demux #(
++      .AtopSupport    ( AtopSupport            ),
+       .AxiIdWidth     ( Cfg.AxiIdWidthSlvPorts ),  // ID Width
+       .aw_chan_t      ( slv_aw_chan_t          ),  // AW Channel Type
+       .w_chan_t       ( w_chan_t               ),  //  W Channel Type
+-- 
+2.25.1.377.g2d2118b814
+

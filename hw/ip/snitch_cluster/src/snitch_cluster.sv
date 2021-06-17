@@ -492,6 +492,7 @@ module snitch_cluster
   localparam bit [DmaXbarCfg.NoSlvPorts-1:0] DMAEnableDefaultMstPort = '1;
   axi_xbar #(
     .Cfg (DmaXbarCfg),
+    .AtopSupport (0),
     .slv_aw_chan_t (axi_mst_dma_aw_chan_t),
     .mst_aw_chan_t (axi_slv_dma_aw_chan_t),
     .w_chan_t (axi_mst_dma_w_chan_t),
