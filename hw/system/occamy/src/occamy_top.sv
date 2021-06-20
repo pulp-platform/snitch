@@ -540,9 +540,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .axi_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6])
   );
 
-  ////////////////////
-  // S1 Quadrants 0 //
-  ////////////////////
+  ///////////////////
+  // S1 Quadrant 0 //
+  ///////////////////
   axi_a48_d64_i8_u0_req_t  narrow_in_cut_0_req;
   axi_a48_d64_i8_u0_resp_t narrow_in_cut_0_rsp;
 
@@ -671,9 +671,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_in_rsp_o(wide_in_cut_0_rsp)
   );
 
-  ////////////////////
-  // S1 Quadrants 1 //
-  ////////////////////
+  ///////////////////
+  // S1 Quadrant 1 //
+  ///////////////////
   axi_a48_d64_i8_u0_req_t  narrow_in_cut_1_req;
   axi_a48_d64_i8_u0_resp_t narrow_in_cut_1_rsp;
 
@@ -802,9 +802,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_in_rsp_o(wide_in_cut_1_rsp)
   );
 
-  ////////////////////
-  // S1 Quadrants 2 //
-  ////////////////////
+  ///////////////////
+  // S1 Quadrant 2 //
+  ///////////////////
   axi_a48_d64_i8_u0_req_t  narrow_in_cut_2_req;
   axi_a48_d64_i8_u0_resp_t narrow_in_cut_2_rsp;
 
@@ -933,9 +933,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_in_rsp_o(wide_in_cut_2_rsp)
   );
 
-  ////////////////////
-  // S1 Quadrants 3 //
-  ////////////////////
+  ///////////////////
+  // S1 Quadrant 3 //
+  ///////////////////
   axi_a48_d64_i8_u0_req_t  narrow_in_cut_3_req;
   axi_a48_d64_i8_u0_resp_t narrow_in_cut_3_rsp;
 
@@ -1064,9 +1064,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_in_rsp_o(wide_in_cut_3_rsp)
   );
 
-  ////////////////////
-  // S1 Quadrants 4 //
-  ////////////////////
+  ///////////////////
+  // S1 Quadrant 4 //
+  ///////////////////
   axi_a48_d64_i8_u0_req_t  narrow_in_cut_4_req;
   axi_a48_d64_i8_u0_resp_t narrow_in_cut_4_rsp;
 
@@ -1195,9 +1195,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_in_rsp_o(wide_in_cut_4_rsp)
   );
 
-  ////////////////////
-  // S1 Quadrants 5 //
-  ////////////////////
+  ///////////////////
+  // S1 Quadrant 5 //
+  ///////////////////
   axi_a48_d64_i8_u0_req_t  narrow_in_cut_5_req;
   axi_a48_d64_i8_u0_resp_t narrow_in_cut_5_rsp;
 
@@ -1326,9 +1326,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_in_rsp_o(wide_in_cut_5_rsp)
   );
 
-  ////////////////////
-  // S1 Quadrants 6 //
-  ////////////////////
+  ///////////////////
+  // S1 Quadrant 6 //
+  ///////////////////
   axi_a48_d64_i8_u0_req_t  narrow_in_cut_6_req;
   axi_a48_d64_i8_u0_resp_t narrow_in_cut_6_rsp;
 
@@ -1457,9 +1457,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_in_rsp_o(wide_in_cut_6_rsp)
   );
 
-  ////////////////////
-  // S1 Quadrants 7 //
-  ////////////////////
+  ///////////////////
+  // S1 Quadrant 7 //
+  ///////////////////
   axi_a48_d64_i8_u0_req_t  narrow_in_cut_7_req;
   axi_a48_d64_i8_u0_resp_t narrow_in_cut_7_rsp;
 

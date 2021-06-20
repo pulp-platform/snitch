@@ -171,9 +171,9 @@ module occamy_top
   );
 
   % for i in range(nr_s1_quadrants):
-  ////////////////////
-  // S1 Quadrants ${i} //
-  ////////////////////
+  ///////////////////
+  // S1 Quadrant ${i} //
+  ///////////////////
   <%
     cut_width = 1
     narrow_in = soc_narrow_xbar.__dict__["out_s1_quadrant_{}".format(i)].cut(context, cut_width, name="narrow_in_cut_{}".format(i))
