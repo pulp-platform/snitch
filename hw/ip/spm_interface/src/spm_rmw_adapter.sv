@@ -44,7 +44,8 @@ module spm_rmw_adapter
   typedef enum  {NORMAL, RMW_READ, RMW_MODIFY_WRITE} state_e;
 
   mem_data_t mask_q, mask_d;
-  mem_data_t masked_wdata_q, masked_wdata_d;
+  mem_data_t masked_wdata_q, masked_wdata_d, masked_data;
+  assign masked_data = (mem_wdata_i & mask_q) | (mem_rdata_i & ~mask_q);
 
   logic         partial_write;
   assign partial_write = mem_valid_i & mem_we_i & ~(&mem_strb_i);
@@ -56,7 +57,7 @@ module spm_rmw_adapter
       mask_d[i] = mem_strb_i[i/8];
     end
 
-    masked_wdata_d = (mem_rvalid_i)? (mem_wdata_i & mask_q) | (mem_rdata_i & ~mask_q) : masked_wdata_q;
+    masked_wdata_d = (mem_rvalid_i)? masked_data : masked_wdata_q;
   end
 
   always_comb begin
