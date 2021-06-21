@@ -45,6 +45,13 @@ pub unsafe fn banshee_freg_cycle_ptr<'a>(cpu: &'a mut Cpu, reg: u32) -> &'a mut 
     cpu.state.fregs_cycle.get_unchecked_mut(reg as usize)
 }
 
+/// Get a pointer to the CAS comparison value register.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_cas_value_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut u32 {
+    &mut cpu.state.cas_value
+}
+
 /// Get a pointer to the program counter register.
 #[no_mangle]
 #[inline(always)]
