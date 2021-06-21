@@ -221,5 +221,9 @@ module spm_rmw_adapter
       masked_data_q <= masked_data_d;
     end
   end
+  `FF(req_state_q, req_state_d, state_e'('0))
+  `FF(mask_q, mask_d, '0)
+  `FF(masked_wdata_q, masked_wdata_d, '0)
+
 
 endmodule
