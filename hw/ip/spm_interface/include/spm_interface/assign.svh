@@ -14,10 +14,10 @@
   assign dst.we    = src.we  ;        \
   assign dst.wdata = src.wdata;       \
   assign dst.strb  = src.strb;        \
-  assign dst.req   = src.req;
+  assign dst.valid = src.valid;
 
 `define SPM_ASSIGN_RSP_CHAN(dst, src) \
-  assign dst.gnt    = src.gnt;        \
+  assign dst.ready  = src.ready;        \
   assign dst.rvalid = src.rvalid;     \
   assign dst.rdata  = src.rdata;
 

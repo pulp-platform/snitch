@@ -67,13 +67,13 @@ package spm_test;
       bus.we      <= '0;
       bus.wdata   <= '0;
       bus.strb    <= '0;
-      bus.req     <= '0;
+      bus.valid   <= '0;
     endtask
 
     task reset_slave;
-      bus.gnt     <= '0;
+      bus.ready   <= '0;
       bus.rvalid  <= '0;
-      bus.rdata  <= '0;
+      bus.rdata   <= '0;
     endtask
 
     task cycle_start;
@@ -113,7 +113,7 @@ package spm_test;
 
     /// Receive a request.
     task recv_req (output req_t req);
-      bus.gnt     <= #TA 1'b0;
+      bus.ready   <= #TA 1'b1;
       cycle_start();
       while (bus.req != 1) begin cycle_end(); cycle_start(); end
       cycle_end();

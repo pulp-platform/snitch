@@ -19,26 +19,24 @@ interface SPM_BUS #(
   typedef logic [StrbWidth-1:0] strb_t;
   /// The request channel.
   addr_t   addr;
-  /// 0 = read, 1 = write, 1 = amo fetch-and-op
   logic    we;
   data_t   wdata;
-  /// Byte-wise strobe
   strb_t   strb;
-  logic    req;
+  logic    valid;
 
   /// The response channel.
-  logic    gnt;
+  logic    ready;
   logic    rvalid;
   data_t   rdata;
 
   modport in  (
-    input  addr, we, wdata, strb, req,
-    output gnt, rvalid, rdata
+    input  addr, we, wdata, strb, valid,
+    output ready, rvalid, rdata
   );
 
   modport out  (
-    output  addr, we, wdata, strb, req,
-    input gnt, rvalid, rdata
+    output  addr, we, wdata, strb, valid,
+    input ready, rvalid, rdata
   );
 
 endinterface
@@ -60,26 +58,24 @@ interface SPM_BUS_DV #(
   typedef logic [StrbWidth-1:0]  strb_t;
   /// The request channel.
   addr_t   addr;
-  /// 0 = read, 1 = write, 1 = amo fetch-and-op
   logic                          we;
   data_t   wdata;
-  /// Byte-wise strobe
   strb_t   strb;
-  logic                          req;
+  logic                          valid;
 
   /// The response channel.
-  logic                          gnt;
+  logic                          ready;
   logic                          rvalid;
   data_t   rdata;
 
   modport in  (
-               input  addr, we, wdata, strb, req,
-               output gnt, rvalid, rdata
+               input  addr, we, wdata, strb, valid,
+               output ready, rvalid, rdata
                );
 
   modport out  (
-                output addr, we, wdata, strb, req,
-                input  gnt, rvalid, rdata
+                output addr, we, wdata, strb, valid,
+                input  ready, rvalid, rdata
                 );
 
 endinterface

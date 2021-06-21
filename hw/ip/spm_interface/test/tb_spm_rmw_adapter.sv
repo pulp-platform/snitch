@@ -93,8 +93,8 @@ module tb_spm_rmw_adapter
        .clk_i(clk),
        .rst_ni(rst_n),
 
-       .mem_req_i(spm_bus_master.req),
-       .mem_gnt_o(spm_bus_master.gnt),
+       .mem_valid_i(spm_bus_master.valid),
+       .mem_ready_o(spm_bus_master.ready),
        .mem_addr_i(spm_bus_master.addr),
        .mem_wdata_i(spm_bus_master.wdata),
        .mem_strb_i(spm_bus_master.strb),
@@ -102,8 +102,8 @@ module tb_spm_rmw_adapter
        .mem_rvalid_o(spm_bus_master.rvalid),
        .mem_rdata_o(spm_bus_master.rdata),
 
-       .mem_req_o(spm_bus_slave.req),
-       .mem_gnt_i(spm_bus_slave.gnt),
+       .mem_valid_o(spm_bus_slave.valid),
+       .mem_ready_i(spm_bus_slave.ready),
        .mem_addr_o(spm_bus_slave.addr),
        .mem_wdata_o(spm_bus_slave.wdata),
        .mem_strb_o(spm_bus_slave.strb),

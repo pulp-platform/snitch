@@ -25,8 +25,8 @@ module spm_rmw_adapter
    input logic  rst_ni,
 
    // Request-side channel
-   input logic  mem_req_i,
-   output logic mem_gnt_o,
+   input logic  mem_valid_i,
+   output logic mem_ready_o,
    input        addr_t mem_addr_i,
    input        mem_data_t mem_wdata_i,
    input        mem_strb_t mem_strb_i,
@@ -35,8 +35,8 @@ module spm_rmw_adapter
    output       mem_data_t mem_rdata_o,
 
    // Mem-side channel
-   output logic mem_req_o,
-   input logic  mem_gnt_i,
+   output logic mem_valid_o,
+   input logic  mem_ready_i,
    output       addr_t mem_addr_o,
    output       mem_data_t mem_wdata_o,
    output       mem_strb_t mem_strb_o,
@@ -110,14 +110,14 @@ module spm_rmw_adapter
   always_comb begin : output_block
 
     // Mem-side
-    mem_req_o = mem_req_i;
+    mem_valid_o = mem_valid_i;
     mem_addr_o = mem_addr_i;
     mem_wdata_o = mem_wdata_i;
     mem_strb_o = '1; // always perform full access
     mem_we_o = mem_we_i;
 
     // Request-side
-    mem_gnt_o = mem_gnt_i;
+    mem_ready_o = mem_ready_i;
     mem_rvalid_o = mem_rvalid_i;
     mem_rdata_o = mem_rdata_i;
 
