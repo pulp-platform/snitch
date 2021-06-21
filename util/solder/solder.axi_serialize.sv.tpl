@@ -3,7 +3,7 @@
     .MaxWriteTxns ( 4 ),
     .AxiIdWidth ( ${axi_in.iw} ),
     .req_t ( ${axi_in.req_type()} ),
-    .resp_t ( ${axi_in.rsp_type()} ),
+    .resp_t ( ${axi_in.rsp_type()} )
   ) ${name} (
     .clk_i ( ${axi_in.clk} ),
     .rst_ni ( ${axi_in.rst} ),
