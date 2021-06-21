@@ -87,18 +87,22 @@ package spm_test;
     /// Send a request.
     task send_req (input req_t req);
       bus.addr    <= #TA req.addr;
-      bus.we      <= #TA req.we;
+      bus.we      <= #TA 1;
       bus.wdata   <= #TA req.wdata;
       bus.strb    <= #TA req.strb;
-      bus.req     <= #TA 1;
+      bus.valid   <= #TA 1;
       cycle_start();
-      while (bus.gnt != 1) begin cycle_end(); cycle_start(); end
+      while (bus.ready != 1) begin cycle_end(); cycle_start(); end
+      cycle_end();
+      bus.valid   <= #TA 0;
+      cycle_start();
+      while (bus.rvalid != 1) begin cycle_end(); cycle_start(); end
       cycle_end();
       bus.addr    <= #TA '0;
-      bus.we      <= #TA '0;
+      bus.we      <= #TA 0;
       bus.wdata   <= #TA '0;
       bus.strb    <= #TA '0;
-      bus.req     <= #TA 0;
+
     endtask
 
     /// Send a response.
@@ -115,15 +119,14 @@ package spm_test;
     task recv_req (output req_t req);
       bus.ready   <= #TA 1'b1;
       cycle_start();
-      while (bus.req != 1) begin cycle_end(); cycle_start(); end
-      cycle_end();
+      while (bus.valid != 1) begin cycle_end(); cycle_start(); end
       req = new;
       req.addr   = bus.addr;
       req.we     = bus.we;
       req.wdata  = bus.wdata;
       req.strb   = bus.strb;
-      bus.gnt    <= #TA 1'b1;
       cycle_end();
+      bus.ready  <= #TA 1'b0;
     endtask
 
     /// Receive a response.
@@ -133,28 +136,6 @@ package spm_test;
       rsp.rdata  = bus.rdata;
       cycle_end();
     endtask
-
-    // /// Monitor request.
-    // task mon_req (output req_t req);
-    //   cycle_start();
-    //   while (!(bus.q_valid && bus.q_ready)) begin cycle_end(); cycle_start(); end
-    //   req = new;
-    //   req.addr  = bus.q_addr;
-    //   req.write = bus.q_write;
-    //   req.amo   = bus.q_amo;
-    //   req.data  = bus.q_data;
-    //   req.strb  = bus.q_strb;
-    //   req.user  = bus.q_user;
-    //   cycle_end();
-    // endtask
-
-    // /// Monitor response.
-    // task mon_rsp (output rsp_t rsp);
-    //   cycle_start();
-    //   rsp = new;
-    //   rsp.data  = bus.p_data;
-    //   cycle_end();
-    // endtask
 
   endclass
 
@@ -294,45 +275,4 @@ package spm_test;
     endtask
   endclass
 
-  // class spm_monitor #(
-  //   // spm interface parameters
-  //   parameter int   AW = 32,
-  //   parameter int   DW = 32,
-  //   parameter type  user_t = logic,
-  //   parameter int unsigned RespLatency = 1,
-  //   // Stimuli application and test time
-  //   parameter time  TA = 0ps,
-  //   parameter time  TT = 0ps
-  // ) extends rand_mem #(.AW(AW), .DW(DW), .user_t (user_t), .TA(TA), .TT(TT));
-
-  //   mailbox req_mbx = new, rsp_mbx = new;
-  //   typedef mem_driver_t::req_t req_t;
-  //   typedef mem_driver_t::rsp_t rsp_t;
-
-  //   /// Constructor.
-  //   function new(virtual MEM_BUS_DV #(
-  //     .ADDR_WIDTH (AW),
-  //     .DATA_WIDTH (DW),
-  //     .user_t (user_t)
-  //   ) bus);
-  //     super.new(bus);
-  //   endfunction
-
-  //   // mem Monitor.
-  //   task monitor;
-  //     forever begin
-  //       automatic mem_driver_t::req_t req;
-  //       this.drv.mon_req(req);
-  //       req_mbx.put(req);
-  //       fork
-  //         begin
-  //           automatic mem_driver_t::rsp_t rsp;
-  //           repeat (RespLatency-1) @(posedge this.drv.bus.clk_i);
-  //           this.drv.mon_rsp(rsp);
-  //           rsp_mbx.put(rsp);
-  //         end
-  //       join_none
-  //     end
-  //   endtask
-  // endclass
 endpackage

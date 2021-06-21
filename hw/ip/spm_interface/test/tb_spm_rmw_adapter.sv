@@ -74,7 +74,8 @@ module tb_spm_rmw_adapter
 
     spm_rand_master.reset();
     repeat(20) @(posedge clk);
-    spm_rand_master.run(4);
+    spm_rand_master.run(1);
+
 
   end // initial begin
 

@@ -41,69 +41,55 @@ module spm_rmw_adapter
    input        mem_data_t mem_rdata_i
    );
 
-  typedef enum  {NORMAL, RMW_READ, RMW_MODIFY_WRITE, RMW_FINAL} state_t;
+  typedef enum  {NORMAL, RMW_READ, RMW_MODIFY_WRITE} state_e;
 
-  logic [DataWidth-1:0] mask_q, mask_d;
-  logic [DataWidth-1:0] masked_data_q, masked_data_d;
+  mem_data_t mask_q, mask_d;
+  mem_data_t masked_wdata_q, masked_wdata_d;
 
-  state_t req_state_q, req_state_d;
+  logic         partial_write;
+  assign partial_write = mem_valid_i & mem_we_i & ~(&mem_strb_i);
 
-  always_comb begin : mask_block
+  state_e req_state_q, req_state_d;
+
+  always_comb begin
     for (int i = 0; i < DataWidth; i++) begin
       mask_d[i] = mem_strb_i[i/8];
     end
 
-    masked_data_d = masked_data_q;
-    if (mem_rvalid_i && !(&mem_strb_i)) begin
-      masked_data_d = (mem_rdata_i & ~mask_q) | (mem_wdata_i & mask_q);
-    end
-
+    masked_wdata_d = (mem_rvalid_i)? (mem_wdata_i & mask_q) | (mem_rdata_i & ~mask_q) : masked_wdata_q;
   end
 
-  always_comb begin : next_state_block
+  always_comb begin
 
     req_state_d = req_state_q;
 
     unique case (req_state_q)
       NORMAL: begin
-        req_state_d = NORMAL;
-
-        // If partial memory access (read or write) is detected perform RMW_READ first
-        if (mem_req_i && !(&mem_strb_i)) begin
+        // If partial memory access is detected perform RMW_READ
+        if (partial_write) begin
           req_state_d = RMW_READ;
         end
       end
 
       RMW_READ: begin
-
         // Wait for full access read request to be granted
-        if (mem_gnt_i) begin
-          if (mem_we_i) begin
-            req_state_d = RMW_MODIFY_WRITE;
-          end else begin
-            req_state_d = RMW_FINAL;
-          end
+        if (mem_rvalid_i) begin
+          req_state_d = RMW_MODIFY_WRITE;
         end
       end // case: RMW_READ
 
       RMW_MODIFY_WRITE: begin
-        if (mem_gnt_i) begin
-          req_state_d = RMW_FINAL;
+        if (mem_rvalid_i) begin
+          req_state_d = NORMAL;
         end
       end
 
-      RMW_FINAL: begin
-        req_state_d = NORMAL;
-      end
-
-      default: begin
-        req_state_d = NORMAL;
-      end
+      default: ;
 
     endcase
   end
 
-  always_comb begin : output_block
+  always_comb begin
 
     // Mem-side
     mem_valid_o = mem_valid_i;
@@ -122,101 +108,36 @@ module spm_rmw_adapter
       NORMAL: begin
 
         // If access is bitwise, generate RMW_READ request
-        if (mem_req_i && !(&mem_strb_i)) begin
-          // Mem-side
-          mem_req_o = 1'b1;
-          mem_addr_o = mem_addr_i;
-          mem_wdata_o = '0;
-          mem_strb_o = '1;
+        if (partial_write) begin
           mem_we_o = '0;
-          // Request-side
-          mem_gnt_o = '0;
-          mem_rvalid_o = '0;
-          mem_rdata_o = '0;
         end
       end // case: NORMAL
 
       RMW_READ: begin
 
-        // Wait and assert read request until granted
-        // Mem-side
-        mem_req_o = 1'b1;
-        mem_addr_o = mem_addr_i;
-        mem_wdata_o = '0;
-        // Request-side
-        mem_gnt_o = 1'b0;
         mem_rvalid_o = 1'b0;
         mem_rdata_o = '0;
         mem_we_o = 1'b0;
 
-        // Once byte-wise read access is granted,
-        // (READ) grant original read request and send masked data next cycle
-        // (WRITE) wait for data arriving in the next cycle
-        if (!mem_we_i && mem_gnt_i) begin
-          mem_gnt_o = 1'b1;
+        if (mem_rvalid_i) begin
+          mem_valid_o = 1'b1;
+          mem_we_o = 1'b1;
+          mem_wdata_o = masked_wdata_d;
         end
 
       end // case: RMW_READ
 
       RMW_MODIFY_WRITE: begin
 
-        // Mem-side
-        mem_req_o = 1'b1;
-        mem_addr_o = mem_addr_i;
-        mem_wdata_o = '0;
+        mem_wdata_o = masked_wdata_q;
         mem_we_o = 1'b1;
-        // Request-side
-        mem_gnt_o = 1'b0;
-        mem_rvalid_o = 1'b0;
-        mem_rdata_o = '0;
 
-        // Data should have arrived, byte-wise modify read data
-        // and issue write request
-        if (mem_rvalid_i) begin
-          mem_wdata_o = (mem_rdata_i & ~mask_q) | (mem_wdata_i & mask_q);
-        end else begin
-          mem_wdata_o = masked_data_q;
-        end
-
-        // grant original request once write request is granted
-        if (mem_gnt_i) begin
-          mem_gnt_o = 1'b1;
-        end
       end // case: RMW_MODIFY_WRITE
-
-      RMW_FINAL: begin
-
-        // Mem-side
-        mem_req_o = 1'b0;
-        mem_addr_o = '0;
-        mem_wdata_o = '0;
-        mem_we_o = 1'b0;
-        // Request-side
-        mem_gnt_o = 1'b0;
-        mem_rvalid_o = mem_rvalid_i;
-        mem_rdata_o = '0;
-
-        // (READ) forward masked data to original request
-        if (!mem_we_i && mem_rvalid_i) begin
-          mem_rdata_o = mem_rdata_i & mask_q;
-        end
-      end
 
       default: ;
     endcase
   end
 
-  always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (~rst_ni) begin
-      req_state_q <= NORMAL;
-      mask_q <= '0;
-      masked_data_q <= '0;
-    end else begin
-      req_state_q <= req_state_d;
-      mask_q <= mask_d;
-      masked_data_q <= masked_data_d;
-    end
-  end
   `FF(req_state_q, req_state_d, state_e'('0))
   `FF(mask_q, mask_d, '0)
   `FF(masked_wdata_q, masked_wdata_d, '0)
