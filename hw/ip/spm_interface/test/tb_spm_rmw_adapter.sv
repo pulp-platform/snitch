@@ -1,3 +1,10 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Authors:
+// - Tim Fischer <fischeti@iis.ee.ethz.ch>
+
 `include "spm_interface/assign.svh"
 
 module tb_spm_rmw_adapter
