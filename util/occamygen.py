@@ -264,6 +264,7 @@ def main():
                                    clk="clk_i",
                                    rst="rst_ni",
                                    no_loopback=True,
+                                   atop_support=False,
                                    node=am_soc_wide_xbar)
 
     for i in range(nr_s1_quadrants):
@@ -323,6 +324,7 @@ def main():
         clk="clk_i",
         rst="rst_ni",
         no_loopback=True,
+        atop_support=False,
         context="quadrant_s1",
         node=am_wide_xbar_quadrant_s1)
 

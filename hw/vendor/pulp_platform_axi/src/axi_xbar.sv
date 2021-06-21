@@ -13,6 +13,7 @@
 // axi_xbar: Fully-connected AXI4+ATOP crossbar with an arbitrary number of slave and master ports.
 // See `doc/axi_xbar.md` for the documentation, including the definition of parameters and ports.
 module axi_xbar #(
+  parameter bit  AtopSupport                                          = 1'b1,
   parameter axi_pkg::xbar_cfg_t Cfg                                   = '0,
   parameter bit [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts-1:0] Connectivity = '1,
   parameter type slv_aw_chan_t                                        = logic,
@@ -122,6 +123,7 @@ module axi_xbar #(
     `endif
     // pragma translate_on
     axi_demux #(
+      .AtopSupport    ( AtopSupport            ),
       .AxiIdWidth     ( Cfg.AxiIdWidthSlvPorts ),  // ID Width
       .aw_chan_t      ( slv_aw_chan_t          ),  // AW Channel Type
       .w_chan_t       ( w_chan_t               ),  //  W Channel Type
