@@ -5,8 +5,10 @@
 // Authors:
 // - Tim Fischer <fischeti@iis.ee.ethz.ch>
 
-`include "common_cells/registers.svh"
+/// This module breaks up sub-word accesses into read-modify-write accesses
+/// to support things like block ECC.
 
+`include "common_cells/registers.svh"
 module spm_rmw_adapter
 #(
   parameter int unsigned  AddrWidth = 0,
@@ -38,28 +40,37 @@ module spm_rmw_adapter
    input logic  mem_ready_i,
    output       addr_t mem_addr_o,
    output       mem_data_t mem_wdata_o,
-   output       mem_strb_t mem_strb_o,
    output logic mem_we_o,
    input logic  mem_rvalid_i,
    input        mem_data_t mem_rdata_i
    );
 
-  typedef enum  {NORMAL, RMW_READ, RMW_MODIFY_WRITE} state_e;
+  typedef enum  {NORMAL, RMW_READ, RMW_MODIFY_WRITE, RMW_FINALIZE} state_e;
+  state_e req_state_q, req_state_d;
 
   mem_data_t mask_q, mask_d;
-  mem_data_t masked_wdata_q, masked_wdata_d, masked_data;
-  assign masked_data = (mem_wdata_i & mask_q) | (mem_rdata_i & ~mask_q);
+  mem_data_t masked_wdata_q, masked_wdata_d;
+  logic masked_wdata_en;
+
+  // The RMW_READ state generates a full-word read request
+  // which is then masked with the pending byte-wise write request
+  assign masked_wdata_d = (mem_wdata_i & mask_q) | (mem_rdata_i & ~mask_q);
+  assign masked_wdata_en = mem_rvalid_i && (req_state_q == RMW_READ);
 
   logic partial_write;
   assign partial_write = mem_valid_i & mem_we_i & ~(&mem_strb_i);
 
-  state_e req_state_q, req_state_d;
-
   cnt_t cnt_q, cnt_d;
   logic rmw_ready, txns_ready;
+
+  // Wait until we do not have any outstanding transactions anymore
+  // since we are blocking the response channel with our `rmw` operation.
   assign rmw_ready = (cnt_q == '0);
+
+  // Only allow `MaxTxns` number of oustanding transactions
   assign txns_ready = cnt_q < MaxTxns;
 
+  // Count number of outstanding requests
   always_comb begin
     cnt_d = cnt_q;
     if (mem_valid_i && mem_ready_o) begin
@@ -74,8 +85,6 @@ module spm_rmw_adapter
     for (int i = 0; i < DataWidth; i++) begin
       mask_d[i] = mem_strb_i[i/8];
     end
-
-    masked_wdata_d = masked_data;
   end
 
   always_comb begin
@@ -84,7 +93,6 @@ module spm_rmw_adapter
     mem_valid_o = mem_valid_i && txns_ready;
     mem_addr_o = mem_addr_i;
     mem_wdata_o = mem_wdata_i;
-    mem_strb_o = '1; // always perform full access
     mem_we_o = mem_we_i;
 
     // Request-side
@@ -94,12 +102,11 @@ module spm_rmw_adapter
 
     req_state_d = req_state_q;
 
-
     unique case (req_state_q)
 
       NORMAL: begin
 
-        // If access is bitwise, generate RMW_READ request
+        // If access is byte-wise, generate full-width read request
         if (partial_write && mem_ready_i && rmw_ready) begin
           req_state_d = RMW_READ;
           mem_we_o = '0;
@@ -108,43 +115,57 @@ module spm_rmw_adapter
 
       RMW_READ: begin
 
+        // stall requests
         mem_rvalid_o = 1'b0;
         mem_rdata_o = '0;
-        mem_we_o = 1'b0;
         mem_ready_o = 1'b0;
 
         if (mem_rvalid_i) begin
           req_state_d = RMW_MODIFY_WRITE;
-          mem_valid_o = 1'b1;
-          mem_we_o = 1'b1;
-          mem_wdata_o = masked_wdata_d;
         end
 
       end // case: RMW_READ
 
       RMW_MODIFY_WRITE: begin
 
+        // stall requests
         mem_rvalid_o = 1'b0;
         mem_ready_o = 1'b0;
 
+        // issue write request with masked data
         mem_valid_o = 1'b1;
         mem_wdata_o = masked_wdata_q;
 
-        if (mem_rvalid_i) begin
-          req_state_d = NORMAL;
-          mem_valid_o = 1'b0;
-          mem_rvalid_o = 1'b1;
+        if (mem_ready_i) begin
+          req_state_d = RMW_FINALIZE;
         end
 
       end // case: RMW_MODIFY_WRITE
+
+      RMW_FINALIZE: begin
+
+        // stall requests
+        mem_rvalid_o = 1'b0;
+        mem_ready_o = 1'b0;
+
+        mem_valid_o = 1'b0;
+        mem_wdata_o = masked_wdata_q;
+
+        // finalize and grant RMW request
+        if (mem_rvalid_i) begin
+          req_state_d = NORMAL;
+          mem_rvalid_o = 1'b1;
+        end
+
+      end // case: RMW_FINALIZE
 
       default: ;
     endcase
   end
 
   `FF(req_state_q, req_state_d, state_e'('0))
-  `FF(mask_q, mask_d, '0)
-  `FFL(masked_wdata_q, masked_wdata_d, mem_rvalid_i, '0)
+  `FFL(mask_q, mask_d, partial_write, '0)
+  `FFL(masked_wdata_q, masked_wdata_d, masked_wdata_en, '0)
   `FF(cnt_q, cnt_d, '0)
 
 endmodule

@@ -45,6 +45,8 @@ module tb_spm_rmw_adapter
                .DATA_WIDTH ( DataWidth )
                ) spm_bus_slave_dv ( clk );
 
+  assign spm_bus_slave.strb = '1;
+
   `SPM_ASSIGN(spm_bus_master, spm_bus_master_dv)
   `SPM_ASSIGN(spm_bus_slave_dv, spm_bus_slave)
 
@@ -112,7 +114,6 @@ module tb_spm_rmw_adapter
        .mem_ready_i(spm_bus_slave.ready),
        .mem_addr_o(spm_bus_slave.addr),
        .mem_wdata_o(spm_bus_slave.wdata),
-       .mem_strb_o(spm_bus_slave.strb),
        .mem_we_o(spm_bus_slave.we),
        .mem_rvalid_i(spm_bus_slave.rvalid),
        .mem_rdata_i(spm_bus_slave.rdata)
