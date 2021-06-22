@@ -87,7 +87,7 @@ package spm_test;
     /// Send a request.
     task send_req (input req_t req);
       bus.addr    <= #TA req.addr;
-      bus.we      <= #TA 1;
+      bus.we      <= #TA req.we;
       bus.wdata   <= #TA req.wdata;
       bus.strb    <= #TA req.strb;
       bus.valid   <= #TA 1;
@@ -99,7 +99,7 @@ package spm_test;
       while (bus.rvalid != 1) begin cycle_end(); cycle_start(); end
       cycle_end();
       bus.addr    <= #TA '0;
-      bus.we      <= #TA 0;
+      bus.we      <= #TA '0;
       bus.wdata   <= #TA '0;
       bus.strb    <= #TA '0;
 
@@ -214,6 +214,7 @@ package spm_test;
       repeat (n) begin
         automatic spm_driver_t::req_t r = new;
         assert(r.randomize());
+        r.we = (r.strb != '1)? 1'b1 : r.we;
         rand_wait(REQ_MIN_WAIT_CYCLES, REQ_MAX_WAIT_CYCLES);
         this.drv.send_req(r);
       end

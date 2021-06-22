@@ -78,4 +78,14 @@ interface SPM_BUS_DV #(
                 input  ready, rvalid, rdata
                 );
 
+  // pragma translate_off
+`ifndef VERILATOR
+  assert property (@(posedge clk_i) (valid && !ready |=> $stable(addr)));
+  assert property (@(posedge clk_i) (valid && !ready |=> $stable(we)));
+  assert property (@(posedge clk_i) (valid && !ready |=> $stable(wdata)));
+  assert property (@(posedge clk_i) (valid && !ready |=> $stable(strb)));
+  assert property (@(posedge clk_i) (valid && !ready |=> valid));
+`endif
+  // pragma translate_on
+
 endinterface

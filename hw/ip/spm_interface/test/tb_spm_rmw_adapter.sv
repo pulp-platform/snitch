@@ -64,8 +64,6 @@ module tb_spm_rmw_adapter
       .AW ( AddrWidth ),
       .DW ( DataWidth ),
       // Right now this module needs an immediate valid response.
-      .REQ_MIN_WAIT_CYCLES (0),
-      .REQ_MAX_WAIT_CYCLES (0),
       .TA ( ApplTime ),
       .TT ( TestTime )
       ) spm_rand_slave = new(spm_bus_slave_dv);
@@ -74,7 +72,7 @@ module tb_spm_rmw_adapter
 
     spm_rand_master.reset();
     repeat(20) @(posedge clk);
-    spm_rand_master.run(1);
+    spm_rand_master.run(10);
 
 
   end // initial begin
