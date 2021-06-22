@@ -65,9 +65,10 @@ module spm_rmw_adapter
     req_state_d = req_state_q;
 
     unique case (req_state_q)
+
       NORMAL: begin
         // If partial memory access is detected perform RMW_READ
-        if (partial_write) begin
+        if (partial_write && mem_ready_i) begin
           req_state_d = RMW_READ;
         end
       end
@@ -109,7 +110,7 @@ module spm_rmw_adapter
       NORMAL: begin
 
         // If access is bitwise, generate RMW_READ request
-        if (partial_write) begin
+        if (partial_write && mem_ready_i) begin
           mem_we_o = '0;
         end
       end // case: NORMAL
