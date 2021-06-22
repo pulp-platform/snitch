@@ -50,22 +50,22 @@ module spm_rmw_adapter
   mem_data_t masked_wdata_q, masked_wdata_d, masked_data;
   assign masked_data = (mem_wdata_i & mask_q) | (mem_rdata_i & ~mask_q);
 
-  logic         partial_write;
+  logic partial_write;
   assign partial_write = mem_valid_i & mem_we_i & ~(&mem_strb_i);
 
   state_e req_state_q, req_state_d;
 
   cnt_t cnt_q, cnt_d;
-  logic         rmw_ready, txns_ready;
+  logic rmw_ready, txns_ready;
   assign rmw_ready = (cnt_q == '0);
   assign txns_ready = cnt_q < MaxTxns;
 
   always_comb begin
     cnt_d = cnt_q;
-    if (mem_valid_o && mem_ready_i) begin
+    if (mem_valid_i && mem_ready_o) begin
       cnt_d++;
     end
-     if (mem_rvalid_i) begin
+     if (mem_rvalid_o) begin
        cnt_d--;
      end
   end
@@ -75,38 +75,7 @@ module spm_rmw_adapter
       mask_d[i] = mem_strb_i[i/8];
     end
 
-    masked_wdata_d = (mem_rvalid_i)? masked_data : masked_wdata_q;
-  end
-
-  always_comb begin
-
-    req_state_d = req_state_q;
-
-    unique case (req_state_q)
-
-      NORMAL: begin
-        // If partial memory access is detected perform RMW_READ
-        if (partial_write && mem_ready_i && rmw_ready) begin
-          req_state_d = RMW_READ;
-        end
-      end
-
-      RMW_READ: begin
-        // Wait for full access read request to be granted
-        if (mem_rvalid_i) begin
-          req_state_d = RMW_MODIFY_WRITE;
-        end
-      end // case: RMW_READ
-
-      RMW_MODIFY_WRITE: begin
-        if (mem_rvalid_i) begin
-          req_state_d = NORMAL;
-        end
-      end
-
-      default: ;
-
-    endcase
+    masked_wdata_d = masked_data;
   end
 
   always_comb begin
@@ -123,12 +92,16 @@ module spm_rmw_adapter
     mem_rvalid_o = mem_rvalid_i;
     mem_rdata_o = mem_rdata_i;
 
+    req_state_d = req_state_q;
+
+
     unique case (req_state_q)
 
       NORMAL: begin
 
         // If access is bitwise, generate RMW_READ request
         if (partial_write && mem_ready_i && rmw_ready) begin
+          req_state_d = RMW_READ;
           mem_we_o = '0;
         end
       end // case: NORMAL
@@ -141,6 +114,7 @@ module spm_rmw_adapter
         mem_ready_o = 1'b0;
 
         if (mem_rvalid_i) begin
+          req_state_d = RMW_MODIFY_WRITE;
           mem_valid_o = 1'b1;
           mem_we_o = 1'b1;
           mem_wdata_o = masked_wdata_d;
@@ -157,6 +131,7 @@ module spm_rmw_adapter
         mem_wdata_o = masked_wdata_q;
 
         if (mem_rvalid_i) begin
+          req_state_d = NORMAL;
           mem_valid_o = 1'b0;
           mem_rvalid_o = 1'b1;
         end
@@ -169,7 +144,7 @@ module spm_rmw_adapter
 
   `FF(req_state_q, req_state_d, state_e'('0))
   `FF(mask_q, mask_d, '0)
-  `FF(masked_wdata_q, masked_wdata_d, '0)
+  `FFL(masked_wdata_q, masked_wdata_d, mem_rvalid_i, '0)
   `FF(cnt_q, cnt_d, '0)
 
 endmodule
