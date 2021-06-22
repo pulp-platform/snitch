@@ -1607,6 +1607,30 @@ impl<'a> InstructionTranslator<'a> {
         self.write_freg(rd, value);
     }
 
+    unsafe fn emit_fsd(&self, rs: u32, addr: LLVMValueRef) {
+        let ptr = self.freg_ptr(rs);
+        let rs = LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _);
+        let rs_lo = LLVMBuildTrunc(self.builder, rs, LLVMInt32Type(), NONAME);
+        let rs_hi = LLVMBuildLShr(
+            self.builder,
+            rs,
+            LLVMConstInt(LLVMInt64Type(), 32, 0),
+            NONAME,
+        );
+        let rs_hi = LLVMBuildTrunc(self.builder, rs_hi, LLVMInt32Type(), NONAME);
+        self.write_mem(addr, rs_lo, 2);
+        self.write_mem(
+            LLVMBuildAdd(
+                self.builder,
+                addr,
+                LLVMConstInt(LLVMInt32Type(), 4, 0),
+                NONAME,
+            ),
+            rs_hi,
+            2,
+        );
+    }
+
     unsafe fn emit_imm20_rd(&self, data: riscv::FormatImm20Rd) -> Result<()> {
         let imm = data.imm20 << 12;
         trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
@@ -3023,6 +3047,7 @@ impl<'a> InstructionTranslator<'a> {
         let ptr = self.freg_ptr(rd);
         self.trace_access(TraceAccess::WriteFReg(rd as u8), data);
         LLVMBuildStore(self.builder, data, ptr);
+        self.emit_possible_ssr_write(rd);
     }
 
     /// Emit the code to read a f64 value from a float register.
@@ -3073,6 +3098,7 @@ impl<'a> InstructionTranslator<'a> {
             TraceAccess::WriteFReg(rd as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
+        self.emit_possible_ssr_write(rd);
     }
 
     /// Emit the code to write a f32 value to a float register.
@@ -3111,6 +3137,7 @@ impl<'a> InstructionTranslator<'a> {
             TraceAccess::WriteFReg(rd as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
+        self.emit_possible_ssr_write(rd);
     }
 
     /// Emit the code to load the next value of an SSR, if enabled.
@@ -3143,6 +3170,43 @@ impl<'a> InstructionTranslator<'a> {
             [self.ssr_ptr(rs), self.section.state_ptr],
         );
         self.emit_fld(rs, addr);
+        self.trace_disabled.set(td);
+        LLVMBuildBr(self.builder, bb_ssroff);
+
+        // Emit a block for the remainder of the operation.
+        LLVMPositionBuilderAtEnd(self.builder, bb_ssroff);
+    }
+
+    /// Emit the code to store the next value to an SSR, if enabled.
+    unsafe fn emit_possible_ssr_write(&self, rd: u32) {
+        // Don't do anything for registers which are not SSR-enabled.
+        if rd >= 2 {
+            return;
+        }
+
+        // Check if SSRs are enabled.
+        let enabled_ptr = self.ssr_enabled_ptr();
+        let enabled = LLVMBuildLoad(self.builder, enabled_ptr, NONAME);
+        let enabled = LLVMBuildTrunc(self.builder, enabled, LLVMInt1Type(), NONAME);
+
+        let bb_ssron = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_ssroff = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_ssron);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_ssroff);
+        LLVMBuildCondBr(self.builder, enabled, bb_ssron, bb_ssroff);
+
+        // Emit the SSR store.
+        LLVMPositionBuilderAtEnd(self.builder, bb_ssron);
+        // Otherwise we trace the loads, which are conditional on SSRs being
+        // enabled, which will cause the resulting IR to have dominance issues
+        // (since execution might have taken the path through the non-ssr
+        // access, but the tracing slot would still be allocated).
+        let td = self.trace_disabled.replace(true);
+        let addr = self.section.emit_call(
+            "banshee_ssr_next",
+            [self.ssr_ptr(rd), self.section.state_ptr],
+        );
+        self.emit_fsd(rd, addr);
         self.trace_disabled.set(td);
         LLVMBuildBr(self.builder, bb_ssroff);
 
