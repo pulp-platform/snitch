@@ -9,13 +9,16 @@
 
 module spm_rmw_adapter
 #(
-  parameter int unsigned AddrWidth = 0,
-  parameter int unsigned DataWidth = 0,
-  parameter int unsigned StrbWidth = AddrWidth / 8,
+  parameter int unsigned  AddrWidth = 0,
+  parameter int unsigned  DataWidth = 0,
+  parameter int unsigned  StrbWidth = AddrWidth / 8,
+  parameter int unsigned  MaxTxns = 32'd3,
 
   localparam type addr_t = logic [AddrWidth-1:0],
   localparam type mem_data_t = logic [DataWidth-1:0],
-  localparam type mem_strb_t = logic [StrbWidth-1:0]
+  localparam type mem_strb_t = logic [StrbWidth-1:0],
+  localparam type cnt_t = logic [$clog2(MaxTxns)-1:0]
+
 ) (
    input logic  clk_i,
    input logic  rst_ni,
@@ -52,6 +55,21 @@ module spm_rmw_adapter
 
   state_e req_state_q, req_state_d;
 
+  cnt_t cnt_q, cnt_d;
+  logic         rmw_ready, txns_ready;
+  assign rmw_ready = (cnt_q == '0);
+  assign txns_ready = cnt_q < MaxTxns;
+
+  always_comb begin
+    cnt_d = cnt_q;
+    if (mem_valid_o && mem_ready_i) begin
+      cnt_d++;
+    end
+     if (mem_rvalid_i) begin
+       cnt_d--;
+     end
+  end
+
   always_comb begin
     for (int i = 0; i < DataWidth; i++) begin
       mask_d[i] = mem_strb_i[i/8];
@@ -68,7 +86,7 @@ module spm_rmw_adapter
 
       NORMAL: begin
         // If partial memory access is detected perform RMW_READ
-        if (partial_write && mem_ready_i) begin
+        if (partial_write && mem_ready_i && rmw_ready) begin
           req_state_d = RMW_READ;
         end
       end
@@ -94,14 +112,14 @@ module spm_rmw_adapter
   always_comb begin
 
     // Mem-side
-    mem_valid_o = mem_valid_i;
+    mem_valid_o = mem_valid_i && txns_ready;
     mem_addr_o = mem_addr_i;
     mem_wdata_o = mem_wdata_i;
     mem_strb_o = '1; // always perform full access
     mem_we_o = mem_we_i;
 
     // Request-side
-    mem_ready_o = mem_ready_i;
+    mem_ready_o = mem_ready_i && txns_ready && rmw_ready;
     mem_rvalid_o = mem_rvalid_i;
     mem_rdata_o = mem_rdata_i;
 
@@ -110,7 +128,7 @@ module spm_rmw_adapter
       NORMAL: begin
 
         // If access is bitwise, generate RMW_READ request
-        if (partial_write && mem_ready_i) begin
+        if (partial_write && mem_ready_i && rmw_ready) begin
           mem_we_o = '0;
         end
       end // case: NORMAL
@@ -120,6 +138,7 @@ module spm_rmw_adapter
         mem_rvalid_o = 1'b0;
         mem_rdata_o = '0;
         mem_we_o = 1'b0;
+        mem_ready_o = 1'b0;
 
         if (mem_rvalid_i) begin
           mem_valid_o = 1'b1;
@@ -131,8 +150,16 @@ module spm_rmw_adapter
 
       RMW_MODIFY_WRITE: begin
 
+        mem_rvalid_o = 1'b0;
+        mem_ready_o = 1'b0;
+
+        mem_valid_o = 1'b1;
         mem_wdata_o = masked_wdata_q;
-        mem_we_o = 1'b1;
+
+        if (mem_rvalid_i) begin
+          mem_valid_o = 1'b0;
+          mem_rvalid_o = 1'b1;
+        end
 
       end // case: RMW_MODIFY_WRITE
 
@@ -143,6 +170,6 @@ module spm_rmw_adapter
   `FF(req_state_q, req_state_d, state_e'('0))
   `FF(mask_q, mask_d, '0)
   `FF(masked_wdata_q, masked_wdata_d, '0)
-
+  `FF(cnt_q, cnt_d, '0)
 
 endmodule
