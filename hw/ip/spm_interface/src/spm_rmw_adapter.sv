@@ -48,14 +48,14 @@ module spm_rmw_adapter
   typedef enum  {NORMAL, RMW_READ, RMW_MODIFY_WRITE, RMW_FINALIZE} state_e;
   state_e req_state_q, req_state_d;
 
-  mem_data_t mask_q, mask_d;
+  mem_data_t mask;
   mem_data_t masked_wdata_q, masked_wdata_d;
   logic masked_wdata_en;
 
   // The RMW_READ state generates a full-word read request
   // which is then masked with the pending byte-wise write request
-  assign masked_wdata_d = (mem_wdata_i & mask_q) | (mem_rdata_i & ~mask_q);
-  assign masked_wdata_en = mem_rvalid_i && (req_state_q == RMW_READ);
+  assign masked_wdata_d = (mem_wdata_i & mask) | (mem_rdata_i & ~mask);
+  assign masked_wdata_en = mem_rvalid_i & (req_state_q == RMW_READ);
 
   logic partial_write;
   assign partial_write = mem_valid_i & mem_we_i & ~(&mem_strb_i);
@@ -73,7 +73,7 @@ module spm_rmw_adapter
   // Count number of outstanding requests
   always_comb begin
     cnt_d = cnt_q;
-    if (mem_valid_i && mem_ready_o) begin
+    if (mem_valid_i & mem_ready_o) begin
       cnt_d++;
     end
      if (mem_rvalid_o) begin
@@ -83,20 +83,20 @@ module spm_rmw_adapter
 
   always_comb begin
     for (int i = 0; i < DataWidth; i++) begin
-      mask_d[i] = mem_strb_i[i/8];
+      mask[i] = mem_strb_i[i/8];
     end
   end
 
   always_comb begin
 
     // Mem-side
-    mem_valid_o = mem_valid_i && txns_ready;
+    mem_valid_o = mem_valid_i & txns_ready;
     mem_addr_o = mem_addr_i;
     mem_wdata_o = mem_wdata_i;
     mem_we_o = mem_we_i;
 
     // Request-side
-    mem_ready_o = mem_ready_i && txns_ready && rmw_ready;
+    mem_ready_o = mem_ready_i & txns_ready & !(partial_write & !rmw_ready);
     mem_rvalid_o = mem_rvalid_i;
     mem_rdata_o = mem_rdata_i;
 
@@ -107,7 +107,7 @@ module spm_rmw_adapter
       NORMAL: begin
 
         // If access is byte-wise, generate full-width read request
-        if (partial_write && mem_ready_i && rmw_ready) begin
+        if (partial_write & mem_ready_i & rmw_ready) begin
           req_state_d = RMW_READ;
           mem_we_o = '0;
         end
@@ -117,8 +117,7 @@ module spm_rmw_adapter
 
         // stall requests
         mem_rvalid_o = 1'b0;
-        mem_rdata_o = '0;
-        mem_ready_o = 1'b0;
+        mem_ready_o = mem_rvalid_i;
 
         if (mem_rvalid_i) begin
           req_state_d = RMW_MODIFY_WRITE;
@@ -145,7 +144,7 @@ module spm_rmw_adapter
       RMW_FINALIZE: begin
 
         // stall requests
-        mem_rvalid_o = 1'b0;
+        mem_rvalid_o = mem_rvalid_i;
         mem_ready_o = 1'b0;
 
         mem_valid_o = 1'b0;
@@ -154,7 +153,6 @@ module spm_rmw_adapter
         // finalize and grant RMW request
         if (mem_rvalid_i) begin
           req_state_d = NORMAL;
-          mem_rvalid_o = 1'b1;
         end
 
       end // case: RMW_FINALIZE
@@ -164,7 +162,6 @@ module spm_rmw_adapter
   end
 
   `FF(req_state_q, req_state_d, state_e'('0))
-  `FFL(mask_q, mask_d, partial_write, '0)
   `FFL(masked_wdata_q, masked_wdata_d, masked_wdata_en, '0)
   `FF(cnt_q, cnt_d, '0)
 
