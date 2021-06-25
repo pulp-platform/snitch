@@ -42,7 +42,7 @@ pub struct CpuState {
     pub pc: u32,
     pub cycle: u64,
     pub instret: u64,
-    pub ssrs: [SsrState; 2],
+    pub ssrs: [SsrState; 3],
     pub ssr_enable: u32,
     pub dma: DmaState,
     pub wfi: bool,

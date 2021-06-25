@@ -23,7 +23,7 @@ static NONAME: &'static i8 = unsafe { std::mem::transmute("\0".as_ptr()) };
 
 /// Base address of the stream semantic regsiters
 static SSR_BASE: u64 = 0x204800;
-static SSR_N_STREAMERS: u32 = 2;
+static SSR_N_STREAMERS: u32 = 3;
 
 /// Number of arguments the trace maximally shows per instruction.
 const TRACE_BUFFER_LEN: u32 = 8;
@@ -3143,7 +3143,7 @@ impl<'a> InstructionTranslator<'a> {
     /// Emit the code to load the next value of an SSR, if enabled.
     unsafe fn emit_possible_ssr_read(&self, rs: u32) {
         // Don't do anything for registers which are not SSR-enabled.
-        if rs >= 2 {
+        if rs >= SSR_N_STREAMERS {
             return;
         }
 
@@ -3180,7 +3180,7 @@ impl<'a> InstructionTranslator<'a> {
     /// Emit the code to store the next value to an SSR, if enabled.
     unsafe fn emit_possible_ssr_write(&self, rd: u32) {
         // Don't do anything for registers which are not SSR-enabled.
-        if rd >= 2 {
+        if rd >= SSR_N_STREAMERS {
             return;
         }
 
