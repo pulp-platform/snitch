@@ -17,19 +17,6 @@
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "icache data (hive 0)"
-        ],
-        "latency": 1,
-        "ports": 1,
-        "speed_optimized": true,
-        "width": 128,
-        "words": 256
-    },
-    {
-        "byte_enable": true,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
             "cva6 instruction cache tag"
         ],
         "latency": 1,
@@ -62,7 +49,7 @@
         "ports": 1,
         "speed_optimized": true,
         "width": 39,
-        "words": 256
+        "words": 128
     },
     {
         "byte_enable": true,
@@ -89,5 +76,18 @@
         "speed_optimized": true,
         "width": 44,
         "words": 256
+    },
+    {
+        "byte_enable": true,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "icache data (hive 0)"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 256,
+        "words": 128
     }
 ]

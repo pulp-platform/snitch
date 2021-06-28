@@ -34,10 +34,10 @@ package occamy_cluster_pkg;
   localparam int unsigned UserWidth = 1;
 
   localparam int unsigned ICacheLineWidth [NrHives] = '{
-    128
+    256
 };
   localparam int unsigned ICacheLineCount [NrHives] = '{
-    256
+    128
 };
   localparam int unsigned ICacheSets [NrHives] = '{
     2
