@@ -22,26 +22,19 @@ memory:
     start: 0x0
     end: 0x100000
     latency: 5
-  periph:
+  periphs:
     start: 0x100000
     end: 0x200000
     latency: 5
+    func:
         - name: PERF_COUNTER_ENABLE
-          access: rw
           size: 6
-          fn: perf_counter_enable
         - name: HART_SELECT
-          access: rw
           size: 10
-          fn: hart_select
         - name: PERF_COUNTER
-          access: rw
           size: 48
-          fn: perf_counter
         - name: WAKE_UP
-          access: wo
           size: 32
-          fn: wake_up
   dram:
     start: 0x80000000
     end: 0x80010000

@@ -4,7 +4,7 @@
 
 //! Engine for dynamic binary translation and execution
 
-use crate::{riscv, tran::ElfTranslator, util::SiUnit, Configuration};
+use crate::{riscv, tran::ElfTranslator, util::SiUnit, Configuration, peripherals::Periphs};
 extern crate termion;
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
@@ -20,7 +20,6 @@ use std::{
     },
 };
 use termion::{color, style};
-
 pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState};
 
 /// An execution engine.
@@ -324,6 +323,12 @@ impl Engine {
                 }
             }
             (0..self.num_clusters).map(|_| tcdm.clone()).collect()
+        };
+
+        // Allocate the pripherals
+        let peripherals: Vec<_> = {
+            let periphs = Periphs::new(&self.config);
+            (0..self.num_clusters).map(|_| periphs.clone()).collect()
         };
 
         // Allocate some barriers.

@@ -23,6 +23,7 @@ mod runtime;
 mod softfloat;
 pub mod tran;
 pub mod util;
+pub mod peripherals;
 
 use crate::configuration::*;
 use crate::engine::*;
