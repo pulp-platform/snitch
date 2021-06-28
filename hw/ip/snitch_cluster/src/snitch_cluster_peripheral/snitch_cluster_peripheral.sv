@@ -53,7 +53,7 @@ module snitch_cluster_peripheral
     .hw2reg (hw2reg)
   );
 
-  logic [47:0][NumPerfCounters-1:0] perf_counter_d, perf_counter_q;
+  logic [NumPerfCounters-1:0][47:0] perf_counter_d, perf_counter_q;
 
   // Wake-up logic.
   // Deprecate in favor of RISC-V interrupts.
@@ -91,7 +91,7 @@ module snitch_cluster_peripheral
         perf_counter_d[i] = perf_counter_d[i] + tcdm_events_q.inc_accessed;
       end
       // TCDM Congested
-      if (reg2hw.perf_counter_enable[i].tcdm_accessed.q) begin
+      if (reg2hw.perf_counter_enable[i].tcdm_congested.q) begin
         perf_counter_d[i] = perf_counter_d[i] + tcdm_events_q.inc_congested;
       end
       // Per-hart performance counter.
@@ -110,6 +110,6 @@ module snitch_cluster_peripheral
     end
   end
 
-  `FFNR(perf_counter_q, perf_counter_d, clk_i)
+  `FF(perf_counter_q, perf_counter_d, '0, clk_i, rst_ni)
 
 endmodule
