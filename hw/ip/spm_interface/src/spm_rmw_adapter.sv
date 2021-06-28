@@ -96,7 +96,7 @@ module spm_rmw_adapter
     mem_we_o = mem_we_i;
 
     // Request-side
-    mem_ready_o = mem_ready_i & txns_ready & !(partial_write & !rmw_ready);
+    mem_ready_o = mem_ready_i & txns_ready & !partial_write;
     mem_rvalid_o = mem_rvalid_i;
     mem_rdata_o = mem_rdata_i;
 
@@ -107,9 +107,14 @@ module spm_rmw_adapter
       NORMAL: begin
 
         // If access is byte-wise, generate full-width read request
-        if (partial_write & mem_ready_i & rmw_ready) begin
-          req_state_d = RMW_READ;
-          mem_we_o = '0;
+        if (partial_write) begin
+          mem_we_o = 1'b0;
+
+          // RMW transaction can start as soon as mem is ready
+          // and doesn't have any outstanding transactions anymore
+          if (mem_ready_i & rmw_ready) begin
+            req_state_d = RMW_READ;
+          end
         end
       end // case: NORMAL
 
@@ -117,7 +122,10 @@ module spm_rmw_adapter
 
         // stall requests
         mem_rvalid_o = 1'b0;
-        mem_ready_o = mem_rvalid_i;
+
+        // wait for data to arrive
+        mem_valid_o = 1'b0;
+        mem_we_o = 1'b0;
 
         if (mem_rvalid_i) begin
           req_state_d = RMW_MODIFY_WRITE;
@@ -129,10 +137,11 @@ module spm_rmw_adapter
 
         // stall requests
         mem_rvalid_o = 1'b0;
-        mem_ready_o = 1'b0;
+        mem_ready_o = mem_ready_i;
 
         // issue write request with masked data
         mem_valid_o = 1'b1;
+        mem_we_o = 1'b1;
         mem_wdata_o = masked_wdata_q;
 
         if (mem_ready_i) begin

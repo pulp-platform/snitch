@@ -95,9 +95,6 @@ package spm_test;
       while (bus.ready != 1) begin cycle_end(); cycle_start(); end
       cycle_end();
       bus.valid   <= #TA 0;
-      cycle_start();
-      while (bus.rvalid != 1) begin cycle_end(); cycle_start(); end
-      cycle_end();
       bus.addr    <= #TA '0;
       bus.we      <= #TA '0;
       bus.wdata   <= #TA '0;
@@ -234,6 +231,7 @@ package spm_test;
   ) extends rand_spm #(.AW(AW), .DW(DW), .TA(TA), .TT(TT));
 
     mailbox req_mbx = new();
+
 
     /// Reset the driver.
     task reset();

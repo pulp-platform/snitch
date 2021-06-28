@@ -81,9 +81,8 @@ interface SPM_BUS_DV #(
   // pragma translate_off
 `ifndef VERILATOR
   assert property (@(posedge clk_i) (valid && !ready |=> $stable(addr)));
-  // Does not hold for RMW requests
-  // assert property (@(posedge clk_i) (valid && !ready |=> $stable(we)));
-  assert property (@(posedge clk_i) (valid && !ready |=> $stable(wdata)));
+  assert property (@(posedge clk_i) (valid && !ready |=> $stable(we)));
+  assert property (@(posedge clk_i) (valid && !ready && we |=> $stable(wdata)));
   assert property (@(posedge clk_i) (valid && !ready |=> $stable(strb)));
   assert property (@(posedge clk_i) (valid && !ready |=> valid));
 `endif
