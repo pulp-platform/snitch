@@ -77,6 +77,7 @@ impl Configuration {
 pub struct Memories {
     pub tcdm: Memory,
     pub dram: Memory,
+    pub periphs: MemoryFunc,
 }
 
 impl Default for Memories {
@@ -91,6 +92,12 @@ impl Default for Memories {
                 start: 0x80000000,
                 end: 0x90000000,
                 latency: 10,
+            },
+            periphs: MemoryFunc {
+                start: 0x20000,
+                end: 0x20000,
+                latency: 2,
+                func: vec![],
             },
         }
     }
@@ -112,6 +119,32 @@ impl Default for Memory {
             latency: 1,
         }
     }
+}
+
+/// Description of a single memory hierarchy with callback functions
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct MemoryFunc {
+    pub start: u32,
+    pub end: u32,
+    pub latency: u64,
+    pub func: Vec<Func>,
+}
+
+impl Default for MemoryFunc {
+    fn default() -> Self {
+        Self {
+            start: 0,
+            end: u32::MAX,
+            latency: 1,
+            func: vec![],
+        }
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct Func {
+    pub name: String,
+    pub size: u32,
 }
 
 /// Struct to configure specific addresses
