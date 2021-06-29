@@ -454,6 +454,26 @@ pub unsafe fn add_llvm_symbols() {
 // #[repr(C)]
 // pub struct System<'a> {}
 
+impl CpuState {
+    /// Create a new CpuState
+    pub fn new(num_dm: usize) -> Self {
+        Self {
+            regs: [0; 32],
+            regs_cycle: [0; 32],
+            fregs: [0; 32],
+            fregs_cycle: [0; 32],
+            cas_value: 0,
+            pc: 0,
+            cycle: 0,
+            instret: 0,
+            ssrs: (0..num_dm).map(|_| Default::default()).collect(),
+            ssr_enable: 0,
+            wfi: false,
+            dma: Default::default(),
+        }
+    }
+}
+
 impl<'a, 'b> Cpu<'a, 'b> {
     /// Create a new CPU in a default state.
     pub fn new(
@@ -469,7 +489,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     ) -> Self {
         Self {
             engine,
-            state: Default::default(),
+            state: CpuState::new(engine.config.ssr.num_dm),
             tcdm_ptr,
             hartid,
             num_cores,

@@ -33,3 +33,5 @@ inst_latency:
   divu: 3
   rem: 3
   remu: 3
+ssr:
+  num_dm: 3

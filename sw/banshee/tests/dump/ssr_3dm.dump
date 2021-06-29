@@ -1,0 +1,268 @@
+
+bin/ssr_3dm:	file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+80010000 <.text>:
+80010000: 97 11 00 00  	auipc	gp, 1
+80010004: 93 81 01 97  	addi	gp, gp, -1680
+80010008: 6f 00 40 00  	j	0x8001000c <.text+0xc>
+8001000c: 17 01 ff bf  	auipc	sp, 786416
+80010010: 13 01 c1 ff  	addi	sp, sp, -4
+80010014: 03 21 01 00  	lw	sp, 0(sp)
+80010018: 73 25 40 f1  	csrr	a0, mhartid
+8001001c: 97 02 ff bf  	auipc	t0, 786416
+80010020: 83 a2 42 02  	lw	t0, 36(t0)
+80010024: 33 05 55 40  	sub	a0, a0, t0
+80010028: 93 12 35 00  	slli	t0, a0, 3
+8001002c: 33 01 51 40  	sub	sp, sp, t0
+80010030: 93 92 62 00  	slli	t0, t0, 6
+80010034: 33 01 51 40  	sub	sp, sp, t0
+80010038: 13 02 01 00  	mv	tp, sp
+8001003c: 93 02 10 00  	addi	t0, zero, 1
+80010040: 93 92 92 00  	slli	t0, t0, 9
+80010044: 33 02 52 40  	sub	tp, tp, t0
+80010048: 97 02 ff bf  	auipc	t0, 786416
+8001004c: 93 82 82 fc  	addi	t0, t0, -56
+80010050: 83 a5 02 00  	lw	a1, 0(t0)
+80010054: 97 00 00 00  	auipc	ra, 0
+80010058: e7 80 c0 03  	jalr	60(ra)
+8001005c: 13 15 15 00  	slli	a0, a0, 1
+80010060: 13 65 15 00  	ori	a0, a0, 1
+80010064: 6f 00 00 01  	j	0x80010074 <.text+0x74>
+80010068: 93 02 f0 ff  	addi	t0, zero, -1
+8001006c: 33 45 55 00  	xor	a0, a0, t0
+80010070: 6f 00 40 00  	j	0x80010074 <.text+0x74>
+80010074: f3 22 40 f1  	csrr	t0, mhartid
+80010078: 63 98 02 00  	bnez	t0, 0x80010088 <.text+0x88>
+8001007c: 97 02 ff bf  	auipc	t0, 786416
+80010080: 93 82 42 fa  	addi	t0, t0, -92
+80010084: 23 a0 a2 00  	sw	a0, 0(t0)
+80010088: 73 00 50 10  	wfi	
+8001008c: 6f f0 df ff  	j	0x80010088 <.text+0x88>
+
+Disassembly of section .text.main:
+
+80010090 <.text.main>:
+80010090: 17 05 00 00  	auipc	a0, 0
+80010094: 13 05 85 0e  	addi	a0, a0, 232
+80010098: 13 06 80 00  	addi	a2, zero, 8
+8001009c: 93 06 70 00  	addi	a3, zero, 7
+800100a0: 2b 20 00 02  	scfgwi	zero, 32
+800100a4: 2b a0 06 04  	scfgwi	a3, 64
+800100a8: 2b 20 06 0c  	scfgwi	a2, 192
+800100ac: 2b 20 05 30  	scfgwi	a0, 768
+800100b0: 97 05 00 00  	auipc	a1, 0
+800100b4: 93 85 85 10  	addi	a1, a1, 264
+800100b8: 2b 20 10 02  	scfgwi	zero, 33
+800100bc: 2b a0 16 04  	scfgwi	a3, 65
+800100c0: 2b 20 16 0c  	scfgwi	a2, 193
+800100c4: 2b a0 15 30  	scfgwi	a1, 769
+800100c8: 2b 20 20 02  	scfgwi	zero, 34
+800100cc: 2b a0 26 04  	scfgwi	a3, 66
+800100d0: 2b 20 26 0c  	scfgwi	a2, 194
+800100d4: 2b a0 25 38  	scfgwi	a1, 898
+800100d8: 73 e5 00 7c  	csrrsi	a0, 1984, 1
+800100dc: 17 05 00 00  	auipc	a0, 0
+800100e0: 13 05 45 09  	addi	a0, a0, 148
+800100e4: 87 31 05 00  	fld	ft3, 0(a0)
+800100e8: 43 72 30 0a  	fmadd.d	ft4, ft0, ft3, ft1
+800100ec: 53 01 42 22  	fmv.d	ft2, ft4
+800100f0: 43 72 30 0a  	fmadd.d	ft4, ft0, ft3, ft1
+800100f4: 53 01 42 22  	fmv.d	ft2, ft4
+800100f8: 43 72 30 0a  	fmadd.d	ft4, ft0, ft3, ft1
+800100fc: 53 01 42 22  	fmv.d	ft2, ft4
+80010100: 43 72 30 0a  	fmadd.d	ft4, ft0, ft3, ft1
+80010104: 53 01 42 22  	fmv.d	ft2, ft4
+80010108: 43 72 30 0a  	fmadd.d	ft4, ft0, ft3, ft1
+8001010c: 53 01 42 22  	fmv.d	ft2, ft4
+80010110: 43 72 30 0a  	fmadd.d	ft4, ft0, ft3, ft1
+80010114: 53 01 42 22  	fmv.d	ft2, ft4
+80010118: 43 72 30 0a  	fmadd.d	ft4, ft0, ft3, ft1
+8001011c: 53 01 42 22  	fmv.d	ft2, ft4
+80010120: 43 72 30 0a  	fmadd.d	ft4, ft0, ft3, ft1
+80010124: 53 01 42 22  	fmv.d	ft2, ft4
+80010128: 73 f5 00 7c  	csrrci	a0, 1984, 1
+8001012c: 13 06 a0 00  	addi	a2, zero, 10
+80010130: 93 06 a0 05  	addi	a3, zero, 90
+80010134: 13 05 00 00  	mv	a0, zero
+80010138: 63 06 d6 02  	beq	a2, a3, 0x80010164 <.text.main+0xd4>
+8001013c: 07 b2 05 00  	fld	ft4, 0(a1)
+80010140: 13 05 15 00  	addi	a0, a0, 1
+80010144: d3 02 05 d2  	fcvt.d.w	ft5, a0
+80010148: 53 03 06 d2  	fcvt.d.w	ft6, a2
+8001014c: c3 f2 32 32  	fmadd.d	ft5, ft5, ft3, ft6
+80010150: 53 27 52 a2  	feq.d	a4, ft4, ft5
+80010154: 13 06 a6 00  	addi	a2, a2, 10
+80010158: 93 85 85 00  	addi	a1, a1, 8
+8001015c: e3 1e 07 fc  	bnez	a4, 0x80010138 <.text.main+0xa8>
+80010160: 67 80 00 00  	ret
+80010164: 13 05 00 00  	mv	a0, zero
+80010168: 67 80 00 00  	ret
+
+Disassembly of section .sdata:
+
+80010170 <.sdata>:
+80010170: 00 00        	<unknown>
+80010172: 00 00        	<unknown>
+80010174: 00 00        	<unknown>
+80010176: 45 40        	<unknown>
+
+Disassembly of section .data.x:
+
+80010178 <.data.x>:
+80010178: 00 00        	<unknown>
+8001017a: 00 00        	<unknown>
+8001017c: 00 00        	<unknown>
+8001017e: f0 3f        	<unknown>
+80010180: 00 00        	<unknown>
+80010182: 00 00        	<unknown>
+80010184: 00 00        	<unknown>
+80010186: 00 40        	<unknown>
+80010188: 00 00        	<unknown>
+8001018a: 00 00        	<unknown>
+8001018c: 00 00        	<unknown>
+8001018e: 08 40        	<unknown>
+80010190: 00 00        	<unknown>
+80010192: 00 00        	<unknown>
+80010194: 00 00        	<unknown>
+80010196: 10 40        	<unknown>
+80010198: 00 00        	<unknown>
+8001019a: 00 00        	<unknown>
+8001019c: 00 00        	<unknown>
+8001019e: 14 40        	<unknown>
+800101a0: 00 00        	<unknown>
+800101a2: 00 00        	<unknown>
+800101a4: 00 00        	<unknown>
+800101a6: 18 40        	<unknown>
+800101a8: 00 00        	<unknown>
+800101aa: 00 00        	<unknown>
+800101ac: 00 00        	<unknown>
+800101ae: 1c 40        	<unknown>
+800101b0: 00 00        	<unknown>
+800101b2: 00 00        	<unknown>
+800101b4: 00 00        	<unknown>
+800101b6: 20 40        	<unknown>
+
+Disassembly of section .data.y:
+
+800101b8 <.data.y>:
+800101b8: 00 00        	<unknown>
+800101ba: 00 00        	<unknown>
+800101bc: 00 00        	<unknown>
+800101be: 24 40        	<unknown>
+800101c0: 00 00        	<unknown>
+800101c2: 00 00        	<unknown>
+800101c4: 00 00        	<unknown>
+800101c6: 34 40        	<unknown>
+800101c8: 00 00        	<unknown>
+800101ca: 00 00        	<unknown>
+800101cc: 00 00        	<unknown>
+800101ce: 3e 40        	<unknown>
+800101d0: 00 00        	<unknown>
+800101d2: 00 00        	<unknown>
+800101d4: 00 00        	<unknown>
+800101d6: 44 40        	<unknown>
+800101d8: 00 00        	<unknown>
+800101da: 00 00        	<unknown>
+800101dc: 00 00        	<unknown>
+800101de: 49 40        	<unknown>
+800101e0: 00 00        	<unknown>
+800101e2: 00 00        	<unknown>
+800101e4: 00 00        	<unknown>
+800101e6: 4e 40        	<unknown>
+800101e8: 00 00        	<unknown>
+800101ea: 00 00        	<unknown>
+800101ec: 00 80        	<unknown>
+800101ee: 51 40        	<unknown>
+800101f0: 00 00        	<unknown>
+800101f2: 00 00        	<unknown>
+800101f4: 00 00        	<unknown>
+800101f6: 54 40        	<unknown>
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+       0: 4c 69        	<unknown>
+       2: 6e 6b        	<unknown>
+       4: 65 72        	<unknown>
+       6: 3a 20        	<unknown>
+       8: 4c 4c        	<unknown>
+       a: 44 20        	<unknown>
+       c: 31 32        	<unknown>
+       e: 2e 30        	<unknown>
+      10: 2e 30        	<unknown>
+      12: 00 00        	<unknown>
+      14: 63 6c 61 6e  	bltu	sp, t1, 0x70c <.comment+0x70c>
+      18: 67 20 76 65  	<unknown>
+      1c: 72 73        	<unknown>
+      1e: 69 6f        	<unknown>
+      20: 6e 20        	<unknown>
+      22: 31 32        	<unknown>
+      24: 2e 30        	<unknown>
+      26: 2e 30        	<unknown>
+      28: 00           	<unknown>
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+       0: 41 2f        	<unknown>
+       2: 00 00        	<unknown>
+       4: 00 72        	<unknown>
+       6: 69 73        	<unknown>
+       8: 63 76 00 01  	bgeu	zero, a6, 0x14 <.riscv.attributes+0x14>
+       c: 25 00        	<unknown>
+       e: 00 00        	<unknown>
+      10: 04 10        	<unknown>
+      12: 05 72        	<unknown>
+      14: 76 33        	<unknown>
+      16: 32 69        	<unknown>
+      18: 32 70        	<unknown>
+      1a: 30 5f        	<unknown>
+      1c: 6d 32        	<unknown>
+      1e: 70 30        	<unknown>
+      20: 5f 61 32 70  	<unknown>
+      24: 30 5f        	<unknown>
+      26: 66 32        	<unknown>
+      28: 70 30        	<unknown>
+      2a: 5f 64 32 70  	<unknown>
+      2e: 30 00        	<unknown>
+
+Disassembly of section .shstrtab:
+
+00000000 <.shstrtab>:
+       0: 00 2e        	<unknown>
+       2: 64 61        	<unknown>
+       4: 74 61        	<unknown>
+       6: 2e 79        	<unknown>
+       8: 00 2e        	<unknown>
+       a: 64 61        	<unknown>
+       c: 74 61        	<unknown>
+       e: 2e 78        	<unknown>
+      10: 00 2e        	<unknown>
+      12: 74 65        	<unknown>
+      14: 78 74        	<unknown>
+      16: 00 2e        	<unknown>
+      18: 63 6f 6d 6d  	bltu	s10, s6, 0x6f6 <.shstrtab+0x6f6>
+      1c: 65 6e        	<unknown>
+      1e: 74 00        	<unknown>
+      20: 2e 72        	<unknown>
+      22: 69 73        	<unknown>
+      24: 63 76 2e 61  	bgeu	t3, s2, 0x630 <.shstrtab+0x630>
+      28: 74 74        	<unknown>
+      2a: 72 69        	<unknown>
+      2c: 62 75        	<unknown>
+      2e: 74 65        	<unknown>
+      30: 73 00 2e 74  	<unknown>
+      34: 65 78        	<unknown>
+      36: 74 2e        	<unknown>
+      38: 6d 61        	<unknown>
+      3a: 69 6e        	<unknown>
+      3c: 00 2e        	<unknown>
+      3e: 73 68 73 74  	csrrsi	a6, 1863, 6
+      42: 72 74        	<unknown>
+      44: 61 62        	<unknown>
+      46: 00 2e        	<unknown>
+      48: 73 64 61 74  	csrrsi	s0, 1862, 2
+      4c: 61 00        	<unknown>
