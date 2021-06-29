@@ -1,0 +1,24 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+package:
+  name: spm_interface
+  authors:
+  - Tim Fischer <fischeti@iis.ee.ethz.ch>
+
+dependencies:
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+
+export_include_dirs:
+- include
+
+sources:
+- src/spm_interface.sv
+- src/spm_rmw_adapter.sv
+- target: simulation
+  files:
+  - src/spm_test.sv
+- target: test
+  files:
+  # Level 0
+  - test/tb_spm_rmw_adapter.sv
