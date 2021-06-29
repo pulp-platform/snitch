@@ -350,6 +350,7 @@ impl Engine {
                 Cpu::new(
                     self,
                     &tcdms[j][0],
+                    &peripherals[j],
                     base_hartid + i,
                     self.num_cores,
                     base_hartid,
@@ -464,6 +465,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     pub fn new(
         engine: &'a Engine,
         tcdm_ptr: &'b u32,
+        periphs: &'b Periphs,
         hartid: usize,
         num_cores: usize,
         cluster_base_hartid: usize,
@@ -476,6 +478,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             engine,
             state: Default::default(),
             tcdm_ptr,
+            periphs,
             hartid,
             num_cores,
             cluster_base_hartid,
@@ -514,6 +517,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 let word = unsafe { *ptr.offset(word_addr as isize) };
                 (word >> (8 * word_offs)) & ((((1 as u64) << (8 << size)) - 1) as u32)
             }
+            // Peripherals
+            x if x >= self.engine.config.memory.periphs.start
+                && x < self.engine.config.memory.periphs.end =>
+                self.periphs.load(addr, size),
             _ => {
                 trace!("Load 0x{:x} ({}B)", addr, 8 << size);
                 self.engine
@@ -588,6 +595,11 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     *word_ptr = (word & !wmask) | ((value << (8 * word_offs)) & wmask);
                 }
             }
+            // Peripherals
+            x if x >= self.engine.config.memory.periphs.start
+                && x < self.engine.config.memory.periphs.end =>
+                self.periphs.store(addr, value, size),
+
             _ => {
                 trace!(
                     "Store 0x{:x} = 0x{:x} if 0x{:x} ({}B)",
