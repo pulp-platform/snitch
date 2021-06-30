@@ -40,16 +40,13 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   typedef logic                   user_t;
   `TCDM_TYPEDEF_ALL(tcdm, addr_t, data_t, strb_t, user_t);
 
-  // SSR constant / derived parameters
-  localparam int unsigned DimWidth = $clog2(Cfg.NumLoops);
-
   // Configuration written through proper registers
   typedef struct packed {
     logic [31:0] idx_shift;
     logic [31:0] idx_base;
     logic [31:0] idx_size;
-    logic [Cfg.NumLoops-1:0][31:0] stride;
-    logic [Cfg.NumLoops-1:0][31:0] bound;
+    logic [3:0][31:0] stride;
+    logic [3:0][31:0] bound;
     logic [31:0] rep;
   } cfg_regs_t;
 
@@ -58,14 +55,14 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   typedef struct packed {
     logic no_indir;
     logic write;
-    logic [DimWidth-1:0] dims;
+    logic [1:0] dims;
   } cfg_alias_fields_t;
 
   // Upper fields accessible on status register
   typedef struct packed {
     logic done;
     logic write;
-    logic [DimWidth-1:0] dims;
+    logic [1:0] dims;
     logic indir;
   } cfg_status_upper_t;
 
@@ -249,13 +246,13 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   // Ignores status field: use launch task to launch job
   task automatic cfg_write_regs (input cfg_regs_t cfg);
     cfg_write(5'h1, cfg.rep);
-    for (int i = 0; i < Cfg.NumLoops; ++i) begin
+    for (int i = 0; i < 4; ++i) begin
       cfg_write(i+2, cfg.bound[i]);
-      cfg_write(i+2+Cfg.NumLoops, cfg.stride[i]);
+      cfg_write(i+6, cfg.stride[i]);
     end
-    cfg_write(2*Cfg.NumLoops+2 + 0, cfg.idx_size);
-    cfg_write(2*Cfg.NumLoops+2 + 1, cfg.idx_base);
-    cfg_write(2*Cfg.NumLoops+2 + 2, cfg.idx_shift);
+    cfg_write(10, cfg.idx_size);
+    cfg_write(11, cfg.idx_base);
+    cfg_write(12, cfg.idx_shift);
   endtask
 
   task automatic cfg_launch_status (input cfg_status_t cfg);
@@ -274,8 +271,8 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   task automatic cfg_read_regs (output cfg_regs_t cfg);
     cfg_read(5'h1, cfg.rep);
     for (int i = 0; i < 4; ++i) begin
-      cfg_read(i+2,  cfg.bound[i]);
-      cfg_read(i+2+Cfg.NumLoops, cfg.stride[i]);
+      cfg_read(i+2, cfg.bound[i]);
+      cfg_read(i+6, cfg.stride[i]);
     end
   endtask
 
@@ -402,17 +399,17 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   // Verify reads of one loop level; used recursively
   // TODO: we assume floating point data when using $bitstoreal. Find a better option?
   task automatic verify_nat_job_loop (
-    input logic                           write,
-    input logic                           write_check,
-    input logic [Cfg.RptWidth-1:0]        rep,
-    input logic [Cfg.NumLoops-1:0][31:0]  bound,
-    input logic [Cfg.NumLoops-1:0][31:0]  stride,
-    input logic [Cfg.NumLoops-1:0]        loop_ena,
-    input logic [DimWidth-1:0]            loop_top_idx,
-    ref   logic [Cfg.NumLoops-1:0][31:0]  loop_idcs,
-    ref   addr_t                          ptr,
-    ref   addr_t                          ptr_next,
-    ref   addr_t                          ptr_source
+    input logic                     write,
+    input logic                     write_check,
+    input logic [Cfg.RptWidth-1:0]  rep,
+    input logic [3:0][31:0]         bound,
+    input logic [3:0][31:0]         stride,
+    input logic [3:0]               loop_ena,
+    input logic [1:0]               loop_top_idx,
+    ref   logic [3:0][31:0]         loop_idcs,
+    ref   addr_t                    ptr,
+    ref   addr_t                    ptr_next,
+    ref   addr_t                    ptr_source
   );
     data_t data_actual, data_golden;
     // Lowestmost loop: read from SSR and memory to compare
@@ -473,7 +470,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     input logic                     write,
     input logic                     alias_launch,
     input addr_t                    data_base,
-    input logic [DimWidth-1:0]      num_loops,
+    input logic [1:0]               num_loops,
     input logic [Cfg.RptWidth-1:0]  rep,
     input logic [3:0][31:0]         bound,
     input logic [3:0][31:0]         stride_elems,
@@ -482,25 +479,25 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   );
     cfg_regs_t    regs;
     cfg_status_t  status;
-    logic [Cfg.NumLoops-1:0]        loop_ena;
-    logic [Cfg.NumLoops-1:0][31:0]  stride;
-    logic [Cfg.NumLoops-1:0][31:0]  loop_idcs;
+    logic [3:0]       loop_ena;
+    logic [3:0][31:0] stride;
+    logic [3:0][31:0] loop_idcs;
     addr_t ptr;
     addr_t data_base_ptr  = data_base + (write ? offs_dest : '0);
     addr_t ptr_next       = data_base_ptr;
     addr_t ptr_source_mut = ptr_source;
     // Determine whether each loop is activated and byte stride
-    for (int i = 0; unsigned'(i) < Cfg.NumLoops; ++i) begin
+    for (int i = 0; i < 4; ++i) begin
       loop_ena [i]  = (num_loops >= i);
       stride   [i]  = WordBytes * stride_elems[i];
     end
-    regs          = {'0, {stride[Cfg.NumLoops-1:0], bound[Cfg.NumLoops-1:0], 32'(rep)}};
+    regs          = {'0, {stride, bound, 32'(rep)}};
     status.upper  = {1'b0, write, num_loops, 1'b0};
     status.ptr    = ptr_next;
     verify_launch(regs, status, alias_launch);
     // Do loops
     verify_nat_job_loop(write, 0, rep, bound, stride,
-        loop_ena, Cfg.NumLoops-1, loop_idcs, ptr, ptr_next, ptr_source_mut);
+        loop_ena, 3, loop_idcs, ptr, ptr_next, ptr_source_mut);
     // Ensure SSR is done after some time to write back
     verify_done(write);
     #Timeout;
@@ -511,7 +508,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
         ptr_source_mut  = ptr_source;
         // Reiterate with checking
         verify_nat_job_loop(1, 1, rep, bound, stride,
-            loop_ena, Cfg.NumLoops-1, loop_idcs, ptr, ptr_next, ptr_source_mut);
+            loop_ena, 3, loop_idcs, ptr, ptr_next, ptr_source_mut);
         $display("%t: Direct write success", $time);
     end else begin
       $display("%t: Direct read success", $time);
@@ -533,8 +530,8 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     cfg_status_t  status;
     logic [31:0]  idx_base_ptr  = idx_base;
     regs = {32'(idx_shift), 32'(data_base), 32'(idx_size),
-        (32*Cfg.NumLoops)'(WordBytes), (32*Cfg.NumLoops)'(bound), 32'(rep)};
-    status.upper  = {1'b0, write, {DimWidth{1'b0}}, 1'b1};
+        (32*4)'(WordBytes), (32*4)'(bound), 32'(rep)};
+    status.upper  = {1'b0, write, 2'b0, 1'b1};
     status.ptr    = idx_base_ptr;
     verify_launch(regs, status, alias_launch);
     // Iterate with Loop 0
