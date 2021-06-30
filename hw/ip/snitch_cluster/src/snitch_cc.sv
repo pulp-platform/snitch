@@ -45,6 +45,7 @@ module snitch_cc #(
   /// Enable F and D Extension
   parameter bit          RVF                = 1,
   parameter bit          RVD                = 1,
+  parameter bit          XDivSqrt          = 0,
   parameter bit          XF8                = 0,
   parameter bit          XF16               = 0,
   parameter bit          XF16ALT            = 0,
@@ -195,6 +196,7 @@ module snitch_cc #(
     .Xssr (Xssr),
     .RVF (RVF),
     .RVD (RVD),
+    .XDivSqrt (XDivSqrt),
     .XF16 (XF16),
     .XF16ALT (XF16ALT),
     .XF8 (XF8),

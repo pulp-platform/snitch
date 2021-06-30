@@ -288,6 +288,11 @@
                                     ],
                                     "default": "rv32imafd"
                                 },
+                                "Xdiv_sqrt": {
+                                    "type": "boolean",
+                                    "description": "Enable hardware support for floating-point division and square-root",
+                                    "default": false
+                                },
                                 "xssr": {
                                     "type": "boolean",
                                     "title": "Enable Xssr Extension",
