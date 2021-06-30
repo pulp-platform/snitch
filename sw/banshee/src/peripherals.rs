@@ -1,30 +1,38 @@
-use PeriphsLoadStore::{Store, Load};
-use crate::Configuration;
-use std::collections::HashMap;
 use crate::configuration::Func;
+use PeriphsLoadStore::{Load, Store};
+
 #[derive(Clone)]
-pub struct Periphs {
-    //TODO use str
-    periphs_fn: Vec<(u32, String)>,
+pub struct Periphs<'a> {
+    func: &'a Vec<Func>,
 }
 
-impl Periphs {
-    pub fn new(config: &Configuration) -> Self {
-        Self {
-            //TODO
-        periphs_fn: vec!((0, "test".to_string())),
-        }
+impl<'a> Periphs<'a> {
+    pub fn new(func: &'a Vec<Func>) -> Self {
+        Self { func }
     }
 
     pub fn load(&self, addr: u32, size: u8) -> u32 {
-        0
+        let v = self.name(addr);
+        callback_periph(v.0)(v.1, size, Load).unwrap()
     }
 
     pub fn store(&self, addr: u32, value: u32, size: u8) {
+        let v = self.name(addr);
+        callback_periph(v.0)(v.1, size, Store(value));
     }
 
+    fn name(&self, mut addr: u32) -> (&str, u32) {
+        for i in self.func {
+            if addr < i.size {
+                return (&i.name[..], addr);
+            }
+            addr = addr - i.size;
+        }
+        ("", addr)
+    }
 }
 
+/// Argument givent to a callback function
 enum PeriphsLoadStore {
     Store(u32),
     Load,
@@ -34,46 +42,49 @@ enum PeriphsLoadStore {
 // USER CODE
 //########################################################################
 
-fn match_name_callback(name: &str) -> fn(u32, PeriphsLoadStore) -> Option<u32>
-{
+/// Match the name of the peripheral in the configuration with the right callback function
+fn callback_periph(name: &str) -> fn(u32, u8, PeriphsLoadStore) -> Option<u32> {
     let name = name.to_string();
 
     if name.eq("PERF_COUNTER_ENABLE") {
-        PERF_COUNTER_ENABLE
+        perf_counter_enable
     } else if name.eq("HART_SELECT") {
-        DEFAULT
+        default
     } else if name.eq("PERF_COUNTER") {
-        DEFAULT
+        default
     } else if name.eq("WAKE_UP") {
-        DEFAULT
+        default
     } else {
-        DEFAULT
+        default
     }
 }
 
 // CALLBACK FUNCTIONs
 
-fn PERF_COUNTER_ENABLE(addr: u32, pls: PeriphsLoadStore) -> Option<u32> {
+fn perf_counter_enable(addr: u32, size: u8, pls: PeriphsLoadStore) -> Option<u32> {
     match pls {
         Store(s) => {
-            println!("{} written in PERF_COUNTER_ENABLE (@ {})", s, addr);
+            println!(
+                "{} ({} byte(s)) written in PERF_COUNTER_ENABLE (@ {})",
+                s, size, addr
+            );
             None
         }
         Load => {
-            println!("Read in PERF_COUNTER_ENABLE (@ {})", addr);
+            println!("{} byte(s) read in PERF_COUNTER_ENABLE (@ {})", size, addr);
             Some(0)
         }
     }
 }
 
-fn DEFAULT(addr: u32, pls: PeriphsLoadStore) -> Option<u32> {
+fn default(_: u32, _: u8, pls: PeriphsLoadStore) -> Option<u32> {
     match pls {
-        Store(s) => {
-            println!("PERIPH DEFAULT CALLBACK: {} written at {}", s, addr);
+        Store(_) => {
+            println!("PERIPH DEFAULT CALLBACK: Store");
             None
         }
         Load => {
-            println!("PERIPH DEFAULT CALLBACK: read at {})", addr);
+            println!("PERIPH DEFAULT CALLBACK: Load");
             Some(0)
         }
     }

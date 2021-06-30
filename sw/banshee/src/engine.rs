@@ -4,8 +4,9 @@
 
 //! Engine for dynamic binary translation and execution
 
-use crate::{riscv, tran::ElfTranslator, util::SiUnit, Configuration, peripherals::Periphs};
+use crate::{peripherals::Periphs, riscv, tran::ElfTranslator, util::SiUnit, Configuration};
 extern crate termion;
+pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState};
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
@@ -20,7 +21,6 @@ use std::{
     },
 };
 use termion::{color, style};
-pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState};
 
 /// An execution engine.
 pub struct Engine {
@@ -327,7 +327,7 @@ impl Engine {
 
         // Allocate the pripherals
         let peripherals: Vec<_> = {
-            let periphs = Periphs::new(&self.config);
+            let periphs = Periphs::new(&self.config.memory.periphs.func);
             (0..self.num_clusters).map(|_| periphs.clone()).collect()
         };
 
@@ -520,7 +520,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
             // Peripherals
             x if x >= self.engine.config.memory.periphs.start
                 && x < self.engine.config.memory.periphs.end =>
-                self.periphs.load(addr, size),
+            {
+                self.periphs
+                    .load(addr - self.engine.config.memory.periphs.start, size)
+            }
             _ => {
                 trace!("Load 0x{:x} ({}B)", addr, 8 << size);
                 self.engine
@@ -598,7 +601,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
             // Peripherals
             x if x >= self.engine.config.memory.periphs.start
                 && x < self.engine.config.memory.periphs.end =>
-                self.periphs.store(addr, value, size),
+            {
+                self.periphs
+                    .store(addr - self.engine.config.memory.periphs.start, value, size)
+            }
 
             _ => {
                 trace!(

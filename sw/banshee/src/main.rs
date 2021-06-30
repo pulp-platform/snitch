@@ -18,12 +18,12 @@ use std::{ffi::CString, os::raw::c_int, path::Path, ptr::null_mut};
 
 pub mod configuration;
 pub mod engine;
+pub mod peripherals;
 pub mod riscv;
 mod runtime;
 mod softfloat;
 pub mod tran;
 pub mod util;
-pub mod peripherals;
 
 use crate::configuration::*;
 use crate::engine::*;

@@ -113,7 +113,7 @@ impl Default for Memory {
     }
 }
 
-/// Description of a single memory hierarchy
+/// Description of a single memory hierarchy with callback functions
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct MemoryFunc {
     pub start: u32,
@@ -128,12 +128,11 @@ impl Default for MemoryFunc {
             start: 0,
             end: u32::MAX,
             latency: 1,
-            func: vec!(),
+            func: vec![],
         }
     }
 }
 
-/// Description of a single memory hierarchy
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Func {
     pub name: String,

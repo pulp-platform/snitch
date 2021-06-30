@@ -20,7 +20,7 @@ pub struct Cpu<'a, 'b> {
     pub engine: &'a Engine,
     pub state: CpuState,
     pub tcdm_ptr: &'b u32,
-    pub periphs: &'b Periphs,
+    pub periphs: &'b Periphs<'b>,
     pub hartid: usize,
     pub num_cores: usize,
     pub cluster_base_hartid: usize,
