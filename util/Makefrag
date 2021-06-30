@@ -35,6 +35,11 @@ VLT_BENDER   += -t rtl
 VLT_SOURCES  := $(shell ${BENDER} script flist ${VLT_BENDER} | ${SED_SRCS})
 VLT_CFLAGS   ?= -std=c++14 -pthread -I ${VLT_BUILDDIR} -I $(VLT_ROOT)/include -I $(VLT_ROOT)/include/vltstd -I $(FESVR)/include -I $(TB_DIR)
 
+VLOGAN_FLAGS := -assert svaext
+VLOGAN_FLAGS += -assert disable_cover
+VLOGAN_FLAGS += -full64
+VLOGAN_FLAGS += -kdb
+
 #################
 # Prerequisites #
 #################
@@ -85,7 +90,7 @@ endef
 #######
 work-vcs/compile.sh: ${VSIM_SOURCES} ${TB_SRCS}
 	mkdir -p work-vcs
-	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="-assert svaext -assert disable_cover -full64 -kdb" > $@
+	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="${VLOGAN_FLAGS}" > $@
 	chmod +x $@
 	$@ > work-vcs/compile.log
 
