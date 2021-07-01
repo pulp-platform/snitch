@@ -9,8 +9,6 @@ address:
   tcdm_start: 0x40000008
   tcdm_end: 0x4000000C
   nr_cores: 0x40000010
-  periph_start: 0x40000014
-  periph_end: 0x40000018
   uart: 0xC0000000
   # Not supported in MemPool
   barrier_reg: 0x50000000
