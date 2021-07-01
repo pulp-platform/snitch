@@ -90,7 +90,12 @@ impl Default for Memories {
                 end: 0x90000000,
                 latency: 10,
             },
-            periphs: MemoryFunc::default(),
+            periphs: MemoryFunc {
+                start: 0x20000,
+                end: 0x20000,
+                latency: 2,
+                func: vec![],
+            },
         }
     }
 }

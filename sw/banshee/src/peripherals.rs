@@ -65,13 +65,19 @@ fn perf_counter_enable(addr: u32, size: u8, pls: PeriphsLoadStore) -> Option<u32
     match pls {
         Store(s) => {
             println!(
-                "{} ({} byte(s)) written in PERF_COUNTER_ENABLE (@ {})",
-                s, size, addr
+                "{:#x} ({} byte(s)) written in PERF_COUNTER_ENABLE (@ {:#x})",
+                s,
+                1 << size,
+                addr
             );
             None
         }
         Load => {
-            println!("{} byte(s) read in PERF_COUNTER_ENABLE (@ {})", size, addr);
+            println!(
+                "{} byte(s) read in PERF_COUNTER_ENABLE (@ {:#x})",
+                1 << size,
+                addr
+            );
             Some(0)
         }
     }
