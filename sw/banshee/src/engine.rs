@@ -717,7 +717,12 @@ impl<'a, 'b> Cpu<'a, 'b> {
         let hartid = self.hartid - self.engine.base_hartid;
         while self.wake_up[hartid].load(Ordering::Relaxed) == 0 {
             // Check if everyone is sleeping
-            if self.num_sleep.load(Ordering::Relaxed) == self.wake_up.len() {
+            if self.num_sleep.load(Ordering::Relaxed) == self.wake_up.len()
+                && self
+                    .wake_up
+                    .into_iter()
+                    .all(|x| x.load(Ordering::Relaxed) == 0)
+            {
                 return 1;
             }
             std::thread::yield_now();
