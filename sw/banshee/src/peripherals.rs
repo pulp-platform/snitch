@@ -1,97 +1,95 @@
-use crate::configuration::Func;
-use PeriphsLoadStore::{Load, Store};
+// Copyright 2021 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
 
-#[derive(Clone)]
-pub struct Periphs<'a> {
-    func: &'a Vec<Func>,
+//! Peripherals
+use crate::configuration::Callback;
+use crate::periph_conf::create_peripherals;
+use PeriphReq::{Load, Store};
+
+pub struct Peripherals {
+    peripherals: Vec<(u32, Box<dyn Peripheral>)>,
 }
 
-impl<'a> Periphs<'a> {
-    pub fn new(func: &'a Vec<Func>) -> Self {
-        Self { func }
+unsafe impl Sync for Peripherals {}
+
+impl Peripherals {
+    pub fn new(callbacks: &Vec<Callback>) -> Self {
+        let mut periphs = create_peripherals();
+        Self {
+            peripherals: callbacks
+                .iter()
+                .map(|x| {
+                    (
+                        x.size,
+                        periphs.remove(
+                            periphs
+                                .iter()
+                                .position(|p| x.name.eq(&p.get_name()))
+                                .expect("One of the peripheral is not defined!"),
+                        ),
+                    )
+                })
+                .collect(),
+        }
     }
 
     pub fn load(&self, addr: u32, size: u8) -> u32 {
-        let v = self.name(addr);
-        callback_periph(v.0)(v.1, size, Load).unwrap()
+        self.load_store(addr, size, Load)
     }
 
     pub fn store(&self, addr: u32, value: u32, size: u8) {
-        let v = self.name(addr);
-        callback_periph(v.0)(v.1, size, Store(value));
+        self.load_store(addr, size, Store(value));
     }
 
-    fn name(&self, mut addr: u32) -> (&str, u32) {
-        for i in self.func {
-            if addr < i.size {
-                return (&i.name[..], addr);
+    fn load_store(&self, mut addr: u32, size: u8, req: PeriphReq) -> u32 {
+        for i in &self.peripherals {
+            if addr < i.0 {
+                return match req {
+                    Load => i.1.load(addr, size),
+                    Store(val) => {
+                        i.1.store(addr, val, size);
+                        0
+                    }
+                };
             }
-            addr = addr - i.size;
+            addr = addr - i.0;
         }
-        ("", addr)
+        match req {
+            Load => DefaultPeripheral.load(addr, size),
+            Store(val) => {
+                DefaultPeripheral.store(addr, val, size);
+                0
+            }
+        }
     }
 }
 
-/// Argument givent to a callback function
-enum PeriphsLoadStore {
-    Store(u32),
+enum PeriphReq {
     Load,
+    Store(u32),
 }
 
-//########################################################################
-// USER CODE
-//########################################################################
+/// Trait represnting a peripheral
+pub trait Peripheral {
+    fn get_name(&self) -> &'static str;
+    fn store(&self, addr: u32, value: u32, size: u8);
+    fn load(&self, addr: u32, size: u8) -> u32;
+}
 
-/// Match the name of the peripheral in the configuration with the right callback function
-fn callback_periph(name: &str) -> fn(u32, u8, PeriphsLoadStore) -> Option<u32> {
-    let name = name.to_string();
+struct DefaultPeripheral;
 
-    if name.eq("PERF_COUNTER_ENABLE") {
-        perf_counter_enable
-    } else if name.eq("HART_SELECT") {
-        default
-    } else if name.eq("PERF_COUNTER") {
-        default
-    } else if name.eq("WAKE_UP") {
-        default
-    } else {
-        default
+impl Peripheral for DefaultPeripheral {
+    fn get_name(&self) -> &'static str {
+        "default"
     }
-}
 
-// CALLBACK FUNCTIONs
-
-fn perf_counter_enable(addr: u32, size: u8, pls: PeriphsLoadStore) -> Option<u32> {
-    match pls {
-        Store(s) => {
-            println!(
-                "{:#x} ({} byte(s)) written in PERF_COUNTER_ENABLE (@ {:#x})",
-                s,
-                1 << size,
-                addr
-            );
-            None
-        }
-        Load => {
-            println!(
-                "{} byte(s) read in PERF_COUNTER_ENABLE (@ {:#x})",
-                1 << size,
-                addr
-            );
-            Some(0)
-        }
+    fn store(&self, _: u32, _: u32, _: u8) {
+        trace!("PERIPHERALS DEFAULT CALLBACK: Store");
     }
-}
 
-fn default(_: u32, _: u8, pls: PeriphsLoadStore) -> Option<u32> {
-    match pls {
-        Store(_) => {
-            println!("PERIPH DEFAULT CALLBACK: Store");
-            None
-        }
-        Load => {
-            println!("PERIPH DEFAULT CALLBACK: Load");
-            Some(0)
-        }
+    fn load(&self, _: u32, _: u8) -> u32 {
+        trace!("PERIPHERALS DEFAULT CALLBACK: Load");
+        0
     }
 }

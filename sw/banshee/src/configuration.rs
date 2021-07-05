@@ -74,7 +74,7 @@ impl Configuration {
 pub struct Memories {
     pub tcdm: Memory,
     pub dram: Memory,
-    pub periphs: MemoryFunc,
+    pub periphs: MemoryCallback,
 }
 
 impl Default for Memories {
@@ -90,11 +90,11 @@ impl Default for Memories {
                 end: 0x90000000,
                 latency: 10,
             },
-            periphs: MemoryFunc {
+            periphs: MemoryCallback {
                 start: 0x20000,
                 end: 0x20000,
                 latency: 2,
-                func: vec![],
+                callbacks: vec![],
             },
         }
     }
@@ -120,26 +120,26 @@ impl Default for Memory {
 
 /// Description of a single memory hierarchy with callback functions
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub struct MemoryFunc {
+pub struct MemoryCallback {
     pub start: u32,
     pub end: u32,
     pub latency: u64,
-    pub func: Vec<Func>,
+    pub callbacks: Vec<Callback>,
 }
 
-impl Default for MemoryFunc {
+impl Default for MemoryCallback {
     fn default() -> Self {
         Self {
             start: 0,
             end: u32::MAX,
             latency: 1,
-            func: vec![],
+            callbacks: vec![],
         }
     }
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub struct Func {
+pub struct Callback {
     pub name: String,
     pub size: u32,
 }
