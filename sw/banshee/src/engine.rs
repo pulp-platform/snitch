@@ -4,7 +4,7 @@
 
 //! Engine for dynamic binary translation and execution
 
-use crate::{peripherals::Periphs, riscv, tran::ElfTranslator, util::SiUnit, Configuration};
+use crate::{peripherals::Peripherals, riscv, tran::ElfTranslator, util::SiUnit, Configuration};
 extern crate termion;
 pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState};
 use anyhow::{anyhow, bail, Result};
@@ -327,8 +327,9 @@ impl Engine {
 
         // Allocate the pripherals
         let peripherals: Vec<_> = {
-            let periphs = Periphs::new(&self.config.memory.periphs.func);
-            (0..self.num_clusters).map(|_| periphs.clone()).collect()
+            (0..self.num_clusters)
+                .map(|_| Peripherals::new(&self.config.memory.periphs.callbacks))
+                .collect()
         };
 
         // Allocate some barriers.
@@ -485,7 +486,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     pub fn new(
         engine: &'a Engine,
         tcdm_ptr: &'b u32,
-        periphs: &'b Periphs,
+        periphs: &'b Peripherals,
         hartid: usize,
         num_cores: usize,
         cluster_base_hartid: usize,
