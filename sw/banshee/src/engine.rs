@@ -553,13 +553,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x == self.engine.config.address.wakeup_reg => {
                 // wake_up
                 if value as i32 == -1 {
-                    self.num_sleep
-                        .fetch_sub(self.wake_up.len(), Ordering::Relaxed);
                     for x in self.wake_up {
                         x.fetch_max(self.state.cycle + 1, Ordering::Release);
                     }
                 } else if (value as usize) < self.wake_up.len() {
-                    self.num_sleep.fetch_sub(1, Ordering::Relaxed);
                     self.wake_up[value as usize - self.engine.base_hartid]
                         .fetch_max(self.state.cycle + 1, Ordering::Release);
                 }
@@ -729,7 +726,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
         let cycle = self.wake_up[hartid].swap(0, Ordering::Relaxed);
         self.state.cycle = std::cmp::max(self.state.cycle, cycle as u64);
         self.state.wfi = false;
-        // The core waking us up, already decremented the `num_sleep` counter for us
+        // decrement the `num_sleep` counter
+        self.num_sleep.fetch_sub(1, Ordering::Release);
         return 0;
     }
 
