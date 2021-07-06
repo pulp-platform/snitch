@@ -1,6 +1,6 @@
 = Peripherals
 
-To allow the user to easily create new peripherals, peripherals can be implemented using callback functions.
+To allow the user to easily create new peripherals, they can be implemented using callback functions.
 
 == Peripheral trait
 
@@ -19,7 +19,7 @@ pub trait Peripheral {
 }
 ----
 
-* The `get_name` method returns the name of the peripheral, the returned string slice should match with with the name in the config file.
+* The `get_name` method returns the name of the peripheral, the returned string slice should match with the name in the config file.
 
 * The `addr` parameter in the `store` and `load` methods is the relative address to that peripheral. Therefore, when implementing these methods, the address range to handle would be `[0; size - 1]`.
 
@@ -29,7 +29,7 @@ pub trait Peripheral {
 
 It's recommended to write the source code of your peripherals in `src/periph_conf.rs`.
 
-To allow the engine to have access to the newly created peripheral, you just need to add an instance of you stuct in the `Vec<Box<dyn Peripheral>>` returned by the `create_peripherals()` function (defined at the top of `src/periph_conf.rs`).
+To allow the engine to have access to the newly created peripheral, you just need to add an instance of your struct in the vector returned by the `create_peripherals()` function (defined at the top of `src/periph_conf.rs`).
 
 Here is an example of a peripheral counting `Loads` and `Stores`:
 
