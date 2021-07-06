@@ -103,7 +103,7 @@ impl Engine {
             trace: false,
             latency: false,
             base_hartid: 0,
-            num_cores: 5,
+            num_cores: 1,
             num_clusters: 1,
             config: Default::default(),
             memory: Default::default(),

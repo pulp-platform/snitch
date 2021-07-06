@@ -24,15 +24,9 @@ memory:
     start: 0x100000
     end: 0x200000
     latency: 5
-    func:
-        - name: PERF_COUNTER_ENABLE
-          size: 6
-        - name: HART_SELECT
-          size: 10
-        - name: PERF_COUNTER
-          size: 48
-        - name: WAKE_UP
-          size: 32
+    callbacks:
+        - name: periph_counter
+          size: 64
   dram:
     start: 0x80000000
     end: 0x80010000

@@ -1,7 +1,40 @@
-// Copyright 2021 ETH Zurich and University of Bologna.
-// Licensed under the Apache License, Version 2.0, see LICENSE for details.
-// SPDX-License-Identifier: Apache-2.0
+= Peripherals
 
+To allow the user to easily create new peripherals, peripherals can be implemented using callback functions.
+
+== Peripheral trait
+
+To implement your own peripheral, you can create a struct implementing the `Peripheral` trait. Each struct should represent one peripheral.
+
+[source,rust]
+----
+/// Trait representing a peripheral
+pub trait Peripheral {
+    /// should return the same name as in the config file
+    fn get_name(&self) -> &'static str;
+    /// store instruction
+    fn store(&self, addr: u32, value: u32, size: u8);
+    /// load instruction
+    fn load(&self, addr: u32, size: u8) -> u32;
+}
+----
+
+* The `get_name` method returns the name of the peripheral, the returned string slice should match with with the name in the config file.
+
+* The `addr` parameter in the `store` and `load` methods is the relative address to that peripheral. Therefore, when implementing these methods, the address range to handle would be `[0; size - 1]`.
+
+* To avoid data race, it is recommended to use *Atomic types* for the _fields_ of your peripheral structs.
+
+== `periph_conf.rs`
+
+It's recommended to write the source code of your peripherals in `src/periph_conf.rs`.
+
+To allow the engine to have access to the newly created peripheral, you just need to add an instance of you stuct in the `Vec<Box<dyn Peripheral>>` returned by the `create_peripherals()` function (defined at the top of `src/periph_conf.rs`).
+
+Here is an example of a peripheral counting `Loads` and `Stores`:
+
+[source,rust]
+----
 use crate::peripherals::Peripheral;
 use std::sync::atomic::{AtomicU32, AtomicU8, Ordering};
 use PeriphCounterState::{CountLoad, CountLoadStore, CountStore, Disabled};
@@ -67,3 +100,24 @@ enum PeriphCounterState {
     CountStore = 2,
     CountLoadStore = 3,
 }
+----
+
+== config file
+
+The following config snippet corresponds to the peripheral described in the previous example:
+
+[source,yaml]
+----
+memory:
+  tcdm:
+    start: 0x0
+    end: 0x100000
+    latency: 5
+  periphs:
+    start: 0x100000
+    end: 0x200000
+    latency: 5
+    callbacks:
+        - name: periph_counter
+          size: 64
+----

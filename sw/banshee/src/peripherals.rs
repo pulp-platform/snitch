@@ -70,10 +70,13 @@ enum PeriphReq {
     Store(u32),
 }
 
-/// Trait represnting a peripheral
+/// Trait representing a peripheral
 pub trait Peripheral {
+    /// should return the same name as in the config file
     fn get_name(&self) -> &'static str;
+    /// store instruction
     fn store(&self, addr: u32, value: u32, size: u8);
+    /// load instruction
     fn load(&self, addr: u32, size: u8) -> u32;
 }
 
