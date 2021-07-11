@@ -169,8 +169,9 @@ class const_axi_slave #(
       wait (!ar_queue.empty());
       ar_beat = ar_queue.peek();
       rand_success = std::randomize(r_beat); assert(rand_success);
-      // TODO:
-      r_beat.r_data = {{DW/AW}{ar_beat.ax_addr}};
+      for (int i = 0; i < (DW/32); i++) begin
+        r_beat.r_data[i*32 +: 32] = ar_beat.ax_addr + (4*i);
+      end
       r_beat.r_id = ar_beat.ax_id;
       if (RAND_RESP && !ar_beat.ax_atop[5])
         r_beat.r_resp[1] = $random();
@@ -397,7 +398,6 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
 
   initial begin
     automatic logic rand_success;
-    $timeformat(-9, 0, " ns", 20);
 
     // Initialize memory region of random axi master
     mst_intf.add_memory_region(CachedRegionStart, CachedRegionEnd, axi_pkg::WTHRU_RALLOCATE);
@@ -419,7 +419,122 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     slv_intf.run();
   end
 
-  // Debug
+  ////////////////////////
+  // Checker tasks      //
+  ////////////////////////
+
+  // Queues
+  localparam int unsigned NoIds = 2**AxiInIdWidth;
+  axi_mst_ar_chan_t ar_queues[NoIds-1:0][$];
+  axi_mst_r_chan_t  r_queues[NoIds-1:0][$];
+
+  // channel sampling into queues
+  always @(posedge clk) #TT begin : proc_channel_sample
+    automatic axi_mst_ar_chan_t ar_beat;
+    // only execute when reset is high
+    if (!rst) begin
+      // AR channel
+      if (axi_mst_req.ar_valid && axi_mst_resp.ar_ready) begin
+        ar_queues[axi_mst_req.ar.id].push_back(axi_mst_req.ar);
+        // $display("Push AR (%0t): Addr=%x ID=%d", $time, axi_mst_req.ar.addr, axi_mst_req.ar.id);
+      end
+      // R channel
+      if (axi_mst_resp.r_valid && axi_mst_req.r_ready) begin
+        r_queues[axi_mst_resp.r.id].push_back(axi_mst_resp.r);
+        // $display("Push  R (%0t): Data=%x ID=%d", $time, axi_mst_resp.r.data, axi_mst_resp.r.id);
+      end
+    end
+  end
+
+  initial begin
+    automatic axi_mst_ar_chan_t  ar_beat;
+    automatic axi_mst_r_chan_t   r_beat;
+    automatic axi_addr_t         aligned_addr;
+    automatic axi_data_t         exp_data;
+    automatic int unsigned       no_r_beat[NoIds];
+    $timeformat(-9, 2, " ns", 20);
+    @(negedge rst);
+    forever begin
+      @(posedge clk);
+      #TT;
+      // Check all read queues
+      for (int unsigned i = 0; i < NoIds; i++) begin
+        while (ar_queues[i].size() != 0 && r_queues[i].size() != 0) begin
+          ar_beat = ar_queues[i][0];
+          r_beat  = r_queues[i].pop_front();
+          // Check data
+          aligned_addr = ar_beat.addr >> $clog2(AxiDataWidth/8) << $clog2(AxiDataWidth/8);
+          for (int i = 0; i < (AxiDataWidth/32); i++) begin
+            exp_data[i*32 +: 32] = aligned_addr + (4*i);
+          end
+          if (r_beat.data != exp_data) begin // TODO: Only works for DW = AW and non-bursts
+            $display("Error (%0t): Read returned wrong data. Addr=%x Aqc=%x Exp=%x", $time, ar_beat.addr, r_beat.data, exp_data);
+          end
+
+          if (r_beat.last && !(ar_beat.len == no_r_beat[i])) begin
+            $display("ERROR> Last flag was not expected!!!!!!!!!!!!!");
+          end
+          no_r_beat[i]++;
+          // pop the queue if it is the last flag
+          if (r_beat.last) begin
+            ar_beat = ar_queues[i].pop_front();
+            no_r_beat[i] = 0;
+          end
+        end
+      end
+    end
+  end
+
+
+  //     wait (this.ar_sample[id].size() > 0);
+
+
+
+  //   forever begin
+  //       wait (this.ar_sample[id].size() > 0);
+  //       ar_beat = this.ar_sample[id].pop_front();
+  //       // This scoreborad only supports this type of burst:
+  //       assert (ar_beat.ax_burst == axi_pkg::BURST_INCR || ar_beat.ax_len == '0) else
+  //           $warning("Not supported AR burst: BURST: %0h.", ar_beat.ax_burst);
+
+  //       for (int unsigned i = 0; i <= ar_beat.ax_len; i++) begin
+  //         wait (this.r_sample[id].size() > 0);
+  //         r_beat = this.r_sample[id].pop_front();
+  //         beat_address = axi_pkg::beat_addr(ar_beat.ax_addr, ar_beat.ax_size, ar_beat.ax_len,
+  //             ar_beat.ax_burst, i);
+  //         beat_address = axi_pkg::aligned_addr(beat_address, ar_beat.ax_size);
+  //         bus_address  = axi_pkg::aligned_addr(beat_address, BUS_SIZE);
+  //         if (!this.memory_q.exists(bus_address)) begin
+  //           for (int unsigned j = 0; j < axi_pkg::num_bytes(BUS_SIZE); j++) begin
+  //             this.memory_q[bus_address+j].push_back(8'bxxxxxxxx);
+  //           end
+  //         end
+  //         // Assert that the correct data is read.
+  //         if (this.check_en[ReadCheck]) begin
+  //           for (int unsigned j = 0; j < axi_pkg::num_bytes(ar_beat.ax_size); j++) begin
+  //             idx_data  = 8*BUS_SIZE'(beat_address+j);
+  //             act_data  = r_beat.r_data[idx_data+:8];
+  //             exp_data  = this.memory_q[beat_address+j];
+  //             tst_data  = exp_data.find with (item === 8'hxx || item === act_data);
+  //             assert (tst_data.size() > 0) else begin
+  //               $warning("Unexpected RData ID: %0h Addr: %0h Byte Idx: %0h Exp Data : %0h Data: %h",
+  //               r_beat.r_id, beat_address+j, idx_data, exp_data, act_data);
+  //             end
+  //           end
+  //         end
+  //       end
+  //       if (this.check_en[RRespCheck]) begin
+  //         assert (r_beat.r_id   == id);
+  //         assert (r_beat.r_resp == axi_pkg::RESP_OKAY);
+  //         assert (r_beat.r_last);
+  //       end
+  //     end
+
+
+
+  ////////////////////////
+  // Debug              //
+  ////////////////////////
   axi_chan_logger #(
     .TestTime   ( 8ns                   ),
     .LoggerName ( "mst_logger"          ),
