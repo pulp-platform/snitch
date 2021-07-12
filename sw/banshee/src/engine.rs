@@ -624,7 +624,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 && x < self.engine.config.memory.periphs.end =>
             {
                 self.periphs
-                    .store(addr - self.engine.config.memory.periphs.start, value, size)
+                    .store(addr - self.engine.config.memory.periphs.start, value, mask, size)
             }
 
             _ => {

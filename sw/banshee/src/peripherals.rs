@@ -38,8 +38,8 @@ impl Peripherals {
         self.load_store(addr, size, Load)
     }
 
-    pub fn store(&self, addr: u32, value: u32, size: u8) {
-        self.load_store(addr, size, Store(value));
+    pub fn store(&self, addr: u32, value: u32, mask: u32, size: u8) {
+        self.load_store(addr, size, Store(value, mask));
     }
 
     fn load_store(&self, mut addr: u32, size: u8, req: PeriphReq) -> u32 {
@@ -47,8 +47,8 @@ impl Peripherals {
             if addr < i.0 {
                 return match req {
                     Load => i.1.load(addr, size),
-                    Store(val) => {
-                        i.1.store(addr, val, size);
+                    Store(val, mask) => {
+                        i.1.store(addr, val, mask, size);
                         0
                     }
                 };
@@ -57,8 +57,8 @@ impl Peripherals {
         }
         match req {
             Load => DefaultPeripheral.load(addr, size),
-            Store(val) => {
-                DefaultPeripheral.store(addr, val, size);
+            Store(val, mask) => {
+                DefaultPeripheral.store(addr, val, mask, size);
                 0
             }
         }
@@ -67,7 +67,7 @@ impl Peripherals {
 
 enum PeriphReq {
     Load,
-    Store(u32),
+    Store(u32, u32),
 }
 
 /// Trait representing a peripheral
@@ -75,7 +75,7 @@ pub trait Peripheral {
     /// should return the same name as in the config file
     fn get_name(&self) -> &'static str;
     /// store instruction
-    fn store(&self, addr: u32, value: u32, size: u8);
+    fn store(&self, addr: u32, value: u32, mask: u32, size: u8);
     /// load instruction
     fn load(&self, addr: u32, size: u8) -> u32;
 }
@@ -87,7 +87,7 @@ impl Peripheral for DefaultPeripheral {
         "default"
     }
 
-    fn store(&self, _: u32, _: u32, _: u8) {
+    fn store(&self, _: u32, _: u32, _: u32, _: u8) {
         trace!("PERIPHERALS DEFAULT CALLBACK: Store");
     }
 

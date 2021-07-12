@@ -13,7 +13,7 @@ pub trait Peripheral {
     /// should return the same name as in the config file
     fn get_name(&self) -> &'static str;
     /// store instruction
-    fn store(&self, addr: u32, value: u32, size: u8);
+    fn store(&self, addr: u32, value: u32, mask: u32, size: u8);
     /// load instruction
     fn load(&self, addr: u32, size: u8) -> u32;
 }
@@ -56,8 +56,8 @@ impl Peripheral for PeriphCounter {
         "periph_counter"
     }
 
-    fn store(&self, addr: u32, val: u32, _: u8) {
-        if addr == 0 {
+    fn store(&self, addr: u32, val: u32, mask: u32, _: u8) {
+        if addr == 0 && (mask & 0x3) == 0x3 {
             let val = val & 0x3;
             if val == 0 {
                 self.state.store(Disabled as u8, Ordering::SeqCst);
@@ -115,9 +115,13 @@ memory:
     latency: 5
   periphs:
     start: 0x100000
-    end: 0x200000
+    end: 0x100040
     latency: 5
     callbacks:
         - name: periph_counter
           size: 64
+  dram:
+    start: 0x80000000
+    end: 0x80010000
+    latency: 10
 ----

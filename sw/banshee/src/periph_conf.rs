@@ -23,8 +23,8 @@ impl Peripheral for PeriphCounter {
         "periph_counter"
     }
 
-    fn store(&self, addr: u32, val: u32, _: u8) {
-        if addr == 0 {
+    fn store(&self, addr: u32, val: u32, mask: u32, _: u8) {
+        if addr == 0 && (mask & 0x3) == 0x3 {
             let val = val & 0x3;
             if val == 0 {
                 self.state.store(Disabled as u8, Ordering::SeqCst);
