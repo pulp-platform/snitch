@@ -5,7 +5,7 @@
 #include "runtime.h"
 
 int main(uint32_t core_id, uint32_t core_num) {
-    volatile uint8_t * p = (uint8_t *) 0x100000;
+    volatile uint8_t *p = (uint8_t *)0x100000;
     volatile uint32_t x;
     if (!core_id) {
         *p = 3;
