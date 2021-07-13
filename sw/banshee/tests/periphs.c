@@ -17,5 +17,5 @@ int main(uint32_t core_id, uint32_t core_num) {
     if (!core_id) {
         x = *(p + 4);
     }
-    return 2 * core_num - x;
+    return !core_id ? 2 * core_num - x : 0;
 }

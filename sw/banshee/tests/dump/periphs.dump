@@ -59,31 +59,34 @@ Disassembly of section .text.startup:
 
 8001008c <main>:
 8001008c:	ff010113          	addi	sp,sp,-16
-80010090:	00051863          	bnez	a0,800100a0 <main+0x14>
-80010094:	001007b7          	lui	a5,0x100
-80010098:	00300713          	li	a4,3
-8001009c:	00e78023          	sb	a4,0(a5) # 100000 <l1_alloc_base+0xffff0>
-800100a0:	bfff0797          	auipc	a5,0xbfff0
-800100a4:	f9878793          	addi	a5,a5,-104 # 40000038 <barrier_reg>
-800100a8:	0007a703          	lw	a4,0(a5)
-800100ac:	00070013          	mv	zero,a4
-800100b0:	001006b7          	lui	a3,0x100
-800100b4:	0046c703          	lbu	a4,4(a3) # 100004 <l1_alloc_base+0xffff4>
-800100b8:	0ff77713          	andi	a4,a4,255
-800100bc:	00e12623          	sw	a4,12(sp)
-800100c0:	00c12703          	lw	a4,12(sp)
-800100c4:	0ff77713          	andi	a4,a4,255
-800100c8:	00e680a3          	sb	a4,1(a3)
-800100cc:	0007a783          	lw	a5,0(a5)
-800100d0:	00078013          	mv	zero,a5
-800100d4:	00051663          	bnez	a0,800100e0 <main+0x54>
-800100d8:	0046a783          	lw	a5,4(a3)
-800100dc:	00f12623          	sw	a5,12(sp)
-800100e0:	00c12503          	lw	a0,12(sp)
+80010090:	00050793          	mv	a5,a0
+80010094:	00051863          	bnez	a0,800100a4 <main+0x18>
+80010098:	00100737          	lui	a4,0x100
+8001009c:	00300693          	li	a3,3
+800100a0:	00d70023          	sb	a3,0(a4) # 100000 <l1_alloc_base+0xffff0>
+800100a4:	bfff0717          	auipc	a4,0xbfff0
+800100a8:	f9470713          	addi	a4,a4,-108 # 40000038 <barrier_reg>
+800100ac:	00072683          	lw	a3,0(a4)
+800100b0:	00068013          	mv	zero,a3
+800100b4:	00100637          	lui	a2,0x100
+800100b8:	00464683          	lbu	a3,4(a2) # 100004 <l1_alloc_base+0xffff4>
+800100bc:	0ff6f693          	andi	a3,a3,255
+800100c0:	00d12623          	sw	a3,12(sp)
+800100c4:	00c12683          	lw	a3,12(sp)
+800100c8:	0ff6f693          	andi	a3,a3,255
+800100cc:	00d600a3          	sb	a3,1(a2)
+800100d0:	00072703          	lw	a4,0(a4)
+800100d4:	00070013          	mv	zero,a4
+800100d8:	00000513          	li	a0,0
+800100dc:	00079e63          	bnez	a5,800100f8 <main+0x6c>
+800100e0:	00464783          	lbu	a5,4(a2)
 800100e4:	00159593          	slli	a1,a1,0x1
-800100e8:	40a58533          	sub	a0,a1,a0
-800100ec:	01010113          	addi	sp,sp,16
-800100f0:	00008067          	ret
+800100e8:	0ff7f793          	andi	a5,a5,255
+800100ec:	00f12623          	sw	a5,12(sp)
+800100f0:	00c12503          	lw	a0,12(sp)
+800100f4:	40a58533          	sub	a0,a1,a0
+800100f8:	01010113          	addi	sp,sp,16
+800100fc:	00008067          	ret
 
 Disassembly of section .comment:
 
