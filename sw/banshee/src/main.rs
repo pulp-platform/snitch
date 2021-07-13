@@ -18,6 +18,7 @@ use std::{ffi::CString, os::raw::c_int, path::Path, ptr::null_mut};
 
 pub mod configuration;
 pub mod engine;
+pub mod memory;
 pub mod periph_conf;
 pub mod peripherals;
 pub mod riscv;

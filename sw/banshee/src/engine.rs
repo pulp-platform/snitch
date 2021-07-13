@@ -623,8 +623,12 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x >= self.engine.config.memory.periphs.start
                 && x < self.engine.config.memory.periphs.end =>
             {
-                self.periphs
-                    .store(addr - self.engine.config.memory.periphs.start, value, mask, size)
+                self.periphs.store(
+                    addr - self.engine.config.memory.periphs.start,
+                    value,
+                    mask,
+                    size,
+                )
             }
 
             _ => {
