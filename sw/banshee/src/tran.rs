@@ -149,6 +149,8 @@ pub struct ElfTranslator<'a> {
     pub tcdm_start: u32,
     /// End address of the fast local scratchpad.
     pub tcdm_end: u32,
+    /// External TCDM range (Cluster id, start, end)
+    pub tcdm_ext_range: Vec<(u32, u32, u32)>,
 }
 
 impl<'a> ElfTranslator<'a> {
@@ -205,6 +207,8 @@ impl<'a> ElfTranslator<'a> {
             latency: engine.latency,
             tcdm_start: engine.config.memory.tcdm.start,
             tcdm_end: engine.config.memory.tcdm.end,
+            //TODO: hardcoded
+            tcdm_ext_range: vec![(0, 0x30000, 0x40000)],
         }
     }
 
@@ -2776,40 +2780,62 @@ impl<'a> InstructionTranslator<'a> {
             NONAME,
         );
 
+        let phi_size = self.section.elf.tcdm_ext_range.len() + 3;
+        let mut values: Vec<LLVMValueRef> = Vec::with_capacity(phi_size);
+        let mut bbs: Vec<LLVMBasicBlockRef> = Vec::with_capacity(phi_size);
+
         // Check if the address is in the TCDM, and emit a fast access.
         let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(aligned_addr);
-        let bb_tcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        let bb_notcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_tcdm);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_notcdm);
-        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_notcdm);
+        let mut bb_yes = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let mut bb_no = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_yes);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_no);
+        LLVMBuildCondBr(self.builder, is_tcdm, bb_yes, bb_no);
 
         // Emit the TCDM fast case.
-        LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
-        let value_tcdm = LLVMBuildLoad(self.builder, tcdm_ptr, NONAME);
+        LLVMPositionBuilderAtEnd(self.builder, bb_yes);
+        values.push(LLVMBuildLoad(self.builder, tcdm_ptr, NONAME));
         LLVMBuildBr(self.builder, bb_end);
-        let bb_tcdm = LLVMGetInsertBlock(self.builder);
+        bbs.push(LLVMGetInsertBlock(self.builder));
+
+        // Check if the addess is in one of the external TCDMs, and emit a fast access
+        for x in &self.section.elf.tcdm_ext_range {
+            LLVMPositionBuilderAtEnd(self.builder, bb_no);
+            let (is_tcdm, tcdm_ptr) = self.emit_tcdm_ext_check(aligned_addr, *x);
+            bb_yes = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+            bb_no = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+            LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_yes);
+            LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_no);
+            LLVMBuildCondBr(self.builder, is_tcdm, bb_yes, bb_no);
+
+            // Emit the external TCDM fast case.
+            LLVMPositionBuilderAtEnd(self.builder, bb_yes);
+            values.push(LLVMBuildLoad(self.builder, tcdm_ptr, NONAME));
+            LLVMBuildBr(self.builder, bb_end);
+            bbs.push(LLVMGetInsertBlock(self.builder));
+        }
 
         // Check if the address is in the SSR configuration space.
-        LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
+        LLVMPositionBuilderAtEnd(self.builder, bb_no);
         let (is_ssr, ssr_ptr, ssr_addr) = self.emit_ssr_check(aligned_addr);
-        let bb_ssr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        let bb_nossr = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_ssr);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_nossr);
-        LLVMBuildCondBr(self.builder, is_ssr, bb_ssr, bb_nossr);
+        bb_yes = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        bb_no = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_yes);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_no);
+        LLVMBuildCondBr(self.builder, is_ssr, bb_yes, bb_no);
 
         // Emit the SSR case,
-        LLVMPositionBuilderAtEnd(self.builder, bb_ssr);
-        let value_ssr = self
-            .section
-            .emit_call("banshee_ssr_read_cfg", [ssr_ptr, ssr_addr]);
+        LLVMPositionBuilderAtEnd(self.builder, bb_yes);
+        values.push(
+            self.section
+                .emit_call("banshee_ssr_read_cfg", [ssr_ptr, ssr_addr]),
+        );
         LLVMBuildBr(self.builder, bb_end);
-        let bb_ssr = LLVMGetInsertBlock(self.builder);
+        bbs.push(LLVMGetInsertBlock(self.builder));
 
         // Emit the regular slow case.
-        LLVMPositionBuilderAtEnd(self.builder, bb_nossr);
-        let value_slow = LLVMBuildCall(
+        LLVMPositionBuilderAtEnd(self.builder, bb_no);
+        values.push(LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
                 self.section.engine.module,
@@ -2829,19 +2855,14 @@ impl<'a> InstructionTranslator<'a> {
             .as_mut_ptr(),
             3,
             NONAME,
-        );
+        ));
         LLVMBuildBr(self.builder, bb_end);
-        let bb_nossr = LLVMGetInsertBlock(self.builder);
+        bbs.push(LLVMGetInsertBlock(self.builder));
 
         // Build the PHI node to bring the two together.
         LLVMPositionBuilderAtEnd(self.builder, bb_end);
         let phi = LLVMBuildPhi(self.builder, LLVMInt32Type(), NONAME);
-        LLVMAddIncoming(
-            phi,
-            [value_tcdm, value_ssr, value_slow].as_mut_ptr(),
-            [bb_tcdm, bb_ssr, bb_nossr].as_mut_ptr(),
-            3,
-        );
+        LLVMAddIncoming(phi, values.as_mut_ptr(), bbs.as_mut_ptr(), phi_size as u32);
 
         // Align the read.
         let shift = LLVMBuildAnd(
@@ -2981,6 +3002,33 @@ impl<'a> InstructionTranslator<'a> {
             [index].as_mut_ptr(),
             1 as u32,
             b"ptr_tcdm\0".as_ptr() as *const _,
+        );
+        let ptr = LLVMBuildBitCast(self.builder, ptr, pty32, NONAME);
+        (in_range, ptr)
+    }
+
+    unsafe fn emit_tcdm_ext_check(
+        &self,
+        addr: LLVMValueRef,
+        tcdm_ext: (u32, u32, u32),
+    ) -> (LLVMValueRef, LLVMValueRef) {
+        let tcdm_start = LLVMConstInt(LLVMInt32Type(), tcdm_ext.1 as u64, 0);
+        let tcdm_end = LLVMConstInt(LLVMInt32Type(), tcdm_ext.2 as u64, 0);
+        let in_range = LLVMBuildAnd(
+            self.builder,
+            LLVMBuildICmp(self.builder, LLVMIntUGE, addr, tcdm_start, NONAME),
+            LLVMBuildICmp(self.builder, LLVMIntULT, addr, tcdm_end, NONAME),
+            NONAME,
+        );
+        let index = LLVMBuildSub(self.builder, addr, tcdm_start, NONAME);
+        let pty32 = LLVMPointerType(LLVMInt32Type(), 0);
+        let pty8 = LLVMPointerType(LLVMInt8Type(), 0);
+        let ptr = LLVMBuildGEP(
+            self.builder,
+            LLVMBuildBitCast(self.builder, self.tcdm_ext_ptr(tcdm_ext.0), pty8, NONAME),
+            [index].as_mut_ptr(),
+            1 as u32,
+            b"ptr_tcdm_ext\0".as_ptr() as *const _,
         );
         let ptr = LLVMBuildBitCast(self.builder, ptr, pty32, NONAME);
         (in_range, ptr)
@@ -3331,6 +3379,17 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn tcdm_ptr(&self) -> LLVMValueRef {
         self.section
             .emit_call_with_name("banshee_tcdm_ptr", [self.section.state_ptr], "ptr_tcdm")
+    }
+
+    unsafe fn tcdm_ext_ptr(&self, id: u32) -> LLVMValueRef {
+        self.section.emit_call_with_name(
+            "banshee_tcdm_ext_ptr",
+            [
+                self.section.state_ptr,
+                LLVMConstInt(LLVMInt32Type(), id as u64, 0),
+            ],
+            &format!("ptr_tcdm_ext{}", id),
+        )
     }
 
     unsafe fn ssr_ptr(&self, ssr: u32) -> LLVMValueRef {

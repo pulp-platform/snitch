@@ -325,6 +325,9 @@ impl Engine {
             (0..self.num_clusters).map(|_| tcdm.clone()).collect()
         };
 
+        //TODO
+        //let tcdm_ext: Vec<&u32> = vec![&tcdms[0][0]];
+
         // Allocate the pripherals
         let peripherals: Vec<_> = {
             (0..self.num_clusters)
@@ -351,6 +354,7 @@ impl Engine {
                 Cpu::new(
                     self,
                     &tcdms[j][0],
+                    [&tcdms[j][0]],
                     &peripherals[j],
                     base_hartid + i,
                     self.num_cores,
@@ -486,6 +490,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     pub fn new(
         engine: &'a Engine,
         tcdm_ptr: &'b u32,
+        tcdm_ext_ptr: [&'b u32; 1],
         periphs: &'b Peripherals,
         hartid: usize,
         num_cores: usize,
@@ -499,6 +504,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             engine,
             state: CpuState::new(engine.config.ssr.num_dm),
             tcdm_ptr,
+            tcdm_ext_ptr,
             periphs,
             hartid,
             num_cores,
