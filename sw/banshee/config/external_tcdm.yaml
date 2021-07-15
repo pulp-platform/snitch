@@ -1,0 +1,61 @@
+# Copyright 2021 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+---
+address:
+  cluster_num: 0x50000002
+  cluster_id: 0x50000003
+memory:
+    -
+        tcdm:
+            start: 0x0
+            end: 0x10000
+            latency: 5
+        periphs:
+            start: 0x100000
+            end: 0x100000
+            latency: 5
+        dram:
+            start: 0x80000000
+            end: 0x80010000
+            latency: 10
+        ext_tcdm:
+            -
+                cluster: 1
+                start: 0x10000
+    -
+        tcdm:
+            start: 0x0
+            end: 0x10000
+            latency: 5
+        periphs:
+            start: 0x100000
+            end: 0x100000
+            latency: 5
+        dram:
+            start: 0x80000000
+            end: 0x80010000
+            latency: 10
+        ext_tcdm:
+            -
+                cluster: 0
+                start: 0x10000
+            -
+                cluster: 2
+                start: 0x20000
+     -
+        tcdm:
+            start: 0x0
+            end: 0x10000
+            latency: 5
+        periphs:
+            start: 0x100000
+            end: 0x100000
+            latency: 5
+        dram:
+            start: 0x80000000
+            end: 0x80010000
+            latency: 10
+        ext_tcdm: []
+
