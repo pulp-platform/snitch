@@ -12,7 +12,6 @@
 // the translated binary).
 
 use std::sync::atomic::{AtomicU64, AtomicUsize};
-use crate::peripherals::Peripherals;
 
 /// A CPU pointer to be passed to the binary code.
 #[repr(C)]
@@ -20,8 +19,7 @@ pub struct Cpu<'a, 'b> {
     pub engine: &'a Engine,
     pub state: CpuState,
     pub tcdm_ptr: &'b u32,
-    pub tcdm_ext_ptr: [&'b u32; 1],
-    pub periphs: &'b Peripherals,
+    pub tcdm_ext_ptr: [&'b u32; 32],
     pub hartid: usize,
     pub num_cores: usize,
     pub cluster_base_hartid: usize,
