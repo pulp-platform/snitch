@@ -24,6 +24,7 @@ all: bin/atomics
 all: bin/wfi
 all: bin/ssr_push
 all: bin/periphs
+all: bin/ext_tcdm
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump
