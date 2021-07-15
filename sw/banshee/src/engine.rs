@@ -53,6 +53,8 @@ pub struct Engine {
     pub memory: Mutex<HashMap<u64, u32>>,
     /// The per-core putchar buffers (per hartid).
     pub putchar_buffer: Mutex<HashMap<usize, Vec<u8>>>,
+    /// The peripherals for each cluster
+    peripherals: Vec<Peripherals>,
 }
 
 // SAFETY: This is safe because only `context` and `module`
@@ -108,6 +110,7 @@ impl Engine {
             config: Default::default(),
             memory: Default::default(),
             putchar_buffer: Default::default(),
+            peripherals: Default::default(),
         }
     }
 
@@ -283,6 +286,12 @@ impl Engine {
         LLVMDisposeTargetMachine(tm);
     }
 
+    pub fn init_periphs(&mut self) {
+        self.peripherals = (0..self.num_clusters)
+            .map(|_| Peripherals::new(&self.config.memory.periphs.callbacks))
+            .collect();
+    }
+
     // Execute the loaded memory.
     pub fn execute(&self) -> Result<u32> {
         unsafe { self.execute_inner() }
@@ -325,15 +334,7 @@ impl Engine {
             (0..self.num_clusters).map(|_| tcdm.clone()).collect()
         };
 
-        //TODO
-        //let tcdm_ext: Vec<&u32> = vec![&tcdms[0][0]];
-
-        // Allocate the pripherals
-        let peripherals: Vec<_> = {
-            (0..self.num_clusters)
-                .map(|_| Peripherals::new(&self.config.memory.periphs.callbacks))
-                .collect()
-        };
+        // External TCDM
 
         // Allocate some barriers.
         let barriers: Vec<_> = (0..self.num_clusters)
@@ -354,8 +355,7 @@ impl Engine {
                 Cpu::new(
                     self,
                     &tcdms[j][0],
-                    [&tcdms[j][0]],
-                    &peripherals[j],
+                    [&tcdms[j][0]; 32],
                     base_hartid + i,
                     self.num_cores,
                     base_hartid,
@@ -470,8 +470,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     pub fn new(
         engine: &'a Engine,
         tcdm_ptr: &'b u32,
-        tcdm_ext_ptr: [&'b u32; 1],
-        periphs: &'b Peripherals,
+        tcdm_ext_ptr: [&'b u32; 32],
         hartid: usize,
         num_cores: usize,
         cluster_base_hartid: usize,
@@ -485,7 +484,6 @@ impl<'a, 'b> Cpu<'a, 'b> {
             state: Default::default(),
             tcdm_ptr,
             tcdm_ext_ptr,
-            periphs,
             hartid,
             num_cores,
             cluster_base_hartid,
@@ -528,7 +526,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x >= self.engine.config.memory.periphs.start
                 && x < self.engine.config.memory.periphs.end =>
             {
-                self.periphs
+                self.engine.peripherals[self.cluster_id]
                     .load(addr - self.engine.config.memory.periphs.start, size)
             }
             _ => {
@@ -609,7 +607,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x >= self.engine.config.memory.periphs.start
                 && x < self.engine.config.memory.periphs.end =>
             {
-                self.periphs.store(
+                self.engine.peripherals[self.cluster_id].store(
                     addr - self.engine.config.memory.periphs.start,
                     value,
                     mask,

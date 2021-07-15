@@ -233,6 +233,9 @@ fn main() -> Result<()> {
         }
     }
 
+    // Init the peripherals
+    engine.init_periphs();
+
     // Execute the binary.
     if !matches.is_present("dry-run") {
         let return_code = engine.execute().context("Failed to execute ELF binary")?;
