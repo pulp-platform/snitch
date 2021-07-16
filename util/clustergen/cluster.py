@@ -249,6 +249,19 @@ class SnitchCluster(Generator):
             if pma[0] == PMA.CACHED:
                 self.cfg['pmas']['cached'].append((pma[1], pma[2]))
 
+    def parse_isect_ssr(self, ssr, core):
+        ssr.update({'isect_master': False, 'isect_master_idx': False, 'isect_slave': False})
+        if core['ssr_intersection']:
+            ssr_isect_triple = core['ssr_intersection_triple']
+            if ssr['reg_idx'] in ssr_isect_triple[0:2]:
+                if not ssr['indirection']:
+                    raise ValueError('An intersection master SSR must be indirection-capable')
+                ssr['isect_master'] = True
+                ssr['isect_master_idx'] = (ssr['reg_idx'] == ssr_isect_triple[1])
+            if ssr['reg_idx'] == ssr_isect_triple[2]:
+                ssr['indirection'] = True   # Required for indirector generation, but not functional
+                ssr['isect_slave'] = True
+
     def parse_cores(self):
         """Parse cores struct"""
         def gen_mask(c, s):
@@ -265,12 +278,13 @@ class SnitchCluster(Generator):
                 if not core['xssr'] or 'ssrs' not in core or not len(core['ssrs']):
                     core['xssr'] = False
                     core['ssrs'] = []
-                # Assign SSR register indices
+                # Assign SSR register indices and intersection roles
                 next_free_reg = 0
                 for ssr in core['ssrs']:
                     if ssr['reg_idx'] in (None, next_free_reg):
                         ssr['reg_idx'] = next_free_reg
                         next_free_reg += 1
+                    self.parse_isect_ssr(ssr, core)
                 # Sort SSRs by register indices (required by decoding logic)
                 core['ssrs'].sort(key=lambda x: x['reg_idx'])
                 # Minimum 1 element to avoid illegal ranges (Xssr prevents generation)

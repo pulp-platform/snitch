@@ -122,9 +122,9 @@ package ${cfg['pkg_name']};
   % endfor
   };
 
-  // TODO: Add intersection parameters to cluster config
   localparam snitch_ssr_pkg::ssr_cfg_t [${cfg['num_ssrs_max']}-1:0] SsrCfgs [${cfg['nr_cores']}] = '{
-${ssr_cfg(core, "'{{{indirection:d}, 0, 0, 0, 0, {indir_out_spill:d}, {num_loops}, {index_width}, {pointer_width}, "\
+${ssr_cfg(core, "'{{{indirection:d}, {isect_master:d}, {isect_master_idx:d}, {isect_slave:d}, "\
+  "{isect_slave_spill:d}, {indir_out_spill:d}, {num_loops}, {index_width}, {pointer_width}, "\
   "{shift_width}, {rpt_width}, {index_credits}, {data_credits}, {mux_resp_depth}}}", "/*None*/ '0", ',\n     ')}\
   };
 
