@@ -193,7 +193,7 @@ fn main() -> Result<()> {
     engine.config = if let Some(config_file) = matches.value_of("configuration") {
         Configuration::parse(config_file)
     } else {
-        Configuration::default()
+        Configuration::new(engine.num_clusters)
     };
     debug!("Configuration used:\n{}", engine.config);
 
@@ -205,6 +205,9 @@ fn main() -> Result<()> {
         Err(e) => bail!("Failed to open binary {}: {:?}", path.display(), e),
     };
 
+    // Create a module for each cluster
+    engine.create_modules();
+
     // Translate the binary.
     engine
         .translate_elf(&elf)
@@ -214,7 +217,7 @@ fn main() -> Result<()> {
     if let Some(path) = matches.value_of("emit-llvm") {
         unsafe {
             LLVMPrintModuleToFile(
-                engine.module,
+                engine.modules[0],
                 format!("{}\0", path).as_ptr() as *const _,
                 null_mut(),
             );
@@ -222,14 +225,17 @@ fn main() -> Result<()> {
     }
     if let Some(path) = matches.value_of("emit-bitcode") {
         unsafe {
-            LLVMWriteBitcodeToFile(engine.module, format!("{}\0", path).as_ptr() as *const _);
+            LLVMWriteBitcodeToFile(
+                engine.modules[0],
+                format!("{}\0", path).as_ptr() as *const _,
+            );
         }
     }
 
     // Dump the module if requested.
     if matches.is_present("dump-llvm") {
         unsafe {
-            LLVMDumpModule(engine.module);
+            LLVMDumpModule(engine.modules[0]);
         }
     }
 
