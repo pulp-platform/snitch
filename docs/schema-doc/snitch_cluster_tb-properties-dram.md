@@ -14,7 +14,7 @@ Main, off-chip DRAM.
 
 `object` ([DRAM](snitch_cluster_tb-properties-dram.md))
 
-# DRAM Properties
+# dram Properties
 
 | Property            | Type     | Required | Nullable       | Defined by                                                                                                                                                                              |
 | :------------------ | :------- | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

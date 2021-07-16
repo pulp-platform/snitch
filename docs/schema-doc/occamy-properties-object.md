@@ -14,7 +14,7 @@ http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/s1_qua
 
 unknown ([object](occamy-properties-object.md))
 
-# object Properties
+# s1\_quadrant Properties
 
 | Property                    | Type      | Required | Nullable       | Defined by                                                                                                                                                                                |
 | :-------------------------- | :-------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

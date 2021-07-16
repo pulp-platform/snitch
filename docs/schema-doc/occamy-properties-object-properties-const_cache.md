@@ -14,7 +14,7 @@ Constant cache configuration.
 
 `object` ([Details](occamy-properties-object-properties-const_cache.md))
 
-# undefined Properties
+# const_cache Properties
 
 | Property        | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                  |
 | :-------------- | :-------- | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

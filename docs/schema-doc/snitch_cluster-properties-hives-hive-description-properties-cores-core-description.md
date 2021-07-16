@@ -14,7 +14,7 @@ Description of a single core.
 
 `object` ([Core Description](snitch_cluster-properties-hives-hive-description-properties-cores-core-description.md))
 
-# Core Description Properties
+# items Properties
 
 | Property                                                  | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                                                                             |
 | :-------------------------------------------------------- | :-------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -33,6 +33,8 @@ Description of a single core.
 | [num_sequencer_instructions](#num_sequencer_instructions) | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_sequencer_instructions.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_sequencer_instructions") |
 | [num_itlb_entries](#num_itlb_entries)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_itlb_entries.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_itlb_entries")                     |
 | [num_dtlb_entries](#num_dtlb_entries)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-num_dtlb_entries.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/num_dtlb_entries")                     |
+| [ssr_intersection](#ssr_intersection)                     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr-intersection-feature.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_intersection")             |
+| [ssr_intersection_triple](#ssr_intersection_triple)       | `array`   | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr-intersection-triple.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_intersection_triple")       |
 | [ssr_mux_resp_depth](#ssr_mux_resp_depth)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr_mux_resp_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_mux_resp_depth")                 |
 | [ssrs](#ssrs)                                             | `array`   | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs")                                             |
 
@@ -390,6 +392,60 @@ The default value is:
 
 ```json
 2
+```
+
+## ssr_intersection
+
+Enable intersection between 3 SSRs for sparse-sparse processing.
+
+`ssr_intersection`
+
+*   is optional
+
+*   Type: `boolean` ([SSR Intersection Feature](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr-intersection-feature.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr-intersection-feature.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_intersection")
+
+### ssr_intersection Type
+
+`boolean` ([SSR Intersection Feature](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr-intersection-feature.md))
+
+## ssr_intersection_triple
+
+Indices of the SSRs forming an SSR intersection triple.
+
+`ssr_intersection_triple`
+
+*   is optional
+
+*   Type: `number[]`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssr-intersection-triple.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssr_intersection_triple")
+
+### ssr_intersection_triple Type
+
+`number[]`
+
+### ssr_intersection_triple Constraints
+
+**maximum number of items**: the maximum number of items for this array is: `3`
+
+**minimum number of items**: the minimum number of items for this array is: `3`
+
+### ssr_intersection_triple Default Value
+
+The default value is:
+
+```json
+[
+  0,
+  1,
+  2
+]
 ```
 
 ## ssr_mux_resp_depth

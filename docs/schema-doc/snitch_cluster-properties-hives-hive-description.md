@@ -14,7 +14,7 @@ Configuration of a Hive
 
 `object` ([Hive Description](snitch_cluster-properties-hives-hive-description.md))
 
-# Hive Description Properties
+# items Properties
 
 | Property          | Type     | Required | Nullable       | Defined by                                                                                                                                                                                                                           |
 | :---------------- | :------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -14,7 +14,7 @@ Base description of a Snitch cluster and its internal structure and configuratio
 
 `object` ([Snitch Cluster Schema](occamy-properties-snitch-cluster-schema.md))
 
-# Snitch Cluster Schema Properties
+# cluster Properties
 
 | Property                                          | Type     | Required | Nullable       | Defined by                                                                                                                                                                   |
 | :------------------------------------------------ | :------- | :------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

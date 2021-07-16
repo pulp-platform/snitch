@@ -14,7 +14,7 @@ http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing
 
 `object` ([Timing and Latency Tuning Parameter](snitch_cluster-properties-timing-and-latency-tuning-parameter.md))
 
-# Timing and Latency Tuning Parameter Properties
+# timing Properties
 
 | Property                                      | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                |
 | :-------------------------------------------- | :-------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
