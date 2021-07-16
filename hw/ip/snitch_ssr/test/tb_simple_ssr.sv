@@ -22,6 +22,9 @@ module tb_simple_ssr;
   // DUT parameters
   localparam snitch_ssr_pkg::ssr_cfg_t Cfg = '{
     Indirection:    Indirection,
+    IsectMaster:    1,
+    IsectSlave:     0,
+    IsectMasterIdx: 0,
     IndirOutSpill:  1,
     NumLoops:       NumLoops,
     IndexWidth:     16,
