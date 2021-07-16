@@ -14,6 +14,7 @@ package snitch_ssr_pkg;
     bit           IsectMaster;
     bit           IsectMasterIdx;
     bit           IsectSlave;
+    bit           IsectSlaveSpill;
     bit           IndirOutSpill;
     int unsigned  NumLoops;
     int unsigned  IndexWidth;
@@ -34,6 +35,7 @@ package snitch_ssr_pkg;
     int unsigned  IdxMaster0;
     int unsigned  IdxMaster1;
     int unsigned  IdxSlave;
+    int unsigned  StreamctlDepth;
   } isect_cfg_t;
 
   // Fields used in addresses of upper alias registers

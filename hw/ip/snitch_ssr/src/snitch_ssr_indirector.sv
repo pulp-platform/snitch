@@ -115,7 +115,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     // Cut timing paths from intersector slave port
     spill_register #(
       .T        ( logic [Cfg.IndexWidth:0] ),
-      .Bypass   ( /*TODO: Cfg.IsectSlaveSpill*/ 1'b1 )
+      .Bypass   ( Cfg.IsectSlaveSpill   )
       ) i_spill_register (
       .clk_i,
       .rst_ni,

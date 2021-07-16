@@ -25,6 +25,7 @@ module tb_simple_ssr;
     IsectMaster:    1,
     IsectSlave:     0,
     IsectMasterIdx: 0,
+    IsectSlaveSpill: 1,
     IndirOutSpill:  1,
     NumLoops:       NumLoops,
     IndexWidth:     16,

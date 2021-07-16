@@ -34,6 +34,7 @@ module tb_simple_ssr_streamer;
       DataCredits:    4,
       MuxRespDepth:   3,
       RptWidth:       4,
+      IsectSlaveSpill: 1,
       default:        '0    // Isect parameters below
     };
     ssr_cfg_t [NumSsrs-1:0] ret = '{CfgSsrDefault, CfgSsrDefault, CfgSsrDefault};

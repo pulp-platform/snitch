@@ -59,6 +59,10 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
     automatic isect_cfg_t ret = '0;
     for (int i = 0; i < NumSsrs; i++) begin
       if (SsrCfgs[i].IsectMaster) begin
+        automatic int unsigned DataBufDepth =
+            SsrCfgs[i].DataCredits + 2*unsigned'(SsrCfgs[i].IndirOutSpill);
+        if (DataBufDepth > ret.StreamctlDepth)
+          ret.StreamctlDepth = DataBufDepth;
         if (SsrCfgs[i].IndexWidth > ret.IndexWidth)
           ret.IndexWidth = SsrCfgs[i].IndexWidth;
         if (SsrCfgs[i].IsectMasterIdx) begin
@@ -166,6 +170,7 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
 
   if (IsectCfg.NumMaster0 != 0) begin : gen_intersector
     snitch_ssr_intersector #(
+      .StreamctlDepth  ( IsectCfg.StreamctlDepth ),
       .isect_slv_req_t ( isect_slv_req_t ),
       .isect_slv_rsp_t ( isect_slv_rsp_t ),
       .isect_mst_req_t ( isect_mst_req_t ),
