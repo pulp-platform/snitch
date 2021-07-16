@@ -152,18 +152,20 @@ pub struct ElfTranslator<'a> {
     pub tcdm_end: u32,
     /// External TCDM range (Cluster id, start, end)
     pub tcdm_ext_range: Vec<(u32, u32, u32)>,
+    /// Cluster ID
+    pub cluster_id: usize,
 }
 
 impl<'a> ElfTranslator<'a> {
     /// Create a new ELF file translator.
-    pub fn new(elf: &'a elf::File, engine: &'a Engine) -> Self {
+    pub fn new(elf: &'a elf::File, engine: &'a Engine, cluster_id: usize) -> Self {
         // Create the root debugging information.
         let (di_builder, di_cu, di_file) = unsafe {
             let dir_name = ".";
             let file_name = "binary.riscv";
             let producer = "banshee";
 
-            let di_builder = LLVMCreateDIBuilder(engine.module);
+            let di_builder = LLVMCreateDIBuilder(engine.modules[cluster_id]);
             let di_file = LLVMDIBuilderCreateFile(
                 di_builder,
                 file_name.as_ptr() as *const _,
@@ -202,10 +204,11 @@ impl<'a> ElfTranslator<'a> {
             inst_bbs: Default::default(),
             trace: engine.trace,
             latency: engine.latency,
-            tcdm_start: engine.config.memory.tcdm.start,
-            tcdm_end: engine.config.memory.tcdm.end,
+            tcdm_start: engine.config.memory[cluster_id].tcdm.start,
+            tcdm_end: engine.config.memory[cluster_id].tcdm.end,
             //TODO: hardcoded
             tcdm_ext_range: vec![(0, 0x30000, 0x40000)],
+            cluster_id,
         }
     }
 
@@ -344,14 +347,17 @@ impl<'a> ElfTranslator<'a> {
         let builder = LLVMCreateBuilderInContext(self.engine.context);
 
         // Assemble the struct type which holds the CPU state.
-        let state_type = LLVMGetTypeByName(self.engine.module, "Cpu\0".as_ptr() as *const _);
+        let state_type = LLVMGetTypeByName(
+            self.engine.modules[self.cluster_id],
+            "Cpu\0".as_ptr() as *const _,
+        );
         let state_ptr_type = LLVMPointerType(state_type, 0u32);
 
         // Emit the function which will run the binary.
         let func_name = format!("execute_binary\0");
         let func_type = LLVMFunctionType(LLVMVoidType(), [state_ptr_type].as_mut_ptr(), 1, 0);
         let func = LLVMAddFunction(
-            self.engine.module,
+            self.engine.modules[self.cluster_id],
             func_name.as_ptr() as *const _,
             func_type,
         );
@@ -513,7 +519,7 @@ impl<'a> ElfTranslator<'a> {
         LLVMBuildCall(
             builder,
             LLVMGetNamedFunction(
-                self.engine.module,
+                self.engine.modules[self.cluster_id],
                 "banshee_abort_illegal_branch\0".as_ptr() as *const _,
             ),
             [state_ptr, indirect_addr, indirect_target].as_mut_ptr(),
@@ -579,7 +585,8 @@ impl<'a> ElfTranslator<'a> {
 
     unsafe fn lookup_func(&self, name: &str) -> LLVMValueRef {
         let n = CString::new(name).unwrap();
-        let ptr = LLVMGetNamedFunction(self.engine.module, n.as_ptr() as *const _);
+        let ptr =
+            LLVMGetNamedFunction(self.engine.modules[self.cluster_id], n.as_ptr() as *const _);
         assert!(
             !ptr.is_null(),
             "function `{}` not found in LLVM module",
@@ -1081,7 +1088,7 @@ impl<'a> InstructionTranslator<'a> {
         let value_slow = LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
-                self.section.engine.module,
+                self.section.engine.modules[self.section.elf.cluster_id],
                 "banshee_load\0".as_ptr() as *const _,
             ),
             [
@@ -1296,7 +1303,7 @@ impl<'a> InstructionTranslator<'a> {
         let value_slow = LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
-                self.section.engine.module,
+                self.section.engine.modules[self.section.elf.cluster_id],
                 "banshee_rmw\0".as_ptr() as *const _,
             ),
             [self.section.state_ptr, addr, value, op].as_mut_ptr(),
@@ -2387,7 +2394,7 @@ impl<'a> InstructionTranslator<'a> {
     ) -> LLVMValueRef {
         let id = LLVMLookupIntrinsicID(name.as_ptr() as *const _, name.len());
         let decl = LLVMGetIntrinsicDeclaration(
-            self.section.engine.module,
+            self.section.engine.modules[self.section.elf.cluster_id],
             id,
             [LLVMTypeOf(rs1)].as_mut_ptr(),
             1,
@@ -2609,12 +2616,16 @@ impl<'a> InstructionTranslator<'a> {
                     is_tcdm,
                     LLVMConstInt(
                         LLVMTypeOf(max_cycle),
-                        self.section.engine.config.memory.tcdm.latency,
+                        self.section.engine.config.memory[self.section.elf.cluster_id]
+                            .tcdm
+                            .latency,
                         0,
                     ),
                     LLVMConstInt(
                         LLVMTypeOf(max_cycle),
-                        self.section.engine.config.memory.dram.latency,
+                        self.section.engine.config.memory[self.section.elf.cluster_id]
+                            .dram
+                            .latency,
                         0,
                     ),
                     NONAME,
@@ -2835,7 +2846,7 @@ impl<'a> InstructionTranslator<'a> {
         values.push(LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
-                self.section.engine.module,
+                self.section.engine.modules[self.section.elf.cluster_id],
                 "banshee_load\0".as_ptr() as *const _,
             ),
             [
@@ -3267,7 +3278,7 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
-                self.section.engine.module,
+                self.section.engine.modules[self.section.elf.cluster_id],
                 "banshee_csr_read\0".as_ptr() as *const _,
             ),
             [
@@ -3285,7 +3296,7 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
-                self.section.engine.module,
+                self.section.engine.modules[self.section.elf.cluster_id],
                 "banshee_csr_write\0".as_ptr() as *const _,
             ),
             [

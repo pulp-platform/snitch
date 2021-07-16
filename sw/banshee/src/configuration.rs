@@ -13,7 +13,7 @@ use std::io::prelude::*;
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Configuration {
     #[serde(default)]
-    pub memory: Memories,
+    pub memory: Vec<Memories>,
     #[serde(default)]
     pub address: Address,
     #[serde(default)]
@@ -37,6 +37,13 @@ impl std::fmt::Display for Configuration {
 }
 
 impl Configuration {
+    pub fn new(num_clusters: usize) -> Self {
+        Self {
+            memory: vec![Default::default(); num_clusters],
+            address: Default::default(),
+            inst_latency: Default::default(),
+        }
+    }
     /// Parse a json/yaml file into a `Configuration` struct
     pub fn parse(name: &str) -> Configuration {
         let config: String = std::fs::read_to_string(name)
@@ -70,11 +77,12 @@ impl Configuration {
 }
 
 /// Holds all the memories in the hierarchy
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct Memories {
     pub tcdm: Memory,
     pub dram: Memory,
     pub periphs: MemoryCallback,
+    pub ext_tcdm: Vec<ExtTcdm>,
 }
 
 impl Default for Memories {
@@ -96,12 +104,13 @@ impl Default for Memories {
                 latency: 2,
                 callbacks: vec![],
             },
+            ext_tcdm: vec![],
         }
     }
 }
 
 /// Description of a single memory hierarchy
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct Memory {
     pub start: u32,
     pub end: u32,
@@ -119,7 +128,7 @@ impl Default for Memory {
 }
 
 /// Description of a single memory hierarchy with callback functions
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct MemoryCallback {
     pub start: u32,
     pub end: u32,
@@ -138,10 +147,16 @@ impl Default for MemoryCallback {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct Callback {
     pub name: String,
     pub size: u32,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+pub struct ExtTcdm {
+    pub cluster: u32,
+    pub start: u32,
 }
 
 /// Struct to configure specific addresses
