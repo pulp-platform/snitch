@@ -6,6 +6,7 @@
 
 `include "tcdm_interface/typedef.svh"
 `include "tcdm_interface/assign.svh"
+`include "snitch_ssr/typedef.svh"
 
 module fixture_ssr import snitch_ssr_pkg::*; #(
   parameter int unsigned  AddrWidth = 0,
@@ -40,6 +41,9 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   typedef logic                   user_t;
   `TCDM_TYPEDEF_ALL(tcdm, addr_t, data_t, strb_t, user_t);
 
+  // Intersector types
+  `SSR_ISECT_TYPEDEF_ALL(isect, logic [Cfg.IndexWidth-1:0])
+
   // Configuration written through proper registers
   typedef struct packed {
     logic [31:0] idx_shift;
@@ -49,22 +53,6 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     logic [3:0][31:0] bound;
     logic [31:0] rep;
   } cfg_regs_t;
-
-  // Fields used in addresses of upper alias registers
-  // *Not* the same order as alias address, but as in upper status fields
-  typedef struct packed {
-    logic no_indir;
-    logic write;
-    logic [1:0] dims;
-  } cfg_alias_fields_t;
-
-  // Upper fields accessible on status register
-  typedef struct packed {
-    logic done;
-    logic write;
-    logic [1:0] dims;
-    logic indir;
-  } cfg_status_upper_t;
 
   // Status register type
   typedef struct packed {
@@ -123,7 +111,11 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     .DataWidth    ( DataWidth   ),
     .tcdm_user_t  ( user_t      ),
     .tcdm_req_t   ( tcdm_req_t  ),
-    .tcdm_rsp_t   ( tcdm_rsp_t  )
+    .tcdm_rsp_t   ( tcdm_rsp_t  ),
+    .isect_slv_req_t  ( isect_slv_req_t ),
+    .isect_slv_rsp_t  ( isect_slv_rsp_t ),
+    .isect_mst_req_t  ( isect_mst_req_t ),
+    .isect_mst_rsp_t  ( isect_mst_rsp_t )
   ) i_snitch_ssr (
     .clk_i          ( clk       ),
     .rst_ni         ( rst_n     ),
@@ -137,6 +129,10 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     .lane_ready_i,
     .mem_req_o,
     .mem_rsp_i,
+    .isect_mst_req_o  (     ),
+    .isect_slv_req_o  (     ),
+    .isect_mst_rsp_i  ( '0  ),
+    .isect_slv_rsp_i  ( '0  ),
     .tcdm_start_address_i
   );
 

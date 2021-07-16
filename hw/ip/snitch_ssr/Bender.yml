@@ -6,6 +6,7 @@ package:
   authors:
   - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
   - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+  - Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
 dependencies:
   common_cells: {path: ../../vendor/pulp_platform_common_cells}
@@ -13,12 +14,16 @@ dependencies:
   # Local dependencies.
   tcdm_interface: {path: ../../ip/tcdm_interface}
 
+export_include_dirs:
+- include
+
 sources:
 # Level 0:
 - src/snitch_ssr_pkg.sv
 - src/snitch_ssr_switch.sv
 # Level 1:
 - src/snitch_ssr_indirector.sv
+- src/snitch_ssr_intersector.sv
 # Level 2
 - src/snitch_ssr_addr_gen.sv
 # Level 3:
@@ -29,5 +34,7 @@ sources:
   files:
   # Level 0
   - test/fixture_ssr.sv
+  - test/fixture_ssr_streamer.sv
   # Level 1
   - test/tb_simple_ssr.sv
+  - test/tb_simple_ssr_streamer.sv

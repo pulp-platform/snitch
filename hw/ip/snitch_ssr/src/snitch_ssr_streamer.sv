@@ -5,14 +5,17 @@
 // Author: Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 // Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
+`include "common_cells/assertions.svh"
+`include "snitch_ssr/typedef.svh"
+
 module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   parameter int unsigned NumSsrs    = 0,
   parameter int unsigned RPorts     = 0,
   parameter int unsigned WPorts     = 0,
   parameter int unsigned AddrWidth  = 0,
   parameter int unsigned DataWidth  = 0,
-  parameter ssr_cfg_t [NumSsrs-1:0] SsrCfgs = '0,
-  parameter logic [NumSsrs:0][4:0]  SsrRegs = '0,
+  parameter ssr_cfg_t [NumSsrs-1:0]  SsrCfgs = '0,
+  parameter logic [NumSsrs-1:0][4:0] SsrRegs = '0,
   parameter type tcdm_user_t  = logic,
   parameter type tcdm_req_t   = logic,
   parameter type tcdm_rsp_t   = logic,
@@ -42,9 +45,58 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   // Ports into memory.
   output tcdm_req_t [NumSsrs-1:0] mem_req_o,
   input  tcdm_rsp_t [NumSsrs-1:0] mem_rsp_i,
+  // From intersector to  stream controller
+  output logic             streamctl_done_o,
+  output logic             streamctl_valid_o,
+  input  logic             streamctl_ready_i,
 
   input  addr_t            tcdm_start_address_i
 );
+
+  // Derive intersection-related configuration from SSR configurations.
+  // This will *not* validate the configuration (see assertions below).
+  function automatic isect_cfg_t derive_isect_cfg();
+    automatic isect_cfg_t ret = '0;
+    for (int i = 0; i < NumSsrs; i++) begin
+      if (SsrCfgs[i].IsectMaster) begin
+        automatic int unsigned DataBufDepth =
+            SsrCfgs[i].DataCredits + 2*unsigned'(SsrCfgs[i].IndirOutSpill);
+        if (DataBufDepth > ret.StreamctlDepth)
+          ret.StreamctlDepth = DataBufDepth;
+        if (SsrCfgs[i].IndexWidth > ret.IndexWidth)
+          ret.IndexWidth = SsrCfgs[i].IndexWidth;
+        if (SsrCfgs[i].IsectMasterIdx) begin
+          ret.NumMaster1++;
+          ret.IdxMaster1 = i;
+        end else begin
+          ret.NumMaster0++;
+          ret.IdxMaster0 = i;
+        end
+      end if (SsrCfgs[i].IsectSlave) begin
+        ret.NumSlave++;
+        ret.IdxSlave = i;
+      end
+    end
+    return ret;
+  endfunction
+
+  // Intersection configuration
+  localparam isect_cfg_t IsectCfg = derive_isect_cfg();
+
+  // Intersection configuration assertions
+  `ASSERT_INIT(isect_max_one_master0, IsectCfg.NumMaster0 <= 1)
+  `ASSERT_INIT(isect_max_one_slave, IsectCfg.NumSlave <= 1)
+  `ASSERT_INIT(isect_num_masters_equal, IsectCfg.NumMaster0 == IsectCfg.NumMaster1)
+  `ASSERT_INIT(isect_slave_only_if_master, IsectCfg.NumSlave <= IsectCfg.NumMaster0)
+
+  // Intersection types
+  `SSR_ISECT_TYPEDEF_ALL(isect, logic [IsectCfg.IndexWidth-1:0])
+
+  // Intersector IO
+  isect_mst_req_t [NumSsrs-1:0] isect_mst_req;
+  isect_slv_req_t [NumSsrs-1:0] isect_slv_req;
+  isect_mst_rsp_t [1:0]         isect_mst_rsp;
+  isect_slv_rsp_t               isect_slv_rsp;
 
   data_t [NumSsrs-1:0] lane_rdata;
   data_t [NumSsrs-1:0] lane_wdata;
@@ -90,7 +142,11 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
       .DataWidth    ( DataWidth   ),
       .tcdm_user_t  ( tcdm_user_t ),
       .tcdm_req_t   ( tcdm_req_t  ),
-      .tcdm_rsp_t   ( tcdm_rsp_t  )
+      .tcdm_rsp_t   ( tcdm_rsp_t  ),
+      .isect_slv_req_t  ( isect_slv_req_t ),
+      .isect_slv_rsp_t  ( isect_slv_rsp_t ),
+      .isect_mst_req_t  ( isect_mst_req_t ),
+      .isect_mst_rsp_t  ( isect_mst_rsp_t )
     ) i_ssr (
       .clk_i,
       .rst_ni,
@@ -104,8 +160,37 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
       .lane_ready_i   ( lane_ready   [i]  ),
       .mem_req_o      ( mem_req_o    [i]  ),
       .mem_rsp_i      ( mem_rsp_i    [i]  ),
+      .isect_mst_req_o  ( isect_mst_req [i] ),
+      .isect_slv_req_o  ( isect_slv_req [i] ),
+      .isect_mst_rsp_i  ( isect_mst_rsp [SsrCfgs[i].IsectMasterIdx] ),
+      .isect_slv_rsp_i  ( isect_slv_rsp     ),
       .tcdm_start_address_i
     );
+  end
+
+  if (IsectCfg.NumMaster0 != 0) begin : gen_intersector
+    snitch_ssr_intersector #(
+      .StreamctlDepth  ( IsectCfg.StreamctlDepth ),
+      .isect_slv_req_t ( isect_slv_req_t ),
+      .isect_slv_rsp_t ( isect_slv_rsp_t ),
+      .isect_mst_req_t ( isect_mst_req_t ),
+      .isect_mst_rsp_t ( isect_mst_rsp_t )
+    ) i_snitch_ssr_intersector (
+      .clk_i,
+      .rst_ni,
+      .mst_req_i ( {isect_mst_req[IsectCfg.IdxMaster1], isect_mst_req[IsectCfg.IdxMaster0]} ),
+      .slv_req_i ( isect_slv_req[IsectCfg.IdxSlave] ),
+      .mst_rsp_o ( isect_mst_rsp ),
+      .slv_rsp_o ( isect_slv_rsp ),
+      .streamctl_done_o,
+      .streamctl_valid_o,
+      .streamctl_ready_i
+    );
+  end else begin : gen_no_intersector
+    assign isect_mst_rsp      = '0;
+    assign isect_slv_rsp      = '0;
+    assign streamctl_o        = '0;
+    assign streamctl_valid_o  = '0;
   end
 
   // Determine which data movers are addressed via the config interface. We

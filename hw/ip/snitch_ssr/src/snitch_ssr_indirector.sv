@@ -7,6 +7,7 @@
 // Indirection datapath for the SSR address generator.
 
 `include "common_cells/registers.svh"
+`include "common_cells/assertions.svh"
 
 module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   parameter ssr_cfg_t Cfg = '0,
@@ -15,10 +16,16 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   parameter type tcdm_req_t   = logic,
   parameter type tcdm_rsp_t   = logic,
   parameter type tcdm_user_t  = logic,
+  parameter type isect_slv_req_t = logic,
+  parameter type isect_slv_rsp_t = logic,
+  parameter type isect_mst_req_t = logic,
+  parameter type isect_mst_rsp_t = logic,
   /// Derived parameters *Do not override*
   parameter int unsigned BytecntWidth = $clog2(DataWidth/8),
   parameter type addr_t     = logic [AddrWidth-1:0],
   parameter type data_t     = logic [DataWidth-1:0],
+  parameter type data_bte_t = logic [DataWidth/8-1:0][7:0],
+  parameter type strb_t     = logic [DataWidth/8-1:0],
   parameter type bytecnt_t  = logic [BytecntWidth-1:0],
   parameter type index_t    = logic [Cfg.IndexWidth-1:0],
   parameter type pointer_t  = logic [Cfg.PointerWidth-1:0],
@@ -30,11 +37,18 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   // Index fetch ports
   output tcdm_req_t idx_req_o,
   input  tcdm_rsp_t idx_rsp_i,
+  // With intersector interfaces
+  output isect_slv_req_t isect_slv_req_o,
+  input  isect_slv_rsp_t isect_slv_rsp_i,
+  output isect_mst_req_t isect_mst_req_o,
+  input  isect_mst_rsp_t isect_mst_rsp_i,
   // From config interface
   input  bytecnt_t  cfg_offs_next_i,
   input  logic      cfg_done_i,
-  // From config registers
   input  logic      cfg_indir_i,
+  input  logic      cfg_isect_slv_i,    // Whether to consume indices from intersector
+  input  logic      cfg_isect_mst_i,    // Whether to emit indices to intersector
+  input  logic      cfg_isect_merge_i,  // Whether to form union instead of intersection
   input  idx_size_t cfg_size_i,
   input  pointer_t  cfg_base_i,
   input  shift_t    cfg_shift_i,
@@ -46,100 +60,265 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   output logic      natit_extraword_o,  // Emit additional index word address if bounds require it
   // To address generator output (downstream)
   output pointer_t  mem_pointer_o,
-  output logic      mem_last_o,
+  output logic      mem_last_o,         // Whether pointer emitted is last in job (indirection)
+  output logic      mem_zero_o,         // Whether to inject a zero value; overrules pointer!
+  output logic      mem_done_o,         // Whether to end job without emitting pointer (inters.)
   output logic      mem_valid_o,
   input  logic      mem_ready_i,
   // TCDM base
   input  addr_t     tcdm_start_address_i
 );
 
-  // Index FIFO signals
-  logic idx_fifo_empty;
-  logic idx_fifo_pop;
-  data_t idx_fifo_out;
+  // Address used for external requests
+  addr_t  idx_addr;
 
-  // Index credit counter
-  logic [$clog2(Cfg.IndexCredits):0] idx_cred_d, idx_cred_q;
-  logic idx_cred_take, idx_cred_give;
-  logic idx_cred_left;
+  // Index used in shift-and-add and emitted to address generator
+  index_t mem_idx;
+  logic   mem_skip;
 
-  // Last word & index tracking
-  logic last_word;
-  bytecnt_t first_idx_byteoffs;
-  bytecnt_t last_idx_byteoffs;
+  // Intersection index counter
+  logic   idx_isect_ena;
+  index_t idx_isect_q;
 
-  // Index serializer
-  data_t    idx_ser_mask;
-  index_t   idx_ser_out;
-  pointer_t idx_ser_offs;
-
-  // Index serializer counter
+  // Index byte (serializer/deserializer) counter
   logic     idx_bytecnt_ena;
   bytecnt_t idx_bytecnt_d, idx_bytecnt_q;
   bytecnt_t idx_bytecnt_next;
 
-  // Index TCDM request (read-only)
-  assign idx_req_o.q = '{
-      // Mask lower bits to fetch only entire, aligned words
-      addr: {tcdm_start_address_i[AddrWidth-1:Cfg.PointerWidth],
-          natit_pointer_i[Cfg.PointerWidth-1:BytecntWidth], {BytecntWidth{1'b0}}},
-      default: '0
-    };
+  if (Cfg.IsectSlave) begin : gen_isect_slave
 
-  // Index handshaking
-  assign idx_req_o.q_valid  = cfg_indir_i & idx_cred_left & ~natit_done_i;
-  assign natit_ready_o      = cfg_indir_i & idx_cred_left & idx_rsp_i.q_ready;
+    // Write data coalescing
+    logic       idx_word_valid_d, idx_word_valid_q, idx_word_clr;
+    strb_t      idx_strb_base, idx_strb_incr;
+    strb_t      idx_strb_d, idx_strb_q;
+    data_bte_t  idx_data_mask, idx_data_shifted;
+    data_bte_t  idx_data_d, idx_data_q;
 
-  // Index FIFO: stores full unserialized words.
-  fifo_v3 #(
-    .FALL_THROUGH ( 1'b0              ),
-    .DATA_WIDTH   ( DataWidth         ),
-    .DEPTH        ( Cfg.IndexCredits  )
-  ) i_idx_fifo (
-    .clk_i,
-    .rst_ni,
-    .flush_i    ( 1'b0              ),
-    .testmode_i ( 1'b0              ),
-    .full_o     (  ),                     // Credit counter prevents overflows
-    .empty_o    ( idx_fifo_empty    ),
-    .usage_o    (  ),
-    .data_i     ( idx_rsp_i.p.data  ),
-    .push_i     ( idx_rsp_i.p_valid ),
-    .data_o     ( idx_fifo_out      ),
-    .pop_i      ( idx_fifo_pop      )
-  );
+    // Data from intersector
+    index_t isect_slv_idx;
+    logic   isect_slv_done;
+    logic   isect_slv_valid, isect_slv_ready;
 
-  // Credit counter that keeps track of the number of memory requests in flight
-  // to ensure that the FIFO does not overfill.
-  always_comb begin
-    idx_cred_d = idx_cred_q;
-    if (idx_cred_take & ~idx_cred_give)       idx_cred_d = idx_cred_q - 1;
-    else if (~idx_cred_take & idx_cred_give)  idx_cred_d = idx_cred_q + 1;
+    // Stall at index request
+    logic  idx_req_stall;
+
+    // Index TCDM request (write-only)
+    assign idx_req_o.q = '{addr: idx_addr, write: 1'b1,
+        strb: idx_strb_q, data: idx_data_q, default: '0};
+
+    // Ready to write data when index word ready and index egress ready
+    assign idx_req_o.q_valid = (idx_word_valid_q | isect_slv_done) & mem_ready_i;
+
+    // Draw new index data address on each write request
+    assign natit_ready_o = idx_req_o.q_valid & idx_rsp_i.q_ready;
+
+    // Cut timing paths from intersector slave port
+    spill_register #(
+      .T        ( logic [Cfg.IndexWidth:0] ),
+      .Bypass   ( Cfg.IsectSlaveSpill   )
+      ) i_spill_register (
+      .clk_i,
+      .rst_ni,
+      .valid_i  ( isect_slv_rsp_i.valid ),
+      .ready_o  ( isect_slv_req_o.ready ),
+      .data_i   ( {isect_slv_rsp_i.idx, isect_slv_rsp_i.done} ),
+      .valid_o  ( isect_slv_valid ),
+      .ready_i  ( isect_slv_ready ),
+      .data_o   ( {isect_slv_idx, isect_slv_done} )
+    );
+
+    // Ready to proceed when both downstream slaves are
+    assign idx_req_stall    = idx_word_valid_q & ~idx_rsp_i.q_ready;
+    assign isect_slv_ready  = mem_ready_i & ~idx_req_stall;
+
+    // Create coalescing masks
+    assign idx_strb_base    = ~({(DataWidth/8){1'b1}} << (1 << cfg_size_i));
+    assign idx_strb_incr    = idx_strb_base << idx_bytecnt_q;
+    assign idx_data_mask    = ~({(DataWidth){1'b1}} << (8 << cfg_size_i)) << {idx_bytecnt_q, 3'b0};
+    assign idx_data_shifted = data_t'(isect_slv_idx) << {idx_bytecnt_q, 3'b0};
+
+    // Coalesce indices to data words to be written to memory
+    assign idx_data_d = (idx_data_q & ~idx_data_mask) | (idx_data_shifted & idx_data_mask);
+    assign idx_strb_d = idx_word_valid_q ? idx_strb_base : (idx_strb_q | idx_strb_incr);
+
+    // Complete word when uppermost index or last index (delayed due to coalescing regs).
+    // On every word transmitted: clear validity *unless* new word loaded.
+    assign idx_word_valid_d = (idx_bytecnt_next == '0);
+    assign idx_word_clr     = idx_req_o.q_valid & idx_rsp_i.q_ready & ~idx_bytecnt_ena;
+
+    `FFLARN(idx_data_q, idx_data_d, idx_bytecnt_ena,  1'b0, clk_i, rst_ni)
+    `FFLARN(idx_strb_q, idx_strb_d, idx_bytecnt_ena,  1'b0, clk_i, rst_ni)
+    `FFLARNC(idx_word_valid_q, idx_word_valid_d, idx_bytecnt_ena, idx_word_clr, 1'b0, clk_i, rst_ni)
+
+    // Not an intersection master: tie off master requests, unable to skip indices
+    assign isect_mst_req_o  = '0;
+    assign mem_skip         = 1'b0;
+
+    // We do not need additional words as our termination is externally controlled
+    assign natit_extraword_o = 1'b0;
+
+    // Intersector slave enable signals
+    assign isect_slv_req_o.ena  = cfg_isect_slv_i;
+    assign idx_isect_ena        = cfg_isect_slv_i & idx_bytecnt_ena;
+
+    // Output to address generator
+    assign mem_idx      = idx_isect_q;
+    assign mem_zero_o   = 1'b0;
+    assign mem_last_o   = 1'b0;
+    assign mem_valid_o  = isect_slv_valid & ~idx_req_stall;
+    assign mem_done_o   = isect_slv_done;
+
+  end else begin : gen_no_isect_slave
+
+    // Index FIFO signals
+    logic   idx_fifo_empty;
+    logic   idx_fifo_pop;
+    data_t  idx_fifo_out;
+
+    // Index FIFO credit counter
+    logic [$clog2(Cfg.IndexCredits):0] idx_cred_d, idx_cred_q;
+    logic idx_cred_take, idx_cred_give;
+    logic idx_cred_left;
+    logic idx_cred_load, idx_cred_clear;
+
+    // Index serializer
+    data_t  idx_ser_mask;
+    index_t idx_ser_out;
+    logic   idx_ser_last;
+    logic   idx_ser_valid;
+
+    // Last word & index tracking
+    logic     last_word;
+    bytecnt_t first_idx_byteoffs;
+    bytecnt_t last_idx_byteoffs;
+
+    // Intersector master interface
+    logic isect_mst_hs;
+    logic isect_done_set, isect_done_clear;
+    logic isect_done_q;
+
+    if (Cfg.IsectMaster) begin : gen_isect_master
+      assign isect_mst_hs = isect_mst_req_o.valid & isect_mst_rsp_i.ready;
+      // Register tracking whether done, and possibly waiting for counterpart to finish
+      assign isect_done_set   = idx_ser_last & isect_mst_hs;
+      assign isect_done_clear = isect_mst_rsp_i.done & isect_mst_hs;
+      `FFLARNC(isect_done_q, 1'b1, isect_done_set, isect_done_clear, 1'b0, clk_i, rst_ni)
+    end else begin : gen_no_isect_master
+      assign isect_mst_hs     = 1'b0;
+      assign isect_done_set   = 1'b0;
+      assign isect_done_clear = 1'b0;
+      assign isect_done_q     = 1'b0;
+    end
+
+    // Index TCDM request (read-only)
+    assign idx_req_o.q = '{addr: idx_addr, default: '0};
+
+    // Index handshaking
+    assign idx_req_o.q_valid  = cfg_indir_i & idx_cred_left & ~natit_done_i;
+    assign natit_ready_o      = cfg_indir_i & idx_cred_left & idx_rsp_i.q_ready;
+
+    // Index FIFO: stores full unserialized words.
+    fifo_v3 #(
+      .FALL_THROUGH ( 1'b0              ),
+      .DATA_WIDTH   ( DataWidth         ),
+      .DEPTH        ( Cfg.IndexCredits  )
+    ) i_idx_fifo (
+      .clk_i,
+      .rst_ni,
+      .flush_i    ( isect_done_clear  ),
+      .testmode_i ( 1'b0              ),
+      .full_o     (  ),                     // Credit counter prevents overflows
+      .empty_o    ( idx_fifo_empty    ),
+      .usage_o    (  ),
+      .data_i     ( idx_rsp_i.p.data  ),
+      .push_i     ( idx_rsp_i.p_valid ),
+      .data_o     ( idx_fifo_out      ),
+      .pop_i      ( idx_fifo_pop      )
+    );
+
+    // Credit counter that keeps track of the number of memory requests in flight
+    // to ensure that the FIFO does not overfill.
+    always_comb begin
+      idx_cred_d = idx_cred_q;
+      if (idx_cred_take & ~idx_cred_give)       idx_cred_d = idx_cred_q - 1;
+      else if (~idx_cred_take & idx_cred_give)  idx_cred_d = idx_cred_q + 1;
+    end
+
+    assign idx_cred_load  = 1'b1;
+    assign idx_cred_clear = isect_done_clear;
+    `FFLARNC(idx_cred_q, idx_cred_d, idx_cred_load, idx_cred_clear, Cfg.IndexCredits, clk_i, rst_ni)
+
+    assign idx_cred_left = (idx_cred_q != '0);
+    assign idx_cred_take = idx_req_o.q_valid & idx_rsp_i.q_ready;
+    assign idx_cred_give = idx_fifo_pop;
+
+    // The initial byte offset and byte offset of the index array bound determine
+    // the final index offset and whether an additional index word is needed.
+    assign last_word          = (idx_cred_q == Cfg.IndexCredits-1) & natit_done_i;
+    assign first_idx_byteoffs = bytecnt_t'(natit_pointer_i);
+    assign {natit_extraword_o, last_idx_byteoffs} = first_idx_byteoffs + natit_boundoffs_i;
+
+    // Move on to next FIFO word if not stalled and at last index in word.
+    assign idx_fifo_pop = idx_bytecnt_ena &
+        (last_word ? idx_bytecnt_q == last_idx_byteoffs : idx_bytecnt_next == '0);
+
+    // Serialize indices: shift left by current byte offset, then mask out index of given size.
+    assign idx_ser_mask   = ~({DataWidth{1'b1}} << (8 << cfg_size_i));
+    assign idx_ser_out    = (idx_fifo_out >> {idx_bytecnt_q, 3'b0}) & idx_ser_mask;
+    assign idx_ser_last   = last_word & idx_fifo_pop & ~isect_done_q;
+    assign idx_ser_valid  = ~idx_fifo_empty;
+
+    // Not an intersection slave: tie off slave requests
+    assign isect_slv_req_o = '{ena: '0, ready: '0};
+
+    // Output index, validity, and zero flag depend on whether we intersect
+    always_comb begin
+      if (Cfg.IsectMaster & cfg_isect_mst_i) begin
+        isect_mst_req_o = '{merge: cfg_isect_merge_i, idx: idx_ser_out,
+            done: isect_done_q, valid: (idx_ser_valid | isect_done_q) & mem_ready_i};
+        idx_isect_ena   = idx_bytecnt_ena;
+        mem_idx         = idx_isect_q;
+        mem_skip        = isect_mst_hs & isect_mst_rsp_i.skip;
+        mem_zero_o      = isect_mst_rsp_i.zero;
+        mem_done_o      = isect_mst_rsp_i.done;
+        mem_last_o      = 1'b0;
+        mem_valid_o     = isect_mst_hs & ~isect_mst_rsp_i.skip;
+      end else begin
+        isect_mst_req_o = '0;
+        idx_isect_ena   = 1'b0;
+        mem_idx         = idx_ser_out;
+        mem_skip        = 1'b0;
+        mem_zero_o      = 1'b0;
+        mem_done_o      = 1'b0;
+        mem_last_o      = idx_ser_last;
+        mem_valid_o     = idx_ser_valid;
+      end
+    end
+
   end
 
-  `FFARN(idx_cred_q, idx_cred_d, Cfg.IndexCredits, clk_i, rst_ni)
+  // Intersection index counter
+  if (Cfg.IsectMaster | Cfg.IsectSlave) begin : gen_isect_ctr
+    index_t idx_isect_d;
+    always_comb begin
+      idx_isect_d = idx_isect_q;
+      // TODO: This should *keep* its value until new job starts, but needs to be shadowable.
+      if (cfg_done_i)         idx_isect_d = '0;
+      else if (idx_isect_ena) idx_isect_d = idx_isect_q + 1;
+    end
+    `FFARN(idx_isect_q, idx_isect_d, '0, clk_i, rst_ni)
+  end else begin : gen_no_isect_ctr
+    assign idx_isect_q = '0;
+  end
 
-  assign idx_cred_left = (idx_cred_q != '0);
-  assign idx_cred_take = idx_req_o.q_valid & idx_rsp_i.q_ready;
-  assign idx_cred_give = idx_fifo_pop;
-
-  // The initial byte offset and byte offset of the index array bound determine
-  // the final index offset and whether an additional index word is needed.
-  assign last_word          = (idx_cred_q == Cfg.IndexCredits-1) & natit_done_i;
-  assign first_idx_byteoffs = bytecnt_t'(natit_pointer_i);
-  assign {natit_extraword_o, last_idx_byteoffs} = first_idx_byteoffs + natit_boundoffs_i;
-
-  // Serialize indices: shift left by current byte offset, then mask out index of given size.
-  assign idx_ser_mask = ~({DataWidth{1'b1}} << (8 << cfg_size_i));
-  assign idx_ser_out  = (idx_fifo_out >> (BytecntWidth+3)'(idx_bytecnt_q << 3)) & idx_ser_mask;
-  assign idx_ser_offs = pointer_t'(idx_ser_out) << BytecntWidth;
+  // Use external natural iterator; mask lower bits to fetch only entire, aligned words.
+  assign idx_addr = {tcdm_start_address_i[AddrWidth-1:Cfg.PointerWidth],
+      natit_pointer_i[Cfg.PointerWidth-1:BytecntWidth], {BytecntWidth{1'b0}}};
 
   // Shift and emit indices
-  assign mem_pointer_o = cfg_base_i + (idx_ser_offs << cfg_shift_i);
-  assign mem_last_o    = last_word & idx_fifo_pop;
-  assign mem_valid_o   = ~idx_fifo_empty;
+  assign mem_pointer_o = cfg_base_i + ((pointer_t'(mem_idx) << BytecntWidth) << cfg_shift_i);
 
-  // Serializer counter advancing the byte offset
+  // Byte counter advancing the byte offset
   always_comb begin
     idx_bytecnt_d = idx_bytecnt_q;
     // Set the initial byte offset (upbeat) before job starts, i.e. while done register set.
@@ -151,11 +330,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
   assign idx_bytecnt_next = idx_bytecnt_q + bytecnt_t'(1 << cfg_size_i);
 
-  // Move on to next FIFO word if not stalled and at last index in word
-  assign idx_fifo_pop = idx_bytecnt_ena &
-      (last_word ? idx_bytecnt_q == last_idx_byteoffs : idx_bytecnt_next == '0);
-
-  // Serialize whenever words are available and downstream ready
-  assign idx_bytecnt_ena  = ~idx_fifo_empty & mem_ready_i;
+  // Advance whenever pointer is available and downstream ready and no zero inject
+  assign idx_bytecnt_ena  = (mem_valid_o & mem_ready_i & ~mem_zero_o & ~mem_done_o) | mem_skip;
 
 endmodule
