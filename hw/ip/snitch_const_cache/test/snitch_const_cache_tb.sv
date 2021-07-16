@@ -4,6 +4,8 @@
 
 // Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
+parameter CacheLineWidth = 256;
+
 class icache_request #(
   parameter int unsigned AddrWidth = 48
 );
@@ -114,6 +116,70 @@ class semirand_axi_master #(
     super.new(axi);
   endfunction
 
+  task send_ars(input int n_reads);
+    automatic logic rand_success;
+    automatic ax_beat_t ar_beat = new_rand_burst(1'b1);
+    repeat (n_reads) begin
+      automatic id_t id;
+      automatic logic jump;
+      // Increment address per default, randomize sporadically
+      rand_success = std::randomize(jump) with {jump dist {1'b0 := 90, 1'b1 := 10};}; assert(rand_success);
+      if (jump) begin
+        ar_beat = new_rand_burst(1'b1);
+      end else begin
+        ar_beat.ax_addr = ar_beat.ax_addr + CacheLineWidth/8;
+      end
+      // Align address
+      ar_beat.ax_addr = ar_beat.ax_addr >> $clog2(CacheLineWidth/8) << $clog2(CacheLineWidth/8);
+      while (tot_r_flight_cnt >= MAX_READ_TXNS) begin
+        rand_wait(1, 1);
+      end
+      if (AXI_ATOPS) begin
+        // The ID must not be the same as that of any in-flight ATOP.
+        forever begin
+          cnt_sem.get();
+          rand_success = std::randomize(id); assert(rand_success);
+          if (!atop_resp_b[id] && !atop_resp_r[id]) begin
+            break;
+          end else begin
+            // The random ID does not meet the requirements, so try another ID in the next cycle.
+            cnt_sem.put();
+            rand_wait(1, 1);
+          end
+        end
+        ar_beat.ax_id = id;
+      end else begin
+        cnt_sem.get();
+      end
+      r_flight_cnt[ar_beat.ax_id]++;
+      tot_r_flight_cnt++;
+      cnt_sem.put();
+      rand_wait(AX_MIN_WAIT_CYCLES, AX_MAX_WAIT_CYCLES);
+      drv.send_ar(ar_beat);
+      if (ar_beat.ax_lock) excl_queue.push_back(ar_beat);
+    end
+  endtask
+
+  // Issue n_reads random read and n_writes random write transactions to an address range.
+  task run(input int n_reads, input int n_writes);
+    automatic logic  ar_done = 1'b0,
+                     aw_done = 1'b0;
+    fork
+      begin
+        send_ars(n_reads);
+        ar_done = 1'b1;
+      end
+      recv_rs(ar_done, aw_done);
+      begin
+        create_aws(n_writes);
+        aw_done = 1'b1;
+      end
+      send_aws(aw_done);
+      send_ws(aw_done);
+      recv_bs(aw_done);
+    join
+  endtask
+
 endclass
 
 // Inherit from the random AXI slave, but return the same data for reads from the same address.
@@ -170,7 +236,7 @@ class const_axi_slave #(
       ar_beat = ar_queue.peek();
       rand_success = std::randomize(r_beat); assert(rand_success);
       for (int i = 0; i < (DW/32); i++) begin
-        r_beat.r_data[i*32 +: 32] = ar_beat.ax_addr + (4*i);
+        r_beat.r_data[i*32 +: 32] = (ar_beat.ax_addr >> $clog2(DW/8) << $clog2(DW/8)) + (4*i);
       end
       r_beat.r_id = ar_beat.ax_id;
       if (RAND_RESP && !ar_beat.ax_atop[5])
@@ -231,7 +297,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   localparam int unsigned AxiAddrWidth = AddrWidth;
   localparam int unsigned AxiDataWidth = FILL_DW;
   localparam int unsigned AxiStrbWidth = AxiDataWidth/8;
-  localparam int unsigned AxiInIdWidth = 2;
+  localparam int unsigned AxiInIdWidth = 6;
   localparam int unsigned AxiOutIdWidth = AxiInIdWidth+1;
   localparam int unsigned AxiUserWidth = 1;
 
@@ -252,27 +318,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   // backing memory
   logic [LINE_WIDTH-1:0] memory [logic [AddrWidth-1:0]];
 
-  // localparam int unsigned IdWidthReq = $clog2(NR_FETCH_PORTS) + 1;
-  // localparam int unsigned IdWidthResp = 2*NR_FETCH_PORTS;
-
   logic  clk, rst;
-  // logic  dut_flush_valid;
-  // addr_t dut_addr;
-  // logic  dut_valid;
-  // logic [31:0] dut_data;
-  // logic  dut_ready;
-  // logic  dut_error;
-
-  // typedef struct packed {
-  //   logic [LINE_WIDTH-1:0] data;
-  //   logic error;
-  //   logic [IdWidthResp-1:0] id;
-  // } dut_in_t;
-
-  // typedef struct packed {
-  //   addr_t addr;
-  //   logic [IdWidthReq-1:0] id;
-  // } dut_out_t;
 
   typedef semirand_axi_master #(
     .AW                   ( AddrWidth    ),
@@ -281,15 +327,15 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     .UW                   ( AxiUserWidth ),
     .TA                   ( TA           ),
     .TT                   ( TT           ),
-    .MAX_READ_TXNS        ( 1            ),
-    .MAX_WRITE_TXNS       ( 1            ),
+    .MAX_READ_TXNS        ( 16           ),
+    .MAX_WRITE_TXNS       ( 4            ),
     .AX_MIN_WAIT_CYCLES   ( 0            ),
     .AX_MAX_WAIT_CYCLES   ( 0            ),
     .W_MIN_WAIT_CYCLES    ( 0            ),
     .W_MAX_WAIT_CYCLES    ( 0            ),
     .RESP_MIN_WAIT_CYCLES ( 0            ),
     .RESP_MAX_WAIT_CYCLES ( 1            ),
-    .AXI_MAX_BURST_LEN    ( 1            ),
+    .AXI_MAX_BURST_LEN    ( 4            ),
     .TRAFFIC_SHAPING      ( 0            ),
     .AXI_EXCLS            ( 1'b0         ),
     .AXI_ATOPS            ( 1'b0         ),
@@ -374,14 +420,6 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     .axi_mst_rsp_i ( axi_slv_resp        )
   );
 
-  // always_ff @(posedge clk or negedge rst) begin
-  //   if(~rst) begin
-  //      <= 0;
-  //   end else begin
-  //      <= ;
-  //   end
-  // end
-
   task static cycle_start;
     #TT;
   endtask
@@ -390,26 +428,23 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     @(posedge clk);
   endtask
 
-  task static reset;
-    // dut_flush_valid = '0;
-    // dut_addr = '0;
-    // dut_valid = '0;
-  endtask
-
   initial begin
     automatic logic rand_success;
 
-    // Initialize memory region of random axi master
-    mst_intf.add_memory_region(CachedRegionStart, CachedRegionEnd, axi_pkg::WTHRU_RALLOCATE);
+    // Initialize memory region of random axi master to only fetch from two lines
+    mst_intf.add_memory_region(CachedRegionStart, CachedRegionStart+LINE_WIDTH/8*2, axi_pkg::WTHRU_RALLOCATE);
 
     // Reset
-    reset();
     mst_intf.reset();
     @(negedge rst);
+    #1000ns;
 
     mst_intf.run(1000, 0);
 
+    mst_intf.add_memory_region(CachedRegionStart, CachedRegionEnd, axi_pkg::WTHRU_RALLOCATE);
     #1000ns;
+    mst_intf.run(1000, 0);
+
     $finish();
   end
 
@@ -436,12 +471,10 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
       // AR channel
       if (axi_mst_req.ar_valid && axi_mst_resp.ar_ready) begin
         ar_queues[axi_mst_req.ar.id].push_back(axi_mst_req.ar);
-        // $display("Push AR (%0t): Addr=%x ID=%d", $time, axi_mst_req.ar.addr, axi_mst_req.ar.id);
       end
       // R channel
       if (axi_mst_resp.r_valid && axi_mst_req.r_ready) begin
         r_queues[axi_mst_resp.r.id].push_back(axi_mst_resp.r);
-        // $display("Push  R (%0t): Data=%x ID=%d", $time, axi_mst_resp.r.data, axi_mst_resp.r.id);
       end
     end
   end
@@ -449,6 +482,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   initial begin
     automatic axi_mst_ar_chan_t  ar_beat;
     automatic axi_mst_r_chan_t   r_beat;
+    automatic axi_addr_t         addr;
     automatic axi_addr_t         aligned_addr;
     automatic axi_data_t         exp_data;
     automatic int unsigned       no_r_beat[NoIds];
@@ -461,76 +495,35 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
       for (int unsigned i = 0; i < NoIds; i++) begin
         while (ar_queues[i].size() != 0 && r_queues[i].size() != 0) begin
           ar_beat = ar_queues[i][0];
-          r_beat  = r_queues[i].pop_front();
-          // Check data
-          aligned_addr = ar_beat.addr >> $clog2(AxiDataWidth/8) << $clog2(AxiDataWidth/8);
-          for (int i = 0; i < (AxiDataWidth/32); i++) begin
-            exp_data[i*32 +: 32] = aligned_addr + (4*i);
-          end
-          if (r_beat.data != exp_data) begin // TODO: Only works for DW = AW and non-bursts
-            $display("Error (%0t): Read returned wrong data. Addr=%x Aqc=%x Exp=%x", $time, ar_beat.addr, r_beat.data, exp_data);
-          end
+          addr = ar_beat.addr;
+          for (int unsigned j = 0; j <= ar_beat.len; j++) begin
+            wait (r_queues[i].size() > 0);
+            r_beat  = r_queues[i].pop_front();
+            // Check data
+            aligned_addr = addr >> $clog2(AxiDataWidth/8) << $clog2(AxiDataWidth/8);
+            for (int i = 0; i < (AxiDataWidth/32); i++) begin
+              exp_data[i*32 +: 32] = aligned_addr + (4*i);
+            end
+            if (r_beat.data != exp_data) begin // TODO: Only works for DW = AW and non-bursts
+              $display("Error (%0t): Read returned wrong data. Addr=0x%x, Beat=%d, Size=%d Aqc=0x%x Exp=0x%x", $time, ar_beat.addr, no_r_beat[i], ar_beat.size, r_beat.data, exp_data);
+            end
 
-          if (r_beat.last && !(ar_beat.len == no_r_beat[i])) begin
-            $display("ERROR> Last flag was not expected!!!!!!!!!!!!!");
-          end
-          no_r_beat[i]++;
-          // pop the queue if it is the last flag
-          if (r_beat.last) begin
-            ar_beat = ar_queues[i].pop_front();
-            no_r_beat[i] = 0;
+            if (r_beat.last && !(ar_beat.len == no_r_beat[i])) begin
+              $display("ERROR> Last flag was not expected!!!!!!!!!!!!!");
+            end
+            no_r_beat[i]++;
+            // pop the queue if it is the last flag
+            if (r_beat.last) begin
+              ar_beat = ar_queues[i].pop_front();
+              no_r_beat[i] = 0;
+            end else begin
+              addr = addr + (1 << ar_beat.size);
+            end
           end
         end
       end
     end
   end
-
-
-  //     wait (this.ar_sample[id].size() > 0);
-
-
-
-  //   forever begin
-  //       wait (this.ar_sample[id].size() > 0);
-  //       ar_beat = this.ar_sample[id].pop_front();
-  //       // This scoreborad only supports this type of burst:
-  //       assert (ar_beat.ax_burst == axi_pkg::BURST_INCR || ar_beat.ax_len == '0) else
-  //           $warning("Not supported AR burst: BURST: %0h.", ar_beat.ax_burst);
-
-  //       for (int unsigned i = 0; i <= ar_beat.ax_len; i++) begin
-  //         wait (this.r_sample[id].size() > 0);
-  //         r_beat = this.r_sample[id].pop_front();
-  //         beat_address = axi_pkg::beat_addr(ar_beat.ax_addr, ar_beat.ax_size, ar_beat.ax_len,
-  //             ar_beat.ax_burst, i);
-  //         beat_address = axi_pkg::aligned_addr(beat_address, ar_beat.ax_size);
-  //         bus_address  = axi_pkg::aligned_addr(beat_address, BUS_SIZE);
-  //         if (!this.memory_q.exists(bus_address)) begin
-  //           for (int unsigned j = 0; j < axi_pkg::num_bytes(BUS_SIZE); j++) begin
-  //             this.memory_q[bus_address+j].push_back(8'bxxxxxxxx);
-  //           end
-  //         end
-  //         // Assert that the correct data is read.
-  //         if (this.check_en[ReadCheck]) begin
-  //           for (int unsigned j = 0; j < axi_pkg::num_bytes(ar_beat.ax_size); j++) begin
-  //             idx_data  = 8*BUS_SIZE'(beat_address+j);
-  //             act_data  = r_beat.r_data[idx_data+:8];
-  //             exp_data  = this.memory_q[beat_address+j];
-  //             tst_data  = exp_data.find with (item === 8'hxx || item === act_data);
-  //             assert (tst_data.size() > 0) else begin
-  //               $warning("Unexpected RData ID: %0h Addr: %0h Byte Idx: %0h Exp Data : %0h Data: %h",
-  //               r_beat.r_id, beat_address+j, idx_data, exp_data, act_data);
-  //             end
-  //           end
-  //         end
-  //       end
-  //       if (this.check_en[RRespCheck]) begin
-  //         assert (r_beat.r_id   == id);
-  //         assert (r_beat.r_resp == axi_pkg::RESP_OKAY);
-  //         assert (r_beat.r_last);
-  //       end
-  //     end
-
-
 
   ////////////////////////
   // Debug              //
@@ -592,174 +585,6 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     .r_valid_i  ( axi_slv_resp.r_valid  ),
     .r_ready_i  ( axi_slv_req.r_ready   )
   );
-  // /// Drive DUT request side.
-  // task static send_req (
-  //   /// Request instruction at address
-  //   input addr_t addr,
-  //   /// Flush the L0 cache.
-  //   input logic flush,
-  //   /// Obtain the instructions.
-  //   output logic [31:0] data
-  // );
-  //     dut_valid       <= #TA ~flush;
-  //     dut_addr        <= #TA addr;
-  //     dut_flush_valid <= #TA flush;
-  //     cycle_start();
-  //     while (!flush && dut_ready != 1) begin cycle_end(); cycle_start(); end
-  //     data      <= dut_data;
-  //     cycle_end();
-  //     dut_valid       <= 0;
-  //     dut_addr        <= 0;
-  //     dut_flush_valid <= 0;
-  // endtask
-
-  // localparam int NrDirectedRequests = 100_000;
-  // // Request Port
-  // initial begin
-  //   automatic int unsigned stall_cycles;
-  //   automatic logic [31:0] data;
-  //   automatic logic [31:0] golden;
-  //   automatic addr_t addr, immediate;
-  //   automatic icache_request #(.AddrWidth (AddrWidth)) req = new;
-  //   automatic int requests = 0;
-  //   reset();
-  //   @(negedge rst);
-  //   req.addr = 0;
-  //   req.flush = 0;
-  //   forever begin
-  //     stall_cycles = $urandom_range(0, 3);
-  //     if (requests == 0) $info("Starting Directed Sequence of %d Requests", NrDirectedRequests);
-  //     if (requests == NrDirectedRequests) $info("Starting Randomized Sequence");
-  //     // Send request
-  //     send_req(req.addr, req.flush, data);
-  //     repeat (stall_cycles) @(posedge clk);
-  //     // Check Response
-  //     if (!req.flush) begin
-  //       addr = req.addr >> CFG.LINE_ALIGN << CFG.LINE_ALIGN;
-  //       assert(memory.exists(addr)) else $fatal(1, "Address has not been allocated.");
-  //       golden = memory[addr][req.addr[CFG.LINE_ALIGN-1:0]*8+:32];
-  //       assert(golden === data) else $fatal(1, "Got: %h Expected: %h", data, golden);
-  //     end
-  //     // Next request preparation
-  //     // Directed Sequence
-  //     if (requests < NrDirectedRequests) begin
-  //         // Re-randomize requests every 100 cycles
-  //         // to pull out of loops.
-  //         if (requests % 100 == 0) begin
-  //           assert(std::randomize(addr));
-  //           req.addr = addr >> 2 <<2;
-  //           req.flush = 1;
-  //         end else req.flush = 0;
-  //         casez (data)
-  //           riscv_instr::BEQ,
-  //           riscv_instr::BNE,
-  //           riscv_instr::BLT,
-  //           riscv_instr::BGE,
-  //           riscv_instr::BLTU,
-  //           riscv_instr::BGEU: begin
-  //             if (data[31]) immediate = $signed({data[31], data[7], data[30:25], data[11:8], 1'b0});
-  //             else immediate = 4;
-  //           end
-  //           riscv_instr::JAL: begin
-  //             immediate = $signed({data[20], data[19:12], data[20], data[30:21], 1'b0});
-  //           end
-  //           default: immediate = 4;
-  //         endcase
-  //         req.addr += immediate;
-  //     // Random Sequence
-  //     end else begin
-  //       assert(req.randomize());
-  //     end
-  //     requests++;
-  //     if (requests > 2*NrDirectedRequests) $finish();
-  //   end
-  // end
-
-  // localparam int unsigned RequestTimeout = 100;
-  // // make sure that we eventually make progress (i.e., a timeout)
-  // `ASSERT(RequestProgress, dut_valid |-> ##[0:RequestTimeout] dut_ready, clk, rst)
-
-  // // Response Drivers
-  // mailbox #(dut_out_t) addr_mbx [2];
-  // semaphore response_lock = new (1);
-
-  // initial begin
-  //   automatic int unsigned stall_cycles;
-  //   automatic dut_out_t dut_out;
-  //   for (int i = 0; i < 2**IdWidthReq; i++)
-  //     addr_mbx [i] = new();
-  //   out_driver.reset_out();
-  //   @(negedge rst);
-  //   repeat (5) @(posedge clk);
-  //   forever begin
-  //     stall_cycles = $urandom_range(0, 5);
-  //     repeat (stall_cycles) @(posedge clk);
-  //     out_driver.recv(dut_out);
-  //     addr_mbx[dut_out.id].put(dut_out);
-  //     // $info("Requesting from Address: %h, ID: %d", dut_out.addr, dut_out.id);
-  //   end
-  // end
-
-  // initial begin
-  //   in_driver.reset_in();
-  //   @(negedge rst);
-  //   repeat (5) @(posedge clk);
-
-  //   // I couldn't find any better way to describing this than
-  //   // manual unrolling. Ugly as fuck.
-  //   fork
-  //     forever begin
-  //       automatic int unsigned stall_cycles;
-  //       automatic dut_out_t dut_out;
-  //       automatic dut_in_t send_data;
-  //       automatic riscv_inst rand_data = new;
-  //       automatic addr_t addr;
-  //       addr_mbx[0].get(dut_out);
-  //       stall_cycles = $urandom_range(1, 10);
-  //       repeat (stall_cycles) @(posedge clk);
-
-  //       send_data.error = 1'b0;
-  //       send_data.id = 0;
-  //       addr = dut_out.addr >> CFG.LINE_ALIGN << CFG.LINE_ALIGN;
-  //       if (!memory.exists(dut_out.addr)) begin
-  //         for (int i = 0; i < CFG.LINE_WIDTH/32; i++) begin
-  //           assert(rand_data.randomize());
-  //           memory[addr][i*32+:32] = rand_data.inst;
-  //         end
-  //       end
-  //       if (DEBUG) $info("Response for Address: %h, ID: 0, Data: %h", dut_out.addr, memory[addr]);
-  //       send_data.data = memory[addr];
-  //       response_lock.get();
-  //       in_driver.send(send_data);
-  //       response_lock.put();
-  //     end
-  //     forever begin
-  //       automatic int unsigned stall_cycles;
-  //       automatic dut_out_t dut_out;
-  //       automatic dut_in_t send_data;
-  //       automatic riscv_inst rand_data = new;
-  //       automatic addr_t addr;
-  //       addr_mbx[1].get(dut_out);
-  //       stall_cycles = $urandom_range(1, 10);
-  //       repeat (stall_cycles) @(posedge clk);
-
-  //       send_data.error = 1'b0;
-  //       send_data.id = 1;
-  //       addr = dut_out.addr >> CFG.LINE_ALIGN << CFG.LINE_ALIGN;
-  //       if (!memory.exists(dut_out.addr)) begin
-  //         for (int i = 0; i < CFG.LINE_WIDTH/32; i++) begin
-  //           assert(rand_data.randomize());
-  //           memory[addr][i*32+:32] = rand_data.inst;
-  //         end
-  //       end
-  //       if (DEBUG) $info("Response for Address: %h, ID: 1, Data: %h", dut_out.addr, memory[addr]);
-  //       send_data.data = memory[addr];
-  //       response_lock.get();
-  //       in_driver.send(send_data);
-  //       response_lock.put();
-  //     end
-  //   join_none
-  // end
 
   // Clock generation.
   initial begin
