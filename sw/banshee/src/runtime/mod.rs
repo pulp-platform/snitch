@@ -37,7 +37,7 @@ include!("common.rs");
 /// These are the contents of the `jit.ll` file, and should contain any opaque
 /// type declarations and function declarations needed by the binary
 /// translation.
-pub static JIT_INITIAL: &'static [u8] = include_bytes!("jit.ll");
+pub static JIT_INITIAL: &'static str = include_str!("jit.ll");
 
 /// The compiled version of `jit.rs`.
 ///

@@ -64,42 +64,10 @@ unsafe impl std::marker::Sync for Engine {}
 impl Engine {
     /// Create a new execution engine.
     pub fn new(context: LLVMContextRef) -> Self {
-        // Create a new LLVM module ot compile into.
-        let module = unsafe {
-            // Wrap the runtime IR up in an LLVM memory buffer.
-            let mut initial_ir = crate::runtime::JIT_INITIAL.to_vec();
-            initial_ir.push(0); // somehow this is needed despite RequireNullTerminated=0 below
-            let initial_buf = LLVMCreateMemoryBufferWithMemoryRange(
-                initial_ir.as_ptr() as *const _,
-                initial_ir.len() - 1,
-                b"jit.ll\0".as_ptr() as *const _,
-                0,
-            );
-
-            // Parse the module.
-            let mut module = std::mem::MaybeUninit::uninit().assume_init();
-            let mut errmsg = std::mem::MaybeUninit::zeroed().assume_init();
-            if LLVMParseIRInContext(context, initial_buf, &mut module, &mut errmsg) != 0
-                || !errmsg.is_null()
-            {
-                error!(
-                    "Cannot parse `jit.ll` IR: {:?}",
-                    std::ffi::CStr::from_ptr(errmsg)
-                );
-            }
-
-            // let module =
-            //     LLVMModuleCreateWithNameInContext(b"banshee\0".as_ptr() as *const _, context);
-            // LLVMSetDataLayout(module, b"i8:8-i16:16-i32:32-i64:64\0".as_ptr() as *const _);
-            module
-        };
-
-        let modules = vec![module];
-
         // Wrap everything up in an engine struct.
         Self {
             context,
-            modules,
+            modules: Default::default(),
             exit_code: Default::default(),
             had_error: Default::default(),
             opt_llvm: true,
@@ -118,85 +86,117 @@ impl Engine {
 
     /// Create a Module for each cluster
     pub fn create_modules(&mut self) {
-        self.modules.resize(self.num_clusters, self.modules[0]);
+        for i in 0..self.num_clusters {
+            let module = unsafe {
+                // Wrap the runtime IR up in an LLVM memory buffer.
+                let mut initial_ir = crate::runtime::JIT_INITIAL
+                    .replace("Cpu", format!("{}{}", "Cpu", i.to_string()).as_str())
+                    .as_bytes()
+                    .to_vec();
+                initial_ir.push(0); // somehow this is needed despite RequireNullTerminated=0 below
+                let initial_buf = LLVMCreateMemoryBufferWithMemoryRange(
+                    initial_ir.as_ptr() as *const _,
+                    initial_ir.len() - 1,
+                    b"jit.ll\0".as_ptr() as *const _,
+                    0,
+                );
+
+                // Parse the module.
+                let mut module = std::mem::MaybeUninit::uninit().assume_init();
+                let mut errmsg = std::mem::MaybeUninit::zeroed().assume_init();
+                if LLVMParseIRInContext(self.context, initial_buf, &mut module, &mut errmsg) != 0
+                    || !errmsg.is_null()
+                {
+                    error!(
+                        "Cannot parse `jit.ll` IR: {:?}",
+                        std::ffi::CStr::from_ptr(errmsg)
+                    );
+                }
+
+                // let module =
+                //     LLVMModuleCreateWithNameInContext(b"banshee\0".as_ptr() as *const _, context);
+                // LLVMSetDataLayout(module, b"i8:8-i16:16-i32:32-i64:64\0".as_ptr() as *const _);
+                module
+            };
+
+            self.modules.push(module);
+        }
     }
 
     /// Translate an ELF binary.
     pub fn translate_elf(&self, elf: &elf::File) -> Result<()> {
-        //TODO
-        let mut tran = ElfTranslator::new(elf, self, 0);
+        for i in 0..self.num_clusters {
+            let mut tran = ElfTranslator::new(elf, self, i);
 
-        // Dump the contents of the binary.
-        debug!("Loading ELF binary");
-        for section in tran.sections() {
-            debug!(
-                "Loading ELF section `{}` from 0x{:x} to 0x{:x}",
-                section.shdr.name,
-                section.shdr.addr,
-                section.shdr.addr + section.shdr.size
-            );
-            for (addr, inst) in tran.instructions(section) {
-                trace!("  - 0x{:x}: {}", addr, inst);
-            }
-        }
-
-        // Estimate the branch target addresses.
-        tran.update_target_addrs();
-
-        // Translate the binary.
-        tran.translate()?;
-
-        // Load and link the LLVM IR for the `jit.rs` runtime library.
-        unsafe {
-            let mut runtime_ir = crate::runtime::JIT_GENERATED.to_vec();
-            runtime_ir.push(0); // somehow this is needed despite RequireNullTerminated=0 below
-            let runtime_buf = LLVMCreateMemoryBufferWithMemoryRange(
-                runtime_ir.as_ptr() as *const _,
-                runtime_ir.len() - 1,
-                b"jit.rs\0".as_ptr() as *const _,
-                0,
-            );
-
-            // Parse the module.
-            let mut runtime = std::mem::MaybeUninit::uninit().assume_init();
-            let mut errmsg = std::mem::MaybeUninit::zeroed().assume_init();
-            if LLVMParseIRInContext(self.context, runtime_buf, &mut runtime, &mut errmsg) != 0
-                || !errmsg.is_null()
-            {
-                error!(
-                    "Cannot parse `jit.rs` IR: {:?}",
-                    std::ffi::CStr::from_ptr(errmsg)
+            // Dump the contents of the binary.
+            debug!("Loading ELF binary");
+            for section in tran.sections() {
+                debug!(
+                    "Loading ELF section `{}` from 0x{:x} to 0x{:x}",
+                    section.shdr.name,
+                    section.shdr.addr,
+                    section.shdr.addr + section.shdr.size
                 );
+                for (addr, inst) in tran.instructions(section) {
+                    trace!("  - 0x{:x}: {}", addr, inst);
+                }
             }
 
-            // Link the runtime module into the translated binary module.
-            //TODO
-            LLVMLinkModules2(self.modules[0], runtime);
-        };
+            // Estimate the branch target addresses.
+            tran.update_target_addrs();
 
-        // Verify that nothing is broken at this point.
-        //TODO
-        let failed = unsafe {
-            LLVMVerifyModule(
-                self.modules[0],
-                LLVMVerifierFailureAction::LLVMPrintMessageAction,
-                std::ptr::null_mut(),
-            )
-        };
-        //TODO
-        if failed != 0 {
-            let path = "/tmp/banshee_failed.ll";
+            // Translate the binary.
+            tran.translate()?;
+
+            // Load and link the LLVM IR for the `jit.rs` runtime library.
             unsafe {
-                LLVMPrintModuleToFile(
-                    self.modules[0],
-                    format!("{}\0", path).as_ptr() as *const _,
+                let mut runtime_ir = crate::runtime::JIT_GENERATED.to_vec();
+                runtime_ir.push(0); // somehow this is needed despite RequireNullTerminated=0 below
+                let runtime_buf = LLVMCreateMemoryBufferWithMemoryRange(
+                    runtime_ir.as_ptr() as *const _,
+                    runtime_ir.len() - 1,
+                    b"jit.rs\0".as_ptr() as *const _,
+                    0,
+                );
+
+                // Parse the module.
+                let mut runtime = std::mem::MaybeUninit::uninit().assume_init();
+                let mut errmsg = std::mem::MaybeUninit::zeroed().assume_init();
+                if LLVMParseIRInContext(self.context, runtime_buf, &mut runtime, &mut errmsg) != 0
+                    || !errmsg.is_null()
+                {
+                    error!(
+                        "Cannot parse `jit.rs` IR: {:?}",
+                        std::ffi::CStr::from_ptr(errmsg)
+                    );
+                }
+
+                // Link the runtime module into the translated binary module.
+                LLVMLinkModules2(self.modules[i], runtime);
+            };
+
+            // Verify that nothing is broken at this point.
+            let failed = unsafe {
+                LLVMVerifyModule(
+                    self.modules[i],
+                    LLVMVerifierFailureAction::LLVMPrintMessageAction,
                     std::ptr::null_mut(),
+                )
+            };
+            if failed != 0 {
+                let path = "/tmp/banshee_failed.ll";
+                unsafe {
+                    LLVMPrintModuleToFile(
+                        self.modules[i],
+                        format!("{}\0", path).as_ptr() as *const _,
+                        std::ptr::null_mut(),
+                    );
+                }
+                bail!(
+                    "LLVM module did not pass verification (failing IR written to {})",
+                    path
                 );
             }
-            bail!(
-                "LLVM module did not pass verification (failing IR written to {})",
-                path
-            );
         }
 
         // Optimize the translation.
@@ -235,69 +235,68 @@ impl Engine {
         debug!("Optimizing IR");
 
         // Create the pass managers.
-        //TODO
-        let func_passes = LLVMCreateFunctionPassManagerForModule(self.modules[0]);
-        let module_passes = LLVMCreatePassManager();
+        for i in 0..self.num_clusters {
+            let func_passes = LLVMCreateFunctionPassManagerForModule(self.modules[i]);
+            let module_passes = LLVMCreatePassManager();
 
-        // Determine the target machine we are running on.
-        let tm_triple = LLVMGetDefaultTargetTriple();
-        let mut tm_target = std::ptr::null_mut();
-        let mut tm_target_msg = std::ptr::null_mut();
-        assert_eq!(
-            LLVMGetTargetFromTriple(tm_triple, &mut tm_target, &mut tm_target_msg),
-            0
-        );
-        let tm_cpu = LLVMGetHostCPUName();
-        let tm_features = LLVMGetHostCPUFeatures();
-        let tm = LLVMCreateTargetMachine(
-            tm_target,
-            tm_triple,
-            tm_cpu,
-            tm_features,
-            LLVMCodeGenOptLevel::LLVMCodeGenLevelAggressive,
-            LLVMRelocMode::LLVMRelocDefault,
-            LLVMCodeModel::LLVMCodeModelJITDefault,
-        );
-        LLVMDisposeMessage(tm_triple);
-        LLVMDisposeMessage(tm_cpu);
-        LLVMDisposeMessage(tm_features);
+            // Determine the target machine we are running on.
+            let tm_triple = LLVMGetDefaultTargetTriple();
+            let mut tm_target = std::ptr::null_mut();
+            let mut tm_target_msg = std::ptr::null_mut();
+            assert_eq!(
+                LLVMGetTargetFromTriple(tm_triple, &mut tm_target, &mut tm_target_msg),
+                0
+            );
+            let tm_cpu = LLVMGetHostCPUName();
+            let tm_features = LLVMGetHostCPUFeatures();
+            let tm = LLVMCreateTargetMachine(
+                tm_target,
+                tm_triple,
+                tm_cpu,
+                tm_features,
+                LLVMCodeGenOptLevel::LLVMCodeGenLevelAggressive,
+                LLVMRelocMode::LLVMRelocDefault,
+                LLVMCodeModel::LLVMCodeModelJITDefault,
+            );
+            LLVMDisposeMessage(tm_triple);
+            LLVMDisposeMessage(tm_cpu);
+            LLVMDisposeMessage(tm_features);
 
-        // Create a pass manager builder.
-        let builder = LLVMPassManagerBuilderCreate();
-        LLVMPassManagerBuilderSetOptLevel(builder, 3);
-        LLVMPassManagerBuilderSetSizeLevel(builder, 0);
-        LLVMPassManagerBuilderUseInlinerWithThreshold(builder, 275);
+            // Create a pass manager builder.
+            let builder = LLVMPassManagerBuilderCreate();
+            LLVMPassManagerBuilderSetOptLevel(builder, 3);
+            LLVMPassManagerBuilderSetSizeLevel(builder, 0);
+            LLVMPassManagerBuilderUseInlinerWithThreshold(builder, 275);
 
-        LLVMPassManagerBuilderPopulateFunctionPassManager(builder, func_passes);
-        LLVMAddAnalysisPasses(tm, module_passes);
-        LLVMPassManagerBuilderPopulateLTOPassManager(builder, module_passes, 0, 1);
-        LLVMPassManagerBuilderPopulateModulePassManager(builder, module_passes);
+            LLVMPassManagerBuilderPopulateFunctionPassManager(builder, func_passes);
+            LLVMAddAnalysisPasses(tm, module_passes);
+            LLVMPassManagerBuilderPopulateLTOPassManager(builder, module_passes, 0, 1);
+            LLVMPassManagerBuilderPopulateModulePassManager(builder, module_passes);
 
-        // Create and run the function pass manager.
-        LLVMInitializeFunctionPassManager(func_passes);
-        //TODO
-        let mut func = LLVMGetFirstFunction(self.modules[0]);
-        while !func.is_null() {
-            let mut name_len = 0;
-            let name = LLVMGetValueName2(func, &mut name_len);
-            let name = std::slice::from_raw_parts(name as *const u8, name_len as usize);
-            let name = std::str::from_utf8_unchecked(name);
-            trace!("  - Optimizing function {}", name);
-            LLVMRunFunctionPassManager(func_passes, func);
-            func = LLVMGetNextFunction(func);
+            // Create and run the function pass manager.
+            LLVMInitializeFunctionPassManager(func_passes);
+            let mut func = LLVMGetFirstFunction(self.modules[i]);
+            while !func.is_null() {
+                let mut name_len = 0;
+                let name = LLVMGetValueName2(func, &mut name_len);
+                let name = std::slice::from_raw_parts(name as *const u8, name_len as usize);
+                let name = std::str::from_utf8_unchecked(name);
+                trace!("  - Optimizing function {}", name);
+                LLVMRunFunctionPassManager(func_passes, func);
+                func = LLVMGetNextFunction(func);
+            }
+            LLVMFinalizeFunctionPassManager(func_passes);
+
+            // Create and run the module pass manager.
+            trace!("  - Optimizing module");
+            LLVMRunPassManager(module_passes, self.modules[i]);
+
+            // Clean up.
+            LLVMPassManagerBuilderDispose(builder);
+            LLVMDisposePassManager(func_passes);
+            LLVMDisposePassManager(module_passes);
+            LLVMDisposeTargetMachine(tm);
         }
-        LLVMFinalizeFunctionPassManager(func_passes);
-
-        // Create and run the module pass manager.
-        trace!("  - Optimizing module");
-        //TODO
-        LLVMRunPassManager(module_passes, self.modules[0]);
-
-        // Clean up.
-        LLVMPassManagerBuilderDispose(builder);
-        LLVMDisposePassManager(func_passes);
-        LLVMDisposePassManager(module_passes);
-        LLVMDisposeTargetMachine(tm);
     }
 
     pub fn init_periphs(&mut self) {
@@ -314,23 +313,27 @@ impl Engine {
     unsafe fn execute_inner<'b>(&'b self) -> Result<u32> {
         // Create a JIT compiler for the module (and consumes it).
         debug!("Creating JIT compiler for translated code");
-        let mut ee = std::mem::MaybeUninit::uninit().assume_init();
-        let mut errmsg = std::mem::MaybeUninit::zeroed().assume_init();
-        let optlevel = if self.opt_jit { 3 } else { 0 };
-        //TODO
-        LLVMCreateJITCompilerForModule(&mut ee, self.modules[0], optlevel, &mut errmsg);
-        if !errmsg.is_null() {
-            bail!(
-                "Cannot create JIT compiler: {:?}",
-                std::ffi::CStr::from_ptr(errmsg)
-            )
-        }
+        let execs: Vec<_> = (0..self.num_clusters)
+            .map(|i| {
+                let mut ee = std::mem::MaybeUninit::uninit().assume_init();
+                let mut errmsg = std::mem::MaybeUninit::zeroed().assume_init();
+                let optlevel = if self.opt_jit { 3 } else { 0 };
+                LLVMCreateJITCompilerForModule(&mut ee, self.modules[i], optlevel, &mut errmsg);
+                if !errmsg.is_null() {
+                    panic!(
+                        "Cannot create JIT compiler: {:?}",
+                        std::ffi::CStr::from_ptr(errmsg)
+                    )
+                }
 
-        // Lookup the function which executes the binary.
-        let exec: for<'c> extern "C" fn(&'c Cpu<'b, 'c>) = std::mem::transmute(
-            LLVMGetFunctionAddress(ee, b"execute_binary\0".as_ptr() as *const _),
-        );
-        debug!("Translated binary is at {:?}", exec as *const i8);
+                // Lookup the function which executes the binary.
+                let exec: for<'c> extern "C" fn(&'c Cpu<'b, 'c>) = std::mem::transmute(
+                    LLVMGetFunctionAddress(ee, b"execute_binary\0".as_ptr() as *const _),
+                );
+                debug!("Translated binary is at {:?}", exec as *const i8);
+                exec
+            })
+            .collect();
 
         // Allocate some TCDM memories.
         let tcdms: Vec<_> = (0..self.num_clusters)
@@ -397,6 +400,7 @@ impl Engine {
         let t0 = std::time::Instant::now();
         crossbeam_utils::thread::scope(|s| {
             for cpu in &cpus {
+                let exec = execs[cpu.cluster_id];
                 s.spawn(move |_| {
                     exec(cpu);
                     debug!("Hart {} finished", cpu.hartid);

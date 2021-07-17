@@ -349,8 +349,9 @@ impl<'a> ElfTranslator<'a> {
         // Assemble the struct type which holds the CPU state.
         let state_type = LLVMGetTypeByName(
             self.engine.modules[self.cluster_id],
-            "Cpu\0".as_ptr() as *const _,
+            format!("{}{}{}", "Cpu", self.cluster_id.to_string(), "\0").as_ptr() as *const _,
         );
+
         let state_ptr_type = LLVMPointerType(state_type, 0u32);
 
         // Emit the function which will run the binary.
