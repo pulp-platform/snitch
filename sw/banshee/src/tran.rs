@@ -191,6 +191,18 @@ impl<'a> ElfTranslator<'a> {
             );
             (di_builder, di_cu, di_file)
         };
+        let tcdm_ext_range: Vec<_> = engine.config.memory[cluster_id]
+            .ext_tcdm
+            .iter()
+            .map(|x| {
+                (
+                    x.cluster,
+                    x.start,
+                    x.start + engine.config.memory[x.cluster as usize].tcdm.end
+                        - engine.config.memory[x.cluster as usize].tcdm.start,
+                )
+            })
+            .collect();
 
         Self {
             elf,
@@ -205,8 +217,7 @@ impl<'a> ElfTranslator<'a> {
             latency: engine.latency,
             tcdm_start: engine.config.memory[cluster_id].tcdm.start,
             tcdm_end: engine.config.memory[cluster_id].tcdm.end,
-            //TODO: hardcoded
-            tcdm_ext_range: vec![(0, 0x30000, 0x40000)],
+            tcdm_ext_range,
             cluster_id,
         }
     }
@@ -2907,14 +2918,14 @@ impl<'a> InstructionTranslator<'a> {
 
         // Check if the address is in the TCDM, and emit a fast access.
         let (is_tcdm, tcdm_ptr) = self.emit_tcdm_check(addr);
-        let bb_tcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        let bb_notcdm = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_tcdm);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_notcdm);
-        LLVMBuildCondBr(self.builder, is_tcdm, bb_tcdm, bb_notcdm);
+        let mut bb_yes = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let mut bb_no = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_yes);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_no);
+        LLVMBuildCondBr(self.builder, is_tcdm, bb_yes, bb_no);
 
         // Emit the TCDM fast case.
-        LLVMPositionBuilderAtEnd(self.builder, bb_tcdm);
+        LLVMPositionBuilderAtEnd(self.builder, bb_yes);
         let ty = LLVMIntType(8 << size);
         {
             let pty = LLVMPointerType(ty, 0);
@@ -2923,7 +2934,29 @@ impl<'a> InstructionTranslator<'a> {
             LLVMBuildStore(self.builder, value, tcdm_ptr);
             LLVMBuildBr(self.builder, bb_end);
         }
-        LLVMPositionBuilderAtEnd(self.builder, bb_notcdm);
+
+        // Check if the addess is in one of the external TCDMs, and emit a fast access
+        for x in &self.section.elf.tcdm_ext_range {
+            LLVMPositionBuilderAtEnd(self.builder, bb_no);
+            let (is_tcdm, tcdm_ptr) = self.emit_tcdm_ext_check(addr, *x);
+            bb_yes = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+            bb_no = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+            LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_yes);
+            LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_no);
+            LLVMBuildCondBr(self.builder, is_tcdm, bb_yes, bb_no);
+
+            // Emit the external TCDM fast case.
+            LLVMPositionBuilderAtEnd(self.builder, bb_yes);
+            {
+                let pty = LLVMPointerType(ty, 0);
+                let value = LLVMBuildTrunc(self.builder, value, ty, NONAME);
+                let tcdm_ptr = LLVMBuildBitCast(self.builder, tcdm_ptr, pty, NONAME);
+                LLVMBuildStore(self.builder, value, tcdm_ptr);
+                LLVMBuildBr(self.builder, bb_end);
+            }
+        }
+
+        LLVMPositionBuilderAtEnd(self.builder, bb_no);
 
         // Align the address.
         let aligned_addr = LLVMBuildAnd(
@@ -3015,6 +3048,7 @@ impl<'a> InstructionTranslator<'a> {
         (in_range, ptr)
     }
 
+    /// Emit the code to check if an address is within the external TCDM config range.
     unsafe fn emit_tcdm_ext_check(
         &self,
         addr: LLVMValueRef,

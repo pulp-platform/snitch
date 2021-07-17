@@ -4,18 +4,20 @@
 
 ---
 memory:
-  tcdm:
-    start: 0x0
-    end: 0x100000
-    latency: 5
-  periphs:
-    start: 0x100000
-    end: 0x100040
-    latency: 5
-    callbacks:
-        - name: periph_counter
-          size: 64
-  dram:
-    start: 0x80000000
-    end: 0x80010000
-    latency: 10
+    -
+        tcdm:
+          start: 0x0
+          end: 0x100000
+          latency: 5
+        periphs:
+          start: 0x100000
+          end: 0x100040
+          latency: 5
+          callbacks:
+              - name: periph_counter
+                size: 64
+        dram:
+          start: 0x80000000
+          end: 0x80010000
+          latency: 10
+        ext_tcdm: []
