@@ -358,6 +358,8 @@ impl Engine {
             .collect();
 
         // External TCDM
+        let mut ext_tcdms = [&tcdms[0][0]; 256];
+        (0..self.num_clusters).for_each(|i| ext_tcdms[i] = &tcdms[i][0]);
 
         // Allocate some barriers.
         let barriers: Vec<_> = (0..self.num_clusters)
@@ -378,7 +380,7 @@ impl Engine {
                 Cpu::new(
                     self,
                     &tcdms[j][0],
-                    [&tcdms[j][0]; 32],
+                    ext_tcdms,
                     base_hartid + i,
                     self.num_cores,
                     base_hartid,
@@ -494,7 +496,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     pub fn new(
         engine: &'a Engine,
         tcdm_ptr: &'b u32,
-        tcdm_ext_ptr: [&'b u32; 32],
+        tcdm_ext_ptr: [&'b u32; 256],
         hartid: usize,
         num_cores: usize,
         cluster_base_hartid: usize,

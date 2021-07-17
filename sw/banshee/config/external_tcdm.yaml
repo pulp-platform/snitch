@@ -4,8 +4,16 @@
 
 ---
 address:
-  cluster_num: 0x50000002
-  cluster_id: 0x50000003
+  tcdm_start: 0x40000000
+  tcdm_end: 0x40000008
+  nr_cores: 0x40000010
+  scratch_reg: 0x40000020
+  wakeup_reg: 0x40000028
+  barrier_reg: 0x40000038
+  cluster_base_hartid: 0x40000040
+  cluster_num: 0x40000048
+  cluster_id: 0x40000050
+  uart: 0xF00B8000
 memory:
     -
         tcdm:
@@ -16,6 +24,7 @@ memory:
             start: 0x100000
             end: 0x100000
             latency: 5
+            callbacks: []
         dram:
             start: 0x80000000
             end: 0x80010000
@@ -27,12 +36,13 @@ memory:
     -
         tcdm:
             start: 0x0
-            end: 0x10000
+            end: 0x20000
             latency: 5
         periphs:
             start: 0x100000
             end: 0x100000
             latency: 5
+            callbacks: []
         dram:
             start: 0x80000000
             end: 0x80010000
@@ -40,19 +50,20 @@ memory:
         ext_tcdm:
             -
                 cluster: 0
-                start: 0x10000
+                start: 0x20000
             -
                 cluster: 2
-                start: 0x20000
-     -
+                start: 0x30000
+    -
         tcdm:
             start: 0x0
-            end: 0x10000
+            end: 0x30000
             latency: 5
         periphs:
             start: 0x100000
             end: 0x100000
             latency: 5
+            callbacks: []
         dram:
             start: 0x80000000
             end: 0x80010000
