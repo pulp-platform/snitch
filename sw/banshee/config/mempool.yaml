@@ -20,6 +20,11 @@ memory:
     start: 0x0
     end: 0x100000
     latency: 5
+  periphs:
+    start: 0x100000
+    end: 0x100000
+    latency: 5
+    callbacks: []
   dram:
     start: 0x80000000
     end: 0x80010000

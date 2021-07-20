@@ -1,0 +1,1 @@
+--num-cores 32 --configuration config/periphs_test.yaml
