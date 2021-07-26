@@ -36,8 +36,8 @@ snrt.crt0.init_core_info:
     # Clear the bss segment.
 snrt.crt0.init_bss:
     bnez      a0, 2f  # only core 0 (TODO: this should be one core globally, not per cluster)
-    la        t0, _edata
-    la        t1, _end
+    la        t0, _sbss
+    la        t1, _ebss
     bge       t0, t1, 2f
 1:  sw        zero, 0(t0)
     addi      t0, t0, 4
