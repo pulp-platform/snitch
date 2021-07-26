@@ -6,11 +6,11 @@ cmake_minimum_required(VERSION 3.13)
 
 # Allow snRuntime to be built as a standalone library.
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    # Read SnitchUtilities
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
-
-    project(snRuntime LANGUAGES C ASM)
     include(SnitchUtilities)
-
+    # Create snRuntime project
+    project(snRuntime LANGUAGES C ASM)
     add_compile_options(-O3 -g -ffunction-sections)
 else()
     # Export package information to includer.
@@ -30,16 +30,43 @@ set(sources
     src/ssr.c
 )
 
-# Generic Runtime (requiring bootloader/OS)
-add_snitch_library(snRuntime src/start.S ${sources} src/ssr_v2.c)
+if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    # Build all runtimes
 
-# Bare Runtimes (with startup code)
-add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v1.c)
-add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v2.c)
-add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources} src/ssr_v1.c)
-add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S ${sources} src/ssr_v1.c)
-add_snitch_library(snRuntime-lethifold src/start_lethifold.S ${sources} src/ssr_v1.c)
-add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources} src/ssr_v1.c)
+    # Generic Runtime (requiring bootloader/OS)
+    add_snitch_library(snRuntime src/start.S ${sources} src/ssr_v2.c)
+
+    # Bare Runtimes (with startup code)
+    add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v1.c)
+    add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v2.c)
+    add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources} src/ssr_v1.c)
+    add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S ${sources} src/ssr_v1.c)
+    add_snitch_library(snRuntime-lethifold src/start_lethifold.S ${sources} src/ssr_v1.c)
+    add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources} src/ssr_v1.c)
+
+else()
+
+    # snRuntime is added externally, only build required runtime
+    if(SNITCH_RUNTIME STREQUAL "snRuntime")
+        # Generic Runtime (requiring bootloader/OS)
+        add_snitch_library(snRuntime src/start.S ${sources} src/ssr_v2.c)
+    # Bare Runtimes (with startup code)
+    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
+        add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v1.c)
+    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
+        add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v2.c)
+    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-billywig")
+        add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources} src/ssr_v1.c)
+    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-bowtruckle")
+        add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S ${sources} src/ssr_v1.c)
+    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-lethifold")
+        add_snitch_library(snRuntime-lethifold src/start_lethifold.S ${sources} src/ssr_v1.c)
+    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-thestral")
+        add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources} src/ssr_v1.c)
+    else()
+        messate(FATAL_ERROR "Requested runtime not implemented: ${SNITCH_RUNTIME}")
+    endif()
+endif()
 
 # Tests
 enable_testing()
