@@ -2208,6 +2208,576 @@ impl<'a> InstructionTranslator<'a> {
 
         // Handle floating-point operations.
         match data.op {
+            // VFloatS instructions
+            riscv::OpcodeRdRs1Rs2::VfaddS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFAdd(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFAdd(self.builder, a1, b1, name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfaddRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFAdd(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFAdd(self.builder, a1, b0, name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsubS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFSub(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFSub(self.builder, a1, b1, name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsubRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFSub(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFSub(self.builder, a1, b0, name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmulS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFMul(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFMul(self.builder, a1, b1, name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmulRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFMul(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFMul(self.builder, a1, b0, name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmacS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let (c0, c1) = self.read_freg_vf64s(data.rd);
+                let res0 = LLVMBuildFAdd(self.builder,
+                                         LLVMBuildFMul(self.builder, a0, b0, name),
+                                         c0,
+                                         name);
+                let res1 = LLVMBuildFAdd(self.builder,
+                                         LLVMBuildFMul(self.builder, a1, b1, name),
+                                         c1,
+                                         name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmacRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let (c0, c1) = self.read_freg_vf64s(data.rd);
+                let res0 = LLVMBuildFAdd(self.builder,
+                                         LLVMBuildFMul(self.builder, a0, b0, name),
+                                         c0,
+                                         name);
+                let res1 = LLVMBuildFAdd(self.builder,
+                                         LLVMBuildFMul(self.builder, a1, b0, name),
+                                         c1,
+                                         name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFDiv(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFDiv(self.builder, a1, b1, name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFDiv(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFDiv(self.builder, a1, b0, name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmreS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let (c0, c1) = self.read_freg_vf64s(data.rd);
+                let res0 = LLVMBuildFSub(self.builder,
+                                         LLVMBuildFMul(self.builder, a0, b0, name),
+                                         c0,
+                                         name);
+                let res1 = LLVMBuildFSub(self.builder,
+                                         LLVMBuildFMul(self.builder, a1, b1, name),
+                                         c1,
+                                         name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmreRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let (c0, c1) = self.read_freg_vf64s(data.rd);
+                let res0 = LLVMBuildFSub(self.builder,
+                                         LLVMBuildFMul(self.builder, a0, b0, name),
+                                         c0,
+                                         name);
+                let res1 = LLVMBuildFSub(self.builder,
+                                         LLVMBuildFMul(self.builder, a1, b0, name),
+                                         c1,
+                                         name);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmaxS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_binary_float_intrinsic("llvm.maxnum", a0, b0);
+                let res1 = self.emit_binary_float_intrinsic("llvm.maxnum", a1, b1);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmaxRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_binary_float_intrinsic("llvm.maxnum", a0, b0);
+                let res1 = self.emit_binary_float_intrinsic("llvm.maxnum", a1, b0);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfminS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_binary_float_intrinsic("llvm.minnum", a0, b0);
+                let res1 = self.emit_binary_float_intrinsic("llvm.minnum", a1, b1);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfminRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_binary_float_intrinsic("llvm.minnum", a0, b0);
+                let res1 = self.emit_binary_float_intrinsic("llvm.minnum", a1, b0);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_fsgnj(a0, b0);
+                let res1 = self.emit_fsgnj(a1, b1);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_fsgnj(a0, b0);
+                let res1 = self.emit_fsgnj(a1, b0);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjnS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_fsgnjn(a0, b0);
+                let res1 = self.emit_fsgnjn(a1, b1);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjnRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_fsgnjn(a0, b0);
+                let res1 = self.emit_fsgnjn(a1, b0);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjxS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_fsgnjx(a0, b0);
+                let res1 = self.emit_fsgnjx(a1, b1);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjxRS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = self.emit_fsgnjx(a0, b0);
+                let res1 = self.emit_fsgnjx(a1, b0);
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfeqS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOEQ, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOEQ, a1, b1, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfeqRS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOEQ, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOEQ, a1, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfltS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOLT, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOLT, a1, b1, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfltRS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOLT, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOLT, a1, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfleS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOLE, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOLE, a1, b1, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfleRS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOLE, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOLE, a1, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgeS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOGE, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOGE, a1, b1, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgeRS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOGE, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOGE, a1, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgtS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOGT, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOGT, a1, b1, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgtRS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOGT, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealOGT, a1, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfneS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealONE, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealONE, a1, b1, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfneRS => {
+                self.was_freppable.set(false);
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealONE, a0, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                let res1 = LLVMBuildZExt(
+                    self.builder,
+                    LLVMBuildFCmp(self.builder, LLVMRealONE, a1, b0, name),
+                    LLVMInt32Type(),
+                    NONAME,
+                );
+                self.write_freg_vf64s(
+                    data.rd,
+                    res1,
+                    res0
+                );
+                return Ok(());
+            }
+
             // Sign injection
             riscv::OpcodeRdRs1Rs2::FsgnjS => {
                 self.write_freg_f32(
@@ -2410,6 +2980,15 @@ impl<'a> InstructionTranslator<'a> {
                         LLVMInt32Type(),
                         NONAME,
                     ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkaSD => {
+                self.was_freppable.set(false);
+                self.write_freg_vf32(
+                    data.rd,
+                    self.read_freg_f32(data.rs1),
+                    self.read_freg_f32(data.rs2),
                 );
                 return Ok(());
             }
@@ -3485,6 +4064,42 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
     }
 
+    unsafe fn read_freg_vf64s(&self, rs: u32) -> (LLVMValueRef, LLVMValueRef) {
+        self.emit_possible_ssr_read(rs);
+        let raw_ptr = self.freg_ptr(rs);
+        self.trace_access(
+            TraceAccess::ReadFReg(rs as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+
+        // read data1
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMFloatType(), 0),
+            NONAME,
+        );
+
+        // read data2
+        let ptr_hi = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMFloatType(), 0),
+            NONAME,
+        );
+        let ptr_hi = LLVMBuildGEP(
+            self.builder,
+            ptr_hi,
+            [LLVMConstInt(LLVMInt32Type(), 1, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        (LLVMBuildLoad(self.builder, ptr_hi, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _))
+
+    }
+
     /// Emit the code to read a f32 value from a float register.
     unsafe fn read_freg_f32(&self, rs: u32) -> LLVMValueRef {
         self.emit_possible_ssr_read(rs);
@@ -3512,6 +4127,97 @@ impl<'a> InstructionTranslator<'a> {
             NONAME,
         );
         LLVMBuildStore(self.builder, data, ptr);
+        self.trace_access(
+            TraceAccess::WriteFReg(rd as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+        self.emit_possible_ssr_write(rd);
+    }
+
+
+/// Emit the code to write a f32 value to a float register.
+unsafe fn write_freg_vf32(&self, rd: u32, data1: LLVMValueRef, data2: LLVMValueRef) {
+    let raw_ptr = self.freg_ptr(rd);
+
+    // Nanbox the value.
+    let ptr_hi = LLVMBuildBitCast(
+        self.builder,
+        raw_ptr,
+        LLVMPointerType(LLVMInt32Type(), 0),
+        NONAME,
+    );
+    let ptr_hi = LLVMBuildGEP(
+        self.builder,
+        ptr_hi,
+        [LLVMConstInt(LLVMInt32Type(), 1, 0)].as_mut_ptr(),
+        1 as u32,
+        NONAME,
+    );
+    LLVMBuildStore(
+        self.builder,
+        LLVMConstInt(LLVMInt32Type(), -1i32 as u64, 0),
+        ptr_hi,
+    );
+
+    // Write the actual value.
+    let ptr1 = LLVMBuildBitCast(
+        self.builder,
+        raw_ptr,
+        LLVMPointerType(LLVMFloatType(), 0),
+        NONAME,
+    );
+    let ptr2 = LLVMBuildBitCast(
+        self.builder,
+        raw_ptr,
+        LLVMPointerType(LLVMFloatType(), 0),
+        NONAME,
+    );
+    let ptr2 = LLVMBuildGEP(
+        self.builder,
+        ptr2,
+        [LLVMConstInt(LLVMInt32Type(), 1, 0)].as_mut_ptr(),
+        1 as u32,
+        NONAME,
+    );
+
+    LLVMBuildStore(self.builder, data1, ptr1);
+    LLVMBuildStore(self.builder, data2, ptr2);
+    self.trace_access(
+        TraceAccess::WriteFReg(rd as u8),
+        LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+    );
+    self.emit_possible_ssr_write(rd);
+}
+
+    /// Emit the code to write a f64 value to a float register.
+    unsafe fn write_freg_vf64s(&self, rd: u32, data1: LLVMValueRef, data0: LLVMValueRef) {
+        let raw_ptr = self.freg_ptr(rd);
+
+        // Write data2
+        let ptr_hi = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMFloatType(), 0),
+            NONAME,
+        );
+        let ptr_hi = LLVMBuildGEP(
+            self.builder,
+            ptr_hi,
+            [LLVMConstInt(LLVMInt32Type(), 1, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        // Write data1
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMFloatType(), 0),
+            NONAME,
+        );
+
+        LLVMBuildStore(self.builder, data0, ptr);
+        LLVMBuildStore(self.builder, data1, ptr_hi);
         self.trace_access(
             TraceAccess::WriteFReg(rd as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),

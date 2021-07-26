@@ -8,7 +8,7 @@ set -e
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
 RISCV_OPCODES=$ROOT/sw/vendor/riscv-opcodes
-OPCODES=(opcodes opcodes-dma opcodes-rep opcodes-ssr)
+OPCODES=(opcodes opcodes-dma opcodes-rep opcodes-ssr opcodes-sflt)
 
 ###########
 # Banshee #
