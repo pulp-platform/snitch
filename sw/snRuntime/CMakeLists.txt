@@ -15,10 +15,13 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 else()
     # Export package information to includer.
     set(SNRUNTIME_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
-    set(SNRUNTIME_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
+    set(SNRUNTIME_INCLUDE_DIRS 
+        ${CMAKE_CURRENT_SOURCE_DIR}/include 
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor 
+        PARENT_SCOPE)
 endif()
 
-include_directories(include)
+include_directories(include vendor)
 
 # Common sources
 set(sources
