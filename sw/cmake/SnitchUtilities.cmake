@@ -15,6 +15,8 @@ if (SNITCH_SIMULATOR)
 endif()
 message(STATUS "Using runtime: ${SNITCH_RUNTIME}")
 
+# Toolchain to use
+set(CMAKE_TOOLCHAIN_FILE toolchain-gcc CACHE STRING "Toolchain to use")
 
 # Linker script
 set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../snRuntime/link/banshee.ld" CACHE FILEPATH "Linker Script")

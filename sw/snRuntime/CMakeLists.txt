@@ -7,7 +7,6 @@ cmake_minimum_required(VERSION 3.13)
 # Allow snRuntime to be built as a standalone library.
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
-    set(CMAKE_TOOLCHAIN_FILE toolchain-gcc CACHE STRING "Toolchain to use")
 
     project(snRuntime LANGUAGES C ASM)
     include(SnitchUtilities)
