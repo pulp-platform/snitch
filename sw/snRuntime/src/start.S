@@ -71,33 +71,33 @@ snrt.crt0.init_stack:
     add       a3, a3, t1
 
     # Allocate thread-local storage at the top of the stack.
-snrt.crt0.init_tls:
-    la        t0, __tdata_start
-    la        t1, __tdata_end
-    la        t2, __tbss_end
-    add       sp, sp, t0
-    sub       sp, sp, t2
-    li        t3, ~0x7
-    and       sp, sp, t3  # align stack to 8B
-    mv        tp, sp
+# snrt.crt0.init_tls:
+#     la        t0, __tdata_start
+#     la        t1, __tdata_end
+#     la        t2, __tbss_end
+#     add       sp, sp, t0
+#     sub       sp, sp, t2
+#     li        t3, ~0x7
+#     and       sp, sp, t3  # align stack to 8B
+#     mv        tp, sp
 
-    # Copy __tdata_start to __tdata_end.
-    mv        t3, tp
-    bge       t0, t1, 2f
-1:  lw        t4, 0(t0)
-    sw        t4, 0(t3)
-    addi      t0, t0, 4
-    addi      t3, t3, 4
-    blt       t0, t1, 1b
-2:
+#     # Copy __tdata_start to __tdata_end.
+#     mv        t3, tp
+#     bge       t0, t1, 2f
+# 1:  lw        t4, 0(t0)
+#     sw        t4, 0(t3)
+#     addi      t0, t0, 4
+#     addi      t3, t3, 4
+#     blt       t0, t1, 1b
+# 2:
 
-    # Clear from _tdata_end to _tbss_end.
-    bge       t0, t2, 2f
-1:  sw        zero, 0(t3)
-    addi      t0, t0, 4
-    addi      t3, t3, 4
-    blt       t0, t2, 1b
-2:
+#     # Clear from _tdata_end to _tbss_end.
+#     bge       t0, t2, 2f
+# 1:  sw        zero, 0(t3)
+#     addi      t0, t0, 4
+#     addi      t3, t3, 4
+#     blt       t0, t2, 1b
+# 2:
 
     # Initialize the root team.
 snrt.crt0.init_team:
