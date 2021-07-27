@@ -6,12 +6,12 @@
 static volatile uint32_t *sink = (void *)0xF1230000;
 
 // int main(uint32_t core_id, uint32_t core_num , void *spm_start, void *spm_end) {
-int main(int argc, char** argv) {
+int main() {
     
-    uint32_t core_id = argc;
-    uint32_t core_num = (uint32_t)((uint32_t*)argv)[0];
-    void *spm_start = (void *)((uint32_t*)argv)[1];
-    void *spm_end = (void *)((uint32_t*)argv)[2];
+    uint32_t core_id = snrt_global_core_idx();
+    uint32_t core_num = snrt_global_core_num();
+    void *spm_start = snrt_cluster_memory().start;
+    void *spm_end = snrt_cluster_memory().end;
 
     volatile uint32_t *x = spm_start + 4;
     if (core_id == 0) {
