@@ -61,7 +61,7 @@ jobs:
       uses: jwlawson/actions-setup-cmake@v1.8
       with:
         cmake-version: 3.19.x
-    - name: Install RISC-V Toolchain
+    - name: Install RISC-V GCC Toolchain
       run: |
         curl -Ls -o riscv-gcc.tar.gz https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-${RISCV_GCC_VERSION}-x86_64-linux-ubuntu14.tar.gz
         sudo mkdir -p /tools/riscv && sudo chmod 777 /tools/riscv
@@ -70,16 +70,34 @@ jobs:
         echo "PATH=$PATH:/tools/riscv/bin" >> $GITHUB_ENV
       env:
         RISCV_GCC_VERSION: 8.3.0-2020.04.0
-    - name: Build runtime
+    - name: Install RISC-V LLVM Toolchain
+      run: |
+        curl -Ls -o riscv-llvm.tar.gz https://sourceforge.net/projects/snitch-llvm/files/nightly/riscv32-snitch-llvm-ubuntu2004.tar.gz/download
+        sudo mkdir -p /tools/riscv-llvm && sudo chmod 777 /tools/riscv-llvm
+        tar -C /tools/riscv-llvm -xf riscv-llvm.tar.gz --strip-components=1
+        echo "PATH=$PATH:/tools/riscv-llvm/bin" >> $GITHUB_ENV
+    - name: Build runtime (GCC)
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
-    - name: Test snRuntime
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-gcc -DBUILD_TESTS=ON .. && make
+    - name: Test snRuntime (GCC)
       working-directory: sw/snRuntime/build
       run: make test
-    - name: Build snBLAS
+    - name: Build snBLAS (GCC)
+      working-directory: sw/snBLAS
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-gcc -DBUILD_TESTS=ON .. && make
+    - name: Test snBLAS (GCC)
+      working-directory: sw/snBLAS/build
+      run: make test
+    - name: Build runtime (LLVM)
+      working-directory: sw/snRuntime
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
+    - name: Test snRuntime (LLVM)
+      working-directory: sw/snRuntime/build
+      run: make test
+    - name: Build snBLAS (LLVM)
       working-directory: sw/snBLAS
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
-    - name: Test snBLAS
+    - name: Test snBLAS (LLVM)
       working-directory: sw/snBLAS/build
       run: make test
 
@@ -93,16 +111,28 @@ jobs:
     name: SW on Banshee (Container)
     steps:
     - uses: actions/checkout@v2
-    - name: Build runtime
+    - name: Build runtime (GCC)
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
-    - name: Test snRuntime
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-gcc -DBUILD_TESTS=ON .. && make
+    - name: Test snRuntime (GCC)
       working-directory: sw/snRuntime/build
       run: make test
-    - name: Build snBLAS
+    - name: Build snBLAS (GCC)
+      working-directory: sw/snBLAS
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-gcc -DBUILD_TESTS=ON .. && make
+    - name: Test snBLAS (GCC)
+      working-directory: sw/snBLAS/build
+      run: make test
+    - name: Build runtime (LLVM)
+      working-directory: sw/snRuntime
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
+    - name: Test snRuntime (LLVM)
+      working-directory: sw/snRuntime/build
+      run: make test
+    - name: Build snBLAS (LLVM)
       working-directory: sw/snBLAS
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
-    - name: Test snBLAS
+    - name: Test snBLAS (LLVM)
       working-directory: sw/snBLAS/build
       run: make test
 
