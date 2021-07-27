@@ -66,4 +66,19 @@ SECTIONS
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >L1
+
+  /* Thread Local Storage sections  */
+  .tdata    :
+  {
+    PROVIDE_HIDDEN (__tdata_start = .);
+    *(.tdata .tdata.* .gnu.linkonce.td.*)
+    PROVIDE_HIDDEN (__tdata_end = .);
+  }
+  .tbss : 
+  { 
+    PROVIDE_HIDDEN (__tbss_start = .);
+    *(.tbss .tbss.* .gnu.linkonce.tb.*) 
+    *(.tcommon)
+    PROVIDE_HIDDEN (__tbss_end = .);
+  }
 }
