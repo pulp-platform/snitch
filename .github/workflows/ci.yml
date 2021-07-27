@@ -72,13 +72,13 @@ jobs:
         RISCV_GCC_VERSION: 8.3.0-2020.04.0
     - name: Build runtime
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DBUILD_TESTS=ON .. && make
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
     - name: Test snRuntime
       working-directory: sw/snRuntime/build
       run: make test
     - name: Build snBLAS
       working-directory: sw/snBLAS
-      run: mkdir build && cd build && cmake -DBUILD_TESTS=ON .. && make
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
       run: make test
@@ -95,13 +95,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build runtime
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DBUILD_TESTS=ON .. && make
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
     - name: Test snRuntime
       working-directory: sw/snRuntime/build
       run: make test
     - name: Build snBLAS
       working-directory: sw/snBLAS
-      run: mkdir build && cd build && cmake -DBUILD_TESTS=ON .. && make
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
       run: make test
@@ -121,7 +121,7 @@ jobs:
         cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
     - name: Build Software
       run: |
-        cd hw/system/snitch_cluster/sw && mkdir build && cd build && cmake .. && make
+        cd hw/system/snitch_cluster/sw && mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm .. && make
     - name: Run Unit Tests
       run: |
         cd hw/system/snitch_cluster/sw/build && make test
