@@ -2303,7 +2303,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeRdRs1Rs2::VfmacRS => {
                 let (a1, a0)  = self.read_freg_vf64s(data.rs1);
                 let (_b1, b0) = self.read_freg_vf64s(data.rs2);
-                let (c0, c1)  = self.read_freg_vf64s(data.rd);
+                let (c1, c0)  = self.read_freg_vf64s(data.rd);
                 let res0 = LLVMBuildFAdd(self.builder,
                                          LLVMBuildFMul(self.builder, a0, b0, name),
                                          c0,
@@ -2365,7 +2365,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeRdRs1Rs2::VfmreRS => {
                 let (a1, a0)  = self.read_freg_vf64s(data.rs1);
                 let (_b1, b0) = self.read_freg_vf64s(data.rs2);
-                let (c0, c1)  = self.read_freg_vf64s(data.rd);
+                let (c1, c0)  = self.read_freg_vf64s(data.rd);
                 let res0 = LLVMBuildFSub(self.builder,
                                          LLVMBuildFMul(self.builder, a0, b0, name),
                                          c0,
