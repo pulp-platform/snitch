@@ -5,7 +5,7 @@
 // Author:
 // Thomas Benz <tbenz@iis.ee.ethz.ch>
 
-/// axi_to_mem_interleved prevents deadlocks by allowing reads to
+/// `axi_to_mem_interleaved` prevents deadlocks by allowing reads to
 /// bypass writes and vice versa
 /// Warning: currently only supports NumBanks == 1!
 
