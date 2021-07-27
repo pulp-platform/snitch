@@ -2,6 +2,6 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-int main(int core_id, int core_num, void *spm_start, void *spm_end) {
+int main() {
     return 0;
 }
