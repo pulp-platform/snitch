@@ -520,7 +520,7 @@ module snitch_cluster
     .default_mst_port_i (dma_xbar_default_port)
   );
 
-  axi_to_mem #(
+  axi_to_mem_interleaved #(
     .axi_req_t (axi_slv_dma_req_t),
     .axi_resp_t (axi_slv_dma_resp_t),
     .AddrWidth (PhysicalAddrWidth),
