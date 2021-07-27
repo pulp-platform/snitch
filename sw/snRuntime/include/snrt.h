@@ -19,12 +19,12 @@ extern "C" {
 
 /// A slice of memory.
 typedef struct snrt_slice {
-    void *start;
-    void *end;
+    uint64_t start;
+    uint64_t end;
 } snrt_slice_t;
 
 static inline size_t snrt_slice_len(snrt_slice_t s) {
-    return (char *)s.end - (char *)s.start;
+    return s.end - s.start;
 }
 
 extern void snrt_barrier();

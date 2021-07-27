@@ -8,8 +8,8 @@ extern const uint32_t _snrt_banshee_cluster_core_num;
 extern const uint32_t _snrt_banshee_cluster_base_hartid;
 extern const uint32_t _snrt_banshee_cluster_num;
 extern const uint32_t _snrt_banshee_cluster_id;
-void *const _snrt_banshee_global_start = (void *)0x90000000;
-void *const _snrt_banshee_global_end = (void *)0x100000000;
+uint64_t const _snrt_banshee_global_start = (uint64_t)0x90000000;
+uint64_t const _snrt_banshee_global_end = (uint64_t)0x100000000;
 
 const uint32_t snrt_stack_size __attribute__((weak)) = 10;
 
