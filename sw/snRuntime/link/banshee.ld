@@ -70,15 +70,14 @@ SECTIONS
   /* Thread Local Storage sections  */
   .tdata    :
   {
-    PROVIDE_HIDDEN (__tdata_start = .);
+    __tdata_start = .;
     *(.tdata .tdata.* .gnu.linkonce.td.*)
-    PROVIDE_HIDDEN (__tdata_end = .);
+    __tdata_end = .;
   }
   .tbss : 
   { 
-    PROVIDE_HIDDEN (__tbss_start = .);
+    __tbss_start = .;
     *(.tbss .tbss.* .gnu.linkonce.tb.*) 
     *(.tcommon)
-    PROVIDE_HIDDEN (__tbss_end = .);
   }
 }
