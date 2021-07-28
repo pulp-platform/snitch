@@ -12,3 +12,6 @@ link_libraries(-lm -lgcc)
 
 add_compile_options(-ffunction-sections)
 add_compile_options(-Wextra)
+
+# Add preprocessor definition to indicate LD is used
+add_compile_definitions(__LINK_LD)
