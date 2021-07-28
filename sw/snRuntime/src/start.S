@@ -70,16 +70,22 @@ snrt.crt0.init_stack:
     add       sp, sp, t0
     add       a3, a3, t1
 
-    # Allocate thread-local storage at the top of the stack.
+    # Allocate thread-local storage at the top of the stack and set tp
+    # to the base of the tls
 snrt.crt0.init_tls:
     la        t0, __tdata_start
     la        t1, __tdata_end
     la        t2, __tbss_end
-    add       sp, sp, t0
+#ifdef __LINK_LD
+    # When using ld, the __tbss_end symbol is observed to be 1 word too big
+    # TODO: Fix this
+    addi      t2, t2, -4
+#endif
+    add       sp, sp, t0   # subtract sp to make room for TLS and align
     sub       sp, sp, t2
-    li        t3, ~0x7
-    and       sp, sp, t3  # align stack to 8B
-    mv        tp, sp
+    andi      sp, sp, ~0x7
+    mv        tp, sp       # palce tp at start of TLS
+    andi      sp, sp, ~0x7 # align stack to 8B
 
     # Copy __tdata_start to __tdata_end.
     mv        t3, tp
@@ -136,5 +142,11 @@ snrt.crt0.end:
 1:
     wfi
     j       1b
+
+
+# The following is a super ugly hack to determine the end of the .tbss section.
+.section ".tbss"
+__tbss_end:
+    .globl __tbss_end
 
 .section .text
