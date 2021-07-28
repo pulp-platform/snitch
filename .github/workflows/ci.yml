@@ -90,15 +90,15 @@ jobs:
       run: make test
     - name: Build runtime (LLVM)
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
+      run: mkdir build-llvm && cd build-llvm && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
     - name: Test snRuntime (LLVM)
-      working-directory: sw/snRuntime/build
+      working-directory: sw/snRuntime/build-llvm
       run: make test
     - name: Build snBLAS (LLVM)
       working-directory: sw/snBLAS
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
+      run: mkdir build-llvm && cd build-llvm && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
     - name: Test snBLAS (LLVM)
-      working-directory: sw/snBLAS/build
+      working-directory: sw/snBLAS/build-llvm
       run: make test
 
   #############################
@@ -125,15 +125,15 @@ jobs:
       run: make test
     - name: Build runtime (LLVM)
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
+      run: mkdir build-llvm && cd build-llvm && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
     - name: Test snRuntime (LLVM)
-      working-directory: sw/snRuntime/build
+      working-directory: sw/snRuntime/build-llvm
       run: make test
     - name: Build snBLAS (LLVM)
       working-directory: sw/snBLAS
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
+      run: mkdir build-llvm && cd build-llvm && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
     - name: Test snBLAS (LLVM)
-      working-directory: sw/snBLAS/build
+      working-directory: sw/snBLAS/build-llvm
       run: make test
 
   ################################
