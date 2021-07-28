@@ -149,9 +149,15 @@ jobs:
     - name: Build Hardware
       run: |
         cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
-    - name: Build Software
+    - name: Build Software (GCC)
       run: |
-        cd hw/system/snitch_cluster/sw && mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm .. && make
-    - name: Run Unit Tests
+        cd hw/system/snitch_cluster/sw && mkdir build-gcc && cd build-gcc && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-gcc -DBUILD_TESTS=ON .. && make
+    - name: Run Unit Tests (GCC)
       run: |
-        cd hw/system/snitch_cluster/sw/build && make test
+        cd hw/system/snitch_cluster/sw/build-gcc && make test
+    - name: Build Software (LLVM)
+      run: |
+        cd hw/system/snitch_cluster/sw && mkdir build-llvm && cd build-llvm && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
+    - name: Run Unit Tests (LLVM)
+      run: |
+        cd hw/system/snitch_cluster/sw/build-llvm && make test
