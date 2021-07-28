@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include <snblas.h>
 #include <snrt.h>
-#include <stdio.h>
+#include "printf.h"
 
 struct data {
     size_t n;
