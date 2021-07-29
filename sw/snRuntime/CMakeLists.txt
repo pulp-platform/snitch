@@ -21,6 +21,13 @@ else()
         PARENT_SCOPE)
 endif()
 
+
+# provide linker script
+set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/link/common.ld" CACHE PATH "")
+message(STATUS "Using common linker script: ${LINKER_SCRIPT}")
+set(TARGET_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/link/banshee.ld" CACHE FILEPATH "Linker Script")
+message(STATUS "Using target linker script: ${TARGET_LINKER_SCRIPT}")
+
 include_directories(include vendor)
 
 # Common sources
