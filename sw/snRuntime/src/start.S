@@ -36,8 +36,8 @@ snrt.crt0.init_core_info:
     # Clear the bss segment.
 snrt.crt0.init_bss:
     bnez      a0, 2f  # only core 0 (TODO: this should be one core globally, not per cluster)
-    la        t0, _sbss
-    la        t1, _ebss
+    la        t0, _edata
+    la        t1, _end
     bge       t0, t1, 2f
 1:  sw        zero, 0(t0)
     addi      t0, t0, 4
@@ -75,33 +75,39 @@ snrt.crt0.init_stack:
 snrt.crt0.init_tls:
     la        t0, __tdata_start
     la        t1, __tdata_end
-    la        t2, __tbss_end
-#ifdef __LINK_LD
-    # When using ld, the __tbss_end symbol is observed to be 1 word too big
-    # TODO: Fix this
-    addi      t2, t2, -4
+    la        t2, __tbss_start
+    # Need to use a different tbss_end symbol when using LLD since it 
+    # hard-codes the tbss section to zero size
+#ifdef __LINK_LLD
+    la        t3, __tbss_end2
+#else
+    la        t3, __tbss_end
 #endif
     add       sp, sp, t0   # subtract sp to make room for TLS and align
-    sub       sp, sp, t2
+    sub       sp, sp, t1
+    add       sp, sp, t2
+    sub       sp, sp, t3
     andi      sp, sp, ~0x7
     mv        tp, sp       # palce tp at start of TLS
     andi      sp, sp, ~0x7 # align stack to 8B
 
     # Copy __tdata_start to __tdata_end.
-    mv        t3, tp
+    mv        t4, tp
     bge       t0, t1, 2f
-1:  lw        t4, 0(t0)
-    sw        t4, 0(t3)
+1:  lw        t5, 0(t0)
+    sw        t5, 0(t4)
     addi      t0, t0, 4
-    addi      t3, t3, 4
+    addi      t4, t4, 4
     blt       t0, t1, 1b
 2:
 
     # Clear from _tdata_end to _tbss_end.
-    bge       t0, t2, 2f
-1:  sw        zero, 0(t3)
+    la        t0, __tbss_start
+    la        t1, __tbss_end
+    bge       t0, t1, 2f
+1:  sw        zero, 0(t4)
     addi      t0, t0, 4
-    addi      t3, t3, 4
+    addi      t4, t4, 4
     blt       t0, t2, 1b
 2:
 
@@ -142,11 +148,3 @@ snrt.crt0.end:
 1:
     wfi
     j       1b
-
-
-# The following is a super ugly hack to determine the end of the .tbss section.
-.section ".tbss"
-__tbss_end:
-    .globl __tbss_end
-
-.section .text

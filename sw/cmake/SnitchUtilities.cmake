@@ -19,8 +19,9 @@ message(STATUS "Using runtime: ${SNITCH_RUNTIME}")
 set(CMAKE_TOOLCHAIN_FILE toolchain-gcc CACHE STRING "Toolchain to use")
 
 # Linker script
-set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../snRuntime/link/banshee.ld" CACHE FILEPATH "Linker Script")
-message(STATUS "Using linker script: ${LINKER_SCRIPT}")
+set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../snRuntime/link/common.ld")
+set(TARGET_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../snRuntime/link/banshee.ld" CACHE FILEPATH "Linker Script")
+message(STATUS "Using linker script: ${TARGET_LINKER_SCRIPT}")
 
 # Select to build the tests
 set(BUILD_TESTS OFF CACHE BOOL "Build test executables")
@@ -37,6 +38,7 @@ macro(add_snitch_executable name)
     add_executable(${ARGV})
     target_link_libraries(${name} ${SNITCH_RUNTIME})
     target_link_options(${name} PRIVATE -T ${LINKER_SCRIPT})
+    target_link_options(${name} PRIVATE -T ${TARGET_LINKER_SCRIPT})
     add_custom_command(
         TARGET ${name}
         POST_BUILD

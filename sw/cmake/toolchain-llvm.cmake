@@ -9,15 +9,28 @@ set(CMAKE_RANLIB llvm-ranlib)
 # LTO
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION false)
 
-# -march=rv32imafd -mabi=ilp32d
+##
+## Compile options
+##
 add_compile_options(-mcpu=snitch -mcmodel=medany -ffast-math -fno-builtin-printf -fno-common)
-add_link_options(-mcpu=snitch -nostartfiles -fuse-ld=lld -Wl,--image-base=0x80000000)
-# add_link_options(-Wl,--verbose)
-
-link_libraries(-lm)
-
 add_compile_options(-ffunction-sections)
 add_compile_options(-Wextra)
+add_compile_options(-static)
+
+##
+## Link options
+##
+
+add_link_options(-mcpu=snitch -nostartfiles -fuse-ld=lld -Wl,--image-base=0x80000000)
+add_link_options(-static)
+# LLD defaults to -z relro which we don't want in a static ELF
+add_link_options(-Wl,-z,norelro)
+add_link_options(-Wl,--gc-sections)
+add_link_options(-Wl,--no-relax)
+# add_link_options(-Wl,--verbose)
+
+# Libraries
+link_libraries(-lm)
 
 # Add preprocessor definition to indicate LLD is used
-# add_compile_definitions(__LINK_LLD)
+add_compile_definitions(__LINK_LLD)
