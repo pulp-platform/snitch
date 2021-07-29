@@ -7,7 +7,7 @@ ENTRY(_start)
 <% dram_address = cfg['dram']['address']; %>
 MEMORY
 {
-    DRAM (rwxai)  : ORIGIN = ${dram_address}, LENGTH = ${cfg['dram']['length']}
+    DRAM (rwxa)  : ORIGIN = ${dram_address}, LENGTH = ${cfg['dram']['length']}
     L1 (rw) : ORIGIN = ${l1_region[0]}, LENGTH = ${l1_region[1]}K
 }
 
