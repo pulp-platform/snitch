@@ -8,9 +8,12 @@ void snrt_putchar(char character);
 // Use snrt_putchar for printf
 #define _putchar snrt_putchar
 
-// vendor printf settings
-// #define PRINTF_DISABLE_SUPPORT_FLOAT
-// #define PRINTF_DISABLE_SUPPORT_EXPONENTIAL
+/// vendor printf settings
+
+#if defined(__GNUC__)
+  // the gcc toolchain doesn't support this
+  #define PRINTF_DISABLE_SUPPORT_FLOAT
+#endif
 
 // Include the vendorized tiny printf implementation.
 #include "../vendor/printf.c"
