@@ -85,13 +85,15 @@ jobs:
         echo "PATH=$PATH:/tools/riscv-llvm/bin" >> $GITHUB_ENV
     - name: Build runtime
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain }} -DBUILD_TESTS=ON .. && make
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON .. && make
     - name: Test snRuntime
       working-directory: sw/snRuntime/build
       run: make test
     - name: Build snBLAS
       working-directory: sw/snBLAS
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain }} -DBUILD_TESTS=ON .. && make
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
       run: make test
@@ -113,13 +115,15 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build runtime
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain }} -DBUILD_TESTS=ON .. && make
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON .. && make
     - name: Test snRuntime
       working-directory: sw/snRuntime/build
       run: make test
     - name: Build snBLAS
       working-directory: sw/snBLAS
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain }} -DBUILD_TESTS=ON .. && make
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
       run: make test
@@ -148,4 +152,3 @@ jobs:
     - name: Run Unit Tests
       run: |
         cd hw/system/snitch_cluster/sw/build && make test
-   
