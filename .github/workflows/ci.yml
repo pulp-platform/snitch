@@ -103,32 +103,25 @@ jobs:
     container:
       image: ghcr.io/pulp-platform/snitch
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        toolchain:
+        - gcc
+        - llvm
     name: SW on Banshee (Container)
     steps:
     - uses: actions/checkout@v2
-    - name: Build runtime (GCC)
+    - name: Build runtime
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-gcc -DBUILD_TESTS=ON .. && make
-    - name: Test snRuntime (GCC)
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain }} -DBUILD_TESTS=ON .. && make
+    - name: Test snRuntime
       working-directory: sw/snRuntime/build
       run: make test
-    - name: Build snBLAS (GCC)
+    - name: Build snBLAS
       working-directory: sw/snBLAS
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-gcc -DBUILD_TESTS=ON .. && make
-    - name: Test snBLAS (GCC)
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain }} -DBUILD_TESTS=ON .. && make
+    - name: Test snBLAS
       working-directory: sw/snBLAS/build
-      run: make test
-    - name: Build runtime (LLVM)
-      working-directory: sw/snRuntime
-      run: mkdir build-llvm && cd build-llvm && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
-    - name: Test snRuntime (LLVM)
-      working-directory: sw/snRuntime/build-llvm
-      run: make test
-    - name: Build snBLAS (LLVM)
-      working-directory: sw/snBLAS
-      run: mkdir build-llvm && cd build-llvm && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
-    - name: Test snBLAS (LLVM)
-      working-directory: sw/snBLAS/build-llvm
       run: make test
 
   ################################
@@ -139,20 +132,20 @@ jobs:
       image: ghcr.io/pulp-platform/snitch
     name: SW on Default Snitch Cluster Config
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        toolchain:
+        - gcc
+        - llvm
     steps:
     - uses: actions/checkout@v2
     - name: Build Hardware
       run: |
         cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
-    - name: Build Software (GCC)
+    - name: Build Software
       run: |
-        cd hw/system/snitch_cluster/sw && mkdir build-gcc && cd build-gcc && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-gcc -DBUILD_TESTS=ON .. && make
-    - name: Run Unit Tests (GCC)
+        cd hw/system/snitch_cluster/sw && mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain }} -DBUILD_TESTS=ON .. && make
+    - name: Run Unit Tests
       run: |
-        cd hw/system/snitch_cluster/sw/build-gcc && make test
-    - name: Build Software (LLVM)
-      run: |
-        cd hw/system/snitch_cluster/sw && mkdir build-llvm && cd build-llvm && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
-    - name: Run Unit Tests (LLVM)
-      run: |
-        cd hw/system/snitch_cluster/sw/build-llvm && make test
+        cd hw/system/snitch_cluster/sw/build && make test
+   
