@@ -55,7 +55,6 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources} src/ssr_v1.c)
 
 else()
-
     # snRuntime is added externally, only build required runtime
     if(SNITCH_RUNTIME STREQUAL "snRuntime")
         # Generic Runtime (requiring bootloader/OS)
@@ -74,7 +73,7 @@ else()
     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-thestral")
         add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources} src/ssr_v1.c)
     else()
-        messate(FATAL_ERROR "Requested runtime not implemented: ${SNITCH_RUNTIME}")
+        message(FATAL_ERROR "Requested runtime not implemented: ${SNITCH_RUNTIME}")
     endif()
 endif()
 

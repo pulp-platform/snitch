@@ -4,7 +4,7 @@
 
 # Locate the banshee simulator for test execution.
 set(SNITCH_BANSHEE "banshee" CACHE PATH "Path to the banshee simulator for testing")
-set(SNITCH_RUNTIME "snRuntime-banshee" CACHE PATH "Target name of the snRuntime flavor to link against")
+set(SNITCH_RUNTIME "snRuntime-banshee" CACHE STRING "Target name of the snRuntime flavor to link against")
 set(SNITCH_SIMULATOR "" CACHE PATH "Command to run a binary in an RTL simulation")
 set(SNITCH_TEST_PREFIX "")
 message(STATUS "Check for Banshee")
@@ -33,8 +33,6 @@ macro(add_snitch_executable name)
     add_executable(${ARGV})
     target_link_libraries(${name} ${SNITCH_RUNTIME})
     target_link_options(${name} PRIVATE "SHELL:-T ${LINKER_SCRIPT}" "SHELL:-T ${TARGET_LINKER_SCRIPT}")
-    message(STATUS "LINKER_SCRIPT= ${LINKER_SCRIPT}")
-    message(STATUS "TARGET_LINKER_SCRIPT= ${TARGET_LINKER_SCRIPT}")
     add_custom_command(
         TARGET ${name}
         POST_BUILD
