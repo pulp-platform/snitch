@@ -338,7 +338,9 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     logic [Cfg.NumLoops-1:0] outermost;
     outermost = loop_enabled & ~(loop_enabled >> 1);
     selected_stride = '0;
-    for (int i = 0; i < Cfg.NumLoops; i++)
+    if (Cfg.Indirection && config_q.indir)
+      selected_stride = DataWidth/8;
+    else for (int i = 0; i < Cfg.NumLoops; i++)
       selected_stride |= outermost[i] ? stride_q[i] : '0;
   end
 
