@@ -9,7 +9,8 @@ void snrt_putchar(char character);
 #define _putchar snrt_putchar
 
 // vendor printf settings
-#define PRINTF_DISABLE_SUPPORT_FLOAT
+// #define PRINTF_DISABLE_SUPPORT_FLOAT
+// #define PRINTF_DISABLE_SUPPORT_EXPONENTIAL
 
 // Include the vendorized tiny printf implementation.
 #include "../vendor/printf.c"
