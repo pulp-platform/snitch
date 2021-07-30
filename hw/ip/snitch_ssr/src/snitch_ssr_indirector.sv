@@ -48,10 +48,11 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   input  logic      cfg_indir_i,
   input  logic      cfg_isect_slv_i,    // Whether to consume indices from intersector
   input  logic      cfg_isect_mst_i,    // Whether to emit indices to intersector
-  input  logic      cfg_isect_merge_i,  // Whether to form union instead of intersection
+  input  logic      cfg_isect_slv_ena_i,  // Whether to wait for connected slave with emission
   input  idx_size_t cfg_size_i,
   input  pointer_t  cfg_base_i,
   input  shift_t    cfg_shift_i,
+  input  idx_flags_t  cfg_flags_i,
   // With natural iterator level 0 (upstream)
   input  pointer_t  natit_pointer_i,
   output logic      natit_ready_o,
@@ -274,8 +275,13 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     // Output index, validity, and zero flag depend on whether we intersect
     always_comb begin
       if (Cfg.IsectMaster & cfg_isect_mst_i) begin
-        isect_mst_req_o = '{merge: cfg_isect_merge_i, idx: idx_ser_out,
-            done: isect_done_q, valid: (idx_ser_valid | isect_done_q) & mem_ready_i};
+        isect_mst_req_o = '{
+            merge:    cfg_flags_i.merge,
+            slv_ena:  cfg_isect_slv_ena_i,
+            idx:      idx_ser_out,
+            done:     isect_done_q,
+            valid:    (idx_ser_valid | isect_done_q) & mem_ready_i
+            };
         idx_isect_ena   = idx_bytecnt_ena;
         mem_idx         = idx_isect_q;
         mem_skip        = isect_mst_hs & isect_mst_rsp_i.skip;

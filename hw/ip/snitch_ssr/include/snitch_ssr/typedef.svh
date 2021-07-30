@@ -10,6 +10,7 @@
 `define SSR_ISECT_TYPEDEF_MST_REQ_T(__req_t, __index_t) \
   typedef struct packed { \
     logic     merge;  \
+    logic     slv_ena;  \
     __index_t idx;    \
     logic     done;   \
     logic     valid;  \

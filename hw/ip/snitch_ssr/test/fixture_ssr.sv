@@ -46,9 +46,8 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
 
   // Configuration written through proper registers
   typedef struct packed {
-    logic [31:0] idx_shift;
     logic [31:0] idx_base;
-    logic [31:0] idx_size;
+    logic [31:0] idx_cfg;
     logic [3:0][31:0] stride;
     logic [3:0][31:0] bound;
     logic [31:0] rep;
@@ -246,9 +245,8 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
       cfg_write(i+2, cfg.bound[i]);
       cfg_write(i+6, cfg.stride[i]);
     end
-    cfg_write(10, cfg.idx_size);
+    cfg_write(10, cfg.idx_cfg);
     cfg_write(11, cfg.idx_base);
-    cfg_write(12, cfg.idx_shift);
   endtask
 
   task automatic cfg_launch_status (input cfg_status_t cfg);
@@ -270,6 +268,8 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
       cfg_read(i+2, cfg.bound[i]);
       cfg_read(i+6, cfg.stride[i]);
     end
+    cfg_read(10, cfg.idx_cfg);
+    cfg_read(11, cfg.idx_base);
   endtask
 
   task automatic cfg_read_status (output cfg_status_t status);
@@ -524,9 +524,9 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   );
     cfg_regs_t    regs;
     cfg_status_t  status;
+    cfg_idx_ctl_t idx_ctl = cfg_idx_ctl_t'{flags: '0, shift: idx_shift, size: idx_size};
     logic [31:0]  idx_base_ptr  = idx_base;
-    regs = {32'(idx_shift), 32'(data_base), 32'(idx_size),
-        (32*4)'(WordBytes), (32*4)'(bound), 32'(rep)};
+    regs = {32'(data_base), 32'(idx_ctl), (32*4)'(WordBytes), (32*4)'(bound), 32'(rep)};
     status.upper  = {1'b0, write, 2'b0, 1'b1};
     status.ptr    = idx_base_ptr;
     verify_launch(regs, status, alias_launch);

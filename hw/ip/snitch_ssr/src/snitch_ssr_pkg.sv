@@ -54,4 +54,20 @@ package snitch_ssr_pkg;
     logic indir;
   } cfg_status_upper_t;
 
+  // Indexing control flags
+  typedef struct packed {
+    /* TODO
+    logic incr_base;
+    logic delta_mode;
+    */
+    logic merge;
+  } idx_flags_t;
+
+  // Layout of indexing control register
+  typedef struct packed {
+    idx_flags_t flags;
+    logic [7:0] shift;
+    logic [7:0] size;
+  } cfg_idx_ctl_t;
+
 endpackage

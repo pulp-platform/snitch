@@ -68,9 +68,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   logic enable, done;
 
   typedef struct packed {
-    logic idx_shift;
     logic idx_base;
-    logic idx_size;
+    logic idx_cfg;
     logic [3:0] stride;
     logic [3:0] bound;
     logic rep;
@@ -86,9 +85,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
   // Read map for added indirection registers
   typedef struct packed {
-    logic [31:0]  idx_shift;
     logic [31:0]  idx_base;
-    logic [31:0]  idx_size;
+    logic [31:0]  idx_cfg;
   } indir_read_map_t;
 
   // Signals interfacing with indirection datapath
@@ -124,6 +122,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     logic [Cfg.ShiftWidth-1:0]    idx_shift_q, idx_shift_sd, idx_shift_sq;
     logic [Cfg.PointerWidth-1:0]  idx_base_q, idx_base_sd, idx_base_sq;
     idx_size_t                    idx_size_q, idx_size_sd, idx_size_sq;
+    idx_flags_t                   idx_flags_q, idx_flags_sd, idx_flags_sq;
 
     // Output spill register, if it exists
     out_spill_t spill_in_data;
@@ -131,17 +130,25 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     logic spill_out_valid, spill_out_ready;
 
     // Config register write
+    cfg_idx_ctl_t cfg_wdata_idx_ctl;
+    assign cfg_wdata_idx_ctl = cfg_wdata_i;
     always_comb begin
       idx_shift_sd  = idx_shift_sq;
       idx_base_sd   = idx_base_sq;
       idx_size_sd   = idx_size_sq;
-      if (write_strobe.idx_shift) idx_shift_sd = cfg_wdata_i;
+      idx_flags_sd  = idx_flags_sq;
+      if (write_strobe.idx_cfg) begin
+        idx_flags_sd = cfg_wdata_idx_ctl.flags;
+        idx_shift_sd = cfg_wdata_idx_ctl.shift;
+        idx_size_sd  = cfg_wdata_idx_ctl.size;
+      end
       if (write_strobe.idx_base)  idx_base_sd  = cfg_wdata_i & WordAddrMask;
-      if (write_strobe.idx_size)  idx_size_sd  = cfg_wdata_i;
     end
 
     // Config register read
-    assign indir_read_map = '{idx_shift_q, idx_base_q, idx_size_q};
+    assign indir_read_map.idx_base = idx_base_q;
+    assign indir_read_map.idx_cfg =
+        cfg_idx_ctl_t'{flags: idx_flags_q, shift: idx_shift_q, size: idx_size_q};
 
     // Config registers
     `FFARN(idx_shift_sq, idx_shift_sd, '0, clk_i, rst_ni)
@@ -150,6 +157,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     `FFLARN(idx_base_q, idx_base_sd, config_q.done, '0, clk_i, rst_ni)
     `FFARN(idx_size_sq, idx_size_sd, '0, clk_i, rst_ni)
     `FFLARN(idx_size_q, idx_size_sd, config_q.done, '0, clk_i, rst_ni)
+    `FFARN(idx_flags_sq, idx_flags_sd, '0, clk_i, rst_ni)
+    `FFLARN(idx_flags_q, idx_flags_sd, config_q.done, '0, clk_i, rst_ni)
 
     // Delay register for last iteration of base loop, in case additional iteration needed.
     `FFLARNC(natit_base_last_q, natit_base_last_d, enable, natit_done, 1'b0, clk_i, rst_ni)
@@ -196,10 +205,11 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
       .cfg_indir_i         ( config_q.indir   ),
       .cfg_isect_slv_i     ( config_q.indir & (config_q.dims == 2'b01)  ),
       .cfg_isect_mst_i     ( config_q.indir & config_q.dims[1]          ),
-      .cfg_isect_merge_i   ( config_q.indir & (config_q.dims == 2'b11)  ),
+      .cfg_isect_slv_ena_i ( config_q.indir & (config_q.dims == 2'b11)  ),
       .cfg_size_i          ( idx_size_q       ),
       .cfg_base_i          ( idx_base_q       ),
       .cfg_shift_i         ( idx_shift_q      ),
+      .cfg_flags_i         ( idx_flags_q      ),
       .natit_pointer_i     ( pointer_q        ),
       .natit_ready_o       ( natit_ready      ),
       .natit_done_i        ( natit_done       ),

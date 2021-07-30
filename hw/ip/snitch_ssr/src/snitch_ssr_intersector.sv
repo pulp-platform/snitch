@@ -27,8 +27,7 @@ module snitch_ssr_intersector import snitch_ssr_pkg::*; #(
 );
 
   logic isect_match, isect_mslag;
-  logic streamctl_ready;
-  logic isect_ena, meta_ena, merge_ena, dst_slv_ena, dst_str_ena;
+  logic isect_ena, meta_ena, merge_ena, mst_slv_ena;
   logic src_valid;
   logic dst_slv_ready, dst_str_ready, dst_all_ready;
   logic isect_done, isect_msout;
@@ -41,16 +40,13 @@ module snitch_ssr_intersector import snitch_ssr_pkg::*; #(
   assign isect_ena    = merge_ena | isect_match | isect_done;
   assign meta_ena     = ~isect_match & ~isect_done;
   assign merge_ena    = mst_req_i[1].merge & mst_req_i[0].merge;
-  // TODO: Control destination enables from master configs, too
-  assign dst_slv_ena  = slv_req_i.ena & 1'b1;
-  assign dst_str_ena  = 1'b1;
+  assign mst_slv_ena  = mst_req_i[1].slv_ena | mst_req_i[0].slv_ena;
 
   // Masters must both provide indices to proceed
   assign src_valid = mst_req_i[0].valid & mst_req_i[1].valid;
 
   // Destinations can stall iff enabled
-  assign dst_slv_ready  = ~dst_slv_ena | slv_req_i.ready;
-  assign dst_str_ready  = ~dst_str_ena | streamctl_ready;
+  assign dst_slv_ready  = ~mst_slv_ena | (slv_req_i.ena & slv_req_i.ready);
   assign dst_all_ready  = dst_slv_ready & dst_str_ready;
 
   // Kill intersection as soon as no more indices can be emitted
@@ -100,7 +96,7 @@ module snitch_ssr_intersector import snitch_ssr_pkg::*; #(
     .usage_o   (  ),
     .data_i    ( isect_done ),
     .valid_i   ( src_valid & dst_slv_ready & isect_ena ),
-    .ready_o   ( streamctl_ready    ),
+    .ready_o   ( dst_str_ready      ),
     .data_o    ( streamctl_done_o   ),
     .valid_o   ( streamctl_valid_o  ),
     .ready_i   ( streamctl_ready_i  )
