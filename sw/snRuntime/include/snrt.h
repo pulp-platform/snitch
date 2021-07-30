@@ -23,9 +23,7 @@ typedef struct snrt_slice {
     uint64_t end;
 } snrt_slice_t;
 
-static inline size_t snrt_slice_len(snrt_slice_t s) {
-    return s.end - s.start;
-}
+static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
 
 extern void snrt_barrier();
 

@@ -11,8 +11,8 @@ void snrt_putchar(char character);
 /// vendor printf settings
 
 #if defined(__GNUC__)
-  // the gcc toolchain doesn't support this
-  #define PRINTF_DISABLE_SUPPORT_FLOAT
+// the gcc toolchain doesn't support this
+#define PRINTF_DISABLE_SUPPORT_FLOAT
 #endif
 
 // Include the vendorized tiny printf implementation.
