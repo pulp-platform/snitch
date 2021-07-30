@@ -1,3 +1,6 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
 onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate -expand -group {All Cores} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/i_snitch/wfi_q}
