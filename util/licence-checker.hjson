@@ -18,6 +18,8 @@
         'sw/banshee/tests/runtime/printf.*',
         // Do not check solder snippets, they generally do not contain valid
         // stand-alone code.
-        'util/solder/*.sv.tpl'
+        'util/solder/*.sv.tpl',
+        // Questasim scripts are not correctly identified by license-checker
+        'hw/system/*.do'
     ],
 }
