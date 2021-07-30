@@ -104,10 +104,10 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   logic  [NumSsrs-1:0] lane_valid;
   logic  [NumSsrs-1:0] lane_ready;
 
-  logic [4:0]       dmcfg_word;
-  logic [7:0]       dmcfg_upper_addr;
-  logic [2:0][31:0] dmcfg_rdata;
-  logic [2:0]       dmcfg_strobe; // which data mover is currently addressed
+  logic [4:0]               dmcfg_word;
+  logic [4:0]               dmcfg_upper_addr;
+  logic [NumSsrs-1:0][31:0] dmcfg_rdata;
+  logic [NumSsrs-1:0]       dmcfg_strobe; // which data mover is currently addressed
 
   snitch_ssr_switch #(
     .DataWidth ( DataWidth  ),
