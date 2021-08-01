@@ -11,7 +11,7 @@ extern const uint32_t _snrt_cluster_cluster_id;
 void *const _snrt_cluster_global_start = (void *)0x90000000;
 void *const _snrt_cluster_global_end = (void *)0x100000000;
 
-const uint32_t snrt_stack_size __attribute__((weak)) = 10;
+const uint32_t snrt_stack_size __attribute__((weak, section(".rodata"))) = 10;
 
 // The boot data generated along with the system RTL.
 // See `hw/system/snitch_cluster/test/tb_lib.hh` for details.
