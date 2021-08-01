@@ -76,13 +76,7 @@ snrt.crt0.init_tls:
     la        t0, __tdata_start
     la        t1, __tdata_end
     la        t2, __tbss_start
-    # Need to use a different tbss_end symbol when using LLD since it 
-    # hard-codes the tbss section to zero size
-#ifdef __LINK_LLD
-    la        t3, __tbss_end2
-#else
     la        t3, __tbss_end
-#endif
     add       sp, sp, t0   # subtract sp to make room for TLS and align
     sub       sp, sp, t1
     add       sp, sp, t2
