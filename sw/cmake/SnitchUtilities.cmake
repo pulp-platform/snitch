@@ -32,7 +32,7 @@ endmacro()
 macro(add_snitch_executable name)
     add_executable(${ARGV})
     target_link_libraries(${name} ${SNITCH_RUNTIME})
-    target_link_options(${name} PRIVATE "SHELL:-T ${LINKER_SCRIPT}" "SHELL:-T ${TARGET_LINKER_SCRIPT}")
+    target_link_options(${name} PRIVATE "SHELL:-T ${LINKER_SCRIPT}")
     add_custom_command(
         TARGET ${name}
         POST_BUILD

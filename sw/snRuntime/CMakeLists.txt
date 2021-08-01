@@ -21,12 +21,18 @@ else()
         PARENT_SCOPE)
 endif()
 
+set(MEM_DRAM_ORIGIN "0x80000000")
+set(MEM_DRAM_SIZE "2147483648")
+set(MEM_L1_ORIGIN "0x100000")
+set(MEM_L1_SIZE "128K")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/link/common.ld.in common.ld @ONLY)
+set(LINKER_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/common.ld CACHE PATH "")
 
 # provide linker script
-set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/link/common.ld" CACHE PATH "")
+# set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/link/common.ld" CACHE PATH "")
 message(STATUS "Using common linker script: ${LINKER_SCRIPT}")
-set(TARGET_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/link/banshee.ld" CACHE FILEPATH "Linker Script")
-message(STATUS "Using target linker script: ${TARGET_LINKER_SCRIPT}")
+# set(TARGET_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/link/banshee.ld" CACHE FILEPATH "Linker Script")
+# message(STATUS "Using target linker script: ${TARGET_LINKER_SCRIPT}")
 
 include_directories(include vendor)
 
