@@ -67,8 +67,8 @@ snrt.crt0.init_stack:
     # Misalign stacks in the TCDM to reduce banking conflicts
     slli      t0, a0, 3  # this hart
     slli      t1, a1, 3  # all harts
-    add       sp, sp, t0
-    add       a3, a3, t1
+    sub       sp, sp, t0
+    sub       a3, a3, t1
 
     # Allocate thread-local storage at the top of the stack and set tp
     # to the base of the tls
