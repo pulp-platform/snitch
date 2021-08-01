@@ -6,7 +6,15 @@
 #include "snrt.h"
 
 int main() {
-    // printf("Hello World!\n");
+    static uint32_t cid = 0;
+    uint32_t core_idx = snrt_global_core_idx();
+    uint32_t core_num = snrt_global_core_num();
+
+    // serialize section
+    do {
+        snrt_barrier();
+    } while (cid != core_idx);
+
     printf("# 0 hart %d global core %d(%d) ", snrt_hartid(),
            snrt_global_core_idx(), snrt_global_core_num());
     printf("in cluster %d(%d) ", snrt_cluster_idx(), snrt_cluster_num());
@@ -23,10 +31,12 @@ int main() {
            snrt_global_memory().start, snrt_global_memory().end,
            snrt_cluster_memory().start, snrt_cluster_memory().end);
     printf("\n");
-    // printf("core_id    %#x\n", core_id);
-    // printf("core_num   %#x\n", core_num);
-    // printf("spm_start  %#x\n", spm_start);
-    // printf("spm_end    %#x\n", spm_end);
+
+    // de-serialize section
+    ++cid;
+    do {
+        snrt_barrier();
+    } while (cid != core_num);
 
     return 0;
 }

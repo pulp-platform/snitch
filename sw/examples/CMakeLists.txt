@@ -16,7 +16,7 @@ include(SnitchUtilities)
 project(Examples LANGUAGES C ASM)
 
 # Compile options
-# add_compile_options(-O3 -g -ffunction-sections)
+add_compile_options(-O3 -g -ffunction-sections)
 
 # Build the runtime
 add_subdirectory(../snRuntime snRuntime)
