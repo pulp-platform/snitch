@@ -15,6 +15,7 @@ SECTIONS
 {
   .text           : { } >DRAM
   .rodata         : { } >DRAM
+  .tohost         : { } >DRAM
   .data           : { } >L1 AT> DRAM
   .sdata          : { } >L1 AT> DRAM
   .sbss           : { } >L1
