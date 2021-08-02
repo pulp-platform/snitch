@@ -2603,6 +2603,6 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       (inst_valid_o && inst_ready_i && inst_cacheable_o) ##1 (inst_valid_o && $stable(inst_addr_o))
       |-> inst_ready_i && $stable(inst_data_i), clk_i, rst_i)
 
-  `ASSERT(RegWriteKnown, gpr_we |-> !$isunknown(gpr_wdata), clk_i, rst_i)
+  `ASSERT(RegWriteKnown, gpr_we & (gpr_waddr != 0) |-> !$isunknown(gpr_wdata), clk_i, rst_i)
 
 endmodule
