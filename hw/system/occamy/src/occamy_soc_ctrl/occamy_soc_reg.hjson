@@ -13,6 +13,11 @@
       type: "int",
       default: "31"
     },
+    { name: "NumIsolateRegs",
+      desc: "Number of Isolate Regs.",
+      type: "int",
+      default: "12"
+    },
   ],
   name: "Occamy SoC"
   clock_primary: "clk_i"
@@ -103,6 +108,59 @@
             name: "DRV"
             resval: "2"
             desc: "Drive strength."
+          }
+        ]
+      }
+    }
+    { multireg:
+      { name: "ISOLATE"
+        desc: "Isolate port of given quadrant."
+        swaccess: "rw"
+        hwaccess: "hro"
+        count: "NumIsolateRegs"
+        cname: "isolate"
+        fields: [
+          { bits: "3:0"
+            resval: "1"
+            name: "ISOLATE"
+            desc: '''
+                  Isolate S1 Quadrant. Four bits corresponding to:
+                    - Bit 0: Narrow In
+                    - Bit 1: Narrow Out
+                    - Bit 2: Wide In
+                    - Bit 3: Wide Out
+
+                  0: De-isolate request
+                  1: Isolate request
+                  '''
+          }
+        ]
+      }
+    }
+    { multireg:
+      { name: "ISOLATED"
+        desc: "Isolation status of S1 quadrant and port"
+        swaccess: "ro"
+        hwaccess: "hwo"
+        hwqe:     "true",
+        hwext:    "true",
+        count: "NumIsolateRegs"
+        cname: "isolated"
+        fields: [
+          { bits: "3:0"
+            resval: "1"
+            name: "ISOLATED"
+            desc: '''
+                  Isolate satus of S1 Quadrant. Four bits corresponding to:
+                    - Bit 0: Narrow In
+                    - Bit 1: Narrow Out
+                    - Bit 2: Wide In
+                    - Bit 3: Wide Out
+
+                  Isolation status:
+                    0: De-isolated
+                    1: Isolated
+                  '''
           }
         ]
       }
