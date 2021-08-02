@@ -101,4 +101,11 @@ SECTIONS
   __global_pointer$ = MIN(__SDATA_BEGIN__ + 0x800,
               MAX(__DATA_BEGIN__ + 0x800, __BSS_END__ - 0x800));
   _end = .; PROVIDE (end = .);
+
+  /* Uninitialized data section in DRAM */
+  .dram :
+  {
+    *(.dram)
+    _edram = .;
+  } >DRAM
 }
