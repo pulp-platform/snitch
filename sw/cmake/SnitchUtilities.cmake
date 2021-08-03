@@ -4,8 +4,10 @@
 
 # Locate the banshee simulator for test execution.
 set(SNITCH_BANSHEE "banshee" CACHE PATH "Path to the banshee simulator for testing")
+set(RUN_BANSHEE_ARGS "--num-cores=8" CACHE PATH "Arguments passed to the banshee sim for the run-banshee target")
 set(SNITCH_RUNTIME "snRuntime-banshee" CACHE STRING "Target name of the snRuntime flavor to link against")
 set(SNITCH_SIMULATOR "" CACHE PATH "Command to run a binary in an RTL simulation")
+set(SPIKE_DASM "spike-dasm" CACHE PATH "Path to the spike-dasm for generating traces")
 set(SNITCH_TEST_PREFIX "")
 message(STATUS "Check for Banshee")
 execute_process(COMMAND ${SNITCH_BANSHEE} --version OUTPUT_VARIABLE SNITCH_BANSHEE_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -37,6 +39,21 @@ macro(add_snitch_executable name)
         TARGET ${name}
         POST_BUILD
         COMMAND ${CMAKE_OBJDUMP} -dhS $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.s)
+    # Run target for banshee
+    if (SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
+        add_custom_target( run-banshee-${name}
+            COMMAND ${SNITCH_BANSHEE} --no-opt-llvm --no-opt-jit ${RUN_BANSHEE_ARGS} --trace $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.trace
+            COMMAND cat $<TARGET_FILE:${name}>.trace | ${SPIKE_DASM} > $<TARGET_FILE:${name}>.trace.txt
+            COMMAND awk -F\" \" '{print>\"${name}\"$$3\".txt\"}' $<TARGET_FILE:${name}>.trace.txt
+            DEPENDS $<TARGET_FILE:${name}>)
+    endif()
+    # Run target for RTL simulator
+    if (SNITCH_SIMULATOR AND NOT SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
+        add_custom_target( run-rtl-${name}
+            COMMAND ${SNITCH_SIMULATOR} $<TARGET_FILE:${name}>
+            COMMAND for f in logs/trace_hart_*.dasm\; do ${SPIKE_DASM} < $$f | ${PYTHON} ${SNRUNTIME_SRC_DIR}/../../util/gen_trace.py > $$\(echo $$f | sed 's/\\.dasm/\\.txt/'\)\; done
+            DEPENDS $<TARGET_FILE:${name}>)
+    endif()
 endmacro()
 
 macro(add_snitch_test_executable name)

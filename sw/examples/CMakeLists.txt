@@ -8,6 +8,9 @@ cmake_minimum_required(VERSION 3.13)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 include(SnitchUtilities)
 
+# Link simulator
+set(SNITCH_SIMULATOR ../../../hw/system/snitch_cluster/bin/snitch_cluster.vlt)
+
 # Create project
 project(Examples LANGUAGES C ASM)
 
