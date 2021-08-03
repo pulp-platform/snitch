@@ -7,17 +7,20 @@ ENTRY(_start)
 <% dram_address = cfg['dram']['address']; %>
 MEMORY
 {
-    DRAM (rwxa)  : ORIGIN = ${dram_address}, LENGTH = ${cfg['dram']['length']}
+    DRAM (rwxai)  : ORIGIN = ${dram_address}, LENGTH = ${cfg['dram']['length']}
     L1 (rw) : ORIGIN = ${l1_region[0]}, LENGTH = ${l1_region[1]}K
 }
 
 SECTIONS
 {
-  .text           : { } >DRAM
-  .rodata         : { } >DRAM
-  .tohost         : { } >DRAM
-  .data           : { } >L1 AT> DRAM
-  .sdata          : { } >L1 AT> DRAM
-  .sbss           : { } >L1
-  .bss            : { } >L1
+  . = ${dram_address};
+  .text.init : { *(.text.init) }
+  . = ALIGN(0x1000);
+  .tohost : { *(.tohost) }
+  . = ALIGN(0x1000);
+  .text : { *(.text) }
+  . = ALIGN(0x1000);
+  .data : { *(.data) }
+  .bss : { *(.bss) }
+  _end = .;
 }
