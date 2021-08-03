@@ -59,20 +59,21 @@ SECTIONS
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
+  /* small data section that can be addressed through the global pointer */
+  .sdata          :
+  {
+    __SDATA_BEGIN__ = .;
+    __global_pointer$ = . + 0x7f0;
+    *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata .srodata.*)
+    *(.sdata .sdata.* .gnu.linkonce.s.*)
+  } >L1 AT> DRAM
+
   /* Initialized data sections goes into L1, load LMA copy after code */
   .data : 
   {
     __DATA_BEGIN__ = .;
     *(.data .data.* .gnu.linkonce.d.*)
     SORT(CONSTRUCTORS)
-  } >L1 AT> DRAM
-
-  /* small data section that can be addressed through the global pointer */
-  .sdata          :
-  {
-    __SDATA_BEGIN__ = .;
-    *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata .srodata.*)
-    *(.sdata .sdata.* .gnu.linkonce.s.*)
   } >L1 AT> DRAM
   _edata = .; PROVIDE (edata = .);
 
@@ -101,8 +102,6 @@ SECTIONS
   . = SEGMENT_START("ldata-segment", .);
   . = ALIGN(32 / 8);
   __BSS_END__ = .;
-  __global_pointer$ = MIN(__SDATA_BEGIN__ + 0x800,
-              MAX(__DATA_BEGIN__ + 0x800, __BSS_END__ - 0x800));
   _end = .; PROVIDE (end = .);
 
   /* Uninitialized data section in DRAM */
