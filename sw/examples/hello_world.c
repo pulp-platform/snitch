@@ -10,12 +10,7 @@ int main() {
     uint32_t core_idx = snrt_global_core_idx();
     uint32_t core_num = snrt_global_core_num();
 
-    // serialize section
-    do {
-        snrt_barrier();
-    } while (cid != core_idx);
-
-    printf("# 0 hart %d global core %d(%d) ", snrt_hartid(),
+    printf("# hart %d global core %d(%d) ", snrt_hartid(),
            snrt_global_core_idx(), snrt_global_core_num());
     printf("in cluster %d(%d) ", snrt_cluster_idx(), snrt_cluster_num());
     printf("cluster core %d(%d) ", snrt_cluster_core_idx(),
@@ -27,16 +22,10 @@ int main() {
     printf("compute: %d dm: %d ", snrt_is_compute_core(), snrt_is_dm_core());
     printf("\n");
 
-    printf("# 1 global mem [%#llx:%#llx] cluster mem [%#llx:%#llx] ",
+    printf("# global mem [%#llx:%#llx] cluster mem [%#llx:%#llx] ",
            snrt_global_memory().start, snrt_global_memory().end,
            snrt_cluster_memory().start, snrt_cluster_memory().end);
     printf("\n");
-
-    // de-serialize section
-    ++cid;
-    do {
-        snrt_barrier();
-    } while (cid != core_num);
 
     return 0;
 }
