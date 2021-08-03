@@ -99,6 +99,7 @@ add_snitch_test(simple tests/simple.c)
 add_snitch_test(varargs_1 tests/varargs_1.c)
 add_snitch_test(varargs_2 tests/varargs_2.c)
 add_snitch_test(barrier tests/barrier.c)
+add_snitch_test(lto tests/lto.c tests/lto_a.c)
 
 add_snitch_test_executable(dma_simple tests/dma_simple.c)
 add_snitch_test_executable(printf_simple tests/printf_simple.c)
