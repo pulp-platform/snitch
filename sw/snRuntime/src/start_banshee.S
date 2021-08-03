@@ -27,6 +27,15 @@ _snrt_cluster_barrier:
     mv        zero, t0
     ret
 
+# Function to init data segment
+# Expecting:
+# - a0: cluster-local core id
+_snrt_init_data:
+    .globl _snrt_init_data
+    # in banshee, the data segment is initialized by the ELF loader and
+    # the load address of the data segment doesn't contain the data section
+    ret
+
 # Function to terminate execution.
 #
 # Expecting:

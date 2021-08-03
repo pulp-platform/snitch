@@ -56,6 +56,9 @@ SECTIONS
      the LLD linker */
   .tbssend : { __tbss_end2 = .; } 
   
+  /* used by the startup to initialize data */
+  _sidata = LOADADDR(.data);
+
   /* Initialized data sections goes into L1, load LMA copy after code */
   .data : 
   {

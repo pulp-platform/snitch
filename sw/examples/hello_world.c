@@ -6,7 +6,6 @@
 #include "snrt.h"
 
 int main() {
-    static uint32_t cid = 0;
     uint32_t core_idx = snrt_global_core_idx();
     uint32_t core_num = snrt_global_core_num();
 
