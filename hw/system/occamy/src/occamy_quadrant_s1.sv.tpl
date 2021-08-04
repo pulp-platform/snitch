@@ -23,6 +23,8 @@ module occamy_quadrant_s1
   input  logic [NrCoresS1Quadrant-1:0] meip_i,
   input  logic [NrCoresS1Quadrant-1:0] mtip_i,
   input  logic [NrCoresS1Quadrant-1:0] msip_i,
+  input  logic [3:0]                   isolate_i,
+  output logic [3:0]                   isolated_o,
   // HBI Connection
   output ${wide_xbar_quadrant_s1.out_hbi.req_type()}   quadrant_hbi_out_req_o,
   input  ${wide_xbar_quadrant_s1.out_hbi.rsp_type()}   quadrant_hbi_out_rsp_i,
@@ -52,9 +54,10 @@ module occamy_quadrant_s1
   // Narrow In + IW Converter //
   ///////////////////////////////
   <%
-    narrow_cluster_in_iwc = soc_narrow_xbar.out_s1_quadrant_0\
+    narrow_cluster_in_iwc = soc_narrow_xbar.out_s1_quadrant_0 \
       .copy(name="narrow_cluster_in_iwc") \
       .declare(context) \
+      .isolate(context, "isolate_i[0]", "narrow_cluster_in_isolate", isolated="isolated_o[0]") \
       .change_iw(context, narrow_xbar_quadrant_s1.in_top.iw, "narrow_cluster_in_iwc", to=narrow_xbar_quadrant_s1.in_top)
   %>
   assign narrow_cluster_in_iwc_req = quadrant_narrow_in_req_i;
@@ -63,7 +66,9 @@ module occamy_quadrant_s1
   ///////////////////////////////
   // Narrow Out + IW Converter //
   ///////////////////////////////
-  <% narrow_cluster_out_iwc = narrow_xbar_quadrant_s1.out_top.change_iw(context, soc_narrow_xbar.in_s1_quadrant_0.iw, "narrow_cluster_out_iwc") %>
+  <% narrow_cluster_out_iwc = narrow_xbar_quadrant_s1.out_top \
+    .change_iw(context, soc_narrow_xbar.in_s1_quadrant_0.iw, "narrow_cluster_out_iwc") \
+    .isolate(context, "isolate_i[1]", "narrow_cluster_out_isolate", isolated="isolated_o[1]") %>
 
   assign quadrant_narrow_out_req_o = ${narrow_cluster_out_iwc.req_name()};
   assign ${narrow_cluster_out_iwc.rsp_name()} = quadrant_narrow_out_rsp_i;
@@ -81,7 +86,10 @@ module occamy_quadrant_s1
       .add_const_cache(context, "snitch_const_cache", const_cache_cfg["width"], const_cache_cfg["count"], const_cache_cfg["sets"])
     else:
       wide_cluster_out_const_cache = wide_xbar_quadrant_s1.out_top
-      wide_cluster_out_iwc = wide_cluster_out_const_cache.change_iw(context, 3, "wide_cluster_out_iwc")
+
+    wide_cluster_out_iwc = wide_cluster_out_const_cache \
+      .change_iw(context, 3, "wide_cluster_out_iwc") \
+      .isolate(context, "isolate_i[3]", "wide_cluster_out_isolate", isolated="isolated_o[3]")
   %>
 
   assign quadrant_wide_out_req_o = ${wide_cluster_out_iwc.req_name()};
@@ -104,6 +112,7 @@ module occamy_quadrant_s1
     soc_wide_xbar.out_s1_quadrant_0 \
       .copy(name="wide_cluster_in_iwc") \
       .declare(context) \
+      .isolate(context, "isolate_i[2]", "wide_cluster_in_isolate", isolated="isolated_o[2]") \
       .change_iw(context, wide_xbar_quadrant_s1.in_top.iw, "wide_cluster_in_iwc", to=wide_xbar_quadrant_s1.in_top)
   %>
   assign wide_cluster_in_iwc_req = quadrant_wide_in_req_i;

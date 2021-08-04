@@ -105,7 +105,7 @@ module occamy_top
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
-  always_comb soc_ctrl_in = '0;
+  assign soc_ctrl_in.boot_mode.d = boot_mode_i;
 
   <% spm_words = cfg["spm"]["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
 
@@ -197,6 +197,8 @@ module occamy_top
     .meip_i ('0),
     .mtip_i ('0),
     .msip_i ('0),
+    .isolate_i (soc_ctrl_out.isolate[${i}].q),
+    .isolated_o (soc_ctrl_in.isolated[${i}].d),
     .quadrant_hbi_out_req_o (${wide_hbi_out.req_name()}),
     .quadrant_hbi_out_rsp_i (${wide_hbi_out.rsp_name()}),
     .quadrant_narrow_out_req_o (${narrow_out.req_name()}),

@@ -374,6 +374,66 @@ module occamy_soc_reg_top #(
   logic [1:0] pad_30_drv_30_qs;
   logic [1:0] pad_30_drv_30_wd;
   logic pad_30_drv_30_we;
+  logic [3:0] isolate_0_isolate_0_qs;
+  logic [3:0] isolate_0_isolate_0_wd;
+  logic isolate_0_isolate_0_we;
+  logic [3:0] isolate_0_isolate_1_qs;
+  logic [3:0] isolate_0_isolate_1_wd;
+  logic isolate_0_isolate_1_we;
+  logic [3:0] isolate_0_isolate_2_qs;
+  logic [3:0] isolate_0_isolate_2_wd;
+  logic isolate_0_isolate_2_we;
+  logic [3:0] isolate_0_isolate_3_qs;
+  logic [3:0] isolate_0_isolate_3_wd;
+  logic isolate_0_isolate_3_we;
+  logic [3:0] isolate_0_isolate_4_qs;
+  logic [3:0] isolate_0_isolate_4_wd;
+  logic isolate_0_isolate_4_we;
+  logic [3:0] isolate_0_isolate_5_qs;
+  logic [3:0] isolate_0_isolate_5_wd;
+  logic isolate_0_isolate_5_we;
+  logic [3:0] isolate_0_isolate_6_qs;
+  logic [3:0] isolate_0_isolate_6_wd;
+  logic isolate_0_isolate_6_we;
+  logic [3:0] isolate_0_isolate_7_qs;
+  logic [3:0] isolate_0_isolate_7_wd;
+  logic isolate_0_isolate_7_we;
+  logic [3:0] isolate_1_isolate_8_qs;
+  logic [3:0] isolate_1_isolate_8_wd;
+  logic isolate_1_isolate_8_we;
+  logic [3:0] isolate_1_isolate_9_qs;
+  logic [3:0] isolate_1_isolate_9_wd;
+  logic isolate_1_isolate_9_we;
+  logic [3:0] isolate_1_isolate_10_qs;
+  logic [3:0] isolate_1_isolate_10_wd;
+  logic isolate_1_isolate_10_we;
+  logic [3:0] isolate_1_isolate_11_qs;
+  logic [3:0] isolate_1_isolate_11_wd;
+  logic isolate_1_isolate_11_we;
+  logic [3:0] isolated_0_isolated_0_qs;
+  logic isolated_0_isolated_0_re;
+  logic [3:0] isolated_0_isolated_1_qs;
+  logic isolated_0_isolated_1_re;
+  logic [3:0] isolated_0_isolated_2_qs;
+  logic isolated_0_isolated_2_re;
+  logic [3:0] isolated_0_isolated_3_qs;
+  logic isolated_0_isolated_3_re;
+  logic [3:0] isolated_0_isolated_4_qs;
+  logic isolated_0_isolated_4_re;
+  logic [3:0] isolated_0_isolated_5_qs;
+  logic isolated_0_isolated_5_re;
+  logic [3:0] isolated_0_isolated_6_qs;
+  logic isolated_0_isolated_6_re;
+  logic [3:0] isolated_0_isolated_7_qs;
+  logic isolated_0_isolated_7_re;
+  logic [3:0] isolated_1_isolated_8_qs;
+  logic isolated_1_isolated_8_re;
+  logic [3:0] isolated_1_isolated_9_qs;
+  logic isolated_1_isolated_9_re;
+  logic [3:0] isolated_1_isolated_10_qs;
+  logic isolated_1_isolated_10_re;
+  logic [3:0] isolated_1_isolated_11_qs;
+  logic isolated_1_isolated_11_re;
 
   // Register instances
   // R[intr_state]: V(False)
@@ -3162,8 +3222,516 @@ module occamy_soc_reg_top #(
 
 
 
+  // Subregister 0 of Multireg isolate
+  // R[isolate_0]: V(False)
 
-  logic [39:0] addr_hit;
+  // F[isolate_0]: 3:0
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_0_isolate_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_0_isolate_0_we),
+    .wd     (isolate_0_isolate_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[0].q ),
+
+    // to register interface (read)
+    .qs     (isolate_0_isolate_0_qs)
+  );
+
+
+  // F[isolate_1]: 7:4
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_0_isolate_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_0_isolate_1_we),
+    .wd     (isolate_0_isolate_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[1].q ),
+
+    // to register interface (read)
+    .qs     (isolate_0_isolate_1_qs)
+  );
+
+
+  // F[isolate_2]: 11:8
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_0_isolate_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_0_isolate_2_we),
+    .wd     (isolate_0_isolate_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[2].q ),
+
+    // to register interface (read)
+    .qs     (isolate_0_isolate_2_qs)
+  );
+
+
+  // F[isolate_3]: 15:12
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_0_isolate_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_0_isolate_3_we),
+    .wd     (isolate_0_isolate_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[3].q ),
+
+    // to register interface (read)
+    .qs     (isolate_0_isolate_3_qs)
+  );
+
+
+  // F[isolate_4]: 19:16
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_0_isolate_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_0_isolate_4_we),
+    .wd     (isolate_0_isolate_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[4].q ),
+
+    // to register interface (read)
+    .qs     (isolate_0_isolate_4_qs)
+  );
+
+
+  // F[isolate_5]: 23:20
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_0_isolate_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_0_isolate_5_we),
+    .wd     (isolate_0_isolate_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[5].q ),
+
+    // to register interface (read)
+    .qs     (isolate_0_isolate_5_qs)
+  );
+
+
+  // F[isolate_6]: 27:24
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_0_isolate_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_0_isolate_6_we),
+    .wd     (isolate_0_isolate_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[6].q ),
+
+    // to register interface (read)
+    .qs     (isolate_0_isolate_6_qs)
+  );
+
+
+  // F[isolate_7]: 31:28
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_0_isolate_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_0_isolate_7_we),
+    .wd     (isolate_0_isolate_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[7].q ),
+
+    // to register interface (read)
+    .qs     (isolate_0_isolate_7_qs)
+  );
+
+
+  // Subregister 8 of Multireg isolate
+  // R[isolate_1]: V(False)
+
+  // F[isolate_8]: 3:0
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_1_isolate_8 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_1_isolate_8_we),
+    .wd     (isolate_1_isolate_8_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[8].q ),
+
+    // to register interface (read)
+    .qs     (isolate_1_isolate_8_qs)
+  );
+
+
+  // F[isolate_9]: 7:4
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_1_isolate_9 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_1_isolate_9_we),
+    .wd     (isolate_1_isolate_9_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[9].q ),
+
+    // to register interface (read)
+    .qs     (isolate_1_isolate_9_qs)
+  );
+
+
+  // F[isolate_10]: 11:8
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_1_isolate_10 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_1_isolate_10_we),
+    .wd     (isolate_1_isolate_10_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[10].q ),
+
+    // to register interface (read)
+    .qs     (isolate_1_isolate_10_qs)
+  );
+
+
+  // F[isolate_11]: 15:12
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h1)
+  ) u_isolate_1_isolate_11 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (isolate_1_isolate_11_we),
+    .wd     (isolate_1_isolate_11_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.isolate[11].q ),
+
+    // to register interface (read)
+    .qs     (isolate_1_isolate_11_qs)
+  );
+
+
+
+
+  // Subregister 0 of Multireg isolated
+  // R[isolated_0]: V(True)
+
+  // F[isolated_0]: 3:0
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_0_isolated_0 (
+    .re     (isolated_0_isolated_0_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[0].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_0_isolated_0_qs)
+  );
+
+
+  // F[isolated_1]: 7:4
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_0_isolated_1 (
+    .re     (isolated_0_isolated_1_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[1].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_0_isolated_1_qs)
+  );
+
+
+  // F[isolated_2]: 11:8
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_0_isolated_2 (
+    .re     (isolated_0_isolated_2_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[2].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_0_isolated_2_qs)
+  );
+
+
+  // F[isolated_3]: 15:12
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_0_isolated_3 (
+    .re     (isolated_0_isolated_3_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[3].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_0_isolated_3_qs)
+  );
+
+
+  // F[isolated_4]: 19:16
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_0_isolated_4 (
+    .re     (isolated_0_isolated_4_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[4].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_0_isolated_4_qs)
+  );
+
+
+  // F[isolated_5]: 23:20
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_0_isolated_5 (
+    .re     (isolated_0_isolated_5_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[5].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_0_isolated_5_qs)
+  );
+
+
+  // F[isolated_6]: 27:24
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_0_isolated_6 (
+    .re     (isolated_0_isolated_6_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[6].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_0_isolated_6_qs)
+  );
+
+
+  // F[isolated_7]: 31:28
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_0_isolated_7 (
+    .re     (isolated_0_isolated_7_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[7].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_0_isolated_7_qs)
+  );
+
+
+  // Subregister 8 of Multireg isolated
+  // R[isolated_1]: V(True)
+
+  // F[isolated_8]: 3:0
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_1_isolated_8 (
+    .re     (isolated_1_isolated_8_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[8].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_1_isolated_8_qs)
+  );
+
+
+  // F[isolated_9]: 7:4
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_1_isolated_9 (
+    .re     (isolated_1_isolated_9_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[9].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_1_isolated_9_qs)
+  );
+
+
+  // F[isolated_10]: 11:8
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_1_isolated_10 (
+    .re     (isolated_1_isolated_10_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[10].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_1_isolated_10_qs)
+  );
+
+
+  // F[isolated_11]: 15:12
+  prim_subreg_ext #(
+    .DW    (4)
+  ) u_isolated_1_isolated_11 (
+    .re     (isolated_1_isolated_11_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      (hw2reg.isolated[11].d),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (isolated_1_isolated_11_qs)
+  );
+
+
+
+
+
+  logic [43:0] addr_hit;
   always_comb begin
     addr_hit = '0;
     addr_hit[ 0] = (reg_addr == OCCAMY_SOC_INTR_STATE_OFFSET);
@@ -3206,6 +3774,10 @@ module occamy_soc_reg_top #(
     addr_hit[37] = (reg_addr == OCCAMY_SOC_PAD_28_OFFSET);
     addr_hit[38] = (reg_addr == OCCAMY_SOC_PAD_29_OFFSET);
     addr_hit[39] = (reg_addr == OCCAMY_SOC_PAD_30_OFFSET);
+    addr_hit[40] = (reg_addr == OCCAMY_SOC_ISOLATE_0_OFFSET);
+    addr_hit[41] = (reg_addr == OCCAMY_SOC_ISOLATE_1_OFFSET);
+    addr_hit[42] = (reg_addr == OCCAMY_SOC_ISOLATED_0_OFFSET);
+    addr_hit[43] = (reg_addr == OCCAMY_SOC_ISOLATED_1_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -3253,6 +3825,10 @@ module occamy_soc_reg_top #(
     if (addr_hit[37] && reg_we && (OCCAMY_SOC_PERMIT[37] != (OCCAMY_SOC_PERMIT[37] & reg_be))) wr_err = 1'b1 ;
     if (addr_hit[38] && reg_we && (OCCAMY_SOC_PERMIT[38] != (OCCAMY_SOC_PERMIT[38] & reg_be))) wr_err = 1'b1 ;
     if (addr_hit[39] && reg_we && (OCCAMY_SOC_PERMIT[39] != (OCCAMY_SOC_PERMIT[39] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[40] && reg_we && (OCCAMY_SOC_PERMIT[40] != (OCCAMY_SOC_PERMIT[40] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[41] && reg_we && (OCCAMY_SOC_PERMIT[41] != (OCCAMY_SOC_PERMIT[41] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[42] && reg_we && (OCCAMY_SOC_PERMIT[42] != (OCCAMY_SOC_PERMIT[42] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[43] && reg_we && (OCCAMY_SOC_PERMIT[43] != (OCCAMY_SOC_PERMIT[43] & reg_be))) wr_err = 1'b1 ;
   end
 
   assign intr_state_ecc_uncorrectable_we = addr_hit[0] & reg_we & ~wr_err;
@@ -3567,6 +4143,66 @@ module occamy_soc_reg_top #(
   assign pad_30_drv_30_we = addr_hit[39] & reg_we & ~wr_err;
   assign pad_30_drv_30_wd = reg_wdata[3:2];
 
+  assign isolate_0_isolate_0_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_0_isolate_0_wd = reg_wdata[3:0];
+
+  assign isolate_0_isolate_1_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_0_isolate_1_wd = reg_wdata[7:4];
+
+  assign isolate_0_isolate_2_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_0_isolate_2_wd = reg_wdata[11:8];
+
+  assign isolate_0_isolate_3_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_0_isolate_3_wd = reg_wdata[15:12];
+
+  assign isolate_0_isolate_4_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_0_isolate_4_wd = reg_wdata[19:16];
+
+  assign isolate_0_isolate_5_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_0_isolate_5_wd = reg_wdata[23:20];
+
+  assign isolate_0_isolate_6_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_0_isolate_6_wd = reg_wdata[27:24];
+
+  assign isolate_0_isolate_7_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_0_isolate_7_wd = reg_wdata[31:28];
+
+  assign isolate_1_isolate_8_we = addr_hit[41] & reg_we & ~wr_err;
+  assign isolate_1_isolate_8_wd = reg_wdata[3:0];
+
+  assign isolate_1_isolate_9_we = addr_hit[41] & reg_we & ~wr_err;
+  assign isolate_1_isolate_9_wd = reg_wdata[7:4];
+
+  assign isolate_1_isolate_10_we = addr_hit[41] & reg_we & ~wr_err;
+  assign isolate_1_isolate_10_wd = reg_wdata[11:8];
+
+  assign isolate_1_isolate_11_we = addr_hit[41] & reg_we & ~wr_err;
+  assign isolate_1_isolate_11_wd = reg_wdata[15:12];
+
+  assign isolated_0_isolated_0_re = addr_hit[42] && reg_re;
+
+  assign isolated_0_isolated_1_re = addr_hit[42] && reg_re;
+
+  assign isolated_0_isolated_2_re = addr_hit[42] && reg_re;
+
+  assign isolated_0_isolated_3_re = addr_hit[42] && reg_re;
+
+  assign isolated_0_isolated_4_re = addr_hit[42] && reg_re;
+
+  assign isolated_0_isolated_5_re = addr_hit[42] && reg_re;
+
+  assign isolated_0_isolated_6_re = addr_hit[42] && reg_re;
+
+  assign isolated_0_isolated_7_re = addr_hit[42] && reg_re;
+
+  assign isolated_1_isolated_8_re = addr_hit[43] && reg_re;
+
+  assign isolated_1_isolated_9_re = addr_hit[43] && reg_re;
+
+  assign isolated_1_isolated_10_re = addr_hit[43] && reg_re;
+
+  assign isolated_1_isolated_11_re = addr_hit[43] && reg_re;
+
   // Read data return
   always_comb begin
     reg_rdata_next = '0;
@@ -3794,6 +4430,42 @@ module occamy_soc_reg_top #(
         reg_rdata_next[0] = pad_30_slw_30_qs;
         reg_rdata_next[1] = pad_30_smt_30_qs;
         reg_rdata_next[3:2] = pad_30_drv_30_qs;
+      end
+
+      addr_hit[40]: begin
+        reg_rdata_next[3:0] = isolate_0_isolate_0_qs;
+        reg_rdata_next[7:4] = isolate_0_isolate_1_qs;
+        reg_rdata_next[11:8] = isolate_0_isolate_2_qs;
+        reg_rdata_next[15:12] = isolate_0_isolate_3_qs;
+        reg_rdata_next[19:16] = isolate_0_isolate_4_qs;
+        reg_rdata_next[23:20] = isolate_0_isolate_5_qs;
+        reg_rdata_next[27:24] = isolate_0_isolate_6_qs;
+        reg_rdata_next[31:28] = isolate_0_isolate_7_qs;
+      end
+
+      addr_hit[41]: begin
+        reg_rdata_next[3:0] = isolate_1_isolate_8_qs;
+        reg_rdata_next[7:4] = isolate_1_isolate_9_qs;
+        reg_rdata_next[11:8] = isolate_1_isolate_10_qs;
+        reg_rdata_next[15:12] = isolate_1_isolate_11_qs;
+      end
+
+      addr_hit[42]: begin
+        reg_rdata_next[3:0] = isolated_0_isolated_0_qs;
+        reg_rdata_next[7:4] = isolated_0_isolated_1_qs;
+        reg_rdata_next[11:8] = isolated_0_isolated_2_qs;
+        reg_rdata_next[15:12] = isolated_0_isolated_3_qs;
+        reg_rdata_next[19:16] = isolated_0_isolated_4_qs;
+        reg_rdata_next[23:20] = isolated_0_isolated_5_qs;
+        reg_rdata_next[27:24] = isolated_0_isolated_6_qs;
+        reg_rdata_next[31:28] = isolated_0_isolated_7_qs;
+      end
+
+      addr_hit[43]: begin
+        reg_rdata_next[3:0] = isolated_1_isolated_8_qs;
+        reg_rdata_next[7:4] = isolated_1_isolated_9_qs;
+        reg_rdata_next[11:8] = isolated_1_isolated_10_qs;
+        reg_rdata_next[15:12] = isolated_1_isolated_11_qs;
       end
 
       default: begin

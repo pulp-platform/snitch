@@ -9,6 +9,7 @@ package occamy_soc_reg_pkg;
   // Param list
   parameter int NumScratchRegs = 4;
   parameter int NumPads = 31;
+  parameter int NumIsolateRegs = 12;
 
   ////////////////////////////
   // Typedefs for registers //
@@ -54,6 +55,10 @@ package occamy_soc_reg_pkg;
     } drv;
   } occamy_soc_reg2hw_pad_mreg_t;
 
+  typedef struct packed {
+    logic [3:0]  q;
+  } occamy_soc_reg2hw_isolate_mreg_t;
+
 
   typedef struct packed {
     struct packed {
@@ -70,23 +75,29 @@ package occamy_soc_reg_pkg;
     logic [1:0]  d;
   } occamy_soc_hw2reg_boot_mode_reg_t;
 
+  typedef struct packed {
+    logic [3:0]  d;
+  } occamy_soc_hw2reg_isolated_mreg_t;
+
 
   ///////////////////////////////////////
   // Register to internal design logic //
   ///////////////////////////////////////
   typedef struct packed {
-    occamy_soc_reg2hw_intr_state_reg_t intr_state; // [132:131]
-    occamy_soc_reg2hw_intr_enable_reg_t intr_enable; // [130:129]
-    occamy_soc_reg2hw_intr_test_reg_t intr_test; // [128:125]
-    occamy_soc_reg2hw_pad_mreg_t [30:0] pad; // [124:1]
+    occamy_soc_reg2hw_intr_state_reg_t intr_state; // [180:179]
+    occamy_soc_reg2hw_intr_enable_reg_t intr_enable; // [178:177]
+    occamy_soc_reg2hw_intr_test_reg_t intr_test; // [176:173]
+    occamy_soc_reg2hw_pad_mreg_t [30:0] pad; // [172:49]
+    occamy_soc_reg2hw_isolate_mreg_t [11:0] isolate; // [48:1]
   } occamy_soc_reg2hw_t;
 
   ///////////////////////////////////////
   // Internal design logic to register //
   ///////////////////////////////////////
   typedef struct packed {
-    occamy_soc_hw2reg_intr_state_reg_t intr_state; // [6:5]
-    occamy_soc_hw2reg_boot_mode_reg_t boot_mode; // [4:5]
+    occamy_soc_hw2reg_intr_state_reg_t intr_state; // [54:53]
+    occamy_soc_hw2reg_boot_mode_reg_t boot_mode; // [52:53]
+    occamy_soc_hw2reg_isolated_mreg_t [11:0] isolated; // [52:5]
   } occamy_soc_hw2reg_t;
 
   // Register Address
@@ -130,6 +141,10 @@ package occamy_soc_reg_pkg;
   parameter logic [7:0] OCCAMY_SOC_PAD_28_OFFSET = 8'h 94;
   parameter logic [7:0] OCCAMY_SOC_PAD_29_OFFSET = 8'h 98;
   parameter logic [7:0] OCCAMY_SOC_PAD_30_OFFSET = 8'h 9c;
+  parameter logic [7:0] OCCAMY_SOC_ISOLATE_0_OFFSET = 8'h a0;
+  parameter logic [7:0] OCCAMY_SOC_ISOLATE_1_OFFSET = 8'h a4;
+  parameter logic [7:0] OCCAMY_SOC_ISOLATED_0_OFFSET = 8'h a8;
+  parameter logic [7:0] OCCAMY_SOC_ISOLATED_1_OFFSET = 8'h ac;
 
 
   // Register Index
@@ -173,11 +188,15 @@ package occamy_soc_reg_pkg;
     OCCAMY_SOC_PAD_27,
     OCCAMY_SOC_PAD_28,
     OCCAMY_SOC_PAD_29,
-    OCCAMY_SOC_PAD_30
+    OCCAMY_SOC_PAD_30,
+    OCCAMY_SOC_ISOLATE_0,
+    OCCAMY_SOC_ISOLATE_1,
+    OCCAMY_SOC_ISOLATED_0,
+    OCCAMY_SOC_ISOLATED_1
   } occamy_soc_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] OCCAMY_SOC_PERMIT [40] = '{
+  parameter logic [3:0] OCCAMY_SOC_PERMIT [44] = '{
     4'b 0001, // index[ 0] OCCAMY_SOC_INTR_STATE
     4'b 0001, // index[ 1] OCCAMY_SOC_INTR_ENABLE
     4'b 0001, // index[ 2] OCCAMY_SOC_INTR_TEST
@@ -217,7 +236,11 @@ package occamy_soc_reg_pkg;
     4'b 0001, // index[36] OCCAMY_SOC_PAD_27
     4'b 0001, // index[37] OCCAMY_SOC_PAD_28
     4'b 0001, // index[38] OCCAMY_SOC_PAD_29
-    4'b 0001  // index[39] OCCAMY_SOC_PAD_30
+    4'b 0001, // index[39] OCCAMY_SOC_PAD_30
+    4'b 1111, // index[40] OCCAMY_SOC_ISOLATE_0
+    4'b 0011, // index[41] OCCAMY_SOC_ISOLATE_1
+    4'b 1111, // index[42] OCCAMY_SOC_ISOLATED_0
+    4'b 0011  // index[43] OCCAMY_SOC_ISOLATED_1
   };
 endpackage
 

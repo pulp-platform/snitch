@@ -143,7 +143,7 @@ module occamy_top
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
-  always_comb soc_ctrl_in = '0;
+  assign soc_ctrl_in.boot_mode.d = boot_mode_i;
 
 
 
@@ -661,6 +661,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .meip_i('0),
       .mtip_i('0),
       .msip_i('0),
+      .isolate_i(soc_ctrl_out.isolate[0].q),
+      .isolated_o(soc_ctrl_in.isolated[0].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_0_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_0_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_0_req),
@@ -792,6 +794,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .meip_i('0),
       .mtip_i('0),
       .msip_i('0),
+      .isolate_i(soc_ctrl_out.isolate[1].q),
+      .isolated_o(soc_ctrl_in.isolated[1].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_1_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_1_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_1_req),
@@ -923,6 +927,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .meip_i('0),
       .mtip_i('0),
       .msip_i('0),
+      .isolate_i(soc_ctrl_out.isolate[2].q),
+      .isolated_o(soc_ctrl_in.isolated[2].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_2_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_2_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_2_req),
@@ -1054,6 +1060,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .meip_i('0),
       .mtip_i('0),
       .msip_i('0),
+      .isolate_i(soc_ctrl_out.isolate[3].q),
+      .isolated_o(soc_ctrl_in.isolated[3].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_3_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_3_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_3_req),
@@ -1185,6 +1193,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .meip_i('0),
       .mtip_i('0),
       .msip_i('0),
+      .isolate_i(soc_ctrl_out.isolate[4].q),
+      .isolated_o(soc_ctrl_in.isolated[4].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_4_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_4_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_4_req),
@@ -1316,6 +1326,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .meip_i('0),
       .mtip_i('0),
       .msip_i('0),
+      .isolate_i(soc_ctrl_out.isolate[5].q),
+      .isolated_o(soc_ctrl_in.isolated[5].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_5_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_5_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_5_req),
@@ -1447,6 +1459,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .meip_i('0),
       .mtip_i('0),
       .msip_i('0),
+      .isolate_i(soc_ctrl_out.isolate[6].q),
+      .isolated_o(soc_ctrl_in.isolated[6].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_6_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_6_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_6_req),
@@ -1578,6 +1592,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .meip_i('0),
       .mtip_i('0),
       .msip_i('0),
+      .isolate_i(soc_ctrl_out.isolate[7].q),
+      .isolated_o(soc_ctrl_in.isolated[7].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_7_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_7_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_7_req),
