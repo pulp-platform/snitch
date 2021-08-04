@@ -498,12 +498,12 @@ class AxiBus(object):
             ) + "\n")
         return bus
 
-    def serialize(self, context, name, inst_name=None, to=None):
+    def serialize(self, context, name, iw=None, inst_name=None, to=None):
         # Generate the new bus.
         if to is None:
             bus = copy(self)
             bus.declared = False
-            bus.iw = self.iw
+            bus.iw = iw or self.iw
             bus.type_prefix = bus.emit_struct()
             bus.name = name
             bus.name_suffix = None
@@ -515,12 +515,15 @@ class AxiBus(object):
         assert (bus.rst == self.rst)
         assert (bus.aw == self.aw)
         assert (bus.dw == self.dw)
-        assert (bus.iw == self.iw)
+        assert (bus.iw <= self.iw)
         assert (bus.uw == self.uw)
 
         # Emit the remapper instance.
         bus.declare(context)
-        tpl = templates.get_template("solder.axi_serialize.sv.tpl")
+        if bus.iw < self.iw:
+            tpl = templates.get_template("solder.axi_id_serialize.sv.tpl")
+        else:
+            tpl = templates.get_template("solder.axi_serialize.sv.tpl")
         context.write(
             tpl.render_unicode(
                 axi_in=self,
