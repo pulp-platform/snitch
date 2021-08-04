@@ -28,7 +28,6 @@ module clint import clint_reg_pkg::*; #(
 
     logic [63:0]               mtime_q;
     logic [${cores-1}:0][63:0] mtimecmp_q;
-    logic [${cores-1}:0]       msip_q;
     // increase the timer
     logic increase_timer;
 
@@ -51,7 +50,7 @@ module clint import clint_reg_pkg::*; #(
     assign mtime_q = {reg2hw.mtime_high.q, reg2hw.mtime_low.q};
 % for i in range(cores):
     assign mtimecmp_q[${i}] = {reg2hw.mtimecmp_high${i}.q, reg2hw.mtimecmp_low${i}.q};
-    assign msip_q[${i}] = reg2hw.msip${i}.q;
+    assign ipi_o[${i}] = reg2hw.msip[${i}].q;
 % endfor
 
     assign {hw2reg.mtime_high.d, hw2reg.mtime_low.d} = mtime_q + 1;
@@ -91,7 +90,6 @@ module clint import clint_reg_pkg::*; #(
         .serial_o  (                )  // left open
     );
 
-    assign ipi_o = msip_q;
 
 endmodule
 

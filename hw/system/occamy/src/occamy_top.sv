@@ -158,10 +158,10 @@ module occamy_top
   mem_strb_t spm_strb;
 
   // Machine timer and machine software interrupt pending.
-  logic mtip, msip;
+  logic [288:0] mtip, msip;
   // Supervisor and machine-mode external interrupt pending.
   logic [1:0] eip;
-  logic debug_req;
+  logic [0:0] debug_req;
   occamy_interrupt_t irq;
 
   assign irq.ext_irq = ext_irq_i;
@@ -535,9 +535,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .irq_i(eip),
-      .ipi_i(msip),
-      .time_irq_i(mtip),
-      .debug_req_i(debug_req),
+      .ipi_i(msip[0]),
+      .time_irq_i(mtip[0]),
+      .debug_req_i(debug_req[0]),
       .axi_req_o(soc_narrow_xbar_in_req[SOC_NARROW_XBAR_IN_CVA6]),
       .axi_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6])
   );
@@ -652,15 +652,17 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_0_req_o = wide_hbi_out_cut_0_cut_req;
   assign wide_hbi_out_cut_0_cut_rsp = hbi_0_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_0 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd0),
+      // .debug_req_i (debug_req[36:1]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[36:1]),
+      .msip_i(msip[36:1]),
       .isolate_i(soc_ctrl_out.isolate[0].q),
       .isolated_o(soc_ctrl_in.isolated[0].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_0_req),
@@ -785,15 +787,17 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_1_req_o = wide_hbi_out_cut_1_cut_req;
   assign wide_hbi_out_cut_1_cut_rsp = hbi_1_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_1 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd1),
+      // .debug_req_i (debug_req[72:37]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[72:37]),
+      .msip_i(msip[72:37]),
       .isolate_i(soc_ctrl_out.isolate[1].q),
       .isolated_o(soc_ctrl_in.isolated[1].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_1_req),
@@ -918,15 +922,17 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_2_req_o = wide_hbi_out_cut_2_cut_req;
   assign wide_hbi_out_cut_2_cut_rsp = hbi_2_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_2 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd2),
+      // .debug_req_i (debug_req[108:73]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[108:73]),
+      .msip_i(msip[108:73]),
       .isolate_i(soc_ctrl_out.isolate[2].q),
       .isolated_o(soc_ctrl_in.isolated[2].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_2_req),
@@ -1051,15 +1057,17 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_3_req_o = wide_hbi_out_cut_3_cut_req;
   assign wide_hbi_out_cut_3_cut_rsp = hbi_3_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_3 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd3),
+      // .debug_req_i (debug_req[144:109]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[144:109]),
+      .msip_i(msip[144:109]),
       .isolate_i(soc_ctrl_out.isolate[3].q),
       .isolated_o(soc_ctrl_in.isolated[3].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_3_req),
@@ -1184,15 +1192,17 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_4_req_o = wide_hbi_out_cut_4_cut_req;
   assign wide_hbi_out_cut_4_cut_rsp = hbi_4_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_4 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd4),
+      // .debug_req_i (debug_req[180:145]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[180:145]),
+      .msip_i(msip[180:145]),
       .isolate_i(soc_ctrl_out.isolate[4].q),
       .isolated_o(soc_ctrl_in.isolated[4].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_4_req),
@@ -1317,15 +1327,17 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_5_req_o = wide_hbi_out_cut_5_cut_req;
   assign wide_hbi_out_cut_5_cut_rsp = hbi_5_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd5),
+      // .debug_req_i (debug_req[216:181]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[216:181]),
+      .msip_i(msip[216:181]),
       .isolate_i(soc_ctrl_out.isolate[5].q),
       .isolated_o(soc_ctrl_in.isolated[5].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_5_req),
@@ -1450,15 +1462,17 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_6_req_o = wide_hbi_out_cut_6_cut_req;
   assign wide_hbi_out_cut_6_cut_rsp = hbi_6_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_6 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd6),
+      // .debug_req_i (debug_req[252:217]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[252:217]),
+      .msip_i(msip[252:217]),
       .isolate_i(soc_ctrl_out.isolate[6].q),
       .isolated_o(soc_ctrl_in.isolated[6].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_6_req),
@@ -1583,15 +1597,17 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_7_req_o = wide_hbi_out_cut_7_cut_req;
   assign wide_hbi_out_cut_7_cut_rsp = hbi_7_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_7 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd7),
+      // .debug_req_i (debug_req[288:253]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[288:253]),
+      .msip_i(msip[288:253]),
       .isolate_i(soc_ctrl_out.isolate[7].q),
       .isolated_o(soc_ctrl_in.isolated[7].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_7_req),
@@ -1907,7 +1923,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   dm::hartinfo_t [0:0] hartinfo;
-  assign hartinfo = ariane_pkg::DebugHartInfo;
+  assign hartinfo[0] = ariane_pkg::DebugHartInfo;
 
   logic                 dmi_rst_n;
   dm::dmi_req_t         dmi_req;
@@ -1961,6 +1977,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   logic [63:0] sba_addr_long;
 
   dm_top #(
+      // .NrHarts (289),
       .NrHarts(1),
       .BusWidth(64),
       .DmBaseAddress('h0)

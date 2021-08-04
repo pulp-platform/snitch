@@ -120,10 +120,10 @@ module occamy_top
   mem_strb_t spm_strb;
 
   // Machine timer and machine software interrupt pending.
-  logic mtip, msip;
+  logic [${cores-1}:0] mtip, msip;
   // Supervisor and machine-mode external interrupt pending.
   logic [1:0] eip;
-  logic debug_req;
+  logic [0:0] debug_req;
   occamy_interrupt_t irq;
 
   assign irq.ext_irq = ext_irq_i;
@@ -163,9 +163,9 @@ module occamy_top
     .clk_i (clk_i),
     .rst_ni (rst_ni),
     .irq_i (eip),
-    .ipi_i (msip),
-    .time_irq_i (mtip),
-    .debug_req_i (debug_req),
+    .ipi_i (msip[0]),
+    .time_irq_i (mtip[0]),
+    .debug_req_i (debug_req[0]),
     .axi_req_o (${soc_narrow_xbar.in_cva6.req_name()}),
     .axi_resp_i (${soc_narrow_xbar.in_cva6.rsp_name()})
   );
@@ -188,15 +188,20 @@ module occamy_top
   assign hbi_${i}_req_o = ${wide_hbi_cut_out.req_name()};
   assign ${wide_hbi_cut_out.rsp_name()} = hbi_${i}_rsp_i;
 
+  <%
+    nr_cores_s1_quadrant = nr_s1_clusters * nr_cluster_cores
+    lower_core = i * nr_cores_s1_quadrant + 1
+  %>
   occamy_quadrant_s1 i_occamy_quadrant_s1_${i} (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
     .test_mode_i (test_mode_i),
     .tile_id_i (6'd${i}),
+    // .debug_req_i (debug_req[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
     .debug_req_i ('0),
     .meip_i ('0),
-    .mtip_i ('0),
-    .msip_i ('0),
+    .mtip_i (mtip[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
+    .msip_i (msip[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
     .isolate_i (soc_ctrl_out.isolate[${i}].q),
     .isolated_o (soc_ctrl_in.isolated[${i}].d),
     .quadrant_hbi_out_req_o (${wide_hbi_out.req_name()}),
@@ -300,7 +305,7 @@ module occamy_top
   ///////////
   <% regbus_debug = soc_periph_xbar.out_debug.to_reg(context, "axi_lite_to_reg_debug") %>
   dm::hartinfo_t [0:0] hartinfo;
-  assign hartinfo = ariane_pkg::DebugHartInfo;
+  assign hartinfo[0] = ariane_pkg::DebugHartInfo;
 
   logic          dmi_rst_n;
   dm::dmi_req_t  dmi_req;
@@ -354,6 +359,7 @@ module occamy_top
   logic [${regbus_debug.dw-1}:0] sba_addr_long;
 
   dm_top #(
+    // .NrHarts (${cores}),
     .NrHarts (1),
     .BusWidth (${regbus_debug.dw}),
     .DmBaseAddress ('h0)
