@@ -469,6 +469,10 @@ package occamy_pkg;
   `AXI_TYPEDEF_ALL(axi_a48_d64_i3_u0, logic [47:0], logic [2:0], logic [63:0], logic [7:0],
                    logic [0:0])
 
+  // AXI bus with 48 bit address, 64 bit data, 1 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d64_i1_u0, logic [47:0], logic [0:0], logic [63:0], logic [7:0],
+                   logic [0:0])
+
   // AXI bus with 48 bit address, 32 bit data, 8 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d32_i8_u0, logic [47:0], logic [7:0], logic [31:0], logic [3:0],
                    logic [0:0])
