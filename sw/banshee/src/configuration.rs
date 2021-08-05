@@ -83,8 +83,8 @@ impl Default for Memories {
     fn default() -> Memories {
         Memories {
             tcdm: Memory {
-                start: 0,
-                end: 0x20000,
+                start: 0x100000,
+                end: 0x120000,
                 latency: 2,
             },
             dram: Memory {
