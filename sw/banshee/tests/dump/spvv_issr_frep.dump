@@ -4,325 +4,325 @@ bin/spvv_issr_frep:	file format elf32-littleriscv
 
 Disassembly of section .l1:
 
-00000000 <.l1>:
-       0: db 47 5a ac  	<unknown>
-       4: 82 80        	<unknown>
-       6: e6 bf        	<unknown>
-       8: 58 a5        	<unknown>
-       a: 7e 46        	<unknown>
-       c: c9 60        	<unknown>
-       e: df bf 05 d2  	<unknown>
-      12: 4e 21        	<unknown>
-      14: 9b 98 d4 bf  	<unknown>
-      18: 23 40 bf 6b  	<unknown>
-      1c: cd 14        	<unknown>
-      1e: fc bf        	<unknown>
-      20: ff 22 68 3a  	<unknown>
-      24: fb 73 ca 3f  	<unknown>
-      28: f5 bc        	<unknown>
-      2a: 5e e1        	<unknown>
-      2c: 11 17        	<unknown>
-      2e: 00 c0        	<unknown>
-      30: e5 15        	<unknown>
-      32: e2 6f        	<unknown>
-      34: ff d4 e1 bf  	<unknown>
-      38: 8b 5f ba a5  	frep.o	s4, 2652, 5, 15
-      3c: f6 94        	<unknown>
-      3e: d5 3f        	<unknown>
-      40: 04 04        	<unknown>
-      42: 53 3a 08 c8  	<unknown>
-      46: f8 3f        	<unknown>
-      48: 54 99        	<unknown>
-      4a: 12 75        	<unknown>
-      4c: 89 ee        	<unknown>
-      4e: f5 bf        	<unknown>
-      50: ad 6f        	<unknown>
-      52: 88 5a        	<unknown>
-      54: fe cd        	<unknown>
-      56: f6 3f        	<unknown>
-      58: 79 04        	<unknown>
-      5a: 41 98        	<unknown>
-      5c: bc e2        	<unknown>
-      5e: d1 bf        	<unknown>
-      60: aa d6        	<unknown>
-      62: ae c8        	<unknown>
-      64: 78 e8        	<unknown>
-      66: e1 bf        	<unknown>
-      68: d9 27        	<unknown>
-      6a: 3b 20 6d fb  	<unknown>
-      6e: f2 3f        	<unknown>
-      70: 87 43 d3 28  	<unknown>
-      74: 22 2d        	<unknown>
-      76: fb 3f 51 6e  	<unknown>
-      7a: 36 de        	<unknown>
-      7c: 3c 0f        	<unknown>
-      7e: fb bf 67 06  	<unknown>
-      82: 59 bb        	<unknown>
-      84: 7d 62        	<unknown>
-      86: e6 bf        	<unknown>
-      88: 0e f2        	<unknown>
-      8a: 9c b0        	<unknown>
-      8c: a1 a7        	<unknown>
-      8e: e2 3f        	<unknown>
-      90: e0 0f        	<unknown>
-      92: 69 8b        	<unknown>
-      94: 99 4d        	<unknown>
-      96: ef 3f 7b 07  	jal	t6, 0xb390c <.l1+0xb390c>
-      9a: 41 2c        	<unknown>
-      9c: 5b 7a f3 bf  	<unknown>
-      a0: aa 74        	<unknown>
-      a2: 67 29 34 45  	<unknown>
-      a6: f5 bf        	<unknown>
-      a8: 0a c1        	<unknown>
-      aa: 56 9d        	<unknown>
-      ac: a1 d5        	<unknown>
-      ae: 57 bf 2b 40  	<unknown>
-      b2: a7 40 d1 08  	<unknown>
-      b6: f5 bf        	<unknown>
-      b8: 00 00        	<unknown>
-      ba: 01 00        	<unknown>
-      bc: 04 00        	<unknown>
-      be: 05 00        	<unknown>
-      c0: 0a 00        	<unknown>
-      c2: 0b 00 0e 00  	frep.i	t3, 1, 0, 0
-      c6: 0f 00 14 00  	<unknown>
-      ca: 15 00        	<unknown>
-      cc: 17 00 18 00  	auipc	zero, 384
-      d0: 28 00        	<unknown>
-      d2: 2a 00        	<unknown>
-      d4: 2b 00 30 00  	dmsrc	zero, gp
-      d8: 34 00        	<unknown>
-      da: 38 00        	<unknown>
-      dc: 3b 00 3d 00  	<unknown>
-      e0: 3f 00 41 00  	<unknown>
-      e4: 44 00        	<unknown>
-      e6: 00 00        	<unknown>
-      e8: 0c 32        	<unknown>
-      ea: 1b df d5 6a  	<unknown>
-      ee: d3 3f 06 46  	<unknown>
-      f2: a7 34 73 ad  	fsd	fs7, -1335(t1)
-      f6: b1 3f        	<unknown>
-      f8: 7e 5f        	<unknown>
-      fa: 8d c4        	<unknown>
-      fc: 4d eb        	<unknown>
-      fe: f5 bf        	<unknown>
-     100: b9 be        	<unknown>
-     102: d7 67 4c c4  	<unknown>
-     106: fb bf b6 a6  	<unknown>
-     10a: cd 6f        	<unknown>
-     10c: d5 73        	<unknown>
-     10e: ed 3f        	<unknown>
-     110: 32 dc        	<unknown>
-     112: 47 37 8e 8b  	fmsub.d	fa4, ft8, fs8, fa7, rup
-     116: e5 bf        	<unknown>
-     118: f2 60        	<unknown>
-     11a: 1b 7a 62 ec  	<unknown>
-     11e: d3 3f 71 e9  	<unknown>
-     122: 06 66        	<unknown>
-     124: fc 8e        	<unknown>
-     126: fa 3f        	<unknown>
-     128: 0d 66        	<unknown>
-     12a: c7 ad 91 f4  	<unknown>
-     12e: d8 bf        	<unknown>
-     130: fe ab        	<unknown>
-     132: e9 02        	<unknown>
-     134: 01 94        	<unknown>
-     136: cf 3f 55 cf  	<unknown>
-     13a: 9f 3c b6 34  	<unknown>
-     13e: f4 3f        	<unknown>
-     140: 9f 08 0c 0f  	<unknown>
-     144: 60 49        	<unknown>
-     146: b2 bf        	<unknown>
-     148: f0 38        	<unknown>
-     14a: a9 42        	<unknown>
-     14c: 39 dc        	<unknown>
-     14e: cb 3f 22 e1  	fnmsub.s	ft11, ft4, fs2, ft8, rup
-     152: ad ff        	<unknown>
-     154: 8e 9e        	<unknown>
-     156: f0 bf        	<unknown>
-     158: 75 66        	<unknown>
-     15a: e6 e7        	<unknown>
-     15c: 3d 79        	<unknown>
-     15e: e2 bf        	<unknown>
-     160: 13 8d e1 f1  	addi	s10, gp, -226
-     164: e4 d1        	<unknown>
-     166: cc 3f        	<unknown>
-     168: 8d 9d        	<unknown>
-     16a: 7d 01        	<unknown>
-     16c: 90 d3        	<unknown>
-     16e: f1 bf        	<unknown>
-     170: 57 79 2f 07  	<unknown>
-     174: ac 26        	<unknown>
-     176: cb bf 73 9e  	<unknown>
-     17a: 29 14        	<unknown>
-     17c: e5 e7        	<unknown>
-     17e: bd bf        	<unknown>
-     180: a9 63        	<unknown>
-     182: 8f f7 5b c0  	<unknown>
-     186: cd bf        	<unknown>
-     188: 16 72        	<unknown>
-     18a: 1d 28        	<unknown>
-     18c: aa 29        	<unknown>
-     18e: f0 3f        	<unknown>
-     190: f9 f2        	<unknown>
-     192: b9 02        	<unknown>
-     194: 93 5c f8 bf  	<unknown>
-     198: 53 62 fd 93  	<unknown>
-     19c: be f6        	<unknown>
-     19e: a3 bf e2 6c  	<unknown>
-     1a2: 0e 4b        	<unknown>
-     1a4: 01 b3        	<unknown>
-     1a6: df bf d8 55  	<unknown>
-     1aa: a3 0f eb 3d  	sb	t5, 991(s6)
-     1ae: f4 bf        	<unknown>
-     1b0: 7d e1        	<unknown>
-     1b2: 4a 19        	<unknown>
-     1b4: 9d f3        	<unknown>
-     1b6: f4 3f        	<unknown>
-     1b8: 83 88 4a b3  	lb	a7, -1228(s5)
-     1bc: 48 9d        	<unknown>
-     1be: a8 bf        	<unknown>
-     1c0: 2d e3        	<unknown>
-     1c2: 29 1b        	<unknown>
-     1c4: fa 11        	<unknown>
-     1c6: e5 3f        	<unknown>
-     1c8: 0b 7e d2 54  	frep.i	tp, 1358, 7, 14
-     1cc: d6 d9        	<unknown>
-     1ce: f2 3f        	<unknown>
-     1d0: f7 e1 39 ee  	<unknown>
-     1d4: e6 97        	<unknown>
-     1d6: ed 3f        	<unknown>
-     1d8: d4 d1        	<unknown>
-     1da: c2 83        	<unknown>
-     1dc: cc 6d        	<unknown>
-     1de: c1 bf        	<unknown>
-     1e0: 9f b1 67 92  	<unknown>
-     1e4: 95 b1        	<unknown>
-     1e6: db bf 7f b7  	<unknown>
-     1ea: 1a 96        	<unknown>
-     1ec: 4c 98        	<unknown>
-     1ee: f6 bf        	<unknown>
-     1f0: de 77        	<unknown>
-     1f2: bf 37 c4 9d  	<unknown>
-     1f6: fb bf 1c 25  	<unknown>
-     1fa: 2c d1        	<unknown>
-     1fc: 33 50 c0 bf  	<unknown>
-     200: 6d ed        	<unknown>
-     202: 96 c4        	<unknown>
-     204: 76 c5        	<unknown>
-     206: f5 3f        	<unknown>
-     208: ea 55        	<unknown>
-     20a: b1 b3        	<unknown>
-     20c: ed e0        	<unknown>
-     20e: fc 3f        	<unknown>
-     210: d4 f4        	<unknown>
-     212: 9d 13        	<unknown>
-     214: 87 98 ea bf  	<unknown>
-     218: ec b2        	<unknown>
-     21a: 23 5d 42 14  	<unknown>
-     21e: e8 bf        	<unknown>
-     220: 58 02        	<unknown>
-     222: ca f0        	<unknown>
-     224: 59 c2        	<unknown>
-     226: eb bf cf 4c  	<unknown>
-     22a: 98 ff        	<unknown>
-     22c: 93 94 f1 bf  	<unknown>
-     230: 5d 6d        	<unknown>
-     232: 84 43        	<unknown>
-     234: 7f 3d 90 bf  	<unknown>
-     238: 42 f1        	<unknown>
-     23a: 65 c1        	<unknown>
-     23c: e8 36        	<unknown>
-     23e: fc 3f        	<unknown>
-     240: 24 ef        	<unknown>
-     242: ce 94        	<unknown>
-     244: bd 85        	<unknown>
-     246: f1 bf        	<unknown>
-     248: e2 ee        	<unknown>
-     24a: 2a 74        	<unknown>
-     24c: 12 0b        	<unknown>
-     24e: e5 3f        	<unknown>
-     250: 35 46        	<unknown>
-     252: 5e 67        	<unknown>
-     254: 9f 4f eb 3f  	<unknown>
-     258: 9a e1        	<unknown>
-     25a: 84 03        	<unknown>
-     25c: d2 73        	<unknown>
-     25e: f5 bf        	<unknown>
-     260: e8 62        	<unknown>
-     262: ce 5e        	<unknown>
-     264: 76 20        	<unknown>
-     266: f4 3f        	<unknown>
-     268: c5 f3        	<unknown>
-     26a: 4b 5d e7 84  	<unknown>
-     26e: f6 3f        	<unknown>
-     270: 24 35        	<unknown>
-     272: 9e a7        	<unknown>
-     274: ff d9 fe bf  	<unknown>
-     278: 8a 88        	<unknown>
-     27a: 72 62        	<unknown>
-     27c: 21 c8        	<unknown>
-     27e: d5 3f        	<unknown>
-     280: d1 45        	<unknown>
-     282: e2 42        	<unknown>
-     284: da 4f        	<unknown>
-     286: ea bf        	<unknown>
-     288: b5 a3        	<unknown>
-     28a: 93 fc 98 95  	andi	s9, a7, -1703
-     28e: ef 3f 7b 9b  	jal	t6, 0xfffb3c44
-     292: 7b 04 40 ee  	<unknown>
-     296: d9 bf        	<unknown>
-     298: 4e bd        	<unknown>
-     29a: e6 8c        	<unknown>
-     29c: 6b 16 de bf  	<unknown>
-     2a0: 58 be        	<unknown>
-     2a2: 40 db        	<unknown>
-     2a4: ad ae        	<unknown>
-     2a6: df bf bd 74  	<unknown>
-     2aa: df bf 11 68  	<unknown>
-     2ae: d8 bf        	<unknown>
-     2b0: 77 05 ba a1  	<unknown>
-     2b4: b8 eb        	<unknown>
-     2b6: c1 3f        	<unknown>
-     2b8: d9 b7        	<unknown>
-     2ba: 77 c9 c8 e1  	<unknown>
-     2be: ef bf 65 a7  	jal	t6, 0xfff5b534
-     2c2: a5 ff        	<unknown>
-     2c4: f5 28        	<unknown>
-     2c6: de 3f        	<unknown>
-     2c8: 75 0c        	<unknown>
-     2ca: d5 8a        	<unknown>
-     2cc: e9 f6        	<unknown>
-     2ce: d0 3f        	<unknown>
-     2d0: 8d 57        	<unknown>
-     2d2: 1f 3f 38 32  	<unknown>
-     2d6: e3 bf 72 95  	<unknown>
-     2da: df 39 98 34  	<unknown>
-     2de: eb bf 90 d1  	<unknown>
-     2e2: 35 0f        	<unknown>
-     2e4: b1 0f        	<unknown>
-     2e6: b7 bf 46 bc  	lui	t6, 771179
-     2ea: 45 ae        	<unknown>
-     2ec: 38 44        	<unknown>
-     2ee: f0 bf        	<unknown>
-     2f0: 65 83        	<unknown>
-     2f2: 4e f8        	<unknown>
-     2f4: 5b 8f c7 3f  	<unknown>
-     2f8: 4e ae        	<unknown>
-     2fa: 97 e2 aa 0f  	auipc	t0, 64174
-     2fe: ac 3f        	<unknown>
-     300: 4d 48        	<unknown>
-     302: 68 87        	<unknown>
-     304: e9 34        	<unknown>
-     306: fa bf        	<unknown>
-     308: 0b 82 ad 8e  	frep.i	s11, 2283, 0, 2
-     30c: f2 67        	<unknown>
-     30e: bc 3f        	<unknown>
-     310: 2c 93        	<unknown>
-     312: b2 59        	<unknown>
-     314: 08 ab        	<unknown>
-     316: 0b           	<unknown>
-     317: 40           	<unknown>
+00100000 <.l1>:
+  100000: db 47 5a ac  	<unknown>
+  100004: 82 80        	<unknown>
+  100006: e6 bf        	<unknown>
+  100008: 58 a5        	<unknown>
+  10000a: 7e 46        	<unknown>
+  10000c: c9 60        	<unknown>
+  10000e: df bf 05 d2  	<unknown>
+  100012: 4e 21        	<unknown>
+  100014: 9b 98 d4 bf  	<unknown>
+  100018: 23 40 bf 6b  	<unknown>
+  10001c: cd 14        	<unknown>
+  10001e: fc bf        	<unknown>
+  100020: ff 22 68 3a  	<unknown>
+  100024: fb 73 ca 3f  	<unknown>
+  100028: f5 bc        	<unknown>
+  10002a: 5e e1        	<unknown>
+  10002c: 11 17        	<unknown>
+  10002e: 00 c0        	<unknown>
+  100030: e5 15        	<unknown>
+  100032: e2 6f        	<unknown>
+  100034: ff d4 e1 bf  	<unknown>
+  100038: 8b 5f ba a5  	frep.o	s4, 2652, 5, 15
+  10003c: f6 94        	<unknown>
+  10003e: d5 3f        	<unknown>
+  100040: 04 04        	<unknown>
+  100042: 53 3a 08 c8  	<unknown>
+  100046: f8 3f        	<unknown>
+  100048: 54 99        	<unknown>
+  10004a: 12 75        	<unknown>
+  10004c: 89 ee        	<unknown>
+  10004e: f5 bf        	<unknown>
+  100050: ad 6f        	<unknown>
+  100052: 88 5a        	<unknown>
+  100054: fe cd        	<unknown>
+  100056: f6 3f        	<unknown>
+  100058: 79 04        	<unknown>
+  10005a: 41 98        	<unknown>
+  10005c: bc e2        	<unknown>
+  10005e: d1 bf        	<unknown>
+  100060: aa d6        	<unknown>
+  100062: ae c8        	<unknown>
+  100064: 78 e8        	<unknown>
+  100066: e1 bf        	<unknown>
+  100068: d9 27        	<unknown>
+  10006a: 3b 20 6d fb  	<unknown>
+  10006e: f2 3f        	<unknown>
+  100070: 87 43 d3 28  	<unknown>
+  100074: 22 2d        	<unknown>
+  100076: fb 3f 51 6e  	<unknown>
+  10007a: 36 de        	<unknown>
+  10007c: 3c 0f        	<unknown>
+  10007e: fb bf 67 06  	<unknown>
+  100082: 59 bb        	<unknown>
+  100084: 7d 62        	<unknown>
+  100086: e6 bf        	<unknown>
+  100088: 0e f2        	<unknown>
+  10008a: 9c b0        	<unknown>
+  10008c: a1 a7        	<unknown>
+  10008e: e2 3f        	<unknown>
+  100090: e0 0f        	<unknown>
+  100092: 69 8b        	<unknown>
+  100094: 99 4d        	<unknown>
+  100096: ef 3f 7b 07  	jal	t6, 0x1b390c <.l1+0xb390c>
+  10009a: 41 2c        	<unknown>
+  10009c: 5b 7a f3 bf  	<unknown>
+  1000a0: aa 74        	<unknown>
+  1000a2: 67 29 34 45  	<unknown>
+  1000a6: f5 bf        	<unknown>
+  1000a8: 0a c1        	<unknown>
+  1000aa: 56 9d        	<unknown>
+  1000ac: a1 d5        	<unknown>
+  1000ae: 57 bf 2b 40  	<unknown>
+  1000b2: a7 40 d1 08  	<unknown>
+  1000b6: f5 bf        	<unknown>
+  1000b8: 00 00        	<unknown>
+  1000ba: 01 00        	<unknown>
+  1000bc: 04 00        	<unknown>
+  1000be: 05 00        	<unknown>
+  1000c0: 0a 00        	<unknown>
+  1000c2: 0b 00 0e 00  	frep.i	t3, 1, 0, 0
+  1000c6: 0f 00 14 00  	<unknown>
+  1000ca: 15 00        	<unknown>
+  1000cc: 17 00 18 00  	auipc	zero, 384
+  1000d0: 28 00        	<unknown>
+  1000d2: 2a 00        	<unknown>
+  1000d4: 2b 00 30 00  	dmsrc	zero, gp
+  1000d8: 34 00        	<unknown>
+  1000da: 38 00        	<unknown>
+  1000dc: 3b 00 3d 00  	<unknown>
+  1000e0: 3f 00 41 00  	<unknown>
+  1000e4: 44 00        	<unknown>
+  1000e6: 00 00        	<unknown>
+  1000e8: 0c 32        	<unknown>
+  1000ea: 1b df d5 6a  	<unknown>
+  1000ee: d3 3f 06 46  	<unknown>
+  1000f2: a7 34 73 ad  	fsd	fs7, -1335(t1)
+  1000f6: b1 3f        	<unknown>
+  1000f8: 7e 5f        	<unknown>
+  1000fa: 8d c4        	<unknown>
+  1000fc: 4d eb        	<unknown>
+  1000fe: f5 bf        	<unknown>
+  100100: b9 be        	<unknown>
+  100102: d7 67 4c c4  	<unknown>
+  100106: fb bf b6 a6  	<unknown>
+  10010a: cd 6f        	<unknown>
+  10010c: d5 73        	<unknown>
+  10010e: ed 3f        	<unknown>
+  100110: 32 dc        	<unknown>
+  100112: 47 37 8e 8b  	fmsub.d	fa4, ft8, fs8, fa7, rup
+  100116: e5 bf        	<unknown>
+  100118: f2 60        	<unknown>
+  10011a: 1b 7a 62 ec  	<unknown>
+  10011e: d3 3f 71 e9  	<unknown>
+  100122: 06 66        	<unknown>
+  100124: fc 8e        	<unknown>
+  100126: fa 3f        	<unknown>
+  100128: 0d 66        	<unknown>
+  10012a: c7 ad 91 f4  	fmsub.h	fs11, ft3, fs1, ft10, rdn
+  10012e: d8 bf        	<unknown>
+  100130: fe ab        	<unknown>
+  100132: e9 02        	<unknown>
+  100134: 01 94        	<unknown>
+  100136: cf 3f 55 cf  	<unknown>
+  10013a: 9f 3c b6 34  	<unknown>
+  10013e: f4 3f        	<unknown>
+  100140: 9f 08 0c 0f  	<unknown>
+  100144: 60 49        	<unknown>
+  100146: b2 bf        	<unknown>
+  100148: f0 38        	<unknown>
+  10014a: a9 42        	<unknown>
+  10014c: 39 dc        	<unknown>
+  10014e: cb 3f 22 e1  	fnmsub.s	ft11, ft4, fs2, ft8, rup
+  100152: ad ff        	<unknown>
+  100154: 8e 9e        	<unknown>
+  100156: f0 bf        	<unknown>
+  100158: 75 66        	<unknown>
+  10015a: e6 e7        	<unknown>
+  10015c: 3d 79        	<unknown>
+  10015e: e2 bf        	<unknown>
+  100160: 13 8d e1 f1  	addi	s10, gp, -226
+  100164: e4 d1        	<unknown>
+  100166: cc 3f        	<unknown>
+  100168: 8d 9d        	<unknown>
+  10016a: 7d 01        	<unknown>
+  10016c: 90 d3        	<unknown>
+  10016e: f1 bf        	<unknown>
+  100170: 57 79 2f 07  	<unknown>
+  100174: ac 26        	<unknown>
+  100176: cb bf 73 9e  	<unknown>
+  10017a: 29 14        	<unknown>
+  10017c: e5 e7        	<unknown>
+  10017e: bd bf        	<unknown>
+  100180: a9 63        	<unknown>
+  100182: 8f f7 5b c0  	<unknown>
+  100186: cd bf        	<unknown>
+  100188: 16 72        	<unknown>
+  10018a: 1d 28        	<unknown>
+  10018c: aa 29        	<unknown>
+  10018e: f0 3f        	<unknown>
+  100190: f9 f2        	<unknown>
+  100192: b9 02        	<unknown>
+  100194: 93 5c f8 bf  	<unknown>
+  100198: 53 62 fd 93  	<unknown>
+  10019c: be f6        	<unknown>
+  10019e: a3 bf e2 6c  	<unknown>
+  1001a2: 0e 4b        	<unknown>
+  1001a4: 01 b3        	<unknown>
+  1001a6: df bf d8 55  	<unknown>
+  1001aa: a3 0f eb 3d  	sb	t5, 991(s6)
+  1001ae: f4 bf        	<unknown>
+  1001b0: 7d e1        	<unknown>
+  1001b2: 4a 19        	<unknown>
+  1001b4: 9d f3        	<unknown>
+  1001b6: f4 3f        	<unknown>
+  1001b8: 83 88 4a b3  	lb	a7, -1228(s5)
+  1001bc: 48 9d        	<unknown>
+  1001be: a8 bf        	<unknown>
+  1001c0: 2d e3        	<unknown>
+  1001c2: 29 1b        	<unknown>
+  1001c4: fa 11        	<unknown>
+  1001c6: e5 3f        	<unknown>
+  1001c8: 0b 7e d2 54  	frep.i	tp, 1358, 7, 14
+  1001cc: d6 d9        	<unknown>
+  1001ce: f2 3f        	<unknown>
+  1001d0: f7 e1 39 ee  	<unknown>
+  1001d4: e6 97        	<unknown>
+  1001d6: ed 3f        	<unknown>
+  1001d8: d4 d1        	<unknown>
+  1001da: c2 83        	<unknown>
+  1001dc: cc 6d        	<unknown>
+  1001de: c1 bf        	<unknown>
+  1001e0: 9f b1 67 92  	<unknown>
+  1001e4: 95 b1        	<unknown>
+  1001e6: db bf 7f b7  	<unknown>
+  1001ea: 1a 96        	<unknown>
+  1001ec: 4c 98        	<unknown>
+  1001ee: f6 bf        	<unknown>
+  1001f0: de 77        	<unknown>
+  1001f2: bf 37 c4 9d  	<unknown>
+  1001f6: fb bf 1c 25  	<unknown>
+  1001fa: 2c d1        	<unknown>
+  1001fc: 33 50 c0 bf  	<unknown>
+  100200: 6d ed        	<unknown>
+  100202: 96 c4        	<unknown>
+  100204: 76 c5        	<unknown>
+  100206: f5 3f        	<unknown>
+  100208: ea 55        	<unknown>
+  10020a: b1 b3        	<unknown>
+  10020c: ed e0        	<unknown>
+  10020e: fc 3f        	<unknown>
+  100210: d4 f4        	<unknown>
+  100212: 9d 13        	<unknown>
+  100214: 87 98 ea bf  	flh	fa7, -1026(s5)
+  100218: ec b2        	<unknown>
+  10021a: 23 5d 42 14  	<unknown>
+  10021e: e8 bf        	<unknown>
+  100220: 58 02        	<unknown>
+  100222: ca f0        	<unknown>
+  100224: 59 c2        	<unknown>
+  100226: eb bf cf 4c  	<unknown>
+  10022a: 98 ff        	<unknown>
+  10022c: 93 94 f1 bf  	<unknown>
+  100230: 5d 6d        	<unknown>
+  100232: 84 43        	<unknown>
+  100234: 7f 3d 90 bf  	<unknown>
+  100238: 42 f1        	<unknown>
+  10023a: 65 c1        	<unknown>
+  10023c: e8 36        	<unknown>
+  10023e: fc 3f        	<unknown>
+  100240: 24 ef        	<unknown>
+  100242: ce 94        	<unknown>
+  100244: bd 85        	<unknown>
+  100246: f1 bf        	<unknown>
+  100248: e2 ee        	<unknown>
+  10024a: 2a 74        	<unknown>
+  10024c: 12 0b        	<unknown>
+  10024e: e5 3f        	<unknown>
+  100250: 35 46        	<unknown>
+  100252: 5e 67        	<unknown>
+  100254: 9f 4f eb 3f  	<unknown>
+  100258: 9a e1        	<unknown>
+  10025a: 84 03        	<unknown>
+  10025c: d2 73        	<unknown>
+  10025e: f5 bf        	<unknown>
+  100260: e8 62        	<unknown>
+  100262: ce 5e        	<unknown>
+  100264: 76 20        	<unknown>
+  100266: f4 3f        	<unknown>
+  100268: c5 f3        	<unknown>
+  10026a: 4b 5d e7 84  	<unknown>
+  10026e: f6 3f        	<unknown>
+  100270: 24 35        	<unknown>
+  100272: 9e a7        	<unknown>
+  100274: ff d9 fe bf  	<unknown>
+  100278: 8a 88        	<unknown>
+  10027a: 72 62        	<unknown>
+  10027c: 21 c8        	<unknown>
+  10027e: d5 3f        	<unknown>
+  100280: d1 45        	<unknown>
+  100282: e2 42        	<unknown>
+  100284: da 4f        	<unknown>
+  100286: ea bf        	<unknown>
+  100288: b5 a3        	<unknown>
+  10028a: 93 fc 98 95  	andi	s9, a7, -1703
+  10028e: ef 3f 7b 9b  	jal	t6, 0xb3c44
+  100292: 7b 04 40 ee  	<unknown>
+  100296: d9 bf        	<unknown>
+  100298: 4e bd        	<unknown>
+  10029a: e6 8c        	<unknown>
+  10029c: 6b 16 de bf  	<unknown>
+  1002a0: 58 be        	<unknown>
+  1002a2: 40 db        	<unknown>
+  1002a4: ad ae        	<unknown>
+  1002a6: df bf bd 74  	<unknown>
+  1002aa: df bf 11 68  	<unknown>
+  1002ae: d8 bf        	<unknown>
+  1002b0: 77 05 ba a1  	<unknown>
+  1002b4: b8 eb        	<unknown>
+  1002b6: c1 3f        	<unknown>
+  1002b8: d9 b7        	<unknown>
+  1002ba: 77 c9 c8 e1  	<unknown>
+  1002be: ef bf 65 a7  	jal	t6, 0x5b534
+  1002c2: a5 ff        	<unknown>
+  1002c4: f5 28        	<unknown>
+  1002c6: de 3f        	<unknown>
+  1002c8: 75 0c        	<unknown>
+  1002ca: d5 8a        	<unknown>
+  1002cc: e9 f6        	<unknown>
+  1002ce: d0 3f        	<unknown>
+  1002d0: 8d 57        	<unknown>
+  1002d2: 1f 3f 38 32  	<unknown>
+  1002d6: e3 bf 72 95  	<unknown>
+  1002da: df 39 98 34  	<unknown>
+  1002de: eb bf 90 d1  	<unknown>
+  1002e2: 35 0f        	<unknown>
+  1002e4: b1 0f        	<unknown>
+  1002e6: b7 bf 46 bc  	lui	t6, 771179
+  1002ea: 45 ae        	<unknown>
+  1002ec: 38 44        	<unknown>
+  1002ee: f0 bf        	<unknown>
+  1002f0: 65 83        	<unknown>
+  1002f2: 4e f8        	<unknown>
+  1002f4: 5b 8f c7 3f  	<unknown>
+  1002f8: 4e ae        	<unknown>
+  1002fa: 97 e2 aa 0f  	auipc	t0, 64174
+  1002fe: ac 3f        	<unknown>
+  100300: 4d 48        	<unknown>
+  100302: 68 87        	<unknown>
+  100304: e9 34        	<unknown>
+  100306: fa bf        	<unknown>
+  100308: 0b 82 ad 8e  	frep.i	s11, 2283, 0, 2
+  10030c: f2 67        	<unknown>
+  10030e: bc 3f        	<unknown>
+  100310: 2c 93        	<unknown>
+  100312: b2 59        	<unknown>
+  100314: 08 ab        	<unknown>
+  100316: 0b           	<unknown>
+  100317: 40           	<unknown>
 
 Disassembly of section .text:
 
@@ -369,188 +369,188 @@ Disassembly of section .text.main:
 80010090 <.text.main>:
 80010090: 13 01 01 ff  	addi	sp, sp, -16
 80010094: 27 34 81 00  	fsd	fs0, 8(sp)
-80010098: 97 05 ff 7f  	auipc	a1, 524272
-8001009c: 93 85 05 02  	addi	a1, a1, 32
-800100a0: 03 d5 05 00  	lhu	a0, 0(a1)
-800100a4: 17 06 ff 7f  	auipc	a2, 524272
-800100a8: 13 06 c6 f5  	addi	a2, a2, -164
-800100ac: 07 30 06 00  	fld	ft0, 0(a2)
+80010098: 97 05 0f 80  	auipc	a1, 524528
+8001009c: 93 85 85 f6  	addi	a1, a1, -152
+800100a0: 07 b0 05 00  	fld	ft0, 0(a1)
+800100a4: 17 06 0f 80  	auipc	a2, 524528
+800100a8: 13 06 46 01  	addi	a2, a2, 20
+800100ac: 03 55 06 00  	lhu	a0, 0(a2)
 800100b0: 13 15 35 00  	slli	a0, a0, 3
-800100b4: 97 06 ff 7f  	auipc	a3, 524272
+800100b4: 97 06 0f 80  	auipc	a3, 524528
 800100b8: 93 86 46 03  	addi	a3, a3, 52
 800100bc: 33 05 d5 00  	add	a0, a0, a3
 800100c0: 87 30 05 00  	fld	ft1, 0(a0)
-800100c4: 03 d5 25 00  	lhu	a0, 2(a1)
-800100c8: 53 f0 00 12  	fmul.d	ft0, ft1, ft0
-800100cc: 87 30 86 00  	fld	ft1, 8(a2)
+800100c4: 53 f0 00 12  	fmul.d	ft0, ft1, ft0
+800100c8: 87 b0 85 00  	fld	ft1, 8(a1)
+800100cc: 03 55 26 00  	lhu	a0, 2(a2)
 800100d0: 13 15 35 00  	slli	a0, a0, 3
-800100d4: 03 d7 45 00  	lhu	a4, 4(a1)
-800100d8: 33 05 d5 00  	add	a0, a0, a3
-800100dc: 07 31 05 00  	fld	ft2, 0(a0)
-800100e0: 87 31 06 01  	fld	ft3, 16(a2)
-800100e4: 13 15 37 00  	slli	a0, a4, 3
-800100e8: 03 d7 65 00  	lhu	a4, 6(a1)
+800100d4: 33 05 d5 00  	add	a0, a0, a3
+800100d8: 07 31 05 00  	fld	ft2, 0(a0)
+800100dc: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+800100e0: 87 b0 05 01  	fld	ft1, 16(a1)
+800100e4: 03 55 46 00  	lhu	a0, 4(a2)
+800100e8: 13 15 35 00  	slli	a0, a0, 3
 800100ec: 33 05 d5 00  	add	a0, a0, a3
-800100f0: 07 32 05 00  	fld	ft4, 0(a0)
-800100f4: 87 32 86 01  	fld	ft5, 24(a2)
-800100f8: 13 15 37 00  	slli	a0, a4, 3
-800100fc: 33 05 d5 00  	add	a0, a0, a3
-80010100: 07 33 05 00  	fld	ft6, 0(a0)
-80010104: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
-80010108: 03 d5 85 00  	lhu	a0, 8(a1)
-8001010c: 43 70 32 02  	fmadd.d	ft0, ft4, ft3, ft0
-80010110: 43 70 53 02  	fmadd.d	ft0, ft6, ft5, ft0
-80010114: 87 30 06 02  	fld	ft1, 32(a2)
+800100f0: 07 31 05 00  	fld	ft2, 0(a0)
+800100f4: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+800100f8: 87 b0 85 01  	fld	ft1, 24(a1)
+800100fc: 03 55 66 00  	lhu	a0, 6(a2)
+80010100: 13 15 35 00  	slli	a0, a0, 3
+80010104: 33 05 d5 00  	add	a0, a0, a3
+80010108: 07 31 05 00  	fld	ft2, 0(a0)
+8001010c: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010110: 87 b0 05 02  	fld	ft1, 32(a1)
+80010114: 03 55 86 00  	lhu	a0, 8(a2)
 80010118: 13 15 35 00  	slli	a0, a0, 3
-8001011c: 03 d7 a5 00  	lhu	a4, 10(a1)
-80010120: 33 05 d5 00  	add	a0, a0, a3
-80010124: 07 31 05 00  	fld	ft2, 0(a0)
-80010128: 87 31 86 02  	fld	ft3, 40(a2)
-8001012c: 13 15 37 00  	slli	a0, a4, 3
-80010130: 03 d7 c5 00  	lhu	a4, 12(a1)
+8001011c: 33 05 d5 00  	add	a0, a0, a3
+80010120: 07 31 05 00  	fld	ft2, 0(a0)
+80010124: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010128: 87 b0 85 02  	fld	ft1, 40(a1)
+8001012c: 03 55 a6 00  	lhu	a0, 10(a2)
+80010130: 13 15 35 00  	slli	a0, a0, 3
 80010134: 33 05 d5 00  	add	a0, a0, a3
-80010138: 07 32 05 00  	fld	ft4, 0(a0)
-8001013c: 87 32 06 03  	fld	ft5, 48(a2)
-80010140: 13 15 37 00  	slli	a0, a4, 3
-80010144: 33 05 d5 00  	add	a0, a0, a3
-80010148: 07 33 05 00  	fld	ft6, 0(a0)
-8001014c: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
-80010150: 03 d5 e5 00  	lhu	a0, 14(a1)
-80010154: 43 70 32 02  	fmadd.d	ft0, ft4, ft3, ft0
-80010158: 43 70 53 02  	fmadd.d	ft0, ft6, ft5, ft0
-8001015c: 87 30 86 03  	fld	ft1, 56(a2)
+80010138: 07 31 05 00  	fld	ft2, 0(a0)
+8001013c: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010140: 87 b0 05 03  	fld	ft1, 48(a1)
+80010144: 03 55 c6 00  	lhu	a0, 12(a2)
+80010148: 13 15 35 00  	slli	a0, a0, 3
+8001014c: 33 05 d5 00  	add	a0, a0, a3
+80010150: 07 31 05 00  	fld	ft2, 0(a0)
+80010154: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010158: 87 b0 85 03  	fld	ft1, 56(a1)
+8001015c: 03 55 e6 00  	lhu	a0, 14(a2)
 80010160: 13 15 35 00  	slli	a0, a0, 3
-80010164: 03 d7 05 01  	lhu	a4, 16(a1)
-80010168: 33 05 d5 00  	add	a0, a0, a3
-8001016c: 07 31 05 00  	fld	ft2, 0(a0)
-80010170: 87 31 06 04  	fld	ft3, 64(a2)
-80010174: 13 15 37 00  	slli	a0, a4, 3
-80010178: 03 d7 25 01  	lhu	a4, 18(a1)
+80010164: 33 05 d5 00  	add	a0, a0, a3
+80010168: 07 31 05 00  	fld	ft2, 0(a0)
+8001016c: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010170: 87 b0 05 04  	fld	ft1, 64(a1)
+80010174: 03 55 06 01  	lhu	a0, 16(a2)
+80010178: 13 15 35 00  	slli	a0, a0, 3
 8001017c: 33 05 d5 00  	add	a0, a0, a3
-80010180: 07 32 05 00  	fld	ft4, 0(a0)
-80010184: 87 32 86 04  	fld	ft5, 72(a2)
-80010188: 13 15 37 00  	slli	a0, a4, 3
-8001018c: 33 05 d5 00  	add	a0, a0, a3
-80010190: 07 33 05 00  	fld	ft6, 0(a0)
-80010194: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
-80010198: 03 d5 45 01  	lhu	a0, 20(a1)
-8001019c: 43 70 32 02  	fmadd.d	ft0, ft4, ft3, ft0
-800101a0: 43 70 53 02  	fmadd.d	ft0, ft6, ft5, ft0
-800101a4: 87 30 06 05  	fld	ft1, 80(a2)
+80010180: 07 31 05 00  	fld	ft2, 0(a0)
+80010184: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010188: 87 b0 85 04  	fld	ft1, 72(a1)
+8001018c: 03 55 26 01  	lhu	a0, 18(a2)
+80010190: 13 15 35 00  	slli	a0, a0, 3
+80010194: 33 05 d5 00  	add	a0, a0, a3
+80010198: 07 31 05 00  	fld	ft2, 0(a0)
+8001019c: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+800101a0: 87 b0 05 05  	fld	ft1, 80(a1)
+800101a4: 03 55 46 01  	lhu	a0, 20(a2)
 800101a8: 13 15 35 00  	slli	a0, a0, 3
-800101ac: 03 d7 65 01  	lhu	a4, 22(a1)
-800101b0: 33 05 d5 00  	add	a0, a0, a3
-800101b4: 07 31 05 00  	fld	ft2, 0(a0)
-800101b8: 87 31 86 05  	fld	ft3, 88(a2)
-800101bc: 13 15 37 00  	slli	a0, a4, 3
-800101c0: 03 d7 85 01  	lhu	a4, 24(a1)
+800101ac: 33 05 d5 00  	add	a0, a0, a3
+800101b0: 07 31 05 00  	fld	ft2, 0(a0)
+800101b4: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+800101b8: 87 b0 85 05  	fld	ft1, 88(a1)
+800101bc: 03 55 66 01  	lhu	a0, 22(a2)
+800101c0: 13 15 35 00  	slli	a0, a0, 3
 800101c4: 33 05 d5 00  	add	a0, a0, a3
-800101c8: 07 32 05 00  	fld	ft4, 0(a0)
-800101cc: 87 32 06 06  	fld	ft5, 96(a2)
-800101d0: 13 15 37 00  	slli	a0, a4, 3
-800101d4: 33 05 d5 00  	add	a0, a0, a3
-800101d8: 07 33 05 00  	fld	ft6, 0(a0)
-800101dc: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
-800101e0: 03 d5 a5 01  	lhu	a0, 26(a1)
-800101e4: 43 70 32 02  	fmadd.d	ft0, ft4, ft3, ft0
-800101e8: 43 70 53 02  	fmadd.d	ft0, ft6, ft5, ft0
-800101ec: 87 30 86 06  	fld	ft1, 104(a2)
+800101c8: 07 31 05 00  	fld	ft2, 0(a0)
+800101cc: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+800101d0: 87 b0 05 06  	fld	ft1, 96(a1)
+800101d4: 03 55 86 01  	lhu	a0, 24(a2)
+800101d8: 13 15 35 00  	slli	a0, a0, 3
+800101dc: 33 05 d5 00  	add	a0, a0, a3
+800101e0: 07 31 05 00  	fld	ft2, 0(a0)
+800101e4: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+800101e8: 87 b0 85 06  	fld	ft1, 104(a1)
+800101ec: 03 55 a6 01  	lhu	a0, 26(a2)
 800101f0: 13 15 35 00  	slli	a0, a0, 3
-800101f4: 03 d7 c5 01  	lhu	a4, 28(a1)
-800101f8: 33 05 d5 00  	add	a0, a0, a3
-800101fc: 07 31 05 00  	fld	ft2, 0(a0)
-80010200: 87 31 06 07  	fld	ft3, 112(a2)
-80010204: 13 15 37 00  	slli	a0, a4, 3
-80010208: 03 d7 e5 01  	lhu	a4, 30(a1)
+800101f4: 33 05 d5 00  	add	a0, a0, a3
+800101f8: 07 31 05 00  	fld	ft2, 0(a0)
+800101fc: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010200: 87 b0 05 07  	fld	ft1, 112(a1)
+80010204: 03 55 c6 01  	lhu	a0, 28(a2)
+80010208: 13 15 35 00  	slli	a0, a0, 3
 8001020c: 33 05 d5 00  	add	a0, a0, a3
-80010210: 07 32 05 00  	fld	ft4, 0(a0)
-80010214: 87 32 86 07  	fld	ft5, 120(a2)
-80010218: 13 15 37 00  	slli	a0, a4, 3
-8001021c: 33 05 d5 00  	add	a0, a0, a3
-80010220: 07 33 05 00  	fld	ft6, 0(a0)
-80010224: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
-80010228: 03 d5 05 02  	lhu	a0, 32(a1)
-8001022c: 43 70 32 02  	fmadd.d	ft0, ft4, ft3, ft0
-80010230: 43 70 53 02  	fmadd.d	ft0, ft6, ft5, ft0
-80010234: 87 30 06 08  	fld	ft1, 128(a2)
+80010210: 07 31 05 00  	fld	ft2, 0(a0)
+80010214: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010218: 87 b0 85 07  	fld	ft1, 120(a1)
+8001021c: 03 55 e6 01  	lhu	a0, 30(a2)
+80010220: 13 15 35 00  	slli	a0, a0, 3
+80010224: 33 05 d5 00  	add	a0, a0, a3
+80010228: 07 31 05 00  	fld	ft2, 0(a0)
+8001022c: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010230: 87 b0 05 08  	fld	ft1, 128(a1)
+80010234: 03 55 06 02  	lhu	a0, 32(a2)
 80010238: 13 15 35 00  	slli	a0, a0, 3
-8001023c: 03 d7 25 02  	lhu	a4, 34(a1)
-80010240: 33 05 d5 00  	add	a0, a0, a3
-80010244: 07 31 05 00  	fld	ft2, 0(a0)
-80010248: 87 31 86 08  	fld	ft3, 136(a2)
-8001024c: 13 15 37 00  	slli	a0, a4, 3
-80010250: 03 d7 45 02  	lhu	a4, 36(a1)
+8001023c: 33 05 d5 00  	add	a0, a0, a3
+80010240: 07 31 05 00  	fld	ft2, 0(a0)
+80010244: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010248: 87 b0 85 08  	fld	ft1, 136(a1)
+8001024c: 03 55 26 02  	lhu	a0, 34(a2)
+80010250: 13 15 35 00  	slli	a0, a0, 3
 80010254: 33 05 d5 00  	add	a0, a0, a3
-80010258: 07 32 05 00  	fld	ft4, 0(a0)
-8001025c: 87 32 06 09  	fld	ft5, 144(a2)
-80010260: 13 15 37 00  	slli	a0, a4, 3
-80010264: 33 05 d5 00  	add	a0, a0, a3
-80010268: 07 33 05 00  	fld	ft6, 0(a0)
-8001026c: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
-80010270: 03 d5 65 02  	lhu	a0, 38(a1)
-80010274: 43 70 32 02  	fmadd.d	ft0, ft4, ft3, ft0
-80010278: 43 70 53 02  	fmadd.d	ft0, ft6, ft5, ft0
-8001027c: 87 30 86 09  	fld	ft1, 152(a2)
+80010258: 07 31 05 00  	fld	ft2, 0(a0)
+8001025c: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010260: 87 b0 05 09  	fld	ft1, 144(a1)
+80010264: 03 55 46 02  	lhu	a0, 36(a2)
+80010268: 13 15 35 00  	slli	a0, a0, 3
+8001026c: 33 05 d5 00  	add	a0, a0, a3
+80010270: 07 31 05 00  	fld	ft2, 0(a0)
+80010274: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010278: 87 b0 85 09  	fld	ft1, 152(a1)
+8001027c: 03 55 66 02  	lhu	a0, 38(a2)
 80010280: 13 15 35 00  	slli	a0, a0, 3
-80010284: 03 d7 85 02  	lhu	a4, 40(a1)
-80010288: 33 05 d5 00  	add	a0, a0, a3
-8001028c: 07 31 05 00  	fld	ft2, 0(a0)
-80010290: 87 31 06 0a  	fld	ft3, 160(a2)
-80010294: 13 15 37 00  	slli	a0, a4, 3
-80010298: 03 d7 a5 02  	lhu	a4, 42(a1)
+80010284: 33 05 d5 00  	add	a0, a0, a3
+80010288: 07 31 05 00  	fld	ft2, 0(a0)
+8001028c: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+80010290: 87 b0 05 0a  	fld	ft1, 160(a1)
+80010294: 03 55 86 02  	lhu	a0, 40(a2)
+80010298: 13 15 35 00  	slli	a0, a0, 3
 8001029c: 33 05 d5 00  	add	a0, a0, a3
-800102a0: 07 32 05 00  	fld	ft4, 0(a0)
-800102a4: 87 32 86 0a  	fld	ft5, 168(a2)
-800102a8: 13 15 37 00  	slli	a0, a4, 3
-800102ac: 33 05 d5 00  	add	a0, a0, a3
-800102b0: 07 33 05 00  	fld	ft6, 0(a0)
-800102b4: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
-800102b8: 03 d5 c5 02  	lhu	a0, 44(a1)
-800102bc: 43 70 32 02  	fmadd.d	ft0, ft4, ft3, ft0
-800102c0: 43 75 53 02  	fmadd.d	fa0, ft6, ft5, ft0
-800102c4: 87 35 06 0b  	fld	fa1, 176(a2)
+800102a0: 07 31 05 00  	fld	ft2, 0(a0)
+800102a4: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+800102a8: 87 b0 85 0a  	fld	ft1, 168(a1)
+800102ac: 03 55 a6 02  	lhu	a0, 42(a2)
+800102b0: 13 15 35 00  	slli	a0, a0, 3
+800102b4: 33 05 d5 00  	add	a0, a0, a3
+800102b8: 07 31 05 00  	fld	ft2, 0(a0)
+800102bc: 43 70 11 02  	fmadd.d	ft0, ft2, ft1, ft0
+800102c0: 87 b0 05 0b  	fld	ft1, 176(a1)
+800102c4: 03 55 c6 02  	lhu	a0, 44(a2)
 800102c8: 13 15 35 00  	slli	a0, a0, 3
 800102cc: 33 05 d5 00  	add	a0, a0, a3
-800102d0: 07 36 05 00  	fld	fa2, 0(a0)
-800102d4: 13 08 01 00  	mv	a6, sp
-800102d8: 93 07 80 00  	addi	a5, zero, 8
-800102dc: 13 05 10 00  	addi	a0, zero, 1
-800102e0: 13 07 60 01  	addi	a4, zero, 22
-800102e4: d3 01 00 d2  	fcvt.d.w	ft3, zero
-800102e8: 2b 20 07 04  	scfgwi	a4, 64
-800102ec: 2b 20 17 04  	scfgwi	a4, 65
-800102f0: 2b a0 07 0c  	scfgwi	a5, 192
-800102f4: 2b a0 17 0c  	scfgwi	a5, 193
-800102f8: 2b 20 15 14  	scfgwi	a0, 321
-800102fc: 2b a0 16 16  	scfgwi	a3, 353
-80010300: 2b 20 06 30  	scfgwi	a2, 768
-80010304: 2b a0 15 20  	scfgwi	a1, 513
-80010308: 73 e0 00 7c  	csrsi	1984, 1
-8001030c: 53 82 31 22  	fmv.d	ft4, ft3
-80010310: d3 82 31 22  	fmv.d	ft5, ft3
-80010314: 53 83 31 22  	fmv.d	ft6, ft3
-80010318: d3 83 31 22  	fmv.d	ft7, ft3
-8001031c: 53 84 31 22  	fmv.d	fs0, ft3
-80010320: 8b 59 07 00  	frep.o	a4, 1, 5, 9
-80010324: c3 f1 00 1a  	fmadd.d	ft3, ft1, ft0, ft3
-80010328: d3 7e 73 02  	fadd.d	ft9, ft6, ft7
-8001032c: 53 73 52 02  	fadd.d	ft6, ft4, ft5
-80010330: d3 73 34 02  	fadd.d	ft7, fs0, ft3
-80010334: 53 72 73 02  	fadd.d	ft4, ft6, ft7
-80010338: 53 7e d2 03  	fadd.d	ft8, ft4, ft9
-8001033c: 27 30 c8 01  	fsd	ft8, 0(a6)
-80010340: d3 02 05 e0  	fmv.x.w	t0, fa0
-80010344: 73 f0 00 7c  	csrci	1984, 1
-80010348: 63 92 02 00  	bnez	t0, 0x8001034c <.text.main+0x2bc>
-8001034c: 97 05 ff 7f  	auipc	a1, 524272
-80010350: 93 85 45 fc  	addi	a1, a1, -60
-80010354: 07 b0 05 00  	fld	ft0, 0(a1)
-80010358: 97 05 00 00  	auipc	a1, 0
-8001035c: 93 85 85 04  	addi	a1, a1, 72
-80010360: 87 b0 05 00  	fld	ft1, 0(a1)
-80010364: 43 71 b6 52  	fmadd.d	ft2, fa2, fa1, fa0
-80010368: 53 71 01 0a  	fsub.d	ft2, ft2, ft0
-8001036c: 53 21 21 22  	fabs.d	ft2, ft2
+800102d0: 07 31 05 00  	fld	ft2, 0(a0)
+800102d4: 43 75 11 02  	fmadd.d	fa0, ft2, ft1, ft0
+800102d8: 13 08 01 00  	mv	a6, sp
+800102dc: 93 07 80 00  	addi	a5, zero, 8
+800102e0: 13 05 10 00  	addi	a0, zero, 1
+800102e4: 13 07 60 01  	addi	a4, zero, 22
+800102e8: d3 01 00 d2  	fcvt.d.w	ft3, zero
+800102ec: 2b 20 07 04  	scfgwi	a4, 64
+800102f0: 2b 20 17 04  	scfgwi	a4, 65
+800102f4: 2b a0 07 0c  	scfgwi	a5, 192
+800102f8: 2b a0 17 0c  	scfgwi	a5, 193
+800102fc: 2b 20 15 14  	scfgwi	a0, 321
+80010300: 2b a0 16 16  	scfgwi	a3, 353
+80010304: 2b a0 05 30  	scfgwi	a1, 768
+80010308: 2b 20 16 20  	scfgwi	a2, 513
+8001030c: 73 e0 00 7c  	csrsi	1984, 1
+80010310: 53 82 31 22  	fmv.d	ft4, ft3
+80010314: d3 82 31 22  	fmv.d	ft5, ft3
+80010318: 53 83 31 22  	fmv.d	ft6, ft3
+8001031c: d3 83 31 22  	fmv.d	ft7, ft3
+80010320: 53 84 31 22  	fmv.d	fs0, ft3
+80010324: 8b 59 07 00  	frep.o	a4, 1, 5, 9
+80010328: c3 f1 00 1a  	fmadd.d	ft3, ft1, ft0, ft3
+8001032c: d3 7e 73 02  	fadd.d	ft9, ft6, ft7
+80010330: 53 73 52 02  	fadd.d	ft6, ft4, ft5
+80010334: d3 73 34 02  	fadd.d	ft7, fs0, ft3
+80010338: 53 72 73 02  	fadd.d	ft4, ft6, ft7
+8001033c: 53 7e d2 03  	fadd.d	ft8, ft4, ft9
+80010340: 27 30 c8 01  	fsd	ft8, 0(a6)
+80010344: d3 02 05 e0  	fmv.x.w	t0, fa0
+80010348: 73 f0 00 7c  	csrci	1984, 1
+8001034c: 63 92 02 00  	bnez	t0, 0x80010350 <.text.main+0x2c0>
+80010350: 97 05 0f 80  	auipc	a1, 524528
+80010354: 93 85 05 fc  	addi	a1, a1, -64
+80010358: 07 b0 05 00  	fld	ft0, 0(a1)
+8001035c: d3 70 05 0a  	fsub.d	ft1, fa0, ft0
+80010360: 53 a1 10 22  	fabs.d	ft2, ft1
+80010364: 97 05 00 00  	auipc	a1, 0
+80010368: 93 85 c5 03  	addi	a1, a1, 60
+8001036c: 87 b0 05 00  	fld	ft1, 0(a1)
 80010370: d3 95 20 a2  	flt.d	a1, ft1, ft2
 80010374: 63 9a 05 00  	bnez	a1, 0x80010388 <.text.main+0x2f8>
 80010378: 07 31 01 00  	fld	ft2, 0(sp)
@@ -580,104 +580,26 @@ Disassembly of section .comment:
        c: 31 32        	<unknown>
        e: 2e 30        	<unknown>
       10: 2e 30        	<unknown>
-      12: 20 28        	<unknown>
-      14: 67 69 74 40  	<unknown>
-      18: 69 69        	<unknown>
-      1a: 73 2d 67 69  	csrrs	s10, 1686, a4
-      1e: 74 2e        	<unknown>
-      20: 65 65        	<unknown>
-      22: 2e 65        	<unknown>
-      24: 74 68        	<unknown>
-      26: 7a 2e        	<unknown>
-      28: 63 68 3a 68  	bltu	s4, gp, 0x6b8 <.l1+0x6b8>
-      2c: 75 65        	<unknown>
-      2e: 74 74        	<unknown>
-      30: 65 72        	<unknown>
-      32: 6e 2f        	<unknown>
-      34: 73 6e 69 74  	csrrsi	t3, 1862, 18
-      38: 63 68 2d 6c  	bltu	s10, sp, 0x708 <.l1+0x708>
-      3c: 6c 76        	<unknown>
-      3e: 6d 2e        	<unknown>
-      40: 67 69 74 20  	<unknown>
-      44: 31 31        	<unknown>
-      46: 66 30        	<unknown>
-      48: 30 62        	<unknown>
-      4a: 39 30        	<unknown>
-      4c: 32 33        	<unknown>
-      4e: 66 31        	<unknown>
-      50: 34 61        	<unknown>
-      52: 63 33 37 65  	<unknown>
-      56: 34 36        	<unknown>
-      58: 65 33        	<unknown>
-      5a: 66 66        	<unknown>
-      5c: 35 33        	<unknown>
-      5e: 31 63        	<unknown>
-      60: 36 39        	<unknown>
-      62: 64 35        	<unknown>
-      64: 37 35 33 64  	lui	a0, 410419
-      68: 63 36 39 62  	<unknown>
-      6c: 29 00        	<unknown>
-      6e: 00 63        	<unknown>
-      70: 6c 61        	<unknown>
-      72: 6e 67        	<unknown>
-      74: 20 76        	<unknown>
-      76: 65 72        	<unknown>
-      78: 73 69 6f 6e  	csrrsi	s2, 1766, 30
-      7c: 20 31        	<unknown>
-      7e: 32 2e        	<unknown>
-      80: 30 2e        	<unknown>
-      82: 30 20        	<unknown>
-      84: 28 67        	<unknown>
-      86: 69 74        	<unknown>
-      88: 40 69        	<unknown>
-      8a: 69 73        	<unknown>
-      8c: 2d 67        	<unknown>
-      8e: 69 74        	<unknown>
-      90: 2e 65        	<unknown>
-      92: 65 2e        	<unknown>
-      94: 65 74        	<unknown>
-      96: 68 7a        	<unknown>
-      98: 2e 63        	<unknown>
-      9a: 68 3a        	<unknown>
-      9c: 68 75        	<unknown>
-      9e: 65 74        	<unknown>
-      a0: 74 65        	<unknown>
-      a2: 72 6e        	<unknown>
-      a4: 2f 73 6e 69  	<unknown>
-      a8: 74 63        	<unknown>
-      aa: 68 2d        	<unknown>
-      ac: 6c 6c        	<unknown>
-      ae: 76 6d        	<unknown>
-      b0: 2e 67        	<unknown>
-      b2: 69 74        	<unknown>
-      b4: 20 31        	<unknown>
-      b6: 31 66        	<unknown>
-      b8: 30 30        	<unknown>
-      ba: 62 39        	<unknown>
-      bc: 30 32        	<unknown>
-      be: 33 66 31 34  	<unknown>
-      c2: 61 63        	<unknown>
-      c4: 33 37 65 34  	<unknown>
-      c8: 36 65        	<unknown>
-      ca: 33 66 66 35  	<unknown>
-      ce: 33 31 63 36  	<unknown>
-      d2: 39 64        	<unknown>
-      d4: 35 37        	<unknown>
-      d6: 35 33        	<unknown>
-      d8: 64 63        	<unknown>
-      da: 36 39        	<unknown>
-      dc: 62 29        	<unknown>
-      de: 00           	<unknown>
+      12: 00 00        	<unknown>
+      14: 63 6c 61 6e  	bltu	sp, t1, 0x70c <.comment+0x70c>
+      18: 67 20 76 65  	<unknown>
+      1c: 72 73        	<unknown>
+      1e: 69 6f        	<unknown>
+      20: 6e 20        	<unknown>
+      22: 31 32        	<unknown>
+      24: 2e 30        	<unknown>
+      26: 2e 30        	<unknown>
+      28: 00           	<unknown>
 
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-       0: 41 2f        	<unknown>
+       0: 41 36        	<unknown>
        2: 00 00        	<unknown>
        4: 00 72        	<unknown>
        6: 69 73        	<unknown>
-       8: 63 76 00 01  	bgeu	zero, a6, 0x14 <.l1+0x14>
-       c: 25 00        	<unknown>
+       8: 63 76 00 01  	bgeu	zero, a6, 0x14 <.riscv.attributes+0x14>
+       c: 2c 00        	<unknown>
        e: 00 00        	<unknown>
       10: 04 10        	<unknown>
       12: 05 72        	<unknown>
@@ -692,7 +614,11 @@ Disassembly of section .riscv.attributes:
       26: 66 32        	<unknown>
       28: 70 30        	<unknown>
       2a: 5f 64 32 70  	<unknown>
-      2e: 30 00        	<unknown>
+      2e: 30 5f        	<unknown>
+      30: 7a 66        	<unknown>
+      32: 68 30        	<unknown>
+      34: 70 31        	<unknown>
+      36: 00           	<unknown>
 
 Disassembly of section .shstrtab:
 
@@ -701,12 +627,12 @@ Disassembly of section .shstrtab:
        2: 74 65        	<unknown>
        4: 78 74        	<unknown>
        6: 00 2e        	<unknown>
-       8: 63 6f 6d 6d  	bltu	s10, s6, 0x6e6 <.l1+0x6e6>
+       8: 63 6f 6d 6d  	bltu	s10, s6, 0x6e6 <.shstrtab+0x6e6>
        c: 65 6e        	<unknown>
        e: 74 00        	<unknown>
       10: 2e 72        	<unknown>
       12: 69 73        	<unknown>
-      14: 63 76 2e 61  	bgeu	t3, s2, 0x620 <.l1+0x620>
+      14: 63 76 2e 61  	bgeu	t3, s2, 0x620 <.shstrtab+0x620>
       18: 74 74        	<unknown>
       1a: 72 69        	<unknown>
       1c: 62 75        	<unknown>

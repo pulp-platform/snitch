@@ -4,15 +4,15 @@ bin/atomics:     file format elf32-littleriscv
 
 Disassembly of section .l1:
 
-00000000 <atomic_barrier>:
-   0:	0000                	unimp
+00100000 <atomic_barrier>:
+  100000:	0000                	unimp
 	...
 
 Disassembly of section .text:
 
 80010000 <_start>:
 80010000:	00001197          	auipc	gp,0x1
-80010004:	a8018193          	addi	gp,gp,-1408 # 80010a80 <__global_pointer$>
+80010004:	a9018193          	addi	gp,gp,-1392 # 80010a90 <__global_pointer$>
 80010008:	0040006f          	j	8001000c <reset_vector>
 
 8001000c <reset_vector>:
@@ -130,8 +130,8 @@ Disassembly of section .text:
 800101a8:	f20798e3          	bnez	a5,800100d8 <check_amos+0x4c>
 800101ac:	00600793          	li	a5,6
 800101b0:	02f67633          	remu	a2,a2,a5
-800101b4:	00c71633          	sll	a2,a4,a2
-800101b8:	20c5202f          	amoxor.w	zero,a2,(a0)
+800101b4:	00c71733          	sll	a4,a4,a2
+800101b8:	20e5202f          	amoxor.w	zero,a4,(a0)
 800101bc:	0005a783          	lw	a5,0(a1)
 800101c0:	00078013          	mv	zero,a5
 800101c4:	00052703          	lw	a4,0(a0)
@@ -162,33 +162,35 @@ Disassembly of section .text.startup:
 80010218:	fff00513          	li	a0,-1
 8001021c:	00f58463          	beq	a1,a5,80010224 <main+0x10>
 80010220:	00008067          	ret
-80010224:	00002823          	sw	zero,16(zero) # 10 <l1_alloc_base>
-80010228:	ff010113          	addi	sp,sp,-16
-8001022c:	00000797          	auipc	a5,0x0
-80010230:	0407aa23          	sw	zero,84(a5) # 80010280 <l2>
-80010234:	00112623          	sw	ra,12(sp)
-80010238:	bfff0797          	auipc	a5,0xbfff0
-8001023c:	e0078793          	addi	a5,a5,-512 # 40000038 <barrier_reg>
-80010240:	0007a783          	lw	a5,0(a5)
-80010244:	00078013          	mv	zero,a5
-80010248:	01000513          	li	a0,16
-8001024c:	e41ff0ef          	jal	ra,8001008c <check_amos>
-80010250:	00050793          	mv	a5,a0
-80010254:	00100513          	li	a0,1
-80010258:	00078863          	beqz	a5,80010268 <main+0x54>
-8001025c:	00c12083          	lw	ra,12(sp)
-80010260:	01010113          	addi	sp,sp,16
-80010264:	00008067          	ret
-80010268:	00000517          	auipc	a0,0x0
-8001026c:	01850513          	addi	a0,a0,24 # 80010280 <l2>
-80010270:	e1dff0ef          	jal	ra,8001008c <check_amos>
-80010274:	00a03533          	snez	a0,a0
-80010278:	fe5ff06f          	j	8001025c <main+0x48>
+80010224:	800f0797          	auipc	a5,0x800f0
+80010228:	de07a623          	sw	zero,-532(a5) # 100010 <l1_alloc_base>
+8001022c:	ff010113          	addi	sp,sp,-16
+80010230:	00000797          	auipc	a5,0x0
+80010234:	0607a023          	sw	zero,96(a5) # 80010290 <l2>
+80010238:	00112623          	sw	ra,12(sp)
+8001023c:	bfff0797          	auipc	a5,0xbfff0
+80010240:	dfc78793          	addi	a5,a5,-516 # 40000038 <barrier_reg>
+80010244:	0007a783          	lw	a5,0(a5)
+80010248:	00078013          	mv	zero,a5
+8001024c:	800f0517          	auipc	a0,0x800f0
+80010250:	dc450513          	addi	a0,a0,-572 # 100010 <l1_alloc_base>
+80010254:	e39ff0ef          	jal	ra,8001008c <check_amos>
+80010258:	00050793          	mv	a5,a0
+8001025c:	00100513          	li	a0,1
+80010260:	00078863          	beqz	a5,80010270 <main+0x5c>
+80010264:	00c12083          	lw	ra,12(sp)
+80010268:	01010113          	addi	sp,sp,16
+8001026c:	00008067          	ret
+80010270:	00000517          	auipc	a0,0x0
+80010274:	02050513          	addi	a0,a0,32 # 80010290 <l2>
+80010278:	e15ff0ef          	jal	ra,8001008c <check_amos>
+8001027c:	00a03533          	snez	a0,a0
+80010280:	fe5ff06f          	j	80010264 <main+0x50>
 
 Disassembly of section .sbss:
 
-80010280 <l2>:
-80010280:	0000                	unimp
+80010290 <l2>:
+80010290:	0000                	unimp
 	...
 
 Disassembly of section .comment:
@@ -198,8 +200,8 @@ Disassembly of section .comment:
    4:	2820                	fld	fs0,80(s0)
    6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
    a:	3120                	fld	fs0,96(a0)
-   c:	2e30                	fld	fa2,88(a2)
-   e:	2e32                	fld	ft8,264(sp)
+   c:	2e31                	jal	328 <atomic_barrier-0xffcd8>
+   e:	2e31                	jal	32a <atomic_barrier-0xffcd6>
   10:	0030                	addi	a2,sp,8
 
 Disassembly of section .riscv.attributes:
@@ -209,7 +211,7 @@ Disassembly of section .riscv.attributes:
    2:	0000                	unimp
    4:	7200                	flw	fs0,32(a2)
    6:	7369                	lui	t1,0xffffa
-   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
+   8:	01007663          	bgeu	zero,a6,14 <atomic_barrier-0xfffec>
    c:	0029                	c.nop	10
    e:	0000                	unimp
   10:	1004                	addi	s1,sp,32

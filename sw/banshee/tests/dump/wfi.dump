@@ -4,15 +4,15 @@ bin/wfi:     file format elf32-littleriscv
 
 Disassembly of section .l1:
 
-00000000 <atomic_barrier>:
-   0:	0000                	unimp
+00100000 <atomic_barrier>:
+  100000:	0000                	unimp
 	...
 
 Disassembly of section .text:
 
 80010000 <_start>:
 80010000:	00001197          	auipc	gp,0x1
-80010004:	8f018193          	addi	gp,gp,-1808 # 800108f0 <__global_pointer$>
+80010004:	90018193          	addi	gp,gp,-1792 # 80010900 <__global_pointer$>
 80010008:	0040006f          	j	8001000c <reset_vector>
 
 8001000c <reset_vector>:
@@ -59,29 +59,31 @@ Disassembly of section .text.startup:
 
 8001008c <main>:
 8001008c:	00050793          	mv	a5,a0
-80010090:	02051a63          	bnez	a0,800100c4 <main+0x38>
+80010090:	02051c63          	bnez	a0,800100c8 <main+0x3c>
 80010094:	00100693          	li	a3,1
 80010098:	02b6f633          	remu	a2,a3,a1
-8001009c:	01000713          	li	a4,16
-800100a0:	00d72023          	sw	a3,0(a4)
-800100a4:	bfff0697          	auipc	a3,0xbfff0
-800100a8:	f8c6a223          	sw	a2,-124(a3) # 40000028 <wake_up_reg>
-800100ac:	10500073          	wfi
-800100b0:	00000513          	li	a0,0
-800100b4:	00079663          	bnez	a5,800100c0 <main+0x34>
-800100b8:	00072503          	lw	a0,0(a4)
-800100bc:	40a58533          	sub	a0,a1,a0
-800100c0:	00008067          	ret
-800100c4:	10500073          	wfi
-800100c8:	00150693          	addi	a3,a0,1
-800100cc:	02b6f6b3          	remu	a3,a3,a1
-800100d0:	01000713          	li	a4,16
-800100d4:	00072603          	lw	a2,0(a4)
-800100d8:	00160613          	addi	a2,a2,1
-800100dc:	00c72023          	sw	a2,0(a4)
-800100e0:	bfff0617          	auipc	a2,0xbfff0
-800100e4:	f4d62423          	sw	a3,-184(a2) # 40000028 <wake_up_reg>
-800100e8:	fc5ff06f          	j	800100ac <main+0x20>
+8001009c:	800f0717          	auipc	a4,0x800f0
+800100a0:	f7470713          	addi	a4,a4,-140 # 100010 <l1_alloc_base>
+800100a4:	00d72023          	sw	a3,0(a4)
+800100a8:	bfff0697          	auipc	a3,0xbfff0
+800100ac:	f8c6a023          	sw	a2,-128(a3) # 40000028 <wake_up_reg>
+800100b0:	10500073          	wfi
+800100b4:	00000513          	li	a0,0
+800100b8:	00079663          	bnez	a5,800100c4 <main+0x38>
+800100bc:	00072503          	lw	a0,0(a4)
+800100c0:	40a58533          	sub	a0,a1,a0
+800100c4:	00008067          	ret
+800100c8:	10500073          	wfi
+800100cc:	00150693          	addi	a3,a0,1
+800100d0:	02b6f6b3          	remu	a3,a3,a1
+800100d4:	800f0717          	auipc	a4,0x800f0
+800100d8:	f3c70713          	addi	a4,a4,-196 # 100010 <l1_alloc_base>
+800100dc:	00072603          	lw	a2,0(a4)
+800100e0:	00160613          	addi	a2,a2,1
+800100e4:	00c72023          	sw	a2,0(a4)
+800100e8:	bfff0617          	auipc	a2,0xbfff0
+800100ec:	f4d62023          	sw	a3,-192(a2) # 40000028 <wake_up_reg>
+800100f0:	fc1ff06f          	j	800100b0 <main+0x24>
 
 Disassembly of section .comment:
 
@@ -90,8 +92,8 @@ Disassembly of section .comment:
    4:	2820                	fld	fs0,80(s0)
    6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
    a:	3120                	fld	fs0,96(a0)
-   c:	2e30                	fld	fa2,88(a2)
-   e:	2e32                	fld	ft8,264(sp)
+   c:	2e31                	jal	328 <atomic_barrier-0xffcd8>
+   e:	2e31                	jal	32a <atomic_barrier-0xffcd6>
   10:	0030                	addi	a2,sp,8
 
 Disassembly of section .riscv.attributes:
@@ -101,7 +103,7 @@ Disassembly of section .riscv.attributes:
    2:	0000                	unimp
    4:	7200                	flw	fs0,32(a2)
    6:	7369                	lui	t1,0xffffa
-   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
+   8:	01007663          	bgeu	zero,a6,14 <atomic_barrier-0xfffec>
    c:	0029                	c.nop	10
    e:	0000                	unimp
   10:	1004                	addi	s1,sp,32

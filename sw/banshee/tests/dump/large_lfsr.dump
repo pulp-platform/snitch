@@ -4,8 +4,8 @@ bin/large_lfsr:     file format elf32-littleriscv
 
 Disassembly of section .l1:
 
-00000000 <atomic_barrier>:
-   0:	0000                	unimp
+00100000 <atomic_barrier>:
+  100000:	0000                	unimp
 	...
 
 Disassembly of section .text:
@@ -59,10 +59,10 @@ Disassembly of section .text.startup:
 
 8001008c <main>:
 8001008c:	400007b7          	lui	a5,0x40000
-80010090:	0087a783          	lw	a5,8(a5) # 40000008 <tcdm_end_address_reg>
+80010090:	0087a703          	lw	a4,8(a5) # 40000008 <tcdm_end_address_reg>
 80010094:	05f5e6b7          	lui	a3,0x5f5e
 80010098:	d0000637          	lui	a2,0xd0000
-8001009c:	0017e713          	ori	a4,a5,1
+8001009c:	00176713          	ori	a4,a4,1
 800100a0:	10068693          	addi	a3,a3,256 # 5f5e100 <ssr_config_reg+0x5d59900>
 800100a4:	00160613          	addi	a2,a2,1 # d0000001 <fake_uart+0x10000001>
 800100a8:	00177793          	andi	a5,a4,1
@@ -84,19 +84,19 @@ Disassembly of section .comment:
    4:	2820                	fld	fs0,80(s0)
    6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
    a:	3120                	fld	fs0,96(a0)
-   c:	2e30                	fld	fa2,88(a2)
-   e:	2e31                	jal	32a <l1_alloc_base+0x31a>
+   c:	2e31                	jal	328 <atomic_barrier-0xffcd8>
+   e:	2e31                	jal	32a <atomic_barrier-0xffcd6>
   10:	0030                	addi	a2,sp,8
 
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-   0:	2f41                	jal	790 <l1_alloc_base+0x780>
+   0:	3341                	jal	fffffd80 <fake_uart+0x3ffffd80>
    2:	0000                	unimp
    4:	7200                	flw	fs0,32(a2)
    6:	7369                	lui	t1,0xffffa
-   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
-   c:	0025                	c.nop	9
+   8:	01007663          	bgeu	zero,a6,14 <atomic_barrier-0xfffec>
+   c:	0029                	c.nop	10
    e:	0000                	unimp
   10:	1004                	addi	s1,sp,32
   12:	7205                	lui	tp,0xfffe1
@@ -110,3 +110,5 @@ Disassembly of section .riscv.attributes:
   26:	3266                	fld	ft4,120(sp)
   28:	3070                	fld	fa2,224(s0)
   2a:	645f 7032 0030      	0x307032645f
+  30:	0108                	addi	a0,sp,128
+  32:	0b0a                	slli	s6,s6,0x2
