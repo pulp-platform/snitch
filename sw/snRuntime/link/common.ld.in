@@ -25,7 +25,6 @@ SECTIONS
     _etext = .;
   } >DRAM
 
-  /* Constant data goes into BRAM */
   .rodata :
   {
     . = ALIGN(4);
