@@ -8,7 +8,6 @@ ENTRY(_start)
 MEMORY
 {
     DRAM (rwxa)  : ORIGIN = @MEM_DRAM_ORIGIN@, LENGTH = @MEM_DRAM_SIZE@
-    L1 (rw) : ORIGIN = @MEM_L1_ORIGIN@, LENGTH = @MEM_L1_SIZE@
 }
 
 SECTIONS
@@ -66,15 +65,15 @@ SECTIONS
     __global_pointer$ = . + 0x7f0;
     *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata .srodata.*)
     *(.sdata .sdata.* .gnu.linkonce.s.*)
-  } >L1 AT> DRAM
+  } >DRAM
 
-  /* Initialized data sections goes into L1, load LMA copy after code */
+  /* Initialized data sections goes into DRAM */
   .data : 
   {
     __DATA_BEGIN__ = .;
     *(.data .data.* .gnu.linkonce.d.*)
     SORT(CONSTRUCTORS)
-  } >L1 AT> DRAM
+  } >DRAM
   _edata = .; PROVIDE (edata = .);
 
   /* small bss section */
@@ -85,7 +84,7 @@ SECTIONS
     *(.dynsbss)
     *(.sbss .sbss.* .gnu.linkonce.sb.*)
     *(.scommon)
-  } >L1
+  } >DRAM
 
   /* Uninitialized data section */
   .bss            :
@@ -97,7 +96,7 @@ SECTIONS
       _end.  Align after .bss to ensure correct alignment even if the
       .bss section disappears because there are no input sections. */
    . = ALIGN(. != 0 ? 32 / 8 : 1);
-  } >L1
+  } >DRAM
   . = ALIGN(32 / 8);
   . = SEGMENT_START("ldata-segment", .);
   . = ALIGN(32 / 8);

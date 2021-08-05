@@ -32,7 +32,7 @@ def emit(name, array):
         print("    .word 0x%s" % s)
 
 
-print(".section .l1,\"aw\",@progbits")
+print(".section .rodata")
 emit("input_size", np.array(N, dtype=np.uint32))
 # emit("input_A", A)
 # emit("input_B", B)

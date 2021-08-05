@@ -36,4 +36,3 @@ Interesting CMake options that can be set via `-D<option>=<value>`:
     - `toolchain-llvm` for a LLVM/Clang toolchain (coming soon)
     - Your own custom `<toolchain>.cmake` file; see `../cmake/toolchain-gcc.cmake` for reference
 - `MEM_DRAM_ORIGIN`/`MEM_DRAM_SIZE`: Base address and size of the external memory used for shared data and program memory
-- `MEM_L1_ORIGIN`/`MEM_L1_SIZE`: Base address and size of the cluster-private L1 TCDM scratchpad memory
