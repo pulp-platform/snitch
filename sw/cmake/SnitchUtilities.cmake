@@ -8,6 +8,7 @@ set(RUN_BANSHEE_ARGS "--num-cores=8" CACHE PATH "Arguments passed to the banshee
 set(SNITCH_RUNTIME "snRuntime-banshee" CACHE STRING "Target name of the snRuntime flavor to link against")
 set(SNITCH_SIMULATOR "" CACHE PATH "Command to run a binary in an RTL simulation")
 set(SPIKE_DASM "spike-dasm" CACHE PATH "Path to the spike-dasm for generating traces")
+set(RUNTIME_TRACE OFF CACHE BOOL "Enable runtime trace output")
 set(SNITCH_TEST_PREFIX "")
 message(STATUS "Check for Banshee")
 execute_process(COMMAND ${SNITCH_BANSHEE} --version OUTPUT_VARIABLE SNITCH_BANSHEE_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)

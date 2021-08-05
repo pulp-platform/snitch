@@ -68,6 +68,9 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     // the _snrt_init_team function is called once per thread before main, so
     // it's as good a point as any.
     putc_buffer[snrt_hartid()].hdr.size = 0;
+
+    // Init allocator
+    snrt_alloc_init(team);
 }
 
 uint32_t _snrt_barrier_reg_ptr() {

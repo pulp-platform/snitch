@@ -15,6 +15,10 @@ uint32_t __attribute__((pure)) snrt_hartid() {
     return hartid;
 }
 
+struct snrt_team_root *snrt_current_team() {
+    return _snrt_team_current->root;
+}
+
 uint32_t snrt_global_core_idx() {
     return snrt_hartid() - _snrt_team_current->root->global_core_base_hartid;
 }

@@ -40,6 +40,9 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->cluster_mailbox = team->cluster_mem.end;
 
     _snrt_team_current = &team->base;
+
+    // Init allocator
+    snrt_alloc_init(team);
 }
 
 // Provide an implementation for putchar.

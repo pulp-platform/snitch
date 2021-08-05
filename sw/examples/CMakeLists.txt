@@ -25,4 +25,5 @@ include_directories(${SNRUNTIME_INCLUDE_DIRS})
 
 # Programs
 add_snitch_executable(hello_world hello_world.c)
+add_snitch_executable(memory memory.c)
 

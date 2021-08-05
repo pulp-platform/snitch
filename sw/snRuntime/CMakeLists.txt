@@ -39,6 +39,11 @@ message(STATUS "Using common linker script: ${LINKER_SCRIPT}")
 # set(TARGET_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/link/banshee.ld" CACHE FILEPATH "Linker Script")
 # message(STATUS "Using target linker script: ${TARGET_LINKER_SCRIPT}")
 
+if(RUNTIME_TRACE)
+    # Enable runtime tracing
+    add_compile_definitions(__SNRT_USE_TRACE)
+endif()
+
 include_directories(include vendor)
 
 # Common sources
@@ -49,6 +54,7 @@ set(sources
     src/printf.c
     src/team.c
     src/ssr.c
+    src/alloc.c
 )
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
