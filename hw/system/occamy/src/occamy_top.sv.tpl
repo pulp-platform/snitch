@@ -113,7 +113,7 @@ module occamy_top
   typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;
   typedef logic [${soc_narrow_xbar.out_spm.dw//8-1}:0] mem_strb_t;
 
-  logic spm_req, spm_we, spm_rvalid;
+  logic spm_req, spm_gnt, spm_we, spm_rvalid;
   logic [1:0] spm_rerror;
   mem_addr_t spm_addr;
   mem_data_t spm_wdata, spm_rdata;
@@ -239,7 +239,7 @@ module occamy_top
     .axi_req_i (${narrow_spm_cdc.req_name()}),
     .axi_resp_o (${narrow_spm_cdc.rsp_name()}),
     .mem_req_o (spm_req),
-    .mem_gnt_i (spm_req), // always granted - it's an SPM.
+    .mem_gnt_i (spm_gnt),
     .mem_addr_o (spm_addr),
     .mem_wdata_o (spm_wdata),
     .mem_strb_o (spm_strb),
@@ -249,7 +249,7 @@ module occamy_top
     .mem_rdata_i (spm_rdata)
   );
 
-  cc_ram_1p_adv #(
+  spm_1p_adv #(
     .NumWords (${spm_words}),
     .DataWidth (${narrow_spm_cdc.dw}),
     .ByteWidth (8),
@@ -258,7 +258,8 @@ module occamy_top
   ) i_spm_cut (
     .clk_i (${narrow_spm_cdc.clk}),
     .rst_ni (${narrow_spm_cdc.rst}),
-    .req_i (spm_req),
+    .valid_i (spm_req),
+    .ready_o (spm_gnt),
     .we_i (spm_we),
     .addr_i (spm_addr[${util.clog2(spm_words) + util.clog2(narrow_spm_cdc.dw//8)-1}:${util.clog2(narrow_spm_cdc.dw//8)}]),
     .wdata_i (spm_wdata),

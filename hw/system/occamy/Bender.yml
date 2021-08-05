@@ -11,6 +11,7 @@ dependencies:
   # axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
   snitch_const_cache: {path: ../../ip/snitch_const_cache}
   snitch-cluster: {path: ../../ip/snitch_cluster}
+  spm-interface: {path: ../../ip/spm_interface}
   cva6: {path: ../../vendor/openhwgroup_cva6}
   lowrisc_uart: {path: ../../vendor/lowrisc_opentitan/uart}
   lowrisc_rv_plic: {path: ../../vendor/lowrisc_opentitan/rv_plic}

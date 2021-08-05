@@ -13,8 +13,11 @@ export_include_dirs:
 - include
 
 sources:
+# Level 1
 - src/spm_interface.sv
 - src/spm_rmw_adapter.sv
+# Level 1
+- src/spm_1p_adv.sv
 - target: simulation
   files:
   - src/spm_test.sv
@@ -22,3 +25,4 @@ sources:
   files:
   # Level 0
   - test/tb_spm_rmw_adapter.sv
+  - test/tb_spm_1p_adv.sv

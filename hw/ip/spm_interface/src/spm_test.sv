@@ -10,9 +10,14 @@ package spm_test;
     parameter int DW = 32
   );
     rand logic [AW-1:0]       addr;
-    rand logic                we;
+    rand bit                  we;
     rand logic [DW-1:0]       wdata;
     rand logic [DW/8-1:0]     strb;
+
+    constraint legal_write_c {
+      we dist {0 := 1, 1 := 1};
+     (we == 0) -> (strb == 0);
+    }
 
     /// Compare objects of same type.
     function do_compare(req_t rhs);
@@ -129,6 +134,28 @@ package spm_test;
     /// Receive a response.
     task recv_rsp (output rsp_t rsp);
       cycle_start();
+      while (bus.rvalid != 1) begin cycle_end(); cycle_start(); end
+      rsp = new;
+      rsp.rdata  = bus.rdata;
+      cycle_end();
+    endtask
+
+    /// Monitor request.
+    task mon_req (output req_t req);
+      cycle_start();
+      while (!(bus.valid && bus.ready)) begin cycle_end(); cycle_start(); end
+      req = new;
+      req.addr   = bus.addr;
+      req.we     = bus.we;
+      req.wdata  = bus.wdata;
+      req.strb   = bus.strb;
+      cycle_end();
+    endtask
+
+    /// Monitor response.
+    task mon_rsp (output rsp_t rsp);
+      cycle_start();
+      while (!(bus.rvalid)) begin cycle_end(); cycle_start(); end
       rsp = new;
       rsp.rdata  = bus.rdata;
       cycle_end();
@@ -211,7 +238,6 @@ package spm_test;
       repeat (n) begin
         automatic spm_driver_t::req_t r = new;
         assert(r.randomize());
-        r.we = (r.strb != '1)? 1'b1 : r.we;
         rand_wait(REQ_MIN_WAIT_CYCLES, REQ_MAX_WAIT_CYCLES);
         this.drv.send_req(r);
       end
@@ -231,7 +257,6 @@ package spm_test;
   ) extends rand_spm #(.AW(AW), .DW(DW), .TA(TA), .TT(TT));
 
     mailbox req_mbx = new();
-
 
     /// Reset the driver.
     task reset();
@@ -271,6 +296,42 @@ package spm_test;
         repeat (RespLatency-1) @(posedge this.drv.bus.clk_i);
         this.drv.send_rsp(rsp);
       end
+    endtask
+  endclass
+
+  class spm_monitor #(
+    // tcdm interface parameters
+    parameter int   AW = 32,
+    parameter int   DW = 32,
+    // Stimuli application and test time
+    parameter time  TA = 0ps,
+    parameter time  TT = 0ps
+  ) extends rand_spm #(.AW(AW), .DW(DW), .TA(TA), .TT(TT));
+
+    mailbox req_mbx = new, rsp_mbx = new;
+
+    /// Constructor.
+    function new(virtual SPM_BUS_DV #(
+      .ADDR_WIDTH (AW),
+      .DATA_WIDTH (DW)
+    ) bus);
+      super.new(bus);
+    endfunction
+
+    // tcdm Monitor.
+    task monitor;
+      fork
+        forever begin
+          automatic spm_test::req_t #(.AW(AW), .DW(DW)) req;
+          this.drv.mon_req(req);
+          req_mbx.put(req);
+        end
+        forever begin
+          automatic spm_test::rsp_t #(.DW(DW)) rsp;
+          this.drv.mon_rsp(rsp);
+          rsp_mbx.put(rsp);
+        end
+      join
     endtask
   endclass
 

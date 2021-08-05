@@ -151,7 +151,7 @@ module occamy_top
   typedef logic [63:0] mem_data_t;
   typedef logic [7:0] mem_strb_t;
 
-  logic spm_req, spm_we, spm_rvalid;
+  logic spm_req, spm_gnt, spm_we, spm_rvalid;
   logic [1:0] spm_rerror;
   mem_addr_t spm_addr;
   mem_data_t spm_wdata, spm_rdata;
@@ -1667,7 +1667,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .axi_req_i(spm_cdc_req),
       .axi_resp_o(spm_cdc_rsp),
       .mem_req_o(spm_req),
-      .mem_gnt_i(spm_req),  // always granted - it's an SPM.
+      .mem_gnt_i(spm_gnt),
       .mem_addr_o(spm_addr),
       .mem_wdata_o(spm_wdata),
       .mem_strb_o(spm_strb),
@@ -1677,7 +1677,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .mem_rdata_i(spm_rdata)
   );
 
-  cc_ram_1p_adv #(
+  spm_1p_adv #(
       .NumWords(16384),
       .DataWidth(64),
       .ByteWidth(8),
@@ -1686,7 +1686,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   ) i_spm_cut (
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
-      .req_i(spm_req),
+      .valid_i(spm_req),
+      .ready_o(spm_gnt),
       .we_i(spm_we),
       .addr_i(spm_addr[16:3]),
       .wdata_i(spm_wdata),
