@@ -24,7 +24,7 @@ VLOG_FLAGS 	  += -suppress 2583
 VLOG_FLAGS 	  += -suppress 13314
 VLOG_FLAGS 	  += ${QUESTA_64BIT}
 
-all: update-source update-plic update-socreg
+all: update-clint update-plic update-socreg update-source
 
 test: ${VSIM_SOURCES} ${TB_SRCS}
 	echo ${VSIM_SOURCES}
@@ -50,29 +50,35 @@ update-source:
 		--quadrant-s1 src/occamy_quadrant_s1.sv.tpl \
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
 		--cva6-sv src/occamy_cva6.sv.tpl
-	@echo "[SOLDER]  Testbench"
 	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --graph addrmap.dot --outdir test \
 		--testharness-sv test/testharness.sv.tpl
+	@echo "[SOLDER]  CLINT"
 	@echo "[SOLDER]  Device Tree"
 	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --outdir . --dts test/occamy.dts
 	@echo "[VERIBLE] Formatting"
 	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
 update-clint:
-	mkdir -p src/clint
-	$(ROOT)/hw/ip/clint/util/gen_clint.py -c 1 $(ROOT)/hw/ip/clint/data/clint.sv.tpl > src/clint/clint.sv
-	$(ROOT)/hw/ip/clint/util/gen_clint.py -c 1 $(ROOT)/hw/ip/clint/data/clint.hjson.tpl > src/clint/clint.hjson
-	$(ROOT)/util/regtool.py -r -t src/clint src/clint/clint.hjson
+	@mkdir -p src/clint
+	@echo "[SOLDER]  Generate CLINT config"
+	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --outdir src/clint \
+		--chip ../../ip/clint/data/clint.hjson.tpl
+	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --outdir src/clint \
+		--chip ../../ip/clint/data/clint.sv.tpl
+	@echo "[REGGEN]  Re-generate CLINT regs"
+	@$(ROOT)/util/regtool.py -r -t src/clint src/clint/clint.hjson
 
 update-plic:
-	mkdir -p src/rv_plic
-	$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 65 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv
-	$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 65 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
-	$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
+	@mkdir -p src/rv_plic
+	@echo "[REGGEN]  Generate PLIC"
+	@$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 65 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv
+	@$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 65 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
+	@$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
 
 # Regenerate the SoC register.
 update-socreg: src/occamy_soc_ctrl/occamy_soc_reg.hjson
-	$(REGGEN) -r src/occamy_soc_ctrl/occamy_soc_reg.hjson --outdir src/occamy_soc_ctrl/
+	@echo "[REGGEN]  Generate SOCREGS"
+	@$(REGGEN) -r src/occamy_soc_ctrl/occamy_soc_reg.hjson --outdir src/occamy_soc_ctrl/
 
 addrmap.png: update-source
 	dot -Tpng addrmap.dot > addrmap.png
