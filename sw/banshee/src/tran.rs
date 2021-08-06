@@ -5,7 +5,7 @@
 //! Binary translation
 
 use crate::{
-    engine::{AtomicOp, Engine, TraceAccess},
+    engine::{FlexfloatOp, AtomicOp, Engine, TraceAccess},
     riscv,
 };
 use anyhow::{anyhow, bail, Context, Result};
@@ -1553,6 +1553,13 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12hiImm12loRs1Rs2::Sw => {
                 self.write_mem(addr, self.read_reg(data.rs2), 2)
             }
+            riscv::OpcodeImm12hiImm12loRs1Rs2::Fsh => {
+                self.was_freppable.set(true);
+                let rs2 = self.read_freg(data.rs2);
+                let rs2_lo = LLVMBuildTrunc(self.builder, rs2, LLVMInt32Type(), NONAME);
+                // let rs2_lo = LLVMBuildTrunc(self.builder, rs2_lo, LLVMInt16Type(), NONAME);
+                self.write_mem(addr, rs2_lo, 1);
+            }
             riscv::OpcodeImm12hiImm12loRs1Rs2::Fsw => {
                 self.was_freppable.set(true);
                 let rs2 = self.read_freg(data.rs2);
@@ -1727,6 +1734,15 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12RdRs1::Fld => {
                 self.was_freppable.set(true);
                 self.emit_fld(data.rd, LLVMBuildAdd(self.builder, rs1, imm, NONAME));
+                return Ok(());
+            }
+            riscv::OpcodeImm12RdRs1::Flh => {
+                self.was_freppable.set(true);
+                let raw = self.emit_load(rs1, imm, 1, false);
+                let raw = LLVMBuildZExt(self.builder, raw, LLVMInt64Type(), NONAME);
+                let pad = LLVMConstInt(LLVMInt64Type(), (-1i64 as u64) << 16, 0);
+                let value = LLVMBuildOr(self.builder, raw, pad, NONAME);
+                self.write_freg(data.rd, value);
                 return Ok(());
             }
             _ => bail!("Unsupported opcode {}", data.op),
@@ -1933,6 +1949,38 @@ impl<'a> InstructionTranslator<'a> {
         let name = name.as_ptr() as *const _;
         self.was_freppable.set(true);
         match data.op {
+            riscv::OpcodeRdRmRs1Rs2::FaddH => self.write_freg(
+                data.rd,
+                self.emit_fhop(
+                    self.read_freg(data.rs1),
+                    self.read_freg(data.rs2),
+                    FlexfloatOp::Fadd,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FsubH => self.write_freg(
+                data.rd,
+                self.emit_fhop(
+                    self.read_freg(data.rs1),
+                    self.read_freg(data.rs2),
+                    FlexfloatOp::Fsub,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FmulH => self.write_freg(
+                data.rd,
+                self.emit_fhop(
+                    self.read_freg(data.rs1),
+                    self.read_freg(data.rs2),
+                    FlexfloatOp::Fmul,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FdivH => self.write_freg(
+                data.rd,
+                self.emit_fhop(
+                    self.read_freg(data.rs1),
+                    self.read_freg(data.rs2),
+                    FlexfloatOp::Fdiv,
+                ),
+            ),
             riscv::OpcodeRdRmRs1Rs2::FaddS => self.write_freg_f32(
                 data.rd,
                 LLVMBuildFAdd(
@@ -2093,6 +2141,25 @@ impl<'a> InstructionTranslator<'a> {
             ),
             _ => bail!("Unsupported opcode {}", data.op),
         }
+    }
+
+    unsafe fn emit_fhop(
+            &self,
+            rs1: LLVMValueRef,
+            rs2: LLVMValueRef,
+            op: FlexfloatOp,
+        ) -> LLVMValueRef {
+
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+
+        let rd = self.section.emit_call_with_name(
+            "banshee_fhop",
+            [rs1, rs2, op],
+            "fresh",
+        );
+        rd
     }
 
     unsafe fn emit_fmadd(
@@ -4117,6 +4184,25 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
     }
 
+    /// Emit the code to read a f16 value from a float register.
+    unsafe fn read_freg_f16(&self, rs: u32) -> LLVMValueRef {
+        self.emit_possible_ssr_read(rs);
+        let raw_ptr = self.freg_ptr(rs);
+        self.trace_access(
+            TraceAccess::ReadFReg(rs as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            // LLVMPointerType(LLVMHalfType(), 0),
+            LLVMPointerType(LLVMInt16Type(), 0),
+            NONAME,
+        );
+        LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
+    }
+
+
     /// Emit the code to write a f64 value to a float register.
     unsafe fn write_freg_f64(&self, rd: u32, data: LLVMValueRef) {
         let raw_ptr = self.freg_ptr(rd);
@@ -4263,6 +4349,47 @@ unsafe fn write_freg_vf32(&self, rd: u32, data1: LLVMValueRef, data2: LLVMValueR
         );
         self.emit_possible_ssr_write(rd);
     }
+
+    /// Emit the code to write a f16 value to a float register.
+    unsafe fn write_freg_f16(&self, rd: u32, data: LLVMValueRef) {
+        let raw_ptr = self.freg_ptr(rd);
+
+        // Nanbox the value.
+        let ptr_hi = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt32Type(), 0),
+            NONAME,
+        );
+        let ptr_hi = LLVMBuildGEP(
+            self.builder,
+            ptr_hi,
+            [LLVMConstInt(LLVMInt32Type(), 1, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMInt32Type(), -1i32 as u64, 0),
+            ptr_hi,
+        );
+
+        // Write the actual value.
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt16Type(), 0),
+            // LLVMPointerType(LLVMHalfType(), 0),
+            NONAME,
+        );
+        LLVMBuildStore(self.builder, data, ptr);
+        self.trace_access(
+            TraceAccess::WriteFReg(rd as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+        self.emit_possible_ssr_write(rd);
+    }
+
 
     /// Emit the code to load the next value of an SSR, if enabled.
     unsafe fn emit_possible_ssr_read(&self, rs: u32) {

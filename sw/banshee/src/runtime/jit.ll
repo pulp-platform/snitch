@@ -28,6 +28,7 @@ declare void @banshee_abort_illegal_branch(%Cpu* %cpu, i32 %addr, i32 %target)
 declare void @banshee_trace(%Cpu* %cpu, i32 %addr, i32 %raw, [2 x i64] %access_slice, [2 x i64] %data_slice)
 declare i32 @banshee_wfi(%Cpu* %cpu)
 declare i32 @banshee_check_clint(%Cpu* %cpu)
+declare i64 @banshee_faddh(i64 %rs1, i64 %rs2, i8 %op)
 
 declare void @banshee_ssr_write_cfg(%SsrState* %ssr,  %Cpu* %cpu, i32 %addr, i32 %value, i32 %mask)
 declare i32 @banshee_ssr_read_cfg(%SsrState* readonly %ssr, i32 %addr)

@@ -6,6 +6,7 @@
 
 use crate::{peripherals::Peripherals, riscv, tran::ElfTranslator, util::SiUnit, Configuration};
 extern crate termion;
+extern crate flexfloat;
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
@@ -500,6 +501,10 @@ pub unsafe fn add_llvm_symbols() {
         b"banshee_check_clint\0".as_ptr() as *const _,
         Cpu::binary_check_clint as *mut _,
     );
+    LLVMAddSymbol(
+        b"banshee_fhop\0".as_ptr() as *const _,
+        Cpu::fhop as *mut _,
+    );
 }
 
 // /// A representation of the system state.
@@ -906,6 +911,40 @@ impl<'a, 'b> Cpu<'a, 'b> {
             self.barrier.fetch_add(1, Ordering::Relaxed);
         }
     }
+    pub unsafe fn fhop(rs1: u64, rs2: u64, op: FlexfloatOp) -> u64 {
+
+        let env = flexfloat::flexfloat_desc_t {
+                exp_bits: flexfloat::FP16EXP,
+                frac_bits: flexfloat::FP16MAN,
+            };
+
+        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 1.0,
+            desc: env
+        };
+        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 2.0,
+            desc: env
+        };
+        let ff_res: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: env
+        };
+
+        flexfloat::flexfloat_set_bits(ff_a, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
+
+        match op {
+            FlexfloatOp::Fadd => flexfloat::ff_add(ff_res, ff_b, ff_a),
+            FlexfloatOp::Fsub => flexfloat::ff_sub(ff_res, ff_b, ff_a),
+            FlexfloatOp::Fmul => flexfloat::ff_mul(ff_res, ff_b, ff_a),
+            FlexfloatOp::Fdiv => flexfloat::ff_div(ff_res, ff_b, ff_a),
+            _                 => flexfloat::ff_add(ff_res, ff_b, ff_a),
+        };
+
+        let rd = flexfloat::flexfloat_get_bits(ff_res);
+        rd
+    }
 }
 
 /// A single register or memory access as recorded in a trace.
@@ -935,4 +974,34 @@ pub enum AtomicOp {
     Amomaxu,
     Amoswap,
     ScW,
+}
+
+/// Flexfloat: which operations is emulated
+#[derive(Debug, Clone, Copy)]
+#[repr(C)]
+pub enum FlexfloatOp {
+    Fmadd,
+    Fmsub,
+    Fnmadd,
+    Fnmsub,
+    Fadd,
+    Fsub,
+    Fmul,
+    Fdiv,
+    Fsqrt, // Not implemented ?
+    Fsgnj,
+    Fsgnjn,
+    Fsgnjx,
+    Fmin,
+    Fmax,
+    Feq,
+    Flt,
+    Fle,
+    Fcvtw2,
+    Fcvtwu2,
+    Fcvt2u,
+    Fcvt2wu,
+    // Fmv,
+    Fclass, // Not implemented ?
+    // Fmv
 }
