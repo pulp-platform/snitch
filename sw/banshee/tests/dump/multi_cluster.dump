@@ -27,7 +27,7 @@ Disassembly of section .riscv.attributes:
    2:	0000                	unimp
    4:	7200                	flw	fs0,32(a2)
    6:	7369                	lui	t1,0xffffa
-   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x14>
+   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base-0xfffec>
    c:	00000027          	0x27
   10:	7205                	lui	tp,0xfffe1
   12:	3376                	fld	ft6,376(sp)

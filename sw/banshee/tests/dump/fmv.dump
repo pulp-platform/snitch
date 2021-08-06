@@ -1,111 +1,144 @@
 
-bin/fmv:     file format elf32-littleriscv
+bin/fmv:	file format elf32-littleriscv
 
-
-Disassembly of section .l1:
-
-00000000 <atomic_barrier>:
-   0:	0000                	unimp
-	...
 
 Disassembly of section .text:
 
-80010000 <_start>:
-80010000:	00001197          	auipc	gp,0x1
-80010004:	8d018193          	addi	gp,gp,-1840 # 800108d0 <__global_pointer$>
-80010008:	0040006f          	j	8001000c <reset_vector>
+80010000 <.text>:
+80010000: 97 11 00 00  	auipc	gp, 1
+80010004: 93 81 01 89  	addi	gp, gp, -1904
+80010008: 6f 00 40 00  	j	0x8001000c <.text+0xc>
+8001000c: 17 01 ff bf  	auipc	sp, 786416
+80010010: 13 01 c1 ff  	addi	sp, sp, -4
+80010014: 03 21 01 00  	lw	sp, 0(sp)
+80010018: 73 25 40 f1  	csrr	a0, mhartid
+8001001c: 97 02 ff bf  	auipc	t0, 786416
+80010020: 83 a2 42 02  	lw	t0, 36(t0)
+80010024: 33 05 55 40  	sub	a0, a0, t0
+80010028: 93 12 35 00  	slli	t0, a0, 3
+8001002c: 33 01 51 40  	sub	sp, sp, t0
+80010030: 93 92 62 00  	slli	t0, t0, 6
+80010034: 33 01 51 40  	sub	sp, sp, t0
+80010038: 13 02 01 00  	mv	tp, sp
+8001003c: 93 02 10 00  	addi	t0, zero, 1
+80010040: 93 92 92 00  	slli	t0, t0, 9
+80010044: 33 02 52 40  	sub	tp, tp, t0
+80010048: 97 02 ff bf  	auipc	t0, 786416
+8001004c: 93 82 82 fc  	addi	t0, t0, -56
+80010050: 83 a5 02 00  	lw	a1, 0(t0)
+80010054: 97 00 00 00  	auipc	ra, 0
+80010058: e7 80 c0 03  	jalr	60(ra)
+8001005c: 13 15 15 00  	slli	a0, a0, 1
+80010060: 13 65 15 00  	ori	a0, a0, 1
+80010064: 6f 00 00 01  	j	0x80010074 <.text+0x74>
+80010068: 93 02 f0 ff  	addi	t0, zero, -1
+8001006c: 33 45 55 00  	xor	a0, a0, t0
+80010070: 6f 00 40 00  	j	0x80010074 <.text+0x74>
+80010074: f3 22 40 f1  	csrr	t0, mhartid
+80010078: 63 98 02 00  	bnez	t0, 0x80010088 <.text+0x88>
+8001007c: 97 02 ff bf  	auipc	t0, 786416
+80010080: 93 82 42 fa  	addi	t0, t0, -92
+80010084: 23 a0 a2 00  	sw	a0, 0(t0)
+80010088: 73 00 50 10  	wfi	
+8001008c: 6f f0 df ff  	j	0x80010088 <.text+0x88>
 
-8001000c <reset_vector>:
-8001000c:	bfff0117          	auipc	sp,0xbfff0
-80010010:	ffc10113          	addi	sp,sp,-4 # 40000008 <tcdm_end_address_reg>
-80010014:	00012103          	lw	sp,0(sp)
-80010018:	f1402573          	csrr	a0,mhartid
-8001001c:	bfff0297          	auipc	t0,0xbfff0
-80010020:	0242a283          	lw	t0,36(t0) # 40000040 <cluster_base_hart_id_reg>
-80010024:	40550533          	sub	a0,a0,t0
-80010028:	00351293          	slli	t0,a0,0x3
-8001002c:	40510133          	sub	sp,sp,t0
-80010030:	00629293          	slli	t0,t0,0x6
-80010034:	40510133          	sub	sp,sp,t0
-80010038:	00010213          	mv	tp,sp
-8001003c:	00100293          	li	t0,1
-80010040:	00929293          	slli	t0,t0,0x9
-80010044:	40520233          	sub	tp,tp,t0
-80010048:	bfff0297          	auipc	t0,0xbfff0
-8001004c:	fc828293          	addi	t0,t0,-56 # 40000010 <nr_cores_address_reg>
-80010050:	0002a583          	lw	a1,0(t0)
-80010054:	038000ef          	jal	ra,8001008c <main>
-80010058:	00151513          	slli	a0,a0,0x1
-8001005c:	00156513          	ori	a0,a0,1
-80010060:	0100006f          	j	80010070 <eoc>
+Disassembly of section .text.main:
 
-80010064 <fail>:
-80010064:	fff00293          	li	t0,-1
-80010068:	00554533          	xor	a0,a0,t0
-8001006c:	0040006f          	j	80010070 <eoc>
-
-80010070 <eoc>:
-80010070:	f14022f3          	csrr	t0,mhartid
-80010074:	00029863          	bnez	t0,80010084 <halt>
-80010078:	bfff0297          	auipc	t0,0xbfff0
-8001007c:	fa828293          	addi	t0,t0,-88 # 40000020 <scratch_reg>
-80010080:	00a2a023          	sw	a0,0(t0)
-
-80010084 <halt>:
-80010084:	10500073          	wfi
-80010088:	ffdff06f          	j	80010084 <halt>
-
-Disassembly of section .text.startup:
-
-8001008c <main>:
-8001008c:	422997b7          	lui	a5,0x42299
-80010090:	ff010113          	addi	sp,sp,-16
-80010094:	a3d78793          	addi	a5,a5,-1475 # 42298a3d <cluster_base_hart_id_reg+0x22989fd>
-80010098:	00f12223          	sw	a5,4(sp)
-8001009c:	00412783          	lw	a5,4(sp)
-800100a0:	00813787          	fld	fa5,8(sp)
-800100a4:	f00007d3          	fmv.w.x	fa5,zero
-800100a8:	f00787d3          	fmv.w.x	fa5,a5
-800100ac:	00000793          	li	a5,0
-800100b0:	e00787d3          	fmv.x.w	a5,fa5
-800100b4:	00f12223          	sw	a5,4(sp)
-800100b8:	00f13427          	fsd	fa5,8(sp)
-800100bc:	00000513          	li	a0,0
-800100c0:	01010113          	addi	sp,sp,16
-800100c4:	00008067          	ret
+80010090 <.text.main>:
+80010090: 13 01 01 ff  	addi	sp, sp, -16
+80010094: 37 95 29 42  	lui	a0, 271001
+80010098: 13 05 d5 a3  	addi	a0, a0, -1475
+8001009c: 23 22 a1 00  	sw	a0, 4(sp)
+800100a0: 03 25 41 00  	lw	a0, 4(sp)
+800100a4: 07 30 81 00  	fld	ft0, 8(sp)
+800100a8: 53 00 00 f0  	fmv.w.x	ft0, zero
+800100ac: 53 00 05 f0  	fmv.w.x	ft0, a0
+800100b0: 13 05 00 00  	mv	a0, zero
+800100b4: 53 05 00 e0  	fmv.x.w	a0, ft0
+800100b8: 23 22 a1 00  	sw	a0, 4(sp)
+800100bc: 27 34 01 00  	fsd	ft0, 8(sp)
+800100c0: 13 05 00 00  	mv	a0, zero
+800100c4: 13 01 01 01  	addi	sp, sp, 16
+800100c8: 67 80 00 00  	ret
 
 Disassembly of section .comment:
 
 00000000 <.comment>:
-   0:	3a434347          	fmsub.d	ft6,ft6,ft4,ft7,rmm
-   4:	2820                	fld	fs0,80(s0)
-   6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
-   a:	3120                	fld	fs0,96(a0)
-   c:	2e30                	fld	fa2,88(a2)
-   e:	2e32                	fld	ft8,264(sp)
-  10:	0030                	addi	a2,sp,8
+       0: 4c 69        	<unknown>
+       2: 6e 6b        	<unknown>
+       4: 65 72        	<unknown>
+       6: 3a 20        	<unknown>
+       8: 4c 4c        	<unknown>
+       a: 44 20        	<unknown>
+       c: 31 32        	<unknown>
+       e: 2e 30        	<unknown>
+      10: 2e 30        	<unknown>
+      12: 00 00        	<unknown>
+      14: 63 6c 61 6e  	bltu	sp, t1, 0x70c <.comment+0x70c>
+      18: 67 20 76 65  	<unknown>
+      1c: 72 73        	<unknown>
+      1e: 69 6f        	<unknown>
+      20: 6e 20        	<unknown>
+      22: 31 32        	<unknown>
+      24: 2e 30        	<unknown>
+      26: 2e 30        	<unknown>
+      28: 00           	<unknown>
 
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-   0:	3341                	jal	fffffd80 <fake_uart+0x3ffffd80>
-   2:	0000                	unimp
-   4:	7200                	flw	fs0,32(a2)
-   6:	7369                	lui	t1,0xffffa
-   8:	01007663          	bgeu	zero,a6,14 <l1_alloc_base+0x4>
-   c:	0029                	c.nop	10
-   e:	0000                	unimp
-  10:	1004                	addi	s1,sp,32
-  12:	7205                	lui	tp,0xfffe1
-  14:	3376                	fld	ft6,376(sp)
-  16:	6932                	flw	fs2,12(sp)
-  18:	7032                	flw	ft0,44(sp)
-  1a:	5f30                	lw	a2,120(a4)
-  1c:	326d                	jal	fffff9c6 <fake_uart+0x3ffff9c6>
-  1e:	3070                	fld	fa2,224(s0)
-  20:	615f 7032 5f30      	0x5f307032615f
-  26:	3266                	fld	ft4,120(sp)
-  28:	3070                	fld	fa2,224(s0)
-  2a:	645f 7032 0030      	0x307032645f
-  30:	0108                	addi	a0,sp,128
-  32:	0b0a                	slli	s6,s6,0x2
+       0: 41 36        	<unknown>
+       2: 00 00        	<unknown>
+       4: 00 72        	<unknown>
+       6: 69 73        	<unknown>
+       8: 63 76 00 01  	bgeu	zero, a6, 0x14 <.riscv.attributes+0x14>
+       c: 2c 00        	<unknown>
+       e: 00 00        	<unknown>
+      10: 04 10        	<unknown>
+      12: 05 72        	<unknown>
+      14: 76 33        	<unknown>
+      16: 32 69        	<unknown>
+      18: 32 70        	<unknown>
+      1a: 30 5f        	<unknown>
+      1c: 6d 32        	<unknown>
+      1e: 70 30        	<unknown>
+      20: 5f 61 32 70  	<unknown>
+      24: 30 5f        	<unknown>
+      26: 66 32        	<unknown>
+      28: 70 30        	<unknown>
+      2a: 5f 64 32 70  	<unknown>
+      2e: 30 5f        	<unknown>
+      30: 7a 66        	<unknown>
+      32: 68 30        	<unknown>
+      34: 70 31        	<unknown>
+      36: 00           	<unknown>
+
+Disassembly of section .shstrtab:
+
+00000000 <.shstrtab>:
+       0: 00 2e        	<unknown>
+       2: 74 65        	<unknown>
+       4: 78 74        	<unknown>
+       6: 00 2e        	<unknown>
+       8: 63 6f 6d 6d  	bltu	s10, s6, 0x6e6 <.shstrtab+0x6e6>
+       c: 65 6e        	<unknown>
+       e: 74 00        	<unknown>
+      10: 2e 72        	<unknown>
+      12: 69 73        	<unknown>
+      14: 63 76 2e 61  	bgeu	t3, s2, 0x620 <.shstrtab+0x620>
+      18: 74 74        	<unknown>
+      1a: 72 69        	<unknown>
+      1c: 62 75        	<unknown>
+      1e: 74 65        	<unknown>
+      20: 73 00 2e 74  	<unknown>
+      24: 65 78        	<unknown>
+      26: 74 2e        	<unknown>
+      28: 6d 61        	<unknown>
+      2a: 69 6e        	<unknown>
+      2c: 00 2e        	<unknown>
+      2e: 73 68 73 74  	csrrsi	a6, 1863, 6
+      32: 72 74        	<unknown>
+      34: 61 62        	<unknown>
+      36: 00 2e        	<unknown>
+      38: 73 64 61 74  	csrrsi	s0, 1862, 2
+      3c: 61 00        	<unknown>

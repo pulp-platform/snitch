@@ -207,12 +207,12 @@ Disassembly of section .comment:
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-       0: 41 2f        	<unknown>
+       0: 41 36        	<unknown>
        2: 00 00        	<unknown>
        4: 00 72        	<unknown>
        6: 69 73        	<unknown>
        8: 63 76 00 01  	bgeu	zero, a6, 0x14 <.riscv.attributes+0x14>
-       c: 25 00        	<unknown>
+       c: 2c 00        	<unknown>
        e: 00 00        	<unknown>
       10: 04 10        	<unknown>
       12: 05 72        	<unknown>
@@ -227,7 +227,11 @@ Disassembly of section .riscv.attributes:
       26: 66 32        	<unknown>
       28: 70 30        	<unknown>
       2a: 5f 64 32 70  	<unknown>
-      2e: 30 00        	<unknown>
+      2e: 30 5f        	<unknown>
+      30: 7a 66        	<unknown>
+      32: 68 30        	<unknown>
+      34: 70 31        	<unknown>
+      36: 00           	<unknown>
 
 Disassembly of section .shstrtab:
 
