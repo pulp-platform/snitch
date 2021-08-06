@@ -935,11 +935,11 @@ impl<'a, 'b> Cpu<'a, 'b> {
         flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
 
         match op {
-            FlexfloatOp::Fadd => flexfloat::ff_add(ff_res, ff_b, ff_a),
-            FlexfloatOp::Fsub => flexfloat::ff_sub(ff_res, ff_b, ff_a),
-            FlexfloatOp::Fmul => flexfloat::ff_mul(ff_res, ff_b, ff_a),
-            FlexfloatOp::Fdiv => flexfloat::ff_div(ff_res, ff_b, ff_a),
-            _                 => flexfloat::ff_add(ff_res, ff_b, ff_a),
+            FlexfloatOp::Fadd => flexfloat::ff_add(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fsub => flexfloat::ff_sub(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmul => flexfloat::ff_mul(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fdiv => flexfloat::ff_div(ff_res, ff_a, ff_b),
+            _                 => flexfloat::ff_add(ff_res, ff_a, ff_b),
         };
 
         let rd = flexfloat::flexfloat_get_bits(ff_res);
