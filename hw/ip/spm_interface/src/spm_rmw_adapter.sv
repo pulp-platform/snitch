@@ -13,7 +13,7 @@ module spm_rmw_adapter
 #(
   parameter int unsigned  AddrWidth = 0,
   parameter int unsigned  DataWidth = 0,
-  parameter int unsigned  StrbWidth = AddrWidth / 8,
+  parameter int unsigned  StrbWidth = DataWidth / 8,
   parameter int unsigned  MaxTxns = 32'd3,
 
   localparam type addr_t = logic [AddrWidth-1:0],
@@ -88,9 +88,8 @@ module spm_rmw_adapter
   end
 
   always_comb begin
-
     // Mem-side
-    mem_valid_o = mem_valid_i & txns_ready;
+    mem_valid_o = mem_valid_i & txns_ready & (!partial_write | rmw_ready);
     mem_addr_o = mem_addr_i;
     mem_wdata_o = mem_wdata_i;
     mem_we_o = mem_we_i;
@@ -105,7 +104,6 @@ module spm_rmw_adapter
     unique case (req_state_q)
 
       NORMAL: begin
-
         // If access is byte-wise, generate full-width read request
         if (partial_write) begin
           mem_we_o = 1'b0;
@@ -116,10 +114,9 @@ module spm_rmw_adapter
             req_state_d = RMW_READ;
           end
         end
-      end // case: NORMAL
+      end
 
       RMW_READ: begin
-
         // stall requests
         mem_rvalid_o = 1'b0;
 
@@ -130,11 +127,9 @@ module spm_rmw_adapter
         if (mem_rvalid_i) begin
           req_state_d = RMW_MODIFY_WRITE;
         end
-
-      end // case: RMW_READ
+      end
 
       RMW_MODIFY_WRITE: begin
-
         // stall requests
         mem_rvalid_o = 1'b0;
         mem_ready_o = mem_ready_i;
@@ -147,11 +142,9 @@ module spm_rmw_adapter
         if (mem_ready_i) begin
           req_state_d = RMW_FINALIZE;
         end
-
-      end // case: RMW_MODIFY_WRITE
+      end
 
       RMW_FINALIZE: begin
-
         // stall requests
         mem_rvalid_o = mem_rvalid_i;
         mem_ready_o = 1'b0;
@@ -163,8 +156,7 @@ module spm_rmw_adapter
         if (mem_rvalid_i) begin
           req_state_d = NORMAL;
         end
-
-      end // case: RMW_FINALIZE
+      end
 
       default: ;
     endcase
