@@ -20,51 +20,22 @@ The default value is:
 
 ```json
 {
-  "size": 128,
-  "banks": 8
+  "size": 128
 }
 ```
 
 # undefined Properties
 
-| Property        | Type     | Required | Nullable       | Defined by                                                                                                                                                         |
-| :-------------- | :------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [size](#size)   | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-size.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/size")   |
-| [banks](#banks) | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-banks.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/banks") |
+| Property            | Type     | Required | Nullable       | Defined by                                                                                                                                                             |
+| :------------------ | :------- | :------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [address](#address) | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-address.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/address") |
+| [length](#length)   | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-length.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/length")   |
 
-## size
+## address
 
-Size of SPM in KiByte. Divided in `n` banks. The total size must be divisible by the number of banks.
+Start address of SPM (Scratchpad Memory).
 
-`size`
-
-*   is optional
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-spm-properties-size.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/size")
-
-### size Type
-
-`number`
-
-### size Examples
-
-```json
-128
-```
-
-```json
-64
-```
-
-## banks
-
-Number of banks.
-
-`banks`
+`address`
 
 *   is optional
 
@@ -72,18 +43,40 @@ Number of banks.
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-spm-properties-banks.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/banks")
+*   defined in: [Occamy System Schema](occamy-properties-spm-properties-address.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/address")
 
-### banks Type
+### address Type
 
 `number`
 
-### banks Examples
+### address Constraints
+
+**minimum**: the value of this number must greater than or equal to: `0`
+
+## length
+
+Size of SPM based on the address range. The full address range will be mapped to SPM.
+
+`length`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-spm-properties-length.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/length")
+
+### length Type
+
+`number`
+
+### length Constraints
+
+**minimum**: the value of this number must greater than or equal to: `0`
+
+### length Examples
 
 ```json
-16
-```
-
-```json
-32
+131072
 ```

@@ -5,12 +5,12 @@
 // Cluster configuration for Occamy.
 {
     rom: {
-        address: 16777216,
-        length: 131072
+        address: 16777216, // 0x1000000
+        length: 131072, // 128 kiB
     },
     spm: {
-      size: 128,
-      latency: 1
+      address: 1879048192, // 0x70000000
+      length: 131072, // 128 kiB
     },
     nr_s1_quadrant: 8,
     s1_quadrant: {

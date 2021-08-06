@@ -31,25 +31,21 @@
         },
         "spm": {
             "default": {
-                "size": 128,
-                "banks": 8
+                "size": 128
             },
             "properties": {
-                "size": {
+                "address": {
                     "type": "number",
-                    "description": "Size of SPM in KiByte. Divided in `n` banks. The total size must be divisible by the number of banks.",
-                    "examples": [
-                        128,
-                        64
-                    ]
+                    "description": "Start address of SPM (Scratchpad Memory).",
+                    "minimum": 0
                 },
-                "banks": {
+                "length": {
                     "type": "number",
-                    "description": "Number of banks.",
+                    "description": "Size of SPM based on the address range. The full address range will be mapped to SPM.",
                     "examples": [
-                        16,
-                        32
-                    ]
+                        131072
+                    ],
+                    "minimum": 0
                 }
             }
         },
