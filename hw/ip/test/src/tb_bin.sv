@@ -5,6 +5,9 @@
 /// RTL Top-level for `fesvr` simulation.
 module tb_bin;
   import "DPI-C" function int fesvr_tick();
+  import "DPI-C" function void clint_tick(
+    output byte msip[]
+  );
 
   // This can't have a unit otherwise the simulation will not advance, for
   // whatever reason.

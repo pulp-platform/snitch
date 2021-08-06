@@ -15,6 +15,7 @@
 extern "C" {
 /// Tick and check whether `fesvr` communication is necessary.
 int fesvr_tick();
+void clint_tick(const svOpenArrayHandle msip);
 void tb_memory_read(long long addr, int len, const svOpenArrayHandle data);
 void tb_memory_write(long long addr, int len, const svOpenArrayHandle data,
                      const svOpenArrayHandle strb);
@@ -118,4 +119,18 @@ void tb_memory_write(long long addr, int len, const svOpenArrayHandle data,
     assert(strb_ptr);
     sim::MEM.write(addr, len, (const uint8_t *)data_ptr,
                    (const uint8_t *)strb_ptr);
+}
+
+const long long clint_addr = sim::BOOTDATA.clint_base;
+const long num_cores = sim::BOOTDATA.core_count;
+
+void clint_tick(const svOpenArrayHandle msip) {
+    uint8_t *msip_ptr = (uint8_t *)svGetArrayPtr(msip);
+    assert(msip_ptr);
+    uint32_t read_val;
+    for (int i = 0; i < num_cores; i++) {
+        sim::MEM.read(clint_addr + 4 * i, sizeof(uint32_t),
+                      (uint8_t *)&read_val);
+        msip_ptr[i] = read_val != 0 ? 1 : 0;
+    }
 }
