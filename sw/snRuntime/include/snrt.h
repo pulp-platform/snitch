@@ -5,6 +5,9 @@
 
 #include <stddef.h>
 #include <stdint.h>
+
+#include "encoding.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,6 +26,11 @@ typedef struct snrt_slice {
     uint64_t end;
 } snrt_slice_t;
 
+/// Peripherals to the Snitch SoC
+struct snrt_peripherals {
+    uint32_t *clint;
+};
+
 static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
 
 extern void snrt_cluster_hw_barrier();
@@ -31,6 +39,7 @@ extern void snrt_global_barrier();
 
 extern uint32_t __attribute__((pure)) snrt_hartid();
 struct snrt_team_root *snrt_current_team();
+extern struct snrt_peripherals *snrt_peripherals();
 extern uint32_t snrt_global_core_idx();
 extern uint32_t snrt_global_core_num();
 extern uint32_t snrt_global_compute_core_idx();
@@ -113,6 +122,57 @@ extern void snrt_fpu_fence();
 
 /// alloc functions
 extern void *snrt_l1alloc(size_t size);
+
+//================================================================================
+// Interrupt functions
+//================================================================================
+
+/**
+ * @brief Globally enable M-mode interrupts
+ * @details On an interrupt event the core will jump to
+ * __snrt_crt0_interrupt_handler service the interrupt and continue normal
+ * execution. Enable interrupt sources with snrt_interrupt_enable
+ */
+static inline void snrt_interrupt_global_enable(void) {
+    set_csr(mstatus, MSTATUS_MIE);  // set M global interrupt enable
+}
+/**
+ * @brief Globally disable interrupts
+ * @details
+ */
+static inline void snrt_interrupt_global_disable(void) {
+    clear_csr(mstatus, MSTATUS_MIE);
+}
+/**
+ * @brief Enable interrupt source irq
+ * @details Enable interrupt, either wakes from wfi or if global interrupts are
+ * enabled, jumps to the IRQ handler
+ *
+ * @param irq one of IRQ_[S/H/M]_[SOFT/TIMER/EXT]
+ * interrupts
+ */
+static inline void snrt_interrupt_enable(uint32_t irq) {
+    set_csr(mie, 1 << irq);
+}
+/**
+ * @brief Disable interrupt source
+ * @details See snrt_interrupt_enable
+ *
+ * @param irq one of IRQ_[S/H/M]_[SOFT/TIMER/EXT]
+ */
+static inline void snrt_interrupt_disable(uint32_t irq) {
+    clear_csr(mie, 1 << irq);
+}
+/**
+ * @brief Get the cause of an interrupt
+ * @details
+ * @return One of IRQ_[S/H/M]_[SOFT/TIMER/EXT]
+ */
+static inline uint32_t snrt_interrupt_cause(void) {
+    return read_csr(mcause) & ~0x80000000;
+}
+extern void snrt_int_sw_clear(uint32_t hartid);
+extern void snrt_int_sw_set(uint32_t hartid);
 
 #ifdef __cplusplus
 }

@@ -35,9 +35,10 @@ struct snrt_barrier {
     uint32_t volatile barrier_iteration;
 };
 
+// This struct is placed at the end of each clusters TCDM
 struct snrt_team_root {
     struct snrt_team base;
-    const void *device_tree;
+    const void *bootdata;
     uint32_t global_core_base_hartid;
     uint32_t global_core_num;
     uint32_t cluster_idx;
@@ -51,4 +52,5 @@ struct snrt_team_root {
     struct snrt_allocator allocator;
     struct snrt_barrier cluster_barrier;
     uint32_t barrier_reg_ptr;
+    struct snrt_peripherals peripherals;
 };

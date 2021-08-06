@@ -160,6 +160,11 @@ snrt.crt0.init_team:
     lw        a4, 16(sp)
     addi      sp, sp, 20
 
+    # Prepare interrupts
+snrt.crt0.init_interrupt:
+    la t0, __snrt_crt0_interrupt_handler
+    csrw   mtvec, t0
+
     # Synchronize cores.
 snrt.crt0.pre_barrier:
     call      _snrt_cluster_barrier
@@ -181,3 +186,126 @@ snrt.crt0.end:
 1:
     wfi
     j       1b
+
+__snrt_crt0_interrupt_handler:
+    .align 4
+    .globl __snrt_crt0_interrupt_handler
+    # store integer context: 17 registers, align stack to 16
+    addi    sp, sp, -80
+    sw  ra, 64(sp)
+    sw  t0, 60(sp)
+    sw  t1, 56(sp)
+    sw  t2, 52(sp)
+    sw  s0, 48(sp)
+    sw  a0, 44(sp)
+    sw  a1, 40(sp)
+    sw  a2, 36(sp)
+    sw  a3, 32(sp)
+    sw  a4, 28(sp)
+    sw  a5, 24(sp)
+    sw  a6, 20(sp)
+    sw  a7, 16(sp)
+    sw  t3, 12(sp)
+    sw  t4,  8(sp)
+    sw  t5,  4(sp)
+    sw  t6,  0(sp)
+    # store double floating point context: 32*8 bytes
+    csrr    t0, misa
+    andi    t0, t0, (1 << 3) # 3: D - single precision float extension
+    beqz    t0, 1f
+    addi    sp, sp, -256
+    fsd     f0, 248(sp)
+    fsd     f1, 240(sp)
+    fsd     f2, 232(sp)
+    fsd     f3, 224(sp)
+    fsd     f4, 216(sp)
+    fsd     f5, 208(sp)
+    fsd     f6, 200(sp)
+    fsd     f7, 192(sp)
+    fsd     f8, 184(sp)
+    fsd     f9, 176(sp)
+    fsd     f10, 168(sp)
+    fsd     f11, 160(sp)
+    fsd     f12, 152(sp)
+    fsd     f13, 144(sp)
+    fsd     f14, 136(sp)
+    fsd     f15, 128(sp)
+    fsd     f16, 120(sp)
+    fsd     f17, 112(sp)
+    fsd     f18, 104(sp)
+    fsd     f19, 96(sp)
+    fsd     f20, 88(sp)
+    fsd     f21, 80(sp)
+    fsd     f22, 72(sp)
+    fsd     f23, 64(sp)
+    fsd     f24, 56(sp)
+    fsd     f25, 48(sp)
+    fsd     f26, 40(sp)
+    fsd     f27, 32(sp)
+    fsd     f28, 24(sp)
+    fsd     f29, 16(sp)
+    fsd     f30, 8(sp)
+    fsd     f31, 0(sp)
+    # state is stored, can now handle the interrupt
+1:  
+    csrr    a0, mhartid
+    call    __snrt_isr
+    # restore fp context
+    csrr    t0, misa
+    andi    t0, t0, (1 << 3) # 3: D - single precision float extension
+    beqz    t0, 1f
+    fld     f0, 248(sp)
+    fld     f1, 240(sp)
+    fld     f2, 232(sp)
+    fld     f3, 224(sp)
+    fld     f4, 216(sp)
+    fld     f5, 208(sp)
+    fld     f6, 200(sp)
+    fld     f7, 192(sp)
+    fld     f8, 184(sp)
+    fld     f9, 176(sp)
+    fld     f10, 168(sp)
+    fld     f11, 160(sp)
+    fld     f12, 152(sp)
+    fld     f13, 144(sp)
+    fld     f14, 136(sp)
+    fld     f15, 128(sp)
+    fld     f16, 120(sp)
+    fld     f17, 112(sp)
+    fld     f18, 104(sp)
+    fld     f19, 96(sp)
+    fld     f20, 88(sp)
+    fld     f21, 80(sp)
+    fld     f22, 72(sp)
+    fld     f23, 64(sp)
+    fld     f24, 56(sp)
+    fld     f25, 48(sp)
+    fld     f26, 40(sp)
+    fld     f27, 32(sp)
+    fld     f28, 24(sp)
+    fld     f29, 16(sp)
+    fld     f30, 8(sp)
+    fld     f31, 0(sp)
+    addi    sp, sp, 256
+    # restore integer context
+1:
+    lw  t6,  0(sp)
+    lw  t5,  4(sp)
+    lw  t4,  8(sp)
+    lw  t3, 12(sp)
+    lw  a7, 16(sp)
+    lw  a6, 20(sp)
+    lw  a5, 24(sp)
+    lw  a4, 28(sp)
+    lw  a3, 32(sp)
+    lw  a2, 36(sp)
+    lw  a1, 40(sp)
+    lw  a0, 44(sp)
+    lw  s0, 48(sp)
+    lw  t2, 52(sp)
+    lw  t1, 56(sp)
+    lw  t0, 60(sp)
+    lw  ra, 64(sp)
+    addi    sp, sp, 80
+    # return from interrupt context
+    mret    
