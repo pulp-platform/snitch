@@ -107,7 +107,7 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   assign soc_ctrl_in.boot_mode.d = boot_mode_i;
 
-  <% spm_words = cfg["spm"]["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
+  <% spm_words = cfg["spm"]["length"]//(soc_narrow_xbar.out_spm.dw//8) %>
 
   typedef logic [${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)-1}:0] mem_addr_t;
   typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;

@@ -312,7 +312,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   xbar_rule_48_t [12:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-  '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h80000000 },
+  '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70020000 },
   '{ idx: 10, start_addr: 48'h20000000, end_addr: 48'h70000000 },
   '{ idx: 10, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
   '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h10000000 },

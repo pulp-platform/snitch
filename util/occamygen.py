@@ -185,7 +185,7 @@ def main():
     am_pcie = am.new_leaf("pcie", 0x28000000, 0x20000000,
                           0x48000000).attach_to(am_soc_wide_xbar)
 
-    am_spm = am.new_leaf("spm", 0x10000000, 0x70000000)
+    am_spm = am.new_leaf("spm", occamy.cfg["spm"]["length"], occamy.cfg["spm"]["address"])
 
     # HBM
     am_hbm = list()
