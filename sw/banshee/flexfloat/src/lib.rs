@@ -8,6 +8,15 @@
 
 include!("./bindings.rs");
 
-/// SOFTFLOAT FORMATS
+/// FLEXFLOAT FORMATS
 pub const FP16EXP: u8 = 5;
 pub const FP16MAN: u8 = 10;
+
+pub const FP16ALTEXP: u8 = 8;
+pub const FP16ALTMAN: u8 = 7;
+
+pub const FP8EXP: u8 = 5;
+pub const FP8MAN: u8 = 2;
+
+pub const FP8ALTEXP: u8 = 4;
+pub const FP8ALTMAN: u8 = 3;
