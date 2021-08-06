@@ -321,7 +321,7 @@ def main():
     wide_xbar_quadrant_s1 = solder.AxiXbar(
         48,
         512,
-        3,  # TODO: Source from JSON description
+        4,  # TODO: Source from JSON description
         name="wide_xbar_quadrant_s1",
         clk="clk_i",
         rst="rst_ni",
