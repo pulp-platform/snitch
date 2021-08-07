@@ -56,6 +56,18 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->cluster_mem.start = spm_start;
     team->cluster_mem.end = spm_end;
 
+    // Allocate memory for cluster barrier
+    team->cluster_mem.end -= sizeof(struct snrt_barrier);
+    team->cluster_barrier = team->cluster_mem.end;
+    team->cluster_barrier->barrier = 0;
+    team->cluster_barrier->barrier_iteration = 0;
+
+    // Allocate memory for global barrier
+    team->global_barrier = team->global_mem.start;
+    team->global_barrier->barrier = 0;
+    team->global_barrier->barrier_iteration = 0;
+    team->global_mem.start += sizeof(struct snrt_barrier);
+
     // Allocate memory for a global mailbox.
     team->global_mailbox = team->global_mem.start;
     team->global_mem.start += sizeof(struct snrt_mailbox);
