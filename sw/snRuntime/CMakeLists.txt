@@ -16,9 +16,9 @@ else()
     # Export package information to includer.
     set(SNRUNTIME_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
     set(SNRUNTIME_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-    set(SNRUNTIME_INCLUDE_DIRS 
-        ${CMAKE_CURRENT_SOURCE_DIR}/include 
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor 
+    set(SNRUNTIME_INCLUDE_DIRS
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor
         PARENT_SCOPE)
 endif()
 
@@ -81,6 +81,8 @@ else()
         add_snitch_library(snRuntime-banshee src/start_banshee.S src/start_banshee.c ${sources} src/ssr_v1.c)
     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
         add_snitch_library(snRuntime-cluster src/start_cluster.S src/start_cluster.c ${sources} src/ssr_v2.c)
+    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-occamy")
+        add_snitch_library(snRuntime-cluster src/start_occamy.S src/start_occamy.c ${sources} src/ssr_v2.c)
     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-billywig")
         add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources} src/ssr_v1.c)
     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-bowtruckle")
