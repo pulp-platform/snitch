@@ -508,6 +508,7 @@ impl CpuState {
             ssr_enable: 0,
             wfi: false,
             dma: Default::default(),
+            irq: Default::default(),
         }
     }
 }
@@ -669,7 +670,11 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     size,
                 )
             }
-
+            // access to the CLINT
+            x if x >= self.engine.config.address.clint 
+              && x < self.engine.config.address.clint + 0x10000 => {
+                // write interrupt pending of CPU x/4
+            }
             _ => {
                 trace!(
                     "Store 0x{:x} = 0x{:x} if 0x{:x} ({}B)",
@@ -723,6 +728,12 @@ impl<'a, 'b> Cpu<'a, 'b> {
             0xB02 => self.state.instret as u32,       // csr_minstret
             0xB82 => (self.state.instret >> 32) as u32, // csr_minstreth
             0xF14 => self.hartid as u32,              // mhartid
+            0x300 => self.state.irq.mstatus, // CSR_MSTATUS
+            0x304 => self.state.irq.mie, // CSR_MIE
+            0x344 => self.state.irq.mip, // CSR_MIP
+            0x305 => self.state.irq.mtvec, // CSR_MTVEC
+            0x341 => self.state.irq.mepc, // CSR_MEPC
+            0x342 => self.state.irq.mcause, // CSR_MCAUSE
             _ => 0,
         }
     }
@@ -731,6 +742,12 @@ impl<'a, 'b> Cpu<'a, 'b> {
         trace!("Write CSR 0x{:x} = 0x{:?}", csr, value);
         match csr {
             0x7C0 => self.state.ssr_enable = value,
+            0x300 => self.state.irq.mstatus = value, // CSR_MSTATUS
+            0x304 => self.state.irq.mie = value, // CSR_MIE
+            0x344 => self.state.irq.mip = value, // CSR_MIP
+            0x305 => self.state.irq.mtvec = value, // CSR_MTVEC
+            0x341 => self.state.irq.mepc = value, // CSR_MEPC
+            0x342 => self.state.irq.mcause = value, // CSR_MCAUSE
             _ => (),
         }
     }

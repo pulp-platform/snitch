@@ -839,6 +839,7 @@ impl<'a> SectionTranslator<'a> {
         // iterate over section instructions
         for (addr, inst) in self.elf.instructions(self.section) {
             // Check for a pending interrupt
+            // 1. emit a load to the CPU state
             let tran = InstructionTranslator {
                 section: self,
                 builder: self.builder,
@@ -973,6 +974,9 @@ impl<'a> InstructionTranslator<'a> {
             LLVMConstInt(LLVMInt32Type(), self.addr, 0),
             self.pc_ptr(),
         );
+
+        // Check for interrupts
+        self.emit_irq_check();
 
         // Update the instret counter.
         let instret = LLVMBuildLoad(self.builder, self.instret_ptr(), NONAME);
@@ -2680,6 +2684,90 @@ impl<'a> InstructionTranslator<'a> {
         self.read_mem(LLVMBuildAdd(self.builder, base, offset, NONAME), size, sext)
     }
 
+    /// Emit the code to check for any interrupt
+    unsafe fn emit_irq_check(&self) {
+        // Fetch IRQ status
+        let mstatus = self.section.emit_call( "banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 0, 0)], );
+        let mie = self.section.emit_call( "banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 1, 0)], );
+        let mip = self.section.emit_call( "banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 2, 0)], );
+        let exception = self.section.emit_call( "banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 3, 0)], );
+        // let mstatus = self.read_csr(0x300); // CSR_MSTATUS
+        // let mie = self.read_csr(0x304); // CSR_MIE
+        // let mip = self.read_csr(0x344); // CSR_MIP
+        // AND the IE and IP registers
+        let mirq = LLVMBuildAnd(self.builder, mie, mip, NONAME);
+        // mask the mirq with the global mie bit in mstatus
+        let mstatus_mie = LLVMBuildAnd(
+            self.builder,
+            mstatus,
+            LLVMConstInt(LLVMInt32Type(), 1 << 3, 0),
+            NONAME,
+        );
+        let is_mstatus_mie = LLVMBuildICmp(
+            self.builder,
+            LLVMIntNE,
+            mstatus_mie,
+            LLVMConstInt(LLVMInt32Type(), 0, 0),
+            NONAME,
+        );
+        let is_any_interrupt_pending = LLVMBuildICmp(
+            self.builder,
+            LLVMIntNE,
+            mirq,
+            LLVMConstInt(LLVMInt32Type(), 0, 0),
+            NONAME,
+        );
+        let is_not_in_exception = LLVMBuildICmp(
+            self.builder,
+            LLVMIntNE,
+            exception,
+            LLVMConstInt(LLVMInt32Type(), 1, 0),
+            NONAME,
+        );
+        let irq = LLVMBuildAnd(
+            self.builder,
+            is_mstatus_mie,
+            is_any_interrupt_pending,
+            NONAME,
+        );
+        let irq_nonnested = LLVMBuildAnd(
+            self.builder,
+            irq,
+            is_not_in_exception,
+            NONAME,
+        );
+        // Create two BB, one for IRQ one for normal execution
+        let bb_noirq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_irq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_noirq);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_irq);
+        // branch to IRQ branch on any interrupt
+        LLVMBuildCondBr(self.builder, irq_nonnested, bb_irq, bb_noirq);
+        LLVMPositionBuilderAtEnd(self.builder, bb_irq);
+        // irq case: set exception flag
+        self.section.emit_call( "banshee_irq_set", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 3, 0), LLVMConstInt(LLVMInt32Type(), 1, 0)], );
+        // Set mcause register
+        // TODO: Get correct cause, currently only settings machine software interrupt
+        self.section.emit_call( "banshee_irq_set", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 4, 0), LLVMConstInt(LLVMInt32Type(), (1 << 31) | 3, 0)], );
+
+        // load mtvec address from CSR
+        let target = self.read_csr(0x305); // CSR_MTVEC
+        // write the next PC to MEPC CSR
+        self.write_csr(0x341, LLVMConstInt(LLVMInt32Type(), self.addr, 0)); // CSR_MEPC
+        // Use the prepared indirect jump switch statement.
+        LLVMBuildStore(self.builder, target, self.section.indirect_target_var);
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMInt32Type(), self.addr as u64, 0),
+            self.section.indirect_addr_var,
+        );
+        LLVMBuildBr(self.builder, self.section.indirect_bb);
+        // LLVMBuildBr(self.builder, self.section.elf.inst_bbs[&target]);
+
+        // no irq case
+        LLVMPositionBuilderAtEnd(self.builder, bb_noirq);
+    }
+
     /// Emit the code for instruction tracing.
     ///
     /// Only emits the code once if called multiple times. Does nothing if the
@@ -3584,6 +3672,11 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn dma_ptr(&self) -> LLVMValueRef {
         self.section
             .emit_call_with_name("banshee_dma_ptr", [self.section.state_ptr], "ptr_dma")
+    }
+
+    unsafe fn irq_ptr(&self) -> LLVMValueRef {
+        self.section
+            .emit_call_with_name("banshee_irq_ptr", [self.section.state_ptr], "ptr_irq")
     }
 
     /// Extract latency from the config file or assign default value

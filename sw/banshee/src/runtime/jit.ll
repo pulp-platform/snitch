@@ -14,6 +14,7 @@
 %Cpu = type opaque
 %SsrState = type opaque
 %DmaState = type opaque
+%IrqState = type opaque
 
 ; Forward declarations.
 declare i32 @banshee_load(%Cpu* %cpu, i32 %addr, i8 %size)
@@ -52,3 +53,7 @@ declare i32* @banshee_tcdm_ext_ptr(%Cpu* %cpu, i32 %cluster_id)
 declare %SsrState* @banshee_ssr_ptr(%Cpu* %cpu, i32 %ssr)
 declare i32* @banshee_ssr_enabled_ptr(%Cpu* %cpu)
 declare %DmaState* @banshee_dma_ptr(%Cpu* %cpu)
+
+declare %IrqState* @banshee_irq_ptr(%Cpu* %cpu)
+declare i32 @banshee_irq_get(%IrqState* readonly %dma, i32 %idx)
+declare void @banshee_irq_set(%IrqState* %dma, i32 %idx, i32 %value)

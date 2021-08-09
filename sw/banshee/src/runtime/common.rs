@@ -46,6 +46,7 @@ pub struct CpuState {
     pub ssr_enable: u32,
     pub dma: DmaState,
     pub wfi: bool,
+    pub irq: IrqState,
 }
 
 /// A representation of a single SSR address generator's state.
@@ -81,4 +82,24 @@ pub struct DmaState {
     reps: u32,
     size: u32,
     done_id: u32,
+}
+
+/// Store IRQ relevant CSRs
+#[derive(Default)]
+#[repr(C)]
+pub struct IrqState {
+    // interrupt control bits of the mstatus CSR
+    pub mstatus: u32,
+    // Machine interrupt enabled (same bits as mie csr)
+    pub mie: u32,
+    // machine interrupt pending (same bits as mip csr)
+    pub mip: u32,
+    // machine trap vector
+    pub mtvec: u32,
+    // machine exception PC
+    pub mepc: u32,
+    // machine cause
+    pub mcause: u32,
+    // CPU is currently in an exception state
+    pub exception: bool,
 }

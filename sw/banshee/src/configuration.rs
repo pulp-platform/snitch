@@ -178,6 +178,7 @@ pub struct Address {
     pub cluster_num: u32,
     pub cluster_id: u32,
     pub uart: u32,
+    pub clint: u32,
 }
 
 impl Default for Address {
@@ -193,6 +194,7 @@ impl Default for Address {
             cluster_num: 0x40000048,
             cluster_id: 0x40000050,
             uart: 0xF00B8000,
+            clint: 0xFFFF0000,
         }
     }
 }

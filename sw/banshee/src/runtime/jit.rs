@@ -108,6 +108,13 @@ pub unsafe fn banshee_dma_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut DmaState {
     &mut cpu.state.dma
 }
 
+/// Get a pointer to the IRQ state.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_irq_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut IrqState {
+    &mut cpu.state.irq
+}
+
 /// Write to an SSR control register.
 #[no_mangle]
 pub unsafe fn banshee_ssr_write_cfg(
@@ -314,5 +321,30 @@ pub unsafe fn banshee_dma_stat(dma: &DmaState, addr: u32) -> u32 {
         1 => dma.done_id + 1, // next_id
         2 | 3 => 0,           // busy
         _ => 0,
+    }
+}
+
+/// Read one of the sub-registers of the IrqState struct
+#[no_mangle]
+pub unsafe fn banshee_irq_get(irq: &IrqState, idx: u32) -> u32 {
+    match idx {
+        0 => irq.mstatus,
+        1 => irq.mie,
+        2 => irq.mip,
+        3 => irq.exception as u32,
+        _ => 0,
+    }
+}
+
+/// Write one of the sub-registers of the IrqState struct
+#[no_mangle]
+pub unsafe fn banshee_irq_set(irq: &mut IrqState, idx: u32, value: u32) {
+    match idx {
+        0 => irq.mstatus = value,
+        1 => irq.mie = value,
+        2 => irq.mip = value,
+        3 => irq.exception = value == 1,
+        4 => irq.mcause = value,
+        _ => (),
     }
 }
