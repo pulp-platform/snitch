@@ -11,7 +11,7 @@ extern const uint32_t _snrt_cluster_cluster_id;
 void *const _snrt_cluster_global_start = (void *)0x90000000;
 void *const _snrt_cluster_global_end = (void *)0x100000000;
 
-const uint32_t snrt_stack_size __attribute__((weak)) = 10;
+const uint32_t snrt_stack_size __attribute__((weak, section(".rodata"))) = 10;
 
 // The boot data generated along with the system RTL.
 // See `hw/system/snitch_cluster/test/tb_lib.hh` for details.
@@ -24,7 +24,7 @@ struct snrt_cluster_bootdata {
 };
 
 // Rudimentary string buffer for putc calls.
-extern uint32_t _end;
+extern uint32_t _edram;
 #define PUTC_BUFFER_LEN (1024 - sizeof(size_t))
 struct putc_buffer_header {
     size_t size;
@@ -33,7 +33,7 @@ struct putc_buffer_header {
 static volatile struct putc_buffer {
     struct putc_buffer_header hdr;
     char data[PUTC_BUFFER_LEN];
-} *const putc_buffer = (void *)&_end;
+} *const putc_buffer = (void *)&_edram;
 
 void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
                      void *spm_start, void *spm_end,
@@ -68,6 +68,9 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     // the _snrt_init_team function is called once per thread before main, so
     // it's as good a point as any.
     putc_buffer[snrt_hartid()].hdr.size = 0;
+
+    // Init allocator
+    snrt_alloc_init(team);
 }
 
 uint32_t _snrt_barrier_reg_ptr() {

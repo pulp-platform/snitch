@@ -5,18 +5,15 @@
 
 void snrt_putchar(char character);
 
-// Generator symbols with the proper names.
-#define printf_ printf
-#define sprintf_ sprintf
-#define snprintf_ snprintf
-#define vsnprintf_ vsnprintf
-#define vprintf_ vprintf
+// Use snrt_putchar for printf
 #define _putchar snrt_putchar
 
-// Include the vendorized tiny printf implementation.
-#define _PRINTF_H_
-#define PRINTF_DISABLE_SUPPORT_FLOAT
-#include <stdarg.h>
-#include <stddef.h>
+/// vendor printf settings
 
+#if defined(__GNUC__)
+// the gcc toolchain doesn't support this
+#define PRINTF_DISABLE_SUPPORT_FLOAT
+#endif
+
+// Include the vendorized tiny printf implementation.
 #include "../vendor/printf.c"

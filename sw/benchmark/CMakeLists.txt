@@ -41,8 +41,7 @@ target_link_libraries(benchmark-matmul-all benchmark-matmul)
 # Tests
 enable_testing()
 add_snitch_raw_test_rtl(benchmark-matmul-all benchmark-matmul-all)
-# TODO(fschuiki): The following currently breaks in Banshee (fmv.x.w not impl)
-# add_snitch_raw_test_args(benchmark-matmul-all-1c benchmark-matmul-all --no-opt-llvm --num-cores=1)
-# add_snitch_raw_test_args(benchmark-matmul-all-2c benchmark-matmul-all --no-opt-llvm --num-cores=2)
-# add_snitch_raw_test_args(benchmark-matmul-all-4c benchmark-matmul-all --no-opt-llvm --num-cores=4)
-# add_snitch_raw_test_args(benchmark-matmul-all-8c benchmark-matmul-all --no-opt-llvm --num-cores=8)
+# Single core on banshee doesn't work due to how the benchmark is implemented
+add_snitch_raw_test_args(benchmark-matmul-all-2c benchmark-matmul-all --no-opt-llvm --no-opt-jit --num-cores=2)
+add_snitch_raw_test_args(benchmark-matmul-all-4c benchmark-matmul-all --no-opt-llvm --no-opt-jit --num-cores=4)
+add_snitch_raw_test_args(benchmark-matmul-all-8c benchmark-matmul-all --no-opt-llvm --no-opt-jit --num-cores=8)
