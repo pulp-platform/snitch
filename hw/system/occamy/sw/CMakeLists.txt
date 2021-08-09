@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.13)
 
 set(SNITCH_SOFTWARE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../sw)
 list(APPEND CMAKE_MODULE_PATH ${SNITCH_SOFTWARE_DIR}/cmake)
-set(CMAKE_TOOLCHAIN_FILE toolchain-gcc)
+set(CMAKE_TOOLCHAIN_FILE toolchain-llvm)
 set(SNITCH_RUNTIME snRuntime-occamy CACHE PATH "")
 set(SNITCH_SIMULATOR ${CMAKE_CURRENT_SOURCE_DIR}/../bin/snitch_cluster.vlt CACHE PATH "")
 
