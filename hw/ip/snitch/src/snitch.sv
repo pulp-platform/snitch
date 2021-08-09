@@ -2059,7 +2059,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
     end
     // Right now we skip this due to simplicity.
-    if (csr_en) begin
+    if (csr_en && !wfi_q) begin
       // Check privilege level.
       if ((priv_lvl_q & inst_data_i[29:28]) == inst_data_i[29:28]) begin
         unique case (inst_data_i[31:20])
