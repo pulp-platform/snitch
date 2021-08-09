@@ -33,8 +33,8 @@ uint32_t snrt_cluster_num() { return _snrt_team_current->root->cluster_num; }
 
 uint32_t snrt_cluster_core_idx() {
     return (snrt_hartid() -
-            _snrt_team_current->root->cluster_core_base_hartid) %
-            _snrt_team_current->root->cluster_core_num;
+        _snrt_team_current->root->cluster_core_base_hartid) %
+         _snrt_team_current->root->cluster_core_num;
 }
 
 uint32_t snrt_cluster_core_num() {
@@ -53,7 +53,7 @@ uint32_t snrt_cluster_compute_core_num() {
 
 uint32_t snrt_cluster_dm_core_idx() {
     // TODO: Actually derive this from the device tree!
-    return 0;
+    return snrt_cluster_core_num() - 1;
 }
 
 uint32_t snrt_cluster_dm_core_num() {
@@ -113,11 +113,11 @@ void snrt_bcast_recv(void *data, size_t len) {
     snrt_barrier();
 }
 
-/// Synchronize cluster with a software barrier
+/// Synchronize cores in a cluster with a software barrier
 void snrt_cluster_barrier() {
     // Remember previous iteration
     struct snrt_barrier *barrier_ptr =
-        _snrt_team_current->root->cluster_barrier;
+        &_snrt_team_current->root->cluster_barrier;
     uint32_t prev_barrier_iteration = barrier_ptr->barrier_iteration;
     uint32_t barrier =
         __atomic_add_fetch(&barrier_ptr->barrier, 1, __ATOMIC_RELAXED);
@@ -132,8 +132,7 @@ void snrt_cluster_barrier() {
     }
 }
 
-/// Synchronize clusters globally with a software barrier
-/// on the global memory
+/// Synchronize clusters globally with a global software barrier
 void snrt_global_barrier() {
     // Remember previous iteration
     struct snrt_barrier *barrier_ptr = _snrt_team_current->root->global_barrier;
