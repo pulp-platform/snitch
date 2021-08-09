@@ -4,7 +4,7 @@
 
 bin2coe
 dataclasses
-editorconfig-checker
+editorconfig-checker==2.3.51
 flake8
 gitpython
 hjson
