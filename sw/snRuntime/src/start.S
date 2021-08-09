@@ -44,6 +44,45 @@ snrt.crt0.init_bss:
     blt       t0, t1, 1b
 2:
 
+snrt.crt0.init_registers:
+    # Clear FP registers
+    csrr    t0, misa
+    andi    t0, t0, (1 << 3) # 3: D - single precision float extension
+    beqz    t0, 3f
+    fcvt.d.w f0, zero
+    fcvt.d.w f1, zero
+    fcvt.d.w f2, zero
+    fcvt.d.w f3, zero
+    fcvt.d.w f4, zero
+    fcvt.d.w f5, zero
+    fcvt.d.w f6, zero
+    fcvt.d.w f7, zero
+    fcvt.d.w f8, zero
+    fcvt.d.w f9, zero
+    fcvt.d.w f10, zero
+    fcvt.d.w f11, zero
+    fcvt.d.w f12, zero
+    fcvt.d.w f13, zero
+    fcvt.d.w f14, zero
+    fcvt.d.w f15, zero
+    fcvt.d.w f16, zero
+    fcvt.d.w f17, zero
+    fcvt.d.w f18, zero
+    fcvt.d.w f19, zero
+    fcvt.d.w f20, zero
+    fcvt.d.w f21, zero
+    fcvt.d.w f22, zero
+    fcvt.d.w f23, zero
+    fcvt.d.w f24, zero
+    fcvt.d.w f25, zero
+    fcvt.d.w f26, zero
+    fcvt.d.w f27, zero
+    fcvt.d.w f28, zero
+    fcvt.d.w f29, zero
+    fcvt.d.w f30, zero
+    fcvt.d.w f31, zero
+3:
+
     # Read hartid and number of cores in the cluster.
 snrt.crt0.init_stack:
 
