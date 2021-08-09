@@ -150,7 +150,7 @@ module snitch_sequencer import snitch_pkg::*; #(
 
   assign inst_last = inst_cnt_q == curr_cfg.max_inst;
   assign rpt_last = rpt_cnt_q == curr_cfg.max_rpt;
-  assign seq_last = inst_last & rpt_last;
+  assign seq_last = inst_last & rpt_last & ~curr_cfg.is_streamctl;
   assign seq_cfg_buffer_pop = (seq_last & seq_next & seq_cfg_buffer_valid) | seq_done;
 
   always_comb begin : sequence_logic
