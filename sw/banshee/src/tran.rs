@@ -838,6 +838,7 @@ impl<'a> SectionTranslator<'a> {
         let mut fseq = SequencerContext::new();
         // iterate over section instructions
         for (addr, inst) in self.elf.instructions(self.section) {
+            // Check for a pending interrupt
             let tran = InstructionTranslator {
                 section: self,
                 builder: self.builder,
@@ -866,6 +867,8 @@ impl<'a> SectionTranslator<'a> {
                 }
             }
             // Place branch to next instruction only after processing of sequence
+            // (a BB that already has a terminator corresponds to a jump instruction and
+            // doesn't need a branch to the next subsequent instruction)
             if LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null() {
                 LLVMBuildBr(self.builder, self.elf.inst_bbs[&(addr + 4)]);
             }
