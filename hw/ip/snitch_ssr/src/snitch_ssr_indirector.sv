@@ -42,7 +42,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   input  isect_slv_rsp_t isect_slv_rsp_i,
   output isect_mst_req_t isect_mst_req_o,
   input  isect_mst_rsp_t isect_mst_rsp_i,
-  // From config interface
+  // With config interface
   input  bytecnt_t  cfg_offs_next_i,
   input  logic      cfg_done_i,
   input  logic      cfg_indir_i,
@@ -53,6 +53,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   input  pointer_t  cfg_base_i,
   input  shift_t    cfg_shift_i,
   input  idx_flags_t  cfg_flags_i,
+  output index_t    cfg_idx_isect_o,
   // With natural iterator level 0 (upstream)
   input  pointer_t  natit_pointer_i,
   output logic      natit_ready_o,
@@ -316,6 +317,9 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   end else begin : gen_no_isect_ctr
     assign idx_isect_q = '0;
   end
+
+  // Expose intersection index for reading from external register
+  assign cfg_idx_isect_o = idx_isect_q;
 
   // Use external natural iterator; mask lower bits to fetch only entire, aligned words.
   assign idx_addr = {tcdm_start_address_i[AddrWidth-1:Cfg.PointerWidth],

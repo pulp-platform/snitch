@@ -439,6 +439,7 @@ module fixture_ssr_streamer import snitch_ssr_pkg::*; #(
     data_t        idx_actual, idx_golden;
     data_t        val_actual, val_golden;
     logic         done;
+    logic [31:0]  reg_read;
     // Configure SSRs
     cfg_idx_ctl_t cfg_idx_ctl;
     logic [31:0]  idx_bound_slave = '1;
@@ -506,6 +507,11 @@ module fixture_ssr_streamer import snitch_ssr_pkg::*; #(
     assert (ssr_data_golden.size() == len_gold) else
         $fatal(1, "Mismatching result length: actual %0d vs golden %0d",
           ssr_data_golden.size(), len_gold);
+    // Verify correct final slave index
+    cfg_read(2, 12, reg_read);
+    assert (reg_read == len_gold) else
+        $fatal(1, "Mismatching index count in slave isect_reg: actual %0d vs golden %0d",
+          reg_read, len_gold);
     // Verify memory contents
     foreach (ssr_data_golden[i]) begin
       data_t idx_width  = 8 << idx_size[2];
