@@ -33,23 +33,6 @@ _snrt_cluster_barrier:
     addi      sp, sp, 4
     ret
 
-# Function to init data segment
-# Expecting:
-# - a0: cluster-local core id
-_snrt_init_data:
-    .globl _snrt_init_data
-    bnez      a0, 2f  # only core 0
-    la        t0, __DATA_BEGIN__    # begin of data segment
-    la        t1, _edata            # end of data segment
-    la        t2, _sidata           # load address of data segment
-    bge       t0, t1, 2f
-1:  lw        t3, 0(t2)
-    sw        t3, 0(t0)
-    addi      t0, t0, 4
-    addi      t2, t2, 4
-    blt       t0, t1, 1b
-2:  ret
-
 # Function to terminate execution.
 #
 # Expecting:

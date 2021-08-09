@@ -33,11 +33,6 @@ snrt.crt0.init_core_info:
     # - a3: TCDM end ptr
     # - a4: device tree ptr
 
-    # Only each cluster's first core initializes the data section
-snrt.crt0.init_data:
-    # a0: cluster-local core id
-    call _snrt_init_data
-
     # Clear the bss segment.
 snrt.crt0.init_bss:
     bnez      a0, 2f  # only core 0 (TODO: this should be one core globally, not per cluster)
