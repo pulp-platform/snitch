@@ -440,23 +440,24 @@ module fixture_ssr_streamer import snitch_ssr_pkg::*; #(
     data_t        val_actual, val_golden;
     logic         done;
     // Configure SSRs
+    cfg_idx_ctl_t cfg_idx_ctl;
     logic [31:0]  idx_bound_slave = '1;
     idx_flags_t   idx_flags = '{merge: merge, default: '0};
     // Slave: set up first so it catches indices
-    regs  [2] = {32'(data_base[2]),
-                  32'(cfg_idx_ctl_t'{size: idx_size[2], flags: '0, default: '0}),
+    cfg_idx_ctl = '{size: idx_size[2], flags: '0, default: '0};
+    regs  [2] = {32'(data_base[2]), 32'(cfg_idx_ctl),
                   (32*4)'(WordBytes), (32*4)'(idx_bound_slave), 32'h0};
     status[2] = '{upper: {1'b0, 1'b1, 2'b01, 1'b1}, ptr: idx_base[2]};
     verify_launch(2, regs[2], status[2], alias_launch);
     // Master 0
-    regs  [0] = {32'(data_base[0]),
-                  32'(cfg_idx_ctl_t'{size: idx_size[0], flags: idx_flags, default: '0}),
+    cfg_idx_ctl = '{size: idx_size[0], flags: idx_flags, default: '0};
+    regs  [0] = {32'(data_base[0]), 32'(cfg_idx_ctl),
                   (32*4)'(WordBytes), (32*4)'(idx_bound[0]), 32'h0};
     status[0] = '{upper: {1'b0, 1'b0, 2'b11, 1'b1}, ptr: idx_base[0]};
     verify_launch(0, regs[0], status[0], alias_launch);
     // Master 1
-    regs  [1] = {32'(data_base[1]),
-                  32'(cfg_idx_ctl_t'{size: idx_size[1], flags: idx_flags, default: '0}),
+    cfg_idx_ctl = '{size: idx_size[1], flags: idx_flags, default: '0};
+    regs  [1] = {32'(data_base[1]), 32'(cfg_idx_ctl),
                   (32*4)'(WordBytes), (32*4)'(idx_bound[1]), 32'h0};
     status[1] = '{upper: {1'b0, 1'b0, 2'b11, 1'b1}, ptr: idx_base[1]};
     verify_launch(1, regs[1], status[1], alias_launch);

@@ -130,7 +130,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     logic spill_out_valid, spill_out_ready;
 
     // Config register write
-    cfg_idx_ctl_t cfg_wdata_idx_ctl;
+    cfg_idx_ctl_t cfg_wdata_idx_ctl, cfg_rdata_idx_ctl;
     assign cfg_wdata_idx_ctl = cfg_wdata_i;
     always_comb begin
       idx_shift_sd  = idx_shift_sq;
@@ -147,8 +147,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
     // Config register read
     assign indir_read_map.idx_base = idx_base_q;
-    assign indir_read_map.idx_cfg =
-        cfg_idx_ctl_t'{flags: idx_flags_q, shift: idx_shift_q, size: idx_size_q};
+    assign cfg_rdata_idx_ctl = '{flags: idx_flags_q, shift: idx_shift_q, size: idx_size_q};
+    assign indir_read_map.idx_cfg = 32'(cfg_rdata_idx_ctl);
 
     // Config registers
     `FFARN(idx_shift_sq, idx_shift_sd, '0, clk_i, rst_ni)

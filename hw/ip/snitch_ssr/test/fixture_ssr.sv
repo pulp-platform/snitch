@@ -524,7 +524,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   );
     cfg_regs_t    regs;
     cfg_status_t  status;
-    cfg_idx_ctl_t idx_ctl = cfg_idx_ctl_t'{flags: '0, shift: idx_shift, size: idx_size};
+    cfg_idx_ctl_t idx_ctl = '{flags: '0, shift: idx_shift, size: idx_size};
     logic [31:0]  idx_base_ptr  = idx_base;
     regs = {32'(data_base), 32'(idx_ctl), (32*4)'(WordBytes), (32*4)'(bound), 32'(rep)};
     status.upper  = {1'b0, write, 2'b0, 1'b1};
