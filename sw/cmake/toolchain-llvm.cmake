@@ -24,6 +24,8 @@ add_compile_options(-mcpu=snitch -mcmodel=medany -ffast-math -fno-builtin-printf
 add_compile_options(-ffunction-sections)
 add_compile_options(-Wextra)
 add_compile_options(-static)
+# For SSR register merge we need to disable the scheduler
+add_compile_options(-mllvm -enable-misched=false)
 
 ##
 ## Link options
