@@ -42,3 +42,4 @@ link_libraries(-lm)
 
 # Add preprocessor definition to indicate LLD is used
 add_compile_definitions(__LINK_LLD)
+add_compile_definitions(__TOOLCHAIN_LLVM__)

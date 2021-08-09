@@ -19,3 +19,4 @@ add_compile_options(-Wextra)
 
 # Add preprocessor definition to indicate LD is used
 add_compile_definitions(__LINK_LD)
+add_compile_definitions(__TOOLCHAIN_GCC__)
