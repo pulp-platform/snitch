@@ -71,6 +71,10 @@ def main():
     parser.add_argument("--chip",
                         metavar="CHIP_TOP",
                         help="(Optional) Chip Top-level")
+    parser.add_argument("--bootdata",
+                        metavar="BOOTDATA",
+                        help="Name of the bootdata file (output)")
+
     parser.add_argument("--graph", "-g", metavar="DOT")
     parser.add_argument("--memories", "-m", action="store_true")
     parser.add_argument("--wrapper", "-w", action="store_true")
@@ -435,6 +439,11 @@ def main():
     # CHIP TOP #
     ############
     write_template(args.chip, outdir, **kwargs)
+
+    ############
+    # BOOTDATA #
+    ############
+    write_template(args.bootdata, outdir, **kwargs)
 
     #######
     # DTS #
