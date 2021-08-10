@@ -51,4 +51,5 @@ struct snrt_team_root {
     struct snrt_allocator allocator;
     struct snrt_barrier cluster_barrier;
     struct snrt_barrier *global_barrier;
+    uint32_t barrier_reg_ptr;
 };

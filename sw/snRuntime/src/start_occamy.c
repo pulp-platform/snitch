@@ -20,7 +20,8 @@ struct snrt_cluster_bootdata {
     uint32_t core_count;
     uint32_t hartid_base;
     uint32_t tcdm_start;
-    uint32_t tcdm_end;
+    uint32_t tcdm_size;
+    uint32_t tcdm_offset;
     uint32_t global_mem_start;
     uint32_t global_mem_end;
     uint32_t cluster_count;
@@ -57,6 +58,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->global_mem.end = bootdata->global_mem_end;
     team->cluster_mem.start = spm_start;
     team->cluster_mem.end = spm_end;
+    team->barrier_reg_ptr = spm_end + 0x30;
 
     // Initialize cluster barrier
     team->cluster_barrier.barrier = 0;
@@ -88,9 +90,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
 }
 
 uint32_t _snrt_barrier_reg_ptr() {
-    const struct snrt_cluster_bootdata *bd =
-        _snrt_team_current->root->device_tree;
-    return bd->tcdm_end + 0x30;
+    return _snrt_team_current->root->barrier_reg_ptr;
 }
 
 extern uintptr_t volatile tohost, fromhost;
