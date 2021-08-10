@@ -2105,7 +2105,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           `endif
           CSR_MSEG: begin
             csr_rvalue = mseg_q;
-            mseg_d = alu_result[$bits(mseg_q)-1:0];
+            if (!exception) mseg_d = alu_result[$bits(mseg_q)-1:0];
           end
           // Privleged Extension:
           CSR_MSTATUS: begin
@@ -2120,15 +2120,17 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             mstatus.mie = ie_q[M];
             mstatus.mpie = pie_q[M];
             csr_rvalue = mstatus;
-            mstatus_d = snitch_pkg::status_rv32_t'(alu_result);
-            mpp_d = mstatus_d.mpp;
-            spp_d = mstatus_d.spp;
-            ie_d[M] = mstatus_d.mie;
-            pie_d[M] = mstatus_d.mpie;
+            if (!exception) begin
+              mstatus_d = snitch_pkg::status_rv32_t'(alu_result);
+              mpp_d = mstatus_d.mpp;
+              spp_d = mstatus_d.spp;
+              ie_d[M] = mstatus_d.mie;
+              pie_d[M] = mstatus_d.mpie;
+            end
           end
           CSR_MEPC: begin
             csr_rvalue = epc_q[M];
-            epc_d[M] = alu_result[31:0];
+            if (!exception) epc_d[M] = alu_result[31:0];
           end
           CSR_MIP: begin
             csr_rvalue[MEI] = irq_i.meip;
@@ -2137,9 +2139,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             csr_rvalue[SEI] = seip_q;
             csr_rvalue[STI] = stip_q;
             csr_rvalue[SSI] = ssip_q;
-            seip_d = alu_result[SEI];
-            stip_d = alu_result[STI];
-            ssip_d = alu_result[SSI];
+            if (!exception) begin
+              seip_d = alu_result[SEI];
+              stip_d = alu_result[STI];
+              ssip_d = alu_result[SSI];
+            end
           end
           CSR_MIE: begin
             csr_rvalue[MEI] = eie_q[M];
@@ -2148,27 +2152,31 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             csr_rvalue[SEI] = eie_q[S];
             csr_rvalue[STI] = tie_q[S];
             csr_rvalue[SSI] = sie_q[S];
-            eie_d[M] = alu_result[MEI];
-            tie_d[M] = alu_result[MTI];
-            sie_d[M] = alu_result[MSI];
-            eie_d[S] = alu_result[SEI];
-            tie_d[S] = alu_result[STI];
-            sie_d[S] = alu_result[SSI];
+            if (!exception) begin
+              eie_d[M] = alu_result[MEI];
+              tie_d[M] = alu_result[MTI];
+              sie_d[M] = alu_result[MSI];
+              eie_d[S] = alu_result[SEI];
+              tie_d[S] = alu_result[STI];
+              sie_d[S] = alu_result[SSI];
+            end
           end
           CSR_MCAUSE: begin
             csr_rvalue = cause_q[M];
             csr_rvalue[31] = cause_irq_q[M];
-            cause_d[M] = alu_result[3:0];
-            cause_irq_d[M] = alu_result[31];
+            if (!exception) begin
+              cause_d[M] = alu_result[3:0];
+              cause_irq_d[M] = alu_result[31];
+            end
           end
           CSR_MTVAL:; // tied-off
           CSR_MTVEC: begin
             csr_rvalue = {tvec_q[M], 2'b0};
-            tvec_d[M] = alu_result[31:2];
+            if (!exception) tvec_d[M] = alu_result[31:2];
           end
           CSR_MSCRATCH: begin
             csr_rvalue = scratch_q[M];
-            scratch_d[M] = alu_result[31:0];
+            if (!exception) scratch_d[M] = alu_result[31:0];
           end
           CSR_MEDELEG:; // we currently don't support delegation
           CSR_SSTATUS: begin
@@ -2176,15 +2184,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             mstatus = '0;
             mstatus.spp = spp_q;
             csr_rvalue = mstatus;
-            spp_d = mstatus.spp;
+            if (!exception) spp_d = mstatus.spp;
           end
           CSR_SSCRATCH: begin
             csr_rvalue = scratch_q[S];
-            scratch_d[S] = alu_result[31:0];
+            if (!exception) scratch_d[S] = alu_result[31:0];
           end
           CSR_SEPC: begin
             csr_rvalue = epc_q[S];
-            epc_d[S] = alu_result[31:0];
+            if (!exception) epc_d[S] = alu_result[31:0];
           end
           CSR_SIP, CSR_SIE:; //tied-off - no delegation
           // Enable if we want to support delegation.
@@ -2193,26 +2201,28 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           CSR_STVEC:; // tied-off - no delegation
           CSR_SATP: begin
             csr_rvalue = satp_q;
-            satp_d.ppn = alu_result[21:0];
-            satp_d.mode = alu_result[31];
+            if (!exception) begin
+              satp_d.ppn = alu_result[21:0];
+              satp_d.mode = alu_result[31];
+            end
           end
           // F/D Extension
           CSR_FFLAGS: begin
             if (FP_EN) begin
               csr_rvalue = {27'b0, fcsr_q.fflags};
-              fcsr_d.fflags = fpnew_pkg::status_t'(alu_result[4:0]);
+              if (!exception) fcsr_d.fflags = fpnew_pkg::status_t'(alu_result[4:0]);
             end else illegal_csr = 1'b1;
           end
           CSR_FRM: begin
             if (FP_EN) begin
               csr_rvalue = {29'b0, fcsr_q.frm};
-              fcsr_d.frm = fpnew_pkg::roundmode_e'(alu_result[2:0]);
+              if (!exception) fcsr_d.frm = fpnew_pkg::roundmode_e'(alu_result[2:0]);
             end else illegal_csr = 1'b1;
           end
           CSR_FCSR: begin
             if (FP_EN) begin
               csr_rvalue = {24'b0, fcsr_q};
-              fcsr_d = fcsr_t'(alu_result[7:0]);
+              if (!exception) fcsr_d = fcsr_t'(alu_result[7:0]);
             end else illegal_csr = 1'b1;
           end
           default: csr_rvalue = '0;
