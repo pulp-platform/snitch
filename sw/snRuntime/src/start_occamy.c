@@ -22,8 +22,8 @@ struct snrt_cluster_bootdata {
     uint32_t tcdm_start;
     uint32_t tcdm_size;
     uint32_t tcdm_offset;
-    uint32_t global_mem_start;
-    uint32_t global_mem_end;
+    uint64_t global_mem_start;
+    uint64_t global_mem_end;
     uint32_t cluster_count;
     uint32_t s1_quadrant_count;
 };
@@ -58,7 +58,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->global_mem.end = bootdata->global_mem_end;
     team->cluster_mem.start = spm_start;
     team->cluster_mem.end = spm_end;
-    team->barrier_reg_ptr = spm_end + 0x30;
+    team->barrier_reg_ptr = spm_start + bootdata->tcdm_size + 0x30;
 
     // Initialize cluster barrier
     team->cluster_barrier.barrier = 0;
