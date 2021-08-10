@@ -17,13 +17,13 @@ _snrt_init_core_info:
     lw        a1, 4(a4)  # load the number of cores per cluster
     lw        t0, 8(a4)  # load cluster's hartid offset
     lw        a2, 12(a4) # start address of the TCDM
-    lw        a3, 16(a4) # end address of the TCDM
+    lw        t1, 16(a4) # size of TCDM address space
+    lw        t2, 20(a4) # offset between cluster TCDMs
     sub       a0, a0, t0
     div       t3, a0, a1 # calculate cluster index
-    lui       t4, 0x40   # relative TCDM offset
-    mul       t3, t3, t4 # global TCDM offset
-    add       a2, a2, t3 # start address of current cluster TCDM
-    add       a3, a3, t3 # end address of current cluster TCDM
+    mul       t4, t3, t2 # calculate cluster TCDM offset
+    add       a2, a2, t4 # start address of current cluster TCDM
+    add       a3, a2, t1 # end address of current cluster TCDM
     remu      a0, a0, a1 # calculate cluster-local core id
     ret
 
