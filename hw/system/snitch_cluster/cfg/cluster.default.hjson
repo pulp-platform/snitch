@@ -4,9 +4,16 @@
 
 // Cluster configuration for a simple testbench system.
 {
+    nr_s1_quadrant: 1,
+    s1_quadrant: {
+        nr_clusters: 1,
+    },
+
     cluster: {
         boot_addr: 4096, // 0x1000
         cluster_base_addr: 1048576, // 0x100000
+        cluster_base_offset: 0, // 0x0
+        cluster_base_hartid: 0,
         addr_width: 48,
         data_width: 64,
         tcdm: {
@@ -62,10 +69,10 @@
         ]
     },
     dram: {
-        // 0x8000_0000
-        address: 2147483648,
-        // 0x8000_0000
-        length: 2147483648
+        // 0x9000_0000
+        address: 2415919104,
+        // 0x7000_0000
+        length: 1879048192
     },
     // Templates.
     compute_core_template: {
