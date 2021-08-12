@@ -52,7 +52,7 @@ void __snrt_isr(uint32_t hartid) {
  * @param hartid Target interrupt to clear
  */
 void snrt_int_sw_clear(uint32_t hartid) {
-    *(snrt_peripherals()->clint + hartid) = 0;
+    *(snrt_peripherals()->clint + ( (hartid & ~0x1f) >> 5)  ) &= ~(1 << (hartid & 0x1f));
 }
 
 /**
@@ -62,7 +62,7 @@ void snrt_int_sw_clear(uint32_t hartid) {
  * @param hartid Target interrupt to set
  */
 void snrt_int_sw_set(uint32_t hartid) {
-    *(snrt_peripherals()->clint + hartid) = 1;
+    *(snrt_peripherals()->clint + ( (hartid & ~0x1f) >> 5)  ) |= (1 << (hartid & 0x1f));
 }
 
 //================================================================================
