@@ -8,12 +8,18 @@
 
 int reboot = 0;
 
-#define tprintf(f_, ...) printf((f_), __VA_ARGS__)
-// #define tprintf(f_, ...) while (0)
+// #define tprintf(f_, ...) printf((f_), __VA_ARGS__)
+#define tprintf(f_, ...) while (0)
 
 int main() {
     unsigned core_idx = snrt_global_core_idx();
     unsigned core_num = snrt_global_core_num();
+
+    // self trigger interrupt through CSR
+    snrt_interrupt_enable(IRQ_M_SOFT);
+    snrt_interrupt_global_enable();
+    set_csr(mip, 1 << IRQ_M_SOFT);
+    return 0;
 
     volatile int32_t *INTERRUPT_FLAG = ((int32_t *)snrt_cluster_memory().start);
 
@@ -58,7 +64,7 @@ int main() {
 }
 
 void irq_m_soft(uint32_t hartid) {
-    snrt_int_sw_clear(hartid);
-    int32_t *INTERRUPT_FLAG = ((int32_t *)snrt_cluster_memory().start);
-    *INTERRUPT_FLAG = hartid;
+    // snrt_int_sw_clear(hartid);
+    // int32_t *INTERRUPT_FLAG = ((int32_t *)snrt_cluster_memory().start);
+    // *INTERRUPT_FLAG = hartid;
 }

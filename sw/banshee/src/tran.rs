@@ -2669,6 +2669,21 @@ impl<'a> InstructionTranslator<'a> {
                 // Continue
                 LLVMPositionBuilderAtEnd(self.builder, bb_wake_up);
             }
+            riscv::OpcodeUnit::Mret => {
+                // read mepc from IrqState
+                let target = self
+                    .section
+                    .emit_call("banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 5, 0)], );
+                self.emit_trace();
+                // Use the prepared indirect jump switch statement.
+                LLVMBuildStore(self.builder, target, self.section.indirect_target_var);
+                LLVMBuildStore(
+                    self.builder,
+                    LLVMConstInt(LLVMInt32Type(), self.addr as u64, 0),
+                    self.section.indirect_addr_var,
+                );
+                LLVMBuildBr(self.builder, self.section.indirect_bb);
+            }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
