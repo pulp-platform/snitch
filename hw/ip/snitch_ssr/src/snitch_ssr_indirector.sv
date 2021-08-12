@@ -82,6 +82,11 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   logic   idx_isect_ena;
   index_t idx_isect_q;
 
+  // Index FIFO credit counter
+  logic [$clog2(Cfg.IndexCredits):0] idx_cred_d, idx_cred_q;
+  logic idx_cred_take, idx_cred_give, idx_cred_clear;
+  logic idx_cred_left, idx_cred_full;
+
   // Index byte (serializer/deserializer) counter
   logic     idx_bytecnt_ena;
   bytecnt_t idx_bytecnt_d, idx_bytecnt_q;
@@ -152,6 +157,11 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     `FFLARN(idx_strb_q, idx_strb_d, idx_bytecnt_ena,  1'b0, clk_i, rst_ni)
     `FFLARNC(idx_word_valid_q, idx_word_valid_d, idx_bytecnt_ena, idx_word_clr, 1'b0, clk_i, rst_ni)
 
+    // TODO: Index counter: decouples data from index requests (resynch when done)
+    assign idx_cred_take  = '0;
+    assign idx_cred_give  = '0;
+    assign idx_cred_clear = 1'b0;
+
     // Not an intersection master: tie off master requests, unable to skip indices
     assign isect_mst_req_o  = '0;
     assign mem_skip         = 1'b0;
@@ -176,12 +186,6 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     logic   idx_fifo_empty;
     logic   idx_fifo_pop;
     data_t  idx_fifo_out;
-
-    // Index FIFO credit counter
-    logic [$clog2(Cfg.IndexCredits):0] idx_cred_d, idx_cred_q;
-    logic idx_cred_take, idx_cred_give;
-    logic idx_cred_left;
-    logic idx_cred_load, idx_cred_clear;
 
     // Index serializer
     data_t  idx_ser_mask;
@@ -238,25 +242,15 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
       .pop_i      ( idx_fifo_pop      )
     );
 
-    // Credit counter that keeps track of the number of memory requests in flight
+    // Index counter: keeps track of the number of memory requests in flight
     // to ensure that the FIFO does not overfill.
-    always_comb begin
-      idx_cred_d = idx_cred_q;
-      if (idx_cred_take & ~idx_cred_give)       idx_cred_d = idx_cred_q - 1;
-      else if (~idx_cred_take & idx_cred_give)  idx_cred_d = idx_cred_q + 1;
-    end
-
-    assign idx_cred_load  = 1'b1;
+    assign idx_cred_take  = idx_req_o.q_valid & idx_rsp_i.q_ready;
+    assign idx_cred_give  = idx_fifo_pop;
     assign idx_cred_clear = isect_done_clear;
-    `FFLARNC(idx_cred_q, idx_cred_d, idx_cred_load, idx_cred_clear, Cfg.IndexCredits, clk_i, rst_ni)
-
-    assign idx_cred_left = (idx_cred_q != '0);
-    assign idx_cred_take = idx_req_o.q_valid & idx_rsp_i.q_ready;
-    assign idx_cred_give = idx_fifo_pop;
 
     // The initial byte offset and byte offset of the index array bound determine
     // the final index offset and whether an additional index word is needed.
-    assign last_word          = (idx_cred_q == Cfg.IndexCredits-1) & natit_done_i;
+    assign last_word          = idx_cred_full & natit_done_i;
     assign first_idx_byteoffs = bytecnt_t'(natit_pointer_i);
     assign {natit_extraword_o, last_idx_byteoffs} = first_idx_byteoffs + natit_boundoffs_i;
 
@@ -303,6 +297,20 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     end
 
   end
+
+  // Credit counter: Used for index dataflow decoupling.
+  always_comb begin
+    idx_cred_d = idx_cred_q;
+    if (idx_cred_take & ~idx_cred_give)       idx_cred_d = idx_cred_q - 1;
+    else if (~idx_cred_take & idx_cred_give)  idx_cred_d = idx_cred_q + 1;
+  end
+
+  logic idx_cred_load;
+  assign idx_cred_load  = 1'b1;
+  `FFLARNC(idx_cred_q, idx_cred_d, idx_cred_load, idx_cred_clear, Cfg.IndexCredits, clk_i, rst_ni)
+
+  assign idx_cred_left = (idx_cred_q != '0);
+  assign idx_cred_full = (idx_cred_q == Cfg.IndexCredits-1);
 
   // Intersection index counter
   if (Cfg.IsectMaster | Cfg.IsectSlave) begin : gen_isect_ctr
