@@ -33,8 +33,7 @@ int main() {
             errors += (core_cluster_sum[i] != cluster_core_num);
         }
         return errors;
-    }
-    else {
+    } else {
         return 0;
     }
 }

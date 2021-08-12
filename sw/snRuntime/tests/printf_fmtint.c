@@ -16,7 +16,8 @@ int main() {
     for (uint32_t i = 0; i < core_global_num; i++) {
         snrt_global_barrier();
         if (i == core_global_id) {
-            printf("Hello from core %i/%i of cluster %i/%i\n", core_id, core_num, cluster_id, cluster_num);
+            printf("Hello from core %i/%i of cluster %i/%i\n", core_id,
+                   core_num, cluster_id, cluster_num);
         }
     }
     return 0;

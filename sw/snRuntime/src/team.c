@@ -33,8 +33,8 @@ uint32_t snrt_cluster_num() { return _snrt_team_current->root->cluster_num; }
 
 uint32_t snrt_cluster_core_idx() {
     return (snrt_hartid() -
-        _snrt_team_current->root->cluster_core_base_hartid) %
-         _snrt_team_current->root->cluster_core_num;
+            _snrt_team_current->root->cluster_core_base_hartid) %
+           _snrt_team_current->root->cluster_core_num;
 }
 
 uint32_t snrt_cluster_core_num() {
@@ -125,10 +125,12 @@ void snrt_cluster_barrier() {
     // Increment the barrier counter
     if (barrier == snrt_cluster_core_num()) {
         barrier_ptr->barrier = 0;
-        __atomic_add_fetch(&barrier_ptr->barrier_iteration, 1, __ATOMIC_RELAXED);
+        __atomic_add_fetch(&barrier_ptr->barrier_iteration, 1,
+                           __ATOMIC_RELAXED);
     } else {
         // Some threads have not reached the barrier --> Let's wait
-        while (prev_barrier_iteration == barrier_ptr->barrier_iteration);
+        while (prev_barrier_iteration == barrier_ptr->barrier_iteration)
+            ;
     }
 }
 
@@ -143,9 +145,11 @@ void snrt_global_barrier() {
     // Increment the barrier counter
     if (barrier == snrt_global_core_num()) {
         barrier_ptr->barrier = 0;
-        __atomic_add_fetch(&barrier_ptr->barrier_iteration, 1, __ATOMIC_RELAXED);
+        __atomic_add_fetch(&barrier_ptr->barrier_iteration, 1,
+                           __ATOMIC_RELAXED);
     } else {
         // Some threads have not reached the barrier --> Let's wait
-        while (prev_barrier_iteration == barrier_ptr->barrier_iteration);
+        while (prev_barrier_iteration == barrier_ptr->barrier_iteration)
+            ;
     }
 }

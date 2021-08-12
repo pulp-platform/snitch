@@ -46,14 +46,15 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->base.root = team;
     team->device_tree = (void *)bootdata;
     team->global_core_base_hartid = bootdata->hartid_base;
-    team->global_core_num = bootdata->core_count *
-        bootdata->cluster_count * bootdata->s1_quadrant_count;
+    team->global_core_num = bootdata->core_count * bootdata->cluster_count *
+                            bootdata->s1_quadrant_count;
     team->cluster_idx =
         (snrt_hartid() - bootdata->hartid_base) / bootdata->core_count;
     team->cluster_num = bootdata->cluster_count;
     team->cluster_core_base_hartid = bootdata->hartid_base;
     team->cluster_core_num = cluster_core_num;
-    team->global_mem.start = bootdata->global_mem_start + _snrt_cluster_global_offset;
+    team->global_mem.start =
+        bootdata->global_mem_start + _snrt_cluster_global_offset;
     team->global_mem.end = bootdata->global_mem_end;
     team->cluster_mem.start = spm_start;
     team->cluster_mem.end = spm_end;
@@ -64,18 +65,18 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->cluster_barrier.barrier_iteration = 0;
 
     // Allocate and initialize global barrier
-    team->global_barrier = (void*)team->global_mem.start;
+    team->global_barrier = (void *)team->global_mem.start;
     team->global_barrier->barrier = 0;
     team->global_barrier->barrier_iteration = 0;
     team->global_mem.start += sizeof(struct snrt_barrier);
 
     // Allocate memory for a global mailbox.
-    team->global_mailbox = (void*)team->global_mem.start;
+    team->global_mailbox = (void *)team->global_mem.start;
     team->global_mem.start += sizeof(struct snrt_mailbox);
 
     // Allocate memory for a cluster mailbox.
     team->cluster_mem.end -= sizeof(struct snrt_mailbox);
-    team->cluster_mailbox = (void*)team->cluster_mem.end;
+    team->cluster_mailbox = (void *)team->cluster_mem.end;
 
     _snrt_team_current = &team->base;
 
