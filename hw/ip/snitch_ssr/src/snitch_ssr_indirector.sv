@@ -123,7 +123,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     spill_register #(
       .T        ( logic [Cfg.IndexWidth:0] ),
       .Bypass   ( Cfg.IsectSlaveSpill   )
-      ) i_spill_register (
+      ) i_spill_slv_idx (
       .clk_i,
       .rst_ni,
       .valid_i  ( isect_slv_rsp_i.valid ),
@@ -162,12 +162,9 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     assign idx_cred_give  = '0;
     assign idx_cred_clear = 1'b0;
 
-    // Not an intersection master: tie off master requests, unable to skip indices
-    assign isect_mst_req_o  = '0;
-    assign mem_skip         = 1'b0;
-
-    // We do not need additional words as our termination is externally controlled
-    assign natit_extraword_o = 1'b0;
+    // Not an intersection master; termination is externally controlled
+    assign isect_mst_req_o    = '0;
+    assign natit_extraword_o  = 1'b0;
 
     // Intersector slave enable signals
     assign isect_slv_req_o.ena  = cfg_isect_slv_i;
@@ -175,6 +172,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
     // Output to address generator
     assign mem_idx      = idx_isect_q;
+    assign mem_skip     = 1'b0;
     assign mem_zero_o   = 1'b0;
     assign mem_last_o   = 1'b0;
     assign mem_valid_o  = isect_slv_valid & ~idx_req_stall;
