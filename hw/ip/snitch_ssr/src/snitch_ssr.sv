@@ -49,7 +49,6 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
 
   data_t fifo_out, fifo_in;
   logic fifo_push, fifo_pop, fifo_full, fifo_empty;
-  logic [$clog2(Cfg.DataCredits):0] credit_d, credit_q;
   logic has_credit, credit_take, credit_give;
   logic [Cfg.RptWidth-1:0] rep_max, rep_q, rep_d, rep_done, rep_enable, rep_clear;
 
@@ -194,16 +193,19 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
 
   // Credit counter that keeps track of the number of memory requests issued
   // to ensure that the FIFO does not overfill.
-  always_comb begin
-    credit_d = credit_q;
-    if (credit_take & ~credit_give)
-      credit_d = credit_q - 1;
-    else if (!credit_take & credit_give)
-      credit_d = credit_q + 1;
-  end
-  assign has_credit = (credit_q != '0);
-
-  `FFARN(credit_q, credit_d, Cfg.DataCredits, clk_i, rst_ni)
+  snitch_ssr_credit_counter #(
+    .NumCredits       ( Cfg.DataCredits ),
+    .InitCreditEmpty  ( 1'b0 )
+  ) i_snitch_ssr_credit_counter (
+    .clk_i,
+    .rst_ni,
+    .credit_o      (  ),
+    .credit_give_i ( credit_give ),
+    .credit_take_i ( credit_take ),
+    .credit_init_i ( 1'b0 ),
+    .credit_left_o ( has_credit ),
+    .credit_full_o (  )
+  );
 
   // Repetition counter.
   assign rep_d = rep_q + 1;

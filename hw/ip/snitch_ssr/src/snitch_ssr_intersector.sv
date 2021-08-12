@@ -80,7 +80,7 @@ module snitch_ssr_intersector import snitch_ssr_pkg::*; #(
   assign slv_rsp_o = '{
     idx:    mst_req_i[isect_msout].idx,
     done:   isect_done,
-    valid:  src_valid & dst_str_ready & isect_ena
+    valid:  src_valid & dst_str_ready & isect_ena & slv_req_i.ena
   };
 
   // Stream controller interface

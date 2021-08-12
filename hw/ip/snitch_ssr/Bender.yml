@@ -21,6 +21,7 @@ sources:
 # Level 0:
 - src/snitch_ssr_pkg.sv
 - src/snitch_ssr_switch.sv
+- src/snitch_ssr_credit_counter.sv
 # Level 1:
 - src/snitch_ssr_indirector.sv
 - src/snitch_ssr_intersector.sv

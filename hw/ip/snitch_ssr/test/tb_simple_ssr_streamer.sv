@@ -68,27 +68,30 @@ module tb_simple_ssr_streamer;
     // Test intersection applications
     // TODO: extend further
     repeat (2) begin
-      fix.verify_isect_inout (
-        /* data_base */     '{'h1000*8, 'h400*8, 'h0},
-        /* idx_base */      '{'h1200*8, 'h580*8, 'h180*8},
-        /* idx_bound */     '{92-1, 67-1},
-        /* merge */         1'b1,
-        /* idx_size */      '{1, 1, 1},
-        /* alias_launch */  1'b1,
-        /* idx_gold_base */ 'h800*8,
-        /* len_gold */      128
-      );
-      fix.verify_isect_inout (
-        /* data_base */     '{'h1000*8, 'h400*8, 'h0},
-        /* idx_base */      '{'h1200*8, 'h580*8, 'h180*8},
-        /* idx_bound */     '{92-1, 67-1},
-        /* merge */         1'b0,
-        /* idx_size */      '{1, 1, 1},
-        /* alias_launch */  1'b1,
-        /* idx_gold_base */ 'ha00*8,
-        /* len_gold */      31
+      repeat(2) begin
+        fix.verify_isect_inout (
+          /* data_base */     '{'h1000*8, 'h400*8, 'h0},
+          /* idx_base */      '{'h1200*8, 'h580*8, 'h180*8},
+          /* idx_bound */     '{92-1, 67-1},
+          /* merge */         1'b1,
+          /* idx_size */      '{1, 1, 1},
+          /* alias_launch */  1'b1,
+          /* idx_gold_base */ 'h800*8,
+          /* len_gold */      128
+        );
+      end repeat (2) begin
+        fix.verify_isect_inout (
+          /* data_base */     '{'h1000*8, 'h400*8, 'h0},
+          /* idx_base */      '{'h1200*8, 'h580*8, 'h180*8},
+          /* idx_bound */     '{92-1, 67-1},
+          /* merge */         1'b0,
+          /* idx_size */      '{1, 1, 1},
+          /* alias_launch */  1'b1,
+          /* idx_gold_base */ 'ha00*8,
+          /* len_gold */      31
 
-      );
+        );
+      end
     end
 
     // Done, no fatal errors occured
