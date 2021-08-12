@@ -5,7 +5,7 @@
 //! Binary translation
 
 use crate::{
-    engine::{FlexfloatOp, AtomicOp, Engine, TraceAccess},
+    engine::{FlexfloatOpCvt, FlexfloatOpCmp, FlexfloatOp, AtomicOp, Engine, TraceAccess},
     riscv,
 };
 use anyhow::{anyhow, bail, Context, Result};
@@ -1014,6 +1014,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::RdRmRs1Rs2Rs3(x) => self.emit_rd_rm_rs1_rs2_rs3(x),
             riscv::Format::RdRs1(x) => self.emit_rd_rs1(x),
             riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
+            riscv::Format::RdRs1Rs2Rs3(x) => self.emit_rd_rs1_rs2_rs3(x),
             riscv::Format::RdRs1Shamt(x) => self.emit_rd_rs1_shamt(x),
             riscv::Format::Rs1(x) => self.emit_rs1(x),
             riscv::Format::Rs1Rs2(x) => self.emit_rs1_rs2(x),
@@ -1553,11 +1554,16 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12hiImm12loRs1Rs2::Sw => {
                 self.write_mem(addr, self.read_reg(data.rs2), 2)
             }
+            riscv::OpcodeImm12hiImm12loRs1Rs2::Fsq => { // or Fsb??
+                self.was_freppable.set(true);
+                let rs2 = self.read_freg(data.rs2);
+                let rs2_lo = LLVMBuildTrunc(self.builder, rs2, LLVMInt32Type(), NONAME);
+                self.write_mem(addr, rs2_lo, 1);
+            }
             riscv::OpcodeImm12hiImm12loRs1Rs2::Fsh => {
                 self.was_freppable.set(true);
                 let rs2 = self.read_freg(data.rs2);
                 let rs2_lo = LLVMBuildTrunc(self.builder, rs2, LLVMInt32Type(), NONAME);
-                // let rs2_lo = LLVMBuildTrunc(self.builder, rs2_lo, LLVMInt16Type(), NONAME);
                 self.write_mem(addr, rs2_lo, 1);
             }
             riscv::OpcodeImm12hiImm12loRs1Rs2::Fsw => {
@@ -1722,6 +1728,24 @@ impl<'a> InstructionTranslator<'a> {
                 // self.section.emit_branch_abort(self.addr, target);
                 return Ok(()); // we have already written the link register
             }
+            riscv::OpcodeImm12RdRs1::Flq => { // or Flb??
+                self.was_freppable.set(true);
+                let raw = self.emit_load(rs1, imm, 1, false);
+                let raw = LLVMBuildZExt(self.builder, raw, LLVMInt64Type(), NONAME);
+                let pad = LLVMConstInt(LLVMInt64Type(), (-1i64 as u64) << 8, 0);
+                let value = LLVMBuildOr(self.builder, raw, pad, NONAME);
+                self.write_freg(data.rd, value);
+                return Ok(());
+            }
+            riscv::OpcodeImm12RdRs1::Flh => {
+                self.was_freppable.set(true);
+                let raw = self.emit_load(rs1, imm, 1, false);
+                let raw = LLVMBuildZExt(self.builder, raw, LLVMInt64Type(), NONAME);
+                let pad = LLVMConstInt(LLVMInt64Type(), (-1i64 as u64) << 16, 0);
+                let value = LLVMBuildOr(self.builder, raw, pad, NONAME);
+                self.write_freg(data.rd, value);
+                return Ok(());
+            }
             riscv::OpcodeImm12RdRs1::Flw => {
                 self.was_freppable.set(true);
                 let raw = self.emit_load(rs1, imm, 2, false);
@@ -1734,15 +1758,6 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12RdRs1::Fld => {
                 self.was_freppable.set(true);
                 self.emit_fld(data.rd, LLVMBuildAdd(self.builder, rs1, imm, NONAME));
-                return Ok(());
-            }
-            riscv::OpcodeImm12RdRs1::Flh => {
-                self.was_freppable.set(true);
-                let raw = self.emit_load(rs1, imm, 1, false);
-                let raw = LLVMBuildZExt(self.builder, raw, LLVMInt64Type(), NONAME);
-                let pad = LLVMConstInt(LLVMInt64Type(), (-1i64 as u64) << 16, 0);
-                let value = LLVMBuildOr(self.builder, raw, pad, NONAME);
-                self.write_freg(data.rd, value);
                 return Ok(());
             }
             _ => bail!("Unsupported opcode {}", data.op),
@@ -1949,35 +1964,79 @@ impl<'a> InstructionTranslator<'a> {
         let name = name.as_ptr() as *const _;
         self.was_freppable.set(true);
         match data.op {
-            riscv::OpcodeRdRmRs1Rs2::FaddH => self.write_freg(
+            // FloatB
+            riscv::OpcodeRdRmRs1Rs2::FaddQ => self.write_freg_f8(
                 data.rd,
-                self.emit_fhop(
-                    self.read_freg(data.rs1),
-                    self.read_freg(data.rs2),
+                self.emit_fopq(
+                    self.read_freg_f8(data.rs1),
+                    self.read_freg_f8(data.rs2),
+                    self.read_freg_f8(data.rd), // not needed
                     FlexfloatOp::Fadd,
                 ),
             ),
-            riscv::OpcodeRdRmRs1Rs2::FsubH => self.write_freg(
+            riscv::OpcodeRdRmRs1Rs2::FsubQ => self.write_freg_f8(
                 data.rd,
-                self.emit_fhop(
-                    self.read_freg(data.rs1),
-                    self.read_freg(data.rs2),
+                self.emit_fopq(
+                    self.read_freg_f8(data.rs1),
+                    self.read_freg_f8(data.rs2),
+                    self.read_freg_f8(data.rd), // not needed
                     FlexfloatOp::Fsub,
                 ),
             ),
-            riscv::OpcodeRdRmRs1Rs2::FmulH => self.write_freg(
+            riscv::OpcodeRdRmRs1Rs2::FmulQ => self.write_freg_f8(
                 data.rd,
-                self.emit_fhop(
-                    self.read_freg(data.rs1),
-                    self.read_freg(data.rs2),
+                self.emit_fopq(
+                    self.read_freg_f8(data.rs1),
+                    self.read_freg_f8(data.rs2),
+                    self.read_freg_f8(data.rd), // not needed
                     FlexfloatOp::Fmul,
                 ),
             ),
-            riscv::OpcodeRdRmRs1Rs2::FdivH => self.write_freg(
+            riscv::OpcodeRdRmRs1Rs2::FdivQ => self.write_freg_f8(
                 data.rd,
-                self.emit_fhop(
-                    self.read_freg(data.rs1),
-                    self.read_freg(data.rs2),
+                self.emit_fopq(
+                    self.read_freg_f8(data.rs1),
+                    self.read_freg_f8(data.rs2),
+                    self.read_freg_f8(data.rd), // not needed
+                    FlexfloatOp::Fdiv,
+                ),
+            ),
+            // FP16
+            riscv::OpcodeRdRmRs1Rs2::FaddH => {
+                self.write_freg_f16(
+                    data.rd,
+                    self.emit_foph(
+                        self.read_freg_f16(data.rs1),
+                        self.read_freg_f16(data.rs2),
+                        self.read_freg_f16(data.rd), // not needed
+                        FlexfloatOp::Fadd,
+                    ),
+                )
+            },
+            riscv::OpcodeRdRmRs1Rs2::FsubH => self.write_freg_f16(
+                data.rd,
+                self.emit_foph(
+                    self.read_freg_f16(data.rs1),
+                    self.read_freg_f16(data.rs2),
+                    self.read_freg_f16(data.rd), // not needed
+                    FlexfloatOp::Fsub,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FmulH => self.write_freg_f16(
+                data.rd,
+                self.emit_foph(
+                    self.read_freg_f16(data.rs1),
+                    self.read_freg_f16(data.rs2),
+                    self.read_freg_f16(data.rd), // not needed
+                    FlexfloatOp::Fmul,
+                ),
+            ),
+            riscv::OpcodeRdRmRs1Rs2::FdivH => self.write_freg_f16(
+                data.rd,
+                self.emit_foph(
+                    self.read_freg_f16(data.rs1),
+                    self.read_freg_f16(data.rs2),
+                    self.read_freg_f16(data.rd), // not needed
                     FlexfloatOp::Fdiv,
                 ),
             ),
@@ -2069,6 +2128,22 @@ impl<'a> InstructionTranslator<'a> {
             data.rs3
         );
         match data.op {
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmaddH
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubH
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddH
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubH
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmaddQ
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubQ
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddQ
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubQ => self.write_freg(
+                data.rd,
+                self.emit_fmadd_flexfloat(
+                    data,
+                    self.read_freg(data.rs1),
+                    self.read_freg(data.rs2),
+                    self.read_freg(data.rs3),
+                )?,
+            ),
             riscv::OpcodeRdRmRs1Rs2Rs3::FmaddS
             | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubS
             | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddS
@@ -2093,7 +2168,6 @@ impl<'a> InstructionTranslator<'a> {
                     self.read_freg_f64(data.rs3),
                 )?,
             ),
-            _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
     }
@@ -2143,23 +2217,570 @@ impl<'a> InstructionTranslator<'a> {
         }
     }
 
-    unsafe fn emit_fhop(
-            &self,
-            rs1: LLVMValueRef,
-            rs2: LLVMValueRef,
-            op: FlexfloatOp,
-        ) -> LLVMValueRef {
-
+    unsafe fn emit_fcvth(
+        &self,
+        rs1: LLVMValueRef,
+        op: FlexfloatOpCvt,
+    ) -> LLVMValueRef {
         // Encode the operation
         let op_value: u8 = std::mem::transmute(op as u8);
         let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
-
         let rd = self.section.emit_call_with_name(
-            "banshee_fhop",
-            [rs1, rs2, op],
-            "fresh",
+            "banshee_fcvth",
+            [rs1, op],
+            "fcvth",
         );
         rd
+    }
+
+    unsafe fn emit_fcvtah(
+        &self,
+        rs1: LLVMValueRef,
+        op: FlexfloatOpCvt,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name(
+            "banshee_fcvtah",
+            [rs1, op],
+            "fcvtah",
+        );
+        rd
+    }
+
+    unsafe fn emit_fcvtb(
+        &self,
+        rs1: LLVMValueRef,
+        op: FlexfloatOpCvt,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name(
+            "banshee_fcvtb",
+            [rs1, op],
+            "fcvtb",
+        );
+        rd
+    }
+
+    unsafe fn emit_fcvtab(
+        &self,
+        rs1: LLVMValueRef,
+        op: FlexfloatOpCvt,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name(
+            "banshee_fcvtab",
+            [rs1, op],
+            "fcvtab",
+        );
+        rd
+    }
+
+    unsafe fn emit_fcmph(
+        &self,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        op: FlexfloatOpCmp,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name("banshee_fcmph", [rs1, rs2, op], "fcmph");
+        rd
+    }
+
+    unsafe fn emit_fcmpah(
+        &self,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        op: FlexfloatOpCmp,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name("banshee_fcmpah", [rs1, rs2, op], "fcmpah");
+        rd
+    }
+
+    unsafe fn emit_fcmpq(
+        &self,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        op: FlexfloatOpCmp,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name("banshee_fcmpb", [rs1, rs2, op], "fcmpb");
+        rd
+    }
+
+    unsafe fn emit_fcmpaq(
+        &self,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        op: FlexfloatOpCmp,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name("banshee_fcmpab", [rs1, rs2, op], "fcmpab");
+        rd
+    }
+
+    unsafe fn emit_foph(
+            &self,
+            rs1: LLVMValueRef,
+            rs2: LLVMValueRef,
+            rs3: LLVMValueRef,
+            op: FlexfloatOp,
+        ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name("banshee_foph", [rs1, rs2, rs3, op], "fresh");
+        rd
+    }
+
+    unsafe fn emit_fopah(
+        &self,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        rs3: LLVMValueRef,
+        op: FlexfloatOp,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name("banshee_fopah", [rs1, rs2, rs3, op], "fresah");
+        rd
+    }
+
+    unsafe fn emit_fopq(
+        &self,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        rs3: LLVMValueRef,
+        op: FlexfloatOp,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name("banshee_fopb", [rs1, rs2, rs3, op], "fresb");
+        rd
+    }
+    unsafe fn emit_fopaq(
+        &self,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        rs3: LLVMValueRef,
+        op: FlexfloatOp,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name("banshee_fopab", [rs1, rs2, rs3, op], "fresab");
+        rd
+    }
+
+    unsafe fn emit_vfab(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOp
+    ) {
+        let (a7, a6, a5, a4, a3, a2, a1, a0) = self.read_freg_vf64b(data.rs1);
+        let (b7, b6, b5, b4, b3, b2, b1, b0) = self.read_freg_vf64b(data.rs2);
+        let zero = LLVMConstNull(LLVMInt8Type());
+        let res0 = self.emit_fopaq(a0, b0, zero, ff_op); // zero not used
+        let res1 = self.emit_fopaq(a1, b1, zero, ff_op); // zero not used
+        let res2 = self.emit_fopaq(a2, b2, zero, ff_op); // zero not used
+        let res3 = self.emit_fopaq(a3, b3, zero, ff_op); // zero not used
+        let res4 = self.emit_fopaq(a4, b4, zero, ff_op); // zero not used
+        let res5 = self.emit_fopaq(a5, b5, zero, ff_op); // zero not used
+        let res6 = self.emit_fopaq(a6, b6, zero, ff_op); // zero not used
+        let res7 = self.emit_fopaq(a7, b7, zero, ff_op); // zero not used
+        self.write_freg_vf64b(data.rd, res7, res6, res5, res4, res3, res2, res1, res0);
+    }
+
+    unsafe fn emit_vfab_r(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOp
+    ) {
+        let (a7, a6, a5, a4, a3, a2, a1, a0) = self.read_freg_vf64b(data.rs1);
+        let (_b7, _b6, _b5, _b4, _b3, _b2, _b1, b0) = self.read_freg_vf64b(data.rs2);
+        let zero = LLVMConstNull(LLVMInt8Type());
+        let res0 = self.emit_fopaq(a0, b0, zero, ff_op); // zero not used
+        let res1 = self.emit_fopaq(a1, b0, zero, ff_op); // zero not used
+        let res2 = self.emit_fopaq(a2, b0, zero, ff_op); // zero not used
+        let res3 = self.emit_fopaq(a3, b0, zero, ff_op); // zero not used
+        let res4 = self.emit_fopaq(a4, b0, zero, ff_op); // zero not used
+        let res5 = self.emit_fopaq(a5, b0, zero, ff_op); // zero not used
+        let res6 = self.emit_fopaq(a6, b0, zero, ff_op); // zero not used
+        let res7 = self.emit_fopaq(a7, b0, zero, ff_op); // zero not used
+        self.write_freg_vf64b(data.rd, res7, res6, res5, res4, res3, res2, res1, res0);
+    }
+
+    unsafe fn emit_vfb(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOp
+    ) {
+        let (a7, a6, a5, a4, a3, a2, a1, a0) = self.read_freg_vf64b(data.rs1);
+        let (b7, b6, b5, b4, b3, b2, b1, b0) = self.read_freg_vf64b(data.rs2);
+        let zero = LLVMConstNull(LLVMInt8Type());
+        let res0 = self.emit_fopq(a0, b0, zero, ff_op); // zero not used
+        let res1 = self.emit_fopq(a1, b1, zero, ff_op); // zero not used
+        let res2 = self.emit_fopq(a2, b2, zero, ff_op); // zero not used
+        let res3 = self.emit_fopq(a3, b3, zero, ff_op); // zero not used
+        let res4 = self.emit_fopq(a4, b4, zero, ff_op); // zero not used
+        let res5 = self.emit_fopq(a5, b5, zero, ff_op); // zero not used
+        let res6 = self.emit_fopq(a6, b6, zero, ff_op); // zero not used
+        let res7 = self.emit_fopq(a7, b7, zero, ff_op); // zero not used
+        self.write_freg_vf64b(data.rd, res7, res6, res5, res4, res3, res2, res1, res0);
+    }
+
+    unsafe fn emit_vfb_r(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOp
+    ) {
+        let (a7, a6, a5, a4, a3, a2, a1, a0) = self.read_freg_vf64b(data.rs1);
+        let (_b7, _b6, _b5, _b4, _b3, _b2, _b1, b0) = self.read_freg_vf64b(data.rs2);
+        let zero = LLVMConstNull(LLVMInt8Type());
+        let res0 = self.emit_fopq(a0, b0, zero, ff_op); // zero not used
+        let res1 = self.emit_fopq(a1, b0, zero, ff_op); // zero not used
+        let res2 = self.emit_fopq(a2, b0, zero, ff_op); // zero not used
+        let res3 = self.emit_fopq(a3, b0, zero, ff_op); // zero not used
+        let res4 = self.emit_fopq(a4, b0, zero, ff_op); // zero not used
+        let res5 = self.emit_fopq(a5, b0, zero, ff_op); // zero not used
+        let res6 = self.emit_fopq(a6, b0, zero, ff_op); // zero not used
+        let res7 = self.emit_fopq(a7, b0, zero, ff_op); // zero not used
+        self.write_freg_vf64b(data.rd, res7, res6, res5, res4, res3, res2, res1, res0);
+    }
+
+    unsafe fn emit_vfah(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOp
+    ) {
+        let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
+        let (b3, b2, b1, b0) = self.read_freg_vf64h(data.rs2);
+        let zero = LLVMConstNull(LLVMInt16Type());
+        let res0 = self.emit_fopah(a0, b0, zero, ff_op); // zero not used
+        let res1 = self.emit_fopah(a1, b1, zero, ff_op); // zero not used
+        let res2 = self.emit_fopah(a2, b2, zero, ff_op); // zero not used
+        let res3 = self.emit_fopah(a3, b3, zero, ff_op); // zero not used
+        self.write_freg_vf64h(data.rd, res3, res2, res1, res0);
+    }
+
+    unsafe fn emit_vfah_r(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOp
+    ) {
+        let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
+        let (_b3, _b2, _b1, b0) = self.read_freg_vf64h(data.rs2);
+        let zero = LLVMConstNull(LLVMInt16Type());
+        let res0 = self.emit_fopah(a0, b0, zero, ff_op); // zero not used
+        let res1 = self.emit_fopah(a1, b0, zero, ff_op); // zero not used
+        let res2 = self.emit_fopah(a2, b0, zero, ff_op); // zero not used
+        let res3 = self.emit_fopah(a3, b0, zero, ff_op); // zero not used
+        self.write_freg_vf64h(data.rd, res3, res2, res1, res0);
+    }
+
+    unsafe fn emit_vfh(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOp
+    ) {
+        let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
+        let (b3, b2, b1, b0) = self.read_freg_vf64h(data.rs2);
+        let zero = LLVMConstNull(LLVMInt16Type());
+        let res0 = self.emit_foph(a0, b0, zero, ff_op); // zero not used
+        let res1 = self.emit_foph(a1, b1, zero, ff_op); // zero not used
+        let res2 = self.emit_foph(a2, b2, zero, ff_op); // zero not used
+        let res3 = self.emit_foph(a3, b3, zero, ff_op); // zero not used
+        self.write_freg_vf64h(data.rd, res3, res2, res1, res0);
+    }
+
+    unsafe fn emit_vfh_r(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOp
+    ) {
+        let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
+        let (_b3, _b2, _b1, b0) = self.read_freg_vf64h(data.rs2);
+        let zero = LLVMConstNull(LLVMInt16Type());
+        let res0 = self.emit_foph(a0, b0, zero, ff_op); // zero not used
+        let res1 = self.emit_foph(a1, b0, zero, ff_op); // zero not used
+        let res2 = self.emit_foph(a2, b0, zero, ff_op); // zero not used
+        let res3 = self.emit_foph(a3, b0, zero, ff_op); // zero not used
+        self.write_freg_vf64h(data.rd, res3, res2, res1, res0);
+    }
+
+    unsafe fn emit_merge_cmp_i32_b(
+        &self,
+        res7: LLVMValueRef,
+        res6: LLVMValueRef,
+        res5: LLVMValueRef,
+        res4: LLVMValueRef,
+        res3: LLVMValueRef,
+        res2: LLVMValueRef,
+        res1: LLVMValueRef,
+        res0: LLVMValueRef,
+    ) -> LLVMValueRef {
+        let value = LLVMConstNull(LLVMInt32Type());
+
+        let res0_pad = LLVMBuildSExt(self.builder, res0, LLVMInt8Type(), NONAME);
+        let res0_pad = LLVMBuildZExt(self.builder, res0_pad, LLVMInt32Type(), NONAME);
+        let res0_pad = LLVMBuildShl(self.builder,  res0_pad, LLVMConstInt(LLVMInt32Type(), 0 as u64, 0), NONAME,);
+
+        let res1_pad = LLVMBuildSExt(self.builder, res1, LLVMInt8Type(), NONAME);
+        let res1_pad = LLVMBuildZExt(self.builder, res1_pad, LLVMInt32Type(), NONAME);
+        let res1_pad = LLVMBuildShl(self.builder,  res1_pad, LLVMConstInt(LLVMInt32Type(), 4 as u64, 0), NONAME,);
+
+        let res2_pad = LLVMBuildSExt(self.builder, res2, LLVMInt8Type(), NONAME);
+        let res2_pad = LLVMBuildZExt(self.builder, res2_pad, LLVMInt32Type(), NONAME);
+        let res2_pad = LLVMBuildShl(self.builder,  res2_pad, LLVMConstInt(LLVMInt32Type(), 8 as u64, 0), NONAME,);
+
+        let res3_pad = LLVMBuildSExt(self.builder, res3, LLVMInt8Type(), NONAME);
+        let res3_pad = LLVMBuildZExt(self.builder, res3_pad, LLVMInt32Type(), NONAME);
+        let res3_pad = LLVMBuildShl(self.builder,  res3_pad, LLVMConstInt(LLVMInt32Type(), 12 as u64, 0), NONAME,);
+
+        let res4_pad = LLVMBuildSExt(self.builder, res4, LLVMInt8Type(), NONAME);
+        let res4_pad = LLVMBuildZExt(self.builder, res4_pad, LLVMInt32Type(), NONAME);
+        let res4_pad = LLVMBuildShl(self.builder,  res4_pad, LLVMConstInt(LLVMInt32Type(), 16 as u64, 0), NONAME,);
+
+        let res5_pad = LLVMBuildSExt(self.builder, res5, LLVMInt8Type(), NONAME);
+        let res5_pad = LLVMBuildZExt(self.builder, res5_pad, LLVMInt32Type(), NONAME);
+        let res5_pad = LLVMBuildShl(self.builder,  res5_pad, LLVMConstInt(LLVMInt32Type(), 20 as u64, 0), NONAME,);
+
+        let res6_pad = LLVMBuildSExt(self.builder, res6, LLVMInt8Type(), NONAME);
+        let res6_pad = LLVMBuildZExt(self.builder, res6_pad, LLVMInt32Type(), NONAME);
+        let res6_pad = LLVMBuildShl(self.builder,  res6_pad, LLVMConstInt(LLVMInt32Type(), 24 as u64, 0), NONAME,);
+
+        let res7_pad = LLVMBuildSExt(self.builder, res7, LLVMInt8Type(), NONAME);
+        let res7_pad = LLVMBuildZExt(self.builder, res7_pad, LLVMInt32Type(), NONAME);
+        let res7_pad = LLVMBuildShl(self.builder,  res7_pad, LLVMConstInt(LLVMInt32Type(), 28 as u64, 0), NONAME,);
+
+        let value = LLVMBuildOr(self.builder, value, res0_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res1_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res2_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res3_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res4_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res5_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res6_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res7_pad, NONAME);
+        value
+    }
+
+    unsafe fn emit_vfcmpq(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOpCmp
+    ) {
+        let (a7, a6, a5, a4, a3, a2, a1, a0) = self.read_freg_vf64b(data.rs1);
+        let (b7, b6, b5, b4, b3, b2, b1, b0) = self.read_freg_vf64b(data.rs2);
+        let res0 = self.emit_fcmpq(a0, b0, ff_op);
+        let res1 = self.emit_fcmpq(a1, b1, ff_op);
+        let res2 = self.emit_fcmpq(a2, b2, ff_op);
+        let res3 = self.emit_fcmpq(a3, b3, ff_op);
+        let res4 = self.emit_fcmpq(a4, b4, ff_op);
+        let res5 = self.emit_fcmpq(a5, b5, ff_op);
+        let res6 = self.emit_fcmpq(a6, b6, ff_op);
+        let res7 = self.emit_fcmpq(a7, b7, ff_op);
+
+        // expand and shift boolean
+        let value = self.emit_merge_cmp_i32_b(res7, res6, res5, res4, res3, res2, res1, res0);
+        self.write_reg(data.rd, value);
+    }
+
+    unsafe fn emit_vfcmpq_r(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOpCmp
+    ) {
+        let (a7, a6, a5, a4, a3, a2, a1, a0) = self.read_freg_vf64b(data.rs1);
+        let (_b7, _b6, _b5, _b4, _b3, _b2, _b1, b0) = self.read_freg_vf64b(data.rs2);
+        let res0 = self.emit_fcmpq(a0, b0, ff_op);
+        let res1 = self.emit_fcmpq(a1, b0, ff_op);
+        let res2 = self.emit_fcmpq(a2, b0, ff_op);
+        let res3 = self.emit_fcmpq(a3, b0, ff_op);
+        let res4 = self.emit_fcmpq(a4, b0, ff_op);
+        let res5 = self.emit_fcmpq(a5, b0, ff_op);
+        let res6 = self.emit_fcmpq(a6, b0, ff_op);
+        let res7 = self.emit_fcmpq(a7, b0, ff_op);
+
+        // expand and shift boolean
+        let value = self.emit_merge_cmp_i32_b(res7, res6, res5, res4, res3, res2, res1, res0);
+        self.write_reg(data.rd, value);
+    }
+
+    unsafe fn emit_merge_cmp_i32_h(
+        &self,
+        res3: LLVMValueRef,
+        res2: LLVMValueRef,
+        res1: LLVMValueRef,
+        res0: LLVMValueRef,
+    ) -> LLVMValueRef {
+        let value = LLVMConstNull(LLVMInt32Type());
+
+        let res0_pad = LLVMBuildSExt(self.builder, res0, LLVMInt8Type(), NONAME);
+        let res0_pad = LLVMBuildZExt(self.builder, res0_pad, LLVMInt32Type(), NONAME);
+        let res0_pad = LLVMBuildShl(self.builder, res0_pad, LLVMConstInt(LLVMInt32Type(), 0 as u64, 0), NONAME,);
+
+        let res1_pad = LLVMBuildSExt(self.builder, res1, LLVMInt8Type(), NONAME);
+        let res1_pad = LLVMBuildZExt(self.builder, res1_pad, LLVMInt32Type(), NONAME);
+        let res1_pad = LLVMBuildShl(self.builder, res1_pad, LLVMConstInt(LLVMInt32Type(), 8 as u64, 0), NONAME,);
+
+        let res2_pad = LLVMBuildSExt(self.builder, res2, LLVMInt8Type(), NONAME);
+        let res2_pad = LLVMBuildZExt(self.builder, res2_pad, LLVMInt32Type(), NONAME);
+        let res2_pad = LLVMBuildShl(self.builder, res2_pad, LLVMConstInt(LLVMInt32Type(), 16 as u64, 0), NONAME,);
+
+        let res3_pad = LLVMBuildSExt(self.builder, res3, LLVMInt8Type(), NONAME);
+        let res3_pad = LLVMBuildZExt(self.builder, res3_pad, LLVMInt32Type(), NONAME);
+        let res3_pad = LLVMBuildShl(self.builder, res3_pad, LLVMConstInt(LLVMInt32Type(), 24 as u64, 0), NONAME,);
+
+        let value = LLVMBuildOr(self.builder, value, res0_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res1_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res2_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res3_pad, NONAME);
+        value
+    }
+
+    unsafe fn emit_vfcmph(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOpCmp
+    ) {
+        let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
+        let (b3, b2, b1, b0) = self.read_freg_vf64h(data.rs2);
+
+        let res0 = self.emit_fcmph(a0, b0, ff_op);
+        let res1 = self.emit_fcmph(a1, b1, ff_op);
+        let res2 = self.emit_fcmph(a2, b2, ff_op);
+        let res3 = self.emit_fcmph(a3, b3, ff_op);
+        let value = self.emit_merge_cmp_i32_h(res3, res2, res1, res0);
+
+        self.write_reg(data.rd, value);
+    }
+
+    unsafe fn emit_vfcmph_r(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOpCmp
+    ) {
+        let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
+        let (_b3, _b2, _b1, b0) = self.read_freg_vf64h(data.rs2);
+        let res0 = self.emit_fcmph(a0, b0, ff_op);
+        let res1 = self.emit_fcmph(a1, b0, ff_op);
+        let res2 = self.emit_fcmph(a2, b0, ff_op);
+        let res3 = self.emit_fcmph(a3, b0, ff_op);
+
+        let value = LLVMConstNull(LLVMInt32Type());
+
+        let res0_pad = LLVMBuildSExt(self.builder, res0, LLVMInt8Type(), NONAME);
+        let res0_pad = LLVMBuildZExt(self.builder, res0_pad, LLVMInt32Type(), NONAME);
+        let res0_pad = LLVMBuildShl(self.builder, res0_pad, LLVMConstInt(LLVMInt32Type(), 0 as u64, 0), NONAME,);
+
+        let res1_pad = LLVMBuildSExt(self.builder, res1, LLVMInt8Type(), NONAME);
+        let res1_pad = LLVMBuildZExt(self.builder, res1_pad, LLVMInt32Type(), NONAME);
+        let res1_pad = LLVMBuildShl(self.builder, res1_pad, LLVMConstInt(LLVMInt32Type(), 8 as u64, 0), NONAME,);
+
+        let res2_pad = LLVMBuildSExt(self.builder, res2, LLVMInt8Type(), NONAME);
+        let res2_pad = LLVMBuildZExt(self.builder, res2_pad, LLVMInt32Type(), NONAME);
+        let res2_pad = LLVMBuildShl(self.builder, res2_pad, LLVMConstInt(LLVMInt32Type(), 16 as u64, 0), NONAME,);
+
+        let res3_pad = LLVMBuildSExt(self.builder, res3, LLVMInt8Type(), NONAME);
+        let res3_pad = LLVMBuildZExt(self.builder, res3_pad, LLVMInt32Type(), NONAME);
+        let res3_pad = LLVMBuildShl(self.builder, res3_pad, LLVMConstInt(LLVMInt32Type(), 24 as u64, 0), NONAME,);
+
+        let value = LLVMBuildOr(self.builder, value, res0_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res1_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res2_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res3_pad, NONAME);
+        self.write_reg(data.rd, value);
+    }
+
+    unsafe fn emit_vfcmpah(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOpCmp
+    ) {
+        let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
+        let (b3, b2, b1, b0) = self.read_freg_vf64h(data.rs2);
+
+        let res0 = self.emit_fcmpah(a0, b0, ff_op);
+        let res1 = self.emit_fcmpah(a1, b1, ff_op);
+        let res2 = self.emit_fcmpah(a2, b2, ff_op);
+        let res3 = self.emit_fcmpah(a3, b3, ff_op);
+
+        let value = LLVMConstNull(LLVMInt32Type());
+
+        let res0_pad = LLVMBuildSExt(self.builder, res0, LLVMInt8Type(), NONAME);
+        let res0_pad = LLVMBuildZExt(self.builder, res0_pad, LLVMInt32Type(), NONAME);
+        let res0_pad = LLVMBuildShl(self.builder, res0_pad, LLVMConstInt(LLVMInt32Type(), 0 as u64, 0), NONAME,);
+
+        let res1_pad = LLVMBuildSExt(self.builder, res1, LLVMInt8Type(), NONAME);
+        let res1_pad = LLVMBuildZExt(self.builder, res1_pad, LLVMInt32Type(), NONAME);
+        let res1_pad = LLVMBuildShl(self.builder, res1_pad, LLVMConstInt(LLVMInt32Type(), 8 as u64, 0), NONAME,);
+
+        let res2_pad = LLVMBuildSExt(self.builder, res2, LLVMInt8Type(), NONAME);
+        let res2_pad = LLVMBuildZExt(self.builder, res2_pad, LLVMInt32Type(), NONAME);
+        let res2_pad = LLVMBuildShl(self.builder, res2_pad, LLVMConstInt(LLVMInt32Type(), 16 as u64, 0), NONAME,);
+
+        let res3_pad = LLVMBuildSExt(self.builder, res3, LLVMInt8Type(), NONAME);
+        let res3_pad = LLVMBuildZExt(self.builder, res3_pad, LLVMInt32Type(), NONAME);
+        let res3_pad = LLVMBuildShl(self.builder, res3_pad, LLVMConstInt(LLVMInt32Type(), 24 as u64, 0), NONAME,);
+
+        let value = LLVMBuildOr(self.builder, value, res0_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res1_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res2_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res3_pad, NONAME);
+        self.write_reg(data.rd, value);
+    }
+
+    unsafe fn emit_vfcmpah_r(
+        &self,
+        data: riscv::FormatRdRs1Rs2,
+        ff_op: FlexfloatOpCmp
+    ) {
+        let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
+        let (_b3, _b2, _b1, b0) = self.read_freg_vf64h(data.rs2);
+        let res0 = self.emit_fcmpah(a0, b0, ff_op);
+        let res1 = self.emit_fcmpah(a1, b0, ff_op);
+        let res2 = self.emit_fcmpah(a2, b0, ff_op);
+        let res3 = self.emit_fcmpah(a3, b0, ff_op);
+
+        let value = LLVMConstNull(LLVMInt32Type());
+
+        let res0_pad = LLVMBuildSExt(self.builder, res0, LLVMInt8Type(), NONAME);
+        let res0_pad = LLVMBuildZExt(self.builder, res0_pad, LLVMInt32Type(), NONAME);
+        let res0_pad = LLVMBuildShl(self.builder, res0_pad, LLVMConstInt(LLVMInt32Type(), 0 as u64, 0), NONAME,);
+
+        let res1_pad = LLVMBuildSExt(self.builder, res1, LLVMInt8Type(), NONAME);
+        let res1_pad = LLVMBuildZExt(self.builder, res1_pad, LLVMInt32Type(), NONAME);
+        let res1_pad = LLVMBuildShl(self.builder, res1_pad, LLVMConstInt(LLVMInt32Type(), 8 as u64, 0), NONAME,);
+
+        let res2_pad = LLVMBuildSExt(self.builder, res2, LLVMInt8Type(), NONAME);
+        let res2_pad = LLVMBuildZExt(self.builder, res2_pad, LLVMInt32Type(), NONAME);
+        let res2_pad = LLVMBuildShl(self.builder, res2_pad, LLVMConstInt(LLVMInt32Type(), 16 as u64, 0), NONAME,);
+
+        let res3_pad = LLVMBuildSExt(self.builder, res3, LLVMInt8Type(), NONAME);
+        let res3_pad = LLVMBuildZExt(self.builder, res3_pad, LLVMInt32Type(), NONAME);
+        let res3_pad = LLVMBuildShl(self.builder, res3_pad, LLVMConstInt(LLVMInt32Type(), 24 as u64, 0), NONAME,);
+
+        let value = LLVMBuildOr(self.builder, value, res0_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res1_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res2_pad, NONAME);
+        let value = LLVMBuildOr(self.builder, value, res3_pad, NONAME);
+        self.write_reg(data.rd, value);
     }
 
     unsafe fn emit_fmadd(
@@ -2211,6 +2832,58 @@ impl<'a> InstructionTranslator<'a> {
                 ),
                 rs3,
                 name,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmaddH
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubH
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddH
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubH => bail!(
+                "Flexfloat opcode should not be decoded here: {}",
+                data.op
+            ),
+        })
+    }
+    unsafe fn emit_fmadd_flexfloat(
+        &self,
+        data: riscv::FormatRdRmRs1Rs2Rs3,
+        rs1: LLVMValueRef,
+        rs2: LLVMValueRef,
+        rs3: LLVMValueRef,
+    ) -> Result<LLVMValueRef> {
+        Ok(match data.op {
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmaddH => self.emit_foph(
+                rs1, rs2, rs3, FlexfloatOp::Fmadd,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmsubH => self.emit_foph(
+                rs1, rs2, rs3, FlexfloatOp::Fmsub,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddH => self.emit_foph(
+                rs1, rs2, rs3, FlexfloatOp::Fnmadd,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubH => self.emit_foph(
+                rs1, rs2, rs3, FlexfloatOp::Fnmsub,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmaddQ => self.emit_fopq(
+                rs1, rs2, rs3, FlexfloatOp::Fmadd,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddQ => self.emit_fopq(
+                rs1, rs2, rs3, FlexfloatOp::Fnmadd,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmsubQ => self.emit_fopq(
+                rs1, rs2, rs3, FlexfloatOp::Fmsub,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubQ => self.emit_fopq(
+                rs1, rs2, rs3, FlexfloatOp::Fnmsub,
+            ),
+            riscv::OpcodeRdRmRs1Rs2Rs3::FmaddS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubS
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmaddD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FmsubD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddD
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubD => bail!(
+                "Float and Double opcodes should not be decoded here: {}",
+                data.op
             ),
         })
     }
@@ -2275,17 +2948,609 @@ impl<'a> InstructionTranslator<'a> {
 
         // Handle floating-point operations.
         match data.op {
+            // FloatAH instructions
+            riscv::OpcodeRdRs1Rs2::FaddAh => {
+                self.write_freg_f16(
+                    data.rd,
+                    self.emit_fopah(
+                        self.read_freg_f16(data.rs1),
+                        self.read_freg_f16(data.rs2),
+                        self.read_freg_f16(data.rd), // not needed
+                        FlexfloatOp::Fadd,
+                    ),
+                )
+            },
+            riscv::OpcodeRdRs1Rs2::FsubAh => self.write_freg_f16(
+                data.rd,
+                self.emit_fopah(
+                    self.read_freg_f16(data.rs1),
+                    self.read_freg_f16(data.rs2),
+                    self.read_freg_f16(data.rd), // not needed
+                    FlexfloatOp::Fsub,
+                ),
+            ),
+            riscv::OpcodeRdRs1Rs2::FmulAh => self.write_freg_f16(
+                data.rd,
+                self.emit_fopah(
+                    self.read_freg_f16(data.rs1),
+                    self.read_freg_f16(data.rs2),
+                    self.read_freg_f16(data.rd), // not needed
+                    FlexfloatOp::Fmul,
+                ),
+            ),
+            riscv::OpcodeRdRs1Rs2::FdivAh => self.write_freg_f16(
+                data.rd,
+                self.emit_fopah(
+                    self.read_freg_f16(data.rs1),
+                    self.read_freg_f16(data.rs2),
+                    self.read_freg_f16(data.rd), // not needed
+                    FlexfloatOp::Fdiv,
+                ),
+            ),
+            // VfloatB instructions
+            riscv::OpcodeRdRs1Rs2::VfaddB => {
+                self.emit_vfb(data, FlexfloatOp::Fadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfaddRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsubB => {
+                self.emit_vfb(data, FlexfloatOp::Fsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsubRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmulB => {
+                self.emit_vfb(data, FlexfloatOp::Fmul);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmulRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fmul);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivB => {
+                self.emit_vfb(data, FlexfloatOp::Fdiv);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fdiv);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmacB => {
+                self.emit_vfb(data, FlexfloatOp::Fmadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmacRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fmadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmreB => {
+                self.emit_vfb(data, FlexfloatOp::Fmsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmreRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fmsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmaxB => {
+                self.emit_vfb(data, FlexfloatOp::Fmax);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmaxRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fmax);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfminB => {
+                self.emit_vfb(data, FlexfloatOp::Fmin);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfminRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fmin);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjB => {
+                self.emit_vfb(data, FlexfloatOp::Fsgnj);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fsgnj);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjnB => {
+                self.emit_vfb(data, FlexfloatOp::Fsgnjn);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjnRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fsgnjn);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjxB => {
+                self.emit_vfb(data, FlexfloatOp::Fsgnjx);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjxRB => {
+                self.emit_vfb_r(data, FlexfloatOp::Fsgnjx);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfeqB => {
+                self.emit_vfcmpq(data, FlexfloatOpCmp::Feq);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfeqRB => {
+                self.emit_vfcmpq_r(data, FlexfloatOpCmp::Feq);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfltB => {
+                self.emit_vfcmpq(data, FlexfloatOpCmp::Flt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfltRB => {
+                self.emit_vfcmpq_r(data, FlexfloatOpCmp::Flt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfleB => {
+                self.emit_vfcmpq(data, FlexfloatOpCmp::Fle);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfleRB => {
+                self.emit_vfcmpq_r(data, FlexfloatOpCmp::Fle);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgeB => {
+                self.emit_vfcmpq(data, FlexfloatOpCmp::Fge);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgeRB => {
+                self.emit_vfcmpq_r(data, FlexfloatOpCmp::Fge);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgtB => {
+                self.emit_vfcmpq(data, FlexfloatOpCmp::Fgt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgtRB => {
+                self.emit_vfcmpq_r(data, FlexfloatOpCmp::Fgt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfneB => {
+                self.emit_vfcmpq(data, FlexfloatOpCmp::Fne);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfneRB => {
+                self.emit_vfcmpq_r(data, FlexfloatOpCmp::Fne);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkaBS => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res0 = self.emit_fcvtb(a0, FlexfloatOpCvt::FcpkS2);
+                let res1 = self.emit_fcvtb(b0, FlexfloatOpCvt::FcpkS2);
+                let (rd7, rd6, rd5, rd4, rd3, rd2, _rd1, _rd0) = self.read_freg_vf64b(data.rd);
+                self.write_freg_vf64b(data.rd, rd7, rd6, rd5, rd4, rd3, rd2, res1, res0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkbBS => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res2 = self.emit_fcvtb(a0, FlexfloatOpCvt::FcpkS2);
+                let res3 = self.emit_fcvtb(b0, FlexfloatOpCvt::FcpkS2);
+                let (rd7, rd6, rd5, rd4, _rd3, _rd2, rd1, rd0) = self.read_freg_vf64b(data.rd);
+                self.write_freg_vf64b(data.rd, rd7, rd6, rd5, rd4, res3, res2, rd1, rd0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkcBS => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res4 = self.emit_fcvtb(a0, FlexfloatOpCvt::FcpkS2);
+                let res5 = self.emit_fcvtb(b0, FlexfloatOpCvt::FcpkS2);
+                let (rd7, rd6, _rd5, _rd4, rd3, rd2, rd1, rd0) = self.read_freg_vf64b(data.rd);
+                self.write_freg_vf64b(data.rd, rd7, rd6, res5, res4, rd3, rd2, rd1, rd0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkdBS => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res6 = self.emit_fcvtb(a0, FlexfloatOpCvt::FcpkS2);
+                let res7 = self.emit_fcvtb(b0, FlexfloatOpCvt::FcpkS2);
+                let (_rd7, _rd6, rd5, rd4, rd3, rd2, rd1, rd0) = self.read_freg_vf64b(data.rd);
+                self.write_freg_vf64b(data.rd, res7, res6, rd5, rd4, rd3, rd2, rd1, rd0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkaBD => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res0 = self.emit_fcvtb(a0, FlexfloatOpCvt::FcpkD2);
+                let res1 = self.emit_fcvtb(b0, FlexfloatOpCvt::FcpkD2);
+                let (rd7, rd6, rd5, rd4, rd3, rd2, _rd1, _rd0) = self.read_freg_vf64b(data.rd);
+                self.write_freg_vf64b(data.rd, rd7, rd6, rd5, rd4, rd3, rd2, res1, res0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkbBD => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res2 = self.emit_fcvtb(a0, FlexfloatOpCvt::FcpkD2);
+                let res3 = self.emit_fcvtb(b0, FlexfloatOpCvt::FcpkD2);
+                let (rd7, rd6, rd5, rd4, _rd3, _rd2, rd1, rd0) = self.read_freg_vf64b(data.rd);
+                self.write_freg_vf64b(data.rd, rd7, rd6, rd5, rd4, res3, res2, rd1, rd0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkcBD => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res4 = self.emit_fcvtb(a0, FlexfloatOpCvt::FcpkD2);
+                let res5 = self.emit_fcvtb(b0, FlexfloatOpCvt::FcpkD2);
+                let (rd7, rd6, _rd5, _rd4, rd3, rd2, rd1, rd0) = self.read_freg_vf64b(data.rd);
+                self.write_freg_vf64b(data.rd, rd7, rd6, res5, res4, rd3, rd2, rd1, rd0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkdBD => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res6 = self.emit_fcvtb(a0, FlexfloatOpCvt::FcpkD2);
+                let res7 = self.emit_fcvtb(b0, FlexfloatOpCvt::FcpkD2);
+                let (_rd7, _rd6, rd5, rd4, rd3, rd2, rd1, rd0) = self.read_freg_vf64b(data.rd);
+                self.write_freg_vf64b(data.rd, res7, res6, rd5, rd4, rd3, rd2, rd1, rd0);
+                return Ok(());
+            }
+            // VfloatAh instructions
+            riscv::OpcodeRdRs1Rs2::VfaddAh => {
+                self.emit_vfah(data, FlexfloatOp::Fadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfaddRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsubAh => {
+                self.emit_vfah(data, FlexfloatOp::Fsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsubRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmulAh => {
+                self.emit_vfah(data, FlexfloatOp::Fmul);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmulRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fmul);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivAh => {
+                self.emit_vfah(data, FlexfloatOp::Fdiv);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fdiv);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmacAh => {
+                self.emit_vfah(data, FlexfloatOp::Fmadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmacRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fmadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmreAh => {
+                self.emit_vfah(data, FlexfloatOp::Fmsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmreRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fmsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmaxAh => {
+                self.emit_vfah(data, FlexfloatOp::Fmax);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmaxRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fmax);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfminAh => {
+                self.emit_vfah(data, FlexfloatOp::Fmin);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfminRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fmin);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjAh => {
+                self.emit_vfah(data, FlexfloatOp::Fsgnj);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fsgnj);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjnAh => {
+                self.emit_vfah(data, FlexfloatOp::Fsgnjn);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjnRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fsgnjn);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjxAh => {
+                self.emit_vfah(data, FlexfloatOp::Fsgnjx);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjxRAh => {
+                self.emit_vfah_r(data, FlexfloatOp::Fsgnjx);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfeqAh => {
+                self.emit_vfcmpah(data, FlexfloatOpCmp::Feq);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfeqRAh => {
+                self.emit_vfcmpah_r(data, FlexfloatOpCmp::Feq);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfltAh => {
+                self.emit_vfcmpah(data, FlexfloatOpCmp::Flt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfltRAh => {
+                self.emit_vfcmpah_r(data, FlexfloatOpCmp::Flt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfleAh => {
+                self.emit_vfcmpah(data, FlexfloatOpCmp::Fle);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfleRAh => {
+                self.emit_vfcmpah_r(data, FlexfloatOpCmp::Fle);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgeAh => {
+                self.emit_vfcmpah(data, FlexfloatOpCmp::Fge);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgeRAh => {
+                self.emit_vfcmpah_r(data, FlexfloatOpCmp::Fge);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgtAh => {
+                self.emit_vfcmpah(data, FlexfloatOpCmp::Fgt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgtRAh => {
+                self.emit_vfcmpah_r(data, FlexfloatOpCmp::Fgt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfneAh => {
+                self.emit_vfcmpah(data, FlexfloatOpCmp::Fne);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfneRAh => {
+                self.emit_vfcmpah_r(data, FlexfloatOpCmp::Fne);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkaAhS => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res0 = self.emit_fcvtah(a0, FlexfloatOpCvt::FcpkS2);
+                let res1 = self.emit_fcvtah(b0, FlexfloatOpCvt::FcpkS2);
+                let (rd3, rd2, _rd1, _rd0) = self.read_freg_vf64h(data.rd);
+                self.write_freg_vf64h(data.rd, rd3, rd2, res1, res0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkbAhS => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res2 = self.emit_fcvtah(a0, FlexfloatOpCvt::FcpkS2);
+                let res3 = self.emit_fcvtah(b0, FlexfloatOpCvt::FcpkS2);
+                let (_rd3, _rd2, rd1, rd0) = self.read_freg_vf64h(data.rd);
+                self.write_freg_vf64h(data.rd, res3, res2, rd1, rd0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkaAhD => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res0 = self.emit_fcvtah(a0, FlexfloatOpCvt::FcpkD2);
+                let res1 = self.emit_fcvtah(b0, FlexfloatOpCvt::FcpkD2);
+                let (rd3, rd2, _rd1, _rd0) = self.read_freg_vf64h(data.rd);
+                self.write_freg_vf64h(data.rd, rd3, rd2, res1, res0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkbAhD => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res2 = self.emit_fcvtah(a0, FlexfloatOpCvt::FcpkD2);
+                let res3 = self.emit_fcvtah(b0, FlexfloatOpCvt::FcpkD2);
+                let (_rd3, _rd2, rd1, rd0) = self.read_freg_vf64h(data.rd);
+                self.write_freg_vf64h(data.rd, res3, res2, rd1, rd0);
+                return Ok(());
+            }
+            // VFloatH instructions
+            riscv::OpcodeRdRs1Rs2::VfaddH => {
+                self.emit_vfh(data, FlexfloatOp::Fadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfaddRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsubH => {
+                self.emit_vfh(data, FlexfloatOp::Fsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsubRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmulH => {
+                self.emit_vfh(data, FlexfloatOp::Fmul);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmulRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fmul);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivH => {
+                self.emit_vfh(data, FlexfloatOp::Fdiv);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fdiv);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmacH => {
+                self.emit_vfh(data, FlexfloatOp::Fmadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmacRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fmadd);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmreH => {
+                self.emit_vfh(data, FlexfloatOp::Fmsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmreRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fmsub);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmaxH => {
+                self.emit_vfh(data, FlexfloatOp::Fmax);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfmaxRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fmax);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfminH => {
+                self.emit_vfh(data, FlexfloatOp::Fmin);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfminRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fmin);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjH => {
+                self.emit_vfh(data, FlexfloatOp::Fsgnj);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fsgnj);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjnH => {
+                self.emit_vfh(data, FlexfloatOp::Fsgnjn);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjnRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fsgnjn);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjxH => {
+                self.emit_vfh(data, FlexfloatOp::Fsgnjx);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfsgnjxRH => {
+                self.emit_vfh_r(data, FlexfloatOp::Fsgnjx);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfeqH => {
+                self.emit_vfcmph(data, FlexfloatOpCmp::Feq);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfeqRH => {
+                self.emit_vfcmph_r(data, FlexfloatOpCmp::Feq);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfltH => {
+                self.emit_vfcmph(data, FlexfloatOpCmp::Flt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfltRH => {
+                self.emit_vfcmph_r(data, FlexfloatOpCmp::Flt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfleH => {
+                self.emit_vfcmph(data, FlexfloatOpCmp::Fle);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfleRH => {
+                self.emit_vfcmph_r(data, FlexfloatOpCmp::Fle);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgeH => {
+                self.emit_vfcmph(data, FlexfloatOpCmp::Fge);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgeRH => {
+                self.emit_vfcmph_r(data, FlexfloatOpCmp::Fge);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgtH => {
+                self.emit_vfcmph(data, FlexfloatOpCmp::Fgt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfgtRH => {
+                self.emit_vfcmph_r(data, FlexfloatOpCmp::Fgt);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfneH => {
+                self.emit_vfcmph(data, FlexfloatOpCmp::Fne);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfneRH => {
+                self.emit_vfcmph_r(data, FlexfloatOpCmp::Fne);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkaHS => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res0 = self.emit_fcvth(a0, FlexfloatOpCvt::FcpkS2);
+                let res1 = self.emit_fcvth(b0, FlexfloatOpCvt::FcpkS2);
+                let (rd3, rd2, _rd1, _rd0) = self.read_freg_vf64h(data.rd);
+                self.write_freg_vf64h(data.rd, rd3, rd2, res1, res0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkbHS => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res2 = self.emit_fcvth(a0, FlexfloatOpCvt::FcpkS2);
+                let res3 = self.emit_fcvth(b0, FlexfloatOpCvt::FcpkS2);
+                let (_rd3, _rd2, rd1, rd0) = self.read_freg_vf64h(data.rd);
+                self.write_freg_vf64h(data.rd, res3, res2, rd1, rd0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkaHD => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res0 = self.emit_fcvth(a0, FlexfloatOpCvt::FcpkD2);
+                let res1 = self.emit_fcvth(b0, FlexfloatOpCvt::FcpkD2);
+                let (rd3, rd2, _rd1, _rd0) = self.read_freg_vf64h(data.rd);
+                self.write_freg_vf64h(data.rd, rd3, rd2, res1, res0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfcpkbHD => {
+                let a0 = self.read_freg(data.rs1);
+                let b0 = self.read_freg(data.rs2);
+                let res2 = self.emit_fcvth(a0, FlexfloatOpCvt::FcpkD2);
+                let res3 = self.emit_fcvth(b0, FlexfloatOpCvt::FcpkD2);
+                let (_rd3, _rd2, rd1, rd0) = self.read_freg_vf64h(data.rd);
+                self.write_freg_vf64h(data.rd, res3, res2, rd1, rd0);
+                return Ok(());
+            }
+
+
             // VFloatS instructions
             riscv::OpcodeRdRs1Rs2::VfaddS => {
                 let (a1, a0) = self.read_freg_vf64s(data.rs1);
                 let (b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = LLVMBuildFAdd(self.builder, a0, b0, name);
                 let res1 = LLVMBuildFAdd(self.builder, a1, b1, name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfaddRS => {
@@ -2293,11 +3558,7 @@ impl<'a> InstructionTranslator<'a> {
                 let (_b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = LLVMBuildFAdd(self.builder, a0, b0, name);
                 let res1 = LLVMBuildFAdd(self.builder, a1, b0, name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfsubS => {
@@ -2305,11 +3566,7 @@ impl<'a> InstructionTranslator<'a> {
                 let (b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = LLVMBuildFSub(self.builder, a0, b0, name);
                 let res1 = LLVMBuildFSub(self.builder, a1, b1, name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfsubRS => {
@@ -2317,11 +3574,7 @@ impl<'a> InstructionTranslator<'a> {
                 let (_b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = LLVMBuildFSub(self.builder, a0, b0, name);
                 let res1 = LLVMBuildFSub(self.builder, a1, b0, name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfmulS => {
@@ -2329,11 +3582,7 @@ impl<'a> InstructionTranslator<'a> {
                 let (b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = LLVMBuildFMul(self.builder, a0, b0, name);
                 let res1 = LLVMBuildFMul(self.builder, a1, b1, name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfmulRS => {
@@ -2341,11 +3590,23 @@ impl<'a> InstructionTranslator<'a> {
                 let (_b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = LLVMBuildFMul(self.builder, a0, b0, name);
                 let res1 = LLVMBuildFMul(self.builder, a1, b0, name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivS => {
+                let (a1, a0) = self.read_freg_vf64s(data.rs1);
+                let (b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFDiv(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFDiv(self.builder, a1, b1, name);
+                self.write_freg_vf64s(data.rd, res1, res0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::VfdivRS => {
+                let (a1, a0)  = self.read_freg_vf64s(data.rs1);
+                let (_b1, b0) = self.read_freg_vf64s(data.rs2);
+                let res0 = LLVMBuildFDiv(self.builder, a0, b0, name);
+                let res1 = LLVMBuildFDiv(self.builder, a1, b0, name);
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfmacS => {
@@ -2360,11 +3621,7 @@ impl<'a> InstructionTranslator<'a> {
                                          LLVMBuildFMul(self.builder, a1, b1, name),
                                          c1,
                                          name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfmacRS => {
@@ -2379,35 +3636,7 @@ impl<'a> InstructionTranslator<'a> {
                                          LLVMBuildFMul(self.builder, a1, b0, name),
                                          c1,
                                          name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
-                return Ok(());
-            }
-            riscv::OpcodeRdRs1Rs2::VfdivS => {
-                let (a1, a0) = self.read_freg_vf64s(data.rs1);
-                let (b1, b0) = self.read_freg_vf64s(data.rs2);
-                let res0 = LLVMBuildFDiv(self.builder, a0, b0, name);
-                let res1 = LLVMBuildFDiv(self.builder, a1, b1, name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
-                return Ok(());
-            }
-            riscv::OpcodeRdRs1Rs2::VfdivRS => {
-                let (a1, a0)  = self.read_freg_vf64s(data.rs1);
-                let (_b1, b0) = self.read_freg_vf64s(data.rs2);
-                let res0 = LLVMBuildFDiv(self.builder, a0, b0, name);
-                let res1 = LLVMBuildFDiv(self.builder, a1, b0, name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfmreS => {
@@ -2422,11 +3651,7 @@ impl<'a> InstructionTranslator<'a> {
                                          LLVMBuildFMul(self.builder, a1, b1, name),
                                          c1,
                                          name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfmreRS => {
@@ -2441,11 +3666,7 @@ impl<'a> InstructionTranslator<'a> {
                                          LLVMBuildFMul(self.builder, a1, b0, name),
                                          c1,
                                          name);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfmaxS => {
@@ -2453,11 +3674,7 @@ impl<'a> InstructionTranslator<'a> {
                 let (b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = self.emit_binary_float_intrinsic("llvm.maxnum", a0, b0);
                 let res1 = self.emit_binary_float_intrinsic("llvm.maxnum", a1, b1);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfmaxRS => {
@@ -2465,11 +3682,7 @@ impl<'a> InstructionTranslator<'a> {
                 let (_b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = self.emit_binary_float_intrinsic("llvm.maxnum", a0, b0);
                 let res1 = self.emit_binary_float_intrinsic("llvm.maxnum", a1, b0);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfminS => {
@@ -2477,11 +3690,7 @@ impl<'a> InstructionTranslator<'a> {
                 let (b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = self.emit_binary_float_intrinsic("llvm.minnum", a0, b0);
                 let res1 = self.emit_binary_float_intrinsic("llvm.minnum", a1, b1);
-                self.write_freg_vf64s(
-                    data.rd,
-                    res1,
-                    res0
-                );
+                self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfminRS => {
@@ -2489,10 +3698,114 @@ impl<'a> InstructionTranslator<'a> {
                 let (_b1, b0) = self.read_freg_vf64s(data.rs2);
                 let res0 = self.emit_binary_float_intrinsic("llvm.minnum", a0, b0);
                 let res1 = self.emit_binary_float_intrinsic("llvm.minnum", a1, b0);
-                self.write_freg_vf64s(
+                self.write_freg_vf64s(data.rd, res1, res0);
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjH => {
+                self.write_freg(
                     data.rd,
-                    res1,
-                    res0
+                    self.emit_foph(
+                        self.read_freg(data.rs1),
+                        self.read_freg(data.rs2),
+                        self.read_freg(data.rd), // not needed
+                        FlexfloatOp::Fsgnj,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjnH => {
+                self.write_freg(
+                    data.rd,
+                    self.emit_foph(
+                        self.read_freg(data.rs1),
+                        self.read_freg(data.rs2),
+                        self.read_freg(data.rd), // not needed
+                        FlexfloatOp::Fsgnjn,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjxH => {
+                self.write_freg(
+                    data.rd,
+                    self.emit_foph(
+                        self.read_freg(data.rs1),
+                        self.read_freg(data.rs2),
+                        self.read_freg(data.rd), // not needed
+                        FlexfloatOp::Fsgnjx,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjAh => {
+                self.write_freg(
+                    data.rd,
+                    self.emit_fopah(
+                        self.read_freg(data.rs1),
+                        self.read_freg(data.rs2),
+                        self.read_freg(data.rd), // not needed
+                        FlexfloatOp::Fsgnj,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjnAh => {
+                self.write_freg(
+                    data.rd,
+                    self.emit_fopah(
+                        self.read_freg(data.rs1),
+                        self.read_freg(data.rs2),
+                        self.read_freg(data.rd), // not needed
+                        FlexfloatOp::Fsgnjn,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjxAh => {
+                self.write_freg(
+                    data.rd,
+                    self.emit_fopah(
+                        self.read_freg(data.rs1),
+                        self.read_freg(data.rs2),
+                        self.read_freg(data.rd), // not needed
+                        FlexfloatOp::Fsgnjx,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjQ => {
+                self.write_freg(
+                    data.rd,
+                    self.emit_fopq(
+                        self.read_freg(data.rs1),
+                        self.read_freg(data.rs2),
+                        self.read_freg(data.rd), // not needed
+                        FlexfloatOp::Fsgnj,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjnQ => {
+                self.write_freg(
+                    data.rd,
+                    self.emit_fopq(
+                        self.read_freg(data.rs1),
+                        self.read_freg(data.rs2),
+                        self.read_freg(data.rd), // not needed
+                        FlexfloatOp::Fsgnjn,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FsgnjxQ => {
+                self.write_freg(
+                    data.rd,
+                    self.emit_fopq(
+                        self.read_freg(data.rs1),
+                        self.read_freg(data.rs2),
+                        self.read_freg(data.rd), // not needed
+                        FlexfloatOp::Fsgnjx,
+                    ),
                 );
                 return Ok(());
             }
@@ -2890,6 +4203,78 @@ impl<'a> InstructionTranslator<'a> {
             }
 
             // Max/min
+            riscv::OpcodeRdRs1Rs2::FmaxQ => {
+                self.write_freg_f8(
+                    data.rd,
+                    self.emit_foph(
+                        self.read_freg_f8(data.rs1),
+                        self.read_freg_f8(data.rs2),
+                        self.read_freg_f8(data.rd), // not needed
+                        FlexfloatOp::Fmax,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FminQ => {
+                self.write_freg_f8(
+                    data.rd,
+                    self.emit_foph(
+                        self.read_freg_f8(data.rs1),
+                        self.read_freg_f8(data.rs2),
+                        self.read_freg_f8(data.rd), // not needed
+                        FlexfloatOp::Fmin,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FmaxAh => {
+                self.write_freg_f16(
+                    data.rd,
+                    self.emit_fopah(
+                        self.read_freg_f16(data.rs1),
+                        self.read_freg_f16(data.rs2),
+                        self.read_freg_f16(data.rd), // not needed
+                        FlexfloatOp::Fmax,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FminAh => {
+                self.write_freg_f16(
+                    data.rd,
+                    self.emit_fopah(
+                        self.read_freg_f16(data.rs1),
+                        self.read_freg_f16(data.rs2),
+                        self.read_freg_f16(data.rd), // not needed
+                        FlexfloatOp::Fmin,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FmaxH => {
+                self.write_freg_f16(
+                    data.rd,
+                    self.emit_foph(
+                        self.read_freg_f16(data.rs1),
+                        self.read_freg_f16(data.rs2),
+                        self.read_freg_f16(data.rd), // not needed
+                        FlexfloatOp::Fmax,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FminH => {
+                self.write_freg_f16(
+                    data.rd,
+                    self.emit_foph(
+                        self.read_freg_f16(data.rs1),
+                        self.read_freg_f16(data.rs2),
+                        self.read_freg_f16(data.rd), // not needed
+                        FlexfloatOp::Fmin,
+                    ),
+                );
+                return Ok(());
+            }
             riscv::OpcodeRdRs1Rs2::FmaxS => {
                 self.write_freg_f32(
                     data.rd,
@@ -2936,6 +4321,144 @@ impl<'a> InstructionTranslator<'a> {
             }
 
             // Comparison
+            riscv::OpcodeRdRs1Rs2::FeqH => {
+                self.was_freppable.set(false);
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        self.emit_fcmph(
+                            self.read_freg_f16(data.rs1),
+                            self.read_freg_f16(data.rs2),
+                            FlexfloatOpCmp::Feq,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FltH => {
+                self.was_freppable.set(false);
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        self.emit_fcmph(
+                            self.read_freg_f16(data.rs1),
+                            self.read_freg_f16(data.rs2),
+                            FlexfloatOpCmp::Flt,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FleH => {
+                self.was_freppable.set(false);
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        self.emit_fcmph(
+                            self.read_freg_f16(data.rs1),
+                            self.read_freg_f16(data.rs2),
+                            FlexfloatOpCmp::Fle,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FeqAh => {
+                self.was_freppable.set(false);
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        self.emit_fcmpah(
+                            self.read_freg_f16(data.rs1),
+                            self.read_freg_f16(data.rs2),
+                            FlexfloatOpCmp::Feq,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FltAh => {
+                self.was_freppable.set(false);
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        self.emit_fcmpah(
+                            self.read_freg_f16(data.rs1),
+                            self.read_freg_f16(data.rs2),
+                            FlexfloatOpCmp::Flt,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FleAh => {
+                self.was_freppable.set(false);
+                self.write_reg(
+                    data.rd,
+                    LLVMBuildZExt(
+                        self.builder,
+                        self.emit_fcmpah(
+                            self.read_freg_f16(data.rs1),
+                            self.read_freg_f16(data.rs2),
+                            FlexfloatOpCmp::Fle,
+                        ),
+                        LLVMInt32Type(),
+                        NONAME,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FeqQ => {
+                self.was_freppable.set(false);
+                self.write_reg(
+                    data.rd,
+                    self.emit_fcmpah(
+                        self.read_freg_f8(data.rs1),
+                        self.read_freg_f8(data.rs2),
+                        FlexfloatOpCmp::Feq,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FltQ => {
+                self.was_freppable.set(false);
+                self.write_reg(
+                    data.rd,
+                    self.emit_fcmpah(
+                        self.read_freg_f8(data.rs1),
+                        self.read_freg_f8(data.rs2),
+                        FlexfloatOpCmp::Flt,
+                    ),
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::FleQ => {
+                self.was_freppable.set(false);
+                self.write_reg(
+                    data.rd,
+                    self.emit_fcmpah(
+                        self.read_freg_f8(data.rs1),
+                        self.read_freg_f8(data.rs2),
+                        FlexfloatOpCmp::Fle,
+                    ),
+                );
+                return Ok(());
+            }
             riscv::OpcodeRdRs1Rs2::FeqS => {
                 self.was_freppable.set(false);
                 self.write_reg(
@@ -3145,6 +4668,57 @@ impl<'a> InstructionTranslator<'a> {
         self.write_reg(data.rd, value);
         Ok(())
     }
+
+    unsafe fn emit_rd_rs1_rs2_rs3(&self, data: riscv::FormatRdRs1Rs2Rs3) -> Result<()> {
+        trace!("{} x{} = x{}, x{}, x{}", data.op, data.rd, data.rs1, data.rs2,data.rs3);
+
+        // Assume generally freppable, later exclude comparisons.
+        self.was_freppable.set(true);
+
+        // Handle floating-point operations.
+        match data.op {
+            // FloatAH instructions
+            riscv::OpcodeRdRs1Rs2Rs3::FmaddAh => self.write_freg(
+                data.rd,
+                self.emit_fopah(
+                    self.read_freg(data.rs1),
+                    self.read_freg(data.rs2),
+                    self.read_freg(data.rs3),
+                    FlexfloatOp::Fmadd,
+                ), 
+            ),
+            riscv::OpcodeRdRs1Rs2Rs3::FnmaddAh => self.write_freg(
+                data.rd,
+                self.emit_fopah(
+                    self.read_freg(data.rs1),
+                    self.read_freg(data.rs2),
+                    self.read_freg(data.rs3),
+                    FlexfloatOp::Fnmadd,
+                ), 
+            ),
+            riscv::OpcodeRdRs1Rs2Rs3::FmsubAh => self.write_freg(
+                data.rd,
+                self.emit_fopah(
+                    self.read_freg(data.rs1),
+                    self.read_freg(data.rs2),
+                    self.read_freg(data.rs3),
+                    FlexfloatOp::Fmsub,
+                ), 
+            ),
+            riscv::OpcodeRdRs1Rs2Rs3::FnmsubAh => self.write_freg(
+                data.rd,
+                self.emit_fopah(
+                    self.read_freg(data.rs1),
+                    self.read_freg(data.rs2),
+                    self.read_freg(data.rs3),
+                    FlexfloatOp::Fnmsub,
+                ), 
+            ),
+            _ => bail!("Unsupported opcode {}", data.op),
+        }
+        Ok(())
+    }
+
 
     unsafe fn emit_fsgnj(&self, rs1: LLVMValueRef, rs2: LLVMValueRef) -> LLVMValueRef {
         self.emit_fsgnj_common(rs1, rs2, |_, b| b)
@@ -4131,6 +5705,190 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
     }
 
+    unsafe fn read_freg_vf64b(&self, rs: u32) -> (LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMValueRef) {
+        self.emit_possible_ssr_read(rs);
+        let raw_ptr = self.freg_ptr(rs);
+        self.trace_access(
+            TraceAccess::ReadFReg(rs as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+        // read data0
+        let ptr_0 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        // read data1
+        let ptr_1 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_1 = LLVMBuildGEP(
+            self.builder,
+            ptr_1,
+            [LLVMConstInt(LLVMInt8Type(), 1, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        // read data2
+        let ptr_2 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_2 = LLVMBuildGEP(
+            self.builder,
+            ptr_2,
+            [LLVMConstInt(LLVMInt8Type(), 2, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        // read data3
+        let ptr_3 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_3 = LLVMBuildGEP(
+            self.builder,
+            ptr_3,
+            [LLVMConstInt(LLVMInt8Type(), 3, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        // read data4
+        let ptr_4 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_4 = LLVMBuildGEP(
+            self.builder,
+            ptr_4,
+            [LLVMConstInt(LLVMInt8Type(), 4, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        // read data5
+        let ptr_5 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_5 = LLVMBuildGEP(
+            self.builder,
+            ptr_5,
+            [LLVMConstInt(LLVMInt8Type(), 5, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        // read data6
+        let ptr_6 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_6 = LLVMBuildGEP(
+            self.builder,
+            ptr_6,
+            [LLVMConstInt(LLVMInt8Type(), 6, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        // read data7
+        let ptr_7 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_7 = LLVMBuildGEP(
+            self.builder,
+            ptr_7,
+            [LLVMConstInt(LLVMInt8Type(), 7, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        (LLVMBuildLoad(self.builder, ptr_7, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_6, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_5, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_4, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_3, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_2, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_1, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_0, format!("f{}\0", rs).as_ptr() as *const _))
+    }
+
+    unsafe fn read_freg_vf64h(&self, rs: u32) -> (LLVMValueRef, LLVMValueRef, LLVMValueRef, LLVMValueRef) {
+        self.emit_possible_ssr_read(rs);
+        let raw_ptr = self.freg_ptr(rs);
+        self.trace_access(
+            TraceAccess::ReadFReg(rs as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+        // read data0
+        let ptr_0 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt16Type(), 0),
+            NONAME,
+        );
+        // read data1
+        let ptr_1 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt16Type(), 0),
+            NONAME,
+        );
+        let ptr_1 = LLVMBuildGEP(
+            self.builder,
+            ptr_1,
+            [LLVMConstInt(LLVMInt16Type(), 1, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        // read data2
+        let ptr_2 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt16Type(), 0),
+            NONAME,
+        );
+        let ptr_2 = LLVMBuildGEP(
+            self.builder,
+            ptr_2,
+            [LLVMConstInt(LLVMInt16Type(), 2, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        // read data3
+        let ptr_3 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt16Type(), 0),
+            NONAME,
+        );
+        let ptr_3 = LLVMBuildGEP(
+            self.builder,
+            ptr_3,
+            [LLVMConstInt(LLVMInt16Type(), 3, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+        (LLVMBuildLoad(self.builder, ptr_3, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_2, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_1, format!("f{}\0", rs).as_ptr() as *const _),
+        LLVMBuildLoad(self.builder, ptr_0, format!("f{}\0", rs).as_ptr() as *const _))
+    }
+
     unsafe fn read_freg_vf64s(&self, rs: u32) -> (LLVMValueRef, LLVMValueRef) {
         self.emit_possible_ssr_read(rs);
         let raw_ptr = self.freg_ptr(rs);
@@ -4167,8 +5925,8 @@ impl<'a> InstructionTranslator<'a> {
 
     }
 
-    /// Emit the code to read a f32 value from a float register.
-    unsafe fn read_freg_f32(&self, rs: u32) -> LLVMValueRef {
+    /// Emit the code to read a f16 value from a float register.
+    unsafe fn read_freg_f8(&self, rs: u32) -> LLVMValueRef {
         self.emit_possible_ssr_read(rs);
         let raw_ptr = self.freg_ptr(rs);
         self.trace_access(
@@ -4178,7 +5936,7 @@ impl<'a> InstructionTranslator<'a> {
         let ptr = LLVMBuildBitCast(
             self.builder,
             raw_ptr,
-            LLVMPointerType(LLVMFloatType(), 0),
+            LLVMPointerType(LLVMInt8Type(), 0),
             NONAME,
         );
         LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
@@ -4195,13 +5953,28 @@ impl<'a> InstructionTranslator<'a> {
         let ptr = LLVMBuildBitCast(
             self.builder,
             raw_ptr,
-            // LLVMPointerType(LLVMHalfType(), 0),
             LLVMPointerType(LLVMInt16Type(), 0),
             NONAME,
         );
         LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
     }
 
+    /// Emit the code to read a f32 value from a float register.
+    unsafe fn read_freg_f32(&self, rs: u32) -> LLVMValueRef {
+        self.emit_possible_ssr_read(rs);
+        let raw_ptr = self.freg_ptr(rs);
+        self.trace_access(
+            TraceAccess::ReadFReg(rs as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMFloatType(), 0),
+            NONAME,
+        );
+        LLVMBuildLoad(self.builder, ptr, format!("f{}\0", rs).as_ptr() as *const _)
+    }
 
     /// Emit the code to write a f64 value to a float register.
     unsafe fn write_freg_f64(&self, rd: u32, data: LLVMValueRef) {
@@ -4275,7 +6048,217 @@ unsafe fn write_freg_vf32(&self, rd: u32, data1: LLVMValueRef, data2: LLVMValueR
     self.emit_possible_ssr_write(rd);
 }
 
-    /// Emit the code to write a f64 value to a float register.
+    /// Emit the code to write multiple f16 values into a 64-bit float register.
+    unsafe fn write_freg_vf64h(&self, rd: u32, data3: LLVMValueRef, data2: LLVMValueRef, data1: LLVMValueRef, data0: LLVMValueRef) {
+        let raw_ptr = self.freg_ptr(rd);
+
+        // Write data0
+        let ptr_0 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt16Type(), 0),
+            NONAME,
+        );
+
+        // Write data1
+        let ptr_1 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt16Type(), 0),
+            NONAME,
+        );
+        let ptr_1 = LLVMBuildGEP(
+            self.builder,
+            ptr_1,
+            [LLVMConstInt(LLVMInt16Type(), 1, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        // Write data2
+        let ptr_2 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt16Type(), 0),
+            NONAME,
+        );
+        let ptr_2 = LLVMBuildGEP(
+            self.builder,
+            ptr_2,
+            [LLVMConstInt(LLVMInt16Type(), 2, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        // Write data3
+        let ptr_3 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt16Type(), 0),
+            NONAME,
+        );
+        let ptr_3 = LLVMBuildGEP(
+            self.builder,
+            ptr_3,
+            [LLVMConstInt(LLVMInt16Type(), 3, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        LLVMBuildStore(self.builder, data0, ptr_0);
+        LLVMBuildStore(self.builder, data1, ptr_1);
+        LLVMBuildStore(self.builder, data2, ptr_2);
+        LLVMBuildStore(self.builder, data3, ptr_3);
+        self.trace_access(
+            TraceAccess::WriteFReg(rd as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+        self.emit_possible_ssr_write(rd);
+    }
+
+    /// Emit the code to write multiple f16 values into a 64-bit float register.
+    unsafe fn write_freg_vf64b(
+        &self,
+        rd: u32,
+        data7: LLVMValueRef,
+        data6: LLVMValueRef,
+        data5: LLVMValueRef,
+        data4: LLVMValueRef,
+        data3: LLVMValueRef,
+        data2: LLVMValueRef,
+        data1: LLVMValueRef,
+        data0: LLVMValueRef
+    ) {
+        let raw_ptr = self.freg_ptr(rd);
+
+        // Write data0
+        let ptr_0 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+
+        // Write data1
+        let ptr_1 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_1 = LLVMBuildGEP(
+            self.builder,
+            ptr_1,
+            [LLVMConstInt(LLVMInt8Type(), 1, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        // Write data2
+        let ptr_2 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_2 = LLVMBuildGEP(
+            self.builder,
+            ptr_2,
+            [LLVMConstInt(LLVMInt8Type(), 2, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        // Write data3
+        let ptr_3 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_3 = LLVMBuildGEP(
+            self.builder,
+            ptr_3,
+            [LLVMConstInt(LLVMInt8Type(), 3, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        // Write data4
+        let ptr_4 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_4 = LLVMBuildGEP(
+            self.builder,
+            ptr_4,
+            [LLVMConstInt(LLVMInt8Type(), 4, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        // Write data5
+        let ptr_5 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_5 = LLVMBuildGEP(
+            self.builder,
+            ptr_5,
+            [LLVMConstInt(LLVMInt8Type(), 5, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        // Write data6
+        let ptr_6 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_6 = LLVMBuildGEP(
+            self.builder,
+            ptr_6,
+            [LLVMConstInt(LLVMInt8Type(), 6, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        // Write data7
+        let ptr_7 = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
+            NONAME,
+        );
+        let ptr_7 = LLVMBuildGEP(
+            self.builder,
+            ptr_7,
+            [LLVMConstInt(LLVMInt8Type(), 7, 0)].as_mut_ptr(),
+            1 as u32,
+            NONAME,
+        );
+
+        LLVMBuildStore(self.builder, data0, ptr_0);
+        LLVMBuildStore(self.builder, data1, ptr_1);
+        LLVMBuildStore(self.builder, data2, ptr_2);
+        LLVMBuildStore(self.builder, data3, ptr_3);
+        LLVMBuildStore(self.builder, data4, ptr_4);
+        LLVMBuildStore(self.builder, data5, ptr_5);
+        LLVMBuildStore(self.builder, data6, ptr_6);
+        LLVMBuildStore(self.builder, data7, ptr_7);
+        self.trace_access(
+            TraceAccess::WriteFReg(rd as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+        self.emit_possible_ssr_write(rd);
+    }
+
     unsafe fn write_freg_vf64s(&self, rd: u32, data1: LLVMValueRef, data0: LLVMValueRef) {
         let raw_ptr = self.freg_ptr(rd);
 
@@ -4353,33 +6336,31 @@ unsafe fn write_freg_vf32(&self, rd: u32, data1: LLVMValueRef, data2: LLVMValueR
     /// Emit the code to write a f16 value to a float register.
     unsafe fn write_freg_f16(&self, rd: u32, data: LLVMValueRef) {
         let raw_ptr = self.freg_ptr(rd);
-
-        // Nanbox the value.
-        let ptr_hi = LLVMBuildBitCast(
-            self.builder,
-            raw_ptr,
-            LLVMPointerType(LLVMInt32Type(), 0),
-            NONAME,
-        );
-        let ptr_hi = LLVMBuildGEP(
-            self.builder,
-            ptr_hi,
-            [LLVMConstInt(LLVMInt32Type(), 1, 0)].as_mut_ptr(),
-            1 as u32,
-            NONAME,
-        );
-        LLVMBuildStore(
-            self.builder,
-            LLVMConstInt(LLVMInt32Type(), -1i32 as u64, 0),
-            ptr_hi,
-        );
-
+        // with vectorization enabled -> non NaN boxing
         // Write the actual value.
         let ptr = LLVMBuildBitCast(
             self.builder,
             raw_ptr,
             LLVMPointerType(LLVMInt16Type(), 0),
-            // LLVMPointerType(LLVMHalfType(), 0),
+            NONAME,
+        );
+        LLVMBuildStore(self.builder, data, ptr);
+        self.trace_access(
+            TraceAccess::WriteFReg(rd as u8),
+            LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+        );
+        self.emit_possible_ssr_write(rd);
+    }
+
+    /// Emit the code to write a f16 value to a float register.
+    unsafe fn write_freg_f8(&self, rd: u32, data: LLVMValueRef) {
+        let raw_ptr = self.freg_ptr(rd);
+        // with vectorization enabled -> non NaN boxing
+        // Write the actual value.
+        let ptr = LLVMBuildBitCast(
+            self.builder,
+            raw_ptr,
+            LLVMPointerType(LLVMInt8Type(), 0),
             NONAME,
         );
         LLVMBuildStore(self.builder, data, ptr);

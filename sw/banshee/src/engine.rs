@@ -505,6 +505,54 @@ pub unsafe fn add_llvm_symbols() {
         b"banshee_fhop\0".as_ptr() as *const _,
         Cpu::fhop as *mut _,
     );
+    LLVMAddSymbol(
+        b"banshee_fcvth\0".as_ptr() as *const _,
+        Cpu::fcvth as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fcvtah\0".as_ptr() as *const _,
+        Cpu::fcvtah as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fcvtb\0".as_ptr() as *const _,
+        Cpu::fcvtb as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fcvtab\0".as_ptr() as *const _,
+        Cpu::fcvtab as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fcmph\0".as_ptr() as *const _,
+        Cpu::fcmph as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fcmpah\0".as_ptr() as *const _,
+        Cpu::fcmpah as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fcmpb\0".as_ptr() as *const _,
+        Cpu::fcmpb as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fcmpab\0".as_ptr() as *const _,
+        Cpu::fcmpab as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_foph\0".as_ptr() as *const _,
+        Cpu::foph as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fopah\0".as_ptr() as *const _,
+        Cpu::fopah as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fopb\0".as_ptr() as *const _,
+        Cpu::fopb as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fopab\0".as_ptr() as *const _,
+        Cpu::fopab as *mut _,
+    );
 }
 
 // /// A representation of the system state.
@@ -911,39 +959,544 @@ impl<'a, 'b> Cpu<'a, 'b> {
             self.barrier.fetch_add(1, Ordering::Relaxed);
         }
     }
-    pub unsafe fn fhop(rs1: u64, rs2: u64, op: FlexfloatOp) -> u64 {
 
-        let env = flexfloat::flexfloat_desc_t {
-                exp_bits: flexfloat::FP16EXP,
-                frac_bits: flexfloat::FP16MAN,
-            };
+    /*
+     * Flexfloat Conversions
+     */
+    pub unsafe fn fcvth(rs1: u64, op: FlexfloatOpCvt) -> u16 {
 
-        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
-            value: 1.0,
-            desc: env
+        let ff_a16: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp16
         };
-        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
-            value: 2.0,
-            desc: env
+        let ff_a32: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp32
+        };
+        let ff_a64: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp64
         };
         let ff_res: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
             value: 0.0,
-            desc: env
+            desc: flexfloat::env_fp16
+        };
+
+        flexfloat::flexfloat_set_bits(ff_a16, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_a32, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_a64, rs1 as u64);
+
+        match op {
+            FlexfloatOpCvt::FcpkS2   => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp16),
+            FlexfloatOpCvt::FcpkD2   => flexfloat::ff_cast(ff_res, ff_a64, flexfloat::env_fp16),
+            FlexfloatOpCvt::Fmvx2f   => flexfloat::ff_cast(ff_res, ff_a16, flexfloat::env_fp16),
+            // FlexfloatOpCvt::Fmvf2x   => flexfloat::ff_cast(ff_res, ff_a, flexfloat::env_fp16),
+            FlexfloatOpCvt::Fcvtw2f  => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp16),
+            FlexfloatOpCvt::Fcvtwu2f => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp16),
+            // FlexfloatOpCvt::Fcvtf2u  => flexfloat::ff_cast(ff_res, ff_a, flexfloat::env_fp16),
+            // FlexfloatOpCvt::Fcvtf2wu => flexfloat::ff_cast(ff_res, ff_a16, flexfloat::env_fp16),
+        };
+
+        let rd = flexfloat::flexfloat_get_bits(ff_res);
+        rd as u16
+    }
+
+    pub unsafe fn fcvtah(rs1: u64, op: FlexfloatOpCvt) -> u16 {
+
+        let ff_a16: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp16alt
+        };
+        let ff_a32: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp32
+        };
+        let ff_a64: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp64
+        };
+        let ff_res: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp16alt
+        };
+
+        flexfloat::flexfloat_set_bits(ff_a16, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_a32, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_a64, rs1 as u64);
+
+        match op {
+            FlexfloatOpCvt::FcpkS2   => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp16alt),
+            FlexfloatOpCvt::FcpkD2   => flexfloat::ff_cast(ff_res, ff_a64, flexfloat::env_fp16alt),
+            FlexfloatOpCvt::Fmvx2f   => flexfloat::ff_cast(ff_res, ff_a16, flexfloat::env_fp16alt),
+            // FlexfloatOpCvt::Fmvf2x   => flexfloat::ff_cast(ff_res, ff_a, flexfloat::env_fp16alt),
+            FlexfloatOpCvt::Fcvtw2f  => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp16alt),
+            FlexfloatOpCvt::Fcvtwu2f => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp16alt),
+            // FlexfloatOpCvt::Fcvtf2u  => flexfloat::ff_cast(ff_res, ff_a, flexfloat::env_fp16alt),
+            // FlexfloatOpCvt::Fcvtf2wu => flexfloat::ff_cast(ff_res, ff_a16, flexfloat::env_fp16alt),
+        };
+
+        let rd = flexfloat::flexfloat_get_bits(ff_res);
+        rd as u16
+    }
+
+    pub unsafe fn fcvtb(rs1: u64, op: FlexfloatOpCvt) -> u8 {
+
+        let ff_a8: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8
+        };
+        let ff_a32: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp32
+        };
+        let ff_a64: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp64
+        };
+        let ff_res: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8
+        };
+
+        flexfloat::flexfloat_set_bits(ff_a8, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_a32, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_a64, rs1 as u64);
+
+        match op {
+            FlexfloatOpCvt::FcpkS2   => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp8),
+            FlexfloatOpCvt::FcpkD2   => flexfloat::ff_cast(ff_res, ff_a64, flexfloat::env_fp8),
+            FlexfloatOpCvt::Fmvx2f   => flexfloat::ff_cast(ff_res, ff_a8, flexfloat::env_fp8),
+            // FlexfloatOpCvt::Fmvf2x   => flexfloat::ff_cast(ff_res, ff_a, flexfloat::env_fp8),
+            FlexfloatOpCvt::Fcvtw2f  => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp8),
+            FlexfloatOpCvt::Fcvtwu2f => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp8),
+            // FlexfloatOpCvt::Fcvtf2u  => flexfloat::ff_cast(ff_res, ff_a, flexfloat::env_fp8),
+            // FlexfloatOpCvt::Fcvtf2wu => flexfloat::ff_cast(ff_res, ff_a16, flexfloat::env_fp8),
+        };
+
+        let rd = flexfloat::flexfloat_get_bits(ff_res);
+        rd as u8
+    }
+
+    pub unsafe fn fcvtab(rs1: u64, op: FlexfloatOpCvt) -> u8 {
+
+        let ff_a8: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8alt
+        };
+        let ff_a32: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp32
+        };
+        let ff_a64: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp64
+        };
+        let ff_res: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8alt
+        };
+
+        flexfloat::flexfloat_set_bits(ff_a8, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_a32, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_a64, rs1 as u64);
+
+        match op {
+            FlexfloatOpCvt::FcpkS2   => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp8alt),
+            FlexfloatOpCvt::FcpkD2   => flexfloat::ff_cast(ff_res, ff_a64, flexfloat::env_fp8alt),
+            FlexfloatOpCvt::Fmvx2f   => flexfloat::ff_cast(ff_res, ff_a8, flexfloat::env_fp8alt),
+            // FlexfloatOpCvt::Fmvf2x   => flexfloat::ff_cast(ff_res, ff_a, flexfloat::env_fp8alt),
+            FlexfloatOpCvt::Fcvtw2f  => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp8alt),
+            FlexfloatOpCvt::Fcvtwu2f => flexfloat::ff_cast(ff_res, ff_a32, flexfloat::env_fp8alt),
+            // FlexfloatOpCvt::Fcvtf2u  => flexfloat::ff_cast(ff_res, ff_a, flexfloat::env_fp8alt),
+            // FlexfloatOpCvt::Fcvtf2wu => flexfloat::ff_cast(ff_res, ff_a16, flexfloat::env_fp8alt),
+        };
+
+        let rd = flexfloat::flexfloat_get_bits(ff_res);
+        rd as u8
+    }
+
+    /*
+     * Flexfloat Comparisons
+     */
+    pub unsafe fn fcmph(rs1: u16, rs2: u16, op: FlexfloatOpCmp) -> bool {
+        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 1.0,
+            desc: flexfloat::env_fp16
+        };
+        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 2.0,
+            desc: flexfloat::env_fp16
+        };
+        flexfloat::flexfloat_set_bits(ff_a, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
+        let res : bool = match op {
+            FlexfloatOpCmp::Feq => flexfloat::ff_eq(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Flt => flexfloat::ff_lt(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fle => flexfloat::ff_le(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fge => flexfloat::ff_ge(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fgt => flexfloat::ff_gt(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fne => flexfloat::ff_neq(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+        };
+        res
+    }
+
+    pub unsafe fn fcmpah(rs1: u16, rs2: u16, op: FlexfloatOpCmp) -> bool {
+        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 1.0,
+            desc: flexfloat::env_fp16alt
+        };
+        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 2.0,
+            desc: flexfloat::env_fp16alt
+        };
+        flexfloat::flexfloat_set_bits(ff_a, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
+        let res : bool = match op {
+            FlexfloatOpCmp::Feq => flexfloat::ff_eq(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Flt => flexfloat::ff_lt(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fle => flexfloat::ff_le(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fge => flexfloat::ff_ge(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fgt => flexfloat::ff_gt(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fne => flexfloat::ff_neq(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+        };
+        res
+    }
+
+    pub unsafe fn fcmpb(rs1: u16, rs2: u16, op: FlexfloatOpCmp) -> bool {
+        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 1.0,
+            desc: flexfloat::env_fp8
+        };
+        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 2.0,
+            desc: flexfloat::env_fp8
+        };
+        flexfloat::flexfloat_set_bits(ff_a, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
+        let res : bool = match op {
+            FlexfloatOpCmp::Feq => flexfloat::ff_eq(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Flt => flexfloat::ff_lt(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fle => flexfloat::ff_le(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fge => flexfloat::ff_ge(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fgt => flexfloat::ff_gt(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fne => flexfloat::ff_neq(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+        };
+        res
+    }
+
+    pub unsafe fn fcmpab(rs1: u16, rs2: u16, op: FlexfloatOpCmp) -> bool {
+        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 1.0,
+            desc: flexfloat::env_fp8alt
+        };
+        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 2.0,
+            desc: flexfloat::env_fp8alt
+        };
+        flexfloat::flexfloat_set_bits(ff_a, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
+        let res : bool = match op {
+            FlexfloatOpCmp::Feq => flexfloat::ff_eq(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Flt => flexfloat::ff_lt(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fle => flexfloat::ff_le(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fge => flexfloat::ff_ge(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fgt => flexfloat::ff_gt(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+            FlexfloatOpCmp::Fne => flexfloat::ff_neq(ff_a, ff_b), // 1 or 0 to int reg (32bit)
+        };
+        res
+    }
+
+    pub unsafe fn foph(rs1: u16, rs2: u16, rs3: u16, op: FlexfloatOp) -> u16 {
+
+        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 1.0,
+            desc: flexfloat::env_fp16
+        };
+        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 2.0,
+            desc: flexfloat::env_fp16
+        };
+        let ff_c: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 3.0,
+            desc: flexfloat::env_fp16
+        };
+        let ff_res: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp16
         };
 
         flexfloat::flexfloat_set_bits(ff_a, rs1 as u64);
         flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
+        flexfloat::flexfloat_set_bits(ff_c, rs3 as u64);
 
         match op {
-            FlexfloatOp::Fadd => flexfloat::ff_add(ff_res, ff_a, ff_b),
-            FlexfloatOp::Fsub => flexfloat::ff_sub(ff_res, ff_a, ff_b),
-            FlexfloatOp::Fmul => flexfloat::ff_mul(ff_res, ff_a, ff_b),
-            FlexfloatOp::Fdiv => flexfloat::ff_div(ff_res, ff_a, ff_b),
-            _                 => flexfloat::ff_add(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmadd   => flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c),
+            FlexfloatOp::Fmsub   => {
+                flexfloat::ff_inverse(ff_c, ff_c);
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+            },
+            FlexfloatOp::Fnmadd  => {
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+                flexfloat::ff_inverse(ff_res, ff_res);
+            },
+            FlexfloatOp::Fnmsub  => {
+                flexfloat::ff_inverse(ff_a, ff_a);
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+            },
+            FlexfloatOp::Fadd    => flexfloat::ff_add(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fsub    => flexfloat::ff_sub(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmul    => flexfloat::ff_mul(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fdiv    => flexfloat::ff_div(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmin    => flexfloat::ff_min(ff_res, ff_a, ff_b), // 1 or 0 to int reg
+            FlexfloatOp::Fmax    => flexfloat::ff_max(ff_res, ff_a, ff_b), // 1 or 0 to int reg
+            FlexfloatOp::Fsgnj   => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp16,
+                                                                          flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+
+            },
+            FlexfloatOp::Fsgnjn  => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp16,
+                                                                          !flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+            },
+            FlexfloatOp::Fsgnjx  => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp16,
+                                                                          flexfloat::flexfloat_sign(ff_a)^flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+            },
         };
 
         let rd = flexfloat::flexfloat_get_bits(ff_res);
-        rd
+        rd as u16
+    }
+
+    pub unsafe fn fopah(rs1: u16, rs2: u16, rs3: u16, op: FlexfloatOp) -> u16 {
+
+        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp16alt
+        };
+        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp16alt
+        };
+        let ff_c: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp16alt
+        };
+        let ff_res: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp16alt
+        };
+
+        flexfloat::flexfloat_set_bits(ff_a, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
+        flexfloat::flexfloat_set_bits(ff_c, rs3 as u64);
+
+        match op {
+            FlexfloatOp::Fmadd   => flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c),
+            FlexfloatOp::Fmsub   => {
+                flexfloat::ff_inverse(ff_c, ff_c);
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+            },
+            FlexfloatOp::Fnmadd  => {
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+                flexfloat::ff_inverse(ff_res, ff_res);
+            },
+            FlexfloatOp::Fnmsub  => {
+                flexfloat::ff_inverse(ff_a, ff_a);
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+            },
+            FlexfloatOp::Fadd    => flexfloat::ff_add(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fsub    => flexfloat::ff_sub(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmul    => flexfloat::ff_mul(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fdiv    => flexfloat::ff_div(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmin    => flexfloat::ff_min(ff_res, ff_a, ff_b), // 1 or 0 to int reg
+            FlexfloatOp::Fmax    => flexfloat::ff_max(ff_res, ff_a, ff_b), // 1 or 0 to int reg
+            FlexfloatOp::Fsgnj   => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp16alt,
+                                                                          flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+            },
+            FlexfloatOp::Fsgnjn  => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp16alt,
+                                                                          !flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+            },
+            FlexfloatOp::Fsgnjx  => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp16alt,
+                                                                          flexfloat::flexfloat_sign(ff_a)^flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+            },
+        };
+
+        let rd = flexfloat::flexfloat_get_bits(ff_res);
+        rd as u16
+    }
+    pub unsafe fn fopb(rs1: u8, rs2: u8, rs3: u8, op: FlexfloatOp) -> u8 {
+
+        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8
+        };
+        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8
+        };
+        let ff_c: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8
+        };
+        let ff_res: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8
+        };
+
+        flexfloat::flexfloat_set_bits(ff_a, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
+        flexfloat::flexfloat_set_bits(ff_c, rs3 as u64);
+
+        match op {
+            FlexfloatOp::Fmadd   => flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c),
+            FlexfloatOp::Fmsub   => {
+                flexfloat::ff_inverse(ff_c, ff_c);
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+            },
+            FlexfloatOp::Fnmadd  => {
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+                flexfloat::ff_inverse(ff_res, ff_res);
+            },
+            FlexfloatOp::Fnmsub  => {
+                flexfloat::ff_inverse(ff_a, ff_a);
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+            },
+            FlexfloatOp::Fadd    => flexfloat::ff_add(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fsub    => flexfloat::ff_sub(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmul    => flexfloat::ff_mul(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fdiv    => flexfloat::ff_div(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmin    => flexfloat::ff_min(ff_res, ff_a, ff_b), // 1 or 0 to int reg
+            FlexfloatOp::Fmax    => flexfloat::ff_max(ff_res, ff_a, ff_b), // 1 or 0 to int reg
+            FlexfloatOp::Fsgnj   => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp8,
+                                                                          flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+
+            },
+            FlexfloatOp::Fsgnjn  => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp8,
+                                                                          !flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+            },
+            FlexfloatOp::Fsgnjx  => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp8,
+                                                                          flexfloat::flexfloat_sign(ff_a)^flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+            },
+        };
+
+        let rd = flexfloat::flexfloat_get_bits(ff_res);
+        rd as u8
+    }
+    pub unsafe fn fopab(rs1: u8, rs2: u8, rs3: u8, op: FlexfloatOp) -> u8 {
+
+        let ff_a: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8alt
+        };
+        let ff_b: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8alt
+        };
+        let ff_c: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8alt
+        };
+        let ff_res: *mut flexfloat::flexfloat_t = &mut flexfloat::flexfloat_t {
+            value: 0.0,
+            desc: flexfloat::env_fp8alt
+        };
+
+        flexfloat::flexfloat_set_bits(ff_a, rs1 as u64);
+        flexfloat::flexfloat_set_bits(ff_b, rs2 as u64);
+        flexfloat::flexfloat_set_bits(ff_c, rs3 as u64);
+
+        match op {
+            FlexfloatOp::Fmadd   => flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c),
+            FlexfloatOp::Fmsub   => {
+                flexfloat::ff_inverse(ff_c, ff_c);
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+            },
+            FlexfloatOp::Fnmadd  => {
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+                flexfloat::ff_inverse(ff_res, ff_res);
+            },
+            FlexfloatOp::Fnmsub  => {
+                flexfloat::ff_inverse(ff_a, ff_a);
+                flexfloat::ff_fma(ff_res, ff_a, ff_b, ff_c);
+            },
+            FlexfloatOp::Fadd    => flexfloat::ff_add(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fsub    => flexfloat::ff_sub(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmul    => flexfloat::ff_mul(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fdiv    => flexfloat::ff_div(ff_res, ff_a, ff_b),
+            FlexfloatOp::Fmin    => flexfloat::ff_min(ff_res, ff_a, ff_b), // 1 or 0 to int reg
+            FlexfloatOp::Fmax    => flexfloat::ff_max(ff_res, ff_a, ff_b), // 1 or 0 to int reg
+            FlexfloatOp::Fsgnj   => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp8alt,
+                                                                          flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+
+            },
+            FlexfloatOp::Fsgnjn  => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp8alt,
+                                                                          !flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+            },
+            FlexfloatOp::Fsgnjx  => {
+                flexfloat::flexfloat_set_bits( ff_res,
+                                               flexfloat::flexfloat_pack( flexfloat::env_fp8alt,
+                                                                          flexfloat::flexfloat_sign(ff_a)^flexfloat::flexfloat_sign(ff_b),
+                                                                          flexfloat::flexfloat_exp(ff_a),
+                                                                          flexfloat::flexfloat_frac(ff_a)
+                                                                        ) as u64 );
+            },
+        };
+
+        let rd = flexfloat::flexfloat_get_bits(ff_res);
+        rd as u8
     }
 }
 
@@ -988,20 +1541,37 @@ pub enum FlexfloatOp {
     Fsub,
     Fmul,
     Fdiv,
-    Fsqrt, // Not implemented ?
+    // Fsqrt, // Not implemented ?
     Fsgnj,
     Fsgnjn,
     Fsgnjx,
     Fmin,
     Fmax,
+    // Fclass, // Not implemented ?
+}
+
+#[derive(Debug, Clone, Copy)]
+#[repr(C)]
+pub enum FlexfloatOpCmp {
     Feq,
     Flt,
     Fle,
-    Fcvtw2,
-    Fcvtwu2,
-    Fcvt2u,
-    Fcvt2wu,
-    // Fmv,
-    Fclass, // Not implemented ?
-    // Fmv
+    Fge,
+    Fgt,
+    Fne
+}
+
+#[derive(Debug, Clone, Copy)]
+#[repr(C)]
+pub enum FlexfloatOpCvt {
+    Fmvx2f,
+    // Fmvf2x,
+    Fcvtw2f,
+    Fcvtwu2f,
+    // Fcvtf2u,
+    // Fcvtf2wu,
+    // FcpkAhS,
+    // FcpkAhD,
+    FcpkS2,
+    FcpkD2,
 }
