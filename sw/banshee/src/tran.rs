@@ -2704,8 +2704,16 @@ impl<'a> InstructionTranslator<'a> {
         // Fetch IRQ status
         let mstatus = self.section.emit_call( "banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 0, 0)], );
         let mie = self.section.emit_call( "banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 1, 0)], );
-        let mip = self.section.emit_call( "banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 2, 0)], );
+        let mip_old = self.section.emit_call( "banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 2, 0)], );
+        // read CLINT and update mip
+        let clint_ret = self
+            .section
+            .emit_call("banshee_check_clint", [self.section.state_ptr]);
+        // mip = (mip_old & ~(1 << 3)) | (clint_ret << 3) // set MSIP bit
+        let mip = LLVMBuildOr(self.builder, LLVMBuildAnd(self.builder, mip_old, LLVMConstInt(LLVMInt32Type(), !(1<<3), 0), NONAME), LLVMBuildShl(self.builder, clint_ret, LLVMConstInt(LLVMInt32Type(), 3, 0), NONAME), NONAME);
+        self.section.emit_call( "banshee_irq_set", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 2, 0), mip]);
         let exception = self.section.emit_call( "banshee_irq_get", [self.irq_ptr(), LLVMConstInt(LLVMInt32Type(), 3, 0)], );
+
         // let mstatus = self.read_csr(0x300); // CSR_MSTATUS
         // let mie = self.read_csr(0x304); // CSR_MIE
         // let mip = self.read_csr(0x344); // CSR_MIP

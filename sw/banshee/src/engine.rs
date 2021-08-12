@@ -56,6 +56,8 @@ pub struct Engine {
     pub putchar_buffer: Mutex<HashMap<usize, Vec<u8>>>,
     /// The peripherals for each cluster
     peripherals: Peripherals,
+    /// The CLINT registers
+    pub clint: Mutex<HashMap<u64, u32>>,
 }
 
 // SAFETY: This is safe because only `context` and `module`
@@ -82,6 +84,7 @@ impl Engine {
             memory: Default::default(),
             putchar_buffer: Default::default(),
             peripherals: Peripherals::new(),
+            clint: Default::default(),
         }
     }
 
@@ -486,6 +489,10 @@ pub unsafe fn add_llvm_symbols() {
         b"banshee_wfi\0".as_ptr() as *const _,
         Cpu::binary_wfi as *mut _,
     );
+    LLVMAddSymbol(
+        b"banshee_check_clint\0".as_ptr() as *const _,
+        Cpu::binary_check_clint as *mut _,
+    );
 }
 
 // /// A representation of the system state.
@@ -583,6 +590,17 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     addr - self.engine.config.memory[self.cluster_id].periphs.start,
                     size,
                 )
+            // access to the CLINT
+            x if x >= self.engine.config.address.clint 
+              && x < self.engine.config.address.clint + 0x1000 => {
+                trace!("CLINT Load off 0x{:x}", addr as u64 - self.engine.config.address.clint as u64);
+                self.engine
+                    .clint
+                    .lock()
+                    .unwrap()
+                    .get(&(addr as u64 - self.engine.config.address.clint as u64))
+                    .copied()
+                    .unwrap_or(0)
             }
             _ => {
                 trace!("Load 0x{:x} ({}B)", addr, 8 << size);
@@ -672,8 +690,17 @@ impl<'a, 'b> Cpu<'a, 'b> {
             }
             // access to the CLINT
             x if x >= self.engine.config.address.clint 
-              && x < self.engine.config.address.clint + 0x10000 => {
-                // write interrupt pending of CPU x/4
+              && x < self.engine.config.address.clint + 0x1000 => {
+                let reg_off = addr - self.engine.config.address.clint;
+                trace!(
+                    "CLINT store off {:x} = 0x{:x}",
+                    reg_off,
+                    value,
+                );
+                let mut clint = self.engine.clint.lock().unwrap();
+                let clint = clint.entry(reg_off as u64).or_default();
+                *clint &= !mask;
+                *clint |= value & mask;
             }
             _ => {
                 trace!(
@@ -815,6 +842,18 @@ impl<'a, 'b> Cpu<'a, 'b> {
         self.state.wfi = false;
         // The core waking us up, already decremented the `num_sleep` counter for us
         return 0;
+    }
+
+    fn binary_check_clint(&mut self) -> u32 {
+        // read the clint software interrupt and return 1 if interrupt pending 
+        let hartid = self.hartid - self.engine.base_hartid;
+        return (self.engine
+            .clint
+            .lock()
+            .unwrap()
+            .get(&(hartid as u64 / 32 as u64))
+            .copied()
+            .unwrap_or(0) & (1 << (hartid % 32) ) ) >> (hartid % 32);
     }
 
     /// A simple barrier across all cores in the cluster.
