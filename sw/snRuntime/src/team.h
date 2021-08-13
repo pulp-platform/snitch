@@ -30,6 +30,11 @@ struct snrt_allocator {
     uint32_t next;
 };
 
+struct snrt_barrier {
+    uint32_t volatile barrier;
+    uint32_t volatile barrier_iteration;
+};
+
 struct snrt_team_root {
     struct snrt_team base;
     const void *device_tree;
@@ -44,4 +49,6 @@ struct snrt_team_root {
     struct snrt_mailbox *global_mailbox;
     struct snrt_mailbox *cluster_mailbox;
     struct snrt_allocator allocator;
+    struct snrt_barrier cluster_barrier;
+    uint32_t barrier_reg_ptr;
 };

@@ -51,7 +51,8 @@ update-source:
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
 		--cva6-sv src/occamy_cva6.sv.tpl
 	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --graph addrmap.dot --outdir test \
-		--testharness-sv test/testharness.sv.tpl
+		--testharness-sv test/testharness.sv.tpl \
+		--bootdata ../../ip/snitch_cluster/test/bootdata.cc.tpl 
 	@echo "[SOLDER]  CLINT"
 	@echo "[SOLDER]  Device Tree"
 	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --outdir . --dts test/occamy.dts

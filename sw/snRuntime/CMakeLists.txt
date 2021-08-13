@@ -16,9 +16,9 @@ else()
     # Export package information to includer.
     set(SNRUNTIME_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
     set(SNRUNTIME_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-    set(SNRUNTIME_INCLUDE_DIRS 
-        ${CMAKE_CURRENT_SOURCE_DIR}/include 
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor 
+    set(SNRUNTIME_INCLUDE_DIRS
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor
         PARENT_SCOPE)
 endif()
 
@@ -107,6 +107,7 @@ add_snitch_test(lto tests/lto.c tests/lto_a.c)
 add_snitch_test_executable(dma_simple tests/dma_simple.c)
 add_snitch_test_executable(printf_simple tests/printf_simple.c)
 add_snitch_test_executable(printf_fmtint tests/printf_fmtint.c)
+add_snitch_test_executable(multi_cluster tests/multi_cluster.c)
 add_snitch_test_rtl(dma_simple)
 add_snitch_test_rtl(printf_simple)
 add_snitch_test_rtl(printf_fmtint)

@@ -15,7 +15,7 @@ static void populate(double *ptr, uint32_t size, uint32_t seed) {
 }
 
 gemm_result_t gemm_bench(gemm_impl_t gemm_impl) {
-    snrt_barrier();
+    snrt_cluster_hw_barrier();
     size_t core_id = snrt_cluster_compute_core_idx();
     size_t core_num = snrt_cluster_compute_core_num();
 
@@ -44,11 +44,11 @@ gemm_result_t gemm_bench(gemm_impl_t gemm_impl) {
 
     // Execute the kernel and measure time.
     size_t t0 = benchmark_get_cycle();
-    snrt_barrier();
+    snrt_cluster_hw_barrier();
     size_t t1 = benchmark_get_cycle();
     gemm_impl(N, M, K, argA, ldA, argB, ldB, argC, ldC);
     size_t t2 = benchmark_get_cycle();
-    snrt_barrier();
+    snrt_cluster_hw_barrier();
     size_t t3 = benchmark_get_cycle();
 
     // Check and return results.

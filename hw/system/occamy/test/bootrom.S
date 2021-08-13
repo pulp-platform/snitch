@@ -8,9 +8,11 @@ _start:
     # write exception vector
     la    t0, exception
     csrw  mtvec, t0
-    la    a1, device_tree
-    # That will park all 32-bit cores since it isn't a supported instruction.
-    lwu   t0, entry_addr
+    la    a1, boot_data
+    # trap manager core 0 in loop
+    beq   a0, zero, exception
+    lw    t0, entry_addr
+    # lwu   t0, entry_addr
     jalr  t0
 exception:
     wfi

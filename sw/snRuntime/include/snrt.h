@@ -25,7 +25,9 @@ typedef struct snrt_slice {
 
 static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
 
-extern void snrt_barrier();
+extern void snrt_cluster_hw_barrier();
+extern void snrt_cluster_sw_barrier();
+extern void snrt_global_barrier();
 
 extern uint32_t __attribute__((pure)) snrt_hartid();
 struct snrt_team_root *snrt_current_team();

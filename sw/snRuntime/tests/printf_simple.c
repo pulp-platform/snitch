@@ -7,7 +7,7 @@
 
 int main() {
     for (uint32_t i = 0; i < snrt_global_core_num(); i++) {
-        snrt_barrier();
+        snrt_cluster_hw_barrier();
         if (i == snrt_global_core_idx()) {
             printf("Hello, World!\n");
         }
