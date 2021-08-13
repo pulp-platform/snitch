@@ -88,6 +88,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
   `FFSR(ssr_active_q, Xssr & ssr_active_d, 1'b0, clk_i, rst_i)
 
   typedef struct packed {
+    logic       ssr; // write-back to SSR at rd
     logic       acc; // write-back to result bus
     logic [4:0] rd;  // write-back to floating point regfile
   } tag_t;
@@ -252,6 +253,14 @@ module snitch_fp_ss import snitch_pkg::*; #(
     end
   end
 
+  // Determine whether destination register is SSR
+  logic is_rd_ssr;
+  always_comb begin
+    is_rd_ssr = 1'b0;
+    for (int s = 0; s < NumSsrs; s++)
+      is_rd_ssr |= (SsrRegs[s] == rd);
+  end
+
   always_comb begin
     acc_resp_o.error = 1'b0;
     fpu_op = fpnew_pkg::ADD;
@@ -277,6 +286,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
 
     fpu_tag_in.rd = rd;
     fpu_tag_in.acc = 1'b0; // RD is on accelerator bus
+    fpu_tag_in.ssr = ssr_active_q & is_rd_ssr;
 
     is_store = 1'b0;
     is_load = 1'b0;
@@ -2573,13 +2583,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
   logic [63:0] nan_boxed_arga;
   assign nan_boxed_arga = {{32{1'b1}}, acc_req_q.data_arga[31:0]};
 
-  logic is_tag_out_rd_ssr;
-  always_comb begin
-    is_tag_out_rd_ssr = 1'b0;
-    for (int s = 0; s < NumSsrs; s++)
-      is_tag_out_rd_ssr |= (SsrRegs[s] == fpu_tag_out.rd);
-  end
-
   // Arbitrate Register File Write Port
   always_comb begin
     fpr_we = 1'b0;
@@ -2600,7 +2603,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
       fpr_wready = 1'b0;
     end else if (fpu_out_valid && !fpu_tag_out.acc) begin
       fpr_we = 1'b1;
-      if (ssr_active_q && is_tag_out_rd_ssr) begin
+      if (fpu_tag_out.ssr) begin
         ssr_wvalid_o = 1'b1;
         // stall write-back to SSR
         if (!ssr_wready_i) begin
