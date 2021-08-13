@@ -16,12 +16,12 @@ int main() {
         *x = 0;
     }
     for (uint32_t i = 0; i < core_num; i++) {
-        snrt_barrier();
+        snrt_cluster_hw_barrier();
         if (i == core_id) {
             *sink = core_id;
             *x += 1;
         }
     }
-    snrt_barrier();
+    snrt_cluster_hw_barrier();
     return core_id == 0 ? core_num -= *x : 0;
 }
