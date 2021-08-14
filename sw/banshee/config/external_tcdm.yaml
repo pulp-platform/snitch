@@ -22,9 +22,11 @@ memory:
             latency: 5
         periphs:
             start: 0x100000
-            end: 0x100000
+            end: 0x10000c
             latency: 5
-            callbacks: []
+            callbacks:
+                - name: semaphores
+                  size: 12
         dram:
             start: 0x80000000
             end: 0x80010000

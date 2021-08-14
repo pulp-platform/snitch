@@ -52,13 +52,13 @@ int main(uint32_t core_id, uint32_t core_num) {
 }
 
 void init_sem(sem_t semaphore, uint32_t val) {
-    __atomic_store_n(semaphore, val, __ATOMIC_RELAXED);
+    *semaphore = val;
 }
 
 void signal_sem(sem_t semaphore, uint32_t val) {
-    __atomic_store_n(semaphore + 1, val, __ATOMIC_RELAXED);
+    *(semaphore + 1) = val;
 }
 
 void wait_sem(sem_t semaphore, uint32_t val) {
-    __atomic_store_n(semaphore + 2, val, __ATOMIC_RELAXED);
+    *(semaphore + 2) = val;
 }

@@ -79,10 +79,10 @@ impl Peripheral for Semaphores {
         "semaphores"
     }
 
-    fn store(&self, addr: u32, val: u32, mask: u32, _: u8) {
+    fn store(&self, addr: u32, val: u32, _mask: u32, _: u8) {
         match addr {
             0 => self.counter.store(val, Ordering::SeqCst),
-            1 => {self.counter.fetch_add(val, Ordering::SeqCst);}
+            4 => {self.counter.fetch_add(val, Ordering::SeqCst);}
             _ => while self.counter.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| if x >= val {
                 Some(x - val)
             } else {
@@ -92,7 +92,7 @@ impl Peripheral for Semaphores {
         }
     }
 
-    fn load(&self, addr: u32, _: u8) -> u32 {
+    fn load(&self, _: u32, _: u8) -> u32 {
         self.counter.load(Ordering::SeqCst)
     }
 }
