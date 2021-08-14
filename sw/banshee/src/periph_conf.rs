@@ -9,7 +9,7 @@ use PeriphCounterState::{CountLoad, CountLoadStore, CountStore, Disabled};
 /// Function called by the engine to get the peripherals. This function should return a vector
 /// containing an instance of all the peripherals.
 pub fn create_peripherals() -> Vec<Box<dyn Peripheral>> {
-    vec![Box::new(PeriphCounter::default())]
+    vec![Box::new(Semaphores::default())]
 }
 
 #[derive(Default)]
@@ -66,4 +66,33 @@ enum PeriphCounterState {
     CountLoad = 1,
     CountStore = 2,
     CountLoadStore = 3,
+}
+
+#[derive(Default)]
+struct Semaphores {
+    counter: AtomicU32,
+}
+
+impl Peripheral for Semaphores {
+
+    fn get_name(&self) -> &'static str {
+        "semaphores"
+    }
+
+    fn store(&self, addr: u32, val: u32, mask: u32, _: u8) {
+        match addr {
+            0 => self.counter.store(val, Ordering::SeqCst),
+            1 => {self.counter.fetch_add(val, Ordering::SeqCst);}
+            _ => while self.counter.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| if x >= val {
+                Some(x - val)
+            } else {
+                None
+            }
+            ).is_err(){}
+        }
+    }
+
+    fn load(&self, addr: u32, _: u8) -> u32 {
+        self.counter.load(Ordering::SeqCst)
+    }
 }

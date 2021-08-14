@@ -26,7 +26,7 @@ impl Peripherals {
                             periphs
                                 .iter()
                                 .position(|p| x.name.eq(&p.get_name()))
-                                .expect("One of the peripheral is not defined!"),
+                                .expect(&format!("One of the peripheral is not defined: {}", x.name)[..]),
                         ),
                     )
                 })
