@@ -1,0 +1,1 @@
+--num-cores=32 --num-clusters=2 --configuration=config/multi_cluster_periph.yaml

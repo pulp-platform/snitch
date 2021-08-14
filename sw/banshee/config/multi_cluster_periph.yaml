@@ -18,31 +18,36 @@ memory:
     -
         tcdm:
             start: 0x0
-            end: 0x10000
-            latency: 5
-        periphs:
-            start: 0x100000
-            end: 0x100000
-            latency: 5
-            callbacks: []
-        dram:
-            start: 0x80000000
-            end: 0x80010000
-            latency: 10
-        ext_tcdm:
-            -
-                cluster: 1
-                start: 0x10000
-    -
-        tcdm:
-            start: 0x0
             end: 0x20000
             latency: 5
         periphs:
             start: 0x100000
-            end: 0x100000
+            end: 0x10002c
             latency: 5
-            callbacks: []
+            callbacks:
+                - name: semaphores
+                  size: 36
+                - name: fence
+                  size: 8
+        dram:
+            start: 0x80000000
+            end: 0x80010000
+            latency: 10
+        ext_tcdm: []
+    -
+        tcdm:
+            start: 0x0
+            end: 0x10000
+            latency: 5
+        periphs:
+            start: 0x100000
+            end: 0x10002c
+            latency: 5
+            callbacks:
+                - name: semaphores
+                  size: 36
+                - name: fence
+                  size: 8
         dram:
             start: 0x80000000
             end: 0x80010000
@@ -50,23 +55,4 @@ memory:
         ext_tcdm:
             -
                 cluster: 0
-                start: 0x20000
-            -
-                cluster: 2
-                start: 0x30000
-    -
-        tcdm:
-            start: 0x0
-            end: 0x30000
-            latency: 5
-        periphs:
-            start: 0x100000
-            end: 0x100000
-            latency: 5
-            callbacks: []
-        dram:
-            start: 0x80000000
-            end: 0x80010000
-            latency: 10
-        ext_tcdm: []
-
+                start: 0x10000

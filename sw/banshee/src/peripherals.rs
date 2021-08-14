@@ -8,47 +8,74 @@ use crate::periph_conf::create_peripherals;
 use PeriphReq::{Load, Store};
 
 pub struct Peripherals {
-    peripherals: Vec<(u32, Box<dyn Peripheral>)>,
+    peripherals: Vec<Box<dyn Peripheral>>,
+    cluster_peripherals: Vec<Vec<(u32, usize)>>,
 }
 
 unsafe impl Sync for Peripherals {}
 
 impl Peripherals {
-    pub fn new(callbacks: &Vec<Callback>) -> Self {
-        let mut periphs = create_peripherals();
+    pub fn new() -> Self {
         Self {
-            peripherals: callbacks
+            peripherals: create_peripherals(),
+            cluster_peripherals: Default::default(),
+        }
+    }
+
+    pub fn add_cluster(&mut self, callbacks: &Vec<Callback>) {
+        self.cluster_peripherals.push(
+            callbacks
                 .iter()
                 .map(|x| {
                     (
                         x.size,
-                        periphs.remove(
-                            periphs
-                                .iter()
-                                .position(|p| x.name.eq(&p.get_name()))
-                                .expect("One of the peripheral is not defined!"),
-                        ),
+                        self.peripherals
+                            .iter()
+                            .position(|p| x.name.eq(&p.get_name()))
+                            .expect(
+                                &format!("One of the peripheral is not defined: {}", x.name)[..],
+                            ),
                     )
                 })
                 .collect(),
+        );
+    }
+    /*
+        pub fn new(callbacks: &Vec<Callback>) -> Self {
+            let mut periphs = create_peripherals();
+            Self {
+                peripherals: callbacks
+                    .iter()
+                    .map(|x| {
+                        (
+                            x.size,
+                            periphs.remove(
+                                periphs
+                                .iter()
+                                .position(|p| x.name.eq(&p.get_name()))
+                                .expect(&format!("One of the peripheral is not defined: {}", x.name)[..]),
+                                ),
+                                )
+                    })
+                .collect(),
+            }
         }
+    */
+    pub fn load(&self, cluster_id: usize, addr: u32, size: u8) -> u32 {
+        self.load_store(cluster_id, addr, size, Load)
     }
 
-    pub fn load(&self, addr: u32, size: u8) -> u32 {
-        self.load_store(addr, size, Load)
+    pub fn store(&self, cluster_id: usize, addr: u32, value: u32, mask: u32, size: u8) {
+        self.load_store(cluster_id, addr, size, Store(value, mask));
     }
 
-    pub fn store(&self, addr: u32, value: u32, mask: u32, size: u8) {
-        self.load_store(addr, size, Store(value, mask));
-    }
-
-    fn load_store(&self, mut addr: u32, size: u8, req: PeriphReq) -> u32 {
-        for i in &self.peripherals {
+    fn load_store(&self, cluster_id: usize, mut addr: u32, size: u8, req: PeriphReq) -> u32 {
+        for i in &self.cluster_peripherals[cluster_id] {
             if addr < i.0 {
                 return match req {
-                    Load => i.1.load(addr, size),
+                    Load => self.peripherals[i.1].load(addr, size),
                     Store(val, mask) => {
-                        i.1.store(addr, val, mask, size);
+                        self.peripherals[i.1].store(addr, val, mask, size);
                         0
                     }
                 };
