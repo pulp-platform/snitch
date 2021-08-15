@@ -9,7 +9,7 @@ use PeriphCounterState::{CountLoad, CountLoadStore, CountStore, Disabled};
 /// Function called by the engine to get the peripherals. This function should return a vector
 /// containing an instance of all the peripherals.
 pub fn create_peripherals() -> Vec<Box<dyn Peripheral>> {
-    vec![Box::new(Semaphores::default())]
+    vec![Box::new(Semaphores::default()), Box::new(Fence::default())]
 }
 
 #[derive(Default)]
@@ -69,21 +69,63 @@ enum PeriphCounterState {
 }
 
 #[derive(Default)]
+struct Fence{
+    set: AtomicU32,
+    current: AtomicU32,
+}
+
+impl Peripheral for Fence {
+    fn get_name(&self) -> &'static str {
+        "fence"
+    }
+
+    fn store(&self, addr: u32, val: u32, _mask: u32, _: u8) {
+        println!("fence: {}", val);
+        self.set.store(val, Ordering::SeqCst)
+    }
+
+    fn load(&self, _: u32, _: u8) -> u32 {
+        println!("wait");
+        self.current.fetch_add(1, Ordering::SeqCst);
+        while self.set.load(Ordering::SeqCst) != self.current.load(Ordering::SeqCst) {}
+        0
+    }
+}
+
+#[derive(Default)]
 struct Semaphores {
-    counter: AtomicU32,
+    emptyCount: AtomicU32,
+    fullCount: AtomicU32,
+    useQueue: AtomicU32,
 }
 
 impl Peripheral for Semaphores {
-
     fn get_name(&self) -> &'static str {
         "semaphores"
     }
 
     fn store(&self, addr: u32, val: u32, _mask: u32, _: u8) {
+        println!("addr: {:x}, val: {}", addr, val);
         match addr {
-            0 => self.counter.store(val, Ordering::SeqCst),
-            4 => {self.counter.fetch_add(val, Ordering::SeqCst);}
-            _ => while self.counter.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| if x >= val {
+            0x0 => self.emptyCount.store(val, Ordering::SeqCst),
+            0x4 => {self.emptyCount.fetch_add(val, Ordering::SeqCst);}
+            0x8 => while self.emptyCount.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| if x >= val {
+                Some(x - val)
+            } else {
+                None
+            }
+            ).is_err(){}
+            0xc => self.fullCount.store(val, Ordering::SeqCst),
+            0x10 => {self.fullCount.fetch_add(val, Ordering::SeqCst);}
+            0x14 => while self.fullCount.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| if x >= val {
+                Some(x - val)
+            } else {
+                None
+            }
+            ).is_err(){}
+            0x18 => self.useQueue.store(val, Ordering::SeqCst),
+            0x1c => {self.useQueue.fetch_add(val, Ordering::SeqCst);}
+            _ => while self.useQueue.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| if x >= val {
                 Some(x - val)
             } else {
                 None
@@ -93,6 +135,6 @@ impl Peripheral for Semaphores {
     }
 
     fn load(&self, _: u32, _: u8) -> u32 {
-        self.counter.load(Ordering::SeqCst)
+        0
     }
 }

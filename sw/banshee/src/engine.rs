@@ -54,7 +54,7 @@ pub struct Engine {
     /// The per-core putchar buffers (per hartid).
     pub putchar_buffer: Mutex<HashMap<usize, Vec<u8>>>,
     /// The peripherals for each cluster
-    peripherals: Vec<Peripherals>,
+    peripherals: Peripherals,
 }
 
 // SAFETY: This is safe because only `context` and `module`
@@ -80,7 +80,7 @@ impl Engine {
             config: Default::default(),
             memory: Default::default(),
             putchar_buffer: Default::default(),
-            peripherals: Default::default(),
+            peripherals: Peripherals::new(),
         }
     }
 
@@ -300,9 +300,8 @@ impl Engine {
     }
 
     pub fn init_periphs(&mut self) {
-        self.peripherals = (0..self.num_clusters)
-            .map(|i| Peripherals::new(&self.config.memory[i].periphs.callbacks))
-            .collect();
+        (0..self.num_clusters)
+            .for_each(|i| self.peripherals.add_cluster(&self.config.memory[i].periphs.callbacks))
     }
 
     // Execute the loaded memory.
@@ -556,7 +555,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x >= self.engine.config.memory[self.cluster_id].periphs.start
                 && x < self.engine.config.memory[self.cluster_id].periphs.end =>
             {
-                self.engine.peripherals[self.cluster_id].load(
+                self.engine.peripherals.load(
+                    self.cluster_id,
                     addr - self.engine.config.memory[self.cluster_id].periphs.start,
                     size,
                 )
@@ -639,7 +639,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x >= self.engine.config.memory[self.cluster_id].periphs.start
                 && x < self.engine.config.memory[self.cluster_id].periphs.end =>
             {
-                self.engine.peripherals[self.cluster_id].store(
+                self.engine.peripherals.store(
+                    self.cluster_id,
                     addr - self.engine.config.memory[self.cluster_id].periphs.start,
                     value,
                     mask,
