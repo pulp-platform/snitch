@@ -750,10 +750,8 @@ module snitch_cc #(
     assign core_tcdm_rsp = tcdm_rsp_i[0];
     // Tie off SSR insruction stream
     assign ssr_qready     = '0;
-    assign ssr_cfg_rsp    = '0;
+    assign ssr_resp       = '0;
     assign ssr_pvalid     = '0;
-    assign cfg_req        = '0;
-    assign cfg_req_valid  = '0;
     // Tie off SSR data stream
     assign ssr_rdata      = '0;
     assign ssr_rready     = '0;
