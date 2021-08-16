@@ -891,6 +891,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
         let cycle = self.wake_up[hartid].swap(0, Ordering::Relaxed);
         self.state.cycle = std::cmp::max(self.state.cycle, cycle as u64);
         self.state.wfi = false;
+        // Trigger IRQ check on next instruction
+        self.state.irq.sample_ctr = u32::MAX;
         // The core waking us up, already decremented the `num_sleep` counter for us
         return 0;
     }

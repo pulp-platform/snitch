@@ -88,6 +88,8 @@ pub struct DmaState {
 #[derive(Default)]
 #[repr(C)]
 pub struct IrqState {
+    // a counter to check the interrupt state every sample_ctr instructions
+    pub sample_ctr: u32,
     // interrupt control bits of the mstatus CSR
     pub mstatus: u32,
     // Machine interrupt enabled (same bits as mie csr)

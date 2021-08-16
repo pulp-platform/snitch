@@ -2727,9 +2727,41 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code to check for any interrupt
     unsafe fn emit_irq_check(&self) {
+        // Update irq_sample_ctr
+        let irq_sample_ctr = LLVMBuildLoad(self.builder, self.irq_sample_ptr(), NONAME);
+        let irq_sample_ctr = LLVMBuildAdd(
+            self.builder,
+            irq_sample_ctr,
+            LLVMConstInt(LLVMTypeOf(irq_sample_ctr), 1, 0),
+            NONAME,
+        );
+        LLVMBuildStore(self.builder, irq_sample_ctr, self.irq_sample_ptr());
+
+        // Create two BB, one for IRQ check (bb_prel_irq) one for normal execution (bb_noirq)
+        let bb_noirq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_prel_irq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_noirq);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_prel_irq);
+
+        // check sampler and branch to bb_prel_irq on overflow
+        let is_sample = LLVMBuildICmp(
+            self.builder,
+            LLVMIntUGE,
+            irq_sample_ctr,
+            LLVMConstInt(LLVMTypeOf(irq_sample_ctr), u64::MAX, 0),
+            NONAME,
+        );
+        LLVMBuildCondBr(self.builder, is_sample, bb_prel_irq, bb_noirq);
+        LLVMPositionBuilderAtEnd(self.builder, bb_prel_irq);
+
+        // reset sampler
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMTypeOf(irq_sample_ctr), 0, 0),
+            self.irq_sample_ptr(),
+        );
+
         // Fetch IRQ status
-        let mstatus = self.read_csr_silent(riscv::Csr::Mstatus as u32);
-        let mie = self.read_csr_silent(riscv::Csr::Mie as u32);
         let mip_old = self.read_csr_silent(riscv::Csr::Mip as u32);
         // read CLINT and update mip
         let clint_ret = self
@@ -2752,7 +2784,11 @@ impl<'a> InstructionTranslator<'a> {
             ),
             NONAME,
         );
-        self.write_csr(riscv::Csr::Mip as u32, mip);
+        self.write_csr_silent(riscv::Csr::Mip as u32, mip);
+
+        // fetch CSRs
+        let mstatus = self.read_csr_silent(riscv::Csr::Mstatus as u32);
+        let mie = self.read_csr_silent(riscv::Csr::Mie as u32);
 
         // AND the IE and IP registers
         let mirq = LLVMBuildAnd(self.builder, mie, mip, NONAME);
@@ -2783,10 +2819,8 @@ impl<'a> InstructionTranslator<'a> {
             is_any_interrupt_pending,
             NONAME,
         );
-        // Create two BB, one for IRQ one for normal execution
-        let bb_noirq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        // Create BB for IRQ
         let bb_irq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
-        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_noirq);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_irq);
 
         // branch to IRQ branch on any interrupt
@@ -3727,6 +3761,14 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn pc_ptr(&self) -> LLVMValueRef {
         self.section
             .emit_call_with_name("banshee_pc_ptr", [self.section.state_ptr], "ptr_pc")
+    }
+
+    unsafe fn irq_sample_ptr(&self) -> LLVMValueRef {
+        self.section.emit_call_with_name(
+            "banshee_irq_sample_ptr",
+            [self.section.state_ptr],
+            "irq_sample_ptr",
+        )
     }
 
     unsafe fn cycle_ptr(&self) -> LLVMValueRef {
