@@ -1,0 +1,1 @@
+--num-cores=1 --configuration tests/config/banshee_ssr_3dm.yaml

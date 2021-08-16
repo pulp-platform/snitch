@@ -5,18 +5,23 @@
 
 static volatile uint32_t *sink = (void *)0xF1230000;
 
-int main(uint32_t core_id, uint32_t core_num, void *spm_start, void *spm_end) {
+int main() {
+    uint32_t core_id = snrt_cluster_core_idx();
+    uint32_t core_num = snrt_cluster_core_num();
+    void *spm_start = snrt_cluster_memory().start;
+    void *spm_end = snrt_cluster_memory().end;
+
     volatile uint32_t *x = spm_start + 4;
     if (core_id == 0) {
         *x = 0;
     }
     for (uint32_t i = 0; i < core_num; i++) {
-        snrt_barrier();
+        snrt_cluster_hw_barrier();
         if (i == core_id) {
             *sink = core_id;
             *x += 1;
         }
     }
-    snrt_barrier();
+    snrt_cluster_hw_barrier();
     return core_id == 0 ? core_num -= *x : 0;
 }

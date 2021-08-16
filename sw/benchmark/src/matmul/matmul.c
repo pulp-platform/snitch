@@ -15,7 +15,7 @@ static void populate(double *ptr, uint32_t size, uint32_t seed) {
 }
 
 gemm_result_t gemm_bench(gemm_impl_t gemm_impl) {
-    snrt_barrier();
+    snrt_cluster_hw_barrier();
     size_t core_id = snrt_cluster_compute_core_idx();
     size_t core_num = snrt_cluster_compute_core_num();
 
@@ -44,11 +44,11 @@ gemm_result_t gemm_bench(gemm_impl_t gemm_impl) {
 
     // Execute the kernel and measure time.
     size_t t0 = benchmark_get_cycle();
-    snrt_barrier();
+    snrt_cluster_hw_barrier();
     size_t t1 = benchmark_get_cycle();
     gemm_impl(N, M, K, argA, ldA, argB, ldB, argC, ldC);
     size_t t2 = benchmark_get_cycle();
-    snrt_barrier();
+    snrt_cluster_hw_barrier();
     size_t t3 = benchmark_get_cycle();
 
     // Check and return results.
@@ -166,7 +166,8 @@ void gemm_seq_ssr(uint32_t N, uint32_t M, uint32_t K, double *A, uint32_t ldA,
                     "fmadd.d %[c2], ft0, ft1, %[c2] \n"
                     "fmadd.d %[c3], ft0, ft1, %[c3] \n"
                     : [ c0 ] "+f"(c0), [ c1 ] "+f"(c1), [ c2 ] "+f"(c2),
-                      [ c3 ] "+f"(c3)::"ft0", "ft1");
+                      [ c3 ] "+f"(c3)::"ft0", "ft1",
+                      "ft2");  // clobber ft0..ft2 for 3 SSR streamers
             }
             C[n * ldC + m + 0] = c0;
             C[n * ldC + m + 1] = c1;
@@ -212,7 +213,7 @@ void gemm_seq_ssr_frep(uint32_t N, uint32_t M, uint32_t K, double *A,
                 : [ c0 ] "+f"(c0), [ c1 ] "+f"(c1), [ c2 ] "+f"(c2),
                   [ c3 ] "+f"(c3)
                 : [ K ] "r"(Km1)
-                : "ft0", "ft1");
+                : "ft0", "ft1", "ft2");  // clobber ft0..ft2 for 3 SSR streamers
             C[n * ldC + m + 0] = c0;
             C[n * ldC + m + 1] = c1;
             C[n * ldC + m + 2] = c2;

@@ -9,17 +9,27 @@
   clock_primary: "clk_i",
   bus_device: "reg",
   regwidth: "32",
+  param_list: [
+    { name: "NumCores",
+      desc: "Number of cores",
+      type: "int",
+      default: "${cores}",
+      local: "true"
+    }
+  ],
   registers: [
-% for i in range(cores):
-    {   name: "MSIP${i}",
-        desc: "Machine Software Interrupt Pending Core ${i}",
+    { multireg: {
+        name: "MSIP",
+        desc: "Machine Software Interrupt Pending ",
+        count: "NumCores",
+        cname: "MSIP",
         swaccess: "rw",
         hwaccess: "hro",
         fields: [
-          { bits: "0", name: "MSIP", desc: "Machine Software Interrupt Pending of Core ${i}" },
+          { bits: "0", name: "P", desc: "Machine Software Interrupt Pending" }
         ]
+      }
     },
-% endfor
     { skipto: "0x4000" },
 % for i in range(cores):
     {   name: "MTIMECMP_LOW${i}",

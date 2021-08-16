@@ -50,13 +50,13 @@ static inline void smat16_dvec_spmv_opt_issr(
     asm volatile(
         // Preload ptrs_a[0], reset base accumulator
         "lw         t4, 0(%[rptr])      \n"
-        "fmv.d      ft2, %[f0]          \n"
+        "fmv.d      ft3, %[f0]          \n"
         // Enable SSRs
         "csrsi      0x7C0, 1            \n"
         "j          20f                 \n"
         // Joint reentry points for loop
-        "10:"  // Reentry with row result in ft8
-        "fsd        ft8, 0 (%[res])     \n"
+        "10:"  // Reentry with row result in ft9
+        "fsd        ft9, 0 (%[res])     \n"
         "11:"  // Reentry with row result already stored
         "add        %[res], %[res], %[rstr]\n"
         // Row loop
@@ -67,63 +67,63 @@ static inline void smat16_dvec_spmv_opt_issr(
         "addi       %[rptr], %[rptr], 4 \n"
         "sub        t6, t5, t4          \n"
         "mv         t4, t5              \n"
-        "fmadd.d    ft3, ft1, ft0, %[f0]\n"
+        "fmadd.d    ft4, ft1, ft0, %[f0]\n"
         "beq        t6, %[c1], 1f       \n"  // ptrs_a[r+1] == ptrs_a[r] + 1 -->
                                              // 1 elem
-        "fmadd.d    ft4, ft1, ft0, %[f0]\n"
+        "fmadd.d    ft5, ft1, ft0, %[f0]\n"
         "beq        t6, %[c2], 2f       \n"  // ptrs_a[r+1] == ptrs_a[r] + 2 -->
                                              // 2 elems
-        "fmadd.d    ft5, ft1, ft0, %[f0]\n"
+        "fmadd.d    ft6, ft1, ft0, %[f0]\n"
         "beq        t6, %[c3], 3f       \n"  // ptrs_a[r+1] == ptrs_a[r] + 3 -->
                                              // 3 elems
-        "fmadd.d    ft6, ft1, ft0, %[f0]\n"
+        "fmadd.d    ft7, ft1, ft0, %[f0]\n"
         "beq        t6, %[c4], 4f       \n"  // ptrs_a[r+1] == ptrs_a[r] + 4 -->
                                              // 4 elems
-        "fmadd.d    ft7, ft1, ft0, %[f0]\n"
+        "fmadd.d    fs0, ft1, ft0, %[f0]\n"
         "beq        t6, %[c5], 5f       \n"  // ptrs_a[r+1] == ptrs_a[r] + 5 -->
                                              // 5 elems
         // If more than 5 elements: commit to FREP
         "addi       t6, t6, -6          \n"
         "frep.o     t6, 1, 5, 0b1001    \n"
-        "fmadd.d    ft2, ft1, ft0, ft2  \n"
-        "fadd.d     ft9, ft6, ft7       \n"
-        "fadd.d     ft6, ft4, ft5       \n"
-        "fadd.d     ft7, ft2, ft3       \n"
-        "fadd.d     ft4, ft6, ft7       \n"
-        "fmv.d      ft2, %[f0]          \n"  // Reset reg ft2 used only in full
+        "fmadd.d    ft3, ft1, ft0, ft3  \n"
+        "fadd.d     ft10, ft7, fs0      \n"
+        "fadd.d     ft7, ft5, ft6       \n"
+        "fadd.d     fs0, ft3, ft4       \n"
+        "fadd.d     ft5, ft7, fs0       \n"
+        "fmv.d      ft3, %[f0]          \n"  // Reset reg ft3 used only in full
                                              // loop
-        "fadd.d     ft8, ft4, ft9       \n"
+        "fadd.d     ft9, ft5, ft10       \n"
         "bne        %[rptr], %[rlst], 10b\n"
         "j          30f                 \n"
         // 5 elems
         "5:"
-        "fadd.d     ft9, ft3, ft4       \n"
-        "fadd.d     ft3, ft5, ft6       \n"
-        "fadd.d     ft4, ft9, ft7       \n"
-        "fadd.d     ft8, ft4, ft3       \n"
+        "fadd.d     ft10, ft4, ft5      \n"
+        "fadd.d     ft4, ft6, ft7       \n"
+        "fadd.d     ft5, ft10, fs0      \n"
+        "fadd.d     ft9, ft5, ft4       \n"
         "bne        %[rptr], %[rlst], 10b\n"
         "j          30f                 \n"
         // 4 elems
         "4:"
-        "fadd.d     ft9, ft3, ft4       \n"
-        "fadd.d     ft3, ft5, ft6       \n"
-        "fadd.d     ft8, ft3, ft9       \n"
+        "fadd.d     ft10, ft4, ft5      \n"
+        "fadd.d     ft4, ft6, ft7       \n"
+        "fadd.d     ft9, ft4, ft10       \n"
         "bne        %[rptr], %[rlst], 10b\n"
         "j          30f                 \n"
         // 3 elems
         "3:"
-        "fadd.d     ft6, ft3, ft4       \n"
-        "fadd.d     ft8, ft5, ft6       \n"
+        "fadd.d     ft7, ft4, ft5       \n"
+        "fadd.d     ft9, ft6, ft7       \n"
         "bne        %[rptr], %[rlst], 10b\n"
         "j          30f                 \n"
         // 2 elems
         "2:"
-        "fadd.d     ft8, ft3, ft4       \n"
+        "fadd.d     ft9, ft4, ft5       \n"
         "bne        %[rptr], %[rlst], 10b\n"
         "j          30f                 \n"
         // 1 elem
         "1:"
-        "fsd        ft3, 0 (%[res])     \n"
+        "fsd        ft4, 0 (%[res])     \n"
         "bne        %[rptr], %[rlst], 11b\n"
         "j          30f                 \n"
         // empty
@@ -140,5 +140,5 @@ static inline void smat16_dvec_spmv_opt_issr(
           [ c5 ] "r"(5), [ f0 ] "f"(0.0),
           [ rstr ] "r"(stride_res << 3)  // inputs
         : "memory", "t4", "t5", "t6", "ft0", "ft1", "ft2", "ft3", "ft4", "ft5",
-          "ft6", "ft7", "ft8", "ft9");
+          "ft6", "ft7", "fs0", "ft9", "ft10");
 }

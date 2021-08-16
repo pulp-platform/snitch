@@ -143,7 +143,7 @@ module occamy_top
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
-  always_comb soc_ctrl_in = '0;
+  assign soc_ctrl_in.boot_mode.d = boot_mode_i;
 
 
 
@@ -151,17 +151,17 @@ module occamy_top
   typedef logic [63:0] mem_data_t;
   typedef logic [7:0] mem_strb_t;
 
-  logic spm_req, spm_we, spm_rvalid;
+  logic spm_req, spm_gnt, spm_we, spm_rvalid;
   logic [1:0] spm_rerror;
   mem_addr_t spm_addr;
   mem_data_t spm_wdata, spm_rdata;
   mem_strb_t spm_strb;
 
   // Machine timer and machine software interrupt pending.
-  logic mtip, msip;
+  logic [288:0] mtip, msip;
   // Supervisor and machine-mode external interrupt pending.
   logic [1:0] eip;
-  logic debug_req;
+  logic [0:0] debug_req;
   occamy_interrupt_t irq;
 
   assign irq.ext_irq = ext_irq_i;
@@ -312,7 +312,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   xbar_rule_48_t [12:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-  '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h80000000 },
+  '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70020000 },
   '{ idx: 10, start_addr: 48'h20000000, end_addr: 48'h70000000 },
   '{ idx: 10, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
   '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h10000000 },
@@ -535,9 +535,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .irq_i(eip),
-      .ipi_i(msip),
-      .time_irq_i(mtip),
-      .debug_req_i(debug_req),
+      .ipi_i(msip[0]),
+      .time_irq_i(mtip[0]),
+      .debug_req_i(debug_req[0]),
       .axi_req_o(soc_narrow_xbar_in_req[SOC_NARROW_XBAR_IN_CVA6]),
       .axi_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6])
   );
@@ -652,15 +652,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_0_req_o = wide_hbi_out_cut_0_cut_req;
   assign wide_hbi_out_cut_0_cut_rsp = hbi_0_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_0 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd0),
+      // .debug_req_i (debug_req[36:1]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[36:1]),
+      .msip_i(msip[36:1]),
+      .isolate_i(soc_ctrl_out.isolate[0].q),
+      .isolated_o(soc_ctrl_in.isolated[0].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_0_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_0_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_0_req),
@@ -783,15 +787,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_1_req_o = wide_hbi_out_cut_1_cut_req;
   assign wide_hbi_out_cut_1_cut_rsp = hbi_1_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_1 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd1),
+      // .debug_req_i (debug_req[72:37]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[72:37]),
+      .msip_i(msip[72:37]),
+      .isolate_i(soc_ctrl_out.isolate[1].q),
+      .isolated_o(soc_ctrl_in.isolated[1].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_1_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_1_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_1_req),
@@ -914,15 +922,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_2_req_o = wide_hbi_out_cut_2_cut_req;
   assign wide_hbi_out_cut_2_cut_rsp = hbi_2_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_2 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd2),
+      // .debug_req_i (debug_req[108:73]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[108:73]),
+      .msip_i(msip[108:73]),
+      .isolate_i(soc_ctrl_out.isolate[2].q),
+      .isolated_o(soc_ctrl_in.isolated[2].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_2_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_2_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_2_req),
@@ -1045,15 +1057,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_3_req_o = wide_hbi_out_cut_3_cut_req;
   assign wide_hbi_out_cut_3_cut_rsp = hbi_3_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_3 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd3),
+      // .debug_req_i (debug_req[144:109]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[144:109]),
+      .msip_i(msip[144:109]),
+      .isolate_i(soc_ctrl_out.isolate[3].q),
+      .isolated_o(soc_ctrl_in.isolated[3].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_3_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_3_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_3_req),
@@ -1176,15 +1192,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_4_req_o = wide_hbi_out_cut_4_cut_req;
   assign wide_hbi_out_cut_4_cut_rsp = hbi_4_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_4 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd4),
+      // .debug_req_i (debug_req[180:145]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[180:145]),
+      .msip_i(msip[180:145]),
+      .isolate_i(soc_ctrl_out.isolate[4].q),
+      .isolated_o(soc_ctrl_in.isolated[4].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_4_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_4_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_4_req),
@@ -1307,15 +1327,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_5_req_o = wide_hbi_out_cut_5_cut_req;
   assign wide_hbi_out_cut_5_cut_rsp = hbi_5_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd5),
+      // .debug_req_i (debug_req[216:181]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[216:181]),
+      .msip_i(msip[216:181]),
+      .isolate_i(soc_ctrl_out.isolate[5].q),
+      .isolated_o(soc_ctrl_in.isolated[5].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_5_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_5_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_5_req),
@@ -1438,15 +1462,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_6_req_o = wide_hbi_out_cut_6_cut_req;
   assign wide_hbi_out_cut_6_cut_rsp = hbi_6_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_6 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd6),
+      // .debug_req_i (debug_req[252:217]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[252:217]),
+      .msip_i(msip[252:217]),
+      .isolate_i(soc_ctrl_out.isolate[6].q),
+      .isolated_o(soc_ctrl_in.isolated[6].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_6_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_6_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_6_req),
@@ -1569,15 +1597,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_7_req_o = wide_hbi_out_cut_7_cut_req;
   assign wide_hbi_out_cut_7_cut_rsp = hbi_7_rsp_i;
 
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_7 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .test_mode_i(test_mode_i),
       .tile_id_i(6'd7),
+      // .debug_req_i (debug_req[288:253]),
       .debug_req_i('0),
       .meip_i('0),
-      .mtip_i('0),
-      .msip_i('0),
+      .mtip_i(mtip[288:253]),
+      .msip_i(msip[288:253]),
+      .isolate_i(soc_ctrl_out.isolate[7].q),
+      .isolated_o(soc_ctrl_in.isolated[7].d),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_7_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_7_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_7_req),
@@ -1618,24 +1650,155 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .dst_resp_i(spm_cdc_rsp)
   );
 
+  axi_a48_d64_i1_u0_req_t  spm_serialize_req;
+  axi_a48_d64_i1_u0_resp_t spm_serialize_rsp;
+
+  axi_id_serialize #(
+      .AtopSupport(1),
+      .AxiSlvPortIdWidth(8),
+      .AxiSlvPortMaxTxns(4),
+      .AxiMstPortIdWidth(1),
+      .AxiMstPortMaxUniqIds(2),
+      .AxiMstPortMaxTxnsPerId(2),
+      .AxiAddrWidth(48),
+      .AxiDataWidth(64),
+      .AxiUserWidth(1),
+      .slv_req_t(axi_a48_d64_i8_u0_req_t),
+      .slv_resp_t(axi_a48_d64_i8_u0_resp_t),
+      .mst_req_t(axi_a48_d64_i1_u0_req_t),
+      .mst_resp_t(axi_a48_d64_i1_u0_resp_t)
+  ) i_spm_serialize (
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
+      .slv_req_i(spm_cdc_req),
+      .slv_resp_o(spm_cdc_rsp),
+      .mst_req_o(spm_serialize_req),
+      .mst_resp_i(spm_serialize_rsp)
+  );
+  axi_a48_d64_i1_u0_req_t  spm_amo_adapter_req;
+  axi_a48_d64_i1_u0_resp_t spm_amo_adapter_rsp;
+
+  axi_riscv_atomics #(
+      .AXI_ADDR_WIDTH(48),
+      .AXI_DATA_WIDTH(64),
+      .AXI_ID_WIDTH(1),
+      .AXI_USER_WIDTH(1),
+      .AXI_MAX_WRITE_TXNS(16),
+      .RISCV_WORD_WIDTH(64)
+  ) i_spm_amo_adapter (
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
+      .slv_aw_addr_i(spm_serialize_req.aw.addr),
+      .slv_aw_prot_i(spm_serialize_req.aw.prot),
+      .slv_aw_region_i(spm_serialize_req.aw.region),
+      .slv_aw_atop_i(spm_serialize_req.aw.atop),
+      .slv_aw_len_i(spm_serialize_req.aw.len),
+      .slv_aw_size_i(spm_serialize_req.aw.size),
+      .slv_aw_burst_i(spm_serialize_req.aw.burst),
+      .slv_aw_lock_i(spm_serialize_req.aw.lock),
+      .slv_aw_cache_i(spm_serialize_req.aw.cache),
+      .slv_aw_qos_i(spm_serialize_req.aw.qos),
+      .slv_aw_id_i(spm_serialize_req.aw.id),
+      .slv_aw_user_i(spm_serialize_req.aw.user),
+      .slv_aw_ready_o(spm_serialize_rsp.aw_ready),
+      .slv_aw_valid_i(spm_serialize_req.aw_valid),
+      .slv_ar_addr_i(spm_serialize_req.ar.addr),
+      .slv_ar_prot_i(spm_serialize_req.ar.prot),
+      .slv_ar_region_i(spm_serialize_req.ar.region),
+      .slv_ar_len_i(spm_serialize_req.ar.len),
+      .slv_ar_size_i(spm_serialize_req.ar.size),
+      .slv_ar_burst_i(spm_serialize_req.ar.burst),
+      .slv_ar_lock_i(spm_serialize_req.ar.lock),
+      .slv_ar_cache_i(spm_serialize_req.ar.cache),
+      .slv_ar_qos_i(spm_serialize_req.ar.qos),
+      .slv_ar_id_i(spm_serialize_req.ar.id),
+      .slv_ar_user_i(spm_serialize_req.ar.user),
+      .slv_ar_ready_o(spm_serialize_rsp.ar_ready),
+      .slv_ar_valid_i(spm_serialize_req.ar_valid),
+      .slv_w_data_i(spm_serialize_req.w.data),
+      .slv_w_strb_i(spm_serialize_req.w.strb),
+      .slv_w_user_i(spm_serialize_req.w.user),
+      .slv_w_last_i(spm_serialize_req.w.last),
+      .slv_w_ready_o(spm_serialize_rsp.w_ready),
+      .slv_w_valid_i(spm_serialize_req.w_valid),
+      .slv_r_data_o(spm_serialize_rsp.r.data),
+      .slv_r_resp_o(spm_serialize_rsp.r.resp),
+      .slv_r_last_o(spm_serialize_rsp.r.last),
+      .slv_r_id_o(spm_serialize_rsp.r.id),
+      .slv_r_user_o(spm_serialize_rsp.r.user),
+      .slv_r_ready_i(spm_serialize_req.r_ready),
+      .slv_r_valid_o(spm_serialize_rsp.r_valid),
+      .slv_b_resp_o(spm_serialize_rsp.b.resp),
+      .slv_b_id_o(spm_serialize_rsp.b.id),
+      .slv_b_user_o(spm_serialize_rsp.b.user),
+      .slv_b_ready_i(spm_serialize_req.b_ready),
+      .slv_b_valid_o(spm_serialize_rsp.b_valid),
+
+      .mst_aw_addr_o(spm_amo_adapter_req.aw.addr),
+      .mst_aw_prot_o(spm_amo_adapter_req.aw.prot),
+      .mst_aw_region_o(spm_amo_adapter_req.aw.region),
+      .mst_aw_atop_o(spm_amo_adapter_req.aw.atop),
+      .mst_aw_len_o(spm_amo_adapter_req.aw.len),
+      .mst_aw_size_o(spm_amo_adapter_req.aw.size),
+      .mst_aw_burst_o(spm_amo_adapter_req.aw.burst),
+      .mst_aw_lock_o(spm_amo_adapter_req.aw.lock),
+      .mst_aw_cache_o(spm_amo_adapter_req.aw.cache),
+      .mst_aw_qos_o(spm_amo_adapter_req.aw.qos),
+      .mst_aw_id_o(spm_amo_adapter_req.aw.id),
+      .mst_aw_user_o(spm_amo_adapter_req.aw.user),
+      .mst_aw_ready_i(spm_amo_adapter_rsp.aw_ready),
+      .mst_aw_valid_o(spm_amo_adapter_req.aw_valid),
+      .mst_ar_addr_o(spm_amo_adapter_req.ar.addr),
+      .mst_ar_prot_o(spm_amo_adapter_req.ar.prot),
+      .mst_ar_region_o(spm_amo_adapter_req.ar.region),
+      .mst_ar_len_o(spm_amo_adapter_req.ar.len),
+      .mst_ar_size_o(spm_amo_adapter_req.ar.size),
+      .mst_ar_burst_o(spm_amo_adapter_req.ar.burst),
+      .mst_ar_lock_o(spm_amo_adapter_req.ar.lock),
+      .mst_ar_cache_o(spm_amo_adapter_req.ar.cache),
+      .mst_ar_qos_o(spm_amo_adapter_req.ar.qos),
+      .mst_ar_id_o(spm_amo_adapter_req.ar.id),
+      .mst_ar_user_o(spm_amo_adapter_req.ar.user),
+      .mst_ar_ready_i(spm_amo_adapter_rsp.ar_ready),
+      .mst_ar_valid_o(spm_amo_adapter_req.ar_valid),
+      .mst_w_data_o(spm_amo_adapter_req.w.data),
+      .mst_w_strb_o(spm_amo_adapter_req.w.strb),
+      .mst_w_user_o(spm_amo_adapter_req.w.user),
+      .mst_w_last_o(spm_amo_adapter_req.w.last),
+      .mst_w_ready_i(spm_amo_adapter_rsp.w_ready),
+      .mst_w_valid_o(spm_amo_adapter_req.w_valid),
+      .mst_r_data_i(spm_amo_adapter_rsp.r.data),
+      .mst_r_resp_i(spm_amo_adapter_rsp.r.resp),
+      .mst_r_last_i(spm_amo_adapter_rsp.r.last),
+      .mst_r_id_i(spm_amo_adapter_rsp.r.id),
+      .mst_r_user_i(spm_amo_adapter_rsp.r.user),
+      .mst_r_ready_o(spm_amo_adapter_req.r_ready),
+      .mst_r_valid_i(spm_amo_adapter_rsp.r_valid),
+      .mst_b_resp_i(spm_amo_adapter_rsp.b.resp),
+      .mst_b_id_i(spm_amo_adapter_rsp.b.id),
+      .mst_b_user_i(spm_amo_adapter_rsp.b.user),
+      .mst_b_ready_o(spm_amo_adapter_req.b_ready),
+      .mst_b_valid_i(spm_amo_adapter_rsp.b_valid)
+  );
+
 
 
   axi_to_mem #(
-      .axi_req_t(axi_a48_d64_i8_u0_req_t),
-      .axi_resp_t(axi_a48_d64_i8_u0_resp_t),
+      .axi_req_t(axi_a48_d64_i1_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i1_u0_resp_t),
       .AddrWidth(17),
       .DataWidth(64),
-      .IdWidth(8),
+      .IdWidth(1),
       .NumBanks(1),
       .BufDepth(1)
   ) i_axi_to_mem (
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
       .busy_o(),
-      .axi_req_i(spm_cdc_req),
-      .axi_resp_o(spm_cdc_rsp),
+      .axi_req_i(spm_amo_adapter_req),
+      .axi_resp_o(spm_amo_adapter_rsp),
       .mem_req_o(spm_req),
-      .mem_gnt_i(spm_req),  // always granted - it's an SPM.
+      .mem_gnt_i(spm_gnt),
       .mem_addr_o(spm_addr),
       .mem_wdata_o(spm_wdata),
       .mem_strb_o(spm_strb),
@@ -1645,7 +1808,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .mem_rdata_i(spm_rdata)
   );
 
-  cc_ram_1p_adv #(
+  spm_1p_adv #(
       .NumWords(16384),
       .DataWidth(64),
       .ByteWidth(8),
@@ -1654,7 +1817,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   ) i_spm_cut (
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
-      .req_i(spm_req),
+      .valid_i(spm_req),
+      .ready_o(spm_gnt),
       .we_i(spm_we),
       .addr_i(spm_addr[16:3]),
       .wdata_i(spm_wdata),
@@ -1891,7 +2055,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   dm::hartinfo_t [0:0] hartinfo;
-  assign hartinfo = ariane_pkg::DebugHartInfo;
+  assign hartinfo[0] = ariane_pkg::DebugHartInfo;
 
   logic                 dmi_rst_n;
   dm::dmi_req_t         dmi_req;
@@ -1945,6 +2109,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   logic [63:0] sba_addr_long;
 
   dm_top #(
+      // .NrHarts (289),
       .NrHarts(1),
       .BusWidth(64),
       .DmBaseAddress('h0)

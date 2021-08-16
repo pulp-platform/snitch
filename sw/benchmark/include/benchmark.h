@@ -4,6 +4,7 @@
 #pragma once
 #include <snrt.h>
 #include <stddef.h>
-#include <stdio.h>
+
+#include "printf.h"
 
 size_t benchmark_get_cycle();

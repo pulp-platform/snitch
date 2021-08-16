@@ -71,6 +71,10 @@ def main():
     parser.add_argument("--chip",
                         metavar="CHIP_TOP",
                         help="(Optional) Chip Top-level")
+    parser.add_argument("--bootdata",
+                        metavar="BOOTDATA",
+                        help="Name of the bootdata file (output)")
+
     parser.add_argument("--graph", "-g", metavar="DOT")
     parser.add_argument("--memories", "-m", action="store_true")
     parser.add_argument("--wrapper", "-w", action="store_true")
@@ -101,6 +105,8 @@ def main():
     # Arguments.
     nr_s1_quadrants = occamy.cfg["nr_s1_quadrant"]
     nr_s1_clusters = occamy.cfg["s1_quadrant"]["nr_clusters"]
+    # Iterate over Hives to get the number of cores.
+    nr_cluster_cores = len([core for hive in occamy.cfg["cluster"]["hives"] for core in hive["cores"]])
 
     if not args.outdir.is_dir():
         exit("Out directory is not a valid path.")
@@ -183,7 +189,7 @@ def main():
     am_pcie = am.new_leaf("pcie", 0x28000000, 0x20000000,
                           0x48000000).attach_to(am_soc_wide_xbar)
 
-    am_spm = am.new_leaf("spm", 0x10000000, 0x70000000)
+    am_spm = am.new_leaf("spm", occamy.cfg["spm"]["length"], occamy.cfg["spm"]["address"])
 
     # HBM
     am_hbm = list()
@@ -377,8 +383,11 @@ def main():
         "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
         "soc_regbus_periph_xbar": soc_regbus_periph_xbar,
         "apb_hbi_ctl": apb_hbi_ctl,
+        "cfg": occamy.cfg,
+        "cores": nr_s1_quadrants * nr_s1_clusters * nr_cluster_cores + 1,
         "nr_s1_quadrants": nr_s1_quadrants,
-        "cfg": occamy.cfg
+        "nr_s1_clusters": nr_s1_clusters,
+        "nr_cluster_cores": nr_cluster_cores
     }
 
     # Emit the code.
@@ -430,6 +439,11 @@ def main():
     # CHIP TOP #
     ############
     write_template(args.chip, outdir, **kwargs)
+
+    ############
+    # BOOTDATA #
+    ############
+    write_template(args.bootdata, outdir, **kwargs)
 
     #######
     # DTS #

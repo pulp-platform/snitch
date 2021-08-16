@@ -30,7 +30,7 @@ static inline void svec16_dvec_dotp_opt_issr(const double* vals_a,
     // Assembly kernel
     asm volatile(
         // Setup zero register
-        "fcvt.d.w   ft2, zero           \n"
+        "fcvt.d.w   ft3, zero           \n"
         // SSR setup
         "scfgwi %[ldec], 0 |  2<<5      \n"  // bounds_0[0]
         "scfgwi %[ldec], 1 |  2<<5      \n"  // bounds_0[1]
@@ -43,18 +43,18 @@ static inline void svec16_dvec_dotp_opt_issr(const double* vals_a,
         // Enable SSRs
         "csrsi      0x7C0, 1            \n"
         // Init target registers
-        "fmv.d      ft3, ft2            \n"
-        "fmv.d      ft4, ft2            \n"
-        "fmv.d      ft5, ft2            \n"
-        "fmv.d      ft6, ft2            \n"
-        "fmv.d      ft7, ft2            \n"
+        "fmv.d      ft4, ft3            \n"
+        "fmv.d      ft5, ft3            \n"
+        "fmv.d      ft6, ft3            \n"
+        "fmv.d      ft7, ft3            \n"
+        "fmv.d      fs0, ft3            \n"
         // Computation
         "frep.o %[ldec], 1, 5, 0b1001   \n"
-        "fmadd.d    ft2, ft1, ft0, ft2  \n"
+        "fmadd.d    ft3, ft1, ft0, ft3  \n"
         // Reduction
         "fadd.d     ft9, ft6, ft7       \n"
         "fadd.d     ft6, ft4, ft5       \n"
-        "fadd.d     ft7, ft2, ft3       \n"
+        "fadd.d     ft7, fs0, ft3       \n"
         "fadd.d     ft4, ft6, ft7       \n"
         "fadd.d     ft8, ft4, ft9       \n"
         // Writeback
@@ -66,7 +66,7 @@ static inline void svec16_dvec_dotp_opt_issr(const double* vals_a,
         [ c8 ] "r"(8), [ c1 ] "r"(1), [ vala ] "r"(vals_a),
         [ idca ] "r"(idcs_a), [ valb ] "r"(vals_b), [ ldec ] "r"(len_a - 1)
         : "memory", "t0", "ft0", "ft1", "ft2", "ft3", "ft4", "ft5", "ft6",
-          "ft7", "ft8", "ft9");
+          "ft7", "ft8", "ft9", "fs0");
 }
 
 int main() {

@@ -105,25 +105,25 @@ module occamy_top
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
-  always_comb soc_ctrl_in = '0;
+  assign soc_ctrl_in.boot_mode.d = boot_mode_i;
 
-  <% spm_words = cfg["spm"]["size"]*1024//(soc_narrow_xbar.out_spm.dw//8) %>
+  <% spm_words = cfg["spm"]["length"]//(soc_narrow_xbar.out_spm.dw//8) %>
 
   typedef logic [${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)-1}:0] mem_addr_t;
   typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;
   typedef logic [${soc_narrow_xbar.out_spm.dw//8-1}:0] mem_strb_t;
 
-  logic spm_req, spm_we, spm_rvalid;
+  logic spm_req, spm_gnt, spm_we, spm_rvalid;
   logic [1:0] spm_rerror;
   mem_addr_t spm_addr;
   mem_data_t spm_wdata, spm_rdata;
   mem_strb_t spm_strb;
 
   // Machine timer and machine software interrupt pending.
-  logic mtip, msip;
+  logic [${cores-1}:0] mtip, msip;
   // Supervisor and machine-mode external interrupt pending.
   logic [1:0] eip;
-  logic debug_req;
+  logic [0:0] debug_req;
   occamy_interrupt_t irq;
 
   assign irq.ext_irq = ext_irq_i;
@@ -163,9 +163,9 @@ module occamy_top
     .clk_i (clk_i),
     .rst_ni (rst_ni),
     .irq_i (eip),
-    .ipi_i (msip),
-    .time_irq_i (mtip),
-    .debug_req_i (debug_req),
+    .ipi_i (msip[0]),
+    .time_irq_i (mtip[0]),
+    .debug_req_i (debug_req[0]),
     .axi_req_o (${soc_narrow_xbar.in_cva6.req_name()}),
     .axi_resp_i (${soc_narrow_xbar.in_cva6.rsp_name()})
   );
@@ -188,15 +188,22 @@ module occamy_top
   assign hbi_${i}_req_o = ${wide_hbi_cut_out.req_name()};
   assign ${wide_hbi_cut_out.rsp_name()} = hbi_${i}_rsp_i;
 
+  <%
+    nr_cores_s1_quadrant = nr_s1_clusters * nr_cluster_cores
+    lower_core = i * nr_cores_s1_quadrant + 1
+  %>
   occamy_quadrant_s1 i_occamy_quadrant_s1_${i} (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
     .test_mode_i (test_mode_i),
     .tile_id_i (6'd${i}),
+    // .debug_req_i (debug_req[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
     .debug_req_i ('0),
     .meip_i ('0),
-    .mtip_i ('0),
-    .msip_i ('0),
+    .mtip_i (mtip[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
+    .msip_i (msip[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
+    .isolate_i (soc_ctrl_out.isolate[${i}].q),
+    .isolated_o (soc_ctrl_in.isolated[${i}].d),
     .quadrant_hbi_out_req_o (${wide_hbi_out.req_name()}),
     .quadrant_hbi_out_rsp_i (${wide_hbi_out.rsp_name()}),
     .quadrant_narrow_out_req_o (${narrow_out.req_name()}),
@@ -215,7 +222,11 @@ module occamy_top
   //////////
   // SPM //
   //////////
-  <% narrow_spm_cdc = soc_narrow_xbar.out_spm.cdc(context, "clk_periph_i", "rst_periph_ni", "spm_cdc") %>
+  <% narrow_spm_cdc = soc_narrow_xbar.out_spm \
+                      .cdc(context, "clk_periph_i", "rst_periph_ni", "spm_cdc") \
+                      .serialize(context, "spm_serialize", iw=1) \
+                      .atomic_adapter(context, 16, "spm_amo_adapter")
+  %>
 
   axi_to_mem #(
     .axi_req_t (${narrow_spm_cdc.req_type()}),
@@ -232,7 +243,7 @@ module occamy_top
     .axi_req_i (${narrow_spm_cdc.req_name()}),
     .axi_resp_o (${narrow_spm_cdc.rsp_name()}),
     .mem_req_o (spm_req),
-    .mem_gnt_i (spm_req), // always granted - it's an SPM.
+    .mem_gnt_i (spm_gnt),
     .mem_addr_o (spm_addr),
     .mem_wdata_o (spm_wdata),
     .mem_strb_o (spm_strb),
@@ -242,7 +253,7 @@ module occamy_top
     .mem_rdata_i (spm_rdata)
   );
 
-  cc_ram_1p_adv #(
+  spm_1p_adv #(
     .NumWords (${spm_words}),
     .DataWidth (${narrow_spm_cdc.dw}),
     .ByteWidth (8),
@@ -251,7 +262,8 @@ module occamy_top
   ) i_spm_cut (
     .clk_i (${narrow_spm_cdc.clk}),
     .rst_ni (${narrow_spm_cdc.rst}),
-    .req_i (spm_req),
+    .valid_i (spm_req),
+    .ready_o (spm_gnt),
     .we_i (spm_we),
     .addr_i (spm_addr[${util.clog2(spm_words) + util.clog2(narrow_spm_cdc.dw//8)-1}:${util.clog2(narrow_spm_cdc.dw//8)}]),
     .wdata_i (spm_wdata),
@@ -298,7 +310,7 @@ module occamy_top
   ///////////
   <% regbus_debug = soc_periph_xbar.out_debug.to_reg(context, "axi_lite_to_reg_debug") %>
   dm::hartinfo_t [0:0] hartinfo;
-  assign hartinfo = ariane_pkg::DebugHartInfo;
+  assign hartinfo[0] = ariane_pkg::DebugHartInfo;
 
   logic          dmi_rst_n;
   dm::dmi_req_t  dmi_req;
@@ -352,6 +364,7 @@ module occamy_top
   logic [${regbus_debug.dw-1}:0] sba_addr_long;
 
   dm_top #(
+    // .NrHarts (${cores}),
     .NrHarts (1),
     .BusWidth (${regbus_debug.dw}),
     .DmBaseAddress ('h0)

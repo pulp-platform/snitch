@@ -67,35 +67,41 @@ snrt.crt0.init_stack:
     # Misalign stacks in the TCDM to reduce banking conflicts
     slli      t0, a0, 3  # this hart
     slli      t1, a1, 3  # all harts
-    add       sp, sp, t0
-    add       a3, a3, t1
+    sub       sp, sp, t0
+    sub       a3, a3, t1
 
-    # Allocate thread-local storage at the top of the stack.
+    # Allocate thread-local storage at the top of the stack and set tp
+    # to the base of the tls
 snrt.crt0.init_tls:
     la        t0, __tdata_start
     la        t1, __tdata_end
-    la        t2, __tbss_end
-    add       sp, sp, t0
-    sub       sp, sp, t2
-    li        t3, ~0x7
-    and       sp, sp, t3  # align stack to 8B
-    mv        tp, sp
+    la        t2, __tbss_start
+    la        t3, __tbss_end
+    add       sp, sp, t0   # subtract sp to make room for TLS and align
+    sub       sp, sp, t1
+    add       sp, sp, t2
+    sub       sp, sp, t3
+    andi      sp, sp, ~0x7
+    mv        tp, sp       # palce tp at start of TLS
+    andi      sp, sp, ~0x7 # align stack to 8B
 
     # Copy __tdata_start to __tdata_end.
-    mv        t3, tp
+    mv        t4, tp
     bge       t0, t1, 2f
-1:  lw        t4, 0(t0)
-    sw        t4, 0(t3)
+1:  lw        t5, 0(t0)
+    sw        t5, 0(t4)
     addi      t0, t0, 4
-    addi      t3, t3, 4
+    addi      t4, t4, 4
     blt       t0, t1, 1b
 2:
 
     # Clear from _tdata_end to _tbss_end.
-    bge       t0, t2, 2f
-1:  sw        zero, 0(t3)
+    la        t0, __tbss_start
+    la        t1, __tbss_end
+    bge       t0, t1, 2f
+1:  sw        zero, 0(t4)
     addi      t0, t0, 4
-    addi      t3, t3, 4
+    addi      t4, t4, 4
     blt       t0, t2, 1b
 2:
 
@@ -136,13 +142,3 @@ snrt.crt0.end:
 1:
     wfi
     j       1b
-
-# The following is a super ugly hack to determine the end of the .tbss section.
-.section ".tdata"
-__tdata_end:
-    .globl __tdata_end
-.section ".tbss"
-__tbss_end:
-    .globl __tbss_end
-
-.section .text

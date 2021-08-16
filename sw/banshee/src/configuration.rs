@@ -18,6 +18,8 @@ pub struct Configuration {
     pub address: Address,
     #[serde(default)]
     pub inst_latency: std::collections::HashMap<String, u64>,
+    #[serde(default)]
+    pub ssr: Ssr,
 }
 
 impl Default for Configuration {
@@ -26,6 +28,7 @@ impl Default for Configuration {
             memory: Default::default(),
             address: Default::default(),
             inst_latency: Default::default(),
+            ssr: Default::default(),
         }
     }
 }
@@ -89,8 +92,8 @@ impl Default for Memories {
     fn default() -> Memories {
         Memories {
             tcdm: Memory {
-                start: 0,
-                end: 0x20000,
+                start: 0x100000,
+                end: 0x120000,
                 latency: 2,
             },
             dram: Memory {
@@ -188,5 +191,17 @@ impl Default for Address {
             cluster_id: 0x40000050,
             uart: 0xF00B8000,
         }
+    }
+}
+
+/// Struct to configure SSRs
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct Ssr {
+    pub num_dm: usize,
+}
+
+impl Default for Ssr {
+    fn default() -> Ssr {
+        Ssr { num_dm: 2 }
     }
 }

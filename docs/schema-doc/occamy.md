@@ -95,8 +95,7 @@ The default value is:
 
 ```json
 {
-  "size": 128,
-  "banks": 8
+  "size": 128
 }
 ```
 

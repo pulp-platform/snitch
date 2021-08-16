@@ -1,3 +1,7 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+
 set(CMAKE_C_COMPILER riscv32-unknown-elf-gcc)
 set(CMAKE_CXX_COMPILER riscv32-unknown-elf-g++)
 set(CMAKE_OBJCOPY riscv32-unknown-elf-objcopy)
@@ -12,3 +16,7 @@ link_libraries(-lm -lgcc)
 
 add_compile_options(-ffunction-sections)
 add_compile_options(-Wextra)
+
+# Add preprocessor definition to indicate LD is used
+add_compile_definitions(__LINK_LD)
+add_compile_definitions(__TOOLCHAIN_GCC__)

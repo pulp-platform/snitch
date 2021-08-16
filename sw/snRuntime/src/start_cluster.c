@@ -8,10 +8,9 @@ extern const uint32_t _snrt_cluster_cluster_core_num;
 extern const uint32_t _snrt_cluster_cluster_base_hartid;
 extern const uint32_t _snrt_cluster_cluster_num;
 extern const uint32_t _snrt_cluster_cluster_id;
-void *const _snrt_cluster_global_start = (void *)0x90000000;
-void *const _snrt_cluster_global_end = (void *)0x100000000;
+void *const _snrt_cluster_global_offset = (void *)0x10000000;
 
-const uint32_t snrt_stack_size __attribute__((weak)) = 10;
+const uint32_t snrt_stack_size __attribute__((weak, section(".rodata"))) = 10;
 
 // The boot data generated along with the system RTL.
 // See `hw/system/snitch_cluster/test/tb_lib.hh` for details.
@@ -20,11 +19,16 @@ struct snrt_cluster_bootdata {
     uint32_t core_count;
     uint32_t hartid_base;
     uint32_t tcdm_start;
-    uint32_t tcdm_end;
+    uint32_t tcdm_size;
+    uint32_t tcdm_offset;
+    uint64_t global_mem_start;
+    uint64_t global_mem_end;
+    uint32_t cluster_count;
+    uint32_t s1_quadrant_count;
 };
 
 // Rudimentary string buffer for putc calls.
-extern uint32_t _end;
+extern uint32_t _edram;
 #define PUTC_BUFFER_LEN (1024 - sizeof(size_t))
 struct putc_buffer_header {
     size_t size;
@@ -33,7 +37,7 @@ struct putc_buffer_header {
 static volatile struct putc_buffer {
     struct putc_buffer_header hdr;
     char data[PUTC_BUFFER_LEN];
-} *const putc_buffer = (void *)&_end;
+} *const putc_buffer = (void *)&_edram;
 
 void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
                      void *spm_start, void *spm_end,
@@ -42,25 +46,31 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->base.root = team;
     team->device_tree = (void *)bootdata;
     team->global_core_base_hartid = bootdata->hartid_base;
-    team->global_core_num = bootdata->core_count;
-    team->cluster_idx = 0;
-    team->cluster_num = 1;
+    team->global_core_num = bootdata->core_count * bootdata->cluster_count *
+                            bootdata->s1_quadrant_count;
+    team->cluster_idx =
+        (snrt_hartid() - bootdata->hartid_base) / bootdata->core_count;
+    team->cluster_num = bootdata->cluster_count;
     team->cluster_core_base_hartid = bootdata->hartid_base;
-    team->cluster_core_num = bootdata->core_count;
+    team->cluster_core_num = cluster_core_num;
     team->global_mem.start =
-        (void *)0x90000000;  // TODO: Read this from bootdata
-    team->global_mem.end =
-        (void *)0x100000000;  // TODO: Read this from bootdata
+        bootdata->global_mem_start + _snrt_cluster_global_offset;
+    team->global_mem.end = bootdata->global_mem_end;
     team->cluster_mem.start = spm_start;
     team->cluster_mem.end = spm_end;
+    team->barrier_reg_ptr = spm_start + bootdata->tcdm_size + 0x30;
+
+    // Initialize cluster barrier
+    team->cluster_barrier.barrier = 0;
+    team->cluster_barrier.barrier_iteration = 0;
 
     // Allocate memory for a global mailbox.
-    team->global_mailbox = team->global_mem.start;
+    team->global_mailbox = (void *)team->global_mem.start;
     team->global_mem.start += sizeof(struct snrt_mailbox);
 
     // Allocate memory for a cluster mailbox.
     team->cluster_mem.end -= sizeof(struct snrt_mailbox);
-    team->cluster_mailbox = team->cluster_mem.end;
+    team->cluster_mailbox = (void *)team->cluster_mem.end;
 
     _snrt_team_current = &team->base;
 
@@ -68,12 +78,13 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     // the _snrt_init_team function is called once per thread before main, so
     // it's as good a point as any.
     putc_buffer[snrt_hartid()].hdr.size = 0;
+
+    // Init allocator
+    snrt_alloc_init(team);
 }
 
 uint32_t _snrt_barrier_reg_ptr() {
-    const struct snrt_cluster_bootdata *bd =
-        _snrt_team_current->root->device_tree;
-    return bd->tcdm_end + 0x30;
+    return _snrt_team_current->root->barrier_reg_ptr;
 }
 
 extern uintptr_t volatile tohost, fromhost;

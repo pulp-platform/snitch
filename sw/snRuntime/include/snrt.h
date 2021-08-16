@@ -19,17 +19,18 @@ extern "C" {
 
 /// A slice of memory.
 typedef struct snrt_slice {
-    void *start;
-    void *end;
+    uint64_t start;
+    uint64_t end;
 } snrt_slice_t;
 
-static inline size_t snrt_slice_len(snrt_slice_t s) {
-    return (char *)s.end - (char *)s.start;
-}
+static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
 
-extern void snrt_barrier();
+extern void snrt_cluster_hw_barrier();
+extern void snrt_cluster_sw_barrier();
+extern void snrt_global_barrier();
 
 extern uint32_t __attribute__((pure)) snrt_hartid();
+struct snrt_team_root *snrt_current_team();
 extern uint32_t snrt_global_core_idx();
 extern uint32_t snrt_global_core_num();
 extern uint32_t snrt_global_compute_core_idx();
@@ -109,6 +110,9 @@ extern void snrt_ssr_read(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
 extern void snrt_ssr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
                            volatile void *ptr);
 extern void snrt_fpu_fence();
+
+/// alloc functions
+extern void *snrt_l1alloc(size_t size);
 
 #ifdef __cplusplus
 }

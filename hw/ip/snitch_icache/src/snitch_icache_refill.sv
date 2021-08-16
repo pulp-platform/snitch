@@ -43,8 +43,10 @@ module snitch_icache_refill #(
     logic queue_push;
     logic queue_pop;
 
+    localparam int unsigned TransactionQueueDepth = 4;
+
     fifo_v3  #(
-        .DEPTH      ( 4                ),
+        .DEPTH      ( TransactionQueueDepth ),
         .DATA_WIDTH ( CFG.PENDING_IW+1 )
     ) i_fifo_id_queue (
         .clk_i       ( clk_i                          ),
@@ -79,8 +81,26 @@ module snitch_icache_refill #(
         end
         assign response_data[CFG.LINE_WIDTH-1:CFG.LINE_WIDTH-CFG.FILL_DW] = axi_rsp_i.r.data;
     end else if (CFG.LINE_WIDTH < CFG.FILL_DW) begin : g_data_slice
+        localparam int unsigned AddrQueueDepth = CFG.FILL_ALIGN-CFG.LINE_ALIGN;
+        logic [AddrQueueDepth-1:0] addr_offset;
+          fifo_v3  #(
+            .DEPTH      ( TransactionQueueDepth ),
+            .DATA_WIDTH ( AddrQueueDepth )
+          ) i_fifo_addr_offset (
+            .clk_i       ( clk_i  ),
+            .rst_ni      ( rst_ni ),
+            .flush_i     ( 1'b0 ),
+            .testmode_i  ( 1'b0 ),
+            .full_o      ( ), // the queue has the same size as the `id_queue`
+            .empty_o     ( ),
+            .usage_o     ( ),
+            .data_i      ( in_req_addr_i[CFG.FILL_ALIGN-1:CFG.LINE_ALIGN] ),
+            .push_i      ( queue_push ),
+            .data_o      ( addr_offset ),
+            .pop_i       ( queue_pop )
+          );
         assign response_data =
-          axi_rsp_i.r.data >> (in_req_addr_i[CFG.FILL_ALIGN-1:CFG.LINE_ALIGN] * CFG.LINE_WIDTH);
+          axi_rsp_i.r.data >> (addr_offset * CFG.LINE_WIDTH);
     end else begin : g_data_passthrough
         assign response_data = axi_rsp_i.r.data;
     end
