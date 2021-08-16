@@ -106,7 +106,10 @@ def main():
     nr_s1_quadrants = occamy.cfg["nr_s1_quadrant"]
     nr_s1_clusters = occamy.cfg["s1_quadrant"]["nr_clusters"]
     # Iterate over Hives to get the number of cores.
-    nr_cluster_cores = len([core for hive in occamy.cfg["cluster"]["hives"] for core in hive["cores"]])
+    nr_cluster_cores = len([
+        core for hive in occamy.cfg["cluster"]["hives"]
+        for core in hive["cores"]
+    ])
 
     if not args.outdir.is_dir():
         exit("Out directory is not a valid path.")
@@ -189,7 +192,8 @@ def main():
     am_pcie = am.new_leaf("pcie", 0x28000000, 0x20000000,
                           0x48000000).attach_to(am_soc_wide_xbar)
 
-    am_spm = am.new_leaf("spm", occamy.cfg["spm"]["length"], occamy.cfg["spm"]["address"])
+    am_spm = am.new_leaf("spm", occamy.cfg["spm"]["length"],
+                         occamy.cfg["spm"]["address"])
 
     # HBM
     am_hbm = list()
@@ -211,6 +215,8 @@ def main():
     am_soc_narrow_xbar.attach(am_soc_regbus_periph_xbar)
     am_soc_narrow_xbar.attach(am_soc_wide_xbar)
     am_soc_narrow_xbar.attach(am_spm)
+
+    am_soc_wide_xbar.attach(am_soc_narrow_xbar)
 
     # HBI
     am_hbi = am.new_leaf("hbi", 0x10000000000,
@@ -286,6 +292,7 @@ def main():
         soc_wide_xbar.add_input("hbi_{}".format(i))
 
     soc_wide_xbar.add_input("soc_narrow")
+    soc_wide_xbar.add_output_entry("soc_narrow", am_soc_narrow_xbar)
 
     # TODO(zarubaf): PCIe should probably go into the small crossbar.
     soc_wide_xbar.add_input("pcie")
@@ -310,6 +317,7 @@ def main():
         soc_narrow_xbar.add_input("s1_quadrant_{}".format(i))
 
     soc_narrow_xbar.add_input("cva6")
+    soc_narrow_xbar.add_input("soc_wide")
     dts.add_cpu("eth,ariane")
 
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
