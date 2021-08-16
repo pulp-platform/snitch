@@ -470,6 +470,14 @@ pub unsafe fn add_llvm_symbols() {
         Cpu::binary_csr_write as *mut _,
     );
     LLVMAddSymbol(
+        b"banshee_csr_read_silent\0".as_ptr() as *const _,
+        Cpu::binary_csr_read_silent as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_csr_write_silent\0".as_ptr() as *const _,
+        Cpu::binary_csr_write_silent as *mut _,
+    );
+    LLVMAddSymbol(
         b"banshee_abort_escape\0".as_ptr() as *const _,
         Cpu::binary_abort_escape as *mut _,
     );
@@ -591,9 +599,13 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     size,
                 )
             // access to the CLINT
-            x if x >= self.engine.config.address.clint 
-              && x < self.engine.config.address.clint + 0x1000 => {
-                trace!("CLINT Load off 0x{:x}", addr as u64 - self.engine.config.address.clint as u64);
+            x if x >= self.engine.config.address.clint
+                && x < self.engine.config.address.clint + 0x1000 =>
+            {
+                trace!(
+                    "CLINT Load off 0x{:x}",
+                    addr as u64 - self.engine.config.address.clint as u64
+                );
                 self.engine
                     .clint
                     .lock()
@@ -689,18 +701,26 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 )
             }
             // access to the CLINT
-            x if x >= self.engine.config.address.clint 
-              && x < self.engine.config.address.clint + 0x1000 => {
+            x if x >= self.engine.config.address.clint
+                && x < self.engine.config.address.clint + 0x1000 =>
+            {
                 let reg_off = addr - self.engine.config.address.clint;
-                trace!(
-                    "CLINT store off {:x} = 0x{:x}",
-                    reg_off,
-                    value,
-                );
+                trace!("CLINT store off {:x} = 0x{:x}", reg_off, value,);
                 let mut clint = self.engine.clint.lock().unwrap();
                 let clint = clint.entry(reg_off as u64).or_default();
                 *clint &= !mask;
                 *clint |= value & mask;
+                // wake cores affected by this write
+                let hart_base = self.engine.base_hartid as u32 + 32 * reg_off;
+                let write_val = value & mask;
+                for i in 0..32 {
+                    if (write_val & (1 << i)) != 0 {
+                        // TODO: Is this thread-safe?
+                        self.num_sleep.fetch_sub(1, Ordering::Relaxed);
+                        self.wake_up[(hart_base + i) as usize]
+                            .fetch_max(self.state.cycle + 1, Ordering::Release);
+                    }
+                }
             }
             _ => {
                 trace!(
@@ -746,35 +766,66 @@ impl<'a, 'b> Cpu<'a, 'b> {
         prev as u32
     }
 
-    fn binary_csr_read(&self, csr: u16) -> u32 {
-        trace!("Read CSR 0x{:x}", csr);
+    fn binary_csr_read(&self, csr: riscv::Csr) -> u32 {
+        trace!("Read CSR {:?}", csr);
         match csr {
-            0x7C0 => self.state.ssr_enable,
-            0xB00 => self.state.cycle as u32,         // csr_mcycle
-            0xB80 => (self.state.cycle >> 32) as u32, // csr_mcycleh
-            0xB02 => self.state.instret as u32,       // csr_minstret
-            0xB82 => (self.state.instret >> 32) as u32, // csr_minstreth
-            0xF14 => self.hartid as u32,              // mhartid
-            0x300 => self.state.irq.mstatus, // CSR_MSTATUS
-            0x304 => self.state.irq.mie, // CSR_MIE
-            0x344 => self.state.irq.mip, // CSR_MIP
-            0x305 => self.state.irq.mtvec, // CSR_MTVEC
-            0x341 => self.state.irq.mepc, // CSR_MEPC
-            0x342 => self.state.irq.mcause, // CSR_MCAUSE
+            riscv::Csr::Ssr => self.state.ssr_enable,
+            riscv::Csr::Mcycle => self.state.cycle as u32, // csr_mcycle
+            riscv::Csr::Mcycleh => (self.state.cycle >> 32) as u32, // csr_mcycleh
+            riscv::Csr::Minstret => self.state.instret as u32, // csr_minstret
+            riscv::Csr::Minstreth => (self.state.instret >> 32) as u32, // csr_minstreth
+            riscv::Csr::Mhartid => self.hartid as u32,     // mhartid
+            riscv::Csr::Mstatus => self.state.irq.mstatus, // CSR_MSTATUS
+            riscv::Csr::Mie => self.state.irq.mie,         // CSR_MIE
+            riscv::Csr::Mip => self.state.irq.mip,         // CSR_MIP
+            riscv::Csr::Mtvec => self.state.irq.mtvec,     // CSR_MTVEC
+            riscv::Csr::Mepc => self.state.irq.mepc,       // CSR_MEPC
+            riscv::Csr::Mcause => self.state.irq.mcause,   // CSR_MCAUSE
             _ => 0,
         }
     }
 
-    fn binary_csr_write(&mut self, csr: u16, value: u32) {
-        trace!("Write CSR 0x{:x} = 0x{:?}", csr, value);
+    fn binary_csr_write(&mut self, csr: riscv::Csr, value: u32) {
+        trace!("Write CSR {:?} = 0x{:?}", csr, value);
         match csr {
-            0x7C0 => self.state.ssr_enable = value,
-            0x300 => self.state.irq.mstatus = value, // CSR_MSTATUS
-            0x304 => self.state.irq.mie = value, // CSR_MIE
-            0x344 => self.state.irq.mip = value, // CSR_MIP
-            0x305 => self.state.irq.mtvec = value, // CSR_MTVEC
-            0x341 => self.state.irq.mepc = value, // CSR_MEPC
-            0x342 => self.state.irq.mcause = value, // CSR_MCAUSE
+            riscv::Csr::Ssr => self.state.ssr_enable = value,
+            riscv::Csr::Mstatus => self.state.irq.mstatus = value, // CSR_MSTATUS
+            riscv::Csr::Mie => self.state.irq.mie = value,         // CSR_MIE
+            riscv::Csr::Mip => self.state.irq.mip = value,         // CSR_MIP
+            riscv::Csr::Mtvec => self.state.irq.mtvec = value,     // CSR_MTVEC
+            riscv::Csr::Mepc => self.state.irq.mepc = value,       // CSR_MEPC
+            riscv::Csr::Mcause => self.state.irq.mcause = value,   // CSR_MCAUSE
+            _ => (),
+        }
+    }
+
+    fn binary_csr_read_silent(&self, csr: riscv::Csr) -> u32 {
+        match csr {
+            riscv::Csr::Ssr => self.state.ssr_enable,
+            riscv::Csr::Mcycle => self.state.cycle as u32, // csr_mcycle
+            riscv::Csr::Mcycleh => (self.state.cycle >> 32) as u32, // csr_mcycleh
+            riscv::Csr::Minstret => self.state.instret as u32, // csr_minstret
+            riscv::Csr::Minstreth => (self.state.instret >> 32) as u32, // csr_minstreth
+            riscv::Csr::Mhartid => self.hartid as u32,     // mhartid
+            riscv::Csr::Mstatus => self.state.irq.mstatus, // CSR_MSTATUS
+            riscv::Csr::Mie => self.state.irq.mie,         // CSR_MIE
+            riscv::Csr::Mip => self.state.irq.mip,         // CSR_MIP
+            riscv::Csr::Mtvec => self.state.irq.mtvec,     // CSR_MTVEC
+            riscv::Csr::Mepc => self.state.irq.mepc,       // CSR_MEPC
+            riscv::Csr::Mcause => self.state.irq.mcause,   // CSR_MCAUSE
+            _ => 0,
+        }
+    }
+
+    fn binary_csr_write_silent(&mut self, csr: riscv::Csr, value: u32) {
+        match csr {
+            riscv::Csr::Ssr => self.state.ssr_enable = value,
+            riscv::Csr::Mstatus => self.state.irq.mstatus = value, // CSR_MSTATUS
+            riscv::Csr::Mie => self.state.irq.mie = value,         // CSR_MIE
+            riscv::Csr::Mip => self.state.irq.mip = value,         // CSR_MIP
+            riscv::Csr::Mtvec => self.state.irq.mtvec = value,     // CSR_MTVEC
+            riscv::Csr::Mepc => self.state.irq.mepc = value,       // CSR_MEPC
+            riscv::Csr::Mcause => self.state.irq.mcause = value,   // CSR_MCAUSE
             _ => (),
         }
     }
@@ -845,15 +896,18 @@ impl<'a, 'b> Cpu<'a, 'b> {
     }
 
     fn binary_check_clint(&mut self) -> u32 {
-        // read the clint software interrupt and return 1 if interrupt pending 
+        // read the clint software interrupt and return 1 if interrupt pending
         let hartid = self.hartid - self.engine.base_hartid;
-        return (self.engine
+        return (self
+            .engine
             .clint
             .lock()
             .unwrap()
             .get(&(hartid as u64 / 32 as u64))
             .copied()
-            .unwrap_or(0) & (1 << (hartid % 32) ) ) >> (hartid % 32);
+            .unwrap_or(0)
+            & (1 << (hartid % 32)))
+            >> (hartid % 32);
     }
 
     /// A simple barrier across all cores in the cluster.

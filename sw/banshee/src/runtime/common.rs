@@ -100,6 +100,4 @@ pub struct IrqState {
     pub mepc: u32,
     // machine cause
     pub mcause: u32,
-    // CPU is currently in an exception state
-    pub exception: bool,
 }

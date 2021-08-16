@@ -122,7 +122,6 @@ impl std::fmt::Debug for DmaState {
     }
 }
 
-
 impl std::fmt::Debug for IrqState {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         f.debug_struct("IrqState")
@@ -132,7 +131,6 @@ impl std::fmt::Debug for IrqState {
             .field("mtvec", &format_args!("{:08x}", self.mtvec))
             .field("mepc", &format_args!("{:08x}", self.mepc))
             .field("mcause", &format_args!("{:08x}", self.mcause))
-            .field("exception", &self.exception)
             .finish()
     }
 }
