@@ -249,7 +249,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
   /// Address map of the `soc_wide_xbar` crossbar.
-  xbar_rule_48_t [18:0] SocWideXbarAddrmap;
+  xbar_rule_48_t [20:0] SocWideXbarAddrmap;
   assign SocWideXbarAddrmap = '{
   '{ idx: 8, start_addr: 48'h80000000, end_addr: 48'hc0000000 },
   '{ idx: 8, start_addr: 48'h1000000000, end_addr: 48'h1040000000 },
@@ -261,7 +261,9 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   '{ idx: 13, start_addr: 48'h1140000000, end_addr: 48'h1180000000 },
   '{ idx: 14, start_addr: 48'h1180000000, end_addr: 48'h11c0000000 },
   '{ idx: 15, start_addr: 48'h11c0000000, end_addr: 48'h1200000000 },
-  '{ idx: 16, start_addr: 48'h20000000, end_addr: 48'h70000000 },
+  '{ idx: 16, start_addr: 48'h00000000, end_addr: 48'h10000000 },
+  '{ idx: 16, start_addr: 48'h70000000, end_addr: 48'h70020000 },
+  '{ idx: 17, start_addr: 48'h20000000, end_addr: 48'h70000000 },
   '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
   '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
   '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
@@ -274,12 +276,12 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   soc_wide_xbar_in_req_t   [17:0] soc_wide_xbar_in_req;
   soc_wide_xbar_in_resp_t  [17:0] soc_wide_xbar_in_rsp;
-  soc_wide_xbar_out_req_t  [16:0] soc_wide_xbar_out_req;
-  soc_wide_xbar_out_resp_t [16:0] soc_wide_xbar_out_rsp;
+  soc_wide_xbar_out_req_t  [17:0] soc_wide_xbar_out_req;
+  soc_wide_xbar_out_resp_t [17:0] soc_wide_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg(SocWideXbarCfg),
-      .Connectivity  ( 306'b011111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110111111111111111110111111111111111110111111111111111110111111111111111110111111111111111110111111111111111110111111111111111110 ),
+      .Connectivity  ( 324'b011111111111111111101111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111101111111111111111110111111111111111111011111111111111111101111111111111111110111111111111111111011111111111111111101111111111111111110 ),
       .AtopSupport(0),
       .slv_aw_chan_t(axi_a48_d512_i3_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i8_u0_aw_chan_t),
@@ -326,14 +328,14 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
 };
 
-  soc_narrow_xbar_in_req_t   [ 8:0] soc_narrow_xbar_in_req;
-  soc_narrow_xbar_in_resp_t  [ 8:0] soc_narrow_xbar_in_rsp;
+  soc_narrow_xbar_in_req_t   [ 9:0] soc_narrow_xbar_in_req;
+  soc_narrow_xbar_in_resp_t  [ 9:0] soc_narrow_xbar_in_rsp;
   soc_narrow_xbar_out_req_t  [11:0] soc_narrow_xbar_out_req;
   soc_narrow_xbar_out_resp_t [11:0] soc_narrow_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg(SocNarrowXbarCfg),
-      .Connectivity  ( 108'b111111111111111101111111111110111111111111011111111111101111111111110111111111111011111111111101111111111110 ),
+      .Connectivity  ( 120'b101111111111111111111111111101111111111110111111111111011111111111101111111111110111111111111011111111111101111111111110 ),
       .AtopSupport(1),
       .slv_aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d64_i8_u0_aw_chan_t),
@@ -515,6 +517,56 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .slv_resp_o(soc_narrow_wide_amo_adapter_rsp),
       .mst_req_o(soc_wide_xbar_in_req[SOC_WIDE_XBAR_IN_SOC_NARROW]),
       .mst_resp_i(soc_wide_xbar_in_rsp[SOC_WIDE_XBAR_IN_SOC_NARROW])
+  );
+
+
+
+  /////////////////////////////
+  // Wide to Narrow Crossbar //
+  /////////////////////////////
+  axi_a48_d512_i4_u0_req_t  soc_wide_narrow_iwc_req;
+  axi_a48_d512_i4_u0_resp_t soc_wide_narrow_iwc_rsp;
+
+  axi_id_remap #(
+      .AxiSlvPortIdWidth(8),
+      .AxiSlvPortMaxUniqIds(4),
+      .AxiMaxTxnsPerId(4),
+      .AxiMstPortIdWidth(4),
+      .slv_req_t(axi_a48_d512_i8_u0_req_t),
+      .slv_resp_t(axi_a48_d512_i8_u0_resp_t),
+      .mst_req_t(axi_a48_d512_i4_u0_req_t),
+      .mst_resp_t(axi_a48_d512_i4_u0_resp_t)
+  ) i_soc_wide_narrow_iwc (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SOC_NARROW]),
+      .slv_resp_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SOC_NARROW]),
+      .mst_req_o(soc_wide_narrow_iwc_req),
+      .mst_resp_i(soc_wide_narrow_iwc_rsp)
+  );
+  axi_dw_converter #(
+      .AxiSlvPortDataWidth(512),
+      .AxiMstPortDataWidth(64),
+      .AxiAddrWidth(48),
+      .AxiIdWidth(4),
+      .aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
+      .mst_w_chan_t(axi_a48_d64_i4_u0_w_chan_t),
+      .slv_w_chan_t(axi_a48_d512_i4_u0_w_chan_t),
+      .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
+      .mst_r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
+      .slv_r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
+      .axi_mst_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_mst_resp_t(axi_a48_d64_i4_u0_resp_t),
+      .axi_slv_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_slv_resp_t(axi_a48_d512_i4_u0_resp_t)
+  ) i_soc_wide_narrow_dw (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(soc_wide_narrow_iwc_req),
+      .slv_resp_o(soc_wide_narrow_iwc_rsp),
+      .mst_req_o(soc_narrow_xbar_in_req[SOC_NARROW_XBAR_IN_SOC_WIDE]),
+      .mst_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_SOC_WIDE])
   );
 
 

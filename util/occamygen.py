@@ -212,6 +212,8 @@ def main():
     am_soc_narrow_xbar.attach(am_soc_wide_xbar)
     am_soc_narrow_xbar.attach(am_spm)
 
+    am_soc_wide_xbar.attach(am_soc_narrow_xbar)
+
     # HBI
     am_hbi = am.new_leaf("hbi", 0x10000000000,
                          0x10000000000).attach_to(am_wide_xbar_quadrant_s1)
@@ -286,10 +288,12 @@ def main():
         soc_wide_xbar.add_input("hbi_{}".format(i))
 
     soc_wide_xbar.add_input("soc_narrow")
+    soc_wide_xbar.add_output_entry("soc_narrow", am_soc_narrow_xbar)
 
     # TODO(zarubaf): PCIe should probably go into the small crossbar.
     soc_wide_xbar.add_input("pcie")
     soc_wide_xbar.add_output_entry("pcie", am_pcie)
+
 
     ###################
     # SoC Narrow Xbar #
@@ -310,6 +314,7 @@ def main():
         soc_narrow_xbar.add_input("s1_quadrant_{}".format(i))
 
     soc_narrow_xbar.add_input("cva6")
+    soc_narrow_xbar.add_input("soc_wide")
     dts.add_cpu("eth,ariane")
 
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
