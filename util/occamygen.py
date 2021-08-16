@@ -106,7 +106,10 @@ def main():
     nr_s1_quadrants = occamy.cfg["nr_s1_quadrant"]
     nr_s1_clusters = occamy.cfg["s1_quadrant"]["nr_clusters"]
     # Iterate over Hives to get the number of cores.
-    nr_cluster_cores = len([core for hive in occamy.cfg["cluster"]["hives"] for core in hive["cores"]])
+    nr_cluster_cores = len([
+        core for hive in occamy.cfg["cluster"]["hives"]
+        for core in hive["cores"]
+    ])
 
     if not args.outdir.is_dir():
         exit("Out directory is not a valid path.")
@@ -189,7 +192,8 @@ def main():
     am_pcie = am.new_leaf("pcie", 0x28000000, 0x20000000,
                           0x48000000).attach_to(am_soc_wide_xbar)
 
-    am_spm = am.new_leaf("spm", occamy.cfg["spm"]["length"], occamy.cfg["spm"]["address"])
+    am_spm = am.new_leaf("spm", occamy.cfg["spm"]["length"],
+                         occamy.cfg["spm"]["address"])
 
     # HBM
     am_hbm = list()
@@ -293,7 +297,6 @@ def main():
     # TODO(zarubaf): PCIe should probably go into the small crossbar.
     soc_wide_xbar.add_input("pcie")
     soc_wide_xbar.add_output_entry("pcie", am_pcie)
-
 
     ###################
     # SoC Narrow Xbar #
