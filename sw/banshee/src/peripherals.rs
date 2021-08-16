@@ -24,38 +24,43 @@ impl Peripherals {
 
     pub fn add_cluster(&mut self, callbacks: &Vec<Callback>) {
         self.cluster_peripherals.push(
-            callbacks.iter().map(|x| {
-                (
-                    x.size,
-                    self.peripherals
-                    .iter()
-                    .position(|p| x.name.eq(&p.get_name()))
-                    .expect(&format!("One of the peripheral is not defined: {}", x.name)[..])
-                  )
-            }).collect()
-            );
-    }
-    /*
-    pub fn new(callbacks: &Vec<Callback>) -> Self {
-        let mut periphs = create_peripherals();
-        Self {
-            peripherals: callbacks
+            callbacks
                 .iter()
                 .map(|x| {
                     (
                         x.size,
-                        periphs.remove(
-                            periphs
+                        self.peripherals
                             .iter()
                             .position(|p| x.name.eq(&p.get_name()))
-                            .expect(&format!("One of the peripheral is not defined: {}", x.name)[..]),
+                            .expect(
+                                &format!("One of the peripheral is not defined: {}", x.name)[..],
                             ),
-                            )
+                    )
                 })
-            .collect(),
-        }
+                .collect(),
+        );
     }
-*/
+    /*
+        pub fn new(callbacks: &Vec<Callback>) -> Self {
+            let mut periphs = create_peripherals();
+            Self {
+                peripherals: callbacks
+                    .iter()
+                    .map(|x| {
+                        (
+                            x.size,
+                            periphs.remove(
+                                periphs
+                                .iter()
+                                .position(|p| x.name.eq(&p.get_name()))
+                                .expect(&format!("One of the peripheral is not defined: {}", x.name)[..]),
+                                ),
+                                )
+                    })
+                .collect(),
+            }
+        }
+    */
     pub fn load(&self, cluster_id: usize, addr: u32, size: u8) -> u32 {
         self.load_store(cluster_id, addr, size, Load)
     }

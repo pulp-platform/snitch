@@ -300,8 +300,10 @@ impl Engine {
     }
 
     pub fn init_periphs(&mut self) {
-        (0..self.num_clusters)
-            .for_each(|i| self.peripherals.add_cluster(&self.config.memory[i].periphs.callbacks))
+        (0..self.num_clusters).for_each(|i| {
+            self.peripherals
+                .add_cluster(&self.config.memory[i].periphs.callbacks)
+        })
     }
 
     // Execute the loaded memory.
