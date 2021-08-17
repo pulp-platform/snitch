@@ -142,9 +142,18 @@ module occamy_top
   // Narrow to Wide Crossbar //
   /////////////////////////////
   <% soc_narrow_xbar.out_soc_wide \
-        .change_iw(context, 3, "soc_narrow_wide_iwc") \
+        .change_iw(context, soc_wide_xbar.in_soc_narrow.iw, "soc_narrow_wide_iwc") \
         .atomic_adapter(context, 16, "soc_narrow_wide_amo_adapter") \
-        .change_dw(context, 512, "soc_narrow_wide_dw", to=soc_wide_xbar.in_soc_narrow)
+        .change_dw(context, soc_wide_xbar.in_soc_narrow.dw, "soc_narrow_wide_dw", to=soc_wide_xbar.in_soc_narrow)
+  %>
+
+  /////////////////////////////
+  // Wide to Narrow Crossbar //
+  /////////////////////////////
+  <%
+    soc_wide_xbar.out_soc_narrow \
+      .change_iw(context, soc_narrow_xbar.in_soc_wide.iw, "soc_wide_narrow_iwc") \
+      .change_dw(context, soc_narrow_xbar.in_soc_wide.dw, "soc_wide_narrow_dw", to=soc_narrow_xbar.in_soc_wide)
   %>
 
   //////////

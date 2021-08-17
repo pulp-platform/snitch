@@ -128,14 +128,14 @@ package snitch_pkg;
   typedef enum integer {
     CoreReq = 0,
     AXISoC  = 1,
-    PTW     = 2,
-    ICache  = 3
+    PTW     = 2
   } cluster_master_e;
 
   // Slaves on Cluster DMA AXI Bus
   typedef enum int unsigned {
-    TCDMDMA = 32'd0,
-    SoCDMAOut = 32'd1
+    TCDMDMA   = 0,
+    SoCDMAOut = 1,
+    ICache    = 2
   } cluster_slave_dma_e;
 
   typedef enum int unsigned {
