@@ -783,6 +783,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
             riscv::Csr::Mtvec => self.state.irq.mtvec,     // CSR_MTVEC
             riscv::Csr::Mepc => self.state.irq.mepc,       // CSR_MEPC
             riscv::Csr::Mcause => self.state.irq.mcause,   // CSR_MCAUSE
+            riscv::Csr::Misa => {
+                // RV32IMAFDX A - Atomic Instructions extension
+                (1 << 0) | (1 << 3) | (1 << 5) | (1 << 8) | (1 << 12) | (1 << 23) | (1 << 30)
+            }
             _ => 0,
         }
     }
@@ -815,6 +819,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
             riscv::Csr::Mtvec => self.state.irq.mtvec,     // CSR_MTVEC
             riscv::Csr::Mepc => self.state.irq.mepc,       // CSR_MEPC
             riscv::Csr::Mcause => self.state.irq.mcause,   // CSR_MCAUSE
+            riscv::Csr::Misa => {
+                // RV32IMAFDX A - Atomic Instructions extension
+                (1 << 0) | (1 << 3) | (1 << 5) | (1 << 8) | (1 << 12) | (1 << 23) | (1 << 30)
+            }
             _ => 0,
         }
     }
