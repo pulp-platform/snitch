@@ -98,8 +98,8 @@ void clint_tick(const svOpenArrayHandle msip) {
     assert(msip_ptr);
     uint32_t read_val;
     for (int i = 0; i < num_cores; i++) {
-        sim::MEM.read(clint_addr + 4 * i, sizeof(uint32_t),
-                      (uint8_t *)&read_val);
-        msip_ptr[i] = read_val != 0 ? 1 : 0;
+        if(i % 32 == 0)
+            sim::MEM.read(clint_addr + i/32, sizeof(uint32_t), (uint8_t *)&read_val);
+        msip_ptr[i] = (read_val & (1 << (i%32)) ) != 0 ? 1 : 0;
     }
 }

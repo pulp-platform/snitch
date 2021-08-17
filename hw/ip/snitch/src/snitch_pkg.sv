@@ -161,7 +161,6 @@ package snitch_pkg;
   } core_events_t;
 
   // SSRs
-  localparam logic [11:0] CSR_SSR = 'h7c0;
   localparam logic [11:0] CSR_MSEG = 12'hBC0;
 
   // --------------------
