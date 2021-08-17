@@ -957,42 +957,62 @@ impl<'a, 'b> Cpu<'a, 'b> {
     /*
      * Flexfloat Conversions
      */
-    pub unsafe fn fp16_op_cvt_from_f(rs1: u64, op: flexfloat::FfOpCvt, alt: bool) -> i32 {
-        flexfloat::ff_instruction_cvt_from_h(rs1, op, alt)
+    pub unsafe fn fp16_op_cvt_from_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool
+    ) -> i32 {
+        flexfloat::ff_instruction_cvt_from_h(rs1, op, fpmode_dst)
     }
 
-    pub unsafe fn fp16_op_cvt_to_f(rs1: u64, op: flexfloat::FfOpCvt, alt: bool) -> u16 {
-        flexfloat::ff_instruction_cvt_to_h(rs1, op, alt)
+    pub unsafe fn fp16_op_cvt_to_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool
+    ) -> u16 {
+        flexfloat::ff_instruction_cvt_to_h(rs1, op, fpmode_dst)
     }
 
-    pub unsafe fn fp8_op_cvt_from_f(rs1: u64, op: flexfloat::FfOpCvt, alt: bool) -> i32 {
-        flexfloat::ff_instruction_cvt_from_b(rs1, op, alt)
+    pub unsafe fn fp8_op_cvt_from_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool
+    ) -> i32 {
+        flexfloat::ff_instruction_cvt_from_b(rs1, op, fpmode_dst)
     }
 
-    pub unsafe fn fp8_op_cvt_to_f(rs1: u64, op: flexfloat::FfOpCvt, alt: bool) -> u8 {
-        flexfloat::ff_instruction_cvt_to_b(rs1, op, alt)
+    pub unsafe fn fp8_op_cvt_to_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool
+    ) -> u8 {
+        flexfloat::ff_instruction_cvt_to_b(rs1, op, fpmode_dst)
     }
 
     /*
      * Flexfloat Comparisons
      */
-    pub unsafe fn fp16_op_cmp(rs1: u16, rs2: u16, op: flexfloat::FlexfloatOpCmp, alt: bool) -> bool {
-        flexfloat::ff_instruction_cmp_h(rs1, rs2, op, alt)
+    pub unsafe fn fp16_op_cmp(rs1: u16, rs2: u16, op: flexfloat::FlexfloatOpCmp, fpmode_dst: bool) -> bool {
+        flexfloat::ff_instruction_cmp_h(rs1, rs2, op, fpmode_dst)
     }
 
-    pub unsafe fn fp8_op_cmp(rs1: u8, rs2: u8, op: flexfloat::FlexfloatOpCmp, alt: bool) -> bool {
-        flexfloat::ff_instruction_cmp_b(rs1, rs2, op, alt)
+    pub unsafe fn fp8_op_cmp(rs1: u8, rs2: u8, op: flexfloat::FlexfloatOpCmp, fpmode_dst: bool) -> bool {
+        flexfloat::ff_instruction_cmp_b(rs1, rs2, op, fpmode_dst)
     }
 
     /*
      * Flexfloat Operations
      */
-    pub unsafe fn fp16_op(rs1: u16, rs2: u16, rs3: u16, op: flexfloat::FlexfloatOp, alt: bool) -> u16 {
-        flexfloat::ff_instruction_h(rs1, rs2, rs3, op, alt)
+    pub unsafe fn fp16_op(rs1: u16, rs2: u16, rs3: u16, op: flexfloat::FlexfloatOp, fpmode_dst: bool) -> u16 {
+        flexfloat::ff_instruction_h(rs1, rs2, rs3, op, fpmode_dst)
     }
 
-    pub unsafe fn fp8_op(rs1: u8, rs2: u8, rs3: u8, op: flexfloat::FlexfloatOp, alt : bool) -> u8 {
-        flexfloat::ff_instruction_b(rs1, rs2, rs3, op, alt)
+    pub unsafe fn fp8_op(rs1: u8, rs2: u8, rs3: u8, op: flexfloat::FlexfloatOp, fpmode_dst : bool) -> u8 {
+        flexfloat::ff_instruction_b(rs1, rs2, rs3, op, fpmode_dst)
     }
 
 }
