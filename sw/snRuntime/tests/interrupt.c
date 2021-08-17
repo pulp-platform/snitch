@@ -11,22 +11,22 @@ int reboot = 0;
 #define tprintf(f_, ...) printf((f_), __VA_ARGS__)
 // #define tprintf(f_, ...) while (0
 
+volatile static int32_t INTERRUPT_FLAG;
+
 int main() {
     unsigned core_idx = snrt_global_core_idx();
     unsigned core_num = snrt_global_core_num();
 
-    volatile int32_t *INTERRUPT_FLAG = ((int32_t *)snrt_cluster_memory().start);
-
     // Test1: Core 0 sends interrupts to each hart sequentially and
     // polls the flag and checks for correctness
     if (core_idx == 0) {
-        for (int i = 1; i < core_num; i++) {
+        for (unsigned i = 1; i < core_num; i++) {
             tprintf("IRQ %d ..", i);
-            *INTERRUPT_FLAG = -1;
+            INTERRUPT_FLAG = -1;
             snrt_int_sw_set(i);
-            while (*INTERRUPT_FLAG != i)
+            while (INTERRUPT_FLAG != (int)i)
                 ;
-            tprintf("OK\n", *INTERRUPT_FLAG);
+            tprintf("OK\n", INTERRUPT_FLAG);
         }
     } else {
         snrt_interrupt_enable(IRQ_M_SOFT);
@@ -35,30 +35,29 @@ int main() {
         snrt_interrupt_global_disable();
     }
 
-    snrt_barrier();
+    snrt_cluster_hw_barrier();
 
     // Test2: Enable software interrupt wihout jumping to the exception address
     if (core_idx == 0) {
-        for (int i = 1; i < core_num; i++) {
+        for (unsigned i = 1; i < core_num; i++) {
             tprintf("trig %d .. ", i);
-            *INTERRUPT_FLAG = -1;
+            INTERRUPT_FLAG = -1;
             snrt_int_sw_set(i);
-            while (*INTERRUPT_FLAG != (i << 8))
+            while (INTERRUPT_FLAG != ((int)i << 8))
                 ;
-            tprintf("OK\n", *INTERRUPT_FLAG);
+            tprintf("OK\n", INTERRUPT_FLAG);
         }
     } else {
         snrt_interrupt_enable(IRQ_M_SOFT);
         asm volatile("wfi");
         if (snrt_interrupt_cause() & IRQ_M_SOFT) {
             snrt_int_sw_clear(core_idx);
-            *INTERRUPT_FLAG = core_idx << 8;
+            INTERRUPT_FLAG = core_idx << 8;
         }
     }
 }
 
 void irq_m_soft(uint32_t hartid) {
     snrt_int_sw_clear(hartid);
-    int32_t *INTERRUPT_FLAG = ((int32_t *)snrt_cluster_memory().start);
-    *INTERRUPT_FLAG = hartid;
+    INTERRUPT_FLAG = hartid;
 }
