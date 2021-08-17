@@ -81,7 +81,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     putc_buffer[snrt_hartid()].hdr.size = 0;
 
     // init peripherals
-    team->peripherals.clint = (uint32_t*)bootdata->clint_base;
+    team->peripherals.clint = (uint32_t *)bootdata->clint_base;
 
     // Init allocator
     snrt_alloc_init(team);
