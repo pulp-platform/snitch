@@ -19,6 +19,12 @@ gemm_result_t gemm_bench(gemm_impl_t gemm_impl) {
     size_t core_id = snrt_cluster_compute_core_idx();
     size_t core_num = snrt_cluster_compute_core_num();
 
+    if(snrt_is_dm_core()) {
+        snrt_cluster_hw_barrier();
+        snrt_cluster_hw_barrier();
+        return (gemm_result_t){0,0,0};
+    }
+
     // Allocate buffer memory in the TCDM and generate input data.
     double *ptr = snrt_cluster_memory().start;
     double *input_A = ptr;
