@@ -24,14 +24,14 @@ module snitch_fpu import snitch_pkg::*; #(
   input fpnew_pkg::fp_format_e              dst_fmt_i,
   input fpnew_pkg::int_format_e             int_fmt_i,
   input logic                               vectorial_op_i,
-  input logic [5:0]                         tag_i,
+  input logic [6:0]                         tag_i,
   // Input Handshake
   input  logic                              in_valid_i,
   output logic                              in_ready_o,
   // Output signals
   output logic [FLEN-1:0]                   result_o,
   output logic [4:0]                        status_o,
-  output logic [5:0]                        tag_o,
+  output logic [6:0]                        tag_o,
   // Output handshake
   output logic                              out_valid_o,
   input  logic                              out_ready_i
@@ -54,13 +54,13 @@ module snitch_fpu import snitch_pkg::*; #(
     fpnew_pkg::fp_format_e   dst_fmt;
     fpnew_pkg::int_format_e  int_fmt;
     logic                    vectorial_op;
-    logic [5:0]              tag;
+    logic [6:0]              tag;
   } fpu_in_t;
 
   typedef struct packed {
     logic [FLEN-1:0] result;
     logic [4:0]      status;
-    logic [5:0]      tag;
+    logic [6:0]      tag;
   } fpu_out_t;
 
   fpu_in_t fpu_in_q, fpu_in;
@@ -98,7 +98,7 @@ module snitch_fpu import snitch_pkg::*; #(
     // FPU configuration
     .Features       ( FPUFeatures ),
     .Implementation ( FPUImplementation ),
-    .TagType        ( logic[5:0]        )
+    .TagType        ( logic[6:0]        )
   ) i_fpu (
     .clk_i                                    ,
     .rst_ni                                   ,

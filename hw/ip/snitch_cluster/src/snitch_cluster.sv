@@ -222,21 +222,22 @@ module snitch_cluster
   localparam int unsigned NumTCDMIn = NrTCDMPortsCores + 1;
   localparam logic [PhysicalAddrWidth-1:0] TCDMMask = ~(TCDMSize-1);
 
-  // Core Requests, SoC Request, PTW, `n` instruction caches.
-  localparam int unsigned NrMasters = 3 + NrHives;
-  localparam int unsigned IdWidthOut = $clog2(NrMasters) + NarrowIdWidthIn;
+  // Core Requests, SoC Request, PTW.
+  localparam int unsigned NrNarrowMasters = 3;
+  localparam int unsigned NarrowIdWidthOut = $clog2(NrNarrowMasters) + NarrowIdWidthIn;
 
   localparam int unsigned NrSlaves = 3;
   localparam int unsigned NrRules = NrSlaves - 1;
 
-  localparam int unsigned NrDmaMasters = 2;
-  localparam int unsigned IdWidthDMAOut = $clog2(NrDmaMasters) + WideIdWidthIn;
+  // DMA, SoC Request, `n` instruction caches.
+  localparam int unsigned NrWideMasters = 2 + NrHives;
+  localparam int unsigned WideIdWidthOut = $clog2(NrWideMasters) + WideIdWidthIn;
   // DMA X-BAR configuration
-  localparam int unsigned NrDmaSlaves = 2;
+  localparam int unsigned NrWideSlaves = 2;
 
   // AXI Configuration
   localparam axi_pkg::xbar_cfg_t ClusterXbarCfg = '{
-    NoSlvPorts: NrMasters,
+    NoSlvPorts: NrNarrowMasters,
     NoMstPorts: NrSlaves,
     MaxMstTrans: 4,
     MaxSlvTrans: 4,
@@ -251,8 +252,8 @@ module snitch_cluster
 
   // DMA configuration struct
   localparam axi_pkg::xbar_cfg_t DmaXbarCfg = '{
-    NoSlvPorts: NrDmaMasters,
-    NoMstPorts: NrDmaSlaves,
+    NoSlvPorts: NrWideMasters,
+    NoMstPorts: NrWideSlaves,
     MaxMstTrans: 4,
     MaxSlvTrans: 4,
     FallThrough: 1'b0,
@@ -288,9 +289,9 @@ module snitch_cluster
   typedef logic [WideDataWidth-1:0]     data_dma_t;
   typedef logic [WideDataWidth/8-1:0]   strb_dma_t;
   typedef logic [NarrowIdWidthIn-1:0]   id_mst_t;
-  typedef logic [IdWidthOut-1:0]        id_slv_t;
+  typedef logic [NarrowIdWidthOut-1:0]  id_slv_t;
   typedef logic [WideIdWidthIn-1:0]     id_dma_mst_t;
-  typedef logic [IdWidthDMAOut-1:0]     id_dma_slv_t;
+  typedef logic [WideIdWidthOut-1:0]    id_dma_slv_t;
   typedef logic [UserWidth-1:0]         user_t;
 
   typedef logic [TCDMAddrWidth-1:0]     tcdm_addr_t;
@@ -392,17 +393,17 @@ module snitch_cluster
   // Wire Definitions
   // ----------------
   // 1. AXI
-  axi_slv_req_t  [NrSlaves-1:0] slave_req;
-  axi_slv_resp_t [NrSlaves-1:0] slave_resp;
+  axi_slv_req_t  [NrSlaves-1:0] narrow_axi_slv_req;
+  axi_slv_resp_t [NrSlaves-1:0] narrow_axi_slv_rsp;
 
-  axi_mst_req_t  [NrMasters-1:0] master_req;
-  axi_mst_resp_t [NrMasters-1:0] master_resp;
+  axi_mst_req_t  [NrNarrowMasters-1:0] narrow_axi_mst_req;
+  axi_mst_resp_t [NrNarrowMasters-1:0] narrow_axi_mst_rsp;
 
   // DMA AXI buses
-  axi_mst_dma_req_t  [NrDmaMasters-1:0] axi_dma_mst_req;
-  axi_mst_dma_resp_t [NrDmaMasters-1:0] axi_dma_mst_res;
-  axi_slv_dma_req_t  [NrDmaSlaves-1 :0] axi_dma_slv_req;
-  axi_slv_dma_resp_t [NrDmaSlaves-1 :0] axi_dma_slv_res;
+  axi_mst_dma_req_t  [NrWideMasters-1:0] wide_axi_mst_req;
+  axi_mst_dma_resp_t [NrWideMasters-1:0] wide_axi_mst_rsp;
+  axi_slv_dma_req_t  [NrWideSlaves-1 :0] wide_axi_slv_req;
+  axi_slv_dma_resp_t [NrWideSlaves-1 :0] wide_axi_slv_rsp;
 
   // 2. Memory Subsystem (Banks)
   mem_req_t [NrSuperBanks-1:0][BanksPerSuperBank-1:0] ic_req;
@@ -454,8 +455,8 @@ module snitch_cluster
   ) i_cut_ext_wide_out (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
-    .slv_req_i (axi_dma_slv_req[SoCDMAOut]),
-    .slv_resp_o (axi_dma_slv_res[SoCDMAOut]),
+    .slv_req_i (wide_axi_slv_req[SoCDMAOut]),
+    .slv_resp_o (wide_axi_slv_rsp[SoCDMAOut]),
     .mst_req_o (wide_out_req_o),
     .mst_resp_i (wide_out_resp_i)
   );
@@ -474,8 +475,8 @@ module snitch_cluster
     .rst_ni (rst_ni),
     .slv_req_i (wide_in_req_i),
     .slv_resp_o (wide_in_resp_o),
-    .mst_req_o (axi_dma_mst_req[SoCDMAIn]),
-    .mst_resp_i (axi_dma_mst_res[SoCDMAIn])
+    .mst_req_o (wide_axi_mst_req[SoCDMAIn]),
+    .mst_resp_i (wide_axi_mst_rsp[SoCDMAIn])
   );
 
   logic [DmaXbarCfg.NoSlvPorts-1:0][$clog2(DmaXbarCfg.NoMstPorts)-1:0] dma_xbar_default_port;
@@ -511,10 +512,10 @@ module snitch_cluster
     .clk_i (clk_i),
     .rst_ni (rst_ni),
     .test_i (1'b0),
-    .slv_ports_req_i (axi_dma_mst_req),
-    .slv_ports_resp_o (axi_dma_mst_res),
-    .mst_ports_req_o (axi_dma_slv_req),
-    .mst_ports_resp_i (axi_dma_slv_res),
+    .slv_ports_req_i (wide_axi_mst_req),
+    .slv_ports_resp_o (wide_axi_mst_rsp),
+    .mst_ports_req_o (wide_axi_slv_req),
+    .mst_ports_resp_i (wide_axi_slv_rsp),
     .addr_map_i (dma_xbar_rule),
     .en_default_mst_port_i (DMAEnableDefaultMstPort),
     .default_mst_port_i (dma_xbar_default_port)
@@ -525,15 +526,15 @@ module snitch_cluster
     .axi_resp_t (axi_slv_dma_resp_t),
     .AddrWidth (PhysicalAddrWidth),
     .DataWidth (WideDataWidth),
-    .IdWidth (IdWidthDMAOut),
+    .IdWidth (WideIdWidthOut),
     .NumBanks (1),
     .BufDepth (MemoryMacroLatency + 1)
   ) i_axi_to_mem_dma (
     .clk_i,
     .rst_ni,
     .busy_o (),
-    .axi_req_i (axi_dma_slv_req[TCDMDMA]),
-    .axi_resp_o (axi_dma_slv_res[TCDMDMA]),
+    .axi_req_i (wide_axi_slv_req[TCDMDMA]),
+    .axi_resp_o (wide_axi_slv_rsp[TCDMDMA]),
     .mem_req_o (ext_dma_req.q_valid),
     .mem_gnt_i (ext_dma_rsp.q_ready),
     .mem_addr_o (ext_dma_req.q.addr),
@@ -797,8 +798,8 @@ module snitch_cluster
         end
       end
       if (Xdma[i]) begin : gen_dma_connection
-        assign axi_dma_mst_req[SDMAMst] = axi_dma_req;
-        assign axi_dma_res = axi_dma_mst_res[SDMAMst];
+        assign wide_axi_mst_req[SDMAMst] = axi_dma_req;
+        assign axi_dma_res = wide_axi_mst_rsp[SDMAMst];
       end
   end
 
@@ -819,7 +820,8 @@ module snitch_cluster
 
       snitch_hive #(
         .AddrWidth (PhysicalAddrWidth),
-        .DataWidth (NarrowDataWidth),
+        .NarrowDataWidth (NarrowDataWidth),
+        .WideDataWidth (WideDataWidth),
         .dreq_t (reqrsp_req_t),
         .drsp_t (reqrsp_rsp_t),
         .hive_req_t (hive_req_t),
@@ -829,8 +831,8 @@ module snitch_cluster
         .ICacheLineCount (ICacheLineCount[i]),
         .ICacheSets (ICacheSets[i]),
         .IsoCrossing (IsoCrossing),
-        .axi_req_t (axi_mst_req_t),
-        .axi_rsp_t (axi_mst_resp_t)
+        .axi_req_t (axi_mst_dma_req_t),
+        .axi_rsp_t (axi_mst_dma_resp_t)
       ) i_snitch_hive (
         .clk_i,
         .clk_d2_i (clk_d2),
@@ -839,8 +841,8 @@ module snitch_cluster
         .hive_rsp_o (hive_rsp_reshape),
         .ptw_data_req_o (ptw_req[i]),
         .ptw_data_rsp_i (ptw_rsp[i]),
-        .axi_req_o (master_req[ICache+i]),
-        .axi_rsp_i (master_resp[ICache+i])
+        .axi_req_o (wide_axi_mst_req[ICache+i]),
+        .axi_rsp_i (wide_axi_mst_rsp[ICache+i])
       );
   end
 
@@ -877,8 +879,8 @@ module snitch_cluster
     .rst_ni,
     .reqrsp_req_i (ptw_to_axi_req),
     .reqrsp_rsp_o (ptw_to_axi_rsp),
-    .axi_req_o (master_req[PTW]),
-    .axi_rsp_i (master_resp[PTW])
+    .axi_req_o (narrow_axi_mst_req[PTW]),
+    .axi_rsp_i (narrow_axi_mst_rsp[PTW])
   );
 
   // --------
@@ -929,8 +931,8 @@ module snitch_cluster
     .rst_ni,
     .reqrsp_req_i (core_to_axi_req),
     .reqrsp_rsp_o (core_to_axi_rsp),
-    .axi_req_o (master_req[CoreReq]),
-    .axi_rsp_i (master_resp[CoreReq])
+    .axi_req_o (narrow_axi_mst_req[CoreReq]),
+    .axi_rsp_i (narrow_axi_mst_rsp[CoreReq])
   );
 
   logic [ClusterXbarCfg.NoSlvPorts-1:0][$clog2(ClusterXbarCfg.NoMstPorts)-1:0]
@@ -971,10 +973,10 @@ module snitch_cluster
     .clk_i,
     .rst_ni,
     .test_i (1'b0),
-    .slv_ports_req_i (master_req),
-    .slv_ports_resp_o (master_resp),
-    .mst_ports_req_o (slave_req),
-    .mst_ports_resp_i (slave_resp),
+    .slv_ports_req_i (narrow_axi_mst_req),
+    .slv_ports_resp_o (narrow_axi_mst_rsp),
+    .mst_ports_req_o (narrow_axi_slv_req),
+    .mst_ports_resp_i (narrow_axi_slv_rsp),
     .addr_map_i (cluster_xbar_rules),
     .en_default_mst_port_i (ClusterEnableDefaultMstPort),
     .default_mst_port_i (cluster_xbar_default_port)
@@ -996,8 +998,8 @@ module snitch_cluster
     .rst_ni,
     .slv_req_i (narrow_in_req_i),
     .slv_resp_o (narrow_in_resp_o),
-    .mst_req_o (master_req[AXISoC]),
-    .mst_resp_i (master_resp[AXISoC])
+    .mst_req_o (narrow_axi_mst_req[AXISoC]),
+    .mst_resp_i (narrow_axi_mst_rsp[AXISoC])
   );
 
   // ---------
@@ -1012,13 +1014,13 @@ module snitch_cluster
     .tcdm_rsp_t (tcdm_rsp_t),
     .AddrWidth (PhysicalAddrWidth),
     .DataWidth (NarrowDataWidth),
-    .IdWidth (IdWidthOut),
+    .IdWidth (NarrowIdWidthOut),
     .BufDepth (MemoryMacroLatency + 1)
   ) i_axi_to_tcdm (
     .clk_i,
     .rst_ni,
-    .axi_req_i (slave_req[TCDM]),
-    .axi_rsp_o (slave_resp[TCDM]),
+    .axi_req_i (narrow_axi_slv_req[TCDM]),
+    .axi_rsp_o (narrow_axi_slv_rsp[TCDM]),
     .tcdm_req_o (axi_soc_req),
     .tcdm_rsp_i (axi_soc_rsp)
   );
@@ -1030,7 +1032,7 @@ module snitch_cluster
     .AXI_MAX_WRITE_TXNS (1),
     .AXI_MAX_READ_TXNS (1),
     .DECOUPLE_W (0),
-    .ID_WIDTH (IdWidthOut),
+    .ID_WIDTH (NarrowIdWidthOut),
     .USER_WIDTH (UserWidth),
     .axi_req_t (axi_slv_req_t),
     .axi_rsp_t (axi_slv_resp_t),
@@ -1040,8 +1042,8 @@ module snitch_cluster
     .clk_i,
     .rst_ni,
     .testmode_i (1'b0),
-    .axi_req_i (slave_req[ClusterPeripherals]),
-    .axi_rsp_o (slave_resp[ClusterPeripherals]),
+    .axi_req_i (narrow_axi_slv_req[ClusterPeripherals]),
+    .axi_rsp_o (narrow_axi_slv_rsp[ClusterPeripherals]),
     .reg_req_o (reg_req),
     .reg_rsp_i (reg_rsp)
   );
@@ -1079,8 +1081,8 @@ module snitch_cluster
   ) i_cut_ext_narrow_mst (
     .clk_i      ( clk_i           ),
     .rst_ni     ( rst_ni          ),
-    .slv_req_i  ( slave_req[SoC]  ),
-    .slv_resp_o ( slave_resp[SoC] ),
+    .slv_req_i  ( narrow_axi_slv_req[SoC] ),
+    .slv_resp_o ( narrow_axi_slv_rsp[SoC] ),
     .mst_req_o  ( narrow_out_req_o   ),
     .mst_resp_i ( narrow_out_resp_i   )
   );

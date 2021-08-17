@@ -24,10 +24,10 @@ package occamy_cluster_pkg;
   localparam int unsigned WideDataWidth = 512;
 
   localparam int unsigned NarrowIdWidthIn = 2;
-  localparam int unsigned NrMasters = 3 + 1;
+  localparam int unsigned NrMasters = 3;
   localparam int unsigned NarrowIdWidthOut = $clog2(NrMasters) + NarrowIdWidthIn;
 
-  localparam int unsigned NrDmaMasters = 2;
+  localparam int unsigned NrDmaMasters = 2 + 1;
   localparam int unsigned WideIdWidthIn = 2;
   localparam int unsigned WideIdWidthOut = $clog2(NrDmaMasters) + WideIdWidthIn;
 
