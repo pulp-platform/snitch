@@ -4170,6 +4170,7 @@ pub enum Csr {
     Mimpid = 0xf13,
     Mhartid = 0xf14,
     Ssr = 0x7c0,
+    Fpmode = 0x7c1,
     Cycleh = 0xc80,
     Timeh = 0xc81,
     Instreth = 0xc82,
