@@ -37,6 +37,8 @@ pub struct Engine {
     pub opt_llvm: bool,
     /// Optimize during JIT compilation.
     pub opt_jit: bool,
+    /// Enable interrupt support.
+    pub interrupt: bool,
     /// Enable instruction tracing.
     pub trace: bool,
     /// Enable instruction latency.
@@ -56,8 +58,6 @@ pub struct Engine {
     pub putchar_buffer: Mutex<HashMap<usize, Vec<u8>>>,
     /// The peripherals for each cluster
     peripherals: Peripherals,
-    /// The CLINT registers
-    pub clint: Mutex<HashMap<u64, u32>>,
 }
 
 // SAFETY: This is safe because only `context` and `module`
@@ -75,6 +75,7 @@ impl Engine {
             had_error: Default::default(),
             opt_llvm: true,
             opt_jit: true,
+            interrupt: true,
             trace: false,
             latency: false,
             base_hartid: 0,
@@ -84,7 +85,6 @@ impl Engine {
             memory: Default::default(),
             putchar_buffer: Default::default(),
             peripherals: Peripherals::new(),
-            clint: Default::default(),
         }
     }
 
@@ -376,6 +376,12 @@ impl Engine {
             .map(|_| AtomicU64::new(0))
             .collect();
 
+        // Allocate CLINT registers
+        let ncores = self.num_clusters * self.num_cores;
+        let clint: Vec<_> = (0..(ncores + 32 - 1) / 32)
+            .map(|_| AtomicU32::new(0))
+            .collect();
+
         // Create the CPUs.
         let cpus: Vec<_> = (0..self.num_clusters)
             .flat_map(|j| (0..self.num_cores).map(move |i| (j, i)))
@@ -392,6 +398,7 @@ impl Engine {
                     &barriers[j],
                     &num_sleep,
                     &wake_up,
+                    &clint,
                 )
             })
             .collect();
@@ -541,6 +548,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         barrier: &'b AtomicUsize,
         num_sleep: &'b AtomicUsize,
         wake_up: &'b Vec<AtomicU64>,
+        clint: &'b Vec<AtomicU32>,
     ) -> Self {
         Self {
             engine,
@@ -554,6 +562,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             barrier,
             num_sleep,
             wake_up,
+            clint,
         }
     }
 
@@ -606,13 +615,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     "CLINT Load off 0x{:x}",
                     addr as u64 - self.engine.config.address.clint as u64
                 );
-                self.engine
-                    .clint
-                    .lock()
-                    .unwrap()
-                    .get(&(addr as u64 - self.engine.config.address.clint as u64))
-                    .copied()
-                    .unwrap_or(0)
+                let word_addr = (addr - self.engine.config.address.clint) / 4;
+                self.clint[word_addr as usize].load(Ordering::Relaxed)
             }
             _ => {
                 trace!("Load 0x{:x} ({}B)", addr, 8 << size);
@@ -704,18 +708,16 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x >= self.engine.config.address.clint
                 && x < self.engine.config.address.clint + 0x1000 =>
             {
-                let reg_off = addr - self.engine.config.address.clint;
-                trace!("CLINT store off {:x} = 0x{:x}", reg_off, value,);
-                let mut clint = self.engine.clint.lock().unwrap();
-                let clint = clint.entry(reg_off as u64).or_default();
-                *clint &= !mask;
-                *clint |= value & mask;
+                let word_addr = (addr - self.engine.config.address.clint) / 4;
+                trace!("CLINT store word off {:x} = 0x{:x}", word_addr, value,);
+                let old_entry = self.clint[word_addr as usize].load(Ordering::Relaxed);
+                let entry = (old_entry & !mask) | (value & mask);
+                self.clint[word_addr as usize].store(entry, Ordering::Relaxed);
                 // wake cores affected by this write
-                let hart_base = self.engine.base_hartid as u32 + 32 * reg_off;
-                let write_val = value & mask;
+
+                let hart_base = self.engine.base_hartid as u32 + 32 * word_addr;
                 for i in 0..32 {
-                    if (write_val & (1 << i)) != 0 {
-                        // TODO: Is this thread-safe?
+                    if ((!old_entry & entry) & (1 << i)) != 0 {
                         self.num_sleep.fetch_sub(1, Ordering::Relaxed);
                         self.wake_up[(hart_base + i) as usize]
                             .fetch_max(self.state.cycle + 1, Ordering::Release);
@@ -892,7 +894,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         self.state.cycle = std::cmp::max(self.state.cycle, cycle as u64);
         self.state.wfi = false;
         // Trigger IRQ check on next instruction
-        self.state.irq.sample_ctr = u32::MAX;
+        self.state.irq.sample_ctr = u32::MAX - 1;
         // The core waking us up, already decremented the `num_sleep` counter for us
         return 0;
     }
@@ -900,15 +902,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     fn binary_check_clint(&mut self) -> u32 {
         // read the clint software interrupt and return 1 if interrupt pending
         let hartid = self.hartid - self.engine.base_hartid;
-        return (self
-            .engine
-            .clint
-            .lock()
-            .unwrap()
-            .get(&(hartid as u64 / 32 as u64))
-            .copied()
-            .unwrap_or(0)
-            & (1 << (hartid % 32)))
+        return (self.clint[(hartid / 32) as usize].load(Ordering::Relaxed) & (1 << (hartid % 32)))
             >> (hartid % 32);
     }
 

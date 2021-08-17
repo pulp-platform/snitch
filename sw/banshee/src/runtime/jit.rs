@@ -108,13 +108,6 @@ pub unsafe fn banshee_dma_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut DmaState {
     &mut cpu.state.dma
 }
 
-/// Get a pointer to the IRQ state.
-#[no_mangle]
-#[inline(always)]
-pub unsafe fn banshee_irq_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut IrqState {
-    &mut cpu.state.irq
-}
-
 /// Write to an SSR control register.
 #[no_mangle]
 pub unsafe fn banshee_ssr_write_cfg(

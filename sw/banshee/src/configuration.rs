@@ -20,6 +20,8 @@ pub struct Configuration {
     pub inst_latency: std::collections::HashMap<String, u64>,
     #[serde(default)]
     pub ssr: Ssr,
+    #[serde(default)]
+    pub interrupt_latency: u32,
 }
 
 impl Default for Configuration {
@@ -29,6 +31,7 @@ impl Default for Configuration {
             address: Default::default(),
             inst_latency: Default::default(),
             ssr: Default::default(),
+            interrupt_latency: 10,
         }
     }
 }

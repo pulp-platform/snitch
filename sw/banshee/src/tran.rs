@@ -976,7 +976,9 @@ impl<'a> InstructionTranslator<'a> {
         );
 
         // Check for interrupts
-        self.emit_irq_check();
+        if self.section.engine.interrupt {
+            self.emit_irq_check();
+        }
 
         // Update the instret counter.
         let instret = LLVMBuildLoad(self.builder, self.instret_ptr(), NONAME);
@@ -2748,7 +2750,11 @@ impl<'a> InstructionTranslator<'a> {
             self.builder,
             LLVMIntUGE,
             irq_sample_ctr,
-            LLVMConstInt(LLVMTypeOf(irq_sample_ctr), u64::MAX, 0),
+            LLVMConstInt(
+                LLVMTypeOf(irq_sample_ctr),
+                self.section.engine.config.interrupt_latency as u64,
+                0,
+            ),
             NONAME,
         );
         LLVMBuildCondBr(self.builder, is_sample, bb_prel_irq, bb_noirq);
