@@ -154,10 +154,10 @@ module occamy_cluster_wrapper (
 );
 
   localparam int unsigned NumIntOutstandingLoads [9] = '{1, 1, 1, 1, 1, 1, 1, 1, 1};
-  localparam int unsigned NumIntOutstandingMem [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 1};
+  localparam int unsigned NumIntOutstandingMem [9] = '{1, 4, 4, 4, 4, 4, 4, 4, 4};
   localparam int unsigned NumFPOutstandingLoads [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 4};
-  localparam int unsigned NumFPOutstandingMem [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 1};
-  localparam int unsigned NumDTLBEntries [9] = '{1, 1, 1, 1, 1, 1, 1, 1, 2};
+  localparam int unsigned NumFPOutstandingMem [9] = '{1, 4, 4, 4, 4, 4, 4, 4, 4};
+  localparam int unsigned NumDTLBEntries [9] = '{2, 1, 1, 1, 1, 1, 1, 1, 1};
   localparam int unsigned NumITLBEntries [9] = '{1, 1, 1, 1, 1, 1, 1, 1, 1};
   localparam int unsigned NumSequencerInstr [9] = '{16, 16, 16, 16, 16, 16, 16, 16, 16};
   localparam int unsigned NumSsrs [9] = '{3, 3, 3, 3, 3, 3, 3, 3, 3};
