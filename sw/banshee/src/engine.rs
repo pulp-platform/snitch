@@ -518,8 +518,20 @@ pub unsafe fn add_llvm_symbols() {
         Cpu::fp16_op_cvt as *mut _,
     );
     LLVMAddSymbol(
-        b"banshee_fp8_op_cvt\0".as_ptr() as *const _,
-        Cpu::fp8_op_cvt as *mut _,
+        b"banshee_fp16_op_cvt_from_f\0".as_ptr() as *const _,
+        Cpu::fp16_op_cvt_from_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp16_op_cvt_to_f\0".as_ptr() as *const _,
+        Cpu::fp16_op_cvt_to_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_op_cvt_from_f\0".as_ptr() as *const _,
+        Cpu::fp8_op_cvt_from_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_op_cvt_to_f\0".as_ptr() as *const _,
+        Cpu::fp8_op_cvt_to_f as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp16_op_cmp\0".as_ptr() as *const _,
@@ -951,12 +963,20 @@ impl<'a, 'b> Cpu<'a, 'b> {
     /*
      * Flexfloat Conversions
      */
-    pub unsafe fn fp16_op_cvt(rs1: u64, op: flexfloat::FlexfloatOpCvt, alt: bool) -> u16 {
-        flexfloat::ff_instruction_cvt_h(rs1, op, alt)
+    pub unsafe fn fp16_op_cvt_from_f(rs1: u64, op: flexfloat::FfOpCvt, alt: bool) -> i32 {
+        flexfloat::ff_instruction_cvt_from_h(rs1, op, alt)
     }
 
-    pub unsafe fn fp8_op_cvt(rs1: u64, op: flexfloat::FlexfloatOpCvt, alt: bool) -> u8 {
-        flexfloat::ff_instruction_cvt_b(rs1, op, alt)
+    pub unsafe fn fp16_op_cvt_to_f(rs1: u64, op: flexfloat::FfOpCvt, alt: bool) -> u16 {
+        flexfloat::ff_instruction_cvt_to_h(rs1, op, alt)
+    }
+
+    pub unsafe fn fp8_op_cvt_from_f(rs1: u64, op: flexfloat::FfOpCvt, alt: bool) -> i32 {
+        flexfloat::ff_instruction_cvt_from_b(rs1, op, alt)
+    }
+
+    pub unsafe fn fp8_op_cvt_to_f(rs1: u64, op: flexfloat::FfOpCvt, alt: bool) -> u8 {
+        flexfloat::ff_instruction_cvt_to_b(rs1, op, alt)
     }
 
     /*
