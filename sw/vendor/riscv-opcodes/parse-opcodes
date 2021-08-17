@@ -270,6 +270,7 @@ csrs = [
 
   # Custom CSR
   (0x7C0, 'ssr'),
+  (0x7C1, 'fpmode'),
 ]
 
 csrs32 = [
@@ -612,7 +613,6 @@ def make_rust():
   for csr in csrs+csrs32:
     print(f'    {make_camel_case(csr[1])} = 0x{csr[0]:03x},')
   print("}")
-
 
 
 def make_py(match,mask):
