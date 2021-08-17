@@ -177,6 +177,7 @@ package snitch_pkg;
   typedef struct packed {
     longint source;
     longint stall;
+    longint exception;
     longint rs1;
     longint rs2;
     longint rd;
@@ -209,6 +210,7 @@ package snitch_pkg;
     string extras_str = "{";
     extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "source", snitch_trace.source);
     extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "stall", snitch_trace.stall);
+    extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "exception", snitch_trace.exception);
     extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rs1", snitch_trace.rs1);
     extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rs2", snitch_trace.rs2);
     extras_str = $sformatf("%s'%s': 0x%0x, ", extras_str, "rd", snitch_trace.rd);
