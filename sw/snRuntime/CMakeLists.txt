@@ -105,6 +105,7 @@ add_snitch_test(varargs_1 tests/varargs_1.c)
 add_snitch_test(varargs_2 tests/varargs_2.c)
 add_snitch_test(barrier tests/barrier.c)
 add_snitch_test(lto tests/lto.c tests/lto_a.c)
+add_snitch_test(interrupt tests/interrupt.c)
 
 add_snitch_test_executable(dma_simple tests/dma_simple.c)
 add_snitch_test_executable(printf_simple tests/printf_simple.c)
@@ -121,6 +122,3 @@ add_snitch_test_args(printf_fmtint printf_fmtint-system --no-opt-llvm --base-har
 add_snitch_test_executable(team_global tests/team_global.c)
 add_snitch_test_rtl(team_global)
 add_snitch_test_args(team_global team_global --base-hartid=3 --num-cores=4 --num-clusters=2)
-
-add_snitch_test_executable(interrupt tests/interrupt.c)
-add_snitch_test_rtl(interrupt)
