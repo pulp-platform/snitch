@@ -722,14 +722,14 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         opb_select = None;
         rd_select = RdBypass;
         rd_bypass = csr_rvalue;
-        csr_en = 1'b1;
+        csr_en = valid_instr;
       end
       CSRRWI: begin
         opa_select = CSRImmmediate;
         opb_select = None;
         rd_select = RdBypass;
         rd_bypass = csr_rvalue;
-        csr_en = 1'b1;
+        csr_en = valid_instr;
       end
       CSRRS: begin  // Atomic Read and Set Bits in CSR
           alu_op = LOr;
@@ -737,7 +737,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           opb_select = CSR;
           rd_select = RdBypass;
           rd_bypass = csr_rvalue;
-          csr_en = 1'b1;
+          csr_en = valid_instr;
       end
       CSRRSI: begin
         // offload CSR enable to FP SS
@@ -747,7 +747,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           opb_select = CSR;
           rd_select = RdBypass;
           rd_bypass = csr_rvalue;
-          csr_en = 1'b1;
+          csr_en = valid_instr;
         end else begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -759,7 +759,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         opb_select = CSR;
         rd_select = RdBypass;
         rd_bypass = csr_rvalue;
-        csr_en = 1'b1;
+        csr_en = valid_instr;
       end
       CSRRCI: begin
         if (inst_data_i[31:20] != CSR_SSR) begin
@@ -768,7 +768,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           opb_select = CSR;
           rd_select = RdBypass;
           rd_bypass = csr_rvalue;
-          csr_en = 1'b1;
+          csr_en = valid_instr;
         end else begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
