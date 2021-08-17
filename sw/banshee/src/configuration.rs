@@ -45,6 +45,7 @@ impl Configuration {
             memory: vec![Default::default(); num_clusters],
             address: Default::default(),
             inst_latency: Default::default(),
+            ssr: Default::default(),
         }
     }
     /// Parse a json/yaml file into a `Configuration` struct
