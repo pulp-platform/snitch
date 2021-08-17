@@ -43,6 +43,8 @@ declare i16 @banshee_fcvtah(i64 %rs1, i8 %op)
 declare i8 @banshee_fcvtb(i64 %rs1, i8 %op)
 declare i8 @banshee_fcvtab(i64 %rs1, i8 %op)
 
+declare i64 @banshee_fp64_op_cvt_to_f(i64 %rs1, i8 %op, i1 %fpmode_src, i1 %fpmode_dst)
+declare i32 @banshee_fp32_op_cvt_to_f(i64 %rs1, i8 %op, i1 %fpmode_src, i1 %fpmode_dst)
 declare i16 @banshee_fp16_op(i16 %rs1, i16 %rs2, i16 %rs3, i8 %op, i1 %fpmode_dst)
 declare i32 @banshee_fp16_op_cvt_from_f(i64 %rs1, i8 %op, i1 %fpmode_src, i1 %fpmode_dst)
 declare i16 @banshee_fp16_op_cvt_to_f(i64 %rs1, i8 %op, i1 %fpmode_src, i1 %fpmode_dst)

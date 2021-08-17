@@ -1951,16 +1951,52 @@ impl<'a> InstructionTranslator<'a> {
                 let value = LLVMBuildFPCast(self.builder, rs1, LLVMDoubleType(), name);
                 self.write_freg_f64(data.rd, value);
             }
-            // riscv::OpcodeRdRmRs1::FcvtQQ => {
-            //     let (fpmode_src, fpmode_dst) = self.read_fpmode();
-            //     let rs1 = self.read_freg_f16(data.rs1);
-            //     let value = self.emit_fp8_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvtwu2f, fpmode_src, fpmode_dst);
-            //     self.write_reg(data.rd, value);
-            // }
             riscv::OpcodeRdRmRs1::FcvtSD => {
                 let rs1 = self.read_freg_f64(data.rs1);
                 let value = LLVMBuildFPCast(self.builder, rs1, LLVMFloatType(), name);
                 self.write_freg_f32(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtSQ => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg_f8(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp32_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt8f2f, fpmode_src, fpmode_dst);
+                self.write_freg(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtDQ => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg_f8(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp64_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt8f2f, fpmode_src, fpmode_dst);
+                self.write_freg(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtQS => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp8_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt32f2f, fpmode_src, fpmode_dst);
+                self.write_freg_f8(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtQD => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg_f64(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp8_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt64f2f, fpmode_src, fpmode_dst);
+                self.write_freg_f8(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtHS => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp16_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt32f2f, fpmode_src, fpmode_dst);
+                self.write_freg_f16(data.rd, value);
+            }
+            riscv::OpcodeRdRmRs1::FcvtHD => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg_f64(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp16_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt64f2f, fpmode_src, fpmode_dst);
+                self.write_freg_f16(data.rd, value);
             }
             _ => bail!("Unsupported opcode {}", data.op),
         };
@@ -2372,7 +2408,7 @@ impl<'a> InstructionTranslator<'a> {
         rd
     }
 
-    /// emit fp16 or fp16fpmode_dst comparison instruction to flexfloat
+    /// emit fp16 or fp16alt comparison instruction to flexfloat
     unsafe fn emit_fp16_op_cmp(
         &self,
         rs1: LLVMValueRef,
@@ -2425,7 +2461,7 @@ impl<'a> InstructionTranslator<'a> {
         rd
     }
 
-    /// emit fp16 or fp16fpmode_dst conversion instruction to flexfloat
+    /// emit fp16 or fp16alt conversion instruction to flexfloat
     unsafe fn emit_fp16_op_cvt_to_f(
         &self,
         rs1: LLVMValueRef,
@@ -2444,7 +2480,7 @@ impl<'a> InstructionTranslator<'a> {
         rd
     }
 
-    /// emit fp16 or fp16fpmode_dst conversion instruction to flexfloat
+    /// emit fp16 or fp16alt conversion instruction to flexfloat
     unsafe fn emit_fp16_op_cvt_from_f(
         &self,
         rs1: LLVMValueRef,
@@ -2459,6 +2495,44 @@ impl<'a> InstructionTranslator<'a> {
             "banshee_fp16_op_cvt_from_f",
             [rs1, op, fpmode_src, fpmode_dst],
             "fp16_op_cvt_from_f",
+        );
+        rd
+    }
+
+    /// emit fp32 conversion instruction to flexfloat
+    unsafe fn emit_fp32_op_cvt_to_f(
+        &self,
+        rs1: LLVMValueRef,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: LLVMValueRef,
+        fpmode_dst: LLVMValueRef,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name(
+            "banshee_fp32_op_cvt_to_f",
+            [rs1, op, fpmode_src, fpmode_dst],
+            "fp32_op_cvt_to_f",
+        );
+        rd
+    }
+
+    /// emit fp32 conversion instruction to flexfloat
+    unsafe fn emit_fp64_op_cvt_to_f(
+        &self,
+        rs1: LLVMValueRef,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: LLVMValueRef,
+        fpmode_dst: LLVMValueRef,
+    ) -> LLVMValueRef {
+        // Encode the operation
+        let op_value: u8 = std::mem::transmute(op as u8);
+        let op = LLVMConstInt(LLVMInt8Type(), op_value as u64, 0);
+        let rd = self.section.emit_call_with_name(
+            "banshee_fp64_op_cvt_to_f",
+            [rs1, op, fpmode_src, fpmode_dst],
+            "fp64_op_cvt_to_f",
         );
         rd
     }
@@ -2505,7 +2579,7 @@ impl<'a> InstructionTranslator<'a> {
         self.write_freg_vf64b(data.rd, res7, res6, res5, res4, res3, res2, res1, res0);
     }
 
-    /// emit vfp16 or vfp16fpmode_dst computation instruction to flexfloat
+    /// emit vfp16 or vfp16alt computation instruction to flexfloat
     unsafe fn emit_vfp16_op(
         &self,
         data: riscv::FormatRdRs1Rs2,
@@ -2522,7 +2596,7 @@ impl<'a> InstructionTranslator<'a> {
         self.write_freg_vf64h(data.rd, res3, res2, res1, res0);
     }
 
-    /// emit vfp168 or vfp16fpmode_dst computation instruction to flexfloat (R)
+    /// emit vfp168 or vfp16alt computation instruction to flexfloat (R)
     unsafe fn emit_vfp16_op_r(
         &self,
         data: riscv::FormatRdRs1Rs2,
@@ -2669,7 +2743,7 @@ impl<'a> InstructionTranslator<'a> {
         value
     }
 
-    /// emit vfp16 or vfp16fpmode_dst computation instruction to flexfloat
+    /// emit vfp16 or vfp16alt computation instruction to flexfloat
     unsafe fn emit_vfp16_op_cmp(
         &self,
         data: riscv::FormatRdRs1Rs2,
@@ -2686,7 +2760,7 @@ impl<'a> InstructionTranslator<'a> {
         self.write_reg(data.rd, value);
     }
 
-    /// emit vfp16 or vfp16fpmode_dst computation instruction to flexfloat (R)
+    /// emit vfp16 or vfp16alt computation instruction to flexfloat (R)
     unsafe fn emit_vfp16_op_cmp_r(
         &self,
         data: riscv::FormatRdRs1Rs2,
@@ -2877,6 +2951,34 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMBuildLoad(self.builder, raw_ptr, NONAME),
                 );
                 return Ok(());
+            }
+            riscv::OpcodeRdRs1::FcvtBB => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg_f8(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp8_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt8f2f, fpmode_src, fpmode_dst);
+                self.write_freg_f8(data.rd, value);
+            }
+            riscv::OpcodeRdRs1::FcvtHB => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg_f16(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp16_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt8f2f, fpmode_src, fpmode_dst);
+                self.write_freg_f16(data.rd, value);
+            }
+            riscv::OpcodeRdRs1::FcvtSH => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg_f16(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp32_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt16f2f, fpmode_src, fpmode_dst);
+                self.write_freg(data.rd, value);
+            }
+            riscv::OpcodeRdRs1::FcvtDH => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg_f16(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp64_op_cvt_to_f(rs1, flexfloat::FfOpCvt::Fcvt16f2f, fpmode_src, fpmode_dst);
+                self.write_freg(data.rd, value);
             }
             _ => (),
         }

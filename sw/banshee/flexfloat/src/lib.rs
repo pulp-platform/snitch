@@ -103,6 +103,10 @@ pub enum FfOpCvt {
     // FcpkAhD,
     FcpkS2,
     FcpkD2,
+    Fcvt64f2f,
+    Fcvt32f2f,
+    Fcvt16f2f,
+    Fcvt8f2f,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -129,9 +133,25 @@ pub fn flexfloat_sign(a: *const flexfloat_t) -> bool
 }
 
 /// conversions to fp8 and fp8alt
-pub unsafe fn ff_instruction_cvt_to_b(rs1: u64, op: FfOpCvt, alt: bool) -> u8 {
+pub unsafe fn ff_instruction_cvt_to_b(
+    rs1: u64,
+    op: FfOpCvt,
+    fpmode_src: bool,
+    fpmode_dst: bool
+) -> u8 {
 
-    let env_dst : flexfloat_desc_t = if alt {
+    let env_fp8_src : flexfloat_desc_t = if fpmode_src {
+        env_fp8alt
+    } else {
+        env_fp8
+    };
+    let env_fp16_src : flexfloat_desc_t = if fpmode_src {
+        env_fp16alt
+    } else {
+        env_fp16
+    };
+
+    let env_dst : flexfloat_desc_t = if fpmode_dst {
         env_fp8alt
     } else {
         env_fp8
@@ -139,7 +159,11 @@ pub unsafe fn ff_instruction_cvt_to_b(rs1: u64, op: FfOpCvt, alt: bool) -> u8 {
 
     let ff_a8: *mut flexfloat_t = &mut flexfloat_t {
         value: 0.0,
-        desc: env_dst
+        desc: env_fp8_src
+    };
+    let ff_a16: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp16_src
     };
     let ff_a32: *mut flexfloat_t = &mut flexfloat_t {
         value: 0.0,
@@ -155,6 +179,7 @@ pub unsafe fn ff_instruction_cvt_to_b(rs1: u64, op: FfOpCvt, alt: bool) -> u8 {
     };
 
     flexfloat_set_bits(ff_a8, rs1 as u64);
+    flexfloat_set_bits(ff_a16, rs1 as u64);
     flexfloat_set_bits(ff_a32, rs1 as u64);
     flexfloat_set_bits(ff_a64, rs1 as u64);
 
@@ -168,6 +193,10 @@ pub unsafe fn ff_instruction_cvt_to_b(rs1: u64, op: FfOpCvt, alt: bool) -> u8 {
         FfOpCvt::Fcvtwu2f => {
             ff_init_long(ff_res, (rs1&0xffffffff) as i64, env_dst);
         },
+        FfOpCvt::Fcvt8f2f => ff_cast(ff_res, ff_a8, env_dst),
+        FfOpCvt::Fcvt16f2f => ff_cast(ff_res, ff_a16, env_dst),
+        FfOpCvt::Fcvt32f2f => ff_cast(ff_res, ff_a32, env_dst),
+        FfOpCvt::Fcvt64f2f => ff_cast(ff_res, ff_a64, env_dst),
         _ => (),
     };
 
@@ -176,9 +205,14 @@ pub unsafe fn ff_instruction_cvt_to_b(rs1: u64, op: FfOpCvt, alt: bool) -> u8 {
 }
 
 /// conversions from fp8 and fp8alt
-pub unsafe fn ff_instruction_cvt_from_b(rs1: u64, op: FfOpCvt, alt: bool) -> i32 {
+pub unsafe fn ff_instruction_cvt_from_b(
+    rs1: u64,
+    op: FfOpCvt,
+    _fpmode_src: bool,
+    fpmode_dst: bool
+) -> i32 {
 
-    let ff_a8 : *mut flexfloat_t = if alt {
+    let ff_a8 : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp8alt
@@ -202,17 +236,37 @@ pub unsafe fn ff_instruction_cvt_from_b(rs1: u64, op: FfOpCvt, alt: bool) -> i32
 }
 
 /// conversions to fp16 and fp16alt
-pub unsafe fn ff_instruction_cvt_to_h(rs1: u64, op: FfOpCvt, alt: bool) -> u16 {
+pub unsafe fn ff_instruction_cvt_to_h(
+    rs1: u64,
+    op: FfOpCvt,
+    fpmode_src: bool,
+    fpmode_dst: bool
+) -> u16 {
 
-    let env_dst : flexfloat_desc_t = if alt {
+    let env_fp8_src : flexfloat_desc_t = if fpmode_src {
+        env_fp8alt
+    } else {
+        env_fp8
+    };
+    let env_fp16_src : flexfloat_desc_t = if fpmode_src {
         env_fp16alt
     } else {
         env_fp16
     };
 
+    let env_dst : flexfloat_desc_t = if fpmode_dst {
+        env_fp16alt
+    } else {
+        env_fp16
+    };
+
+    let ff_a8: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp8_src
+    };
     let ff_a16: *mut flexfloat_t = &mut flexfloat_t {
         value: 0.0,
-        desc: env_dst
+        desc: env_fp16_src
     };
     let ff_a32: *mut flexfloat_t = &mut flexfloat_t {
         value: 0.0,
@@ -227,6 +281,7 @@ pub unsafe fn ff_instruction_cvt_to_h(rs1: u64, op: FfOpCvt, alt: bool) -> u16 {
         desc: env_dst
     };
 
+    flexfloat_set_bits(ff_a8, rs1 as u64);
     flexfloat_set_bits(ff_a16, rs1 as u64);
     flexfloat_set_bits(ff_a32, rs1 as u64);
     flexfloat_set_bits(ff_a64, rs1 as u64);
@@ -241,6 +296,10 @@ pub unsafe fn ff_instruction_cvt_to_h(rs1: u64, op: FfOpCvt, alt: bool) -> u16 {
         FfOpCvt::Fcvtwu2f => {
             ff_init_long(ff_res, (rs1&0xffffffff) as i64, env_dst);
         },
+        FfOpCvt::Fcvt8f2f => ff_cast(ff_res, ff_a8, env_dst),
+        FfOpCvt::Fcvt16f2f => ff_cast(ff_res, ff_a16, env_dst),
+        FfOpCvt::Fcvt32f2f => ff_cast(ff_res, ff_a32, env_dst),
+        FfOpCvt::Fcvt64f2f => ff_cast(ff_res, ff_a64, env_dst),
         _ => (),
     };
 
@@ -249,9 +308,14 @@ pub unsafe fn ff_instruction_cvt_to_h(rs1: u64, op: FfOpCvt, alt: bool) -> u16 {
 }
 
 /// conversions from fp16 and fp16alt
-pub unsafe fn ff_instruction_cvt_from_h(rs1: u64, op: FfOpCvt, alt: bool) -> i32 {
+pub unsafe fn ff_instruction_cvt_from_h(
+    rs1: u64,
+    op: FfOpCvt,
+    _fpmode_src: bool,
+    fpmode_dst: bool
+) -> i32 {
 
-    let ff_a16 : *mut flexfloat_t = if alt {
+    let ff_a16 : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp16alt
@@ -275,10 +339,100 @@ pub unsafe fn ff_instruction_cvt_from_h(rs1: u64, op: FfOpCvt, alt: bool) -> i32
     rd as i32
 }
 
-/// fp8 and fp8alt comparison instruction emulation
-pub unsafe fn ff_instruction_cmp_b(rs1: u8, rs2: u8, op: FlexfloatOpCmp, alt: bool) -> bool {
+/// conversions to fp32
+pub unsafe fn ff_instruction_cvt_to_s(
+    rs1: u64,
+    op: FfOpCvt,
+    fpmode_src: bool,
+    _fpmode_dst: bool
+) -> u32 {
 
-    let ff_a : *mut flexfloat_t = if alt {
+    let env_fp8_src : flexfloat_desc_t = if fpmode_src {
+        env_fp8alt
+    } else {
+        env_fp8
+    };
+    let env_fp16_src : flexfloat_desc_t = if fpmode_src {
+        env_fp16alt
+    } else {
+        env_fp16
+    };
+
+    let ff_a8: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp8_src
+    };
+    let ff_a16: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp16_src
+    };
+    let ff_res: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp32
+    };
+
+    flexfloat_set_bits(ff_a8, rs1 as u64);
+    flexfloat_set_bits(ff_a16, rs1 as u64);
+
+    match op {
+        FfOpCvt::Fcvt8f2f => ff_cast(ff_res, ff_a8, env_fp32),
+        FfOpCvt::Fcvt16f2f => ff_cast(ff_res, ff_a16, env_fp32),
+        _ => (),
+    };
+
+    let rd = flexfloat_get_bits(ff_res);
+    rd as u32
+}
+
+/// conversions to fp64
+pub unsafe fn ff_instruction_cvt_to_d(
+    rs1: u64,
+    op: FfOpCvt,
+    fpmode_src: bool,
+    _fpmode_dst: bool
+) -> u64 {
+
+    let env_fp8_src : flexfloat_desc_t = if fpmode_src {
+        env_fp8alt
+    } else {
+        env_fp8
+    };
+    let env_fp16_src : flexfloat_desc_t = if fpmode_src {
+        env_fp16alt
+    } else {
+        env_fp16
+    };
+
+    let ff_a8: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp8_src
+    };
+    let ff_a16: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp16_src
+    };
+    let ff_res: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp64
+    };
+
+    flexfloat_set_bits(ff_a8, rs1 as u64);
+    flexfloat_set_bits(ff_a16, rs1 as u64);
+
+    match op {
+        FfOpCvt::Fcvt8f2f => ff_cast(ff_res, ff_a8, env_fp64),
+        FfOpCvt::Fcvt16f2f => ff_cast(ff_res, ff_a16, env_fp64),
+        _ => (),
+    };
+
+    let rd = flexfloat_get_bits(ff_res);
+    rd as u64
+}
+
+/// fp8 and fp8alt comparison instruction emulation
+pub unsafe fn ff_instruction_cmp_b(rs1: u8, rs2: u8, op: FlexfloatOpCmp, fpmode_dst: bool) -> bool {
+
+    let ff_a : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp8alt
@@ -290,7 +444,7 @@ pub unsafe fn ff_instruction_cmp_b(rs1: u8, rs2: u8, op: FlexfloatOpCmp, alt: bo
         }
     };
 
-    let ff_b : *mut flexfloat_t = if alt {
+    let ff_b : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp8alt
@@ -318,9 +472,9 @@ pub unsafe fn ff_instruction_cmp_b(rs1: u8, rs2: u8, op: FlexfloatOpCmp, alt: bo
 }
 
 /// fp16 and fp16alt comparison instruction emulation
-pub unsafe fn ff_instruction_cmp_h(rs1: u16, rs2: u16, op: FlexfloatOpCmp, alt: bool) -> bool {
+pub unsafe fn ff_instruction_cmp_h(rs1: u16, rs2: u16, op: FlexfloatOpCmp, fpmode_dst: bool) -> bool {
 
-    let ff_a : *mut flexfloat_t = if alt {
+    let ff_a : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp16alt
@@ -332,7 +486,7 @@ pub unsafe fn ff_instruction_cmp_h(rs1: u16, rs2: u16, op: FlexfloatOpCmp, alt: 
         }
     };
 
-    let ff_b : *mut flexfloat_t = if alt {
+    let ff_b : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp16alt
@@ -360,15 +514,15 @@ pub unsafe fn ff_instruction_cmp_h(rs1: u16, rs2: u16, op: FlexfloatOpCmp, alt: 
 }
 
 /// fp8 and fp8alt instruction emulation
-pub unsafe fn ff_instruction_b(rs1: u8, rs2: u8, rs3: u8, op: FlexfloatOp, alt: bool) -> u8 {
+pub unsafe fn ff_instruction_b(rs1: u8, rs2: u8, rs3: u8, op: FlexfloatOp, fpmode_dst: bool) -> u8 {
 
-    let env : flexfloat_desc_t = if alt {
+    let env : flexfloat_desc_t = if fpmode_dst {
         env_fp8alt
     } else {
         env_fp8
     };
 
-    let ff_a : *mut flexfloat_t = if alt {
+    let ff_a : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp8alt
@@ -380,7 +534,7 @@ pub unsafe fn ff_instruction_b(rs1: u8, rs2: u8, rs3: u8, op: FlexfloatOp, alt: 
         }
     };
 
-    let ff_b : *mut flexfloat_t = if alt {
+    let ff_b : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp8alt
@@ -392,7 +546,7 @@ pub unsafe fn ff_instruction_b(rs1: u8, rs2: u8, rs3: u8, op: FlexfloatOp, alt: 
         }
     };
 
-    let ff_c : *mut flexfloat_t = if alt {
+    let ff_c : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp8alt
@@ -404,7 +558,7 @@ pub unsafe fn ff_instruction_b(rs1: u8, rs2: u8, rs3: u8, op: FlexfloatOp, alt: 
         }
     };
 
-    let ff_res : *mut flexfloat_t = if alt {
+    let ff_res : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp8alt
@@ -416,7 +570,7 @@ pub unsafe fn ff_instruction_b(rs1: u8, rs2: u8, rs3: u8, op: FlexfloatOp, alt: 
         }
     };
 
-    let ff_zero : *mut flexfloat_t = if alt {
+    let ff_zero : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp8alt
@@ -491,15 +645,15 @@ pub unsafe fn ff_instruction_b(rs1: u8, rs2: u8, rs3: u8, op: FlexfloatOp, alt: 
 
 
 /// fp16 and fp16alt instruction emulation
-pub unsafe fn ff_instruction_h(rs1: u16, rs2: u16, rs3: u16, op: FlexfloatOp, alt: bool) -> u16 {
+pub unsafe fn ff_instruction_h(rs1: u16, rs2: u16, rs3: u16, op: FlexfloatOp, fpmode_dst: bool) -> u16 {
 
-    let env : flexfloat_desc_t = if alt {
+    let env : flexfloat_desc_t = if fpmode_dst {
         env_fp16alt
     } else {
         env_fp16
     };
 
-    let ff_a : *mut flexfloat_t = if alt {
+    let ff_a : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp16alt
@@ -511,7 +665,7 @@ pub unsafe fn ff_instruction_h(rs1: u16, rs2: u16, rs3: u16, op: FlexfloatOp, al
         }
     };
 
-    let ff_b : *mut flexfloat_t = if alt {
+    let ff_b : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp16alt
@@ -523,7 +677,7 @@ pub unsafe fn ff_instruction_h(rs1: u16, rs2: u16, rs3: u16, op: FlexfloatOp, al
         }
     };
 
-    let ff_c : *mut flexfloat_t = if alt {
+    let ff_c : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp16alt
@@ -535,7 +689,7 @@ pub unsafe fn ff_instruction_h(rs1: u16, rs2: u16, rs3: u16, op: FlexfloatOp, al
         }
     };
 
-    let ff_res : *mut flexfloat_t = if alt {
+    let ff_res : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp16alt
@@ -547,7 +701,7 @@ pub unsafe fn ff_instruction_h(rs1: u16, rs2: u16, rs3: u16, op: FlexfloatOp, al
         }
     };
 
-    let ff_zero : *mut flexfloat_t = if alt {
+    let ff_zero : *mut flexfloat_t = if fpmode_dst {
         &mut flexfloat_t {
             value: 0.0,
             desc: env_fp16alt

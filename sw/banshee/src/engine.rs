@@ -518,6 +518,14 @@ pub unsafe fn add_llvm_symbols() {
         Cpu::fp16_op_cvt_from_f as *mut _,
     );
     LLVMAddSymbol(
+        b"banshee_fp64_op_cvt_to_f\0".as_ptr() as *const _,
+        Cpu::fp64_op_cvt_to_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp32_op_cvt_to_f\0".as_ptr() as *const _,
+        Cpu::fp32_op_cvt_to_f as *mut _,
+    );
+    LLVMAddSymbol(
         b"banshee_fp16_op_cvt_to_f\0".as_ptr() as *const _,
         Cpu::fp16_op_cvt_to_f as *mut _,
     );
@@ -957,13 +965,31 @@ impl<'a, 'b> Cpu<'a, 'b> {
     /*
      * Flexfloat Conversions
      */
+    pub unsafe fn fp64_op_cvt_to_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool
+    ) -> u64 {
+        flexfloat::ff_instruction_cvt_to_d(rs1, op, fpmode_src, fpmode_dst)
+    }
+
+    pub unsafe fn fp32_op_cvt_to_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool
+    ) -> u32 {
+        flexfloat::ff_instruction_cvt_to_s(rs1, op, fpmode_src, fpmode_dst)
+    }
+
     pub unsafe fn fp16_op_cvt_from_f(
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
         fpmode_dst: bool
     ) -> i32 {
-        flexfloat::ff_instruction_cvt_from_h(rs1, op, fpmode_dst)
+        flexfloat::ff_instruction_cvt_from_h(rs1, op, fpmode_src, fpmode_dst)
     }
 
     pub unsafe fn fp16_op_cvt_to_f(
@@ -972,7 +998,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         fpmode_src: bool,
         fpmode_dst: bool
     ) -> u16 {
-        flexfloat::ff_instruction_cvt_to_h(rs1, op, fpmode_dst)
+        flexfloat::ff_instruction_cvt_to_h(rs1, op, fpmode_src, fpmode_dst)
     }
 
     pub unsafe fn fp8_op_cvt_from_f(
@@ -981,7 +1007,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         fpmode_src: bool,
         fpmode_dst: bool
     ) -> i32 {
-        flexfloat::ff_instruction_cvt_from_b(rs1, op, fpmode_dst)
+        flexfloat::ff_instruction_cvt_from_b(rs1, op, fpmode_src, fpmode_dst)
     }
 
     pub unsafe fn fp8_op_cvt_to_f(
@@ -990,7 +1016,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         fpmode_src: bool,
         fpmode_dst: bool
     ) -> u8 {
-        flexfloat::ff_instruction_cvt_to_b(rs1, op, fpmode_dst)
+        flexfloat::ff_instruction_cvt_to_b(rs1, op, fpmode_src, fpmode_dst)
     }
 
     /*
