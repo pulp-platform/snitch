@@ -838,8 +838,6 @@ impl<'a> SectionTranslator<'a> {
         let mut fseq = SequencerContext::new();
         // iterate over section instructions
         for (addr, inst) in self.elf.instructions(self.section) {
-            // Check for a pending interrupt
-            // 1. emit a load to the CPU state
             let tran = InstructionTranslator {
                 section: self,
                 builder: self.builder,
@@ -2851,11 +2849,11 @@ impl<'a> InstructionTranslator<'a> {
             ),
             NONAME,
         );
-        self.write_csr(riscv::Csr::Mstatus as u32, mstatus_wb);
+        self.write_csr_silent(riscv::Csr::Mstatus as u32, mstatus_wb);
 
         // Set mcause register
         // TODO: Get correct cause, currently only settings machine software interrupt
-        self.write_csr(
+        self.write_csr_silent(
             riscv::Csr::Mcause as u32,
             LLVMConstInt(LLVMInt32Type(), (1 << 31) | 3, 0),
         );
@@ -2863,7 +2861,7 @@ impl<'a> InstructionTranslator<'a> {
         // load mtvec address from CSR
         let target = self.read_csr_silent(riscv::Csr::Mtvec as u32);
         // write the next PC to MEPC CSR
-        self.write_csr(
+        self.write_csr_silent(
             riscv::Csr::Mepc as u32,
             LLVMConstInt(LLVMInt32Type(), self.addr, 0),
         );

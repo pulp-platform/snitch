@@ -308,4 +308,4 @@ __snrt_crt0_interrupt_handler:
     lw  ra, 64(sp)
     addi    sp, sp, 80
     # return from interrupt context
-    mret    
+    mret
