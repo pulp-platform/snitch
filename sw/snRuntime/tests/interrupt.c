@@ -32,6 +32,7 @@ int main() {
         snrt_interrupt_enable(IRQ_M_SOFT);
         snrt_interrupt_global_enable();
         asm volatile("wfi");
+        asm volatile("nop");
         snrt_interrupt_global_disable();
     }
 
