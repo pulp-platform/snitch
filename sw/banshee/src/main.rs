@@ -191,7 +191,7 @@ fn main() -> Result<()> {
     }
 
     engine.config = if let Some(config_file) = matches.value_of("configuration") {
-        Configuration::parse(config_file)
+        Configuration::parse(config_file, engine.num_clusters)
     } else {
         Configuration::new(engine.num_clusters)
     };

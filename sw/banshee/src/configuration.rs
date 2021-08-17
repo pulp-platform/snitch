@@ -49,17 +49,19 @@ impl Configuration {
         }
     }
     /// Parse a json/yaml file into a `Configuration` struct
-    pub fn parse(name: &str) -> Configuration {
+    pub fn parse(name: &str, num_clusters: usize) -> Configuration {
         let config: String = std::fs::read_to_string(name)
             .unwrap_or_else(|_| panic!("Could not open file {}", name))
             .parse()
             .unwrap_or_else(|_| panic!("Could not parse file {}", name));
         // Parse the configuration file based on it's name
-        if name.to_lowercase().contains("json") {
+        let mut config: Configuration = if name.to_lowercase().contains("json") {
             serde_json::from_str(&config).expect("Error while reading json")
         } else {
             serde_yaml::from_str(&config).expect("Error while reading yaml")
-        }
+        };
+        config.memory.resize_with(num_clusters, Default::default);
+        config
     }
 
     /// Write the default `Configuration` struct into a json/yaml file
