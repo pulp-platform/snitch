@@ -181,7 +181,6 @@ pub struct Address {
     pub cluster_base_hartid: u32,
     pub cluster_num: u32,
     pub cluster_id: u32,
-    pub fp_mode: u32, // 2bits: fp_mode_src, fp_mode_dst
     pub uart: u32,
     pub clint: u32,
 }
@@ -198,7 +197,6 @@ impl Default for Address {
             cluster_base_hartid: 0x40000040,
             cluster_num: 0x40000048,
             cluster_id: 0x40000050,
-            fp_mode: 0x40000054,
             uart: 0xF00B8000,
             clint: 0xFFFF0000,
         }
