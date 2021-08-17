@@ -134,6 +134,9 @@ class semirand_axi_master #(
       while (tot_r_flight_cnt >= MAX_READ_TXNS) begin
         rand_wait(1, 1);
       end
+      if (AXI_EXCLS) begin
+        rand_excl_ar(ar_beat);
+      end
       if (AXI_ATOPS) begin
         // The ID must not be the same as that of any in-flight ATOP.
         forever begin
@@ -275,7 +278,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     parameter type addr_t = logic [AddrWidth-1:0],
     parameter int NR_FETCH_PORTS = 1,
     parameter int LINE_WIDTH = 256,
-    parameter int LINE_COUNT = 8,
+    parameter int LINE_COUNT = 64,
     parameter int SET_COUNT = 2, // TODO Case with one set not working
     parameter int FETCH_AW = AddrWidth,
     parameter int FETCH_DW = 32,
@@ -297,7 +300,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   localparam int unsigned AxiAddrWidth = AddrWidth;
   localparam int unsigned AxiDataWidth = FILL_DW;
   localparam int unsigned AxiStrbWidth = AxiDataWidth/8;
-  localparam int unsigned AxiInIdWidth = 6;
+  localparam int unsigned AxiInIdWidth = 3;
   localparam int unsigned AxiOutIdWidth = AxiInIdWidth+1;
   localparam int unsigned AxiUserWidth = 1;
 
@@ -313,7 +316,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
 
   // Address regions
   localparam axi_addr_t CachedRegionStart = axi_addr_t'(32'h8000_0000);
-  localparam axi_addr_t CachedRegionEnd   = axi_addr_t'(32'h8000_0200);
+  localparam axi_addr_t CachedRegionEnd   = axi_addr_t'(32'h8000_1000);
 
   // backing memory
   logic [LINE_WIDTH-1:0] memory [logic [AddrWidth-1:0]];
@@ -330,15 +333,15 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     .MAX_READ_TXNS        ( 16           ),
     .MAX_WRITE_TXNS       ( 4            ),
     .AX_MIN_WAIT_CYCLES   ( 0            ),
-    .AX_MAX_WAIT_CYCLES   ( 0            ),
+    .AX_MAX_WAIT_CYCLES   ( 8            ),
     .W_MIN_WAIT_CYCLES    ( 0            ),
-    .W_MAX_WAIT_CYCLES    ( 0            ),
+    .W_MAX_WAIT_CYCLES    ( 8            ),
     .RESP_MIN_WAIT_CYCLES ( 0            ),
-    .RESP_MAX_WAIT_CYCLES ( 1            ),
-    .AXI_MAX_BURST_LEN    ( 4            ),
+    .RESP_MAX_WAIT_CYCLES ( 8            ),
+    .AXI_MAX_BURST_LEN    ( 16           ),
     .TRAFFIC_SHAPING      ( 0            ),
-    .AXI_EXCLS            ( 1'b0         ),
-    .AXI_ATOPS            ( 1'b0         ),
+    .AXI_EXCLS            ( 1'b1         ),
+    .AXI_ATOPS            ( 1'b1         ),
     .AXI_BURST_FIXED      ( 1'b0         ),
     .AXI_BURST_INCR       ( 1'b1         ),
     .AXI_BURST_WRAP       ( 1'b0         )
@@ -353,11 +356,11 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     .TT                   ( TT            ),
     .RAND_RESP            ( 0             ),
     .AX_MIN_WAIT_CYCLES   ( 0             ),
-    .AX_MAX_WAIT_CYCLES   ( 50            ),
-    .R_MIN_WAIT_CYCLES    ( 10            ),
-    .R_MAX_WAIT_CYCLES    ( 20            ),
-    .RESP_MIN_WAIT_CYCLES ( 10            ),
-    .RESP_MAX_WAIT_CYCLES ( 20            )
+    .AX_MAX_WAIT_CYCLES   ( 8             ),
+    .R_MIN_WAIT_CYCLES    ( 0             ),
+    .R_MAX_WAIT_CYCLES    ( 8             ),
+    .RESP_MIN_WAIT_CYCLES ( 0             ),
+    .RESP_MAX_WAIT_CYCLES ( 8             )
   ) axi_rand_slave_t;
 
   AXI_BUS_DV #(
@@ -410,6 +413,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   ) dut (
     .clk_i         ( clk                 ),
     .rst_ni        ( ~rst                ),
+    .enable_i      ( 1'b1                ),
     .flush_valid_i ( 1'b0                ),
     .flush_ready_o ( /*unused*/          ),
     .start_addr_i  ( {CachedRegionStart} ),
@@ -428,20 +432,73 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     @(posedge clk);
   endtask
 
+  // typedef axi_test::axi_ax_beat #(.AW(AxiAddrWidth), .IW(AxiInIdWidth), .UW(AxiUserWidth)) ar_beat_t;
+
+  typedef axi_test::axi_driver #(
+    .AW(AxiAddrWidth), .DW(AxiDataWidth), .IW(AxiInIdWidth), .UW(AxiUserWidth), .TA(TA), .TT(TT)
+  ) axi_driver_t;
+
+  typedef axi_driver_t::ax_beat_t ar_beat_t;
+  typedef axi_driver_t::r_beat_t  r_beat_t;
+
   initial begin
     automatic logic rand_success;
+    automatic ar_beat_t ar_beat = new;
+    automatic r_beat_t r_beat = new;
+
+    ar_beat.ax_id     = '1;
+    ar_beat.ax_addr   = CachedRegionStart;
+    ar_beat.ax_len    = 7;
+    ar_beat.ax_size   = $clog2(AxiStrbWidth);
+    ar_beat.ax_burst  = axi_pkg::BURST_INCR;
+    ar_beat.ax_lock   = 1'b0;
+    ar_beat.ax_cache  = axi_pkg::WTHRU_RALLOCATE;
+    ar_beat.ax_prot   = '0;
+    ar_beat.ax_qos    = '0;
+    ar_beat.ax_region = '0;
+    ar_beat.ax_atop   = '0;
+    ar_beat.ax_user   = '1;
 
     // Initialize memory region of random axi master to only fetch from two lines
-    mst_intf.add_memory_region(CachedRegionStart, CachedRegionStart+LINE_WIDTH/8*2, axi_pkg::WTHRU_RALLOCATE);
+    mst_intf.add_memory_region(CachedRegionStart, CachedRegionEnd, axi_pkg::WTHRU_RALLOCATE);
 
     // Reset
     mst_intf.reset();
     @(negedge rst);
     #1000ns;
 
+    mst_intf.drv.send_ar(ar_beat);
+    for (int i = 0; i <= ar_beat.ax_len; i++) begin
+      mst_intf.drv.recv_r(r_beat);
+    end
+    #10000ns;
+    mst_intf.drv.send_ar(ar_beat);
+    for (int i = 0; i <= ar_beat.ax_len; i++) begin
+      mst_intf.drv.recv_r(r_beat);
+    end
+    #10000ns;
+    fork
+      begin
+        ar_beat.ax_addr   = CachedRegionStart+'h100;
+        ar_beat.ax_len    = 0;
+        mst_intf.drv.send_ar(ar_beat);
+        ar_beat.ax_id     = '0;
+        mst_intf.drv.send_ar(ar_beat);
+      end
+      begin
+        for (int i = 0; i <= ar_beat.ax_len; i++) begin
+          mst_intf.drv.recv_r(r_beat);
+        end
+        for (int i = 0; i <= ar_beat.ax_len; i++) begin
+          mst_intf.drv.recv_r(r_beat);
+        end
+      end
+    join
+    #10000ns;
+
     mst_intf.run(1000, 0);
 
-    mst_intf.add_memory_region(CachedRegionStart, CachedRegionEnd, axi_pkg::WTHRU_RALLOCATE);
+    mst_intf.add_memory_region(CachedRegionStart, CachedRegionStart+2*(CachedRegionEnd-CachedRegionStart), axi_pkg::WTHRU_RALLOCATE);
     #1000ns;
     mst_intf.run(1000, 0);
 
