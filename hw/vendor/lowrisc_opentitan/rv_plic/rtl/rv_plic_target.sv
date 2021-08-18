@@ -12,15 +12,15 @@
 // many input sources.
 //
 
-`include "common_cells/assertions.svh"
+`include "prim_assert.sv"
 
 module rv_plic_target #(
   parameter int N_SOURCE = 32,
   parameter int MAX_PRIO = 7,
 
   // Local param (Do not change this through parameter
-  localparam int SrcWidth  = $clog2(N_SOURCE+1),  // derived parameter
-  localparam int PrioWidth = $clog2(MAX_PRIO+1)   // derived parameter
+  localparam int SrcWidth  = $clog2(N_SOURCE),  // derived parameter
+  localparam int PrioWidth = $clog2(MAX_PRIO+1) // derived parameter
 ) (
   input clk_i,
   input rst_ni,
@@ -79,32 +79,17 @@ module rv_plic_target #(
         end
       // this creates the node assignments
       end else begin : gen_nodes
-        // NOTE: the code below has been written in this way in order to work
-        // around a synthesis issue in Vivado 2018.3 and 2019.2 where the whole
-        // module would be optimized away if these assign statements contained
-        // ternary statements to implement the muxes.
-        //
-        // TODO: rewrite these lines with ternary statmements onec the problem
-        // has been fixed in the tool.
-        //
-        // See also originating issue:
-        // https://github.com/lowRISC/opentitan/issues/1355
-        // Xilinx issue:
-        // https://forums.xilinx.com/t5/Synthesis/
-        // Simulation-Synthesis-Mismatch-with-Vivado-2018-3/m-p/1065923#M33849
-
         logic sel; // local helper variable
         // in case only one of the parent has a pending irq_o, forward that one
         // in case both irqs are pending, forward the one with higher priority
         assign sel = (~is_tree[C0] & is_tree[C1]) |
                      (is_tree[C0] & is_tree[C1] & logic'(max_tree[C1] > max_tree[C0]));
         // forwarding muxes
-        assign is_tree[Pa]  = (sel               & is_tree[C1])  |
-                              ((~sel)            & is_tree[C0]);
-        assign id_tree[Pa]  = ({SrcWidth{sel}}   & id_tree[C1])  |
-                              ({SrcWidth{~sel}}  & id_tree[C0]);
-        assign max_tree[Pa] = ({PrioWidth{sel}}  & max_tree[C1]) |
-                              ({PrioWidth{~sel}} & max_tree[C0]);
+        // Note: these ternaries have triggered a synthesis bug in Vivado versions older
+        // than 2020.2. If the problem resurfaces again, have a look at issue #1408.
+        assign is_tree[Pa]  = (sel) ? is_tree[C1]  : is_tree[C0];
+        assign id_tree[Pa]  = (sel) ? id_tree[C1]  : id_tree[C0];
+        assign max_tree[Pa] = (sel) ? max_tree[C1] : max_tree[C0];
       end
     end : gen_level
   end : gen_tree

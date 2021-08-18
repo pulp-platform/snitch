@@ -11,8 +11,10 @@
 #  - prio:   Max value of interrupt priorities
 {
   name: "RV_PLIC",
-  clock_primary: "clk_i",
-  bus_device: "reg",
+  clocking: [{clock: "clk_i", reset: "rst_ni"}],
+  bus_interfaces: [
+    { protocol: "tlul", direction: "device" }
+  ],
 
   param_list: [
     { name: "NumSrc",
@@ -34,19 +36,45 @@
       local: "true",
     },
   ],
+
+  // In order to not disturb the PLIC address map, we place the alert test
+  // register manually at a safe offset after the main CSRs.
+  no_auto_alert_regs: "True",
+  alert_list: [
+    { name: "fatal_fault",
+      desc: '''
+      This fatal alert is triggered when a fatal TL-UL bus integrity fault is detected.
+      '''
+    }
+  ],
+
+  inter_signal_list: [
+    { struct:  "logic",
+      type:    "uni",
+      name:    "irq",
+      act:     "req",
+      package: "",
+      width:   "${target}"
+    },
+
+    { struct:  "logic",
+      type:    "uni",
+      name:    "irq_id",
+      act:     "req",
+      package: "",
+    },
+
+    { struct:  "logic",
+      type:    "uni",
+      name:    "msip",
+      act:     "req",
+      package: "",
+      width:   "${target}"
+    },
+  ]
+
   regwidth: "32",
   registers: [
-% for i in range(src):
-    { name: "PRIO${i}",
-      desc: "Interrupt Source ${i} Priority",
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        { bits: "${(prio).bit_length()-1}:0" }
-      ],
-    },
-% endfor
-    { skipto: "0x1000" }
     { multireg: {
         name: "IP",
         desc: "Interrupt Pending",
@@ -73,8 +101,18 @@
         ],
       }
     },
+% for i in range(src):
+    { name: "PRIO${i}",
+      desc: "Interrupt Source ${i} Priority",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "${(prio).bit_length()-1}:0" }
+      ],
+    }
+% endfor
 % for i in range(target):
-    { skipto: "${0x2000 + i * 0x80}" }
+    { skipto: "${0x100*(math.ceil((src*4+8*math.ceil(src/32))/0x100)) + i*0x100 | x}" }
     { multireg: {
         name: "IE${i}",
         desc: "Interrupt Enable for Target ${i}",
@@ -87,9 +125,6 @@
         ],
       }
     }
-% endfor
-% for i in range(target):
-    { skipto: "${0x200000 + 0x1000 * i}" }
     { name: "THRESHOLD${i}",
       desc: "Threshold of priority for Target ${i}",
       swaccess: "rw",
@@ -107,7 +142,7 @@
       hwqe: "true",
       hwre: "true",
       fields: [
-        { bits: "${(src).bit_length()-1}:0" }
+        { bits: "${(src-1).bit_length()-1}:0" }
       ],
       tags: [// CC register value is related to IP
              "excl:CsrNonInitTests:CsrExclCheck"],
@@ -124,5 +159,19 @@
       ],
     }
 % endfor
-  ]
+  { skipto: "${0x100*(math.ceil((src*4+8*math.ceil(src/32))/0x100)) + target*0x100 | x}" }
+  { name: "ALERT_TEST",
+      desc: '''Alert Test Register.''',
+      swaccess: "wo",
+      hwaccess: "hro",
+      hwqe:     "True",
+      hwext:    "True",
+      fields: [
+        { bits: "0",
+          name: "fatal_fault",
+          desc: "'Write 1 to trigger one alert event of this kind.'",
+        }
+      ],
+    }
+  ],
 }
