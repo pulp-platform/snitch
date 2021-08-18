@@ -715,7 +715,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 self.clint[word_addr as usize].store(entry, Ordering::Relaxed);
                 // wake cores affected by this write
 
-                let hart_base = self.engine.base_hartid as u32 + 32 * word_addr;
+                let hart_base = 32 * word_addr;
                 for i in 0..32 {
                     if ((!old_entry & entry) & (1 << i)) != 0 {
                         self.num_sleep.fetch_sub(1, Ordering::Relaxed);

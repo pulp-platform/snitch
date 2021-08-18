@@ -248,7 +248,6 @@ __snrt_crt0_interrupt_handler:
     fsd     f31, 0(sp)
     # state is stored, can now handle the interrupt
 1:  
-    csrr    a0, mhartid
     call    __snrt_isr
     # restore fp context
     csrr    t0, misa

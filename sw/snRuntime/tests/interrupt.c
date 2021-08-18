@@ -57,7 +57,7 @@ int main() {
     }
 }
 
-void irq_m_soft(uint32_t hartid) {
-    snrt_int_sw_clear(hartid);
-    INTERRUPT_FLAG = hartid;
+void irq_m_soft(uint32_t core_idx) {
+    snrt_int_sw_clear(core_idx);
+    INTERRUPT_FLAG = core_idx;
 }
