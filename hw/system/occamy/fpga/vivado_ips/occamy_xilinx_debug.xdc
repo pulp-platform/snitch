@@ -19,3 +19,13 @@ set_property MARK_DEBUG true [get_nets {i_occamy/i_occamy_cva6/i_cva6/csr_regfil
 
 # Boot ROM response
 set_property MARK_DEBUG true [get_nets {bootrom_req_ready_q}]
+
+# Ariane AXI
+set_property MARK_DEBUG true [get_nets {i_occamy/soc_narrow_xbar_in_req[1]*}]
+set_property MARK_DEBUG true [get_nets {i_occamy/soc_narrow_xbar_in_rsp[1]*}]
+
+# Ariane cache interfaces
+set_property MARK_DEBUG true [get_nets {i_occamy/i_occamy_cva6/i_cva6/icache_dreq_if_cache*}]
+set_property MARK_DEBUG true [get_nets {i_occamy/i_occamy_cva6/i_cva6/icache_dreq_cache_if*}]
+set_property MARK_DEBUG true [get_nets {i_occamy/i_occamy_cva6/i_cva6/dcache_req_ports_ex_cache*}]
+set_property MARK_DEBUG true [get_nets {i_occamy/i_occamy_cva6/i_cva6/dcache_req_ports_cache_ex*}]
