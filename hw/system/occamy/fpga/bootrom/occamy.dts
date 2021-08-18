@@ -10,8 +10,8 @@
   compatible = "eth,occamy-dev";
   model = "eth,occamy";
   config {
-		u-boot,spl-payload-offset = <0x6000000>;
-	};
+    u-boot,spl-payload-offset = <0x6000000>;
+  };
   chosen {
     stdout-path = "/soc/serial@40000000:115200";
   };
@@ -73,7 +73,7 @@
       #clock-cells = <0>;
       compatible = "fixed-clock";
       clock-frequency = <100000000>;
-	  };
+    };
     axi_quad_spi_1: spi@4c000000 {
       compatible = "xlnx,axi-quad-spi-3.2", "xlnx,xps-spi-2.00.a";
       interrupt-parent = <&PLIC0>;
