@@ -83,6 +83,11 @@ csrs = [
   (0x002, 'frm'),
   (0x003, 'fcsr'),
 
+  # Custom User R/W
+  (0x800, 'fmode'),
+  (0x801, 'fmodesrc'),
+  (0x802, 'fmodedst'),
+
   # Standard User RO
   (0xC00, 'cycle'),
   (0xC01, 'time'),

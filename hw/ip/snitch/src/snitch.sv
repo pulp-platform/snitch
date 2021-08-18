@@ -93,6 +93,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   input  logic    [1:0] ptw_is_4mega_i,
   // FPU **un-timed** Side-channel
   output fpnew_pkg::roundmode_e fpu_rnd_mode_o,
+  output fpnew_pkg::fmt_mode_t  fpu_fmt_mode_o,
   input  fpnew_pkg::status_t    fpu_status_i
 );
   // Debug module's base address
@@ -283,10 +284,12 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   typedef struct packed {
     fpnew_pkg::roundmode_e frm;
     fpnew_pkg::status_t    fflags;
+    fpnew_pkg::fmt_mode_t  fmode;
   } fcsr_t;
   fcsr_t fcsr_d, fcsr_q;
 
   assign fpu_rnd_mode_o = fcsr_q.frm;
+  assign fpu_fmt_mode_o = fcsr_q.fmode;
 
   // Registers
   `FFSR(pc_q, pc_d, BootAddr, clk_i, rst_i)
@@ -2018,6 +2021,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     // registers
     fcsr_d = fcsr_q;
     fcsr_d.fflags = fcsr_q.fflags | fpu_status_i;
+    fcsr_d.fmode.src = fcsr_q.fmode.src;
+    fcsr_d.fmode.dst = fcsr_q.fmode.dst;
     scratch_d = scratch_q;
     epc_d = epc_q;
     cause_d = cause_q;
@@ -2223,6 +2228,24 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             if (FP_EN) begin
               csr_rvalue = {24'b0, fcsr_q};
               if (!exception) fcsr_d = fcsr_t'(alu_result[7:0]);
+            end else illegal_csr = 1'b1;
+          end
+          CSR_FMODE: begin
+            if (FP_EN) begin
+              csr_rvalue = {30'b0, fcsr_q.fmode};
+              if (!exception) fcsr_d.fmode = fpnew_pkg::fmt_mode_t'(opa[1:0]);
+            end else illegal_csr = 1'b1;
+          end
+          CSR_FMODESRC: begin
+            if (FP_EN) begin
+              csr_rvalue = {31'b0, fcsr_q.fmode.src};
+              if (!exception) fcsr_d.fmode.src = opa[0];
+            end else illegal_csr = 1'b1;
+          end
+          CSR_FMODEDST: begin
+            if (FP_EN) begin
+              csr_rvalue = {31'b0, fcsr_q.fmode.dst};
+              if (!exception) fcsr_d.fmode.dst = opa[0];
             end else illegal_csr = 1'b1;
           end
           default: csr_rvalue = '0;

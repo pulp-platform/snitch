@@ -166,6 +166,7 @@ module snitch_cc #(
   logic acc_demux_snitch_valid_q, acc_demux_snitch_ready_q;
 
   fpnew_pkg::roundmode_e fpu_rnd_mode;
+  fpnew_pkg::fmt_mode_t  fpu_fmt_mode;
   fpnew_pkg::status_t    fpu_status;
 
   // Snitch Integer Core
@@ -230,6 +231,7 @@ module snitch_cc #(
     .ptw_is_4mega_i (hive_rsp_i.ptw_is_4mega),
     .wake_up_sync_i,
     .fpu_rnd_mode_o ( fpu_rnd_mode ),
+    .fpu_fmt_mode_o ( fpu_fmt_mode ),
     .fpu_status_i ( fpu_status )
   );
 
@@ -456,6 +458,7 @@ module snitch_cc #(
       .data_req_o       ( fpu_dreq       ),
       .data_rsp_i       ( fpu_drsp       ),
       .fpu_rnd_mode_i   ( fpu_rnd_mode   ),
+      .fpu_fmt_mode_i   ( fpu_fmt_mode   ),
       .fpu_status_o     ( fpu_status     ),
       .ssr_raddr_o      ( ssr_raddr      ),
       .ssr_rdata_i      ( ssr_rdata      ),
