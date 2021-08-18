@@ -5,6 +5,8 @@
 // Shift Register for Serial Peripheral Interface (SPI) Host IP.
 //
 
+`include "common_cells/assertions.svh"
+
 module spi_host_shift_register (
   input              clk_i,
   input              rst_ni,
@@ -61,7 +63,7 @@ module spi_host_shift_register (
   assign sd_o       = (speed_i == Standard) ? {3'b000, sr_q[7]}   :
                       (speed_i == Dual)     ? {2'b00,  sr_q[7:6]} :
                       (speed_i == Quad)     ? {sr_q[7:4]} :
-                      4'h00;
+                      4'h0;
 
   // Buffer the rx_data outputs to simplify three-way flow control
   // between fsm, shift reg and byte_merge.

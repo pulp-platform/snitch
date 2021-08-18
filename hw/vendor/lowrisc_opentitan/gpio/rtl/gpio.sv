@@ -4,26 +4,23 @@
 //
 // General Purpose Input/Output module
 
-`include "prim_assert.sv"
+`include "common_cells/assertions.svh"
 
 module gpio
   import gpio_reg_pkg::*;
 #(
-  parameter logic [NumAlerts-1:0] AlertAsyncOn = {NumAlerts{1'b1}}
+  parameter type reg_req_t = logic,
+  parameter type reg_rsp_t = logic
 ) (
   input clk_i,
   input rst_ni,
 
-  // Bus interface
-  input  tlul_pkg::tl_h2d_t tl_i,
-  output tlul_pkg::tl_d2h_t tl_o,
+  // Below Register interface can be changed
+  input  reg_req_t reg_req_i,
+  output reg_rsp_t reg_rsp_o,
 
   // Interrupts
   output logic [31:0] intr_gpio_o,
-
-  // Alerts
-  input  prim_alert_pkg::alert_rx_t [NumAlerts-1:0] alert_rx_i,
-  output prim_alert_pkg::alert_tx_t [NumAlerts-1:0] alert_tx_o,
 
   // GPIOs
   input        [31:0] cio_gpio_i,
@@ -139,41 +136,20 @@ module gpio
                                event_intr_actlow |
                                event_intr_acthigh;
 
-  // Alerts
-  logic [NumAlerts-1:0] alert_test, alerts;
-  assign alert_test = {
-    reg2hw.alert_test.q &
-    reg2hw.alert_test.qe
-  };
-
-  for (genvar i = 0; i < NumAlerts; i++) begin : gen_alert_tx
-    prim_alert_sender #(
-      .AsyncOn(AlertAsyncOn[i]),
-      .IsFatal(1'b1)
-    ) u_prim_alert_sender (
-      .clk_i,
-      .rst_ni,
-      .alert_test_i  ( alert_test[i] ),
-      .alert_req_i   ( alerts[0]     ),
-      .alert_ack_o   (               ),
-      .alert_state_o (               ),
-      .alert_rx_i    ( alert_rx_i[i] ),
-      .alert_tx_o    ( alert_tx_o[i] )
-    );
-  end
-
   // Register module
-  gpio_reg_top u_reg (
+  gpio_reg_top #(
+    .reg_req_t (reg_req_t),
+    .reg_rsp_t (reg_rsp_t)
+  ) u_reg (
     .clk_i,
     .rst_ni,
 
-    .tl_i,
-    .tl_o,
+    .reg_req_i,
+    .reg_rsp_o,
 
     .reg2hw,
     .hw2reg,
 
-    .intg_err_o (alerts[0]),
     .devmode_i  (1'b1)
   );
 
@@ -181,6 +157,5 @@ module gpio
   `ASSERT_KNOWN(IntrGpioKnown, intr_gpio_o)
   `ASSERT_KNOWN(CioGpioEnOKnown, cio_gpio_en_o)
   `ASSERT_KNOWN(CioGpioOKnown, cio_gpio_o)
-  `ASSERT_KNOWN(AlertsKnown_A, alert_tx_o)
 
 endmodule

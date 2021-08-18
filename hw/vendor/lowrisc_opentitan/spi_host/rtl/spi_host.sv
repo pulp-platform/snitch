@@ -6,27 +6,22 @@
 //
 //
 
-`include "prim_assert.sv"
+`include "common_cells/assertions.svh"
 
 module spi_host
   import spi_host_reg_pkg::*;
 #(
-  parameter logic [NumAlerts-1:0] AlertAsyncOn = {NumAlerts{1'b1}}
+  parameter type reg_req_t = logic,
+  parameter type reg_rsp_t = logic
 ) (
   input              clk_i,
   input              rst_ni,
   input              clk_core_i,
   input              rst_core_ni,
 
-  input              lc_ctrl_pkg::lc_tx_t scanmode_i,
-
   // Register interface
-  input              tlul_pkg::tl_h2d_t tl_i,
-  output             tlul_pkg::tl_d2h_t tl_o,
-
-  // Alerts
-  input  prim_alert_pkg::alert_rx_t [NumAlerts-1:0] alert_rx_i,
-  output prim_alert_pkg::alert_tx_t [NumAlerts-1:0] alert_tx_o,
+  input  reg_req_t reg_req_i,
+  output reg_rsp_t reg_rsp_o,
 
   // SPI Interface
   output logic             cio_sck_o,
@@ -37,10 +32,6 @@ module spi_host
   output logic [3:0]       cio_sd_en_o,
   input        [3:0]       cio_sd_i,
 
-  // Passthrough interface
-  input  spi_device_pkg::passthrough_req_t passthrough_i,
-  output spi_device_pkg::passthrough_rsp_t passthrough_o,
-
   output logic             intr_error_o,
   output logic             intr_spi_event_o
 );
@@ -50,45 +41,24 @@ module spi_host
   spi_host_reg2hw_t reg2hw;
   spi_host_hw2reg_t hw2reg;
 
-  tlul_pkg::tl_h2d_t fifo_win_h2d;
-  tlul_pkg::tl_d2h_t fifo_win_d2h;
+  reg_req_t fifo_win_h2d;
+  reg_rsp_t fifo_win_d2h;
 
   // Register module
-  logic [NumAlerts-1:0] alert_test, alerts;
-  spi_host_reg_top u_reg (
+  spi_host_reg_top #(
+    .reg_req_t (reg_req_t),
+    .reg_rsp_t (reg_rsp_t)
+  ) u_reg (
     .clk_i,
     .rst_ni,
-    .tl_i       (tl_i),
-    .tl_o       (tl_o),
-    .tl_win_o   (fifo_win_h2d),
-    .tl_win_i   (fifo_win_d2h),
+    .reg_req_i,
+    .reg_rsp_o,
+    .reg_req_win_o (fifo_win_h2d),
+    .reg_rsp_win_i (fifo_win_d2h),
     .reg2hw,
     .hw2reg,
-    .intg_err_o (alerts[0]),
     .devmode_i  (1'b1)
   );
-
-  // Alerts
-  assign alert_test = {
-    reg2hw.alert_test.q &
-    reg2hw.alert_test.qe
-  };
-
-  for (genvar i = 0; i < NumAlerts; i++) begin : gen_alert_tx
-    prim_alert_sender #(
-      .AsyncOn(AlertAsyncOn[i]),
-      .IsFatal(1'b1)
-    ) u_prim_alert_sender (
-      .clk_i,
-      .rst_ni,
-      .alert_test_i  ( alert_test[i] ),
-      .alert_req_i   ( alerts[0]     ),
-      .alert_ack_o   (               ),
-      .alert_state_o (               ),
-      .alert_rx_i    ( alert_rx_i[i] ),
-      .alert_tx_o    ( alert_tx_o[i] )
-    );
-  end
 
   logic             sck;
   logic [NumCS-1:0] csb;
@@ -96,72 +66,14 @@ module spi_host
   logic [3:0]       sd_en;
   logic [3:0]       sd_i;
 
-  if (NumCS == 1) begin : gen_passthrough_implementation
-    logic passthrough_en;
-    assign passthrough_en  = passthrough_i.passthrough_en;
+  assign cio_sck_o    = sck;
+  assign cio_sck_en_o = 1'b1;
+  assign cio_csb_o    = csb;
+  assign cio_csb_en_o = {NumCS{1'b1}};
+  assign cio_sd_o     = sd_out;
+  assign cio_sd_en_o  = sd_en;
 
-    logic        pt_sck;
-    logic        pt_sck_en;
-    logic [0:0]  pt_csb;
-    logic [0:0]  pt_csb_en;
-    logic [3:0]  pt_sd_out;
-    logic [3:0]  pt_sd_en;
-
-    assign pt_sck       = passthrough_i.sck;
-    assign pt_sck_en    = passthrough_i.sck_en;
-    assign pt_csb[0]    = passthrough_i.csb;
-    assign pt_csb_en[0] = passthrough_i.csb_en;
-    assign pt_sd_out    = passthrough_i.s;
-    assign pt_sd_en     = passthrough_i.s_en;
-
-    assign cio_sck_o    = passthrough_en ? pt_sck    : sck;
-    assign cio_sck_en_o = passthrough_en ? pt_sck_en : 1'b1;
-    assign cio_csb_o    = passthrough_en ? pt_csb    : csb;
-    assign cio_csb_en_o = passthrough_en ? pt_csb_en : 1'b1;
-    assign cio_sd_o     = passthrough_en ? pt_sd_out : sd_out;
-    assign cio_sd_en_o  = passthrough_en ? pt_sd_en  : sd_en;
-
-  end                   : gen_passthrough_implementation
-  else begin            : gen_passthrough_ignore
-     // Passthrough only supported for instances with one CSb line
-    `ASSERT(PassthroughNumCSCompat_A, !passthrough_i.passthrough_en, clk_i, rst_ni)
-
-    assign cio_sck_o    = sck;
-    assign cio_sck_en_o = 1'b1;
-    assign cio_csb_o    = csb;
-    assign cio_csb_en_o = {NumCS{1'b1}};
-    assign cio_sd_o     = sd_out;
-    assign cio_sd_en_o  = sd_en;
-
-    logic       unused_pt_en;
-    logic       unused_pt_sck;
-    logic       unused_pt_sck_en;
-    logic       unused_pt_csb;
-    logic       unused_pt_csb_en;
-    logic [3:0] unused_pt_sd_out;
-    logic [3:0] unused_pt_sd_en;
-
-    assign unused_pt_en     = passthrough_i.passthrough_en;
-    assign unused_pt_sck    = passthrough_i.sck;
-    assign unused_pt_sck_en = passthrough_i.sck_en;
-    assign unused_pt_csb    = passthrough_i.csb;
-    assign unused_pt_csb_en = passthrough_i.csb_en;
-    assign unused_pt_sd_out = passthrough_i.s;
-    assign unused_pt_sd_en  = passthrough_i.s_en;
-
-  end                   : gen_passthrough_ignore
-
-  logic unused_pt_sck_gate_en;
-  assign unused_pt_sck_gate_en = passthrough_i.sck_gate_en;
-
-  assign passthrough_o.s = cio_sd_i;
   assign sd_i            = cio_sd_i;
-
-  // TODO: REMOVE THIS CODE
-  // Temp tie-offs to silence lint warnings
-  logic unused_scan;
-
-  assign unused_scan = ^scanmode_i;
 
   assign hw2reg.status.byteorder.d  = ByteOrder;
   assign hw2reg.status.byteorder.de = 1'b1;
@@ -308,7 +220,10 @@ module spi_host
   logic        rx_valid;
   logic        rx_ready;
 
-  spi_host_window u_window (
+  spi_host_window #(
+    .reg_req_t  (reg_req_t),
+    .reg_rsp_t  (reg_rsp_t)
+  ) u_window (
     .clk_i,
     .rst_ni,
     .win_i      (fifo_win_h2d),
@@ -597,9 +512,6 @@ module spi_host
   );
 
 
-  `ASSERT_KNOWN(TlDValidKnownO_A, tl_o.d_valid)
-  `ASSERT_KNOWN(TlAReadyKnownO_A, tl_o.a_ready)
-  `ASSERT_KNOWN(AlertKnownO_A, alert_tx_o)
   `ASSERT_KNOWN(CioSckKnownO_A, cio_sck_o)
   `ASSERT_KNOWN(CioSckEnKnownO_A, cio_sck_en_o)
   `ASSERT_KNOWN(CioCsbKnownO_A, cio_csb_o)
@@ -608,6 +520,5 @@ module spi_host
   `ASSERT_KNOWN(CioSdEnKnownO_A, cio_sd_en_o)
   `ASSERT_KNOWN(IntrSpiEventKnownO_A, intr_spi_event_o)
   `ASSERT_KNOWN(IntrErrorKnownO_A, intr_error_o)
-  `ASSERT_KNOWN(PassthroughKnownO_A, passthrough_o)
 
 endmodule : spi_host

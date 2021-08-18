@@ -21,7 +21,7 @@
 // For further information, see Section 8.2.4 in H. Kaeslin, "Top-Down Digital VLSI Design: From
 // Architecture to Gate-Level Circuits and FPGAs", 2015.
 
-`include "prim_assert.sv"
+`include "common_cells/assertions.svh"
 
 module prim_sync_reqack (
   input  clk_src_i,       // REQ side, SRC domain

@@ -12,7 +12,7 @@
 // many input sources.
 //
 
-`include "prim_assert.sv"
+`include "common_cells/assertions.svh"
 
 module rv_plic_target #(
   parameter int N_SOURCE = 32,

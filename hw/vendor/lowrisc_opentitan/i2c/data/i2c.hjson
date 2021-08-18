@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 { name: "i2c"
-  clocking: [{clock: "clk_i", reset: "rst_ni"}],
+  clock_primary: "clk_i"
   bus_interfaces: [
-    { protocol: "tlul", direction: "device" }
+    { protocol: "reg_iface", direction: "device" }
   ],
   // INPUT pins
   available_inout_list: [

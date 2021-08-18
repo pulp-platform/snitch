@@ -5,6 +5,8 @@
 // Core Implemenation module for Serial Peripheral Interface (SPI) Host IP.
 //
 
+`include "common_cells/assertions.svh"
+
 module spi_host_fsm
   import spi_host_cmd_pkg::*;
 #(
@@ -489,7 +491,7 @@ module spi_host_fsm
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
       sample_en_q <= 1'b0;
-      sample_en_q2 <= 1'b00;
+      sample_en_q2 <= 1'b0;
     end else begin
       sample_en_q  <= (fsm_en && !stall) ? sample_en_d : sample_en_q;
       sample_en_q2 <= (fsm_en && !stall) ? sample_en_q : sample_en_q2;
@@ -516,12 +518,12 @@ module spi_host_fsm
     always_ff @(posedge clk_i or negedge rst_ni) begin
       if (!rst_ni) begin
         csb_q[ii] <= 1'b1;
-        sck_q     <= 1'b0;
+        if (ii == 0) sck_q     <= 1'b0;
       end else begin
         csb_q[ii] <= (csid != ii) ? 1'b1 :
                      !stall       ? csb_single_d :
                      csb_q[ii];
-        sck_q     <= !stall ? sck_d : sck_q;
+        if (ii == 0) sck_q     <= !stall ? sck_d : sck_q;
       end
     end
   end : gen_csb_gen

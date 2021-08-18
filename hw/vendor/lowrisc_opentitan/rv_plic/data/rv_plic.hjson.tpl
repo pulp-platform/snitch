@@ -11,9 +11,9 @@
 #  - prio:   Max value of interrupt priorities
 {
   name: "RV_PLIC",
-  clocking: [{clock: "clk_i", reset: "rst_ni"}],
+  clock_primary: "clk_i",
   bus_interfaces: [
-    { protocol: "tlul", direction: "device" }
+    { protocol: "reg_iface", direction: "device" }
   ],
 
   param_list: [
@@ -75,6 +75,17 @@
 
   regwidth: "32",
   registers: [
+% for i in range(src):
+    { name: "PRIO${i}",
+      desc: "Interrupt Source ${i} Priority",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "${(prio).bit_length()-1}:0" }
+      ],
+    },
+% endfor
+    { skipto: "0x1000" }
     { multireg: {
         name: "IP",
         desc: "Interrupt Pending",
@@ -101,18 +112,8 @@
         ],
       }
     },
-% for i in range(src):
-    { name: "PRIO${i}",
-      desc: "Interrupt Source ${i} Priority",
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        { bits: "${(prio).bit_length()-1}:0" }
-      ],
-    }
-% endfor
 % for i in range(target):
-    { skipto: "${0x100*(math.ceil((src*4+8*math.ceil(src/32))/0x100)) + i*0x100 | x}" }
+    { skipto: "${0x2000 + i * 0x80}" }
     { multireg: {
         name: "IE${i}",
         desc: "Interrupt Enable for Target ${i}",
@@ -125,6 +126,9 @@
         ],
       }
     }
+% endfor
+% for i in range(target):
+    { skipto: "${0x200000 + 0x1000 * i}" }
     { name: "THRESHOLD${i}",
       desc: "Threshold of priority for Target ${i}",
       swaccess: "rw",
@@ -159,7 +163,7 @@
       ],
     }
 % endfor
-  { skipto: "${0x100*(math.ceil((src*4+8*math.ceil(src/32))/0x100)) + target*0x100 | x}" }
+  { skipto: "${0x200000 + target*0x1000  | x}" }
   { name: "ALERT_TEST",
       desc: '''Alert Test Register.''',
       swaccess: "wo",
