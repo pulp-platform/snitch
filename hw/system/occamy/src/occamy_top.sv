@@ -1833,6 +1833,26 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .mst_b_valid_i(spm_amo_adapter_rsp.b_valid)
   );
 
+  axi_a48_d64_i1_u0_req_t  spm_amo_adapter_cut_req;
+  axi_a48_d64_i1_u0_resp_t spm_amo_adapter_cut_rsp;
+
+  axi_multicut #(
+      .NoCuts(1),
+      .aw_chan_t(axi_a48_d64_i1_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d64_i1_u0_w_chan_t),
+      .b_chan_t(axi_a48_d64_i1_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d64_i1_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d64_i1_u0_r_chan_t),
+      .req_t(axi_a48_d64_i1_u0_req_t),
+      .resp_t(axi_a48_d64_i1_u0_resp_t)
+  ) i_spm_amo_adapter_cut (
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
+      .slv_req_i(spm_amo_adapter_req),
+      .slv_resp_o(spm_amo_adapter_rsp),
+      .mst_req_o(spm_amo_adapter_cut_req),
+      .mst_resp_i(spm_amo_adapter_cut_rsp)
+  );
 
 
   axi_to_mem #(
@@ -1847,8 +1867,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
       .busy_o(),
-      .axi_req_i(spm_amo_adapter_req),
-      .axi_resp_o(spm_amo_adapter_rsp),
+      .axi_req_i(spm_amo_adapter_cut_req),
+      .axi_resp_o(spm_amo_adapter_cut_rsp),
       .mem_req_o(spm_req),
       .mem_gnt_i(spm_gnt),
       .mem_addr_o(spm_addr),
