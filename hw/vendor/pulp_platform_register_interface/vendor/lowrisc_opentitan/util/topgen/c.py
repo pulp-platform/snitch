@@ -5,59 +5,34 @@
 `top_{name}.h`.
 """
 from collections import OrderedDict
+from typing import Dict, List, Optional, Tuple
 
 from mako.template import Template
 
+from .lib import get_base_and_size, Name
 
-class Name(object):
-    """We often need to format names in specific ways; this class does so."""
-    def __add__(self, other):
-        return Name(self.parts + other.parts)
-
-    @staticmethod
-    def from_snake_case(input):
-        return Name(input.split("_"))
-
-    def __init__(self, parts):
-        self.parts = list(parts)
-        for p in parts:
-            assert len(p) > 0, "cannot add zero-length name piece"
-
-    def as_snake_case(self):
-        return "_".join([p.lower() for p in self.parts])
-
-    def as_camel_case(self):
-        out = ""
-        for p in self.parts:
-            # If we're about to join two parts which would introduce adjacent
-            # numbers, put an underscore between them.
-            if out[-1:].isnumeric() and p[:1].isnumeric():
-                out += "_" + p
-            else:
-                out += p.capitalize()
-        return out
-
-    def as_c_define(self):
-        return "_".join([p.upper() for p in self.parts])
-
-    def as_c_enum(self):
-        return "k" + self.as_camel_case()
-
-    def as_c_type(self):
-        return self.as_snake_case() + "_t"
+from reggen.ip_block import IpBlock
 
 
 class MemoryRegion(object):
-    def __init__(self, name, base_addr, size_bytes):
+    def __init__(self, name: Name, base_addr: int, size_bytes: int):
+        assert isinstance(base_addr, int)
         self.name = name
         self.base_addr = base_addr
         self.size_bytes = size_bytes
+        self.size_words = (size_bytes + 3) // 4
 
     def base_addr_name(self):
         return self.name + Name(["base", "addr"])
 
+    def offset_name(self):
+        return self.name + Name(["offset"])
+
     def size_bytes_name(self):
         return self.name + Name(["size", "bytes"])
+
+    def size_words_name(self):
+        return self.name + Name(["size", "words"])
 
 
 class CEnum(object):
@@ -126,10 +101,11 @@ class CArrayMapping(object):
         return Template(template).render(mapping=self)
 
 
-class TopGenC(object):
-    def __init__(self, top_info):
+class TopGenC:
+    def __init__(self, top_info, name_to_block: Dict[str, IpBlock]):
         self.top = top_info
         self._top_name = Name(["top"]) + Name.from_snake_case(top_info["name"])
+        self._name_to_block = name_to_block
 
         # The .c file needs the .h file's relative path, store it here
         self.header_path = None
@@ -139,17 +115,42 @@ class TopGenC(object):
         self._init_alert_mapping()
         self._init_pinmux_mapping()
         self._init_pwrmgr_wakeups()
+        self._init_rstmgr_sw_rsts()
+        self._init_pwrmgr_reset_requests()
+        self._init_clkmgr_clocks()
 
-    def modules(self):
-        return [(m["name"],
-                 MemoryRegion(self._top_name + Name.from_snake_case(m["name"]),
-                              m["base_addr"], m["size"]))
-                for m in self.top["module"]]
+    def devices(self) -> List[Tuple[Tuple[str, Optional[str]], MemoryRegion]]:
+        '''Return a list of MemoryRegion objects for devices on the bus
+
+        The list returned is pairs (full_if, region) where full_if is itself a
+        pair (inst_name, if_name). inst_name is the name of some IP block
+        instantiation. if_name is the name of the interface (may be None).
+        region is a MemoryRegion object representing the device.
+
+        '''
+        ret = []  # type: List[Tuple[Tuple[str, Optional[str]], MemoryRegion]]
+        for inst in self.top['module']:
+            block = self._name_to_block[inst['type']]
+            for if_name, rb in block.reg_blocks.items():
+                full_if = (inst['name'], if_name)
+                full_if_name = Name.from_snake_case(full_if[0])
+                if if_name is not None:
+                    full_if_name += Name.from_snake_case(if_name)
+
+                name = self._top_name + full_if_name
+                base, size = get_base_and_size(self._name_to_block,
+                                               inst, if_name)
+
+                region = MemoryRegion(name, base, size)
+                ret.append((full_if, region))
+
+        return ret
 
     def memories(self):
         return [(m["name"],
                  MemoryRegion(self._top_name + Name.from_snake_case(m["name"]),
-                              m["base_addr"], m["size"]))
+                              int(m["base_addr"], 0),
+                              int(m["size"], 0)))
                 for m in self.top["memory"]]
 
     def _init_plic_targets(self):
@@ -207,8 +208,7 @@ class TopGenC(object):
             # adding a bit-index suffix
             if "width" in intr and int(intr["width"]) != 1:
                 for i in range(int(intr["width"])):
-                    name = Name.from_snake_case(
-                        intr["name"]) + Name([str(i)])
+                    name = Name.from_snake_case(intr["name"]) + Name([str(i)])
                     irq_id = interrupts.add_constant(name,
                                                      docstring="{} {}".format(
                                                          intr["name"], i))
@@ -261,10 +261,10 @@ class TopGenC(object):
         for alert in self.top["alert"]:
             if "width" in alert and int(alert["width"]) != 1:
                 for i in range(int(alert["width"])):
-                    name = Name.from_snake_case(
-                        alert["name"]) + Name([str(i)])
-                    irq_id = alerts.add_constant(name, docstring="{} {}".format(
-                                                         alert["name"], i))
+                    name = Name.from_snake_case(alert["name"]) + Name([str(i)])
+                    irq_id = alerts.add_constant(name,
+                                                 docstring="{} {}".format(
+                                                     alert["name"], i))
                     source_name = source_name_map[alert["module_name"]]
                     alert_mapping.add_entry(irq_id, source_name)
             else:
@@ -282,8 +282,9 @@ class TopGenC(object):
     def _init_pinmux_mapping(self):
         """Generate C enums for addressing pinmux registers and in/out selects.
 
-        Inputs are connected in order: inouts, then inputs
-        Outputs are connected in order: inouts, then outputs
+        Inputs/outputs are connected in the order the modules are listed in
+        the hjson under the "mio_modules" key. For each module, the corresponding
+        inouts are connected first, followed by either the inputs or the outputs.
 
         Inputs:
         - Peripheral chooses register field (pinmux_peripheral_in)
@@ -295,63 +296,63 @@ class TopGenC(object):
 
         Insel and outsel have some special values which are captured here too.
         """
-        pinmux_info = self.top["pinmux"]
+        pinmux_info = self.top['pinmux']
+        pinout_info = self.top['pinout']
 
         # Peripheral Inputs
         peripheral_in = CEnum(self._top_name +
-                              Name(["pinmux", "peripheral", "in"]))
-        for signal in pinmux_info["inouts"] + pinmux_info["inputs"]:
-            if "width" in signal and int(signal["width"]) != 1:
-                for i in range(int(signal["width"])):
-                    name = Name.from_snake_case(
-                        signal["name"]) + Name([str(i)])
-                    peripheral_in.add_constant(name,
-                                               docstring="{} {}".format(
-                                                   signal["name"], i))
-            else:
-                peripheral_in.add_constant(Name.from_snake_case(
-                    signal["name"]),
-                                           docstring=signal["name"])
-        peripheral_in.add_last_constant("Last valid peripheral input")
+                              Name(['pinmux', 'peripheral', 'in']))
+        i = 0
+        for sig in pinmux_info['ios']:
+            if sig['connection'] == 'muxed' and sig['type'] in ['inout', 'input']:
+                index = Name([str(sig['idx'])]) if sig['idx'] != -1 else Name([])
+                name = Name.from_snake_case(sig['name']) + index
+                peripheral_in.add_constant(name, docstring='Peripheral Input {}'.format(i))
+                i += 1
+
+        peripheral_in.add_last_constant('Last valid peripheral input')
 
         # Pinmux Input Selects
-        insel = CEnum(self._top_name + Name(["pinmux", "insel"]))
-        insel.add_constant(Name(["constant", "zero"]),
-                           docstring="Tie constantly to zero")
-        insel.add_constant(Name(["constant", "one"]),
-                           docstring="Tie constantly to one")
-        for i in range(int(pinmux_info["num_mio"])):
-            insel.add_constant(Name(["mio", str(i)]),
-                               docstring="MIO Pad {}".format(i))
-        insel.add_last_constant("Last valid insel value")
+        insel = CEnum(self._top_name + Name(['pinmux', 'insel']))
+        insel.add_constant(Name(['constant', 'zero']),
+                           docstring='Tie constantly to zero')
+        insel.add_constant(Name(['constant', 'one']),
+                           docstring='Tie constantly to one')
+        i = 0
+        for pad in pinout_info['pads']:
+            if pad['connection'] == 'muxed':
+                insel.add_constant(Name([pad['name']]),
+                                   docstring='MIO Pad {}'.format(i))
+                i += 1
+        insel.add_last_constant('Last valid insel value')
 
         # MIO Outputs
-        mio_out = CEnum(self._top_name + Name(["pinmux", "mio", "out"]))
-        for i in range(int(pinmux_info["num_mio"])):
-            mio_out.add_constant(Name([str(i)]),
-                                 docstring="MIO Pad {}".format(i))
-        mio_out.add_last_constant("Last valid mio output")
+        mio_out = CEnum(self._top_name + Name(['pinmux', 'mio', 'out']))
+        i = 0
+        for pad in pinout_info['pads']:
+            if pad['connection'] == 'muxed':
+                mio_out.add_constant(Name.from_snake_case(pad['name']),
+                                     docstring='MIO Pad {}'.format(i))
+                i += 1
+        mio_out.add_last_constant('Last valid mio output')
 
         # Pinmux Output Selects
-        outsel = CEnum(self._top_name + Name(["pinmux", "outsel"]))
-        outsel.add_constant(Name(["constant", "zero"]),
-                            docstring="Tie constantly to zero")
-        outsel.add_constant(Name(["constant", "one"]),
-                            docstring="Tie constantly to one")
-        outsel.add_constant(Name(["constant", "high", "z"]),
-                            docstring="Tie constantly to high-Z")
-        for signal in pinmux_info["inouts"] + pinmux_info["outputs"]:
-            if "width" in signal and int(signal["width"]) != 1:
-                for i in range(int(signal["width"])):
-                    name = Name.from_snake_case(
-                        signal["name"]) + Name([str(i)])
-                    outsel.add_constant(name,
-                                        docstring="{} {}".format(
-                                            signal["name"], i))
-            else:
-                outsel.add_constant(Name.from_snake_case(signal["name"]),
-                                    docstring=signal["name"])
-        outsel.add_last_constant("Last valid outsel value")
+        outsel = CEnum(self._top_name + Name(['pinmux', 'outsel']))
+        outsel.add_constant(Name(['constant', 'zero']),
+                            docstring='Tie constantly to zero')
+        outsel.add_constant(Name(['constant', 'one']),
+                            docstring='Tie constantly to one')
+        outsel.add_constant(Name(['constant', 'high', 'z']),
+                            docstring='Tie constantly to high-Z')
+        i = 0
+        for sig in pinmux_info['ios']:
+            if sig['connection'] == 'muxed' and sig['type'] in ['inout', 'output']:
+                index = Name([str(sig['idx'])]) if sig['idx'] != -1 else Name([])
+                name = Name.from_snake_case(sig['name']) + index
+                outsel.add_constant(name, docstring='Peripheral Output {}'.format(i))
+                i += 1
+
+        outsel.add_last_constant('Last valid outsel value')
 
         self.pinmux_peripheral_in = peripheral_in
         self.pinmux_insel = insel
@@ -359,12 +360,85 @@ class TopGenC(object):
         self.pinmux_outsel = outsel
 
     def _init_pwrmgr_wakeups(self):
-        enum = CEnum(self._top_name + Name(["power", "manager", "wake", "ups"]))
+        enum = CEnum(self._top_name +
+                     Name(["power", "manager", "wake", "ups"]))
 
         for signal in self.top["wakeups"]:
-            enum.add_constant(Name.from_snake_case(signal["module"]) +
-                              Name.from_snake_case(signal["name"]))
+            enum.add_constant(
+                Name.from_snake_case(signal["module"]) +
+                Name.from_snake_case(signal["name"]))
 
         enum.add_last_constant("Last valid pwrmgr wakeup signal")
 
         self.pwrmgr_wakeups = enum
+
+    # Enumerates the positions of all software controllable resets
+    def _init_rstmgr_sw_rsts(self):
+        sw_rsts = [
+            rst for rst in self.top["resets"]["nodes"]
+            if 'sw' in rst and rst['sw'] == 1
+        ]
+
+        enum = CEnum(self._top_name +
+                     Name(["reset", "manager", "sw", "resets"]))
+
+        for rst in sw_rsts:
+            enum.add_constant(Name.from_snake_case(rst["name"]))
+
+        enum.add_last_constant("Last valid rstmgr software reset request")
+
+        self.rstmgr_sw_rsts = enum
+
+    def _init_pwrmgr_reset_requests(self):
+        enum = CEnum(self._top_name +
+                     Name(["power", "manager", "reset", "requests"]))
+
+        for signal in self.top["reset_requests"]:
+            enum.add_constant(
+                Name.from_snake_case(signal["module"]) +
+                Name.from_snake_case(signal["name"]))
+
+        enum.add_last_constant("Last valid pwrmgr reset_request signal")
+
+        self.pwrmgr_reset_requests = enum
+
+    def _init_clkmgr_clocks(self):
+        """
+        Creates CEnums for accessing the software-controlled clocks in the
+        design.
+
+        The logic here matches the logic in topgen.py in how it instantiates the
+        clock manager with the described clocks.
+
+        We differentiate "gateable" clocks and "hintable" clocks because the
+        clock manager has separate register interfaces for each group.
+        """
+
+        aon_clocks = set()
+        for src in self.top['clocks']['srcs'] + self.top['clocks'][
+                'derived_srcs']:
+            if src['aon'] == 'yes':
+                aon_clocks.add(src['name'])
+
+        gateable_clocks = CEnum(self._top_name + Name(["gateable", "clocks"]))
+        hintable_clocks = CEnum(self._top_name + Name(["hintable", "clocks"]))
+
+        # This replicates the behaviour in `topgen.py` in deriving `hints` and
+        # `sw_clocks`.
+        for group in self.top['clocks']['groups']:
+            for (name, source) in group['clocks'].items():
+                if source not in aon_clocks:
+                    # All these clocks start with `clk_` which is redundant.
+                    clock_name = Name.from_snake_case(name).remove_part("clk")
+                    docstring = "Clock {} in group {}".format(
+                        name, group['name'])
+                    if group["sw_cg"] == "yes":
+                        gateable_clocks.add_constant(clock_name, docstring)
+                    elif group["sw_cg"] == "hint":
+                        hintable_clocks.add_constant(clock_name, docstring)
+
+        gateable_clocks.add_last_constant("Last Valid Gateable Clock")
+        hintable_clocks.add_last_constant("Last Valid Hintable Clock")
+
+        self.clkmgr_gateable_clocks = gateable_clocks
+        self.clkmgr_hintable_clocks = hintable_clocks

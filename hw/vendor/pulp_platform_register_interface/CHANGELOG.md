@@ -6,6 +6,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.3.1 - 2021-06-24
+### Fixed
+- Align AXI version in ips_list.yml with Bender.yml
+
+## 0.3.0 - 2021-06-09
+### Changed
+- Rebased register_interface specific change of reggen tool on lowRISC upstream master
+- Bump AXI version
+
+## 0.2.2 - 2021-04-20
+### Added
+- Add `periph_to_reg`.
+
+### Changed
+- Bump AXI version
+
+## 0.2.1 - 2021-02-03
+### Changed
+- Update `axi` to `0.23.0`
+- Update `common_cells` to `1.21.0`
+
+### Added
+- Add ipapprox description
+
 ## 0.2.0 - 2020-12-30
 ### Fixed
 - Fix bug in AXI-Lite to register interface conversion

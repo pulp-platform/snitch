@@ -3,8 +3,8 @@ package:
   authors: ["Fabian Schuiki <fschuiki@iis.ee.ethz.ch>", "Florian Zaruba <zarubaf@iis.ee.ethz.ch>"]
 
 dependencies:
-  axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.23.0 }
-  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.19.0 }
+  axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.29.1 }
+  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.21.0 }
 
 export_include_dirs:
   - include
@@ -17,6 +17,7 @@ sources:
   # Level 1
   - src/apb_to_reg.sv
   - src/axi_to_reg.sv
+  - src/periph_to_reg.sv
   - src/reg_cdc.sv
   - src/reg_demux.sv
   - src/reg_mux.sv
