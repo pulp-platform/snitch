@@ -54,6 +54,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
   // Register Interface
   // FPU **un-timed** Side-channel
   input  fpnew_pkg::roundmode_e fpu_rnd_mode_i,
+  input  fpnew_pkg::fmt_mode_t  fpu_fmt_mode_i,
   output fpnew_pkg::status_t    fpu_status_o,
   // SSR Interface
   output logic  [2:0][4:0] ssr_raddr_o,
