@@ -27,14 +27,14 @@ module occamy_cva6 import occamy_pkg::*; (
     RASDepth: 2,
     BTBEntries: 32,
     BHTEntries: 128,
-    // idempotent region
-    NrNonIdempotentRules: 1,
-    NonIdempotentAddrBase: {  64'b0 },
-    NonIdempotentLength:   {  64'h8000_0000 },
-    NrExecuteRegionRules: 4,
+    // DRAM -- SPM, SPM -- Boot ROM, Boot ROM -- Debug Module
+    NrNonIdempotentRules: 3,
+    NonIdempotentAddrBase: {64'd${cfg["spm"]["address"]+cfg["spm"]["length"]}           , 64'd${cfg["rom"]["address"]+cfg["rom"]["length"]}                      , 64'h1000},
+    NonIdempotentLength:   {64'd${0x80000000-cfg["spm"]["address"]-cfg["spm"]["length"]}, 64'd${cfg["spm"]["address"]-cfg["rom"]["address"]-cfg["rom"]["length"]}, 64'd${cfg["rom"]["address"]-0x1000}},
+    NrExecuteRegionRules: 5,
     // DRAM, Boot ROM, SPM, Debug Module
-    ExecuteRegionAddrBase: {64'h8000_0000,            64'd${cfg["rom"]["address"]}, 64'd${cfg["spm"]["address"]}, 64'h0},
-    ExecuteRegionLength:   {(64'hffff_ffff_ffff_ffff-64'h8000_0000), 64'd${cfg["rom"]["length"]}, 64'd${cfg["spm"]["length"]}, 64'h1000},
+    ExecuteRegionAddrBase: {64'h10_0000_0000, 64'h8000_0000, 64'd${cfg["rom"]["address"]}, 64'd${cfg["spm"]["address"]}, 64'h0   },
+    ExecuteRegionLength:   {64'h2_0000_0000 , 64'h8000_0000, 64'd${cfg["rom"]["length"]} , 64'd${cfg["spm"]["length"]} , 64'h1000},
     // cached region
     NrCachedRegionRules:    2,
     CachedRegionAddrBase:  {64'h8000_0000, 64'd${cfg["spm"]["address"]}},
