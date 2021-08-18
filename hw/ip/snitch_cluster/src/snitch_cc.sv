@@ -47,6 +47,7 @@ module snitch_cc #(
   parameter bit          RVD                = 1,
   parameter bit          XDivSqrt          = 0,
   parameter bit          XF8                = 0,
+  parameter bit          XF8ALT             = 0,
   parameter bit          XF16               = 0,
   parameter bit          XF16ALT            = 0,
   parameter bit          XFVEC              = 0,
@@ -125,6 +126,7 @@ module snitch_cc #(
                           XF16    ? 16 : // Xf16 ext.
                           XF16ALT ? 16 : // Xf16alt ext.
                           XF8     ? 8 :  // Xf8 ext.
+                          XF8ALT  ? 8 :  // Xf8alt ext.
                           0;             // Unused in case of no FP
 
   typedef struct packed {
@@ -449,6 +451,7 @@ module snitch_cc #(
       .XF16 (XF16),
       .XF16ALT (XF16ALT),
       .XF8 (XF8),
+      .XF8ALT (XF8ALT),
       .XFVEC (XFVEC),
       .FLEN (FLEN)
     ) i_snitch_fp_ss (
