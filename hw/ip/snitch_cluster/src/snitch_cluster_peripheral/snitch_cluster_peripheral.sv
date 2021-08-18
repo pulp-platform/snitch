@@ -71,7 +71,6 @@ module snitch_cluster_peripheral
   // Continuously assign the perf values.
   for (genvar i = 0; i < NumPerfCounters; i++) begin : gen_perf_assign
     assign hw2reg.perf_counter[i].d = perf_counter_q[i];
-    assign hw2reg.perf_counter[i].de = 1'b1;
   end
 
   // The hardware barrier is external and always reads `0`.

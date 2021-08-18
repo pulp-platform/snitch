@@ -10,10 +10,11 @@
         default: "2"
         },
     ],
-    name: "Snitch Cluster Peripheral",
+    name: "snitch_cluster_peripheral",
     clock_primary: "clk_i",
-    bus_device: "reg",
-    bus_host: "none",
+    bus_interfaces: [
+        { protocol: "reg_iface", direction: "device"}
+    ]
     regwidth: 64,
     registers: [{
         multireg: {
@@ -22,7 +23,7 @@
             swaccess: "rw",
             hwaccess: "hro",
             count: "NumPerfCounters",
-            cname: "performance counter enable ",
+            cname: "performance_counter_enable",
             fields: [{
                 bits: "0:0",
                 resval: "0",
@@ -91,7 +92,7 @@
             swaccess: "rw",
             hwaccess: "hro",
             count: "NumPerfCounters",
-            cname: "hart select ",
+            cname: "hart_select",
             fields: [{
                 bits: "9:0",
                 name: "HART_SELECT",
@@ -107,7 +108,7 @@
             swaccess: "rw",
             hwaccess: "hrw",
             count: "NumPerfCounters",
-            cname: "performance counter ",
+            cname: "performance_counter",
             hwext: true,
             hwqe:  true,
             fields: [{
