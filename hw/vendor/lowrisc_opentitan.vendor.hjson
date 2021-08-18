@@ -14,7 +14,6 @@
 
   mapping: [
     {from: 'hw/ip/prim', to: 'prim', patch_dir: 'prim'},
-    {from: 'hw/ip/uart', to: 'uart', patch_dir: 'uart'},
     {from: 'hw/ip/gpio', to: 'gpio', patch_dir: 'gpio'},
     {from: 'hw/ip/i2c', to: 'i2c', patch_dir: 'i2c'},
     {from: 'hw/ip/spi_host', to: 'spi_host', patch_dir: 'spi_host'},
@@ -23,5 +22,12 @@
 
   exclude_from_upstream: [
     "*.core",
+    "*doc", "*dv", "*lint", "*fpv", "*pre_dv",
+    "*.prj.hjson", "*_testplan.hjson",
+    // We do not need primitive generation
+    "hw/ip/prim/util",
+    // For the PLIC, we need only the templates, not the generated RTL
+    "hw/ip/rv_plic/rtl/rv_plic.sv",
+    "hw/ip/rv_plic/rtl/rv_plic_reg*.sv"
   ]
 }
