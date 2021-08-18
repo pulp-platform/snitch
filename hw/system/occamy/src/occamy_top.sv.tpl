@@ -234,7 +234,8 @@ module occamy_top
   <% narrow_spm_cdc = soc_narrow_xbar.out_spm \
                       .cdc(context, "clk_periph_i", "rst_periph_ni", "spm_cdc") \
                       .serialize(context, "spm_serialize", iw=1) \
-                      .atomic_adapter(context, 16, "spm_amo_adapter")
+                      .atomic_adapter(context, 16, "spm_amo_adapter") \
+                      .cut(context, 1)
   %>
 
   axi_to_mem #(

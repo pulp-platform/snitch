@@ -72,7 +72,7 @@ Disassembly of section .text:
  100009a:	1b00                	addi	s0,sp,432
  100009c:	7465                	lui	s0,0xffff9
  100009e:	2c68                	fld	fa0,216(s0)
- 10000a0:	6163636f          	jal	t1,10366b6 <bin_to_hex_table+0x3588e>
+ 10000a0:	6163636f          	jal	t1,10366b6 <bin_to_hex_table+0x35896>
  10000a4:	796d                	lui	s2,0xffffb
  10000a6:	642d                	lui	s0,0xb
  10000a8:	7665                	lui	a2,0xffff9
@@ -85,7 +85,7 @@ Disassembly of section .text:
  10000b6:	2600                	fld	fs0,8(a2)
  10000b8:	7465                	lui	s0,0xffff9
  10000ba:	2c68                	fld	fa0,216(s0)
- 10000bc:	6163636f          	jal	t1,10366d2 <bin_to_hex_table+0x358aa>
+ 10000bc:	6163636f          	jal	t1,10366d2 <bin_to_hex_table+0x358b2>
  10000c0:	796d                	lui	s2,0xffffb
  10000c2:	0000                	unimp
  10000c4:	0000                	unimp
@@ -211,7 +211,7 @@ Disassembly of section .text:
  10001c2:	0500                	addi	s0,sp,640
  10001c4:	0000                	unimp
  10001c6:	7500                	ld	s0,40(a0)
- 10001c8:	79616b6f          	jal	s6,101695e <bin_to_hex_table+0x15b36>
+ 10001c8:	79616b6f          	jal	s6,101695e <bin_to_hex_table+0x15b3e>
  10001cc:	0000                	unimp
  10001ce:	0000                	unimp
  10001d0:	0000                	unimp
@@ -879,7 +879,7 @@ Disassembly of section .text:
  100073e:	fd01                	bnez	a0,1000656 <device_tree+0x626>
  1000740:	2d75                	addiw	s10,s10,29
  1000742:	6f62                	ld	t5,24(sp)
- 1000744:	0000746f          	jal	s0,1007744 <bin_to_hex_table+0x691c>
+ 1000744:	0000746f          	jal	s0,1007744 <bin_to_hex_table+0x6924>
  1000748:	0000                	unimp
  100074a:	0300                	addi	s0,sp,384
  100074c:	0000                	unimp
@@ -973,7 +973,7 @@ Disassembly of section .text:
  1000806:	0200                	addi	s0,sp,256
  1000808:	0000                	unimp
  100080a:	0100                	addi	s0,sp,128
- 100080c:	6e696c63          	bltu	s2,t1,1000f04 <bin_to_hex_table+0xdc>
+ 100080c:	6e696c63          	bltu	s2,t1,1000f04 <bin_to_hex_table+0xe4>
  1000810:	4074                	lw	a3,68(s0)
  1000812:	3034                	fld	fa3,96(s0)
  1000814:	3030                	fld	fa2,96(s0)
@@ -996,7 +996,7 @@ Disassembly of section .text:
  1000836:	1b00                	addi	s0,sp,432
  1000838:	6972                	ld	s2,280(sp)
  100083a:	2c766373          	csrrsi	t1,0x2c7,12
- 100083e:	6e696c63          	bltu	s2,t1,1000f36 <bin_to_hex_table+0x10e>
+ 100083e:	6e696c63          	bltu	s2,t1,1000f36 <bin_to_hex_table+0x116>
  1000842:	3074                	fld	fa3,224(s0)
  1000844:	0000                	unimp
  1000846:	0000                	unimp
@@ -1020,7 +1020,7 @@ Disassembly of section .text:
  100086a:	0800                	addi	s0,sp,16
  100086c:	0000                	unimp
  100086e:	f200                	sd	s0,32(a2)
- 1000870:	746e6f63          	bltu	t3,t1,1000fce <bin_to_hex_table+0x1a6>
+ 1000870:	746e6f63          	bltu	t3,t1,1000fce <bin_to_hex_table+0x1ae>
  1000874:	6f72                	ld	t5,280(sp)
  1000876:	006c                	addi	a1,sp,12
  1000878:	0000                	unimp
@@ -1046,7 +1046,7 @@ Disassembly of section .text:
  10008a0:	7272                	ld	tp,312(sp)
  10008a2:	7075                	c.lui	zero,0xffffd
  10008a4:	2d74                	fld	fa3,216(a0)
- 10008a6:	746e6f63          	bltu	t3,t1,1001004 <bin_to_hex_table+0x1dc>
+ 10008a6:	746e6f63          	bltu	t3,t1,1001004 <bin_to_hex_table+0x1e4>
  10008aa:	6f72                	ld	t5,280(sp)
  10008ac:	6c6c                	ld	a1,216(s0)
  10008ae:	7265                	lui	tp,0xffff9
@@ -1157,7 +1157,7 @@ Disassembly of section .text:
  100098e:	6c65                	lui	s8,0x19
  1000990:	736c                	ld	a1,224(a4)
  1000992:	6300                	ld	s0,0(a4)
- 1000994:	61706d6f          	jal	s10,10077aa <bin_to_hex_table+0x6982>
+ 1000994:	61706d6f          	jal	s10,10077aa <bin_to_hex_table+0x698a>
  1000998:	6974                	ld	a3,208(a0)
  100099a:	6c62                	ld	s8,24(sp)
  100099c:	0065                	c.nop	25
@@ -1166,7 +1166,7 @@ Disassembly of section .text:
  10009a2:	006c                	addi	a1,sp,12
  10009a4:	2d75                	addiw	s10,s10,29
  10009a6:	6f62                	ld	t5,24(sp)
- 10009a8:	732c746f          	jal	s0,10c80da <bin_to_hex_table+0xc72b2>
+ 10009a8:	732c746f          	jal	s0,10c80da <bin_to_hex_table+0xc72ba>
  10009ac:	6c70                	ld	a2,216(s0)
  10009ae:	702d                	c.lui	zero,0xfffeb
  10009b0:	7961                	lui	s2,0xffff8
@@ -1182,22 +1182,22 @@ Disassembly of section .text:
  10009c8:	0068                	addi	a0,sp,12
  10009ca:	6564                	ld	s1,200(a0)
  10009cc:	6976                	ld	s2,344(sp)
- 10009ce:	745f6563          	bltu	t5,t0,1001118 <bin_to_hex_table+0x2f0>
+ 10009ce:	745f6563          	bltu	t5,t0,1001118 <bin_to_hex_table+0x2f8>
  10009d2:	7079                	c.lui	zero,0xffffe
  10009d4:	0065                	c.nop	25
  10009d6:	6572                	ld	a0,280(sp)
- 10009d8:	69740067          	jr	1687(s0) # ffffffffffff8697 <bin_to_hex_table+0xfffffffffeff786f>
+ 10009d8:	69740067          	jr	1687(s0) # ffffffffffff8697 <bin_to_hex_table+0xfffffffffeff7877>
  10009dc:	656d                	lui	a0,0x1b
  10009de:	6162                	ld	sp,24(sp)
  10009e0:	662d6573          	csrrsi	a0,0x662,26
  10009e4:	6572                	ld	a0,280(sp)
  10009e6:	7571                	lui	a0,0xffffc
  10009e8:	6e65                	lui	t3,0x19
- 10009ea:	73007963          	bgeu	zero,a6,100111c <bin_to_hex_table+0x2f4>
+ 10009ea:	73007963          	bgeu	zero,a6,100111c <bin_to_hex_table+0x2fc>
  10009ee:	6174                	ld	a3,192(a0)
  10009f0:	7574                	ld	a3,232(a0)
  10009f2:	6c630073          	0x6c630073
- 10009f6:	2d6b636f          	jal	t1,10b6ccc <bin_to_hex_table+0xb5ea4>
+ 10009f6:	2d6b636f          	jal	t1,10b6ccc <bin_to_hex_table+0xb5eac>
  10009fa:	7266                	ld	tp,120(sp)
  10009fc:	7165                	addi	sp,sp,-400
  10009fe:	6575                	lui	a0,0x1d
@@ -1222,13 +1222,13 @@ Disassembly of section .text:
  1000a26:	7272                	ld	tp,312(sp)
  1000a28:	7075                	c.lui	zero,0xffffd
  1000a2a:	2d74                	fld	fa3,216(a0)
- 1000a2c:	6c6c6563          	bltu	s8,t1,10010f6 <bin_to_hex_table+0x2ce>
+ 1000a2c:	6c6c6563          	bltu	s8,t1,10010f6 <bin_to_hex_table+0x2d6>
  1000a30:	6e690073          	0x6e690073
  1000a34:	6574                	ld	a3,200(a0)
  1000a36:	7272                	ld	tp,312(sp)
  1000a38:	7075                	c.lui	zero,0xffffd
  1000a3a:	2d74                	fld	fa3,216(a0)
- 1000a3c:	746e6f63          	bltu	t3,t1,100119a <bin_to_hex_table+0x372>
+ 1000a3c:	746e6f63          	bltu	t3,t1,100119a <bin_to_hex_table+0x37a>
  1000a40:	6f72                	ld	t5,280(sp)
  1000a42:	6c6c                	ld	a1,216(s0)
  1000a44:	7265                	lui	tp,0xffff9
@@ -1307,7 +1307,7 @@ Disassembly of section .text:
  1000ae8:	7472                	ld	s0,312(sp)
  1000aea:	63230073          	0x63230073
  1000aee:	6f6c                	ld	a1,216(a4)
- 1000af0:	632d6b63          	bltu	s10,s2,1001126 <bin_to_hex_table+0x2fe>
+ 1000af0:	632d6b63          	bltu	s10,s2,1001126 <bin_to_hex_table+0x306>
  1000af4:	6c65                	lui	s8,0x19
  1000af6:	736c                	ld	a1,224(a4)
  1000af8:	6300                	ld	s0,0(a4)
@@ -1371,14 +1371,14 @@ Disassembly of section .text:
  1000b7a:	7200                	ld	s0,32(a2)
  1000b7c:	6165                	addi	sp,sp,112
  1000b7e:	2d64                	fld	fs1,216(a0)
- 1000b80:	796c6e6f          	jal	t3,10c7316 <bin_to_hex_table+0xc64ee>
+ 1000b80:	796c6e6f          	jal	t3,10c7316 <bin_to_hex_table+0xc64f6>
  1000b84:	7200                	ld	s0,32(a2)
  1000b86:	7369                	lui	t1,0xffffa
- 1000b88:	6d2c7663          	bgeu	s8,s2,1001254 <bin_to_hex_table+0x42c>
+ 1000b88:	6d2c7663          	bgeu	s8,s2,1001254 <bin_to_hex_table+0x434>
  1000b8c:	7861                	lui	a6,0xffff8
  1000b8e:	702d                	c.lui	zero,0xfffeb
  1000b90:	6972                	ld	s2,280(sp)
- 1000b92:	7469726f          	jal	tp,10982d8 <bin_to_hex_table+0x974b0>
+ 1000b92:	7469726f          	jal	tp,10982d8 <bin_to_hex_table+0x974b8>
  1000b96:	0079                	c.nop	30
  1000b98:	6972                	ld	s2,280(sp)
  1000b9a:	2c766373          	csrrsi	t1,0x2c7,12
@@ -1400,13 +1400,13 @@ Disassembly of section .text:
 
 0000000001000bbc <is_transmit_empty>:
  1000bbc:	400007b7          	lui	a5,0x40000
- 1000bc0:	0147c503          	lbu	a0,20(a5) # 40000014 <bin_to_hex_table+0x3efff1ec>
+ 1000bc0:	0147c503          	lbu	a0,20(a5) # 40000014 <bin_to_hex_table+0x3efff1f4>
  1000bc4:	02057513          	andi	a0,a0,32
  1000bc8:	00008067          	ret
 
 0000000001000bcc <write_serial>:
  1000bcc:	40000737          	lui	a4,0x40000
- 1000bd0:	01474783          	lbu	a5,20(a4) # 40000014 <bin_to_hex_table+0x3efff1ec>
+ 1000bd0:	01474783          	lbu	a5,20(a4) # 40000014 <bin_to_hex_table+0x3efff1f4>
  1000bd4:	0207f793          	andi	a5,a5,32
  1000bd8:	fe078ce3          	beqz	a5,1000bd0 <write_serial+0x4>
  1000bdc:	00a70023          	sb	a0,0(a4)
@@ -1416,7 +1416,7 @@ Disassembly of section .text:
  1000be4:	0045959b          	slliw	a1,a1,0x4
  1000be8:	02b5553b          	divuw	a0,a0,a1
  1000bec:	400007b7          	lui	a5,0x40000
- 1000bf0:	00078223          	sb	zero,4(a5) # 40000004 <bin_to_hex_table+0x3efff1dc>
+ 1000bf0:	00078223          	sb	zero,4(a5) # 40000004 <bin_to_hex_table+0x3efff1e4>
  1000bf4:	f8000713          	li	a4,-128
  1000bf8:	00e78623          	sb	a4,12(a5)
  1000bfc:	0ff57713          	zext.b	a4,a0
@@ -1433,7 +1433,7 @@ Disassembly of section .text:
  1000c28:	00008067          	ret
 
 0000000001000c2c <print_uart>:
- 1000c2c:	ff010113          	addi	sp,sp,-16 # 30302ff0 <bin_to_hex_table+0x2f3021c8>
+ 1000c2c:	ff010113          	addi	sp,sp,-16 # 30302ff0 <bin_to_hex_table+0x2f3021d0>
  1000c30:	00813023          	sd	s0,0(sp)
  1000c34:	00113423          	sd	ra,8(sp)
  1000c38:	00050413          	mv	s0,a0
@@ -1449,7 +1449,7 @@ Disassembly of section .text:
 
 0000000001000c60 <bin_to_hex>:
  1000c60:	00000797          	auipc	a5,0x0
- 1000c64:	1c878793          	addi	a5,a5,456 # 1000e28 <bin_to_hex_table>
+ 1000c64:	1c078793          	addi	a5,a5,448 # 1000e20 <bin_to_hex_table>
  1000c68:	00f57713          	andi	a4,a0,15
  1000c6c:	00e78733          	add	a4,a5,a4
  1000c70:	00074703          	lbu	a4,0(a4)
@@ -1532,29 +1532,26 @@ Disassembly of section .text.startup:
  1000d7c:	02faf537          	lui	a0,0x2faf
  1000d80:	ff010113          	addi	sp,sp,-16
  1000d84:	20058593          	addi	a1,a1,512 # 1c200 <_start-0xfe3e00>
- 1000d88:	08050513          	addi	a0,a0,128 # 2faf080 <bin_to_hex_table+0x1fae258>
+ 1000d88:	08050513          	addi	a0,a0,128 # 2faf080 <bin_to_hex_table+0x1fae260>
  1000d8c:	00113423          	sd	ra,8(sp)
  1000d90:	e55ff0ef          	jal	ra,1000be4 <init_uart>
  1000d94:	00000517          	auipc	a0,0x0
- 1000d98:	05c50513          	addi	a0,a0,92 # 1000df0 <main+0x78>
+ 1000d98:	05450513          	addi	a0,a0,84 # 1000de8 <main+0x70>
  1000d9c:	e91ff0ef          	jal	ra,1000c2c <print_uart>
  1000da0:	00000517          	auipc	a0,0x0
- 1000da4:	06050513          	addi	a0,a0,96 # 1000e00 <main+0x88>
+ 1000da4:	05850513          	addi	a0,a0,88 # 1000df8 <main+0x80>
  1000da8:	e85ff0ef          	jal	ra,1000c2c <print_uart>
- 1000dac:	00087737          	lui	a4,0x87
- 1000db0:	fff70713          	addi	a4,a4,-1 # 86fff <_start-0xf79001>
- 1000db4:	010017b7          	lui	a5,0x1001
- 1000db8:	00c71713          	slli	a4,a4,0xc
- 1000dbc:	0100d6b7          	lui	a3,0x100d
- 1000dc0:	0007b583          	ld	a1,0(a5) # 1001000 <bin_to_hex_table+0x1d8>
- 1000dc4:	00f70633          	add	a2,a4,a5
- 1000dc8:	00878793          	addi	a5,a5,8
- 1000dcc:	00b63023          	sd	a1,0(a2) # ffffffffffff9000 <bin_to_hex_table+0xfffffffffeff81d8>
- 1000dd0:	fed798e3          	bne	a5,a3,1000dc0 <main+0x48>
- 1000dd4:	01100793          	li	a5,17
- 1000dd8:	01b79793          	slli	a5,a5,0x1b
- 1000ddc:	f1402573          	csrr	a0,mhartid
- 1000de0:	fffff597          	auipc	a1,0xfffff
- 1000de4:	25058593          	addi	a1,a1,592 # 1000030 <device_tree>
- 1000de8:	00078067          	jr	a5
- 1000dec:	0000006f          	j	1000dec <main+0x74>
+ 1000dac:	010017b7          	lui	a5,0x1001
+ 1000db0:	6efff5b7          	lui	a1,0x6efff
+ 1000db4:	0100d737          	lui	a4,0x100d
+ 1000db8:	0007b603          	ld	a2,0(a5) # 1001000 <bin_to_hex_table+0x1e0>
+ 1000dbc:	00f586b3          	add	a3,a1,a5
+ 1000dc0:	00878793          	addi	a5,a5,8
+ 1000dc4:	00c6b023          	sd	a2,0(a3)
+ 1000dc8:	fee798e3          	bne	a5,a4,1000db8 <main+0x40>
+ 1000dcc:	700007b7          	lui	a5,0x70000
+ 1000dd0:	f1402573          	csrr	a0,mhartid
+ 1000dd4:	fffff597          	auipc	a1,0xfffff
+ 1000dd8:	25c58593          	addi	a1,a1,604 # 1000030 <device_tree>
+ 1000ddc:	00078067          	jr	a5 # 70000000 <bin_to_hex_table+0x6efff1e0>
+ 1000de0:	0000006f          	j	1000de0 <main+0x68>
