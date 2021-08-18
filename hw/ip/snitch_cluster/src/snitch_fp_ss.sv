@@ -27,6 +27,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
   parameter bit XF16 = 0,
   parameter bit XF16ALT = 0,
   parameter bit XF8 = 0,
+  parameter bit XF8ALT = 0,
   parameter bit XFVEC = 0,
   parameter int unsigned FLEN = DataWidth,
   /// Derived parameter *Do not override*
@@ -2532,7 +2533,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
               fpnew_pkg::FP32:    op[i] = {(FLEN / 32){op[i][31:0]}};
               fpnew_pkg::FP16,
               fpnew_pkg::FP16ALT: op[i] = {(FLEN / 16){op[i][15:0]}};
-              fpnew_pkg::FP8:     op[i] = {(FLEN /  8){op[i][ 7:0]}};
+              fpnew_pkg::FP8,
+              fpnew_pkg::FP8ALT:  op[i] = {(FLEN /  8){op[i][ 7:0]}};
               default:            op[i] = op[i][FLEN-1:0];
             endcase
           end
@@ -2554,6 +2556,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
     .XF16 (XF16),
     .XF16ALT (XF16ALT),
     .XF8 (XF8),
+    .XF8ALT (XF8ALT),
     .XFVEC (XFVEC),
     .FLEN (FLEN),
     .FPUImplementation (FPUImplementation)
