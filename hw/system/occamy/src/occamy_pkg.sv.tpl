@@ -25,14 +25,7 @@ package occamy_pkg;
 
   typedef struct packed {
     logic [31:0] gpio;
-    logic uart_tx_watermark;
-    logic uart_rx_watermark;
-    logic uart_tx_empty;
-    logic uart_rx_overflow;
-    logic uart_rx_frame_err;
-    logic uart_rx_break_err;
-    logic uart_rx_timeout;
-    logic uart_rx_parity_err;
+    logic uart;
     logic spim_error;
     logic spim_spi_event;
     logic i2c_fmt_watermark;

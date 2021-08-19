@@ -13,7 +13,7 @@ dependencies:
   snitch-cluster: {path: ../../ip/snitch_cluster}
   spm-interface: {path: ../../ip/spm_interface}
   cva6: {path: ../../vendor/openhwgroup_cva6}
-  lowrisc_uart: {path: ../../vendor/lowrisc_opentitan/uart}
+  apb_uart_sv: {path: ../../vendor/pulp_platform_apb_uart_sv}
   lowrisc_rv_plic: {path: ../../vendor/lowrisc_opentitan/rv_plic}
   lowrisc_gpio: {path: ../../vendor/lowrisc_opentitan/gpio}
   lowrisc_spi_host: {path: ../../vendor/lowrisc_opentitan/spi_host}
