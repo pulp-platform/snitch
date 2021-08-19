@@ -43,13 +43,16 @@ module uart_rx (
 
     logic        sampleData;
 
-    logic [15:0] baud_cnt;
+    logic [19:0] baud_cnt, cfg_div_i_eff;
     logic        baudgen_en;
     logic        bit_done;
 
     logic        start_bit;
     logic        set_error;
     logic        s_rx_fall;
+
+    // Actual divisor is *16 times* the divisor latches
+    assign cfg_div_i_eff = {cfg_div_i, 4'h0};
 
 
     assign busy_o = (CS != IDLE);
@@ -211,12 +214,12 @@ module uart_rx (
         begin
             if(baudgen_en)
             begin
-                if(!start_bit && (baud_cnt == cfg_div_i))
+                if(!start_bit && (baud_cnt == cfg_div_i_eff))
                 begin
                     baud_cnt <= 'h0;
                     bit_done <= 1'b1;
                 end
-                else if(start_bit && (baud_cnt == {1'b0,cfg_div_i[15:1]}))
+                else if(start_bit && (baud_cnt == {1'b0,cfg_div_i_eff[19:1]}))
                 begin
                     baud_cnt <= 'h0;
                     bit_done <= 1'b1;

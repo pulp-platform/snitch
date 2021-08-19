@@ -39,9 +39,12 @@ module uart_tx (
 
     logic        sampleData;
 
-    logic [15:0] baud_cnt;
+    logic [19:0] baud_cnt, cfg_div_i_eff;
     logic        baudgen_en;
     logic        bit_done;
+
+    // Actual divisor is *16 times* the divisor latches
+    assign cfg_div_i_eff = {cfg_div_i, 4'h0};
 
     assign busy_o = (CS != IDLE);
 
@@ -191,7 +194,7 @@ module uart_tx (
         begin
             if(baudgen_en)
             begin
-                if(baud_cnt == cfg_div_i)
+                if(baud_cnt == cfg_div_i_eff)
                 begin
                     baud_cnt <= 'h0;
                     bit_done <= 1'b1;

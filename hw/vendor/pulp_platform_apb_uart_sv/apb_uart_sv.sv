@@ -10,33 +10,27 @@
 
 module apb_uart_sv
 #(
-    parameter APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
+    parameter type apb_req_t    = logic,
+    parameter type apb_resp_t   = logic
 )
 (
-    input  logic                      CLK,
-    input  logic                      RSTN,
-    /* verilator lint_off UNUSED */
-    input  logic [APB_ADDR_WIDTH-1:0] PADDR,
-    /* lint_on */
-    input  logic               [31:0] PWDATA,
-    input  logic                      PWRITE,
-    input  logic                      PSEL,
-    input  logic                      PENABLE,
-    output logic               [31:0] PRDATA,
-    output logic                      PREADY,
-    output logic                      PSLVERR,
+    input  logic                      clk_i,
+    input  logic                      rst_ni,
+
+    input  apb_req_t                  apb_req_i,
+    output apb_resp_t                 apb_resp_o,
 
     input  logic                      rx_i,      // Receiver input
     output logic                      tx_o,      // Transmitter output
 
-    output logic                      event_o    // interrupt/event output
+    output logic                      intr_o     // interrupt/event output
 );
     // register addresses
-    parameter RBR = 3'h0, THR = 3'h0, DLL = 3'h0, IER = 3'h1, DLM = 3'h1, IIR = 3'h2,
+    localparam RBR = 3'h0, THR = 3'h0, DLL = 3'h0, IER = 3'h1, DLM = 3'h1, IIR = 3'h2,
               FCR = 3'h2, LCR = 3'h3, MCR = 3'h4, LSR = 3'h5, MSR = 3'h6, SCR = 3'h7;
 
-    parameter TX_FIFO_DEPTH = 16; // in bytes
-    parameter RX_FIFO_DEPTH = 16; // in bytes
+    localparam TX_FIFO_DEPTH = 16; // in bytes
+    localparam RX_FIFO_DEPTH = 16; // in bytes
 
     logic [2:0]       register_adr;
     logic [9:0][7:0]  regs_q, regs_n;
@@ -67,7 +61,6 @@ module apb_uart_sv
     logic             fifo_rx_ready;
     logic             rx_ready;
 
-    logic             [7:0] fifo_tx_data;
     logic             [8:0] fifo_rx_data;
 
     logic             [7:0] tx_data;
@@ -77,8 +70,8 @@ module apb_uart_sv
     // TODO: check that stop bits are really not necessary here
     uart_rx uart_rx_i
     (
-        .clk_i              ( CLK                           ),
-        .rstn_i             ( RSTN                          ),
+        .clk_i,
+        .rstn_i             ( rst_ni                        ),
         .rx_i               ( rx_i                          ),
         .cfg_en_i           ( 1'b1                          ),
         .cfg_div_i          ( {regs_q[DLM + 'd8], regs_q[DLL + 'd8]}    ),
@@ -97,8 +90,8 @@ module apb_uart_sv
 
     uart_tx uart_tx_i
     (
-        .clk_i              ( CLK                           ),
-        .rstn_i             ( RSTN                          ),
+        .clk_i,
+        .rstn_i             ( rst_ni                        ),
         .tx_o               ( tx_o                          ),
         /* verilator lint_off PINCONNECTEMPTY */
         .busy_o             (                               ),
@@ -121,8 +114,8 @@ module apb_uart_sv
     )
     uart_rx_fifo_i
     (
-        .clk_i              ( CLK                           ),
-        .rstn_i             ( RSTN                          ),
+        .clk_i,
+        .rstn_i             ( rst_ni                        ),
 
         .clr_i              ( rx_fifo_clr_q                 ),
 
@@ -144,8 +137,8 @@ module apb_uart_sv
     )
     uart_tx_fifo_i
     (
-        .clk_i              ( CLK                           ),
-        .rstn_i             ( RSTN                          ),
+        .clk_i,
+        .rstn_i             ( rst_ni                        ),
 
         .clr_i              ( tx_fifo_clr_q                 ),
 
@@ -156,7 +149,7 @@ module apb_uart_sv
         .ready_i            ( tx_ready                      ),
 
         .valid_i            ( fifo_tx_valid                 ),
-        .data_i             ( fifo_tx_data                  ),
+        .data_i             ( apb_req_i.pwdata[7:0]         ),
         // not needed since we are getting the status via the fifo population
         .ready_o            (                               )
     );
@@ -168,8 +161,8 @@ module apb_uart_sv
     )
     uart_interrupt_i
     (
-        .clk_i              ( CLK                           ),
-        .rstn_i             ( RSTN                          ),
+        .clk_i,
+        .rstn_i             ( rst_ni                        ),
 
 
         .IER_i              ( regs_q[IER][2:0]              ), // interrupt enable register
@@ -184,7 +177,7 @@ module apb_uart_sv
 
         .clr_int_i          ( clr_int                       ), // one hot
 
-        .interrupt_o        ( event_o                       ),
+        .interrupt_o        ( intr_o                        ),
         .IIR_o              ( IIR_o                         )
 
     );
@@ -211,7 +204,7 @@ module apb_uart_sv
         regs_n[LSR][5] = ~ (|tx_elements); // fifo is empty
         regs_n[LSR][6] = tx_ready & ~ (|tx_elements); // shift register and fifo are empty
 
-        if (PSEL && PENABLE && PWRITE)
+        if (apb_req_i.psel && apb_req_i.penable && apb_req_i.pwrite && apb_req_i.pstrb[0])
         begin
             case (register_adr)
 
@@ -219,11 +212,10 @@ module apb_uart_sv
                 begin
                     if (regs_q[LCR][7]) // Divisor Latch Access Bit (DLAB)
                     begin
-                        regs_n[DLL + 'd8] = PWDATA[7:0];
+                        regs_n[DLL + 'd8] = apb_req_i.pwdata[7:0];
                     end
                     else
                     begin
-                        fifo_tx_data = PWDATA[7:0];
                         fifo_tx_valid = 1'b1;
                     end
                 end
@@ -231,19 +223,19 @@ module apb_uart_sv
                 IER: // either IER or DLM
                 begin
                     if (regs_q[LCR][7]) // Divisor Latch Access Bit (DLAB)
-                        regs_n[DLM + 'd8] = PWDATA[7:0];
+                        regs_n[DLM + 'd8] = apb_req_i.pwdata[7:0];
                     else
-                        regs_n[IER] = PWDATA[7:0];
+                        regs_n[IER] = apb_req_i.pwdata[7:0];
                 end
 
                 LCR:
-                    regs_n[LCR] = PWDATA[7:0];
+                    regs_n[LCR] = apb_req_i.pwdata[7:0];
 
                 FCR: // write only register, fifo control register
                 begin
-                    rx_fifo_clr_n   = PWDATA[1];
-                    tx_fifo_clr_n   = PWDATA[2];
-                    trigger_level_n = PWDATA[7:6];
+                    rx_fifo_clr_n   = apb_req_i.pwdata[1];
+                    tx_fifo_clr_n   = apb_req_i.pwdata[2];
+                    trigger_level_n = apb_req_i.pwdata[7:6];
                 end
 
                 default: ;
@@ -253,6 +245,8 @@ module apb_uart_sv
 
     end
 
+    logic [31:0] PRDATA;
+
     // register read logic
     always_comb
     begin
@@ -261,7 +255,7 @@ module apb_uart_sv
         fifo_rx_ready = 1'b0;
         clr_int      = 4'b0;
 
-        if (PSEL && PENABLE && !PWRITE)
+        if (apb_req_i.psel && apb_req_i.penable && !apb_req_i.pwrite)
         begin
             case (register_adr)
                 RBR: // either RBR or DLL
@@ -308,9 +302,9 @@ module apb_uart_sv
     end
 
     // synchronouse part
-    always_ff @(posedge CLK, negedge RSTN)
+    always_ff @(posedge clk_i, negedge rst_ni)
     begin
-        if(~RSTN)
+        if(~rst_ni)
         begin
 
             regs_q[IER]       <= 8'h0;
@@ -339,9 +333,9 @@ module apb_uart_sv
         end
     end
 
-    assign register_adr = {PADDR[2:0]};
+    assign register_adr = apb_req_i.paddr[4:2];
     // APB logic: we are always ready to capture the data into our regs
     // not supporting transfare failure
-    assign PREADY  = 1'b1;
-    assign PSLVERR = 1'b0;
+    assign apb_resp_o = '{prdata: PRDATA, pready: 1'b1, pslverr: 1'b0};
+
 endmodule
