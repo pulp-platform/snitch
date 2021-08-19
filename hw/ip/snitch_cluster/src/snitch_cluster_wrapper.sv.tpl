@@ -25,7 +25,7 @@ ${int(c[prop])}\
 
 <%def name="core_isa(isa)">\
 ${cfg['nr_cores']}'b\
-  % for c in reversed(cfg['cores']):
+  % for c in cfg['cores'][::-1]:
 ${int(getattr(c['isa_parsed'], isa))}\
   % endfor
 </%def>\
