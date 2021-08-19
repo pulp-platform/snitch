@@ -228,8 +228,8 @@ module snitch_const_cache #(
   logic                        lookup_hit;
   logic [CFG.LINE_WIDTH-1:0]   lookup_data;
   logic                        lookup_error;
-  logic                        lookup_valid, lookup_valid2;
-  logic                        lookup_ready, lookup_ready2;
+  logic                        lookup_valid;
+  logic                        lookup_ready;
 
   logic [CFG.COUNT_ALIGN-1:0]  write_addr;
   logic [CFG.SET_ALIGN-1:0]    write_set;
@@ -382,8 +382,8 @@ module snitch_const_cache #(
   assign in_meta.valid = cache_req.ar_valid;
 
   assign in_addr  = cache_req.ar.addr >> CFG.LINE_ALIGN << CFG.LINE_ALIGN;
-  assign in_valid = cache_req.ar_valid; // & ~metadata[lookup_meta.id].valid; // Suppress handshake if transaction in flight
-  assign cache_rsp.ar_ready = in_ready; // & ~metadata[lookup_meta.id].valid; // Suppress handshake if transaction in flight
+  assign in_valid = cache_req.ar_valid;
+  assign cache_rsp.ar_ready = in_ready;
   // R channel
   assign cache_rsp.r.id    = r_id;
   assign cache_rsp.r.data  = in_rsp_data_q >> (metadata[r_id].addr[$clog2(AxiDataWidth/8)+:WORD_OFFSET] * AxiDataWidth);
@@ -410,7 +410,7 @@ module snitch_const_cache #(
           metadata[r_id].valid <= 1'b0;
         end
       end
-      if (lookup_valid2 && lookup_ready2) begin
+      if (lookup_valid && lookup_ready) begin
         metadata[lookup_meta.id].addr  <= lookup_meta.addr;
         metadata[lookup_meta.id].len   <= lookup_meta.len;
         metadata[lookup_meta.id].size  <= lookup_meta.size;
@@ -471,9 +471,6 @@ module snitch_const_cache #(
     .write_ready_o ( write_ready        )
   );
 
-  assign lookup_valid2 = lookup_valid  & ~metadata[lookup_meta.id].valid;
-  assign lookup_ready  = lookup_ready2 & ~metadata[lookup_meta.id].valid;
-
   snitch_icache_handler #(CFG) i_handler (
     .clk_i,
     .rst_ni,
@@ -484,8 +481,8 @@ module snitch_const_cache #(
     .in_req_hit_i    ( lookup_hit         ),
     .in_req_data_i   ( lookup_data        ),
     .in_req_error_i  ( lookup_error       ),
-    .in_req_valid_i  ( lookup_valid2      ),
-    .in_req_ready_o  ( lookup_ready2      ),
+    .in_req_valid_i  ( lookup_valid       ),
+    .in_req_ready_o  ( lookup_ready       ),
 
     .in_rsp_data_o   ( in_rsp_data        ),
     .in_rsp_error_o  ( in_rsp_error       ),

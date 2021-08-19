@@ -40,4 +40,5 @@ add wave -group "handler" -divider -height 8 write
 add wave -group "handler" -ports -color "Yellow Green" snitch_const_cache_tb/dut/i_handler/write_*
 add wave -group "handler" -divider -height 8 internal
 add wave -group "handler" -internal snitch_const_cache_tb/dut/i_handler/*
+add wave -group "handler" -internal snitch_const_cache_tb/dut/i_handler/pending_q
 
