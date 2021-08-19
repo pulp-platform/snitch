@@ -207,6 +207,7 @@ module snitch_const_cache #(
       TAG_WIDTH:     AxiAddrWidth - $clog2(LineWidth/8) - $clog2(LineCount) + 1,
       ID_WIDTH_REQ:  AxiIdWidth,
       ID_WIDTH_RESP: 2**AxiIdWidth,
+      META_WIDTH:    AxiIdWidth,
       PENDING_IW:    $clog2(PendingCount),
       default:       0
   };
@@ -442,12 +443,12 @@ module snitch_const_cache #(
 
     // TODO(zarubaf): This is wrong, just for initial estimates.
     .in_addr_i     ( in_addr   ),
-    .in_id_i       ( in_id     ),
+    .in_meta_i     ( in_id     ),
     .in_valid_i    ( in_valid  ),
     .in_ready_o    ( in_ready  ),
 
     .out_addr_o    ( lookup_addr        ),
-    .out_id_o      ( lookup_id          ),
+    .out_meta_o    ( lookup_id          ),
     .out_set_o     ( lookup_set         ),
     .out_hit_o     ( lookup_hit         ),
     .out_data_o    ( lookup_data        ),
