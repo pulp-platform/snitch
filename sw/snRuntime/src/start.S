@@ -47,7 +47,7 @@ snrt.crt0.init_bss:
 snrt.crt0.init_registers:
     # Clear FP registers
     csrr    t0, misa
-    andi    t0, t0, (1 << 3) # 3: D - single precision float extension
+    andi    t0, t0, (1 << 3) | (1 << 5) # D/F - single/double precision float extension
     beqz    t0, 3f
     fcvt.d.w f0, zero
     fcvt.d.w f1, zero
