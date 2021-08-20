@@ -9,4 +9,9 @@
     url: "https://github.com/pulp-platform/register_interface.git",
     rev: "master",
   }
+
+  exclude_from_upstream: [
+    "*.vendor.hjson"
+  ]
+
 }
