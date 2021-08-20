@@ -921,8 +921,6 @@ package riscv_instr;
   localparam logic [11:0] CSR_FRM = 12'h2;
   localparam logic [11:0] CSR_FCSR = 12'h3;
   localparam logic [11:0] CSR_FMODE = 12'h800;
-  localparam logic [11:0] CSR_FMODESRC = 12'h801;
-  localparam logic [11:0] CSR_FMODEDST = 12'h802;
   localparam logic [11:0] CSR_CYCLE = 12'hc00;
   localparam logic [11:0] CSR_TIME = 12'hc01;
   localparam logic [11:0] CSR_INSTRET = 12'hc02;
