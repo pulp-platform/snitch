@@ -1,0 +1,70 @@
+From 5c30bea5a0803248e1f644d028458f154b6318b8 Mon Sep 17 00:00:00 2001
+From: Paul Scheffler <paulsc@iis.ee.ethz.ch>
+Date: Mon, 6 Sep 2021 20:08:34 +0200
+Subject: [PATCH 2/2] vendor: Fixes to opentitan SPI
+
+---
+ rtl/spi_host.sv                | 2 +-
+ rtl/spi_host_fsm.sv            | 8 ++++----
+ rtl/spi_host_shift_register.sv | 5 +++--
+ 3 files changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/rtl/spi_host.sv b/rtl/spi_host.sv
+index 26e0e61..b096564 100644
+--- a/rtl/spi_host.sv
++++ b/rtl/spi_host.sv
+@@ -102,7 +102,7 @@ module spi_host
+         test_speed_inval = 1'b0;
+       end
+       Dual, Quad: begin
+-        test_dir_inval   = (reg2hw.command.direction.q != Bidir);
++        test_dir_inval   = (reg2hw.command.direction.q == Bidir);
+         test_speed_inval = 1'b0;
+       end
+       default: begin
+diff --git a/rtl/spi_host_fsm.sv b/rtl/spi_host_fsm.sv
+index dfa494a..4fb1360 100644
+--- a/rtl/spi_host_fsm.sv
++++ b/rtl/spi_host_fsm.sv
+@@ -536,7 +536,7 @@ module spi_host_fsm
+     end else begin
+       unique case (cmd_speed)
+         Standard: begin
+-          sd_en_o[0]   = 1'b1;
++          sd_en_o[0]   = cmd_wr_en;
+           sd_en_o[1]   = 1'b0;
+           sd_en_o[3:2] = 2'b00;
+         end
+@@ -559,8 +559,8 @@ module spi_host_fsm
+   // Assertions confirming valid user input.
+   //
+ 
+-  `ASSERT(BidirOnlyInStdMode_A, cmd_speed == Standard || !(cmd_rd_en && cmd_wr_en), clk_i, rst_ni)
+-  `ASSERT(ValidSpeed_A, cmd_speed != RsvdSpd, clk_i, rst_ni)
+-  `ASSERT(ValidCSID_A, csid < NumCS, clk_i, rst_ni)
++  `ASSERT(BidirOnlyInStdMode_A, $isunknown(rst_ni) || (cmd_speed == Standard || !(cmd_rd_en && cmd_wr_en)), clk_i, rst_ni)
++  `ASSERT(ValidSpeed_A, $isunknown(rst_ni) || (cmd_speed != RsvdSpd), clk_i, rst_ni)
++  `ASSERT(ValidCSID_A, $isunknown(rst_ni) || (csid < NumCS), clk_i, rst_ni)
+ 
+ endmodule
+diff --git a/rtl/spi_host_shift_register.sv b/rtl/spi_host_shift_register.sv
+index e1e6807..468bbda 100644
+--- a/rtl/spi_host_shift_register.sv
++++ b/rtl/spi_host_shift_register.sv
+@@ -52,10 +52,11 @@ module spi_host_shift_register (
+   logic              rx_buf_valid_q;
+   logic              rx_buf_valid_d;
+ 
+-  `ASSERT(SpeedValid, speed_i != RsvdSpd, clk_i, rst_ni)
++  `ASSERT(SpeedValid, $isunknown(rst_ni) || (speed_i != RsvdSpd), clk_i, rst_ni)
+ 
+   assign next_bits  = full_cyc_i ? sd_i : sd_i_q;
+-  assign sr_shifted = (speed_i == Standard) ? {sr_q[6:0], next_bits[0]} :
++  // NB: In Standard mode, input data is sent on SI (Pin 1), *not* on SO (Pin 0)
++  assign sr_shifted = (speed_i == Standard) ? {sr_q[6:0], next_bits[1]} :
+                       (speed_i == Dual)     ? {sr_q[5:0], next_bits[1:0]} :
+                       (speed_i == Quad)     ? {sr_q[3:0], next_bits[3:0]} :
+                       8'h00;
+-- 
+2.16.5
+
