@@ -609,10 +609,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          src_fmt      = fpnew_pkg::FP16ALT;
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FSUB_H: begin
@@ -622,10 +621,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_mode = 1'b1;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          src_fmt      = fpnew_pkg::FP16ALT;
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FMUL_H: begin
@@ -634,10 +632,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          src_fmt      = fpnew_pkg::FP16ALT;
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FDIV_H: begin
@@ -646,10 +643,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          src_fmt      = fpnew_pkg::FP16ALT;
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FSGNJ_H,
@@ -660,16 +656,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-      end
-      riscv_instr::FSGNJ_AH,
-      riscv_instr::FSGNJN_AH,
-      riscv_instr::FSGNJX_AH: begin
-        fpu_op = fpnew_pkg::SGNJ;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        fpu_rnd_mode = fpnew_pkg::roundmode_e'({1'b0, acc_req_q.data_op[13:12]});
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
       end
       riscv_instr::FMIN_H,
       riscv_instr::FMAX_H: begin
@@ -678,27 +668,20 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
       end
-      riscv_instr::FMIN_AH,
-      riscv_instr::FMAX_AH: begin
-        fpu_op = fpnew_pkg::MINMAX;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        fpu_rnd_mode = fpnew_pkg::roundmode_e'({1'b0, acc_req_q.data_op[13:12]});
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-      end
-
       riscv_instr::FSQRT_H: begin
         fpu_op = fpnew_pkg::SQRT;
         op_select[0] = RegA;
         op_select[1] = RegA;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          src_fmt      = fpnew_pkg::FP16ALT;
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FMADD_H: begin
@@ -708,10 +691,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegC;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          src_fmt      = fpnew_pkg::FP16ALT;
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FMSUB_H: begin
@@ -722,10 +704,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_mode      = 1'b1;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          src_fmt      = fpnew_pkg::FP16ALT;
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FNMSUB_H: begin
@@ -735,10 +716,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegC;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          src_fmt      = fpnew_pkg::FP16ALT;
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FNMADD_H: begin
@@ -749,10 +729,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_mode      = 1'b1;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP64;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          src_fmt      = fpnew_pkg::FP16ALT;
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FCVT_S_H: begin
@@ -761,13 +740,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP32;
-      end
-      riscv_instr::FCVT_S_AH: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP32;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+        end
       end
       riscv_instr::FCVT_H_S: begin
         fpu_op = fpnew_pkg::F2F;
@@ -775,9 +750,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
       riscv_instr::FCVT_D_H: begin
@@ -786,13 +760,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP64;
-      end
-      riscv_instr::FCVT_D_AH: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP64;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+        end
       end
       riscv_instr::FCVT_H_D: begin
         fpu_op = fpnew_pkg::F2F;
@@ -800,27 +770,24 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
-          dst_fmt      = fpnew_pkg::FP16ALT;
-          set_dyn_rm   = 1'b1;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
-      riscv_instr::FCVT_H_AH: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16;
-      end
-      riscv_instr::FCVT_AH_H: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16;
-        set_dyn_rm   = 1'b1;
-      end
-      // Vectorial Half Precision
+      // riscv_instr::FCVT_H_H: begin
+      //   fpu_op = fpnew_pkg::F2F;
+      //   op_select[0] = RegA;
+      //   op_select[1] = RegB;
+      //   src_fmt      = fpnew_pkg::FP16;
+      //   dst_fmt      = fpnew_pkg::FP16;
+      //   if (fpu_fmt_mode_i.src == 1'b1 && fpu_fmt_mode_i.dst == 1'b0) begin
+      //     src_fmt    = fpnew_pkg::FP16ALT;
+      //   end
+      //   if (fpu_fmt_mode_i.src == 1'b0 && fpu_fmt_mode_i.dst == 1'b1) begin
+      //     dst_fmt    = fpnew_pkg::FP16ALT;
+      //   end
+      // end
+      // Vectorial [alternate] Half Precision
       riscv_instr::VFADD_H,
       riscv_instr::VFADD_R_H: begin
         fpu_op = fpnew_pkg::ADD;
@@ -828,6 +795,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFADD_R_H}) op_select[2] = RegBRep;
@@ -840,6 +811,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_mode      = 1'b1;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFSUB_R_H}) op_select[2] = RegBRep;
@@ -851,6 +826,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMUL_R_H}) op_select[1] = RegBRep;
@@ -862,6 +841,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFDIV_R_H}) op_select[1] = RegBRep;
@@ -874,6 +857,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode = fpnew_pkg::RNE;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMIN_R_H}) op_select[1] = RegBRep;
       end
@@ -884,6 +871,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         fpu_rnd_mode = fpnew_pkg::RTZ;
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMAX_R_H}) op_select[1] = RegBRep;
@@ -894,6 +885,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegA;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
       end
@@ -905,6 +900,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMAC_R_H}) op_select[1] = RegBRep;
@@ -917,6 +916,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMRE_R_H}) op_select[1] = RegBRep;
@@ -929,6 +932,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode = fpnew_pkg::RNE;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFSGNJ_R_H}) op_select[1] = RegBRep;
       end
@@ -940,6 +947,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode = fpnew_pkg::RTZ;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFSGNJN_R_H}) op_select[1] = RegBRep;
       end
@@ -951,6 +962,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode = fpnew_pkg::RDN;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFSGNJX_R_H}) op_select[1] = RegBRep;
       end
@@ -960,6 +975,22 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
+        vectorial_op = 1'b1;
+        set_dyn_rm   = 1'b1;
+      end
+      riscv_instr::VFCPKB_H_S: begin
+        fpu_op = fpnew_pkg::CPKAB;
+        op_select[0] = RegA;
+        op_select[1] = RegB;
+        op_mode      = 1'b1;
+        src_fmt      = fpnew_pkg::FP32;
+        dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
       end
@@ -970,6 +1001,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP32;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVTU_S_H}) op_mode = 1'b1;
@@ -981,19 +1015,12 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVTU_H_S}) op_mode = 1'b1;
-      end
-      riscv_instr::VFCPKB_H_S: begin
-        fpu_op = fpnew_pkg::CPKAB;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        op_mode      = 1'b1;
-        src_fmt      = fpnew_pkg::FP32;
-        dst_fmt      = fpnew_pkg::FP16;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
       end
       riscv_instr::VFCPKA_H_D: begin
         fpu_op = fpnew_pkg::CPKAB;
@@ -1001,6 +1028,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
       end
@@ -1011,232 +1041,23 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_mode      = 1'b1;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
       end
-      // Vectorial Alternate Half Precision
-      riscv_instr::VFADD_AH,
-      riscv_instr::VFADD_R_AH: begin
-        fpu_op = fpnew_pkg::ADD;
-        op_select[1] = RegA;
-        op_select[2] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFADD_R_AH}) op_select[2] = RegBRep;
-      end
-      riscv_instr::VFSUB_AH,
-      riscv_instr::VFSUB_R_AH: begin
-        fpu_op  = fpnew_pkg::ADD;
-        op_select[1] = RegA;
-        op_select[2] = RegB;
-        op_mode      = 1'b1;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFSUB_R_AH}) op_select[2] = RegBRep;
-      end
-      riscv_instr::VFMUL_AH,
-      riscv_instr::VFMUL_R_AH: begin
-        fpu_op = fpnew_pkg::MUL;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFMUL_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFDIV_AH,
-      riscv_instr::VFDIV_R_AH: begin
-        fpu_op = fpnew_pkg::DIV;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFDIV_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFMIN_AH,
-      riscv_instr::VFMIN_R_AH: begin
-        fpu_op = fpnew_pkg::MINMAX;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        fpu_rnd_mode = fpnew_pkg::RNE;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFMIN_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFMAX_AH,
-      riscv_instr::VFMAX_R_AH: begin
-        fpu_op = fpnew_pkg::MINMAX;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        fpu_rnd_mode = fpnew_pkg::RTZ;
-        vectorial_op = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFMAX_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFSQRT_AH: begin
-        fpu_op = fpnew_pkg::SQRT;
-        op_select[0] = RegA;
-        op_select[1] = RegA;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-      end
-      riscv_instr::VFMAC_AH,
-      riscv_instr::VFMAC_R_AH: begin
-        fpu_op = fpnew_pkg::FMADD;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        op_select[2] = RegDest;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFMAC_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFMRE_AH,
-      riscv_instr::VFMRE_R_AH: begin
-        fpu_op = fpnew_pkg::FNMSUB;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        op_select[2] = RegDest;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFMRE_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFSGNJ_AH,
-      riscv_instr::VFSGNJ_R_AH: begin
-        fpu_op = fpnew_pkg::SGNJ;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        fpu_rnd_mode = fpnew_pkg::RNE;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFSGNJ_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFSGNJN_AH,
-      riscv_instr::VFSGNJN_R_AH: begin
-        fpu_op = fpnew_pkg::SGNJ;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        fpu_rnd_mode = fpnew_pkg::RTZ;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFSGNJN_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFSGNJX_AH,
-      riscv_instr::VFSGNJX_R_AH: begin
-        fpu_op = fpnew_pkg::SGNJ;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        fpu_rnd_mode = fpnew_pkg::RDN;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFSGNJX_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFCPKA_AH_S: begin
-        fpu_op = fpnew_pkg::CPKAB;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP32;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-      end
-      riscv_instr::VFCVT_S_AH,
-      riscv_instr::VFCVTU_S_AH: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP32;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFCVTU_S_AH}) op_mode = 1'b1;
-      end
-      riscv_instr::VFCVT_AH_S,
-      riscv_instr::VFCVTU_AH_S: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP32;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFCVTU_AH_S}) op_mode = 1'b1;
-      end
-      riscv_instr::VFCPKB_AH_S: begin
-        fpu_op = fpnew_pkg::CPKAB;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        op_mode      = 1'b1;
-        src_fmt      = fpnew_pkg::FP32;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-      end
-      riscv_instr::VFCPKA_AH_D: begin
-        fpu_op = fpnew_pkg::CPKAB;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP64;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-      end
-      riscv_instr::VFCPKB_AH_D: begin
-        fpu_op = fpnew_pkg::CPKAB;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        op_mode      = 1'b1;
-        src_fmt      = fpnew_pkg::FP64;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-      end
-      riscv_instr::VFCVT_H_AH,
-      riscv_instr::VFCVTU_H_AH: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFCVTU_H_AH}) op_mode = 1'b1;
-      end
-      riscv_instr::VFCVT_AH_H,
-      riscv_instr::VFCVTU_AH_H: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFCVTU_AH_H}) op_mode = 1'b1;
-      end
-      // Quarter Precision
+      // [Alternate] Quarter Precision
       riscv_instr::FADD_B: begin
         fpu_op = fpnew_pkg::ADD;
         op_select[1] = RegA;
         op_select[2] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FSUB_B: begin
         fpu_op = fpnew_pkg::ADD;
@@ -1245,6 +1066,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_mode = 1'b1;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FMUL_B: begin
         fpu_op = fpnew_pkg::MUL;
@@ -1252,6 +1077,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FDIV_B: begin
         fpu_op = fpnew_pkg::DIV;
@@ -1259,6 +1088,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FSGNJ_B,
       riscv_instr::FSGNJN_B,
@@ -1268,6 +1101,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FMIN_B,
       riscv_instr::FMAX_B: begin
@@ -1276,6 +1113,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FSQRT_B: begin
         fpu_op = fpnew_pkg::SQRT;
@@ -1283,6 +1124,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegA;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FMADD_B: begin
         fpu_op = fpnew_pkg::FMADD;
@@ -1291,6 +1136,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegC;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FMSUB_B: begin
         fpu_op = fpnew_pkg::FMADD;
@@ -1300,6 +1149,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_mode      = 1'b1;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FNMSUB_B: begin
         fpu_op = fpnew_pkg::FNMSUB;
@@ -1308,6 +1161,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegC;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FNMADD_B: begin
         fpu_op = fpnew_pkg::FNMSUB;
@@ -1317,6 +1174,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_mode      = 1'b1;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FCVT_S_B: begin
         fpu_op = fpnew_pkg::F2F;
@@ -1324,6 +1185,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP32;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FCVT_B_S: begin
         fpu_op = fpnew_pkg::F2F;
@@ -1331,6 +1195,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FCVT_D_B: begin
         fpu_op = fpnew_pkg::F2F;
@@ -1338,6 +1205,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP64;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FCVT_B_D: begin
         fpu_op = fpnew_pkg::F2F;
@@ -1345,6 +1215,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FCVT_H_B: begin
         fpu_op = fpnew_pkg::F2F;
@@ -1352,6 +1225,12 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+        end
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FCVT_B_H: begin
         fpu_op = fpnew_pkg::F2F;
@@ -1359,22 +1238,14 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+        end
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
-      riscv_instr::FCVT_AH_B: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP8;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-      end
-      riscv_instr::FCVT_B_AH: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP8;
-      end
-      // Vectorial Quarter Precision
+      // Vectorial [alternate] Quarter Precision
       riscv_instr::VFADD_B,
       riscv_instr::VFADD_R_B: begin
         fpu_op = fpnew_pkg::ADD;
@@ -1382,6 +1253,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFADD_R_B}) op_select[2] = RegBRep;
@@ -1394,6 +1269,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_mode      = 1'b1;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFSUB_R_B}) op_select[2] = RegBRep;
@@ -1405,6 +1284,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMUL_R_B}) op_select[1] = RegBRep;
@@ -1416,6 +1299,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFDIV_R_B}) op_select[1] = RegBRep;
@@ -1428,6 +1315,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode = fpnew_pkg::RNE;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMIN_R_B}) op_select[1] = RegBRep;
       end
@@ -1438,6 +1329,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         fpu_rnd_mode = fpnew_pkg::RTZ;
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMAX_R_B}) op_select[1] = RegBRep;
@@ -1448,6 +1343,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegA;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
       end
@@ -1459,6 +1358,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMAC_R_B}) op_select[1] = RegBRep;
@@ -1471,6 +1374,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFMRE_R_B}) op_select[1] = RegBRep;
@@ -1483,6 +1390,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode = fpnew_pkg::RNE;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFSGNJ_R_B}) op_select[1] = RegBRep;
       end
@@ -1494,6 +1405,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode = fpnew_pkg::RTZ;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFSGNJN_R_B}) op_select[1] = RegBRep;
       end
@@ -1505,6 +1420,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode = fpnew_pkg::RDN;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFSGNJX_R_B}) op_select[1] = RegBRep;
       end
@@ -1515,6 +1434,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCPKB_B_S}) op_mode = 1;
@@ -1526,6 +1448,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCPKD_B_S}) op_mode = 1;
@@ -1537,6 +1462,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCPKB_B_D}) op_mode = 1;
@@ -1548,6 +1476,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCPKD_B_D}) op_mode = 1;
@@ -1559,6 +1490,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP32;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVTU_S_B}) op_mode = 1'b1;
@@ -1570,6 +1504,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVTU_B_S}) op_mode = 1'b1;
@@ -1581,6 +1518,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVTU_H_B}) op_mode = 1'b1;
@@ -1592,31 +1532,15 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+        end
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVTU_B_H}) op_mode = 1'b1;
-      end
-      riscv_instr::VFCVT_AH_B,
-      riscv_instr::VFCVTU_AH_B: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP8;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFCVTU_AH_B}) op_mode = 1'b1;
-      end
-      riscv_instr::VFCVT_B_AH,
-      riscv_instr::VFCVTU_B_AH: begin
-        fpu_op = fpnew_pkg::F2F;
-        op_select[0] = RegA;
-        op_select[1] = RegB;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP8;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFCVTU_B_AH}) op_mode = 1'b1;
       end
       // -------------------
       // From float to int
@@ -1795,7 +1719,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
       end
-      // Half Precision Floating-Point
+      // [Alternate] Half Precision Floating-Point
       riscv_instr::FLE_H,
       riscv_instr::FLT_H,
       riscv_instr::FEQ_H: begin
@@ -1804,6 +1728,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1]   = RegB;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
       end
@@ -1813,6 +1741,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RNE;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
       end
@@ -1824,9 +1756,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
         dst_fmt        = fpnew_pkg::FP16;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
+        if (fpu_fmt_mode_i.src == 1'b1) begin
           src_fmt    = fpnew_pkg::FP16ALT;
-          set_dyn_rm = 1'b1;
         end
         if (acc_req_q.data_op inside {riscv_instr::FCVT_WU_H}) op_mode = 1'b1; // unsigned
       end
@@ -1835,12 +1766,16 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RUP; // passthrough without checking nan-box
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         op_mode        = 1'b1; // sign-extend result
         op_select[0]   = RegA;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
       end
-      // Vectorial Half Precision
+      // Vectorial [alternate] Half Precision
       riscv_instr::VFEQ_H,
       riscv_instr::VFEQ_R_H: begin
         fpu_op = fpnew_pkg::CMP;
@@ -1849,6 +1784,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RDN;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
@@ -1862,6 +1801,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RDN;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         op_mode        = 1'b1;
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
@@ -1876,6 +1819,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RTZ;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
@@ -1889,6 +1836,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RTZ;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         op_mode        = 1'b1;
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
@@ -1903,6 +1854,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RNE;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
@@ -1916,6 +1871,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RNE;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         op_mode        = 1'b1;
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
@@ -1928,6 +1887,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RNE;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
@@ -1937,6 +1900,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RUP; // passthrough without checking nan-box
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         op_mode        = 1'b1; // sign-extend result
         op_select[0]   = RegA;
         vectorial_op   = 1'b1;
@@ -1949,6 +1916,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[0]   = RegA;
         src_fmt        = fpnew_pkg::FP16;
         dst_fmt        = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP16ALT;
+          dst_fmt      = fpnew_pkg::FP16ALT;
+        end
         int_fmt        = fpnew_pkg::INT16;
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
@@ -1956,155 +1927,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         set_dyn_rm     = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVT_XU_H}) op_mode = 1'b1; // upper
       end
-      // Alternate Half Precision Floating-Point
-      riscv_instr::FLE_AH, // todo (smach) alt fp16 must go here and below
-      riscv_instr::FLT_AH,
-      riscv_instr::FEQ_AH: begin
-        fpu_op = fpnew_pkg::CMP;
-        op_select[0]   = RegA;
-        op_select[1]   = RegB;
-        fpu_rnd_mode   = fpnew_pkg::roundmode_e'({1'b0, acc_req_q.data_op[13:12]}); // mask fp16alt
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-      end
-      riscv_instr::FCLASS_AH: begin
-        fpu_op = fpnew_pkg::CLASSIFY;
-        op_select[0]   = RegA;
-        fpu_rnd_mode   = fpnew_pkg::RNE;
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-      end
-      riscv_instr::FMV_X_AH: begin
-        fpu_op = fpnew_pkg::SGNJ;
-        fpu_rnd_mode   = fpnew_pkg::RUP; // passthrough without checking nan-box
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        op_mode        = 1'b1; // sign-extend result
-        op_select[0]   = RegA;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-      end
-      // Vectorial Alternate Half Precision
-      riscv_instr::VFEQ_AH,
-      riscv_instr::VFEQ_R_AH: begin
-        fpu_op = fpnew_pkg::CMP;
-        op_select[0]   = RegA;
-        op_select[1]   = RegB;
-        fpu_rnd_mode   = fpnew_pkg::RDN;
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        vectorial_op   = 1'b1;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-        if (acc_req_q.data_op inside {riscv_instr::VFEQ_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFNE_AH,
-      riscv_instr::VFNE_R_AH: begin
-        fpu_op = fpnew_pkg::CMP;
-        op_select[0]   = RegA;
-        op_select[1]   = RegB;
-        fpu_rnd_mode   = fpnew_pkg::RDN;
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        op_mode        = 1'b1;
-        vectorial_op   = 1'b1;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-        if (acc_req_q.data_op inside {riscv_instr::VFNE_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFLT_AH,
-      riscv_instr::VFLT_R_AH: begin
-        fpu_op = fpnew_pkg::CMP;
-        op_select[0]   = RegA;
-        op_select[1]   = RegB;
-        fpu_rnd_mode   = fpnew_pkg::RTZ;
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        vectorial_op   = 1'b1;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-        if (acc_req_q.data_op inside {riscv_instr::VFLT_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFGE_AH,
-      riscv_instr::VFGE_R_AH: begin
-        fpu_op = fpnew_pkg::CMP;
-        op_select[0]   = RegA;
-        op_select[1]   = RegB;
-        fpu_rnd_mode   = fpnew_pkg::RTZ;
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        op_mode        = 1'b1;
-        vectorial_op   = 1'b1;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-        if (acc_req_q.data_op inside {riscv_instr::VFGE_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFLE_AH,
-      riscv_instr::VFLE_R_AH: begin
-        fpu_op = fpnew_pkg::CMP;
-        op_select[0]   = RegA;
-        op_select[1]   = RegB;
-        fpu_rnd_mode   = fpnew_pkg::RNE;
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        vectorial_op   = 1'b1;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-        if (acc_req_q.data_op inside {riscv_instr::VFLE_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFGT_AH,
-      riscv_instr::VFGT_R_AH: begin
-        fpu_op = fpnew_pkg::CMP;
-        op_select[0]   = RegA;
-        op_select[1]   = RegB;
-        fpu_rnd_mode   = fpnew_pkg::RNE;
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        op_mode        = 1'b1;
-        vectorial_op   = 1'b1;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-        if (acc_req_q.data_op inside {riscv_instr::VFGT_R_AH}) op_select[1] = RegBRep;
-      end
-      riscv_instr::VFCLASS_AH: begin
-        fpu_op = fpnew_pkg::CLASSIFY;
-        op_select[0]   = RegA;
-        fpu_rnd_mode   = fpnew_pkg::RNE;
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        vectorial_op   = 1'b1;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-      end
-      riscv_instr::VFMV_X_AH: begin
-        fpu_op = fpnew_pkg::SGNJ;
-        fpu_rnd_mode   = fpnew_pkg::RUP; // passthrough without checking nan-box
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        op_mode        = 1'b1; // sign-extend result
-        op_select[0]   = RegA;
-        vectorial_op   = 1'b1;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-      end
-      riscv_instr::VFCVT_X_AH,
-      riscv_instr::VFCVT_XU_AH: begin
-        fpu_op = fpnew_pkg::F2I;
-        op_select[0]   = RegA;
-        src_fmt        = fpnew_pkg::FP16ALT;
-        dst_fmt        = fpnew_pkg::FP16ALT;
-        int_fmt        = fpnew_pkg::INT16;
-        vectorial_op   = 1'b1;
-        fpu_tag_in.acc = 1'b1;
-        rd_is_fp       = 1'b0;
-        set_dyn_rm     = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFCVT_XU_AH}) op_mode = 1'b1; // upper
-      end
-      // Quarter Precision Floating-Point
+      // [Alternate] Quarter Precision Floating-Point
       riscv_instr::FLE_B,
       riscv_instr::FLT_B,
       riscv_instr::FEQ_B: begin
@@ -2113,6 +1936,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1]   = RegB;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
       end
@@ -2122,6 +1949,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RNE;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
       end
@@ -2131,6 +1962,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[0]   = RegA;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
         if (acc_req_q.data_op inside {riscv_instr::FCVT_WU_B}) op_mode = 1'b1; // unsigned
@@ -2140,6 +1975,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RUP; // passthrough without checking nan-box
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         op_mode        = 1'b1; // sign-extend result
         op_select[0]   = RegA;
         vectorial_op   = 1'b1;
@@ -2155,6 +1994,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RDN;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
@@ -2168,6 +2011,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RDN;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         op_mode        = 1'b1;
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
@@ -2182,6 +2029,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RTZ;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
@@ -2195,6 +2046,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RTZ;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         op_mode        = 1'b1;
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
@@ -2209,6 +2064,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RNE;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
@@ -2222,6 +2081,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RNE;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         op_mode        = 1'b1;
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
@@ -2234,6 +2097,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RNE;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
@@ -2243,6 +2110,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode   = fpnew_pkg::RUP; // passthrough without checking nan-box
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         op_mode        = 1'b1; // sign-extend result
         op_select[0]   = RegA;
         vectorial_op   = 1'b1;
@@ -2255,6 +2126,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[0]   = RegA;
         src_fmt        = fpnew_pkg::FP8;
         dst_fmt        = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt      = fpnew_pkg::FP8ALT;
+          dst_fmt      = fpnew_pkg::FP8ALT;
+        end
         int_fmt        = fpnew_pkg::INT8;
         vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
@@ -2289,23 +2164,37 @@ module snitch_fp_ss import snitch_pkg::*; #(
         dst_fmt      = fpnew_pkg::FP64;
         if (acc_req_q.data_op inside {riscv_instr::FCVT_D_WU}) op_mode = 1'b1; // unsigned
       end
-      // Half Precision Floating-Point
+      // [Alternate] Half Precision Floating-Point
       riscv_instr::FMV_H_X: begin
         fpu_op = fpnew_pkg::SGNJ;
         op_select[0] = AccBus;
         fpu_rnd_mode = fpnew_pkg::RUP; // passthrough without checking nan-box
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
       end
-      riscv_instr::FCVT_H_W,
+      riscv_instr::FCVT_H_W: begin
+        fpu_op = fpnew_pkg::I2F;
+        op_select[0] = AccBus;
+        src_fmt      = fpnew_pkg::FP16;
+        dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
+        if (acc_req_q.data_op inside {riscv_instr::FCVT_H_W}) op_mode = 1'b1; // unsigned
+      end
       riscv_instr::FCVT_H_WU: begin
         fpu_op = fpnew_pkg::I2F;
         op_select[0] = AccBus;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
-        if (acc_req_q.data_op[14:12] == 3'b101) begin
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
           dst_fmt    = fpnew_pkg::FP16ALT;
-          set_dyn_rm = 1'b1;
         end
         if (acc_req_q.data_op inside {riscv_instr::FCVT_H_WU}) op_mode = 1'b1; // unsigned
       end
@@ -2316,6 +2205,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_rnd_mode = fpnew_pkg::RUP; // passthrough without checking nan-box
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         vectorial_op = 1'b1;
       end
       riscv_instr::VFCVT_H_X,
@@ -2324,46 +2217,26 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[0] = AccBus;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP16ALT;
+          dst_fmt    = fpnew_pkg::FP16ALT;
+        end
         int_fmt      = fpnew_pkg::INT16;
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVT_H_XU}) op_mode = 1'b1; // upper
       end
-      // Alternate Half Precision Floating-Point
-      riscv_instr::FMV_AH_X: begin
-        fpu_op = fpnew_pkg::SGNJ;
-        op_select[0] = AccBus;
-        fpu_rnd_mode = fpnew_pkg::RUP; // passthrough without checking nan-box
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-      end
-      // Vectorial Alternate Half Precision Floating-Point
-      riscv_instr::VFMV_AH_X: begin
-        fpu_op = fpnew_pkg::SGNJ;
-        op_select[0] = AccBus;
-        fpu_rnd_mode = fpnew_pkg::RUP; // passthrough without checking nan-box
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        vectorial_op = 1'b1;
-      end
-      riscv_instr::VFCVT_AH_X,
-      riscv_instr::VFCVT_AH_XU: begin
-        fpu_op = fpnew_pkg::I2F;
-        op_select[0] = AccBus;
-        src_fmt      = fpnew_pkg::FP16ALT;
-        dst_fmt      = fpnew_pkg::FP16ALT;
-        int_fmt      = fpnew_pkg::INT16;
-        vectorial_op = 1'b1;
-        set_dyn_rm   = 1'b1;
-        if (acc_req_q.data_op inside {riscv_instr::VFCVT_AH_XU}) op_mode = 1'b1; // upper
-      end
-      // Quarter Precision Floating-Point
+      // [Alternate] Quarter Precision Floating-Point
       riscv_instr::FMV_B_X: begin
         fpu_op = fpnew_pkg::SGNJ;
         op_select[0] = AccBus;
         fpu_rnd_mode = fpnew_pkg::RUP; // passthrough without checking nan-box
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
       end
       riscv_instr::FCVT_B_W,
       riscv_instr::FCVT_B_WU: begin
@@ -2433,7 +2306,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         use_fpu = 1'b0;
         rd_is_fp = 1'b0;
       end
-      // Quarter Precision Floating-Point
+      // [Alternate] Quarter Precision Floating-Point
       riscv_instr::FLB: begin
         is_load = 1'b1;
         ls_size = Byte;
