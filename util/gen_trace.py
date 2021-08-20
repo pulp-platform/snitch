@@ -478,6 +478,9 @@ def annotate_snitch(extras: dict,
     if annot_fseq_offl and extras['fpu_offload']:
         target_name = 'FSEQ' if extras['is_seq_insn'] else 'FPSS'
         ret.append('{} <~~ 0x{:08x}'.format(target_name, pc))
+    # If exception, annotate
+    if not (extras['stall']) and extras['exception']:
+        ret.append('exception')
     # Regular linear datapath operation
     if not (extras['stall'] or extras['fpu_offload']):
         # Operand registers

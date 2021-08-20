@@ -5,7 +5,7 @@
 #include "uart.h"
 #define SPL_SRC 0x1001000UL
 #define SPL_SIZE 0xC000
-#define SPL_DEST 0x88000000UL
+#define SPL_DEST 0x70000000UL
 
 // Boot modes.
 enum boot_mode_t { JTAG, SPL_ROM };

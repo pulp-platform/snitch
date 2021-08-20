@@ -34,4 +34,4 @@ bootrom-spl.bin: bootrom.bin  $(ARIANE_SDK)/u-boot/spl/u-boot-spl.bin
 	bin2coe -i $< -o $@ -w 32
 
 clean:
-	rm *.bin *.coe *.dump src/*.o *.dtb
+	rm -rf *.bin *.coe *.dump src/*.o *.dtb

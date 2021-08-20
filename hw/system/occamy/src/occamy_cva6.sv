@@ -52,17 +52,17 @@ module occamy_cva6
     RASDepth: 2,
     BTBEntries: 32,
     BHTEntries: 128,
-  // idempotent region
-  NrNonIdempotentRules: 1, NonIdempotentAddrBase: {
-    64'b0
+  // DRAM -- SPM, SPM -- Boot ROM, Boot ROM -- Debug Module
+  NrNonIdempotentRules: 3, NonIdempotentAddrBase: {
+    64'd1879179264, 64'd16908288, 64'h1000
   }, NonIdempotentLength: {
-    64'h8000_0000
-  }, NrExecuteRegionRules: 4,
+    64'd268304384, 64'd1862139904, 64'd16773120
+  }, NrExecuteRegionRules: 5,
   // DRAM, Boot ROM, SPM, Debug Module
   ExecuteRegionAddrBase: {
-    64'h8000_0000, 64'd16777216, 64'd1879048192, 64'h0
+    64'h10_0000_0000, 64'h8000_0000, 64'd16777216, 64'd1879048192, 64'h0
   }, ExecuteRegionLength: {
-    (64'hffff_ffff_ffff_ffff - 64'h8000_0000), 64'd131072, 64'd131072, 64'h1000
+    64'h2_0000_0000, 64'h8000_0000, 64'd131072, 64'd131072, 64'h1000
   },
   // cached region
   NrCachedRegionRules: 2, CachedRegionAddrBase: {

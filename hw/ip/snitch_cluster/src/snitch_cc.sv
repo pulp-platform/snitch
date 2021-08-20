@@ -772,6 +772,7 @@ module snitch_cc #(
           // State
           source:       snitch_pkg::SrcSnitch,
           stall:        i_snitch.stall,
+          exception:    i_snitch.exception,
           // Decoding
           rs1:          i_snitch.rs1,
           rs2:          i_snitch.rs2,
