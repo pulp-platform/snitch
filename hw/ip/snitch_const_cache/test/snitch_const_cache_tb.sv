@@ -1,10 +1,9 @@
-// Copyright 2020 ETH Zurich and University of Bologna.
+// Copyright 2021 ETH Zurich and University of Bologna.
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
 
 // Author: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-
-parameter CacheLineWidth = 256;
+//         Samuel Riedel <sriedel@iis.ee.ethz.ch>
 
 class icache_request #(
   parameter int unsigned AddrWidth = 48
@@ -73,6 +72,7 @@ class semirand_axi_master #(
   // AXI feature usage
   parameter int   AXI_MAX_BURST_LEN = 0, // maximum number of beats in burst; 0 = AXI max (256)
   parameter int   TRAFFIC_SHAPING   = 0,
+  parameter int   AXI_ADDR_INCR     = 1,
   parameter bit   AXI_EXCLS         = 1'b0,
   parameter bit   AXI_ATOPS         = 1'b0,
   parameter bit   AXI_BURST_FIXED   = 1'b1,
@@ -123,14 +123,13 @@ class semirand_axi_master #(
       automatic id_t id;
       automatic logic jump;
       // Increment address per default, randomize sporadically
-      rand_success = std::randomize(jump) with {jump dist {1'b0 := 90, 1'b1 := 10};}; assert(rand_success);
+      rand_success = std::randomize(jump) with {jump dist {1'b0 := 90, 1'b1 := 10};};
+      assert(rand_success);
       if (jump) begin
         ar_beat = new_rand_burst(1'b1);
       end else begin
-        ar_beat.ax_addr = ar_beat.ax_addr + CacheLineWidth/8;
+        ar_beat.ax_addr = ar_beat.ax_addr + AXI_ADDR_INCR;
       end
-      // Align address
-      ar_beat.ax_addr = ar_beat.ax_addr >> $clog2(CacheLineWidth/8) << $clog2(CacheLineWidth/8);
       while (tot_r_flight_cnt >= MAX_READ_TXNS) begin
         rand_wait(1, 1);
       end
@@ -243,9 +242,9 @@ class const_axi_slave #(
       end
       r_beat.r_id = ar_beat.ax_id;
       if (RAND_RESP && !ar_beat.ax_atop[5])
-        r_beat.r_resp[1] = $random();
+        r_beat.r_resp[1] = $urandom();
       if (ar_beat.ax_lock)
-        r_beat.r_resp[0]= $random();
+        r_beat.r_resp[0]= $urandom();
       rand_wait(R_MIN_WAIT_CYCLES, R_MAX_WAIT_CYCLES);
       if (ar_beat.ax_len == '0) begin
         r_beat.r_last = 1'b1;
@@ -274,18 +273,12 @@ endclass
 `include "common_cells/assertions.svh"
 
 module snitch_const_cache_tb import snitch_pkg::*; #(
-    parameter int unsigned AddrWidth = 32,
-    parameter type addr_t = logic [AddrWidth-1:0],
-    parameter int NR_FETCH_PORTS = 1,
-    parameter int LINE_WIDTH = 256,
-    parameter int LINE_COUNT = 64,
-    parameter int SET_COUNT = 2, // TODO Case with one set not working
-    parameter int FETCH_AW = AddrWidth,
-    parameter int FETCH_DW = 32,
-    parameter int FILL_AW = AddrWidth,
-    parameter int FILL_DW = 64,
-    parameter int L0_EARLY_TAG_WIDTH = 8,
-    parameter bit EARLY_LATCH = 0
+    parameter int unsigned AxiAddrWidth = 32,
+    parameter int unsigned AxiDataWidth = 128,
+    parameter int unsigned AxiIdWidth   = 5,
+    parameter int unsigned LineWidth    = 256,
+    parameter int unsigned LineCount    = 128,
+    parameter int unsigned SetCount     = 2
 );
 
   localparam time ClkPeriod = 10ns;
@@ -297,12 +290,10 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   `include "axi/typedef.svh"
   `include "axi/assign.svh"
 
-  localparam int unsigned AxiAddrWidth = AddrWidth;
-  localparam int unsigned AxiDataWidth = FILL_DW;
-  localparam int unsigned AxiStrbWidth = AxiDataWidth/8;
-  localparam int unsigned AxiInIdWidth = 3;
+  localparam int unsigned AxiStrbWidth  = AxiDataWidth/8;
+  localparam int unsigned AxiInIdWidth  = AxiIdWidth;
   localparam int unsigned AxiOutIdWidth = AxiInIdWidth+1;
-  localparam int unsigned AxiUserWidth = 1;
+  localparam int unsigned AxiUserWidth  = 1;
 
   typedef logic [AxiAddrWidth-1:0]  axi_addr_t;
   typedef logic [AxiDataWidth-1:0]  axi_data_t;
@@ -319,12 +310,12 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   localparam axi_addr_t CachedRegionEnd   = axi_addr_t'(32'h8000_1000);
 
   // backing memory
-  logic [LINE_WIDTH-1:0] memory [logic [AddrWidth-1:0]];
+  logic [LineWidth-1:0] memory [logic [AxiAddrWidth-1:0]];
 
   logic  clk, rst;
 
   typedef semirand_axi_master #(
-    .AW                   ( AddrWidth    ),
+    .AW                   ( AxiAddrWidth ),
     .DW                   ( AxiDataWidth ),
     .IW                   ( AxiInIdWidth ),
     .UW                   ( AxiUserWidth ),
@@ -340,6 +331,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     .RESP_MAX_WAIT_CYCLES ( 8            ),
     .AXI_MAX_BURST_LEN    ( 16           ),
     .TRAFFIC_SHAPING      ( 0            ),
+    .AXI_ADDR_INCR        ( LineWidth/8  ),
     .AXI_EXCLS            ( 1'b1         ),
     .AXI_ATOPS            ( 1'b1         ),
     .AXI_BURST_FIXED      ( 1'b0         ),
@@ -348,7 +340,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   ) axi_rand_master_t;
 
   typedef const_axi_slave #(
-    .AW                   ( AddrWidth     ),
+    .AW                   ( AxiAddrWidth  ),
     .DW                   ( AxiDataWidth  ),
     .IW                   ( AxiOutIdWidth ),
     .UW                   ( AxiUserWidth  ),
@@ -364,7 +356,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   ) axi_rand_slave_t;
 
   AXI_BUS_DV #(
-    .AXI_ADDR_WIDTH ( AddrWidth    ),
+    .AXI_ADDR_WIDTH ( AxiAddrWidth ),
     .AXI_DATA_WIDTH ( AxiDataWidth ),
     .AXI_ID_WIDTH   ( AxiInIdWidth ),
     .AXI_USER_WIDTH ( AxiUserWidth )
@@ -373,7 +365,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   );
 
   AXI_BUS_DV #(
-    .AXI_ADDR_WIDTH ( AddrWidth     ),
+    .AXI_ADDR_WIDTH ( AxiAddrWidth  ),
     .AXI_DATA_WIDTH ( AxiDataWidth  ),
     .AXI_ID_WIDTH   ( AxiOutIdWidth ),
     .AXI_USER_WIDTH ( AxiUserWidth  )
@@ -397,11 +389,11 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   `AXI_ASSIGN_TO_RESP(axi_slv_resp, axi_slv_dv)
 
   snitch_const_cache #(
-    .LineWidth    ( LINE_WIDTH     ),
-    .LineCount    ( LINE_COUNT     ),
-    .SetCount     ( SET_COUNT      ),
-    .AxiAddrWidth ( AddrWidth      ),
-    .AxiDataWidth ( FILL_DW        ),
+    .LineWidth    ( LineWidth      ),
+    .LineCount    ( LineCount      ),
+    .SetCount     ( SetCount       ),
+    .AxiAddrWidth ( AxiAddrWidth   ),
+    .AxiDataWidth ( AxiDataWidth   ),
     .AxiIdWidth   ( AxiInIdWidth   ),
     .AxiUserWidth ( 1              ),
     .MaxTrans     ( 32'd8          ),
@@ -432,8 +424,6 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     @(posedge clk);
   endtask
 
-  // typedef axi_test::axi_ax_beat #(.AW(AxiAddrWidth), .IW(AxiInIdWidth), .UW(AxiUserWidth)) ar_beat_t;
-
   typedef axi_test::axi_driver #(
     .AW(AxiAddrWidth), .DW(AxiDataWidth), .IW(AxiInIdWidth), .UW(AxiUserWidth), .TA(TA), .TT(TT)
   ) axi_driver_t;
@@ -446,6 +436,15 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     automatic ar_beat_t ar_beat = new;
     automatic r_beat_t r_beat = new;
 
+    // Initialize memory region of random axi master to only fetch from two lines
+    mst_intf.add_memory_region(CachedRegionStart, CachedRegionEnd, axi_pkg::WTHRU_RALLOCATE);
+
+    // Reset
+    mst_intf.reset();
+    @(negedge rst);
+    #1000ns;
+
+    // Issue single miss and hit burst for debugging
     ar_beat.ax_id     = '1;
     ar_beat.ax_addr   = CachedRegionStart;
     ar_beat.ax_len    = 7;
@@ -459,14 +458,6 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     ar_beat.ax_atop   = '0;
     ar_beat.ax_user   = '1;
 
-    // Initialize memory region of random axi master to only fetch from two lines
-    mst_intf.add_memory_region(CachedRegionStart, CachedRegionEnd, axi_pkg::WTHRU_RALLOCATE);
-
-    // Reset
-    mst_intf.reset();
-    @(negedge rst);
-    #1000ns;
-
     mst_intf.drv.send_ar(ar_beat);
     for (int i = 0; i <= ar_beat.ax_len; i++) begin
       mst_intf.drv.recv_r(r_beat);
@@ -477,6 +468,8 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
       mst_intf.drv.recv_r(r_beat);
     end
     #10000ns;
+
+    // Issue two requests to the same location simultaneously
     fork
       begin
         ar_beat.ax_addr   = CachedRegionStart+'h100;
@@ -496,11 +489,15 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
     join
     #10000ns;
 
-    mst_intf.run(1000, 0);
+    // Issue random request to the cached region
+    mst_intf.run(10000, 0);
+    mst_intf.add_memory_region(CachedRegionStart,
+                               CachedRegionStart+2*(CachedRegionEnd-CachedRegionStart),
+                               axi_pkg::WTHRU_RALLOCATE);
 
-    mst_intf.add_memory_region(CachedRegionStart, CachedRegionStart+2*(CachedRegionEnd-CachedRegionStart), axi_pkg::WTHRU_RALLOCATE);
     #1000ns;
-    mst_intf.run(1000, 0);
+    // Issue random requests, 50% to the cached region
+    mst_intf.run(10000, 0);
 
     $finish();
   end
@@ -517,8 +514,8 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
 
   // Queues
   localparam int unsigned NoIds = 2**AxiInIdWidth;
-  axi_mst_ar_chan_t ar_queues[NoIds-1:0][$];
-  axi_mst_r_chan_t  r_queues[NoIds-1:0][$];
+  axi_mst_ar_chan_t ar_queues[NoIds][$];
+  axi_mst_r_chan_t  r_queues[NoIds][$];
 
   // channel sampling into queues
   always @(posedge clk) #TT begin : proc_channel_sample
@@ -561,8 +558,9 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
             for (int i = 0; i < (AxiDataWidth/32); i++) begin
               exp_data[i*32 +: 32] = aligned_addr + (4*i);
             end
-            if (r_beat.data != exp_data) begin // TODO: Only works for DW = AW and non-bursts
-              $display("Error (%0t): Read returned wrong data. Addr=0x%x, Beat=%d, Size=%d Aqc=0x%x Exp=0x%x", $time, ar_beat.addr, no_r_beat[i], ar_beat.size, r_beat.data, exp_data);
+            if (r_beat.data != exp_data) begin
+              $display("Error (%0t): Wrong data. Addr=0x%x, Beat=%d, Size=%d Aqc=0x%x Exp=0x%x",
+                       $time, ar_beat.addr, no_r_beat[i], ar_beat.size, r_beat.data, exp_data);
             end
 
             if (r_beat.last && !(ar_beat.len == no_r_beat[i])) begin
@@ -585,63 +583,65 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   ////////////////////////
   // Debug              //
   ////////////////////////
-  axi_chan_logger #(
-    .TestTime   ( 8ns                   ),
-    .LoggerName ( "mst_logger"          ),
-    .aw_chan_t  ( axi_mst_aw_chan_t     ),
-    .w_chan_t   ( axi_mst_w_chan_t      ),
-    .b_chan_t   ( axi_mst_b_chan_t      ),
-    .ar_chan_t  ( axi_mst_ar_chan_t     ),
-    .r_chan_t   ( axi_mst_r_chan_t      )
-  ) i_axi_chan_logger_mst (
-    .clk_i      ( clk                   ),
-    .rst_ni     ( ~rst                  ),
-    .end_sim_i  ( 1'b0                  ),
-    .aw_chan_i  ( axi_mst_req.aw        ),
-    .aw_valid_i ( axi_mst_req.aw_valid  ),
-    .aw_ready_i ( axi_mst_resp.aw_ready ),
-    .w_chan_i   ( axi_mst_req.w         ),
-    .w_valid_i  ( axi_mst_req.w_valid   ),
-    .w_ready_i  ( axi_mst_resp.w_ready  ),
-    .b_chan_i   ( axi_mst_resp.b        ),
-    .b_valid_i  ( axi_mst_resp.b_valid  ),
-    .b_ready_i  ( axi_mst_req.b_ready   ),
-    .ar_chan_i  ( axi_mst_req.ar        ),
-    .ar_valid_i ( axi_mst_req.ar_valid  ),
-    .ar_ready_i ( axi_mst_resp.ar_ready ),
-    .r_chan_i   ( axi_mst_resp.r        ),
-    .r_valid_i  ( axi_mst_resp.r_valid  ),
-    .r_ready_i  ( axi_mst_req.r_ready   )
-  );
+  if (DEBUG) begin: gen_chan_logger
+    axi_chan_logger #(
+      .TestTime   ( 8ns                   ),
+      .LoggerName ( "mst_logger"          ),
+      .aw_chan_t  ( axi_mst_aw_chan_t     ),
+      .w_chan_t   ( axi_mst_w_chan_t      ),
+      .b_chan_t   ( axi_mst_b_chan_t      ),
+      .ar_chan_t  ( axi_mst_ar_chan_t     ),
+      .r_chan_t   ( axi_mst_r_chan_t      )
+    ) i_axi_chan_logger_mst (
+      .clk_i      ( clk                   ),
+      .rst_ni     ( ~rst                  ),
+      .end_sim_i  ( 1'b0                  ),
+      .aw_chan_i  ( axi_mst_req.aw        ),
+      .aw_valid_i ( axi_mst_req.aw_valid  ),
+      .aw_ready_i ( axi_mst_resp.aw_ready ),
+      .w_chan_i   ( axi_mst_req.w         ),
+      .w_valid_i  ( axi_mst_req.w_valid   ),
+      .w_ready_i  ( axi_mst_resp.w_ready  ),
+      .b_chan_i   ( axi_mst_resp.b        ),
+      .b_valid_i  ( axi_mst_resp.b_valid  ),
+      .b_ready_i  ( axi_mst_req.b_ready   ),
+      .ar_chan_i  ( axi_mst_req.ar        ),
+      .ar_valid_i ( axi_mst_req.ar_valid  ),
+      .ar_ready_i ( axi_mst_resp.ar_ready ),
+      .r_chan_i   ( axi_mst_resp.r        ),
+      .r_valid_i  ( axi_mst_resp.r_valid  ),
+      .r_ready_i  ( axi_mst_req.r_ready   )
+    );
 
-  axi_chan_logger #(
-    .TestTime   ( 8ns                   ),
-    .LoggerName ( "slv_logger"          ),
-    .aw_chan_t  ( axi_slv_aw_chan_t     ),
-    .w_chan_t   ( axi_slv_w_chan_t      ),
-    .b_chan_t   ( axi_slv_b_chan_t      ),
-    .ar_chan_t  ( axi_slv_ar_chan_t     ),
-    .r_chan_t   ( axi_slv_r_chan_t      )
-  ) i_axi_chan_logger_slv (
-    .clk_i      ( clk                   ),
-    .rst_ni     ( ~rst                  ),
-    .end_sim_i  ( 1'b0                  ),
-    .aw_chan_i  ( axi_slv_req.aw        ),
-    .aw_valid_i ( axi_slv_req.aw_valid  ),
-    .aw_ready_i ( axi_slv_resp.aw_ready ),
-    .w_chan_i   ( axi_slv_req.w         ),
-    .w_valid_i  ( axi_slv_req.w_valid   ),
-    .w_ready_i  ( axi_slv_resp.w_ready  ),
-    .b_chan_i   ( axi_slv_resp.b        ),
-    .b_valid_i  ( axi_slv_resp.b_valid  ),
-    .b_ready_i  ( axi_slv_req.b_ready   ),
-    .ar_chan_i  ( axi_slv_req.ar        ),
-    .ar_valid_i ( axi_slv_req.ar_valid  ),
-    .ar_ready_i ( axi_slv_resp.ar_ready ),
-    .r_chan_i   ( axi_slv_resp.r        ),
-    .r_valid_i  ( axi_slv_resp.r_valid  ),
-    .r_ready_i  ( axi_slv_req.r_ready   )
-  );
+    axi_chan_logger #(
+      .TestTime   ( 8ns                   ),
+      .LoggerName ( "slv_logger"          ),
+      .aw_chan_t  ( axi_slv_aw_chan_t     ),
+      .w_chan_t   ( axi_slv_w_chan_t      ),
+      .b_chan_t   ( axi_slv_b_chan_t      ),
+      .ar_chan_t  ( axi_slv_ar_chan_t     ),
+      .r_chan_t   ( axi_slv_r_chan_t      )
+    ) i_axi_chan_logger_slv (
+      .clk_i      ( clk                   ),
+      .rst_ni     ( ~rst                  ),
+      .end_sim_i  ( 1'b0                  ),
+      .aw_chan_i  ( axi_slv_req.aw        ),
+      .aw_valid_i ( axi_slv_req.aw_valid  ),
+      .aw_ready_i ( axi_slv_resp.aw_ready ),
+      .w_chan_i   ( axi_slv_req.w         ),
+      .w_valid_i  ( axi_slv_req.w_valid   ),
+      .w_ready_i  ( axi_slv_resp.w_ready  ),
+      .b_chan_i   ( axi_slv_resp.b        ),
+      .b_valid_i  ( axi_slv_resp.b_valid  ),
+      .b_ready_i  ( axi_slv_req.b_ready   ),
+      .ar_chan_i  ( axi_slv_req.ar        ),
+      .ar_valid_i ( axi_slv_req.ar_valid  ),
+      .ar_ready_i ( axi_slv_resp.ar_ready ),
+      .r_chan_i   ( axi_slv_resp.r        ),
+      .r_valid_i  ( axi_slv_resp.r_valid  ),
+      .r_ready_i  ( axi_slv_req.r_ready   )
+    );
+  end
 
   // Clock generation.
   initial begin

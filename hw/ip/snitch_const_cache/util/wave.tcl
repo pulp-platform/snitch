@@ -1,3 +1,7 @@
+# Copyright 2021 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+
 # Testbench
 add wave -group "snitch_const_cache_tb" snitch_const_cache_tb/*
 # DUT
