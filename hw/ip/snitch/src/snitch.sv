@@ -31,6 +31,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   parameter bit          XF16      = 0,
   parameter bit          XF16ALT   = 0,
   parameter bit          XF8       = 0,
+  parameter bit          XF8ALT    = 0,
   parameter bit          XFVEC     = 0,
   int unsigned           FLEN      = DataWidth,
   /// Enable experimental IPU extension.
@@ -1127,57 +1128,77 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMADD_H,
       FMSUB_H,
       FNMSUB_H,
-      FNMADD_H: begin
-        if (FP_EN && (XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
-            (XF16ALT && inst_data_i[14:12] == 3'b101)) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Half Precision Floating-Point
+      FNMADD_H,
       FSGNJ_H,
       FSGNJN_H,
       FSGNJX_H,
       FMIN_H,
       FMAX_H: begin
-        if (FP_EN && XF16) begin
+        if (FP_EN && XF16 && fcsr_q.fmode.dst == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && XF16ALT && fcsr_q.fmode.dst == 1'b1) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      FCVT_S_H,
+      FCVT_S_H: begin
+        if (FP_EN && RVF && XF16 && fcsr_q.fmode.src == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && RVF && XF16ALT && fcsr_q.fmode.src == 1'b1) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       FCVT_H_S: begin
-        if (FP_EN && RVF) begin
-          if ((XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
-              (XF16ALT && inst_data_i[14:12] == 3'b101)) begin
-            write_rd = 1'b0;
-            acc_qvalid_o = valid_instr;
-          end else begin
-            illegal_inst = 1'b1;
-          end
+        if (FP_EN && RVF && XF16 && fcsr_q.fmode.dst == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && RVF && XF16ALT && fcsr_q.fmode.dst == 1'b1) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      FCVT_D_H,
+      FCVT_D_H: begin
+        if (FP_EN && RVD && XF16 && fcsr_q.fmode.src == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && RVD && XF16ALT && fcsr_q.fmode.src == 1'b1) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       FCVT_H_D: begin
-        if (FP_EN && RVD) begin
-          if ((XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
-              (XF16ALT && inst_data_i[14:12] == 3'b101)) begin
-            write_rd = 1'b0;
-            acc_qvalid_o = valid_instr;
-          end else begin
-            illegal_inst = 1'b1;
-          end
+        if (FP_EN && RVD && XF16 && fcsr_q.fmode.dst == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && RVD && XF16ALT && fcsr_q.fmode.dst == 1'b1) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      // Vectors
+      // FCVT_H_H: begin
+      //   if (FP_EN && XF16 && XF16ALT &&
+      //      (fcsr_q.fmode.src != fcsr_q.fmode.dst)) begin
+      //     write_rd = 1'b0;
+      //     acc_qvalid_o = valid_instr;
+      //   end else begin
+      //     illegal_inst = 1'b1;
+      //   end
+      // end
+
+      // Vectorized [Alt] Half Precision Floating-Point
       VFADD_H,
       VFADD_R_H,
       VFSUB_H,
@@ -1200,125 +1221,85 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFSGNJN_H,
       VFSGNJN_R_H,
       VFSGNJX_H,
-      VFSGNJX_R_H,
-      VFCPKA_H_S: begin
-        if (FP_EN && XFVEC && XF16 && RVF) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+      VFSGNJX_R_H: begin
+        if (FP_EN && XFVEC && FLEN >= 32) begin
+          if (XF16 && fcsr_q.fmode.dst == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF16ALT && fcsr_q.fmode.dst == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
+      VFCPKA_H_S,
+      VFCPKB_H_S,
+      VFCVT_H_S,
+      VFCVTU_H_S: begin
+        if (FP_EN && XFVEC && RVF && FLEN >= 32) begin
+          if (XF16 && fcsr_q.fmode.dst == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF16ALT && fcsr_q.fmode.dst == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
       end
       VFCVT_S_H,
-      VFCVTU_S_H,
-      VFCVT_H_S,
-      VFCVTU_H_S,
-      VFCPKB_H_S,
+      VFCVTU_S_H: begin
+        if (FP_EN && XFVEC && RVF && FLEN >= 32) begin
+          if (XF16 && fcsr_q.fmode.src == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF16ALT && fcsr_q.fmode.src == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       VFCPKA_H_D,
       VFCPKB_H_D: begin
-        if (FP_EN && XFVEC && XF16 && RVF && RVD) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+        if (FP_EN && XFVEC && RVD && FLEN >= 32) begin
+          if (XF16 && fcsr_q.fmode.dst == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF16ALT && fcsr_q.fmode.dst == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      // Alternate Half Precision Floating-Point
-      FSGNJ_AH,
-      FSGNJN_AH,
-      FSGNJX_AH,
-      FMIN_AH,
-      FMAX_AH: begin
-        if (FP_EN && XF16ALT) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      FCVT_S_AH: begin
-        if (FP_EN && RVF && XF16ALT) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      FCVT_D_AH: begin
-        if (FP_EN && RVD && XF16ALT) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      FCVT_H_AH,
-      FCVT_AH_H: begin
-        if (FP_EN && XF16 && XF16ALT) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Vectors
-      VFADD_AH,
-      VFADD_R_AH,
-      VFSUB_AH,
-      VFSUB_R_AH,
-      VFMUL_AH,
-      VFMUL_R_AH,
-      // VFDIV_AH,
-      // VFDIV_R_AH,
-      VFMIN_AH,
-      VFMIN_R_AH,
-      VFMAX_AH,
-      VFMAX_R_AH,
-      // VFSQRT_AH,
-      VFMAC_AH,
-      VFMAC_R_AH,
-      VFMRE_AH,
-      VFMRE_R_AH,
-      VFSGNJ_AH,
-      VFSGNJ_R_AH,
-      VFSGNJN_AH,
-      VFSGNJN_R_AH,
-      VFSGNJX_AH,
-      VFSGNJX_R_AH,
-      VFCPKA_AH_S: begin
-        if (FP_EN && XFVEC && XF16ALT && RVF) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      VFCVT_S_AH,
-      VFCVTU_S_AH,
-      VFCVT_AH_S,
-      VFCVTU_AH_S,
-      VFCPKB_AH_S,
-      VFCPKA_AH_D,
-      VFCPKB_AH_D: begin
-        if (FP_EN && XFVEC && XF16ALT && RVF && RVD) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      VFCVT_H_AH,
-      VFCVTU_H_AH,
-      VFCVT_AH_H,
-      VFCVTU_AH_H: begin
-        if (FP_EN && XFVEC && XF16ALT && XF16 && RVF) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Quarter Precision Floating-Point
+      // VFCVT_H_H,
+      // VFCVTU_H_H: begin
+      //   if (FP_EN && XFVEC && RVF && XF16 && XF16ALT && FLEN >= 32) begin
+      //     if (fcsr_q.fmode.src != fcsr_q.fmode.dst) begin
+      //       write_rd = 1'b0;
+      //       acc_qvalid_o = valid_instr;
+      //     end else begin
+      //       illegal_inst = 1'b1;
+      //     end
+      //   end else begin
+      //     illegal_inst = 1'b1;
+      //   end
+      // end
+      // [Alternate] Quarter Precision Floating-Point
       FADD_B,
       FSUB_B,
       FMUL_B,
@@ -1333,50 +1314,97 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FMSUB_B,
       FNMSUB_B,
       FNMADD_B: begin
-        if (FP_EN && XF8) begin
+        if (FP_EN && XF8 && fcsr_q.fmode.dst == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && XF8ALT && fcsr_q.fmode.dst == 1'b1) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      FCVT_S_B,
+      FCVT_S_B: begin
+        if (FP_EN && RVF && XF8 && fcsr_q.fmode.src == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && RVF && XF8ALT && fcsr_q.fmode.src == 1'b1) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       FCVT_B_S: begin
-        if (FP_EN && RVF && XF8) begin
+        if (FP_EN && RVF && XF8 && fcsr_q.fmode.dst == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && RVF && XF8ALT && fcsr_q.fmode.dst == 1'b1) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      FCVT_D_B,
+      FCVT_D_B: begin
+        if (FP_EN && RVD && XF8 && fcsr_q.fmode.src == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && RVD && XF8ALT && fcsr_q.fmode.src == 1'b1) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       FCVT_B_D: begin
-        if (FP_EN && RVD && XF8) begin
+        if (FP_EN && RVD && XF8 && fcsr_q.fmode.dst == 1'b0) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && RVF && XF8ALT && fcsr_q.fmode.dst == 1'b1) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      FCVT_H_B,
+      FCVT_H_B: begin
+        if (FP_EN) begin
+          if ((XF8 && fcsr_q.fmode.src == 1'b0) ||
+             (XF8ALT && fcsr_q.fmode.src == 1'b1)) begin
+            if ((XF16 && fcsr_q.fmode.dst == 1'b0) ||
+               (XF16ALT && fcsr_q.fmode.dst == 1'b1)) begin
+              write_rd = 1'b0;
+              acc_qvalid_o = valid_instr;
+            end else begin
+              illegal_inst = 1'b1;
+            end
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       FCVT_B_H: begin
-        if (FP_EN && XF16 && XF8) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+        if (FP_EN) begin
+          if ((XF16 && fcsr_q.fmode.src == 1'b0) ||
+             (XF16ALT && fcsr_q.fmode.src == 1'b1)) begin
+            if ((XF8 && fcsr_q.fmode.dst == 1'b0) ||
+               (XF8ALT && fcsr_q.fmode.dst == 1'b1)) begin
+              write_rd = 1'b0;
+              acc_qvalid_o = valid_instr;
+            end else begin
+              illegal_inst = 1'b1;
+            end
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      FCVT_AH_B,
-      FCVT_B_AH: begin
-        if (FP_EN && RVF && RVD) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Vectors
+      // Vectorized [Alternate] Quarter Precision Floating-Point
       VFADD_B,
       VFADD_R_B,
       VFSUB_B,
@@ -1407,62 +1435,115 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      VFCVT_B_S,
+      VFCVTU_B_S,
       VFCPKA_B_S,
-      VFCPKB_B_S: begin
-        if (FP_EN && XFVEC && XF8 && RVF) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+      VFCPKB_B_S,
+      VFCPKC_B_S,
+      VFCPKD_B_S: begin
+        if (FP_EN && XFVEC && RVF && FLEN >= 16) begin // GIANNA: FLEN>=16 ?
+          if (XF8 && fcsr_q.fmode.dst == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF8ALT && fcsr_q.fmode.dst == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
       end
       VFCVT_S_B,
-      VFCVTU_S_B,
-      VFCVT_B_S,
-      VFCVTU_B_S: begin
-        if (FP_EN && XFVEC && XF8 && RVF && FLEN >= 64) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+      VFCVTU_S_B: begin
+        if (FP_EN && XFVEC && RVF && FLEN >= 16) begin
+          if (XF8 && fcsr_q.fmode.src == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF8ALT && fcsr_q.fmode.src == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      VFCPKC_B_S,
-      VFCPKD_B_S,
       VFCPKA_B_D,
       VFCPKB_B_D,
       VFCPKC_B_D,
       VFCPKD_B_D: begin
-        if (FP_EN && XFVEC && XF8 && RVD) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+        if (FP_EN && XFVEC && RVD && FLEN >= 16) begin // GIANNA: FLEN>=16 ?
+          if (XF8 && fcsr_q.fmode.dst == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF8ALT && fcsr_q.fmode.dst == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
+      VFCVT_B_H,
+      VFCVTU_B_H: begin
+        if (FP_EN && XFVEC && FLEN >= 16) begin
+          if ((XF16 && fcsr_q.fmode.src == 1'b0) ||
+             (XF16ALT && fcsr_q.fmode.src == 1'b1)) begin
+            if ((XF8 && fcsr_q.fmode.dst == 1'b0) ||
+               (XF8ALT && fcsr_q.fmode.dst == 1'b1)) begin
+              write_rd = 1'b0;
+              acc_qvalid_o = valid_instr;
+            end else begin
+              illegal_inst = 1'b1;
+            end
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
       end
       VFCVT_H_B,
-      VFCVTU_H_B,
-      VFCVT_B_H,
-      VFCVTU_B_H: begin
-        if (FP_EN && XFVEC && XF8 && XF16 && FLEN >= 32) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      VFCVT_AH_B,
-      VFCVTU_AH_B,
-      VFCVT_B_AH,
-      VFCVTU_B_AH: begin
-        if (FP_EN && XFVEC && XF8 && XF16ALT && FLEN >= 32) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+      VFCVTU_H_B: begin
+        if (FP_EN && XFVEC && FLEN >= 16) begin
+          if ((XF8 && fcsr_q.fmode.src == 1'b0) ||
+             (XF8ALT && fcsr_q.fmode.src == 1'b1)) begin
+            if ((XF16 && fcsr_q.fmode.dst == 1'b0) ||
+               (XF16ALT && fcsr_q.fmode.dst == 1'b1)) begin
+              write_rd = 1'b0;
+              acc_qvalid_o = valid_instr;
+            end else begin
+              illegal_inst = 1'b1;
+            end
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
       end
       // Offload FP-Int Instructions - fire and forget
+      // Double Precision Floating-Point
+      FLE_D,
+      FLT_D,
+      FEQ_D,
+      FCLASS_D,
+      FCVT_W_D,
+      FCVT_WU_D: begin
+        if (FP_EN && RVD) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
+          acc_qvalid_o = valid_instr;
+          acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       // Single Precision Floating-Point
       FLE_S,
       FLT_S,
@@ -1501,23 +1582,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
-      // Double Precision Floating-Point
-      FLE_D,
-      FLT_D,
-      FEQ_D,
-      FCLASS_D,
-      FCVT_W_D,
-      FCVT_WU_D: begin
-        if (FP_EN && RVD) begin
-          write_rd = 1'b0;
-          uses_rd = 1'b1;
-          acc_qvalid_o = valid_instr;
-          acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Half Precision Floating-Point
+      // [Alternate] Half Precision Floating-Point
       FLE_H,
       FLT_H,
       FEQ_H,
@@ -1525,8 +1590,12 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FCVT_W_H,
       FCVT_WU_H,
       FMV_X_H: begin
-        if (FP_EN && (XF16 && inst_data_i[14:12] inside {[3'b000:3'b100], 3'b111}) ||
-              (XF16ALT && inst_data_i[14:12] == 3'b101)) begin
+        if (FP_EN && XF16 && fcsr_q.fmode.src == 1'b0) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
+          acc_qvalid_o = valid_instr;
+          acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
+        end else if (FP_EN && XF16ALT && fcsr_q.fmode.src == 1'b1) begin
           write_rd = 1'b0;
           uses_rd = 1'b1;
           acc_qvalid_o = valid_instr;
@@ -1549,70 +1618,34 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFGT_H,
       VFGT_R_H,
       VFCLASS_H: begin
-        if (FP_EN && XFVEC && XF16 && FLEN >= 32) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
+        if (FP_EN && XFVEC && FLEN >= 32) begin
+          if (XF16 && fcsr_q.fmode.dst == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF16ALT && fcsr_q.fmode.dst == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end
-      end
+      end 
       VFMV_X_H,
       VFCVT_X_H,
       VFCVT_XU_H: begin
-        if (FP_EN && XFVEC && XF16 && FLEN >= 32 && ~RVD) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
+        if (FP_EN && XFVEC && FLEN >= 32 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't FLEN == 32 be enough???
+          if (XF16 && fcsr_q.fmode.src == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF16ALT && fcsr_q.fmode.src == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end
-      end
-      // Alternate Half Precision Floating-Point
-      FLE_AH,
-      FLT_AH,
-      FEQ_AH,
-      FCLASS_AH,
-      FMV_X_AH: begin
-        if (FP_EN && XF16ALT) begin
-          write_rd = 1'b0;
-          uses_rd = 1'b1;
-          acc_qvalid_o = valid_instr;
-          acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Vectors
-      VFEQ_AH,
-      VFEQ_R_AH,
-      VFNE_AH,
-      VFNE_R_AH,
-      VFLT_AH,
-      VFLT_R_AH,
-      VFGE_AH,
-      VFGE_R_AH,
-      VFLE_AH,
-      VFLE_R_AH,
-      VFGT_AH,
-      VFGT_R_AH,
-      VFCLASS_AH: begin
-        if (FP_EN && XFVEC && XF16ALT && FLEN >= 32) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      VFMV_X_AH,
-      VFCVT_X_AH,
-      VFCVT_XU_AH: begin
-        if (FP_EN && XFVEC && XF16ALT && FLEN >= 32 && ~RVD) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Quarter Precision Floating-Point
+      end      
+      // [Alternate] Quarter Precision Floating-Point
       FLE_B,
       FLT_B,
       FEQ_B,
@@ -1620,7 +1653,12 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FCVT_W_B,
       FCVT_WU_B,
       FMV_X_B: begin
-        if (FP_EN && XF8) begin
+        if (FP_EN && XF8 && fcsr_q.fmode.src == 1'b0) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
+          acc_qvalid_o = valid_instr;
+          acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
+        end else if (FP_EN && XF8ALT && fcsr_q.fmode.src == 1'b1) begin
           write_rd = 1'b0;
           uses_rd = 1'b1;
           acc_qvalid_o = valid_instr;
@@ -1642,25 +1680,46 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFLE_R_B,
       VFGT_B,
       VFGT_R_B: begin
-        if (FP_EN && XFVEC && XF8 && FLEN >= 16) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
+        if (FP_EN && XFVEC && FLEN >= 16) begin
+          if (XF8 && fcsr_q.fmode.src == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF8ALT && fcsr_q.fmode.src == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end
-      end
+      end     
       VFMV_X_B,
       VFCLASS_B,
       VFCVT_X_B,
       VFCVT_XU_B: begin
-        if (FP_EN && XFVEC && XF8 && FLEN >= 16 && ~RVD) begin
+        if (FP_EN && XFVEC && FLEN >= 16 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't && FLEN <= 32 be more accurate???
+          if (XF8 && fcsr_q.fmode.src == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF8ALT && fcsr_q.fmode.src == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end
+      end      
+      // Offload Int-FP Instructions - fire and forget
+      // Double Precision Floating-Point
+      FCVT_D_W,
+      FCVT_D_WU: begin
+        if (FP_EN && RVD) begin
+          opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
           illegal_inst = 1'b1;
         end
       end
-      // Offload Int-FP Instructions - fire and forget
       // Single Precision Floating-Point
       FMV_W_X,
       FCVT_S_W,
@@ -1673,22 +1732,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
-      // Double Precision Floating-Point
-      FCVT_D_W,
-      FCVT_D_WU: begin
-        if (FP_EN && RVD) begin
-          opa_select = Reg;
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Half Precision Floating-Point
+      // [Alternate] Half Precision Floating-Point
       FMV_H_X,
       FCVT_H_W,
       FCVT_H_WU: begin
-        if (FP_EN && XF16) begin
+        if (FP_EN && XF16 && (fcsr_q.fmode.dst == 1'b0)) begin
+          opa_select = Reg;
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && XF16ALT && (fcsr_q.fmode.dst == 1'b1)) begin
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1700,39 +1752,27 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFMV_H_X,
       VFCVT_H_X,
       VFCVT_H_XU: begin
-        if (FP_EN && XFVEC && XF16 && FLEN >= 32 && ~RVD) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
+        if (FP_EN && XFVEC && FLEN >= 32 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't && FLEN <= 32 be more accurate???
+          if (XF16 && fcsr_q.fmode.dst == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF16ALT && fcsr_q.fmode.dst == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end
       end
-      // Alternate Half Precision Floating-Point
-      FMV_AH_X: begin
-        if (FP_EN && XF16ALT) begin
-          opa_select = Reg;
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Vectors
-      VFMV_AH_X,
-      VFCVT_AH_X,
-      VFCVT_AH_XU: begin
-        if (FP_EN && XFVEC && XF16ALT && FLEN >= 32 && ~RVD) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      // Quarter Precision Floating-Point
+      // [Alternate] Quarter Precision Floating-Point
       FMV_B_X,
       FCVT_B_W,
       FCVT_B_WU: begin
-        if (FP_EN && XF8) begin
+        if (FP_EN && XF8 && fcsr_q.fmode.dst == 1'b0) begin
+          opa_select = Reg;
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (FP_EN && XF8ALT && fcsr_q.fmode.dst == 1'b1) begin
           opa_select = Reg;
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -1744,11 +1784,16 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFMV_B_X,
       VFCVT_B_X,
       VFCVT_B_XU: begin
-        if (FP_EN && XFVEC && XF8 && FLEN >= 16 && ~RVD) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
+        if (FP_EN && XFVEC && FLEN >= 16 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't && FLEN <= 32 be more accurate???
+          if (XF8 && fcsr_q.fmode.dst == 1'b0) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else if (XF8ALT && fcsr_q.fmode.dst == 1'b1) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end
       end
       // FP Sequencer
@@ -1840,7 +1885,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       // Quarter Precision Floating-Point
       FLB: begin
-        if (FP_EN && XF8) begin
+        if (FP_EN && (XF8 || XF8ALT)) begin
           opa_select = Reg;
           opb_select = IImmediate;
           write_rd = 1'b0;
@@ -1852,7 +1897,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       FSB: begin
-        if (FP_EN && XF8) begin
+        if (FP_EN && (XF8 || XF8ALT)) begin
           opa_select = Reg;
           opb_select = SFImmediate;
           write_rd = 1'b0;
@@ -2234,18 +2279,6 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             if (FP_EN) begin
               csr_rvalue = {30'b0, fcsr_q.fmode};
               if (!exception) fcsr_d.fmode = fpnew_pkg::fmt_mode_t'(opa[1:0]);
-            end else illegal_csr = 1'b1;
-          end
-          CSR_FMODESRC: begin
-            if (FP_EN) begin
-              csr_rvalue = {31'b0, fcsr_q.fmode.src};
-              if (!exception) fcsr_d.fmode.src = opa[0];
-            end else illegal_csr = 1'b1;
-          end
-          CSR_FMODEDST: begin
-            if (FP_EN) begin
-              csr_rvalue = {31'b0, fcsr_q.fmode.dst};
-              if (!exception) fcsr_d.fmode.dst = opa[0];
             end else illegal_csr = 1'b1;
           end
           default: csr_rvalue = '0;

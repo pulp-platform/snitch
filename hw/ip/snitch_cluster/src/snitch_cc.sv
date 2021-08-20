@@ -119,7 +119,7 @@ module snitch_cc #(
   input  addr_t                      tcdm_addr_mask_i
 );
 
-  localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XFVEC | XF16 | XF16ALT | XF8;
+  localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XFVEC | XF16 | XF16ALT | XF8ALT;
   localparam int unsigned FLEN = RVD     ? 64 : // D ext.
                           RVF     ? 32 : // F ext.
                           XF16    ? 16 : // Xf16 ext.
@@ -201,6 +201,7 @@ module snitch_cc #(
     .XF16 (XF16),
     .XF16ALT (XF16ALT),
     .XF8 (XF8),
+    .XF8ALT (XF8ALT),
     .XFVEC (XFVEC),
     .FLEN (FLEN)
   ) i_snitch (
