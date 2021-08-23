@@ -308,8 +308,14 @@
                                 },
                                 "xf8": {
                                     "type": "boolean",
-                                    "title": "Xf8 16-bit Float Extension",
+                                    "title": "Xf8 8-bit Float Extension",
                                     "description": "Enable Smallfloat Xf8 extension (IEEE 8-bit float).",
+                                    "default": false
+                                },
+                                "xf8alt": {
+                                    "type": "boolean",
+                                    "title": "Xf8 8-bit Float Extension",
+                                    "description": "Enable Smallfloat Xf8alt extension.",
                                     "default": false
                                 },
                                 "xf16": {
