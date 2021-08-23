@@ -48,7 +48,13 @@ class Occamy(Generator):
         # CVA6
         self.cluster.add_mem(256,
                              512,
-                             desc="cva6 instruction/data cache array",
+                             desc="cva6 data cache array",
+                             byte_enable=True,
+                             speed_optimized=True,
+                             density_optimized=False)
+        self.cluster.add_mem(256,
+                             128,
+                             desc="cva6 instruction cache array",
                              byte_enable=True,
                              speed_optimized=True,
                              density_optimized=False)

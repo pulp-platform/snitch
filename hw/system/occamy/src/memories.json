@@ -17,6 +17,19 @@
         "byte_width": 8,
         "density_optimized": false,
         "description": [
+            "cva6 instruction cache array"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 128,
+        "words": 256
+    },
+    {
+        "byte_enable": true,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
             "cva6 instruction cache tag"
         ],
         "latency": 1,
@@ -30,7 +43,7 @@
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "cva6 instruction/data cache array"
+            "cva6 data cache array"
         ],
         "latency": 1,
         "ports": 1,
