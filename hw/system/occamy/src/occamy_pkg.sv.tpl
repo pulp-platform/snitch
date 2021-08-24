@@ -53,7 +53,8 @@ package occamy_pkg;
     logic i2c_host_timeout;
     logic ecc_uncorrectable;
     logic ecc_correctable;
-    logic [3:0] ext_irq;
+    // 4 programmable, 8 HBM (1x per channel)
+    logic [11:0] ext_irq;
     logic zero;
   } occamy_interrupt_t;
 

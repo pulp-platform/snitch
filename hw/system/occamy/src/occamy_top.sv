@@ -67,19 +67,20 @@ module occamy_top
 
     /// HBI Config and APB Control
     output reg_a48_d32_req_t hbi_cfg_req_o,
-    input  reg_a48_d32_rsp_t hbi_cfg_rsp_i,
+    input reg_a48_d32_rsp_t hbi_cfg_rsp_i,
     output apb_a48_d32_req_t apb_hbi_ctl_req_o,
-    input  apb_a48_d32_rsp_t apb_hbi_ctl_rsp_i,
-
+    input apb_a48_d32_rsp_t apb_hbi_ctl_rsp_i,
+    /// HBM Config
+    output apb_a48_d32_req_t apb_hbm_cfg_req_o,
+    input apb_a48_d32_rsp_t apb_hbm_cfg_rsp_i,
     /// PCIe/DDR Config
     output reg_a48_d32_req_t pcie_cfg_req_o,
-    input  reg_a48_d32_rsp_t pcie_cfg_rsp_i,
+    input reg_a48_d32_rsp_t pcie_cfg_rsp_i,
     /// Chip specific control registers
     output reg_a48_d32_req_t chip_ctrl_req_o,
-    input  reg_a48_d32_rsp_t chip_ctrl_rsp_i,
-
+    input reg_a48_d32_rsp_t chip_ctrl_rsp_i,
     // "external interrupts from uncore - "programmable"
-    input logic [3:0] ext_irq_i,
+    input logic [11:0] ext_irq_i,
 
     /// HBM2e Ports
     output axi_a48_d512_i8_u0_req_t  hbm_0_req_o,
@@ -211,8 +212,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [12:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [12:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [13:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [13:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -235,7 +236,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(13),
+      .NoRules(14),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -1957,6 +1958,27 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   assign apb_hbi_ctl_req_o = apb_hbi_ctl_req;
   assign apb_hbi_ctl_rsp   = apb_hbi_ctl_rsp_i;
+
+  // APB port for HBI
+  apb_a48_d32_req_t apb_hbm_cfg_req;
+  apb_a48_d32_rsp_t apb_hbm_cfg_rsp;
+
+  reg_to_apb #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t),
+      .apb_req_t(apb_a48_d32_req_t),
+      .apb_rsp_t(apb_a48_d32_rsp_t)
+  ) i_apb_hbm_cfg_pc (
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_CFG]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_CFG]),
+      .apb_req_o(apb_hbm_cfg_req),
+      .apb_rsp_i(apb_hbm_cfg_rsp)
+  );
+
+  assign apb_hbm_cfg_req_o = apb_hbm_cfg_req;
+  assign apb_hbm_cfg_rsp   = apb_hbm_cfg_rsp_i;
 
   /////////////////
   // Peripherals //

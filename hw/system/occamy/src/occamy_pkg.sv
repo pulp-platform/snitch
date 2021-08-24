@@ -53,7 +53,8 @@ package occamy_pkg;
     logic i2c_host_timeout;
     logic ecc_uncorrectable;
     logic ecc_correctable;
-    logic [3:0] ext_irq;
+    // 4 programmable, 8 HBM (1x per channel)
+    logic [11:0] ext_irq;
     logic zero;
   } occamy_interrupt_t;
 
@@ -160,11 +161,12 @@ package occamy_pkg;
     SOC_REGBUS_PERIPH_XBAR_OUT_PCIE_CFG,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CFG,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CTL,
+    SOC_REGBUS_PERIPH_XBAR_OUT_HBM_CFG,
     SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   } soc_regbus_periph_xbar_outputs_e;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [12:0] SocRegbusPeriphXbarAddrmap = '{
+  localparam xbar_rule_48_t [13:0] SocRegbusPeriphXbarAddrmap = '{
   '{ idx: 0, start_addr: 48'h04000000, end_addr: 48'h04100000 },
   '{ idx: 1, start_addr: 48'h02000000, end_addr: 48'h02001000 },
   '{ idx: 2, start_addr: 48'h02005000, end_addr: 48'h02006000 },
@@ -177,7 +179,8 @@ package occamy_pkg;
   '{ idx: 9, start_addr: 48'h03000000, end_addr: 48'h03020000 },
   '{ idx: 10, start_addr: 48'h05000000, end_addr: 48'h05020000 },
   '{ idx: 11, start_addr: 48'h06000000, end_addr: 48'h06010000 },
-  '{ idx: 12, start_addr: 48'h07000000, end_addr: 48'h07010000 }
+  '{ idx: 12, start_addr: 48'h07000000, end_addr: 48'h07010000 },
+  '{ idx: 13, start_addr: 48'h08000000, end_addr: 48'h08010000 }
 };
 
   /// Inputs of the `soc_wide_xbar` crossbar.

@@ -184,6 +184,9 @@ def main():
     am_hbi_ctl = am.new_leaf("hbi_ctl", 0x10000,
                              0x07000000).attach_to(am_soc_regbus_periph_xbar)
 
+    am_hbm_cfg = am.new_leaf("hbm_cfg", 0x10000,
+                             0x08000000).attach_to(am_soc_regbus_periph_xbar)
+
     am_plic = am.new_leaf("plic", 0x4000000,
                           0x0C000000).attach_to(am_soc_regbus_periph_xbar)
 
@@ -265,6 +268,7 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("pcie_cfg", am_pcie_cfg)
     soc_regbus_periph_xbar.add_output_entry("hbi_cfg", am_hbi_cfg)
     soc_regbus_periph_xbar.add_output_entry("hbi_ctl", am_hbi_ctl)
+    soc_regbus_periph_xbar.add_output_entry("hbm_cfg", am_hbm_cfg)
 
     #################
     # SoC Wide Xbar #
@@ -382,6 +386,12 @@ def main():
                                 dw=soc_regbus_periph_xbar.dw,
                                 name="apb_hbi_ctl")
 
+    apb_hbm_cfg = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
+                                rst=soc_regbus_periph_xbar.rst,
+                                aw=soc_regbus_periph_xbar.aw,
+                                dw=soc_regbus_periph_xbar.dw,
+                                name="apb_hbm_cfg")
+
     kwargs = {
         "solder": solder,
         "util": util,
@@ -391,11 +401,13 @@ def main():
         "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
         "soc_regbus_periph_xbar": soc_regbus_periph_xbar,
         "apb_hbi_ctl": apb_hbi_ctl,
+        "apb_hbm_cfg": apb_hbm_cfg,
         "cfg": occamy.cfg,
         "cores": nr_s1_quadrants * nr_s1_clusters * nr_cluster_cores + 1,
         "nr_s1_quadrants": nr_s1_quadrants,
         "nr_s1_clusters": nr_s1_clusters,
-        "nr_cluster_cores": nr_cluster_cores
+        "nr_cluster_cores": nr_cluster_cores,
+        "hbm_channel_size": HBM_CHANNEL_SIZE
     }
 
     # Emit the code.
