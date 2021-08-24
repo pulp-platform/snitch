@@ -24,7 +24,7 @@ index 0000000..45e80b5
 +  axi: {path: ../../vendor/pulp_platform_axi}
 +  common_cells: {path: ../../vendor/pulp_platform_common_cells}
 +  fpnew: {path: ../../vendor/pulp_platform_fpnew}
-+  reqrsp_interface: {path: ../reqrsp_interface}
++  reqrsp_interface: {path: ../../ip/reqrsp_interface}
 +  riscv-dbg: {path: ../../vendor/pulp_platform_riscv_dbg}
 +
 +sources:
@@ -101,6 +101,6 @@ index 0000000..45e80b5
 +      - include/instr_tracer_pkg.sv
 +      - src/util/instr_tracer.sv
 +      - src/util/instr_tracer_if.sv
--- 
+--
 2.25.1.377.g2d2118b814
 
