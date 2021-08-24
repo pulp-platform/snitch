@@ -15,6 +15,7 @@ dependencies:
 
 sources:
 # Level 0:
+- src/snitch_axi_to_cache.sv
 - src/snitch_const_cache.sv
 - target: test
   files:
