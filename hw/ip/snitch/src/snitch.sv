@@ -1989,6 +1989,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
                    | (dtlb_page_fault & dtlb_trans_valid)
                    | (itlb_page_fault & itlb_trans_valid);
 
+  `ifndef VCS
   // pragma translate_off
   always_ff @(posedge clk_i) begin
     if (!rst_i && illegal_inst && valid_instr) begin
@@ -1997,6 +1998,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     end
   end
   // pragma translate_on
+  `endif
 
   assign meip = irq_i.meip & eie_q[M];
   assign mtip = irq_i.mtip & tie_q[M];
