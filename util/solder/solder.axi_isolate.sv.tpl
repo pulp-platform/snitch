@@ -1,5 +1,11 @@
   axi_isolate #(
     .NumPending ( ${num_pending} ),
+    .TerminateTransaction ( ${int(terminated)} ),
+    .AtopSupport ( ${int(atop_support)} ),
+    .AxiIdWidth ( ${axi_in.iw} ),
+    .AxiAddrWidth ( ${axi_in.aw} ),
+    .AxiDataWidth ( ${axi_in.dw} ),
+    .AxiUserWidth ( ${max(1, axi_in.uw)} ),
     .req_t  ( ${axi_in.req_type()} ),
     .resp_t ( ${axi_in.rsp_type()} )
   ) ${name} (
