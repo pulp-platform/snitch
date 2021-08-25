@@ -77,6 +77,7 @@ module snitch_icache #(
         FILL_AW:           FILL_AW,
         FILL_DW:           FILL_DW,
         EARLY_LATCH:       EARLY_LATCH,
+        BUFFER_LOOKUP:     0,
 
         FETCH_ALIGN: $clog2(FETCH_DW/8),
         FILL_ALIGN:  $clog2(FILL_DW/8),
