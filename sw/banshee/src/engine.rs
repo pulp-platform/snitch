@@ -6,7 +6,6 @@
 
 use crate::{peripherals::Peripherals, riscv, tran::ElfTranslator, util::SiUnit, Configuration};
 extern crate termion;
-pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState};
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
@@ -21,6 +20,8 @@ use std::{
     },
 };
 use termion::{color, style};
+
+pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState};
 
 /// An execution engine.
 pub struct Engine {
