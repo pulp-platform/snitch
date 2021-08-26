@@ -188,6 +188,10 @@ impl<'a> ElfTranslator<'a> {
                 0,                                                 // DWOId
                 1,                                                 // SplitDebugInlining
                 1,                                                 // DebugInfoForProfiling
+                std::ptr::null(),                                  // SysRoot
+                0,                                                 // SysRootLen
+                std::ptr::null(),                                  // SDK
+                0,                                                 // SDKLen
             );
             (di_builder, di_cu, di_file)
         };
@@ -357,7 +361,7 @@ impl<'a> ElfTranslator<'a> {
         let builder = LLVMCreateBuilderInContext(self.engine.context);
 
         // Assemble the struct type which holds the CPU state.
-        let state_type = LLVMGetTypeByName2(
+        let state_type = LLVMGetTypeByName(
             self.engine.modules[self.cluster_id],
             format!("{}{}{}", "Cpu", self.cluster_id.to_string(), "\0").as_ptr() as *const _,
         );
