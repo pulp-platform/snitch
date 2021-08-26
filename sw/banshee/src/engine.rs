@@ -477,14 +477,6 @@ pub unsafe fn add_llvm_symbols() {
         Cpu::binary_csr_write as *mut _,
     );
     LLVMAddSymbol(
-        b"banshee_csr_read_silent\0".as_ptr() as *const _,
-        Cpu::binary_csr_read_silent as *mut _,
-    );
-    LLVMAddSymbol(
-        b"banshee_csr_write_silent\0".as_ptr() as *const _,
-        Cpu::binary_csr_write_silent as *mut _,
-    );
-    LLVMAddSymbol(
         b"banshee_abort_escape\0".as_ptr() as *const _,
         Cpu::binary_abort_escape as *mut _,
     );
@@ -768,8 +760,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
         prev as u32
     }
 
-    fn binary_csr_read(&self, csr: riscv::Csr) -> u32 {
-        trace!("Read CSR {:?}", csr);
+    fn binary_csr_read(&self, csr: riscv::Csr, notrace: u32) -> u32 {
+        if notrace == 0 {
+            trace!("Read CSR {:?}", csr);
+        }
         match csr {
             riscv::Csr::Ssr => self.state.ssr_enable,
             riscv::Csr::Mcycle => self.state.cycle as u32, // csr_mcycle
@@ -791,43 +785,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
         }
     }
 
-    fn binary_csr_write(&mut self, csr: riscv::Csr, value: u32) {
-        trace!("Write CSR {:?} = 0x{:?}", csr, value);
-        match csr {
-            riscv::Csr::Ssr => self.state.ssr_enable = value,
-            riscv::Csr::Mstatus => self.state.irq.mstatus = value, // CSR_MSTATUS
-            riscv::Csr::Mie => self.state.irq.mie = value,         // CSR_MIE
-            riscv::Csr::Mip => self.state.irq.mip = value,         // CSR_MIP
-            riscv::Csr::Mtvec => self.state.irq.mtvec = value,     // CSR_MTVEC
-            riscv::Csr::Mepc => self.state.irq.mepc = value,       // CSR_MEPC
-            riscv::Csr::Mcause => self.state.irq.mcause = value,   // CSR_MCAUSE
-            _ => (),
+    fn binary_csr_write(&mut self, csr: riscv::Csr, value: u32, notrace: u32) {
+        if notrace == 0 {
+            trace!("Write CSR {:?} = 0x{:?}", csr, value);
         }
-    }
-
-    fn binary_csr_read_silent(&self, csr: riscv::Csr) -> u32 {
-        match csr {
-            riscv::Csr::Ssr => self.state.ssr_enable,
-            riscv::Csr::Mcycle => self.state.cycle as u32, // csr_mcycle
-            riscv::Csr::Mcycleh => (self.state.cycle >> 32) as u32, // csr_mcycleh
-            riscv::Csr::Minstret => self.state.instret as u32, // csr_minstret
-            riscv::Csr::Minstreth => (self.state.instret >> 32) as u32, // csr_minstreth
-            riscv::Csr::Mhartid => self.hartid as u32,     // mhartid
-            riscv::Csr::Mstatus => self.state.irq.mstatus, // CSR_MSTATUS
-            riscv::Csr::Mie => self.state.irq.mie,         // CSR_MIE
-            riscv::Csr::Mip => self.state.irq.mip,         // CSR_MIP
-            riscv::Csr::Mtvec => self.state.irq.mtvec,     // CSR_MTVEC
-            riscv::Csr::Mepc => self.state.irq.mepc,       // CSR_MEPC
-            riscv::Csr::Mcause => self.state.irq.mcause,   // CSR_MCAUSE
-            riscv::Csr::Misa => {
-                // RV32IMAFDX A - Atomic Instructions extension
-                (1 << 0) | (1 << 3) | (1 << 5) | (1 << 8) | (1 << 12) | (1 << 23) | (1 << 30)
-            }
-            _ => 0,
-        }
-    }
-
-    fn binary_csr_write_silent(&mut self, csr: riscv::Csr, value: u32) {
         match csr {
             riscv::Csr::Ssr => self.state.ssr_enable = value,
             riscv::Csr::Mstatus => self.state.irq.mstatus = value, // CSR_MSTATUS

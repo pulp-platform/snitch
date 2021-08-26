@@ -3643,9 +3643,11 @@ impl<'a> InstructionTranslator<'a> {
             [
                 self.section.state_ptr,
                 LLVMConstInt(LLVMInt16Type(), csr as u64, 0),
+                // notrace
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
             ]
             .as_mut_ptr(),
-            2,
+            3,
             NONAME,
         )
     }
@@ -3662,9 +3664,11 @@ impl<'a> InstructionTranslator<'a> {
                 self.section.state_ptr,
                 LLVMConstInt(LLVMInt16Type(), csr as u64, 0),
                 data,
+                // notrace
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
             ]
             .as_mut_ptr(),
-            3,
+            4,
             NONAME,
         );
     }
@@ -3675,14 +3679,16 @@ impl<'a> InstructionTranslator<'a> {
             self.builder,
             LLVMGetNamedFunction(
                 self.section.engine.module,
-                "banshee_csr_read_silent\0".as_ptr() as *const _,
+                "banshee_csr_read\0".as_ptr() as *const _,
             ),
             [
                 self.section.state_ptr,
                 LLVMConstInt(LLVMInt16Type(), csr as u64, 0),
+                // notrace
+                LLVMConstInt(LLVMInt32Type(), 1, 0),
             ]
             .as_mut_ptr(),
-            2,
+            3,
             NONAME,
         )
     }
@@ -3693,15 +3699,17 @@ impl<'a> InstructionTranslator<'a> {
             self.builder,
             LLVMGetNamedFunction(
                 self.section.engine.module,
-                "banshee_csr_write_silent\0".as_ptr() as *const _,
+                "banshee_csr_write\0".as_ptr() as *const _,
             ),
             [
                 self.section.state_ptr,
                 LLVMConstInt(LLVMInt16Type(), csr as u64, 0),
                 data,
+                // notrace
+                LLVMConstInt(LLVMInt32Type(), 1, 0),
             ]
             .as_mut_ptr(),
-            3,
+            4,
             NONAME,
         );
     }
