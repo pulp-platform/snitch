@@ -116,9 +116,9 @@ You can set breakpoints on instructions in the RISC-V binary based on their inde
 
 ## Dependencies
 
-Banshee currently requires LLVM 10 to be installed on the system. It is *technically* possible to support multiple LLVM versions through the use of cargo features, but that is not yet implemented.
+Banshee currently requires LLVM 12 to be installed on the system. It is *technically* possible to support multiple LLVM versions through the use of cargo features, but that is not yet implemented.
 
-As a hacky workaround, try changing the `llvm-sys = "100"` line to whatever major version you have times 10, and hope for the best. Be prepared that this breaks the build due to some API changes in LLVM.
+As a hacky workaround, try changing the `llvm-sys = "120"` line to whatever major version you have times 10, and hope for the best. Be prepared that this breaks the build due to some API changes in LLVM.
 
 ## Limitations
 

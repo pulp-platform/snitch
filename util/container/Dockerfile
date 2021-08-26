@@ -29,10 +29,10 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH "/root/.cargo/bin:${PATH}"
 RUN cargo install bender
 
-# Get LLVM 10
+# Get LLVM 12
 RUN wget https://apt.llvm.org/llvm.sh
 RUN chmod +x llvm.sh
-RUN ./llvm.sh 10
+RUN ./llvm.sh 12
 
 # Install `banshee`
 COPY sw/banshee /tmp/banshee
