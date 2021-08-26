@@ -16,7 +16,7 @@ call_vsim() {
     grep "Errors: 0," vsim.log
 }
 
-# call_vsim snitch_const_cache_tb
+# call_vsim snitch_read_only_cache_tb
 
 
-vsim -coverage -voptargs="+acc +cover=sbecft" snitch_const_cache_tb -do 'log -r /*; do ../util/wave.tcl; run -all'
+vsim -coverage -voptargs="+acc +cover=sbecft" snitch_read_only_cache_tb -do 'log -r /*; do ../util/wave.tcl; run -all'

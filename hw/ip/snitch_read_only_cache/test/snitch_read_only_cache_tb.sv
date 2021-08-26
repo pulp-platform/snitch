@@ -272,7 +272,7 @@ endclass
 
 `include "common_cells/assertions.svh"
 
-module snitch_const_cache_tb import snitch_pkg::*; #(
+module snitch_read_only_cache_tb import snitch_pkg::*; #(
     parameter int unsigned AxiAddrWidth = 32,
     parameter int unsigned AxiDataWidth = 128,
     parameter int unsigned AxiIdWidth   = 5,
@@ -388,7 +388,7 @@ module snitch_const_cache_tb import snitch_pkg::*; #(
   `AXI_ASSIGN_FROM_REQ(axi_slv_dv, axi_slv_req)
   `AXI_ASSIGN_TO_RESP(axi_slv_resp, axi_slv_dv)
 
-  snitch_const_cache #(
+  snitch_read_only_cache #(
     .LineWidth    ( LineWidth      ),
     .LineCount    ( LineCount      ),
     .SetCount     ( SetCount       ),

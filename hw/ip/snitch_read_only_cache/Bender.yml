@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: SHL-0.51
 
 package:
-  name: snitch_const_cache
+  name: snitch_read_only_cache
   authors:
   - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
   - Samuel Riedel <sriedel@iis.ee.ethz.ch>
@@ -16,7 +16,7 @@ dependencies:
 sources:
 # Level 0:
 - src/snitch_axi_to_cache.sv
-- src/snitch_const_cache.sv
+- src/snitch_read_only_cache.sv
 - target: test
   files:
-  - test/snitch_const_cache_tb.sv
+  - test/snitch_read_only_cache_tb.sv
