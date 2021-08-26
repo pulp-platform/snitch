@@ -489,6 +489,28 @@ module snitch_read_only_cache_tb import snitch_pkg::*; #(
     join
     #10000ns;
 
+    // Issue a cache and bypass request simultaneously
+    // to test reordering or transactions
+    fork
+      begin
+        ar_beat.ax_addr   = CachedRegionStart+'h200;
+        ar_beat.ax_len    = 1;
+        mst_intf.drv.send_ar(ar_beat);
+        ar_beat.ax_len    = 0;
+        ar_beat.ax_addr   = CachedRegionEnd+'h200;
+        mst_intf.drv.send_ar(ar_beat);
+      end
+      begin
+        for (int i = 0; i <= ar_beat.ax_len; i++) begin
+          mst_intf.drv.recv_r(r_beat);
+        end
+        for (int i = 0; i <= ar_beat.ax_len; i++) begin
+          mst_intf.drv.recv_r(r_beat);
+        end
+      end
+    join
+    #10000ns;
+
     // Issue random request to the cached region
     mst_intf.run(10000, 0);
     mst_intf.add_memory_region(CachedRegionStart,
@@ -506,6 +528,24 @@ module snitch_read_only_cache_tb import snitch_pkg::*; #(
     slv_intf.reset();
     @(negedge rst);
     slv_intf.run();
+  end
+
+  // Time-out
+  initial begin
+    automatic int unsigned timeout;
+    @(negedge rst);
+    timeout = 0;
+    while (1) begin
+      @(posedge clk);
+      timeout += 1;
+      if (axi_mst_req.ar_valid && axi_mst_resp.ar_ready) begin
+        timeout = 0;
+      end
+      if (timeout > 5000) begin
+        $error("Simulation timed out at %0t", $time);
+        $finish();
+      end
+    end
   end
 
   ////////////////////////
