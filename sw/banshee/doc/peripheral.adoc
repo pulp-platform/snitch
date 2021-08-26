@@ -27,11 +27,11 @@ pub trait Peripheral {
 
 == `periph_conf.rs`
 
-It's recommended to write the source code of your peripherals in `src/periph_conf.rs`.
+It's recommended to write the source code of your peripherals in `src/peripherals.rs`.
 
-To allow the engine to have access to the newly created peripheral, you just need to add an instance of your struct in the vector returned by the `create_peripherals()` function (defined at the top of `src/periph_conf.rs`).
+To allow the engine to have access to the newly created peripheral type, you just need to add an instance of your struct in the vector returned by the `get_peripheral_types()` function (defined at the top of `src/periph_conf.rs`).
 
-Here is an example of a peripheral counting `Loads` and `Stores`:
+Here is an example of a peripheral counting loads and stores:
 
 [source,rust]
 ----
@@ -41,7 +41,7 @@ use PeriphCounterState::{CountLoad, CountLoadStore, CountStore, Disabled};
 
 /// Function called by the engine to get the peripherals. This function should return a vector
 /// containing an instance of all the peripherals.
-pub fn create_peripherals() -> Vec<Box<dyn Peripheral>> {
+pub fn get_peripheral_types() -> Vec<Box<dyn Peripheral>> {
     vec![Box::new(PeriphCounter::default())]
 }
 
