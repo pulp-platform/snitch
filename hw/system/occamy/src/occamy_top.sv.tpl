@@ -70,16 +70,17 @@ module occamy_top
   input  ${soc_regbus_periph_xbar.out_hbi_cfg.rsp_type()} hbi_cfg_rsp_i,
   output ${apb_hbi_ctl.req_type()} apb_hbi_ctl_req_o,
   input  ${apb_hbi_ctl.rsp_type()} apb_hbi_ctl_rsp_i,
-
+  /// HBM Config
+  output ${apb_hbm_cfg.req_type()} apb_hbm_cfg_req_o,
+  input  ${apb_hbm_cfg.rsp_type()} apb_hbm_cfg_rsp_i,
   /// PCIe/DDR Config
   output ${soc_regbus_periph_xbar.out_pcie_cfg.req_type()} pcie_cfg_req_o,
   input  ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_type()} pcie_cfg_rsp_i,
   /// Chip specific control registers
   output ${soc_regbus_periph_xbar.out_chip_ctrl.req_type()} chip_ctrl_req_o,
   input  ${soc_regbus_periph_xbar.out_chip_ctrl.rsp_type()} chip_ctrl_rsp_i,
-
   // "external interrupts from uncore - "programmable"
-  input logic [3:0] ext_irq_i,
+  input logic [11:0] ext_irq_i,
 
   /// HBM2e Ports
 % for i in range(8):
@@ -300,6 +301,11 @@ module occamy_top
   <% soc_regbus_periph_xbar.out_hbi_ctl.to_apb(context, "apb_hbi_ctl", to=apb_hbi_ctl) %>
   assign apb_hbi_ctl_req_o = ${apb_hbi_ctl.req_name()};
   assign ${apb_hbi_ctl.rsp_name()} = apb_hbi_ctl_rsp_i;
+
+  // APB port for HBI
+  <% soc_regbus_periph_xbar.out_hbm_cfg.to_apb(context, "apb_hbm_cfg", to=apb_hbm_cfg) %>
+  assign apb_hbm_cfg_req_o = ${apb_hbm_cfg.req_name()};
+  assign ${apb_hbm_cfg.rsp_name()} = apb_hbm_cfg_rsp_i;
 
   /////////////////
   // Peripherals //

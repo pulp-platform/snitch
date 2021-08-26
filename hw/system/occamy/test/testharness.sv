@@ -276,6 +276,8 @@ module testharness import occamy_pkg::*; (
     .hbi_cfg_rsp_i ('0),
     .apb_hbi_ctl_req_o (),
     .apb_hbi_ctl_rsp_i ('0),
+    .apb_hbm_cfg_req_o (),
+    .apb_hbm_cfg_rsp_i ('0),
     .pcie_cfg_req_o (),
     .pcie_cfg_rsp_i ('0),
     .chip_ctrl_req_o (),
