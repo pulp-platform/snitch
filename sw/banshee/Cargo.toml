@@ -17,7 +17,7 @@ clap = "2"
 crossbeam-utils = "0.8"
 elf = "0.0.10"
 itertools = "0.9"
-llvm-sys = "100"
+llvm-sys = "120"
 log = { version = "0.4", features = ["release_max_level_info"] }
 pretty_env_logger = "0.4"
 serde = { version = "1.0.123", features = ["derive"] }
