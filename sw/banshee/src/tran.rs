@@ -361,8 +361,8 @@ impl<'a> ElfTranslator<'a> {
         let builder = LLVMCreateBuilderInContext(self.engine.context);
 
         // Assemble the struct type which holds the CPU state.
-        let state_type = LLVMGetTypeByName(
-            self.engine.modules[self.cluster_id],
+        let state_type = LLVMGetTypeByName2(
+            self.engine.context,
             format!("{}{}{}", "Cpu", self.cluster_id.to_string(), "\0").as_ptr() as *const _,
         );
 
