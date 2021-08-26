@@ -136,6 +136,14 @@ import occamy_pkg::*;
     .clk_mgr_rsp_i (clk_mgr_rsp),
     .pcie_cfg_req_o (),
     .pcie_cfg_rsp_i ('0),
+    // Tie the HBM interrupts to zero.
+    .ext_irq_i ({8'b0, ext_irq_i}),
+    .apb_hbm_cfg_req_o (),
+    .apb_hbm_cfg_rsp_i ('0),
+    .hbi_cfg_req_o (),
+    .hbi_cfg_rsp_i ('0),
+    .apb_hbi_ctl_req_o (),
+    .apb_hbi_ctl_rsp_i ('0),
     .*
   );
 

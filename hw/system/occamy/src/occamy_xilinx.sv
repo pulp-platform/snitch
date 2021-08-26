@@ -608,12 +608,20 @@ module occamy_xilinx
 
   // Occamy top-level
   occamy_top i_occamy (
-      .bootrom_req_o (bootrom_req),
-      .bootrom_rsp_i (bootrom_rsp),
-      .clk_mgr_req_o (clk_mgr_req),
-      .clk_mgr_rsp_i (clk_mgr_rsp),
+      .bootrom_req_o(bootrom_req),
+      .bootrom_rsp_i(bootrom_rsp),
+      .clk_mgr_req_o(clk_mgr_req),
+      .clk_mgr_rsp_i(clk_mgr_rsp),
       .pcie_cfg_req_o(),
       .pcie_cfg_rsp_i('0),
+      // Tie the HBM interrupts to zero.
+      .ext_irq_i({8'b0, ext_irq_i}),
+      .apb_hbm_cfg_req_o(),
+      .apb_hbm_cfg_rsp_i('0),
+      .hbi_cfg_req_o(),
+      .hbi_cfg_rsp_i('0),
+      .apb_hbi_ctl_req_o(),
+      .apb_hbi_ctl_rsp_i('0),
       .*
   );
 
