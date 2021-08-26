@@ -13,7 +13,7 @@ use std::io::prelude::*;
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Configuration {
     #[serde(default)]
-    pub memory: Memories,
+    pub memory: Vec<Memories>,
     #[serde(default)]
     pub address: Address,
     #[serde(default)]
@@ -40,18 +40,28 @@ impl std::fmt::Display for Configuration {
 }
 
 impl Configuration {
+    pub fn new(num_clusters: usize) -> Self {
+        Self {
+            memory: vec![Default::default(); num_clusters],
+            address: Default::default(),
+            inst_latency: Default::default(),
+            ssr: Default::default(),
+        }
+    }
     /// Parse a json/yaml file into a `Configuration` struct
-    pub fn parse(name: &str) -> Configuration {
+    pub fn parse(name: &str, num_clusters: usize) -> Configuration {
         let config: String = std::fs::read_to_string(name)
             .unwrap_or_else(|_| panic!("Could not open file {}", name))
             .parse()
             .unwrap_or_else(|_| panic!("Could not parse file {}", name));
         // Parse the configuration file based on it's name
-        if name.to_lowercase().contains("json") {
+        let mut config: Configuration = if name.to_lowercase().contains("json") {
             serde_json::from_str(&config).expect("Error while reading json")
         } else {
             serde_yaml::from_str(&config).expect("Error while reading yaml")
-        }
+        };
+        config.memory.resize_with(num_clusters, Default::default);
+        config
     }
 
     /// Write the default `Configuration` struct into a json/yaml file
@@ -73,10 +83,12 @@ impl Configuration {
 }
 
 /// Holds all the memories in the hierarchy
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct Memories {
     pub tcdm: Memory,
     pub dram: Memory,
+    pub periphs: MemoryCallback,
+    pub ext_tcdm: Vec<ExtTcdm>,
 }
 
 impl Default for Memories {
@@ -92,12 +104,19 @@ impl Default for Memories {
                 end: 0x90000000,
                 latency: 10,
             },
+            periphs: MemoryCallback {
+                start: 0x20000,
+                end: 0x20000,
+                latency: 2,
+                callbacks: vec![],
+            },
+            ext_tcdm: vec![],
         }
     }
 }
 
 /// Description of a single memory hierarchy
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct Memory {
     pub start: u32,
     pub end: u32,
@@ -112,6 +131,38 @@ impl Default for Memory {
             latency: 1,
         }
     }
+}
+
+/// Description of a single memory hierarchy with callback functions
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+pub struct MemoryCallback {
+    pub start: u32,
+    pub end: u32,
+    pub latency: u64,
+    pub callbacks: Vec<Callback>,
+}
+
+impl Default for MemoryCallback {
+    fn default() -> Self {
+        Self {
+            start: 0,
+            end: u32::MAX,
+            latency: 1,
+            callbacks: vec![],
+        }
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+pub struct Callback {
+    pub name: String,
+    pub size: u32,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+pub struct ExtTcdm {
+    pub cluster: u32,
+    pub start: u32,
 }
 
 /// Struct to configure specific addresses

@@ -1,0 +1,55 @@
+# Copyright 2021 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+---
+address:
+  barrier_reg: 0x40000038
+  cluster_base_hartid: 0x40000040
+  cluster_id: 0x40000050
+  cluster_num: 0x40000048
+  nr_cores: 0x40000010
+  scratch_reg: 0x40000020
+  tcdm_end: 0x40000008
+  tcdm_start: 0x40000000
+  uart: 0xF00B8000
+  wakeup_reg: 0x40000028
+memory:
+- dram:
+    end: 0x80010000
+    latency: 10
+    start: 0x80000000
+  ext_tcdm: []
+  periphs:
+    callbacks:
+    - name: semaphores
+      size: 36
+    - name: fence
+      size: 8
+    end: 0x10002c
+    latency: 5
+    start: 0x100000
+  tcdm:
+    end: 0x20000
+    latency: 5
+    start: 0x0
+- dram:
+    end: 0x80010000
+    latency: 10
+    start: 0x80000000
+  ext_tcdm:
+  - cluster: 0
+    start: 0x10000
+  periphs:
+    callbacks:
+    - name: semaphores
+      size: 36
+    - name: fence
+      size: 8
+    end: 0x10002c
+    latency: 5
+    start: 0x100000
+  tcdm:
+    end: 0x10000
+    latency: 5
+    start: 0x0

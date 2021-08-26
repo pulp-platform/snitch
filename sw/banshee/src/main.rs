@@ -18,6 +18,7 @@ use std::{ffi::CString, os::raw::c_int, path::Path, ptr::null_mut};
 
 pub mod configuration;
 pub mod engine;
+pub mod peripherals;
 pub mod riscv;
 mod runtime;
 mod softfloat;
@@ -189,9 +190,9 @@ fn main() -> Result<()> {
     }
 
     engine.config = if let Some(config_file) = matches.value_of("configuration") {
-        Configuration::parse(config_file)
+        Configuration::parse(config_file, engine.num_clusters)
     } else {
-        Configuration::default()
+        Configuration::new(engine.num_clusters)
     };
     debug!("Configuration used:\n{}", engine.config);
 
@@ -203,6 +204,9 @@ fn main() -> Result<()> {
         Err(e) => bail!("Failed to open binary {}: {:?}", path.display(), e),
     };
 
+    // Create a module for each cluster
+    engine.create_modules();
+
     // Translate the binary.
     engine
         .translate_elf(&elf)
@@ -212,7 +216,7 @@ fn main() -> Result<()> {
     if let Some(path) = matches.value_of("emit-llvm") {
         unsafe {
             LLVMPrintModuleToFile(
-                engine.module,
+                engine.modules[0],
                 format!("{}\0", path).as_ptr() as *const _,
                 null_mut(),
             );
@@ -220,16 +224,22 @@ fn main() -> Result<()> {
     }
     if let Some(path) = matches.value_of("emit-bitcode") {
         unsafe {
-            LLVMWriteBitcodeToFile(engine.module, format!("{}\0", path).as_ptr() as *const _);
+            LLVMWriteBitcodeToFile(
+                engine.modules[0],
+                format!("{}\0", path).as_ptr() as *const _,
+            );
         }
     }
 
     // Dump the module if requested.
     if matches.is_present("dump-llvm") {
         unsafe {
-            LLVMDumpModule(engine.module);
+            LLVMDumpModule(engine.modules[0]);
         }
     }
+
+    // Init the peripherals
+    engine.init_periphs();
 
     // Execute the binary.
     if !matches.is_present("dry-run") {

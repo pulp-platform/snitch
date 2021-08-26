@@ -1,0 +1,127 @@
+= Peripherals
+
+To allow the user to easily create new peripherals, they can be implemented using callback functions.
+
+== Peripheral trait
+
+To implement your own peripheral, you can create a struct implementing the `Peripheral` trait. Each struct should represent one peripheral.
+
+[source,rust]
+----
+/// Trait representing a peripheral
+pub trait Peripheral {
+    /// should return the same name as in the config file
+    fn get_name(&self) -> &'static str;
+    /// store instruction
+    fn store(&self, addr: u32, value: u32, mask: u32, size: u8);
+    /// load instruction
+    fn load(&self, addr: u32, size: u8) -> u32;
+}
+----
+
+* The `get_name` method returns the name of the peripheral, the returned string slice should match with the name in the config file.
+
+* The `addr` parameter in the `store` and `load` methods is the relative address to that peripheral. Therefore, when implementing these methods, the address range to handle would be `[0; size - 1]`.
+
+* To avoid data race, it is recommended to use *Atomic types* for the _fields_ of your peripheral structs.
+
+== `periph_conf.rs`
+
+It's recommended to write the source code of your peripherals in `src/peripherals.rs`.
+
+To allow the engine to have access to the newly created peripheral type, you just need to add an instance of your struct in the vector returned by the `get_peripheral_types()` function (defined at the top of `src/periph_conf.rs`).
+
+Here is an example of a peripheral counting loads and stores:
+
+[source,rust]
+----
+use crate::peripherals::Peripheral;
+use std::sync::atomic::{AtomicU32, AtomicU8, Ordering};
+use PeriphCounterState::{CountLoad, CountLoadStore, CountStore, Disabled};
+
+/// Function called by the engine to get the peripherals. This function should return a vector
+/// containing an instance of all the peripherals.
+pub fn get_peripheral_types() -> Vec<Box<dyn Peripheral>> {
+    vec![Box::new(PeriphCounter::default())]
+}
+
+#[derive(Default)]
+struct PeriphCounter {
+    state: AtomicU8,
+    counter: AtomicU32,
+}
+
+impl Peripheral for PeriphCounter {
+    fn get_name(&self) -> &'static str {
+        "periph_counter"
+    }
+
+    fn store(&self, addr: u32, val: u32, mask: u32, _: u8) {
+        if addr == 0 && (mask & 0x3) == 0x3 {
+            let val = val & 0x3;
+            if val == 0 {
+                self.state.store(Disabled as u8, Ordering::SeqCst);
+                self.counter.store(0, Ordering::SeqCst);
+            } else if val == 1 {
+                self.state.store(CountLoad as u8, Ordering::SeqCst);
+                self.counter.store(0, Ordering::SeqCst);
+            } else if val == 2 {
+                self.state.store(CountStore as u8, Ordering::SeqCst);
+                self.counter.store(0, Ordering::SeqCst);
+            } else if val == 3 {
+                self.state.store(CountLoadStore as u8, Ordering::SeqCst);
+                self.counter.store(0, Ordering::SeqCst);
+            } else if (self.state.load(Ordering::SeqCst) & 0x2) != 0 {
+                self.counter.fetch_add(1, Ordering::SeqCst);
+            }
+        } else if (self.state.load(Ordering::SeqCst) & 0x2) != 0 {
+            self.counter.fetch_add(1, Ordering::SeqCst);
+        }
+    }
+
+    fn load(&self, addr: u32, _: u8) -> u32 {
+        let mut res: u32 = 0;
+        if addr > 3 {
+            res = self.counter.load(Ordering::SeqCst) >> 8 * (addr - 4);
+        } else if addr == 0 {
+            res = self.state.load(Ordering::SeqCst) as u32;
+        }
+        let state = self.state.load(Ordering::SeqCst);
+        if state == CountLoad as u8 || state == CountLoadStore as u8 {
+            self.counter.fetch_add(1, Ordering::SeqCst);
+        }
+        res
+    }
+}
+
+enum PeriphCounterState {
+    Disabled = 0,
+    CountLoad = 1,
+    CountStore = 2,
+    CountLoadStore = 3,
+}
+----
+
+== config file
+
+The following config snippet corresponds to the peripheral described in the previous example:
+
+[source,yaml]
+----
+memory:
+  tcdm:
+    start: 0x0
+    end: 0x100000
+    latency: 5
+  periphs:
+    start: 0x100000
+    end: 0x100040
+    latency: 5
+    callbacks:
+        - name: periph_counter
+          size: 64
+  dram:
+    start: 0x80000000
+    end: 0x80010000
+    latency: 10
+----

@@ -80,6 +80,13 @@ pub unsafe fn banshee_tcdm_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut u32 {
     &mut *(cpu.tcdm_ptr as *const _ as *mut _)
 }
 
+/// Get a pointer to an external TCDM buffer.
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_tcdm_ext_ptr<'a>(cpu: &'a mut Cpu, cluster_id: u32) -> &'a mut u32 {
+    &mut *(*cpu.tcdm_ext_ptr.get_unchecked(cluster_id as usize) as *const _ as *mut _)
+}
+
 /// Get a pointer to an SSR.
 #[no_mangle]
 #[inline(always)]

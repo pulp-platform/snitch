@@ -19,6 +19,7 @@ pub struct Cpu<'a, 'b> {
     pub engine: &'a Engine,
     pub state: CpuState,
     pub tcdm_ptr: &'b u32,
+    pub tcdm_ext_ptr: &'b Vec<&'b u32>,
     pub hartid: usize,
     pub num_cores: usize,
     pub cluster_base_hartid: usize,
