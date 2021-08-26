@@ -54,20 +54,20 @@ impl Peripherals {
                 return match req {
                     Load => {
                         trace!(
-                            "Periph load from {}: cluster_id {}, addr {}, size {}",
+                            "Periph load from {}: cluster_id {}, offs 0x{:x}, size {}",
                             self.peripherals[i.1].get_name(),
                             cluster_id,
-                            addr - i.0,
+                            addr,
                             size
                         );
                         self.peripherals[i.1].load(addr, size)
                     }
                     Store(val, mask) => {
                         trace!(
-                            "Periph store to {}: cluster_id {}, addr {}, size {}, mask {}, val {}",
+                            "Periph store to {}: cluster_id {}, offs 0x{:x}, size {}, mask 0x{:x}, val {}",
                             self.peripherals[i.1].get_name(),
                             cluster_id,
-                            addr - i.0,
+                            addr,
                             size,
                             mask,
                             val
