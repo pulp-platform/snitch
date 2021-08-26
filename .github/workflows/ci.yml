@@ -27,14 +27,10 @@ jobs:
         toolchain: ${{ matrix.rust }}
         override: true
         components: rustfmt
-    - uses: KyleMayes/install-llvm-action@v1
-      with:
-        version: '12.0'
-        directory: ${{ runner.temp }}/llvm
+    - name: Install LLVM
+      run: sudo apt install llvm-12-dev
     - working-directory: sw/banshee
       run: cargo build
-      env:
-        LLVM_SYS_120_PREFIX: ${{ runner.temp }}/llvm
     - working-directory: sw/banshee
       run: cargo test --all
     - working-directory: sw/banshee
@@ -58,10 +54,8 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
-    - uses: KyleMayes/install-llvm-action@v1
-      with:
-        version: '12.0'
-        directory: ${{ runner.temp }}/llvm
+    - name: Install LLVM
+      run: sudo apt install llvm-12-dev
     - working-directory: sw/banshee
       run: cargo install --path .
     - name: Setup cmake
