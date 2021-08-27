@@ -14,6 +14,7 @@ address:
   tcdm_start: 0x40000000
   uart: 0xF00B8000
   wakeup_reg: 0x40000028
+  clint: 0xFFFF0000
 memory:
 - dram:
     end: 0x80010000
