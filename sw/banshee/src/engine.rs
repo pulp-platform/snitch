@@ -599,6 +599,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     addr - self.engine.config.memory[self.cluster_id].periphs.start,
                     size,
                 )
+            }
             // access to the CLINT
             x if x >= self.engine.config.address.clint
                 && x < self.engine.config.address.clint + 0x1000 =>

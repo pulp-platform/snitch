@@ -3678,7 +3678,7 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
-                self.section.engine.module,
+                self.section.engine.modules[self.section.elf.cluster_id],
                 "banshee_csr_read\0".as_ptr() as *const _,
             ),
             [
@@ -3698,7 +3698,7 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildCall(
             self.builder,
             LLVMGetNamedFunction(
-                self.section.engine.module,
+                self.section.engine.modules[self.section.elf.cluster_id],
                 "banshee_csr_write\0".as_ptr() as *const _,
             ),
             [

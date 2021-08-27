@@ -49,6 +49,7 @@ impl Configuration {
             address: Default::default(),
             inst_latency: Default::default(),
             ssr: Default::default(),
+            interrupt_latency: 10,
         }
     }
     /// Parse a json/yaml file into a `Configuration` struct
