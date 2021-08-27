@@ -89,3 +89,18 @@ void tb_memory_write(long long addr, int len, const svOpenArrayHandle data,
     sim::MEM.write(addr, len, (const uint8_t *)data_ptr,
                    (const uint8_t *)strb_ptr);
 }
+
+const long long clint_addr = sim::BOOTDATA.clint_base;
+const long num_cores = sim::BOOTDATA.core_count;
+
+void clint_tick(const svOpenArrayHandle msip) {
+    uint8_t *msip_ptr = (uint8_t *)svGetArrayPtr(msip);
+    assert(msip_ptr);
+    uint32_t read_val;
+    for (int i = 0; i < num_cores; i++) {
+        if (i % 32 == 0)
+            sim::MEM.read(clint_addr + i / 32, sizeof(uint32_t),
+                          (uint8_t *)&read_val);
+        msip_ptr[i] = (read_val & (1 << (i % 32))) != 0 ? 1 : 0;
+    }
+}

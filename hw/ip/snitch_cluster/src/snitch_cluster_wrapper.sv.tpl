@@ -11,21 +11,21 @@ ${disclaimer}
 </%def>
 
 <%def name="core_cfg(prop)">\
-  % for c in cfg['cores']:
+  % for c in cfg['cores'][::-1]:
 ${c[prop]}${', ' if not loop.last else ''}\
   % endfor
 </%def>\
 
 <%def name="core_cfg_flat(prop)">\
 ${cfg['nr_cores']}'b\
-  % for c in reversed(cfg['cores']):
+  % for c in cfg['cores'][::-1]:
 ${int(c[prop])}\
   % endfor
 </%def>\
 
 <%def name="core_isa(isa)">\
 ${cfg['nr_cores']}'b\
-  % for c in cfg['cores']:
+  % for c in cfg['cores'][::-1]:
 ${int(getattr(c['isa_parsed'], isa))}\
   % endfor
 </%def>\

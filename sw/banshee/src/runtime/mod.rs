@@ -78,6 +78,7 @@ impl std::fmt::Debug for CpuState {
             .field("instret", &self.instret)
             .field("ssrs", &self.ssrs)
             .field("dma", &self.dma)
+            .field("irq", &self.irq)
             .field("wfi", &self.wfi)
             .finish()
     }
@@ -117,6 +118,19 @@ impl std::fmt::Debug for DmaState {
             .field("reps", &self.reps)
             .field("size", &self.size)
             .field("done_id", &self.done_id)
+            .finish()
+    }
+}
+
+impl std::fmt::Debug for IrqState {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.debug_struct("IrqState")
+            .field("mstatus", &format_args!("{:08x}", self.mstatus))
+            .field("mie", &format_args!("{:08x}", self.mie))
+            .field("mip", &format_args!("{:08x}", self.mip))
+            .field("mtvec", &format_args!("{:08x}", self.mtvec))
+            .field("mepc", &format_args!("{:08x}", self.mepc))
+            .field("mcause", &format_args!("{:08x}", self.mcause))
             .finish()
     }
 }

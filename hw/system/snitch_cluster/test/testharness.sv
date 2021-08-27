@@ -8,6 +8,9 @@ module testharness import snitch_cluster_pkg::*; (
   input  logic        clk_i,
   input  logic        rst_ni
 );
+  import "DPI-C" function void clint_tick(
+    output byte msip[]
+  );
 
   narrow_in_req_t narrow_in_req;
   narrow_in_resp_t narrow_in_resp;
@@ -17,6 +20,7 @@ module testharness import snitch_cluster_pkg::*; (
   wide_out_resp_t wide_out_resp;
   wide_in_req_t wide_in_req;
   wide_in_resp_t wide_in_resp;
+  logic [snitch_cluster_pkg::NrCores-1:0] msip;
 
   snitch_cluster_wrapper i_snitch_cluster (
     .clk_i,
@@ -24,7 +28,7 @@ module testharness import snitch_cluster_pkg::*; (
     .debug_req_i ('0),
     .meip_i ('0),
     .mtip_i ('0),
-    .msip_i ('0),
+    .msip_i (msip),
     .narrow_in_req_i (narrow_in_req),
     .narrow_in_resp_o (narrow_in_resp),
     .narrow_out_req_o (narrow_out_req),
@@ -68,5 +72,19 @@ module testharness import snitch_cluster_pkg::*; (
     .req_i (wide_out_req),
     .rsp_o (wide_out_resp)
   );
+
+  // CLINT
+  // verilog_lint: waive-start always-ff-non-blocking
+  localparam int NumCores = snitch_cluster_pkg::NrCores;
+  always_ff @(posedge clk_i) begin
+    automatic byte msip_ret[NumCores];
+    if (rst_ni) begin
+      clint_tick(msip_ret);
+      for (int i = 0; i < NumCores; i++) begin
+        msip[i] = msip_ret[i];
+      end
+    end
+  end
+  // verilog_lint: waive-stop always-ff-non-blocking
 
 endmodule

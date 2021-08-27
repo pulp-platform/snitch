@@ -105,4 +105,11 @@
         isa: "rv32imafd",
         xdma: true
     }
+    // peripherals
+    clint: {
+        // 0x0400_0000
+        address: 67108864,
+        // 0x0010_0000
+        length: 1048576
+    },
 }

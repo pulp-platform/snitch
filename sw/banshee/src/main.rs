@@ -79,6 +79,11 @@ fn main() -> Result<()> {
                 .help("Enable instruction tracing"),
         )
         .arg(
+            Arg::with_name("no-interrupt")
+                .long("no-interrupt")
+                .help("Disable interrupt support for faster execution"),
+        )
+        .arg(
             Arg::with_name("latency")
                 .long("latency")
                 .short("l")
@@ -173,6 +178,10 @@ fn main() -> Result<()> {
     let mut engine = Engine::new(context);
     engine.opt_llvm = !matches.is_present("no-opt-llvm");
     engine.opt_jit = !matches.is_present("no-opt-jit");
+    engine.interrupt = !matches.is_present("no-interrupt");
+    if engine.interrupt {
+        debug!("Interrupts enabled");
+    }
     engine.trace = matches.is_present("trace");
     engine.latency = matches.is_present("latency");
     matches

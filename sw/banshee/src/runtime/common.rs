@@ -11,7 +11,7 @@
 // Try to pack as much as possible into `mod.rs` (for banshee) or `jit.rs` (for
 // the translated binary).
 
-use std::sync::atomic::{AtomicU64, AtomicUsize};
+use std::sync::atomic::{AtomicU64, AtomicU32, AtomicUsize};
 
 /// A CPU pointer to be passed to the binary code.
 #[repr(C)]
@@ -29,6 +29,7 @@ pub struct Cpu<'a, 'b> {
     pub barrier: &'b AtomicUsize,
     pub num_sleep: &'b AtomicUsize,
     pub wake_up: &'b Vec<AtomicU64>,
+    pub clint: &'b Vec<AtomicU32>,
 }
 
 /// A representation of a single CPU core's state.
@@ -46,6 +47,7 @@ pub struct CpuState {
     pub ssr_enable: u32,
     pub dma: DmaState,
     pub wfi: bool,
+    pub irq: IrqState,
 }
 
 /// A representation of a single SSR address generator's state.
@@ -81,4 +83,24 @@ pub struct DmaState {
     reps: u32,
     size: u32,
     done_id: u32,
+}
+
+/// Store IRQ relevant CSRs
+#[derive(Default)]
+#[repr(C)]
+pub struct IrqState {
+    // a counter to check the interrupt state every sample_ctr instructions
+    pub sample_ctr: u32,
+    // interrupt control bits of the mstatus CSR
+    pub mstatus: u32,
+    // Machine interrupt enabled (same bits as mie csr)
+    pub mie: u32,
+    // machine interrupt pending (same bits as mip csr)
+    pub mip: u32,
+    // machine trap vector
+    pub mtvec: u32,
+    // machine exception PC
+    pub mepc: u32,
+    // machine cause
+    pub mcause: u32,
 }

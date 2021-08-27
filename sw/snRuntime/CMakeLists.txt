@@ -16,9 +16,10 @@ else()
     # Export package information to includer.
     set(SNRUNTIME_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
     set(SNRUNTIME_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-    set(SNRUNTIME_INCLUDE_DIRS
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor
+    set(SNRUNTIME_INCLUDE_DIRS 
+        ${CMAKE_CURRENT_SOURCE_DIR}/include 
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor 
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/riscv-opcodes
         PARENT_SCOPE)
 endif()
 
@@ -44,7 +45,7 @@ if(RUNTIME_TRACE)
     add_compile_definitions(__SNRT_USE_TRACE)
 endif()
 
-include_directories(include vendor)
+include_directories(include vendor vendor/riscv-opcodes)
 
 # Common sources
 set(sources
@@ -55,6 +56,7 @@ set(sources
     src/team.c
     src/ssr.c
     src/alloc.c
+    src/interrupt.c
 )
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
@@ -103,6 +105,7 @@ add_snitch_test(varargs_1 tests/varargs_1.c)
 add_snitch_test(varargs_2 tests/varargs_2.c)
 add_snitch_test(barrier tests/barrier.c)
 add_snitch_test(lto tests/lto.c tests/lto_a.c)
+add_snitch_test(interrupt tests/interrupt.c)
 
 add_snitch_test_executable(dma_simple tests/dma_simple.c)
 add_snitch_test_executable(printf_simple tests/printf_simple.c)

@@ -41,6 +41,9 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
 
     _snrt_team_current = &team->base;
 
+    // init peripherals
+    team->peripherals.clint = (uint32_t *)0xffff0000;
+
     // Init allocator
     snrt_alloc_init(team);
 }

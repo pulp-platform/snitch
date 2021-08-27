@@ -20,6 +20,8 @@ pub struct Configuration {
     pub inst_latency: std::collections::HashMap<String, u64>,
     #[serde(default)]
     pub ssr: Ssr,
+    #[serde(default)]
+    pub interrupt_latency: u32,
 }
 
 impl Default for Configuration {
@@ -29,6 +31,7 @@ impl Default for Configuration {
             address: Default::default(),
             inst_latency: Default::default(),
             ssr: Default::default(),
+            interrupt_latency: 10,
         }
     }
 }
@@ -46,6 +49,7 @@ impl Configuration {
             address: Default::default(),
             inst_latency: Default::default(),
             ssr: Default::default(),
+            interrupt_latency: 10,
         }
     }
     /// Parse a json/yaml file into a `Configuration` struct
@@ -178,6 +182,7 @@ pub struct Address {
     pub cluster_num: u32,
     pub cluster_id: u32,
     pub uart: u32,
+    pub clint: u32,
 }
 
 impl Default for Address {
@@ -193,6 +198,7 @@ impl Default for Address {
             cluster_num: 0x40000048,
             cluster_id: 0x40000050,
             uart: 0xF00B8000,
+            clint: 0xFFFF0000,
         }
     }
 }

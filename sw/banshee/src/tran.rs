@@ -866,6 +866,8 @@ impl<'a> SectionTranslator<'a> {
                 }
             }
             // Place branch to next instruction only after processing of sequence
+            // (a BB that already has a terminator corresponds to a jump instruction and
+            // doesn't need a branch to the next subsequent instruction)
             if LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(self.builder)).is_null() {
                 LLVMBuildBr(self.builder, self.elf.inst_bbs[&(addr + 4)]);
             }
@@ -970,6 +972,11 @@ impl<'a> InstructionTranslator<'a> {
             LLVMConstInt(LLVMInt32Type(), self.addr, 0),
             self.pc_ptr(),
         );
+
+        // Check for interrupts
+        if self.section.engine.interrupt {
+            self.emit_irq_check();
+        }
 
         // Update the instret counter.
         let instret = LLVMBuildLoad(self.builder, self.instret_ptr(), NONAME);
@@ -2662,6 +2669,47 @@ impl<'a> InstructionTranslator<'a> {
                 // Continue
                 LLVMPositionBuilderAtEnd(self.builder, bb_wake_up);
             }
+            riscv::OpcodeUnit::Mret => {
+                // read mepc from IrqState
+                let target = self.read_csr_silent(riscv::Csr::Mepc as u32);
+                // restore mstatus.mie from mstatus.pie and set mstatus.pie = 1
+                let mstatus = self.read_csr_silent(riscv::Csr::Mstatus as u32);
+                let mstatus_pie = LLVMBuildAnd(
+                    self.builder,
+                    mstatus,
+                    LLVMConstInt(LLVMInt32Type(), 1 << 7, 0),
+                    NONAME,
+                );
+                let mstatus_mie = LLVMBuildLShr(
+                    self.builder,
+                    mstatus_pie,
+                    LLVMConstInt(LLVMInt32Type(), 4, 0),
+                    NONAME,
+                );
+                let mstatus_masked = LLVMBuildAnd(
+                    self.builder,
+                    mstatus,
+                    LLVMConstInt(LLVMInt32Type(), !((1 << 3) | (1 << 7)), 0),
+                    NONAME,
+                );
+                let mstatus_pie_set = LLVMBuildOr(
+                    self.builder,
+                    mstatus_masked,
+                    LLVMConstInt(LLVMInt32Type(), 1 << 7, 0),
+                    NONAME,
+                );
+                let mstatus_wb = LLVMBuildOr(self.builder, mstatus_pie_set, mstatus_mie, NONAME);
+                self.write_csr_silent(riscv::Csr::Mstatus as u32, mstatus_wb);
+                self.emit_trace();
+                // Use the prepared indirect jump switch statement.
+                LLVMBuildStore(self.builder, target, self.section.indirect_target_var);
+                LLVMBuildStore(
+                    self.builder,
+                    LLVMConstInt(LLVMInt32Type(), self.addr as u64, 0),
+                    self.section.indirect_addr_var,
+                );
+                LLVMBuildBr(self.builder, self.section.indirect_bb);
+            }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
@@ -2675,6 +2723,160 @@ impl<'a> InstructionTranslator<'a> {
         sext: bool,
     ) -> LLVMValueRef {
         self.read_mem(LLVMBuildAdd(self.builder, base, offset, NONAME), size, sext)
+    }
+
+    /// Emit the code to check for any interrupt
+    unsafe fn emit_irq_check(&self) {
+        // Update irq_sample_ctr
+        let irq_sample_ctr = LLVMBuildLoad(self.builder, self.irq_sample_ptr(), NONAME);
+        let irq_sample_ctr = LLVMBuildAdd(
+            self.builder,
+            irq_sample_ctr,
+            LLVMConstInt(LLVMTypeOf(irq_sample_ctr), 1, 0),
+            NONAME,
+        );
+        LLVMBuildStore(self.builder, irq_sample_ctr, self.irq_sample_ptr());
+
+        // Create two BB, one for IRQ check (bb_prel_irq) one for normal execution (bb_noirq)
+        let bb_noirq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        let bb_prel_irq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_noirq);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_prel_irq);
+
+        // check sampler and branch to bb_prel_irq on overflow
+        let is_sample = LLVMBuildICmp(
+            self.builder,
+            LLVMIntUGE,
+            irq_sample_ctr,
+            LLVMConstInt(
+                LLVMTypeOf(irq_sample_ctr),
+                self.section.engine.config.interrupt_latency as u64,
+                0,
+            ),
+            NONAME,
+        );
+        LLVMBuildCondBr(self.builder, is_sample, bb_prel_irq, bb_noirq);
+        LLVMPositionBuilderAtEnd(self.builder, bb_prel_irq);
+
+        // reset sampler
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMTypeOf(irq_sample_ctr), 0, 0),
+            self.irq_sample_ptr(),
+        );
+
+        // Fetch IRQ status
+        let mip_old = self.read_csr_silent(riscv::Csr::Mip as u32);
+        // read CLINT and update mip
+        let clint_ret = self
+            .section
+            .emit_call("banshee_check_clint", [self.section.state_ptr]);
+        // mip = (mip_old & ~(1 << 3)) | (clint_ret << 3) // set MSIP bit
+        let mip = LLVMBuildOr(
+            self.builder,
+            LLVMBuildAnd(
+                self.builder,
+                mip_old,
+                LLVMConstInt(LLVMInt32Type(), !(1 << 3), 0),
+                NONAME,
+            ),
+            LLVMBuildShl(
+                self.builder,
+                clint_ret,
+                LLVMConstInt(LLVMInt32Type(), 3, 0),
+                NONAME,
+            ),
+            NONAME,
+        );
+        self.write_csr_silent(riscv::Csr::Mip as u32, mip);
+
+        // fetch CSRs
+        let mstatus = self.read_csr_silent(riscv::Csr::Mstatus as u32);
+        let mie = self.read_csr_silent(riscv::Csr::Mie as u32);
+
+        // AND the IE and IP registers
+        let mirq = LLVMBuildAnd(self.builder, mie, mip, NONAME);
+        // mask the mirq with the global mie bit in mstatus
+        let mstatus_mie = LLVMBuildAnd(
+            self.builder,
+            mstatus,
+            LLVMConstInt(LLVMInt32Type(), 1 << 3, 0),
+            NONAME,
+        );
+        let is_mstatus_mie = LLVMBuildICmp(
+            self.builder,
+            LLVMIntNE,
+            mstatus_mie,
+            LLVMConstInt(LLVMInt32Type(), 0, 0),
+            NONAME,
+        );
+        let is_any_interrupt_pending = LLVMBuildICmp(
+            self.builder,
+            LLVMIntNE,
+            mirq,
+            LLVMConstInt(LLVMInt32Type(), 0, 0),
+            NONAME,
+        );
+        let is_irq = LLVMBuildAnd(
+            self.builder,
+            is_mstatus_mie,
+            is_any_interrupt_pending,
+            NONAME,
+        );
+        // Create BB for IRQ
+        let bb_irq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_irq);
+
+        // branch to IRQ branch on any interrupt
+        LLVMBuildCondBr(self.builder, is_irq, bb_irq, bb_noirq);
+        LLVMPositionBuilderAtEnd(self.builder, bb_irq);
+
+        // irq case: disable mstatus.mie and store mstatus.mpie
+        // clear mie and mpie bits, set mpie bit with value of mstatus.mie and write CSR
+        let mstatus_wb = LLVMBuildOr(
+            self.builder,
+            LLVMBuildAnd(
+                self.builder,
+                mstatus,
+                LLVMConstInt(LLVMInt32Type(), !((1 << 3) | (1 << 7)), 0),
+                NONAME,
+            ),
+            LLVMBuildShl(
+                self.builder,
+                mstatus_mie,
+                LLVMConstInt(LLVMInt32Type(), 4, 0),
+                NONAME,
+            ),
+            NONAME,
+        );
+        self.write_csr_silent(riscv::Csr::Mstatus as u32, mstatus_wb);
+
+        // Set mcause register
+        // TODO: Get correct cause, currently only settings machine software interrupt
+        self.write_csr_silent(
+            riscv::Csr::Mcause as u32,
+            LLVMConstInt(LLVMInt32Type(), (1 << 31) | 3, 0),
+        );
+
+        // load mtvec address from CSR
+        let target = self.read_csr_silent(riscv::Csr::Mtvec as u32);
+        // write the next PC to MEPC CSR
+        self.write_csr_silent(
+            riscv::Csr::Mepc as u32,
+            LLVMConstInt(LLVMInt32Type(), self.addr, 0),
+        );
+
+        // Use the prepared indirect jump switch statement.
+        LLVMBuildStore(self.builder, target, self.section.indirect_target_var);
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMInt32Type(), self.addr as u64, 0),
+            self.section.indirect_addr_var,
+        );
+        LLVMBuildBr(self.builder, self.section.indirect_bb);
+
+        // no irq case
+        LLVMPositionBuilderAtEnd(self.builder, bb_noirq);
     }
 
     /// Emit the code for instruction tracing.
@@ -3441,9 +3643,11 @@ impl<'a> InstructionTranslator<'a> {
             [
                 self.section.state_ptr,
                 LLVMConstInt(LLVMInt16Type(), csr as u64, 0),
+                // notrace
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
             ]
             .as_mut_ptr(),
-            2,
+            3,
             NONAME,
         )
     }
@@ -3460,9 +3664,52 @@ impl<'a> InstructionTranslator<'a> {
                 self.section.state_ptr,
                 LLVMConstInt(LLVMInt16Type(), csr as u64, 0),
                 data,
+                // notrace
+                LLVMConstInt(LLVMInt32Type(), 0, 0),
+            ]
+            .as_mut_ptr(),
+            4,
+            NONAME,
+        );
+    }
+
+    /// Emit the code necessary to read a value from a register.
+    unsafe fn read_csr_silent(&self, csr: u32) -> LLVMValueRef {
+        LLVMBuildCall(
+            self.builder,
+            LLVMGetNamedFunction(
+                self.section.engine.modules[self.section.elf.cluster_id],
+                "banshee_csr_read\0".as_ptr() as *const _,
+            ),
+            [
+                self.section.state_ptr,
+                LLVMConstInt(LLVMInt16Type(), csr as u64, 0),
+                // notrace
+                LLVMConstInt(LLVMInt32Type(), 1, 0),
             ]
             .as_mut_ptr(),
             3,
+            NONAME,
+        )
+    }
+
+    /// Emit the code necessary to write a value to a register.
+    unsafe fn write_csr_silent(&self, csr: u32, data: LLVMValueRef) {
+        LLVMBuildCall(
+            self.builder,
+            LLVMGetNamedFunction(
+                self.section.engine.modules[self.section.elf.cluster_id],
+                "banshee_csr_write\0".as_ptr() as *const _,
+            ),
+            [
+                self.section.state_ptr,
+                LLVMConstInt(LLVMInt16Type(), csr as u64, 0),
+                data,
+                // notrace
+                LLVMConstInt(LLVMInt32Type(), 1, 0),
+            ]
+            .as_mut_ptr(),
+            4,
             NONAME,
         );
     }
@@ -3526,6 +3773,14 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn pc_ptr(&self) -> LLVMValueRef {
         self.section
             .emit_call_with_name("banshee_pc_ptr", [self.section.state_ptr], "ptr_pc")
+    }
+
+    unsafe fn irq_sample_ptr(&self) -> LLVMValueRef {
+        self.section.emit_call_with_name(
+            "banshee_irq_sample_ptr",
+            [self.section.state_ptr],
+            "irq_sample_ptr",
+        )
     }
 
     unsafe fn cycle_ptr(&self) -> LLVMValueRef {

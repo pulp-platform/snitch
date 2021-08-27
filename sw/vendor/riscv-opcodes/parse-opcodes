@@ -267,6 +267,9 @@ csrs = [
   (0xF12, 'marchid'),
   (0xF13, 'mimpid'),
   (0xF14, 'mhartid'),
+
+  # Custom CSR
+  (0x7C0, 'ssr'),
 ]
 
 csrs32 = [
@@ -600,6 +603,16 @@ def make_rust():
   print("        }")
   print("    }")
   print("}")
+
+  # Emit CSR enum
+  print("/// CSR")
+  print("#[derive(Debug, Copy, Clone)]")
+  print("#[repr(C)]")
+  print("pub enum Csr {")
+  for csr in csrs+csrs32:
+    print(f'    {make_camel_case(csr[1])} = 0x{csr[0]:03x},')
+  print("}")
+
 
 
 def make_py(match,mask):

@@ -316,3 +316,10 @@ pub unsafe fn banshee_dma_stat(dma: &DmaState, addr: u32) -> u32 {
         _ => 0,
     }
 }
+
+/// Get a pointer to the IRQ sample counter
+#[no_mangle]
+#[inline(always)]
+pub unsafe fn banshee_irq_sample_ptr<'a>(cpu: &'a mut Cpu) -> &'a mut u32 {
+    &mut cpu.state.irq.sample_ctr
+}

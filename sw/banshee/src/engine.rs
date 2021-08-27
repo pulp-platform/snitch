@@ -37,6 +37,8 @@ pub struct Engine {
     pub opt_llvm: bool,
     /// Optimize during JIT compilation.
     pub opt_jit: bool,
+    /// Enable interrupt support.
+    pub interrupt: bool,
     /// Enable instruction tracing.
     pub trace: bool,
     /// Enable instruction latency.
@@ -73,6 +75,7 @@ impl Engine {
             had_error: Default::default(),
             opt_llvm: true,
             opt_jit: true,
+            interrupt: true,
             trace: false,
             latency: false,
             base_hartid: 0,
@@ -373,6 +376,12 @@ impl Engine {
             .map(|_| AtomicU64::new(0))
             .collect();
 
+        // Allocate CLINT registers
+        let ncores = self.num_clusters * self.num_cores;
+        let clint: Vec<_> = (0..(ncores + 32 - 1) / 32)
+            .map(|_| AtomicU32::new(0))
+            .collect();
+
         // Create the CPUs.
         let cpus: Vec<_> = (0..self.num_clusters)
             .flat_map(|j| (0..self.num_cores).map(move |i| (j, i)))
@@ -389,6 +398,7 @@ impl Engine {
                     &barriers[j],
                     &num_sleep,
                     &wake_up,
+                    &clint,
                 )
             })
             .collect();
@@ -486,6 +496,10 @@ pub unsafe fn add_llvm_symbols() {
         b"banshee_wfi\0".as_ptr() as *const _,
         Cpu::binary_wfi as *mut _,
     );
+    LLVMAddSymbol(
+        b"banshee_check_clint\0".as_ptr() as *const _,
+        Cpu::binary_check_clint as *mut _,
+    );
 }
 
 // /// A representation of the system state.
@@ -508,6 +522,7 @@ impl CpuState {
             ssr_enable: 0,
             wfi: false,
             dma: Default::default(),
+            irq: Default::default(),
         }
     }
 }
@@ -525,6 +540,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         barrier: &'b AtomicUsize,
         num_sleep: &'b AtomicUsize,
         wake_up: &'b Vec<AtomicU64>,
+        clint: &'b Vec<AtomicU32>,
     ) -> Self {
         Self {
             engine,
@@ -538,6 +554,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             barrier,
             num_sleep,
             wake_up,
+            clint,
         }
     }
 
@@ -582,6 +599,17 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     addr - self.engine.config.memory[self.cluster_id].periphs.start,
                     size,
                 )
+            }
+            // access to the CLINT
+            x if x >= self.engine.config.address.clint
+                && x < self.engine.config.address.clint + 0x1000 =>
+            {
+                trace!(
+                    "CLINT Load off 0x{:x}",
+                    addr as u64 - self.engine.config.address.clint as u64
+                );
+                let word_addr = (addr - self.engine.config.address.clint) / 4;
+                self.clint[word_addr as usize].load(Ordering::Relaxed)
             }
             _ => {
                 trace!("Load 0x{:x} ({}B)", addr, 8 << size);
@@ -669,7 +697,26 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     size,
                 )
             }
+            // access to the CLINT
+            x if x >= self.engine.config.address.clint
+                && x < self.engine.config.address.clint + 0x1000 =>
+            {
+                let word_addr = (addr - self.engine.config.address.clint) / 4;
+                trace!("CLINT store word off {:x} = 0x{:x}", word_addr, value,);
+                let old_entry = self.clint[word_addr as usize].load(Ordering::Relaxed);
+                let entry = (old_entry & !mask) | (value & mask);
+                self.clint[word_addr as usize].store(entry, Ordering::Relaxed);
+                // wake cores affected by this write
 
+                let hart_base = 32 * word_addr;
+                for i in 0..32 {
+                    if ((!old_entry & entry) & (1 << i)) != 0 {
+                        self.num_sleep.fetch_sub(1, Ordering::Relaxed);
+                        self.wake_up[(hart_base + i) as usize]
+                            .fetch_max(self.state.cycle + 1, Ordering::Release);
+                    }
+                }
+            }
             _ => {
                 trace!(
                     "Store 0x{:x} = 0x{:x} if 0x{:x} ({}B)",
@@ -714,23 +761,43 @@ impl<'a, 'b> Cpu<'a, 'b> {
         prev as u32
     }
 
-    fn binary_csr_read(&self, csr: u16) -> u32 {
-        trace!("Read CSR 0x{:x}", csr);
+    fn binary_csr_read(&self, csr: riscv::Csr, notrace: u32) -> u32 {
+        if notrace == 0 {
+            trace!("Read CSR {:?}", csr);
+        }
         match csr {
-            0x7C0 => self.state.ssr_enable,
-            0xB00 => self.state.cycle as u32,         // csr_mcycle
-            0xB80 => (self.state.cycle >> 32) as u32, // csr_mcycleh
-            0xB02 => self.state.instret as u32,       // csr_minstret
-            0xB82 => (self.state.instret >> 32) as u32, // csr_minstreth
-            0xF14 => self.hartid as u32,              // mhartid
+            riscv::Csr::Ssr => self.state.ssr_enable,
+            riscv::Csr::Mcycle => self.state.cycle as u32, // csr_mcycle
+            riscv::Csr::Mcycleh => (self.state.cycle >> 32) as u32, // csr_mcycleh
+            riscv::Csr::Minstret => self.state.instret as u32, // csr_minstret
+            riscv::Csr::Minstreth => (self.state.instret >> 32) as u32, // csr_minstreth
+            riscv::Csr::Mhartid => self.hartid as u32,     // mhartid
+            riscv::Csr::Mstatus => self.state.irq.mstatus, // CSR_MSTATUS
+            riscv::Csr::Mie => self.state.irq.mie,         // CSR_MIE
+            riscv::Csr::Mip => self.state.irq.mip,         // CSR_MIP
+            riscv::Csr::Mtvec => self.state.irq.mtvec,     // CSR_MTVEC
+            riscv::Csr::Mepc => self.state.irq.mepc,       // CSR_MEPC
+            riscv::Csr::Mcause => self.state.irq.mcause,   // CSR_MCAUSE
+            riscv::Csr::Misa => {
+                // RV32IMAFDX A - Atomic Instructions extension
+                (1 << 0) | (1 << 3) | (1 << 5) | (1 << 8) | (1 << 12) | (1 << 23) | (1 << 30)
+            }
             _ => 0,
         }
     }
 
-    fn binary_csr_write(&mut self, csr: u16, value: u32) {
-        trace!("Write CSR 0x{:x} = 0x{:?}", csr, value);
+    fn binary_csr_write(&mut self, csr: riscv::Csr, value: u32, notrace: u32) {
+        if notrace == 0 {
+            trace!("Write CSR {:?} = 0x{:?}", csr, value);
+        }
         match csr {
-            0x7C0 => self.state.ssr_enable = value,
+            riscv::Csr::Ssr => self.state.ssr_enable = value,
+            riscv::Csr::Mstatus => self.state.irq.mstatus = value, // CSR_MSTATUS
+            riscv::Csr::Mie => self.state.irq.mie = value,         // CSR_MIE
+            riscv::Csr::Mip => self.state.irq.mip = value,         // CSR_MIP
+            riscv::Csr::Mtvec => self.state.irq.mtvec = value,     // CSR_MTVEC
+            riscv::Csr::Mepc => self.state.irq.mepc = value,       // CSR_MEPC
+            riscv::Csr::Mcause => self.state.irq.mcause = value,   // CSR_MCAUSE
             _ => (),
         }
     }
@@ -796,8 +863,17 @@ impl<'a, 'b> Cpu<'a, 'b> {
         let cycle = self.wake_up[hartid].swap(0, Ordering::Relaxed);
         self.state.cycle = std::cmp::max(self.state.cycle, cycle as u64);
         self.state.wfi = false;
+        // Trigger IRQ check on next instruction
+        self.state.irq.sample_ctr = u32::MAX - 1;
         // The core waking us up, already decremented the `num_sleep` counter for us
         return 0;
+    }
+
+    fn binary_check_clint(&mut self) -> u32 {
+        // read the clint software interrupt and return 1 if interrupt pending
+        let hartid = self.hartid - self.engine.base_hartid;
+        return (self.clint[(hartid / 32) as usize].load(Ordering::Relaxed) & (1 << (hartid % 32)))
+            >> (hartid % 32);
     }
 
     /// A simple barrier across all cores in the cluster.

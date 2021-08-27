@@ -170,8 +170,8 @@ def main():
     am_spim = am.new_leaf("spim", 0x20000,
                           0x03000000).attach_to(am_soc_regbus_periph_xbar)
 
-    am_clint = am.new_leaf("clint", 0x0100000,
-                           0x04000000).attach_to(am_soc_regbus_periph_xbar)
+    am_clint = am.new_leaf("clint", occamy.cfg["clint"]["length"],
+                           occamy.cfg["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
     dts.add_clint([0], am_clint)
 
     am_pcie_cfg = am.new_leaf("pcie_cfg", 0x20000,

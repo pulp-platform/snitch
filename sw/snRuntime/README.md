@@ -36,3 +36,14 @@ Interesting CMake options that can be set via `-D<option>=<value>`:
     - `toolchain-llvm` for a LLVM/Clang toolchain (coming soon)
     - Your own custom `<toolchain>.cmake` file; see `../cmake/toolchain-gcc.cmake` for reference
 - `MEM_DRAM_ORIGIN`/`MEM_DRAM_SIZE`: Base address and size of the external memory used for shared data and program memory
+
+## Adding a new entry to the device-tree
+
+On the example of adding a CLINT device:
+
+1. Add member `clint_base` to the `snrt_cluster_bootdata` struct in `start_cluster.c`
+2. Add the same member to the `BootData` struct in `tb_lib.hh`
+3. Add an enrty of the device in the cluster configuration `cluster.default.hjson`
+4. Add the same member to the `bootdata.cc.tpl` template and get the value from the member added in 3.
+5. Generate the bootdata.cc file by running cluster-gen `make cluster_gen`
+6. The value is now available at boot in `bootdata->clint_base`

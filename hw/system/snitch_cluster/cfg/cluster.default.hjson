@@ -74,6 +74,12 @@
         // 0x8000_0000
         length: 2147483648
     },
+    clint: {
+        // 0xffff_0000
+        address: 4294901760,
+        // 0x0000_1000
+        length: 4096
+    },
     // Templates.
     compute_core_template: {
         isa: "rv32imafd",
@@ -88,8 +94,16 @@
         num_itlb_entries: 1,
     },
     dma_core_template: {
-        isa: "rv32imafd",
-        # isa: "rv32ema",
+        isa: "rv32ima",
         xdma: true
+        xssr: false
+        xfrep: false
+        num_int_outstanding_loads: 1,
+        num_int_outstanding_mem: 4,
+        num_fp_outstanding_loads: 4,
+        num_fp_outstanding_mem: 4,
+        num_sequencer_instructions: 16,
+        num_dtlb_entries: 1,
+        num_itlb_entries: 1,
     }
 }

@@ -25,6 +25,7 @@ struct snrt_cluster_bootdata {
     uint64_t global_mem_end;
     uint32_t cluster_count;
     uint32_t s1_quadrant_count;
+    uint32_t clint_base;
 };
 
 // Rudimentary string buffer for putc calls.
@@ -44,7 +45,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
                      const struct snrt_cluster_bootdata *bootdata,
                      struct snrt_team_root *team) {
     team->base.root = team;
-    team->device_tree = (void *)bootdata;
+    team->bootdata = (void *)bootdata;
     team->global_core_base_hartid = bootdata->hartid_base;
     team->global_core_num = bootdata->core_count * bootdata->cluster_count *
                             bootdata->s1_quadrant_count;
@@ -78,6 +79,9 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     // the _snrt_init_team function is called once per thread before main, so
     // it's as good a point as any.
     putc_buffer[snrt_hartid()].hdr.size = 0;
+
+    // init peripherals
+    team->peripherals.clint = (uint32_t *)bootdata->clint_base;
 
     // Init allocator
     snrt_alloc_init(team);

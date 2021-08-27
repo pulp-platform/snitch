@@ -26,6 +26,8 @@ add_compile_options(-Wextra)
 add_compile_options(-static)
 # For SSR register merge we need to disable the scheduler
 add_compile_options(-mllvm -enable-misched=false)
+# LLD doesn't support relaxation for RISC-V yet
+add_compile_options(-mno-relax)
 
 ##
 ## Link options

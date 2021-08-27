@@ -15,6 +15,7 @@ address:
   cluster_base_hartid: 0x50000001
   cluster_num: 0x50000002
   cluster_id: 0x50000003
+  clint: 0xFFFF0000
 memory:
   tcdm:
     start: 0x0
