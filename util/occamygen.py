@@ -302,6 +302,8 @@ def main():
     soc_wide_xbar.add_input("pcie")
     soc_wide_xbar.add_output_entry("pcie", am_pcie)
 
+    soc_wide_xbar.add_output_entry("spm", am_spm)
+
     ###################
     # SoC Narrow Xbar #
     ###################
@@ -325,7 +327,6 @@ def main():
     dts.add_cpu("eth,ariane")
 
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
-    soc_narrow_xbar.add_output_entry("spm", am_spm)
     soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)

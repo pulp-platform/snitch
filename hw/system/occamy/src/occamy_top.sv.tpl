@@ -108,11 +108,11 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   assign soc_ctrl_in.boot_mode.d = boot_mode_i;
 
-  <% spm_words = cfg["spm"]["length"]//(soc_narrow_xbar.out_spm.dw//8) %>
+  <% spm_words = cfg["spm"]["length"]//(soc_wide_xbar.out_spm.dw//8) %>
 
-  typedef logic [${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)-1}:0] mem_addr_t;
-  typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;
-  typedef logic [${soc_narrow_xbar.out_spm.dw//8-1}:0] mem_strb_t;
+  typedef logic [${util.clog2(spm_words) + util.clog2(soc_wide_xbar.out_spm.dw//8)-1}:0] mem_addr_t;
+  typedef logic [${soc_wide_xbar.out_spm.dw-1}:0] mem_data_t;
+  typedef logic [${soc_wide_xbar.out_spm.dw//8-1}:0] mem_strb_t;
 
   logic spm_req, spm_gnt, spm_we, spm_rvalid;
   logic [1:0] spm_rerror;
@@ -232,7 +232,7 @@ module occamy_top
   //////////
   // SPM //
   //////////
-  <% narrow_spm_cdc = soc_narrow_xbar.out_spm \
+  <% wide_spm_cdc = soc_wide_xbar.out_spm \
                       .cdc(context, "clk_periph_i", "rst_periph_ni", "spm_cdc") \
                       .serialize(context, "spm_serialize", iw=1) \
                       .atomic_adapter(context, 16, "spm_amo_adapter") \
@@ -240,19 +240,19 @@ module occamy_top
   %>
 
   axi_to_mem #(
-    .axi_req_t (${narrow_spm_cdc.req_type()}),
-    .axi_resp_t (${narrow_spm_cdc.rsp_type()}),
-    .AddrWidth (${util.clog2(spm_words) + util.clog2(narrow_spm_cdc.dw//8)}),
-    .DataWidth (${narrow_spm_cdc.dw}),
-    .IdWidth (${narrow_spm_cdc.iw}),
+    .axi_req_t (${wide_spm_cdc.req_type()}),
+    .axi_resp_t (${wide_spm_cdc.rsp_type()}),
+    .AddrWidth (${util.clog2(spm_words) + util.clog2(wide_spm_cdc.dw//8)}),
+    .DataWidth (${wide_spm_cdc.dw}),
+    .IdWidth (${wide_spm_cdc.iw}),
     .NumBanks (1),
     .BufDepth (1)
   ) i_axi_to_mem (
-    .clk_i (${narrow_spm_cdc.clk}),
-    .rst_ni (${narrow_spm_cdc.rst}),
+    .clk_i (${wide_spm_cdc.clk}),
+    .rst_ni (${wide_spm_cdc.rst}),
     .busy_o (),
-    .axi_req_i (${narrow_spm_cdc.req_name()}),
-    .axi_resp_o (${narrow_spm_cdc.rsp_name()}),
+    .axi_req_i (${wide_spm_cdc.req_name()}),
+    .axi_resp_o (${wide_spm_cdc.rsp_name()}),
     .mem_req_o (spm_req),
     .mem_gnt_i (spm_gnt),
     .mem_addr_o (spm_addr),
@@ -266,17 +266,17 @@ module occamy_top
 
   spm_1p_adv #(
     .NumWords (${spm_words}),
-    .DataWidth (${narrow_spm_cdc.dw}),
+    .DataWidth (${wide_spm_cdc.dw}),
     .ByteWidth (8),
     .EnableInputPipeline (1'b1),
     .EnableOutputPipeline (1'b1)
   ) i_spm_cut (
-    .clk_i (${narrow_spm_cdc.clk}),
-    .rst_ni (${narrow_spm_cdc.rst}),
+    .clk_i (${wide_spm_cdc.clk}),
+    .rst_ni (${wide_spm_cdc.rst}),
     .valid_i (spm_req),
     .ready_o (spm_gnt),
     .we_i (spm_we),
-    .addr_i (spm_addr[${util.clog2(spm_words) + util.clog2(narrow_spm_cdc.dw//8)-1}:${util.clog2(narrow_spm_cdc.dw//8)}]),
+    .addr_i (spm_addr[${util.clog2(spm_words) + util.clog2(wide_spm_cdc.dw//8)-1}:${util.clog2(wide_spm_cdc.dw//8)}]),
     .wdata_i (spm_wdata),
     .be_i (spm_strb),
     .rdata_o (spm_rdata),

@@ -226,6 +226,7 @@ package occamy_pkg;
     SOC_WIDE_XBAR_OUT_HBM_7,
     SOC_WIDE_XBAR_OUT_SOC_NARROW,
     SOC_WIDE_XBAR_OUT_PCIE,
+    SOC_WIDE_XBAR_OUT_SPM,
     SOC_WIDE_XBAR_NUM_OUTPUTS
   } soc_wide_xbar_outputs_e;
 
@@ -298,7 +299,6 @@ package occamy_pkg;
     SOC_NARROW_XBAR_OUT_S1_QUADRANT_6,
     SOC_NARROW_XBAR_OUT_S1_QUADRANT_7,
     SOC_NARROW_XBAR_OUT_PERIPH,
-    SOC_NARROW_XBAR_OUT_SPM,
     SOC_NARROW_XBAR_OUT_SOC_WIDE,
     SOC_NARROW_XBAR_OUT_REGBUS_PERIPH,
     SOC_NARROW_XBAR_NUM_OUTPUTS
@@ -316,7 +316,7 @@ package occamy_pkg;
   AxiIdUsedSlvPorts:  4,
   AxiAddrWidth:       48,
   AxiDataWidth:       64,
-  NoAddrRules:        13
+  NoAddrRules:        12
 };
 
   // AXI bus with 48 bit address, 64 bit data, 4 bit IDs, and 0 bit user data.
@@ -478,8 +478,8 @@ package occamy_pkg;
   `AXI_TYPEDEF_ALL(axi_a48_d64_i3_u0, logic [47:0], logic [2:0], logic [63:0], logic [7:0],
                    logic [0:0])
 
-  // AXI bus with 48 bit address, 64 bit data, 1 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d64_i1_u0, logic [47:0], logic [0:0], logic [63:0], logic [7:0],
+  // AXI bus with 48 bit address, 512 bit data, 1 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d512_i1_u0, logic [47:0], logic [0:0], logic [511:0], logic [63:0],
                    logic [0:0])
 
   // AXI bus with 48 bit address, 32 bit data, 8 bit IDs, and 0 bit user data.
