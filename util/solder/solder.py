@@ -650,7 +650,9 @@ class AxiBus(object):
                 name,
                 inst_name=None,
                 to=None,
-                num_pending=128,
+                num_pending=16,
+                terminated=False,
+                atop_support=True,
                 isolated=None):
 
         # Generate the new bus.
@@ -681,6 +683,8 @@ class AxiBus(object):
                                name=inst_name or "i_{}".format(name),
                                isolate=isolate,
                                isolated=isolated or "",
+                               terminated=terminated,
+                               atop_support=atop_support,
                                num_pending=num_pending) + "\n")
         return bus
 

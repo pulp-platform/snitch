@@ -149,7 +149,13 @@ module occamy_quadrant_s1
   axi_a48_d64_i8_u0_resp_t narrow_cluster_in_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(128),
+      .NumPending(16),
+      .TerminateTransaction(1),
+      .AtopSupport(1),
+      .AxiIdWidth(8),
+      .AxiAddrWidth(48),
+      .AxiDataWidth(64),
+      .AxiUserWidth(1),
       .req_t(axi_a48_d64_i8_u0_req_t),
       .resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_narrow_cluster_in_isolate (
@@ -162,6 +168,7 @@ module occamy_quadrant_s1
       .isolate_i(isolate_i[0]),
       .isolated_o(isolated_o[0])
   );
+
   axi_id_remap #(
       .AxiSlvPortIdWidth(8),
       .AxiSlvPortMaxUniqIds(4),
@@ -210,7 +217,13 @@ module occamy_quadrant_s1
   axi_a48_d64_i4_u0_resp_t narrow_cluster_out_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(128),
+      .NumPending(16),
+      .TerminateTransaction(0),
+      .AtopSupport(1),
+      .AxiIdWidth(4),
+      .AxiAddrWidth(48),
+      .AxiDataWidth(64),
+      .AxiUserWidth(1),
       .req_t(axi_a48_d64_i4_u0_req_t),
       .resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_narrow_cluster_out_isolate (
@@ -223,6 +236,7 @@ module occamy_quadrant_s1
       .isolate_i(isolate_i[1]),
       .isolated_o(isolated_o[1])
   );
+
 
 
   assign quadrant_narrow_out_req_o = narrow_cluster_out_isolate_req;
@@ -258,7 +272,13 @@ module occamy_quadrant_s1
   axi_a48_d512_i3_u0_resp_t wide_cluster_out_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(128),
+      .NumPending(16),
+      .TerminateTransaction(0),
+      .AtopSupport(0),
+      .AxiIdWidth(3),
+      .AxiAddrWidth(48),
+      .AxiDataWidth(512),
+      .AxiUserWidth(1),
       .req_t(axi_a48_d512_i3_u0_req_t),
       .resp_t(axi_a48_d512_i3_u0_resp_t)
   ) i_wide_cluster_out_isolate (
@@ -271,6 +291,7 @@ module occamy_quadrant_s1
       .isolate_i(isolate_i[3]),
       .isolated_o(isolated_o[3])
   );
+
 
 
   assign quadrant_wide_out_req_o = wide_cluster_out_isolate_req;
@@ -314,7 +335,13 @@ module occamy_quadrant_s1
   axi_a48_d512_i8_u0_resp_t wide_cluster_in_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(128),
+      .NumPending(16),
+      .TerminateTransaction(1),
+      .AtopSupport(0),
+      .AxiIdWidth(8),
+      .AxiAddrWidth(48),
+      .AxiDataWidth(512),
+      .AxiUserWidth(1),
       .req_t(axi_a48_d512_i8_u0_req_t),
       .resp_t(axi_a48_d512_i8_u0_resp_t)
   ) i_wide_cluster_in_isolate (
@@ -327,6 +354,7 @@ module occamy_quadrant_s1
       .isolate_i(isolate_i[2]),
       .isolated_o(isolated_o[2])
   );
+
   axi_id_remap #(
       .AxiSlvPortIdWidth(8),
       .AxiSlvPortMaxUniqIds(4),
