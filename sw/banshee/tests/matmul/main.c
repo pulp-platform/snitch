@@ -17,7 +17,11 @@ static void populate(double *ptr, uint32_t N, uint32_t M, uint32_t ld,
     }
 }
 
-int main(uint32_t core_id, uint32_t core_num) {
+int main(void) {
+    extern uint32_t nr_cores_address_reg;
+    uint32_t core_num = *((uint32_t*)nr_cores_address_reg);
+    uint32_t core_id = read_csr(mhartid);
+
     pulp_timer_t start_time, stop_time;
     uint32_t compute_core_num = core_num;
     if (input_size < compute_core_num) compute_core_num = input_size;

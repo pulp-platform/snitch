@@ -82,7 +82,10 @@ static int check_amos(volatile uint32_t* const addr) {
     return 0;
 }
 
-int main(uint32_t core_id, uint32_t core_num) {
+int main(void) {
+    extern uint32_t nr_cores_address_reg;
+    uint32_t core_num = *((uint32_t*)nr_cores_address_reg);
+
     volatile uint32_t* l1 = (void*)&l1_alloc_base;
     // Test hardcoded for 8 cores
     if (core_num != 8) return -1;

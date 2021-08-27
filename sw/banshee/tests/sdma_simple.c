@@ -6,19 +6,23 @@
 
 #include <stdint.h>
 
+#include "runtime.h"
+
 #define NELEM 128
 
 static volatile uint8_t src_buf[NELEM];
 static volatile uint8_t dst_buf[NELEM];
 
-int main(int hartid) {
+int main(void) {
+
     uint64_t src, dst;
     uint32_t size = 10, cfg = 0, tid, sstrd, dstrd, nreps;
     unsigned errs = 0;
 
 #ifdef VSIM
+    uint32_t core_id = read_csr(mhartid);
     // but non-dma cores to sleep
-    if (hartid != 8) asm("wfi");
+    if (core_id != 8) asm("wfi");
 #endif
 
     for (int i = 0; i < NELEM; ++i) src_buf[i] = (uint8_t)i;

@@ -49,7 +49,11 @@ uint32_t wait_fence();
 void push_fifo(uint32_t val);
 uint32_t pop_fifo();
 
-int main(uint32_t core_id, uint32_t core_num) {
+int main(void) {
+    extern uint32_t nr_cores_address_reg;
+    uint32_t core_num = *((uint32_t*)nr_cores_address_reg);
+    uint32_t core_id = read_csr(mhartid);
+
     set_fence(core_num * *cluster_num);
     switch (*cluster_id) {
         case 0:

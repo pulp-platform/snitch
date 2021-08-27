@@ -4,7 +4,11 @@
 
 #include "runtime.h"
 
-int main(uint32_t core_id, uint32_t core_num) {
+int main(void) {
+    extern uint32_t nr_cores_address_reg;
+    uint32_t core_num = *((uint32_t*)nr_cores_address_reg);
+    uint32_t core_id = read_csr(mhartid);
+    
     volatile uint32_t *x = (void *)&l1_alloc_base;
     if (core_id == 0) {
         *x = 0;

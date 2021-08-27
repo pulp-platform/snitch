@@ -8,10 +8,12 @@ _start:
     li      a0, 1
     li      t0, 0
     li      t1, 1
-1:  bne     t0, t1, .+2468
+1:  bne     t0, t1, fix
     j       end
-    # Fill in some padding bytes
-    .fill   1b+2468-., 1, 0
+
+# Fill in some padding bytes
+.fill   2468
+
 fix:
     li      a0, 0
 end:
