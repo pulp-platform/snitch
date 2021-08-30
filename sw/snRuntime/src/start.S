@@ -35,7 +35,16 @@ snrt.crt0.init_core_info:
 
     # Clear the bss segment.
 snrt.crt0.init_bss:
-    bnez      a0, 2f  # only core 0 (TODO: this should be one core globally, not per cluster)
+    # Takes device tree ptr as argument and returns the hart base ID
+    mv        s0, a0 # store a0 in s0 since we dont have a stack yet
+    mv        a0, a4
+    call      _snrt_get_base_hartid
+    mv        t0, a0
+    mv        a0, s0
+    # only core 0. t0: return value base hartid
+    csrr      t1, mhartid
+    sub       t0, t1, t0
+    bnez      t0, 2f
     la        t0, _edata
     la        t1, _end
     bge       t0, t1, 2f

@@ -52,3 +52,8 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
 void snrt_putchar(char character) {
     *(volatile uint32_t *)0xF00B8000 = character;
 }
+
+uint32_t _snrt_get_base_hartid(void) {
+    return _snrt_banshee_cluster_base_hartid -
+           _snrt_banshee_cluster_id * _snrt_banshee_cluster_core_num;
+}

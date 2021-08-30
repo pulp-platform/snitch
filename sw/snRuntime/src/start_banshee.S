@@ -16,6 +16,7 @@ _snrt_init_core_info:
     csrr      a0, mhartid  # shift core's hartid such that first core is 0
     sub       a0, a0, t0
     lw        a1, nr_cores_address_reg   # load the number of cores per cluster
+    remu      a0, a0, a1                 # calculate cluster-local core id
     lw        a2, tcdm_start_address_reg # start address of the TCDM
     lw        a3, tcdm_end_address_reg   # end address of the TCDM
     ret

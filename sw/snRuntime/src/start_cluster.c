@@ -111,3 +111,7 @@ void snrt_putchar(char character) {
         buf->hdr.size = 0;
     }
 }
+
+uint32_t _snrt_get_base_hartid(const struct snrt_cluster_bootdata *bootdata) {
+    return bootdata->hartid_base;
+}
