@@ -23,7 +23,7 @@ int main() {
         for (unsigned i = 1; i < core_num; i++) {
             tprintf("IRQ %d ..", i);
             INTERRUPT_FLAG = -1;
-            snrt_int_sw_set(i);
+            snrt_int_sw_set(snrt_global_core_base_hartid() + i);
             while (INTERRUPT_FLAG != (int)i)
                 ;
             tprintf("OK\n", INTERRUPT_FLAG);
@@ -42,7 +42,7 @@ int main() {
         for (unsigned i = 1; i < core_num; i++) {
             tprintf("trig %d .. ", i);
             INTERRUPT_FLAG = -1;
-            snrt_int_sw_set(i);
+            snrt_int_sw_set(snrt_global_core_base_hartid() + i);
             while (INTERRUPT_FLAG != ((int)i << 8))
                 ;
             tprintf("OK\n", INTERRUPT_FLAG);
@@ -51,13 +51,13 @@ int main() {
         snrt_interrupt_enable(IRQ_M_SOFT);
         asm volatile("wfi");
         if (snrt_interrupt_cause() & IRQ_M_SOFT) {
-            snrt_int_sw_clear(core_idx);
+            snrt_int_sw_clear(snrt_global_core_base_hartid() + core_idx);
             INTERRUPT_FLAG = core_idx << 8;
         }
     }
 }
 
 void irq_m_soft(uint32_t core_idx) {
-    snrt_int_sw_clear(core_idx);
+    snrt_int_sw_clear(snrt_global_core_base_hartid() + core_idx);
     INTERRUPT_FLAG = core_idx;
 }
