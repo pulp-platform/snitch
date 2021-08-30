@@ -120,6 +120,18 @@ pub enum FlexfloatOpCmp {
     Fne
 }
 
+#[derive(Debug, Clone, Copy)]
+#[repr(C)]
+pub enum FlexfloatOpExp {
+    FaddexSH,
+    FmulexSH,
+    FmacexSH,
+    FmulexSB,
+    FaddexHB,
+    FmulexHB,
+    FmacexHB,
+}
+
 /// return the sign of the flexfloat
 pub fn flexfloat_sign(a: *const flexfloat_t) -> bool
 {
@@ -775,6 +787,139 @@ pub unsafe fn ff_instruction_h(rs1: u16, rs2: u16, rs3: u16, op: FlexfloatOp, fp
     rd as u16
 }
 
+// fp16 to fp32 expansion instructions
+pub unsafe fn ff_fp16_to_fp32_op(rs1: u16, rs2: u16, rs3: f32, op: FlexfloatOpExp, fpmode_src: bool) -> f32 {
+
+    let env : flexfloat_desc_t = if fpmode_src {
+        env_fp16alt
+    } else {
+        env_fp16
+    };
+
+    let ff_a : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env
+        };
+
+    let ff_b : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env
+        };
+    let ff_c : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env_fp32
+    };
+
+    let ff_res : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env_fp32
+        };
+
+    flexfloat_set_bits(ff_a, rs1 as u64);
+    flexfloat_set_bits(ff_b, rs2 as u64);
+    ff_init_float(ff_c, rs3, env_fp32);
+
+
+    match op {
+        FlexfloatOpExp::FaddexSH   => ff_add_any(ff_res, ff_a, ff_b),
+        FlexfloatOpExp::FmulexSH   => ff_mul_any(ff_res, ff_a, ff_b),
+        FlexfloatOpExp::FmacexSH   => ff_fma_any(ff_res, ff_a, ff_b, ff_c),
+        _ => (),
+    };
+
+    let rd = ff_get_float(ff_res);
+    rd as f32
+}
+
+// fp8 to fp16 expansion instructions
+pub unsafe fn ff_fp8_to_fp16_op(rs1: u8, rs2: u8, rs3: u16, op: FlexfloatOpExp, fpmode_src: bool, fpmode_dst: bool) -> u16 {
+
+    let env8 : flexfloat_desc_t = if fpmode_src {
+        env_fp8alt
+    } else {
+        env_fp8
+    };
+
+    let env16 : flexfloat_desc_t = if fpmode_dst {
+        env_fp16alt
+    } else {
+        env_fp16
+    };
+
+
+
+    let ff_a : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env8
+        };
+
+    let ff_b : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env8
+        };
+    let ff_c : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env16
+    };
+
+    let ff_res : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env16
+    };
+
+    flexfloat_set_bits(ff_a, rs1 as u64);
+    flexfloat_set_bits(ff_b, rs2 as u64);
+    flexfloat_set_bits(ff_c, rs3 as u64);
+
+    match op {
+        FlexfloatOpExp::FaddexHB  => ff_add_any(ff_res, ff_a, ff_b),
+        FlexfloatOpExp::FmulexHB  => ff_mul_any(ff_res, ff_a, ff_b),
+        FlexfloatOpExp::FmacexHB  => ff_fma_any(ff_res, ff_a, ff_b, ff_c),
+        _ => (),
+    };
+
+    let rd = flexfloat_get_bits(ff_res);
+    rd as u16
+}
+
+pub unsafe fn ff_fp8_to_fp32_op(rs1: u8, rs2: u8, _rs3: f32, op: FlexfloatOpExp, fpmode_src: bool) -> f32 {
+
+    let env8 : flexfloat_desc_t = if fpmode_src {
+        env_fp8alt
+    } else {
+        env_fp8
+    };
+
+    let ff_a : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env8
+        };
+
+    let ff_b : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env8
+        };
+    // let ff_c : *mut flexfloat_t = &mut flexfloat_t {
+    //         value: 0.0,
+    //         desc: env_fp32
+    // };
+
+    let ff_res : *mut flexfloat_t = &mut flexfloat_t {
+            value: 0.0,
+            desc: env_fp32
+    };
+
+    flexfloat_set_bits(ff_a, rs1 as u64);
+    flexfloat_set_bits(ff_b, rs2 as u64);
+
+    match op {
+        FlexfloatOpExp::FmulexSB  => ff_mul_any(ff_res, ff_a, ff_b),
+        _ => (),
+    };
+
+    let rd = ff_get_float(ff_res);
+    rd as f32
+}
 /// convert double to int
 pub unsafe fn double_to_int(dbl_orig: f64) -> i32 {
     let dbl : f64 = if dbl_orig>=0.0 {

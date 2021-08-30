@@ -553,6 +553,18 @@ pub unsafe fn add_llvm_symbols() {
         b"banshee_fp8_op\0".as_ptr() as *const _,
         Cpu::fp8_op as *mut _,
     );
+    LLVMAddSymbol(
+        b"banshee_fp16_to_fp32_op\0".as_ptr() as *const _,
+        Cpu::fp16_to_fp32_op as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_to_fp16_op\0".as_ptr() as *const _,
+        Cpu::fp8_to_fp16_op as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_to_fp32_op\0".as_ptr() as *const _,
+        Cpu::fp8_to_fp32_op as *mut _,
+    );
 }
 
 // /// A representation of the system state.
@@ -1036,11 +1048,18 @@ impl<'a, 'b> Cpu<'a, 'b> {
     pub unsafe fn fp16_op(rs1: u16, rs2: u16, rs3: u16, op: flexfloat::FlexfloatOp, fpmode_dst: bool) -> u16 {
         flexfloat::ff_instruction_h(rs1, rs2, rs3, op, fpmode_dst)
     }
-
     pub unsafe fn fp8_op(rs1: u8, rs2: u8, rs3: u8, op: flexfloat::FlexfloatOp, fpmode_dst : bool) -> u8 {
         flexfloat::ff_instruction_b(rs1, rs2, rs3, op, fpmode_dst)
     }
-
+    pub unsafe fn fp16_to_fp32_op(rs1: u16, rs2: u16, rs3: f32, op: flexfloat::FlexfloatOpExp, fpmode_src: bool) -> f32 {
+        flexfloat::ff_fp16_to_fp32_op(rs1, rs2, rs3, op, fpmode_src)
+    }
+    pub unsafe fn fp8_to_fp16_op(rs1: u8, rs2: u8, rs3: u16, op: flexfloat::FlexfloatOpExp, fpmode_src: bool, fpmode_dst: bool) -> u16 {
+        flexfloat::ff_fp8_to_fp16_op(rs1, rs2, rs3, op, fpmode_src, fpmode_dst)
+    }
+    pub unsafe fn fp8_to_fp32_op(rs1: u8, rs2: u8, rs3: f32, op: flexfloat::FlexfloatOpExp, fpmode_src: bool) -> f32 {
+        flexfloat::ff_fp8_to_fp32_op(rs1, rs2, rs3, op, fpmode_src)
+    }
 }
 
 /// A single register or memory access as recorded in a trace.
