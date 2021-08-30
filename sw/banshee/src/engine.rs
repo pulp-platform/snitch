@@ -502,18 +502,6 @@ pub unsafe fn add_llvm_symbols() {
         Cpu::binary_check_clint as *mut _,
     );
     LLVMAddSymbol(
-        b"banshee_fhop\0".as_ptr() as *const _,
-        Cpu::fhop as *mut _,
-    );
-    LLVMAddSymbol(
-        b"banshee_fcvth\0".as_ptr() as *const _,
-        Cpu::fcvth as *mut _,
-    );
-    LLVMAddSymbol(
-        b"banshee_fp16_op_cvt\0".as_ptr() as *const _,
-        Cpu::fp16_op_cvt as *mut _,
-    );
-    LLVMAddSymbol(
         b"banshee_fp16_op_cvt_from_f\0".as_ptr() as *const _,
         Cpu::fp16_op_cvt_from_f as *mut _,
     );
@@ -585,6 +573,7 @@ impl CpuState {
             instret: 0,
             ssrs: (0..num_dm).map(|_| Default::default()).collect(),
             ssr_enable: 0,
+            fpmode: 0,
             wfi: false,
             dma: Default::default(),
             irq: Default::default(),
@@ -833,7 +822,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         }
         match csr {
             riscv::Csr::Ssr => self.state.ssr_enable,
-            riscv::Csr::Fpmode => self.state.fpmode as u32
+            riscv::Csr::Fpmode => self.state.fpmode as u32,
             riscv::Csr::Mcycle => self.state.cycle as u32, // csr_mcycle
             riscv::Csr::Mcycleh => (self.state.cycle >> 32) as u32, // csr_mcycleh
             riscv::Csr::Minstret => self.state.instret as u32, // csr_minstret
