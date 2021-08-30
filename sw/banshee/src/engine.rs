@@ -377,8 +377,8 @@ impl Engine {
             .collect();
 
         // Allocate CLINT registers
-        let ncores = self.num_clusters * self.num_cores;
-        let clint: Vec<_> = (0..(ncores + 32 - 1) / 32)
+        let n_virt_cores = self.num_clusters * self.num_cores + self.base_hartid;
+        let clint: Vec<_> = (0..(n_virt_cores + 32 - 1) / 32)
             .map(|_| AtomicU32::new(0))
             .collect();
 
@@ -708,11 +708,12 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 self.clint[word_addr as usize].store(entry, Ordering::Relaxed);
                 // wake cores affected by this write
 
-                let hart_base = 32 * word_addr;
+                let hart_base = 32 * word_addr as i32 - self.engine.base_hartid as i32;
                 for i in 0..32 {
                     if ((!old_entry & entry) & (1 << i)) != 0 {
+                        trace!("  wake_up[{}] PING", (hart_base + i as i32) as usize);
                         self.num_sleep.fetch_sub(1, Ordering::Relaxed);
-                        self.wake_up[(hart_base + i) as usize]
+                        self.wake_up[(hart_base + i as i32) as usize]
                             .fetch_max(self.state.cycle + 1, Ordering::Release);
                     }
                 }
@@ -871,7 +872,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
 
     fn binary_check_clint(&mut self) -> u32 {
         // read the clint software interrupt and return 1 if interrupt pending
-        let hartid = self.hartid - self.engine.base_hartid;
+        let hartid = self.hartid;
         return (self.clint[(hartid / 32) as usize].load(Ordering::Relaxed) & (1 << (hartid % 32)))
             >> (hartid % 32);
     }
