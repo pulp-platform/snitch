@@ -8,8 +8,8 @@
 
 int reboot = 0;
 
-#define tprintf(f_, ...) printf((f_), __VA_ARGS__)
-// #define tprintf(f_, ...) while (0
+// #define tprintf(f_, ...) printf((f_), __VA_ARGS__)
+#define tprintf(f_, ...) while (0)
 
 volatile static int32_t INTERRUPT_FLAG;
 
