@@ -23,6 +23,10 @@ struct snrt_peripherals *snrt_peripherals() {
     return &_snrt_team_current->root->peripherals;
 }
 
+uint32_t snrt_global_core_base_hartid() {
+    return _snrt_team_current->root->global_core_base_hartid;
+}
+
 uint32_t snrt_global_core_idx() {
     return snrt_hartid() - _snrt_team_current->root->global_core_base_hartid;
 }
