@@ -290,7 +290,7 @@
                                 },
                                 "Xdiv_sqrt": {
                                     "type": "boolean",
-                                    "description": "Enable hardware support for floating-point division and square-root",
+                                    "description": "Enable hardware support for floating-point division and square-root. The iterative floating-point unit is known to produce some rounding inaccuracies so it is disabled by default.",
                                     "default": false
                                 },
                                 "xssr": {

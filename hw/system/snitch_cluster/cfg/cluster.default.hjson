@@ -92,7 +92,7 @@
         num_sequencer_instructions: 16,
         num_dtlb_entries: 1,
         num_itlb_entries: 1,
-        // Enable division/quare root unit
+        // Enable division/square root unit
         // Xdiv_sqrt: true,
     },
     dma_core_template: {

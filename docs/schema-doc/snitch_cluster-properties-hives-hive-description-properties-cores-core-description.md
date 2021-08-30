@@ -71,7 +71,7 @@ The default value is:
 
 ## Xdiv_sqrt
 
-Enable hardware support for floating-point division and square-root
+Enable hardware support for floating-point division and square-root. The iterative floating-point unit is known to produce some rounding inaccuracies so it is disabled by default.
 
 `Xdiv_sqrt`
 
