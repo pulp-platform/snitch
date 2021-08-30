@@ -28,9 +28,9 @@ static struct data allocate_data(snrt_slice_t mem) {
     printf("Allocating %d elements\n", n);
 
     return (struct data){.n = n,
-                         .x = (double *)mem.start + 0 * n,
-                         .y = (double *)mem.start + 1 * n,
-                         .yo = (double *)mem.start + 2 * n};
+                         .x = (double *)snrt_l1alloc(sizeof(double) * n),
+                         .y = (double *)snrt_l1alloc(sizeof(double) * n),
+                         .yo = (double *)snrt_l1alloc(sizeof(double) * n)};
 }
 
 /// Generate the test data.
@@ -48,10 +48,11 @@ static void generate_data(const struct data *data) {
     }
 }
 
+static struct data data;
+
 int main() {
     // Allocate some memory to operate on and distribute the information across
     // the cores.
-    struct data data;
     if (snrt_global_core_idx() == 0) {
         size_t size_cluster = snrt_slice_len(snrt_cluster_memory());
         size_t size_global = snrt_slice_len(snrt_global_memory());
@@ -64,13 +65,9 @@ int main() {
             printf("Preparing data in cluster memory\n");
             data = allocate_data(snrt_cluster_memory());
         }
-
-        // Distribute the data descriptor to the other cores.
-        snrt_bcast_send(&data, sizeof(data));
-    } else {
-        // Receive the data descriptor from the main core.
-        snrt_bcast_recv(&data, sizeof(data));
     }
+
+    snrt_cluster_hw_barrier();
 
     printf("Core %d/%d (cluster %d/%d) works on %d items in %p, %p, %p\n",
            snrt_global_core_idx(), snrt_global_core_num(), snrt_cluster_idx(),
