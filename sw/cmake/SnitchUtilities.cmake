@@ -4,9 +4,11 @@
 
 # Locate the banshee simulator for test execution.
 set(SNITCH_BANSHEE "banshee" CACHE PATH "Path to the banshee simulator for testing")
+set(BANSHEE_TIMEOUT "180" CACHE STRING "Timeout when running tests on banshee")
 set(RUN_BANSHEE_ARGS "--num-cores=8" CACHE PATH "Arguments passed to the banshee sim for the run-banshee target")
 set(SNITCH_RUNTIME "snRuntime-banshee" CACHE STRING "Target name of the snRuntime flavor to link against")
 set(SNITCH_SIMULATOR "" CACHE PATH "Command to run a binary in an RTL simulation")
+set(SIMULATOR_TIMEOUT "1800" CACHE STRING "Timeout when running tests on RTL simulation")
 set(SPIKE_DASM "spike-dasm" CACHE PATH "Path to the spike-dasm for generating traces")
 set(RUNTIME_TRACE OFF CACHE BOOL "Enable runtime trace output")
 set(SNITCH_TEST_PREFIX "")
@@ -66,6 +68,7 @@ endmacro()
 macro(add_snitch_raw_test_args test_name target_name)
     if (SNITCH_RUNTIME STREQUAL "snRuntime-banshee" AND BUILD_TESTS)
         add_test(NAME ${SNITCH_TEST_PREFIX}${test_name} COMMAND ${SNITCH_BANSHEE} $<TARGET_FILE:${target_name}> ${ARGN})
+        set_tests_properties(${SNITCH_TEST_PREFIX}${test_name} PROPERTIES TIMEOUT ${BANSHEE_TIMEOUT}) 
     endif()
 endmacro()
 
@@ -78,6 +81,7 @@ endmacro()
 macro(add_snitch_raw_test_rtl test_name target_name)
     if (NOT SNITCH_RUNTIME STREQUAL "snRuntime-banshee" AND BUILD_TESTS)
         add_test(NAME ${SNITCH_TEST_PREFIX}rtl-${test_name} COMMAND ${SNITCH_SIMULATOR} $<TARGET_FILE:${target_name}>)
+        set_tests_properties(${SNITCH_TEST_PREFIX}rtl-${test_name} PROPERTIES TIMEOUT ${SIMULATOR_TIMEOUT}) 
     endif()
 endmacro()
 
