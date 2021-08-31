@@ -95,7 +95,9 @@ package ${cfg['pkg_name']};
       default: 0
   };
 
-  localparam fpnew_pkg::fpu_implementation_t FPUImplementation = '{
+  localparam fpnew_pkg::fpu_implementation_t FPUImplementation [${cfg['nr_cores']}] = '{
+  % for c in cfg['cores']:
+    '{
         PipeRegs: // FMA Block
                   '{
                     '{  ${cfg['timing']['lat_comp_fp32']}, // FP32
@@ -108,11 +110,17 @@ package ${cfg['pkg_name']};
                     '{default: ${cfg['timing']['lat_noncomp']}},   // NONCOMP
                     '{default: ${cfg['timing']['lat_conv']}}},   // CONV
         UnitTypes: '{'{default: fpnew_pkg::MERGED},
+% if c["Xdiv_sqrt"]:
+                    '{default: fpnew_pkg::MERGED}, // DIVSQRT
+% else:
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
+% endif
                     '{default: fpnew_pkg::PARALLEL}, // NONCOMP
                     '{default: fpnew_pkg::MERGED}},  // CONV
         PipeConfig: fpnew_pkg::${cfg['timing']['fpu_pipe_config']}
-    };
+    }${',\n' if not loop.last else '\n'}\
+  % endfor
+  };
 
   localparam snitch_ssr_pkg::ssr_cfg_t [${cfg['num_ssrs_max']}-1:0] SsrCfgs [${cfg['nr_cores']}] = '{
 ${ssr_cfg(core, "'{{{indirection:d}, {indir_out_spill:d}, {num_loops}, {index_width}, {pointer_width}, "\
@@ -187,6 +195,7 @@ module ${cfg['name']}_wrapper (
     .RVE (${core_isa('e')}),
     .RVF (${core_isa('f')}),
     .RVD (${core_isa('d')}),
+    .XDivSqrt (${core_cfg_flat('Xdiv_sqrt')}),
     .XF16 (${core_cfg_flat('xf16')}),
     .XF16ALT (${core_cfg_flat('xf16alt')}),
     .XF8 (${core_cfg_flat('xf8')}),
