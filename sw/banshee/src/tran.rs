@@ -3913,7 +3913,7 @@ impl<'a> InstructionTranslator<'a> {
             }
             riscv::OpcodeRdRs1Rs2::VfsumS => {
                 let (a1, a0)  = self.read_freg_vf64s(data.rs1);
-                let c0 = self.read_freg_f32(data.rd);
+                let c0 = self.read_freg_f32(data.rs2);
                 let res = LLVMBuildFAdd(self.builder,
                                         LLVMBuildFAdd(self.builder, a1, a0, name),
                                         c0,
