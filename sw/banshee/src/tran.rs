@@ -4729,7 +4729,14 @@ impl<'a> InstructionTranslator<'a> {
                 );
                 return Ok(());
             }
-            riscv::OpcodeRdRs1Rs2::VfcpkaSD => {
+            riscv::OpcodeRdRs1Rs2::VfcpkaSS |
+            riscv::OpcodeRdRs1Rs2::VfcpkbSS |
+            riscv::OpcodeRdRs1Rs2::VfcpkcSS |
+            riscv::OpcodeRdRs1Rs2::VfcpkdSS |
+            riscv::OpcodeRdRs1Rs2::VfcpkaSD |
+            riscv::OpcodeRdRs1Rs2::VfcpkbSD |
+            riscv::OpcodeRdRs1Rs2::VfcpkcSD |
+            riscv::OpcodeRdRs1Rs2::VfcpkdSD => {
                 self.was_freppable.set(false);
                 self.write_freg_vf32(
                     data.rd,
