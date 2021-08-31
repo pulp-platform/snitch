@@ -5,8 +5,8 @@
 //! Engine for dynamic binary translation and execution
 
 use crate::{peripherals::Peripherals, riscv, tran::ElfTranslator, util::SiUnit, Configuration};
-extern crate termion;
 extern crate flexfloat;
+extern crate termion;
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
 use llvm_sys::{
@@ -970,7 +970,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
-        fpmode_dst: bool
+        fpmode_dst: bool,
     ) -> u64 {
         flexfloat::ff_instruction_cvt_to_d(rs1, op, fpmode_src, fpmode_dst)
     }
@@ -979,7 +979,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
-        fpmode_dst: bool
+        fpmode_dst: bool,
     ) -> u32 {
         flexfloat::ff_instruction_cvt_to_s(rs1, op, fpmode_src, fpmode_dst)
     }
@@ -988,7 +988,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
-        fpmode_dst: bool
+        fpmode_dst: bool,
     ) -> i32 {
         flexfloat::ff_instruction_cvt_from_h(rs1, op, fpmode_src, fpmode_dst)
     }
@@ -997,7 +997,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
-        fpmode_dst: bool
+        fpmode_dst: bool,
     ) -> u16 {
         flexfloat::ff_instruction_cvt_to_h(rs1, op, fpmode_src, fpmode_dst)
     }
@@ -1006,7 +1006,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
-        fpmode_dst: bool
+        fpmode_dst: bool,
     ) -> i32 {
         flexfloat::ff_instruction_cvt_from_b(rs1, op, fpmode_src, fpmode_dst)
     }
@@ -1015,7 +1015,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
-        fpmode_dst: bool
+        fpmode_dst: bool,
     ) -> u8 {
         flexfloat::ff_instruction_cvt_to_b(rs1, op, fpmode_src, fpmode_dst)
     }
@@ -1023,30 +1023,71 @@ impl<'a, 'b> Cpu<'a, 'b> {
     /*
      * Flexfloat Comparisons
      */
-    pub unsafe fn fp16_op_cmp(rs1: u16, rs2: u16, op: flexfloat::FlexfloatOpCmp, fpmode_dst: bool) -> bool {
+    pub unsafe fn fp16_op_cmp(
+        rs1: u16,
+        rs2: u16,
+        op: flexfloat::FlexfloatOpCmp,
+        fpmode_dst: bool,
+    ) -> bool {
         flexfloat::ff_instruction_cmp_h(rs1, rs2, op, fpmode_dst)
     }
 
-    pub unsafe fn fp8_op_cmp(rs1: u8, rs2: u8, op: flexfloat::FlexfloatOpCmp, fpmode_dst: bool) -> bool {
+    pub unsafe fn fp8_op_cmp(
+        rs1: u8,
+        rs2: u8,
+        op: flexfloat::FlexfloatOpCmp,
+        fpmode_dst: bool,
+    ) -> bool {
         flexfloat::ff_instruction_cmp_b(rs1, rs2, op, fpmode_dst)
     }
 
     /*
      * Flexfloat Operations
      */
-    pub unsafe fn fp16_op(rs1: u16, rs2: u16, rs3: u16, op: flexfloat::FlexfloatOp, fpmode_dst: bool) -> u16 {
+    pub unsafe fn fp16_op(
+        rs1: u16,
+        rs2: u16,
+        rs3: u16,
+        op: flexfloat::FlexfloatOp,
+        fpmode_dst: bool,
+    ) -> u16 {
         flexfloat::ff_instruction_h(rs1, rs2, rs3, op, fpmode_dst)
     }
-    pub unsafe fn fp8_op(rs1: u8, rs2: u8, rs3: u8, op: flexfloat::FlexfloatOp, fpmode_dst : bool) -> u8 {
+    pub unsafe fn fp8_op(
+        rs1: u8,
+        rs2: u8,
+        rs3: u8,
+        op: flexfloat::FlexfloatOp,
+        fpmode_dst: bool,
+    ) -> u8 {
         flexfloat::ff_instruction_b(rs1, rs2, rs3, op, fpmode_dst)
     }
-    pub unsafe fn fp16_to_fp32_op(rs1: u16, rs2: u16, rs3: f32, op: flexfloat::FlexfloatOpExp, fpmode_src: bool) -> f32 {
+    pub unsafe fn fp16_to_fp32_op(
+        rs1: u16,
+        rs2: u16,
+        rs3: f32,
+        op: flexfloat::FlexfloatOpExp,
+        fpmode_src: bool,
+    ) -> f32 {
         flexfloat::ff_fp16_to_fp32_op(rs1, rs2, rs3, op, fpmode_src)
     }
-    pub unsafe fn fp8_to_fp16_op(rs1: u8, rs2: u8, rs3: u16, op: flexfloat::FlexfloatOpExp, fpmode_src: bool, fpmode_dst: bool) -> u16 {
+    pub unsafe fn fp8_to_fp16_op(
+        rs1: u8,
+        rs2: u8,
+        rs3: u16,
+        op: flexfloat::FlexfloatOpExp,
+        fpmode_src: bool,
+        fpmode_dst: bool,
+    ) -> u16 {
         flexfloat::ff_fp8_to_fp16_op(rs1, rs2, rs3, op, fpmode_src, fpmode_dst)
     }
-    pub unsafe fn fp8_to_fp32_op(rs1: u8, rs2: u8, rs3: f32, op: flexfloat::FlexfloatOpExp, fpmode_src: bool) -> f32 {
+    pub unsafe fn fp8_to_fp32_op(
+        rs1: u8,
+        rs2: u8,
+        rs3: f32,
+        op: flexfloat::FlexfloatOpExp,
+        fpmode_src: bool,
+    ) -> f32 {
         flexfloat::ff_fp8_to_fp32_op(rs1, rs2, rs3, op, fpmode_src)
     }
 }

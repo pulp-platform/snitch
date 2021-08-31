@@ -5,10 +5,7 @@
 const FLEXFLOAT_DIR: &str = "../vendor/flexfloat";
 
 fn main() {
-
-    let src = [
-        "../vendor/flexfloat/src/flexfloat.c"
-    ];
+    let src = ["../vendor/flexfloat/src/flexfloat.c"];
 
     // Ensure that we rebuild whenever any of the input files changes.
     for f in &src {
@@ -22,8 +19,7 @@ fn main() {
         .flag("-std=c11")
         .flag("-O3")
         .warnings(false);
-        // .define("FLEXFLOAT_FLAGS", None);
+    // .define("FLEXFLOAT_FLAGS", None);
 
     build.compile("flexfloat");
-
 }
