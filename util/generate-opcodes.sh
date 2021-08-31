@@ -27,7 +27,7 @@ rustfmt $INSTR_RS
 #######
 # RTL #
 #######
-OPCODES+=(opcodes-sflt opcodes-ipu)
+OPCODES+=(opcodes-ipu)
 INSTR_SV=$ROOT/hw/ip/snitch/src/riscv_instr.sv
 
 cat > $INSTR_SV <<- EOM
