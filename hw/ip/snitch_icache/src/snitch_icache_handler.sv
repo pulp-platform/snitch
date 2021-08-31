@@ -4,6 +4,8 @@
 
 // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 
+`include "common_cells/registers.svh"
+
 module snitch_icache_handler #(
     parameter snitch_icache_pkg::config_t CFG = '0
 )(
@@ -142,6 +144,28 @@ module snitch_icache_handler #(
         .empty_o (                 )
     );
 
+    // Gurarntee ordering
+    // Check if there is a miss in flight from this ID. In that case, stall all
+    // further requests to guarantee correct ordering of requests.
+    logic [CFG.ID_WIDTH_RESP-1:0] miss_in_flight_d, miss_in_flight_q;
+
+    if (CFG.GUARANTEE_ORDERING) begin : g_miss_in_flight_table
+      always_comb begin : p_miss_in_flight
+          miss_in_flight_d = miss_in_flight_q;
+          if (push_enable) begin
+            miss_in_flight_d |= push_idmask;
+          end
+          if (in_rsp_valid_o && in_rsp_ready_i) begin
+            miss_in_flight_d &= ~in_rsp_id_o;
+          end
+      end
+
+      `FF(miss_in_flight_q, miss_in_flight_d, '0, clk_i, rst_ni)
+    end else begin : g_tie_off_miss_in_flight
+      assign miss_in_flight_d = '0;
+      assign miss_in_flight_q = '0;
+    end
+
     // The miss handler checks if the access into the cache was a hit. If yes,
     // the data is forwarded to the response handler. Otherwise the table of
     // pending refills is consulted to check if any refills are currently in
@@ -173,8 +197,11 @@ module snitch_icache_handler #(
         out_req_valid_o = 0;
 
         if (in_req_valid_i) begin
+            // Miss already in flight. Stall to preserve ordering
+            if (miss_in_flight_q[in_req_id_i]) begin
+                in_req_ready_o = 0;
             // The cache lookup was a hit.
-            if (in_req_hit_i) begin
+            end else if (in_req_hit_i) begin
                 hit_valid = 1;
                 in_req_ready_o = hit_ready;
 
@@ -290,6 +317,7 @@ module snitch_icache_handler #(
         // No cache hit is pending, but response data is available.
         end else if (arb_d.sel == 1) begin
             if (out_rsp_valid_i) begin
+                hit_ready       = 0;
                 rsp_valid       = 1;
                 rsp_ready       = (in_rsp_ready_i || in_rsp_served_q)
                                 && (write_ready_i || write_served_q);

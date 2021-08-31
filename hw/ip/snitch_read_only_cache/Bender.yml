@@ -1,0 +1,22 @@
+# Copyright 2021 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+
+package:
+  name: snitch_read_only_cache
+  authors:
+  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+  - Samuel Riedel <sriedel@iis.ee.ethz.ch>
+
+dependencies:
+  axi: {path: ../../vendor/pulp_axi}
+  tech_cells_generic: {path: ../../vendor/pulp_tech_cells_generic}
+  snitch_icache: {path: ../snitch_icache}
+
+sources:
+# Level 0:
+- src/snitch_axi_to_cache.sv
+- src/snitch_read_only_cache.sv
+- target: test
+  files:
+  - test/snitch_read_only_cache_tb.sv
