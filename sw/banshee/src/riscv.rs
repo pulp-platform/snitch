@@ -1143,6 +1143,8 @@ pub enum OpcodeRdRs1 {
     VfcvtXuS,
     VfcvtSX,
     VfcvtSXu,
+    VfcvtHH,
+    VfcvtuHH,
     VfsqrtH,
     VfclassH,
     VfmvXH,
@@ -1220,6 +1222,8 @@ impl std::fmt::Display for OpcodeRdRs1 {
             Self::VfcvtXuS => write!(f, "vfcvt.xu.s"),
             Self::VfcvtSX => write!(f, "vfcvt.s.x"),
             Self::VfcvtSXu => write!(f, "vfcvt.s.xu"),
+            Self::VfcvtHH => write!(f, "vfcvt.h.h"),
+            Self::VfcvtuHH => write!(f, "vfcvtu.h.h"),
             Self::VfsqrtH => write!(f, "vfsqrt.h"),
             Self::VfclassH => write!(f, "vfclass.h"),
             Self::VfmvXH => write!(f, "vfmv.x.h"),
@@ -1501,8 +1505,6 @@ pub enum OpcodeRdRs1Rs2 {
     VfdotpRB,
     VfdotpexHB,
     VfdotpexHRB,
-    VfavgAh,
-    VfavgRAh,
 }
 
 impl std::fmt::Display for FormatRdRs1Rs2 {
@@ -1752,8 +1754,6 @@ impl std::fmt::Display for OpcodeRdRs1Rs2 {
             Self::VfdotpRB => write!(f, "vfdotp.r.b"),
             Self::VfdotpexHB => write!(f, "vfdotpex.h.b"),
             Self::VfdotpexHRB => write!(f, "vfdotpex.h.r.b"),
-            Self::VfavgAh => write!(f, "vfavg.ah"),
-            Self::VfavgRAh => write!(f, "vfavg.r.ah"),
         }
     }
 }
@@ -2471,8 +2471,6 @@ pub fn parse_u32(raw: u32) -> Format {
         0x94007033 => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::VfdotpRB, raw),
         0xae003033 => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::VfdotpexHB, raw),
         0xae007033 => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::VfdotpexHRB, raw),
-        0xac001033 => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::VfavgAh, raw),
-        0xac005033 => return parse_rd_rs1_rs2(OpcodeRdRs1Rs2::VfavgRAh, raw),
         _ => (),
     }
     match raw & 0xfe007fff {
@@ -2576,6 +2574,8 @@ pub fn parse_u32(raw: u32) -> Format {
         0x98204033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtXuS, raw),
         0x98300033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtSX, raw),
         0x98304033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtSXu, raw),
+        0x98502033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtHH, raw),
+        0x98506033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtuHH, raw),
         0x8e002033 => return parse_rd_rs1(OpcodeRdRs1::VfsqrtH, raw),
         0x98102033 => return parse_rd_rs1(OpcodeRdRs1::VfclassH, raw),
         0x98002033 => return parse_rd_rs1(OpcodeRdRs1::VfmvXH, raw),
@@ -3181,6 +3181,8 @@ pub struct Latency {
     vfcvt_xu_s: u8,
     vfcvt_s_x: u8,
     vfcvt_s_xu: u8,
+    vfcvt_h_h: u8,
+    vfcvtu_h_h: u8,
     vfsqrt_h: u8,
     vfclass_h: u8,
     vfmv_x_h: u8,
@@ -3444,8 +3446,6 @@ pub struct Latency {
     vfdotp_r_b: u8,
     vfdotpex_h_b: u8,
     vfdotpex_h_r_b: u8,
-    vfavg_ah: u8,
-    vfavg_r_ah: u8,
     // Format::RdRs1Rs2Rs3
     cmix: u8,
     cmov: u8,
@@ -3690,6 +3690,8 @@ impl Default for Latency {
             vfcvt_xu_s: 1,
             vfcvt_s_x: 1,
             vfcvt_s_xu: 1,
+            vfcvt_h_h: 1,
+            vfcvtu_h_h: 1,
             vfsqrt_h: 1,
             vfclass_h: 1,
             vfmv_x_h: 1,
@@ -3952,8 +3954,6 @@ impl Default for Latency {
             vfdotp_r_b: 1,
             vfdotpex_h_b: 1,
             vfdotpex_h_r_b: 1,
-            vfavg_ah: 1,
-            vfavg_r_ah: 1,
             cmix: 1,
             cmov: 1,
             fsl: 1,

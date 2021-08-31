@@ -80,16 +80,16 @@ fcvt.h.d  rd rs1 24..20=1 31..27=0x08 rm       26..25=2 6..2=0x14 1..0=3
 @fclass.ah  rd rs1 24..20=0 31..27=0x1C 14..12=1 26..25=2 6..2=0x14 1..0=3
 @fmv.ah.x   rd rs1 24..20=0 31..27=0x1E 14..12=0 26..25=2 6..2=0x14 1..0=3
 # RV64Xfhalf: in addition to the above
-@fcvt.l.ah  rd rs1 24..20=2 31..27=0x18 rm       26..25=2 6..2=0x14 1..0=3 # same as .h
-@fcvt.lu.ah rd rs1 24..20=3 31..27=0x18 rm       26..25=2 6..2=0x14 1..0=3 # same as .h
-@fcvt.ah.l  rd rs1 24..20=2 31..27=0x1A rm       26..25=2 6..2=0x14 1..0=3 # same as .h
-@fcvt.ah.lu rd rs1 24..20=3 31..27=0x1A rm       26..25=2 6..2=0x14 1..0=3 # same as .h
+@fcvt.l.ah  rd rs1 24..20=2 31..27=0x18 rm       26..25=2 6..2=0x14 1..0=3
+@fcvt.lu.ah rd rs1 24..20=3 31..27=0x18 rm       26..25=2 6..2=0x14 1..0=3
+@fcvt.ah.l  rd rs1 24..20=2 31..27=0x1A rm       26..25=2 6..2=0x14 1..0=3
+@fcvt.ah.lu rd rs1 24..20=3 31..27=0x1A rm       26..25=2 6..2=0x14 1..0=3
 # XfhalfwithF - half-precision conversions with F extension
-@fcvt.s.ah  rd rs1 24..20=2 31..27=0x08 14..12=0 26..25=0 6..2=0x14 1..0=3 # same as .h
-@fcvt.ah.s  rd rs1 24..20=0 31..27=0x08 rm       26..25=2 6..2=0x14 1..0=3 # same as .h
+@fcvt.s.ah  rd rs1 24..20=2 31..27=0x08 14..12=0 26..25=0 6..2=0x14 1..0=3
+@fcvt.ah.s  rd rs1 24..20=0 31..27=0x08 rm       26..25=2 6..2=0x14 1..0=3
 # XfhalfwithD - half-precision conversions with D extension (in addition to XfhalfwithF)
-@fcvt.d.ah  rd rs1 24..20=2 31..27=0x08 14..12=0 26..25=1 6..2=0x14 1..0=3 # same as .h
-@fcvt.ah.d  rd rs1 24..20=1 31..27=0x08 rm       26..25=2 6..2=0x14 1..0=3 # same as .h
+@fcvt.d.ah  rd rs1 24..20=2 31..27=0x08 14..12=0 26..25=1 6..2=0x14 1..0=3
+@fcvt.ah.d  rd rs1 24..20=1 31..27=0x08 rm       26..25=2 6..2=0x14 1..0=3
 # Xfalthalfwithhalf - alternate half-precision conversions with Xfhalf extension
 fcvt.h.h    rd rs1 24..20=2 31..27=0x08 rm       26..25=2 6..2=0x14 1..0=3
 @fcvt.ah.h  rd rs1 24..20=2 31..27=0x08 rm       26..25=2 6..2=0x14 1..0=3
@@ -244,15 +244,22 @@ vfcvt.xu.s  rd rs1 24..20=2 31..30=2 29..25=0x0C 14=1 13..12=0 6..2=0x0C 1..0=3
 vfcvt.s.x   rd rs1 24..20=3 31..30=2 29..25=0x0C 14=0 13..12=0 6..2=0x0C 1..0=3
 vfcvt.s.xu  rd rs1 24..20=3 31..30=2 29..25=0x0C 14=1 13..12=0 6..2=0x0C 1..0=3
 # XfvecsinglewithF - vectorial single-precision conversions with F extension, a-d legality depends on FLEN
-vfcpka.s.s  rd rs1 rs2      31..30=2 29..25=0x18 14=0 13..12=0 6..2=0x0C 1..0=3
-vfcpkb.s.s  rd rs1 rs2      31..30=2 29..25=0x18 14=1 13..12=0 6..2=0x0C 1..0=3
-vfcpkc.s.s  rd rs1 rs2      31..30=2 29..25=0x19 14=0 13..12=0 6..2=0x0C 1..0=3
-vfcpkd.s.s  rd rs1 rs2      31..30=2 29..25=0x19 14=1 13..12=0 6..2=0x0C 1..0=3
+vfcpka.s.s  rd rs1 rs2        31..30=2 29..25=0x18 14=0 13..12=0 6..2=0x0C 1..0=3
+vfcpkb.s.s  rd rs1 rs2        31..30=2 29..25=0x18 14=1 13..12=0 6..2=0x0C 1..0=3
+vfcpkc.s.s  rd rs1 rs2        31..30=2 29..25=0x19 14=0 13..12=0 6..2=0x0C 1..0=3
+vfcpkd.s.s  rd rs1 rs2        31..30=2 29..25=0x19 14=1 13..12=0 6..2=0x0C 1..0=3
 # XfvecsinglewithD - vectorial single-precision conversions with D extension, a-d legality depends on FLEN (in addition to the above)
-vfcpka.s.d  rd rs1 rs2      31..30=2 29..25=0x1A 14=0 13..12=0 6..2=0x0C 1..0=3
-vfcpkb.s.d  rd rs1 rs2      31..30=2 29..25=0x1A 14=1 13..12=0 6..2=0x0C 1..0=3
-vfcpkc.s.d  rd rs1 rs2      31..30=2 29..25=0x1B 14=0 13..12=0 6..2=0x0C 1..0=3
-vfcpkd.s.d  rd rs1 rs2      31..30=2 29..25=0x1B 14=1 13..12=0 6..2=0x0C 1..0=3
+vfcpka.s.d  rd rs1 rs2        31..30=2 29..25=0x1A 14=0 13..12=0 6..2=0x0C 1..0=3
+vfcpkb.s.d  rd rs1 rs2        31..30=2 29..25=0x1A 14=1 13..12=0 6..2=0x0C 1..0=3
+vfcpkc.s.d  rd rs1 rs2        31..30=2 29..25=0x1B 14=0 13..12=0 6..2=0x0C 1..0=3
+vfcpkd.s.d  rd rs1 rs2        31..30=2 29..25=0x1B 14=1 13..12=0 6..2=0x0C 1..0=3
+# Xfvecalthalfwithhalf - vectorial alternate half-precision conversions with Xfvechalf extension
+vfcvt.h.h     rd rs1 24..20=5 31..30=2 29..25=0x0C 14=0 13..12=2 6..2=0x0C 1..0=3
+@vfcvt.h.ah   rd rs1 24..20=5 31..30=2 29..25=0x0C 14=0 13..12=2 6..2=0x0C 1..0=3
+@vfcvt.ah.h   rd rs1 24..20=5 31..30=2 29..25=0x0C 14=0 13..12=2 6..2=0x0C 1..0=3
+vfcvtu.h.h    rd rs1 24..20=5 31..30=2 29..25=0x0C 14=1 13..12=2 6..2=0x0C 1..0=3
+@vfcvtu.h.ah  rd rs1 24..20=5 31..30=2 29..25=0x0C 14=1 13..12=2 6..2=0x0C 1..0=3
+@vfcvtu.ah.h  rd rs1 24..20=5 31..30=2 29..25=0x0C 14=1 13..12=2 6..2=0x0C 1..0=3
 
 # Xfvechalf - vectorial half-precision floats - requires FLEN >= 32
 vfadd.h     rd rs1 rs2      31..30=2 29..25=0x01 14=0 13..12=2 6..2=0x0C 1..0=3
@@ -440,10 +447,10 @@ vfcvtu.h.b  rd rs1 24..20=7 31..30=2 29..25=0x0C 14=1 13..12=2 6..2=0x0C 1..0=3
 vfcvt.b.h   rd rs1 24..20=6 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
 vfcvtu.b.h  rd rs1 24..20=6 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
 # Xfvecquarterwithalthalf - vectorial quarter-precision conversions with Xfvecalthalf extension
-@vfcvt.ah.b  rd rs1 24..20=7 31..30=2 29..25=0x0C 14=0 13..12=1 6..2=0x0C 1..0=3
-@vfcvtu.ah.b rd rs1 24..20=7 31..30=2 29..25=0x0C 14=1 13..12=1 6..2=0x0C 1..0=3
-@vfcvt.b.ah  rd rs1 24..20=5 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
-@vfcvtu.b.ah rd rs1 24..20=5 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
+@vfcvt.ah.b  rd rs1 24..20=7 31..30=2 29..25=0x0C 14=0 13..12=2 6..2=0x0C 1..0=3
+@vfcvtu.ah.b rd rs1 24..20=7 31..30=2 29..25=0x0C 14=1 13..12=2 6..2=0x0C 1..0=3
+@vfcvt.b.ah  rd rs1 24..20=6 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
+@vfcvtu.b.ah rd rs1 24..20=6 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
 
 # Xfvecaltquarter - vectorial alternative quarter-precision floats - requires FLEN >= 16
 @vfadd.ab     rd rs1 rs2      31..30=2 29..25=0x01 14=0 13..12=3 6..2=0x0C 1..0=3
@@ -510,10 +517,10 @@ vfcvtu.b.h  rd rs1 24..20=6 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
 @vfcvt.ab.h   rd rs1 24..20=6 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
 @vfcvtu.ab.h  rd rs1 24..20=6 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
 # Xfvecquarterwithalthalf - vectorial quarter-precision conversions with Xfvecalthalf extension
-@vfcvt.ah.ab  rd rs1 24..20=7 31..30=2 29..25=0x0C 14=0 13..12=1 6..2=0x0C 1..0=3
-@vfcvtu.ah.ab rd rs1 24..20=7 31..30=2 29..25=0x0C 14=1 13..12=1 6..2=0x0C 1..0=3
-@vfcvt.ab.ah  rd rs1 24..20=5 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
-@vfcvtu.ab.ah rd rs1 24..20=5 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
+@vfcvt.ah.ab  rd rs1 24..20=7 31..30=2 29..25=0x0C 14=0 13..12=2 6..2=0x0C 1..0=3
+@vfcvtu.ah.ab rd rs1 24..20=7 31..30=2 29..25=0x0C 14=1 13..12=2 6..2=0x0C 1..0=3
+@vfcvt.ab.ah  rd rs1 24..20=6 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
+@vfcvtu.ab.ah rd rs1 24..20=6 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
 
 #SMALLFLOAT AUXILIARY
 # collected under Xfaux - naming not final
@@ -521,9 +528,9 @@ vfcvtu.b.h  rd rs1 24..20=6 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
 # Xfauxsingle - single-precision auxiliary operations - requires F extension
 # no instructions currently
 # Xfauxvecsingle - vectorial single-precision auxiliary operations - requires Xfvecsingle extension
-vfsum.s        rd rs1 rs2  31..30=2 29..25=0x1C 14=0 13..12=0 6..2=0x0C 1..0=3 # TODO
-vfsumexp.s.h   rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=0 6..2=0x0C 1..0=3 # TODO
-@vfsumexp.s.ah rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=0 6..2=0x0C 1..0=3 # TODO
+vfsum.s        rd rs1 rs2  31..30=2 29..25=0x1C 14=0 13..12=0 6..2=0x0C 1..0=3
+vfsumexp.s.h   rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=0 6..2=0x0C 1..0=3
+@vfsumexp.s.ah rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=0 6..2=0x0C 1..0=3
 vfdotp.s       rd rs1 rs2  31..30=2 29..25=0x0A 14=0 13..12=0 6..2=0x0C 1..0=3
 vfdotp.r.s     rd rs1 rs2  31..30=2 29..25=0x0A 14=1 13..12=0 6..2=0x0C 1..0=3
 #vfavg.s       rd rs1 rs2  31..30=2 29..25=0x16 14=0 13..12=0 6..2=0x0C 1..0=3
@@ -533,11 +540,11 @@ vfdotp.r.s     rd rs1 rs2  31..30=2 29..25=0x0A 14=1 13..12=0 6..2=0x0C 1..0=3
 fmulex.s.h rd rs1 rs2     31..27=0x09 rm       26..25=2 6..2=0x14 1..0=3
 fmacex.s.h rd rs1 rs2     31..27=0x0A rm       26..25=2 6..2=0x14 1..0=3
 # Xfauxvechalf - vectorial half-precision auxiliary operations - requires Xfvechalf extension
-vfsum.h         rd rs1 rs2  31..30=2 29..25=0x1C 14=0 13..12=2 6..2=0x0C 1..0=3 # TODO
-vfsumexp.h.b    rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=2 6..2=0x0C 1..0=3 # TODO
-@vfsumexp.ah.b  rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=2 6..2=0x0C 1..0=3 # TODO
-@vfsumexp.h.ab  rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=2 6..2=0x0C 1..0=3 # TODO
-@vfsumexp.ah.ab rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=2 6..2=0x0C 1..0=3 # TODO
+vfsum.h         rd rs1 rs2  31..30=2 29..25=0x1C 14=0 13..12=2 6..2=0x0C 1..0=3
+vfsumexp.h.b    rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=2 6..2=0x0C 1..0=3
+@vfsumexp.ah.b  rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=2 6..2=0x0C 1..0=3
+@vfsumexp.h.ab  rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=2 6..2=0x0C 1..0=3
+@vfsumexp.ah.ab rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=2 6..2=0x0C 1..0=3
 vfdotp.h        rd rs1 rs2  31..30=2 29..25=0x0A 14=0 13..12=2 6..2=0x0C 1..0=3
 vfdotp.r.h      rd rs1 rs2  31..30=2 29..25=0x0A 14=1 13..12=2 6..2=0x0C 1..0=3
 vfdotpex.s.h    rd rs1 rs2  31..30=2 29..25=0x0B 14=0 13..12=2 6..2=0x0C 1..0=3
@@ -549,7 +556,7 @@ vfdotpex.s.r.h  rd rs1 rs2  31..30=2 29..25=0x0B 14=1 13..12=2 6..2=0x0C 1..0=3
 @fmulex.s.ah rd rs1 rs2     31..27=0x09 rm       26..25=2 6..2=0x14 1..0=3
 @fmacex.s.ah rd rs1 rs2     31..27=0x0A rm       26..25=2 6..2=0x14 1..0=3
 # Xfauxvecalthalf - vectorial alternate half-precision auxiliary operations - requires Xfvecalthalf extension
-@vfsum.ah        rd rs1 rs2  31..30=2 29..25=0x0A 14=0 13..12=2 6..2=0x0C 1..0=3 # TODO
+@vfsum.ah        rd rs1 rs2  31..30=2 29..25=0x1C 14=0 13..12=2 6..2=0x0C 1..0=3
 @vfdotp.ah       rd rs1 rs2  31..30=2 29..25=0x0A 14=0 13..12=2 6..2=0x0C 1..0=3
 @vfdotp.r.ah     rd rs1 rs2  31..30=2 29..25=0x0A 14=1 13..12=2 6..2=0x0C 1..0=3
 @vfdotpex.s.ah   rd rs1 rs2  31..30=2 29..25=0x0B 14=0 13..12=2 6..2=0x0C 1..0=3
@@ -561,8 +568,8 @@ vfdotpex.s.r.h  rd rs1 rs2  31..30=2 29..25=0x0B 14=1 13..12=2 6..2=0x0C 1..0=3
 fmulex.s.b rd rs1 rs2     31..27=0x09 rm       26..25=3 6..2=0x14 1..0=3
 fmacex.s.b rd rs1 rs2     31..27=0x0A rm       26..25=3 6..2=0x14 1..0=3
 # Xfauxvecquarter - vectorial quarter-precision auxiliary operations - requires Xfvecquarter extension
-vfsum.b          rd rs1 rs2  31..30=2 29..25=0x1C 14=0 13..12=3 6..2=0x0C 1..0=3 # TODO
-vfsumexp.b       rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=3 6..2=0x0C 1..0=3 # TODO
+vfsum.b          rd rs1 rs2  31..30=2 29..25=0x1C 14=0 13..12=3 6..2=0x0C 1..0=3
+vfsumexp.b       rd rs1 rs2  31..30=2 29..25=0x1D 14=0 13..12=3 6..2=0x0C 1..0=3
 vfdotp.b         rd rs1 rs2  31..30=2 29..25=0x0A 14=0 13..12=3 6..2=0x0C 1..0=3
 vfdotp.r.b       rd rs1 rs2  31..30=2 29..25=0x0A 14=1 13..12=3 6..2=0x0C 1..0=3
 vfdotpex.h.b     rd rs1 rs2  31..30=2 29..25=0x17 14=0 13..12=3 6..2=0x0C 1..0=3
@@ -576,7 +583,7 @@ vfdotpex.h.r.b   rd rs1 rs2  31..30=2 29..25=0x17 14=1 13..12=3 6..2=0x0C 1..0=3
 @fmulex.s.ab rd rs1 rs2     31..27=0x09 rm       26..25=3 6..2=0x14 1..0=3
 @fmacex.s.ab rd rs1 rs2     31..27=0x0A rm       26..25=3 6..2=0x14 1..0=3
 # Xfauxvecaltquarter - vectorial alternate quarter-precision auxiliary operations - requires Xfvecaltquarter extension
-@vfsum.ab         rd rs1 rs2  31..30=2 29..25=0x0A 14=0 13..12=0 6..2=0x0C 1..0=3 # TODO
+@vfsum.ab         rd rs1 rs2  31..30=2 29..25=0x1C 14=0 13..12=3 6..2=0x0C 1..0=3
 @vfdotp.ab        rd rs1 rs2  31..30=2 29..25=0x0A 14=0 13..12=3 6..2=0x0C 1..0=3
 @vfdotp.r.ab      rd rs1 rs2  31..30=2 29..25=0x0A 14=1 13..12=3 6..2=0x0C 1..0=3
 @vfdotpex.h.ab    rd rs1 rs2  31..30=2 29..25=0x17 14=0 13..12=3 6..2=0x0C 1..0=3
@@ -585,14 +592,3 @@ vfdotpex.h.r.b   rd rs1 rs2  31..30=2 29..25=0x17 14=1 13..12=3 6..2=0x0C 1..0=3
 @vfdotpex.ah.r.ab rd rs1 rs2  31..30=2 29..25=0x17 14=1 13..12=3 6..2=0x0C 1..0=3
 #@vfavg.ab        rd rs1 rs2  31..30=2 29..25=0x16 14=0 13..12=3 6..2=0x0C 1..0=3
 #@vfavg.r.ab      rd rs1 rs2  31..30=2 29..25=0x16 14=1 13..12=3 6..2=0x0C 1..0=3
-
-
-fmulex.s.ah rd rs1 rs2     31..27=0x09 14..12=5 26..25=2 6..2=0x14 1..0=3
-fmacex.s.ah rd rs1 rs2     31..27=0x0A 14..12=5 26..25=2 6..2=0x14 1..0=3
-# Xfauxvecalthalf - vectorial alternate half-precision auxiliary operations - requires Xfvecalthalf extension
-vfdotp.ah   rd rs1 rs2      31..30=2 29..25=0x0A 14=0 13..12=1 6..2=0x0C 1..0=3
-vfdotp.r.ah rd rs1 rs2      31..30=2 29..25=0x0A 14=1 13..12=1 6..2=0x0C 1..0=3
-vfdotpex.s.ah   rd rs1 rs2  31..30=2 29..25=0x0B 14=0 13..12=1 6..2=0x0C 1..0=3
-vfdotpex.s.r.ah rd rs1 rs2  31..30=2 29..25=0x0B 14=1 13..12=1 6..2=0x0C 1..0=3
-vfavg.ah    rd rs1 rs2      31..30=2 29..25=0x16 14=0 13..12=1 6..2=0x0C 1..0=3
-vfavg.r.ah  rd rs1 rs2      31..30=2 29..25=0x16 14=1 13..12=1 6..2=0x0C 1..0=3
