@@ -1,6 +1,6 @@
   axi_id_remap #(
     .AxiSlvPortIdWidth ( ${axi_in.iw} ),
-    .AxiSlvPortMaxUniqIds ( 4 ),
+    .AxiSlvPortMaxUniqIds ( ${2**axi_out.iw} ),
     .AxiMaxTxnsPerId ( 4 ),
     .AxiMstPortIdWidth ( ${axi_out.iw} ),
     .slv_req_t ( ${axi_in.req_type()} ),

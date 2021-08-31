@@ -171,7 +171,7 @@ module occamy_quadrant_s1
 
   axi_id_remap #(
       .AxiSlvPortIdWidth(8),
-      .AxiSlvPortMaxUniqIds(4),
+      .AxiSlvPortMaxUniqIds(16),
       .AxiMaxTxnsPerId(4),
       .AxiMstPortIdWidth(4),
       .slv_req_t(axi_a48_d64_i8_u0_req_t),
@@ -198,7 +198,7 @@ module occamy_quadrant_s1
 
   axi_id_remap #(
       .AxiSlvPortIdWidth(7),
-      .AxiSlvPortMaxUniqIds(4),
+      .AxiSlvPortMaxUniqIds(16),
       .AxiMaxTxnsPerId(4),
       .AxiMstPortIdWidth(4),
       .slv_req_t(axi_a48_d64_i7_u0_req_t),
@@ -253,7 +253,7 @@ module occamy_quadrant_s1
 
   axi_id_remap #(
       .AxiSlvPortIdWidth(7),
-      .AxiSlvPortMaxUniqIds(4),
+      .AxiSlvPortMaxUniqIds(8),
       .AxiMaxTxnsPerId(4),
       .AxiMstPortIdWidth(3),
       .slv_req_t(axi_a48_d512_i7_u0_req_t),
@@ -357,7 +357,7 @@ module occamy_quadrant_s1
 
   axi_id_remap #(
       .AxiSlvPortIdWidth(8),
-      .AxiSlvPortMaxUniqIds(4),
+      .AxiSlvPortMaxUniqIds(16),
       .AxiMaxTxnsPerId(4),
       .AxiMstPortIdWidth(4),
       .slv_req_t(axi_a48_d512_i8_u0_req_t),
