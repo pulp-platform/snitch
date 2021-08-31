@@ -28,6 +28,17 @@ _snrt_cluster_barrier:
     mv        zero, t0
     ret
 
+# Mustn't use any non-temporary registers
+# a0 = base_hartid - cluster_id*core_num
+_snrt_get_base_hartid:
+    .globl _snrt_get_base_hartid
+    lw t0, _snrt_banshee_cluster_base_hartid
+    lw t1, _snrt_banshee_cluster_id
+    lw t2, _snrt_banshee_cluster_core_num
+    mul t1, t1, t2
+    sub a0, t0, t1
+    ret
+
 # Function to terminate execution.
 #
 # Expecting:

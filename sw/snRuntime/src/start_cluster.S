@@ -39,6 +39,15 @@ _snrt_cluster_barrier:
     addi      sp, sp, 4
     ret
 
+# Mustn't use any non-temporary registers
+# Expecting:
+# - a0: device tree ptr ("bootdata" in `tb_lib.hh`)
+# a0 = bootdata->hartid_base
+_snrt_get_base_hartid:
+    .globl _snrt_get_base_hartid
+    lw        a0, 8(a0)  # load cluster's hartid offset
+    ret
+
 # Function to terminate execution.
 #
 # Expecting:
