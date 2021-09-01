@@ -100,6 +100,14 @@
         num_sequencer_instructions: 16,
         num_dtlb_entries: 1,
         num_itlb_entries: 1,
+        // SSSR configuration below
+        ssr_intersection: true,
+        ssr_intersection_triple: [0, 1, 2],
+        ssrs: [
+            {indirection: true},    // Master 0
+            {indirection: true},    // Master 1
+            {},                     // Slave
+        ],
     },
     dma_core_template: {
         isa: "rv32imafd",
