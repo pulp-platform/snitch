@@ -104,7 +104,8 @@ package ${cfg['pkg_name']};
                         ${cfg['timing']['lat_comp_fp64']}, // FP64
                         ${cfg['timing']['lat_comp_fp16']}, // FP16
                         ${cfg['timing']['lat_comp_fp8']}, // FP8
-                        ${cfg['timing']['lat_comp_fp16_alt']}  // FP16alt
+                        ${cfg['timing']['lat_comp_fp16_alt']},  // FP16alt
+                        ${cfg['timing']['lat_comp_fp8_alt']}  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: ${cfg['timing']['lat_noncomp']}},   // NONCOMP
@@ -203,6 +204,7 @@ module ${cfg['name']}_wrapper (
     .XF8 (${core_cfg_flat('xf8')}),
     .XF8ALT (${core_cfg_flat('xf8alt')}),
     .XFVEC (${core_cfg_flat('xfvec')}),
+    .XFAUX (${core_cfg_flat('xfaux')}),
     .Xdma (${core_cfg_flat('xdma')}),
     .Xssr (${core_cfg_flat('xssr')}),
     .Xfrep (${core_cfg_flat('xfrep')}),

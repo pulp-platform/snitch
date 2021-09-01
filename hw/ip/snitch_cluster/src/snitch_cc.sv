@@ -51,6 +51,7 @@ module snitch_cc #(
   parameter bit          XF16               = 0,
   parameter bit          XF16ALT            = 0,
   parameter bit          XFVEC              = 0,
+  parameter bit          XFAUX              = 0,
   /// Enable Snitch DMA
   parameter bit          Xdma               = 0,
   /// Has `frep` support.
@@ -120,7 +121,8 @@ module snitch_cc #(
   input  addr_t                      tcdm_addr_mask_i
 );
 
-  localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XFVEC | XF16 | XF16ALT | XF8ALT;
+  localparam bit XFAUX_MERGED  = XFAUX & (FPUImplementation.UnitTypes[0] == fpnew_pkg::MERGED);
+  localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XFVEC | XFAUX_MERGED | XF16 | XF16ALT | XF8ALT;
   localparam int unsigned FLEN = RVD     ? 64 : // D ext.
                           RVF     ? 32 : // F ext.
                           XF16    ? 16 : // Xf16 ext.
@@ -205,6 +207,7 @@ module snitch_cc #(
     .XF8 (XF8),
     .XF8ALT (XF8ALT),
     .XFVEC (XFVEC),
+    .XFAUX (XFAUX_MERGED),
     .FLEN (FLEN)
   ) i_snitch (
     .clk_i ( clk_d2_i ), // if necessary operate on half the frequency

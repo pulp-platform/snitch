@@ -77,7 +77,8 @@ package occamy_cluster_pkg;
                         3, // FP64
                         1, // FP16
                         1, // FP8
-                        2  // FP16alt
+                        2, // FP16alt
+                        1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
