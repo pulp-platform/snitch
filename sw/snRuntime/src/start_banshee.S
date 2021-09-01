@@ -16,6 +16,7 @@ _snrt_init_core_info:
     csrr      a0, mhartid  # shift core's hartid such that first core is 0
     sub       a0, a0, t0
     lw        a1, nr_cores_address_reg   # load the number of cores per cluster
+    remu      a0, a0, a1                 # calculate cluster-local core id
     lw        a2, tcdm_start_address_reg # start address of the TCDM
     lw        a3, tcdm_end_address_reg   # end address of the TCDM
     ret
@@ -25,6 +26,17 @@ _snrt_cluster_barrier:
     .globl _snrt_cluster_barrier
     lw        t0, barrier_reg
     mv        zero, t0
+    ret
+
+# Mustn't use any non-temporary registers
+# a0 = base_hartid - cluster_id*core_num
+_snrt_get_base_hartid:
+    .globl _snrt_get_base_hartid
+    lw t0, _snrt_banshee_cluster_base_hartid
+    lw t1, _snrt_banshee_cluster_id
+    lw t2, _snrt_banshee_cluster_core_num
+    mul t1, t1, t2
+    sub a0, t0, t1
     ret
 
 # Function to terminate execution.
