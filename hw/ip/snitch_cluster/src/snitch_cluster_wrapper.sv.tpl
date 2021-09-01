@@ -103,9 +103,9 @@ package ${cfg['pkg_name']};
                     '{  ${cfg['timing']['lat_comp_fp32']}, // FP32
                         ${cfg['timing']['lat_comp_fp64']}, // FP64
                         ${cfg['timing']['lat_comp_fp16']}, // FP16
-                        ${cfg['timing']['lat_comp_fp8']},  // FP8
-                        ${cfg['timing']['lat_comp_fp16_alt']}, // FP16alt
-                        ${cfg['timing']['lat_comp_fp8_alt']}   // FP8alt
+                        ${cfg['timing']['lat_comp_fp8']}, // FP8
+                        ${cfg['timing']['lat_comp_fp16_alt']},  // FP16alt
+                        ${cfg['timing']['lat_comp_fp8_alt']}  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: ${cfg['timing']['lat_noncomp']}},   // NONCOMP

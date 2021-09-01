@@ -1159,6 +1159,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      FMACEX_S_H,
+      FMULEX_S_H: begin
+        if (FP_EN && RVF && XF16 && XFAUX) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       FCVT_S_H: begin
         if (FP_EN && RVF && XF16 && fcsr_q.fmode.src == 1'b0) begin
           write_rd = 1'b0;
