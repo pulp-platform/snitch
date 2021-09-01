@@ -503,55 +503,55 @@ pub unsafe fn add_llvm_symbols() {
     );
     LLVMAddSymbol(
         b"banshee_fp16_op_cvt_from_f\0".as_ptr() as *const _,
-        Cpu::fp16_op_cvt_from_f as *mut _,
+        Cpu::binary_fp16_op_cvt_from_f as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp64_op_cvt_to_f\0".as_ptr() as *const _,
-        Cpu::fp64_op_cvt_to_f as *mut _,
+        Cpu::binary_fp64_op_cvt_to_f as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp32_op_cvt_to_f\0".as_ptr() as *const _,
-        Cpu::fp32_op_cvt_to_f as *mut _,
+        Cpu::binary_fp32_op_cvt_to_f as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp16_op_cvt_to_f\0".as_ptr() as *const _,
-        Cpu::fp16_op_cvt_to_f as *mut _,
+        Cpu::binary_fp16_op_cvt_to_f as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp8_op_cvt_from_f\0".as_ptr() as *const _,
-        Cpu::fp8_op_cvt_from_f as *mut _,
+        Cpu::binary_fp8_op_cvt_from_f as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp8_op_cvt_to_f\0".as_ptr() as *const _,
-        Cpu::fp8_op_cvt_to_f as *mut _,
+        Cpu::binary_fp8_op_cvt_to_f as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp16_op_cmp\0".as_ptr() as *const _,
-        Cpu::fp16_op_cmp as *mut _,
+        Cpu::binary_fp16_op_cmp as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp8_op_cmp\0".as_ptr() as *const _,
-        Cpu::fp8_op_cmp as *mut _,
+        Cpu::binary_fp8_op_cmp as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp16_op\0".as_ptr() as *const _,
-        Cpu::fp16_op as *mut _,
+        Cpu::binary_fp16_op as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp8_op\0".as_ptr() as *const _,
-        Cpu::fp8_op as *mut _,
+        Cpu::binary_fp8_op as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp16_to_fp32_op\0".as_ptr() as *const _,
-        Cpu::fp16_to_fp32_op as *mut _,
+        Cpu::binary_fp16_to_fp32_op as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp8_to_fp16_op\0".as_ptr() as *const _,
-        Cpu::fp8_to_fp16_op as *mut _,
+        Cpu::binary_fp8_to_fp16_op as *mut _,
     );
     LLVMAddSymbol(
         b"banshee_fp8_to_fp32_op\0".as_ptr() as *const _,
-        Cpu::fp8_to_fp32_op as *mut _,
+        Cpu::binary_fp8_to_fp32_op as *mut _,
     );
 }
 
@@ -966,7 +966,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     /*
      * Flexfloat Conversions
      */
-    pub unsafe fn fp64_op_cvt_to_f(
+    pub unsafe fn binary_fp64_op_cvt_to_f(
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
@@ -975,7 +975,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         flexfloat::ff_instruction_cvt_to_d(rs1, op, fpmode_src, fpmode_dst)
     }
 
-    pub unsafe fn fp32_op_cvt_to_f(
+    pub unsafe fn binary_fp32_op_cvt_to_f(
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
@@ -984,7 +984,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         flexfloat::ff_instruction_cvt_to_s(rs1, op, fpmode_src, fpmode_dst)
     }
 
-    pub unsafe fn fp16_op_cvt_from_f(
+    pub unsafe fn binary_fp16_op_cvt_from_f(
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
@@ -993,7 +993,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         flexfloat::ff_instruction_cvt_from_h(rs1, op, fpmode_src, fpmode_dst)
     }
 
-    pub unsafe fn fp16_op_cvt_to_f(
+    pub unsafe fn binary_fp16_op_cvt_to_f(
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
@@ -1002,7 +1002,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         flexfloat::ff_instruction_cvt_to_h(rs1, op, fpmode_src, fpmode_dst)
     }
 
-    pub unsafe fn fp8_op_cvt_from_f(
+    pub unsafe fn binary_fp8_op_cvt_from_f(
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
@@ -1011,7 +1011,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         flexfloat::ff_instruction_cvt_from_b(rs1, op, fpmode_src, fpmode_dst)
     }
 
-    pub unsafe fn fp8_op_cvt_to_f(
+    pub unsafe fn binary_fp8_op_cvt_to_f(
         rs1: u64,
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
@@ -1023,7 +1023,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     /*
      * Flexfloat Comparisons
      */
-    pub unsafe fn fp16_op_cmp(
+    pub unsafe fn binary_fp16_op_cmp(
         rs1: u16,
         rs2: u16,
         op: flexfloat::FlexfloatOpCmp,
@@ -1032,7 +1032,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         flexfloat::ff_instruction_cmp_h(rs1, rs2, op, fpmode_dst)
     }
 
-    pub unsafe fn fp8_op_cmp(
+    pub unsafe fn binary_fp8_op_cmp(
         rs1: u8,
         rs2: u8,
         op: flexfloat::FlexfloatOpCmp,
@@ -1044,7 +1044,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     /*
      * Flexfloat Operations
      */
-    pub unsafe fn fp16_op(
+    pub unsafe fn binary_fp16_op(
         rs1: u16,
         rs2: u16,
         rs3: u16,
@@ -1053,7 +1053,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     ) -> u16 {
         flexfloat::ff_instruction_h(rs1, rs2, rs3, op, fpmode_dst)
     }
-    pub unsafe fn fp8_op(
+    pub unsafe fn binary_fp8_op(
         rs1: u8,
         rs2: u8,
         rs3: u8,
@@ -1062,7 +1062,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     ) -> u8 {
         flexfloat::ff_instruction_b(rs1, rs2, rs3, op, fpmode_dst)
     }
-    pub unsafe fn fp16_to_fp32_op(
+    pub unsafe fn binary_fp16_to_fp32_op(
         rs1: u16,
         rs2: u16,
         rs3: f32,
@@ -1071,7 +1071,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     ) -> f32 {
         flexfloat::ff_fp16_to_fp32_op(rs1, rs2, rs3, op, fpmode_src)
     }
-    pub unsafe fn fp8_to_fp16_op(
+    pub unsafe fn binary_fp8_to_fp16_op(
         rs1: u8,
         rs2: u8,
         rs3: u16,
@@ -1081,7 +1081,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     ) -> u16 {
         flexfloat::ff_fp8_to_fp16_op(rs1, rs2, rs3, op, fpmode_src, fpmode_dst)
     }
-    pub unsafe fn fp8_to_fp32_op(
+    pub unsafe fn binary_fp8_to_fp32_op(
         rs1: u8,
         rs2: u8,
         rs3: f32,
