@@ -425,6 +425,12 @@
                                                 "description": "Whether to cut timing paths with a spill register at the intersector index output; added only if this SSR is an intersection slave.",
                                                 "default": true
                                             },
+                                            "isect_slave_credits": {
+                                                "type": "number",
+                                                "description": "Number of elements by which intersected indices may outrun corresponding data; added only if this SSR is an intersection slave.",
+                                                "minimum": 2,
+                                                "default": 8
+                                            },
                                             "num_loops": {
                                                 "type": "number",
                                                 "description": "Number of nested hardware loops in address generator.",

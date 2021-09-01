@@ -22,6 +22,7 @@ package snitch_ssr_pkg;
     int unsigned  ShiftWidth;
     int unsigned  RptWidth;
     int unsigned  IndexCredits;
+    int unsigned  IsectSlaveCredits;
     int unsigned  DataCredits;
     int unsigned  MuxRespDepth;
   } ssr_cfg_t;

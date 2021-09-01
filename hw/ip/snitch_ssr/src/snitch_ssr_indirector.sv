@@ -319,7 +319,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
   // Credit counter: used for index dataflow decoupling
   snitch_ssr_credit_counter #(
-    .NumCredits       ( Cfg.IsectSlave ? 8 /*TODO*/ : Cfg.IndexCredits),
+    .NumCredits       ( Cfg.IsectSlave ? Cfg.IsectSlaveCredits : Cfg.IndexCredits),
     .InitCreditEmpty  ( Cfg.IsectSlave )
     ) i_credit_counter (
     .clk_i,
