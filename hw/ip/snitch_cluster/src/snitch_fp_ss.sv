@@ -1234,10 +1234,14 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[0] = RegA;
         op_select[1] = RegB;
 <<<<<<< HEAD
+<<<<<<< HEAD
         op_select[2] = RegDest;
 =======
         op_select[2] = RegC;
 >>>>>>> ad macex and mulex support if XFAUX is enabled and FPU setting is MERGED
+=======
+        op_select[2] = RegDest;
+>>>>>>> mulexp/macexp: bugfixing
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP32;
         if (fpu_fmt_mode_i.src == 1'b1) begin
