@@ -45,7 +45,7 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   // Ports into memory.
   output tcdm_req_t [NumSsrs-1:0] mem_req_o,
   input  tcdm_rsp_t [NumSsrs-1:0] mem_rsp_i,
-  // From intersector to  stream controller
+  // From intersector to stream controller
   output logic             streamctl_done_o,
   output logic             streamctl_valid_o,
   input  logic             streamctl_ready_i,

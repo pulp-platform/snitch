@@ -56,10 +56,6 @@ package snitch_ssr_pkg;
 
   // Indexing control flags
   typedef struct packed {
-    /* TODO
-    logic incr_base;
-    logic delta_mode;
-    */
     logic merge;
   } idx_flags_t;
 
