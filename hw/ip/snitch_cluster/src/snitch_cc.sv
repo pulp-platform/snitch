@@ -120,7 +120,8 @@ module snitch_cc #(
   input  addr_t                      tcdm_addr_mask_i
 );
 
-  localparam bit XFAUX_MERGED  = XFAUX & (FPUImplementation.UnitTypes[0] == fpnew_pkg::MERGED);
+  // localaparam bit FPUImplementation.UnitTypes[3]
+  localparam bit XFAUX_MERGED  = XFAUX & (FPUImplementation.UnitTypes[3] == '{default: fpnew_pkg::MERGED});
   localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XFVEC | XFAUX_MERGED | XF16 | XF16ALT | XF8ALT;
   localparam int unsigned FLEN = RVD     ? 64 : // D ext.
                           RVF     ? 32 : // F ext.
