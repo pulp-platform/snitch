@@ -170,8 +170,9 @@ def main():
     am_spim = am.new_leaf("spim", 0x20000,
                           0x03000000).attach_to(am_soc_regbus_periph_xbar)
 
-    am_clint = am.new_leaf("clint", occamy.cfg["clint"]["length"],
-                           occamy.cfg["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+    am_clint = am.new_leaf(
+        "clint", occamy.cfg["clint"]["length"],
+        occamy.cfg["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
     dts.add_clint([0], am_clint)
 
     am_pcie_cfg = am.new_leaf("pcie_cfg", 0x20000,
@@ -184,8 +185,15 @@ def main():
     am_hbi_ctl = am.new_leaf("hbi_ctl", 0x10000,
                              0x07000000).attach_to(am_soc_regbus_periph_xbar)
 
-    am_hbm_cfg = am.new_leaf("hbm_cfg", 0x10000,
+    am_hbm_cfg = am.new_leaf("hbm_cfg", 0x400000,
                              0x08000000).attach_to(am_soc_regbus_periph_xbar)
+
+    am_hbm_phy_cfg = am.new_leaf(
+        "hbm_phy_cfg", 0x100000,
+        0x09000000).attach_to(am_soc_regbus_periph_xbar)
+
+    am_hbm_seq = am.new_leaf("hbm_seq", 0x10000,
+                             0x0A000000).attach_to(am_soc_regbus_periph_xbar)
 
     am_plic = am.new_leaf("plic", 0x4000000,
                           0x0C000000).attach_to(am_soc_regbus_periph_xbar)
@@ -269,6 +277,8 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("hbi_cfg", am_hbi_cfg)
     soc_regbus_periph_xbar.add_output_entry("hbi_ctl", am_hbi_ctl)
     soc_regbus_periph_xbar.add_output_entry("hbm_cfg", am_hbm_cfg)
+    soc_regbus_periph_xbar.add_output_entry("hbm_phy_cfg", am_hbm_phy_cfg)
+    soc_regbus_periph_xbar.add_output_entry("hbm_seq", am_hbm_seq)
 
     #################
     # SoC Wide Xbar #

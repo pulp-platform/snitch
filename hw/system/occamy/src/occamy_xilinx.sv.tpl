@@ -144,6 +144,10 @@ import occamy_pkg::*;
     .hbi_cfg_rsp_i ('0),
     .apb_hbi_ctl_req_o (),
     .apb_hbi_ctl_rsp_i ('0),
+    .hbm_phy_cfg_req_o ('0),
+    .hbm_phy_cfg_rsp_i (),
+    .hbm_seq_req_o ('0),
+    .hbm_seq_rsp_i (),
     .*
   );
 
