@@ -162,11 +162,13 @@ package occamy_pkg;
     SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CFG,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CTL,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBM_CFG,
+    SOC_REGBUS_PERIPH_XBAR_OUT_HBM_PHY_CFG,
+    SOC_REGBUS_PERIPH_XBAR_OUT_HBM_SEQ,
     SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   } soc_regbus_periph_xbar_outputs_e;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [13:0] SocRegbusPeriphXbarAddrmap = '{
+  localparam xbar_rule_48_t [15:0] SocRegbusPeriphXbarAddrmap = '{
   '{ idx: 0, start_addr: 48'h04000000, end_addr: 48'h04100000 },
   '{ idx: 1, start_addr: 48'h02000000, end_addr: 48'h02001000 },
   '{ idx: 2, start_addr: 48'h02005000, end_addr: 48'h02006000 },
@@ -180,7 +182,9 @@ package occamy_pkg;
   '{ idx: 10, start_addr: 48'h05000000, end_addr: 48'h05020000 },
   '{ idx: 11, start_addr: 48'h06000000, end_addr: 48'h06010000 },
   '{ idx: 12, start_addr: 48'h07000000, end_addr: 48'h07010000 },
-  '{ idx: 13, start_addr: 48'h08000000, end_addr: 48'h08010000 }
+  '{ idx: 13, start_addr: 48'h08000000, end_addr: 48'h08400000 },
+  '{ idx: 14, start_addr: 48'h09000000, end_addr: 48'h09100000 },
+  '{ idx: 15, start_addr: 48'h0a000000, end_addr: 48'h0a010000 }
 };
 
   /// Inputs of the `soc_wide_xbar` crossbar.

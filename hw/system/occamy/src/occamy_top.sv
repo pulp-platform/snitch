@@ -73,6 +73,10 @@ module occamy_top
     /// HBM Config
     output apb_a48_d32_req_t apb_hbm_cfg_req_o,
     input apb_a48_d32_rsp_t apb_hbm_cfg_rsp_i,
+    output reg_a48_d32_req_t hbm_phy_cfg_req_o,
+    input reg_a48_d32_rsp_t hbm_phy_cfg_rsp_i,
+    output reg_a48_d32_req_t hbm_seq_req_o,
+    input reg_a48_d32_rsp_t hbm_seq_rsp_i,
     /// PCIe/DDR Config
     output reg_a48_d32_req_t pcie_cfg_req_o,
     input reg_a48_d32_rsp_t pcie_cfg_rsp_i,
@@ -212,8 +216,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [13:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [13:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [15:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [15:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -236,7 +240,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(14),
+      .NoRules(16),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -1978,8 +1982,11 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
   assign apb_hbm_cfg_req_o = apb_hbm_cfg_req;
-  assign apb_hbm_cfg_rsp   = apb_hbm_cfg_rsp_i;
-
+  assign apb_hbm_cfg_rsp = apb_hbm_cfg_rsp_i;
+  assign hbm_phy_cfg_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_PHY_CFG];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_PHY_CFG] = hbm_phy_cfg_rsp_i;
+  assign hbm_seq_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_SEQ];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_SEQ] = hbm_seq_rsp_i;
   /////////////////
   // Peripherals //
   /////////////////
