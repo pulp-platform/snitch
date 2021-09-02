@@ -794,7 +794,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         let mut prev = data.get(&(addr as u64)).copied().unwrap_or(0);
         // Atomics
         let result = match op {
-            AtomicOp::Amoadd => prev + value,
+            AtomicOp::Amoadd => prev.wrapping_add(value),
             AtomicOp::Amoxor => prev ^ value,
             AtomicOp::Amoor => prev | value,
             AtomicOp::Amoand => prev & value,
