@@ -33,6 +33,7 @@ int main() {
         snrt_interrupt_global_enable();
         asm volatile("wfi");
         snrt_interrupt_global_disable();
+        write_csr(mcause, 0);
     }
 
     snrt_cluster_hw_barrier();
