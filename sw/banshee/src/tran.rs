@@ -1015,7 +1015,6 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::RdRmRs1Rs2Rs3(x) => self.emit_rd_rm_rs1_rs2_rs3(x),
             riscv::Format::RdRs1(x) => self.emit_rd_rs1(x),
             riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
-            // riscv::Format::RdRs1Rs2Rs3(x) => self.emit_rd_rs1_rs2_rs3(x),
             riscv::Format::RdRs1Shamt(x) => self.emit_rd_rs1_shamt(x),
             riscv::Format::Rs1(x) => self.emit_rs1(x),
             riscv::Format::Rs1Rs2(x) => self.emit_rs1_rs2(x),
