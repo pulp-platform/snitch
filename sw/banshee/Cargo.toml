@@ -24,6 +24,7 @@ serde = { version = "1.0.123", features = ["derive"] }
 serde_json = "1.0.63"
 serde_yaml = "0.8"
 termion = "*"
+flexfloat = { path = "flexfloat" }
 
 [build-dependencies]
 cc = "1.0"

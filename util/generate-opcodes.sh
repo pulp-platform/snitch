@@ -8,7 +8,7 @@ set -e
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
 RISCV_OPCODES=$ROOT/sw/vendor/riscv-opcodes
-OPCODES=(opcodes opcodes-dma opcodes-rep opcodes-ssr)
+OPCODES=(opcodes opcodes-dma opcodes-rep opcodes-ssr opcodes-flt-occamy)
 
 ###########
 # Banshee #
@@ -27,7 +27,7 @@ rustfmt $INSTR_RS
 #######
 # RTL #
 #######
-OPCODES+=(opcodes-sflt opcodes-ipu)
+OPCODES=(opcodes opcodes-dma opcodes-rep opcodes-ssr opcodes-ipu opcodes-sflt) # TODO: change opcodes-sflt to opcodes-flt-occamy
 INSTR_SV=$ROOT/hw/ip/snitch/src/riscv_instr.sv
 
 cat > $INSTR_SV <<- EOM

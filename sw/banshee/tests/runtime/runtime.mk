@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 RISCV_XLEN    ?= 32
-RISCV_ABI     ?= rv$(RISCV_XLEN)imafd
+RISCV_ABI     ?= rv$(RISCV_XLEN)imafd_xfvecsingle
 RISCV_PREFIX  ?= riscv$(RISCV_XLEN)-unknown-elf-
 RISCV_CC      ?= $(RISCV_PREFIX)gcc
 RISCV_CXX     ?= $(RISCV_PREFIX)g++

@@ -1,0 +1,18 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "flexfloat"
+version = "0.1.0"
+authors = ["Gianna Paulin <pauling@iis.ee.ethz.ch>"]
+build = "build.rs"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[build-dependencies]
+cc = "1.0"
+pkg-config = "0.3"

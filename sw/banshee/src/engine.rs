@@ -5,6 +5,7 @@
 //! Engine for dynamic binary translation and execution
 
 use crate::{peripherals::Peripherals, riscv, tran::ElfTranslator, util::SiUnit, Configuration};
+extern crate flexfloat;
 extern crate termion;
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
@@ -500,6 +501,58 @@ pub unsafe fn add_llvm_symbols() {
         b"banshee_check_clint\0".as_ptr() as *const _,
         Cpu::binary_check_clint as *mut _,
     );
+    LLVMAddSymbol(
+        b"banshee_fp16_op_cvt_from_f\0".as_ptr() as *const _,
+        Cpu::binary_fp16_op_cvt_from_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp64_op_cvt_to_f\0".as_ptr() as *const _,
+        Cpu::binary_fp64_op_cvt_to_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp32_op_cvt_to_f\0".as_ptr() as *const _,
+        Cpu::binary_fp32_op_cvt_to_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp16_op_cvt_to_f\0".as_ptr() as *const _,
+        Cpu::binary_fp16_op_cvt_to_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_op_cvt_from_f\0".as_ptr() as *const _,
+        Cpu::binary_fp8_op_cvt_from_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_op_cvt_to_f\0".as_ptr() as *const _,
+        Cpu::binary_fp8_op_cvt_to_f as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp16_op_cmp\0".as_ptr() as *const _,
+        Cpu::binary_fp16_op_cmp as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_op_cmp\0".as_ptr() as *const _,
+        Cpu::binary_fp8_op_cmp as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp16_op\0".as_ptr() as *const _,
+        Cpu::binary_fp16_op as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_op\0".as_ptr() as *const _,
+        Cpu::binary_fp8_op as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp16_to_fp32_op\0".as_ptr() as *const _,
+        Cpu::binary_fp16_to_fp32_op as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_to_fp16_op\0".as_ptr() as *const _,
+        Cpu::binary_fp8_to_fp16_op as *mut _,
+    );
+    LLVMAddSymbol(
+        b"banshee_fp8_to_fp32_op\0".as_ptr() as *const _,
+        Cpu::binary_fp8_to_fp32_op as *mut _,
+    );
 }
 
 // /// A representation of the system state.
@@ -520,6 +573,7 @@ impl CpuState {
             instret: 0,
             ssrs: (0..num_dm).map(|_| Default::default()).collect(),
             ssr_enable: 0,
+            fpmode: 0,
             wfi: false,
             dma: Default::default(),
             irq: Default::default(),
@@ -768,6 +822,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         }
         match csr {
             riscv::Csr::Ssr => self.state.ssr_enable,
+            riscv::Csr::Fpmode => self.state.fpmode as u32,
             riscv::Csr::Mcycle => self.state.cycle as u32, // csr_mcycle
             riscv::Csr::Mcycleh => (self.state.cycle >> 32) as u32, // csr_mcycleh
             riscv::Csr::Minstret => self.state.instret as u32, // csr_minstret
@@ -793,6 +848,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         }
         match csr {
             riscv::Csr::Ssr => self.state.ssr_enable = value,
+            riscv::Csr::Fpmode => self.state.fpmode = value,
             riscv::Csr::Mstatus => self.state.irq.mstatus = value, // CSR_MSTATUS
             riscv::Csr::Mie => self.state.irq.mie = value,         // CSR_MIE
             riscv::Csr::Mip => self.state.irq.mip = value,         // CSR_MIP
@@ -905,6 +961,134 @@ impl<'a, 'b> Cpu<'a, 'b> {
             }
             self.barrier.fetch_add(1, Ordering::Relaxed);
         }
+    }
+
+    /*
+     * Flexfloat Conversions
+     */
+    pub unsafe fn binary_fp64_op_cvt_to_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool,
+    ) -> u64 {
+        flexfloat::ff_instruction_cvt_to_d(rs1, op, fpmode_src, fpmode_dst)
+    }
+
+    pub unsafe fn binary_fp32_op_cvt_to_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool,
+    ) -> u32 {
+        flexfloat::ff_instruction_cvt_to_s(rs1, op, fpmode_src, fpmode_dst)
+    }
+
+    pub unsafe fn binary_fp16_op_cvt_from_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool,
+    ) -> i32 {
+        flexfloat::ff_instruction_cvt_from_h(rs1, op, fpmode_src, fpmode_dst)
+    }
+
+    pub unsafe fn binary_fp16_op_cvt_to_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool,
+    ) -> u16 {
+        flexfloat::ff_instruction_cvt_to_h(rs1, op, fpmode_src, fpmode_dst)
+    }
+
+    pub unsafe fn binary_fp8_op_cvt_from_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool,
+    ) -> i32 {
+        flexfloat::ff_instruction_cvt_from_b(rs1, op, fpmode_src, fpmode_dst)
+    }
+
+    pub unsafe fn binary_fp8_op_cvt_to_f(
+        rs1: u64,
+        op: flexfloat::FfOpCvt,
+        fpmode_src: bool,
+        fpmode_dst: bool,
+    ) -> u8 {
+        flexfloat::ff_instruction_cvt_to_b(rs1, op, fpmode_src, fpmode_dst)
+    }
+
+    /*
+     * Flexfloat Comparisons
+     */
+    pub unsafe fn binary_fp16_op_cmp(
+        rs1: u16,
+        rs2: u16,
+        op: flexfloat::FlexfloatOpCmp,
+        fpmode_dst: bool,
+    ) -> bool {
+        flexfloat::ff_instruction_cmp_h(rs1, rs2, op, fpmode_dst)
+    }
+
+    pub unsafe fn binary_fp8_op_cmp(
+        rs1: u8,
+        rs2: u8,
+        op: flexfloat::FlexfloatOpCmp,
+        fpmode_dst: bool,
+    ) -> bool {
+        flexfloat::ff_instruction_cmp_b(rs1, rs2, op, fpmode_dst)
+    }
+
+    /*
+     * Flexfloat Operations
+     */
+    pub unsafe fn binary_fp16_op(
+        rs1: u16,
+        rs2: u16,
+        rs3: u16,
+        op: flexfloat::FlexfloatOp,
+        fpmode_dst: bool,
+    ) -> u16 {
+        flexfloat::ff_instruction_h(rs1, rs2, rs3, op, fpmode_dst)
+    }
+    pub unsafe fn binary_fp8_op(
+        rs1: u8,
+        rs2: u8,
+        rs3: u8,
+        op: flexfloat::FlexfloatOp,
+        fpmode_dst: bool,
+    ) -> u8 {
+        flexfloat::ff_instruction_b(rs1, rs2, rs3, op, fpmode_dst)
+    }
+    pub unsafe fn binary_fp16_to_fp32_op(
+        rs1: u16,
+        rs2: u16,
+        rs3: f32,
+        op: flexfloat::FlexfloatOpExp,
+        fpmode_src: bool,
+    ) -> f32 {
+        flexfloat::ff_fp16_to_fp32_op(rs1, rs2, rs3, op, fpmode_src)
+    }
+    pub unsafe fn binary_fp8_to_fp16_op(
+        rs1: u8,
+        rs2: u8,
+        rs3: u16,
+        op: flexfloat::FlexfloatOpExp,
+        fpmode_src: bool,
+        fpmode_dst: bool,
+    ) -> u16 {
+        flexfloat::ff_fp8_to_fp16_op(rs1, rs2, rs3, op, fpmode_src, fpmode_dst)
+    }
+    pub unsafe fn binary_fp8_to_fp32_op(
+        rs1: u8,
+        rs2: u8,
+        rs3: f32,
+        op: flexfloat::FlexfloatOpExp,
+        fpmode_src: bool,
+    ) -> f32 {
+        flexfloat::ff_fp8_to_fp32_op(rs1, rs2, rs3, op, fpmode_src)
     }
 }
 

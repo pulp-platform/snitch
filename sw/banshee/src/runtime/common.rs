@@ -45,6 +45,7 @@ pub struct CpuState {
     pub instret: u64,
     pub ssrs: Vec<SsrState>,
     pub ssr_enable: u32,
+    pub fpmode: u32,
     pub dma: DmaState,
     pub wfi: bool,
     pub irq: IrqState,
