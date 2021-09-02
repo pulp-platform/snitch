@@ -23,7 +23,6 @@ all: bin/far_jump
 all: bin/atomics
 all: bin/wfi
 all: bin/multi_cluster_periph
-all: bin/ssr_push
 
 bin/%: %.c
 	mkdir -p $(shell dirname $@) dump
