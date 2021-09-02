@@ -241,7 +241,7 @@ module snitch_axi_to_cache #(
     .empty_o ( rsp_id_empty  )
   );
 
-  onehot #(
+  cc_onehot #(
     .Width ( CFG.ID_WIDTH_RESP )
   ) i_onehot (
     .d_i         ( rsp_id_masked ),
