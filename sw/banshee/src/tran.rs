@@ -5631,18 +5631,24 @@ impl<'a> InstructionTranslator<'a> {
             LLVMConstInt(LLVMInt32Type(), 0, 0),
             NONAME,
         );
-        let is_irq = LLVMBuildAnd(
-            self.builder,
-            is_mstatus_mie,
-            is_any_interrupt_pending,
-            NONAME,
+
+        // Create BB for any pending interrupt
+        let bb_any_irq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_any_irq);
+        LLVMBuildCondBr(self.builder, is_any_interrupt_pending, bb_any_irq, bb_noirq);
+        LLVMPositionBuilderAtEnd(self.builder, bb_any_irq);
+
+        // Set mcause register
+        // TODO: Get correct cause, currently only settings machine software interrupt
+        self.write_csr_silent(
+            riscv::Csr::Mcause as u32,
+            LLVMConstInt(LLVMInt32Type(), (1 << 31) | 3, 0),
         );
-        // Create BB for IRQ
+
+        // Create BB for IRQ and mstatus.mie
         let bb_irq = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_irq);
-
-        // branch to IRQ branch on any interrupt
-        LLVMBuildCondBr(self.builder, is_irq, bb_irq, bb_noirq);
+        LLVMBuildCondBr(self.builder, is_mstatus_mie, bb_irq, bb_noirq);
         LLVMPositionBuilderAtEnd(self.builder, bb_irq);
 
         // irq case: disable mstatus.mie and store mstatus.mpie
@@ -5664,13 +5670,6 @@ impl<'a> InstructionTranslator<'a> {
             NONAME,
         );
         self.write_csr_silent(riscv::Csr::Mstatus as u32, mstatus_wb);
-
-        // Set mcause register
-        // TODO: Get correct cause, currently only settings machine software interrupt
-        self.write_csr_silent(
-            riscv::Csr::Mcause as u32,
-            LLVMConstInt(LLVMInt32Type(), (1 << 31) | 3, 0),
-        );
 
         // load mtvec address from CSR
         let target = self.read_csr_silent(riscv::Csr::Mtvec as u32);
