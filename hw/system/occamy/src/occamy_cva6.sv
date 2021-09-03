@@ -130,6 +130,9 @@ module occamy_cva6
       .AxiDataWidth(64),
       .AxiIdWidth(4),
       .AxiUserWidth(1),
+      .axi_ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
+      .axi_aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
+      .axi_w_chan_t(axi_a48_d64_i4_u0_w_chan_t),
       .axi_req_t(axi_a48_d64_i4_u0_req_t),
       .axi_rsp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_cva6 (

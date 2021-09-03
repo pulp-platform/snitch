@@ -449,6 +449,21 @@ class AxiBus(object):
     def rsp_type(self):
         return "{}_resp_t".format(self.type_prefix)
 
+    def ar_chan_type(self):
+        return "{}_ar_chan_t".format(self.type_prefix)
+
+    def r_chan_type(self):
+        return "{}_r_chan_t".format(self.type_prefix)
+
+    def aw_chan_type(self):
+        return "{}_aw_chan_t".format(self.type_prefix)
+
+    def w_chan_type(self):
+        return "{}_w_chan_t".format(self.type_prefix)
+
+    def b_chan_type(self):
+        return "{}_b_chan_t".format(self.type_prefix)
+
     def addr_type(self):
         return "logic [{}:0]".format(self.aw - 1)
 
