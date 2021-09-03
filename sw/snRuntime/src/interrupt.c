@@ -2,12 +2,15 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 #include "encoding.h"
+#include "printf.h"
 #include "snrt.h"
+#include "team.h"
 
 //================================================================================
 // Data
 //================================================================================
 volatile static uint32_t clint_mutex = 0;
+__thread static uint32_t *clint_p;
 
 //================================================================================
 // ISR definitions
@@ -20,6 +23,11 @@ void irq_m_ext(uint32_t core_idx);
 //================================================================================
 // Public functions
 //================================================================================
+
+void snrt_int_init(struct snrt_team_root *team) {
+    // Put the clint address in tls for faster access
+    clint_p = team->peripherals.clint;
+}
 
 /**
  * @brief Interrupt service routine called by start.S on interrupts and
@@ -59,8 +67,7 @@ void __snrt_isr(void) {
  */
 void snrt_int_sw_clear(uint32_t hartid) {
     snrt_mutex_lock(&clint_mutex);
-    *(snrt_peripherals()->clint + ((hartid & ~0x1f) >> 5)) &=
-        ~(1 << (hartid & 0x1f));
+    *(clint_p + ((hartid & ~0x1f) >> 5)) &= ~(1 << (hartid & 0x1f));
     snrt_mutex_release(&clint_mutex);
 }
 
@@ -72,8 +79,26 @@ void snrt_int_sw_clear(uint32_t hartid) {
  */
 void snrt_int_sw_set(uint32_t hartid) {
     snrt_mutex_lock(&clint_mutex);
-    *(snrt_peripherals()->clint + ((hartid & ~0x1f) >> 5)) |=
-        (1 << (hartid & 0x1f));
+    *(clint_p + ((hartid & ~0x1f) >> 5)) |= (1 << (hartid & 0x1f));
+    snrt_mutex_release(&clint_mutex);
+}
+
+/**
+ * @brief Read SW interrupt for hartid in CLINT
+ * @details
+ *
+ * @param hartid Target interrupt to set
+ */
+
+/**
+ * @brief Read SW interrupt for hartid in CLINT
+ *
+ * @param hartid hartid to poll for interrupt flag
+ * @return uint32_t 0 if no SW interrupt is pending, 1 otherwise
+ */
+uint32_t snrt_int_sw_get(uint32_t hartid) {
+    snrt_mutex_lock(&clint_mutex);
+    uint32_t ret = *(clint_p + ((hartid & ~0x1f) >> 5)) >> (hartid & 0x1f);
     snrt_mutex_release(&clint_mutex);
 }
 

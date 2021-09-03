@@ -16,9 +16,9 @@ else()
     # Export package information to includer.
     set(SNRUNTIME_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
     set(SNRUNTIME_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-    set(SNRUNTIME_INCLUDE_DIRS 
-        ${CMAKE_CURRENT_SOURCE_DIR}/include 
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor 
+    set(SNRUNTIME_INCLUDE_DIRS
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/riscv-opcodes
         PARENT_SCOPE)
 endif()
@@ -45,7 +45,11 @@ if(RUNTIME_TRACE)
     add_compile_definitions(__SNRT_USE_TRACE)
 endif()
 
-include_directories(include vendor vendor/riscv-opcodes)
+include_directories(
+    include
+    vendor
+    vendor/riscv-opcodes
+)
 
 # Common sources
 set(sources
@@ -57,6 +61,10 @@ set(sources
     src/ssr.c
     src/alloc.c
     src/interrupt.c
+    # OpenMP support
+    src/omp/omp.c
+    src/omp/kmp.c
+    src/omp/eu.c
 )
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
@@ -122,3 +130,8 @@ add_snitch_test_args(printf_fmtint printf_fmtint-system --no-opt-llvm --base-har
 add_snitch_test_executable(team_global tests/team_global.c)
 add_snitch_test_rtl(team_global)
 add_snitch_test_args(team_global team_global --base-hartid=3 --num-cores=4 --num-clusters=2)
+
+# event unit test
+add_snitch_test_executable(event_unit tests/event_unit.c)
+add_snitch_test_rtl(event_unit)
+add_snitch_test_args(event_unit event_unit --base-hartid=3 --num-cores=8 --num-clusters=1)

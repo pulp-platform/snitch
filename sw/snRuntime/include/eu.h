@@ -1,0 +1,81 @@
+
+#pragma once
+
+#include <stdint.h>
+
+/**
+ * @brief Initialize the event unit
+ * @details
+ */
+void eu_init(void);
+
+/**
+ * @brief send all workers in loop to exit()
+ * @param core_idx cluster-local core index
+ */
+void eu_exit(uint32_t core_idx);
+
+/**
+ * @brief Enter the event unit loop, never exits
+ *
+ * @param core_idx cluster-local core index
+ */
+void eu_event_loop(uint32_t core_idx);
+
+/**
+ * @brief Set function to execute by `nthreads` number of threads
+ * @details
+ *
+ * @param fn pointer to worker function to be executed
+ * @param data pointer to function arguments
+ * @param argc number of elements in data
+ * @param nthreads number of threads that have to execute this event
+ */
+int eu_dispatch_push(void (*fn)(void *, uint32_t), uint32_t argc, void *data,
+                     uint32_t nthreads);
+
+/**
+ * @brief wait for all workers to idle
+ * @param core_idx cluster-local core index
+ */
+void eu_run_empty(uint32_t core_idx);
+
+/**
+ * @brief Debugging info to printf
+ * @details
+ */
+void eu_print_status(void);
+
+/**
+ * @brief Acquires the event unit mutex, exits only on success
+ */
+void eu_mutex_lock(void);
+
+/**
+ * @brief Releases the acquired mutex
+ */
+void eu_mutex_release(void);
+
+/**
+ * Getters
+ */
+uint32_t eu_get_workers_in_loop();
+
+////////////////////////////////////////////////////////////////////////////////
+// debug
+////////////////////////////////////////////////////////////////////////////////
+// #define EU_DEBUG_LEVEL 100
+
+#ifdef EU_DEBUG_LEVEL
+#include "printf.h"
+#define _EU_PRINTF(...)             \
+    if (1) {                        \
+        printf("[eu] "__VA_ARGS__); \
+    }
+#define EU_PRINTF(d, ...)        \
+    if (EU_DEBUG_LEVEL >= d) {   \
+        _EU_PRINTF(__VA_ARGS__); \
+    }
+#else
+#define EU_PRINTF(d, ...)
+#endif

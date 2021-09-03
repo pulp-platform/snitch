@@ -47,6 +47,7 @@ extern uint32_t snrt_global_compute_core_idx();
 extern uint32_t snrt_global_compute_core_num();
 extern uint32_t snrt_global_dm_core_idx();
 extern uint32_t snrt_global_dm_core_num();
+extern uint32_t snrt_cluster_core_base_hartid();
 extern uint32_t snrt_cluster_core_idx();
 extern uint32_t snrt_cluster_core_num();
 extern uint32_t snrt_cluster_compute_core_idx();
@@ -127,6 +128,11 @@ extern void *snrt_l1alloc(size_t size);
 //================================================================================
 // Interrupt functions
 //================================================================================
+/**
+ * @brief Init the interrupt subsystem
+ *
+ */
+void snrt_int_init(struct snrt_team_root *team);
 
 /**
  * @brief Globally enable M-mode interrupts
@@ -174,6 +180,13 @@ static inline uint32_t snrt_interrupt_cause(void) {
 }
 extern void snrt_int_sw_clear(uint32_t hartid);
 extern void snrt_int_sw_set(uint32_t hartid);
+uint32_t snrt_int_sw_get(uint32_t hartid);
+
+/**
+ * @brief Put the hart into wait for interrupt state
+ *
+ */
+static inline void sntr_wfi() { asm volatile("wfi"); }
 
 //================================================================================
 // Mutex functions

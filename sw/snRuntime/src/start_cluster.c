@@ -85,6 +85,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
 
     // Init allocator
     snrt_alloc_init(team);
+    snrt_int_init(team);
 }
 
 uint32_t _snrt_barrier_reg_ptr() {
