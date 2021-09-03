@@ -10,10 +10,10 @@ Subject: [PATCH] cva6: Custom Bender.yml
 
 diff --git a/Bender.yml b/Bender.yml
 new file mode 100644
-index 0000000..45e80b5
+index 0000000..6db1f00
 --- /dev/null
 +++ b/Bender.yml
-@@ -0,0 +1,87 @@
+@@ -0,0 +1,86 @@
 +package:
 +  name: cva6
 +  authors:
@@ -29,7 +29,6 @@ index 0000000..45e80b5
 +
 +sources:
 +  - defines:
-+      WT_DCACHE: 1
 +    files:
 +    # Packages
 +    - include/riscv_pkg.sv
