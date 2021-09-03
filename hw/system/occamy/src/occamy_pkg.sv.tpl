@@ -19,7 +19,7 @@ package occamy_pkg;
   localparam int unsigned AddrWidth = occamy_cluster_pkg::AddrWidth;
   localparam int unsigned UserWidth = occamy_cluster_pkg::UserWidth;
 
-  localparam int unsigned NrClustersS1Quadrant = 4;
+  localparam int unsigned NrClustersS1Quadrant = ${nr_s1_clusters};
   localparam int unsigned NrCoresCluster = occamy_cluster_pkg::NrCores;
   localparam int unsigned NrCoresS1Quadrant = NrClustersS1Quadrant * NrCoresCluster;
 
