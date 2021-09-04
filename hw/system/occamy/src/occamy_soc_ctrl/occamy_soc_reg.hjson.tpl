@@ -197,7 +197,7 @@
         ]
       }
     },
-    { skipto: "0x1000" },
+    { skipto: "0x100" },
 % for i in range(nr_s1_quadrants):
 % for j in range(cfg["s1_quadrant"].get("ro_cache_cfg", {}).get("address_regions", 1)):
     { name: "RO_START_ADDR_LOW_${j}_QUADRANT_${i}",

@@ -26,7 +26,7 @@ module occamy_soc_reg_top #(
 
   import occamy_soc_reg_pkg::* ;
 
-  localparam int AW = 13;
+  localparam int AW = 9;
   localparam int DW = 32;
   localparam int DBW = DW/8;                    // Byte Width
 

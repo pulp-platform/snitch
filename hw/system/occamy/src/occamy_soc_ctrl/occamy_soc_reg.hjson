@@ -197,7 +197,7 @@
         ]
       }
     },
-    { skipto: "0x1000" },
+    { skipto: "0x100" },
     { name: "RO_START_ADDR_LOW_0_QUADRANT_0",
       desc: "Read-only cache start address low",
       swaccess: "rw",
