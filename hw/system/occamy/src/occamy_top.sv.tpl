@@ -205,7 +205,16 @@ module occamy_top
   <%
     nr_cores_s1_quadrant = nr_s1_clusters * nr_cluster_cores
     lower_core = i * nr_cores_s1_quadrant + 1
+    ro_addr_regions = cfg["s1_quadrant"].get("ro_cache_cfg", {}).get("address_regions", 1)
   %>
+    // Assemble address from `soc_ctrl` regs.
+    logic [${ro_addr_regions-1}:0][${soc_wide_xbar.aw-1}:0] start_addr_${i}, end_addr_${i};
+  % for j in range(ro_addr_regions):
+    assign start_addr_${i}[${j}] = {soc_ctrl_out.ro_start_addr_high_${j}_quadrant_${i}.q, soc_ctrl_out.ro_start_addr_low_${j}_quadrant_${i}.q};
+    assign end_addr_${i}[${j}] = {soc_ctrl_out.ro_end_addr_high_${j}_quadrant_${i}.q, soc_ctrl_out.ro_end_addr_low_${j}_quadrant_${i}.q};
+  % endfor
+    assign soc_ctrl_in.ro_cache_flush[${i}].de = soc_ctrl_out.ro_cache_flush[${i}].q & soc_ctrl_in.ro_cache_flush[${i}].d;
+
   occamy_quadrant_s1 i_occamy_quadrant_s1_${i} (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
@@ -218,6 +227,11 @@ module occamy_top
     .msip_i (msip[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
     .isolate_i (soc_ctrl_out.isolate[${i}].q),
     .isolated_o (soc_ctrl_in.isolated[${i}].d),
+    .ro_enable_i (soc_ctrl_out.ro_cache_enable[${i}].q),
+    .ro_flush_valid_i (soc_ctrl_out.ro_cache_flush[${i}].q),
+    .ro_flush_ready_o (soc_ctrl_in.ro_cache_flush[${i}].d),
+    .ro_start_addr_i (start_addr_${i}),
+    .ro_end_addr_i (end_addr_${i}),
     .quadrant_hbi_out_req_o (${wide_hbi_out.req_name()}),
     .quadrant_hbi_out_rsp_i (${wide_hbi_out.rsp_name()}),
     .quadrant_narrow_out_req_o (${narrow_out.req_name()}),

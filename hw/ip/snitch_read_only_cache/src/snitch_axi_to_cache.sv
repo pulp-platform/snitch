@@ -434,6 +434,7 @@ module axi_burst_splitter_table #(
   id_queue #(
     .ID_WIDTH ( $bits(id_t) ),
     .CAPACITY ( MaxTrans    ),
+    .FULL_BW  ( 1'b1        ),
     .data_t   ( cnt_idx_t   )
   ) i_idq (
     .clk_i,

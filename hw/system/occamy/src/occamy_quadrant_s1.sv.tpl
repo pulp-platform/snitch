@@ -9,6 +9,8 @@
 <%
   cut_width = 1
   nr_clusters = int(cfg["s1_quadrant"]["nr_clusters"])
+  ro_cache_cfg = cfg["s1_quadrant"].get("ro_cache_cfg", {})
+  ro_cache_regions = ro_cache_cfg.get("address_regions", 1)
 %>
 
 /// Occamy Stage 1 Quadrant
@@ -25,6 +27,11 @@ module occamy_quadrant_s1
   input  logic [NrCoresS1Quadrant-1:0] msip_i,
   input  logic [3:0]                   isolate_i,
   output logic [3:0]                   isolated_o,
+  input  logic                         ro_enable_i,
+  input  logic                         ro_flush_valid_i,
+  output logic                         ro_flush_ready_o,
+  input  logic [${ro_cache_regions-1}:0][${soc_wide_xbar.in_s1_quadrant_0.aw-1}:0] ro_start_addr_i,
+  input  logic [${ro_cache_regions-1}:0][${soc_wide_xbar.in_s1_quadrant_0.aw-1}:0] ro_end_addr_i,
   // HBI Connection
   output ${wide_xbar_quadrant_s1.out_hbi.req_type()}   quadrant_hbi_out_req_o,
   input  ${wide_xbar_quadrant_s1.out_hbi.rsp_type()}   quadrant_hbi_out_rsp_i,
@@ -73,27 +80,29 @@ module occamy_quadrant_s1
   assign quadrant_narrow_out_req_o = ${narrow_cluster_out_iwc.req_name()};
   assign ${narrow_cluster_out_iwc.rsp_name()} = quadrant_narrow_out_rsp_i;
 
-  ////////////////////////////////////////////
-  // Wide Out + Const Cache + IW Converter  //
-  ////////////////////////////////////////////
-  addr_t const_cache_start_addr, const_cache_end_addr;
-  assign const_cache_start_addr = '0;
-  assign const_cache_end_addr = '1;
+  /////////////////////////////////////////
+  // Wide Out + RO Cache + IW Converter  //
+  /////////////////////////////////////////
   <%
-    const_cache_cfg = cfg["s1_quadrant"].get("const_cache")
-    if const_cache_cfg:
-      wide_cluster_out_const_cache = wide_xbar_quadrant_s1.out_top \
-      .add_const_cache(context, "snitch_const_cache", const_cache_cfg["width"], const_cache_cfg["count"], const_cache_cfg["sets"])
+    wide_xbar_out_iwc = wide_xbar_quadrant_s1.out_top.change_iw(context, 3, "wide_cluster_out_iwc")
+    if ro_cache_cfg:
+      wide_cluster_out_ro_cache = wide_xbar_out_iwc \
+      .add_ro_cache(context, "snitch_ro_cache", \
+        ro_cache_cfg, \
+        enable="ro_enable_i", \
+        flush_valid="ro_flush_valid_i", \
+        flush_ready="ro_flush_ready_o", \
+        start_addr="ro_start_addr_i", \
+        end_addr="ro_end_addr_i")
     else:
-      wide_cluster_out_const_cache = wide_xbar_quadrant_s1.out_top
+      wide_cluster_out_ro_cache = wide_xbar_out_iwc
 
-    wide_cluster_out_iwc = wide_cluster_out_const_cache \
-      .change_iw(context, 3, "wide_cluster_out_iwc") \
+    wide_cluster_out_cut = wide_cluster_out_ro_cache \
       .isolate(context, "isolate_i[3]", "wide_cluster_out_isolate", isolated="isolated_o[3]", atop_support=False)
   %>
 
-  assign quadrant_wide_out_req_o = ${wide_cluster_out_iwc.req_name()};
-  assign ${wide_cluster_out_iwc.rsp_name()} = quadrant_wide_out_rsp_i;
+  assign quadrant_wide_out_req_o = ${wide_cluster_out_cut.req_name()};
+  assign ${wide_cluster_out_cut.rsp_name()} = quadrant_wide_out_rsp_i;
 
   ////////////////////
   // HBI Connection //

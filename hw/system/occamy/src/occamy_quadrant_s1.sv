@@ -12,28 +12,33 @@
 module occamy_quadrant_s1
   import occamy_pkg::*;
 (
-    input  logic                                             clk_i,
-    input  logic                                             rst_ni,
-    input  logic                                             test_mode_i,
-    input  tile_id_t                                         tile_id_i,
-    input  logic                     [NrCoresS1Quadrant-1:0] debug_req_i,
-    input  logic                     [NrCoresS1Quadrant-1:0] meip_i,
-    input  logic                     [NrCoresS1Quadrant-1:0] mtip_i,
-    input  logic                     [NrCoresS1Quadrant-1:0] msip_i,
-    input  logic                     [                  3:0] isolate_i,
-    output logic                     [                  3:0] isolated_o,
+    input  logic                                                   clk_i,
+    input  logic                                                   rst_ni,
+    input  logic                                                   test_mode_i,
+    input  tile_id_t                                               tile_id_i,
+    input  logic                     [NrCoresS1Quadrant-1:0]       debug_req_i,
+    input  logic                     [NrCoresS1Quadrant-1:0]       meip_i,
+    input  logic                     [NrCoresS1Quadrant-1:0]       mtip_i,
+    input  logic                     [NrCoresS1Quadrant-1:0]       msip_i,
+    input  logic                     [                  3:0]       isolate_i,
+    output logic                     [                  3:0]       isolated_o,
+    input  logic                                                   ro_enable_i,
+    input  logic                                                   ro_flush_valid_i,
+    output logic                                                   ro_flush_ready_o,
+    input  logic                     [                  1:0][47:0] ro_start_addr_i,
+    input  logic                     [                  1:0][47:0] ro_end_addr_i,
     // HBI Connection
-    output axi_a48_d512_i7_u0_req_t                          quadrant_hbi_out_req_o,
-    input  axi_a48_d512_i7_u0_resp_t                         quadrant_hbi_out_rsp_i,
+    output axi_a48_d512_i7_u0_req_t                                quadrant_hbi_out_req_o,
+    input  axi_a48_d512_i7_u0_resp_t                               quadrant_hbi_out_rsp_i,
     // Next-Level
-    output axi_a48_d64_i4_u0_req_t                           quadrant_narrow_out_req_o,
-    input  axi_a48_d64_i4_u0_resp_t                          quadrant_narrow_out_rsp_i,
-    input  axi_a48_d64_i8_u0_req_t                           quadrant_narrow_in_req_i,
-    output axi_a48_d64_i8_u0_resp_t                          quadrant_narrow_in_rsp_o,
-    output axi_a48_d512_i3_u0_req_t                          quadrant_wide_out_req_o,
-    input  axi_a48_d512_i3_u0_resp_t                         quadrant_wide_out_rsp_i,
-    input  axi_a48_d512_i8_u0_req_t                          quadrant_wide_in_req_i,
-    output axi_a48_d512_i8_u0_resp_t                         quadrant_wide_in_rsp_o
+    output axi_a48_d64_i4_u0_req_t                                 quadrant_narrow_out_req_o,
+    input  axi_a48_d64_i4_u0_resp_t                                quadrant_narrow_out_rsp_i,
+    input  axi_a48_d64_i8_u0_req_t                                 quadrant_narrow_in_req_i,
+    output axi_a48_d64_i8_u0_resp_t                                quadrant_narrow_in_rsp_o,
+    output axi_a48_d512_i3_u0_req_t                                quadrant_wide_out_req_o,
+    input  axi_a48_d512_i3_u0_resp_t                               quadrant_wide_out_rsp_i,
+    input  axi_a48_d512_i8_u0_req_t                                quadrant_wide_in_req_i,
+    output axi_a48_d512_i8_u0_resp_t                               quadrant_wide_in_rsp_o
 );
 
   // Calculate cluster base address based on `tile id`.
@@ -242,12 +247,9 @@ module occamy_quadrant_s1
   assign quadrant_narrow_out_req_o = narrow_cluster_out_isolate_req;
   assign narrow_cluster_out_isolate_rsp = quadrant_narrow_out_rsp_i;
 
-  ////////////////////////////////////////////
-  // Wide Out + Const Cache + IW Converter  //
-  ////////////////////////////////////////////
-  addr_t const_cache_start_addr, const_cache_end_addr;
-  assign const_cache_start_addr = '0;
-  assign const_cache_end_addr   = '1;
+  /////////////////////////////////////////
+  // Wide Out + RO Cache + IW Converter  //
+  /////////////////////////////////////////
   axi_a48_d512_i3_u0_req_t  wide_cluster_out_iwc_req;
   axi_a48_d512_i3_u0_resp_t wide_cluster_out_iwc_rsp;
 
@@ -268,24 +270,55 @@ module occamy_quadrant_s1
       .mst_req_o(wide_cluster_out_iwc_req),
       .mst_resp_i(wide_cluster_out_iwc_rsp)
   );
-  axi_a48_d512_i3_u0_req_t  wide_cluster_out_isolate_req;
-  axi_a48_d512_i3_u0_resp_t wide_cluster_out_isolate_rsp;
+  axi_a48_d512_i4_u0_req_t  snitch_ro_cache_req;
+  axi_a48_d512_i4_u0_resp_t snitch_ro_cache_rsp;
+
+  snitch_read_only_cache #(
+      .LineWidth(512),
+      .LineCount(256),
+      .SetCount(2),
+      .AxiAddrWidth(48),
+      .AxiDataWidth(512),
+      .AxiIdWidth(3),
+      .AxiUserWidth(1),
+      .MaxTrans(8),
+      .NrAddrRules(2),
+      .slv_req_t(axi_a48_d512_i3_u0_req_t),
+      .slv_rsp_t(axi_a48_d512_i3_u0_resp_t),
+      .mst_req_t(axi_a48_d512_i4_u0_req_t),
+      .mst_rsp_t(axi_a48_d512_i4_u0_resp_t)
+  ) i_snitch_ro_cache (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .enable_i(ro_enable_i),
+      .flush_valid_i(ro_flush_valid_i),
+      .flush_ready_o(ro_flush_ready_o),
+      .start_addr_i(ro_start_addr_i),
+      .end_addr_i(ro_end_addr_i),
+      .axi_slv_req_i(wide_cluster_out_iwc_req),
+      .axi_slv_rsp_o(wide_cluster_out_iwc_rsp),
+      .axi_mst_req_o(snitch_ro_cache_req),
+      .axi_mst_rsp_i(snitch_ro_cache_rsp)
+  );
+
+  axi_a48_d512_i4_u0_req_t  wide_cluster_out_isolate_req;
+  axi_a48_d512_i4_u0_resp_t wide_cluster_out_isolate_rsp;
 
   axi_isolate #(
       .NumPending(16),
       .TerminateTransaction(0),
       .AtopSupport(0),
-      .AxiIdWidth(3),
+      .AxiIdWidth(4),
       .AxiAddrWidth(48),
       .AxiDataWidth(512),
       .AxiUserWidth(1),
-      .req_t(axi_a48_d512_i3_u0_req_t),
-      .resp_t(axi_a48_d512_i3_u0_resp_t)
+      .req_t(axi_a48_d512_i4_u0_req_t),
+      .resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_cluster_out_isolate (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(wide_cluster_out_iwc_req),
-      .slv_resp_o(wide_cluster_out_iwc_rsp),
+      .slv_req_i(snitch_ro_cache_req),
+      .slv_resp_o(snitch_ro_cache_rsp),
       .mst_req_o(wide_cluster_out_isolate_req),
       .mst_resp_i(wide_cluster_out_isolate_rsp),
       .isolate_i(isolate_i[3]),

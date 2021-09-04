@@ -23,11 +23,13 @@
     s1_quadrant: {
         nr_clusters: 4,
         // Disable for easier flow trials.
-        // const_cache: {
-        //     width: 512,
-        //     count: 256,
-        //     sets: 2
-        // }
+        ro_cache_cfg: {
+            width: 512,
+            count: 256,
+            sets: 2,
+            max_trans: 8,
+            address_regions: 2,
+        }
     },
     cluster: {
         name: "occamy_cluster"

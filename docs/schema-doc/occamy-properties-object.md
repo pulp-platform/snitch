@@ -16,10 +16,10 @@ unknown ([object](occamy-properties-object.md))
 
 # object Properties
 
-| Property                    | Type      | Required | Nullable       | Defined by                                                                                                                                                                                |
-| :-------------------------- | :-------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [nr_clusters](#nr_clusters) | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-object-properties-nr_clusters.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/s1_quadrant/properties/nr_clusters") |
-| [const_cache](#const_cache) | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-object-properties-const_cache.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/s1_quadrant/properties/const_cache") |
+| Property                      | Type      | Required | Nullable       | Defined by                                                                                                                                                                                  |
+| :---------------------------- | :-------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [nr_clusters](#nr_clusters)   | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-object-properties-nr_clusters.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/s1_quadrant/properties/nr_clusters")   |
+| [ro_cache_cfg](#ro_cache_cfg) | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-object-properties-ro_cache_cfg.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/s1_quadrant/properties/ro_cache_cfg") |
 
 ## nr_clusters
 
@@ -47,20 +47,20 @@ The default value is:
 4
 ```
 
-## const_cache
+## ro_cache_cfg
 
 Constant cache configuration.
 
-`const_cache`
+`ro_cache_cfg`
 
 *   is optional
 
-*   Type: `object` ([Details](occamy-properties-object-properties-const_cache.md))
+*   Type: `object` ([Details](occamy-properties-object-properties-ro_cache_cfg.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-object-properties-const_cache.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/s1\_quadrant/properties/const_cache")
+*   defined in: [Occamy System Schema](occamy-properties-object-properties-ro_cache_cfg.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/s1\_quadrant/properties/ro_cache_cfg")
 
-### const_cache Type
+### ro_cache_cfg Type
 
-`object` ([Details](occamy-properties-object-properties-const_cache.md))
+`object` ([Details](occamy-properties-object-properties-ro_cache_cfg.md))

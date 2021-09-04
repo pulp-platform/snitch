@@ -751,18 +751,17 @@ class AxiBus(object):
             ) + "\n")
         return bus
 
-    def add_const_cache(self,
-                        context,
-                        name,
-                        line_width,
-                        line_count,
-                        set_count,
-                        flush_valid=None,
-                        flush_ready=None,
-                        start_addr=None,
-                        end_addr=None,
-                        inst_name=None,
-                        to=None):
+    def add_ro_cache(self,
+                     context,
+                     name,
+                     cfg,
+                     enable=None,
+                     flush_valid=None,
+                     flush_ready=None,
+                     start_addr=None,
+                     end_addr=None,
+                     inst_name=None,
+                     to=None):
         # Generate the new bus.
         if to is None:
             bus = copy(self)
@@ -784,14 +783,13 @@ class AxiBus(object):
 
         # Emit the remapper instance.
         bus.declare(context)
-        tpl = templates.get_template("solder.snitch_const_cache.sv.tpl")
+        tpl = templates.get_template("solder.snitch_ro_cache.sv.tpl")
         context.write(
             tpl.render_unicode(
                 axi_in=self,
                 axi_out=bus,
-                line_width=line_width,
-                line_count=line_count,
-                set_count=set_count,
+                cfg=cfg,
+                enable=enable or "1'b1",
                 flush_valid=flush_valid or "1'b0",
                 flush_ready=flush_ready or "",
                 start_addr=start_addr or "'0",

@@ -62,10 +62,15 @@
                     "default": 4,
                     "description": "Number of clusters in an S1 quadrant."
                 },
-                "const_cache": {
+                "ro_cache_cfg": {
                     "type": "object",
                     "description": "Constant cache configuration.",
                     "properties": {
+                        "max_trans": {
+                            "type": "integer",
+                            "description": "Maximum Outstanding Transaction",
+                            "default": 4
+                        },
                         "width": {
                             "type": "integer",
                             "description": "Cache Line Width"
@@ -77,6 +82,11 @@
                         "sets": {
                             "type": "integer",
                             "description": "The set associativity of the cache. Power of two; >= 1."
+                        },
+                        "address_regions": {
+                            "type": "integer",
+                            "description": "Number of programmable address regions.",
+                            "default": 1
                         }
                     }
                 }
