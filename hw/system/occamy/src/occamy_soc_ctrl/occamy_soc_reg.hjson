@@ -192,7 +192,7 @@
           { bits: "0:0"
             resval: "0"
             name: "FLUSH"
-            desc: "Flush (inv RO cache of S1 quadrant."
+            desc: "Flush (invalidate) RO cache of S1 quadrant."
           }
         ]
       }
