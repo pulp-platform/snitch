@@ -9,7 +9,7 @@ package:
 
 dependencies:
   # axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
-  snitch_const_cache: {path: ../../ip/snitch_const_cache}
+  snitch_read_only_cache: {path: ../../ip/snitch_read_only_cache}
   snitch-cluster: {path: ../../ip/snitch_cluster}
   spm-interface: {path: ../../ip/spm_interface}
   cva6: {path: ../../vendor/openhwgroup_cva6}

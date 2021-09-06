@@ -13,10 +13,10 @@
       type: "int",
       default: "31"
     },
-    { name: "NumIsolateRegs",
-      desc: "Number of Isolate Regs.",
+    { name: "NumS1Quadrants",
+      desc: "Number of S1 Quadrants.",
       type: "int",
-      default: "12"
+      default: "8"
     },
   ],
   name: "Occamy SoC"
@@ -117,7 +117,7 @@
         desc: "Isolate port of given quadrant."
         swaccess: "rw"
         hwaccess: "hro"
-        count: "NumIsolateRegs"
+        count: "NumS1Quadrants"
         cname: "isolate"
         fields: [
           { bits: "3:0"
@@ -136,7 +136,7 @@
           }
         ]
       }
-    }
+    },
     { multireg:
       { name: "ISOLATED"
         desc: "Isolation status of S1 quadrant and port"
@@ -144,7 +144,7 @@
         hwaccess: "hwo"
         hwqe:     "true",
         hwext:    "true",
-        count: "NumIsolateRegs"
+        count: "NumS1Quadrants"
         cname: "isolated"
         fields: [
           { bits: "3:0"
@@ -164,6 +164,743 @@
           }
         ]
       }
+    },
+    { multireg:
+      { name: "RO_CACHE_ENABLE",
+        desc: "Enable read-only cache of quadrant.",
+        swaccess: "rw"
+        hwaccess: "hro"
+        count: "NumS1Quadrants"
+        cname: "ro_enable"
+        fields: [
+          { bits: "0:0"
+            resval: "0"
+            name: "ENABLE"
+            desc: "Enable RO cache of S1 quadrant."
+          }
+        ]
+      },
+    },
+    { multireg:
+      { name: "RO_CACHE_FLUSH",
+        desc: "Flush read-only cache.",
+        swaccess: "rw"
+        hwaccess: "hrw"
+        count: "NumS1Quadrants"
+        cname: "ro_flush"
+        fields: [
+          { bits: "0:0"
+            resval: "0"
+            name: "FLUSH"
+            desc: "Flush (invalidate) RO cache of S1 quadrant."
+          }
+        ]
+      }
+    },
+    { skipto: "0x100" },
+    { name: "RO_START_ADDR_LOW_0_QUADRANT_0",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_0_QUADRANT_0",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_0_QUADRANT_0",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_0_QUADRANT_0",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_1_QUADRANT_0",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_1_QUADRANT_0",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_1_QUADRANT_0",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_1_QUADRANT_0",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_0_QUADRANT_1",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_0_QUADRANT_1",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_0_QUADRANT_1",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_0_QUADRANT_1",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_1_QUADRANT_1",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_1_QUADRANT_1",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_1_QUADRANT_1",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_1_QUADRANT_1",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_0_QUADRANT_2",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_0_QUADRANT_2",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_0_QUADRANT_2",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_0_QUADRANT_2",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_1_QUADRANT_2",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_1_QUADRANT_2",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_1_QUADRANT_2",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_1_QUADRANT_2",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_0_QUADRANT_3",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_0_QUADRANT_3",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_0_QUADRANT_3",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_0_QUADRANT_3",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_1_QUADRANT_3",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_1_QUADRANT_3",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_1_QUADRANT_3",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_1_QUADRANT_3",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_0_QUADRANT_4",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_0_QUADRANT_4",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_0_QUADRANT_4",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_0_QUADRANT_4",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_1_QUADRANT_4",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_1_QUADRANT_4",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_1_QUADRANT_4",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_1_QUADRANT_4",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_0_QUADRANT_5",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_0_QUADRANT_5",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_0_QUADRANT_5",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_0_QUADRANT_5",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_1_QUADRANT_5",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_1_QUADRANT_5",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_1_QUADRANT_5",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_1_QUADRANT_5",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_0_QUADRANT_6",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_0_QUADRANT_6",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_0_QUADRANT_6",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_0_QUADRANT_6",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_1_QUADRANT_6",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_1_QUADRANT_6",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_1_QUADRANT_6",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_1_QUADRANT_6",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_0_QUADRANT_7",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_0_QUADRANT_7",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_0_QUADRANT_7",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_0_QUADRANT_7",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_START_ADDR_LOW_1_QUADRANT_7",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_START_ADDR_HIGH_1_QUADRANT_7",
+      desc: "Read-only cache start address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
+    }
+    { name: "RO_END_ADDR_LOW_1_QUADRANT_7",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0"
+        name: "ADDR_LOW"
+        desc: "Lower 32-bit of read-only region."
+        }
+      ]
+    },
+    { name: "RO_END_ADDR_HIGH_1_QUADRANT_7",
+      desc: "Read-only cache end address low",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0"
+        name: "ADDR_HIGH"
+        desc: "Higher 32-bit of read-only region."
+        }
+      ]
     }
   ]
 }

@@ -1,13 +1,13 @@
-  snitch_const_cache #(
-    .LineWidth (${line_width}),
-    .LineCount (${line_count}),
-    .SetCount (${set_count}),
+  snitch_read_only_cache #(
+    .LineWidth (${cfg["width"]}),
+    .LineCount (${cfg["count"]}),
+    .SetCount (${cfg["sets"]}),
     .AxiAddrWidth (${axi_in.aw}),
     .AxiDataWidth (${axi_in.dw}),
     .AxiIdWidth (${axi_in.iw}),
-    .AxiUserWidth (1),
-    .MaxTrans (MaxTransaction),
-    .NrAddrRules (1),
+    .AxiUserWidth (${max(axi_in.uw, 1)}),
+    .MaxTrans (${cfg["max_trans"]}),
+    .NrAddrRules (${cfg["address_regions"]}),
     .slv_req_t (${axi_in.req_type()}),
     .slv_rsp_t (${axi_in.rsp_type()}),
     .mst_req_t (${axi_out.req_type()}),
@@ -15,7 +15,7 @@
   ) ${name} (
     .clk_i (${axi_in.clk}),
     .rst_ni (${axi_in.rst}),
-    // TODO(zarubaf): Fix
+    .enable_i (${enable}),
     .flush_valid_i (${flush_valid}),
     .flush_ready_o (${flush_ready}),
     .start_addr_i (${start_addr}),

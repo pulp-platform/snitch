@@ -24,6 +24,8 @@ VLOG_FLAGS 	  += -suppress 2583
 VLOG_FLAGS 	  += -suppress 13314
 VLOG_FLAGS 	  += ${QUESTA_64BIT}
 
+CFG ?= src/occamy_cfg.hjson
+
 all: update-clint update-plic update-socreg update-source
 
 test: ${VSIM_SOURCES} ${TB_SRCS}
@@ -44,27 +46,27 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 update-source:
 	@echo "[SOLDER]  Generating sources"
 	@echo "[SOLDER]  RTL"
-	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --graph addrmap.dot --outdir src --wrapper --memories \
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap.dot --outdir src --wrapper --memories \
 		--top-sv src/occamy_top.sv.tpl \
 		--pkg-sv src/occamy_pkg.sv.tpl \
 		--quadrant-s1 src/occamy_quadrant_s1.sv.tpl \
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
 		--cva6-sv src/occamy_cva6.sv.tpl
-	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --graph addrmap.dot --outdir test \
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap.dot --outdir test \
 		--testharness-sv test/testharness.sv.tpl \
 		--bootdata ../../ip/snitch_cluster/test/bootdata.cc.tpl
 	@echo "[SOLDER]  CLINT"
 	@echo "[SOLDER]  Device Tree"
-	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --outdir . --dts test/occamy.dts
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir . --dts test/occamy.dts
 	@echo "[VERIBLE] Formatting"
 	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
 update-clint:
 	@mkdir -p src/clint
 	@echo "[SOLDER]  Generate CLINT config"
-	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --outdir src/clint \
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/clint \
 		--chip ../../ip/clint/data/clint.hjson.tpl
-	@$(ROOT)/util/occamygen.py --cfg src/occamy_cfg.hjson --outdir src/clint \
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/clint \
 		--chip ../../ip/clint/data/clint.sv.tpl
 	@echo "[REGGEN]  Re-generate CLINT regs"
 	@$(ROOT)/util/regtool.py -r -t src/clint src/clint/clint.hjson
@@ -77,7 +79,10 @@ update-plic:
 	@$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
 
 # Regenerate the SoC register.
-update-socreg: src/occamy_soc_ctrl/occamy_soc_reg.hjson
+update-socreg:
+	@echo "[REGGEN]  Generate SOCREGS config"
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/occamy_soc_ctrl \
+		--chip src/occamy_soc_ctrl/occamy_soc_reg.hjson.tpl
 	@echo "[REGGEN]  Generate SOCREGS"
 	@$(REGGEN) -r src/occamy_soc_ctrl/occamy_soc_reg.hjson --outdir src/occamy_soc_ctrl/
 

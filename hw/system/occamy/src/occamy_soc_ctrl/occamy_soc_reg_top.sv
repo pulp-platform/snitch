@@ -26,7 +26,7 @@ module occamy_soc_reg_top #(
 
   import occamy_soc_reg_pkg::* ;
 
-  localparam int AW = 8;
+  localparam int AW = 9;
   localparam int DW = 32;
   localparam int DBW = DW/8;                    // Byte Width
 
@@ -374,66 +374,286 @@ module occamy_soc_reg_top #(
   logic [1:0] pad_30_drv_30_qs;
   logic [1:0] pad_30_drv_30_wd;
   logic pad_30_drv_30_we;
-  logic [3:0] isolate_0_isolate_0_qs;
-  logic [3:0] isolate_0_isolate_0_wd;
-  logic isolate_0_isolate_0_we;
-  logic [3:0] isolate_0_isolate_1_qs;
-  logic [3:0] isolate_0_isolate_1_wd;
-  logic isolate_0_isolate_1_we;
-  logic [3:0] isolate_0_isolate_2_qs;
-  logic [3:0] isolate_0_isolate_2_wd;
-  logic isolate_0_isolate_2_we;
-  logic [3:0] isolate_0_isolate_3_qs;
-  logic [3:0] isolate_0_isolate_3_wd;
-  logic isolate_0_isolate_3_we;
-  logic [3:0] isolate_0_isolate_4_qs;
-  logic [3:0] isolate_0_isolate_4_wd;
-  logic isolate_0_isolate_4_we;
-  logic [3:0] isolate_0_isolate_5_qs;
-  logic [3:0] isolate_0_isolate_5_wd;
-  logic isolate_0_isolate_5_we;
-  logic [3:0] isolate_0_isolate_6_qs;
-  logic [3:0] isolate_0_isolate_6_wd;
-  logic isolate_0_isolate_6_we;
-  logic [3:0] isolate_0_isolate_7_qs;
-  logic [3:0] isolate_0_isolate_7_wd;
-  logic isolate_0_isolate_7_we;
-  logic [3:0] isolate_1_isolate_8_qs;
-  logic [3:0] isolate_1_isolate_8_wd;
-  logic isolate_1_isolate_8_we;
-  logic [3:0] isolate_1_isolate_9_qs;
-  logic [3:0] isolate_1_isolate_9_wd;
-  logic isolate_1_isolate_9_we;
-  logic [3:0] isolate_1_isolate_10_qs;
-  logic [3:0] isolate_1_isolate_10_wd;
-  logic isolate_1_isolate_10_we;
-  logic [3:0] isolate_1_isolate_11_qs;
-  logic [3:0] isolate_1_isolate_11_wd;
-  logic isolate_1_isolate_11_we;
-  logic [3:0] isolated_0_isolated_0_qs;
-  logic isolated_0_isolated_0_re;
-  logic [3:0] isolated_0_isolated_1_qs;
-  logic isolated_0_isolated_1_re;
-  logic [3:0] isolated_0_isolated_2_qs;
-  logic isolated_0_isolated_2_re;
-  logic [3:0] isolated_0_isolated_3_qs;
-  logic isolated_0_isolated_3_re;
-  logic [3:0] isolated_0_isolated_4_qs;
-  logic isolated_0_isolated_4_re;
-  logic [3:0] isolated_0_isolated_5_qs;
-  logic isolated_0_isolated_5_re;
-  logic [3:0] isolated_0_isolated_6_qs;
-  logic isolated_0_isolated_6_re;
-  logic [3:0] isolated_0_isolated_7_qs;
-  logic isolated_0_isolated_7_re;
-  logic [3:0] isolated_1_isolated_8_qs;
-  logic isolated_1_isolated_8_re;
-  logic [3:0] isolated_1_isolated_9_qs;
-  logic isolated_1_isolated_9_re;
-  logic [3:0] isolated_1_isolated_10_qs;
-  logic isolated_1_isolated_10_re;
-  logic [3:0] isolated_1_isolated_11_qs;
-  logic isolated_1_isolated_11_re;
+  logic [3:0] isolate_isolate_0_qs;
+  logic [3:0] isolate_isolate_0_wd;
+  logic isolate_isolate_0_we;
+  logic [3:0] isolate_isolate_1_qs;
+  logic [3:0] isolate_isolate_1_wd;
+  logic isolate_isolate_1_we;
+  logic [3:0] isolate_isolate_2_qs;
+  logic [3:0] isolate_isolate_2_wd;
+  logic isolate_isolate_2_we;
+  logic [3:0] isolate_isolate_3_qs;
+  logic [3:0] isolate_isolate_3_wd;
+  logic isolate_isolate_3_we;
+  logic [3:0] isolate_isolate_4_qs;
+  logic [3:0] isolate_isolate_4_wd;
+  logic isolate_isolate_4_we;
+  logic [3:0] isolate_isolate_5_qs;
+  logic [3:0] isolate_isolate_5_wd;
+  logic isolate_isolate_5_we;
+  logic [3:0] isolate_isolate_6_qs;
+  logic [3:0] isolate_isolate_6_wd;
+  logic isolate_isolate_6_we;
+  logic [3:0] isolate_isolate_7_qs;
+  logic [3:0] isolate_isolate_7_wd;
+  logic isolate_isolate_7_we;
+  logic [3:0] isolated_isolated_0_qs;
+  logic isolated_isolated_0_re;
+  logic [3:0] isolated_isolated_1_qs;
+  logic isolated_isolated_1_re;
+  logic [3:0] isolated_isolated_2_qs;
+  logic isolated_isolated_2_re;
+  logic [3:0] isolated_isolated_3_qs;
+  logic isolated_isolated_3_re;
+  logic [3:0] isolated_isolated_4_qs;
+  logic isolated_isolated_4_re;
+  logic [3:0] isolated_isolated_5_qs;
+  logic isolated_isolated_5_re;
+  logic [3:0] isolated_isolated_6_qs;
+  logic isolated_isolated_6_re;
+  logic [3:0] isolated_isolated_7_qs;
+  logic isolated_isolated_7_re;
+  logic ro_cache_enable_enable_0_qs;
+  logic ro_cache_enable_enable_0_wd;
+  logic ro_cache_enable_enable_0_we;
+  logic ro_cache_enable_enable_1_qs;
+  logic ro_cache_enable_enable_1_wd;
+  logic ro_cache_enable_enable_1_we;
+  logic ro_cache_enable_enable_2_qs;
+  logic ro_cache_enable_enable_2_wd;
+  logic ro_cache_enable_enable_2_we;
+  logic ro_cache_enable_enable_3_qs;
+  logic ro_cache_enable_enable_3_wd;
+  logic ro_cache_enable_enable_3_we;
+  logic ro_cache_enable_enable_4_qs;
+  logic ro_cache_enable_enable_4_wd;
+  logic ro_cache_enable_enable_4_we;
+  logic ro_cache_enable_enable_5_qs;
+  logic ro_cache_enable_enable_5_wd;
+  logic ro_cache_enable_enable_5_we;
+  logic ro_cache_enable_enable_6_qs;
+  logic ro_cache_enable_enable_6_wd;
+  logic ro_cache_enable_enable_6_we;
+  logic ro_cache_enable_enable_7_qs;
+  logic ro_cache_enable_enable_7_wd;
+  logic ro_cache_enable_enable_7_we;
+  logic ro_cache_flush_flush_0_qs;
+  logic ro_cache_flush_flush_0_wd;
+  logic ro_cache_flush_flush_0_we;
+  logic ro_cache_flush_flush_1_qs;
+  logic ro_cache_flush_flush_1_wd;
+  logic ro_cache_flush_flush_1_we;
+  logic ro_cache_flush_flush_2_qs;
+  logic ro_cache_flush_flush_2_wd;
+  logic ro_cache_flush_flush_2_we;
+  logic ro_cache_flush_flush_3_qs;
+  logic ro_cache_flush_flush_3_wd;
+  logic ro_cache_flush_flush_3_we;
+  logic ro_cache_flush_flush_4_qs;
+  logic ro_cache_flush_flush_4_wd;
+  logic ro_cache_flush_flush_4_we;
+  logic ro_cache_flush_flush_5_qs;
+  logic ro_cache_flush_flush_5_wd;
+  logic ro_cache_flush_flush_5_we;
+  logic ro_cache_flush_flush_6_qs;
+  logic ro_cache_flush_flush_6_wd;
+  logic ro_cache_flush_flush_6_we;
+  logic ro_cache_flush_flush_7_qs;
+  logic ro_cache_flush_flush_7_wd;
+  logic ro_cache_flush_flush_7_we;
+  logic [31:0] ro_start_addr_low_0_quadrant_0_qs;
+  logic [31:0] ro_start_addr_low_0_quadrant_0_wd;
+  logic ro_start_addr_low_0_quadrant_0_we;
+  logic [15:0] ro_start_addr_high_0_quadrant_0_qs;
+  logic [15:0] ro_start_addr_high_0_quadrant_0_wd;
+  logic ro_start_addr_high_0_quadrant_0_we;
+  logic [31:0] ro_end_addr_low_0_quadrant_0_qs;
+  logic [31:0] ro_end_addr_low_0_quadrant_0_wd;
+  logic ro_end_addr_low_0_quadrant_0_we;
+  logic [15:0] ro_end_addr_high_0_quadrant_0_qs;
+  logic [15:0] ro_end_addr_high_0_quadrant_0_wd;
+  logic ro_end_addr_high_0_quadrant_0_we;
+  logic [31:0] ro_start_addr_low_1_quadrant_0_qs;
+  logic [31:0] ro_start_addr_low_1_quadrant_0_wd;
+  logic ro_start_addr_low_1_quadrant_0_we;
+  logic [15:0] ro_start_addr_high_1_quadrant_0_qs;
+  logic [15:0] ro_start_addr_high_1_quadrant_0_wd;
+  logic ro_start_addr_high_1_quadrant_0_we;
+  logic [31:0] ro_end_addr_low_1_quadrant_0_qs;
+  logic [31:0] ro_end_addr_low_1_quadrant_0_wd;
+  logic ro_end_addr_low_1_quadrant_0_we;
+  logic [15:0] ro_end_addr_high_1_quadrant_0_qs;
+  logic [15:0] ro_end_addr_high_1_quadrant_0_wd;
+  logic ro_end_addr_high_1_quadrant_0_we;
+  logic [31:0] ro_start_addr_low_0_quadrant_1_qs;
+  logic [31:0] ro_start_addr_low_0_quadrant_1_wd;
+  logic ro_start_addr_low_0_quadrant_1_we;
+  logic [15:0] ro_start_addr_high_0_quadrant_1_qs;
+  logic [15:0] ro_start_addr_high_0_quadrant_1_wd;
+  logic ro_start_addr_high_0_quadrant_1_we;
+  logic [31:0] ro_end_addr_low_0_quadrant_1_qs;
+  logic [31:0] ro_end_addr_low_0_quadrant_1_wd;
+  logic ro_end_addr_low_0_quadrant_1_we;
+  logic [15:0] ro_end_addr_high_0_quadrant_1_qs;
+  logic [15:0] ro_end_addr_high_0_quadrant_1_wd;
+  logic ro_end_addr_high_0_quadrant_1_we;
+  logic [31:0] ro_start_addr_low_1_quadrant_1_qs;
+  logic [31:0] ro_start_addr_low_1_quadrant_1_wd;
+  logic ro_start_addr_low_1_quadrant_1_we;
+  logic [15:0] ro_start_addr_high_1_quadrant_1_qs;
+  logic [15:0] ro_start_addr_high_1_quadrant_1_wd;
+  logic ro_start_addr_high_1_quadrant_1_we;
+  logic [31:0] ro_end_addr_low_1_quadrant_1_qs;
+  logic [31:0] ro_end_addr_low_1_quadrant_1_wd;
+  logic ro_end_addr_low_1_quadrant_1_we;
+  logic [15:0] ro_end_addr_high_1_quadrant_1_qs;
+  logic [15:0] ro_end_addr_high_1_quadrant_1_wd;
+  logic ro_end_addr_high_1_quadrant_1_we;
+  logic [31:0] ro_start_addr_low_0_quadrant_2_qs;
+  logic [31:0] ro_start_addr_low_0_quadrant_2_wd;
+  logic ro_start_addr_low_0_quadrant_2_we;
+  logic [15:0] ro_start_addr_high_0_quadrant_2_qs;
+  logic [15:0] ro_start_addr_high_0_quadrant_2_wd;
+  logic ro_start_addr_high_0_quadrant_2_we;
+  logic [31:0] ro_end_addr_low_0_quadrant_2_qs;
+  logic [31:0] ro_end_addr_low_0_quadrant_2_wd;
+  logic ro_end_addr_low_0_quadrant_2_we;
+  logic [15:0] ro_end_addr_high_0_quadrant_2_qs;
+  logic [15:0] ro_end_addr_high_0_quadrant_2_wd;
+  logic ro_end_addr_high_0_quadrant_2_we;
+  logic [31:0] ro_start_addr_low_1_quadrant_2_qs;
+  logic [31:0] ro_start_addr_low_1_quadrant_2_wd;
+  logic ro_start_addr_low_1_quadrant_2_we;
+  logic [15:0] ro_start_addr_high_1_quadrant_2_qs;
+  logic [15:0] ro_start_addr_high_1_quadrant_2_wd;
+  logic ro_start_addr_high_1_quadrant_2_we;
+  logic [31:0] ro_end_addr_low_1_quadrant_2_qs;
+  logic [31:0] ro_end_addr_low_1_quadrant_2_wd;
+  logic ro_end_addr_low_1_quadrant_2_we;
+  logic [15:0] ro_end_addr_high_1_quadrant_2_qs;
+  logic [15:0] ro_end_addr_high_1_quadrant_2_wd;
+  logic ro_end_addr_high_1_quadrant_2_we;
+  logic [31:0] ro_start_addr_low_0_quadrant_3_qs;
+  logic [31:0] ro_start_addr_low_0_quadrant_3_wd;
+  logic ro_start_addr_low_0_quadrant_3_we;
+  logic [15:0] ro_start_addr_high_0_quadrant_3_qs;
+  logic [15:0] ro_start_addr_high_0_quadrant_3_wd;
+  logic ro_start_addr_high_0_quadrant_3_we;
+  logic [31:0] ro_end_addr_low_0_quadrant_3_qs;
+  logic [31:0] ro_end_addr_low_0_quadrant_3_wd;
+  logic ro_end_addr_low_0_quadrant_3_we;
+  logic [15:0] ro_end_addr_high_0_quadrant_3_qs;
+  logic [15:0] ro_end_addr_high_0_quadrant_3_wd;
+  logic ro_end_addr_high_0_quadrant_3_we;
+  logic [31:0] ro_start_addr_low_1_quadrant_3_qs;
+  logic [31:0] ro_start_addr_low_1_quadrant_3_wd;
+  logic ro_start_addr_low_1_quadrant_3_we;
+  logic [15:0] ro_start_addr_high_1_quadrant_3_qs;
+  logic [15:0] ro_start_addr_high_1_quadrant_3_wd;
+  logic ro_start_addr_high_1_quadrant_3_we;
+  logic [31:0] ro_end_addr_low_1_quadrant_3_qs;
+  logic [31:0] ro_end_addr_low_1_quadrant_3_wd;
+  logic ro_end_addr_low_1_quadrant_3_we;
+  logic [15:0] ro_end_addr_high_1_quadrant_3_qs;
+  logic [15:0] ro_end_addr_high_1_quadrant_3_wd;
+  logic ro_end_addr_high_1_quadrant_3_we;
+  logic [31:0] ro_start_addr_low_0_quadrant_4_qs;
+  logic [31:0] ro_start_addr_low_0_quadrant_4_wd;
+  logic ro_start_addr_low_0_quadrant_4_we;
+  logic [15:0] ro_start_addr_high_0_quadrant_4_qs;
+  logic [15:0] ro_start_addr_high_0_quadrant_4_wd;
+  logic ro_start_addr_high_0_quadrant_4_we;
+  logic [31:0] ro_end_addr_low_0_quadrant_4_qs;
+  logic [31:0] ro_end_addr_low_0_quadrant_4_wd;
+  logic ro_end_addr_low_0_quadrant_4_we;
+  logic [15:0] ro_end_addr_high_0_quadrant_4_qs;
+  logic [15:0] ro_end_addr_high_0_quadrant_4_wd;
+  logic ro_end_addr_high_0_quadrant_4_we;
+  logic [31:0] ro_start_addr_low_1_quadrant_4_qs;
+  logic [31:0] ro_start_addr_low_1_quadrant_4_wd;
+  logic ro_start_addr_low_1_quadrant_4_we;
+  logic [15:0] ro_start_addr_high_1_quadrant_4_qs;
+  logic [15:0] ro_start_addr_high_1_quadrant_4_wd;
+  logic ro_start_addr_high_1_quadrant_4_we;
+  logic [31:0] ro_end_addr_low_1_quadrant_4_qs;
+  logic [31:0] ro_end_addr_low_1_quadrant_4_wd;
+  logic ro_end_addr_low_1_quadrant_4_we;
+  logic [15:0] ro_end_addr_high_1_quadrant_4_qs;
+  logic [15:0] ro_end_addr_high_1_quadrant_4_wd;
+  logic ro_end_addr_high_1_quadrant_4_we;
+  logic [31:0] ro_start_addr_low_0_quadrant_5_qs;
+  logic [31:0] ro_start_addr_low_0_quadrant_5_wd;
+  logic ro_start_addr_low_0_quadrant_5_we;
+  logic [15:0] ro_start_addr_high_0_quadrant_5_qs;
+  logic [15:0] ro_start_addr_high_0_quadrant_5_wd;
+  logic ro_start_addr_high_0_quadrant_5_we;
+  logic [31:0] ro_end_addr_low_0_quadrant_5_qs;
+  logic [31:0] ro_end_addr_low_0_quadrant_5_wd;
+  logic ro_end_addr_low_0_quadrant_5_we;
+  logic [15:0] ro_end_addr_high_0_quadrant_5_qs;
+  logic [15:0] ro_end_addr_high_0_quadrant_5_wd;
+  logic ro_end_addr_high_0_quadrant_5_we;
+  logic [31:0] ro_start_addr_low_1_quadrant_5_qs;
+  logic [31:0] ro_start_addr_low_1_quadrant_5_wd;
+  logic ro_start_addr_low_1_quadrant_5_we;
+  logic [15:0] ro_start_addr_high_1_quadrant_5_qs;
+  logic [15:0] ro_start_addr_high_1_quadrant_5_wd;
+  logic ro_start_addr_high_1_quadrant_5_we;
+  logic [31:0] ro_end_addr_low_1_quadrant_5_qs;
+  logic [31:0] ro_end_addr_low_1_quadrant_5_wd;
+  logic ro_end_addr_low_1_quadrant_5_we;
+  logic [15:0] ro_end_addr_high_1_quadrant_5_qs;
+  logic [15:0] ro_end_addr_high_1_quadrant_5_wd;
+  logic ro_end_addr_high_1_quadrant_5_we;
+  logic [31:0] ro_start_addr_low_0_quadrant_6_qs;
+  logic [31:0] ro_start_addr_low_0_quadrant_6_wd;
+  logic ro_start_addr_low_0_quadrant_6_we;
+  logic [15:0] ro_start_addr_high_0_quadrant_6_qs;
+  logic [15:0] ro_start_addr_high_0_quadrant_6_wd;
+  logic ro_start_addr_high_0_quadrant_6_we;
+  logic [31:0] ro_end_addr_low_0_quadrant_6_qs;
+  logic [31:0] ro_end_addr_low_0_quadrant_6_wd;
+  logic ro_end_addr_low_0_quadrant_6_we;
+  logic [15:0] ro_end_addr_high_0_quadrant_6_qs;
+  logic [15:0] ro_end_addr_high_0_quadrant_6_wd;
+  logic ro_end_addr_high_0_quadrant_6_we;
+  logic [31:0] ro_start_addr_low_1_quadrant_6_qs;
+  logic [31:0] ro_start_addr_low_1_quadrant_6_wd;
+  logic ro_start_addr_low_1_quadrant_6_we;
+  logic [15:0] ro_start_addr_high_1_quadrant_6_qs;
+  logic [15:0] ro_start_addr_high_1_quadrant_6_wd;
+  logic ro_start_addr_high_1_quadrant_6_we;
+  logic [31:0] ro_end_addr_low_1_quadrant_6_qs;
+  logic [31:0] ro_end_addr_low_1_quadrant_6_wd;
+  logic ro_end_addr_low_1_quadrant_6_we;
+  logic [15:0] ro_end_addr_high_1_quadrant_6_qs;
+  logic [15:0] ro_end_addr_high_1_quadrant_6_wd;
+  logic ro_end_addr_high_1_quadrant_6_we;
+  logic [31:0] ro_start_addr_low_0_quadrant_7_qs;
+  logic [31:0] ro_start_addr_low_0_quadrant_7_wd;
+  logic ro_start_addr_low_0_quadrant_7_we;
+  logic [15:0] ro_start_addr_high_0_quadrant_7_qs;
+  logic [15:0] ro_start_addr_high_0_quadrant_7_wd;
+  logic ro_start_addr_high_0_quadrant_7_we;
+  logic [31:0] ro_end_addr_low_0_quadrant_7_qs;
+  logic [31:0] ro_end_addr_low_0_quadrant_7_wd;
+  logic ro_end_addr_low_0_quadrant_7_we;
+  logic [15:0] ro_end_addr_high_0_quadrant_7_qs;
+  logic [15:0] ro_end_addr_high_0_quadrant_7_wd;
+  logic ro_end_addr_high_0_quadrant_7_we;
+  logic [31:0] ro_start_addr_low_1_quadrant_7_qs;
+  logic [31:0] ro_start_addr_low_1_quadrant_7_wd;
+  logic ro_start_addr_low_1_quadrant_7_we;
+  logic [15:0] ro_start_addr_high_1_quadrant_7_qs;
+  logic [15:0] ro_start_addr_high_1_quadrant_7_wd;
+  logic ro_start_addr_high_1_quadrant_7_we;
+  logic [31:0] ro_end_addr_low_1_quadrant_7_qs;
+  logic [31:0] ro_end_addr_low_1_quadrant_7_wd;
+  logic ro_end_addr_low_1_quadrant_7_we;
+  logic [15:0] ro_end_addr_high_1_quadrant_7_qs;
+  logic [15:0] ro_end_addr_high_1_quadrant_7_wd;
+  logic ro_end_addr_high_1_quadrant_7_we;
 
   // Register instances
   // R[intr_state]: V(False)
@@ -3223,20 +3443,20 @@ module occamy_soc_reg_top #(
 
 
   // Subregister 0 of Multireg isolate
-  // R[isolate_0]: V(False)
+  // R[isolate]: V(False)
 
   // F[isolate_0]: 3:0
   prim_subreg #(
     .DW      (4),
     .SWACCESS("RW"),
     .RESVAL  (4'h1)
-  ) u_isolate_0_isolate_0 (
+  ) u_isolate_isolate_0 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (isolate_0_isolate_0_we),
-    .wd     (isolate_0_isolate_0_wd),
+    .we     (isolate_isolate_0_we),
+    .wd     (isolate_isolate_0_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -3247,7 +3467,7 @@ module occamy_soc_reg_top #(
     .q      (reg2hw.isolate[0].q ),
 
     // to register interface (read)
-    .qs     (isolate_0_isolate_0_qs)
+    .qs     (isolate_isolate_0_qs)
   );
 
 
@@ -3256,13 +3476,13 @@ module occamy_soc_reg_top #(
     .DW      (4),
     .SWACCESS("RW"),
     .RESVAL  (4'h1)
-  ) u_isolate_0_isolate_1 (
+  ) u_isolate_isolate_1 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (isolate_0_isolate_1_we),
-    .wd     (isolate_0_isolate_1_wd),
+    .we     (isolate_isolate_1_we),
+    .wd     (isolate_isolate_1_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -3273,7 +3493,7 @@ module occamy_soc_reg_top #(
     .q      (reg2hw.isolate[1].q ),
 
     // to register interface (read)
-    .qs     (isolate_0_isolate_1_qs)
+    .qs     (isolate_isolate_1_qs)
   );
 
 
@@ -3282,13 +3502,13 @@ module occamy_soc_reg_top #(
     .DW      (4),
     .SWACCESS("RW"),
     .RESVAL  (4'h1)
-  ) u_isolate_0_isolate_2 (
+  ) u_isolate_isolate_2 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (isolate_0_isolate_2_we),
-    .wd     (isolate_0_isolate_2_wd),
+    .we     (isolate_isolate_2_we),
+    .wd     (isolate_isolate_2_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -3299,7 +3519,7 @@ module occamy_soc_reg_top #(
     .q      (reg2hw.isolate[2].q ),
 
     // to register interface (read)
-    .qs     (isolate_0_isolate_2_qs)
+    .qs     (isolate_isolate_2_qs)
   );
 
 
@@ -3308,13 +3528,13 @@ module occamy_soc_reg_top #(
     .DW      (4),
     .SWACCESS("RW"),
     .RESVAL  (4'h1)
-  ) u_isolate_0_isolate_3 (
+  ) u_isolate_isolate_3 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (isolate_0_isolate_3_we),
-    .wd     (isolate_0_isolate_3_wd),
+    .we     (isolate_isolate_3_we),
+    .wd     (isolate_isolate_3_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -3325,7 +3545,7 @@ module occamy_soc_reg_top #(
     .q      (reg2hw.isolate[3].q ),
 
     // to register interface (read)
-    .qs     (isolate_0_isolate_3_qs)
+    .qs     (isolate_isolate_3_qs)
   );
 
 
@@ -3334,13 +3554,13 @@ module occamy_soc_reg_top #(
     .DW      (4),
     .SWACCESS("RW"),
     .RESVAL  (4'h1)
-  ) u_isolate_0_isolate_4 (
+  ) u_isolate_isolate_4 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (isolate_0_isolate_4_we),
-    .wd     (isolate_0_isolate_4_wd),
+    .we     (isolate_isolate_4_we),
+    .wd     (isolate_isolate_4_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -3351,7 +3571,7 @@ module occamy_soc_reg_top #(
     .q      (reg2hw.isolate[4].q ),
 
     // to register interface (read)
-    .qs     (isolate_0_isolate_4_qs)
+    .qs     (isolate_isolate_4_qs)
   );
 
 
@@ -3360,13 +3580,13 @@ module occamy_soc_reg_top #(
     .DW      (4),
     .SWACCESS("RW"),
     .RESVAL  (4'h1)
-  ) u_isolate_0_isolate_5 (
+  ) u_isolate_isolate_5 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (isolate_0_isolate_5_we),
-    .wd     (isolate_0_isolate_5_wd),
+    .we     (isolate_isolate_5_we),
+    .wd     (isolate_isolate_5_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -3377,7 +3597,7 @@ module occamy_soc_reg_top #(
     .q      (reg2hw.isolate[5].q ),
 
     // to register interface (read)
-    .qs     (isolate_0_isolate_5_qs)
+    .qs     (isolate_isolate_5_qs)
   );
 
 
@@ -3386,13 +3606,13 @@ module occamy_soc_reg_top #(
     .DW      (4),
     .SWACCESS("RW"),
     .RESVAL  (4'h1)
-  ) u_isolate_0_isolate_6 (
+  ) u_isolate_isolate_6 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (isolate_0_isolate_6_we),
-    .wd     (isolate_0_isolate_6_wd),
+    .we     (isolate_isolate_6_we),
+    .wd     (isolate_isolate_6_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -3403,7 +3623,7 @@ module occamy_soc_reg_top #(
     .q      (reg2hw.isolate[6].q ),
 
     // to register interface (read)
-    .qs     (isolate_0_isolate_6_qs)
+    .qs     (isolate_isolate_6_qs)
   );
 
 
@@ -3412,13 +3632,13 @@ module occamy_soc_reg_top #(
     .DW      (4),
     .SWACCESS("RW"),
     .RESVAL  (4'h1)
-  ) u_isolate_0_isolate_7 (
+  ) u_isolate_isolate_7 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (isolate_0_isolate_7_we),
-    .wd     (isolate_0_isolate_7_wd),
+    .we     (isolate_isolate_7_we),
+    .wd     (isolate_isolate_7_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -3429,355 +3649,2403 @@ module occamy_soc_reg_top #(
     .q      (reg2hw.isolate[7].q ),
 
     // to register interface (read)
-    .qs     (isolate_0_isolate_7_qs)
-  );
-
-
-  // Subregister 8 of Multireg isolate
-  // R[isolate_1]: V(False)
-
-  // F[isolate_8]: 3:0
-  prim_subreg #(
-    .DW      (4),
-    .SWACCESS("RW"),
-    .RESVAL  (4'h1)
-  ) u_isolate_1_isolate_8 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
-
-    // from register interface
-    .we     (isolate_1_isolate_8_we),
-    .wd     (isolate_1_isolate_8_wd),
-
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
-
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.isolate[8].q ),
-
-    // to register interface (read)
-    .qs     (isolate_1_isolate_8_qs)
-  );
-
-
-  // F[isolate_9]: 7:4
-  prim_subreg #(
-    .DW      (4),
-    .SWACCESS("RW"),
-    .RESVAL  (4'h1)
-  ) u_isolate_1_isolate_9 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
-
-    // from register interface
-    .we     (isolate_1_isolate_9_we),
-    .wd     (isolate_1_isolate_9_wd),
-
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
-
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.isolate[9].q ),
-
-    // to register interface (read)
-    .qs     (isolate_1_isolate_9_qs)
-  );
-
-
-  // F[isolate_10]: 11:8
-  prim_subreg #(
-    .DW      (4),
-    .SWACCESS("RW"),
-    .RESVAL  (4'h1)
-  ) u_isolate_1_isolate_10 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
-
-    // from register interface
-    .we     (isolate_1_isolate_10_we),
-    .wd     (isolate_1_isolate_10_wd),
-
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
-
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.isolate[10].q ),
-
-    // to register interface (read)
-    .qs     (isolate_1_isolate_10_qs)
-  );
-
-
-  // F[isolate_11]: 15:12
-  prim_subreg #(
-    .DW      (4),
-    .SWACCESS("RW"),
-    .RESVAL  (4'h1)
-  ) u_isolate_1_isolate_11 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
-
-    // from register interface
-    .we     (isolate_1_isolate_11_we),
-    .wd     (isolate_1_isolate_11_wd),
-
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
-
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.isolate[11].q ),
-
-    // to register interface (read)
-    .qs     (isolate_1_isolate_11_qs)
+    .qs     (isolate_isolate_7_qs)
   );
 
 
 
 
   // Subregister 0 of Multireg isolated
-  // R[isolated_0]: V(True)
+  // R[isolated]: V(True)
 
   // F[isolated_0]: 3:0
   prim_subreg_ext #(
     .DW    (4)
-  ) u_isolated_0_isolated_0 (
-    .re     (isolated_0_isolated_0_re),
+  ) u_isolated_isolated_0 (
+    .re     (isolated_isolated_0_re),
     .we     (1'b0),
     .wd     ('0),
     .d      (hw2reg.isolated[0].d),
     .qre    (),
     .qe     (),
     .q      (),
-    .qs     (isolated_0_isolated_0_qs)
+    .qs     (isolated_isolated_0_qs)
   );
 
 
   // F[isolated_1]: 7:4
   prim_subreg_ext #(
     .DW    (4)
-  ) u_isolated_0_isolated_1 (
-    .re     (isolated_0_isolated_1_re),
+  ) u_isolated_isolated_1 (
+    .re     (isolated_isolated_1_re),
     .we     (1'b0),
     .wd     ('0),
     .d      (hw2reg.isolated[1].d),
     .qre    (),
     .qe     (),
     .q      (),
-    .qs     (isolated_0_isolated_1_qs)
+    .qs     (isolated_isolated_1_qs)
   );
 
 
   // F[isolated_2]: 11:8
   prim_subreg_ext #(
     .DW    (4)
-  ) u_isolated_0_isolated_2 (
-    .re     (isolated_0_isolated_2_re),
+  ) u_isolated_isolated_2 (
+    .re     (isolated_isolated_2_re),
     .we     (1'b0),
     .wd     ('0),
     .d      (hw2reg.isolated[2].d),
     .qre    (),
     .qe     (),
     .q      (),
-    .qs     (isolated_0_isolated_2_qs)
+    .qs     (isolated_isolated_2_qs)
   );
 
 
   // F[isolated_3]: 15:12
   prim_subreg_ext #(
     .DW    (4)
-  ) u_isolated_0_isolated_3 (
-    .re     (isolated_0_isolated_3_re),
+  ) u_isolated_isolated_3 (
+    .re     (isolated_isolated_3_re),
     .we     (1'b0),
     .wd     ('0),
     .d      (hw2reg.isolated[3].d),
     .qre    (),
     .qe     (),
     .q      (),
-    .qs     (isolated_0_isolated_3_qs)
+    .qs     (isolated_isolated_3_qs)
   );
 
 
   // F[isolated_4]: 19:16
   prim_subreg_ext #(
     .DW    (4)
-  ) u_isolated_0_isolated_4 (
-    .re     (isolated_0_isolated_4_re),
+  ) u_isolated_isolated_4 (
+    .re     (isolated_isolated_4_re),
     .we     (1'b0),
     .wd     ('0),
     .d      (hw2reg.isolated[4].d),
     .qre    (),
     .qe     (),
     .q      (),
-    .qs     (isolated_0_isolated_4_qs)
+    .qs     (isolated_isolated_4_qs)
   );
 
 
   // F[isolated_5]: 23:20
   prim_subreg_ext #(
     .DW    (4)
-  ) u_isolated_0_isolated_5 (
-    .re     (isolated_0_isolated_5_re),
+  ) u_isolated_isolated_5 (
+    .re     (isolated_isolated_5_re),
     .we     (1'b0),
     .wd     ('0),
     .d      (hw2reg.isolated[5].d),
     .qre    (),
     .qe     (),
     .q      (),
-    .qs     (isolated_0_isolated_5_qs)
+    .qs     (isolated_isolated_5_qs)
   );
 
 
   // F[isolated_6]: 27:24
   prim_subreg_ext #(
     .DW    (4)
-  ) u_isolated_0_isolated_6 (
-    .re     (isolated_0_isolated_6_re),
+  ) u_isolated_isolated_6 (
+    .re     (isolated_isolated_6_re),
     .we     (1'b0),
     .wd     ('0),
     .d      (hw2reg.isolated[6].d),
     .qre    (),
     .qe     (),
     .q      (),
-    .qs     (isolated_0_isolated_6_qs)
+    .qs     (isolated_isolated_6_qs)
   );
 
 
   // F[isolated_7]: 31:28
   prim_subreg_ext #(
     .DW    (4)
-  ) u_isolated_0_isolated_7 (
-    .re     (isolated_0_isolated_7_re),
+  ) u_isolated_isolated_7 (
+    .re     (isolated_isolated_7_re),
     .we     (1'b0),
     .wd     ('0),
     .d      (hw2reg.isolated[7].d),
     .qre    (),
     .qe     (),
     .q      (),
-    .qs     (isolated_0_isolated_7_qs)
+    .qs     (isolated_isolated_7_qs)
   );
 
 
-  // Subregister 8 of Multireg isolated
-  // R[isolated_1]: V(True)
 
-  // F[isolated_8]: 3:0
-  prim_subreg_ext #(
-    .DW    (4)
-  ) u_isolated_1_isolated_8 (
-    .re     (isolated_1_isolated_8_re),
-    .we     (1'b0),
-    .wd     ('0),
-    .d      (hw2reg.isolated[8].d),
-    .qre    (),
+
+  // Subregister 0 of Multireg ro_cache_enable
+  // R[ro_cache_enable]: V(False)
+
+  // F[enable_0]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_enable_enable_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_enable_enable_0_we),
+    .wd     (ro_cache_enable_enable_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
     .qe     (),
-    .q      (),
-    .qs     (isolated_1_isolated_8_qs)
+    .q      (reg2hw.ro_cache_enable[0].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_enable_enable_0_qs)
   );
 
 
-  // F[isolated_9]: 7:4
-  prim_subreg_ext #(
-    .DW    (4)
-  ) u_isolated_1_isolated_9 (
-    .re     (isolated_1_isolated_9_re),
-    .we     (1'b0),
-    .wd     ('0),
-    .d      (hw2reg.isolated[9].d),
-    .qre    (),
+  // F[enable_1]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_enable_enable_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_enable_enable_1_we),
+    .wd     (ro_cache_enable_enable_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
     .qe     (),
-    .q      (),
-    .qs     (isolated_1_isolated_9_qs)
+    .q      (reg2hw.ro_cache_enable[1].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_enable_enable_1_qs)
   );
 
 
-  // F[isolated_10]: 11:8
-  prim_subreg_ext #(
-    .DW    (4)
-  ) u_isolated_1_isolated_10 (
-    .re     (isolated_1_isolated_10_re),
-    .we     (1'b0),
-    .wd     ('0),
-    .d      (hw2reg.isolated[10].d),
-    .qre    (),
+  // F[enable_2]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_enable_enable_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_enable_enable_2_we),
+    .wd     (ro_cache_enable_enable_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
     .qe     (),
-    .q      (),
-    .qs     (isolated_1_isolated_10_qs)
+    .q      (reg2hw.ro_cache_enable[2].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_enable_enable_2_qs)
   );
 
 
-  // F[isolated_11]: 15:12
-  prim_subreg_ext #(
-    .DW    (4)
-  ) u_isolated_1_isolated_11 (
-    .re     (isolated_1_isolated_11_re),
-    .we     (1'b0),
-    .wd     ('0),
-    .d      (hw2reg.isolated[11].d),
-    .qre    (),
+  // F[enable_3]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_enable_enable_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_enable_enable_3_we),
+    .wd     (ro_cache_enable_enable_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
     .qe     (),
-    .q      (),
-    .qs     (isolated_1_isolated_11_qs)
+    .q      (reg2hw.ro_cache_enable[3].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_enable_enable_3_qs)
+  );
+
+
+  // F[enable_4]: 4:4
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_enable_enable_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_enable_enable_4_we),
+    .wd     (ro_cache_enable_enable_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_enable[4].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_enable_enable_4_qs)
+  );
+
+
+  // F[enable_5]: 5:5
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_enable_enable_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_enable_enable_5_we),
+    .wd     (ro_cache_enable_enable_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_enable[5].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_enable_enable_5_qs)
+  );
+
+
+  // F[enable_6]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_enable_enable_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_enable_enable_6_we),
+    .wd     (ro_cache_enable_enable_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_enable[6].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_enable_enable_6_qs)
+  );
+
+
+  // F[enable_7]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_enable_enable_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_enable_enable_7_we),
+    .wd     (ro_cache_enable_enable_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_enable[7].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_enable_enable_7_qs)
   );
 
 
 
 
+  // Subregister 0 of Multireg ro_cache_flush
+  // R[ro_cache_flush]: V(False)
 
-  logic [43:0] addr_hit;
+  // F[flush_0]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_flush_flush_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_flush_flush_0_we),
+    .wd     (ro_cache_flush_flush_0_wd),
+
+    // from internal hardware
+    .de     (hw2reg.ro_cache_flush[0].de),
+    .d      (hw2reg.ro_cache_flush[0].d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_flush[0].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_flush_flush_0_qs)
+  );
+
+
+  // F[flush_1]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_flush_flush_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_flush_flush_1_we),
+    .wd     (ro_cache_flush_flush_1_wd),
+
+    // from internal hardware
+    .de     (hw2reg.ro_cache_flush[1].de),
+    .d      (hw2reg.ro_cache_flush[1].d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_flush[1].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_flush_flush_1_qs)
+  );
+
+
+  // F[flush_2]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_flush_flush_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_flush_flush_2_we),
+    .wd     (ro_cache_flush_flush_2_wd),
+
+    // from internal hardware
+    .de     (hw2reg.ro_cache_flush[2].de),
+    .d      (hw2reg.ro_cache_flush[2].d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_flush[2].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_flush_flush_2_qs)
+  );
+
+
+  // F[flush_3]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_flush_flush_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_flush_flush_3_we),
+    .wd     (ro_cache_flush_flush_3_wd),
+
+    // from internal hardware
+    .de     (hw2reg.ro_cache_flush[3].de),
+    .d      (hw2reg.ro_cache_flush[3].d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_flush[3].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_flush_flush_3_qs)
+  );
+
+
+  // F[flush_4]: 4:4
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_flush_flush_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_flush_flush_4_we),
+    .wd     (ro_cache_flush_flush_4_wd),
+
+    // from internal hardware
+    .de     (hw2reg.ro_cache_flush[4].de),
+    .d      (hw2reg.ro_cache_flush[4].d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_flush[4].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_flush_flush_4_qs)
+  );
+
+
+  // F[flush_5]: 5:5
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_flush_flush_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_flush_flush_5_we),
+    .wd     (ro_cache_flush_flush_5_wd),
+
+    // from internal hardware
+    .de     (hw2reg.ro_cache_flush[5].de),
+    .d      (hw2reg.ro_cache_flush[5].d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_flush[5].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_flush_flush_5_qs)
+  );
+
+
+  // F[flush_6]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_flush_flush_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_flush_flush_6_we),
+    .wd     (ro_cache_flush_flush_6_wd),
+
+    // from internal hardware
+    .de     (hw2reg.ro_cache_flush[6].de),
+    .d      (hw2reg.ro_cache_flush[6].d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_flush[6].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_flush_flush_6_qs)
+  );
+
+
+  // F[flush_7]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_flush_flush_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_flush_flush_7_we),
+    .wd     (ro_cache_flush_flush_7_wd),
+
+    // from internal hardware
+    .de     (hw2reg.ro_cache_flush[7].de),
+    .d      (hw2reg.ro_cache_flush[7].d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_flush[7].q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_flush_flush_7_qs)
+  );
+
+
+
+  // R[ro_start_addr_low_0_quadrant_0]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_0_quadrant_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_0_quadrant_0_we),
+    .wd     (ro_start_addr_low_0_quadrant_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_0_quadrant_0.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_0_quadrant_0_qs)
+  );
+
+
+  // R[ro_start_addr_high_0_quadrant_0]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_0_quadrant_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_0_quadrant_0_we),
+    .wd     (ro_start_addr_high_0_quadrant_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_0_quadrant_0.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_0_quadrant_0_qs)
+  );
+
+
+  // R[ro_end_addr_low_0_quadrant_0]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_0_quadrant_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_0_quadrant_0_we),
+    .wd     (ro_end_addr_low_0_quadrant_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_0_quadrant_0.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_0_quadrant_0_qs)
+  );
+
+
+  // R[ro_end_addr_high_0_quadrant_0]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_0_quadrant_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_0_quadrant_0_we),
+    .wd     (ro_end_addr_high_0_quadrant_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_0_quadrant_0.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_0_quadrant_0_qs)
+  );
+
+
+  // R[ro_start_addr_low_1_quadrant_0]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_1_quadrant_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_1_quadrant_0_we),
+    .wd     (ro_start_addr_low_1_quadrant_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_1_quadrant_0.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_1_quadrant_0_qs)
+  );
+
+
+  // R[ro_start_addr_high_1_quadrant_0]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_1_quadrant_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_1_quadrant_0_we),
+    .wd     (ro_start_addr_high_1_quadrant_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_1_quadrant_0.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_1_quadrant_0_qs)
+  );
+
+
+  // R[ro_end_addr_low_1_quadrant_0]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_1_quadrant_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_1_quadrant_0_we),
+    .wd     (ro_end_addr_low_1_quadrant_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_1_quadrant_0.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_1_quadrant_0_qs)
+  );
+
+
+  // R[ro_end_addr_high_1_quadrant_0]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_1_quadrant_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_1_quadrant_0_we),
+    .wd     (ro_end_addr_high_1_quadrant_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_1_quadrant_0.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_1_quadrant_0_qs)
+  );
+
+
+  // R[ro_start_addr_low_0_quadrant_1]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_0_quadrant_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_0_quadrant_1_we),
+    .wd     (ro_start_addr_low_0_quadrant_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_0_quadrant_1.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_0_quadrant_1_qs)
+  );
+
+
+  // R[ro_start_addr_high_0_quadrant_1]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_0_quadrant_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_0_quadrant_1_we),
+    .wd     (ro_start_addr_high_0_quadrant_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_0_quadrant_1.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_0_quadrant_1_qs)
+  );
+
+
+  // R[ro_end_addr_low_0_quadrant_1]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_0_quadrant_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_0_quadrant_1_we),
+    .wd     (ro_end_addr_low_0_quadrant_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_0_quadrant_1.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_0_quadrant_1_qs)
+  );
+
+
+  // R[ro_end_addr_high_0_quadrant_1]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_0_quadrant_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_0_quadrant_1_we),
+    .wd     (ro_end_addr_high_0_quadrant_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_0_quadrant_1.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_0_quadrant_1_qs)
+  );
+
+
+  // R[ro_start_addr_low_1_quadrant_1]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_1_quadrant_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_1_quadrant_1_we),
+    .wd     (ro_start_addr_low_1_quadrant_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_1_quadrant_1.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_1_quadrant_1_qs)
+  );
+
+
+  // R[ro_start_addr_high_1_quadrant_1]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_1_quadrant_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_1_quadrant_1_we),
+    .wd     (ro_start_addr_high_1_quadrant_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_1_quadrant_1.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_1_quadrant_1_qs)
+  );
+
+
+  // R[ro_end_addr_low_1_quadrant_1]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_1_quadrant_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_1_quadrant_1_we),
+    .wd     (ro_end_addr_low_1_quadrant_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_1_quadrant_1.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_1_quadrant_1_qs)
+  );
+
+
+  // R[ro_end_addr_high_1_quadrant_1]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_1_quadrant_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_1_quadrant_1_we),
+    .wd     (ro_end_addr_high_1_quadrant_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_1_quadrant_1.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_1_quadrant_1_qs)
+  );
+
+
+  // R[ro_start_addr_low_0_quadrant_2]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_0_quadrant_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_0_quadrant_2_we),
+    .wd     (ro_start_addr_low_0_quadrant_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_0_quadrant_2.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_0_quadrant_2_qs)
+  );
+
+
+  // R[ro_start_addr_high_0_quadrant_2]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_0_quadrant_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_0_quadrant_2_we),
+    .wd     (ro_start_addr_high_0_quadrant_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_0_quadrant_2.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_0_quadrant_2_qs)
+  );
+
+
+  // R[ro_end_addr_low_0_quadrant_2]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_0_quadrant_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_0_quadrant_2_we),
+    .wd     (ro_end_addr_low_0_quadrant_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_0_quadrant_2.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_0_quadrant_2_qs)
+  );
+
+
+  // R[ro_end_addr_high_0_quadrant_2]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_0_quadrant_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_0_quadrant_2_we),
+    .wd     (ro_end_addr_high_0_quadrant_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_0_quadrant_2.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_0_quadrant_2_qs)
+  );
+
+
+  // R[ro_start_addr_low_1_quadrant_2]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_1_quadrant_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_1_quadrant_2_we),
+    .wd     (ro_start_addr_low_1_quadrant_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_1_quadrant_2.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_1_quadrant_2_qs)
+  );
+
+
+  // R[ro_start_addr_high_1_quadrant_2]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_1_quadrant_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_1_quadrant_2_we),
+    .wd     (ro_start_addr_high_1_quadrant_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_1_quadrant_2.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_1_quadrant_2_qs)
+  );
+
+
+  // R[ro_end_addr_low_1_quadrant_2]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_1_quadrant_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_1_quadrant_2_we),
+    .wd     (ro_end_addr_low_1_quadrant_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_1_quadrant_2.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_1_quadrant_2_qs)
+  );
+
+
+  // R[ro_end_addr_high_1_quadrant_2]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_1_quadrant_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_1_quadrant_2_we),
+    .wd     (ro_end_addr_high_1_quadrant_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_1_quadrant_2.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_1_quadrant_2_qs)
+  );
+
+
+  // R[ro_start_addr_low_0_quadrant_3]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_0_quadrant_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_0_quadrant_3_we),
+    .wd     (ro_start_addr_low_0_quadrant_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_0_quadrant_3.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_0_quadrant_3_qs)
+  );
+
+
+  // R[ro_start_addr_high_0_quadrant_3]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_0_quadrant_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_0_quadrant_3_we),
+    .wd     (ro_start_addr_high_0_quadrant_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_0_quadrant_3.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_0_quadrant_3_qs)
+  );
+
+
+  // R[ro_end_addr_low_0_quadrant_3]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_0_quadrant_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_0_quadrant_3_we),
+    .wd     (ro_end_addr_low_0_quadrant_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_0_quadrant_3.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_0_quadrant_3_qs)
+  );
+
+
+  // R[ro_end_addr_high_0_quadrant_3]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_0_quadrant_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_0_quadrant_3_we),
+    .wd     (ro_end_addr_high_0_quadrant_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_0_quadrant_3.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_0_quadrant_3_qs)
+  );
+
+
+  // R[ro_start_addr_low_1_quadrant_3]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_1_quadrant_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_1_quadrant_3_we),
+    .wd     (ro_start_addr_low_1_quadrant_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_1_quadrant_3.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_1_quadrant_3_qs)
+  );
+
+
+  // R[ro_start_addr_high_1_quadrant_3]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_1_quadrant_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_1_quadrant_3_we),
+    .wd     (ro_start_addr_high_1_quadrant_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_1_quadrant_3.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_1_quadrant_3_qs)
+  );
+
+
+  // R[ro_end_addr_low_1_quadrant_3]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_1_quadrant_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_1_quadrant_3_we),
+    .wd     (ro_end_addr_low_1_quadrant_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_1_quadrant_3.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_1_quadrant_3_qs)
+  );
+
+
+  // R[ro_end_addr_high_1_quadrant_3]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_1_quadrant_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_1_quadrant_3_we),
+    .wd     (ro_end_addr_high_1_quadrant_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_1_quadrant_3.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_1_quadrant_3_qs)
+  );
+
+
+  // R[ro_start_addr_low_0_quadrant_4]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_0_quadrant_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_0_quadrant_4_we),
+    .wd     (ro_start_addr_low_0_quadrant_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_0_quadrant_4.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_0_quadrant_4_qs)
+  );
+
+
+  // R[ro_start_addr_high_0_quadrant_4]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_0_quadrant_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_0_quadrant_4_we),
+    .wd     (ro_start_addr_high_0_quadrant_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_0_quadrant_4.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_0_quadrant_4_qs)
+  );
+
+
+  // R[ro_end_addr_low_0_quadrant_4]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_0_quadrant_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_0_quadrant_4_we),
+    .wd     (ro_end_addr_low_0_quadrant_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_0_quadrant_4.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_0_quadrant_4_qs)
+  );
+
+
+  // R[ro_end_addr_high_0_quadrant_4]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_0_quadrant_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_0_quadrant_4_we),
+    .wd     (ro_end_addr_high_0_quadrant_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_0_quadrant_4.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_0_quadrant_4_qs)
+  );
+
+
+  // R[ro_start_addr_low_1_quadrant_4]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_1_quadrant_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_1_quadrant_4_we),
+    .wd     (ro_start_addr_low_1_quadrant_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_1_quadrant_4.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_1_quadrant_4_qs)
+  );
+
+
+  // R[ro_start_addr_high_1_quadrant_4]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_1_quadrant_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_1_quadrant_4_we),
+    .wd     (ro_start_addr_high_1_quadrant_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_1_quadrant_4.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_1_quadrant_4_qs)
+  );
+
+
+  // R[ro_end_addr_low_1_quadrant_4]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_1_quadrant_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_1_quadrant_4_we),
+    .wd     (ro_end_addr_low_1_quadrant_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_1_quadrant_4.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_1_quadrant_4_qs)
+  );
+
+
+  // R[ro_end_addr_high_1_quadrant_4]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_1_quadrant_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_1_quadrant_4_we),
+    .wd     (ro_end_addr_high_1_quadrant_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_1_quadrant_4.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_1_quadrant_4_qs)
+  );
+
+
+  // R[ro_start_addr_low_0_quadrant_5]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_0_quadrant_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_0_quadrant_5_we),
+    .wd     (ro_start_addr_low_0_quadrant_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_0_quadrant_5.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_0_quadrant_5_qs)
+  );
+
+
+  // R[ro_start_addr_high_0_quadrant_5]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_0_quadrant_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_0_quadrant_5_we),
+    .wd     (ro_start_addr_high_0_quadrant_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_0_quadrant_5.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_0_quadrant_5_qs)
+  );
+
+
+  // R[ro_end_addr_low_0_quadrant_5]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_0_quadrant_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_0_quadrant_5_we),
+    .wd     (ro_end_addr_low_0_quadrant_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_0_quadrant_5.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_0_quadrant_5_qs)
+  );
+
+
+  // R[ro_end_addr_high_0_quadrant_5]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_0_quadrant_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_0_quadrant_5_we),
+    .wd     (ro_end_addr_high_0_quadrant_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_0_quadrant_5.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_0_quadrant_5_qs)
+  );
+
+
+  // R[ro_start_addr_low_1_quadrant_5]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_1_quadrant_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_1_quadrant_5_we),
+    .wd     (ro_start_addr_low_1_quadrant_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_1_quadrant_5.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_1_quadrant_5_qs)
+  );
+
+
+  // R[ro_start_addr_high_1_quadrant_5]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_1_quadrant_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_1_quadrant_5_we),
+    .wd     (ro_start_addr_high_1_quadrant_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_1_quadrant_5.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_1_quadrant_5_qs)
+  );
+
+
+  // R[ro_end_addr_low_1_quadrant_5]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_1_quadrant_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_1_quadrant_5_we),
+    .wd     (ro_end_addr_low_1_quadrant_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_1_quadrant_5.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_1_quadrant_5_qs)
+  );
+
+
+  // R[ro_end_addr_high_1_quadrant_5]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_1_quadrant_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_1_quadrant_5_we),
+    .wd     (ro_end_addr_high_1_quadrant_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_1_quadrant_5.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_1_quadrant_5_qs)
+  );
+
+
+  // R[ro_start_addr_low_0_quadrant_6]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_0_quadrant_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_0_quadrant_6_we),
+    .wd     (ro_start_addr_low_0_quadrant_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_0_quadrant_6.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_0_quadrant_6_qs)
+  );
+
+
+  // R[ro_start_addr_high_0_quadrant_6]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_0_quadrant_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_0_quadrant_6_we),
+    .wd     (ro_start_addr_high_0_quadrant_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_0_quadrant_6.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_0_quadrant_6_qs)
+  );
+
+
+  // R[ro_end_addr_low_0_quadrant_6]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_0_quadrant_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_0_quadrant_6_we),
+    .wd     (ro_end_addr_low_0_quadrant_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_0_quadrant_6.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_0_quadrant_6_qs)
+  );
+
+
+  // R[ro_end_addr_high_0_quadrant_6]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_0_quadrant_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_0_quadrant_6_we),
+    .wd     (ro_end_addr_high_0_quadrant_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_0_quadrant_6.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_0_quadrant_6_qs)
+  );
+
+
+  // R[ro_start_addr_low_1_quadrant_6]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_1_quadrant_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_1_quadrant_6_we),
+    .wd     (ro_start_addr_low_1_quadrant_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_1_quadrant_6.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_1_quadrant_6_qs)
+  );
+
+
+  // R[ro_start_addr_high_1_quadrant_6]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_1_quadrant_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_1_quadrant_6_we),
+    .wd     (ro_start_addr_high_1_quadrant_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_1_quadrant_6.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_1_quadrant_6_qs)
+  );
+
+
+  // R[ro_end_addr_low_1_quadrant_6]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_1_quadrant_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_1_quadrant_6_we),
+    .wd     (ro_end_addr_low_1_quadrant_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_1_quadrant_6.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_1_quadrant_6_qs)
+  );
+
+
+  // R[ro_end_addr_high_1_quadrant_6]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_1_quadrant_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_1_quadrant_6_we),
+    .wd     (ro_end_addr_high_1_quadrant_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_1_quadrant_6.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_1_quadrant_6_qs)
+  );
+
+
+  // R[ro_start_addr_low_0_quadrant_7]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_0_quadrant_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_0_quadrant_7_we),
+    .wd     (ro_start_addr_low_0_quadrant_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_0_quadrant_7.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_0_quadrant_7_qs)
+  );
+
+
+  // R[ro_start_addr_high_0_quadrant_7]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_0_quadrant_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_0_quadrant_7_we),
+    .wd     (ro_start_addr_high_0_quadrant_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_0_quadrant_7.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_0_quadrant_7_qs)
+  );
+
+
+  // R[ro_end_addr_low_0_quadrant_7]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_0_quadrant_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_0_quadrant_7_we),
+    .wd     (ro_end_addr_low_0_quadrant_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_0_quadrant_7.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_0_quadrant_7_qs)
+  );
+
+
+  // R[ro_end_addr_high_0_quadrant_7]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_0_quadrant_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_0_quadrant_7_we),
+    .wd     (ro_end_addr_high_0_quadrant_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_0_quadrant_7.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_0_quadrant_7_qs)
+  );
+
+
+  // R[ro_start_addr_low_1_quadrant_7]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_start_addr_low_1_quadrant_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_low_1_quadrant_7_we),
+    .wd     (ro_start_addr_low_1_quadrant_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_low_1_quadrant_7.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_low_1_quadrant_7_qs)
+  );
+
+
+  // R[ro_start_addr_high_1_quadrant_7]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_start_addr_high_1_quadrant_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_start_addr_high_1_quadrant_7_we),
+    .wd     (ro_start_addr_high_1_quadrant_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_start_addr_high_1_quadrant_7.q ),
+
+    // to register interface (read)
+    .qs     (ro_start_addr_high_1_quadrant_7_qs)
+  );
+
+
+  // R[ro_end_addr_low_1_quadrant_7]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_ro_end_addr_low_1_quadrant_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_low_1_quadrant_7_we),
+    .wd     (ro_end_addr_low_1_quadrant_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_low_1_quadrant_7.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_low_1_quadrant_7_qs)
+  );
+
+
+  // R[ro_end_addr_high_1_quadrant_7]: V(False)
+
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_ro_end_addr_high_1_quadrant_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_end_addr_high_1_quadrant_7_we),
+    .wd     (ro_end_addr_high_1_quadrant_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_end_addr_high_1_quadrant_7.q ),
+
+    // to register interface (read)
+    .qs     (ro_end_addr_high_1_quadrant_7_qs)
+  );
+
+
+
+
+  logic [107:0] addr_hit;
   always_comb begin
     addr_hit = '0;
-    addr_hit[ 0] = (reg_addr == OCCAMY_SOC_INTR_STATE_OFFSET);
-    addr_hit[ 1] = (reg_addr == OCCAMY_SOC_INTR_ENABLE_OFFSET);
-    addr_hit[ 2] = (reg_addr == OCCAMY_SOC_INTR_TEST_OFFSET);
-    addr_hit[ 3] = (reg_addr == OCCAMY_SOC_VERSION_OFFSET);
-    addr_hit[ 4] = (reg_addr == OCCAMY_SOC_SCRATCH_0_OFFSET);
-    addr_hit[ 5] = (reg_addr == OCCAMY_SOC_SCRATCH_1_OFFSET);
-    addr_hit[ 6] = (reg_addr == OCCAMY_SOC_SCRATCH_2_OFFSET);
-    addr_hit[ 7] = (reg_addr == OCCAMY_SOC_SCRATCH_3_OFFSET);
-    addr_hit[ 8] = (reg_addr == OCCAMY_SOC_BOOT_MODE_OFFSET);
-    addr_hit[ 9] = (reg_addr == OCCAMY_SOC_PAD_0_OFFSET);
-    addr_hit[10] = (reg_addr == OCCAMY_SOC_PAD_1_OFFSET);
-    addr_hit[11] = (reg_addr == OCCAMY_SOC_PAD_2_OFFSET);
-    addr_hit[12] = (reg_addr == OCCAMY_SOC_PAD_3_OFFSET);
-    addr_hit[13] = (reg_addr == OCCAMY_SOC_PAD_4_OFFSET);
-    addr_hit[14] = (reg_addr == OCCAMY_SOC_PAD_5_OFFSET);
-    addr_hit[15] = (reg_addr == OCCAMY_SOC_PAD_6_OFFSET);
-    addr_hit[16] = (reg_addr == OCCAMY_SOC_PAD_7_OFFSET);
-    addr_hit[17] = (reg_addr == OCCAMY_SOC_PAD_8_OFFSET);
-    addr_hit[18] = (reg_addr == OCCAMY_SOC_PAD_9_OFFSET);
-    addr_hit[19] = (reg_addr == OCCAMY_SOC_PAD_10_OFFSET);
-    addr_hit[20] = (reg_addr == OCCAMY_SOC_PAD_11_OFFSET);
-    addr_hit[21] = (reg_addr == OCCAMY_SOC_PAD_12_OFFSET);
-    addr_hit[22] = (reg_addr == OCCAMY_SOC_PAD_13_OFFSET);
-    addr_hit[23] = (reg_addr == OCCAMY_SOC_PAD_14_OFFSET);
-    addr_hit[24] = (reg_addr == OCCAMY_SOC_PAD_15_OFFSET);
-    addr_hit[25] = (reg_addr == OCCAMY_SOC_PAD_16_OFFSET);
-    addr_hit[26] = (reg_addr == OCCAMY_SOC_PAD_17_OFFSET);
-    addr_hit[27] = (reg_addr == OCCAMY_SOC_PAD_18_OFFSET);
-    addr_hit[28] = (reg_addr == OCCAMY_SOC_PAD_19_OFFSET);
-    addr_hit[29] = (reg_addr == OCCAMY_SOC_PAD_20_OFFSET);
-    addr_hit[30] = (reg_addr == OCCAMY_SOC_PAD_21_OFFSET);
-    addr_hit[31] = (reg_addr == OCCAMY_SOC_PAD_22_OFFSET);
-    addr_hit[32] = (reg_addr == OCCAMY_SOC_PAD_23_OFFSET);
-    addr_hit[33] = (reg_addr == OCCAMY_SOC_PAD_24_OFFSET);
-    addr_hit[34] = (reg_addr == OCCAMY_SOC_PAD_25_OFFSET);
-    addr_hit[35] = (reg_addr == OCCAMY_SOC_PAD_26_OFFSET);
-    addr_hit[36] = (reg_addr == OCCAMY_SOC_PAD_27_OFFSET);
-    addr_hit[37] = (reg_addr == OCCAMY_SOC_PAD_28_OFFSET);
-    addr_hit[38] = (reg_addr == OCCAMY_SOC_PAD_29_OFFSET);
-    addr_hit[39] = (reg_addr == OCCAMY_SOC_PAD_30_OFFSET);
-    addr_hit[40] = (reg_addr == OCCAMY_SOC_ISOLATE_0_OFFSET);
-    addr_hit[41] = (reg_addr == OCCAMY_SOC_ISOLATE_1_OFFSET);
-    addr_hit[42] = (reg_addr == OCCAMY_SOC_ISOLATED_0_OFFSET);
-    addr_hit[43] = (reg_addr == OCCAMY_SOC_ISOLATED_1_OFFSET);
+    addr_hit[  0] = (reg_addr == OCCAMY_SOC_INTR_STATE_OFFSET);
+    addr_hit[  1] = (reg_addr == OCCAMY_SOC_INTR_ENABLE_OFFSET);
+    addr_hit[  2] = (reg_addr == OCCAMY_SOC_INTR_TEST_OFFSET);
+    addr_hit[  3] = (reg_addr == OCCAMY_SOC_VERSION_OFFSET);
+    addr_hit[  4] = (reg_addr == OCCAMY_SOC_SCRATCH_0_OFFSET);
+    addr_hit[  5] = (reg_addr == OCCAMY_SOC_SCRATCH_1_OFFSET);
+    addr_hit[  6] = (reg_addr == OCCAMY_SOC_SCRATCH_2_OFFSET);
+    addr_hit[  7] = (reg_addr == OCCAMY_SOC_SCRATCH_3_OFFSET);
+    addr_hit[  8] = (reg_addr == OCCAMY_SOC_BOOT_MODE_OFFSET);
+    addr_hit[  9] = (reg_addr == OCCAMY_SOC_PAD_0_OFFSET);
+    addr_hit[ 10] = (reg_addr == OCCAMY_SOC_PAD_1_OFFSET);
+    addr_hit[ 11] = (reg_addr == OCCAMY_SOC_PAD_2_OFFSET);
+    addr_hit[ 12] = (reg_addr == OCCAMY_SOC_PAD_3_OFFSET);
+    addr_hit[ 13] = (reg_addr == OCCAMY_SOC_PAD_4_OFFSET);
+    addr_hit[ 14] = (reg_addr == OCCAMY_SOC_PAD_5_OFFSET);
+    addr_hit[ 15] = (reg_addr == OCCAMY_SOC_PAD_6_OFFSET);
+    addr_hit[ 16] = (reg_addr == OCCAMY_SOC_PAD_7_OFFSET);
+    addr_hit[ 17] = (reg_addr == OCCAMY_SOC_PAD_8_OFFSET);
+    addr_hit[ 18] = (reg_addr == OCCAMY_SOC_PAD_9_OFFSET);
+    addr_hit[ 19] = (reg_addr == OCCAMY_SOC_PAD_10_OFFSET);
+    addr_hit[ 20] = (reg_addr == OCCAMY_SOC_PAD_11_OFFSET);
+    addr_hit[ 21] = (reg_addr == OCCAMY_SOC_PAD_12_OFFSET);
+    addr_hit[ 22] = (reg_addr == OCCAMY_SOC_PAD_13_OFFSET);
+    addr_hit[ 23] = (reg_addr == OCCAMY_SOC_PAD_14_OFFSET);
+    addr_hit[ 24] = (reg_addr == OCCAMY_SOC_PAD_15_OFFSET);
+    addr_hit[ 25] = (reg_addr == OCCAMY_SOC_PAD_16_OFFSET);
+    addr_hit[ 26] = (reg_addr == OCCAMY_SOC_PAD_17_OFFSET);
+    addr_hit[ 27] = (reg_addr == OCCAMY_SOC_PAD_18_OFFSET);
+    addr_hit[ 28] = (reg_addr == OCCAMY_SOC_PAD_19_OFFSET);
+    addr_hit[ 29] = (reg_addr == OCCAMY_SOC_PAD_20_OFFSET);
+    addr_hit[ 30] = (reg_addr == OCCAMY_SOC_PAD_21_OFFSET);
+    addr_hit[ 31] = (reg_addr == OCCAMY_SOC_PAD_22_OFFSET);
+    addr_hit[ 32] = (reg_addr == OCCAMY_SOC_PAD_23_OFFSET);
+    addr_hit[ 33] = (reg_addr == OCCAMY_SOC_PAD_24_OFFSET);
+    addr_hit[ 34] = (reg_addr == OCCAMY_SOC_PAD_25_OFFSET);
+    addr_hit[ 35] = (reg_addr == OCCAMY_SOC_PAD_26_OFFSET);
+    addr_hit[ 36] = (reg_addr == OCCAMY_SOC_PAD_27_OFFSET);
+    addr_hit[ 37] = (reg_addr == OCCAMY_SOC_PAD_28_OFFSET);
+    addr_hit[ 38] = (reg_addr == OCCAMY_SOC_PAD_29_OFFSET);
+    addr_hit[ 39] = (reg_addr == OCCAMY_SOC_PAD_30_OFFSET);
+    addr_hit[ 40] = (reg_addr == OCCAMY_SOC_ISOLATE_OFFSET);
+    addr_hit[ 41] = (reg_addr == OCCAMY_SOC_ISOLATED_OFFSET);
+    addr_hit[ 42] = (reg_addr == OCCAMY_SOC_RO_CACHE_ENABLE_OFFSET);
+    addr_hit[ 43] = (reg_addr == OCCAMY_SOC_RO_CACHE_FLUSH_OFFSET);
+    addr_hit[ 44] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_0_QUADRANT_0_OFFSET);
+    addr_hit[ 45] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_0_QUADRANT_0_OFFSET);
+    addr_hit[ 46] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_0_QUADRANT_0_OFFSET);
+    addr_hit[ 47] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_0_QUADRANT_0_OFFSET);
+    addr_hit[ 48] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_1_QUADRANT_0_OFFSET);
+    addr_hit[ 49] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_1_QUADRANT_0_OFFSET);
+    addr_hit[ 50] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_1_QUADRANT_0_OFFSET);
+    addr_hit[ 51] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_1_QUADRANT_0_OFFSET);
+    addr_hit[ 52] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_0_QUADRANT_1_OFFSET);
+    addr_hit[ 53] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_0_QUADRANT_1_OFFSET);
+    addr_hit[ 54] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_0_QUADRANT_1_OFFSET);
+    addr_hit[ 55] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_0_QUADRANT_1_OFFSET);
+    addr_hit[ 56] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_1_QUADRANT_1_OFFSET);
+    addr_hit[ 57] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_1_QUADRANT_1_OFFSET);
+    addr_hit[ 58] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_1_QUADRANT_1_OFFSET);
+    addr_hit[ 59] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_1_QUADRANT_1_OFFSET);
+    addr_hit[ 60] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_0_QUADRANT_2_OFFSET);
+    addr_hit[ 61] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_0_QUADRANT_2_OFFSET);
+    addr_hit[ 62] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_0_QUADRANT_2_OFFSET);
+    addr_hit[ 63] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_0_QUADRANT_2_OFFSET);
+    addr_hit[ 64] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_1_QUADRANT_2_OFFSET);
+    addr_hit[ 65] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_1_QUADRANT_2_OFFSET);
+    addr_hit[ 66] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_1_QUADRANT_2_OFFSET);
+    addr_hit[ 67] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_1_QUADRANT_2_OFFSET);
+    addr_hit[ 68] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_0_QUADRANT_3_OFFSET);
+    addr_hit[ 69] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_0_QUADRANT_3_OFFSET);
+    addr_hit[ 70] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_0_QUADRANT_3_OFFSET);
+    addr_hit[ 71] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_0_QUADRANT_3_OFFSET);
+    addr_hit[ 72] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_1_QUADRANT_3_OFFSET);
+    addr_hit[ 73] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_1_QUADRANT_3_OFFSET);
+    addr_hit[ 74] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_1_QUADRANT_3_OFFSET);
+    addr_hit[ 75] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_1_QUADRANT_3_OFFSET);
+    addr_hit[ 76] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_0_QUADRANT_4_OFFSET);
+    addr_hit[ 77] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_0_QUADRANT_4_OFFSET);
+    addr_hit[ 78] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_0_QUADRANT_4_OFFSET);
+    addr_hit[ 79] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_0_QUADRANT_4_OFFSET);
+    addr_hit[ 80] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_1_QUADRANT_4_OFFSET);
+    addr_hit[ 81] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_1_QUADRANT_4_OFFSET);
+    addr_hit[ 82] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_1_QUADRANT_4_OFFSET);
+    addr_hit[ 83] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_1_QUADRANT_4_OFFSET);
+    addr_hit[ 84] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_0_QUADRANT_5_OFFSET);
+    addr_hit[ 85] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_0_QUADRANT_5_OFFSET);
+    addr_hit[ 86] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_0_QUADRANT_5_OFFSET);
+    addr_hit[ 87] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_0_QUADRANT_5_OFFSET);
+    addr_hit[ 88] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_1_QUADRANT_5_OFFSET);
+    addr_hit[ 89] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_1_QUADRANT_5_OFFSET);
+    addr_hit[ 90] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_1_QUADRANT_5_OFFSET);
+    addr_hit[ 91] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_1_QUADRANT_5_OFFSET);
+    addr_hit[ 92] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_0_QUADRANT_6_OFFSET);
+    addr_hit[ 93] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_0_QUADRANT_6_OFFSET);
+    addr_hit[ 94] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_0_QUADRANT_6_OFFSET);
+    addr_hit[ 95] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_0_QUADRANT_6_OFFSET);
+    addr_hit[ 96] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_1_QUADRANT_6_OFFSET);
+    addr_hit[ 97] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_1_QUADRANT_6_OFFSET);
+    addr_hit[ 98] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_1_QUADRANT_6_OFFSET);
+    addr_hit[ 99] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_1_QUADRANT_6_OFFSET);
+    addr_hit[100] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_0_QUADRANT_7_OFFSET);
+    addr_hit[101] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_0_QUADRANT_7_OFFSET);
+    addr_hit[102] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_0_QUADRANT_7_OFFSET);
+    addr_hit[103] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_0_QUADRANT_7_OFFSET);
+    addr_hit[104] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_LOW_1_QUADRANT_7_OFFSET);
+    addr_hit[105] = (reg_addr == OCCAMY_SOC_RO_START_ADDR_HIGH_1_QUADRANT_7_OFFSET);
+    addr_hit[106] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_LOW_1_QUADRANT_7_OFFSET);
+    addr_hit[107] = (reg_addr == OCCAMY_SOC_RO_END_ADDR_HIGH_1_QUADRANT_7_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -3785,50 +6053,114 @@ module occamy_soc_reg_top #(
   // Check sub-word write is permitted
   always_comb begin
     wr_err = 1'b0;
-    if (addr_hit[ 0] && reg_we && (OCCAMY_SOC_PERMIT[ 0] != (OCCAMY_SOC_PERMIT[ 0] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[ 1] && reg_we && (OCCAMY_SOC_PERMIT[ 1] != (OCCAMY_SOC_PERMIT[ 1] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[ 2] && reg_we && (OCCAMY_SOC_PERMIT[ 2] != (OCCAMY_SOC_PERMIT[ 2] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[ 3] && reg_we && (OCCAMY_SOC_PERMIT[ 3] != (OCCAMY_SOC_PERMIT[ 3] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[ 4] && reg_we && (OCCAMY_SOC_PERMIT[ 4] != (OCCAMY_SOC_PERMIT[ 4] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[ 5] && reg_we && (OCCAMY_SOC_PERMIT[ 5] != (OCCAMY_SOC_PERMIT[ 5] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[ 6] && reg_we && (OCCAMY_SOC_PERMIT[ 6] != (OCCAMY_SOC_PERMIT[ 6] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[ 7] && reg_we && (OCCAMY_SOC_PERMIT[ 7] != (OCCAMY_SOC_PERMIT[ 7] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[ 8] && reg_we && (OCCAMY_SOC_PERMIT[ 8] != (OCCAMY_SOC_PERMIT[ 8] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[ 9] && reg_we && (OCCAMY_SOC_PERMIT[ 9] != (OCCAMY_SOC_PERMIT[ 9] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[10] && reg_we && (OCCAMY_SOC_PERMIT[10] != (OCCAMY_SOC_PERMIT[10] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[11] && reg_we && (OCCAMY_SOC_PERMIT[11] != (OCCAMY_SOC_PERMIT[11] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[12] && reg_we && (OCCAMY_SOC_PERMIT[12] != (OCCAMY_SOC_PERMIT[12] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[13] && reg_we && (OCCAMY_SOC_PERMIT[13] != (OCCAMY_SOC_PERMIT[13] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[14] && reg_we && (OCCAMY_SOC_PERMIT[14] != (OCCAMY_SOC_PERMIT[14] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[15] && reg_we && (OCCAMY_SOC_PERMIT[15] != (OCCAMY_SOC_PERMIT[15] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[16] && reg_we && (OCCAMY_SOC_PERMIT[16] != (OCCAMY_SOC_PERMIT[16] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[17] && reg_we && (OCCAMY_SOC_PERMIT[17] != (OCCAMY_SOC_PERMIT[17] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[18] && reg_we && (OCCAMY_SOC_PERMIT[18] != (OCCAMY_SOC_PERMIT[18] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[19] && reg_we && (OCCAMY_SOC_PERMIT[19] != (OCCAMY_SOC_PERMIT[19] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[20] && reg_we && (OCCAMY_SOC_PERMIT[20] != (OCCAMY_SOC_PERMIT[20] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[21] && reg_we && (OCCAMY_SOC_PERMIT[21] != (OCCAMY_SOC_PERMIT[21] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[22] && reg_we && (OCCAMY_SOC_PERMIT[22] != (OCCAMY_SOC_PERMIT[22] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[23] && reg_we && (OCCAMY_SOC_PERMIT[23] != (OCCAMY_SOC_PERMIT[23] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[24] && reg_we && (OCCAMY_SOC_PERMIT[24] != (OCCAMY_SOC_PERMIT[24] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[25] && reg_we && (OCCAMY_SOC_PERMIT[25] != (OCCAMY_SOC_PERMIT[25] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[26] && reg_we && (OCCAMY_SOC_PERMIT[26] != (OCCAMY_SOC_PERMIT[26] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[27] && reg_we && (OCCAMY_SOC_PERMIT[27] != (OCCAMY_SOC_PERMIT[27] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[28] && reg_we && (OCCAMY_SOC_PERMIT[28] != (OCCAMY_SOC_PERMIT[28] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[29] && reg_we && (OCCAMY_SOC_PERMIT[29] != (OCCAMY_SOC_PERMIT[29] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[30] && reg_we && (OCCAMY_SOC_PERMIT[30] != (OCCAMY_SOC_PERMIT[30] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[31] && reg_we && (OCCAMY_SOC_PERMIT[31] != (OCCAMY_SOC_PERMIT[31] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[32] && reg_we && (OCCAMY_SOC_PERMIT[32] != (OCCAMY_SOC_PERMIT[32] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[33] && reg_we && (OCCAMY_SOC_PERMIT[33] != (OCCAMY_SOC_PERMIT[33] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[34] && reg_we && (OCCAMY_SOC_PERMIT[34] != (OCCAMY_SOC_PERMIT[34] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[35] && reg_we && (OCCAMY_SOC_PERMIT[35] != (OCCAMY_SOC_PERMIT[35] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[36] && reg_we && (OCCAMY_SOC_PERMIT[36] != (OCCAMY_SOC_PERMIT[36] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[37] && reg_we && (OCCAMY_SOC_PERMIT[37] != (OCCAMY_SOC_PERMIT[37] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[38] && reg_we && (OCCAMY_SOC_PERMIT[38] != (OCCAMY_SOC_PERMIT[38] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[39] && reg_we && (OCCAMY_SOC_PERMIT[39] != (OCCAMY_SOC_PERMIT[39] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[40] && reg_we && (OCCAMY_SOC_PERMIT[40] != (OCCAMY_SOC_PERMIT[40] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[41] && reg_we && (OCCAMY_SOC_PERMIT[41] != (OCCAMY_SOC_PERMIT[41] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[42] && reg_we && (OCCAMY_SOC_PERMIT[42] != (OCCAMY_SOC_PERMIT[42] & reg_be))) wr_err = 1'b1 ;
-    if (addr_hit[43] && reg_we && (OCCAMY_SOC_PERMIT[43] != (OCCAMY_SOC_PERMIT[43] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  0] && reg_we && (OCCAMY_SOC_PERMIT[  0] != (OCCAMY_SOC_PERMIT[  0] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  1] && reg_we && (OCCAMY_SOC_PERMIT[  1] != (OCCAMY_SOC_PERMIT[  1] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  2] && reg_we && (OCCAMY_SOC_PERMIT[  2] != (OCCAMY_SOC_PERMIT[  2] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  3] && reg_we && (OCCAMY_SOC_PERMIT[  3] != (OCCAMY_SOC_PERMIT[  3] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  4] && reg_we && (OCCAMY_SOC_PERMIT[  4] != (OCCAMY_SOC_PERMIT[  4] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  5] && reg_we && (OCCAMY_SOC_PERMIT[  5] != (OCCAMY_SOC_PERMIT[  5] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  6] && reg_we && (OCCAMY_SOC_PERMIT[  6] != (OCCAMY_SOC_PERMIT[  6] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  7] && reg_we && (OCCAMY_SOC_PERMIT[  7] != (OCCAMY_SOC_PERMIT[  7] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  8] && reg_we && (OCCAMY_SOC_PERMIT[  8] != (OCCAMY_SOC_PERMIT[  8] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[  9] && reg_we && (OCCAMY_SOC_PERMIT[  9] != (OCCAMY_SOC_PERMIT[  9] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 10] && reg_we && (OCCAMY_SOC_PERMIT[ 10] != (OCCAMY_SOC_PERMIT[ 10] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 11] && reg_we && (OCCAMY_SOC_PERMIT[ 11] != (OCCAMY_SOC_PERMIT[ 11] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 12] && reg_we && (OCCAMY_SOC_PERMIT[ 12] != (OCCAMY_SOC_PERMIT[ 12] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 13] && reg_we && (OCCAMY_SOC_PERMIT[ 13] != (OCCAMY_SOC_PERMIT[ 13] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 14] && reg_we && (OCCAMY_SOC_PERMIT[ 14] != (OCCAMY_SOC_PERMIT[ 14] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 15] && reg_we && (OCCAMY_SOC_PERMIT[ 15] != (OCCAMY_SOC_PERMIT[ 15] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 16] && reg_we && (OCCAMY_SOC_PERMIT[ 16] != (OCCAMY_SOC_PERMIT[ 16] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 17] && reg_we && (OCCAMY_SOC_PERMIT[ 17] != (OCCAMY_SOC_PERMIT[ 17] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 18] && reg_we && (OCCAMY_SOC_PERMIT[ 18] != (OCCAMY_SOC_PERMIT[ 18] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 19] && reg_we && (OCCAMY_SOC_PERMIT[ 19] != (OCCAMY_SOC_PERMIT[ 19] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 20] && reg_we && (OCCAMY_SOC_PERMIT[ 20] != (OCCAMY_SOC_PERMIT[ 20] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 21] && reg_we && (OCCAMY_SOC_PERMIT[ 21] != (OCCAMY_SOC_PERMIT[ 21] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 22] && reg_we && (OCCAMY_SOC_PERMIT[ 22] != (OCCAMY_SOC_PERMIT[ 22] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 23] && reg_we && (OCCAMY_SOC_PERMIT[ 23] != (OCCAMY_SOC_PERMIT[ 23] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 24] && reg_we && (OCCAMY_SOC_PERMIT[ 24] != (OCCAMY_SOC_PERMIT[ 24] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 25] && reg_we && (OCCAMY_SOC_PERMIT[ 25] != (OCCAMY_SOC_PERMIT[ 25] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 26] && reg_we && (OCCAMY_SOC_PERMIT[ 26] != (OCCAMY_SOC_PERMIT[ 26] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 27] && reg_we && (OCCAMY_SOC_PERMIT[ 27] != (OCCAMY_SOC_PERMIT[ 27] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 28] && reg_we && (OCCAMY_SOC_PERMIT[ 28] != (OCCAMY_SOC_PERMIT[ 28] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 29] && reg_we && (OCCAMY_SOC_PERMIT[ 29] != (OCCAMY_SOC_PERMIT[ 29] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 30] && reg_we && (OCCAMY_SOC_PERMIT[ 30] != (OCCAMY_SOC_PERMIT[ 30] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 31] && reg_we && (OCCAMY_SOC_PERMIT[ 31] != (OCCAMY_SOC_PERMIT[ 31] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 32] && reg_we && (OCCAMY_SOC_PERMIT[ 32] != (OCCAMY_SOC_PERMIT[ 32] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 33] && reg_we && (OCCAMY_SOC_PERMIT[ 33] != (OCCAMY_SOC_PERMIT[ 33] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 34] && reg_we && (OCCAMY_SOC_PERMIT[ 34] != (OCCAMY_SOC_PERMIT[ 34] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 35] && reg_we && (OCCAMY_SOC_PERMIT[ 35] != (OCCAMY_SOC_PERMIT[ 35] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 36] && reg_we && (OCCAMY_SOC_PERMIT[ 36] != (OCCAMY_SOC_PERMIT[ 36] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 37] && reg_we && (OCCAMY_SOC_PERMIT[ 37] != (OCCAMY_SOC_PERMIT[ 37] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 38] && reg_we && (OCCAMY_SOC_PERMIT[ 38] != (OCCAMY_SOC_PERMIT[ 38] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 39] && reg_we && (OCCAMY_SOC_PERMIT[ 39] != (OCCAMY_SOC_PERMIT[ 39] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 40] && reg_we && (OCCAMY_SOC_PERMIT[ 40] != (OCCAMY_SOC_PERMIT[ 40] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 41] && reg_we && (OCCAMY_SOC_PERMIT[ 41] != (OCCAMY_SOC_PERMIT[ 41] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 42] && reg_we && (OCCAMY_SOC_PERMIT[ 42] != (OCCAMY_SOC_PERMIT[ 42] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 43] && reg_we && (OCCAMY_SOC_PERMIT[ 43] != (OCCAMY_SOC_PERMIT[ 43] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 44] && reg_we && (OCCAMY_SOC_PERMIT[ 44] != (OCCAMY_SOC_PERMIT[ 44] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 45] && reg_we && (OCCAMY_SOC_PERMIT[ 45] != (OCCAMY_SOC_PERMIT[ 45] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 46] && reg_we && (OCCAMY_SOC_PERMIT[ 46] != (OCCAMY_SOC_PERMIT[ 46] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 47] && reg_we && (OCCAMY_SOC_PERMIT[ 47] != (OCCAMY_SOC_PERMIT[ 47] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 48] && reg_we && (OCCAMY_SOC_PERMIT[ 48] != (OCCAMY_SOC_PERMIT[ 48] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 49] && reg_we && (OCCAMY_SOC_PERMIT[ 49] != (OCCAMY_SOC_PERMIT[ 49] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 50] && reg_we && (OCCAMY_SOC_PERMIT[ 50] != (OCCAMY_SOC_PERMIT[ 50] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 51] && reg_we && (OCCAMY_SOC_PERMIT[ 51] != (OCCAMY_SOC_PERMIT[ 51] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 52] && reg_we && (OCCAMY_SOC_PERMIT[ 52] != (OCCAMY_SOC_PERMIT[ 52] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 53] && reg_we && (OCCAMY_SOC_PERMIT[ 53] != (OCCAMY_SOC_PERMIT[ 53] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 54] && reg_we && (OCCAMY_SOC_PERMIT[ 54] != (OCCAMY_SOC_PERMIT[ 54] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 55] && reg_we && (OCCAMY_SOC_PERMIT[ 55] != (OCCAMY_SOC_PERMIT[ 55] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 56] && reg_we && (OCCAMY_SOC_PERMIT[ 56] != (OCCAMY_SOC_PERMIT[ 56] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 57] && reg_we && (OCCAMY_SOC_PERMIT[ 57] != (OCCAMY_SOC_PERMIT[ 57] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 58] && reg_we && (OCCAMY_SOC_PERMIT[ 58] != (OCCAMY_SOC_PERMIT[ 58] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 59] && reg_we && (OCCAMY_SOC_PERMIT[ 59] != (OCCAMY_SOC_PERMIT[ 59] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 60] && reg_we && (OCCAMY_SOC_PERMIT[ 60] != (OCCAMY_SOC_PERMIT[ 60] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 61] && reg_we && (OCCAMY_SOC_PERMIT[ 61] != (OCCAMY_SOC_PERMIT[ 61] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 62] && reg_we && (OCCAMY_SOC_PERMIT[ 62] != (OCCAMY_SOC_PERMIT[ 62] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 63] && reg_we && (OCCAMY_SOC_PERMIT[ 63] != (OCCAMY_SOC_PERMIT[ 63] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 64] && reg_we && (OCCAMY_SOC_PERMIT[ 64] != (OCCAMY_SOC_PERMIT[ 64] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 65] && reg_we && (OCCAMY_SOC_PERMIT[ 65] != (OCCAMY_SOC_PERMIT[ 65] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 66] && reg_we && (OCCAMY_SOC_PERMIT[ 66] != (OCCAMY_SOC_PERMIT[ 66] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 67] && reg_we && (OCCAMY_SOC_PERMIT[ 67] != (OCCAMY_SOC_PERMIT[ 67] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 68] && reg_we && (OCCAMY_SOC_PERMIT[ 68] != (OCCAMY_SOC_PERMIT[ 68] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 69] && reg_we && (OCCAMY_SOC_PERMIT[ 69] != (OCCAMY_SOC_PERMIT[ 69] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 70] && reg_we && (OCCAMY_SOC_PERMIT[ 70] != (OCCAMY_SOC_PERMIT[ 70] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 71] && reg_we && (OCCAMY_SOC_PERMIT[ 71] != (OCCAMY_SOC_PERMIT[ 71] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 72] && reg_we && (OCCAMY_SOC_PERMIT[ 72] != (OCCAMY_SOC_PERMIT[ 72] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 73] && reg_we && (OCCAMY_SOC_PERMIT[ 73] != (OCCAMY_SOC_PERMIT[ 73] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 74] && reg_we && (OCCAMY_SOC_PERMIT[ 74] != (OCCAMY_SOC_PERMIT[ 74] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 75] && reg_we && (OCCAMY_SOC_PERMIT[ 75] != (OCCAMY_SOC_PERMIT[ 75] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 76] && reg_we && (OCCAMY_SOC_PERMIT[ 76] != (OCCAMY_SOC_PERMIT[ 76] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 77] && reg_we && (OCCAMY_SOC_PERMIT[ 77] != (OCCAMY_SOC_PERMIT[ 77] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 78] && reg_we && (OCCAMY_SOC_PERMIT[ 78] != (OCCAMY_SOC_PERMIT[ 78] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 79] && reg_we && (OCCAMY_SOC_PERMIT[ 79] != (OCCAMY_SOC_PERMIT[ 79] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 80] && reg_we && (OCCAMY_SOC_PERMIT[ 80] != (OCCAMY_SOC_PERMIT[ 80] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 81] && reg_we && (OCCAMY_SOC_PERMIT[ 81] != (OCCAMY_SOC_PERMIT[ 81] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 82] && reg_we && (OCCAMY_SOC_PERMIT[ 82] != (OCCAMY_SOC_PERMIT[ 82] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 83] && reg_we && (OCCAMY_SOC_PERMIT[ 83] != (OCCAMY_SOC_PERMIT[ 83] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 84] && reg_we && (OCCAMY_SOC_PERMIT[ 84] != (OCCAMY_SOC_PERMIT[ 84] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 85] && reg_we && (OCCAMY_SOC_PERMIT[ 85] != (OCCAMY_SOC_PERMIT[ 85] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 86] && reg_we && (OCCAMY_SOC_PERMIT[ 86] != (OCCAMY_SOC_PERMIT[ 86] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 87] && reg_we && (OCCAMY_SOC_PERMIT[ 87] != (OCCAMY_SOC_PERMIT[ 87] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 88] && reg_we && (OCCAMY_SOC_PERMIT[ 88] != (OCCAMY_SOC_PERMIT[ 88] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 89] && reg_we && (OCCAMY_SOC_PERMIT[ 89] != (OCCAMY_SOC_PERMIT[ 89] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 90] && reg_we && (OCCAMY_SOC_PERMIT[ 90] != (OCCAMY_SOC_PERMIT[ 90] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 91] && reg_we && (OCCAMY_SOC_PERMIT[ 91] != (OCCAMY_SOC_PERMIT[ 91] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 92] && reg_we && (OCCAMY_SOC_PERMIT[ 92] != (OCCAMY_SOC_PERMIT[ 92] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 93] && reg_we && (OCCAMY_SOC_PERMIT[ 93] != (OCCAMY_SOC_PERMIT[ 93] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 94] && reg_we && (OCCAMY_SOC_PERMIT[ 94] != (OCCAMY_SOC_PERMIT[ 94] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 95] && reg_we && (OCCAMY_SOC_PERMIT[ 95] != (OCCAMY_SOC_PERMIT[ 95] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 96] && reg_we && (OCCAMY_SOC_PERMIT[ 96] != (OCCAMY_SOC_PERMIT[ 96] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 97] && reg_we && (OCCAMY_SOC_PERMIT[ 97] != (OCCAMY_SOC_PERMIT[ 97] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 98] && reg_we && (OCCAMY_SOC_PERMIT[ 98] != (OCCAMY_SOC_PERMIT[ 98] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[ 99] && reg_we && (OCCAMY_SOC_PERMIT[ 99] != (OCCAMY_SOC_PERMIT[ 99] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[100] && reg_we && (OCCAMY_SOC_PERMIT[100] != (OCCAMY_SOC_PERMIT[100] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[101] && reg_we && (OCCAMY_SOC_PERMIT[101] != (OCCAMY_SOC_PERMIT[101] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[102] && reg_we && (OCCAMY_SOC_PERMIT[102] != (OCCAMY_SOC_PERMIT[102] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[103] && reg_we && (OCCAMY_SOC_PERMIT[103] != (OCCAMY_SOC_PERMIT[103] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[104] && reg_we && (OCCAMY_SOC_PERMIT[104] != (OCCAMY_SOC_PERMIT[104] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[105] && reg_we && (OCCAMY_SOC_PERMIT[105] != (OCCAMY_SOC_PERMIT[105] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[106] && reg_we && (OCCAMY_SOC_PERMIT[106] != (OCCAMY_SOC_PERMIT[106] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[107] && reg_we && (OCCAMY_SOC_PERMIT[107] != (OCCAMY_SOC_PERMIT[107] & reg_be))) wr_err = 1'b1 ;
   end
 
   assign intr_state_ecc_uncorrectable_we = addr_hit[0] & reg_we & ~wr_err;
@@ -4143,65 +6475,285 @@ module occamy_soc_reg_top #(
   assign pad_30_drv_30_we = addr_hit[39] & reg_we & ~wr_err;
   assign pad_30_drv_30_wd = reg_wdata[3:2];
 
-  assign isolate_0_isolate_0_we = addr_hit[40] & reg_we & ~wr_err;
-  assign isolate_0_isolate_0_wd = reg_wdata[3:0];
+  assign isolate_isolate_0_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_isolate_0_wd = reg_wdata[3:0];
 
-  assign isolate_0_isolate_1_we = addr_hit[40] & reg_we & ~wr_err;
-  assign isolate_0_isolate_1_wd = reg_wdata[7:4];
+  assign isolate_isolate_1_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_isolate_1_wd = reg_wdata[7:4];
 
-  assign isolate_0_isolate_2_we = addr_hit[40] & reg_we & ~wr_err;
-  assign isolate_0_isolate_2_wd = reg_wdata[11:8];
+  assign isolate_isolate_2_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_isolate_2_wd = reg_wdata[11:8];
 
-  assign isolate_0_isolate_3_we = addr_hit[40] & reg_we & ~wr_err;
-  assign isolate_0_isolate_3_wd = reg_wdata[15:12];
+  assign isolate_isolate_3_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_isolate_3_wd = reg_wdata[15:12];
 
-  assign isolate_0_isolate_4_we = addr_hit[40] & reg_we & ~wr_err;
-  assign isolate_0_isolate_4_wd = reg_wdata[19:16];
+  assign isolate_isolate_4_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_isolate_4_wd = reg_wdata[19:16];
 
-  assign isolate_0_isolate_5_we = addr_hit[40] & reg_we & ~wr_err;
-  assign isolate_0_isolate_5_wd = reg_wdata[23:20];
+  assign isolate_isolate_5_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_isolate_5_wd = reg_wdata[23:20];
 
-  assign isolate_0_isolate_6_we = addr_hit[40] & reg_we & ~wr_err;
-  assign isolate_0_isolate_6_wd = reg_wdata[27:24];
+  assign isolate_isolate_6_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_isolate_6_wd = reg_wdata[27:24];
 
-  assign isolate_0_isolate_7_we = addr_hit[40] & reg_we & ~wr_err;
-  assign isolate_0_isolate_7_wd = reg_wdata[31:28];
+  assign isolate_isolate_7_we = addr_hit[40] & reg_we & ~wr_err;
+  assign isolate_isolate_7_wd = reg_wdata[31:28];
 
-  assign isolate_1_isolate_8_we = addr_hit[41] & reg_we & ~wr_err;
-  assign isolate_1_isolate_8_wd = reg_wdata[3:0];
+  assign isolated_isolated_0_re = addr_hit[41] && reg_re;
 
-  assign isolate_1_isolate_9_we = addr_hit[41] & reg_we & ~wr_err;
-  assign isolate_1_isolate_9_wd = reg_wdata[7:4];
+  assign isolated_isolated_1_re = addr_hit[41] && reg_re;
 
-  assign isolate_1_isolate_10_we = addr_hit[41] & reg_we & ~wr_err;
-  assign isolate_1_isolate_10_wd = reg_wdata[11:8];
+  assign isolated_isolated_2_re = addr_hit[41] && reg_re;
 
-  assign isolate_1_isolate_11_we = addr_hit[41] & reg_we & ~wr_err;
-  assign isolate_1_isolate_11_wd = reg_wdata[15:12];
+  assign isolated_isolated_3_re = addr_hit[41] && reg_re;
 
-  assign isolated_0_isolated_0_re = addr_hit[42] && reg_re;
+  assign isolated_isolated_4_re = addr_hit[41] && reg_re;
 
-  assign isolated_0_isolated_1_re = addr_hit[42] && reg_re;
+  assign isolated_isolated_5_re = addr_hit[41] && reg_re;
 
-  assign isolated_0_isolated_2_re = addr_hit[42] && reg_re;
+  assign isolated_isolated_6_re = addr_hit[41] && reg_re;
 
-  assign isolated_0_isolated_3_re = addr_hit[42] && reg_re;
+  assign isolated_isolated_7_re = addr_hit[41] && reg_re;
 
-  assign isolated_0_isolated_4_re = addr_hit[42] && reg_re;
+  assign ro_cache_enable_enable_0_we = addr_hit[42] & reg_we & ~wr_err;
+  assign ro_cache_enable_enable_0_wd = reg_wdata[0];
 
-  assign isolated_0_isolated_5_re = addr_hit[42] && reg_re;
+  assign ro_cache_enable_enable_1_we = addr_hit[42] & reg_we & ~wr_err;
+  assign ro_cache_enable_enable_1_wd = reg_wdata[1];
 
-  assign isolated_0_isolated_6_re = addr_hit[42] && reg_re;
+  assign ro_cache_enable_enable_2_we = addr_hit[42] & reg_we & ~wr_err;
+  assign ro_cache_enable_enable_2_wd = reg_wdata[2];
 
-  assign isolated_0_isolated_7_re = addr_hit[42] && reg_re;
+  assign ro_cache_enable_enable_3_we = addr_hit[42] & reg_we & ~wr_err;
+  assign ro_cache_enable_enable_3_wd = reg_wdata[3];
 
-  assign isolated_1_isolated_8_re = addr_hit[43] && reg_re;
+  assign ro_cache_enable_enable_4_we = addr_hit[42] & reg_we & ~wr_err;
+  assign ro_cache_enable_enable_4_wd = reg_wdata[4];
 
-  assign isolated_1_isolated_9_re = addr_hit[43] && reg_re;
+  assign ro_cache_enable_enable_5_we = addr_hit[42] & reg_we & ~wr_err;
+  assign ro_cache_enable_enable_5_wd = reg_wdata[5];
 
-  assign isolated_1_isolated_10_re = addr_hit[43] && reg_re;
+  assign ro_cache_enable_enable_6_we = addr_hit[42] & reg_we & ~wr_err;
+  assign ro_cache_enable_enable_6_wd = reg_wdata[6];
 
-  assign isolated_1_isolated_11_re = addr_hit[43] && reg_re;
+  assign ro_cache_enable_enable_7_we = addr_hit[42] & reg_we & ~wr_err;
+  assign ro_cache_enable_enable_7_wd = reg_wdata[7];
+
+  assign ro_cache_flush_flush_0_we = addr_hit[43] & reg_we & ~wr_err;
+  assign ro_cache_flush_flush_0_wd = reg_wdata[0];
+
+  assign ro_cache_flush_flush_1_we = addr_hit[43] & reg_we & ~wr_err;
+  assign ro_cache_flush_flush_1_wd = reg_wdata[1];
+
+  assign ro_cache_flush_flush_2_we = addr_hit[43] & reg_we & ~wr_err;
+  assign ro_cache_flush_flush_2_wd = reg_wdata[2];
+
+  assign ro_cache_flush_flush_3_we = addr_hit[43] & reg_we & ~wr_err;
+  assign ro_cache_flush_flush_3_wd = reg_wdata[3];
+
+  assign ro_cache_flush_flush_4_we = addr_hit[43] & reg_we & ~wr_err;
+  assign ro_cache_flush_flush_4_wd = reg_wdata[4];
+
+  assign ro_cache_flush_flush_5_we = addr_hit[43] & reg_we & ~wr_err;
+  assign ro_cache_flush_flush_5_wd = reg_wdata[5];
+
+  assign ro_cache_flush_flush_6_we = addr_hit[43] & reg_we & ~wr_err;
+  assign ro_cache_flush_flush_6_wd = reg_wdata[6];
+
+  assign ro_cache_flush_flush_7_we = addr_hit[43] & reg_we & ~wr_err;
+  assign ro_cache_flush_flush_7_wd = reg_wdata[7];
+
+  assign ro_start_addr_low_0_quadrant_0_we = addr_hit[44] & reg_we & ~wr_err;
+  assign ro_start_addr_low_0_quadrant_0_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_0_quadrant_0_we = addr_hit[45] & reg_we & ~wr_err;
+  assign ro_start_addr_high_0_quadrant_0_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_0_quadrant_0_we = addr_hit[46] & reg_we & ~wr_err;
+  assign ro_end_addr_low_0_quadrant_0_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_0_quadrant_0_we = addr_hit[47] & reg_we & ~wr_err;
+  assign ro_end_addr_high_0_quadrant_0_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_1_quadrant_0_we = addr_hit[48] & reg_we & ~wr_err;
+  assign ro_start_addr_low_1_quadrant_0_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_1_quadrant_0_we = addr_hit[49] & reg_we & ~wr_err;
+  assign ro_start_addr_high_1_quadrant_0_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_1_quadrant_0_we = addr_hit[50] & reg_we & ~wr_err;
+  assign ro_end_addr_low_1_quadrant_0_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_1_quadrant_0_we = addr_hit[51] & reg_we & ~wr_err;
+  assign ro_end_addr_high_1_quadrant_0_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_0_quadrant_1_we = addr_hit[52] & reg_we & ~wr_err;
+  assign ro_start_addr_low_0_quadrant_1_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_0_quadrant_1_we = addr_hit[53] & reg_we & ~wr_err;
+  assign ro_start_addr_high_0_quadrant_1_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_0_quadrant_1_we = addr_hit[54] & reg_we & ~wr_err;
+  assign ro_end_addr_low_0_quadrant_1_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_0_quadrant_1_we = addr_hit[55] & reg_we & ~wr_err;
+  assign ro_end_addr_high_0_quadrant_1_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_1_quadrant_1_we = addr_hit[56] & reg_we & ~wr_err;
+  assign ro_start_addr_low_1_quadrant_1_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_1_quadrant_1_we = addr_hit[57] & reg_we & ~wr_err;
+  assign ro_start_addr_high_1_quadrant_1_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_1_quadrant_1_we = addr_hit[58] & reg_we & ~wr_err;
+  assign ro_end_addr_low_1_quadrant_1_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_1_quadrant_1_we = addr_hit[59] & reg_we & ~wr_err;
+  assign ro_end_addr_high_1_quadrant_1_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_0_quadrant_2_we = addr_hit[60] & reg_we & ~wr_err;
+  assign ro_start_addr_low_0_quadrant_2_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_0_quadrant_2_we = addr_hit[61] & reg_we & ~wr_err;
+  assign ro_start_addr_high_0_quadrant_2_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_0_quadrant_2_we = addr_hit[62] & reg_we & ~wr_err;
+  assign ro_end_addr_low_0_quadrant_2_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_0_quadrant_2_we = addr_hit[63] & reg_we & ~wr_err;
+  assign ro_end_addr_high_0_quadrant_2_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_1_quadrant_2_we = addr_hit[64] & reg_we & ~wr_err;
+  assign ro_start_addr_low_1_quadrant_2_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_1_quadrant_2_we = addr_hit[65] & reg_we & ~wr_err;
+  assign ro_start_addr_high_1_quadrant_2_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_1_quadrant_2_we = addr_hit[66] & reg_we & ~wr_err;
+  assign ro_end_addr_low_1_quadrant_2_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_1_quadrant_2_we = addr_hit[67] & reg_we & ~wr_err;
+  assign ro_end_addr_high_1_quadrant_2_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_0_quadrant_3_we = addr_hit[68] & reg_we & ~wr_err;
+  assign ro_start_addr_low_0_quadrant_3_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_0_quadrant_3_we = addr_hit[69] & reg_we & ~wr_err;
+  assign ro_start_addr_high_0_quadrant_3_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_0_quadrant_3_we = addr_hit[70] & reg_we & ~wr_err;
+  assign ro_end_addr_low_0_quadrant_3_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_0_quadrant_3_we = addr_hit[71] & reg_we & ~wr_err;
+  assign ro_end_addr_high_0_quadrant_3_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_1_quadrant_3_we = addr_hit[72] & reg_we & ~wr_err;
+  assign ro_start_addr_low_1_quadrant_3_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_1_quadrant_3_we = addr_hit[73] & reg_we & ~wr_err;
+  assign ro_start_addr_high_1_quadrant_3_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_1_quadrant_3_we = addr_hit[74] & reg_we & ~wr_err;
+  assign ro_end_addr_low_1_quadrant_3_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_1_quadrant_3_we = addr_hit[75] & reg_we & ~wr_err;
+  assign ro_end_addr_high_1_quadrant_3_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_0_quadrant_4_we = addr_hit[76] & reg_we & ~wr_err;
+  assign ro_start_addr_low_0_quadrant_4_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_0_quadrant_4_we = addr_hit[77] & reg_we & ~wr_err;
+  assign ro_start_addr_high_0_quadrant_4_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_0_quadrant_4_we = addr_hit[78] & reg_we & ~wr_err;
+  assign ro_end_addr_low_0_quadrant_4_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_0_quadrant_4_we = addr_hit[79] & reg_we & ~wr_err;
+  assign ro_end_addr_high_0_quadrant_4_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_1_quadrant_4_we = addr_hit[80] & reg_we & ~wr_err;
+  assign ro_start_addr_low_1_quadrant_4_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_1_quadrant_4_we = addr_hit[81] & reg_we & ~wr_err;
+  assign ro_start_addr_high_1_quadrant_4_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_1_quadrant_4_we = addr_hit[82] & reg_we & ~wr_err;
+  assign ro_end_addr_low_1_quadrant_4_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_1_quadrant_4_we = addr_hit[83] & reg_we & ~wr_err;
+  assign ro_end_addr_high_1_quadrant_4_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_0_quadrant_5_we = addr_hit[84] & reg_we & ~wr_err;
+  assign ro_start_addr_low_0_quadrant_5_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_0_quadrant_5_we = addr_hit[85] & reg_we & ~wr_err;
+  assign ro_start_addr_high_0_quadrant_5_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_0_quadrant_5_we = addr_hit[86] & reg_we & ~wr_err;
+  assign ro_end_addr_low_0_quadrant_5_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_0_quadrant_5_we = addr_hit[87] & reg_we & ~wr_err;
+  assign ro_end_addr_high_0_quadrant_5_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_1_quadrant_5_we = addr_hit[88] & reg_we & ~wr_err;
+  assign ro_start_addr_low_1_quadrant_5_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_1_quadrant_5_we = addr_hit[89] & reg_we & ~wr_err;
+  assign ro_start_addr_high_1_quadrant_5_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_1_quadrant_5_we = addr_hit[90] & reg_we & ~wr_err;
+  assign ro_end_addr_low_1_quadrant_5_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_1_quadrant_5_we = addr_hit[91] & reg_we & ~wr_err;
+  assign ro_end_addr_high_1_quadrant_5_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_0_quadrant_6_we = addr_hit[92] & reg_we & ~wr_err;
+  assign ro_start_addr_low_0_quadrant_6_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_0_quadrant_6_we = addr_hit[93] & reg_we & ~wr_err;
+  assign ro_start_addr_high_0_quadrant_6_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_0_quadrant_6_we = addr_hit[94] & reg_we & ~wr_err;
+  assign ro_end_addr_low_0_quadrant_6_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_0_quadrant_6_we = addr_hit[95] & reg_we & ~wr_err;
+  assign ro_end_addr_high_0_quadrant_6_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_1_quadrant_6_we = addr_hit[96] & reg_we & ~wr_err;
+  assign ro_start_addr_low_1_quadrant_6_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_1_quadrant_6_we = addr_hit[97] & reg_we & ~wr_err;
+  assign ro_start_addr_high_1_quadrant_6_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_1_quadrant_6_we = addr_hit[98] & reg_we & ~wr_err;
+  assign ro_end_addr_low_1_quadrant_6_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_1_quadrant_6_we = addr_hit[99] & reg_we & ~wr_err;
+  assign ro_end_addr_high_1_quadrant_6_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_0_quadrant_7_we = addr_hit[100] & reg_we & ~wr_err;
+  assign ro_start_addr_low_0_quadrant_7_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_0_quadrant_7_we = addr_hit[101] & reg_we & ~wr_err;
+  assign ro_start_addr_high_0_quadrant_7_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_0_quadrant_7_we = addr_hit[102] & reg_we & ~wr_err;
+  assign ro_end_addr_low_0_quadrant_7_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_0_quadrant_7_we = addr_hit[103] & reg_we & ~wr_err;
+  assign ro_end_addr_high_0_quadrant_7_wd = reg_wdata[15:0];
+
+  assign ro_start_addr_low_1_quadrant_7_we = addr_hit[104] & reg_we & ~wr_err;
+  assign ro_start_addr_low_1_quadrant_7_wd = reg_wdata[31:0];
+
+  assign ro_start_addr_high_1_quadrant_7_we = addr_hit[105] & reg_we & ~wr_err;
+  assign ro_start_addr_high_1_quadrant_7_wd = reg_wdata[15:0];
+
+  assign ro_end_addr_low_1_quadrant_7_we = addr_hit[106] & reg_we & ~wr_err;
+  assign ro_end_addr_low_1_quadrant_7_wd = reg_wdata[31:0];
+
+  assign ro_end_addr_high_1_quadrant_7_we = addr_hit[107] & reg_we & ~wr_err;
+  assign ro_end_addr_high_1_quadrant_7_wd = reg_wdata[15:0];
 
   // Read data return
   always_comb begin
@@ -4433,39 +6985,303 @@ module occamy_soc_reg_top #(
       end
 
       addr_hit[40]: begin
-        reg_rdata_next[3:0] = isolate_0_isolate_0_qs;
-        reg_rdata_next[7:4] = isolate_0_isolate_1_qs;
-        reg_rdata_next[11:8] = isolate_0_isolate_2_qs;
-        reg_rdata_next[15:12] = isolate_0_isolate_3_qs;
-        reg_rdata_next[19:16] = isolate_0_isolate_4_qs;
-        reg_rdata_next[23:20] = isolate_0_isolate_5_qs;
-        reg_rdata_next[27:24] = isolate_0_isolate_6_qs;
-        reg_rdata_next[31:28] = isolate_0_isolate_7_qs;
+        reg_rdata_next[3:0] = isolate_isolate_0_qs;
+        reg_rdata_next[7:4] = isolate_isolate_1_qs;
+        reg_rdata_next[11:8] = isolate_isolate_2_qs;
+        reg_rdata_next[15:12] = isolate_isolate_3_qs;
+        reg_rdata_next[19:16] = isolate_isolate_4_qs;
+        reg_rdata_next[23:20] = isolate_isolate_5_qs;
+        reg_rdata_next[27:24] = isolate_isolate_6_qs;
+        reg_rdata_next[31:28] = isolate_isolate_7_qs;
       end
 
       addr_hit[41]: begin
-        reg_rdata_next[3:0] = isolate_1_isolate_8_qs;
-        reg_rdata_next[7:4] = isolate_1_isolate_9_qs;
-        reg_rdata_next[11:8] = isolate_1_isolate_10_qs;
-        reg_rdata_next[15:12] = isolate_1_isolate_11_qs;
+        reg_rdata_next[3:0] = isolated_isolated_0_qs;
+        reg_rdata_next[7:4] = isolated_isolated_1_qs;
+        reg_rdata_next[11:8] = isolated_isolated_2_qs;
+        reg_rdata_next[15:12] = isolated_isolated_3_qs;
+        reg_rdata_next[19:16] = isolated_isolated_4_qs;
+        reg_rdata_next[23:20] = isolated_isolated_5_qs;
+        reg_rdata_next[27:24] = isolated_isolated_6_qs;
+        reg_rdata_next[31:28] = isolated_isolated_7_qs;
       end
 
       addr_hit[42]: begin
-        reg_rdata_next[3:0] = isolated_0_isolated_0_qs;
-        reg_rdata_next[7:4] = isolated_0_isolated_1_qs;
-        reg_rdata_next[11:8] = isolated_0_isolated_2_qs;
-        reg_rdata_next[15:12] = isolated_0_isolated_3_qs;
-        reg_rdata_next[19:16] = isolated_0_isolated_4_qs;
-        reg_rdata_next[23:20] = isolated_0_isolated_5_qs;
-        reg_rdata_next[27:24] = isolated_0_isolated_6_qs;
-        reg_rdata_next[31:28] = isolated_0_isolated_7_qs;
+        reg_rdata_next[0] = ro_cache_enable_enable_0_qs;
+        reg_rdata_next[1] = ro_cache_enable_enable_1_qs;
+        reg_rdata_next[2] = ro_cache_enable_enable_2_qs;
+        reg_rdata_next[3] = ro_cache_enable_enable_3_qs;
+        reg_rdata_next[4] = ro_cache_enable_enable_4_qs;
+        reg_rdata_next[5] = ro_cache_enable_enable_5_qs;
+        reg_rdata_next[6] = ro_cache_enable_enable_6_qs;
+        reg_rdata_next[7] = ro_cache_enable_enable_7_qs;
       end
 
       addr_hit[43]: begin
-        reg_rdata_next[3:0] = isolated_1_isolated_8_qs;
-        reg_rdata_next[7:4] = isolated_1_isolated_9_qs;
-        reg_rdata_next[11:8] = isolated_1_isolated_10_qs;
-        reg_rdata_next[15:12] = isolated_1_isolated_11_qs;
+        reg_rdata_next[0] = ro_cache_flush_flush_0_qs;
+        reg_rdata_next[1] = ro_cache_flush_flush_1_qs;
+        reg_rdata_next[2] = ro_cache_flush_flush_2_qs;
+        reg_rdata_next[3] = ro_cache_flush_flush_3_qs;
+        reg_rdata_next[4] = ro_cache_flush_flush_4_qs;
+        reg_rdata_next[5] = ro_cache_flush_flush_5_qs;
+        reg_rdata_next[6] = ro_cache_flush_flush_6_qs;
+        reg_rdata_next[7] = ro_cache_flush_flush_7_qs;
+      end
+
+      addr_hit[44]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_0_quadrant_0_qs;
+      end
+
+      addr_hit[45]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_0_quadrant_0_qs;
+      end
+
+      addr_hit[46]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_0_quadrant_0_qs;
+      end
+
+      addr_hit[47]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_0_quadrant_0_qs;
+      end
+
+      addr_hit[48]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_1_quadrant_0_qs;
+      end
+
+      addr_hit[49]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_1_quadrant_0_qs;
+      end
+
+      addr_hit[50]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_1_quadrant_0_qs;
+      end
+
+      addr_hit[51]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_1_quadrant_0_qs;
+      end
+
+      addr_hit[52]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_0_quadrant_1_qs;
+      end
+
+      addr_hit[53]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_0_quadrant_1_qs;
+      end
+
+      addr_hit[54]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_0_quadrant_1_qs;
+      end
+
+      addr_hit[55]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_0_quadrant_1_qs;
+      end
+
+      addr_hit[56]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_1_quadrant_1_qs;
+      end
+
+      addr_hit[57]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_1_quadrant_1_qs;
+      end
+
+      addr_hit[58]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_1_quadrant_1_qs;
+      end
+
+      addr_hit[59]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_1_quadrant_1_qs;
+      end
+
+      addr_hit[60]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_0_quadrant_2_qs;
+      end
+
+      addr_hit[61]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_0_quadrant_2_qs;
+      end
+
+      addr_hit[62]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_0_quadrant_2_qs;
+      end
+
+      addr_hit[63]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_0_quadrant_2_qs;
+      end
+
+      addr_hit[64]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_1_quadrant_2_qs;
+      end
+
+      addr_hit[65]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_1_quadrant_2_qs;
+      end
+
+      addr_hit[66]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_1_quadrant_2_qs;
+      end
+
+      addr_hit[67]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_1_quadrant_2_qs;
+      end
+
+      addr_hit[68]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_0_quadrant_3_qs;
+      end
+
+      addr_hit[69]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_0_quadrant_3_qs;
+      end
+
+      addr_hit[70]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_0_quadrant_3_qs;
+      end
+
+      addr_hit[71]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_0_quadrant_3_qs;
+      end
+
+      addr_hit[72]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_1_quadrant_3_qs;
+      end
+
+      addr_hit[73]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_1_quadrant_3_qs;
+      end
+
+      addr_hit[74]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_1_quadrant_3_qs;
+      end
+
+      addr_hit[75]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_1_quadrant_3_qs;
+      end
+
+      addr_hit[76]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_0_quadrant_4_qs;
+      end
+
+      addr_hit[77]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_0_quadrant_4_qs;
+      end
+
+      addr_hit[78]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_0_quadrant_4_qs;
+      end
+
+      addr_hit[79]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_0_quadrant_4_qs;
+      end
+
+      addr_hit[80]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_1_quadrant_4_qs;
+      end
+
+      addr_hit[81]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_1_quadrant_4_qs;
+      end
+
+      addr_hit[82]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_1_quadrant_4_qs;
+      end
+
+      addr_hit[83]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_1_quadrant_4_qs;
+      end
+
+      addr_hit[84]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_0_quadrant_5_qs;
+      end
+
+      addr_hit[85]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_0_quadrant_5_qs;
+      end
+
+      addr_hit[86]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_0_quadrant_5_qs;
+      end
+
+      addr_hit[87]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_0_quadrant_5_qs;
+      end
+
+      addr_hit[88]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_1_quadrant_5_qs;
+      end
+
+      addr_hit[89]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_1_quadrant_5_qs;
+      end
+
+      addr_hit[90]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_1_quadrant_5_qs;
+      end
+
+      addr_hit[91]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_1_quadrant_5_qs;
+      end
+
+      addr_hit[92]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_0_quadrant_6_qs;
+      end
+
+      addr_hit[93]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_0_quadrant_6_qs;
+      end
+
+      addr_hit[94]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_0_quadrant_6_qs;
+      end
+
+      addr_hit[95]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_0_quadrant_6_qs;
+      end
+
+      addr_hit[96]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_1_quadrant_6_qs;
+      end
+
+      addr_hit[97]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_1_quadrant_6_qs;
+      end
+
+      addr_hit[98]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_1_quadrant_6_qs;
+      end
+
+      addr_hit[99]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_1_quadrant_6_qs;
+      end
+
+      addr_hit[100]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_0_quadrant_7_qs;
+      end
+
+      addr_hit[101]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_0_quadrant_7_qs;
+      end
+
+      addr_hit[102]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_0_quadrant_7_qs;
+      end
+
+      addr_hit[103]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_0_quadrant_7_qs;
+      end
+
+      addr_hit[104]: begin
+        reg_rdata_next[31:0] = ro_start_addr_low_1_quadrant_7_qs;
+      end
+
+      addr_hit[105]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_1_quadrant_7_qs;
+      end
+
+      addr_hit[106]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_1_quadrant_7_qs;
+      end
+
+      addr_hit[107]: begin
+        reg_rdata_next[15:0] = ro_end_addr_high_1_quadrant_7_qs;
       end
 
       default: begin
