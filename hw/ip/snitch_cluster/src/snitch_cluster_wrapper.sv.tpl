@@ -11,7 +11,7 @@ ${disclaimer}
 </%def>
 
 <%def name="core_cfg(prop)">\
-  % for c in cfg['cores'][::-1]:
+  % for c in cfg['cores']:
 ${c[prop]}${', ' if not loop.last else ''}\
   % endfor
 </%def>\
