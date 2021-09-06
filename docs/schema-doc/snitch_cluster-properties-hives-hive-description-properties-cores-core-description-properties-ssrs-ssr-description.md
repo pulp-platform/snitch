@@ -16,19 +16,21 @@ Description of a single Stream Semantic Register.
 
 # SSR Description Properties
 
-| Property                            | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                                                                                                             |
-| :---------------------------------- | :-------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [reg_idx](#reg_idx)                 | `number`  | Optional | can be null    | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-reg_idx.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/reg_idx")                 |
-| [indirection](#indirection)         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-indirection.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/indirection")         |
-| [indir_out_spill](#indir_out_spill) | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-indir_out_spill.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/indir_out_spill") |
-| [num_loops](#num_loops)             | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-num_loops.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/num_loops")             |
-| [index_credits](#index_credits)     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-index_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/index_credits")     |
-| [data_credits](#data_credits)       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-data_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/data_credits")       |
-| [mux_resp_depth](#mux_resp_depth)   | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-mux_resp_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/mux_resp_depth")   |
-| [index_width](#index_width)         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-index_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/index_width")         |
-| [pointer_width](#pointer_width)     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-pointer_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/pointer_width")     |
-| [shift_width](#shift_width)         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-shift_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/shift_width")         |
-| [rpt_width](#rpt_width)             | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-rpt_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/rpt_width")             |
+| Property                                    | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                                                                                                                     |
+| :------------------------------------------ | :-------- | :------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [reg_idx](#reg_idx)                         | `number`  | Optional | can be null    | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-reg_idx.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/reg_idx")                         |
+| [indirection](#indirection)                 | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-indirection.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/indirection")                 |
+| [indir_out_spill](#indir_out_spill)         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-indir_out_spill.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/indir_out_spill")         |
+| [isect_slave_spill](#isect_slave_spill)     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-isect_slave_spill.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/isect_slave_spill")     |
+| [isect_slave_credits](#isect_slave_credits) | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-isect_slave_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/isect_slave_credits") |
+| [num_loops](#num_loops)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-num_loops.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/num_loops")                     |
+| [index_credits](#index_credits)             | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-index_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/index_credits")             |
+| [data_credits](#data_credits)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-data_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/data_credits")               |
+| [mux_resp_depth](#mux_resp_depth)           | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-mux_resp_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/mux_resp_depth")           |
+| [index_width](#index_width)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-index_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/index_width")                 |
+| [pointer_width](#pointer_width)             | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-pointer_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/pointer_width")             |
+| [shift_width](#shift_width)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-shift_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/shift_width")                 |
+| [rpt_width](#rpt_width)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-rpt_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/rpt_width")                     |
 
 ## reg_idx
 
@@ -96,6 +98,62 @@ The default value is:
 
 ```json
 true
+```
+
+## isect_slave_spill
+
+Whether to cut timing paths with a spill register at the intersector index output; added only if this SSR is an intersection slave.
+
+`isect_slave_spill`
+
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-isect_slave_spill.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/isect_slave_spill")
+
+### isect_slave_spill Type
+
+`boolean`
+
+### isect_slave_spill Default Value
+
+The default value is:
+
+```json
+true
+```
+
+## isect_slave_credits
+
+Number of elements by which intersected indices may outrun corresponding data; added only if this SSR is an intersection slave.
+
+`isect_slave_credits`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-isect_slave_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/isect_slave_credits")
+
+### isect_slave_credits Type
+
+`number`
+
+### isect_slave_credits Constraints
+
+**minimum**: the value of this number must greater than or equal to: `2`
+
+### isect_slave_credits Default Value
+
+The default value is:
+
+```json
+8
 ```
 
 ## num_loops

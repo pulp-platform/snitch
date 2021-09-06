@@ -6,6 +6,7 @@
 
 `include "tcdm_interface/typedef.svh"
 `include "tcdm_interface/assign.svh"
+`include "snitch_ssr/typedef.svh"
 
 module fixture_ssr import snitch_ssr_pkg::*; #(
   parameter int unsigned  AddrWidth = 0,
@@ -40,31 +41,17 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   typedef logic                   user_t;
   `TCDM_TYPEDEF_ALL(tcdm, addr_t, data_t, strb_t, user_t);
 
+  // Intersector types
+  `SSR_ISECT_TYPEDEF_ALL(isect, logic [Cfg.IndexWidth-1:0])
+
   // Configuration written through proper registers
   typedef struct packed {
-    logic [31:0] idx_shift;
     logic [31:0] idx_base;
-    logic [31:0] idx_size;
+    logic [31:0] idx_cfg;
     logic [3:0][31:0] stride;
     logic [3:0][31:0] bound;
     logic [31:0] rep;
   } cfg_regs_t;
-
-  // Fields used in addresses of upper alias registers
-  // *Not* the same order as alias address, but as in upper status fields
-  typedef struct packed {
-    logic no_indir;
-    logic write;
-    logic [1:0] dims;
-  } cfg_alias_fields_t;
-
-  // Upper fields accessible on status register
-  typedef struct packed {
-    logic done;
-    logic write;
-    logic [1:0] dims;
-    logic indir;
-  } cfg_status_upper_t;
 
   // Status register type
   typedef struct packed {
@@ -123,7 +110,11 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     .DataWidth    ( DataWidth   ),
     .tcdm_user_t  ( user_t      ),
     .tcdm_req_t   ( tcdm_req_t  ),
-    .tcdm_rsp_t   ( tcdm_rsp_t  )
+    .tcdm_rsp_t   ( tcdm_rsp_t  ),
+    .isect_slv_req_t  ( isect_slv_req_t ),
+    .isect_slv_rsp_t  ( isect_slv_rsp_t ),
+    .isect_mst_req_t  ( isect_mst_req_t ),
+    .isect_mst_rsp_t  ( isect_mst_rsp_t )
   ) i_snitch_ssr (
     .clk_i          ( clk       ),
     .rst_ni         ( rst_n     ),
@@ -137,6 +128,10 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     .lane_ready_i,
     .mem_req_o,
     .mem_rsp_i,
+    .isect_mst_req_o  (     ),
+    .isect_slv_req_o  (     ),
+    .isect_mst_rsp_i  ( '0  ),
+    .isect_slv_rsp_i  ( '0  ),
     .tcdm_start_address_i
   );
 
@@ -250,9 +245,8 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
       cfg_write(i+2, cfg.bound[i]);
       cfg_write(i+6, cfg.stride[i]);
     end
-    cfg_write(10, cfg.idx_size);
+    cfg_write(10, cfg.idx_cfg);
     cfg_write(11, cfg.idx_base);
-    cfg_write(12, cfg.idx_shift);
   endtask
 
   task automatic cfg_launch_status (input cfg_status_t cfg);
@@ -274,6 +268,8 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
       cfg_read(i+2, cfg.bound[i]);
       cfg_read(i+6, cfg.stride[i]);
     end
+    cfg_read(10, cfg.idx_cfg);
+    cfg_read(11, cfg.idx_base);
   endtask
 
   task automatic cfg_read_status (output cfg_status_t status);
@@ -528,9 +524,9 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   );
     cfg_regs_t    regs;
     cfg_status_t  status;
+    cfg_idx_ctl_t idx_ctl = '{flags: '0, shift: idx_shift, size: idx_size};
     logic [31:0]  idx_base_ptr  = idx_base;
-    regs = {32'(idx_shift), 32'(data_base), 32'(idx_size),
-        (32*4)'(WordBytes), (32*4)'(bound), 32'(rep)};
+    regs = {32'(data_base), 32'(idx_ctl), (32*4)'(WordBytes), (32*4)'(bound), 32'(rep)};
     status.upper  = {1'b0, write, 2'b0, 1'b1};
     status.ptr    = idx_base_ptr;
     verify_launch(regs, status, alias_launch);

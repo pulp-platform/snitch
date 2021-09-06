@@ -20,6 +20,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
   parameter bit Xssr = 1,
   parameter int unsigned NumSsrs = 0,
   parameter logic [NumSsrs-1:0][4:0]  SsrRegs = '0,
+  parameter bit SsrStreamctl = 0,
   parameter type acc_req_t = logic,
   parameter type acc_resp_t = logic,
   parameter bit RVF = 1,
@@ -64,6 +65,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
   output logic  [0:0]      ssr_wvalid_o,
   input  logic  [0:0]      ssr_wready_i,
   output logic  [0:0]      ssr_wdone_o,
+  // SSR stream control interface
+  input  logic             streamctl_done_i,
+  input  logic             streamctl_valid_i,
+  output logic             streamctl_ready_o,
   // Core event strobes
   output core_events_t core_events_o
 );
@@ -178,7 +183,10 @@ module snitch_fp_ss import snitch_pkg::*; #(
       .oup_qdata_argb_o ( acc_req.data_argb   ),
       .oup_qdata_argc_o ( acc_req.data_argc   ),
       .oup_qvalid_o     ( acc_req_valid       ),
-      .oup_qready_i     ( acc_req_ready       )
+      .oup_qready_i     ( acc_req_ready       ),
+      .streamctl_done_i,
+      .streamctl_valid_i,
+      .streamctl_ready_o
     );
   end else begin : gen_no_fpu_sequencer
     // pragma translate_off

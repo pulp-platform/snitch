@@ -409,12 +409,23 @@ module snitch_cc #(
   logic  [0:0]      ssr_wvalid;
   logic  [0:0]      ssr_wready;
   logic  [0:0]      ssr_wdone;
+  logic             ssr_streamctl_done;
+  logic             ssr_streamctl_valid;
+  logic             ssr_streamctl_ready;
+
+  function automatic bit derive_ssr_streamctl();
+    for (int i = 0; i < NumSsrs; i++)
+      if (SsrCfgs[i].IsectMaster) return 1;
+    return 0;
+  endfunction
 
   if (FPEn) begin : gen_fpu
     snitch_pkg::core_events_t fp_ss_core_events;
 
     dreq_t fpu_dreq;
     drsp_t fpu_drsp;
+
+    localparam bit SsrStreamctl = derive_ssr_streamctl();
 
     snitch_fp_ss #(
       .AddrWidth (AddrWidth),
@@ -425,6 +436,7 @@ module snitch_cc #(
       .FPUImplementation (FPUImplementation),
       .NumSsrs (NumSsrs),
       .SsrRegs (SsrRegs),
+      .SsrStreamctl (SsrStreamctl),
       .dreq_t (dreq_t),
       .drsp_t (drsp_t),
       .acc_req_t (acc_req_t),
@@ -466,6 +478,9 @@ module snitch_cc #(
       .ssr_wvalid_o     ( ssr_wvalid     ),
       .ssr_wready_i     ( ssr_wready     ),
       .ssr_wdone_o      ( ssr_wdone      ),
+      .streamctl_done_i   ( ssr_streamctl_done  ),
+      .streamctl_valid_i  ( ssr_streamctl_valid ),
+      .streamctl_ready_o  ( ssr_streamctl_ready ),
       .core_events_o
     );
 
@@ -663,7 +678,8 @@ module snitch_cc #(
       .mem_resp_valid_i (cfg_req_valid_q)
     );
 
-    // TODO: Assert that NumSsrs is at least 1 in any case
+    // If Xssr is enabled, we should at least have one SSR
+    `ASSERT_INIT(CheckSsrWithXssr, NumSsrs >= 1);
 
     snitch_ssr_streamer #(
       .NumSsrs (NumSsrs),
@@ -696,6 +712,9 @@ module snitch_cc #(
       .ssr_wdone_i    ( ssr_wdone  ),
       .mem_req_o      ( ssr_req    ),
       .mem_rsp_i      ( ssr_rsp    ),
+      .streamctl_done_o   ( ssr_streamctl_done  ),
+      .streamctl_valid_o  ( ssr_streamctl_valid ),
+      .streamctl_ready_i  ( ssr_streamctl_ready ),
       .tcdm_start_address_i (tcdm_addr_base_i)
     );
 
@@ -739,6 +758,9 @@ module snitch_cc #(
     assign ssr_rdata      = '0;
     assign ssr_rready     = '0;
     assign ssr_wready     = '0;
+    // Tie off SSR stream control
+    assign ssr_streamctl_done   = '0;
+    assign ssr_streamctl_valid  = '0;
   end
 
   // --------------------------

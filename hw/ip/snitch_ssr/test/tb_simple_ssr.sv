@@ -22,6 +22,8 @@ module tb_simple_ssr;
   // DUT parameters
   localparam snitch_ssr_pkg::ssr_cfg_t Cfg = '{
     Indirection:    Indirection,
+    IsectMaster:    1,
+    IsectSlaveSpill: 1,
     IndirOutSpill:  1,
     NumLoops:       NumLoops,
     IndexWidth:     16,
@@ -30,7 +32,9 @@ module tb_simple_ssr;
     IndexCredits:   3,
     DataCredits:    4,
     MuxRespDepth:   3,
-    RptWidth:       4
+    RptWidth:       4,
+    // Zero intersection params
+    default:        '0
   };
 
   // Instantiate fixture

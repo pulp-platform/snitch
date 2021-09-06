@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: SHL-0.51
 
 `include "common_cells/registers.svh"
+`include "common_cells/assertions.svh"
 
 /// Description: Filters FPU repetition instructions
 module snitch_sequencer import snitch_pkg::*; #(
@@ -35,11 +36,16 @@ module snitch_sequencer import snitch_pkg::*; #(
     output data_t                            oup_qdata_argb_o,
     output addr_t                            oup_qdata_argc_o,
     output logic                             oup_qvalid_o,
-    input  logic                             oup_qready_i
+    input  logic                             oup_qready_i,
+    // SSR stream control interface
+    input  logic                             streamctl_done_i,
+    input  logic                             streamctl_valid_i,
+    output logic                             streamctl_ready_o
 );
   localparam int RptBits = 16;
 
   typedef struct packed {
+    logic is_streamctl;
     logic is_outer;
     logic [DepthBits-1:0] max_inst;
     logic [RptBits-1:0] max_rpt;
@@ -57,7 +63,7 @@ module snitch_sequencer import snitch_pkg::*; #(
   seq_cfg_t seq_cfg_buffer_in, seq_cfg_buffer_out;
   seq_cfg_t curr_cfg;
 
-  logic inst_last, rpt_last, seq_last, seq_next;
+  logic inst_last, rpt_last, seq_last, seq_next, seq_done;
 
   logic seq_out_ready, seq_out_valid;
   logic [31:0] seq_qdata_op;
@@ -128,7 +134,7 @@ module snitch_sequencer import snitch_pkg::*; #(
       rb_wr_en = 1;
     end
     // read logic
-    if (seq_last && seq_next) begin
+    if ((seq_last && seq_next) || seq_done) begin
       /* verilator lint_off WIDTH */
       rd_pointer_d = rd_pointer_q + curr_cfg.max_inst + 1;
       /* verilator lint_on WIDTH */
@@ -144,14 +150,19 @@ module snitch_sequencer import snitch_pkg::*; #(
 
   assign inst_last = inst_cnt_q == curr_cfg.max_inst;
   assign rpt_last = rpt_cnt_q == curr_cfg.max_rpt;
-  assign seq_last = inst_last & rpt_last;
-  assign seq_cfg_buffer_pop = seq_last & seq_next & seq_cfg_buffer_valid;
+  assign seq_last = inst_last & rpt_last & ~curr_cfg.is_streamctl;
+  assign seq_cfg_buffer_pop = (seq_last & seq_next & seq_cfg_buffer_valid) | seq_done;
 
   always_comb begin : sequence_logic
     inst_cnt_d = inst_cnt_q;
     rpt_cnt_d = rpt_cnt_q;
     stagger_cnt_d = stagger_cnt_q;
-    if (seq_next) begin
+    if (seq_done) begin
+      // We are aborting the loop: reset counters
+      inst_cnt_d = '0;
+      rpt_cnt_d = '0;
+      stagger_cnt_d = '0;
+    end else if (seq_next) begin
       if (curr_cfg.is_outer) begin
         if (inst_last) begin
           inst_cnt_d = 0;
@@ -176,7 +187,17 @@ module snitch_sequencer import snitch_pkg::*; #(
   end
 
   assign seq_next = seq_out_valid & seq_out_ready;
-  assign seq_out_valid = ~rb_empty;
+
+  always_comb begin : proc_steamctl
+    seq_out_valid     = ~rb_empty;
+    seq_done          = 1'b0;
+    streamctl_ready_o = 1'b0;
+    if (curr_cfg.is_outer & curr_cfg.is_streamctl) begin
+      seq_out_valid     = ~rb_empty & streamctl_valid_i & ~streamctl_done_i;
+      seq_done          = ~rb_empty & streamctl_valid_i & streamctl_done_i;
+      streamctl_ready_o = (~rb_empty & seq_out_ready) | seq_done;
+    end
+  end
 
   // Compose offloading instruction e.g. staggering.
   /* verilator lint_off WIDTH */
@@ -210,6 +231,10 @@ module snitch_sequencer import snitch_pkg::*; #(
       .pop_i     (seq_cfg_buffer_pop)
   );
 
+  // Ensure that `max_inst` bits fit into assigned slot
+  `ASSERT_INIT(CheckMaxInstFieldWidth, DepthBits < 11);
+
+  assign seq_cfg_buffer_in.is_streamctl = inp_qdata_op_i[31];
   assign seq_cfg_buffer_in.is_outer = inp_qdata_op_i[7];
   assign seq_cfg_buffer_in.max_inst = inp_qdata_op_i[20+:DepthBits];
   assign seq_cfg_buffer_in.stagger_mask = inp_qdata_op_i[11:8];

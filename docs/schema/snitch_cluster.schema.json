@@ -370,6 +370,23 @@
                                     "description": "Number of DTLB entries. Determines the core's size.",
                                     "default": 2
                                 },
+                                "ssr_intersection": {
+                                    "type": "boolean",
+                                    "title": "SSR Intersection Feature",
+                                    "description": "Enable intersection between 3 SSRs for sparse-sparse processing.",
+                                    "default": false
+                                },
+                                "ssr_intersection_triple": {
+                                    "type": "array",
+                                    "title": "SSR Intersection Triple",
+                                    "description": "Indices of the SSRs forming an SSR intersection triple.",
+                                    "maxItems": 3,
+                                    "minItems": 3,
+                                    "default": [0, 1, 2],
+                                      "items": {
+                                        "type": "number"
+                                      }
+                                },
                                 "ssr_mux_resp_depth": {
                                     "type": "number",
                                     "description": "Depth of response buffer in the TCDM multiplexer arbitrating between core and SSR 0.",
@@ -402,6 +419,17 @@
                                                 "type": "boolean",
                                                 "description": "Whether to cut timing paths with a spill register at the address generator output; added only if indirection extension enabled.",
                                                 "default": true
+                                            },
+                                            "isect_slave_spill": {
+                                                "type": "boolean",
+                                                "description": "Whether to cut timing paths with a spill register at the intersector index output; added only if this SSR is an intersection slave.",
+                                                "default": true
+                                            },
+                                            "isect_slave_credits": {
+                                                "type": "number",
+                                                "description": "Number of elements by which intersected indices may outrun corresponding data; added only if this SSR is an intersection slave.",
+                                                "minimum": 2,
+                                                "default": 8
                                             },
                                             "num_loops": {
                                                 "type": "number",
