@@ -58,7 +58,7 @@ static void __microtask_wrapper(void *arg, uint32_t argc) {
     switch (argc) {
         default:
             // printf("Too many args to __microtask_wrapper: %d!\n", argc);
-            exit(-1);
+            snrt_exit(-1);
         case 0:
             fn(&gtid, id_addr);
             break;
@@ -214,7 +214,7 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
     /// a worker enters this fork call: this means nested parallelism
     if (snrt_cluster_core_idx() != 0) {
         KMP_PRINTF(0, "error: nested parallelism\n");
-        exit(-1);
+        snrt_exit(-1);
         /// TODO: This almost works. The problem is, that the current task in
         /// the EU is not yet completed (due to this thread forking). Correctly,
         /// this thread woul re-enter the event queue, run the newly dispatched

@@ -9,7 +9,11 @@
 #ifndef OMP_STATIC
 omp_t ompData;
 #else
-extern const omp_t ompData;
+const omp_t ompData = {
+    .plainTeam = {.nbThreads = OMPSTATIC_NUMTHREADS},
+    .numThreads = OMPSTATIC_NUMTHREADS,
+    .maxThreads = OMPSTATIC_NUMTHREADS,
+};
 #endif
 
 static inline void initTeam(omp_t *_this, omp_team_t *team) {}
@@ -19,8 +23,6 @@ void omp_init(void) {
 
 #ifndef OMP_STATIC
     unsigned int nbCores = snrt_cluster_compute_core_num();
-    int coreMask = (1 << nbCores) - 1;
-    _this->coreMask = coreMask;
     _this->numThreads = nbCores;
     _this->maxThreads = nbCores;
 
@@ -40,16 +42,44 @@ void omp_init(void) {
     initTeam(_this, &_this->plainTeam);
 #endif
 
-    OMP_PRINTF(10, "omp_init coreMask=%#x numThreads=%d maxThreads=%d\n",
-               _this->coreMask, _this->numThreads, _this->maxThreads);
+    OMP_PRINTF(10, "omp_init numThreads=%d maxThreads=%d\n", _this->numThreads,
+               _this->maxThreads);
+}
+
+/**
+ * @brief Bootstrap the system for the use of the OpenMP runtime
+ * Bootstrap: Core 0 inits the event unit and all other cores enter it while
+ * core 0 waits for the queue to be full of workers
+ * Park DM core
+ *
+ * Use: if(snrt_omp_bootstrap(core_idx)) return 0;
+ *
+ * @param core_idx cluster-local core-index
+ */
+unsigned __attribute__((noinline)) snrt_omp_bootstrap(uint32_t core_idx) {
+    if (core_idx == 0) {
+        // master hart initializes event unit and runtime
+        eu_init();
+        omp_init();
+        snrt_cluster_hw_barrier();
+        while (eu_get_workers_in_loop() !=
+               (snrt_cluster_compute_core_num() - 1))
+            ;
+        return 0;
+    } else if (snrt_is_dm_core()) {
+        // park dm core for now
+        snrt_cluster_hw_barrier();
+        return 1;
+    } else {
+        // all worker cores enter the event queue
+        snrt_cluster_hw_barrier();
+        eu_event_loop(core_idx);
+        return 1;
+    }
 }
 
 void partialParallelRegion(int32_t argc, void *data,
                            void (*fn)(void *, uint32_t), int num_threads) {
-    // int coreMask = ompData.coreMask;
-    // unsigned int coreSet = (1<<num_threads)-1;
-    // int nbCores = ompData.plainTeam.nbThreads;
-
 #ifndef OMP_STATIC
     ompData.plainTeam.nbThreads = num_threads;
 #endif

@@ -5,13 +5,13 @@
 #pragma once
 
 #include "interface.h"
+#include "snrt.h"
 
 typedef void (*kmpc_micro)(kmp_int32 *global_tid, kmp_int32 *bound_tid, ...);
 
 ////////////////////////////////////////////////////////////////////////////////
 // debug
 ////////////////////////////////////////////////////////////////////////////////
-#define KMP_DEBUG_LEVEL 100
 
 #ifdef KMP_DEBUG_LEVEL
 #include "encoding.h"

@@ -12,6 +12,17 @@
 extern "C" {
 #endif
 
+//================================================================================
+// Debug
+//================================================================================
+// #define OMP_DEBUG_LEVEL 100
+// #define KMP_DEBUG_LEVEL 100
+// #define EU_DEBUG_LEVEL 100
+
+//================================================================================
+// Macros
+//================================================================================
+
 #ifndef snrt_min
 #define snrt_min(a, b) ((a) < (b) ? (a) : (b))
 #endif
@@ -122,7 +133,20 @@ extern void snrt_ssr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
                            volatile void *ptr);
 extern void snrt_fpu_fence();
 
-/// alloc functions
+/**
+ * @brief Use as replacement of the stdlib exit() call
+ *
+ * @param status exit code
+ */
+static inline __attribute__((noreturn)) void snrt_exit(int status) {
+    (void)status;
+    while (1)
+        ;
+}
+
+//================================================================================
+// Allocation functions
+//================================================================================
 extern void *snrt_l1alloc(size_t size);
 
 //================================================================================
@@ -214,6 +238,16 @@ static inline void snrt_mutex_release(volatile uint32_t *pmtx) {
     asm volatile("amoswap.w.rl  x0,x0,(%0)   # Release lock by storing 0\n"
                  : "+r"(pmtx));
 }
+
+//================================================================================
+// Runtime functions
+//================================================================================
+
+/**
+ * @brief Bootstrap macro for openmp applications
+ */
+#define __snrt_omp_bootstrap(core_idx) \
+    if (snrt_omp_bootstrap(core_idx)) return 0
 
 #ifdef __cplusplus
 }

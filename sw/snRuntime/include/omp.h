@@ -26,7 +26,6 @@ typedef struct {
     omp_team_t plainTeam;
     int numThreads;
     int maxThreads;
-    unsigned short coreMask;
 #ifndef OMP_STATIC
     uint32_t lastCycleCnt;
 #endif
@@ -43,6 +42,7 @@ extern const omp_t ompData;
 ////////////////////////////////////////////////////////////////////////////////
 
 void omp_init(void);
+unsigned snrt_omp_bootstrap(uint32_t core_idx);
 void partialParallelRegion(int32_t argc, void *data,
                            void (*fn)(void *, uint32_t), int num_threads);
 
@@ -51,7 +51,6 @@ static inline omp_t *omp_getData() { return &ompData; }
 ////////////////////////////////////////////////////////////////////////////////
 // debug
 ////////////////////////////////////////////////////////////////////////////////
-#define OMP_DEBUG_LEVEL 100
 
 #ifdef OMP_DEBUG_LEVEL
 #include "encoding.h"
@@ -72,11 +71,9 @@ static inline omp_t *omp_getData() { return &ompData; }
 // inlines
 ////////////////////////////////////////////////////////////////////////////////
 
-#define omp_get_thread_num(x) read_csr(mhartid)
-
-// static inline uint32_t omp_get_thread_num() {
-//   return read_csr(mhartid);
-// }
+static inline unsigned omp_get_thread_num(void) {
+    return snrt_cluster_core_idx();
+}
 
 static inline omp_team_t *omp_get_team(omp_t *_this) {
     return &_this->plainTeam;
@@ -113,8 +110,6 @@ parallelRegionExec(int32_t argc, void *data, void (*fn)(void *, uint32_t),
 static inline void __attribute__((always_inline))
 parallelRegion(int32_t argc, void *data, void (*fn)(void *, uint32_t),
                int num_threads) {
-    // int coreMask = omp_getData()->coreMask;
-
     partialParallelRegion(argc, data, fn, num_threads);
 
     // if (num_threads <= omp_getData()->maxThreads) {

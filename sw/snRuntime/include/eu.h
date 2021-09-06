@@ -6,6 +6,8 @@
 
 #include <stdint.h>
 
+#include "snrt.h"
+
 /**
  * @brief Initialize the event unit
  * @details
@@ -67,7 +69,6 @@ uint32_t eu_get_workers_in_loop();
 ////////////////////////////////////////////////////////////////////////////////
 // debug
 ////////////////////////////////////////////////////////////////////////////////
-// #define EU_DEBUG_LEVEL 100
 
 #ifdef EU_DEBUG_LEVEL
 #include "printf.h"
