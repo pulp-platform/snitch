@@ -26,17 +26,6 @@ except ImportError as e:
     print(f'{e} --> No progress bar will be shown.', file=sys.stderr)
     has_progressbar = False
 
-try:
-    from shutil import which
-    has_llvm_addr2line = which("llvm-addr2line") is not None
-    if has_llvm_addr2line:
-        addr2line = 'llvm-addr2line'
-    else:
-        addr2line = 'addr2line'
-except ImportError as e:
-    print(f'{e} --> Will use `addr2line`', file=sys.stderr)
-    addr2line = 'addr2line'
-
 
 # line format:
 # Snitch RTL simulation:
@@ -179,6 +168,12 @@ parser.add_argument(
     default='chrome.json',
     help='Output JSON file')
 parser.add_argument(
+    '--addr2line',
+    metavar='<path>',
+    nargs='?',
+    default='addr2line',
+    help='`addr2line` binary to use for parsing')
+parser.add_argument(
     '-t',
     '--time',
     action='store_true',
@@ -211,6 +206,7 @@ traces = args.traces
 output = args.output
 use_time = args.time
 banshee = args.banshee
+addr2line = args.addr2line
 
 print('elf:', elf, file=sys.stderr)
 print('traces:', traces, file=sys.stderr)
