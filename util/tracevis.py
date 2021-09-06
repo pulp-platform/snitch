@@ -163,7 +163,7 @@ parser.add_argument(
 parser.add_argument(
     '-o',
     '--output',
-    metavar='<trace>',
+    metavar='<json>',
     nargs='?',
     default='chrome.json',
     help='Output JSON file')
@@ -185,7 +185,7 @@ parser.add_argument(
 parser.add_argument(
     '-s',
     '--start',
-    metavar='<trace>',
+    metavar='<line>',
     nargs='?',
     type=int,
     default=0,
@@ -193,7 +193,7 @@ parser.add_argument(
 parser.add_argument(
     '-e',
     '--end',
-    metavar='<trace>',
+    metavar='<line>',
     nargs='?',
     type=int,
     default=-1,
