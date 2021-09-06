@@ -61,11 +61,18 @@ set(sources
     src/ssr.c
     src/alloc.c
     src/interrupt.c
-    # OpenMP support
-    src/omp/omp.c
-    src/omp/kmp.c
-    src/omp/eu.c
 )
+
+# Sources only compatible with the LLVM toolchain
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    set(sources
+        ${sources}
+        # OpenMP support
+        src/omp/omp.c
+        src/omp/kmp.c
+        src/omp/eu.c
+    )
+endif()
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     # Build all runtimes
@@ -132,6 +139,8 @@ add_snitch_test_rtl(team_global)
 add_snitch_test_args(team_global team_global --base-hartid=3 --num-cores=4 --num-clusters=2)
 
 # event unit test
-add_snitch_test_executable(event_unit tests/event_unit.c)
-add_snitch_test_rtl(event_unit)
-add_snitch_test_args(event_unit event_unit --base-hartid=3 --num-cores=8 --num-clusters=1)
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    add_snitch_test_executable(event_unit tests/event_unit.c)
+    add_snitch_test_rtl(event_unit)
+    add_snitch_test_args(event_unit event_unit --base-hartid=3 --num-cores=8 --num-clusters=1)
+endif()
