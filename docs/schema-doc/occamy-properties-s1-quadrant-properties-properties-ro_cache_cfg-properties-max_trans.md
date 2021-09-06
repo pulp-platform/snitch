@@ -1,15 +1,23 @@
-# Untitled undefined type in Occamy System Schema Schema
+# Untitled integer in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/default
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/ro_cache_cfg/properties/max_trans
 ```
 
-
+Maximum Outstanding Transaction
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [occamy.schema.json*](occamy.schema.json "open original schema") |
 
-## default Type
+## max_trans Type
 
-unknown
+`integer`
+
+## max_trans Default Value
+
+The default value is:
+
+```json
+4
+```

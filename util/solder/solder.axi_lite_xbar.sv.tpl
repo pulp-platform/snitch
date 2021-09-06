@@ -34,9 +34,9 @@ typedef enum int {
 localparam axi_pkg::xbar_cfg_t ${cfg_name} = '{
   NoSlvPorts:         ${xbar.name.upper()}_NUM_INPUTS,
   NoMstPorts:         ${xbar.name.upper()}_NUM_OUTPUTS,
-  MaxSlvTrans:        4,
-  MaxMstTrans:        4,
-  FallThrough:        0,
+  MaxSlvTrans:        ${xbar.max_slv_trans},
+  MaxMstTrans:        ${xbar.max_mst_trans},
+  FallThrough:        ${int(xbar.fall_through)},
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 0,
   AxiIdUsedSlvPorts:  0,

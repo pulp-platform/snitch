@@ -1,7 +1,7 @@
 # Number of S1 Quadrants Schema
 
 ```txt
-http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/nr_s1_quadrant
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant
 ```
 
 

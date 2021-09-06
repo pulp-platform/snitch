@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json",
+    "$id": "http://pulp-platform.org/snitch/occamy.schema.json",
     "title": "Occamy System Schema",
-    "description": "Description for a very simple single-cluster testbench. That is the most minimal system available. Most of the hardware is emulated by the testbench.",
+    "description": "Description of an Occamy-based system.",
     "type": "object",
     "required": [
         "cluster"
@@ -49,13 +49,20 @@
                 }
             }
         },
+        "wide_xbar": {
+            "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+        },
+        "narrow_xbar": {
+            "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+        },
         "nr_s1_quadrant": {
             "title": "Number of S1 Quadrants",
             "type": "integer",
             "default": 8
         },
         "s1_quadrant": {
-            "title": "object",
+            "title": "S1 Quadrant Properties",
+            "type": "object",
             "properties": {
                 "nr_clusters": {
                     "type": "integer",
@@ -89,6 +96,12 @@
                             "default": 1
                         }
                     }
+                },
+                "wide_xbar": {
+                    "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+                },
+                "narrow_xbar": {
+                    "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
                 }
             }
         }

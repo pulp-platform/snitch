@@ -1133,6 +1133,9 @@ class AxiXbar(Xbar):
                  dw,
                  iw,
                  uw=0,
+                 max_slv_trans=4,
+                 max_mst_trans=4,
+                 fall_through=False,
                  no_loopback=False,
                  atop_support=True,
                  **kwargs):
@@ -1141,6 +1144,9 @@ class AxiXbar(Xbar):
         self.dw = dw
         self.iw = iw
         self.uw = uw
+        self.max_slv_trans = max_slv_trans
+        self.max_mst_trans = max_mst_trans
+        self.fall_through = fall_through
         self.no_loopback = no_loopback
         self.symbolic_addrmap = list()
         self.atop_support = atop_support
@@ -1216,9 +1222,9 @@ class AxiXbar(Xbar):
             self.name.upper())
         cfg += "  NoMstPorts:         {}_NUM_OUTPUTS,\n".format(
             self.name.upper())
-        cfg += "  MaxSlvTrans:        4,\n"
-        cfg += "  MaxMstTrans:        4,\n"
-        cfg += "  FallThrough:        0,\n"
+        cfg += "  MaxSlvTrans:        {},\n".format(self.max_slv_trans)
+        cfg += "  MaxMstTrans:        {},\n".format(self.max_mst_trans)
+        cfg += "  FallThrough:        {},\n".format(int(self.fall_through))
         cfg += "  LatencyMode:        axi_pkg::CUT_ALL_PORTS,\n"
         cfg += "  AxiIdWidthSlvPorts: {},\n".format(self.iw)
         cfg += "  AxiIdUsedSlvPorts:  {},\n".format(self.iw)
@@ -1393,10 +1399,19 @@ class AxiXbar(Xbar):
 class AxiLiteXbar(Xbar):
     tpl = templates.get_template("solder.axi_lite_xbar.sv.tpl")
 
-    def __init__(self, aw, dw, **kwargs):
+    def __init__(self,
+                 aw,
+                 dw,
+                 max_slv_trans=4,
+                 max_mst_trans=4,
+                 fall_through=False,
+                 **kwargs):
         super().__init__(**kwargs)
         self.aw = aw
         self.dw = dw
+        self.max_slv_trans = max_slv_trans
+        self.max_mst_trans = max_mst_trans
+        self.fall_through = fall_through
         self.addrmap = list()
 
     def add_input(self, name):

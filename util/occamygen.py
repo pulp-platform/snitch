@@ -283,15 +283,19 @@ def main():
     #################
     # SoC Wide Xbar #
     #################
-    soc_wide_xbar = solder.AxiXbar(48,
-                                   512,
-                                   3,
-                                   name="soc_wide_xbar",
-                                   clk="clk_i",
-                                   rst="rst_ni",
-                                   no_loopback=True,
-                                   atop_support=False,
-                                   node=am_soc_wide_xbar)
+    soc_wide_xbar = solder.AxiXbar(
+        48,
+        512,
+        3,
+        name="soc_wide_xbar",
+        clk="clk_i",
+        rst="rst_ni",
+        max_slv_trans=occamy.cfg["wide_xbar"]["max_slv_trans"],
+        max_mst_trans=occamy.cfg["wide_xbar"]["max_mst_trans"],
+        fall_through=occamy.cfg["wide_xbar"]["fall_through"],
+        no_loopback=True,
+        atop_support=False,
+        node=am_soc_wide_xbar)
 
     for i in range(nr_s1_quadrants):
         soc_wide_xbar.add_output_symbolic("s1_quadrant_{}".format(i),
@@ -315,14 +319,18 @@ def main():
     ###################
     # SoC Narrow Xbar #
     ###################
-    soc_narrow_xbar = solder.AxiXbar(48,
-                                     64,
-                                     4,
-                                     name="soc_narrow_xbar",
-                                     clk="clk_i",
-                                     rst="rst_ni",
-                                     no_loopback=True,
-                                     node=am_soc_narrow_xbar)
+    soc_narrow_xbar = solder.AxiXbar(
+        48,
+        64,
+        4,
+        name="soc_narrow_xbar",
+        clk="clk_i",
+        rst="rst_ni",
+        max_slv_trans=occamy.cfg["narrow_xbar"]["max_slv_trans"],
+        max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
+        fall_through=occamy.cfg["narrow_xbar"]["fall_through"],
+        no_loopback=True,
+        node=am_soc_narrow_xbar)
 
     for i in range(nr_s1_quadrants):
         soc_narrow_xbar.add_output_symbolic("s1_quadrant_{}".format(i),
@@ -351,6 +359,9 @@ def main():
         name="wide_xbar_quadrant_s1",
         clk="clk_i",
         rst="rst_ni",
+        max_slv_trans=occamy.cfg["s1_quadrant"]["wide_xbar"]["max_slv_trans"],
+        max_mst_trans=occamy.cfg["s1_quadrant"]["wide_xbar"]["max_mst_trans"],
+        fall_through=occamy.cfg["s1_quadrant"]["wide_xbar"]["fall_through"],
         no_loopback=True,
         atop_support=False,
         context="quadrant_s1",
@@ -363,6 +374,11 @@ def main():
         name="narrow_xbar_quadrant_s1",
         clk="clk_i",
         rst="rst_ni",
+        max_slv_trans=occamy.cfg["s1_quadrant"]["narrow_xbar"]
+        ["max_slv_trans"],
+        max_mst_trans=occamy.cfg["s1_quadrant"]["narrow_xbar"]
+        ["max_mst_trans"],
+        fall_through=occamy.cfg["s1_quadrant"]["narrow_xbar"]["fall_through"],
         no_loopback=True,
         context="quadrant_s1")
 

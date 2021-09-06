@@ -1,7 +1,7 @@
 # Untitled object in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/rom
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/rom
 ```
 
 Read-only memory from which *all* harts of the system start to boot.

@@ -1,7 +1,7 @@
 # Untitled undefined type in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm
 ```
 
 
@@ -26,10 +26,10 @@ The default value is:
 
 # undefined Properties
 
-| Property            | Type     | Required | Nullable       | Defined by                                                                                                                                                             |
-| :------------------ | :------- | :------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [address](#address) | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-address.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/address") |
-| [length](#length)   | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-length.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/length")   |
+| Property            | Type     | Required | Nullable       | Defined by                                                                                                                                                  |
+| :------------------ | :------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [address](#address) | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-address.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/address") |
+| [length](#length)   | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-length.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/length")   |
 
 ## address
 
@@ -43,7 +43,7 @@ Start address of SPM (Scratchpad Memory).
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-spm-properties-address.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/address")
+*   defined in: [Occamy System Schema](occamy-properties-spm-properties-address.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/address")
 
 ### address Type
 
@@ -65,7 +65,7 @@ Size of SPM based on the address range. The full address range will be mapped to
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-spm-properties-length.md "http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/length")
+*   defined in: [Occamy System Schema](occamy-properties-spm-properties-length.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/length")
 
 ### length Type
 

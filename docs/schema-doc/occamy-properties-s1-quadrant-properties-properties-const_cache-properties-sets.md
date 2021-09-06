@@ -1,15 +1,15 @@
-# Untitled undefined type in Occamy System Schema Schema
+# Untitled integer in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/default
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/const_cache/properties/sets
 ```
 
-
+The set associativity of the cache. Power of two; >= 1.
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [occamy.schema.json*](occamy.schema.json "open original schema") |
 
-## default Type
+## sets Type
 
-unknown
+`integer`
