@@ -65,12 +65,22 @@ fn main() -> Result<()> {
         .arg(
             Arg::with_name("no-opt-llvm")
                 .long("no-opt-llvm")
-                .help("Do not optimize LLVM IR"),
+                .help("Do not optimize LLVM IR (default, deprecated)"),
         )
         .arg(
             Arg::with_name("no-opt-jit")
                 .long("no-opt-jit")
-                .help("Do not optimize during JIT compilation"),
+                .help("Do not optimize during JIT compilation (default, deprecated)"),
+        )
+        .arg(
+            Arg::with_name("opt-llvm")
+                .long("opt-llvm")
+                .help("Optimize LLVM IR"),
+        )
+        .arg(
+            Arg::with_name("opt-jit")
+                .long("opt-jit")
+                .help("Optimize during JIT compilation"),
         )
         .arg(
             Arg::with_name("trace")
@@ -176,8 +186,14 @@ fn main() -> Result<()> {
 
     // Setup the execution engine.
     let mut engine = Engine::new(context);
-    engine.opt_llvm = !matches.is_present("no-opt-llvm");
-    engine.opt_jit = !matches.is_present("no-opt-jit");
+    if matches.is_present("opt-llvm") && matches.is_present("no-opt-llvm") {
+        bail!("Both --opt-llvm and --no-opt-llvm provided");
+    }
+    if matches.is_present("opt-jit") && matches.is_present("no-opt-jit") {
+        bail!("Both --opt-jit and --no-opt-jit provided");
+    }
+    engine.opt_llvm = matches.is_present("opt-llvm");
+    engine.opt_jit = matches.is_present("opt-jit");
     engine.interrupt = !matches.is_present("no-interrupt");
     if engine.interrupt {
         debug!("Interrupts enabled");
