@@ -1,9 +1,6 @@
-/*
- * @Author: Noah Huetter
- * @Date:   2020-11-06 11:37:47
- * @Last Modified by:   Noah Huetter
- * @Last Modified time: 2020-11-13 14:28:26
- */
+// Copyright 2021 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
 
 #include "eu.h"
 
