@@ -259,9 +259,9 @@ package occamy_cluster_pkg;
     '{'{1, 0, 0, 1, 1, 1, 4, 16, 18, 3, 4, 3, 8, 4, 3},
       '{1, 1, 1, 0, 1, 1, 4, 16, 18, 3, 4, 3, 8, 4, 3},
       '{1, 1, 0, 0, 1, 1, 4, 16, 18, 3, 4, 3, 8, 4, 3}},
-    '{'{0, 0, 0, 0, 1, 1, 4, 16, 18, 3, 4, 3, 8, 4, 3},
-      '{0, 0, 0, 0, 1, 1, 4, 16, 18, 3, 4, 3, 8, 4, 3},
-      '{0, 0, 0, 0, 1, 1, 4, 16, 18, 3, 4, 3, 8, 4, 3}}
+    '{/*None*/ '0,
+      /*None*/ '0,
+      /*None*/ '0}
   };
 
   localparam logic [3-1:0][4:0] SsrRegs [9] = '{
@@ -273,7 +273,7 @@ package occamy_cluster_pkg;
     '{2, 1, 0},
     '{2, 1, 0},
     '{2, 1, 0},
-    '{2, 1, 0}
+    '{/*None*/ 0, /*None*/ 0, /*None*/ 0}
   };
 
 endpackage
@@ -300,13 +300,13 @@ module occamy_cluster_wrapper (
 );
 
   localparam int unsigned NumIntOutstandingLoads [9] = '{1, 1, 1, 1, 1, 1, 1, 1, 1};
-  localparam int unsigned NumIntOutstandingMem [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 1};
+  localparam int unsigned NumIntOutstandingMem [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 4};
   localparam int unsigned NumFPOutstandingLoads [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 4};
-  localparam int unsigned NumFPOutstandingMem [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 1};
-  localparam int unsigned NumDTLBEntries [9] = '{1, 1, 1, 1, 1, 1, 1, 1, 2};
+  localparam int unsigned NumFPOutstandingMem [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 4};
+  localparam int unsigned NumDTLBEntries [9] = '{1, 1, 1, 1, 1, 1, 1, 1, 1};
   localparam int unsigned NumITLBEntries [9] = '{1, 1, 1, 1, 1, 1, 1, 1, 1};
   localparam int unsigned NumSequencerInstr [9] = '{16, 16, 16, 16, 16, 16, 16, 16, 16};
-  localparam int unsigned NumSsrs [9] = '{3, 3, 3, 3, 3, 3, 3, 3, 3};
+  localparam int unsigned NumSsrs [9] = '{3, 3, 3, 3, 3, 3, 3, 3, 1};
   localparam int unsigned SsrMuxRespDepth [9] = '{4, 4, 4, 4, 4, 4, 4, 4, 4};
 
   // Snitch cluster under test.
@@ -336,16 +336,16 @@ module occamy_cluster_wrapper (
     .ICacheLineCount (occamy_cluster_pkg::ICacheLineCount),
     .ICacheSets (occamy_cluster_pkg::ICacheSets),
     .RVE (9'b000000000),
-    .RVF (9'b111111111),
-    .RVD (9'b111111111),
+    .RVF (9'b011111111),
+    .RVD (9'b011111111),
     .XDivSqrt (9'b000000000),
     .XF16 (9'b000000000),
     .XF16ALT (9'b000000000),
     .XF8 (9'b000000000),
     .XFVEC (9'b000000000),
     .Xdma (9'b100000000),
-    .Xssr (9'b111111111),
-    .Xfrep (9'b111111111),
+    .Xssr (9'b011111111),
+    .Xfrep (9'b011111111),
     .FPUImplementation (occamy_cluster_pkg::FPUImplementation),
     .SnitchPMACfg (occamy_cluster_pkg::SnitchPMACfg),
     .NumIntOutstandingLoads (NumIntOutstandingLoads),
