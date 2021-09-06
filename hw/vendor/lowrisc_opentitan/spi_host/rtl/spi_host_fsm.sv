@@ -536,7 +536,7 @@ module spi_host_fsm
     end else begin
       unique case (cmd_speed)
         Standard: begin
-          sd_en_o[0]   = 1'b1;
+          sd_en_o[0]   = cmd_wr_en;
           sd_en_o[1]   = 1'b0;
           sd_en_o[3:2] = 2'b00;
         end
@@ -559,8 +559,8 @@ module spi_host_fsm
   // Assertions confirming valid user input.
   //
 
-  `ASSERT(BidirOnlyInStdMode_A, cmd_speed == Standard || !(cmd_rd_en && cmd_wr_en), clk_i, rst_ni)
-  `ASSERT(ValidSpeed_A, cmd_speed != RsvdSpd, clk_i, rst_ni)
-  `ASSERT(ValidCSID_A, csid < NumCS, clk_i, rst_ni)
+  `ASSERT(BidirOnlyInStdMode_A, $isunknown(rst_ni) || (cmd_speed == Standard || !(cmd_rd_en && cmd_wr_en)), clk_i, rst_ni)
+  `ASSERT(ValidSpeed_A, $isunknown(rst_ni) || (cmd_speed != RsvdSpd), clk_i, rst_ni)
+  `ASSERT(ValidCSID_A, $isunknown(rst_ni) || (csid < NumCS), clk_i, rst_ni)
 
 endmodule

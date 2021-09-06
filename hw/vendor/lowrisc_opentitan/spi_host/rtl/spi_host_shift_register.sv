@@ -52,10 +52,11 @@ module spi_host_shift_register (
   logic              rx_buf_valid_q;
   logic              rx_buf_valid_d;
 
-  `ASSERT(SpeedValid, speed_i != RsvdSpd, clk_i, rst_ni)
+  `ASSERT(SpeedValid, $isunknown(rst_ni) || (speed_i != RsvdSpd), clk_i, rst_ni)
 
   assign next_bits  = full_cyc_i ? sd_i : sd_i_q;
-  assign sr_shifted = (speed_i == Standard) ? {sr_q[6:0], next_bits[0]} :
+  // NB: In Standard mode, input data is sent on SI (Pin 1), *not* on SO (Pin 0)
+  assign sr_shifted = (speed_i == Standard) ? {sr_q[6:0], next_bits[1]} :
                       (speed_i == Dual)     ? {sr_q[5:0], next_bits[1:0]} :
                       (speed_i == Quad)     ? {sr_q[3:0], next_bits[3:0]} :
                       8'h00;
