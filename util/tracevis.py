@@ -28,8 +28,15 @@ except ImportError as e:
 
 
 # line format:
+# Snitch RTL simulation:
 # 101000 82      M         0x00001000 csrr    a0, mhartid     #; comment
 # time   cycle   priv_lvl  pc         insn
+# MemPool RTL simulation:
+# 101000 82      0x00001000 csrr    a0, mhartid     #; comment
+# time   cycle   pc         insn
+# Banshee traces:
+# 00000432 00000206 0005     800101e0  x15:00000064 x15=00000065 # addi    a5, a5, 1
+# cycle    instret  hard_id  pc        register                    insn
 
 # regex matches to groups
 # 0 -> time
@@ -38,7 +45,8 @@ except ImportError as e:
 # 3 -> pc (hex with 0x prefix)
 # 4 -> instruction
 # 5 -> args
-LINE_REGEX = r' *(\d+) +(\d+) +([3M1S0U]?) *(0x[0-9a-f]+) ([.\w]+) +(.+)#'
+RTL_REGEX = r' *(\d+) +(\d+) +([3M1S0U]?) *(0x[0-9a-f]+) ([.\w]+) +(.+)#'
+BANSHEE_REGEX = r' *(\d+) (\d+) (\d+) ([0-9a-f]+) *.+ +.+# ([\w\.]*)()'
 
 # regex matches a line of instruction retired by the accelerator
 # 2 -> privilege level
@@ -47,14 +55,11 @@ LINE_REGEX = r' *(\d+) +(\d+) +([3M1S0U]?) *(0x[0-9a-f]+) ([.\w]+) +(.+)#'
 # 5 -> args
 ACC_LINE_REGEX = r' +([3M1S0U]?) *(0x[0-9a-f]+) ([.\w]+) +(.+)#'
 
-re_line = re.compile(LINE_REGEX)
-re_acc_line = re.compile(ACC_LINE_REGEX)
-
 buf = []
 
 
 def flush(buf, hartid):
-    global output_file, use_time
+    global output_file
     # get function names
     pcs = [x[3] for x in buf]
     a2ls = os.popen(
@@ -88,6 +93,12 @@ def flush(buf, hartid):
         duration = next_time - time
         # print(f'"{label}" time {time} next: {next_time}'
         #       f' duration: {duration}', file=sys.stderr)
+        if banshee:
+            # Banshee stores all traces in a single file
+            hartid = priv
+            # In Banshee, each instruction takes one cycle
+            duration = 1
+
         pid = elf+':hartid'+str(hartid)
         funcname = func
 
@@ -137,6 +148,7 @@ def parse_line(line, hartid):
     return 0
 
 
+# Argument parsing
 parser = argparse.ArgumentParser('tracevis', allow_abbrev=True)
 parser.add_argument(
     'elf',
@@ -161,6 +173,10 @@ parser.add_argument(
     action='store_true',
     help='Use the traces time instead of cycles')
 parser.add_argument(
+    '--banshee',
+    action='store_true',
+    help='Parse Banshee traces')
+parser.add_argument(
     '-s',
     '--start',
     metavar='<trace>',
@@ -183,10 +199,19 @@ elf = args.elf
 traces = args.traces
 output = args.output
 use_time = args.time
+banshee = args.banshee
 
 print('elf', elf, file=sys.stderr)
 print('traces', traces, file=sys.stderr)
 print('output', output, file=sys.stderr)
+
+# Compile regex
+if banshee:
+    re_line = re.compile(BANSHEE_REGEX)
+else:
+    re_line = re.compile(RTL_REGEX)
+
+re_acc_line = re.compile(ACC_LINE_REGEX)
 
 with open(output, 'w') as output_file:
     # JSON header
