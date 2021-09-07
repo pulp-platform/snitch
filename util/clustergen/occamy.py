@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-from .cluster import Generator, PMA, PMACfg, SnitchCluster
+from .cluster import Generator, PMA, PMACfg, SnitchCluster, clog2
 
 
 class Occamy(Generator):
@@ -28,17 +28,19 @@ class Occamy(Generator):
 
         self.cluster.cfg['tie_ports'] = False
 
-        if "const_cache" in self.cfg["s1_quadrant"]:
-            const_cache = self.cfg["s1_quadrant"]["const_cache"]
-            self.cluster.add_mem(const_cache["count"],
-                                 const_cache["width"],
-                                 desc="const cache data",
+        if "ro_cache_cfg" in self.cfg["s1_quadrant"]:
+            ro_cache = self.cfg["s1_quadrant"]["ro_cache_cfg"]
+            ro_tag_width = self.cluster.cfg['addr_width'] - clog2(
+                ro_cache['width'] // 8) - clog2(ro_cache['count']) + 3
+            self.cluster.add_mem(ro_cache["count"],
+                                 ro_cache["width"],
+                                 desc="ro cache data",
                                  byte_enable=False,
                                  speed_optimized=True,
                                  density_optimized=True)
-            self.cluster.add_mem(const_cache["count"],
-                                 self.cluster.tag_width,
-                                 desc="const_cache tag",
+            self.cluster.add_mem(ro_cache["count"],
+                                 ro_tag_width,
+                                 desc="ro cache tag",
                                  byte_enable=False,
                                  speed_optimized=True,
                                  density_optimized=True)

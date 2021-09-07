@@ -39,6 +39,19 @@
         "words": 256
     },
     {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": true,
+        "description": [
+            "ro cache data"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 512,
+        "words": 256
+    },
+    {
         "byte_enable": true,
         "byte_width": 8,
         "density_optimized": false,
@@ -102,5 +115,18 @@
         "speed_optimized": true,
         "width": 256,
         "words": 128
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": true,
+        "description": [
+            "ro cache tag"
+        ],
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 37,
+        "words": 256
     }
 ]
