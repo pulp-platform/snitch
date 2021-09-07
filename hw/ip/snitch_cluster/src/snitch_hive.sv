@@ -49,32 +49,24 @@ module snitch_hive #(
   localparam int unsigned LogCoreCount = cf_math_pkg::idx_width(CoreCount);
   localparam int unsigned ExtendedIdWidth = IdWidth + LogCoreCount;
 
-  logic flush_valid, flush_ready;
-  always_comb begin
-    flush_valid = 0;
-    for (int i = 0; i < CoreCount; i++) begin
-      flush_valid |= hive_req_i[i].flush_i_valid;
-    end
-  end
-
-  for (genvar i = 0; i < CoreCount; i++) begin : gen_assign_flush_ready
-    assign hive_rsp_o[i].flush_i_ready = flush_ready;
-  end
-
   addr_t [CoreCount-1:0] inst_addr;
   logic [CoreCount-1:0] inst_cacheable;
   logic [CoreCount-1:0][31:0] inst_data;
   logic [CoreCount-1:0] inst_valid;
   logic [CoreCount-1:0] inst_ready;
   logic [CoreCount-1:0] inst_error;
+  logic [CoreCount-1:0] flush_valid;
+  logic [CoreCount-1:0] flush_ready;
 
   for (genvar i = 0; i < CoreCount; i++) begin : gen_unpack_icache
     assign inst_addr[i] = hive_req_i[i].inst_addr;
     assign inst_cacheable[i] = hive_req_i[i].inst_cacheable;
     assign inst_valid[i] = hive_req_i[i].inst_valid;
+    assign flush_valid[i] = hive_req_i[i].flush_i_valid;
     assign hive_rsp_o[i].inst_data = inst_data[i];
     assign hive_rsp_o[i].inst_ready = inst_ready[i];
     assign hive_rsp_o[i].inst_error = inst_error[i];
+    assign hive_rsp_o[i].flush_i_ready = flush_ready[i];
   end
 
   snitch_icache #(
@@ -99,8 +91,8 @@ module snitch_hive #(
     // TODO: Wire to socregs or similar
     .enable_prefetching_i ( 1'b1 ),
     .icache_events_o      (      ),
-    .flush_valid_i   ( flush_valid   ),
-    .flush_ready_o   ( flush_ready ),
+    .flush_valid_i    ( flush_valid    ),
+    .flush_ready_o    ( flush_ready    ),
 
     .inst_addr_i      ( inst_addr      ),
     .inst_cacheable_i ( inst_cacheable ),

@@ -50,8 +50,8 @@ module snitch_icache #(
     input  logic                               enable_prefetching_i,
     output snitch_icache_pkg::icache_events_t [NR_FETCH_PORTS-1:0] icache_events_o,
 
-    input  logic flush_valid_i,
-    output logic flush_ready_o,
+    input  logic [NR_FETCH_PORTS-1:0]               flush_valid_i,
+    output logic [NR_FETCH_PORTS-1:0]               flush_ready_o,
 
     input  logic [NR_FETCH_PORTS-1:0][FETCH_AW-1:0] inst_addr_i,
     output logic [NR_FETCH_PORTS-1:0][FETCH_DW-1:0] inst_data_o,
@@ -216,7 +216,7 @@ module snitch_icache #(
         ) i_snitch_icache_l0 (
             .clk_i ( clk_d2_i ),
             .rst_ni,
-            .flush_valid_i,
+            .flush_valid_i   ( flush_valid_i[i]       ),
             .enable_prefetching_i,
             .icache_events_o ( icache_events_o [i]    ),
             .in_addr_i       ( inst_addr_i    [i]     ),
@@ -376,32 +376,36 @@ module snitch_icache #(
     logic                        write_ready ;
 
     logic flush_valid, flush_ready;
+    logic flush_valid_lookup, flush_ready_lookup;
+
+    assign flush_ready_o = {CFG.NR_FETCH_PORTS{flush_ready}};
+    assign flush_valid = |flush_valid_i;
 
     // We need to propagate the handshake into the other
     // clock domain in case we operate w/ different clocks.
     if (ISO_CROSSING) begin : gen_flush_crossing
         isochronous_4phase_handshake
         i_isochronous_4phase_handshake (
-            .src_clk_i   ( clk_d2_i      ),
-            .src_rst_ni  ( rst_ni        ),
-            .src_valid_i ( flush_valid_i ),
-            .src_ready_o ( flush_ready_o ),
-            .dst_clk_i   ( clk_i         ),
-            .dst_rst_ni  ( rst_ni        ),
-            .dst_valid_o ( flush_valid   ),
-            .dst_ready_i ( flush_ready   )
+            .src_clk_i   ( clk_d2_i           ),
+            .src_rst_ni  ( rst_ni             ),
+            .src_valid_i ( flush_valid        ),
+            .src_ready_o ( flush_ready        ),
+            .dst_clk_i   ( clk_i              ),
+            .dst_rst_ni  ( rst_ni             ),
+            .dst_valid_o ( flush_valid_lookup ),
+            .dst_ready_i ( flush_ready_lookup )
         );
     end else begin : gen_no_flush_crossing
-        assign flush_valid = flush_valid_i;
-        assign flush_ready_o = flush_ready;
+        assign flush_valid_lookup = flush_valid;
+        assign flush_ready = flush_ready_lookup;
     end
 
     snitch_icache_lookup #(CFG) i_lookup (
         .clk_i,
         .rst_ni,
 
-        .flush_valid_i (flush_valid),
-        .flush_ready_o (flush_ready),
+        .flush_valid_i (flush_valid_lookup  ),
+        .flush_ready_o (flush_ready_lookup  ),
 
         .in_addr_i     ( prefetch_lookup_req.addr  ),
         .in_id_i       ( prefetch_lookup_req.id    ),
