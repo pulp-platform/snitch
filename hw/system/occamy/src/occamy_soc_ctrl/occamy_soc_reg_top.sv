@@ -4291,7 +4291,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_end_addr_high_0_quadrant_0 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4345,7 +4345,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_start_addr_high_1_quadrant_0 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4399,7 +4399,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h2)
   ) u_ro_end_addr_high_1_quadrant_0 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4507,7 +4507,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_end_addr_high_0_quadrant_1 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4561,7 +4561,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_start_addr_high_1_quadrant_1 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4615,7 +4615,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h2)
   ) u_ro_end_addr_high_1_quadrant_1 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4723,7 +4723,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_end_addr_high_0_quadrant_2 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4777,7 +4777,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_start_addr_high_1_quadrant_2 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4831,7 +4831,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h2)
   ) u_ro_end_addr_high_1_quadrant_2 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4939,7 +4939,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_end_addr_high_0_quadrant_3 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4993,7 +4993,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_start_addr_high_1_quadrant_3 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5047,7 +5047,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h2)
   ) u_ro_end_addr_high_1_quadrant_3 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5155,7 +5155,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_end_addr_high_0_quadrant_4 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5209,7 +5209,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_start_addr_high_1_quadrant_4 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5263,7 +5263,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h2)
   ) u_ro_end_addr_high_1_quadrant_4 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5371,7 +5371,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_end_addr_high_0_quadrant_5 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5425,7 +5425,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_start_addr_high_1_quadrant_5 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5479,7 +5479,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h2)
   ) u_ro_end_addr_high_1_quadrant_5 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5587,7 +5587,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_end_addr_high_0_quadrant_6 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5641,7 +5641,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_start_addr_high_1_quadrant_6 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5695,7 +5695,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h2)
   ) u_ro_end_addr_high_1_quadrant_6 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5803,7 +5803,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_end_addr_high_0_quadrant_7 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5857,7 +5857,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h1)
   ) u_ro_start_addr_high_1_quadrant_7 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5911,7 +5911,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (16),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (16'h2)
   ) u_ro_end_addr_high_1_quadrant_7 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),

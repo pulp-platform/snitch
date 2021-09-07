@@ -210,9 +210,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_0_QUADRANT_0",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 0
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -232,9 +233,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_0_QUADRANT_0",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -254,9 +256,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_1_QUADRANT_0",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -276,9 +279,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_1_QUADRANT_0",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 2
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -298,9 +302,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_0_QUADRANT_1",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 0
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -320,9 +325,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_0_QUADRANT_1",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -342,9 +348,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_1_QUADRANT_1",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -364,9 +371,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_1_QUADRANT_1",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 2
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -386,9 +394,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_0_QUADRANT_2",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 0
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -408,9 +417,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_0_QUADRANT_2",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -430,9 +440,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_1_QUADRANT_2",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -452,9 +463,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_1_QUADRANT_2",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 2
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -474,9 +486,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_0_QUADRANT_3",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 0
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -496,9 +509,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_0_QUADRANT_3",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -518,9 +532,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_1_QUADRANT_3",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -540,9 +555,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_1_QUADRANT_3",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 2
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -562,9 +578,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_0_QUADRANT_4",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 0
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -584,9 +601,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_0_QUADRANT_4",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -606,9 +624,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_1_QUADRANT_4",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -628,9 +647,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_1_QUADRANT_4",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 2
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -650,9 +670,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_0_QUADRANT_5",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 0
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -672,9 +693,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_0_QUADRANT_5",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -694,9 +716,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_1_QUADRANT_5",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -716,9 +739,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_1_QUADRANT_5",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 2
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -738,9 +762,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_0_QUADRANT_6",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 0
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -760,9 +785,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_0_QUADRANT_6",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -782,9 +808,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_1_QUADRANT_6",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -804,9 +831,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_1_QUADRANT_6",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 2
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -826,9 +854,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_0_QUADRANT_7",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 0
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -848,9 +877,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_0_QUADRANT_7",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -870,9 +900,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_1_QUADRANT_7",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 1
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
@@ -892,9 +923,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_1_QUADRANT_7",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: 2
       fields: [
         { bits: "15:0"
         name: "ADDR_HIGH"
