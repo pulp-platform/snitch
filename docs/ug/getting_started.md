@@ -36,11 +36,16 @@ This will take you through the necessary steps to get a sample program running o
     less trace_hart_00000000.txt
     ```
     Optionally you can inspect the dumped waveforms (`snitch_cluster.vcd`).
-7. Visualize the traces with the `util/tracevis.py` script.
+7. Visualize the traces with the `util/trace/tracevis.py` script.
     ```
-    ./util/tracevis.py -o trace.json sw/build/benchmark/benchmark-matmul-all hw/system/snitch_cluster/logs/trace_hart_*.txt
+    ./util/trace/tracevis.py -o trace.json sw/build/benchmark/benchmark-matmul-all hw/system/snitch_cluster/logs/trace_hart_*.txt
     ```
     The generated JSON file can be visualized with [Trace-Viewer](https://github.com/catapult-project/catapult/tree/master/tracing), or by loading it into Chrome's `about:tracing`. You can check out an example trace [here](../example_trace.html).
+8. Annotate the traces with the `util/trace/annotate.py` script.
+    ```
+    ./util/trace/annotate.py -o annotated.s sw/build/benchmark/benchmark-matmul-all hw/system/snitch_cluster/logs/trace_hart_00001.txt
+    ```
+    The generated `annotated.s` interleaves source code with retired instructions.
 
 ## Prerequisites
 
