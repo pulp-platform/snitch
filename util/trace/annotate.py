@@ -117,7 +117,7 @@ with open(trace, 'r') as f:
             try:
                 src_files[src_fname] = [x.strip()
                                         for x in open(src_fname, 'r').readlines()]
-            except OSError as e:
+            except OSError:
                 src_files[src_fname] = None
         if src_files[src_fname] is not None:
             srf_f_line = int(files_abs[0].split(':')[-1])
