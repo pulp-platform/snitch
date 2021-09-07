@@ -56,7 +56,8 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   // Derive intersection-related configuration from SSR configurations.
   // This will *not* validate the configuration (see assertions below).
   function automatic isect_cfg_t derive_isect_cfg();
-    automatic isect_cfg_t ret = '0;
+    // Ensure nonzero width parameters to keep derived types sane.
+    automatic isect_cfg_t ret = '{IndexWidth: 1, default: '0};
     for (int i = 0; i < NumSsrs; i++) begin
       if (SsrCfgs[i].IsectMaster) begin
         automatic int unsigned DataBufDepth =
