@@ -114,12 +114,15 @@ with open(trace, 'r') as f:
         # Get source of last file and print the line
         src_fname = files_abs[0].split(':')[0]
         if src_fname not in src_files.keys():
-            src_files[src_fname] = [x.strip() for x in open(src_fname, 'r').readlines()]
-        srf_f_line = int(files_abs[0].split(':')[-1])
-        src_line = src_files[src_fname][srf_f_line-1]
-
-        # print(src_files[src_fname][0])
-        annot = f'{annot}\n;  {src_line}'
+            try:
+                src_files[src_fname] = [x.strip()
+                                        for x in open(src_fname, 'r').readlines()]
+            except OSError as e:
+                src_files[src_fname] = None
+        if src_files[src_fname] is not None:
+            srf_f_line = int(files_abs[0].split(':')[-1])
+            src_line = src_files[src_fname][srf_f_line-1]
+            annot = f'{annot}\n;  {src_line}'
 
         if len(annot) and annot != last:
             of.write(annot+'\n')
