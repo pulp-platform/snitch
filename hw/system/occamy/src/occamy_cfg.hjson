@@ -112,8 +112,19 @@
         ],
     },
     dma_core_template: {
-        isa: "rv32imafd",
+        isa: "rv32ima",
+        // Xdiv_sqrt: true,
+        # isa: "rv32ema",
         xdma: true
+        xssr: false
+        xfrep: false
+        num_int_outstanding_loads: 1,
+        num_int_outstanding_mem: 4,
+        num_fp_outstanding_loads: 4,
+        num_fp_outstanding_mem: 4,
+        num_sequencer_instructions: 16,
+        num_dtlb_entries: 1,
+        num_itlb_entries: 1,
     }
     // peripherals
     clint: {
