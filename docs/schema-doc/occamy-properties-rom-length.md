@@ -1,7 +1,7 @@
 # Untitled number in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/rom/length
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/rom/length
 ```
 
 Total size of ROM in bytes.

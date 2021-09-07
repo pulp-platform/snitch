@@ -1,7 +1,7 @@
 # Untitled number in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/length
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/length
 ```
 
 Size of SPM based on the address range. The full address range will be mapped to SPM.

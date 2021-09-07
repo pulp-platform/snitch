@@ -98,7 +98,7 @@ jobs:
     - run: pip install -r python-requirements.txt
     - name: Re-generate documentation and diff
       run: |
-        cd docs/ && jsonschema2md -d schema/ --out schema-doc -x schema-doc -n
+        cd docs/ && rm -r schema-doc && jsonschema2md -d schema/ --out schema-doc -x schema-doc -n
         ../util/git-diff.py --error-msg "::error ::Found stale documentation, please re-generate schema doc."
 
   #################

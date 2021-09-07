@@ -1,7 +1,7 @@
 # Untitled undefined type in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/rom/default
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/rom/default
 ```
 
 

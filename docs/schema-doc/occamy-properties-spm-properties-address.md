@@ -1,7 +1,7 @@
 # Untitled number in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/snitch_cluster_tb.schema.json#/properties/spm/properties/address
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/address
 ```
 
 Start address of SPM (Scratchpad Memory).
