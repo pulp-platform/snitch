@@ -11,5 +11,6 @@ hjson
 jsonref
 jsonschema
 mako
+progressbar2
 tabulate
 yamlfmt
