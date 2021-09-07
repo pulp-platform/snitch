@@ -46,6 +46,9 @@ jobs:
         toolchain:
         - gcc
         - llvm
+        cmake_args:
+        - ""
+        - -DOMPSTATIC_NUMTHREADS=8
     name: SW on Banshee
     steps:
     - uses: actions/checkout@v2
@@ -82,14 +85,14 @@ jobs:
     - name: Build runtime
       working-directory: sw/snRuntime
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON .. && make
+        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test snRuntime
       working-directory: sw/snRuntime/build
       run: make test
     - name: Build snBLAS
       working-directory: sw/snBLAS
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON .. && make
+        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
       run: make test
@@ -106,6 +109,9 @@ jobs:
         toolchain:
         - gcc
         - llvm
+        cmake_args:
+        - ""
+        - -DOMPSTATIC_NUMTHREADS=8
     name: SW on Banshee (Container)
     steps:
     - uses: actions/checkout@v2
@@ -137,6 +143,9 @@ jobs:
         toolchain:
         - gcc
         - llvm
+        cmake_args:
+        - ""
+        - -DOMPSTATIC_NUMTHREADS=8
     steps:
     - uses: actions/checkout@v2
     - name: Build Hardware
