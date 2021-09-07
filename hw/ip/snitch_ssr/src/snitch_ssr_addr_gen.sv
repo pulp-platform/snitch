@@ -95,15 +95,15 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   pointer_t mem_pointer;
   logic mem_last, mem_kill, mem_ptr_hs;
 
-  if (Cfg.Indirection) begin : gen_indirection
+  // Type for output spill register
+  typedef struct packed {
+    pointer_t pointer;
+    logic     last;
+    logic     zero;
+    logic     kill;
+  } out_spill_t;
 
-    // Type for output spill register
-    typedef struct packed {
-      pointer_t pointer;
-      logic     last;
-      logic     zero;
-      logic     kill;
-    } out_spill_t;
+  if (Cfg.Indirection) begin : gen_indirection
 
     // Interface between natural iterator 0 and indirector
     logic natit_base_last_d, natit_base_last_q;
