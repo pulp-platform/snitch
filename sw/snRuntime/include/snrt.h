@@ -205,6 +205,7 @@ static inline uint32_t snrt_interrupt_cause(void) {
 extern void snrt_int_sw_clear(uint32_t hartid);
 extern void snrt_int_sw_set(uint32_t hartid);
 uint32_t snrt_int_sw_get(uint32_t hartid);
+void snrt_int_clint_set(uint32_t reg_off, uint32_t mask);
 
 /**
  * @brief Put the hart into wait for interrupt state

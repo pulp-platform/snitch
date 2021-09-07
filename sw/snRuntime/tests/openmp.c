@@ -78,6 +78,6 @@ int main() {
     err |= paralell_section() << 1;
 
     // exit
-    eu_exit(core_idx);
+    eu_exit(eu_p, core_idx);
     return err;
 }

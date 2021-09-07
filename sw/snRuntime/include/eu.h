@@ -8,24 +8,40 @@
 
 #include "snrt.h"
 
+typedef struct {
+    uint32_t workers_in_loop;
+    uint32_t exit_flag;
+    uint32_t workers_mutex;
+    uint32_t workers_wfi;
+    struct {
+        void (*fn)(void *, uint32_t);  // points to microtask wrapper
+        void *data;
+        uint32_t argc;
+        uint32_t nthreads;
+        uint32_t fini_count;
+    } e;
+} eu_t;
+extern __thread eu_t *eu_p;
+
 /**
  * @brief Initialize the event unit
- * @details
+ *
+ * @return eu_t* pointer to initialized event unit struct
  */
-void eu_init(void);
+eu_t *eu_init(void);
 
 /**
  * @brief send all workers in loop to exit()
  * @param core_idx cluster-local core index
  */
-void eu_exit(uint32_t core_idx);
+void eu_exit(eu_t *_this, uint32_t core_idx);
 
 /**
  * @brief Enter the event unit loop, never exits
  *
  * @param core_idx cluster-local core index
  */
-void eu_event_loop(uint32_t core_idx);
+void eu_event_loop(eu_t *_this, uint32_t core_idx);
 
 /**
  * @brief Set function to execute by `nthreads` number of threads
@@ -36,35 +52,35 @@ void eu_event_loop(uint32_t core_idx);
  * @param argc number of elements in data
  * @param nthreads number of threads that have to execute this event
  */
-int eu_dispatch_push(void (*fn)(void *, uint32_t), uint32_t argc, void *data,
-                     uint32_t nthreads);
+int eu_dispatch_push(eu_t *_this, void (*fn)(void *, uint32_t), uint32_t argc,
+                     void *data, uint32_t nthreads);
 
 /**
  * @brief wait for all workers to idle
  * @param core_idx cluster-local core index
  */
-void eu_run_empty(uint32_t core_idx);
+void eu_run_empty(eu_t *_this, uint32_t core_idx);
 
 /**
  * @brief Debugging info to printf
  * @details
  */
-void eu_print_status(void);
+void eu_print_status(eu_t *_this);
 
 /**
  * @brief Acquires the event unit mutex, exits only on success
  */
-void eu_mutex_lock(void);
+void eu_mutex_lock(eu_t *_this);
 
 /**
  * @brief Releases the acquired mutex
  */
-void eu_mutex_release(void);
+void eu_mutex_release(eu_t *_this);
 
 /**
  * Getters
  */
-uint32_t eu_get_workers_in_loop();
+uint32_t eu_get_workers_in_loop(eu_t *_this);
 
 ////////////////////////////////////////////////////////////////////////////////
 // debug

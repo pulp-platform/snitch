@@ -85,7 +85,7 @@ parallelRegionExec(int32_t argc, void *data, void (*fn)(void *, uint32_t),
     // pulp_timer_t start_time, stop_time;
 
     // Now that the team is ready, wake up slaves
-    (void)eu_dispatch_push(fn, argc, data, num_threads);
+    (void)eu_dispatch_push(eu_p, fn, argc, data, num_threads);
 
     // Team execution
     // perfParallelEnter();
@@ -96,7 +96,7 @@ parallelRegionExec(int32_t argc, void *data, void (*fn)(void *, uint32_t),
     // start_time = pulp_get_timer();
     // reset_peripheral_counters();
     // start_peripheral_counters();
-    eu_run_empty(snrt_cluster_core_idx());
+    eu_run_empty(eu_p, snrt_cluster_core_idx());
     // stop_time = pulp_get_timer();
     // stop_peripheral_counters();
     // OMP_PRINTF(0, "cycles=%d\n",stop_time-start_time);

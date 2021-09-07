@@ -85,13 +85,6 @@ void snrt_int_sw_set(uint32_t hartid) {
 
 /**
  * @brief Read SW interrupt for hartid in CLINT
- * @details
- *
- * @param hartid Target interrupt to set
- */
-
-/**
- * @brief Read SW interrupt for hartid in CLINT
  *
  * @param hartid hartid to poll for interrupt flag
  * @return uint32_t 0 if no SW interrupt is pending, 1 otherwise
@@ -99,6 +92,19 @@ void snrt_int_sw_set(uint32_t hartid) {
 uint32_t snrt_int_sw_get(uint32_t hartid) {
     snrt_mutex_lock(&clint_mutex);
     uint32_t ret = *(clint_p + ((hartid & ~0x1f) >> 5)) >> (hartid & 0x1f);
+    snrt_mutex_release(&clint_mutex);
+}
+
+/**
+ * @brief Set a `mask` of bits in the CLINT register `reg_off` (word offset).
+ * This can be used to send interrupts to a set of cores
+ *
+ * @param reg_off CLINT register offset in word (=byte_off/4)
+ * @param mask bit mask to set
+ */
+void snrt_int_clint_set(uint32_t reg_off, uint32_t mask) {
+    snrt_mutex_lock(&clint_mutex);
+    *(clint_p + reg_off) |= mask;
     snrt_mutex_release(&clint_mutex);
 }
 

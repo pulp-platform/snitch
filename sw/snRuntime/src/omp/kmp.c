@@ -220,7 +220,7 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
         /// this thread woul re-enter the event queue, run the newly dispatched
         /// thread and then return to this thread. If this is not done, the
         /// nested parallelism is not executed in the correct order
-        (void)eu_dispatch_push(__microtask_wrapper, argc, args,
+        (void)eu_dispatch_push(eu_p, __microtask_wrapper, argc, args,
                                omp->numThreads);
     } else {
         parallelRegion(argc, args, __microtask_wrapper, omp->numThreads);
@@ -423,7 +423,7 @@ void __kmpc_dispatch_init_4(ident_t *loc, kmp_int32 gtid,
     omp_team_t *team = omp_get_team(omp_getData());
     // dynLoopInitNoIter(team, lb, ub, st, chunk);
     // int core_id = omp_get_thread_num();
-    eu_mutex_lock();
+    eu_mutex_lock(eu_p);
     // if (team->loop_epoch - team->core_epoch[core_id] != 0)
     // {
     //   eu_mutex_release();
@@ -444,7 +444,7 @@ void __kmpc_dispatch_init_4(ident_t *loc, kmp_int32 gtid,
             team->loop_start, team->loop_end, team->loop_incr,
             team->loop_chunk);
     }
-    eu_mutex_release();
+    eu_mutex_release(eu_p);
 }
 
 /*!
@@ -482,7 +482,7 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
     *p_st = 1;
 
     // int result = dynLoopIter(team, (int*) p_lb, (int*) p_ub, (int*) p_last);
-    eu_mutex_lock();
+    eu_mutex_lock(eu_p);
 
     // have already iterated over all the iterations(no more work), return 0
     if (team->loop_start > team->loop_end) {
@@ -490,7 +490,7 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
         KMP_PRINTF(
             10, "__kmpc_dispatch_next_4 start > end: team->loop_is_setup %d\n",
             team->loop_is_setup);
-        eu_mutex_release();
+        eu_mutex_release(eu_p);
         return 0;
     }
 
@@ -506,7 +506,7 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
                "__kmpc_dispatch_next_4 : last: %d [l %4d u %4d s %4d] "
                "team->loop_start %d\n",
                *p_last, *p_lb, *p_ub, *p_st, team->loop_start);
-    eu_mutex_release();
+    eu_mutex_release(eu_p);
     return 1;
 }
 
