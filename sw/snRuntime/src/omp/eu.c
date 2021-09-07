@@ -21,11 +21,13 @@ volatile event_t evt;
 volatile static uint32_t workers_in_loop;
 static uint32_t exit_flag;
 static volatile uint32_t workers_mutex;
+static volatile uint32_t workers_wfi;
 
 void eu_init(void) {
     workers_mutex = 0;
     workers_in_loop = 0;
     exit_flag = 0;
+    workers_wfi = 0;
 }
 
 /**
@@ -92,13 +94,14 @@ void eu_event_loop(uint32_t core_idx) {
             evt.fn(evt.data, evt.argc);
             __atomic_add_fetch(&evt.fini_count, 1, __ATOMIC_RELAXED);
             // explicit barrier
-            do {
-                scratch = __atomic_load_n(&evt.fini_count, __ATOMIC_RELAXED);
-            } while (evt.fini_count != nthds);
+            while (__atomic_load_n(&evt.fini_count, __ATOMIC_RELAXED) != nthds)
+                ;
         } else {
             // enter wait for interrupt
             do {
+                __atomic_add_fetch(&workers_wfi, 1, __ATOMIC_RELAXED);
                 sntr_wfi();
+                __atomic_add_fetch(&workers_wfi, -1, __ATOMIC_RELAXED);
             } while (
                 !snrt_int_sw_get(snrt_global_core_base_hartid() + core_idx));
             snrt_int_sw_clear(snrt_global_core_base_hartid() + core_idx);
@@ -153,12 +156,16 @@ void eu_run_empty(uint32_t core_idx) {
     }
 
     // wait for queue to be empty
-    do {
-        nfini = __atomic_load_n(&evt.fini_count, __ATOMIC_RELAXED);
-    } while (nfini != evt.nthreads - 1);
+    while (__atomic_load_n(&evt.fini_count, __ATOMIC_RELAXED) !=
+           evt.nthreads - 1)
+        ;
     // stop workers from re-executing the task
     evt.nthreads = 0;
     __atomic_add_fetch(&evt.fini_count, 1, __ATOMIC_RELAXED);
+
+    // wait for all workers to be in wfi
+    while (__atomic_load_n(&workers_wfi, __ATOMIC_RELAXED) != workers_in_loop)
+        ;
 
     EU_PRINTF(10, "eu_run_empty exit\n");
 }
