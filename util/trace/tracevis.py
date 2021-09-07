@@ -274,4 +274,3 @@ with open(output, 'w') as output_file:
 
     # JSON footer
     output_file.write(r'{}]}''\n')
-print(f'diffs: {diffs}')
