@@ -16,6 +16,7 @@
 import re
 import os
 import sys
+from functools import lru_cache
 import argparse
 
 has_progressbar = True
@@ -58,12 +59,24 @@ ACC_LINE_REGEX = r' +([3M1S0U]?) *(0x[0-9a-f]+) ([.\w]+) +(.+)#'
 buf = []
 
 
+@lru_cache(maxsize=1024)
+def addr2line_cache(addr):
+    cmd = f'{addr2line} -e {elf} -f -a -i {addr:x}'
+    return os.popen(cmd).read().split('\n')
+
+
 def flush(buf, hartid):
     global output_file
     # get function names
     pcs = [x[3] for x in buf]
-    a2ls = os.popen(
-        f'{addr2line} -e {elf} -f -a -i {" ".join(pcs)}').read().split('\n')[:-1]
+    a2ls = []
+
+    if cache:
+        for addr in pcs:
+            a2ls += addr2line_cache(int(addr, base=16))[:-1]
+    else:
+        a2ls = os.popen(
+            f'{addr2line} -e {elf} -f -a -i {" ".join(pcs)}').read().split('\n')[:-1]
 
     for i in range(len(buf)-1):
         (time, cyc, priv, pc, instr, args) = buf.pop(0)
@@ -154,6 +167,8 @@ parser.add_argument(
     'elf',
     metavar='<elf>',
     help='The binary executed to generate the traces',
+
+
 )
 parser.add_argument(
     'traces',
@@ -179,9 +194,14 @@ parser.add_argument(
     action='store_true',
     help='Use the traces time instead of cycles')
 parser.add_argument(
+    '-b',
     '--banshee',
     action='store_true',
     help='Parse Banshee traces')
+parser.add_argument(
+    '--no-cache',
+    action='store_true',
+    help='Disable addr2line caching (slow but might give better traces in some cases)')
 parser.add_argument(
     '-s',
     '--start',
@@ -207,11 +227,13 @@ output = args.output
 use_time = args.time
 banshee = args.banshee
 addr2line = args.addr2line
+cache = not args.no_cache
 
 print('elf:', elf, file=sys.stderr)
 print('traces:', traces, file=sys.stderr)
 print('output:', output, file=sys.stderr)
 print('addr2line:', addr2line, file=sys.stderr)
+print('cache:', cache, file=sys.stderr)
 
 # Compile regex
 if banshee:
@@ -252,3 +274,4 @@ with open(output, 'w') as output_file:
 
     # JSON footer
     output_file.write(r'{}]}''\n')
+print(f'diffs: {diffs}')
