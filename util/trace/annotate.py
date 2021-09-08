@@ -15,6 +15,7 @@
 
 import sys
 import os
+import re
 from functools import lru_cache
 import argparse
 
@@ -77,6 +78,7 @@ print(f' annotating: {output}    ', end='')
 
 # buffer source files
 src_files = {}
+trace_start_col = -1
 
 
 @lru_cache(maxsize=1024)
@@ -95,11 +97,17 @@ with open(trace, 'r') as f:
     last_prog = 0
     for lino, line in enumerate(f.readlines()):
 
-        addr = int(line.split(' ')[3], base=16)
-        addr_hex = f'{addr:x}'
-        cmd = f'llvm-addr2line -e {elf} -f -i {addr_hex}'
+        # RTL traces might not contain a PC on each line
+        try:
+            addr_str = re.split(r" +", line.strip())[3]
+            addr = int(addr_str, base=16)
+            if trace_start_col < 0:
+                trace_start_col = line.find(addr_str)
+        except:
+            of.write(f'      {line[trace_start_col:]}')
+            continue
 
-        # ret = os.popen(cmd).read().split('\n')
+        addr_hex = f'{addr:x}'
         ret = adr2line(addr)
 
         funs = ret[::2]
@@ -126,7 +134,7 @@ with open(trace, 'r') as f:
 
         if len(annot) and annot != last:
             of.write(annot+'\n')
-        of.write(f'      {line[line.find(addr_hex):]}')
+        of.write(f'      {line[trace_start_col:]}')
         last = annot
 
         # very simple progress
