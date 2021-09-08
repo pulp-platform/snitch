@@ -64,7 +64,6 @@ set(sources
     src/ssr.c
     src/alloc.c
     src/interrupt.c
-    src/dm.c
 )
 
 # Sources only compatible with the LLVM toolchain
@@ -133,7 +132,6 @@ add_snitch_test(varargs_2 tests/varargs_2.c)
 add_snitch_test(barrier tests/barrier.c)
 add_snitch_test(lto tests/lto.c tests/lto_a.c)
 add_snitch_test(interrupt tests/interrupt.c)
-add_snitch_test(data_mover tests/data_mover.c)
 
 add_snitch_test_executable(dma_simple tests/dma_simple.c)
 add_snitch_test_executable(printf_simple tests/printf_simple.c)
@@ -151,8 +149,10 @@ add_snitch_test_executable(team_global tests/team_global.c)
 add_snitch_test_rtl(team_global)
 add_snitch_test_args(team_global team_global --base-hartid=3 --num-cores=4 --num-clusters=2)
 
-# OpenMP tests are currently targeted at single-cluster systems with 8+1 cores
+# Tests exclusive to LLVM
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    add_snitch_test(data_mover tests/data_mover.c)
+
     add_snitch_test_executable(event_unit tests/event_unit.c)
     add_snitch_test_rtl(event_unit)
     add_snitch_test_args(event_unit event_unit --base-hartid=3 --num-cores=9 --num-clusters=1)
