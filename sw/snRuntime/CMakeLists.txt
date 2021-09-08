@@ -16,9 +16,9 @@ else()
     # Export package information to includer.
     set(SNRUNTIME_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
     set(SNRUNTIME_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-    set(SNRUNTIME_INCLUDE_DIRS 
-        ${CMAKE_CURRENT_SOURCE_DIR}/include 
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor 
+    set(SNRUNTIME_INCLUDE_DIRS
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/riscv-opcodes
         PARENT_SCOPE)
 endif()
@@ -104,6 +104,7 @@ add_snitch_test(simple tests/simple.c)
 add_snitch_test(varargs_1 tests/varargs_1.c)
 add_snitch_test(varargs_2 tests/varargs_2.c)
 add_snitch_test(barrier tests/barrier.c)
+add_snitch_test(fence_i tests/fence_i.c)
 add_snitch_test(lto tests/lto.c tests/lto_a.c)
 add_snitch_test(interrupt tests/interrupt.c)
 
