@@ -30,6 +30,7 @@ int main() {
                 *(long *)(SPL_DEST + i) = *(long *)(SPL_SRC + i);
             }
             __asm__ volatile(
+                "fence.i;"
                 "csrr a0, mhartid;"
                 "la a1, device_tree;"
                 "jr %0;" ::"r"(SPL_DEST));

@@ -13,7 +13,6 @@ dependencies:
 
 sources:
   - defines:
-      WT_DCACHE: 1
     files:
     # Packages
     - include/riscv_pkg.sv

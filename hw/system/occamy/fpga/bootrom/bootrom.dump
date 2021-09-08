@@ -1550,8 +1550,9 @@ Disassembly of section .text.startup:
  1000dc4:	00c6b023          	sd	a2,0(a3)
  1000dc8:	fee798e3          	bne	a5,a4,1000db8 <main+0x40>
  1000dcc:	700007b7          	lui	a5,0x70000
- 1000dd0:	f1402573          	csrr	a0,mhartid
- 1000dd4:	fffff597          	auipc	a1,0xfffff
- 1000dd8:	25c58593          	addi	a1,a1,604 # 1000030 <device_tree>
- 1000ddc:	00078067          	jr	a5 # 70000000 <bin_to_hex_table+0x6efff1e0>
- 1000de0:	0000006f          	j	1000de0 <main+0x68>
+ 1000dd0:	0000100f          	fence.i
+ 1000dd4:	f1402573          	csrr	a0,mhartid
+ 1000dd8:	fffff597          	auipc	a1,0xfffff
+ 1000ddc:	25858593          	addi	a1,a1,600 # 1000030 <device_tree>
+ 1000de0:	00078067          	jr	a5 # 70000000 <bin_to_hex_table+0x6efff1e0>
+ 1000de4:	0000006f          	j	1000de4 <main+0x6c>

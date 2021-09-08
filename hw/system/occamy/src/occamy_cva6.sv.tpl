@@ -72,6 +72,9 @@ module occamy_cva6 import occamy_pkg::*; (
     .AxiDataWidth (${soc_narrow_xbar.in_cva6.dw}),
     .AxiIdWidth (${soc_narrow_xbar.in_cva6.iw}),
     .AxiUserWidth (${soc_narrow_xbar.in_cva6.uw + 1}),
+    .axi_ar_chan_t(${soc_narrow_xbar.in_cva6.ar_chan_type()}),
+    .axi_aw_chan_t(${soc_narrow_xbar.in_cva6.aw_chan_type()}),
+    .axi_w_chan_t(${soc_narrow_xbar.in_cva6.w_chan_type()}),
     .axi_req_t (${soc_narrow_xbar.in_cva6.req_type()}),
     .axi_rsp_t (${soc_narrow_xbar.in_cva6.rsp_type()})
   ) i_cva6 (
