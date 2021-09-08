@@ -251,6 +251,13 @@ static inline void snrt_mutex_release(volatile uint32_t *pmtx) {
 #define __snrt_omp_bootstrap(core_idx) \
     if (snrt_omp_bootstrap(core_idx)) return 0
 
+/**
+ * @brief Destroy an OpenMP session so all cores exit cleanly
+ */
+#define __snrt_omp_destroy(core_idx) \
+    eu_exit(core_idx);               \
+    dm_exit();
+
 #ifdef __cplusplus
 }
 #endif

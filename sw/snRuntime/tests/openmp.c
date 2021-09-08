@@ -55,14 +55,15 @@ unsigned __attribute__((noinline)) static_schedule(void) {
 
 unsigned __attribute__((noinline)) paralell_section(void) {
     unsigned tx = read_csr(minstret);
+    static volatile uint32_t sum = 0;
 
 // the following code is executed by all harts
 #pragma omp parallel
     {
         tx = read_csr(minstret) - tx;
-        // tprintf("fork oh: %d\n", tx);
+        __atomic_add_fetch(&sum, 10, __ATOMIC_RELAXED);
     }
-    return 0;
+    return sum != 8 * 10;
 }
 
 int main() {
@@ -78,6 +79,6 @@ int main() {
     err |= paralell_section() << 1;
 
     // exit
-    eu_exit(core_idx);
+    __snrt_omp_destroy(core_idx);
     return err;
 }

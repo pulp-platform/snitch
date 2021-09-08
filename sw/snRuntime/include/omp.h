@@ -32,9 +32,9 @@ typedef struct {
 } omp_t;
 
 #ifndef OMP_STATIC
-extern omp_t ompData;
+extern __thread omp_t volatile *omp_p;
 #else
-extern const omp_t ompData;
+extern const omp_t omp_p;
 #endif
 
 //================================================================================
@@ -46,7 +46,13 @@ unsigned snrt_omp_bootstrap(uint32_t core_idx);
 void partialParallelRegion(int32_t argc, void *data,
                            void (*fn)(void *, uint32_t), int num_threads);
 
-static inline omp_t *omp_getData() { return &ompData; }
+static inline omp_t *omp_getData() {
+#ifndef OMP_STATIC
+    return omp_p;
+#else
+    return &omp_p;
+#endif
+}
 
 //================================================================================
 // debug
