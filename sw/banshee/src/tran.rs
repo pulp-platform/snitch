@@ -1700,6 +1700,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12RdRs1::Lw => self.emit_load(rs1, imm, 2, true),
             riscv::OpcodeImm12RdRs1::Lbu => self.emit_load(rs1, imm, 0, false),
             riscv::OpcodeImm12RdRs1::Lhu => self.emit_load(rs1, imm, 1, false),
+            riscv::OpcodeImm12RdRs1::FenceI => return Ok(()), /* NOP */
             riscv::OpcodeImm12RdRs1::Csrrw
             | riscv::OpcodeImm12RdRs1::Csrrs
             | riscv::OpcodeImm12RdRs1::Csrrc
