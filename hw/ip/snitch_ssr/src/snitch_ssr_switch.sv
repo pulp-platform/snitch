@@ -10,13 +10,11 @@ module snitch_ssr_switch #(
   parameter int unsigned NumSsrs    = 0,
   parameter int unsigned RPorts     = 0,
   parameter int unsigned WPorts     = 0,
-  parameter logic [NumSsrs:0][4:0] SsrRegs = '0,
+  parameter logic [NumSsrs-1:0][4:0] SsrRegs = '0,
   /// Derived parameter *Do not override*
   parameter int unsigned Ports = RPorts + WPorts,
   parameter type data_t = logic [DataWidth-1:0]
 ) (
-  input  logic             clk_i,
-  input  logic             rst_ni,
   // Read and write streams coming from the processor.
   input  logic  [RPorts-1:0][4:0] ssr_raddr_i,
   output data_t [RPorts-1:0]      ssr_rdata_o,

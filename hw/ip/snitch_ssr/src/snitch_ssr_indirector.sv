@@ -120,7 +120,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
         strb: idx_strb_q, data: idx_data_q, amo: reqrsp_pkg::AMONone, default: '0};
 
     // Write index word when it is complete or when done is popped
-    assign idx_req_o.q_valid = idx_word_valid_q | idx_done_set;
+    assign idx_req_o.q_valid = idx_word_valid_q;
 
     // Draw new index data address on each write request
     assign natit_ready_o = idx_req_o.q_valid & idx_rsp_i.q_ready;
@@ -178,7 +178,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
     `FFLARN(idx_data_q, idx_data_d, idx_bytecnt_ena,  1'b0, clk_i, rst_ni)
     `FFLARN(idx_strb_q, idx_strb_d, idx_bytecnt_ena,  1'b0, clk_i, rst_ni)
-    `FFLARNC(idx_word_valid_q, idx_word_valid_d, idx_bytecnt_ena, idx_word_clr, 1'b0, clk_i, rst_ni)
+    `FFLARNC(idx_word_valid_q, idx_word_valid_d, isect_slv_hs, idx_word_clr, 1'b0, clk_i, rst_ni)
 
     // Not an intersection master; termination is externally controlled
     assign isect_mst_req_o    = '0;
