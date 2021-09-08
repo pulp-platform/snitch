@@ -114,7 +114,7 @@ Disassembly of section .text:
  10000f6:	1c00                	addi	s0,sp,560
  10000f8:	0000                	unimp
  10000fa:	4600                	lw	s0,8(a2)
- 10000fc:	636f732f          	0x636f732f
+ 10000fc:	636f732f          	vamoandei64.v	zero,(t5),v22,v6
  1000100:	7265732f          	0x7265732f
  1000104:	6169                	addi	sp,sp,208
  1000106:	406c                	lw	a1,68(s0)
@@ -1395,18 +1395,18 @@ Disassembly of section .text:
 
 0000000001000bb0 <read_reg_u8>:
  1000bb0:	00054503          	lbu	a0,0(a0)
- 1000bb4:	0ff57513          	zext.b	a0,a0
+ 1000bb4:	0ff57513          	andi	a0,a0,255
  1000bb8:	00008067          	ret
 
 0000000001000bbc <is_transmit_empty>:
- 1000bbc:	400007b7          	lui	a5,0x40000
- 1000bc0:	0147c503          	lbu	a0,20(a5) # 40000014 <bin_to_hex_table+0x3efff1f4>
+ 1000bbc:	020027b7          	lui	a5,0x2002
+ 1000bc0:	0147c503          	lbu	a0,20(a5) # 2002014 <bin_to_hex_table+0x10011f4>
  1000bc4:	02057513          	andi	a0,a0,32
  1000bc8:	00008067          	ret
 
 0000000001000bcc <write_serial>:
- 1000bcc:	40000737          	lui	a4,0x40000
- 1000bd0:	01474783          	lbu	a5,20(a4) # 40000014 <bin_to_hex_table+0x3efff1f4>
+ 1000bcc:	02002737          	lui	a4,0x2002
+ 1000bd0:	01474783          	lbu	a5,20(a4) # 2002014 <bin_to_hex_table+0x10011f4>
  1000bd4:	0207f793          	andi	a5,a5,32
  1000bd8:	fe078ce3          	beqz	a5,1000bd0 <write_serial+0x4>
  1000bdc:	00a70023          	sb	a0,0(a4)
@@ -1415,14 +1415,14 @@ Disassembly of section .text:
 0000000001000be4 <init_uart>:
  1000be4:	0045959b          	slliw	a1,a1,0x4
  1000be8:	02b5553b          	divuw	a0,a0,a1
- 1000bec:	400007b7          	lui	a5,0x40000
- 1000bf0:	00078223          	sb	zero,4(a5) # 40000004 <bin_to_hex_table+0x3efff1e4>
+ 1000bec:	020027b7          	lui	a5,0x2002
+ 1000bf0:	00078223          	sb	zero,4(a5) # 2002004 <bin_to_hex_table+0x10011e4>
  1000bf4:	f8000713          	li	a4,-128
  1000bf8:	00e78623          	sb	a4,12(a5)
- 1000bfc:	0ff57713          	zext.b	a4,a0
+ 1000bfc:	0ff57713          	andi	a4,a0,255
  1000c00:	0085551b          	srliw	a0,a0,0x8
  1000c04:	00e78023          	sb	a4,0(a5)
- 1000c08:	0ff57513          	zext.b	a0,a0
+ 1000c08:	0ff57513          	andi	a0,a0,255
  1000c0c:	00a78223          	sb	a0,4(a5)
  1000c10:	00300713          	li	a4,3
  1000c14:	00e78623          	sb	a4,12(a5)
@@ -1471,7 +1471,7 @@ Disassembly of section .text:
  1000ca8:	ff800913          	li	s2,-8
  1000cac:	0084d53b          	srlw	a0,s1,s0
  1000cb0:	00810593          	addi	a1,sp,8
- 1000cb4:	0ff57513          	zext.b	a0,a0
+ 1000cb4:	0ff57513          	andi	a0,a0,255
  1000cb8:	fa9ff0ef          	jal	ra,1000c60 <bin_to_hex>
  1000cbc:	00814503          	lbu	a0,8(sp)
  1000cc0:	ff84041b          	addiw	s0,s0,-8
@@ -1497,7 +1497,7 @@ Disassembly of section .text:
  1000d08:	ff800913          	li	s2,-8
  1000d0c:	0084d533          	srl	a0,s1,s0
  1000d10:	00810593          	addi	a1,sp,8
- 1000d14:	0ff57513          	zext.b	a0,a0
+ 1000d14:	0ff57513          	andi	a0,a0,255
  1000d18:	f49ff0ef          	jal	ra,1000c60 <bin_to_hex>
  1000d1c:	00814503          	lbu	a0,8(sp)
  1000d20:	ff84041b          	addiw	s0,s0,-8
