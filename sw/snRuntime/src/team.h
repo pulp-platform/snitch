@@ -21,13 +21,17 @@ struct snrt_mailbox {
     size_t len;
 };
 
-struct snrt_allocator {
+struct snrt_allocator_inst {
     // Base address from where allocation starts
     uint32_t base;
     // Number of bytes alloctable
     uint32_t size;
     // Address of the next allocated block
     uint32_t next;
+};
+struct snrt_allocator {
+    struct snrt_allocator_inst l1;
+    struct snrt_allocator_inst l3;
 };
 
 struct snrt_barrier {

@@ -21,7 +21,7 @@ typedef struct {
         uint32_t fini_count;
     } e;
 } eu_t;
-extern __thread eu_t *eu_p;
+extern __thread volatile eu_t *eu_p;
 
 /**
  * @brief Initialize the event unit

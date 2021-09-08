@@ -108,6 +108,24 @@ void snrt_int_clint_set(uint32_t reg_off, uint32_t mask) {
     snrt_mutex_release(&clint_mutex);
 }
 
+/**
+ * @brief Go to wfi and exit with cleared SW interrupt if a SW interrupt
+ * is presen
+ *
+ */
+void snrt_int_sw_poll(void) {
+    uint32_t exit = 0, hartid = snrt_hartid();
+    while (!exit) {
+        sntr_wfi();
+        snrt_mutex_lock(&clint_mutex);
+        if (*(clint_p + ((hartid & ~0x1f) >> 5)) >> (hartid & 0x1f)) {
+            *(clint_p + ((hartid & ~0x1f) >> 5)) &= ~(1 << (hartid & 0x1f));
+            exit = 1;
+        }
+        snrt_mutex_release(&clint_mutex);
+    }
+}
+
 //================================================================================
 // Weak definition of IRQ handler
 //================================================================================

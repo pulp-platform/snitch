@@ -64,6 +64,7 @@ set(sources
     src/ssr.c
     src/alloc.c
     src/interrupt.c
+    src/dm.c
 )
 
 # Sources only compatible with the LLVM toolchain
@@ -74,6 +75,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
         src/omp/omp.c
         src/omp/kmp.c
         src/omp/eu.c
+        src/dm.c
     )
     # Check if static OpenMP runtime is requested
     if(OMPSTATIC_NUMTHREADS GREATER 0)
@@ -131,6 +133,7 @@ add_snitch_test(varargs_2 tests/varargs_2.c)
 add_snitch_test(barrier tests/barrier.c)
 add_snitch_test(lto tests/lto.c tests/lto_a.c)
 add_snitch_test(interrupt tests/interrupt.c)
+add_snitch_test(data_mover tests/data_mover.c)
 
 add_snitch_test_executable(dma_simple tests/dma_simple.c)
 add_snitch_test_executable(printf_simple tests/printf_simple.c)

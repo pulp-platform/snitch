@@ -14,7 +14,7 @@
  * eu_init for main thread and call to eu_event_loop for worker threads
  *
  */
-__thread eu_t *eu_p;
+__thread volatile eu_t *eu_p;
 
 eu_t *eu_init(void) {
     // Allocate the eu struct in L1 for fast access
