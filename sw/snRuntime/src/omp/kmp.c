@@ -14,33 +14,9 @@
 typedef void (*__task_type32)(_kmp_ptr32, _kmp_ptr32, _kmp_ptr32);
 typedef void (*__task_type64)(_kmp_ptr64, _kmp_ptr64, _kmp_ptr64);
 
+static void *args[sizeof(_kmp_ptr32)];
+
 static void __microtask_wrapper(void *arg, uint32_t argc) {
-    // kmp_int32 id = omp_get_thread_num();
-    // _kmp_ptr32 *args = (_kmp_ptr32*) arg;
-    // __task_type32 fn = (__task_type32) args[0];
-    // _kmp_ptr32 id_addr = (_kmp_ptr32)((uint32_t) &id);
-    // _kmp_ptr32 arg_addr = (_kmp_ptr32)(uint32_t) &args[1];
-    // fn(id_addr, id_addr, arg_addr);
-
-    /**
-     * HERO implementation
-     */
-    // kmp_int32 id = omp_get_thread_num();
-    // _kmp_ptr32 *args = (_kmp_ptr32*) arg;
-    // __task_type32 fn = (__task_type32) args[0];
-    // _kmp_ptr32 id_addr = (_kmp_ptr32)((uint32_t) &id);
-    // _kmp_ptr32 arg_addr = (_kmp_ptr32)(uint32_t) &args[1];
-
-    // printf("__microtask_wrapper fn=%#x id_addr=%#x arg_addr=%#x
-    // args=[%#x,%#x,%#x]\n",
-    //   fn, id_addr, arg_addr, ((uint32_t*)arg_addr)[0],
-    //   ((uint32_t*)arg_addr)[1], ((uint32_t*)arg_addr)[2]);
-
-    // fn(id_addr, id_addr, arg_addr);
-
-    /**
-     * My take
-     */
     kmp_int32 id = omp_get_thread_num();
     _kmp_ptr32 *args = (_kmp_ptr32 *)arg;
     kmpc_micro fn = (kmpc_micro)args[0];
@@ -48,12 +24,7 @@ static void __microtask_wrapper(void *arg, uint32_t argc) {
 
     // first element in args in function pointer
     _kmp_ptr32 *p_argv = &(args)[1];
-
     kmp_int32 gtid = id;
-    // id =0;
-
-    // printf("args = [%#x,%#x,%#x,%#x,]\n",p_argv[0], p_argv[1], p_argv[2],
-    // p_argv[3]); printf("__microtask_wrapper: argc=%d fn @ %#x\n", argc, fn);
 
     switch (argc) {
         default:
@@ -175,8 +146,6 @@ void __kmpc_push_num_threads(ident_t *loc, kmp_int32 global_tid,
     }
 }
 
-static void *args[sizeof(_kmp_ptr32)];
-
 /*!
 @ingroup PARALLEL
 @param loc  source location information
@@ -207,9 +176,6 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
                "__kmpc_fork_call: argc=%d numthreads=%d omp->numThreads=%d "
                "microtask @%#x\n",
                argc, omp->numThreads, omp->numThreads, (uint32_t)microtask);
-    // printf("args = [%#x,%#x,%#x,%#x,%#x]\n",((_kmp_ptr32*)args)[0],
-    // ((_kmp_ptr32*)args)[1], ((_kmp_ptr32*)args)[2], ((_kmp_ptr32*)args)[3],
-    // ((_kmp_ptr32*)args)[4]);
 
     /// a worker enters this fork call: this means nested parallelism
     if (snrt_cluster_core_idx() != 0) {
@@ -220,7 +186,7 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
         /// this thread woul re-enter the event queue, run the newly dispatched
         /// thread and then return to this thread. If this is not done, the
         /// nested parallelism is not executed in the correct order
-        (void)eu_dispatch_push(eu_p, __microtask_wrapper, argc, args,
+        (void)eu_dispatch_push(__microtask_wrapper, argc, args,
                                omp->numThreads);
     } else {
         parallelRegion(argc, args, __microtask_wrapper, omp->numThreads);
@@ -397,7 +363,11 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
                *plastiter, *plower, *pupper, incr, *pstride, chunk);
 }
 
-#ifndef OMP_STATIC
+//================================================================================
+// Dynamic scheduling
+// Only available if not OMPSTATIC_NUMTHREADS
+//================================================================================
+#ifndef OMPSTATIC_NUMTHREADS
 
 /*!
 @ingroup WORK_SHARING
@@ -423,7 +393,7 @@ void __kmpc_dispatch_init_4(ident_t *loc, kmp_int32 gtid,
     omp_team_t *team = omp_get_team(omp_getData());
     // dynLoopInitNoIter(team, lb, ub, st, chunk);
     // int core_id = omp_get_thread_num();
-    eu_mutex_lock(eu_p);
+    eu_mutex_lock();
     // if (team->loop_epoch - team->core_epoch[core_id] != 0)
     // {
     //   eu_mutex_release();
@@ -444,7 +414,7 @@ void __kmpc_dispatch_init_4(ident_t *loc, kmp_int32 gtid,
             team->loop_start, team->loop_end, team->loop_incr,
             team->loop_chunk);
     }
-    eu_mutex_release(eu_p);
+    eu_mutex_release();
 }
 
 /*!
@@ -482,7 +452,7 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
     *p_st = 1;
 
     // int result = dynLoopIter(team, (int*) p_lb, (int*) p_ub, (int*) p_last);
-    eu_mutex_lock(eu_p);
+    eu_mutex_lock();
 
     // have already iterated over all the iterations(no more work), return 0
     if (team->loop_start > team->loop_end) {
@@ -490,7 +460,7 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
         KMP_PRINTF(
             10, "__kmpc_dispatch_next_4 start > end: team->loop_is_setup %d\n",
             team->loop_is_setup);
-        eu_mutex_release(eu_p);
+        eu_mutex_release();
         return 0;
     }
 
@@ -506,7 +476,7 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
                "__kmpc_dispatch_next_4 : last: %d [l %4d u %4d s %4d] "
                "team->loop_start %d\n",
                *p_last, *p_lb, *p_ub, *p_st, team->loop_start);
-    eu_mutex_release(eu_p);
+    eu_mutex_release();
     return 1;
 }
 
@@ -524,4 +494,4 @@ int __kmpc_dispatch_next_4u(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
     return ret;
 }
 
-#endif  // #ifndef OMP_STATIC
+#endif  // #ifndef OMPSTATIC_NUMTHREADS

@@ -151,7 +151,9 @@ add_snitch_test_args(team_global team_global --base-hartid=3 --num-cores=4 --num
 
 # Tests exclusive to LLVM
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    add_snitch_test(data_mover tests/data_mover.c)
+    add_snitch_test_executable(data_mover tests/data_mover.c)
+    add_snitch_test_rtl(data_mover)
+    add_snitch_test_args(data_mover data_mover --base-hartid=3 --num-cores=9 --num-clusters=1)
 
     add_snitch_test_executable(event_unit tests/event_unit.c)
     add_snitch_test_rtl(event_unit)

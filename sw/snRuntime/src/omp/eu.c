@@ -16,27 +16,38 @@
  */
 __thread volatile eu_t *eu_p;
 
-eu_t *eu_init(void) {
-    // Allocate the eu struct in L1 for fast access
-    eu_t *_this = snrt_l1alloc(sizeof(eu_t));
-    _this->workers_mutex = 0;
-    _this->workers_in_loop = 0;
-    _this->exit_flag = 0;
-    _this->workers_wfi = 0;
-    // store copy of eu_p on tls
-    eu_p = _this;
-    return eu_p;
+/**
+ * @brief Pointer to where the DM struct in TCDM is located
+ *
+ */
+static eu_t *volatile eu_p_global;
+
+void eu_init(void) {
+    if (snrt_cluster_core_idx() == 0) {
+        // Allocate the eu struct in L1 for fast access
+        eu_p = snrt_l1alloc(sizeof(eu_t));
+        eu_p->workers_mutex = 0;
+        eu_p->workers_in_loop = 0;
+        eu_p->exit_flag = 0;
+        eu_p->workers_wfi = 0;
+        // store copy of eu_p on shared memory
+        eu_p_global = eu_p;
+    } else {
+        while (!eu_p_global)
+            ;
+        eu_p = eu_p_global;
+    }
 }
 
 /**
  * @brief send all workers in loop to exit()
  * @details
  */
-void eu_exit(eu_t *_this, uint32_t core_idx) {
+void eu_exit(uint32_t core_idx) {
     // make sure queue is empty
-    eu_run_empty(_this, core_idx);
+    eu_run_empty(core_idx);
     // set exit flag and wake cores
-    _this->exit_flag = 1;
+    eu_p->exit_flag = 1;
     for (uint32_t i = 0; i < snrt_cluster_compute_core_num(); ++i) {
         snrt_int_sw_set(snrt_cluster_core_base_hartid() + i);
     }
@@ -45,16 +56,16 @@ void eu_exit(eu_t *_this, uint32_t core_idx) {
 /**
  * @brief Return the number of workers currently present in the event loop
  */
-uint32_t eu_get_workers_in_loop(eu_t *_this) {
-    return __atomic_load_n(&_this->workers_in_loop, __ATOMIC_RELAXED);
+uint32_t eu_get_workers_in_loop() {
+    return __atomic_load_n(&eu_p->workers_in_loop, __ATOMIC_RELAXED);
 }
 
 /**
  * @brief Print event unit status
  *
  */
-void eu_print_status(eu_t *_this) {
-    EU_PRINTF(0, "workers_in_loop=%d\n", _this->workers_in_loop);
+void eu_print_status() {
+    EU_PRINTF(0, "workers_in_loop=%d\n", eu_p->workers_in_loop);
 }
 
 /**
@@ -62,15 +73,12 @@ void eu_print_status(eu_t *_this) {
  *
  * @param core_idx local core index of the entering thread
  */
-void eu_event_loop(eu_t *_this, uint32_t core_idx) {
+void eu_event_loop(uint32_t core_idx) {
     uint32_t scratch;
     uint32_t nthds;
 
-    // store copy of eu_p on tls
-    eu_p = _this;
-
     // count number of workers in loop
-    __atomic_add_fetch(&_this->workers_in_loop, 1, __ATOMIC_RELAXED);
+    __atomic_add_fetch(&eu_p->workers_in_loop, 1, __ATOMIC_RELAXED);
     // enable software interrupts
     snrt_interrupt_enable(IRQ_M_SOFT);
 
@@ -78,35 +86,31 @@ void eu_event_loop(eu_t *_this, uint32_t core_idx) {
 
     while (1) {
         // check for exit
-        if (_this->exit_flag) {
+        if (eu_p->exit_flag) {
             // printf("eu: exit\n");
             snrt_interrupt_disable(IRQ_M_SOFT);
             return;
         }
 
-        if (core_idx < _this->e.nthreads) {
+        if (core_idx < eu_p->e.nthreads) {
             // make a local copy of nthreads to sync after work since the master
-            // hart will reset _this->e.nthreads as soon as all workers finished
+            // hart will reset eu_p->e.nthreads as soon as all workers finished
             // which might cause a race condition
-            nthds = _this->e.nthreads;
-            EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\n", _this->e.fn,
-                      ((uint32_t *)_this->e.data)[0]);
+            nthds = eu_p->e.nthreads;
+            EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\n", eu_p->e.fn,
+                      ((uint32_t *)eu_p->e.data)[0]);
             // call
-            _this->e.fn(_this->e.data, _this->e.argc);
-            __atomic_add_fetch(&_this->e.fini_count, 1, __ATOMIC_RELAXED);
+            eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
+            __atomic_add_fetch(&eu_p->e.fini_count, 1, __ATOMIC_RELAXED);
             // explicit barrier
-            while (__atomic_load_n(&_this->e.fini_count, __ATOMIC_RELAXED) !=
+            while (__atomic_load_n(&eu_p->e.fini_count, __ATOMIC_RELAXED) !=
                    nthds)
                 ;
         } else {
             // enter wait for interrupt
-            do {
-                __atomic_add_fetch(&_this->workers_wfi, 1, __ATOMIC_RELAXED);
-                sntr_wfi();
-                __atomic_add_fetch(&_this->workers_wfi, -1, __ATOMIC_RELAXED);
-            } while (
-                !snrt_int_sw_get(snrt_global_core_base_hartid() + core_idx));
-            snrt_int_sw_clear(snrt_global_core_base_hartid() + core_idx);
+            __atomic_add_fetch(&eu_p->workers_wfi, 1, __ATOMIC_RELAXED);
+            snrt_int_sw_poll();
+            __atomic_add_fetch(&eu_p->workers_wfi, -1, __ATOMIC_RELAXED);
         }
     }
 }
@@ -120,17 +124,17 @@ void eu_event_loop(eu_t *_this, uint32_t core_idx) {
  * @param nthreads Number of threads that shall run the task
  * @return int 0
  */
-int eu_dispatch_push(eu_t *_this, void (*fn)(void *, uint32_t), uint32_t argc,
-                     void *data, uint32_t nthreads) {
+int eu_dispatch_push(void (*fn)(void *, uint32_t), uint32_t argc, void *data,
+                     uint32_t nthreads) {
     // fill queue
-    _this->e.fn = fn;
-    _this->e.data = data;
-    _this->e.argc = argc;
-    _this->e.nthreads = nthreads;
-    _this->e.fini_count = 0;
+    eu_p->e.fn = fn;
+    eu_p->e.data = data;
+    eu_p->e.argc = argc;
+    eu_p->e.nthreads = nthreads;
+    eu_p->e.fini_count = 0;
 
     EU_PRINTF(10, "eu_dispatch_push success, workers %d in loop %d\n", nthreads,
-              _this->workers_in_loop);
+              eu_p->workers_in_loop);
 
     return 0;
 }
@@ -139,10 +143,10 @@ int eu_dispatch_push(eu_t *_this, void (*fn)(void *, uint32_t), uint32_t argc,
  * @brief supervisor core enters this loop to empty the event queue
  * @details
  */
-void eu_run_empty(eu_t *_this, uint32_t core_idx) {
+void eu_run_empty(uint32_t core_idx) {
     unsigned nfini;
-    if (!_this->e.nthreads) return;
-    EU_PRINTF(10, "eu_run_empty enter: q size %d\n", _this->e.nthreads);
+    if (!eu_p->e.nthreads) return;
+    EU_PRINTF(10, "eu_run_empty enter: q size %d\n", eu_p->e.nthreads);
 
 #ifdef OMPSTATIC_NUMTHREADS
 #define WAKE_MASK (((1 << OMPSTATIC_NUMTHREADS) - 1) & ~0x1)
@@ -174,24 +178,24 @@ void eu_run_empty(eu_t *_this, uint32_t core_idx) {
 #endif
 
     // Am i also part of the team?
-    if (core_idx < _this->e.nthreads) {
+    if (core_idx < eu_p->e.nthreads) {
         // call
-        EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\n", _this->e.fn,
-                  ((uint32_t *)_this->e.data)[0]);
-        _this->e.fn(_this->e.data, _this->e.argc);
+        EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\n", eu_p->e.fn,
+                  ((uint32_t *)eu_p->e.data)[0]);
+        eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
     }
 
     // wait for queue to be empty
-    while (__atomic_load_n(&_this->e.fini_count, __ATOMIC_RELAXED) !=
-           _this->e.nthreads - 1)
+    while (__atomic_load_n(&eu_p->e.fini_count, __ATOMIC_RELAXED) !=
+           eu_p->e.nthreads - 1)
         ;
     // stop workers from re-executing the task
-    _this->e.nthreads = 0;
-    __atomic_add_fetch(&_this->e.fini_count, 1, __ATOMIC_RELAXED);
+    eu_p->e.nthreads = 0;
+    __atomic_add_fetch(&eu_p->e.fini_count, 1, __ATOMIC_RELAXED);
 
     // wait for all workers to be in wfi
-    while (__atomic_load_n(&_this->workers_wfi, __ATOMIC_RELAXED) !=
-           _this->workers_in_loop)
+    while (__atomic_load_n(&eu_p->workers_wfi, __ATOMIC_RELAXED) !=
+           eu_p->workers_in_loop)
         ;
 
     EU_PRINTF(10, "eu_run_empty exit\n");
@@ -200,13 +204,9 @@ void eu_run_empty(eu_t *_this, uint32_t core_idx) {
 /**
  * @brief Lock the event unit mutex
  */
-inline void eu_mutex_lock(eu_t *_this) {
-    snrt_mutex_lock(&_this->workers_mutex);
-}
+inline void eu_mutex_lock() { snrt_mutex_lock(&eu_p->workers_mutex); }
 
 /**
  * @brief Free the event unit mutex
  */
-inline void eu_mutex_release(eu_t *_this) {
-    snrt_mutex_release(&_this->workers_mutex);
-}
+inline void eu_mutex_release() { snrt_mutex_release(&eu_p->workers_mutex); }

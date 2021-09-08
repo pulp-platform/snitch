@@ -162,7 +162,6 @@ void dm_main(void) {
 
         // sleep if queue is empty and no stats pending
         if (!dm_p->queue_fill && !dm_p->stat_q) {
-            // 17
             snrt_int_sw_poll();
         }
     }

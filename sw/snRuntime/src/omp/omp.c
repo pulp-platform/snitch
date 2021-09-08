@@ -30,10 +30,6 @@ void omp_init(void) {
     _this->plainTeam.loop_epoch = 0;
     _this->plainTeam.loop_is_setup = 0;
 
-    // _this->plainTeam.loop_start;
-    // _this->plainTeam.loop_end;
-    // _this->plainTeam.loop_incr;
-    // _this->plainTeam.loop_chunk;
     for (int i = 0; i < sizeof(_this->plainTeam.core_epoch) /
                             sizeof(_this->plainTeam.core_epoch[0]);
          i++)
@@ -57,13 +53,12 @@ void omp_init(void) {
  * @param core_idx cluster-local core-index
  */
 unsigned __attribute__((noinline)) snrt_omp_bootstrap(uint32_t core_idx) {
-    static eu_t *eu;
+    eu_init();
     if (core_idx == 0) {
         // master hart initializes event unit and runtime
-        eu = eu_init();
         omp_init();
         snrt_cluster_hw_barrier();
-        while (eu_get_workers_in_loop(eu_p) !=
+        while (eu_get_workers_in_loop() !=
                (snrt_cluster_compute_core_num() - 1))
             ;
         return 0;
@@ -74,7 +69,7 @@ unsigned __attribute__((noinline)) snrt_omp_bootstrap(uint32_t core_idx) {
     } else {
         // all worker cores enter the event queue
         snrt_cluster_hw_barrier();
-        eu_event_loop(eu, core_idx);
+        eu_event_loop(core_idx);
         return 1;
     }
 }
