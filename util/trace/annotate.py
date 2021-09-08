@@ -103,7 +103,7 @@ with open(trace, 'r') as f:
             addr = int(addr_str, base=16)
             if trace_start_col < 0:
                 trace_start_col = line.find(addr_str)
-        except:
+        except (ValueError, IndexError):
             of.write(f'      {line[trace_start_col:]}')
             continue
 
