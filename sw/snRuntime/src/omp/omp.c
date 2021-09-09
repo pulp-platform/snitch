@@ -32,9 +32,8 @@ static inline void initTeam(omp_t *_this, omp_team_t *team) {}
 
 void omp_init(void) {
     if (snrt_cluster_core_idx() == 0) {
-        omp_p = (omp_t *)snrt_l1alloc(sizeof(omp_t));
-
 #ifndef OMPSTATIC_NUMTHREADS
+        omp_p = (omp_t *)snrt_l1alloc(sizeof(omp_t));
         unsigned int nbCores = snrt_cluster_compute_core_num();
         omp_p->numThreads = nbCores;
         omp_p->maxThreads = nbCores;
@@ -49,17 +48,19 @@ void omp_init(void) {
             omp_p->plainTeam.core_epoch[i] = 0;
 
         initTeam(omp_p, &omp_p->plainTeam);
+        omp_p_global = omp_p;
 #endif
 
 #ifdef OPENMP_PROFILE
         omp_prof = (omp_prof_t *)snrt_l1alloc(sizeof(omp_prof_t));
 #endif
 
-        omp_p_global = omp_p;
     } else {
+#ifndef OMPSTATIC_NUMTHREADS
         while (!omp_p_global)
             ;
         omp_p = omp_p_global;
+#endif
     }
 
     OMP_PRINTF(10, "omp_init numThreads=%d maxThreads=%d\n", omp_p->numThreads,

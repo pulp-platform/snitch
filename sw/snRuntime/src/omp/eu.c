@@ -249,16 +249,10 @@ void wake_workers(void) {
     while (__atomic_load_n(&eu_p->workers_wfi, __ATOMIC_RELAXED) !=
            eu_p->workers_in_loop)
         ;
-#ifdef OMPSTATIC_NUMTHREADS
-#define WAKE_MASK (((1 << OMPSTATIC_NUMTHREADS) - 1) & ~0x1)
-    // snrt_wakeup(WAKE_MASK);
-    snrt_wakeup(-1);
-#else
     // Wake the cluster cores. We do this with cluster relative hart IDs and do
     // not wake hart 0 since this is the main thread
     uint32_t numcores = snrt_cluster_compute_core_num();
     for (uint32_t hart = 1; hart < numcores; ++hart) snrt_wakeup(hart);
-#endif
 }
 void worker_wfi(void) { sntr_wfi(); }
 
