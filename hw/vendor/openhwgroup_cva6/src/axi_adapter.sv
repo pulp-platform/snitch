@@ -29,6 +29,7 @@ module axi_adapter #(
   input  logic                             clk_i,  // Clock
   input  logic                             rst_ni, // Asynchronous reset active low
 
+  output logic                             busy_o,
   input  logic                             req_i,
   input  ariane_axi::ad_req_t              type_i,
   output logic                             gnt_o,
@@ -65,6 +66,9 @@ module axi_adapter #(
   logic [(DATA_WIDTH/AXI_DATA_WIDTH)-1:0] addr_offset_d, addr_offset_q;
   logic [AXI_ID_WIDTH-1:0]    id_d, id_q;
   logic [ADDR_INDEX-1:0]      index;
+
+  // Busy if we're not idle
+  assign busy_o = state_q != IDLE;
 
   always_comb begin : axi_fsm
     // Default assignments

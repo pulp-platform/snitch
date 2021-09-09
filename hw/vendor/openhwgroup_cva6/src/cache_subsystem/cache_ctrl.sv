@@ -26,6 +26,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
     input  logic                                 flush_i,
     input  logic                                 bypass_i,  // enable cache
     output logic                                 busy_o,
+    input  logic                                 stall_i,   // stall new memory requests
     // Core request ports
     input  dcache_req_i_t                        req_port_i,
     output dcache_req_o_t                        req_port_o,
@@ -130,7 +131,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
 
             IDLE: begin
                 // a new request arrived
-                if (req_port_i.data_req && !flush_i) begin
+                if (req_port_i.data_req && !flush_i && !stall_i) begin
                     // request the cache line - we can do this speculatively
                     req_o = '1;
 
