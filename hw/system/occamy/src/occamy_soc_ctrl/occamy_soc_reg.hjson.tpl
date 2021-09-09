@@ -212,9 +212,10 @@
       ]
     },
     { name: "RO_START_ADDR_HIGH_${j}_QUADRANT_${i}",
-      desc: "Read-only cache start address low",
+      desc: "Read-only cache start address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: ${j}
       fields: [
         { bits: "${soc_wide_xbar.aw-33}:0"
         name: "ADDR_HIGH"
@@ -234,9 +235,10 @@
       ]
     },
     { name: "RO_END_ADDR_HIGH_${j}_QUADRANT_${i}",
-      desc: "Read-only cache end address low",
+      desc: "Read-only cache end address high",
       swaccess: "rw",
       hwaccess: "hro",
+      resval: ${j + 1}
       fields: [
         { bits: "${soc_wide_xbar.aw-33}:0"
         name: "ADDR_HIGH"
