@@ -9,6 +9,9 @@
 #include "printf.h"
 #include "snrt.h"
 
+//================================================================================
+// data
+//================================================================================
 /**
  * @brief Pointer to the event unit struct only initialized after call to
  * eu_init for main thread and call to eu_event_loop for worker threads
@@ -22,14 +25,20 @@ __thread volatile eu_t *eu_p;
  */
 static eu_t *volatile eu_p_global;
 
+//================================================================================
+// prototypes
+//================================================================================
+void wake_workers(void);
+void worker_wfi(void);
+
+//================================================================================
+// public
+//================================================================================
 void eu_init(void) {
     if (snrt_cluster_core_idx() == 0) {
         // Allocate the eu struct in L1 for fast access
         eu_p = snrt_l1alloc(sizeof(eu_t));
-        eu_p->workers_mutex = 0;
-        eu_p->workers_in_loop = 0;
-        eu_p->exit_flag = 0;
-        eu_p->workers_wfi = 0;
+        snrt_memset(eu_p, 0, sizeof(eu_t));
         // store copy of eu_p on shared memory
         eu_p_global = eu_p;
     } else {
@@ -48,9 +57,7 @@ void eu_exit(uint32_t core_idx) {
     eu_run_empty(core_idx);
     // set exit flag and wake cores
     eu_p->exit_flag = 1;
-    for (uint32_t i = 0; i < snrt_cluster_compute_core_num(); ++i) {
-        snrt_int_sw_set(snrt_cluster_core_base_hartid() + i);
-    }
+    wake_workers();
 }
 
 /**
@@ -79,16 +86,20 @@ void eu_event_loop(uint32_t core_idx) {
 
     // count number of workers in loop
     __atomic_add_fetch(&eu_p->workers_in_loop, 1, __ATOMIC_RELAXED);
+
     // enable software interrupts
+#ifdef EU_USE_CLINT
     snrt_interrupt_enable(IRQ_M_SOFT);
+#endif
 
     EU_PRINTF(0, "#%d entered event loop\n", core_idx);
 
     while (1) {
         // check for exit
         if (eu_p->exit_flag) {
-            // printf("eu: exit\n");
+#ifdef EU_USE_CLINT
             snrt_interrupt_disable(IRQ_M_SOFT);
+#endif
             return;
         }
 
@@ -109,7 +120,7 @@ void eu_event_loop(uint32_t core_idx) {
         } else {
             // enter wait for interrupt
             __atomic_add_fetch(&eu_p->workers_wfi, 1, __ATOMIC_RELAXED);
-            snrt_int_sw_poll();
+            worker_wfi();
             __atomic_add_fetch(&eu_p->workers_wfi, -1, __ATOMIC_RELAXED);
         }
     }
@@ -148,34 +159,7 @@ void eu_run_empty(uint32_t core_idx) {
     if (!eu_p->e.nthreads) return;
     EU_PRINTF(10, "eu_run_empty enter: q size %d\n", eu_p->e.nthreads);
 
-#ifdef OMPSTATIC_NUMTHREADS
-#define WAKE_MASK (((1 << OMPSTATIC_NUMTHREADS) - 1) & ~0x1)
-    // Fast wake-up for static number of worker threads
-    uint32_t basehart = snrt_cluster_core_base_hartid();
-    if ((basehart % 32) + OMPSTATIC_NUMTHREADS > 32) {
-        // wake-up is split over two CLINT registers
-        snrt_int_clint_set(basehart / 32, WAKE_MASK << (basehart % 32));
-        snrt_int_clint_set(basehart / 32 + 1,
-                           WAKE_MASK >> (32 - basehart % 32));
-    } else {
-        snrt_int_clint_set(basehart / 32, WAKE_MASK << (basehart % 32));
-    }
-    const uint32_t mask = OMPSTATIC_NUMTHREADS - 1;
-#else
-
-    // wake all worker cores except the main thread
-    uint32_t numcores = snrt_cluster_compute_core_num(),
-             basehart = snrt_cluster_core_base_hartid();
-    uint32_t mask = 0, hart = 1;
-    for (; hart < numcores; ++hart) {
-        mask |= 1 << (basehart + hart);
-        if ((basehart + hart + 1) % 32 == 0) {
-            snrt_int_clint_set((basehart + hart) / 32, mask);
-            mask = 0;
-        }
-    }
-    if (mask) snrt_int_clint_set((basehart + hart) / 32, mask);
-#endif
+    wake_workers();
 
     // Am i also part of the team?
     if (core_idx < eu_p->e.nthreads) {
@@ -210,3 +194,72 @@ inline void eu_mutex_lock() { snrt_mutex_lock(&eu_p->workers_mutex); }
  * @brief Free the event unit mutex
  */
 inline void eu_mutex_release() { snrt_mutex_release(&eu_p->workers_mutex); }
+
+//================================================================================
+// private
+//================================================================================
+
+/**
+ * @brief When using the CLINT as wakeup
+ *
+ */
+#ifdef EU_USE_CLINT
+
+void wake_workers(void) {
+#ifdef OMPSTATIC_NUMTHREADS
+#define WAKE_MASK (((1 << OMPSTATIC_NUMTHREADS) - 1) & ~0x1)
+    // Fast wake-up for static number of worker threads
+    uint32_t basehart = snrt_cluster_core_base_hartid();
+    if ((basehart % 32) + OMPSTATIC_NUMTHREADS > 32) {
+        // wake-up is split over two CLINT registers
+        snrt_int_clint_set(basehart / 32, WAKE_MASK << (basehart % 32));
+        snrt_int_clint_set(basehart / 32 + 1,
+                           WAKE_MASK >> (32 - basehart % 32));
+    } else {
+        snrt_int_clint_set(basehart / 32, WAKE_MASK << (basehart % 32));
+    }
+    const uint32_t mask = OMPSTATIC_NUMTHREADS - 1;
+#else
+
+    // wake all worker cores except the main thread
+    uint32_t numcores = snrt_cluster_compute_core_num(),
+             basehart = snrt_cluster_core_base_hartid();
+    uint32_t mask = 0, hart = 1;
+    for (; hart < numcores; ++hart) {
+        mask |= 1 << (basehart + hart);
+        if ((basehart + hart + 1) % 32 == 0) {
+            snrt_int_clint_set((basehart + hart) / 32, mask);
+            mask = 0;
+        }
+    }
+    if (mask) snrt_int_clint_set((basehart + hart) / 32, mask);
+#endif
+}
+
+void worker_wfi(void) { snrt_int_sw_poll(); }
+
+/**
+ * @brief If we use the wake-up register to wake the worker cores
+ *
+ */
+#else  // #ifdef EU_USE_CLINT
+
+void wake_workers(void) {
+    // Guard to wake only if all workers are wfi
+    while (__atomic_load_n(&eu_p->workers_wfi, __ATOMIC_RELAXED) !=
+           eu_p->workers_in_loop)
+        ;
+#ifdef OMPSTATIC_NUMTHREADS
+#define WAKE_MASK (((1 << OMPSTATIC_NUMTHREADS) - 1) & ~0x1)
+    // snrt_wakeup(WAKE_MASK);
+    snrt_wakeup(-1);
+#else
+    // Wake the cluster cores. We do this with cluster relative hart IDs and do
+    // not wake hart 0 since this is the main thread
+    uint32_t numcores = snrt_cluster_compute_core_num();
+    for (uint32_t hart = 1; hart < numcores; ++hart) snrt_wakeup(hart);
+#endif
+}
+void worker_wfi(void) { sntr_wfi(); }
+
+#endif  // #ifdef EU_USE_CLINT

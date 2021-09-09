@@ -73,7 +73,11 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->cluster_mem.end -= sizeof(struct snrt_mailbox);
     team->cluster_mailbox = (void *)team->cluster_mem.end;
 
+    // TLS caches of frequently used data
     _snrt_team_current = &team->base;
+    _snrt_core_idx =
+        (snrt_hartid() - _snrt_team_current->root->cluster_core_base_hartid) %
+        _snrt_team_current->root->cluster_core_num;
 
     // Initialize the string buffer. This technically doesn't belong here, but
     // the _snrt_init_team function is called once per thread before main, so
@@ -82,6 +86,8 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
 
     // init peripherals
     team->peripherals.clint = (uint32_t *)bootdata->clint_base;
+    team->peripherals.wakeup =
+        (uint32_t *)(spm_start + bootdata->tcdm_size + 0x28);
 
     // Init allocator
     snrt_alloc_init(team);

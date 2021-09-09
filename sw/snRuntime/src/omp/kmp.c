@@ -26,6 +26,9 @@ static void __microtask_wrapper(void *arg, uint32_t argc) {
     _kmp_ptr32 *p_argv = &(args)[1];
     kmp_int32 gtid = id;
 
+    OMP_PROF(if (snrt_hartid() == 1) omp_prof->fork_oh =
+                 read_csr(mcycle) - omp_prof->fork_oh);
+
     switch (argc) {
         default:
             // printf("Too many args to __microtask_wrapper: %d!\n", argc);
@@ -159,6 +162,8 @@ Do the actual fork and call the microtask in the relevant number of threads.
 void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
     (void)loc;
     omp_t *omp = omp_getData();
+
+    OMP_PROF(omp_prof->fork_oh = read_csr(mcycle));
 
     va_list vl;
     int arg_size = 0;

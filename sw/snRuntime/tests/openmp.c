@@ -74,9 +74,11 @@ int main() {
     __snrt_omp_bootstrap(core_idx);
 
     // Static schedule test
-    err |= static_schedule() << 0;
+    // err |= static_schedule() << 0;
+    // OMP_PROF(omp_print_prof());
     // Launch overhead test
     err |= paralell_section() << 1;
+    OMP_PROF(omp_print_prof());
 
     // exit
     __snrt_omp_destroy(core_idx);

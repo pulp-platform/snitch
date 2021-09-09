@@ -31,6 +31,12 @@ extern "C" {
 #define snrt_max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
+static inline void *snrt_memset(void *ptr, int value, size_t num) {
+    for (uint32_t i = 0; i < num; ++i)
+        *((uint8_t *)ptr + i) = (unsigned char)value;
+    return ptr;
+}
+
 /// A slice of memory.
 typedef struct snrt_slice {
     uint64_t start;
@@ -39,7 +45,8 @@ typedef struct snrt_slice {
 
 /// Peripherals to the Snitch SoC
 struct snrt_peripherals {
-    uint32_t *clint;
+    volatile uint32_t *clint;
+    volatile uint32_t *wakeup;
 };
 
 static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
@@ -69,6 +76,7 @@ extern uint32_t snrt_cluster_idx();
 extern uint32_t snrt_cluster_num();
 extern int snrt_is_compute_core();
 extern int snrt_is_dm_core();
+extern void snrt_wakeup(uint32_t mask);
 
 extern snrt_slice_t snrt_global_memory();
 extern snrt_slice_t snrt_cluster_memory();

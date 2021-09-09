@@ -6,7 +6,10 @@
 
 #include "snrt.h"
 
-#ifndef OMP_STATIC
+//================================================================================
+// data
+//================================================================================
+#ifndef OMPSTATIC_NUMTHREADS
 __thread omp_t volatile *omp_p;
 static omp_t *volatile omp_p_global;
 #else
@@ -17,13 +20,21 @@ const omp_t omp_p = {
 };
 #endif
 
+#ifdef OMP_PROF
+#include "printf.h"
+omp_prof_t *omp_prof;
+#endif
+
+//================================================================================
+// public
+//================================================================================
 static inline void initTeam(omp_t *_this, omp_team_t *team) {}
 
 void omp_init(void) {
     if (snrt_cluster_core_idx() == 0) {
         omp_p = (omp_t *)snrt_l1alloc(sizeof(omp_t));
 
-#ifndef OMP_STATIC
+#ifndef OMPSTATIC_NUMTHREADS
         unsigned int nbCores = snrt_cluster_compute_core_num();
         omp_p->numThreads = nbCores;
         omp_p->maxThreads = nbCores;
@@ -39,6 +50,11 @@ void omp_init(void) {
 
         initTeam(omp_p, &omp_p->plainTeam);
 #endif
+
+#ifdef OPENMP_PROFILE
+        omp_prof = (omp_prof_t *)snrt_l1alloc(sizeof(omp_prof_t));
+#endif
+
         omp_p_global = omp_p;
     } else {
         while (!omp_p_global)
@@ -86,7 +102,7 @@ unsigned __attribute__((noinline)) snrt_omp_bootstrap(uint32_t core_idx) {
 
 void partialParallelRegion(int32_t argc, void *data,
                            void (*fn)(void *, uint32_t), int num_threads) {
-#ifndef OMP_STATIC
+#ifndef OMPSTATIC_NUMTHREADS
     omp_p->plainTeam.nbThreads = num_threads;
 #endif
 
@@ -94,3 +110,9 @@ void partialParallelRegion(int32_t argc, void *data,
                num_threads, omp_p->plainTeam.nbThreads, omp_p->numThreads);
     parallelRegionExec(argc, data, fn, num_threads);
 }
+
+#ifdef OPENMP_PROFILE
+void omp_print_prof(void) {
+    printf("%-20s %d\n", "fork_oh", omp_prof->fork_oh);
+}
+#endif
