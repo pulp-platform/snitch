@@ -11,8 +11,8 @@
 #define AXPY_N 64
 #define NUMTHREADS 8
 
-// #define tprintf(...) printf(__VA_ARGS__)
-#define tprintf(...) while (0)
+#define tprintf(...) printf(__VA_ARGS__)
+// #define tprintf(...) while (0)
 
 volatile static uint32_t sum = 0;
 
@@ -43,6 +43,7 @@ unsigned __attribute__((noinline)) static_schedule(void) {
 #pragma omp for schedule(static)
         for (unsigned i = 0; i < AXPY_N; i++) {
             // data_y[i] = data_a * data_x[i] + data_y[i];
+            // data_y[i] = data_a * __builtin_ssr_pop(0) + __builtin_ssr_pop(1);
             __builtin_ssr_push(
                 2, data_a * __builtin_ssr_pop(0) + __builtin_ssr_pop(1));
         }
