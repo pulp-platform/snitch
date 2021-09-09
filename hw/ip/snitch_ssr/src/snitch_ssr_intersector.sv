@@ -7,7 +7,7 @@
 `include "common_cells/registers.svh"
 
 module snitch_ssr_intersector import snitch_ssr_pkg::*; #(
-  parameter int  StreamctlDepth  = 0,
+  parameter int unsigned StreamctlDepth = 0,
   parameter type isect_mst_req_t = logic,
   parameter type isect_mst_rsp_t = logic,
   parameter type isect_slv_req_t = logic,

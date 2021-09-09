@@ -117,8 +117,6 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
     .WPorts    ( WPorts     ),
     .SsrRegs   ( SsrRegs    )
   ) i_switch (
-    .clk_i,
-    .rst_ni,
     .ssr_raddr_i,
     .ssr_rdata_o,
     .ssr_rvalid_i,
@@ -190,7 +188,7 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   end else begin : gen_no_intersector
     assign isect_mst_rsp      = '0;
     assign isect_slv_rsp      = '0;
-    assign streamctl_o        = '0;
+    assign streamctl_done_o   = '0;
     assign streamctl_valid_o  = '0;
   end
 
