@@ -696,9 +696,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     }
                 } else if (value as usize) < self.wake_up.len() {
                     self.num_sleep.fetch_sub(1, Ordering::Relaxed);
-                    self.wake_up[value as usize - self.engine.base_hartid]
-                        .fetch_max(self.state.cycle + 1, Ordering::Release);
+                    self.wake_up[value as usize].fetch_max(self.state.cycle + 1, Ordering::Release);
                 }
+                debug!("self.num_sleep {}", self.num_sleep.load(Ordering::Relaxed));
             } // wakeup_reg
             x if x == self.engine.config.address.barrier_reg => (), // barrier_reg
             x if x == self.engine.config.address.cluster_base_hartid => (), // cluster_base_hartid
