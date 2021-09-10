@@ -55,8 +55,9 @@ void eu_init(void) {
  */
 void eu_exit(uint32_t core_idx) {
     // make sure queue is empty
-    eu_run_empty(core_idx);
+    if (!eu_p->e.nthreads) eu_run_empty(core_idx);
     // set exit flag and wake cores
+    wait_worker_wfi();
     eu_p->exit_flag = 1;
     wake_workers();
 }
@@ -121,15 +122,11 @@ void eu_event_loop(uint32_t core_idx) {
                       ((uint32_t *)eu_p->e.data)[0]);
             // call
             eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
-            __atomic_add_fetch(&eu_p->e.fini_count, 1, __ATOMIC_RELAXED);
-            // explicit barrier
-            while (__atomic_load_n(&eu_p->e.fini_count, __ATOMIC_RELAXED) !=
-                   nthds)
-                ;
-        } else {
-            // enter wait for interrupt
-            worker_wfi();
         }
+
+        // enter wait for interrupt
+        __atomic_add_fetch(&eu_p->e.fini_count, 1, __ATOMIC_RELAXED);
+        worker_wfi();
     }
 }
 
@@ -152,7 +149,6 @@ int eu_dispatch_push(void (*fn)(void *, uint32_t), uint32_t argc, void *data,
     eu_p->e.data = data;
     eu_p->e.argc = argc;
     eu_p->e.nthreads = nthreads;
-    eu_p->e.fini_count = 0;
 
     EU_PRINTF(10, "eu_dispatch_push success, workers %d in loop %d\n", nthreads,
               eu_p->workers_in_loop);
@@ -166,10 +162,12 @@ int eu_dispatch_push(void (*fn)(void *, uint32_t), uint32_t argc, void *data,
  */
 void eu_run_empty(uint32_t core_idx) {
     unsigned nfini, scratch;
-    if (!eu_p->e.nthreads) return;
+    scratch = eu_p->e.nthreads;
+    if (!scratch) return;
     EU_PRINTF(10, "eu_run_empty enter: q size %d\n", eu_p->e.nthreads);
 
-    wake_workers();
+    eu_p->e.fini_count = 0;
+    if (scratch > 1) wake_workers();
 
     // Am i also part of the team?
     if (core_idx < eu_p->e.nthreads) {
@@ -180,13 +178,15 @@ void eu_run_empty(uint32_t core_idx) {
     }
 
     // wait for queue to be empty
-    scratch = eu_p->e.nthreads - 1;
-    while (__atomic_load_n(&eu_p->e.fini_count, __ATOMIC_RELAXED) != scratch)
-        ;
+    if (scratch > 1) {
+        scratch = eu_get_workers_in_loop();
+        while (__atomic_load_n(&eu_p->e.fini_count, __ATOMIC_RELAXED) !=
+               scratch)
+            ;
+    }
 
     // stop workers from re-executing the task
     eu_p->e.nthreads = 0;
-    __atomic_add_fetch(&eu_p->e.fini_count, 1, __ATOMIC_RELAXED);
 
     EU_PRINTF(10, "eu_run_empty exit\n");
 }
@@ -204,6 +204,12 @@ inline void eu_mutex_release() { snrt_mutex_release(&eu_p->workers_mutex); }
 //================================================================================
 // private
 //================================================================================
+
+static void wait_worker_wfi(void) {
+    uint32_t scratch = eu_p->workers_in_loop;
+    while (__atomic_load_n(&eu_p->workers_wfi, __ATOMIC_RELAXED) != scratch)
+        ;
+}
 
 /**
  * @brief When using the CLINT as wakeup
@@ -266,12 +272,6 @@ static void worker_wfi(void) {
     __atomic_add_fetch(&eu_p->workers_wfi, 1, __ATOMIC_RELAXED);
     sntr_wfi();
     __atomic_add_fetch(&eu_p->workers_wfi, -1, __ATOMIC_RELAXED);
-}
-
-static void wait_worker_wfi(void) {
-    uint32_t scratch = eu_p->workers_in_loop;
-    while (__atomic_load_n(&eu_p->workers_wfi, __ATOMIC_RELAXED) != scratch)
-        ;
 }
 
 #endif  // #ifdef EU_USE_CLINT
