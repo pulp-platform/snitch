@@ -211,6 +211,6 @@ pub struct Ssr {
 
 impl Default for Ssr {
     fn default() -> Ssr {
-        Ssr { num_dm: 2 }
+        Ssr { num_dm: 3 }
     }
 }
