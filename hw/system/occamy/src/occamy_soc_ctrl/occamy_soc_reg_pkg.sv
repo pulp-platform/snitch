@@ -549,15 +549,15 @@ package occamy_soc_reg_pkg;
   parameter logic [0:0] OCCAMY_SOC_INTR_TEST_ECC_UNCORRECTABLE_RESVAL = 1'h 0;
   parameter logic [0:0] OCCAMY_SOC_INTR_TEST_ECC_CORRECTABLE_RESVAL = 1'h 0;
   parameter logic [1:0] OCCAMY_SOC_BOOT_MODE_RESVAL = 2'h 0;
-  parameter logic [31:0] OCCAMY_SOC_ISOLATED_RESVAL = 32'h 11111111;
-  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_0_RESVAL = 4'h 1;
-  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_1_RESVAL = 4'h 1;
-  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_2_RESVAL = 4'h 1;
-  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_3_RESVAL = 4'h 1;
-  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_4_RESVAL = 4'h 1;
-  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_5_RESVAL = 4'h 1;
-  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_6_RESVAL = 4'h 1;
-  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_7_RESVAL = 4'h 1;
+  parameter logic [31:0] OCCAMY_SOC_ISOLATED_RESVAL = 32'h ffffffff;
+  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_0_RESVAL = 4'h f;
+  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_1_RESVAL = 4'h f;
+  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_2_RESVAL = 4'h f;
+  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_3_RESVAL = 4'h f;
+  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_4_RESVAL = 4'h f;
+  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_5_RESVAL = 4'h f;
+  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_6_RESVAL = 4'h f;
+  parameter logic [3:0] OCCAMY_SOC_ISOLATED_ISOLATED_7_RESVAL = 4'h f;
 
   // Register index
   typedef enum int {
