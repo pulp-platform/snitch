@@ -1601,7 +1601,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCLASS_S: begin
         if (FP_EN && XFVEC && RVF && FLEN >= 64) begin
           write_rd = 1'b0;
+          uses_rd = 1'b1;
           acc_qvalid_o = valid_instr;
+          acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
         end else begin
           illegal_inst = 1'b1;
         end
@@ -1645,10 +1647,14 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         if (FP_EN && XFVEC && FLEN >= 32) begin
           if (XF16 && fcsr_q.fmode.dst == 1'b0) begin
             write_rd = 1'b0;
+            uses_rd = 1'b1;
             acc_qvalid_o = valid_instr;
+            acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
           end else if (XF16ALT && fcsr_q.fmode.dst == 1'b1) begin
             write_rd = 1'b0;
+            uses_rd = 1'b1;
             acc_qvalid_o = valid_instr;
+            acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
           end else begin
             illegal_inst = 1'b1;
           end
@@ -1660,10 +1666,14 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         if (FP_EN && XFVEC && FLEN >= 32 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't FLEN == 32 be enough???
           if (XF16 && fcsr_q.fmode.src == 1'b0) begin
             write_rd = 1'b0;
+            uses_rd = 1'b1;
             acc_qvalid_o = valid_instr;
+            acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
           end else if (XF16ALT && fcsr_q.fmode.src == 1'b1) begin
             write_rd = 1'b0;
+            uses_rd = 1'b1;
             acc_qvalid_o = valid_instr;
+            acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
           end else begin
             illegal_inst = 1'b1;
           end
@@ -1707,10 +1717,14 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         if (FP_EN && XFVEC && FLEN >= 16) begin
           if (XF8 && fcsr_q.fmode.src == 1'b0) begin
             write_rd = 1'b0;
+            uses_rd = 1'b1;
             acc_qvalid_o = valid_instr;
+            acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
           end else if (XF8ALT && fcsr_q.fmode.src == 1'b1) begin
             write_rd = 1'b0;
+            uses_rd = 1'b1;
             acc_qvalid_o = valid_instr;
+            acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
           end else begin
             illegal_inst = 1'b1;
           end
@@ -1723,10 +1737,14 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         if (FP_EN && XFVEC && FLEN >= 16 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't && FLEN <= 32 be more accurate???
           if (XF8 && fcsr_q.fmode.src == 1'b0) begin
             write_rd = 1'b0;
+            uses_rd = 1'b1;
             acc_qvalid_o = valid_instr;
+            acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
           end else if (XF8ALT && fcsr_q.fmode.src == 1'b1) begin
             write_rd = 1'b0;
+            uses_rd = 1'b1;
             acc_qvalid_o = valid_instr;
+            acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
           end else begin
             illegal_inst = 1'b1;
           end
