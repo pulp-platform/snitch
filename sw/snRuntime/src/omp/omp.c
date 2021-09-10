@@ -84,8 +84,7 @@ unsigned __attribute__((noinline)) snrt_omp_bootstrap(uint32_t core_idx) {
     if (core_idx == 0) {
         // master hart initializes event unit and runtime
         snrt_cluster_hw_barrier();
-        while (eu_get_workers_in_loop() !=
-               (snrt_cluster_compute_core_num() - 1))
+        while (eu_get_workers_in_wfi() != (snrt_cluster_compute_core_num() - 1))
             ;
         return 0;
     } else if (snrt_is_dm_core()) {

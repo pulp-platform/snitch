@@ -25,11 +25,9 @@ int main() {
 
     // Bootstrap: Core 0 inits the event unit and all other cores enter it while
     // core 0 waits for the queue to be full of workers
-    static eu_t *eu;
     eu_init();
     if (core_idx == 0) {
-        while (eu_get_workers_in_loop() !=
-               (snrt_cluster_compute_core_num() - 1))
+        while (eu_get_workers_in_wfi() != (snrt_cluster_compute_core_num() - 1))
             ;
     } else if (snrt_is_dm_core()) {
         // Park DM core

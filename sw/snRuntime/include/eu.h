@@ -80,6 +80,7 @@ void eu_mutex_release();
  * Getters
  */
 uint32_t eu_get_workers_in_loop();
+uint32_t eu_get_workers_in_wfi();
 
 //================================================================================
 // debug

@@ -28,8 +28,9 @@ static eu_t *volatile eu_p_global;
 //================================================================================
 // prototypes
 //================================================================================
-void wake_workers(void);
-void worker_wfi(void);
+static void wake_workers(void);
+static void worker_wfi(void);
+static void wait_worker_wfi(void);
 
 //================================================================================
 // public
@@ -65,6 +66,14 @@ void eu_exit(uint32_t core_idx) {
  */
 uint32_t eu_get_workers_in_loop() {
     return __atomic_load_n(&eu_p->workers_in_loop, __ATOMIC_RELAXED);
+}
+
+/**
+ * @brief Return the number of workers currently in the loop and waiting for
+ * interrupt
+ */
+uint32_t eu_get_workers_in_wfi() {
+    return __atomic_load_n(&eu_p->workers_wfi, __ATOMIC_RELAXED);
 }
 
 /**
@@ -119,9 +128,7 @@ void eu_event_loop(uint32_t core_idx) {
                 ;
         } else {
             // enter wait for interrupt
-            __atomic_add_fetch(&eu_p->workers_wfi, 1, __ATOMIC_RELAXED);
             worker_wfi();
-            __atomic_add_fetch(&eu_p->workers_wfi, -1, __ATOMIC_RELAXED);
         }
     }
 }
@@ -137,6 +144,9 @@ void eu_event_loop(uint32_t core_idx) {
  */
 int eu_dispatch_push(void (*fn)(void *, uint32_t), uint32_t argc, void *data,
                      uint32_t nthreads) {
+    // wait for workers to be in wfi before manipulating the event struct
+    wait_worker_wfi();
+
     // fill queue
     eu_p->e.fn = fn;
     eu_p->e.data = data;
@@ -155,7 +165,7 @@ int eu_dispatch_push(void (*fn)(void *, uint32_t), uint32_t argc, void *data,
  * @details
  */
 void eu_run_empty(uint32_t core_idx) {
-    unsigned nfini;
+    unsigned nfini, scratch;
     if (!eu_p->e.nthreads) return;
     EU_PRINTF(10, "eu_run_empty enter: q size %d\n", eu_p->e.nthreads);
 
@@ -170,17 +180,13 @@ void eu_run_empty(uint32_t core_idx) {
     }
 
     // wait for queue to be empty
-    while (__atomic_load_n(&eu_p->e.fini_count, __ATOMIC_RELAXED) !=
-           eu_p->e.nthreads - 1)
+    scratch = eu_p->e.nthreads - 1;
+    while (__atomic_load_n(&eu_p->e.fini_count, __ATOMIC_RELAXED) != scratch)
         ;
+
     // stop workers from re-executing the task
     eu_p->e.nthreads = 0;
     __atomic_add_fetch(&eu_p->e.fini_count, 1, __ATOMIC_RELAXED);
-
-    // wait for all workers to be in wfi
-    while (__atomic_load_n(&eu_p->workers_wfi, __ATOMIC_RELAXED) !=
-           eu_p->workers_in_loop)
-        ;
 
     EU_PRINTF(10, "eu_run_empty exit\n");
 }
@@ -205,7 +211,7 @@ inline void eu_mutex_release() { snrt_mutex_release(&eu_p->workers_mutex); }
  */
 #ifdef EU_USE_CLINT
 
-void wake_workers(void) {
+static void wake_workers(void) {
 #ifdef OMPSTATIC_NUMTHREADS
 #define WAKE_MASK (((1 << OMPSTATIC_NUMTHREADS) - 1) & ~0x1)
     // Fast wake-up for static number of worker threads
@@ -236,7 +242,11 @@ void wake_workers(void) {
 #endif
 }
 
-void worker_wfi(void) { snrt_int_sw_poll(); }
+static void worker_wfi(void) {
+    __atomic_add_fetch(&eu_p->workers_wfi, 1, __ATOMIC_RELAXED);
+    snrt_int_sw_poll();
+    __atomic_add_fetch(&eu_p->workers_wfi, -1, __ATOMIC_RELAXED);
+}
 
 /**
  * @brief If we use the wake-up register to wake the worker cores
@@ -244,16 +254,24 @@ void worker_wfi(void) { snrt_int_sw_poll(); }
  */
 #else  // #ifdef EU_USE_CLINT
 
-void wake_workers(void) {
+static void wake_workers(void) {
     // Guard to wake only if all workers are wfi
-    while (__atomic_load_n(&eu_p->workers_wfi, __ATOMIC_RELAXED) !=
-           eu_p->workers_in_loop)
-        ;
+    wait_worker_wfi();
     // Wake the cluster cores. We do this with cluster relative hart IDs and do
     // not wake hart 0 since this is the main thread
     uint32_t numcores = snrt_cluster_compute_core_num();
     for (uint32_t hart = 1; hart < numcores; ++hart) snrt_wakeup(hart);
 }
-void worker_wfi(void) { sntr_wfi(); }
+static void worker_wfi(void) {
+    __atomic_add_fetch(&eu_p->workers_wfi, 1, __ATOMIC_RELAXED);
+    sntr_wfi();
+    __atomic_add_fetch(&eu_p->workers_wfi, -1, __ATOMIC_RELAXED);
+}
+
+static void wait_worker_wfi(void) {
+    uint32_t scratch = eu_p->workers_in_loop;
+    while (__atomic_load_n(&eu_p->workers_wfi, __ATOMIC_RELAXED) != scratch)
+        ;
+}
 
 #endif  // #ifdef EU_USE_CLINT
