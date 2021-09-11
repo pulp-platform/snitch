@@ -20,6 +20,7 @@ dependencies:
   lowrisc_i2c: {path: ../../vendor/lowrisc_opentitan/i2c}
   test: {path: ../../ip/test}
   apb: {path: ../../vendor/pulp_platform_apb}
+  timer: {path: ../../vendor/pulp_platform_apb_timer}
 
 sources:
 # Level 0:

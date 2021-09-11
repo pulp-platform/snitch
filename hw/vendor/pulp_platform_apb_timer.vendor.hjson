@@ -1,0 +1,19 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "pulp_platform_apb_timer",
+  target_dir: "pulp_platform_apb_timer",
+
+  upstream: {
+    url: "https://github.com/pulp-platform/apb_timer.git",
+    rev: "master",
+  },
+
+  patch_dir: "patches/pulp_platform_apb_timer",
+
+  exclude_from_upstream: [
+    ".github",
+    "src_files.yml"
+  ]
+}

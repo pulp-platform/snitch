@@ -61,6 +61,13 @@
       reg-shift = <2>;
       reg-io-width = <4>;
     };
+    timer@2006000 {
+      compatible = "pulp,apb_timer";
+      interrupts = <0x00000067 0x00000068 0x00000069 0x00000070>;
+      reg = <0x00000000 0x2006000 0x00000000 0x00001000>;
+      interrupt-parent = <&PLIC0>;
+      reg-names = "control";
+    };
     spiclk: virt_100mhz {
       #clock-cells = <0>;
       compatible = "fixed-clock";
