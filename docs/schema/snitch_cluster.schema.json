@@ -209,7 +209,12 @@
                 },
                 "lat_comp_fp8": {
                     "type": "number",
-                    "description": "Latency setting (number of pipeline stages) for FP32 (fp8).",
+                    "description": "Latency setting (number of pipeline stages) for FP8.",
+                    "default": 1
+                },
+                "lat_comp_fp8alt": {
+                    "type": "number",
+                    "description": "Latency setting (number of pipeline stages) for FP8alt.",
                     "default": 1
                 },
                 "lat_noncomp": {
