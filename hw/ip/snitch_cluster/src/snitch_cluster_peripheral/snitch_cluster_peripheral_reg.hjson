@@ -108,9 +108,9 @@
             swaccess: "rw",
             hwaccess: "hrw",
             count: "NumPerfCounters",
-            cname: "performance_counter",
-            hwext: true,
-            hwqe:  true,
+            cname: "performance counter ",
+            hwext: "true",
+            hwqe: "true",
             fields: [{
                 bits: "47:0",
                 name: "PERF_COUNTER",

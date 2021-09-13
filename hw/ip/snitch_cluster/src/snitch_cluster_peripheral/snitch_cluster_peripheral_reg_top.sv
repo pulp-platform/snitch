@@ -639,11 +639,11 @@ module snitch_cluster_peripheral_reg_top #(
 
   assign perf_counter_0_we = addr_hit[3] & reg_we & !reg_error;
   assign perf_counter_0_wd = reg_wdata[47:0];
-  assign perf_counter_0_re = addr_hit[3] & reg_re & !reg_error;
+  assign perf_counter_0_re = addr_hit[3] && reg_re;
 
   assign perf_counter_1_we = addr_hit[4] & reg_we & !reg_error;
   assign perf_counter_1_wd = reg_wdata[47:0];
-  assign perf_counter_1_re = addr_hit[4] & reg_re & !reg_error;
+  assign perf_counter_1_re = addr_hit[4] && reg_re;
 
   assign wake_up_we = addr_hit[5] & reg_we & !reg_error;
   assign wake_up_wd = reg_wdata[31:0];

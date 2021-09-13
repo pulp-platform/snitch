@@ -65,17 +65,17 @@ package snitch_cluster_peripheral_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [1:0] perf_counter_enable; // [194:183]
-    snitch_cluster_peripheral_reg2hw_hart_select_mreg_t [1:0] hart_select; // [182:163]
-    snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t [1:0] perf_counter; // [162:65]
-    snitch_cluster_peripheral_reg2hw_wake_up_reg_t wake_up; // [64:32]
-    snitch_cluster_peripheral_reg2hw_hw_barrier_reg_t hw_barrier; // [31:0]
+    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [1:0] perf_counter_enable; // [195:184]
+    snitch_cluster_peripheral_reg2hw_hart_select_mreg_t [1:0] hart_select; // [183:164]
+    snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t [1:0] perf_counter; // [163:66]
+    snitch_cluster_peripheral_reg2hw_wake_up_reg_t wake_up; // [65:33]
+    snitch_cluster_peripheral_reg2hw_hw_barrier_reg_t hw_barrier; // [32:1]
   } snitch_cluster_peripheral_reg2hw_t;
 
   // HW -> register type
   typedef struct packed {
-    snitch_cluster_peripheral_hw2reg_perf_counter_mreg_t [1:0] perf_counter; // [127:32]
-    snitch_cluster_peripheral_hw2reg_hw_barrier_reg_t hw_barrier; // [31:0]
+    snitch_cluster_peripheral_hw2reg_perf_counter_mreg_t [1:0] perf_counter; // [128:33]
+    snitch_cluster_peripheral_hw2reg_hw_barrier_reg_t hw_barrier; // [32:1]
   } snitch_cluster_peripheral_hw2reg_t;
 
   // Register offsets
