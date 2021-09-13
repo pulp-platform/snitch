@@ -9,11 +9,12 @@
 //================================================================================
 // data
 //================================================================================
+static omp_t *volatile omp_p_global;
+
 #ifndef OMPSTATIC_NUMTHREADS
 __thread omp_t volatile *omp_p;
-static omp_t *volatile omp_p_global;
 #else
-const omp_t omp_p = {
+omp_t omp_p = {
     .plainTeam = {.nbThreads = OMPSTATIC_NUMTHREADS},
     .numThreads = OMPSTATIC_NUMTHREADS,
     .maxThreads = OMPSTATIC_NUMTHREADS,
@@ -48,7 +49,12 @@ void omp_init(void) {
             omp_p->plainTeam.core_epoch[i] = 0;
 
         initTeam(omp_p, &omp_p->plainTeam);
+        omp_p->kmpc_barrier = (uint32_t *)snrt_l1alloc(sizeof(uint32_t));
         omp_p_global = omp_p;
+#else
+        omp_p.kmpc_barrier = (uint32_t *)snrt_l1alloc(sizeof(uint32_t));
+        *omp_p.kmpc_barrier = 0;
+        omp_p_global = &omp_p;
 #endif
 
 #ifdef OPENMP_PROFILE
@@ -56,9 +62,9 @@ void omp_init(void) {
 #endif
 
     } else {
-#ifndef OMPSTATIC_NUMTHREADS
         while (!omp_p_global)
             ;
+#ifndef OMPSTATIC_NUMTHREADS
         omp_p = omp_p_global;
 #endif
     }

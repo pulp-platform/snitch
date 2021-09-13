@@ -58,12 +58,21 @@ typedef struct {
 } omp_team_t;
 
 typedef struct {
+#ifndef OMPSTATIC_NUMTHREADS
     omp_team_t plainTeam;
     int numThreads;
     int maxThreads;
-#ifndef OMPSTATIC_NUMTHREADS
-    uint32_t lastCycleCnt;
+#else
+    const omp_team_t plainTeam;
+    const int numThreads;
+    const int maxThreads;
 #endif
+    /**
+     * @brief Pointer to the barrier register used for synchronization eg with
+     * #pragma omp barrier
+     *
+     */
+    uint32_t *kmpc_barrier;
 } omp_t;
 
 #ifdef OPENMP_PROFILE
@@ -76,7 +85,7 @@ extern omp_prof_t *omp_prof;
 #ifndef OMPSTATIC_NUMTHREADS
 extern __thread omp_t volatile *omp_p;
 #else
-extern const omp_t omp_p;
+extern omp_t omp_p;
 #endif
 
 //================================================================================

@@ -108,7 +108,6 @@ kmp_int32 __kmpc_global_thread_num(ident_t *loc) {
     return gtid;
 }
 
-static volatile uint32_t kmp_barrier;
 void __kmpc_barrier(ident_t *loc, kmp_int32 tid) {
     (void)loc;
     (void)tid;
@@ -116,14 +115,14 @@ void __kmpc_barrier(ident_t *loc, kmp_int32 tid) {
     uint32_t ret;
     KMP_PRINTF(50, "barrier numThreads: %d\n", (uint32_t)_this->numThreads);
     // atomic add the barrier
-    ret = __atomic_add_fetch(&kmp_barrier, 1, __ATOMIC_RELAXED);
+    ret = __atomic_add_fetch(_this->kmpc_barrier, 1, __ATOMIC_RELAXED);
     if (ret == (uint32_t)_this->numThreads) {
         // am i the last one? reset barrier
-        kmp_barrier = 0;
+        *_this->kmpc_barrier = 0;
     } else {
         // wait until last core has reset the barrier
         do {
-            ret = __atomic_load_n(&kmp_barrier, __ATOMIC_RELAXED);
+            ret = __atomic_load_n(_this->kmpc_barrier, __ATOMIC_RELAXED);
         } while (ret);
     }
 }
@@ -142,11 +141,13 @@ void __kmpc_push_num_threads(ident_t *loc, kmp_int32 global_tid,
     (void)loc;
     KMP_PRINTF(20, "__kmpc_push_num_threads: enter T#%d num_threads=%d\n",
                global_tid, num_threads);
+#ifndef OMPSTATIC_NUMTHREADS
     omp_t *omp = omp_getData();
     omp->numThreads = num_threads;
     if (omp->numThreads > omp->maxThreads) {
         omp->numThreads = omp->maxThreads;
     }
+#endif
 }
 
 /*!
