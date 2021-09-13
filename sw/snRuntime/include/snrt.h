@@ -220,7 +220,7 @@ void snrt_int_sw_poll(void);
  * @brief Put the hart into wait for interrupt state
  *
  */
-static inline void sntr_wfi() { asm volatile("wfi"); }
+static inline void snrt_wfi() { asm volatile("wfi"); }
 
 //================================================================================
 // Mutex functions

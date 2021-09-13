@@ -78,6 +78,7 @@ unsigned __attribute__((noinline)) paralell_section(void) {
 #define DATASIZE 4 * 1024
 #define TILESIZE (DATASIZE / 4)
 #define NTHREADS 8
+#include "data.h"
 
 unsigned __attribute__((noinline)) double_buffering(void) {
     static double *bufx, *bufy, *x, *y;
@@ -85,15 +86,9 @@ unsigned __attribute__((noinline)) double_buffering(void) {
 
     bufx = snrt_l1alloc(sizeof(double) * 2 * TILESIZE);
     bufy = snrt_l1alloc(sizeof(double) * 2 * TILESIZE);
-    x = snrt_l3alloc(sizeof(double) * DATASIZE);
-    y = snrt_l3alloc(sizeof(double) * DATASIZE);
-
-    // generate data
-    a = 2.0;
-    for (int i = 0; i < DATASIZE; ++i) {
-        x[i] = (double)i;
-        y[i] = (double)(i + 1);
-    }
+    x = axpy_4096_x;
+    y = axpy_4096_y;
+    a = axpy_4096_a;
 
 #pragma omp parallel firstprivate(bufx, bufy, x, y, a)
     {
@@ -157,7 +152,7 @@ unsigned __attribute__((noinline)) double_buffering(void) {
                 // Computation
                 "frep.o %[ldec], 1, 0, 0b0000   \n"
                 "fmadd.d    ft2, %[a], ft0, ft1  \n" ::[a] "fr"(a),
-                [ldec] "r"(TILESIZE / NTHREADS - 1)
+                [ ldec ] "r"(TILESIZE / NTHREADS - 1)
                 : "memory", "ft0", "ft1", "ft2");
             __builtin_ssr_barrier(2);
             __builtin_ssr_disable();
@@ -181,10 +176,10 @@ unsigned __attribute__((noinline)) double_buffering(void) {
     // Verify result
     double mse = 0.0, gold;
     for (int i = 0; i < DATASIZE; ++i) {
-        gold = a * ((double)i) + ((double)(i + 1));
+        gold = axpy_4096_g[i];
         mse += (gold - x[i]) * (gold - x[i]);
     }
-    // mse = mse * 1.0 * (1.0 / (double)(DATASIZE));
+    mse = mse * 1.0 * (1.0 / (double)(DATASIZE));
     tprintf("mse = %f\n", mse);
     if (mse > 0.0001) return 1;
 

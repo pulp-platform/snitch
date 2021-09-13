@@ -8,24 +8,8 @@
 
 #include "snrt.h"
 
-typedef struct {
-    uint32_t workers_in_loop;
-    uint32_t exit_flag;
-    uint32_t workers_mutex;
-    uint32_t workers_wfi;
-    struct {
-        void (*fn)(void *, uint32_t);  // points to microtask wrapper
-        void *data;
-        uint32_t argc;
-        uint32_t nthreads;
-        uint32_t fini_count;
-    } e;
-} eu_t;
-
 /**
  * @brief Initialize the event unit
- *
- * @return eu_t* pointer to initialized event unit struct
  */
 void eu_init(void);
 

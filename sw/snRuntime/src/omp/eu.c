@@ -10,6 +10,37 @@
 #include "snrt.h"
 
 //================================================================================
+// Settings
+//================================================================================
+/**
+ * @brief Define EU_USE_CLINT to use the CLINT based SW interrupt system for
+ * synchronization. If not defined, the harts use the wakeup register to
+ * syncrhonize which is faster but only works for cluster-local synchronization
+ * which is sufficient at the moment since the OpenMP runtime is single cluster
+ * only.
+ *
+ */
+// #define EU_USE_CLINT
+
+//================================================================================
+// Types
+//================================================================================
+
+typedef struct {
+    uint32_t workers_in_loop;
+    uint32_t exit_flag;
+    uint32_t workers_mutex;
+    uint32_t workers_wfi;
+    struct {
+        void (*fn)(void *, uint32_t);  // points to microtask wrapper
+        void *data;
+        uint32_t argc;
+        uint32_t nthreads;
+        uint32_t fini_count;
+    } e;
+} eu_t;
+
+//================================================================================
 // data
 //================================================================================
 /**
@@ -270,7 +301,7 @@ static void wake_workers(void) {
 }
 static void worker_wfi(void) {
     __atomic_add_fetch(&eu_p->workers_wfi, 1, __ATOMIC_RELAXED);
-    sntr_wfi();
+    snrt_wfi();
     __atomic_add_fetch(&eu_p->workers_wfi, -1, __ATOMIC_RELAXED);
 }
 

@@ -6,13 +6,45 @@
 
 #include "snrt.h"
 
+//================================================================================
+// Settings
+//================================================================================
+
+/**
+ * @brief Define DM_USE_CLINT to use the CLINT based SW interrupt system for
+ * synchronization. If not defined, the harts use the wakeup register to
+ * syncrhonize which is faster but only works for cluster-local synchronization
+ * which is sufficient at the moment since the OpenMP runtime is single cluster
+ * only.
+ *
+ */
+// #define DM_USE_CLINT
+
+/**
+ * @brief Number of outstanding transactions to buffer. Each requires
+ * sizeof(dm_task_t) bytes
+ *
+ */
 #define DM_TASK_QUEUE_SIZE 4
 
+//================================================================================
+// Macros
+//================================================================================
+
+#define _stat_mtx_lock() snrt_mutex_lock(&dm_p->mutex)
+#define _stat_mtx_release() snrt_mutex_release(&dm_p->mutex)
+
+/**
+ * Returns of the dm status call
+ */
 #define DM_STATUS_COMPLETE_ID 0
 #define DM_STATUS_NEXT_ID 1
 #define DM_STATUS_BUSY 2
 #define DM_STATUS_WOULD_BLOCK 3
 
+//================================================================================
+// Types
+//================================================================================
 typedef struct {
     uint64_t src;
     uint64_t dst;
@@ -45,7 +77,12 @@ typedef struct {
     en_stat_t stat_q;
     uint32_t stat_p;
     uint32_t stat_pvalid;
+    uint32_t dm_wfi;
 } dm_t;
+
+//================================================================================
+// Data
+//================================================================================
 
 /**
  * @brief Pointer to the data mover struct in TCDM per thread for faster access
@@ -62,8 +99,8 @@ static dm_t *volatile dm_p_global;
 //================================================================================
 // Declarations
 //================================================================================
-inline void mtx_lock(void);
-inline void mtx_release(void);
+static void wfi_dm(void);
+static void wake_dm(void);
 
 //================================================================================
 // Debug
@@ -91,12 +128,7 @@ void dm_init(void) {
     // create a data mover instance
     if (snrt_is_dm_core()) {
         dm_p = (dm_t *)snrt_l1alloc(sizeof(dm_t));
-        dm_p->queue_fill = 0;
-        dm_p->queue_front = 0;
-        dm_p->queue_back = 0;
-        dm_p->mutex = 0;
-        dm_p->stat_q = 0;
-        dm_p->stat_pvalid = 0;
+        snrt_memset(dm_p, 0, sizeof(dm_t));
         dm_p_global = dm_p;
     } else {
         while (!dm_p_global)
@@ -162,7 +194,7 @@ void dm_main(void) {
 
         // sleep if queue is empty and no stats pending
         if (!dm_p->queue_fill && !dm_p->stat_q) {
-            snrt_int_sw_poll();
+            wfi_dm();
         }
     }
     DM_PRINTF(10, "dm: exit\n");
@@ -181,7 +213,7 @@ void dm_memcpy_async(void *dest, const void *src, size_t n) {
     do {
         s = __atomic_load_n(&dm_p->queue_fill, __ATOMIC_RELAXED);
     } while (s >= DM_TASK_QUEUE_SIZE);
-    mtx_lock();
+    _stat_mtx_lock();
 
     // insert
     t = &dm_p->queue[dm_p->queue_front];
@@ -196,10 +228,9 @@ void dm_memcpy_async(void *dest, const void *src, size_t n) {
     dm_p->queue_front = (dm_p->queue_front + 1) % DM_TASK_QUEUE_SIZE;
 
     // signal data mover
-    uint32_t basehart = snrt_cluster_core_base_hartid();
-    snrt_int_sw_set(basehart + snrt_cluster_dm_core_idx());
+    wake_dm();
 
-    mtx_release();
+    _stat_mtx_release();
 }
 
 void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
@@ -215,7 +246,7 @@ void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
     do {
         s = __atomic_load_n(&dm_p->queue_fill, __ATOMIC_RELAXED);
     } while (s >= DM_TASK_QUEUE_SIZE);
-    mtx_lock();
+    _stat_mtx_lock();
 
     // insert
     t = &dm_p->queue[dm_p->queue_front];
@@ -233,14 +264,16 @@ void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
     dm_p->queue_front = (dm_p->queue_front + 1) % DM_TASK_QUEUE_SIZE;
 
     // signal data mover
-    uint32_t basehart = snrt_cluster_core_base_hartid();
-    snrt_int_sw_set(basehart + snrt_cluster_dm_core_idx());
+    wake_dm();
 
-    mtx_release();
+    _stat_mtx_release();
 }
 
 void dm_wait(void) {
     uint32_t s;
+
+    // signal data mover
+    wake_dm();
 
     // first, wait for the dm queue to be empty and no request be pending
     do {
@@ -251,37 +284,54 @@ void dm_wait(void) {
 
     // then, issue the STAT_WAIT_IDLE request so the DM core polls for the DMA
     // to be idle
-    mtx_lock();
+    _stat_mtx_lock();
     dm_p->stat_pvalid = 0;
     // this is the request
     dm_p->stat_q = STAT_WAIT_IDLE;
     // signal data mover
-    uint32_t basehart = snrt_cluster_core_base_hartid();
-    snrt_int_sw_set(basehart + snrt_cluster_dm_core_idx());
+    wake_dm();
     // whenever stat_pvalid is non-zero, the DMA has completed all transfers
     while (!dm_p->stat_pvalid)
         ;
-    mtx_release();
+    _stat_mtx_release();
 }
 
 void dm_exit(void) {
     dm_p->stat_q = STAT_EXIT;
     // signal data mover
-    uint32_t basehart = snrt_cluster_core_base_hartid();
-    snrt_int_sw_set(basehart + snrt_cluster_dm_core_idx());
+    wake_dm();
 }
 
 void dm_wait_ready(void) {
-    mtx_lock();
+    _stat_mtx_lock();
     dm_p->stat_pvalid = 0;
     dm_p->stat_q = STAT_READY;
-    uint32_t basehart = snrt_cluster_core_base_hartid();
-    snrt_int_sw_set(basehart + snrt_cluster_dm_core_idx());
+    wake_dm();
     while (!dm_p->stat_pvalid)
         ;
-    mtx_release();
+    _stat_mtx_release();
 }
 
-inline void mtx_lock(void) { snrt_mutex_lock(&dm_p->mutex); }
+//================================================================================
+// private
+//================================================================================
 
-inline void mtx_release(void) { snrt_mutex_release(&dm_p->mutex); }
+#ifdef DM_USE_CLINT
+static void wfi_dm(void) { snrt_int_sw_poll(); }
+static void wake_dm(void) {
+    uint32_t basehart = snrt_cluster_core_base_hartid();
+    snrt_int_sw_set(basehart + snrt_cluster_dm_core_idx());
+}
+#else
+static void wfi_dm(void) {
+    __atomic_add_fetch(&dm_p->dm_wfi, 1, __ATOMIC_RELAXED);
+    snrt_wfi();
+    __atomic_add_fetch(&dm_p->dm_wfi, -1, __ATOMIC_RELAXED);
+}
+static void wake_dm(void) {
+    // wait for DM to sleep before sending wakeup
+    while (!__atomic_load_n(&dm_p->dm_wfi, __ATOMIC_RELAXED))
+        ;
+    snrt_wakeup(snrt_cluster_dm_core_idx());
+}
+#endif  // #ifdef DM_USE_CLINT

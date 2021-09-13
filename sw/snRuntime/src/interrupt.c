@@ -116,7 +116,7 @@ void snrt_int_clint_set(uint32_t reg_off, uint32_t mask) {
 void snrt_int_sw_poll(void) {
     uint32_t exit = 0, hartid = snrt_hartid();
     while (!exit) {
-        sntr_wfi();
+        snrt_wfi();
         snrt_mutex_lock(&clint_mutex);
         if (*(clint_p + ((hartid & ~0x1f) >> 5)) >> (hartid & 0x1f)) {
             *(clint_p + ((hartid & ~0x1f) >> 5)) &= ~(1 << (hartid & 0x1f));
