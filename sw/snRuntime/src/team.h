@@ -35,11 +35,6 @@ struct snrt_allocator {
     struct snrt_allocator_inst l3;
 };
 
-struct snrt_barrier {
-    uint32_t volatile barrier;
-    uint32_t volatile barrier_iteration;
-};
-
 // This struct is placed at the end of each clusters TCDM
 struct snrt_team_root {
     struct snrt_team base;

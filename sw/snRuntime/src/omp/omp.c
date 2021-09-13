@@ -49,11 +49,11 @@ void omp_init(void) {
             omp_p->plainTeam.core_epoch[i] = 0;
 
         initTeam(omp_p, &omp_p->plainTeam);
-        omp_p->kmpc_barrier = (uint32_t *)snrt_l1alloc(sizeof(uint32_t));
+        memset(omp_p->kmpc_barrier, 0, sizeof(struct snrt_barrier));
         omp_p_global = omp_p;
 #else
         omp_p.kmpc_barrier = (uint32_t *)snrt_l1alloc(sizeof(uint32_t));
-        *omp_p.kmpc_barrier = 0;
+        memset(omp_p.kmpc_barrier, 0, sizeof(struct snrt_barrier));
         omp_p_global = &omp_p;
 #endif
 

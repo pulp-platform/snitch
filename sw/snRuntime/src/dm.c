@@ -18,7 +18,7 @@
  * only.
  *
  */
-// #define DM_USE_CLINT
+#define DM_USE_CLINT
 
 /**
  * @brief Number of outstanding transactions to buffer. Each requires
@@ -134,6 +134,9 @@ void dm_init(void) {
     cluster_dm_core_idx = snrt_cluster_dm_core_idx();
     // create a data mover instance
     if (snrt_is_dm_core()) {
+#ifdef DM_USE_CLINT
+        snrt_interrupt_enable(IRQ_M_SOFT);
+#endif
         dm_p = (dm_t *)snrt_l1alloc(sizeof(dm_t));
         snrt_memset(dm_p, 0, sizeof(dm_t));
         dm_p_global = dm_p;
@@ -147,9 +150,6 @@ void dm_init(void) {
 void dm_main(void) {
     dm_task_t *t;
     uint32_t do_exit = 0;
-
-    // enable software interrupts
-    snrt_interrupt_enable(IRQ_M_SOFT);
 
     DM_PRINTF(10, "enter main\n");
 
@@ -205,7 +205,9 @@ void dm_main(void) {
         }
     }
     DM_PRINTF(10, "dm: exit\n");
+#ifdef DM_USE_CLINT
     snrt_interrupt_disable(IRQ_M_SOFT);
+#endif
     return;
 }
 

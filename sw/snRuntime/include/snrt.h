@@ -49,11 +49,18 @@ struct snrt_peripherals {
     volatile uint32_t *wakeup;
 };
 
+/// Barrier to use with snrt_barrier
+struct snrt_barrier {
+    uint32_t volatile barrier;
+    uint32_t volatile barrier_iteration;
+};
+
 static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
 
 extern void snrt_cluster_hw_barrier();
 extern void snrt_cluster_sw_barrier();
 extern void snrt_global_barrier();
+extern void snrt_barrier(struct snrt_barrier *barr, uint32_t n);
 
 extern uint32_t __attribute__((pure)) snrt_hartid();
 struct snrt_team_root *snrt_current_team();

@@ -114,17 +114,7 @@ void __kmpc_barrier(ident_t *loc, kmp_int32 tid) {
     omp_t *_this = omp_getData();
     uint32_t ret;
     KMP_PRINTF(50, "barrier numThreads: %d\n", (uint32_t)_this->numThreads);
-    // atomic add the barrier
-    ret = __atomic_add_fetch(_this->kmpc_barrier, 1, __ATOMIC_RELAXED);
-    if (ret == (uint32_t)_this->numThreads) {
-        // am i the last one? reset barrier
-        *_this->kmpc_barrier = 0;
-    } else {
-        // wait until last core has reset the barrier
-        do {
-            ret = __atomic_load_n(_this->kmpc_barrier, __ATOMIC_RELAXED);
-        } while (ret);
-    }
+    snrt_barrier(_this->kmpc_barrier, (uint32_t)_this->numThreads);
 }
 
 /*!

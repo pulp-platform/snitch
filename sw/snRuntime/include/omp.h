@@ -72,7 +72,7 @@ typedef struct {
      * #pragma omp barrier
      *
      */
-    uint32_t *kmpc_barrier;
+    struct snrt_barrier *kmpc_barrier;
 } omp_t;
 
 #ifdef OPENMP_PROFILE
