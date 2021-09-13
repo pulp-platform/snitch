@@ -35,6 +35,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   /// Enable div/sqrt unit (buggy - use with caution)
   parameter bit          XDivSqrt  = 0,
   parameter bit          XFVEC     = 0,
+  parameter bit          XFDOTP    = 0,
   parameter bit          XFAUX     = 0,
   int unsigned           FLEN      = DataWidth,
   /// Enable experimental IPU extension.
@@ -1313,6 +1314,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       //     illegal_inst = 1'b1;
       //   end
       // end
+      VFDOTPEX_S_H,
+      VFDOTPEX_S_R_H: begin
+        if (FP_EN && XFVEC && RVF && XF16 && XFDOTP) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       // [Alternate] Quarter Precision Floating-Point
       FADD_B,
       FSUB_B,
@@ -1547,6 +1557,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           end else begin
             illegal_inst = 1'b1;
           end
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
+      VFDOTPEX_H_B,
+      VFDOTPEX_H_R_B: begin
+        if (FP_EN && XFVEC && RVF && XF16 && XFDOTP) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
         end else begin
           illegal_inst = 1'b1;
         end
