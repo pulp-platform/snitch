@@ -27,7 +27,8 @@ void dm_main(void);
 void dm_exit(void);
 
 /**
- * @brief Start an asynchronus memory copy
+ * @brief Queue an asynchronus memory copy. The transfer is not started unless
+ * dm_start or dm_wait is issued
  * @details block only if DM queue is full
  *
  * @param dest destination pointer
@@ -38,7 +39,8 @@ void dm_exit(void);
 void dm_memcpy_async(void *dest, const void *src, size_t n);
 
 /**
- * @brief Start an asynchronus memory copy
+ * @brief Queue an asynchronus memory copy. The transfer is not started unless
+ * dm_start or dm_wait is issued
  * @details block only if DM queue is full
  *
  * @param src source address
@@ -52,6 +54,12 @@ void dm_memcpy_async(void *dest, const void *src, size_t n);
 void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
                        uint32_t sstrd, uint32_t dstrd, uint32_t nreps,
                        uint32_t cfg);
+
+/**
+ * @brief Trigger the start of queued transfers and exit immediately
+ *
+ */
+void dm_start(void);
 
 /**
  * @brief Wait for all DMA transfers to complete

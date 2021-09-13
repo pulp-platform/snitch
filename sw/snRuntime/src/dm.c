@@ -31,8 +31,8 @@
 // Macros
 //================================================================================
 
-#define _stat_mtx_lock() snrt_mutex_lock(&dm_p->mutex)
-#define _stat_mtx_release() snrt_mutex_release(&dm_p->mutex)
+#define _dm_mtx_lock() snrt_mutex_lock(&dm_p->mutex)
+#define _dm_mtx_release() snrt_mutex_release(&dm_p->mutex)
 
 /**
  * Returns of the dm status call
@@ -213,7 +213,7 @@ void dm_memcpy_async(void *dest, const void *src, size_t n) {
     do {
         s = __atomic_load_n(&dm_p->queue_fill, __ATOMIC_RELAXED);
     } while (s >= DM_TASK_QUEUE_SIZE);
-    _stat_mtx_lock();
+    _dm_mtx_lock();
 
     // insert
     t = &dm_p->queue[dm_p->queue_front];
@@ -227,10 +227,7 @@ void dm_memcpy_async(void *dest, const void *src, size_t n) {
     __atomic_add_fetch(&dm_p->queue_fill, 1, __ATOMIC_RELAXED);
     dm_p->queue_front = (dm_p->queue_front + 1) % DM_TASK_QUEUE_SIZE;
 
-    // signal data mover
-    wake_dm();
-
-    _stat_mtx_release();
+    _dm_mtx_release();
 }
 
 void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
@@ -246,7 +243,7 @@ void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
     do {
         s = __atomic_load_n(&dm_p->queue_fill, __ATOMIC_RELAXED);
     } while (s >= DM_TASK_QUEUE_SIZE);
-    _stat_mtx_lock();
+    _dm_mtx_lock();
 
     // insert
     t = &dm_p->queue[dm_p->queue_front];
@@ -263,11 +260,10 @@ void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
     __atomic_add_fetch(&dm_p->queue_fill, 1, __ATOMIC_RELAXED);
     dm_p->queue_front = (dm_p->queue_front + 1) % DM_TASK_QUEUE_SIZE;
 
-    // signal data mover
-    wake_dm();
-
-    _stat_mtx_release();
+    _dm_mtx_release();
 }
+
+void dm_start(void) { wake_dm(); }
 
 void dm_wait(void) {
     uint32_t s;
@@ -284,7 +280,7 @@ void dm_wait(void) {
 
     // then, issue the STAT_WAIT_IDLE request so the DM core polls for the DMA
     // to be idle
-    _stat_mtx_lock();
+    _dm_mtx_lock();
     dm_p->stat_pvalid = 0;
     // this is the request
     dm_p->stat_q = STAT_WAIT_IDLE;
@@ -293,7 +289,7 @@ void dm_wait(void) {
     // whenever stat_pvalid is non-zero, the DMA has completed all transfers
     while (!dm_p->stat_pvalid)
         ;
-    _stat_mtx_release();
+    _dm_mtx_release();
 }
 
 void dm_exit(void) {
@@ -303,13 +299,13 @@ void dm_exit(void) {
 }
 
 void dm_wait_ready(void) {
-    _stat_mtx_lock();
+    _dm_mtx_lock();
     dm_p->stat_pvalid = 0;
     dm_p->stat_q = STAT_READY;
     wake_dm();
     while (!dm_p->stat_pvalid)
         ;
-    _stat_mtx_release();
+    _dm_mtx_release();
 }
 
 //================================================================================
