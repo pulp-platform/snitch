@@ -1310,19 +1310,19 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
-      // VFCVT_H_H,
-      // VFCVTU_H_H: begin
-      //   if (FP_EN && XFVEC && RVF && XF16 && XF16ALT && FLEN >= 32) begin
-      //     if (fcsr_q.fmode.src != fcsr_q.fmode.dst) begin
-      //       write_rd = 1'b0;
-      //       acc_qvalid_o = valid_instr;
-      //     end else begin
-      //       illegal_inst = 1'b1;
-      //     end
-      //   end else begin
-      //     illegal_inst = 1'b1;
-      //   end
-      // end
+      VFCVT_H_H,
+      VFCVTU_H_H: begin
+        if (FP_EN && XFVEC && RVF && XF16 && XF16ALT && FLEN >= 32) begin
+          if (fcsr_q.fmode.src != fcsr_q.fmode.dst) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       VFDOTPEX_S_H,
       VFDOTPEX_S_R_H: begin
         if (FP_EN && XFVEC && RVF && XF16 && XFDOTP) begin
@@ -1484,7 +1484,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCPKB_B_S,
       VFCPKC_B_S,
       VFCPKD_B_S: begin
-        if (FP_EN && XFVEC && RVF && FLEN >= 16) begin // GIANNA: FLEN>=16 ?
+        if (FP_EN && XFVEC && RVF && FLEN >= 16) begin
           if (XF8 && fcsr_q.fmode.dst == 1'b0) begin
             write_rd = 1'b0;
             acc_qvalid_o = valid_instr;
@@ -1518,7 +1518,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFCPKB_B_D,
       VFCPKC_B_D,
       VFCPKD_B_D: begin
-        if (FP_EN && XFVEC && RVD && FLEN >= 16) begin // GIANNA: FLEN>=16 ?
+        if (FP_EN && XFVEC && RVD && FLEN >= 16) begin
           if (XF8 && fcsr_q.fmode.dst == 1'b0) begin
             write_rd = 1'b0;
             acc_qvalid_o = valid_instr;
