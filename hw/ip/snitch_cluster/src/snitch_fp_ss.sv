@@ -30,7 +30,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
   parameter bit XF8 = 0,
   parameter bit XF8ALT = 0,
   parameter bit XFVEC = 0,
-  parameter bit XFDOTP = 0,
   parameter int unsigned FLEN = DataWidth,
   /// Derived parameter *Do not override*
   parameter type addr_t = logic [AddrWidth-1:0],
@@ -2538,7 +2537,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
     .XF8     ( XF8     ),
     .XF8ALT  ( XF8ALT  ),
     .XFVEC   ( XFVEC   ),
-    .XFDOTP  ( XFDOTP  ),
     .FLEN    ( FLEN    ),
     .FPUImplementation (FPUImplementation)
   ) i_fpu (

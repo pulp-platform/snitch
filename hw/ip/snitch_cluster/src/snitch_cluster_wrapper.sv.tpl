@@ -127,7 +127,11 @@ package ${cfg['pkg_name']};
 % endif
                     '{default: fpnew_pkg::PARALLEL}, // NONCOMP
                     '{default: fpnew_pkg::MERGED},   // CONV
+% if c["xfdotp"]:
                     '{default: fpnew_pkg::MERGED}},  // DOTP
+% else:
+                    '{default: fpnew_pkg::DISABLED}}, // DOTP
+% endif
         PipeConfig: fpnew_pkg::${cfg['timing']['fpu_pipe_config']}
     }${',\n' if not loop.last else '\n'}\
   % endfor
