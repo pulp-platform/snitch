@@ -96,6 +96,12 @@ __thread volatile dm_t *dm_p;
  */
 static dm_t *volatile dm_p_global;
 
+/**
+ * @brief DM core id for wakeup is stored on TLS for performance
+ *
+ */
+__thread uint32_t cluster_dm_core_idx;
+
 //================================================================================
 // Declarations
 //================================================================================
@@ -125,6 +131,7 @@ static void wake_dm(void);
 // Publics
 //================================================================================
 void dm_init(void) {
+    cluster_dm_core_idx = snrt_cluster_dm_core_idx();
     // create a data mover instance
     if (snrt_is_dm_core()) {
         dm_p = (dm_t *)snrt_l1alloc(sizeof(dm_t));
@@ -316,7 +323,7 @@ void dm_wait_ready(void) {
 static void wfi_dm(void) { snrt_int_sw_poll(); }
 static void wake_dm(void) {
     uint32_t basehart = snrt_cluster_core_base_hartid();
-    snrt_int_sw_set(basehart + snrt_cluster_dm_core_idx());
+    snrt_int_sw_set(basehart + cluster_dm_core_idx);
 }
 #else
 static void wfi_dm(void) {
@@ -328,6 +335,6 @@ static void wake_dm(void) {
     // wait for DM to sleep before sending wakeup
     while (!__atomic_load_n(&dm_p->dm_wfi, __ATOMIC_RELAXED))
         ;
-    snrt_wakeup(snrt_cluster_dm_core_idx());
+    snrt_wakeup(cluster_dm_core_idx);
 }
 #endif  // #ifdef DM_USE_CLINT
