@@ -80,7 +80,8 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     // init peripherals
     team->peripherals.clint = (uint32_t *)bootdata->clint_base;
     team->peripherals.wakeup =
-        (uint32_t *)(spm_start + bootdata->tcdm_size + 0x28);
+        (uint32_t *)(spm_start + bootdata->tcdm_size + 0x30);
+    team->peripherals.perf_counters = spm_start + bootdata->tcdm_size;
 
     // Init allocator
     snrt_alloc_init(team);
