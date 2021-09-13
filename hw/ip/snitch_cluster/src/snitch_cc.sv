@@ -51,7 +51,7 @@ module snitch_cc #(
   parameter bit          XF16               = 0,
   parameter bit          XF16ALT            = 0,
   parameter bit          XFVEC              = 0,
-  parameter bit          XFAUX              = 0,
+  parameter bit          XFDOTP             = 0,
   /// Enable Snitch DMA
   parameter bit          Xdma               = 0,
   /// Has `frep` support.
@@ -121,9 +121,9 @@ module snitch_cc #(
   input  addr_t                      tcdm_addr_mask_i
 );
 
-  // localaparam bit FPUImplementation.UnitTypes[3]
-  localparam bit XFAUX_MERGED  = XFAUX & (FPUImplementation.UnitTypes[3] == '{default: fpnew_pkg::MERGED});
-  localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XFVEC | XFAUX_MERGED | XF16 | XF16ALT | XF8ALT;
+  // FMA architecture is "merged" -> mulexp and macexp instructions are supported
+  localparam bit XFAUX_MERGED  = (FPUImplementation.UnitTypes[3] == '{default: fpnew_pkg::MERGED});
+  localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XFVEC | XFAUX_MERGED | XF16 | XF16ALT | XF8ALT | XFDOTP;
   localparam int unsigned FLEN = RVD     ? 64 : // D ext.
                           RVF     ? 32 : // F ext.
                           XF16    ? 16 : // Xf16 ext.
@@ -208,6 +208,7 @@ module snitch_cc #(
     .XF8 (XF8),
     .XF8ALT (XF8ALT),
     .XFVEC (XFVEC),
+    .XFDOTP (XFDOTP),
     .XFAUX (XFAUX_MERGED),
     .FLEN (FLEN)
   ) i_snitch (
@@ -460,6 +461,7 @@ module snitch_cc #(
       .XF8 (XF8),
       .XF8ALT (XF8ALT),
       .XFVEC (XFVEC),
+      .XFDOTP (XFDOTP),
       .FLEN (FLEN)
     ) i_snitch_fp_ss (
       .clk_i,
