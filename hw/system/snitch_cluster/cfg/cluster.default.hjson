@@ -85,6 +85,13 @@
         isa: "rv32imafd",
         xssr: true
         xfrep: true
+        xf16: true,
+        xf16alt: true,
+        xf8: true,
+        xf8alt: true,
+        xfaux: true,
+        xfdotp: true,
+        xfvec: true,
         num_int_outstanding_loads: 1,
         num_int_outstanding_mem: 4,
         num_fp_outstanding_loads: 4,

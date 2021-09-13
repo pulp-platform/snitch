@@ -12,7 +12,6 @@ module snitch_fpu import snitch_pkg::*; #(
   parameter bit          XF8                = 0,
   parameter bit          XF8ALT             = 0,
   parameter bit          XFVEC              = 0,
-  parameter bit          XFDOTP             = 0,
   parameter int unsigned FLEN               = 0
 ) (
   input logic                               clk_i,
@@ -43,7 +42,6 @@ module snitch_fpu import snitch_pkg::*; #(
     Width:             fpnew_pkg::maximum(FLEN, 32),
     EnableVectors:     XFVEC,
     EnableNanBox:      1'b1,
-    EnableDotpOpGroup: XFDOTP,
     FpFmtMask:         {RVF, RVD, XF16, XF8, XF16ALT, XF8ALT},
     IntFmtMask:        {XFVEC && (XF8 || XF8ALT), XFVEC && (XF16 || XF16ALT), 1'b1, 1'b0}
   };
