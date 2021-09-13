@@ -5,6 +5,11 @@
 #include "snrt.h"
 #include "team.h"
 
+#define ALIGN_UP(addr, size) (((addr) + (size)-1) & ~((size)-1))
+#define ALIGN_DOWN(addr, size) ((addr) & ~((size)-1))
+
+#define MIN_CHUNK_SIZE 8
+
 /**
  * @brief Allocate a chunk of memory in the L1 memory
  * @details This currently does not support free-ing of memory
@@ -14,6 +19,8 @@
  */
 void *snrt_l1alloc(size_t size) {
     struct snrt_allocator_inst *alloc = &snrt_current_team()->allocator.l1;
+
+    size = ALIGN_UP(size, MIN_CHUNK_SIZE);
 
     if (alloc->next + size > alloc->base + alloc->size) {
         snrt_trace(
@@ -53,13 +60,15 @@ void *snrt_l3alloc(size_t size) {
  */
 void snrt_alloc_init(struct snrt_team_root *team) {
     // Allocator in L1 TCDM memory
-    team->allocator.l1.base = (uint32_t)team->cluster_mem.start;
+    team->allocator.l1.base =
+        ALIGN_UP((uint32_t)team->cluster_mem.start, MIN_CHUNK_SIZE);
     team->allocator.l1.size =
         (uint32_t)(team->cluster_mem.end - team->cluster_mem.start);
     team->allocator.l1.next = team->allocator.l1.base;
     // Allocator in L3 shared memory
     extern uint32_t _edram;
-    team->allocator.l3.base = (uint32_t)_edram;
+    team->allocator.l3.base = ALIGN_UP((uint32_t)_edram, MIN_CHUNK_SIZE);
+    ;
     team->allocator.l3.size = 0;
     team->allocator.l3.next = team->allocator.l3.base;
 }
