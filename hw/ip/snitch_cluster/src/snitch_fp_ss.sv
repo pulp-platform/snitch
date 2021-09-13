@@ -995,6 +995,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_op = fpnew_pkg::CPKAB;
         op_select[0] = RegA;
         op_select[1] = RegB;
+        op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP16;
         if (fpu_fmt_mode_i.dst == 1'b1) begin
@@ -1007,6 +1008,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_op = fpnew_pkg::CPKAB;
         op_select[0] = RegA;
         op_select[1] = RegB;
+        op_select[2] = RegDest;
         op_mode      = 1'b1;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP16;
@@ -1048,6 +1050,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_op = fpnew_pkg::CPKAB;
         op_select[0] = RegA;
         op_select[1] = RegB;
+        op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP16;
         if (fpu_fmt_mode_i.dst == 1'b1) begin
@@ -1060,6 +1063,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_op = fpnew_pkg::CPKAB;
         op_select[0] = RegA;
         op_select[1] = RegB;
+        op_select[2] = RegDest;
         op_mode      = 1'b1;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP16;
@@ -1489,6 +1493,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_op = fpnew_pkg::CPKAB;
         op_select[0] = RegA;
         op_select[1] = RegB;
+        op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP8;
         if (fpu_fmt_mode_i.dst == 1'b1) begin
@@ -1503,6 +1508,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_op = fpnew_pkg::CPKCD;
         op_select[0] = RegA;
         op_select[1] = RegB;
+        op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP8;
         if (fpu_fmt_mode_i.dst == 1'b1) begin
@@ -1517,6 +1523,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_op = fpnew_pkg::CPKAB;
         op_select[0] = RegA;
         op_select[1] = RegB;
+        op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP8;
         if (fpu_fmt_mode_i.dst == 1'b1) begin
@@ -1531,6 +1538,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         fpu_op = fpnew_pkg::CPKCD;
         op_select[0] = RegA;
         op_select[1] = RegB;
+        op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP8;
         if (fpu_fmt_mode_i.dst == 1'b1) begin
