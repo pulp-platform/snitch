@@ -335,6 +335,12 @@
                                     "description": "Enable Smallfloat Xf16alt extension, also known as brain-float.",
                                     "default": false
                                 },
+                                "xfdotp": {
+                                    "type": "boolean",
+                                    "title": "Xfdotp Extension",
+                                    "description": "Enable DOTP extensions.",
+                                    "default": false
+                                },
                                 "xfvec": {
                                     "type": "boolean",
                                     "title": "Xfvec Extension",

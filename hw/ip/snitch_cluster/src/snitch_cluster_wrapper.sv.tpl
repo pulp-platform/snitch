@@ -105,13 +105,16 @@ package ${cfg['pkg_name']};
                         ${cfg['timing']['lat_comp_fp16_alt']}, // FP16alt
                         ${cfg['timing']['lat_comp_fp8_alt']}   // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: ${cfg['timing']['lat_noncomp']}},   // NONCOMP
-                    '{default: ${cfg['timing']['lat_conv']}}},   // CONV
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},
+                    '{default: 1},                               // DIVSQRT
+                    '{default: ${cfg['timing']['lat_noncomp']}}, // NONCOMP
+                    '{default: ${cfg['timing']['lat_conv']}},    // CONV
+                    '{default: 1}                                // DOTP
+                    },
+        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
                     '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED}},  // CONV
+                    '{default: fpnew_pkg::MERGED},   // CONV
+                    '{default: fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::${cfg['timing']['fpu_pipe_config']}
     };
 
@@ -193,7 +196,7 @@ module ${cfg['name']}_wrapper (
     .XF8 (${core_cfg_flat('xf8')}),
     .XF8ALT (${core_cfg_flat('xf8alt')}),
     .XFVEC (${core_cfg_flat('xfvec')}),
-    .XFAUX (${core_cfg_flat('xfaux')}),
+    .XFDOTP (${core_cfg_flat('xfdotp')}),
     .Xdma (${core_cfg_flat('xdma')}),
     .Xssr (${core_cfg_flat('xssr')}),
     .Xfrep (${core_cfg_flat('xfrep')}),
