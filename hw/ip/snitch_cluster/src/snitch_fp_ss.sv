@@ -2531,14 +2531,15 @@ module snitch_fp_ss import snitch_pkg::*; #(
   // Floating Point Unit
   // ----------------------
   snitch_fpu #(
-    .RVF (RVF),
-    .RVD (RVD),
-    .XF16 (XF16),
-    .XF16ALT (XF16ALT),
-    .XF8 (XF8),
-    .XF8ALT (XF8ALT),
-    .XFVEC (XFVEC),
-    .FLEN (FLEN),
+    .RVF     ( RVF     ),
+    .RVD     ( RVD     ),
+    .XF16    ( XF16    ),
+    .XF16ALT ( XF16ALT ),
+    .XF8     ( XF8     ),
+    .XF8ALT  ( XF8ALT  ),
+    .XFVEC   ( XFVEC   ),
+    .XFDOTP  ( XFDOTP  ),
+    .FLEN    ( FLEN    ),
     .FPUImplementation (FPUImplementation)
   ) i_fpu (
     .clk_i                           ,

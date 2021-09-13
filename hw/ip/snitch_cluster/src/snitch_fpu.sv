@@ -40,11 +40,12 @@ module snitch_fpu import snitch_pkg::*; #(
 );
 
   localparam fpnew_pkg::fpu_features_t FPUFeatures = '{
-    Width:         fpnew_pkg::maximum(FLEN, 32),
-    EnableVectors: XFVEC,
-    EnableNanBox:  1'b1,
-    FpFmtMask:     {RVF, RVD, XF16, XF8, XF16ALT, XF8ALT},
-    IntFmtMask:    {XFVEC && (XF8 || XF8ALT), XFVEC && (XF16 || XF16ALT), 1'b1, 1'b0}
+    Width:             fpnew_pkg::maximum(FLEN, 32),
+    EnableVectors:     XFVEC,
+    EnableNanBox:      1'b1,
+    EnableDotpOpGroup: XFDOTP,
+    FpFmtMask:         {RVF, RVD, XF16, XF8, XF16ALT, XF8ALT},
+    IntFmtMask:        {XFVEC && (XF8 || XF8ALT), XFVEC && (XF16 || XF16ALT), 1'b1, 1'b0}
   };
 
   typedef struct packed {
