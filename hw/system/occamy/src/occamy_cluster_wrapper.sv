@@ -82,11 +82,13 @@ package occamy_cluster_pkg;
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
-                    '{default: 1}},   // CONV
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},
+                    '{default: 1},   // CONV
+                    '{default: 1}},  // DOTP
+        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
                     '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED}},  // CONV
+                    '{default: fpnew_pkg::MERGED},   // CONV
+                    '{default: fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     },
     '{
@@ -337,13 +339,15 @@ module occamy_cluster_wrapper (
     .ICacheLineCount (occamy_cluster_pkg::ICacheLineCount),
     .ICacheSets (occamy_cluster_pkg::ICacheSets),
     .RVE (9'b000000000),
-    .RVF (9'b011111111),
-    .RVD (9'b011111111),
+    .RVF (9'b111111111),
+    .RVD (9'b111111111),
     .XDivSqrt (9'b000000000),
-    .XF16 (9'b000000000),
-    .XF16ALT (9'b000000000),
-    .XF8 (9'b000000000),
-    .XFVEC (9'b000000000),
+    .XF16 (9'b011111111),
+    .XF16ALT (9'b011111111),
+    .XF8 (9'b011111111),
+    .XF8ALT (9'b011111111),
+    .XFVEC (9'b011111111),
+    .XFDOTP (9'b011111111),
     .Xdma (9'b100000000),
     .Xssr (9'b011111111),
     .Xfrep (9'b011111111),
