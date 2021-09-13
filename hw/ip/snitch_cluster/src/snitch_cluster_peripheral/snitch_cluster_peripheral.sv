@@ -106,6 +106,10 @@ module snitch_cluster_peripheral
       if (reg2hw.perf_counter_enable[i].issue_core_to_fpu.q) begin
         perf_counter_d[i] = perf_counter_d[i] + sel_core_events.issue_core_to_fpu;
       end
+      // Reset performance counter.
+      if (reg2hw.perf_counter[i].qe) begin
+        perf_counter_d[i] = reg2hw.perf_counter[i].q;
+      end
     end
   end
 
