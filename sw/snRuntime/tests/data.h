@@ -1,3 +1,7 @@
+// Copyright 2021 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
 static double axpy_4096_x[4096] = {
     0.000000,    1.000000,    2.000000,    3.000000,    4.000000,
     5.000000,    6.000000,    7.000000,    8.000000,    9.000000,
