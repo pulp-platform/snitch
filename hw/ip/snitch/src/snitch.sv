@@ -231,7 +231,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic [1:0][31:0] scratch_d, scratch_q;
   logic [1:0][31:0] epc_d, epc_q;
   logic [0:0][31:2] tvec_d, tvec_q;
-  logic [0:0][3:0] cause_d, cause_q;
+  logic [0:0][4:0] cause_d, cause_q;
   logic [0:0] cause_irq_d, cause_irq_q;
   logic spp_d, spp_q;
   snitch_pkg::priv_lvl_t mpp_d, mpp_q;
@@ -2189,7 +2189,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             csr_rvalue = cause_q[M];
             csr_rvalue[31] = cause_irq_q[M];
             if (!exception) begin
-              cause_d[M] = alu_result[3:0];
+              cause_d[M] = alu_result[4:0];
               cause_irq_d[M] = alu_result[31];
             end
           end

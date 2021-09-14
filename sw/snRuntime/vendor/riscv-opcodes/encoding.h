@@ -140,6 +140,8 @@ extern "C" {
 #define MIP_VSEIP (1 << IRQ_VS_EXT)
 #define MIP_MEIP (1 << IRQ_M_EXT)
 #define MIP_SGEIP (1 << IRQ_S_GEXT)
+#define SIP_SCIP (1 << IRQ_S_CLUSTER)
+#define MIP_MCIP (1 << IRQ_M_CLUSTER)
 
 #define MIE_SSIE (1 << IRQ_S_SOFT)
 #define MIE_HSIE (1 << IRQ_H_SOFT)
@@ -150,6 +152,8 @@ extern "C" {
 #define MIE_SEIE (1 << IRQ_S_EXT)
 #define MIE_HEIE (1 << IRQ_H_EXT)
 #define MIE_MEIE (1 << IRQ_M_EXT)
+#define MIE_SCIE (1 << IRQ_S_CLUSTER)
+#define MIE_MCIE (1 << IRQ_M_CLUSTER)
 
 #define MCAUSE_INTERRUPT 0x80000000
 
@@ -221,6 +225,8 @@ extern "C" {
 #define IRQ_S_GEXT 12
 #define IRQ_COP 12
 #define IRQ_HOST 13
+#define IRQ_M_CLUSTER 19
+#define IRQ_S_CLUSTER 17
 
 /* page table entry (PTE) fields */
 #define PTE_V 0x001                 /* Valid */
