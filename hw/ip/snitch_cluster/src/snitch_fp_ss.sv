@@ -1623,6 +1623,23 @@ module snitch_fp_ss import snitch_pkg::*; #(
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVTU_B_H}) op_mode = 1'b1;
       end
+      riscv_instr::VFCVT_B_B,
+      riscv_instr::VFCVTU_B_B: begin
+        fpu_op = fpnew_pkg::F2F;
+        op_select[0] = RegA;
+        op_select[1] = RegB;
+        src_fmt      = fpnew_pkg::FP8;
+        dst_fmt      = fpnew_pkg::FP8;
+        if (fpu_fmt_mode_i.src == 1'b1) begin
+          src_fmt    = fpnew_pkg::FP8ALT;
+        end
+        if (fpu_fmt_mode_i.dst == 1'b1) begin
+          dst_fmt    = fpnew_pkg::FP8ALT;
+        end
+        vectorial_op = 1'b1;
+        set_dyn_rm   = 1'b1;
+        if (acc_req_q.data_op inside {riscv_instr::VFCVTU_B_B}) op_mode = 1'b1;
+      end
       riscv_instr::VFDOTPEX_H_B: begin
         fpu_op = fpnew_pkg::SDOTP;
         op_select[0] = RegA;

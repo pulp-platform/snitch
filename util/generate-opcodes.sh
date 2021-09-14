@@ -27,12 +27,7 @@ rustfmt $INSTR_RS
 #######
 # RTL #
 #######
-<<<<<<< HEAD
-OPCODES=(opcodes opcodes-dma opcodes-rep opcodes-ssr opcodes-ipu opcodes-sflt) # TODO: change opcodes-sflt to opcodes-flt-occamy
-=======
-# OPCODES+=(opcodes-sflt opcodes-ipu)
-OPCODES+=(opcodes-flt-occamy opcodes-ipu)
->>>>>>> 7fbc0191d3eacab4e0fb5b6f7f6fe76625214663
+OPCODES=(opcodes opcodes-dma opcodes-rep opcodes-ssr opcodes-ipu opcodes-flt-occamy)
 INSTR_SV=$ROOT/hw/ip/snitch/src/riscv_instr.sv
 
 cat > $INSTR_SV <<- EOM

@@ -1561,6 +1561,19 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      VFCVT_B_B,
+      VFCVTU_B_B: begin
+        if (FP_EN && XFVEC && RVF && XF8 && XF8ALT && FLEN >= 16) begin
+          if (fcsr_q.fmode.src != fcsr_q.fmode.dst) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       VFDOTPEX_H_B,
       VFDOTPEX_H_R_B: begin
         if (FP_EN && XFVEC && RVF && XF16 && XFDOTP) begin
