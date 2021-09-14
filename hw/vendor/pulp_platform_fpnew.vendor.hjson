@@ -7,7 +7,7 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/fpnew.git",
-    rev: "master",
+    rev: "feature/expanding_dotp",
   },
 
   exclude_from_upstream: [
