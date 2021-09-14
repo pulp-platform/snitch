@@ -1173,6 +1173,8 @@ pub enum OpcodeRdRs1 {
     VfcvtuHB,
     VfcvtBH,
     VfcvtuBH,
+    VfcvtBB,
+    VfcvtuBB,
 }
 
 impl std::fmt::Display for FormatRdRs1 {
@@ -1252,6 +1254,8 @@ impl std::fmt::Display for OpcodeRdRs1 {
             Self::VfcvtuHB => write!(f, "vfcvtu.h.b"),
             Self::VfcvtBH => write!(f, "vfcvt.b.h"),
             Self::VfcvtuBH => write!(f, "vfcvtu.b.h"),
+            Self::VfcvtBB => write!(f, "vfcvt.b.b"),
+            Self::VfcvtuBB => write!(f, "vfcvtu.b.b"),
         }
     }
 }
@@ -2604,6 +2608,8 @@ pub fn parse_u32(raw: u32) -> Format {
         0x98706033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtuHB, raw),
         0x98603033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtBH, raw),
         0x98607033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtuBH, raw),
+        0x98703033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtBB, raw),
+        0x98707033 => return parse_rd_rs1(OpcodeRdRs1::VfcvtuBB, raw),
         _ => (),
     }
     match raw & 0xfff07fff {
@@ -3211,6 +3217,8 @@ pub struct Latency {
     vfcvtu_h_b: u8,
     vfcvt_b_h: u8,
     vfcvtu_b_h: u8,
+    vfcvt_b_b: u8,
+    vfcvtu_b_b: u8,
     // Format::RdRs1Rs2
     add: u8,
     sub: u8,
@@ -3720,6 +3728,8 @@ impl Default for Latency {
             vfcvtu_h_b: 1,
             vfcvt_b_h: 1,
             vfcvtu_b_h: 1,
+            vfcvt_b_b: 1,
+            vfcvtu_b_b: 1,
             add: 1,
             sub: 1,
             sll: 1,
@@ -3996,6 +4006,7 @@ pub enum Csr {
     Fflags = 0x001,
     Frm = 0x002,
     Fcsr = 0x003,
+    Fmode = 0x800,
     Cycle = 0xc00,
     Time = 0xc01,
     Instret = 0xc02,
