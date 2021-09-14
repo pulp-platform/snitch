@@ -13,8 +13,8 @@ int main() {
     uint32_t cluster_id = snrt_cluster_idx();
     uint32_t cluster_num = snrt_cluster_num();
 
-    uint32_t *cluster_sum = snrt_global_memory().start;
-    uint32_t *core_cluster_sum = snrt_global_memory().start + 4;
+    uint32_t *cluster_sum = (uint32_t *)snrt_global_memory().start;
+    uint32_t *core_cluster_sum = (uint32_t *)snrt_global_memory().start + 4;
 
     for (uint32_t i = 0; i < global_core_num; i++) {
         snrt_global_barrier();

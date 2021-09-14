@@ -7,4 +7,6 @@
 #include "snrt.h"
 
 // TODO: Implement using cluster DMA for a faster `memcpy`.
-void *snrt_memcpy(void *dst, const void *src, size_t n) { memcpy(dst, src, n); }
+void *snrt_memcpy(void *dst, const void *src, size_t n) {
+    return memcpy(dst, src, n);
+}

@@ -13,6 +13,8 @@
 volatile static uint32_t sum = 0;
 
 static void task(void *arg, uint32_t argc) {
+    (void)arg;
+    (void)argc;
     __atomic_add_fetch(&sum, 1, __ATOMIC_RELAXED);
     tprintf("work arg[0] = %d argc = %d\n", ((uint32_t *)arg)[0], argc);
 }

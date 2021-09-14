@@ -41,6 +41,17 @@
 #endif
 
 //================================================================================
+// Macros
+//================================================================================
+#ifdef OMPSTATIC_NUMTHREADS
+#define _OMP_T const omp_t
+#define _OMP_TEAM_T const omp_team_t
+#else
+#define _OMP_T omp_t
+#define _OMP_TEAM_T omp_team_t
+#endif
+
+//================================================================================
 // types
 //================================================================================
 
@@ -97,14 +108,6 @@ unsigned snrt_omp_bootstrap(uint32_t core_idx);
 void partialParallelRegion(int32_t argc, void *data,
                            void (*fn)(void *, uint32_t), int num_threads);
 
-static inline omp_t *omp_getData() {
-#ifndef OMPSTATIC_NUMTHREADS
-    return omp_p;
-#else
-    return &omp_p;
-#endif
-}
-
 #ifdef OPENMP_PROFILE
 void omp_print_prof(void);
 #endif
@@ -113,12 +116,20 @@ void omp_print_prof(void);
 // inlines
 //================================================================================
 
-static inline unsigned omp_get_thread_num(void) {
-    return snrt_cluster_core_idx();
-}
-
+#ifndef OMPSTATIC_NUMTHREADS
+static inline omp_t *omp_getData() { return omp_p; }
 static inline omp_team_t *omp_get_team(omp_t *_this) {
     return &_this->plainTeam;
+}
+#else
+static inline const omp_t *omp_getData() { return &omp_p; }
+static inline const omp_team_t *omp_get_team(const omp_t *_this) {
+    return &_this->plainTeam;
+}
+#endif
+
+static inline unsigned omp_get_thread_num(void) {
+    return snrt_cluster_core_idx();
 }
 
 static inline void __attribute__((always_inline))

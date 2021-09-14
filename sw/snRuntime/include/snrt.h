@@ -162,7 +162,9 @@ static inline __attribute__((noreturn)) void snrt_exit(int status) {
 //================================================================================
 // Allocation functions
 //================================================================================
+extern void snrt_alloc_init(struct snrt_team_root *team);
 extern void *snrt_l1alloc(size_t size);
+extern void *snrt_l3alloc(size_t size);
 
 //================================================================================
 // Interrupt functions

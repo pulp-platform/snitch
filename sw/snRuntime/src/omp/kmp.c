@@ -26,8 +26,9 @@ static void __microtask_wrapper(void *arg, uint32_t argc) {
     _kmp_ptr32 *p_argv = &(args)[1];
     kmp_int32 gtid = id;
 
+    uint32_t cycle = read_csr(mcycle);
     OMP_PROF(if (snrt_hartid() == 1) omp_prof->fork_oh =
-                 read_csr(mcycle) - omp_prof->fork_oh);
+                 cycle - omp_prof->fork_oh);
 
     switch (argc) {
         default:
@@ -80,6 +81,8 @@ static void __microtask_wrapper(void *arg, uint32_t argc) {
                p_argv[10], p_argv[11]);
             break;
     }
+    // for performance tracking in traces
+    cycle = read_csr(mcycle);
 }
 
 /*!
@@ -111,7 +114,7 @@ kmp_int32 __kmpc_global_thread_num(ident_t *loc) {
 void __kmpc_barrier(ident_t *loc, kmp_int32 tid) {
     (void)loc;
     (void)tid;
-    omp_t *_this = omp_getData();
+    _OMP_T *_this = omp_getData();
     uint32_t ret;
     KMP_PRINTF(50, "barrier numThreads: %d\n", (uint32_t)_this->numThreads);
     snrt_barrier(_this->kmpc_barrier, (uint32_t)_this->numThreads);
@@ -129,6 +132,8 @@ This call is only required if the parallel construct has a `num_threads` clause.
 void __kmpc_push_num_threads(ident_t *loc, kmp_int32 global_tid,
                              kmp_int32 num_threads) {
     (void)loc;
+    (void)global_tid;
+    (void)num_threads;
     KMP_PRINTF(20, "__kmpc_push_num_threads: enter T#%d num_threads=%d\n",
                global_tid, num_threads);
 #ifndef OMPSTATIC_NUMTHREADS
@@ -152,7 +157,7 @@ Do the actual fork and call the microtask in the relevant number of threads.
 */
 void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
     (void)loc;
-    omp_t *omp = omp_getData();
+    _OMP_T *omp = omp_getData();
 
     OMP_PROF(omp_prof->fork_oh = read_csr(mcycle));
 
@@ -218,8 +223,9 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
                               kmp_int32 *pstride, kmp_int32 incr,
                               kmp_int32 chunk) {
     (void)loc;
-    omp_t *omp = omp_getData();
-    omp_team_t *team = omp_get_team(omp);
+    (void)gtid;
+    _OMP_T *omp = omp_getData();
+    _OMP_TEAM_T *team = omp_get_team(omp);
     unsigned threadNum = omp_get_thread_num();
     kmp_uint32 loopSize = (*pupper - *plower) / incr + 1;
     kmp_int32 globalUpper = *pupper;
@@ -302,8 +308,9 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
                                kmp_uint64 *pupper, kmp_int64 *pstride,
                                kmp_int64 incr, kmp_int64 chunk) {
     (void)loc;
-    omp_t *omp = omp_getData();
-    omp_team_t *team = omp_get_team(omp);
+    (void)gtid;
+    _OMP_T *omp = omp_getData();
+    _OMP_TEAM_T *team = omp_get_team(omp);
     unsigned threadNum = omp_get_thread_num();
     kmp_uint64 loopSize = (*pupper - *plower) / incr + 1;
     kmp_uint64 globalUpper = *pupper;

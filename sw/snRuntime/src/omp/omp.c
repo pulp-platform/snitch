@@ -4,6 +4,7 @@
 
 #include "omp.h"
 
+#include "dm.h"
 #include "snrt.h"
 
 //================================================================================
@@ -29,7 +30,10 @@ omp_prof_t *omp_prof;
 //================================================================================
 // public
 //================================================================================
-static inline void initTeam(omp_t *_this, omp_team_t *team) {}
+static inline void initTeam(omp_t *_this, omp_team_t *team) {
+    (void)_this;
+    (void)team;
+}
 
 void omp_init(void) {
     if (snrt_cluster_core_idx() == 0) {
@@ -49,11 +53,12 @@ void omp_init(void) {
             omp_p->plainTeam.core_epoch[i] = 0;
 
         initTeam(omp_p, &omp_p->plainTeam);
-        memset(omp_p->kmpc_barrier, 0, sizeof(struct snrt_barrier));
+        snrt_memset(omp_p->kmpc_barrier, 0, sizeof(struct snrt_barrier));
         omp_p_global = omp_p;
 #else
-        omp_p.kmpc_barrier = (uint32_t *)snrt_l1alloc(sizeof(uint32_t));
-        memset(omp_p.kmpc_barrier, 0, sizeof(struct snrt_barrier));
+        omp_p.kmpc_barrier =
+            (struct snrt_barrier *)snrt_l1alloc(sizeof(struct snrt_barrier));
+        snrt_memset(omp_p.kmpc_barrier, 0, sizeof(struct snrt_barrier));
         omp_p_global = &omp_p;
 #endif
 

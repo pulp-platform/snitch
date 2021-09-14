@@ -72,12 +72,12 @@ typedef struct {
     dm_task_t queue[DM_TASK_QUEUE_SIZE];
     uint32_t queue_back;
     uint32_t queue_front;
-    uint32_t queue_fill;
-    uint32_t mutex;
-    en_stat_t stat_q;
-    uint32_t stat_p;
-    uint32_t stat_pvalid;
-    uint32_t dm_wfi;
+    volatile uint32_t queue_fill;
+    volatile uint32_t mutex;
+    volatile en_stat_t stat_q;
+    volatile uint32_t stat_p;
+    volatile uint32_t stat_pvalid;
+    volatile uint32_t dm_wfi;
 } dm_t;
 
 //================================================================================
@@ -89,12 +89,11 @@ typedef struct {
  *
  */
 __thread volatile dm_t *dm_p;
-
 /**
  * @brief Pointer to where the DM struct in TCDM is located
  *
  */
-static dm_t *volatile dm_p_global;
+static volatile dm_t *volatile dm_p_global;
 
 /**
  * @brief DM core id for wakeup is stored on TLS for performance
@@ -138,7 +137,7 @@ void dm_init(void) {
         snrt_interrupt_enable(IRQ_M_SOFT);
 #endif
         dm_p = (dm_t *)snrt_l1alloc(sizeof(dm_t));
-        snrt_memset(dm_p, 0, sizeof(dm_t));
+        snrt_memset((void *)dm_p, 0, sizeof(dm_t));
         dm_p_global = dm_p;
     } else {
         while (!dm_p_global)
@@ -148,7 +147,7 @@ void dm_init(void) {
 }
 
 void dm_main(void) {
-    dm_task_t *t;
+    volatile dm_task_t *t;
     uint32_t do_exit = 0;
 
     DM_PRINTF(10, "enter main\n");
@@ -213,7 +212,7 @@ void dm_main(void) {
 
 void dm_memcpy_async(void *dest, const void *src, size_t n) {
     uint32_t s;
-    dm_task_t *t;
+    volatile dm_task_t *t;
 
     DM_PRINTF(10, "dm_memcpy_async %#x -> %#x size %d\n", src, dest,
               (uint32_t)n);
@@ -243,7 +242,7 @@ void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
                        uint32_t sstrd, uint32_t dstrd, uint32_t nreps,
                        uint32_t cfg) {
     uint32_t s;
-    dm_task_t *t;
+    volatile dm_task_t *t;
 
     DM_PRINTF(10, "dm_memcpy2d_async %#x -> %#x size %d\n", src, dst,
               (uint32_t)size);

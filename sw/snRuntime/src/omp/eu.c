@@ -54,7 +54,7 @@ __thread volatile eu_t *eu_p;
  * @brief Pointer to where the DM struct in TCDM is located
  *
  */
-static eu_t *volatile eu_p_global;
+static volatile eu_t *volatile eu_p_global;
 
 //================================================================================
 // prototypes
@@ -70,7 +70,7 @@ void eu_init(void) {
     if (snrt_cluster_core_idx() == 0) {
         // Allocate the eu struct in L1 for fast access
         eu_p = snrt_l1alloc(sizeof(eu_t));
-        snrt_memset(eu_p, 0, sizeof(eu_t));
+        snrt_memset((void *)eu_p, 0, sizeof(eu_t));
         // store copy of eu_p on shared memory
         eu_p_global = eu_p;
     } else {

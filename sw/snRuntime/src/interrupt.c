@@ -10,7 +10,7 @@
 // Data
 //================================================================================
 static volatile uint32_t clint_mutex = 0;
-static __thread uint32_t *clint_p;
+static __thread volatile uint32_t *clint_p;
 
 //================================================================================
 // ISR definitions
@@ -93,6 +93,7 @@ uint32_t snrt_int_sw_get(uint32_t hartid) {
     snrt_mutex_lock(&clint_mutex);
     uint32_t ret = *(clint_p + ((hartid & ~0x1f) >> 5)) >> (hartid & 0x1f);
     snrt_mutex_release(&clint_mutex);
+    return ret;
 }
 
 /**
@@ -134,6 +135,6 @@ void __attribute__((weak)) irq_m_soft(uint32_t core_idx) {
     snrt_int_sw_clear(core_idx);
 }
 
-void __attribute__((weak)) irq_m_timer(uint32_t core_idx) {}
+void __attribute__((weak)) irq_m_timer(uint32_t core_idx) { (void)core_idx; }
 
-void __attribute__((weak)) irq_m_ext(uint32_t core_idx) {}
+void __attribute__((weak)) irq_m_ext(uint32_t core_idx) { (void)core_idx; }
