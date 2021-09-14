@@ -451,6 +451,13 @@ vfcvtu.b.h  rd rs1 24..20=6 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
 @vfcvtu.ah.b rd rs1 24..20=7 31..30=2 29..25=0x0C 14=1 13..12=2 6..2=0x0C 1..0=3
 @vfcvt.b.ah  rd rs1 24..20=6 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
 @vfcvtu.b.ah rd rs1 24..20=6 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
+# Xfvecquarterwithhalf - vectorial quarter-precision conversions with Xfvechalf extension
+vfcvt.b.b    rd rs1 24..20=7 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
+@vfcvt.ab.b  rd rs1 24..20=7 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
+@vfcvt.b.ab  rd rs1 24..20=7 31..30=2 29..25=0x0C 14=0 13..12=3 6..2=0x0C 1..0=3
+vfcvtu.b.b   rd rs1 24..20=7 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
+@vfcvtu.ab.b rd rs1 24..20=7 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
+@vfcvtu.b.ab rd rs1 24..20=7 31..30=2 29..25=0x0C 14=1 13..12=3 6..2=0x0C 1..0=3
 
 # Xfvecaltquarter - vectorial alternative quarter-precision floats - requires FLEN >= 16
 @vfadd.ab     rd rs1 rs2      31..30=2 29..25=0x01 14=0 13..12=3 6..2=0x0C 1..0=3
