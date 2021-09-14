@@ -1691,11 +1691,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
           end
         end
-      end 
+      end
       VFMV_X_H,
       VFCVT_X_H,
       VFCVT_XU_H: begin
-        if (FP_EN && XFVEC && FLEN >= 32 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't FLEN == 32 be enough???
+        if (FP_EN && XFVEC && FLEN >= 32 && ~RVD) begin
           if (XF16 && fcsr_q.fmode.src == 1'b0) begin
             write_rd = 1'b0;
             uses_rd = 1'b1;
@@ -1710,7 +1710,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
           end
         end
-      end      
+      end
       // [Alternate] Quarter Precision Floating-Point
       FLE_B,
       FLT_B,
@@ -1761,12 +1761,12 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
           end
         end
-      end     
+      end
       VFMV_X_B,
       VFCLASS_B,
       VFCVT_X_B,
       VFCVT_XU_B: begin
-        if (FP_EN && XFVEC && FLEN >= 16 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't && FLEN <= 32 be more accurate???
+        if (FP_EN && XFVEC && FLEN >= 16 && ~RVD) begin
           if (XF8 && fcsr_q.fmode.src == 1'b0) begin
             write_rd = 1'b0;
             uses_rd = 1'b1;
@@ -1781,7 +1781,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
           end
         end
-      end      
+      end
       // Offload Int-FP Instructions - fire and forget
       // Double Precision Floating-Point
       FCVT_D_W,
@@ -1826,7 +1826,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFMV_H_X,
       VFCVT_H_X,
       VFCVT_H_XU: begin
-        if (FP_EN && XFVEC && FLEN >= 32 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't && FLEN <= 32 be more accurate???
+        if (FP_EN && XFVEC && FLEN >= 32 && ~RVD) begin
           if (XF16 && fcsr_q.fmode.dst == 1'b0) begin
             write_rd = 1'b0;
             acc_qvalid_o = valid_instr;
@@ -1858,7 +1858,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFMV_B_X,
       VFCVT_B_X,
       VFCVT_B_XU: begin
-        if (FP_EN && XFVEC && FLEN >= 16 && ~RVD) begin // Gianna: WHY was here && ~RVD wouldn't && FLEN <= 32 be more accurate???
+        if (FP_EN && XFVEC && FLEN >= 16 && ~RVD) begin
           if (XF8 && fcsr_q.fmode.dst == 1'b0) begin
             write_rd = 1'b0;
             acc_qvalid_o = valid_instr;
