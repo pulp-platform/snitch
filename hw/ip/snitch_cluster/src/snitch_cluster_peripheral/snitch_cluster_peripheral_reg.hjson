@@ -330,6 +330,38 @@
         }]
     },
     {
+        name: "CL_CLINT_SET",
+        desc: '''
+        Set bits in the cluster-local CLINT. Writing a 1 at location i sets the cluster-local interrupt
+        of hart i, where i is relative to the first hart in the cluster, ignoring the cluster base hart ID.
+        '''
+        hwext: "true",
+        hwqe: "true",
+        swaccess: "wo",
+        hwaccess: "hro",
+          fields: [{
+              bits: "31:0",
+              name: "CL_CLINT_SET",
+              desc: "Set cluster-local interrupt of hart i"
+          }]
+    },
+    {
+        name: "CL_CLINT_CLEAR",
+        desc: '''
+        Clear bits in the cluster-local CLINT. Writing a 1 at location i clears the cluster-local interrupt
+        of hart i, where i is relative to the first hart in the cluster, ignoring the cluster base hart ID.
+        '''
+        hwext: "true",
+        hwqe: "true",
+        swaccess: "wo",
+        hwaccess: "hro",
+          fields: [{
+              bits: "31:0",
+              name: "CL_CLINT_CLEAR",
+              desc: "Clear cluster-local interrupt of hart i"
+          }]
+    },
+    {
         name: "HW_BARRIER",
         desc: '''Hardware barrier register. Loads to this register will block until all cores have
         performed the load. At this stage we know that they reached the same point in the control flow,

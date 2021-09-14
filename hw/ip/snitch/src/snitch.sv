@@ -85,7 +85,6 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   /// Transactions need to be handled strictly in-order.
   output dreq_t         data_req_o,
   input  drsp_t         data_rsp_i,
-  input  logic          wake_up_sync_i, // synchronous wake-up interrupt
   // Address Translation interface.
   output logic    [1:0] ptw_valid_o,
   input  logic    [1:0] ptw_ready_i,
@@ -108,8 +107,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic interrupt, ecall, ebreak;
   logic zero_lsb;
 
-  logic meip, mtip, msip;
-  logic seip, stip, ssip;
+  logic meip, mtip, msip, mcip;
+  logic seip, stip, ssip, scip;
   logic interrupts_enabled;
   logic any_interrupt_pending;
 
@@ -242,9 +241,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic [1:0] eie_d, eie_q;
   logic [1:0] tie_d, tie_q;
   logic [1:0] sie_d, sie_q;
+  logic [1:0] cie_d, cie_q;
   logic       seip_d, seip_q;
   logic       stip_d, stip_q;
   logic       ssip_d, ssip_q;
+  logic       scip_d, scip_q;
   snitch_pkg::priv_lvl_t priv_lvl_d, priv_lvl_q;
 
   typedef struct packed {
@@ -273,9 +274,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   `FFSR(eie_q, eie_d, '0, clk_i, rst_i)
   `FFSR(tie_q, tie_d, '0, clk_i, rst_i)
   `FFSR(sie_q, sie_d, '0, clk_i, rst_i)
+  `FFSR(cie_q, cie_d, '0, clk_i, rst_i)
   `FFSR(seip_q, seip_d, '0, clk_i, rst_i)
   `FFSR(stip_q, stip_d, '0, clk_i, rst_i)
   `FFSR(ssip_q, ssip_d, '0, clk_i, rst_i)
+  `FFSR(scip_q, scip_d, '0, clk_i, rst_i)
 
   `FFSR(dcsr_q, dcsr_d, '0, clk_i, rst_i)
   `FFNR(dpc_q, dpc_d, clk_i)
@@ -494,7 +497,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     csr_en = 1'b0;
     // Debug request and wake up are possibilties to move out of
     // the low power state.
-    wfi_d = (wake_up_sync_i || irq_i.debug || debug_q || any_interrupt_pending) ? 1'b0 : wfi_q;
+    wfi_d = (irq_i.debug || debug_q || any_interrupt_pending) ? 1'b0 : wfi_q;
 
     unique casez (inst_data_i)
       ADD: begin
@@ -2011,13 +2014,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign meip = irq_i.meip & eie_q[M];
   assign mtip = irq_i.mtip & tie_q[M];
   assign msip = irq_i.msip & sie_q[M];
+  assign mcip = irq_i.mcip & cie_q[M];
 
   assign seip = seip_q & eie_q[S];
   assign stip = stip_q & tie_q[S];
   assign ssip = ssip_q & sie_q[S];
+  assign scip = scip_q & cie_q[S];
 
   assign interrupts_enabled = ((priv_lvl_q == PrivLvlM) & ie_q[M]) || (priv_lvl_q != PrivLvlM);
-  assign any_interrupt_pending = meip | mtip | msip | seip | stip | ssip;
+  assign any_interrupt_pending = meip | mtip | msip | mcip | seip | stip | ssip | scip;
   assign interrupt = interrupts_enabled & any_interrupt_pending;
 
   // CSR logic
@@ -2043,9 +2048,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     eie_d = eie_q;
     tie_d = tie_q;
     sie_d = sie_q;
+    cie_d = cie_q;
     seip_d = seip_q;
     stip_d = stip_q;
     ssip_d = ssip_q;
+    scip_d = scip_q;
 
     tvec_d = tvec_q;
 
@@ -2146,29 +2153,36 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             csr_rvalue[MEI] = irq_i.meip;
             csr_rvalue[MTI] = irq_i.mtip;
             csr_rvalue[MSI] = irq_i.msip;
+            csr_rvalue[MCI] = irq_i.mcip;
             csr_rvalue[SEI] = seip_q;
             csr_rvalue[STI] = stip_q;
             csr_rvalue[SSI] = ssip_q;
+            csr_rvalue[SCI] = scip_q;
             if (!exception) begin
               seip_d = alu_result[SEI];
               stip_d = alu_result[STI];
               ssip_d = alu_result[SSI];
+              scip_d = alu_result[SCI];
             end
           end
           CSR_MIE: begin
             csr_rvalue[MEI] = eie_q[M];
             csr_rvalue[MTI] = tie_q[M];
             csr_rvalue[MSI] = sie_q[M];
+            csr_rvalue[MCI] = cie_q[M];
             csr_rvalue[SEI] = eie_q[S];
             csr_rvalue[STI] = tie_q[S];
             csr_rvalue[SSI] = sie_q[S];
+            csr_rvalue[SCI] = cie_q[S];
             if (!exception) begin
               eie_d[M] = alu_result[MEI];
               tie_d[M] = alu_result[MTI];
               sie_d[M] = alu_result[MSI];
+              cie_d[M] = alu_result[MCI];
               eie_d[S] = alu_result[SEI];
               tie_d[S] = alu_result[STI];
               sie_d[S] = alu_result[SSI];
+              cie_d[S] = alu_result[SCI];
             end
           end
           CSR_MCAUSE: begin
@@ -2273,9 +2287,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         if (meip)      cause_d[M] = MEI;
         else if (mtip) cause_d[M] = MTI;
         else if (msip) cause_d[M] = MSI;
+        else if (mcip) cause_d[M] = MCI;
         else if (seip) cause_d[M] = SEI;
         else if (stip) cause_d[M] = STI;
         else if (ssip) cause_d[M] = SSI;
+        else if (scip) cause_d[M] = SCI;
       end
 
       if (exception) begin

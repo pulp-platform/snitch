@@ -456,8 +456,8 @@ module snitch_cluster
   reg_rsp_t reg_rsp;
 
   // 5. Misc. Wires.
-  logic [NrCores-1:0] wake_up_sync;
   logic icache_prefetch_enable;
+  logic [NrCores-1:0] cl_interrupt;
 
   // -------------
   // DMA Subsystem
@@ -735,6 +735,7 @@ module snitch_cluster
       i_sync_mtip  (.clk_i, .rst_ni, .serial_i (mtip_i[i]), .serial_o (irq.mtip));
     sync #(.STAGES (2))
       i_sync_msip  (.clk_i, .rst_ni, .serial_i (msip_i[i]), .serial_o (irq.msip));
+    assign irq.mcip = cl_interrupt[i];
 
       tcdm_req_t [TcdmPorts-1:0] tcdm_req_wo_user;
 
@@ -804,7 +805,6 @@ module snitch_cluster
         .data_rsp_i (core_rsp[i]),
         .tcdm_req_o (tcdm_req_wo_user),
         .tcdm_rsp_i (tcdm_rsp[TcdmPortsOffs+:TcdmPorts]),
-        .wake_up_sync_i (wake_up_sync[i]),
         .axi_dma_req_o (axi_dma_req),
         .axi_dma_res_i (axi_dma_res),
         .axi_dma_busy_o (),
@@ -1093,8 +1093,8 @@ module snitch_cluster
     /// The TCDM always starts at the cluster base.
     .tcdm_start_address_i (tcdm_start_address),
     .tcdm_end_address_i (tcdm_end_address),
-    .wake_up_o (wake_up_sync),
     .icache_prefetch_enable_o (icache_prefetch_enable),
+    .cl_clint_o (cl_interrupt),
     .cluster_hart_base_id_i (hart_base_id_i),
     .core_events_i (core_events),
     .tcdm_events_i (tcdm_events),

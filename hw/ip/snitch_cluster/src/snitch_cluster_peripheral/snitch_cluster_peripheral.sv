@@ -29,8 +29,8 @@ module snitch_cluster_peripheral
 
   input  addr_t                      tcdm_start_address_i,
   input  addr_t                      tcdm_end_address_i,
-  output logic [NrCores-1:0]         wake_up_o,
   output logic                       icache_prefetch_enable_o,
+  output logic [NrCores-1:0]         cl_clint_o,
   input  logic [9:0]                 cluster_hart_base_id_i,
   input  core_events_t [NrCores-1:0] core_events_i,
   input  tcdm_events_t               tcdm_events_i,
@@ -63,19 +63,20 @@ module snitch_cluster_peripheral
   );
 
   logic [NumPerfCounters-1:0][47:0] perf_counter_d, perf_counter_q;
+  logic [31:0] cl_clint_d, cl_clint_q;
 
-  // Wake-up logic.
-  // Deprecate in favor of RISC-V interrupts.
+  // Wake-up logic: Bits in cl_clint_q can be set/cleared with writes to
+  // cl_clint_set/cl_clint_clear
   always_comb begin
-    wake_up_o = '0;
-    if (reg2hw.wake_up.qe) begin
-      if (reg2hw.wake_up.q == '1) begin
-        wake_up_o = '1;
-      end else begin
-        wake_up_o[reg2hw.wake_up.q] = 1'b1;
-      end
+    cl_clint_d = cl_clint_q;
+    if (reg2hw.cl_clint_set.qe) begin
+      cl_clint_d = cl_clint_q | reg2hw.cl_clint_set.q;
+    end else if (reg2hw.cl_clint_clear.qe) begin
+      cl_clint_d = cl_clint_q & ~reg2hw.cl_clint_clear.q;
     end
   end
+  `FF(cl_clint_q, cl_clint_d, '0, clk_i, rst_ni)
+  assign cl_clint_o = cl_clint_q[NrCores-1:0];
 
   // Enable icache prefetch
   assign icache_prefetch_enable_o = reg2hw.icache_prefetch_enable.q;
