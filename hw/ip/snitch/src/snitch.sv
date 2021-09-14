@@ -1324,10 +1324,19 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       VFDOTPEX_S_H,
-      VFDOTPEX_S_R_H: begin
-        if (FP_EN && XFVEC && RVF && XF16 && XFDOTP) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+      VFDOTPEX_S_R_H,
+      VFNDOTPEX_S_H,
+      VFNDOTPEX_S_R_H,
+      VFSUMEX_S_H,
+      VFNSUMEX_S_H: begin
+        if (FP_EN && XFVEC && FLEN >= 64 && XFDOTP) begin
+          if ((XF16 && fcsr_q.fmode.src == 1'b0) ||
+             (XF16ALT && fcsr_q.fmode.src == 1'b1)) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
@@ -1584,10 +1593,24 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       VFDOTPEX_H_B,
-      VFDOTPEX_H_R_B: begin
-        if (FP_EN && XFVEC && RVF && XF16 && XFDOTP) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+      VFDOTPEX_H_R_B,
+      VFNDOTPEX_H_B,
+      VFNDOTPEX_H_R_B,
+      VFSUMEX_H_B,
+      VFNSUMEX_H_B: begin
+        if (FP_EN && XFVEC && FLEN >= 32 && XFDOTP) begin
+          if ((XF8 && fcsr_q.fmode.src == 1'b0) ||
+             (XF8ALT && fcsr_q.fmode.src == 1'b1)) begin
+            if ((XF16 && fcsr_q.fmode.dst == 1'b0) ||
+               (XF16ALT && fcsr_q.fmode.dst == 1'b1)) begin
+              write_rd = 1'b0;
+              acc_qvalid_o = valid_instr;
+            end else begin
+              illegal_inst = 1'b1;
+            end
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
