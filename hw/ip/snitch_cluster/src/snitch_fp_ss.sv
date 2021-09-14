@@ -1072,7 +1072,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
       end
-      riscv_instr::VFDOTPEX_S_H: begin
+      riscv_instr::VFDOTPEX_S_H,
+      riscv_instr::VFDOTPEX_S_R_H: begin
         fpu_op = fpnew_pkg::SDOTP;
         op_select[0] = RegA;
         op_select[1] = RegB;
@@ -1085,6 +1086,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
+        if (acc_req_q.data_op inside {riscv_instr::VFDOTPEX_S_R_H}) op_select[2] = RegBRep;
       end
       // [Alternate] Quarter Precision
       riscv_instr::FADD_B: begin
@@ -1648,7 +1650,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFCVTU_B_B}) op_mode = 1'b1;
       end
-      riscv_instr::VFDOTPEX_H_B: begin
+      riscv_instr::VFDOTPEX_H_B,
+      riscv_instr::VFDOTPEX_H_R_B: begin
         fpu_op = fpnew_pkg::SDOTP;
         op_select[0] = RegA;
         op_select[1] = RegB;
@@ -1664,6 +1667,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         end
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
+        if (acc_req_q.data_op inside {riscv_instr::VFDOTPEX_H_R_B}) op_select[2] = RegBRep;
       end
       // -------------------
       // From float to int
