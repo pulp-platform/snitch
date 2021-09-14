@@ -122,7 +122,7 @@ module snitch_cc #(
 );
 
   // FMA architecture is "merged" -> mulexp and macexp instructions are supported
-  localparam bit XFauxMerged  = (FPUImplementation.UnitTypes[3] == '{default: fpnew_pkg::MERGED});
+  localparam bit XFauxMerged  = (FPUImplementation.UnitTypes[3] == fpnew_pkg::MERGED);
   localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XF8ALT | XFVEC | XFauxMerged | XFDOTP;
   localparam int unsigned FLEN = RVD     ? 64 : // D ext.
                           RVF     ? 32 : // F ext.
