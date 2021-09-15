@@ -5,8 +5,15 @@
   name: "pulp_platform_register_interface",
   target_dir: "pulp_platform_register_interface",
 
+  patch_dir: "patches/pulp_platform_register_interface",
+
   upstream: {
     url: "https://github.com/pulp-platform/register_interface.git",
     rev: "master",
   }
+
+  exclude_from_upstream: [
+    "*.vendor.hjson"
+  ]
+
 }

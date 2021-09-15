@@ -1,219 +1,136 @@
 # Copyright lowRISC contributors.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
-"""Generate SystemVerilog designs from validated register JSON tree
-"""
+"""Generate SystemVerilog designs from IpBlock object"""
 
 import logging as log
+import os
+from typing import Dict, Optional, Tuple
 
-from mako.template import Template
-from mako import exceptions
+from mako import exceptions  # type: ignore
+from mako.template import Template  # type: ignore
 from pkg_resources import resource_filename
 
-from .data import Field, Reg, MultiReg, Window, Block
-from .field_enums import HwAccess, SwRdAccess, SwWrAccess
+from .ip_block import IpBlock
+from .multi_register import MultiRegister
+from .reg_base import RegBase
+from .register import Register
 
 
-def escape_name(name):
+def escape_name(name: str) -> str:
     return name.lower().replace(' ', '_')
 
 
-def check_field_bool(obj, field, default):
-    if field in obj:
-        return True if obj[field] == "true" else False
+def make_box_quote(msg: str, indent: str = '  ') -> str:
+    hr = indent + ('/' * (len(msg) + 6))
+    middle = indent + '// ' + msg + ' //'
+    return '\n'.join([hr, middle, hr])
+
+
+def _get_awparam_name(iface_name: Optional[str]) -> str:
+    return (iface_name or 'Iface').capitalize() + 'Aw'
+
+
+def get_addr_widths(block: IpBlock) -> Dict[Optional[str], Tuple[str, int]]:
+    '''Return the address widths for the device interfaces
+
+    Returns a dictionary keyed by interface name whose values are pairs:
+    (paramname, width) where paramname is IfaceAw for an unnamed interface and
+    FooAw for an interface called foo. This is constructed in the same order as
+    block.reg_blocks.
+
+    If there is a single device interface and that interface is unnamed, use
+    the more general parameter name "BlockAw".
+
+    '''
+    assert block.reg_blocks
+    if len(block.reg_blocks) == 1 and None in block.reg_blocks:
+        return {None: ('BlockAw', block.reg_blocks[None].get_addr_width())}
+
+    return {name: (_get_awparam_name(name), rb.get_addr_width())
+            for name, rb in block.reg_blocks.items()}
+
+
+def get_type_name_pfx(block: IpBlock, iface_name: Optional[str]) -> str:
+    return block.name.lower() + ('' if iface_name is None
+                                 else '_{}'.format(iface_name.lower()))
+
+
+def get_r0(reg: RegBase) -> Register:
+    '''Get a Register representing an entry in the RegBase'''
+    if isinstance(reg, Register):
+        return reg
     else:
-        return default
+        assert isinstance(reg, MultiRegister)
+        return reg.reg
 
 
-def parse_field(obj, reg, nfields):
-    """Convert OrderedDict field into Field class
-    """
-    f = Field()
-    f.name = escape_name(obj["name"])
-    # if name doesn't exist and only one field in a reg
-    if f.name == "" and nfields == 1:
-        f.name = reg.name
-
-    # MSB, LSB
-    f.lsb = obj["bitinfo"][2]
-    f.msb = f.lsb + obj["bitinfo"][1] - 1
-
-    f.swaccess = obj["genswaccess"]
-    f.swrdaccess = obj["genswrdaccess"]
-    f.swwraccess = obj["genswwraccess"]
-    f.hwaccess = obj["genhwaccess"]
-    f.hwqe = obj["genhwqe"]
-    f.hwre = obj["genhwre"]
-    f.hwext = reg.hwext
-    f.tags = obj["tags"]
-    f.shadowed = reg.shadowed
-
-    # resval handling. `genresval` has zero value if `resval` field is defined
-    # as unknown 'x'
-    f.resval = obj["genresval"]
-
-    return f
+def get_iface_tx_type(block: IpBlock,
+                      iface_name: Optional[str],
+                      hw2reg: bool) -> str:
+    x2x = 'hw2reg' if hw2reg else 'reg2hw'
+    pfx = get_type_name_pfx(block, iface_name)
+    return '_'.join([pfx, x2x, 't'])
 
 
-def parse_reg(obj):
-    """Convert OrderedDict register into Register or MultiRegister object.
-    Supports nested MultiRegisters.
-    """
-    if 'multireg' in obj:
-        regs = []
-        for genr in obj['multireg']['genregs']:
-            regs += [parse_reg(genr)]
-        # get register properties of the first register in the multireg and
-        # copy them to the parent
-        # since all regs in a multireg have the same props
-        reg = MultiReg(regs[0].get_reg_flat(0))
-        # since this is a multireg, the list of fields can
-        # contain regs or multiregs
-        reg.fields = regs
-        # a homogenous multireg contains only one single field that is replicated
-        reg.ishomog = len(obj['multireg']['fields']) == 1
-        # TODO: need to rework this once the underlying JSON has been changed
-        reg.name = escape_name(obj['multireg']['name'])
-        # TODO: need to reference proper param here such that it can be used
-        # in the package template for the array declaration
-        # reg.param = ...
+def get_reg_tx_type(block: IpBlock, reg: RegBase, hw2reg: bool) -> str:
+    '''Get the name of the hw2reg or reg2hw type for reg'''
+    if isinstance(reg, Register):
+        r0 = reg
+        type_suff = 'reg_t'
     else:
-        reg = Reg(escape_name(obj['name']))
-        reg.offset = obj["genoffset"]
-        reg.fields = []
+        assert isinstance(reg, MultiRegister)
+        r0 = reg.reg
+        type_suff = 'mreg_t'
 
-        reg.hwext = (obj['hwext'] == "true")
-        reg.hwqe = (obj["hwqe"] == "true")
-        reg.hwre = (obj["hwre"] == "true")
-        reg.resval = obj["genresval"]
-        reg.dvrights = obj["gendvrights"]
-        reg.regwen = obj["regwen"].lower()
-        reg.ishomog = len(obj['fields']) == 1
-        reg.tags = (obj['tags'])
-        reg.shadowed = (obj["shadowed"] == "true")
-
-        # Parsing Fields
-        for f in obj["fields"]:
-            field = parse_field(f, reg, len(obj["fields"]))
-            if field is not None:
-                reg.fields.append(field)
-                reg.width = max(reg.width, field.msb + 1)
-
-        # TODO: Field bitfield overlapping check
-        log.info("R[0x%04x]: %s ", reg.offset, reg.name)
-        for f in reg.fields:
-            log.info("  F[%2d:%2d]: %s", f.msb, f.lsb, f.name)
-
-    return reg
+    x2x = 'hw2reg' if hw2reg else 'reg2hw'
+    return '_'.join([block.name.lower(),
+                     x2x,
+                     r0.name.lower(),
+                     type_suff])
 
 
-def parse_win(obj, width):
-    # Convert register window fields into Window class
-    # base_addr : genoffset
-    # limit_addr : genoffset + items*width
-    win = Window()
-    win.name = obj["name"]
-    win.base_addr = obj["genoffset"]
-    win.limit_addr = obj["genoffset"] + int(obj["items"]) * (width // 8)
-    win.dvrights = obj["swaccess"]
-    win.n_bits = obj["genvalidbits"]
-
-    # TODO: Generate warnings of `noalign` or `unusual`
-    return win
-
-
-def json_to_reg(obj):
-    """Converts JSON OrderedDict into structure having useful information for
-    Template to use.
-
-    Main purpose of this function is:
-        - Add Offset value based on auto calculation
-        - Prepare Systemverilog data structure to generate _pkg file
-    """
-    block = Block()
-
-    # Name
-    block.name = escape_name(obj["name"])
-    log.info("Processing module: %s", block.name)
-
-    block.width = int(obj["regwidth"], 0)
-
-    if block.width != 32 and block.width != 64:
-        log.error(
-            "Current reggen tool doesn't support field width that is not 32 nor 64"
-        )
-
-    log.info("Data Width is set to %d bits", block.width)
-
-    block.bus_device = obj["bus_device"]
-
-    if block.bus_device != "tlul" and block.bus_device != "reg":
-        log.error(
-            "Current reggen tool doesn't support buses other than TileLink and Register Interface"
-        )
-
-    block.params = obj["param_list"] if "param_list" in obj else []
-
-    block.hier_path = obj["hier_path"] if "hier_path" in obj else ""
-
-    for r in obj["registers"]:
-        # Check if any exception condition hit
-        if 'reserved' in r:
-            continue
-        elif 'skipto' in r:
-            continue
-        elif 'sameaddr' in r:
-            log.error("Current tool doesn't support 'sameaddr' type")
-            continue
-        elif 'window' in r:
-            win = parse_win(r['window'], block.width)
-            if win is not None:
-                block.wins.append(win)
-            continue
-
-        block.regs += [parse_reg(r)]
-
-    # Last offset and calculate space
-    #  Later on, it could use block.regs[-1].genoffset
-    if "space" in obj:
-        block.addr_width = int(obj["space"], 0).bit_length()
-    else:
-        block.addr_width = (obj["gensize"] - 1).bit_length()
-
-    return block
-
-
-def gen_rtl(obj, outdir):
-    # obj: OrderedDict
-
-    block = json_to_reg(obj)
-
+def gen_rtl(block: IpBlock, outdir: str) -> int:
     # Read Register templates
     reg_top_tpl = Template(
         filename=resource_filename('reggen', 'reg_top.sv.tpl'))
     reg_pkg_tpl = Template(
         filename=resource_filename('reggen', 'reg_pkg.sv.tpl'))
 
-    # Generate pkg.sv with block name
-    with open(outdir + "/" + block.name + "_reg_pkg.sv", 'w',
-              encoding='UTF-8') as fout:
+    # Generate <block>_reg_pkg.sv
+    #
+    # This defines the various types used to interface between the *_reg_top
+    # module(s) and the block itself.
+    reg_pkg_path = os.path.join(outdir, block.name.lower() + "_reg_pkg.sv")
+    with open(reg_pkg_path, 'w', encoding='UTF-8') as fout:
         try:
-            fout.write(
-                reg_pkg_tpl.render(block=block,
-                                   HwAccess=HwAccess,
-                                   SwRdAccess=SwRdAccess,
-                                   SwWrAccess=SwWrAccess))
-        except:  # noqa: F722 for template Exception handling
+            fout.write(reg_pkg_tpl.render(block=block))
+        except:  # noqa F722 for template Exception handling
             log.error(exceptions.text_error_template().render())
+            return 1
 
-    # Generate top.sv
-    with open(outdir + "/" + block.name + "_reg_top.sv", 'w',
-              encoding='UTF-8') as fout:
-        try:
-            fout.write(
-                reg_top_tpl.render(block=block,
-                                   HwAccess=HwAccess,
-                                   SwRdAccess=SwRdAccess,
-                                   SwWrAccess=SwWrAccess))
-        except:  # noqa: F722 for template Exception handling
-            log.error(exceptions.text_error_template().render())
+    # Generate the register block implementation(s). For a device interface
+    # with no name we generate the register module "<block>_reg_top" (writing
+    # to <block>_reg_top.sv). In any other case, we also need the interface
+    # name, giving <block>_<ifname>_reg_top.
+    lblock = block.name.lower()
+    for if_name, rb in block.reg_blocks.items():
+        if if_name is None:
+            mod_base = lblock
+        else:
+            mod_base = lblock + '_' + if_name.lower()
+
+        mod_name = mod_base + '_reg_top'
+        reg_top_path = os.path.join(outdir, mod_name + '.sv')
+        with open(reg_top_path, 'w', encoding='UTF-8') as fout:
+            try:
+                fout.write(reg_top_tpl.render(block=block,
+                                              mod_base=mod_base,
+                                              mod_name=mod_name,
+                                              if_name=if_name,
+                                              rb=rb))
+            except:  # noqa F722 for template Exception handling
+                log.error(exceptions.text_error_template().render())
+                return 1
+
+    return 0

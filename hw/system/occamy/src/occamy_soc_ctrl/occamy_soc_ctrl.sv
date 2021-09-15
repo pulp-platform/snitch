@@ -26,6 +26,20 @@ module occamy_soc_ctrl import occamy_soc_reg_pkg::*; #(
 
   occamy_soc_hw2reg_t hw2reg;
 
+  // Add local hw2reg signals
+  logic intr_state_ecc_correctable_d;
+  logic intr_state_ecc_correctable_de;
+  logic intr_state_ecc_uncorrectable_d;
+  logic intr_state_ecc_uncorrectable_de;
+
+  always_comb begin
+    hw2reg = hw2reg_i;
+    hw2reg.intr_state.ecc_correctable.d = intr_state_ecc_correctable_d;
+    hw2reg.intr_state.ecc_correctable.de = intr_state_ecc_correctable_de;
+    hw2reg.intr_state.ecc_uncorrectable.d = intr_state_ecc_uncorrectable_d;
+    hw2reg.intr_state.ecc_uncorrectable.de = intr_state_ecc_uncorrectable_de;
+  end
+
   occamy_soc_reg_top #(
     .reg_req_t ( reg_req_t ),
     .reg_rsp_t ( reg_rsp_t  )
@@ -35,7 +49,7 @@ module occamy_soc_ctrl import occamy_soc_reg_pkg::*; #(
     .reg_req_i ( reg_req_i ),
     .reg_rsp_o ( reg_rsp_o ),
     .reg2hw    ( reg2hw_o ),
-    .hw2reg    ( hw2reg_i | hw2reg ),
+    .hw2reg    ( hw2reg ),
     .devmode_i ( 1'b1 )
   );
 
@@ -47,8 +61,8 @@ module occamy_soc_ctrl import occamy_soc_reg_pkg::*; #(
     .reg2hw_intr_test_q_i   (reg2hw_o.intr_test.ecc_correctable.q),
     .reg2hw_intr_test_qe_i  (reg2hw_o.intr_test.ecc_correctable.qe),
     .reg2hw_intr_state_q_i  (reg2hw_o.intr_state.ecc_correctable.q),
-    .hw2reg_intr_state_de_o (hw2reg.intr_state.ecc_correctable.de),
-    .hw2reg_intr_state_d_o  (hw2reg.intr_state.ecc_correctable.d),
+    .hw2reg_intr_state_de_o (intr_state_ecc_correctable_de),
+    .hw2reg_intr_state_d_o  (intr_state_ecc_correctable_d),
     .intr_o                 (intr_ecc_correctable_o)
   );
 
@@ -60,8 +74,8 @@ module occamy_soc_ctrl import occamy_soc_reg_pkg::*; #(
     .reg2hw_intr_test_q_i   (reg2hw_o.intr_test.ecc_uncorrectable.q),
     .reg2hw_intr_test_qe_i  (reg2hw_o.intr_test.ecc_uncorrectable.qe),
     .reg2hw_intr_state_q_i  (reg2hw_o.intr_state.ecc_uncorrectable.q),
-    .hw2reg_intr_state_de_o (hw2reg.intr_state.ecc_uncorrectable.de),
-    .hw2reg_intr_state_d_o  (hw2reg.intr_state.ecc_uncorrectable.d),
+    .hw2reg_intr_state_de_o (intr_state_ecc_uncorrectable_de),
+    .hw2reg_intr_state_d_o  (intr_state_ecc_uncorrectable_d),
     .intr_o                 (intr_ecc_uncorrectable_o)
   );
 

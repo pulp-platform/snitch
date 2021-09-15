@@ -531,25 +531,19 @@ module occamy_top
   //////////////
   //   UART   //
   //////////////
-  uart #(
-    .reg_req_t (${soc_regbus_periph_xbar.out_uart.req_type()} ),
-    .reg_rsp_t (${soc_regbus_periph_xbar.out_uart.rsp_type()} )
+
+  <% uart_apb = soc_regbus_periph_xbar.out_uart.to_apb(context, "uart_apb") %>
+  apb_uart_sv #(
+    .apb_req_t (${uart_apb.req_type()} ),
+    .apb_resp_t (${uart_apb.rsp_type()} )
   ) i_uart (
-    .clk_i (${soc_regbus_periph_xbar.out_uart.clk}),
-    .rst_ni (${soc_regbus_periph_xbar.out_uart.rst}),
-    .reg_req_i (${soc_regbus_periph_xbar.out_uart.req_name()}),
-    .reg_rsp_o (${soc_regbus_periph_xbar.out_uart.rsp_name()}),
-    .cio_tx_o (uart_tx_o),
-    .cio_rx_i (uart_rx_i),
-    .cio_tx_en_o (),
-    .intr_tx_watermark_o (irq.uart_tx_watermark),
-    .intr_rx_watermark_o (irq.uart_rx_watermark),
-    .intr_tx_empty_o (irq.uart_tx_empty),
-    .intr_rx_overflow_o (irq.uart_rx_overflow),
-    .intr_rx_frame_err_o (irq.uart_rx_frame_err),
-    .intr_rx_break_err_o (irq.uart_rx_break_err),
-    .intr_rx_timeout_o (irq.uart_rx_timeout),
-    .intr_rx_parity_err_o (irq.uart_rx_parity_err)
+    .clk_i (${uart_apb.clk}),
+    .rst_ni (${uart_apb.rst}),
+    .apb_req_i (${uart_apb.req_name()}),
+    .apb_resp_o (${uart_apb.rsp_name()}),
+    .rx_i (uart_rx_i),
+    .tx_o (uart_tx_o),
+    .intr_o (irq.uart)
   );
 
   /////////////

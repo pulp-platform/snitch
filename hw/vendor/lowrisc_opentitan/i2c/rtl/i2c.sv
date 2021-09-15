@@ -6,7 +6,9 @@
 
 `include "common_cells/assertions.svh"
 
-module i2c #(
+module i2c
+  import i2c_reg_pkg::*;
+#(
   parameter type reg_req_t = logic,
   parameter type reg_rsp_t = logic
 ) (

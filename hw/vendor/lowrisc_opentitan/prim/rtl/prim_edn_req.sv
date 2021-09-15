@@ -18,13 +18,21 @@ module prim_edn_req
 #(
   parameter int OutWidth = 32,
 
-  // Non-functional parameter to switch on the request stability assertion.
-  // Used in submodule `prim_sync_reqack`.
-  parameter bit EnReqStabA = 1
+  // EDN Request latency checker
+  //
+  //  Each consumer IP may have the maximum expected latency. MaxLatency
+  //  parameter describes the expected latency in terms of the consumer clock
+  //  cycles. If the edn request comes later than that, the assertion will be
+  //  fired.
+  //
+  //  The default value is 0, which disables the assertion.
+  parameter int unsigned MaxLatency = 0
 ) (
   // Design side
   input                       clk_i,
   input                       rst_ni,
+  input                       req_chk_i, // Used for gating assertions. Drive to 1 during normal
+                                         // operation.
   input                       req_i,
   output logic                ack_o,
   output logic [OutWidth-1:0] data_o,
@@ -46,13 +54,13 @@ module prim_edn_req
   prim_sync_reqack_data #(
     .Width(SyncWidth),
     .DataSrc2Dst(1'b0),
-    .DataReg(1'b0),
-    .EnReqStabA(EnReqStabA)
+    .DataReg(1'b0)
   ) u_prim_sync_reqack_data (
     .clk_src_i  ( clk_i                           ),
     .rst_src_ni ( rst_ni                          ),
     .clk_dst_i  ( clk_edn_i                       ),
     .rst_dst_ni ( rst_edn_ni                      ),
+    .req_chk_i  ( req_chk_i                       ),
     .src_req_i  ( word_req                        ),
     .src_ack_o  ( word_ack                        ),
     .dst_req_o  ( edn_o.edn_req                   ),
@@ -95,5 +103,42 @@ module prim_edn_req
     end
   end
   assign fips_o = fips_q;
+
+  ////////////////
+  // Assertions //
+  ////////////////
+
+  // EDN Max Latency Checker
+`ifndef SYNTHESIS
+  if (MaxLatency != 0) begin: g_maxlatency_assertion
+    localparam int unsigned LatencyW = $clog2(MaxLatency+1);
+    logic [LatencyW-1:0] latency_counter;
+    logic reset_counter;
+    logic enable_counter;
+
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+      if (!rst_ni) latency_counter <= '0;
+      else if (reset_counter) latency_counter <= '0;
+      else if (enable_counter) latency_counter <= latency_counter + 1'b1;
+    end
+
+    assign reset_counter  = ack_o;
+    assign enable_counter = req_i;
+
+    `ASSERT(MaxLatency_A, latency_counter <= MaxLatency)
+
+    // TODO: Is it worth to check req & ack pair?
+    //         _________________________________
+    // req  __/                                 \______
+    //                                           ____
+    // ack  ____________________________________/    \_
+    //
+    //                                          | error
+
+  end // g_maxlatency_assertion
+`else // SYNTHESIS
+  logic unused_param_maxlatency;
+  assign unused_param_maxlatency = ^MaxLatency;
+`endif // SYNTHESIS
 
 endmodule : prim_edn_req

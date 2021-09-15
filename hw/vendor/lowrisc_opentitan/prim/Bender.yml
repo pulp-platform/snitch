@@ -3,10 +3,22 @@ package:
   description: "lowRISC RTL primitives"
   authors: ["lowRISC Contributors"]
 
+# Used for implementation of primitive cells
+dependencies:
+  common_cells: {path: ../../pulp_platform_common_cells}
+
 sources:
+# Patched in
+- prim_pulp_platform/prim_flop_2sync.sv
 # Level 0
 - rtl/prim_util_pkg.sv
 # Level 1
+- rtl/prim_sync_reqack.sv
+- rtl/prim_sync_reqack_data.sv
+- rtl/prim_pulse_sync.sv
+- rtl/prim_packer_fifo.sv
 - rtl/prim_fifo_sync.sv
 - rtl/prim_filter_ctr.sv
 - rtl/prim_intr_hw.sv
+# Level 2
+- rtl/prim_fifo_async.sv

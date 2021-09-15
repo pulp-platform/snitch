@@ -11,13 +11,15 @@
 {
   name: "RV_PLIC",
   clock_primary: "clk_i",
-  bus_device: "reg",
+  bus_interfaces: [
+    { protocol: "reg_iface", direction: "device" }
+  ],
 
   param_list: [
     { name: "NumSrc",
       desc: "Number of interrupt sources",
       type: "int",
-      default: "73",
+      default: "66",
       local: "true"
     },
     { name: "NumTarget",
@@ -33,6 +35,43 @@
       local: "true",
     },
   ],
+
+  // In order to not disturb the PLIC address map, we place the alert test
+  // register manually at a safe offset after the main CSRs.
+  no_auto_alert_regs: "True",
+  alert_list: [
+    { name: "fatal_fault",
+      desc: '''
+      This fatal alert is triggered when a fatal TL-UL bus integrity fault is detected.
+      '''
+    }
+  ],
+
+  inter_signal_list: [
+    { struct:  "logic",
+      type:    "uni",
+      name:    "irq",
+      act:     "req",
+      package: "",
+      width:   "2"
+    },
+
+    { struct:  "logic",
+      type:    "uni",
+      name:    "irq_id",
+      act:     "req",
+      package: "",
+    },
+
+    { struct:  "logic",
+      type:    "uni",
+      name:    "msip",
+      act:     "req",
+      package: "",
+      width:   "2"
+    },
+  ]
+
   regwidth: "32",
   registers: [
     { name: "PRIO0",
@@ -563,62 +602,6 @@
         { bits: "2:0" }
       ],
     },
-    { name: "PRIO66",
-      desc: "Interrupt Source 66 Priority",
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        { bits: "2:0" }
-      ],
-    },
-    { name: "PRIO67",
-      desc: "Interrupt Source 67 Priority",
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        { bits: "2:0" }
-      ],
-    },
-    { name: "PRIO68",
-      desc: "Interrupt Source 68 Priority",
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        { bits: "2:0" }
-      ],
-    },
-    { name: "PRIO69",
-      desc: "Interrupt Source 69 Priority",
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        { bits: "2:0" }
-      ],
-    },
-    { name: "PRIO70",
-      desc: "Interrupt Source 70 Priority",
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        { bits: "2:0" }
-      ],
-    },
-    { name: "PRIO71",
-      desc: "Interrupt Source 71 Priority",
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        { bits: "2:0" }
-      ],
-    },
-    { name: "PRIO72",
-      desc: "Interrupt Source 72 Priority",
-      swaccess: "rw",
-      hwaccess: "hro",
-      fields: [
-        { bits: "2:0" }
-      ],
-    },
     { skipto: "0x1000" }
     { multireg: {
         name: "IP",
@@ -740,6 +723,20 @@
         }
       ],
     }
-  ]
+  { skipto: "2105344" }
+  { name: "ALERT_TEST",
+      desc: '''Alert Test Register.''',
+      swaccess: "wo",
+      hwaccess: "hro",
+      hwqe:     "True",
+      hwext:    "True",
+      fields: [
+        { bits: "0",
+          name: "fatal_fault",
+          desc: "'Write 1 to trigger one alert event of this kind.'",
+        }
+      ],
+    }
+  ],
 }
 

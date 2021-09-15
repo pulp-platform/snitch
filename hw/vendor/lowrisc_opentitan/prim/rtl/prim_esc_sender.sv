@@ -43,15 +43,25 @@ module prim_esc_sender
   // decode differential signals //
   /////////////////////////////////
 
-  logic resp, sigint_detected;
+  logic resp, resp_n, resp_p, sigint_detected;
+
+  // This prevents further tool optimizations of the differential signal.
+  prim_buf #(
+    .Width(2)
+  ) u_prim_buf_resp (
+    .in_i({esc_rx_i.resp_n,
+           esc_rx_i.resp_p}),
+    .out_o({resp_n,
+            resp_p})
+  );
 
   prim_diff_decode #(
     .AsyncOn(1'b0)
-  ) i_decode_resp (
+  ) u_decode_resp (
     .clk_i,
     .rst_ni,
-    .diff_pi  ( esc_rx_i.resp_p ),
-    .diff_ni  ( esc_rx_i.resp_n ),
+    .diff_pi  ( resp_p          ),
+    .diff_ni  ( resp_n          ),
     .level_o  ( resp            ),
     .rise_o   (                 ),
     .fall_o   (                 ),
@@ -75,13 +85,13 @@ module prim_esc_sender
   assign esc_p = esc_req_i | esc_req_q | (ping_req_d & ~ping_req_q);
 
   // This prevents further tool optimizations of the differential signal.
-  prim_buf u_prim_buf_p (
-    .in_i(esc_p),
-    .out_o(esc_tx_o.esc_p)
-  );
-  prim_buf u_prim_buf_n (
-    .in_i(~esc_p),
-    .out_o(esc_tx_o.esc_n)
+  prim_buf #(
+    .Width(2)
+  ) u_prim_buf_esc (
+    .in_i({~esc_p,
+           esc_p}),
+    .out_o({esc_tx_o.esc_n,
+            esc_tx_o.esc_p})
   );
 
   //////////////
@@ -104,7 +114,7 @@ module prim_esc_sender
       Idle: begin
         if (esc_req_i) begin
           state_d = CheckEscRespHi;
-        end else if (ping_req_i) begin
+        end else if (ping_req_d & ~ping_req_q) begin
           state_d = CheckPingResp0;
         end
         // any assertion of the response signal

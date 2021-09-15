@@ -11,10 +11,9 @@ import re
 import sys
 from pathlib import PurePath
 
-import hjson
-
-from reggen import (gen_cheader, gen_ctheader, gen_dv, gen_html, gen_json,
-                    gen_rtl, gen_fpv, gen_selfdoc, validate, version)
+from reggen import (gen_cheader, gen_dv, gen_fpv, gen_html,
+                    gen_json, gen_rtl, gen_selfdoc, version)
+from reggen.ip_block import IpBlock
 
 DESC = """regtool, generate register info from Hjson source"""
 
@@ -27,7 +26,6 @@ USAGE = '''
 
 
 def main():
-    format = 'hjson'
     verbose = 0
 
     parser = argparse.ArgumentParser(
@@ -48,10 +46,6 @@ def main():
                         '-D',
                         action='store_true',
                         help='Output C defines header')
-    parser.add_argument('--ctdefines',
-                        '-T',
-                        action='store_true',
-                        help='Output C defines header (Titan style)')
     parser.add_argument('--doc',
                         action='store_true',
                         help='Output source file documentation (gfm)')
@@ -72,6 +66,10 @@ def main():
                         '-t',
                         help='Target directory for generated RTL; '
                         'tool uses ../rtl if blank.')
+    parser.add_argument('--dv-base-prefix',
+                        default='dv_base',
+                        help='Prefix for the DV register classes from which '
+                        'the register models are derived.')
     parser.add_argument('--outfile',
                         '-o',
                         type=argparse.FileType('w'),
@@ -105,97 +103,101 @@ def main():
         version.show_and_exit(__file__, ["Hjson", "Mako"])
 
     verbose = args.verbose
-
-    if args.j:
-        format = 'json'
-    elif args.c:
-        format = 'compact'
-    elif args.d:
-        format = 'html'
-    elif args.doc:
-        format = 'doc'
-    elif args.r:
-        format = 'rtl'
-    elif args.s:
-        format = 'dv'
-    elif args.f:
-        format = 'fpv'
-    elif args.cdefines:
-        format = 'cdh'
-    elif args.ctdefines:
-        format = 'cth'
-
     if (verbose):
         log.basicConfig(format="%(levelname)s: %(message)s", level=log.DEBUG)
     else:
         log.basicConfig(format="%(levelname)s: %(message)s")
 
-    outfile = args.outfile
+    # Entries are triples of the form (arg, (format, dirspec)).
+    #
+    # arg is the name of the argument that selects the format. format is the
+    # name of the format. dirspec is None if the output is a single file; if
+    # the output needs a directory, it is a default path relative to the source
+    # file (used when --outdir is not given).
+    arg_to_format = [('j', ('json', None)), ('c', ('compact', None)),
+                     ('d', ('html', None)), ('doc', ('doc', None)),
+                     ('r', ('rtl', 'rtl')), ('s', ('dv', 'dv')),
+                     ('f', ('fpv', 'fpv/vip')), ('cdefines', ('cdh', None))]
+    format = None
+    dirspec = None
+    for arg_name, spec in arg_to_format:
+        if getattr(args, arg_name):
+            if format is not None:
+                log.error('Multiple output formats specified on '
+                          'command line ({} and {}).'.format(format, spec[0]))
+                sys.exit(1)
+            format, dirspec = spec
+    if format is None:
+        format = 'hjson'
 
     infile = args.input
 
-    params = args.param.split(';')
+    # Split parameters into key=value pairs.
+    raw_params = args.param.split(';') if args.param else []
+    params = []
+    for idx, raw_param in enumerate(raw_params):
+        tokens = raw_param.split('=')
+        if len(tokens) != 2:
+            raise ValueError('Entry {} in list of parameter defaults to '
+                             'apply is {!r}, which is not of the form '
+                             'param=value.'
+                             .format(idx, raw_param))
+        params.append((tokens[0], tokens[1]))
 
-    if format == 'rtl':
-        if args.outdir:
-            outdir = args.outdir
-        elif infile != sys.stdin:
-            outdir = str(PurePath(infile.name).parents[1].joinpath("rtl"))
-        else:
-            # Using sys.stdin. not possible to generate RTL
-            log.error("-r option cannot be used with pipe or stdin")
-    elif format == 'dv':
-        if args.outdir:
-            outdir = args.outdir
-        elif infile != sys.stdin:
-            outdir = str(PurePath(infile.name).parents[1].joinpath("dv"))
-        else:
-            # Using sys.stdin. not possible to generate RTL
-            log.error("-s option cannot be used with pipe or stdin")
-    elif format == 'fpv':
-        if args.outdir:
-            outdir = args.outdir
-        elif infile != sys.stdin:
-            outdir = str(PurePath(infile.name).parents[1].joinpath("fpv/vip"))
-        else:
-            # Using sys.stdin. not possible to generate RTL
-            log.error("-s option cannot be used with pipe or stdin")
+    # Define either outfile or outdir (but not both), depending on the output
+    # format.
+    outfile = None
+    outdir = None
+    if dirspec is None:
+        if args.outdir is not None:
+            log.error('The {} format expects an output file, '
+                      'not an output directory.'.format(format))
+            sys.exit(1)
+
+        outfile = args.outfile
     else:
-        # Ignore
-        outdir = "."
+        if args.outfile is not sys.stdout:
+            log.error('The {} format expects an output directory, '
+                      'not an output file.'.format(format))
+            sys.exit(1)
+
+        if args.outdir is not None:
+            outdir = args.outdir
+        elif infile is not sys.stdin:
+            outdir = str(PurePath(infile.name).parents[1].joinpath(dirspec))
+        else:
+            # We're using sys.stdin, so can't infer an output directory name
+            log.error(
+                'The {} format writes to an output directory, which '
+                'cannot be inferred automatically if the input comes '
+                'from stdin. Use --outdir to specify it manually.'.format(
+                    format))
+            sys.exit(1)
 
     if format == 'doc':
         with outfile:
             gen_selfdoc.document(outfile)
         exit(0)
 
-    with infile:
-        try:
-            srcfull = infile.read()
-            obj = hjson.loads(srcfull,
-                              use_decimal=True,
-                              object_pairs_hook=validate.checking_dict)
-        except ValueError:
-            raise SystemExit(sys.exc_info()[1])
+    srcfull = infile.read()
+
+    try:
+        obj = IpBlock.from_text(srcfull, params, infile.name)
+    except ValueError as err:
+        log.error(str(err))
+        exit(1)
 
     if args.novalidate:
         with outfile:
             gen_json.gen_json(obj, outfile, format)
             outfile.write('\n')
-    elif (validate.validate(obj, params=params) == 0):
-        if (verbose):
-            log.info("Second validate pass (should show added optional keys)")
-            validate.validate(obj, params=params)
-
+    else:
         if format == 'rtl':
-            gen_rtl.gen_rtl(obj, outdir)
-            return 0
+            return gen_rtl.gen_rtl(obj, outdir)
         if format == 'dv':
-            gen_dv.gen_dv(obj, outdir)
-            return 0
+            return gen_dv.gen_dv(obj, args.dv_base_prefix, outdir)
         if format == 'fpv':
-            gen_fpv.gen_fpv(obj, outdir)
-            return 0
+            return gen_fpv.gen_fpv(obj, outdir)
         src_lic = None
         src_copy = ''
         found_spdx = None
@@ -220,16 +222,14 @@ def main():
 
         with outfile:
             if format == 'html':
-                gen_html.gen_html(obj, outfile)
+                return gen_html.gen_html(obj, outfile)
             elif format == 'cdh':
-                gen_cheader.gen_cdefines(obj, outfile, src_lic, src_copy)
-            elif format == 'cth':
-                gen_ctheader.gen_cdefines(obj, outfile, src_lic, src_copy)
+                return gen_cheader.gen_cdefines(obj, outfile, src_lic, src_copy)
             else:
-                gen_json.gen_json(obj, outfile, format)
+                return gen_json.gen_json(obj, outfile, format)
 
             outfile.write('\n')
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

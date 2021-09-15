@@ -9,9 +9,13 @@ package snitch_cluster_peripheral_reg_pkg;
   // Param list
   parameter int NumPerfCounters = 2;
 
+  // Address widths within the block
+  parameter int BlockAw = 6;
+
   ////////////////////////////
   // Typedefs for registers //
   ////////////////////////////
+
   typedef struct packed {
     struct packed {
       logic        q;
@@ -39,6 +43,7 @@ package snitch_cluster_peripheral_reg_pkg;
 
   typedef struct packed {
     logic [47:0] q;
+    logic        qe;
   } snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t;
 
   typedef struct packed {
@@ -50,47 +55,45 @@ package snitch_cluster_peripheral_reg_pkg;
     logic [31:0] q;
   } snitch_cluster_peripheral_reg2hw_hw_barrier_reg_t;
 
-
   typedef struct packed {
     logic [47:0] d;
-    logic        de;
   } snitch_cluster_peripheral_hw2reg_perf_counter_mreg_t;
 
   typedef struct packed {
     logic [31:0] d;
   } snitch_cluster_peripheral_hw2reg_hw_barrier_reg_t;
 
-
-  ///////////////////////////////////////
-  // Register to internal design logic //
-  ///////////////////////////////////////
+  // Register -> HW type
   typedef struct packed {
-    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [1:0] perf_counter_enable; // [193:182]
-    snitch_cluster_peripheral_reg2hw_hart_select_mreg_t [1:0] hart_select; // [181:162]
-    snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t [1:0] perf_counter; // [161:66]
-    snitch_cluster_peripheral_reg2hw_wake_up_reg_t wake_up; // [65:33]
-    snitch_cluster_peripheral_reg2hw_hw_barrier_reg_t hw_barrier; // [32:1]
+    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [1:0] perf_counter_enable; // [194:183]
+    snitch_cluster_peripheral_reg2hw_hart_select_mreg_t [1:0] hart_select; // [182:163]
+    snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t [1:0] perf_counter; // [162:65]
+    snitch_cluster_peripheral_reg2hw_wake_up_reg_t wake_up; // [64:32]
+    snitch_cluster_peripheral_reg2hw_hw_barrier_reg_t hw_barrier; // [31:0]
   } snitch_cluster_peripheral_reg2hw_t;
 
-  ///////////////////////////////////////
-  // Internal design logic to register //
-  ///////////////////////////////////////
+  // HW -> register type
   typedef struct packed {
-    snitch_cluster_peripheral_hw2reg_perf_counter_mreg_t [1:0] perf_counter; // [130:33]
-    snitch_cluster_peripheral_hw2reg_hw_barrier_reg_t hw_barrier; // [32:1]
+    snitch_cluster_peripheral_hw2reg_perf_counter_mreg_t [1:0] perf_counter; // [127:32]
+    snitch_cluster_peripheral_hw2reg_hw_barrier_reg_t hw_barrier; // [31:0]
   } snitch_cluster_peripheral_hw2reg_t;
 
-  // Register Address
-  parameter logic [5:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET = 6'h 0;
-  parameter logic [5:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1_OFFSET = 6'h 8;
-  parameter logic [5:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_OFFSET = 6'h 10;
-  parameter logic [5:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET = 6'h 18;
-  parameter logic [5:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET = 6'h 20;
-  parameter logic [5:0] SNITCH_CLUSTER_PERIPHERAL_WAKE_UP_OFFSET = 6'h 28;
-  parameter logic [5:0] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET = 6'h 30;
+  // Register offsets
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET = 6'h 0;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1_OFFSET = 6'h 8;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_OFFSET = 6'h 10;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET = 6'h 18;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET = 6'h 20;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_WAKE_UP_OFFSET = 6'h 28;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET = 6'h 30;
 
+  // Reset values for hwext registers and their fields
+  parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_RESVAL = 48'h 0;
+  parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_RESVAL = 48'h 0;
+  parameter logic [31:0] SNITCH_CLUSTER_PERIPHERAL_WAKE_UP_RESVAL = 32'h 0;
+  parameter logic [31:0] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_RESVAL = 32'h 0;
 
-  // Register Index
+  // Register index
   typedef enum int {
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0,
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1,
@@ -111,5 +114,6 @@ package snitch_cluster_peripheral_reg_pkg;
     4'b 1111, // index[5] SNITCH_CLUSTER_PERIPHERAL_WAKE_UP
     4'b 1111  // index[6] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER
   };
+
 endpackage
 

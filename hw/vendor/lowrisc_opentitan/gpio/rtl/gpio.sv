@@ -6,25 +6,29 @@
 
 `include "common_cells/assertions.svh"
 
-module gpio #(
+module gpio
+  import gpio_reg_pkg::*;
+#(
   parameter type reg_req_t = logic,
   parameter type reg_rsp_t = logic
 ) (
   input clk_i,
   input rst_ni,
 
-  // Below Regster interface can be changed
+  // Below Register interface can be changed
   input  reg_req_t reg_req_i,
   output reg_rsp_t reg_rsp_o,
 
+  // Interrupts
+  output logic [31:0] intr_gpio_o,
+
+  // GPIOs
   input        [31:0] cio_gpio_i,
   output logic [31:0] cio_gpio_o,
-  output logic [31:0] cio_gpio_en_o,
-
-  output logic [31:0] intr_gpio_o
+  output logic [31:0] cio_gpio_en_o
 );
 
-  import gpio_reg_pkg::* ;
+
 
   gpio_reg2hw_t reg2hw;
   gpio_hw2reg_t hw2reg;
@@ -131,7 +135,6 @@ module gpio #(
                                event_intr_fall   |
                                event_intr_actlow |
                                event_intr_acthigh;
-
 
   // Register module
   gpio_reg_top #(

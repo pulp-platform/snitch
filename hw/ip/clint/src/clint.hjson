@@ -7,24 +7,30 @@
 {
   name: "CLINT",
   clock_primary: "clk_i",
-  bus_device: "reg",
+  bus_interfaces: [
+    { protocol: "reg_iface", direction: "device" }
+  ],
   regwidth: "32",
+  param_list: [
+    { name: "NumCores",
+      desc: "Number of cores",
+      type: "int",
+      default: "2",
+      local: "true"
+    }
+  ],
   registers: [
-    {   name: "MSIP0",
-        desc: "Machine Software Interrupt Pending Core 0",
+    { multireg: {
+        name: "MSIP",
+        desc: "Machine Software Interrupt Pending ",
+        count: "NumCores",
+        cname: "MSIP",
         swaccess: "rw",
         hwaccess: "hro",
         fields: [
-          { bits: "0", name: "MSIP", desc: "Machine Software Interrupt Pending of Core 0" },
+          { bits: "0", name: "P", desc: "Machine Software Interrupt Pending" }
         ]
-    },
-    {   name: "MSIP1",
-        desc: "Machine Software Interrupt Pending Core 1",
-        swaccess: "rw",
-        hwaccess: "hro",
-        fields: [
-          { bits: "0", name: "MSIP", desc: "Machine Software Interrupt Pending of Core 1" },
-        ]
+      }
     },
     { skipto: "0x4000" },
     {   name: "MTIMECMP_LOW0",

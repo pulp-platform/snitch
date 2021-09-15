@@ -7,7 +7,9 @@
 {
   name: "CLINT",
   clock_primary: "clk_i",
-  bus_device: "reg",
+  bus_interfaces: [
+    { protocol: "reg_iface", direction: "device" }
+  ],
   regwidth: "32",
   param_list: [
     { name: "NumCores",

@@ -7,13 +7,18 @@
 package rv_plic_reg_pkg;
 
   // Param list
-  parameter int NumSrc = 73;
+  parameter int NumSrc = 66;
   parameter int NumTarget = 2;
   parameter int PrioWidth = 3;
+  parameter int NumAlerts = 1;
+
+  // Address widths within the block
+  parameter int BlockAw = 22;
 
   ////////////////////////////
   // Typedefs for registers //
   ////////////////////////////
+
   typedef struct packed {
     logic [2:0]  q;
   } rv_plic_reg2hw_prio0_reg_t;
@@ -279,34 +284,6 @@ package rv_plic_reg_pkg;
   } rv_plic_reg2hw_prio65_reg_t;
 
   typedef struct packed {
-    logic [2:0]  q;
-  } rv_plic_reg2hw_prio66_reg_t;
-
-  typedef struct packed {
-    logic [2:0]  q;
-  } rv_plic_reg2hw_prio67_reg_t;
-
-  typedef struct packed {
-    logic [2:0]  q;
-  } rv_plic_reg2hw_prio68_reg_t;
-
-  typedef struct packed {
-    logic [2:0]  q;
-  } rv_plic_reg2hw_prio69_reg_t;
-
-  typedef struct packed {
-    logic [2:0]  q;
-  } rv_plic_reg2hw_prio70_reg_t;
-
-  typedef struct packed {
-    logic [2:0]  q;
-  } rv_plic_reg2hw_prio71_reg_t;
-
-  typedef struct packed {
-    logic [2:0]  q;
-  } rv_plic_reg2hw_prio72_reg_t;
-
-  typedef struct packed {
     logic        q;
   } rv_plic_reg2hw_le_mreg_t;
 
@@ -346,6 +323,10 @@ package rv_plic_reg_pkg;
     logic        q;
   } rv_plic_reg2hw_msip1_reg_t;
 
+  typedef struct packed {
+    logic        q;
+    logic        qe;
+  } rv_plic_reg2hw_alert_test_reg_t;
 
   typedef struct packed {
     logic        d;
@@ -360,199 +341,186 @@ package rv_plic_reg_pkg;
     logic [6:0]  d;
   } rv_plic_hw2reg_cc1_reg_t;
 
-
-  ///////////////////////////////////////
-  // Register to internal design logic //
-  ///////////////////////////////////////
+  // Register -> HW type
   typedef struct packed {
-    rv_plic_reg2hw_prio0_reg_t prio0; // [464:462]
-    rv_plic_reg2hw_prio1_reg_t prio1; // [461:459]
-    rv_plic_reg2hw_prio2_reg_t prio2; // [458:456]
-    rv_plic_reg2hw_prio3_reg_t prio3; // [455:453]
-    rv_plic_reg2hw_prio4_reg_t prio4; // [452:450]
-    rv_plic_reg2hw_prio5_reg_t prio5; // [449:447]
-    rv_plic_reg2hw_prio6_reg_t prio6; // [446:444]
-    rv_plic_reg2hw_prio7_reg_t prio7; // [443:441]
-    rv_plic_reg2hw_prio8_reg_t prio8; // [440:438]
-    rv_plic_reg2hw_prio9_reg_t prio9; // [437:435]
-    rv_plic_reg2hw_prio10_reg_t prio10; // [434:432]
-    rv_plic_reg2hw_prio11_reg_t prio11; // [431:429]
-    rv_plic_reg2hw_prio12_reg_t prio12; // [428:426]
-    rv_plic_reg2hw_prio13_reg_t prio13; // [425:423]
-    rv_plic_reg2hw_prio14_reg_t prio14; // [422:420]
-    rv_plic_reg2hw_prio15_reg_t prio15; // [419:417]
-    rv_plic_reg2hw_prio16_reg_t prio16; // [416:414]
-    rv_plic_reg2hw_prio17_reg_t prio17; // [413:411]
-    rv_plic_reg2hw_prio18_reg_t prio18; // [410:408]
-    rv_plic_reg2hw_prio19_reg_t prio19; // [407:405]
-    rv_plic_reg2hw_prio20_reg_t prio20; // [404:402]
-    rv_plic_reg2hw_prio21_reg_t prio21; // [401:399]
-    rv_plic_reg2hw_prio22_reg_t prio22; // [398:396]
-    rv_plic_reg2hw_prio23_reg_t prio23; // [395:393]
-    rv_plic_reg2hw_prio24_reg_t prio24; // [392:390]
-    rv_plic_reg2hw_prio25_reg_t prio25; // [389:387]
-    rv_plic_reg2hw_prio26_reg_t prio26; // [386:384]
-    rv_plic_reg2hw_prio27_reg_t prio27; // [383:381]
-    rv_plic_reg2hw_prio28_reg_t prio28; // [380:378]
-    rv_plic_reg2hw_prio29_reg_t prio29; // [377:375]
-    rv_plic_reg2hw_prio30_reg_t prio30; // [374:372]
-    rv_plic_reg2hw_prio31_reg_t prio31; // [371:369]
-    rv_plic_reg2hw_prio32_reg_t prio32; // [368:366]
-    rv_plic_reg2hw_prio33_reg_t prio33; // [365:363]
-    rv_plic_reg2hw_prio34_reg_t prio34; // [362:360]
-    rv_plic_reg2hw_prio35_reg_t prio35; // [359:357]
-    rv_plic_reg2hw_prio36_reg_t prio36; // [356:354]
-    rv_plic_reg2hw_prio37_reg_t prio37; // [353:351]
-    rv_plic_reg2hw_prio38_reg_t prio38; // [350:348]
-    rv_plic_reg2hw_prio39_reg_t prio39; // [347:345]
-    rv_plic_reg2hw_prio40_reg_t prio40; // [344:342]
-    rv_plic_reg2hw_prio41_reg_t prio41; // [341:339]
-    rv_plic_reg2hw_prio42_reg_t prio42; // [338:336]
-    rv_plic_reg2hw_prio43_reg_t prio43; // [335:333]
-    rv_plic_reg2hw_prio44_reg_t prio44; // [332:330]
-    rv_plic_reg2hw_prio45_reg_t prio45; // [329:327]
-    rv_plic_reg2hw_prio46_reg_t prio46; // [326:324]
-    rv_plic_reg2hw_prio47_reg_t prio47; // [323:321]
-    rv_plic_reg2hw_prio48_reg_t prio48; // [320:318]
-    rv_plic_reg2hw_prio49_reg_t prio49; // [317:315]
-    rv_plic_reg2hw_prio50_reg_t prio50; // [314:312]
-    rv_plic_reg2hw_prio51_reg_t prio51; // [311:309]
-    rv_plic_reg2hw_prio52_reg_t prio52; // [308:306]
-    rv_plic_reg2hw_prio53_reg_t prio53; // [305:303]
-    rv_plic_reg2hw_prio54_reg_t prio54; // [302:300]
-    rv_plic_reg2hw_prio55_reg_t prio55; // [299:297]
-    rv_plic_reg2hw_prio56_reg_t prio56; // [296:294]
-    rv_plic_reg2hw_prio57_reg_t prio57; // [293:291]
-    rv_plic_reg2hw_prio58_reg_t prio58; // [290:288]
-    rv_plic_reg2hw_prio59_reg_t prio59; // [287:285]
-    rv_plic_reg2hw_prio60_reg_t prio60; // [284:282]
-    rv_plic_reg2hw_prio61_reg_t prio61; // [281:279]
-    rv_plic_reg2hw_prio62_reg_t prio62; // [278:276]
-    rv_plic_reg2hw_prio63_reg_t prio63; // [275:273]
-    rv_plic_reg2hw_prio64_reg_t prio64; // [272:270]
-    rv_plic_reg2hw_prio65_reg_t prio65; // [269:267]
-    rv_plic_reg2hw_prio66_reg_t prio66; // [266:264]
-    rv_plic_reg2hw_prio67_reg_t prio67; // [263:261]
-    rv_plic_reg2hw_prio68_reg_t prio68; // [260:258]
-    rv_plic_reg2hw_prio69_reg_t prio69; // [257:255]
-    rv_plic_reg2hw_prio70_reg_t prio70; // [254:252]
-    rv_plic_reg2hw_prio71_reg_t prio71; // [251:249]
-    rv_plic_reg2hw_prio72_reg_t prio72; // [248:246]
-    rv_plic_reg2hw_le_mreg_t [72:0] le; // [245:173]
-    rv_plic_reg2hw_ie0_mreg_t [72:0] ie0; // [172:100]
-    rv_plic_reg2hw_ie1_mreg_t [72:0] ie1; // [99:27]
-    rv_plic_reg2hw_threshold0_reg_t threshold0; // [26:24]
-    rv_plic_reg2hw_cc0_reg_t cc0; // [23:15]
-    rv_plic_reg2hw_msip0_reg_t msip0; // [14:14]
-    rv_plic_reg2hw_threshold1_reg_t threshold1; // [13:11]
-    rv_plic_reg2hw_cc1_reg_t cc1; // [10:2]
-    rv_plic_reg2hw_msip1_reg_t msip1; // [1:1]
+    rv_plic_reg2hw_prio0_reg_t prio0; // [423:421]
+    rv_plic_reg2hw_prio1_reg_t prio1; // [420:418]
+    rv_plic_reg2hw_prio2_reg_t prio2; // [417:415]
+    rv_plic_reg2hw_prio3_reg_t prio3; // [414:412]
+    rv_plic_reg2hw_prio4_reg_t prio4; // [411:409]
+    rv_plic_reg2hw_prio5_reg_t prio5; // [408:406]
+    rv_plic_reg2hw_prio6_reg_t prio6; // [405:403]
+    rv_plic_reg2hw_prio7_reg_t prio7; // [402:400]
+    rv_plic_reg2hw_prio8_reg_t prio8; // [399:397]
+    rv_plic_reg2hw_prio9_reg_t prio9; // [396:394]
+    rv_plic_reg2hw_prio10_reg_t prio10; // [393:391]
+    rv_plic_reg2hw_prio11_reg_t prio11; // [390:388]
+    rv_plic_reg2hw_prio12_reg_t prio12; // [387:385]
+    rv_plic_reg2hw_prio13_reg_t prio13; // [384:382]
+    rv_plic_reg2hw_prio14_reg_t prio14; // [381:379]
+    rv_plic_reg2hw_prio15_reg_t prio15; // [378:376]
+    rv_plic_reg2hw_prio16_reg_t prio16; // [375:373]
+    rv_plic_reg2hw_prio17_reg_t prio17; // [372:370]
+    rv_plic_reg2hw_prio18_reg_t prio18; // [369:367]
+    rv_plic_reg2hw_prio19_reg_t prio19; // [366:364]
+    rv_plic_reg2hw_prio20_reg_t prio20; // [363:361]
+    rv_plic_reg2hw_prio21_reg_t prio21; // [360:358]
+    rv_plic_reg2hw_prio22_reg_t prio22; // [357:355]
+    rv_plic_reg2hw_prio23_reg_t prio23; // [354:352]
+    rv_plic_reg2hw_prio24_reg_t prio24; // [351:349]
+    rv_plic_reg2hw_prio25_reg_t prio25; // [348:346]
+    rv_plic_reg2hw_prio26_reg_t prio26; // [345:343]
+    rv_plic_reg2hw_prio27_reg_t prio27; // [342:340]
+    rv_plic_reg2hw_prio28_reg_t prio28; // [339:337]
+    rv_plic_reg2hw_prio29_reg_t prio29; // [336:334]
+    rv_plic_reg2hw_prio30_reg_t prio30; // [333:331]
+    rv_plic_reg2hw_prio31_reg_t prio31; // [330:328]
+    rv_plic_reg2hw_prio32_reg_t prio32; // [327:325]
+    rv_plic_reg2hw_prio33_reg_t prio33; // [324:322]
+    rv_plic_reg2hw_prio34_reg_t prio34; // [321:319]
+    rv_plic_reg2hw_prio35_reg_t prio35; // [318:316]
+    rv_plic_reg2hw_prio36_reg_t prio36; // [315:313]
+    rv_plic_reg2hw_prio37_reg_t prio37; // [312:310]
+    rv_plic_reg2hw_prio38_reg_t prio38; // [309:307]
+    rv_plic_reg2hw_prio39_reg_t prio39; // [306:304]
+    rv_plic_reg2hw_prio40_reg_t prio40; // [303:301]
+    rv_plic_reg2hw_prio41_reg_t prio41; // [300:298]
+    rv_plic_reg2hw_prio42_reg_t prio42; // [297:295]
+    rv_plic_reg2hw_prio43_reg_t prio43; // [294:292]
+    rv_plic_reg2hw_prio44_reg_t prio44; // [291:289]
+    rv_plic_reg2hw_prio45_reg_t prio45; // [288:286]
+    rv_plic_reg2hw_prio46_reg_t prio46; // [285:283]
+    rv_plic_reg2hw_prio47_reg_t prio47; // [282:280]
+    rv_plic_reg2hw_prio48_reg_t prio48; // [279:277]
+    rv_plic_reg2hw_prio49_reg_t prio49; // [276:274]
+    rv_plic_reg2hw_prio50_reg_t prio50; // [273:271]
+    rv_plic_reg2hw_prio51_reg_t prio51; // [270:268]
+    rv_plic_reg2hw_prio52_reg_t prio52; // [267:265]
+    rv_plic_reg2hw_prio53_reg_t prio53; // [264:262]
+    rv_plic_reg2hw_prio54_reg_t prio54; // [261:259]
+    rv_plic_reg2hw_prio55_reg_t prio55; // [258:256]
+    rv_plic_reg2hw_prio56_reg_t prio56; // [255:253]
+    rv_plic_reg2hw_prio57_reg_t prio57; // [252:250]
+    rv_plic_reg2hw_prio58_reg_t prio58; // [249:247]
+    rv_plic_reg2hw_prio59_reg_t prio59; // [246:244]
+    rv_plic_reg2hw_prio60_reg_t prio60; // [243:241]
+    rv_plic_reg2hw_prio61_reg_t prio61; // [240:238]
+    rv_plic_reg2hw_prio62_reg_t prio62; // [237:235]
+    rv_plic_reg2hw_prio63_reg_t prio63; // [234:232]
+    rv_plic_reg2hw_prio64_reg_t prio64; // [231:229]
+    rv_plic_reg2hw_prio65_reg_t prio65; // [228:226]
+    rv_plic_reg2hw_le_mreg_t [65:0] le; // [225:160]
+    rv_plic_reg2hw_ie0_mreg_t [65:0] ie0; // [159:94]
+    rv_plic_reg2hw_ie1_mreg_t [65:0] ie1; // [93:28]
+    rv_plic_reg2hw_threshold0_reg_t threshold0; // [27:25]
+    rv_plic_reg2hw_cc0_reg_t cc0; // [24:16]
+    rv_plic_reg2hw_msip0_reg_t msip0; // [15:15]
+    rv_plic_reg2hw_threshold1_reg_t threshold1; // [14:12]
+    rv_plic_reg2hw_cc1_reg_t cc1; // [11:3]
+    rv_plic_reg2hw_msip1_reg_t msip1; // [2:2]
+    rv_plic_reg2hw_alert_test_reg_t alert_test; // [1:0]
   } rv_plic_reg2hw_t;
 
-  ///////////////////////////////////////
-  // Internal design logic to register //
-  ///////////////////////////////////////
+  // HW -> register type
   typedef struct packed {
-    rv_plic_hw2reg_ip_mreg_t [72:0] ip; // [160:15]
-    rv_plic_hw2reg_cc0_reg_t cc0; // [14:6]
-    rv_plic_hw2reg_cc1_reg_t cc1; // [5:-3]
+    rv_plic_hw2reg_ip_mreg_t [65:0] ip; // [145:14]
+    rv_plic_hw2reg_cc0_reg_t cc0; // [13:7]
+    rv_plic_hw2reg_cc1_reg_t cc1; // [6:0]
   } rv_plic_hw2reg_t;
 
-  // Register Address
-  parameter logic [21:0] RV_PLIC_PRIO0_OFFSET = 22'h 0;
-  parameter logic [21:0] RV_PLIC_PRIO1_OFFSET = 22'h 4;
-  parameter logic [21:0] RV_PLIC_PRIO2_OFFSET = 22'h 8;
-  parameter logic [21:0] RV_PLIC_PRIO3_OFFSET = 22'h c;
-  parameter logic [21:0] RV_PLIC_PRIO4_OFFSET = 22'h 10;
-  parameter logic [21:0] RV_PLIC_PRIO5_OFFSET = 22'h 14;
-  parameter logic [21:0] RV_PLIC_PRIO6_OFFSET = 22'h 18;
-  parameter logic [21:0] RV_PLIC_PRIO7_OFFSET = 22'h 1c;
-  parameter logic [21:0] RV_PLIC_PRIO8_OFFSET = 22'h 20;
-  parameter logic [21:0] RV_PLIC_PRIO9_OFFSET = 22'h 24;
-  parameter logic [21:0] RV_PLIC_PRIO10_OFFSET = 22'h 28;
-  parameter logic [21:0] RV_PLIC_PRIO11_OFFSET = 22'h 2c;
-  parameter logic [21:0] RV_PLIC_PRIO12_OFFSET = 22'h 30;
-  parameter logic [21:0] RV_PLIC_PRIO13_OFFSET = 22'h 34;
-  parameter logic [21:0] RV_PLIC_PRIO14_OFFSET = 22'h 38;
-  parameter logic [21:0] RV_PLIC_PRIO15_OFFSET = 22'h 3c;
-  parameter logic [21:0] RV_PLIC_PRIO16_OFFSET = 22'h 40;
-  parameter logic [21:0] RV_PLIC_PRIO17_OFFSET = 22'h 44;
-  parameter logic [21:0] RV_PLIC_PRIO18_OFFSET = 22'h 48;
-  parameter logic [21:0] RV_PLIC_PRIO19_OFFSET = 22'h 4c;
-  parameter logic [21:0] RV_PLIC_PRIO20_OFFSET = 22'h 50;
-  parameter logic [21:0] RV_PLIC_PRIO21_OFFSET = 22'h 54;
-  parameter logic [21:0] RV_PLIC_PRIO22_OFFSET = 22'h 58;
-  parameter logic [21:0] RV_PLIC_PRIO23_OFFSET = 22'h 5c;
-  parameter logic [21:0] RV_PLIC_PRIO24_OFFSET = 22'h 60;
-  parameter logic [21:0] RV_PLIC_PRIO25_OFFSET = 22'h 64;
-  parameter logic [21:0] RV_PLIC_PRIO26_OFFSET = 22'h 68;
-  parameter logic [21:0] RV_PLIC_PRIO27_OFFSET = 22'h 6c;
-  parameter logic [21:0] RV_PLIC_PRIO28_OFFSET = 22'h 70;
-  parameter logic [21:0] RV_PLIC_PRIO29_OFFSET = 22'h 74;
-  parameter logic [21:0] RV_PLIC_PRIO30_OFFSET = 22'h 78;
-  parameter logic [21:0] RV_PLIC_PRIO31_OFFSET = 22'h 7c;
-  parameter logic [21:0] RV_PLIC_PRIO32_OFFSET = 22'h 80;
-  parameter logic [21:0] RV_PLIC_PRIO33_OFFSET = 22'h 84;
-  parameter logic [21:0] RV_PLIC_PRIO34_OFFSET = 22'h 88;
-  parameter logic [21:0] RV_PLIC_PRIO35_OFFSET = 22'h 8c;
-  parameter logic [21:0] RV_PLIC_PRIO36_OFFSET = 22'h 90;
-  parameter logic [21:0] RV_PLIC_PRIO37_OFFSET = 22'h 94;
-  parameter logic [21:0] RV_PLIC_PRIO38_OFFSET = 22'h 98;
-  parameter logic [21:0] RV_PLIC_PRIO39_OFFSET = 22'h 9c;
-  parameter logic [21:0] RV_PLIC_PRIO40_OFFSET = 22'h a0;
-  parameter logic [21:0] RV_PLIC_PRIO41_OFFSET = 22'h a4;
-  parameter logic [21:0] RV_PLIC_PRIO42_OFFSET = 22'h a8;
-  parameter logic [21:0] RV_PLIC_PRIO43_OFFSET = 22'h ac;
-  parameter logic [21:0] RV_PLIC_PRIO44_OFFSET = 22'h b0;
-  parameter logic [21:0] RV_PLIC_PRIO45_OFFSET = 22'h b4;
-  parameter logic [21:0] RV_PLIC_PRIO46_OFFSET = 22'h b8;
-  parameter logic [21:0] RV_PLIC_PRIO47_OFFSET = 22'h bc;
-  parameter logic [21:0] RV_PLIC_PRIO48_OFFSET = 22'h c0;
-  parameter logic [21:0] RV_PLIC_PRIO49_OFFSET = 22'h c4;
-  parameter logic [21:0] RV_PLIC_PRIO50_OFFSET = 22'h c8;
-  parameter logic [21:0] RV_PLIC_PRIO51_OFFSET = 22'h cc;
-  parameter logic [21:0] RV_PLIC_PRIO52_OFFSET = 22'h d0;
-  parameter logic [21:0] RV_PLIC_PRIO53_OFFSET = 22'h d4;
-  parameter logic [21:0] RV_PLIC_PRIO54_OFFSET = 22'h d8;
-  parameter logic [21:0] RV_PLIC_PRIO55_OFFSET = 22'h dc;
-  parameter logic [21:0] RV_PLIC_PRIO56_OFFSET = 22'h e0;
-  parameter logic [21:0] RV_PLIC_PRIO57_OFFSET = 22'h e4;
-  parameter logic [21:0] RV_PLIC_PRIO58_OFFSET = 22'h e8;
-  parameter logic [21:0] RV_PLIC_PRIO59_OFFSET = 22'h ec;
-  parameter logic [21:0] RV_PLIC_PRIO60_OFFSET = 22'h f0;
-  parameter logic [21:0] RV_PLIC_PRIO61_OFFSET = 22'h f4;
-  parameter logic [21:0] RV_PLIC_PRIO62_OFFSET = 22'h f8;
-  parameter logic [21:0] RV_PLIC_PRIO63_OFFSET = 22'h fc;
-  parameter logic [21:0] RV_PLIC_PRIO64_OFFSET = 22'h 100;
-  parameter logic [21:0] RV_PLIC_PRIO65_OFFSET = 22'h 104;
-  parameter logic [21:0] RV_PLIC_PRIO66_OFFSET = 22'h 108;
-  parameter logic [21:0] RV_PLIC_PRIO67_OFFSET = 22'h 10c;
-  parameter logic [21:0] RV_PLIC_PRIO68_OFFSET = 22'h 110;
-  parameter logic [21:0] RV_PLIC_PRIO69_OFFSET = 22'h 114;
-  parameter logic [21:0] RV_PLIC_PRIO70_OFFSET = 22'h 118;
-  parameter logic [21:0] RV_PLIC_PRIO71_OFFSET = 22'h 11c;
-  parameter logic [21:0] RV_PLIC_PRIO72_OFFSET = 22'h 120;
-  parameter logic [21:0] RV_PLIC_IP_0_OFFSET = 22'h 1000;
-  parameter logic [21:0] RV_PLIC_IP_1_OFFSET = 22'h 1004;
-  parameter logic [21:0] RV_PLIC_IP_2_OFFSET = 22'h 1008;
-  parameter logic [21:0] RV_PLIC_LE_0_OFFSET = 22'h 100c;
-  parameter logic [21:0] RV_PLIC_LE_1_OFFSET = 22'h 1010;
-  parameter logic [21:0] RV_PLIC_LE_2_OFFSET = 22'h 1014;
-  parameter logic [21:0] RV_PLIC_IE0_0_OFFSET = 22'h 2000;
-  parameter logic [21:0] RV_PLIC_IE0_1_OFFSET = 22'h 2004;
-  parameter logic [21:0] RV_PLIC_IE0_2_OFFSET = 22'h 2008;
-  parameter logic [21:0] RV_PLIC_IE1_0_OFFSET = 22'h 2080;
-  parameter logic [21:0] RV_PLIC_IE1_1_OFFSET = 22'h 2084;
-  parameter logic [21:0] RV_PLIC_IE1_2_OFFSET = 22'h 2088;
-  parameter logic [21:0] RV_PLIC_THRESHOLD0_OFFSET = 22'h 200000;
-  parameter logic [21:0] RV_PLIC_CC0_OFFSET = 22'h 200004;
-  parameter logic [21:0] RV_PLIC_MSIP0_OFFSET = 22'h 200008;
-  parameter logic [21:0] RV_PLIC_THRESHOLD1_OFFSET = 22'h 201000;
-  parameter logic [21:0] RV_PLIC_CC1_OFFSET = 22'h 201004;
-  parameter logic [21:0] RV_PLIC_MSIP1_OFFSET = 22'h 201008;
+  // Register offsets
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO0_OFFSET = 22'h 0;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO1_OFFSET = 22'h 4;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO2_OFFSET = 22'h 8;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO3_OFFSET = 22'h c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO4_OFFSET = 22'h 10;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO5_OFFSET = 22'h 14;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO6_OFFSET = 22'h 18;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO7_OFFSET = 22'h 1c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO8_OFFSET = 22'h 20;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO9_OFFSET = 22'h 24;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO10_OFFSET = 22'h 28;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO11_OFFSET = 22'h 2c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO12_OFFSET = 22'h 30;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO13_OFFSET = 22'h 34;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO14_OFFSET = 22'h 38;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO15_OFFSET = 22'h 3c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO16_OFFSET = 22'h 40;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO17_OFFSET = 22'h 44;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO18_OFFSET = 22'h 48;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO19_OFFSET = 22'h 4c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO20_OFFSET = 22'h 50;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO21_OFFSET = 22'h 54;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO22_OFFSET = 22'h 58;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO23_OFFSET = 22'h 5c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO24_OFFSET = 22'h 60;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO25_OFFSET = 22'h 64;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO26_OFFSET = 22'h 68;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO27_OFFSET = 22'h 6c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO28_OFFSET = 22'h 70;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO29_OFFSET = 22'h 74;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO30_OFFSET = 22'h 78;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO31_OFFSET = 22'h 7c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO32_OFFSET = 22'h 80;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO33_OFFSET = 22'h 84;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO34_OFFSET = 22'h 88;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO35_OFFSET = 22'h 8c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO36_OFFSET = 22'h 90;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO37_OFFSET = 22'h 94;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO38_OFFSET = 22'h 98;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO39_OFFSET = 22'h 9c;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO40_OFFSET = 22'h a0;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO41_OFFSET = 22'h a4;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO42_OFFSET = 22'h a8;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO43_OFFSET = 22'h ac;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO44_OFFSET = 22'h b0;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO45_OFFSET = 22'h b4;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO46_OFFSET = 22'h b8;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO47_OFFSET = 22'h bc;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO48_OFFSET = 22'h c0;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO49_OFFSET = 22'h c4;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO50_OFFSET = 22'h c8;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO51_OFFSET = 22'h cc;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO52_OFFSET = 22'h d0;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO53_OFFSET = 22'h d4;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO54_OFFSET = 22'h d8;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO55_OFFSET = 22'h dc;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO56_OFFSET = 22'h e0;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO57_OFFSET = 22'h e4;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO58_OFFSET = 22'h e8;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO59_OFFSET = 22'h ec;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO60_OFFSET = 22'h f0;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO61_OFFSET = 22'h f4;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO62_OFFSET = 22'h f8;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO63_OFFSET = 22'h fc;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO64_OFFSET = 22'h 100;
+  parameter logic [BlockAw-1:0] RV_PLIC_PRIO65_OFFSET = 22'h 104;
+  parameter logic [BlockAw-1:0] RV_PLIC_IP_0_OFFSET = 22'h 1000;
+  parameter logic [BlockAw-1:0] RV_PLIC_IP_1_OFFSET = 22'h 1004;
+  parameter logic [BlockAw-1:0] RV_PLIC_IP_2_OFFSET = 22'h 1008;
+  parameter logic [BlockAw-1:0] RV_PLIC_LE_0_OFFSET = 22'h 100c;
+  parameter logic [BlockAw-1:0] RV_PLIC_LE_1_OFFSET = 22'h 1010;
+  parameter logic [BlockAw-1:0] RV_PLIC_LE_2_OFFSET = 22'h 1014;
+  parameter logic [BlockAw-1:0] RV_PLIC_IE0_0_OFFSET = 22'h 2000;
+  parameter logic [BlockAw-1:0] RV_PLIC_IE0_1_OFFSET = 22'h 2004;
+  parameter logic [BlockAw-1:0] RV_PLIC_IE0_2_OFFSET = 22'h 2008;
+  parameter logic [BlockAw-1:0] RV_PLIC_IE1_0_OFFSET = 22'h 2080;
+  parameter logic [BlockAw-1:0] RV_PLIC_IE1_1_OFFSET = 22'h 2084;
+  parameter logic [BlockAw-1:0] RV_PLIC_IE1_2_OFFSET = 22'h 2088;
+  parameter logic [BlockAw-1:0] RV_PLIC_THRESHOLD0_OFFSET = 22'h 200000;
+  parameter logic [BlockAw-1:0] RV_PLIC_CC0_OFFSET = 22'h 200004;
+  parameter logic [BlockAw-1:0] RV_PLIC_MSIP0_OFFSET = 22'h 200008;
+  parameter logic [BlockAw-1:0] RV_PLIC_THRESHOLD1_OFFSET = 22'h 201000;
+  parameter logic [BlockAw-1:0] RV_PLIC_CC1_OFFSET = 22'h 201004;
+  parameter logic [BlockAw-1:0] RV_PLIC_MSIP1_OFFSET = 22'h 201008;
+  parameter logic [BlockAw-1:0] RV_PLIC_ALERT_TEST_OFFSET = 22'h 202000;
 
+  // Reset values for hwext registers and their fields
+  parameter logic [6:0] RV_PLIC_CC0_RESVAL = 7'h 0;
+  parameter logic [6:0] RV_PLIC_CC1_RESVAL = 7'h 0;
+  parameter logic [0:0] RV_PLIC_ALERT_TEST_RESVAL = 1'h 0;
 
-  // Register Index
+  // Register index
   typedef enum int {
     RV_PLIC_PRIO0,
     RV_PLIC_PRIO1,
@@ -620,13 +588,6 @@ package rv_plic_reg_pkg;
     RV_PLIC_PRIO63,
     RV_PLIC_PRIO64,
     RV_PLIC_PRIO65,
-    RV_PLIC_PRIO66,
-    RV_PLIC_PRIO67,
-    RV_PLIC_PRIO68,
-    RV_PLIC_PRIO69,
-    RV_PLIC_PRIO70,
-    RV_PLIC_PRIO71,
-    RV_PLIC_PRIO72,
     RV_PLIC_IP_0,
     RV_PLIC_IP_1,
     RV_PLIC_IP_2,
@@ -644,11 +605,12 @@ package rv_plic_reg_pkg;
     RV_PLIC_MSIP0,
     RV_PLIC_THRESHOLD1,
     RV_PLIC_CC1,
-    RV_PLIC_MSIP1
+    RV_PLIC_MSIP1,
+    RV_PLIC_ALERT_TEST
   } rv_plic_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] RV_PLIC_PERMIT [91] = '{
+  parameter logic [3:0] RV_PLIC_PERMIT [85] = '{
     4'b 0001, // index[ 0] RV_PLIC_PRIO0
     4'b 0001, // index[ 1] RV_PLIC_PRIO1
     4'b 0001, // index[ 2] RV_PLIC_PRIO2
@@ -715,31 +677,26 @@ package rv_plic_reg_pkg;
     4'b 0001, // index[63] RV_PLIC_PRIO63
     4'b 0001, // index[64] RV_PLIC_PRIO64
     4'b 0001, // index[65] RV_PLIC_PRIO65
-    4'b 0001, // index[66] RV_PLIC_PRIO66
-    4'b 0001, // index[67] RV_PLIC_PRIO67
-    4'b 0001, // index[68] RV_PLIC_PRIO68
-    4'b 0001, // index[69] RV_PLIC_PRIO69
-    4'b 0001, // index[70] RV_PLIC_PRIO70
-    4'b 0001, // index[71] RV_PLIC_PRIO71
-    4'b 0001, // index[72] RV_PLIC_PRIO72
-    4'b 1111, // index[73] RV_PLIC_IP_0
-    4'b 1111, // index[74] RV_PLIC_IP_1
-    4'b 0011, // index[75] RV_PLIC_IP_2
-    4'b 1111, // index[76] RV_PLIC_LE_0
-    4'b 1111, // index[77] RV_PLIC_LE_1
-    4'b 0011, // index[78] RV_PLIC_LE_2
-    4'b 1111, // index[79] RV_PLIC_IE0_0
-    4'b 1111, // index[80] RV_PLIC_IE0_1
-    4'b 0011, // index[81] RV_PLIC_IE0_2
-    4'b 1111, // index[82] RV_PLIC_IE1_0
-    4'b 1111, // index[83] RV_PLIC_IE1_1
-    4'b 0011, // index[84] RV_PLIC_IE1_2
-    4'b 0001, // index[85] RV_PLIC_THRESHOLD0
-    4'b 0001, // index[86] RV_PLIC_CC0
-    4'b 0001, // index[87] RV_PLIC_MSIP0
-    4'b 0001, // index[88] RV_PLIC_THRESHOLD1
-    4'b 0001, // index[89] RV_PLIC_CC1
-    4'b 0001  // index[90] RV_PLIC_MSIP1
+    4'b 1111, // index[66] RV_PLIC_IP_0
+    4'b 1111, // index[67] RV_PLIC_IP_1
+    4'b 0001, // index[68] RV_PLIC_IP_2
+    4'b 1111, // index[69] RV_PLIC_LE_0
+    4'b 1111, // index[70] RV_PLIC_LE_1
+    4'b 0001, // index[71] RV_PLIC_LE_2
+    4'b 1111, // index[72] RV_PLIC_IE0_0
+    4'b 1111, // index[73] RV_PLIC_IE0_1
+    4'b 0001, // index[74] RV_PLIC_IE0_2
+    4'b 1111, // index[75] RV_PLIC_IE1_0
+    4'b 1111, // index[76] RV_PLIC_IE1_1
+    4'b 0001, // index[77] RV_PLIC_IE1_2
+    4'b 0001, // index[78] RV_PLIC_THRESHOLD0
+    4'b 0001, // index[79] RV_PLIC_CC0
+    4'b 0001, // index[80] RV_PLIC_MSIP0
+    4'b 0001, // index[81] RV_PLIC_THRESHOLD1
+    4'b 0001, // index[82] RV_PLIC_CC1
+    4'b 0001, // index[83] RV_PLIC_MSIP1
+    4'b 0001  // index[84] RV_PLIC_ALERT_TEST
   };
+
 endpackage
 

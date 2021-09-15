@@ -2508,25 +2508,35 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   //////////////
   //   UART   //
   //////////////
-  uart #(
+
+  apb_a48_d32_req_t uart_apb_req;
+  apb_a48_d32_rsp_t uart_apb_rsp;
+
+  reg_to_apb #(
       .reg_req_t(reg_a48_d32_req_t),
-      .reg_rsp_t(reg_a48_d32_rsp_t)
-  ) i_uart (
+      .reg_rsp_t(reg_a48_d32_rsp_t),
+      .apb_req_t(apb_a48_d32_req_t),
+      .apb_rsp_t(apb_a48_d32_rsp_t)
+  ) i_uart_apb_pc (
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
       .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_UART]),
       .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_UART]),
-      .cio_tx_o(uart_tx_o),
-      .cio_rx_i(uart_rx_i),
-      .cio_tx_en_o(),
-      .intr_tx_watermark_o(irq.uart_tx_watermark),
-      .intr_rx_watermark_o(irq.uart_rx_watermark),
-      .intr_tx_empty_o(irq.uart_tx_empty),
-      .intr_rx_overflow_o(irq.uart_rx_overflow),
-      .intr_rx_frame_err_o(irq.uart_rx_frame_err),
-      .intr_rx_break_err_o(irq.uart_rx_break_err),
-      .intr_rx_timeout_o(irq.uart_rx_timeout),
-      .intr_rx_parity_err_o(irq.uart_rx_parity_err)
+      .apb_req_o(uart_apb_req),
+      .apb_rsp_i(uart_apb_rsp)
+  );
+
+  apb_uart_sv #(
+      .apb_req_t (apb_a48_d32_req_t),
+      .apb_resp_t(apb_a48_d32_rsp_t)
+  ) i_uart (
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
+      .apb_req_i(uart_apb_req),
+      .apb_resp_o(uart_apb_rsp),
+      .rx_i(uart_rx_i),
+      .tx_o(uart_tx_o),
+      .intr_o(irq.uart)
   );
 
   /////////////

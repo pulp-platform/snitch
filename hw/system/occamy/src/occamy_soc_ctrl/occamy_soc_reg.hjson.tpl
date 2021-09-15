@@ -19,10 +19,11 @@
       default: "${nr_s1_quadrants}"
     },
   ],
-  name: "Occamy SoC"
+  name: "Occamy_SoC"
   clock_primary: "clk_i"
-  bus_device: "reg"
-  bus_host: "none"
+  bus_interfaces: [
+    { protocol: "reg_iface", direction: "device" }
+  ],
   interrupt_list: [
     { name: "ecc_uncorrectable"
       desc: "Detected an uncorrectable ECC error on system SRAM."}
