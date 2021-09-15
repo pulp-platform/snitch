@@ -1140,19 +1140,10 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       FSGNJX_H,
       FMIN_H,
       FMAX_H: begin
-        if (FP_EN && XF16 && fcsr_q.fmode.dst == 1'b0 && (!(inst_data_i inside {FDIV_H, FSQRT_H}) || XDivSqrt))) begin
+        if (FP_EN && XF16 && fcsr_q.fmode.dst == 1'b0 && (!(inst_data_i inside {FDIV_H, FSQRT_H}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
-        end else if (FP_EN && XF16ALT && fcsr_q.fmode.dst == 1'b1 && (!(inst_data_i inside {VFDIV_H, VFDIV_R_H, VFSQRT_H}) || XDivSqrt))) begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-        end else begin
-          illegal_inst = 1'b1;
-        end
-      end
-      FMACEX_S_H,
-      FMULEX_S_H: begin
-        if (FP_EN && RVF && XF16 && XFAUX) begin
+        end else if (FP_EN && XF16ALT && fcsr_q.fmode.dst == 1'b1 && (!(inst_data_i inside {VFDIV_H, VFDIV_R_H, VFSQRT_H}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
         end else begin
@@ -1247,10 +1238,10 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFSGNJX_H,
       VFSGNJX_R_H: begin
         if (FP_EN && XFVEC && FLEN >= 32) begin
-          if (XF16 && fcsr_q.fmode.dst == 1'b0 && (!(inst_data_i inside {VFDIV_H, VFDIV_R_H, VFSQRT_H}) || XDivSqrt))) begin
+          if (XF16 && fcsr_q.fmode.dst == 1'b0 && (!(inst_data_i inside {VFDIV_H, VFDIV_R_H, VFSQRT_H}) || XDivSqrt)) begin
             write_rd = 1'b0;
             acc_qvalid_o = valid_instr;
-          end else if (XF16ALT && fcsr_q.fmode.dst == 1'b1 && (!(inst_data_i inside {VFDIV_H, VFDIV_R_H, VFSQRT_H}) || XDivSqrt))) begin
+          end else if (XF16ALT && fcsr_q.fmode.dst == 1'b1 && (!(inst_data_i inside {VFDIV_H, VFDIV_R_H, VFSQRT_H}) || XDivSqrt)) begin
             write_rd = 1'b0;
             acc_qvalid_o = valid_instr;
           end else begin

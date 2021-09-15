@@ -78,8 +78,6 @@ module snitch_cluster
   parameter bit [NrCores-1:0] XFVEC         = '0,
   /// Enable DOTP support.
   parameter bit [NrCores-1:0] XFDOTP        = '0,
-  /// Enable DOTP support.
-  parameter bit [NrCores-1:0] XFDOTP        = '0,
   /// Per-core enabling of the custom `Xdma` ISA extensions.
   parameter bit [NrCores-1:0] Xdma          = '0,
   /// Per-core enabling of the custom `Xssr` ISA extensions.

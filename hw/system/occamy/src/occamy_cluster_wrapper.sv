@@ -80,10 +80,10 @@ package occamy_cluster_pkg;
                         2, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1}, // DIVSQRT
-                    '{default: 1}, // NONCOMP
-                    '{default: 1}, // CONV
-                    '{default: 1} // DOTP
+                    '{default: 1},   // DIVSQRT
+                    '{default: 1},   // NONCOMP
+                    '{default: 1},   // CONV
+                    '{default: 1}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -102,52 +102,10 @@ package occamy_cluster_pkg;
                         2, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1}, // DIVSQRT
-                    '{default: 1}, // NONCOMP
-                    '{default: 1}, // CONV
-                    '{default: 1} // DOTP
-                    },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
-        PipeConfig: fpnew_pkg::BEFORE
-    },
-    '{
-        PipeRegs: // FMA Block
-                  '{
-                    '{  3, // FP32
-                        3, // FP64
-                        1, // FP16
-                        1, // FP8
-                        2  // FP16alt
-                      },
-                    '{default: 1}, // DIVSQRT
-                    '{default: 1}, // NONCOMP
-                    '{default: 1}, // CONV
-                    '{default: 1} // DOTP
-                    },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED}},  // CONV
-        PipeConfig: fpnew_pkg::BEFORE
-    },
-    '{
-        PipeRegs: // FMA Block
-                  '{
-                    '{  3, // FP32
-                        3, // FP64
-                        1, // FP16
-                        1, // FP8
-                        2, // FP16alt
-                        1  // FP8alt
-                      },
-                    '{default: 1}, // DIVSQRT
-                    '{default: 1}, // NONCOMP
-                    '{default: 1}, // CONV
-                    '{default: 1} // DOTP
+                    '{default: 1},   // DIVSQRT
+                    '{default: 1},   // NONCOMP
+                    '{default: 1},   // CONV
+                    '{default: 1}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -166,10 +124,10 @@ package occamy_cluster_pkg;
                         2, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1}, // DIVSQRT
-                    '{default: 1}, // NONCOMP
-                    '{default: 1}, // CONV
-                    '{default: 1} // DOTP
+                    '{default: 1},   // DIVSQRT
+                    '{default: 1},   // NONCOMP
+                    '{default: 1},   // CONV
+                    '{default: 1}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -188,10 +146,10 @@ package occamy_cluster_pkg;
                         2, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1}, // DIVSQRT
-                    '{default: 1}, // NONCOMP
-                    '{default: 1}, // CONV
-                    '{default: 1} // DOTP
+                    '{default: 1},   // DIVSQRT
+                    '{default: 1},   // NONCOMP
+                    '{default: 1},   // CONV
+                    '{default: 1}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -210,10 +168,10 @@ package occamy_cluster_pkg;
                         2, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1}, // DIVSQRT
-                    '{default: 1}, // NONCOMP
-                    '{default: 1}, // CONV
-                    '{default: 1} // DOTP
+                    '{default: 1},   // DIVSQRT
+                    '{default: 1},   // NONCOMP
+                    '{default: 1},   // CONV
+                    '{default: 1}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -232,10 +190,10 @@ package occamy_cluster_pkg;
                         2, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1}, // DIVSQRT
-                    '{default: 1}, // NONCOMP
-                    '{default: 1}, // CONV
-                    '{default: 1} // DOTP
+                    '{default: 1},   // DIVSQRT
+                    '{default: 1},   // NONCOMP
+                    '{default: 1},   // CONV
+                    '{default: 1}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -254,10 +212,54 @@ package occamy_cluster_pkg;
                         2, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1}, // DIVSQRT
-                    '{default: 1}, // NONCOMP
-                    '{default: 1}, // CONV
-                    '{default: 1} // DOTP
+                    '{default: 1},   // DIVSQRT
+                    '{default: 1},   // NONCOMP
+                    '{default: 1},   // CONV
+                    '{default: 1}    // DOTP
+                    },
+        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
+                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{default: fpnew_pkg::MERGED},   // CONV
+                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        PipeConfig: fpnew_pkg::BEFORE
+    },
+    '{
+        PipeRegs: // FMA Block
+                  '{
+                    '{  3, // FP32
+                        3, // FP64
+                        1, // FP16
+                        1, // FP8
+                        2, // FP16alt
+                        1  // FP8alt
+                      },
+                    '{default: 1},   // DIVSQRT
+                    '{default: 1},   // NONCOMP
+                    '{default: 1},   // CONV
+                    '{default: 1}    // DOTP
+                    },
+        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
+                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{default: fpnew_pkg::MERGED},   // CONV
+                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        PipeConfig: fpnew_pkg::BEFORE
+    },
+    '{
+        PipeRegs: // FMA Block
+                  '{
+                    '{  3, // FP32
+                        3, // FP64
+                        1, // FP16
+                        1, // FP8
+                        2, // FP16alt
+                        1  // FP8alt
+                      },
+                    '{default: 1},   // DIVSQRT
+                    '{default: 1},   // NONCOMP
+                    '{default: 1},   // CONV
+                    '{default: 1}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -370,8 +372,8 @@ module occamy_cluster_wrapper (
     .ICacheLineCount (occamy_cluster_pkg::ICacheLineCount),
     .ICacheSets (occamy_cluster_pkg::ICacheSets),
     .RVE (9'b000000000),
-    .RVF (9'b111111111),
-    .RVD (9'b111111111),
+    .RVF (9'b011111111),
+    .RVD (9'b011111111),
     .XDivSqrt (9'b000000000),
     .XF16 (9'b011111111),
     .XF16ALT (9'b011111111),
