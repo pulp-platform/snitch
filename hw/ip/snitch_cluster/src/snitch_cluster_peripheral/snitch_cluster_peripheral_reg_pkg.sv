@@ -35,6 +35,84 @@ package snitch_cluster_peripheral_reg_pkg;
     struct packed {
       logic        q;
     } issue_core_to_fpu;
+    struct packed {
+      logic        q;
+    } dma_aw_stall;
+    struct packed {
+      logic        q;
+    } dma_ar_stall;
+    struct packed {
+      logic        q;
+    } dma_r_stall;
+    struct packed {
+      logic        q;
+    } dma_w_stall;
+    struct packed {
+      logic        q;
+    } dma_buf_w_stall;
+    struct packed {
+      logic        q;
+    } dma_buf_r_stall;
+    struct packed {
+      logic        q;
+    } dma_aw_valid;
+    struct packed {
+      logic        q;
+    } dma_aw_ready;
+    struct packed {
+      logic        q;
+    } dma_aw_done;
+    struct packed {
+      logic        q;
+    } dma_aw_bw;
+    struct packed {
+      logic        q;
+    } dma_ar_valid;
+    struct packed {
+      logic        q;
+    } dma_ar_ready;
+    struct packed {
+      logic        q;
+    } dma_ar_done;
+    struct packed {
+      logic        q;
+    } dma_ar_bw;
+    struct packed {
+      logic        q;
+    } dma_r_valid;
+    struct packed {
+      logic        q;
+    } dma_r_ready;
+    struct packed {
+      logic        q;
+    } dma_r_done;
+    struct packed {
+      logic        q;
+    } dma_r_bw;
+    struct packed {
+      logic        q;
+    } dma_w_valid;
+    struct packed {
+      logic        q;
+    } dma_w_ready;
+    struct packed {
+      logic        q;
+    } dma_w_done;
+    struct packed {
+      logic        q;
+    } dma_w_bw;
+    struct packed {
+      logic        q;
+    } dma_b_valid;
+    struct packed {
+      logic        q;
+    } dma_b_ready;
+    struct packed {
+      logic        q;
+    } dma_b_done;
+    struct packed {
+      logic        q;
+    } dma_busy;
   } snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t;
 
   typedef struct packed {
@@ -65,7 +143,7 @@ package snitch_cluster_peripheral_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [1:0] perf_counter_enable; // [195:184]
+    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [1:0] perf_counter_enable; // [247:184]
     snitch_cluster_peripheral_reg2hw_hart_select_mreg_t [1:0] hart_select; // [183:164]
     snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t [1:0] perf_counter; // [163:66]
     snitch_cluster_peripheral_reg2hw_wake_up_reg_t wake_up; // [65:33]
@@ -106,8 +184,8 @@ package snitch_cluster_peripheral_reg_pkg;
 
   // Register width information to check illegal writes
   parameter logic [3:0] SNITCH_CLUSTER_PERIPHERAL_PERMIT [7] = '{
-    4'b 0001, // index[0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0
-    4'b 0001, // index[1] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1
+    4'b 1111, // index[0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0
+    4'b 1111, // index[1] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1
     4'b 0111, // index[2] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT
     4'b 1111, // index[3] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0
     4'b 1111, // index[4] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1

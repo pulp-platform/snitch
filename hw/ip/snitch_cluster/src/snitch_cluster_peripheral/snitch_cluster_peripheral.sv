@@ -11,9 +11,11 @@ module snitch_cluster_peripheral
   import snitch_cluster_peripheral_reg_pkg::*;
 #(
   parameter int unsigned AddrWidth = 0,
+  parameter int unsigned DMADataWidth = 0,
   parameter type reg_req_t = logic,
   parameter type reg_rsp_t = logic,
   parameter type         tcdm_events_t = logic,
+  parameter type         dma_events_t = logic,
   // Nr of course in the cluster
   parameter logic [31:0] NrCores       = 0,
   /// Derived parameter *Do not override*
@@ -30,12 +32,15 @@ module snitch_cluster_peripheral
   output logic [NrCores-1:0]         wake_up_o,
   input  logic [9:0]                 cluster_hart_base_id_i,
   input  core_events_t [NrCores-1:0] core_events_i,
-  input  tcdm_events_t               tcdm_events_i
+  input  tcdm_events_t               tcdm_events_i,
+  input  dma_events_t   dma_events_i
 );
 
   // Pipeline register to ease timing.
   tcdm_events_t tcdm_events_q;
+  dma_events_t dma_events_q;
   `FF(tcdm_events_q, tcdm_events_i, '0)
+  `FF(dma_events_q, dma_events_i, '0)
 
   snitch_cluster_peripheral_reg2hw_t reg2hw;
   snitch_cluster_peripheral_hw2reg_t hw2reg;
@@ -86,25 +91,133 @@ module snitch_cluster_peripheral
         perf_counter_d[i]++;
       end
       // TCDM Accessed
-      if (reg2hw.perf_counter_enable[i].tcdm_accessed.q) begin
+      else if (reg2hw.perf_counter_enable[i].tcdm_accessed.q) begin
         perf_counter_d[i] = perf_counter_d[i] + tcdm_events_q.inc_accessed;
       end
       // TCDM Congested
-      if (reg2hw.perf_counter_enable[i].tcdm_congested.q) begin
+      else if (reg2hw.perf_counter_enable[i].tcdm_congested.q) begin
         perf_counter_d[i] = perf_counter_d[i] + tcdm_events_q.inc_congested;
       end
       // Per-hart performance counter.
       // Issue FPU
-      if (reg2hw.perf_counter_enable[i].issue_fpu.q) begin
+      else if (reg2hw.perf_counter_enable[i].issue_fpu.q) begin
         perf_counter_d[i] = perf_counter_d[i] + sel_core_events.issue_fpu;
       end
       // Issue FPU Sequencer
-      if (reg2hw.perf_counter_enable[i].issue_fpu_seq.q) begin
+      else if (reg2hw.perf_counter_enable[i].issue_fpu_seq.q) begin
         perf_counter_d[i] = perf_counter_d[i] + sel_core_events.issue_fpu_seq;
       end
       // Issue Core to FPU
-      if (reg2hw.perf_counter_enable[i].issue_core_to_fpu.q) begin
+      else if (reg2hw.perf_counter_enable[i].issue_core_to_fpu.q) begin
         perf_counter_d[i] = perf_counter_d[i] + sel_core_events.issue_core_to_fpu;
+      end
+      // DMA AW stall
+      else if (reg2hw.perf_counter_enable[i].dma_aw_stall.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.aw_stall;
+      end
+      // DMA AR stall
+      else if (reg2hw.perf_counter_enable[i].dma_ar_stall.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.ar_stall;
+      end
+      // DMA R stall
+      else if (reg2hw.perf_counter_enable[i].dma_r_stall.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.r_stall;
+      end
+      // DMA W stall
+      else if (reg2hw.perf_counter_enable[i].dma_w_stall.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.w_stall;
+      end
+      // DMA BUF W stall
+      else if (reg2hw.perf_counter_enable[i].dma_buf_w_stall.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.buf_w_stall;
+      end
+      // DMA BUF R stall
+      else if (reg2hw.perf_counter_enable[i].dma_buf_r_stall.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.buf_r_stall;
+      end
+      // DMA AW valid
+      else if (reg2hw.perf_counter_enable[i].dma_aw_valid.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.aw_valid;
+      end
+      // DMA AW ready
+      else if (reg2hw.perf_counter_enable[i].dma_aw_ready.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.aw_ready;
+      end
+      // DMA AW done
+      else if (reg2hw.perf_counter_enable[i].dma_aw_done.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.aw_done;
+      end
+      // DMA AW BW
+      else if (reg2hw.perf_counter_enable[i].dma_aw_bw.q &&
+                dma_events_q.aw_done) begin
+        perf_counter_d[i] = perf_counter_d[i] + ((dma_events_q.aw_len + 1) << (dma_events_q.aw_size));
+      end
+      // DMA AR valid
+      else if (reg2hw.perf_counter_enable[i].dma_ar_valid.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.ar_valid;
+      end
+      // DMA AR ready
+      else if (reg2hw.perf_counter_enable[i].dma_ar_ready.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.ar_ready;
+      end
+      // DMA AR done
+      else if (reg2hw.perf_counter_enable[i].dma_ar_done.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.ar_done;
+      end
+      // DMA AR BW
+      else if (reg2hw.perf_counter_enable[i].dma_ar_bw.q &&
+                dma_events_q.ar_done) begin
+          perf_counter_d[i] = perf_counter_d[i] + ((dma_events_q.ar_len + 1) << (dma_events_q.ar_size));
+      end
+      // DMA R valid
+      else if (reg2hw.perf_counter_enable[i].dma_r_valid.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.r_valid;
+      end
+      // DMA R ready
+      else if (reg2hw.perf_counter_enable[i].dma_r_ready.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.r_ready;
+      end
+      // DMA R done
+      else if (reg2hw.perf_counter_enable[i].dma_r_done.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.r_done;
+      end
+      // DMA R BW
+      else if (reg2hw.perf_counter_enable[i].dma_r_bw.q &&
+                dma_events_q.r_done) begin
+        perf_counter_d[i] = perf_counter_d[i] + DMADataWidth/8;
+      end
+      // DMA W valid
+      else if (reg2hw.perf_counter_enable[i].dma_w_valid.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.w_valid;
+      end
+      // DMA W ready
+      else if (reg2hw.perf_counter_enable[i].dma_w_ready.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.w_ready;
+      end
+      // DMA W done
+      else if (reg2hw.perf_counter_enable[i].dma_w_done.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.w_done;
+      end
+      // DMA W BW
+      else if (reg2hw.perf_counter_enable[i].dma_w_bw.q &&
+                dma_events_q.w_done) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.num_bytes_written;
+      end
+      // DMA B valid
+      else if (reg2hw.perf_counter_enable[i].dma_b_valid.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.b_valid;
+      end
+      // DMA B ready
+      else if (reg2hw.perf_counter_enable[i].dma_b_ready.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.b_ready;
+      end
+      // DMA B done
+      else if (reg2hw.perf_counter_enable[i].dma_b_done.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.b_done;
+      end
+      // DMA busy
+      else if (reg2hw.perf_counter_enable[i].dma_busy.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + dma_events_q.dma_busy;
       end
       // Reset performance counter.
       if (reg2hw.perf_counter[i].qe) begin
