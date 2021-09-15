@@ -150,7 +150,8 @@ module snitch_cluster_peripheral
       // DMA AW BW
       else if (reg2hw.perf_counter_enable[i].dma_aw_bw.q &&
                 dma_events_q.aw_done) begin
-        perf_counter_d[i] = perf_counter_d[i] + ((dma_events_q.aw_len + 1) << (dma_events_q.aw_size));
+        perf_counter_d[i] = perf_counter_d[i] +
+              ((dma_events_q.aw_len + 1) << (dma_events_q.aw_size));
       end
       // DMA AR valid
       else if (reg2hw.perf_counter_enable[i].dma_ar_valid.q) begin
@@ -167,7 +168,8 @@ module snitch_cluster_peripheral
       // DMA AR BW
       else if (reg2hw.perf_counter_enable[i].dma_ar_bw.q &&
                 dma_events_q.ar_done) begin
-          perf_counter_d[i] = perf_counter_d[i] + ((dma_events_q.ar_len + 1) << (dma_events_q.ar_size));
+          perf_counter_d[i] = perf_counter_d[i] +
+                ((dma_events_q.ar_len + 1) << (dma_events_q.ar_size));
       end
       // DMA R valid
       else if (reg2hw.perf_counter_enable[i].dma_r_valid.q) begin
