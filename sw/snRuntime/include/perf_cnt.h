@@ -63,8 +63,8 @@ enum snrt_perf_cnt_type {
 };
 
 void snrt_start_perf_counter(enum snrt_perf_cnt perf_cnt,
-                                    enum snrt_perf_cnt_type perf_cnt_type,
-                                    uint32_t hart_id);
+                             enum snrt_perf_cnt_type perf_cnt_type,
+                             uint32_t hart_id);
 void snrt_stop_perf_counter(enum snrt_perf_cnt perf_cnt);
 void snrt_reset_perf_counter(enum snrt_perf_cnt);
 uint32_t snrt_get_perf_counter(enum snrt_perf_cnt perf_cnt);

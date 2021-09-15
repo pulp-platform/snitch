@@ -1,12 +1,12 @@
 // Copyright 2020 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
-#include "printf.h"
 #include "perf_cnt.h"
+
+#include "printf.h"
 #include "snrt.h"
 
 int main() {
-
     uint32_t core_idx = snrt_cluster_core_idx();
 
     if (core_idx == 0) {
@@ -51,7 +51,8 @@ int main() {
 
         // Transfer around some data
         uint32_t *dst = (void *)snrt_cluster_memory().start;
-        uint32_t *src = (void *)snrt_global_memory().start + 0x4; // Induce missaligned access
+        uint32_t *src = (void *)snrt_global_memory().start +
+                        0x4;  // Induce missaligned access
         printf("Transfering from %p to %p\n", src, dst);
         snrt_dma_txid_t txid_1d = snrt_dma_start_1d(dst, src, 128);
         snrt_dma_txid_t txid_2d = snrt_dma_start_2d(dst, src, 128, 128, 0, 4);
