@@ -64,7 +64,7 @@ set(sources
     src/ssr.c
     src/alloc.c
     src/interrupt.c
-    src/perf.c
+    src/perf_cnt.c
 )
 
 # Sources only compatible with the LLVM toolchain
@@ -139,7 +139,7 @@ add_snitch_test_executable(dma_simple tests/dma_simple.c)
 add_snitch_test_executable(printf_simple tests/printf_simple.c)
 add_snitch_test_executable(printf_fmtint tests/printf_fmtint.c)
 add_snitch_test_executable(multi_cluster tests/multi_cluster.c)
-add_snitch_test_executable(perf tests/perf.c)
+add_snitch_test_executable(perf_cnt tests/perf_cnt.c)
 add_snitch_test_rtl(dma_simple)
 add_snitch_test_rtl(printf_simple)
 add_snitch_test_rtl(printf_fmtint)

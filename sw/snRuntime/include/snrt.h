@@ -63,31 +63,9 @@ extern void snrt_cluster_sw_barrier();
 extern void snrt_global_barrier();
 extern void snrt_barrier(struct snrt_barrier *barr, uint32_t n);
 
-/// Different of perf counters
-enum snrt_perf_cnt {
-    SNRT_PERF_CNT0 = 0,
-    SNRT_PERF_CNT1 = 1,
-};
-
-/// Different types of performance counters
-enum snrt_perf_cnt_type {
-    SNRT_PERF_CNT_CYCLES = 0x1,
-    SNRT_PERF_CNT_TCDM_ACCESSED = 0x2,
-    SNRT_PERF_CNT_TCDM_CONGESTED = 0x4,
-    SNRT_PERF_CNT_ISSUE_FPU = 0x8,
-    SNRT_PERF_CNT_ISSUE_FPU_SEQ = 0x10,
-    SNRT_PERF_CNT_ISSUE_ISSUE_CORE_TO_FPU = 0x20,
-};
-
 extern uint32_t __attribute__((pure)) snrt_hartid();
 struct snrt_team_root *snrt_current_team();
 extern struct snrt_peripherals *snrt_peripherals();
-extern void snrt_start_perf_counter(enum snrt_perf_cnt perf_cnt,
-                                    enum snrt_perf_cnt_type perf_cnt_type,
-                                    uint32_t hart_id);
-extern void snrt_stop_perf_counter(enum snrt_perf_cnt perf_cnt);
-extern void snrt_reset_perf_counter(enum snrt_perf_cnt);
-extern uint32_t snrt_get_perf_counter(enum snrt_perf_cnt perf_cnt);
 extern uint32_t snrt_global_core_base_hartid();
 extern uint32_t snrt_global_core_idx();
 extern uint32_t snrt_global_core_num();
