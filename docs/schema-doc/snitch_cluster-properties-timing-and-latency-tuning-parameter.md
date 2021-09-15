@@ -35,6 +35,7 @@ http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing
 | [lat_comp_fp16](#lat_comp_fp16)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16")               |
 | [lat_comp_fp16_alt](#lat_comp_fp16_alt)       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp16_alt.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp16_alt")       |
 | [lat_comp_fp8](#lat_comp_fp8)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp8.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp8")                 |
+| [lat_comp_fp8alt](#lat_comp_fp8alt)           | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp8alt.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp8alt")           |
 | [lat_noncomp](#lat_noncomp)                   | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_noncomp.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_noncomp")                   |
 | [lat_conv](#lat_conv)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_conv.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_conv")                         |
 | [fpu_pipe_config](#fpu_pipe_config)           | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-fpu_pipe_config.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/fpu_pipe_config")           |
@@ -405,7 +406,7 @@ The default value is:
 
 ## lat_comp_fp8
 
-Latency setting (number of pipeline stages) for FP32 (fp8).
+Latency setting (number of pipeline stages) for FP8.
 
 `lat_comp_fp8`
 
@@ -422,6 +423,32 @@ Latency setting (number of pipeline stages) for FP32 (fp8).
 `number`
 
 ### lat_comp_fp8 Default Value
+
+The default value is:
+
+```json
+1
+```
+
+## lat_comp_fp8alt
+
+Latency setting (number of pipeline stages) for FP8alt.
+
+`lat_comp_fp8alt`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-lat_comp_fp8alt.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp8alt")
+
+### lat_comp_fp8alt Type
+
+`number`
+
+### lat_comp_fp8alt Default Value
 
 The default value is:
 
