@@ -76,18 +76,10 @@ module snitch_cluster
   parameter bit [NrCores-1:0] XF8ALT        = '0,
   /// Enable SIMD support.
   parameter bit [NrCores-1:0] XFVEC         = '0,
-<<<<<<< HEAD
-<<<<<<< HEAD
   /// Enable DOTP support.
   parameter bit [NrCores-1:0] XFDOTP        = '0,
-=======
-  /// Enable FP aux support.
-  parameter bit [NrCores-1:0] XFAUX         = '0,
->>>>>>> ad macex and mulex support if XFAUX is enabled and FPU setting is MERGED
-=======
   /// Enable DOTP support.
   parameter bit [NrCores-1:0] XFDOTP        = '0,
->>>>>>> FPU: add sdotp instruction support
   /// Per-core enabling of the custom `Xdma` ISA extensions.
   parameter bit [NrCores-1:0] Xdma          = '0,
   /// Per-core enabling of the custom `Xssr` ISA extensions.
@@ -762,15 +754,7 @@ module snitch_cluster
         .XF8 (XF8[i]),
         .XF8ALT (XF8ALT[i]),
         .XFVEC (XFVEC[i]),
-<<<<<<< HEAD
-<<<<<<< HEAD
         .XFDOTP (XFDOTP[i]),
-=======
-        .XFAUX (XFAUX[i]),
->>>>>>> ad macex and mulex support if XFAUX is enabled and FPU setting is MERGED
-=======
-        .XFDOTP (XFDOTP[i]),
->>>>>>> FPU: add sdotp instruction support
         .Xdma (Xdma[i]),
         .IsoCrossing (IsoCrossing),
         .Xfrep (Xfrep[i]),
