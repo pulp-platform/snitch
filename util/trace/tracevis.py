@@ -148,23 +148,6 @@ def parse_line(line, hartid):
     if match:
         (time, cyc, priv, pc, instr, args, cmt) = tuple(
             [match.group(i+1).strip() for i in range(re_line.groups)])
-    # print(match)
-
-    # if not match:
-    #     # match accelerator line with same timestamp as before
-    #     match = re_acc_line.match(line)
-    #     if match:
-    #         (time, cyc, priv, cmt) = tuple(
-    #             [match.group(i+1).strip() for i in range(re_acc_line.groups)])
-    #         # use time,cyc from last line
-    #         time, cyc = last_time, last_cyc
-    #         args = pc = ''
-    #         instr = 'acc'
-    #     else:
-    #         print(f'no match in "{line}"')
-    #         return 1
-
-        # print(line)
         buf.append((time, cyc, priv, pc, instr, args, cmt))
         last_time, last_cyc = time, cyc
 
