@@ -35,10 +35,10 @@ module occamy_quadrant_s1
     input  axi_a48_d64_i4_u0_resp_t                                quadrant_narrow_out_rsp_i,
     input  axi_a48_d64_i8_u0_req_t                                 quadrant_narrow_in_req_i,
     output axi_a48_d64_i8_u0_resp_t                                quadrant_narrow_in_rsp_o,
-    output axi_a48_d512_i3_u0_req_t                                quadrant_wide_out_req_o,
-    input  axi_a48_d512_i3_u0_resp_t                               quadrant_wide_out_rsp_i,
-    input  axi_a48_d512_i8_u0_req_t                                quadrant_wide_in_req_i,
-    output axi_a48_d512_i8_u0_resp_t                               quadrant_wide_in_rsp_o
+    output axi_a48_d512_i4_u0_req_t                                quadrant_wide_out_req_o,
+    input  axi_a48_d512_i4_u0_resp_t                               quadrant_wide_out_rsp_i,
+    input  axi_a48_d512_i9_u0_req_t                                quadrant_wide_in_req_i,
+    output axi_a48_d512_i9_u0_resp_t                               quadrant_wide_in_rsp_o
 );
 
   // Calculate cluster base address based on `tile id`.
@@ -361,22 +361,22 @@ module occamy_quadrant_s1
   ////////////////////////////
   // Wide In + IW Converter //
   ////////////////////////////
-  axi_a48_d512_i8_u0_req_t  wide_cluster_in_iwc_req;
-  axi_a48_d512_i8_u0_resp_t wide_cluster_in_iwc_rsp;
+  axi_a48_d512_i9_u0_req_t  wide_cluster_in_iwc_req;
+  axi_a48_d512_i9_u0_resp_t wide_cluster_in_iwc_rsp;
 
-  axi_a48_d512_i8_u0_req_t  wide_cluster_in_isolate_req;
-  axi_a48_d512_i8_u0_resp_t wide_cluster_in_isolate_rsp;
+  axi_a48_d512_i9_u0_req_t  wide_cluster_in_isolate_req;
+  axi_a48_d512_i9_u0_resp_t wide_cluster_in_isolate_rsp;
 
   axi_isolate #(
       .NumPending(16),
       .TerminateTransaction(1),
       .AtopSupport(0),
-      .AxiIdWidth(8),
+      .AxiIdWidth(9),
       .AxiAddrWidth(48),
       .AxiDataWidth(512),
       .AxiUserWidth(1),
-      .req_t(axi_a48_d512_i8_u0_req_t),
-      .resp_t(axi_a48_d512_i8_u0_resp_t)
+      .req_t(axi_a48_d512_i9_u0_req_t),
+      .resp_t(axi_a48_d512_i9_u0_resp_t)
   ) i_wide_cluster_in_isolate (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -389,12 +389,12 @@ module occamy_quadrant_s1
   );
 
   axi_id_remap #(
-      .AxiSlvPortIdWidth(8),
+      .AxiSlvPortIdWidth(9),
       .AxiSlvPortMaxUniqIds(16),
       .AxiMaxTxnsPerId(4),
       .AxiMstPortIdWidth(4),
-      .slv_req_t(axi_a48_d512_i8_u0_req_t),
-      .slv_resp_t(axi_a48_d512_i8_u0_resp_t),
+      .slv_req_t(axi_a48_d512_i9_u0_req_t),
+      .slv_resp_t(axi_a48_d512_i9_u0_resp_t),
       .mst_req_t(axi_a48_d512_i4_u0_req_t),
       .mst_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_cluster_in_iwc (

@@ -286,7 +286,7 @@ def main():
     soc_wide_xbar = solder.AxiXbar(
         48,
         512,
-        3,
+        4 if occamy.cfg["s1_quadrant"].get("ro_cache_cfg") else 3,
         name="soc_wide_xbar",
         clk="clk_i",
         rst="rst_ni",

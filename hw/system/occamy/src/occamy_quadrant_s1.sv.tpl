@@ -99,6 +99,8 @@ module occamy_quadrant_s1
 
     wide_cluster_out_cut = wide_cluster_out_ro_cache \
       .isolate(context, "isolate_i[3]", "wide_cluster_out_isolate", isolated="isolated_o[3]", atop_support=False)
+
+    assert soc_wide_xbar.in_s1_quadrant_0.iw == wide_cluster_out_cut.iw, "S1 Quadrant and Cluster Out IW mismatches."
   %>
 
   assign quadrant_wide_out_req_o = ${wide_cluster_out_cut.req_name()};
