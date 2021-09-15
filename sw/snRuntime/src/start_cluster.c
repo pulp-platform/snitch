@@ -60,7 +60,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->global_mem.end = (uint64_t)bootdata->global_mem_end;
     team->cluster_mem.start = (uint64_t)spm_start;
     team->cluster_mem.end = (uint64_t)spm_end;
-    team->barrier_reg_ptr = (uint32_t)spm_start + bootdata->tcdm_size + 0x30;
+    team->barrier_reg_ptr = (uint32_t)spm_start + bootdata->tcdm_size + 0x38;
 
     // Initialize cluster barrier
     team->cluster_barrier.barrier = 0;

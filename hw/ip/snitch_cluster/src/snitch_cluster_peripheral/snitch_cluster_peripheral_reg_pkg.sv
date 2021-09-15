@@ -143,27 +143,28 @@ package snitch_cluster_peripheral_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [1:0] perf_counter_enable; // [247:184]
-    snitch_cluster_peripheral_reg2hw_hart_select_mreg_t [1:0] hart_select; // [183:164]
-    snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t [1:0] perf_counter; // [163:66]
-    snitch_cluster_peripheral_reg2hw_wake_up_reg_t wake_up; // [65:33]
-    snitch_cluster_peripheral_reg2hw_hw_barrier_reg_t hw_barrier; // [32:1]
+    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [1:0] perf_counter_enable; // [246:183]
+    snitch_cluster_peripheral_reg2hw_hart_select_mreg_t [1:0] hart_select; // [182:163]
+    snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t [1:0] perf_counter; // [162:65]
+    snitch_cluster_peripheral_reg2hw_wake_up_reg_t wake_up; // [64:32]
+    snitch_cluster_peripheral_reg2hw_hw_barrier_reg_t hw_barrier; // [31:0]
   } snitch_cluster_peripheral_reg2hw_t;
 
   // HW -> register type
   typedef struct packed {
-    snitch_cluster_peripheral_hw2reg_perf_counter_mreg_t [1:0] perf_counter; // [128:33]
-    snitch_cluster_peripheral_hw2reg_hw_barrier_reg_t hw_barrier; // [32:1]
+    snitch_cluster_peripheral_hw2reg_perf_counter_mreg_t [1:0] perf_counter; // [127:32]
+    snitch_cluster_peripheral_hw2reg_hw_barrier_reg_t hw_barrier; // [31:0]
   } snitch_cluster_peripheral_hw2reg_t;
 
   // Register offsets
   parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET = 6'h 0;
   parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1_OFFSET = 6'h 8;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_OFFSET = 6'h 10;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET = 6'h 18;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET = 6'h 20;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_WAKE_UP_OFFSET = 6'h 28;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET = 6'h 30;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0_OFFSET = 6'h 10;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1_OFFSET = 6'h 18;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET = 6'h 20;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET = 6'h 28;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_WAKE_UP_OFFSET = 6'h 30;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET = 6'h 38;
 
   // Reset values for hwext registers and their fields
   parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_RESVAL = 48'h 0;
@@ -175,7 +176,8 @@ package snitch_cluster_peripheral_reg_pkg;
   typedef enum int {
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0,
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1,
-    SNITCH_CLUSTER_PERIPHERAL_HART_SELECT,
+    SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0,
+    SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1,
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0,
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1,
     SNITCH_CLUSTER_PERIPHERAL_WAKE_UP,
@@ -183,14 +185,15 @@ package snitch_cluster_peripheral_reg_pkg;
   } snitch_cluster_peripheral_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] SNITCH_CLUSTER_PERIPHERAL_PERMIT [7] = '{
+  parameter logic [3:0] SNITCH_CLUSTER_PERIPHERAL_PERMIT [8] = '{
     4'b 1111, // index[0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0
     4'b 1111, // index[1] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1
-    4'b 0111, // index[2] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT
-    4'b 1111, // index[3] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0
-    4'b 1111, // index[4] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1
-    4'b 1111, // index[5] SNITCH_CLUSTER_PERIPHERAL_WAKE_UP
-    4'b 1111  // index[6] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER
+    4'b 0011, // index[2] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0
+    4'b 0011, // index[3] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1
+    4'b 1111, // index[4] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0
+    4'b 1111, // index[5] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1
+    4'b 1111, // index[6] SNITCH_CLUSTER_PERIPHERAL_WAKE_UP
+    4'b 1111  // index[7] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER
   };
 
 endpackage

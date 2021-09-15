@@ -260,12 +260,12 @@ module snitch_cluster_peripheral_reg_top #(
   logic perf_counter_enable_1_dma_busy_1_qs;
   logic perf_counter_enable_1_dma_busy_1_wd;
   logic perf_counter_enable_1_dma_busy_1_we;
-  logic [9:0] hart_select_hart_select_0_qs;
-  logic [9:0] hart_select_hart_select_0_wd;
-  logic hart_select_hart_select_0_we;
-  logic [9:0] hart_select_hart_select_1_qs;
-  logic [9:0] hart_select_hart_select_1_wd;
-  logic hart_select_hart_select_1_we;
+  logic [9:0] hart_select_0_qs;
+  logic [9:0] hart_select_0_wd;
+  logic hart_select_0_we;
+  logic [9:0] hart_select_1_qs;
+  logic [9:0] hart_select_1_wd;
+  logic hart_select_1_we;
   logic [47:0] perf_counter_0_qs;
   logic [47:0] perf_counter_0_wd;
   logic perf_counter_0_we;
@@ -1954,20 +1954,19 @@ module snitch_cluster_peripheral_reg_top #(
 
 
   // Subregister 0 of Multireg hart_select
-  // R[hart_select]: V(False)
+  // R[hart_select_0]: V(False)
 
-  // F[hart_select_0]: 9:0
   prim_subreg #(
     .DW      (10),
     .SWACCESS("RW"),
     .RESVAL  (10'h0)
-  ) u_hart_select_hart_select_0 (
+  ) u_hart_select_0 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (hart_select_hart_select_0_we),
-    .wd     (hart_select_hart_select_0_wd),
+    .we     (hart_select_0_we),
+    .wd     (hart_select_0_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -1978,22 +1977,23 @@ module snitch_cluster_peripheral_reg_top #(
     .q      (reg2hw.hart_select[0].q ),
 
     // to register interface (read)
-    .qs     (hart_select_hart_select_0_qs)
+    .qs     (hart_select_0_qs)
   );
 
+  // Subregister 1 of Multireg hart_select
+  // R[hart_select_1]: V(False)
 
-  // F[hart_select_1]: 19:10
   prim_subreg #(
     .DW      (10),
     .SWACCESS("RW"),
     .RESVAL  (10'h0)
-  ) u_hart_select_hart_select_1 (
+  ) u_hart_select_1 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (hart_select_hart_select_1_we),
-    .wd     (hart_select_hart_select_1_wd),
+    .we     (hart_select_1_we),
+    .wd     (hart_select_1_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -2004,9 +2004,8 @@ module snitch_cluster_peripheral_reg_top #(
     .q      (reg2hw.hart_select[1].q ),
 
     // to register interface (read)
-    .qs     (hart_select_hart_select_1_qs)
+    .qs     (hart_select_1_qs)
   );
-
 
 
 
@@ -2077,16 +2076,17 @@ module snitch_cluster_peripheral_reg_top #(
 
 
 
-  logic [6:0] addr_hit;
+  logic [7:0] addr_hit;
   always_comb begin
     addr_hit = '0;
     addr_hit[0] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET);
     addr_hit[1] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1_OFFSET);
-    addr_hit[2] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_OFFSET);
-    addr_hit[3] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET);
-    addr_hit[4] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET);
-    addr_hit[5] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_WAKE_UP_OFFSET);
-    addr_hit[6] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET);
+    addr_hit[2] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0_OFFSET);
+    addr_hit[3] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1_OFFSET);
+    addr_hit[4] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET);
+    addr_hit[5] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET);
+    addr_hit[6] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_WAKE_UP_OFFSET);
+    addr_hit[7] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -2100,7 +2100,8 @@ module snitch_cluster_peripheral_reg_top #(
                (addr_hit[3] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[3] & ~reg_be))) |
                (addr_hit[4] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[4] & ~reg_be))) |
                (addr_hit[5] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[5] & ~reg_be))) |
-               (addr_hit[6] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[6] & ~reg_be)))));
+               (addr_hit[6] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[6] & ~reg_be))) |
+               (addr_hit[7] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[7] & ~reg_be)))));
   end
 
   assign perf_counter_enable_0_cycle_0_we = addr_hit[0] & reg_we & !reg_error;
@@ -2121,85 +2122,85 @@ module snitch_cluster_peripheral_reg_top #(
   assign perf_counter_enable_0_issue_core_to_fpu_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_issue_core_to_fpu_0_wd = reg_wdata[5];
 
-  assign perf_counter_enable_0_dma_aw_stall_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_aw_stall_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_aw_stall_0_wd = reg_wdata[6];
 
-  assign perf_counter_enable_0_dma_ar_stall_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_ar_stall_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_ar_stall_0_wd = reg_wdata[7];
 
-  assign perf_counter_enable_0_dma_r_stall_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_r_stall_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_r_stall_0_wd = reg_wdata[8];
 
-  assign perf_counter_enable_0_dma_w_stall_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_w_stall_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_w_stall_0_wd = reg_wdata[9];
 
-  assign perf_counter_enable_0_dma_buf_w_stall_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_buf_w_stall_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_buf_w_stall_0_wd = reg_wdata[10];
 
-  assign perf_counter_enable_0_dma_buf_r_stall_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_buf_r_stall_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_buf_r_stall_0_wd = reg_wdata[11];
 
-  assign perf_counter_enable_0_dma_aw_valid_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_aw_valid_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_aw_valid_0_wd = reg_wdata[12];
 
-  assign perf_counter_enable_0_dma_aw_ready_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_aw_ready_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_aw_ready_0_wd = reg_wdata[13];
 
-  assign perf_counter_enable_0_dma_aw_done_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_aw_done_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_aw_done_0_wd = reg_wdata[14];
 
-  assign perf_counter_enable_0_dma_aw_bw_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_aw_bw_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_aw_bw_0_wd = reg_wdata[15];
 
-  assign perf_counter_enable_0_dma_ar_valid_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_ar_valid_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_ar_valid_0_wd = reg_wdata[16];
 
-  assign perf_counter_enable_0_dma_ar_ready_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_ar_ready_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_ar_ready_0_wd = reg_wdata[17];
 
-  assign perf_counter_enable_0_dma_ar_done_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_ar_done_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_ar_done_0_wd = reg_wdata[18];
 
-  assign perf_counter_enable_0_dma_ar_bw_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_ar_bw_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_ar_bw_0_wd = reg_wdata[19];
 
-  assign perf_counter_enable_0_dma_r_valid_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_r_valid_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_r_valid_0_wd = reg_wdata[20];
 
-  assign perf_counter_enable_0_dma_r_ready_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_r_ready_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_r_ready_0_wd = reg_wdata[21];
 
-  assign perf_counter_enable_0_dma_r_done_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_r_done_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_r_done_0_wd = reg_wdata[22];
 
-  assign perf_counter_enable_0_dma_r_bw_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_r_bw_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_r_bw_0_wd = reg_wdata[23];
 
-  assign perf_counter_enable_0_dma_w_valid_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_w_valid_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_w_valid_0_wd = reg_wdata[24];
 
-  assign perf_counter_enable_0_dma_w_ready_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_w_ready_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_w_ready_0_wd = reg_wdata[25];
 
-  assign perf_counter_enable_0_dma_w_done_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_w_done_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_w_done_0_wd = reg_wdata[26];
 
-  assign perf_counter_enable_0_dma_w_bw_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_w_bw_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_w_bw_0_wd = reg_wdata[27];
 
-  assign perf_counter_enable_0_dma_b_valid_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_b_valid_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_b_valid_0_wd = reg_wdata[28];
 
-  assign perf_counter_enable_0_dma_b_ready_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_b_ready_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_b_ready_0_wd = reg_wdata[29];
 
-  assign perf_counter_enable_0_dma_b_done_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_b_done_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_b_done_0_wd = reg_wdata[30];
 
-  assign perf_counter_enable_0_dma_busy_0_we = addr_hit[0] & reg_we & ~wr_err;
+  assign perf_counter_enable_0_dma_busy_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_dma_busy_0_wd = reg_wdata[31];
 
-  assign perf_counter_enable_1_cycle_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_cycle_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_cycle_1_wd = reg_wdata[0];
 
   assign perf_counter_enable_1_tcdm_accessed_1_we = addr_hit[1] & reg_we & !reg_error;
@@ -2217,102 +2218,102 @@ module snitch_cluster_peripheral_reg_top #(
   assign perf_counter_enable_1_issue_core_to_fpu_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_issue_core_to_fpu_1_wd = reg_wdata[5];
 
-  assign perf_counter_enable_1_dma_aw_stall_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_aw_stall_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_aw_stall_1_wd = reg_wdata[6];
 
-  assign perf_counter_enable_1_dma_ar_stall_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_ar_stall_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_ar_stall_1_wd = reg_wdata[7];
 
-  assign perf_counter_enable_1_dma_r_stall_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_r_stall_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_r_stall_1_wd = reg_wdata[8];
 
-  assign perf_counter_enable_1_dma_w_stall_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_w_stall_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_w_stall_1_wd = reg_wdata[9];
 
-  assign perf_counter_enable_1_dma_buf_w_stall_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_buf_w_stall_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_buf_w_stall_1_wd = reg_wdata[10];
 
-  assign perf_counter_enable_1_dma_buf_r_stall_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_buf_r_stall_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_buf_r_stall_1_wd = reg_wdata[11];
 
-  assign perf_counter_enable_1_dma_aw_valid_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_aw_valid_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_aw_valid_1_wd = reg_wdata[12];
 
-  assign perf_counter_enable_1_dma_aw_ready_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_aw_ready_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_aw_ready_1_wd = reg_wdata[13];
 
-  assign perf_counter_enable_1_dma_aw_done_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_aw_done_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_aw_done_1_wd = reg_wdata[14];
 
-  assign perf_counter_enable_1_dma_aw_bw_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_aw_bw_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_aw_bw_1_wd = reg_wdata[15];
 
-  assign perf_counter_enable_1_dma_ar_valid_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_ar_valid_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_ar_valid_1_wd = reg_wdata[16];
 
-  assign perf_counter_enable_1_dma_ar_ready_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_ar_ready_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_ar_ready_1_wd = reg_wdata[17];
 
-  assign perf_counter_enable_1_dma_ar_done_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_ar_done_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_ar_done_1_wd = reg_wdata[18];
 
-  assign perf_counter_enable_1_dma_ar_bw_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_ar_bw_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_ar_bw_1_wd = reg_wdata[19];
 
-  assign perf_counter_enable_1_dma_r_valid_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_r_valid_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_r_valid_1_wd = reg_wdata[20];
 
-  assign perf_counter_enable_1_dma_r_ready_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_r_ready_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_r_ready_1_wd = reg_wdata[21];
 
-  assign perf_counter_enable_1_dma_r_done_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_r_done_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_r_done_1_wd = reg_wdata[22];
 
-  assign perf_counter_enable_1_dma_r_bw_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_r_bw_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_r_bw_1_wd = reg_wdata[23];
 
-  assign perf_counter_enable_1_dma_w_valid_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_w_valid_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_w_valid_1_wd = reg_wdata[24];
 
-  assign perf_counter_enable_1_dma_w_ready_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_w_ready_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_w_ready_1_wd = reg_wdata[25];
 
-  assign perf_counter_enable_1_dma_w_done_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_w_done_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_w_done_1_wd = reg_wdata[26];
 
-  assign perf_counter_enable_1_dma_w_bw_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_w_bw_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_w_bw_1_wd = reg_wdata[27];
 
-  assign perf_counter_enable_1_dma_b_valid_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_b_valid_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_b_valid_1_wd = reg_wdata[28];
 
-  assign perf_counter_enable_1_dma_b_ready_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_b_ready_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_b_ready_1_wd = reg_wdata[29];
 
-  assign perf_counter_enable_1_dma_b_done_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_b_done_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_b_done_1_wd = reg_wdata[30];
 
-  assign perf_counter_enable_1_dma_busy_1_we = addr_hit[1] & reg_we & ~wr_err;
+  assign perf_counter_enable_1_dma_busy_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_dma_busy_1_wd = reg_wdata[31];
 
-  assign hart_select_hart_select_0_we = addr_hit[2] & reg_we & ~wr_err;
-  assign hart_select_hart_select_0_wd = reg_wdata[9:0];
+  assign hart_select_0_we = addr_hit[2] & reg_we & !reg_error;
+  assign hart_select_0_wd = reg_wdata[9:0];
 
-  assign hart_select_hart_select_1_we = addr_hit[2] & reg_we & !reg_error;
-  assign hart_select_hart_select_1_wd = reg_wdata[19:10];
+  assign hart_select_1_we = addr_hit[3] & reg_we & !reg_error;
+  assign hart_select_1_wd = reg_wdata[9:0];
 
-  assign perf_counter_0_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_0_we = addr_hit[4] & reg_we & !reg_error;
   assign perf_counter_0_wd = reg_wdata[47:0];
-  assign perf_counter_0_re = addr_hit[3] && reg_re;
+  assign perf_counter_0_re = addr_hit[4] & reg_re & !reg_error;
 
-  assign perf_counter_1_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_1_we = addr_hit[5] & reg_we & !reg_error;
   assign perf_counter_1_wd = reg_wdata[47:0];
-  assign perf_counter_1_re = addr_hit[4] && reg_re;
+  assign perf_counter_1_re = addr_hit[5] & reg_re & !reg_error;
 
-  assign wake_up_we = addr_hit[5] & reg_we & !reg_error;
+  assign wake_up_we = addr_hit[6] & reg_we & !reg_error;
   assign wake_up_wd = reg_wdata[31:0];
 
-  assign hw_barrier_re = addr_hit[6] & reg_re & !reg_error;
+  assign hw_barrier_re = addr_hit[7] & reg_re & !reg_error;
 
   // Read data return
   always_comb begin
@@ -2389,23 +2390,26 @@ module snitch_cluster_peripheral_reg_top #(
       end
 
       addr_hit[2]: begin
-        reg_rdata_next[9:0] = hart_select_hart_select_0_qs;
-        reg_rdata_next[19:10] = hart_select_hart_select_1_qs;
+        reg_rdata_next[9:0] = hart_select_0_qs;
       end
 
       addr_hit[3]: begin
-        reg_rdata_next[47:0] = perf_counter_0_qs;
+        reg_rdata_next[9:0] = hart_select_1_qs;
       end
 
       addr_hit[4]: begin
-        reg_rdata_next[47:0] = perf_counter_1_qs;
+        reg_rdata_next[47:0] = perf_counter_0_qs;
       end
 
       addr_hit[5]: begin
-        reg_rdata_next[31:0] = '0;
+        reg_rdata_next[47:0] = perf_counter_1_qs;
       end
 
       addr_hit[6]: begin
+        reg_rdata_next[31:0] = '0;
+      end
+
+      addr_hit[7]: begin
         reg_rdata_next[31:0] = hw_barrier_qs;
       end
 

@@ -15,8 +15,7 @@ typedef union {
 
 typedef struct {
     volatile perf_reg32_t enable[NUM_PERF_COUNTERS];
-    volatile perf_reg32_t
-        hart_select;  // multireg is compacted into one register
+    volatile perf_reg32_t hart_select[NUM_PERF_COUNTERS];
     volatile perf_reg32_t perf_counter[NUM_PERF_COUNTERS];
 } perf_reg_t;
 

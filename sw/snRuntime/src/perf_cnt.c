@@ -8,7 +8,7 @@ void snrt_start_perf_counter(enum snrt_perf_cnt perf_cnt,
                              enum snrt_perf_cnt_type perf_cnt_type,
                              uint32_t hart_id) {
     perf_reg_t *perf_reg = (void *)snrt_peripherals()->perf_counters;
-    perf_reg->hart_select.value |= hart_id << (10 * perf_cnt);
+    perf_reg->hart_select[perf_cnt].value |= hart_id;
     perf_reg->enable[perf_cnt].value = (0x1 << perf_cnt_type);
 }
 
@@ -22,7 +22,7 @@ void snrt_stop_perf_counter(enum snrt_perf_cnt perf_cnt) {
 void snrt_reset_perf_counter(enum snrt_perf_cnt perf_cnt) {
     perf_reg_t *perf_reg = (void *)snrt_peripherals()->perf_counters;
     perf_reg->enable[perf_cnt].value = 0x0;
-    perf_reg->hart_select.value = 0x0;
+    perf_reg->hart_select[perf_cnt].value = 0x0;
     perf_reg->perf_counter[perf_cnt].value = 0x0;
 }
 

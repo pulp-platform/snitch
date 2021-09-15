@@ -332,6 +332,7 @@
             hwaccess: "hro",
             count: "NumPerfCounters",
             cname: "hart_select",
+            compact: "false",
             fields: [{
                 bits: "9:0",
                 name: "HART_SELECT",
@@ -347,7 +348,7 @@
             swaccess: "rw",
             hwaccess: "hrw",
             count: "NumPerfCounters",
-            cname: "performance counter ",
+            cname: "performance_counter",
             hwext: "true",
             hwqe: "true",
             fields: [{
