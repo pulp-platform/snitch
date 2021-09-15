@@ -328,6 +328,21 @@ module snitch_cluster
     logic [$clog2(NrTCDMPortsCores):0] inc_congested;
   } tcdm_events_t;
 
+  // Event counter increments for DMA.
+  typedef struct packed {
+      logic aw_stall, ar_stall, r_stall, w_stall,
+                   buf_w_stall, buf_r_stall;
+      logic aw_valid, aw_ready, aw_done, aw_bw;
+      logic ar_valid, ar_ready, ar_done, ar_bw;
+      logic r_valid,  r_ready,  r_done, r_bw;
+      logic w_valid,  w_ready,  w_done, w_bw;
+      logic b_valid,  b_ready,  b_done;
+      logic dma_busy;
+      axi_pkg::len_t aw_len, ar_len;
+      axi_pkg::size_t aw_size, ar_size;
+      logic [$clog2(WideDataWidth/8):0] num_bytes_written;
+  } dma_events_t;
+
   typedef struct packed {
     int unsigned idx;
     addr_t start_addr;
@@ -427,6 +442,7 @@ module snitch_cluster
 
   core_events_t [NrCores-1:0] core_events;
   tcdm_events_t               tcdm_events;
+  dma_events_t                dma_events;
 
   // 4. Memory Subsystem (Core side).
   reqrsp_req_t [NrCores-1:0] core_req, filtered_core_req;
@@ -707,6 +723,7 @@ module snitch_cluster
     axi_mst_dma_req_t   axi_dma_req;
     axi_mst_dma_resp_t  axi_dma_res;
     interrupts_t irq;
+    dma_events_t        dma_core_events;
 
     sync #(.STAGES (2))
       i_sync_debug (.clk_i, .rst_ni, .serial_i (debug_req_i[i]), .serial_o (irq.debug));
@@ -738,6 +755,7 @@ module snitch_cluster
         .hive_rsp_t (hive_rsp_t),
         .acc_req_t (acc_req_t),
         .acc_resp_t (acc_resp_t),
+        .dma_events_t (dma_events_t),
         .BootAddr (BootAddr),
         .RVE (RVE[i]),
         .RVF (RVF[i]),
@@ -789,6 +807,7 @@ module snitch_cluster
         .axi_dma_res_i (axi_dma_res),
         .axi_dma_busy_o (),
         .axi_dma_perf_o (),
+        .axi_dma_events_o (dma_core_events),
         .core_events_o (core_events[i]),
         .tcdm_addr_base_i (tcdm_start_address),
         .tcdm_addr_mask_i (TCDMMask)
@@ -803,6 +822,7 @@ module snitch_cluster
       if (Xdma[i]) begin : gen_dma_connection
         assign wide_axi_mst_req[SDMAMst] = axi_dma_req;
         assign axi_dma_res = wide_axi_mst_rsp[SDMAMst];
+        assign dma_events = dma_core_events;
       end
   end
 
@@ -1056,6 +1076,7 @@ module snitch_cluster
     .reg_req_t (reg_req_t),
     .reg_rsp_t (reg_rsp_t),
     .tcdm_events_t (tcdm_events_t),
+    .dma_events_t (dma_events_t),
     .NrCores (NrCores)
   ) i_snitch_cluster_peripheral (
     .clk_i,
@@ -1068,7 +1089,8 @@ module snitch_cluster
     .wake_up_o (wake_up_sync),
     .cluster_hart_base_id_i (hart_base_id_i),
     .core_events_i (core_events),
-    .tcdm_events_i (tcdm_events)
+    .tcdm_events_i (tcdm_events),
+    .dma_events_i (dma_events)
   );
 
   // Optionally decouple the external narrow AXI master ports.
