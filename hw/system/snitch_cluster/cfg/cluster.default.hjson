@@ -90,7 +90,6 @@
         xf16alt: true,
         xf8: true,
         xf8alt: true,
-        xfaux: true,
         xfdotp: true,
         xfvec: true,
         num_int_outstanding_loads: 1,

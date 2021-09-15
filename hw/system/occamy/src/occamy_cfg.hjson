@@ -71,6 +71,7 @@
             lat_comp_fp64: 3,
             lat_comp_fp16_alt: 2,
             lat_comp_fp8: 1,
+            lat_comp_fp8_alt: 1,
             lat_noncomp: 1,
             lat_conv: 1,
             fpu_pipe_config: "BEFORE"
@@ -113,6 +114,12 @@
         xssr: true,
         xfrep: true,
         xdma: false,
+        xf16: true,
+        xf16alt: true,
+        xf8: true,
+        xf8alt: true,
+        xfdotp: true,
+        xfvec: true,
         ssr_nr_credits: 4,
         num_int_outstanding_loads: 1,
         num_int_outstanding_mem: 4,
@@ -137,6 +144,12 @@
         xdma: true
         xssr: false
         xfrep: false
+        xf16: false,
+        xf16alt: false,
+        xf8: false,
+        xf8alt: false,
+        xfdotp: false,
+        xfvec: false,
         num_int_outstanding_loads: 1,
         num_int_outstanding_mem: 4,
         num_fp_outstanding_loads: 4,
