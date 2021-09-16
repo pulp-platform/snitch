@@ -1,0 +1,1128 @@
+From d36f749d0614a7bf63703b12059d30d637ab828d Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Thu, 9 Sep 2021 14:31:06 +0200
+Subject: [PATCH] cva6: Add temporal fence
+
+Experimental feature for some security research
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ include/ariane_pkg.sv                          |   2 +-
+ include/riscv_pkg.sv                           |   2 +
+ src/ariane.sv                                  |  48 ++++++-
+ src/axi_adapter.sv                             |   4 +
+ src/cache_subsystem/cache_ctrl.sv              |   3 +-
+ src/cache_subsystem/cva6_icache.sv             |   8 +-
+ src/cache_subsystem/cva6_icache_axi_wrapper.sv |   4 +
+ src/cache_subsystem/miss_handler.sv            |  10 +-
+ src/cache_subsystem/std_cache_subsystem.sv     |  19 ++-
+ src/cache_subsystem/std_nbdcache.sv            |   9 ++
+ src/cache_subsystem/wt_cache_subsystem.sv      |  17 ++-
+ src/cache_subsystem/wt_dcache.sv               |  14 ++
+ src/cache_subsystem/wt_dcache_ctrl.sv          |   6 +-
+ src/cache_subsystem/wt_dcache_missunit.sv      |  18 ++-
+ src/commit_stage.sv                            |  13 ++
+ src/controller.sv                              | 169 ++++++++++++++++++++++++-
+ src/csr_regfile.sv                             |  18 +++
+ src/decoder.sv                                 |  11 ++
+ src/issue_read_operands.sv                     |   9 +-
+ src/issue_stage.sv                             |   5 +-
+ 20 files changed, 356 insertions(+), 33 deletions(-)
+
+diff --git a/include/ariane_pkg.sv b/include/ariane_pkg.sv
+index f98a6d3..47bcd8f 100644
+--- a/include/ariane_pkg.sv
++++ b/include/ariane_pkg.sv
+@@ -446,7 +446,7 @@ package ariane_pkg;
+                                // set lower than operations
+                                SLTS, SLTU,
+                                // CSR functions
+-                               MRET, SRET, DRET, ECALL, WFI, FENCE, FENCE_I, SFENCE_VMA, CSR_WRITE, CSR_READ, CSR_SET, CSR_CLEAR,
++                               MRET, SRET, DRET, ECALL, WFI, FENCE, FENCE_I, SFENCE_VMA, CSR_WRITE, CSR_READ, CSR_SET, CSR_CLEAR, FENCE_T,
+                                // LSU functions
+                                LD, SD, LW, LWU, SW, LH, LHU, SH, LB, SB, LBU,
+                                // Atomic Memory Operations
+diff --git a/include/riscv_pkg.sv b/include/riscv_pkg.sv
+index abcbce4..da73996 100644
+--- a/include/riscv_pkg.sv
++++ b/include/riscv_pkg.sv
+@@ -411,6 +411,8 @@ package riscv;
+         // Cache Control (platform specifc)
+         CSR_DCACHE         = 12'h701,
+         CSR_ICACHE         = 12'h700,
++        CSR_FENCE_T_PAD    = 12'h702,
++        CSR_FENCE_T_CEIL   = 12'h703,
+         // Triggers
+         CSR_TSELECT        = 12'h7A0,
+         CSR_TDATA1         = 12'h7A1,
+diff --git a/src/ariane.sv b/src/ariane.sv
+index 414fa4e..a2e51ad 100644
+--- a/src/ariane.sv
++++ b/src/ariane.sv
+@@ -72,6 +72,7 @@ module ariane import ariane_pkg::*; #(
+   logic [riscv::VLEN-1:0]     pc_commit;
+   logic                       eret;
+   logic [NR_COMMIT_PORTS-1:0] commit_ack;
++  logic                       rst_uarch_n;
+ 
+   // --------------
+   // PCGEN <-> CSR
+@@ -191,6 +192,9 @@ module ariane import ariane_pkg::*; #(
+   logic                     dcache_en_csr_nbdcache;
+   logic                     csr_write_fflags_commit_cs;
+   logic                     icache_en_csr;
++  logic [31:0]              fence_t_pad_csr_ctrl;
++  logic                     fence_t_src_sel_csr_ctrl;
++  logic [31:0]              fence_t_ceil_csr_ctrl;
+   logic                     debug_mode;
+   logic                     single_step_csr_commit;
+   riscv::pmpcfg_t [15:0]    pmpcfg;
+@@ -221,12 +225,18 @@ module ariane import ariane_pkg::*; #(
+   logic                     fence_i_commit_controller;
+   logic                     fence_commit_controller;
+   logic                     sfence_vma_commit_controller;
++  logic                     fence_t_commit_controller;
+   logic                     halt_ctrl;
+   logic                     halt_csr_ctrl;
+   logic                     dcache_flush_ctrl_cache;
+   logic                     dcache_flush_ack_cache_ctrl;
+   logic                     set_debug_pc;
+   logic                     flush_commit;
++  logic                     rst_uarch_controller_n;
++  logic [riscv::VLEN-1:0]   rst_addr_ctrl_if;
++  logic                     busy_cache_ctrl;
++  logic                     stall_ctrl_cache;
++  logic                     init_ctrl_cache_n;
+ 
+   icache_areq_i_t           icache_areq_ex_cache;
+   icache_areq_o_t           icache_areq_cache_ex;
+@@ -245,16 +255,19 @@ module ariane import ariane_pkg::*; #(
+   logic                     dcache_commit_wbuffer_empty;
+   logic                     dcache_commit_wbuffer_not_ni;
+ 
++  assign rst_uarch_n = rst_ni & rst_uarch_controller_n;
++
+   // --------------
+   // Frontend
+   // --------------
+   frontend #(
+     .ArianeCfg ( ArianeCfg )
+   ) i_frontend (
++    .rst_ni              ( rst_uarch_n                   ),
+     .flush_i             ( flush_ctrl_if                 ), // not entirely correct
+     .flush_bp_i          ( 1'b0                          ),
+     .debug_mode_i        ( debug_mode                    ),
+-    .boot_addr_i         ( boot_addr_i[riscv::VLEN-1:0]  ),
++    .boot_addr_i         ( rst_addr_ctrl_if              ),
+     .icache_dreq_i       ( icache_dreq_cache_if          ),
+     .icache_dreq_o       ( icache_dreq_if_cache          ),
+     .resolved_branch_i   ( resolved_branch               ),
+@@ -276,7 +289,7 @@ module ariane import ariane_pkg::*; #(
+   // ---------
+   id_stage id_stage_i (
+     .clk_i,
+-    .rst_ni,
++    .rst_ni                     ( rst_uarch_n                ),
+     .flush_i                    ( flush_ctrl_if              ),
+     .debug_req_i,
+ 
+@@ -310,6 +323,7 @@ module ariane import ariane_pkg::*; #(
+   ) issue_stage_i (
+     .clk_i,
+     .rst_ni,
++    .rst_uarch_ni               ( rst_uarch_n                  ),
+     .sb_full_o                  ( sb_full                      ),
+     .flush_unissued_instr_i     ( flush_unissued_instr_ctrl_id ),
+     .flush_i                    ( flush_ctrl_id                ),
+@@ -368,7 +382,7 @@ module ariane import ariane_pkg::*; #(
+     .ArianeCfg  ( ArianeCfg  )
+   ) ex_stage_i (
+     .clk_i                  ( clk_i                       ),
+-    .rst_ni                 ( rst_ni                      ),
++    .rst_ni                 ( rst_uarch_n                 ),
+     .debug_mode_i           ( debug_mode                  ),
+     .flush_i                ( flush_ctrl_ex               ),
+     .rs1_forwarding_i       ( rs1_forwarding_id_ex        ),
+@@ -464,7 +478,7 @@ module ariane import ariane_pkg::*; #(
+     .NR_COMMIT_PORTS ( NR_COMMIT_PORTS )
+   ) commit_stage_i (
+     .clk_i,
+-    .rst_ni,
++    .rst_ni                 ( rst_uarch_n                   ),
+     .halt_i                 ( halt_ctrl                     ),
+     .flush_dcache_i         ( dcache_flush_ctrl_cache       ),
+     .exception_o            ( ex_commit                     ),
+@@ -492,6 +506,7 @@ module ariane import ariane_pkg::*; #(
+     .fence_i_o              ( fence_i_commit_controller     ),
+     .fence_o                ( fence_commit_controller       ),
+     .sfence_vma_o           ( sfence_vma_commit_controller  ),
++    .fence_t_o              ( fence_t_commit_controller     ),
+     .flush_commit_o         ( flush_commit                  ),
+     .*
+   );
+@@ -544,6 +559,9 @@ module ariane import ariane_pkg::*; #(
+     .single_step_o          ( single_step_csr_commit        ),
+     .dcache_en_o            ( dcache_en_csr_nbdcache        ),
+     .icache_en_o            ( icache_en_csr                 ),
++    .fence_t_pad_o          ( fence_t_pad_csr_ctrl          ),
++    .fence_t_src_sel_o      ( fence_t_src_sel_csr_ctrl      ),
++    .fence_t_ceil_i         ( fence_t_ceil_csr_ctrl         ),
+     .perf_addr_o            ( addr_csr_perf                 ),
+     .perf_data_o            ( data_csr_perf                 ),
+     .perf_data_i            ( data_perf_csr                 ),
+@@ -595,10 +613,21 @@ module ariane import ariane_pkg::*; #(
+     .flush_tlb_o            ( flush_tlb_ctrl_ex             ),
+     .flush_dcache_o         ( dcache_flush_ctrl_cache       ),
+     .flush_dcache_ack_i     ( dcache_flush_ack_cache_ctrl   ),
++    .rst_uarch_no           ( rst_uarch_controller_n        ),
++    .rst_addr_o             ( rst_addr_ctrl_if              ),
++    .cache_busy_i           ( busy_cache_ctrl               ),
++    .stall_cache_o          ( stall_ctrl_cache              ),
++    .cache_init_no          ( init_ctrl_cache_n             ),
++    .fence_t_pad_i          ( fence_t_pad_csr_ctrl          ),
++    .fence_t_src_sel_i      ( fence_t_src_sel_csr_ctrl      ),
++    .fence_t_ceil_o         ( fence_t_ceil_csr_ctrl         ),
++    .priv_lvl_i             ( priv_lvl                      ),
+ 
+     .halt_csr_i             ( halt_csr_ctrl                 ),
+     .halt_o                 ( halt_ctrl                     ),
+     // control ports
++    .boot_addr_i            ( boot_addr_i[riscv::VLEN-1:0]  ),
++    .pc_commit_i            ( pc_commit                     ),
+     .eret_i                 ( eret                          ),
+     .ex_valid_i             ( ex_commit.valid               ),
+     .set_debug_pc_i         ( set_debug_pc                  ),
+@@ -606,6 +635,7 @@ module ariane import ariane_pkg::*; #(
+     .resolved_branch_i      ( resolved_branch               ),
+     .fence_i_i              ( fence_i_commit_controller     ),
+     .fence_i                ( fence_commit_controller       ),
++    .fence_t_i              ( fence_t_commit_controller     ),
+     .sfence_vma_i           ( sfence_vma_commit_controller  ),
+     .flush_commit_i         ( flush_commit                  ),
+ 
+@@ -630,7 +660,10 @@ module ariane import ariane_pkg::*; #(
+   ) i_cache_subsystem (
+     // to D$
+     .clk_i                 ( clk_i                       ),
+-    .rst_ni                ( rst_ni                      ),
++    .rst_ni                ( rst_uarch_n                 ),
++    .busy_o                ( busy_cache_ctrl             ),
++    .stall_i               ( stall_ctrl_cache            ),
++    .init_ni               ( init_ctrl_cache_n           ),
+     // I$
+     .icache_en_i           ( icache_en_csr               ),
+     .icache_flush_i        ( icache_flush_ctrl_cache     ),
+@@ -681,8 +714,11 @@ module ariane import ariane_pkg::*; #(
+   ) i_cache_subsystem (
+     // to D$
+     .clk_i                 ( clk_i                       ),
+-    .rst_ni                ( rst_ni                      ),
++    .rst_ni                ( rst_uarch_n                 ),
+     .priv_lvl_i            ( priv_lvl                    ),
++    .busy_o                ( busy_cache_ctrl             ),
++    .stall_i               ( stall_ctrl_cache            ),
++    .init_ni               ( init_ctrl_cache_n           ),
+     // I$
+     .icache_en_i           ( icache_en_csr               ),
+     .icache_flush_i        ( icache_flush_ctrl_cache     ),
+diff --git a/src/axi_adapter.sv b/src/axi_adapter.sv
+index e2504b7..b689887 100644
+--- a/src/axi_adapter.sv
++++ b/src/axi_adapter.sv
+@@ -29,6 +29,7 @@ module axi_adapter #(
+   input  logic                             clk_i,  // Clock
+   input  logic                             rst_ni, // Asynchronous reset active low
+ 
++  output logic                             busy_o,
+   input  logic                             req_i,
+   input  ariane_axi::ad_req_t              type_i,
+   output logic                             gnt_o,
+@@ -66,6 +67,9 @@ module axi_adapter #(
+   logic [AXI_ID_WIDTH-1:0]    id_d, id_q;
+   logic [ADDR_INDEX-1:0]      index;
+ 
++  // Busy if we're not idle
++  assign busy_o = state_q != IDLE;
++
+   always_comb begin : axi_fsm
+     // Default assignments
+     axi_req_o.aw_valid  = 1'b0;
+diff --git a/src/cache_subsystem/cache_ctrl.sv b/src/cache_subsystem/cache_ctrl.sv
+index 372b4ba..e0716ef 100644
+--- a/src/cache_subsystem/cache_ctrl.sv
++++ b/src/cache_subsystem/cache_ctrl.sv
+@@ -26,6 +26,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
+     input  logic                                 flush_i,
+     input  logic                                 bypass_i,  // enable cache
+     output logic                                 busy_o,
++    input  logic                                 stall_i,   // stall new memory requests
+     // Core request ports
+     input  dcache_req_i_t                        req_port_i,
+     output dcache_req_o_t                        req_port_o,
+@@ -130,7 +131,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
+ 
+             IDLE: begin
+                 // a new request arrived
+-                if (req_port_i.data_req && !flush_i) begin
++                if (req_port_i.data_req && !flush_i && !stall_i) begin
+                     // request the cache line - we can do this speculatively
+                     req_o = '1;
+ 
+diff --git a/src/cache_subsystem/cva6_icache.sv b/src/cache_subsystem/cva6_icache.sv
+index 010ba47..e2d703e 100644
+--- a/src/cache_subsystem/cva6_icache.sv
++++ b/src/cache_subsystem/cva6_icache.sv
+@@ -35,6 +35,8 @@ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
+   input  logic                      flush_i,              // flush the icache, flush and kill have to be asserted together
+   input  logic                      en_i,                 // enable icache
+   output logic                      miss_o,               // to performance counter
++  output logic                      busy_o,
++  input  logic                      init_ni,              // do not init after enabling
+   // address translation requests
+   input  icache_areq_i_t            areq_i,
+   output icache_areq_o_t            areq_o,
+@@ -92,6 +94,8 @@ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
+   typedef enum logic[2:0] {FLUSH, IDLE, READ, MISS, KILL_ATRANS, KILL_MISS} state_e;
+   state_e state_d, state_q;
+ 
++  assign busy_o = (state_q != IDLE);
++
+ ///////////////////////////////////////////////////////
+ // address -> cl_index mapping, interface plumbing
+ ///////////////////////////////////////////////////////
+@@ -152,7 +156,7 @@ end else begin : gen_piton_offset
+   always_comb begin : p_fsm
+     // default assignment
+     state_d      = state_q;
+-    cache_en_d   = cache_en_q & en_i;// disabling the cache is always possible, enable needs to go via flush
++    cache_en_d   = (cache_en_q | init_ni) & en_i;// disabling the cache is always possible, enable needs to go via flush if we init
+     flush_en     = 1'b0;
+     cmp_en_d     = 1'b0;
+     cache_rden   = 1'b0;
+@@ -196,7 +200,7 @@ end else begin : gen_piton_offset
+           cmp_en_d = cache_en_q;
+ 
+           // handle pending flushes, or perform cache clear upon enable
+-          if (flush_d || (en_i && !cache_en_q)) begin
++          if (flush_d || (en_i && !cache_en_q && !init_ni)) begin
+             state_d    = FLUSH;
+           // wait for incoming requests
+           end else begin
+diff --git a/src/cache_subsystem/cva6_icache_axi_wrapper.sv b/src/cache_subsystem/cva6_icache_axi_wrapper.sv
+index 2cad769..114ec6e 100644
+--- a/src/cache_subsystem/cva6_icache_axi_wrapper.sv
++++ b/src/cache_subsystem/cva6_icache_axi_wrapper.sv
+@@ -29,6 +29,8 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
+   input  logic              flush_i,     // flush the icache, flush and kill have to be asserted together
+   input  logic              en_i,        // enable icache
+   output logic              miss_o,      // to performance counter
++  output logic              busy_o,
++  input  logic              init_ni,
+   // address translation requests
+   input  icache_areq_i_t    areq_i,
+   output icache_areq_o_t    areq_o,
+@@ -109,6 +111,8 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
+     .flush_i            ( flush_i             ),
+     .en_i               ( en_i                ),
+     .miss_o             ( miss_o              ),
++    .busy_o             ( busy_o              ),
++    .init_ni            ( init_ni             ),
+     .areq_i             ( areq_i              ),
+     .areq_o             ( areq_o              ),
+     .dreq_i             ( dreq_i              ),
+diff --git a/src/cache_subsystem/miss_handler.sv b/src/cache_subsystem/miss_handler.sv
+index 82b9f0c..8f61d82 100644
+--- a/src/cache_subsystem/miss_handler.sv
++++ b/src/cache_subsystem/miss_handler.sv
+@@ -26,10 +26,12 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+ )(
+     input  logic                                        clk_i,
+     input  logic                                        rst_ni,
++    output logic                                        busy_o,       // miss handler or axi is busy
+     input  logic                                        flush_i,      // flush request
+     output logic                                        flush_ack_o,  // acknowledge successful flush
+     output logic                                        miss_o,
+     input  logic                                        busy_i,       // dcache is busy with something
++    input  logic                                        init_ni,      // do not init after reset
+     // Bypass or miss
+     input  logic [NR_PORTS-1:0][$bits(miss_req_t)-1:0]  miss_req_i,
+     // Bypass handling
+@@ -122,6 +124,10 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+     ariane_pkg::amo_t amo_op;
+     logic [63:0] amo_operand_a, amo_operand_b, amo_result_o;
+ 
++    // Busy signals
++    logic bypass_axi_busy, miss_axi_busy;
++    assign busy_o = bypass_axi_busy | miss_axi_busy | (state_q != IDLE);
++
+     struct packed {
+         logic [63:3] address;
+         logic        valid;
+@@ -376,7 +382,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+                 be_o.vldrty = '1;
+                 cnt_d       = cnt_q + (1'b1 << DCACHE_BYTE_OFFSET);
+                 // finished initialization
+-                if (cnt_q[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] == DCACHE_NUM_WORDS-1)
++                if (cnt_q[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] == DCACHE_NUM_WORDS-1 || init_ni)
+                     state_d = IDLE;
+             end
+             // ----------------------
+@@ -577,6 +583,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+     ) i_bypass_axi_adapter (
+         .clk_i,
+         .rst_ni,
++        .busy_o                ( bypass_axi_busy        ),
+         .req_i                 ( req_fsm_bypass_valid   ),
+         .type_i                ( ariane_axi::SINGLE_REQ ),
+         .gnt_o                 ( gnt_bypass_fsm         ),
+@@ -610,6 +617,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+     ) i_miss_axi_adapter (
+         .clk_i,
+         .rst_ni,
++        .busy_o              ( miss_axi_busy      ),
+         .req_i               ( req_fsm_miss_valid ),
+         .type_i              ( req_fsm_miss_req   ),
+         .gnt_o               ( gnt_miss_fsm       ),
+diff --git a/src/cache_subsystem/std_cache_subsystem.sv b/src/cache_subsystem/std_cache_subsystem.sv
+index 8a79417..3b32d16 100644
+--- a/src/cache_subsystem/std_cache_subsystem.sv
++++ b/src/cache_subsystem/std_cache_subsystem.sv
+@@ -27,9 +27,12 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+     parameter type axi_req_t = ariane_axi::req_t,
+     parameter type axi_rsp_t = ariane_axi::resp_t
+ ) (
+-    input logic                            clk_i,
+-    input logic                            rst_ni,
+-    input riscv::priv_lvl_t                priv_lvl_i,
++    input  logic                           clk_i,
++    input  logic                           rst_ni,
++    input  riscv::priv_lvl_t               priv_lvl_i,
++    output logic                           busy_o,
++    input  logic                           stall_i,                // stall new memory requests
++    input  logic                           init_ni,                // do not init after reset
+     // I$
+     input  logic                           icache_en_i,            // enable icache (or bypass e.g: in debug mode)
+     input  logic                           icache_flush_i,         // flush the icache, flush and kill have to be asserted together
+@@ -67,6 +70,11 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+     axi_req_t axi_req_data;
+     axi_rsp_t axi_resp_data;
+ 
++    logic              icache_busy;
++    logic              dcache_busy;
++
++    assign busy_o = icache_busy | dcache_busy;
++
+     cva6_icache_axi_wrapper #(
+         .ArianeCfg    ( ArianeCfg    ),
+         .AxiAddrWidth ( AxiAddrWidth ),
+@@ -82,6 +90,8 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+         .flush_i    ( icache_flush_i        ),
+         .en_i       ( icache_en_i           ),
+         .miss_o     ( icache_miss_o         ),
++        .busy_o     ( icache_busy           ),
++        .init_ni    ( init_ni               ),
+         .areq_i     ( icache_areq_i         ),
+         .areq_o     ( icache_areq_o         ),
+         .dreq_i     ( icache_dreq_i         ),
+@@ -108,6 +118,9 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+       .flush_i      ( dcache_flush_i         ),
+       .flush_ack_o  ( dcache_flush_ack_o     ),
+       .miss_o       ( dcache_miss_o          ),
++      .busy_o       ( dcache_busy            ),
++      .stall_i      ( stall_i                ),
++      .init_ni      ( init_ni                ),
+       .axi_bypass_o ( axi_req_bypass         ),
+       .axi_bypass_i ( axi_resp_bypass        ),
+       .axi_data_o   ( axi_req_data           ),
+diff --git a/src/cache_subsystem/std_nbdcache.sv b/src/cache_subsystem/std_nbdcache.sv
+index bb12116..d4504aa 100644
+--- a/src/cache_subsystem/std_nbdcache.sv
++++ b/src/cache_subsystem/std_nbdcache.sv
+@@ -28,6 +28,9 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
+     input  logic                           flush_i,     // high until acknowledged
+     output logic                           flush_ack_o, // send a single cycle acknowledge signal when the cache is flushed
+     output logic                           miss_o,      // we missed on a LD/ST
++    output logic                           busy_o,
++    input  logic                           stall_i,   // stall new memory requests
++    input  logic                           init_ni,
+     // AMOs
+     input  amo_req_t                       amo_req_i,
+     output amo_resp_t                      amo_resp_o,
+@@ -87,6 +90,10 @@ import std_cache_pkg::*;
+     cache_line_t [DCACHE_SET_ASSOC-1:0]  rdata_ram;
+     cl_be_t                              be_ram;
+ 
++    // Busy signals
++    logic miss_handler_busy;
++    assign busy_o = |busy | miss_handler_busy;
++
+     // ------------------
+     // Cache Controller
+     // ------------------
+@@ -97,6 +104,7 @@ import std_cache_pkg::*;
+             ) i_cache_ctrl (
+                 .bypass_i              ( ~enable_i            ),
+                 .busy_o                ( busy            [i]  ),
++                .stall_i               ( stall_i              ),
+                 // from core
+                 .req_port_i            ( req_ports_i     [i]  ),
+                 .req_port_o            ( req_ports_o     [i]  ),
+@@ -139,6 +147,7 @@ import std_cache_pkg::*;
+         .axi_req_t              ( axi_req_t            ),
+         .axi_rsp_t              ( axi_rsp_t            )
+     ) i_miss_handler (
++        .busy_o                 ( miss_handler_busy    ),
+         .flush_i                ( flush_i              ),
+         .busy_i                 ( |busy                ),
+         // AMOs
+diff --git a/src/cache_subsystem/wt_cache_subsystem.sv b/src/cache_subsystem/wt_cache_subsystem.sv
+index f8c233a..c47088a 100644
+--- a/src/cache_subsystem/wt_cache_subsystem.sv
++++ b/src/cache_subsystem/wt_cache_subsystem.sv
+@@ -28,8 +28,11 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+   parameter type axi_req_t = ariane_axi::req_t,
+   parameter type axi_rsp_t = ariane_axi::resp_t
+ ) (
+-  input logic                            clk_i,
+-  input logic                            rst_ni,
++  input  logic                           clk_i,
++  input  logic                           rst_ni,
++  output logic                           busy_o,
++  input  logic                           stall_i,                // stall new memory requests
++  input  logic                           init_ni,
+   // I$
+   input  logic                           icache_en_i,            // enable icache (or bypass e.g: in debug mode)
+   input  logic                           icache_flush_i,         // flush the icache, flush and kill have to be asserted together
+@@ -76,6 +79,11 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+   wt_cache_pkg::dcache_req_t  dcache_adapter;
+   wt_cache_pkg::dcache_rtrn_t adapter_dcache;
+ 
++  logic                       icache_busy;
++  logic                       dcache_busy;
++
++  assign busy_o = dcache_busy | icache_busy;
++
+   cva6_icache #(
+     // use ID 0 for icache reads
+     .RdTxId             ( 0             ),
+@@ -86,6 +94,8 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+     .flush_i            ( icache_flush_i          ),
+     .en_i               ( icache_en_i             ),
+     .miss_o             ( icache_miss_o           ),
++    .busy_o             ( icache_busy             ),
++    .init_ni            ( init_ni                 ),
+     .areq_i             ( icache_areq_i           ),
+     .areq_o             ( icache_areq_o           ),
+     .dreq_i             ( icache_dreq_i           ),
+@@ -111,6 +121,9 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+     .clk_i           ( clk_i                   ),
+     .rst_ni          ( rst_ni                  ),
+     .enable_i        ( dcache_enable_i         ),
++    .busy_o          ( dcache_busy             ),
++    .stall_i         ( stall_i                 ),
++    .init_ni         ( init_ni                 ),
+     .flush_i         ( dcache_flush_i          ),
+     .flush_ack_o     ( dcache_flush_ack_o      ),
+     .miss_o          ( dcache_miss_o           ),
+diff --git a/src/cache_subsystem/wt_dcache.sv b/src/cache_subsystem/wt_dcache.sv
+index 28e1d4a..7f4bc6a 100644
+--- a/src/cache_subsystem/wt_dcache.sv
++++ b/src/cache_subsystem/wt_dcache.sv
+@@ -28,6 +28,9 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
+   input  logic                           flush_i,     // high until acknowledged
+   output logic                           flush_ack_o, // send a single cycle acknowledge signal when the cache is flushed
+   output logic                           miss_o,      // we missed on a ld/st
++  output logic                           busy_o,
++  input  logic                           stall_i,     // stall new memory requests
++  input  logic                           init_ni,
+   output logic                           wbuffer_empty_o,
+   output logic                           wbuffer_not_ni_o,
+ 
+@@ -102,6 +105,13 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
+   // wbuffer <-> memory
+   wbuffer_t [DCACHE_WBUF_DEPTH-1:0]             wbuffer_data;
+ 
++  // controllers -> management
++  logic [NumPorts-2:0]                          ctrl_busy;
++
++  // missunit -> management
++  logic                                         missunit_busy;
++
++  assign busy_o = |ctrl_busy | missunit_busy | ~wbuffer_empty_o;
+ 
+ ///////////////////////////////////////////////////////
+ // miss handling unit
+@@ -118,8 +128,10 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
+     .flush_i            ( flush_i            ),
+     .flush_ack_o        ( flush_ack_o        ),
+     .miss_o             ( miss_o             ),
++    .busy_o             ( missunit_busy      ),
+     .wbuffer_empty_i    ( wbuffer_empty_o    ),
+     .cache_en_o         ( cache_en           ),
++    .init_ni            ( init_ni            ),
+     // amo interface
+     .amo_req_i          ( amo_req_i          ),
+     .amo_resp_o         ( amo_resp_o         ),
+@@ -173,6 +185,8 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
+       .clk_i           ( clk_i             ),
+       .rst_ni          ( rst_ni            ),
+       .cache_en_i      ( cache_en          ),
++      .busy_o          ( ctrl_busy     [k] ),
++      .stall_i         ( stall_i           ),
+       // reqs from core
+       .req_port_i      ( req_ports_i   [k] ),
+       .req_port_o      ( req_ports_o   [k] ),
+diff --git a/src/cache_subsystem/wt_dcache_ctrl.sv b/src/cache_subsystem/wt_dcache_ctrl.sv
+index 2254870..b659c6e 100644
+--- a/src/cache_subsystem/wt_dcache_ctrl.sv
++++ b/src/cache_subsystem/wt_dcache_ctrl.sv
+@@ -20,6 +20,8 @@ module wt_dcache_ctrl import ariane_pkg::*; import wt_cache_pkg::*; #(
+   input  logic                            clk_i,          // Clock
+   input  logic                            rst_ni,         // Asynchronous reset active low
+   input  logic                            cache_en_i,
++  output logic                            busy_o,
++  input  logic                            stall_i,        // stall new memory requests
+   // core request ports
+   input  dcache_req_i_t                   req_port_i,
+   output dcache_req_o_t                   req_port_o,
+@@ -92,6 +94,8 @@ module wt_dcache_ctrl import ariane_pkg::*; import wt_cache_pkg::*; #(
+   assign rd_ack_d     = rd_ack_i;
+   assign rd_tag_only_o = '0;
+ 
++  assign busy_o = (state_q != IDLE);
++
+ ///////////////////////////////////////////////////////
+ // main control logic
+ ///////////////////////////////////////////////////////
+@@ -110,7 +114,7 @@ module wt_dcache_ctrl import ariane_pkg::*; import wt_cache_pkg::*; #(
+         //////////////////////////////////
+         // wait for an incoming request
+         IDLE: begin
+-          if (req_port_i.data_req) begin
++          if (req_port_i.data_req && !stall_i) begin
+             rd_req_o = 1'b1;
+             // if read ack then ack the `req_port_o`, and goto `READ` state
+             if (rd_ack_i) begin
+diff --git a/src/cache_subsystem/wt_dcache_missunit.sv b/src/cache_subsystem/wt_dcache_missunit.sv
+index ae1f7a1..6ee7de5 100644
+--- a/src/cache_subsystem/wt_dcache_missunit.sv
++++ b/src/cache_subsystem/wt_dcache_missunit.sv
+@@ -26,9 +26,11 @@ module wt_dcache_missunit import ariane_pkg::*; import wt_cache_pkg::*; #(
+   input  logic                                       flush_i,     // flush request, this waits for pending tx (write, read) to finish and will clear the cache
+   output logic                                       flush_ack_o, // send a single cycle acknowledge signal when the cache is flushed
+   output logic                                       miss_o,      // we missed on a ld/st
++  output logic                                       busy_o,      // missunit is busy
+   // local cache management signals
+   input  logic                                       wbuffer_empty_i,
+   output logic                                       cache_en_o,  // local cache enable signal
++  input  logic                                       init_ni,     // no init after reset
+   // AMO interface
+   input  amo_req_t                                   amo_req_i,
+   output amo_resp_t                                  amo_resp_o,
+@@ -69,7 +71,7 @@ module wt_dcache_missunit import ariane_pkg::*; import wt_cache_pkg::*; #(
+ );
+ 
+   // controller FSM
+-  typedef enum logic[2:0] {IDLE, DRAIN, AMO,  FLUSH, STORE_WAIT, LOAD_WAIT, AMO_WAIT} state_e;
++  typedef enum logic[2:0] {IDLE, DRAIN, AMO, FLUSH, INIT, STORE_WAIT, LOAD_WAIT, AMO_WAIT} state_e;
+   state_e state_d, state_q;
+ 
+   // MSHR for reads
+@@ -120,6 +122,8 @@ module wt_dcache_missunit import ariane_pkg::*; import wt_cache_pkg::*; #(
+                              (mask_reads) ? miss_we_i & miss_req_i : miss_req_i;
+   assign miss_is_write     = miss_we_i[miss_port_idx];
+ 
++  assign busy_o = state_q != IDLE;
++
+   // read port arbiter
+   lzc #(
+     .WIDTH ( NumPorts )
+@@ -358,8 +362,8 @@ module wt_dcache_missunit import ariane_pkg::*; import wt_cache_pkg::*; #(
+     amo_resp_o.ack   = 1'b0;
+     miss_replay_o    = '0;
+ 
+-    // disabling cache is possible anytime, enabling goes via flush
+-    enable_d         = enable_q & enable_i;
++    // disabling cache is possible anytime, enabling goes via flush if we init
++    enable_d         = (enable_q | init_ni) & enable_i;
+     flush_ack_d      = flush_ack_q;
+     flush_en         = 1'b0;
+     amo_sel          = 1'b0;
+@@ -468,6 +472,12 @@ module wt_dcache_missunit import ariane_pkg::*; import wt_cache_pkg::*; #(
+         end
+       end
+       //////////////////////////////////
++      // initialize the cache
++      INIT: begin
++        // flush, unless we want to skip init
++        state_d = (init_ni) ? IDLE : FLUSH;
++      end
++      //////////////////////////////////
+       // send out amo op request
+       AMO: begin
+         mem_data_o.rtype = DCACHE_ATOMIC_REQ;
+@@ -503,7 +513,7 @@ module wt_dcache_missunit import ariane_pkg::*; import wt_cache_pkg::*; #(
+ 
+ always_ff @(posedge clk_i or negedge rst_ni) begin : p_regs
+   if (!rst_ni) begin
+-    state_q               <= FLUSH;
++    state_q               <= INIT;
+     cnt_q                 <= '0;
+     enable_q              <= '0;
+     flush_ack_q           <= '0;
+diff --git a/src/commit_stage.sv b/src/commit_stage.sv
+index 42e65b8..518eafc 100644
+--- a/src/commit_stage.sv
++++ b/src/commit_stage.sv
+@@ -50,6 +50,7 @@ module commit_stage import ariane_pkg::*; #(
+     output logic                                    commit_csr_o,       // commit the pending CSR instruction
+     output logic                                    fence_i_o,          // flush I$ and pipeline
+     output logic                                    fence_o,            // flush D$ and pipeline
++    output logic                                    fence_t_o,          // flush microarchitecture
+     output logic                                    flush_commit_o,     // request a pipeline flush
+     output logic                                    sfence_vma_o        // flush TLBs and pipeline
+ );
+@@ -109,6 +110,7 @@ module commit_stage import ariane_pkg::*; #(
+         fence_i_o          = 1'b0;
+         fence_o            = 1'b0;
+         sfence_vma_o       = 1'b0;
++        fence_t_o          = 20'b0;
+         csr_write_fflags_o = 1'b0;
+         flush_commit_o  = 1'b0;
+ 
+@@ -162,6 +164,16 @@ module commit_stage import ariane_pkg::*; #(
+                 end
+             end
+             // ------------------
++            // FENCE.T Logic
++            // ------------------
++            // fence.t is idempotent so we can safely re-execute it after returning
++            // from interrupt service routine
++            if (commit_instr_i[0].op == FENCE_T) begin
++                commit_ack_o[0] = no_st_pending_i;
++                // tell the controller to flush the D$
++                fence_t_o = no_st_pending_i;
++            end
++            // ------------------
+             // SFENCE.VMA Logic
+             // ------------------
+             // sfence.vma is idempotent so we can safely re-execute it after returning
+@@ -217,6 +229,7 @@ module commit_stage import ariane_pkg::*; #(
+             if (commit_ack_o[0] && commit_instr_i[1].valid
+                                 && !halt_i
+                                 && !(commit_instr_i[0].fu inside {CSR})
++                                && (commit_instr_i[0].op != FENCE_T)
+                                 && !flush_dcache_i
+                                 && !instr_0_is_amo
+                                 && !single_step_i) begin
+diff --git a/src/controller.sv b/src/controller.sv
+index 6e8a1dc..9bbdd15 100644
+--- a/src/controller.sv
++++ b/src/controller.sv
+@@ -16,6 +16,7 @@
+ module controller import ariane_pkg::*; (
+     input  logic            clk_i,
+     input  logic            rst_ni,
++    output logic            rst_uarch_no,
+     output logic            set_pc_commit_o,        // Set PC om PC Gen
+     output logic            flush_if_o,             // Flush the IF stage
+     output logic            flush_unissued_instr_o, // Flush un-issued instructions of the scoreboard
+@@ -27,8 +28,19 @@ module controller import ariane_pkg::*; (
+     input  logic            flush_dcache_ack_i,     // Acknowledge the whole DCache Flush
+     output logic            flush_tlb_o,            // Flush TLBs
+ 
++    input  logic [riscv::VLEN-1:0] boot_addr_i,
++    output logic [riscv::VLEN-1:0] rst_addr_o,
++    input  logic [riscv::VLEN-1:0] pc_commit_i,
+     input  logic            halt_csr_i,             // Halt request from CSR (WFI instruction)
+     output logic            halt_o,                 // Halt signal to commit stage
++    input  logic            cache_busy_i,           // Cache is busy
++    output logic            stall_cache_o,          // Let dcache not accept any new requests
++    output logic            cache_init_no,          // Do not init cache
++    input  logic [31:0]     fence_t_pad_i,          // Pad cycles of fence.t end relative to time interrupt
++    input  logic            fence_t_src_sel_i,
++    output logic [31:0]     fence_t_ceil_o,
++    input  logic            time_irq_i,             // Time interrupt
++    input  riscv::priv_lvl_t priv_lvl_i,
+     input  logic            eret_i,                 // Return from exception
+     input  logic            ex_valid_i,             // We got an exception, flush the pipeline
+     input  logic            set_debug_pc_i,         // set the debug pc from CSR
+@@ -36,6 +48,7 @@ module controller import ariane_pkg::*; (
+     input  logic            flush_csr_i,            // We got an instruction which altered the CSR, flush the pipeline
+     input  logic            fence_i_i,              // fence.i in
+     input  logic            fence_i,                // fence in
++    input  logic            fence_t_i,              // fence.t in
+     input  logic            sfence_vma_i,           // We got an instruction to flush the TLBs and pipeline
+     input  logic            flush_commit_i          // Flush request from commit stage
+ );
+@@ -44,10 +57,31 @@ module controller import ariane_pkg::*; (
+     logic fence_active_d, fence_active_q;
+     logic flush_dcache;
+ 
++    // Pad counter
++    logic [31:0]      pad_cnt;
++    logic [3:0]       drain_cnt;
++    logic             time_irq_q;
++    riscv::priv_lvl_t priv_lvl_q;
++
++    // cache init shift register. Keep 'no cache init' asserted for 3 cycles.
++    logic [2:0] cache_init_d, cache_init_q;
++    assign cache_init_d[2:1] = cache_init_q[1:0];
++    assign cache_init_no     = |cache_init_q;
++
++    // address to fetch from after coming out of (uarch) reset
++    logic [riscv::VLEN-1:0] rst_addr_d, rst_addr_q;
++    assign rst_addr_o = rst_addr_q;
++
++    // fence.t FSM
++    typedef enum logic[2:0] {IDLE, FLUSH_DCACHE, DRAIN_REQS, PAD, RST_UARCH} fence_t_state_e;
++    fence_t_state_e fence_t_state_d, fence_t_state_q;
++    logic [3:0]     rst_uarch_cnt_d, rst_uarch_cnt_q;
++
+     // ------------
+     // Flush CTRL
+     // ------------
+     always_comb begin : flush_ctrl
++        rst_addr_d             = rst_addr_q;
+         fence_active_d         = fence_active_q;
+         set_pc_commit_o        = 1'b0;
+         flush_if_o             = 1'b0;
+@@ -107,7 +141,7 @@ module controller import ariane_pkg::*; (
+ 
+ // this is not needed in the case since we
+ // have a write-through cache in this case
+-`ifndef WT_DCACHE
++//`ifndef WT_DCACHE
+         // wait for the acknowledge here
+         if (flush_dcache_ack_i && fence_active_q) begin
+             fence_active_d = 1'b0;
+@@ -115,7 +149,7 @@ module controller import ariane_pkg::*; (
+         end else if (fence_active_q) begin
+             flush_dcache = 1'b1;
+         end
+-`endif
++//`endif
+         // ---------------------------------
+         // SFENCE.VMA
+         // ---------------------------------
+@@ -129,6 +163,18 @@ module controller import ariane_pkg::*; (
+             flush_tlb_o            = 1'b1;
+         end
+ 
++        // ---------------------------------
++        // FENCE.T
++        // ---------------------------------
++        if (fence_t_i) begin
++            flush_icache_o = 1'b1;
++            flush_dcache   = 1'b1;
++            fence_active_d = 1'b1;
++
++            // Save PC to continue from after coming out of reset
++            rst_addr_d     = pc_commit_i + {{riscv::VLEN-3{1'b0}}, 3'b100};
++        end
++
+         // Set PC to commit stage and flush pipleine
+         if (flush_csr_i || flush_commit_i) begin
+             set_pc_commit_o        = 1'b1;
+@@ -163,20 +209,129 @@ module controller import ariane_pkg::*; (
+     // ----------------------
+     always_comb begin
+         // halt the core if the fence is active
+-        halt_o = halt_csr_i || fence_active_q;
++        halt_o = halt_csr_i || fence_active_q || (fence_t_state_q != IDLE);
++    end
++
++    // ----------------------
++    // Microreset Logic
++    // ----------------------
++    always_comb begin : fence_t_fsm
++        // Default assignments
++        fence_t_state_d = fence_t_state_q;
++        rst_uarch_cnt_d = rst_uarch_cnt_q;
++        rst_uarch_no    = 1'b1;
++        fence_t_ceil_o  = '0;
++        cache_init_d[0] = 1'b0;
++
++        unique case (fence_t_state_q)
++            // Idle
++            IDLE: begin
++                if (fence_t_i) fence_t_state_d = FLUSH_DCACHE;
++            end
++
++            // Wait for dcache to acknowledge flush
++            FLUSH_DCACHE: begin
++                if (flush_dcache_ack_i) fence_t_state_d = DRAIN_REQS;
++            end
++
++            // Wait for all pending (external) transactions to complete,
++            // s.t. we do not violate any handshake protocols.
++            DRAIN_REQS: begin
++                // The cache controls our only handshaked interface.
++                // Wait until it was idle for 16 cycles.
++                if (drain_cnt == 4'hf) begin
++                    fence_t_state_d = PAD;
++                    fence_t_ceil_o = (pad_cnt == '0) ? '0 : fence_t_pad_i - pad_cnt;
++                end
++            end
++
++            // Wait for the padding to complete.
++            PAD: begin
++                if (pad_cnt == '0) fence_t_state_d = RST_UARCH;
++            end
++
++            // Reset microarchitecture
++            RST_UARCH: begin
++                rst_uarch_no    = 1'b0;
++                cache_init_d[0] = 1'b1;
++
++                // Return to IDLE after 16 cycles
++                if (rst_uarch_cnt_q == 4'hf) begin
++                    rst_uarch_cnt_d = 4'b0;
++                    fence_t_state_d = IDLE;
++                end else begin
++                    rst_uarch_cnt_d = rst_uarch_cnt_q + 1;
++                end
++            end
++
++            // We should never reach this state
++            default: begin
++                fence_t_state_d = IDLE;
++            end
++        endcase
+     end
+ 
++    // Let the dcache not accept any new memory requests after flushing until reset
++    assign stall_cache_o = (fence_t_state_q inside {DRAIN_REQS, PAD, RST_UARCH});
++
++    // Start padding either from CLINT timer interrupt [0] or exetinig leaving U-mode [1]
++    logic load_pad_cnt;
++    assign load_pad_cnt = fence_t_src_sel_i ? ((priv_lvl_q == riscv::PRIV_LVL_U) && (priv_lvl_i != riscv::PRIV_LVL_U))
++                                            : (time_irq_i & ~time_irq_q);
++
++    counter #(
++        .WIDTH           ( 4 ),
++        .STICKY_OVERFLOW ( 0 )
++    ) i_drain_cnt (
++        .clk_i,
++        .rst_ni,
++        .clear_i    ( cache_busy_i      ), // Start counting from 0 when cache is busy
++        .en_i       ( drain_cnt != 4'hf ), // Stop counting when saturated
++        .load_i     ( 1'b0              ),
++        .down_i     ( 1'b0              ),
++        .d_i        ( '0                ),
++        .q_o        ( drain_cnt         ),
++        .overflow_o (                   )
++    );
++
++    counter #(
++        .WIDTH           ( 32 ),
++        .STICKY_OVERFLOW ( 0  )
++    ) i_pad_cnt (
++        .clk_i,
++        .rst_ni,
++        .clear_i    ( 1'b0          ),
++        .en_i       ( |pad_cnt      ),  // Count until 0
++        .load_i     ( load_pad_cnt  ),  // Start counting on positive edge of time irq
++        .down_i     ( 1'b1          ),  // Always count down
++        .d_i        ( fence_t_pad_i ),  // Start counting from FENCE_T_CSR value
++        .q_o        ( pad_cnt       ),
++        .overflow_o (               )
++    );
++
+     // ----------------------
+     // Registers
+     // ----------------------
+     always_ff @(posedge clk_i or negedge rst_ni) begin
+         if (~rst_ni) begin
+-            fence_active_q <= 1'b0;
+-            flush_dcache_o <= 1'b0;
++            fence_t_state_q <= IDLE;
++            rst_uarch_cnt_q <= 4'b0;
++            fence_active_q  <= 1'b0;
++            flush_dcache_o  <= 1'b0;
++            rst_addr_q      <= boot_addr_i;
++            time_irq_q      <= 1'b0;
++            priv_lvl_q      <= riscv::PRIV_LVL_M;
++            cache_init_q    <= '0;
+         end else begin
+-            fence_active_q <= fence_active_d;
++            fence_t_state_q <= fence_t_state_d;
++            fence_active_q  <= fence_active_d;
++            rst_uarch_cnt_q <= rst_uarch_cnt_d;
+             // register on the flush signal, this signal might be critical
+-            flush_dcache_o <= flush_dcache;
++            flush_dcache_o  <= flush_dcache;
++            rst_addr_q      <= rst_addr_d;
++            time_irq_q      <= time_irq_i;
++            priv_lvl_q      <= priv_lvl_i;
++            cache_init_q    <= cache_init_d;
+         end
+     end
+ endmodule
+diff --git a/src/csr_regfile.sv b/src/csr_regfile.sv
+index 71f3b2a..5b1f166 100644
+--- a/src/csr_regfile.sv
++++ b/src/csr_regfile.sv
+@@ -78,6 +78,10 @@ module csr_regfile import ariane_pkg::*; #(
+     // Caches
+     output logic                  icache_en_o,                // L1 ICache Enable
+     output logic                  dcache_en_o,                // L1 DCache Enable
++    // fence.t
++    output logic [31:0]           fence_t_pad_o,              // Padding time of fence.t relative to time interrupt
++    output logic                  fence_t_src_sel_o,          // Pad relative to selected source
++    input  logic [31:0]           fence_t_ceil_i,
+     // Performance Counter
+     output logic  [4:0]           perf_addr_o,                // read/write address to performance counter module (up to 29 aux counters possible in riscv encoding.h)
+     output logic[riscv::XLEN-1:0] perf_data_o,                // write data to performance counter module
+@@ -133,6 +137,8 @@ module csr_regfile import ariane_pkg::*; #(
+     riscv::xlen_t stval_q,     stval_d;
+     riscv::xlen_t dcache_q,    dcache_d;
+     riscv::xlen_t icache_q,    icache_d;
++    riscv::xlen_t fence_t_pad_q, fence_t_pad_d;
++    riscv::xlen_t fence_t_ceil_q, fence_t_ceil_d;
+ 
+     logic        wfi_d,       wfi_q;
+ 
+@@ -279,6 +285,8 @@ module csr_regfile import ariane_pkg::*; #(
+                 // custom (non RISC-V) cache control
+                 riscv::CSR_DCACHE:           csr_rdata = dcache_q;
+                 riscv::CSR_ICACHE:           csr_rdata = icache_q;
++                riscv::CSR_FENCE_T_PAD:      csr_rdata = fence_t_pad_q;
++                riscv::CSR_FENCE_T_CEIL:     csr_rdata = fence_t_ceil_q;
+                 // PMPs
+                 riscv::CSR_PMPCFG0:          csr_rdata = pmpcfg_q[7:0];
+                 riscv::CSR_PMPCFG2:          csr_rdata = pmpcfg_q[15:8];
+@@ -377,6 +385,8 @@ module csr_regfile import ariane_pkg::*; #(
+         mtval_d                 = mtval_q;
+         dcache_d                = dcache_q;
+         icache_d                = icache_q;
++        fence_t_pad_d           = fence_t_pad_q;
++        fence_t_ceil_d          = {fence_t_ceil_q[63:32], (fence_t_ceil_i > fence_t_ceil_q[31:0]) ? fence_t_ceil_i : fence_t_ceil_q[31:0]};
+ 
+         sepc_d                  = sepc_q;
+         scause_d                = scause_q;
+@@ -592,6 +602,8 @@ module csr_regfile import ariane_pkg::*; #(
+ 
+                 riscv::CSR_DCACHE:             dcache_d    = {{riscv::XLEN-1{1'b0}}, csr_wdata[0]}; // enable bit
+                 riscv::CSR_ICACHE:             icache_d    = {{riscv::XLEN-1{1'b0}}, csr_wdata[0]}; // enable bit
++                riscv::CSR_FENCE_T_PAD:        fence_t_pad_d = {{riscv::XLEN-32{1'b0}}, csr_wdata[31:0]};
++                riscv::CSR_FENCE_T_CEIL:       fence_t_ceil_d = {{riscv::XLEN-31{1'b0}}, csr_wdata[32:0]};
+                 // PMP locked logic
+                 // 1. refuse to update any locked entry
+                 // 2. also refuse to update the entry below a locked TOR entry
+@@ -1052,6 +1064,8 @@ module csr_regfile import ariane_pkg::*; #(
+     assign icache_en_o      = icache_q[0] & (~debug_mode_q);
+ `endif
+     assign dcache_en_o      = dcache_q[0];
++    assign fence_t_pad_o    = fence_t_pad_q;
++    assign fence_t_src_sel_o= fence_t_ceil_q[32];
+ 
+     // determine if mprv needs to be considered if in debug mode
+     assign mprv             = (debug_mode_q && !dcsr_q.mprven) ? 1'b0 : mstatus_q.mprv;
+@@ -1091,6 +1105,8 @@ module csr_regfile import ariane_pkg::*; #(
+             mtval_q                <= {riscv::XLEN{1'b0}};
+             dcache_q               <= {{riscv::XLEN-1{1'b0}}, 1'b1};
+             icache_q               <= {{riscv::XLEN-1{1'b0}}, 1'b1};
++            fence_t_pad_q          <= {riscv::XLEN{1'b0}};
++            fence_t_ceil_q         <= {riscv::XLEN{1'b0}};
+             // supervisor mode registers
+             sepc_q                 <= {riscv::XLEN{1'b0}};
+             scause_q               <= {riscv::XLEN{1'b0}};
+@@ -1134,6 +1150,8 @@ module csr_regfile import ariane_pkg::*; #(
+             mtval_q                <= mtval_d;
+             dcache_q               <= dcache_d;
+             icache_q               <= icache_d;
++            fence_t_pad_q          <= fence_t_pad_d;
++            fence_t_ceil_q         <= fence_t_ceil_d;
+             // supervisor mode registers
+             sepc_q                 <= sepc_d;
+             scause_q               <= scause_d;
+diff --git a/src/decoder.sv b/src/decoder.sv
+index e0c551e..c15a9a1 100644
+--- a/src/decoder.sv
++++ b/src/decoder.sv
+@@ -1003,6 +1003,17 @@ module decoder import ariane_pkg::*; (
+                     instruction_o.rd[4:0] = instr.utype.rd;
+                 end
+ 
++                // Custom instructions
++                // FENCE.T
++                riscv::OpcodeCustom0: begin
++                    instruction_o.fu    = NONE;
++                    instruction_o.rs1   = '0;
++                    instruction_o.rs2   = '0;
++                    instruction_o.rd    = '0;
++                    imm_select          = UIMM;
++                    instruction_o.op    = ariane_pkg::FENCE_T;
++                end
++
+                 default: illegal_instr = 1'b1;
+             endcase
+         end
+diff --git a/src/issue_read_operands.sv b/src/issue_read_operands.sv
+index f5da02d..72eb061 100644
+--- a/src/issue_read_operands.sv
++++ b/src/issue_read_operands.sv
+@@ -19,6 +19,7 @@ module issue_read_operands import ariane_pkg::*; #(
+ )(
+     input  logic                                   clk_i,    // Clock
+     input  logic                                   rst_ni,   // Asynchronous reset active low
++    input  logic                                   rst_uarch_ni,
+     // flush
+     input  logic                                   flush_i,
+     // coming from rename
+@@ -236,8 +237,8 @@ module issue_read_operands import ariane_pkg::*; #(
+ 
+     // FU select, assert the correct valid out signal (in the next cycle)
+     // This needs to be like this to make verilator happy. I know its ugly.
+-    always_ff @(posedge clk_i or negedge rst_ni) begin
+-      if (!rst_ni) begin
++    always_ff @(posedge clk_i or negedge rst_uarch_ni) begin
++      if (!rst_uarch_ni) begin
+         alu_valid_q    <= 1'b0;
+         lsu_valid_q    <= 1'b0;
+         mult_valid_q   <= 1'b0;
+@@ -417,8 +418,8 @@ module issue_read_operands import ariane_pkg::*; #(
+     // ----------------------
+     // Registers (ID <-> EX)
+     // ----------------------
+-    always_ff @(posedge clk_i or negedge rst_ni) begin
+-        if (!rst_ni) begin
++    always_ff @(posedge clk_i or negedge rst_uarch_ni) begin
++        if (!rst_uarch_ni) begin
+             operand_a_q           <= '{default: 0};
+             operand_b_q           <= '{default: 0};
+             imm_q                 <= '0;
+diff --git a/src/issue_stage.sv b/src/issue_stage.sv
+index 2258eb6..421a6bb 100644
+--- a/src/issue_stage.sv
++++ b/src/issue_stage.sv
+@@ -21,6 +21,7 @@ module issue_stage import ariane_pkg::*; #(
+ )(
+     input  logic                                     clk_i,     // Clock
+     input  logic                                     rst_ni,    // Asynchronous reset active low
++    input  logic                                     rst_uarch_ni,
+ 
+     output logic                                     sb_full_o,
+     input  logic                                     flush_unissued_instr_i,
+@@ -103,7 +104,7 @@ module issue_stage import ariane_pkg::*; #(
+     // ---------------------------------------------------------
+     re_name i_re_name (
+         .clk_i                  ( clk_i                        ),
+-        .rst_ni                 ( rst_ni                       ),
++        .rst_ni                 ( rst_uarch_ni                 ),
+         .flush_i                ( flush_i                      ),
+         .flush_unissied_instr_i ( flush_unissued_instr_i       ),
+         .issue_instr_i          ( decoded_instr_i              ),
+@@ -122,6 +123,8 @@ module issue_stage import ariane_pkg::*; #(
+         .NR_WB_PORTS(NR_WB_PORTS),
+         .NR_COMMIT_PORTS(NR_COMMIT_PORTS)
+     ) i_scoreboard (
++        .rst_ni                ( rst_uarch_ni                              ),
++
+         .sb_full_o             ( sb_full_o                                 ),
+         .unresolved_branch_i   ( 1'b0                                      ),
+         .rd_clobber_gpr_o      ( rd_clobber_gpr_sb_iro                     ),
+-- 
+2.16.5
+

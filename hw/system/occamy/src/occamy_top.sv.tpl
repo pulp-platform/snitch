@@ -658,4 +658,25 @@ module occamy_top
     .intr_host_timeout_o (irq.i2c_host_timeout)
   );
 
+  /////////////
+  //  Timer  //
+  /////////////
+  <% apb_timer_bus = soc_regbus_periph_xbar.out_timer.to_apb(context, "apb_timer") %>
+  apb_timer #(
+    .APB_ADDR_WIDTH (${apb_timer_bus.aw}),
+    .TIMER_CNT (2)
+  ) i_apb_timer (
+    .HCLK (${soc_regbus_periph_xbar.out_timer.clk}),
+    .HRESETn (${soc_regbus_periph_xbar.out_timer.rst}),
+    .PADDR (apb_timer_req.paddr),
+    .PWDATA (apb_timer_req.pwdata),
+    .PWRITE (apb_timer_req.pwrite),
+    .PSEL (apb_timer_req.psel),
+    .PENABLE (apb_timer_req.penable),
+    .PRDATA (apb_timer_rsp.prdata),
+    .PREADY (apb_timer_rsp.pready),
+    .PSLVERR (apb_timer_rsp.pslverr),
+    .irq_o (irq.timer)
+  );
+
 endmodule

@@ -24,6 +24,7 @@ package occamy_pkg;
   localparam int unsigned NrCoresS1Quadrant = NrClustersS1Quadrant * NrCoresCluster;
 
   typedef struct packed {
+    logic [3:0] timer;
     logic [31:0] gpio;
     logic uart;
     logic spim_error;
@@ -151,6 +152,7 @@ package occamy_pkg;
     SOC_REGBUS_PERIPH_XBAR_OUT_GPIO,
     SOC_REGBUS_PERIPH_XBAR_OUT_I2C,
     SOC_REGBUS_PERIPH_XBAR_OUT_SPIM,
+    SOC_REGBUS_PERIPH_XBAR_OUT_TIMER,
     SOC_REGBUS_PERIPH_XBAR_OUT_PCIE_CFG,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CFG,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CTL,
@@ -161,7 +163,7 @@ package occamy_pkg;
   } soc_regbus_periph_xbar_outputs_e;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [15:0] SocRegbusPeriphXbarAddrmap = '{
+  localparam xbar_rule_48_t [16:0] SocRegbusPeriphXbarAddrmap = '{
   '{ idx: 0, start_addr: 48'h04000000, end_addr: 48'h04100000 },
   '{ idx: 1, start_addr: 48'h02000000, end_addr: 48'h02001000 },
   '{ idx: 2, start_addr: 48'h02005000, end_addr: 48'h02006000 },
@@ -172,12 +174,13 @@ package occamy_pkg;
   '{ idx: 7, start_addr: 48'h02003000, end_addr: 48'h02004000 },
   '{ idx: 8, start_addr: 48'h02004000, end_addr: 48'h02005000 },
   '{ idx: 9, start_addr: 48'h03000000, end_addr: 48'h03020000 },
-  '{ idx: 10, start_addr: 48'h05000000, end_addr: 48'h05020000 },
-  '{ idx: 11, start_addr: 48'h06000000, end_addr: 48'h06010000 },
-  '{ idx: 12, start_addr: 48'h07000000, end_addr: 48'h07010000 },
-  '{ idx: 13, start_addr: 48'h08000000, end_addr: 48'h08400000 },
-  '{ idx: 14, start_addr: 48'h09000000, end_addr: 48'h09100000 },
-  '{ idx: 15, start_addr: 48'h0a000000, end_addr: 48'h0a010000 }
+  '{ idx: 10, start_addr: 48'h02006000, end_addr: 48'h02007000 },
+  '{ idx: 11, start_addr: 48'h05000000, end_addr: 48'h05020000 },
+  '{ idx: 12, start_addr: 48'h06000000, end_addr: 48'h06010000 },
+  '{ idx: 13, start_addr: 48'h07000000, end_addr: 48'h07010000 },
+  '{ idx: 14, start_addr: 48'h08000000, end_addr: 48'h08400000 },
+  '{ idx: 15, start_addr: 48'h09000000, end_addr: 48'h09100000 },
+  '{ idx: 16, start_addr: 48'h0a000000, end_addr: 48'h0a010000 }
 };
 
   /// Inputs of the `soc_wide_xbar` crossbar.

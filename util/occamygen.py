@@ -167,6 +167,9 @@ def main():
     am_chip_ctrl = am.new_leaf("chip_ctrl", 0x1000,
                                0x02005000).attach_to(am_soc_regbus_periph_xbar)
 
+    am_timer = am.new_leaf("timer", 0x1000,
+                           0x02006000).attach_to(am_soc_regbus_periph_xbar)
+
     am_spim = am.new_leaf("spim", 0x20000,
                           0x03000000).attach_to(am_soc_regbus_periph_xbar)
 
@@ -273,6 +276,7 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("gpio", am_gpio)
     soc_regbus_periph_xbar.add_output_entry("i2c", am_i2c)
     soc_regbus_periph_xbar.add_output_entry("spim", am_spim)
+    soc_regbus_periph_xbar.add_output_entry("timer", am_timer)
     soc_regbus_periph_xbar.add_output_entry("pcie_cfg", am_pcie_cfg)
     soc_regbus_periph_xbar.add_output_entry("hbi_cfg", am_hbi_cfg)
     soc_regbus_periph_xbar.add_output_entry("hbi_ctl", am_hbi_ctl)

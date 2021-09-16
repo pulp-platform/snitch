@@ -26,10 +26,12 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
 )(
     input  logic                                        clk_i,
     input  logic                                        rst_ni,
+    output logic                                        busy_o,       // miss handler or axi is busy
     input  logic                                        flush_i,      // flush request
     output logic                                        flush_ack_o,  // acknowledge successful flush
     output logic                                        miss_o,
     input  logic                                        busy_i,       // dcache is busy with something
+    input  logic                                        init_ni,      // do not init after reset
     // Bypass or miss
     input  logic [NR_PORTS-1:0][$bits(miss_req_t)-1:0]  miss_req_i,
     // Bypass handling
@@ -121,6 +123,10 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
     // AMOs
     ariane_pkg::amo_t amo_op;
     logic [63:0] amo_operand_a, amo_operand_b, amo_result_o;
+
+    // Busy signals
+    logic bypass_axi_busy, miss_axi_busy;
+    assign busy_o = bypass_axi_busy | miss_axi_busy | (state_q != IDLE);
 
     struct packed {
         logic [63:3] address;
@@ -376,7 +382,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
                 be_o.vldrty = '1;
                 cnt_d       = cnt_q + (1'b1 << DCACHE_BYTE_OFFSET);
                 // finished initialization
-                if (cnt_q[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] == DCACHE_NUM_WORDS-1)
+                if (cnt_q[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] == DCACHE_NUM_WORDS-1 || init_ni)
                     state_d = IDLE;
             end
             // ----------------------
@@ -577,6 +583,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
     ) i_bypass_axi_adapter (
         .clk_i,
         .rst_ni,
+        .busy_o                ( bypass_axi_busy        ),
         .req_i                 ( req_fsm_bypass_valid   ),
         .type_i                ( ariane_axi::SINGLE_REQ ),
         .gnt_o                 ( gnt_bypass_fsm         ),
@@ -610,6 +617,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
     ) i_miss_axi_adapter (
         .clk_i,
         .rst_ni,
+        .busy_o              ( miss_axi_busy      ),
         .req_i               ( req_fsm_miss_valid ),
         .type_i              ( req_fsm_miss_req   ),
         .gnt_o               ( gnt_miss_fsm       ),

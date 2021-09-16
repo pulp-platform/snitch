@@ -216,8 +216,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [15:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [15:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [16:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [16:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -240,7 +240,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(16),
+      .NoRules(17),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -2649,6 +2649,43 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .intr_acq_overflow_o(irq.i2c_acq_overflow),
       .intr_ack_stop_o(irq.i2c_ack_stop),
       .intr_host_timeout_o(irq.i2c_host_timeout)
+  );
+
+  /////////////
+  //  Timer  //
+  /////////////
+  apb_a48_d32_req_t apb_timer_req;
+  apb_a48_d32_rsp_t apb_timer_rsp;
+
+  reg_to_apb #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t),
+      .apb_req_t(apb_a48_d32_req_t),
+      .apb_rsp_t(apb_a48_d32_rsp_t)
+  ) i_apb_timer_pc (
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
+      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_TIMER]),
+      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_TIMER]),
+      .apb_req_o(apb_timer_req),
+      .apb_rsp_i(apb_timer_rsp)
+  );
+
+  apb_timer #(
+      .APB_ADDR_WIDTH(48),
+      .TIMER_CNT(2)
+  ) i_apb_timer (
+      .HCLK(clk_periph_i),
+      .HRESETn(rst_periph_ni),
+      .PADDR(apb_timer_req.paddr),
+      .PWDATA(apb_timer_req.pwdata),
+      .PWRITE(apb_timer_req.pwrite),
+      .PSEL(apb_timer_req.psel),
+      .PENABLE(apb_timer_req.penable),
+      .PRDATA(apb_timer_rsp.prdata),
+      .PREADY(apb_timer_rsp.pready),
+      .PSLVERR(apb_timer_rsp.pslverr),
+      .irq_o(irq.timer)
   );
 
 endmodule
