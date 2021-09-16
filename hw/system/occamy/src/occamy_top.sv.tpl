@@ -332,8 +332,13 @@ module occamy_top
   // Peripherals //
   /////////////////
   <% soc_narrow_xbar.out_periph \
-      .cdc(context, "clk_periph_i", "rst_periph_ni", "axi_lite_cdc") \
+      .cdc(context, "clk_periph_i", "rst_periph_ni", "axi_lite_from_soc_cdc") \
       .to_axi_lite(context, "axi_to_axi_lite_periph", to=soc_periph_xbar.in_soc) %>
+
+    <% soc_periph_xbar.out_soc \
+      .cdc(context, "clk_i", "rst_ni", "axi_lite_to_soc_cdc") \
+      .to_axi(context, "axi_lite_to_axi_periph", to=soc_narrow_xbar.in_periph)
+    %>
 
   <% soc_narrow_xbar.out_regbus_periph \
       .cdc(context, "clk_periph_i", "rst_periph_ni", "periph_cdc") \
