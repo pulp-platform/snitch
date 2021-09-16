@@ -12,7 +12,8 @@ module axi_dma_perf_counters #(
     parameter int unsigned DATA_WIDTH         = -1,
     parameter type         axi_req_t          = logic,
     parameter type         axi_res_t          = logic,
-    parameter type         dma_events_t       = logic
+    parameter type         dma_events_t       = logic,
+    localparam bit         EnablePerfCounters = 0
 ) (
     input  logic                         clk_i,
     input  logic                         rst_ni,
@@ -49,7 +50,7 @@ module axi_dma_perf_counters #(
     // see if counters should be increased
     always_comb begin : proc_next_perf_state
 
-        // defualt: keep old value
+        // default: keep old value
         dma_perf_d = dma_perf_q;
         dma_events = '0;
 
@@ -185,8 +186,13 @@ module axi_dma_perf_counters #(
         end
     end
 
-    `FF(dma_perf_q, dma_perf_d, 0);
-    assign dma_perf_o = dma_perf_q;
     assign dma_events_o = dma_events;
+
+    if (EnablePerfCounters) begin : gen_perf_counters
+      `FF(dma_perf_q, dma_perf_d, 0);
+      assign dma_perf_o = dma_perf_q;
+    end
+
+
 
 endmodule
