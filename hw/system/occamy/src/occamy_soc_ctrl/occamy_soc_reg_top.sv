@@ -3453,7 +3453,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (4'h1)
+    .RESVAL  (4'hf)
   ) u_isolate_isolate_0 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3479,7 +3479,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (4'h1)
+    .RESVAL  (4'hf)
   ) u_isolate_isolate_1 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3505,7 +3505,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (4'h1)
+    .RESVAL  (4'hf)
   ) u_isolate_isolate_2 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3531,7 +3531,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (4'h1)
+    .RESVAL  (4'hf)
   ) u_isolate_isolate_3 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3557,7 +3557,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (4'h1)
+    .RESVAL  (4'hf)
   ) u_isolate_isolate_4 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3583,7 +3583,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (4'h1)
+    .RESVAL  (4'hf)
   ) u_isolate_isolate_5 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3609,7 +3609,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (4'h1)
+    .RESVAL  (4'hf)
   ) u_isolate_isolate_6 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3635,7 +3635,7 @@ module occamy_soc_reg_top #(
   prim_subreg #(
     .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (4'h1)
+    .RESVAL  (4'hf)
   ) u_isolate_isolate_7 (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),

@@ -122,7 +122,8 @@
         cname: "isolate"
         fields: [
           { bits: "3:0"
-            resval: "1"
+            // Isolate all channels by default
+            resval: "15"
             name: "ISOLATE"
             desc: '''
                   Isolate S1 Quadrant. Four bits corresponding to:
@@ -149,7 +150,8 @@
         cname: "isolated"
         fields: [
           { bits: "3:0"
-            resval: "1"
+            // Should correspond to ISOLATE reset value
+            resval: "15"
             name: "ISOLATED"
             desc: '''
                   Isolate satus of S1 Quadrant. Four bits corresponding to:

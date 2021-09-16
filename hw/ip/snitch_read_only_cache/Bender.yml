@@ -9,8 +9,9 @@ package:
   - Samuel Riedel <sriedel@iis.ee.ethz.ch>
 
 dependencies:
-  axi: {path: ../../vendor/pulp_axi}
-  tech_cells_generic: {path: ../../vendor/pulp_tech_cells_generic}
+  axi: {path: ../../vendor/pulp_platform_axi}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  tech_cells_generic: {path: ../../vendor/pulp_platform_tech_cells_generic}
   snitch_icache: {path: ../snitch_icache}
 
 sources:
