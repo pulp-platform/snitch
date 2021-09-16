@@ -40,12 +40,19 @@ message(STATUS "Using common linker script: ${LINKER_SCRIPT}")
 # set(TARGET_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/link/banshee.ld" CACHE FILEPATH "Linker Script")
 # message(STATUS "Using target linker script: ${TARGET_LINKER_SCRIPT}")
 
+# OpenMP
+set(OMPSTATIC_NUMTHREADS "0" CACHE STRING "If set to a non-zero value the OpenMP runtime is optimized to the number of cores")
+
 if(RUNTIME_TRACE)
     # Enable runtime tracing
     add_compile_definitions(__SNRT_USE_TRACE)
 endif()
 
-include_directories(include vendor vendor/riscv-opcodes)
+include_directories(
+    include
+    vendor
+    vendor/riscv-opcodes
+)
 
 # Common sources
 set(sources
@@ -58,6 +65,25 @@ set(sources
     src/alloc.c
     src/interrupt.c
 )
+
+# Sources only compatible with the LLVM toolchain
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    set(sources
+        ${sources}
+        # OpenMP support
+        src/omp/omp.c
+        src/omp/kmp.c
+        src/omp/eu.c
+        src/dm.c
+    )
+    # Check if static OpenMP runtime is requested
+    if(OMPSTATIC_NUMTHREADS GREATER 0)
+        message(STATUS "Using ${OMPSTATIC_NUMTHREADS} threads for optimized OpenMP runtime")
+        add_compile_definitions(OMPSTATIC_NUMTHREADS=${OMPSTATIC_NUMTHREADS})
+    else()
+        message(STATUS "Generic OpenMP runtime")
+    endif()
+endif()
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     # Build all runtimes
@@ -123,3 +149,17 @@ add_snitch_test_args(printf_fmtint printf_fmtint-system --no-opt-llvm --base-har
 add_snitch_test_executable(team_global tests/team_global.c)
 add_snitch_test_rtl(team_global)
 add_snitch_test_args(team_global team_global --base-hartid=3 --num-cores=4 --num-clusters=2)
+
+# Tests exclusive to LLVM
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    add_snitch_test_executable(data_mover tests/data_mover.c)
+    add_snitch_test_rtl(data_mover)
+    add_snitch_test_args(data_mover data_mover --base-hartid=3 --num-cores=9 --num-clusters=1)
+
+    add_snitch_test_executable(event_unit tests/event_unit.c)
+    add_snitch_test_rtl(event_unit)
+    add_snitch_test_args(event_unit event_unit --base-hartid=3 --num-cores=9 --num-clusters=1)
+    add_snitch_test_executable(openmp tests/openmp.c)
+    add_snitch_test_rtl(openmp)
+    add_snitch_test_args(openmp openmp --base-hartid=3 --num-cores=9 --num-clusters=1)
+endif()

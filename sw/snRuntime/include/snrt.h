@@ -12,6 +12,17 @@
 extern "C" {
 #endif
 
+//================================================================================
+// Debug
+//================================================================================
+// #define OMP_DEBUG_LEVEL 100
+// #define KMP_DEBUG_LEVEL 100
+// #define EU_DEBUG_LEVEL 100
+
+//================================================================================
+// Macros
+//================================================================================
+
 #ifndef snrt_min
 #define snrt_min(a, b) ((a) < (b) ? (a) : (b))
 #endif
@@ -19,6 +30,12 @@ extern "C" {
 #ifndef snrt_max
 #define snrt_max(a, b) ((a) > (b) ? (a) : (b))
 #endif
+
+static inline void *snrt_memset(void *ptr, int value, size_t num) {
+    for (uint32_t i = 0; i < num; ++i)
+        *((uint8_t *)ptr + i) = (unsigned char)value;
+    return ptr;
+}
 
 /// A slice of memory.
 typedef struct snrt_slice {
@@ -28,7 +45,14 @@ typedef struct snrt_slice {
 
 /// Peripherals to the Snitch SoC
 struct snrt_peripherals {
-    uint32_t *clint;
+    volatile uint32_t *clint;
+    volatile uint32_t *wakeup;
+};
+
+/// Barrier to use with snrt_barrier
+struct snrt_barrier {
+    uint32_t volatile barrier;
+    uint32_t volatile barrier_iteration;
 };
 
 static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
@@ -36,6 +60,7 @@ static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
 extern void snrt_cluster_hw_barrier();
 extern void snrt_cluster_sw_barrier();
 extern void snrt_global_barrier();
+extern void snrt_barrier(struct snrt_barrier *barr, uint32_t n);
 
 extern uint32_t __attribute__((pure)) snrt_hartid();
 struct snrt_team_root *snrt_current_team();
@@ -47,6 +72,7 @@ extern uint32_t snrt_global_compute_core_idx();
 extern uint32_t snrt_global_compute_core_num();
 extern uint32_t snrt_global_dm_core_idx();
 extern uint32_t snrt_global_dm_core_num();
+extern uint32_t snrt_cluster_core_base_hartid();
 extern uint32_t snrt_cluster_core_idx();
 extern uint32_t snrt_cluster_core_num();
 extern uint32_t snrt_cluster_compute_core_idx();
@@ -57,6 +83,7 @@ extern uint32_t snrt_cluster_idx();
 extern uint32_t snrt_cluster_num();
 extern int snrt_is_compute_core();
 extern int snrt_is_dm_core();
+extern void snrt_wakeup(uint32_t mask);
 
 extern snrt_slice_t snrt_global_memory();
 extern snrt_slice_t snrt_cluster_memory();
@@ -121,12 +148,32 @@ extern void snrt_ssr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
                            volatile void *ptr);
 extern void snrt_fpu_fence();
 
-/// alloc functions
+/**
+ * @brief Use as replacement of the stdlib exit() call
+ *
+ * @param status exit code
+ */
+static inline __attribute__((noreturn)) void snrt_exit(int status) {
+    (void)status;
+    while (1)
+        ;
+}
+
+//================================================================================
+// Allocation functions
+//================================================================================
+extern void snrt_alloc_init(struct snrt_team_root *team);
 extern void *snrt_l1alloc(size_t size);
+extern void *snrt_l3alloc(size_t size);
 
 //================================================================================
 // Interrupt functions
 //================================================================================
+/**
+ * @brief Init the interrupt subsystem
+ *
+ */
+void snrt_int_init(struct snrt_team_root *team);
 
 /**
  * @brief Globally enable M-mode interrupts
@@ -174,6 +221,15 @@ static inline uint32_t snrt_interrupt_cause(void) {
 }
 extern void snrt_int_sw_clear(uint32_t hartid);
 extern void snrt_int_sw_set(uint32_t hartid);
+uint32_t snrt_int_sw_get(uint32_t hartid);
+void snrt_int_clint_set(uint32_t reg_off, uint32_t mask);
+void snrt_int_sw_poll(void);
+
+/**
+ * @brief Put the hart into wait for interrupt state
+ *
+ */
+static inline void snrt_wfi() { asm volatile("wfi"); }
 
 //================================================================================
 // Mutex functions
@@ -201,6 +257,23 @@ static inline void snrt_mutex_release(volatile uint32_t *pmtx) {
     asm volatile("amoswap.w.rl  x0,x0,(%0)   # Release lock by storing 0\n"
                  : "+r"(pmtx));
 }
+
+//================================================================================
+// Runtime functions
+//================================================================================
+
+/**
+ * @brief Bootstrap macro for openmp applications
+ */
+#define __snrt_omp_bootstrap(core_idx) \
+    if (snrt_omp_bootstrap(core_idx)) return 0
+
+/**
+ * @brief Destroy an OpenMP session so all cores exit cleanly
+ */
+#define __snrt_omp_destroy(core_idx) \
+    eu_exit(core_idx);               \
+    dm_exit();
 
 #ifdef __cplusplus
 }

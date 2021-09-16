@@ -7,6 +7,14 @@
 int __attribute__((noinline)) __attribute__((optimize(1)))
 sum(int dummy0, int dummy1, int dummy2, int dummy3, int dummy4, int dummy5,
     int dummy6, int N, ...) {
+    (void)dummy0;
+    (void)dummy1;
+    (void)dummy2;
+    (void)dummy3;
+    (void)dummy4;
+    (void)dummy5;
+    (void)dummy6;
+
     int sum = 0;
     va_list va;
     va_start(va, N);

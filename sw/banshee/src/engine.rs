@@ -688,6 +688,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
             } // scratch_reg
             x if x == self.engine.config.address.wakeup_reg => {
                 // wake_up
+                let old_num_sleep = self.num_sleep.load(Ordering::Relaxed);
                 if value as i32 == -1 {
                     self.num_sleep
                         .fetch_sub(self.wake_up.len(), Ordering::Relaxed);
@@ -696,8 +697,10 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     }
                 } else if (value as usize) < self.wake_up.len() {
                     self.num_sleep.fetch_sub(1, Ordering::Relaxed);
-                    self.wake_up[value as usize - self.engine.base_hartid]
-                        .fetch_max(self.state.cycle + 1, Ordering::Release);
+                    self.wake_up[value as usize].fetch_max(self.state.cycle + 1, Ordering::Release);
+                }
+                if self.num_sleep.load(Ordering::Relaxed) > old_num_sleep {
+                    error!("num_sleep has wrapped. Did you wake a core that was already running?")
                 }
             } // wakeup_reg
             x if x == self.engine.config.address.barrier_reg => (), // barrier_reg

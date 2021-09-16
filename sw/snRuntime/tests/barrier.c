@@ -8,8 +8,8 @@ static volatile uint32_t *sink = (void *)0xF1230000;
 int main() {
     uint32_t core_id = snrt_cluster_core_idx();
     uint32_t core_num = snrt_cluster_core_num();
-    void *spm_start = snrt_cluster_memory().start;
-    void *spm_end = snrt_cluster_memory().end;
+    void *spm_start = (void *)snrt_cluster_memory().start;
+    void *spm_end = (void *)snrt_cluster_memory().end;
 
     volatile uint32_t *x = spm_start + 4;
     if (core_id == 0) {

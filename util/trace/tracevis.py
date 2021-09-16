@@ -42,19 +42,20 @@ except ImportError as e:
 # regex matches to groups
 # 0 -> time
 # 1 -> cycle
-# 2 -> privilege level
+# 2 -> privilege level (RTL) / hartid (banshee)
 # 3 -> pc (hex with 0x prefix)
 # 4 -> instruction
-# 5 -> args
-RTL_REGEX = r' *(\d+) +(\d+) +([3M1S0U]?) *(0x[0-9a-f]+) ([.\w]+) +(.+)#'
-BANSHEE_REGEX = r' *(\d+) (\d+) (\d+) ([0-9a-f]+) *.+ +.+# ([\w\.]*)()'
+# 5 -> args (RTL) / empty (banshee)
+# 6 -> comment (RTL) / instruction arguments (banshee)
+RTL_REGEX = r' *(\d+) +(\d+) +([3M1S0U]?) *(0x[0-9a-f]+) ([.\w]+) +(.+)#; (.*)'
+BANSHEE_REGEX = r' *(\d+) (\d+) (\d+) ([0-9a-f]+) *.+ +.+# ([\w\.]*)( +)(.*)'
 
 # regex matches a line of instruction retired by the accelerator
+# 0 -> time
+# 1 -> cycle
 # 2 -> privilege level
-# 3 -> pc (hex with 0x prefix)
-# 4 -> instruction
-# 5 -> args
-ACC_LINE_REGEX = r' +([3M1S0U]?) *(0x[0-9a-f]+) ([.\w]+) +(.+)#'
+# 3 -> comment
+ACC_LINE_REGEX = r' *(\d+) +(\d+) +([3M1S0U]?) *#; (.*)'
 
 buf = []
 
@@ -79,7 +80,7 @@ def flush(buf, hartid):
             f'{addr2line} -e {elf} -f -a -i {" ".join(pcs)}').read().split('\n')[:-1]
 
     for i in range(len(buf)-1):
-        (time, cyc, priv, pc, instr, args) = buf.pop(0)
+        (time, cyc, priv, pc, instr, args, cmt) = buf.pop(0)
 
         if use_time:
             next_time = int(buf[0][0])
@@ -87,6 +88,9 @@ def flush(buf, hartid):
         else:
             next_time = int(buf[0][1])
             time = int(cyc)
+
+        # Have lookahead time to this instruction?
+        next_time = lah[time] if time in lah else next_time
 
         # print(f'time "{time}", cyc "{cyc}", priv "{priv}", pc "{pc}"'
         #       f', instr "{instr}", args "{args}"', file=sys.stderr)
@@ -100,12 +104,17 @@ def flush(buf, hartid):
         # print(f'pc "{pc}", func "{func}", file "{file}"')
 
         # assemble values for json
-        label = instr
-        cat = instr
-        start_time = time
+        # Doc: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+        # The name of the event, as displayed in Trace Viewer
+        name = instr
+        # The event categories. This is a comma separated list of categories for the event.
+        # The categories can be used to hide events in the Trace Viewer UI.
+        cat = 'instr'
+        # The tracing clock timestamp of the event. The timestamps are provided at microsecond granularity.
+        ts = time
+        # There is an extra parameter dur to specify the tracing clock duration of complete events in microseconds.
         duration = next_time - time
-        # print(f'"{label}" time {time} next: {next_time}'
-        #       f' duration: {duration}', file=sys.stderr)
+
         if banshee:
             # Banshee stores all traces in a single file
             hartid = priv
@@ -124,8 +133,8 @@ def flush(buf, hartid):
         arg_inlined = inlined
 
         output_file.write((
-            f'{{"name": "{label}", "cat": "{cat}", "ph": "X", '
-            f'"ts": {start_time}, "dur": {duration}, "pid": "{pid}", '
+            f'{{"name": "{name}", "cat": "{cat}", "ph": "X", '
+            f'"ts": {ts}, "dur": {duration}, "pid": "{pid}", '
             f'"tid": "{funcname}", "args": {{"pc": "{arg_pc}", '
             f'"instr": "{arg_instr} {arg_args}", "time": "{arg_cycles}", '
             f'"Origin": "{arg_coords}", "inline": "{arg_inlined}"'
@@ -137,24 +146,10 @@ def parse_line(line, hartid):
     # print(line)
     match = re_line.match(line)
     if match:
-        (time, cyc, priv, pc, instr, args) = tuple(
+        (time, cyc, priv, pc, instr, args, cmt) = tuple(
             [match.group(i+1).strip() for i in range(re_line.groups)])
-    # print(match)
-
-    if not match:
-        # match accelerator line with same timestamp as before
-        match = re_acc_line.match(line)
-        if match:
-            (priv, pc, instr, args) = tuple(
-                [match.group(i+1).strip() for i in range(re_acc_line.groups)])
-            # use time,cyc from last line
-            time, cyc = last_time, last_cyc
-        else:
-            return 1
-
-    # print(line)
-    buf.append((time, cyc, priv, pc, instr, args))
-    last_time, last_cyc = time, cyc
+        buf.append((time, cyc, priv, pc, instr, args, cmt))
+        last_time, last_cyc = time, cyc
 
     if len(buf) > 10:
         flush(buf, hartid)
@@ -243,6 +238,54 @@ else:
 
 re_acc_line = re.compile(ACC_LINE_REGEX)
 
+
+def offload_lookahead(lines):
+    # dict mapping time stamp of retired instruction to time stamp of
+    # accelerator complete
+    lah = {}
+    searches = []
+    re_load = re.compile(r'([a-z]*[0-9]*|zero) *<~~ Word')
+
+    for line in lines:
+        match = re_line.match(line)
+        if match:
+            (time, cyc, priv, pc, instr, args, cmt) = tuple(
+                [match.group(i+1).strip() for i in range(re_line.groups)])
+            time = int(time) if use_time else int(cyc)
+
+            # register searchers
+            if '<~~ Word' in cmt:
+                if re_load.search(cmt):
+                    dst_reg = re_load.search(cmt).group(1)
+                    pat = f'(lsu) {dst_reg}  <--'
+                    searches.append({'pat': pat, 'start': time})
+                else:
+                    print(f'unsupported load lah: {cmt}')
+
+        # If this line is an acc-only line, get the data
+        if not match:
+            match = re_acc_line.match(line)
+            if match:
+                (time, cyc, priv, cmt) = tuple(
+                    [match.group(i+1).strip() for i in range(re_acc_line.groups)])
+
+        time = int(time) if use_time else int(cyc)
+
+        # Check for any open searches
+        removes = []
+        for s in searches:
+            if s['pat'] in cmt:
+                lah[s['start']] = time
+                removes.append(s)
+        [searches.remove(r) for r in removes]
+
+    # for l in lah:
+    #     print(f'{l} -> {lah[l]}')
+    return lah
+
+
+lah = {}
+
 with open(output, 'w') as output_file:
     # JSON header
     output_file.write('{"traceEvents": [\n')
@@ -258,15 +301,19 @@ with open(output, 'w') as output_file:
             f'parsing hartid {hartid} with trace {filename}', file=sys.stderr)
         tot_lines = len(open(filename).readlines())
         with open(filename) as f:
+            all_lines = f.readlines()[args.start:args.end]
+            # offload lookahead
+            if not banshee:
+                lah = offload_lookahead(all_lines)
             if has_progressbar:
                 for lino, line in progressbar.progressbar(
-                        enumerate(f.readlines()[args.start:args.end]),
+                        enumerate(all_lines),
                         max_value=tot_lines):
                     fails += parse_line(line, hartid)
                     lines += 1
             else:
                 for lino, line in enumerate(
-                        f.readlines()[args.start:args.end]):
+                        all_lines):
                     fails += parse_line(line, hartid)
                     lines += 1
             flush(buf, hartid)

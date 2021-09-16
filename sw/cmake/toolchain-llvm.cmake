@@ -28,6 +28,7 @@ add_compile_options(-static)
 add_compile_options(-mllvm -enable-misched=false)
 # LLD doesn't support relaxation for RISC-V yet
 add_compile_options(-mno-relax)
+add_compile_options(-fopenmp)
 
 ##
 ## Link options

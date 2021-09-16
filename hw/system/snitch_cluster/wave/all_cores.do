@@ -21,15 +21,35 @@ add wave -noupdate -expand -group {All Cores} {/tb_bin/i_dut/i_snitch_cluster/i_
 add wave -noupdate -expand -group {All Cores} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[6]/i_snitch_cc/i_snitch/pc_q}
 add wave -noupdate -expand -group {All Cores} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[7]/i_snitch_cc/i_snitch/pc_q}
 add wave -noupdate -expand -group {All Cores} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[8]/i_snitch_cc/i_snitch/pc_q}
-add wave -noupdate -divider FPUs
+add wave -noupdate -divider {FPU subsystem}
 add wave -noupdate -expand -group FPU0 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/trace_port_o}
 add wave -noupdate -expand -group FPU0 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/op_i}
 add wave -noupdate -expand -group FPU0 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/out_valid_o}
 add wave -noupdate -expand -group FPU0 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/out_ready_i}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/mem_addr_o}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/mem_write_o}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/mem_valid_o}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/mem_ready_i}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/enable}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/done}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/lane_rdata_o}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/lane_valid_o}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/lane_ready_i}
+add wave -noupdate -expand -group {SSR 0.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/bound_sq}
 add wave -noupdate -group FPU1 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/trace_port_o}
 add wave -noupdate -group FPU1 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/op_i}
 add wave -noupdate -group FPU1 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/out_valid_o}
 add wave -noupdate -group FPU1 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/out_ready_i}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/mem_addr_o}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/mem_write_o}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/mem_valid_o}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/mem_ready_i}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/enable}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/done}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/lane_rdata_o}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/lane_valid_o}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/lane_ready_i}
+add wave -noupdate -group {SSR 1.0} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[1]/i_snitch_cc/gen_ssrs/i_snitch_ssr_streamer/gen_ssrs[0]/i_ssr/i_addr_gen/bound_sq}
 add wave -noupdate -group FPU2 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[2]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/trace_port_o}
 add wave -noupdate -group FPU2 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[2]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/op_i}
 add wave -noupdate -group FPU2 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[2]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/out_valid_o}
@@ -54,10 +74,6 @@ add wave -noupdate -group FPU7 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_cor
 add wave -noupdate -group FPU7 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[7]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/op_i}
 add wave -noupdate -group FPU7 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[7]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/out_valid_o}
 add wave -noupdate -group FPU7 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[7]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/out_ready_i}
-add wave -noupdate -group FPU8 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[8]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/trace_port_o}
-add wave -noupdate -group FPU8 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[8]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/op_i}
-add wave -noupdate -group FPU8 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[8]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/out_valid_o}
-add wave -noupdate -group FPU8 {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[8]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_fpu/out_ready_i}
 add wave -noupdate -group {FPU0 LSU} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_snitch_lsu/lsu_qready_o}
 add wave -noupdate -group {FPU0 LSU} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_snitch_lsu/lsu_qvalid_i}
 add wave -noupdate -group {FPU0 LSU} {/tb_bin/i_dut/i_snitch_cluster/i_cluster/gen_core[0]/i_snitch_cc/gen_fpu/i_snitch_fp_ss/i_snitch_lsu/lsu_pready_i}
@@ -113,7 +129,10 @@ add wave -noupdate -group {Narrow Out} /tb_bin/i_dut/i_snitch_cluster/i_cluster/
 add wave -noupdate -group {Narrow Out} /tb_bin/i_dut/i_snitch_cluster/i_cluster/narrow_out_req_o.aw_valid
 add wave -noupdate -group {Narrow Out} /tb_bin/i_dut/i_snitch_cluster/i_cluster/narrow_out_resp_i.aw_ready
 TreeUpdate [SetDefaultTree]
+WaveRestoreCursors {{Cursor 1} {0 ps} 0}
 quietly wave cursor active 1
+configure wave -namecolwidth 150
+configure wave -valuecolwidth 100
 configure wave -justifyvalue left
 configure wave -signalnamewidth 1
 configure wave -snapdistance 10
@@ -126,3 +145,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
+WaveRestoreZoom {0 ps} {15540 ns}
