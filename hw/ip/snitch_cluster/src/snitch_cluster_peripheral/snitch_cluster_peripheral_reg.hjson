@@ -314,22 +314,6 @@
         }
     },
     {
-        name: "WAKE_UP"
-        desc: '''
-        (Legcay) Writing the hartid wakes up the corresponding core of the cluster (always starting at 0).
-        Writing `-1` (all ones) wakes up all cores of the cluster.
-        '''
-        hwext: "true",
-        hwqe: "true",
-        swaccess: "wo",
-        hwaccess: "hro",
-        fields: [{
-            bits: "31:0",
-            name: "WAKE_UP",
-            desc: "Wake up specifc core with the written id, or all cores (`-1`)."
-        }]
-    },
-    {
         name: "CL_CLINT_SET",
         desc: '''
         Set bits in the cluster-local CLINT. Writing a 1 at location i sets the cluster-local interrupt
