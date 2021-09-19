@@ -192,35 +192,6 @@ jobs:
         util/lint-editorconfig
         echo "::remove-matcher owner=editorconfig-checker-matcher::"
 
-  ################
-  # Lint Commits #
-  ################
-  commits:
-    name: Commit Messages
-    runs-on: ubuntu-latest
-    # Only trigger on pull requests, otherwise we don't know the base and the
-    # `github.event.pull_request` object isn't available either.
-    if: github.event_name == 'pull_request'
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        # We need the entire history to make meaningful decisions.
-        fetch-depth: 0
-        # By default the runner creates a merge commit (which we don't allow).
-        # So checkout the pull request HEAD commit instead of merge commit.
-        ref: ${{ github.event.pull_request.head.sha }}
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.x
-    - name: Install requirements
-      run: pip install -r python-requirements.txt
-    - name: Check commits
-      run: |
-        util/lint-commits.py \
-          --error-msg-prefix="::error ::" \
-          --warning-msg-prefix="::warning ::" \
-          ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}
-
   ###########
   # Banshee #
   ###########
