@@ -37,6 +37,7 @@ module snitch_cc #(
   parameter type         hive_rsp_t         = logic,
   parameter type         acc_req_t          = logic,
   parameter type         acc_resp_t         = logic,
+  parameter type         dma_events_t       = logic,
   parameter fpnew_pkg::fpu_implementation_t FPUImplementation = '0,
   /// Boot address of core.
   parameter logic [31:0] BootAddr           = 32'h0000_1000,
@@ -113,6 +114,7 @@ module snitch_cc #(
   input  axi_rsp_t                   axi_dma_res_i,
   output logic                       axi_dma_busy_o,
   output axi_dma_pkg::dma_perf_t     axi_dma_perf_o,
+  output dma_events_t                axi_dma_events_o,
   // Core event strobes
   output snitch_pkg::core_events_t   core_events_o,
   input  addr_t                      tcdm_addr_base_i,
@@ -324,7 +326,8 @@ module snitch_cc #(
       .DMAReqFifoDepth (DMAReqFifoDepth),
       .axi_req_t (axi_req_t),
       .axi_res_t (axi_rsp_t),
-      .acc_resp_t (acc_resp_t)
+      .acc_resp_t (acc_resp_t),
+      .dma_events_t (dma_events_t)
     ) i_axi_dma_tc_snitch_fe (
       .clk_i            ( clk_i                     ),
       .rst_ni           ( rst_ni                    ),
@@ -345,7 +348,8 @@ module snitch_cc #(
       .acc_pvalid_o     ( dma_pvalid                ),
       .acc_pready_i     ( dma_pready                ),
       .hart_id_i        ( hart_id_i                 ),
-      .dma_perf_o       ( axi_dma_perf_o            )
+      .dma_perf_o       ( axi_dma_perf_o            ),
+      .dma_events_o     ( axi_dma_events_o          )
     );
 
   // no DMA instanciated

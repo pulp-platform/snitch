@@ -77,7 +77,201 @@
                 name: "ISSUE_CORE_TO_FPU"
                 desc: '''Incremented whenever the core issues an FPU instruction.
                         _This is a hart-local signal._'''
-            }]
+            },
+            {
+                bits: "6:6",
+                resval: "0",
+                name: "DMA_AW_STALL"
+                desc: '''
+                        Incremented whenever aw_valid = 1 but aw_ready = 0.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "7:7",
+                resval: "0",
+                name: "DMA_AR_STALL"
+                desc: '''
+                        Incremented whenever ar_valid = 1 but ar_ready = 0.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "8:8",
+                resval: "0",
+                name: "DMA_R_STALL"
+                desc: '''
+                        Incremented whenever r_ready = 1 but r_valid = 0.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "9:9",
+                resval: "0",
+                name: "DMA_W_STALL"
+                desc: '''
+                        Incremented whenever w_valid = 1 but w_ready = 0.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "10:10",
+                resval: "0",
+                name: "DMA_BUF_W_STALL"
+                desc: '''
+                        Incremented whenever w_ready = 1 but w_valid = 0.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "11:11",
+                resval: "0",
+                name: "DMA_BUF_R_STALL"
+                desc: '''
+                        Incremented whenever r_valid = 1 but r_ready = 0.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "12:12",
+                resval: "0",
+                name: "DMA_AW_DONE"
+                desc: '''
+                        Incremented whenever AW handshake occurs.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "13:13",
+                resval: "0",
+                name: "DMA_AW_BW"
+                desc: '''
+                        Whenever AW handshake occurs, the counter is incremented
+                        by the number of bytes transfered for this transaction
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "14:14",
+                resval: "0",
+                name: "DMA_AR_DONE"
+                desc: '''
+                        Incremented whenever AR handshake occurs.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "15:15",
+                resval: "0",
+                name: "DMA_AR_BW"
+                desc: '''
+                        Whenever AR handshake occurs, the counter is incremented
+                        by the number of bytes transfered for this transaction
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "16:16",
+                resval: "0",
+                name: "DMA_R_DONE"
+                desc: '''
+                        Incremented whenever R handshake occurs.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "17:17",
+                resval: "0",
+                name: "DMA_R_BW"
+                desc: '''
+                        Whenever R handshake occurs, the counter is incremented
+                        by the number of bytes transfered in this cycle
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "18:18",
+                resval: "0",
+                name: "DMA_W_DONE"
+                desc: '''
+                        Incremented whenvever W handshake occurs.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "19:19",
+                resval: "0",
+                name: "DMA_W_BW"
+                desc: '''
+                        Whenever W handshake occurs, the counter is incremented
+                        by the number of bytes transfered in this cycle
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "20:20",
+                resval: "0",
+                name: "DMA_B_DONE"
+                desc: '''
+                        Incremented whenever B handshake occurs.
+                        _This is a DMA-local signal_
+                        '''
+            },
+            {
+                bits: "21:21",
+                resval: "0",
+                name: "DMA_BUSY"
+                desc: '''
+                        Incremented whenever DMA is busy.
+                        _This is a DMA-local signal_
+                        '''
+            },
+                        {
+                bits: "22:22",
+                resval: "0",
+                name: "ICACHE_MISS"
+                desc: '''
+                        Incremented for instruction cache misses.
+                        _This is a hart-local signal_
+                        '''
+            },
+                        {
+                bits: "23:23",
+                resval: "0",
+                name: "ICACHE_HIT"
+                desc: '''
+                        Incremented for instruction cache hits.
+                        _This is a hart-local signal_
+                        '''
+            },
+                        {
+                bits: "24:24",
+                resval: "0",
+                name: "ICACHE_PREFETCH"
+                desc: '''
+                        Incremented for instruction cache prefetches.
+                        _This is a hart-local signal_
+                        '''
+            },
+                        {
+                bits: "25:25",
+                resval: "0",
+                name: "ICACHE_DOUBLE_HIT"
+                desc: '''
+                        Incremented for instruction cache double hit.
+                        _This is a hart-local signal_
+                        '''
+            },
+                        {
+                bits: "26:26",
+                resval: "0",
+                name: "ICACHE_STALL"
+                desc: '''
+                        Incremented for instruction cache stalls.
+                        _This is a hart-local signal_
+                        '''
+            },
+            ]
         }
     },
     {
@@ -93,6 +287,7 @@
             hwaccess: "hro",
             count: "NumPerfCounters",
             cname: "hart_select",
+            compact: "false",
             fields: [{
                 bits: "9:0",
                 name: "HART_SELECT",
@@ -109,8 +304,8 @@
             hwaccess: "hrw",
             count: "NumPerfCounters",
             cname: "performance_counter",
-            hwext: true,
-            hwqe:  true,
+            hwext: "true",
+            hwqe: "true",
             fields: [{
                 bits: "47:0",
                 name: "PERF_COUNTER",
@@ -145,6 +340,18 @@
         fields: [{
             bits: "31:0",
             name: "HW_BARRIER",
+            desc: "Hardware barrier register."
+        }]
+    },
+    {
+        name: "ICACHE_PREFETCH_ENABLE",
+        desc: '''Controls prefetching of the instruction cache.'''
+        swaccess: "wo",
+        hwaccess: "hro",
+        resval: "1",
+        fields: [{
+            bits: "0:0",
+            name: "ICACHE_PREFETCH_ENABLE",
             desc: "Hardware barrier register."
         }]
     }

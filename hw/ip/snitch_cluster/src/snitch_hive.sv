@@ -42,7 +42,11 @@ module snitch_hive #(
   output dreq_t    ptw_data_req_o,
   input  drsp_t    ptw_data_rsp_i,
   output axi_req_t axi_req_o,
-  input  axi_rsp_t axi_rsp_i
+  input  axi_rsp_t axi_rsp_i,
+
+  input logic      icache_prefetch_enable_i,
+
+  output snitch_icache_pkg::icache_events_t [CoreCount-1:0] icache_events_o
 );
   // Extend the ID to route back results to the appropriate core.
   localparam int unsigned IdWidth = 5;
@@ -57,6 +61,8 @@ module snitch_hive #(
   logic [CoreCount-1:0] inst_error;
   logic [CoreCount-1:0] flush_valid;
   logic [CoreCount-1:0] flush_ready;
+
+
 
   for (genvar i = 0; i < CoreCount; i++) begin : gen_unpack_icache
     assign inst_addr[i] = hive_req_i[i].inst_addr;
@@ -88,9 +94,8 @@ module snitch_hive #(
     .clk_i (clk_i),
     .clk_d2_i (clk_d2_i),
     .rst_ni (rst_ni),
-    // TODO: Wire to socregs or similar
-    .enable_prefetching_i ( 1'b1 ),
-    .icache_events_o      (      ),
+    .enable_prefetching_i ( icache_prefetch_enable_i ),
+    .icache_events_o  ( icache_events_o),
     .flush_valid_i    ( flush_valid    ),
     .flush_ready_o    ( flush_ready    ),
 
