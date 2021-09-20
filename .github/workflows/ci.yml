@@ -114,7 +114,19 @@ jobs:
         - -DOMPSTATIC_NUMTHREADS=8
     name: SW on Banshee (Container)
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 0
+    - name: Get Banshee changed
+      id: banshee-changes
+      run: echo "::set-output name=banshee_changed::$(! git diff --name-only --diff-filter=ACMRT
+        ${{ github.event.pull_request.base.sha }} | grep -q ^sw/banshee; echo $?)"
+    - name: Build banshee
+      if: ${{ steps.banshee-changes.outputs.banshee_changed == 1 }}
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        export PATH=$HOME/.cargo/bin:${PATH}
+        cargo install --path sw/banshee
     - name: Build runtime
       working-directory: sw/snRuntime
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
