@@ -6,23 +6,12 @@
 
 #include "snrt.h"
 
-// Must match with `snitch_cluster_peripheral`
-#define NUM_PERF_COUNTERS 2
-
-typedef union {
-    uint32_t value __attribute__((aligned(8)));
-} perf_reg32_t;
-
-typedef struct {
-    volatile perf_reg32_t enable[NUM_PERF_COUNTERS];
-    volatile perf_reg32_t hart_select[NUM_PERF_COUNTERS];
-    volatile perf_reg32_t perf_counter[NUM_PERF_COUNTERS];
-} perf_reg_t;
-
 /// Different perf counters
+// Must match with `snitch_cluster_peripheral`
 enum snrt_perf_cnt {
-    SNRT_PERF_CNT0 = 0,
-    SNRT_PERF_CNT1 = 1,
+    SNRT_PERF_CNT0,
+    SNRT_PERF_CNT1,
+    SNRT_PERF_N_CNT
 };
 
 /// Different types of performance counters
@@ -39,27 +28,33 @@ enum snrt_perf_cnt_type {
     SNRT_PERF_CNT_DMA_W_STALL,
     SNRT_PERF_CNT_DMA_BUF_W_STALL,
     SNRT_PERF_CNT_DMA_BUF_R_STALL,
-    SNRT_PERF_CNT_DMA_AW_VALID,
-    SNRT_PERF_CNT_DMA_AW_READY,
     SNRT_PERF_CNT_DMA_AW_DONE,
     SNRT_PERF_CNT_DMA_AW_BW,
-    SNRT_PERF_CNT_DMA_AR_VALID,
-    SNRT_PERF_CNT_DMA_AR_READY,
     SNRT_PERF_CNT_DMA_AR_DONE,
     SNRT_PERF_CNT_DMA_AR_BW,
-    SNRT_PERF_CNT_DMA_R_VALID,
-    SNRT_PERF_CNT_DMA_R_READY,
     SNRT_PERF_CNT_DMA_R_DONE,
     SNRT_PERF_CNT_DMA_R_BW,
-    SNRT_PERF_CNT_DMA_W_VALID,
-    SNRT_PERF_CNT_DMA_W_READY,
     SNRT_PERF_CNT_DMA_W_DONE,
     SNRT_PERF_CNT_DMA_W_BW,
-    SNRT_PERF_CNT_DMA_B_VALID,
-    SNRT_PERF_CNT_DMA_B_READY,
     SNRT_PERF_CNT_DMA_B_DONE,
-    SNRT_PERF_CNT_DMA_BUSY
+    SNRT_PERF_CNT_DMA_BUSY,
+    SNRT_PERF_CNT_ICACHE_MISS,
+    SNRT_PERF_CNT_ICACHE_HIT,
+    SNRT_PERF_CNT_ICACHE_PREFETCH,
+    SNRT_PERF_CNT_ICACHE_DOUBLE_HIT,
+    SNRT_PERF_CNT_ICACHE_STALL,
 };
+
+typedef union {
+    uint32_t value __attribute__((aligned(8)));
+} perf_reg32_t;
+
+typedef struct {
+    volatile perf_reg32_t enable[SNRT_PERF_N_CNT];
+    volatile perf_reg32_t hart_select[SNRT_PERF_N_CNT];
+    volatile perf_reg32_t perf_counter[SNRT_PERF_N_CNT];
+} perf_reg_t;
+
 
 void snrt_start_perf_counter(enum snrt_perf_cnt perf_cnt,
                              enum snrt_perf_cnt_type perf_cnt_type,
