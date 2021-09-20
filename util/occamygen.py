@@ -232,6 +232,8 @@ def main():
 
     am_soc_wide_xbar.attach(am_soc_narrow_xbar)
 
+    am_soc_axi_lite_periph_xbar.attach(am_soc_narrow_xbar)
+
     # HBI
     am_hbi = am.new_leaf("hbi", 0x10000000000,
                          0x10000000000).attach_to(am_wide_xbar_quadrant_s1)
@@ -253,6 +255,7 @@ def main():
     soc_axi_lite_periph_xbar.add_input("soc")
     soc_axi_lite_periph_xbar.add_input("debug")
     soc_axi_lite_periph_xbar.add_output_entry("debug", am_debug)
+    soc_axi_lite_periph_xbar.add_output_entry("soc", am_soc_narrow_xbar)
 
     ##########
     # RegBus #
@@ -344,6 +347,7 @@ def main():
 
     soc_narrow_xbar.add_input("cva6")
     soc_narrow_xbar.add_input("soc_wide")
+    soc_narrow_xbar.add_input("periph")
     dts.add_cpu("eth,ariane")
 
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)

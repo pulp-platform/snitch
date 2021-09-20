@@ -91,6 +91,7 @@ package occamy_pkg;
   /// Outputs of the `soc_axi_lite_periph_xbar` crossbar.
   typedef enum int {
     SOC_AXI_LITE_PERIPH_XBAR_OUT_DEBUG,
+    SOC_AXI_LITE_PERIPH_XBAR_OUT_SOC,
     SOC_AXI_LITE_PERIPH_XBAR_NUM_OUTPUTS
   } soc_axi_lite_periph_xbar_outputs_e;
 
@@ -106,12 +107,13 @@ package occamy_pkg;
   AxiIdUsedSlvPorts:  0,
   AxiAddrWidth:       48,
   AxiDataWidth:       64,
-  NoAddrRules:        1
+  NoAddrRules:        2
 };
 
   /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [0:0] SocAxiLitePeriphXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h00001000 }
+  localparam xbar_rule_48_t [1:0] SocAxiLitePeriphXbarAddrmap = '{
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h00001000 },
+  '{ idx: 1, start_addr: 48'h01000000, end_addr: 48'h1200000000 }
 };
 
   // AXI plugs of the `soc_axi_lite_periph_xbar` crossbar.
@@ -284,6 +286,7 @@ package occamy_pkg;
     SOC_NARROW_XBAR_IN_S1_QUADRANT_7,
     SOC_NARROW_XBAR_IN_CVA6,
     SOC_NARROW_XBAR_IN_SOC_WIDE,
+    SOC_NARROW_XBAR_IN_PERIPH,
     SOC_NARROW_XBAR_NUM_INPUTS
   } soc_narrow_xbar_inputs_e;
 

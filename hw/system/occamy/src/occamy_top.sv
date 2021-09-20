@@ -187,8 +187,8 @@ module occamy_top
 
   axi_lite_a48_d64_req_t [1:0] soc_axi_lite_periph_xbar_in_req;
   axi_lite_a48_d64_rsp_t [1:0] soc_axi_lite_periph_xbar_in_rsp;
-  axi_lite_a48_d64_req_t [0:0] soc_axi_lite_periph_xbar_out_req;
-  axi_lite_a48_d64_rsp_t [0:0] soc_axi_lite_periph_xbar_out_rsp;
+  axi_lite_a48_d64_req_t [1:0] soc_axi_lite_periph_xbar_out_req;
+  axi_lite_a48_d64_rsp_t [1:0] soc_axi_lite_periph_xbar_out_rsp;
 
   // The `soc_axi_lite_periph_xbar` crossbar.
   axi_lite_xbar #(
@@ -333,14 +333,14 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
 };
 
-  soc_narrow_xbar_in_req_t   [ 9:0] soc_narrow_xbar_in_req;
-  soc_narrow_xbar_in_resp_t  [ 9:0] soc_narrow_xbar_in_rsp;
+  soc_narrow_xbar_in_req_t   [10:0] soc_narrow_xbar_in_req;
+  soc_narrow_xbar_in_resp_t  [10:0] soc_narrow_xbar_in_rsp;
   soc_narrow_xbar_out_req_t  [11:0] soc_narrow_xbar_out_req;
   soc_narrow_xbar_out_resp_t [11:0] soc_narrow_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg(SocNarrowXbarCfg),
-      .Connectivity  ( 120'b101111111111111111111111111101111111111110111111111111011111111111101111111111110111111111111011111111111101111111111110 ),
+      .Connectivity  ( 132'b111011111111101111111111111111111111111101111111111110111111111111011111111111101111111111110111111111111011111111111101111111111110 ),
       .AtopSupport(1),
       .slv_aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d64_i8_u0_aw_chan_t),
@@ -2158,8 +2158,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   /////////////////
   // Peripherals //
   /////////////////
-  axi_a48_d64_i8_u0_req_t  axi_lite_cdc_req;
-  axi_a48_d64_i8_u0_resp_t axi_lite_cdc_rsp;
+  axi_a48_d64_i8_u0_req_t  axi_lite_from_soc_cdc_req;
+  axi_a48_d64_i8_u0_resp_t axi_lite_from_soc_cdc_rsp;
 
   axi_cdc #(
       .aw_chan_t (axi_a48_d64_i8_u0_aw_chan_t),
@@ -2170,15 +2170,15 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .axi_req_t (axi_a48_d64_i8_u0_req_t),
       .axi_resp_t(axi_a48_d64_i8_u0_resp_t),
       .LogDepth  (2)
-  ) i_axi_lite_cdc (
+  ) i_axi_lite_from_soc_cdc (
       .src_clk_i (clk_i),
       .src_rst_ni(rst_ni),
       .src_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_PERIPH]),
       .src_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_PERIPH]),
       .dst_clk_i (clk_periph_i),
       .dst_rst_ni(rst_periph_ni),
-      .dst_req_o (axi_lite_cdc_req),
-      .dst_resp_i(axi_lite_cdc_rsp)
+      .dst_req_o (axi_lite_from_soc_cdc_req),
+      .dst_resp_i(axi_lite_from_soc_cdc_rsp)
   );
 
   axi_to_axi_lite #(
@@ -2197,10 +2197,50 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
       .test_i(test_mode_i),
-      .slv_req_i(axi_lite_cdc_req),
-      .slv_resp_o(axi_lite_cdc_rsp),
+      .slv_req_i(axi_lite_from_soc_cdc_req),
+      .slv_resp_o(axi_lite_from_soc_cdc_rsp),
       .mst_req_o(soc_axi_lite_periph_xbar_in_req[SOC_AXI_LITE_PERIPH_XBAR_IN_SOC]),
       .mst_resp_i(soc_axi_lite_periph_xbar_in_rsp[SOC_AXI_LITE_PERIPH_XBAR_IN_SOC])
+  );
+
+
+
+  axi_lite_a48_d64_req_t axi_lite_to_soc_cdc_req;
+  axi_lite_a48_d64_rsp_t axi_lite_to_soc_cdc_rsp;
+
+  axi_cdc #(
+      .aw_chan_t (axi_lite_a48_d64_aw_chan_t),
+      .w_chan_t  (axi_lite_a48_d64_w_chan_t),
+      .b_chan_t  (axi_lite_a48_d64_b_chan_t),
+      .ar_chan_t (axi_lite_a48_d64_ar_chan_t),
+      .r_chan_t  (axi_lite_a48_d64_r_chan_t),
+      .axi_req_t (axi_lite_a48_d64_req_t),
+      .axi_resp_t(axi_lite_a48_d64_rsp_t),
+      .LogDepth  (2)
+  ) i_axi_lite_to_soc_cdc (
+      .src_clk_i (clk_periph_i),
+      .src_rst_ni(rst_periph_ni),
+      .src_req_i (soc_axi_lite_periph_xbar_out_req[SOC_AXI_LITE_PERIPH_XBAR_OUT_SOC]),
+      .src_resp_o(soc_axi_lite_periph_xbar_out_rsp[SOC_AXI_LITE_PERIPH_XBAR_OUT_SOC]),
+      .dst_clk_i (clk_i),
+      .dst_rst_ni(rst_ni),
+      .dst_req_o (axi_lite_to_soc_cdc_req),
+      .dst_resp_i(axi_lite_to_soc_cdc_rsp)
+  );
+
+  axi_lite_to_axi #(
+      .AxiDataWidth(64),
+      .req_lite_t  (axi_lite_a48_d64_req_t),
+      .resp_lite_t (axi_lite_a48_d64_rsp_t),
+      .req_t       (axi_a48_d64_i4_u0_req_t),
+      .resp_t      (axi_a48_d64_i4_u0_resp_t)
+  ) i_axi_lite_to_axi_periph_pc (
+      .slv_req_lite_i (axi_lite_to_soc_cdc_req),
+      .slv_resp_lite_o(axi_lite_to_soc_cdc_rsp),
+      .slv_aw_cache_i (axi_pkg::CACHE_MODIFIABLE),
+      .slv_ar_cache_i (axi_pkg::CACHE_MODIFIABLE),
+      .mst_req_o      (soc_narrow_xbar_in_req[SOC_NARROW_XBAR_IN_PERIPH]),
+      .mst_resp_i     (soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_PERIPH])
   );
 
 
