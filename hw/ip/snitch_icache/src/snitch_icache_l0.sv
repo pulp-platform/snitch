@@ -386,6 +386,7 @@ module snitch_icache_l0 import snitch_icache_pkg::*; #(
     icache_events_o.l0_hit = hit_any & in_valid_i;
     icache_events_o.l0_prefetch = prefetcher_out.vld;
     icache_events_o.l0_double_hit = hit_any & ~hit_early_is_onehot & in_valid_i;
+    icache_events_o.l0_stall = !in_ready_o & in_valid_i;
   end
 
   // ----------
