@@ -1,4 +1,4 @@
-# Occamy System Schema Schema
+# AXI Crossbar Schema Schema
 
 ```txt
 http://pulp-platform.org/snitch/axi_xbar.schema.json
@@ -10,17 +10,17 @@ AXI Crossbar Properties
 | :------------------ | :--------- | :------------- | :----------- | :---------------- | :-------------------- | :------------------ | :------------------------------------------------------------------ |
 | Can be instantiated | No         | Unknown status | No           | Forbidden         | Allowed               | none                | [axi_xbar.schema.json](axi_xbar.schema.json "open original schema") |
 
-## Occamy System Schema Type
+## AXI Crossbar Schema Type
 
-`object` ([Occamy System Schema](axi_xbar.md))
+`object` ([AXI Crossbar Schema](axi_xbar.md))
 
-# Occamy System Schema Properties
+# AXI Crossbar Schema Properties
 
-| Property                        | Type      | Required | Nullable       | Defined by                                                                                                                                    |
-| :------------------------------ | :-------- | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| [max_slv_trans](#max_slv_trans) | `integer` | Optional | cannot be null | [Occamy System Schema](axi_xbar-properties-max_slv_trans.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/max_slv_trans") |
-| [max_mst_trans](#max_mst_trans) | `integer` | Optional | cannot be null | [Occamy System Schema](axi_xbar-properties-max_mst_trans.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/max_mst_trans") |
-| [fall_through](#fall_through)   | `boolean` | Optional | cannot be null | [Occamy System Schema](axi_xbar-properties-fall_through.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/fall_through")   |
+| Property                        | Type      | Required | Nullable       | Defined by                                                                                                                                   |
+| :------------------------------ | :-------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------- |
+| [max_slv_trans](#max_slv_trans) | `integer` | Optional | cannot be null | [AXI Crossbar Schema](axi_xbar-properties-max_slv_trans.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/max_slv_trans") |
+| [max_mst_trans](#max_mst_trans) | `integer` | Optional | cannot be null | [AXI Crossbar Schema](axi_xbar-properties-max_mst_trans.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/max_mst_trans") |
+| [fall_through](#fall_through)   | `boolean` | Optional | cannot be null | [AXI Crossbar Schema](axi_xbar-properties-fall_through.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/fall_through")   |
 
 ## max_slv_trans
 
@@ -34,7 +34,7 @@ Maximum outstanding transaction on the slave port.
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](axi_xbar-properties-max_slv_trans.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/max_slv_trans")
+*   defined in: [AXI Crossbar Schema](axi_xbar-properties-max_slv_trans.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/max_slv_trans")
 
 ### max_slv_trans Type
 
@@ -60,7 +60,7 @@ Maximum outstanding transaction on the master port.
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](axi_xbar-properties-max_mst_trans.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/max_mst_trans")
+*   defined in: [AXI Crossbar Schema](axi_xbar-properties-max_mst_trans.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/max_mst_trans")
 
 ### max_mst_trans Type
 
@@ -86,7 +86,7 @@ Configure crossbar to be fall-through (zero latency).
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](axi_xbar-properties-fall_through.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/fall_through")
+*   defined in: [AXI Crossbar Schema](axi_xbar-properties-fall_through.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/fall_through")
 
 ### fall_through Type
 

@@ -20,8 +20,8 @@ http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant
 | :---------------------------- | :-------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [nr_clusters](#nr_clusters)   | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties-properties-nr_clusters.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/nr_clusters")   |
 | [ro_cache_cfg](#ro_cache_cfg) | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties-properties-ro_cache_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/ro_cache_cfg") |
-| [wide_xbar](#wide_xbar)       | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-occamy-system-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/s1_quadrant/properties/wide_xbar")                          |
-| [narrow_xbar](#narrow_xbar)   | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-occamy-system-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/s1_quadrant/properties/narrow_xbar")                        |
+| [wide_xbar](#wide_xbar)       | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/s1_quadrant/properties/wide_xbar")                           |
+| [narrow_xbar](#narrow_xbar)   | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/s1_quadrant/properties/narrow_xbar")                         |
 
 ## nr_clusters
 
@@ -75,15 +75,15 @@ AXI Crossbar Properties
 
 *   is optional
 
-*   Type: `object` ([Occamy System Schema](occamy-properties-occamy-system-schema-1.md))
+*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-occamy-system-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/s1\_quadrant/properties/wide_xbar")
+*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/s1\_quadrant/properties/wide_xbar")
 
 ### wide_xbar Type
 
-`object` ([Occamy System Schema](occamy-properties-occamy-system-schema-1.md))
+`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
 
 ## narrow_xbar
 
@@ -93,12 +93,12 @@ AXI Crossbar Properties
 
 *   is optional
 
-*   Type: `object` ([Occamy System Schema](occamy-properties-occamy-system-schema-1.md))
+*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-occamy-system-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/s1\_quadrant/properties/narrow_xbar")
+*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/s1\_quadrant/properties/narrow_xbar")
 
 ### narrow_xbar Type
 
-`object` ([Occamy System Schema](occamy-properties-occamy-system-schema-1.md))
+`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))

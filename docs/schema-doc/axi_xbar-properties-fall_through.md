@@ -1,4 +1,4 @@
-# Untitled boolean in Occamy System Schema Schema
+# Untitled boolean in AXI Crossbar Schema Schema
 
 ```txt
 http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/fall_through

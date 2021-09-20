@@ -1,4 +1,4 @@
-# Untitled integer in Occamy System Schema Schema
+# Untitled integer in AXI Crossbar Schema Schema
 
 ```txt
 http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/max_slv_trans
