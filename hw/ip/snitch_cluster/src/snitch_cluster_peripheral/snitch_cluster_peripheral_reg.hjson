@@ -135,24 +135,6 @@
             {
                 bits: "12:12",
                 resval: "0",
-                name: "DMA_AW_VALID"
-                desc: '''
-                        Incremented whenever aw_valid = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "13:13",
-                resval: "0",
-                name: "DMA_AW_READY"
-                desc: '''
-                        Incremented whenever aw_ready = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "14:14",
-                resval: "0",
                 name: "DMA_AW_DONE"
                 desc: '''
                         Incremented whenever AW handshake occurs.
@@ -160,7 +142,7 @@
                         '''
             },
             {
-                bits: "15:15",
+                bits: "13:13",
                 resval: "0",
                 name: "DMA_AW_BW"
                 desc: '''
@@ -170,25 +152,7 @@
                         '''
             },
             {
-                bits: "16:16",
-                resval: "0",
-                name: "DMA_AR_VALID"
-                desc: '''
-                        Incremented whenever ar_valid = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "17:17",
-                resval: "0",
-                name: "DMA_AR_READY"
-                desc: '''
-                        Incremented whenever ar_ready = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "18:18",
+                bits: "14:14",
                 resval: "0",
                 name: "DMA_AR_DONE"
                 desc: '''
@@ -197,7 +161,7 @@
                         '''
             },
             {
-                bits: "19:19",
+                bits: "15:15",
                 resval: "0",
                 name: "DMA_AR_BW"
                 desc: '''
@@ -207,25 +171,7 @@
                         '''
             },
             {
-                bits: "20:20",
-                resval: "0",
-                name: "DMA_R_VALID"
-                desc: '''
-                        Incremented whenever r_valid = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "21:21",
-                resval: "0",
-                name: "DMA_R_READY"
-                desc: '''
-                        Incremented whenever r_ready = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "22:22",
+                bits: "16:16",
                 resval: "0",
                 name: "DMA_R_DONE"
                 desc: '''
@@ -234,7 +180,7 @@
                         '''
             },
             {
-                bits: "23:23",
+                bits: "17:17",
                 resval: "0",
                 name: "DMA_R_BW"
                 desc: '''
@@ -244,25 +190,7 @@
                         '''
             },
             {
-                bits: "24:24",
-                resval: "0",
-                name: "DMA_W_VALID"
-                desc: '''
-                        Incremented whenever w_valid = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "25:25",
-                resval: "0",
-                name: "DMA_W_READY"
-                desc: '''
-                        Incremented whenever w_ready = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "26:26",
+                bits: "18:18",
                 resval: "0",
                 name: "DMA_W_DONE"
                 desc: '''
@@ -271,7 +199,7 @@
                         '''
             },
             {
-                bits: "27:27",
+                bits: "19:19",
                 resval: "0",
                 name: "DMA_W_BW"
                 desc: '''
@@ -281,25 +209,7 @@
                         '''
             },
             {
-                bits: "28:28",
-                resval: "0",
-                name: "DMA_B_VALID"
-                desc: '''
-                        Incremented whenever b_valid = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "29:29",
-                resval: "0",
-                name: "DMA_B_READY"
-                desc: '''
-                        Incremented whenever b_ready = 1.
-                        _This is a DMA-local signal_
-                        '''
-            },
-            {
-                bits: "30:30",
+                bits: "20:20",
                 resval: "0",
                 name: "DMA_B_DONE"
                 desc: '''
@@ -308,12 +218,57 @@
                         '''
             },
             {
-                bits: "31:31",
+                bits: "21:21",
                 resval: "0",
                 name: "DMA_BUSY"
                 desc: '''
                         Incremented whenever DMA is busy.
                         _This is a DMA-local signal_
+                        '''
+            },
+                        {
+                bits: "22:22",
+                resval: "0",
+                name: "ICACHE_MISS"
+                desc: '''
+                        Incremented for instruction cache misses.
+                        _This is a hart-local signal_
+                        '''
+            },
+                        {
+                bits: "23:23",
+                resval: "0",
+                name: "ICACHE_HIT"
+                desc: '''
+                        Incremented for instruction cache hits.
+                        _This is a hart-local signal_
+                        '''
+            },
+                        {
+                bits: "24:24",
+                resval: "0",
+                name: "ICACHE_PREFETCH"
+                desc: '''
+                        Incremented for instruction cache prefetches.
+                        _This is a hart-local signal_
+                        '''
+            },
+                        {
+                bits: "25:25",
+                resval: "0",
+                name: "ICACHE_DOUBLE_HIT"
+                desc: '''
+                        Incremented for instruction cache double hit.
+                        _This is a hart-local signal_
+                        '''
+            },
+                        {
+                bits: "26:26",
+                resval: "0",
+                name: "ICACHE_STALL"
+                desc: '''
+                        Incremented for instruction cache stalls.
+                        _This is a hart-local signal_
                         '''
             },
             ]
