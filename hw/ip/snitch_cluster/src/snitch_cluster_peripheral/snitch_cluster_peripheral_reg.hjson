@@ -342,6 +342,18 @@
             name: "HW_BARRIER",
             desc: "Hardware barrier register."
         }]
+    },
+    {
+        name: "ICACHE_PREFETCH_ENABLE",
+        desc: '''Controls prefetching of the instruction cache.'''
+        swaccess: "wo",
+        hwaccess: "hro",
+        resval: "1",
+        fields: [{
+            bits: "0:0",
+            name: "ICACHE_PREFETCH_ENABLE",
+            desc: "Hardware barrier register."
+        }]
     }
     ]
 }

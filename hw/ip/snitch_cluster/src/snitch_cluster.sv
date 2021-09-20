@@ -457,6 +457,7 @@ module snitch_cluster
 
   // 5. Misc. Wires.
   logic [NrCores-1:0] wake_up_sync;
+  logic icache_prefetch_enable;
 
   // -------------
   // DMA Subsystem
@@ -870,6 +871,7 @@ module snitch_cluster
         .ptw_data_rsp_i (ptw_rsp[i]),
         .axi_req_o (wide_axi_mst_req[ICache+i]),
         .axi_rsp_i (wide_axi_mst_rsp[ICache+i]),
+        .icache_prefetch_enable_i (icache_prefetch_enable),
         .icache_events_o(icache_events_reshape)
       );
   end
@@ -1092,6 +1094,7 @@ module snitch_cluster
     .tcdm_start_address_i (tcdm_start_address),
     .tcdm_end_address_i (tcdm_end_address),
     .wake_up_o (wake_up_sync),
+    .icache_prefetch_enable_o (icache_prefetch_enable),
     .cluster_hart_base_id_i (hart_base_id_i),
     .core_events_i (core_events),
     .tcdm_events_i (tcdm_events),
