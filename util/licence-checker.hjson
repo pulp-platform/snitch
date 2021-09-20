@@ -17,6 +17,7 @@
         'util/lowrisc_misc-linters/*',
         'sw/banshee/tests/runtime/printf.*',
         'sw/snRuntime/include/interface.h',
+        'sw/snRuntime/include/snitch_cluster_peripheral.h',
         // Do not check solder snippets, they generally do not contain valid
         // stand-alone code.
         'util/solder/*.sv.tpl',
