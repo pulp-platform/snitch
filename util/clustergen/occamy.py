@@ -45,7 +45,11 @@ class Occamy(Generator):
                                  speed_optimized=True,
                                  density_optimized=True)
 
-        self.cluster.add_mem(cfg["spm"]["length"]//8, 64, desc="SPM", speed_optimized=False, density_optimized=True)
+        self.cluster.add_mem(cfg["spm"]["length"] // 8,
+                             64,
+                             desc="SPM",
+                             speed_optimized=False,
+                             density_optimized=True)
 
         # CVA6
         self.cluster.add_mem(256,
@@ -78,6 +82,106 @@ class Occamy(Generator):
                              byte_enable=True,
                              speed_optimized=True,
                              density_optimized=False)
+        # HBM
+        self.cluster.add_mem(2**6,
+                             16,
+                             byte_enable=False,
+                             desc="HBM Re-order",
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**6,
+                             14,
+                             byte_enable=False,
+                             desc="HBM Fifo",
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**4,
+                             32,
+                             byte_enable=False,
+                             desc="HBM WR Fifo",
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**4,
+                             102,
+                             byte_enable=False,
+                             desc="HBM RD Fifo",
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**6,
+                             48,
+                             byte_enable=False,
+                             desc="HBM Test",
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**4,
+                             576,
+                             byte_enable=False,
+                             desc="HBM Test/W Data",
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**4,
+                             64,
+                             byte_enable=False,
+                             desc="HBM Test",
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**4,
+                             204,
+                             byte_enable=False,
+                             desc="HBM Analyzer",
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+
+        self.cluster.add_mem(2**3,
+                             56,
+                             desc="HBM RD CMD",
+                             byte_enable=False,
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**4,
+                             74,
+                             desc="HBM WR CMD",
+                             byte_enable=False,
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**4,
+                             11,
+                             desc="HBM BID",
+                             byte_enable=False,
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**7,
+                             585,
+                             desc="HBM RD ID",
+                             byte_enable=False,
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**6,
+                             6,
+                             desc="HBM RD ID",
+                             byte_enable=False,
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
+        self.cluster.add_mem(2**7,
+                             641,
+                             desc="HBM ReOrd",
+                             byte_enable=False,
+                             speed_optimized=True,
+                             density_optimized=False,
+                             dual_port=True)
 
     def render_wrapper(self):
         return self.cluster.render_wrapper()

@@ -177,16 +177,18 @@ class SnitchCluster(Generator):
                 byte_enable=True,
                 desc=None,
                 speed_optimized=True,
-                density_optimized=False):
+                density_optimized=False,
+                dual_port=False):
         mem = (
             width,  # width
             words,  # words
             8,  # byte_width
-            1,  # ports
+            2 if dual_port else 1,  # ports
             1,  # latency
             byte_enable,  # byte_enable
             speed_optimized,  # speed optimized
             density_optimized,  # density optimized
+            dual_port
         )
         self.mems.add(mem)
         if mem in self.mems_desc:
@@ -223,6 +225,7 @@ class SnitchCluster(Generator):
                 'byte_enable': mem[5],
                 'speed_optimized': mem[6],
                 'density_optimized': mem[7],
+                'dual_port': mem[8],
             })
         return json.dumps(cfg, sort_keys=True, indent=4)
 
