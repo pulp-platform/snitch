@@ -443,6 +443,7 @@ module snitch_cluster
   core_events_t [NrCores-1:0] core_events;
   tcdm_events_t               tcdm_events;
   dma_events_t                dma_events;
+  snitch_icache_pkg::icache_events_t [NrCores-1:0] icache_events;
 
   // 4. Memory Subsystem (Core side).
   reqrsp_req_t [NrCores-1:0] core_req, filtered_core_req;
@@ -832,12 +833,15 @@ module snitch_cluster
       hive_req_t [HiveSize-1:0] hive_req_reshape;
       hive_rsp_t [HiveSize-1:0] hive_rsp_reshape;
 
+      snitch_icache_pkg::icache_events_t [HiveSize-1:0] icache_events_reshape;
+
       for (genvar j = 0; j < NrCores; j++) begin : gen_hive_matrix
         // Check whether the core actually belongs to the current hive.
         if (Hive[j] == i) begin : gen_hive_connection
           localparam int unsigned HivePosition = get_core_position(i, j);
           assign hive_req_reshape[HivePosition] = hive_req[j];
           assign hive_rsp[j] = hive_rsp_reshape[HivePosition];
+          assign icache_events[j] = icache_events_reshape[HivePosition];
         end
       end
 
@@ -865,7 +869,8 @@ module snitch_cluster
         .ptw_data_req_o (ptw_req[i]),
         .ptw_data_rsp_i (ptw_rsp[i]),
         .axi_req_o (wide_axi_mst_req[ICache+i]),
-        .axi_rsp_i (wide_axi_mst_rsp[ICache+i])
+        .axi_rsp_i (wide_axi_mst_rsp[ICache+i]),
+        .icache_events_o(icache_events_reshape)
       );
   end
 
@@ -1090,7 +1095,8 @@ module snitch_cluster
     .cluster_hart_base_id_i (hart_base_id_i),
     .core_events_i (core_events),
     .tcdm_events_i (tcdm_events),
-    .dma_events_i (dma_events)
+    .dma_events_i (dma_events),
+    .icache_events_i (icache_events)
   );
 
   // Optionally decouple the external narrow AXI master ports.
