@@ -12,8 +12,13 @@
 #define AXPY_N 64
 #define NUMTHREADS 8
 
-// #define tprintf(...) printf(__VA_ARGS__)
-#define tprintf(...) while (0)
+// Test output printf
+#define tprintf(...) printf(__VA_ARGS__)
+// #define tprintf(...) while (0)
+
+// Trace printf for debugging
+// #define ttprintf(...) printf(__VA_ARGS__)
+#define ttprintf(...) while (0)
 
 volatile static uint32_t sum = 0;
 
@@ -98,7 +103,7 @@ unsigned __attribute__((noinline)) double_buffering(void) {
 
         // first copy-in
         if (thread_id == 0) {
-            tprintf("copy-in t: %d\n", 0);
+            ttprintf("copy-in t: %d\n", 0);
             dm_memcpy_async((void *)bufx, (void *)x, sizeof(double) * TILESIZE);
             dm_memcpy_async((void *)bufy, (void *)y, sizeof(double) * TILESIZE);
             dm_wait();
@@ -111,7 +116,7 @@ unsigned __attribute__((noinline)) double_buffering(void) {
             if (thread_id == 0) {
                 // copy-out
                 if (tile > 0) {
-                    tprintf("copy-out t: %d\n", tile);
+                    ttprintf("copy-out t: %d\n", tile);
                     dm_memcpy_async(
                         (void *)&x[tile - TILESIZE],
                         (void *)&bufx[TILESIZE * ((tile / TILESIZE + 1) % 2)],
@@ -119,7 +124,7 @@ unsigned __attribute__((noinline)) double_buffering(void) {
                 }
                 // copy-in
                 if (tile < DATASIZE - TILESIZE) {
-                    tprintf("copy-in t: %d\n", tile);
+                    ttprintf("copy-in t: %d\n", tile);
                     dm_memcpy_async(
                         (void *)&bufx[TILESIZE * ((tile / TILESIZE + 1) % 2)],
                         (void *)&x[tile + TILESIZE], sizeof(double) * TILESIZE);
@@ -131,11 +136,11 @@ unsigned __attribute__((noinline)) double_buffering(void) {
             }
 
             // compute
-            if (thread_id == 0)
-                for (int i = 0; i < TILESIZE; ++i)
-                    tprintf("  %3d x %3.2f y %3.2f\n", i,
-                            bufx[TILESIZE * ((tile / TILESIZE) % 2) + i],
-                            bufy[TILESIZE * ((tile / TILESIZE) % 2) + i]);
+            // if (thread_id == 0)
+            //     for (int i = 0; i < TILESIZE; ++i)
+            //         tprintf("  %3d x %3.2f y %3.2f\n", i,
+            //                 bufx[TILESIZE * ((tile / TILESIZE) % 2) + i],
+            //                 bufy[TILESIZE * ((tile / TILESIZE) % 2) + i]);
             __builtin_ssr_setup_1d_r(0, 0, TILESIZE / NTHREADS - 1,
                                      sizeof(double),
                                      &bufx[TILESIZE * ((tile / TILESIZE) % 2) +
@@ -195,15 +200,15 @@ int main() {
 
     __snrt_omp_bootstrap(core_idx);
 
-    // // Static schedule test
-    // err |= static_schedule() << 0;
-    // OMP_PROF(omp_print_prof());
+    tprintf("Static schedule test\n");
+    err |= static_schedule() << 0;
+    OMP_PROF(omp_print_prof());
 
-    // // Launch overhead test
-    // err |= paralell_section() << 1;
-    // OMP_PROF(omp_print_prof());
+    tprintf("Launch overhead test\n");
+    err |= paralell_section() << 1;
+    OMP_PROF(omp_print_prof());
 
-    // Double buffering test
+    tprintf("Double buffering test\n");
     err |= double_buffering() << 2;
     OMP_PROF(omp_print_prof());
 
