@@ -8,11 +8,7 @@
 
 /// Different perf counters
 // Must match with `snitch_cluster_peripheral`
-enum snrt_perf_cnt {
-    SNRT_PERF_CNT0,
-    SNRT_PERF_CNT1,
-    SNRT_PERF_N_CNT
-};
+enum snrt_perf_cnt { SNRT_PERF_CNT0, SNRT_PERF_CNT1, SNRT_PERF_N_CNT };
 
 /// Different types of performance counters
 enum snrt_perf_cnt_type {
@@ -54,7 +50,6 @@ typedef struct {
     volatile perf_reg32_t hart_select[SNRT_PERF_N_CNT];
     volatile perf_reg32_t perf_counter[SNRT_PERF_N_CNT];
 } perf_reg_t;
-
 
 void snrt_start_perf_counter(enum snrt_perf_cnt perf_cnt,
                              enum snrt_perf_cnt_type perf_cnt_type,
