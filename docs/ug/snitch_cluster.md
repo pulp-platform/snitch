@@ -51,7 +51,10 @@ In `hw/system/snicht_cluster`:
     === "Questasim"
 
         ```
+        # Headless
         bin/snitch_cluster.vsim path/to/riscv/binary
+        # GUI
+        bin/snitch_cluster.vsim.gui path/to/riscv/binary
         ```
 
     === "VCS"
