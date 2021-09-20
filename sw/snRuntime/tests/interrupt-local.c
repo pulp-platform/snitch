@@ -37,26 +37,22 @@ int main() {
     unsigned cluster_core_num = snrt_cluster_core_num();
     volatile unsigned tmp;
 
-    // cluster master cores init cluster_flags
-    if (cluster_core_idx == 0) {
-        cluster_flags[cluster_idx] = (int32_t *)snrt_l1alloc(sizeof(int32_t));
-        *cluster_flags[cluster_idx] = 0;
-    }
-    snrt_cluster_hw_barrier();
+    volatile int32_t *cluster_flag =
+        (int32_t *)snrt_cluster_memory().start + 0x100;
 
     // Test 1: Use the cluster-local interrupt for fast synchronization inside
     // cluster
     if (cluster_core_idx != 0) {
-        sleep_loop(cluster_core_idx, cluster_flags[cluster_idx]);
+        sleep_loop(cluster_core_idx, cluster_flag);
     } else {
+        *cluster_flag = 0;
         for (unsigned i = 8; i; --i) {
             tprintf("wake %d..", i);
             snrt_int_cluster_set(~0x1 & ((1 << cluster_core_num) - 1));
-            while (
-                __atomic_load_n(cluster_flags[cluster_idx], __ATOMIC_RELAXED) !=
-                (int32_t)(cluster_core_num - 1))
+            while (__atomic_load_n(cluster_flag, __ATOMIC_RELAXED) !=
+                   (int32_t)(cluster_core_num - 1))
                 ;
-            *cluster_flags[cluster_idx] = 0;
+            *cluster_flag = 0;
             snrt_cluster_hw_barrier();
             tprintf("OK!\n");
         }
@@ -69,11 +65,11 @@ int main() {
     // if (cluster_core_idx == 0) {
     //     for (unsigned i = 1; i < cluster_core_num; i++) {
     //         tprintf("IRQ %d ..", i);
-    //         *cluster_flags[cluster_idx] = -1;
+    //         *cluster_flag = -1;
     //         snrt_int_cluster_set(1 << i);
-    //         while (*cluster_flags[cluster_idx] != (int)i)
+    //         while (*cluster_flag != (int)i)
     //             ;
-    //         tprintf("OK\n", *cluster_flags[cluster_idx]);
+    //         tprintf("OK\n", *cluster_flag);
     //     }
     // } else {
     //     snrt_interrupt_enable(IRQ_M_CLUSTER);
@@ -91,20 +87,23 @@ int main() {
     // a hart is not in wfi and the wfi becomes a NOP
     if (cluster_core_idx == 0) {
         // set the interrupt and wait for cluster cores to enable interrupts
+        *cluster_flag = 0;
         snrt_int_cluster_set(~0x1 & ((1 << cluster_core_num) - 1));
         snrt_cluster_hw_barrier();
+        while (__atomic_load_n(cluster_flag, __ATOMIC_RELAXED) !=
+               (int32_t)(cluster_core_num - 1))
+            ;
     } else {
         snrt_cluster_hw_barrier();
         // wait a bit so that the cl-clint has the new values, then enable
         // interrupts and do a wfi
-        tmp = 20;
+        tmp = 100;
         while (--tmp)
             ;
         snrt_interrupt_enable(IRQ_M_CLUSTER);
         snrt_wfi();  // This WFI should be a NOP
-        if (snrt_interrupt_cause() & IRQ_M_CLUSTER) {
-            snrt_int_cluster_clr(1 << cluster_core_idx);
-        }
+        snrt_int_cluster_clr(1 << cluster_core_idx);
+        __atomic_add_fetch(cluster_flag, 1, __ATOMIC_RELAXED);
         snrt_interrupt_disable(IRQ_M_CLUSTER);
     }
     snrt_cluster_hw_barrier();
