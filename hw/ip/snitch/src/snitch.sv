@@ -2381,7 +2381,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           CSR_FMODE: begin
             if (FP_EN) begin
               csr_rvalue = {30'b0, fcsr_q.fmode};
-              if (!exception) fcsr_d.fmode = fpnew_pkg::fmt_mode_t'(opa[1:0]);
+              if (!exception) fcsr_d.fmode = fpnew_pkg::fmt_mode_t'(alu_result[1:0]);
             end else illegal_csr = 1'b1;
           end
           default: csr_rvalue = '0;
