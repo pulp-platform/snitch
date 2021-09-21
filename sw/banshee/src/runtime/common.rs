@@ -13,7 +13,7 @@
 
 use std::{
     sync::{
-        atomic::{AtomicU64, AtomicU32, AtomicUsize},
+        atomic::{AtomicU32, AtomicUsize},
         Mutex,
     },
 };

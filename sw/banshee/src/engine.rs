@@ -16,10 +16,9 @@ use llvm_sys::{
 use std::{
     collections::HashMap,
     sync::{
-        atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicU32, AtomicUsize, Ordering},
         Mutex,
     },
-    time,
 };
 use termion::{color, style};
 
