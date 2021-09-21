@@ -129,7 +129,7 @@ As a hacky workaround, try changing the `llvm-sys = "120"` line to whatever majo
 
 - [x] Add instruction tracing
 - [x] Add SSR support
-- [ ] Add DMA support
+- [x] Add DMA support
 - [x] Add FREP support
 - [x] Add fast local memory / memory hierarchy
 - [x] Add multi-core execution
