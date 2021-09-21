@@ -15,6 +15,7 @@ address:
   uart: 0xF00B8000
   wakeup_reg: 0x40000028
   clint: 0xFFFF0000
+  cl_clint: 0x40000060
 memory:
 - dram:
     end: 0x80010000

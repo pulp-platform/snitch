@@ -107,7 +107,6 @@ module snitch_cc #(
   // TCDM Streamer Ports
   output tcdm_req_t [TCDMPorts-1:0]  tcdm_req_o,
   input  tcdm_rsp_t [TCDMPorts-1:0]  tcdm_rsp_i,
-  input  logic                       wake_up_sync_i,
   // Accelerator Offload port
   // DMA ports
   output axi_req_t                   axi_dma_req_o,
@@ -230,7 +229,6 @@ module snitch_cc #(
     .ptw_ppn_o (hive_req_o.ptw_ppn),
     .ptw_pte_i (hive_rsp_i.ptw_pte),
     .ptw_is_4mega_i (hive_rsp_i.ptw_is_4mega),
-    .wake_up_sync_i,
     .fpu_rnd_mode_o ( fpu_rnd_mode ),
     .fpu_status_i ( fpu_status )
   );

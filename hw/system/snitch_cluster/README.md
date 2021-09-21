@@ -24,6 +24,11 @@ to `bin/snitch_cluster`, for example:
 
     bin/snitch_cluster.vlt sw/alive
 
+Questasim simulation can be run in GUI mode with Wave-Format scripts in `wave/*.do`
+
+    bin/snitch_cluster.vsim.gui sw/alive
+    VSIM> do wave/all_cores.do
+
 ## Traces
 
 Each simulation will generate a unique tracefile for each hart in the system.

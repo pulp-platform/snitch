@@ -5542,6 +5542,48 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code to check for any interrupt
     unsafe fn emit_irq_check(&self) {
+        // Update MIP CSR (machine interrupt pending)
+        let mip_old = self.read_csr_silent(riscv::Csr::Mip as u32);
+        // read CLINT and update mip
+        let clint_ret = self
+            .section
+            .emit_call("banshee_check_clint", [self.section.state_ptr]);
+        let cl_clint_ret = self
+            .section
+            .emit_call("banshee_check_cl_clint", [self.section.state_ptr]);
+        // mip = (mip_old & ~(1 << 3) & ~(1 << 19))
+        let mut mip = LLVMBuildAnd(
+            self.builder,
+            mip_old,
+            LLVMConstInt(LLVMInt32Type(), !((1 << 3) | (1 << 19)), 0),
+            NONAME,
+        );
+        // mip |= (clint_ret << 3) // set MSIP bit
+        mip = LLVMBuildOr(
+            self.builder,
+            mip,
+            LLVMBuildShl(
+                self.builder,
+                clint_ret,
+                LLVMConstInt(LLVMInt32Type(), 3, 0),
+                NONAME,
+            ),
+            NONAME,
+        );
+        // mip |= (cl_clint_ret << 19) // set MCIP bit
+        mip = LLVMBuildOr(
+            self.builder,
+            mip,
+            LLVMBuildShl(
+                self.builder,
+                cl_clint_ret,
+                LLVMConstInt(LLVMInt32Type(), 19, 0),
+                NONAME,
+            ),
+            NONAME,
+        );
+        self.write_csr_silent(riscv::Csr::Mip as u32, mip);
+
         // Update irq_sample_ctr
         let irq_sample_ctr = LLVMBuildLoad(self.builder, self.irq_sample_ptr(), NONAME);
         let irq_sample_ctr = LLVMBuildAdd(
@@ -5579,31 +5621,6 @@ impl<'a> InstructionTranslator<'a> {
             LLVMConstInt(LLVMTypeOf(irq_sample_ctr), 0, 0),
             self.irq_sample_ptr(),
         );
-
-        // Fetch IRQ status
-        let mip_old = self.read_csr_silent(riscv::Csr::Mip as u32);
-        // read CLINT and update mip
-        let clint_ret = self
-            .section
-            .emit_call("banshee_check_clint", [self.section.state_ptr]);
-        // mip = (mip_old & ~(1 << 3)) | (clint_ret << 3) // set MSIP bit
-        let mip = LLVMBuildOr(
-            self.builder,
-            LLVMBuildAnd(
-                self.builder,
-                mip_old,
-                LLVMConstInt(LLVMInt32Type(), !(1 << 3), 0),
-                NONAME,
-            ),
-            LLVMBuildShl(
-                self.builder,
-                clint_ret,
-                LLVMConstInt(LLVMInt32Type(), 3, 0),
-                NONAME,
-            ),
-            NONAME,
-        );
-        self.write_csr_silent(riscv::Csr::Mip as u32, mip);
 
         // fetch CSRs
         let mstatus = self.read_csr_silent(riscv::Csr::Mstatus as u32);
@@ -5666,11 +5683,80 @@ impl<'a> InstructionTranslator<'a> {
         );
         self.write_csr_silent(riscv::Csr::Mstatus as u32, mstatus_wb);
 
-        // Set mcause register
-        // TODO: Get correct cause, currently only settings machine software interrupt
+        // Set mcause register by priority encoding
+        let mcause_val_p = LLVMBuildAlloca(self.builder, LLVMInt32Type(), NONAME);
+        let bb_write_mcause = LLVMCreateBasicBlockInContext(
+            self.section.engine.context,
+            b"bb_write_mcause\0".as_ptr() as *const _,
+        );
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_write_mcause);
+        // check if msip -> mcasue = 3
+        let bb_is_msip = LLVMCreateBasicBlockInContext(
+            self.section.engine.context,
+            b"bb_is_msip\0".as_ptr() as *const _,
+        );
+        let bb_is_not_msip = LLVMCreateBasicBlockInContext(
+            self.section.engine.context,
+            b"bb_is_not_msip\0".as_ptr() as *const _,
+        );
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_is_msip);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_is_not_msip);
+        let is_msip = LLVMBuildICmp(
+            self.builder,
+            LLVMIntNE,
+            clint_ret,
+            LLVMConstInt(LLVMInt32Type(), 0, 0),
+            NONAME,
+        );
+        LLVMBuildCondBr(self.builder, is_msip, bb_is_msip, bb_is_not_msip);
+        LLVMPositionBuilderAtEnd(self.builder, bb_is_msip);
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMInt32Type(), (1 << 31) | 3, 0),
+            mcause_val_p,
+        );
+        LLVMBuildBr(self.builder, bb_write_mcause);
+        LLVMPositionBuilderAtEnd(self.builder, bb_is_not_msip);
+        // check if mcip -> mcasue = 19
+        let bb_is_mcip = LLVMCreateBasicBlockInContext(
+            self.section.engine.context,
+            b"bb_is_mcip\0".as_ptr() as *const _,
+        );
+        let bb_is_not_mcip = LLVMCreateBasicBlockInContext(
+            self.section.engine.context,
+            b"bb_is_not_mcip\0".as_ptr() as *const _,
+        );
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_is_mcip);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_is_not_mcip);
+        let is_mcip = LLVMBuildICmp(
+            self.builder,
+            LLVMIntNE,
+            cl_clint_ret,
+            LLVMConstInt(LLVMInt32Type(), 0, 0),
+            NONAME,
+        );
+        LLVMBuildCondBr(self.builder, is_mcip, bb_is_mcip, bb_is_not_mcip);
+        LLVMPositionBuilderAtEnd(self.builder, bb_is_mcip);
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMInt32Type(), (1 << 31) | 19, 0),
+            mcause_val_p,
+        );
+        LLVMBuildBr(self.builder, bb_write_mcause);
+        LLVMPositionBuilderAtEnd(self.builder, bb_is_not_mcip);
+        // Failed to find mcause -> set to 0
+        LLVMBuildStore(
+            self.builder,
+            LLVMConstInt(LLVMInt32Type(), (1 << 31) | 0, 0),
+            mcause_val_p,
+        );
+        LLVMBuildBr(self.builder, bb_write_mcause);
+
+        // actually write mcause register
+        LLVMPositionBuilderAtEnd(self.builder, bb_write_mcause);
         self.write_csr_silent(
             riscv::Csr::Mcause as u32,
-            LLVMConstInt(LLVMInt32Type(), (1 << 31) | 3, 0),
+            LLVMBuildLoad(self.builder, mcause_val_p, NONAME),
         );
 
         // load mtvec address from CSR

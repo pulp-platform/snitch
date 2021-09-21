@@ -16,13 +16,13 @@ use llvm_sys::{
 use std::{
     collections::HashMap,
     sync::{
-        atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicU32, AtomicUsize, Ordering},
         Mutex,
     },
 };
 use termion::{color, style};
 
-pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState};
+pub use crate::runtime::{Cpu, CpuState, DmaState, SsrState, WakeupState};
 
 /// An execution engine.
 pub struct Engine {
@@ -371,16 +371,22 @@ impl Engine {
             .map(|_| AtomicUsize::new(0))
             .collect();
 
-        // Allocate global variables to keep track of sleeping cores.
-        let num_sleep = AtomicUsize::new(0);
-        let wake_up: Vec<_> = (0..self.num_clusters * self.num_cores)
-            .map(|_| AtomicU64::new(0))
-            .collect();
+        // Allocate state struct to keep track of sleeping cores.
+        let wakeup_state = Mutex::new(WakeupState {
+            num: 0,
+            req: vec![0; self.num_clusters * self.num_cores],
+            wfi: vec![false; self.num_clusters * self.num_cores],
+        });
 
         // Allocate CLINT registers
         let n_virt_cores = self.num_clusters * self.num_cores + self.base_hartid;
         let clint: Vec<_> = (0..(n_virt_cores + 32 - 1) / 32)
             .map(|_| AtomicU32::new(0))
+            .collect();
+
+        // Allocate cluster-local CLINT registers
+        let cl_clints: Vec<_> = (0..self.num_clusters)
+            .map(|_| AtomicUsize::new(0))
             .collect();
 
         // Create the CPUs.
@@ -397,9 +403,9 @@ impl Engine {
                     base_hartid,
                     j,
                     &barriers[j],
-                    &num_sleep,
-                    &wake_up,
+                    &wakeup_state,
                     &clint,
+                    &cl_clints[j],
                 )
             })
             .collect();
@@ -502,6 +508,10 @@ pub unsafe fn add_llvm_symbols() {
         Cpu::binary_check_clint as *mut _,
     );
     LLVMAddSymbol(
+        b"banshee_check_cl_clint\0".as_ptr() as *const _,
+        Cpu::binary_check_cl_clint as *mut _,
+    );
+    LLVMAddSymbol(
         b"banshee_fp16_op_cvt_from_f\0".as_ptr() as *const _,
         Cpu::binary_fp16_op_cvt_from_f as *mut _,
     );
@@ -592,9 +602,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
         cluster_base_hartid: usize,
         cluster_id: usize,
         barrier: &'b AtomicUsize,
-        num_sleep: &'b AtomicUsize,
-        wake_up: &'b Vec<AtomicU64>,
+        wakeup_state: &'b Mutex<WakeupState>,
         clint: &'b Vec<AtomicU32>,
+        cl_clint: &'b AtomicUsize,
     ) -> Self {
         Self {
             engine,
@@ -606,9 +616,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
             cluster_base_hartid,
             cluster_id,
             barrier,
-            num_sleep,
-            wake_up,
+            wakeup_state,
             clint,
+            cl_clint,
         }
     }
 
@@ -663,10 +673,16 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     addr as u64 - self.engine.config.address.clint as u64
                 );
                 let word_addr = (addr - self.engine.config.address.clint) / 4;
-                self.clint[word_addr as usize].load(Ordering::Relaxed)
+                self.clint[word_addr as usize].load(Ordering::SeqCst)
+            }
+            // The cl_clint is WO
+            x if x >= self.engine.config.address.cl_clint
+                && x < self.engine.config.address.cl_clint + 0x8 =>
+            {
+                0
             }
             _ => {
-                trace!("Load 0x{:x} ({}B)", addr, 8 << size);
+                // trace!("Load 0x{:x} ({}B)", addr, 8 << size);
                 self.engine
                     .memory
                     .lock()
@@ -687,21 +703,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 self.engine.exit_code.store(value, Ordering::SeqCst)
             } // scratch_reg
             x if x == self.engine.config.address.wakeup_reg => {
-                // wake_up
-                let old_num_sleep = self.num_sleep.load(Ordering::Relaxed);
-                if value as i32 == -1 {
-                    self.num_sleep
-                        .fetch_sub(self.wake_up.len(), Ordering::Relaxed);
-                    for x in self.wake_up {
-                        x.fetch_max(self.state.cycle + 1, Ordering::Release);
-                    }
-                } else if (value as usize) < self.wake_up.len() {
-                    self.num_sleep.fetch_sub(1, Ordering::Relaxed);
-                    self.wake_up[value as usize].fetch_max(self.state.cycle + 1, Ordering::Release);
-                }
-                if self.num_sleep.load(Ordering::Relaxed) > old_num_sleep {
-                    error!("num_sleep has wrapped. Did you wake a core that was already running?")
-                }
+                // wakeup_req
+                self.wake(value);
             } // wakeup_reg
             x if x == self.engine.config.address.barrier_reg => (), // barrier_reg
             x if x == self.engine.config.address.cluster_base_hartid => (), // cluster_base_hartid
@@ -760,20 +763,43 @@ impl<'a, 'b> Cpu<'a, 'b> {
             {
                 let word_addr = (addr - self.engine.config.address.clint) / 4;
                 trace!("CLINT store word off {:x} = 0x{:x}", word_addr, value,);
-                let old_entry = self.clint[word_addr as usize].load(Ordering::Relaxed);
+                let old_entry = self.clint[word_addr as usize].load(Ordering::SeqCst);
                 let entry = (old_entry & !mask) | (value & mask);
-                self.clint[word_addr as usize].store(entry, Ordering::Relaxed);
+                self.clint[word_addr as usize].store(entry, Ordering::SeqCst);
                 // wake cores affected by this write
 
                 let hart_base = 32 * word_addr as i32 - self.engine.base_hartid as i32;
                 for i in 0..32 {
                     if ((!old_entry & entry) & (1 << i)) != 0 {
-                        trace!("  wake_up[{}] PING", (hart_base + i as i32) as usize);
-                        self.num_sleep.fetch_sub(1, Ordering::Relaxed);
-                        self.wake_up[(hart_base + i as i32) as usize]
-                            .fetch_max(self.state.cycle + 1, Ordering::Release);
+                        trace!(
+                            "  wakeup_wus.req[{}] from CLINT",
+                            (hart_base + i as i32) as usize
+                        );
+                        self.wake((hart_base + i) as u32);
                     }
                 }
+            }
+            x if x == self.engine.config.address.cl_clint => {
+                // clint set register
+                let old_entry = self
+                    .cl_clint
+                    .fetch_or((value & mask) as usize, Ordering::SeqCst);
+                // wake cores affected by this write
+                let hart_base = (self.cluster_id * self.num_cores) as u32;
+                for i in 0..32 {
+                    if ((!old_entry & (value & mask) as usize) & (1 << i)) != 0 {
+                        trace!(
+                            "  wakeup_wus.req[{}] from cluster-local CLINT",
+                            (hart_base + i) as usize
+                        );
+                        self.wake((hart_base + i) as u32);
+                    }
+                }
+            }
+            x if x == self.engine.config.address.cl_clint + 0x8 => {
+                // clint clear register
+                self.cl_clint
+                    .fetch_and(!(value & mask) as usize, Ordering::SeqCst);
             }
             _ => {
                 trace!(
@@ -907,32 +933,64 @@ impl<'a, 'b> Cpu<'a, 'b> {
     }
 
     fn binary_wfi(&mut self) -> u32 {
+        let mut wus = self.wakeup_state.lock().unwrap();
+        // Don't wfi if any interrupt is pending. Mip is updated before each instruction in tran.rs
+        let mie = self.binary_csr_read(riscv::Csr::Mie, 1);
+        let mip = self.binary_csr_read(riscv::Csr::Mip, 1);
+        let hartid = self.hartid - self.engine.base_hartid;
+        if mip & mie != 0 {
+            trace!(" hart: {} wfi is nop. mip: {:x}", self.hartid, mip);
+            // clear a possible outstanding wakeup request
+            wus.req[hartid] = 0;
+            // Trigger IRQ check on next instruction
+            self.state.irq.sample_ctr = u32::MAX - 1;
+            return 0;
+        }
         // Set own wfi.
         self.state.wfi = true;
-        self.num_sleep.fetch_add(1, Ordering::Release);
-        // Wait for the wake up call
-        let hartid = self.hartid - self.engine.base_hartid;
-        while self.wake_up[hartid].load(Ordering::Relaxed) == 0 {
+        wus.wfi[hartid] = true;
+        wus.num += 1;
+        // Wait for the wake up call: poll while this hart is not requested to wake and
+        // exit iff all harts are in the WFI loop and no requests are outstanding
+        let mut do_poll = wus.req[hartid] == 0;
+        let mut do_exit =
+            wus.num == wus.req.len() && wus.req.iter().filter(|&n| *n != 0).count() == 0;
+        std::mem::drop(wus);
+        while do_poll {
             // Check if everyone is sleeping
-            if self.num_sleep.load(Ordering::Relaxed) == self.wake_up.len() {
+            if do_exit {
                 return 1;
             }
             std::thread::yield_now();
+            let wus = self.wakeup_state.lock().unwrap();
+            do_poll = wus.req[hartid] == 0;
+            do_exit = wus.num == wus.req.len() && wus.req.iter().filter(|&n| *n != 0).count() == 0;
+            std::mem::drop(wus);
         }
+        let mut wus = self.wakeup_state.lock().unwrap();
         // Someone woke us up --> Clear the flag
-        let cycle = self.wake_up[hartid].swap(0, Ordering::Relaxed);
+        let cycle = wus.req[hartid];
         self.state.cycle = std::cmp::max(self.state.cycle, cycle as u64);
         self.state.wfi = false;
+        wus.req[hartid] = 0;
+        wus.wfi[hartid] = false;
+        wus.num -= 1;
         // Trigger IRQ check on next instruction
         self.state.irq.sample_ctr = u32::MAX - 1;
-        // The core waking us up, already decremented the `num_sleep` counter for us
         return 0;
     }
 
     fn binary_check_clint(&mut self) -> u32 {
         // read the clint software interrupt and return 1 if interrupt pending
         let hartid = self.hartid;
-        return (self.clint[(hartid / 32) as usize].load(Ordering::Relaxed) & (1 << (hartid % 32)))
+        return (self.clint[(hartid / 32) as usize].load(Ordering::SeqCst) & (1 << (hartid % 32)))
+            >> (hartid % 32);
+    }
+
+    fn binary_check_cl_clint(&mut self) -> u32 {
+        // read the cluster-local clint software interrupt and return 1 if interrupt pending
+        let hartid = self.hartid - self.engine.base_hartid - self.cluster_id * self.num_cores;
+        return (self.cl_clint.load(Ordering::SeqCst) as u32 & (1 << (hartid % 32)))
             >> (hartid % 32);
     }
 
@@ -964,6 +1022,25 @@ impl<'a, 'b> Cpu<'a, 'b> {
             }
             self.barrier.fetch_add(1, Ordering::Relaxed);
         }
+    }
+
+    fn wake(&self, hart: u32) {
+        // Lock is released once out of scope
+        let mut wus = self.wakeup_state.lock().unwrap();
+        if hart as i32 == -1 {
+            for i in 0..wus.req.len() {
+                wus.req[i] = self.state.cycle + 1;
+            }
+        } else if (hart as usize) < wus.req.len() {
+            wus.req[hart as usize] = self.state.cycle + 1;
+        }
+        trace!(
+            "[{}] wake num: {:?} req: {:?} wfi: {:?}",
+            self.hartid,
+            wus.num,
+            wus.req,
+            wus.wfi,
+        );
     }
 
     /*

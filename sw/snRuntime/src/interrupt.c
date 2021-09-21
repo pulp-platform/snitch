@@ -7,10 +7,20 @@
 #include "team.h"
 
 //================================================================================
+// Macros
+//================================================================================
+
+/// The cluster-local clint is in the cluster peripheral system which has 64 bit
+/// register width
+#define cl_clint_set(x) *(cl_clint_p + 0) = (x)
+#define cl_clint_clr(x) *(cl_clint_p + 2) = (x)
+
+//================================================================================
 // Data
 //================================================================================
 static volatile uint32_t clint_mutex = 0;
 static __thread volatile uint32_t *clint_p;
+static __thread volatile uint32_t *cl_clint_p;
 
 //================================================================================
 // ISR definitions
@@ -19,6 +29,7 @@ static __thread volatile uint32_t *clint_p;
 void irq_m_soft(uint32_t core_idx);
 void irq_m_timer(uint32_t core_idx);
 void irq_m_ext(uint32_t core_idx);
+void irq_m_cluster(uint32_t core_idx);
 
 //================================================================================
 // Public functions
@@ -27,6 +38,7 @@ void irq_m_ext(uint32_t core_idx);
 void snrt_int_init(struct snrt_team_root *team) {
     // Put the clint address in tls for faster access
     clint_p = team->peripherals.clint;
+    cl_clint_p = team->peripherals.cl_clint;
 }
 
 /**
@@ -50,6 +62,10 @@ void __snrt_isr(void) {
                 break;
             case IRQ_M_EXT:
                 irq_m_ext(core_idx);
+                break;
+            case IRQ_M_CLUSTER:
+                core_idx = snrt_cluster_core_idx();
+                irq_m_cluster(core_idx);
                 break;
         }
     } else {
@@ -127,6 +143,18 @@ void snrt_int_sw_poll(void) {
     }
 }
 
+/**
+ * @brief Write mask to the cluster-local interrupt clear register
+ * @param mask set bit at X clears the interrupt of hart X
+ */
+void snrt_int_cluster_clr(uint32_t mask) { cl_clint_clr(mask); }
+
+/**
+ * @brief Write mask to the cluster-local interrupt set register
+ * @param mask set bit at X sets the interrupt of hart X
+ */
+void snrt_int_cluster_set(uint32_t mask) { cl_clint_set(mask); }
+
 //================================================================================
 // Weak definition of IRQ handler
 //================================================================================
@@ -138,3 +166,7 @@ void __attribute__((weak)) irq_m_soft(uint32_t core_idx) {
 void __attribute__((weak)) irq_m_timer(uint32_t core_idx) { (void)core_idx; }
 
 void __attribute__((weak)) irq_m_ext(uint32_t core_idx) { (void)core_idx; }
+
+void __attribute__((weak)) irq_m_cluster(uint32_t cluster_core_idx) {
+    snrt_int_cluster_clr(1 << cluster_core_idx);
+}

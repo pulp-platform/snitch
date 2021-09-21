@@ -134,6 +134,7 @@ add_snitch_test(barrier tests/barrier.c)
 add_snitch_test(fence_i tests/fence_i.c)
 add_snitch_test(lto tests/lto.c tests/lto_a.c)
 add_snitch_test(interrupt tests/interrupt.c)
+add_snitch_test(interrupt-local tests/interrupt-local.c)
 
 add_snitch_test_executable(dma_simple tests/dma_simple.c)
 add_snitch_test_executable(printf_simple tests/printf_simple.c)

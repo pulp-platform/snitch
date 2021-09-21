@@ -1,6 +1,7 @@
 // Copyright 2020 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
+#include "snitch_cluster_peripheral.h"
 #include "snrt.h"
 #include "team.h"
 
@@ -60,7 +61,8 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->global_mem.end = (uint64_t)bootdata->global_mem_end;
     team->cluster_mem.start = (uint64_t)spm_start;
     team->cluster_mem.end = (uint64_t)spm_end;
-    team->barrier_reg_ptr = (uint32_t)spm_start + bootdata->tcdm_size + 0x38;
+    team->barrier_reg_ptr = (uint32_t)spm_start + bootdata->tcdm_size +
+                            SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_REG_OFFSET;
 
     // Initialize cluster barrier
     team->cluster_barrier.barrier = 0;
@@ -79,9 +81,14 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
 
     // init peripherals
     team->peripherals.clint = (uint32_t *)bootdata->clint_base;
-    team->peripherals.wakeup =
-        (uint32_t *)(spm_start + bootdata->tcdm_size + 0x30);
-    team->peripherals.perf_counters = spm_start + bootdata->tcdm_size;
+    team->peripherals.perf_counters =
+        (uint32_t
+             *)(spm_start + bootdata->tcdm_size +
+                SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_REG_OFFSET);
+    team->peripherals.wakeup = (uint32_t *)0;  // not supported in RTL anymore
+    team->peripherals.cl_clint =
+        (uint32_t *)(spm_start + bootdata->tcdm_size +
+                     SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET_REG_OFFSET);
 
     // Init allocator
     snrt_alloc_init(team);

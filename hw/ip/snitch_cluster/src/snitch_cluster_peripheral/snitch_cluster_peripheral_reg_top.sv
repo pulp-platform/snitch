@@ -244,8 +244,10 @@ module snitch_cluster_peripheral_reg_top #(
   logic [47:0] perf_counter_1_wd;
   logic perf_counter_1_we;
   logic perf_counter_1_re;
-  logic [31:0] wake_up_wd;
-  logic wake_up_we;
+  logic [31:0] cl_clint_set_wd;
+  logic cl_clint_set_we;
+  logic [31:0] cl_clint_clear_wd;
+  logic cl_clint_clear_we;
   logic [31:0] hw_barrier_qs;
   logic hw_barrier_re;
   logic icache_prefetch_enable_wd;
@@ -1754,18 +1756,34 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // R[wake_up]: V(True)
+  // R[cl_clint_set]: V(True)
 
   prim_subreg_ext #(
     .DW    (32)
-  ) u_wake_up (
+  ) u_cl_clint_set (
     .re     (1'b0),
-    .we     (wake_up_we),
-    .wd     (wake_up_wd),
+    .we     (cl_clint_set_we),
+    .wd     (cl_clint_set_wd),
     .d      ('0),
     .qre    (),
-    .qe     (reg2hw.wake_up.qe),
-    .q      (reg2hw.wake_up.q ),
+    .qe     (reg2hw.cl_clint_set.qe),
+    .q      (reg2hw.cl_clint_set.q ),
+    .qs     ()
+  );
+
+
+  // R[cl_clint_clear]: V(True)
+
+  prim_subreg_ext #(
+    .DW    (32)
+  ) u_cl_clint_clear (
+    .re     (1'b0),
+    .we     (cl_clint_clear_we),
+    .wd     (cl_clint_clear_wd),
+    .d      ('0),
+    .qre    (),
+    .qe     (reg2hw.cl_clint_clear.qe),
+    .q      (reg2hw.cl_clint_clear.q ),
     .qs     ()
   );
 
@@ -1814,7 +1832,7 @@ module snitch_cluster_peripheral_reg_top #(
 
 
 
-  logic [8:0] addr_hit;
+  logic [9:0] addr_hit;
   always_comb begin
     addr_hit = '0;
     addr_hit[0] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET);
@@ -1823,9 +1841,10 @@ module snitch_cluster_peripheral_reg_top #(
     addr_hit[3] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1_OFFSET);
     addr_hit[4] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET);
     addr_hit[5] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET);
-    addr_hit[6] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_WAKE_UP_OFFSET);
-    addr_hit[7] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET);
-    addr_hit[8] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_ICACHE_PREFETCH_ENABLE_OFFSET);
+    addr_hit[6] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET_OFFSET);
+    addr_hit[7] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_CLEAR_OFFSET);
+    addr_hit[8] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET);
+    addr_hit[9] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_ICACHE_PREFETCH_ENABLE_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -1841,7 +1860,8 @@ module snitch_cluster_peripheral_reg_top #(
                (addr_hit[5] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[5] & ~reg_be))) |
                (addr_hit[6] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[6] & ~reg_be))) |
                (addr_hit[7] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[7] & ~reg_be))) |
-               (addr_hit[8] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[8] & ~reg_be)))));
+               (addr_hit[8] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[8] & ~reg_be))) |
+               (addr_hit[9] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[9] & ~reg_be)))));
   end
 
   assign perf_counter_enable_0_cycle_0_we = addr_hit[0] & reg_we & !reg_error;
@@ -2020,12 +2040,15 @@ module snitch_cluster_peripheral_reg_top #(
   assign perf_counter_1_wd = reg_wdata[47:0];
   assign perf_counter_1_re = addr_hit[5] & reg_re & !reg_error;
 
-  assign wake_up_we = addr_hit[6] & reg_we & !reg_error;
-  assign wake_up_wd = reg_wdata[31:0];
+  assign cl_clint_set_we = addr_hit[6] & reg_we & !reg_error;
+  assign cl_clint_set_wd = reg_wdata[31:0];
 
-  assign hw_barrier_re = addr_hit[7] & reg_re & !reg_error;
+  assign cl_clint_clear_we = addr_hit[7] & reg_we & !reg_error;
+  assign cl_clint_clear_wd = reg_wdata[31:0];
 
-  assign icache_prefetch_enable_we = addr_hit[8] & reg_we & !reg_error;
+  assign hw_barrier_re = addr_hit[8] & reg_re & !reg_error;
+
+  assign icache_prefetch_enable_we = addr_hit[9] & reg_we & !reg_error;
   assign icache_prefetch_enable_wd = reg_wdata[0];
 
   // Read data return
@@ -2113,10 +2136,14 @@ module snitch_cluster_peripheral_reg_top #(
       end
 
       addr_hit[7]: begin
-        reg_rdata_next[31:0] = hw_barrier_qs;
+        reg_rdata_next[31:0] = '0;
       end
 
       addr_hit[8]: begin
+        reg_rdata_next[31:0] = hw_barrier_qs;
+      end
+
+      addr_hit[9]: begin
         reg_rdata_next[0] = '0;
       end
 
