@@ -39,8 +39,6 @@ pub struct Cpu<'a, 'b> {
     pub cluster_id: usize,
     /// The cluster's shared barrier state.
     pub barrier: &'b AtomicUsize,
-    /// Tuple of (num: u32, req: Vec<bool>, wfi: Vec<bool>)
-    pub wakeup_pending: &'b AtomicUsize,
     pub wakeup_state: &'b Mutex<WakeupState>,
     pub clint: &'b Vec<AtomicU32>,
     /// cluster's shared CLINT state

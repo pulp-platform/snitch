@@ -372,8 +372,7 @@ impl Engine {
             .map(|_| AtomicUsize::new(0))
             .collect();
 
-        // Allocate global variables to keep track of sleeping cores.
-        let wakeup_pending = AtomicUsize::new(0);
+        // Allocate state struct to keep track of sleeping cores.
         let wakeup_state = Mutex::new(WakeupState {
             num: 0,
             req: vec![0; self.num_clusters * self.num_cores],
@@ -405,7 +404,6 @@ impl Engine {
                     base_hartid,
                     j,
                     &barriers[j],
-                    &wakeup_pending,
                     &wakeup_state,
                     &clint,
                     &cl_clints[j],
@@ -605,7 +603,6 @@ impl<'a, 'b> Cpu<'a, 'b> {
         cluster_base_hartid: usize,
         cluster_id: usize,
         barrier: &'b AtomicUsize,
-        wakeup_pending: &'b AtomicUsize,
         wakeup_state: &'b Mutex<WakeupState>,
         clint: &'b Vec<AtomicU32>,
         cl_clint: &'b AtomicUsize,
@@ -620,7 +617,6 @@ impl<'a, 'b> Cpu<'a, 'b> {
             cluster_base_hartid,
             cluster_id,
             barrier,
-            wakeup_pending,
             wakeup_state,
             clint,
             cl_clint,
@@ -938,9 +934,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     }
 
     fn binary_wfi(&mut self) -> u32 {
-        // let mut wus: &mut WakeupState = &mut *self.wakeup_state.lock().unwrap();
-        let mut wus_obj = self.wakeup_state.lock().unwrap();
-        self.wakeup_pending.fetch_sub(1, Ordering::SeqCst);
+        let mut wus = self.wakeup_state.lock().unwrap();
         // Don't wfi if any interrupt is pending. Mip is updated before each instruction in tran.rs
         let mie = self.binary_csr_read(riscv::Csr::Mie, 1);
         let mip = self.binary_csr_read(riscv::Csr::Mip, 1);
@@ -948,41 +942,40 @@ impl<'a, 'b> Cpu<'a, 'b> {
         if mip & mie != 0 {
             trace!(" hart: {} wfi is nop. mip: {:x}", self.hartid, mip);
             // clear a possible outstanding wakeup request
-            wus_obj.req[hartid] = 0;
+            wus.req[hartid] = 0;
             // Trigger IRQ check on next instruction
             self.state.irq.sample_ctr = u32::MAX - 1;
             return 0;
         }
         // Set own wfi.
         self.state.wfi = true;
-        wus_obj.wfi[hartid] = true;
-        wus_obj.num += 1;
+        wus.wfi[hartid] = true;
+        wus.num += 1;
         // Wait for the wake up call: poll while this hart is not requested to wake and
         // exit iff all harts are in the WFI loop and no requests are outstanding
-        let mut do_poll = wus_obj.req[hartid] == 0;
-        let mut do_exit = wus_obj.num == wus_obj.req.len()
-            && wus_obj.req.iter().filter(|&n| *n != 0).count() == 0;
-        std::mem::drop(wus_obj);
+        let mut do_poll = wus.req[hartid] == 0;
+        let mut do_exit =
+            wus.num == wus.req.len() && wus.req.iter().filter(|&n| *n != 0).count() == 0;
+        std::mem::drop(wus);
         while do_poll {
             // Check if everyone is sleeping
             if do_exit {
                 return 1;
             }
             std::thread::yield_now();
-            let wus_obj = self.wakeup_state.lock().unwrap();
-            do_poll = wus_obj.req[hartid] == 0;
-            do_exit = wus_obj.num == wus_obj.req.len()
-                && wus_obj.req.iter().filter(|&n| *n != 0).count() == 0;
-            std::mem::drop(wus_obj);
+            let wus = self.wakeup_state.lock().unwrap();
+            do_poll = wus.req[hartid] == 0;
+            do_exit = wus.num == wus.req.len() && wus.req.iter().filter(|&n| *n != 0).count() == 0;
+            std::mem::drop(wus);
         }
-        let mut wus_obj = self.wakeup_state.lock().unwrap();
+        let mut wus = self.wakeup_state.lock().unwrap();
         // Someone woke us up --> Clear the flag
-        let cycle = wus_obj.req[hartid];
+        let cycle = wus.req[hartid];
         self.state.cycle = std::cmp::max(self.state.cycle, cycle as u64);
         self.state.wfi = false;
-        wus_obj.req[hartid] = 0;
-        wus_obj.wfi[hartid] = false;
-        wus_obj.num -= 1;
+        wus.req[hartid] = 0;
+        wus.wfi[hartid] = false;
+        wus.num -= 1;
         // Trigger IRQ check on next instruction
         self.state.irq.sample_ctr = u32::MAX - 1;
         return 0;
@@ -1035,8 +1028,6 @@ impl<'a, 'b> Cpu<'a, 'b> {
     fn wake(&self, hart: u32) {
         // Lock is released once out of scope
         let mut wus = self.wakeup_state.lock().unwrap();
-        // enforce sequential consistency with the atomic accesses to the CLINT
-        self.wakeup_pending.fetch_add(1, Ordering::SeqCst);
         if hart as i32 == -1 {
             for i in 0..wus.req.len() {
                 wus.req[i] = self.state.cycle + 1;
