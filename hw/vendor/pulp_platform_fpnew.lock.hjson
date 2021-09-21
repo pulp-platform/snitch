@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/pulp-platform/fpnew.git
-    rev: e364e4f0ac0a29d6358902885839788e0e51f220
+    rev: b76b06880e344fbc0494f77837ba668593ddc490
   }
 }

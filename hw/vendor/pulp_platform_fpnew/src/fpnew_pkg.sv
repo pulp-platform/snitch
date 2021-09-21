@@ -119,7 +119,7 @@ package fpnew_pkg;
   localparam int unsigned OP_BITS = 5;
 
   typedef enum logic [OP_BITS-1:0] {
-    SDOTP, VSUM,                 // DOTP operation group
+    SDOTP, EXVSUM, VSUM,         // DOTP operation group
     FMADD, FNMSUB, ADD, MUL,     // ADDMUL operation group
     DIV, SQRT,                   // DIVSQRT operation group
     SGNJ, MINMAX, CMP, CLASSIFY, // NONCOMP operation group
@@ -404,7 +404,7 @@ package fpnew_pkg;
       DIV, SQRT:                   return DIVSQRT;
       SGNJ, MINMAX, CMP, CLASSIFY: return NONCOMP;
       F2F, F2I, I2F, CPKAB, CPKCD: return CONV;
-      SDOTP, VSUM:                 return DOTP;
+      SDOTP, EXVSUM, VSUM:         return DOTP;
       default:                     return NONCOMP;
     endcase
   endfunction
@@ -487,8 +487,8 @@ package fpnew_pkg;
   function automatic fmt_logic_t get_dotp_dst_fmts(fmt_logic_t cfg);
     automatic fmt_logic_t res;
     unique case (cfg) // goes through some of the allowed configurations
-      6'b001111:  res=6'b101010; // fp8(alt) -> fp16(alt) & fp16(alt) -> fp32
-      6'b000101:  res=6'b001010; // fp8(alt) -> fp16(alt)
+      6'b001111:  res=6'b101111; // fp8(alt) -> fp16(alt) & fp16(alt) -> fp32
+      6'b000101:  res=6'b001111; // fp8(alt) -> fp16(alt)
       default: return '0;
     endcase
     return res;

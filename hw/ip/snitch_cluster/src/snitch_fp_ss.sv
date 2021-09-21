@@ -1056,7 +1056,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         if (acc_req_q.data_op inside {riscv_instr::VFNDOTPEX_S_R_H}) op_select[2] = RegBRep;
       end
       riscv_instr::VFSUMEX_S_H: begin
-        fpu_op = fpnew_pkg::VSUM;
+        fpu_op = fpnew_pkg::EXVSUM;
         op_select[0] = RegA;
         op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP16;
@@ -1065,7 +1065,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         set_dyn_rm   = 1'b1;
       end
       riscv_instr::VFNSUMEX_S_H: begin
-        fpu_op = fpnew_pkg::VSUM;
+        fpu_op = fpnew_pkg::EXVSUM;
         op_select[0] = RegA;
         op_select[2] = RegDest;
         op_mode      = 1'b1;
@@ -1585,7 +1585,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         if (acc_req_q.data_op inside {riscv_instr::VFNDOTPEX_H_R_B}) op_select[2] = RegBRep;
       end
       riscv_instr::VFSUMEX_H_B: begin
-        fpu_op = fpnew_pkg::VSUM;
+        fpu_op = fpnew_pkg::EXVSUM;
         op_select[0] = RegA;
         op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP8;
@@ -1594,7 +1594,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
         set_dyn_rm   = 1'b1;
       end
       riscv_instr::VFNSUMEX_H_B: begin
-        fpu_op = fpnew_pkg::VSUM;
+        fpu_op = fpnew_pkg::EXVSUM;
         op_select[0] = RegA;
         op_select[2] = RegDest;
         op_mode      = 1'b1;
