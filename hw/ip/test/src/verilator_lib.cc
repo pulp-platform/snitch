@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: SHL-0.51
 
 #include "Vtestharness.h"
+#include "Vtestharness__Dpi.h"
 #include "sim.hh"
 #include "tb_lib.hh"
 #include "verilated.h"
