@@ -1255,6 +1255,20 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      VFSUM_H,
+      VFNSUM_H: begin
+        if (FP_EN && XFVEC && FLEN >= 64 && XFDOTP) begin
+          if ((XF16 && fcsr_q.fmode.src == 1'b0) ||
+             (XF16ALT && fcsr_q.fmode.src == 1'b1)) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       VFCPKA_H_S,
       VFCPKB_H_S,
       VFCVT_H_S,
@@ -1478,6 +1492,20 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           && (!(inst_data_i inside {VFDIV_B, VFDIV_R_B, VFSQRT_B}) || XDivSqrt)) begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
+      VFSUM_B,
+      VFNSUM_B: begin
+        if (FP_EN && XFVEC && FLEN >= 32 && XFDOTP) begin
+          if ((XF8 && fcsr_q.fmode.src == 1'b0) ||
+             (XF8ALT && fcsr_q.fmode.src == 1'b1)) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end else begin
           illegal_inst = 1'b1;
         end
