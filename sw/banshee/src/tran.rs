@@ -4618,7 +4618,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4644,7 +4644,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4670,7 +4670,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4696,7 +4696,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4722,7 +4722,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4748,7 +4748,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4774,7 +4774,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4800,7 +4800,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4826,7 +4826,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4852,7 +4852,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4878,7 +4878,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
@@ -4904,7 +4904,7 @@ impl<'a> InstructionTranslator<'a> {
                     self.builder,
                     res1,
                     LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
-                    name
+                    name,
                 );
                 let res = LLVMBuildOr(self.builder, res0, res1, name);
                 self.write_reg(data.rd, res);
