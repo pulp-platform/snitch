@@ -1,23 +1,15 @@
-# Untitled number in Snitch Cluster Schema Schema
+# Xf8 8-bit Float Extension Schema
 
 ```txt
-http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/lat_comp_fp8
+http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/xf8
 ```
 
-Latency setting (number of pipeline stages) for FP8.
+Enable Smallfloat Xf8 extension (IEEE 8-bit float).
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :------------------------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [snitch_cluster.schema.json*](snitch_cluster.schema.json "open original schema") |
 
-## lat_comp_fp8 Type
+## xf8 Type
 
-`number`
-
-## lat_comp_fp8 Default Value
-
-The default value is:
-
-```json
-1
-```
+`boolean` ([Xf8 8-bit Float Extension](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-xf8-8-bit-float-extension.md))

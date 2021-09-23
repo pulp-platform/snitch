@@ -72,8 +72,12 @@ module snitch_cluster
   parameter bit [NrCores-1:0] XF16ALT       = '0,
   /// FP 8-bit
   parameter bit [NrCores-1:0] XF8           = '0,
+  /// FP 8-bit alt
+  parameter bit [NrCores-1:0] XF8ALT        = '0,
   /// Enable SIMD support.
   parameter bit [NrCores-1:0] XFVEC         = '0,
+  /// Enable DOTP support.
+  parameter bit [NrCores-1:0] XFDOTP        = '0,
   /// Per-core enabling of the custom `Xdma` ISA extensions.
   parameter bit [NrCores-1:0] Xdma          = '0,
   /// Per-core enabling of the custom `Xssr` ISA extensions.
@@ -767,7 +771,9 @@ module snitch_cluster
         .XF16 (XF16[i]),
         .XF16ALT (XF16ALT[i]),
         .XF8 (XF8[i]),
+        .XF8ALT (XF8ALT[i]),
         .XFVEC (XFVEC[i]),
+        .XFDOTP (XFDOTP[i]),
         .Xdma (Xdma[i]),
         .IsoCrossing (IsoCrossing),
         .Xfrep (Xfrep[i]),

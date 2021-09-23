@@ -46,11 +46,13 @@ module snitch_cc #(
   /// Enable F and D Extension
   parameter bit          RVF                = 1,
   parameter bit          RVD                = 1,
-  parameter bit          XDivSqrt          = 0,
+  parameter bit          XDivSqrt           = 0,
   parameter bit          XF8                = 0,
+  parameter bit          XF8ALT             = 0,
   parameter bit          XF16               = 0,
   parameter bit          XF16ALT            = 0,
   parameter bit          XFVEC              = 0,
+  parameter bit          XFDOTP             = 0,
   /// Enable Snitch DMA
   parameter bit          Xdma               = 0,
   /// Has `frep` support.
@@ -120,12 +122,15 @@ module snitch_cc #(
   input  addr_t                      tcdm_addr_mask_i
 );
 
-  localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XFVEC | XF16 | XF16ALT | XF8;
+  // FMA architecture is "merged" -> mulexp and macexp instructions are supported
+  localparam bit XFauxMerged  = (FPUImplementation.UnitTypes[3] == fpnew_pkg::MERGED);
+  localparam bit FPEn = RVF | RVD | XF16 | XF16ALT | XF8 | XF8ALT | XFVEC | XFauxMerged | XFDOTP;
   localparam int unsigned FLEN = RVD     ? 64 : // D ext.
                           RVF     ? 32 : // F ext.
                           XF16    ? 16 : // Xf16 ext.
                           XF16ALT ? 16 : // Xf16alt ext.
                           XF8     ? 8 :  // Xf8 ext.
+                          XF8ALT  ? 8 :  // Xf8alt ext.
                           0;             // Unused in case of no FP
 
   typedef struct packed {
@@ -166,6 +171,7 @@ module snitch_cc #(
   logic acc_demux_snitch_valid_q, acc_demux_snitch_ready_q;
 
   fpnew_pkg::roundmode_e fpu_rnd_mode;
+  fpnew_pkg::fmt_mode_t  fpu_fmt_mode;
   fpnew_pkg::status_t    fpu_status;
 
   // Snitch Integer Core
@@ -201,7 +207,10 @@ module snitch_cc #(
     .XF16 (XF16),
     .XF16ALT (XF16ALT),
     .XF8 (XF8),
+    .XF8ALT (XF8ALT),
     .XFVEC (XFVEC),
+    .XFDOTP (XFDOTP),
+    .XFAUX (XFauxMerged),
     .FLEN (FLEN)
   ) i_snitch (
     .clk_i ( clk_d2_i ), // if necessary operate on half the frequency
@@ -230,6 +239,7 @@ module snitch_cc #(
     .ptw_pte_i (hive_rsp_i.ptw_pte),
     .ptw_is_4mega_i (hive_rsp_i.ptw_is_4mega),
     .fpu_rnd_mode_o ( fpu_rnd_mode ),
+    .fpu_fmt_mode_o ( fpu_fmt_mode ),
     .fpu_status_i ( fpu_status )
   );
 
@@ -451,6 +461,7 @@ module snitch_cc #(
       .XF16 (XF16),
       .XF16ALT (XF16ALT),
       .XF8 (XF8),
+      .XF8ALT (XF8ALT),
       .XFVEC (XFVEC),
       .FLEN (FLEN)
     ) i_snitch_fp_ss (
@@ -469,6 +480,7 @@ module snitch_cc #(
       .data_req_o       ( fpu_dreq       ),
       .data_rsp_i       ( fpu_drsp       ),
       .fpu_rnd_mode_i   ( fpu_rnd_mode   ),
+      .fpu_fmt_mode_i   ( fpu_fmt_mode   ),
       .fpu_status_o     ( fpu_status     ),
       .ssr_raddr_o      ( ssr_raddr      ),
       .ssr_rdata_i      ( ssr_rdata      ),

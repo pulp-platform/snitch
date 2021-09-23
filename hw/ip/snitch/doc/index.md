@@ -58,7 +58,9 @@ the Snitch core and a file list you can:
 | `XF16`                   | bit        | 0       | Enable half-precision floating point extension (needs `FP_EN`).                                                                                          |
 | `XF16ALT`                | bit        | 0       | Enable brain-float extension (needs `FP_EN`).                                                                                                            |
 | `XF8`                    | bit        | 0       | Enable eight byte floating-point extensions (needs `FP_EN`).                                                                                             |
+| `XF8ALT`                 | bit        | 0       | Enable alternate eight byte floating-point extensions (needs `FP_EN`).                                                                                   |
 | `XFVEC`                  | bit        | 0       | Enable vectorized extension (needs `FP_EN`).                                                                                                             |
+| `XFDOTP`                 | bit        | 0       | Enable DOTP operation group (needs `FP_EN`).                                                                                                             |
 | `FLEN`                   | bit        | 0       | Required floating-point length (depends on enabled extension). Determined by the maximum floating-point length (`64` for double, `32` for single, etc.). |
 
 ### Ports
@@ -121,7 +123,9 @@ the Snitch core and a file list you can:
     .XF16 (),
     .XF16ALT (),
     .XF8 (),
+    .XF8ALT (),
     .XFVEC (),
+    .XFDOTP (),
     .FLEN ()
   ) i_snitch (
     .clk_i ( ),

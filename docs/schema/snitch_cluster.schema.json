@@ -209,7 +209,12 @@
                 },
                 "lat_comp_fp8": {
                     "type": "number",
-                    "description": "Latency setting (number of pipeline stages) for FP32 (fp8).",
+                    "description": "Latency setting (number of pipeline stages) for FP8.",
+                    "default": 1
+                },
+                "lat_comp_fp8alt": {
+                    "type": "number",
+                    "description": "Latency setting (number of pipeline stages) for FP8alt.",
                     "default": 1
                 },
                 "lat_noncomp": {
@@ -313,8 +318,14 @@
                                 },
                                 "xf8": {
                                     "type": "boolean",
-                                    "title": "Xf8 16-bit Float Extension",
+                                    "title": "Xf8 8-bit Float Extension",
                                     "description": "Enable Smallfloat Xf8 extension (IEEE 8-bit float).",
+                                    "default": false
+                                },
+                                "xf8alt": {
+                                    "type": "boolean",
+                                    "title": "Xf8 8-bit Float Extension",
+                                    "description": "Enable Smallfloat Xf8alt extension.",
                                     "default": false
                                 },
                                 "xf16": {
@@ -327,6 +338,12 @@
                                     "type": "boolean",
                                     "title": "Xf16alt 16-bit Brain-Float Extension",
                                     "description": "Enable Smallfloat Xf16alt extension, also known as brain-float.",
+                                    "default": false
+                                },
+                                "xfdotp": {
+                                    "type": "boolean",
+                                    "title": "Xfdotp Extension",
+                                    "description": "Enable DOTP extensions.",
                                     "default": false
                                 },
                                 "xfvec": {

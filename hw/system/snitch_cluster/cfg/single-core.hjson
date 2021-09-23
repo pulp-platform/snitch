@@ -30,6 +30,7 @@
             lat_comp_fp64: 3,
             lat_comp_fp16_alt: 2,
             lat_comp_fp8: 1,
+            lat_comp_fp8_alt: 1,
             lat_noncomp: 1,
             lat_conv: 1,
             fpu_pipe_config: "BEFORE"

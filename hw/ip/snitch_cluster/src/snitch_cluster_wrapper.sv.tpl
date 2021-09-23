@@ -104,19 +104,27 @@ package ${cfg['pkg_name']};
                         ${cfg['timing']['lat_comp_fp64']}, // FP64
                         ${cfg['timing']['lat_comp_fp16']}, // FP16
                         ${cfg['timing']['lat_comp_fp8']}, // FP8
-                        ${cfg['timing']['lat_comp_fp16_alt']}  // FP16alt
+                        ${cfg['timing']['lat_comp_fp16_alt']}, // FP16alt
+                        ${cfg['timing']['lat_comp_fp8_alt']}  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: ${cfg['timing']['lat_noncomp']}},   // NONCOMP
-                    '{default: ${cfg['timing']['lat_conv']}}},   // CONV
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},
+                    '{default: ${cfg['timing']['lat_conv']}},   // CONV
+                    '{default: 1}    // DOTP
+                    },
+        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
 % if c["Xdiv_sqrt"]:
                     '{default: fpnew_pkg::MERGED}, // DIVSQRT
 % else:
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
 % endif
                     '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED}},  // CONV
+                    '{default: fpnew_pkg::MERGED},   // CONV
+% if c["xfdotp"]:
+                    '{default: fpnew_pkg::MERGED}},  // DOTP
+% else:
+                    '{default: fpnew_pkg::DISABLED}}, // DOTP
+% endif
         PipeConfig: fpnew_pkg::${cfg['timing']['fpu_pipe_config']}
     }${',\n' if not loop.last else '\n'}\
   % endfor
@@ -201,7 +209,9 @@ module ${cfg['name']}_wrapper (
     .XF16 (${core_cfg_flat('xf16')}),
     .XF16ALT (${core_cfg_flat('xf16alt')}),
     .XF8 (${core_cfg_flat('xf8')}),
+    .XF8ALT (${core_cfg_flat('xf8alt')}),
     .XFVEC (${core_cfg_flat('xfvec')}),
+    .XFDOTP (${core_cfg_flat('xfdotp')}),
     .Xdma (${core_cfg_flat('xdma')}),
     .Xssr (${core_cfg_flat('xssr')}),
     .Xfrep (${core_cfg_flat('xfrep')}),
