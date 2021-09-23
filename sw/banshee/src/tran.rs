@@ -4479,7 +4479,7 @@ impl<'a> InstructionTranslator<'a> {
                 let res1 = self.emit_binary_float_intrinsic("llvm.minnum", a1, b0);
                 self.write_freg_vf64s(data.rd, res1, res0);
                 return Ok(());
-            }            
+            }
             riscv::OpcodeRdRs1Rs2::FsgnjH => {
                 let (_fpmode_src, fpmode_dst) = self.read_fpmode();
                 self.write_freg_f16(
