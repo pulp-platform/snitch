@@ -73,6 +73,6 @@ _snrt_exit:
 1:  ret
 
 # HTIF sections
-.pushsection .tohost,"aw",@progbits;
+.pushsection .htif,"aw",@progbits;
 .align 6; .global tohost; tohost: .dword 0;
 .align 6; .global fromhost; fromhost: .dword 0;
