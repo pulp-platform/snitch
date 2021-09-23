@@ -2901,15 +2901,10 @@ impl<'a> InstructionTranslator<'a> {
     ) -> LLVMValueRef {
         let value = LLVMConstNull(LLVMInt32Type());
 
-        let res0_pad = LLVMBuildSExt(self.builder, res0, LLVMInt8Type(), NONAME);
-        let res1_pad = LLVMBuildSExt(self.builder, res1, LLVMInt8Type(), NONAME);
-        let res2_pad = LLVMBuildSExt(self.builder, res2, LLVMInt8Type(), NONAME);
-        let res3_pad = LLVMBuildSExt(self.builder, res3, LLVMInt8Type(), NONAME);
-
-        let res0_pad = LLVMBuildZExt(self.builder, res0_pad, LLVMInt32Type(), NONAME);
-        let res1_pad = LLVMBuildZExt(self.builder, res1_pad, LLVMInt32Type(), NONAME);
-        let res2_pad = LLVMBuildZExt(self.builder, res2_pad, LLVMInt32Type(), NONAME);
-        let res3_pad = LLVMBuildZExt(self.builder, res3_pad, LLVMInt32Type(), NONAME);
+        let res0_pad = LLVMBuildZExt(self.builder, res0, LLVMInt32Type(), NONAME);
+        let res1_pad = LLVMBuildZExt(self.builder, res1, LLVMInt32Type(), NONAME);
+        let res2_pad = LLVMBuildZExt(self.builder, res2, LLVMInt32Type(), NONAME);
+        let res3_pad = LLVMBuildZExt(self.builder, res3, LLVMInt32Type(), NONAME);
 
         let res0_pad = LLVMBuildShl(
             self.builder,
