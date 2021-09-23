@@ -439,28 +439,16 @@ pub unsafe fn ff_instruction_cmp_h(
     op: FlexfloatOpCmp,
     fpmode_dst: bool,
 ) -> bool {
-    let ff_a: *mut flexfloat_t = if fpmode_dst {
-        &mut flexfloat_t {
-            value: 0.0,
-            desc: env_fp16alt,
-        }
-    } else {
-        &mut flexfloat_t {
-            value: 0.0,
-            desc: env_fp16,
-        }
-    };
 
-    let ff_b: *mut flexfloat_t = if fpmode_dst {
-        &mut flexfloat_t {
-            value: 0.0,
-            desc: env_fp16alt,
-        }
-    } else {
-        &mut flexfloat_t {
-            value: 0.0,
-            desc: env_fp16,
-        }
+    let env_fp16_dst: flexfloat_desc_t = if fpmode_dst { env_fp16alt } else { env_fp16 };
+
+    let ff_a: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp16_dst,
+    };
+    let ff_b: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp16_dst,
     };
 
     flexfloat_set_bits(ff_a, rs1 as u64);
