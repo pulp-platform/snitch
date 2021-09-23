@@ -11,14 +11,14 @@
 //================================================================================
 
 /**
- * @brief Define DM_USE_CLINT to use the CLINT based SW interrupt system for
- * synchronization. If not defined, the harts use the wakeup register to
- * syncrhonize which is faster but only works for cluster-local synchronization
- * which is sufficient at the moment since the OpenMP runtime is single cluster
- * only.
+ * @brief Define DM_USE_GLOBAL_CLINT to use the cluster-shared CLINT based SW
+ * interrupt system for synchronization. If not defined, the harts use the
+ * cluster-local CLINT to syncrhonize which is faster but only works for
+ * cluster-local synchronization which is sufficient at the moment since the
+ * OpenMP runtime is single cluster only.
  *
  */
-#define DM_USE_CLINT
+// #define DM_USE_GLOBAL_CLINT
 
 /**
  * @brief Number of outstanding transactions to buffer. Each requires
@@ -104,7 +104,7 @@ __thread uint32_t cluster_dm_core_idx;
 //================================================================================
 // Declarations
 //================================================================================
-static void wfi_dm(void);
+static void wfi_dm(uint32_t cluster_core_idx);
 static void wake_dm(void);
 
 //================================================================================
@@ -133,8 +133,10 @@ void dm_init(void) {
     cluster_dm_core_idx = snrt_cluster_dm_core_idx();
     // create a data mover instance
     if (snrt_is_dm_core()) {
-#ifdef DM_USE_CLINT
+#ifdef DM_USE_GLOBAL_CLINT
         snrt_interrupt_enable(IRQ_M_SOFT);
+#else
+        snrt_interrupt_enable(IRQ_M_CLUSTER);
 #endif
         dm_p = (dm_t *)snrt_l1alloc(sizeof(dm_t));
         snrt_memset((void *)dm_p, 0, sizeof(dm_t));
@@ -149,6 +151,7 @@ void dm_init(void) {
 void dm_main(void) {
     volatile dm_task_t *t;
     uint32_t do_exit = 0;
+    uint32_t cluster_core_idx = snrt_cluster_core_idx();
 
     DM_PRINTF(10, "enter main\n");
 
@@ -200,12 +203,14 @@ void dm_main(void) {
 
         // sleep if queue is empty and no stats pending
         if (!dm_p->queue_fill && !dm_p->stat_q) {
-            wfi_dm();
+            wfi_dm(cluster_core_idx);
         }
     }
     DM_PRINTF(10, "dm: exit\n");
-#ifdef DM_USE_CLINT
+#ifdef DM_USE_GLOBAL_CLINT
     snrt_interrupt_disable(IRQ_M_SOFT);
+#else
+    snrt_interrupt_disable(IRQ_M_CLUSTER);
 #endif
     return;
 }
@@ -320,22 +325,26 @@ void dm_wait_ready(void) {
 // private
 //================================================================================
 
-#ifdef DM_USE_CLINT
-static void wfi_dm(void) { snrt_int_sw_poll(); }
+#ifdef DM_USE_GLOBAL_CLINT
+static void wfi_dm(uint32_t cluster_core_idx) {
+    (void)cluster_core_idx;
+    snrt_int_sw_poll();
+}
 static void wake_dm(void) {
     uint32_t basehart = snrt_cluster_core_base_hartid();
     snrt_int_sw_set(basehart + cluster_dm_core_idx);
 }
 #else
-static void wfi_dm(void) {
+static void wfi_dm(uint32_t cluster_core_idx) {
     __atomic_add_fetch(&dm_p->dm_wfi, 1, __ATOMIC_RELAXED);
     snrt_wfi();
+    snrt_int_cluster_clr(1 << cluster_core_idx);
     __atomic_add_fetch(&dm_p->dm_wfi, -1, __ATOMIC_RELAXED);
 }
 static void wake_dm(void) {
     // wait for DM to sleep before sending wakeup
     while (!__atomic_load_n(&dm_p->dm_wfi, __ATOMIC_RELAXED))
         ;
-    snrt_wakeup(cluster_dm_core_idx);
+    snrt_int_cluster_set(1 << snrt_cluster_dm_core_idx());
 }
-#endif  // #ifdef DM_USE_CLINT
+#endif  // #ifdef DM_USE_GLOBAL_CLINT

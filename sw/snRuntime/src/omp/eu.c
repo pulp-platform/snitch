@@ -13,14 +13,14 @@
 // Settings
 //================================================================================
 /**
- * @brief Define EU_USE_CLINT to use the CLINT based SW interrupt system for
- * synchronization. If not defined, the harts use the wakeup register to
- * syncrhonize which is faster but only works for cluster-local synchronization
- * which is sufficient at the moment since the OpenMP runtime is single cluster
- * only.
+ * @brief Define EU_USE_GLOBAL_CLINT to use the cluster-shared CLINT based SW
+ * interrupt system for synchronization. If not defined, the harts use the
+ * cluster-local CLINT to syncrhonize which is faster but only works for
+ * cluster-local synchronization which is sufficient at the moment since the
+ * OpenMP runtime is single cluster only.
  *
  */
-#define EU_USE_CLINT
+// #define EU_USE_GLOBAL_CLINT
 
 //================================================================================
 // Types
@@ -60,7 +60,7 @@ static volatile eu_t *volatile eu_p_global;
 // prototypes
 //================================================================================
 static void wake_workers(void);
-static void worker_wfi(void);
+static void worker_wfi(uint32_t cluster_core_idx);
 static void wait_worker_wfi(void);
 
 //================================================================================
@@ -119,9 +119,9 @@ void eu_print_status() {
 /**
  * @brief Main loop of the event unit
  *
- * @param core_idx local core index of the entering thread
+ * @param cluster_core_idx local core index of the entering thread
  */
-void eu_event_loop(uint32_t core_idx) {
+void eu_event_loop(uint32_t cluster_core_idx) {
     uint32_t scratch;
     uint32_t nthds;
 
@@ -129,22 +129,26 @@ void eu_event_loop(uint32_t core_idx) {
     __atomic_add_fetch(&eu_p->workers_in_loop, 1, __ATOMIC_RELAXED);
 
     // enable software interrupts
-#ifdef EU_USE_CLINT
+#ifdef EU_USE_GLOBAL_CLINT
     snrt_interrupt_enable(IRQ_M_SOFT);
+#else
+    snrt_interrupt_enable(IRQ_M_CLUSTER);
 #endif
 
-    EU_PRINTF(0, "#%d entered event loop\n", core_idx);
+    EU_PRINTF(0, "#%d entered event loop\n", cluster_core_idx);
 
     while (1) {
         // check for exit
         if (eu_p->exit_flag) {
-#ifdef EU_USE_CLINT
+#ifdef EU_USE_GLOBAL_CLINT
             snrt_interrupt_disable(IRQ_M_SOFT);
+#else
+            snrt_interrupt_enable(IRQ_M_CLUSTER);
 #endif
             return;
         }
 
-        if (core_idx < eu_p->e.nthreads) {
+        if (cluster_core_idx < eu_p->e.nthreads) {
             // make a local copy of nthreads to sync after work since the master
             // hart will reset eu_p->e.nthreads as soon as all workers finished
             // which might cause a race condition
@@ -157,7 +161,7 @@ void eu_event_loop(uint32_t core_idx) {
 
         // enter wait for interrupt
         __atomic_add_fetch(&eu_p->e.fini_count, 1, __ATOMIC_RELAXED);
-        worker_wfi();
+        worker_wfi(cluster_core_idx);
     }
 }
 
@@ -246,7 +250,7 @@ static void wait_worker_wfi(void) {
  * @brief When using the CLINT as wakeup
  *
  */
-#ifdef EU_USE_CLINT
+#ifdef EU_USE_GLOBAL_CLINT
 
 static void wake_workers(void) {
 #ifdef OMPSTATIC_NUMTHREADS
@@ -279,7 +283,7 @@ static void wake_workers(void) {
 #endif
 }
 
-static void worker_wfi(void) {
+static void worker_wfi(uint32_t cluster_core_idx) {
     __atomic_add_fetch(&eu_p->workers_wfi, 1, __ATOMIC_RELAXED);
     snrt_int_sw_poll();
     __atomic_add_fetch(&eu_p->workers_wfi, -1, __ATOMIC_RELAXED);
@@ -289,7 +293,7 @@ static void worker_wfi(void) {
  * @brief If we use the wake-up register to wake the worker cores
  *
  */
-#else  // #ifdef EU_USE_CLINT
+#else  // #ifdef EU_USE_GLOBAL_CLINT
 
 static void wake_workers(void) {
     // Guard to wake only if all workers are wfi
@@ -297,12 +301,13 @@ static void wake_workers(void) {
     // Wake the cluster cores. We do this with cluster relative hart IDs and do
     // not wake hart 0 since this is the main thread
     uint32_t numcores = snrt_cluster_compute_core_num();
-    for (uint32_t hart = 1; hart < numcores; ++hart) snrt_wakeup(hart);
+    snrt_int_cluster_set(~0x1 & ((1 << numcores) - 1));
 }
-static void worker_wfi(void) {
+static void worker_wfi(uint32_t cluster_core_idx) {
     __atomic_add_fetch(&eu_p->workers_wfi, 1, __ATOMIC_RELAXED);
     snrt_wfi();
+    snrt_int_cluster_clr(1 << cluster_core_idx);
     __atomic_add_fetch(&eu_p->workers_wfi, -1, __ATOMIC_RELAXED);
 }
 
-#endif  // #ifdef EU_USE_CLINT
+#endif  // #ifdef EU_USE_GLOBAL_CLINT

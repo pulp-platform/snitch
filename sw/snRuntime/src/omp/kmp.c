@@ -15,6 +15,15 @@ typedef void (*__task_type32)(_kmp_ptr32, _kmp_ptr32, _kmp_ptr32);
 typedef void (*__task_type64)(_kmp_ptr64, _kmp_ptr64, _kmp_ptr64);
 
 static void *args[sizeof(_kmp_ptr32)];
+/**
+ * @brief Usually the arguments passed to __kmpc_fork_call would to a malloc
+ * with the amount of arguments passed. This is too slow for our case and thus
+ * we reserve a chunk of arguments in TCDM and use it. This limits the maximum
+ * number of arguments
+ *
+ */
+#define KMP_FORK_MAX_NARGS 12
+
 
 static void __microtask_wrapper(void *arg, uint32_t argc) {
     kmp_int32 id = omp_get_thread_num();

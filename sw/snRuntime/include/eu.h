@@ -22,9 +22,9 @@ void eu_exit(uint32_t core_idx);
 /**
  * @brief Enter the event unit loop, never exits
  *
- * @param core_idx cluster-local core index
+ * @param cluster_core_idx cluster-local core index
  */
-void eu_event_loop(uint32_t core_idx);
+void eu_event_loop(uint32_t cluster_core_idx);
 
 /**
  * @brief Set function to execute by `nthreads` number of threads
