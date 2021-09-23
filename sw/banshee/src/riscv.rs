@@ -2612,10 +2612,10 @@ pub fn parse_u32(raw: u32) -> Format {
         0xafe02033 => return parse_rd_rs1(OpcodeRdRs1::VfnsumH, raw),
         0x8e703033 => return parse_rd_rs1(OpcodeRdRs1::VfsumB, raw),
         0xae703033 => return parse_rd_rs1(OpcodeRdRs1::VfnsumB, raw),
-        0x8f600033 => return parse_rd_rs1(OpcodeRdRs1::VfsumexSH, raw),
-        0xaf600033 => return parse_rd_rs1(OpcodeRdRs1::VfnsumexSH, raw),
-        0x8f702033 => return parse_rd_rs1(OpcodeRdRs1::VfsumexHB, raw),
-        0xaf702033 => return parse_rd_rs1(OpcodeRdRs1::VfnsumexHB, raw),
+        0x8f602033 => return parse_rd_rs1(OpcodeRdRs1::VfsumexSH, raw),
+        0xaf602033 => return parse_rd_rs1(OpcodeRdRs1::VfnsumexSH, raw),
+        0x8f703033 => return parse_rd_rs1(OpcodeRdRs1::VfsumexHB, raw),
+        0xaf703033 => return parse_rd_rs1(OpcodeRdRs1::VfnsumexHB, raw),
         _ => (),
     }
     match raw & 0xfff07fff {

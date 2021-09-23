@@ -485,6 +485,17 @@ module snitch_fp_ss import snitch_pkg::*; #(
         vectorial_op = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFSGNJX_R_S}) op_select[1] = RegBRep;
       end
+      riscv_instr::VFSUM_S,
+      riscv_instr::VFNSUM_S: begin
+        fpu_op = fpnew_pkg::VSUM;
+        op_select[0] = RegA;
+        op_select[2] = RegDest;
+        src_fmt      = fpnew_pkg::FP32;
+        dst_fmt      = fpnew_pkg::FP32;
+        vectorial_op = 1'b1;
+        set_dyn_rm   = 1'b1;
+        if (acc_req_q.data_op inside {riscv_instr::VFNSUM_S}) op_mode = 1'b1;
+      end
       riscv_instr::VFCPKA_S_S: begin
         fpu_op = fpnew_pkg::CPKAB;
         op_select[0] = RegA;
@@ -736,11 +747,11 @@ module snitch_fp_ss import snitch_pkg::*; #(
       end
       riscv_instr::VFSUM_H,
       riscv_instr::VFNSUM_H: begin
-        fpu_op = fpnew_pkg::EXVSUM;
+        fpu_op = fpnew_pkg::VSUM;
         op_select[0] = RegA;
         op_select[2] = RegDest;
-        src_fmt      = fpnew_pkg::FP8;
-        dst_fmt      = fpnew_pkg::FP8;
+        src_fmt      = fpnew_pkg::FP16;
+        dst_fmt      = fpnew_pkg::FP16;
         vectorial_op = 1'b1;
         set_dyn_rm   = 1'b1;
         if (acc_req_q.data_op inside {riscv_instr::VFNSUM_H}) op_mode = 1'b1;
@@ -1211,7 +1222,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
       end
       riscv_instr::VFSUM_B,
       riscv_instr::VFNSUM_B: begin
-        fpu_op = fpnew_pkg::EXVSUM;
+        fpu_op = fpnew_pkg::VSUM;
         op_select[0] = RegA;
         op_select[2] = RegDest;
         src_fmt      = fpnew_pkg::FP8;

@@ -1094,6 +1094,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      VFSUM_S,
+      VFNSUM_S: begin
+        if (FP_EN && XFVEC && FLEN >= 64 && XFDOTP && RVF) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       // Double Precision Floating-Point
       FADD_D,
       FSUB_D,
@@ -1338,7 +1347,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       VFNDOTPEX_S_R_H,
       VFSUMEX_S_H,
       VFNSUMEX_S_H: begin
-        if (FP_EN && XFVEC && FLEN >= 64 && XFDOTP) begin
+        if (FP_EN && XFVEC && FLEN >= 64 && XFDOTP && RVF) begin
           if ((XF16 && fcsr_q.fmode.src == 1'b0) ||
              (XF16ALT && fcsr_q.fmode.src == 1'b1)) begin
             write_rd = 1'b0;
