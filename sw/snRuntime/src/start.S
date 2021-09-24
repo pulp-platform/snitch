@@ -181,6 +181,7 @@ snrt.crt0.pre_barrier:
     # Execute the main function.
 snrt.crt0.main:
     call      main  # main(int core_id, int core_num, void *spm_start, void *spm_end)
+    mv        s0, a0 # store return value in s0
     # lw        s0, tcdm_end_address_reg  # add return value to special slot
     # addi      s0, s0, -8
     # amoadd.w  zero, a0, (s0)
@@ -191,6 +192,7 @@ snrt.crt0.post_barrier:
 
     # Write execution result to EOC register.
 snrt.crt0.end:
+    mv        a0, s0 # recover return value of main function in s0
     call      _snrt_exit
 1:
     wfi
