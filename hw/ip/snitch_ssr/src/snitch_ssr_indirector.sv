@@ -156,11 +156,11 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
     // Advance to next job in upstream address gen once done handshaked;
     // Swap indirection-related shadowed registers at the same time.
-    logic cfg_indir_next;
-    assign cfg_indir_next = cfg_isect_slv_i & isect_slv_hs & isect_slv_done;
+    assign cfg_indir_next_o = cfg_isect_slv_i & isect_slv_hs & isect_slv_done;
+    assign cfg_indir_swap_o = cfg_isect_slv_i ? cfg_indir_next_o : cfg_done_i;
 
     // Track when the last index word was received and we wait for upstream termination
-    `FFLARNC(done_pending_q, 1'b1, cfg_indir_next, cfg_done_i, 1'b0, clk_i, rst_ni)
+    `FFLARNC(done_pending_q, 1'b1, cfg_indir_next_o, cfg_done_i, 1'b0, clk_i, rst_ni)
 
     // Create coalescing masks
     assign idx_strb_base    = ~({(DataWidth/8){1'b1}} << (1 << cfg_size_i));
