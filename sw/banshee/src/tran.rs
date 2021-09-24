@@ -2767,23 +2767,14 @@ impl<'a> InstructionTranslator<'a> {
     ) -> LLVMValueRef {
         let value = LLVMConstNull(LLVMInt32Type());
 
-        let res0_pad = LLVMBuildSExt(self.builder, res0, LLVMInt8Type(), NONAME);
-        let res1_pad = LLVMBuildSExt(self.builder, res1, LLVMInt8Type(), NONAME);
-        let res2_pad = LLVMBuildSExt(self.builder, res2, LLVMInt8Type(), NONAME);
-        let res3_pad = LLVMBuildSExt(self.builder, res3, LLVMInt8Type(), NONAME);
-        let res4_pad = LLVMBuildSExt(self.builder, res4, LLVMInt8Type(), NONAME);
-        let res5_pad = LLVMBuildSExt(self.builder, res5, LLVMInt8Type(), NONAME);
-        let res6_pad = LLVMBuildSExt(self.builder, res6, LLVMInt8Type(), NONAME);
-        let res7_pad = LLVMBuildSExt(self.builder, res7, LLVMInt8Type(), NONAME);
-
-        let res0_pad = LLVMBuildZExt(self.builder, res0_pad, LLVMInt32Type(), NONAME);
-        let res1_pad = LLVMBuildZExt(self.builder, res1_pad, LLVMInt32Type(), NONAME);
-        let res2_pad = LLVMBuildZExt(self.builder, res2_pad, LLVMInt32Type(), NONAME);
-        let res3_pad = LLVMBuildZExt(self.builder, res3_pad, LLVMInt32Type(), NONAME);
-        let res4_pad = LLVMBuildZExt(self.builder, res4_pad, LLVMInt32Type(), NONAME);
-        let res5_pad = LLVMBuildZExt(self.builder, res5_pad, LLVMInt32Type(), NONAME);
-        let res6_pad = LLVMBuildZExt(self.builder, res6_pad, LLVMInt32Type(), NONAME);
-        let res7_pad = LLVMBuildZExt(self.builder, res7_pad, LLVMInt32Type(), NONAME);
+        let res0_pad = LLVMBuildZExt(self.builder, res0, LLVMInt32Type(), NONAME);
+        let res1_pad = LLVMBuildZExt(self.builder, res1, LLVMInt32Type(), NONAME);
+        let res2_pad = LLVMBuildZExt(self.builder, res2, LLVMInt32Type(), NONAME);
+        let res3_pad = LLVMBuildZExt(self.builder, res3, LLVMInt32Type(), NONAME);
+        let res4_pad = LLVMBuildZExt(self.builder, res4, LLVMInt32Type(), NONAME);
+        let res5_pad = LLVMBuildZExt(self.builder, res5, LLVMInt32Type(), NONAME);
+        let res6_pad = LLVMBuildZExt(self.builder, res6, LLVMInt32Type(), NONAME);
+        let res7_pad = LLVMBuildZExt(self.builder, res7, LLVMInt32Type(), NONAME);
 
         let res0_pad = LLVMBuildShl(
             self.builder,
@@ -2794,43 +2785,43 @@ impl<'a> InstructionTranslator<'a> {
         let res1_pad = LLVMBuildShl(
             self.builder,
             res1_pad,
-            LLVMConstInt(LLVMInt32Type(), 4 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
             NONAME,
         );
         let res2_pad = LLVMBuildShl(
             self.builder,
             res2_pad,
-            LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
             NONAME,
         );
         let res3_pad = LLVMBuildShl(
             self.builder,
             res3_pad,
-            LLVMConstInt(LLVMInt32Type(), 12 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 3 as u64, 0),
             NONAME,
         );
         let res4_pad = LLVMBuildShl(
             self.builder,
             res4_pad,
-            LLVMConstInt(LLVMInt32Type(), 16 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 4 as u64, 0),
             NONAME,
         );
         let res5_pad = LLVMBuildShl(
             self.builder,
             res5_pad,
-            LLVMConstInt(LLVMInt32Type(), 20 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 5 as u64, 0),
             NONAME,
         );
         let res6_pad = LLVMBuildShl(
             self.builder,
             res6_pad,
-            LLVMConstInt(LLVMInt32Type(), 24 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 6 as u64, 0),
             NONAME,
         );
         let res7_pad = LLVMBuildShl(
             self.builder,
             res7_pad,
-            LLVMConstInt(LLVMInt32Type(), 28 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 7 as u64, 0),
             NONAME,
         );
 
@@ -2901,15 +2892,10 @@ impl<'a> InstructionTranslator<'a> {
     ) -> LLVMValueRef {
         let value = LLVMConstNull(LLVMInt32Type());
 
-        let res0_pad = LLVMBuildSExt(self.builder, res0, LLVMInt8Type(), NONAME);
-        let res1_pad = LLVMBuildSExt(self.builder, res1, LLVMInt8Type(), NONAME);
-        let res2_pad = LLVMBuildSExt(self.builder, res2, LLVMInt8Type(), NONAME);
-        let res3_pad = LLVMBuildSExt(self.builder, res3, LLVMInt8Type(), NONAME);
-
-        let res0_pad = LLVMBuildZExt(self.builder, res0_pad, LLVMInt32Type(), NONAME);
-        let res1_pad = LLVMBuildZExt(self.builder, res1_pad, LLVMInt32Type(), NONAME);
-        let res2_pad = LLVMBuildZExt(self.builder, res2_pad, LLVMInt32Type(), NONAME);
-        let res3_pad = LLVMBuildZExt(self.builder, res3_pad, LLVMInt32Type(), NONAME);
+        let res0_pad = LLVMBuildZExt(self.builder, res0, LLVMInt32Type(), NONAME);
+        let res1_pad = LLVMBuildZExt(self.builder, res1, LLVMInt32Type(), NONAME);
+        let res2_pad = LLVMBuildZExt(self.builder, res2, LLVMInt32Type(), NONAME);
+        let res3_pad = LLVMBuildZExt(self.builder, res3, LLVMInt32Type(), NONAME);
 
         let res0_pad = LLVMBuildShl(
             self.builder,
@@ -2920,19 +2906,19 @@ impl<'a> InstructionTranslator<'a> {
         let res1_pad = LLVMBuildShl(
             self.builder,
             res1_pad,
-            LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
             NONAME,
         );
         let res2_pad = LLVMBuildShl(
             self.builder,
             res2_pad,
-            LLVMConstInt(LLVMInt32Type(), 16 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
             NONAME,
         );
         let res3_pad = LLVMBuildShl(
             self.builder,
             res3_pad,
-            LLVMConstInt(LLVMInt32Type(), 24 as u64, 0),
+            LLVMConstInt(LLVMInt32Type(), 3 as u64, 0),
             NONAME,
         );
 
@@ -4628,7 +4614,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfeqRS => {
@@ -4647,7 +4640,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfltS => {
@@ -4666,7 +4666,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfltRS => {
@@ -4685,7 +4692,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfleS => {
@@ -4704,7 +4718,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfleRS => {
@@ -4723,7 +4744,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfgeS => {
@@ -4742,7 +4770,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfgeRS => {
@@ -4761,7 +4796,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfgtS => {
@@ -4780,7 +4822,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfgtRS => {
@@ -4799,7 +4848,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfneS => {
@@ -4818,7 +4874,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
             riscv::OpcodeRdRs1Rs2::VfneRS => {
@@ -4837,7 +4900,14 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMInt32Type(),
                     NONAME,
                 );
-                self.write_freg_vf64s(data.rd, res1, res0);
+                let res1 = LLVMBuildShl(
+                    self.builder,
+                    res1,
+                    LLVMConstInt(LLVMInt32Type(), 1 as u64, 0),
+                    name,
+                );
+                let res = LLVMBuildOr(self.builder, res0, res1, name);
+                self.write_reg(data.rd, res);
                 return Ok(());
             }
 
