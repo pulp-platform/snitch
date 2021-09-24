@@ -82,10 +82,6 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   logic   idx_isect_ena;
   index_t idx_isect_q;
 
-  // Index FIFO credit counter
-  logic idx_cred_take, idx_cred_give, idx_cred_clear;
-  logic idx_cred_left, idx_cred_full;
-
   // Index byte (serializer/deserializer) counter
   logic     idx_bytecnt_ena;
   bytecnt_t idx_bytecnt_d, idx_bytecnt_q;
@@ -114,6 +110,9 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     // Handshaking at request egresses
     logic idx_req_stall;
     logic mem_hs;
+
+    // Decoupling credit counter
+    logic idx_cred_left, idx_cred_full;
 
     // Index TCDM request (write-only)
     assign idx_req_o.q = '{addr: idx_addr, write: 1'b1,
@@ -146,16 +145,27 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     assign isect_slv_hs   = isect_slv_valid & isect_slv_ready;
     assign mem_hs         = mem_valid_o & mem_ready_i;
     assign idx_done_set   = isect_slv_hs & isect_slv_done;
-    assign idx_cred_give  = isect_slv_hs & ~isect_slv_done;
-    assign idx_cred_take  = mem_hs & ~mem_done_o;
     assign idx_done_clear = mem_hs & mem_done_o;
-    assign idx_cred_clear = 1'b0;
+
+    snitch_ssr_credit_counter #(
+      .NumCredits       ( Cfg.IsectSlave ? Cfg.IsectSlaveCredits : Cfg.IndexCredits),
+      .InitCreditEmpty  ( Cfg.IsectSlave )
+      ) i_credit_counter (
+      .clk_i,
+      .rst_ni,
+      .credit_o      (  ),
+      .credit_give_i ( idx_bytecnt_ena  ),
+      .credit_take_i ( idx_isect_ena    ),
+      .credit_init_i ( 1'b0 ),
+      .credit_left_o ( idx_cred_left    ),
+      .credit_full_o ( idx_cred_full    )
+    );
 
     `FFLARNC(idx_done_q, 1'b1, idx_done_set, cfg_done_i, 1'b0, clk_i, rst_ni)
     `FFLARNC(idx_done_flag_q, 1'b1, idx_done_set, idx_done_clear, 1'b0, clk_i, rst_ni)
 
     // Advance byte counter on index pop unless done
-    assign idx_bytecnt_ena = idx_cred_give;
+    assign idx_bytecnt_ena = isect_slv_hs & ~isect_slv_done;;
 
     // Ready to write indices when not done, memory ready, and credits remaining
     assign idx_req_stall    = idx_word_valid_q & ~idx_rsp_i.q_ready;
@@ -186,7 +196,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
     // Intersector slave enable signals
     assign isect_slv_req_o.ena  = ~(idx_done_q | cfg_done_i) & cfg_isect_slv_i;
-    assign idx_isect_ena        = idx_cred_take;
+    assign idx_isect_ena        = mem_hs & ~mem_done_o;
 
     // Output to address generator
     assign mem_idx      = idx_isect_q;
@@ -218,6 +228,9 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     logic isect_mst_hs;
     logic isect_done_set, isect_done_clear;
     logic isect_done_q;
+
+    // Index credit counter
+    logic idx_cred_left, idx_cred_full;
 
     if (Cfg.IsectMaster) begin : gen_isect_master
       assign isect_mst_hs = isect_mst_req_o.valid & isect_mst_rsp_i.ready;
@@ -260,9 +273,19 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
     // Index counter: keeps track of the number of memory requests in flight
     // to ensure that the FIFO does not overfill.
-    assign idx_cred_take  = idx_req_o.q_valid & idx_rsp_i.q_ready;
-    assign idx_cred_give  = idx_fifo_pop;
-    assign idx_cred_clear = isect_done_clear;
+    snitch_ssr_credit_counter #(
+      .NumCredits       ( Cfg.IndexCredits ),
+      .InitCreditEmpty  ( 0 )
+      ) i_credit_counter (
+      .clk_i,
+      .rst_ni,
+      .credit_o      (  ),
+      .credit_give_i ( idx_fifo_pop     ),
+      .credit_take_i ( idx_req_o.q_valid & idx_rsp_i.q_ready ),
+      .credit_init_i ( isect_done_clear ),
+      .credit_left_o ( idx_cred_left    ),
+      .credit_full_o ( idx_cred_full    )
+    );
 
     // The initial byte offset and byte offset of the index array bound determine
     // the final index offset and whether an additional index word is needed.
@@ -316,21 +339,6 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     end
 
   end
-
-  // Credit counter: used for index dataflow decoupling
-  snitch_ssr_credit_counter #(
-    .NumCredits       ( Cfg.IsectSlave ? Cfg.IsectSlaveCredits : Cfg.IndexCredits),
-    .InitCreditEmpty  ( Cfg.IsectSlave )
-    ) i_credit_counter (
-    .clk_i,
-    .rst_ni,
-    .credit_o      (  ),
-    .credit_give_i ( idx_cred_give  ),
-    .credit_take_i ( idx_cred_take  ),
-    .credit_init_i ( idx_cred_clear ),
-    .credit_left_o ( idx_cred_left  ),
-    .credit_full_o ( idx_cred_full  )
-  );
 
   // Intersection index counter
   if (Cfg.IsectMaster | Cfg.IsectSlave) begin : gen_isect_ctr
