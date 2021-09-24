@@ -179,7 +179,6 @@ package ariane_pkg;
     localparam int unsigned LAT_COMP_FP16    = 'd1;
     localparam int unsigned LAT_COMP_FP16ALT = 'd1;
     localparam int unsigned LAT_COMP_FP8     = 'd1;
-    localparam int unsigned LAT_COMP_FP8ALT  = 'd1;
     localparam int unsigned LAT_DIVSQRT      = 'd2;
     localparam int unsigned LAT_NONCOMP      = 'd1;
     localparam int unsigned LAT_CONV         = 'd2;

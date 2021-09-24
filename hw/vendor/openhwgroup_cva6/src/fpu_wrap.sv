@@ -61,16 +61,14 @@ module fpu_wrap import ariane_pkg::*; (
     // Implementation (number of registers etc)
     localparam fpnew_pkg::fpu_implementation_t FPU_IMPLEMENTATION = '{
       PipeRegs:  '{// FP32, FP64, FP16, FP8, FP16alt
-                 '{LAT_COMP_FP32, LAT_COMP_FP64, LAT_COMP_FP16, LAT_COMP_FP8, LAT_COMP_FP16ALT, LAT_COMP_FP8ALT}, // ADDMUL
-                 '{default: LAT_DIVSQRT},         // DIVSQRT
-                 '{default: LAT_NONCOMP},         // NONCOMP
-                 '{default: LAT_CONV},            // CONV
-                 '{default: fpnew_pkg::MERGED}},  // DOTP
+                 '{LAT_COMP_FP32, LAT_COMP_FP64, LAT_COMP_FP16, LAT_COMP_FP8, LAT_COMP_FP16ALT}, // ADDMUL
+                 '{default: LAT_DIVSQRT}, // DIVSQRT
+                 '{default: LAT_NONCOMP}, // NONCOMP
+                 '{default: LAT_CONV}},   // CONV
       UnitTypes: '{'{default: fpnew_pkg::PARALLEL}, // ADDMUL
                    '{default: fpnew_pkg::MERGED},   // DIVSQRT
                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                   '{default: fpnew_pkg::MERGED},   // CONV
-                   '{default: fpnew_pkg::MERGED}},  // DOTP
+                   '{default: fpnew_pkg::MERGED}},  // CONV
       PipeConfig: fpnew_pkg::DISTRIBUTED
     };
 
