@@ -8,6 +8,18 @@
 #include "snrt.h"
 
 //================================================================================
+// settings
+//================================================================================
+/**
+ * @brief Usually the arguments passed to __kmpc_fork_call would to a malloc
+ * with the amount of arguments passed. This is too slow for our case and thus
+ * we reserve a chunk of arguments in TCDM and use it. This limits the maximum
+ * number of arguments
+ *
+ */
+#define KMP_FORK_MAX_NARGS 12
+
+//================================================================================
 // data
 //================================================================================
 static omp_t *volatile omp_p_global;
@@ -37,6 +49,9 @@ static inline void initTeam(omp_t *_this, omp_team_t *team) {
 
 void omp_init(void) {
     if (snrt_cluster_core_idx() == 0) {
+        // allocate space for kmp arguments
+        kmpc_args =
+            (_kmp_ptr32 *)snrt_l1alloc(sizeof(_kmp_ptr32) * KMP_FORK_MAX_NARGS);
 #ifndef OMPSTATIC_NUMTHREADS
         omp_p = (omp_t *)snrt_l1alloc(sizeof(omp_t));
         unsigned int nbCores = snrt_cluster_compute_core_num();
@@ -54,11 +69,13 @@ void omp_init(void) {
 
         initTeam(omp_p, &omp_p->plainTeam);
         snrt_memset(omp_p->kmpc_barrier, 0, sizeof(struct snrt_barrier));
+        // Exchange omp pointer with other cluster cores
         omp_p_global = omp_p;
 #else
         omp_p.kmpc_barrier =
             (struct snrt_barrier *)snrt_l1alloc(sizeof(struct snrt_barrier));
         snrt_memset(omp_p.kmpc_barrier, 0, sizeof(struct snrt_barrier));
+        // Exchange omp pointer with other cluster cores
         omp_p_global = &omp_p;
 #endif
 

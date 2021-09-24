@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "eu.h"
+#include "kmp.h"
 #include "snrt.h"
 
 //================================================================================
@@ -84,6 +85,13 @@ typedef struct {
      *
      */
     struct snrt_barrier *kmpc_barrier;
+    /**
+     * @brief Usually the arguments passed to __kmpc_fork_call would to a malloc
+     * with the amount of arguments passed. This is too slow for our case and
+     * thus we reserve a chunk of arguments in TCDM and use it. This limits the
+     * maximum number of arguments
+     */
+    _kmp_ptr32 *kmpc_args;
 } omp_t;
 
 #ifdef OPENMP_PROFILE
@@ -110,6 +118,7 @@ void partialParallelRegion(int32_t argc, void *data,
 
 #ifdef OPENMP_PROFILE
 void omp_print_prof(void);
+extern omp_prof_t *omp_prof;
 #endif
 
 //================================================================================
