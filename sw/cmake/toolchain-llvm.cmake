@@ -29,6 +29,8 @@ add_compile_options(-mllvm -enable-misched=false)
 # LLD doesn't support relaxation for RISC-V yet
 add_compile_options(-mno-relax)
 add_compile_options(-fopenmp)
+# For smallfloat we need experimental extensions enabled (Zfh)
+add_compile_options(-menable-experimental-extensions)
 
 ##
 ## Link options
