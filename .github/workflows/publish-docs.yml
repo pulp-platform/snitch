@@ -7,7 +7,6 @@ on:
   push:
     branches:
     - master
-    - doc/doxygen
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -29,11 +28,4 @@ jobs:
         ./doxybook2/bin/doxybook2 --input sw/doxygen/xml --output docs/runtime --config docs/doxybook2.json
         rm -rf doxybook2
     - run: pip install -r docs/requirements.txt
-    - run: mkdocs build
     - run: mkdocs gh-deploy --force
-    - uses: actions/upload-artifact@v2
-      with:
-        name: mkdocs
-        path: |
-          site/
-          docs/runtime
