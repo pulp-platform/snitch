@@ -1,5 +1,5 @@
 {
-  "baseUrl": "/runtime/",
+  "baseUrl": "/snitch/runtime/",
   "indexInFolders": true,
   "linkSuffix": "/",
   "indexClassesName": "index",
