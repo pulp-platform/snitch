@@ -1,0 +1,31 @@
+# Copyright 2021 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+DOXYFILE_ENCODING = UTF-8
+PROJECT_NAME = "Snitch Runtime"
+OUTPUT_DIRECTORY = doxygen
+GENERATE_LATEX = NO
+
+# Necessary for doxybook2
+GENERATE_XML = YES
+XML_OUTPUT = xml
+
+# Source
+INPUT = benchmark snBLAS snRuntime
+RECURSIVE = YES
+FILE_PATTERNS = *.h *.hpp *.md
+EXAMPLE_PATH = examples snRuntime/test
+EXAMPLE_PATTERNS = *.c
+
+# Html related stuff, optional
+SHOW_NAMESPACES = YES
+EXTRACT_ALL = YES
+GENERATE_HTML = YES
+
+# This is here just so we don't have to mess
+# with dot executable on continous integration.
+CALL_GRAPH = NO
+HAVE_DOT = NO
+
+IMAGE_PATH = images
