@@ -168,7 +168,7 @@ static inline __attribute__((noreturn)) void snrt_exit(int status) {
 //================================================================================
 // Allocation functions
 //================================================================================
-extern void snrt_alloc_init(struct snrt_team_root *team);
+extern void snrt_alloc_init(struct snrt_team_root *team, uint32_t l3off);
 extern void *snrt_l1alloc(size_t size);
 extern void *snrt_l3alloc(size_t size);
 
@@ -273,15 +273,19 @@ static inline void snrt_mutex_release(volatile uint32_t *pmtx) {
 /**
  * @brief Bootstrap macro for openmp applications
  */
-#define __snrt_omp_bootstrap(core_idx) \
-    if (snrt_omp_bootstrap(core_idx)) return 0
+#define __snrt_omp_bootstrap(core_idx)     \
+    if (snrt_omp_bootstrap(core_idx)) do { \
+            snrt_cluster_hw_barrier();     \
+            return 0;                      \
+    } while (0)
 
 /**
  * @brief Destroy an OpenMP session so all cores exit cleanly
  */
 #define __snrt_omp_destroy(core_idx) \
     eu_exit(core_idx);               \
-    dm_exit();
+    dm_exit();                       \
+    snrt_cluster_hw_barrier();
 
 #ifdef __cplusplus
 }

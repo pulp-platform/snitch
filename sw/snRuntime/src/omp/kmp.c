@@ -14,16 +14,23 @@
 typedef void (*__task_type32)(_kmp_ptr32, _kmp_ptr32, _kmp_ptr32);
 typedef void (*__task_type64)(_kmp_ptr64, _kmp_ptr64, _kmp_ptr64);
 
-static void *args[sizeof(_kmp_ptr32)];
+/**
+ * @brief Usually the arguments passed to __kmpc_fork_call would do a malloc
+ * with the amount of arguments passed. This is too slow for our case and thus
+ * we reserve a chunk of arguments in TCDM and use it. This limits the maximum
+ * number of arguments
+ *
+ */
+_kmp_ptr32 *kmpc_args;
 
 static void __microtask_wrapper(void *arg, uint32_t argc) {
     kmp_int32 id = omp_get_thread_num();
-    _kmp_ptr32 *args = (_kmp_ptr32 *)arg;
-    kmpc_micro fn = (kmpc_micro)args[0];
     kmp_int32 *id_addr = (kmp_int32 *)(&id);
 
-    // first element in args in function pointer
-    _kmp_ptr32 *p_argv = &(args)[1];
+    // first element in args is the function pointer
+    kmpc_micro fn = (kmpc_micro)((_kmp_ptr32 *)arg)[0];
+    // second element in args is the pointer to the argument vector
+    _kmp_ptr32 *p_argv = &((_kmp_ptr32 *)arg)[1];
     kmp_int32 gtid = id;
 
     uint32_t cycle = read_csr(mcycle);
@@ -164,12 +171,17 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
     va_list vl;
     int arg_size = 0;
     arg_size = (argc + 1) * sizeof(_kmp_ptr32);
-    // void *args = rt_malloc(arg_size);
-    // for(int i = 0; i < arg_size; i ++) ((uint8_t*)args)[i]=0;
-    ((_kmp_ptr32 *)args)[0] = (_kmp_ptr32)microtask;
+
+    // Do not alloc for argument pointers but use the statically alllocated
+    // kmpc_args
+    // void *args = rt_malloc(arg_size); for(int i = 0; i < arg_size;
+    // i ++) ((uint8_t*)args)[i]=0;
+    // first element holds pointer to the microtask
+    kmpc_args[0] = (_kmp_ptr32)microtask;
+    // copy remaining varargs
     va_start(vl, microtask);
     for (int i = 1; i <= argc; ++i) {
-        ((_kmp_ptr32 *)args)[i] = (_kmp_ptr32)va_arg(vl, _kmp_ptr32);
+        kmpc_args[i] = (_kmp_ptr32)va_arg(vl, _kmp_ptr32);
     }
     va_end(vl);
 
@@ -187,10 +199,10 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
         /// this thread woul re-enter the event queue, run the newly dispatched
         /// thread and then return to this thread. If this is not done, the
         /// nested parallelism is not executed in the correct order
-        (void)eu_dispatch_push(__microtask_wrapper, argc, args,
+        (void)eu_dispatch_push(__microtask_wrapper, argc, kmpc_args,
                                omp->numThreads);
     } else {
-        parallelRegion(argc, args, __microtask_wrapper, omp->numThreads);
+        parallelRegion(argc, kmpc_args, __microtask_wrapper, omp->numThreads);
     }
 
     // rt_free(args);

@@ -68,11 +68,11 @@ _snrt_exit:
     bnez      a0, 1f
     slli      t0, t0, 1
     ori       t0, t0, 1
-    la        t1, .tohost
+    la        t1, tohost
     sw        t0, 0(t1)
 1:  ret
 
 # HTIF sections
-.pushsection .tohost,"aw",@progbits;
+.pushsection .htif,"aw",@progbits;
 .align 6; .global tohost; tohost: .dword 0;
 .align 6; .global fromhost; fromhost: .dword 0;

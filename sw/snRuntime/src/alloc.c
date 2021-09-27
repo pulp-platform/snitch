@@ -57,8 +57,9 @@ void *snrt_l3alloc(size_t size) {
  * @details
  *
  * @param snrt_team_root pointer to the team structure
+ * @param l3off Number of bytes to skip on _edram before starting allocator
  */
-void snrt_alloc_init(struct snrt_team_root *team) {
+void snrt_alloc_init(struct snrt_team_root *team, uint32_t l3off) {
     // Allocator in L1 TCDM memory
     team->allocator.l1.base =
         ALIGN_UP((uint32_t)team->cluster_mem.start, MIN_CHUNK_SIZE);
@@ -67,7 +68,8 @@ void snrt_alloc_init(struct snrt_team_root *team) {
     team->allocator.l1.next = team->allocator.l1.base;
     // Allocator in L3 shared memory
     extern uint32_t _edram;
-    team->allocator.l3.base = ALIGN_UP((uint32_t)_edram, MIN_CHUNK_SIZE);
+    team->allocator.l3.base =
+        ALIGN_UP((uint32_t)_edram + l3off, MIN_CHUNK_SIZE);
     ;
     team->allocator.l3.size = 0;
     team->allocator.l3.next = team->allocator.l3.base;

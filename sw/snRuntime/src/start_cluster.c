@@ -91,7 +91,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
                      SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET_REG_OFFSET);
 
     // Init allocator
-    snrt_alloc_init(team);
+    snrt_alloc_init(team, sizeof(struct putc_buffer));
     snrt_int_init(team);
 }
 
