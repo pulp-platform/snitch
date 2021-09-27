@@ -40,4 +40,11 @@ nav:
   - Snitch Cluster: rm/snitch_cluster/index.md
   - Reqrsp Interface: rm/reqrsp_interface/index.md
   - Custom Instructions: rm/custom_instructions.md
+- Snitch Runtime:
+  - Pages: runtime/Pages/index.md
+  - Files: runtime/Files/index.md
+  - Classes: runtime/Classes/index.md
+  - Examples: runtime/Examples/index.md
+  - Modules: runtime/Modules/index.md
+  - Namespaces: runtime/Namespaces/index.md
   # - Solder: rm/solder.md

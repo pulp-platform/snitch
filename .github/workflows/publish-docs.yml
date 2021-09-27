@@ -7,6 +7,7 @@ on:
   push:
     branches:
     - master
+    - doc/doxygen
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,5 +16,24 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: 3.x
+    - uses: mattnotmitt/doxygen-action@v1
+      with:
+        working-directory: sw/
+    - name: Generate Runtime Documentation
+      run: |
+        mkdir doxybook2; cd doxybook2
+        wget https://github.com/matusnovak/doxybook2/releases/download/v1.4.0/doxybook2-linux-amd64-v1.4.0.zip
+        unzip doxybook2-linux-amd64-v1.4.0.zip; cd ../
+        chmod +x doxybook2/bin/doxybook2
+        mkdir docs/runtime
+        ./doxybook2/bin/doxybook2 --input sw/doxygen/xml --output docs/runtime --config docs/doxybook2.json
+        rm -rf doxybook2
     - run: pip install -r docs/requirements.txt
-    - run: mkdocs gh-deploy --force
+    - run: mkdocs build
+    # - run: mkdocs gh-deploy --force
+    - uses: actions/upload-artifact@v2
+      with:
+        name: mkdocs
+        path: |
+          site/
+          docs/runtime
