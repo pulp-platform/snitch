@@ -150,7 +150,6 @@ add_snitch_test_args(printf_fmtint printf_fmtint-cluster --no-opt-llvm --base-ha
 add_snitch_test_args(printf_fmtint printf_fmtint-system --no-opt-llvm --base-hartid=3 --num-cores=8 --num-clusters=4)
 
 add_snitch_test_executable(team_global tests/team_global.c)
-add_snitch_test_rtl(team_global)
 add_snitch_test_args(team_global team_global --base-hartid=3 --num-cores=4 --num-clusters=2)
 
 # Tests exclusive to LLVM
