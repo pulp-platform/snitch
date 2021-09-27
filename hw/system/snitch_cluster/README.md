@@ -37,6 +37,10 @@ target.
 
     make traces
 
+A source-code annotated trace can be generated using the `annotate` target
+
+    make annotate
+
 ## Software
 
 The runtime and additional software libraries for the cluster configuration can be compiled as follows:
