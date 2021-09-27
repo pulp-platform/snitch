@@ -78,12 +78,14 @@ define QUESTASIM
 	@! grep -P "Errors: [1-9]*," $(dir $<)vsim.log
 	@mkdir -p bin
 	@echo "#!/bin/bash" > $@
+	@echo 'echo $$1 > logs/.rtlbinary' >> $@
 	@echo '${VSIM} +permissive -work ${VSIM_BUILDDIR} -c \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr -lutil" \
 				-t 1ps -voptargs=+acc $1 +permissive-off ++$$1 \
 				-do "log -r /*; run -a"' >> $@
 	@chmod +x $@
 	@echo "#!/bin/bash" > $@.gui
+	@echo 'echo $$1 > logs/.rtlbinary' >> $@
 	@echo '${VSIM} +permissive -work ${VSIM_BUILDDIR} \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr -lutil" \
 				-t 1ps -voptargs=+acc $1 +permissive-off ++$$1 \
@@ -107,3 +109,11 @@ logs/trace_hart_%.txt: logs/trace_hart_%.dasm ${ROOT}/util/gen_trace.py
 	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py > $@
 
 traces: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.txt/') || echo "")
+
+# make annotate
+# Generate source-code interleaved traces for all harts. Reads the binary from
+# the logs/.rtlbinary file that is written at start of simulation in the vsim script
+logs/trace_hart_%.s: logs/trace_hart_%.txt ${ROOT}/util/trace/annotate.py
+	$(PYTHON) ${ROOT}/util/trace/annotate.py -q -o $@ $(BINARY) $<
+BINARY ?= $(shell cat logs/.rtlbinary)
+annotate: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.s/') || echo "")
