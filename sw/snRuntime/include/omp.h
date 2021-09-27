@@ -86,7 +86,7 @@ typedef struct {
      */
     struct snrt_barrier *kmpc_barrier;
     /**
-     * @brief Usually the arguments passed to __kmpc_fork_call would to a malloc
+     * @brief Usually the arguments passed to __kmpc_fork_call would do a malloc
      * with the amount of arguments passed. This is too slow for our case and
      * thus we reserve a chunk of arguments in TCDM and use it. This limits the
      * maximum number of arguments

@@ -15,7 +15,7 @@ typedef void (*__task_type32)(_kmp_ptr32, _kmp_ptr32, _kmp_ptr32);
 typedef void (*__task_type64)(_kmp_ptr64, _kmp_ptr64, _kmp_ptr64);
 
 /**
- * @brief Usually the arguments passed to __kmpc_fork_call would to a malloc
+ * @brief Usually the arguments passed to __kmpc_fork_call would do a malloc
  * with the amount of arguments passed. This is too slow for our case and thus
  * we reserve a chunk of arguments in TCDM and use it. This limits the maximum
  * number of arguments
@@ -29,7 +29,7 @@ static void __microtask_wrapper(void *arg, uint32_t argc) {
 
     // first element in args is the function pointer
     kmpc_micro fn = (kmpc_micro)((_kmp_ptr32 *)arg)[0];
-    // second element in args in function pointer
+    // second element in args is the pointer to the argument vector
     _kmp_ptr32 *p_argv = &((_kmp_ptr32 *)arg)[1];
     kmp_int32 gtid = id;
 
