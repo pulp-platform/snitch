@@ -59,6 +59,11 @@ parser.add_argument(
     type=int,
     default=-1,
     help='Last line to parse')
+parser.add_argument(
+    '-q',
+    '--quiet',
+    action='store_true',
+    help='Quiet output')
 
 args = parser.parse_args()
 
@@ -66,15 +71,18 @@ elf = args.elf
 trace = args.trace
 output = args.output
 addr2line = args.addr2line
+quiet = args.quiet
 
-print('elf:', elf, file=sys.stderr)
-print('trace:', trace, file=sys.stderr)
-print('output:', output, file=sys.stderr)
-print('addr2line:', addr2line, file=sys.stderr)
+if not quiet:
+    print('elf:', elf, file=sys.stderr)
+    print('trace:', trace, file=sys.stderr)
+    print('output:', output, file=sys.stderr)
+    print('addr2line:', addr2line, file=sys.stderr)
 
 of = open(output, 'w')
 
-print(f' annotating: {output}    ', end='')
+if not quiet:
+    print(f' annotating: {output}    ', end='')
 
 # buffer source files
 src_files = {}
@@ -138,10 +146,12 @@ with open(trace, 'r') as f:
         last = annot
 
         # very simple progress
-        prog = int(100.0 / tot_lines * lino)
-        if prog > last_prog:
-            last_prog = prog
-            sys.stdout.write(f'\b\b\b\b{prog:3d}%')
-            sys.stdout.flush()
-print(' done')
-print(adr2line.cache_info())
+        if not quiet:
+            prog = int(100.0 / tot_lines * lino)
+            if prog > last_prog:
+                last_prog = prog
+                sys.stdout.write(f'\b\b\b\b{prog:3d}%')
+                sys.stdout.flush()
+if not quiet:
+    print(' done')
+    print(adr2line.cache_info())
