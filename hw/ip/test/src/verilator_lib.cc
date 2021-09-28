@@ -2,13 +2,14 @@
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
 
+#include <printf.h>
+
 #include "Vtestharness.h"
 #include "Vtestharness__Dpi.h"
 #include "sim.hh"
 #include "tb_lib.hh"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
-
 namespace sim {
 
 // Number of cycles between HTIF checks.
@@ -19,6 +20,13 @@ void sim_thread_main(void *arg) { ((Sim *)arg)->main(); }
 int TIME = 0;
 
 Sim::Sim(int argc, char **argv) : htif_t(argc, argv) {
+    // Search arguments for `--vcd` flag and enable waves if requested
+    for (auto i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--vcd") == 0) {
+            printf("VCD wave generation enabled\n");
+            vlt_vcd = true;
+        }
+    }
     Verilated::commandArgs(argc, argv);
 }
 
@@ -41,9 +49,11 @@ void Sim::main() {
     bool clk_i = 0, rst_ni = 0;
 
     // Trace 8 levels of hierarchy.
-    top->trace(vcd.get(), 8);
-    vcd->open("sim.vcd");
-    vcd->dump(TIME);
+    if (vlt_vcd) {
+        top->trace(vcd.get(), 8);
+        vcd->open("sim.vcd");
+        vcd->dump(TIME);
+    }
     TIME += 2;
 
     while (!Verilated::gotFinish()) {
@@ -53,7 +63,7 @@ void Sim::main() {
         top->rst_ni = rst_ni;
         // Evaluate the DUT.
         top->eval();
-        vcd->dump(TIME);
+        if (vlt_vcd) vcd->dump(TIME);
         // Increase global time.
         TIME++;
         // Switch to the HTIF interface in regular intervals.
@@ -63,7 +73,7 @@ void Sim::main() {
     }
 
     // Clean up.
-    vcd->close();
+    if (vlt_vcd) vcd->close();
 }
 }  // namespace sim
 

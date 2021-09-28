@@ -42,6 +42,7 @@ struct Sim : htif_t {
    private:
     context_t *host;
     context_t target;
+    bool vlt_vcd = false;
 };
 
 void sim_thread_main(void *arg);
