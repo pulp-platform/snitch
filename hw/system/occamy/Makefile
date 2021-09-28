@@ -13,6 +13,7 @@ include $(ROOT)/util/Makefrag
 
 VLT_FLAGS 	  += -Wno-SYMRSVDWORD
 REGGEN        ?= ${ROOT}/util/regtool.py
+CLANG_FORMAT  ?= $(shell which clang-format-10.0.1)
 
 QUESTA_64BIT	= -64
 VSIM      		= vsim ${QUESTA_64BIT}
@@ -88,6 +89,7 @@ update-socreg:
 	@$(REGGEN) -r src/occamy_soc_ctrl/occamy_soc_reg.hjson --outdir src/occamy_soc_ctrl/
 	@echo "[REGGEN]  Generate CDEFS"
 	@$(REGGEN) --cdefines --outfile $(CDEF) src/occamy_soc_ctrl/occamy_soc_reg.hjson
+	@$(CLANG_FORMAT) -i $(CDEF)
 
 addrmap.png: update-source
 	dot -Tpng addrmap.dot > addrmap.png
