@@ -25,6 +25,7 @@ VLOG_FLAGS 	  += -suppress 13314
 VLOG_FLAGS 	  += ${QUESTA_64BIT}
 
 CFG ?= src/occamy_cfg.hjson
+CDEF = ${ROOT}/sw/snRuntime/include/occamy_soc_peripheral.h
 
 all: update-clint update-plic update-socreg update-source
 
@@ -85,6 +86,8 @@ update-socreg:
 		--chip src/occamy_soc_ctrl/occamy_soc_reg.hjson.tpl
 	@echo "[REGGEN]  Generate SOCREGS"
 	@$(REGGEN) -r src/occamy_soc_ctrl/occamy_soc_reg.hjson --outdir src/occamy_soc_ctrl/
+	@echo "[REGGEN]  Generate CDEFS"
+	@$(REGGEN) --cdefines --outfile $(CDEF) src/occamy_soc_ctrl/occamy_soc_reg.hjson
 
 addrmap.png: update-source
 	dot -Tpng addrmap.dot > addrmap.png
