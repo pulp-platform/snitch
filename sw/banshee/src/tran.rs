@@ -3303,18 +3303,6 @@ impl<'a> InstructionTranslator<'a> {
                 );
                 self.write_freg(data.rd, value);
             }
-            riscv::OpcodeRdRs1::FcvtHD => {
-                let (fpmode_src, fpmode_dst) = self.read_fpmode();
-                let rs1 = self.read_freg(data.rs1);
-                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
-                let value = self.emit_fp16_op_cvt_to_f(
-                    rs1,
-                    flexfloat::FfOpCvt::Fcvt16f2f,
-                    fpmode_src,
-                    fpmode_dst,
-                );
-                self.write_freg_f16(data.rd, value);
-            }
             riscv::OpcodeRdRs1::VfsumS => {
                 let (a1, a0) = self.read_freg_vf64s(data.rs1);
                 let c0 = self.read_freg_f32(data.rd);
