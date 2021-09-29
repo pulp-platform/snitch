@@ -325,7 +325,7 @@ pub unsafe fn ff_instruction_cvt_to_s(
     op: FfOpCvt,
     fpmode_src: bool,
     _fpmode_dst: bool,
-) -> f32 {
+) -> i32 {
     let env_fp8_src: flexfloat_desc_t = if fpmode_src { env_fp8alt } else { env_fp8 };
     let env_fp16_src: flexfloat_desc_t = if fpmode_src { env_fp16alt } else { env_fp16 };
 
@@ -351,8 +351,8 @@ pub unsafe fn ff_instruction_cvt_to_s(
         _ => (),
     };
 
-    let rd = ff_get_float(ff_res);
-    rd as f32
+    let rd = flexfloat_get_bits(ff_res);
+    rd as i32
 }
 
 /// conversions to fp64
