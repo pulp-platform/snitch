@@ -1,0 +1,4 @@
+[submodule "sw/vendor/riscv-isa-sim"]
+	path = sw/vendor/riscv-isa-sim
+	url = git@github.com:noah95/riscv-isa-sim.git
+	branch = snitch
