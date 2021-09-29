@@ -171,6 +171,7 @@ package ariane_pkg;
     localparam bit XF16    = 1'b0; // Is half-precision float extension (Xf16) enabled
     localparam bit XF16ALT = 1'b0; // Is alternative half-precision float extension (Xf16alt) enabled
     localparam bit XF8     = 1'b0; // Is quarter-precision float extension (Xf8) enabled
+    localparam bit XF8ALT  = 1'b0; // Is alternative half-precision float extension (Xf8alt) enabled
     localparam bit XFVEC   = 1'b0; // Is vectorial float extension (Xfvec) enabled
 
     // Transprecision float unit
@@ -183,6 +184,7 @@ package ariane_pkg;
     localparam int unsigned LAT_DIVSQRT      = 'd2;
     localparam int unsigned LAT_NONCOMP      = 'd1;
     localparam int unsigned LAT_CONV         = 'd2;
+    localparam int unsigned LAT_DOTP         = 'd2;
 
     // --------------------------------------
     // vvvv Don't change these by hand! vvvv
@@ -193,7 +195,8 @@ package ariane_pkg;
                          RVF     ? 32 : // F ext.
                          XF16    ? 16 : // Xf16 ext.
                          XF16ALT ? 16 : // Xf16alt ext.
-                         XF8     ? 8 :  // Xf8 ext.
+                         XF8     ? 8  : // Xf8 ext.
+                         XF8ALT  ? 8  : // Xf8alt ext.
                          1;             // Unused in case of no FP
 
     localparam bit NSX = XF16 | XF16ALT | XF8 | XFVEC; // Are non-standard extensions present?
@@ -202,6 +205,7 @@ package ariane_pkg;
     localparam bit XF16VEC    = XF16    & XFVEC & FLEN>16; // FP16 vectors available if vectors and larger fmt enabled
     localparam bit XF16ALTVEC = XF16ALT & XFVEC & FLEN>16; // FP16ALT vectors available if vectors and larger fmt enabled
     localparam bit XF8VEC     = XF8     & XFVEC & FLEN>8;  // FP8 vectors available if vectors and larger fmt enabled
+    localparam bit XF8ALTVEC  = XF8ALT  & XFVEC & FLEN>8;  // FP8ALT vectors available if vectors and larger fmt enabled
     // ^^^^ until here ^^^^
     // ---------------------
 
