@@ -38,7 +38,7 @@ RUN cargo install --path /tmp/banshee
 
 # Build `riscv-isa-sim`
 COPY sw/vendor/riscv-isa-sim /tmp/riscv-isa-sim
-RUN cd /tmp/riscv-isa-sim && mkdir build && cd build && ../configure --prefix=/root/riscv && make install -s
+RUN cd /tmp/riscv-isa-sim && mkdir build && cd build && ../configure --prefix=/root/riscv && make install
 
 # 2. Stage
 FROM ubuntu:18.04 AS snitch
