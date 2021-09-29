@@ -80,7 +80,7 @@ $(VLT_BUILDDIR)/generated/%.o: generated/%.cc ${VLT_BUILDDIR}/lib/libfesvr.a
 # Link verilated archive wich $(VLT_COBJ)
 bin/snitch_cluster.vlt: $(VLT_AR) $(VLT_COBJ) ${VLT_BUILDDIR}/lib/libfesvr.a
 	mkdir -p $(dir $@)
-	$(CXX) $(LDFLAGS) -std=c++14 -lpthread -L ${VLT_BUILDDIR}/lib -lfesvr -o $@ $(VLT_AR) $(VLT_COBJ)
+	$(CXX) $(LDFLAGS) -std=c++14 -L ${VLT_BUILDDIR}/lib -o $@ $(VLT_COBJ) $(VLT_AR) -lfesvr -lpthread
 
 ############
 # Modelsim #
