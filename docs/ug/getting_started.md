@@ -36,6 +36,12 @@ This will take you through the necessary steps to get a sample program running o
     less trace_hart_00000000.txt
     ```
     Optionally you can inspect the dumped waveforms (`snitch_cluster.vcd`).
+    `spike-dasm` is required to generate the traces. Using the source from this repository supports disassembly of Snitch-custom instructions:
+    ```
+    cd sw/vendor/riscv-isa-sim
+    mkdir build; cd build
+    ../configure; make spike-dasm
+    ```
 7. Visualize the traces with the `util/trace/tracevis.py` script.
     ```
     ./util/trace/tracevis.py -o trace.json sw/build/benchmark/benchmark-matmul-all hw/system/snitch_cluster/logs/trace_hart_*.txt
