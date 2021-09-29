@@ -63,7 +63,7 @@ module fpnew_opgroup_multifmt_slice #(
   // We will send the format information along with the data
   localparam int unsigned FMT_BITS =
       fpnew_pkg::maximum($clog2(NUM_FORMATS), $clog2(NUM_INT_FORMATS));
-  localparam int unsigned AUX_BITS = FMT_BITS + 2; // also add vectorial and integer flags
+  localparam int unsigned AUX_BITS = FMT_BITS + 3; // also add vectorial and integer flags
 
   logic [NUM_LANES-1:0] lane_in_ready, lane_out_valid; // Handshake signals for the lanes
   logic                 vectorial_op;
@@ -73,7 +73,7 @@ module fpnew_opgroup_multifmt_slice #(
   // additional flags for CONV
   logic       dst_fmt_is_int, dst_is_cpk;
   logic [1:0] dst_vec_op; // info for vectorial results (for packing)
-  logic [2:0] target_aux_d, target_aux_q;
+  logic [1:0] target_aux_d, target_aux_q;
   logic       is_up_cast, is_down_cast;
 
   logic [NUM_FORMATS-1:0][Width-1:0]      fmt_slice_result;
@@ -89,7 +89,7 @@ module fpnew_opgroup_multifmt_slice #(
   logic   [NUM_LANES-1:0][AUX_BITS-1:0] lane_aux; // only the first one is actually used
   logic   [NUM_LANES-1:0]               lane_busy; // dito
 
-  logic                result_is_vector;
+  logic                result_is_vector, result_is_vsum, op_is_vsum;
   logic [FMT_BITS-1:0] result_fmt;
   logic                result_fmt_is_int, result_is_cpk;
   logic [1:0]          result_vec_op; // info for vectorial results (for packing)
@@ -108,13 +108,14 @@ module fpnew_opgroup_multifmt_slice #(
 
   assign is_up_cast   = (fpnew_pkg::fp_width(dst_fmt_i) > fpnew_pkg::fp_width(src_fmt_i));
   assign is_down_cast = (fpnew_pkg::fp_width(dst_fmt_i) < fpnew_pkg::fp_width(src_fmt_i));
+  assign op_is_vsum   = op_i == fpnew_pkg::VSUM ? 1'b1 : 1'b0;
 
   // The destination format is the int format for F2I casts
   assign dst_fmt    = dst_fmt_is_int ? int_fmt_i : dst_fmt_i;
 
   // The data sent along consists of the vectorial flag and format bits
-  assign aux_data      = {dst_fmt_is_int, vectorial_op, dst_fmt};
-  assign target_aux_d  = {dst_vec_op, dst_is_cpk};
+  assign aux_data      = {dst_is_cpk, dst_fmt_is_int, vectorial_op, dst_fmt, op_is_vsum};
+  assign target_aux_d  = dst_vec_op;
 
   // CONV passes one operand for assembly after the unit: opC for cpk, opB for others
   if (OpGroup == fpnew_pkg::CONV) begin : conv_target
@@ -346,6 +347,9 @@ module fpnew_opgroup_multifmt_slice #(
     end else begin : inactive_lane
       assign lane_out_valid[lane] = 1'b0; // unused lane
       assign lane_in_ready[lane]  = 1'b0; // unused lane
+      assign lane_aux[lane]       = 1'b0; // unused lane
+      assign lane_tags[lane]      = 1'b0; // unused lane
+      assign lane_ext_bit[lane]   = 1'b1; // NaN-box unused lane
       assign local_result         = '{default: lane_ext_bit[0]}; // sign-extend/nan box
       assign lane_status[lane]    = '0;
       assign lane_busy[lane]      = 1'b0;
@@ -425,7 +429,7 @@ module fpnew_opgroup_multifmt_slice #(
   if (OpGroup == fpnew_pkg::CONV) begin : target_regs
     // Bypass pipeline signals, index i holds signal after i register stages
     logic [0:NumPipeRegs][Width-1:0] byp_pipe_target_q;
-    logic [0:NumPipeRegs][2:0]       byp_pipe_aux_q;
+    logic [0:NumPipeRegs][1:0]       byp_pipe_aux_q;
     logic [0:NumPipeRegs]            byp_pipe_valid_q;
     // Ready signal is combinatorial for all stages
     logic [0:NumPipeRegs] byp_pipe_ready;
@@ -456,7 +460,7 @@ module fpnew_opgroup_multifmt_slice #(
     assign conv_target_q = byp_pipe_target_q[NumPipeRegs];
 
     // decode the aux data
-    assign {result_vec_op, result_is_cpk} = byp_pipe_aux_q[NumPipeRegs];
+    assign result_vec_op = byp_pipe_aux_q[NumPipeRegs];
 
     for (genvar fmt = 0; fmt < NUM_FORMATS; fmt++) begin : pack_conv_cpk_result
       localparam int unsigned FP_WIDTH = fpnew_pkg::fp_width(fpnew_pkg::fp_format_e'(fmt));
@@ -478,17 +482,18 @@ module fpnew_opgroup_multifmt_slice #(
     end
 
   end else begin : no_conv
-    assign {result_vec_op, result_is_cpk} = '0;
+    assign result_vec_op = '0;
     assign fmt_conv_cpk_result = '0;
   end
 
   // ------------
   // Output Side
   // ------------
-  assign {result_fmt_is_int, result_is_vector, result_fmt} = lane_aux[0];
+  assign {result_is_cpk, result_fmt_is_int, result_is_vector, result_fmt, result_is_vsum} = lane_aux[0];
 
-  assign result_o = result_fmt_is_int ? ifmt_slice_result[result_fmt]                  :
-                    result_is_cpk     ? fmt_conv_cpk_result[result_fmt][result_vec_op] :
+  assign result_o = result_fmt_is_int ? ifmt_slice_result[result_fmt]                   :
+                    result_is_cpk     ? fmt_conv_cpk_result[result_fmt][result_vec_op]  :
+                    result_is_vsum    ? {{(Width/2){1'b1}}, {fmt_slice_result[result_fmt][Width/2-1:0]}} :
                                         fmt_slice_result[result_fmt];
 
   assign extension_bit_o = lane_ext_bit[0]; // don't care about upper ones
