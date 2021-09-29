@@ -2058,13 +2058,21 @@ impl<'a> InstructionTranslator<'a> {
             }
             riscv::OpcodeRdRmRs1::FcvtHD => {
                 let (fpmode_src, fpmode_dst) = self.read_fpmode();
-                let rs1 = self.read_freg_f64(data.rs1);
+                let rs1 = self.read_freg(data.rs1);
                 let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
                 let value = self.emit_fp16_op_cvt_to_f(
                     rs1,
                     flexfloat::FfOpCvt::Fcvt64f2f,
                     fpmode_src,
                     fpmode_dst,
+                );
+
+                // pad left bits with 1
+                let ptr = self.freg_ptr(data.rd);
+                LLVMBuildStore(
+                    self.builder,
+                    LLVMConstInt(LLVMInt64Type(), -1i32 as u64, 0),
+                    ptr,
                 );
                 self.write_freg_f16(data.rd, value);
             }
@@ -3174,6 +3182,12 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMPointerType(LLVMInt32Type(), 0),
                     NONAME,
                 );
+                // pad left bits with 1
+                LLVMBuildStore(
+                    self.builder,
+                    LLVMConstInt(LLVMInt64Type(), -1i32 as u64, 0),
+                    raw_ptr,
+                );
                 // build the actual store and add trace
                 LLVMBuildStore(self.builder, rs1, ptr);
                 self.trace_access(
@@ -3262,7 +3276,20 @@ impl<'a> InstructionTranslator<'a> {
                     fpmode_src,
                     fpmode_dst,
                 );
-                self.write_freg_f32(data.rd, value);
+
+                let raw_ptr = self.freg_ptr(data.rd);
+                let ptr = LLVMBuildBitCast(
+                    self.builder,
+                    raw_ptr,
+                    LLVMPointerType(LLVMInt32Type(), 0),
+                    NONAME,
+                );
+                // build the actual store and add trace
+                LLVMBuildStore(self.builder, value, ptr);
+                self.trace_access(
+                    TraceAccess::WriteFReg(data.rd as u8),
+                    LLVMBuildLoad(self.builder, raw_ptr, NONAME),
+                );
             }
             riscv::OpcodeRdRs1::FcvtDH => {
                 let (fpmode_src, fpmode_dst) = self.read_fpmode();
@@ -3275,6 +3302,18 @@ impl<'a> InstructionTranslator<'a> {
                     fpmode_dst,
                 );
                 self.write_freg(data.rd, value);
+            }
+            riscv::OpcodeRdRs1::FcvtHD => {
+                let (fpmode_src, fpmode_dst) = self.read_fpmode();
+                let rs1 = self.read_freg(data.rs1);
+                let rs1 = LLVMBuildZExt(self.builder, rs1, LLVMInt64Type(), NONAME);
+                let value = self.emit_fp16_op_cvt_to_f(
+                    rs1,
+                    flexfloat::FfOpCvt::Fcvt16f2f,
+                    fpmode_src,
+                    fpmode_dst,
+                );
+                self.write_freg_f16(data.rd, value);
             }
             riscv::OpcodeRdRs1::VfsumS => {
                 let (a1, a0) = self.read_freg_vf64s(data.rs1);
