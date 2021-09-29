@@ -67,13 +67,13 @@ clean-vlt-obj:
 	rm $(VLT_COBJ)
 
 # Build targets for verilator TB
-$(VLT_BUILDDIR)/tb/%.o: $(TB_DIR)/%.cc $(VLT_AR)
+$(VLT_BUILDDIR)/tb/%.o: $(TB_DIR)/%.cc $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
 $(VLT_BUILDDIR)/vlt/%.o: $(VLT_ROOT)/include/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
-$(VLT_BUILDDIR)/generated/%.o: generated/%.cc
+$(VLT_BUILDDIR)/generated/%.o: generated/%.cc ${VLT_BUILDDIR}/lib/libfesvr.a
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
 
