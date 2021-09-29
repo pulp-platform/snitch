@@ -10,20 +10,20 @@ inst.go: opcodes opcodes-pseudo parse-opcodes
 	cat opcodes opcodes-pseudo opcodes-pulp | ./parse-opcodes -go > $@
 
 inst.c: opcodes opcodes-pseudo parse-opcodes
-	cat opcodes opcodes-pseudo opcodes-rep opcodes-dma opcodes-pseudo opcodes-ipu | ./parse-opcodes -c > $@
+	cat opcodes opcodes-pseudo opcodes-rep opcodes-dma opcodes-pseudo opcodes-sflt opcodes-ipu | ./parse-opcodes -c > $@
 
 inst.sv: opcodes opcodes-pseudo parse-opcodes
-	cat opcodes opcodes-rvc opcodes-rvc-pseudo opcodes-pseudo opcodes-pulp opcodes-ipu | ./parse-opcodes -sv > $@
+	cat opcodes opcodes-rvc opcodes-rvc-pseudo opcodes-pseudo opcodes-pulp opcodes-sflt opcodes-ipu | ./parse-opcodes -sv > $@
 
 inst.py: opcodes opcodes-pseudo parse-opcodes
 	cat opcodes opcodes-pseudo opcodes-pulp | ./parse-opcodes -py > $@
 
 inst.rs: $(ALL_OPCODES) parse-opcodes
-	cat opcodes opcodes-rvc opcodes-rvc-pseudo opcodes-pseudo opcodes-pulp | ./parse-opcodes -rust > $@
+	cat opcodes opcodes-rvc opcodes-rvc-pseudo opcodes-pseudo opcodes-pulp opcodes-sflt | ./parse-opcodes -rust > $@
 	rustfmt $@
 
-inst.sverilog: opcodes opcodes-pseudo parse-opcodes opcodes-rep opcodes-dma
-	cat opcodes opcodes-rvc opcodes-rvc-pseudo opcodes-rep opcodes-dma opcodes-pseudo opcodes-ipu | ./parse-opcodes -sverilog > $@
+inst.sverilog: opcodes opcodes-pseudo parse-opcodes opcodes-sflt opcodes-rep opcodes-dma
+	cat opcodes opcodes-rvc opcodes-rvc-pseudo opcodes-rep opcodes-dma opcodes-pseudo opcodes-sflt opcodes-ipu | ./parse-opcodes -sverilog > $@
 
 instr-table.tex: $(ALL_OPCODES) parse-opcodes
 	cat opcodes opcodes-pseudo opcodes-pulp | ./parse-opcodes -tex > $@
