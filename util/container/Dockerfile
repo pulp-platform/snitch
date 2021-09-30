@@ -7,8 +7,6 @@
 # 1. Stage
 FROM ubuntu:18.04 AS builder
 
-ARG SPIKE_VERSION=641d7d03e6a8d822b720fcb1a19f261813c00c4a
-
 COPY apt-requirements.txt /tmp/apt-requirements.txt
 RUN apt-get update && \
     sed 's/#.*//' /tmp/apt-requirements.txt \
@@ -39,8 +37,8 @@ COPY sw/banshee /tmp/banshee
 RUN cargo install --path /tmp/banshee
 
 # Build `riscv-isa-sim`
-RUN git clone https://github.com/riscv/riscv-isa-sim.git
-RUN cd riscv-isa-sim && git checkout ${SPIKE_VERSION} && ./configure --prefix=/root/riscv && make install -s
+COPY sw/vendor/riscv-isa-sim /tmp/riscv-isa-sim
+RUN cd /tmp/riscv-isa-sim && mkdir build && cd build && ../configure --prefix=/root/riscv && make install
 
 # 2. Stage
 FROM ubuntu:18.04 AS snitch
