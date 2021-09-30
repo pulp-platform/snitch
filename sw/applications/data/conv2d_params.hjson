@@ -1,0 +1,24 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Parameters for a single Conv2d layer
+
+{
+    kernel: "Conv2d"
+    channels: {
+        out: 8,
+        in: 32
+    }
+    input_dim: {
+        height: 4,
+        width: 8
+    }
+    filter: {
+        height: 3,
+        width: 3,
+        padding: 1, # width//2
+        stride: 1,
+    }
+    prec: 64
+}
