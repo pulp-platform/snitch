@@ -19,3 +19,5 @@ enable_testing()
 add_subdirectory(${SNITCH_SOFTWARE_DIR}/snRuntime snRuntime)
 add_subdirectory(${SNITCH_SOFTWARE_DIR}/snBLAS snBLAS)
 add_subdirectory(${SNITCH_SOFTWARE_DIR}/benchmark benchmark)
+add_subdirectory(${SNITCH_SOFTWARE_DIR}/applications applications)
+
