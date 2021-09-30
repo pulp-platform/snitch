@@ -1,0 +1,12 @@
+diff -Naur work-orig/fesvr/context.h work/fesvr/context.h
+--- work-orig/fesvr/context.h	2021-09-28 13:43:01.948011433 +0200
++++ work/fesvr/context.h	2021-09-28 13:43:30.549093869 +0200
+@@ -7,7 +7,7 @@
+ 
+ #if defined(__GLIBC__)
+ # undef USE_UCONTEXT
+-# define USE_UCONTEXT
++// # define USE_UCONTEXT
+ # include <ucontext.h>
+ # include <memory>
+ #include <limits.h>

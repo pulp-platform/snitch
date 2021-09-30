@@ -3,7 +3,7 @@ BENDER		   ?= bender
 DASM 	       ?= spike-dasm
 VLT			   ?= verilator
 
-VERILATOR_ROOT ?= $$(dirname $$(which $(VLT)))/../share/verilator
+VERILATOR_ROOT ?= $(dir $(shell which $(VLT)))/../share/verilator
 VLT_ROOT	   ?= ${VERILATOR_ROOT}
 
 MATCH_END := '/+incdir+/ s/$$/\/*\/*/'
@@ -21,6 +21,7 @@ FESVR          ?= ${MKFILE_DIR}work
 FESVR_VERSION  ?= 35d50bc40e59ea1d5566fbd3d9226023821b1bb6
 
 VLT_BUILDDIR := work-vlt
+VLT_FESVR     = $(VLT_BUILDDIR)/riscv-isa-sim
 VLT_FLAGS    += -Wno-BLKANDNBLK
 VLT_FLAGS    += -Wno-LITENDIAN
 VLT_FLAGS    += -Wno-CASEINCOMPLETE
@@ -33,7 +34,36 @@ VLT_FLAGS    += -Wno-fatal
 VLT_FLAGS    += --unroll-count 1024
 VLT_BENDER   += -t rtl
 VLT_SOURCES  := $(shell ${BENDER} script flist ${VLT_BENDER} | ${SED_SRCS})
-VLT_CFLAGS   ?= -std=c++14 -pthread -I ${VLT_BUILDDIR} -I $(VLT_ROOT)/include -I $(VLT_ROOT)/include/vltstd -I $(FESVR)/include -I $(TB_DIR)
+VLT_CFLAGS   += -std=c++14 -pthread
+VLT_CFLAGS   +=-I ${VLT_BUILDDIR} -I $(VLT_ROOT)/include -I $(VLT_ROOT)/include/vltstd -I $(VLT_FESVR)/include -I $(TB_DIR)
+
+# We need a recent LLVM installation (>11) to compile Verilator.
+# We also need to link the binaries with LLVM's libc++.
+# Define CLANG_PATH to be the path of your Clang installation.
+
+ifneq (${CLANG_PATH},)
+    CLANG_CC       := $(CLANG_PATH)/bin/clang
+    CLANG_CXX      := $(CLANG_PATH)/bin/clang++
+    CLANG_CXXFLAGS := -nostdinc++ -isystem $(CLANG_PATH)/include/c++/v1
+    CLANG_LDFLAGS  := -nostdlib++ -fuse-ld=lld -L ${CLANG_PATH}/lib -Wl,-rpath,${CLANG_PATH}/lib -lc++
+else
+    CLANG_CC       ?= clang
+    CLANG_CXX      ?= clang++
+    CLANG_CXXFLAGS := ""
+    CLANG_LDFLAGS  := ""
+endif
+
+# If requested, build verilator with LLVM and add llvm c/ld flags
+ifeq ($(VLT_USE_LLVM),ON)
+    CC         = $(CLANG_CC)
+    CXX        = $(CLANG_CXX)
+    CFLAGS     = $(CLANG_CXXFLAGS)
+    CXXFLAGS   = $(CLANG_CXXFLAGS)
+    LDFLAGS    = $(CLANG_LDFLAGS)
+    VLT_FLAGS += --compiler clang
+    VLT_FLAGS += -CFLAGS "${CLANG_CXXFLAGS}"
+    VLT_FLAGS += -LDFLAGS "${CLANG_LDFLAGS}"
+endif
 
 VLOGAN_FLAGS := -assert svaext
 VLOGAN_FLAGS += -assert disable_cover
@@ -53,6 +83,22 @@ work/${FESVR_VERSION}_unzip:
 work/lib/libfesvr.a: work/${FESVR_VERSION}_unzip
 	cd $(dir $<)/ && ./configure --prefix `pwd`
 	make -C $(dir $<) install-config-hdrs install-hdrs libfesvr.a
+	mkdir -p $(dir $@)
+	cp $(dir $<)libfesvr.a $@
+
+# Build fesvr seperately for verilator since this might use different compilers
+# and libraries than modelsim/vcs and
+$(VLT_FESVR)/${FESVR_VERSION}_unzip:
+	mkdir -p $(dir $@)
+	wget -O $(dir $@)/${FESVR_VERSION} https://github.com/riscv/riscv-isa-sim/tarball/${FESVR_VERSION}
+	tar xfm $(dir $@)${FESVR_VERSION} --strip-components=1 -C $(dir $@)
+	patch -d $(dir $@) -p1 < ${ROOT}/util/patches/riscv-isa-sim/fesrv.patch
+	touch $@
+
+$(VLT_BUILDDIR)/lib/libfesvr.a: $(VLT_FESVR)/${FESVR_VERSION}_unzip
+	cd $(dir $<)/ && ./configure --prefix `pwd` \
+        CC=${CC} CXX=${CXX} CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" LDFLAGS="${LDFLAGS}"
+	$(MAKE) -C $(dir $<) install-config-hdrs install-hdrs libfesvr.a
 	mkdir -p $(dir $@)
 	cp $(dir $<)libfesvr.a $@
 

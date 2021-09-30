@@ -15,6 +15,9 @@ CFG 		?= cfg/cluster.default.hjson
 CLUSTER_GEN ?= $(ROOT)/util/clustergen.py
 CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
 
+# Verilated and compiled snitch cluster
+VLT_AR          = ${VLT_BUILDDIR}/Vtestharness__ALL.a
+
 # uncomment, if questasim should be run in 64-bit mode
 QUESTA_64BIT	= -64
 VSIM      		= vsim ${QUESTA_64BIT}
@@ -45,32 +48,39 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 #############
 # Verilator #
 #############
-${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
+$(VLT_AR): ${VLT_SOURCES} ${TB_SRCS}
 	$(call VERILATE,testharness)
+verilate: $(VLT_AR)
 
-verilate: ${VLT_BUILDDIR}/verilate
+# Required C sources for the verilator TB that are linked against the verilated model
+VLT_COBJ += $(VLT_BUILDDIR)/tb/common_lib.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/verilator_lib.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/tb_bin.o
+# Sources from verilator root
+VLT_COBJ += $(VLT_BUILDDIR)/vlt/verilated.o
+VLT_COBJ += $(VLT_BUILDDIR)/vlt/verilated_dpi.o
+VLT_COBJ += $(VLT_BUILDDIR)/vlt/verilated_vcd_c.o
+# Bootdata
+VLT_COBJ += $(VLT_BUILDDIR)/generated/bootdata.o
 
-bin/snitch_cluster.vlt: ${VLT_BUILDDIR}/verilate ${TB_DIR}/verilator_lib.cc ${TB_DIR}/common_lib.cc ${TB_DIR}/tb_bin.cc work/lib/libfesvr.a test/bootrom.bin generated/bootdata.cc
-	$(CXX) $(VLT_CFLAGS) -c ${TB_DIR}/common_lib.cc -o ${VLT_BUILDDIR}/common_lib.o -Itest
-	$(CXX) $(VLT_CFLAGS) -c generated/bootdata.cc -o ${VLT_BUILDDIR}/bootdata.o -Itest
-	$(CXX) $(VLT_CFLAGS) -c ${TB_DIR}/verilator_lib.cc -o ${VLT_BUILDDIR}/verilator_lib.o
-	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated.cpp -o ${VLT_BUILDDIR}/verilated.o
-	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated_dpi.cpp -o ${VLT_BUILDDIR}/verilated_dpi.o
-	$(CXX) $(VLT_CFLAGS) -c $(VLT_ROOT)/include/verilated_vcd_c.cpp -o ${VLT_BUILDDIR}/verilated_vcd_c.o
-	mkdir -p bin
-	$(LD) -o ${VLT_BUILDDIR}/snitch_cluster.o -r \
-		${VLT_BUILDDIR}/common_lib.o \
-		${VLT_BUILDDIR}/bootdata.o \
-		${VLT_BUILDDIR}/verilator_lib.o \
-		${VLT_BUILDDIR}/verilated.o \
-		${VLT_BUILDDIR}/verilated_dpi.o \
-		${VLT_BUILDDIR}/verilated_vcd_c.o \
-		${VLT_BUILDDIR}/Vtestharness__ALL.a \
-		-lfesvr \
-		-L ${VLT_BUILDDIR} \
-		-L $(FESVR)/lib
-	$(AR) rcs bin/libsnitch_cluster.a ${VLT_BUILDDIR}/snitch_cluster.o
-	$(CXX) $(VLT_CFLAGS) ${TB_DIR}/tb_bin.cc -L bin -lsnitch_cluster -o $@
+clean-vlt-obj:
+	rm $(VLT_COBJ)
+
+# Build targets for verilator TB
+$(VLT_BUILDDIR)/tb/%.o: $(TB_DIR)/%.cc $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
+$(VLT_BUILDDIR)/vlt/%.o: $(VLT_ROOT)/include/%.cpp
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
+$(VLT_BUILDDIR)/generated/%.o: generated/%.cc ${VLT_BUILDDIR}/lib/libfesvr.a
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
+
+# Link verilated archive wich $(VLT_COBJ)
+bin/snitch_cluster.vlt: $(VLT_AR) $(VLT_COBJ) ${VLT_BUILDDIR}/lib/libfesvr.a
+	mkdir -p $(dir $@)
+	$(CXX) $(LDFLAGS) -std=c++14 -L ${VLT_BUILDDIR}/lib -o $@ $(VLT_COBJ) $(VLT_AR) -lfesvr -lpthread
 
 ############
 # Modelsim #
