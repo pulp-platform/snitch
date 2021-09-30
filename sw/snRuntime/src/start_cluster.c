@@ -53,7 +53,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
                             bootdata->s1_quadrant_count;
     team->cluster_idx =
         (snrt_hartid() - bootdata->hartid_base) / bootdata->core_count;
-    team->cluster_num = bootdata->cluster_count;
+    team->cluster_num = bootdata->cluster_count * bootdata->s1_quadrant_count;
     team->cluster_core_base_hartid = bootdata->hartid_base;
     team->cluster_core_num = cluster_core_num;
     team->global_mem.start =
