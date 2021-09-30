@@ -40,6 +40,3 @@ target_link_libraries(net-conv2d kernels layers utils)
 add_snitch_executable(net-gemm src/net_gemm.c)
 target_link_libraries(net-gemm kernels utils)
 
-add_snitch_executable(dma-perf src/dma_perf.c)
-target_link_libraries(dma-perf utils)
-
