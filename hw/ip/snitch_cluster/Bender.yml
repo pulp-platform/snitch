@@ -26,6 +26,9 @@ dependencies:
   snitch_ssr: {path: ../../ip/snitch_ssr}
   snitch: {path: ../../ip/snitch}
 
+export_include_dirs:
+- include
+
 sources:
 # Level 0:
 - src/snitch_amo_shim.sv

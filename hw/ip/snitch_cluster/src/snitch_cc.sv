@@ -7,6 +7,15 @@
 `include "common_cells/assertions.svh"
 `include "common_cells/registers.svh"
 `include "snitch_vm/typedef.svh"
+`include "hierarchical/snitch_hierarchical.svh"
+
+// required to rebuild the structs in the wrapper
+`include "axi/typedef.svh"
+`include "mem_interface/typedef.svh"
+`include "register_interface/typedef.svh"
+`include "reqrsp_interface/typedef.svh"
+`include "tcdm_interface/typedef.svh"
+`include "snitch_vm/typedef.svh"
 
 /// Snitch Core Complex (CC)
 /// Contains the Snitch Integer Core + FPU + Private Accelerators
@@ -900,5 +909,320 @@ module snitch_cc #(
   // pragma translate_on
 
   `ASSERT_INIT(BootAddrAligned, BootAddr[1:0] == 2'b00)
+
+endmodule
+
+module snitch_cc_wrap #(
+  /// Address width of the buses
+  parameter int unsigned AddrWidth          = 0,
+  /// Data width of the buses.
+  parameter int unsigned DataWidth          = 0,
+  /// Data width of the AXI DMA buses.
+  parameter int unsigned DMADataWidth       = 0,
+  /// Id width of the AXI DMA bus.
+  parameter int unsigned DMAIdWidth         = 0,
+  parameter int unsigned DMAAxiReqFifoDepth = 0,
+  parameter int unsigned DMAReqFifoDepth    = 0,
+  /// Data port request type.
+  `TYPE_PARAMETER(dreq_t, logic),
+  /// Data port response type.
+  `TYPE_PARAMETER(drsp_t, logic),
+  /// Data port request type.
+  `TYPE_PARAMETER(tcdm_req_t, logic),
+  /// Data port response type.
+  `TYPE_PARAMETER(tcdm_rsp_t, logic),
+  /// TCDM User Payload
+  `TYPE_PARAMETER(tcdm_user_t, logic),
+  `TYPE_PARAMETER(axi_req_t, logic),
+  `TYPE_PARAMETER(axi_rsp_t, logic),
+  `TYPE_PARAMETER(hive_req_t, logic),
+  `TYPE_PARAMETER(hive_rsp_t, logic),
+  `TYPE_PARAMETER(acc_req_t, logic),
+  `TYPE_PARAMETER(acc_resp_t, logic),
+  `TYPE_PARAMETER(dma_events_t, logic),
+  parameter fpnew_pkg::fpu_implementation_t FPUImplementation = '0,
+  /// Boot address of core.
+  parameter logic [31:0] BootAddr           = 32'h0000_1000,
+  /// Reduced-register extension
+  parameter bit          RVE                = 0,
+  /// Enable F and D Extension
+  parameter bit          RVF                = 1,
+  parameter bit          RVD                = 1,
+  parameter bit          XDivSqrt           = 0,
+  parameter bit          XF8                = 0,
+  parameter bit          XF8ALT             = 0,
+  parameter bit          XF16               = 0,
+  parameter bit          XF16ALT            = 0,
+  parameter bit          XFVEC              = 0,
+  parameter bit          XFDOTP             = 0,
+  /// Enable Snitch DMA
+  parameter bit          Xdma               = 0,
+  /// Has `frep` support.
+  parameter bit          Xfrep              = 1,
+  /// Has `SSR` support.
+  parameter bit          Xssr               = 1,
+  /// Has `IPU` support.
+  parameter bit          Xipu               = 1,
+  parameter int unsigned NumIntOutstandingLoads = 0,
+  parameter int unsigned NumIntOutstandingMem = 0,
+  parameter int unsigned NumFPOutstandingLoads = 0,
+  parameter int unsigned NumFPOutstandingMem = 0,
+  parameter int unsigned NumDTLBEntries = 0,
+  parameter int unsigned NumITLBEntries = 0,
+  parameter int unsigned NumSequencerInstr = 0,
+  parameter int unsigned NumSsrs = 0,
+  parameter int unsigned SsrMuxRespDepth = 0,
+  parameter snitch_ssr_pkg::ssr_cfg_t [NumSsrs-1:0] SsrCfgs = '0,
+  parameter logic [NumSsrs-1:0][4:0] SsrRegs = '0,
+  /// Add isochronous clock-domain crossings e.g., make it possible to operate
+  /// the core in a slower clock domain.
+  parameter bit          IsoCrossing        = 0,
+  /// Timing Parameters
+  /// Insert Pipeline registers into off-loading path (request)
+  parameter bit          RegisterOffloadReq = 0,
+  /// Insert Pipeline registers into off-loading path (response)
+  parameter bit          RegisterOffloadRsp = 0,
+  /// Insert Pipeline registers into data memory path (request)
+  parameter bit          RegisterCoreReq    = 0,
+  /// Insert Pipeline registers into data memory path (response)
+  parameter bit          RegisterCoreRsp    = 0,
+  /// Insert Pipeline register into the FPU data path (request)
+  parameter bit          RegisterFPUReq     = 0,
+  /// Insert Pipeline registers after sequencer
+  parameter bit          RegisterSequencer  = 0,
+  snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
+  /// Derived parameter *Do not override*
+  parameter int unsigned TCDMPorts = (NumSsrs > 1 ? NumSsrs : 1),
+  `TYPE_PARAMETER(addr_t, logic [AddrWidth-1:0]),
+  `TYPE_PARAMETER(data_t, logic [DataWidth-1:0])
+) (
+  input  logic                       clk_i,
+  input  logic                       clk_d2_i,
+  input  logic                       rst_ni,
+  input  logic                       rst_int_ss_ni,
+  input  logic                       rst_fp_ss_ni,
+  input  logic [31:0]                hart_id_i,
+  input  `STRUCT_PORT(snitch_pkg::interrupts_t)    irq_i,
+  output `TYPE_PORT(hive_req_t)                  hive_req_o,
+  input  `TYPE_PORT(hive_rsp_t)                  hive_rsp_i,
+  // Core data ports
+  output `TYPE_PORT(dreq_t)                      data_req_o,
+  input  `TYPE_PORT(drsp_t)                      data_rsp_i,
+  // TCDM Streamer Ports
+  output `TYPE_PORT(tcdm_req_t) [TCDMPorts-1:0]  tcdm_req_o,
+  input  `TYPE_PORT(tcdm_rsp_t) [TCDMPorts-1:0]  tcdm_rsp_i,
+  // Accelerator Offload port
+  // DMA ports
+  output `TYPE_PORT(axi_req_t)                   axi_dma_req_o,
+  input  `TYPE_PORT(axi_rsp_t)                   axi_dma_res_i,
+  output logic                       axi_dma_busy_o,
+  output `STRUCT_PORT(axi_dma_pkg::dma_perf_t)     axi_dma_perf_o,
+  output `TYPE_PORT(dma_events_t)                axi_dma_events_o,
+  // Core event strobes
+  output `STRUCT_PORT(snitch_pkg::core_events_t)   core_events_o,
+  input  `TYPE_PORT(addr_t)                      tcdm_addr_base_i,
+  input  `TYPE_PORT(addr_t)                      tcdm_addr_mask_i
+);
+
+`ifdef REPACK_SNITCH_CC
+  localparam int unsigned PhysicalAddrWidth = 48;
+  localparam int unsigned NarrowDataWidth = 64;
+  localparam int unsigned WideDataWidth = 512;
+  localparam int unsigned NrCores = 9;
+  localparam int unsigned WideIdWidthIn = 2;
+  localparam int unsigned UserWidth = 1;
+  localparam int unsigned CoreIDWidth = cf_math_pkg::idx_width(NrCores);
+
+    typedef logic [PhysicalAddrWidth-1:0] r_addr_t;
+    typedef logic [NarrowDataWidth-1:0]   r_data_t;
+    typedef logic [NarrowDataWidth/8-1:0] r_strb_t;
+
+    typedef logic [WideDataWidth-1:0]     r_data_dma_t;
+    typedef logic [WideDataWidth/8-1:0]   r_strb_dma_t;
+    typedef logic [WideIdWidthIn-1:0]     r_id_dma_mst_t;
+    typedef logic [UserWidth-1:0]         r_user_t;
+
+    // typedef logic [TCDMAddrWidth-1:0]     r_tcdm_addr_t;
+
+
+    typedef struct packed {
+      logic [CoreIDWidth-1:0] core_id;
+      bit                     is_core;
+    } lcl_tcdm_user_t;
+
+
+    `REQRSP_TYPEDEF_ALL(lcl_reqrsp, r_addr_t, r_data_t, r_strb_t)
+    `TCDM_TYPEDEF_ALL(lcl_tcdm, r_addr_t, r_data_t, r_strb_t, lcl_tcdm_user_t)
+    `AXI_TYPEDEF_ALL(lcl_axi_mst_dma, r_addr_t, r_id_dma_mst_t, r_data_dma_t, r_strb_dma_t, r_user_t)
+  // `TCDM_TYPEDEF_ALL(tcdm_dma, addr_t, data_dma_t, strb_dma_t, logic)
+
+    typedef struct packed {
+      snitch_pkg::acc_addr_e   addr;
+      logic [4:0]  id;
+      logic [31:0] data_op;
+      r_data_t       data_arga;
+      r_data_t       data_argb;
+      r_addr_t       data_argc;
+    } lcl_acc_req_t;
+
+      typedef struct packed {
+      logic [4:0] id;
+      logic       error;
+      r_data_t      data;
+    } lcl_acc_resp_t;
+
+    typedef struct packed {
+          logic aw_stall, ar_stall, r_stall, w_stall,
+                      buf_w_stall, buf_r_stall;
+          logic aw_valid, aw_ready, aw_done, aw_bw;
+          logic ar_valid, ar_ready, ar_done, ar_bw;
+          logic r_valid,  r_ready,  r_done, r_bw;
+          logic w_valid,  w_ready,  w_done, w_bw;
+          logic b_valid,  b_ready,  b_done;
+          logic dma_busy;
+          axi_pkg::len_t aw_len, ar_len;
+          axi_pkg::size_t aw_size, ar_size;
+          logic [$clog2(WideDataWidth/8):0] num_bytes_written;
+      } lcl_dma_events_t;
+
+    localparam int unsigned VPN_SIZE = 10;
+    localparam int unsigned PAGE_SHIFT = 12;
+
+    /// Virtual Address Definition
+    typedef struct packed {
+      /// Virtual Page Number 1
+      logic [31:32-VPN_SIZE] vpn1;
+      /// Virtual Page Number 0
+      logic [PAGE_SHIFT+VPN_SIZE-1:PAGE_SHIFT] vpn0;
+    } r_va_t;
+
+    // defines pa_t, l0_pte_t, pte_sv32_t
+    `SNITCH_VM_TYPEDEF(PhysicalAddrWidth)
+
+  typedef struct packed {
+    snitch_pkg::acc_addr_e   addr;
+    logic [4:0]  id;
+    logic [31:0] data_op;
+    r_data_t       data_arga;
+    r_data_t       data_argb;
+    r_addr_t       data_argc;
+  } hive_acc_req_t;
+
+    typedef struct packed {
+    logic [4:0] id;
+    logic       error;
+    r_data_t      data;
+  } hive_acc_resp_t;
+
+    typedef struct packed {
+      // Slow domain.
+      logic       flush_i_valid;
+      r_addr_t      inst_addr;
+      logic       inst_cacheable;
+      logic       inst_valid;
+      // Fast domain.
+      hive_acc_req_t   acc_req;
+      logic       acc_qvalid;
+      logic       acc_pready;
+      // Slow domain.
+      logic [1:0] ptw_valid;
+      r_va_t [1:0]  ptw_va;
+      pa_t [1:0]  ptw_ppn;
+    } lcl_hive_req_t;
+
+    typedef struct packed {
+      // Slow domain.
+      logic          flush_i_ready;
+      logic [31:0]   inst_data;
+      logic          inst_ready;
+      logic          inst_error;
+      // Fast domain.
+      logic          acc_qready;
+      hive_acc_resp_t     acc_resp;
+      logic          acc_pvalid;
+      // Slow domain.
+      logic [1:0]    ptw_ready;
+      l0_pte_t [1:0] ptw_pte;
+      logic [1:0]    ptw_is_4mega;
+    } lcl_hive_rsp_t;
+`endif
+
+  snitch_cc #(
+    .AddrWidth (AddrWidth),
+    .DataWidth (DataWidth),
+    .DMADataWidth (DMADataWidth),
+    .DMAIdWidth (DMAIdWidth),
+    .SnitchPMACfg (SnitchPMACfg),
+    .DMAAxiReqFifoDepth (DMAAxiReqFifoDepth),
+    .DMAReqFifoDepth (DMAReqFifoDepth),
+    .dreq_t (`TYPE_PARAMETER_INST_W(dreq_t, lcl_reqrsp_req_t)),
+    .drsp_t (`TYPE_PARAMETER_INST_W(drsp_t, lcl_reqrsp_rsp_t)),
+    .tcdm_req_t (`TYPE_PARAMETER_INST_W(tcdm_req_t, lcl_tcdm_req_t)),
+    .tcdm_rsp_t (`TYPE_PARAMETER_INST_W(tcdm_rsp_t, lcl_tcdm_rsp_t)),
+    .tcdm_user_t (`TYPE_PARAMETER_INST_W(tcdm_user_t, lcl_tcdm_user_t)),
+    .axi_req_t (`TYPE_PARAMETER_INST_W(axi_req_t, lcl_axi_mst_dma_req_t)),
+    .axi_rsp_t (`TYPE_PARAMETER_INST_W(axi_rsp_t, lcl_axi_mst_dma_resp_t)),
+    .hive_req_t (`TYPE_PARAMETER_INST_W(hive_req_t, lcl_hive_req_t)),
+    .hive_rsp_t (`TYPE_PARAMETER_INST_W(hive_rsp_t, lcl_hive_rsp_t)),
+    .acc_req_t (`TYPE_PARAMETER_INST_W(acc_req_t, lcl_acc_req_t)),
+    .acc_resp_t (`TYPE_PARAMETER_INST_W(acc_resp_t, lcl_acc_resp_t)),
+    .dma_events_t (`TYPE_PARAMETER_INST_W(dma_events_t, lcl_dma_events_t)),
+    .BootAddr (BootAddr),
+    .RVE (RVE),
+    .RVF (RVF),
+    .RVD (RVD),
+    .XDivSqrt (XDivSqrt),
+    .XF16 (XF16),
+    .XF16ALT (XF16ALT),
+    .XF8 (XF8),
+    .XF8ALT (XF8ALT),
+    .XFVEC (XFVEC),
+    .XFDOTP (XFDOTP),
+    .Xdma (Xdma),
+    .IsoCrossing (IsoCrossing),
+    .Xfrep (Xfrep),
+    .Xssr (Xssr),
+    .Xipu (Xipu),
+    .NumIntOutstandingLoads (NumIntOutstandingLoads),
+    .NumIntOutstandingMem (NumIntOutstandingMem),
+    .NumFPOutstandingLoads (NumFPOutstandingLoads),
+    .NumFPOutstandingMem (NumFPOutstandingMem),
+    .FPUImplementation (FPUImplementation),
+    .NumDTLBEntries (NumDTLBEntries),
+    .NumITLBEntries (NumITLBEntries),
+    .NumSequencerInstr (NumSequencerInstr),
+    .NumSsrs (NumSsrs),
+    .SsrMuxRespDepth (SsrMuxRespDepth),
+    .SsrCfgs (SsrCfgs),
+    .SsrRegs (SsrRegs),
+    .RegisterOffloadReq (RegisterOffloadReq),
+    .RegisterOffloadRsp (RegisterOffloadRsp),
+    .RegisterCoreReq (RegisterCoreReq),
+    .RegisterCoreRsp (RegisterCoreRsp),
+    .RegisterFPUReq (RegisterFPUReq),
+    .RegisterSequencer (RegisterSequencer)
+  ) i_snitch_cc_wrap (
+    .clk_i,
+    .clk_d2_i,
+    .rst_ni,
+    .rst_int_ss_ni,
+    .rst_fp_ss_ni,
+    .hart_id_i,
+    .hive_req_o,
+    .hive_rsp_i,
+    .irq_i,
+    .data_req_o,
+    .data_rsp_i,
+    .tcdm_req_o,
+    .tcdm_rsp_i,
+    .axi_dma_req_o,
+    .axi_dma_res_i,
+    .axi_dma_busy_o,
+    .axi_dma_perf_o,
+    .axi_dma_events_o,
+    .core_events_o,
+    .tcdm_addr_base_i,
+    .tcdm_addr_mask_i
+  );
 
 endmodule

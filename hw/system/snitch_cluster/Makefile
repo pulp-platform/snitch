@@ -23,6 +23,11 @@ QUESTA_64BIT	= -64
 VSIM      		= vsim ${QUESTA_64BIT}
 VLOG      		= vlog ${QUESTA_64BIT}
 
+ifeq ($(VLT_USE_HIER),ON)
+VLT_FLAGS    += --hierarchical
+else
+endif
+
 VLT_FLAGS    += --trace
 
 VLOG_FLAGS 	  += -svinputport=compat

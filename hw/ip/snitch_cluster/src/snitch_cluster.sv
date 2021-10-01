@@ -17,6 +17,7 @@
 `include "tcdm_interface/typedef.svh"
 
 `include "snitch_vm/typedef.svh"
+`include "hierarchical/snitch_hierarchical.svh"
 
 /// Snitch many-core cluster with improved TCDM interconnect.
 /// Snitch Cluster Top-Level.
@@ -743,7 +744,7 @@ module snitch_cluster
 
       tcdm_req_t [TcdmPorts-1:0] tcdm_req_wo_user;
 
-      snitch_cc #(
+      snitch_cc_wrap #(
         .AddrWidth (PhysicalAddrWidth),
         .DataWidth (NarrowDataWidth),
         .DMADataWidth (WideDataWidth),
@@ -751,18 +752,18 @@ module snitch_cluster
         .SnitchPMACfg (SnitchPMACfg),
         .DMAAxiReqFifoDepth (DMAAxiReqFifoDepth),
         .DMAReqFifoDepth (DMAReqFifoDepth),
-        .dreq_t (reqrsp_req_t),
-        .drsp_t (reqrsp_rsp_t),
-        .tcdm_req_t (tcdm_req_t),
-        .tcdm_rsp_t (tcdm_rsp_t),
-        .tcdm_user_t (tcdm_user_t),
-        .axi_req_t (axi_mst_dma_req_t),
-        .axi_rsp_t (axi_mst_dma_resp_t),
-        .hive_req_t (hive_req_t),
-        .hive_rsp_t (hive_rsp_t),
-        .acc_req_t (acc_req_t),
-        .acc_resp_t (acc_resp_t),
-        .dma_events_t (dma_events_t),
+        .dreq_t (`TYPE_PARAMETER_INST(reqrsp_req_t)),
+        .drsp_t (`TYPE_PARAMETER_INST(reqrsp_rsp_t)),
+        .tcdm_req_t (`TYPE_PARAMETER_INST(tcdm_req_t)),
+        .tcdm_rsp_t (`TYPE_PARAMETER_INST(tcdm_rsp_t)),
+        .tcdm_user_t (`TYPE_PARAMETER_INST(tcdm_user_t)),
+        .axi_req_t (`TYPE_PARAMETER_INST(axi_mst_dma_req_t)),
+        .axi_rsp_t (`TYPE_PARAMETER_INST(axi_mst_dma_resp_t)),
+        .hive_req_t (`TYPE_PARAMETER_INST(hive_req_t)),
+        .hive_rsp_t (`TYPE_PARAMETER_INST(hive_rsp_t)),
+        .acc_req_t (`TYPE_PARAMETER_INST(acc_req_t)),
+        .acc_resp_t (`TYPE_PARAMETER_INST(acc_resp_t)),
+        .dma_events_t (`TYPE_PARAMETER_INST(dma_events_t)),
         .BootAddr (BootAddr),
         .RVE (RVE[i]),
         .RVF (RVF[i]),
