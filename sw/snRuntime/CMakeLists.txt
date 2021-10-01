@@ -136,7 +136,6 @@ add_snitch_test(lto tests/lto.c tests/lto_a.c)
 add_snitch_test(interrupt tests/interrupt.c)
 add_snitch_test(interrupt-local tests/interrupt-local.c)
 
-add_snitch_test_executable(fp64_scalar tests/fp64_scalar.c)
 add_snitch_test_executable(fp32_vector_comparisons tests/fp32_vector_comparisons.c)
 add_snitch_test_executable(fp16_vector_comparisons tests/fp16_vector_comparisons.c)
 add_snitch_test_executable(fp16alt_vector_comparisons tests/fp16alt_vector_comparisons.c)
