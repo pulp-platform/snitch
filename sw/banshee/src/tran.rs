@@ -7251,7 +7251,6 @@ impl<'a> InstructionTranslator<'a> {
 
     /// Emit the code to write a f8 value to a float register.
     unsafe fn write_freg_f8(&self, rd: u32, data: LLVMValueRef) {
-
         // Nan-box value
         let nan_box = LLVMConstInt(LLVMInt64Type(), (-1i64 - 0xff) as u64, 0);
         let value = LLVMBuildZExt(self.builder, data, LLVMInt64Type(), NONAME);
