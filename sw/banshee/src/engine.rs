@@ -1060,7 +1060,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         op: flexfloat::FfOpCvt,
         fpmode_src: bool,
         fpmode_dst: bool,
-    ) -> u32 {
+    ) -> i32 {
         flexfloat::ff_instruction_cvt_to_s(rs1, op, fpmode_src, fpmode_dst)
     }
 
