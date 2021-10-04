@@ -1,4 +1,4 @@
-### Applications
+# Applications
 
 This subdirectory contains some applications or benchmarks specifically implemented and optimized for Snitch.
 
@@ -23,6 +23,7 @@ There are currently a few tests for various layer types. Some additional informa
 ## Usage
 To run a specific benchmark, first configure the dimensions and the desired precision `data/app_params.hjson`.
 ```
+{
     kernel: "GEMM"
     M: 16,
     N: 16,
