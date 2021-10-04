@@ -54,8 +54,8 @@ module fpu_wrap import ariane_pkg::*; (
       Width:         64,
       EnableVectors: ariane_pkg::XFVEC,
       EnableNanBox:  1'b1,
-      FpFmtMask:     {RVF, RVD, XF16, XF8, XF16ALT},
-      IntFmtMask:    {XFVEC && XF8, XFVEC && (XF16 || XF16ALT), 1'b1, 1'b1}
+      FpFmtMask:     {RVF, RVD, XF16, XF8, XF16ALT, XF8ALT},
+      IntFmtMask:    {XFVEC && (XF8 || XF8ALT), XFVEC && (XF16 || XF16ALT), 1'b1, 1'b1}
     };
 
     // Implementation (number of registers etc)
@@ -65,12 +65,12 @@ module fpu_wrap import ariane_pkg::*; (
                  '{default: LAT_DIVSQRT},         // DIVSQRT
                  '{default: LAT_NONCOMP},         // NONCOMP
                  '{default: LAT_CONV},            // CONV
-                 '{default: fpnew_pkg::MERGED}},  // DOTP
-      UnitTypes: '{'{default: fpnew_pkg::PARALLEL}, // ADDMUL
-                   '{default: fpnew_pkg::MERGED},   // DIVSQRT
-                   '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                   '{default: fpnew_pkg::MERGED},   // CONV
-                   '{default: fpnew_pkg::MERGED}},  // DOTP
+                 '{default: LAT_DOTP}},           // DOTP
+      UnitTypes: '{'{default: fpnew_pkg::PARALLEL},  // ADDMUL
+                   '{default: fpnew_pkg::MERGED},    // DIVSQRT
+                   '{default: fpnew_pkg::PARALLEL},  // NONCOMP
+                   '{default: fpnew_pkg::MERGED},    // CONV
+                   '{default: fpnew_pkg::DISABLED}}, // DOTP
       PipeConfig: fpnew_pkg::DISTRIBUTED
     };
 
