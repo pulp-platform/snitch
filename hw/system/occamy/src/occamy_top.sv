@@ -711,7 +711,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   // Assemble address from `soc_ctrl` regs.
-  logic [1:0][47:0] start_addr_0, end_addr_0;
+  logic [3:0][47:0] start_addr_0, end_addr_0;
   assign start_addr_0[0] = {
     soc_ctrl_out.ro_start_addr_high_0_quadrant_0.q, soc_ctrl_out.ro_start_addr_low_0_quadrant_0.q
   };
@@ -723,6 +723,18 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   };
   assign end_addr_0[1] = {
     soc_ctrl_out.ro_end_addr_high_1_quadrant_0.q, soc_ctrl_out.ro_end_addr_low_1_quadrant_0.q
+  };
+  assign start_addr_0[2] = {
+    soc_ctrl_out.ro_start_addr_high_2_quadrant_0.q, soc_ctrl_out.ro_start_addr_low_2_quadrant_0.q
+  };
+  assign end_addr_0[2] = {
+    soc_ctrl_out.ro_end_addr_high_2_quadrant_0.q, soc_ctrl_out.ro_end_addr_low_2_quadrant_0.q
+  };
+  assign start_addr_0[3] = {
+    soc_ctrl_out.ro_start_addr_high_3_quadrant_0.q, soc_ctrl_out.ro_start_addr_low_3_quadrant_0.q
+  };
+  assign end_addr_0[3] = {
+    soc_ctrl_out.ro_end_addr_high_3_quadrant_0.q, soc_ctrl_out.ro_end_addr_low_3_quadrant_0.q
   };
   assign soc_ctrl_in.ro_cache_flush[0].de = soc_ctrl_out.ro_cache_flush[0].q & soc_ctrl_in.ro_cache_flush[0].d;
 
@@ -867,7 +879,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   // Assemble address from `soc_ctrl` regs.
-  logic [1:0][47:0] start_addr_1, end_addr_1;
+  logic [3:0][47:0] start_addr_1, end_addr_1;
   assign start_addr_1[0] = {
     soc_ctrl_out.ro_start_addr_high_0_quadrant_1.q, soc_ctrl_out.ro_start_addr_low_0_quadrant_1.q
   };
@@ -879,6 +891,18 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   };
   assign end_addr_1[1] = {
     soc_ctrl_out.ro_end_addr_high_1_quadrant_1.q, soc_ctrl_out.ro_end_addr_low_1_quadrant_1.q
+  };
+  assign start_addr_1[2] = {
+    soc_ctrl_out.ro_start_addr_high_2_quadrant_1.q, soc_ctrl_out.ro_start_addr_low_2_quadrant_1.q
+  };
+  assign end_addr_1[2] = {
+    soc_ctrl_out.ro_end_addr_high_2_quadrant_1.q, soc_ctrl_out.ro_end_addr_low_2_quadrant_1.q
+  };
+  assign start_addr_1[3] = {
+    soc_ctrl_out.ro_start_addr_high_3_quadrant_1.q, soc_ctrl_out.ro_start_addr_low_3_quadrant_1.q
+  };
+  assign end_addr_1[3] = {
+    soc_ctrl_out.ro_end_addr_high_3_quadrant_1.q, soc_ctrl_out.ro_end_addr_low_3_quadrant_1.q
   };
   assign soc_ctrl_in.ro_cache_flush[1].de = soc_ctrl_out.ro_cache_flush[1].q & soc_ctrl_in.ro_cache_flush[1].d;
 
@@ -1023,7 +1047,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   // Assemble address from `soc_ctrl` regs.
-  logic [1:0][47:0] start_addr_2, end_addr_2;
+  logic [3:0][47:0] start_addr_2, end_addr_2;
   assign start_addr_2[0] = {
     soc_ctrl_out.ro_start_addr_high_0_quadrant_2.q, soc_ctrl_out.ro_start_addr_low_0_quadrant_2.q
   };
@@ -1035,6 +1059,18 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   };
   assign end_addr_2[1] = {
     soc_ctrl_out.ro_end_addr_high_1_quadrant_2.q, soc_ctrl_out.ro_end_addr_low_1_quadrant_2.q
+  };
+  assign start_addr_2[2] = {
+    soc_ctrl_out.ro_start_addr_high_2_quadrant_2.q, soc_ctrl_out.ro_start_addr_low_2_quadrant_2.q
+  };
+  assign end_addr_2[2] = {
+    soc_ctrl_out.ro_end_addr_high_2_quadrant_2.q, soc_ctrl_out.ro_end_addr_low_2_quadrant_2.q
+  };
+  assign start_addr_2[3] = {
+    soc_ctrl_out.ro_start_addr_high_3_quadrant_2.q, soc_ctrl_out.ro_start_addr_low_3_quadrant_2.q
+  };
+  assign end_addr_2[3] = {
+    soc_ctrl_out.ro_end_addr_high_3_quadrant_2.q, soc_ctrl_out.ro_end_addr_low_3_quadrant_2.q
   };
   assign soc_ctrl_in.ro_cache_flush[2].de = soc_ctrl_out.ro_cache_flush[2].q & soc_ctrl_in.ro_cache_flush[2].d;
 
@@ -1179,7 +1215,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   // Assemble address from `soc_ctrl` regs.
-  logic [1:0][47:0] start_addr_3, end_addr_3;
+  logic [3:0][47:0] start_addr_3, end_addr_3;
   assign start_addr_3[0] = {
     soc_ctrl_out.ro_start_addr_high_0_quadrant_3.q, soc_ctrl_out.ro_start_addr_low_0_quadrant_3.q
   };
@@ -1191,6 +1227,18 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   };
   assign end_addr_3[1] = {
     soc_ctrl_out.ro_end_addr_high_1_quadrant_3.q, soc_ctrl_out.ro_end_addr_low_1_quadrant_3.q
+  };
+  assign start_addr_3[2] = {
+    soc_ctrl_out.ro_start_addr_high_2_quadrant_3.q, soc_ctrl_out.ro_start_addr_low_2_quadrant_3.q
+  };
+  assign end_addr_3[2] = {
+    soc_ctrl_out.ro_end_addr_high_2_quadrant_3.q, soc_ctrl_out.ro_end_addr_low_2_quadrant_3.q
+  };
+  assign start_addr_3[3] = {
+    soc_ctrl_out.ro_start_addr_high_3_quadrant_3.q, soc_ctrl_out.ro_start_addr_low_3_quadrant_3.q
+  };
+  assign end_addr_3[3] = {
+    soc_ctrl_out.ro_end_addr_high_3_quadrant_3.q, soc_ctrl_out.ro_end_addr_low_3_quadrant_3.q
   };
   assign soc_ctrl_in.ro_cache_flush[3].de = soc_ctrl_out.ro_cache_flush[3].q & soc_ctrl_in.ro_cache_flush[3].d;
 
@@ -1335,7 +1383,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   // Assemble address from `soc_ctrl` regs.
-  logic [1:0][47:0] start_addr_4, end_addr_4;
+  logic [3:0][47:0] start_addr_4, end_addr_4;
   assign start_addr_4[0] = {
     soc_ctrl_out.ro_start_addr_high_0_quadrant_4.q, soc_ctrl_out.ro_start_addr_low_0_quadrant_4.q
   };
@@ -1347,6 +1395,18 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   };
   assign end_addr_4[1] = {
     soc_ctrl_out.ro_end_addr_high_1_quadrant_4.q, soc_ctrl_out.ro_end_addr_low_1_quadrant_4.q
+  };
+  assign start_addr_4[2] = {
+    soc_ctrl_out.ro_start_addr_high_2_quadrant_4.q, soc_ctrl_out.ro_start_addr_low_2_quadrant_4.q
+  };
+  assign end_addr_4[2] = {
+    soc_ctrl_out.ro_end_addr_high_2_quadrant_4.q, soc_ctrl_out.ro_end_addr_low_2_quadrant_4.q
+  };
+  assign start_addr_4[3] = {
+    soc_ctrl_out.ro_start_addr_high_3_quadrant_4.q, soc_ctrl_out.ro_start_addr_low_3_quadrant_4.q
+  };
+  assign end_addr_4[3] = {
+    soc_ctrl_out.ro_end_addr_high_3_quadrant_4.q, soc_ctrl_out.ro_end_addr_low_3_quadrant_4.q
   };
   assign soc_ctrl_in.ro_cache_flush[4].de = soc_ctrl_out.ro_cache_flush[4].q & soc_ctrl_in.ro_cache_flush[4].d;
 
@@ -1491,7 +1551,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   // Assemble address from `soc_ctrl` regs.
-  logic [1:0][47:0] start_addr_5, end_addr_5;
+  logic [3:0][47:0] start_addr_5, end_addr_5;
   assign start_addr_5[0] = {
     soc_ctrl_out.ro_start_addr_high_0_quadrant_5.q, soc_ctrl_out.ro_start_addr_low_0_quadrant_5.q
   };
@@ -1503,6 +1563,18 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   };
   assign end_addr_5[1] = {
     soc_ctrl_out.ro_end_addr_high_1_quadrant_5.q, soc_ctrl_out.ro_end_addr_low_1_quadrant_5.q
+  };
+  assign start_addr_5[2] = {
+    soc_ctrl_out.ro_start_addr_high_2_quadrant_5.q, soc_ctrl_out.ro_start_addr_low_2_quadrant_5.q
+  };
+  assign end_addr_5[2] = {
+    soc_ctrl_out.ro_end_addr_high_2_quadrant_5.q, soc_ctrl_out.ro_end_addr_low_2_quadrant_5.q
+  };
+  assign start_addr_5[3] = {
+    soc_ctrl_out.ro_start_addr_high_3_quadrant_5.q, soc_ctrl_out.ro_start_addr_low_3_quadrant_5.q
+  };
+  assign end_addr_5[3] = {
+    soc_ctrl_out.ro_end_addr_high_3_quadrant_5.q, soc_ctrl_out.ro_end_addr_low_3_quadrant_5.q
   };
   assign soc_ctrl_in.ro_cache_flush[5].de = soc_ctrl_out.ro_cache_flush[5].q & soc_ctrl_in.ro_cache_flush[5].d;
 
@@ -1647,7 +1719,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   // Assemble address from `soc_ctrl` regs.
-  logic [1:0][47:0] start_addr_6, end_addr_6;
+  logic [3:0][47:0] start_addr_6, end_addr_6;
   assign start_addr_6[0] = {
     soc_ctrl_out.ro_start_addr_high_0_quadrant_6.q, soc_ctrl_out.ro_start_addr_low_0_quadrant_6.q
   };
@@ -1659,6 +1731,18 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   };
   assign end_addr_6[1] = {
     soc_ctrl_out.ro_end_addr_high_1_quadrant_6.q, soc_ctrl_out.ro_end_addr_low_1_quadrant_6.q
+  };
+  assign start_addr_6[2] = {
+    soc_ctrl_out.ro_start_addr_high_2_quadrant_6.q, soc_ctrl_out.ro_start_addr_low_2_quadrant_6.q
+  };
+  assign end_addr_6[2] = {
+    soc_ctrl_out.ro_end_addr_high_2_quadrant_6.q, soc_ctrl_out.ro_end_addr_low_2_quadrant_6.q
+  };
+  assign start_addr_6[3] = {
+    soc_ctrl_out.ro_start_addr_high_3_quadrant_6.q, soc_ctrl_out.ro_start_addr_low_3_quadrant_6.q
+  };
+  assign end_addr_6[3] = {
+    soc_ctrl_out.ro_end_addr_high_3_quadrant_6.q, soc_ctrl_out.ro_end_addr_low_3_quadrant_6.q
   };
   assign soc_ctrl_in.ro_cache_flush[6].de = soc_ctrl_out.ro_cache_flush[6].q & soc_ctrl_in.ro_cache_flush[6].d;
 
@@ -1803,7 +1887,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
 
   // Assemble address from `soc_ctrl` regs.
-  logic [1:0][47:0] start_addr_7, end_addr_7;
+  logic [3:0][47:0] start_addr_7, end_addr_7;
   assign start_addr_7[0] = {
     soc_ctrl_out.ro_start_addr_high_0_quadrant_7.q, soc_ctrl_out.ro_start_addr_low_0_quadrant_7.q
   };
@@ -1815,6 +1899,18 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   };
   assign end_addr_7[1] = {
     soc_ctrl_out.ro_end_addr_high_1_quadrant_7.q, soc_ctrl_out.ro_end_addr_low_1_quadrant_7.q
+  };
+  assign start_addr_7[2] = {
+    soc_ctrl_out.ro_start_addr_high_2_quadrant_7.q, soc_ctrl_out.ro_start_addr_low_2_quadrant_7.q
+  };
+  assign end_addr_7[2] = {
+    soc_ctrl_out.ro_end_addr_high_2_quadrant_7.q, soc_ctrl_out.ro_end_addr_low_2_quadrant_7.q
+  };
+  assign start_addr_7[3] = {
+    soc_ctrl_out.ro_start_addr_high_3_quadrant_7.q, soc_ctrl_out.ro_start_addr_low_3_quadrant_7.q
+  };
+  assign end_addr_7[3] = {
+    soc_ctrl_out.ro_end_addr_high_3_quadrant_7.q, soc_ctrl_out.ro_end_addr_low_3_quadrant_7.q
   };
   assign soc_ctrl_in.ro_cache_flush[7].de = soc_ctrl_out.ro_cache_flush[7].q & soc_ctrl_in.ro_cache_flush[7].d;
 
