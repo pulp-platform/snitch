@@ -432,6 +432,8 @@ void gemm_fp16simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
     register volatile double ft2 asm("ft2");
     asm volatile("" : "=f"(ft0), "=f"(ft1), "=f"(ft2));
 
+    // printf("M %d, N %d, K %d, ldA %d, ldB %d, ldC %d, setup_SSR %d\n", M, N, K, ldA, ldB, ldC, setup_SSR);
+
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
     // for maximum utilization
@@ -560,17 +562,17 @@ void gemm_fp16simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
         }
 
         // Clean up left over column
-        snrt_ssr_disable();
+        // snrt_ssr_disable();
 
-        for (; n < N; n++) {
-            __fp16 c = (*ALPHA) ? C[m * ldC + n] : 0.0;
-            for (uint32_t k = 0; k < K; k++) {
-                c += A[k + m * ldA] * B[k + n * ldB];
-            }
-            C[m * ldC + n] = c;
-        }
+        // for (; n < N; n++) {
+        //     __fp16 c = (*ALPHA) ? C[m * ldC + n] : 0.0;
+        //     for (uint32_t k = 0; k < K; k++) {
+        //         c += A[k + m * ldA] * B[k + n * ldB];
+        //     }
+        //     C[m * ldC + n] = c;
+        // }
 
-        snrt_ssr_enable();
+        // snrt_ssr_enable();
     }
 
     snrt_ssr_disable();
