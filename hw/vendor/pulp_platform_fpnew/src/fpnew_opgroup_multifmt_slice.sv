@@ -63,7 +63,7 @@ module fpnew_opgroup_multifmt_slice #(
   // We will send the format information along with the data
   localparam int unsigned FMT_BITS =
       fpnew_pkg::maximum($clog2(NUM_FORMATS), $clog2(NUM_INT_FORMATS));
-  localparam int unsigned AUX_BITS = FMT_BITS + 3; // also add vectorial and integer flags
+  localparam int unsigned AUX_BITS = FMT_BITS + 4; // also add vectorial and integer flags
 
   logic [NUM_LANES-1:0] lane_in_ready, lane_out_valid; // Handshake signals for the lanes
   logic                 vectorial_op;
@@ -239,13 +239,13 @@ module fpnew_opgroup_multifmt_slice #(
           .busy_o          ( lane_busy[lane]     )
         );
       end else if (OpGroup == fpnew_pkg::DOTP) begin : lane_instance
-        fpnew_dotp_wrapper #(
+        fpnew_sdotp_multi_wrapper #(
           .FpFmtConfig ( LANE_FORMATS         ), // fp64 and fp32 not supported
           .NumPipeRegs ( NumPipeRegs          ),
           .PipeConfig  ( PipeConfig           ),
           .TagType     ( TagType              ),
           .AuxType     ( logic [AUX_BITS-1:0] )
-        ) i_fpnew_dotp_wrapper (
+        ) i_fpnew_sdotp_multi_wrapper (
           .clk_i,
           .rst_ni,
           .operands_i      ( local_operands[2:0] ), // 3 operands

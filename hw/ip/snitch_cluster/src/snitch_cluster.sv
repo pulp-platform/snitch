@@ -86,7 +86,8 @@ module snitch_cluster
   parameter bit [NrCores-1:0] Xfrep         = '0,
   /// # Core-global parameters
   /// FPU configuration.
-  parameter fpnew_pkg::fpu_implementation_t FPUImplementation [NrCores] = '{default: 0},
+  parameter fpnew_pkg::fpu_implementation_t FPUImplementation [NrCores] =
+    '{default: fpnew_pkg::fpu_implementation_t'(0)},
   /// Physical Memory Attribute Configuration
   parameter snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '0,
   /// # Per-core parameters
