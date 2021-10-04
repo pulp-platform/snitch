@@ -97,7 +97,7 @@ ENV PATH "/tools/riscv/bin:${PATH}"
 RUN latest_tag=`curl -s -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/pulp-platform/llvm-project/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'` && \
     echo "SNITCH_LLVM_VERSION=${SNITCH_LLVM_VERSION} LLVM_TAR=${LLVM_TAR} latest_tag=${latest_tag}" && \
     test "${SNITCH_LLVM_VERSION}" = "latest" && SNITCH_LLVM_VERSION=${latest_tag} || : ; \
-    LLVM_TAR=riscv32-pulp-llvm-ubuntu1804-snitch-$(echo $SNITCH_LLVM_VERSION | cut -d '-' -f3-).tar.gz && \
+    LLVM_TAR=riscv32-pulp-llvm-ubuntu1804-$(echo $SNITCH_LLVM_VERSION | cut -d '-' -f3-).tar.gz && \
     mkdir -p riscv-llvm && \
     echo "SNITCH_LLVM_VERSION=${SNITCH_LLVM_VERSION} LLVM_TAR=${LLVM_TAR} latest_tag=${latest_tag}" && \
     wget -qO- https://github.com/pulp-platform/llvm-project/releases/download/${SNITCH_LLVM_VERSION}/${LLVM_TAR} | \
