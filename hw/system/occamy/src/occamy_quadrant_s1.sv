@@ -25,8 +25,8 @@ module occamy_quadrant_s1
     input  logic                                                   ro_enable_i,
     input  logic                                                   ro_flush_valid_i,
     output logic                                                   ro_flush_ready_o,
-    input  logic                     [                  1:0][47:0] ro_start_addr_i,
-    input  logic                     [                  1:0][47:0] ro_end_addr_i,
+    input  logic                     [                  3:0][47:0] ro_start_addr_i,
+    input  logic                     [                  3:0][47:0] ro_end_addr_i,
     // HBI Connection
     output axi_a48_d512_i7_u0_req_t                                quadrant_hbi_out_req_o,
     input  axi_a48_d512_i7_u0_resp_t                               quadrant_hbi_out_rsp_i,
@@ -274,15 +274,15 @@ module occamy_quadrant_s1
   axi_a48_d512_i4_u0_resp_t snitch_ro_cache_rsp;
 
   snitch_read_only_cache #(
-      .LineWidth(512),
-      .LineCount(256),
+      .LineWidth(1024),
+      .LineCount(128),
       .SetCount(2),
       .AxiAddrWidth(48),
       .AxiDataWidth(512),
       .AxiIdWidth(3),
       .AxiUserWidth(1),
       .MaxTrans(8),
-      .NrAddrRules(2),
+      .NrAddrRules(4),
       .slv_req_t(axi_a48_d512_i3_u0_req_t),
       .slv_rsp_t(axi_a48_d512_i3_u0_resp_t),
       .mst_req_t(axi_a48_d512_i4_u0_req_t),
