@@ -22,12 +22,12 @@
   cpus {
     #address-cells = <1>;
     #size-cells = <0>;
-    timebase-frequency = <25000000>;
+    timebase-frequency = <7500000>;
     CPU0: cpu@0 {
       device_type = "cpu";
       status = "okay";
       compatible = "eth,ariane", "riscv";
-      clock-frequency = <50000000>;
+      clock-frequency = <25000000>;
       riscv,isa = "rv64fimafd";
       mmu-type = "riscv,sv39";
       tlb-split;
@@ -53,7 +53,7 @@
     serial@2002000 {
       compatible = "ns16550";
       reg = <0x0 0x2002000 0x0 0x1000>;
-      clock-frequency = <50000000>;
+      clock-frequency = <25000000>;
       current-speed = <115200>;
       interrupt-parent = <&PLIC0>;
       interrupts = <33>;
@@ -115,7 +115,7 @@
       };
     };
     clint@4000000 {
-      clock-frequency = <25000000>;
+      clock-frequency = <7500000>;
       compatible = "riscv,clint0";
       interrupts-extended = <&CPU0_intc 3 &CPU0_intc 7>;
       reg-names = "control";

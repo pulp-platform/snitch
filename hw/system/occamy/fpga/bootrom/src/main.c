@@ -11,7 +11,7 @@
 enum boot_mode_t { JTAG, SPL_ROM };
 
 int main() {
-    init_uart(50000000, 115200);
+    init_uart(25000000, 115200);
     print_uart("Hello World!\r\n");
 
     // Hardcode boot mode for now. TODO(niwis): derive e.g. from GPIO.

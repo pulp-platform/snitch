@@ -191,8 +191,8 @@ Disassembly of section .text:
  1000196:	0400                	addi	s0,sp,512
  1000198:	0000                	unimp
  100019a:	6200                	ld	s0,0(a2)
- 100019c:	7d01                	lui	s10,0xfffe0
- 100019e:	4078                	lw	a4,68(s0)
+ 100019c:	7200                	ld	s0,32(a2)
+ 100019e:	e070                	sd	a2,192(s0)
  10001a0:	0000                	unimp
  10001a2:	0100                	addi	s0,sp,128
  10001a4:	40757063          	bgeu	a0,t2,10005a4 <device_tree+0x574>
@@ -235,8 +235,8 @@ Disassembly of section .text:
  10001f6:	0400                	addi	s0,sp,512
  10001f8:	0000                	unimp
  10001fa:	7c00                	ld	s0,56(s0)
- 10001fc:	fa02                	sd	zero,304(sp)
- 10001fe:	80f0                	0x80f0
+ 10001fc:	7d01                	lui	s10,0xfffe0
+ 10001fe:	4078                	lw	a4,68(s0)
  1000200:	0000                	unimp
  1000202:	0300                	addi	s0,sp,384
  1000204:	0000                	unimp
@@ -447,8 +447,8 @@ Disassembly of section .text:
  10003c2:	0400                	addi	s0,sp,512
  10003c4:	0000                	unimp
  10003c6:	7c00                	ld	s0,56(s0)
- 10003c8:	fa02                	sd	zero,304(sp)
- 10003ca:	80f0                	0x80f0
+ 10003c8:	7d01                	lui	s10,0xfffe0
+ 10003ca:	4078                	lw	a4,68(s0)
  10003cc:	0000                	unimp
  10003ce:	0300                	addi	s0,sp,384
  10003d0:	0000                	unimp
@@ -960,8 +960,8 @@ Disassembly of section .text:
  10007ee:	0400                	addi	s0,sp,512
  10007f0:	0000                	unimp
  10007f2:	7c00                	ld	s0,56(s0)
- 10007f4:	7d01                	lui	s10,0xfffe0
- 10007f6:	4078                	lw	a4,68(s0)
+ 10007f4:	7200                	ld	s0,32(a2)
+ 10007f6:	e070                	sd	a2,192(s0)
  10007f8:	0000                	unimp
  10007fa:	0300                	addi	s0,sp,384
  10007fc:	0000                	unimp
@@ -1483,10 +1483,10 @@ Disassembly of section .text.startup:
 
 0000000001000d18 <main>:
  1000d18:	0001c5b7          	lui	a1,0x1c
- 1000d1c:	02faf537          	lui	a0,0x2faf
+ 1000d1c:	017d8537          	lui	a0,0x17d8
  1000d20:	ff010113          	addi	sp,sp,-16
  1000d24:	20058593          	addi	a1,a1,512 # 1c200 <_start-0xfe3e00>
- 1000d28:	08050513          	addi	a0,a0,128 # 2faf080 <bin_to_hex_table+0x1fae2c0>
+ 1000d28:	84050513          	addi	a0,a0,-1984 # 17d7840 <bin_to_hex_table+0x7d6a80>
  1000d2c:	00113423          	sd	ra,8(sp)
  1000d30:	e55ff0ef          	jal	ra,1000b84 <init_uart>
  1000d34:	00000517          	auipc	a0,0x0

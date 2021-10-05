@@ -259,21 +259,23 @@ proc create_root_design { parentCell DEBUG } {
   # Create instance: clk_wiz, and set properties
   set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz ]
   set_property -dict [ list \
-   CONFIG.CLKOUT1_JITTER {115.831} \
+   CONFIG.CLKOUT1_JITTER {137.681} \
+   CONFIG.CLKOUT1_PHASE_ERROR {105.461} \
    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100} \
-   CONFIG.CLKOUT2_JITTER {132.683} \
-   CONFIG.CLKOUT2_PHASE_ERROR {87.180} \
-   CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {50} \
+   CONFIG.CLKOUT2_JITTER {183.467} \
+   CONFIG.CLKOUT2_PHASE_ERROR {105.461} \
+   CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {25} \
    CONFIG.CLKOUT2_USED {true} \
-   CONFIG.CLKOUT3_JITTER {154.057} \
-   CONFIG.CLKOUT3_PHASE_ERROR {87.180} \
-   CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {25} \
+   CONFIG.CLKOUT3_JITTER {231.878} \
+   CONFIG.CLKOUT3_PHASE_ERROR {105.461} \
+   CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {7.5} \
    CONFIG.CLKOUT3_REQUESTED_PHASE {90} \
    CONFIG.CLKOUT3_USED {true} \
    CONFIG.CLK_OUT2_PORT {clk_out2} \
-   CONFIG.MMCM_CLKOUT0_DIVIDE_F {12.000} \
-   CONFIG.MMCM_CLKOUT1_DIVIDE {24} \
-   CONFIG.MMCM_CLKOUT2_DIVIDE {48} \
+   CONFIG.MMCM_CLKFBOUT_MULT_F {9.000} \
+   CONFIG.MMCM_CLKOUT0_DIVIDE_F {9.000} \
+   CONFIG.MMCM_CLKOUT1_DIVIDE {36} \
+   CONFIG.MMCM_CLKOUT2_DIVIDE {120} \
    CONFIG.MMCM_CLKOUT2_PHASE {90.000} \
    CONFIG.NUM_OUT_CLKS {3} \
    CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
@@ -492,7 +494,7 @@ proc create_root_design { parentCell DEBUG } {
   set_property HDL_ATTRIBUTE.DEBUG $DEBUG [get_bd_nets blk_mem_gen_0_douta]
   connect_bd_net -net clk_100MHz_n_1 [get_bd_ports clk_100MHz_n] [get_bd_pins clk_wiz/clk_in1_n]
   connect_bd_net -net clk_100MHz_p_1 [get_bd_ports clk_100MHz_p] [get_bd_pins clk_wiz/clk_in1_p]
-  connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins axi_quad_spi_0/ext_spi_clk] [get_bd_pins clk_wiz/clk_out1] [get_bd_pins hbm_0/AXI_00_ACLK] [get_bd_pins hbm_0/AXI_00_WDATA_PARITY] [get_bd_pins hbm_0/AXI_01_ACLK] [get_bd_pins hbm_0/AXI_04_ACLK] [get_bd_pins hbm_0/AXI_05_ACLK] [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins hbm_0/AXI_12_ACLK] [get_bd_pins hbm_0/AXI_16_ACLK] [get_bd_pins hbm_0/AXI_20_ACLK] [get_bd_pins hbm_0/AXI_24_ACLK] [get_bd_pins hbm_0/AXI_28_ACLK] [get_bd_pins hbm_0/HBM_REF_CLK_0] [get_bd_pins hbm_0/HBM_REF_CLK_1] [get_bd_pins smartconnect_0/aclk1] [get_bd_pins smartconnect_1/aclk1] [get_bd_pins smartconnect_2/aclk1] [get_bd_pins smartconnect_3/aclk1] [get_bd_pins smartconnect_4/aclk1] [get_bd_pins smartconnect_5/aclk1] [get_bd_pins smartconnect_6/aclk1] [get_bd_pins smartconnect_7/aclk1]
+  connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins axi_quad_spi_0/ext_spi_clk] [get_bd_pins clk_wiz/clk_out1] [get_bd_pins hbm_0/AXI_00_ACLK] [get_bd_pins hbm_0/AXI_01_ACLK] [get_bd_pins hbm_0/AXI_04_ACLK] [get_bd_pins hbm_0/AXI_05_ACLK] [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins hbm_0/AXI_12_ACLK] [get_bd_pins hbm_0/AXI_16_ACLK] [get_bd_pins hbm_0/AXI_20_ACLK] [get_bd_pins hbm_0/AXI_24_ACLK] [get_bd_pins hbm_0/AXI_28_ACLK] [get_bd_pins hbm_0/HBM_REF_CLK_0] [get_bd_pins hbm_0/HBM_REF_CLK_1] [get_bd_pins smartconnect_0/aclk1] [get_bd_pins smartconnect_1/aclk1] [get_bd_pins smartconnect_2/aclk1] [get_bd_pins smartconnect_3/aclk1] [get_bd_pins smartconnect_4/aclk1] [get_bd_pins smartconnect_5/aclk1] [get_bd_pins smartconnect_6/aclk1] [get_bd_pins smartconnect_7/aclk1]
   connect_bd_net -net clk_wiz_clk_out2 [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins axi_quad_spi_0/s_axi4_aclk] [get_bd_pins blk_mem_gen_0/clka] [get_bd_pins clk_wiz/clk_out2] [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins occamy_xilinx_0/clk_i] [get_bd_pins occamy_xilinx_0/clk_periph_i] [get_bd_pins smartconnect_0/aclk] [get_bd_pins smartconnect_1/aclk] [get_bd_pins smartconnect_2/aclk] [get_bd_pins smartconnect_3/aclk] [get_bd_pins smartconnect_4/aclk] [get_bd_pins smartconnect_5/aclk] [get_bd_pins smartconnect_6/aclk] [get_bd_pins smartconnect_7/aclk] [get_bd_pins smartconnect_8/aclk]
   connect_bd_net -net clk_wiz_clk_out3 [get_bd_pins clk_wiz/clk_out3] [get_bd_pins occamy_xilinx_0/rtc_i]
   connect_bd_net -net const_high_dout [get_bd_pins axi_quad_spi_0/keyclearb] [get_bd_pins axi_quad_spi_0/usrdoneo] [get_bd_pins axi_quad_spi_0/usrdonets] [get_bd_pins const_high/dout]
