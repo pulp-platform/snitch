@@ -227,6 +227,11 @@
                     "description": "Latency setting (number of pipeline stages) for floating-point conversion instructions.",
                     "default": 1
                 },
+                "lat_sdotp": {
+                    "type": "number",
+                    "description": "Latency setting (number of pipeline stages) for floating-point expanding dot product with accumulation.",
+                    "default": 2
+                },
                 "fpu_pipe_config": {
                     "type": "string",
                     "description": "Pipeline configuration (i.e., position of the registers) of the FPU.",

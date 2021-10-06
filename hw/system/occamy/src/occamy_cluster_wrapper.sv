@@ -73,17 +73,17 @@ package occamy_cluster_pkg;
     '{
         PipeRegs: // FMA Block
                   '{
-                    '{  3, // FP32
-                        3, // FP64
+                    '{  2, // FP32
+                        2, // FP64
                         1, // FP16
                         1, // FP8
-                        2, // FP16alt
+                        1, // FP16alt
                         1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
                     '{default: 1},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: 2}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -95,17 +95,17 @@ package occamy_cluster_pkg;
     '{
         PipeRegs: // FMA Block
                   '{
-                    '{  3, // FP32
-                        3, // FP64
+                    '{  2, // FP32
+                        2, // FP64
                         1, // FP16
                         1, // FP8
-                        2, // FP16alt
+                        1, // FP16alt
                         1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
                     '{default: 1},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: 2}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -117,17 +117,17 @@ package occamy_cluster_pkg;
     '{
         PipeRegs: // FMA Block
                   '{
-                    '{  3, // FP32
-                        3, // FP64
+                    '{  2, // FP32
+                        2, // FP64
                         1, // FP16
                         1, // FP8
-                        2, // FP16alt
+                        1, // FP16alt
                         1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
                     '{default: 1},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: 2}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -139,17 +139,17 @@ package occamy_cluster_pkg;
     '{
         PipeRegs: // FMA Block
                   '{
-                    '{  3, // FP32
-                        3, // FP64
+                    '{  2, // FP32
+                        2, // FP64
                         1, // FP16
                         1, // FP8
-                        2, // FP16alt
+                        1, // FP16alt
                         1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
                     '{default: 1},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: 2}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -161,17 +161,17 @@ package occamy_cluster_pkg;
     '{
         PipeRegs: // FMA Block
                   '{
-                    '{  3, // FP32
-                        3, // FP64
+                    '{  2, // FP32
+                        2, // FP64
                         1, // FP16
                         1, // FP8
-                        2, // FP16alt
+                        1, // FP16alt
                         1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
                     '{default: 1},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: 2}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -183,17 +183,17 @@ package occamy_cluster_pkg;
     '{
         PipeRegs: // FMA Block
                   '{
-                    '{  3, // FP32
-                        3, // FP64
+                    '{  2, // FP32
+                        2, // FP64
                         1, // FP16
                         1, // FP8
-                        2, // FP16alt
+                        1, // FP16alt
                         1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
                     '{default: 1},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: 2}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -205,17 +205,17 @@ package occamy_cluster_pkg;
     '{
         PipeRegs: // FMA Block
                   '{
-                    '{  3, // FP32
-                        3, // FP64
+                    '{  2, // FP32
+                        2, // FP64
                         1, // FP16
                         1, // FP8
-                        2, // FP16alt
+                        1, // FP16alt
                         1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
                     '{default: 1},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: 2}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -227,17 +227,17 @@ package occamy_cluster_pkg;
     '{
         PipeRegs: // FMA Block
                   '{
-                    '{  3, // FP32
-                        3, // FP64
+                    '{  2, // FP32
+                        2, // FP64
                         1, // FP16
                         1, // FP8
-                        2, // FP16alt
+                        1, // FP16alt
                         1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
                     '{default: 1},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: 2}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
@@ -249,17 +249,17 @@ package occamy_cluster_pkg;
     '{
         PipeRegs: // FMA Block
                   '{
-                    '{  3, // FP32
-                        3, // FP64
+                    '{  2, // FP32
+                        2, // FP64
                         1, // FP16
                         1, // FP8
-                        2, // FP16alt
+                        1, // FP16alt
                         1  // FP8alt
                       },
                     '{default: 1},   // DIVSQRT
                     '{default: 1},   // NONCOMP
                     '{default: 1},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: 2}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
                     '{default: fpnew_pkg::DISABLED}, // DIVSQRT
