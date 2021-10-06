@@ -67,13 +67,14 @@
         dma_req_fifo_depth: 3,
         // Timing parameters
         timing: {
-            lat_comp_fp32: 3,
-            lat_comp_fp64: 3,
-            lat_comp_fp16_alt: 2,
+            lat_comp_fp32: 2,
+            lat_comp_fp64: 2,
+            lat_comp_fp16_alt: 1,
             lat_comp_fp8: 1,
             lat_comp_fp8_alt: 1,
             lat_noncomp: 1,
             lat_conv: 1,
+            lat_sdotp: 2,
             fpu_pipe_config: "BEFORE"
             narrow_xbar_latency: "CUT_ALL_PORTS",
             wide_xbar_latency: "CUT_ALL_PORTS",

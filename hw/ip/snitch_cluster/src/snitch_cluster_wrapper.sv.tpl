@@ -110,7 +110,7 @@ package ${cfg['pkg_name']};
                     '{default: 1},   // DIVSQRT
                     '{default: ${cfg['timing']['lat_noncomp']}},   // NONCOMP
                     '{default: ${cfg['timing']['lat_conv']}},   // CONV
-                    '{default: 1}    // DOTP
+                    '{default: ${cfg['timing']['lat_sdotp']}}    // DOTP
                     },
         UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
 % if c["Xdiv_sqrt"]:
