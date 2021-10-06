@@ -32,6 +32,7 @@
             lat_comp_fp8_alt: 1,
             lat_noncomp: 1,
             lat_conv: 1,
+            lat_sdotp: 2,
             fpu_pipe_config: "BEFORE"
             narrow_xbar_latency: "CUT_ALL_PORTS",
             wide_xbar_latency: "CUT_ALL_PORTS",
