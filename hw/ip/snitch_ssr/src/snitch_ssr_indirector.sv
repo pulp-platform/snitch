@@ -173,8 +173,8 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
     // Complete word when uppermost index or last index (delayed due to coalescing regs).
     // On every word transmitted: clear validity *unless* new word loaded.
-    assign idx_word_valid_d = idx_bytecnt_rovr;
-    assign idx_word_clr     = idx_req_o.q_valid & idx_rsp_i.q_ready & ~idx_bytecnt_ena;
+    assign idx_word_valid_d = idx_bytecnt_rovr | (~idx_bytecnt_rovr_q & isect_slv_done);
+    assign idx_word_clr     = idx_req_o.q_valid & idx_rsp_i.q_ready & ~isect_slv_hs;
 
     `FFLARN(idx_data_q, idx_data_d, idx_bytecnt_ena,  1'b0, clk_i, rst_ni)
     `FFLARN(idx_strb_q, idx_strb_d, idx_bytecnt_ena,  1'b0, clk_i, rst_ni)
