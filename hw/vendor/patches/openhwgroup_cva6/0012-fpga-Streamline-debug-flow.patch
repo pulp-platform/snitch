@@ -1,0 +1,68 @@
+From 25f1af884f2d46b303f2e31939abaa6375ac2804 Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Fri, 8 Oct 2021 13:07:46 +0200
+Subject: [PATCH] fpga: Streamline debug flow
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ src/ariane.sv      |  6 +++---
+ src/csr_regfile.sv | 12 ++++++++----
+ 2 files changed, 11 insertions(+), 7 deletions(-)
+
+diff --git a/src/ariane.sv b/src/ariane.sv
+index a2e51ad..b428766 100644
+--- a/src/ariane.sv
++++ b/src/ariane.sv
+@@ -57,8 +57,8 @@ module ariane import ariane_pkg::*; #(
+   input  wt_cache_pkg::l15_rtrn_t      l15_rtrn_i
+ `else
+   // memory side, AXI Master
+-  output axi_req_t                     axi_req_o,
+-  input  axi_rsp_t                     axi_resp_i
++  (* mark_debug = "true" *) output axi_req_t                     axi_req_o,
++  (* mark_debug = "true" *) input  axi_rsp_t                     axi_resp_i
+ `endif
+ );
+ 
+@@ -69,7 +69,7 @@ module ariane import ariane_pkg::*; #(
+   riscv::priv_lvl_t           priv_lvl;
+   exception_t                 ex_commit; // exception from commit stage
+   bp_resolve_t                resolved_branch;
+-  logic [riscv::VLEN-1:0]     pc_commit;
++  (* mark_debug = "true" *) logic [riscv::VLEN-1:0]     pc_commit;
+   logic                       eret;
+   logic [NR_COMMIT_PORTS-1:0] commit_ack;
+   logic                       rst_uarch_n;
+diff --git a/src/csr_regfile.sv b/src/csr_regfile.sv
+index 5b1f166..e7f89f8 100644
+--- a/src/csr_regfile.sv
++++ b/src/csr_regfile.sv
+@@ -125,9 +125,12 @@ module csr_regfile import ariane_pkg::*; #(
+     riscv::xlen_t mie_q,       mie_d;
+     riscv::xlen_t mcounteren_q,mcounteren_d;
+     riscv::xlen_t mscratch_q,  mscratch_d;
+-    riscv::xlen_t mepc_q,      mepc_d;
+-    riscv::xlen_t mcause_q,    mcause_d;
+-    riscv::xlen_t mtval_q,     mtval_d;
++    (* mark_debug = "true" *) riscv::xlen_t mepc_q;
++    riscv::xlen_t mepc_d;
++    (* mark_debug = "true" *) riscv::xlen_t mcause_q;
++    riscv::xlen_t mcause_d;
++    (* mark_debug = "true" *) riscv::xlen_t mtval_q;
++    riscv::xlen_t mtval_d;
+ 
+     riscv::xlen_t stvec_q,     stvec_d;
+     riscv::xlen_t scounteren_q,scounteren_d;
+@@ -142,7 +145,8 @@ module csr_regfile import ariane_pkg::*; #(
+ 
+     logic        wfi_d,       wfi_q;
+ 
+-    riscv::xlen_t cycle_q,     cycle_d;
++    (* mark_debug = "true" *) riscv::xlen_t cycle_q;
++    riscv::xlen_t cycle_d;
+     riscv::xlen_t instret_q,   instret_d;
+ 
+     riscv::pmpcfg_t [15:0]    pmpcfg_q,  pmpcfg_d;
+-- 
+2.16.5
+
