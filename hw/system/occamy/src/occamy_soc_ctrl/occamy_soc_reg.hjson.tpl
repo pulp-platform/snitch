@@ -47,6 +47,23 @@
         }
       ]
     }
+    { name: "CHIP_ID"
+      desc: "Id of chip for multi-chip systems."
+      swaccess: "ro"
+      hwaccess: "hwo"
+      hwqe:     "true",
+      hwext:    "true",
+      fields: [
+        {
+          bits: "1:0"
+          resval: "0"
+          name: "CHIP_ID"
+          desc: '''
+                Id of chip for multi-chip systems.
+                '''
+        }
+      ]
+    }
     { multireg:
       { name: "SCRATCH"
         desc: "Scratch register for SW to write to."
