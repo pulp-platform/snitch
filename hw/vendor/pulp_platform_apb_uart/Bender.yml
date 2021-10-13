@@ -1,9 +1,11 @@
 package:
   name: apb_uart
-  authors: ["Sebastian Witt"]
+  authors: [
+      "Sebastian Witt",
+      "Jonathan Kimmitt"
+    ]
 
 sources:
-  - src/apb_uart.sv
   - src/slib_clock_div.sv
   - src/slib_counter.sv
   - src/slib_edge_detect.sv
@@ -15,3 +17,5 @@ sources:
   - src/uart_interrupt.sv
   - src/uart_receiver.sv
   - src/uart_transmitter.sv
+  - src/apb_uart.sv
+  - src/apb_uart_wrap.sv

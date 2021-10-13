@@ -7,7 +7,7 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/apb_uart.git",
-    rev: "master",
+    rev: "cleanup/to-sv",
   },
 
   patch_dir: "patches/pulp_platform_apb_uart",
@@ -16,7 +16,7 @@
     "LICENSE",
     "README.md",
     "src_files.yml",
-    "apb_uart.tcl",
+    "util",
     "*.vhd"
   ]
 }
