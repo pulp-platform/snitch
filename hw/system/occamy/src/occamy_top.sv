@@ -2662,28 +2662,25 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .apb_rsp_i(uart_apb_rsp)
   );
 
-  apb_uart i_apb_uart (
-      .CLK    (clk_i),
-      .RSTN   (rst_ni),
-      .PSEL   (uart_apb_req.psel),
-      .PENABLE(uart_apb_req.penable),
-      .PWRITE (uart_apb_req.pwrite),
-      .PADDR  (uart_apb_req.paddr[4:2]),
-      .PWDATA (uart_apb_req.pwdata),
-      .PRDATA (uart_apb_rsp.prdata),
-      .PREADY (uart_apb_rsp.pready),
-      .PSLVERR(uart_apb_rsp.pslverr),
-      .INT    (irq.uart),
-      .OUT1N  (),  // keep open
-      .OUT2N  (),  // keep open
-      .RTSN   (),  // no flow control
-      .DTRN   (),  // no flow control
-      .CTSN   (1'b0),
-      .DSRN   (1'b0),
-      .DCDN   (1'b0),
-      .RIN    (1'b0),
-      .SIN    (uart_rx_i),
-      .SOUT   (uart_tx_o)
+  apb_uart_wrap #(
+      .apb_req_t (apb_a48_d32_req_t),
+      .apb_resp_t(apb_a48_d32_rsp_t)
+  ) i_uart (
+      .clk_i(clk_periph_i),
+      .rst_ni(rst_periph_ni),
+      .apb_req_i(uart_apb_req),
+      .apb_resp_o(uart_apb_rsp),
+      .intr_o(irq.uart),
+      .out1_no(),  // keep open
+      .out2_no(),  // keep open
+      .rts_no(),  // no flow control
+      .dtr_no(),  // no flow control
+      .cts_ni(1'b0),  // no flow control
+      .dsr_ni(1'b0),  // no flow control
+      .dcd_ni(1'b0),  // no flow control
+      .rin_ni(1'b0),
+      .sin_i(uart_rx_i),
+      .sout_o(uart_tx_o)
   );
 
   /////////////

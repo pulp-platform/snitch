@@ -538,28 +538,25 @@ module occamy_top
   //////////////
 
   <% uart_apb = soc_regbus_periph_xbar.out_uart.to_apb(context, "uart_apb") %>
-  apb_uart i_apb_uart (
-    .CLK     ( clk_i                             ),
-    .RSTN    ( rst_ni                            ),
-    .PSEL    ( ${uart_apb.req_name()}.psel       ),
-    .PENABLE ( ${uart_apb.req_name()}.penable    ),
-    .PWRITE  ( ${uart_apb.req_name()}.pwrite     ),
-    .PADDR   ( ${uart_apb.req_name()}.paddr[4:2] ),
-    .PWDATA  ( ${uart_apb.req_name()}.pwdata     ),
-    .PRDATA  ( ${uart_apb.rsp_name()}.prdata     ),
-    .PREADY  ( ${uart_apb.rsp_name()}.pready     ),
-    .PSLVERR ( ${uart_apb.rsp_name()}.pslverr    ),
-    .INT     ( irq.uart                          ),
-    .OUT1N   (                                   ), // keep open
-    .OUT2N   (                                   ), // keep open
-    .RTSN    (                                   ), // no flow control
-    .DTRN    (                                   ), // no flow control
-    .CTSN    ( 1'b0                              ),
-    .DSRN    ( 1'b0                              ),
-    .DCDN    ( 1'b0                              ),
-    .RIN     ( 1'b0                              ),
-    .SIN     ( uart_rx_i                         ),
-    .SOUT    ( uart_tx_o                         )
+  apb_uart_wrap #(
+    .apb_req_t (${uart_apb.req_type()} ),
+    .apb_resp_t (${uart_apb.rsp_type()} )
+  ) i_uart (
+    .clk_i (${uart_apb.clk}),
+    .rst_ni (${uart_apb.rst}),
+    .apb_req_i (${uart_apb.req_name()}),
+    .apb_resp_o (${uart_apb.rsp_name()}),
+    .intr_o (irq.uart),
+    .out1_no (  ),  // keep open
+    .out2_no (  ),  // keep open
+    .rts_no (  ),   // no flow control
+    .dtr_no (  ),   // no flow control
+    .cts_ni (1'b0), // no flow control
+    .dsr_ni (1'b0), // no flow control
+    .dcd_ni (1'b0), // no flow control
+    .rin_ni (1'b0),
+    .sin_i (uart_rx_i),
+    .sout_o (uart_tx_o)
   );
 
   /////////////
