@@ -25,15 +25,15 @@
 //
 
 module apb_uart_wrap #(
-    parameter type apb_req_t  = logic,
-    parameter type apb_resp_t = logic
+    parameter type apb_req_t = logic,
+    parameter type apb_rsp_t = logic
 ) (
   input  logic clk_i,
   input  logic rst_ni,
 
   // APB
-  input  apb_req_t  apb_req_i,
-  output apb_resp_t apb_rsp_o,
+  input  apb_req_t apb_req_i,
+  output apb_rsp_t apb_rsp_o,
 
   // Physical interface
   output logic intr_o,
@@ -41,11 +41,11 @@ module apb_uart_wrap #(
   output logic out2_no,
   output logic rts_no,
   output logic dtr_no,
-  output logic cts_ni,
-  output logic dsr_ni,
-  output logic dcd_ni,
-  output logic rin_ni,
-  output logic sin_i,   // RX
+  input  logic cts_ni,
+  input  logic dsr_ni,
+  input  logic dcd_ni,
+  input  logic rin_ni,
+  input  logic sin_i,   // RX
   output logic sout_o   // TX
 );
 

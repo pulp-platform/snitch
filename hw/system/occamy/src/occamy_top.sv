@@ -2663,13 +2663,13 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
   apb_uart_wrap #(
-      .apb_req_t (apb_a48_d32_req_t),
-      .apb_resp_t(apb_a48_d32_rsp_t)
+      .apb_req_t(apb_a48_d32_req_t),
+      .apb_rsp_t(apb_a48_d32_rsp_t)
   ) i_uart (
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
       .apb_req_i(uart_apb_req),
-      .apb_resp_o(uart_apb_rsp),
+      .apb_rsp_o(uart_apb_rsp),
       .intr_o(irq.uart),
       .out1_no(),  // keep open
       .out2_no(),  // keep open
