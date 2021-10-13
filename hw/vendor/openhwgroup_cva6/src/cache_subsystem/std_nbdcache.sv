@@ -14,7 +14,7 @@
 
 
 module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
-    parameter logic [63:0] CACHE_START_ADDR = 64'h8000_0000,
+    parameter ariane_cfg_t ArianeCfg        = ArianeDefaultConfig, // contains cacheable regions
     parameter int unsigned AXI_ADDR_WIDTH   = 0,
     parameter int unsigned AXI_DATA_WIDTH   = 0,
     parameter int unsigned AXI_ID_WIDTH     = 0,
@@ -100,7 +100,7 @@ import std_cache_pkg::*;
     generate
         for (genvar i = 0; i < 3; i++) begin : master_ports
             cache_ctrl  #(
-                .CACHE_START_ADDR      ( CACHE_START_ADDR     )
+                .ArianeCfg             ( ArianeCfg            )
             ) i_cache_ctrl (
                 .bypass_i              ( ~enable_i            ),
                 .busy_o                ( busy            [i]  ),
