@@ -7,10 +7,8 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/apb_uart.git",
-    rev: "cleanup/to-sv",
+    rev: "master",
   },
-
-  patch_dir: "patches/pulp_platform_apb_uart",
 
   exclude_from_upstream: [
     "LICENSE",

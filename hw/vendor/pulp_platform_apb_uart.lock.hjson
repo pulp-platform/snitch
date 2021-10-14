@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/pulp-platform/apb_uart.git
-    rev: 171ebda46dcb533c19521e4e65d570650f93d055
+    rev: b6145341df79137ac584c83e9c081f80a7a40440
   }
 }
