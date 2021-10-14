@@ -2662,17 +2662,25 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .apb_rsp_i(uart_apb_rsp)
   );
 
-  apb_uart_sv #(
-      .apb_req_t (apb_a48_d32_req_t),
-      .apb_resp_t(apb_a48_d32_rsp_t)
+  apb_uart_wrap #(
+      .apb_req_t(apb_a48_d32_req_t),
+      .apb_rsp_t(apb_a48_d32_rsp_t)
   ) i_uart (
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
       .apb_req_i(uart_apb_req),
-      .apb_resp_o(uart_apb_rsp),
-      .rx_i(uart_rx_i),
-      .tx_o(uart_tx_o),
-      .intr_o(irq.uart)
+      .apb_rsp_o(uart_apb_rsp),
+      .intr_o(irq.uart),
+      .out1_no(),  // keep open
+      .out2_no(),  // keep open
+      .rts_no(),  // no flow control
+      .dtr_no(),  // no flow control
+      .cts_ni(1'b0),  // no flow control
+      .dsr_ni(1'b0),  // no flow control
+      .dcd_ni(1'b0),  // no flow control
+      .rin_ni(1'b0),
+      .sin_i(uart_rx_i),
+      .sout_o(uart_tx_o)
   );
 
   /////////////
