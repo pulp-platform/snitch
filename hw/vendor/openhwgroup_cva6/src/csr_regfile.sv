@@ -125,9 +125,12 @@ module csr_regfile import ariane_pkg::*; #(
     riscv::xlen_t mie_q,       mie_d;
     riscv::xlen_t mcounteren_q,mcounteren_d;
     riscv::xlen_t mscratch_q,  mscratch_d;
-    riscv::xlen_t mepc_q,      mepc_d;
-    riscv::xlen_t mcause_q,    mcause_d;
-    riscv::xlen_t mtval_q,     mtval_d;
+    (* mark_debug = "true" *) riscv::xlen_t mepc_q;
+    riscv::xlen_t mepc_d;
+    (* mark_debug = "true" *) riscv::xlen_t mcause_q;
+    riscv::xlen_t mcause_d;
+    (* mark_debug = "true" *) riscv::xlen_t mtval_q;
+    riscv::xlen_t mtval_d;
 
     riscv::xlen_t stvec_q,     stvec_d;
     riscv::xlen_t scounteren_q,scounteren_d;
@@ -142,7 +145,8 @@ module csr_regfile import ariane_pkg::*; #(
 
     logic        wfi_d,       wfi_q;
 
-    riscv::xlen_t cycle_q,     cycle_d;
+    (* mark_debug = "true" *) riscv::xlen_t cycle_q;
+    riscv::xlen_t cycle_d;
     riscv::xlen_t instret_q,   instret_d;
 
     riscv::pmpcfg_t [15:0]    pmpcfg_q,  pmpcfg_d;

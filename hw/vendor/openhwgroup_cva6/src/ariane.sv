@@ -57,8 +57,8 @@ module ariane import ariane_pkg::*; #(
   input  wt_cache_pkg::l15_rtrn_t      l15_rtrn_i
 `else
   // memory side, AXI Master
-  output axi_req_t                     axi_req_o,
-  input  axi_rsp_t                     axi_resp_i
+  (* mark_debug = "true" *) output axi_req_t                     axi_req_o,
+  (* mark_debug = "true" *) input  axi_rsp_t                     axi_resp_i
 `endif
 );
 
@@ -69,7 +69,7 @@ module ariane import ariane_pkg::*; #(
   riscv::priv_lvl_t           priv_lvl;
   exception_t                 ex_commit; // exception from commit stage
   bp_resolve_t                resolved_branch;
-  logic [riscv::VLEN-1:0]     pc_commit;
+  (* mark_debug = "true" *) logic [riscv::VLEN-1:0]     pc_commit;
   logic                       eret;
   logic [NR_COMMIT_PORTS-1:0] commit_ack;
   logic                       rst_uarch_n;
