@@ -69,6 +69,7 @@
         timing: {
             lat_comp_fp32: 2,
             lat_comp_fp64: 2,
+            lat_comp_fp16: 1,
             lat_comp_fp16_alt: 1,
             lat_comp_fp8: 1,
             lat_comp_fp8_alt: 1,
