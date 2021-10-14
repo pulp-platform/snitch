@@ -1,0 +1,86 @@
+From 3c58f034afc6aad3f8a00c4c949b4e99b1168225 Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Wed, 13 Oct 2021 16:53:49 +0200
+Subject: [PATCH] ariane/wb: Check cacheable region length
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ src/cache_subsystem/cache_ctrl.sv          | 4 ++--
+ src/cache_subsystem/std_cache_subsystem.sv | 2 +-
+ src/cache_subsystem/std_nbdcache.sv        | 4 ++--
+ src/cache_subsystem/std_no_dcache.sv       | 2 +-
+ 4 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/src/cache_subsystem/cache_ctrl.sv b/src/cache_subsystem/cache_ctrl.sv
+index e0716ef..4673ae0 100644
+--- a/src/cache_subsystem/cache_ctrl.sv
++++ b/src/cache_subsystem/cache_ctrl.sv
+@@ -19,7 +19,7 @@
+ 
+ 
+ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
+-    parameter logic [63:0] CACHE_START_ADDR  = 64'h4000_0000
++    parameter ariane_cfg_t ArianeCfg = ArianeDefaultConfig // contains cacheable regions
+ ) (
+     input  logic                                 clk_i,     // Clock
+     input  logic                                 rst_ni,    // Asynchronous reset active low
+@@ -251,7 +251,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
+                     // -------------------------
+                     // Check for cache-ability
+                     // -------------------------
+-                    if (tag_o < CACHE_START_ADDR[DCACHE_TAG_WIDTH+DCACHE_INDEX_WIDTH-1:DCACHE_INDEX_WIDTH]) begin
++                    if (!is_inside_cacheable_regions(ArianeCfg, {{{64-riscv::PLEN}{1'b0}}, tag_o, {ICACHE_INDEX_WIDTH{1'b0}}})) begin
+                         mem_req_d.bypass = 1'b1;
+                         state_d = WAIT_REFILL_GNT;
+                     end
+diff --git a/src/cache_subsystem/std_cache_subsystem.sv b/src/cache_subsystem/std_cache_subsystem.sv
+index 3b32d16..30b5aab 100644
+--- a/src/cache_subsystem/std_cache_subsystem.sv
++++ b/src/cache_subsystem/std_cache_subsystem.sv
+@@ -105,7 +105,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+    // Port 1: Load Unit
+    // Port 2: Store Unit
+    std_nbdcache #(
+-      .CACHE_START_ADDR ( ArianeCfg.CachedRegionAddrBase ),
++      .ArianeCfg        ( ArianeCfg                      ),
+       .AXI_ADDR_WIDTH   ( AxiAddrWidth                   ),
+       .AXI_DATA_WIDTH   ( AxiDataWidth                   ),
+       .AXI_ID_WIDTH     ( AxiIdWidth                     ),
+diff --git a/src/cache_subsystem/std_nbdcache.sv b/src/cache_subsystem/std_nbdcache.sv
+index d4504aa..3658597 100644
+--- a/src/cache_subsystem/std_nbdcache.sv
++++ b/src/cache_subsystem/std_nbdcache.sv
+@@ -14,7 +14,7 @@
+ 
+ 
+ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
+-    parameter logic [63:0] CACHE_START_ADDR = 64'h8000_0000,
++    parameter ariane_cfg_t ArianeCfg        = ArianeDefaultConfig, // contains cacheable regions
+     parameter int unsigned AXI_ADDR_WIDTH   = 0,
+     parameter int unsigned AXI_DATA_WIDTH   = 0,
+     parameter int unsigned AXI_ID_WIDTH     = 0,
+@@ -100,7 +100,7 @@ import std_cache_pkg::*;
+     generate
+         for (genvar i = 0; i < 3; i++) begin : master_ports
+             cache_ctrl  #(
+-                .CACHE_START_ADDR      ( CACHE_START_ADDR     )
++                .ArianeCfg             ( ArianeCfg            )
+             ) i_cache_ctrl (
+                 .bypass_i              ( ~enable_i            ),
+                 .busy_o                ( busy            [i]  ),
+diff --git a/src/cache_subsystem/std_no_dcache.sv b/src/cache_subsystem/std_no_dcache.sv
+index 339c7cf..d9a8245 100644
+--- a/src/cache_subsystem/std_no_dcache.sv
++++ b/src/cache_subsystem/std_no_dcache.sv
+@@ -12,7 +12,7 @@
+ // Description: Bypass version of data cache
+ 
+ module std_nbdcache #(
+-    parameter logic [63:0] CACHE_START_ADDR = 64'h8000_0000
++    parameter ariane_pkg::ariane_cfg_t ArianeCfg = ariane_pkg::ArianeDefaultConfig // contains cacheable regions
+ ) (
+     input  logic                            clk_i,       // Clock
+     input  logic                            rst_ni,      // Asynchronous reset active low
+-- 
+2.16.5
+
