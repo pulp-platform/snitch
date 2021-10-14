@@ -68,7 +68,7 @@ module occamy_cva6
   NrCachedRegionRules: 2, CachedRegionAddrBase: {
     64'h8000_0000, 64'd1879048192
   }, CachedRegionLength: {
-    (64'hffff_ffff_ffff_ffff - 64'h8000_0000), 64'd131072
+    (64'hff_ffff_ffff - 64'h8000_0000), 64'd131072
   },
   //  cache config
   Axi64BitCompliant: 1'b1, SwapEndianess: 1'b0,
