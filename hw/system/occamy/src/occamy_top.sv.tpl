@@ -93,7 +93,7 @@ module occamy_top
 % endfor
 
   /// HBI Ports
-% for i in range(nr_s1_quadrants):
+% for i in range(nr_s1_quadrants+1):
   input   ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_type()} hbi_${i}_req_i,
   output  ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_type()} hbi_${i}_rsp_o,
   output  ${wide_xbar_quadrant_s1.out_hbi.req_type()} hbi_${i}_req_o,
@@ -311,7 +311,7 @@ module occamy_top
 
   /// HBI Ports
   // TODO(zarubaf): Truncate address.
-% for i in range(nr_s1_quadrants):
+% for i in range(nr_s1_quadrants+1):
   assign ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_name()} = hbi_${i}_req_i;
   assign hbi_${i}_rsp_o = ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_name()};
 % endfor

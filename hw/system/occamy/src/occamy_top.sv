@@ -137,6 +137,10 @@ module occamy_top
     output axi_a48_d512_i4_u0_resp_t hbi_7_rsp_o,
     output axi_a48_d512_i7_u0_req_t  hbi_7_req_o,
     input  axi_a48_d512_i7_u0_resp_t hbi_7_rsp_i,
+    input  axi_a48_d512_i4_u0_req_t  hbi_8_req_i,
+    output axi_a48_d512_i4_u0_resp_t hbi_8_rsp_o,
+    output axi_a48_d512_i7_u0_req_t  hbi_8_req_o,
+    input  axi_a48_d512_i7_u0_resp_t hbi_8_rsp_i,
 
     /// PCIe Ports
     output axi_a48_d512_i9_u0_req_t  pcie_axi_req_o,
@@ -280,14 +284,14 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
 };
 
-  soc_wide_xbar_in_req_t   [17:0] soc_wide_xbar_in_req;
-  soc_wide_xbar_in_resp_t  [17:0] soc_wide_xbar_in_rsp;
+  soc_wide_xbar_in_req_t   [18:0] soc_wide_xbar_in_req;
+  soc_wide_xbar_in_resp_t  [18:0] soc_wide_xbar_in_rsp;
   soc_wide_xbar_out_req_t  [17:0] soc_wide_xbar_out_req;
   soc_wide_xbar_out_resp_t [17:0] soc_wide_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg(SocWideXbarCfg),
-      .Connectivity  ( 324'b011111111111111111101111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111101111111111111111110111111111111111111011111111111111111101111111111111111110111111111111111111011111111111111111101111111111111111110 ),
+      .Connectivity  ( 342'b011111111111111111101111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111101111111111111111110111111111111111111011111111111111111101111111111111111110111111111111111111011111111111111111101111111111111111110 ),
       .AtopSupport(0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i9_u0_aw_chan_t),
@@ -322,7 +326,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
   '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70020000 },
   '{ idx: 10, start_addr: 48'h20000000, end_addr: 48'h70000000 },
-  '{ idx: 10, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
+  '{ idx: 10, start_addr: 48'h80000000, end_addr: 48'h20000000000 },
   '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h10000000 },
   '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
   '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
@@ -336,12 +340,12 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   soc_narrow_xbar_in_req_t   [10:0] soc_narrow_xbar_in_req;
   soc_narrow_xbar_in_resp_t  [10:0] soc_narrow_xbar_in_rsp;
-  soc_narrow_xbar_out_req_t  [11:0] soc_narrow_xbar_out_req;
-  soc_narrow_xbar_out_resp_t [11:0] soc_narrow_xbar_out_rsp;
+  soc_narrow_xbar_out_req_t  [12:0] soc_narrow_xbar_out_req;
+  soc_narrow_xbar_out_resp_t [12:0] soc_narrow_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg(SocNarrowXbarCfg),
-      .Connectivity  ( 132'b111011111111101111111111111111111111111101111111111110111111111111011111111111101111111111110111111111111011111111111101111111111110 ),
+      .Connectivity  ( 143'b11110111111111101111111111111111111111111111011111111111110111111111111101111111111111011111111111110111111111111101111111111111011111111111110 ),
       .AtopSupport(1),
       .slv_aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d64_i8_u0_aw_chan_t),
@@ -2206,6 +2210,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign hbi_6_rsp_o = soc_wide_xbar_in_rsp[SOC_WIDE_XBAR_IN_HBI_6];
   assign soc_wide_xbar_in_req[SOC_WIDE_XBAR_IN_HBI_7] = hbi_7_req_i;
   assign hbi_7_rsp_o = soc_wide_xbar_in_rsp[SOC_WIDE_XBAR_IN_HBI_7];
+  assign soc_wide_xbar_in_req[SOC_WIDE_XBAR_IN_HBI_8] = hbi_8_req_i;
+  assign hbi_8_rsp_o = soc_wide_xbar_in_rsp[SOC_WIDE_XBAR_IN_HBI_8];
 
   // APB port for HBI
   apb_a48_d32_req_t apb_hbi_ctl_req;

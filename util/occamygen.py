@@ -237,6 +237,7 @@ def main():
     # HBI
     am_hbi = am.new_leaf("hbi", 0x10000000000,
                          0x10000000000).attach_to(am_wide_xbar_quadrant_s1)
+    am_soc_wide_xbar.attach(am_hbi)
 
     # Generate crossbars.
 
@@ -313,7 +314,7 @@ def main():
     for i in range(8):
         soc_wide_xbar.add_output_entry("hbm_{}".format(i), am_hbm[i])
 
-    for i in range(nr_s1_quadrants):
+    for i in range(nr_s1_quadrants+1):
         soc_wide_xbar.add_input("hbi_{}".format(i))
 
     soc_wide_xbar.add_input("soc_narrow")
@@ -355,6 +356,7 @@ def main():
     soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)
+    soc_narrow_xbar.add_output_entry("hbi", am_hbi)
 
     ################
     # S1 Quadrants #

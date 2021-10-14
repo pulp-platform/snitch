@@ -113,7 +113,7 @@ package occamy_pkg;
   /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
   localparam xbar_rule_48_t [1:0] SocAxiLitePeriphXbarAddrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-  '{ idx: 1, start_addr: 48'h01000000, end_addr: 48'h1200000000 }
+  '{ idx: 1, start_addr: 48'h01000000, end_addr: 48'h20000000000 }
 };
 
   // AXI plugs of the `soc_axi_lite_periph_xbar` crossbar.
@@ -203,6 +203,7 @@ package occamy_pkg;
     SOC_WIDE_XBAR_IN_HBI_5,
     SOC_WIDE_XBAR_IN_HBI_6,
     SOC_WIDE_XBAR_IN_HBI_7,
+    SOC_WIDE_XBAR_IN_HBI_8,
     SOC_WIDE_XBAR_IN_SOC_NARROW,
     SOC_WIDE_XBAR_IN_PCIE,
     SOC_WIDE_XBAR_NUM_INPUTS
@@ -304,6 +305,7 @@ package occamy_pkg;
     SOC_NARROW_XBAR_OUT_SPM,
     SOC_NARROW_XBAR_OUT_SOC_WIDE,
     SOC_NARROW_XBAR_OUT_REGBUS_PERIPH,
+    SOC_NARROW_XBAR_OUT_HBI,
     SOC_NARROW_XBAR_NUM_OUTPUTS
   } soc_narrow_xbar_outputs_e;
 
