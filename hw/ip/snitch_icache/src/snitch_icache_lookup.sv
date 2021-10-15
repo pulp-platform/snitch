@@ -6,7 +6,10 @@
 
 /// An actual cache lookup.
 module snitch_icache_lookup #(
-    parameter snitch_icache_pkg::config_t CFG = '0
+    parameter snitch_icache_pkg::config_t CFG = '0,
+    /// Configuration input types for SRAMs used in implementation.
+    parameter type sram_cfg_data_t  = logic,
+    parameter type sram_cfg_tag_t   = logic
 )(
     input  logic clk_i,
     input  logic rst_ni,
@@ -34,7 +37,10 @@ module snitch_icache_lookup #(
     input  logic [CFG.TAG_WIDTH-1:0]    write_tag_i,
     input  logic                        write_error_i,
     input  logic                        write_valid_i,
-    output logic                        write_ready_o
+    output logic                        write_ready_o,
+
+    input  sram_cfg_data_t  sram_cfg_data_i,
+    input  sram_cfg_tag_t   sram_cfg_tag_i
 );
 
     `ifndef SYNTHESIS
@@ -144,10 +150,13 @@ module snitch_icache_lookup #(
           .DataWidth (CFG.TAG_WIDTH+2),
           .ByteWidth (8),
           .NumPorts (1),
-          .Latency (1)
+          .Latency (1),
+          .impl_in_t (sram_cfg_tag_t)
         ) i_tag (
           .clk_i (clk_i),
           .rst_ni (rst_ni),
+          .impl_i (sram_cfg_tag_i),
+          .impl_o (  ),
           .req_i (ram_enable[i]),
           .we_i (ram_write),
           .addr_i (ram_addr),
@@ -161,10 +170,13 @@ module snitch_icache_lookup #(
           .DataWidth (CFG.LINE_WIDTH),
           .ByteWidth (8),
           .NumPorts (1),
-          .Latency (1)
+          .Latency (1),
+          .impl_in_t (sram_cfg_data_t)
         ) i_data (
           .clk_i (clk_i),
           .rst_ni (rst_ni),
+          .impl_i (sram_cfg_data_i),
+          .impl_o (  ),
           .req_i (ram_enable[i]),
           .we_i (ram_write),
           .addr_i (ram_addr),
