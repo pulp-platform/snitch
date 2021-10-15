@@ -29,6 +29,9 @@ struct Sim : htif_t {
     // HTIF overrides. Calls into the global memory.
     void read_chunk(addr_t taddr, size_t len, void *dst);
     void write_chunk(addr_t taddr, size_t len, const void *src);
+    bool is_address_preloaded(addr_t taddr, size_t len) override {
+        return disable_preloading;
+    }
 
     void idle();
 
@@ -43,6 +46,7 @@ struct Sim : htif_t {
     context_t *host;
     context_t target;
     bool vlt_vcd = false;
+    bool disable_preloading = false;
 };
 
 void sim_thread_main(void *arg);

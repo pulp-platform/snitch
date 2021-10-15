@@ -111,6 +111,7 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   assign soc_ctrl_in.boot_mode.d = boot_mode_i;
+  assign soc_ctrl_in.chip_id.d = chip_id_i;
 
   <% spm_words = cfg["spm"]["length"]//(soc_narrow_xbar.out_spm.dw//8) %>
 
