@@ -16,24 +16,26 @@ Base description of a Snitch cluster and its internal structure and configuratio
 
 # Snitch Cluster Schema Properties
 
-| Property                                          | Type     | Required | Nullable       | Defined by                                                                                                                                                                   |
-| :------------------------------------------------ | :------- | :------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [name](#name)                                     | `string` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-name.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/name")                                     |
-| [boot_addr](#boot_addr)                           | `number` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-boot_addr.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/boot_addr")                           |
-| [cluster_base_addr](#cluster_base_addr)           | `number` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-cluster_base_addr.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster_base_addr")           |
-| [tcdm](#tcdm)                                     | `object` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-tcdm.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/tcdm")                                     |
-| [addr_width](#addr_width)                         | `number` | Required | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-addr_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/addr_width")                         |
-| [data_width](#data_width)                         | `number` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-data_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/data_width")                         |
-| [dma_data_width](#dma_data_width)                 | `number` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_data_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_data_width")                 |
-| [id_width_in](#id_width_in)                       | `number` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-id_width_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/id_width_in")                       |
-| [dma_id_width_in](#dma_id_width_in)               | `number` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_id_width_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_id_width_in")               |
-| [hart_base_id](#hart_base_id)                     | `number` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hart_base_id.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hart_base_id")                     |
-| [mode](#mode)                                     | `string` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-mode.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/mode")                                     |
-| [vm](#vm)                                         | `string` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-vm.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/vm")                                         |
-| [dma_axi_req_fifo_depth](#dma_axi_req_fifo_depth) | `number` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_axi_req_fifo_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_axi_req_fifo_depth") |
-| [dma_req_fifo_depth](#dma_req_fifo_depth)         | `number` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_req_fifo_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_req_fifo_depth")         |
-| [timing](#timing)                                 | `object` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing")    |
-| [hives](#hives)                                   | `array`  | Required | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives")                                   |
+| Property                                          | Type      | Required | Nullable       | Defined by                                                                                                                                                                   |
+| :------------------------------------------------ | :-------- | :------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [name](#name)                                     | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-name.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/name")                                     |
+| [boot_addr](#boot_addr)                           | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-boot_addr.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/boot_addr")                           |
+| [cluster_base_addr](#cluster_base_addr)           | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-cluster_base_addr.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster_base_addr")           |
+| [tcdm](#tcdm)                                     | `object`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-tcdm.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/tcdm")                                     |
+| [addr_width](#addr_width)                         | `number`  | Required | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-addr_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/addr_width")                         |
+| [data_width](#data_width)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-data_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/data_width")                         |
+| [dma_data_width](#dma_data_width)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_data_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_data_width")                 |
+| [id_width_in](#id_width_in)                       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-id_width_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/id_width_in")                       |
+| [dma_id_width_in](#dma_id_width_in)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_id_width_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_id_width_in")               |
+| [hart_base_id](#hart_base_id)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hart_base_id.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hart_base_id")                     |
+| [mode](#mode)                                     | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-mode.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/mode")                                     |
+| [vm](#vm)                                         | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-vm.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/vm")                                         |
+| [dma_axi_req_fifo_depth](#dma_axi_req_fifo_depth) | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_axi_req_fifo_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_axi_req_fifo_depth") |
+| [dma_req_fifo_depth](#dma_req_fifo_depth)         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_req_fifo_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_req_fifo_depth")         |
+| [sram_cfg_expose](#sram_cfg_expose)               | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-sram_cfg_expose.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/sram_cfg_expose")               |
+| [sram_cfg_fields](#sram_cfg_fields)               | `object`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-sram_cfg_fields.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/sram_cfg_fields")               |
+| [timing](#timing)                                 | `object`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing")    |
+| [hives](#hives)                                   | `array`   | Required | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives")                                   |
 
 ## name
 
@@ -389,6 +391,56 @@ The default value is:
 
 ```json
 3
+```
+
+## sram_cfg_expose
+
+Whether to expose memory cut configuration inputs for implementation
+
+`sram_cfg_expose`
+
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-sram_cfg_expose.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/sram_cfg_expose")
+
+### sram_cfg_expose Type
+
+`boolean`
+
+## sram_cfg_fields
+
+The names and widths of memory cut configuration inputs needed for implementation
+
+`sram_cfg_fields`
+
+*   is optional
+
+*   Type: `object` ([Details](snitch_cluster-properties-sram_cfg_fields.md))
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-sram_cfg_fields.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/sram_cfg_fields")
+
+### sram_cfg_fields Type
+
+`object` ([Details](snitch_cluster-properties-sram_cfg_fields.md))
+
+### sram_cfg_fields Constraints
+
+**minimum number of properties**: the minimum number of properties for this object is: `1`
+
+### sram_cfg_fields Default Value
+
+The default value is:
+
+```json
+{
+  "reserved": 1
+}
 ```
 
 ## timing
