@@ -316,6 +316,7 @@ def main():
 
     for i in range(nr_s1_quadrants+1):
         soc_wide_xbar.add_input("hbi_{}".format(i))
+    soc_wide_xbar.add_output_entry("hbi_{}".format(nr_s1_quadrants), am_hbi)
 
     soc_wide_xbar.add_input("soc_narrow")
     soc_wide_xbar.add_output_entry("soc_narrow", am_soc_narrow_xbar)
@@ -356,7 +357,6 @@ def main():
     soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)
-    soc_narrow_xbar.add_output_entry("hbi", am_hbi)
 
     ################
     # S1 Quadrants #
