@@ -813,7 +813,7 @@ class AxiBus(object):
             ) + "\n")
         return bus
 
-    def trunc_addr(self, context, target_aw, inst_name=None, to=None):
+    def trunc_addr(self, context, target_aw, name=None, inst_name=None, to=None):
         if self.aw == target_aw:
             return self
 
