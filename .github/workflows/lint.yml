@@ -46,7 +46,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: 3.9
     - name: Install requirements
       run: pip install -r python-requirements.txt
     - name: Re-vendor and diff
@@ -66,7 +66,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: 3.9
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
@@ -94,7 +94,7 @@ jobs:
     - run: npm install -g @adobe/jsonschema2md@v5.0.1
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: 3.9
     - run: pip install -r python-requirements.txt
     - name: Re-generate documentation and diff
       run: |
@@ -111,7 +111,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: 3.9
     - name: Install requirements
       run: pip install -r python-requirements.txt
     - name: Check license
@@ -130,7 +130,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: 3.9
     - name: Install requirements
       run: pip install -r python-requirements.txt
     # Check the proper formatting of all Bender.yml
@@ -149,7 +149,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: 3.9
     - name: Install requirements
       run: pip install flake8
     # Check that all python sources conform to the `pep8` standard
@@ -183,7 +183,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: 3.9
     - name: Install requirements
       run: pip install -r python-requirements.txt
     - name: Check files
@@ -218,7 +218,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: 3.9
     - name: Install apt requirements
       run: |
         sudo apt update
