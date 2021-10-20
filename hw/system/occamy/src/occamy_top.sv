@@ -2214,7 +2214,6 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   assign soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_HBM_7] = hbm_7_rsp_i;
 
   /// HBI Ports
-  // TODO(zarubaf): Truncate address.
   // Inputs
   axi_a48_d512_i4_u0_req_t  in_hbi_0_req;
   axi_a48_d512_i4_u0_resp_t in_hbi_0_rsp;

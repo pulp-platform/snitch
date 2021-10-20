@@ -313,7 +313,6 @@ module occamy_top
 % endfor
 
   /// HBI Ports
-  // TODO(zarubaf): Truncate address.
   // Inputs
 % for i in range(nr_s1_quadrants+1):
   <%
