@@ -16,7 +16,8 @@ module occamy_cva6
     input  logic                          time_irq_i,
     input  logic                          debug_req_i,
     output axi_a48_d64_i4_u0_req_t        axi_req_o,
-    input  axi_a48_d64_i4_u0_resp_t       axi_resp_i
+    input  axi_a48_d64_i4_u0_resp_t       axi_resp_i,
+    input  sram_cfg_cva6_t                sram_cfg_i
 );
 
   axi_a48_d64_i4_u0_req_t  cva6_axi_req;
@@ -134,7 +135,8 @@ module occamy_cva6
       .axi_aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
       .axi_w_chan_t(axi_a48_d64_i4_u0_w_chan_t),
       .axi_req_t(axi_a48_d64_i4_u0_req_t),
-      .axi_rsp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_rsp_t(axi_a48_d64_i4_u0_resp_t),
+      .sram_cfg_t(sram_cfg_cva6_t)
   ) i_cva6 (
       .clk_i,
       .rst_ni,
@@ -145,7 +147,12 @@ module occamy_cva6
       .time_irq_i(time_irq),
       .debug_req_i(debug_req),
       .axi_req_o(cva6_axi_req),
-      .axi_resp_i(cva6_axi_rsp)
+      .axi_resp_i(cva6_axi_rsp),
+      .sram_cfg_idata_i(sram_cfg_i.icache_data),
+      .sram_cfg_itag_i(sram_cfg_i.icache_tag),
+      .sram_cfg_ddata_i(sram_cfg_i.dcache_data),
+      .sram_cfg_dtag_i(sram_cfg_i.dcache_tag),
+      .sram_cfg_dvalid_dirty_i(sram_cfg_i.dcache_valid_dirty)
   );
 
 endmodule

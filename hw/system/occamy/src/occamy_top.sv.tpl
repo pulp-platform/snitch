@@ -188,7 +188,8 @@ module occamy_top
     .time_irq_i (mtip[0]),
     .debug_req_i (debug_req[0]),
     .axi_req_o (${soc_narrow_xbar.in_cva6.req_name()}),
-    .axi_resp_i (${soc_narrow_xbar.in_cva6.rsp_name()})
+    .axi_resp_i (${soc_narrow_xbar.in_cva6.rsp_name()}),
+    .sram_cfg_i (sram_cfgs_i.cva6)
   );
 
   % for i in range(nr_s1_quadrants):

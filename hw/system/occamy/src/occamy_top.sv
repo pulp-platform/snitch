@@ -625,7 +625,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .time_irq_i(mtip[0]),
       .debug_req_i(debug_req[0]),
       .axi_req_o(soc_narrow_xbar_in_req[SOC_NARROW_XBAR_IN_CVA6]),
-      .axi_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6])
+      .axi_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6]),
+      .sram_cfg_i(sram_cfgs_i.cva6)
   );
 
   ///////////////////
