@@ -93,7 +93,7 @@ module occamy_top
 % endfor
 
   /// HBI Ports
-% for i in range(nr_s1_quadrants):
+% for i in range(nr_s1_quadrants+1):
   input   ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_type()} hbi_${i}_req_i,
   output  ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_type()} hbi_${i}_rsp_o,
   output  ${wide_xbar_quadrant_s1.out_hbi.req_type()} hbi_${i}_req_o,
@@ -143,7 +143,10 @@ module occamy_top
   //   CROSSBARS   //
   ///////////////////
   ${module}
-
+  <%
+    soc_wide_hbi_iwc = soc_wide_xbar.__dict__["out_hbi_{}".format(nr_s1_quadrants)] \
+        .change_iw(context, wide_xbar_quadrant_s1.out_hbi.iw, "soc_wide_hbi_iwc")
+  %>
   /////////////////////////////
   // Narrow to Wide Crossbar //
   /////////////////////////////
@@ -310,11 +313,20 @@ module occamy_top
 % endfor
 
   /// HBI Ports
-  // TODO(zarubaf): Truncate address.
-% for i in range(nr_s1_quadrants):
-  assign ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_name()} = hbi_${i}_req_i;
-  assign hbi_${i}_rsp_o = ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_name()};
+  // Inputs
+% for i in range(nr_s1_quadrants+1):
+  <%
+    hbi_in = soc_wide_xbar.__dict__["in_hbi_{}".format(i)].copy(name="in_hbi_{}".format(i)).declare(context)
+    hbi_in_trunc_addr = hbi_in.trunc_addr(context, target_aw=40, inst_name="hbi_in_trunc_addr_{}".format(i),
+                                          to=soc_wide_xbar.__dict__["in_hbi_{}".format(i)])
+  %>
+  assign ${hbi_in.req_name()} = hbi_${i}_req_i;
+  assign hbi_${i}_rsp_o = ${hbi_in.rsp_name()};
+
 % endfor
+  // Outputs
+  assign hbi_${nr_s1_quadrants}_req_o = ${soc_wide_hbi_iwc.req_name()};
+  assign ${soc_wide_hbi_iwc.rsp_name()} = hbi_${nr_s1_quadrants}_rsp_i;
 
   // APB port for HBI
   <% soc_regbus_periph_xbar.out_hbi_ctl.to_apb(context, "apb_hbi_ctl", to=apb_hbi_ctl) %>

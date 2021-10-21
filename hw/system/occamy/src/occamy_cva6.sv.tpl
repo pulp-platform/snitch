@@ -38,7 +38,7 @@ module occamy_cva6 import occamy_pkg::*; (
     // cached region
     NrCachedRegionRules:    2,
     CachedRegionAddrBase:  {64'h8000_0000, 64'd${cfg["spm"]["address"]}},
-    CachedRegionLength:    {(64'hffff_ffff_ffff_ffff-64'h8000_0000), 64'd${cfg["spm"]["length"]}},
+    CachedRegionLength:    {(64'hff_ffff_ffff-64'h8000_0000), 64'd${cfg["spm"]["length"]}},
     //  cache config
     Axi64BitCompliant:      1'b1,
     SwapEndianess:          1'b0,
