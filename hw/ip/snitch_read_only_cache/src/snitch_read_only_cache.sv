@@ -28,7 +28,10 @@ module snitch_read_only_cache #(
   parameter type slv_req_t = logic,
   parameter type slv_rsp_t = logic,
   parameter type mst_req_t = logic,
-  parameter type mst_rsp_t = logic
+  parameter type mst_rsp_t = logic,
+  /// Configuration input types for memory cuts used in implementation.
+  parameter type sram_cfg_data_t  = logic,
+  parameter type sram_cfg_tag_t   = logic
 ) (
   input  logic                                     clk_i,
   input  logic                                     rst_ni,
@@ -40,7 +43,9 @@ module snitch_read_only_cache #(
   input  slv_req_t                                 axi_slv_req_i,
   output slv_rsp_t                                 axi_slv_rsp_o,
   output mst_req_t                                 axi_mst_req_o,
-  input  mst_rsp_t                                 axi_mst_rsp_i
+  input  mst_rsp_t                                 axi_mst_rsp_i,
+  input  sram_cfg_data_t                           sram_cfg_data_i,
+  input  sram_cfg_tag_t                            sram_cfg_tag_i
 );
 
   `include "axi/typedef.svh"
@@ -269,7 +274,11 @@ module snitch_read_only_cache #(
   );
 
   // The lookup module contains the actual cache RAMs and performs lookups.
-  snitch_icache_lookup #(CFG) i_lookup (
+  snitch_icache_lookup #(
+    .CFG              ( CFG ),
+    .sram_cfg_tag_t   ( sram_cfg_tag_t  ),
+    .sram_cfg_data_t  ( sram_cfg_data_t )
+  ) i_lookup (
     .clk_i,
     .rst_ni,
 
@@ -296,7 +305,10 @@ module snitch_read_only_cache #(
     .write_tag_i   ( write_tag     ),
     .write_error_i ( write_error   ),
     .write_valid_i ( write_valid   ),
-    .write_ready_o ( write_ready   )
+    .write_ready_o ( write_ready   ),
+
+    .sram_cfg_tag_i,
+    .sram_cfg_data_i
   );
 
   // The handler module deals with the result of the lookup. It also

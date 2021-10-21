@@ -11,7 +11,9 @@
     .slv_req_t (${axi_in.req_type()}),
     .slv_rsp_t (${axi_in.rsp_type()}),
     .mst_req_t (${axi_out.req_type()}),
-    .mst_rsp_t (${axi_out.rsp_type()})
+    .mst_rsp_t (${axi_out.rsp_type()}),
+    .sram_cfg_data_t (${sram_cfg_data_t}),
+    .sram_cfg_tag_t (${sram_cfg_tag_t})
   ) ${name} (
     .clk_i (${axi_in.clk}),
     .rst_ni (${axi_in.rst}),
@@ -23,5 +25,7 @@
     .axi_slv_req_i (${axi_in.req_name()}),
     .axi_slv_rsp_o (${axi_in.rsp_name()}),
     .axi_mst_req_o (${axi_out.req_name()}),
-    .axi_mst_rsp_i (${axi_out.rsp_name()})
+    .axi_mst_rsp_i (${axi_out.rsp_name()}),
+    .sram_cfg_data_i (${sram_cfg_data_i}),
+    .sram_cfg_tag_i (${sram_cfg_tag_i})
   );

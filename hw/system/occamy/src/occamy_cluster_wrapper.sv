@@ -45,6 +45,18 @@ package occamy_cluster_pkg;
 
   localparam int unsigned Hive [NrCores] = '{0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+  typedef struct packed {
+    logic [2:0] ema;
+    logic [1:0] emaw;
+    logic [0:0] emas;
+  } sram_cfg_t;
+
+  typedef struct packed {
+    sram_cfg_t icache_tag;
+    sram_cfg_t icache_data;
+    sram_cfg_t tcdm;
+  } sram_cfgs_t;
+
   typedef logic [AddrWidth-1:0]         addr_t;
   typedef logic [NarrowDataWidth-1:0]   data_t;
   typedef logic [NarrowDataWidth/8-1:0] strb_t;
@@ -325,6 +337,7 @@ module occamy_cluster_wrapper (
   input  logic [9:0]                             hart_base_id_i,
   input  logic [47:0]                            cluster_base_addr_i,
   input  logic                                   clk_d2_bypass_i,
+  input  sram_cfgs_t                             sram_cfgs_i,
   input  occamy_cluster_pkg::narrow_in_req_t     narrow_in_req_i,
   output occamy_cluster_pkg::narrow_in_resp_t    narrow_in_resp_o,
   output occamy_cluster_pkg::narrow_out_req_t    narrow_out_req_o,
@@ -412,7 +425,9 @@ module occamy_cluster_wrapper (
     .RegisterSequencer (0),
     .IsoCrossing (0),
     .NarrowXbarLatency (axi_pkg::CUT_ALL_PORTS),
-    .WideXbarLatency (axi_pkg::CUT_ALL_PORTS)
+    .WideXbarLatency (axi_pkg::CUT_ALL_PORTS),
+    .sram_cfg_t (occamy_cluster_pkg::sram_cfg_t),
+    .sram_cfgs_t (occamy_cluster_pkg::sram_cfgs_t)
   ) i_cluster (
     .clk_i,
     .rst_ni,
@@ -423,6 +438,7 @@ module occamy_cluster_wrapper (
     .hart_base_id_i,
     .cluster_base_addr_i,
     .clk_d2_bypass_i,
+    .sram_cfgs_i (sram_cfgs_i),
     .narrow_in_req_i,
     .narrow_in_resp_o,
     .narrow_out_req_o,

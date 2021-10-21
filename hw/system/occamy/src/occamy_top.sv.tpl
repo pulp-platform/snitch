@@ -105,7 +105,10 @@ module occamy_top
   input   ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i,
 
   input  ${soc_wide_xbar.in_pcie.req_type()} pcie_axi_req_i,
-  output ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o
+  output ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o,
+
+  /// SRAM configuration
+  input sram_cfgs_t sram_cfgs_i
 );
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
@@ -245,7 +248,8 @@ module occamy_top
     .quadrant_wide_out_req_o (${wide_out.req_name()}),
     .quadrant_wide_out_rsp_i (${wide_out.rsp_name()}),
     .quadrant_wide_in_req_i (${wide_in.req_name()}),
-    .quadrant_wide_in_rsp_o (${wide_in.rsp_name()})
+    .quadrant_wide_in_rsp_o (${wide_in.rsp_name()}),
+    .sram_cfg_i (sram_cfgs_i.quadrant)
   );
 
   % endfor
@@ -291,7 +295,8 @@ module occamy_top
     .DataWidth (${narrow_spm_cdc.dw}),
     .ByteWidth (8),
     .EnableInputPipeline (1'b1),
-    .EnableOutputPipeline (1'b1)
+    .EnableOutputPipeline (1'b1),
+    .sram_cfg_t (sram_cfg_t)
   ) i_spm_cut (
     .clk_i (${narrow_spm_cdc.clk}),
     .rst_ni (${narrow_spm_cdc.rst}),
@@ -303,7 +308,8 @@ module occamy_top
     .be_i (spm_strb),
     .rdata_o (spm_rdata),
     .rvalid_o (spm_rvalid),
-    .rerror_o (spm_rerror)
+    .rerror_o (spm_rerror),
+    .sram_cfg_i (sram_cfgs_i.spm)
   );
 
   /// HBM2e Ports

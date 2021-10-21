@@ -23,6 +23,29 @@ package occamy_pkg;
   localparam int unsigned NrCoresCluster = occamy_cluster_pkg::NrCores;
   localparam int unsigned NrCoresS1Quadrant = NrClustersS1Quadrant * NrCoresCluster;
 
+  // Memory cut configurations: one per memory parameterization
+  typedef occamy_cluster_pkg::sram_cfg_t sram_cfg_t;
+
+  typedef struct packed {
+    occamy_cluster_pkg::sram_cfgs_t cluster;
+    sram_cfg_t rocache_tag;
+    sram_cfg_t rocache_data;
+  } sram_cfg_quadrant_t;
+
+  typedef struct packed {
+    sram_cfg_t icache_tag;
+    sram_cfg_t icache_data;
+    sram_cfg_t dcache_tag;
+    sram_cfg_t dcache_data;
+    sram_cfg_t dcache_valid_dirty;
+  } sram_cfg_cva6_t;
+
+  typedef struct packed {
+    sram_cfg_quadrant quadrant;
+    sram_cfg_cva6 cva6;
+    sram_cfg_t spm;
+  } sram_cfgs_t;
+
   typedef struct packed {
     logic [3:0] timer;
     logic [31:0] gpio;
