@@ -19,10 +19,15 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
     parameter int unsigned AXI_DATA_WIDTH   = 0,
     parameter int unsigned AXI_ID_WIDTH     = 0,
     parameter type axi_req_t = ariane_axi::req_t,
-    parameter type axi_rsp_t = ariane_axi::resp_t
+    parameter type axi_rsp_t = ariane_axi::resp_t,
+    parameter type sram_cfg_t = logic
 )(
     input  logic                           clk_i,       // Clock
     input  logic                           rst_ni,      // Asynchronous reset active low
+    // SRAM config
+    input sram_cfg_t                       sram_cfg_data_i,
+    input sram_cfg_t                       sram_cfg_tag_i,
+    input sram_cfg_t                       sram_cfg_valid_dirty_i,
     // Cache management
     input  logic                           enable_i,    // from CSR
     input  logic                           flush_i,     // high until acknowledged
@@ -184,12 +189,15 @@ import std_cache_pkg::*;
     // --------------
     for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
         tc_sram #(
+            .impl_in_t ( sram_cfg_t                         ),
             .DataWidth ( DCACHE_LINE_WIDTH                  ),
             .NumWords  ( DCACHE_NUM_WORDS                   ),
             .NumPorts  ( 1                                  )
         ) data_sram (
             .req_i   ( req_ram [i]                          ),
             .rst_ni  ( rst_ni                               ),
+            .impl_i  ( sram_cfg_data_i                      ),
+            .impl_o  (  ),
             .we_i    ( we_ram                               ),
             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
             .wdata_i ( wdata_ram.data                       ),
@@ -199,12 +207,15 @@ import std_cache_pkg::*;
         );
 
         tc_sram #(
+            .impl_in_t ( sram_cfg_t                         ),
             .DataWidth ( DCACHE_TAG_WIDTH                   ),
             .NumWords  ( DCACHE_NUM_WORDS                   ),
             .NumPorts  ( 1                                  )
         ) tag_sram (
             .req_i   ( req_ram [i]                          ),
             .rst_ni  ( rst_ni                               ),
+            .impl_i  ( sram_cfg_tag_i                       ),
+            .impl_o  (  ),
             .we_i    ( we_ram                               ),
             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
             .wdata_i ( wdata_ram.tag                        ),
@@ -232,12 +243,15 @@ import std_cache_pkg::*;
     end
 
     tc_sram #(
+        .impl_in_t ( sram_cfg_t                       ),
         .DataWidth ( 4*DCACHE_DIRTY_WIDTH             ),
         .NumWords  ( DCACHE_NUM_WORDS                 ),
         .NumPorts  ( 1                                )
     ) valid_dirty_sram (
         .clk_i   ( clk_i                               ),
         .rst_ni  ( rst_ni                              ),
+        .impl_i  ( sram_cfg_valid_dirty_i              ),
+        .impl_o  (  ),
         .req_i   ( |req_ram                            ),
         .we_i    ( we_ram                              ),
         .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] ),

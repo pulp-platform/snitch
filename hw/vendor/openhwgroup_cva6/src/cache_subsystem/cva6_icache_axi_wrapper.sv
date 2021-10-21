@@ -20,11 +20,16 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
   parameter int unsigned AxiIdWidth   = 0,
   parameter int unsigned AxiUserWidth = 0,
   parameter type axi_req_t = ariane_axi::req_t,
-  parameter type axi_rsp_t = ariane_axi::resp_t
+  parameter type axi_rsp_t = ariane_axi::resp_t,
+  parameter type sram_cfg_t = logic
 ) (
   input  logic              clk_i,
   input  logic              rst_ni,
   input riscv::priv_lvl_t   priv_lvl_i,
+
+  // SRAM config
+  input sram_cfg_t          sram_cfg_data_i,
+  input sram_cfg_t          sram_cfg_tag_i,
 
   input  logic              flush_i,     // flush the icache, flush and kill have to be asserted together
   input  logic              en_i,        // enable icache
@@ -104,10 +109,13 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
   cva6_icache #(
     // use ID 0 for icache reads
     .RdTxId             ( 0             ),
-    .ArianeCfg          ( ArianeCfg     )
+    .ArianeCfg          ( ArianeCfg     ),
+    .sram_cfg_t         ( sram_cfg_t    )
   ) i_cva6_icache (
     .clk_i              ( clk_i               ),
     .rst_ni             ( rst_ni              ),
+    .sram_cfg_data_i    ( sram_cfg_data_i     ),
+    .sram_cfg_tag_i     ( sram_cfg_tag_i      ),
     .flush_i            ( flush_i             ),
     .en_i               ( en_i                ),
     .miss_o             ( miss_o              ),

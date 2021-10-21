@@ -25,7 +25,8 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
     parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
     parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
     parameter type axi_req_t = ariane_axi::req_t,
-    parameter type axi_rsp_t = ariane_axi::resp_t
+    parameter type axi_rsp_t = ariane_axi::resp_t,
+    parameter type sram_cfg_t = logic
 ) (
     input  logic                           clk_i,
     input  logic                           rst_ni,
@@ -33,6 +34,12 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
     output logic                           busy_o,
     input  logic                           stall_i,                // stall new memory requests
     input  logic                           init_ni,                // do not init after reset
+    // SRAM config
+    input sram_cfg_t                       sram_cfg_idata_i,
+    input sram_cfg_t                       sram_cfg_itag_i,
+    input sram_cfg_t                       sram_cfg_ddata_i,
+    input sram_cfg_t                       sram_cfg_dtag_i,
+    input sram_cfg_t                       sram_cfg_dvalid_dirty_i,
     // I$
     input  logic                           icache_en_i,            // enable icache (or bypass e.g: in debug mode)
     input  logic                           icache_flush_i,         // flush the icache, flush and kill have to be asserted together
@@ -82,11 +89,14 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
         .AxiIdWidth   ( AxiIdWidth   ),
         .AxiUserWidth ( AxiUserWidth ),
         .axi_req_t    ( axi_req_t    ),
-        .axi_rsp_t    ( axi_rsp_t    )
+        .axi_rsp_t    ( axi_rsp_t    ),
+        .sram_cfg_t   ( sram_cfg_t   )
     ) i_cva6_icache_axi_wrapper (
         .clk_i      ( clk_i                 ),
         .rst_ni     ( rst_ni                ),
         .priv_lvl_i ( priv_lvl_i            ),
+        .sram_cfg_data_i ( sram_cfg_idata_i ),
+        .sram_cfg_tag_i  ( sram_cfg_itag_i  ),
         .flush_i    ( icache_flush_i        ),
         .en_i       ( icache_en_i           ),
         .miss_o     ( icache_miss_o         ),
@@ -110,10 +120,14 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
       .AXI_DATA_WIDTH   ( AxiDataWidth                   ),
       .AXI_ID_WIDTH     ( AxiIdWidth                     ),
       .axi_req_t        ( axi_req_t                      ),
-      .axi_rsp_t        ( axi_rsp_t                      )
+      .axi_rsp_t        ( axi_rsp_t                      ),
+      .sram_cfg_t       ( sram_cfg_t                     )
    ) i_nbdcache (
       .clk_i,
       .rst_ni,
+      .sram_cfg_data_i ( sram_cfg_ddata_i    ),
+      .sram_cfg_tag_i  ( sram_cfg_dtag_i     ),
+      .sram_cfg_valid_dirty_i ( sram_cfg_dvalid_dirty_i ),
       .enable_i     ( dcache_enable_i        ),
       .flush_i      ( dcache_flush_i         ),
       .flush_ack_o  ( dcache_flush_ack_o     ),

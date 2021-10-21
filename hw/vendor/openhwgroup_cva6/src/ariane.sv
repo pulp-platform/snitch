@@ -33,14 +33,20 @@ module ariane import ariane_pkg::*; #(
   parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
   parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
   parameter type axi_req_t = ariane_axi::req_t,
-  parameter type axi_rsp_t = ariane_axi::resp_t
+  parameter type axi_rsp_t = ariane_axi::resp_t,
+  parameter type sram_cfg_t = logic
 ) (
   input  logic                         clk_i,
   input  logic                         rst_ni,
   // Core ID, Cluster ID and boot address are considered more or less static
   input  logic [63:0]                  boot_addr_i,  // reset boot address
   input  logic [63:0]                  hart_id_i,    // hart id in a multicore environment (reflected in a CSR)
-
+  // SRAM config
+  input sram_cfg_t                     sram_cfg_idata_i,
+  input sram_cfg_t                     sram_cfg_itag_i,
+  input sram_cfg_t                     sram_cfg_ddata_i,
+  input sram_cfg_t                     sram_cfg_dtag_i,
+  input sram_cfg_t                     sram_cfg_dvalid_dirty_i,
   // Interrupt inputs
   input  logic [1:0]                   irq_i,        // level sensitive IR lines, mip & sip (async)
   input  logic                         ipi_i,        // inter-processor interrupts (async)
@@ -656,7 +662,8 @@ module ariane import ariane_pkg::*; #(
     .AxiIdWidth           ( AxiIdWidth ),
     .AxiUserWidth         ( AxiUserWidth ),
     .axi_req_t            ( axi_req_t ),
-    .axi_rsp_t            ( axi_rsp_t )
+    .axi_rsp_t            ( axi_rsp_t ),
+    .sram_cfg_t           ( sram_cfg_t )
   ) i_cache_subsystem (
     // to D$
     .clk_i                 ( clk_i                       ),
@@ -664,6 +671,11 @@ module ariane import ariane_pkg::*; #(
     .busy_o                ( busy_cache_ctrl             ),
     .stall_i               ( stall_ctrl_cache            ),
     .init_ni               ( init_ctrl_cache_n           ),
+    // SRAM config
+    .sram_cfg_idata_i        ( sram_cfg_idata_i          ),
+    .sram_cfg_itag_i         ( sram_cfg_itag_i           ),
+    .sram_cfg_ddata_i        ( sram_cfg_ddata_i          ),
+    .sram_cfg_dtag_i         ( sram_cfg_dtag_i           ),
     // I$
     .icache_en_i           ( icache_en_csr               ),
     .icache_flush_i        ( icache_flush_ctrl_cache     ),
@@ -710,7 +722,8 @@ module ariane import ariane_pkg::*; #(
     .axi_aw_chan_t         ( axi_aw_chan_t               ),
     .axi_w_chan_t          ( axi_w_chan_t                ),
     .axi_req_t             ( axi_req_t                   ),
-    .axi_rsp_t             ( axi_rsp_t                   )
+    .axi_rsp_t             ( axi_rsp_t                   ),
+    .sram_cfg_t            ( sram_cfg_t                  )
   ) i_cache_subsystem (
     // to D$
     .clk_i                 ( clk_i                       ),
@@ -719,6 +732,12 @@ module ariane import ariane_pkg::*; #(
     .busy_o                ( busy_cache_ctrl             ),
     .stall_i               ( stall_ctrl_cache            ),
     .init_ni               ( init_ctrl_cache_n           ),
+    // SRAM config
+    .sram_cfg_idata_i        ( sram_cfg_idata_i          ),
+    .sram_cfg_itag_i         ( sram_cfg_itag_i           ),
+    .sram_cfg_ddata_i        ( sram_cfg_ddata_i          ),
+    .sram_cfg_dtag_i         ( sram_cfg_dtag_i           ),
+    .sram_cfg_dvalid_dirty_i ( sram_cfg_dvalid_dirty_i   ),
     // I$
     .icache_en_i           ( icache_en_csr               ),
     .icache_flush_i        ( icache_flush_ctrl_cache     ),
