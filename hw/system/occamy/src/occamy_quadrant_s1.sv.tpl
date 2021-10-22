@@ -169,7 +169,7 @@ module occamy_quadrant_s1
     .wide_out_resp_i (${wide_cluster_out.rsp_name()}),
     .wide_in_req_i (${wide_cluster_in.req_name()}),
     .wide_in_resp_o (${wide_cluster_in.rsp_name()}),
-    .sram_cfg_i (sram_cfg_i.cluster)
+    .sram_cfgs_i (sram_cfg_i.cluster)
   );
 
 % endfor

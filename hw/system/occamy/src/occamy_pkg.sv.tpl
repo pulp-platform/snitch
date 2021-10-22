@@ -42,8 +42,8 @@ package occamy_pkg;
 
   typedef struct packed {
     sram_cfg_t spm;
-    sram_cfg_cva6 cva6;
-    sram_cfg_quadrant quadrant;
+    sram_cfg_cva6_t cva6;
+    sram_cfg_quadrant_t quadrant;
   } sram_cfgs_t;
 
   localparam int unsigned SramCfgWidth = $bits(sram_cfg_t);

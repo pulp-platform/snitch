@@ -337,7 +337,7 @@ module occamy_cluster_wrapper (
   input  logic [9:0]                             hart_base_id_i,
   input  logic [47:0]                            cluster_base_addr_i,
   input  logic                                   clk_d2_bypass_i,
-  input  sram_cfgs_t                             sram_cfgs_i,
+  input  occamy_cluster_pkg::sram_cfgs_t         sram_cfgs_i,
   input  occamy_cluster_pkg::narrow_in_req_t     narrow_in_req_i,
   output occamy_cluster_pkg::narrow_in_resp_t    narrow_in_resp_o,
   output occamy_cluster_pkg::narrow_out_req_t    narrow_out_req_o,

@@ -136,7 +136,7 @@ module occamy_cva6
       .axi_w_chan_t(axi_a48_d64_i4_u0_w_chan_t),
       .axi_req_t(axi_a48_d64_i4_u0_req_t),
       .axi_rsp_t(axi_a48_d64_i4_u0_resp_t),
-      .sram_cfg_t(sram_cfg_cva6_t)
+      .sram_cfg_t(sram_cfg_t)
   ) i_cva6 (
       .clk_i,
       .rst_ni,

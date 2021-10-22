@@ -78,7 +78,7 @@ module occamy_cva6 import occamy_pkg::*; (
     .axi_w_chan_t(${soc_narrow_xbar.in_cva6.w_chan_type()}),
     .axi_req_t (${soc_narrow_xbar.in_cva6.req_type()}),
     .axi_rsp_t (${soc_narrow_xbar.in_cva6.rsp_type()}),
-    .sram_cfg_t (sram_cfg_cva6_t)
+    .sram_cfg_t (sram_cfg_t)
   ) i_cva6 (
     .clk_i,
     .rst_ni,

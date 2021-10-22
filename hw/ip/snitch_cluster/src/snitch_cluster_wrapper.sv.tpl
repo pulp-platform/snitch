@@ -169,7 +169,7 @@ module ${cfg['name']}_wrapper (
   input  logic                                   clk_d2_bypass_i,
 % endif
 % if cfg['sram_cfg_expose']:
-  input  sram_cfgs_t                             sram_cfgs_i,
+  input  ${cfg['pkg_name']}::sram_cfgs_t         sram_cfgs_i,
 %endif
   input  ${cfg['pkg_name']}::narrow_in_req_t     narrow_in_req_i,
   output ${cfg['pkg_name']}::narrow_in_resp_t    narrow_in_resp_o,

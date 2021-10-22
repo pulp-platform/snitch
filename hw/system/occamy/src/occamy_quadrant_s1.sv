@@ -561,7 +561,7 @@ module occamy_quadrant_s1
       .wide_out_resp_i(wide_out_0_rsp),
       .wide_in_req_i(wide_in_iwc_0_cut_req),
       .wide_in_resp_o(wide_in_iwc_0_cut_rsp),
-      .sram_cfg_i(sram_cfg_i.cluster)
+      .sram_cfgs_i(sram_cfg_i.cluster)
   );
 
   ///////////////
@@ -710,7 +710,7 @@ module occamy_quadrant_s1
       .wide_out_resp_i(wide_out_1_rsp),
       .wide_in_req_i(wide_in_iwc_1_cut_req),
       .wide_in_resp_o(wide_in_iwc_1_cut_rsp),
-      .sram_cfg_i(sram_cfg_i.cluster)
+      .sram_cfgs_i(sram_cfg_i.cluster)
   );
 
   ///////////////
@@ -859,7 +859,7 @@ module occamy_quadrant_s1
       .wide_out_resp_i(wide_out_2_rsp),
       .wide_in_req_i(wide_in_iwc_2_cut_req),
       .wide_in_resp_o(wide_in_iwc_2_cut_rsp),
-      .sram_cfg_i(sram_cfg_i.cluster)
+      .sram_cfgs_i(sram_cfg_i.cluster)
   );
 
   ///////////////
@@ -1008,7 +1008,7 @@ module occamy_quadrant_s1
       .wide_out_resp_i(wide_out_3_rsp),
       .wide_in_req_i(wide_in_iwc_3_cut_req),
       .wide_in_resp_o(wide_in_iwc_3_cut_rsp),
-      .sram_cfg_i(sram_cfg_i.cluster)
+      .sram_cfgs_i(sram_cfg_i.cluster)
   );
 
 endmodule
