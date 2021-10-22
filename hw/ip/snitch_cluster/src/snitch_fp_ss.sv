@@ -20,7 +20,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
   parameter bit Xssr = 1,
   parameter int unsigned NumSsrs = 0,
   parameter logic [NumSsrs-1:0][4:0]  SsrRegs = '0,
-  parameter bit SsrStreamctl = 0,
   parameter type acc_req_t = logic,
   parameter type acc_resp_t = logic,
   parameter bit RVF = 1,
