@@ -53,6 +53,9 @@ def main():
     parser.add_argument("--top-sv",
                         metavar="TOP_SV",
                         help="Name of top-level file (output).")
+    parser.add_argument("--soc-sv",
+                        metavar="TOP_SYNC_SV",
+                        help="Name of synchronous SoC file (output).")
     parser.add_argument("--pkg-sv",
                         metavar="PKG_SV",
                         help="Name of top-level package file (output)")
@@ -303,6 +306,7 @@ def main():
         fall_through=occamy.cfg["wide_xbar"]["fall_through"],
         no_loopback=True,
         atop_support=False,
+        context="soc",
         node=am_soc_wide_xbar)
 
     for i in range(nr_s1_quadrants):
@@ -339,6 +343,7 @@ def main():
         max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
         fall_through=occamy.cfg["narrow_xbar"]["fall_through"],
         no_loopback=True,
+        context="soc",
         node=am_soc_narrow_xbar)
 
     for i in range(nr_s1_quadrants):
@@ -453,6 +458,15 @@ def main():
     write_template(args.top_sv,
                    outdir,
                    module=solder.code_module['default'],
+                   soc_periph_xbar=soc_axi_lite_periph_xbar,
+                   **kwargs)
+
+    ###########################
+    # SoC (fully synchronous) #
+    ###########################
+    write_template(args.soc_sv,
+                   outdir,
+                   module=solder.code_module['soc'],
                    soc_periph_xbar=soc_axi_lite_periph_xbar,
                    **kwargs)
 

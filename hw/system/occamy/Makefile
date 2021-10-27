@@ -48,6 +48,7 @@ update-source:
 	@echo "[SOLDER]  RTL"
 	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap.dot --outdir src --wrapper --memories \
 		--top-sv src/occamy_top.sv.tpl \
+		--soc-sv src/occamy_soc.sv.tpl \
 		--pkg-sv src/occamy_pkg.sv.tpl \
 		--quadrant-s1 src/occamy_quadrant_s1.sv.tpl \
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
@@ -59,7 +60,7 @@ update-source:
 	@echo "[SOLDER]  Device Tree"
 	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir . --dts test/occamy.dts
 	@echo "[VERIBLE] Formatting"
-	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
+	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_soc.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
 update-clint:
 	@mkdir -p src/clint
