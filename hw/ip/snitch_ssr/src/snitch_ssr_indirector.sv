@@ -121,15 +121,20 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     logic done_out, next_out;
     logic [$clog2(Cfg.IsectSlaveCredits)-1:0] done_usage;
 
+    // Not an intersection master; termination is externally controlled
+    assign isect_mst_req_o    = '0;
+    assign natit_extraword_o  = 1'b0;
+
     // Index TCDM request (write-only)
     assign idx_req_o.q = '{addr: idx_addr, write: 1'b1,
         strb: idx_strb_q, data: idx_data_q, amo: reqrsp_pkg::AMONone, default: '0};
-
-    // Write index word when it is complete or when done is popped
     assign idx_req_o.q_valid = idx_word_valid_q;
 
     // Draw new index data address on each write request
     assign natit_ready_o = idx_req_o.q_valid & idx_rsp_i.q_ready;
+
+    // Ready for intersection when in intersection mode and job not done
+    assign isect_slv_req_o.ena = ~(done_pending_q | cfg_done_i) & cfg_isect_slv_i;
 
     // Cut timing paths from intersector slave port
     spill_register #(
@@ -210,18 +215,12 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     // Swap either on next or when upstream is done
     assign cfg_indir_swap_o = cfg_isect_slv_i ? (done_out_valid_nonext & next_out) : cfg_done_i;
 
-    // Not an intersection master; termination is externally controlled
-    assign isect_mst_req_o    = '0;
-    assign natit_extraword_o  = 1'b0;
-
-    // Intersector slave enable signals
-    assign isect_slv_req_o.ena  = ~(done_pending_q | cfg_done_i) & cfg_isect_slv_i;
-    assign idx_isect_ena        = done_out_valid_nonext & done_out_ready & ~done_out;
+    // Count up memory address index on every non-meta index
+    assign idx_isect_ena = done_out_valid_nonext & done_out_ready & ~done_out;
 
     // Expose intersection index for reading from external register
     // TODO: Find a cleaner solution?
     assign cfg_idx_isect_o = idx_isect_q + (done_usage-1);
-
 
     // Output to address generator
     assign mem_idx      = idx_isect_q;
