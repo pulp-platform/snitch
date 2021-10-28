@@ -94,6 +94,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   indir_read_map_t indir_read_map;
   pointer_t mem_pointer;
   logic mem_last, mem_kill, mem_ptr_hs;
+  logic cfg_indir_next;
 
   // Type for output spill register
   typedef struct packed {
@@ -113,6 +114,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     logic natit_done;
     bytecnt_t natit_boundoffs;
     index_t natit_base_bound;
+    logic cfg_indir_swap, cfg_isect_consec;
 
     // Address generation output of indirector
     logic indir_valid;
@@ -157,13 +159,13 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
     // Config registers
     `FFARN(idx_shift_sq, idx_shift_sd, '0, clk_i, rst_ni)
-    `FFLARN(idx_shift_q, idx_shift_sd, config_q.done, '0, clk_i, rst_ni)
+    `FFLARN(idx_shift_q, idx_shift_sd, cfg_indir_swap, '0, clk_i, rst_ni)
     `FFARN(idx_base_sq, idx_base_sd, '0, clk_i, rst_ni)
-    `FFLARN(idx_base_q, idx_base_sd, config_q.done, '0, clk_i, rst_ni)
+    `FFLARN(idx_base_q, idx_base_sd, cfg_indir_swap, '0, clk_i, rst_ni)
     `FFARN(idx_size_sq, idx_size_sd, '0, clk_i, rst_ni)
-    `FFLARN(idx_size_q, idx_size_sd, config_q.done, '0, clk_i, rst_ni)
+    `FFLARN(idx_size_q, idx_size_sd, cfg_indir_swap, '0, clk_i, rst_ni)
     `FFARN(idx_flags_sq, idx_flags_sd, '0, clk_i, rst_ni)
-    `FFLARN(idx_flags_q, idx_flags_sd, config_q.done, '0, clk_i, rst_ni)
+    `FFLARN(idx_flags_q, idx_flags_sd, cfg_indir_swap, '0, clk_i, rst_ni)
 
     // Intersection index count shadow register (read-only, slave-only)
     if (Cfg.IsectSlave) begin : gen_idx_isect_reg
@@ -193,6 +195,12 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
     // Determine word offset incurred by indirect loop bound on loop 0.
     assign natit_boundoffs = bytecnt_t'(bound_q[0]) << idx_size_q;
+
+    // TODO: check when consectuive indirection jobs have similar enough configs to be chained
+    assign cfg_isect_consec = 
+      (config_sq.dims == config_q.dims) &
+      (config_sq.write == config_q.write) &
+      (config_sq.indir == config_q.indir);
 
     // Encapsulated indirection datapath
     snitch_ssr_indirector #(
@@ -226,6 +234,9 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
       .cfg_shift_i         ( idx_shift_q      ),
       .cfg_flags_i         ( idx_flags_q      ),
       .cfg_idx_isect_o     ( idx_isect_sd     ),
+      .cfg_indir_swap_o    ( cfg_indir_swap   ),
+      .cfg_indir_next_o    ( cfg_indir_next   ),
+      .cfg_isect_consec_i  ( cfg_isect_consec ),
       .natit_pointer_i     ( pointer_q        ),
       .natit_ready_o       ( natit_ready      ),
       .natit_done_i        ( natit_done       ),
@@ -285,6 +296,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     assign mem_kill    = 1'b0;
     assign mem_ptr_hs  = mem_valid_o & mem_ready_i;
     assign mem_zero_o  = 1'b0;
+    assign cfg_indir_next = 1'b0;
 
     // Tie off the index request port as no indirection
     assign idx_req_o = '0;
@@ -405,6 +417,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
         pointer_qn = pointer_q + selected_stride;
       if (mem_ptr_hs)
         config_qn.done = mem_last | mem_kill;
+      if (cfg_indir_next)
+        config_qn.done = 1;
     end
   end
 
