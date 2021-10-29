@@ -36,7 +36,11 @@ module snitch_int_ss import riscv_instr::*; import snitch_ipu_pkg::*; import sni
   output data_t [0:0]      ssr_wdata_o,
   output logic  [0:0]      ssr_wvalid_o,
   input  logic  [0:0]      ssr_wready_i,
-  output logic  [0:0]      ssr_wdone_o
+  output logic  [0:0]      ssr_wdone_o,
+  // SSR stream control interface
+  input  logic             streamctl_done_i,
+  input  logic             streamctl_valid_i,
+  output logic             streamctl_ready_o
 );
 
   logic [2:0][4:0]  int_raddr;
@@ -117,7 +121,10 @@ module snitch_int_ss import riscv_instr::*; import snitch_ipu_pkg::*; import sni
       .oup_qdata_argb_o ( acc_req.data_argb   ),
       .oup_qdata_argc_o ( acc_req.data_argc   ),
       .oup_qvalid_o     ( acc_req_valid       ),
-      .oup_qready_i     ( acc_req_ready       )
+      .oup_qready_i     ( acc_req_ready       ),
+      .streamctl_done_i,
+      .streamctl_valid_i,
+      .streamctl_ready_o
     );
   end else begin : gen_no_ipu_sequencer
     // assign sequencer_tracer_port_o = 0;

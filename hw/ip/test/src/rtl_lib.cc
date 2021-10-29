@@ -25,6 +25,12 @@ namespace sim {
 void sim_thread_main(void *arg) { ((Sim *)arg)->main(); }
 
 Sim::Sim(int argc, char **argv) : htif_t(argc, argv) {
+    for (auto i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--disable_preloading") == 0) {
+            printf("fesvr-based binary preloading disabled\n");
+            disable_preloading = true;
+        }
+    }
     host = context_t::current();
     target.init(sim_thread_main, this);
     target.switch_to();

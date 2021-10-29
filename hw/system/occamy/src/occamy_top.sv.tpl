@@ -93,7 +93,7 @@ module occamy_top
 % endfor
 
   /// HBI Ports
-% for i in range(nr_s1_quadrants):
+% for i in range(nr_s1_quadrants+1):
   input   ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_type()} hbi_${i}_req_i,
   output  ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_type()} hbi_${i}_rsp_o,
   output  ${wide_xbar_quadrant_s1.out_hbi.req_type()} hbi_${i}_req_o,
@@ -111,6 +111,7 @@ module occamy_top
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   assign soc_ctrl_in.boot_mode.d = boot_mode_i;
+  assign soc_ctrl_in.chip_id.d = chip_id_i;
 
   <% spm_words = cfg["spm"]["length"]//(soc_narrow_xbar.out_spm.dw//8) %>
 
@@ -142,7 +143,10 @@ module occamy_top
   //   CROSSBARS   //
   ///////////////////
   ${module}
-
+  <%
+    soc_wide_hbi_iwc = soc_wide_xbar.__dict__["out_hbi_{}".format(nr_s1_quadrants)] \
+        .change_iw(context, wide_xbar_quadrant_s1.out_hbi.iw, "soc_wide_hbi_iwc")
+  %>
   /////////////////////////////
   // Narrow to Wide Crossbar //
   /////////////////////////////
@@ -309,11 +313,20 @@ module occamy_top
 % endfor
 
   /// HBI Ports
-  // TODO(zarubaf): Truncate address.
-% for i in range(nr_s1_quadrants):
-  assign ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_name()} = hbi_${i}_req_i;
-  assign hbi_${i}_rsp_o = ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_name()};
+  // Inputs
+% for i in range(nr_s1_quadrants+1):
+  <%
+    hbi_in = soc_wide_xbar.__dict__["in_hbi_{}".format(i)].copy(name="in_hbi_{}".format(i)).declare(context)
+    hbi_in_trunc_addr = hbi_in.trunc_addr(context, target_aw=40, inst_name="hbi_in_trunc_addr_{}".format(i),
+                                          to=soc_wide_xbar.__dict__["in_hbi_{}".format(i)])
+  %>
+  assign ${hbi_in.req_name()} = hbi_${i}_req_i;
+  assign hbi_${i}_rsp_o = ${hbi_in.rsp_name()};
+
 % endfor
+  // Outputs
+  assign hbi_${nr_s1_quadrants}_req_o = ${soc_wide_hbi_iwc.req_name()};
+  assign ${soc_wide_hbi_iwc.rsp_name()} = hbi_${nr_s1_quadrants}_rsp_i;
 
   // APB port for HBI
   <% soc_regbus_periph_xbar.out_hbi_ctl.to_apb(context, "apb_hbi_ctl", to=apb_hbi_ctl) %>
@@ -538,17 +551,25 @@ module occamy_top
   //////////////
 
   <% uart_apb = soc_regbus_periph_xbar.out_uart.to_apb(context, "uart_apb") %>
-  apb_uart_sv #(
+  apb_uart_wrap #(
     .apb_req_t (${uart_apb.req_type()} ),
-    .apb_resp_t (${uart_apb.rsp_type()} )
+    .apb_rsp_t (${uart_apb.rsp_type()} )
   ) i_uart (
     .clk_i (${uart_apb.clk}),
     .rst_ni (${uart_apb.rst}),
     .apb_req_i (${uart_apb.req_name()}),
-    .apb_resp_o (${uart_apb.rsp_name()}),
-    .rx_i (uart_rx_i),
-    .tx_o (uart_tx_o),
-    .intr_o (irq.uart)
+    .apb_rsp_o (${uart_apb.rsp_name()}),
+    .intr_o (irq.uart),
+    .out1_no (  ),  // keep open
+    .out2_no (  ),  // keep open
+    .rts_no (  ),   // no flow control
+    .dtr_no (  ),   // no flow control
+    .cts_ni (1'b0), // no flow control
+    .dsr_ni (1'b0), // no flow control
+    .dcd_ni (1'b0), // no flow control
+    .rin_ni (1'b0),
+    .sin_i (uart_rx_i),
+    .sout_o (uart_tx_o)
   );
 
   /////////////

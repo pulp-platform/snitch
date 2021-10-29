@@ -2,19 +2,19 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 {
-  name: "pulp_platform_apb_uart_sv",
-  target_dir: "pulp_platform_apb_uart_sv",
+  name: "pulp_platform_apb_uart",
+  target_dir: "pulp_platform_apb_uart",
 
   upstream: {
-    url: "https://github.com/pulp-platform/apb_uart_sv.git",
-    rev: "pulpinov1",
+    url: "https://github.com/pulp-platform/apb_uart.git",
+    rev: "master",
   },
-
-  patch_dir: "patches/pulp_platform_apb_uart_sv",
 
   exclude_from_upstream: [
     "LICENSE",
     "README.md",
-    "src_files.yml"
+    "src_files.yml",
+    "util",
+    "*.vhd"
   ]
 }

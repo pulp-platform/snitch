@@ -813,6 +813,40 @@ class AxiBus(object):
             ) + "\n")
         return bus
 
+    def trunc_addr(self, context, target_aw, name=None, inst_name=None, to=None):
+        if self.aw == target_aw:
+            return self
+
+        # Generate the new bus
+        if to is None:
+            bus = copy(self)
+            bus.declared = False
+            bus.type_prefix = bus.emit_struct()
+            bus.name = name
+            bus.name_suffix = None
+        else:
+            bus = to
+
+        # Check bus properties.
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+        assert (bus.iw == self.iw)
+        assert (bus.uw == self.uw)
+
+        # Emit the addr_trunc instance.
+        bus.declare(context)
+        tpl = templates.get_template("solder.axi_trunc_addr.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                axi_in=self,
+                axi_out=bus,
+                target_aw=target_aw,
+                name=inst_name or "i_{}".format(name),
+            ) + "\n")
+        return bus
+
 
 # An AXI-Lite bus.
 class AxiLiteBus(object):

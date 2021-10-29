@@ -398,7 +398,10 @@ module snitch_cc #(
       .ssr_wdata_o      ( /* TODO */               ),
       .ssr_wvalid_o     ( /* TODO */               ),
       .ssr_wready_i     ('0                        ),
-      .ssr_wdone_o      ( /* TODO */               )
+      .ssr_wdone_o      ( /* TODO */               ),
+      .streamctl_done_i   ( /* TODO */             ),
+      .streamctl_valid_i  ( /* TODO */             ),
+      .streamctl_ready_o  ( /* TODO */             )
     );
   end else begin : gen_no_ipu
     assign ipu_resp = '0;
@@ -425,19 +428,11 @@ module snitch_cc #(
   logic             ssr_streamctl_valid;
   logic             ssr_streamctl_ready;
 
-  function automatic bit derive_ssr_streamctl();
-    for (int i = 0; i < NumSsrs; i++)
-      if (SsrCfgs[i].IsectMaster) return 1;
-    return 0;
-  endfunction
-
   if (FPEn) begin : gen_fpu
     snitch_pkg::core_events_t fp_ss_core_events;
 
     dreq_t fpu_dreq;
     drsp_t fpu_drsp;
-
-    localparam bit SsrStreamctl = derive_ssr_streamctl();
 
     snitch_fp_ss #(
       .AddrWidth (AddrWidth),
@@ -448,7 +443,6 @@ module snitch_cc #(
       .FPUImplementation (FPUImplementation),
       .NumSsrs (NumSsrs),
       .SsrRegs (SsrRegs),
-      .SsrStreamctl (SsrStreamctl),
       .dreq_t (dreq_t),
       .drsp_t (drsp_t),
       .acc_req_t (acc_req_t),

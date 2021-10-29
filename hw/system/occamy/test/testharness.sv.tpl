@@ -118,7 +118,7 @@ module testharness import occamy_pkg::*; (
     .hbm_${i}_req_o (hbm_channel_${i}_req),
     .hbm_${i}_rsp_i (hbm_channel_${i}_rsp),
 % endfor
-% for i in range(nr_s1_quadrants):
+% for i in range(nr_s1_quadrants+1):
     .hbi_${i}_req_i ('0),
     .hbi_${i}_rsp_o (),
     .hbi_${i}_req_o (),
