@@ -105,6 +105,19 @@
             "description": "Number of request entries the DMA can keep",
             "default": 3
         },
+        "sram_cfg_expose": {
+            "type": "boolean",
+            "description": "Whether to expose memory cut configuration inputs for implementation",
+            "default": false
+        },
+        "sram_cfg_fields": {
+            "type": "object",
+            "description": "The names and widths of memory cut configuration inputs needed for implementation",
+            "default": {"reserved" : 1},
+            "minProperties": 1,
+            "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+            "additionalProperties": { "type": "number", "minimum": 1 }
+        },
         "timing": {
             "type": "object",
             "title": "Timing and Latency Tuning Parameter",

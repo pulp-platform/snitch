@@ -43,7 +43,9 @@ module occamy_quadrant_s1
   output ${soc_wide_xbar.in_s1_quadrant_0.req_type()}   quadrant_wide_out_req_o,
   input  ${soc_wide_xbar.in_s1_quadrant_0.rsp_type()}   quadrant_wide_out_rsp_i,
   input  ${soc_wide_xbar.out_s1_quadrant_0.req_type()}   quadrant_wide_in_req_i,
-  output ${soc_wide_xbar.out_s1_quadrant_0.rsp_type()}   quadrant_wide_in_rsp_o
+  output ${soc_wide_xbar.out_s1_quadrant_0.rsp_type()}   quadrant_wide_in_rsp_o,
+  // SRAM configuration
+  input  occamy_pkg::sram_cfg_quadrant_t sram_cfg_i
 );
 
  // Calculate cluster base address based on `tile id`.
@@ -93,7 +95,11 @@ module occamy_quadrant_s1
         flush_valid="ro_flush_valid_i", \
         flush_ready="ro_flush_ready_o", \
         start_addr="ro_start_addr_i", \
-        end_addr="ro_end_addr_i")
+        end_addr="ro_end_addr_i", \
+        sram_cfg_data_t="sram_cfg_t", \
+        sram_cfg_tag_t="sram_cfg_t", \
+        sram_cfg_data_i="sram_cfg_i.rocache_data", \
+        sram_cfg_tag_i="sram_cfg_i.rocache_tag")
     else:
       wide_cluster_out_ro_cache = wide_xbar_out_iwc
 
@@ -162,7 +168,8 @@ module occamy_quadrant_s1
     .wide_out_req_o  (${wide_cluster_out.req_name()}),
     .wide_out_resp_i (${wide_cluster_out.rsp_name()}),
     .wide_in_req_i (${wide_cluster_in.req_name()}),
-    .wide_in_resp_o (${wide_cluster_in.rsp_name()})
+    .wide_in_resp_o (${wide_cluster_in.rsp_name()}),
+    .sram_cfgs_i (sram_cfg_i.cluster)
   );
 
 % endfor

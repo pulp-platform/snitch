@@ -14,7 +14,8 @@ module occamy_cva6 import occamy_pkg::*; (
   input  logic              time_irq_i,
   input  logic              debug_req_i,
   output ${soc_narrow_xbar.in_cva6.req_type()} axi_req_o,
-  input  ${soc_narrow_xbar.in_cva6.rsp_type()} axi_resp_i
+  input  ${soc_narrow_xbar.in_cva6.rsp_type()} axi_resp_i,
+  input  sram_cfg_cva6_t    sram_cfg_i
 );
 
   <% cva6 = soc_narrow_xbar.in_cva6.copy(name="cva6_axi").declare(context).cut(context) %>
@@ -76,7 +77,8 @@ module occamy_cva6 import occamy_pkg::*; (
     .axi_aw_chan_t(${soc_narrow_xbar.in_cva6.aw_chan_type()}),
     .axi_w_chan_t(${soc_narrow_xbar.in_cva6.w_chan_type()}),
     .axi_req_t (${soc_narrow_xbar.in_cva6.req_type()}),
-    .axi_rsp_t (${soc_narrow_xbar.in_cva6.rsp_type()})
+    .axi_rsp_t (${soc_narrow_xbar.in_cva6.rsp_type()}),
+    .sram_cfg_t (sram_cfg_t)
   ) i_cva6 (
     .clk_i,
     .rst_ni,
@@ -87,7 +89,12 @@ module occamy_cva6 import occamy_pkg::*; (
     .time_irq_i (time_irq),
     .debug_req_i (debug_req),
     .axi_req_o (cva6_axi_req),
-    .axi_resp_i (cva6_axi_rsp)
+    .axi_resp_i (cva6_axi_rsp),
+    .sram_cfg_idata_i (sram_cfg_i.icache_data),
+    .sram_cfg_itag_i (sram_cfg_i.icache_tag),
+    .sram_cfg_ddata_i (sram_cfg_i.dcache_data),
+    .sram_cfg_dtag_i (sram_cfg_i.dcache_tag),
+    .sram_cfg_dvalid_dirty_i (sram_cfg_i.dcache_valid_dirty)
   );
 
 endmodule

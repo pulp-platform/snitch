@@ -30,6 +30,13 @@
 //                "none":   Each bit gets initialized with 1'bx. (default)
 // - PrintSimCfg: Prints at the beginning of the simulation a `Hello` message with
 //                the instantiated parameters and signal widths.
+// - ImplKey:     Key by which an instance can refer to a specific implementation (e.g. macro).
+//                May be used to look up additional parameters for implementation (e.g. generator,
+//                line width, muxing) in an external reference, such as a configuration file.
+// - impl_in_t:   Implementation-related inputs, such as pseudo-static macro configuration inputs.
+// - impl_out_t:  Implementation-related outputs. To ensure the behavioral accuracy of this model,
+//                these may *not* have any effects at the behavioral abstraction level.
+// - ImplOutSim:  Static output assumed by `impl_out_t` in behavioral simulation.
 //
 // Ports:
 // - `clk_i`:   Clock
@@ -40,6 +47,8 @@
 // - `wdata_i`: Write data, has to be valid on request
 // - `be_i`:    Byte enable, active high
 // - `rdata_o`: Read data, valid `Latency` cycles after a request with `we_i` low.
+// - `impl_i`:  Implementation-related inputs
+// - `impl_o`:  Implementation-related outputs
 //
 // Behaviour:
 // - Address collision:  When Ports are making a write access onto the same address,
@@ -58,6 +67,10 @@ module tc_sram #(
   parameter int unsigned Latency      = 32'd1,    // Latency when the read data is available
   parameter              SimInit      = "none",   // Simulation initialization
   parameter bit          PrintSimCfg  = 1'b0,     // Print configuration
+  parameter              ImplKey      = "none",   // Reference to specific implementation
+  parameter type         impl_in_t    = logic,    // Type for implementation inputs
+  parameter type         impl_out_t   = logic,    // Type for implementation outputs
+  parameter impl_out_t   ImplOutSim   = 'X,       // Implementation output in simulation
   // DEPENDENT PARAMETERS, DO NOT OVERWRITE!
   parameter int unsigned AddrWidth = (NumWords > 32'd1) ? $clog2(NumWords) : 32'd1,
   parameter int unsigned BeWidth   = (DataWidth + ByteWidth - 32'd1) / ByteWidth, // ceil_div
@@ -67,6 +80,11 @@ module tc_sram #(
 ) (
   input  logic                 clk_i,      // Clock
   input  logic                 rst_ni,     // Asynchronous reset active low
+`ifndef PULP_TC_SRAM_NOIMPL
+  // Implementation-related IO
+  input  impl_in_t             impl_i,
+  output impl_out_t            impl_o,
+`endif
   // input ports
   input  logic  [NumPorts-1:0] req_i,      // request
   input  logic  [NumPorts-1:0] we_i,       // write enable
@@ -76,6 +94,11 @@ module tc_sram #(
   // output ports
   output data_t [NumPorts-1:0] rdata_o     // read data
 );
+
+`ifndef PULP_TC_SRAM_NOIMPL
+  // constant implementation output in behavioral simulation
+  assign impl_o = ImplOutSim;
+`endif
 
   // memory array
   data_t sram [NumWords-1:0];

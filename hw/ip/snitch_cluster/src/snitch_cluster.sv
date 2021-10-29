@@ -155,6 +155,9 @@ module snitch_cluster
   parameter type         wide_out_resp_t   = logic,
   parameter type         wide_in_req_t     = logic,
   parameter type         wide_in_resp_t    = logic,
+  // Memory configuration input types; these vary depending on implementation.
+  parameter type         sram_cfg_t        = logic,
+  parameter type         sram_cfgs_t       = logic,
   // Memory latency parameter. Most of the memories have a read latency of 1. In
   // case you have memory macros which are pipelined you want to adjust this
   // value here. This only applies to the TCDM. The instruction cache macros will break!
@@ -188,6 +191,9 @@ module snitch_cluster
   /// Base address of cluster. TCDM and cluster peripheral location are derived from
   /// it. This signal is pseudo-static.
   input  logic [PhysicalAddrWidth-1:0]  cluster_base_addr_i,
+  /// Configuration inputs for the memory cuts used in implementation.
+  /// These signals are pseudo-static.
+  input  sram_cfgs_t                    sram_cfgs_i,
   /// Bypass half-frequency clock. (`d2` = divide-by-two). This signal is
   /// pseudo-static.
   input  logic                          clk_d2_bypass_i,
@@ -634,10 +640,13 @@ module snitch_cluster
         .DataWidth (NarrowDataWidth),
         .ByteWidth (8),
         .NumPorts (1),
-        .Latency (1)
+        .Latency (1),
+        .impl_in_t (sram_cfg_t)
       ) i_data_mem (
         .clk_i,
         .rst_ni,
+        .impl_i (sram_cfgs_i.tcdm),
+        .impl_o (  ),
         .req_i (mem_cs),
         .we_i (mem_wen),
         .addr_i (mem_add),
@@ -866,6 +875,8 @@ module snitch_cluster
         .ICacheLineCount (ICacheLineCount[i]),
         .ICacheSets (ICacheSets[i]),
         .IsoCrossing (IsoCrossing),
+        .sram_cfg_t  (sram_cfg_t),
+        .sram_cfgs_t (sram_cfgs_t),
         .axi_req_t (axi_mst_dma_req_t),
         .axi_rsp_t (axi_mst_dma_resp_t)
       ) i_snitch_hive (
@@ -879,7 +890,8 @@ module snitch_cluster
         .axi_req_o (wide_axi_mst_req[ICache+i]),
         .axi_rsp_i (wide_axi_mst_rsp[ICache+i]),
         .icache_prefetch_enable_i (icache_prefetch_enable),
-        .icache_events_o(icache_events_reshape)
+        .icache_events_o(icache_events_reshape),
+        .sram_cfgs_i
       );
   end
 

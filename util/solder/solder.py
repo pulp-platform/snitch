@@ -776,7 +776,12 @@ class AxiBus(object):
                      start_addr=None,
                      end_addr=None,
                      inst_name=None,
-                     to=None):
+                     to=None,
+                     sram_cfg_data_t=None,
+                     sram_cfg_tag_t=None,
+                     sram_cfg_data_i=None,
+                     sram_cfg_tag_i=None
+                     ):
         # Generate the new bus.
         if to is None:
             bus = copy(self)
@@ -810,6 +815,10 @@ class AxiBus(object):
                 start_addr=start_addr or "'0",
                 end_addr=end_addr or "'1",
                 name=inst_name or "i_{}".format(name),
+                sram_cfg_data_t=sram_cfg_data_t or 'logic',
+                sram_cfg_tag_t=sram_cfg_tag_t or 'logic',
+                sram_cfg_data_i=sram_cfg_data_i or '  ',
+                sram_cfg_tag_i=sram_cfg_tag_i or '  '
             ) + "\n")
         return bus
 

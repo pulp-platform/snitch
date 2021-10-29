@@ -28,6 +28,9 @@ module snitch_hive #(
   parameter type         axi_rsp_t          = logic,
   parameter type         hive_req_t         = logic,
   parameter type         hive_rsp_t         = logic,
+  /// Configuration input types for memory cuts used in implementation.
+  parameter type         sram_cfg_t         = logic,
+  parameter type         sram_cfgs_t        = logic,
   /// Derived parameter *Do not override*
   parameter type addr_t = logic [AddrWidth-1:0],
   parameter type data_t = logic [NarrowDataWidth-1:0]
@@ -45,6 +48,8 @@ module snitch_hive #(
   input  axi_rsp_t axi_rsp_i,
 
   input logic      icache_prefetch_enable_i,
+
+  input sram_cfgs_t sram_cfgs_i,
 
   output snitch_icache_pkg::icache_events_t [CoreCount-1:0] icache_events_o
 );
@@ -88,6 +93,8 @@ module snitch_hive #(
     .EARLY_LATCH        ( 0               ),
     .L0_EARLY_TAG_WIDTH ( snitch_pkg::PAGE_SHIFT - $clog2(ICacheLineWidth/8) ),
     .ISO_CROSSING       ( IsoCrossing     ),
+    .sram_cfg_tag_t     ( sram_cfg_t ),
+    .sram_cfg_data_t    ( sram_cfg_t ),
     .axi_req_t          ( axi_req_t ),
     .axi_rsp_t          ( axi_rsp_t )
   ) i_snitch_icache (
@@ -105,6 +112,9 @@ module snitch_hive #(
     .inst_valid_i     ( inst_valid     ),
     .inst_ready_o     ( inst_ready     ),
     .inst_error_o     ( inst_error     ),
+
+    .sram_cfg_tag_i   ( sram_cfgs_i.icache_tag  ),
+    .sram_cfg_data_i  ( sram_cfgs_i.icache_data ),
 
     .axi_req_o (axi_req_o),
     .axi_rsp_i (axi_rsp_i)

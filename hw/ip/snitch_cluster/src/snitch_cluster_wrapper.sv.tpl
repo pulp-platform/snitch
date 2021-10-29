@@ -69,6 +69,18 @@ package ${cfg['pkg_name']};
 
   localparam int unsigned Hive [NrCores] = '{${core_cfg('hive')}};
 
+  typedef struct packed {
+% for field, width in cfg['sram_cfg_fields'].items():
+    logic [${width-1}:0] ${field};
+% endfor
+  } sram_cfg_t;
+
+  typedef struct packed {
+    sram_cfg_t icache_tag;
+    sram_cfg_t icache_data;
+    sram_cfg_t tcdm;
+  } sram_cfgs_t;
+
   typedef logic [AddrWidth-1:0]         addr_t;
   typedef logic [NarrowDataWidth-1:0]   data_t;
   typedef logic [NarrowDataWidth/8-1:0] strb_t;
@@ -156,6 +168,9 @@ module ${cfg['name']}_wrapper (
   input  logic [${cfg['addr_width']-1}:0]                            cluster_base_addr_i,
   input  logic                                   clk_d2_bypass_i,
 % endif
+% if cfg['sram_cfg_expose']:
+  input  ${cfg['pkg_name']}::sram_cfgs_t         sram_cfgs_i,
+%endif
   input  ${cfg['pkg_name']}::narrow_in_req_t     narrow_in_req_i,
   output ${cfg['pkg_name']}::narrow_in_resp_t    narrow_in_resp_o,
   output ${cfg['pkg_name']}::narrow_out_req_t    narrow_out_req_o,
@@ -243,7 +258,9 @@ module ${cfg['name']}_wrapper (
     .RegisterSequencer (${int(cfg['timing']['register_sequencer'])}),
     .IsoCrossing (${int(cfg['timing']['iso_crossings'])}),
     .NarrowXbarLatency (axi_pkg::${cfg['timing']['narrow_xbar_latency']}),
-    .WideXbarLatency (axi_pkg::${cfg['timing']['wide_xbar_latency']})
+    .WideXbarLatency (axi_pkg::${cfg['timing']['wide_xbar_latency']}),
+    .sram_cfg_t (${cfg['pkg_name']}::sram_cfg_t),
+    .sram_cfgs_t (${cfg['pkg_name']}::sram_cfgs_t)
   ) i_cluster (
     .clk_i,
     .rst_ni,
@@ -260,6 +277,11 @@ module ${cfg['name']}_wrapper (
     .cluster_base_addr_i,
     .clk_d2_bypass_i,
 % endif
+% if cfg['sram_cfg_expose']:
+    .sram_cfgs_i (sram_cfgs_i),
+% else:
+    .sram_cfgs_i (${cfg['pkg_name']}::sram_cfgs_t'('0)),
+%endif
     .narrow_in_req_i,
     .narrow_in_resp_o,
     .narrow_out_req_o,

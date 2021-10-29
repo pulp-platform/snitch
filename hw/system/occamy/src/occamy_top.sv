@@ -147,7 +147,10 @@ module occamy_top
     input  axi_a48_d512_i9_u0_resp_t pcie_axi_rsp_i,
 
     input  axi_a48_d512_i4_u0_req_t  pcie_axi_req_i,
-    output axi_a48_d512_i4_u0_resp_t pcie_axi_rsp_o
+    output axi_a48_d512_i4_u0_resp_t pcie_axi_rsp_o,
+
+    /// SRAM configuration
+    input sram_cfgs_t sram_cfgs_i
 );
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
@@ -622,7 +625,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .time_irq_i(mtip[0]),
       .debug_req_i(debug_req[0]),
       .axi_req_o(soc_narrow_xbar_in_req[SOC_NARROW_XBAR_IN_CVA6]),
-      .axi_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6])
+      .axi_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_CVA6]),
+      .sram_cfg_i(sram_cfgs_i.cva6)
   );
 
   ///////////////////
@@ -790,7 +794,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_out_req_o(wide_out_cut_0_req),
       .quadrant_wide_out_rsp_i(wide_out_cut_0_rsp),
       .quadrant_wide_in_req_i(wide_in_cut_0_req),
-      .quadrant_wide_in_rsp_o(wide_in_cut_0_rsp)
+      .quadrant_wide_in_rsp_o(wide_in_cut_0_rsp),
+      .sram_cfg_i(sram_cfgs_i.quadrant)
   );
 
   ///////////////////
@@ -958,7 +963,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_out_req_o(wide_out_cut_1_req),
       .quadrant_wide_out_rsp_i(wide_out_cut_1_rsp),
       .quadrant_wide_in_req_i(wide_in_cut_1_req),
-      .quadrant_wide_in_rsp_o(wide_in_cut_1_rsp)
+      .quadrant_wide_in_rsp_o(wide_in_cut_1_rsp),
+      .sram_cfg_i(sram_cfgs_i.quadrant)
   );
 
   ///////////////////
@@ -1126,7 +1132,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_out_req_o(wide_out_cut_2_req),
       .quadrant_wide_out_rsp_i(wide_out_cut_2_rsp),
       .quadrant_wide_in_req_i(wide_in_cut_2_req),
-      .quadrant_wide_in_rsp_o(wide_in_cut_2_rsp)
+      .quadrant_wide_in_rsp_o(wide_in_cut_2_rsp),
+      .sram_cfg_i(sram_cfgs_i.quadrant)
   );
 
   ///////////////////
@@ -1294,7 +1301,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_out_req_o(wide_out_cut_3_req),
       .quadrant_wide_out_rsp_i(wide_out_cut_3_rsp),
       .quadrant_wide_in_req_i(wide_in_cut_3_req),
-      .quadrant_wide_in_rsp_o(wide_in_cut_3_rsp)
+      .quadrant_wide_in_rsp_o(wide_in_cut_3_rsp),
+      .sram_cfg_i(sram_cfgs_i.quadrant)
   );
 
   ///////////////////
@@ -1462,7 +1470,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_out_req_o(wide_out_cut_4_req),
       .quadrant_wide_out_rsp_i(wide_out_cut_4_rsp),
       .quadrant_wide_in_req_i(wide_in_cut_4_req),
-      .quadrant_wide_in_rsp_o(wide_in_cut_4_rsp)
+      .quadrant_wide_in_rsp_o(wide_in_cut_4_rsp),
+      .sram_cfg_i(sram_cfgs_i.quadrant)
   );
 
   ///////////////////
@@ -1630,7 +1639,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_out_req_o(wide_out_cut_5_req),
       .quadrant_wide_out_rsp_i(wide_out_cut_5_rsp),
       .quadrant_wide_in_req_i(wide_in_cut_5_req),
-      .quadrant_wide_in_rsp_o(wide_in_cut_5_rsp)
+      .quadrant_wide_in_rsp_o(wide_in_cut_5_rsp),
+      .sram_cfg_i(sram_cfgs_i.quadrant)
   );
 
   ///////////////////
@@ -1798,7 +1808,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_out_req_o(wide_out_cut_6_req),
       .quadrant_wide_out_rsp_i(wide_out_cut_6_rsp),
       .quadrant_wide_in_req_i(wide_in_cut_6_req),
-      .quadrant_wide_in_rsp_o(wide_in_cut_6_rsp)
+      .quadrant_wide_in_rsp_o(wide_in_cut_6_rsp),
+      .sram_cfg_i(sram_cfgs_i.quadrant)
   );
 
   ///////////////////
@@ -1966,7 +1977,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .quadrant_wide_out_req_o(wide_out_cut_7_req),
       .quadrant_wide_out_rsp_i(wide_out_cut_7_rsp),
       .quadrant_wide_in_req_i(wide_in_cut_7_req),
-      .quadrant_wide_in_rsp_o(wide_in_cut_7_rsp)
+      .quadrant_wide_in_rsp_o(wide_in_cut_7_rsp),
+      .sram_cfg_i(sram_cfgs_i.quadrant)
   );
 
 
@@ -2180,7 +2192,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .DataWidth(64),
       .ByteWidth(8),
       .EnableInputPipeline(1'b1),
-      .EnableOutputPipeline(1'b1)
+      .EnableOutputPipeline(1'b1),
+      .sram_cfg_t(sram_cfg_t)
   ) i_spm_cut (
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
@@ -2192,7 +2205,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .be_i(spm_strb),
       .rdata_o(spm_rdata),
       .rvalid_o(spm_rvalid),
-      .rerror_o(spm_rerror)
+      .rerror_o(spm_rerror),
+      .sram_cfg_i(sram_cfgs_i.spm)
   );
 
   /// HBM2e Ports

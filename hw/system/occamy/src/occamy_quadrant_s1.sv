@@ -12,33 +12,35 @@
 module occamy_quadrant_s1
   import occamy_pkg::*;
 (
-    input  logic                                                   clk_i,
-    input  logic                                                   rst_ni,
-    input  logic                                                   test_mode_i,
-    input  tile_id_t                                               tile_id_i,
-    input  logic                     [NrCoresS1Quadrant-1:0]       debug_req_i,
-    input  logic                     [NrCoresS1Quadrant-1:0]       meip_i,
-    input  logic                     [NrCoresS1Quadrant-1:0]       mtip_i,
-    input  logic                     [NrCoresS1Quadrant-1:0]       msip_i,
-    input  logic                     [                  3:0]       isolate_i,
-    output logic                     [                  3:0]       isolated_o,
-    input  logic                                                   ro_enable_i,
-    input  logic                                                   ro_flush_valid_i,
-    output logic                                                   ro_flush_ready_o,
-    input  logic                     [                  3:0][47:0] ro_start_addr_i,
-    input  logic                     [                  3:0][47:0] ro_end_addr_i,
+    input  logic                                                         clk_i,
+    input  logic                                                         rst_ni,
+    input  logic                                                         test_mode_i,
+    input  tile_id_t                                                     tile_id_i,
+    input  logic                           [NrCoresS1Quadrant-1:0]       debug_req_i,
+    input  logic                           [NrCoresS1Quadrant-1:0]       meip_i,
+    input  logic                           [NrCoresS1Quadrant-1:0]       mtip_i,
+    input  logic                           [NrCoresS1Quadrant-1:0]       msip_i,
+    input  logic                           [                  3:0]       isolate_i,
+    output logic                           [                  3:0]       isolated_o,
+    input  logic                                                         ro_enable_i,
+    input  logic                                                         ro_flush_valid_i,
+    output logic                                                         ro_flush_ready_o,
+    input  logic                           [                  3:0][47:0] ro_start_addr_i,
+    input  logic                           [                  3:0][47:0] ro_end_addr_i,
     // HBI Connection
-    output axi_a48_d512_i7_u0_req_t                                quadrant_hbi_out_req_o,
-    input  axi_a48_d512_i7_u0_resp_t                               quadrant_hbi_out_rsp_i,
+    output axi_a48_d512_i7_u0_req_t                                      quadrant_hbi_out_req_o,
+    input  axi_a48_d512_i7_u0_resp_t                                     quadrant_hbi_out_rsp_i,
     // Next-Level
-    output axi_a48_d64_i4_u0_req_t                                 quadrant_narrow_out_req_o,
-    input  axi_a48_d64_i4_u0_resp_t                                quadrant_narrow_out_rsp_i,
-    input  axi_a48_d64_i8_u0_req_t                                 quadrant_narrow_in_req_i,
-    output axi_a48_d64_i8_u0_resp_t                                quadrant_narrow_in_rsp_o,
-    output axi_a48_d512_i4_u0_req_t                                quadrant_wide_out_req_o,
-    input  axi_a48_d512_i4_u0_resp_t                               quadrant_wide_out_rsp_i,
-    input  axi_a48_d512_i9_u0_req_t                                quadrant_wide_in_req_i,
-    output axi_a48_d512_i9_u0_resp_t                               quadrant_wide_in_rsp_o
+    output axi_a48_d64_i4_u0_req_t                                       quadrant_narrow_out_req_o,
+    input  axi_a48_d64_i4_u0_resp_t                                      quadrant_narrow_out_rsp_i,
+    input  axi_a48_d64_i8_u0_req_t                                       quadrant_narrow_in_req_i,
+    output axi_a48_d64_i8_u0_resp_t                                      quadrant_narrow_in_rsp_o,
+    output axi_a48_d512_i4_u0_req_t                                      quadrant_wide_out_req_o,
+    input  axi_a48_d512_i4_u0_resp_t                                     quadrant_wide_out_rsp_i,
+    input  axi_a48_d512_i9_u0_req_t                                      quadrant_wide_in_req_i,
+    output axi_a48_d512_i9_u0_resp_t                                     quadrant_wide_in_rsp_o,
+    // SRAM configuration
+    input  occamy_pkg::sram_cfg_quadrant_t                               sram_cfg_i
 );
 
   // Calculate cluster base address based on `tile id`.
@@ -286,7 +288,9 @@ module occamy_quadrant_s1
       .slv_req_t(axi_a48_d512_i3_u0_req_t),
       .slv_rsp_t(axi_a48_d512_i3_u0_resp_t),
       .mst_req_t(axi_a48_d512_i4_u0_req_t),
-      .mst_rsp_t(axi_a48_d512_i4_u0_resp_t)
+      .mst_rsp_t(axi_a48_d512_i4_u0_resp_t),
+      .sram_cfg_data_t(sram_cfg_t),
+      .sram_cfg_tag_t(sram_cfg_t)
   ) i_snitch_ro_cache (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -298,7 +302,9 @@ module occamy_quadrant_s1
       .axi_slv_req_i(wide_cluster_out_iwc_req),
       .axi_slv_rsp_o(wide_cluster_out_iwc_rsp),
       .axi_mst_req_o(snitch_ro_cache_req),
-      .axi_mst_rsp_i(snitch_ro_cache_rsp)
+      .axi_mst_rsp_i(snitch_ro_cache_rsp),
+      .sram_cfg_data_i(sram_cfg_i.rocache_data),
+      .sram_cfg_tag_i(sram_cfg_i.rocache_tag)
   );
 
   axi_a48_d512_i4_u0_req_t  wide_cluster_out_isolate_req;
@@ -554,7 +560,8 @@ module occamy_quadrant_s1
       .wide_out_req_o(wide_out_0_req),
       .wide_out_resp_i(wide_out_0_rsp),
       .wide_in_req_i(wide_in_iwc_0_cut_req),
-      .wide_in_resp_o(wide_in_iwc_0_cut_rsp)
+      .wide_in_resp_o(wide_in_iwc_0_cut_rsp),
+      .sram_cfgs_i(sram_cfg_i.cluster)
   );
 
   ///////////////
@@ -702,7 +709,8 @@ module occamy_quadrant_s1
       .wide_out_req_o(wide_out_1_req),
       .wide_out_resp_i(wide_out_1_rsp),
       .wide_in_req_i(wide_in_iwc_1_cut_req),
-      .wide_in_resp_o(wide_in_iwc_1_cut_rsp)
+      .wide_in_resp_o(wide_in_iwc_1_cut_rsp),
+      .sram_cfgs_i(sram_cfg_i.cluster)
   );
 
   ///////////////
@@ -850,7 +858,8 @@ module occamy_quadrant_s1
       .wide_out_req_o(wide_out_2_req),
       .wide_out_resp_i(wide_out_2_rsp),
       .wide_in_req_i(wide_in_iwc_2_cut_req),
-      .wide_in_resp_o(wide_in_iwc_2_cut_rsp)
+      .wide_in_resp_o(wide_in_iwc_2_cut_rsp),
+      .sram_cfgs_i(sram_cfg_i.cluster)
   );
 
   ///////////////
@@ -998,7 +1007,8 @@ module occamy_quadrant_s1
       .wide_out_req_o(wide_out_3_req),
       .wide_out_resp_i(wide_out_3_rsp),
       .wide_in_req_i(wide_in_iwc_3_cut_req),
-      .wide_in_resp_o(wide_in_iwc_3_cut_rsp)
+      .wide_in_resp_o(wide_in_iwc_3_cut_rsp),
+      .sram_cfgs_i(sram_cfg_i.cluster)
   );
 
 endmodule

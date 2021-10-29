@@ -65,6 +65,13 @@
         dma_data_width: 512,
         dma_axi_req_fifo_depth: 3,
         dma_req_fifo_depth: 3,
+        // Memory configuration inputs
+        sram_cfg_expose: true,
+        sram_cfg_fields: {
+            ema: 3,
+            emaw: 2,
+            emas: 1
+        },
         // Timing parameters
         timing: {
             lat_comp_fp32: 2,

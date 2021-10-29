@@ -30,7 +30,9 @@ module spm_1p_adv #(
   parameter type         parity_t  = logic [ecc_pkg::get_parity_width(DataWidth)-1:0],
   parameter type         addr_t    = logic [AddrWidth-1:0],
   parameter type         data_t    = logic [DataWidth-1:0],
-  parameter type         be_t      = logic [BeWidth-1:0]
+  parameter type         be_t      = logic [BeWidth-1:0],
+  /// Configuration input types for SRAMs used in implementation.
+  parameter type sram_cfg_t = logic
 ) (
   input logic        clk_i,
   input logic        rst_ni,
@@ -45,7 +47,9 @@ module spm_1p_adv #(
   output data_t      rdata_o,    // read data
   /// Read- or write transaction is valid.
   output logic       rvalid_o,
-  output logic [1:0] rerror_o    // Bit1: Uncorrectable, Bit0: Correctable
+  output logic [1:0] rerror_o,    // Bit1: Uncorrectable, Bit0: Correctable
+  // SRAM configuration
+  input  sram_cfg_t  sram_cfg_i
 );
 
   // Calculate the true SPM data width (i.e., DW with optional ECC).
@@ -162,10 +166,13 @@ module spm_1p_adv #(
     .NumPorts (1),
     .SimInit (SimInit),
     .PrintSimCfg (PrintSimCfg),
-    .Latency  (1)
+    .Latency  (1),
+    .impl_in_t (sram_cfg_t)
   ) i_mem (
     .clk_i(clk_i),
     .rst_ni(rst_ni),
+    .impl_i (sram_cfg_i),
+    .impl_o (  ),
     .req_i(req_q),
     .we_i(we_q),
     .addr_i(addr_q),

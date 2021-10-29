@@ -18,10 +18,15 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
   // note that the write buffer uses all IDs up to DCACHE_MAX_TX-1 for write transactions
   parameter logic [CACHE_ID_WIDTH-1:0]   RdAmoTxId          = 1,
   // contains cacheable regions
-  parameter ariane_pkg::ariane_cfg_t     ArianeCfg          = ariane_pkg::ArianeDefaultConfig
+  parameter ariane_pkg::ariane_cfg_t     ArianeCfg          = ariane_pkg::ArianeDefaultConfig,
+  parameter type                         sram_cfg_t         = logic
 ) (
   input  logic                           clk_i,       // Clock
   input  logic                           rst_ni,      // Asynchronous reset active low
+
+  // SRAM config
+  input sram_cfg_t                       sram_cfg_data_i,
+  input sram_cfg_t                       sram_cfg_tag_i,
 
   // Cache management
   input  logic                           enable_i,    // from CSR
@@ -280,10 +285,14 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
 
   wt_dcache_mem #(
     .Axi64BitCompliant ( ArianeCfg.Axi64BitCompliant ),
-    .NumPorts          ( NumPorts                    )
+    .NumPorts          ( NumPorts                    ),
+    .sram_cfg_t        ( sram_cfg_t                  )
   ) i_wt_dcache_mem (
     .clk_i             ( clk_i              ),
     .rst_ni            ( rst_ni             ),
+    // SRAM config
+    .sram_cfg_data_i   ( sram_cfg_data_i    ),
+    .sram_cfg_tag_i    ( sram_cfg_tag_i     ),
     // read ports
     .rd_prio_i         ( rd_prio            ),
     .rd_tag_i          ( rd_tag             ),

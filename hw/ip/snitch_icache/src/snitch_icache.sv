@@ -40,6 +40,10 @@ module snitch_icache #(
     parameter int L0_EARLY_TAG_WIDTH = -1,
     /// Operate L0 cache in slower clock-domain
     parameter bit ISO_CROSSING      = 1,
+    /// Configuration input types for memory cuts used in implementation.
+    parameter type sram_cfg_data_t  = logic,
+    parameter type sram_cfg_tag_t   = logic,
+
     parameter type axi_req_t = logic,
     parameter type axi_rsp_t = logic
 ) (
@@ -59,6 +63,10 @@ module snitch_icache #(
     input  logic [NR_FETCH_PORTS-1:0]               inst_valid_i,
     output logic [NR_FETCH_PORTS-1:0]               inst_ready_o,
     output logic [NR_FETCH_PORTS-1:0]               inst_error_o,
+
+    input  sram_cfg_data_t  sram_cfg_data_i,
+    input  sram_cfg_tag_t   sram_cfg_tag_i,
+
     output axi_req_t axi_req_o,
     input  axi_rsp_t axi_rsp_i
 );
@@ -400,7 +408,11 @@ module snitch_icache #(
         assign flush_ready = flush_ready_lookup;
     end
 
-    snitch_icache_lookup #(CFG) i_lookup (
+    snitch_icache_lookup #(
+        .CFG (CFG),
+        .sram_cfg_tag_t (sram_cfg_tag_t),
+        .sram_cfg_data_t (sram_cfg_data_t)
+    ) i_lookup (
         .clk_i,
         .rst_ni,
 
@@ -427,7 +439,10 @@ module snitch_icache #(
         .write_tag_i   ( write_tag          ),
         .write_error_i ( write_error        ),
         .write_valid_i ( write_valid        ),
-        .write_ready_o ( write_ready        )
+        .write_ready_o ( write_ready        ),
+
+        .sram_cfg_tag_i,
+        .sram_cfg_data_i
     );
 
     // The miss handler module deals with the result of the lookup. It also
