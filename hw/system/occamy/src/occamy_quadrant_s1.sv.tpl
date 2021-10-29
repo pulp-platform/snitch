@@ -64,6 +64,7 @@ module occamy_quadrant_s1
     narrow_cluster_in_iwc = soc_narrow_xbar.out_s1_quadrant_0 \
       .copy(name="narrow_cluster_in_iwc") \
       .declare(context) \
+      .cut(context, cut_width) \
       .isolate(context, "isolate_i[0]", "narrow_cluster_in_isolate", isolated="isolated_o[0]", terminated=True) \
       .change_iw(context, narrow_xbar_quadrant_s1.in_top.iw, "narrow_cluster_in_iwc", to=narrow_xbar_quadrant_s1.in_top)
   %>
@@ -75,7 +76,9 @@ module occamy_quadrant_s1
   ///////////////////////////////
   <% narrow_cluster_out_iwc = narrow_xbar_quadrant_s1.out_top \
     .change_iw(context, soc_narrow_xbar.in_s1_quadrant_0.iw, "narrow_cluster_out_iwc") \
-    .isolate(context, "isolate_i[1]", "narrow_cluster_out_isolate", isolated="isolated_o[1]") %>
+    .isolate(context, "isolate_i[1]", "narrow_cluster_out_isolate", isolated="isolated_o[1]") \
+    .cut(context, cut_width)
+   %>
 
   assign quadrant_narrow_out_req_o = ${narrow_cluster_out_iwc.req_name()};
   assign ${narrow_cluster_out_iwc.rsp_name()} = quadrant_narrow_out_rsp_i;
@@ -98,7 +101,8 @@ module occamy_quadrant_s1
       wide_cluster_out_ro_cache = wide_xbar_out_iwc
 
     wide_cluster_out_cut = wide_cluster_out_ro_cache \
-      .isolate(context, "isolate_i[3]", "wide_cluster_out_isolate", isolated="isolated_o[3]", atop_support=False)
+      .isolate(context, "isolate_i[3]", "wide_cluster_out_isolate", isolated="isolated_o[3]", atop_support=False) \
+      .cut(context, cut_width)
 
     assert soc_wide_xbar.in_s1_quadrant_0.iw == wide_cluster_out_cut.iw, "S1 Quadrant and Cluster Out IW mismatches."
   %>
@@ -123,6 +127,7 @@ module occamy_quadrant_s1
     soc_wide_xbar.out_s1_quadrant_0 \
       .copy(name="wide_cluster_in_iwc") \
       .declare(context) \
+      .cut(context, cut_width) \
       .isolate(context, "isolate_i[2]", "wide_cluster_in_isolate", isolated="isolated_o[2]", terminated=True, atop_support=False) \
       .change_iw(context, wide_xbar_quadrant_s1.in_top.iw, "wide_cluster_in_iwc", to=wide_xbar_quadrant_s1.in_top)
   %>
