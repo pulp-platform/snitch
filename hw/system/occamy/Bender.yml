@@ -41,8 +41,10 @@ sources:
 - src/occamy_cva6.sv
 - src/occamy_quadrant_s1.sv
 # Level 3:
+- src/occamy_soc.sv
+# Level 4:
 - src/occamy_top.sv
-# # Level 3:
+# # Level 5:
 - target: xilinx
   files:
   - src/occamy_xilinx.sv

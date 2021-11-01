@@ -112,21 +112,15 @@ module occamy_top
 );
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
-  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
-  assign soc_ctrl_in.boot_mode.d = boot_mode_i;
-  assign soc_ctrl_in.chip_id.d = chip_id_i;
-
-  <% spm_words = cfg["spm"]["length"]//(soc_narrow_xbar.out_spm.dw//8) %>
-
-  typedef logic [${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)-1}:0] mem_addr_t;
-  typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;
-  typedef logic [${soc_narrow_xbar.out_spm.dw//8-1}:0] mem_strb_t;
-
-  logic spm_req, spm_gnt, spm_we, spm_rvalid;
+  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in, soc_ctrl_soc_in;
   logic [1:0] spm_rerror;
-  mem_addr_t spm_addr;
-  mem_data_t spm_wdata, spm_rdata;
-  mem_strb_t spm_strb;
+
+  always_comb begin
+    soc_ctrl_in = soc_ctrl_soc_in;
+    // External SoC register inputs
+    soc_ctrl_in.boot_mode.d = boot_mode_i;
+    soc_ctrl_in.chip_id.d = chip_id_i;
+  end
 
   // Machine timer and machine software interrupt pending.
   logic [${cores-1}:0] mtip, msip;
@@ -137,210 +131,81 @@ module occamy_top
 
   assign irq.ext_irq = ext_irq_i;
 
-  addr_t [${nr_s1_quadrants-1}:0] s1_quadrant_base_addr;
-  % for i in range(nr_s1_quadrants):
-  assign s1_quadrant_base_addr[${i}] = ClusterBaseOffset + ${i} * S1QuadrantAddressSpace;
-  % endfor
+  //////////////////////////
+  //   Peripheral Xbars   //
+  //////////////////////////
 
-  ///////////////////
-  //   CROSSBARS   //
-  ///////////////////
   ${module}
-  <%
-    soc_wide_hbi_iwc = soc_wide_xbar.__dict__["out_hbi_{}".format(nr_s1_quadrants)] \
-        .change_iw(context, wide_xbar_quadrant_s1.out_hbi.iw, "soc_wide_hbi_iwc")
-  %>
-  /////////////////////////////
-  // Narrow to Wide Crossbar //
-  /////////////////////////////
-  <% soc_narrow_xbar.out_soc_wide \
-        .change_iw(context, soc_wide_xbar.in_soc_narrow.iw, "soc_narrow_wide_iwc") \
-        .atomic_adapter(context, 16, "soc_narrow_wide_amo_adapter") \
-        .change_dw(context, soc_wide_xbar.in_soc_narrow.dw, "soc_narrow_wide_dw", to=soc_wide_xbar.in_soc_narrow)
-  %>
 
-  /////////////////////////////
-  // Wide to Narrow Crossbar //
-  /////////////////////////////
-  <%
-    soc_wide_xbar.out_soc_narrow \
-      .change_iw(context, soc_narrow_xbar.in_soc_wide.iw, "soc_wide_narrow_iwc") \
-      .change_dw(context, soc_narrow_xbar.in_soc_wide.dw, "soc_wide_narrow_dw", to=soc_narrow_xbar.in_soc_wide)
-  %>
+  ///////////////////////////////
+  //   Synchronous top level   //
+  ///////////////////////////////
 
-  //////////
-  // PCIe //
-  //////////
-  assign pcie_axi_req_o = ${soc_wide_xbar.out_pcie.req_name()};
-  assign ${soc_wide_xbar.out_pcie.rsp_name()} = pcie_axi_rsp_i;
-  assign ${soc_wide_xbar.in_pcie.req_name()} = pcie_axi_req_i;
-  assign pcie_axi_rsp_o = ${soc_wide_xbar.in_pcie.rsp_name()};
-
-  //////////
-  // CVA6 //
-  //////////
-
-  occamy_cva6 i_occamy_cva6 (
-    .clk_i (clk_i),
-    .rst_ni (rst_ni),
-    .irq_i (eip),
-    .ipi_i (msip[0]),
-    .time_irq_i (mtip[0]),
-    .debug_req_i (debug_req[0]),
-    .axi_req_o (${soc_narrow_xbar.in_cva6.req_name()}),
-    .axi_resp_i (${soc_narrow_xbar.in_cva6.rsp_name()}),
-    .sram_cfg_i (sram_cfgs_i.cva6)
-  );
-
-  % for i in range(nr_s1_quadrants):
-  ///////////////////
-  // S1 Quadrant ${i} //
-  ///////////////////
-  <%
-    cut_width = 1
-    narrow_in = soc_narrow_xbar.__dict__["out_s1_quadrant_{}".format(i)].cut(context, cut_width, name="narrow_in_cut_{}".format(i))
-    narrow_out = soc_narrow_xbar.__dict__["in_s1_quadrant_{}".format(i)].copy(name="narrow_out_cut_{}".format(i)).declare(context)
-    narrow_out.cut(context, cut_width, to=soc_narrow_xbar.__dict__["in_s1_quadrant_{}".format(i)])
-    wide_in = soc_wide_xbar.__dict__["out_s1_quadrant_{}".format(i)].cut(context, cut_width, name="wide_in_cut_{}".format(i))
-    wide_out = soc_wide_xbar.__dict__["in_s1_quadrant_{}".format(i)].copy(name="wide_out_cut_{}".format(i)).declare(context)
-    wide_out.cut(context, cut_width, to=soc_wide_xbar.__dict__["in_s1_quadrant_{}".format(i)])
-    wide_hbi_out = wide_xbar_quadrant_s1.out_hbi.copy(name="wide_hbi_out_cut_{}".format(i)).declare(context)
-    wide_hbi_cut_out = wide_hbi_out.cut(context, cut_width)
-  %>
-  assign hbi_${i}_req_o = ${wide_hbi_cut_out.req_name()};
-  assign ${wide_hbi_cut_out.rsp_name()} = hbi_${i}_rsp_i;
-
-  <%
-    nr_cores_s1_quadrant = nr_s1_clusters * nr_cluster_cores
-    lower_core = i * nr_cores_s1_quadrant + 1
-    ro_addr_regions = cfg["s1_quadrant"].get("ro_cache_cfg", {}).get("address_regions", 1)
-  %>
-    // Assemble address from `soc_ctrl` regs.
-    logic [${ro_addr_regions-1}:0][${soc_wide_xbar.aw-1}:0] start_addr_${i}, end_addr_${i};
-  % for j in range(ro_addr_regions):
-    assign start_addr_${i}[${j}] = {soc_ctrl_out.ro_start_addr_high_${j}_quadrant_${i}.q, soc_ctrl_out.ro_start_addr_low_${j}_quadrant_${i}.q};
-    assign end_addr_${i}[${j}] = {soc_ctrl_out.ro_end_addr_high_${j}_quadrant_${i}.q, soc_ctrl_out.ro_end_addr_low_${j}_quadrant_${i}.q};
-  % endfor
-    assign soc_ctrl_in.ro_cache_flush[${i}].de = soc_ctrl_out.ro_cache_flush[${i}].q & soc_ctrl_in.ro_cache_flush[${i}].d;
-
-  occamy_quadrant_s1 i_occamy_quadrant_s1_${i} (
-    .clk_i (clk_i),
-    .rst_ni (rst_ni),
-    .test_mode_i (test_mode_i),
-    .tile_id_i (6'd${i}),
-    // .debug_req_i (debug_req[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
-    .debug_req_i ('0),
-    .meip_i ('0),
-    .mtip_i (mtip[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
-    .msip_i (msip[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
-    .isolate_i (soc_ctrl_out.isolate[${i}].q),
-    .isolated_o (soc_ctrl_in.isolated[${i}].d),
-    .ro_enable_i (soc_ctrl_out.ro_cache_enable[${i}].q),
-    .ro_flush_valid_i (soc_ctrl_out.ro_cache_flush[${i}].q),
-    .ro_flush_ready_o (soc_ctrl_in.ro_cache_flush[${i}].d),
-    .ro_start_addr_i (start_addr_${i}),
-    .ro_end_addr_i (end_addr_${i}),
-    .quadrant_hbi_out_req_o (${wide_hbi_out.req_name()}),
-    .quadrant_hbi_out_rsp_i (${wide_hbi_out.rsp_name()}),
-    .quadrant_narrow_out_req_o (${narrow_out.req_name()}),
-    .quadrant_narrow_out_rsp_i (${narrow_out.rsp_name()}),
-    .quadrant_narrow_in_req_i (${narrow_in.req_name()}),
-    .quadrant_narrow_in_rsp_o (${narrow_in.rsp_name()}),
-    .quadrant_wide_out_req_o (${wide_out.req_name()}),
-    .quadrant_wide_out_rsp_i (${wide_out.rsp_name()}),
-    .quadrant_wide_in_req_i (${wide_in.req_name()}),
-    .quadrant_wide_in_rsp_o (${wide_in.rsp_name()}),
-    .sram_cfg_i (sram_cfgs_i.quadrant)
-  );
-
-  % endfor
-
-
-  //////////
-  // SPM //
-  //////////
-  <% narrow_spm_cdc = soc_narrow_xbar.out_spm \
-                      .cdc(context, "clk_periph_i", "rst_periph_ni", "spm_cdc") \
-                      .serialize(context, "spm_serialize", iw=1) \
-                      .atomic_adapter(context, 16, "spm_amo_adapter") \
-                      .cut(context, 1)
-  %>
-
-  axi_to_mem #(
-    .axi_req_t (${narrow_spm_cdc.req_type()}),
-    .axi_resp_t (${narrow_spm_cdc.rsp_type()}),
-    .AddrWidth (${util.clog2(spm_words) + util.clog2(narrow_spm_cdc.dw//8)}),
-    .DataWidth (${narrow_spm_cdc.dw}),
-    .IdWidth (${narrow_spm_cdc.iw}),
-    .NumBanks (1),
-    .BufDepth (1)
-  ) i_axi_to_mem (
-    .clk_i (${narrow_spm_cdc.clk}),
-    .rst_ni (${narrow_spm_cdc.rst}),
-    .busy_o (),
-    .axi_req_i (${narrow_spm_cdc.req_name()}),
-    .axi_resp_o (${narrow_spm_cdc.rsp_name()}),
-    .mem_req_o (spm_req),
-    .mem_gnt_i (spm_gnt),
-    .mem_addr_o (spm_addr),
-    .mem_wdata_o (spm_wdata),
-    .mem_strb_o (spm_strb),
-    .mem_atop_o (),
-    .mem_we_o (spm_we),
-    .mem_rvalid_i (spm_rvalid),
-    .mem_rdata_i (spm_rdata)
-  );
-
-  spm_1p_adv #(
-    .NumWords (${spm_words}),
-    .DataWidth (${narrow_spm_cdc.dw}),
-    .ByteWidth (8),
-    .EnableInputPipeline (1'b1),
-    .EnableOutputPipeline (1'b1),
-    .sram_cfg_t (sram_cfg_t)
-  ) i_spm_cut (
-    .clk_i (${narrow_spm_cdc.clk}),
-    .rst_ni (${narrow_spm_cdc.rst}),
-    .valid_i (spm_req),
-    .ready_o (spm_gnt),
-    .we_i (spm_we),
-    .addr_i (spm_addr[${util.clog2(spm_words) + util.clog2(narrow_spm_cdc.dw//8)-1}:${util.clog2(narrow_spm_cdc.dw//8)}]),
-    .wdata_i (spm_wdata),
-    .be_i (spm_strb),
-    .rdata_o (spm_rdata),
-    .rvalid_o (spm_rvalid),
-    .rerror_o (spm_rerror),
-    .sram_cfg_i (sram_cfgs_i.spm)
-  );
-
-  /// HBM2e Ports
+  // Peripheral Xbar connections
+<%
+  periph_axi_lite_soc2per = soc_narrow_xbar.out_periph.copy(name="periph_axi_lite_soc2per").declare(context)
+  periph_axi_lite_per2soc = soc_narrow_xbar.in_periph.copy(name="periph_axi_lite_per2soc").declare(context)
+  periph_regbus_soc2per = soc_narrow_xbar.out_regbus_periph.copy(name="periph_regbus_soc2per").declare(context)
+%> \
+  occamy_soc i_occamy_soc (
+    .clk_i,
+    .rst_ni,
+    .test_mode_i,
 % for i in range(8):
-  assign hbm_${i}_req_o = ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].req_name()};
-  assign ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].rsp_name()} = hbm_${i}_rsp_i;
+    .hbm_${i}_req_o,
+    .hbm_${i}_rsp_i,
 % endfor
-
-  /// HBI Ports
-  // Inputs
 % for i in range(nr_s1_quadrants+1):
-  <%
-    hbi_in = soc_wide_xbar.__dict__["in_hbi_{}".format(i)].copy(name="in_hbi_{}".format(i)).declare(context)
-    hbi_in_trunc_addr = hbi_in.trunc_addr(context, target_aw=40, inst_name="hbi_in_trunc_addr_{}".format(i),
-                                          to=soc_wide_xbar.__dict__["in_hbi_{}".format(i)])
-  %>
-  assign ${hbi_in.req_name()} = hbi_${i}_req_i;
-  assign hbi_${i}_rsp_o = ${hbi_in.rsp_name()};
-
+    .hbi_${i}_req_i,
+    .hbi_${i}_rsp_o,
+    .hbi_${i}_req_o,
+    .hbi_${i}_rsp_i,
 % endfor
-  // Outputs
-  assign hbi_${nr_s1_quadrants}_req_o = ${soc_wide_hbi_iwc.req_name()};
-  assign ${soc_wide_hbi_iwc.rsp_name()} = hbi_${nr_s1_quadrants}_rsp_i;
+    .pcie_axi_req_o,
+    .pcie_axi_rsp_i,
+    .pcie_axi_req_i,
+    .pcie_axi_rsp_o,
+    .periph_axi_lite_req_o ( periph_axi_lite_soc2per_req ),
+    .periph_axi_lite_rsp_i ( periph_axi_lite_soc2per_rsp ),
+    .periph_axi_lite_req_i ( periph_axi_lite_per2soc_req ),
+    .periph_axi_lite_rsp_o ( periph_axi_lite_per2soc_rsp ),
+    .periph_regbus_req_o ( periph_regbus_soc2per_req ),
+    .periph_regbus_rsp_i ( periph_regbus_soc2per_rsp ),
+    .soc_ctrl_out_i ( soc_ctrl_out ),
+    .soc_ctrl_in_o ( soc_ctrl_soc_in ),
+    .spm_rerror_o (spm_rerror),
+    .mtip_i ( mtip ),
+    .msip_i ( msip ),
+    .eip_i ( eip ),
+    .debug_req_i ( debug_req ),
+    .sram_cfgs_i
+  );
+
+  // Connect AXI-lite master
+  <% periph_axi_lite_soc2per \
+      .cdc(context, "clk_periph_i", "rst_periph_ni", "axi_lite_from_soc_cdc") \
+      .to_axi_lite(context, "axi_to_axi_lite_periph", to=soc_periph_xbar.in_soc) %> \
+  // Connect AXI-lite slave
+  <% soc_periph_xbar.out_soc \
+      .cdc(context, "clk_i", "rst_ni", "axi_lite_to_soc_cdc") \
+      .to_axi(context, "axi_lite_to_axi_periph", to=periph_axi_lite_per2soc) %> \
+  // Connect Regbus master
+  <% periph_regbus_soc2per \
+      .cdc(context, "clk_periph_i", "rst_periph_ni", "periph_cdc") \
+      .change_dw(context, 32, "axi_to_axi_lite_dw") \
+      .to_axi_lite(context, "axi_to_axi_lite_regbus_periph") \
+      .to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_soc) %> \
+
+  //////////////////////
+  // HBI & HBM Config //
+  //////////////////////
 
   // APB port for HBI
   <% soc_regbus_periph_xbar.out_hbi_ctl.to_apb(context, "apb_hbi_ctl", to=apb_hbi_ctl) %>
   assign apb_hbi_ctl_req_o = ${apb_hbi_ctl.req_name()};
   assign ${apb_hbi_ctl.rsp_name()} = apb_hbi_ctl_rsp_i;
 
-  // APB port for HBI
+  // APB port for HBM
   <% soc_regbus_periph_xbar.out_hbm_cfg.to_apb(context, "apb_hbm_cfg", to=apb_hbm_cfg) %>
   assign apb_hbm_cfg_req_o = ${apb_hbm_cfg.req_name()};
   assign ${apb_hbm_cfg.rsp_name()} = apb_hbm_cfg_rsp_i;
@@ -348,24 +213,6 @@ module occamy_top
   assign ${soc_regbus_periph_xbar.out_hbm_phy_cfg.rsp_name()} = hbm_phy_cfg_rsp_i;
   assign hbm_seq_req_o = ${soc_regbus_periph_xbar.out_hbm_seq.req_name()};
   assign ${soc_regbus_periph_xbar.out_hbm_seq.rsp_name()} = hbm_seq_rsp_i;
-  /////////////////
-  // Peripherals //
-  /////////////////
-  <% soc_narrow_xbar.out_periph \
-      .cdc(context, "clk_periph_i", "rst_periph_ni", "axi_lite_from_soc_cdc") \
-      .to_axi_lite(context, "axi_to_axi_lite_periph", to=soc_periph_xbar.in_soc) %>
-
-    <% soc_periph_xbar.out_soc \
-      .cdc(context, "clk_i", "rst_ni", "axi_lite_to_soc_cdc") \
-      .to_axi(context, "axi_lite_to_axi_periph", to=soc_narrow_xbar.in_periph)
-    %>
-
-  <% soc_narrow_xbar.out_regbus_periph \
-      .cdc(context, "clk_periph_i", "rst_periph_ni", "periph_cdc") \
-      .change_dw(context, 32, "axi_to_axi_lite_dw") \
-      .to_axi_lite(context, "axi_to_axi_lite_regbus_periph") \
-      .to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_soc) %>
-
 
   ///////////
   // Debug //

@@ -501,10 +501,6 @@ package occamy_pkg;
   `APB_TYPEDEF_REQ_T(apb_a48_d32_req_t, logic [47:0], logic [31:0], logic [3:0])
   `APB_TYPEDEF_RESP_T(apb_a48_d32_rsp_t, logic [31:0])
 
-  // AXI bus with 48 bit address, 64 bit data, 1 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d64_i1_u0, logic [47:0], logic [0:0], logic [63:0], logic [7:0],
-                   logic [0:0])
-
   // AXI bus with 48 bit address, 32 bit data, 8 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d32_i8_u0, logic [47:0], logic [7:0], logic [31:0], logic [3:0],
                    logic [0:0])
@@ -514,6 +510,10 @@ package occamy_pkg;
 
   // Register bus with 48 bit address and 64 bit data.
   `REG_BUS_TYPEDEF_ALL(reg_a48_d64, logic [47:0], logic [63:0], logic [7:0])
+
+  // AXI bus with 48 bit address, 64 bit data, 1 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d64_i1_u0, logic [47:0], logic [0:0], logic [63:0], logic [7:0],
+                   logic [0:0])
 
   // AXI bus with 48 bit address, 512 bit data, 3 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d512_i3_u0, logic [47:0], logic [2:0], logic [511:0], logic [63:0],
