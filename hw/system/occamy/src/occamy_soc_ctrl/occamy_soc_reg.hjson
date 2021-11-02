@@ -1,6 +1,7 @@
 // Copyright 2020 ETH Zurich and University of Bologna.
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
+// Licensed under Solderpad Hardware License, Version 0.51, see LICENSE for details.
 {
   param_list: [
     { name: "NumScratchRegs",
