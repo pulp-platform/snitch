@@ -152,6 +152,26 @@ module occamy_quadrant_s1
   axi_a48_d64_i8_u0_req_t  narrow_cluster_in_iwc_req;
   axi_a48_d64_i8_u0_resp_t narrow_cluster_in_iwc_rsp;
 
+  axi_a48_d64_i8_u0_req_t  narrow_cluster_in_iwc_cut_req;
+  axi_a48_d64_i8_u0_resp_t narrow_cluster_in_iwc_cut_rsp;
+
+  axi_multicut #(
+      .NoCuts(1),
+      .aw_chan_t(axi_a48_d64_i8_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d64_i8_u0_w_chan_t),
+      .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
+      .req_t(axi_a48_d64_i8_u0_req_t),
+      .resp_t(axi_a48_d64_i8_u0_resp_t)
+  ) i_narrow_cluster_in_iwc_cut (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(narrow_cluster_in_iwc_req),
+      .slv_resp_o(narrow_cluster_in_iwc_rsp),
+      .mst_req_o(narrow_cluster_in_iwc_cut_req),
+      .mst_resp_i(narrow_cluster_in_iwc_cut_rsp)
+  );
   axi_a48_d64_i8_u0_req_t  narrow_cluster_in_isolate_req;
   axi_a48_d64_i8_u0_resp_t narrow_cluster_in_isolate_rsp;
 
@@ -168,8 +188,8 @@ module occamy_quadrant_s1
   ) i_narrow_cluster_in_isolate (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(narrow_cluster_in_iwc_req),
-      .slv_resp_o(narrow_cluster_in_iwc_rsp),
+      .slv_req_i(narrow_cluster_in_iwc_cut_req),
+      .slv_resp_o(narrow_cluster_in_iwc_cut_rsp),
       .mst_req_o(narrow_cluster_in_isolate_req),
       .mst_resp_i(narrow_cluster_in_isolate_rsp),
       .isolate_i(isolate_i[0]),
@@ -244,10 +264,30 @@ module occamy_quadrant_s1
       .isolated_o(isolated_o[1])
   );
 
+  axi_a48_d64_i4_u0_req_t  narrow_cluster_out_isolate_cut_req;
+  axi_a48_d64_i4_u0_resp_t narrow_cluster_out_isolate_cut_rsp;
+
+  axi_multicut #(
+      .NoCuts(1),
+      .aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d64_i4_u0_w_chan_t),
+      .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
+      .req_t(axi_a48_d64_i4_u0_req_t),
+      .resp_t(axi_a48_d64_i4_u0_resp_t)
+  ) i_narrow_cluster_out_isolate_cut (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(narrow_cluster_out_isolate_req),
+      .slv_resp_o(narrow_cluster_out_isolate_rsp),
+      .mst_req_o(narrow_cluster_out_isolate_cut_req),
+      .mst_resp_i(narrow_cluster_out_isolate_cut_rsp)
+  );
 
 
-  assign quadrant_narrow_out_req_o = narrow_cluster_out_isolate_req;
-  assign narrow_cluster_out_isolate_rsp = quadrant_narrow_out_rsp_i;
+  assign quadrant_narrow_out_req_o = narrow_cluster_out_isolate_cut_req;
+  assign narrow_cluster_out_isolate_cut_rsp = quadrant_narrow_out_rsp_i;
 
   /////////////////////////////////////////
   // Wide Out + RO Cache + IW Converter  //
@@ -331,10 +371,30 @@ module occamy_quadrant_s1
       .isolated_o(isolated_o[3])
   );
 
+  axi_a48_d512_i4_u0_req_t  wide_cluster_out_isolate_cut_req;
+  axi_a48_d512_i4_u0_resp_t wide_cluster_out_isolate_cut_rsp;
+
+  axi_multicut #(
+      .NoCuts(1),
+      .aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d512_i4_u0_w_chan_t),
+      .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
+      .req_t(axi_a48_d512_i4_u0_req_t),
+      .resp_t(axi_a48_d512_i4_u0_resp_t)
+  ) i_wide_cluster_out_isolate_cut (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(wide_cluster_out_isolate_req),
+      .slv_resp_o(wide_cluster_out_isolate_rsp),
+      .mst_req_o(wide_cluster_out_isolate_cut_req),
+      .mst_resp_i(wide_cluster_out_isolate_cut_rsp)
+  );
 
 
-  assign quadrant_wide_out_req_o = wide_cluster_out_isolate_req;
-  assign wide_cluster_out_isolate_rsp = quadrant_wide_out_rsp_i;
+  assign quadrant_wide_out_req_o = wide_cluster_out_isolate_cut_req;
+  assign wide_cluster_out_isolate_cut_rsp = quadrant_wide_out_rsp_i;
 
   ////////////////////
   // HBI Connection //
@@ -370,6 +430,26 @@ module occamy_quadrant_s1
   axi_a48_d512_i9_u0_req_t  wide_cluster_in_iwc_req;
   axi_a48_d512_i9_u0_resp_t wide_cluster_in_iwc_rsp;
 
+  axi_a48_d512_i9_u0_req_t  wide_cluster_in_iwc_cut_req;
+  axi_a48_d512_i9_u0_resp_t wide_cluster_in_iwc_cut_rsp;
+
+  axi_multicut #(
+      .NoCuts(1),
+      .aw_chan_t(axi_a48_d512_i9_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d512_i9_u0_w_chan_t),
+      .b_chan_t(axi_a48_d512_i9_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d512_i9_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d512_i9_u0_r_chan_t),
+      .req_t(axi_a48_d512_i9_u0_req_t),
+      .resp_t(axi_a48_d512_i9_u0_resp_t)
+  ) i_wide_cluster_in_iwc_cut (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(wide_cluster_in_iwc_req),
+      .slv_resp_o(wide_cluster_in_iwc_rsp),
+      .mst_req_o(wide_cluster_in_iwc_cut_req),
+      .mst_resp_i(wide_cluster_in_iwc_cut_rsp)
+  );
   axi_a48_d512_i9_u0_req_t  wide_cluster_in_isolate_req;
   axi_a48_d512_i9_u0_resp_t wide_cluster_in_isolate_rsp;
 
@@ -386,8 +466,8 @@ module occamy_quadrant_s1
   ) i_wide_cluster_in_isolate (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(wide_cluster_in_iwc_req),
-      .slv_resp_o(wide_cluster_in_iwc_rsp),
+      .slv_req_i(wide_cluster_in_iwc_cut_req),
+      .slv_resp_o(wide_cluster_in_iwc_cut_rsp),
       .mst_req_o(wide_cluster_in_isolate_req),
       .mst_resp_i(wide_cluster_in_isolate_rsp),
       .isolate_i(isolate_i[2]),
