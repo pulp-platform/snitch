@@ -101,7 +101,7 @@ package ${cfg['pkg_name']};
       NrCachedRegionRules: ${len(cfg['pmas']['cached'])},
       CachedRegion: '{
 % for cp in cfg['pmas']['cached']:
-          '{base: ${to_sv_hex(cp[0], cfg['addr_width'])}, mask: ${to_sv_hex(cp[1], cfg['addr_width'])}}${', ' if not loop.last else ''}
+          '{base: ${to_sv_hex(cp[0], cfg['addr_width'])}, mask: ${to_sv_hex(cp[1], cfg['addr_width'])}}${',' if not loop.last else ''}
 % endfor
       },
       default: 0

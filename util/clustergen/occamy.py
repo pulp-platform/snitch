@@ -16,10 +16,16 @@ class Occamy(Generator):
         # from here we know that we have a valid object.
         # and construct a new Occamy object.
         self.cfg = cfg
+        # PMA Configuration for Snitch clusters only; for CVA6, see its SV template.
         pma_cfg = PMACfg()
-        # TODO(zarubaf): Check dram start address is aligned to its length.
-        # For this example system make the entire dram cacheable.
-        pma_cfg.add_region(PMA.CACHED, 0x80000000, 0x80000000)
+        addr_width = cfg["cluster"]['addr_width']
+        # Make the entire HBM, but not HBI cacheable
+        pma_cfg.add_region(PMA.CACHED, 0x0000_8000_0000, 0xffff_8000_0000)
+        pma_cfg.add_region(PMA.CACHED, 0x0010_0000_0000, 0xfff0_0000_0000)
+        # Make the SPM cacheable
+        pma_cfg.add_region_length(PMA.CACHED, 0x7000_0000, 0x1000_0000, addr_width)
+        # Make the boot ROM cacheable
+        pma_cfg.add_region_length(PMA.CACHED, 0x0100_0000, 0x2_0000, addr_width)
 
         # Store Snitch cluster config in separate variable
         self.cluster = SnitchCluster(cfg["cluster"], pma_cfg)

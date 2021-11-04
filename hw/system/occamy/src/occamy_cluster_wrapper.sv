@@ -74,9 +74,12 @@ package occamy_cluster_pkg;
   `AXI_TYPEDEF_ALL(wide_out, addr_t, wide_out_id_t, data_dma_t, strb_dma_t, user_t)
 
   localparam snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{
-      NrCachedRegionRules: 1,
+      NrCachedRegionRules: 4,
       CachedRegion: '{
-          '{base: 48'h80000000, mask: 48'h80000000}
+          '{base: 48'h80000000, mask: 48'hffff80000000},
+          '{base: 48'h1000000000, mask: 48'hfff000000000},
+          '{base: 48'h70000000, mask: 48'hfffff0000000},
+          '{base: 48'h1000000, mask: 48'hfffffffe0000}
       },
       default: 0
   };
