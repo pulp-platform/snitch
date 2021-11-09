@@ -20,8 +20,8 @@ module occamy_quadrant_s1
     input  logic                           [NrCoresS1Quadrant-1:0]       meip_i,
     input  logic                           [NrCoresS1Quadrant-1:0]       mtip_i,
     input  logic                           [NrCoresS1Quadrant-1:0]       msip_i,
-    input  logic                           [                  3:0]       isolate_i,
-    output logic                           [                  3:0]       isolated_o,
+    input  logic                           [                  4:0]       isolate_i,
+    output logic                           [                  4:0]       isolated_o,
     input  logic                                                         ro_enable_i,
     input  logic                                                         ro_flush_valid_i,
     output logic                                                         ro_flush_ready_o,
@@ -399,8 +399,32 @@ module occamy_quadrant_s1
   ////////////////////
   // HBI Connection //
   ////////////////////
-  axi_a48_d512_i7_u0_req_t  wide_xbar_quadrant_s1_out_cut_req;
-  axi_a48_d512_i7_u0_resp_t wide_xbar_quadrant_s1_out_cut_rsp;
+  axi_a48_d512_i7_u0_req_t  quadrant_hbi_out_isolate_req;
+  axi_a48_d512_i7_u0_resp_t quadrant_hbi_out_isolate_rsp;
+
+  axi_isolate #(
+      .NumPending(16),
+      .TerminateTransaction(0),
+      .AtopSupport(0),
+      .AxiIdWidth(7),
+      .AxiAddrWidth(48),
+      .AxiDataWidth(512),
+      .AxiUserWidth(1),
+      .req_t(axi_a48_d512_i7_u0_req_t),
+      .resp_t(axi_a48_d512_i7_u0_resp_t)
+  ) i_quadrant_hbi_out_isolate (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(wide_xbar_quadrant_s1_out_req[WIDE_XBAR_QUADRANT_S1_OUT_HBI]),
+      .slv_resp_o(wide_xbar_quadrant_s1_out_rsp[WIDE_XBAR_QUADRANT_S1_OUT_HBI]),
+      .mst_req_o(quadrant_hbi_out_isolate_req),
+      .mst_resp_i(quadrant_hbi_out_isolate_rsp),
+      .isolate_i(isolate_i[4]),
+      .isolated_o(isolated_o[4])
+  );
+
+  axi_a48_d512_i7_u0_req_t  quadrant_hbi_out_isolate_cut_req;
+  axi_a48_d512_i7_u0_resp_t quadrant_hbi_out_isolate_cut_rsp;
 
   axi_multicut #(
       .NoCuts(1),
@@ -411,18 +435,18 @@ module occamy_quadrant_s1
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
       .req_t(axi_a48_d512_i7_u0_req_t),
       .resp_t(axi_a48_d512_i7_u0_resp_t)
-  ) i_wide_xbar_quadrant_s1_out_cut (
+  ) i_quadrant_hbi_out_isolate_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(wide_xbar_quadrant_s1_out_req[WIDE_XBAR_QUADRANT_S1_OUT_HBI]),
-      .slv_resp_o(wide_xbar_quadrant_s1_out_rsp[WIDE_XBAR_QUADRANT_S1_OUT_HBI]),
-      .mst_req_o(wide_xbar_quadrant_s1_out_cut_req),
-      .mst_resp_i(wide_xbar_quadrant_s1_out_cut_rsp)
+      .slv_req_i(quadrant_hbi_out_isolate_req),
+      .slv_resp_o(quadrant_hbi_out_isolate_rsp),
+      .mst_req_o(quadrant_hbi_out_isolate_cut_req),
+      .mst_resp_i(quadrant_hbi_out_isolate_cut_rsp)
   );
 
 
-  assign quadrant_hbi_out_req_o = wide_xbar_quadrant_s1_out_cut_req;
-  assign wide_xbar_quadrant_s1_out_cut_rsp = quadrant_hbi_out_rsp_i;
+  assign quadrant_hbi_out_req_o = quadrant_hbi_out_isolate_cut_req;
+  assign quadrant_hbi_out_isolate_cut_rsp = quadrant_hbi_out_rsp_i;
 
   ////////////////////////////
   // Wide In + IW Converter //
