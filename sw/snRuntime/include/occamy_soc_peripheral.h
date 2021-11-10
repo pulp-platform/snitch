@@ -400,100 +400,106 @@ extern "C" {
                           .index = OCCAMY_SOC_PAD_30_DRV_30_OFFSET})
 
 // Isolate port of given quadrant. (common parameters)
-#define OCCAMY_SOC_ISOLATE_ISOLATE_FIELD_WIDTH 4
-#define OCCAMY_SOC_ISOLATE_ISOLATE_FIELDS_PER_REG 8
-#define OCCAMY_SOC_ISOLATE_MULTIREG_COUNT 1
+#define OCCAMY_SOC_ISOLATE_ISOLATE_FIELD_WIDTH 5
+#define OCCAMY_SOC_ISOLATE_ISOLATE_FIELDS_PER_REG 6
+#define OCCAMY_SOC_ISOLATE_MULTIREG_COUNT 2
 
 // Isolate port of given quadrant.
-#define OCCAMY_SOC_ISOLATE_REG_OFFSET 0xa4
-#define OCCAMY_SOC_ISOLATE_ISOLATE_0_MASK 0xf
-#define OCCAMY_SOC_ISOLATE_ISOLATE_0_OFFSET 0
-#define OCCAMY_SOC_ISOLATE_ISOLATE_0_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_ISOLATE_0_MASK, \
-                          .index = OCCAMY_SOC_ISOLATE_ISOLATE_0_OFFSET})
-#define OCCAMY_SOC_ISOLATE_ISOLATE_1_MASK 0xf
-#define OCCAMY_SOC_ISOLATE_ISOLATE_1_OFFSET 4
-#define OCCAMY_SOC_ISOLATE_ISOLATE_1_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_ISOLATE_1_MASK, \
-                          .index = OCCAMY_SOC_ISOLATE_ISOLATE_1_OFFSET})
-#define OCCAMY_SOC_ISOLATE_ISOLATE_2_MASK 0xf
-#define OCCAMY_SOC_ISOLATE_ISOLATE_2_OFFSET 8
-#define OCCAMY_SOC_ISOLATE_ISOLATE_2_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_ISOLATE_2_MASK, \
-                          .index = OCCAMY_SOC_ISOLATE_ISOLATE_2_OFFSET})
-#define OCCAMY_SOC_ISOLATE_ISOLATE_3_MASK 0xf
-#define OCCAMY_SOC_ISOLATE_ISOLATE_3_OFFSET 12
-#define OCCAMY_SOC_ISOLATE_ISOLATE_3_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_ISOLATE_3_MASK, \
-                          .index = OCCAMY_SOC_ISOLATE_ISOLATE_3_OFFSET})
-#define OCCAMY_SOC_ISOLATE_ISOLATE_4_MASK 0xf
-#define OCCAMY_SOC_ISOLATE_ISOLATE_4_OFFSET 16
-#define OCCAMY_SOC_ISOLATE_ISOLATE_4_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_ISOLATE_4_MASK, \
-                          .index = OCCAMY_SOC_ISOLATE_ISOLATE_4_OFFSET})
-#define OCCAMY_SOC_ISOLATE_ISOLATE_5_MASK 0xf
-#define OCCAMY_SOC_ISOLATE_ISOLATE_5_OFFSET 20
-#define OCCAMY_SOC_ISOLATE_ISOLATE_5_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_ISOLATE_5_MASK, \
-                          .index = OCCAMY_SOC_ISOLATE_ISOLATE_5_OFFSET})
-#define OCCAMY_SOC_ISOLATE_ISOLATE_6_MASK 0xf
-#define OCCAMY_SOC_ISOLATE_ISOLATE_6_OFFSET 24
-#define OCCAMY_SOC_ISOLATE_ISOLATE_6_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_ISOLATE_6_MASK, \
-                          .index = OCCAMY_SOC_ISOLATE_ISOLATE_6_OFFSET})
-#define OCCAMY_SOC_ISOLATE_ISOLATE_7_MASK 0xf
-#define OCCAMY_SOC_ISOLATE_ISOLATE_7_OFFSET 28
-#define OCCAMY_SOC_ISOLATE_ISOLATE_7_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_ISOLATE_7_MASK, \
-                          .index = OCCAMY_SOC_ISOLATE_ISOLATE_7_OFFSET})
+#define OCCAMY_SOC_ISOLATE_0_REG_OFFSET 0xa4
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_0_MASK 0x1f
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_0_OFFSET 0
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_0_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_0_ISOLATE_0_MASK, \
+                          .index = OCCAMY_SOC_ISOLATE_0_ISOLATE_0_OFFSET})
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_1_MASK 0x1f
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_1_OFFSET 5
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_1_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_0_ISOLATE_1_MASK, \
+                          .index = OCCAMY_SOC_ISOLATE_0_ISOLATE_1_OFFSET})
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_2_MASK 0x1f
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_2_OFFSET 10
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_2_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_0_ISOLATE_2_MASK, \
+                          .index = OCCAMY_SOC_ISOLATE_0_ISOLATE_2_OFFSET})
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_3_MASK 0x1f
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_3_OFFSET 15
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_3_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_0_ISOLATE_3_MASK, \
+                          .index = OCCAMY_SOC_ISOLATE_0_ISOLATE_3_OFFSET})
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_4_MASK 0x1f
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_4_OFFSET 20
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_4_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_0_ISOLATE_4_MASK, \
+                          .index = OCCAMY_SOC_ISOLATE_0_ISOLATE_4_OFFSET})
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_5_MASK 0x1f
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_5_OFFSET 25
+#define OCCAMY_SOC_ISOLATE_0_ISOLATE_5_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_0_ISOLATE_5_MASK, \
+                          .index = OCCAMY_SOC_ISOLATE_0_ISOLATE_5_OFFSET})
+
+// Isolate port of given quadrant.
+#define OCCAMY_SOC_ISOLATE_1_REG_OFFSET 0xa8
+#define OCCAMY_SOC_ISOLATE_1_ISOLATE_6_MASK 0x1f
+#define OCCAMY_SOC_ISOLATE_1_ISOLATE_6_OFFSET 0
+#define OCCAMY_SOC_ISOLATE_1_ISOLATE_6_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_1_ISOLATE_6_MASK, \
+                          .index = OCCAMY_SOC_ISOLATE_1_ISOLATE_6_OFFSET})
+#define OCCAMY_SOC_ISOLATE_1_ISOLATE_7_MASK 0x1f
+#define OCCAMY_SOC_ISOLATE_1_ISOLATE_7_OFFSET 5
+#define OCCAMY_SOC_ISOLATE_1_ISOLATE_7_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATE_1_ISOLATE_7_MASK, \
+                          .index = OCCAMY_SOC_ISOLATE_1_ISOLATE_7_OFFSET})
 
 // Isolation status of S1 quadrant and port (common parameters)
-#define OCCAMY_SOC_ISOLATED_ISOLATED_FIELD_WIDTH 4
-#define OCCAMY_SOC_ISOLATED_ISOLATED_FIELDS_PER_REG 8
-#define OCCAMY_SOC_ISOLATED_MULTIREG_COUNT 1
+#define OCCAMY_SOC_ISOLATED_ISOLATED_FIELD_WIDTH 5
+#define OCCAMY_SOC_ISOLATED_ISOLATED_FIELDS_PER_REG 6
+#define OCCAMY_SOC_ISOLATED_MULTIREG_COUNT 2
 
 // Isolation status of S1 quadrant and port
-#define OCCAMY_SOC_ISOLATED_REG_OFFSET 0xa8
-#define OCCAMY_SOC_ISOLATED_ISOLATED_0_MASK 0xf
-#define OCCAMY_SOC_ISOLATED_ISOLATED_0_OFFSET 0
-#define OCCAMY_SOC_ISOLATED_ISOLATED_0_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_ISOLATED_0_MASK, \
-                          .index = OCCAMY_SOC_ISOLATED_ISOLATED_0_OFFSET})
-#define OCCAMY_SOC_ISOLATED_ISOLATED_1_MASK 0xf
-#define OCCAMY_SOC_ISOLATED_ISOLATED_1_OFFSET 4
-#define OCCAMY_SOC_ISOLATED_ISOLATED_1_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_ISOLATED_1_MASK, \
-                          .index = OCCAMY_SOC_ISOLATED_ISOLATED_1_OFFSET})
-#define OCCAMY_SOC_ISOLATED_ISOLATED_2_MASK 0xf
-#define OCCAMY_SOC_ISOLATED_ISOLATED_2_OFFSET 8
-#define OCCAMY_SOC_ISOLATED_ISOLATED_2_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_ISOLATED_2_MASK, \
-                          .index = OCCAMY_SOC_ISOLATED_ISOLATED_2_OFFSET})
-#define OCCAMY_SOC_ISOLATED_ISOLATED_3_MASK 0xf
-#define OCCAMY_SOC_ISOLATED_ISOLATED_3_OFFSET 12
-#define OCCAMY_SOC_ISOLATED_ISOLATED_3_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_ISOLATED_3_MASK, \
-                          .index = OCCAMY_SOC_ISOLATED_ISOLATED_3_OFFSET})
-#define OCCAMY_SOC_ISOLATED_ISOLATED_4_MASK 0xf
-#define OCCAMY_SOC_ISOLATED_ISOLATED_4_OFFSET 16
-#define OCCAMY_SOC_ISOLATED_ISOLATED_4_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_ISOLATED_4_MASK, \
-                          .index = OCCAMY_SOC_ISOLATED_ISOLATED_4_OFFSET})
-#define OCCAMY_SOC_ISOLATED_ISOLATED_5_MASK 0xf
-#define OCCAMY_SOC_ISOLATED_ISOLATED_5_OFFSET 20
-#define OCCAMY_SOC_ISOLATED_ISOLATED_5_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_ISOLATED_5_MASK, \
-                          .index = OCCAMY_SOC_ISOLATED_ISOLATED_5_OFFSET})
-#define OCCAMY_SOC_ISOLATED_ISOLATED_6_MASK 0xf
-#define OCCAMY_SOC_ISOLATED_ISOLATED_6_OFFSET 24
-#define OCCAMY_SOC_ISOLATED_ISOLATED_6_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_ISOLATED_6_MASK, \
-                          .index = OCCAMY_SOC_ISOLATED_ISOLATED_6_OFFSET})
-#define OCCAMY_SOC_ISOLATED_ISOLATED_7_MASK 0xf
-#define OCCAMY_SOC_ISOLATED_ISOLATED_7_OFFSET 28
-#define OCCAMY_SOC_ISOLATED_ISOLATED_7_FIELD                           \
-    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_ISOLATED_7_MASK, \
-                          .index = OCCAMY_SOC_ISOLATED_ISOLATED_7_OFFSET})
+#define OCCAMY_SOC_ISOLATED_0_REG_OFFSET 0xac
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_0_MASK 0x1f
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_0_OFFSET 0
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_0_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_0_ISOLATED_0_MASK, \
+                          .index = OCCAMY_SOC_ISOLATED_0_ISOLATED_0_OFFSET})
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_1_MASK 0x1f
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_1_OFFSET 5
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_1_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_0_ISOLATED_1_MASK, \
+                          .index = OCCAMY_SOC_ISOLATED_0_ISOLATED_1_OFFSET})
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_2_MASK 0x1f
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_2_OFFSET 10
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_2_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_0_ISOLATED_2_MASK, \
+                          .index = OCCAMY_SOC_ISOLATED_0_ISOLATED_2_OFFSET})
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_3_MASK 0x1f
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_3_OFFSET 15
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_3_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_0_ISOLATED_3_MASK, \
+                          .index = OCCAMY_SOC_ISOLATED_0_ISOLATED_3_OFFSET})
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_4_MASK 0x1f
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_4_OFFSET 20
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_4_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_0_ISOLATED_4_MASK, \
+                          .index = OCCAMY_SOC_ISOLATED_0_ISOLATED_4_OFFSET})
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_5_MASK 0x1f
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_5_OFFSET 25
+#define OCCAMY_SOC_ISOLATED_0_ISOLATED_5_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_0_ISOLATED_5_MASK, \
+                          .index = OCCAMY_SOC_ISOLATED_0_ISOLATED_5_OFFSET})
+
+// Isolation status of S1 quadrant and port
+#define OCCAMY_SOC_ISOLATED_1_REG_OFFSET 0xb0
+#define OCCAMY_SOC_ISOLATED_1_ISOLATED_6_MASK 0x1f
+#define OCCAMY_SOC_ISOLATED_1_ISOLATED_6_OFFSET 0
+#define OCCAMY_SOC_ISOLATED_1_ISOLATED_6_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_1_ISOLATED_6_MASK, \
+                          .index = OCCAMY_SOC_ISOLATED_1_ISOLATED_6_OFFSET})
+#define OCCAMY_SOC_ISOLATED_1_ISOLATED_7_MASK 0x1f
+#define OCCAMY_SOC_ISOLATED_1_ISOLATED_7_OFFSET 5
+#define OCCAMY_SOC_ISOLATED_1_ISOLATED_7_FIELD                           \
+    ((bitfield_field32_t){.mask = OCCAMY_SOC_ISOLATED_1_ISOLATED_7_MASK, \
+                          .index = OCCAMY_SOC_ISOLATED_1_ISOLATED_7_OFFSET})
 
 // Enable read-only cache of quadrant. (common parameters)
 #define OCCAMY_SOC_RO_CACHE_ENABLE_ENABLE_FIELD_WIDTH 1
@@ -501,7 +507,7 @@ extern "C" {
 #define OCCAMY_SOC_RO_CACHE_ENABLE_MULTIREG_COUNT 1
 
 // Enable read-only cache of quadrant.
-#define OCCAMY_SOC_RO_CACHE_ENABLE_REG_OFFSET 0xac
+#define OCCAMY_SOC_RO_CACHE_ENABLE_REG_OFFSET 0xb4
 #define OCCAMY_SOC_RO_CACHE_ENABLE_ENABLE_0_BIT 0
 #define OCCAMY_SOC_RO_CACHE_ENABLE_ENABLE_1_BIT 1
 #define OCCAMY_SOC_RO_CACHE_ENABLE_ENABLE_2_BIT 2
@@ -517,7 +523,7 @@ extern "C" {
 #define OCCAMY_SOC_RO_CACHE_FLUSH_MULTIREG_COUNT 1
 
 // Flush read-only cache.
-#define OCCAMY_SOC_RO_CACHE_FLUSH_REG_OFFSET 0xb0
+#define OCCAMY_SOC_RO_CACHE_FLUSH_REG_OFFSET 0xb8
 #define OCCAMY_SOC_RO_CACHE_FLUSH_FLUSH_0_BIT 0
 #define OCCAMY_SOC_RO_CACHE_FLUSH_FLUSH_1_BIT 1
 #define OCCAMY_SOC_RO_CACHE_FLUSH_FLUSH_2_BIT 2
