@@ -86,7 +86,7 @@ module snitch_icache_lookup #(
             ram_wtag   = '0;
         end else  if (write_valid_i) begin
             ram_addr   = write_addr_i;
-            ram_enable = $unsigned(1 << write_set_i);
+            ram_enable = CFG.SET_COUNT > 1 ? $unsigned(1 << write_set_i) : 1'b1;
             ram_write  = 1'b1;
             write_ready_o = 1'b1;
         end else if (out_ready_i) begin
