@@ -139,9 +139,9 @@
         count: "NumS1Quadrants"
         cname: "isolate"
         fields: [
-          { bits: "3:0"
+          { bits: "4:0"
             // Isolate all channels by default
-            resval: "15"
+            resval: "31"
             name: "ISOLATE"
             desc: '''
                   Isolate S1 Quadrant. Four bits corresponding to:
@@ -149,6 +149,7 @@
                     - Bit 1: Narrow Out
                     - Bit 2: Wide In
                     - Bit 3: Wide Out
+                    - Bit 4: HBI Out
 
                   0: De-isolate request
                   1: Isolate request
@@ -167,9 +168,9 @@
         count: "NumS1Quadrants"
         cname: "isolated"
         fields: [
-          { bits: "3:0"
+          { bits: "4:0"
             // Should correspond to ISOLATE reset value
-            resval: "15"
+            resval: "31"
             name: "ISOLATED"
             desc: '''
                   Isolate satus of S1 Quadrant. Four bits corresponding to:
@@ -177,6 +178,7 @@
                     - Bit 1: Narrow Out
                     - Bit 2: Wide In
                     - Bit 3: Wide Out
+                    - Bit 4: HBI Out
 
                   Isolation status:
                     0: De-isolated

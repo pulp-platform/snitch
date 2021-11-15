@@ -25,8 +25,8 @@ module occamy_quadrant_s1
   input  logic [NrCoresS1Quadrant-1:0] meip_i,
   input  logic [NrCoresS1Quadrant-1:0] mtip_i,
   input  logic [NrCoresS1Quadrant-1:0] msip_i,
-  input  logic [3:0]                   isolate_i,
-  output logic [3:0]                   isolated_o,
+  input  logic [4:0]                   isolate_i,
+  output logic [4:0]                   isolated_o,
   input  logic                         ro_enable_i,
   input  logic                         ro_flush_valid_i,
   output logic                         ro_flush_ready_o,
@@ -120,7 +120,9 @@ module occamy_quadrant_s1
   // HBI Connection //
   ////////////////////
   <%
-      wide_cluster_hbi_out_iwc = wide_xbar_quadrant_s1.out_hbi.cut(context, cut_width)
+    wide_cluster_hbi_out_iwc = wide_xbar_quadrant_s1.out_hbi  \
+      .isolate(context, "isolate_i[4]", "quadrant_hbi_out_isolate", isolated="isolated_o[4]", atop_support=False) \
+      .cut(context, cut_width)
   %>
 
   assign quadrant_hbi_out_req_o = ${wide_cluster_hbi_out_iwc.req_name()};
