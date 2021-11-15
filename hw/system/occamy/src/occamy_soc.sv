@@ -247,26 +247,6 @@ module occamy_soc
       .default_mst_port_i   ('0)
   );
 
-  axi_a48_d512_i7_u0_req_t  soc_wide_hbi_iwc_req;
-  axi_a48_d512_i7_u0_resp_t soc_wide_hbi_iwc_rsp;
-
-  axi_id_remap #(
-      .AxiSlvPortIdWidth(9),
-      .AxiSlvPortMaxUniqIds(128),
-      .AxiMaxTxnsPerId(4),
-      .AxiMstPortIdWidth(7),
-      .slv_req_t(axi_a48_d512_i9_u0_req_t),
-      .slv_resp_t(axi_a48_d512_i9_u0_resp_t),
-      .mst_req_t(axi_a48_d512_i7_u0_req_t),
-      .mst_resp_t(axi_a48_d512_i7_u0_resp_t)
-  ) i_soc_wide_hbi_iwc (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
-      .slv_req_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_HBI_8]),
-      .slv_resp_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_HBI_8]),
-      .mst_req_o(soc_wide_hbi_iwc_req),
-      .mst_resp_i(soc_wide_hbi_iwc_rsp)
-  );
 
   /////////////////////////////
   // Narrow to Wide Crossbar //
@@ -2349,7 +2329,7 @@ module occamy_soc
   // HBI //
   /////////
 
-  // Inputs
+  // Inputs from HBI to wide Xbar
   axi_a48_d512_i4_u0_req_t  in_hbi_0_req;
   axi_a48_d512_i4_u0_resp_t in_hbi_0_rsp;
 
@@ -2717,11 +2697,52 @@ module occamy_soc
   );
 
   assign in_hbi_8_req = hbi_8_req_i;
-  assign hbi_8_rsp_o = in_hbi_8_rsp;
+  assign hbi_8_rsp_o  = in_hbi_8_rsp;
 
-  // Outputs
-  assign hbi_8_req_o = soc_wide_hbi_iwc_req;
-  assign soc_wide_hbi_iwc_rsp = hbi_8_rsp_i;
+  // Single output from wide Xbar to HBI
+  axi_a48_d512_i7_u0_req_t  soc_wide_hbi_iwc_req;
+  axi_a48_d512_i7_u0_resp_t soc_wide_hbi_iwc_rsp;
+
+  axi_id_remap #(
+      .AxiSlvPortIdWidth(9),
+      .AxiSlvPortMaxUniqIds(128),
+      .AxiMaxTxnsPerId(4),
+      .AxiMstPortIdWidth(7),
+      .slv_req_t(axi_a48_d512_i9_u0_req_t),
+      .slv_resp_t(axi_a48_d512_i9_u0_resp_t),
+      .mst_req_t(axi_a48_d512_i7_u0_req_t),
+      .mst_resp_t(axi_a48_d512_i7_u0_resp_t)
+  ) i_soc_wide_hbi_iwc (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_HBI_8]),
+      .slv_resp_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_HBI_8]),
+      .mst_req_o(soc_wide_hbi_iwc_req),
+      .mst_resp_i(soc_wide_hbi_iwc_rsp)
+  );
+  axi_a48_d512_i7_u0_req_t  soc_wide_hbi_iwc_cut_req;
+  axi_a48_d512_i7_u0_resp_t soc_wide_hbi_iwc_cut_rsp;
+
+  axi_multicut #(
+      .NoCuts(6),
+      .aw_chan_t(axi_a48_d512_i7_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d512_i7_u0_w_chan_t),
+      .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
+      .req_t(axi_a48_d512_i7_u0_req_t),
+      .resp_t(axi_a48_d512_i7_u0_resp_t)
+  ) i_soc_wide_hbi_iwc_cut (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(soc_wide_hbi_iwc_req),
+      .slv_resp_o(soc_wide_hbi_iwc_rsp),
+      .mst_req_o(soc_wide_hbi_iwc_cut_req),
+      .mst_resp_i(soc_wide_hbi_iwc_cut_rsp)
+  );
+
+  assign hbi_8_req_o = soc_wide_hbi_iwc_cut_req;
+  assign soc_wide_hbi_iwc_cut_rsp = hbi_8_rsp_i;
 
   /////////////////
   // Peripherals //

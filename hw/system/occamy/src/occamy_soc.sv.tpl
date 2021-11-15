@@ -83,10 +83,7 @@ module occamy_soc
   //   CROSSBARS   //
   ///////////////////
   ${module}
-  <%
-    soc_wide_hbi_iwc = soc_wide_xbar.__dict__["out_hbi_{}".format(nr_s1_quadrants)] \
-        .change_iw(context, wide_xbar_quadrant_s1.out_hbi.iw, "soc_wide_hbi_iwc")
-  %>
+
   /////////////////////////////
   // Narrow to Wide Crossbar //
   /////////////////////////////
@@ -282,7 +279,7 @@ module occamy_soc
   // HBI //
   /////////
 
-  // Inputs
+  // Inputs from HBI to wide Xbar
 % for i in range(nr_s1_quadrants+1):
   <%
     hbi_in_cuts = 6
@@ -295,7 +292,13 @@ module occamy_soc
   assign hbi_${i}_rsp_o = ${hbi_in.rsp_name()};
 
 % endfor
-  // Outputs
+  // Single output from wide Xbar to HBI
+  <%
+    hbi_widex_cuts = 6
+    soc_wide_hbi_iwc = soc_wide_xbar.__dict__["out_hbi_{}".format(nr_s1_quadrants)] \
+        .change_iw(context, wide_xbar_quadrant_s1.out_hbi.iw, "soc_wide_hbi_iwc") \
+        .cut(context, hbi_widex_cuts)
+  %>
   assign hbi_${nr_s1_quadrants}_req_o = ${soc_wide_hbi_iwc.req_name()};
   assign ${soc_wide_hbi_iwc.rsp_name()} = hbi_${nr_s1_quadrants}_rsp_i;
 
