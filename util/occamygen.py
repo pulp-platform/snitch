@@ -77,11 +77,14 @@ def main():
     parser.add_argument("--bootdata",
                         metavar="BOOTDATA",
                         help="Name of the bootdata file (output)")
+    parser.add_argument("--cheader",
+                        metavar="CHEADER",
+                        help="Name of the cheader file (output)")
 
     parser.add_argument("--graph", "-g", metavar="DOT")
     parser.add_argument("--memories", "-m", action="store_true")
     parser.add_argument("--wrapper", "-w", action="store_true")
-    parser.add_argument("--cheader", "-D", metavar="CHEADER")
+    parser.add_argument("--am-cheader", "-D", metavar="ADDRMAP_CHEADER")
     parser.add_argument("--dts", metavar="DTS", help="System's device tree.")
 
     parser.add_argument("-v",
@@ -498,11 +501,16 @@ def main():
     ################
     write_template(args.cva6_sv, outdir, **kwargs)
 
-    ###########
-    # CHEADER #
-    ###########
-    if args.cheader:
-        with open(args.cheader, "w") as file:
+    ###################
+    # Generic CHEADER #
+    ###################
+    write_template(args.cheader, outdir, **kwargs)
+
+    ###################
+    # ADDRMAP CHEADER #
+    ###################
+    if args.am_cheader:
+        with open(args.am_cheader, "w") as file:
             file.write(am.print_cheader())
 
     ############
