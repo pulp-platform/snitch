@@ -259,6 +259,25 @@ static inline void snrt_mutex_lock(volatile uint32_t *pmtx) {
 }
 
 /**
+ * @brief lock a mutex, blocking
+ * @details test and test-and-set (ttas) implementation of a lock.
+ *          Declare mutex with `static volatile uint32_t mtx = 0;`
+ */
+static inline void snrt_mutex_ttas_lock(volatile uint32_t *pmtx) {
+    asm volatile(
+        "1:\n"
+        "  lw x5, 0(%0)\n"
+        "  bnez x5, 1b\n"
+        "  li x5,1          # x5 = 1\n"
+        "2:\n"
+        "  amoswap.w.aq  x5,x5,(%0)   # x5 = oldlock & lock = 1\n"
+        "  bnez          x5,2b      # Retry if previously set)\n"
+        : "+r"(pmtx)
+        :
+        : "x5");
+}
+
+/**
  * @brief Release the mutex
  */
 static inline void snrt_mutex_release(volatile uint32_t *pmtx) {
