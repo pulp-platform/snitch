@@ -195,6 +195,7 @@ module axi_id_remap #(
   state_t state_d, state_q;
   idx_t ar_id_d, ar_id_q,
         aw_id_d, aw_id_q;
+  logic ar_prio_d, ar_prio_q;
   always_comb begin
     mst_req_o.aw_valid  = 1'b0;
     slv_resp_o.aw_ready = 1'b0;
@@ -207,6 +208,7 @@ module axi_id_remap #(
     rd_push_oup_id      =   '0;
     ar_id_d             = ar_id_q;
     aw_id_d             = aw_id_q;
+    ar_prio_d           = ar_prio_q;
     state_d             = state_q;
 
     unique case (state_q)
@@ -241,7 +243,8 @@ module axi_id_remap #(
             end
           // If this is an ATOP that gives rise to an R response, we must remap to an ID that is
           // free on both read and write direction and push also to the read table.
-          end else begin
+          // Only allowed if AR does not have arbitration priority
+          end else if (!(ar_prio_q && mst_req_o.ar_valid)) begin
             // Nullify a potential AR at our output.  This is legal in this state.
             mst_req_o.ar_valid  = 1'b0;
             slv_resp_o.ar_ready = 1'b0;
@@ -255,6 +258,8 @@ module axi_id_remap #(
               mst_req_o.aw_valid = 1'b1;
               rd_push            = 1'b1;
               wr_push            = 1'b1;
+              // Give AR priority in the next cycle (so ATOPs cannot infinitely preempt ARs).
+              ar_prio_d = 1'b1;
             end
           end
         end
@@ -288,6 +293,10 @@ module axi_id_remap #(
         //   4'b??10: state_d = HoldAW;
         //   default: state_d = Ready;
         // endcase
+
+        if (mst_req_o.ar_valid && mst_resp_i.ar_ready) begin
+          ar_prio_d = 1'b0; // Reset AR priority, because handshake was successful in this cycle.
+        end
       end
 
       HoldAR: begin
@@ -297,6 +306,7 @@ module axi_id_remap #(
         slv_resp_o.ar_ready = mst_resp_i.ar_ready;
         if (mst_resp_i.ar_ready) begin
           state_d = Ready;
+          ar_prio_d = 1'b0; // Reset AR priority, because handshake was successful in this cycle.
         end
       end
 
@@ -323,6 +333,9 @@ module axi_id_remap #(
           2'b11:   state_d = Ready;
           default: /*do nothing / stay in this state*/;
         endcase
+        if (mst_resp_i.ar_ready) begin
+          ar_prio_d = 1'b0; // Reset AR priority, because handshake was successful in this cycle.
+        end
       end
 
       default: state_d = Ready;
@@ -333,10 +346,12 @@ module axi_id_remap #(
   always_ff @(posedge clk_i, negedge rst_ni) begin
     if (!rst_ni) begin
       ar_id_q <= '0;
+      ar_prio_q <= 1'b0;
       aw_id_q <= '0;
       state_q <= Ready;
     end else begin
       ar_id_q <= ar_id_d;
+      ar_prio_q <= ar_prio_d;
       aw_id_q <= aw_id_d;
       state_q <= state_d;
     end
