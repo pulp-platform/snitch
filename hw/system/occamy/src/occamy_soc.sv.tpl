@@ -83,10 +83,7 @@ module occamy_soc
   //   CROSSBARS   //
   ///////////////////
   ${module}
-  <%
-    soc_wide_hbi_iwc = soc_wide_xbar.__dict__["out_hbi_{}".format(nr_s1_quadrants)] \
-        .change_iw(context, wide_xbar_quadrant_s1.out_hbi.iw, "soc_wide_hbi_iwc")
-  %>
+
   /////////////////////////////
   // Narrow to Wide Crossbar //
   /////////////////////////////
@@ -108,14 +105,26 @@ module occamy_soc
   //////////
   // PCIe //
   //////////
-  assign pcie_axi_req_o = ${soc_wide_xbar.out_pcie.req_name()};
-  assign ${soc_wide_xbar.out_pcie.rsp_name()} = pcie_axi_rsp_i;
-  assign ${soc_wide_xbar.in_pcie.req_name()} = pcie_axi_req_i;
-  assign pcie_axi_rsp_o = ${soc_wide_xbar.in_pcie.rsp_name()};
+  <%
+    pcie_cuts = 3
+    pcie_out = soc_wide_xbar.__dict__["out_pcie"].cut(context, pcie_cuts, name="pcie_out", inst_name="i_pcie_out_cut")
+    pcie_in = soc_wide_xbar.__dict__["in_pcie"].copy(name="pcie_in").declare(context)
+    pcie_in.cut(context, pcie_cuts, to=soc_wide_xbar.__dict__["in_pcie"])
+  %>\
+
+  assign pcie_axi_req_o = ${pcie_out.req_name()};
+  assign ${pcie_out.rsp_name()} = pcie_axi_rsp_i;
+  assign ${pcie_in.req_name()} = pcie_axi_req_i;
+  assign pcie_axi_rsp_o = ${pcie_in.rsp_name()};
 
   //////////
   // CVA6 //
   //////////
+  <%
+    cva6_cuts = 1
+    cva6_mst = soc_narrow_xbar.__dict__["in_cva6"].copy(name="cva6_mst").declare(context)
+    cva6_mst.cut(context, cva6_cuts, to=soc_narrow_xbar.__dict__["in_cva6"])
+  %>\
 
   occamy_cva6 i_occamy_cva6 (
     .clk_i (clk_i),
@@ -124,8 +133,8 @@ module occamy_soc
     .ipi_i (msip_i[0]),
     .time_irq_i (mtip_i[0]),
     .debug_req_i (debug_req_i[0]),
-    .axi_req_o (${soc_narrow_xbar.in_cva6.req_name()}),
-    .axi_resp_i (${soc_narrow_xbar.in_cva6.rsp_name()}),
+    .axi_req_o (${cva6_mst.req_name()}),
+    .axi_resp_i (${cva6_mst.rsp_name()}),
     .sram_cfg_i (sram_cfgs_i.cva6)
   );
 
@@ -134,15 +143,16 @@ module occamy_soc
   // S1 Quadrant ${i} //
   ///////////////////
   <%
-    cut_width = 1
-    narrow_in = soc_narrow_xbar.__dict__["out_s1_quadrant_{}".format(i)].cut(context, cut_width, name="narrow_in_cut_{}".format(i))
+    quad_widex_cuts = 3
+    quad_hbi_cuts = 6
+    narrow_in = soc_narrow_xbar.__dict__["out_s1_quadrant_{}".format(i)].cut(context, quad_widex_cuts, name="narrow_in_cut_{}".format(i))
     narrow_out = soc_narrow_xbar.__dict__["in_s1_quadrant_{}".format(i)].copy(name="narrow_out_cut_{}".format(i)).declare(context)
-    narrow_out.cut(context, cut_width, to=soc_narrow_xbar.__dict__["in_s1_quadrant_{}".format(i)])
-    wide_in = soc_wide_xbar.__dict__["out_s1_quadrant_{}".format(i)].cut(context, cut_width, name="wide_in_cut_{}".format(i))
+    narrow_out.cut(context, quad_widex_cuts, to=soc_narrow_xbar.__dict__["in_s1_quadrant_{}".format(i)])
+    wide_in = soc_wide_xbar.__dict__["out_s1_quadrant_{}".format(i)].cut(context, quad_widex_cuts, name="wide_in_cut_{}".format(i))
     wide_out = soc_wide_xbar.__dict__["in_s1_quadrant_{}".format(i)].copy(name="wide_out_cut_{}".format(i)).declare(context)
-    wide_out.cut(context, cut_width, to=soc_wide_xbar.__dict__["in_s1_quadrant_{}".format(i)])
+    wide_out.cut(context, quad_widex_cuts, to=soc_wide_xbar.__dict__["in_s1_quadrant_{}".format(i)])
     wide_hbi_out = wide_xbar_quadrant_s1.out_hbi.copy(name="wide_hbi_out_cut_{}".format(i)).declare(context)
-    wide_hbi_cut_out = wide_hbi_out.cut(context, cut_width)
+    wide_hbi_cut_out = wide_hbi_out.cut(context, quad_hbi_cuts)
   %>
   assign hbi_${i}_req_o = ${wide_hbi_cut_out.req_name()};
   assign ${wide_hbi_cut_out.rsp_name()} = hbi_${i}_rsp_i;
@@ -254,41 +264,66 @@ module occamy_soc
   ///////////
 
 % for i in range(8):
-  assign hbm_${i}_req_o = ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].req_name()};
-  assign ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].rsp_name()} = hbm_${i}_rsp_i;
+  <%
+    hbm_cuts = 3
+    hbm_out = soc_wide_xbar.__dict__["out_hbm_{}".format(i)].cut(
+      context, hbm_cuts, name="hbm_out_{}".format(i), inst_name="i_hbm_out_cut_{}".format(i))
+  %>\
+
+  assign hbm_${i}_req_o = ${hbm_out.req_name()};
+  assign ${hbm_out.rsp_name()} = hbm_${i}_rsp_i;
+
 % endfor
 
   /////////
   // HBI //
   /////////
 
-  // Inputs
+  // Inputs from HBI to wide Xbar
 % for i in range(nr_s1_quadrants+1):
   <%
+    hbi_in_cuts = 6
     hbi_in = soc_wide_xbar.__dict__["in_hbi_{}".format(i)].copy(name="in_hbi_{}".format(i)).declare(context)
-    hbi_in_trunc_addr = hbi_in.trunc_addr(context, target_aw=40, inst_name="hbi_in_trunc_addr_{}".format(i),
-                                          to=soc_wide_xbar.__dict__["in_hbi_{}".format(i)])
+    hbi_in_trunc = hbi_in.copy(name="in_hbi_trunc_{}".format(i)).declare(context)
+    hbi_in.trunc_addr(context, target_aw=40, inst_name="hbi_in_trunc_addr_{}".format(i), to=hbi_in_trunc)
+    hbi_in_trunc.cut(context, hbi_in_cuts, to=soc_wide_xbar.__dict__["in_hbi_{}".format(i)])
   %>
   assign ${hbi_in.req_name()} = hbi_${i}_req_i;
   assign hbi_${i}_rsp_o = ${hbi_in.rsp_name()};
 
 % endfor
-  // Outputs
+  // Single output from wide Xbar to HBI
+  <%
+    hbi_widex_cuts = 6
+    soc_wide_hbi_iwc = soc_wide_xbar.__dict__["out_hbi_{}".format(nr_s1_quadrants)] \
+        .change_iw(context, wide_xbar_quadrant_s1.out_hbi.iw, "soc_wide_hbi_iwc") \
+        .cut(context, hbi_widex_cuts)
+  %>
   assign hbi_${nr_s1_quadrants}_req_o = ${soc_wide_hbi_iwc.req_name()};
   assign ${soc_wide_hbi_iwc.rsp_name()} = hbi_${nr_s1_quadrants}_rsp_i;
 
   /////////////////
   // Peripherals //
   /////////////////
+  <%
+    periph_regbus_cuts = 3
+    periph_axi_lite_cuts = 3
+    periph_regbus_out = soc_narrow_xbar.__dict__["out_regbus_periph"].cut(context,
+      periph_regbus_cuts, name="periph_regbus_out", inst_name="i_periph_regbus_out_cut")
+    periph_axi_lite_out = soc_narrow_xbar.__dict__["out_periph"].cut(context,
+      periph_axi_lite_cuts, name="periph_axi_lite_out", inst_name="i_periph_axi_lite_out_cut")
+    periph_axi_lite_in = soc_narrow_xbar.__dict__["in_periph"].copy(name="periph_axi_lite_in").declare(context)
+    periph_axi_lite_in.cut(context, periph_axi_lite_cuts, to=soc_narrow_xbar.__dict__["in_periph"])
+  %>\
 
   // Inputs
-  assign ${soc_narrow_xbar.in_periph.req_name()} = periph_axi_lite_req_i;
-  assign periph_axi_lite_rsp_o = ${soc_narrow_xbar.in_periph.rsp_name()};
+  assign ${periph_axi_lite_in.req_name()} = periph_axi_lite_req_i;
+  assign periph_axi_lite_rsp_o = ${periph_axi_lite_in.rsp_name()};
 
   // Outputs
-  assign periph_axi_lite_req_o = ${soc_narrow_xbar.out_periph.req_name()};
-  assign ${soc_narrow_xbar.out_periph.rsp_name()} = periph_axi_lite_rsp_i;
-  assign periph_regbus_req_o = ${soc_narrow_xbar.out_regbus_periph.req_name()};
-  assign ${soc_narrow_xbar.out_regbus_periph.rsp_name()} = periph_regbus_rsp_i;
+  assign periph_axi_lite_req_o = ${periph_axi_lite_out.req_name()};
+  assign ${periph_axi_lite_out.rsp_name()} = periph_axi_lite_rsp_i;
+  assign periph_regbus_req_o = ${periph_regbus_out.req_name()};
+  assign ${periph_regbus_out.rsp_name()} = periph_regbus_rsp_i;
 
 endmodule
