@@ -654,6 +654,28 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 let word = unsafe { *ptr.offset(word_addr as isize) };
                 (word >> (8 * word_offs)) & ((((1 as u64) << (8 << size)) - 1) as u32)
             }
+            // TCDM External
+            x if self
+                .engine
+                .config
+                .memory
+                .iter()
+                .any(|m| x >= m.tcdm.start && x < m.tcdm.end) =>
+            {
+                let id = self
+                    .engine
+                    .config
+                    .memory
+                    .iter()
+                    .position(|m| addr >= m.tcdm.start && addr < m.tcdm.end)
+                    .unwrap();
+                let tcdm_addr = addr - self.engine.config.memory[id].tcdm.start;
+                let word_addr = tcdm_addr / 4;
+                let word_offs = tcdm_addr - 4 * word_addr;
+                let ptr: *const u32 = self.tcdm_ext_ptr[id];
+                let word = unsafe { *ptr.offset(word_addr as isize) };
+                (word >> (8 * word_offs)) & ((((1 as u64) << (8 << size)) - 1) as u32)
+            }
             // Peripherals
             x if x >= self.engine.config.memory[self.cluster_id].periphs.start
                 && x < self.engine.config.memory[self.cluster_id].periphs.end =>
@@ -737,6 +759,33 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 let word_addr = tcdm_addr / 4;
                 let word_offs = tcdm_addr - 4 * word_addr;
                 let ptr = self.tcdm_ptr as *const u32;
+                let ptr_mut = ptr as *mut u32;
+                let wmask = ((((1 as u64) << (8 << size)) - 1) as u32) << (8 * word_offs);
+                unsafe {
+                    let word_ptr = ptr_mut.offset(word_addr as isize);
+                    let word = *word_ptr;
+                    *word_ptr = (word & !wmask) | ((value << (8 * word_offs)) & wmask);
+                }
+            }
+            // TCDM External
+            x if self
+                .engine
+                .config
+                .memory
+                .iter()
+                .any(|m| x >= m.tcdm.start && x < m.tcdm.end) =>
+            {
+                let id = self
+                    .engine
+                    .config
+                    .memory
+                    .iter()
+                    .position(|m| addr >= m.tcdm.start && addr < m.tcdm.end)
+                    .unwrap();
+                let tcdm_addr = addr - self.engine.config.memory[id].tcdm.start;
+                let word_addr = tcdm_addr / 4;
+                let word_offs = tcdm_addr - 4 * word_addr;
+                let ptr = self.tcdm_ext_ptr[id] as *const u32;
                 let ptr_mut = ptr as *mut u32;
                 let wmask = ((((1 as u64) << (8 << size)) - 1) as u32) << (8 * word_offs);
                 unsafe {
