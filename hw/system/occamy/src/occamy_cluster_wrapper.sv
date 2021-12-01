@@ -76,10 +76,11 @@ package occamy_cluster_pkg;
   localparam snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{
       NrCachedRegionRules: 4,
       CachedRegion: '{
-          '{base: 48'h80000000, mask: 48'hffff80000000},
-          '{base: 48'h1000000000, mask: 48'hfff000000000},
-          '{base: 48'h70000000, mask: 48'hfffff0000000},
-          '{base: 48'h1000000, mask: 48'hfffffffe0000}
+          0: '{base: 48'h80000000, mask: 48'hffff80000000},
+          1: '{base: 48'h1000000000, mask: 48'hfff000000000},
+          2: '{base: 48'h70000000, mask: 48'hfffff0000000},
+          3: '{base: 48'h1000000, mask: 48'hfffffffe0000},
+          default: '0
       },
       default: 0
   };
