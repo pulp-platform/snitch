@@ -249,13 +249,32 @@ static inline void snrt_wfi() { asm volatile("wfi"); }
  */
 static inline void snrt_mutex_lock(volatile uint32_t *pmtx) {
     asm volatile(
-        "li            x5,1          # x5 = 1\n"
+        "li            t0,1          # t0 = 1\n"
         "1:\n"
-        "  amoswap.w.aq  x5,x5,(%0)   # x5 = oldlock & lock = 1\n"
-        "  bnez          x5,1b      # Retry if previously set)\n"
+        "  amoswap.w.aq  t0,t0,(%0)   # t0 = oldlock & lock = 1\n"
+        "  bnez          t0,1b      # Retry if previously set)\n"
         : "+r"(pmtx)
         :
-        : "x5");
+        : "t0");
+}
+
+/**
+ * @brief lock a mutex, blocking
+ * @details test and test-and-set (ttas) implementation of a lock.
+ *          Declare mutex with `static volatile uint32_t mtx = 0;`
+ */
+static inline void snrt_mutex_ttas_lock(volatile uint32_t *pmtx) {
+    asm volatile(
+        "1:\n"
+        "  lw t0, 0(%0)\n"
+        "  bnez t0, 1b\n"
+        "  li t0,1          # t0 = 1\n"
+        "2:\n"
+        "  amoswap.w.aq  t0,t0,(%0)   # t0 = oldlock & lock = 1\n"
+        "  bnez          t0,2b      # Retry if previously set)\n"
+        : "+r"(pmtx)
+        :
+        : "t0");
 }
 
 /**
