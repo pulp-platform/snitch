@@ -2831,5 +2831,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // constraints a bit.
   `ASSERT(RegWriteKnown, gpr_we & (gpr_waddr != 0) & !retire_load
                                     |-> !$isunknown(gpr_wdata), clk_i, rst_i)
+  // Check that PMA rule counts do not exceed maximum number of rules
+  `ASSERT_INIT(CheckPMANonIdempotent,
+    SnitchPMACfg.NrNonIdempotentRegionRules <= snitch_pma_pkg::NrMaxRules);
+  `ASSERT_INIT(CheckPMAExecute, SnitchPMACfg.NrExecuteRegionRules <= snitch_pma_pkg::NrMaxRules);
+  `ASSERT_INIT(CheckPMACached, SnitchPMACfg.NrCachedRegionRules <= snitch_pma_pkg::NrMaxRules);
+  `ASSERT_INIT(CheckPMAAMORegion, SnitchPMACfg.NrAMORegionRules <= snitch_pma_pkg::NrMaxRules);
 
 endmodule

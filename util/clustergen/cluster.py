@@ -130,6 +130,18 @@ class PMACfg(object):
     def add_region(self, pma, base, mask):
         self.regions.append((pma, base, mask))
 
+    def add_region_length(self, pma, base, length, addr_width):
+        # The base *must* be aligned to the length, i.e. only one region is added.
+        is_length_power_of_two = (length != 0) and (length & (length-1) == 0)
+        # Python uses arbitrary-precision integers --> we can support any address width
+        mask_addr_space = ((1 << addr_width) - 1)
+        mask = mask_addr_space & ~(length - 1)
+        is_mask_aligned = ((~mask & base) == 0)
+        if (not is_length_power_of_two) or (mask == 0) or (not is_mask_aligned):
+            exit("Cacheable regions must have a power-of-two length aligned to their base.")
+        else:
+            self.add_region(pma, base, mask)
+
 
 class SnitchCluster(Generator):
     """
@@ -354,10 +366,10 @@ class SnitchClusterTB(Generator):
         # and construct a new SnitchClusterTB object.
         self.cfg = cfg
         pma_cfg = PMACfg()
-        # TODO(zarubaf): Check dram start address is aligned to its length.
         # For this example system make the entire dram cacheable.
-        pma_cfg.add_region(PMA.CACHED, self.cfg['dram']['address'],
-                           self.cfg['dram']['length'])
+        pma_cfg.add_region_length(PMA.CACHED, self.cfg['dram']['address'],
+                                  self.cfg['dram']['length'],
+                                  self.cfg['cluster']['addr_width'])
         self.cfg['cluster']['tie_ports'] = True
         # Store Snitch cluster config in separate variable
         self.cluster = SnitchCluster(cfg["cluster"], pma_cfg)

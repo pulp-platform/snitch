@@ -21,7 +21,7 @@ Disassembly of section .text:
 
 000000000100002c <_cva6_init>:
  100002c:	01000317          	auipc	t1,0x1000
- 1000030:	07430313          	addi	t1,t1,116 # 20000a0 <__soc_ctrl_isolate>
+ 1000030:	07830313          	addi	t1,t1,120 # 20000a4 <__soc_ctrl_isolate>
  1000034:	00032023          	sw	zero,0(t1)
  1000038:	00000397          	auipc	t2,0x0
  100003c:	01038393          	addi	t2,t2,16 # 1000048 <exception>
