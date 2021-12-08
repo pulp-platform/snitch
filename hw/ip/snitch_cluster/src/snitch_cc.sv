@@ -181,6 +181,9 @@ module snitch_cc #(
   fpnew_pkg::fmt_mode_t  fpu_fmt_mode;
   fpnew_pkg::status_t    fpu_status;
 
+  snitch_pkg::core_events_t snitch_events;
+  snitch_pkg::core_events_t fpu_events;
+
   // Snitch Integer Core
   dreq_t snitch_dreq_d, snitch_dreq_q, merged_dreq;
   drsp_t snitch_drsp_d, snitch_drsp_q, merged_drsp;
@@ -248,7 +251,8 @@ module snitch_cc #(
     .ptw_is_4mega_i (hive_rsp_i.ptw_is_4mega),
     .fpu_rnd_mode_o ( fpu_rnd_mode ),
     .fpu_fmt_mode_o ( fpu_fmt_mode ),
-    .fpu_status_i ( fpu_status )
+    .fpu_status_i ( fpu_status ),
+    .core_events_o ( snitch_events)
   );
 
   reqrsp_iso #(
@@ -499,7 +503,7 @@ module snitch_cc #(
       .streamctl_done_i   ( ssr_streamctl_done  ),
       .streamctl_valid_i  ( ssr_streamctl_valid ),
       .streamctl_ready_o  ( ssr_streamctl_ready ),
-      .core_events_o
+      .core_events_o      ( fp_ss_core_events   )
     );
 
     reqrsp_mux #(
@@ -519,6 +523,10 @@ module snitch_cc #(
       .mst_req_o (merged_dreq),
       .mst_rsp_i (merged_drsp)
     );
+
+    assign core_events_o.issue_fpu = fp_ss_core_events.issue_fpu;
+    assign core_events_o.issue_fpu_seq = fp_ss_core_events.issue_fpu_seq;
+    assign core_events_o.issue_core_to_fpu = fp_ss_core_events.issue_core_to_fpu;
 
   end else begin : gen_no_fpu
     assign fpu_status = '0;
@@ -540,7 +548,9 @@ module snitch_cc #(
     assign merged_dreq = snitch_dreq_q;
     assign snitch_drsp_q = merged_drsp;
 
-    assign core_events_o = '0;
+    assign core_events_o.issue_fpu = '0;
+    assign core_events_o.issue_fpu_seq = '0;
+    assign core_events_o.issue_core_to_fpu = '0;
   end
 
   // Decide whether to go to SoC or TCDM
@@ -782,6 +792,12 @@ module snitch_cc #(
     assign ssr_streamctl_done   = '0;
     assign ssr_streamctl_valid  = '0;
   end
+
+  // Core events for performance counters
+  assign core_events_o.retired_instr = snitch_events.retired_instr;
+  assign core_events_o.retired_load = snitch_events.retired_load;
+  assign core_events_o.retired_i = snitch_events.retired_i;
+  assign core_events_o.retired_acc = snitch_events.retired_acc;
 
   // --------------------------
   // Tracer

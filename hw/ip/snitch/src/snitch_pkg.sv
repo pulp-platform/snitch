@@ -163,6 +163,10 @@ package snitch_pkg;
     logic issue_fpu;          // core operations performed in the FPU
     logic issue_fpu_seq;      // includes load/store operations
     logic issue_core_to_fpu;  // instructions issued from core to FPU
+    logic retired_instr;      // number of instructions retired by the core
+    logic retired_load;       // number of load instructions retired by the core
+    logic retired_i;          // number of base instructions retired by the core
+    logic retired_acc;        // number of offloaded instructions retired by the core
   } core_events_t;
 
   // SSRs

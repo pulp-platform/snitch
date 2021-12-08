@@ -7,7 +7,7 @@
         { name: "NumPerfCounters",
         desc: "Number of performance counters",
         type: "int",
-        default: "2"
+        default: "8"
         },
     ],
     name: "snitch_cluster_peripheral",
@@ -81,6 +81,38 @@
             {
                 bits: "6:6",
                 resval: "0",
+                name: "RETIRED_INSTR"
+                desc: '''
+                        Instructions retired by the core. _This is a hart-local signal._
+                        '''
+            },
+            {
+                bits: "7:7",
+                resval: "0",
+                name: "RETIRED_LOAD"
+                desc: '''
+                        Load instructions retired by the core. _This is a hart-local signal._
+                        '''
+            },
+            {
+                bits: "8:8",
+                resval: "0",
+                name: "RETIRED_I"
+                desc: '''
+                        Base instructions retired by the core. _This is a hart-local signal._
+                        '''
+            },
+            {
+                bits: "9:9",
+                resval: "0",
+                name: "RETIRED_ACC"
+                desc: '''
+                        Offloaded instructions retired by the core. _This is a hart-local signal._
+                        '''
+            },
+            {
+                bits: "10:10",
+                resval: "0",
                 name: "DMA_AW_STALL"
                 desc: '''
                         Incremented whenever aw_valid = 1 but aw_ready = 0.
@@ -88,7 +120,7 @@
                         '''
             },
             {
-                bits: "7:7",
+                bits: "11:11",
                 resval: "0",
                 name: "DMA_AR_STALL"
                 desc: '''
@@ -97,7 +129,7 @@
                         '''
             },
             {
-                bits: "8:8",
+                bits: "12:12",
                 resval: "0",
                 name: "DMA_R_STALL"
                 desc: '''
@@ -106,7 +138,7 @@
                         '''
             },
             {
-                bits: "9:9",
+                bits: "13:13",
                 resval: "0",
                 name: "DMA_W_STALL"
                 desc: '''
@@ -115,7 +147,7 @@
                         '''
             },
             {
-                bits: "10:10",
+                bits: "14:14",
                 resval: "0",
                 name: "DMA_BUF_W_STALL"
                 desc: '''
@@ -124,7 +156,7 @@
                         '''
             },
             {
-                bits: "11:11",
+                bits: "15:15",
                 resval: "0",
                 name: "DMA_BUF_R_STALL"
                 desc: '''
@@ -133,7 +165,7 @@
                         '''
             },
             {
-                bits: "12:12",
+                bits: "16:16",
                 resval: "0",
                 name: "DMA_AW_DONE"
                 desc: '''
@@ -142,7 +174,7 @@
                         '''
             },
             {
-                bits: "13:13",
+                bits: "17:17",
                 resval: "0",
                 name: "DMA_AW_BW"
                 desc: '''
@@ -152,7 +184,7 @@
                         '''
             },
             {
-                bits: "14:14",
+                bits: "18:18",
                 resval: "0",
                 name: "DMA_AR_DONE"
                 desc: '''
@@ -161,7 +193,7 @@
                         '''
             },
             {
-                bits: "15:15",
+                bits: "19:19",
                 resval: "0",
                 name: "DMA_AR_BW"
                 desc: '''
@@ -171,7 +203,7 @@
                         '''
             },
             {
-                bits: "16:16",
+                bits: "20:20",
                 resval: "0",
                 name: "DMA_R_DONE"
                 desc: '''
@@ -180,7 +212,7 @@
                         '''
             },
             {
-                bits: "17:17",
+                bits: "21:21",
                 resval: "0",
                 name: "DMA_R_BW"
                 desc: '''
@@ -190,7 +222,7 @@
                         '''
             },
             {
-                bits: "18:18",
+                bits: "22:22",
                 resval: "0",
                 name: "DMA_W_DONE"
                 desc: '''
@@ -199,7 +231,7 @@
                         '''
             },
             {
-                bits: "19:19",
+                bits: "23:23",
                 resval: "0",
                 name: "DMA_W_BW"
                 desc: '''
@@ -209,7 +241,7 @@
                         '''
             },
             {
-                bits: "20:20",
+                bits: "24:24",
                 resval: "0",
                 name: "DMA_B_DONE"
                 desc: '''
@@ -218,7 +250,7 @@
                         '''
             },
             {
-                bits: "21:21",
+                bits: "25:25",
                 resval: "0",
                 name: "DMA_BUSY"
                 desc: '''
@@ -227,7 +259,7 @@
                         '''
             },
                         {
-                bits: "22:22",
+                bits: "26:26",
                 resval: "0",
                 name: "ICACHE_MISS"
                 desc: '''
@@ -236,7 +268,7 @@
                         '''
             },
                         {
-                bits: "23:23",
+                bits: "27:27",
                 resval: "0",
                 name: "ICACHE_HIT"
                 desc: '''
@@ -245,7 +277,7 @@
                         '''
             },
                         {
-                bits: "24:24",
+                bits: "28:28",
                 resval: "0",
                 name: "ICACHE_PREFETCH"
                 desc: '''
@@ -254,7 +286,7 @@
                         '''
             },
                         {
-                bits: "25:25",
+                bits: "29:29",
                 resval: "0",
                 name: "ICACHE_DOUBLE_HIT"
                 desc: '''
@@ -263,7 +295,7 @@
                         '''
             },
                         {
-                bits: "26:26",
+                bits: "30:30",
                 resval: "0",
                 name: "ICACHE_STALL"
                 desc: '''

@@ -8,7 +8,16 @@
 
 /// Different perf counters
 // Must match with `snitch_cluster_peripheral`
-enum snrt_perf_cnt { SNRT_PERF_CNT0, SNRT_PERF_CNT1, SNRT_PERF_N_CNT };
+enum snrt_perf_cnt {
+    SNRT_PERF_CNT0,
+    SNRT_PERF_CNT1,
+    SNRT_PERF_CNT2,
+    SNRT_PERF_CNT3,
+    SNRT_PERF_CNT4,
+    SNRT_PERF_CNT5,
+    SNRT_PERF_CNT6,
+    SNRT_PERF_CNT7,
+    SNRT_PERF_N_CNT };
 
 /// Different types of performance counters
 enum snrt_perf_cnt_type {
@@ -17,7 +26,11 @@ enum snrt_perf_cnt_type {
     SNRT_PERF_CNT_TCDM_CONGESTED,
     SNRT_PERF_CNT_ISSUE_FPU,
     SNRT_PERF_CNT_ISSUE_FPU_SEQ,
-    SNRT_PERF_CNT_ISSUE_ISSUE_CORE_TO_FPU,
+    SNRT_PERF_CNT_ISSUE_CORE_TO_FPU,
+    SNRT_PERF_CNT_RETIRED_INSTR,
+    SNRT_PERF_CNT_RETIRED_LOAD,
+    SNRT_PERF_CNT_RETIRED_I,
+    SNRT_PERF_CNT_RETIRED_ACC,
     SNRT_PERF_CNT_DMA_AW_STALL,
     SNRT_PERF_CNT_DMA_AR_STALL,
     SNRT_PERF_CNT_DMA_R_STALL,

@@ -7,10 +7,10 @@
 package snitch_cluster_peripheral_reg_pkg;
 
   // Param list
-  parameter int NumPerfCounters = 2;
+  parameter int NumPerfCounters = 8;
 
   // Address widths within the block
-  parameter int BlockAw = 7;
+  parameter int BlockAw = 8;
 
   ////////////////////////////
   // Typedefs for registers //
@@ -35,6 +35,18 @@ package snitch_cluster_peripheral_reg_pkg;
     struct packed {
       logic        q;
     } issue_core_to_fpu;
+    struct packed {
+      logic        q;
+    } retired_instr;
+    struct packed {
+      logic        q;
+    } retired_load;
+    struct packed {
+      logic        q;
+    } retired_i;
+    struct packed {
+      logic        q;
+    } retired_acc;
     struct packed {
       logic        q;
     } dma_aw_stall;
@@ -137,9 +149,9 @@ package snitch_cluster_peripheral_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [1:0] perf_counter_enable; // [270:217]
-    snitch_cluster_peripheral_reg2hw_hart_select_mreg_t [1:0] hart_select; // [216:197]
-    snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t [1:0] perf_counter; // [196:99]
+    snitch_cluster_peripheral_reg2hw_perf_counter_enable_mreg_t [7:0] perf_counter_enable; // [818:571]
+    snitch_cluster_peripheral_reg2hw_hart_select_mreg_t [7:0] hart_select; // [570:491]
+    snitch_cluster_peripheral_reg2hw_perf_counter_mreg_t [7:0] perf_counter; // [490:99]
     snitch_cluster_peripheral_reg2hw_cl_clint_set_reg_t cl_clint_set; // [98:66]
     snitch_cluster_peripheral_reg2hw_cl_clint_clear_reg_t cl_clint_clear; // [65:33]
     snitch_cluster_peripheral_reg2hw_hw_barrier_reg_t hw_barrier; // [32:1]
@@ -148,25 +160,49 @@ package snitch_cluster_peripheral_reg_pkg;
 
   // HW -> register type
   typedef struct packed {
-    snitch_cluster_peripheral_hw2reg_perf_counter_mreg_t [1:0] perf_counter; // [127:32]
+    snitch_cluster_peripheral_hw2reg_perf_counter_mreg_t [7:0] perf_counter; // [415:32]
     snitch_cluster_peripheral_hw2reg_hw_barrier_reg_t hw_barrier; // [31:0]
   } snitch_cluster_peripheral_hw2reg_t;
 
   // Register offsets
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET = 7'h 0;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1_OFFSET = 7'h 8;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0_OFFSET = 7'h 10;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1_OFFSET = 7'h 18;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET = 7'h 20;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET = 7'h 28;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET_OFFSET = 7'h 30;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_CLEAR_OFFSET = 7'h 38;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET = 7'h 40;
-  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_ICACHE_PREFETCH_ENABLE_OFFSET = 7'h 48;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET = 8'h 0;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1_OFFSET = 8'h 8;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_2_OFFSET = 8'h 10;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_3_OFFSET = 8'h 18;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_4_OFFSET = 8'h 20;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_5_OFFSET = 8'h 28;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_6_OFFSET = 8'h 30;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_7_OFFSET = 8'h 38;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0_OFFSET = 8'h 40;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1_OFFSET = 8'h 48;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_2_OFFSET = 8'h 50;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_3_OFFSET = 8'h 58;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_4_OFFSET = 8'h 60;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_5_OFFSET = 8'h 68;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_6_OFFSET = 8'h 70;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_7_OFFSET = 8'h 78;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET = 8'h 80;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET = 8'h 88;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_2_OFFSET = 8'h 90;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_3_OFFSET = 8'h 98;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_4_OFFSET = 8'h a0;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_5_OFFSET = 8'h a8;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_6_OFFSET = 8'h b0;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_7_OFFSET = 8'h b8;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET_OFFSET = 8'h c0;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_CLEAR_OFFSET = 8'h c8;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET = 8'h d0;
+  parameter logic [BlockAw-1:0] SNITCH_CLUSTER_PERIPHERAL_ICACHE_PREFETCH_ENABLE_OFFSET = 8'h d8;
 
   // Reset values for hwext registers and their fields
   parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_RESVAL = 48'h 0;
   parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_RESVAL = 48'h 0;
+  parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_2_RESVAL = 48'h 0;
+  parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_3_RESVAL = 48'h 0;
+  parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_4_RESVAL = 48'h 0;
+  parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_5_RESVAL = 48'h 0;
+  parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_6_RESVAL = 48'h 0;
+  parameter logic [47:0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_7_RESVAL = 48'h 0;
   parameter logic [31:0] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET_RESVAL = 32'h 0;
   parameter logic [31:0] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_CLEAR_RESVAL = 32'h 0;
   parameter logic [31:0] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_RESVAL = 32'h 0;
@@ -175,10 +211,28 @@ package snitch_cluster_peripheral_reg_pkg;
   typedef enum int {
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0,
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_2,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_3,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_4,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_5,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_6,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_7,
     SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0,
     SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1,
+    SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_2,
+    SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_3,
+    SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_4,
+    SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_5,
+    SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_6,
+    SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_7,
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0,
     SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_2,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_3,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_4,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_5,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_6,
+    SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_7,
     SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET,
     SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_CLEAR,
     SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER,
@@ -186,17 +240,35 @@ package snitch_cluster_peripheral_reg_pkg;
   } snitch_cluster_peripheral_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] SNITCH_CLUSTER_PERIPHERAL_PERMIT [10] = '{
-    4'b 1111, // index[0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0
-    4'b 1111, // index[1] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1
-    4'b 0011, // index[2] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0
-    4'b 0011, // index[3] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1
-    4'b 1111, // index[4] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0
-    4'b 1111, // index[5] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1
-    4'b 1111, // index[6] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET
-    4'b 1111, // index[7] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_CLEAR
-    4'b 1111, // index[8] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER
-    4'b 0001  // index[9] SNITCH_CLUSTER_PERIPHERAL_ICACHE_PREFETCH_ENABLE
+  parameter logic [3:0] SNITCH_CLUSTER_PERIPHERAL_PERMIT [28] = '{
+    4'b 1111, // index[ 0] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0
+    4'b 1111, // index[ 1] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1
+    4'b 1111, // index[ 2] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_2
+    4'b 1111, // index[ 3] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_3
+    4'b 1111, // index[ 4] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_4
+    4'b 1111, // index[ 5] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_5
+    4'b 1111, // index[ 6] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_6
+    4'b 1111, // index[ 7] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_7
+    4'b 0011, // index[ 8] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0
+    4'b 0011, // index[ 9] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1
+    4'b 0011, // index[10] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_2
+    4'b 0011, // index[11] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_3
+    4'b 0011, // index[12] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_4
+    4'b 0011, // index[13] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_5
+    4'b 0011, // index[14] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_6
+    4'b 0011, // index[15] SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_7
+    4'b 1111, // index[16] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0
+    4'b 1111, // index[17] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1
+    4'b 1111, // index[18] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_2
+    4'b 1111, // index[19] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_3
+    4'b 1111, // index[20] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_4
+    4'b 1111, // index[21] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_5
+    4'b 1111, // index[22] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_6
+    4'b 1111, // index[23] SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_7
+    4'b 1111, // index[24] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET
+    4'b 1111, // index[25] SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_CLEAR
+    4'b 1111, // index[26] SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER
+    4'b 0001  // index[27] SNITCH_CLUSTER_PERIPHERAL_ICACHE_PREFETCH_ENABLE
   };
 
 endpackage

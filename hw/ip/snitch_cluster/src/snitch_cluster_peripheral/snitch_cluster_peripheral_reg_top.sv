@@ -10,7 +10,7 @@
 module snitch_cluster_peripheral_reg_top #(
     parameter type reg_req_t = logic,
     parameter type reg_rsp_t = logic,
-    parameter int AW = 7
+    parameter int AW = 8
 ) (
   input clk_i,
   input rst_ni,
@@ -86,6 +86,18 @@ module snitch_cluster_peripheral_reg_top #(
   logic perf_counter_enable_0_issue_core_to_fpu_0_qs;
   logic perf_counter_enable_0_issue_core_to_fpu_0_wd;
   logic perf_counter_enable_0_issue_core_to_fpu_0_we;
+  logic perf_counter_enable_0_retired_instr_0_qs;
+  logic perf_counter_enable_0_retired_instr_0_wd;
+  logic perf_counter_enable_0_retired_instr_0_we;
+  logic perf_counter_enable_0_retired_load_0_qs;
+  logic perf_counter_enable_0_retired_load_0_wd;
+  logic perf_counter_enable_0_retired_load_0_we;
+  logic perf_counter_enable_0_retired_i_0_qs;
+  logic perf_counter_enable_0_retired_i_0_wd;
+  logic perf_counter_enable_0_retired_i_0_we;
+  logic perf_counter_enable_0_retired_acc_0_qs;
+  logic perf_counter_enable_0_retired_acc_0_wd;
+  logic perf_counter_enable_0_retired_acc_0_we;
   logic perf_counter_enable_0_dma_aw_stall_0_qs;
   logic perf_counter_enable_0_dma_aw_stall_0_wd;
   logic perf_counter_enable_0_dma_aw_stall_0_we;
@@ -167,6 +179,18 @@ module snitch_cluster_peripheral_reg_top #(
   logic perf_counter_enable_1_issue_core_to_fpu_1_qs;
   logic perf_counter_enable_1_issue_core_to_fpu_1_wd;
   logic perf_counter_enable_1_issue_core_to_fpu_1_we;
+  logic perf_counter_enable_1_retired_instr_1_qs;
+  logic perf_counter_enable_1_retired_instr_1_wd;
+  logic perf_counter_enable_1_retired_instr_1_we;
+  logic perf_counter_enable_1_retired_load_1_qs;
+  logic perf_counter_enable_1_retired_load_1_wd;
+  logic perf_counter_enable_1_retired_load_1_we;
+  logic perf_counter_enable_1_retired_i_1_qs;
+  logic perf_counter_enable_1_retired_i_1_wd;
+  logic perf_counter_enable_1_retired_i_1_we;
+  logic perf_counter_enable_1_retired_acc_1_qs;
+  logic perf_counter_enable_1_retired_acc_1_wd;
+  logic perf_counter_enable_1_retired_acc_1_we;
   logic perf_counter_enable_1_dma_aw_stall_1_qs;
   logic perf_counter_enable_1_dma_aw_stall_1_wd;
   logic perf_counter_enable_1_dma_aw_stall_1_we;
@@ -230,12 +254,588 @@ module snitch_cluster_peripheral_reg_top #(
   logic perf_counter_enable_1_icache_stall_1_qs;
   logic perf_counter_enable_1_icache_stall_1_wd;
   logic perf_counter_enable_1_icache_stall_1_we;
+  logic perf_counter_enable_2_cycle_2_qs;
+  logic perf_counter_enable_2_cycle_2_wd;
+  logic perf_counter_enable_2_cycle_2_we;
+  logic perf_counter_enable_2_tcdm_accessed_2_qs;
+  logic perf_counter_enable_2_tcdm_accessed_2_wd;
+  logic perf_counter_enable_2_tcdm_accessed_2_we;
+  logic perf_counter_enable_2_tcdm_congested_2_qs;
+  logic perf_counter_enable_2_tcdm_congested_2_wd;
+  logic perf_counter_enable_2_tcdm_congested_2_we;
+  logic perf_counter_enable_2_issue_fpu_2_qs;
+  logic perf_counter_enable_2_issue_fpu_2_wd;
+  logic perf_counter_enable_2_issue_fpu_2_we;
+  logic perf_counter_enable_2_issue_fpu_seq_2_qs;
+  logic perf_counter_enable_2_issue_fpu_seq_2_wd;
+  logic perf_counter_enable_2_issue_fpu_seq_2_we;
+  logic perf_counter_enable_2_issue_core_to_fpu_2_qs;
+  logic perf_counter_enable_2_issue_core_to_fpu_2_wd;
+  logic perf_counter_enable_2_issue_core_to_fpu_2_we;
+  logic perf_counter_enable_2_retired_instr_2_qs;
+  logic perf_counter_enable_2_retired_instr_2_wd;
+  logic perf_counter_enable_2_retired_instr_2_we;
+  logic perf_counter_enable_2_retired_load_2_qs;
+  logic perf_counter_enable_2_retired_load_2_wd;
+  logic perf_counter_enable_2_retired_load_2_we;
+  logic perf_counter_enable_2_retired_i_2_qs;
+  logic perf_counter_enable_2_retired_i_2_wd;
+  logic perf_counter_enable_2_retired_i_2_we;
+  logic perf_counter_enable_2_retired_acc_2_qs;
+  logic perf_counter_enable_2_retired_acc_2_wd;
+  logic perf_counter_enable_2_retired_acc_2_we;
+  logic perf_counter_enable_2_dma_aw_stall_2_qs;
+  logic perf_counter_enable_2_dma_aw_stall_2_wd;
+  logic perf_counter_enable_2_dma_aw_stall_2_we;
+  logic perf_counter_enable_2_dma_ar_stall_2_qs;
+  logic perf_counter_enable_2_dma_ar_stall_2_wd;
+  logic perf_counter_enable_2_dma_ar_stall_2_we;
+  logic perf_counter_enable_2_dma_r_stall_2_qs;
+  logic perf_counter_enable_2_dma_r_stall_2_wd;
+  logic perf_counter_enable_2_dma_r_stall_2_we;
+  logic perf_counter_enable_2_dma_w_stall_2_qs;
+  logic perf_counter_enable_2_dma_w_stall_2_wd;
+  logic perf_counter_enable_2_dma_w_stall_2_we;
+  logic perf_counter_enable_2_dma_buf_w_stall_2_qs;
+  logic perf_counter_enable_2_dma_buf_w_stall_2_wd;
+  logic perf_counter_enable_2_dma_buf_w_stall_2_we;
+  logic perf_counter_enable_2_dma_buf_r_stall_2_qs;
+  logic perf_counter_enable_2_dma_buf_r_stall_2_wd;
+  logic perf_counter_enable_2_dma_buf_r_stall_2_we;
+  logic perf_counter_enable_2_dma_aw_done_2_qs;
+  logic perf_counter_enable_2_dma_aw_done_2_wd;
+  logic perf_counter_enable_2_dma_aw_done_2_we;
+  logic perf_counter_enable_2_dma_aw_bw_2_qs;
+  logic perf_counter_enable_2_dma_aw_bw_2_wd;
+  logic perf_counter_enable_2_dma_aw_bw_2_we;
+  logic perf_counter_enable_2_dma_ar_done_2_qs;
+  logic perf_counter_enable_2_dma_ar_done_2_wd;
+  logic perf_counter_enable_2_dma_ar_done_2_we;
+  logic perf_counter_enable_2_dma_ar_bw_2_qs;
+  logic perf_counter_enable_2_dma_ar_bw_2_wd;
+  logic perf_counter_enable_2_dma_ar_bw_2_we;
+  logic perf_counter_enable_2_dma_r_done_2_qs;
+  logic perf_counter_enable_2_dma_r_done_2_wd;
+  logic perf_counter_enable_2_dma_r_done_2_we;
+  logic perf_counter_enable_2_dma_r_bw_2_qs;
+  logic perf_counter_enable_2_dma_r_bw_2_wd;
+  logic perf_counter_enable_2_dma_r_bw_2_we;
+  logic perf_counter_enable_2_dma_w_done_2_qs;
+  logic perf_counter_enable_2_dma_w_done_2_wd;
+  logic perf_counter_enable_2_dma_w_done_2_we;
+  logic perf_counter_enable_2_dma_w_bw_2_qs;
+  logic perf_counter_enable_2_dma_w_bw_2_wd;
+  logic perf_counter_enable_2_dma_w_bw_2_we;
+  logic perf_counter_enable_2_dma_b_done_2_qs;
+  logic perf_counter_enable_2_dma_b_done_2_wd;
+  logic perf_counter_enable_2_dma_b_done_2_we;
+  logic perf_counter_enable_2_dma_busy_2_qs;
+  logic perf_counter_enable_2_dma_busy_2_wd;
+  logic perf_counter_enable_2_dma_busy_2_we;
+  logic perf_counter_enable_2_icache_miss_2_qs;
+  logic perf_counter_enable_2_icache_miss_2_wd;
+  logic perf_counter_enable_2_icache_miss_2_we;
+  logic perf_counter_enable_2_icache_hit_2_qs;
+  logic perf_counter_enable_2_icache_hit_2_wd;
+  logic perf_counter_enable_2_icache_hit_2_we;
+  logic perf_counter_enable_2_icache_prefetch_2_qs;
+  logic perf_counter_enable_2_icache_prefetch_2_wd;
+  logic perf_counter_enable_2_icache_prefetch_2_we;
+  logic perf_counter_enable_2_icache_double_hit_2_qs;
+  logic perf_counter_enable_2_icache_double_hit_2_wd;
+  logic perf_counter_enable_2_icache_double_hit_2_we;
+  logic perf_counter_enable_2_icache_stall_2_qs;
+  logic perf_counter_enable_2_icache_stall_2_wd;
+  logic perf_counter_enable_2_icache_stall_2_we;
+  logic perf_counter_enable_3_cycle_3_qs;
+  logic perf_counter_enable_3_cycle_3_wd;
+  logic perf_counter_enable_3_cycle_3_we;
+  logic perf_counter_enable_3_tcdm_accessed_3_qs;
+  logic perf_counter_enable_3_tcdm_accessed_3_wd;
+  logic perf_counter_enable_3_tcdm_accessed_3_we;
+  logic perf_counter_enable_3_tcdm_congested_3_qs;
+  logic perf_counter_enable_3_tcdm_congested_3_wd;
+  logic perf_counter_enable_3_tcdm_congested_3_we;
+  logic perf_counter_enable_3_issue_fpu_3_qs;
+  logic perf_counter_enable_3_issue_fpu_3_wd;
+  logic perf_counter_enable_3_issue_fpu_3_we;
+  logic perf_counter_enable_3_issue_fpu_seq_3_qs;
+  logic perf_counter_enable_3_issue_fpu_seq_3_wd;
+  logic perf_counter_enable_3_issue_fpu_seq_3_we;
+  logic perf_counter_enable_3_issue_core_to_fpu_3_qs;
+  logic perf_counter_enable_3_issue_core_to_fpu_3_wd;
+  logic perf_counter_enable_3_issue_core_to_fpu_3_we;
+  logic perf_counter_enable_3_retired_instr_3_qs;
+  logic perf_counter_enable_3_retired_instr_3_wd;
+  logic perf_counter_enable_3_retired_instr_3_we;
+  logic perf_counter_enable_3_retired_load_3_qs;
+  logic perf_counter_enable_3_retired_load_3_wd;
+  logic perf_counter_enable_3_retired_load_3_we;
+  logic perf_counter_enable_3_retired_i_3_qs;
+  logic perf_counter_enable_3_retired_i_3_wd;
+  logic perf_counter_enable_3_retired_i_3_we;
+  logic perf_counter_enable_3_retired_acc_3_qs;
+  logic perf_counter_enable_3_retired_acc_3_wd;
+  logic perf_counter_enable_3_retired_acc_3_we;
+  logic perf_counter_enable_3_dma_aw_stall_3_qs;
+  logic perf_counter_enable_3_dma_aw_stall_3_wd;
+  logic perf_counter_enable_3_dma_aw_stall_3_we;
+  logic perf_counter_enable_3_dma_ar_stall_3_qs;
+  logic perf_counter_enable_3_dma_ar_stall_3_wd;
+  logic perf_counter_enable_3_dma_ar_stall_3_we;
+  logic perf_counter_enable_3_dma_r_stall_3_qs;
+  logic perf_counter_enable_3_dma_r_stall_3_wd;
+  logic perf_counter_enable_3_dma_r_stall_3_we;
+  logic perf_counter_enable_3_dma_w_stall_3_qs;
+  logic perf_counter_enable_3_dma_w_stall_3_wd;
+  logic perf_counter_enable_3_dma_w_stall_3_we;
+  logic perf_counter_enable_3_dma_buf_w_stall_3_qs;
+  logic perf_counter_enable_3_dma_buf_w_stall_3_wd;
+  logic perf_counter_enable_3_dma_buf_w_stall_3_we;
+  logic perf_counter_enable_3_dma_buf_r_stall_3_qs;
+  logic perf_counter_enable_3_dma_buf_r_stall_3_wd;
+  logic perf_counter_enable_3_dma_buf_r_stall_3_we;
+  logic perf_counter_enable_3_dma_aw_done_3_qs;
+  logic perf_counter_enable_3_dma_aw_done_3_wd;
+  logic perf_counter_enable_3_dma_aw_done_3_we;
+  logic perf_counter_enable_3_dma_aw_bw_3_qs;
+  logic perf_counter_enable_3_dma_aw_bw_3_wd;
+  logic perf_counter_enable_3_dma_aw_bw_3_we;
+  logic perf_counter_enable_3_dma_ar_done_3_qs;
+  logic perf_counter_enable_3_dma_ar_done_3_wd;
+  logic perf_counter_enable_3_dma_ar_done_3_we;
+  logic perf_counter_enable_3_dma_ar_bw_3_qs;
+  logic perf_counter_enable_3_dma_ar_bw_3_wd;
+  logic perf_counter_enable_3_dma_ar_bw_3_we;
+  logic perf_counter_enable_3_dma_r_done_3_qs;
+  logic perf_counter_enable_3_dma_r_done_3_wd;
+  logic perf_counter_enable_3_dma_r_done_3_we;
+  logic perf_counter_enable_3_dma_r_bw_3_qs;
+  logic perf_counter_enable_3_dma_r_bw_3_wd;
+  logic perf_counter_enable_3_dma_r_bw_3_we;
+  logic perf_counter_enable_3_dma_w_done_3_qs;
+  logic perf_counter_enable_3_dma_w_done_3_wd;
+  logic perf_counter_enable_3_dma_w_done_3_we;
+  logic perf_counter_enable_3_dma_w_bw_3_qs;
+  logic perf_counter_enable_3_dma_w_bw_3_wd;
+  logic perf_counter_enable_3_dma_w_bw_3_we;
+  logic perf_counter_enable_3_dma_b_done_3_qs;
+  logic perf_counter_enable_3_dma_b_done_3_wd;
+  logic perf_counter_enable_3_dma_b_done_3_we;
+  logic perf_counter_enable_3_dma_busy_3_qs;
+  logic perf_counter_enable_3_dma_busy_3_wd;
+  logic perf_counter_enable_3_dma_busy_3_we;
+  logic perf_counter_enable_3_icache_miss_3_qs;
+  logic perf_counter_enable_3_icache_miss_3_wd;
+  logic perf_counter_enable_3_icache_miss_3_we;
+  logic perf_counter_enable_3_icache_hit_3_qs;
+  logic perf_counter_enable_3_icache_hit_3_wd;
+  logic perf_counter_enable_3_icache_hit_3_we;
+  logic perf_counter_enable_3_icache_prefetch_3_qs;
+  logic perf_counter_enable_3_icache_prefetch_3_wd;
+  logic perf_counter_enable_3_icache_prefetch_3_we;
+  logic perf_counter_enable_3_icache_double_hit_3_qs;
+  logic perf_counter_enable_3_icache_double_hit_3_wd;
+  logic perf_counter_enable_3_icache_double_hit_3_we;
+  logic perf_counter_enable_3_icache_stall_3_qs;
+  logic perf_counter_enable_3_icache_stall_3_wd;
+  logic perf_counter_enable_3_icache_stall_3_we;
+  logic perf_counter_enable_4_cycle_4_qs;
+  logic perf_counter_enable_4_cycle_4_wd;
+  logic perf_counter_enable_4_cycle_4_we;
+  logic perf_counter_enable_4_tcdm_accessed_4_qs;
+  logic perf_counter_enable_4_tcdm_accessed_4_wd;
+  logic perf_counter_enable_4_tcdm_accessed_4_we;
+  logic perf_counter_enable_4_tcdm_congested_4_qs;
+  logic perf_counter_enable_4_tcdm_congested_4_wd;
+  logic perf_counter_enable_4_tcdm_congested_4_we;
+  logic perf_counter_enable_4_issue_fpu_4_qs;
+  logic perf_counter_enable_4_issue_fpu_4_wd;
+  logic perf_counter_enable_4_issue_fpu_4_we;
+  logic perf_counter_enable_4_issue_fpu_seq_4_qs;
+  logic perf_counter_enable_4_issue_fpu_seq_4_wd;
+  logic perf_counter_enable_4_issue_fpu_seq_4_we;
+  logic perf_counter_enable_4_issue_core_to_fpu_4_qs;
+  logic perf_counter_enable_4_issue_core_to_fpu_4_wd;
+  logic perf_counter_enable_4_issue_core_to_fpu_4_we;
+  logic perf_counter_enable_4_retired_instr_4_qs;
+  logic perf_counter_enable_4_retired_instr_4_wd;
+  logic perf_counter_enable_4_retired_instr_4_we;
+  logic perf_counter_enable_4_retired_load_4_qs;
+  logic perf_counter_enable_4_retired_load_4_wd;
+  logic perf_counter_enable_4_retired_load_4_we;
+  logic perf_counter_enable_4_retired_i_4_qs;
+  logic perf_counter_enable_4_retired_i_4_wd;
+  logic perf_counter_enable_4_retired_i_4_we;
+  logic perf_counter_enable_4_retired_acc_4_qs;
+  logic perf_counter_enable_4_retired_acc_4_wd;
+  logic perf_counter_enable_4_retired_acc_4_we;
+  logic perf_counter_enable_4_dma_aw_stall_4_qs;
+  logic perf_counter_enable_4_dma_aw_stall_4_wd;
+  logic perf_counter_enable_4_dma_aw_stall_4_we;
+  logic perf_counter_enable_4_dma_ar_stall_4_qs;
+  logic perf_counter_enable_4_dma_ar_stall_4_wd;
+  logic perf_counter_enable_4_dma_ar_stall_4_we;
+  logic perf_counter_enable_4_dma_r_stall_4_qs;
+  logic perf_counter_enable_4_dma_r_stall_4_wd;
+  logic perf_counter_enable_4_dma_r_stall_4_we;
+  logic perf_counter_enable_4_dma_w_stall_4_qs;
+  logic perf_counter_enable_4_dma_w_stall_4_wd;
+  logic perf_counter_enable_4_dma_w_stall_4_we;
+  logic perf_counter_enable_4_dma_buf_w_stall_4_qs;
+  logic perf_counter_enable_4_dma_buf_w_stall_4_wd;
+  logic perf_counter_enable_4_dma_buf_w_stall_4_we;
+  logic perf_counter_enable_4_dma_buf_r_stall_4_qs;
+  logic perf_counter_enable_4_dma_buf_r_stall_4_wd;
+  logic perf_counter_enable_4_dma_buf_r_stall_4_we;
+  logic perf_counter_enable_4_dma_aw_done_4_qs;
+  logic perf_counter_enable_4_dma_aw_done_4_wd;
+  logic perf_counter_enable_4_dma_aw_done_4_we;
+  logic perf_counter_enable_4_dma_aw_bw_4_qs;
+  logic perf_counter_enable_4_dma_aw_bw_4_wd;
+  logic perf_counter_enable_4_dma_aw_bw_4_we;
+  logic perf_counter_enable_4_dma_ar_done_4_qs;
+  logic perf_counter_enable_4_dma_ar_done_4_wd;
+  logic perf_counter_enable_4_dma_ar_done_4_we;
+  logic perf_counter_enable_4_dma_ar_bw_4_qs;
+  logic perf_counter_enable_4_dma_ar_bw_4_wd;
+  logic perf_counter_enable_4_dma_ar_bw_4_we;
+  logic perf_counter_enable_4_dma_r_done_4_qs;
+  logic perf_counter_enable_4_dma_r_done_4_wd;
+  logic perf_counter_enable_4_dma_r_done_4_we;
+  logic perf_counter_enable_4_dma_r_bw_4_qs;
+  logic perf_counter_enable_4_dma_r_bw_4_wd;
+  logic perf_counter_enable_4_dma_r_bw_4_we;
+  logic perf_counter_enable_4_dma_w_done_4_qs;
+  logic perf_counter_enable_4_dma_w_done_4_wd;
+  logic perf_counter_enable_4_dma_w_done_4_we;
+  logic perf_counter_enable_4_dma_w_bw_4_qs;
+  logic perf_counter_enable_4_dma_w_bw_4_wd;
+  logic perf_counter_enable_4_dma_w_bw_4_we;
+  logic perf_counter_enable_4_dma_b_done_4_qs;
+  logic perf_counter_enable_4_dma_b_done_4_wd;
+  logic perf_counter_enable_4_dma_b_done_4_we;
+  logic perf_counter_enable_4_dma_busy_4_qs;
+  logic perf_counter_enable_4_dma_busy_4_wd;
+  logic perf_counter_enable_4_dma_busy_4_we;
+  logic perf_counter_enable_4_icache_miss_4_qs;
+  logic perf_counter_enable_4_icache_miss_4_wd;
+  logic perf_counter_enable_4_icache_miss_4_we;
+  logic perf_counter_enable_4_icache_hit_4_qs;
+  logic perf_counter_enable_4_icache_hit_4_wd;
+  logic perf_counter_enable_4_icache_hit_4_we;
+  logic perf_counter_enable_4_icache_prefetch_4_qs;
+  logic perf_counter_enable_4_icache_prefetch_4_wd;
+  logic perf_counter_enable_4_icache_prefetch_4_we;
+  logic perf_counter_enable_4_icache_double_hit_4_qs;
+  logic perf_counter_enable_4_icache_double_hit_4_wd;
+  logic perf_counter_enable_4_icache_double_hit_4_we;
+  logic perf_counter_enable_4_icache_stall_4_qs;
+  logic perf_counter_enable_4_icache_stall_4_wd;
+  logic perf_counter_enable_4_icache_stall_4_we;
+  logic perf_counter_enable_5_cycle_5_qs;
+  logic perf_counter_enable_5_cycle_5_wd;
+  logic perf_counter_enable_5_cycle_5_we;
+  logic perf_counter_enable_5_tcdm_accessed_5_qs;
+  logic perf_counter_enable_5_tcdm_accessed_5_wd;
+  logic perf_counter_enable_5_tcdm_accessed_5_we;
+  logic perf_counter_enable_5_tcdm_congested_5_qs;
+  logic perf_counter_enable_5_tcdm_congested_5_wd;
+  logic perf_counter_enable_5_tcdm_congested_5_we;
+  logic perf_counter_enable_5_issue_fpu_5_qs;
+  logic perf_counter_enable_5_issue_fpu_5_wd;
+  logic perf_counter_enable_5_issue_fpu_5_we;
+  logic perf_counter_enable_5_issue_fpu_seq_5_qs;
+  logic perf_counter_enable_5_issue_fpu_seq_5_wd;
+  logic perf_counter_enable_5_issue_fpu_seq_5_we;
+  logic perf_counter_enable_5_issue_core_to_fpu_5_qs;
+  logic perf_counter_enable_5_issue_core_to_fpu_5_wd;
+  logic perf_counter_enable_5_issue_core_to_fpu_5_we;
+  logic perf_counter_enable_5_retired_instr_5_qs;
+  logic perf_counter_enable_5_retired_instr_5_wd;
+  logic perf_counter_enable_5_retired_instr_5_we;
+  logic perf_counter_enable_5_retired_load_5_qs;
+  logic perf_counter_enable_5_retired_load_5_wd;
+  logic perf_counter_enable_5_retired_load_5_we;
+  logic perf_counter_enable_5_retired_i_5_qs;
+  logic perf_counter_enable_5_retired_i_5_wd;
+  logic perf_counter_enable_5_retired_i_5_we;
+  logic perf_counter_enable_5_retired_acc_5_qs;
+  logic perf_counter_enable_5_retired_acc_5_wd;
+  logic perf_counter_enable_5_retired_acc_5_we;
+  logic perf_counter_enable_5_dma_aw_stall_5_qs;
+  logic perf_counter_enable_5_dma_aw_stall_5_wd;
+  logic perf_counter_enable_5_dma_aw_stall_5_we;
+  logic perf_counter_enable_5_dma_ar_stall_5_qs;
+  logic perf_counter_enable_5_dma_ar_stall_5_wd;
+  logic perf_counter_enable_5_dma_ar_stall_5_we;
+  logic perf_counter_enable_5_dma_r_stall_5_qs;
+  logic perf_counter_enable_5_dma_r_stall_5_wd;
+  logic perf_counter_enable_5_dma_r_stall_5_we;
+  logic perf_counter_enable_5_dma_w_stall_5_qs;
+  logic perf_counter_enable_5_dma_w_stall_5_wd;
+  logic perf_counter_enable_5_dma_w_stall_5_we;
+  logic perf_counter_enable_5_dma_buf_w_stall_5_qs;
+  logic perf_counter_enable_5_dma_buf_w_stall_5_wd;
+  logic perf_counter_enable_5_dma_buf_w_stall_5_we;
+  logic perf_counter_enable_5_dma_buf_r_stall_5_qs;
+  logic perf_counter_enable_5_dma_buf_r_stall_5_wd;
+  logic perf_counter_enable_5_dma_buf_r_stall_5_we;
+  logic perf_counter_enable_5_dma_aw_done_5_qs;
+  logic perf_counter_enable_5_dma_aw_done_5_wd;
+  logic perf_counter_enable_5_dma_aw_done_5_we;
+  logic perf_counter_enable_5_dma_aw_bw_5_qs;
+  logic perf_counter_enable_5_dma_aw_bw_5_wd;
+  logic perf_counter_enable_5_dma_aw_bw_5_we;
+  logic perf_counter_enable_5_dma_ar_done_5_qs;
+  logic perf_counter_enable_5_dma_ar_done_5_wd;
+  logic perf_counter_enable_5_dma_ar_done_5_we;
+  logic perf_counter_enable_5_dma_ar_bw_5_qs;
+  logic perf_counter_enable_5_dma_ar_bw_5_wd;
+  logic perf_counter_enable_5_dma_ar_bw_5_we;
+  logic perf_counter_enable_5_dma_r_done_5_qs;
+  logic perf_counter_enable_5_dma_r_done_5_wd;
+  logic perf_counter_enable_5_dma_r_done_5_we;
+  logic perf_counter_enable_5_dma_r_bw_5_qs;
+  logic perf_counter_enable_5_dma_r_bw_5_wd;
+  logic perf_counter_enable_5_dma_r_bw_5_we;
+  logic perf_counter_enable_5_dma_w_done_5_qs;
+  logic perf_counter_enable_5_dma_w_done_5_wd;
+  logic perf_counter_enable_5_dma_w_done_5_we;
+  logic perf_counter_enable_5_dma_w_bw_5_qs;
+  logic perf_counter_enable_5_dma_w_bw_5_wd;
+  logic perf_counter_enable_5_dma_w_bw_5_we;
+  logic perf_counter_enable_5_dma_b_done_5_qs;
+  logic perf_counter_enable_5_dma_b_done_5_wd;
+  logic perf_counter_enable_5_dma_b_done_5_we;
+  logic perf_counter_enable_5_dma_busy_5_qs;
+  logic perf_counter_enable_5_dma_busy_5_wd;
+  logic perf_counter_enable_5_dma_busy_5_we;
+  logic perf_counter_enable_5_icache_miss_5_qs;
+  logic perf_counter_enable_5_icache_miss_5_wd;
+  logic perf_counter_enable_5_icache_miss_5_we;
+  logic perf_counter_enable_5_icache_hit_5_qs;
+  logic perf_counter_enable_5_icache_hit_5_wd;
+  logic perf_counter_enable_5_icache_hit_5_we;
+  logic perf_counter_enable_5_icache_prefetch_5_qs;
+  logic perf_counter_enable_5_icache_prefetch_5_wd;
+  logic perf_counter_enable_5_icache_prefetch_5_we;
+  logic perf_counter_enable_5_icache_double_hit_5_qs;
+  logic perf_counter_enable_5_icache_double_hit_5_wd;
+  logic perf_counter_enable_5_icache_double_hit_5_we;
+  logic perf_counter_enable_5_icache_stall_5_qs;
+  logic perf_counter_enable_5_icache_stall_5_wd;
+  logic perf_counter_enable_5_icache_stall_5_we;
+  logic perf_counter_enable_6_cycle_6_qs;
+  logic perf_counter_enable_6_cycle_6_wd;
+  logic perf_counter_enable_6_cycle_6_we;
+  logic perf_counter_enable_6_tcdm_accessed_6_qs;
+  logic perf_counter_enable_6_tcdm_accessed_6_wd;
+  logic perf_counter_enable_6_tcdm_accessed_6_we;
+  logic perf_counter_enable_6_tcdm_congested_6_qs;
+  logic perf_counter_enable_6_tcdm_congested_6_wd;
+  logic perf_counter_enable_6_tcdm_congested_6_we;
+  logic perf_counter_enable_6_issue_fpu_6_qs;
+  logic perf_counter_enable_6_issue_fpu_6_wd;
+  logic perf_counter_enable_6_issue_fpu_6_we;
+  logic perf_counter_enable_6_issue_fpu_seq_6_qs;
+  logic perf_counter_enable_6_issue_fpu_seq_6_wd;
+  logic perf_counter_enable_6_issue_fpu_seq_6_we;
+  logic perf_counter_enable_6_issue_core_to_fpu_6_qs;
+  logic perf_counter_enable_6_issue_core_to_fpu_6_wd;
+  logic perf_counter_enable_6_issue_core_to_fpu_6_we;
+  logic perf_counter_enable_6_retired_instr_6_qs;
+  logic perf_counter_enable_6_retired_instr_6_wd;
+  logic perf_counter_enable_6_retired_instr_6_we;
+  logic perf_counter_enable_6_retired_load_6_qs;
+  logic perf_counter_enable_6_retired_load_6_wd;
+  logic perf_counter_enable_6_retired_load_6_we;
+  logic perf_counter_enable_6_retired_i_6_qs;
+  logic perf_counter_enable_6_retired_i_6_wd;
+  logic perf_counter_enable_6_retired_i_6_we;
+  logic perf_counter_enable_6_retired_acc_6_qs;
+  logic perf_counter_enable_6_retired_acc_6_wd;
+  logic perf_counter_enable_6_retired_acc_6_we;
+  logic perf_counter_enable_6_dma_aw_stall_6_qs;
+  logic perf_counter_enable_6_dma_aw_stall_6_wd;
+  logic perf_counter_enable_6_dma_aw_stall_6_we;
+  logic perf_counter_enable_6_dma_ar_stall_6_qs;
+  logic perf_counter_enable_6_dma_ar_stall_6_wd;
+  logic perf_counter_enable_6_dma_ar_stall_6_we;
+  logic perf_counter_enable_6_dma_r_stall_6_qs;
+  logic perf_counter_enable_6_dma_r_stall_6_wd;
+  logic perf_counter_enable_6_dma_r_stall_6_we;
+  logic perf_counter_enable_6_dma_w_stall_6_qs;
+  logic perf_counter_enable_6_dma_w_stall_6_wd;
+  logic perf_counter_enable_6_dma_w_stall_6_we;
+  logic perf_counter_enable_6_dma_buf_w_stall_6_qs;
+  logic perf_counter_enable_6_dma_buf_w_stall_6_wd;
+  logic perf_counter_enable_6_dma_buf_w_stall_6_we;
+  logic perf_counter_enable_6_dma_buf_r_stall_6_qs;
+  logic perf_counter_enable_6_dma_buf_r_stall_6_wd;
+  logic perf_counter_enable_6_dma_buf_r_stall_6_we;
+  logic perf_counter_enable_6_dma_aw_done_6_qs;
+  logic perf_counter_enable_6_dma_aw_done_6_wd;
+  logic perf_counter_enable_6_dma_aw_done_6_we;
+  logic perf_counter_enable_6_dma_aw_bw_6_qs;
+  logic perf_counter_enable_6_dma_aw_bw_6_wd;
+  logic perf_counter_enable_6_dma_aw_bw_6_we;
+  logic perf_counter_enable_6_dma_ar_done_6_qs;
+  logic perf_counter_enable_6_dma_ar_done_6_wd;
+  logic perf_counter_enable_6_dma_ar_done_6_we;
+  logic perf_counter_enable_6_dma_ar_bw_6_qs;
+  logic perf_counter_enable_6_dma_ar_bw_6_wd;
+  logic perf_counter_enable_6_dma_ar_bw_6_we;
+  logic perf_counter_enable_6_dma_r_done_6_qs;
+  logic perf_counter_enable_6_dma_r_done_6_wd;
+  logic perf_counter_enable_6_dma_r_done_6_we;
+  logic perf_counter_enable_6_dma_r_bw_6_qs;
+  logic perf_counter_enable_6_dma_r_bw_6_wd;
+  logic perf_counter_enable_6_dma_r_bw_6_we;
+  logic perf_counter_enable_6_dma_w_done_6_qs;
+  logic perf_counter_enable_6_dma_w_done_6_wd;
+  logic perf_counter_enable_6_dma_w_done_6_we;
+  logic perf_counter_enable_6_dma_w_bw_6_qs;
+  logic perf_counter_enable_6_dma_w_bw_6_wd;
+  logic perf_counter_enable_6_dma_w_bw_6_we;
+  logic perf_counter_enable_6_dma_b_done_6_qs;
+  logic perf_counter_enable_6_dma_b_done_6_wd;
+  logic perf_counter_enable_6_dma_b_done_6_we;
+  logic perf_counter_enable_6_dma_busy_6_qs;
+  logic perf_counter_enable_6_dma_busy_6_wd;
+  logic perf_counter_enable_6_dma_busy_6_we;
+  logic perf_counter_enable_6_icache_miss_6_qs;
+  logic perf_counter_enable_6_icache_miss_6_wd;
+  logic perf_counter_enable_6_icache_miss_6_we;
+  logic perf_counter_enable_6_icache_hit_6_qs;
+  logic perf_counter_enable_6_icache_hit_6_wd;
+  logic perf_counter_enable_6_icache_hit_6_we;
+  logic perf_counter_enable_6_icache_prefetch_6_qs;
+  logic perf_counter_enable_6_icache_prefetch_6_wd;
+  logic perf_counter_enable_6_icache_prefetch_6_we;
+  logic perf_counter_enable_6_icache_double_hit_6_qs;
+  logic perf_counter_enable_6_icache_double_hit_6_wd;
+  logic perf_counter_enable_6_icache_double_hit_6_we;
+  logic perf_counter_enable_6_icache_stall_6_qs;
+  logic perf_counter_enable_6_icache_stall_6_wd;
+  logic perf_counter_enable_6_icache_stall_6_we;
+  logic perf_counter_enable_7_cycle_7_qs;
+  logic perf_counter_enable_7_cycle_7_wd;
+  logic perf_counter_enable_7_cycle_7_we;
+  logic perf_counter_enable_7_tcdm_accessed_7_qs;
+  logic perf_counter_enable_7_tcdm_accessed_7_wd;
+  logic perf_counter_enable_7_tcdm_accessed_7_we;
+  logic perf_counter_enable_7_tcdm_congested_7_qs;
+  logic perf_counter_enable_7_tcdm_congested_7_wd;
+  logic perf_counter_enable_7_tcdm_congested_7_we;
+  logic perf_counter_enable_7_issue_fpu_7_qs;
+  logic perf_counter_enable_7_issue_fpu_7_wd;
+  logic perf_counter_enable_7_issue_fpu_7_we;
+  logic perf_counter_enable_7_issue_fpu_seq_7_qs;
+  logic perf_counter_enable_7_issue_fpu_seq_7_wd;
+  logic perf_counter_enable_7_issue_fpu_seq_7_we;
+  logic perf_counter_enable_7_issue_core_to_fpu_7_qs;
+  logic perf_counter_enable_7_issue_core_to_fpu_7_wd;
+  logic perf_counter_enable_7_issue_core_to_fpu_7_we;
+  logic perf_counter_enable_7_retired_instr_7_qs;
+  logic perf_counter_enable_7_retired_instr_7_wd;
+  logic perf_counter_enable_7_retired_instr_7_we;
+  logic perf_counter_enable_7_retired_load_7_qs;
+  logic perf_counter_enable_7_retired_load_7_wd;
+  logic perf_counter_enable_7_retired_load_7_we;
+  logic perf_counter_enable_7_retired_i_7_qs;
+  logic perf_counter_enable_7_retired_i_7_wd;
+  logic perf_counter_enable_7_retired_i_7_we;
+  logic perf_counter_enable_7_retired_acc_7_qs;
+  logic perf_counter_enable_7_retired_acc_7_wd;
+  logic perf_counter_enable_7_retired_acc_7_we;
+  logic perf_counter_enable_7_dma_aw_stall_7_qs;
+  logic perf_counter_enable_7_dma_aw_stall_7_wd;
+  logic perf_counter_enable_7_dma_aw_stall_7_we;
+  logic perf_counter_enable_7_dma_ar_stall_7_qs;
+  logic perf_counter_enable_7_dma_ar_stall_7_wd;
+  logic perf_counter_enable_7_dma_ar_stall_7_we;
+  logic perf_counter_enable_7_dma_r_stall_7_qs;
+  logic perf_counter_enable_7_dma_r_stall_7_wd;
+  logic perf_counter_enable_7_dma_r_stall_7_we;
+  logic perf_counter_enable_7_dma_w_stall_7_qs;
+  logic perf_counter_enable_7_dma_w_stall_7_wd;
+  logic perf_counter_enable_7_dma_w_stall_7_we;
+  logic perf_counter_enable_7_dma_buf_w_stall_7_qs;
+  logic perf_counter_enable_7_dma_buf_w_stall_7_wd;
+  logic perf_counter_enable_7_dma_buf_w_stall_7_we;
+  logic perf_counter_enable_7_dma_buf_r_stall_7_qs;
+  logic perf_counter_enable_7_dma_buf_r_stall_7_wd;
+  logic perf_counter_enable_7_dma_buf_r_stall_7_we;
+  logic perf_counter_enable_7_dma_aw_done_7_qs;
+  logic perf_counter_enable_7_dma_aw_done_7_wd;
+  logic perf_counter_enable_7_dma_aw_done_7_we;
+  logic perf_counter_enable_7_dma_aw_bw_7_qs;
+  logic perf_counter_enable_7_dma_aw_bw_7_wd;
+  logic perf_counter_enable_7_dma_aw_bw_7_we;
+  logic perf_counter_enable_7_dma_ar_done_7_qs;
+  logic perf_counter_enable_7_dma_ar_done_7_wd;
+  logic perf_counter_enable_7_dma_ar_done_7_we;
+  logic perf_counter_enable_7_dma_ar_bw_7_qs;
+  logic perf_counter_enable_7_dma_ar_bw_7_wd;
+  logic perf_counter_enable_7_dma_ar_bw_7_we;
+  logic perf_counter_enable_7_dma_r_done_7_qs;
+  logic perf_counter_enable_7_dma_r_done_7_wd;
+  logic perf_counter_enable_7_dma_r_done_7_we;
+  logic perf_counter_enable_7_dma_r_bw_7_qs;
+  logic perf_counter_enable_7_dma_r_bw_7_wd;
+  logic perf_counter_enable_7_dma_r_bw_7_we;
+  logic perf_counter_enable_7_dma_w_done_7_qs;
+  logic perf_counter_enable_7_dma_w_done_7_wd;
+  logic perf_counter_enable_7_dma_w_done_7_we;
+  logic perf_counter_enable_7_dma_w_bw_7_qs;
+  logic perf_counter_enable_7_dma_w_bw_7_wd;
+  logic perf_counter_enable_7_dma_w_bw_7_we;
+  logic perf_counter_enable_7_dma_b_done_7_qs;
+  logic perf_counter_enable_7_dma_b_done_7_wd;
+  logic perf_counter_enable_7_dma_b_done_7_we;
+  logic perf_counter_enable_7_dma_busy_7_qs;
+  logic perf_counter_enable_7_dma_busy_7_wd;
+  logic perf_counter_enable_7_dma_busy_7_we;
+  logic perf_counter_enable_7_icache_miss_7_qs;
+  logic perf_counter_enable_7_icache_miss_7_wd;
+  logic perf_counter_enable_7_icache_miss_7_we;
+  logic perf_counter_enable_7_icache_hit_7_qs;
+  logic perf_counter_enable_7_icache_hit_7_wd;
+  logic perf_counter_enable_7_icache_hit_7_we;
+  logic perf_counter_enable_7_icache_prefetch_7_qs;
+  logic perf_counter_enable_7_icache_prefetch_7_wd;
+  logic perf_counter_enable_7_icache_prefetch_7_we;
+  logic perf_counter_enable_7_icache_double_hit_7_qs;
+  logic perf_counter_enable_7_icache_double_hit_7_wd;
+  logic perf_counter_enable_7_icache_double_hit_7_we;
+  logic perf_counter_enable_7_icache_stall_7_qs;
+  logic perf_counter_enable_7_icache_stall_7_wd;
+  logic perf_counter_enable_7_icache_stall_7_we;
   logic [9:0] hart_select_0_qs;
   logic [9:0] hart_select_0_wd;
   logic hart_select_0_we;
   logic [9:0] hart_select_1_qs;
   logic [9:0] hart_select_1_wd;
   logic hart_select_1_we;
+  logic [9:0] hart_select_2_qs;
+  logic [9:0] hart_select_2_wd;
+  logic hart_select_2_we;
+  logic [9:0] hart_select_3_qs;
+  logic [9:0] hart_select_3_wd;
+  logic hart_select_3_we;
+  logic [9:0] hart_select_4_qs;
+  logic [9:0] hart_select_4_wd;
+  logic hart_select_4_we;
+  logic [9:0] hart_select_5_qs;
+  logic [9:0] hart_select_5_wd;
+  logic hart_select_5_we;
+  logic [9:0] hart_select_6_qs;
+  logic [9:0] hart_select_6_wd;
+  logic hart_select_6_we;
+  logic [9:0] hart_select_7_qs;
+  logic [9:0] hart_select_7_wd;
+  logic hart_select_7_we;
   logic [47:0] perf_counter_0_qs;
   logic [47:0] perf_counter_0_wd;
   logic perf_counter_0_we;
@@ -244,6 +844,30 @@ module snitch_cluster_peripheral_reg_top #(
   logic [47:0] perf_counter_1_wd;
   logic perf_counter_1_we;
   logic perf_counter_1_re;
+  logic [47:0] perf_counter_2_qs;
+  logic [47:0] perf_counter_2_wd;
+  logic perf_counter_2_we;
+  logic perf_counter_2_re;
+  logic [47:0] perf_counter_3_qs;
+  logic [47:0] perf_counter_3_wd;
+  logic perf_counter_3_we;
+  logic perf_counter_3_re;
+  logic [47:0] perf_counter_4_qs;
+  logic [47:0] perf_counter_4_wd;
+  logic perf_counter_4_we;
+  logic perf_counter_4_re;
+  logic [47:0] perf_counter_5_qs;
+  logic [47:0] perf_counter_5_wd;
+  logic perf_counter_5_we;
+  logic perf_counter_5_re;
+  logic [47:0] perf_counter_6_qs;
+  logic [47:0] perf_counter_6_wd;
+  logic perf_counter_6_we;
+  logic perf_counter_6_re;
+  logic [47:0] perf_counter_7_qs;
+  logic [47:0] perf_counter_7_wd;
+  logic perf_counter_7_we;
+  logic perf_counter_7_re;
   logic [31:0] cl_clint_set_wd;
   logic cl_clint_set_we;
   logic [31:0] cl_clint_clear_wd;
@@ -414,7 +1038,111 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_aw_stall_0]: 6:6
+  // F[retired_instr_0]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_0_retired_instr_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_0_retired_instr_0_we),
+    .wd     (perf_counter_enable_0_retired_instr_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[0].retired_instr.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_0_retired_instr_0_qs)
+  );
+
+
+  // F[retired_load_0]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_0_retired_load_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_0_retired_load_0_we),
+    .wd     (perf_counter_enable_0_retired_load_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[0].retired_load.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_0_retired_load_0_qs)
+  );
+
+
+  // F[retired_i_0]: 8:8
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_0_retired_i_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_0_retired_i_0_we),
+    .wd     (perf_counter_enable_0_retired_i_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[0].retired_i.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_0_retired_i_0_qs)
+  );
+
+
+  // F[retired_acc_0]: 9:9
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_0_retired_acc_0 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_0_retired_acc_0_we),
+    .wd     (perf_counter_enable_0_retired_acc_0_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[0].retired_acc.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_0_retired_acc_0_qs)
+  );
+
+
+  // F[dma_aw_stall_0]: 10:10
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -440,7 +1168,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_ar_stall_0]: 7:7
+  // F[dma_ar_stall_0]: 11:11
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -466,7 +1194,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_r_stall_0]: 8:8
+  // F[dma_r_stall_0]: 12:12
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -492,7 +1220,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_w_stall_0]: 9:9
+  // F[dma_w_stall_0]: 13:13
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -518,7 +1246,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_buf_w_stall_0]: 10:10
+  // F[dma_buf_w_stall_0]: 14:14
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -544,7 +1272,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_buf_r_stall_0]: 11:11
+  // F[dma_buf_r_stall_0]: 15:15
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -570,7 +1298,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_aw_done_0]: 12:12
+  // F[dma_aw_done_0]: 16:16
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -596,7 +1324,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_aw_bw_0]: 13:13
+  // F[dma_aw_bw_0]: 17:17
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -622,7 +1350,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_ar_done_0]: 14:14
+  // F[dma_ar_done_0]: 18:18
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -648,7 +1376,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_ar_bw_0]: 15:15
+  // F[dma_ar_bw_0]: 19:19
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -674,7 +1402,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_r_done_0]: 16:16
+  // F[dma_r_done_0]: 20:20
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -700,7 +1428,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_r_bw_0]: 17:17
+  // F[dma_r_bw_0]: 21:21
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -726,7 +1454,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_w_done_0]: 18:18
+  // F[dma_w_done_0]: 22:22
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -752,7 +1480,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_w_bw_0]: 19:19
+  // F[dma_w_bw_0]: 23:23
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -778,7 +1506,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_b_done_0]: 20:20
+  // F[dma_b_done_0]: 24:24
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -804,7 +1532,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_busy_0]: 21:21
+  // F[dma_busy_0]: 25:25
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -830,7 +1558,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_miss_0]: 22:22
+  // F[icache_miss_0]: 26:26
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -856,7 +1584,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_hit_0]: 23:23
+  // F[icache_hit_0]: 27:27
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -882,7 +1610,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_prefetch_0]: 24:24
+  // F[icache_prefetch_0]: 28:28
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -908,7 +1636,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_double_hit_0]: 25:25
+  // F[icache_double_hit_0]: 29:29
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -934,7 +1662,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_stall_0]: 26:26
+  // F[icache_stall_0]: 30:30
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1119,7 +1847,111 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_aw_stall_1]: 6:6
+  // F[retired_instr_1]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_1_retired_instr_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_1_retired_instr_1_we),
+    .wd     (perf_counter_enable_1_retired_instr_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[1].retired_instr.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_1_retired_instr_1_qs)
+  );
+
+
+  // F[retired_load_1]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_1_retired_load_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_1_retired_load_1_we),
+    .wd     (perf_counter_enable_1_retired_load_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[1].retired_load.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_1_retired_load_1_qs)
+  );
+
+
+  // F[retired_i_1]: 8:8
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_1_retired_i_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_1_retired_i_1_we),
+    .wd     (perf_counter_enable_1_retired_i_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[1].retired_i.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_1_retired_i_1_qs)
+  );
+
+
+  // F[retired_acc_1]: 9:9
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_1_retired_acc_1 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_1_retired_acc_1_we),
+    .wd     (perf_counter_enable_1_retired_acc_1_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[1].retired_acc.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_1_retired_acc_1_qs)
+  );
+
+
+  // F[dma_aw_stall_1]: 10:10
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1145,7 +1977,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_ar_stall_1]: 7:7
+  // F[dma_ar_stall_1]: 11:11
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1171,7 +2003,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_r_stall_1]: 8:8
+  // F[dma_r_stall_1]: 12:12
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1197,7 +2029,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_w_stall_1]: 9:9
+  // F[dma_w_stall_1]: 13:13
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1223,7 +2055,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_buf_w_stall_1]: 10:10
+  // F[dma_buf_w_stall_1]: 14:14
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1249,7 +2081,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_buf_r_stall_1]: 11:11
+  // F[dma_buf_r_stall_1]: 15:15
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1275,7 +2107,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_aw_done_1]: 12:12
+  // F[dma_aw_done_1]: 16:16
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1301,7 +2133,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_aw_bw_1]: 13:13
+  // F[dma_aw_bw_1]: 17:17
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1327,7 +2159,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_ar_done_1]: 14:14
+  // F[dma_ar_done_1]: 18:18
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1353,7 +2185,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_ar_bw_1]: 15:15
+  // F[dma_ar_bw_1]: 19:19
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1379,7 +2211,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_r_done_1]: 16:16
+  // F[dma_r_done_1]: 20:20
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1405,7 +2237,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_r_bw_1]: 17:17
+  // F[dma_r_bw_1]: 21:21
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1431,7 +2263,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_w_done_1]: 18:18
+  // F[dma_w_done_1]: 22:22
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1457,7 +2289,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_w_bw_1]: 19:19
+  // F[dma_w_bw_1]: 23:23
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1483,7 +2315,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_b_done_1]: 20:20
+  // F[dma_b_done_1]: 24:24
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1509,7 +2341,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[dma_busy_1]: 21:21
+  // F[dma_busy_1]: 25:25
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1535,7 +2367,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_miss_1]: 22:22
+  // F[icache_miss_1]: 26:26
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1561,7 +2393,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_hit_1]: 23:23
+  // F[icache_hit_1]: 27:27
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1587,7 +2419,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_prefetch_1]: 24:24
+  // F[icache_prefetch_1]: 28:28
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1613,7 +2445,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_double_hit_1]: 25:25
+  // F[icache_double_hit_1]: 29:29
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1639,7 +2471,7 @@ module snitch_cluster_peripheral_reg_top #(
   );
 
 
-  // F[icache_stall_1]: 26:26
+  // F[icache_stall_1]: 30:30
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
@@ -1662,6 +2494,4860 @@ module snitch_cluster_peripheral_reg_top #(
 
     // to register interface (read)
     .qs     (perf_counter_enable_1_icache_stall_1_qs)
+  );
+
+
+  // Subregister 2 of Multireg perf_counter_enable
+  // R[perf_counter_enable_2]: V(False)
+
+  // F[cycle_2]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_cycle_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_cycle_2_we),
+    .wd     (perf_counter_enable_2_cycle_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].cycle.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_cycle_2_qs)
+  );
+
+
+  // F[tcdm_accessed_2]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_tcdm_accessed_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_tcdm_accessed_2_we),
+    .wd     (perf_counter_enable_2_tcdm_accessed_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].tcdm_accessed.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_tcdm_accessed_2_qs)
+  );
+
+
+  // F[tcdm_congested_2]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_tcdm_congested_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_tcdm_congested_2_we),
+    .wd     (perf_counter_enable_2_tcdm_congested_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].tcdm_congested.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_tcdm_congested_2_qs)
+  );
+
+
+  // F[issue_fpu_2]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_issue_fpu_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_issue_fpu_2_we),
+    .wd     (perf_counter_enable_2_issue_fpu_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].issue_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_issue_fpu_2_qs)
+  );
+
+
+  // F[issue_fpu_seq_2]: 4:4
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_issue_fpu_seq_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_issue_fpu_seq_2_we),
+    .wd     (perf_counter_enable_2_issue_fpu_seq_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].issue_fpu_seq.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_issue_fpu_seq_2_qs)
+  );
+
+
+  // F[issue_core_to_fpu_2]: 5:5
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_issue_core_to_fpu_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_issue_core_to_fpu_2_we),
+    .wd     (perf_counter_enable_2_issue_core_to_fpu_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].issue_core_to_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_issue_core_to_fpu_2_qs)
+  );
+
+
+  // F[retired_instr_2]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_retired_instr_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_retired_instr_2_we),
+    .wd     (perf_counter_enable_2_retired_instr_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].retired_instr.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_retired_instr_2_qs)
+  );
+
+
+  // F[retired_load_2]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_retired_load_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_retired_load_2_we),
+    .wd     (perf_counter_enable_2_retired_load_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].retired_load.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_retired_load_2_qs)
+  );
+
+
+  // F[retired_i_2]: 8:8
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_retired_i_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_retired_i_2_we),
+    .wd     (perf_counter_enable_2_retired_i_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].retired_i.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_retired_i_2_qs)
+  );
+
+
+  // F[retired_acc_2]: 9:9
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_retired_acc_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_retired_acc_2_we),
+    .wd     (perf_counter_enable_2_retired_acc_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].retired_acc.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_retired_acc_2_qs)
+  );
+
+
+  // F[dma_aw_stall_2]: 10:10
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_aw_stall_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_aw_stall_2_we),
+    .wd     (perf_counter_enable_2_dma_aw_stall_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_aw_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_aw_stall_2_qs)
+  );
+
+
+  // F[dma_ar_stall_2]: 11:11
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_ar_stall_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_ar_stall_2_we),
+    .wd     (perf_counter_enable_2_dma_ar_stall_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_ar_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_ar_stall_2_qs)
+  );
+
+
+  // F[dma_r_stall_2]: 12:12
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_r_stall_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_r_stall_2_we),
+    .wd     (perf_counter_enable_2_dma_r_stall_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_r_stall_2_qs)
+  );
+
+
+  // F[dma_w_stall_2]: 13:13
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_w_stall_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_w_stall_2_we),
+    .wd     (perf_counter_enable_2_dma_w_stall_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_w_stall_2_qs)
+  );
+
+
+  // F[dma_buf_w_stall_2]: 14:14
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_buf_w_stall_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_buf_w_stall_2_we),
+    .wd     (perf_counter_enable_2_dma_buf_w_stall_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_buf_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_buf_w_stall_2_qs)
+  );
+
+
+  // F[dma_buf_r_stall_2]: 15:15
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_buf_r_stall_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_buf_r_stall_2_we),
+    .wd     (perf_counter_enable_2_dma_buf_r_stall_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_buf_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_buf_r_stall_2_qs)
+  );
+
+
+  // F[dma_aw_done_2]: 16:16
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_aw_done_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_aw_done_2_we),
+    .wd     (perf_counter_enable_2_dma_aw_done_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_aw_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_aw_done_2_qs)
+  );
+
+
+  // F[dma_aw_bw_2]: 17:17
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_aw_bw_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_aw_bw_2_we),
+    .wd     (perf_counter_enable_2_dma_aw_bw_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_aw_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_aw_bw_2_qs)
+  );
+
+
+  // F[dma_ar_done_2]: 18:18
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_ar_done_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_ar_done_2_we),
+    .wd     (perf_counter_enable_2_dma_ar_done_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_ar_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_ar_done_2_qs)
+  );
+
+
+  // F[dma_ar_bw_2]: 19:19
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_ar_bw_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_ar_bw_2_we),
+    .wd     (perf_counter_enable_2_dma_ar_bw_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_ar_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_ar_bw_2_qs)
+  );
+
+
+  // F[dma_r_done_2]: 20:20
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_r_done_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_r_done_2_we),
+    .wd     (perf_counter_enable_2_dma_r_done_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_r_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_r_done_2_qs)
+  );
+
+
+  // F[dma_r_bw_2]: 21:21
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_r_bw_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_r_bw_2_we),
+    .wd     (perf_counter_enable_2_dma_r_bw_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_r_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_r_bw_2_qs)
+  );
+
+
+  // F[dma_w_done_2]: 22:22
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_w_done_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_w_done_2_we),
+    .wd     (perf_counter_enable_2_dma_w_done_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_w_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_w_done_2_qs)
+  );
+
+
+  // F[dma_w_bw_2]: 23:23
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_w_bw_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_w_bw_2_we),
+    .wd     (perf_counter_enable_2_dma_w_bw_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_w_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_w_bw_2_qs)
+  );
+
+
+  // F[dma_b_done_2]: 24:24
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_b_done_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_b_done_2_we),
+    .wd     (perf_counter_enable_2_dma_b_done_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_b_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_b_done_2_qs)
+  );
+
+
+  // F[dma_busy_2]: 25:25
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_dma_busy_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_dma_busy_2_we),
+    .wd     (perf_counter_enable_2_dma_busy_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].dma_busy.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_dma_busy_2_qs)
+  );
+
+
+  // F[icache_miss_2]: 26:26
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_icache_miss_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_icache_miss_2_we),
+    .wd     (perf_counter_enable_2_icache_miss_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].icache_miss.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_icache_miss_2_qs)
+  );
+
+
+  // F[icache_hit_2]: 27:27
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_icache_hit_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_icache_hit_2_we),
+    .wd     (perf_counter_enable_2_icache_hit_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].icache_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_icache_hit_2_qs)
+  );
+
+
+  // F[icache_prefetch_2]: 28:28
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_icache_prefetch_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_icache_prefetch_2_we),
+    .wd     (perf_counter_enable_2_icache_prefetch_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].icache_prefetch.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_icache_prefetch_2_qs)
+  );
+
+
+  // F[icache_double_hit_2]: 29:29
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_icache_double_hit_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_icache_double_hit_2_we),
+    .wd     (perf_counter_enable_2_icache_double_hit_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].icache_double_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_icache_double_hit_2_qs)
+  );
+
+
+  // F[icache_stall_2]: 30:30
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_2_icache_stall_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_2_icache_stall_2_we),
+    .wd     (perf_counter_enable_2_icache_stall_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[2].icache_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_2_icache_stall_2_qs)
+  );
+
+
+  // Subregister 3 of Multireg perf_counter_enable
+  // R[perf_counter_enable_3]: V(False)
+
+  // F[cycle_3]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_cycle_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_cycle_3_we),
+    .wd     (perf_counter_enable_3_cycle_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].cycle.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_cycle_3_qs)
+  );
+
+
+  // F[tcdm_accessed_3]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_tcdm_accessed_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_tcdm_accessed_3_we),
+    .wd     (perf_counter_enable_3_tcdm_accessed_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].tcdm_accessed.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_tcdm_accessed_3_qs)
+  );
+
+
+  // F[tcdm_congested_3]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_tcdm_congested_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_tcdm_congested_3_we),
+    .wd     (perf_counter_enable_3_tcdm_congested_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].tcdm_congested.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_tcdm_congested_3_qs)
+  );
+
+
+  // F[issue_fpu_3]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_issue_fpu_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_issue_fpu_3_we),
+    .wd     (perf_counter_enable_3_issue_fpu_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].issue_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_issue_fpu_3_qs)
+  );
+
+
+  // F[issue_fpu_seq_3]: 4:4
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_issue_fpu_seq_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_issue_fpu_seq_3_we),
+    .wd     (perf_counter_enable_3_issue_fpu_seq_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].issue_fpu_seq.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_issue_fpu_seq_3_qs)
+  );
+
+
+  // F[issue_core_to_fpu_3]: 5:5
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_issue_core_to_fpu_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_issue_core_to_fpu_3_we),
+    .wd     (perf_counter_enable_3_issue_core_to_fpu_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].issue_core_to_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_issue_core_to_fpu_3_qs)
+  );
+
+
+  // F[retired_instr_3]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_retired_instr_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_retired_instr_3_we),
+    .wd     (perf_counter_enable_3_retired_instr_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].retired_instr.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_retired_instr_3_qs)
+  );
+
+
+  // F[retired_load_3]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_retired_load_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_retired_load_3_we),
+    .wd     (perf_counter_enable_3_retired_load_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].retired_load.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_retired_load_3_qs)
+  );
+
+
+  // F[retired_i_3]: 8:8
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_retired_i_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_retired_i_3_we),
+    .wd     (perf_counter_enable_3_retired_i_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].retired_i.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_retired_i_3_qs)
+  );
+
+
+  // F[retired_acc_3]: 9:9
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_retired_acc_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_retired_acc_3_we),
+    .wd     (perf_counter_enable_3_retired_acc_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].retired_acc.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_retired_acc_3_qs)
+  );
+
+
+  // F[dma_aw_stall_3]: 10:10
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_aw_stall_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_aw_stall_3_we),
+    .wd     (perf_counter_enable_3_dma_aw_stall_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_aw_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_aw_stall_3_qs)
+  );
+
+
+  // F[dma_ar_stall_3]: 11:11
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_ar_stall_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_ar_stall_3_we),
+    .wd     (perf_counter_enable_3_dma_ar_stall_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_ar_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_ar_stall_3_qs)
+  );
+
+
+  // F[dma_r_stall_3]: 12:12
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_r_stall_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_r_stall_3_we),
+    .wd     (perf_counter_enable_3_dma_r_stall_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_r_stall_3_qs)
+  );
+
+
+  // F[dma_w_stall_3]: 13:13
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_w_stall_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_w_stall_3_we),
+    .wd     (perf_counter_enable_3_dma_w_stall_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_w_stall_3_qs)
+  );
+
+
+  // F[dma_buf_w_stall_3]: 14:14
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_buf_w_stall_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_buf_w_stall_3_we),
+    .wd     (perf_counter_enable_3_dma_buf_w_stall_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_buf_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_buf_w_stall_3_qs)
+  );
+
+
+  // F[dma_buf_r_stall_3]: 15:15
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_buf_r_stall_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_buf_r_stall_3_we),
+    .wd     (perf_counter_enable_3_dma_buf_r_stall_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_buf_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_buf_r_stall_3_qs)
+  );
+
+
+  // F[dma_aw_done_3]: 16:16
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_aw_done_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_aw_done_3_we),
+    .wd     (perf_counter_enable_3_dma_aw_done_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_aw_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_aw_done_3_qs)
+  );
+
+
+  // F[dma_aw_bw_3]: 17:17
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_aw_bw_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_aw_bw_3_we),
+    .wd     (perf_counter_enable_3_dma_aw_bw_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_aw_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_aw_bw_3_qs)
+  );
+
+
+  // F[dma_ar_done_3]: 18:18
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_ar_done_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_ar_done_3_we),
+    .wd     (perf_counter_enable_3_dma_ar_done_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_ar_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_ar_done_3_qs)
+  );
+
+
+  // F[dma_ar_bw_3]: 19:19
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_ar_bw_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_ar_bw_3_we),
+    .wd     (perf_counter_enable_3_dma_ar_bw_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_ar_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_ar_bw_3_qs)
+  );
+
+
+  // F[dma_r_done_3]: 20:20
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_r_done_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_r_done_3_we),
+    .wd     (perf_counter_enable_3_dma_r_done_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_r_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_r_done_3_qs)
+  );
+
+
+  // F[dma_r_bw_3]: 21:21
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_r_bw_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_r_bw_3_we),
+    .wd     (perf_counter_enable_3_dma_r_bw_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_r_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_r_bw_3_qs)
+  );
+
+
+  // F[dma_w_done_3]: 22:22
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_w_done_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_w_done_3_we),
+    .wd     (perf_counter_enable_3_dma_w_done_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_w_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_w_done_3_qs)
+  );
+
+
+  // F[dma_w_bw_3]: 23:23
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_w_bw_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_w_bw_3_we),
+    .wd     (perf_counter_enable_3_dma_w_bw_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_w_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_w_bw_3_qs)
+  );
+
+
+  // F[dma_b_done_3]: 24:24
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_b_done_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_b_done_3_we),
+    .wd     (perf_counter_enable_3_dma_b_done_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_b_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_b_done_3_qs)
+  );
+
+
+  // F[dma_busy_3]: 25:25
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_dma_busy_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_dma_busy_3_we),
+    .wd     (perf_counter_enable_3_dma_busy_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].dma_busy.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_dma_busy_3_qs)
+  );
+
+
+  // F[icache_miss_3]: 26:26
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_icache_miss_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_icache_miss_3_we),
+    .wd     (perf_counter_enable_3_icache_miss_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].icache_miss.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_icache_miss_3_qs)
+  );
+
+
+  // F[icache_hit_3]: 27:27
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_icache_hit_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_icache_hit_3_we),
+    .wd     (perf_counter_enable_3_icache_hit_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].icache_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_icache_hit_3_qs)
+  );
+
+
+  // F[icache_prefetch_3]: 28:28
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_icache_prefetch_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_icache_prefetch_3_we),
+    .wd     (perf_counter_enable_3_icache_prefetch_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].icache_prefetch.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_icache_prefetch_3_qs)
+  );
+
+
+  // F[icache_double_hit_3]: 29:29
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_icache_double_hit_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_icache_double_hit_3_we),
+    .wd     (perf_counter_enable_3_icache_double_hit_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].icache_double_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_icache_double_hit_3_qs)
+  );
+
+
+  // F[icache_stall_3]: 30:30
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_3_icache_stall_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_3_icache_stall_3_we),
+    .wd     (perf_counter_enable_3_icache_stall_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[3].icache_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_3_icache_stall_3_qs)
+  );
+
+
+  // Subregister 4 of Multireg perf_counter_enable
+  // R[perf_counter_enable_4]: V(False)
+
+  // F[cycle_4]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_cycle_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_cycle_4_we),
+    .wd     (perf_counter_enable_4_cycle_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].cycle.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_cycle_4_qs)
+  );
+
+
+  // F[tcdm_accessed_4]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_tcdm_accessed_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_tcdm_accessed_4_we),
+    .wd     (perf_counter_enable_4_tcdm_accessed_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].tcdm_accessed.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_tcdm_accessed_4_qs)
+  );
+
+
+  // F[tcdm_congested_4]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_tcdm_congested_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_tcdm_congested_4_we),
+    .wd     (perf_counter_enable_4_tcdm_congested_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].tcdm_congested.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_tcdm_congested_4_qs)
+  );
+
+
+  // F[issue_fpu_4]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_issue_fpu_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_issue_fpu_4_we),
+    .wd     (perf_counter_enable_4_issue_fpu_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].issue_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_issue_fpu_4_qs)
+  );
+
+
+  // F[issue_fpu_seq_4]: 4:4
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_issue_fpu_seq_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_issue_fpu_seq_4_we),
+    .wd     (perf_counter_enable_4_issue_fpu_seq_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].issue_fpu_seq.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_issue_fpu_seq_4_qs)
+  );
+
+
+  // F[issue_core_to_fpu_4]: 5:5
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_issue_core_to_fpu_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_issue_core_to_fpu_4_we),
+    .wd     (perf_counter_enable_4_issue_core_to_fpu_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].issue_core_to_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_issue_core_to_fpu_4_qs)
+  );
+
+
+  // F[retired_instr_4]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_retired_instr_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_retired_instr_4_we),
+    .wd     (perf_counter_enable_4_retired_instr_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].retired_instr.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_retired_instr_4_qs)
+  );
+
+
+  // F[retired_load_4]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_retired_load_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_retired_load_4_we),
+    .wd     (perf_counter_enable_4_retired_load_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].retired_load.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_retired_load_4_qs)
+  );
+
+
+  // F[retired_i_4]: 8:8
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_retired_i_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_retired_i_4_we),
+    .wd     (perf_counter_enable_4_retired_i_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].retired_i.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_retired_i_4_qs)
+  );
+
+
+  // F[retired_acc_4]: 9:9
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_retired_acc_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_retired_acc_4_we),
+    .wd     (perf_counter_enable_4_retired_acc_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].retired_acc.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_retired_acc_4_qs)
+  );
+
+
+  // F[dma_aw_stall_4]: 10:10
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_aw_stall_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_aw_stall_4_we),
+    .wd     (perf_counter_enable_4_dma_aw_stall_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_aw_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_aw_stall_4_qs)
+  );
+
+
+  // F[dma_ar_stall_4]: 11:11
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_ar_stall_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_ar_stall_4_we),
+    .wd     (perf_counter_enable_4_dma_ar_stall_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_ar_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_ar_stall_4_qs)
+  );
+
+
+  // F[dma_r_stall_4]: 12:12
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_r_stall_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_r_stall_4_we),
+    .wd     (perf_counter_enable_4_dma_r_stall_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_r_stall_4_qs)
+  );
+
+
+  // F[dma_w_stall_4]: 13:13
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_w_stall_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_w_stall_4_we),
+    .wd     (perf_counter_enable_4_dma_w_stall_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_w_stall_4_qs)
+  );
+
+
+  // F[dma_buf_w_stall_4]: 14:14
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_buf_w_stall_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_buf_w_stall_4_we),
+    .wd     (perf_counter_enable_4_dma_buf_w_stall_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_buf_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_buf_w_stall_4_qs)
+  );
+
+
+  // F[dma_buf_r_stall_4]: 15:15
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_buf_r_stall_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_buf_r_stall_4_we),
+    .wd     (perf_counter_enable_4_dma_buf_r_stall_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_buf_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_buf_r_stall_4_qs)
+  );
+
+
+  // F[dma_aw_done_4]: 16:16
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_aw_done_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_aw_done_4_we),
+    .wd     (perf_counter_enable_4_dma_aw_done_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_aw_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_aw_done_4_qs)
+  );
+
+
+  // F[dma_aw_bw_4]: 17:17
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_aw_bw_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_aw_bw_4_we),
+    .wd     (perf_counter_enable_4_dma_aw_bw_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_aw_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_aw_bw_4_qs)
+  );
+
+
+  // F[dma_ar_done_4]: 18:18
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_ar_done_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_ar_done_4_we),
+    .wd     (perf_counter_enable_4_dma_ar_done_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_ar_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_ar_done_4_qs)
+  );
+
+
+  // F[dma_ar_bw_4]: 19:19
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_ar_bw_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_ar_bw_4_we),
+    .wd     (perf_counter_enable_4_dma_ar_bw_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_ar_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_ar_bw_4_qs)
+  );
+
+
+  // F[dma_r_done_4]: 20:20
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_r_done_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_r_done_4_we),
+    .wd     (perf_counter_enable_4_dma_r_done_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_r_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_r_done_4_qs)
+  );
+
+
+  // F[dma_r_bw_4]: 21:21
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_r_bw_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_r_bw_4_we),
+    .wd     (perf_counter_enable_4_dma_r_bw_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_r_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_r_bw_4_qs)
+  );
+
+
+  // F[dma_w_done_4]: 22:22
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_w_done_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_w_done_4_we),
+    .wd     (perf_counter_enable_4_dma_w_done_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_w_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_w_done_4_qs)
+  );
+
+
+  // F[dma_w_bw_4]: 23:23
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_w_bw_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_w_bw_4_we),
+    .wd     (perf_counter_enable_4_dma_w_bw_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_w_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_w_bw_4_qs)
+  );
+
+
+  // F[dma_b_done_4]: 24:24
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_b_done_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_b_done_4_we),
+    .wd     (perf_counter_enable_4_dma_b_done_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_b_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_b_done_4_qs)
+  );
+
+
+  // F[dma_busy_4]: 25:25
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_dma_busy_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_dma_busy_4_we),
+    .wd     (perf_counter_enable_4_dma_busy_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].dma_busy.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_dma_busy_4_qs)
+  );
+
+
+  // F[icache_miss_4]: 26:26
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_icache_miss_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_icache_miss_4_we),
+    .wd     (perf_counter_enable_4_icache_miss_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].icache_miss.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_icache_miss_4_qs)
+  );
+
+
+  // F[icache_hit_4]: 27:27
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_icache_hit_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_icache_hit_4_we),
+    .wd     (perf_counter_enable_4_icache_hit_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].icache_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_icache_hit_4_qs)
+  );
+
+
+  // F[icache_prefetch_4]: 28:28
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_icache_prefetch_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_icache_prefetch_4_we),
+    .wd     (perf_counter_enable_4_icache_prefetch_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].icache_prefetch.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_icache_prefetch_4_qs)
+  );
+
+
+  // F[icache_double_hit_4]: 29:29
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_icache_double_hit_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_icache_double_hit_4_we),
+    .wd     (perf_counter_enable_4_icache_double_hit_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].icache_double_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_icache_double_hit_4_qs)
+  );
+
+
+  // F[icache_stall_4]: 30:30
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_4_icache_stall_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_4_icache_stall_4_we),
+    .wd     (perf_counter_enable_4_icache_stall_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[4].icache_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_4_icache_stall_4_qs)
+  );
+
+
+  // Subregister 5 of Multireg perf_counter_enable
+  // R[perf_counter_enable_5]: V(False)
+
+  // F[cycle_5]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_cycle_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_cycle_5_we),
+    .wd     (perf_counter_enable_5_cycle_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].cycle.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_cycle_5_qs)
+  );
+
+
+  // F[tcdm_accessed_5]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_tcdm_accessed_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_tcdm_accessed_5_we),
+    .wd     (perf_counter_enable_5_tcdm_accessed_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].tcdm_accessed.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_tcdm_accessed_5_qs)
+  );
+
+
+  // F[tcdm_congested_5]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_tcdm_congested_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_tcdm_congested_5_we),
+    .wd     (perf_counter_enable_5_tcdm_congested_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].tcdm_congested.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_tcdm_congested_5_qs)
+  );
+
+
+  // F[issue_fpu_5]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_issue_fpu_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_issue_fpu_5_we),
+    .wd     (perf_counter_enable_5_issue_fpu_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].issue_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_issue_fpu_5_qs)
+  );
+
+
+  // F[issue_fpu_seq_5]: 4:4
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_issue_fpu_seq_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_issue_fpu_seq_5_we),
+    .wd     (perf_counter_enable_5_issue_fpu_seq_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].issue_fpu_seq.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_issue_fpu_seq_5_qs)
+  );
+
+
+  // F[issue_core_to_fpu_5]: 5:5
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_issue_core_to_fpu_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_issue_core_to_fpu_5_we),
+    .wd     (perf_counter_enable_5_issue_core_to_fpu_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].issue_core_to_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_issue_core_to_fpu_5_qs)
+  );
+
+
+  // F[retired_instr_5]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_retired_instr_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_retired_instr_5_we),
+    .wd     (perf_counter_enable_5_retired_instr_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].retired_instr.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_retired_instr_5_qs)
+  );
+
+
+  // F[retired_load_5]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_retired_load_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_retired_load_5_we),
+    .wd     (perf_counter_enable_5_retired_load_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].retired_load.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_retired_load_5_qs)
+  );
+
+
+  // F[retired_i_5]: 8:8
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_retired_i_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_retired_i_5_we),
+    .wd     (perf_counter_enable_5_retired_i_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].retired_i.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_retired_i_5_qs)
+  );
+
+
+  // F[retired_acc_5]: 9:9
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_retired_acc_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_retired_acc_5_we),
+    .wd     (perf_counter_enable_5_retired_acc_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].retired_acc.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_retired_acc_5_qs)
+  );
+
+
+  // F[dma_aw_stall_5]: 10:10
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_aw_stall_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_aw_stall_5_we),
+    .wd     (perf_counter_enable_5_dma_aw_stall_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_aw_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_aw_stall_5_qs)
+  );
+
+
+  // F[dma_ar_stall_5]: 11:11
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_ar_stall_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_ar_stall_5_we),
+    .wd     (perf_counter_enable_5_dma_ar_stall_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_ar_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_ar_stall_5_qs)
+  );
+
+
+  // F[dma_r_stall_5]: 12:12
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_r_stall_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_r_stall_5_we),
+    .wd     (perf_counter_enable_5_dma_r_stall_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_r_stall_5_qs)
+  );
+
+
+  // F[dma_w_stall_5]: 13:13
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_w_stall_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_w_stall_5_we),
+    .wd     (perf_counter_enable_5_dma_w_stall_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_w_stall_5_qs)
+  );
+
+
+  // F[dma_buf_w_stall_5]: 14:14
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_buf_w_stall_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_buf_w_stall_5_we),
+    .wd     (perf_counter_enable_5_dma_buf_w_stall_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_buf_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_buf_w_stall_5_qs)
+  );
+
+
+  // F[dma_buf_r_stall_5]: 15:15
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_buf_r_stall_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_buf_r_stall_5_we),
+    .wd     (perf_counter_enable_5_dma_buf_r_stall_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_buf_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_buf_r_stall_5_qs)
+  );
+
+
+  // F[dma_aw_done_5]: 16:16
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_aw_done_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_aw_done_5_we),
+    .wd     (perf_counter_enable_5_dma_aw_done_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_aw_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_aw_done_5_qs)
+  );
+
+
+  // F[dma_aw_bw_5]: 17:17
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_aw_bw_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_aw_bw_5_we),
+    .wd     (perf_counter_enable_5_dma_aw_bw_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_aw_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_aw_bw_5_qs)
+  );
+
+
+  // F[dma_ar_done_5]: 18:18
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_ar_done_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_ar_done_5_we),
+    .wd     (perf_counter_enable_5_dma_ar_done_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_ar_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_ar_done_5_qs)
+  );
+
+
+  // F[dma_ar_bw_5]: 19:19
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_ar_bw_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_ar_bw_5_we),
+    .wd     (perf_counter_enable_5_dma_ar_bw_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_ar_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_ar_bw_5_qs)
+  );
+
+
+  // F[dma_r_done_5]: 20:20
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_r_done_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_r_done_5_we),
+    .wd     (perf_counter_enable_5_dma_r_done_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_r_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_r_done_5_qs)
+  );
+
+
+  // F[dma_r_bw_5]: 21:21
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_r_bw_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_r_bw_5_we),
+    .wd     (perf_counter_enable_5_dma_r_bw_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_r_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_r_bw_5_qs)
+  );
+
+
+  // F[dma_w_done_5]: 22:22
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_w_done_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_w_done_5_we),
+    .wd     (perf_counter_enable_5_dma_w_done_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_w_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_w_done_5_qs)
+  );
+
+
+  // F[dma_w_bw_5]: 23:23
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_w_bw_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_w_bw_5_we),
+    .wd     (perf_counter_enable_5_dma_w_bw_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_w_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_w_bw_5_qs)
+  );
+
+
+  // F[dma_b_done_5]: 24:24
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_b_done_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_b_done_5_we),
+    .wd     (perf_counter_enable_5_dma_b_done_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_b_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_b_done_5_qs)
+  );
+
+
+  // F[dma_busy_5]: 25:25
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_dma_busy_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_dma_busy_5_we),
+    .wd     (perf_counter_enable_5_dma_busy_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].dma_busy.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_dma_busy_5_qs)
+  );
+
+
+  // F[icache_miss_5]: 26:26
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_icache_miss_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_icache_miss_5_we),
+    .wd     (perf_counter_enable_5_icache_miss_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].icache_miss.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_icache_miss_5_qs)
+  );
+
+
+  // F[icache_hit_5]: 27:27
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_icache_hit_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_icache_hit_5_we),
+    .wd     (perf_counter_enable_5_icache_hit_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].icache_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_icache_hit_5_qs)
+  );
+
+
+  // F[icache_prefetch_5]: 28:28
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_icache_prefetch_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_icache_prefetch_5_we),
+    .wd     (perf_counter_enable_5_icache_prefetch_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].icache_prefetch.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_icache_prefetch_5_qs)
+  );
+
+
+  // F[icache_double_hit_5]: 29:29
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_icache_double_hit_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_icache_double_hit_5_we),
+    .wd     (perf_counter_enable_5_icache_double_hit_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].icache_double_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_icache_double_hit_5_qs)
+  );
+
+
+  // F[icache_stall_5]: 30:30
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_5_icache_stall_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_5_icache_stall_5_we),
+    .wd     (perf_counter_enable_5_icache_stall_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[5].icache_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_5_icache_stall_5_qs)
+  );
+
+
+  // Subregister 6 of Multireg perf_counter_enable
+  // R[perf_counter_enable_6]: V(False)
+
+  // F[cycle_6]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_cycle_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_cycle_6_we),
+    .wd     (perf_counter_enable_6_cycle_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].cycle.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_cycle_6_qs)
+  );
+
+
+  // F[tcdm_accessed_6]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_tcdm_accessed_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_tcdm_accessed_6_we),
+    .wd     (perf_counter_enable_6_tcdm_accessed_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].tcdm_accessed.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_tcdm_accessed_6_qs)
+  );
+
+
+  // F[tcdm_congested_6]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_tcdm_congested_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_tcdm_congested_6_we),
+    .wd     (perf_counter_enable_6_tcdm_congested_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].tcdm_congested.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_tcdm_congested_6_qs)
+  );
+
+
+  // F[issue_fpu_6]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_issue_fpu_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_issue_fpu_6_we),
+    .wd     (perf_counter_enable_6_issue_fpu_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].issue_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_issue_fpu_6_qs)
+  );
+
+
+  // F[issue_fpu_seq_6]: 4:4
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_issue_fpu_seq_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_issue_fpu_seq_6_we),
+    .wd     (perf_counter_enable_6_issue_fpu_seq_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].issue_fpu_seq.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_issue_fpu_seq_6_qs)
+  );
+
+
+  // F[issue_core_to_fpu_6]: 5:5
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_issue_core_to_fpu_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_issue_core_to_fpu_6_we),
+    .wd     (perf_counter_enable_6_issue_core_to_fpu_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].issue_core_to_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_issue_core_to_fpu_6_qs)
+  );
+
+
+  // F[retired_instr_6]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_retired_instr_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_retired_instr_6_we),
+    .wd     (perf_counter_enable_6_retired_instr_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].retired_instr.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_retired_instr_6_qs)
+  );
+
+
+  // F[retired_load_6]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_retired_load_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_retired_load_6_we),
+    .wd     (perf_counter_enable_6_retired_load_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].retired_load.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_retired_load_6_qs)
+  );
+
+
+  // F[retired_i_6]: 8:8
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_retired_i_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_retired_i_6_we),
+    .wd     (perf_counter_enable_6_retired_i_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].retired_i.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_retired_i_6_qs)
+  );
+
+
+  // F[retired_acc_6]: 9:9
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_retired_acc_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_retired_acc_6_we),
+    .wd     (perf_counter_enable_6_retired_acc_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].retired_acc.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_retired_acc_6_qs)
+  );
+
+
+  // F[dma_aw_stall_6]: 10:10
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_aw_stall_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_aw_stall_6_we),
+    .wd     (perf_counter_enable_6_dma_aw_stall_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_aw_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_aw_stall_6_qs)
+  );
+
+
+  // F[dma_ar_stall_6]: 11:11
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_ar_stall_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_ar_stall_6_we),
+    .wd     (perf_counter_enable_6_dma_ar_stall_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_ar_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_ar_stall_6_qs)
+  );
+
+
+  // F[dma_r_stall_6]: 12:12
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_r_stall_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_r_stall_6_we),
+    .wd     (perf_counter_enable_6_dma_r_stall_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_r_stall_6_qs)
+  );
+
+
+  // F[dma_w_stall_6]: 13:13
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_w_stall_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_w_stall_6_we),
+    .wd     (perf_counter_enable_6_dma_w_stall_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_w_stall_6_qs)
+  );
+
+
+  // F[dma_buf_w_stall_6]: 14:14
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_buf_w_stall_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_buf_w_stall_6_we),
+    .wd     (perf_counter_enable_6_dma_buf_w_stall_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_buf_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_buf_w_stall_6_qs)
+  );
+
+
+  // F[dma_buf_r_stall_6]: 15:15
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_buf_r_stall_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_buf_r_stall_6_we),
+    .wd     (perf_counter_enable_6_dma_buf_r_stall_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_buf_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_buf_r_stall_6_qs)
+  );
+
+
+  // F[dma_aw_done_6]: 16:16
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_aw_done_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_aw_done_6_we),
+    .wd     (perf_counter_enable_6_dma_aw_done_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_aw_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_aw_done_6_qs)
+  );
+
+
+  // F[dma_aw_bw_6]: 17:17
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_aw_bw_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_aw_bw_6_we),
+    .wd     (perf_counter_enable_6_dma_aw_bw_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_aw_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_aw_bw_6_qs)
+  );
+
+
+  // F[dma_ar_done_6]: 18:18
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_ar_done_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_ar_done_6_we),
+    .wd     (perf_counter_enable_6_dma_ar_done_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_ar_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_ar_done_6_qs)
+  );
+
+
+  // F[dma_ar_bw_6]: 19:19
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_ar_bw_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_ar_bw_6_we),
+    .wd     (perf_counter_enable_6_dma_ar_bw_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_ar_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_ar_bw_6_qs)
+  );
+
+
+  // F[dma_r_done_6]: 20:20
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_r_done_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_r_done_6_we),
+    .wd     (perf_counter_enable_6_dma_r_done_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_r_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_r_done_6_qs)
+  );
+
+
+  // F[dma_r_bw_6]: 21:21
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_r_bw_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_r_bw_6_we),
+    .wd     (perf_counter_enable_6_dma_r_bw_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_r_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_r_bw_6_qs)
+  );
+
+
+  // F[dma_w_done_6]: 22:22
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_w_done_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_w_done_6_we),
+    .wd     (perf_counter_enable_6_dma_w_done_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_w_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_w_done_6_qs)
+  );
+
+
+  // F[dma_w_bw_6]: 23:23
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_w_bw_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_w_bw_6_we),
+    .wd     (perf_counter_enable_6_dma_w_bw_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_w_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_w_bw_6_qs)
+  );
+
+
+  // F[dma_b_done_6]: 24:24
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_b_done_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_b_done_6_we),
+    .wd     (perf_counter_enable_6_dma_b_done_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_b_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_b_done_6_qs)
+  );
+
+
+  // F[dma_busy_6]: 25:25
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_dma_busy_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_dma_busy_6_we),
+    .wd     (perf_counter_enable_6_dma_busy_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].dma_busy.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_dma_busy_6_qs)
+  );
+
+
+  // F[icache_miss_6]: 26:26
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_icache_miss_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_icache_miss_6_we),
+    .wd     (perf_counter_enable_6_icache_miss_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].icache_miss.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_icache_miss_6_qs)
+  );
+
+
+  // F[icache_hit_6]: 27:27
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_icache_hit_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_icache_hit_6_we),
+    .wd     (perf_counter_enable_6_icache_hit_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].icache_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_icache_hit_6_qs)
+  );
+
+
+  // F[icache_prefetch_6]: 28:28
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_icache_prefetch_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_icache_prefetch_6_we),
+    .wd     (perf_counter_enable_6_icache_prefetch_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].icache_prefetch.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_icache_prefetch_6_qs)
+  );
+
+
+  // F[icache_double_hit_6]: 29:29
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_icache_double_hit_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_icache_double_hit_6_we),
+    .wd     (perf_counter_enable_6_icache_double_hit_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].icache_double_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_icache_double_hit_6_qs)
+  );
+
+
+  // F[icache_stall_6]: 30:30
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_6_icache_stall_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_6_icache_stall_6_we),
+    .wd     (perf_counter_enable_6_icache_stall_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[6].icache_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_6_icache_stall_6_qs)
+  );
+
+
+  // Subregister 7 of Multireg perf_counter_enable
+  // R[perf_counter_enable_7]: V(False)
+
+  // F[cycle_7]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_cycle_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_cycle_7_we),
+    .wd     (perf_counter_enable_7_cycle_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].cycle.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_cycle_7_qs)
+  );
+
+
+  // F[tcdm_accessed_7]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_tcdm_accessed_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_tcdm_accessed_7_we),
+    .wd     (perf_counter_enable_7_tcdm_accessed_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].tcdm_accessed.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_tcdm_accessed_7_qs)
+  );
+
+
+  // F[tcdm_congested_7]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_tcdm_congested_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_tcdm_congested_7_we),
+    .wd     (perf_counter_enable_7_tcdm_congested_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].tcdm_congested.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_tcdm_congested_7_qs)
+  );
+
+
+  // F[issue_fpu_7]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_issue_fpu_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_issue_fpu_7_we),
+    .wd     (perf_counter_enable_7_issue_fpu_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].issue_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_issue_fpu_7_qs)
+  );
+
+
+  // F[issue_fpu_seq_7]: 4:4
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_issue_fpu_seq_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_issue_fpu_seq_7_we),
+    .wd     (perf_counter_enable_7_issue_fpu_seq_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].issue_fpu_seq.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_issue_fpu_seq_7_qs)
+  );
+
+
+  // F[issue_core_to_fpu_7]: 5:5
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_issue_core_to_fpu_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_issue_core_to_fpu_7_we),
+    .wd     (perf_counter_enable_7_issue_core_to_fpu_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].issue_core_to_fpu.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_issue_core_to_fpu_7_qs)
+  );
+
+
+  // F[retired_instr_7]: 6:6
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_retired_instr_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_retired_instr_7_we),
+    .wd     (perf_counter_enable_7_retired_instr_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].retired_instr.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_retired_instr_7_qs)
+  );
+
+
+  // F[retired_load_7]: 7:7
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_retired_load_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_retired_load_7_we),
+    .wd     (perf_counter_enable_7_retired_load_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].retired_load.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_retired_load_7_qs)
+  );
+
+
+  // F[retired_i_7]: 8:8
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_retired_i_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_retired_i_7_we),
+    .wd     (perf_counter_enable_7_retired_i_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].retired_i.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_retired_i_7_qs)
+  );
+
+
+  // F[retired_acc_7]: 9:9
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_retired_acc_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_retired_acc_7_we),
+    .wd     (perf_counter_enable_7_retired_acc_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].retired_acc.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_retired_acc_7_qs)
+  );
+
+
+  // F[dma_aw_stall_7]: 10:10
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_aw_stall_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_aw_stall_7_we),
+    .wd     (perf_counter_enable_7_dma_aw_stall_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_aw_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_aw_stall_7_qs)
+  );
+
+
+  // F[dma_ar_stall_7]: 11:11
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_ar_stall_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_ar_stall_7_we),
+    .wd     (perf_counter_enable_7_dma_ar_stall_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_ar_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_ar_stall_7_qs)
+  );
+
+
+  // F[dma_r_stall_7]: 12:12
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_r_stall_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_r_stall_7_we),
+    .wd     (perf_counter_enable_7_dma_r_stall_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_r_stall_7_qs)
+  );
+
+
+  // F[dma_w_stall_7]: 13:13
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_w_stall_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_w_stall_7_we),
+    .wd     (perf_counter_enable_7_dma_w_stall_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_w_stall_7_qs)
+  );
+
+
+  // F[dma_buf_w_stall_7]: 14:14
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_buf_w_stall_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_buf_w_stall_7_we),
+    .wd     (perf_counter_enable_7_dma_buf_w_stall_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_buf_w_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_buf_w_stall_7_qs)
+  );
+
+
+  // F[dma_buf_r_stall_7]: 15:15
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_buf_r_stall_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_buf_r_stall_7_we),
+    .wd     (perf_counter_enable_7_dma_buf_r_stall_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_buf_r_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_buf_r_stall_7_qs)
+  );
+
+
+  // F[dma_aw_done_7]: 16:16
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_aw_done_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_aw_done_7_we),
+    .wd     (perf_counter_enable_7_dma_aw_done_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_aw_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_aw_done_7_qs)
+  );
+
+
+  // F[dma_aw_bw_7]: 17:17
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_aw_bw_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_aw_bw_7_we),
+    .wd     (perf_counter_enable_7_dma_aw_bw_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_aw_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_aw_bw_7_qs)
+  );
+
+
+  // F[dma_ar_done_7]: 18:18
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_ar_done_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_ar_done_7_we),
+    .wd     (perf_counter_enable_7_dma_ar_done_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_ar_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_ar_done_7_qs)
+  );
+
+
+  // F[dma_ar_bw_7]: 19:19
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_ar_bw_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_ar_bw_7_we),
+    .wd     (perf_counter_enable_7_dma_ar_bw_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_ar_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_ar_bw_7_qs)
+  );
+
+
+  // F[dma_r_done_7]: 20:20
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_r_done_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_r_done_7_we),
+    .wd     (perf_counter_enable_7_dma_r_done_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_r_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_r_done_7_qs)
+  );
+
+
+  // F[dma_r_bw_7]: 21:21
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_r_bw_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_r_bw_7_we),
+    .wd     (perf_counter_enable_7_dma_r_bw_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_r_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_r_bw_7_qs)
+  );
+
+
+  // F[dma_w_done_7]: 22:22
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_w_done_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_w_done_7_we),
+    .wd     (perf_counter_enable_7_dma_w_done_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_w_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_w_done_7_qs)
+  );
+
+
+  // F[dma_w_bw_7]: 23:23
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_w_bw_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_w_bw_7_we),
+    .wd     (perf_counter_enable_7_dma_w_bw_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_w_bw.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_w_bw_7_qs)
+  );
+
+
+  // F[dma_b_done_7]: 24:24
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_b_done_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_b_done_7_we),
+    .wd     (perf_counter_enable_7_dma_b_done_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_b_done.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_b_done_7_qs)
+  );
+
+
+  // F[dma_busy_7]: 25:25
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_dma_busy_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_dma_busy_7_we),
+    .wd     (perf_counter_enable_7_dma_busy_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].dma_busy.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_dma_busy_7_qs)
+  );
+
+
+  // F[icache_miss_7]: 26:26
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_icache_miss_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_icache_miss_7_we),
+    .wd     (perf_counter_enable_7_icache_miss_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].icache_miss.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_icache_miss_7_qs)
+  );
+
+
+  // F[icache_hit_7]: 27:27
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_icache_hit_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_icache_hit_7_we),
+    .wd     (perf_counter_enable_7_icache_hit_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].icache_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_icache_hit_7_qs)
+  );
+
+
+  // F[icache_prefetch_7]: 28:28
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_icache_prefetch_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_icache_prefetch_7_we),
+    .wd     (perf_counter_enable_7_icache_prefetch_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].icache_prefetch.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_icache_prefetch_7_qs)
+  );
+
+
+  // F[icache_double_hit_7]: 29:29
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_icache_double_hit_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_icache_double_hit_7_we),
+    .wd     (perf_counter_enable_7_icache_double_hit_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].icache_double_hit.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_icache_double_hit_7_qs)
+  );
+
+
+  // F[icache_stall_7]: 30:30
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_perf_counter_enable_7_icache_stall_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (perf_counter_enable_7_icache_stall_7_we),
+    .wd     (perf_counter_enable_7_icache_stall_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.perf_counter_enable[7].icache_stall.q ),
+
+    // to register interface (read)
+    .qs     (perf_counter_enable_7_icache_stall_7_qs)
   );
 
 
@@ -1721,6 +7407,168 @@ module snitch_cluster_peripheral_reg_top #(
     .qs     (hart_select_1_qs)
   );
 
+  // Subregister 2 of Multireg hart_select
+  // R[hart_select_2]: V(False)
+
+  prim_subreg #(
+    .DW      (10),
+    .SWACCESS("RW"),
+    .RESVAL  (10'h0)
+  ) u_hart_select_2 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (hart_select_2_we),
+    .wd     (hart_select_2_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.hart_select[2].q ),
+
+    // to register interface (read)
+    .qs     (hart_select_2_qs)
+  );
+
+  // Subregister 3 of Multireg hart_select
+  // R[hart_select_3]: V(False)
+
+  prim_subreg #(
+    .DW      (10),
+    .SWACCESS("RW"),
+    .RESVAL  (10'h0)
+  ) u_hart_select_3 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (hart_select_3_we),
+    .wd     (hart_select_3_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.hart_select[3].q ),
+
+    // to register interface (read)
+    .qs     (hart_select_3_qs)
+  );
+
+  // Subregister 4 of Multireg hart_select
+  // R[hart_select_4]: V(False)
+
+  prim_subreg #(
+    .DW      (10),
+    .SWACCESS("RW"),
+    .RESVAL  (10'h0)
+  ) u_hart_select_4 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (hart_select_4_we),
+    .wd     (hart_select_4_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.hart_select[4].q ),
+
+    // to register interface (read)
+    .qs     (hart_select_4_qs)
+  );
+
+  // Subregister 5 of Multireg hart_select
+  // R[hart_select_5]: V(False)
+
+  prim_subreg #(
+    .DW      (10),
+    .SWACCESS("RW"),
+    .RESVAL  (10'h0)
+  ) u_hart_select_5 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (hart_select_5_we),
+    .wd     (hart_select_5_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.hart_select[5].q ),
+
+    // to register interface (read)
+    .qs     (hart_select_5_qs)
+  );
+
+  // Subregister 6 of Multireg hart_select
+  // R[hart_select_6]: V(False)
+
+  prim_subreg #(
+    .DW      (10),
+    .SWACCESS("RW"),
+    .RESVAL  (10'h0)
+  ) u_hart_select_6 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (hart_select_6_we),
+    .wd     (hart_select_6_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.hart_select[6].q ),
+
+    // to register interface (read)
+    .qs     (hart_select_6_qs)
+  );
+
+  // Subregister 7 of Multireg hart_select
+  // R[hart_select_7]: V(False)
+
+  prim_subreg #(
+    .DW      (10),
+    .SWACCESS("RW"),
+    .RESVAL  (10'h0)
+  ) u_hart_select_7 (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (hart_select_7_we),
+    .wd     (hart_select_7_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.hart_select[7].q ),
+
+    // to register interface (read)
+    .qs     (hart_select_7_qs)
+  );
+
 
 
   // Subregister 0 of Multireg perf_counter
@@ -1753,6 +7601,102 @@ module snitch_cluster_peripheral_reg_top #(
     .qe     (reg2hw.perf_counter[1].qe),
     .q      (reg2hw.perf_counter[1].q ),
     .qs     (perf_counter_1_qs)
+  );
+
+  // Subregister 2 of Multireg perf_counter
+  // R[perf_counter_2]: V(True)
+
+  prim_subreg_ext #(
+    .DW    (48)
+  ) u_perf_counter_2 (
+    .re     (perf_counter_2_re),
+    .we     (perf_counter_2_we),
+    .wd     (perf_counter_2_wd),
+    .d      (hw2reg.perf_counter[2].d),
+    .qre    (),
+    .qe     (reg2hw.perf_counter[2].qe),
+    .q      (reg2hw.perf_counter[2].q ),
+    .qs     (perf_counter_2_qs)
+  );
+
+  // Subregister 3 of Multireg perf_counter
+  // R[perf_counter_3]: V(True)
+
+  prim_subreg_ext #(
+    .DW    (48)
+  ) u_perf_counter_3 (
+    .re     (perf_counter_3_re),
+    .we     (perf_counter_3_we),
+    .wd     (perf_counter_3_wd),
+    .d      (hw2reg.perf_counter[3].d),
+    .qre    (),
+    .qe     (reg2hw.perf_counter[3].qe),
+    .q      (reg2hw.perf_counter[3].q ),
+    .qs     (perf_counter_3_qs)
+  );
+
+  // Subregister 4 of Multireg perf_counter
+  // R[perf_counter_4]: V(True)
+
+  prim_subreg_ext #(
+    .DW    (48)
+  ) u_perf_counter_4 (
+    .re     (perf_counter_4_re),
+    .we     (perf_counter_4_we),
+    .wd     (perf_counter_4_wd),
+    .d      (hw2reg.perf_counter[4].d),
+    .qre    (),
+    .qe     (reg2hw.perf_counter[4].qe),
+    .q      (reg2hw.perf_counter[4].q ),
+    .qs     (perf_counter_4_qs)
+  );
+
+  // Subregister 5 of Multireg perf_counter
+  // R[perf_counter_5]: V(True)
+
+  prim_subreg_ext #(
+    .DW    (48)
+  ) u_perf_counter_5 (
+    .re     (perf_counter_5_re),
+    .we     (perf_counter_5_we),
+    .wd     (perf_counter_5_wd),
+    .d      (hw2reg.perf_counter[5].d),
+    .qre    (),
+    .qe     (reg2hw.perf_counter[5].qe),
+    .q      (reg2hw.perf_counter[5].q ),
+    .qs     (perf_counter_5_qs)
+  );
+
+  // Subregister 6 of Multireg perf_counter
+  // R[perf_counter_6]: V(True)
+
+  prim_subreg_ext #(
+    .DW    (48)
+  ) u_perf_counter_6 (
+    .re     (perf_counter_6_re),
+    .we     (perf_counter_6_we),
+    .wd     (perf_counter_6_wd),
+    .d      (hw2reg.perf_counter[6].d),
+    .qre    (),
+    .qe     (reg2hw.perf_counter[6].qe),
+    .q      (reg2hw.perf_counter[6].q ),
+    .qs     (perf_counter_6_qs)
+  );
+
+  // Subregister 7 of Multireg perf_counter
+  // R[perf_counter_7]: V(True)
+
+  prim_subreg_ext #(
+    .DW    (48)
+  ) u_perf_counter_7 (
+    .re     (perf_counter_7_re),
+    .we     (perf_counter_7_we),
+    .wd     (perf_counter_7_wd),
+    .d      (hw2reg.perf_counter[7].d),
+    .qre    (),
+    .qe     (reg2hw.perf_counter[7].qe),
+    .q      (reg2hw.perf_counter[7].q ),
+    .qs     (perf_counter_7_qs)
   );
 
 
@@ -1832,19 +7776,37 @@ module snitch_cluster_peripheral_reg_top #(
 
 
 
-  logic [9:0] addr_hit;
+  logic [27:0] addr_hit;
   always_comb begin
     addr_hit = '0;
-    addr_hit[0] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET);
-    addr_hit[1] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1_OFFSET);
-    addr_hit[2] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0_OFFSET);
-    addr_hit[3] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1_OFFSET);
-    addr_hit[4] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET);
-    addr_hit[5] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET);
-    addr_hit[6] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET_OFFSET);
-    addr_hit[7] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_CLEAR_OFFSET);
-    addr_hit[8] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET);
-    addr_hit[9] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_ICACHE_PREFETCH_ENABLE_OFFSET);
+    addr_hit[ 0] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_0_OFFSET);
+    addr_hit[ 1] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_1_OFFSET);
+    addr_hit[ 2] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_2_OFFSET);
+    addr_hit[ 3] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_3_OFFSET);
+    addr_hit[ 4] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_4_OFFSET);
+    addr_hit[ 5] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_5_OFFSET);
+    addr_hit[ 6] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_6_OFFSET);
+    addr_hit[ 7] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_ENABLE_7_OFFSET);
+    addr_hit[ 8] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_0_OFFSET);
+    addr_hit[ 9] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_1_OFFSET);
+    addr_hit[10] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_2_OFFSET);
+    addr_hit[11] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_3_OFFSET);
+    addr_hit[12] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_4_OFFSET);
+    addr_hit[13] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_5_OFFSET);
+    addr_hit[14] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_6_OFFSET);
+    addr_hit[15] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HART_SELECT_7_OFFSET);
+    addr_hit[16] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_0_OFFSET);
+    addr_hit[17] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_1_OFFSET);
+    addr_hit[18] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_2_OFFSET);
+    addr_hit[19] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_3_OFFSET);
+    addr_hit[20] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_4_OFFSET);
+    addr_hit[21] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_5_OFFSET);
+    addr_hit[22] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_6_OFFSET);
+    addr_hit[23] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_PERF_COUNTER_7_OFFSET);
+    addr_hit[24] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_SET_OFFSET);
+    addr_hit[25] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_CL_CLINT_CLEAR_OFFSET);
+    addr_hit[26] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_OFFSET);
+    addr_hit[27] = (reg_addr == SNITCH_CLUSTER_PERIPHERAL_ICACHE_PREFETCH_ENABLE_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -1852,16 +7814,34 @@ module snitch_cluster_peripheral_reg_top #(
   // Check sub-word write is permitted
   always_comb begin
     wr_err = (reg_we &
-              ((addr_hit[0] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[0] & ~reg_be))) |
-               (addr_hit[1] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[1] & ~reg_be))) |
-               (addr_hit[2] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[2] & ~reg_be))) |
-               (addr_hit[3] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[3] & ~reg_be))) |
-               (addr_hit[4] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[4] & ~reg_be))) |
-               (addr_hit[5] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[5] & ~reg_be))) |
-               (addr_hit[6] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[6] & ~reg_be))) |
-               (addr_hit[7] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[7] & ~reg_be))) |
-               (addr_hit[8] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[8] & ~reg_be))) |
-               (addr_hit[9] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[9] & ~reg_be)))));
+              ((addr_hit[ 0] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 0] & ~reg_be))) |
+               (addr_hit[ 1] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 1] & ~reg_be))) |
+               (addr_hit[ 2] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 2] & ~reg_be))) |
+               (addr_hit[ 3] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 3] & ~reg_be))) |
+               (addr_hit[ 4] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 4] & ~reg_be))) |
+               (addr_hit[ 5] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 5] & ~reg_be))) |
+               (addr_hit[ 6] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 6] & ~reg_be))) |
+               (addr_hit[ 7] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 7] & ~reg_be))) |
+               (addr_hit[ 8] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 8] & ~reg_be))) |
+               (addr_hit[ 9] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[ 9] & ~reg_be))) |
+               (addr_hit[10] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[10] & ~reg_be))) |
+               (addr_hit[11] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[11] & ~reg_be))) |
+               (addr_hit[12] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[12] & ~reg_be))) |
+               (addr_hit[13] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[13] & ~reg_be))) |
+               (addr_hit[14] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[14] & ~reg_be))) |
+               (addr_hit[15] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[15] & ~reg_be))) |
+               (addr_hit[16] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[16] & ~reg_be))) |
+               (addr_hit[17] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[17] & ~reg_be))) |
+               (addr_hit[18] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[18] & ~reg_be))) |
+               (addr_hit[19] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[19] & ~reg_be))) |
+               (addr_hit[20] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[20] & ~reg_be))) |
+               (addr_hit[21] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[21] & ~reg_be))) |
+               (addr_hit[22] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[22] & ~reg_be))) |
+               (addr_hit[23] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[23] & ~reg_be))) |
+               (addr_hit[24] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[24] & ~reg_be))) |
+               (addr_hit[25] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[25] & ~reg_be))) |
+               (addr_hit[26] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[26] & ~reg_be))) |
+               (addr_hit[27] & (|(SNITCH_CLUSTER_PERIPHERAL_PERMIT[27] & ~reg_be)))));
   end
 
   assign perf_counter_enable_0_cycle_0_we = addr_hit[0] & reg_we & !reg_error;
@@ -1882,68 +7862,80 @@ module snitch_cluster_peripheral_reg_top #(
   assign perf_counter_enable_0_issue_core_to_fpu_0_we = addr_hit[0] & reg_we & !reg_error;
   assign perf_counter_enable_0_issue_core_to_fpu_0_wd = reg_wdata[5];
 
+  assign perf_counter_enable_0_retired_instr_0_we = addr_hit[0] & reg_we & !reg_error;
+  assign perf_counter_enable_0_retired_instr_0_wd = reg_wdata[6];
+
+  assign perf_counter_enable_0_retired_load_0_we = addr_hit[0] & reg_we & !reg_error;
+  assign perf_counter_enable_0_retired_load_0_wd = reg_wdata[7];
+
+  assign perf_counter_enable_0_retired_i_0_we = addr_hit[0] & reg_we & !reg_error;
+  assign perf_counter_enable_0_retired_i_0_wd = reg_wdata[8];
+
+  assign perf_counter_enable_0_retired_acc_0_we = addr_hit[0] & reg_we & !reg_error;
+  assign perf_counter_enable_0_retired_acc_0_wd = reg_wdata[9];
+
   assign perf_counter_enable_0_dma_aw_stall_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_aw_stall_0_wd = reg_wdata[6];
+  assign perf_counter_enable_0_dma_aw_stall_0_wd = reg_wdata[10];
 
   assign perf_counter_enable_0_dma_ar_stall_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_ar_stall_0_wd = reg_wdata[7];
+  assign perf_counter_enable_0_dma_ar_stall_0_wd = reg_wdata[11];
 
   assign perf_counter_enable_0_dma_r_stall_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_r_stall_0_wd = reg_wdata[8];
+  assign perf_counter_enable_0_dma_r_stall_0_wd = reg_wdata[12];
 
   assign perf_counter_enable_0_dma_w_stall_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_w_stall_0_wd = reg_wdata[9];
+  assign perf_counter_enable_0_dma_w_stall_0_wd = reg_wdata[13];
 
   assign perf_counter_enable_0_dma_buf_w_stall_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_buf_w_stall_0_wd = reg_wdata[10];
+  assign perf_counter_enable_0_dma_buf_w_stall_0_wd = reg_wdata[14];
 
   assign perf_counter_enable_0_dma_buf_r_stall_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_buf_r_stall_0_wd = reg_wdata[11];
+  assign perf_counter_enable_0_dma_buf_r_stall_0_wd = reg_wdata[15];
 
   assign perf_counter_enable_0_dma_aw_done_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_aw_done_0_wd = reg_wdata[12];
+  assign perf_counter_enable_0_dma_aw_done_0_wd = reg_wdata[16];
 
   assign perf_counter_enable_0_dma_aw_bw_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_aw_bw_0_wd = reg_wdata[13];
+  assign perf_counter_enable_0_dma_aw_bw_0_wd = reg_wdata[17];
 
   assign perf_counter_enable_0_dma_ar_done_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_ar_done_0_wd = reg_wdata[14];
+  assign perf_counter_enable_0_dma_ar_done_0_wd = reg_wdata[18];
 
   assign perf_counter_enable_0_dma_ar_bw_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_ar_bw_0_wd = reg_wdata[15];
+  assign perf_counter_enable_0_dma_ar_bw_0_wd = reg_wdata[19];
 
   assign perf_counter_enable_0_dma_r_done_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_r_done_0_wd = reg_wdata[16];
+  assign perf_counter_enable_0_dma_r_done_0_wd = reg_wdata[20];
 
   assign perf_counter_enable_0_dma_r_bw_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_r_bw_0_wd = reg_wdata[17];
+  assign perf_counter_enable_0_dma_r_bw_0_wd = reg_wdata[21];
 
   assign perf_counter_enable_0_dma_w_done_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_w_done_0_wd = reg_wdata[18];
+  assign perf_counter_enable_0_dma_w_done_0_wd = reg_wdata[22];
 
   assign perf_counter_enable_0_dma_w_bw_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_w_bw_0_wd = reg_wdata[19];
+  assign perf_counter_enable_0_dma_w_bw_0_wd = reg_wdata[23];
 
   assign perf_counter_enable_0_dma_b_done_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_b_done_0_wd = reg_wdata[20];
+  assign perf_counter_enable_0_dma_b_done_0_wd = reg_wdata[24];
 
   assign perf_counter_enable_0_dma_busy_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_dma_busy_0_wd = reg_wdata[21];
+  assign perf_counter_enable_0_dma_busy_0_wd = reg_wdata[25];
 
   assign perf_counter_enable_0_icache_miss_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_icache_miss_0_wd = reg_wdata[22];
+  assign perf_counter_enable_0_icache_miss_0_wd = reg_wdata[26];
 
   assign perf_counter_enable_0_icache_hit_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_icache_hit_0_wd = reg_wdata[23];
+  assign perf_counter_enable_0_icache_hit_0_wd = reg_wdata[27];
 
   assign perf_counter_enable_0_icache_prefetch_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_icache_prefetch_0_wd = reg_wdata[24];
+  assign perf_counter_enable_0_icache_prefetch_0_wd = reg_wdata[28];
 
   assign perf_counter_enable_0_icache_double_hit_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_icache_double_hit_0_wd = reg_wdata[25];
+  assign perf_counter_enable_0_icache_double_hit_0_wd = reg_wdata[29];
 
   assign perf_counter_enable_0_icache_stall_0_we = addr_hit[0] & reg_we & !reg_error;
-  assign perf_counter_enable_0_icache_stall_0_wd = reg_wdata[26];
+  assign perf_counter_enable_0_icache_stall_0_wd = reg_wdata[30];
 
   assign perf_counter_enable_1_cycle_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_cycle_1_wd = reg_wdata[0];
@@ -1963,92 +7955,704 @@ module snitch_cluster_peripheral_reg_top #(
   assign perf_counter_enable_1_issue_core_to_fpu_1_we = addr_hit[1] & reg_we & !reg_error;
   assign perf_counter_enable_1_issue_core_to_fpu_1_wd = reg_wdata[5];
 
+  assign perf_counter_enable_1_retired_instr_1_we = addr_hit[1] & reg_we & !reg_error;
+  assign perf_counter_enable_1_retired_instr_1_wd = reg_wdata[6];
+
+  assign perf_counter_enable_1_retired_load_1_we = addr_hit[1] & reg_we & !reg_error;
+  assign perf_counter_enable_1_retired_load_1_wd = reg_wdata[7];
+
+  assign perf_counter_enable_1_retired_i_1_we = addr_hit[1] & reg_we & !reg_error;
+  assign perf_counter_enable_1_retired_i_1_wd = reg_wdata[8];
+
+  assign perf_counter_enable_1_retired_acc_1_we = addr_hit[1] & reg_we & !reg_error;
+  assign perf_counter_enable_1_retired_acc_1_wd = reg_wdata[9];
+
   assign perf_counter_enable_1_dma_aw_stall_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_aw_stall_1_wd = reg_wdata[6];
+  assign perf_counter_enable_1_dma_aw_stall_1_wd = reg_wdata[10];
 
   assign perf_counter_enable_1_dma_ar_stall_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_ar_stall_1_wd = reg_wdata[7];
+  assign perf_counter_enable_1_dma_ar_stall_1_wd = reg_wdata[11];
 
   assign perf_counter_enable_1_dma_r_stall_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_r_stall_1_wd = reg_wdata[8];
+  assign perf_counter_enable_1_dma_r_stall_1_wd = reg_wdata[12];
 
   assign perf_counter_enable_1_dma_w_stall_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_w_stall_1_wd = reg_wdata[9];
+  assign perf_counter_enable_1_dma_w_stall_1_wd = reg_wdata[13];
 
   assign perf_counter_enable_1_dma_buf_w_stall_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_buf_w_stall_1_wd = reg_wdata[10];
+  assign perf_counter_enable_1_dma_buf_w_stall_1_wd = reg_wdata[14];
 
   assign perf_counter_enable_1_dma_buf_r_stall_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_buf_r_stall_1_wd = reg_wdata[11];
+  assign perf_counter_enable_1_dma_buf_r_stall_1_wd = reg_wdata[15];
 
   assign perf_counter_enable_1_dma_aw_done_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_aw_done_1_wd = reg_wdata[12];
+  assign perf_counter_enable_1_dma_aw_done_1_wd = reg_wdata[16];
 
   assign perf_counter_enable_1_dma_aw_bw_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_aw_bw_1_wd = reg_wdata[13];
+  assign perf_counter_enable_1_dma_aw_bw_1_wd = reg_wdata[17];
 
   assign perf_counter_enable_1_dma_ar_done_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_ar_done_1_wd = reg_wdata[14];
+  assign perf_counter_enable_1_dma_ar_done_1_wd = reg_wdata[18];
 
   assign perf_counter_enable_1_dma_ar_bw_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_ar_bw_1_wd = reg_wdata[15];
+  assign perf_counter_enable_1_dma_ar_bw_1_wd = reg_wdata[19];
 
   assign perf_counter_enable_1_dma_r_done_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_r_done_1_wd = reg_wdata[16];
+  assign perf_counter_enable_1_dma_r_done_1_wd = reg_wdata[20];
 
   assign perf_counter_enable_1_dma_r_bw_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_r_bw_1_wd = reg_wdata[17];
+  assign perf_counter_enable_1_dma_r_bw_1_wd = reg_wdata[21];
 
   assign perf_counter_enable_1_dma_w_done_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_w_done_1_wd = reg_wdata[18];
+  assign perf_counter_enable_1_dma_w_done_1_wd = reg_wdata[22];
 
   assign perf_counter_enable_1_dma_w_bw_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_w_bw_1_wd = reg_wdata[19];
+  assign perf_counter_enable_1_dma_w_bw_1_wd = reg_wdata[23];
 
   assign perf_counter_enable_1_dma_b_done_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_b_done_1_wd = reg_wdata[20];
+  assign perf_counter_enable_1_dma_b_done_1_wd = reg_wdata[24];
 
   assign perf_counter_enable_1_dma_busy_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_dma_busy_1_wd = reg_wdata[21];
+  assign perf_counter_enable_1_dma_busy_1_wd = reg_wdata[25];
 
   assign perf_counter_enable_1_icache_miss_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_icache_miss_1_wd = reg_wdata[22];
+  assign perf_counter_enable_1_icache_miss_1_wd = reg_wdata[26];
 
   assign perf_counter_enable_1_icache_hit_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_icache_hit_1_wd = reg_wdata[23];
+  assign perf_counter_enable_1_icache_hit_1_wd = reg_wdata[27];
 
   assign perf_counter_enable_1_icache_prefetch_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_icache_prefetch_1_wd = reg_wdata[24];
+  assign perf_counter_enable_1_icache_prefetch_1_wd = reg_wdata[28];
 
   assign perf_counter_enable_1_icache_double_hit_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_icache_double_hit_1_wd = reg_wdata[25];
+  assign perf_counter_enable_1_icache_double_hit_1_wd = reg_wdata[29];
 
   assign perf_counter_enable_1_icache_stall_1_we = addr_hit[1] & reg_we & !reg_error;
-  assign perf_counter_enable_1_icache_stall_1_wd = reg_wdata[26];
+  assign perf_counter_enable_1_icache_stall_1_wd = reg_wdata[30];
 
-  assign hart_select_0_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_cycle_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_cycle_2_wd = reg_wdata[0];
+
+  assign perf_counter_enable_2_tcdm_accessed_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_tcdm_accessed_2_wd = reg_wdata[1];
+
+  assign perf_counter_enable_2_tcdm_congested_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_tcdm_congested_2_wd = reg_wdata[2];
+
+  assign perf_counter_enable_2_issue_fpu_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_issue_fpu_2_wd = reg_wdata[3];
+
+  assign perf_counter_enable_2_issue_fpu_seq_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_issue_fpu_seq_2_wd = reg_wdata[4];
+
+  assign perf_counter_enable_2_issue_core_to_fpu_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_issue_core_to_fpu_2_wd = reg_wdata[5];
+
+  assign perf_counter_enable_2_retired_instr_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_retired_instr_2_wd = reg_wdata[6];
+
+  assign perf_counter_enable_2_retired_load_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_retired_load_2_wd = reg_wdata[7];
+
+  assign perf_counter_enable_2_retired_i_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_retired_i_2_wd = reg_wdata[8];
+
+  assign perf_counter_enable_2_retired_acc_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_retired_acc_2_wd = reg_wdata[9];
+
+  assign perf_counter_enable_2_dma_aw_stall_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_aw_stall_2_wd = reg_wdata[10];
+
+  assign perf_counter_enable_2_dma_ar_stall_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_ar_stall_2_wd = reg_wdata[11];
+
+  assign perf_counter_enable_2_dma_r_stall_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_r_stall_2_wd = reg_wdata[12];
+
+  assign perf_counter_enable_2_dma_w_stall_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_w_stall_2_wd = reg_wdata[13];
+
+  assign perf_counter_enable_2_dma_buf_w_stall_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_buf_w_stall_2_wd = reg_wdata[14];
+
+  assign perf_counter_enable_2_dma_buf_r_stall_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_buf_r_stall_2_wd = reg_wdata[15];
+
+  assign perf_counter_enable_2_dma_aw_done_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_aw_done_2_wd = reg_wdata[16];
+
+  assign perf_counter_enable_2_dma_aw_bw_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_aw_bw_2_wd = reg_wdata[17];
+
+  assign perf_counter_enable_2_dma_ar_done_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_ar_done_2_wd = reg_wdata[18];
+
+  assign perf_counter_enable_2_dma_ar_bw_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_ar_bw_2_wd = reg_wdata[19];
+
+  assign perf_counter_enable_2_dma_r_done_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_r_done_2_wd = reg_wdata[20];
+
+  assign perf_counter_enable_2_dma_r_bw_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_r_bw_2_wd = reg_wdata[21];
+
+  assign perf_counter_enable_2_dma_w_done_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_w_done_2_wd = reg_wdata[22];
+
+  assign perf_counter_enable_2_dma_w_bw_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_w_bw_2_wd = reg_wdata[23];
+
+  assign perf_counter_enable_2_dma_b_done_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_b_done_2_wd = reg_wdata[24];
+
+  assign perf_counter_enable_2_dma_busy_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_dma_busy_2_wd = reg_wdata[25];
+
+  assign perf_counter_enable_2_icache_miss_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_icache_miss_2_wd = reg_wdata[26];
+
+  assign perf_counter_enable_2_icache_hit_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_icache_hit_2_wd = reg_wdata[27];
+
+  assign perf_counter_enable_2_icache_prefetch_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_icache_prefetch_2_wd = reg_wdata[28];
+
+  assign perf_counter_enable_2_icache_double_hit_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_icache_double_hit_2_wd = reg_wdata[29];
+
+  assign perf_counter_enable_2_icache_stall_2_we = addr_hit[2] & reg_we & !reg_error;
+  assign perf_counter_enable_2_icache_stall_2_wd = reg_wdata[30];
+
+  assign perf_counter_enable_3_cycle_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_cycle_3_wd = reg_wdata[0];
+
+  assign perf_counter_enable_3_tcdm_accessed_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_tcdm_accessed_3_wd = reg_wdata[1];
+
+  assign perf_counter_enable_3_tcdm_congested_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_tcdm_congested_3_wd = reg_wdata[2];
+
+  assign perf_counter_enable_3_issue_fpu_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_issue_fpu_3_wd = reg_wdata[3];
+
+  assign perf_counter_enable_3_issue_fpu_seq_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_issue_fpu_seq_3_wd = reg_wdata[4];
+
+  assign perf_counter_enable_3_issue_core_to_fpu_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_issue_core_to_fpu_3_wd = reg_wdata[5];
+
+  assign perf_counter_enable_3_retired_instr_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_retired_instr_3_wd = reg_wdata[6];
+
+  assign perf_counter_enable_3_retired_load_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_retired_load_3_wd = reg_wdata[7];
+
+  assign perf_counter_enable_3_retired_i_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_retired_i_3_wd = reg_wdata[8];
+
+  assign perf_counter_enable_3_retired_acc_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_retired_acc_3_wd = reg_wdata[9];
+
+  assign perf_counter_enable_3_dma_aw_stall_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_aw_stall_3_wd = reg_wdata[10];
+
+  assign perf_counter_enable_3_dma_ar_stall_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_ar_stall_3_wd = reg_wdata[11];
+
+  assign perf_counter_enable_3_dma_r_stall_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_r_stall_3_wd = reg_wdata[12];
+
+  assign perf_counter_enable_3_dma_w_stall_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_w_stall_3_wd = reg_wdata[13];
+
+  assign perf_counter_enable_3_dma_buf_w_stall_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_buf_w_stall_3_wd = reg_wdata[14];
+
+  assign perf_counter_enable_3_dma_buf_r_stall_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_buf_r_stall_3_wd = reg_wdata[15];
+
+  assign perf_counter_enable_3_dma_aw_done_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_aw_done_3_wd = reg_wdata[16];
+
+  assign perf_counter_enable_3_dma_aw_bw_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_aw_bw_3_wd = reg_wdata[17];
+
+  assign perf_counter_enable_3_dma_ar_done_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_ar_done_3_wd = reg_wdata[18];
+
+  assign perf_counter_enable_3_dma_ar_bw_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_ar_bw_3_wd = reg_wdata[19];
+
+  assign perf_counter_enable_3_dma_r_done_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_r_done_3_wd = reg_wdata[20];
+
+  assign perf_counter_enable_3_dma_r_bw_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_r_bw_3_wd = reg_wdata[21];
+
+  assign perf_counter_enable_3_dma_w_done_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_w_done_3_wd = reg_wdata[22];
+
+  assign perf_counter_enable_3_dma_w_bw_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_w_bw_3_wd = reg_wdata[23];
+
+  assign perf_counter_enable_3_dma_b_done_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_b_done_3_wd = reg_wdata[24];
+
+  assign perf_counter_enable_3_dma_busy_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_dma_busy_3_wd = reg_wdata[25];
+
+  assign perf_counter_enable_3_icache_miss_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_icache_miss_3_wd = reg_wdata[26];
+
+  assign perf_counter_enable_3_icache_hit_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_icache_hit_3_wd = reg_wdata[27];
+
+  assign perf_counter_enable_3_icache_prefetch_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_icache_prefetch_3_wd = reg_wdata[28];
+
+  assign perf_counter_enable_3_icache_double_hit_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_icache_double_hit_3_wd = reg_wdata[29];
+
+  assign perf_counter_enable_3_icache_stall_3_we = addr_hit[3] & reg_we & !reg_error;
+  assign perf_counter_enable_3_icache_stall_3_wd = reg_wdata[30];
+
+  assign perf_counter_enable_4_cycle_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_cycle_4_wd = reg_wdata[0];
+
+  assign perf_counter_enable_4_tcdm_accessed_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_tcdm_accessed_4_wd = reg_wdata[1];
+
+  assign perf_counter_enable_4_tcdm_congested_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_tcdm_congested_4_wd = reg_wdata[2];
+
+  assign perf_counter_enable_4_issue_fpu_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_issue_fpu_4_wd = reg_wdata[3];
+
+  assign perf_counter_enable_4_issue_fpu_seq_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_issue_fpu_seq_4_wd = reg_wdata[4];
+
+  assign perf_counter_enable_4_issue_core_to_fpu_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_issue_core_to_fpu_4_wd = reg_wdata[5];
+
+  assign perf_counter_enable_4_retired_instr_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_retired_instr_4_wd = reg_wdata[6];
+
+  assign perf_counter_enable_4_retired_load_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_retired_load_4_wd = reg_wdata[7];
+
+  assign perf_counter_enable_4_retired_i_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_retired_i_4_wd = reg_wdata[8];
+
+  assign perf_counter_enable_4_retired_acc_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_retired_acc_4_wd = reg_wdata[9];
+
+  assign perf_counter_enable_4_dma_aw_stall_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_aw_stall_4_wd = reg_wdata[10];
+
+  assign perf_counter_enable_4_dma_ar_stall_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_ar_stall_4_wd = reg_wdata[11];
+
+  assign perf_counter_enable_4_dma_r_stall_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_r_stall_4_wd = reg_wdata[12];
+
+  assign perf_counter_enable_4_dma_w_stall_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_w_stall_4_wd = reg_wdata[13];
+
+  assign perf_counter_enable_4_dma_buf_w_stall_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_buf_w_stall_4_wd = reg_wdata[14];
+
+  assign perf_counter_enable_4_dma_buf_r_stall_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_buf_r_stall_4_wd = reg_wdata[15];
+
+  assign perf_counter_enable_4_dma_aw_done_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_aw_done_4_wd = reg_wdata[16];
+
+  assign perf_counter_enable_4_dma_aw_bw_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_aw_bw_4_wd = reg_wdata[17];
+
+  assign perf_counter_enable_4_dma_ar_done_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_ar_done_4_wd = reg_wdata[18];
+
+  assign perf_counter_enable_4_dma_ar_bw_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_ar_bw_4_wd = reg_wdata[19];
+
+  assign perf_counter_enable_4_dma_r_done_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_r_done_4_wd = reg_wdata[20];
+
+  assign perf_counter_enable_4_dma_r_bw_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_r_bw_4_wd = reg_wdata[21];
+
+  assign perf_counter_enable_4_dma_w_done_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_w_done_4_wd = reg_wdata[22];
+
+  assign perf_counter_enable_4_dma_w_bw_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_w_bw_4_wd = reg_wdata[23];
+
+  assign perf_counter_enable_4_dma_b_done_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_b_done_4_wd = reg_wdata[24];
+
+  assign perf_counter_enable_4_dma_busy_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_dma_busy_4_wd = reg_wdata[25];
+
+  assign perf_counter_enable_4_icache_miss_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_icache_miss_4_wd = reg_wdata[26];
+
+  assign perf_counter_enable_4_icache_hit_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_icache_hit_4_wd = reg_wdata[27];
+
+  assign perf_counter_enable_4_icache_prefetch_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_icache_prefetch_4_wd = reg_wdata[28];
+
+  assign perf_counter_enable_4_icache_double_hit_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_icache_double_hit_4_wd = reg_wdata[29];
+
+  assign perf_counter_enable_4_icache_stall_4_we = addr_hit[4] & reg_we & !reg_error;
+  assign perf_counter_enable_4_icache_stall_4_wd = reg_wdata[30];
+
+  assign perf_counter_enable_5_cycle_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_cycle_5_wd = reg_wdata[0];
+
+  assign perf_counter_enable_5_tcdm_accessed_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_tcdm_accessed_5_wd = reg_wdata[1];
+
+  assign perf_counter_enable_5_tcdm_congested_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_tcdm_congested_5_wd = reg_wdata[2];
+
+  assign perf_counter_enable_5_issue_fpu_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_issue_fpu_5_wd = reg_wdata[3];
+
+  assign perf_counter_enable_5_issue_fpu_seq_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_issue_fpu_seq_5_wd = reg_wdata[4];
+
+  assign perf_counter_enable_5_issue_core_to_fpu_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_issue_core_to_fpu_5_wd = reg_wdata[5];
+
+  assign perf_counter_enable_5_retired_instr_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_retired_instr_5_wd = reg_wdata[6];
+
+  assign perf_counter_enable_5_retired_load_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_retired_load_5_wd = reg_wdata[7];
+
+  assign perf_counter_enable_5_retired_i_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_retired_i_5_wd = reg_wdata[8];
+
+  assign perf_counter_enable_5_retired_acc_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_retired_acc_5_wd = reg_wdata[9];
+
+  assign perf_counter_enable_5_dma_aw_stall_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_aw_stall_5_wd = reg_wdata[10];
+
+  assign perf_counter_enable_5_dma_ar_stall_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_ar_stall_5_wd = reg_wdata[11];
+
+  assign perf_counter_enable_5_dma_r_stall_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_r_stall_5_wd = reg_wdata[12];
+
+  assign perf_counter_enable_5_dma_w_stall_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_w_stall_5_wd = reg_wdata[13];
+
+  assign perf_counter_enable_5_dma_buf_w_stall_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_buf_w_stall_5_wd = reg_wdata[14];
+
+  assign perf_counter_enable_5_dma_buf_r_stall_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_buf_r_stall_5_wd = reg_wdata[15];
+
+  assign perf_counter_enable_5_dma_aw_done_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_aw_done_5_wd = reg_wdata[16];
+
+  assign perf_counter_enable_5_dma_aw_bw_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_aw_bw_5_wd = reg_wdata[17];
+
+  assign perf_counter_enable_5_dma_ar_done_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_ar_done_5_wd = reg_wdata[18];
+
+  assign perf_counter_enable_5_dma_ar_bw_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_ar_bw_5_wd = reg_wdata[19];
+
+  assign perf_counter_enable_5_dma_r_done_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_r_done_5_wd = reg_wdata[20];
+
+  assign perf_counter_enable_5_dma_r_bw_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_r_bw_5_wd = reg_wdata[21];
+
+  assign perf_counter_enable_5_dma_w_done_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_w_done_5_wd = reg_wdata[22];
+
+  assign perf_counter_enable_5_dma_w_bw_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_w_bw_5_wd = reg_wdata[23];
+
+  assign perf_counter_enable_5_dma_b_done_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_b_done_5_wd = reg_wdata[24];
+
+  assign perf_counter_enable_5_dma_busy_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_dma_busy_5_wd = reg_wdata[25];
+
+  assign perf_counter_enable_5_icache_miss_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_icache_miss_5_wd = reg_wdata[26];
+
+  assign perf_counter_enable_5_icache_hit_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_icache_hit_5_wd = reg_wdata[27];
+
+  assign perf_counter_enable_5_icache_prefetch_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_icache_prefetch_5_wd = reg_wdata[28];
+
+  assign perf_counter_enable_5_icache_double_hit_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_icache_double_hit_5_wd = reg_wdata[29];
+
+  assign perf_counter_enable_5_icache_stall_5_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_enable_5_icache_stall_5_wd = reg_wdata[30];
+
+  assign perf_counter_enable_6_cycle_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_cycle_6_wd = reg_wdata[0];
+
+  assign perf_counter_enable_6_tcdm_accessed_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_tcdm_accessed_6_wd = reg_wdata[1];
+
+  assign perf_counter_enable_6_tcdm_congested_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_tcdm_congested_6_wd = reg_wdata[2];
+
+  assign perf_counter_enable_6_issue_fpu_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_issue_fpu_6_wd = reg_wdata[3];
+
+  assign perf_counter_enable_6_issue_fpu_seq_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_issue_fpu_seq_6_wd = reg_wdata[4];
+
+  assign perf_counter_enable_6_issue_core_to_fpu_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_issue_core_to_fpu_6_wd = reg_wdata[5];
+
+  assign perf_counter_enable_6_retired_instr_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_retired_instr_6_wd = reg_wdata[6];
+
+  assign perf_counter_enable_6_retired_load_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_retired_load_6_wd = reg_wdata[7];
+
+  assign perf_counter_enable_6_retired_i_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_retired_i_6_wd = reg_wdata[8];
+
+  assign perf_counter_enable_6_retired_acc_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_retired_acc_6_wd = reg_wdata[9];
+
+  assign perf_counter_enable_6_dma_aw_stall_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_aw_stall_6_wd = reg_wdata[10];
+
+  assign perf_counter_enable_6_dma_ar_stall_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_ar_stall_6_wd = reg_wdata[11];
+
+  assign perf_counter_enable_6_dma_r_stall_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_r_stall_6_wd = reg_wdata[12];
+
+  assign perf_counter_enable_6_dma_w_stall_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_w_stall_6_wd = reg_wdata[13];
+
+  assign perf_counter_enable_6_dma_buf_w_stall_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_buf_w_stall_6_wd = reg_wdata[14];
+
+  assign perf_counter_enable_6_dma_buf_r_stall_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_buf_r_stall_6_wd = reg_wdata[15];
+
+  assign perf_counter_enable_6_dma_aw_done_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_aw_done_6_wd = reg_wdata[16];
+
+  assign perf_counter_enable_6_dma_aw_bw_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_aw_bw_6_wd = reg_wdata[17];
+
+  assign perf_counter_enable_6_dma_ar_done_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_ar_done_6_wd = reg_wdata[18];
+
+  assign perf_counter_enable_6_dma_ar_bw_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_ar_bw_6_wd = reg_wdata[19];
+
+  assign perf_counter_enable_6_dma_r_done_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_r_done_6_wd = reg_wdata[20];
+
+  assign perf_counter_enable_6_dma_r_bw_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_r_bw_6_wd = reg_wdata[21];
+
+  assign perf_counter_enable_6_dma_w_done_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_w_done_6_wd = reg_wdata[22];
+
+  assign perf_counter_enable_6_dma_w_bw_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_w_bw_6_wd = reg_wdata[23];
+
+  assign perf_counter_enable_6_dma_b_done_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_b_done_6_wd = reg_wdata[24];
+
+  assign perf_counter_enable_6_dma_busy_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_dma_busy_6_wd = reg_wdata[25];
+
+  assign perf_counter_enable_6_icache_miss_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_icache_miss_6_wd = reg_wdata[26];
+
+  assign perf_counter_enable_6_icache_hit_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_icache_hit_6_wd = reg_wdata[27];
+
+  assign perf_counter_enable_6_icache_prefetch_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_icache_prefetch_6_wd = reg_wdata[28];
+
+  assign perf_counter_enable_6_icache_double_hit_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_icache_double_hit_6_wd = reg_wdata[29];
+
+  assign perf_counter_enable_6_icache_stall_6_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_enable_6_icache_stall_6_wd = reg_wdata[30];
+
+  assign perf_counter_enable_7_cycle_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_cycle_7_wd = reg_wdata[0];
+
+  assign perf_counter_enable_7_tcdm_accessed_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_tcdm_accessed_7_wd = reg_wdata[1];
+
+  assign perf_counter_enable_7_tcdm_congested_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_tcdm_congested_7_wd = reg_wdata[2];
+
+  assign perf_counter_enable_7_issue_fpu_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_issue_fpu_7_wd = reg_wdata[3];
+
+  assign perf_counter_enable_7_issue_fpu_seq_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_issue_fpu_seq_7_wd = reg_wdata[4];
+
+  assign perf_counter_enable_7_issue_core_to_fpu_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_issue_core_to_fpu_7_wd = reg_wdata[5];
+
+  assign perf_counter_enable_7_retired_instr_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_retired_instr_7_wd = reg_wdata[6];
+
+  assign perf_counter_enable_7_retired_load_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_retired_load_7_wd = reg_wdata[7];
+
+  assign perf_counter_enable_7_retired_i_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_retired_i_7_wd = reg_wdata[8];
+
+  assign perf_counter_enable_7_retired_acc_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_retired_acc_7_wd = reg_wdata[9];
+
+  assign perf_counter_enable_7_dma_aw_stall_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_aw_stall_7_wd = reg_wdata[10];
+
+  assign perf_counter_enable_7_dma_ar_stall_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_ar_stall_7_wd = reg_wdata[11];
+
+  assign perf_counter_enable_7_dma_r_stall_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_r_stall_7_wd = reg_wdata[12];
+
+  assign perf_counter_enable_7_dma_w_stall_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_w_stall_7_wd = reg_wdata[13];
+
+  assign perf_counter_enable_7_dma_buf_w_stall_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_buf_w_stall_7_wd = reg_wdata[14];
+
+  assign perf_counter_enable_7_dma_buf_r_stall_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_buf_r_stall_7_wd = reg_wdata[15];
+
+  assign perf_counter_enable_7_dma_aw_done_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_aw_done_7_wd = reg_wdata[16];
+
+  assign perf_counter_enable_7_dma_aw_bw_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_aw_bw_7_wd = reg_wdata[17];
+
+  assign perf_counter_enable_7_dma_ar_done_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_ar_done_7_wd = reg_wdata[18];
+
+  assign perf_counter_enable_7_dma_ar_bw_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_ar_bw_7_wd = reg_wdata[19];
+
+  assign perf_counter_enable_7_dma_r_done_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_r_done_7_wd = reg_wdata[20];
+
+  assign perf_counter_enable_7_dma_r_bw_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_r_bw_7_wd = reg_wdata[21];
+
+  assign perf_counter_enable_7_dma_w_done_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_w_done_7_wd = reg_wdata[22];
+
+  assign perf_counter_enable_7_dma_w_bw_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_w_bw_7_wd = reg_wdata[23];
+
+  assign perf_counter_enable_7_dma_b_done_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_b_done_7_wd = reg_wdata[24];
+
+  assign perf_counter_enable_7_dma_busy_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_dma_busy_7_wd = reg_wdata[25];
+
+  assign perf_counter_enable_7_icache_miss_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_icache_miss_7_wd = reg_wdata[26];
+
+  assign perf_counter_enable_7_icache_hit_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_icache_hit_7_wd = reg_wdata[27];
+
+  assign perf_counter_enable_7_icache_prefetch_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_icache_prefetch_7_wd = reg_wdata[28];
+
+  assign perf_counter_enable_7_icache_double_hit_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_icache_double_hit_7_wd = reg_wdata[29];
+
+  assign perf_counter_enable_7_icache_stall_7_we = addr_hit[7] & reg_we & !reg_error;
+  assign perf_counter_enable_7_icache_stall_7_wd = reg_wdata[30];
+
+  assign hart_select_0_we = addr_hit[8] & reg_we & !reg_error;
   assign hart_select_0_wd = reg_wdata[9:0];
 
-  assign hart_select_1_we = addr_hit[3] & reg_we & !reg_error;
+  assign hart_select_1_we = addr_hit[9] & reg_we & !reg_error;
   assign hart_select_1_wd = reg_wdata[9:0];
 
-  assign perf_counter_0_we = addr_hit[4] & reg_we & !reg_error;
+  assign hart_select_2_we = addr_hit[10] & reg_we & !reg_error;
+  assign hart_select_2_wd = reg_wdata[9:0];
+
+  assign hart_select_3_we = addr_hit[11] & reg_we & !reg_error;
+  assign hart_select_3_wd = reg_wdata[9:0];
+
+  assign hart_select_4_we = addr_hit[12] & reg_we & !reg_error;
+  assign hart_select_4_wd = reg_wdata[9:0];
+
+  assign hart_select_5_we = addr_hit[13] & reg_we & !reg_error;
+  assign hart_select_5_wd = reg_wdata[9:0];
+
+  assign hart_select_6_we = addr_hit[14] & reg_we & !reg_error;
+  assign hart_select_6_wd = reg_wdata[9:0];
+
+  assign hart_select_7_we = addr_hit[15] & reg_we & !reg_error;
+  assign hart_select_7_wd = reg_wdata[9:0];
+
+  assign perf_counter_0_we = addr_hit[16] & reg_we & !reg_error;
   assign perf_counter_0_wd = reg_wdata[47:0];
-  assign perf_counter_0_re = addr_hit[4] & reg_re & !reg_error;
+  assign perf_counter_0_re = addr_hit[16] & reg_re & !reg_error;
 
-  assign perf_counter_1_we = addr_hit[5] & reg_we & !reg_error;
+  assign perf_counter_1_we = addr_hit[17] & reg_we & !reg_error;
   assign perf_counter_1_wd = reg_wdata[47:0];
-  assign perf_counter_1_re = addr_hit[5] & reg_re & !reg_error;
+  assign perf_counter_1_re = addr_hit[17] & reg_re & !reg_error;
 
-  assign cl_clint_set_we = addr_hit[6] & reg_we & !reg_error;
+  assign perf_counter_2_we = addr_hit[18] & reg_we & !reg_error;
+  assign perf_counter_2_wd = reg_wdata[47:0];
+  assign perf_counter_2_re = addr_hit[18] & reg_re & !reg_error;
+
+  assign perf_counter_3_we = addr_hit[19] & reg_we & !reg_error;
+  assign perf_counter_3_wd = reg_wdata[47:0];
+  assign perf_counter_3_re = addr_hit[19] & reg_re & !reg_error;
+
+  assign perf_counter_4_we = addr_hit[20] & reg_we & !reg_error;
+  assign perf_counter_4_wd = reg_wdata[47:0];
+  assign perf_counter_4_re = addr_hit[20] & reg_re & !reg_error;
+
+  assign perf_counter_5_we = addr_hit[21] & reg_we & !reg_error;
+  assign perf_counter_5_wd = reg_wdata[47:0];
+  assign perf_counter_5_re = addr_hit[21] & reg_re & !reg_error;
+
+  assign perf_counter_6_we = addr_hit[22] & reg_we & !reg_error;
+  assign perf_counter_6_wd = reg_wdata[47:0];
+  assign perf_counter_6_re = addr_hit[22] & reg_re & !reg_error;
+
+  assign perf_counter_7_we = addr_hit[23] & reg_we & !reg_error;
+  assign perf_counter_7_wd = reg_wdata[47:0];
+  assign perf_counter_7_re = addr_hit[23] & reg_re & !reg_error;
+
+  assign cl_clint_set_we = addr_hit[24] & reg_we & !reg_error;
   assign cl_clint_set_wd = reg_wdata[31:0];
 
-  assign cl_clint_clear_we = addr_hit[7] & reg_we & !reg_error;
+  assign cl_clint_clear_we = addr_hit[25] & reg_we & !reg_error;
   assign cl_clint_clear_wd = reg_wdata[31:0];
 
-  assign hw_barrier_re = addr_hit[8] & reg_re & !reg_error;
+  assign hw_barrier_re = addr_hit[26] & reg_re & !reg_error;
 
-  assign icache_prefetch_enable_we = addr_hit[9] & reg_we & !reg_error;
+  assign icache_prefetch_enable_we = addr_hit[27] & reg_we & !reg_error;
   assign icache_prefetch_enable_wd = reg_wdata[0];
 
   // Read data return
@@ -2062,27 +8666,31 @@ module snitch_cluster_peripheral_reg_top #(
         reg_rdata_next[3] = perf_counter_enable_0_issue_fpu_0_qs;
         reg_rdata_next[4] = perf_counter_enable_0_issue_fpu_seq_0_qs;
         reg_rdata_next[5] = perf_counter_enable_0_issue_core_to_fpu_0_qs;
-        reg_rdata_next[6] = perf_counter_enable_0_dma_aw_stall_0_qs;
-        reg_rdata_next[7] = perf_counter_enable_0_dma_ar_stall_0_qs;
-        reg_rdata_next[8] = perf_counter_enable_0_dma_r_stall_0_qs;
-        reg_rdata_next[9] = perf_counter_enable_0_dma_w_stall_0_qs;
-        reg_rdata_next[10] = perf_counter_enable_0_dma_buf_w_stall_0_qs;
-        reg_rdata_next[11] = perf_counter_enable_0_dma_buf_r_stall_0_qs;
-        reg_rdata_next[12] = perf_counter_enable_0_dma_aw_done_0_qs;
-        reg_rdata_next[13] = perf_counter_enable_0_dma_aw_bw_0_qs;
-        reg_rdata_next[14] = perf_counter_enable_0_dma_ar_done_0_qs;
-        reg_rdata_next[15] = perf_counter_enable_0_dma_ar_bw_0_qs;
-        reg_rdata_next[16] = perf_counter_enable_0_dma_r_done_0_qs;
-        reg_rdata_next[17] = perf_counter_enable_0_dma_r_bw_0_qs;
-        reg_rdata_next[18] = perf_counter_enable_0_dma_w_done_0_qs;
-        reg_rdata_next[19] = perf_counter_enable_0_dma_w_bw_0_qs;
-        reg_rdata_next[20] = perf_counter_enable_0_dma_b_done_0_qs;
-        reg_rdata_next[21] = perf_counter_enable_0_dma_busy_0_qs;
-        reg_rdata_next[22] = perf_counter_enable_0_icache_miss_0_qs;
-        reg_rdata_next[23] = perf_counter_enable_0_icache_hit_0_qs;
-        reg_rdata_next[24] = perf_counter_enable_0_icache_prefetch_0_qs;
-        reg_rdata_next[25] = perf_counter_enable_0_icache_double_hit_0_qs;
-        reg_rdata_next[26] = perf_counter_enable_0_icache_stall_0_qs;
+        reg_rdata_next[6] = perf_counter_enable_0_retired_instr_0_qs;
+        reg_rdata_next[7] = perf_counter_enable_0_retired_load_0_qs;
+        reg_rdata_next[8] = perf_counter_enable_0_retired_i_0_qs;
+        reg_rdata_next[9] = perf_counter_enable_0_retired_acc_0_qs;
+        reg_rdata_next[10] = perf_counter_enable_0_dma_aw_stall_0_qs;
+        reg_rdata_next[11] = perf_counter_enable_0_dma_ar_stall_0_qs;
+        reg_rdata_next[12] = perf_counter_enable_0_dma_r_stall_0_qs;
+        reg_rdata_next[13] = perf_counter_enable_0_dma_w_stall_0_qs;
+        reg_rdata_next[14] = perf_counter_enable_0_dma_buf_w_stall_0_qs;
+        reg_rdata_next[15] = perf_counter_enable_0_dma_buf_r_stall_0_qs;
+        reg_rdata_next[16] = perf_counter_enable_0_dma_aw_done_0_qs;
+        reg_rdata_next[17] = perf_counter_enable_0_dma_aw_bw_0_qs;
+        reg_rdata_next[18] = perf_counter_enable_0_dma_ar_done_0_qs;
+        reg_rdata_next[19] = perf_counter_enable_0_dma_ar_bw_0_qs;
+        reg_rdata_next[20] = perf_counter_enable_0_dma_r_done_0_qs;
+        reg_rdata_next[21] = perf_counter_enable_0_dma_r_bw_0_qs;
+        reg_rdata_next[22] = perf_counter_enable_0_dma_w_done_0_qs;
+        reg_rdata_next[23] = perf_counter_enable_0_dma_w_bw_0_qs;
+        reg_rdata_next[24] = perf_counter_enable_0_dma_b_done_0_qs;
+        reg_rdata_next[25] = perf_counter_enable_0_dma_busy_0_qs;
+        reg_rdata_next[26] = perf_counter_enable_0_icache_miss_0_qs;
+        reg_rdata_next[27] = perf_counter_enable_0_icache_hit_0_qs;
+        reg_rdata_next[28] = perf_counter_enable_0_icache_prefetch_0_qs;
+        reg_rdata_next[29] = perf_counter_enable_0_icache_double_hit_0_qs;
+        reg_rdata_next[30] = perf_counter_enable_0_icache_stall_0_qs;
       end
 
       addr_hit[1]: begin
@@ -2092,58 +8700,314 @@ module snitch_cluster_peripheral_reg_top #(
         reg_rdata_next[3] = perf_counter_enable_1_issue_fpu_1_qs;
         reg_rdata_next[4] = perf_counter_enable_1_issue_fpu_seq_1_qs;
         reg_rdata_next[5] = perf_counter_enable_1_issue_core_to_fpu_1_qs;
-        reg_rdata_next[6] = perf_counter_enable_1_dma_aw_stall_1_qs;
-        reg_rdata_next[7] = perf_counter_enable_1_dma_ar_stall_1_qs;
-        reg_rdata_next[8] = perf_counter_enable_1_dma_r_stall_1_qs;
-        reg_rdata_next[9] = perf_counter_enable_1_dma_w_stall_1_qs;
-        reg_rdata_next[10] = perf_counter_enable_1_dma_buf_w_stall_1_qs;
-        reg_rdata_next[11] = perf_counter_enable_1_dma_buf_r_stall_1_qs;
-        reg_rdata_next[12] = perf_counter_enable_1_dma_aw_done_1_qs;
-        reg_rdata_next[13] = perf_counter_enable_1_dma_aw_bw_1_qs;
-        reg_rdata_next[14] = perf_counter_enable_1_dma_ar_done_1_qs;
-        reg_rdata_next[15] = perf_counter_enable_1_dma_ar_bw_1_qs;
-        reg_rdata_next[16] = perf_counter_enable_1_dma_r_done_1_qs;
-        reg_rdata_next[17] = perf_counter_enable_1_dma_r_bw_1_qs;
-        reg_rdata_next[18] = perf_counter_enable_1_dma_w_done_1_qs;
-        reg_rdata_next[19] = perf_counter_enable_1_dma_w_bw_1_qs;
-        reg_rdata_next[20] = perf_counter_enable_1_dma_b_done_1_qs;
-        reg_rdata_next[21] = perf_counter_enable_1_dma_busy_1_qs;
-        reg_rdata_next[22] = perf_counter_enable_1_icache_miss_1_qs;
-        reg_rdata_next[23] = perf_counter_enable_1_icache_hit_1_qs;
-        reg_rdata_next[24] = perf_counter_enable_1_icache_prefetch_1_qs;
-        reg_rdata_next[25] = perf_counter_enable_1_icache_double_hit_1_qs;
-        reg_rdata_next[26] = perf_counter_enable_1_icache_stall_1_qs;
+        reg_rdata_next[6] = perf_counter_enable_1_retired_instr_1_qs;
+        reg_rdata_next[7] = perf_counter_enable_1_retired_load_1_qs;
+        reg_rdata_next[8] = perf_counter_enable_1_retired_i_1_qs;
+        reg_rdata_next[9] = perf_counter_enable_1_retired_acc_1_qs;
+        reg_rdata_next[10] = perf_counter_enable_1_dma_aw_stall_1_qs;
+        reg_rdata_next[11] = perf_counter_enable_1_dma_ar_stall_1_qs;
+        reg_rdata_next[12] = perf_counter_enable_1_dma_r_stall_1_qs;
+        reg_rdata_next[13] = perf_counter_enable_1_dma_w_stall_1_qs;
+        reg_rdata_next[14] = perf_counter_enable_1_dma_buf_w_stall_1_qs;
+        reg_rdata_next[15] = perf_counter_enable_1_dma_buf_r_stall_1_qs;
+        reg_rdata_next[16] = perf_counter_enable_1_dma_aw_done_1_qs;
+        reg_rdata_next[17] = perf_counter_enable_1_dma_aw_bw_1_qs;
+        reg_rdata_next[18] = perf_counter_enable_1_dma_ar_done_1_qs;
+        reg_rdata_next[19] = perf_counter_enable_1_dma_ar_bw_1_qs;
+        reg_rdata_next[20] = perf_counter_enable_1_dma_r_done_1_qs;
+        reg_rdata_next[21] = perf_counter_enable_1_dma_r_bw_1_qs;
+        reg_rdata_next[22] = perf_counter_enable_1_dma_w_done_1_qs;
+        reg_rdata_next[23] = perf_counter_enable_1_dma_w_bw_1_qs;
+        reg_rdata_next[24] = perf_counter_enable_1_dma_b_done_1_qs;
+        reg_rdata_next[25] = perf_counter_enable_1_dma_busy_1_qs;
+        reg_rdata_next[26] = perf_counter_enable_1_icache_miss_1_qs;
+        reg_rdata_next[27] = perf_counter_enable_1_icache_hit_1_qs;
+        reg_rdata_next[28] = perf_counter_enable_1_icache_prefetch_1_qs;
+        reg_rdata_next[29] = perf_counter_enable_1_icache_double_hit_1_qs;
+        reg_rdata_next[30] = perf_counter_enable_1_icache_stall_1_qs;
       end
 
       addr_hit[2]: begin
-        reg_rdata_next[9:0] = hart_select_0_qs;
+        reg_rdata_next[0] = perf_counter_enable_2_cycle_2_qs;
+        reg_rdata_next[1] = perf_counter_enable_2_tcdm_accessed_2_qs;
+        reg_rdata_next[2] = perf_counter_enable_2_tcdm_congested_2_qs;
+        reg_rdata_next[3] = perf_counter_enable_2_issue_fpu_2_qs;
+        reg_rdata_next[4] = perf_counter_enable_2_issue_fpu_seq_2_qs;
+        reg_rdata_next[5] = perf_counter_enable_2_issue_core_to_fpu_2_qs;
+        reg_rdata_next[6] = perf_counter_enable_2_retired_instr_2_qs;
+        reg_rdata_next[7] = perf_counter_enable_2_retired_load_2_qs;
+        reg_rdata_next[8] = perf_counter_enable_2_retired_i_2_qs;
+        reg_rdata_next[9] = perf_counter_enable_2_retired_acc_2_qs;
+        reg_rdata_next[10] = perf_counter_enable_2_dma_aw_stall_2_qs;
+        reg_rdata_next[11] = perf_counter_enable_2_dma_ar_stall_2_qs;
+        reg_rdata_next[12] = perf_counter_enable_2_dma_r_stall_2_qs;
+        reg_rdata_next[13] = perf_counter_enable_2_dma_w_stall_2_qs;
+        reg_rdata_next[14] = perf_counter_enable_2_dma_buf_w_stall_2_qs;
+        reg_rdata_next[15] = perf_counter_enable_2_dma_buf_r_stall_2_qs;
+        reg_rdata_next[16] = perf_counter_enable_2_dma_aw_done_2_qs;
+        reg_rdata_next[17] = perf_counter_enable_2_dma_aw_bw_2_qs;
+        reg_rdata_next[18] = perf_counter_enable_2_dma_ar_done_2_qs;
+        reg_rdata_next[19] = perf_counter_enable_2_dma_ar_bw_2_qs;
+        reg_rdata_next[20] = perf_counter_enable_2_dma_r_done_2_qs;
+        reg_rdata_next[21] = perf_counter_enable_2_dma_r_bw_2_qs;
+        reg_rdata_next[22] = perf_counter_enable_2_dma_w_done_2_qs;
+        reg_rdata_next[23] = perf_counter_enable_2_dma_w_bw_2_qs;
+        reg_rdata_next[24] = perf_counter_enable_2_dma_b_done_2_qs;
+        reg_rdata_next[25] = perf_counter_enable_2_dma_busy_2_qs;
+        reg_rdata_next[26] = perf_counter_enable_2_icache_miss_2_qs;
+        reg_rdata_next[27] = perf_counter_enable_2_icache_hit_2_qs;
+        reg_rdata_next[28] = perf_counter_enable_2_icache_prefetch_2_qs;
+        reg_rdata_next[29] = perf_counter_enable_2_icache_double_hit_2_qs;
+        reg_rdata_next[30] = perf_counter_enable_2_icache_stall_2_qs;
       end
 
       addr_hit[3]: begin
-        reg_rdata_next[9:0] = hart_select_1_qs;
+        reg_rdata_next[0] = perf_counter_enable_3_cycle_3_qs;
+        reg_rdata_next[1] = perf_counter_enable_3_tcdm_accessed_3_qs;
+        reg_rdata_next[2] = perf_counter_enable_3_tcdm_congested_3_qs;
+        reg_rdata_next[3] = perf_counter_enable_3_issue_fpu_3_qs;
+        reg_rdata_next[4] = perf_counter_enable_3_issue_fpu_seq_3_qs;
+        reg_rdata_next[5] = perf_counter_enable_3_issue_core_to_fpu_3_qs;
+        reg_rdata_next[6] = perf_counter_enable_3_retired_instr_3_qs;
+        reg_rdata_next[7] = perf_counter_enable_3_retired_load_3_qs;
+        reg_rdata_next[8] = perf_counter_enable_3_retired_i_3_qs;
+        reg_rdata_next[9] = perf_counter_enable_3_retired_acc_3_qs;
+        reg_rdata_next[10] = perf_counter_enable_3_dma_aw_stall_3_qs;
+        reg_rdata_next[11] = perf_counter_enable_3_dma_ar_stall_3_qs;
+        reg_rdata_next[12] = perf_counter_enable_3_dma_r_stall_3_qs;
+        reg_rdata_next[13] = perf_counter_enable_3_dma_w_stall_3_qs;
+        reg_rdata_next[14] = perf_counter_enable_3_dma_buf_w_stall_3_qs;
+        reg_rdata_next[15] = perf_counter_enable_3_dma_buf_r_stall_3_qs;
+        reg_rdata_next[16] = perf_counter_enable_3_dma_aw_done_3_qs;
+        reg_rdata_next[17] = perf_counter_enable_3_dma_aw_bw_3_qs;
+        reg_rdata_next[18] = perf_counter_enable_3_dma_ar_done_3_qs;
+        reg_rdata_next[19] = perf_counter_enable_3_dma_ar_bw_3_qs;
+        reg_rdata_next[20] = perf_counter_enable_3_dma_r_done_3_qs;
+        reg_rdata_next[21] = perf_counter_enable_3_dma_r_bw_3_qs;
+        reg_rdata_next[22] = perf_counter_enable_3_dma_w_done_3_qs;
+        reg_rdata_next[23] = perf_counter_enable_3_dma_w_bw_3_qs;
+        reg_rdata_next[24] = perf_counter_enable_3_dma_b_done_3_qs;
+        reg_rdata_next[25] = perf_counter_enable_3_dma_busy_3_qs;
+        reg_rdata_next[26] = perf_counter_enable_3_icache_miss_3_qs;
+        reg_rdata_next[27] = perf_counter_enable_3_icache_hit_3_qs;
+        reg_rdata_next[28] = perf_counter_enable_3_icache_prefetch_3_qs;
+        reg_rdata_next[29] = perf_counter_enable_3_icache_double_hit_3_qs;
+        reg_rdata_next[30] = perf_counter_enable_3_icache_stall_3_qs;
       end
 
       addr_hit[4]: begin
-        reg_rdata_next[47:0] = perf_counter_0_qs;
+        reg_rdata_next[0] = perf_counter_enable_4_cycle_4_qs;
+        reg_rdata_next[1] = perf_counter_enable_4_tcdm_accessed_4_qs;
+        reg_rdata_next[2] = perf_counter_enable_4_tcdm_congested_4_qs;
+        reg_rdata_next[3] = perf_counter_enable_4_issue_fpu_4_qs;
+        reg_rdata_next[4] = perf_counter_enable_4_issue_fpu_seq_4_qs;
+        reg_rdata_next[5] = perf_counter_enable_4_issue_core_to_fpu_4_qs;
+        reg_rdata_next[6] = perf_counter_enable_4_retired_instr_4_qs;
+        reg_rdata_next[7] = perf_counter_enable_4_retired_load_4_qs;
+        reg_rdata_next[8] = perf_counter_enable_4_retired_i_4_qs;
+        reg_rdata_next[9] = perf_counter_enable_4_retired_acc_4_qs;
+        reg_rdata_next[10] = perf_counter_enable_4_dma_aw_stall_4_qs;
+        reg_rdata_next[11] = perf_counter_enable_4_dma_ar_stall_4_qs;
+        reg_rdata_next[12] = perf_counter_enable_4_dma_r_stall_4_qs;
+        reg_rdata_next[13] = perf_counter_enable_4_dma_w_stall_4_qs;
+        reg_rdata_next[14] = perf_counter_enable_4_dma_buf_w_stall_4_qs;
+        reg_rdata_next[15] = perf_counter_enable_4_dma_buf_r_stall_4_qs;
+        reg_rdata_next[16] = perf_counter_enable_4_dma_aw_done_4_qs;
+        reg_rdata_next[17] = perf_counter_enable_4_dma_aw_bw_4_qs;
+        reg_rdata_next[18] = perf_counter_enable_4_dma_ar_done_4_qs;
+        reg_rdata_next[19] = perf_counter_enable_4_dma_ar_bw_4_qs;
+        reg_rdata_next[20] = perf_counter_enable_4_dma_r_done_4_qs;
+        reg_rdata_next[21] = perf_counter_enable_4_dma_r_bw_4_qs;
+        reg_rdata_next[22] = perf_counter_enable_4_dma_w_done_4_qs;
+        reg_rdata_next[23] = perf_counter_enable_4_dma_w_bw_4_qs;
+        reg_rdata_next[24] = perf_counter_enable_4_dma_b_done_4_qs;
+        reg_rdata_next[25] = perf_counter_enable_4_dma_busy_4_qs;
+        reg_rdata_next[26] = perf_counter_enable_4_icache_miss_4_qs;
+        reg_rdata_next[27] = perf_counter_enable_4_icache_hit_4_qs;
+        reg_rdata_next[28] = perf_counter_enable_4_icache_prefetch_4_qs;
+        reg_rdata_next[29] = perf_counter_enable_4_icache_double_hit_4_qs;
+        reg_rdata_next[30] = perf_counter_enable_4_icache_stall_4_qs;
       end
 
       addr_hit[5]: begin
-        reg_rdata_next[47:0] = perf_counter_1_qs;
+        reg_rdata_next[0] = perf_counter_enable_5_cycle_5_qs;
+        reg_rdata_next[1] = perf_counter_enable_5_tcdm_accessed_5_qs;
+        reg_rdata_next[2] = perf_counter_enable_5_tcdm_congested_5_qs;
+        reg_rdata_next[3] = perf_counter_enable_5_issue_fpu_5_qs;
+        reg_rdata_next[4] = perf_counter_enable_5_issue_fpu_seq_5_qs;
+        reg_rdata_next[5] = perf_counter_enable_5_issue_core_to_fpu_5_qs;
+        reg_rdata_next[6] = perf_counter_enable_5_retired_instr_5_qs;
+        reg_rdata_next[7] = perf_counter_enable_5_retired_load_5_qs;
+        reg_rdata_next[8] = perf_counter_enable_5_retired_i_5_qs;
+        reg_rdata_next[9] = perf_counter_enable_5_retired_acc_5_qs;
+        reg_rdata_next[10] = perf_counter_enable_5_dma_aw_stall_5_qs;
+        reg_rdata_next[11] = perf_counter_enable_5_dma_ar_stall_5_qs;
+        reg_rdata_next[12] = perf_counter_enable_5_dma_r_stall_5_qs;
+        reg_rdata_next[13] = perf_counter_enable_5_dma_w_stall_5_qs;
+        reg_rdata_next[14] = perf_counter_enable_5_dma_buf_w_stall_5_qs;
+        reg_rdata_next[15] = perf_counter_enable_5_dma_buf_r_stall_5_qs;
+        reg_rdata_next[16] = perf_counter_enable_5_dma_aw_done_5_qs;
+        reg_rdata_next[17] = perf_counter_enable_5_dma_aw_bw_5_qs;
+        reg_rdata_next[18] = perf_counter_enable_5_dma_ar_done_5_qs;
+        reg_rdata_next[19] = perf_counter_enable_5_dma_ar_bw_5_qs;
+        reg_rdata_next[20] = perf_counter_enable_5_dma_r_done_5_qs;
+        reg_rdata_next[21] = perf_counter_enable_5_dma_r_bw_5_qs;
+        reg_rdata_next[22] = perf_counter_enable_5_dma_w_done_5_qs;
+        reg_rdata_next[23] = perf_counter_enable_5_dma_w_bw_5_qs;
+        reg_rdata_next[24] = perf_counter_enable_5_dma_b_done_5_qs;
+        reg_rdata_next[25] = perf_counter_enable_5_dma_busy_5_qs;
+        reg_rdata_next[26] = perf_counter_enable_5_icache_miss_5_qs;
+        reg_rdata_next[27] = perf_counter_enable_5_icache_hit_5_qs;
+        reg_rdata_next[28] = perf_counter_enable_5_icache_prefetch_5_qs;
+        reg_rdata_next[29] = perf_counter_enable_5_icache_double_hit_5_qs;
+        reg_rdata_next[30] = perf_counter_enable_5_icache_stall_5_qs;
       end
 
       addr_hit[6]: begin
-        reg_rdata_next[31:0] = '0;
+        reg_rdata_next[0] = perf_counter_enable_6_cycle_6_qs;
+        reg_rdata_next[1] = perf_counter_enable_6_tcdm_accessed_6_qs;
+        reg_rdata_next[2] = perf_counter_enable_6_tcdm_congested_6_qs;
+        reg_rdata_next[3] = perf_counter_enable_6_issue_fpu_6_qs;
+        reg_rdata_next[4] = perf_counter_enable_6_issue_fpu_seq_6_qs;
+        reg_rdata_next[5] = perf_counter_enable_6_issue_core_to_fpu_6_qs;
+        reg_rdata_next[6] = perf_counter_enable_6_retired_instr_6_qs;
+        reg_rdata_next[7] = perf_counter_enable_6_retired_load_6_qs;
+        reg_rdata_next[8] = perf_counter_enable_6_retired_i_6_qs;
+        reg_rdata_next[9] = perf_counter_enable_6_retired_acc_6_qs;
+        reg_rdata_next[10] = perf_counter_enable_6_dma_aw_stall_6_qs;
+        reg_rdata_next[11] = perf_counter_enable_6_dma_ar_stall_6_qs;
+        reg_rdata_next[12] = perf_counter_enable_6_dma_r_stall_6_qs;
+        reg_rdata_next[13] = perf_counter_enable_6_dma_w_stall_6_qs;
+        reg_rdata_next[14] = perf_counter_enable_6_dma_buf_w_stall_6_qs;
+        reg_rdata_next[15] = perf_counter_enable_6_dma_buf_r_stall_6_qs;
+        reg_rdata_next[16] = perf_counter_enable_6_dma_aw_done_6_qs;
+        reg_rdata_next[17] = perf_counter_enable_6_dma_aw_bw_6_qs;
+        reg_rdata_next[18] = perf_counter_enable_6_dma_ar_done_6_qs;
+        reg_rdata_next[19] = perf_counter_enable_6_dma_ar_bw_6_qs;
+        reg_rdata_next[20] = perf_counter_enable_6_dma_r_done_6_qs;
+        reg_rdata_next[21] = perf_counter_enable_6_dma_r_bw_6_qs;
+        reg_rdata_next[22] = perf_counter_enable_6_dma_w_done_6_qs;
+        reg_rdata_next[23] = perf_counter_enable_6_dma_w_bw_6_qs;
+        reg_rdata_next[24] = perf_counter_enable_6_dma_b_done_6_qs;
+        reg_rdata_next[25] = perf_counter_enable_6_dma_busy_6_qs;
+        reg_rdata_next[26] = perf_counter_enable_6_icache_miss_6_qs;
+        reg_rdata_next[27] = perf_counter_enable_6_icache_hit_6_qs;
+        reg_rdata_next[28] = perf_counter_enable_6_icache_prefetch_6_qs;
+        reg_rdata_next[29] = perf_counter_enable_6_icache_double_hit_6_qs;
+        reg_rdata_next[30] = perf_counter_enable_6_icache_stall_6_qs;
       end
 
       addr_hit[7]: begin
-        reg_rdata_next[31:0] = '0;
+        reg_rdata_next[0] = perf_counter_enable_7_cycle_7_qs;
+        reg_rdata_next[1] = perf_counter_enable_7_tcdm_accessed_7_qs;
+        reg_rdata_next[2] = perf_counter_enable_7_tcdm_congested_7_qs;
+        reg_rdata_next[3] = perf_counter_enable_7_issue_fpu_7_qs;
+        reg_rdata_next[4] = perf_counter_enable_7_issue_fpu_seq_7_qs;
+        reg_rdata_next[5] = perf_counter_enable_7_issue_core_to_fpu_7_qs;
+        reg_rdata_next[6] = perf_counter_enable_7_retired_instr_7_qs;
+        reg_rdata_next[7] = perf_counter_enable_7_retired_load_7_qs;
+        reg_rdata_next[8] = perf_counter_enable_7_retired_i_7_qs;
+        reg_rdata_next[9] = perf_counter_enable_7_retired_acc_7_qs;
+        reg_rdata_next[10] = perf_counter_enable_7_dma_aw_stall_7_qs;
+        reg_rdata_next[11] = perf_counter_enable_7_dma_ar_stall_7_qs;
+        reg_rdata_next[12] = perf_counter_enable_7_dma_r_stall_7_qs;
+        reg_rdata_next[13] = perf_counter_enable_7_dma_w_stall_7_qs;
+        reg_rdata_next[14] = perf_counter_enable_7_dma_buf_w_stall_7_qs;
+        reg_rdata_next[15] = perf_counter_enable_7_dma_buf_r_stall_7_qs;
+        reg_rdata_next[16] = perf_counter_enable_7_dma_aw_done_7_qs;
+        reg_rdata_next[17] = perf_counter_enable_7_dma_aw_bw_7_qs;
+        reg_rdata_next[18] = perf_counter_enable_7_dma_ar_done_7_qs;
+        reg_rdata_next[19] = perf_counter_enable_7_dma_ar_bw_7_qs;
+        reg_rdata_next[20] = perf_counter_enable_7_dma_r_done_7_qs;
+        reg_rdata_next[21] = perf_counter_enable_7_dma_r_bw_7_qs;
+        reg_rdata_next[22] = perf_counter_enable_7_dma_w_done_7_qs;
+        reg_rdata_next[23] = perf_counter_enable_7_dma_w_bw_7_qs;
+        reg_rdata_next[24] = perf_counter_enable_7_dma_b_done_7_qs;
+        reg_rdata_next[25] = perf_counter_enable_7_dma_busy_7_qs;
+        reg_rdata_next[26] = perf_counter_enable_7_icache_miss_7_qs;
+        reg_rdata_next[27] = perf_counter_enable_7_icache_hit_7_qs;
+        reg_rdata_next[28] = perf_counter_enable_7_icache_prefetch_7_qs;
+        reg_rdata_next[29] = perf_counter_enable_7_icache_double_hit_7_qs;
+        reg_rdata_next[30] = perf_counter_enable_7_icache_stall_7_qs;
       end
 
       addr_hit[8]: begin
-        reg_rdata_next[31:0] = hw_barrier_qs;
+        reg_rdata_next[9:0] = hart_select_0_qs;
       end
 
       addr_hit[9]: begin
+        reg_rdata_next[9:0] = hart_select_1_qs;
+      end
+
+      addr_hit[10]: begin
+        reg_rdata_next[9:0] = hart_select_2_qs;
+      end
+
+      addr_hit[11]: begin
+        reg_rdata_next[9:0] = hart_select_3_qs;
+      end
+
+      addr_hit[12]: begin
+        reg_rdata_next[9:0] = hart_select_4_qs;
+      end
+
+      addr_hit[13]: begin
+        reg_rdata_next[9:0] = hart_select_5_qs;
+      end
+
+      addr_hit[14]: begin
+        reg_rdata_next[9:0] = hart_select_6_qs;
+      end
+
+      addr_hit[15]: begin
+        reg_rdata_next[9:0] = hart_select_7_qs;
+      end
+
+      addr_hit[16]: begin
+        reg_rdata_next[47:0] = perf_counter_0_qs;
+      end
+
+      addr_hit[17]: begin
+        reg_rdata_next[47:0] = perf_counter_1_qs;
+      end
+
+      addr_hit[18]: begin
+        reg_rdata_next[47:0] = perf_counter_2_qs;
+      end
+
+      addr_hit[19]: begin
+        reg_rdata_next[47:0] = perf_counter_3_qs;
+      end
+
+      addr_hit[20]: begin
+        reg_rdata_next[47:0] = perf_counter_4_qs;
+      end
+
+      addr_hit[21]: begin
+        reg_rdata_next[47:0] = perf_counter_5_qs;
+      end
+
+      addr_hit[22]: begin
+        reg_rdata_next[47:0] = perf_counter_6_qs;
+      end
+
+      addr_hit[23]: begin
+        reg_rdata_next[47:0] = perf_counter_7_qs;
+      end
+
+      addr_hit[24]: begin
+        reg_rdata_next[31:0] = '0;
+      end
+
+      addr_hit[25]: begin
+        reg_rdata_next[31:0] = '0;
+      end
+
+      addr_hit[26]: begin
+        reg_rdata_next[31:0] = hw_barrier_qs;
+      end
+
+      addr_hit[27]: begin
         reg_rdata_next[0] = '0;
       end
 

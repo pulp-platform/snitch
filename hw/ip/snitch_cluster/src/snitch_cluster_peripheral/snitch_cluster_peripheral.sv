@@ -119,6 +119,22 @@ module snitch_cluster_peripheral
       else if (reg2hw.perf_counter_enable[i].issue_core_to_fpu.q) begin
         perf_counter_d[i] = perf_counter_d[i] + sel_core_events.issue_core_to_fpu;
       end
+      // Retired instructions
+      else if (reg2hw.perf_counter_enable[i].retired_instr.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + sel_core_events.retired_instr;
+      end
+      // Retired load instructions
+      else if (reg2hw.perf_counter_enable[i].retired_load.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + sel_core_events.retired_load;
+      end
+      // Retired base instructions
+      else if (reg2hw.perf_counter_enable[i].retired_i.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + sel_core_events.retired_i;
+      end
+      // Retired offloaded instructions
+      else if (reg2hw.perf_counter_enable[i].retired_acc.q) begin
+        perf_counter_d[i] = perf_counter_d[i] + sel_core_events.retired_acc;
+      end
       // DMA AW stall
       else if (reg2hw.perf_counter_enable[i].dma_aw_stall.q) begin
         perf_counter_d[i] = perf_counter_d[i] + dma_events_q.aw_stall;
