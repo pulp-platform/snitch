@@ -7,7 +7,7 @@
         { name: "NumPerfCounters",
         desc: "Number of performance counters",
         type: "int",
-        default: "8"
+        default: "16"
         },
     ],
     name: "snitch_cluster_peripheral",
