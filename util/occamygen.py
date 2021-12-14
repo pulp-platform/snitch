@@ -136,20 +136,26 @@ def main():
         with open(outdir / "memories.json", "w") as f:
             f.write(occamy.cluster.memory_cfg())
 
+    ####################
+    # Address Map (AM) #
+    ####################
     # Create the address map.
     am = solder.AddrMap()
     # Create a device tree object.
     dts = device_tree.DeviceTree()
 
+    # Toplevel crossbar address map
     am_soc_narrow_xbar = am.new_node("soc_narrow_xbar")
     am_soc_wide_xbar = am.new_node("soc_wide_xbar")
 
+    # Quadrant crossbar address map
     am_wide_xbar_quadrant_s1 = list()
     am_narrow_xbar_quadrant_s1 = list()
     for i in range(nr_s1_quadrants):
         am_wide_xbar_quadrant_s1.append(am.new_node("wide_xbar_quadrant_s1_{}".format(i)))
         am_narrow_xbar_quadrant_s1.append(am.new_node("narrow_xbar_quadrant_s1_{}".format(i)))
 
+    # Peripheral crossbar address map
     am_soc_axi_lite_periph_xbar = am.new_node("soc_axi_lite_periph_xbar")
     am_soc_regbus_periph_xbar = am.new_node("soc_periph_regbus_xbar")
 
@@ -160,8 +166,9 @@ def main():
     ])
 
     am_bootrom = am.new_leaf(
-        "bootrom", occamy.cfg["rom"]["length"],
-        occamy.cfg["rom"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        "bootrom",
+        occamy.cfg["peripheral"]["rom"]["length"],
+        occamy.cfg["peripheral"]["rom"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_soc_ctrl = am.new_leaf("soc_ctrl", 0x1000,
                               0x02000000).attach_to(am_soc_regbus_periph_xbar)
@@ -190,8 +197,9 @@ def main():
                           0x03000000).attach_to(am_soc_regbus_periph_xbar)
 
     am_clint = am.new_leaf(
-        "clint", occamy.cfg["clint"]["length"],
-        occamy.cfg["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        "clint",
+        occamy.cfg["peripheral"]["clint"]["length"],
+        occamy.cfg["peripheral"]["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
     dts.add_clint([0], am_clint)
 
     am_pcie_cfg = am.new_leaf("pcie_cfg", 0x20000,
@@ -225,7 +233,9 @@ def main():
         am_soc_narrow_xbar.attach(am_narrow_xbar_quadrant_s1[i])
         am_soc_wide_xbar.attach(am_wide_xbar_quadrant_s1[i])
 
-    # Quadrants and Cluster addrmap
+    ##############################
+    # AM: Quadrants and Clusters #
+    ##############################
     cluster_size        = occamy.cfg["cluster"]["cluster_base_offset"]
     cluster_tcdm_size   = occamy.cfg["cluster"]["tcdm"]["size"] * 1024
     cluster_periph_size = cluster_tcdm_size
