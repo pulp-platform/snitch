@@ -98,7 +98,7 @@ addrmap: update-source addrmap.png addrmap.pdf
 addrmap.png: update-source
 	dot -Tpng addrmap/addrmap.dot > addrmap.png
 
-addrmap.tex:
+addrmap.tex: update-source
 	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir addrmap --template addrmap/addrmap.tex.tpl
 
 addrmap.pdf: addrmap.tex
