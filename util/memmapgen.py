@@ -109,12 +109,12 @@ def main():
 
         # collect into dict
         entry = {
-            'name': row['name'].upper().replace("_", "\_"),
-            'start_addr_str': start_addr_str.replace("_", "\_"),
+            'name': row['name'].upper().replace("_", "\\_"),
+            'start_addr_str': start_addr_str.replace("_", "\\_"),
             'start_addr': start_addr,
-            'end_addr_str': end_addr_str.replace("_", "\_"),
+            'end_addr_str': end_addr_str.replace("_", "\\_"),
             'end_addr': end_addr,
-            'size': size_str.replace("_", "\_")
+            'size': size_str.replace("_", "\\_")
         }
 
         # collect all_quadrant_entries seperately for "zoom-in" graphic
@@ -157,11 +157,11 @@ def main():
 
             filler_entry = {
                 'name': filler_entry_name,
-                'start_addr_str': filler_entry_start_addr_str.replace("_", "\_"),
+                'start_addr_str': filler_entry_start_addr_str.replace("_", "\\_"),
                 'start_addr': filler_entry_start_addr,
-                'end_addr_str': filler_entry_end_addr_str.replace("_", "\_"),
+                'end_addr_str': filler_entry_end_addr_str.replace("_", "\\_"),
                 'end_addr': filler_entry_end_addr,
-                'size': filler_entry_size_str.replace("_", "\_")
+                'size': filler_entry_size_str.replace("_", "\\_")
             }
             added_quadrant = 1
             all_entries_filled.append(filler_entry)
@@ -188,11 +188,11 @@ def main():
 
                 filler_entry = {
                     'name':           filler_entry_name,
-                    'start_addr_str': filler_entry_start_addr_str.replace("_", "\_"),
+                    'start_addr_str': filler_entry_start_addr_str.replace("_", "\\_"),
                     'start_addr':     filler_entry_start_addr,
-                    'end_addr_str':   filler_entry_end_addr_str.replace("_", "\_"),
+                    'end_addr_str':   filler_entry_end_addr_str.replace("_", "\\_"),
                     'end_addr':       filler_entry_end_addr,
-                    'size':           filler_entry_size_str.replace("_", "\_")
+                    'size':           filler_entry_size_str.replace("_", "\\_")
                 }
                 all_entries_filled.append(filler_entry)
 
