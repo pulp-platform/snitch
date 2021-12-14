@@ -48,14 +48,14 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 update-source:
 	@echo "[SOLDER]  Generating sources"
 	@echo "[SOLDER]  RTL"
-	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap.dot --outdir src --wrapper --memories \
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap/addrmap.dot --outdir src --wrapper --memories \
 		--top-sv src/occamy_top.sv.tpl \
 		--soc-sv src/occamy_soc.sv.tpl \
 		--pkg-sv src/occamy_pkg.sv.tpl \
 		--quadrant-s1 src/occamy_quadrant_s1.sv.tpl \
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
 		--cva6-sv src/occamy_cva6.sv.tpl
-	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap.dot --outdir test \
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap/addrmap.dot --am-cheader addrmap/addrmap.h --am-csv addrmap/addrmap.csv --outdir test \
 		--testharness-sv test/testharness.sv.tpl \
 		--bootdata ../../ip/snitch_cluster/test/bootdata.cc.tpl
 	@echo "[SOLDER]  CLINT"
@@ -92,8 +92,28 @@ update-socreg:
 	@$(REGGEN) --cdefines --outfile $(CDEF) src/occamy_soc_ctrl/occamy_soc_reg.hjson
 	@$(CLANG_FORMAT) -i $(CDEF)
 
+# Generate all addressmaps
+addrmap: update-source addrmap.png addrmap.pdf
+
 addrmap.png: update-source
-	dot -Tpng addrmap.dot > addrmap.png
+	dot -Tpng addrmap/addrmap.dot > addrmap.png
+
+addrmap.tex:
+	@$(ROOT)/util/memmapgen.py --file addrmap/addrmap.csv --outdir addrmap --template addrmap/addrmap.tex.tpl
+
+addrmap.pdf: addrmap.tex
+	cd addrmap && latexmk -quiet -pdf addrmap.tex
+
+clean-addrmap.pdf:
+	rm -rf addrmap/addrmap.aux
+	rm -rf addrmap/addrmap.fdb*
+	rm -rf addrmap/addrmap.fls
+	rm -rf addrmap/addrmap.log
+	rm -rf addrmap/addrmap.pdf
+
+clean-addrmap: clean-addrmap.pdf
+	rm -rf addrmap.png
+
 
 #############
 # Verilator #
