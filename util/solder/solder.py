@@ -8,6 +8,7 @@
 import math
 import pathlib
 import logging
+import csv
 
 from copy import copy
 from mako.lookup import TemplateLookup
@@ -54,6 +55,14 @@ class AddrMap(object):
                 continue
             out += entry.print_cheader()
         return out
+
+    def print_csv(self, csv_writer):
+        csv_writer.writerow(['name', 'start_addr', 'end_addr', 'size'])
+        for entry in self.entries:
+            if not isinstance(entry, AddrMapLeaf):
+                continue
+            entry.print_csv(csv_writer)
+        return csv_writer
 
     def render_graphviz(self):
         out = "digraph {\n"
@@ -106,6 +115,10 @@ class AddrMapLeaf(AddrMapEntry):
             out += "#define {}{}_BASE_ADDR 0x{:08x}\n".format(
                 self.name.upper(), idx, base)
         return out
+
+    def print_csv(self, csv_writer):
+        for i, base in enumerate(self.bases):
+            csv_writer.writerow([self.name, base, base + self.size - 1, self.size])
 
     def render_graphviz(self):
         label = self.name
