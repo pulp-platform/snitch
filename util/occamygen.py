@@ -159,42 +159,68 @@ def main():
     am_soc_axi_lite_periph_xbar = am.new_node("soc_axi_lite_periph_xbar")
     am_soc_regbus_periph_xbar = am.new_node("soc_periph_regbus_xbar")
 
-    am_debug = am.new_leaf("debug", 0x1000,
-                           0x00000000).attach_to(am_soc_axi_lite_periph_xbar)
+    ############################
+    # AM: Periph AXI Lite XBar #
+    ############################
+    am_debug = am.new_leaf("debug",
+                           occamy.cfg["peripheral"]["debug"]["length"],
+                           occamy.cfg["peripheral"]["debug"]["address"]).attach_to(am_soc_axi_lite_periph_xbar)
     dts.add_device("debug", "riscv,debug-013", am_debug, [
         "interrupts-extended = <&CPU0_intc 65535>", "reg-names = \"control\""
     ])
 
+    ##########################
+    # AM: Periph Regbus XBar #
+    ##########################
     am_bootrom = am.new_leaf(
         "bootrom",
         occamy.cfg["peripheral"]["rom"]["length"],
         occamy.cfg["peripheral"]["rom"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_soc_ctrl = am.new_leaf("soc_ctrl", 0x1000,
-                              0x02000000).attach_to(am_soc_regbus_periph_xbar)
-    am_clk_mgr = am.new_leaf("clk_mgr", 0x1000,
-                             0x02001000).attach_to(am_soc_regbus_periph_xbar)
+    am_soc_ctrl = am.new_leaf(
+        "soc_ctrl",
+        occamy.cfg["peripheral"]["soc_ctrl"]["length"],
+        occamy.cfg["peripheral"]["soc_ctrl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_uart = am.new_leaf("uart", 0x1000,
-                          0x02002000).attach_to(am_soc_regbus_periph_xbar)
+    am_clk_mgr = am.new_leaf(
+        "clk_mgr",
+        occamy.cfg["peripheral"]["clk_mgr"]["length"],
+        occamy.cfg["peripheral"]["clk_mgr"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+
+    am_uart = am.new_leaf(
+        "uart",
+        occamy.cfg["peripheral"]["uart"]["length"],
+        occamy.cfg["peripheral"]["uart"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+
     dts.add_device("serial", "lowrisc,serial", am_uart, [
         "clock-frequency = <50000000>", "current-speed = <115200>",
         "interrupt-parent = <&PLIC0>", "interrupts = <1>"
     ])
 
-    am_gpio = am.new_leaf("gpio", 0x1000,
-                          0x02003000).attach_to(am_soc_regbus_periph_xbar)
-    am_i2c = am.new_leaf("i2c", 0x1000,
-                         0x02004000).attach_to(am_soc_regbus_periph_xbar)
+    am_gpio = am.new_leaf(
+        "gpio",
+        occamy.cfg["peripheral"]["gpio"]["length"],
+        occamy.cfg["peripheral"]["gpio"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_chip_ctrl = am.new_leaf("chip_ctrl", 0x1000,
-                               0x02005000).attach_to(am_soc_regbus_periph_xbar)
+    am_i2c = am.new_leaf(
+        "i2c",
+        occamy.cfg["peripheral"]["i2c"]["length"],
+        occamy.cfg["peripheral"]["i2c"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_timer = am.new_leaf("timer", 0x1000,
-                           0x02006000).attach_to(am_soc_regbus_periph_xbar)
+    am_chip_ctrl = am.new_leaf(
+        "chip_ctrl",
+        occamy.cfg["peripheral"]["chip_ctrl"]["length"],
+        occamy.cfg["peripheral"]["chip_ctrl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_spim = am.new_leaf("spim", 0x20000,
-                          0x03000000).attach_to(am_soc_regbus_periph_xbar)
+    am_timer = am.new_leaf(
+        "timer",
+        occamy.cfg["peripheral"]["timer"]["length"],
+        occamy.cfg["peripheral"]["timer"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+
+    am_spim = am.new_leaf(
+        "spim",
+        occamy.cfg["peripheral"]["spim"]["length"],
+        occamy.cfg["peripheral"]["spim"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_clint = am.new_leaf(
         "clint",
@@ -202,99 +228,163 @@ def main():
         occamy.cfg["peripheral"]["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
     dts.add_clint([0], am_clint)
 
-    am_pcie_cfg = am.new_leaf("pcie_cfg", 0x20000,
-                              0x05000000).attach_to(am_soc_regbus_periph_xbar)
+    am_pcie_cfg = am.new_leaf(
+        "pcie_cfg",
+        occamy.cfg["peripheral"]["pcie_cfg"]["length"],
+        occamy.cfg["peripheral"]["pcie_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     # TODO: Revise address map for HBI config and APB control
-    am_hbi_cfg = am.new_leaf("hbi_cfg", 0x10000,
-                             0x06000000).attach_to(am_soc_regbus_periph_xbar)
+    am_hbi_cfg = am.new_leaf(
+        "hbi_cfg",
+        occamy.cfg["peripheral"]["hbi_cfg"]["length"],
+        occamy.cfg["peripheral"]["hbi_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_hbi_ctl = am.new_leaf("hbi_ctl", 0x10000,
-                             0x07000000).attach_to(am_soc_regbus_periph_xbar)
+    am_hbi_ctl = am.new_leaf(
+        "hbi_ctl",
+        occamy.cfg["peripheral"]["hbi_ctl"]["length"],
+        occamy.cfg["peripheral"]["hbi_ctl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_hbm_cfg = am.new_leaf("hbm_cfg", 0x400000,
-                             0x08000000).attach_to(am_soc_regbus_periph_xbar)
+    am_hbm_cfg = am.new_leaf(
+        "hbm_cfg",
+        occamy.cfg["peripheral"]["hbm_cfg"]["length"],
+        occamy.cfg["peripheral"]["hbm_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_hbm_phy_cfg = am.new_leaf(
-        "hbm_phy_cfg", 0x100000,
-        0x09000000).attach_to(am_soc_regbus_periph_xbar)
+        "hbm_phy_cfg",
+        occamy.cfg["peripheral"]["hbm_phy_cfg"]["length"],
+        occamy.cfg["peripheral"]["hbm_phy_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_hbm_seq = am.new_leaf("hbm_seq", 0x10000,
-                             0x0A000000).attach_to(am_soc_regbus_periph_xbar)
+    am_hbm_seq = am.new_leaf(
+        "hbm_seq",
+        occamy.cfg["peripheral"]["hbm_seq"]["length"],
+        occamy.cfg["peripheral"]["hbm_seq"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_plic = am.new_leaf("plic", 0x4000000,
-                          0x0C000000).attach_to(am_soc_regbus_periph_xbar)
+    am_plic = am.new_leaf(
+        "plic",
+        occamy.cfg["peripheral"]["plic"]["length"],
+        occamy.cfg["peripheral"]["plic"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     dts.add_plic([0], am_plic)
 
-    # connect quadrants AXI interconnects to each other and to "AXI soc wide" and "AXI soc narrow"
+    ##################
+    # AM: SPM / PCIE #
+    ##################
+    # Connect PCIE to Wide AXI
+    am_pcie = am.new_leaf(
+        "pcie",
+        occamy.cfg["pcie"]["length"],
+        occamy.cfg["pcie"]["address_io"],
+        occamy.cfg["pcie"]["address_mm"]).attach_to(am_soc_wide_xbar)
+
+    # Connect SPM to Narrow AXI
+    am_spm = am.new_leaf(
+        "spm",
+        occamy.cfg["spm"]["length"],
+        occamy.cfg["spm"]["address"]).attach_to(am_soc_narrow_xbar)
+
+    ###########
+    # AM: HBI #
+    ###########
+    am_hbi = am.new_leaf(
+        "hbi",
+        occamy.cfg["hbi"]["length"],
+        occamy.cfg["hbi"]["address"])
+    am_soc_wide_xbar.attach(am_hbi)
+
+    # Add connection from quadrants AXI xbar to HBI
     for i in range(nr_s1_quadrants):
-        am_narrow_xbar_quadrant_s1[i].attach(am_wide_xbar_quadrant_s1[i])
-        am_soc_narrow_xbar.attach(am_narrow_xbar_quadrant_s1[i])
-        am_soc_wide_xbar.attach(am_wide_xbar_quadrant_s1[i])
+        am_wide_xbar_quadrant_s1[i].attach(am_hbi)
+
+    ###########
+    # AM: HBM #
+    ###########
+    am_hbm = list()
+
+    hbm_base_address_0 = occamy.cfg["hbm"]["address_0"]
+    hbm_base_address_1 = occamy.cfg["hbm"]["address_1"]
+
+    nr_hbm_channels = occamy.cfg["hbm"]["nr_channels_total"]
+    nr_channels_base_0 = occamy.cfg["hbm"]["nr_channels_address_0"]
+
+    hbm_channel_size = occamy.cfg["hbm"]["channel_size"]
+
+    for i in range(nr_hbm_channels):
+        bases = list()
+        # Map first channels on both base addresses
+        if i < nr_channels_base_0:
+            bases.append(hbm_base_address_0 + i * hbm_channel_size)
+        # Map all channels on second base address
+        bases.append(hbm_base_address_1 + i * hbm_channel_size)
+        # create address map
+        am_hbm.append(
+            am.new_leaf(
+                "hbm_{}".format(i),
+                hbm_channel_size,
+                *bases).attach_to(am_soc_wide_xbar))
+
+    dts.add_memory(am_hbm[0])
 
     ##############################
     # AM: Quadrants and Clusters #
     ##############################
-    cluster_size        = occamy.cfg["cluster"]["cluster_base_offset"]
-    cluster_tcdm_size   = occamy.cfg["cluster"]["tcdm"]["size"] * 1024
+    cluster_size = occamy.cfg["cluster"]["cluster_base_offset"]
+    cluster_tcdm_size = occamy.cfg["cluster"]["tcdm"]["size"] * 1024
     cluster_periph_size = cluster_tcdm_size
 
     quadrants_base_addr = occamy.cfg["cluster"]["cluster_base_addr"]
-    quadrant_size       = cluster_size * nr_s1_clusters
+    quadrant_size = cluster_size * nr_s1_clusters
 
-    am_s1_quadrants = list()
     for i in range(nr_s1_quadrants):
-
         cluster_base_addr = quadrants_base_addr + i * quadrant_size
 
         am_clusters = list()
         for j in range(nr_s1_clusters):
             bases_cluster = list()
             bases_cluster.append(cluster_base_addr + j * cluster_size + 0)
-            am_clusters.append(am.new_leaf("quadrant_{}_cluster_{}_tcdm".format(i,j), cluster_tcdm_size, *bases_cluster).attach_to(am_wide_xbar_quadrant_s1[i]).attach_to(am_narrow_xbar_quadrant_s1[i]))
+            am_clusters.append(
+                am.new_leaf(
+                    "quadrant_{}_cluster_{}_tcdm".format(i, j),
+                    cluster_tcdm_size,
+                    *bases_cluster
+                ).attach_to(
+                    am_wide_xbar_quadrant_s1[i]
+                ).attach_to(
+                    am_narrow_xbar_quadrant_s1[i]
+                )
+            )
 
             bases_cluster = list()
             bases_cluster.append(cluster_base_addr + j * cluster_size + cluster_tcdm_size)
-            am_clusters.append(am.new_leaf("quadrant_{}_cluster_{}_periph".format(i,j), cluster_periph_size, *bases_cluster).attach_to(am_wide_xbar_quadrant_s1[i]).attach_to(am_narrow_xbar_quadrant_s1[i]))
+            am_clusters.append(
+                am.new_leaf(
+                    "quadrant_{}_cluster_{}_periph".format(i, j),
+                    cluster_periph_size,
+                    *bases_cluster
+                ).attach_to(
+                    am_wide_xbar_quadrant_s1[i]
+                ).attach_to(
+                    am_narrow_xbar_quadrant_s1[i]
+                )
+            )
 
-    am_pcie = am.new_leaf("pcie", 0x28000000, 0x20000000,
-                          0x48000000).attach_to(am_soc_wide_xbar)
+    ##############################
+    # AM: Crossbars #
+    ##############################
+    # Connect quadrants AXI xbar
+    for i in range(nr_s1_quadrants):
+        am_narrow_xbar_quadrant_s1[i].attach(am_wide_xbar_quadrant_s1[i])
+        am_soc_narrow_xbar.attach(am_narrow_xbar_quadrant_s1[i])
+        am_soc_wide_xbar.attach(am_wide_xbar_quadrant_s1[i])
 
-    am_spm = am.new_leaf("spm", occamy.cfg["spm"]["length"],
-                         occamy.cfg["spm"]["address"])
-
-    # HBM
-    am_hbm = list()
-    HBM_CHANNEL_SIZE = 0x40000000  # 1 GB channel size
-    HBM_BASE = 0x80000000
-
-    for i in range(8):
-        bases = list()
-        if i < 2:
-            bases.append(HBM_BASE + i * HBM_CHANNEL_SIZE)
-        bases.append(0x1000000000 + i * HBM_CHANNEL_SIZE)
-        am_hbm.append(
-            am.new_leaf("hbm_{}".format(i), HBM_CHANNEL_SIZE,
-                        *bases).attach_to(am_soc_wide_xbar))
-
-    dts.add_memory(am_hbm[0])
-
+    # Connect narrow xbar
     am_soc_narrow_xbar.attach(am_soc_axi_lite_periph_xbar)
     am_soc_narrow_xbar.attach(am_soc_regbus_periph_xbar)
     am_soc_narrow_xbar.attach(am_soc_wide_xbar)
-    am_soc_narrow_xbar.attach(am_spm)
-
-    am_soc_wide_xbar.attach(am_soc_narrow_xbar)
 
     am_soc_axi_lite_periph_xbar.attach(am_soc_narrow_xbar)
 
-    # HBI
-    am_hbi = am.new_leaf("hbi", 0x10000000000, 0x10000000000)
-    am_soc_wide_xbar.attach(am_hbi)
-
-    for i in range(nr_s1_quadrants):
-        am_wide_xbar_quadrant_s1[i].attach(am_hbi)
+    # Connect wide xbar
+    am_soc_wide_xbar.attach(am_soc_narrow_xbar)
 
     # Generate crossbars.
 
@@ -502,7 +592,7 @@ def main():
         "nr_s1_quadrants": nr_s1_quadrants,
         "nr_s1_clusters": nr_s1_clusters,
         "nr_cluster_cores": nr_cluster_cores,
-        "hbm_channel_size": HBM_CHANNEL_SIZE
+        "hbm_channel_size": hbm_channel_size
     }
 
     # Emit the code.
