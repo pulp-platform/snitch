@@ -143,7 +143,12 @@ def main():
 
     am_soc_narrow_xbar = am.new_node("soc_narrow_xbar")
     am_soc_wide_xbar = am.new_node("soc_wide_xbar")
-    am_wide_xbar_quadrant_s1 = am.new_node("wide_xbar_quadrant_s1")
+
+    am_wide_xbar_quadrant_s1 = list()
+    am_narrow_xbar_quadrant_s1 = list()
+    for i in range(nr_s1_quadrants):
+        am_wide_xbar_quadrant_s1.append(am.new_node("wide_xbar_quadrant_s1_{}".format(i)))
+        am_narrow_xbar_quadrant_s1.append(am.new_node("narrow_xbar_quadrant_s1_{}".format(i)))
 
     am_soc_axi_lite_periph_xbar = am.new_node("soc_axi_lite_periph_xbar")
     am_soc_regbus_periph_xbar = am.new_node("soc_periph_regbus_xbar")
@@ -214,6 +219,35 @@ def main():
 
     dts.add_plic([0], am_plic)
 
+    # connect quadrants AXI interconnects to each other and to "AXI soc wide" and "AXI soc narrow"
+    for i in range(nr_s1_quadrants):
+        am_narrow_xbar_quadrant_s1[i].attach(am_wide_xbar_quadrant_s1[i])
+        am_soc_narrow_xbar.attach(am_narrow_xbar_quadrant_s1[i])
+        am_soc_wide_xbar.attach(am_wide_xbar_quadrant_s1[i])
+
+    # Quadrants and Cluster addrmap
+    cluster_size        = occamy.cfg["cluster"]["cluster_base_offset"]
+    cluster_tcdm_size   = occamy.cfg["cluster"]["tcdm"]["size"] * 1024
+    cluster_periph_size = cluster_tcdm_size
+
+    quadrants_base_addr = occamy.cfg["cluster"]["cluster_base_addr"]
+    quadrant_size       = cluster_size * nr_s1_clusters
+
+    am_s1_quadrants = list()
+    for i in range(nr_s1_quadrants):
+
+        cluster_base_addr = quadrants_base_addr + i * quadrant_size
+
+        am_clusters = list()
+        for j in range(nr_s1_clusters):
+            bases_cluster = list()
+            bases_cluster.append(cluster_base_addr + j * cluster_size + 0)
+            am_clusters.append(am.new_leaf("quadrant_{}_cluster_{}_tcdm".format(i,j), cluster_tcdm_size, *bases_cluster).attach_to(am_wide_xbar_quadrant_s1[i]).attach_to(am_narrow_xbar_quadrant_s1[i]))
+
+            bases_cluster = list()
+            bases_cluster.append(cluster_base_addr + j * cluster_size + cluster_tcdm_size)
+            am_clusters.append(am.new_leaf("quadrant_{}_cluster_{}_periph".format(i,j), cluster_periph_size, *bases_cluster).attach_to(am_wide_xbar_quadrant_s1[i]).attach_to(am_narrow_xbar_quadrant_s1[i]))
+
     am_pcie = am.new_leaf("pcie", 0x28000000, 0x20000000,
                           0x48000000).attach_to(am_soc_wide_xbar)
 
@@ -246,9 +280,11 @@ def main():
     am_soc_axi_lite_periph_xbar.attach(am_soc_narrow_xbar)
 
     # HBI
-    am_hbi = am.new_leaf("hbi", 0x10000000000,
-                         0x10000000000).attach_to(am_wide_xbar_quadrant_s1)
+    am_hbi = am.new_leaf("hbi", 0x10000000000, 0x10000000000)
     am_soc_wide_xbar.attach(am_hbi)
+
+    for i in range(nr_s1_quadrants):
+        am_wide_xbar_quadrant_s1[i].attach(am_hbi)
 
     # Generate crossbars.
 
@@ -388,7 +424,7 @@ def main():
         no_loopback=True,
         atop_support=False,
         context="quadrant_s1",
-        node=am_wide_xbar_quadrant_s1)
+        node=am_wide_xbar_quadrant_s1[0])
 
     narrow_xbar_quadrant_s1 = solder.AxiXbar(
         48,
