@@ -162,9 +162,11 @@ def main():
     ############################
     # AM: Periph AXI Lite XBar #
     ############################
-    am_debug = am.new_leaf("debug",
-                           occamy.cfg["peripheral"]["debug"]["length"],
-                           occamy.cfg["peripheral"]["debug"]["address"]).attach_to(am_soc_axi_lite_periph_xbar)
+    am_debug = am.new_leaf(
+        "debug",
+        occamy.cfg["debug"]["length"],
+        occamy.cfg["debug"]["address"]).attach_to(am_soc_axi_lite_periph_xbar)
+
     dts.add_device("debug", "riscv,debug-013", am_debug, [
         "interrupts-extended = <&CPU0_intc 65535>", "reg-names = \"control\""
     ])
@@ -174,23 +176,23 @@ def main():
     ##########################
     am_bootrom = am.new_leaf(
         "bootrom",
-        occamy.cfg["peripheral"]["rom"]["length"],
-        occamy.cfg["peripheral"]["rom"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["rom"]["length"],
+        occamy.cfg["rom"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_soc_ctrl = am.new_leaf(
         "soc_ctrl",
-        occamy.cfg["peripheral"]["soc_ctrl"]["length"],
-        occamy.cfg["peripheral"]["soc_ctrl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["soc_ctrl"]["length"],
+        occamy.cfg["soc_ctrl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_clk_mgr = am.new_leaf(
         "clk_mgr",
-        occamy.cfg["peripheral"]["clk_mgr"]["length"],
-        occamy.cfg["peripheral"]["clk_mgr"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["clk_mgr"]["length"],
+        occamy.cfg["clk_mgr"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_uart = am.new_leaf(
         "uart",
-        occamy.cfg["peripheral"]["uart"]["length"],
-        occamy.cfg["peripheral"]["uart"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["uart"]["length"],
+        occamy.cfg["uart"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     dts.add_device("serial", "lowrisc,serial", am_uart, [
         "clock-frequency = <50000000>", "current-speed = <115200>",
@@ -199,70 +201,70 @@ def main():
 
     am_gpio = am.new_leaf(
         "gpio",
-        occamy.cfg["peripheral"]["gpio"]["length"],
-        occamy.cfg["peripheral"]["gpio"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["gpio"]["length"],
+        occamy.cfg["gpio"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_i2c = am.new_leaf(
         "i2c",
-        occamy.cfg["peripheral"]["i2c"]["length"],
-        occamy.cfg["peripheral"]["i2c"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["i2c"]["length"],
+        occamy.cfg["i2c"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_chip_ctrl = am.new_leaf(
         "chip_ctrl",
-        occamy.cfg["peripheral"]["chip_ctrl"]["length"],
-        occamy.cfg["peripheral"]["chip_ctrl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["chip_ctrl"]["length"],
+        occamy.cfg["chip_ctrl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_timer = am.new_leaf(
         "timer",
-        occamy.cfg["peripheral"]["timer"]["length"],
-        occamy.cfg["peripheral"]["timer"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["timer"]["length"],
+        occamy.cfg["timer"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_spim = am.new_leaf(
         "spim",
-        occamy.cfg["peripheral"]["spim"]["length"],
-        occamy.cfg["peripheral"]["spim"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["spim"]["length"],
+        occamy.cfg["spim"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_clint = am.new_leaf(
         "clint",
-        occamy.cfg["peripheral"]["clint"]["length"],
-        occamy.cfg["peripheral"]["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["clint"]["length"],
+        occamy.cfg["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
     dts.add_clint([0], am_clint)
 
     am_pcie_cfg = am.new_leaf(
         "pcie_cfg",
-        occamy.cfg["peripheral"]["pcie_cfg"]["length"],
-        occamy.cfg["peripheral"]["pcie_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["pcie_cfg"]["length"],
+        occamy.cfg["pcie_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     # TODO: Revise address map for HBI config and APB control
     am_hbi_cfg = am.new_leaf(
         "hbi_cfg",
-        occamy.cfg["peripheral"]["hbi_cfg"]["length"],
-        occamy.cfg["peripheral"]["hbi_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["hbi_cfg"]["length"],
+        occamy.cfg["hbi_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_hbi_ctl = am.new_leaf(
         "hbi_ctl",
-        occamy.cfg["peripheral"]["hbi_ctl"]["length"],
-        occamy.cfg["peripheral"]["hbi_ctl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["hbi_ctl"]["length"],
+        occamy.cfg["hbi_ctl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_hbm_cfg = am.new_leaf(
         "hbm_cfg",
-        occamy.cfg["peripheral"]["hbm_cfg"]["length"],
-        occamy.cfg["peripheral"]["hbm_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["hbm_cfg"]["length"],
+        occamy.cfg["hbm_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_hbm_phy_cfg = am.new_leaf(
         "hbm_phy_cfg",
-        occamy.cfg["peripheral"]["hbm_phy_cfg"]["length"],
-        occamy.cfg["peripheral"]["hbm_phy_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["hbm_phy_cfg"]["length"],
+        occamy.cfg["hbm_phy_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_hbm_seq = am.new_leaf(
         "hbm_seq",
-        occamy.cfg["peripheral"]["hbm_seq"]["length"],
-        occamy.cfg["peripheral"]["hbm_seq"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["hbm_seq"]["length"],
+        occamy.cfg["hbm_seq"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     am_plic = am.new_leaf(
         "plic",
-        occamy.cfg["peripheral"]["plic"]["length"],
-        occamy.cfg["peripheral"]["plic"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["plic"]["length"],
+        occamy.cfg["plic"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
     dts.add_plic([0], am_plic)
 
