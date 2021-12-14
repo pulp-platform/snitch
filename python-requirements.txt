@@ -15,5 +15,3 @@ progressbar2
 tabulate
 yamlfmt
 pyyaml
-csv
-operator
