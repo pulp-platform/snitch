@@ -8,7 +8,6 @@
 import math
 import pathlib
 import logging
-import csv
 
 from copy import copy
 from mako.lookup import TemplateLookup
