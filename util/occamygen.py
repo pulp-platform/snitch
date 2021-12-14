@@ -11,6 +11,7 @@ import sys
 import re
 import logging
 from subprocess import run
+import csv
 
 from jsonref import JsonRef
 from clustergen.occamy import Occamy
@@ -80,11 +81,15 @@ def main():
     parser.add_argument("--cheader",
                         metavar="CHEADER",
                         help="Name of the cheader file (output)")
+    parser.add_argument("--csv",
+                        metavar="CSV",
+                        help="Name of the csv file (output)")
 
     parser.add_argument("--graph", "-g", metavar="DOT")
     parser.add_argument("--memories", "-m", action="store_true")
     parser.add_argument("--wrapper", "-w", action="store_true")
     parser.add_argument("--am-cheader", "-D", metavar="ADDRMAP_CHEADER")
+    parser.add_argument("--am-csv", "-aml", metavar="ADDRMAP_CSV")
     parser.add_argument("--dts", metavar="DTS", help="System's device tree.")
 
     parser.add_argument("-v",
@@ -512,6 +517,14 @@ def main():
     if args.am_cheader:
         with open(args.am_cheader, "w") as file:
             file.write(am.print_cheader())
+
+    ###############
+    # ADDRMAP CSV #
+    ###############
+    if args.am_csv:
+        with open(args.am_csv, 'w', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile, delimiter=',')
+            am.print_csv(csv_writer)
 
     ############
     # CHIP TOP #
