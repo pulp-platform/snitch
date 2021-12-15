@@ -28,7 +28,7 @@ VLOG_FLAGS 	  += ${QUESTA_64BIT}
 CFG ?= src/occamy_cfg.hjson
 CDEF = ${ROOT}/sw/snRuntime/include/occamy_soc_peripheral.h
 
-all: update-clint update-plic update-socreg update-source
+all: update-clint update-plic update-socreg update-source addrmap.tex
 
 test: ${VSIM_SOURCES} ${TB_SRCS}
 	echo ${VSIM_SOURCES}
@@ -55,7 +55,7 @@ update-source:
 		--quadrant-s1 src/occamy_quadrant_s1.sv.tpl \
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
 		--cva6-sv src/occamy_cva6.sv.tpl
-	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap/addrmap.dot --am-cheader addrmap/addrmap.h --am-csv addrmap/addrmap.csv --outdir test \
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap/addrmap.dot --am-csv addrmap/addrmap.csv --outdir test \
 		--testharness-sv test/testharness.sv.tpl \
 		--bootdata ../../ip/snitch_cluster/test/bootdata.cc.tpl
 	@echo "[SOLDER]  CLINT"
@@ -100,6 +100,8 @@ addrmap.png: update-source
 
 addrmap.tex: update-source
 	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir addrmap --am-tex addrmap/addrmap.tex.tpl
+
+addrmap.md: update-source
 	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir $(ROOT)/docs/ug/ --am-md occamy_addrmap.md
 
 addrmap.pdf: addrmap.tex
