@@ -10,6 +10,8 @@ import re
 import csv
 import operator
 
+from pytablewriter import MarkdownTableWriter
+from pytablewriter.style import Style
 from mako.template import Template
 
 
@@ -72,17 +74,21 @@ def main():
                         metavar="file",
                         type=argparse.FileType('r'),
                         required=True,
-                        help="A csv memory map file")
+                        help="A csv memory map file (input)")
     parser.add_argument("--outdir",
                         "-o",
                         type=pathlib.Path,
                         required=True,
                         help="Target directory.")
-    parser.add_argument("--template",
-                        "-t",
-                        type=pathlib.Path,
-                        required=True,
-                        help="Latex template.")
+    parser.add_argument("--tex",
+                        metavar="TEX_TEMPLATE",
+                        help="Name of the .tex template file (input)")
+    parser.add_argument("--md",
+                        metavar="MD_FILE",
+                        help="Name of the .md file (output)")
+
+    parser.add_argument("--am-tex", "-t", metavar="ADDRMAP_TEX")
+    parser.add_argument("--am-md", "-m", metavar="ADDRMAP_MD")
 
     args = parser.parse_args()
 
@@ -138,6 +144,7 @@ def main():
     all_entries_filled = []
     added_quadrant = 0
     added_quadrant_old = 0
+    md_occamy_list = []
     for entry in all_entries:
 
         filler_entry = None
@@ -165,6 +172,13 @@ def main():
             }
             added_quadrant = 1
             all_entries_filled.append(filler_entry)
+            md_occamy_list.append([
+                filler_entry['name'],
+                filler_entry['size'],
+                "used",
+                filler_entry['start_addr_str'],
+                filler_entry['end_addr_str']
+            ])
 
         # add EMTPY block entry at correct position
         if (old_entry != {}):
@@ -195,13 +209,26 @@ def main():
                     'size':           filler_entry_size_str.replace("_", "\\_")
                 }
                 all_entries_filled.append(filler_entry)
-
+                md_occamy_list.append([
+                    "-",
+                    filler_entry['size'],
+                    "free",
+                    filler_entry['start_addr_str'],
+                    filler_entry['end_addr_str']
+                ])
                 # store quadrant filler entry
                 if not (added_quadrant_old == added_quadrant):
                     quadrant_filler = dict(filler_entry)
 
         # keep normal entry
         all_entries_filled.append(entry)
+        md_occamy_list.append([
+            entry['name'],
+            entry['size'],
+            "used",
+            entry['start_addr_str'],
+            entry['end_addr_str']
+        ])
 
         # update old_entry to new entry
         old_entry = entry
@@ -224,6 +251,7 @@ def main():
     (QIDX0, QIDX1) = get_label_pos(NR_CLUSTERS_PER_QUADRANT)
 
     all_quadrant_entries_filled = []
+    md_quadrants_list = []
     for entry in all_quadrant_entries:
         items = entry['name'].split('\\_')
         qidx = int(items[1])
@@ -249,12 +277,15 @@ def main():
         cluster_string = ""
         cluster_border = ""
         inner_string = ""
+        md_string = ""
         if tcdm:
+            md_string = "CLUSTER\\_TCDM"
             inner_string = "{} TCDM".format(entry['size'])
             cluster_string = cluster_size_str
             cluster_border = "lrt"
             outer_start_addr = entry['start_addr_str']
         else:
+            md_string = "CLUSTER\\_PERIPHERAL"
             inner_string = "{} PERIPHERAL".format(entry['size'])
             cluster_string = "CLUSTER {}".format(cidx)
             cluster_border = "lrb"
@@ -273,15 +304,87 @@ def main():
         }
 
         all_quadrant_entries_filled.append(new_entry)
+        md_quadrants_list.append([
+            qidx,
+            cidx,
+            md_string,
+            entry['size'],
+            new_entry['inner_start_addr'],
+            new_entry['inner_end_addr'],
+        ])
 
     # write out .tex file
-    write_template(args.template,
-                   args.outdir,
-                   all_entries=all_entries_filled,
-                   nr_quadrants=NR_QUADRANTS,
-                   nr_clusters=NR_CLUSTERS_PER_QUADRANT,
-                   all_quadrant_entries=all_quadrant_entries_filled,
-                   quadrant_filler=quadrant_filler)
+    if args.am_tex:
+        write_template(args.am_tex,
+                       args.outdir,
+                       all_entries=all_entries_filled,
+                       nr_quadrants=NR_QUADRANTS,
+                       nr_clusters=NR_CLUSTERS_PER_QUADRANT,
+                       all_quadrant_entries=all_quadrant_entries_filled,
+                       quadrant_filler=quadrant_filler)
+
+    if args.am_md:
+        md_file_path = args.outdir / str(args.am_md)
+
+        md_quadrants_list.append([
+            "-",
+            "-",
+            quadrant_filler['name'],
+            quadrant_filler['size'],
+            quadrant_filler['start_addr_str'],
+            quadrant_filler['end_addr_str'],
+        ])
+
+        table_occamy_name = "Occamy Address Map"
+        table_quadrants_name = "Quadrants Address Map"
+
+        header_occamy = ["Name", "Size", "Status", "Start", "End"]
+        header_quadrants = ["Quadrant", "Cluster", "Name", "Size", "Start", "End"]
+
+        writer = MarkdownTableWriter(margin=1)
+
+        with open(md_file_path, "w") as file:
+            writer.stream = file
+
+            # markdown text
+            file.write("# Address Map")
+            file.write("\n\n")
+            file.write("This is the current address map of occamy.")
+            file.write("Note that the Quadrants address map has its own table below.")
+            file.write("\n\n")
+
+            # add occamy addrmap
+            file.write("## " + table_occamy_name)
+            file.write("\n\n")
+            writer.headers = header_occamy
+            writer.value_matrix = md_occamy_list
+
+            # set style
+            writer.set_style("Name", Style(align="left"))
+            writer.set_style("Size", Style(align="right"))
+            writer.set_style("Status", Style(align="center"))
+            writer.set_style("Start", Style(align="right"))
+            writer.set_style("End", Style(align="right"))
+
+            writer.write_table()
+            writer.write_null_line()
+            writer.write_null_line()
+
+            # add quadrants addrmap
+            file.write("## " + table_quadrants_name)
+            file.write("\n\n")
+            writer.headers = header_quadrants
+            writer.value_matrix = md_quadrants_list
+
+            writer.set_style("Quadrant", Style(align="center"))
+            writer.set_style("Cluster", Style(align="center"))
+            writer.set_style("Name", Style(align="left"))
+            writer.set_style("Size", Style(align="right"))
+            writer.set_style("Start", Style(align="right"))
+            writer.set_style("End", Style(align="right"))
+
+            writer.write_table()
+            writer.write_null_line()
 
 
 if __name__ == "__main__":

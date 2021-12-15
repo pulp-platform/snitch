@@ -99,7 +99,8 @@ addrmap.png: update-source
 	dot -Tpng addrmap/addrmap.dot > addrmap.png
 
 addrmap.tex: update-source
-	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir addrmap --template addrmap/addrmap.tex.tpl
+	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir addrmap --am-tex addrmap/addrmap.tex.tpl
+	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir $(ROOT)/docs/ug/ --am-md occamy_addrmap.md
 
 addrmap.pdf: addrmap.tex
 	cd addrmap && latexmk -quiet -pdf addrmap.tex
