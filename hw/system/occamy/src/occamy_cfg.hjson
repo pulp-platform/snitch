@@ -226,6 +226,7 @@
         address: 201326592, // 0x0C00_0000
         length: 67108864, // 64 MiB 0x400_0000
     },
+    // non-peripheral IPs
     pcie: {
       address_io: 536870912, // 0x2000_0000
       address_mm: 1207959552, // 0x4800_0000
@@ -233,7 +234,7 @@
     },
     spm: {
       address: 1879048192, // 0x7000_0000
-      length: 131072, // 128 kiB
+      length: 131072, // 128 kiB 0x2_0000
     },
     hbi: {
         address: 1099511627776, // 0x100_0000_0000
