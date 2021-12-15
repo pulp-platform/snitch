@@ -182,13 +182,13 @@ def main():
 
         # add EMTPY block entry at correct position
         if (old_entry != {}):
-            filler_entry_end_addr = entry['start_addr']
+            filler_entry_end_addr = entry['start_addr']-1
             filler_entry_start_addr = 0
             # consider added quadrant block
             if added_quadrant_old == added_quadrant:
-                filler_entry_start_addr = old_entry['end_addr']
+                filler_entry_start_addr = old_entry['end_addr']+1
             else:
-                filler_entry_start_addr = quadrant_range_end
+                filler_entry_start_addr = quadrant_range_end+1
 
             if (filler_entry_end_addr-1 > filler_entry_start_addr):
 
@@ -349,7 +349,7 @@ def main():
             # markdown text
             file.write("# Address Map")
             file.write("\n\n")
-            file.write("This is the current address map of occamy.")
+            file.write("This is the current address map of occamy. ")
             file.write("Note that the Quadrants address map has its own table below.")
             file.write("\n\n")
 
