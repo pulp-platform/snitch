@@ -23,6 +23,8 @@
         // Do not check solder snippets, they generally do not contain valid
         // stand-alone code.
         'util/solder/*.sv.tpl',
+        // Do not check tex Templates
+        'hw/system/occamy/addrmap/addrmap.tex.tpl'
         // Questasim scripts are not correctly identified by license-checker
         'hw/system/*.do'
     ],

@@ -2,7 +2,6 @@
 *.png
 *.h
 *.csv
-*.tex
 *.pdf
 *.aux
 *.fdb_latexmk
