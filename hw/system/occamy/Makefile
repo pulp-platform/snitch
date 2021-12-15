@@ -96,7 +96,7 @@ update-socreg:
 addrmap: update-source addrmap.png addrmap.pdf
 
 addrmap.png: update-source
-	dot -Tpng addrmap/addrmap.dot > addrmap.png
+	dot -Tpng addrmap/addrmap.dot > addrmap/addrmap.png
 
 addrmap.tex: update-source
 	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir addrmap --am-tex addrmap/addrmap.tex.tpl
