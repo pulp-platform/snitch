@@ -73,7 +73,7 @@
         "dma_id_width_in": {
             "type": "number",
             "description": "Id width of the wide AXI plug into the cluster.",
-            "default": 2
+            "default": 0
         },
         "hart_base_id": {
             "type": "number",
