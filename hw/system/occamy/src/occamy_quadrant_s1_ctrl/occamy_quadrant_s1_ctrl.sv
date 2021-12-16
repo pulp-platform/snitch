@@ -42,7 +42,7 @@ module occamy_quadrant_s1_ctrl
   output axi_a48_d64_i4_u0_req_t quadrant_out_req_o,
   input  axi_a48_d64_i4_u0_resp_t quadrant_out_rsp_i,
   input  axi_a48_d64_i8_u0_req_t quadrant_in_req_i,
-  output axi_a48_d64_i8_u0_resp_t quadrant_in_rsp_o,
+  output axi_a48_d64_i8_u0_resp_t quadrant_in_rsp_o
 );
 
   localparam addr_t InternalBaseAddr = ClusterBaseOffset +
@@ -227,6 +227,6 @@ axi_xbar #(
   );
 
   // Reset directly from register (i.e. (de)assertion inherently synchronized)
-  output logic rst_quadrant_no = reg2hw.reset_n.q;
+  assign rst_quadrant_no = reg2hw.reset_n.q;
 
 endmodule

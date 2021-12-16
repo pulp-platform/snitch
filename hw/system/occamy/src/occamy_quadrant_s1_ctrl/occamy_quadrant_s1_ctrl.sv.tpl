@@ -46,7 +46,7 @@ module occamy_quadrant_s1_ctrl
   output ${soc_narrow_xbar.in_s1_quadrant_0.req_type()} quadrant_out_req_o,
   input  ${soc_narrow_xbar.in_s1_quadrant_0.rsp_type()} quadrant_out_rsp_i,
   input  ${soc_narrow_xbar.out_s1_quadrant_0.req_type()} quadrant_in_req_i,
-  output ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} quadrant_in_rsp_o,
+  output ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} quadrant_in_rsp_o
 );
 
   localparam addr_t InternalBaseAddr = ClusterBaseOffset +
@@ -119,6 +119,6 @@ module occamy_quadrant_s1_ctrl
   );
 
   // Reset directly from register (i.e. (de)assertion inherently synchronized)
-  output logic rst_quadrant_no = reg2hw.reset_n.q;
+  assign rst_quadrant_no = reg2hw.reset_n.q;
 
 endmodule

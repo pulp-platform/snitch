@@ -19,6 +19,7 @@
         'sw/snRuntime/include/interface.h',
         // Generated C headers
         'sw/snRuntime/include/snitch_cluster_peripheral.h',
+        'sw/snRuntime/include/occamy_quad_peripheral.h',
         'sw/snRuntime/include/occamy_soc_peripheral.h',
         // Do not check solder snippets, they generally do not contain valid
         // stand-alone code.
