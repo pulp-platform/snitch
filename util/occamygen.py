@@ -63,6 +63,9 @@ def main():
     parser.add_argument("--quadrant-s1",
                         metavar="QUADRANT_S1",
                         help="Name of S1 quadrant template file (output)")
+    parser.add_argument("--quadrant-s1-ctrl",
+                        metavar="QUADRANT_S1_CTL",
+                        help="Name of S1 quadrant controller template file (output)")
     parser.add_argument("--xilinx-sv",
                         metavar="XILINX_SV",
                         help="Name of the Xilinx wrapper file (output).")
@@ -510,6 +513,33 @@ def main():
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)
 
+    ##########################
+    # S1 Quadrant controller #
+    ##########################
+    # Non-loopback crossbar shims off both narrow master and slave for internal resources
+    quadrant_s1_ctrl_xbar = solder.AxiXbar(
+        48,
+        64,
+        4,  # TODO: Source from JSON description
+        name="quadrant_s1_ctrl_xbar",
+        clk="clk_i",
+        rst="rst_ni",
+        max_slv_trans=4,        # TODO: Source from JSON description
+        max_mst_trans=4,        # TODO: Source from JSON description
+        fall_through=False,     # TODO: Source from JSON description
+        no_loopback=True,
+        context="quadrant_s1_ctrl")
+
+    # TODO: Define appropriate default routes for each port! (not correct as-is!)
+    quadrant_s1_ctrl_xbar.add_output("soc", [])
+    quadrant_s1_ctrl_xbar.add_output("quadrant", [])
+    quadrant_s1_ctrl_xbar.add_input("soc")
+    quadrant_s1_ctrl_xbar.add_input("quadrant")
+
+    quadrant_s1_ctrl_xbar.add_output_symbolic("internal",
+                                              "InternalBaseAddress",
+                                              "QuadrantAddressSpace")
+
     ################
     # S1 Quadrants #
     ################
@@ -585,6 +615,7 @@ def main():
         "util": util,
         "soc_narrow_xbar": soc_narrow_xbar,
         "soc_wide_xbar": soc_wide_xbar,
+        "quadrant_s1_ctrl_xbar": quadrant_s1_ctrl_xbar,
         "wide_xbar_quadrant_s1": wide_xbar_quadrant_s1,
         "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
         "soc_regbus_periph_xbar": soc_regbus_periph_xbar,
@@ -615,6 +646,14 @@ def main():
                    outdir,
                    module=solder.code_module['soc'],
                    soc_periph_xbar=soc_axi_lite_periph_xbar,
+                   **kwargs)
+
+    ##########################
+    # S1 Quadrant controller #
+    ##########################
+    write_template(args.quadrant_s1_ctrl,
+                   outdir,
+                   module=solder.code_module['quadrant_s1_ctrl'],
                    **kwargs)
 
     ###############

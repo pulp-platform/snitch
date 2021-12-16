@@ -26,9 +26,9 @@ VLOG_FLAGS 	  += -suppress 13314
 VLOG_FLAGS 	  += ${QUESTA_64BIT}
 
 CFG ?= src/occamy_cfg.hjson
-CDEF = ${ROOT}/sw/snRuntime/include/occamy_soc_peripheral.h
+REG_INCDIR ?= ${ROOT}/sw/snRuntime/include/
 
-all: update-clint update-plic update-socreg update-source update-addrmap
+all: update-clint update-plic update-socreg update-quadreg update-source update-addrmap
 
 test: ${VSIM_SOURCES} ${TB_SRCS}
 	echo ${VSIM_SOURCES}
@@ -55,7 +55,9 @@ update-source:
 		--quadrant-s1 src/occamy_quadrant_s1.sv.tpl \
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
 		--cva6-sv src/occamy_cva6.sv.tpl
-	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap/addrmap.dot --am-csv addrmap/addrmap.csv --outdir test \
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/occamy_quadrant_s1_ctrl \
+		--quadrant-s1-ctrl src/occamy_quadrant_s1_ctrl/occamy_quadrant_s1_ctrl.sv.tpl
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir test \
 		--testharness-sv test/testharness.sv.tpl \
 		--bootdata ../../ip/snitch_cluster/test/bootdata.cc.tpl
 	@echo "[SOLDER]  CLINT"
@@ -81,16 +83,22 @@ update-plic:
 	@$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 70 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
 	@$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
 
-# Regenerate the SoC register.
+# Update generic control register.
+define update_ctrl_regs
+	$(if $5, @echo "[REGGEN]  Generate $1 config" && \
+		$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir $2 --chip $2/$3.tpl)
+	@echo "[REGGEN]  Generate $1"
+	@$(REGGEN) -r $2/$3 --outdir $2
+	@echo "[REGGEN]  Generate $1 CDEFS"
+	@$(REGGEN) --cdefines --outfile $(REG_INCDIR)/${4}.h $2/$3
+	@$(CLANG_FORMAT) -i $(REG_INCDIR)/${4}.h
+endef
+
 update-socreg:
-	@echo "[REGGEN]  Generate SOCREGS config"
-	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/occamy_soc_ctrl \
-		--chip src/occamy_soc_ctrl/occamy_soc_reg.hjson.tpl
-	@echo "[REGGEN]  Generate SOCREGS"
-	@$(REGGEN) -r src/occamy_soc_ctrl/occamy_soc_reg.hjson --outdir src/occamy_soc_ctrl/
-	@echo "[REGGEN]  Generate CDEFS"
-	@$(REGGEN) --cdefines --outfile $(CDEF) src/occamy_soc_ctrl/occamy_soc_reg.hjson
-	@$(CLANG_FORMAT) -i $(CDEF)
+	$(call update_ctrl_regs,SOCREGS,src/occamy_soc_ctrl,occamy_soc_reg.hjson,occamy_soc_peripheral,1)
+
+update-quadreg:
+	$(call update_ctrl_regs,QUADREGS,src/occamy_quadrant_s1_ctrl,occamy_quadrant_s1_reg.hjson,occamy_quad_peripheral,1)
 
 # Generate all addressmaps
 update-addrmap: addrmap.tex addrmap.md

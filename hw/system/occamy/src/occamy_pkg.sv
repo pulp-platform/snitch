@@ -378,6 +378,60 @@ package occamy_pkg;
   // verilog_lint: waive parameter-name-style
   localparam int SOC_NARROW_XBAR_IW_OUT = 8;
 
+  /// Inputs of the `quadrant_s1_ctrl_xbar` crossbar.
+  typedef enum int {
+    QUADRANT_S1_CTRL_XBAR_IN_SOC,
+    QUADRANT_S1_CTRL_XBAR_IN_QUADRANT,
+    QUADRANT_S1_CTRL_XBAR_NUM_INPUTS
+  } quadrant_s1_ctrl_xbar_inputs_e;
+
+  /// Outputs of the `quadrant_s1_ctrl_xbar` crossbar.
+  typedef enum int {
+    QUADRANT_S1_CTRL_XBAR_OUT_SOC,
+    QUADRANT_S1_CTRL_XBAR_OUT_QUADRANT,
+    QUADRANT_S1_CTRL_XBAR_OUT_INTERNAL,
+    QUADRANT_S1_CTRL_XBAR_NUM_OUTPUTS
+  } quadrant_s1_ctrl_xbar_outputs_e;
+
+  /// Configuration of the `quadrant_s1_ctrl_xbar` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantS1CtrlXbarCfg = '{
+  NoSlvPorts:         QUADRANT_S1_CTRL_XBAR_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_S1_CTRL_XBAR_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 4,
+  AxiIdUsedSlvPorts:  4,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       64,
+  NoAddrRules:        1
+};
+
+  // AXI bus with 48 bit address, 64 bit data, 5 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d64_i5_u0, logic [47:0], logic [4:0], logic [63:0], logic [7:0],
+                   logic [0:0])
+
+  typedef axi_a48_d64_i4_u0_req_t quadrant_s1_ctrl_xbar_in_req_t;
+  typedef axi_a48_d64_i5_u0_req_t quadrant_s1_ctrl_xbar_out_req_t;
+  typedef axi_a48_d64_i4_u0_resp_t quadrant_s1_ctrl_xbar_in_resp_t;
+  typedef axi_a48_d64_i5_u0_resp_t quadrant_s1_ctrl_xbar_out_resp_t;
+  typedef axi_a48_d64_i4_u0_aw_chan_t quadrant_s1_ctrl_xbar_in_aw_chan_t;
+  typedef axi_a48_d64_i5_u0_aw_chan_t quadrant_s1_ctrl_xbar_out_aw_chan_t;
+  typedef axi_a48_d64_i4_u0_w_chan_t quadrant_s1_ctrl_xbar_in_w_chan_t;
+  typedef axi_a48_d64_i5_u0_w_chan_t quadrant_s1_ctrl_xbar_out_w_chan_t;
+  typedef axi_a48_d64_i4_u0_b_chan_t quadrant_s1_ctrl_xbar_in_b_chan_t;
+  typedef axi_a48_d64_i5_u0_b_chan_t quadrant_s1_ctrl_xbar_out_b_chan_t;
+  typedef axi_a48_d64_i4_u0_ar_chan_t quadrant_s1_ctrl_xbar_in_ar_chan_t;
+  typedef axi_a48_d64_i5_u0_ar_chan_t quadrant_s1_ctrl_xbar_out_ar_chan_t;
+  typedef axi_a48_d64_i4_u0_r_chan_t quadrant_s1_ctrl_xbar_in_r_chan_t;
+  typedef axi_a48_d64_i5_u0_r_chan_t quadrant_s1_ctrl_xbar_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_S1_CTRL_XBAR_IW_IN = 4;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_S1_CTRL_XBAR_IW_OUT = 5;
+
   /// Inputs of the `wide_xbar_quadrant_s1` crossbar.
   typedef enum int {
     WIDE_XBAR_QUADRANT_S1_IN_TOP,
