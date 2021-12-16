@@ -66,31 +66,7 @@ def get_label_pos(max_nr_merged_entries):
     return (idx0, idx1)
 
 
-def main():
-    """Generate the memory map for a given memory address map."""
-    parser = argparse.ArgumentParser(prog="memmapgen")
-    parser.add_argument("--file",
-                        "-f",
-                        metavar="file",
-                        type=argparse.FileType('r'),
-                        required=True,
-                        help="A csv memory map file (input)")
-    parser.add_argument("--outdir",
-                        "-o",
-                        type=pathlib.Path,
-                        required=True,
-                        help="Target directory.")
-    parser.add_argument("--tex",
-                        metavar="TEX_TEMPLATE",
-                        help="Name of the .tex template file (input)")
-    parser.add_argument("--md",
-                        metavar="MD_FILE",
-                        help="Name of the .md file (output)")
-
-    parser.add_argument("--am-tex", "-t", metavar="ADDRMAP_TEX")
-    parser.add_argument("--am-md", "-m", metavar="ADDRMAP_MD")
-
-    args = parser.parse_args()
+def main(file, outdir, tex_filename, md_filename):
 
     # initialize values
     quadrant_range_start = 2**64
@@ -100,7 +76,7 @@ def main():
     all_entries = []
     all_quadrant_entries = []
 
-    reader = csv.DictReader(args.file)
+    reader = csv.DictReader(file)
     for row in reader:
 
         # get strings for template
@@ -314,17 +290,17 @@ def main():
         ])
 
     # write out .tex file
-    if args.am_tex:
-        write_template(args.am_tex,
-                       args.outdir,
+    if tex_filename:
+        write_template(tex_filename,
+                       outdir,
                        all_entries=all_entries_filled,
                        nr_quadrants=NR_QUADRANTS,
                        nr_clusters=NR_CLUSTERS_PER_QUADRANT,
                        all_quadrant_entries=all_quadrant_entries_filled,
                        quadrant_filler=quadrant_filler)
 
-    if args.am_md:
-        md_file_path = args.outdir / str(args.am_md)
+    if md_filename:
+        md_file_path = args.outdir / str(md_filename)
 
         md_quadrants_list.append([
             "-",
@@ -388,4 +364,27 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+
+    """Generate the memory map for a given memory address map."""
+    parser = argparse.ArgumentParser(prog="addrmapgen")
+    parser.add_argument("--file",
+                        "-f",
+                        metavar="file",
+                        type=argparse.FileType('r'),
+                        required=True,
+                        help="A csv memory map file (input)")
+    parser.add_argument("--outdir",
+                        "-o",
+                        type=pathlib.Path,
+                        required=True,
+                        help="Target directory.")
+    parser.add_argument("--tex",
+                        metavar="TEX_TEMPLATE",
+                        help="Name of the .tex template file (input)")
+    parser.add_argument("--md",
+                        metavar="MD_FILE",
+                        help="Name of the .md file (output)")
+
+    args = parser.parse_args()
+
+    main(file=args.file, outdir=args.outdir, tex_filename=args.tex, md_filename=args.md)

@@ -28,7 +28,7 @@ VLOG_FLAGS 	  += ${QUESTA_64BIT}
 CFG ?= src/occamy_cfg.hjson
 CDEF = ${ROOT}/sw/snRuntime/include/occamy_soc_peripheral.h
 
-all: update-clint update-plic update-socreg update-source addrmap.tex
+all: update-clint update-plic update-socreg update-source addrmap
 
 test: ${VSIM_SOURCES} ${TB_SRCS}
 	echo ${VSIM_SOURCES}
@@ -93,16 +93,16 @@ update-socreg:
 	@$(CLANG_FORMAT) -i $(CDEF)
 
 # Generate all addressmaps
-addrmap: update-source addrmap.png addrmap.pdf
+addrmap: update-source addrmap.png addrmap.pdf addrmap.md
 
 addrmap.png: update-source
 	dot -Tpng addrmap/addrmap.dot > addrmap/addrmap.png
 
 addrmap.tex: update-source
-	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir addrmap --am-tex addrmap/addrmap.tex.tpl
+	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir addrmap --tex addrmap/addrmap.tex.tpl
 
 addrmap.md: update-source
-	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir $(ROOT)/docs/ug/ --am-md occamy_addrmap.md
+	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir $(ROOT)/docs/ug/ --md occamy_addrmap.md
 
 addrmap.pdf: addrmap.tex
 	cd addrmap && latexmk -quiet -pdf addrmap.tex
