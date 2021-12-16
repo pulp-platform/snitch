@@ -102,7 +102,8 @@ package occamy_pkg;
   /// The address space set aside for each slave.
   localparam addr_t ClusterAddressSpace = 'h4_0000; // 256 kiB
   /// The address space of a single S1 quadrant.
-  localparam addr_t S1QuadrantAddressSpace = ClusterAddressSpace * NrClustersS1Quadrant;
+  /// Like clusters, allocate double the mapped space and use upper half for internal slaves
+  localparam addr_t S1QuadrantAddressSpace =  2* ClusterAddressSpace * NrClustersS1Quadrant;
 
   ${package}
 
