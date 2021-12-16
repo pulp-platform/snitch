@@ -42,11 +42,13 @@
       wide_xbar: {
         max_slv_trans: 4,
         max_mst_trans: 4,
+        slv_id_width: 2,
         fall_through: false,
       },
       narrow_xbar: {
         max_slv_trans: 4,
         max_mst_trans: 4,
+        slv_id_width: 4,
         fall_through: false,
       },
     },

@@ -89,9 +89,10 @@ module occamy_quadrant_s1
   // Wide Out + RO Cache + IW Converter  //
   /////////////////////////////////////////
   <%
-    wide_xbar_out_iwc = wide_xbar_quadrant_s1.out_top.change_iw(context, 3, "wide_cluster_out_iwc")
+    wide_target_iw = 3
     if ro_cache_cfg:
-      wide_cluster_out_ro_cache = wide_xbar_out_iwc \
+      wide_target_iw += 1
+      wide_cluster_out_ro_cache = wide_xbar_quadrant_s1.out_top \
       .add_ro_cache(context, "snitch_ro_cache", \
         ro_cache_cfg, \
         enable="ro_enable_i", \
@@ -104,9 +105,10 @@ module occamy_quadrant_s1
         sram_cfg_data_i="sram_cfg_i.rocache_data", \
         sram_cfg_tag_i="sram_cfg_i.rocache_tag")
     else:
-      wide_cluster_out_ro_cache = wide_xbar_out_iwc
+      wide_cluster_out_ro_cache = wide_xbar_quadrant_s1.out_top
 
     wide_cluster_out_cut = wide_cluster_out_ro_cache \
+      .change_iw(context, wide_target_iw, "wide_cluster_out_iwc") \
       .isolate(context, "isolate_i[3]", "wide_cluster_out_isolate", isolated="isolated_o[3]", atop_support=False) \
       .cut(context, cut_width)
 

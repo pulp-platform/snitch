@@ -74,6 +74,11 @@ update-clint:
 	@echo "[REGGEN]  Re-generate CLINT regs"
 	@$(ROOT)/util/regtool.py -r -t src/clint src/clint/clint.hjson
 
+quad_xbar_test:
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src \
+		--pkg-sv src/occamy_pkg.sv.tpl \
+		--quad_xbar_test  src/quad_xbar_test.sv.tpl
+
 update-plic:
 	@mkdir -p src/rv_plic
 	@echo "[REGGEN]  Generate PLIC"

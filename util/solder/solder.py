@@ -1231,6 +1231,13 @@ class AxiXbar(Xbar):
                         [(r.lo, r.hi)
                          for r in self.node.get_routes() if r.port == entry])
 
+    def add_output_entries(self, name, entries):
+        from pprint import pprint
+        pprint([(r.lo, r.hi) for r in self.node.get_routes() if r.port in entries])
+        self.add_output(name,
+                        [(r.lo, r.hi)
+                         for r in self.node.get_routes() if r.port in entries])
+
     def addr_map_len(self):
         return len(self.addrmap) + len(self.symbolic_addrmap)
 

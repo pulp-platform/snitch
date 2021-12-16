@@ -62,6 +62,9 @@ def main():
     parser.add_argument("--quadrant-s1",
                         metavar="QUADRANT_S1",
                         help="Name of S1 quadrant template file (output)")
+    parser.add_argument("--quad_xbar_test",
+                        metavar="QUAD_XBAR_TEST",
+                        help="quad_xbar_test)")
     parser.add_argument("--xilinx-sv",
                         metavar="XILINX_SV",
                         help="Name of the Xilinx wrapper file (output).")
@@ -138,6 +141,7 @@ def main():
 
     am_soc_narrow_xbar = am.new_node("soc_narrow_xbar")
     am_soc_wide_xbar = am.new_node("soc_wide_xbar")
+    #am_soc_pre_xbar = am.new_node("soc_pre_xbar")
     am_wide_xbar_quadrant_s1 = am.new_node("wide_xbar_quadrant_s1")
 
     am_soc_axi_lite_periph_xbar = am.new_node("soc_axi_lite_periph_xbar")
@@ -294,13 +298,82 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("hbm_phy_cfg", am_hbm_phy_cfg)
     soc_regbus_periph_xbar.add_output_entry("hbm_seq", am_hbm_seq)
 
+
+    #########################
+    # SoC Quadrant Pre Xbar #
+    #########################
+
+    for i in range(nr_s1_quadrants):
+        # TODO
+        occamy.cfg["pre_xbar"] = dict()
+        occamy.cfg["pre_xbar"]["max_slv_trans"] = 4
+        occamy.cfg["pre_xbar"]["max_mst_trans"] = 4
+        occamy.cfg["pre_xbar"]["fall_through"] = False
+
+        soc_pre_xbar = solder.AxiXbar(
+            48,
+            64,
+            1 + occamy.cfg["wide_xbar_slv_id_width_no_rocache"]
+                + (1 if occamy.cfg["s1_quadrant"].get("ro_cache_cfg") else 0),
+            name="soc_pre_xbar_{}".format(i),
+            clk="clk_i",
+            rst="rst_ni",
+            max_slv_trans=occamy.cfg["pre_xbar"]["max_slv_trans"],
+            max_mst_trans=occamy.cfg["pre_xbar"]["max_mst_trans"],
+            fall_through=occamy.cfg["pre_xbar"]["fall_through"],
+            no_loopback=True,
+            context="soc",
+            #node=am_soc_pre_xbar,
+            node=None)
+
+        soc_pre_xbar.add_input("quadrant")
+        soc_pre_xbar.add_input("hbi")
+
+        soc_pre_xbar.add_output("quadrants", [])
+        soc_pre_xbar.add_output("hbm", [])
+        #soc_pre_xbar.add_output_entries("hbm", am_hbm)
+
+    #####################
+    # SoC Quadrant Xbar #
+    #####################
+
+    occamy.cfg["quadrant_xbar"] = dict()
+    occamy.cfg["quadrant_xbar"]["max_slv_trans"] = 4
+    occamy.cfg["quadrant_xbar"]["max_mst_trans"] = 4
+    occamy.cfg["quadrant_xbar"]["fall_through"] = False
+
+    soc_quadrant_xbar = solder.AxiXbar(
+        48,
+        64,
+        1 + occamy.cfg["wide_xbar_slv_id_width_no_rocache"]
+            + (1 if occamy.cfg["s1_quadrant"].get("ro_cache_cfg") else 0),
+        name="soc_quadrant_xbar",
+        clk="clk_i",
+        rst="rst_ni",
+        max_slv_trans=occamy.cfg["quadrant_xbar"]["max_slv_trans"],
+        max_mst_trans=occamy.cfg["quadrant_xbar"]["max_mst_trans"],
+        fall_through=occamy.cfg["quadrant_xbar"]["fall_through"],
+        no_loopback=True,
+        context="quad_xbar_test",
+        #node=am_soc_quadrant_xbar,
+        node=None)
+
+    soc_quadrant_xbar.add_output("soc_system", [])
+    soc_quadrant_xbar.add_input("soc_system")
+    for i in range(nr_s1_quadrants):
+        soc_quadrant_xbar.add_output_symbolic("s1_quadrant_{}".format(i),
+                                          "s1_quadrant_base_addr",
+                                          "S1QuadrantAddressSpace")
+        soc_quadrant_xbar.add_input("pre_{}".format(i))
+
     #################
     # SoC Wide Xbar #
     #################
     soc_wide_xbar = solder.AxiXbar(
         48,
         512,
-        4 if occamy.cfg["s1_quadrant"].get("ro_cache_cfg") else 3,
+        occamy.cfg["wide_xbar_slv_id_width_no_rocache"]
+            + (1 if occamy.cfg["s1_quadrant"].get("ro_cache_cfg") else 0),
         name="soc_wide_xbar",
         clk="clk_i",
         rst="rst_ni",
@@ -338,7 +411,7 @@ def main():
     soc_narrow_xbar = solder.AxiXbar(
         48,
         64,
-        4,
+        occamy.cfg["narrow_xbar_slv_id_width"],
         name="soc_narrow_xbar",
         clk="clk_i",
         rst="rst_ni",
@@ -369,11 +442,12 @@ def main():
     ################
     # S1 Quadrants #
     ################
+
     # Dummy entries to generate associated types.
     wide_xbar_quadrant_s1 = solder.AxiXbar(
         48,
         512,
-        4,  # TODO: Source from JSON description
+        occamy.cfg["s1_quadrant"]["wide_xbar_slv_id_width"],
         name="wide_xbar_quadrant_s1",
         clk="clk_i",
         rst="rst_ni",
@@ -388,7 +462,7 @@ def main():
     narrow_xbar_quadrant_s1 = solder.AxiXbar(
         48,
         64,
-        4,  # TODO: Source from JSON description
+        occamy.cfg["s1_quadrant"]["narrow_xbar_slv_id_width"],
         name="narrow_xbar_quadrant_s1",
         clk="clk_i",
         rst="rst_ni",
@@ -479,6 +553,14 @@ def main():
     write_template(args.quadrant_s1,
                    outdir,
                    module=solder.code_module['quadrant_s1'],
+                   **kwargs)
+
+    ##################
+    # Quad Xbar test #
+    ##################
+    write_template(args.quad_xbar_test,
+                   outdir,
+                   module=solder.code_module['quad_xbar_test'],
                    **kwargs)
 
     ###########
