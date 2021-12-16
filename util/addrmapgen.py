@@ -66,7 +66,7 @@ def get_label_pos(max_nr_merged_entries: int):
     return (idx0, idx1)
 
 
-def main(file: str, outdir: pathlib.Path, tex_filename:str, md_filename: str):
+def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
 
     # initialize values
     quadrant_range_start = 2**64
