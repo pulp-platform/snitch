@@ -45,7 +45,7 @@ module occamy_quadrant_s1
   input  ${soc_wide_xbar.out_s1_quadrant_0.req_type()}   quadrant_wide_in_req_i,
   output ${soc_wide_xbar.out_s1_quadrant_0.rsp_type()}   quadrant_wide_in_rsp_o,
   // SRAM configuration
-  input  occamy_pkg::sram_cfg_quadrant_t sram_cfg_i
+  input  sram_cfg_quadrant_t sram_cfg_i
 );
 
  // Calculate cluster base address based on `tile id`.
