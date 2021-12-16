@@ -14,8 +14,18 @@
         "wide_xbar": {
             "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
         },
+        "wide_xbar_slv_id_width_no_rocache": {
+            "type": "integer",
+            "description": "ID width of incoming slave ports.",
+            "default": 3
+        },
         "narrow_xbar": {
             "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+        },
+        "narrow_xbar_slv_id_width": {
+            "type": "integer",
+            "description": "ID width of incoming slave ports.",
+            "default": 4
         },
         "nr_s1_quadrant": {
             "title": "Number of S1 Quadrants",
@@ -62,8 +72,18 @@
                 "wide_xbar": {
                     "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
                 },
+                "wide_xbar_slv_id_width": {
+                    "type": "integer",
+                    "description": "ID width of incoming slave ports.",
+                    "default": 2
+                },
                 "narrow_xbar": {
                     "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+                },
+                "narrow_xbar_slv_id_width": {
+                    "type": "integer",
+                    "description": "ID width of incoming slave ports.",
+                    "default": 4
                 }
             }
         },

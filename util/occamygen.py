@@ -443,7 +443,8 @@ def main():
     soc_wide_xbar = solder.AxiXbar(
         48,
         512,
-        4 if occamy.cfg["s1_quadrant"].get("ro_cache_cfg") else 3,
+        occamy.cfg["wide_xbar_slv_id_width_no_rocache"] +
+            (1 if occamy.cfg["s1_quadrant"].get("ro_cache_cfg") else 0),
         name="soc_wide_xbar",
         clk="clk_i",
         rst="rst_ni",
@@ -481,7 +482,7 @@ def main():
     soc_narrow_xbar = solder.AxiXbar(
         48,
         64,
-        4,
+        occamy.cfg["narrow_xbar_slv_id_width"],
         name="soc_narrow_xbar",
         clk="clk_i",
         rst="rst_ni",
@@ -516,7 +517,7 @@ def main():
     wide_xbar_quadrant_s1 = solder.AxiXbar(
         48,
         512,
-        4,  # TODO: Source from JSON description
+        occamy.cfg["s1_quadrant"]["wide_xbar_slv_id_width"],
         name="wide_xbar_quadrant_s1",
         clk="clk_i",
         rst="rst_ni",
@@ -531,7 +532,7 @@ def main():
     narrow_xbar_quadrant_s1 = solder.AxiXbar(
         48,
         64,
-        4,  # TODO: Source from JSON description
+        occamy.cfg["s1_quadrant"]["narrow_xbar_slv_id_width"],
         name="narrow_xbar_quadrant_s1",
         clk="clk_i",
         rst="rst_ni",
