@@ -72,7 +72,7 @@
             "description": "Debug module.",
             "default": {
                 "address": 0,
-                "length": 4096,
+                "length": 4096
             },
             "address": {
                 "type": "number",
@@ -317,6 +317,7 @@
                 "type": "number",
                 "description": "Total size of HBI_CTL in bytes.",
                 "minimum": 0
+            }
         },
         "hbm_cfg": {
             "type": "object",
@@ -334,6 +335,7 @@
                 "type": "number",
                 "description": "Total size of HBM_CFG in bytes.",
                 "minimum": 0
+            }
         },
         "hbm_phy_cfg": {
             "type": "object",
@@ -351,6 +353,7 @@
                 "type": "number",
                 "description": "Total size of HBM_PHY_CFG in bytes.",
                 "minimum": 0
+            }
         },
         "hbm_seq": {
             "type": "object",
@@ -368,6 +371,7 @@
                 "type": "number",
                 "description": "Total size of HBM_PHY_CFG in bytes.",
                 "minimum": 0
+            }
         },
         "plic": {
             "type": "object",
@@ -385,6 +389,7 @@
                 "type": "number",
                 "description": "Total size of PLIC in bytes.",
                 "minimum": 0
+            }
         },
         "spm": {
             "description": "Scratchpad Memory (SPM).",

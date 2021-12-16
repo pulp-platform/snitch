@@ -28,7 +28,7 @@ VLOG_FLAGS 	  += ${QUESTA_64BIT}
 CFG ?= src/occamy_cfg.hjson
 CDEF = ${ROOT}/sw/snRuntime/include/occamy_soc_peripheral.h
 
-all: update-clint update-plic update-socreg update-source addrmap
+all: update-clint update-plic update-socreg update-source update-addrmap
 
 test: ${VSIM_SOURCES} ${TB_SRCS}
 	echo ${VSIM_SOURCES}
@@ -93,7 +93,9 @@ update-socreg:
 	@$(CLANG_FORMAT) -i $(CDEF)
 
 # Generate all addressmaps
-addrmap: update-source addrmap.png addrmap.pdf addrmap.md
+update-addrmap: addrmap.tex addrmap.md
+
+addrmap: update-source update-addrmap addrmap.png addrmap.pdf
 
 addrmap.png: update-source
 	dot -Tpng addrmap/addrmap.dot > addrmap/addrmap.png
