@@ -19,7 +19,7 @@ from mako.template import Template
 re_trailws = re.compile(r'[ \t\r]+$', re.MULTILINE)
 
 
-def write_template(tpl_path, outdir, **kwargs):
+def write_template(tpl_path: str, outdir: pathlib.Path, **kwargs):
     if tpl_path:
         tpl_path = pathlib.Path(tpl_path).absolute()
         print(tpl_path)
@@ -34,7 +34,7 @@ def write_template(tpl_path, outdir, **kwargs):
             raise FileNotFoundError
 
 
-def get_size_string(size):
+def get_size_string(size: int):
     size_str = ""
     if size >= 1024*1024*1024*1024:
         scaled_size = size/(1024*1024*1024*1024)
@@ -54,7 +54,7 @@ def get_size_string(size):
     return size_str
 
 
-def get_label_pos(max_nr_merged_entries):
+def get_label_pos(max_nr_merged_entries: int):
     half = max_nr_merged_entries / 2
     (idx0, idx1) = (0, 0)
     if (max_nr_merged_entries % 2) == 0:
@@ -66,7 +66,7 @@ def get_label_pos(max_nr_merged_entries):
     return (idx0, idx1)
 
 
-def main(file, outdir, tex_filename, md_filename):
+def main(file: str, outdir: pathlib.Path, tex_filename:str, md_filename: str):
 
     # initialize values
     quadrant_range_start = 2**64
@@ -380,9 +380,11 @@ if __name__ == "__main__":
                         help="Target directory.")
     parser.add_argument("--tex",
                         metavar="TEX_TEMPLATE",
+                        type=str,
                         help="Name of the .tex template file (input)")
     parser.add_argument("--md",
                         metavar="MD_FILE",
+                        type=str,
                         help="Name of the .md file (output)")
 
     args = parser.parse_args()
