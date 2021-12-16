@@ -1,16 +1,16 @@
 # Untitled undefined type in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi
 ```
 
-Scratchpad Memory (SPM).
+High-Bandwidth Interconnect (HBI).
 
 | Abstract            | Extensible | Status         | Identifiable | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :----------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | No           | Forbidden         | Allowed               | none                | [occamy.schema.json*](occamy.schema.json "open original schema") |
 
-## spm Type
+## hbi Type
 
 unknown
 
@@ -18,12 +18,12 @@ unknown
 
 | Property            | Type     | Required | Nullable       | Defined by                                                                                                                                                  |
 | :------------------ | :------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [address](#address) | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-address.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/address") |
-| [length](#length)   | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm-properties-length.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/length")   |
+| [address](#address) | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi-properties-address.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi/properties/address") |
+| [length](#length)   | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi-properties-length.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi/properties/length")   |
 
 ## address
 
-Start address of SPM (Scratchpad Memory).
+Start address of HBI.
 
 `address`
 
@@ -33,7 +33,7 @@ Start address of SPM (Scratchpad Memory).
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-spm-properties-address.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/address")
+*   defined in: [Occamy System Schema](occamy-properties-hbi-properties-address.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi/properties/address")
 
 ### address Type
 
@@ -45,7 +45,7 @@ Start address of SPM (Scratchpad Memory).
 
 ## length
 
-Size of SPM based on the address range. The full address range will be mapped to SPM.
+Size of HBI.
 
 `length`
 
@@ -55,7 +55,7 @@ Size of SPM based on the address range. The full address range will be mapped to
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-spm-properties-length.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm/properties/length")
+*   defined in: [Occamy System Schema](occamy-properties-hbi-properties-length.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi/properties/length")
 
 ### length Type
 

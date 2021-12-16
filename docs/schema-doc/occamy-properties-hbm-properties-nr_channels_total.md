@@ -1,15 +1,19 @@
-# Untitled object in Occamy System Schema Schema
+# Untitled number in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/rom
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/nr_channels_total
 ```
 
-Read-only memory from which *all* harts of the system start to boot.
+Total number of HBM channels (all are mapped onto region of address\_1.
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [occamy.schema.json*](occamy.schema.json "open original schema") |
 
-## rom Type
+## nr_channels_total Type
 
-`object` ([Details](occamy-properties-rom.md))
+`number`
+
+## nr_channels_total Constraints
+
+**minimum**: the value of this number must greater than or equal to: `0`

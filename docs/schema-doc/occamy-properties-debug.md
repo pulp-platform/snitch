@@ -1,15 +1,15 @@
 # Untitled object in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/rom
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/debug
 ```
 
-Read-only memory from which *all* harts of the system start to boot.
+Debug module.
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [occamy.schema.json*](occamy.schema.json "open original schema") |
 
-## rom Type
+## debug Type
 
-`object` ([Details](occamy-properties-rom.md))
+`object` ([Details](occamy-properties-debug.md))

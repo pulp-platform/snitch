@@ -1,15 +1,19 @@
-# Untitled object in Occamy System Schema Schema
+# Untitled number in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/rom
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/address_0
 ```
 
-Read-only memory from which *all* harts of the system start to boot.
+Start address of first memory region of HBM.
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [occamy.schema.json*](occamy.schema.json "open original schema") |
 
-## rom Type
+## address\_0 Type
 
-`object` ([Details](occamy-properties-rom.md))
+`number`
+
+## address\_0 Constraints
+
+**minimum**: the value of this number must greater than or equal to: `0`
