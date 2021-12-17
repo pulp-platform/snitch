@@ -1,0 +1,606 @@
+% Copyright 2021 ETH Zurich and University of Bologna.
+% Licensed under the Apache License, Version 2.0, see LICENSE for details.
+% SPDX-License-Identifier: Apache-2.0
+
+
+\documentclass[]{standalone}
+
+\usepackage[]{bytefield}
+
+\begin{document}
+
+\bytefieldsetup{bitheight=2\baselineskip}%
+{\tiny
+
+  \begin{bytefield}[bitheight=2\baselineskip]{19}
+
+    \bitbox[]{5}{\texttt{0x0000\_0000} \\ [0\baselineskip] \texttt{0x0000\_0fff}} &
+    \bitbox{14}{4.0 KB for DEBUG} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{16.0 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0100\_0000} \\ [0\baselineskip] \texttt{0x0101\_ffff}} &
+    \bitbox{14}{128.0 KB for BOOTROM} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{15.9 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0200\_0000} \\ [0\baselineskip] \texttt{0x0200\_0fff}} &
+    \bitbox{14}{4.0 KB for SOC\_CTRL} \\
+    \bitbox[]{5}{\texttt{0x0200\_1000} \\ [0\baselineskip] \texttt{0x0200\_1fff}} &
+    \bitbox{14}{4.0 KB for CLK\_MGR} \\
+    \bitbox[]{5}{\texttt{0x0200\_2000} \\ [0\baselineskip] \texttt{0x0200\_2fff}} &
+    \bitbox{14}{4.0 KB for UART} \\
+    \bitbox[]{5}{\texttt{0x0200\_3000} \\ [0\baselineskip] \texttt{0x0200\_3fff}} &
+    \bitbox{14}{4.0 KB for GPIO} \\
+    \bitbox[]{5}{\texttt{0x0200\_4000} \\ [0\baselineskip] \texttt{0x0200\_4fff}} &
+    \bitbox{14}{4.0 KB for I2C} \\
+    \bitbox[]{5}{\texttt{0x0200\_5000} \\ [0\baselineskip] \texttt{0x0200\_5fff}} &
+    \bitbox{14}{4.0 KB for CHIP\_CTRL} \\
+    \bitbox[]{5}{\texttt{0x0200\_6000} \\ [0\baselineskip] \texttt{0x0200\_6fff}} &
+    \bitbox{14}{4.0 KB for TIMER} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{16.0 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0300\_0000} \\ [0\baselineskip] \texttt{0x0301\_ffff}} &
+    \bitbox{14}{128.0 KB for SPIM} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{15.9 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0400\_0000} \\ [0\baselineskip] \texttt{0x040f\_ffff}} &
+    \bitbox{14}{1.0 MB for CLINT} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{15.0 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0500\_0000} \\ [0\baselineskip] \texttt{0x0501\_ffff}} &
+    \bitbox{14}{128.0 KB for PCIE\_CFG} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{15.9 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0600\_0000} \\ [0\baselineskip] \texttt{0x0600\_ffff}} &
+    \bitbox{14}{64.0 KB for HBI\_CFG} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{15.9 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0700\_0000} \\ [0\baselineskip] \texttt{0x0700\_ffff}} &
+    \bitbox{14}{64.0 KB for HBI\_CTL} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{15.9 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0800\_0000} \\ [0\baselineskip] \texttt{0x083f\_ffff}} &
+    \bitbox{14}{4.0 MB for HBM\_CFG} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{12.0 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0900\_0000} \\ [0\baselineskip] \texttt{0x090f\_ffff}} &
+    \bitbox{14}{1.0 MB for HBM\_PHY\_CFG} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{15.0 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0a00\_0000} \\ [0\baselineskip] \texttt{0x0a00\_ffff}} &
+    \bitbox{14}{64.0 KB for HBM\_SEQ} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{31.9 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x0c00\_0000} \\ [0\baselineskip] \texttt{0x0fff\_ffff}} &
+    \bitbox{14}{64.0 MB for PLIC} \\
+    \bitbox[]{5}{\texttt{0x1000\_0000} \\ [0\baselineskip] \texttt{0x107f\_ffff}} &
+    \bitbox{14}{8.0 MB for QUADRANTS} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{248.0 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x2000\_0000} \\ [0\baselineskip] \texttt{0x47ff\_ffff}} &
+    \bitbox{14}{640.0 MB for PCIE} \\
+    \bitbox[]{5}{\texttt{0x4800\_0000} \\ [0\baselineskip] \texttt{0x6fff\_ffff}} &
+    \bitbox{14}{640.0 MB for PCIE} \\
+    \bitbox[]{5}{\texttt{0x7000\_0000} \\ [0\baselineskip] \texttt{0x7001\_ffff}} &
+    \bitbox{14}{128.0 KB for SPM} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{255.9 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x8000\_0000} \\ [0\baselineskip] \texttt{0xbfff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_0} \\
+    \bitbox[]{5}{\texttt{0xc000\_0000} \\ [0\baselineskip] \texttt{0xffff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_1} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{60.0 GB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x10\_0000\_0000} \\ [0\baselineskip] \texttt{0x10\_3fff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_0} \\
+    \bitbox[]{5}{\texttt{0x10\_4000\_0000} \\ [0\baselineskip] \texttt{0x10\_7fff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_1} \\
+    \bitbox[]{5}{\texttt{0x10\_8000\_0000} \\ [0\baselineskip] \texttt{0x10\_bfff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_2} \\
+    \bitbox[]{5}{\texttt{0x10\_c000\_0000} \\ [0\baselineskip] \texttt{0x10\_ffff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_3} \\
+    \bitbox[]{5}{\texttt{0x11\_0000\_0000} \\ [0\baselineskip] \texttt{0x11\_3fff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_4} \\
+    \bitbox[]{5}{\texttt{0x11\_4000\_0000} \\ [0\baselineskip] \texttt{0x11\_7fff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_5} \\
+    \bitbox[]{5}{\texttt{0x11\_8000\_0000} \\ [0\baselineskip] \texttt{0x11\_bfff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_6} \\
+    \bitbox[]{5}{\texttt{0x11\_c000\_0000} \\ [0\baselineskip] \texttt{0x11\_ffff\_ffff}} &
+    \bitbox{14}{1.0 GB for HBM\_7} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{952.0 GB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x100\_0000\_0000} \\ [0\baselineskip] \texttt{0x1ff\_ffff\_ffff}} &
+    \bitbox{14}{1.0 TB for HBI} \\
+
+  \end{bytefield}
+
+
+
+  \begin{bytefield}[]{26}
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1000\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lrt]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1000\_0000} \\ [0\baselineskip] \texttt{0x1001\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1003\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 0}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1002\_0000} \\ [0\baselineskip] \texttt{0x1003\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1004\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1004\_0000} \\ [0\baselineskip] \texttt{0x1005\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1007\_ffff}} &
+    \bitbox[lr]{5}{\texttt{1.0 MB}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 1}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1006\_0000} \\ [0\baselineskip] \texttt{0x1007\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1008\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{QUADRANT 0}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1008\_0000} \\ [0\baselineskip] \texttt{0x1009\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x100b\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 2}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x100a\_0000} \\ [0\baselineskip] \texttt{0x100b\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x100c\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x100c\_0000} \\ [0\baselineskip] \texttt{0x100d\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x100f\_ffff}} &
+    \bitbox[lrb]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 3}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x100e\_0000} \\ [0\baselineskip] \texttt{0x100f\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1010\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lrt]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1010\_0000} \\ [0\baselineskip] \texttt{0x1011\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1013\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 0}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1012\_0000} \\ [0\baselineskip] \texttt{0x1013\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1014\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1014\_0000} \\ [0\baselineskip] \texttt{0x1015\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1017\_ffff}} &
+    \bitbox[lr]{5}{\texttt{1.0 MB}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 1}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1016\_0000} \\ [0\baselineskip] \texttt{0x1017\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1018\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{QUADRANT 1}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1018\_0000} \\ [0\baselineskip] \texttt{0x1019\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x101b\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 2}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x101a\_0000} \\ [0\baselineskip] \texttt{0x101b\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x101c\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x101c\_0000} \\ [0\baselineskip] \texttt{0x101d\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x101f\_ffff}} &
+    \bitbox[lrb]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 3}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x101e\_0000} \\ [0\baselineskip] \texttt{0x101f\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1020\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lrt]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1020\_0000} \\ [0\baselineskip] \texttt{0x1021\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1023\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 0}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1022\_0000} \\ [0\baselineskip] \texttt{0x1023\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1024\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1024\_0000} \\ [0\baselineskip] \texttt{0x1025\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1027\_ffff}} &
+    \bitbox[lr]{5}{\texttt{1.0 MB}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 1}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1026\_0000} \\ [0\baselineskip] \texttt{0x1027\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1028\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{QUADRANT 2}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1028\_0000} \\ [0\baselineskip] \texttt{0x1029\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x102b\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 2}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x102a\_0000} \\ [0\baselineskip] \texttt{0x102b\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x102c\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x102c\_0000} \\ [0\baselineskip] \texttt{0x102d\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x102f\_ffff}} &
+    \bitbox[lrb]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 3}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x102e\_0000} \\ [0\baselineskip] \texttt{0x102f\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1030\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lrt]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1030\_0000} \\ [0\baselineskip] \texttt{0x1031\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1033\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 0}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1032\_0000} \\ [0\baselineskip] \texttt{0x1033\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1034\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1034\_0000} \\ [0\baselineskip] \texttt{0x1035\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1037\_ffff}} &
+    \bitbox[lr]{5}{\texttt{1.0 MB}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 1}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1036\_0000} \\ [0\baselineskip] \texttt{0x1037\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1038\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{QUADRANT 3}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1038\_0000} \\ [0\baselineskip] \texttt{0x1039\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x103b\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 2}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x103a\_0000} \\ [0\baselineskip] \texttt{0x103b\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x103c\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x103c\_0000} \\ [0\baselineskip] \texttt{0x103d\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x103f\_ffff}} &
+    \bitbox[lrb]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 3}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x103e\_0000} \\ [0\baselineskip] \texttt{0x103f\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1040\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lrt]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1040\_0000} \\ [0\baselineskip] \texttt{0x1041\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1043\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 0}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1042\_0000} \\ [0\baselineskip] \texttt{0x1043\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1044\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1044\_0000} \\ [0\baselineskip] \texttt{0x1045\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1047\_ffff}} &
+    \bitbox[lr]{5}{\texttt{1.0 MB}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 1}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1046\_0000} \\ [0\baselineskip] \texttt{0x1047\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1048\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{QUADRANT 4}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1048\_0000} \\ [0\baselineskip] \texttt{0x1049\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x104b\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 2}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x104a\_0000} \\ [0\baselineskip] \texttt{0x104b\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x104c\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x104c\_0000} \\ [0\baselineskip] \texttt{0x104d\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x104f\_ffff}} &
+    \bitbox[lrb]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 3}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x104e\_0000} \\ [0\baselineskip] \texttt{0x104f\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1050\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lrt]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1050\_0000} \\ [0\baselineskip] \texttt{0x1051\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1053\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 0}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1052\_0000} \\ [0\baselineskip] \texttt{0x1053\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1054\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1054\_0000} \\ [0\baselineskip] \texttt{0x1055\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1057\_ffff}} &
+    \bitbox[lr]{5}{\texttt{1.0 MB}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 1}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1056\_0000} \\ [0\baselineskip] \texttt{0x1057\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1058\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{QUADRANT 5}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1058\_0000} \\ [0\baselineskip] \texttt{0x1059\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x105b\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 2}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x105a\_0000} \\ [0\baselineskip] \texttt{0x105b\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x105c\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x105c\_0000} \\ [0\baselineskip] \texttt{0x105d\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x105f\_ffff}} &
+    \bitbox[lrb]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 3}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x105e\_0000} \\ [0\baselineskip] \texttt{0x105f\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1060\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lrt]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1060\_0000} \\ [0\baselineskip] \texttt{0x1061\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1063\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 0}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1062\_0000} \\ [0\baselineskip] \texttt{0x1063\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1064\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1064\_0000} \\ [0\baselineskip] \texttt{0x1065\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1067\_ffff}} &
+    \bitbox[lr]{5}{\texttt{1.0 MB}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 1}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1066\_0000} \\ [0\baselineskip] \texttt{0x1067\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1068\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{QUADRANT 6}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1068\_0000} \\ [0\baselineskip] \texttt{0x1069\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x106b\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 2}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x106a\_0000} \\ [0\baselineskip] \texttt{0x106b\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x106c\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x106c\_0000} \\ [0\baselineskip] \texttt{0x106d\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x106f\_ffff}} &
+    \bitbox[lrb]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 3}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x106e\_0000} \\ [0\baselineskip] \texttt{0x106f\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1070\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lrt]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1070\_0000} \\ [0\baselineskip] \texttt{0x1071\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1073\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 0}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1072\_0000} \\ [0\baselineskip] \texttt{0x1073\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1074\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1074\_0000} \\ [0\baselineskip] \texttt{0x1075\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x1077\_ffff}} &
+    \bitbox[lr]{5}{\texttt{1.0 MB}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 1}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x1076\_0000} \\ [0\baselineskip] \texttt{0x1077\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1078\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{QUADRANT 7}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x1078\_0000} \\ [0\baselineskip] \texttt{0x1079\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x107b\_ffff}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 2}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x107a\_0000} \\ [0\baselineskip] \texttt{0x107b\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x107c\_0000} \\ [0\baselineskip] \texttt{}} &
+    \bitbox[lr]{5}{\texttt{}} &
+    \bitbox[lrt]{5}{\texttt{256.0 KB}} &
+    \bitbox{8}{\texttt{128.0 KB TCDM}} &
+    \bitbox[]{4}{\texttt{0x107c\_0000} \\ [0\baselineskip] \texttt{0x107d\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{} \\ [0\baselineskip] \texttt{0x107f\_ffff}} &
+    \bitbox[lrb]{5}{\texttt{}} &
+    \bitbox[lrb]{5}{\texttt{CLUSTER 3}} &
+    \bitbox{8}{\texttt{128.0 KB PERIPHERAL}} &
+    \bitbox[]{4}{\texttt{0x107e\_0000} \\ [0\baselineskip] \texttt{0x107f\_ffff}} \\
+
+    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox[]{4}{\texttt{0x1080\_0000} \\ [0\baselineskip] \texttt{0x1fff\_ffff}} &
+    \bitbox{18}{248.0 MB EMPTY} &
+    \bitbox[]{4}{\texttt{0x1080\_0000} \\ [0\baselineskip] \texttt{0x1fff\_ffff}}  \\
+  \end{bytefield}
+
+}
+
+\end{document}

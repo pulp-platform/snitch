@@ -35,6 +35,7 @@ nav:
   - Occamy:
     - Guide: ug/occamy.md
     - Schema: schema-doc/occamy.md
+    - Memory Map: ug/occamy_addrmap.md
 - Reference Manual:
   - Snitch: rm/snitch/index.md
   - Snitch Cluster: rm/snitch_cluster/index.md

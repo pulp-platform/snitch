@@ -1,0 +1,9 @@
+*.dot
+*.png
+*.h
+*.csv
+*.pdf
+*.aux
+*.fdb_latexmk
+*.fls
+*.gz

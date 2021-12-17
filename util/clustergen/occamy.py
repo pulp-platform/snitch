@@ -20,12 +20,24 @@ class Occamy(Generator):
         pma_cfg = PMACfg()
         addr_width = cfg["cluster"]['addr_width']
         # Make the entire HBM, but not HBI cacheable
-        pma_cfg.add_region(PMA.CACHED, 0x0000_8000_0000, 0xffff_8000_0000)
-        pma_cfg.add_region(PMA.CACHED, 0x0010_0000_0000, 0xfff0_0000_0000)
+        pma_cfg.add_region_length(PMA.CACHED,
+                                  cfg["hbm"]["address_0"],
+                                  cfg["hbm"]["nr_channels_address_0"] * cfg["hbm"]["channel_size"],
+                                  addr_width)
+        pma_cfg.add_region_length(PMA.CACHED,
+                                  cfg["hbm"]["address_1"],
+                                  cfg["hbm"]["nr_channels_total"] * cfg["hbm"]["channel_size"],
+                                  addr_width)
         # Make the SPM cacheable
-        pma_cfg.add_region_length(PMA.CACHED, 0x7000_0000, 0x1000_0000, addr_width)
+        pma_cfg.add_region_length(PMA.CACHED,
+                                  cfg["spm"]["address"],
+                                  cfg["spm"]["length"],
+                                  addr_width)
         # Make the boot ROM cacheable
-        pma_cfg.add_region_length(PMA.CACHED, 0x0100_0000, 0x2_0000, addr_width)
+        pma_cfg.add_region_length(PMA.CACHED,
+                                  cfg["rom"]["address"],
+                                  cfg["rom"]["length"],
+                                  addr_width)
 
         # Store Snitch cluster config in separate variable
         self.cluster = SnitchCluster(cfg["cluster"], pma_cfg)
