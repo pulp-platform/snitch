@@ -1,0 +1,86 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://pulp-platform.org/snitch/peripherals.schema.json",
+    "title": "Peripherals Schema",
+    "description": "Description of an a peripheral sub-system.",
+    "type": "object",
+    "required": [],
+    "properties": {
+        "rom": {
+            "type": "object",
+            "description": "Read-only memory from which _all_ harts of the system start to boot.",
+            "default": {
+                "address": 16777216,
+                "length": 131072
+            },
+            "address": {
+                "type": "number",
+                "description": "Start address of ROM.",
+                "minimum": 0
+            },
+            "length": {
+                "type": "number",
+                "description": "Total size of ROM in bytes.",
+                "minimum": 0
+            }
+        },
+        "clint": {
+            "type": "object",
+            "description": "Core-local Interrupt Controller (CLINT) peripheral.",
+            "default": {
+                "address": 67108864,
+                "length": 1048576
+            },
+            "address": {
+                "type": "number",
+                "description": "Start address of CLINT address region.",
+                "minimum": 0
+            },
+            "length": {
+                "type": "number",
+                "description": "Total size of CLINT address region in bytes.",
+                "minimum": 0
+            }
+        },
+        "axi_lite_peripherals": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of the peripheral connected to the AXI-lite crossbar."
+                },
+                "address": {
+                    "type": "number",
+                    "description": "Start address of the peripheral address region.",
+                    "minimum": 0
+                },
+                "length": {
+                    "type": "number",
+                    "description": "Total size of the peripheral address region in bytes.",
+                    "minimum": 0
+                }
+            }
+        },
+        "regbus_peripherals": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of the peripheral connected to the Register Bus crossbar."
+                },
+                "address": {
+                    "type": "number",
+                    "description": "Start address of the peripheral address region.",
+                    "minimum": 0
+                },
+                "length": {
+                    "type": "number",
+                    "description": "Total size of the peripheral address region in bytes.",
+                    "minimum": 0
+                }
+            }
+        }
+    }
+}

@@ -4,7 +4,7 @@
 http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi/properties/address
 ```
 
-Start address of HBI.
+Start address of SPM (Scratchpad Memory).
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |

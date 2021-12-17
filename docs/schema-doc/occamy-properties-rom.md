@@ -13,3 +13,14 @@ Read-only memory from which *all* harts of the system start to boot.
 ## rom Type
 
 `object` ([Details](occamy-properties-rom.md))
+
+## rom Default Value
+
+The default value is:
+
+```json
+{
+  "address": 16777216,
+  "length": 131072
+}
+```

@@ -4,7 +4,7 @@
 http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm
 ```
 
-High Bandwidth Memory (HBM).
+
 
 | Abstract            | Extensible | Status         | Identifiable | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :----------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
@@ -14,21 +14,28 @@ High Bandwidth Memory (HBM).
 
 unknown
 
+## hbm Default Value
+
+The default value is:
+
+```json
+{
+  "size": 128
+}
+```
+
 # undefined Properties
 
-| Property                                        | Type     | Required | Nullable       | Defined by                                                                                                                                                                              |
-| :---------------------------------------------- | :------- | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [address_0](#address_0)                         | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm-properties-address_0.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/address_0")                         |
-| [address_1](#address_1)                         | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm-properties-address_1.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/address_1")                         |
-| [nr_channels_total](#nr_channels_total)         | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm-properties-nr_channels_total.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/nr_channels_total")         |
-| [nr_channels_address_0](#nr_channels_address_0) | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm-properties-nr_channels_address_0.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/nr_channels_address_0") |
-| [channel_size](#channel_size)                   | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm-properties-channel_size.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/channel_size")                   |
+| Property            | Type     | Required | Nullable       | Defined by                                                                                                                                                  |
+| :------------------ | :------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [address](#address) | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm-properties-address.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/address") |
+| [length](#length)   | `number` | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm-properties-length.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/length")   |
 
-## address\_0
+## address
 
-Start address of first memory region of HBM.
+Start address of SPM (Scratchpad Memory).
 
-`address_0`
+`address`
 
 *   is optional
 
@@ -36,21 +43,21 @@ Start address of first memory region of HBM.
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-hbm-properties-address\_0.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/address\_0")
+*   defined in: [Occamy System Schema](occamy-properties-hbm-properties-address.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/address")
 
-### address\_0 Type
+### address Type
 
 `number`
 
-### address\_0 Constraints
+### address Constraints
 
 **minimum**: the value of this number must greater than or equal to: `0`
 
-## address\_1
+## length
 
-Start address of second memory region of HB.
+Size of SPM based on the address range. The full address range will be mapped to SPM.
 
-`address_1`
+`length`
 
 *   is optional
 
@@ -58,78 +65,18 @@ Start address of second memory region of HB.
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-hbm-properties-address\_1.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/address\_1")
+*   defined in: [Occamy System Schema](occamy-properties-hbm-properties-length.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/length")
 
-### address\_1 Type
-
-`number`
-
-### address\_1 Constraints
-
-**minimum**: the value of this number must greater than or equal to: `0`
-
-## nr_channels_total
-
-Total number of HBM channels (all are mapped onto region of address\_1.
-
-`nr_channels_total`
-
-*   is optional
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-hbm-properties-nr_channels_total.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/nr_channels_total")
-
-### nr_channels_total Type
+### length Type
 
 `number`
 
-### nr_channels_total Constraints
+### length Constraints
 
 **minimum**: the value of this number must greater than or equal to: `0`
 
-## nr_channels_address\_0
+### length Examples
 
-Number of HBM channels mapped onto address\_0.
-
-`nr_channels_address_0`
-
-*   is optional
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-hbm-properties-nr_channels_address\_0.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/nr_channels_address\_0")
-
-### nr_channels_address\_0 Type
-
-`number`
-
-### nr_channels_address\_0 Constraints
-
-**minimum**: the value of this number must greater than or equal to: `0`
-
-## channel_size
-
-Size of a single HBM channel in bytes.
-
-`channel_size`
-
-*   is optional
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-hbm-properties-channel_size.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/channel_size")
-
-### channel_size Type
-
-`number`
-
-### channel_size Constraints
-
-**minimum**: the value of this number must greater than or equal to: `0`
+```json
+131072
+```

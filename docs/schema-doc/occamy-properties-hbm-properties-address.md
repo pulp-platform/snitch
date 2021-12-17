@@ -1,25 +1,19 @@
 # Untitled number in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie/properties/length
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/address
 ```
 
-Size of SPM based on the address range. The full address range will be mapped to SPM.
+Start address of SPM (Scratchpad Memory).
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [occamy.schema.json*](occamy.schema.json "open original schema") |
 
-## length Type
+## address Type
 
 `number`
 
-## length Constraints
+## address Constraints
 
 **minimum**: the value of this number must greater than or equal to: `0`
-
-## length Examples
-
-```json
-131072
-```
