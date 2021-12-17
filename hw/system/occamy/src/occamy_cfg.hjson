@@ -66,9 +66,10 @@
         addr_width: 48,
         data_width: 64,
         tcdm: {
-            size: 128,
+            size: 128, // 128 kiB
             banks: 32,
         },
+        periph_size: 128, // 128 kiB
         dma_data_width: 512,
         dma_axi_req_fifo_depth: 3,
         dma_req_fifo_depth: 3,
@@ -175,77 +176,99 @@
         num_itlb_entries: 1,
     }
     // peripherals
-    debug: {
-        address: 0, // 0x0000_0000
-        length: 4096, // 4 kiB 0x1000
-    },
-    rom: {
-        address: 16777216, // 0x0100_0000
-        length: 131072, // 128 kiB 0x2_0000
-    },
-    soc_ctrl: {
-        address: 33554432, // 0x0200_0000
-        length: 4096, // 4 kiB 0x1000
-    },
-    clk_mgr: {
-        address: 33558528, // 0x0200_1000
-        length: 4096, // 4 kiB 0x1000
-    },
-    uart: {
-        address: 33562624, // 0x0200_2000
-        length: 4096, // 4 kiB 0x1000
-    },
-    gpio: {
-        address:  33566720, // 0x0200_3000
-        length: 4096, // 4 kiB 0x1000
-    },
-    i2c: {
-        address: 33570816, // 0x0200_4000
-        length: 4096, // 4 kiB 0x1000
-    },
-    chip_ctrl: {
-        address: 33574912, // 0x0200_5000
-        length: 4096, // 4 kiB 0x1000
-    },
-    timer: {
-        address: 33579008, // 0x0200_6000
-        length: 4096, // 4 kiB 0x1000
-    },
-    spim: {
-        address: 50331648, // 0x0300_0000
-        length: 131072, // 4 kiB 0x2_0000
-    },
-    clint: {
-        address: 67108864, // 0x0400_0000
-        length: 1048576, // 1 MiB 0x10_0000
-    },
-    pcie_cfg: {
-        address: 83886080, // 0x0500_0000
-        length: 131072, // 128 kiB 0x2_0000
-    },
-    hbi_cfg: {
-        address: 100663296, // 0x0600_0000
-        length: 65536, // 64 kiB 0x1_0000
-    },
-    hbi_ctl: {
-        address: 117440512, // 0x0700_0000
-        length: 65536, // 64 kiB 0x1_0000
-    },
-    hbm_cfg: {
-        address: 134217728, // 0x0800_0000
-        length: 4194304, // 4 MiB 0x40_0000
-    },
-    hbm_phy_cfg: {
-        address: 150994944 // 0x0900_0000
-        length: 1048576, // 1 MiB 0x10_0000
-    },
-    hbm_seq: {
-        address: 167772160, // 0x0A00_0000
-        length: 65536, // 64 kiB 0x1_0000
-    },
-    plic: {
-        address: 201326592, // 0x0C00_0000
-        length: 67108864, // 64 MiB 0x400_0000
+    peripherals: {
+        rom: {
+            address: 16777216, // 0x0100_0000
+            length: 131072, // 128 kiB 0x2_0000
+        },
+        clint: {
+                    address: 67108864, // 0x0400_0000
+                    length: 1048576, // 1 MiB 0x10_0000
+        },
+        axi_lite_peripherals: [
+            {
+                name: "debug",
+                address: 0, // 0x0000_0000
+                length: 4096, // 4 kiB 0x1000
+            }
+        ],
+        regbus_peripherals: [
+            {
+                name: "soc_ctrl",
+                address: 33554432, // 0x0200_0000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "clk_mgr",
+                address: 33558528, // 0x0200_1000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "uart",
+                address: 33562624, // 0x0200_2000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "gpio",
+                address:  33566720, // 0x0200_3000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "i2c",
+                address: 33570816, // 0x0200_4000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "chip_ctrl",
+                address: 33574912, // 0x0200_5000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "timer",
+                address: 33579008, // 0x0200_6000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "spim",
+                address: 50331648, // 0x0300_0000
+                length: 131072, // 4 kiB 0x2_0000
+            },
+            {
+                name: "pcie_cfg",
+                address: 83886080, // 0x0500_0000
+                length: 131072, // 128 kiB 0x2_0000
+            },
+            {
+                name: "hbi_cfg",
+                address: 100663296, // 0x0600_0000
+                length: 65536, // 64 kiB 0x1_0000
+            },
+            {
+                name: "hbi_ctl",
+                address: 117440512, // 0x0700_0000
+                length: 65536, // 64 kiB 0x1_0000
+            },
+            {
+                name: "hbm_cfg",
+                address: 134217728, // 0x0800_0000
+                length: 4194304, // 4 MiB 0x40_0000
+            },
+            {
+                name: "hbm_phy_cfg",
+                address: 150994944 // 0x0900_0000
+                length: 1048576, // 1 MiB 0x10_0000
+            },
+            {
+                name: "hbm_seq",
+                address: 167772160, // 0x0A00_0000
+                length: 65536, // 64 kiB 0x1_0000
+            },
+            {
+                name: "plic",
+                address: 201326592, // 0x0C00_0000
+                length: 67108864, // 64 MiB 0x400_0000
+            },
+        ],
     },
     // non-peripheral IPs
     pcie: {
@@ -269,7 +292,7 @@
         nr_channels_address_0: 2,
     },
     // dram corresponds to 'hbm address_0' and 'nr_channels_address_0'
-    dram: { 
+    dram: {
         address: 2147483648, // 0x8000_0000
         length: 2147483648, // 2 GiB 0x8000_0000
     },
