@@ -968,8 +968,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
             TraceAccess::RMWMem => format!("AMO:{:08x}", data as u32),
             TraceAccess::ReadReg(x) => format!("x{}:{:08x}", x, data as u32),
             TraceAccess::WriteReg(x) => format!("x{}={:08x}", x, data as u32),
-            TraceAccess::ReadFReg(x) => format!("f{}:{:4.4}", x, data),
-            TraceAccess::WriteFReg(x) => format!("f{}={:4.4}", x, data),
+            TraceAccess::ReadFReg(x) => format!("f{}:{:4.4}", x, f64::from_bits(data)),
+            TraceAccess::WriteFReg(x) => format!("f{}={:4.4}", x, f64::from_bits(data)),
         });
         let args = args.join(" ");
 
