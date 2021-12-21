@@ -39,6 +39,9 @@ def emit_header_file(layer_type: str, **kwargs):
     elif layer_type == 'MaxPool':
         file = file_path / 'data_maxpool.h'
         emit_str += emit_maxpool_layer(**kwargs)
+    elif layer_type == 'FusedConv':
+        file = file_path / 'data_fusedconv.h'
+        emit_str += emit_fusedconv(**kwargs)
     with file.open('w') as f:
         f.write(emit_str)
 
@@ -182,6 +185,56 @@ def emit_maxpool_layer(name='maxpool', **kwargs):
     return layer_str
 
 
+def emit_fusedconv(name='fusedconv', **kwargs):
+
+    ifmap = kwargs['ifmap']
+    kernel = kwargs['kernel']
+    ofmap = kwargs['ofmap']
+    ifmap_padded = kwargs['ifmap_padded']
+
+    padding = kwargs['padding']
+
+    ih, iw, ci = ifmap.shape
+    oh, ow, co = ofmap.shape
+    _, fh, fw, _ = kernel.shape
+    ih_pad, iw_pad, _ = ifmap_padded.shape
+
+    layer_str = '#include <stdint.h>\n\n'
+    layer_str += f'uint16_t ch_in = {ci};\n'
+    layer_str += f'uint16_t ch_out = {co};\n'
+    layer_str += f'uint16_t dim_in_x = {iw};\n'
+    layer_str += f'uint16_t dim_in_y = {ih};\n'
+    layer_str += f'uint16_t dim_kernel_x = {fw};\n'
+    layer_str += f'uint16_t dim_kernel_y = {fh};\n'
+    layer_str += f'uint16_t dim_out_x = {ow};\n'
+    layer_str += f'uint16_t dim_out_y = {oh};\n'
+    layer_str += f'uint16_t padding_y_top = {padding["padding_y_top"]};\n'
+    layer_str += f'uint16_t padding_y_bottom = {padding["padding_y_bottom"]};\n'
+    layer_str += f'uint16_t padding_x_left = {padding["padding_x_left"]};\n'
+    layer_str += f'uint16_t padding_x_right  = {padding["padding_x_right"]};\n'
+    layer_str += f'uint16_t stride_x = {kwargs["stride"]["stride_x"]};\n'
+    layer_str += f'uint16_t stride_y = {kwargs["stride"]["stride_y"]};\n'
+    layer_str += 'int8_t *bias;\n'
+    layer_str += 'uint16_t bias_shift;\n'
+    layer_str += 'uint16_t out_shift;\n'
+    layer_str += 'uint16_t out_mult;\n'
+    layer_str += 'double *lambda;\n'
+    layer_str += 'double *k;\n'
+    layer_str += 'double *pIm2ColBuffer;\n'
+    layer_str += 'int flag_relu;\n'
+    layer_str += 'int flag_batch_norm;\n'
+    layer_str += 'int flag_y_accumulate_start;\n'
+    layer_str += 'int flag_y_accumulate_end;\n'
+    layer_str += 'unsigned int *memory_chan;\n\n'
+
+    layer_str += f'static double {name}_result[{oh}][{ow}][{co}] __attribute__((section(".data")));\n\n'
+    layer_str += f'static double {name}_ifmap_dram[{ih_pad}][{iw_pad}][{ci}] = ' + array_to_cstr(ifmap_padded) + ';\n\n'
+    layer_str += f'static double {name}_weights_dram[{co}][{fh}][{fw}][{ci}] = ' + array_to_cstr(kernel) + ';\n\n'
+    layer_str += f'static double {name}_ofmap_dram[{oh}][{ow}][{co}] = ' + array_to_cstr(ofmap) + ';\n\n'
+
+    return layer_str
+
+
 def conv2d(ifmap, weights, padding=1, stride=1):
     n, ci, ih, iw = ifmap.shape
     co, _, fh, fw = weights.shape
@@ -214,6 +267,28 @@ def batchnorm(ifmap):
     ofmap = ifmap * gamma.unsqueeze(-1).unsqueeze(-1) + beta.unsqueeze(-1).unsqueeze(-1)
 
     return ofmap, gamma, beta
+
+
+def fused_conv(ifmap, weights, padding):
+
+    ih, iw, ci = ifmap.shape
+    co, fh, fw, _ = weights.shape
+
+    ifmap_padded = torch.zeros(ih + padding['top'] + padding['bottom'], iw +
+                               padding['left'] + padding['right'], ci, requires_grad=False, dtype=ifmap.dtype)
+    ifmap_padded[padding['top']:-padding['bottom'], padding['left']:-padding['right']] = ifmap
+
+    ofmap = torch.zeros(ifmap_padded.shape[0] - (fh - 1), ifmap_padded.shape[1] - (fw - 1), co)
+
+    print(ifmap_padded.shape, ofmap.shape)
+
+    # Conv2d
+    for h in range(ifmap_padded.shape[0] - (fh - 1)):
+        for w in range(ifmap_padded.shape[1] - (fw - 1)):
+            for c in range(co):
+                ofmap[h, w, c] = torch.dot(ifmap_padded[h:h+fh, w:w+fw].flatten(), weights[c].flatten())
+
+    return ofmap, ifmap_padded
 
 
 def main():
@@ -283,7 +358,7 @@ def main():
             'tb': param['transpose_B'],
             'alpha': param['alpha'],
             'prec': param['prec']
-            }
+        }
 
         emit_header_file('GEMM', **kwargs)
 
@@ -314,6 +389,30 @@ def main():
 
         kwargs = {'ifmap': ifmap, 'ofmap': ofmap, 'kernel_size': param['kernel_size']}
         emit_header_file('MaxPool', **kwargs)
+
+    elif param['kernel'] == 'FusedConv':
+        ifmap = torch.randn(param['dim_in_y'], param['dim_in_x'], param['ch_in'], requires_grad=False, dtype=dtype)
+        kernel = torch.randn(param['ch_out'], param['dim_kernel_y'], param['dim_kernel_x'],
+                             param['ch_in'], requires_grad=False, dtype=dtype)
+
+        padding = {'left': param['padding']['padding_x_left'],
+                   'right': param['padding']['padding_x_right'],
+                   'top': param['padding']['padding_y_top'],
+                   'bottom': param['padding']['padding_y_bottom']}
+
+        # TODO: BatchNorm, ReLU etc.
+        ofmap, ifmap_padded = fused_conv(ifmap, kernel, padding)
+
+        kwargs = {
+            'ifmap': ifmap,
+            'ifmap_padded': ifmap_padded,
+            'ofmap': ofmap,
+            'kernel': kernel,
+            'padding': param['padding'],
+            'stride': param['stride']
+        }
+        emit_header_file('FusedConv', **kwargs)
+
     else:
         print("No valid kernel selected")
 
