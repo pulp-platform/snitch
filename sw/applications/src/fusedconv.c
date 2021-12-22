@@ -11,7 +11,7 @@
 
 int main() {
 
-    double *ptr = (void *)snrt_cluster_memory().start;
+    float *ptr = (void *)snrt_cluster_memory().start;
 
     uint32_t ifmap_size = (dim_in_x + padding_x_left + padding_x_right) *
                           (dim_in_y + padding_y_top + padding_y_bottom) * ch_in;
@@ -19,27 +19,27 @@ int main() {
     uint32_t ofmap_size = dim_out_x * dim_out_y * ch_out;
 
 
-    double *pInBuffer = ptr;
+    float *pInBuffer = ptr;
     ptr += ifmap_size;
-    double *pWeight = ptr;
+    float *pWeight = ptr;
     ptr += weights_size;
-    double *pOutBuffer = ptr;
+    float *pOutBuffer = ptr;
     ptr += ofmap_size;
 
     if (snrt_is_dm_core()) {
         printf("pInBuffer %p, pWeight %p, pOutBuffer %p ofmap_size %d\n", pInBuffer, pWeight, pOutBuffer, ofmap_size);
 
         snrt_dma_start_1d(pInBuffer, fusedconv_ifmap_dram,
-                          ifmap_size * sizeof(double));
+                          ifmap_size * sizeof(float));
         snrt_dma_start_1d(pWeight, fusedconv_weights_dram,
-                          weights_size * sizeof(double));
+                          weights_size * sizeof(float));
     }
 
     snrt_cluster_hw_barrier();
 
     if (snrt_is_compute_core()) {
 
-        occamy_conv_opt(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
+        occamy_conv_opt_fp32(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
                         dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
                         padding_x_left, padding_x_right, stride_x, stride_y, bias,
                         bias_shift, out_shift, out_mult, pOutBuffer, dim_out_x,
@@ -56,7 +56,7 @@ int main() {
         const uint32_t output_w_stride = ch_out;
         const uint32_t output_h_stride = output_w_stride * dim_out_x;
         for (uint32_t i = 0; i < ofmap_size; i++) {
-            if (fabs(pOutBuffer[i] - ((double *)fusedconv_ofmap_dram)[i]) > 0.01) {
+            if (fabs(pOutBuffer[i] - ((float *)fusedconv_ofmap_dram)[i]) > 0.01) {
                 errors++;
                 printf("Error at h %d w %d co %d\n", i / output_h_stride, (i % output_h_stride) / output_w_stride, i % output_w_stride);
             }

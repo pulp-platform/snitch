@@ -199,6 +199,15 @@ def emit_fusedconv(name='fusedconv', **kwargs):
     _, fh, fw, _ = kernel.shape
     ih_pad, iw_pad, _ = ifmap_padded.shape
 
+    ctypes = {
+        '64': 'double',
+        '32': 'float',
+        '16': '__fp16',
+        '8': 'char'
+    }
+
+    dtype = ctypes[str(kwargs['prec'])]
+
     layer_str = '#include <stdint.h>\n\n'
     layer_str += f'uint16_t ch_in = {ci};\n'
     layer_str += f'uint16_t ch_out = {co};\n'
@@ -218,19 +227,19 @@ def emit_fusedconv(name='fusedconv', **kwargs):
     layer_str += 'uint16_t bias_shift;\n'
     layer_str += 'uint16_t out_shift;\n'
     layer_str += 'uint16_t out_mult;\n'
-    layer_str += 'double *lambda;\n'
-    layer_str += 'double *k;\n'
-    layer_str += 'double *pIm2ColBuffer;\n'
+    layer_str += f'{dtype} *lambda;\n'
+    layer_str += f'{dtype} *k;\n'
+    layer_str += f'{dtype} *pIm2ColBuffer;\n'
     layer_str += 'int flag_relu;\n'
     layer_str += 'int flag_batch_norm;\n'
-    layer_str += 'int flag_y_accumulate_start;\n'
+    layer_str += 'int flag_y_accumulate_start = 1;\n'
     layer_str += 'int flag_y_accumulate_end;\n'
     layer_str += 'unsigned int *memory_chan;\n\n'
 
-    layer_str += f'static double {name}_result[{oh}][{ow}][{co}] __attribute__((section(".data")));\n\n'
-    layer_str += f'static double {name}_ifmap_dram[{ih_pad}][{iw_pad}][{ci}] = ' + array_to_cstr(ifmap_padded) + ';\n\n'
-    layer_str += f'static double {name}_weights_dram[{co}][{fh}][{fw}][{ci}] = ' + array_to_cstr(kernel) + ';\n\n'
-    layer_str += f'static double {name}_ofmap_dram[{oh}][{ow}][{co}] = ' + array_to_cstr(ofmap) + ';\n\n'
+    layer_str += f'static {dtype} {name}_result[{oh}][{ow}][{co}] __attribute__((section(".data")));\n\n'
+    layer_str += f'static {dtype} {name}_ifmap_dram[{ih_pad}][{iw_pad}][{ci}] = ' + array_to_cstr(ifmap_padded) + ';\n\n'
+    layer_str += f'static {dtype} {name}_weights_dram[{co}][{fh}][{fw}][{ci}] = ' + array_to_cstr(kernel) + ';\n\n'
+    layer_str += f'static {dtype} {name}_ofmap_dram[{oh}][{ow}][{co}] = ' + array_to_cstr(ofmap) + ';\n\n'
 
     return layer_str
 
@@ -411,7 +420,8 @@ def main():
             'ofmap': ofmap,
             'kernel': kernel,
             'padding': param['padding'],
-            'stride': param['stride']
+            'stride': param['stride'],
+            'prec': param['prec']
         }
         emit_header_file('FusedConv', **kwargs)
 
