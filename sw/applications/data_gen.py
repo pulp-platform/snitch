@@ -269,24 +269,31 @@ def batchnorm(ifmap):
     return ofmap, gamma, beta
 
 
-def fused_conv(ifmap, weights, padding):
+def fused_conv(ifmap, weights, padding, stride):
 
     ih, iw, ci = ifmap.shape
     co, fh, fw, _ = weights.shape
 
-    ifmap_padded = torch.zeros(ih + padding['top'] + padding['bottom'], iw +
-                               padding['left'] + padding['right'], ci, requires_grad=False, dtype=ifmap.dtype)
-    ifmap_padded[padding['top']:-padding['bottom'], padding['left']:-padding['right']] = ifmap
+    ifmap_padded = torch.zeros(ih + padding['padding_y_top'] + padding['padding_y_bottom'], iw +
+                               padding['padding_x_left'] + padding['padding_x_right'], ci, requires_grad=False, dtype=ifmap.dtype)
+    ifmap_padded[padding['padding_y_top']:ih+padding['padding_y_top'],
+                 padding['padding_x_left']:iw+padding['padding_x_left']] = ifmap
 
-    ofmap = torch.zeros(ifmap_padded.shape[0] - (fh - 1), ifmap_padded.shape[1] - (fw - 1), co)
+    # Don't cover undefined behaviour when there are steps without a complete kernel window
+    assert (ifmap_padded.shape[0] - (fh - 1) - 1) % stride['stride_y'] == 0
+    assert (ifmap_padded.shape[1] - (fw - 1) - 1) % stride['stride_x'] == 0
 
-    print(ifmap_padded.shape, ofmap.shape)
+    ofmap = torch.zeros((ifmap_padded.shape[0] - (fh - 1) - 1) // stride['stride_y'] + 1,
+                        (ifmap_padded.shape[1] - (fw - 1) - 1) // stride['stride_x'] + 1, co)
+
+    print(ifmap.shape, ifmap_padded.shape, ofmap.shape)
 
     # Conv2d
-    for h in range(ifmap_padded.shape[0] - (fh - 1)):
-        for w in range(ifmap_padded.shape[1] - (fw - 1)):
+    for h in range(0, ifmap_padded.shape[0] - (fh - 1), stride['stride_y']):
+        for w in range(0, ifmap_padded.shape[1] - (fw - 1), stride['stride_x']):
             for c in range(co):
-                ofmap[h, w, c] = torch.dot(ifmap_padded[h:h+fh, w:w+fw].flatten(), weights[c].flatten())
+                ofmap[h//stride['stride_y'], w//stride['stride_x'],
+                      c] = torch.dot(ifmap_padded[h:h+fh, w:w+fw].flatten(), weights[c].flatten())
 
     return ofmap, ifmap_padded
 
@@ -395,13 +402,8 @@ def main():
         kernel = torch.randn(param['ch_out'], param['dim_kernel_y'], param['dim_kernel_x'],
                              param['ch_in'], requires_grad=False, dtype=dtype)
 
-        padding = {'left': param['padding']['padding_x_left'],
-                   'right': param['padding']['padding_x_right'],
-                   'top': param['padding']['padding_y_top'],
-                   'bottom': param['padding']['padding_y_bottom']}
-
         # TODO: BatchNorm, ReLU etc.
-        ofmap, ifmap_padded = fused_conv(ifmap, kernel, padding)
+        ofmap, ifmap_padded = fused_conv(ifmap, kernel, param['padding'], param['stride'])
 
         kwargs = {
             'ifmap': ifmap,

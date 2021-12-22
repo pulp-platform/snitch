@@ -8,8 +8,8 @@
     kernel: "FusedConv"
     ch_in: 32
     ch_out: 8
-    dim_in_x: 8
-    dim_in_y: 8
+    dim_in_x: 15
+    dim_in_y: 15
     dim_kernel_x: 3
     dim_kernel_y: 3
     padding: {
@@ -19,8 +19,8 @@
       padding_y_bottom: 1
     }
     stride: {
-      stride_x: 1
-      stride_y: 1
+      stride_x: 2
+      stride_y: 2
     }
     prec: 64
 }
