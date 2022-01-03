@@ -970,10 +970,24 @@ impl<'a, 'b> Cpu<'a, 'b> {
             TraceAccess::WriteReg(x) => format!("x{}={:08x}", x, data as u32),
             TraceAccess::ReadFReg(x) => format!("f{:02}:{:>16.6}", x, f64::from_bits(data)),
             TraceAccess::WriteFReg(x) => format!("f{:02}={:>16.6}", x, f64::from_bits(data)),
-            TraceAccess::ReadF32Reg(x) => format!("f{:02}:{:>12.4}", x, f32::from_bits(data as u32)),
-            TraceAccess::WriteF32Reg(x) => format!("f{:02}={:>12.4}", x, f32::from_bits(data as u32)),
-            TraceAccess::Readvf64sReg(x) => format!("f{:02}:[{:>12.4}, {:>12.4}]", x, f32::from_bits((data >> 32) as u32), f32::from_bits((data) as u32)),
-            TraceAccess::Writevf64sReg(x) => format!("f{:02}=[{:>12.4}, {:>12.4}]", x, f32::from_bits((data >> 32) as u32), f32::from_bits((data) as u32)),
+            TraceAccess::ReadF32Reg(x) => {
+                format!("f{:02}:{:>12.4}", x, f32::from_bits(data as u32))
+            }
+            TraceAccess::WriteF32Reg(x) => {
+                format!("f{:02}={:>12.4}", x, f32::from_bits(data as u32))
+            }
+            TraceAccess::Readvf64sReg(x) => format!(
+                "f{:02}:[{:>12.4}, {:>12.4}]",
+                x,
+                f32::from_bits((data >> 32) as u32),
+                f32::from_bits((data) as u32)
+            ),
+            TraceAccess::Writevf64sReg(x) => format!(
+                "f{:02}=[{:>12.4}, {:>12.4}]",
+                x,
+                f32::from_bits((data >> 32) as u32),
+                f32::from_bits((data) as u32)
+            ),
         });
         let args = args.join(" ");
 
