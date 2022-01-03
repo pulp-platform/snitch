@@ -1564,9 +1564,9 @@ impl<'a> InstructionTranslator<'a> {
             }
             riscv::OpcodeImm12hiImm12loRs1Rs2::Fsw => {
                 self.was_freppable.set(true);
-                let rs2 = self.read_freg(data.rs2);
-                let rs2_lo = LLVMBuildTrunc(self.builder, rs2, LLVMInt32Type(), NONAME);
-                self.write_mem(addr, rs2_lo, 2);
+                let rs2 = self.read_freg_f32(data.rs2);
+                let rs2 = LLVMBuildBitCast(self.builder, rs2, LLVMInt32Type(), NONAME);
+                self.write_mem(addr, rs2, 2);
             }
             riscv::OpcodeImm12hiImm12loRs1Rs2::Fsd => {
                 self.was_freppable.set(true);
@@ -1746,10 +1746,8 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12RdRs1::Flw => {
                 self.was_freppable.set(true);
                 let raw = self.emit_load(rs1, imm, 2, false);
-                let raw = LLVMBuildZExt(self.builder, raw, LLVMInt64Type(), NONAME);
-                let pad = LLVMConstInt(LLVMInt64Type(), (-1i64 as u64) << 32, 0);
-                let value = LLVMBuildOr(self.builder, raw, pad, NONAME);
-                self.write_freg(data.rd, value);
+                let value = LLVMBuildBitCast(self.builder, raw, LLVMFloatType(), NONAME);
+                self.write_freg_f32(data.rd, value);
                 return Ok(());
             }
             riscv::OpcodeImm12RdRs1::Fld => {
@@ -3192,7 +3190,7 @@ impl<'a> InstructionTranslator<'a> {
                 // build the actual store and add trace
                 LLVMBuildStore(self.builder, rs1, ptr);
                 self.trace_access(
-                    TraceAccess::WriteFReg(data.rd as u8),
+                    TraceAccess::WriteF32Reg(data.rd as u8),
                     LLVMBuildLoad(self.builder, raw_ptr, NONAME),
                 );
                 return Ok(());
@@ -6777,7 +6775,7 @@ impl<'a> InstructionTranslator<'a> {
         self.emit_possible_ssr_read(rs);
         let raw_ptr = self.freg_ptr(rs);
         self.trace_access(
-            TraceAccess::ReadFReg(rs as u8),
+            TraceAccess::Readvf64sReg(rs as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
 
@@ -6853,7 +6851,7 @@ impl<'a> InstructionTranslator<'a> {
         self.emit_possible_ssr_read(rs);
         let raw_ptr = self.freg_ptr(rs);
         self.trace_access(
-            TraceAccess::ReadFReg(rs as u8),
+            TraceAccess::ReadF32Reg(rs as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
         let ptr = LLVMBuildBitCast(
@@ -7183,7 +7181,7 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildStore(self.builder, data0, ptr);
         LLVMBuildStore(self.builder, data1, ptr_hi);
         self.trace_access(
-            TraceAccess::WriteFReg(rd as u8),
+            TraceAccess::Writevf64sReg(rd as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
         self.emit_possible_ssr_write(rd);
@@ -7222,7 +7220,7 @@ impl<'a> InstructionTranslator<'a> {
         );
         LLVMBuildStore(self.builder, data, ptr);
         self.trace_access(
-            TraceAccess::WriteFReg(rd as u8),
+            TraceAccess::WriteF32Reg(rd as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
         self.emit_possible_ssr_write(rd);
