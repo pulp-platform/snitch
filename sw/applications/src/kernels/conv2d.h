@@ -39,9 +39,9 @@
  * @param lambda bias for BatchNorm
  * @param flag_relu RELU activation flag
  * @param flag_batch_norm BatchNorm flag
- * @param flag_y_accumulate_start Requantization stuff?
- * @param flag_y_accumulate_end Requantization stuff?
- * @param memory_chan Don't know about that one
+ * @param flag_y_accumulate_start indicates that output feature map is initizialized with zeros
+ * @param flag_y_accumulate_end indicates that BN, RELU can be performed
+ * @param memory_chan Not used
  */
 void __attribute__((noinline)) occamy_conv_opt_fp64(
     const double* pInBuffer, const uint16_t dim_in_x, const uint16_t dim_in_y,

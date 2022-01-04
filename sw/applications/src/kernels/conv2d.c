@@ -9,8 +9,8 @@
 typedef float v2f32 __attribute__((vector_size(8)));
 
 typedef union {
-    double  f64;
-    v2f32   vec;
+    double f64;
+    v2f32 vec;
 } v2s;
 
 void __attribute__((noinline)) occamy_conv_opt_fp64(
@@ -135,7 +135,6 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                               (void*)(pWeight + co * kernel_co_stride));
                 snrt_ssr_enable();
 
-                // TODO: clobb ft2 as well?
                 asm volatile(
                     "frep.o %[n_frep], 8, 0, 0 \n"
                     "fmadd.d %[sum0], ft0, ft1, %[sum0] \n"
@@ -156,7 +155,6 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                 snrt_ssr_disable();
 
                 // TODO: Check if needs to be unrolled manually
-                // printf("co %d, h0 %d w %d\n", co, h0, w);
                 for (uint32_t i = 0; i < max_unroll; i++) {
                     pOutBuffer[(h0 * max_unroll + i) * output_h_stride +
                                w * output_w_stride + co] = sum[i];
@@ -178,7 +176,6 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
 
             // Output width dimension `dim_out_x`
             for (uint32_t w = 0; w < dim_out_x; w++) {
-                // TODO: check if initialization needs to be unrolled by hand
                 register double sum[max_unroll];
                 if (flag_y_accumulate_start) {
                     for (uint32_t i = 0; i < cleanup_unroll; i++) {
@@ -301,13 +298,64 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                 snrt_ssr_disable();
 
                 // TODO: Check if needs to be unrolled manually
-                // printf("co %d, h0 %d w %d\n", co, h0, w);
                 for (uint32_t i = 0; i < cleanup_unroll; i++) {
                     pOutBuffer[(h0 * max_unroll + i) * output_h_stride +
                                w * output_w_stride + co] = sum[i];
                 }
             }
         }
+    }
+
+    snrt_cluster_hw_barrier();
+
+    if (flag_batch_norm | flag_relu) {
+        snrt_ssr_loop_2d(SNRT_SSR_DM0, dim_out_x * dim_out_y,
+                         ch_out / compute_num, sizeof(double) * ch_out,
+                         sizeof(double));
+        snrt_ssr_loop_2d(SNRT_SSR_DM1, dim_out_x * dim_out_y,
+                         ch_out / compute_num, sizeof(double) * ch_out,
+                         sizeof(double));
+        snrt_ssr_repeat(SNRT_SSR_DM1, 1);
+
+        snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_2D, &pOutBuffer[compute_id]);
+        snrt_ssr_write(SNRT_SSR_DM1, SNRT_SSR_2D, &pOutBuffer[compute_id]);
+
+        snrt_ssr_enable();
+
+        for (uint32_t co = compute_id; co < ch_out; co += compute_num) {
+            register double current_lambda = lambda[co];
+            register double current_k = k[co];
+            register double zero = 0.0;
+
+            register double tmp;
+
+            if (flag_batch_norm && flag_relu) {
+                asm volatile(
+                    "frep.o %[n_frep], 2, 0, 0\n"
+                    "fmadd.d $[tmp], ft0, %[k] %[l]\n"
+                    "fmax.d ft1, %[tmp], %[zero]\n"
+                    : [tmp] "+f"(tmp)
+                    : [k] "f"(current_k), [l] "f"(current_lambda),
+                      [zero] "f"(zero), [n_frep] "r"(dim_out_x * dim_out_y - 1)
+                    : "ft0", "ft1", "ft2");
+            } else if (flag_batch_norm && !flag_relu) {
+                asm volatile(
+                    "frep.o %[n_frep], 1, 0, 0\n"
+                    "fmadd.d $[tmp], ft0, %[k] %[l]\n"
+                    : [tmp] "+f"(tmp), [k] "+f"(current_k),
+                      [l] "+f"(current_lambda)
+                    : [n_frep] "r"(dim_out_x * dim_out_y - 1)
+                    : "ft0", "ft1", "ft2");
+            } else if (!flag_batch_norm && flag_relu) {
+                asm volatile(
+                    "frep.o %[n_frep], 1, 0, 0 \n"
+                    "fmax.d ft1, ft0, %[zero]\n" ::[zero] "f"(zero),
+                    [n_frep] "r"(dim_out_x * dim_out_y - 1)
+                    : "ft0", "ft1", "ft2");
+            }
+        }
+
+        snrt_ssr_disable();
     }
 }
 
@@ -367,17 +415,18 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
     // }
 
     // Setup SSRs bounds and strides for input feature map
-    const uint32_t ssr0_b[4] = {max_unroll, ch_in/2, dim_kernel_x, dim_kernel_y};
-    const uint32_t ssr0_i[4] = {
-        input_h_stride * stride_y * sizeof(float), 1 * sizeof(v2s),
-        input_w_stride * sizeof(float), input_h_stride * sizeof(float)};
+    const uint32_t ssr0_b[4] = {max_unroll, ch_in / 2, dim_kernel_x,
+                                dim_kernel_y};
+    const uint32_t ssr0_i[4] = {input_h_stride * stride_y * sizeof(float),
+                                1 * sizeof(v2s), input_w_stride * sizeof(float),
+                                input_h_stride * sizeof(float)};
 
     snrt_ssr_loop_4d(SNRT_SSR_DM0, ssr0_b[0], ssr0_b[1], ssr0_b[2], ssr0_b[3],
                      ssr0_i[0], ssr0_i[1], ssr0_i[2], ssr0_i[3]);
 
     // Setup SSRs bounds and strides for kernel
     // We use only 3D SSRs here as the inner most dimension is repeated
-    const uint32_t ssr1_b[3] = {ch_in/2, dim_kernel_x, dim_kernel_y};
+    const uint32_t ssr1_b[3] = {ch_in / 2, dim_kernel_x, dim_kernel_y};
     const uint32_t ssr1_i[3] = {1 * sizeof(v2s),
                                 kernel_w_stride * sizeof(float),
                                 kernel_h_stride * sizeof(float)};
@@ -385,6 +434,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
     snrt_ssr_loop_3d(SNRT_SSR_DM1, ssr1_b[0], ssr1_b[1], ssr1_b[2], ssr1_i[0],
                      ssr1_i[1], ssr1_i[2]);
 
+    // Repeat the innermost value `max_unroll` times
     snrt_ssr_repeat(SNRT_SSR_DM1, max_unroll);
 
     // Output channel dimension `ch_out` is parallelized over cores
@@ -409,22 +459,26 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
         for (h0 = 0; h0 < dim_out_y / max_unroll; h0++) {
             // Output width dimension `dim_out_x`
             for (uint32_t w = 0; w < dim_out_x; w++) {
-                // TODO: check if initialization needs to be unrolled by hand
                 register v2s sum[max_unroll];
                 register float reduce_reg[max_unroll];
+                // pointer to output buffer location where intermediate values
+                // are read from and stored
+                float* _pOutBuffer =
+                    &pOutBuffer[(h0 * max_unroll) * output_h_stride +
+                                w * output_w_stride + co];
 
+                // Initialize registers with zero if the first
+                // tile is processed, otherwise load intermediate values
                 if (flag_y_accumulate_start) {
                     for (uint32_t i = 0; i < max_unroll; i++) {
                         sum[i].f64 = 0.0;
                         reduce_reg[i] = 0.0;
                     }
                 } else {
-                    // TODO: make it work for FP32 SIMD
-                    // for (uint32_t i = 0; i < max_unroll; i++) {
-                    //     sum[i] = *(pOutBuffer +
-                    //                (h0 * max_unroll + i) * output_h_stride +
-                    //                w * output_w_stride + co);
-                    // }
+                    for (uint32_t i = 0; i < max_unroll; i++) {
+                        sum[i].f64 = 0.0;
+                        reduce_reg[i] = _pOutBuffer[i * output_h_stride];
+                    }
                 }
 
                 // SSR address setup and enable
@@ -437,7 +491,6 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                               (void*)(pWeight + co * kernel_co_stride));
                 snrt_ssr_enable();
 
-                // TODO: clobb ft2 as well?
                 asm volatile(
                     // frep over vfMACs
                     "frep.o %[n_frep], 8, 0, 0 \n"
@@ -462,25 +515,22 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                       [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
                       [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
                       [sum6] "+f"(sum[6].f64), [sum7] "+f"(sum[7].f64),
-                      [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                    [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                    [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                    [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                    [ reduce_reg4 ] "+f"(reduce_reg[4]),
-                    [ reduce_reg5 ] "+f"(reduce_reg[5]),
-                    [ reduce_reg6 ] "+f"(reduce_reg[6]),
-                    [ reduce_reg7 ] "+f"(reduce_reg[7])
-                    : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in/2 - 1)
+                      [reduce_reg0] "+f"(reduce_reg[0]),
+                      [reduce_reg1] "+f"(reduce_reg[1]),
+                      [reduce_reg2] "+f"(reduce_reg[2]),
+                      [reduce_reg3] "+f"(reduce_reg[3]),
+                      [reduce_reg4] "+f"(reduce_reg[4]),
+                      [reduce_reg5] "+f"(reduce_reg[5]),
+                      [reduce_reg6] "+f"(reduce_reg[6]),
+                      [reduce_reg7] "+f"(reduce_reg[7])
+                    : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                     : "ft0", "ft1", "ft2");
 
                 snrt_ssr_disable();
 
-                // TODO: Check if needs to be unrolled manually
-                // printf("co %d, h0 %d w %d\n", co, h0, w);
+                // Write back output values
                 for (uint32_t i = 0; i < max_unroll; i++) {
-                    pOutBuffer[(h0 * max_unroll + i) * output_h_stride +
-                               w * output_w_stride + co] = reduce_reg[i];
-
+                    _pOutBuffer[i * output_h_stride] = reduce_reg[i];
                 }
             }
         }
@@ -499,23 +549,25 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
 
             // Output width dimension `dim_out_x`
             for (uint32_t w = 0; w < dim_out_x; w++) {
-                // TODO: check if initialization needs to be unrolled by hand
                 register v2s sum[max_unroll];
                 register float reduce_reg[max_unroll];
+
+                // pointer to output buffer location where intermediate values
+                // are read from and stored
+                float* _pOutBuffer =
+                    &pOutBuffer[(h0 * max_unroll) * output_h_stride +
+                                w * output_w_stride + co];
 
                 if (flag_y_accumulate_start) {
                     for (uint32_t i = 0; i < cleanup_unroll; i++) {
                         sum[i].f64 = 0.0;
                         reduce_reg[i] = 0.0;
-                        // printf("co %d w %d i %d\n", co, w, i);
                     }
                 } else {
-                    // TODO: !flag_y_accumulate_start
-                    // for (uint32_t i = 0; i < cleanup_unroll; i++) {
-                    //     sum[i] = *(pOutBuffer +
-                    //                (h0 * max_unroll + i) * output_h_stride +
-                    //                w * output_w_stride + co);
-                    // }
+                    for (uint32_t i = 0; i < cleanup_unroll; i++) {
+                        sum[i].f64 = 0.0;
+                        reduce_reg[i] = _pOutBuffer[i * output_h_stride];
+                    }
                 }
 
                 // SSR address setup and enable
@@ -549,17 +601,18 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg5], %[sum5] \n"
                             "vfsum.s %[reduce_reg6], %[sum6] \n"
                             : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
-                            [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
-                            [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
-                            [sum6] "+f"(sum[6].f64),
-                            [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                            [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                            [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                            [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                            [ reduce_reg4 ] "+f"(reduce_reg[4]),
-                            [ reduce_reg5 ] "+f"(reduce_reg[5]),
-                            [ reduce_reg6 ] "+f"(reduce_reg[6])
-                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in/2 - 1)
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
+                              [sum6] "+f"(sum[6].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2]),
+                              [reduce_reg3] "+f"(reduce_reg[3]),
+                              [reduce_reg4] "+f"(reduce_reg[4]),
+                              [reduce_reg5] "+f"(reduce_reg[5]),
+                              [reduce_reg6] "+f"(reduce_reg[6])
+                            : [n_frep] "r"(
+                                dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 6:
@@ -580,15 +633,16 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg4], %[sum4] \n"
                             "vfsum.s %[reduce_reg5], %[sum5] \n"
                             : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
-                            [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
-                            [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
-                            [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                            [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                            [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                            [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                            [ reduce_reg4 ] "+f"(reduce_reg[4]),
-                            [ reduce_reg5 ] "+f"(reduce_reg[5])
-                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in/2 - 1)
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2]),
+                              [reduce_reg3] "+f"(reduce_reg[3]),
+                              [reduce_reg4] "+f"(reduce_reg[4]),
+                              [reduce_reg5] "+f"(reduce_reg[5])
+                            : [n_frep] "r"(
+                                dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 5:
@@ -607,14 +661,15 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg3], %[sum3] \n"
                             "vfsum.s %[reduce_reg4], %[sum4] \n"
                             : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
-                            [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
-                            [sum4] "+f"(sum[4].f64),
-                            [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                            [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                            [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                            [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                            [ reduce_reg4 ] "+f"(reduce_reg[4])
-                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in/2 - 1)
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [sum4] "+f"(sum[4].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2]),
+                              [reduce_reg3] "+f"(reduce_reg[3]),
+                              [reduce_reg4] "+f"(reduce_reg[4])
+                            : [n_frep] "r"(
+                                dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 4:
@@ -631,12 +686,13 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg2], %[sum2] \n"
                             "vfsum.s %[reduce_reg3], %[sum3] \n"
                             : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
-                            [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
-                            [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                            [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                            [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                            [ reduce_reg3 ] "+f"(reduce_reg[3])
-                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in/2 - 1)
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2]),
+                              [reduce_reg3] "+f"(reduce_reg[3])
+                            : [n_frep] "r"(
+                                dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 3:
@@ -651,11 +707,12 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg1], %[sum1] \n"
                             "vfsum.s %[reduce_reg2], %[sum2] \n"
                             : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
-                            [sum2] "+f"(sum[2].f64),
-                            [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                            [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                            [ reduce_reg2 ] "+f"(reduce_reg[2])
-                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in/2 - 1)
+                              [sum2] "+f"(sum[2].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2])
+                            : [n_frep] "r"(
+                                dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 2:
@@ -668,9 +725,10 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg0], %[sum0] \n"
                             "vfsum.s %[reduce_reg1], %[sum1] \n"
                             : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
-                            [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                            [ reduce_reg1 ] "+f"(reduce_reg[1])
-                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in/2 - 1)
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1])
+                            : [n_frep] "r"(
+                                dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 1:
@@ -680,23 +738,93 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfmac.s %[sum0], ft0, ft1 \n"
                             // Sum reduce vector
                             "vfsum.s %[reduce_reg0], %[sum0] \n"
-                            : [sum0] "+f"(sum[0].f64),
-                            [ reduce_reg0 ] "+f"(reduce_reg[0])
-                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in/2 - 1)
+                            : [sum0] "+f"(sum[0].f64), [reduce_reg0] "+f"(
+                                                           reduce_reg[0])
+                            : [n_frep] "r"(
+                                dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                 }
 
                 snrt_ssr_disable();
 
-                // TODO: Check if needs to be unrolled manually
-                // printf("co %d, h0 %d w %d\n", co, h0, w);
                 for (uint32_t i = 0; i < cleanup_unroll; i++) {
-                    pOutBuffer[(h0 * max_unroll + i) * output_h_stride +
-                               w * output_w_stride + co] = reduce_reg[i];
+                    _pOutBuffer[i * output_h_stride] = reduce_reg[i];
                 }
             }
         }
     }
-}
 
+    // Cores need to be synchronized as the conv2d is parallized over output
+    // channels but BatchNorm/ReLU uses the channel dimension for SIMD
+    // instructions
+    snrt_cluster_hw_barrier();
+
+    if (flag_batch_norm | flag_relu) {
+        // Refernce Loops
+        // for (int co = 0; co < ch_out; co++) {
+        //     for (int y = 0; y < dim_out_y; y++) {
+        //         for (int x = 0; x < dim_out_x; x++) {
+        //             pOutBuffer[y][x][co] =  max(pOutBuffer[y][x][co] * k[co]
+        //             + l[co], 0);
+        //         }
+        //     }
+        // }
+
+        // Ouput channels are distributed across cores, SIMD operates on pairs
+        // of 2 One SSR reads, while the other SSR writes back to the same
+        // location
+        snrt_ssr_loop_2d(SNRT_SSR_DM0, dim_out_x * dim_out_y,
+                         ch_out / compute_num / 2, sizeof(float) * ch_out,
+                         sizeof(v2s));
+        snrt_ssr_loop_2d(SNRT_SSR_DM1, dim_out_x * dim_out_y,
+                         ch_out / compute_num / 2, sizeof(float) * ch_out,
+                         sizeof(v2s));
+        snrt_ssr_repeat(SNRT_SSR_DM1, 1);  // Disable repeat from conv2d
+
+        snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_2D, &pOutBuffer[compute_id * 2]);
+        snrt_ssr_write(SNRT_SSR_DM1, SNRT_SSR_2D, &pOutBuffer[compute_id * 2]);
+
+        snrt_ssr_enable();
+
+        for (uint32_t co = compute_id; co < ch_out / 2; co += compute_num) {
+            register v2s current_lambda = ((v2s*)lambda)[co];
+            register v2s current_k = ((v2s*)k)[co];
+            register v2s zero = (v2s)0.0;
+
+            register v2s tmp;
+
+            // TODO: unroll to solve RAW dependencies
+            if (flag_batch_norm && flag_relu) {
+                asm volatile(
+                    "frep.o %[n_frep], 3, 0, 0\n"
+                    "vfmul.s %[tmp], ft0, %[k]\n"     // BN kappa
+                    "vfadd.s %[tmp], %[tmp], %[l]\n"  // BN lambda
+                    "vfmax.s ft1, %[tmp], %[zero]\n"  // ReLU
+                    : [tmp] "+f"(tmp.f64)
+                    : [k] "f"(current_k.f64), [l] "f"(current_lambda.f64),
+                      [zero] "f"(zero.f64),
+                      [n_frep] "r"(dim_out_x * dim_out_y - 1)
+                    : "ft0", "ft1", "ft2");
+            } else if (flag_batch_norm && !flag_relu) {
+                asm volatile(
+                    "frep.o %[n_frep], 2, 0, 0\n"
+                    "vfmul.s %[tmp], ft0, %[k]\n"  // BN kappa
+                    "vfadd.s ft1, %[tmp], %[l]\n"  // BN lambda
+                    : [tmp] "+f"(tmp.f64), [k] "+f"(current_k.f64),
+                      [l] "+f"(current_lambda.f64)
+                    : [n_frep] "r"(dim_out_x * dim_out_y - 1)
+                    : "ft0", "ft1", "ft2");
+            } else if (!flag_batch_norm && flag_relu) {
+                asm volatile(
+                    "frep.o %[n_frep], 1, 0, 0 \n"
+                    "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                    ::[zero] "f"(zero.f64),
+                    [n_frep] "r"(dim_out_x * dim_out_y - 1)
+                    : "ft0", "ft1", "ft2");
+            }
+        }
+
+        snrt_ssr_disable();
+    }
+}

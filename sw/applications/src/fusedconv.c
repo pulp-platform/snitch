@@ -23,21 +23,34 @@ int main() {
     ptr += ifmap_size;
     float *pWeight = ptr;
     ptr += weights_size;
+    float *k = ptr;
+    ptr += ch_out;
+    float *lambda = ptr;
+    ptr += ch_out;
     float *pOutBuffer = ptr;
     ptr += ofmap_size;
 
-    if (snrt_is_dm_core()) {
-        printf("pInBuffer %p, pWeight %p, pOutBuffer %p ofmap_size %d\n", pInBuffer, pWeight, pOutBuffer, ofmap_size);
+    if (ptr >= snrt_cluster_memory().end) {
+        printf("Not enough TCDM memory to store tile\n");
+        return 1;
+    }
 
-        snrt_dma_start_1d(pInBuffer, fusedconv_ifmap_dram,
+    if (snrt_is_dm_core()) {
+        snrt_dma_start_1d(pInBuffer, fusedconv_pInBuffer_dram,
                           ifmap_size * sizeof(float));
-        snrt_dma_start_1d(pWeight, fusedconv_weights_dram,
+        snrt_dma_start_1d(pWeight, fusedconv_pWeight_dram,
                           weights_size * sizeof(float));
+        snrt_dma_start_1d(pOutBuffer, fusedconv_pOutBuffer_dram, ofmap_size * sizeof(float));
+        snrt_dma_start_1d(k, k_dram, sizeof(k_dram));
+        snrt_dma_start_1d(lambda, lambda_dram, sizeof(lambda_dram));
+        snrt_dma_wait_all();
     }
 
     snrt_cluster_hw_barrier();
 
     if (snrt_is_compute_core()) {
+
+        benchmark_get_cycle();
 
         occamy_conv_opt_fp32(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
                         dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
@@ -47,23 +60,28 @@ int main() {
                         flag_batch_norm, flag_y_accumulate_start,
                         flag_y_accumulate_end, memory_chan);
 
+        benchmark_get_cycle();
+
+    } else {
+        // conv kernel has 1 cluster barrier to synchronize
+        snrt_cluster_hw_barrier();
     }
     snrt_cluster_hw_barrier();
 
+    uint32_t errors = 0;
     if (snrt_is_dm_core()) {
-        uint32_t errors = 0;
         // Output feature map (H x W x Co)
         const uint32_t output_w_stride = ch_out;
         const uint32_t output_h_stride = output_w_stride * dim_out_x;
         for (uint32_t i = 0; i < ofmap_size; i++) {
-            if (fabs(pOutBuffer[i] - ((float *)fusedconv_ofmap_dram)[i]) > 0.01) {
+            if (fabs(pOutBuffer[i] - ((float *)fusedconv_pCheckOutBuffer_dram)[i]) > 0.01) {
                 errors++;
-                printf("Error at h %d w %d co %d\n", i / output_h_stride, (i % output_h_stride) / output_w_stride, i % output_w_stride);
+                // printf("Error at h %d w %d co %d\n", i / output_h_stride, (i % output_h_stride) / output_w_stride, i % output_w_stride);
             }
         }
         printf("%d/%d Errors\n", errors, ofmap_size);
     }
 
 
-    return 0;
+    return errors;
 }
