@@ -737,8 +737,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
         op_select[1] = RegB;
         op_select[2] = RegC;
         op_mode      = 1'b1;
-        src_fmt      = fpnew_pkg::FP64;
-        dst_fmt      = fpnew_pkg::FP64;
+        src_fmt      = fpnew_pkg::FP16;
+        dst_fmt      = fpnew_pkg::FP16;
         if (fpu_fmt_mode_i.dst == 1'b1) begin
           src_fmt    = fpnew_pkg::FP16ALT;
           dst_fmt    = fpnew_pkg::FP16ALT;
