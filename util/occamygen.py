@@ -549,8 +549,8 @@ def main():
         512,
         occamy.cfg["s1_quadrant"]["wide_xbar_slv_id_width"],
         name="wide_xbar_quadrant_s1",
-        clk="clk_i",
-        rst="rst_ni",
+        clk="clk_quadrant",
+        rst="rst_quadrant_n",
         max_slv_trans=occamy.cfg["s1_quadrant"]["wide_xbar"]["max_slv_trans"],
         max_mst_trans=occamy.cfg["s1_quadrant"]["wide_xbar"]["max_mst_trans"],
         fall_through=occamy.cfg["s1_quadrant"]["wide_xbar"]["fall_through"],
@@ -564,8 +564,8 @@ def main():
         64,
         occamy.cfg["s1_quadrant"]["narrow_xbar_slv_id_width"],
         name="narrow_xbar_quadrant_s1",
-        clk="clk_i",
-        rst="rst_ni",
+        clk="clk_quadrant",
+        rst="rst_quadrant_n",
         max_slv_trans=occamy.cfg["s1_quadrant"]["narrow_xbar"]
         ["max_slv_trans"],
         max_mst_trans=occamy.cfg["s1_quadrant"]["narrow_xbar"]

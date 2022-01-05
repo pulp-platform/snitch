@@ -27,13 +27,6 @@ module occamy_quadrant_s1
   input  logic [NrCoresS1Quadrant-1:0] meip_i,
   input  logic [NrCoresS1Quadrant-1:0] mtip_i,
   input  logic [NrCoresS1Quadrant-1:0] msip_i,
-  input  logic [4:0]                   isolate_i,
-  output logic [4:0]                   isolated_o,
-  input  logic                         ro_enable_i,
-  input  logic                         ro_flush_valid_i,
-  output logic                         ro_flush_ready_o,
-  input  logic [${ro_cache_regions-1}:0][${soc_wide_xbar.in_s1_quadrant_0.aw-1}:0] ro_start_addr_i,
-  input  logic [${ro_cache_regions-1}:0][${soc_wide_xbar.in_s1_quadrant_0.aw-1}:0] ro_end_addr_i,
   // HBI Connection
   output ${wide_xbar_quadrant_s1.out_hbi.req_type()}   quadrant_hbi_out_req_o,
   input  ${wide_xbar_quadrant_s1.out_hbi.rsp_type()}   quadrant_hbi_out_rsp_i,
@@ -56,6 +49,12 @@ module occamy_quadrant_s1
   assign cluster_base_addr[${i}] = ClusterBaseOffset + tile_id_i * NrClustersS1Quadrant * ClusterAddressSpace + ${i} * ClusterAddressSpace;
   %endfor
 
+  // Signals from Controller
+  logic clk_quadrant, rst_quadrant_n;
+  logic [4:0] isolate, isolated;
+  logic ro_enable, ro_flush_valid, ro_flush_ready;
+  logic [${ro_cache_regions-1}:0][${soc_wide_xbar.in_s1_quadrant_0.aw-1}:0] ro_start_addr, ro_end_addr;
+
   ///////////////////
   //   CROSSBARS   //
   ///////////////////
@@ -69,7 +68,7 @@ module occamy_quadrant_s1
       .copy(name="narrow_cluster_in_iwc") \
       .declare(context) \
       .cut(context, cut_width) \
-      .isolate(context, "isolate_i[0]", "narrow_cluster_in_isolate", isolated="isolated_o[0]", terminated=True) \
+      .isolate(context, "isolate[0]", "narrow_cluster_in_isolate", isolated="isolated[0]", terminated=True, to_clk="clk_quadrant", to_rst="rst_quadrant_n") \
       .change_iw(context, narrow_xbar_quadrant_s1.in_top.iw, "narrow_cluster_in_iwc", to=narrow_xbar_quadrant_s1.in_top)
   %>
   assign narrow_cluster_in_iwc_req = quadrant_narrow_in_req_i;
@@ -80,7 +79,7 @@ module occamy_quadrant_s1
   ///////////////////////////////
   <% narrow_cluster_out_iwc = narrow_xbar_quadrant_s1.out_top \
     .change_iw(context, soc_narrow_xbar.in_s1_quadrant_0.iw, "narrow_cluster_out_iwc") \
-    .isolate(context, "isolate_i[1]", "narrow_cluster_out_isolate", isolated="isolated_o[1]") \
+    .isolate(context, "isolate[1]", "narrow_cluster_out_isolate", isolated="isolated[1]", to_clk="clk_i", to_rst="rst_ni") \
     .cut(context, cut_width)
    %>
 
@@ -97,11 +96,11 @@ module occamy_quadrant_s1
       wide_cluster_out_ro_cache = wide_xbar_quadrant_s1.out_top \
       .add_ro_cache(context, "snitch_ro_cache", \
         ro_cache_cfg, \
-        enable="ro_enable_i", \
-        flush_valid="ro_flush_valid_i", \
-        flush_ready="ro_flush_ready_o", \
-        start_addr="ro_start_addr_i", \
-        end_addr="ro_end_addr_i", \
+        enable="ro_enable", \
+        flush_valid="ro_flush_valid", \
+        flush_ready="ro_flush_ready", \
+        start_addr="ro_start_addr", \
+        end_addr="ro_end_addr", \
         sram_cfg_data_t="sram_cfg_t", \
         sram_cfg_tag_t="sram_cfg_t", \
         sram_cfg_data_i="sram_cfg_i.rocache_data", \
@@ -111,7 +110,7 @@ module occamy_quadrant_s1
 
     wide_cluster_out_cut = wide_cluster_out_ro_cache \
       .change_iw(context, wide_target_iw, "wide_cluster_out_iwc") \
-      .isolate(context, "isolate_i[3]", "wide_cluster_out_isolate", isolated="isolated_o[3]", atop_support=False) \
+      .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni") \
       .cut(context, wide_out_added_cuts)
 
     assert soc_wide_xbar.in_s1_quadrant_0.iw == wide_cluster_out_cut.iw, "S1 Quadrant and Cluster Out IW mismatches."
@@ -125,7 +124,7 @@ module occamy_quadrant_s1
   ////////////////////
   <%
     wide_cluster_hbi_out_iwc = wide_xbar_quadrant_s1.out_hbi  \
-      .isolate(context, "isolate_i[4]", "quadrant_hbi_out_isolate", isolated="isolated_o[4]", atop_support=False) \
+      .isolate(context, "isolate[4]", "quadrant_hbi_out_isolate", isolated="isolated[4]", atop_support=False, to_clk="clk_i", to_rst="rst_ni") \
       .cut(context, wide_out_added_cuts)
   %>
 
@@ -140,11 +139,38 @@ module occamy_quadrant_s1
       .copy(name="wide_cluster_in_iwc") \
       .declare(context) \
       .cut(context, wide_out_added_cuts) \
-      .isolate(context, "isolate_i[2]", "wide_cluster_in_isolate", isolated="isolated_o[2]", terminated=True, atop_support=False) \
+      .isolate(context, "isolate[2]", "wide_cluster_in_isolate", isolated="isolated[2]", terminated=True, atop_support=False, to_clk="clk_quadrant", to_rst="rst_quadrant_n") \
       .change_iw(context, wide_xbar_quadrant_s1.in_top.iw, "wide_cluster_in_iwc", to=wide_xbar_quadrant_s1.in_top)
   %>
   assign wide_cluster_in_iwc_req = quadrant_wide_in_req_i;
   assign quadrant_wide_in_rsp_o = wide_cluster_in_iwc_rsp;
+
+  /////////////////////////
+  // Quadrant Controller //
+  /////////////////////////
+
+  occamy_quadrant_s1_ctrl i_occamy_quadrant_s1_ctrl (
+    .clk_i,
+    .rst_ni,
+    .test_mode_i,
+    .clk_quadrant_o (clk_quadrant),
+    .rst_quadrant_no (rst_quadrant_n),
+    .isolate_o (isolate),
+    .isolated_i (isolated),
+    .ro_enable_o (ro_enable),
+    .ro_flush_valid_o (ro_flush_valid),
+    .ro_flush_ready_i  (ro_flush_ready),
+    .ro_start_addr_o (ro_start_addr),
+    .ro_end_addr_o (ro_end_addr),
+    .soc_out_req_o (quadrant_narrow_out_req_o),
+    .soc_out_rsp_i (quadrant_narrow_out_rsp_i),
+    .soc_in_req_i (quadrant_narrow_in_req_i),
+    .soc_in_rsp_o (quadrant_narrow_in_rsp_o),
+    .quadrant_out_req_o (${narrow_cluster_out_iwc.req_name()}),
+    .quadrant_out_rsp_i (${narrow_cluster_out_iwc.rsp_name()}),
+    .quadrant_in_req_i (narrow_cluster_in_iwc_req),
+    .quadrant_in_rsp_o (narrow_cluster_in_iwc_rsp)
+  );
 
 % for i in range(nr_clusters):
   ///////////////
@@ -163,8 +189,8 @@ module occamy_quadrant_s1
   assign hart_base_id_${i} = HartIdOffset + tile_id_i * NrCoresS1Quadrant + ${i} * NrCoresCluster;
 
   occamy_cluster_wrapper i_occamy_cluster_${i} (
-    .clk_i (clk_i),
-    .rst_ni (rst_ni),
+    .clk_i (clk_quadrant),
+    .rst_ni (rst_quadrant_n),
     .debug_req_i (debug_req_i[${i}*NrCoresCluster+:NrCoresCluster]),
     .meip_i (meip_i[${i}*NrCoresCluster+:NrCoresCluster]),
     .mtip_i (mtip_i[${i}*NrCoresCluster+:NrCoresCluster]),

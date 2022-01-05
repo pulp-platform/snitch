@@ -414,9 +414,9 @@ class AxiBus(object):
         self.name_suffix = name_suffix
         self.declared = declared
 
-    def copy(self, name=None):
-        return AxiBus(self.clk,
-                      self.rst,
+    def copy(self, name=None, clk=None, rst=None):
+        return AxiBus(clk or self.clk,
+                      rst or self.rst,
                       self.aw,
                       self.dw,
                       self.iw,
@@ -680,6 +680,8 @@ class AxiBus(object):
                 num_pending=16,
                 terminated=False,
                 atop_support=True,
+                to_clk=None,
+                to_rst=None,
                 isolated=None):
 
         # Generate the new bus.
@@ -690,12 +692,19 @@ class AxiBus(object):
             bus.type_prefix = bus.emit_struct()
             bus.name = name
             bus.name_suffix = None
+            if to_clk:
+                bus.clk = to_clk
+            if to_rst:
+                bus.rst = to_rst
         else:
             bus = to
 
         # Check bus properties.
-        assert (bus.clk == self.clk)
-        assert (bus.rst == self.rst)
+        # Do not check clk/rst iff new bus generated in new gated domain
+        if (to_clk is None) or (to is not None):
+            assert (bus.clk == self.clk)
+        if (to_rst is None) or (to is not None):
+            assert (bus.rst == self.rst)
         assert (bus.aw == self.aw)
         assert (bus.dw == self.dw)
         assert (bus.iw == self.iw)

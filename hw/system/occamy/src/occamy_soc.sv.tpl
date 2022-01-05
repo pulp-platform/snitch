@@ -49,6 +49,7 @@ module occamy_soc
   input   ${soc_narrow_xbar.out_regbus_periph.rsp_type()} periph_regbus_rsp_i,
 
   // SoC control register IO
+  // FIXME: reg2hw and hw2reg connections are currently unused; this may change, however. 
   input  occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out_i,
   output occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in_o,
   output logic [1:0] spm_rerror_o,
@@ -151,7 +152,7 @@ module occamy_soc
     wide_in = soc_wide_xbar.__dict__["out_s1_quadrant_{}".format(i)].cut(context, quad_widex_cuts, name="wide_in_cut_{}".format(i))
     wide_out = soc_wide_xbar.__dict__["in_s1_quadrant_{}".format(i)].copy(name="wide_out_cut_{}".format(i)).declare(context)
     wide_out.cut(context, quad_widex_cuts, to=soc_wide_xbar.__dict__["in_s1_quadrant_{}".format(i)])
-    wide_hbi_out = wide_xbar_quadrant_s1.out_hbi.copy(name="wide_hbi_out_cut_{}".format(i)).declare(context)
+    wide_hbi_out = wide_xbar_quadrant_s1.out_hbi.copy(name="wide_hbi_out_cut_{}".format(i), clk="clk_i", rst="rst_ni").declare(context)
     wide_hbi_cut_out = wide_hbi_out.cut(context, quad_hbi_cuts)
   %>
   assign hbi_${i}_req_o = ${wide_hbi_cut_out.req_name()};
@@ -162,13 +163,6 @@ module occamy_soc
     lower_core = i * nr_cores_s1_quadrant + 1
     ro_addr_regions = cfg["s1_quadrant"].get("ro_cache_cfg", {}).get("address_regions", 1)
   %>
-    // Assemble address from `soc_ctrl` regs.
-    logic [${ro_addr_regions-1}:0][${soc_wide_xbar.aw-1}:0] start_addr_${i}, end_addr_${i};
-  % for j in range(ro_addr_regions):
-    assign start_addr_${i}[${j}] = {soc_ctrl_out_i.ro_start_addr_high_${j}_quadrant_${i}.q, soc_ctrl_out_i.ro_start_addr_low_${j}_quadrant_${i}.q};
-    assign end_addr_${i}[${j}] = {soc_ctrl_out_i.ro_end_addr_high_${j}_quadrant_${i}.q, soc_ctrl_out_i.ro_end_addr_low_${j}_quadrant_${i}.q};
-  % endfor
-    assign soc_ctrl_in_o.ro_cache_flush[${i}].de = soc_ctrl_out_i.ro_cache_flush[${i}].q & soc_ctrl_in_o.ro_cache_flush[${i}].d;
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_${i} (
     .clk_i (clk_i),
@@ -180,13 +174,6 @@ module occamy_soc
     .meip_i ('0),
     .mtip_i (mtip_i[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
     .msip_i (msip_i[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
-    .isolate_i (soc_ctrl_out_i.isolate[${i}].q),
-    .isolated_o (soc_ctrl_in_o.isolated[${i}].d),
-    .ro_enable_i (soc_ctrl_out_i.ro_cache_enable[${i}].q),
-    .ro_flush_valid_i (soc_ctrl_out_i.ro_cache_flush[${i}].q),
-    .ro_flush_ready_o (soc_ctrl_in_o.ro_cache_flush[${i}].d),
-    .ro_start_addr_i (start_addr_${i}),
-    .ro_end_addr_i (end_addr_${i}),
     .quadrant_hbi_out_req_o (${wide_hbi_out.req_name()}),
     .quadrant_hbi_out_rsp_i (${wide_hbi_out.rsp_name()}),
     .quadrant_narrow_out_req_o (${narrow_out.req_name()}),

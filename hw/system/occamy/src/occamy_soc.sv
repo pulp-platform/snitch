@@ -91,6 +91,7 @@ module occamy_soc
     input  axi_a48_d64_i8_u0_resp_t periph_regbus_rsp_i,
 
     // SoC control register IO
+    // FIXME: reg2hw and hw2reg connections are currently unused; this may change, however.
     input occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out_i,
     output occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in_o,
     output logic [1:0] spm_rerror_o,
@@ -650,37 +651,6 @@ module occamy_soc
   assign wide_hbi_out_cut_0_cut_rsp = hbi_0_rsp_i;
 
 
-  // Assemble address from `soc_ctrl` regs.
-  logic [3:0][47:0] start_addr_0, end_addr_0;
-  assign start_addr_0[0] = {
-    soc_ctrl_out_i.ro_start_addr_high_0_quadrant_0.q,
-    soc_ctrl_out_i.ro_start_addr_low_0_quadrant_0.q
-  };
-  assign end_addr_0[0] = {
-    soc_ctrl_out_i.ro_end_addr_high_0_quadrant_0.q, soc_ctrl_out_i.ro_end_addr_low_0_quadrant_0.q
-  };
-  assign start_addr_0[1] = {
-    soc_ctrl_out_i.ro_start_addr_high_1_quadrant_0.q,
-    soc_ctrl_out_i.ro_start_addr_low_1_quadrant_0.q
-  };
-  assign end_addr_0[1] = {
-    soc_ctrl_out_i.ro_end_addr_high_1_quadrant_0.q, soc_ctrl_out_i.ro_end_addr_low_1_quadrant_0.q
-  };
-  assign start_addr_0[2] = {
-    soc_ctrl_out_i.ro_start_addr_high_2_quadrant_0.q,
-    soc_ctrl_out_i.ro_start_addr_low_2_quadrant_0.q
-  };
-  assign end_addr_0[2] = {
-    soc_ctrl_out_i.ro_end_addr_high_2_quadrant_0.q, soc_ctrl_out_i.ro_end_addr_low_2_quadrant_0.q
-  };
-  assign start_addr_0[3] = {
-    soc_ctrl_out_i.ro_start_addr_high_3_quadrant_0.q,
-    soc_ctrl_out_i.ro_start_addr_low_3_quadrant_0.q
-  };
-  assign end_addr_0[3] = {
-    soc_ctrl_out_i.ro_end_addr_high_3_quadrant_0.q, soc_ctrl_out_i.ro_end_addr_low_3_quadrant_0.q
-  };
-  assign soc_ctrl_in_o.ro_cache_flush[0].de = soc_ctrl_out_i.ro_cache_flush[0].q & soc_ctrl_in_o.ro_cache_flush[0].d;
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_0 (
       .clk_i(clk_i),
@@ -692,13 +662,6 @@ module occamy_soc
       .meip_i('0),
       .mtip_i(mtip_i[36:1]),
       .msip_i(msip_i[36:1]),
-      .isolate_i(soc_ctrl_out_i.isolate[0].q),
-      .isolated_o(soc_ctrl_in_o.isolated[0].d),
-      .ro_enable_i(soc_ctrl_out_i.ro_cache_enable[0].q),
-      .ro_flush_valid_i(soc_ctrl_out_i.ro_cache_flush[0].q),
-      .ro_flush_ready_o(soc_ctrl_in_o.ro_cache_flush[0].d),
-      .ro_start_addr_i(start_addr_0),
-      .ro_end_addr_i(end_addr_0),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_0_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_0_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_0_req),
@@ -823,37 +786,6 @@ module occamy_soc
   assign wide_hbi_out_cut_1_cut_rsp = hbi_1_rsp_i;
 
 
-  // Assemble address from `soc_ctrl` regs.
-  logic [3:0][47:0] start_addr_1, end_addr_1;
-  assign start_addr_1[0] = {
-    soc_ctrl_out_i.ro_start_addr_high_0_quadrant_1.q,
-    soc_ctrl_out_i.ro_start_addr_low_0_quadrant_1.q
-  };
-  assign end_addr_1[0] = {
-    soc_ctrl_out_i.ro_end_addr_high_0_quadrant_1.q, soc_ctrl_out_i.ro_end_addr_low_0_quadrant_1.q
-  };
-  assign start_addr_1[1] = {
-    soc_ctrl_out_i.ro_start_addr_high_1_quadrant_1.q,
-    soc_ctrl_out_i.ro_start_addr_low_1_quadrant_1.q
-  };
-  assign end_addr_1[1] = {
-    soc_ctrl_out_i.ro_end_addr_high_1_quadrant_1.q, soc_ctrl_out_i.ro_end_addr_low_1_quadrant_1.q
-  };
-  assign start_addr_1[2] = {
-    soc_ctrl_out_i.ro_start_addr_high_2_quadrant_1.q,
-    soc_ctrl_out_i.ro_start_addr_low_2_quadrant_1.q
-  };
-  assign end_addr_1[2] = {
-    soc_ctrl_out_i.ro_end_addr_high_2_quadrant_1.q, soc_ctrl_out_i.ro_end_addr_low_2_quadrant_1.q
-  };
-  assign start_addr_1[3] = {
-    soc_ctrl_out_i.ro_start_addr_high_3_quadrant_1.q,
-    soc_ctrl_out_i.ro_start_addr_low_3_quadrant_1.q
-  };
-  assign end_addr_1[3] = {
-    soc_ctrl_out_i.ro_end_addr_high_3_quadrant_1.q, soc_ctrl_out_i.ro_end_addr_low_3_quadrant_1.q
-  };
-  assign soc_ctrl_in_o.ro_cache_flush[1].de = soc_ctrl_out_i.ro_cache_flush[1].q & soc_ctrl_in_o.ro_cache_flush[1].d;
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_1 (
       .clk_i(clk_i),
@@ -865,13 +797,6 @@ module occamy_soc
       .meip_i('0),
       .mtip_i(mtip_i[72:37]),
       .msip_i(msip_i[72:37]),
-      .isolate_i(soc_ctrl_out_i.isolate[1].q),
-      .isolated_o(soc_ctrl_in_o.isolated[1].d),
-      .ro_enable_i(soc_ctrl_out_i.ro_cache_enable[1].q),
-      .ro_flush_valid_i(soc_ctrl_out_i.ro_cache_flush[1].q),
-      .ro_flush_ready_o(soc_ctrl_in_o.ro_cache_flush[1].d),
-      .ro_start_addr_i(start_addr_1),
-      .ro_end_addr_i(end_addr_1),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_1_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_1_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_1_req),
@@ -996,37 +921,6 @@ module occamy_soc
   assign wide_hbi_out_cut_2_cut_rsp = hbi_2_rsp_i;
 
 
-  // Assemble address from `soc_ctrl` regs.
-  logic [3:0][47:0] start_addr_2, end_addr_2;
-  assign start_addr_2[0] = {
-    soc_ctrl_out_i.ro_start_addr_high_0_quadrant_2.q,
-    soc_ctrl_out_i.ro_start_addr_low_0_quadrant_2.q
-  };
-  assign end_addr_2[0] = {
-    soc_ctrl_out_i.ro_end_addr_high_0_quadrant_2.q, soc_ctrl_out_i.ro_end_addr_low_0_quadrant_2.q
-  };
-  assign start_addr_2[1] = {
-    soc_ctrl_out_i.ro_start_addr_high_1_quadrant_2.q,
-    soc_ctrl_out_i.ro_start_addr_low_1_quadrant_2.q
-  };
-  assign end_addr_2[1] = {
-    soc_ctrl_out_i.ro_end_addr_high_1_quadrant_2.q, soc_ctrl_out_i.ro_end_addr_low_1_quadrant_2.q
-  };
-  assign start_addr_2[2] = {
-    soc_ctrl_out_i.ro_start_addr_high_2_quadrant_2.q,
-    soc_ctrl_out_i.ro_start_addr_low_2_quadrant_2.q
-  };
-  assign end_addr_2[2] = {
-    soc_ctrl_out_i.ro_end_addr_high_2_quadrant_2.q, soc_ctrl_out_i.ro_end_addr_low_2_quadrant_2.q
-  };
-  assign start_addr_2[3] = {
-    soc_ctrl_out_i.ro_start_addr_high_3_quadrant_2.q,
-    soc_ctrl_out_i.ro_start_addr_low_3_quadrant_2.q
-  };
-  assign end_addr_2[3] = {
-    soc_ctrl_out_i.ro_end_addr_high_3_quadrant_2.q, soc_ctrl_out_i.ro_end_addr_low_3_quadrant_2.q
-  };
-  assign soc_ctrl_in_o.ro_cache_flush[2].de = soc_ctrl_out_i.ro_cache_flush[2].q & soc_ctrl_in_o.ro_cache_flush[2].d;
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_2 (
       .clk_i(clk_i),
@@ -1038,13 +932,6 @@ module occamy_soc
       .meip_i('0),
       .mtip_i(mtip_i[108:73]),
       .msip_i(msip_i[108:73]),
-      .isolate_i(soc_ctrl_out_i.isolate[2].q),
-      .isolated_o(soc_ctrl_in_o.isolated[2].d),
-      .ro_enable_i(soc_ctrl_out_i.ro_cache_enable[2].q),
-      .ro_flush_valid_i(soc_ctrl_out_i.ro_cache_flush[2].q),
-      .ro_flush_ready_o(soc_ctrl_in_o.ro_cache_flush[2].d),
-      .ro_start_addr_i(start_addr_2),
-      .ro_end_addr_i(end_addr_2),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_2_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_2_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_2_req),
@@ -1169,37 +1056,6 @@ module occamy_soc
   assign wide_hbi_out_cut_3_cut_rsp = hbi_3_rsp_i;
 
 
-  // Assemble address from `soc_ctrl` regs.
-  logic [3:0][47:0] start_addr_3, end_addr_3;
-  assign start_addr_3[0] = {
-    soc_ctrl_out_i.ro_start_addr_high_0_quadrant_3.q,
-    soc_ctrl_out_i.ro_start_addr_low_0_quadrant_3.q
-  };
-  assign end_addr_3[0] = {
-    soc_ctrl_out_i.ro_end_addr_high_0_quadrant_3.q, soc_ctrl_out_i.ro_end_addr_low_0_quadrant_3.q
-  };
-  assign start_addr_3[1] = {
-    soc_ctrl_out_i.ro_start_addr_high_1_quadrant_3.q,
-    soc_ctrl_out_i.ro_start_addr_low_1_quadrant_3.q
-  };
-  assign end_addr_3[1] = {
-    soc_ctrl_out_i.ro_end_addr_high_1_quadrant_3.q, soc_ctrl_out_i.ro_end_addr_low_1_quadrant_3.q
-  };
-  assign start_addr_3[2] = {
-    soc_ctrl_out_i.ro_start_addr_high_2_quadrant_3.q,
-    soc_ctrl_out_i.ro_start_addr_low_2_quadrant_3.q
-  };
-  assign end_addr_3[2] = {
-    soc_ctrl_out_i.ro_end_addr_high_2_quadrant_3.q, soc_ctrl_out_i.ro_end_addr_low_2_quadrant_3.q
-  };
-  assign start_addr_3[3] = {
-    soc_ctrl_out_i.ro_start_addr_high_3_quadrant_3.q,
-    soc_ctrl_out_i.ro_start_addr_low_3_quadrant_3.q
-  };
-  assign end_addr_3[3] = {
-    soc_ctrl_out_i.ro_end_addr_high_3_quadrant_3.q, soc_ctrl_out_i.ro_end_addr_low_3_quadrant_3.q
-  };
-  assign soc_ctrl_in_o.ro_cache_flush[3].de = soc_ctrl_out_i.ro_cache_flush[3].q & soc_ctrl_in_o.ro_cache_flush[3].d;
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_3 (
       .clk_i(clk_i),
@@ -1211,13 +1067,6 @@ module occamy_soc
       .meip_i('0),
       .mtip_i(mtip_i[144:109]),
       .msip_i(msip_i[144:109]),
-      .isolate_i(soc_ctrl_out_i.isolate[3].q),
-      .isolated_o(soc_ctrl_in_o.isolated[3].d),
-      .ro_enable_i(soc_ctrl_out_i.ro_cache_enable[3].q),
-      .ro_flush_valid_i(soc_ctrl_out_i.ro_cache_flush[3].q),
-      .ro_flush_ready_o(soc_ctrl_in_o.ro_cache_flush[3].d),
-      .ro_start_addr_i(start_addr_3),
-      .ro_end_addr_i(end_addr_3),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_3_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_3_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_3_req),
@@ -1342,37 +1191,6 @@ module occamy_soc
   assign wide_hbi_out_cut_4_cut_rsp = hbi_4_rsp_i;
 
 
-  // Assemble address from `soc_ctrl` regs.
-  logic [3:0][47:0] start_addr_4, end_addr_4;
-  assign start_addr_4[0] = {
-    soc_ctrl_out_i.ro_start_addr_high_0_quadrant_4.q,
-    soc_ctrl_out_i.ro_start_addr_low_0_quadrant_4.q
-  };
-  assign end_addr_4[0] = {
-    soc_ctrl_out_i.ro_end_addr_high_0_quadrant_4.q, soc_ctrl_out_i.ro_end_addr_low_0_quadrant_4.q
-  };
-  assign start_addr_4[1] = {
-    soc_ctrl_out_i.ro_start_addr_high_1_quadrant_4.q,
-    soc_ctrl_out_i.ro_start_addr_low_1_quadrant_4.q
-  };
-  assign end_addr_4[1] = {
-    soc_ctrl_out_i.ro_end_addr_high_1_quadrant_4.q, soc_ctrl_out_i.ro_end_addr_low_1_quadrant_4.q
-  };
-  assign start_addr_4[2] = {
-    soc_ctrl_out_i.ro_start_addr_high_2_quadrant_4.q,
-    soc_ctrl_out_i.ro_start_addr_low_2_quadrant_4.q
-  };
-  assign end_addr_4[2] = {
-    soc_ctrl_out_i.ro_end_addr_high_2_quadrant_4.q, soc_ctrl_out_i.ro_end_addr_low_2_quadrant_4.q
-  };
-  assign start_addr_4[3] = {
-    soc_ctrl_out_i.ro_start_addr_high_3_quadrant_4.q,
-    soc_ctrl_out_i.ro_start_addr_low_3_quadrant_4.q
-  };
-  assign end_addr_4[3] = {
-    soc_ctrl_out_i.ro_end_addr_high_3_quadrant_4.q, soc_ctrl_out_i.ro_end_addr_low_3_quadrant_4.q
-  };
-  assign soc_ctrl_in_o.ro_cache_flush[4].de = soc_ctrl_out_i.ro_cache_flush[4].q & soc_ctrl_in_o.ro_cache_flush[4].d;
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_4 (
       .clk_i(clk_i),
@@ -1384,13 +1202,6 @@ module occamy_soc
       .meip_i('0),
       .mtip_i(mtip_i[180:145]),
       .msip_i(msip_i[180:145]),
-      .isolate_i(soc_ctrl_out_i.isolate[4].q),
-      .isolated_o(soc_ctrl_in_o.isolated[4].d),
-      .ro_enable_i(soc_ctrl_out_i.ro_cache_enable[4].q),
-      .ro_flush_valid_i(soc_ctrl_out_i.ro_cache_flush[4].q),
-      .ro_flush_ready_o(soc_ctrl_in_o.ro_cache_flush[4].d),
-      .ro_start_addr_i(start_addr_4),
-      .ro_end_addr_i(end_addr_4),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_4_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_4_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_4_req),
@@ -1515,37 +1326,6 @@ module occamy_soc
   assign wide_hbi_out_cut_5_cut_rsp = hbi_5_rsp_i;
 
 
-  // Assemble address from `soc_ctrl` regs.
-  logic [3:0][47:0] start_addr_5, end_addr_5;
-  assign start_addr_5[0] = {
-    soc_ctrl_out_i.ro_start_addr_high_0_quadrant_5.q,
-    soc_ctrl_out_i.ro_start_addr_low_0_quadrant_5.q
-  };
-  assign end_addr_5[0] = {
-    soc_ctrl_out_i.ro_end_addr_high_0_quadrant_5.q, soc_ctrl_out_i.ro_end_addr_low_0_quadrant_5.q
-  };
-  assign start_addr_5[1] = {
-    soc_ctrl_out_i.ro_start_addr_high_1_quadrant_5.q,
-    soc_ctrl_out_i.ro_start_addr_low_1_quadrant_5.q
-  };
-  assign end_addr_5[1] = {
-    soc_ctrl_out_i.ro_end_addr_high_1_quadrant_5.q, soc_ctrl_out_i.ro_end_addr_low_1_quadrant_5.q
-  };
-  assign start_addr_5[2] = {
-    soc_ctrl_out_i.ro_start_addr_high_2_quadrant_5.q,
-    soc_ctrl_out_i.ro_start_addr_low_2_quadrant_5.q
-  };
-  assign end_addr_5[2] = {
-    soc_ctrl_out_i.ro_end_addr_high_2_quadrant_5.q, soc_ctrl_out_i.ro_end_addr_low_2_quadrant_5.q
-  };
-  assign start_addr_5[3] = {
-    soc_ctrl_out_i.ro_start_addr_high_3_quadrant_5.q,
-    soc_ctrl_out_i.ro_start_addr_low_3_quadrant_5.q
-  };
-  assign end_addr_5[3] = {
-    soc_ctrl_out_i.ro_end_addr_high_3_quadrant_5.q, soc_ctrl_out_i.ro_end_addr_low_3_quadrant_5.q
-  };
-  assign soc_ctrl_in_o.ro_cache_flush[5].de = soc_ctrl_out_i.ro_cache_flush[5].q & soc_ctrl_in_o.ro_cache_flush[5].d;
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_5 (
       .clk_i(clk_i),
@@ -1557,13 +1337,6 @@ module occamy_soc
       .meip_i('0),
       .mtip_i(mtip_i[216:181]),
       .msip_i(msip_i[216:181]),
-      .isolate_i(soc_ctrl_out_i.isolate[5].q),
-      .isolated_o(soc_ctrl_in_o.isolated[5].d),
-      .ro_enable_i(soc_ctrl_out_i.ro_cache_enable[5].q),
-      .ro_flush_valid_i(soc_ctrl_out_i.ro_cache_flush[5].q),
-      .ro_flush_ready_o(soc_ctrl_in_o.ro_cache_flush[5].d),
-      .ro_start_addr_i(start_addr_5),
-      .ro_end_addr_i(end_addr_5),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_5_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_5_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_5_req),
@@ -1688,37 +1461,6 @@ module occamy_soc
   assign wide_hbi_out_cut_6_cut_rsp = hbi_6_rsp_i;
 
 
-  // Assemble address from `soc_ctrl` regs.
-  logic [3:0][47:0] start_addr_6, end_addr_6;
-  assign start_addr_6[0] = {
-    soc_ctrl_out_i.ro_start_addr_high_0_quadrant_6.q,
-    soc_ctrl_out_i.ro_start_addr_low_0_quadrant_6.q
-  };
-  assign end_addr_6[0] = {
-    soc_ctrl_out_i.ro_end_addr_high_0_quadrant_6.q, soc_ctrl_out_i.ro_end_addr_low_0_quadrant_6.q
-  };
-  assign start_addr_6[1] = {
-    soc_ctrl_out_i.ro_start_addr_high_1_quadrant_6.q,
-    soc_ctrl_out_i.ro_start_addr_low_1_quadrant_6.q
-  };
-  assign end_addr_6[1] = {
-    soc_ctrl_out_i.ro_end_addr_high_1_quadrant_6.q, soc_ctrl_out_i.ro_end_addr_low_1_quadrant_6.q
-  };
-  assign start_addr_6[2] = {
-    soc_ctrl_out_i.ro_start_addr_high_2_quadrant_6.q,
-    soc_ctrl_out_i.ro_start_addr_low_2_quadrant_6.q
-  };
-  assign end_addr_6[2] = {
-    soc_ctrl_out_i.ro_end_addr_high_2_quadrant_6.q, soc_ctrl_out_i.ro_end_addr_low_2_quadrant_6.q
-  };
-  assign start_addr_6[3] = {
-    soc_ctrl_out_i.ro_start_addr_high_3_quadrant_6.q,
-    soc_ctrl_out_i.ro_start_addr_low_3_quadrant_6.q
-  };
-  assign end_addr_6[3] = {
-    soc_ctrl_out_i.ro_end_addr_high_3_quadrant_6.q, soc_ctrl_out_i.ro_end_addr_low_3_quadrant_6.q
-  };
-  assign soc_ctrl_in_o.ro_cache_flush[6].de = soc_ctrl_out_i.ro_cache_flush[6].q & soc_ctrl_in_o.ro_cache_flush[6].d;
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_6 (
       .clk_i(clk_i),
@@ -1730,13 +1472,6 @@ module occamy_soc
       .meip_i('0),
       .mtip_i(mtip_i[252:217]),
       .msip_i(msip_i[252:217]),
-      .isolate_i(soc_ctrl_out_i.isolate[6].q),
-      .isolated_o(soc_ctrl_in_o.isolated[6].d),
-      .ro_enable_i(soc_ctrl_out_i.ro_cache_enable[6].q),
-      .ro_flush_valid_i(soc_ctrl_out_i.ro_cache_flush[6].q),
-      .ro_flush_ready_o(soc_ctrl_in_o.ro_cache_flush[6].d),
-      .ro_start_addr_i(start_addr_6),
-      .ro_end_addr_i(end_addr_6),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_6_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_6_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_6_req),
@@ -1861,37 +1596,6 @@ module occamy_soc
   assign wide_hbi_out_cut_7_cut_rsp = hbi_7_rsp_i;
 
 
-  // Assemble address from `soc_ctrl` regs.
-  logic [3:0][47:0] start_addr_7, end_addr_7;
-  assign start_addr_7[0] = {
-    soc_ctrl_out_i.ro_start_addr_high_0_quadrant_7.q,
-    soc_ctrl_out_i.ro_start_addr_low_0_quadrant_7.q
-  };
-  assign end_addr_7[0] = {
-    soc_ctrl_out_i.ro_end_addr_high_0_quadrant_7.q, soc_ctrl_out_i.ro_end_addr_low_0_quadrant_7.q
-  };
-  assign start_addr_7[1] = {
-    soc_ctrl_out_i.ro_start_addr_high_1_quadrant_7.q,
-    soc_ctrl_out_i.ro_start_addr_low_1_quadrant_7.q
-  };
-  assign end_addr_7[1] = {
-    soc_ctrl_out_i.ro_end_addr_high_1_quadrant_7.q, soc_ctrl_out_i.ro_end_addr_low_1_quadrant_7.q
-  };
-  assign start_addr_7[2] = {
-    soc_ctrl_out_i.ro_start_addr_high_2_quadrant_7.q,
-    soc_ctrl_out_i.ro_start_addr_low_2_quadrant_7.q
-  };
-  assign end_addr_7[2] = {
-    soc_ctrl_out_i.ro_end_addr_high_2_quadrant_7.q, soc_ctrl_out_i.ro_end_addr_low_2_quadrant_7.q
-  };
-  assign start_addr_7[3] = {
-    soc_ctrl_out_i.ro_start_addr_high_3_quadrant_7.q,
-    soc_ctrl_out_i.ro_start_addr_low_3_quadrant_7.q
-  };
-  assign end_addr_7[3] = {
-    soc_ctrl_out_i.ro_end_addr_high_3_quadrant_7.q, soc_ctrl_out_i.ro_end_addr_low_3_quadrant_7.q
-  };
-  assign soc_ctrl_in_o.ro_cache_flush[7].de = soc_ctrl_out_i.ro_cache_flush[7].q & soc_ctrl_in_o.ro_cache_flush[7].d;
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_7 (
       .clk_i(clk_i),
@@ -1903,13 +1607,6 @@ module occamy_soc
       .meip_i('0),
       .mtip_i(mtip_i[288:253]),
       .msip_i(msip_i[288:253]),
-      .isolate_i(soc_ctrl_out_i.isolate[7].q),
-      .isolated_o(soc_ctrl_in_o.isolated[7].d),
-      .ro_enable_i(soc_ctrl_out_i.ro_cache_enable[7].q),
-      .ro_flush_valid_i(soc_ctrl_out_i.ro_cache_flush[7].q),
-      .ro_flush_ready_o(soc_ctrl_in_o.ro_cache_flush[7].d),
-      .ro_start_addr_i(start_addr_7),
-      .ro_end_addr_i(end_addr_7),
       .quadrant_hbi_out_req_o(wide_hbi_out_cut_7_req),
       .quadrant_hbi_out_rsp_i(wide_hbi_out_cut_7_rsp),
       .quadrant_narrow_out_req_o(narrow_out_cut_7_req),
