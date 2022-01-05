@@ -186,4 +186,6 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_snitch_test_executable(fp8alt_comparison_scalar tests/fp8alt_comparison_scalar.c)
     add_snitch_test_executable(fp8alt_computation_scalar tests/fp8alt_computation_scalar.c)
 
+    add_snitch_test_executable(fp32_conversions_scalar tests/fp32_conversions_scalar.c)
+    add_snitch_test_executable(fp64_conversions_scalar tests/fp64_conversions_scalar.c)
 endif()
