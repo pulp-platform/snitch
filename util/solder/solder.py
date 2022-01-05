@@ -1221,9 +1221,12 @@ class AxiXbar(Xbar):
         self.symbolic_addrmap = list()
         self.atop_support = atop_support
         self.addrmap = list()
+        self.connections = dict()
 
-    def add_input(self, name):
+    def add_input(self, name, outputs=None):
         self.inputs.append(name)
+        if outputs:
+            self.connections[name] = outputs
 
     def add_output(self, name, addrs, default=False):
         idx = len(self.outputs)
@@ -1449,17 +1452,13 @@ class AxiXbar(Xbar):
         """Generate a connectivity matrix"""
         length = len(self.outputs) * len(self.inputs)
         connectivity = ""
-        # check if port names match and disable that route
-        if self.no_loopback:
-            for i in self.inputs:
-                for o in self.outputs:
-                    if (i == o):
-                        connectivity += "0"
-                    else:
-                        connectivity += "1"
-        else:
-            connectivity += "1" * length
-
+        for i in self.inputs:
+            for o in self.outputs:
+                # Disable link only if connectivity specified for input or loopback disabled
+                import sys
+                #print(self.connections, sys.stderr)
+                connectivity += "0" if (((i in self.connections) and (o not in self.connections[i]))
+                                        or (self.no_loopback and i == o)) else "1"
         connectivity = "{}'b{}".format(length, connectivity[::-1])
 
         return connectivity

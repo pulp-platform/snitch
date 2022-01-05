@@ -533,8 +533,8 @@ def main():
     # TODO: Define appropriate default routes for each port! (not correct as-is!)
     quadrant_s1_ctrl_xbar.add_output("soc", [])
     quadrant_s1_ctrl_xbar.add_output("quadrant", [])
-    quadrant_s1_ctrl_xbar.add_input("soc")
-    quadrant_s1_ctrl_xbar.add_input("quadrant")
+    quadrant_s1_ctrl_xbar.add_input("soc", outputs=['quadrant', 'internal'])
+    quadrant_s1_ctrl_xbar.add_input("quadrant", outputs=['soc', 'internal'])
 
     quadrant_s1_ctrl_xbar.add_output_symbolic("internal",
                                               "InternalBaseAddress",
