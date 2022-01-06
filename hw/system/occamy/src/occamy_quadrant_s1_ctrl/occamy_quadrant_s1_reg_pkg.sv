@@ -44,6 +44,10 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_ro_cache_enable_reg_t;
 
   typedef struct packed {
+    logic        q;
+  } occamy_quadrant_s1_reg2hw_ro_cache_flush_reg_t;
+
+  typedef struct packed {
     logic [31:0] q;
   } occamy_quadrant_s1_reg2hw_ro_start_addr_low_0_reg_t;
 
@@ -125,12 +129,18 @@ package occamy_quadrant_s1_reg_pkg;
     } hbi_out;
   } occamy_quadrant_s1_hw2reg_isolated_reg_t;
 
+  typedef struct packed {
+    logic        d;
+    logic        de;
+  } occamy_quadrant_s1_hw2reg_ro_cache_flush_reg_t;
+
   // Register -> HW type
   typedef struct packed {
-    occamy_quadrant_s1_reg2hw_clk_ena_reg_t clk_ena; // [391:391]
-    occamy_quadrant_s1_reg2hw_reset_n_reg_t reset_n; // [390:390]
-    occamy_quadrant_s1_reg2hw_isolate_reg_t isolate; // [389:385]
-    occamy_quadrant_s1_reg2hw_ro_cache_enable_reg_t ro_cache_enable; // [384:384]
+    occamy_quadrant_s1_reg2hw_clk_ena_reg_t clk_ena; // [392:392]
+    occamy_quadrant_s1_reg2hw_reset_n_reg_t reset_n; // [391:391]
+    occamy_quadrant_s1_reg2hw_isolate_reg_t isolate; // [390:386]
+    occamy_quadrant_s1_reg2hw_ro_cache_enable_reg_t ro_cache_enable; // [385:385]
+    occamy_quadrant_s1_reg2hw_ro_cache_flush_reg_t ro_cache_flush; // [384:384]
     occamy_quadrant_s1_reg2hw_ro_start_addr_low_0_reg_t ro_start_addr_low_0; // [383:352]
     occamy_quadrant_s1_reg2hw_ro_start_addr_high_0_reg_t ro_start_addr_high_0; // [351:336]
     occamy_quadrant_s1_reg2hw_ro_end_addr_low_0_reg_t ro_end_addr_low_0; // [335:304]
@@ -151,7 +161,8 @@ package occamy_quadrant_s1_reg_pkg;
 
   // HW -> register type
   typedef struct packed {
-    occamy_quadrant_s1_hw2reg_isolated_reg_t isolated; // [4:0]
+    occamy_quadrant_s1_hw2reg_isolated_reg_t isolated; // [6:2]
+    occamy_quadrant_s1_hw2reg_ro_cache_flush_reg_t ro_cache_flush; // [1:0]
   } occamy_quadrant_s1_hw2reg_t;
 
   // Register offsets
@@ -160,6 +171,7 @@ package occamy_quadrant_s1_reg_pkg;
   parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_ISOLATE_OFFSET = 9'h 8;
   parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_ISOLATED_OFFSET = 9'h c;
   parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE_OFFSET = 9'h 10;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH_OFFSET = 9'h 14;
   parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0_OFFSET = 9'h 100;
   parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0_OFFSET = 9'h 104;
   parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0_OFFSET = 9'h 108;
@@ -192,6 +204,7 @@ package occamy_quadrant_s1_reg_pkg;
     OCCAMY_QUADRANT_S1_ISOLATE,
     OCCAMY_QUADRANT_S1_ISOLATED,
     OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE,
+    OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH,
     OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0,
     OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0,
     OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0,
@@ -211,28 +224,29 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] OCCAMY_QUADRANT_S1_PERMIT [21] = '{
+  parameter logic [3:0] OCCAMY_QUADRANT_S1_PERMIT [22] = '{
     4'b 0001, // index[ 0] OCCAMY_QUADRANT_S1_CLK_ENA
     4'b 0001, // index[ 1] OCCAMY_QUADRANT_S1_RESET_N
     4'b 0001, // index[ 2] OCCAMY_QUADRANT_S1_ISOLATE
     4'b 0001, // index[ 3] OCCAMY_QUADRANT_S1_ISOLATED
     4'b 0001, // index[ 4] OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE
-    4'b 1111, // index[ 5] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0
-    4'b 0011, // index[ 6] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0
-    4'b 1111, // index[ 7] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0
-    4'b 0011, // index[ 8] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0
-    4'b 1111, // index[ 9] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1
-    4'b 0011, // index[10] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1
-    4'b 1111, // index[11] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1
-    4'b 0011, // index[12] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1
-    4'b 1111, // index[13] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2
-    4'b 0011, // index[14] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2
-    4'b 1111, // index[15] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2
-    4'b 0011, // index[16] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2
-    4'b 1111, // index[17] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3
-    4'b 0011, // index[18] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3
-    4'b 1111, // index[19] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3
-    4'b 0011  // index[20] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3
+    4'b 0001, // index[ 5] OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH
+    4'b 1111, // index[ 6] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0
+    4'b 0011, // index[ 7] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0
+    4'b 1111, // index[ 8] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0
+    4'b 0011, // index[ 9] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0
+    4'b 1111, // index[10] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1
+    4'b 0011, // index[11] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1
+    4'b 1111, // index[12] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1
+    4'b 0011, // index[13] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1
+    4'b 1111, // index[14] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2
+    4'b 0011, // index[15] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2
+    4'b 1111, // index[16] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2
+    4'b 0011, // index[17] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2
+    4'b 1111, // index[18] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3
+    4'b 0011, // index[19] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3
+    4'b 1111, // index[20] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3
+    4'b 0011  // index[21] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3
   };
 
 endpackage

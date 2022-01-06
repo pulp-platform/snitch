@@ -19,13 +19,15 @@ module occamy_quadrant_s1_ctrl
   input  logic rst_ni,
   input  logic test_mode_i,
 
+  input  logic tile_id_i,
+
   // Quadrant clock and reset
   output logic clk_quadrant_o,
   output logic rst_quadrant_no,
 
   // Quadrant control signals
   output occamy_quadrant_s1_reg2hw_isolate_reg_t isolate_o,
-  input  occamy_quadrant_s1_reg2hw_isolated_reg_t isolated_i,
+  input  occamy_quadrant_s1_hw2reg_isolated_reg_t isolated_i,
   output logic ro_enable_o,
   output logic ro_flush_valid_o,
   input  logic ro_flush_ready_i,
@@ -45,17 +47,17 @@ module occamy_quadrant_s1_ctrl
   output axi_a48_d64_i8_u0_resp_t quadrant_in_rsp_o
 );
 
-  localparam addr_t InternalBaseAddr = ClusterBaseOffset +
-    tile_id_i * NrClustersS1Quadrant * ClusterAddressSpace + 4 * ClusterAddressSpace;
-  localparam addr_t InternalAddressSpace = S1QuadrantAddressSpace - InternalBaseAddr;
+  // Upper half of quadrant space reserved for internal use (same size as for all clusters)
+  addr_t [0:0] internal_xbar_base_addr = '{ClusterBaseOffset +
+    tile_id_i * S1QuadrantAddressSpace + S1QuadrantClusterSpace};
 
-  // TODO: Set correct default rules for xbar! Pipeline appropriately (possibly only outwards)
+  // TODO: Pipeline appropriately (possibly only outwards)
   // Controller crossbar: shims off for access to internal space
 
 /// Address map of the `quadrant_s1_ctrl_xbar` crossbar.
 xbar_rule_48_t [0:0] QuadrantS1CtrlXbarAddrmap;
 assign QuadrantS1CtrlXbarAddrmap = '{
-  '{ idx: 2, start_addr: InternalBaseAddress[0], end_addr: InternalBaseAddress[0] + QuadrantAddressSpace }
+  '{ idx: 2, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantClusterSpace }
 };
 
 quadrant_s1_ctrl_xbar_in_req_t [1:0] quadrant_s1_ctrl_xbar_in_req;
@@ -98,16 +100,16 @@ axi_xbar #(
   // Connect upward (SoC) narrow ports
   assign soc_out_req_o = quadrant_s1_ctrl_xbar_out_req[QUADRANT_S1_CTRL_XBAR_OUT_SOC];
   assign quadrant_s1_ctrl_xbar_out_rsp[QUADRANT_S1_CTRL_XBAR_OUT_SOC] = soc_out_rsp_i;
-  assign quadrant_s1_ctrl_xbar_in_req[QUADRANT_S1_CTRL_XBAR_IN_SOC] = narrow_in_req_i;
-  assign narrow_in_rsp_o = quadrant_s1_ctrl_xbar_in_rsp[QUADRANT_S1_CTRL_XBAR_IN_SOC];
+  assign quadrant_s1_ctrl_xbar_in_req[QUADRANT_S1_CTRL_XBAR_IN_SOC] = soc_in_req_i;
+  assign soc_in_rsp_o = quadrant_s1_ctrl_xbar_in_rsp[QUADRANT_S1_CTRL_XBAR_IN_SOC];
 
   // Connect quadrant narrow ports
-  assign narrow_out_req_o =  quadrant_s1_ctrl_xbar_out_req[QUADRANT_S1_CTRL_XBAR_OUT_QUADRANT];
-  assign quadrant_s1_ctrl_xbar_out_rsp[QUADRANT_S1_CTRL_XBAR_OUT_QUADRANT] = narrow_out_rsp_i;
-  assign quadrant_s1_ctrl_xbar_in_req[QUADRANT_S1_CTRL_XBAR_IN_QUADRANT] = narrow_in_req_i;
-  assign narrow_in_rsp_o = quadrant_s1_ctrl_xbar_in_rsp[QUADRANT_S1_CTRL_XBAR_IN_QUADRANT];
+  assign quadrant_out_req_o =  quadrant_s1_ctrl_xbar_out_req[QUADRANT_S1_CTRL_XBAR_OUT_QUADRANT];
+  assign quadrant_s1_ctrl_xbar_out_rsp[QUADRANT_S1_CTRL_XBAR_OUT_QUADRANT] = quadrant_out_rsp_i;
+  assign quadrant_s1_ctrl_xbar_in_req[QUADRANT_S1_CTRL_XBAR_IN_QUADRANT] = quadrant_in_req_i;
+  assign quadrant_in_rsp_o = quadrant_s1_ctrl_xbar_in_rsp[QUADRANT_S1_CTRL_XBAR_IN_QUADRANT];
 
-  // Toward inernal register file
+  // Toward internal register file
     axi_a48_d32_i5_u0_req_t axi_to_axi_lite_dw_req;
   axi_a48_d32_i5_u0_resp_t axi_to_axi_lite_dw_rsp;
 
@@ -182,12 +184,12 @@ axi_xbar #(
 
 
   // Control registers
-  output occamy_quadrant_s1_reg2hw_t reg2hw;
-  input  occamy_quadrant_s1_hw2reg_t hw2reg;
+  occamy_quadrant_s1_reg2hw_t reg2hw;
+  occamy_quadrant_s1_hw2reg_t hw2reg;
 
   occamy_quadrant_s1_reg_top #(
     .reg_req_t (reg_a48_d32_req_t),
-    .reg_rsp_t (reg_a48_d32_rsp_t),
+    .reg_rsp_t (reg_a48_d32_rsp_t)
   ) i_occamy_quadrant_s1_reg_top (
     .clk_i,
     .rst_ni,
@@ -195,7 +197,7 @@ axi_xbar #(
     .reg_rsp_o (axi_lite_to_regbus_regs_rsp),
     .reg2hw,
     .hw2reg,
-    .devmode_i (1'b0),
+    .devmode_i (1'b0)
   );
 
   // Control quadrant control signals

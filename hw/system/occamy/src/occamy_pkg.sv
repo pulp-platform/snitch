@@ -103,7 +103,8 @@ package occamy_pkg;
   localparam addr_t ClusterAddressSpace = 'h4_0000;  // 256 kiB
   /// The address space of a single S1 quadrant.
   /// Like clusters, allocate double the mapped space and use upper half for internal slaves
-  localparam addr_t S1QuadrantAddressSpace = 2 * ClusterAddressSpace * NrClustersS1Quadrant;
+  localparam addr_t S1QuadrantClusterSpace = ClusterAddressSpace * NrClustersS1Quadrant;
+  localparam addr_t S1QuadrantAddressSpace = 2 * S1QuadrantClusterSpace;
 
   // AXI-Lite bus with 48 bit address and 64 bit data.
   `AXI_LITE_TYPEDEF_ALL(axi_lite_a48_d64, logic [47:0], logic [63:0], logic [7:0])
@@ -572,6 +573,10 @@ package occamy_pkg;
 
   // AXI bus with 48 bit address, 64 bit data, 1 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d64_i1_u0, logic [47:0], logic [0:0], logic [63:0], logic [7:0],
+                   logic [0:0])
+
+  // AXI bus with 48 bit address, 32 bit data, 5 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d32_i5_u0, logic [47:0], logic [4:0], logic [31:0], logic [3:0],
                    logic [0:0])
 
   // AXI bus with 48 bit address, 512 bit data, 6 bit IDs, and 0 bit user data.

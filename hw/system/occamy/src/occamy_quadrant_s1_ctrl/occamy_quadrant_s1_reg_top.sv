@@ -102,6 +102,9 @@ module occamy_quadrant_s1_reg_top #(
   logic ro_cache_enable_qs;
   logic ro_cache_enable_wd;
   logic ro_cache_enable_we;
+  logic ro_cache_flush_qs;
+  logic ro_cache_flush_wd;
+  logic ro_cache_flush_we;
   logic [31:0] ro_start_addr_low_0_qs;
   logic [31:0] ro_start_addr_low_0_wd;
   logic ro_start_addr_low_0_we;
@@ -439,6 +442,33 @@ module occamy_quadrant_s1_reg_top #(
 
     // to register interface (read)
     .qs     (ro_cache_enable_qs)
+  );
+
+
+  // R[ro_cache_flush]: V(False)
+
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_ro_cache_flush (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (ro_cache_flush_we),
+    .wd     (ro_cache_flush_wd),
+
+    // from internal hardware
+    .de     (hw2reg.ro_cache_flush.de),
+    .d      (hw2reg.ro_cache_flush.d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.ro_cache_flush.q ),
+
+    // to register interface (read)
+    .qs     (ro_cache_flush_qs)
   );
 
 
@@ -876,7 +906,7 @@ module occamy_quadrant_s1_reg_top #(
 
 
 
-  logic [20:0] addr_hit;
+  logic [21:0] addr_hit;
   always_comb begin
     addr_hit = '0;
     addr_hit[ 0] = (reg_addr == OCCAMY_QUADRANT_S1_CLK_ENA_OFFSET);
@@ -884,22 +914,23 @@ module occamy_quadrant_s1_reg_top #(
     addr_hit[ 2] = (reg_addr == OCCAMY_QUADRANT_S1_ISOLATE_OFFSET);
     addr_hit[ 3] = (reg_addr == OCCAMY_QUADRANT_S1_ISOLATED_OFFSET);
     addr_hit[ 4] = (reg_addr == OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE_OFFSET);
-    addr_hit[ 5] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0_OFFSET);
-    addr_hit[ 6] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0_OFFSET);
-    addr_hit[ 7] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0_OFFSET);
-    addr_hit[ 8] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0_OFFSET);
-    addr_hit[ 9] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1_OFFSET);
-    addr_hit[10] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1_OFFSET);
-    addr_hit[11] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1_OFFSET);
-    addr_hit[12] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1_OFFSET);
-    addr_hit[13] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2_OFFSET);
-    addr_hit[14] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2_OFFSET);
-    addr_hit[15] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2_OFFSET);
-    addr_hit[16] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2_OFFSET);
-    addr_hit[17] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3_OFFSET);
-    addr_hit[18] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3_OFFSET);
-    addr_hit[19] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3_OFFSET);
-    addr_hit[20] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3_OFFSET);
+    addr_hit[ 5] = (reg_addr == OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH_OFFSET);
+    addr_hit[ 6] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0_OFFSET);
+    addr_hit[ 7] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0_OFFSET);
+    addr_hit[ 8] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0_OFFSET);
+    addr_hit[ 9] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0_OFFSET);
+    addr_hit[10] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1_OFFSET);
+    addr_hit[11] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1_OFFSET);
+    addr_hit[12] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1_OFFSET);
+    addr_hit[13] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1_OFFSET);
+    addr_hit[14] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2_OFFSET);
+    addr_hit[15] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2_OFFSET);
+    addr_hit[16] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2_OFFSET);
+    addr_hit[17] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2_OFFSET);
+    addr_hit[18] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3_OFFSET);
+    addr_hit[19] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3_OFFSET);
+    addr_hit[20] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3_OFFSET);
+    addr_hit[21] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -927,7 +958,8 @@ module occamy_quadrant_s1_reg_top #(
                (addr_hit[17] & (|(OCCAMY_QUADRANT_S1_PERMIT[17] & ~reg_be))) |
                (addr_hit[18] & (|(OCCAMY_QUADRANT_S1_PERMIT[18] & ~reg_be))) |
                (addr_hit[19] & (|(OCCAMY_QUADRANT_S1_PERMIT[19] & ~reg_be))) |
-               (addr_hit[20] & (|(OCCAMY_QUADRANT_S1_PERMIT[20] & ~reg_be)))));
+               (addr_hit[20] & (|(OCCAMY_QUADRANT_S1_PERMIT[20] & ~reg_be))) |
+               (addr_hit[21] & (|(OCCAMY_QUADRANT_S1_PERMIT[21] & ~reg_be)))));
   end
 
   assign clk_ena_we = addr_hit[0] & reg_we & !reg_error;
@@ -964,52 +996,55 @@ module occamy_quadrant_s1_reg_top #(
   assign ro_cache_enable_we = addr_hit[4] & reg_we & !reg_error;
   assign ro_cache_enable_wd = reg_wdata[0];
 
-  assign ro_start_addr_low_0_we = addr_hit[5] & reg_we & !reg_error;
+  assign ro_cache_flush_we = addr_hit[5] & reg_we & !reg_error;
+  assign ro_cache_flush_wd = reg_wdata[0];
+
+  assign ro_start_addr_low_0_we = addr_hit[6] & reg_we & !reg_error;
   assign ro_start_addr_low_0_wd = reg_wdata[31:0];
 
-  assign ro_start_addr_high_0_we = addr_hit[6] & reg_we & !reg_error;
+  assign ro_start_addr_high_0_we = addr_hit[7] & reg_we & !reg_error;
   assign ro_start_addr_high_0_wd = reg_wdata[15:0];
 
-  assign ro_end_addr_low_0_we = addr_hit[7] & reg_we & !reg_error;
+  assign ro_end_addr_low_0_we = addr_hit[8] & reg_we & !reg_error;
   assign ro_end_addr_low_0_wd = reg_wdata[31:0];
 
-  assign ro_end_addr_high_0_we = addr_hit[8] & reg_we & !reg_error;
+  assign ro_end_addr_high_0_we = addr_hit[9] & reg_we & !reg_error;
   assign ro_end_addr_high_0_wd = reg_wdata[15:0];
 
-  assign ro_start_addr_low_1_we = addr_hit[9] & reg_we & !reg_error;
+  assign ro_start_addr_low_1_we = addr_hit[10] & reg_we & !reg_error;
   assign ro_start_addr_low_1_wd = reg_wdata[31:0];
 
-  assign ro_start_addr_high_1_we = addr_hit[10] & reg_we & !reg_error;
+  assign ro_start_addr_high_1_we = addr_hit[11] & reg_we & !reg_error;
   assign ro_start_addr_high_1_wd = reg_wdata[15:0];
 
-  assign ro_end_addr_low_1_we = addr_hit[11] & reg_we & !reg_error;
+  assign ro_end_addr_low_1_we = addr_hit[12] & reg_we & !reg_error;
   assign ro_end_addr_low_1_wd = reg_wdata[31:0];
 
-  assign ro_end_addr_high_1_we = addr_hit[12] & reg_we & !reg_error;
+  assign ro_end_addr_high_1_we = addr_hit[13] & reg_we & !reg_error;
   assign ro_end_addr_high_1_wd = reg_wdata[15:0];
 
-  assign ro_start_addr_low_2_we = addr_hit[13] & reg_we & !reg_error;
+  assign ro_start_addr_low_2_we = addr_hit[14] & reg_we & !reg_error;
   assign ro_start_addr_low_2_wd = reg_wdata[31:0];
 
-  assign ro_start_addr_high_2_we = addr_hit[14] & reg_we & !reg_error;
+  assign ro_start_addr_high_2_we = addr_hit[15] & reg_we & !reg_error;
   assign ro_start_addr_high_2_wd = reg_wdata[15:0];
 
-  assign ro_end_addr_low_2_we = addr_hit[15] & reg_we & !reg_error;
+  assign ro_end_addr_low_2_we = addr_hit[16] & reg_we & !reg_error;
   assign ro_end_addr_low_2_wd = reg_wdata[31:0];
 
-  assign ro_end_addr_high_2_we = addr_hit[16] & reg_we & !reg_error;
+  assign ro_end_addr_high_2_we = addr_hit[17] & reg_we & !reg_error;
   assign ro_end_addr_high_2_wd = reg_wdata[15:0];
 
-  assign ro_start_addr_low_3_we = addr_hit[17] & reg_we & !reg_error;
+  assign ro_start_addr_low_3_we = addr_hit[18] & reg_we & !reg_error;
   assign ro_start_addr_low_3_wd = reg_wdata[31:0];
 
-  assign ro_start_addr_high_3_we = addr_hit[18] & reg_we & !reg_error;
+  assign ro_start_addr_high_3_we = addr_hit[19] & reg_we & !reg_error;
   assign ro_start_addr_high_3_wd = reg_wdata[15:0];
 
-  assign ro_end_addr_low_3_we = addr_hit[19] & reg_we & !reg_error;
+  assign ro_end_addr_low_3_we = addr_hit[20] & reg_we & !reg_error;
   assign ro_end_addr_low_3_wd = reg_wdata[31:0];
 
-  assign ro_end_addr_high_3_we = addr_hit[20] & reg_we & !reg_error;
+  assign ro_end_addr_high_3_we = addr_hit[21] & reg_we & !reg_error;
   assign ro_end_addr_high_3_wd = reg_wdata[15:0];
 
   // Read data return
@@ -1045,66 +1080,70 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[5]: begin
-        reg_rdata_next[31:0] = ro_start_addr_low_0_qs;
+        reg_rdata_next[0] = ro_cache_flush_qs;
       end
 
       addr_hit[6]: begin
-        reg_rdata_next[15:0] = ro_start_addr_high_0_qs;
+        reg_rdata_next[31:0] = ro_start_addr_low_0_qs;
       end
 
       addr_hit[7]: begin
-        reg_rdata_next[31:0] = ro_end_addr_low_0_qs;
+        reg_rdata_next[15:0] = ro_start_addr_high_0_qs;
       end
 
       addr_hit[8]: begin
-        reg_rdata_next[15:0] = ro_end_addr_high_0_qs;
+        reg_rdata_next[31:0] = ro_end_addr_low_0_qs;
       end
 
       addr_hit[9]: begin
-        reg_rdata_next[31:0] = ro_start_addr_low_1_qs;
+        reg_rdata_next[15:0] = ro_end_addr_high_0_qs;
       end
 
       addr_hit[10]: begin
-        reg_rdata_next[15:0] = ro_start_addr_high_1_qs;
+        reg_rdata_next[31:0] = ro_start_addr_low_1_qs;
       end
 
       addr_hit[11]: begin
-        reg_rdata_next[31:0] = ro_end_addr_low_1_qs;
+        reg_rdata_next[15:0] = ro_start_addr_high_1_qs;
       end
 
       addr_hit[12]: begin
-        reg_rdata_next[15:0] = ro_end_addr_high_1_qs;
+        reg_rdata_next[31:0] = ro_end_addr_low_1_qs;
       end
 
       addr_hit[13]: begin
-        reg_rdata_next[31:0] = ro_start_addr_low_2_qs;
+        reg_rdata_next[15:0] = ro_end_addr_high_1_qs;
       end
 
       addr_hit[14]: begin
-        reg_rdata_next[15:0] = ro_start_addr_high_2_qs;
+        reg_rdata_next[31:0] = ro_start_addr_low_2_qs;
       end
 
       addr_hit[15]: begin
-        reg_rdata_next[31:0] = ro_end_addr_low_2_qs;
+        reg_rdata_next[15:0] = ro_start_addr_high_2_qs;
       end
 
       addr_hit[16]: begin
-        reg_rdata_next[15:0] = ro_end_addr_high_2_qs;
+        reg_rdata_next[31:0] = ro_end_addr_low_2_qs;
       end
 
       addr_hit[17]: begin
-        reg_rdata_next[31:0] = ro_start_addr_low_3_qs;
+        reg_rdata_next[15:0] = ro_end_addr_high_2_qs;
       end
 
       addr_hit[18]: begin
-        reg_rdata_next[15:0] = ro_start_addr_high_3_qs;
+        reg_rdata_next[31:0] = ro_start_addr_low_3_qs;
       end
 
       addr_hit[19]: begin
-        reg_rdata_next[31:0] = ro_end_addr_low_3_qs;
+        reg_rdata_next[15:0] = ro_start_addr_high_3_qs;
       end
 
       addr_hit[20]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_3_qs;
+      end
+
+      addr_hit[21]: begin
         reg_rdata_next[15:0] = ro_end_addr_high_3_qs;
       end
 

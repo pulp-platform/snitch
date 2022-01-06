@@ -153,6 +153,7 @@ module occamy_quadrant_s1
     .clk_i,
     .rst_ni,
     .test_mode_i,
+    .tile_id_i,
     .clk_quadrant_o (clk_quadrant),
     .rst_quadrant_no (rst_quadrant_n),
     .isolate_o (isolate),

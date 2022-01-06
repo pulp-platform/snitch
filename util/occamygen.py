@@ -537,8 +537,8 @@ def main():
     quadrant_s1_ctrl_xbar.add_input("quadrant", outputs=['soc', 'internal'])
 
     quadrant_s1_ctrl_xbar.add_output_symbolic("internal",
-                                              "InternalBaseAddress",
-                                              "QuadrantAddressSpace")
+                                              "internal_xbar_base_addr",
+                                              "S1QuadrantClusterSpace")
 
     ################
     # S1 Quadrants #

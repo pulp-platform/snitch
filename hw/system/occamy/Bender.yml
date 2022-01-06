@@ -27,6 +27,8 @@ sources:
 - src/occamy_cluster_wrapper.sv
 - src/occamy_soc_ctrl/occamy_soc_reg_pkg.sv
 - src/occamy_soc_ctrl/occamy_soc_reg_top.sv
+- src/occamy_quadrant_s1_ctrl/occamy_quadrant_s1_reg_pkg.sv
+- src/occamy_quadrant_s1_ctrl/occamy_quadrant_s1_reg_top.sv
 - src/rv_plic/rv_plic_reg_pkg.sv
 - src/rv_plic/rv_plic_reg_top.sv
 - src/rv_plic/rv_plic.sv
@@ -35,6 +37,7 @@ sources:
 - src/clint/clint.sv
 - src/reg_to_apb.sv
 # Level 1:
+- src//occamy_quadrant_s1_ctrl.sv
 - src/occamy_soc_ctrl/occamy_soc_ctrl.sv
 - src/occamy_pkg.sv
 # Level 2:

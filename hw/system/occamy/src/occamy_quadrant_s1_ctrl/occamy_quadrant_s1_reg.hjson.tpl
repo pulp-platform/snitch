@@ -65,6 +65,14 @@
         { bits: "0:0", resval: 0, name: "enable", desc: "Enable RO cache of S1 quadrant."}
       ]
     },
+    { name: "RO_CACHE_FLUSH",
+      desc: "Flush read-only cache.",
+      swaccess: "rw"
+      hwaccess: "hrw"
+      fields: [
+        { bits: "0:0", resval: 0, name: "flush", desc: "Flush (invalidate) RO cache of S1 quadrant."}
+      ]
+    },
 
     // Start RO cache region fields at regular offset
     { skipto: "0x100" }

@@ -53,10 +53,9 @@ update-source:
 		--soc-sv src/occamy_soc.sv.tpl \
 		--pkg-sv src/occamy_pkg.sv.tpl \
 		--quadrant-s1 src/occamy_quadrant_s1.sv.tpl \
+		--quadrant-s1-ctrl src/occamy_quadrant_s1_ctrl.sv.tpl \
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
 		--cva6-sv src/occamy_cva6.sv.tpl
-	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/occamy_quadrant_s1_ctrl \
-		--quadrant-s1-ctrl src/occamy_quadrant_s1_ctrl/occamy_quadrant_s1_ctrl.sv.tpl
 	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir test \
 		--testharness-sv test/testharness.sv.tpl \
 		--bootdata ../../ip/snitch_cluster/test/bootdata.cc.tpl
