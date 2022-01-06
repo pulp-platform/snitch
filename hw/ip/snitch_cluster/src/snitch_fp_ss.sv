@@ -2055,7 +2055,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
         end
         op_mode        = 1'b1; // sign-extend result
         op_select[0]   = RegA;
-        vectorial_op   = 1'b1;
         fpu_tag_in.acc = 1'b1;
         rd_is_fp       = 1'b0;
       end
@@ -2250,17 +2249,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
           dst_fmt    = fpnew_pkg::FP16ALT;
         end
       end
-      riscv_instr::FCVT_H_W: begin
-        fpu_op = fpnew_pkg::I2F;
-        op_select[0] = AccBus;
-        src_fmt      = fpnew_pkg::FP16;
-        dst_fmt      = fpnew_pkg::FP16;
-        if (fpu_fmt_mode_i.dst == 1'b1) begin
-          src_fmt    = fpnew_pkg::FP16ALT;
-          dst_fmt    = fpnew_pkg::FP16ALT;
-        end
-        if (acc_req_q.data_op inside {riscv_instr::FCVT_H_W}) op_mode = 1'b1; // unsigned
-      end
+      riscv_instr::FCVT_H_W,
       riscv_instr::FCVT_H_WU: begin
         fpu_op = fpnew_pkg::I2F;
         op_select[0] = AccBus;
