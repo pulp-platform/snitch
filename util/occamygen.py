@@ -340,7 +340,7 @@ def main():
     quadrant_size = cluster_size * nr_s1_clusters
 
     for i in range(nr_s1_quadrants):
-        cluster_base_addr = quadrants_base_addr + i * quadrant_size
+        cluster_base_addr = quadrants_base_addr + 2 * i * quadrant_size
 
         am_clusters = list()
         for j in range(nr_s1_clusters):
@@ -370,6 +370,16 @@ def main():
                 ).attach_to(
                     am_narrow_xbar_quadrant_s1[i]
                 )
+            )
+
+        am.new_leaf(
+                "quadrant_{}_internal".format(i),
+                cluster_tcdm_size,
+                cluster_base_addr + nr_s1_clusters * cluster_size + cluster_tcdm_size
+            ).attach_to(
+                am_narrow_xbar_quadrant_s1[i]
+            ).attach_to(
+                am_soc_narrow_xbar
             )
 
     ##############################
@@ -460,9 +470,11 @@ def main():
         node=am_soc_wide_xbar)
 
     for i in range(nr_s1_quadrants):
+        # Only clusters, but not internal space is accessible on the wide Xbar.
+        # This prevent gating-related issues (the narrow quadrabt ports are never gated).
         soc_wide_xbar.add_output_symbolic("s1_quadrant_{}".format(i),
                                           "s1_quadrant_base_addr",
-                                          "S1QuadrantAddressSpace")
+                                          "S1QuadrantClusterSpace")
         soc_wide_xbar.add_input("s1_quadrant_{}".format(i))
 
     for i in range(8):

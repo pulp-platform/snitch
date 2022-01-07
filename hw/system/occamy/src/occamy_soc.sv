@@ -132,7 +132,7 @@ module occamy_soc
   ///////////////////
 
   /// Address map of the `soc_wide_xbar` crossbar.
-  xbar_rule_48_t [21:0] SocWideXbarAddrmap;
+  xbar_rule_48_t [29:0] SocWideXbarAddrmap;
   assign SocWideXbarAddrmap = '{
   '{ idx: 8, start_addr: 48'h80000000, end_addr: 48'hc0000000 },
   '{ idx: 8, start_addr: 48'h1000000000, end_addr: 48'h1040000000 },
@@ -146,16 +146,24 @@ module occamy_soc
   '{ idx: 15, start_addr: 48'h11c0000000, end_addr: 48'h1200000000 },
   '{ idx: 16, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 17, start_addr: 48'h00000000, end_addr: 48'h10000000 },
+  '{ idx: 17, start_addr: 48'h10120000, end_addr: 48'h10140000 },
+  '{ idx: 17, start_addr: 48'h10320000, end_addr: 48'h10340000 },
+  '{ idx: 17, start_addr: 48'h10520000, end_addr: 48'h10540000 },
+  '{ idx: 17, start_addr: 48'h10720000, end_addr: 48'h10740000 },
+  '{ idx: 17, start_addr: 48'h10920000, end_addr: 48'h10940000 },
+  '{ idx: 17, start_addr: 48'h10b20000, end_addr: 48'h10b40000 },
+  '{ idx: 17, start_addr: 48'h10d20000, end_addr: 48'h10d40000 },
+  '{ idx: 17, start_addr: 48'h10f20000, end_addr: 48'h10f40000 },
   '{ idx: 17, start_addr: 48'h70000000, end_addr: 48'h70020000 },
   '{ idx: 18, start_addr: 48'h20000000, end_addr: 48'h70000000 },
-  '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
-  '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
-  '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
-  '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantAddressSpace },
-  '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantAddressSpace },
-  '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantAddressSpace },
-  '{ idx: 6, start_addr: s1_quadrant_base_addr[6], end_addr: s1_quadrant_base_addr[6] + S1QuadrantAddressSpace },
-  '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
+  '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantClusterSpace },
+  '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantClusterSpace },
+  '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantClusterSpace },
+  '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantClusterSpace },
+  '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantClusterSpace },
+  '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantClusterSpace },
+  '{ idx: 6, start_addr: s1_quadrant_base_addr[6], end_addr: s1_quadrant_base_addr[6] + S1QuadrantClusterSpace },
+  '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantClusterSpace }
 };
 
   soc_wide_xbar_in_req_t   [18:0] soc_wide_xbar_in_req;

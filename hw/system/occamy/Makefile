@@ -28,7 +28,8 @@ VLOG_FLAGS 	  += ${QUESTA_64BIT}
 CFG ?= src/occamy_cfg.hjson
 REG_INCDIR ?= ${ROOT}/sw/snRuntime/include/
 
-all: update-clint update-plic update-socreg update-quadreg update-source update-addrmap
+all: update-clint update-plic update-socreg update-quadreg update-source
+#all: update-clint update-plic update-socreg update-quadreg update-source update-addrmap
 
 test: ${VSIM_SOURCES} ${TB_SRCS}
 	echo ${VSIM_SOURCES}
@@ -56,7 +57,7 @@ update-source:
 		--quadrant-s1-ctrl src/occamy_quadrant_s1_ctrl.sv.tpl \
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
 		--cva6-sv src/occamy_cva6.sv.tpl
-	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir test \
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --graph addrmap/addrmap.dot --am-csv addrmap/addrmap.csv --outdir test \
 		--testharness-sv test/testharness.sv.tpl \
 		--bootdata ../../ip/snitch_cluster/test/bootdata.cc.tpl
 	@echo "[SOLDER]  CLINT"

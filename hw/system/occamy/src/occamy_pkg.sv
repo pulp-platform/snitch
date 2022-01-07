@@ -273,7 +273,7 @@ package occamy_pkg;
   AxiIdUsedSlvPorts:  4,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        22
+  NoAddrRules:        30
 };
 
   // AXI bus with 48 bit address, 512 bit data, 4 bit IDs, and 0 bit user data.
