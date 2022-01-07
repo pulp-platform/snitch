@@ -11,13 +11,13 @@ Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
  include/riscv_pkg.sv                           |   2 +
  src/ariane.sv                                  |  48 ++++++-
  src/axi_adapter.sv                             |   4 +
- src/cache_subsystem/cache_ctrl.sv              |   3 +-
- src/cache_subsystem/cva6_icache.sv             |   8 +-
- src/cache_subsystem/cva6_icache_axi_wrapper.sv |   4 +
+ src/cache_subsystem/cache_ctrl.sv              |   8 +-
+ src/cache_subsystem/cva6_icache.sv             |  12 +-
+ src/cache_subsystem/cva6_icache_axi_wrapper.sv |   6 +
  src/cache_subsystem/miss_handler.sv            |  10 +-
- src/cache_subsystem/std_cache_subsystem.sv     |  19 ++-
+ src/cache_subsystem/std_cache_subsystem.sv     |  20 ++-
  src/cache_subsystem/std_nbdcache.sv            |   9 ++
- src/cache_subsystem/wt_cache_subsystem.sv      |  17 ++-
+ src/cache_subsystem/wt_cache_subsystem.sv      |  18 ++-
  src/cache_subsystem/wt_dcache.sv               |  14 ++
  src/cache_subsystem/wt_dcache_ctrl.sv          |   6 +-
  src/cache_subsystem/wt_dcache_missunit.sv      |  18 ++-
@@ -27,10 +27,10 @@ Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
  src/decoder.sv                                 |  11 ++
  src/issue_read_operands.sv                     |   9 +-
  src/issue_stage.sv                             |   5 +-
- 20 files changed, 356 insertions(+), 33 deletions(-)
+ 20 files changed, 365 insertions(+), 37 deletions(-)
 
 diff --git a/include/ariane_pkg.sv b/include/ariane_pkg.sv
-index f98a6d3..47bcd8f 100644
+index f98a6d31..47bcd8f4 100644
 --- a/include/ariane_pkg.sv
 +++ b/include/ariane_pkg.sv
 @@ -446,7 +446,7 @@ package ariane_pkg;
@@ -43,7 +43,7 @@ index f98a6d3..47bcd8f 100644
                                 LD, SD, LW, LWU, SW, LH, LHU, SH, LB, SB, LBU,
                                 // Atomic Memory Operations
 diff --git a/include/riscv_pkg.sv b/include/riscv_pkg.sv
-index abcbce4..da73996 100644
+index abcbce47..da739960 100644
 --- a/include/riscv_pkg.sv
 +++ b/include/riscv_pkg.sv
 @@ -411,6 +411,8 @@ package riscv;
@@ -56,7 +56,7 @@ index abcbce4..da73996 100644
          CSR_TSELECT        = 12'h7A0,
          CSR_TDATA1         = 12'h7A1,
 diff --git a/src/ariane.sv b/src/ariane.sv
-index 414fa4e..a2e51ad 100644
+index 414fa4ea..a2e51ade 100644
 --- a/src/ariane.sv
 +++ b/src/ariane.sv
 @@ -72,6 +72,7 @@ module ariane import ariane_pkg::*; #(
@@ -226,7 +226,7 @@ index 414fa4e..a2e51ad 100644
      .icache_en_i           ( icache_en_csr               ),
      .icache_flush_i        ( icache_flush_ctrl_cache     ),
 diff --git a/src/axi_adapter.sv b/src/axi_adapter.sv
-index e2504b7..b689887 100644
+index e2504b75..b689887c 100644
 --- a/src/axi_adapter.sv
 +++ b/src/axi_adapter.sv
 @@ -29,6 +29,7 @@ module axi_adapter #(
@@ -248,40 +248,62 @@ index e2504b7..b689887 100644
      // Default assignments
      axi_req_o.aw_valid  = 1'b0;
 diff --git a/src/cache_subsystem/cache_ctrl.sv b/src/cache_subsystem/cache_ctrl.sv
-index 372b4ba..e0716ef 100644
+index 372b4bae..2e3a007a 100644
 --- a/src/cache_subsystem/cache_ctrl.sv
 +++ b/src/cache_subsystem/cache_ctrl.sv
-@@ -26,6 +26,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
-     input  logic                                 flush_i,
+@@ -23,9 +23,9 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
+ ) (
+     input  logic                                 clk_i,     // Clock
+     input  logic                                 rst_ni,    // Asynchronous reset active low
+-    input  logic                                 flush_i,
      input  logic                                 bypass_i,  // enable cache
      output logic                                 busy_o,
 +    input  logic                                 stall_i,   // stall new memory requests
      // Core request ports
      input  dcache_req_i_t                        req_port_i,
      output dcache_req_o_t                        req_port_o,
-@@ -130,7 +131,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
+@@ -130,7 +130,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
  
              IDLE: begin
                  // a new request arrived
 -                if (req_port_i.data_req && !flush_i) begin
-+                if (req_port_i.data_req && !flush_i && !stall_i) begin
++                if (req_port_i.data_req && !stall_i) begin
                      // request the cache line - we can do this speculatively
                      req_o = '1;
  
+@@ -173,7 +173,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
+                         mem_req_d.tag = req_port_i.address_tag;
+                     end
+                     // we speculatively request another transfer
+-                    if (req_port_i.data_req && !flush_i) begin
++                    if (req_port_i.data_req && !stall_i) begin
+                         req_o = '1;
+                     end
+                     // ------------
+@@ -181,7 +181,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
+                     // ------------
+                     if (|hit_way_i) begin
+                         // we can request another cache-line if this was a load
+-                        if (req_port_i.data_req && !mem_req_q.we && !flush_i) begin
++                        if (req_port_i.data_req && !mem_req_q.we && !stall_i) begin
+                             state_d          = WAIT_TAG; // switch back to WAIT_TAG
+                             mem_req_d.index  = req_port_i.address_index;
+                             mem_req_d.be     = req_port_i.data_be;
 diff --git a/src/cache_subsystem/cva6_icache.sv b/src/cache_subsystem/cva6_icache.sv
-index 010ba47..e2d703e 100644
+index 010ba476..b11226be 100644
 --- a/src/cache_subsystem/cva6_icache.sv
 +++ b/src/cache_subsystem/cva6_icache.sv
-@@ -35,6 +35,8 @@ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -35,6 +35,9 @@ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
    input  logic                      flush_i,              // flush the icache, flush and kill have to be asserted together
    input  logic                      en_i,                 // enable icache
    output logic                      miss_o,               // to performance counter
 +  output logic                      busy_o,
++  input  logic                      stall_i,
 +  input  logic                      init_ni,              // do not init after enabling
    // address translation requests
    input  icache_areq_i_t            areq_i,
    output icache_areq_o_t            areq_o,
-@@ -92,6 +94,8 @@ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -92,6 +95,8 @@ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
    typedef enum logic[2:0] {FLUSH, IDLE, READ, MISS, KILL_ATRANS, KILL_MISS} state_e;
    state_e state_d, state_q;
  
@@ -290,7 +312,7 @@ index 010ba47..e2d703e 100644
  ///////////////////////////////////////////////////////
  // address -> cl_index mapping, interface plumbing
  ///////////////////////////////////////////////////////
-@@ -152,7 +156,7 @@ end else begin : gen_piton_offset
+@@ -152,7 +157,7 @@ end else begin : gen_piton_offset
    always_comb begin : p_fsm
      // default assignment
      state_d      = state_q;
@@ -299,7 +321,7 @@ index 010ba47..e2d703e 100644
      flush_en     = 1'b0;
      cmp_en_d     = 1'b0;
      cache_rden   = 1'b0;
-@@ -196,7 +200,7 @@ end else begin : gen_piton_offset
+@@ -196,10 +201,11 @@ end else begin : gen_piton_offset
            cmp_en_d = cache_en_q;
  
            // handle pending flushes, or perform cache clear upon enable
@@ -307,31 +329,38 @@ index 010ba47..e2d703e 100644
 +          if (flush_d || (en_i && !cache_en_q && !init_ni)) begin
              state_d    = FLUSH;
            // wait for incoming requests
-           end else begin
+-          end else begin
++          end
++          else if (!stall_i) begin
+             // mem requests are for sure invals here
+             if (!mem_rtrn_vld_i) begin
+               dreq_o.ready = 1'b1;
 diff --git a/src/cache_subsystem/cva6_icache_axi_wrapper.sv b/src/cache_subsystem/cva6_icache_axi_wrapper.sv
-index 2cad769..114ec6e 100644
+index 2cad7692..a402ace8 100644
 --- a/src/cache_subsystem/cva6_icache_axi_wrapper.sv
 +++ b/src/cache_subsystem/cva6_icache_axi_wrapper.sv
-@@ -29,6 +29,8 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -29,6 +29,9 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
    input  logic              flush_i,     // flush the icache, flush and kill have to be asserted together
    input  logic              en_i,        // enable icache
    output logic              miss_o,      // to performance counter
 +  output logic              busy_o,
++  input  logic              stall_i,
 +  input  logic              init_ni,
    // address translation requests
    input  icache_areq_i_t    areq_i,
    output icache_areq_o_t    areq_o,
-@@ -109,6 +111,8 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -109,6 +112,9 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
      .flush_i            ( flush_i             ),
      .en_i               ( en_i                ),
      .miss_o             ( miss_o              ),
 +    .busy_o             ( busy_o              ),
++    .stall_i            ( stall_i             ),
 +    .init_ni            ( init_ni             ),
      .areq_i             ( areq_i              ),
      .areq_o             ( areq_o              ),
      .dreq_i             ( dreq_i              ),
 diff --git a/src/cache_subsystem/miss_handler.sv b/src/cache_subsystem/miss_handler.sv
-index 82b9f0c..8f61d82 100644
+index 82b9f0c4..8f61d82e 100644
 --- a/src/cache_subsystem/miss_handler.sv
 +++ b/src/cache_subsystem/miss_handler.sv
 @@ -26,10 +26,12 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
@@ -384,7 +413,7 @@ index 82b9f0c..8f61d82 100644
          .type_i              ( req_fsm_miss_req   ),
          .gnt_o               ( gnt_miss_fsm       ),
 diff --git a/src/cache_subsystem/std_cache_subsystem.sv b/src/cache_subsystem/std_cache_subsystem.sv
-index 8a79417..3b32d16 100644
+index 8a79417e..1dd686db 100644
 --- a/src/cache_subsystem/std_cache_subsystem.sv
 +++ b/src/cache_subsystem/std_cache_subsystem.sv
 @@ -27,9 +27,12 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
@@ -415,16 +444,17 @@ index 8a79417..3b32d16 100644
      cva6_icache_axi_wrapper #(
          .ArianeCfg    ( ArianeCfg    ),
          .AxiAddrWidth ( AxiAddrWidth ),
-@@ -82,6 +90,8 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+@@ -82,6 +90,9 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
          .flush_i    ( icache_flush_i        ),
          .en_i       ( icache_en_i           ),
          .miss_o     ( icache_miss_o         ),
 +        .busy_o     ( icache_busy           ),
++        .stall_i    ( stall_i               ),
 +        .init_ni    ( init_ni               ),
          .areq_i     ( icache_areq_i         ),
          .areq_o     ( icache_areq_o         ),
          .dreq_i     ( icache_dreq_i         ),
-@@ -108,6 +118,9 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+@@ -108,6 +119,9 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
        .flush_i      ( dcache_flush_i         ),
        .flush_ack_o  ( dcache_flush_ack_o     ),
        .miss_o       ( dcache_miss_o          ),
@@ -435,7 +465,7 @@ index 8a79417..3b32d16 100644
        .axi_bypass_i ( axi_resp_bypass        ),
        .axi_data_o   ( axi_req_data           ),
 diff --git a/src/cache_subsystem/std_nbdcache.sv b/src/cache_subsystem/std_nbdcache.sv
-index bb12116..d4504aa 100644
+index bb121168..5a36ca96 100644
 --- a/src/cache_subsystem/std_nbdcache.sv
 +++ b/src/cache_subsystem/std_nbdcache.sv
 @@ -28,6 +28,9 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
@@ -463,7 +493,7 @@ index bb12116..d4504aa 100644
              ) i_cache_ctrl (
                  .bypass_i              ( ~enable_i            ),
                  .busy_o                ( busy            [i]  ),
-+                .stall_i               ( stall_i              ),
++                .stall_i               ( stall_i | flush_i    ),
                  // from core
                  .req_port_i            ( req_ports_i     [i]  ),
                  .req_port_o            ( req_ports_o     [i]  ),
@@ -476,7 +506,7 @@ index bb12116..d4504aa 100644
          .busy_i                 ( |busy                ),
          // AMOs
 diff --git a/src/cache_subsystem/wt_cache_subsystem.sv b/src/cache_subsystem/wt_cache_subsystem.sv
-index f8c233a..c47088a 100644
+index f8c233a5..3c375cf3 100644
 --- a/src/cache_subsystem/wt_cache_subsystem.sv
 +++ b/src/cache_subsystem/wt_cache_subsystem.sv
 @@ -28,8 +28,11 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
@@ -505,16 +535,17 @@ index f8c233a..c47088a 100644
    cva6_icache #(
      // use ID 0 for icache reads
      .RdTxId             ( 0             ),
-@@ -86,6 +94,8 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -86,6 +94,9 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
      .flush_i            ( icache_flush_i          ),
      .en_i               ( icache_en_i             ),
      .miss_o             ( icache_miss_o           ),
 +    .busy_o             ( icache_busy             ),
++    .stall_i            ( stall_i                 ),
 +    .init_ni            ( init_ni                 ),
      .areq_i             ( icache_areq_i           ),
      .areq_o             ( icache_areq_o           ),
      .dreq_i             ( icache_dreq_i           ),
-@@ -111,6 +121,9 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -111,6 +122,9 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
      .clk_i           ( clk_i                   ),
      .rst_ni          ( rst_ni                  ),
      .enable_i        ( dcache_enable_i         ),
@@ -525,7 +556,7 @@ index f8c233a..c47088a 100644
      .flush_ack_o     ( dcache_flush_ack_o      ),
      .miss_o          ( dcache_miss_o           ),
 diff --git a/src/cache_subsystem/wt_dcache.sv b/src/cache_subsystem/wt_dcache.sv
-index 28e1d4a..7f4bc6a 100644
+index 28e1d4a1..7f4bc6ae 100644
 --- a/src/cache_subsystem/wt_dcache.sv
 +++ b/src/cache_subsystem/wt_dcache.sv
 @@ -28,6 +28,9 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
@@ -573,7 +604,7 @@ index 28e1d4a..7f4bc6a 100644
        .req_port_i      ( req_ports_i   [k] ),
        .req_port_o      ( req_ports_o   [k] ),
 diff --git a/src/cache_subsystem/wt_dcache_ctrl.sv b/src/cache_subsystem/wt_dcache_ctrl.sv
-index 2254870..b659c6e 100644
+index 22548703..b659c6e5 100644
 --- a/src/cache_subsystem/wt_dcache_ctrl.sv
 +++ b/src/cache_subsystem/wt_dcache_ctrl.sv
 @@ -20,6 +20,8 @@ module wt_dcache_ctrl import ariane_pkg::*; import wt_cache_pkg::*; #(
@@ -604,7 +635,7 @@ index 2254870..b659c6e 100644
              // if read ack then ack the `req_port_o`, and goto `READ` state
              if (rd_ack_i) begin
 diff --git a/src/cache_subsystem/wt_dcache_missunit.sv b/src/cache_subsystem/wt_dcache_missunit.sv
-index ae1f7a1..6ee7de5 100644
+index ae1f7a1e..6ee7de59 100644
 --- a/src/cache_subsystem/wt_dcache_missunit.sv
 +++ b/src/cache_subsystem/wt_dcache_missunit.sv
 @@ -26,9 +26,11 @@ module wt_dcache_missunit import ariane_pkg::*; import wt_cache_pkg::*; #(
@@ -671,7 +702,7 @@ index ae1f7a1..6ee7de5 100644
      enable_q              <= '0;
      flush_ack_q           <= '0;
 diff --git a/src/commit_stage.sv b/src/commit_stage.sv
-index 42e65b8..518eafc 100644
+index 42e65b8e..518eafcb 100644
 --- a/src/commit_stage.sv
 +++ b/src/commit_stage.sv
 @@ -50,6 +50,7 @@ module commit_stage import ariane_pkg::*; #(
@@ -716,7 +747,7 @@ index 42e65b8..518eafc 100644
                                  && !instr_0_is_amo
                                  && !single_step_i) begin
 diff --git a/src/controller.sv b/src/controller.sv
-index 6e8a1dc..9bbdd15 100644
+index 6e8a1dc2..e39c1b9c 100644
 --- a/src/controller.sv
 +++ b/src/controller.sv
 @@ -16,6 +16,7 @@
@@ -891,8 +922,8 @@ index 6e8a1dc..9bbdd15 100644
 +        endcase
      end
  
-+    // Let the dcache not accept any new memory requests after flushing until reset
-+    assign stall_cache_o = (fence_t_state_q inside {DRAIN_REQS, PAD, RST_UARCH});
++    // Let the caches not accept any new memory requests during fence_t
++    assign stall_cache_o = (fence_t_state_q != IDLE);
 +
 +    // Start padding either from CLINT timer interrupt [0] or exetinig leaving U-mode [1]
 +    logic load_pad_cnt;
@@ -960,7 +991,7 @@ index 6e8a1dc..9bbdd15 100644
      end
  endmodule
 diff --git a/src/csr_regfile.sv b/src/csr_regfile.sv
-index 71f3b2a..5b1f166 100644
+index 71f3b2ad..5b1f1669 100644
 --- a/src/csr_regfile.sv
 +++ b/src/csr_regfile.sv
 @@ -78,6 +78,10 @@ module csr_regfile import ariane_pkg::*; #(
@@ -1038,7 +1069,7 @@ index 71f3b2a..5b1f166 100644
              sepc_q                 <= sepc_d;
              scause_q               <= scause_d;
 diff --git a/src/decoder.sv b/src/decoder.sv
-index e0c551e..c15a9a1 100644
+index e0c551e7..c15a9a10 100644
 --- a/src/decoder.sv
 +++ b/src/decoder.sv
 @@ -1003,6 +1003,17 @@ module decoder import ariane_pkg::*; (
@@ -1060,7 +1091,7 @@ index e0c551e..c15a9a1 100644
              endcase
          end
 diff --git a/src/issue_read_operands.sv b/src/issue_read_operands.sv
-index f5da02d..72eb061 100644
+index f5da02d0..72eb0618 100644
 --- a/src/issue_read_operands.sv
 +++ b/src/issue_read_operands.sv
 @@ -19,6 +19,7 @@ module issue_read_operands import ariane_pkg::*; #(
@@ -1094,7 +1125,7 @@ index f5da02d..72eb061 100644
              operand_b_q           <= '{default: 0};
              imm_q                 <= '0;
 diff --git a/src/issue_stage.sv b/src/issue_stage.sv
-index 2258eb6..421a6bb 100644
+index 2258eb69..421a6bb0 100644
 --- a/src/issue_stage.sv
 +++ b/src/issue_stage.sv
 @@ -21,6 +21,7 @@ module issue_stage import ariane_pkg::*; #(

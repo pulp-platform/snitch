@@ -23,7 +23,6 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
 ) (
     input  logic                                 clk_i,     // Clock
     input  logic                                 rst_ni,    // Asynchronous reset active low
-    input  logic                                 flush_i,
     input  logic                                 bypass_i,  // enable cache
     output logic                                 busy_o,
     input  logic                                 stall_i,   // stall new memory requests
@@ -131,7 +130,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
 
             IDLE: begin
                 // a new request arrived
-                if (req_port_i.data_req && !flush_i && !stall_i) begin
+                if (req_port_i.data_req && !stall_i) begin
                     // request the cache line - we can do this speculatively
                     req_o = '1;
 
@@ -174,7 +173,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
                         mem_req_d.tag = req_port_i.address_tag;
                     end
                     // we speculatively request another transfer
-                    if (req_port_i.data_req && !flush_i) begin
+                    if (req_port_i.data_req && !stall_i) begin
                         req_o = '1;
                     end
                     // ------------
@@ -182,7 +181,7 @@ module cache_ctrl import ariane_pkg::*; import std_cache_pkg::*; #(
                     // ------------
                     if (|hit_way_i) begin
                         // we can request another cache-line if this was a load
-                        if (req_port_i.data_req && !mem_req_q.we && !flush_i) begin
+                        if (req_port_i.data_req && !mem_req_q.we && !stall_i) begin
                             state_d          = WAIT_TAG; // switch back to WAIT_TAG
                             mem_req_d.index  = req_port_i.address_index;
                             mem_req_d.be     = req_port_i.data_be;

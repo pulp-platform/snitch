@@ -104,6 +104,7 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
     .en_i               ( icache_en_i             ),
     .miss_o             ( icache_miss_o           ),
     .busy_o             ( icache_busy             ),
+    .stall_i            ( stall_i                 ),
     .init_ni            ( init_ni                 ),
     .areq_i             ( icache_areq_i           ),
     .areq_o             ( icache_areq_o           ),
