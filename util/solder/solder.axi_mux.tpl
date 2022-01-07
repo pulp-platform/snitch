@@ -1,0 +1,32 @@
+  axi_mux #(
+    .SlvAxiIDWidth (${bus_in.iw}),
+    .slv_aw_chan_t (${axi_in.type_prefix}_aw_chan_t),
+    .mst_aw_chan_t (${axi_out.type_prefix}_aw_chan_t),
+    .w_chan_t      (${axi_in.type_prefix}_w_chan_t),
+    .slv_b_chan_t  ((${axi_in.type_prefix}_b_chan_t),
+    .mst_b_chan_t  ((${axi_out.type_prefix}_b_chan_t),
+    .slv_ar_chan_t ((${axi_in.type_prefix}_ar_chan_t),
+    .mst_ar_chan_t ((${axi_out.type_prefix}_ar_chan_t),
+    .slv_r_chan_t  ((${axi_in.type_prefix}_r_chan_t),
+    .mst_r_chan_t  ((${axi_out.type_prefix}_r_chan_t),
+    .slv_req_t     (${bus_in.req_type()}),
+    .slv_resp_t    (${bus_in.rsp_type()}),
+    .mst_req_t     (${bus_out.rsp_type()}),
+    .mst_resp_t    (${bus_out.rsp_type()}),
+    .NoSlvPorts    (),
+    .MaxWTrans     (${max_w_trans}),
+    .FallThrough   (${fall_through}),
+    .SpillAw       (${spill_chans}),
+    .SpillW        (${spill_chans}),
+    .SpillB        (${spill_chans}),
+    .SpillAr       (${spill_chans}),
+    .SpillR        (${spill_chans})
+  ) i_axi_mux (
+    .clk_i (${bus_in.clk}),
+    .rst_ni (${bus_in.rst}),
+    .test_i (test_mode_i),
+    .slv_req_i (${bus_in.req_name()}),
+    .slv_resp_o (${bus_in.rsp_name()}),
+    .mst_req_o (${bus_out.req_name()}),
+    .mst_resp_i (${bus_out.rsp_name()})
+  );

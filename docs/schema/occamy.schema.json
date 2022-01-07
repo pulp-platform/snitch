@@ -75,7 +75,7 @@
                 "wide_xbar_slv_id_width": {
                     "type": "integer",
                     "description": "ID width of incoming slave ports.",
-                    "default": 2
+                    "default": 3
                 },
                 "narrow_xbar": {
                     "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"

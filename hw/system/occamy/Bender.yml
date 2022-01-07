@@ -37,17 +37,18 @@ sources:
 - src/clint/clint.sv
 - src/reg_to_apb.sv
 # Level 1:
-- src//occamy_quadrant_s1_ctrl.sv
 - src/occamy_soc_ctrl/occamy_soc_ctrl.sv
 - src/occamy_pkg.sv
 # Level 2:
+- src/occamy_quadrant_s1_ctrl.sv
+# Level 3:
 - src/occamy_cva6.sv
 - src/occamy_quadrant_s1.sv
-# Level 3:
-- src/occamy_soc.sv
 # Level 4:
+- src/occamy_soc.sv
+# Level 5:
 - src/occamy_top.sv
-# # Level 5:
+# # Level 6:
 - target: xilinx
   files:
   - src/occamy_xilinx.sv

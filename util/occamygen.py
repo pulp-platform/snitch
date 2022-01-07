@@ -516,29 +516,37 @@ def main():
     ##########################
     # S1 Quadrant controller #
     ##########################
-    # Non-loopback crossbar shims off both narrow master and slave for internal resources
-    quadrant_s1_ctrl_xbar = solder.AxiXbar(
-        48,
-        64,
-        4,  # TODO: Source from JSON description
-        name="quadrant_s1_ctrl_xbar",
-        clk="clk_i",
-        rst="rst_ni",
-        max_slv_trans=4,        # TODO: Source from JSON description
-        max_mst_trans=4,        # TODO: Source from JSON description
-        fall_through=False,     # TODO: Source from JSON description
-        no_loopback=True,
-        context="quadrant_s1_ctrl")
 
-    # TODO: Define appropriate default routes for each port! (not correct as-is!)
-    quadrant_s1_ctrl_xbar.add_output("soc", [])
-    quadrant_s1_ctrl_xbar.add_output("quadrant", [])
-    quadrant_s1_ctrl_xbar.add_input("soc", outputs=['quadrant', 'internal'])
-    quadrant_s1_ctrl_xbar.add_input("quadrant", outputs=['soc', 'internal'])
+    # We need 3 "crossbars", which are really simple muxes and demuxes
+    quadrant_s1_ctrl_xbars = dict()
+    for name in ['soc_to_quad', 'quad_to_soc', 'demux']:
+        # Use and preserve narrow Xbar IDs
+        # TODO: max trans and fallthrough from narrow Xbar for now; rectify this!
+        quadrant_s1_ctrl_xbars[name] = solder.AxiXbar(
+            48,
+            64,
+            occamy.cfg["narrow_xbar_slv_id_width"],
+            name="quadrant_s1_ctrl_{}_xbar".format(name),
+            clk="clk_i",
+            rst="rst_ni",
+            max_slv_trans=occamy.cfg["narrow_xbar"]["max_slv_trans"],
+            max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
+            fall_through=occamy.cfg["narrow_xbar"]["fall_through"],
+            no_loopback=True,
+            context="quadrant_s1_ctrl")
 
-    quadrant_s1_ctrl_xbar.add_output_symbolic("internal",
+    for name in ['soc_to_quad', 'quad_to_soc']:
+        quadrant_s1_ctrl_xbars[name].add_output("out", [])
+        quadrant_s1_ctrl_xbars[name].add_input("in")
+        quadrant_s1_ctrl_xbars[name].add_output_symbolic("internal",
+                                                  "internal_xbar_base_addr",
+                                                  "S1QuadrantClusterSpace")
+
+    quadrant_s1_ctrl_xbars['demux'].add_output_symbolic("out",
                                               "internal_xbar_base_addr",
                                               "S1QuadrantClusterSpace")
+    quadrant_s1_ctrl_xbars['demux'].add_input("soc")
+    quadrant_s1_ctrl_xbars['demux'].add_input("quad")
 
     ################
     # S1 Quadrants #
@@ -615,7 +623,7 @@ def main():
         "util": util,
         "soc_narrow_xbar": soc_narrow_xbar,
         "soc_wide_xbar": soc_wide_xbar,
-        "quadrant_s1_ctrl_xbar": quadrant_s1_ctrl_xbar,
+        "quadrant_s1_ctrl_xbars": quadrant_s1_ctrl_xbars,
         "wide_xbar_quadrant_s1": wide_xbar_quadrant_s1,
         "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
         "soc_regbus_periph_xbar": soc_regbus_periph_xbar,

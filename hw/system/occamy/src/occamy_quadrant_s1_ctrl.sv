@@ -19,7 +19,7 @@ module occamy_quadrant_s1_ctrl
   input  logic rst_ni,
   input  logic test_mode_i,
 
-  input  logic tile_id_i,
+  input  tile_id_t tile_id_i,
 
   // Quadrant clock and reset
   output logic clk_quadrant_o,
@@ -41,10 +41,10 @@ module occamy_quadrant_s1_ctrl
   output axi_a48_d64_i8_u0_resp_t soc_in_rsp_o,
 
   // Quadrant narrow ports
-  output axi_a48_d64_i4_u0_req_t quadrant_out_req_o,
-  input  axi_a48_d64_i4_u0_resp_t quadrant_out_rsp_i,
-  input  axi_a48_d64_i8_u0_req_t quadrant_in_req_i,
-  output axi_a48_d64_i8_u0_resp_t quadrant_in_rsp_o
+  output axi_a48_d64_i8_u0_req_t quadrant_out_req_o,
+  input  axi_a48_d64_i8_u0_resp_t quadrant_out_rsp_i,
+  input  axi_a48_d64_i4_u0_req_t quadrant_in_req_i,
+  output axi_a48_d64_i4_u0_resp_t quadrant_in_rsp_o
 );
 
   // Upper half of quadrant space reserved for internal use (same size as for all clusters)
@@ -54,20 +54,104 @@ module occamy_quadrant_s1_ctrl
   // TODO: Pipeline appropriately (possibly only outwards)
   // Controller crossbar: shims off for access to internal space
 
-/// Address map of the `quadrant_s1_ctrl_xbar` crossbar.
-xbar_rule_48_t [0:0] QuadrantS1CtrlXbarAddrmap;
-assign QuadrantS1CtrlXbarAddrmap = '{
-  '{ idx: 2, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantClusterSpace }
+/// Address map of the `quadrant_s1_ctrl_soc_to_quad_xbar` crossbar.
+xbar_rule_48_t [0:0] QuadrantS1CtrlSocToQuadXbarAddrmap;
+assign QuadrantS1CtrlSocToQuadXbarAddrmap = '{
+  '{ idx: 1, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantClusterSpace }
 };
 
-quadrant_s1_ctrl_xbar_in_req_t [1:0] quadrant_s1_ctrl_xbar_in_req;
-quadrant_s1_ctrl_xbar_in_resp_t [1:0] quadrant_s1_ctrl_xbar_in_rsp;
-quadrant_s1_ctrl_xbar_out_req_t [2:0] quadrant_s1_ctrl_xbar_out_req;
-quadrant_s1_ctrl_xbar_out_resp_t [2:0] quadrant_s1_ctrl_xbar_out_rsp;
+quadrant_s1_ctrl_soc_to_quad_xbar_in_req_t [0:0] quadrant_s1_ctrl_soc_to_quad_xbar_in_req;
+quadrant_s1_ctrl_soc_to_quad_xbar_in_resp_t [0:0] quadrant_s1_ctrl_soc_to_quad_xbar_in_rsp;
+quadrant_s1_ctrl_soc_to_quad_xbar_out_req_t [1:0] quadrant_s1_ctrl_soc_to_quad_xbar_out_req;
+quadrant_s1_ctrl_soc_to_quad_xbar_out_resp_t [1:0] quadrant_s1_ctrl_soc_to_quad_xbar_out_rsp;
 
 axi_xbar #(
-  .Cfg           ( QuadrantS1CtrlXbarCfg ),
-  .Connectivity  ( 6'b101110 ),
+  .Cfg           ( QuadrantS1CtrlSocToQuadXbarCfg ),
+  .Connectivity  ( 2'b11 ),
+  .AtopSupport   ( 1 ),
+  .slv_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
+  .mst_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
+  .w_chan_t      ( axi_a48_d64_i4_u0_w_chan_t ),
+  .slv_b_chan_t  ( axi_a48_d64_i4_u0_b_chan_t ),
+  .mst_b_chan_t  ( axi_a48_d64_i4_u0_b_chan_t ),
+  .slv_ar_chan_t ( axi_a48_d64_i4_u0_ar_chan_t ),
+  .mst_ar_chan_t ( axi_a48_d64_i4_u0_ar_chan_t ),
+  .slv_r_chan_t  ( axi_a48_d64_i4_u0_r_chan_t ),
+  .mst_r_chan_t  ( axi_a48_d64_i4_u0_r_chan_t ),
+  .slv_req_t     ( axi_a48_d64_i4_u0_req_t ),
+  .slv_resp_t    ( axi_a48_d64_i4_u0_resp_t ),
+  .mst_req_t     ( axi_a48_d64_i4_u0_req_t ),
+  .mst_resp_t    ( axi_a48_d64_i4_u0_resp_t ),
+  .rule_t        ( xbar_rule_48_t )
+) i_quadrant_s1_ctrl_soc_to_quad_xbar (
+  .clk_i  ( clk_i ),
+  .rst_ni ( rst_ni ),
+  .test_i ( test_mode_i ),
+  .slv_ports_req_i  ( quadrant_s1_ctrl_soc_to_quad_xbar_in_req  ),
+  .slv_ports_resp_o ( quadrant_s1_ctrl_soc_to_quad_xbar_in_rsp  ),
+  .mst_ports_req_o  ( quadrant_s1_ctrl_soc_to_quad_xbar_out_req ),
+  .mst_ports_resp_i ( quadrant_s1_ctrl_soc_to_quad_xbar_out_rsp ),
+  .addr_map_i       ( QuadrantS1CtrlSocToQuadXbarAddrmap ),
+  .en_default_mst_port_i ( '1 ),
+  .default_mst_port_i    ( '0 )
+);
+
+/// Address map of the `quadrant_s1_ctrl_quad_to_soc_xbar` crossbar.
+xbar_rule_48_t [0:0] QuadrantS1CtrlQuadToSocXbarAddrmap;
+assign QuadrantS1CtrlQuadToSocXbarAddrmap = '{
+  '{ idx: 1, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantClusterSpace }
+};
+
+quadrant_s1_ctrl_quad_to_soc_xbar_in_req_t [0:0] quadrant_s1_ctrl_quad_to_soc_xbar_in_req;
+quadrant_s1_ctrl_quad_to_soc_xbar_in_resp_t [0:0] quadrant_s1_ctrl_quad_to_soc_xbar_in_rsp;
+quadrant_s1_ctrl_quad_to_soc_xbar_out_req_t [1:0] quadrant_s1_ctrl_quad_to_soc_xbar_out_req;
+quadrant_s1_ctrl_quad_to_soc_xbar_out_resp_t [1:0] quadrant_s1_ctrl_quad_to_soc_xbar_out_rsp;
+
+axi_xbar #(
+  .Cfg           ( QuadrantS1CtrlQuadToSocXbarCfg ),
+  .Connectivity  ( 2'b11 ),
+  .AtopSupport   ( 1 ),
+  .slv_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
+  .mst_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
+  .w_chan_t      ( axi_a48_d64_i4_u0_w_chan_t ),
+  .slv_b_chan_t  ( axi_a48_d64_i4_u0_b_chan_t ),
+  .mst_b_chan_t  ( axi_a48_d64_i4_u0_b_chan_t ),
+  .slv_ar_chan_t ( axi_a48_d64_i4_u0_ar_chan_t ),
+  .mst_ar_chan_t ( axi_a48_d64_i4_u0_ar_chan_t ),
+  .slv_r_chan_t  ( axi_a48_d64_i4_u0_r_chan_t ),
+  .mst_r_chan_t  ( axi_a48_d64_i4_u0_r_chan_t ),
+  .slv_req_t     ( axi_a48_d64_i4_u0_req_t ),
+  .slv_resp_t    ( axi_a48_d64_i4_u0_resp_t ),
+  .mst_req_t     ( axi_a48_d64_i4_u0_req_t ),
+  .mst_resp_t    ( axi_a48_d64_i4_u0_resp_t ),
+  .rule_t        ( xbar_rule_48_t )
+) i_quadrant_s1_ctrl_quad_to_soc_xbar (
+  .clk_i  ( clk_i ),
+  .rst_ni ( rst_ni ),
+  .test_i ( test_mode_i ),
+  .slv_ports_req_i  ( quadrant_s1_ctrl_quad_to_soc_xbar_in_req  ),
+  .slv_ports_resp_o ( quadrant_s1_ctrl_quad_to_soc_xbar_in_rsp  ),
+  .mst_ports_req_o  ( quadrant_s1_ctrl_quad_to_soc_xbar_out_req ),
+  .mst_ports_resp_i ( quadrant_s1_ctrl_quad_to_soc_xbar_out_rsp ),
+  .addr_map_i       ( QuadrantS1CtrlQuadToSocXbarAddrmap ),
+  .en_default_mst_port_i ( '1 ),
+  .default_mst_port_i    ( '0 )
+);
+
+/// Address map of the `quadrant_s1_ctrl_demux_xbar` crossbar.
+xbar_rule_48_t [0:0] QuadrantS1CtrlDemuxXbarAddrmap;
+assign QuadrantS1CtrlDemuxXbarAddrmap = '{
+  '{ idx: 0, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantClusterSpace }
+};
+
+quadrant_s1_ctrl_demux_xbar_in_req_t [1:0] quadrant_s1_ctrl_demux_xbar_in_req;
+quadrant_s1_ctrl_demux_xbar_in_resp_t [1:0] quadrant_s1_ctrl_demux_xbar_in_rsp;
+quadrant_s1_ctrl_demux_xbar_out_req_t [0:0] quadrant_s1_ctrl_demux_xbar_out_req;
+quadrant_s1_ctrl_demux_xbar_out_resp_t [0:0] quadrant_s1_ctrl_demux_xbar_out_rsp;
+
+axi_xbar #(
+  .Cfg           ( QuadrantS1CtrlDemuxXbarCfg ),
+  .Connectivity  ( 2'b11 ),
   .AtopSupport   ( 1 ),
   .slv_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
   .mst_aw_chan_t ( axi_a48_d64_i5_u0_aw_chan_t ),
@@ -83,31 +167,37 @@ axi_xbar #(
   .mst_req_t     ( axi_a48_d64_i5_u0_req_t ),
   .mst_resp_t    ( axi_a48_d64_i5_u0_resp_t ),
   .rule_t        ( xbar_rule_48_t )
-) i_quadrant_s1_ctrl_xbar (
+) i_quadrant_s1_ctrl_demux_xbar (
   .clk_i  ( clk_i ),
   .rst_ni ( rst_ni ),
   .test_i ( test_mode_i ),
-  .slv_ports_req_i  ( quadrant_s1_ctrl_xbar_in_req  ),
-  .slv_ports_resp_o ( quadrant_s1_ctrl_xbar_in_rsp  ),
-  .mst_ports_req_o  ( quadrant_s1_ctrl_xbar_out_req ),
-  .mst_ports_resp_i ( quadrant_s1_ctrl_xbar_out_rsp ),
-  .addr_map_i       ( QuadrantS1CtrlXbarAddrmap ),
+  .slv_ports_req_i  ( quadrant_s1_ctrl_demux_xbar_in_req  ),
+  .slv_ports_resp_o ( quadrant_s1_ctrl_demux_xbar_in_rsp  ),
+  .mst_ports_req_o  ( quadrant_s1_ctrl_demux_xbar_out_req ),
+  .mst_ports_resp_i ( quadrant_s1_ctrl_demux_xbar_out_rsp ),
+  .addr_map_i       ( QuadrantS1CtrlDemuxXbarAddrmap ),
   .en_default_mst_port_i ( '1 ),
   .default_mst_port_i    ( '0 )
 );
 
 
   // Connect upward (SoC) narrow ports
-  assign soc_out_req_o = quadrant_s1_ctrl_xbar_out_req[QUADRANT_S1_CTRL_XBAR_OUT_SOC];
-  assign quadrant_s1_ctrl_xbar_out_rsp[QUADRANT_S1_CTRL_XBAR_OUT_SOC] = soc_out_rsp_i;
-  assign quadrant_s1_ctrl_xbar_in_req[QUADRANT_S1_CTRL_XBAR_IN_SOC] = soc_in_req_i;
-  assign soc_in_rsp_o = quadrant_s1_ctrl_xbar_in_rsp[QUADRANT_S1_CTRL_XBAR_IN_SOC];
+  assign soc_out_req_o = quadrant_s1_ctrl_quad_to_soc_xbar_out_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_OUT];
+  assign quadrant_s1_ctrl_quad_to_soc_xbar_out_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_OUT] = soc_out_rsp_i;
+  assign quadrant_s1_ctrl_quad_to_soc_xbar_in_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN] = soc_in_req_i;
+  assign soc_in_rsp_o = quadrant_s1_ctrl_quad_to_soc_xbar_in_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN];
 
   // Connect quadrant narrow ports
-  assign quadrant_out_req_o =  quadrant_s1_ctrl_xbar_out_req[QUADRANT_S1_CTRL_XBAR_OUT_QUADRANT];
-  assign quadrant_s1_ctrl_xbar_out_rsp[QUADRANT_S1_CTRL_XBAR_OUT_QUADRANT] = quadrant_out_rsp_i;
-  assign quadrant_s1_ctrl_xbar_in_req[QUADRANT_S1_CTRL_XBAR_IN_QUADRANT] = quadrant_in_req_i;
-  assign quadrant_in_rsp_o = quadrant_s1_ctrl_xbar_in_rsp[QUADRANT_S1_CTRL_XBAR_IN_QUADRANT];
+  assign quadrant_out_req_o = quadrant_s1_ctrl_soc_to_quad_xbar_out_req[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_OUT];
+  assign quadrant_s1_ctrl_soc_to_quad_xbar_out_rsp[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_OUT] = quadrant_out_rsp_i;
+  assign quadrant_s1_ctrl_soc_to_quad_xbar_in_req[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_IN_IN] = quadrant_in_req_i;
+  assign quadrant_in_rsp_o = quadrant_s1_ctrl_soc_to_quad_xbar_in_rsp[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_IN_IN];
+
+  // Connect internal demux
+  assign quadrant_s1_ctrl_demux_xbar_in_req[QUADRANT_S1_CTRL_DEMUX_XBAR_IN_SOC] = quadrant_s1_ctrl_soc_to_quad_xbar_out_req[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_INTERNAL];
+  assign quadrant_s1_ctrl_soc_to_quad_xbar_out_rsp[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_INTERNAL] = quadrant_s1_ctrl_demux_xbar_in_rsp[QUADRANT_S1_CTRL_DEMUX_XBAR_IN_SOC];
+  assign quadrant_s1_ctrl_demux_xbar_in_req[QUADRANT_S1_CTRL_DEMUX_XBAR_IN_QUAD] = quadrant_s1_ctrl_quad_to_soc_xbar_out_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_INTERNAL];
+  assign quadrant_s1_ctrl_quad_to_soc_xbar_out_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_INTERNAL] = quadrant_s1_ctrl_demux_xbar_in_rsp[QUADRANT_S1_CTRL_DEMUX_XBAR_IN_QUAD];
 
   // Toward internal register file
     axi_a48_d32_i5_u0_req_t axi_to_axi_lite_dw_req;
@@ -132,8 +222,8 @@ axi_xbar #(
   ) i_axi_to_axi_lite_dw (
     .clk_i ( clk_i ),
     .rst_ni ( rst_ni ),
-    .slv_req_i ( quadrant_s1_ctrl_xbar_out_req[QUADRANT_S1_CTRL_XBAR_OUT_INTERNAL] ),
-    .slv_resp_o ( quadrant_s1_ctrl_xbar_out_rsp[QUADRANT_S1_CTRL_XBAR_OUT_INTERNAL] ),
+    .slv_req_i ( quadrant_s1_ctrl_demux_xbar_out_req[QUADRANT_S1_CTRL_DEMUX_XBAR_OUT_OUT] ),
+    .slv_resp_o ( quadrant_s1_ctrl_demux_xbar_out_rsp[QUADRANT_S1_CTRL_DEMUX_XBAR_OUT_OUT] ),
     .mst_req_o ( axi_to_axi_lite_dw_req ),
     .mst_resp_i ( axi_to_axi_lite_dw_rsp )
   );

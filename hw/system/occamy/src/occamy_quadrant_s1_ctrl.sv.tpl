@@ -22,7 +22,7 @@ module occamy_quadrant_s1_ctrl
   input  logic rst_ni,
   input  logic test_mode_i,
 
-  input  logic tile_id_i,
+  input  tile_id_t tile_id_i,
 
   // Quadrant clock and reset
   output logic clk_quadrant_o,
@@ -44,10 +44,10 @@ module occamy_quadrant_s1_ctrl
   output ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} soc_in_rsp_o,
 
   // Quadrant narrow ports
-  output ${soc_narrow_xbar.in_s1_quadrant_0.req_type()} quadrant_out_req_o,
-  input  ${soc_narrow_xbar.in_s1_quadrant_0.rsp_type()} quadrant_out_rsp_i,
-  input  ${soc_narrow_xbar.out_s1_quadrant_0.req_type()} quadrant_in_req_i,
-  output ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} quadrant_in_rsp_o
+  output ${soc_narrow_xbar.out_s1_quadrant_0.req_type()} quadrant_out_req_o,
+  input  ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} quadrant_out_rsp_i,
+  input  ${soc_narrow_xbar.in_s1_quadrant_0.req_type()} quadrant_in_req_i,
+  output ${soc_narrow_xbar.in_s1_quadrant_0.rsp_type()} quadrant_in_rsp_o
 );
 
   // Upper half of quadrant space reserved for internal use (same size as for all clusters)
@@ -59,20 +59,26 @@ module occamy_quadrant_s1_ctrl
   ${module}
 
   // Connect upward (SoC) narrow ports
-  assign soc_out_req_o = ${quadrant_s1_ctrl_xbar.out_soc.req_name()};
-  assign ${quadrant_s1_ctrl_xbar.out_soc.rsp_name()} = soc_out_rsp_i;
-  assign ${quadrant_s1_ctrl_xbar.in_soc.req_name()} = soc_in_req_i;
-  assign soc_in_rsp_o = ${quadrant_s1_ctrl_xbar.in_soc.rsp_name()};
+  assign soc_out_req_o = ${quadrant_s1_ctrl_xbars["quad_to_soc"].out_out.req_name()};
+  assign ${quadrant_s1_ctrl_xbars["quad_to_soc"].out_out.rsp_name()} = soc_out_rsp_i;
+  assign ${quadrant_s1_ctrl_xbars["quad_to_soc"].in_in.req_name()} = soc_in_req_i;
+  assign soc_in_rsp_o = ${quadrant_s1_ctrl_xbars["quad_to_soc"].in_in.rsp_name()};
 
   // Connect quadrant narrow ports
-  assign quadrant_out_req_o =  ${quadrant_s1_ctrl_xbar.out_quadrant.req_name()};
-  assign ${quadrant_s1_ctrl_xbar.out_quadrant.rsp_name()} = quadrant_out_rsp_i;
-  assign ${quadrant_s1_ctrl_xbar.in_quadrant.req_name()} = quadrant_in_req_i;
-  assign quadrant_in_rsp_o = ${quadrant_s1_ctrl_xbar.in_quadrant.rsp_name()};
+  assign quadrant_out_req_o = ${quadrant_s1_ctrl_xbars["soc_to_quad"].out_out.req_name()};
+  assign ${quadrant_s1_ctrl_xbars["soc_to_quad"].out_out.rsp_name()} = quadrant_out_rsp_i;
+  assign ${quadrant_s1_ctrl_xbars["soc_to_quad"].in_in.req_name()} = quadrant_in_req_i;
+  assign quadrant_in_rsp_o = ${quadrant_s1_ctrl_xbars["soc_to_quad"].in_in.rsp_name()};
+
+  // Connect internal demux
+  assign ${quadrant_s1_ctrl_xbars["demux"].in_soc.req_name()} = ${quadrant_s1_ctrl_xbars["soc_to_quad"].out_internal.req_name()};
+  assign ${quadrant_s1_ctrl_xbars["soc_to_quad"].out_internal.rsp_name()} = ${quadrant_s1_ctrl_xbars["demux"].in_soc.rsp_name()};
+  assign ${quadrant_s1_ctrl_xbars["demux"].in_quad.req_name()} = ${quadrant_s1_ctrl_xbars["quad_to_soc"].out_internal.req_name()};
+  assign ${quadrant_s1_ctrl_xbars["quad_to_soc"].out_internal.rsp_name()} = ${quadrant_s1_ctrl_xbars["demux"].in_quad.rsp_name()};
 
   // Toward internal register file
   <%
-    quad_regs_regbus = quadrant_s1_ctrl_xbar.out_internal \
+    quad_regs_regbus = quadrant_s1_ctrl_xbars["demux"].out_out \
       .change_dw(context, 32, "axi_to_axi_lite_dw") \
       .to_axi_lite(context, "axi_to_axi_lite_regbus_regs") \
       .to_reg(context, "axi_lite_to_regbus_regs")

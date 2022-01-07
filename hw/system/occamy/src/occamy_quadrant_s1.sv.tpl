@@ -71,8 +71,6 @@ module occamy_quadrant_s1
       .isolate(context, "isolate[0]", "narrow_cluster_in_isolate", isolated="isolated[0]", terminated=True, to_clk="clk_quadrant", to_rst="rst_quadrant_n") \
       .change_iw(context, narrow_xbar_quadrant_s1.in_top.iw, "narrow_cluster_in_iwc", to=narrow_xbar_quadrant_s1.in_top)
   %>
-  assign narrow_cluster_in_iwc_req = quadrant_narrow_in_req_i;
-  assign quadrant_narrow_in_rsp_o = narrow_cluster_in_iwc_rsp;
 
   ///////////////////////////////
   // Narrow Out + IW Converter //
@@ -82,9 +80,6 @@ module occamy_quadrant_s1
     .isolate(context, "isolate[1]", "narrow_cluster_out_isolate", isolated="isolated[1]", to_clk="clk_i", to_rst="rst_ni") \
     .cut(context, cut_width)
    %>
-
-  assign quadrant_narrow_out_req_o = ${narrow_cluster_out_iwc.req_name()};
-  assign ${narrow_cluster_out_iwc.rsp_name()} = quadrant_narrow_out_rsp_i;
 
   /////////////////////////////////////////
   // Wide Out + RO Cache + IW Converter  //
@@ -167,10 +162,10 @@ module occamy_quadrant_s1
     .soc_out_rsp_i (quadrant_narrow_out_rsp_i),
     .soc_in_req_i (quadrant_narrow_in_req_i),
     .soc_in_rsp_o (quadrant_narrow_in_rsp_o),
-    .quadrant_out_req_o (${narrow_cluster_out_iwc.req_name()}),
-    .quadrant_out_rsp_i (${narrow_cluster_out_iwc.rsp_name()}),
-    .quadrant_in_req_i (narrow_cluster_in_iwc_req),
-    .quadrant_in_rsp_o (narrow_cluster_in_iwc_rsp)
+    .quadrant_out_req_o (narrow_cluster_in_iwc_req),
+    .quadrant_out_rsp_i (narrow_cluster_in_iwc_rsp),
+    .quadrant_in_req_i (${narrow_cluster_out_iwc.req_name()}),
+    .quadrant_in_rsp_o (${narrow_cluster_out_iwc.rsp_name()})
   );
 
 % for i in range(nr_clusters):
@@ -178,10 +173,10 @@ module occamy_quadrant_s1
   // Cluster ${i} //
   ///////////////
   <%
-    narrow_cluster_in = narrow_xbar_quadrant_s1.__dict__["out_cluster_{}".format(i)].change_iw(context, 2, "narrow_in_iwc_{}".format(i)).cut(context, xbar_cluster_added_cuts)
+    narrow_cluster_in = narrow_xbar_quadrant_s1.__dict__["out_cluster_{}".format(i)].change_iw(context, cfg["cluster"]["id_width_in"], "narrow_in_iwc_{}".format(i)).cut(context, xbar_cluster_added_cuts)
     narrow_cluster_out = narrow_xbar_quadrant_s1.__dict__["in_cluster_{}".format(i)].copy(name="narrow_out_{}".format(i)).declare(context)
     narrow_cluster_out.cut(context, xbar_cluster_added_cuts, to=narrow_xbar_quadrant_s1.__dict__["in_cluster_{}".format(i)])
-    wide_cluster_in = wide_xbar_quadrant_s1.__dict__["out_cluster_{}".format(i)].change_iw(context, 2, "wide_in_iwc_{}".format(i)).cut(context, xbar_cluster_added_cuts)
+    wide_cluster_in = wide_xbar_quadrant_s1.__dict__["out_cluster_{}".format(i)].change_iw(context, cfg["cluster"]["dma_id_width_in"], "wide_in_iwc_{}".format(i)).cut(context, xbar_cluster_added_cuts)
     wide_cluster_out = wide_xbar_quadrant_s1.__dict__["in_cluster_{}".format(i)].copy(name="wide_out_{}".format(i)).declare(context)
     wide_cluster_out.cut(context, xbar_cluster_added_cuts, to=wide_xbar_quadrant_s1.__dict__["in_cluster_{}".format(i)])
   %>
