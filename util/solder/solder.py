@@ -401,7 +401,7 @@ class Bus(object):
         self.name_suffix = name_suffix
         self.declared = declared
 
-    def assign(self, from_bus):
+    def assign(self, from_bus, context):
         context.write("  assign {} = {};\n".format(self.req_name(), from_bus.req_name()))
         context.write("  assign {} = {};\n\n".format(from_bus.rsp_name(), self.rsp_name()))
 
@@ -582,7 +582,8 @@ class AxiBus(Bus):
 
     def change_dw(self, context, target_dw, name, inst_name=None, to=None):
         if self.dw == target_dw:
-            return self
+            if to is None:
+                return self
 
         # Generate the new bus.
         if to is None:
@@ -603,6 +604,11 @@ class AxiBus(Bus):
         assert (bus.iw == self.iw)
         assert (bus.uw == self.uw)
 
+        # Handle to-assignment
+        if self.dw == target_dw:
+            to.assign(self, context)
+            return to
+
         # Emit the remapper instance.
         bus.declare(context)
         tpl = templates.get_template("solder.axi_change_dw.sv.tpl")
@@ -616,7 +622,8 @@ class AxiBus(Bus):
 
     def cut(self, context, nr_cuts=1, name=None, inst_name=None, to=None):
         if nr_cuts == 0:
-            return self
+            if to is None:
+                return self
 
         name = name or "{}_cut".format(self.name)
 
@@ -636,6 +643,11 @@ class AxiBus(Bus):
         assert (bus.dw == self.dw)
         assert (bus.iw == self.iw)
         assert (bus.uw == self.uw)
+
+        # Handle to-assignment
+        if nr_cuts == 0:
+            to.assign(self, context)
+            return to
 
         # Emit the cut instance.
         bus.declare(context)
@@ -658,7 +670,8 @@ class AxiBus(Bus):
             to=None,
             log_depth=2):
         if self.clk == target_clk and self.rst == target_rst:
-            return self
+            if to is None:
+                return self
 
         # Generate the new bus.
         if to is None:
@@ -679,6 +692,11 @@ class AxiBus(Bus):
         assert (bus.dw == self.dw)
         assert (bus.iw == self.iw)
         assert (bus.uw == self.uw)
+
+        # Handle to-assignment
+        if self.clk == target_clk and self.rst == target_rst:
+            to.assign(self, context)
+            return to
 
         # Emit the CDC instance.
         bus.declare(context)
@@ -866,7 +884,8 @@ class AxiBus(Bus):
 
     def trunc_addr(self, context, target_aw, name=None, inst_name=None, to=None):
         if self.aw == target_aw:
-            return self
+            if to is None:
+                return self
 
         # Generate the new bus
         if to is None:
@@ -885,6 +904,11 @@ class AxiBus(Bus):
         assert (bus.dw == self.dw)
         assert (bus.iw == self.iw)
         assert (bus.uw == self.uw)
+
+        # Handle to-assignment
+        if self.aw == target_aw:
+            to.assign(self, context)
+            return to
 
         # Emit the addr_trunc instance.
         bus.declare(context)
@@ -929,7 +953,8 @@ class AxiLiteBus(Bus):
             to=None,
             log_depth=2):
         if self.clk == target_clk and self.rst == target_rst:
-            return self
+            if to is None:
+                return self
 
         # Generate the new bus.
         if to is None:
@@ -948,6 +973,11 @@ class AxiLiteBus(Bus):
         assert (bus.rst == target_rst)
         assert (bus.aw == self.aw)
         assert (bus.dw == self.dw)
+
+        # Handle to-assignment
+        if self.clk == target_clk and self.rst == target_rst:
+            to.assign(self, context)
+            return to
 
         # Emit the CDC instance.
         bus.declare(context)
