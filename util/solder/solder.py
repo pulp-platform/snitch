@@ -1467,8 +1467,6 @@ class AxiXbar(Xbar):
         for i in self.inputs:
             for o in self.outputs:
                 # Disable link only if connectivity specified for input or loopback disabled
-                import sys
-                #print(self.connections, sys.stderr)
                 connectivity += "0" if (((i in self.connections) and (o not in self.connections[i]))
                                         or (self.no_loopback and i == o)) else "1"
         connectivity = "{}'b{}".format(length, connectivity[::-1])
