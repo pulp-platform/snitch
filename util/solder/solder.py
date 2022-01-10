@@ -390,8 +390,46 @@ class RegStruct:
         return name
 
 
+# An abstract bus; has simply a request and response which may be assigned.
+class Bus(object):
+    def __init__(self,
+                 name,
+                 name_suffix=None,
+                 declared=False):
+        self.type_prefix = None
+        self.name = name
+        self.name_suffix = name_suffix
+        self.declared = declared
+
+    def assign(self, from_bus):
+        context.write("  assign {} = {};\n".format(self.req_name(), from_bus.req_name()))
+        context.write("  assign {} = {};\n\n".format(from_bus.rsp_name(), self.rsp_name()))
+
+    def declare(self, context):
+        if self.declared:
+            return
+        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
+        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
+        self.declared = True
+        return self
+
+    def req_name(self):
+        return "{}_req{}".format(self.name, self.name_suffix or "")
+
+    def rsp_name(self):
+        return "{}_rsp{}".format(self.name, self.name_suffix or "")
+
+    def req_type(self):
+        assert (self.type_prefix is not None)
+        return "{}_req_t".format(self.type_prefix)
+
+    def rsp_type(self):
+        assert (self.type_prefix is not None)
+        return "{}_rsp_t".format(self.type_prefix)
+
+
 # An AXI bus.
-class AxiBus(object):
+class AxiBus(Bus):
     def __init__(self,
                  clk,
                  rst,
@@ -403,6 +441,7 @@ class AxiBus(object):
                  name_suffix=None,
                  type_prefix=None,
                  declared=False):
+        super().__init__(name, name_suffix, declared)
         self.clk = clk
         self.rst = rst
         self.aw = aw
@@ -410,9 +449,6 @@ class AxiBus(object):
         self.iw = iw
         self.uw = uw
         self.type_prefix = type_prefix or self.emit_struct()
-        self.name = name
-        self.name_suffix = name_suffix
-        self.declared = declared
 
     def copy(self, name=None, clk=None, rst=None):
         return AxiBus(clk or self.clk,
@@ -441,23 +477,8 @@ class AxiBus(object):
                                   prefix="s_axi_{}".format(name or ""),
                                   bus=self)
 
-    def declare(self, context):
-        if self.declared:
-            return
-        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
-        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
-        self.declared = True
-        return self
-
-    def req_name(self):
-        return "{}_req{}".format(self.name, self.name_suffix or "")
-
-    def rsp_name(self):
-        return "{}_rsp{}".format(self.name, self.name_suffix or "")
-
-    def req_type(self):
-        return "{}_req_t".format(self.type_prefix)
-
+    # TODO: For some reason the suffix here is nonstandard, hence the override.
+    # This ought to be fixed, but for now, it is everywhere...
     def rsp_type(self):
         return "{}_resp_t".format(self.type_prefix)
 
@@ -879,7 +900,7 @@ class AxiBus(object):
 
 
 # An AXI-Lite bus.
-class AxiLiteBus(object):
+class AxiLiteBus(Bus):
     def __init__(self,
                  clk,
                  rst,
@@ -889,37 +910,15 @@ class AxiLiteBus(object):
                  name_suffix=None,
                  type_prefix=None,
                  declared=False):
+        super().__init__(name, name_suffix, declared)
         self.clk = clk
         self.rst = rst
         self.aw = aw
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
-        self.name = name
-        self.name_suffix = name_suffix
-        self.declared = declared
 
     def emit_struct(self):
         return AxiLiteStruct.emit(self.aw, self.dw)
-
-    def declare(self, context):
-        if self.declared:
-            return
-        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
-        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
-        self.declared = True
-        return self
-
-    def req_name(self):
-        return "{}_req{}".format(self.name, self.name_suffix or "")
-
-    def rsp_name(self):
-        return "{}_rsp{}".format(self.name, self.name_suffix or "")
-
-    def req_type(self):
-        return "{}_req_t".format(self.type_prefix)
-
-    def rsp_type(self):
-        return "{}_rsp_t".format(self.type_prefix)
 
     def cdc(self,
             context,
@@ -1014,7 +1013,7 @@ class AxiLiteBus(object):
 
 
 # An advanced peripheral bus.
-class ApbBus(object):
+class ApbBus(Bus):
     def __init__(self,
                  clk,
                  rst,
@@ -1024,14 +1023,12 @@ class ApbBus(object):
                  name_suffix=None,
                  type_prefix=None,
                  declared=False):
+        super().__init__(name, name_suffix, declared)
         self.clk = clk
         self.rst = rst
         self.aw = aw
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
-        self.name = name
-        self.name_suffix = name_suffix
-        self.declared = declared
 
     def emit_struct(self):
         return ApbStruct.emit(self.aw, self.dw)
@@ -1050,26 +1047,6 @@ class ApbBus(object):
                                   prefix="s_apb_{}".format(name or ""),
                                   bus=self)
 
-    def declare(self, context):
-        if self.declared:
-            return
-        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
-        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
-        self.declared = True
-        return self
-
-    def req_name(self):
-        return "{}_req{}".format(self.name, self.name_suffix or "")
-
-    def rsp_name(self):
-        return "{}_rsp{}".format(self.name, self.name_suffix or "")
-
-    def req_type(self):
-        return "{}_req_t".format(self.type_prefix)
-
-    def rsp_type(self):
-        return "{}_rsp_t".format(self.type_prefix)
-
     def addr_type(self):
         return "logic [{}:0]".format(self.aw - 1)
 
@@ -1081,7 +1058,7 @@ class ApbBus(object):
 
 
 # A register bus.
-class RegBus(object):
+class RegBus(Bus):
     def __init__(self,
                  clk,
                  rst,
@@ -1091,37 +1068,15 @@ class RegBus(object):
                  name_suffix=None,
                  type_prefix=None,
                  declared=False):
+        super().__init__(name, name_suffix, declared)
         self.clk = clk
         self.rst = rst
         self.aw = aw
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
-        self.name = name
-        self.name_suffix = name_suffix
-        self.declared = declared
 
     def emit_struct(self):
         return RegStruct.emit(self.aw, self.dw)
-
-    def declare(self, context):
-        if self.declared:
-            return
-        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
-        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
-        self.declared = True
-        return self
-
-    def req_name(self):
-        return "{}_req{}".format(self.name, self.name_suffix or "")
-
-    def rsp_name(self):
-        return "{}_rsp{}".format(self.name, self.name_suffix or "")
-
-    def req_type(self):
-        return "{}_req_t".format(self.type_prefix)
-
-    def rsp_type(self):
-        return "{}_rsp_t".format(self.type_prefix)
 
     def addr_type(self):
         return "logic [{}:0]".format(self.aw - 1)
