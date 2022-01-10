@@ -48,7 +48,8 @@ module occamy_quadrant_s1_ctrl
 );
 
   // Upper half of quadrant space reserved for internal use (same size as for all clusters)
-  addr_t [0:0] internal_xbar_base_addr = '{ClusterBaseOffset +
+  addr_t [0:0] internal_xbar_base_addr;
+  assign internal_xbar_base_addr = '{ClusterBaseOffset +
     tile_id_i * S1QuadrantAddressSpace + S1QuadrantClusterSpace};
 
   // TODO: Pipeline appropriately (possibly only outwards)
@@ -69,19 +70,19 @@ axi_xbar #(
   .Cfg           ( QuadrantS1CtrlSocToQuadXbarCfg ),
   .Connectivity  ( 2'b11 ),
   .AtopSupport   ( 1 ),
-  .slv_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
-  .mst_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
-  .w_chan_t      ( axi_a48_d64_i4_u0_w_chan_t ),
-  .slv_b_chan_t  ( axi_a48_d64_i4_u0_b_chan_t ),
-  .mst_b_chan_t  ( axi_a48_d64_i4_u0_b_chan_t ),
-  .slv_ar_chan_t ( axi_a48_d64_i4_u0_ar_chan_t ),
-  .mst_ar_chan_t ( axi_a48_d64_i4_u0_ar_chan_t ),
-  .slv_r_chan_t  ( axi_a48_d64_i4_u0_r_chan_t ),
-  .mst_r_chan_t  ( axi_a48_d64_i4_u0_r_chan_t ),
-  .slv_req_t     ( axi_a48_d64_i4_u0_req_t ),
-  .slv_resp_t    ( axi_a48_d64_i4_u0_resp_t ),
-  .mst_req_t     ( axi_a48_d64_i4_u0_req_t ),
-  .mst_resp_t    ( axi_a48_d64_i4_u0_resp_t ),
+  .slv_aw_chan_t ( axi_a48_d64_i8_u0_aw_chan_t ),
+  .mst_aw_chan_t ( axi_a48_d64_i8_u0_aw_chan_t ),
+  .w_chan_t      ( axi_a48_d64_i8_u0_w_chan_t ),
+  .slv_b_chan_t  ( axi_a48_d64_i8_u0_b_chan_t ),
+  .mst_b_chan_t  ( axi_a48_d64_i8_u0_b_chan_t ),
+  .slv_ar_chan_t ( axi_a48_d64_i8_u0_ar_chan_t ),
+  .mst_ar_chan_t ( axi_a48_d64_i8_u0_ar_chan_t ),
+  .slv_r_chan_t  ( axi_a48_d64_i8_u0_r_chan_t ),
+  .mst_r_chan_t  ( axi_a48_d64_i8_u0_r_chan_t ),
+  .slv_req_t     ( axi_a48_d64_i8_u0_req_t ),
+  .slv_resp_t    ( axi_a48_d64_i8_u0_resp_t ),
+  .mst_req_t     ( axi_a48_d64_i8_u0_req_t ),
+  .mst_resp_t    ( axi_a48_d64_i8_u0_resp_t ),
   .rule_t        ( xbar_rule_48_t )
 ) i_quadrant_s1_ctrl_soc_to_quad_xbar (
   .clk_i  ( clk_i ),
@@ -138,44 +139,31 @@ axi_xbar #(
   .default_mst_port_i    ( '0 )
 );
 
-/// Address map of the `quadrant_s1_ctrl_demux_xbar` crossbar.
-xbar_rule_48_t [0:0] QuadrantS1CtrlDemuxXbarAddrmap;
-assign QuadrantS1CtrlDemuxXbarAddrmap = '{
-  '{ idx: 0, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantClusterSpace }
-};
+axi_lite_a48_d32_req_t [1:0] quadrant_s1_ctrl_mux_in_req;
+axi_lite_a48_d32_rsp_t [1:0] quadrant_s1_ctrl_mux_in_rsp;
+axi_lite_a48_d32_req_t [0:0] quadrant_s1_ctrl_mux_out_req;
+axi_lite_a48_d32_rsp_t [0:0] quadrant_s1_ctrl_mux_out_rsp;
 
-quadrant_s1_ctrl_demux_xbar_in_req_t [1:0] quadrant_s1_ctrl_demux_xbar_in_req;
-quadrant_s1_ctrl_demux_xbar_in_resp_t [1:0] quadrant_s1_ctrl_demux_xbar_in_rsp;
-quadrant_s1_ctrl_demux_xbar_out_req_t [0:0] quadrant_s1_ctrl_demux_xbar_out_req;
-quadrant_s1_ctrl_demux_xbar_out_resp_t [0:0] quadrant_s1_ctrl_demux_xbar_out_rsp;
-
-axi_xbar #(
-  .Cfg           ( QuadrantS1CtrlDemuxXbarCfg ),
-  .Connectivity  ( 2'b11 ),
-  .AtopSupport   ( 1 ),
-  .slv_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
-  .mst_aw_chan_t ( axi_a48_d64_i5_u0_aw_chan_t ),
-  .w_chan_t      ( axi_a48_d64_i4_u0_w_chan_t ),
-  .slv_b_chan_t  ( axi_a48_d64_i4_u0_b_chan_t ),
-  .mst_b_chan_t  ( axi_a48_d64_i5_u0_b_chan_t ),
-  .slv_ar_chan_t ( axi_a48_d64_i4_u0_ar_chan_t ),
-  .mst_ar_chan_t ( axi_a48_d64_i5_u0_ar_chan_t ),
-  .slv_r_chan_t  ( axi_a48_d64_i4_u0_r_chan_t ),
-  .mst_r_chan_t  ( axi_a48_d64_i5_u0_r_chan_t ),
-  .slv_req_t     ( axi_a48_d64_i4_u0_req_t ),
-  .slv_resp_t    ( axi_a48_d64_i4_u0_resp_t ),
-  .mst_req_t     ( axi_a48_d64_i5_u0_req_t ),
-  .mst_resp_t    ( axi_a48_d64_i5_u0_resp_t ),
-  .rule_t        ( xbar_rule_48_t )
-) i_quadrant_s1_ctrl_demux_xbar (
+// The `quadrant_s1_ctrl_mux` crossbar.
+axi_lite_xbar #(
+  .Cfg       ( QuadrantS1CtrlMuxCfg ),
+  .aw_chan_t ( axi_lite_a48_d32_aw_chan_t ),
+  .w_chan_t  ( axi_lite_a48_d32_w_chan_t ),
+  .b_chan_t  ( axi_lite_a48_d32_b_chan_t ),
+  .ar_chan_t ( axi_lite_a48_d32_ar_chan_t ),
+  .r_chan_t  ( axi_lite_a48_d32_r_chan_t ),
+  .req_t     ( axi_lite_a48_d32_req_t ),
+  .resp_t    ( axi_lite_a48_d32_rsp_t ),
+  .rule_t    ( xbar_rule_48_t )
+) i_quadrant_s1_ctrl_mux (
   .clk_i  ( clk_i ),
   .rst_ni ( rst_ni ),
   .test_i ( test_mode_i ),
-  .slv_ports_req_i  ( quadrant_s1_ctrl_demux_xbar_in_req  ),
-  .slv_ports_resp_o ( quadrant_s1_ctrl_demux_xbar_in_rsp  ),
-  .mst_ports_req_o  ( quadrant_s1_ctrl_demux_xbar_out_req ),
-  .mst_ports_resp_i ( quadrant_s1_ctrl_demux_xbar_out_rsp ),
-  .addr_map_i       ( QuadrantS1CtrlDemuxXbarAddrmap ),
+  .slv_ports_req_i  ( quadrant_s1_ctrl_mux_in_req  ),
+  .slv_ports_resp_o ( quadrant_s1_ctrl_mux_in_rsp  ),
+  .mst_ports_req_o  ( quadrant_s1_ctrl_mux_out_req ),
+  .mst_ports_resp_i ( quadrant_s1_ctrl_mux_out_rsp ),
+  .addr_map_i       ( QuadrantS1CtrlMuxAddrmap ),
   .en_default_mst_port_i ( '1 ),
   .default_mst_port_i    ( '0 )
 );
@@ -184,73 +172,164 @@ axi_xbar #(
   // Connect upward (SoC) narrow ports
   assign soc_out_req_o = quadrant_s1_ctrl_quad_to_soc_xbar_out_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_OUT];
   assign quadrant_s1_ctrl_quad_to_soc_xbar_out_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_OUT] = soc_out_rsp_i;
-  assign quadrant_s1_ctrl_quad_to_soc_xbar_in_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN] = soc_in_req_i;
-  assign soc_in_rsp_o = quadrant_s1_ctrl_quad_to_soc_xbar_in_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN];
+  assign quadrant_s1_ctrl_soc_to_quad_xbar_in_req[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_IN_IN] = soc_in_req_i;
+  assign soc_in_rsp_o = quadrant_s1_ctrl_soc_to_quad_xbar_in_rsp[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_IN_IN];
 
   // Connect quadrant narrow ports
   assign quadrant_out_req_o = quadrant_s1_ctrl_soc_to_quad_xbar_out_req[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_OUT];
   assign quadrant_s1_ctrl_soc_to_quad_xbar_out_rsp[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_OUT] = quadrant_out_rsp_i;
-  assign quadrant_s1_ctrl_soc_to_quad_xbar_in_req[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_IN_IN] = quadrant_in_req_i;
-  assign quadrant_in_rsp_o = quadrant_s1_ctrl_soc_to_quad_xbar_in_rsp[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_IN_IN];
+  assign quadrant_s1_ctrl_quad_to_soc_xbar_in_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN] = quadrant_in_req_i;
+  assign quadrant_in_rsp_o = quadrant_s1_ctrl_quad_to_soc_xbar_in_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN];
 
-  // Connect internal demux
-  assign quadrant_s1_ctrl_demux_xbar_in_req[QUADRANT_S1_CTRL_DEMUX_XBAR_IN_SOC] = quadrant_s1_ctrl_soc_to_quad_xbar_out_req[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_INTERNAL];
-  assign quadrant_s1_ctrl_soc_to_quad_xbar_out_rsp[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_INTERNAL] = quadrant_s1_ctrl_demux_xbar_in_rsp[QUADRANT_S1_CTRL_DEMUX_XBAR_IN_SOC];
-  assign quadrant_s1_ctrl_demux_xbar_in_req[QUADRANT_S1_CTRL_DEMUX_XBAR_IN_QUAD] = quadrant_s1_ctrl_quad_to_soc_xbar_out_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_INTERNAL];
-  assign quadrant_s1_ctrl_quad_to_soc_xbar_out_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_INTERNAL] = quadrant_s1_ctrl_demux_xbar_in_rsp[QUADRANT_S1_CTRL_DEMUX_XBAR_IN_QUAD];
+  // Convert both internal ports to AXI lite, since only registers for now
+    axi_a48_d64_i1_u0_req_t soc_to_quad_internal_ser_req;
+  axi_a48_d64_i1_u0_resp_t soc_to_quad_internal_ser_rsp;
 
-  // Toward internal register file
-    axi_a48_d32_i5_u0_req_t axi_to_axi_lite_dw_req;
-  axi_a48_d32_i5_u0_resp_t axi_to_axi_lite_dw_rsp;
+  axi_id_serialize #(
+    .AtopSupport (1),
+    .AxiSlvPortIdWidth (8),
+    .AxiSlvPortMaxTxns (4),
+    .AxiMstPortIdWidth (1),
+    .AxiMstPortMaxUniqIds (2),
+    .AxiMstPortMaxTxnsPerId (2),
+    .AxiAddrWidth (48),
+    .AxiDataWidth (64),
+    .AxiUserWidth (1),
+    .slv_req_t (axi_a48_d64_i8_u0_req_t),
+    .slv_resp_t (axi_a48_d64_i8_u0_resp_t),
+    .mst_req_t (axi_a48_d64_i1_u0_req_t),
+    .mst_resp_t (axi_a48_d64_i1_u0_resp_t)
+  ) i_soc_to_quad_internal_ser (
+    .clk_i ( clk_i ),
+    .rst_ni ( rst_ni ),
+    .slv_req_i ( quadrant_s1_ctrl_soc_to_quad_xbar_out_req[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_INTERNAL] ),
+    .slv_resp_o ( quadrant_s1_ctrl_soc_to_quad_xbar_out_rsp[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_INTERNAL] ),
+    .mst_req_o ( soc_to_quad_internal_ser_req ),
+    .mst_resp_i ( soc_to_quad_internal_ser_rsp )
+  );
+  axi_a48_d32_i1_u0_req_t axi_to_axi_lite_dw_req;
+  axi_a48_d32_i1_u0_resp_t axi_to_axi_lite_dw_rsp;
 
   axi_dw_converter #(
     .AxiSlvPortDataWidth ( 64 ),
     .AxiMstPortDataWidth ( 32 ),
     .AxiAddrWidth ( 48 ),
-    .AxiIdWidth ( 5 ),
-    .aw_chan_t ( axi_a48_d32_i5_u0_aw_chan_t ),
-    .mst_w_chan_t ( axi_a48_d32_i5_u0_w_chan_t ),
-    .slv_w_chan_t ( axi_a48_d64_i5_u0_w_chan_t ),
-    .b_chan_t ( axi_a48_d32_i5_u0_b_chan_t ),
-    .ar_chan_t ( axi_a48_d32_i5_u0_ar_chan_t ),
-    .mst_r_chan_t ( axi_a48_d32_i5_u0_r_chan_t ),
-    .slv_r_chan_t ( axi_a48_d64_i5_u0_r_chan_t ),
-    .axi_mst_req_t ( axi_a48_d32_i5_u0_req_t ),
-    .axi_mst_resp_t ( axi_a48_d32_i5_u0_resp_t ),
-    .axi_slv_req_t ( axi_a48_d64_i5_u0_req_t ),
-    .axi_slv_resp_t ( axi_a48_d64_i5_u0_resp_t )
+    .AxiIdWidth ( 1 ),
+    .aw_chan_t ( axi_a48_d32_i1_u0_aw_chan_t ),
+    .mst_w_chan_t ( axi_a48_d32_i1_u0_w_chan_t ),
+    .slv_w_chan_t ( axi_a48_d64_i1_u0_w_chan_t ),
+    .b_chan_t ( axi_a48_d32_i1_u0_b_chan_t ),
+    .ar_chan_t ( axi_a48_d32_i1_u0_ar_chan_t ),
+    .mst_r_chan_t ( axi_a48_d32_i1_u0_r_chan_t ),
+    .slv_r_chan_t ( axi_a48_d64_i1_u0_r_chan_t ),
+    .axi_mst_req_t ( axi_a48_d32_i1_u0_req_t ),
+    .axi_mst_resp_t ( axi_a48_d32_i1_u0_resp_t ),
+    .axi_slv_req_t ( axi_a48_d64_i1_u0_req_t ),
+    .axi_slv_resp_t ( axi_a48_d64_i1_u0_resp_t )
   ) i_axi_to_axi_lite_dw (
     .clk_i ( clk_i ),
     .rst_ni ( rst_ni ),
-    .slv_req_i ( quadrant_s1_ctrl_demux_xbar_out_req[QUADRANT_S1_CTRL_DEMUX_XBAR_OUT_OUT] ),
-    .slv_resp_o ( quadrant_s1_ctrl_demux_xbar_out_rsp[QUADRANT_S1_CTRL_DEMUX_XBAR_OUT_OUT] ),
+    .slv_req_i ( soc_to_quad_internal_ser_req ),
+    .slv_resp_o ( soc_to_quad_internal_ser_rsp ),
     .mst_req_o ( axi_to_axi_lite_dw_req ),
     .mst_resp_i ( axi_to_axi_lite_dw_rsp )
   );
 
-  axi_lite_a48_d32_req_t axi_to_axi_lite_regbus_regs_req;
-  axi_lite_a48_d32_rsp_t axi_to_axi_lite_regbus_regs_rsp;
-
   axi_to_axi_lite #(
     .AxiAddrWidth ( 48 ),
     .AxiDataWidth ( 32 ),
-    .AxiIdWidth ( 5 ),
+    .AxiIdWidth ( 1 ),
     .AxiUserWidth ( 1 ),
     .AxiMaxWriteTxns ( 4  ),
     .AxiMaxReadTxns ( 4  ),
     .FallThrough ( 0  ),
-    .full_req_t ( axi_a48_d32_i5_u0_req_t ),
-    .full_resp_t ( axi_a48_d32_i5_u0_resp_t ),
+    .full_req_t ( axi_a48_d32_i1_u0_req_t ),
+    .full_resp_t ( axi_a48_d32_i1_u0_resp_t ),
     .lite_req_t ( axi_lite_a48_d32_req_t ),
     .lite_resp_t ( axi_lite_a48_d32_rsp_t )
-  ) i_axi_to_axi_lite_regbus_regs_pc (
+  ) i_quad_to_soc_internal_ser_pc (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
     .test_i (test_mode_i),
     .slv_req_i (axi_to_axi_lite_dw_req),
     .slv_resp_o (axi_to_axi_lite_dw_rsp),
-    .mst_req_o (axi_to_axi_lite_regbus_regs_req),
-    .mst_resp_i (axi_to_axi_lite_regbus_regs_rsp)
+    .mst_req_o (quadrant_s1_ctrl_mux_in_req[QUADRANT_S1_CTRL_MUX_IN_SOC]),
+    .mst_resp_i (quadrant_s1_ctrl_mux_in_rsp[QUADRANT_S1_CTRL_MUX_IN_SOC])
+  );
+
+  axi_a48_d64_i1_u0_req_t soc_internal_serialize_req;
+  axi_a48_d64_i1_u0_resp_t soc_internal_serialize_rsp;
+
+  axi_id_serialize #(
+    .AtopSupport (1),
+    .AxiSlvPortIdWidth (4),
+    .AxiSlvPortMaxTxns (4),
+    .AxiMstPortIdWidth (1),
+    .AxiMstPortMaxUniqIds (2),
+    .AxiMstPortMaxTxnsPerId (2),
+    .AxiAddrWidth (48),
+    .AxiDataWidth (64),
+    .AxiUserWidth (1),
+    .slv_req_t (axi_a48_d64_i4_u0_req_t),
+    .slv_resp_t (axi_a48_d64_i4_u0_resp_t),
+    .mst_req_t (axi_a48_d64_i1_u0_req_t),
+    .mst_resp_t (axi_a48_d64_i1_u0_resp_t)
+  ) i_soc_internal_serialize (
+    .clk_i ( clk_i ),
+    .rst_ni ( rst_ni ),
+    .slv_req_i ( quadrant_s1_ctrl_quad_to_soc_xbar_out_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_INTERNAL] ),
+    .slv_resp_o ( quadrant_s1_ctrl_quad_to_soc_xbar_out_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_OUT_INTERNAL] ),
+    .mst_req_o ( soc_internal_serialize_req ),
+    .mst_resp_i ( soc_internal_serialize_rsp )
+  );
+  axi_a48_d32_i1_u0_req_t soc_internal_change_dw_req;
+  axi_a48_d32_i1_u0_resp_t soc_internal_change_dw_rsp;
+
+  axi_dw_converter #(
+    .AxiSlvPortDataWidth ( 64 ),
+    .AxiMstPortDataWidth ( 32 ),
+    .AxiAddrWidth ( 48 ),
+    .AxiIdWidth ( 1 ),
+    .aw_chan_t ( axi_a48_d32_i1_u0_aw_chan_t ),
+    .mst_w_chan_t ( axi_a48_d32_i1_u0_w_chan_t ),
+    .slv_w_chan_t ( axi_a48_d64_i1_u0_w_chan_t ),
+    .b_chan_t ( axi_a48_d32_i1_u0_b_chan_t ),
+    .ar_chan_t ( axi_a48_d32_i1_u0_ar_chan_t ),
+    .mst_r_chan_t ( axi_a48_d32_i1_u0_r_chan_t ),
+    .slv_r_chan_t ( axi_a48_d64_i1_u0_r_chan_t ),
+    .axi_mst_req_t ( axi_a48_d32_i1_u0_req_t ),
+    .axi_mst_resp_t ( axi_a48_d32_i1_u0_resp_t ),
+    .axi_slv_req_t ( axi_a48_d64_i1_u0_req_t ),
+    .axi_slv_resp_t ( axi_a48_d64_i1_u0_resp_t )
+  ) i_soc_internal_change_dw (
+    .clk_i ( clk_i ),
+    .rst_ni ( rst_ni ),
+    .slv_req_i ( soc_internal_serialize_req ),
+    .slv_resp_o ( soc_internal_serialize_rsp ),
+    .mst_req_o ( soc_internal_change_dw_req ),
+    .mst_resp_i ( soc_internal_change_dw_rsp )
+  );
+
+  axi_to_axi_lite #(
+    .AxiAddrWidth ( 48 ),
+    .AxiDataWidth ( 32 ),
+    .AxiIdWidth ( 1 ),
+    .AxiUserWidth ( 1 ),
+    .AxiMaxWriteTxns ( 4  ),
+    .AxiMaxReadTxns ( 4  ),
+    .FallThrough ( 0  ),
+    .full_req_t ( axi_a48_d32_i1_u0_req_t ),
+    .full_resp_t ( axi_a48_d32_i1_u0_resp_t ),
+    .lite_req_t ( axi_lite_a48_d32_req_t ),
+    .lite_resp_t ( axi_lite_a48_d32_rsp_t )
+  ) i_soc_internal_to_axi_lite_pc (
+    .clk_i (clk_i),
+    .rst_ni (rst_ni),
+    .test_i (test_mode_i),
+    .slv_req_i (soc_internal_change_dw_req),
+    .slv_resp_o (soc_internal_change_dw_rsp),
+    .mst_req_o (quadrant_s1_ctrl_mux_in_req[QUADRANT_S1_CTRL_MUX_IN_QUAD]),
+    .mst_resp_i (quadrant_s1_ctrl_mux_in_rsp[QUADRANT_S1_CTRL_MUX_IN_QUAD])
   );
 
   reg_a48_d32_req_t axi_lite_to_regbus_regs_req;
@@ -266,8 +345,8 @@ axi_xbar #(
   ) i_axi_lite_to_regbus_regs_pc (
     .clk_i          ( clk_i ),
     .rst_ni         ( rst_ni ),
-    .axi_lite_req_i ( axi_to_axi_lite_regbus_regs_req ),
-    .axi_lite_rsp_o ( axi_to_axi_lite_regbus_regs_rsp ),
+    .axi_lite_req_i ( quadrant_s1_ctrl_mux_out_req[QUADRANT_S1_CTRL_MUX_OUT_OUT] ),
+    .axi_lite_rsp_o ( quadrant_s1_ctrl_mux_out_rsp[QUADRANT_S1_CTRL_MUX_OUT_OUT] ),
     .reg_req_o      ( axi_lite_to_regbus_regs_req ),
     .reg_rsp_i      ( axi_lite_to_regbus_regs_rsp )
   );

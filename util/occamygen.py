@@ -471,7 +471,7 @@ def main():
 
     for i in range(nr_s1_quadrants):
         # Only clusters, but not internal space is accessible on the wide Xbar.
-        # This prevent gating-related issues (the narrow quadrabt ports are never gated).
+        # This prevent gating-related issues (the narrow quadrant ports are never gated).
         soc_wide_xbar.add_output_symbolic("s1_quadrant_{}".format(i),
                                           "s1_quadrant_base_addr",
                                           "S1QuadrantClusterSpace")
@@ -531,20 +531,21 @@ def main():
 
     # We need 3 "crossbars", which are really simple muxes and demuxes
     quadrant_s1_ctrl_xbars = dict()
-    for name in ['soc_to_quad', 'quad_to_soc', 'demux']:
-        # Use and preserve narrow Xbar IDs
-        # TODO: max trans and fallthrough from narrow Xbar for now; rectify this!
+    for name, iw in {
+        'soc_to_quad': soc_narrow_xbar.iw_out(),
+        'quad_to_soc': soc_narrow_xbar.iw,
+    }.items():
+        # Reuse (preserve) narrow Xbar IDs and max transactions
         quadrant_s1_ctrl_xbars[name] = solder.AxiXbar(
             48,
             64,
-            occamy.cfg["narrow_xbar_slv_id_width"],
+            iw,
             name="quadrant_s1_ctrl_{}_xbar".format(name),
             clk="clk_i",
             rst="rst_ni",
             max_slv_trans=occamy.cfg["narrow_xbar"]["max_slv_trans"],
             max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
             fall_through=occamy.cfg["narrow_xbar"]["fall_through"],
-            no_loopback=True,
             context="quadrant_s1_ctrl")
 
     for name in ['soc_to_quad', 'quad_to_soc']:
@@ -554,11 +555,21 @@ def main():
                                                   "internal_xbar_base_addr",
                                                   "S1QuadrantClusterSpace")
 
-    quadrant_s1_ctrl_xbars['demux'].add_output_symbolic("out",
-                                              "internal_xbar_base_addr",
-                                              "S1QuadrantClusterSpace")
-    quadrant_s1_ctrl_xbars['demux'].add_input("soc")
-    quadrant_s1_ctrl_xbars['demux'].add_input("quad")
+    # AXI Lite mux to combine register requests
+    quadrant_s1_ctrl_mux = solder.AxiLiteXbar(
+    48,
+    32,
+    name="quadrant_s1_ctrl_mux",
+    clk="clk_i",
+    rst="rst_ni",
+    max_slv_trans=occamy.cfg["narrow_xbar"]["max_slv_trans"],
+    max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
+    fall_through=False,
+    context="quadrant_s1_ctrl")
+
+    quadrant_s1_ctrl_mux.add_output("out", [(0, (1<<48)-1)])
+    quadrant_s1_ctrl_mux.add_input("soc")
+    quadrant_s1_ctrl_mux.add_input("quad")
 
     ################
     # S1 Quadrants #
@@ -636,6 +647,7 @@ def main():
         "soc_narrow_xbar": soc_narrow_xbar,
         "soc_wide_xbar": soc_wide_xbar,
         "quadrant_s1_ctrl_xbars": quadrant_s1_ctrl_xbars,
+        "quadrant_s1_ctrl_mux": quadrant_s1_ctrl_mux,
         "wide_xbar_quadrant_s1": wide_xbar_quadrant_s1,
         "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
         "soc_regbus_periph_xbar": soc_regbus_periph_xbar,

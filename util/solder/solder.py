@@ -1258,6 +1258,9 @@ class AxiXbar(Xbar):
     def addr_map_len(self):
         return len(self.addrmap) + len(self.symbolic_addrmap)
 
+    def iw_out(self):
+        return self.iw + int(math.ceil(math.log2(max(1, len(self.inputs)))))
+
     def emit(self):
         global code_module
         global code_package
@@ -1267,7 +1270,7 @@ class AxiXbar(Xbar):
         code_module.setdefault(self.context, "")
         # Compute the ID widths.
         iw_in = self.iw
-        iw_out = self.iw + int(math.ceil(math.log2(max(1, len(self.inputs)))))
+        iw_out = self.iw_out()
 
         # Emit the input enum into the package.
         input_enum_name = "{}_inputs_e".format(self.name)

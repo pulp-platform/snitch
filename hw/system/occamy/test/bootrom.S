@@ -18,9 +18,27 @@ _snitch_init:
     jalr    t2
 
 _cva6_init:
-    # De-isolate snitches
-    la      t1, __soc_ctrl_isolate
-    sw      zero, 0(t1)
+    # Reset, ungate, deisolate each quadrant
+    la      t0, __quad_count
+    la      t1, __quad_int_base
+    la      t2, __quad_stride
+    li      t3, 1
+1:  addi    t0, t0, -1
+    # Assert reset
+    sw      zero, 4(t1)
+    # Ungate clock (sync reset)
+    sw      t3, 0(t1)
+    # Deassert reset
+    sw      t3, 4(t1)
+    # Deisolate quadrant
+    sw      zero, 8(t1)
+    # Move onto next quadrant
+    add     t1, t1, t2
+
+    fence
+
+    bnez    t0, 1b
+
     # Set trap vector
     la      t2, exception
     csrw    mtvec, t2
