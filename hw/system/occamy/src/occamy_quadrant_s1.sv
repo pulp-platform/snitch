@@ -564,8 +564,11 @@ module occamy_quadrant_s1
       .mst_req_o(narrow_in_iwc_0_req),
       .mst_resp_i(narrow_in_iwc_0_rsp)
   );
-  axi_a48_d64_i4_u0_req_t   narrow_out_0_req;
-  axi_a48_d64_i4_u0_resp_t  narrow_out_0_rsp;
+  axi_a48_d64_i4_u0_req_t  narrow_out_0_req;
+  axi_a48_d64_i4_u0_resp_t narrow_out_0_rsp;
+
+  assign narrow_xbar_quadrant_s1_in_req[NARROW_XBAR_QUADRANT_S1_IN_CLUSTER_0] = narrow_out_0_req;
+  assign narrow_out_0_rsp = narrow_xbar_quadrant_s1_in_rsp[NARROW_XBAR_QUADRANT_S1_IN_CLUSTER_0];
 
   axi_a48_d512_i1_u0_req_t  wide_in_iwc_0_req;
   axi_a48_d512_i1_u0_resp_t wide_in_iwc_0_rsp;
@@ -587,8 +590,11 @@ module occamy_quadrant_s1
       .mst_req_o(wide_in_iwc_0_req),
       .mst_resp_i(wide_in_iwc_0_rsp)
   );
-  axi_a48_d512_i3_u0_req_t wide_out_0_req;
+  axi_a48_d512_i3_u0_req_t  wide_out_0_req;
   axi_a48_d512_i3_u0_resp_t wide_out_0_rsp;
+
+  assign wide_xbar_quadrant_s1_in_req[WIDE_XBAR_QUADRANT_S1_IN_CLUSTER_0] = wide_out_0_req;
+  assign wide_out_0_rsp = wide_xbar_quadrant_s1_in_rsp[WIDE_XBAR_QUADRANT_S1_IN_CLUSTER_0];
 
 
 
@@ -639,8 +645,11 @@ module occamy_quadrant_s1
       .mst_req_o(narrow_in_iwc_1_req),
       .mst_resp_i(narrow_in_iwc_1_rsp)
   );
-  axi_a48_d64_i4_u0_req_t   narrow_out_1_req;
-  axi_a48_d64_i4_u0_resp_t  narrow_out_1_rsp;
+  axi_a48_d64_i4_u0_req_t  narrow_out_1_req;
+  axi_a48_d64_i4_u0_resp_t narrow_out_1_rsp;
+
+  assign narrow_xbar_quadrant_s1_in_req[NARROW_XBAR_QUADRANT_S1_IN_CLUSTER_1] = narrow_out_1_req;
+  assign narrow_out_1_rsp = narrow_xbar_quadrant_s1_in_rsp[NARROW_XBAR_QUADRANT_S1_IN_CLUSTER_1];
 
   axi_a48_d512_i1_u0_req_t  wide_in_iwc_1_req;
   axi_a48_d512_i1_u0_resp_t wide_in_iwc_1_rsp;
@@ -662,8 +671,11 @@ module occamy_quadrant_s1
       .mst_req_o(wide_in_iwc_1_req),
       .mst_resp_i(wide_in_iwc_1_rsp)
   );
-  axi_a48_d512_i3_u0_req_t wide_out_1_req;
+  axi_a48_d512_i3_u0_req_t  wide_out_1_req;
   axi_a48_d512_i3_u0_resp_t wide_out_1_rsp;
+
+  assign wide_xbar_quadrant_s1_in_req[WIDE_XBAR_QUADRANT_S1_IN_CLUSTER_1] = wide_out_1_req;
+  assign wide_out_1_rsp = wide_xbar_quadrant_s1_in_rsp[WIDE_XBAR_QUADRANT_S1_IN_CLUSTER_1];
 
 
 
@@ -714,8 +726,11 @@ module occamy_quadrant_s1
       .mst_req_o(narrow_in_iwc_2_req),
       .mst_resp_i(narrow_in_iwc_2_rsp)
   );
-  axi_a48_d64_i4_u0_req_t   narrow_out_2_req;
-  axi_a48_d64_i4_u0_resp_t  narrow_out_2_rsp;
+  axi_a48_d64_i4_u0_req_t  narrow_out_2_req;
+  axi_a48_d64_i4_u0_resp_t narrow_out_2_rsp;
+
+  assign narrow_xbar_quadrant_s1_in_req[NARROW_XBAR_QUADRANT_S1_IN_CLUSTER_2] = narrow_out_2_req;
+  assign narrow_out_2_rsp = narrow_xbar_quadrant_s1_in_rsp[NARROW_XBAR_QUADRANT_S1_IN_CLUSTER_2];
 
   axi_a48_d512_i1_u0_req_t  wide_in_iwc_2_req;
   axi_a48_d512_i1_u0_resp_t wide_in_iwc_2_rsp;
@@ -737,8 +752,11 @@ module occamy_quadrant_s1
       .mst_req_o(wide_in_iwc_2_req),
       .mst_resp_i(wide_in_iwc_2_rsp)
   );
-  axi_a48_d512_i3_u0_req_t wide_out_2_req;
+  axi_a48_d512_i3_u0_req_t  wide_out_2_req;
   axi_a48_d512_i3_u0_resp_t wide_out_2_rsp;
+
+  assign wide_xbar_quadrant_s1_in_req[WIDE_XBAR_QUADRANT_S1_IN_CLUSTER_2] = wide_out_2_req;
+  assign wide_out_2_rsp = wide_xbar_quadrant_s1_in_rsp[WIDE_XBAR_QUADRANT_S1_IN_CLUSTER_2];
 
 
 
@@ -789,8 +807,11 @@ module occamy_quadrant_s1
       .mst_req_o(narrow_in_iwc_3_req),
       .mst_resp_i(narrow_in_iwc_3_rsp)
   );
-  axi_a48_d64_i4_u0_req_t   narrow_out_3_req;
-  axi_a48_d64_i4_u0_resp_t  narrow_out_3_rsp;
+  axi_a48_d64_i4_u0_req_t  narrow_out_3_req;
+  axi_a48_d64_i4_u0_resp_t narrow_out_3_rsp;
+
+  assign narrow_xbar_quadrant_s1_in_req[NARROW_XBAR_QUADRANT_S1_IN_CLUSTER_3] = narrow_out_3_req;
+  assign narrow_out_3_rsp = narrow_xbar_quadrant_s1_in_rsp[NARROW_XBAR_QUADRANT_S1_IN_CLUSTER_3];
 
   axi_a48_d512_i1_u0_req_t  wide_in_iwc_3_req;
   axi_a48_d512_i1_u0_resp_t wide_in_iwc_3_rsp;
@@ -812,8 +833,11 @@ module occamy_quadrant_s1
       .mst_req_o(wide_in_iwc_3_req),
       .mst_resp_i(wide_in_iwc_3_rsp)
   );
-  axi_a48_d512_i3_u0_req_t wide_out_3_req;
+  axi_a48_d512_i3_u0_req_t  wide_out_3_req;
   axi_a48_d512_i3_u0_resp_t wide_out_3_rsp;
+
+  assign wide_xbar_quadrant_s1_in_req[WIDE_XBAR_QUADRANT_S1_IN_CLUSTER_3] = wide_out_3_req;
+  assign wide_out_3_rsp = wide_xbar_quadrant_s1_in_rsp[WIDE_XBAR_QUADRANT_S1_IN_CLUSTER_3];
 
 
 
