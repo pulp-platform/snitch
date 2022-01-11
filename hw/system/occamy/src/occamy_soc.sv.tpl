@@ -75,9 +75,10 @@ module occamy_soc
   mem_data_t spm_wdata, spm_rdata;
   mem_strb_t spm_strb;
 
-  addr_t [${nr_s1_quadrants-1}:0] s1_quadrant_base_addr;
+  addr_t [${nr_s1_quadrants-1}:0] s1_quadrant_base_addr, s1_quadrant_cfg_base_addr;
   % for i in range(nr_s1_quadrants):
   assign s1_quadrant_base_addr[${i}] = ClusterBaseOffset + ${i} * S1QuadrantAddressSpace;
+  assign s1_quadrant_cfg_base_addr[${i}] = S1QuadrantCfgBaseOffset + ${i} * S1QuadrantCfgAddressSpace;
   % endfor
 
   ///////////////////

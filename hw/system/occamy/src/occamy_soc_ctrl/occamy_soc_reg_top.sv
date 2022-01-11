@@ -101,6 +101,8 @@ module occamy_soc_reg_top #(
   logic scratch_3_we;
   logic [1:0] boot_mode_qs;
   logic boot_mode_re;
+  logic [31:0] num_quadrants_qs;
+  logic num_quadrants_re;
   logic pad_0_slw_0_qs;
   logic pad_0_slw_0_wd;
   logic pad_0_slw_0_we;
@@ -667,6 +669,22 @@ module occamy_soc_reg_top #(
     .qe     (),
     .q      (),
     .qs     (boot_mode_qs)
+  );
+
+
+  // R[num_quadrants]: V(True)
+
+  prim_subreg_ext #(
+    .DW    (32)
+  ) u_num_quadrants (
+    .re     (num_quadrants_re),
+    .we     (1'b0),
+    .wd     ('0),
+    .d      ('0),
+    .qre    (),
+    .qe     (),
+    .q      (),
+    .qs     (num_quadrants_qs)
   );
 
 
@@ -3185,7 +3203,7 @@ module occamy_soc_reg_top #(
 
 
 
-  logic [40:0] addr_hit;
+  logic [41:0] addr_hit;
   always_comb begin
     addr_hit = '0;
     addr_hit[ 0] = (reg_addr == OCCAMY_SOC_INTR_STATE_OFFSET);
@@ -3198,37 +3216,38 @@ module occamy_soc_reg_top #(
     addr_hit[ 7] = (reg_addr == OCCAMY_SOC_SCRATCH_2_OFFSET);
     addr_hit[ 8] = (reg_addr == OCCAMY_SOC_SCRATCH_3_OFFSET);
     addr_hit[ 9] = (reg_addr == OCCAMY_SOC_BOOT_MODE_OFFSET);
-    addr_hit[10] = (reg_addr == OCCAMY_SOC_PAD_0_OFFSET);
-    addr_hit[11] = (reg_addr == OCCAMY_SOC_PAD_1_OFFSET);
-    addr_hit[12] = (reg_addr == OCCAMY_SOC_PAD_2_OFFSET);
-    addr_hit[13] = (reg_addr == OCCAMY_SOC_PAD_3_OFFSET);
-    addr_hit[14] = (reg_addr == OCCAMY_SOC_PAD_4_OFFSET);
-    addr_hit[15] = (reg_addr == OCCAMY_SOC_PAD_5_OFFSET);
-    addr_hit[16] = (reg_addr == OCCAMY_SOC_PAD_6_OFFSET);
-    addr_hit[17] = (reg_addr == OCCAMY_SOC_PAD_7_OFFSET);
-    addr_hit[18] = (reg_addr == OCCAMY_SOC_PAD_8_OFFSET);
-    addr_hit[19] = (reg_addr == OCCAMY_SOC_PAD_9_OFFSET);
-    addr_hit[20] = (reg_addr == OCCAMY_SOC_PAD_10_OFFSET);
-    addr_hit[21] = (reg_addr == OCCAMY_SOC_PAD_11_OFFSET);
-    addr_hit[22] = (reg_addr == OCCAMY_SOC_PAD_12_OFFSET);
-    addr_hit[23] = (reg_addr == OCCAMY_SOC_PAD_13_OFFSET);
-    addr_hit[24] = (reg_addr == OCCAMY_SOC_PAD_14_OFFSET);
-    addr_hit[25] = (reg_addr == OCCAMY_SOC_PAD_15_OFFSET);
-    addr_hit[26] = (reg_addr == OCCAMY_SOC_PAD_16_OFFSET);
-    addr_hit[27] = (reg_addr == OCCAMY_SOC_PAD_17_OFFSET);
-    addr_hit[28] = (reg_addr == OCCAMY_SOC_PAD_18_OFFSET);
-    addr_hit[29] = (reg_addr == OCCAMY_SOC_PAD_19_OFFSET);
-    addr_hit[30] = (reg_addr == OCCAMY_SOC_PAD_20_OFFSET);
-    addr_hit[31] = (reg_addr == OCCAMY_SOC_PAD_21_OFFSET);
-    addr_hit[32] = (reg_addr == OCCAMY_SOC_PAD_22_OFFSET);
-    addr_hit[33] = (reg_addr == OCCAMY_SOC_PAD_23_OFFSET);
-    addr_hit[34] = (reg_addr == OCCAMY_SOC_PAD_24_OFFSET);
-    addr_hit[35] = (reg_addr == OCCAMY_SOC_PAD_25_OFFSET);
-    addr_hit[36] = (reg_addr == OCCAMY_SOC_PAD_26_OFFSET);
-    addr_hit[37] = (reg_addr == OCCAMY_SOC_PAD_27_OFFSET);
-    addr_hit[38] = (reg_addr == OCCAMY_SOC_PAD_28_OFFSET);
-    addr_hit[39] = (reg_addr == OCCAMY_SOC_PAD_29_OFFSET);
-    addr_hit[40] = (reg_addr == OCCAMY_SOC_PAD_30_OFFSET);
+    addr_hit[10] = (reg_addr == OCCAMY_SOC_NUM_QUADRANTS_OFFSET);
+    addr_hit[11] = (reg_addr == OCCAMY_SOC_PAD_0_OFFSET);
+    addr_hit[12] = (reg_addr == OCCAMY_SOC_PAD_1_OFFSET);
+    addr_hit[13] = (reg_addr == OCCAMY_SOC_PAD_2_OFFSET);
+    addr_hit[14] = (reg_addr == OCCAMY_SOC_PAD_3_OFFSET);
+    addr_hit[15] = (reg_addr == OCCAMY_SOC_PAD_4_OFFSET);
+    addr_hit[16] = (reg_addr == OCCAMY_SOC_PAD_5_OFFSET);
+    addr_hit[17] = (reg_addr == OCCAMY_SOC_PAD_6_OFFSET);
+    addr_hit[18] = (reg_addr == OCCAMY_SOC_PAD_7_OFFSET);
+    addr_hit[19] = (reg_addr == OCCAMY_SOC_PAD_8_OFFSET);
+    addr_hit[20] = (reg_addr == OCCAMY_SOC_PAD_9_OFFSET);
+    addr_hit[21] = (reg_addr == OCCAMY_SOC_PAD_10_OFFSET);
+    addr_hit[22] = (reg_addr == OCCAMY_SOC_PAD_11_OFFSET);
+    addr_hit[23] = (reg_addr == OCCAMY_SOC_PAD_12_OFFSET);
+    addr_hit[24] = (reg_addr == OCCAMY_SOC_PAD_13_OFFSET);
+    addr_hit[25] = (reg_addr == OCCAMY_SOC_PAD_14_OFFSET);
+    addr_hit[26] = (reg_addr == OCCAMY_SOC_PAD_15_OFFSET);
+    addr_hit[27] = (reg_addr == OCCAMY_SOC_PAD_16_OFFSET);
+    addr_hit[28] = (reg_addr == OCCAMY_SOC_PAD_17_OFFSET);
+    addr_hit[29] = (reg_addr == OCCAMY_SOC_PAD_18_OFFSET);
+    addr_hit[30] = (reg_addr == OCCAMY_SOC_PAD_19_OFFSET);
+    addr_hit[31] = (reg_addr == OCCAMY_SOC_PAD_20_OFFSET);
+    addr_hit[32] = (reg_addr == OCCAMY_SOC_PAD_21_OFFSET);
+    addr_hit[33] = (reg_addr == OCCAMY_SOC_PAD_22_OFFSET);
+    addr_hit[34] = (reg_addr == OCCAMY_SOC_PAD_23_OFFSET);
+    addr_hit[35] = (reg_addr == OCCAMY_SOC_PAD_24_OFFSET);
+    addr_hit[36] = (reg_addr == OCCAMY_SOC_PAD_25_OFFSET);
+    addr_hit[37] = (reg_addr == OCCAMY_SOC_PAD_26_OFFSET);
+    addr_hit[38] = (reg_addr == OCCAMY_SOC_PAD_27_OFFSET);
+    addr_hit[39] = (reg_addr == OCCAMY_SOC_PAD_28_OFFSET);
+    addr_hit[40] = (reg_addr == OCCAMY_SOC_PAD_29_OFFSET);
+    addr_hit[41] = (reg_addr == OCCAMY_SOC_PAD_30_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -3276,7 +3295,8 @@ module occamy_soc_reg_top #(
                (addr_hit[37] & (|(OCCAMY_SOC_PERMIT[37] & ~reg_be))) |
                (addr_hit[38] & (|(OCCAMY_SOC_PERMIT[38] & ~reg_be))) |
                (addr_hit[39] & (|(OCCAMY_SOC_PERMIT[39] & ~reg_be))) |
-               (addr_hit[40] & (|(OCCAMY_SOC_PERMIT[40] & ~reg_be)))));
+               (addr_hit[40] & (|(OCCAMY_SOC_PERMIT[40] & ~reg_be))) |
+               (addr_hit[41] & (|(OCCAMY_SOC_PERMIT[41] & ~reg_be)))));
   end
 
   assign intr_state_ecc_uncorrectable_we = addr_hit[0] & reg_we & !reg_error;
@@ -3313,283 +3333,285 @@ module occamy_soc_reg_top #(
 
   assign boot_mode_re = addr_hit[9] & reg_re & !reg_error;
 
-  assign pad_0_slw_0_we = addr_hit[10] & reg_we & !reg_error;
+  assign num_quadrants_re = addr_hit[10] & reg_re & !reg_error;
+
+  assign pad_0_slw_0_we = addr_hit[11] & reg_we & !reg_error;
   assign pad_0_slw_0_wd = reg_wdata[0];
 
-  assign pad_0_smt_0_we = addr_hit[10] & reg_we & !reg_error;
+  assign pad_0_smt_0_we = addr_hit[11] & reg_we & !reg_error;
   assign pad_0_smt_0_wd = reg_wdata[1];
 
-  assign pad_0_drv_0_we = addr_hit[10] & reg_we & !reg_error;
+  assign pad_0_drv_0_we = addr_hit[11] & reg_we & !reg_error;
   assign pad_0_drv_0_wd = reg_wdata[3:2];
 
-  assign pad_1_slw_1_we = addr_hit[11] & reg_we & !reg_error;
+  assign pad_1_slw_1_we = addr_hit[12] & reg_we & !reg_error;
   assign pad_1_slw_1_wd = reg_wdata[0];
 
-  assign pad_1_smt_1_we = addr_hit[11] & reg_we & !reg_error;
+  assign pad_1_smt_1_we = addr_hit[12] & reg_we & !reg_error;
   assign pad_1_smt_1_wd = reg_wdata[1];
 
-  assign pad_1_drv_1_we = addr_hit[11] & reg_we & !reg_error;
+  assign pad_1_drv_1_we = addr_hit[12] & reg_we & !reg_error;
   assign pad_1_drv_1_wd = reg_wdata[3:2];
 
-  assign pad_2_slw_2_we = addr_hit[12] & reg_we & !reg_error;
+  assign pad_2_slw_2_we = addr_hit[13] & reg_we & !reg_error;
   assign pad_2_slw_2_wd = reg_wdata[0];
 
-  assign pad_2_smt_2_we = addr_hit[12] & reg_we & !reg_error;
+  assign pad_2_smt_2_we = addr_hit[13] & reg_we & !reg_error;
   assign pad_2_smt_2_wd = reg_wdata[1];
 
-  assign pad_2_drv_2_we = addr_hit[12] & reg_we & !reg_error;
+  assign pad_2_drv_2_we = addr_hit[13] & reg_we & !reg_error;
   assign pad_2_drv_2_wd = reg_wdata[3:2];
 
-  assign pad_3_slw_3_we = addr_hit[13] & reg_we & !reg_error;
+  assign pad_3_slw_3_we = addr_hit[14] & reg_we & !reg_error;
   assign pad_3_slw_3_wd = reg_wdata[0];
 
-  assign pad_3_smt_3_we = addr_hit[13] & reg_we & !reg_error;
+  assign pad_3_smt_3_we = addr_hit[14] & reg_we & !reg_error;
   assign pad_3_smt_3_wd = reg_wdata[1];
 
-  assign pad_3_drv_3_we = addr_hit[13] & reg_we & !reg_error;
+  assign pad_3_drv_3_we = addr_hit[14] & reg_we & !reg_error;
   assign pad_3_drv_3_wd = reg_wdata[3:2];
 
-  assign pad_4_slw_4_we = addr_hit[14] & reg_we & !reg_error;
+  assign pad_4_slw_4_we = addr_hit[15] & reg_we & !reg_error;
   assign pad_4_slw_4_wd = reg_wdata[0];
 
-  assign pad_4_smt_4_we = addr_hit[14] & reg_we & !reg_error;
+  assign pad_4_smt_4_we = addr_hit[15] & reg_we & !reg_error;
   assign pad_4_smt_4_wd = reg_wdata[1];
 
-  assign pad_4_drv_4_we = addr_hit[14] & reg_we & !reg_error;
+  assign pad_4_drv_4_we = addr_hit[15] & reg_we & !reg_error;
   assign pad_4_drv_4_wd = reg_wdata[3:2];
 
-  assign pad_5_slw_5_we = addr_hit[15] & reg_we & !reg_error;
+  assign pad_5_slw_5_we = addr_hit[16] & reg_we & !reg_error;
   assign pad_5_slw_5_wd = reg_wdata[0];
 
-  assign pad_5_smt_5_we = addr_hit[15] & reg_we & !reg_error;
+  assign pad_5_smt_5_we = addr_hit[16] & reg_we & !reg_error;
   assign pad_5_smt_5_wd = reg_wdata[1];
 
-  assign pad_5_drv_5_we = addr_hit[15] & reg_we & !reg_error;
+  assign pad_5_drv_5_we = addr_hit[16] & reg_we & !reg_error;
   assign pad_5_drv_5_wd = reg_wdata[3:2];
 
-  assign pad_6_slw_6_we = addr_hit[16] & reg_we & !reg_error;
+  assign pad_6_slw_6_we = addr_hit[17] & reg_we & !reg_error;
   assign pad_6_slw_6_wd = reg_wdata[0];
 
-  assign pad_6_smt_6_we = addr_hit[16] & reg_we & !reg_error;
+  assign pad_6_smt_6_we = addr_hit[17] & reg_we & !reg_error;
   assign pad_6_smt_6_wd = reg_wdata[1];
 
-  assign pad_6_drv_6_we = addr_hit[16] & reg_we & !reg_error;
+  assign pad_6_drv_6_we = addr_hit[17] & reg_we & !reg_error;
   assign pad_6_drv_6_wd = reg_wdata[3:2];
 
-  assign pad_7_slw_7_we = addr_hit[17] & reg_we & !reg_error;
+  assign pad_7_slw_7_we = addr_hit[18] & reg_we & !reg_error;
   assign pad_7_slw_7_wd = reg_wdata[0];
 
-  assign pad_7_smt_7_we = addr_hit[17] & reg_we & !reg_error;
+  assign pad_7_smt_7_we = addr_hit[18] & reg_we & !reg_error;
   assign pad_7_smt_7_wd = reg_wdata[1];
 
-  assign pad_7_drv_7_we = addr_hit[17] & reg_we & !reg_error;
+  assign pad_7_drv_7_we = addr_hit[18] & reg_we & !reg_error;
   assign pad_7_drv_7_wd = reg_wdata[3:2];
 
-  assign pad_8_slw_8_we = addr_hit[18] & reg_we & !reg_error;
+  assign pad_8_slw_8_we = addr_hit[19] & reg_we & !reg_error;
   assign pad_8_slw_8_wd = reg_wdata[0];
 
-  assign pad_8_smt_8_we = addr_hit[18] & reg_we & !reg_error;
+  assign pad_8_smt_8_we = addr_hit[19] & reg_we & !reg_error;
   assign pad_8_smt_8_wd = reg_wdata[1];
 
-  assign pad_8_drv_8_we = addr_hit[18] & reg_we & !reg_error;
+  assign pad_8_drv_8_we = addr_hit[19] & reg_we & !reg_error;
   assign pad_8_drv_8_wd = reg_wdata[3:2];
 
-  assign pad_9_slw_9_we = addr_hit[19] & reg_we & !reg_error;
+  assign pad_9_slw_9_we = addr_hit[20] & reg_we & !reg_error;
   assign pad_9_slw_9_wd = reg_wdata[0];
 
-  assign pad_9_smt_9_we = addr_hit[19] & reg_we & !reg_error;
+  assign pad_9_smt_9_we = addr_hit[20] & reg_we & !reg_error;
   assign pad_9_smt_9_wd = reg_wdata[1];
 
-  assign pad_9_drv_9_we = addr_hit[19] & reg_we & !reg_error;
+  assign pad_9_drv_9_we = addr_hit[20] & reg_we & !reg_error;
   assign pad_9_drv_9_wd = reg_wdata[3:2];
 
-  assign pad_10_slw_10_we = addr_hit[20] & reg_we & !reg_error;
+  assign pad_10_slw_10_we = addr_hit[21] & reg_we & !reg_error;
   assign pad_10_slw_10_wd = reg_wdata[0];
 
-  assign pad_10_smt_10_we = addr_hit[20] & reg_we & !reg_error;
+  assign pad_10_smt_10_we = addr_hit[21] & reg_we & !reg_error;
   assign pad_10_smt_10_wd = reg_wdata[1];
 
-  assign pad_10_drv_10_we = addr_hit[20] & reg_we & !reg_error;
+  assign pad_10_drv_10_we = addr_hit[21] & reg_we & !reg_error;
   assign pad_10_drv_10_wd = reg_wdata[3:2];
 
-  assign pad_11_slw_11_we = addr_hit[21] & reg_we & !reg_error;
+  assign pad_11_slw_11_we = addr_hit[22] & reg_we & !reg_error;
   assign pad_11_slw_11_wd = reg_wdata[0];
 
-  assign pad_11_smt_11_we = addr_hit[21] & reg_we & !reg_error;
+  assign pad_11_smt_11_we = addr_hit[22] & reg_we & !reg_error;
   assign pad_11_smt_11_wd = reg_wdata[1];
 
-  assign pad_11_drv_11_we = addr_hit[21] & reg_we & !reg_error;
+  assign pad_11_drv_11_we = addr_hit[22] & reg_we & !reg_error;
   assign pad_11_drv_11_wd = reg_wdata[3:2];
 
-  assign pad_12_slw_12_we = addr_hit[22] & reg_we & !reg_error;
+  assign pad_12_slw_12_we = addr_hit[23] & reg_we & !reg_error;
   assign pad_12_slw_12_wd = reg_wdata[0];
 
-  assign pad_12_smt_12_we = addr_hit[22] & reg_we & !reg_error;
+  assign pad_12_smt_12_we = addr_hit[23] & reg_we & !reg_error;
   assign pad_12_smt_12_wd = reg_wdata[1];
 
-  assign pad_12_drv_12_we = addr_hit[22] & reg_we & !reg_error;
+  assign pad_12_drv_12_we = addr_hit[23] & reg_we & !reg_error;
   assign pad_12_drv_12_wd = reg_wdata[3:2];
 
-  assign pad_13_slw_13_we = addr_hit[23] & reg_we & !reg_error;
+  assign pad_13_slw_13_we = addr_hit[24] & reg_we & !reg_error;
   assign pad_13_slw_13_wd = reg_wdata[0];
 
-  assign pad_13_smt_13_we = addr_hit[23] & reg_we & !reg_error;
+  assign pad_13_smt_13_we = addr_hit[24] & reg_we & !reg_error;
   assign pad_13_smt_13_wd = reg_wdata[1];
 
-  assign pad_13_drv_13_we = addr_hit[23] & reg_we & !reg_error;
+  assign pad_13_drv_13_we = addr_hit[24] & reg_we & !reg_error;
   assign pad_13_drv_13_wd = reg_wdata[3:2];
 
-  assign pad_14_slw_14_we = addr_hit[24] & reg_we & !reg_error;
+  assign pad_14_slw_14_we = addr_hit[25] & reg_we & !reg_error;
   assign pad_14_slw_14_wd = reg_wdata[0];
 
-  assign pad_14_smt_14_we = addr_hit[24] & reg_we & !reg_error;
+  assign pad_14_smt_14_we = addr_hit[25] & reg_we & !reg_error;
   assign pad_14_smt_14_wd = reg_wdata[1];
 
-  assign pad_14_drv_14_we = addr_hit[24] & reg_we & !reg_error;
+  assign pad_14_drv_14_we = addr_hit[25] & reg_we & !reg_error;
   assign pad_14_drv_14_wd = reg_wdata[3:2];
 
-  assign pad_15_slw_15_we = addr_hit[25] & reg_we & !reg_error;
+  assign pad_15_slw_15_we = addr_hit[26] & reg_we & !reg_error;
   assign pad_15_slw_15_wd = reg_wdata[0];
 
-  assign pad_15_smt_15_we = addr_hit[25] & reg_we & !reg_error;
+  assign pad_15_smt_15_we = addr_hit[26] & reg_we & !reg_error;
   assign pad_15_smt_15_wd = reg_wdata[1];
 
-  assign pad_15_drv_15_we = addr_hit[25] & reg_we & !reg_error;
+  assign pad_15_drv_15_we = addr_hit[26] & reg_we & !reg_error;
   assign pad_15_drv_15_wd = reg_wdata[3:2];
 
-  assign pad_16_slw_16_we = addr_hit[26] & reg_we & !reg_error;
+  assign pad_16_slw_16_we = addr_hit[27] & reg_we & !reg_error;
   assign pad_16_slw_16_wd = reg_wdata[0];
 
-  assign pad_16_smt_16_we = addr_hit[26] & reg_we & !reg_error;
+  assign pad_16_smt_16_we = addr_hit[27] & reg_we & !reg_error;
   assign pad_16_smt_16_wd = reg_wdata[1];
 
-  assign pad_16_drv_16_we = addr_hit[26] & reg_we & !reg_error;
+  assign pad_16_drv_16_we = addr_hit[27] & reg_we & !reg_error;
   assign pad_16_drv_16_wd = reg_wdata[3:2];
 
-  assign pad_17_slw_17_we = addr_hit[27] & reg_we & !reg_error;
+  assign pad_17_slw_17_we = addr_hit[28] & reg_we & !reg_error;
   assign pad_17_slw_17_wd = reg_wdata[0];
 
-  assign pad_17_smt_17_we = addr_hit[27] & reg_we & !reg_error;
+  assign pad_17_smt_17_we = addr_hit[28] & reg_we & !reg_error;
   assign pad_17_smt_17_wd = reg_wdata[1];
 
-  assign pad_17_drv_17_we = addr_hit[27] & reg_we & !reg_error;
+  assign pad_17_drv_17_we = addr_hit[28] & reg_we & !reg_error;
   assign pad_17_drv_17_wd = reg_wdata[3:2];
 
-  assign pad_18_slw_18_we = addr_hit[28] & reg_we & !reg_error;
+  assign pad_18_slw_18_we = addr_hit[29] & reg_we & !reg_error;
   assign pad_18_slw_18_wd = reg_wdata[0];
 
-  assign pad_18_smt_18_we = addr_hit[28] & reg_we & !reg_error;
+  assign pad_18_smt_18_we = addr_hit[29] & reg_we & !reg_error;
   assign pad_18_smt_18_wd = reg_wdata[1];
 
-  assign pad_18_drv_18_we = addr_hit[28] & reg_we & !reg_error;
+  assign pad_18_drv_18_we = addr_hit[29] & reg_we & !reg_error;
   assign pad_18_drv_18_wd = reg_wdata[3:2];
 
-  assign pad_19_slw_19_we = addr_hit[29] & reg_we & !reg_error;
+  assign pad_19_slw_19_we = addr_hit[30] & reg_we & !reg_error;
   assign pad_19_slw_19_wd = reg_wdata[0];
 
-  assign pad_19_smt_19_we = addr_hit[29] & reg_we & !reg_error;
+  assign pad_19_smt_19_we = addr_hit[30] & reg_we & !reg_error;
   assign pad_19_smt_19_wd = reg_wdata[1];
 
-  assign pad_19_drv_19_we = addr_hit[29] & reg_we & !reg_error;
+  assign pad_19_drv_19_we = addr_hit[30] & reg_we & !reg_error;
   assign pad_19_drv_19_wd = reg_wdata[3:2];
 
-  assign pad_20_slw_20_we = addr_hit[30] & reg_we & !reg_error;
+  assign pad_20_slw_20_we = addr_hit[31] & reg_we & !reg_error;
   assign pad_20_slw_20_wd = reg_wdata[0];
 
-  assign pad_20_smt_20_we = addr_hit[30] & reg_we & !reg_error;
+  assign pad_20_smt_20_we = addr_hit[31] & reg_we & !reg_error;
   assign pad_20_smt_20_wd = reg_wdata[1];
 
-  assign pad_20_drv_20_we = addr_hit[30] & reg_we & !reg_error;
+  assign pad_20_drv_20_we = addr_hit[31] & reg_we & !reg_error;
   assign pad_20_drv_20_wd = reg_wdata[3:2];
 
-  assign pad_21_slw_21_we = addr_hit[31] & reg_we & !reg_error;
+  assign pad_21_slw_21_we = addr_hit[32] & reg_we & !reg_error;
   assign pad_21_slw_21_wd = reg_wdata[0];
 
-  assign pad_21_smt_21_we = addr_hit[31] & reg_we & !reg_error;
+  assign pad_21_smt_21_we = addr_hit[32] & reg_we & !reg_error;
   assign pad_21_smt_21_wd = reg_wdata[1];
 
-  assign pad_21_drv_21_we = addr_hit[31] & reg_we & !reg_error;
+  assign pad_21_drv_21_we = addr_hit[32] & reg_we & !reg_error;
   assign pad_21_drv_21_wd = reg_wdata[3:2];
 
-  assign pad_22_slw_22_we = addr_hit[32] & reg_we & !reg_error;
+  assign pad_22_slw_22_we = addr_hit[33] & reg_we & !reg_error;
   assign pad_22_slw_22_wd = reg_wdata[0];
 
-  assign pad_22_smt_22_we = addr_hit[32] & reg_we & !reg_error;
+  assign pad_22_smt_22_we = addr_hit[33] & reg_we & !reg_error;
   assign pad_22_smt_22_wd = reg_wdata[1];
 
-  assign pad_22_drv_22_we = addr_hit[32] & reg_we & !reg_error;
+  assign pad_22_drv_22_we = addr_hit[33] & reg_we & !reg_error;
   assign pad_22_drv_22_wd = reg_wdata[3:2];
 
-  assign pad_23_slw_23_we = addr_hit[33] & reg_we & !reg_error;
+  assign pad_23_slw_23_we = addr_hit[34] & reg_we & !reg_error;
   assign pad_23_slw_23_wd = reg_wdata[0];
 
-  assign pad_23_smt_23_we = addr_hit[33] & reg_we & !reg_error;
+  assign pad_23_smt_23_we = addr_hit[34] & reg_we & !reg_error;
   assign pad_23_smt_23_wd = reg_wdata[1];
 
-  assign pad_23_drv_23_we = addr_hit[33] & reg_we & !reg_error;
+  assign pad_23_drv_23_we = addr_hit[34] & reg_we & !reg_error;
   assign pad_23_drv_23_wd = reg_wdata[3:2];
 
-  assign pad_24_slw_24_we = addr_hit[34] & reg_we & !reg_error;
+  assign pad_24_slw_24_we = addr_hit[35] & reg_we & !reg_error;
   assign pad_24_slw_24_wd = reg_wdata[0];
 
-  assign pad_24_smt_24_we = addr_hit[34] & reg_we & !reg_error;
+  assign pad_24_smt_24_we = addr_hit[35] & reg_we & !reg_error;
   assign pad_24_smt_24_wd = reg_wdata[1];
 
-  assign pad_24_drv_24_we = addr_hit[34] & reg_we & !reg_error;
+  assign pad_24_drv_24_we = addr_hit[35] & reg_we & !reg_error;
   assign pad_24_drv_24_wd = reg_wdata[3:2];
 
-  assign pad_25_slw_25_we = addr_hit[35] & reg_we & !reg_error;
+  assign pad_25_slw_25_we = addr_hit[36] & reg_we & !reg_error;
   assign pad_25_slw_25_wd = reg_wdata[0];
 
-  assign pad_25_smt_25_we = addr_hit[35] & reg_we & !reg_error;
+  assign pad_25_smt_25_we = addr_hit[36] & reg_we & !reg_error;
   assign pad_25_smt_25_wd = reg_wdata[1];
 
-  assign pad_25_drv_25_we = addr_hit[35] & reg_we & !reg_error;
+  assign pad_25_drv_25_we = addr_hit[36] & reg_we & !reg_error;
   assign pad_25_drv_25_wd = reg_wdata[3:2];
 
-  assign pad_26_slw_26_we = addr_hit[36] & reg_we & !reg_error;
+  assign pad_26_slw_26_we = addr_hit[37] & reg_we & !reg_error;
   assign pad_26_slw_26_wd = reg_wdata[0];
 
-  assign pad_26_smt_26_we = addr_hit[36] & reg_we & !reg_error;
+  assign pad_26_smt_26_we = addr_hit[37] & reg_we & !reg_error;
   assign pad_26_smt_26_wd = reg_wdata[1];
 
-  assign pad_26_drv_26_we = addr_hit[36] & reg_we & !reg_error;
+  assign pad_26_drv_26_we = addr_hit[37] & reg_we & !reg_error;
   assign pad_26_drv_26_wd = reg_wdata[3:2];
 
-  assign pad_27_slw_27_we = addr_hit[37] & reg_we & !reg_error;
+  assign pad_27_slw_27_we = addr_hit[38] & reg_we & !reg_error;
   assign pad_27_slw_27_wd = reg_wdata[0];
 
-  assign pad_27_smt_27_we = addr_hit[37] & reg_we & !reg_error;
+  assign pad_27_smt_27_we = addr_hit[38] & reg_we & !reg_error;
   assign pad_27_smt_27_wd = reg_wdata[1];
 
-  assign pad_27_drv_27_we = addr_hit[37] & reg_we & !reg_error;
+  assign pad_27_drv_27_we = addr_hit[38] & reg_we & !reg_error;
   assign pad_27_drv_27_wd = reg_wdata[3:2];
 
-  assign pad_28_slw_28_we = addr_hit[38] & reg_we & !reg_error;
+  assign pad_28_slw_28_we = addr_hit[39] & reg_we & !reg_error;
   assign pad_28_slw_28_wd = reg_wdata[0];
 
-  assign pad_28_smt_28_we = addr_hit[38] & reg_we & !reg_error;
+  assign pad_28_smt_28_we = addr_hit[39] & reg_we & !reg_error;
   assign pad_28_smt_28_wd = reg_wdata[1];
 
-  assign pad_28_drv_28_we = addr_hit[38] & reg_we & !reg_error;
+  assign pad_28_drv_28_we = addr_hit[39] & reg_we & !reg_error;
   assign pad_28_drv_28_wd = reg_wdata[3:2];
 
-  assign pad_29_slw_29_we = addr_hit[39] & reg_we & !reg_error;
+  assign pad_29_slw_29_we = addr_hit[40] & reg_we & !reg_error;
   assign pad_29_slw_29_wd = reg_wdata[0];
 
-  assign pad_29_smt_29_we = addr_hit[39] & reg_we & !reg_error;
+  assign pad_29_smt_29_we = addr_hit[40] & reg_we & !reg_error;
   assign pad_29_smt_29_wd = reg_wdata[1];
 
-  assign pad_29_drv_29_we = addr_hit[39] & reg_we & !reg_error;
+  assign pad_29_drv_29_we = addr_hit[40] & reg_we & !reg_error;
   assign pad_29_drv_29_wd = reg_wdata[3:2];
 
-  assign pad_30_slw_30_we = addr_hit[40] & reg_we & !reg_error;
+  assign pad_30_slw_30_we = addr_hit[41] & reg_we & !reg_error;
   assign pad_30_slw_30_wd = reg_wdata[0];
 
-  assign pad_30_smt_30_we = addr_hit[40] & reg_we & !reg_error;
+  assign pad_30_smt_30_we = addr_hit[41] & reg_we & !reg_error;
   assign pad_30_smt_30_wd = reg_wdata[1];
 
-  assign pad_30_drv_30_we = addr_hit[40] & reg_we & !reg_error;
+  assign pad_30_drv_30_we = addr_hit[41] & reg_we & !reg_error;
   assign pad_30_drv_30_wd = reg_wdata[3:2];
 
   // Read data return
@@ -3640,186 +3662,190 @@ module occamy_soc_reg_top #(
       end
 
       addr_hit[10]: begin
+        reg_rdata_next[31:0] = num_quadrants_qs;
+      end
+
+      addr_hit[11]: begin
         reg_rdata_next[0] = pad_0_slw_0_qs;
         reg_rdata_next[1] = pad_0_smt_0_qs;
         reg_rdata_next[3:2] = pad_0_drv_0_qs;
       end
 
-      addr_hit[11]: begin
+      addr_hit[12]: begin
         reg_rdata_next[0] = pad_1_slw_1_qs;
         reg_rdata_next[1] = pad_1_smt_1_qs;
         reg_rdata_next[3:2] = pad_1_drv_1_qs;
       end
 
-      addr_hit[12]: begin
+      addr_hit[13]: begin
         reg_rdata_next[0] = pad_2_slw_2_qs;
         reg_rdata_next[1] = pad_2_smt_2_qs;
         reg_rdata_next[3:2] = pad_2_drv_2_qs;
       end
 
-      addr_hit[13]: begin
+      addr_hit[14]: begin
         reg_rdata_next[0] = pad_3_slw_3_qs;
         reg_rdata_next[1] = pad_3_smt_3_qs;
         reg_rdata_next[3:2] = pad_3_drv_3_qs;
       end
 
-      addr_hit[14]: begin
+      addr_hit[15]: begin
         reg_rdata_next[0] = pad_4_slw_4_qs;
         reg_rdata_next[1] = pad_4_smt_4_qs;
         reg_rdata_next[3:2] = pad_4_drv_4_qs;
       end
 
-      addr_hit[15]: begin
+      addr_hit[16]: begin
         reg_rdata_next[0] = pad_5_slw_5_qs;
         reg_rdata_next[1] = pad_5_smt_5_qs;
         reg_rdata_next[3:2] = pad_5_drv_5_qs;
       end
 
-      addr_hit[16]: begin
+      addr_hit[17]: begin
         reg_rdata_next[0] = pad_6_slw_6_qs;
         reg_rdata_next[1] = pad_6_smt_6_qs;
         reg_rdata_next[3:2] = pad_6_drv_6_qs;
       end
 
-      addr_hit[17]: begin
+      addr_hit[18]: begin
         reg_rdata_next[0] = pad_7_slw_7_qs;
         reg_rdata_next[1] = pad_7_smt_7_qs;
         reg_rdata_next[3:2] = pad_7_drv_7_qs;
       end
 
-      addr_hit[18]: begin
+      addr_hit[19]: begin
         reg_rdata_next[0] = pad_8_slw_8_qs;
         reg_rdata_next[1] = pad_8_smt_8_qs;
         reg_rdata_next[3:2] = pad_8_drv_8_qs;
       end
 
-      addr_hit[19]: begin
+      addr_hit[20]: begin
         reg_rdata_next[0] = pad_9_slw_9_qs;
         reg_rdata_next[1] = pad_9_smt_9_qs;
         reg_rdata_next[3:2] = pad_9_drv_9_qs;
       end
 
-      addr_hit[20]: begin
+      addr_hit[21]: begin
         reg_rdata_next[0] = pad_10_slw_10_qs;
         reg_rdata_next[1] = pad_10_smt_10_qs;
         reg_rdata_next[3:2] = pad_10_drv_10_qs;
       end
 
-      addr_hit[21]: begin
+      addr_hit[22]: begin
         reg_rdata_next[0] = pad_11_slw_11_qs;
         reg_rdata_next[1] = pad_11_smt_11_qs;
         reg_rdata_next[3:2] = pad_11_drv_11_qs;
       end
 
-      addr_hit[22]: begin
+      addr_hit[23]: begin
         reg_rdata_next[0] = pad_12_slw_12_qs;
         reg_rdata_next[1] = pad_12_smt_12_qs;
         reg_rdata_next[3:2] = pad_12_drv_12_qs;
       end
 
-      addr_hit[23]: begin
+      addr_hit[24]: begin
         reg_rdata_next[0] = pad_13_slw_13_qs;
         reg_rdata_next[1] = pad_13_smt_13_qs;
         reg_rdata_next[3:2] = pad_13_drv_13_qs;
       end
 
-      addr_hit[24]: begin
+      addr_hit[25]: begin
         reg_rdata_next[0] = pad_14_slw_14_qs;
         reg_rdata_next[1] = pad_14_smt_14_qs;
         reg_rdata_next[3:2] = pad_14_drv_14_qs;
       end
 
-      addr_hit[25]: begin
+      addr_hit[26]: begin
         reg_rdata_next[0] = pad_15_slw_15_qs;
         reg_rdata_next[1] = pad_15_smt_15_qs;
         reg_rdata_next[3:2] = pad_15_drv_15_qs;
       end
 
-      addr_hit[26]: begin
+      addr_hit[27]: begin
         reg_rdata_next[0] = pad_16_slw_16_qs;
         reg_rdata_next[1] = pad_16_smt_16_qs;
         reg_rdata_next[3:2] = pad_16_drv_16_qs;
       end
 
-      addr_hit[27]: begin
+      addr_hit[28]: begin
         reg_rdata_next[0] = pad_17_slw_17_qs;
         reg_rdata_next[1] = pad_17_smt_17_qs;
         reg_rdata_next[3:2] = pad_17_drv_17_qs;
       end
 
-      addr_hit[28]: begin
+      addr_hit[29]: begin
         reg_rdata_next[0] = pad_18_slw_18_qs;
         reg_rdata_next[1] = pad_18_smt_18_qs;
         reg_rdata_next[3:2] = pad_18_drv_18_qs;
       end
 
-      addr_hit[29]: begin
+      addr_hit[30]: begin
         reg_rdata_next[0] = pad_19_slw_19_qs;
         reg_rdata_next[1] = pad_19_smt_19_qs;
         reg_rdata_next[3:2] = pad_19_drv_19_qs;
       end
 
-      addr_hit[30]: begin
+      addr_hit[31]: begin
         reg_rdata_next[0] = pad_20_slw_20_qs;
         reg_rdata_next[1] = pad_20_smt_20_qs;
         reg_rdata_next[3:2] = pad_20_drv_20_qs;
       end
 
-      addr_hit[31]: begin
+      addr_hit[32]: begin
         reg_rdata_next[0] = pad_21_slw_21_qs;
         reg_rdata_next[1] = pad_21_smt_21_qs;
         reg_rdata_next[3:2] = pad_21_drv_21_qs;
       end
 
-      addr_hit[32]: begin
+      addr_hit[33]: begin
         reg_rdata_next[0] = pad_22_slw_22_qs;
         reg_rdata_next[1] = pad_22_smt_22_qs;
         reg_rdata_next[3:2] = pad_22_drv_22_qs;
       end
 
-      addr_hit[33]: begin
+      addr_hit[34]: begin
         reg_rdata_next[0] = pad_23_slw_23_qs;
         reg_rdata_next[1] = pad_23_smt_23_qs;
         reg_rdata_next[3:2] = pad_23_drv_23_qs;
       end
 
-      addr_hit[34]: begin
+      addr_hit[35]: begin
         reg_rdata_next[0] = pad_24_slw_24_qs;
         reg_rdata_next[1] = pad_24_smt_24_qs;
         reg_rdata_next[3:2] = pad_24_drv_24_qs;
       end
 
-      addr_hit[35]: begin
+      addr_hit[36]: begin
         reg_rdata_next[0] = pad_25_slw_25_qs;
         reg_rdata_next[1] = pad_25_smt_25_qs;
         reg_rdata_next[3:2] = pad_25_drv_25_qs;
       end
 
-      addr_hit[36]: begin
+      addr_hit[37]: begin
         reg_rdata_next[0] = pad_26_slw_26_qs;
         reg_rdata_next[1] = pad_26_smt_26_qs;
         reg_rdata_next[3:2] = pad_26_drv_26_qs;
       end
 
-      addr_hit[37]: begin
+      addr_hit[38]: begin
         reg_rdata_next[0] = pad_27_slw_27_qs;
         reg_rdata_next[1] = pad_27_smt_27_qs;
         reg_rdata_next[3:2] = pad_27_drv_27_qs;
       end
 
-      addr_hit[38]: begin
+      addr_hit[39]: begin
         reg_rdata_next[0] = pad_28_slw_28_qs;
         reg_rdata_next[1] = pad_28_smt_28_qs;
         reg_rdata_next[3:2] = pad_28_drv_28_qs;
       end
 
-      addr_hit[39]: begin
+      addr_hit[40]: begin
         reg_rdata_next[0] = pad_29_slw_29_qs;
         reg_rdata_next[1] = pad_29_smt_29_qs;
         reg_rdata_next[3:2] = pad_29_drv_29_qs;
       end
 
-      addr_hit[40]: begin
+      addr_hit[41]: begin
         reg_rdata_next[0] = pad_30_slw_30_qs;
         reg_rdata_next[1] = pad_30_smt_30_qs;
         reg_rdata_next[3:2] = pad_30_drv_30_qs;

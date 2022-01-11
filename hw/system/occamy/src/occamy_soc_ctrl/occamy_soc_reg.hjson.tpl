@@ -96,6 +96,23 @@
         }
       ]
     }
+    { name: "NUM_QUADRANTS"
+      desc: "Number of quadrants per chip."
+      swaccess: "ro"
+      hwaccess: "none"
+      hwqe:     "true",
+      hwext:    "true",
+      fields: [
+        {
+          bits: "31:0"
+          resval: ${nr_s1_clusters}
+          name: "NUM_QUADRANTS"
+          desc: '''
+                Number of quadrants per chip.
+                '''
+        }
+      ]
+    }
     { multireg:
       { name: "PAD"
         desc: "GPIO pad configuration."

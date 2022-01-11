@@ -103,37 +103,38 @@ package occamy_soc_reg_pkg;
   parameter logic [BlockAw-1:0] OCCAMY_SOC_SCRATCH_2_OFFSET = 8'h 1c;
   parameter logic [BlockAw-1:0] OCCAMY_SOC_SCRATCH_3_OFFSET = 8'h 20;
   parameter logic [BlockAw-1:0] OCCAMY_SOC_BOOT_MODE_OFFSET = 8'h 24;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_0_OFFSET = 8'h 28;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_1_OFFSET = 8'h 2c;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_2_OFFSET = 8'h 30;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_3_OFFSET = 8'h 34;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_4_OFFSET = 8'h 38;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_5_OFFSET = 8'h 3c;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_6_OFFSET = 8'h 40;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_7_OFFSET = 8'h 44;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_8_OFFSET = 8'h 48;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_9_OFFSET = 8'h 4c;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_10_OFFSET = 8'h 50;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_11_OFFSET = 8'h 54;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_12_OFFSET = 8'h 58;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_13_OFFSET = 8'h 5c;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_14_OFFSET = 8'h 60;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_15_OFFSET = 8'h 64;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_16_OFFSET = 8'h 68;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_17_OFFSET = 8'h 6c;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_18_OFFSET = 8'h 70;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_19_OFFSET = 8'h 74;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_20_OFFSET = 8'h 78;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_21_OFFSET = 8'h 7c;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_22_OFFSET = 8'h 80;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_23_OFFSET = 8'h 84;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_24_OFFSET = 8'h 88;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_25_OFFSET = 8'h 8c;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_26_OFFSET = 8'h 90;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_27_OFFSET = 8'h 94;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_28_OFFSET = 8'h 98;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_29_OFFSET = 8'h 9c;
-  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_30_OFFSET = 8'h a0;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_NUM_QUADRANTS_OFFSET = 8'h 28;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_0_OFFSET = 8'h 2c;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_1_OFFSET = 8'h 30;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_2_OFFSET = 8'h 34;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_3_OFFSET = 8'h 38;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_4_OFFSET = 8'h 3c;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_5_OFFSET = 8'h 40;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_6_OFFSET = 8'h 44;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_7_OFFSET = 8'h 48;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_8_OFFSET = 8'h 4c;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_9_OFFSET = 8'h 50;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_10_OFFSET = 8'h 54;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_11_OFFSET = 8'h 58;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_12_OFFSET = 8'h 5c;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_13_OFFSET = 8'h 60;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_14_OFFSET = 8'h 64;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_15_OFFSET = 8'h 68;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_16_OFFSET = 8'h 6c;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_17_OFFSET = 8'h 70;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_18_OFFSET = 8'h 74;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_19_OFFSET = 8'h 78;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_20_OFFSET = 8'h 7c;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_21_OFFSET = 8'h 80;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_22_OFFSET = 8'h 84;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_23_OFFSET = 8'h 88;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_24_OFFSET = 8'h 8c;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_25_OFFSET = 8'h 90;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_26_OFFSET = 8'h 94;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_27_OFFSET = 8'h 98;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_28_OFFSET = 8'h 9c;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_29_OFFSET = 8'h a0;
+  parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_30_OFFSET = 8'h a4;
 
   // Reset values for hwext registers and their fields
   parameter logic [1:0] OCCAMY_SOC_INTR_TEST_RESVAL = 2'h 0;
@@ -142,6 +143,8 @@ package occamy_soc_reg_pkg;
   parameter logic [1:0] OCCAMY_SOC_CHIP_ID_RESVAL = 2'h 0;
   parameter logic [1:0] OCCAMY_SOC_CHIP_ID_CHIP_ID_RESVAL = 2'h 0;
   parameter logic [1:0] OCCAMY_SOC_BOOT_MODE_RESVAL = 2'h 0;
+  parameter logic [31:0] OCCAMY_SOC_NUM_QUADRANTS_RESVAL = 32'h 4;
+  parameter logic [31:0] OCCAMY_SOC_NUM_QUADRANTS_NUM_QUADRANTS_RESVAL = 32'h 4;
 
   // Register index
   typedef enum int {
@@ -155,6 +158,7 @@ package occamy_soc_reg_pkg;
     OCCAMY_SOC_SCRATCH_2,
     OCCAMY_SOC_SCRATCH_3,
     OCCAMY_SOC_BOOT_MODE,
+    OCCAMY_SOC_NUM_QUADRANTS,
     OCCAMY_SOC_PAD_0,
     OCCAMY_SOC_PAD_1,
     OCCAMY_SOC_PAD_2,
@@ -189,7 +193,7 @@ package occamy_soc_reg_pkg;
   } occamy_soc_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] OCCAMY_SOC_PERMIT [41] = '{
+  parameter logic [3:0] OCCAMY_SOC_PERMIT [42] = '{
     4'b 0001, // index[ 0] OCCAMY_SOC_INTR_STATE
     4'b 0001, // index[ 1] OCCAMY_SOC_INTR_ENABLE
     4'b 0001, // index[ 2] OCCAMY_SOC_INTR_TEST
@@ -200,37 +204,38 @@ package occamy_soc_reg_pkg;
     4'b 1111, // index[ 7] OCCAMY_SOC_SCRATCH_2
     4'b 1111, // index[ 8] OCCAMY_SOC_SCRATCH_3
     4'b 0001, // index[ 9] OCCAMY_SOC_BOOT_MODE
-    4'b 0001, // index[10] OCCAMY_SOC_PAD_0
-    4'b 0001, // index[11] OCCAMY_SOC_PAD_1
-    4'b 0001, // index[12] OCCAMY_SOC_PAD_2
-    4'b 0001, // index[13] OCCAMY_SOC_PAD_3
-    4'b 0001, // index[14] OCCAMY_SOC_PAD_4
-    4'b 0001, // index[15] OCCAMY_SOC_PAD_5
-    4'b 0001, // index[16] OCCAMY_SOC_PAD_6
-    4'b 0001, // index[17] OCCAMY_SOC_PAD_7
-    4'b 0001, // index[18] OCCAMY_SOC_PAD_8
-    4'b 0001, // index[19] OCCAMY_SOC_PAD_9
-    4'b 0001, // index[20] OCCAMY_SOC_PAD_10
-    4'b 0001, // index[21] OCCAMY_SOC_PAD_11
-    4'b 0001, // index[22] OCCAMY_SOC_PAD_12
-    4'b 0001, // index[23] OCCAMY_SOC_PAD_13
-    4'b 0001, // index[24] OCCAMY_SOC_PAD_14
-    4'b 0001, // index[25] OCCAMY_SOC_PAD_15
-    4'b 0001, // index[26] OCCAMY_SOC_PAD_16
-    4'b 0001, // index[27] OCCAMY_SOC_PAD_17
-    4'b 0001, // index[28] OCCAMY_SOC_PAD_18
-    4'b 0001, // index[29] OCCAMY_SOC_PAD_19
-    4'b 0001, // index[30] OCCAMY_SOC_PAD_20
-    4'b 0001, // index[31] OCCAMY_SOC_PAD_21
-    4'b 0001, // index[32] OCCAMY_SOC_PAD_22
-    4'b 0001, // index[33] OCCAMY_SOC_PAD_23
-    4'b 0001, // index[34] OCCAMY_SOC_PAD_24
-    4'b 0001, // index[35] OCCAMY_SOC_PAD_25
-    4'b 0001, // index[36] OCCAMY_SOC_PAD_26
-    4'b 0001, // index[37] OCCAMY_SOC_PAD_27
-    4'b 0001, // index[38] OCCAMY_SOC_PAD_28
-    4'b 0001, // index[39] OCCAMY_SOC_PAD_29
-    4'b 0001  // index[40] OCCAMY_SOC_PAD_30
+    4'b 1111, // index[10] OCCAMY_SOC_NUM_QUADRANTS
+    4'b 0001, // index[11] OCCAMY_SOC_PAD_0
+    4'b 0001, // index[12] OCCAMY_SOC_PAD_1
+    4'b 0001, // index[13] OCCAMY_SOC_PAD_2
+    4'b 0001, // index[14] OCCAMY_SOC_PAD_3
+    4'b 0001, // index[15] OCCAMY_SOC_PAD_4
+    4'b 0001, // index[16] OCCAMY_SOC_PAD_5
+    4'b 0001, // index[17] OCCAMY_SOC_PAD_6
+    4'b 0001, // index[18] OCCAMY_SOC_PAD_7
+    4'b 0001, // index[19] OCCAMY_SOC_PAD_8
+    4'b 0001, // index[20] OCCAMY_SOC_PAD_9
+    4'b 0001, // index[21] OCCAMY_SOC_PAD_10
+    4'b 0001, // index[22] OCCAMY_SOC_PAD_11
+    4'b 0001, // index[23] OCCAMY_SOC_PAD_12
+    4'b 0001, // index[24] OCCAMY_SOC_PAD_13
+    4'b 0001, // index[25] OCCAMY_SOC_PAD_14
+    4'b 0001, // index[26] OCCAMY_SOC_PAD_15
+    4'b 0001, // index[27] OCCAMY_SOC_PAD_16
+    4'b 0001, // index[28] OCCAMY_SOC_PAD_17
+    4'b 0001, // index[29] OCCAMY_SOC_PAD_18
+    4'b 0001, // index[30] OCCAMY_SOC_PAD_19
+    4'b 0001, // index[31] OCCAMY_SOC_PAD_20
+    4'b 0001, // index[32] OCCAMY_SOC_PAD_21
+    4'b 0001, // index[33] OCCAMY_SOC_PAD_22
+    4'b 0001, // index[34] OCCAMY_SOC_PAD_23
+    4'b 0001, // index[35] OCCAMY_SOC_PAD_24
+    4'b 0001, // index[36] OCCAMY_SOC_PAD_25
+    4'b 0001, // index[37] OCCAMY_SOC_PAD_26
+    4'b 0001, // index[38] OCCAMY_SOC_PAD_27
+    4'b 0001, // index[39] OCCAMY_SOC_PAD_28
+    4'b 0001, // index[40] OCCAMY_SOC_PAD_29
+    4'b 0001  // index[41] OCCAMY_SOC_PAD_30
   };
 
 endpackage

@@ -49,8 +49,7 @@ module occamy_quadrant_s1_ctrl
 
   // Upper half of quadrant space reserved for internal use (same size as for all clusters)
   addr_t [0:0] internal_xbar_base_addr;
-  assign internal_xbar_base_addr = '{ClusterBaseOffset +
-    tile_id_i * S1QuadrantAddressSpace + S1QuadrantClusterSpace};
+  assign internal_xbar_base_addr = '{S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace};
 
   // TODO: Pipeline appropriately (possibly only outwards)
   // Controller crossbar: shims off for access to internal space
@@ -58,7 +57,7 @@ module occamy_quadrant_s1_ctrl
 /// Address map of the `quadrant_s1_ctrl_soc_to_quad_xbar` crossbar.
 xbar_rule_48_t [0:0] QuadrantS1CtrlSocToQuadXbarAddrmap;
 assign QuadrantS1CtrlSocToQuadXbarAddrmap = '{
-  '{ idx: 1, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantClusterSpace }
+  '{ idx: 1, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantCfgAddressSpace }
 };
 
 quadrant_s1_ctrl_soc_to_quad_xbar_in_req_t [0:0] quadrant_s1_ctrl_soc_to_quad_xbar_in_req;
@@ -100,7 +99,7 @@ axi_xbar #(
 /// Address map of the `quadrant_s1_ctrl_quad_to_soc_xbar` crossbar.
 xbar_rule_48_t [0:0] QuadrantS1CtrlQuadToSocXbarAddrmap;
 assign QuadrantS1CtrlQuadToSocXbarAddrmap = '{
-  '{ idx: 1, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantClusterSpace }
+  '{ idx: 1, start_addr: internal_xbar_base_addr[0], end_addr: internal_xbar_base_addr[0] + S1QuadrantCfgAddressSpace }
 };
 
 quadrant_s1_ctrl_quad_to_soc_xbar_in_req_t [0:0] quadrant_s1_ctrl_quad_to_soc_xbar_in_req;

@@ -10,7 +10,7 @@ Disassembly of section .text:
 
 0000000001000008 <_snitch_init>:
  1000008:	00000317          	auipc	t1,0x0
- 100000c:	06c30313          	addi	t1,t1,108 # 1000074 <exception>
+ 100000c:	07030313          	addi	t1,t1,112 # 1000078 <exception>
  1000010:	30531073          	csrw	mtvec,t1
  1000014:	f1402573          	csrr	a0,mhartid
  1000018:	00000597          	auipc	a1,0x0
@@ -20,29 +20,29 @@ Disassembly of section .text:
  1000028:	000380e7          	jalr	t2
 
 000000000100002c <_cva6_init>:
- 100002c:	00800293          	li	t0,8
- 1000030:	0f040317          	auipc	t1,0xf040
- 1000034:	fd030313          	addi	t1,t1,-48 # 10040000 <__quad_int_base>
- 1000038:	ff080397          	auipc	t2,0xff080
- 100003c:	fc838393          	addi	t2,t2,-56 # 80000 <__quad_stride>
- 1000040:	00100e13          	li	t3,1
- 1000044:	fff28293          	addi	t0,t0,-1
- 1000048:	00032223          	sw	zero,4(t1)
- 100004c:	01c32023          	sw	t3,0(t1)
- 1000050:	01c32223          	sw	t3,4(t1)
- 1000054:	00032423          	sw	zero,8(t1)
- 1000058:	00730333          	add	t1,t1,t2
- 100005c:	0ff0000f          	fence
- 1000060:	fe0292e3          	bnez	t0,1000044 <_cva6_init+0x18>
- 1000064:	00000397          	auipc	t2,0x0
- 1000068:	01038393          	addi	t2,t2,16 # 1000074 <exception>
- 100006c:	30539073          	csrw	mtvec,t2
- 1000070:	0040006f          	j	1000074 <exception>
+ 100002c:	01000297          	auipc	t0,0x1000
+ 1000030:	ffc28293          	addi	t0,t0,-4 # 2000028 <__soc_ctrl_nr_quads>
+ 1000034:	0002a283          	lw	t0,0(t0)
+ 1000038:	0a000317          	auipc	t1,0xa000
+ 100003c:	fc830313          	addi	t1,t1,-56 # b000000 <__quad_int_base>
+ 1000040:	ff010397          	auipc	t2,0xff010
+ 1000044:	fc038393          	addi	t2,t2,-64 # 10000 <__quad_stride>
+ 1000048:	00100e13          	li	t3,1
+ 100004c:	fff28293          	addi	t0,t0,-1
+ 1000050:	00032223          	sw	zero,4(t1)
+ 1000054:	01c32023          	sw	t3,0(t1)
+ 1000058:	01c32223          	sw	t3,4(t1)
+ 100005c:	00032423          	sw	zero,8(t1)
+ 1000060:	00730333          	add	t1,t1,t2
+ 1000064:	fe0294e3          	bnez	t0,100004c <_cva6_init+0x20>
+ 1000068:	00000397          	auipc	t2,0x0
+ 100006c:	01038393          	addi	t2,t2,16 # 1000078 <exception>
+ 1000070:	30539073          	csrw	mtvec,t2
+ 1000074:	0040006f          	j	1000078 <exception>
 
-0000000001000074 <exception>:
- 1000074:	10500073          	wfi
- 1000078:	ffdff06f          	j	1000074 <exception>
- 100007c:	00000013          	nop
+0000000001000078 <exception>:
+ 1000078:	10500073          	wfi
+ 100007c:	ffdff06f          	j	1000078 <exception>
 
 0000000001000080 <device_tree>:
  1000080:	0dd0                	addi	a2,sp,724
@@ -796,5 +796,5 @@ Disassembly of section .text:
 Disassembly of section .boot_section:
 
 00000000010006dc <entry_addr>:
- 10006dc:	0074                	addi	a3,sp,12
+ 10006dc:	0078                	addi	a4,sp,12
  10006de:	0100                	addi	s0,sp,128

@@ -117,22 +117,30 @@ module occamy_soc
   mem_data_t spm_wdata, spm_rdata;
   mem_strb_t spm_strb;
 
-  addr_t [7:0] s1_quadrant_base_addr;
+  addr_t [7:0] s1_quadrant_base_addr, s1_quadrant_cfg_base_addr;
   assign s1_quadrant_base_addr[0] = ClusterBaseOffset + 0 * S1QuadrantAddressSpace;
+  assign s1_quadrant_cfg_base_addr[0] = S1QuadrantCfgBaseOffset + 0 * S1QuadrantCfgAddressSpace;
   assign s1_quadrant_base_addr[1] = ClusterBaseOffset + 1 * S1QuadrantAddressSpace;
+  assign s1_quadrant_cfg_base_addr[1] = S1QuadrantCfgBaseOffset + 1 * S1QuadrantCfgAddressSpace;
   assign s1_quadrant_base_addr[2] = ClusterBaseOffset + 2 * S1QuadrantAddressSpace;
+  assign s1_quadrant_cfg_base_addr[2] = S1QuadrantCfgBaseOffset + 2 * S1QuadrantCfgAddressSpace;
   assign s1_quadrant_base_addr[3] = ClusterBaseOffset + 3 * S1QuadrantAddressSpace;
+  assign s1_quadrant_cfg_base_addr[3] = S1QuadrantCfgBaseOffset + 3 * S1QuadrantCfgAddressSpace;
   assign s1_quadrant_base_addr[4] = ClusterBaseOffset + 4 * S1QuadrantAddressSpace;
+  assign s1_quadrant_cfg_base_addr[4] = S1QuadrantCfgBaseOffset + 4 * S1QuadrantCfgAddressSpace;
   assign s1_quadrant_base_addr[5] = ClusterBaseOffset + 5 * S1QuadrantAddressSpace;
+  assign s1_quadrant_cfg_base_addr[5] = S1QuadrantCfgBaseOffset + 5 * S1QuadrantCfgAddressSpace;
   assign s1_quadrant_base_addr[6] = ClusterBaseOffset + 6 * S1QuadrantAddressSpace;
+  assign s1_quadrant_cfg_base_addr[6] = S1QuadrantCfgBaseOffset + 6 * S1QuadrantCfgAddressSpace;
   assign s1_quadrant_base_addr[7] = ClusterBaseOffset + 7 * S1QuadrantAddressSpace;
+  assign s1_quadrant_cfg_base_addr[7] = S1QuadrantCfgBaseOffset + 7 * S1QuadrantCfgAddressSpace;
 
   ///////////////////
   //   CROSSBARS   //
   ///////////////////
 
   /// Address map of the `soc_wide_xbar` crossbar.
-  xbar_rule_48_t [29:0] SocWideXbarAddrmap;
+  xbar_rule_48_t [21:0] SocWideXbarAddrmap;
   assign SocWideXbarAddrmap = '{
   '{ idx: 8, start_addr: 48'h80000000, end_addr: 48'hc0000000 },
   '{ idx: 8, start_addr: 48'h1000000000, end_addr: 48'h1040000000 },
@@ -146,24 +154,16 @@ module occamy_soc
   '{ idx: 15, start_addr: 48'h11c0000000, end_addr: 48'h1200000000 },
   '{ idx: 16, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 17, start_addr: 48'h00000000, end_addr: 48'h10000000 },
-  '{ idx: 17, start_addr: 48'h10100000, end_addr: 48'h10200000 },
-  '{ idx: 17, start_addr: 48'h10300000, end_addr: 48'h10400000 },
-  '{ idx: 17, start_addr: 48'h10500000, end_addr: 48'h10600000 },
-  '{ idx: 17, start_addr: 48'h10700000, end_addr: 48'h10800000 },
-  '{ idx: 17, start_addr: 48'h10900000, end_addr: 48'h10a00000 },
-  '{ idx: 17, start_addr: 48'h10b00000, end_addr: 48'h10c00000 },
-  '{ idx: 17, start_addr: 48'h10d00000, end_addr: 48'h10e00000 },
-  '{ idx: 17, start_addr: 48'h10f00000, end_addr: 48'h11000000 },
   '{ idx: 17, start_addr: 48'h70000000, end_addr: 48'h70020000 },
   '{ idx: 18, start_addr: 48'h20000000, end_addr: 48'h70000000 },
-  '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantClusterSpace },
-  '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantClusterSpace },
-  '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantClusterSpace },
-  '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantClusterSpace },
-  '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantClusterSpace },
-  '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantClusterSpace },
-  '{ idx: 6, start_addr: s1_quadrant_base_addr[6], end_addr: s1_quadrant_base_addr[6] + S1QuadrantClusterSpace },
-  '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantClusterSpace }
+  '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
+  '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
+  '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
+  '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantAddressSpace },
+  '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantAddressSpace },
+  '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantAddressSpace },
+  '{ idx: 6, start_addr: s1_quadrant_base_addr[6], end_addr: s1_quadrant_base_addr[6] + S1QuadrantAddressSpace },
+  '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
 };
 
   soc_wide_xbar_in_req_t   [18:0] soc_wide_xbar_in_req;
@@ -203,21 +203,30 @@ module occamy_soc
   );
 
   /// Address map of the `soc_narrow_xbar` crossbar.
-  xbar_rule_48_t [12:0] SocNarrowXbarAddrmap;
+  xbar_rule_48_t [21:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
   '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70020000 },
   '{ idx: 10, start_addr: 48'h20000000, end_addr: 48'h70000000 },
   '{ idx: 10, start_addr: 48'h80000000, end_addr: 48'h20000000000 },
-  '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h10000000 },
+  '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h0a010000 },
+  '{ idx: 11, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
   '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
+  '{ idx: 0, start_addr: s1_quadrant_cfg_base_addr[0], end_addr: s1_quadrant_cfg_base_addr[0] + S1QuadrantCfgAddressSpace },
   '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
+  '{ idx: 1, start_addr: s1_quadrant_cfg_base_addr[1], end_addr: s1_quadrant_cfg_base_addr[1] + S1QuadrantCfgAddressSpace },
   '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
+  '{ idx: 2, start_addr: s1_quadrant_cfg_base_addr[2], end_addr: s1_quadrant_cfg_base_addr[2] + S1QuadrantCfgAddressSpace },
   '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantAddressSpace },
+  '{ idx: 3, start_addr: s1_quadrant_cfg_base_addr[3], end_addr: s1_quadrant_cfg_base_addr[3] + S1QuadrantCfgAddressSpace },
   '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantAddressSpace },
+  '{ idx: 4, start_addr: s1_quadrant_cfg_base_addr[4], end_addr: s1_quadrant_cfg_base_addr[4] + S1QuadrantCfgAddressSpace },
   '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantAddressSpace },
+  '{ idx: 5, start_addr: s1_quadrant_cfg_base_addr[5], end_addr: s1_quadrant_cfg_base_addr[5] + S1QuadrantCfgAddressSpace },
   '{ idx: 6, start_addr: s1_quadrant_base_addr[6], end_addr: s1_quadrant_base_addr[6] + S1QuadrantAddressSpace },
-  '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace }
+  '{ idx: 6, start_addr: s1_quadrant_cfg_base_addr[6], end_addr: s1_quadrant_cfg_base_addr[6] + S1QuadrantCfgAddressSpace },
+  '{ idx: 7, start_addr: s1_quadrant_base_addr[7], end_addr: s1_quadrant_base_addr[7] + S1QuadrantAddressSpace },
+  '{ idx: 7, start_addr: s1_quadrant_cfg_base_addr[7], end_addr: s1_quadrant_cfg_base_addr[7] + S1QuadrantCfgAddressSpace }
 };
 
   soc_narrow_xbar_in_req_t   [10:0] soc_narrow_xbar_in_req;

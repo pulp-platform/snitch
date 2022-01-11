@@ -1213,6 +1213,7 @@ class AxiXbar(Xbar):
         self.fall_through = fall_through
         self.no_loopback = no_loopback
         self.symbolic_addrmap = list()
+        self.symbolic_addrmap_multi = list()
         self.atop_support = atop_support
         self.addrmap = list()
         self.connections = dict()
@@ -1235,13 +1236,19 @@ class AxiXbar(Xbar):
         self.symbolic_addrmap.append((idx, base, length))
         self.outputs.append(name)
 
+    def add_output_symbolic_multi(self, name, entries):
+        idx = len(self.outputs)
+        self.symbolic_addrmap_multi.append((idx, entries))
+        self.outputs.append(name)
+
     def add_output_entry(self, name, entry):
         self.add_output(name,
                         [(r.lo, r.hi)
                          for r in self.node.get_routes() if r.port == entry])
 
     def addr_map_len(self):
-        return len(self.addrmap) + len(self.symbolic_addrmap)
+        return len(self.addrmap) + len(self.symbolic_addrmap) + sum(
+            len(am) for am in self.symbolic_addrmap_multi)
 
     def iw_out(self):
         return self.iw + int(math.ceil(math.log2(max(1, len(self.inputs)))))
@@ -1312,21 +1319,21 @@ class AxiXbar(Xbar):
             self.aw,
             self.addr_map_len() - 1, addrmap_name)
         addrmap += "assign {} = '{{\n".format(addrmap_name)
+        addrmap_lines = []
         for i in range(len(self.addrmap)):
-            addrmap += "  '{{ idx: {}, start_addr: {aw}'h{:08x}, end_addr: {aw}'h{:08x} }}".format(
-                *self.addrmap[i], aw=self.aw)
-            if i != len(self.addrmap) - 1 or len(self.symbolic_addrmap) > 0:
-                addrmap += ",\n"
-            else:
-                addrmap += "\n"
+            addrmap_lines.append(
+                "  '{{ idx: {}, start_addr: {aw}'h{:08x}, end_addr: {aw}'h{:08x} }}".format(
+                *self.addrmap[i], aw=self.aw))
         for i, (idx, base, length) in enumerate(self.symbolic_addrmap):
-            addrmap += "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
-                idx, base, base, length, i=i)
-            if i != len(self.symbolic_addrmap) - 1:
-                addrmap += ",\n"
-            else:
-                addrmap += "\n"
-        addrmap += "};\n"
+            addrmap_lines.append(
+                "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
+                idx, base, base, length, i=i))
+        for i, (idx, entries) in enumerate(self.symbolic_addrmap_multi):
+            for base, length in entries:
+                addrmap_lines.append(
+                    "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
+                    idx, base, base, length, i=i))
+        addrmap += "{}\n}};\n".format(',\n'.join(addrmap_lines))
 
         code_module[self.context] += "\n" + addrmap
 

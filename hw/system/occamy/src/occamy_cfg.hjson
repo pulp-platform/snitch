@@ -35,6 +35,8 @@
         max_mst_trans: 4,
         fall_through: false,
       },
+      cfg_base_addr: 184549376, // 0x0b000000
+      cfg_base_offset: 65536 // 0x10000
     },
     cluster: {
         name: "occamy_cluster"

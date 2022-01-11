@@ -84,6 +84,16 @@
                     "type": "integer",
                     "description": "ID width of incoming slave ports.",
                     "default": 4
+                },
+                "cfg_base_addr": {
+                    "type": "number",
+                    "description": "Base address of the quadrant configuration region.",
+                    "default": 184549376
+                },
+                "cfg_base_offset": {
+                    "type": "number",
+                    "description": "Allocated size and offset of each quadrant configuration.",
+                    "default": 65536
                 }
             }
         },

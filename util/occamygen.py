@@ -337,10 +337,10 @@ def main():
     cluster_periph_size = cluster_tcdm_size
 
     quadrants_base_addr = occamy.cfg["cluster"]["cluster_base_addr"]
-    quadrant_cluster_size = cluster_size * nr_s1_clusters
+    quadrant_size = cluster_size * nr_s1_clusters
 
     for i in range(nr_s1_quadrants):
-        cluster_base_addr = quadrants_base_addr + 2 * i * quadrant_cluster_size
+        cluster_base_addr = quadrants_base_addr + i * quadrant_size
 
         am_clusters = list()
         for j in range(nr_s1_clusters):
@@ -374,8 +374,8 @@ def main():
 
         am.new_leaf(
                 "quadrant_{}_internal".format(i),
-                quadrant_cluster_size,
-                cluster_base_addr + quadrant_cluster_size
+                occamy.cfg["s1_quadrant"]["cfg_base_offset"],
+                occamy.cfg["s1_quadrant"]["cfg_base_addr"] + i * occamy.cfg["s1_quadrant"]["cfg_base_offset"]
             ).attach_to(
                 am_narrow_xbar_quadrant_s1[i]
             ).attach_to(
@@ -470,11 +470,9 @@ def main():
         node=am_soc_wide_xbar)
 
     for i in range(nr_s1_quadrants):
-        # Only clusters, but not internal space is accessible on the wide Xbar.
-        # This prevent gating-related issues (the narrow quadrant ports are never gated).
         soc_wide_xbar.add_output_symbolic("s1_quadrant_{}".format(i),
                                           "s1_quadrant_base_addr",
-                                          "S1QuadrantClusterSpace")
+                                          "S1QuadrantAddressSpace")
         soc_wide_xbar.add_input("s1_quadrant_{}".format(i))
 
     for i in range(8):
@@ -509,9 +507,11 @@ def main():
         node=am_soc_narrow_xbar)
 
     for i in range(nr_s1_quadrants):
-        soc_narrow_xbar.add_output_symbolic("s1_quadrant_{}".format(i),
-                                            "s1_quadrant_base_addr",
-                                            "S1QuadrantAddressSpace")
+        soc_narrow_xbar.add_output_symbolic_multi("s1_quadrant_{}".format(i),
+                                                  [("s1_quadrant_base_addr",
+                                                    "S1QuadrantAddressSpace"),
+                                                   ("s1_quadrant_cfg_base_addr",
+                                                    "S1QuadrantCfgAddressSpace")])
         soc_narrow_xbar.add_input("s1_quadrant_{}".format(i))
 
     soc_narrow_xbar.add_input("cva6")
@@ -552,22 +552,22 @@ def main():
         quadrant_s1_ctrl_xbars[name].add_output("out", [])
         quadrant_s1_ctrl_xbars[name].add_input("in")
         quadrant_s1_ctrl_xbars[name].add_output_symbolic("internal",
-                                                  "internal_xbar_base_addr",
-                                                  "S1QuadrantClusterSpace")
+                                                         "internal_xbar_base_addr",
+                                                         "S1QuadrantCfgAddressSpace")
 
     # AXI Lite mux to combine register requests
     quadrant_s1_ctrl_mux = solder.AxiLiteXbar(
-    48,
-    32,
-    name="quadrant_s1_ctrl_mux",
-    clk="clk_i",
-    rst="rst_ni",
-    max_slv_trans=occamy.cfg["narrow_xbar"]["max_slv_trans"],
-    max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
-    fall_through=False,
-    context="quadrant_s1_ctrl")
+        48,
+        32,
+        name="quadrant_s1_ctrl_mux",
+        clk="clk_i",
+        rst="rst_ni",
+        max_slv_trans=occamy.cfg["narrow_xbar"]["max_slv_trans"],
+        max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
+        fall_through=False,
+        context="quadrant_s1_ctrl")
 
-    quadrant_s1_ctrl_mux.add_output("out", [(0, (1<<48)-1)])
+    quadrant_s1_ctrl_mux.add_output("out", [(0, (1 << 48) - 1)])
     quadrant_s1_ctrl_mux.add_input("soc")
     quadrant_s1_ctrl_mux.add_input("quad")
 

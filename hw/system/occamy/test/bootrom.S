@@ -19,7 +19,8 @@ _snitch_init:
 
 _cva6_init:
     # Reset, ungate, deisolate each quadrant
-    la      t0, __quad_count
+    la      t0, __soc_ctrl_nr_quads
+    lw      t0, 0(t0)
     la      t1, __quad_int_base
     la      t2, __quad_stride
     li      t3, 1
@@ -34,9 +35,6 @@ _cva6_init:
     sw      zero, 8(t1)
     # Move onto next quadrant
     add     t1, t1, t2
-
-    fence
-
     bnez    t0, 1b
 
     # Set trap vector

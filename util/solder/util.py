@@ -54,3 +54,7 @@ def camelize(s):
 
 def clog2(x):
     return x.bit_length() - 1
+
+
+def to_sv_hex(x, length=None):
+    return "{}'h{}".format(length or "", '{:_x}'.format(x))
