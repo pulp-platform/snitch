@@ -4464,14 +4464,14 @@ impl<'a> InstructionTranslator<'a> {
                 let (c1, c0) = self.read_freg_vf64s(data.rd);
                 let res0 = LLVMBuildFSub(
                     self.builder,
-                    LLVMBuildFMul(self.builder, a0, b0, name),
                     c0,
+                    LLVMBuildFMul(self.builder, a0, b0, name),
                     name,
                 );
                 let res1 = LLVMBuildFSub(
                     self.builder,
-                    LLVMBuildFMul(self.builder, a1, b1, name),
                     c1,
+                    LLVMBuildFMul(self.builder, a1, b1, name),
                     name,
                 );
                 self.write_freg_vf64s(data.rd, res1, res0);
@@ -4483,14 +4483,14 @@ impl<'a> InstructionTranslator<'a> {
                 let (c1, c0) = self.read_freg_vf64s(data.rd);
                 let res0 = LLVMBuildFSub(
                     self.builder,
-                    LLVMBuildFMul(self.builder, a0, b0, name),
                     c0,
+                    LLVMBuildFMul(self.builder, a0, b0, name),
                     name,
                 );
                 let res1 = LLVMBuildFSub(
                     self.builder,
-                    LLVMBuildFMul(self.builder, a1, b0, name),
                     c1,
+                    LLVMBuildFMul(self.builder, a1, b0, name),
                     name,
                 );
                 self.write_freg_vf64s(data.rd, res1, res0);
