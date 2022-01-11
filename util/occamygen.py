@@ -337,10 +337,10 @@ def main():
     cluster_periph_size = cluster_tcdm_size
 
     quadrants_base_addr = occamy.cfg["cluster"]["cluster_base_addr"]
-    quadrant_size = cluster_size * nr_s1_clusters
+    quadrant_cluster_size = cluster_size * nr_s1_clusters
 
     for i in range(nr_s1_quadrants):
-        cluster_base_addr = quadrants_base_addr + 2 * i * quadrant_size
+        cluster_base_addr = quadrants_base_addr + 2 * i * quadrant_cluster_size
 
         am_clusters = list()
         for j in range(nr_s1_clusters):
@@ -374,8 +374,8 @@ def main():
 
         am.new_leaf(
                 "quadrant_{}_internal".format(i),
-                cluster_tcdm_size,
-                cluster_base_addr + nr_s1_clusters * cluster_size + cluster_tcdm_size
+                quadrant_cluster_size,
+                cluster_base_addr + quadrant_cluster_size
             ).attach_to(
                 am_narrow_xbar_quadrant_s1[i]
             ).attach_to(
