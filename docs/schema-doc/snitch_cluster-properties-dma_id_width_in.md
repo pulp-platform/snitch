@@ -13,3 +13,11 @@ Id width of the wide AXI plug into the cluster.
 ## dma_id_width_in Type
 
 `number`
+
+## dma_id_width_in Default Value
+
+The default value is:
+
+```json
+1
+```

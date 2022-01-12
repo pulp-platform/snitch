@@ -258,6 +258,14 @@ Id width of the wide AXI plug into the cluster.
 
 `number`
 
+### dma_id_width_in Default Value
+
+The default value is:
+
+```json
+1
+```
+
 ## hart_base_id
 
 Base hart id of the cluster. All cores get the respective cluster id plus their cluster position as the final `hart_id`.
