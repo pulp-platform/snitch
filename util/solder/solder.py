@@ -1323,16 +1323,16 @@ class AxiXbar(Xbar):
         for i in range(len(self.addrmap)):
             addrmap_lines.append(
                 "  '{{ idx: {}, start_addr: {aw}'h{:08x}, end_addr: {aw}'h{:08x} }}".format(
-                *self.addrmap[i], aw=self.aw))
+                    *self.addrmap[i], aw=self.aw))
         for i, (idx, base, length) in enumerate(self.symbolic_addrmap):
             addrmap_lines.append(
                 "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
-                idx, base, base, length, i=i))
+                    idx, base, base, length, i=i))
         for i, (idx, entries) in enumerate(self.symbolic_addrmap_multi):
             for base, length in entries:
                 addrmap_lines.append(
                     "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
-                    idx, base, base, length, i=i))
+                        idx, base, base, length, i=i))
         addrmap += "{}\n}};\n".format(',\n'.join(addrmap_lines))
 
         code_module[self.context] += "\n" + addrmap
