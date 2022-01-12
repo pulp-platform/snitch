@@ -10,13 +10,13 @@ Disassembly of section .text:
 
 0000000001000008 <_snitch_init>:
  1000008:	00000317          	auipc	t1,0x0
- 100000c:	07030313          	addi	t1,t1,112 # 1000078 <exception>
+ 100000c:	08030313          	addi	t1,t1,128 # 1000088 <exception>
  1000010:	30531073          	csrw	mtvec,t1
  1000014:	f1402573          	csrr	a0,mhartid
  1000018:	00000597          	auipc	a1,0x0
- 100001c:	6c858593          	addi	a1,a1,1736 # 10006e0 <boot_data>
+ 100001c:	6d858593          	addi	a1,a1,1752 # 10006f0 <boot_data>
  1000020:	00000397          	auipc	t2,0x0
- 1000024:	6bc3a383          	lw	t2,1724(t2) # 10006dc <entry_addr>
+ 1000024:	6cc3a383          	lw	t2,1740(t2) # 10006ec <entry_addr>
  1000028:	000380e7          	jalr	t2
 
 000000000100002c <_cva6_init>:
@@ -30,771 +30,775 @@ Disassembly of section .text:
  1000048:	00100e13          	li	t3,1
  100004c:	fff28293          	addi	t0,t0,-1
  1000050:	00032223          	sw	zero,4(t1)
- 1000054:	01c32023          	sw	t3,0(t1)
- 1000058:	01c32223          	sw	t3,4(t1)
- 100005c:	00032423          	sw	zero,8(t1)
- 1000060:	00730333          	add	t1,t1,t2
- 1000064:	fe0294e3          	bnez	t0,100004c <_cva6_init+0x20>
- 1000068:	00000397          	auipc	t2,0x0
- 100006c:	01038393          	addi	t2,t2,16 # 1000078 <exception>
- 1000070:	30539073          	csrw	mtvec,t2
- 1000074:	0040006f          	j	1000078 <exception>
+ 1000054:	0ff0000f          	fence
+ 1000058:	01c32023          	sw	t3,0(t1)
+ 100005c:	0ff0000f          	fence
+ 1000060:	01c32223          	sw	t3,4(t1)
+ 1000064:	0ff0000f          	fence
+ 1000068:	00032423          	sw	zero,8(t1)
+ 100006c:	0ff0000f          	fence
+ 1000070:	00730333          	add	t1,t1,t2
+ 1000074:	fc029ce3          	bnez	t0,100004c <_cva6_init+0x20>
+ 1000078:	00000397          	auipc	t2,0x0
+ 100007c:	01038393          	addi	t2,t2,16 # 1000088 <exception>
+ 1000080:	30539073          	csrw	mtvec,t2
+ 1000084:	0040006f          	j	1000088 <exception>
 
-0000000001000078 <exception>:
- 1000078:	10500073          	wfi
- 100007c:	ffdff06f          	j	1000078 <exception>
+0000000001000088 <exception>:
+ 1000088:	10500073          	wfi
+ 100008c:	ffdff06f          	j	1000088 <exception>
 
-0000000001000080 <device_tree>:
- 1000080:	0dd0                	addi	a2,sp,724
- 1000082:	edfe                	sd	t6,216(sp)
- 1000084:	0000                	unimp
- 1000086:	5606                	lw	a2,96(sp)
- 1000088:	0000                	unimp
- 100008a:	3800                	fld	fs0,48(s0)
- 100008c:	0000                	unimp
- 100008e:	2c05                	addiw	s8,s8,1
- 1000090:	0000                	unimp
- 1000092:	2800                	fld	fs0,16(s0)
+0000000001000090 <device_tree>:
+ 1000090:	0dd0                	addi	a2,sp,724
+ 1000092:	edfe                	sd	t6,216(sp)
  1000094:	0000                	unimp
- 1000096:	1100                	addi	s0,sp,160
+ 1000096:	5606                	lw	a2,96(sp)
  1000098:	0000                	unimp
- 100009a:	1000                	addi	s0,sp,32
+ 100009a:	3800                	fld	fs0,48(s0)
  100009c:	0000                	unimp
- 100009e:	0000                	unimp
+ 100009e:	2c05                	addiw	s8,s8,1
  10000a0:	0000                	unimp
- 10000a2:	2a01                	sext.w	s4,s4
+ 10000a2:	2800                	fld	fs0,16(s0)
  10000a4:	0000                	unimp
- 10000a6:	f404                	sd	s1,40(s0)
+ 10000a6:	1100                	addi	s0,sp,160
+ 10000a8:	0000                	unimp
+ 10000aa:	1000                	addi	s0,sp,32
+ 10000ac:	0000                	unimp
+ 10000ae:	0000                	unimp
+ 10000b0:	0000                	unimp
+ 10000b2:	2a01                	sext.w	s4,s4
+ 10000b4:	0000                	unimp
+ 10000b6:	f404                	sd	s1,40(s0)
 	...
- 10000b8:	0000                	unimp
- 10000ba:	0100                	addi	s0,sp,128
- 10000bc:	0000                	unimp
- 10000be:	0000                	unimp
- 10000c0:	0000                	unimp
- 10000c2:	0300                	addi	s0,sp,384
- 10000c4:	0000                	unimp
- 10000c6:	0400                	addi	s0,sp,512
  10000c8:	0000                	unimp
- 10000ca:	0000                	unimp
+ 10000ca:	0100                	addi	s0,sp,128
  10000cc:	0000                	unimp
- 10000ce:	0200                	addi	s0,sp,256
+ 10000ce:	0000                	unimp
  10000d0:	0000                	unimp
  10000d2:	0300                	addi	s0,sp,384
  10000d4:	0000                	unimp
  10000d6:	0400                	addi	s0,sp,512
  10000d8:	0000                	unimp
- 10000da:	0f00                	addi	s0,sp,912
+ 10000da:	0000                	unimp
  10000dc:	0000                	unimp
  10000de:	0200                	addi	s0,sp,256
  10000e0:	0000                	unimp
  10000e2:	0300                	addi	s0,sp,384
  10000e4:	0000                	unimp
- 10000e6:	0f00                	addi	s0,sp,912
+ 10000e6:	0400                	addi	s0,sp,512
  10000e8:	0000                	unimp
- 10000ea:	1b00                	addi	s0,sp,432
- 10000ec:	7465                	lui	s0,0xffff9
- 10000ee:	2c68                	fld	fa0,216(s0)
- 10000f0:	6163636f          	jal	t1,1036706 <boot_data+0x36026>
- 10000f4:	796d                	lui	s2,0xffffb
- 10000f6:	642d                	lui	s0,0xb
- 10000f8:	7665                	lui	a2,0xffff9
- 10000fa:	0000                	unimp
- 10000fc:	0000                	unimp
- 10000fe:	0300                	addi	s0,sp,384
- 1000100:	0000                	unimp
- 1000102:	0b00                	addi	s0,sp,400
- 1000104:	0000                	unimp
- 1000106:	2600                	fld	fs0,8(a2)
- 1000108:	7465                	lui	s0,0xffff9
- 100010a:	2c68                	fld	fa0,216(s0)
- 100010c:	6163636f          	jal	t1,1036722 <boot_data+0x36042>
- 1000110:	796d                	lui	s2,0xffffb
- 1000112:	0000                	unimp
+ 10000ea:	0f00                	addi	s0,sp,912
+ 10000ec:	0000                	unimp
+ 10000ee:	0200                	addi	s0,sp,256
+ 10000f0:	0000                	unimp
+ 10000f2:	0300                	addi	s0,sp,384
+ 10000f4:	0000                	unimp
+ 10000f6:	0f00                	addi	s0,sp,912
+ 10000f8:	0000                	unimp
+ 10000fa:	1b00                	addi	s0,sp,432
+ 10000fc:	7465                	lui	s0,0xffff9
+ 10000fe:	2c68                	fld	fa0,216(s0)
+ 1000100:	6163636f          	jal	t1,1036716 <boot_data+0x36026>
+ 1000104:	796d                	lui	s2,0xffffb
+ 1000106:	642d                	lui	s0,0xb
+ 1000108:	7665                	lui	a2,0xffff9
+ 100010a:	0000                	unimp
+ 100010c:	0000                	unimp
+ 100010e:	0300                	addi	s0,sp,384
+ 1000110:	0000                	unimp
+ 1000112:	0b00                	addi	s0,sp,400
  1000114:	0000                	unimp
- 1000116:	0100                	addi	s0,sp,128
- 1000118:	736f6863          	bltu	t5,s6,1000848 <boot_data+0x168>
- 100011c:	6e65                	lui	t3,0x19
- 100011e:	0000                	unimp
- 1000120:	0000                	unimp
- 1000122:	0300                	addi	s0,sp,384
+ 1000116:	2600                	fld	fs0,8(a2)
+ 1000118:	7465                	lui	s0,0xffff9
+ 100011a:	2c68                	fld	fa0,216(s0)
+ 100011c:	6163636f          	jal	t1,1036732 <boot_data+0x36042>
+ 1000120:	796d                	lui	s2,0xffffb
+ 1000122:	0000                	unimp
  1000124:	0000                	unimp
- 1000126:	0600                	addi	s0,sp,768
- 1000128:	0000                	unimp
- 100012a:	2c00                	fld	fs0,24(s0)
- 100012c:	6974682f          	0x6974682f
- 1000130:	0066                	c.slli	zero,0x19
- 1000132:	0000                	unimp
+ 1000126:	0100                	addi	s0,sp,128
+ 1000128:	736f6863          	bltu	t5,s6,1000858 <boot_data+0x168>
+ 100012c:	6e65                	lui	t3,0x19
+ 100012e:	0000                	unimp
+ 1000130:	0000                	unimp
+ 1000132:	0300                	addi	s0,sp,384
  1000134:	0000                	unimp
- 1000136:	0200                	addi	s0,sp,256
+ 1000136:	0600                	addi	s0,sp,768
  1000138:	0000                	unimp
- 100013a:	0100                	addi	s0,sp,128
- 100013c:	656d                	lui	a0,0x1b
- 100013e:	6f6d                	lui	t5,0x1b
- 1000140:	7972                	ld	s2,312(sp)
- 1000142:	3840                	fld	fs0,176(s0)
- 1000144:	3030                	fld	fa2,96(s0)
- 1000146:	3030                	fld	fa2,96(s0)
- 1000148:	3030                	fld	fa2,96(s0)
- 100014a:	0030                	addi	a2,sp,8
- 100014c:	0000                	unimp
- 100014e:	0300                	addi	s0,sp,384
- 1000150:	0000                	unimp
- 1000152:	0700                	addi	s0,sp,896
- 1000154:	0000                	unimp
- 1000156:	3800                	fld	fs0,48(s0)
- 1000158:	656d                	lui	a0,0x1b
- 100015a:	6f6d                	lui	t5,0x1b
- 100015c:	7972                	ld	s2,312(sp)
- 100015e:	0000                	unimp
+ 100013a:	2c00                	fld	fs0,24(s0)
+ 100013c:	6974682f          	0x6974682f
+ 1000140:	0066                	c.slli	zero,0x19
+ 1000142:	0000                	unimp
+ 1000144:	0000                	unimp
+ 1000146:	0200                	addi	s0,sp,256
+ 1000148:	0000                	unimp
+ 100014a:	0100                	addi	s0,sp,128
+ 100014c:	656d                	lui	a0,0x1b
+ 100014e:	6f6d                	lui	t5,0x1b
+ 1000150:	7972                	ld	s2,312(sp)
+ 1000152:	3840                	fld	fs0,176(s0)
+ 1000154:	3030                	fld	fa2,96(s0)
+ 1000156:	3030                	fld	fa2,96(s0)
+ 1000158:	3030                	fld	fa2,96(s0)
+ 100015a:	0030                	addi	a2,sp,8
+ 100015c:	0000                	unimp
+ 100015e:	0300                	addi	s0,sp,384
  1000160:	0000                	unimp
- 1000162:	0300                	addi	s0,sp,384
+ 1000162:	0700                	addi	s0,sp,896
  1000164:	0000                	unimp
- 1000166:	1000                	addi	s0,sp,32
- 1000168:	0000                	unimp
- 100016a:	4400                	lw	s0,8(s0)
- 100016c:	0000                	unimp
+ 1000166:	3800                	fld	fs0,48(s0)
+ 1000168:	656d                	lui	a0,0x1b
+ 100016a:	6f6d                	lui	t5,0x1b
+ 100016c:	7972                	ld	s2,312(sp)
  100016e:	0000                	unimp
- 1000170:	0080                	addi	s0,sp,64
- 1000172:	0000                	unimp
+ 1000170:	0000                	unimp
+ 1000172:	0300                	addi	s0,sp,384
  1000174:	0000                	unimp
- 1000176:	0000                	unimp
- 1000178:	0040                	addi	s0,sp,4
- 100017a:	0000                	unimp
+ 1000176:	1000                	addi	s0,sp,32
+ 1000178:	0000                	unimp
+ 100017a:	4400                	lw	s0,8(s0)
  100017c:	0000                	unimp
- 100017e:	0200                	addi	s0,sp,256
- 1000180:	0000                	unimp
- 1000182:	0100                	addi	s0,sp,128
- 1000184:	73757063          	bgeu	a0,s7,10008a4 <boot_data+0x1c4>
- 1000188:	0000                	unimp
+ 100017e:	0000                	unimp
+ 1000180:	0080                	addi	s0,sp,64
+ 1000182:	0000                	unimp
+ 1000184:	0000                	unimp
+ 1000186:	0000                	unimp
+ 1000188:	0040                	addi	s0,sp,4
  100018a:	0000                	unimp
  100018c:	0000                	unimp
- 100018e:	0300                	addi	s0,sp,384
+ 100018e:	0200                	addi	s0,sp,256
  1000190:	0000                	unimp
- 1000192:	0400                	addi	s0,sp,512
- 1000194:	0000                	unimp
- 1000196:	0000                	unimp
+ 1000192:	0100                	addi	s0,sp,128
+ 1000194:	73757063          	bgeu	a0,s7,10008b4 <boot_data+0x1c4>
  1000198:	0000                	unimp
- 100019a:	0100                	addi	s0,sp,128
+ 100019a:	0000                	unimp
  100019c:	0000                	unimp
  100019e:	0300                	addi	s0,sp,384
  10001a0:	0000                	unimp
  10001a2:	0400                	addi	s0,sp,512
  10001a4:	0000                	unimp
- 10001a6:	0f00                	addi	s0,sp,912
+ 10001a6:	0000                	unimp
  10001a8:	0000                	unimp
- 10001aa:	0000                	unimp
+ 10001aa:	0100                	addi	s0,sp,128
  10001ac:	0000                	unimp
  10001ae:	0300                	addi	s0,sp,384
  10001b0:	0000                	unimp
  10001b2:	0400                	addi	s0,sp,512
  10001b4:	0000                	unimp
- 10001b6:	4800                	lw	s0,16(s0)
- 10001b8:	7d01                	lui	s10,0xfffe0
- 10001ba:	4078                	lw	a4,68(s0)
+ 10001b6:	0f00                	addi	s0,sp,912
+ 10001b8:	0000                	unimp
+ 10001ba:	0000                	unimp
  10001bc:	0000                	unimp
- 10001be:	0100                	addi	s0,sp,128
- 10001c0:	40757063          	bgeu	a0,t2,10005c0 <device_tree+0x540>
- 10001c4:	0030                	addi	a2,sp,8
- 10001c6:	0000                	unimp
- 10001c8:	0000                	unimp
- 10001ca:	0300                	addi	s0,sp,384
+ 10001be:	0300                	addi	s0,sp,384
+ 10001c0:	0000                	unimp
+ 10001c2:	0400                	addi	s0,sp,512
+ 10001c4:	0000                	unimp
+ 10001c6:	4800                	lw	s0,16(s0)
+ 10001c8:	7d01                	lui	s10,0xfffe0
+ 10001ca:	4078                	lw	a4,68(s0)
  10001cc:	0000                	unimp
- 10001ce:	0400                	addi	s0,sp,512
- 10001d0:	0000                	unimp
- 10001d2:	3800                	fld	fs0,48(s0)
- 10001d4:	00757063          	bgeu	a0,t2,10001d4 <device_tree+0x154>
+ 10001ce:	0100                	addi	s0,sp,128
+ 10001d0:	40757063          	bgeu	a0,t2,10005d0 <device_tree+0x540>
+ 10001d4:	0030                	addi	a2,sp,8
+ 10001d6:	0000                	unimp
  10001d8:	0000                	unimp
  10001da:	0300                	addi	s0,sp,384
  10001dc:	0000                	unimp
- 10001de:	0500                	addi	s0,sp,640
+ 10001de:	0400                	addi	s0,sp,512
  10001e0:	0000                	unimp
- 10001e2:	5b00                	lw	s0,48(a4)
- 10001e4:	79616b6f          	jal	s6,101697a <boot_data+0x1629a>
+ 10001e2:	3800                	fld	fs0,48(s0)
+ 10001e4:	00757063          	bgeu	a0,t2,10001e4 <device_tree+0x154>
  10001e8:	0000                	unimp
- 10001ea:	0000                	unimp
+ 10001ea:	0300                	addi	s0,sp,384
  10001ec:	0000                	unimp
- 10001ee:	0300                	addi	s0,sp,384
+ 10001ee:	0500                	addi	s0,sp,640
  10001f0:	0000                	unimp
- 10001f2:	1100                	addi	s0,sp,160
- 10001f4:	0000                	unimp
- 10001f6:	1b00                	addi	s0,sp,432
- 10001f8:	6972                	ld	s2,280(sp)
- 10001fa:	00766373          	csrrsi	t1,0x7,12
- 10001fe:	7465                	lui	s0,0xffff9
- 1000200:	2c68                	fld	fa0,216(s0)
- 1000202:	7261                	lui	tp,0xffff8
- 1000204:	6169                	addi	sp,sp,208
- 1000206:	656e                	ld	a0,216(sp)
- 1000208:	0000                	unimp
- 100020a:	0000                	unimp
- 100020c:	0000                	unimp
- 100020e:	0300                	addi	s0,sp,384
- 1000210:	0000                	unimp
- 1000212:	0400                	addi	s0,sp,512
- 1000214:	0000                	unimp
- 1000216:	6200                	ld	s0,0(a2)
- 1000218:	fa02                	sd	zero,304(sp)
- 100021a:	80f0                	0x80f0
+ 10001f2:	5b00                	lw	s0,48(a4)
+ 10001f4:	79616b6f          	jal	s6,101698a <boot_data+0x1629a>
+ 10001f8:	0000                	unimp
+ 10001fa:	0000                	unimp
+ 10001fc:	0000                	unimp
+ 10001fe:	0300                	addi	s0,sp,384
+ 1000200:	0000                	unimp
+ 1000202:	1100                	addi	s0,sp,160
+ 1000204:	0000                	unimp
+ 1000206:	1b00                	addi	s0,sp,432
+ 1000208:	6972                	ld	s2,280(sp)
+ 100020a:	00766373          	csrrsi	t1,0x7,12
+ 100020e:	7465                	lui	s0,0xffff9
+ 1000210:	2c68                	fld	fa0,216(s0)
+ 1000212:	7261                	lui	tp,0xffff8
+ 1000214:	6169                	addi	sp,sp,208
+ 1000216:	656e                	ld	a0,216(sp)
+ 1000218:	0000                	unimp
+ 100021a:	0000                	unimp
  100021c:	0000                	unimp
  100021e:	0300                	addi	s0,sp,384
  1000220:	0000                	unimp
- 1000222:	0b00                	addi	s0,sp,400
+ 1000222:	0400                	addi	s0,sp,512
  1000224:	0000                	unimp
- 1000226:	7200                	ld	s0,32(a2)
- 1000228:	7672                	ld	a2,312(sp)
- 100022a:	3436                	fld	fs0,360(sp)
- 100022c:	6966                	ld	s2,88(sp)
- 100022e:	616d                	addi	sp,sp,240
- 1000230:	6466                	ld	s0,88(sp)
- 1000232:	0000                	unimp
+ 1000226:	6200                	ld	s0,0(a2)
+ 1000228:	fa02                	sd	zero,304(sp)
+ 100022a:	80f0                	0x80f0
+ 100022c:	0000                	unimp
+ 100022e:	0300                	addi	s0,sp,384
+ 1000230:	0000                	unimp
+ 1000232:	0b00                	addi	s0,sp,400
  1000234:	0000                	unimp
- 1000236:	0300                	addi	s0,sp,384
- 1000238:	0000                	unimp
- 100023a:	0b00                	addi	s0,sp,400
- 100023c:	0000                	unimp
- 100023e:	7c00                	ld	s0,56(s0)
- 1000240:	6972                	ld	s2,280(sp)
- 1000242:	2c766373          	csrrsi	t1,0x2c7,12
- 1000246:	39337673          	csrrci	a2,0x393,6
- 100024a:	0000                	unimp
+ 1000236:	7200                	ld	s0,32(a2)
+ 1000238:	7672                	ld	a2,312(sp)
+ 100023a:	3436                	fld	fs0,360(sp)
+ 100023c:	6966                	ld	s2,88(sp)
+ 100023e:	616d                	addi	sp,sp,240
+ 1000240:	6466                	ld	s0,88(sp)
+ 1000242:	0000                	unimp
+ 1000244:	0000                	unimp
+ 1000246:	0300                	addi	s0,sp,384
+ 1000248:	0000                	unimp
+ 100024a:	0b00                	addi	s0,sp,400
  100024c:	0000                	unimp
- 100024e:	0300                	addi	s0,sp,384
- 1000250:	0000                	unimp
- 1000252:	0000                	unimp
- 1000254:	0000                	unimp
- 1000256:	8500                	0x8500
- 1000258:	0000                	unimp
- 100025a:	0300                	addi	s0,sp,384
+ 100024e:	7c00                	ld	s0,56(s0)
+ 1000250:	6972                	ld	s2,280(sp)
+ 1000252:	2c766373          	csrrsi	t1,0x2c7,12
+ 1000256:	39337673          	csrrci	a2,0x393,6
+ 100025a:	0000                	unimp
  100025c:	0000                	unimp
- 100025e:	0400                	addi	s0,sp,512
+ 100025e:	0300                	addi	s0,sp,384
  1000260:	0000                	unimp
- 1000262:	4400                	lw	s0,8(s0)
+ 1000262:	0000                	unimp
  1000264:	0000                	unimp
- 1000266:	0000                	unimp
+ 1000266:	8500                	0x8500
  1000268:	0000                	unimp
- 100026a:	0100                	addi	s0,sp,128
- 100026c:	6e69                	lui	t3,0x1a
- 100026e:	6574                	ld	a3,200(a0)
- 1000270:	7272                	ld	tp,312(sp)
- 1000272:	7075                	c.lui	zero,0xffffd
- 1000274:	2d74                	fld	fa3,216(a0)
- 1000276:	746e6f63          	bltu	t3,t1,10009d4 <boot_data+0x2f4>
- 100027a:	6f72                	ld	t5,280(sp)
- 100027c:	6c6c                	ld	a1,216(s0)
- 100027e:	7265                	lui	tp,0xffff9
- 1000280:	0000                	unimp
- 1000282:	0000                	unimp
- 1000284:	0000                	unimp
- 1000286:	0300                	addi	s0,sp,384
- 1000288:	0000                	unimp
- 100028a:	0400                	addi	s0,sp,512
- 100028c:	0000                	unimp
- 100028e:	8f00                	0x8f00
+ 100026a:	0300                	addi	s0,sp,384
+ 100026c:	0000                	unimp
+ 100026e:	0400                	addi	s0,sp,512
+ 1000270:	0000                	unimp
+ 1000272:	4400                	lw	s0,8(s0)
+ 1000274:	0000                	unimp
+ 1000276:	0000                	unimp
+ 1000278:	0000                	unimp
+ 100027a:	0100                	addi	s0,sp,128
+ 100027c:	6e69                	lui	t3,0x1a
+ 100027e:	6574                	ld	a3,200(a0)
+ 1000280:	7272                	ld	tp,312(sp)
+ 1000282:	7075                	c.lui	zero,0xffffd
+ 1000284:	2d74                	fld	fa3,216(a0)
+ 1000286:	746e6f63          	bltu	t3,t1,10009e4 <boot_data+0x2f4>
+ 100028a:	6f72                	ld	t5,280(sp)
+ 100028c:	6c6c                	ld	a1,216(s0)
+ 100028e:	7265                	lui	tp,0xffff9
  1000290:	0000                	unimp
- 1000292:	0100                	addi	s0,sp,128
+ 1000292:	0000                	unimp
  1000294:	0000                	unimp
  1000296:	0300                	addi	s0,sp,384
  1000298:	0000                	unimp
- 100029a:	0000                	unimp
+ 100029a:	0400                	addi	s0,sp,512
  100029c:	0000                	unimp
- 100029e:	a000                	fsd	fs0,0(s0)
+ 100029e:	8f00                	0x8f00
  10002a0:	0000                	unimp
- 10002a2:	0300                	addi	s0,sp,384
+ 10002a2:	0100                	addi	s0,sp,128
  10002a4:	0000                	unimp
- 10002a6:	0f00                	addi	s0,sp,912
+ 10002a6:	0300                	addi	s0,sp,384
  10002a8:	0000                	unimp
- 10002aa:	1b00                	addi	s0,sp,432
- 10002ac:	6972                	ld	s2,280(sp)
- 10002ae:	2c766373          	csrrsi	t1,0x2c7,12
- 10002b2:	2d757063          	bgeu	a0,s7,1000572 <device_tree+0x4f2>
- 10002b6:	6e69                	lui	t3,0x1a
- 10002b8:	6374                	ld	a3,192(a4)
- 10002ba:	0000                	unimp
- 10002bc:	0000                	unimp
- 10002be:	0300                	addi	s0,sp,384
- 10002c0:	0000                	unimp
- 10002c2:	0400                	addi	s0,sp,512
- 10002c4:	0000                	unimp
- 10002c6:	b500                	fsd	fs0,40(a0)
- 10002c8:	0000                	unimp
- 10002ca:	0100                	addi	s0,sp,128
+ 10002aa:	0000                	unimp
+ 10002ac:	0000                	unimp
+ 10002ae:	a000                	fsd	fs0,0(s0)
+ 10002b0:	0000                	unimp
+ 10002b2:	0300                	addi	s0,sp,384
+ 10002b4:	0000                	unimp
+ 10002b6:	0f00                	addi	s0,sp,912
+ 10002b8:	0000                	unimp
+ 10002ba:	1b00                	addi	s0,sp,432
+ 10002bc:	6972                	ld	s2,280(sp)
+ 10002be:	2c766373          	csrrsi	t1,0x2c7,12
+ 10002c2:	2d757063          	bgeu	a0,s7,1000582 <device_tree+0x4f2>
+ 10002c6:	6e69                	lui	t3,0x1a
+ 10002c8:	6374                	ld	a3,192(a4)
+ 10002ca:	0000                	unimp
  10002cc:	0000                	unimp
- 10002ce:	0200                	addi	s0,sp,256
+ 10002ce:	0300                	addi	s0,sp,384
  10002d0:	0000                	unimp
- 10002d2:	0200                	addi	s0,sp,256
+ 10002d2:	0400                	addi	s0,sp,512
  10002d4:	0000                	unimp
- 10002d6:	0200                	addi	s0,sp,256
+ 10002d6:	b500                	fsd	fs0,40(a0)
  10002d8:	0000                	unimp
  10002da:	0100                	addi	s0,sp,128
- 10002dc:	00636f73          	csrrsi	t5,0x6,6
+ 10002dc:	0000                	unimp
+ 10002de:	0200                	addi	s0,sp,256
  10002e0:	0000                	unimp
- 10002e2:	0300                	addi	s0,sp,384
+ 10002e2:	0200                	addi	s0,sp,256
  10002e4:	0000                	unimp
- 10002e6:	0400                	addi	s0,sp,512
+ 10002e6:	0200                	addi	s0,sp,256
  10002e8:	0000                	unimp
- 10002ea:	0000                	unimp
- 10002ec:	0000                	unimp
- 10002ee:	0200                	addi	s0,sp,256
+ 10002ea:	0100                	addi	s0,sp,128
+ 10002ec:	00636f73          	csrrsi	t5,0x6,6
  10002f0:	0000                	unimp
  10002f2:	0300                	addi	s0,sp,384
  10002f4:	0000                	unimp
  10002f6:	0400                	addi	s0,sp,512
  10002f8:	0000                	unimp
- 10002fa:	0f00                	addi	s0,sp,912
+ 10002fa:	0000                	unimp
  10002fc:	0000                	unimp
  10002fe:	0200                	addi	s0,sp,256
  1000300:	0000                	unimp
  1000302:	0300                	addi	s0,sp,384
  1000304:	0000                	unimp
- 1000306:	0b00                	addi	s0,sp,400
+ 1000306:	0400                	addi	s0,sp,512
  1000308:	0000                	unimp
- 100030a:	1b00                	addi	s0,sp,432
- 100030c:	706d6973          	csrrsi	s2,0x706,26
- 1000310:	656c                	ld	a1,200(a0)
- 1000312:	622d                	lui	tp,0xb
- 1000314:	7375                	lui	t1,0xffffd
- 1000316:	0000                	unimp
+ 100030a:	0f00                	addi	s0,sp,912
+ 100030c:	0000                	unimp
+ 100030e:	0200                	addi	s0,sp,256
+ 1000310:	0000                	unimp
+ 1000312:	0300                	addi	s0,sp,384
+ 1000314:	0000                	unimp
+ 1000316:	0b00                	addi	s0,sp,400
  1000318:	0000                	unimp
- 100031a:	0300                	addi	s0,sp,384
- 100031c:	0000                	unimp
- 100031e:	0000                	unimp
- 1000320:	0000                	unimp
- 1000322:	bd00                	fsd	fs0,56(a0)
- 1000324:	0000                	unimp
- 1000326:	0100                	addi	s0,sp,128
- 1000328:	6564                	ld	s1,200(a0)
- 100032a:	7562                	ld	a0,56(sp)
- 100032c:	00304067          	0x304067
+ 100031a:	1b00                	addi	s0,sp,432
+ 100031c:	706d6973          	csrrsi	s2,0x706,26
+ 1000320:	656c                	ld	a1,200(a0)
+ 1000322:	622d                	lui	tp,0xb
+ 1000324:	7375                	lui	t1,0xffffd
+ 1000326:	0000                	unimp
+ 1000328:	0000                	unimp
+ 100032a:	0300                	addi	s0,sp,384
+ 100032c:	0000                	unimp
+ 100032e:	0000                	unimp
  1000330:	0000                	unimp
- 1000332:	0300                	addi	s0,sp,384
+ 1000332:	bd00                	fsd	fs0,56(a0)
  1000334:	0000                	unimp
- 1000336:	1000                	addi	s0,sp,32
- 1000338:	0000                	unimp
- 100033a:	1b00                	addi	s0,sp,432
- 100033c:	6972                	ld	s2,280(sp)
- 100033e:	2c766373          	csrrsi	t1,0x2c7,12
- 1000342:	6564                	ld	s1,200(a0)
- 1000344:	7562                	ld	a0,56(sp)
- 1000346:	31302d67          	0x31302d67
- 100034a:	00000033          	add	zero,zero,zero
- 100034e:	0300                	addi	s0,sp,384
- 1000350:	0000                	unimp
- 1000352:	0800                	addi	s0,sp,16
- 1000354:	0000                	unimp
- 1000356:	c400                	sw	s0,8(s0)
- 1000358:	0000                	unimp
- 100035a:	0100                	addi	s0,sp,128
- 100035c:	0000                	unimp
- 100035e:	ffff                	0xffff
+ 1000336:	0100                	addi	s0,sp,128
+ 1000338:	6564                	ld	s1,200(a0)
+ 100033a:	7562                	ld	a0,56(sp)
+ 100033c:	00304067          	0x304067
+ 1000340:	0000                	unimp
+ 1000342:	0300                	addi	s0,sp,384
+ 1000344:	0000                	unimp
+ 1000346:	1000                	addi	s0,sp,32
+ 1000348:	0000                	unimp
+ 100034a:	1b00                	addi	s0,sp,432
+ 100034c:	6972                	ld	s2,280(sp)
+ 100034e:	2c766373          	csrrsi	t1,0x2c7,12
+ 1000352:	6564                	ld	s1,200(a0)
+ 1000354:	7562                	ld	a0,56(sp)
+ 1000356:	31302d67          	0x31302d67
+ 100035a:	00000033          	add	zero,zero,zero
+ 100035e:	0300                	addi	s0,sp,384
  1000360:	0000                	unimp
- 1000362:	0300                	addi	s0,sp,384
+ 1000362:	0800                	addi	s0,sp,16
  1000364:	0000                	unimp
- 1000366:	0800                	addi	s0,sp,16
+ 1000366:	c400                	sw	s0,8(s0)
  1000368:	0000                	unimp
- 100036a:	d800                	sw	s0,48(s0)
- 100036c:	746e6f63          	bltu	t3,t1,1000aca <boot_data+0x3ea>
- 1000370:	6f72                	ld	t5,280(sp)
- 1000372:	006c                	addi	a1,sp,12
+ 100036a:	0100                	addi	s0,sp,128
+ 100036c:	0000                	unimp
+ 100036e:	ffff                	0xffff
+ 1000370:	0000                	unimp
+ 1000372:	0300                	addi	s0,sp,384
  1000374:	0000                	unimp
- 1000376:	0300                	addi	s0,sp,384
+ 1000376:	0800                	addi	s0,sp,16
  1000378:	0000                	unimp
- 100037a:	1000                	addi	s0,sp,32
- 100037c:	0000                	unimp
- 100037e:	4400                	lw	s0,8(s0)
-	...
+ 100037a:	d800                	sw	s0,48(s0)
+ 100037c:	746e6f63          	bltu	t3,t1,1000ada <boot_data+0x3ea>
+ 1000380:	6f72                	ld	t5,280(sp)
+ 1000382:	006c                	addi	a1,sp,12
+ 1000384:	0000                	unimp
+ 1000386:	0300                	addi	s0,sp,384
+ 1000388:	0000                	unimp
+ 100038a:	1000                	addi	s0,sp,32
  100038c:	0000                	unimp
- 100038e:	0010                	0x10
- 1000390:	0000                	unimp
- 1000392:	0200                	addi	s0,sp,256
- 1000394:	0000                	unimp
- 1000396:	0100                	addi	s0,sp,128
- 1000398:	69726573          	csrrsi	a0,0x697,4
- 100039c:	6c61                	lui	s8,0x18
- 100039e:	3240                	fld	fs0,160(a2)
- 10003a0:	3030                	fld	fa2,96(s0)
- 10003a2:	3032                	fld	ft0,296(sp)
- 10003a4:	3030                	fld	fa2,96(s0)
- 10003a6:	0000                	unimp
- 10003a8:	0000                	unimp
- 10003aa:	0300                	addi	s0,sp,384
- 10003ac:	0000                	unimp
- 10003ae:	0f00                	addi	s0,sp,912
- 10003b0:	0000                	unimp
- 10003b2:	1b00                	addi	s0,sp,432
- 10003b4:	6f6c                	ld	a1,216(a4)
- 10003b6:	73697277          	0x73697277
- 10003ba:	65732c63          	0x65732c63
- 10003be:	6972                	ld	s2,280(sp)
- 10003c0:	6c61                	lui	s8,0x18
- 10003c2:	0000                	unimp
- 10003c4:	0000                	unimp
- 10003c6:	0300                	addi	s0,sp,384
- 10003c8:	0000                	unimp
- 10003ca:	0400                	addi	s0,sp,512
- 10003cc:	0000                	unimp
- 10003ce:	6200                	ld	s0,0(a2)
- 10003d0:	fa02                	sd	zero,304(sp)
- 10003d2:	80f0                	0x80f0
+ 100038e:	4400                	lw	s0,8(s0)
+	...
+ 100039c:	0000                	unimp
+ 100039e:	0010                	0x10
+ 10003a0:	0000                	unimp
+ 10003a2:	0200                	addi	s0,sp,256
+ 10003a4:	0000                	unimp
+ 10003a6:	0100                	addi	s0,sp,128
+ 10003a8:	69726573          	csrrsi	a0,0x697,4
+ 10003ac:	6c61                	lui	s8,0x18
+ 10003ae:	3240                	fld	fs0,160(a2)
+ 10003b0:	3030                	fld	fa2,96(s0)
+ 10003b2:	3032                	fld	ft0,296(sp)
+ 10003b4:	3030                	fld	fa2,96(s0)
+ 10003b6:	0000                	unimp
+ 10003b8:	0000                	unimp
+ 10003ba:	0300                	addi	s0,sp,384
+ 10003bc:	0000                	unimp
+ 10003be:	0f00                	addi	s0,sp,912
+ 10003c0:	0000                	unimp
+ 10003c2:	1b00                	addi	s0,sp,432
+ 10003c4:	6f6c                	ld	a1,216(a4)
+ 10003c6:	73697277          	0x73697277
+ 10003ca:	65732c63          	0x65732c63
+ 10003ce:	6972                	ld	s2,280(sp)
+ 10003d0:	6c61                	lui	s8,0x18
+ 10003d2:	0000                	unimp
  10003d4:	0000                	unimp
  10003d6:	0300                	addi	s0,sp,384
  10003d8:	0000                	unimp
  10003da:	0400                	addi	s0,sp,512
  10003dc:	0000                	unimp
- 10003de:	e200                	sd	s0,0(a2)
- 10003e0:	0100                	addi	s0,sp,128
- 10003e2:	00c2                	slli	ra,ra,0x10
+ 10003de:	6200                	ld	s0,0(a2)
+ 10003e0:	fa02                	sd	zero,304(sp)
+ 10003e2:	80f0                	0x80f0
  10003e4:	0000                	unimp
  10003e6:	0300                	addi	s0,sp,384
  10003e8:	0000                	unimp
  10003ea:	0400                	addi	s0,sp,512
  10003ec:	0000                	unimp
- 10003ee:	f000                	sd	s0,32(s0)
- 10003f0:	0000                	unimp
- 10003f2:	0200                	addi	s0,sp,256
+ 10003ee:	e200                	sd	s0,0(a2)
+ 10003f0:	0100                	addi	s0,sp,128
+ 10003f2:	00c2                	slli	ra,ra,0x10
  10003f4:	0000                	unimp
  10003f6:	0300                	addi	s0,sp,384
  10003f8:	0000                	unimp
  10003fa:	0400                	addi	s0,sp,512
  10003fc:	0000                	unimp
- 10003fe:	0101                	addi	sp,sp,0
+ 10003fe:	f000                	sd	s0,32(s0)
  1000400:	0000                	unimp
- 1000402:	0100                	addi	s0,sp,128
+ 1000402:	0200                	addi	s0,sp,256
  1000404:	0000                	unimp
  1000406:	0300                	addi	s0,sp,384
  1000408:	0000                	unimp
- 100040a:	1000                	addi	s0,sp,32
+ 100040a:	0400                	addi	s0,sp,512
  100040c:	0000                	unimp
- 100040e:	4400                	lw	s0,8(s0)
+ 100040e:	0101                	addi	sp,sp,0
  1000410:	0000                	unimp
- 1000412:	0000                	unimp
- 1000414:	0002                	c.slli64	zero
- 1000416:	0020                	addi	s0,sp,8
+ 1000412:	0100                	addi	s0,sp,128
+ 1000414:	0000                	unimp
+ 1000416:	0300                	addi	s0,sp,384
  1000418:	0000                	unimp
- 100041a:	0000                	unimp
+ 100041a:	1000                	addi	s0,sp,32
  100041c:	0000                	unimp
- 100041e:	0010                	0x10
+ 100041e:	4400                	lw	s0,8(s0)
  1000420:	0000                	unimp
- 1000422:	0200                	addi	s0,sp,256
- 1000424:	0000                	unimp
- 1000426:	0100                	addi	s0,sp,128
- 1000428:	6e696c63          	bltu	s2,t1,1000b20 <boot_data+0x440>
- 100042c:	4074                	lw	a3,68(s0)
- 100042e:	3034                	fld	fa3,96(s0)
- 1000430:	3030                	fld	fa2,96(s0)
- 1000432:	3030                	fld	fa2,96(s0)
- 1000434:	0030                	addi	a2,sp,8
- 1000436:	0000                	unimp
- 1000438:	0000                	unimp
- 100043a:	0300                	addi	s0,sp,384
- 100043c:	0000                	unimp
- 100043e:	0d00                	addi	s0,sp,656
- 1000440:	0000                	unimp
- 1000442:	1b00                	addi	s0,sp,432
- 1000444:	6972                	ld	s2,280(sp)
- 1000446:	2c766373          	csrrsi	t1,0x2c7,12
- 100044a:	6e696c63          	bltu	s2,t1,1000b42 <boot_data+0x462>
- 100044e:	3074                	fld	fa3,224(s0)
+ 1000422:	0000                	unimp
+ 1000424:	0002                	c.slli64	zero
+ 1000426:	0020                	addi	s0,sp,8
+ 1000428:	0000                	unimp
+ 100042a:	0000                	unimp
+ 100042c:	0000                	unimp
+ 100042e:	0010                	0x10
+ 1000430:	0000                	unimp
+ 1000432:	0200                	addi	s0,sp,256
+ 1000434:	0000                	unimp
+ 1000436:	0100                	addi	s0,sp,128
+ 1000438:	6e696c63          	bltu	s2,t1,1000b30 <boot_data+0x440>
+ 100043c:	4074                	lw	a3,68(s0)
+ 100043e:	3034                	fld	fa3,96(s0)
+ 1000440:	3030                	fld	fa2,96(s0)
+ 1000442:	3030                	fld	fa2,96(s0)
+ 1000444:	0030                	addi	a2,sp,8
+ 1000446:	0000                	unimp
+ 1000448:	0000                	unimp
+ 100044a:	0300                	addi	s0,sp,384
+ 100044c:	0000                	unimp
+ 100044e:	0d00                	addi	s0,sp,656
  1000450:	0000                	unimp
- 1000452:	0000                	unimp
- 1000454:	0000                	unimp
- 1000456:	0300                	addi	s0,sp,384
- 1000458:	0000                	unimp
- 100045a:	1000                	addi	s0,sp,32
- 100045c:	0000                	unimp
- 100045e:	c400                	sw	s0,8(s0)
+ 1000452:	1b00                	addi	s0,sp,432
+ 1000454:	6972                	ld	s2,280(sp)
+ 1000456:	2c766373          	csrrsi	t1,0x2c7,12
+ 100045a:	6e696c63          	bltu	s2,t1,1000b52 <boot_data+0x462>
+ 100045e:	3074                	fld	fa3,224(s0)
  1000460:	0000                	unimp
- 1000462:	0100                	addi	s0,sp,128
+ 1000462:	0000                	unimp
  1000464:	0000                	unimp
  1000466:	0300                	addi	s0,sp,384
  1000468:	0000                	unimp
- 100046a:	0100                	addi	s0,sp,128
+ 100046a:	1000                	addi	s0,sp,32
  100046c:	0000                	unimp
- 100046e:	0700                	addi	s0,sp,896
+ 100046e:	c400                	sw	s0,8(s0)
  1000470:	0000                	unimp
- 1000472:	0300                	addi	s0,sp,384
+ 1000472:	0100                	addi	s0,sp,128
  1000474:	0000                	unimp
- 1000476:	0800                	addi	s0,sp,16
+ 1000476:	0300                	addi	s0,sp,384
  1000478:	0000                	unimp
- 100047a:	d800                	sw	s0,48(s0)
- 100047c:	746e6f63          	bltu	t3,t1,1000bda <boot_data+0x4fa>
- 1000480:	6f72                	ld	t5,280(sp)
- 1000482:	006c                	addi	a1,sp,12
+ 100047a:	0100                	addi	s0,sp,128
+ 100047c:	0000                	unimp
+ 100047e:	0700                	addi	s0,sp,896
+ 1000480:	0000                	unimp
+ 1000482:	0300                	addi	s0,sp,384
  1000484:	0000                	unimp
- 1000486:	0300                	addi	s0,sp,384
+ 1000486:	0800                	addi	s0,sp,16
  1000488:	0000                	unimp
- 100048a:	1000                	addi	s0,sp,32
- 100048c:	0000                	unimp
- 100048e:	4400                	lw	s0,8(s0)
- 1000490:	0000                	unimp
- 1000492:	0000                	unimp
- 1000494:	0004                	0x4
- 1000496:	0000                	unimp
+ 100048a:	d800                	sw	s0,48(s0)
+ 100048c:	746e6f63          	bltu	t3,t1,1000bea <boot_data+0x4fa>
+ 1000490:	6f72                	ld	t5,280(sp)
+ 1000492:	006c                	addi	a1,sp,12
+ 1000494:	0000                	unimp
+ 1000496:	0300                	addi	s0,sp,384
  1000498:	0000                	unimp
- 100049a:	0000                	unimp
- 100049c:	1000                	addi	s0,sp,32
- 100049e:	0000                	unimp
+ 100049a:	1000                	addi	s0,sp,32
+ 100049c:	0000                	unimp
+ 100049e:	4400                	lw	s0,8(s0)
  10004a0:	0000                	unimp
- 10004a2:	0200                	addi	s0,sp,256
- 10004a4:	0000                	unimp
- 10004a6:	0100                	addi	s0,sp,128
- 10004a8:	6e69                	lui	t3,0x1a
- 10004aa:	6574                	ld	a3,200(a0)
- 10004ac:	7272                	ld	tp,312(sp)
- 10004ae:	7075                	c.lui	zero,0xffffd
- 10004b0:	2d74                	fld	fa3,216(a0)
- 10004b2:	746e6f63          	bltu	t3,t1,1000c10 <boot_data+0x530>
- 10004b6:	6f72                	ld	t5,280(sp)
- 10004b8:	6c6c                	ld	a1,216(s0)
- 10004ba:	7265                	lui	tp,0xffff9
- 10004bc:	6340                	ld	s0,128(a4)
- 10004be:	3030                	fld	fa2,96(s0)
- 10004c0:	3030                	fld	fa2,96(s0)
- 10004c2:	3030                	fld	fa2,96(s0)
- 10004c4:	0000                	unimp
- 10004c6:	0000                	unimp
- 10004c8:	0000                	unimp
- 10004ca:	0300                	addi	s0,sp,384
- 10004cc:	0000                	unimp
- 10004ce:	0c00                	addi	s0,sp,528
- 10004d0:	0000                	unimp
- 10004d2:	1b00                	addi	s0,sp,432
- 10004d4:	6972                	ld	s2,280(sp)
- 10004d6:	2c766373          	csrrsi	t1,0x2c7,12
- 10004da:	6c70                	ld	a2,216(s0)
- 10004dc:	6369                	lui	t1,0x1a
- 10004de:	0030                	addi	a2,sp,8
+ 10004a2:	0000                	unimp
+ 10004a4:	0004                	0x4
+ 10004a6:	0000                	unimp
+ 10004a8:	0000                	unimp
+ 10004aa:	0000                	unimp
+ 10004ac:	1000                	addi	s0,sp,32
+ 10004ae:	0000                	unimp
+ 10004b0:	0000                	unimp
+ 10004b2:	0200                	addi	s0,sp,256
+ 10004b4:	0000                	unimp
+ 10004b6:	0100                	addi	s0,sp,128
+ 10004b8:	6e69                	lui	t3,0x1a
+ 10004ba:	6574                	ld	a3,200(a0)
+ 10004bc:	7272                	ld	tp,312(sp)
+ 10004be:	7075                	c.lui	zero,0xffffd
+ 10004c0:	2d74                	fld	fa3,216(a0)
+ 10004c2:	746e6f63          	bltu	t3,t1,1000c20 <boot_data+0x530>
+ 10004c6:	6f72                	ld	t5,280(sp)
+ 10004c8:	6c6c                	ld	a1,216(s0)
+ 10004ca:	7265                	lui	tp,0xffff9
+ 10004cc:	6340                	ld	s0,128(a4)
+ 10004ce:	3030                	fld	fa2,96(s0)
+ 10004d0:	3030                	fld	fa2,96(s0)
+ 10004d2:	3030                	fld	fa2,96(s0)
+ 10004d4:	0000                	unimp
+ 10004d6:	0000                	unimp
+ 10004d8:	0000                	unimp
+ 10004da:	0300                	addi	s0,sp,384
+ 10004dc:	0000                	unimp
+ 10004de:	0c00                	addi	s0,sp,528
  10004e0:	0000                	unimp
- 10004e2:	0300                	addi	s0,sp,384
- 10004e4:	0000                	unimp
- 10004e6:	0400                	addi	s0,sp,512
-	...
+ 10004e2:	1b00                	addi	s0,sp,432
+ 10004e4:	6972                	ld	s2,280(sp)
+ 10004e6:	2c766373          	csrrsi	t1,0x2c7,12
+ 10004ea:	6c70                	ld	a2,216(s0)
+ 10004ec:	6369                	lui	t1,0x1a
+ 10004ee:	0030                	addi	a2,sp,8
  10004f0:	0000                	unimp
  10004f2:	0300                	addi	s0,sp,384
  10004f4:	0000                	unimp
  10004f6:	0400                	addi	s0,sp,512
- 10004f8:	0000                	unimp
- 10004fa:	8f00                	0x8f00
- 10004fc:	0000                	unimp
- 10004fe:	0100                	addi	s0,sp,128
+	...
  1000500:	0000                	unimp
  1000502:	0300                	addi	s0,sp,384
  1000504:	0000                	unimp
- 1000506:	0000                	unimp
+ 1000506:	0400                	addi	s0,sp,512
  1000508:	0000                	unimp
- 100050a:	a000                	fsd	fs0,0(s0)
+ 100050a:	8f00                	0x8f00
  100050c:	0000                	unimp
- 100050e:	0300                	addi	s0,sp,384
+ 100050e:	0100                	addi	s0,sp,128
  1000510:	0000                	unimp
- 1000512:	1000                	addi	s0,sp,32
+ 1000512:	0300                	addi	s0,sp,384
  1000514:	0000                	unimp
- 1000516:	c400                	sw	s0,8(s0)
+ 1000516:	0000                	unimp
  1000518:	0000                	unimp
- 100051a:	0100                	addi	s0,sp,128
+ 100051a:	a000                	fsd	fs0,0(s0)
  100051c:	0000                	unimp
- 100051e:	0b00                	addi	s0,sp,400
+ 100051e:	0300                	addi	s0,sp,384
  1000520:	0000                	unimp
- 1000522:	0100                	addi	s0,sp,128
+ 1000522:	1000                	addi	s0,sp,32
  1000524:	0000                	unimp
- 1000526:	0900                	addi	s0,sp,144
+ 1000526:	c400                	sw	s0,8(s0)
  1000528:	0000                	unimp
- 100052a:	0300                	addi	s0,sp,384
+ 100052a:	0100                	addi	s0,sp,128
  100052c:	0000                	unimp
- 100052e:	0400                	addi	s0,sp,512
+ 100052e:	0b00                	addi	s0,sp,400
  1000530:	0000                	unimp
- 1000532:	0c01                	addi	s8,s8,0
+ 1000532:	0100                	addi	s0,sp,128
  1000534:	0000                	unimp
- 1000536:	0700                	addi	s0,sp,896
+ 1000536:	0900                	addi	s0,sp,144
  1000538:	0000                	unimp
  100053a:	0300                	addi	s0,sp,384
  100053c:	0000                	unimp
  100053e:	0400                	addi	s0,sp,512
  1000540:	0000                	unimp
- 1000542:	1f01                	addi	t5,t5,-32
+ 1000542:	0c01                	addi	s8,s8,0
  1000544:	0000                	unimp
- 1000546:	1e00                	addi	s0,sp,816
+ 1000546:	0700                	addi	s0,sp,896
  1000548:	0000                	unimp
  100054a:	0300                	addi	s0,sp,384
  100054c:	0000                	unimp
- 100054e:	1000                	addi	s0,sp,32
+ 100054e:	0400                	addi	s0,sp,512
  1000550:	0000                	unimp
- 1000552:	4400                	lw	s0,8(s0)
+ 1000552:	1f01                	addi	t5,t5,-32
  1000554:	0000                	unimp
- 1000556:	0000                	unimp
- 1000558:	000c                	0xc
- 100055a:	0000                	unimp
+ 1000556:	1e00                	addi	s0,sp,816
+ 1000558:	0000                	unimp
+ 100055a:	0300                	addi	s0,sp,384
  100055c:	0000                	unimp
- 100055e:	0000                	unimp
- 1000560:	0004                	0x4
- 1000562:	0000                	unimp
+ 100055e:	1000                	addi	s0,sp,32
+ 1000560:	0000                	unimp
+ 1000562:	4400                	lw	s0,8(s0)
  1000564:	0000                	unimp
- 1000566:	0300                	addi	s0,sp,384
- 1000568:	0000                	unimp
- 100056a:	0400                	addi	s0,sp,512
+ 1000566:	0000                	unimp
+ 1000568:	000c                	0xc
+ 100056a:	0000                	unimp
  100056c:	0000                	unimp
- 100056e:	b500                	fsd	fs0,40(a0)
- 1000570:	0000                	unimp
- 1000572:	0200                	addi	s0,sp,256
+ 100056e:	0000                	unimp
+ 1000570:	0004                	0x4
+ 1000572:	0000                	unimp
  1000574:	0000                	unimp
- 1000576:	0200                	addi	s0,sp,256
+ 1000576:	0300                	addi	s0,sp,384
  1000578:	0000                	unimp
- 100057a:	0200                	addi	s0,sp,256
+ 100057a:	0400                	addi	s0,sp,512
  100057c:	0000                	unimp
- 100057e:	0100                	addi	s0,sp,128
- 1000580:	7468                	ld	a0,232(s0)
- 1000582:	6669                	lui	a2,0x1a
+ 100057e:	b500                	fsd	fs0,40(a0)
+ 1000580:	0000                	unimp
+ 1000582:	0200                	addi	s0,sp,256
  1000584:	0000                	unimp
- 1000586:	0000                	unimp
+ 1000586:	0200                	addi	s0,sp,256
  1000588:	0000                	unimp
- 100058a:	0300                	addi	s0,sp,384
+ 100058a:	0200                	addi	s0,sp,256
  100058c:	0000                	unimp
- 100058e:	0a00                	addi	s0,sp,272
- 1000590:	0000                	unimp
- 1000592:	1b00                	addi	s0,sp,432
- 1000594:	6375                	lui	t1,0x1d
- 1000596:	2c62                	fld	fs8,24(sp)
- 1000598:	7468                	ld	a0,232(s0)
- 100059a:	6669                	lui	a2,0x1a
- 100059c:	0030                	addi	a2,sp,8
- 100059e:	0000                	unimp
+ 100058e:	0100                	addi	s0,sp,128
+ 1000590:	7468                	ld	a0,232(s0)
+ 1000592:	6669                	lui	a2,0x1a
+ 1000594:	0000                	unimp
+ 1000596:	0000                	unimp
+ 1000598:	0000                	unimp
+ 100059a:	0300                	addi	s0,sp,384
+ 100059c:	0000                	unimp
+ 100059e:	0a00                	addi	s0,sp,272
  10005a0:	0000                	unimp
- 10005a2:	0200                	addi	s0,sp,256
- 10005a4:	0000                	unimp
- 10005a6:	0200                	addi	s0,sp,256
- 10005a8:	0000                	unimp
- 10005aa:	0900                	addi	s0,sp,144
- 10005ac:	64646123          	0x64646123
- 10005b0:	6572                	ld	a0,280(sp)
- 10005b2:	632d7373          	csrrci	t1,0x632,26
- 10005b6:	6c65                	lui	s8,0x19
- 10005b8:	736c                	ld	a1,224(a4)
- 10005ba:	2300                	fld	fs0,0(a4)
- 10005bc:	657a6973          	csrrsi	s2,0x657,20
- 10005c0:	632d                	lui	t1,0xb
- 10005c2:	6c65                	lui	s8,0x19
- 10005c4:	736c                	ld	a1,224(a4)
- 10005c6:	6300                	ld	s0,0(a4)
- 10005c8:	61706d6f          	jal	s10,10073de <boot_data+0x6cfe>
- 10005cc:	6974                	ld	a3,208(a0)
- 10005ce:	6c62                	ld	s8,24(sp)
- 10005d0:	0065                	c.nop	25
- 10005d2:	6f6d                	lui	t5,0x1b
- 10005d4:	6564                	ld	s1,200(a0)
- 10005d6:	006c                	addi	a1,sp,12
- 10005d8:	6f647473          	csrrci	s0,0x6f6,8
- 10005dc:	7475                	lui	s0,0xffffd
- 10005de:	702d                	c.lui	zero,0xfffeb
- 10005e0:	7461                	lui	s0,0xffff8
- 10005e2:	0068                	addi	a0,sp,12
+ 10005a2:	1b00                	addi	s0,sp,432
+ 10005a4:	6375                	lui	t1,0x1d
+ 10005a6:	2c62                	fld	fs8,24(sp)
+ 10005a8:	7468                	ld	a0,232(s0)
+ 10005aa:	6669                	lui	a2,0x1a
+ 10005ac:	0030                	addi	a2,sp,8
+ 10005ae:	0000                	unimp
+ 10005b0:	0000                	unimp
+ 10005b2:	0200                	addi	s0,sp,256
+ 10005b4:	0000                	unimp
+ 10005b6:	0200                	addi	s0,sp,256
+ 10005b8:	0000                	unimp
+ 10005ba:	0900                	addi	s0,sp,144
+ 10005bc:	64646123          	0x64646123
+ 10005c0:	6572                	ld	a0,280(sp)
+ 10005c2:	632d7373          	csrrci	t1,0x632,26
+ 10005c6:	6c65                	lui	s8,0x19
+ 10005c8:	736c                	ld	a1,224(a4)
+ 10005ca:	2300                	fld	fs0,0(a4)
+ 10005cc:	657a6973          	csrrsi	s2,0x657,20
+ 10005d0:	632d                	lui	t1,0xb
+ 10005d2:	6c65                	lui	s8,0x19
+ 10005d4:	736c                	ld	a1,224(a4)
+ 10005d6:	6300                	ld	s0,0(a4)
+ 10005d8:	61706d6f          	jal	s10,10073ee <boot_data+0x6cfe>
+ 10005dc:	6974                	ld	a3,208(a0)
+ 10005de:	6c62                	ld	s8,24(sp)
+ 10005e0:	0065                	c.nop	25
+ 10005e2:	6f6d                	lui	t5,0x1b
  10005e4:	6564                	ld	s1,200(a0)
- 10005e6:	6976                	ld	s2,344(sp)
- 10005e8:	745f6563          	bltu	t5,t0,1000d32 <boot_data+0x652>
- 10005ec:	7079                	c.lui	zero,0xffffe
- 10005ee:	0065                	c.nop	25
- 10005f0:	6572                	ld	a0,280(sp)
- 10005f2:	69740067          	jr	1687(s0) # ffffffffffff8697 <__base_hbm_sym+0xffffffff7fff8697>
- 10005f6:	656d                	lui	a0,0x1b
- 10005f8:	6162                	ld	sp,24(sp)
- 10005fa:	662d6573          	csrrsi	a0,0x662,26
- 10005fe:	6572                	ld	a0,280(sp)
- 1000600:	7571                	lui	a0,0xffffc
- 1000602:	6e65                	lui	t3,0x19
- 1000604:	73007963          	bgeu	zero,a6,1000d36 <boot_data+0x656>
- 1000608:	6174                	ld	a3,192(a0)
- 100060a:	7574                	ld	a3,232(a0)
- 100060c:	6c630073          	0x6c630073
- 1000610:	2d6b636f          	jal	t1,10b68e6 <boot_data+0xb6206>
- 1000614:	7266                	ld	tp,120(sp)
- 1000616:	7165                	addi	sp,sp,-400
- 1000618:	6575                	lui	a0,0x1d
- 100061a:	636e                	ld	t1,216(sp)
- 100061c:	0079                	c.nop	30
- 100061e:	6972                	ld	s2,280(sp)
- 1000620:	2c766373          	csrrsi	t1,0x2c7,12
- 1000624:	7369                	lui	t1,0xffffa
- 1000626:	0061                	c.nop	24
- 1000628:	6d6d                	lui	s10,0x1b
- 100062a:	2d75                	addiw	s10,s10,29
- 100062c:	7974                	ld	a3,240(a0)
- 100062e:	6570                	ld	a2,200(a0)
- 1000630:	7400                	ld	s0,40(s0)
- 1000632:	626c                	ld	a1,192(a2)
- 1000634:	732d                	lui	t1,0xfffeb
- 1000636:	6c70                	ld	a2,216(s0)
- 1000638:	7469                	lui	s0,0xffffa
- 100063a:	2300                	fld	fs0,0(a4)
- 100063c:	6e69                	lui	t3,0x1a
- 100063e:	6574                	ld	a3,200(a0)
- 1000640:	7272                	ld	tp,312(sp)
- 1000642:	7075                	c.lui	zero,0xffffd
- 1000644:	2d74                	fld	fa3,216(a0)
- 1000646:	6c6c6563          	bltu	s8,t1,1000d10 <boot_data+0x630>
- 100064a:	6e690073          	0x6e690073
+ 10005e6:	006c                	addi	a1,sp,12
+ 10005e8:	6f647473          	csrrci	s0,0x6f6,8
+ 10005ec:	7475                	lui	s0,0xffffd
+ 10005ee:	702d                	c.lui	zero,0xfffeb
+ 10005f0:	7461                	lui	s0,0xffff8
+ 10005f2:	0068                	addi	a0,sp,12
+ 10005f4:	6564                	ld	s1,200(a0)
+ 10005f6:	6976                	ld	s2,344(sp)
+ 10005f8:	745f6563          	bltu	t5,t0,1000d42 <boot_data+0x652>
+ 10005fc:	7079                	c.lui	zero,0xffffe
+ 10005fe:	0065                	c.nop	25
+ 1000600:	6572                	ld	a0,280(sp)
+ 1000602:	69740067          	jr	1687(s0) # ffffffffffff8697 <__base_hbm_sym+0xffffffff7fff8697>
+ 1000606:	656d                	lui	a0,0x1b
+ 1000608:	6162                	ld	sp,24(sp)
+ 100060a:	662d6573          	csrrsi	a0,0x662,26
+ 100060e:	6572                	ld	a0,280(sp)
+ 1000610:	7571                	lui	a0,0xffffc
+ 1000612:	6e65                	lui	t3,0x19
+ 1000614:	73007963          	bgeu	zero,a6,1000d46 <boot_data+0x656>
+ 1000618:	6174                	ld	a3,192(a0)
+ 100061a:	7574                	ld	a3,232(a0)
+ 100061c:	6c630073          	0x6c630073
+ 1000620:	2d6b636f          	jal	t1,10b68f6 <boot_data+0xb6206>
+ 1000624:	7266                	ld	tp,120(sp)
+ 1000626:	7165                	addi	sp,sp,-400
+ 1000628:	6575                	lui	a0,0x1d
+ 100062a:	636e                	ld	t1,216(sp)
+ 100062c:	0079                	c.nop	30
+ 100062e:	6972                	ld	s2,280(sp)
+ 1000630:	2c766373          	csrrsi	t1,0x2c7,12
+ 1000634:	7369                	lui	t1,0xffffa
+ 1000636:	0061                	c.nop	24
+ 1000638:	6d6d                	lui	s10,0x1b
+ 100063a:	2d75                	addiw	s10,s10,29
+ 100063c:	7974                	ld	a3,240(a0)
+ 100063e:	6570                	ld	a2,200(a0)
+ 1000640:	7400                	ld	s0,40(s0)
+ 1000642:	626c                	ld	a1,192(a2)
+ 1000644:	732d                	lui	t1,0xfffeb
+ 1000646:	6c70                	ld	a2,216(s0)
+ 1000648:	7469                	lui	s0,0xffffa
+ 100064a:	2300                	fld	fs0,0(a4)
+ 100064c:	6e69                	lui	t3,0x1a
  100064e:	6574                	ld	a3,200(a0)
  1000650:	7272                	ld	tp,312(sp)
  1000652:	7075                	c.lui	zero,0xffffd
  1000654:	2d74                	fld	fa3,216(a0)
- 1000656:	746e6f63          	bltu	t3,t1,1000db4 <boot_data+0x6d4>
- 100065a:	6f72                	ld	t5,280(sp)
- 100065c:	6c6c                	ld	a1,216(s0)
- 100065e:	7265                	lui	tp,0xffff9
- 1000660:	7000                	ld	s0,32(s0)
- 1000662:	6168                	ld	a0,192(a0)
- 1000664:	646e                	ld	s0,216(sp)
- 1000666:	656c                	ld	a1,200(a0)
- 1000668:	7200                	ld	s0,32(a2)
- 100066a:	6e61                	lui	t3,0x18
- 100066c:	00736567          	0x736567
- 1000670:	6e69                	lui	t3,0x1a
- 1000672:	6574                	ld	a3,200(a0)
- 1000674:	7272                	ld	tp,312(sp)
- 1000676:	7075                	c.lui	zero,0xffffd
- 1000678:	7374                	ld	a3,224(a4)
- 100067a:	652d                	lui	a0,0xb
- 100067c:	7478                	ld	a4,232(s0)
- 100067e:	6e65                	lui	t3,0x19
- 1000680:	6564                	ld	s1,200(a0)
- 1000682:	0064                	addi	s1,sp,12
- 1000684:	6572                	ld	a0,280(sp)
- 1000686:	616e2d67          	0x616e2d67
- 100068a:	656d                	lui	a0,0x1b
- 100068c:	75630073          	0x75630073
- 1000690:	7272                	ld	tp,312(sp)
- 1000692:	6e65                	lui	t3,0x19
- 1000694:	2d74                	fld	fa3,216(a0)
- 1000696:	65657073          	csrci	0x656,10
- 100069a:	0064                	addi	s1,sp,12
- 100069c:	6e69                	lui	t3,0x1a
- 100069e:	6574                	ld	a3,200(a0)
+ 1000656:	6c6c6563          	bltu	s8,t1,1000d20 <boot_data+0x630>
+ 100065a:	6e690073          	0x6e690073
+ 100065e:	6574                	ld	a3,200(a0)
+ 1000660:	7272                	ld	tp,312(sp)
+ 1000662:	7075                	c.lui	zero,0xffffd
+ 1000664:	2d74                	fld	fa3,216(a0)
+ 1000666:	746e6f63          	bltu	t3,t1,1000dc4 <boot_data+0x6d4>
+ 100066a:	6f72                	ld	t5,280(sp)
+ 100066c:	6c6c                	ld	a1,216(s0)
+ 100066e:	7265                	lui	tp,0xffff9
+ 1000670:	7000                	ld	s0,32(s0)
+ 1000672:	6168                	ld	a0,192(a0)
+ 1000674:	646e                	ld	s0,216(sp)
+ 1000676:	656c                	ld	a1,200(a0)
+ 1000678:	7200                	ld	s0,32(a2)
+ 100067a:	6e61                	lui	t3,0x18
+ 100067c:	00736567          	0x736567
+ 1000680:	6e69                	lui	t3,0x1a
+ 1000682:	6574                	ld	a3,200(a0)
+ 1000684:	7272                	ld	tp,312(sp)
+ 1000686:	7075                	c.lui	zero,0xffffd
+ 1000688:	7374                	ld	a3,224(a4)
+ 100068a:	652d                	lui	a0,0xb
+ 100068c:	7478                	ld	a4,232(s0)
+ 100068e:	6e65                	lui	t3,0x19
+ 1000690:	6564                	ld	s1,200(a0)
+ 1000692:	0064                	addi	s1,sp,12
+ 1000694:	6572                	ld	a0,280(sp)
+ 1000696:	616e2d67          	0x616e2d67
+ 100069a:	656d                	lui	a0,0x1b
+ 100069c:	75630073          	0x75630073
  10006a0:	7272                	ld	tp,312(sp)
- 10006a2:	7075                	c.lui	zero,0xffffd
+ 10006a2:	6e65                	lui	t3,0x19
  10006a4:	2d74                	fld	fa3,216(a0)
- 10006a6:	6170                	ld	a2,192(a0)
- 10006a8:	6572                	ld	a0,280(sp)
- 10006aa:	746e                	ld	s0,248(sp)
- 10006ac:	6900                	ld	s0,16(a0)
- 10006ae:	746e                	ld	s0,248(sp)
- 10006b0:	7265                	lui	tp,0xffff9
- 10006b2:	7572                	ld	a0,312(sp)
- 10006b4:	7470                	ld	a2,232(s0)
- 10006b6:	69720073          	0x69720073
- 10006ba:	2c766373          	csrrsi	t1,0x2c7,12
- 10006be:	616d                	addi	sp,sp,240
- 10006c0:	2d78                	fld	fa4,216(a0)
- 10006c2:	7270                	ld	a2,224(a2)
- 10006c4:	6f69                	lui	t5,0x1a
- 10006c6:	6972                	ld	s2,280(sp)
- 10006c8:	7974                	ld	a3,240(a0)
- 10006ca:	7200                	ld	s0,32(a2)
- 10006cc:	7369                	lui	t1,0xffffa
- 10006ce:	6e2c7663          	bgeu	s8,sp,1000dba <boot_data+0x6da>
- 10006d2:	6564                	ld	s1,200(a0)
- 10006d4:	0076                	c.slli	zero,0x1d
- 10006d6:	0000                	unimp
- 10006d8:	0000                	unimp
+ 10006a6:	65657073          	csrci	0x656,10
+ 10006aa:	0064                	addi	s1,sp,12
+ 10006ac:	6e69                	lui	t3,0x1a
+ 10006ae:	6574                	ld	a3,200(a0)
+ 10006b0:	7272                	ld	tp,312(sp)
+ 10006b2:	7075                	c.lui	zero,0xffffd
+ 10006b4:	2d74                	fld	fa3,216(a0)
+ 10006b6:	6170                	ld	a2,192(a0)
+ 10006b8:	6572                	ld	a0,280(sp)
+ 10006ba:	746e                	ld	s0,248(sp)
+ 10006bc:	6900                	ld	s0,16(a0)
+ 10006be:	746e                	ld	s0,248(sp)
+ 10006c0:	7265                	lui	tp,0xffff9
+ 10006c2:	7572                	ld	a0,312(sp)
+ 10006c4:	7470                	ld	a2,232(s0)
+ 10006c6:	69720073          	0x69720073
+ 10006ca:	2c766373          	csrrsi	t1,0x2c7,12
+ 10006ce:	616d                	addi	sp,sp,240
+ 10006d0:	2d78                	fld	fa4,216(a0)
+ 10006d2:	7270                	ld	a2,224(a2)
+ 10006d4:	6f69                	lui	t5,0x1a
+ 10006d6:	6972                	ld	s2,280(sp)
+ 10006d8:	7974                	ld	a3,240(a0)
+ 10006da:	7200                	ld	s0,32(a2)
+ 10006dc:	7369                	lui	t1,0xffffa
+ 10006de:	6e2c7663          	bgeu	s8,sp,1000dca <boot_data+0x6da>
+ 10006e2:	6564                	ld	s1,200(a0)
+ 10006e4:	0076                	c.slli	zero,0x1d
+ 10006e6:	0000                	unimp
+ 10006e8:	0000                	unimp
 	...
 
 Disassembly of section .boot_section:
 
-00000000010006dc <entry_addr>:
- 10006dc:	0078                	addi	a4,sp,12
- 10006de:	0100                	addi	s0,sp,128
+00000000010006ec <entry_addr>:
+ 10006ec:	0088                	addi	a0,sp,64
+ 10006ee:	0100                	addi	s0,sp,128

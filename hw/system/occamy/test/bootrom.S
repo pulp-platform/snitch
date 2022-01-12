@@ -27,12 +27,16 @@ _cva6_init:
 1:  addi    t0, t0, -1
     # Assert reset
     sw      zero, 4(t1)
+    fence
     # Ungate clock (sync reset)
     sw      t3, 0(t1)
+    fence
     # Deassert reset
     sw      t3, 4(t1)
+    fence
     # Deisolate quadrant
     sw      zero, 8(t1)
+    fence
     # Move onto next quadrant
     add     t1, t1, t2
     bnez    t0, 1b
