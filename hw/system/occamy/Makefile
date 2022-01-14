@@ -28,8 +28,7 @@ VLOG_FLAGS 	  += ${QUESTA_64BIT}
 CFG ?= src/occamy_cfg.hjson
 REG_INCDIR ?= ${ROOT}/sw/snRuntime/include/
 
-all: update-clint update-plic update-socreg update-quadreg update-source
-#all: update-clint update-plic update-socreg update-quadreg update-source update-addrmap
+all: update-clint update-plic update-socreg update-quadreg update-source update-addrmap
 
 test: ${VSIM_SOURCES} ${TB_SRCS}
 	echo ${VSIM_SOURCES}

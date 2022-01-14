@@ -373,7 +373,7 @@ def main():
             )
 
         am.new_leaf(
-                "quadrant_{}_internal".format(i),
+                "quad_{}_cfg".format(i),
                 occamy.cfg["s1_quadrant"]["cfg_base_offset"],
                 occamy.cfg["s1_quadrant"]["cfg_base_addr"] + i * occamy.cfg["s1_quadrant"]["cfg_base_offset"]
             ).attach_to(
