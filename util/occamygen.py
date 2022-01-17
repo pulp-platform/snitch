@@ -625,9 +625,9 @@ def main():
 
     # We need 3 "crossbars", which are really simple muxes and demuxes
     quadrant_s1_ctrl_xbars = dict()
-    for name, iw in {
-        'soc_to_quad': soc_narrow_xbar.iw_out(),
-        'quad_to_soc': soc_narrow_xbar.iw,
+    for name, (iw, lm) in {
+        'soc_to_quad': (soc_narrow_xbar.iw_out(), "axi_pkg::CUT_SLV_PORTS"),
+        'quad_to_soc': (soc_narrow_xbar.iw, "axi_pkg::CUT_MST_PORTS"),
     }.items():
         # Reuse (preserve) narrow Xbar IDs and max transactions
         quadrant_s1_ctrl_xbars[name] = solder.AxiXbar(
@@ -640,6 +640,7 @@ def main():
             max_slv_trans=occamy.cfg["narrow_xbar"]["max_slv_trans"],
             max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
             fall_through=occamy.cfg["narrow_xbar"]["fall_through"],
+            latency_mode=lm,
             context="quadrant_s1_ctrl")
 
     for name in ['soc_to_quad', 'quad_to_soc']:
@@ -659,6 +660,7 @@ def main():
         max_slv_trans=occamy.cfg["narrow_xbar"]["max_slv_trans"],
         max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
         fall_through=False,
+        latency_mode="axi_pkg::CUT_MST_PORTS",
         context="quadrant_s1_ctrl")
 
     quadrant_s1_ctrl_mux.add_output("out", [(0, (1 << 48) - 1)])
