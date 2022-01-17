@@ -481,7 +481,7 @@ def main():
     # Each connects one quadrant and one HBI master to the HBM and quadrant xbars
     quadrant_pre_xbars = list()
     for i in range(nr_s1_quadrants):
-        quadrant_pre_xbar =solder.AxiXbar(
+        quadrant_pre_xbar = solder.AxiXbar(
             48,
             512,
             occamy.cfg["pre_xbar_slv_id_width_no_rocache"] + (
