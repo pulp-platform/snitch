@@ -1202,6 +1202,7 @@ class AxiXbar(Xbar):
                  fall_through=False,
                  no_loopback=False,
                  atop_support=True,
+                 latency_mode=None,
                  **kwargs):
         super().__init__(**kwargs)
         self.aw = aw
@@ -1217,6 +1218,7 @@ class AxiXbar(Xbar):
         self.atop_support = atop_support
         self.addrmap = list()
         self.connections = dict()
+        self.latency_mode = latency_mode or "axi_pkg::CUT_ALL_PORTS"
 
     def add_input(self, name, outputs=None):
         self.inputs.append(name)
@@ -1303,7 +1305,7 @@ class AxiXbar(Xbar):
         cfg += "  MaxSlvTrans:        {},\n".format(self.max_slv_trans)
         cfg += "  MaxMstTrans:        {},\n".format(self.max_mst_trans)
         cfg += "  FallThrough:        {},\n".format(int(self.fall_through))
-        cfg += "  LatencyMode:        axi_pkg::CUT_ALL_PORTS,\n"
+        cfg += "  LatencyMode:        {},\n".format(self.latency_mode)
         cfg += "  AxiIdWidthSlvPorts: {},\n".format(self.iw)
         cfg += "  AxiIdUsedSlvPorts:  {},\n".format(self.iw)
         cfg += "  AxiAddrWidth:       {},\n".format(self.aw)
@@ -1477,6 +1479,7 @@ class AxiLiteXbar(Xbar):
                  max_slv_trans=4,
                  max_mst_trans=4,
                  fall_through=False,
+                 latency_mode=None,
                  **kwargs):
         super().__init__(**kwargs)
         self.aw = aw
@@ -1485,6 +1488,7 @@ class AxiLiteXbar(Xbar):
         self.max_mst_trans = max_mst_trans
         self.fall_through = fall_through
         self.addrmap = list()
+        self.latency_mode = latency_mode or "axi_pkg::CUT_ALL_PORTS"
 
     def add_input(self, name):
         self.inputs.append(name)

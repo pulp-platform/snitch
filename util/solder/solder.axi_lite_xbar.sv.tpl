@@ -37,7 +37,7 @@ localparam axi_pkg::xbar_cfg_t ${cfg_name} = '{
   MaxSlvTrans:        ${xbar.max_slv_trans},
   MaxMstTrans:        ${xbar.max_mst_trans},
   FallThrough:        ${int(xbar.fall_through)},
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  LatencyMode:        ${xbar.latency_mode},
   AxiIdWidthSlvPorts: 0,
   AxiIdUsedSlvPorts:  0,
   AxiAddrWidth:       ${xbar.aw},
