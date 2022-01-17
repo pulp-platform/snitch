@@ -100,10 +100,22 @@ module occamy_soc
   // Crossbars
   ${module}
 
-  /////////////////////////////////
-  // Narrow-Wide xbar connection //
-  /////////////////////////////////
+  ///////////////////////////////////
+  // Connections between crossbars //
+  ///////////////////////////////////
   <%
+    #// inter xbar -> wide xbar & wide xbar -> inter xbar
+    quadrant_inter_xbar.out_wide_xbar \
+      .change_iw(context, soc_wide_xbar.iw, "inter_to_wide_iw_conv_{}".format(i)) \
+      .cut(context, cuts_wide_and_inter, name="inter_to_wide_cut_{}".format(i), to=soc_wide_xbar.in_quadrant_inter_xbar)
+    soc_wide_xbar.out_quadrant_inter_xbar \
+      .cut(context, cuts_wide_and_inter, name="wide_to_inter_cut_{}".format(i)) \
+      .change_iw(context, quadrant_inter_xbar.iw, "wide_to_inter_iw_conv_{}".format(i), to=quadrant_inter_xbar.in_wide_xbar)
+    #// wide xbar -> hbm xbar
+    soc_wide_xbar.out_hbm_xbar \
+      .change_iw(context, hbm_xbar.iw, "wide_to_hbm_iw_conv_{}".format(i)) \
+      .cut(context, cuts_wide_to_hbm, name="wide_to_hbm_iw_cut_{}".format(i), to=hbm_xbar.in_wide_xbar)
+    #// narrow xbar -> wide xbar & wide xbar -> narrow xbar
     soc_narrow_xbar.out_soc_wide \
       .cut(context, cuts_narrow_and_wide) \
       .change_iw(context, soc_wide_xbar.in_soc_narrow.iw, "soc_narrow_wide_iwc") \
@@ -174,13 +186,6 @@ module occamy_soc
     #// pre xbar -> inter xbar
     quadrant_pre_xbars[i].out_quadrant_inter_xbar \
       .cut(context, cuts_pre_to_inter, name="pre_to_inter_cut_{}".format(i), to=quadrant_inter_xbar.__dict__["in_quadrant_{}".format(i)])
-    #// inter xbar -> wide xbar & wide xbar -> inter xbar
-    quadrant_inter_xbar.out_wide_xbar \
-      .change_iw(context, soc_wide_xbar.iw, "inter_to_wide_iw_conv_{}".format(i)) \
-      .cut(context, cuts_wide_and_inter, name="inter_to_wide_cut_{}".format(i), to=soc_wide_xbar.in_quadrant_inter_xbar)
-    soc_wide_xbar.out_quadrant_inter_xbar \
-      .cut(context, cuts_wide_and_inter, name="wide_to_inter_cut_{}".format(i)) \
-      .change_iw(context, quadrant_inter_xbar.iw, "wide_to_inter_iw_conv_{}".format(i), to=quadrant_inter_xbar.in_wide_xbar)
     #// pre xbar -> hbm xbar
     quadrant_pre_xbars[i].out_hbm_xbar \
       .cut(context, cuts_pre_to_hbmx, name="pre_to_hbm_cut_{}".format(i), to=hbm_xbar.__dict__["in_quadrant_{}".format(i)])
@@ -286,13 +291,6 @@ module occamy_soc
   ///////////
   // HBM2e //
   ///////////
-
-  // Connect wide to hbm xbar
-  <% soc_wide_xbar.out_hbm_xbar \
-      .change_iw(context, hbm_xbar.iw, "wide_to_hbm_iw_conv_{}".format(i)) \
-      .cut(context, cuts_wide_to_hbm, name="wide_to_hbm_iw_cut_{}".format(i), to=hbm_xbar.in_wide_xbar)
-  %>\
-
   % for i in range(nr_hbm_channels):
   <% hbm_out_soc = hbm_xbar.__dict__["out_hbm_{}".format(i)] \
       .cut(context, cuts_hbmx_to_hbm, name="hbm_out_soc_{}".format(i))
