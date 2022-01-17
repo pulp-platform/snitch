@@ -401,7 +401,7 @@ class Bus(object):
         self.name_suffix = name_suffix
         self.declared = declared
 
-    def assign(self, from_bus, context):
+    def assign(self, context, from_bus):
         context.write("  assign {} = {};\n".format(self.req_name(), from_bus.req_name()))
         context.write("  assign {} = {};\n\n".format(from_bus.rsp_name(), self.rsp_name()))
 
@@ -606,7 +606,7 @@ class AxiBus(Bus):
 
         # Handle to-assignment
         if self.dw == target_dw:
-            to.assign(self, context)
+            to.assign(context, self)
             return to
 
         # Emit the remapper instance.
@@ -646,7 +646,7 @@ class AxiBus(Bus):
 
         # Handle to-assignment
         if nr_cuts == 0:
-            to.assign(self, context)
+            to.assign(context, self)
             return to
 
         # Emit the cut instance.
@@ -695,7 +695,7 @@ class AxiBus(Bus):
 
         # Handle to-assignment
         if self.clk == target_clk and self.rst == target_rst:
-            to.assign(self, context)
+            to.assign(context, self)
             return to
 
         # Emit the CDC instance.
@@ -907,7 +907,7 @@ class AxiBus(Bus):
 
         # Handle to-assignment
         if self.aw == target_aw:
-            to.assign(self, context)
+            to.assign(context, self)
             return to
 
         # Emit the addr_trunc instance.
@@ -976,7 +976,7 @@ class AxiLiteBus(Bus):
 
         # Handle to-assignment
         if self.clk == target_clk and self.rst == target_rst:
-            to.assign(self, context)
+            to.assign(context, self)
             return to
 
         # Emit the CDC instance.
@@ -1241,10 +1241,11 @@ class AxiXbar(Xbar):
         self.symbolic_addrmap_multi.append((idx, entries))
         self.outputs.append(name)
 
-    def add_output_entry(self, name, entry):
-        self.add_output(name,
-                        [(r.lo, r.hi)
-                         for r in self.node.get_routes() if r.port == entry])
+    def add_output_entry(self, name, entry, range_mask=None):
+        addrs = [(r.lo, r.hi) for r in self.node.get_routes() if r.port == entry]
+        if range_mask is not None:
+            addrs = filter(lambda r: r[0] >= range_mask[0] and r[1] < range_mask[1], addrs)
+        self.add_output(name, addrs)
 
     def addr_map_len(self):
         return len(self.addrmap) + len(self.symbolic_addrmap) + sum(
