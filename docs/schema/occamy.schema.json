@@ -14,7 +14,7 @@
         "wide_xbar": {
             "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
         },
-        "wide_xbar_slv_id_width_no_rocache": {
+        "pre_xbar_slv_id_width_no_rocache": {
             "type": "integer",
             "description": "ID width of incoming slave ports.",
             "default": 3

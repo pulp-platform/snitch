@@ -151,6 +151,17 @@ def main():
     am_soc_narrow_xbar = am.new_node("soc_narrow_xbar")
     am_soc_wide_xbar = am.new_node("soc_wide_xbar")
 
+    # Quadrant pre-crossbar address map
+    am_quadrant_pre_xbar = list()
+    for i in range(nr_s1_quadrants):
+        am_quadrant_pre_xbar.append(am.new_node("am_quadrant_pre_xbar_{}".format(i)))
+
+    # Quadrant inter crossbar address map:
+    am_quadrant_inter_xbar = am.new_node("am_quadrant_inter_xbar")
+
+    # HBM crossbar address map
+    am_hbm_xbar = am.new_node("am_hbm_xbar")
+
     # Quadrant crossbar address map
     am_wide_xbar_quadrant_s1 = list()
     am_narrow_xbar_quadrant_s1 = list()
@@ -279,7 +290,7 @@ def main():
         "pcie",
         occamy.cfg["pcie"]["length"],
         occamy.cfg["pcie"]["address_io"],
-        occamy.cfg["pcie"]["address_mm"]).attach_to(am_soc_wide_xbar)
+        occamy.cfg["pcie"]["address_mm"]).attach_to(am_soc_narrow_xbar)
 
     # Connect SPM to Narrow AXI
     am_spm = am.new_leaf(
@@ -325,7 +336,7 @@ def main():
             am.new_leaf(
                 "hbm_{}".format(i),
                 hbm_channel_size,
-                *bases).attach_to(am_soc_wide_xbar))
+                *bases).attach_to(am_hbm_xbar))
 
     dts.add_memory(am_hbm[0])
 
@@ -388,8 +399,20 @@ def main():
     # Connect quadrants AXI xbar
     for i in range(nr_s1_quadrants):
         am_narrow_xbar_quadrant_s1[i].attach(am_wide_xbar_quadrant_s1[i])
+        am_wide_xbar_quadrant_s1[i].attach(am_quadrant_pre_xbar[i])
         am_soc_narrow_xbar.attach(am_narrow_xbar_quadrant_s1[i])
-        am_soc_wide_xbar.attach(am_wide_xbar_quadrant_s1[i])
+        am_quadrant_inter_xbar.attach(am_wide_xbar_quadrant_s1[i])
+
+    # Connect quadrant inter xbar
+    am_soc_wide_xbar.attach(am_quadrant_inter_xbar)
+    am_quadrant_inter_xbar.attach(am_soc_wide_xbar)
+    for i in range(nr_s1_quadrants):
+        am_quadrant_pre_xbar[i].attach(am_quadrant_inter_xbar)
+
+    # Connect HBM xbar masters (memory slaves already attached)
+    am_soc_wide_xbar.attach(am_hbm_xbar)
+    for i in range(nr_s1_quadrants):
+        am_quadrant_pre_xbar[i].attach(am_hbm_xbar)
 
     # Connect narrow xbar
     am_soc_narrow_xbar.attach(am_soc_axi_lite_periph_xbar)
@@ -450,14 +473,93 @@ def main():
     soc_regbus_periph_xbar.add_output_entry("hbm_phy_cfg", am_hbm_phy_cfg)
     soc_regbus_periph_xbar.add_output_entry("hbm_seq", am_hbm_seq)
 
-    #################
-    # SoC Wide Xbar #
-    #################
+    ##################
+    # SoC Wide Xbars #
+    ##################
+
+    # Quadrant pre xbars
+    # Each connects one quadrant and one HBI master to the HBM and quadrant xbars
+    quadrant_pre_xbars = list()
+    for i in range(nr_s1_quadrants):
+        quadrant_pre_xbar =solder.AxiXbar(
+            48,
+            512,
+            occamy.cfg["pre_xbar_slv_id_width_no_rocache"] + (
+                1 if occamy.cfg["s1_quadrant"].get("ro_cache_cfg") else 0),
+            name="quadrant_pre_xbar_{}".format(i),
+            clk="clk_i",
+            rst="rst_ni",
+            max_slv_trans=occamy.cfg["quadrant_pre_xbar"]["max_slv_trans"],
+            max_mst_trans=occamy.cfg["quadrant_pre_xbar"]["max_mst_trans"],
+            fall_through=occamy.cfg["quadrant_pre_xbar"]["fall_through"],
+            no_loopback=True,
+            atop_support=False,
+            context="soc",
+            node=am_quadrant_pre_xbar[i])
+
+        # Default port:
+        quadrant_pre_xbar.add_output_entry("quadrant_inter_xbar", am_quadrant_inter_xbar)
+        quadrant_pre_xbar.add_output_entry("hbm_xbar", am_hbm_xbar)
+        quadrant_pre_xbar.add_input("quadrant")
+        quadrant_pre_xbar.add_input("hbi")
+
+        quadrant_pre_xbars.append(quadrant_pre_xbar)
+
+    # Quadrant inter xbar
+    # Connects all quadrant pre xbars to all quadrants, with additional wide xbar M/S pair
+    quadrant_inter_xbar = solder.AxiXbar(
+        48,
+        512,
+        quadrant_pre_xbars[0].iw_out(),
+        name="quadrant_inter_xbar",
+        clk="clk_i",
+        rst="rst_ni",
+        max_slv_trans=occamy.cfg["quadrant_inter_xbar"]["max_slv_trans"],
+        max_mst_trans=occamy.cfg["quadrant_inter_xbar"]["max_mst_trans"],
+        fall_through=occamy.cfg["quadrant_inter_xbar"]["fall_through"],
+        no_loopback=True,
+        atop_support=False,
+        context="soc",
+        node=am_quadrant_inter_xbar)
+
+    # Default port: soc wide xbar
+    quadrant_inter_xbar.add_output_entry("wide_xbar", am_soc_wide_xbar)
+    quadrant_inter_xbar.add_input("wide_xbar")
+    for i in range(nr_s1_quadrants):
+        # Default route passes HBI through quadrant 0
+        # --> mask this route, forcing it through default wide xbar
+        quadrant_inter_xbar.add_output_entry("quadrant_{}".format(i),
+                                             am_wide_xbar_quadrant_s1[i],
+                                             range_mask=(0, 0x1000000000))
+        quadrant_inter_xbar.add_input("quadrant_{}".format(i))
+
+    hbm_xbar = solder.AxiXbar(
+        48,
+        512,
+        quadrant_pre_xbars[0].iw_out(),
+        name="hbm_xbar",
+        clk="clk_i",
+        rst="rst_ni",
+        max_slv_trans=occamy.cfg["hbm_xbar"]["max_slv_trans"],
+        max_mst_trans=occamy.cfg["hbm_xbar"]["max_mst_trans"],
+        fall_through=occamy.cfg["hbm_xbar"]["fall_through"],
+        no_loopback=True,
+        atop_support=False,
+        context="soc",
+        node=am_hbm_xbar)
+
+    # Default port: HBM 0
+    for i in range(nr_hbm_channels):
+        hbm_xbar.add_output_entry("hbm_{}".format(i), am_hbm[i])
+    for i in range(nr_s1_quadrants):
+        hbm_xbar.add_input("quadrant_{}".format(i))
+    hbm_xbar.add_input("wide_xbar")
+
     soc_wide_xbar = solder.AxiXbar(
         48,
         512,
-        occamy.cfg["wide_xbar_slv_id_width_no_rocache"] + (
-            1 if occamy.cfg["s1_quadrant"].get("ro_cache_cfg") else 0),
+        # This is the cleanest solution minimizing ID width conversions
+        quadrant_pre_xbars[0].iw,
         name="soc_wide_xbar",
         clk="clk_i",
         rst="rst_ni",
@@ -469,25 +571,14 @@ def main():
         context="soc",
         node=am_soc_wide_xbar)
 
-    for i in range(nr_s1_quadrants):
-        soc_wide_xbar.add_output_symbolic("s1_quadrant_{}".format(i),
-                                          "s1_quadrant_base_addr",
-                                          "S1QuadrantAddressSpace")
-        soc_wide_xbar.add_input("s1_quadrant_{}".format(i))
-
-    for i in range(8):
-        soc_wide_xbar.add_output_entry("hbm_{}".format(i), am_hbm[i])
-
-    for i in range(nr_s1_quadrants+1):
-        soc_wide_xbar.add_input("hbi_{}".format(i))
-    soc_wide_xbar.add_output_entry("hbi_{}".format(nr_s1_quadrants), am_hbi)
-
-    soc_wide_xbar.add_input("soc_narrow")
+    # Default port: HBI (always escalate "upwards" in hierarchy -> off-chip)
+    soc_wide_xbar.add_output_entry("hbi", am_hbi)
+    soc_wide_xbar.add_output_entry("hbm_xbar", am_hbm_xbar)
+    soc_wide_xbar.add_output_entry("quadrant_inter_xbar", am_quadrant_inter_xbar)
     soc_wide_xbar.add_output_entry("soc_narrow", am_soc_narrow_xbar)
-
-    # TODO(zarubaf): PCIe should probably go into the small crossbar.
-    soc_wide_xbar.add_input("pcie")
-    soc_wide_xbar.add_output_entry("pcie", am_pcie)
+    soc_wide_xbar.add_input("hbi")
+    soc_wide_xbar.add_input("quadrant_inter_xbar")
+    soc_wide_xbar.add_input("soc_narrow")
 
     ###################
     # SoC Narrow Xbar #
@@ -517,13 +608,16 @@ def main():
     soc_narrow_xbar.add_input("cva6")
     soc_narrow_xbar.add_input("soc_wide")
     soc_narrow_xbar.add_input("periph")
+    soc_narrow_xbar.add_input("pcie")
     dts.add_cpu("eth,ariane")
 
+    # Default port: wide xbar
+    soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
     soc_narrow_xbar.add_output_entry("spm", am_spm)
-    soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)
+    soc_narrow_xbar.add_output_entry("pcie", am_pcie)
 
     ##########################
     # S1 Quadrant controller #
@@ -646,6 +740,9 @@ def main():
         "util": util,
         "soc_narrow_xbar": soc_narrow_xbar,
         "soc_wide_xbar": soc_wide_xbar,
+        "quadrant_pre_xbars": quadrant_pre_xbars,
+        "hbm_xbar": hbm_xbar,
+        "quadrant_inter_xbar": quadrant_inter_xbar,
         "quadrant_s1_ctrl_xbars": quadrant_s1_ctrl_xbars,
         "quadrant_s1_ctrl_mux": quadrant_s1_ctrl_mux,
         "wide_xbar_quadrant_s1": wide_xbar_quadrant_s1,
@@ -658,7 +755,8 @@ def main():
         "nr_s1_quadrants": nr_s1_quadrants,
         "nr_s1_clusters": nr_s1_clusters,
         "nr_cluster_cores": nr_cluster_cores,
-        "hbm_channel_size": hbm_channel_size
+        "hbm_channel_size": hbm_channel_size,
+        "nr_hbm_channels": nr_hbm_channels
     }
 
     # Emit the code.

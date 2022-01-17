@@ -51,11 +51,11 @@ module testharness import occamy_pkg::*; (
 </%def>
 
 % for i in range(8):
-  ${tb_memory(soc_wide_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i))}
+  ${tb_memory(hbm_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i))}
 % endfor
 
   logic tx, rx;
-  ${tb_memory(soc_wide_xbar.out_pcie, "pcie_axi")}
+  ${tb_memory(soc_narrow_xbar.out_pcie, "pcie_axi")}
   ${tb_memory(soc_regbus_periph_xbar.out_bootrom, "bootrom_regbus")}
   ${tb_memory(soc_regbus_periph_xbar.out_clk_mgr, "clk_mgr")}
   occamy_top i_occamy (

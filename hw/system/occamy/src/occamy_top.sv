@@ -143,11 +143,11 @@ module occamy_top
     input  axi_a48_d512_i6_u0_resp_t hbi_8_rsp_i,
 
     /// PCIe Ports
-    output axi_a48_d512_i9_u0_req_t  pcie_axi_req_o,
-    input  axi_a48_d512_i9_u0_resp_t pcie_axi_rsp_i,
+    output axi_a48_d64_i8_u0_req_t  pcie_axi_req_o,
+    input  axi_a48_d64_i8_u0_resp_t pcie_axi_rsp_i,
 
-    input  axi_a48_d512_i4_u0_req_t  pcie_axi_req_i,
-    output axi_a48_d512_i4_u0_resp_t pcie_axi_rsp_o,
+    input  axi_a48_d64_i4_u0_req_t  pcie_axi_req_i,
+    output axi_a48_d64_i4_u0_resp_t pcie_axi_rsp_o,
 
     /// SRAM configuration
     input sram_cfgs_t sram_cfgs_i

@@ -215,51 +215,549 @@ package occamy_pkg;
   '{ idx: 16, start_addr: 48'h0a000000, end_addr: 48'h0a010000 }
 };
 
+  /// Inputs of the `quadrant_pre_xbar_0` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_0_IN_QUADRANT,
+    QUADRANT_PRE_XBAR_0_IN_HBI,
+    QUADRANT_PRE_XBAR_0_NUM_INPUTS
+  } quadrant_pre_xbar_0_inputs_e;
+
+  /// Outputs of the `quadrant_pre_xbar_0` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_0_OUT_QUADRANT_INTER_XBAR,
+    QUADRANT_PRE_XBAR_0_OUT_HBM_XBAR,
+    QUADRANT_PRE_XBAR_0_NUM_OUTPUTS
+  } quadrant_pre_xbar_0_outputs_e;
+
+  /// Configuration of the `quadrant_pre_xbar_0` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar0_Cfg = '{
+  NoSlvPorts:         QUADRANT_PRE_XBAR_0_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_PRE_XBAR_0_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 4,
+  AxiIdUsedSlvPorts:  4,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        3
+};
+
+  // AXI bus with 48 bit address, 512 bit data, 4 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d512_i4_u0, logic [47:0], logic [3:0], logic [511:0], logic [63:0],
+                   logic [0:0])
+
+  // AXI bus with 48 bit address, 512 bit data, 5 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d512_i5_u0, logic [47:0], logic [4:0], logic [511:0], logic [63:0],
+                   logic [0:0])
+
+  typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_0_in_req_t;
+  typedef axi_a48_d512_i5_u0_req_t quadrant_pre_xbar_0_out_req_t;
+  typedef axi_a48_d512_i4_u0_resp_t quadrant_pre_xbar_0_in_resp_t;
+  typedef axi_a48_d512_i5_u0_resp_t quadrant_pre_xbar_0_out_resp_t;
+  typedef axi_a48_d512_i4_u0_aw_chan_t quadrant_pre_xbar_0_in_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t quadrant_pre_xbar_0_out_aw_chan_t;
+  typedef axi_a48_d512_i4_u0_w_chan_t quadrant_pre_xbar_0_in_w_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t quadrant_pre_xbar_0_out_w_chan_t;
+  typedef axi_a48_d512_i4_u0_b_chan_t quadrant_pre_xbar_0_in_b_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t quadrant_pre_xbar_0_out_b_chan_t;
+  typedef axi_a48_d512_i4_u0_ar_chan_t quadrant_pre_xbar_0_in_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t quadrant_pre_xbar_0_out_ar_chan_t;
+  typedef axi_a48_d512_i4_u0_r_chan_t quadrant_pre_xbar_0_in_r_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t quadrant_pre_xbar_0_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_0_IW_IN = 4;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_0_IW_OUT = 5;
+
+  /// Inputs of the `quadrant_pre_xbar_1` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_1_IN_QUADRANT,
+    QUADRANT_PRE_XBAR_1_IN_HBI,
+    QUADRANT_PRE_XBAR_1_NUM_INPUTS
+  } quadrant_pre_xbar_1_inputs_e;
+
+  /// Outputs of the `quadrant_pre_xbar_1` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_1_OUT_QUADRANT_INTER_XBAR,
+    QUADRANT_PRE_XBAR_1_OUT_HBM_XBAR,
+    QUADRANT_PRE_XBAR_1_NUM_OUTPUTS
+  } quadrant_pre_xbar_1_outputs_e;
+
+  /// Configuration of the `quadrant_pre_xbar_1` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar1_Cfg = '{
+  NoSlvPorts:         QUADRANT_PRE_XBAR_1_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_PRE_XBAR_1_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 4,
+  AxiIdUsedSlvPorts:  4,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        3
+};
+
+  typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_1_in_req_t;
+  typedef axi_a48_d512_i5_u0_req_t quadrant_pre_xbar_1_out_req_t;
+  typedef axi_a48_d512_i4_u0_resp_t quadrant_pre_xbar_1_in_resp_t;
+  typedef axi_a48_d512_i5_u0_resp_t quadrant_pre_xbar_1_out_resp_t;
+  typedef axi_a48_d512_i4_u0_aw_chan_t quadrant_pre_xbar_1_in_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t quadrant_pre_xbar_1_out_aw_chan_t;
+  typedef axi_a48_d512_i4_u0_w_chan_t quadrant_pre_xbar_1_in_w_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t quadrant_pre_xbar_1_out_w_chan_t;
+  typedef axi_a48_d512_i4_u0_b_chan_t quadrant_pre_xbar_1_in_b_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t quadrant_pre_xbar_1_out_b_chan_t;
+  typedef axi_a48_d512_i4_u0_ar_chan_t quadrant_pre_xbar_1_in_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t quadrant_pre_xbar_1_out_ar_chan_t;
+  typedef axi_a48_d512_i4_u0_r_chan_t quadrant_pre_xbar_1_in_r_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t quadrant_pre_xbar_1_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_1_IW_IN = 4;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_1_IW_OUT = 5;
+
+  /// Inputs of the `quadrant_pre_xbar_2` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_2_IN_QUADRANT,
+    QUADRANT_PRE_XBAR_2_IN_HBI,
+    QUADRANT_PRE_XBAR_2_NUM_INPUTS
+  } quadrant_pre_xbar_2_inputs_e;
+
+  /// Outputs of the `quadrant_pre_xbar_2` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_2_OUT_QUADRANT_INTER_XBAR,
+    QUADRANT_PRE_XBAR_2_OUT_HBM_XBAR,
+    QUADRANT_PRE_XBAR_2_NUM_OUTPUTS
+  } quadrant_pre_xbar_2_outputs_e;
+
+  /// Configuration of the `quadrant_pre_xbar_2` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar2_Cfg = '{
+  NoSlvPorts:         QUADRANT_PRE_XBAR_2_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_PRE_XBAR_2_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 4,
+  AxiIdUsedSlvPorts:  4,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        3
+};
+
+  typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_2_in_req_t;
+  typedef axi_a48_d512_i5_u0_req_t quadrant_pre_xbar_2_out_req_t;
+  typedef axi_a48_d512_i4_u0_resp_t quadrant_pre_xbar_2_in_resp_t;
+  typedef axi_a48_d512_i5_u0_resp_t quadrant_pre_xbar_2_out_resp_t;
+  typedef axi_a48_d512_i4_u0_aw_chan_t quadrant_pre_xbar_2_in_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t quadrant_pre_xbar_2_out_aw_chan_t;
+  typedef axi_a48_d512_i4_u0_w_chan_t quadrant_pre_xbar_2_in_w_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t quadrant_pre_xbar_2_out_w_chan_t;
+  typedef axi_a48_d512_i4_u0_b_chan_t quadrant_pre_xbar_2_in_b_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t quadrant_pre_xbar_2_out_b_chan_t;
+  typedef axi_a48_d512_i4_u0_ar_chan_t quadrant_pre_xbar_2_in_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t quadrant_pre_xbar_2_out_ar_chan_t;
+  typedef axi_a48_d512_i4_u0_r_chan_t quadrant_pre_xbar_2_in_r_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t quadrant_pre_xbar_2_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_2_IW_IN = 4;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_2_IW_OUT = 5;
+
+  /// Inputs of the `quadrant_pre_xbar_3` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_3_IN_QUADRANT,
+    QUADRANT_PRE_XBAR_3_IN_HBI,
+    QUADRANT_PRE_XBAR_3_NUM_INPUTS
+  } quadrant_pre_xbar_3_inputs_e;
+
+  /// Outputs of the `quadrant_pre_xbar_3` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_3_OUT_QUADRANT_INTER_XBAR,
+    QUADRANT_PRE_XBAR_3_OUT_HBM_XBAR,
+    QUADRANT_PRE_XBAR_3_NUM_OUTPUTS
+  } quadrant_pre_xbar_3_outputs_e;
+
+  /// Configuration of the `quadrant_pre_xbar_3` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar3_Cfg = '{
+  NoSlvPorts:         QUADRANT_PRE_XBAR_3_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_PRE_XBAR_3_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 4,
+  AxiIdUsedSlvPorts:  4,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        3
+};
+
+  typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_3_in_req_t;
+  typedef axi_a48_d512_i5_u0_req_t quadrant_pre_xbar_3_out_req_t;
+  typedef axi_a48_d512_i4_u0_resp_t quadrant_pre_xbar_3_in_resp_t;
+  typedef axi_a48_d512_i5_u0_resp_t quadrant_pre_xbar_3_out_resp_t;
+  typedef axi_a48_d512_i4_u0_aw_chan_t quadrant_pre_xbar_3_in_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t quadrant_pre_xbar_3_out_aw_chan_t;
+  typedef axi_a48_d512_i4_u0_w_chan_t quadrant_pre_xbar_3_in_w_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t quadrant_pre_xbar_3_out_w_chan_t;
+  typedef axi_a48_d512_i4_u0_b_chan_t quadrant_pre_xbar_3_in_b_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t quadrant_pre_xbar_3_out_b_chan_t;
+  typedef axi_a48_d512_i4_u0_ar_chan_t quadrant_pre_xbar_3_in_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t quadrant_pre_xbar_3_out_ar_chan_t;
+  typedef axi_a48_d512_i4_u0_r_chan_t quadrant_pre_xbar_3_in_r_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t quadrant_pre_xbar_3_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_3_IW_IN = 4;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_3_IW_OUT = 5;
+
+  /// Inputs of the `quadrant_pre_xbar_4` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_4_IN_QUADRANT,
+    QUADRANT_PRE_XBAR_4_IN_HBI,
+    QUADRANT_PRE_XBAR_4_NUM_INPUTS
+  } quadrant_pre_xbar_4_inputs_e;
+
+  /// Outputs of the `quadrant_pre_xbar_4` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_4_OUT_QUADRANT_INTER_XBAR,
+    QUADRANT_PRE_XBAR_4_OUT_HBM_XBAR,
+    QUADRANT_PRE_XBAR_4_NUM_OUTPUTS
+  } quadrant_pre_xbar_4_outputs_e;
+
+  /// Configuration of the `quadrant_pre_xbar_4` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar4_Cfg = '{
+  NoSlvPorts:         QUADRANT_PRE_XBAR_4_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_PRE_XBAR_4_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 4,
+  AxiIdUsedSlvPorts:  4,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        3
+};
+
+  typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_4_in_req_t;
+  typedef axi_a48_d512_i5_u0_req_t quadrant_pre_xbar_4_out_req_t;
+  typedef axi_a48_d512_i4_u0_resp_t quadrant_pre_xbar_4_in_resp_t;
+  typedef axi_a48_d512_i5_u0_resp_t quadrant_pre_xbar_4_out_resp_t;
+  typedef axi_a48_d512_i4_u0_aw_chan_t quadrant_pre_xbar_4_in_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t quadrant_pre_xbar_4_out_aw_chan_t;
+  typedef axi_a48_d512_i4_u0_w_chan_t quadrant_pre_xbar_4_in_w_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t quadrant_pre_xbar_4_out_w_chan_t;
+  typedef axi_a48_d512_i4_u0_b_chan_t quadrant_pre_xbar_4_in_b_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t quadrant_pre_xbar_4_out_b_chan_t;
+  typedef axi_a48_d512_i4_u0_ar_chan_t quadrant_pre_xbar_4_in_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t quadrant_pre_xbar_4_out_ar_chan_t;
+  typedef axi_a48_d512_i4_u0_r_chan_t quadrant_pre_xbar_4_in_r_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t quadrant_pre_xbar_4_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_4_IW_IN = 4;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_4_IW_OUT = 5;
+
+  /// Inputs of the `quadrant_pre_xbar_5` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_5_IN_QUADRANT,
+    QUADRANT_PRE_XBAR_5_IN_HBI,
+    QUADRANT_PRE_XBAR_5_NUM_INPUTS
+  } quadrant_pre_xbar_5_inputs_e;
+
+  /// Outputs of the `quadrant_pre_xbar_5` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_5_OUT_QUADRANT_INTER_XBAR,
+    QUADRANT_PRE_XBAR_5_OUT_HBM_XBAR,
+    QUADRANT_PRE_XBAR_5_NUM_OUTPUTS
+  } quadrant_pre_xbar_5_outputs_e;
+
+  /// Configuration of the `quadrant_pre_xbar_5` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar5_Cfg = '{
+  NoSlvPorts:         QUADRANT_PRE_XBAR_5_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_PRE_XBAR_5_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 4,
+  AxiIdUsedSlvPorts:  4,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        3
+};
+
+  typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_5_in_req_t;
+  typedef axi_a48_d512_i5_u0_req_t quadrant_pre_xbar_5_out_req_t;
+  typedef axi_a48_d512_i4_u0_resp_t quadrant_pre_xbar_5_in_resp_t;
+  typedef axi_a48_d512_i5_u0_resp_t quadrant_pre_xbar_5_out_resp_t;
+  typedef axi_a48_d512_i4_u0_aw_chan_t quadrant_pre_xbar_5_in_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t quadrant_pre_xbar_5_out_aw_chan_t;
+  typedef axi_a48_d512_i4_u0_w_chan_t quadrant_pre_xbar_5_in_w_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t quadrant_pre_xbar_5_out_w_chan_t;
+  typedef axi_a48_d512_i4_u0_b_chan_t quadrant_pre_xbar_5_in_b_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t quadrant_pre_xbar_5_out_b_chan_t;
+  typedef axi_a48_d512_i4_u0_ar_chan_t quadrant_pre_xbar_5_in_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t quadrant_pre_xbar_5_out_ar_chan_t;
+  typedef axi_a48_d512_i4_u0_r_chan_t quadrant_pre_xbar_5_in_r_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t quadrant_pre_xbar_5_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_5_IW_IN = 4;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_5_IW_OUT = 5;
+
+  /// Inputs of the `quadrant_pre_xbar_6` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_6_IN_QUADRANT,
+    QUADRANT_PRE_XBAR_6_IN_HBI,
+    QUADRANT_PRE_XBAR_6_NUM_INPUTS
+  } quadrant_pre_xbar_6_inputs_e;
+
+  /// Outputs of the `quadrant_pre_xbar_6` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_6_OUT_QUADRANT_INTER_XBAR,
+    QUADRANT_PRE_XBAR_6_OUT_HBM_XBAR,
+    QUADRANT_PRE_XBAR_6_NUM_OUTPUTS
+  } quadrant_pre_xbar_6_outputs_e;
+
+  /// Configuration of the `quadrant_pre_xbar_6` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar6_Cfg = '{
+  NoSlvPorts:         QUADRANT_PRE_XBAR_6_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_PRE_XBAR_6_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 4,
+  AxiIdUsedSlvPorts:  4,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        3
+};
+
+  typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_6_in_req_t;
+  typedef axi_a48_d512_i5_u0_req_t quadrant_pre_xbar_6_out_req_t;
+  typedef axi_a48_d512_i4_u0_resp_t quadrant_pre_xbar_6_in_resp_t;
+  typedef axi_a48_d512_i5_u0_resp_t quadrant_pre_xbar_6_out_resp_t;
+  typedef axi_a48_d512_i4_u0_aw_chan_t quadrant_pre_xbar_6_in_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t quadrant_pre_xbar_6_out_aw_chan_t;
+  typedef axi_a48_d512_i4_u0_w_chan_t quadrant_pre_xbar_6_in_w_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t quadrant_pre_xbar_6_out_w_chan_t;
+  typedef axi_a48_d512_i4_u0_b_chan_t quadrant_pre_xbar_6_in_b_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t quadrant_pre_xbar_6_out_b_chan_t;
+  typedef axi_a48_d512_i4_u0_ar_chan_t quadrant_pre_xbar_6_in_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t quadrant_pre_xbar_6_out_ar_chan_t;
+  typedef axi_a48_d512_i4_u0_r_chan_t quadrant_pre_xbar_6_in_r_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t quadrant_pre_xbar_6_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_6_IW_IN = 4;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_6_IW_OUT = 5;
+
+  /// Inputs of the `quadrant_pre_xbar_7` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_7_IN_QUADRANT,
+    QUADRANT_PRE_XBAR_7_IN_HBI,
+    QUADRANT_PRE_XBAR_7_NUM_INPUTS
+  } quadrant_pre_xbar_7_inputs_e;
+
+  /// Outputs of the `quadrant_pre_xbar_7` crossbar.
+  typedef enum int {
+    QUADRANT_PRE_XBAR_7_OUT_QUADRANT_INTER_XBAR,
+    QUADRANT_PRE_XBAR_7_OUT_HBM_XBAR,
+    QUADRANT_PRE_XBAR_7_NUM_OUTPUTS
+  } quadrant_pre_xbar_7_outputs_e;
+
+  /// Configuration of the `quadrant_pre_xbar_7` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar7_Cfg = '{
+  NoSlvPorts:         QUADRANT_PRE_XBAR_7_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_PRE_XBAR_7_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 4,
+  AxiIdUsedSlvPorts:  4,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        3
+};
+
+  typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_7_in_req_t;
+  typedef axi_a48_d512_i5_u0_req_t quadrant_pre_xbar_7_out_req_t;
+  typedef axi_a48_d512_i4_u0_resp_t quadrant_pre_xbar_7_in_resp_t;
+  typedef axi_a48_d512_i5_u0_resp_t quadrant_pre_xbar_7_out_resp_t;
+  typedef axi_a48_d512_i4_u0_aw_chan_t quadrant_pre_xbar_7_in_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t quadrant_pre_xbar_7_out_aw_chan_t;
+  typedef axi_a48_d512_i4_u0_w_chan_t quadrant_pre_xbar_7_in_w_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t quadrant_pre_xbar_7_out_w_chan_t;
+  typedef axi_a48_d512_i4_u0_b_chan_t quadrant_pre_xbar_7_in_b_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t quadrant_pre_xbar_7_out_b_chan_t;
+  typedef axi_a48_d512_i4_u0_ar_chan_t quadrant_pre_xbar_7_in_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t quadrant_pre_xbar_7_out_ar_chan_t;
+  typedef axi_a48_d512_i4_u0_r_chan_t quadrant_pre_xbar_7_in_r_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t quadrant_pre_xbar_7_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_7_IW_IN = 4;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_PRE_XBAR_7_IW_OUT = 5;
+
+  /// Inputs of the `quadrant_inter_xbar` crossbar.
+  typedef enum int {
+    QUADRANT_INTER_XBAR_IN_WIDE_XBAR,
+    QUADRANT_INTER_XBAR_IN_QUADRANT_0,
+    QUADRANT_INTER_XBAR_IN_QUADRANT_1,
+    QUADRANT_INTER_XBAR_IN_QUADRANT_2,
+    QUADRANT_INTER_XBAR_IN_QUADRANT_3,
+    QUADRANT_INTER_XBAR_IN_QUADRANT_4,
+    QUADRANT_INTER_XBAR_IN_QUADRANT_5,
+    QUADRANT_INTER_XBAR_IN_QUADRANT_6,
+    QUADRANT_INTER_XBAR_IN_QUADRANT_7,
+    QUADRANT_INTER_XBAR_NUM_INPUTS
+  } quadrant_inter_xbar_inputs_e;
+
+  /// Outputs of the `quadrant_inter_xbar` crossbar.
+  typedef enum int {
+    QUADRANT_INTER_XBAR_OUT_WIDE_XBAR,
+    QUADRANT_INTER_XBAR_OUT_QUADRANT_0,
+    QUADRANT_INTER_XBAR_OUT_QUADRANT_1,
+    QUADRANT_INTER_XBAR_OUT_QUADRANT_2,
+    QUADRANT_INTER_XBAR_OUT_QUADRANT_3,
+    QUADRANT_INTER_XBAR_OUT_QUADRANT_4,
+    QUADRANT_INTER_XBAR_OUT_QUADRANT_5,
+    QUADRANT_INTER_XBAR_OUT_QUADRANT_6,
+    QUADRANT_INTER_XBAR_OUT_QUADRANT_7,
+    QUADRANT_INTER_XBAR_NUM_OUTPUTS
+  } quadrant_inter_xbar_outputs_e;
+
+  /// Configuration of the `quadrant_inter_xbar` crossbar.
+  localparam axi_pkg::xbar_cfg_t QuadrantInterXbarCfg = '{
+  NoSlvPorts:         QUADRANT_INTER_XBAR_NUM_INPUTS,
+  NoMstPorts:         QUADRANT_INTER_XBAR_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 5,
+  AxiIdUsedSlvPorts:  5,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        10
+};
+
+  // AXI bus with 48 bit address, 512 bit data, 9 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d512_i9_u0, logic [47:0], logic [8:0], logic [511:0], logic [63:0],
+                   logic [0:0])
+
+  typedef axi_a48_d512_i5_u0_req_t quadrant_inter_xbar_in_req_t;
+  typedef axi_a48_d512_i9_u0_req_t quadrant_inter_xbar_out_req_t;
+  typedef axi_a48_d512_i5_u0_resp_t quadrant_inter_xbar_in_resp_t;
+  typedef axi_a48_d512_i9_u0_resp_t quadrant_inter_xbar_out_resp_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t quadrant_inter_xbar_in_aw_chan_t;
+  typedef axi_a48_d512_i9_u0_aw_chan_t quadrant_inter_xbar_out_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t quadrant_inter_xbar_in_w_chan_t;
+  typedef axi_a48_d512_i9_u0_w_chan_t quadrant_inter_xbar_out_w_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t quadrant_inter_xbar_in_b_chan_t;
+  typedef axi_a48_d512_i9_u0_b_chan_t quadrant_inter_xbar_out_b_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t quadrant_inter_xbar_in_ar_chan_t;
+  typedef axi_a48_d512_i9_u0_ar_chan_t quadrant_inter_xbar_out_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t quadrant_inter_xbar_in_r_chan_t;
+  typedef axi_a48_d512_i9_u0_r_chan_t quadrant_inter_xbar_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_INTER_XBAR_IW_IN = 5;
+  // verilog_lint: waive parameter-name-style
+  localparam int QUADRANT_INTER_XBAR_IW_OUT = 9;
+
+  /// Inputs of the `hbm_xbar` crossbar.
+  typedef enum int {
+    HBM_XBAR_IN_QUADRANT_0,
+    HBM_XBAR_IN_QUADRANT_1,
+    HBM_XBAR_IN_QUADRANT_2,
+    HBM_XBAR_IN_QUADRANT_3,
+    HBM_XBAR_IN_QUADRANT_4,
+    HBM_XBAR_IN_QUADRANT_5,
+    HBM_XBAR_IN_QUADRANT_6,
+    HBM_XBAR_IN_QUADRANT_7,
+    HBM_XBAR_IN_WIDE_XBAR,
+    HBM_XBAR_NUM_INPUTS
+  } hbm_xbar_inputs_e;
+
+  /// Outputs of the `hbm_xbar` crossbar.
+  typedef enum int {
+    HBM_XBAR_OUT_HBM_0,
+    HBM_XBAR_OUT_HBM_1,
+    HBM_XBAR_OUT_HBM_2,
+    HBM_XBAR_OUT_HBM_3,
+    HBM_XBAR_OUT_HBM_4,
+    HBM_XBAR_OUT_HBM_5,
+    HBM_XBAR_OUT_HBM_6,
+    HBM_XBAR_OUT_HBM_7,
+    HBM_XBAR_NUM_OUTPUTS
+  } hbm_xbar_outputs_e;
+
+  /// Configuration of the `hbm_xbar` crossbar.
+  localparam axi_pkg::xbar_cfg_t HbmXbarCfg = '{
+  NoSlvPorts:         HBM_XBAR_NUM_INPUTS,
+  NoMstPorts:         HBM_XBAR_NUM_OUTPUTS,
+  MaxSlvTrans:        4,
+  MaxMstTrans:        4,
+  FallThrough:        0,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
+  AxiIdWidthSlvPorts: 5,
+  AxiIdUsedSlvPorts:  5,
+  AxiAddrWidth:       48,
+  AxiDataWidth:       512,
+  NoAddrRules:        10
+};
+
+  typedef axi_a48_d512_i5_u0_req_t hbm_xbar_in_req_t;
+  typedef axi_a48_d512_i9_u0_req_t hbm_xbar_out_req_t;
+  typedef axi_a48_d512_i5_u0_resp_t hbm_xbar_in_resp_t;
+  typedef axi_a48_d512_i9_u0_resp_t hbm_xbar_out_resp_t;
+  typedef axi_a48_d512_i5_u0_aw_chan_t hbm_xbar_in_aw_chan_t;
+  typedef axi_a48_d512_i9_u0_aw_chan_t hbm_xbar_out_aw_chan_t;
+  typedef axi_a48_d512_i5_u0_w_chan_t hbm_xbar_in_w_chan_t;
+  typedef axi_a48_d512_i9_u0_w_chan_t hbm_xbar_out_w_chan_t;
+  typedef axi_a48_d512_i5_u0_b_chan_t hbm_xbar_in_b_chan_t;
+  typedef axi_a48_d512_i9_u0_b_chan_t hbm_xbar_out_b_chan_t;
+  typedef axi_a48_d512_i5_u0_ar_chan_t hbm_xbar_in_ar_chan_t;
+  typedef axi_a48_d512_i9_u0_ar_chan_t hbm_xbar_out_ar_chan_t;
+  typedef axi_a48_d512_i5_u0_r_chan_t hbm_xbar_in_r_chan_t;
+  typedef axi_a48_d512_i9_u0_r_chan_t hbm_xbar_out_r_chan_t;
+
+  // verilog_lint: waive parameter-name-style
+  localparam int HBM_XBAR_IW_IN = 5;
+  // verilog_lint: waive parameter-name-style
+  localparam int HBM_XBAR_IW_OUT = 9;
+
   /// Inputs of the `soc_wide_xbar` crossbar.
   typedef enum int {
-    SOC_WIDE_XBAR_IN_S1_QUADRANT_0,
-    SOC_WIDE_XBAR_IN_S1_QUADRANT_1,
-    SOC_WIDE_XBAR_IN_S1_QUADRANT_2,
-    SOC_WIDE_XBAR_IN_S1_QUADRANT_3,
-    SOC_WIDE_XBAR_IN_S1_QUADRANT_4,
-    SOC_WIDE_XBAR_IN_S1_QUADRANT_5,
-    SOC_WIDE_XBAR_IN_S1_QUADRANT_6,
-    SOC_WIDE_XBAR_IN_S1_QUADRANT_7,
-    SOC_WIDE_XBAR_IN_HBI_0,
-    SOC_WIDE_XBAR_IN_HBI_1,
-    SOC_WIDE_XBAR_IN_HBI_2,
-    SOC_WIDE_XBAR_IN_HBI_3,
-    SOC_WIDE_XBAR_IN_HBI_4,
-    SOC_WIDE_XBAR_IN_HBI_5,
-    SOC_WIDE_XBAR_IN_HBI_6,
-    SOC_WIDE_XBAR_IN_HBI_7,
-    SOC_WIDE_XBAR_IN_HBI_8,
+    SOC_WIDE_XBAR_IN_HBI,
+    SOC_WIDE_XBAR_IN_QUADRANT_INTER_XBAR,
     SOC_WIDE_XBAR_IN_SOC_NARROW,
-    SOC_WIDE_XBAR_IN_PCIE,
     SOC_WIDE_XBAR_NUM_INPUTS
   } soc_wide_xbar_inputs_e;
 
   /// Outputs of the `soc_wide_xbar` crossbar.
   typedef enum int {
-    SOC_WIDE_XBAR_OUT_S1_QUADRANT_0,
-    SOC_WIDE_XBAR_OUT_S1_QUADRANT_1,
-    SOC_WIDE_XBAR_OUT_S1_QUADRANT_2,
-    SOC_WIDE_XBAR_OUT_S1_QUADRANT_3,
-    SOC_WIDE_XBAR_OUT_S1_QUADRANT_4,
-    SOC_WIDE_XBAR_OUT_S1_QUADRANT_5,
-    SOC_WIDE_XBAR_OUT_S1_QUADRANT_6,
-    SOC_WIDE_XBAR_OUT_S1_QUADRANT_7,
-    SOC_WIDE_XBAR_OUT_HBM_0,
-    SOC_WIDE_XBAR_OUT_HBM_1,
-    SOC_WIDE_XBAR_OUT_HBM_2,
-    SOC_WIDE_XBAR_OUT_HBM_3,
-    SOC_WIDE_XBAR_OUT_HBM_4,
-    SOC_WIDE_XBAR_OUT_HBM_5,
-    SOC_WIDE_XBAR_OUT_HBM_6,
-    SOC_WIDE_XBAR_OUT_HBM_7,
-    SOC_WIDE_XBAR_OUT_HBI_8,
+    SOC_WIDE_XBAR_OUT_HBI,
+    SOC_WIDE_XBAR_OUT_HBM_XBAR,
+    SOC_WIDE_XBAR_OUT_QUADRANT_INTER_XBAR,
     SOC_WIDE_XBAR_OUT_SOC_NARROW,
-    SOC_WIDE_XBAR_OUT_PCIE,
     SOC_WIDE_XBAR_NUM_OUTPUTS
   } soc_wide_xbar_outputs_e;
 
@@ -275,36 +773,32 @@ package occamy_pkg;
   AxiIdUsedSlvPorts:  4,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        22
+  NoAddrRules:        5
 };
 
-  // AXI bus with 48 bit address, 512 bit data, 4 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i4_u0, logic [47:0], logic [3:0], logic [511:0], logic [63:0],
-                   logic [0:0])
-
-  // AXI bus with 48 bit address, 512 bit data, 9 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i9_u0, logic [47:0], logic [8:0], logic [511:0], logic [63:0],
+  // AXI bus with 48 bit address, 512 bit data, 6 bit IDs, and 0 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d512_i6_u0, logic [47:0], logic [5:0], logic [511:0], logic [63:0],
                    logic [0:0])
 
   typedef axi_a48_d512_i4_u0_req_t soc_wide_xbar_in_req_t;
-  typedef axi_a48_d512_i9_u0_req_t soc_wide_xbar_out_req_t;
+  typedef axi_a48_d512_i6_u0_req_t soc_wide_xbar_out_req_t;
   typedef axi_a48_d512_i4_u0_resp_t soc_wide_xbar_in_resp_t;
-  typedef axi_a48_d512_i9_u0_resp_t soc_wide_xbar_out_resp_t;
+  typedef axi_a48_d512_i6_u0_resp_t soc_wide_xbar_out_resp_t;
   typedef axi_a48_d512_i4_u0_aw_chan_t soc_wide_xbar_in_aw_chan_t;
-  typedef axi_a48_d512_i9_u0_aw_chan_t soc_wide_xbar_out_aw_chan_t;
+  typedef axi_a48_d512_i6_u0_aw_chan_t soc_wide_xbar_out_aw_chan_t;
   typedef axi_a48_d512_i4_u0_w_chan_t soc_wide_xbar_in_w_chan_t;
-  typedef axi_a48_d512_i9_u0_w_chan_t soc_wide_xbar_out_w_chan_t;
+  typedef axi_a48_d512_i6_u0_w_chan_t soc_wide_xbar_out_w_chan_t;
   typedef axi_a48_d512_i4_u0_b_chan_t soc_wide_xbar_in_b_chan_t;
-  typedef axi_a48_d512_i9_u0_b_chan_t soc_wide_xbar_out_b_chan_t;
+  typedef axi_a48_d512_i6_u0_b_chan_t soc_wide_xbar_out_b_chan_t;
   typedef axi_a48_d512_i4_u0_ar_chan_t soc_wide_xbar_in_ar_chan_t;
-  typedef axi_a48_d512_i9_u0_ar_chan_t soc_wide_xbar_out_ar_chan_t;
+  typedef axi_a48_d512_i6_u0_ar_chan_t soc_wide_xbar_out_ar_chan_t;
   typedef axi_a48_d512_i4_u0_r_chan_t soc_wide_xbar_in_r_chan_t;
-  typedef axi_a48_d512_i9_u0_r_chan_t soc_wide_xbar_out_r_chan_t;
+  typedef axi_a48_d512_i6_u0_r_chan_t soc_wide_xbar_out_r_chan_t;
 
   // verilog_lint: waive parameter-name-style
   localparam int SOC_WIDE_XBAR_IW_IN = 4;
   // verilog_lint: waive parameter-name-style
-  localparam int SOC_WIDE_XBAR_IW_OUT = 9;
+  localparam int SOC_WIDE_XBAR_IW_OUT = 6;
 
   /// Inputs of the `soc_narrow_xbar` crossbar.
   typedef enum int {
@@ -319,6 +813,7 @@ package occamy_pkg;
     SOC_NARROW_XBAR_IN_CVA6,
     SOC_NARROW_XBAR_IN_SOC_WIDE,
     SOC_NARROW_XBAR_IN_PERIPH,
+    SOC_NARROW_XBAR_IN_PCIE,
     SOC_NARROW_XBAR_NUM_INPUTS
   } soc_narrow_xbar_inputs_e;
 
@@ -332,10 +827,11 @@ package occamy_pkg;
     SOC_NARROW_XBAR_OUT_S1_QUADRANT_5,
     SOC_NARROW_XBAR_OUT_S1_QUADRANT_6,
     SOC_NARROW_XBAR_OUT_S1_QUADRANT_7,
+    SOC_NARROW_XBAR_OUT_SOC_WIDE,
     SOC_NARROW_XBAR_OUT_PERIPH,
     SOC_NARROW_XBAR_OUT_SPM,
-    SOC_NARROW_XBAR_OUT_SOC_WIDE,
     SOC_NARROW_XBAR_OUT_REGBUS_PERIPH,
+    SOC_NARROW_XBAR_OUT_PCIE,
     SOC_NARROW_XBAR_NUM_OUTPUTS
   } soc_narrow_xbar_outputs_e;
 
@@ -569,10 +1065,6 @@ package occamy_pkg;
 
   // AXI bus with 48 bit address, 512 bit data, 3 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL(axi_a48_d512_i3_u0, logic [47:0], logic [2:0], logic [511:0], logic [63:0],
-                   logic [0:0])
-
-  // AXI bus with 48 bit address, 512 bit data, 6 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i6_u0, logic [47:0], logic [5:0], logic [511:0], logic [63:0],
                    logic [0:0])
 
   typedef axi_a48_d512_i3_u0_req_t wide_xbar_quadrant_s1_in_req_t;

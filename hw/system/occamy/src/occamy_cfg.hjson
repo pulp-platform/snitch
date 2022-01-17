@@ -14,6 +14,21 @@
       max_mst_trans: 4,
       fall_through: false,
     },
+    quadrant_pre_xbar: {
+      max_slv_trans: 4,
+      max_mst_trans: 4,
+      fall_through: false,
+    },
+    quadrant_inter_xbar: {
+      max_slv_trans: 4,
+      max_mst_trans: 4,
+      fall_through: false,
+    },
+    hbm_xbar: {
+      max_slv_trans: 4,
+      max_mst_trans: 4,
+      fall_through: false,
+    },
     nr_s1_quadrant: 8,
     s1_quadrant: {
       nr_clusters: 4,

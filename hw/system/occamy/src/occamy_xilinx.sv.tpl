@@ -67,12 +67,12 @@ import occamy_pkg::*;
 
   /// HBM2e Ports
 % for i in range(8):
-  ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].emit_flat_master_port("hbm_{}".format(i))},
+  ${hbm_xbar.__dict__["out_hbm_{}".format(i)].emit_flat_master_port("hbm_{}".format(i))},
 % endfor
 
   /// PCIe Ports
-  ${soc_wide_xbar.out_pcie.emit_flat_master_port("pcie")},
-  ${soc_wide_xbar.in_pcie.emit_flat_slave_port("pcie")}
+  ${soc_narrow_xbar.out_pcie.emit_flat_master_port("pcie")},
+  ${soc_narrow_xbar.in_pcie.emit_flat_slave_port("pcie")}
   /// HBI Ports
 );
 
@@ -80,11 +80,11 @@ import occamy_pkg::*;
   //////////
   // PCIe //
   //////////
-  ${soc_wide_xbar.out_pcie.req_type()} pcie_axi_req_o;
-  ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i;
+  ${soc_narrow_xbar.out_pcie.req_type()} pcie_axi_req_o;
+  ${soc_narrow_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i;
 
-  ${soc_wide_xbar.in_pcie.req_type()} pcie_axi_req_i;
-  ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o;
+  ${soc_narrow_xbar.in_pcie.req_type()} pcie_axi_req_i;
+  ${soc_narrow_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(pcie, pcie_axi_req_o, pcie_axi_rsp_i)
@@ -94,8 +94,8 @@ import occamy_pkg::*;
   // HBM //
   /////////
 % for i in range(8):
-  ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].req_type()} hbm_${i}_req_o;
-  ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].rsp_type()} hbm_${i}_rsp_i;
+  ${hbm_xbar.__dict__["out_hbm_{}".format(i)].req_type()} hbm_${i}_req_o;
+  ${hbm_xbar.__dict__["out_hbm_{}".format(i)].rsp_type()} hbm_${i}_rsp_i;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_${i}, hbm_${i}_req_o, hbm_${i}_rsp_i)

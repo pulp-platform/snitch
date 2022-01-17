@@ -34,8 +34,8 @@ module occamy_quadrant_s1_ctrl
   output logic ro_enable_o,
   output logic ro_flush_valid_o,
   input  logic ro_flush_ready_i,
-  output logic [${ro_cache_regions-1}:0][${soc_wide_xbar.in_s1_quadrant_0.aw-1}:0] ro_start_addr_o,
-  output logic [${ro_cache_regions-1}:0][${soc_wide_xbar.in_s1_quadrant_0.aw-1}:0] ro_end_addr_o,
+  output logic [${ro_cache_regions-1}:0][${quadrant_pre_xbars[0].in_quadrant.aw-1}:0] ro_start_addr_o,
+  output logic [${ro_cache_regions-1}:0][${quadrant_pre_xbars[0].in_quadrant.aw-1}:0] ro_end_addr_o,
 
   // Upward (SoC) narrow ports
   output ${soc_narrow_xbar.in_s1_quadrant_0.req_type()} soc_out_req_o,

@@ -87,25 +87,25 @@ module occamy_top
   input logic [11:0] ext_irq_i,
 
   /// HBM2e Ports
-% for i in range(8):
-  output  ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].req_type()} hbm_${i}_req_o,
-  input   ${soc_wide_xbar.__dict__["out_hbm_{}".format(i)].rsp_type()} hbm_${i}_rsp_i,
+% for i in range(nr_hbm_channels):
+  output  ${hbm_xbar.__dict__["out_hbm_{}".format(i)].req_type()} hbm_${i}_req_o,
+  input   ${hbm_xbar.__dict__["out_hbm_{}".format(i)].rsp_type()} hbm_${i}_rsp_i,
 % endfor
 
   /// HBI Ports
 % for i in range(nr_s1_quadrants+1):
-  input   ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].req_type()} hbi_${i}_req_i,
-  output  ${soc_wide_xbar.__dict__["in_hbi_{}".format(i)].rsp_type()} hbi_${i}_rsp_o,
+  input   ${quadrant_pre_xbars[0].in_hbi.req_type()} hbi_${i}_req_i,
+  output  ${quadrant_pre_xbars[0].in_hbi.rsp_type()} hbi_${i}_rsp_o,
   output  ${wide_xbar_quadrant_s1.out_hbi.req_type()} hbi_${i}_req_o,
   input   ${wide_xbar_quadrant_s1.out_hbi.rsp_type()} hbi_${i}_rsp_i,
 % endfor
 
   /// PCIe Ports
-  output  ${soc_wide_xbar.out_pcie.req_type()} pcie_axi_req_o,
-  input   ${soc_wide_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i,
+  output  ${soc_narrow_xbar.out_pcie.req_type()} pcie_axi_req_o,
+  input   ${soc_narrow_xbar.out_pcie.rsp_type()} pcie_axi_rsp_i,
 
-  input  ${soc_wide_xbar.in_pcie.req_type()} pcie_axi_req_i,
-  output ${soc_wide_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o,
+  input  ${soc_narrow_xbar.in_pcie.req_type()} pcie_axi_req_i,
+  output ${soc_narrow_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o,
 
   /// SRAM configuration
   input sram_cfgs_t sram_cfgs_i

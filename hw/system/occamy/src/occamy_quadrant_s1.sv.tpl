@@ -35,10 +35,10 @@ module occamy_quadrant_s1
   input  ${soc_narrow_xbar.in_s1_quadrant_0.rsp_type()} quadrant_narrow_out_rsp_i,
   input  ${soc_narrow_xbar.out_s1_quadrant_0.req_type()} quadrant_narrow_in_req_i,
   output ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} quadrant_narrow_in_rsp_o,
-  output ${soc_wide_xbar.in_s1_quadrant_0.req_type()}   quadrant_wide_out_req_o,
-  input  ${soc_wide_xbar.in_s1_quadrant_0.rsp_type()}   quadrant_wide_out_rsp_i,
-  input  ${soc_wide_xbar.out_s1_quadrant_0.req_type()}   quadrant_wide_in_req_i,
-  output ${soc_wide_xbar.out_s1_quadrant_0.rsp_type()}   quadrant_wide_in_rsp_o,
+  output ${quadrant_pre_xbars[0].in_quadrant.req_type()} quadrant_wide_out_req_o,
+  input  ${quadrant_pre_xbars[0].in_quadrant.rsp_type()} quadrant_wide_out_rsp_i,
+  input  ${quadrant_inter_xbar.out_quadrant_0.req_type()} quadrant_wide_in_req_i,
+  output ${quadrant_inter_xbar.out_quadrant_0.rsp_type()} quadrant_wide_in_rsp_o,
   // SRAM configuration
   input  sram_cfg_quadrant_t sram_cfg_i
 );
@@ -53,7 +53,7 @@ module occamy_quadrant_s1
   logic clk_quadrant, rst_quadrant_n;
   logic [4:0] isolate, isolated;
   logic ro_enable, ro_flush_valid, ro_flush_ready;
-  logic [${ro_cache_regions-1}:0][${soc_wide_xbar.in_s1_quadrant_0.aw-1}:0] ro_start_addr, ro_end_addr;
+  logic [${ro_cache_regions-1}:0][${quadrant_pre_xbars[0].in_quadrant.aw-1}:0] ro_start_addr, ro_end_addr;
 
   ///////////////////
   //   CROSSBARS   //
@@ -108,7 +108,7 @@ module occamy_quadrant_s1
       .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni") \
       .cut(context, wide_out_added_cuts)
 
-    assert soc_wide_xbar.in_s1_quadrant_0.iw == wide_cluster_out_cut.iw, "S1 Quadrant and Cluster Out IW mismatches."
+    assert quadrant_pre_xbars[0].in_quadrant.iw == wide_cluster_out_cut.iw, "S1 Quadrant and Cluster Out IW mismatches."
   %>
 
   assign quadrant_wide_out_req_o = ${wide_cluster_out_cut.req_name()};
@@ -130,7 +130,7 @@ module occamy_quadrant_s1
   // Wide In + IW Converter //
   ////////////////////////////
   <%
-    soc_wide_xbar.out_s1_quadrant_0 \
+    quadrant_inter_xbar.out_quadrant_0 \
       .copy(name="wide_cluster_in_iwc") \
       .declare(context) \
       .cut(context, wide_out_added_cuts) \
