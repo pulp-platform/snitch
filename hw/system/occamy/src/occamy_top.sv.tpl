@@ -93,12 +93,15 @@ module occamy_top
 % endfor
 
   /// HBI Ports
-% for i in range(nr_s1_quadrants+1):
-  input   ${quadrant_pre_xbars[0].in_hbi.req_type()} hbi_${i}_req_i,
-  output  ${quadrant_pre_xbars[0].in_hbi.rsp_type()} hbi_${i}_rsp_o,
-  output  ${wide_xbar_quadrant_s1.out_hbi.req_type()} hbi_${i}_req_o,
-  input   ${wide_xbar_quadrant_s1.out_hbi.rsp_type()} hbi_${i}_rsp_i,
-% endfor
+  input   ${soc_wide_xbar.in_hbi.req_type()} hbi_wide_req_i,
+  output  ${soc_wide_xbar.in_hbi.rsp_type()} hbi_wide_rsp_o,
+  output  ${soc_wide_xbar.out_hbi.req_type()} hbi_wide_req_o,
+  input   ${soc_wide_xbar.out_hbi.rsp_type()} hbi_wide_rsp_i,
+
+  input   ${soc_narrow_xbar.in_hbi.req_type()} hbi_narrow_req_i,
+  output  ${soc_narrow_xbar.in_hbi.rsp_type()} hbi_narrow_rsp_o,
+  output  ${soc_narrow_xbar.out_hbi.req_type()} hbi_narrow_req_o,
+  input   ${soc_narrow_xbar.out_hbi.rsp_type()} hbi_narrow_rsp_i,
 
   /// PCIe Ports
   output  ${soc_narrow_xbar.out_pcie.req_type()} pcie_axi_req_o,
@@ -155,11 +158,11 @@ module occamy_top
     .hbm_${i}_req_o,
     .hbm_${i}_rsp_i,
 % endfor
-% for i in range(nr_s1_quadrants+1):
-    .hbi_${i}_req_i,
-    .hbi_${i}_rsp_o,
-    .hbi_${i}_req_o,
-    .hbi_${i}_rsp_i,
+% for s in ("wide", "narrow"):
+    .hbi_${s}_req_i,
+    .hbi_${s}_rsp_o,
+    .hbi_${s}_req_o,
+    .hbi_${s}_rsp_i,
 % endfor
     .pcie_axi_req_o,
     .pcie_axi_rsp_i,

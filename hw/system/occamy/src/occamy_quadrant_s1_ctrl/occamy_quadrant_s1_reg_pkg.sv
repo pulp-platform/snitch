@@ -34,9 +34,6 @@ package occamy_quadrant_s1_reg_pkg;
     struct packed {
       logic        q;
     } wide_out;
-    struct packed {
-      logic        q;
-    } hbi_out;
   } occamy_quadrant_s1_reg2hw_isolate_reg_t;
 
   typedef struct packed {
@@ -124,9 +121,6 @@ package occamy_quadrant_s1_reg_pkg;
     struct packed {
       logic        d;
     } wide_out;
-    struct packed {
-      logic        d;
-    } hbi_out;
   } occamy_quadrant_s1_hw2reg_isolated_reg_t;
 
   typedef struct packed {
@@ -136,9 +130,9 @@ package occamy_quadrant_s1_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    occamy_quadrant_s1_reg2hw_clk_ena_reg_t clk_ena; // [392:392]
-    occamy_quadrant_s1_reg2hw_reset_n_reg_t reset_n; // [391:391]
-    occamy_quadrant_s1_reg2hw_isolate_reg_t isolate; // [390:386]
+    occamy_quadrant_s1_reg2hw_clk_ena_reg_t clk_ena; // [391:391]
+    occamy_quadrant_s1_reg2hw_reset_n_reg_t reset_n; // [390:390]
+    occamy_quadrant_s1_reg2hw_isolate_reg_t isolate; // [389:386]
     occamy_quadrant_s1_reg2hw_ro_cache_enable_reg_t ro_cache_enable; // [385:385]
     occamy_quadrant_s1_reg2hw_ro_cache_flush_reg_t ro_cache_flush; // [384:384]
     occamy_quadrant_s1_reg2hw_ro_start_addr_low_0_reg_t ro_start_addr_low_0; // [383:352]
@@ -161,7 +155,7 @@ package occamy_quadrant_s1_reg_pkg;
 
   // HW -> register type
   typedef struct packed {
-    occamy_quadrant_s1_hw2reg_isolated_reg_t isolated; // [6:2]
+    occamy_quadrant_s1_hw2reg_isolated_reg_t isolated; // [5:2]
     occamy_quadrant_s1_hw2reg_ro_cache_flush_reg_t ro_cache_flush; // [1:0]
   } occamy_quadrant_s1_hw2reg_t;
 
@@ -190,12 +184,11 @@ package occamy_quadrant_s1_reg_pkg;
   parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3_OFFSET = 9'h 13c;
 
   // Reset values for hwext registers and their fields
-  parameter logic [4:0] OCCAMY_QUADRANT_S1_ISOLATED_RESVAL = 5'h 1f;
+  parameter logic [3:0] OCCAMY_QUADRANT_S1_ISOLATED_RESVAL = 4'h f;
   parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_NARROW_IN_RESVAL = 1'h 1;
   parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_NARROW_OUT_RESVAL = 1'h 1;
   parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_WIDE_IN_RESVAL = 1'h 1;
   parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_WIDE_OUT_RESVAL = 1'h 1;
-  parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_HBI_OUT_RESVAL = 1'h 1;
 
   // Register index
   typedef enum int {

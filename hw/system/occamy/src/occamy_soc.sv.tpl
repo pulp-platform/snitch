@@ -13,8 +13,6 @@
   cuts_quad_to_pre = 1
   cuts_pre_to_inter = 1
   cuts_inter_to_quad = 3
-  cuts_hbi_to_pre = 6
-  cuts_quad_to_hbi = 6
   cuts_narrow_to_cva6 = 1
   cuts_narrow_conv_to_spm = 1
   cuts_narrow_and_pcie = 1
@@ -22,6 +20,7 @@
   cuts_wide_to_hbm = 6
   cuts_wide_and_inter = 3
   cuts_wide_and_hbi = 3
+  cuts_narrow_and_hbi = 3
   cuts_pre_to_hbmx = 3
   cuts_hbmx_to_hbm = 3
   cuts_periph_regbus = 3
@@ -46,12 +45,15 @@ module occamy_soc
 % endfor
 
   /// HBI Ports
-% for i in range(nr_s1_quadrants+1):
-  input   ${quadrant_pre_xbars[0].in_hbi.req_type()} hbi_${i}_req_i,
-  output  ${quadrant_pre_xbars[0].in_hbi.rsp_type()} hbi_${i}_rsp_o,
-  output  ${wide_xbar_quadrant_s1.out_hbi.req_type()} hbi_${i}_req_o,
-  input   ${wide_xbar_quadrant_s1.out_hbi.rsp_type()} hbi_${i}_rsp_i,
-% endfor
+  input   ${soc_wide_xbar.in_hbi.req_type()} hbi_wide_req_i,
+  output  ${soc_wide_xbar.in_hbi.rsp_type()} hbi_wide_rsp_o,
+  output  ${soc_wide_xbar.out_hbi.req_type()} hbi_wide_req_o,
+  input   ${soc_wide_xbar.out_hbi.rsp_type()} hbi_wide_rsp_i,
+
+  input   ${soc_narrow_xbar.in_hbi.req_type()} hbi_narrow_req_i,
+  output  ${soc_narrow_xbar.in_hbi.rsp_type()} hbi_narrow_rsp_o,
+  output  ${soc_narrow_xbar.out_hbi.req_type()} hbi_narrow_req_o,
+  input   ${soc_narrow_xbar.out_hbi.rsp_type()} hbi_narrow_rsp_i,
 
   /// PCIe Ports
   output  ${soc_narrow_xbar.out_pcie.req_type()} pcie_axi_req_o,
@@ -162,9 +164,9 @@ module occamy_soc
   );
 
   % for i in range(nr_s1_quadrants):
-  ///////////////////////////
-  // S1 Quadrant and HBI ${i} //
-  ///////////////////////////
+  //////////////////////
+  // S1 Quadrant ${i} //
+  //////////////////////
   <%
     #// Derived parameters
     nr_cores_s1_quadrant = nr_s1_clusters * nr_cluster_cores
@@ -177,12 +179,6 @@ module occamy_soc
     wide_in = quadrant_inter_xbar.__dict__["out_quadrant_{}".format(i)].cut(context, cuts_inter_to_quad, name="wide_in_{}".format(i))
     wide_out = quadrant_pre_xbars[i].in_quadrant.copy(name="wide_out_{}".format(i)).declare(context)
     wide_out.cut(context, cuts_quad_to_pre, name="wide_out_cut_{}".format(i), to=quadrant_pre_xbars[i].in_quadrant)
-    #// hbi -> pre xbar (trunc. addr) & quad -> hbi
-    hbi_in_soc = quadrant_pre_xbars[i].in_hbi.copy(name="hbi_in_soc_{}".format(i)).declare(context)
-    hbi_in_soc.trunc_addr(context, target_aw=hbi_trunc_addr_width, name="hbi_in_soc_trunc_{}".format(i))\
-      .cut(context, cuts_hbi_to_pre,  name="hbi_in_soc_trunc_cut_{}".format(i), to=quadrant_pre_xbars[i].in_hbi)
-    hbi_out = wide_xbar_quadrant_s1.out_hbi.copy(name="hbi_out_{}".format(i), clk="clk_i", rst="rst_ni").declare(context)
-    hbi_out_soc = hbi_out.cut(context, cuts_quad_to_hbi, name="hbi_out_soc_{}".format(i))
     #// pre xbar -> inter xbar
     quadrant_pre_xbars[i].out_quadrant_inter_xbar \
       .cut(context, cuts_pre_to_inter, name="pre_to_inter_cut_{}".format(i), to=quadrant_inter_xbar.__dict__["in_quadrant_{}".format(i)])
@@ -190,12 +186,6 @@ module occamy_soc
     quadrant_pre_xbars[i].out_hbm_xbar \
       .cut(context, cuts_pre_to_hbmx, name="pre_to_hbm_cut_{}".format(i), to=hbm_xbar.__dict__["in_quadrant_{}".format(i)])
   %>\
-
-  // HBI connections
-  assign hbi_${i}_req_o = ${hbi_out_soc.req_name()};
-  assign ${hbi_out_soc.rsp_name()} = hbi_${i}_rsp_i;
-  assign ${hbi_in_soc.req_name()} = hbi_${i}_req_i;
-  assign hbi_${i}_rsp_o = ${hbi_in_soc.rsp_name()};
 
   occamy_quadrant_s1 i_occamy_quadrant_s1_${i} (
     .clk_i (clk_i),
@@ -206,8 +196,6 @@ module occamy_soc
     .meip_i ('0),
     .mtip_i (mtip_i[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
     .msip_i (msip_i[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
-    .quadrant_hbi_out_req_o (${hbi_out.req_name()}),
-    .quadrant_hbi_out_rsp_i (${hbi_out.rsp_name()}),
     .quadrant_narrow_out_req_o (${narrow_out.req_name()}),
     .quadrant_narrow_out_rsp_i (${narrow_out.rsp_name()}),
     .quadrant_narrow_in_req_i (${narrow_in.req_name()}),
@@ -305,21 +293,26 @@ module occamy_soc
   // HBI //
   /////////
 
-  // Additional hbi <-> wide xbar connection
   <%
-    #// inter xbar -> wide xbar & wide xbar -> inter xbar
-    hbi_in_wide_soc = quadrant_pre_xbars[0].in_hbi.copy(name="hbi_in_wide_soc").declare(context)
-    hbi_in_wide_soc.change_iw(context, soc_wide_xbar.in_hbi.iw, "hbi_to_wide_iw_conv") \
-      .cut(context, cuts_wide_and_hbi, name="hbi_to_wide_cut", to=soc_wide_xbar.in_hbi)
-    hbi_out_wide_soc = soc_wide_xbar.out_hbi \
-      .cut(context, cuts_wide_and_hbi, name="wide_to_hbi_cut") \
-      .change_iw(context, wide_xbar_quadrant_s1.out_hbi.iw, "wide_to_hbi_iw_conv")
+    #// hbi <-> wide xbar
+    hbi_in_wide_soc = soc_wide_xbar.in_hbi.copy(name="hbi_in_wide_soc").declare(context)
+    hbi_in_wide_soc.cut(context, cuts_wide_and_hbi, name="hbi_to_wide_cut", to=soc_wide_xbar.in_hbi)
+    hbi_out_wide_soc = soc_wide_xbar.out_hbi.cut(context, cuts_wide_and_hbi, name="wide_to_hbi_cut")
+    #// hbi <-> narrow xbar
+    hbi_in_narrow_soc = soc_narrow_xbar.in_hbi.copy(name="hbi_in_narrow_soc").declare(context)
+    hbi_in_narrow_soc.cut(context, cuts_narrow_and_hbi, name="hbi_to_narrow_cut", to=soc_narrow_xbar.in_hbi)
+    hbi_out_narrow_soc = soc_narrow_xbar.out_hbi.cut(context, cuts_narrow_and_hbi, name="narrow_to_hbi_cut")
   %>\
 
-  assign hbi_${nr_s1_quadrants}_req_o = ${hbi_out_wide_soc.req_name()};
-  assign ${hbi_out_wide_soc.rsp_name()} = hbi_${nr_s1_quadrants}_rsp_i;
-  assign ${hbi_in_wide_soc.req_name()} = hbi_${nr_s1_quadrants}_req_i;
-  assign hbi_${nr_s1_quadrants}_rsp_o = ${hbi_in_wide_soc.rsp_name()};
+  assign hbi_wide_req_o = ${hbi_out_wide_soc.req_name()};
+  assign ${hbi_out_wide_soc.rsp_name()} = hbi_wide_rsp_i;
+  assign ${hbi_in_wide_soc.req_name()} = hbi_wide_req_i;
+  assign hbi_wide_rsp_o = ${hbi_in_wide_soc.rsp_name()};
+
+  assign hbi_narrow_req_o = ${hbi_out_narrow_soc.req_name()};
+  assign ${hbi_out_narrow_soc.rsp_name()} = hbi_narrow_rsp_i;
+  assign ${hbi_in_narrow_soc.req_name()} = hbi_narrow_req_i;
+  assign hbi_narrow_rsp_o = ${hbi_in_narrow_soc.rsp_name()};
 
   /////////////////
   // Peripherals //

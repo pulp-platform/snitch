@@ -12,7 +12,6 @@
   cuts_widex_with_cluster = 0
   cuts_narrx_with_ctrl = 1
   cuts_widexroc_with_wideout = 1
-  cuts_widex_to_hbiout = 1
   nr_clusters = int(cfg["s1_quadrant"]["nr_clusters"])
   ro_cache_cfg = cfg["s1_quadrant"].get("ro_cache_cfg", {})
   ro_cache_regions = ro_cache_cfg.get("address_regions", 1)
@@ -30,9 +29,6 @@ module occamy_quadrant_s1
   input  logic [NrCoresS1Quadrant-1:0] meip_i,
   input  logic [NrCoresS1Quadrant-1:0] mtip_i,
   input  logic [NrCoresS1Quadrant-1:0] msip_i,
-  // HBI Connection
-  output ${wide_xbar_quadrant_s1.out_hbi.req_type()}   quadrant_hbi_out_req_o,
-  input  ${wide_xbar_quadrant_s1.out_hbi.rsp_type()}   quadrant_hbi_out_rsp_i,
   // Next-Level
   output ${soc_narrow_xbar.in_s1_quadrant_0.req_type()} quadrant_narrow_out_req_o,
   input  ${soc_narrow_xbar.in_s1_quadrant_0.rsp_type()} quadrant_narrow_out_rsp_i,
@@ -117,18 +113,6 @@ module occamy_quadrant_s1
 
   assign quadrant_wide_out_req_o = ${wide_cluster_out_cut.req_name()};
   assign ${wide_cluster_out_cut.rsp_name()} = quadrant_wide_out_rsp_i;
-
-  ////////////////////
-  // HBI Connection //
-  ////////////////////
-  <%
-    wide_cluster_hbi_out_iwc = wide_xbar_quadrant_s1.out_hbi  \
-      .isolate(context, "isolate[4]", "quadrant_hbi_out_isolate", isolated="isolated[4]", atop_support=False, to_clk="clk_i", to_rst="rst_ni") \
-      .cut(context, cuts_widex_to_hbiout)
-  %>
-
-  assign quadrant_hbi_out_req_o = ${wide_cluster_hbi_out_iwc.req_name()};
-  assign ${wide_cluster_hbi_out_iwc.rsp_name()} = quadrant_hbi_out_rsp_i;
 
   ////////////////////////////
   // Wide In + IW Converter //

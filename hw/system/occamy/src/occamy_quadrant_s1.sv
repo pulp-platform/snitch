@@ -20,9 +20,6 @@ module occamy_quadrant_s1
     input  logic                     [NrCoresS1Quadrant-1:0] meip_i,
     input  logic                     [NrCoresS1Quadrant-1:0] mtip_i,
     input  logic                     [NrCoresS1Quadrant-1:0] msip_i,
-    // HBI Connection
-    output axi_a48_d512_i6_u0_req_t                          quadrant_hbi_out_req_o,
-    input  axi_a48_d512_i6_u0_resp_t                         quadrant_hbi_out_rsp_i,
     // Next-Level
     output axi_a48_d64_i4_u0_req_t                           quadrant_narrow_out_req_o,
     input  axi_a48_d64_i4_u0_resp_t                          quadrant_narrow_out_rsp_i,
@@ -30,8 +27,8 @@ module occamy_quadrant_s1
     output axi_a48_d64_i8_u0_resp_t                          quadrant_narrow_in_rsp_o,
     output axi_a48_d512_i4_u0_req_t                          quadrant_wide_out_req_o,
     input  axi_a48_d512_i4_u0_resp_t                         quadrant_wide_out_rsp_i,
-    input  axi_a48_d512_i9_u0_req_t                          quadrant_wide_in_req_i,
-    output axi_a48_d512_i9_u0_resp_t                         quadrant_wide_in_rsp_o,
+    input  axi_a48_d512_i8_u0_req_t                          quadrant_wide_in_req_i,
+    output axi_a48_d512_i8_u0_resp_t                         quadrant_wide_in_rsp_o,
     // SRAM configuration
     input  sram_cfg_quadrant_t                               sram_cfg_i
 );
@@ -54,23 +51,22 @@ module occamy_quadrant_s1
   ///////////////////
 
   /// Address map of the `wide_xbar_quadrant_s1` crossbar.
-  xbar_rule_48_t [4:0] WideXbarQuadrantS1Addrmap;
+  xbar_rule_48_t [3:0] WideXbarQuadrantS1Addrmap;
   assign WideXbarQuadrantS1Addrmap = '{
-  '{ idx: 1, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 2, start_addr: cluster_base_addr[0], end_addr: cluster_base_addr[0] + ClusterAddressSpace },
-  '{ idx: 3, start_addr: cluster_base_addr[1], end_addr: cluster_base_addr[1] + ClusterAddressSpace },
-  '{ idx: 4, start_addr: cluster_base_addr[2], end_addr: cluster_base_addr[2] + ClusterAddressSpace },
-  '{ idx: 5, start_addr: cluster_base_addr[3], end_addr: cluster_base_addr[3] + ClusterAddressSpace }
+  '{ idx: 1, start_addr: cluster_base_addr[0], end_addr: cluster_base_addr[0] + ClusterAddressSpace },
+  '{ idx: 2, start_addr: cluster_base_addr[1], end_addr: cluster_base_addr[1] + ClusterAddressSpace },
+  '{ idx: 3, start_addr: cluster_base_addr[2], end_addr: cluster_base_addr[2] + ClusterAddressSpace },
+  '{ idx: 4, start_addr: cluster_base_addr[3], end_addr: cluster_base_addr[3] + ClusterAddressSpace }
 };
 
   wide_xbar_quadrant_s1_in_req_t   [4:0] wide_xbar_quadrant_s1_in_req;
   wide_xbar_quadrant_s1_in_resp_t  [4:0] wide_xbar_quadrant_s1_in_rsp;
-  wide_xbar_quadrant_s1_out_req_t  [5:0] wide_xbar_quadrant_s1_out_req;
-  wide_xbar_quadrant_s1_out_resp_t [5:0] wide_xbar_quadrant_s1_out_rsp;
+  wide_xbar_quadrant_s1_out_req_t  [4:0] wide_xbar_quadrant_s1_out_req;
+  wide_xbar_quadrant_s1_out_resp_t [4:0] wide_xbar_quadrant_s1_out_rsp;
 
   axi_xbar #(
       .Cfg          (WideXbarQuadrantS1Cfg),
-      .Connectivity (30'b011111101111110111111011111110),
+      .Connectivity (25'b0111110111110111110111110),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i3_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i6_u0_aw_chan_t),
@@ -390,76 +386,24 @@ module occamy_quadrant_s1
   assign quadrant_wide_out_req_o = wide_cluster_out_isolate_cut_req;
   assign wide_cluster_out_isolate_cut_rsp = quadrant_wide_out_rsp_i;
 
-  ////////////////////
-  // HBI Connection //
-  ////////////////////
-  axi_a48_d512_i6_u0_req_t  quadrant_hbi_out_isolate_req;
-  axi_a48_d512_i6_u0_resp_t quadrant_hbi_out_isolate_rsp;
-
-  axi_isolate #(
-      .NumPending(16),
-      .TerminateTransaction(0),
-      .AtopSupport(0),
-      .AxiIdWidth(6),
-      .AxiAddrWidth(48),
-      .AxiDataWidth(512),
-      .AxiUserWidth(1),
-      .req_t(axi_a48_d512_i6_u0_req_t),
-      .resp_t(axi_a48_d512_i6_u0_resp_t)
-  ) i_quadrant_hbi_out_isolate (
-      .clk_i(clk_quadrant),
-      .rst_ni(rst_quadrant_n),
-      .slv_req_i(wide_xbar_quadrant_s1_out_req[WIDE_XBAR_QUADRANT_S1_OUT_HBI]),
-      .slv_resp_o(wide_xbar_quadrant_s1_out_rsp[WIDE_XBAR_QUADRANT_S1_OUT_HBI]),
-      .mst_req_o(quadrant_hbi_out_isolate_req),
-      .mst_resp_i(quadrant_hbi_out_isolate_rsp),
-      .isolate_i(isolate[4]),
-      .isolated_o(isolated[4])
-  );
-
-  axi_a48_d512_i6_u0_req_t  quadrant_hbi_out_isolate_cut_req;
-  axi_a48_d512_i6_u0_resp_t quadrant_hbi_out_isolate_cut_rsp;
-
-  axi_multicut #(
-      .NoCuts(1),
-      .aw_chan_t(axi_a48_d512_i6_u0_aw_chan_t),
-      .w_chan_t(axi_a48_d512_i6_u0_w_chan_t),
-      .b_chan_t(axi_a48_d512_i6_u0_b_chan_t),
-      .ar_chan_t(axi_a48_d512_i6_u0_ar_chan_t),
-      .r_chan_t(axi_a48_d512_i6_u0_r_chan_t),
-      .req_t(axi_a48_d512_i6_u0_req_t),
-      .resp_t(axi_a48_d512_i6_u0_resp_t)
-  ) i_quadrant_hbi_out_isolate_cut (
-      .clk_i(clk_i),
-      .rst_ni(rst_ni),
-      .slv_req_i(quadrant_hbi_out_isolate_req),
-      .slv_resp_o(quadrant_hbi_out_isolate_rsp),
-      .mst_req_o(quadrant_hbi_out_isolate_cut_req),
-      .mst_resp_i(quadrant_hbi_out_isolate_cut_rsp)
-  );
-
-
-  assign quadrant_hbi_out_req_o = quadrant_hbi_out_isolate_cut_req;
-  assign quadrant_hbi_out_isolate_cut_rsp = quadrant_hbi_out_rsp_i;
-
   ////////////////////////////
   // Wide In + IW Converter //
   ////////////////////////////
-  axi_a48_d512_i9_u0_req_t  wide_cluster_in_iwc_req;
-  axi_a48_d512_i9_u0_resp_t wide_cluster_in_iwc_rsp;
+  axi_a48_d512_i8_u0_req_t  wide_cluster_in_iwc_req;
+  axi_a48_d512_i8_u0_resp_t wide_cluster_in_iwc_rsp;
 
-  axi_a48_d512_i9_u0_req_t  wide_cluster_in_iwc_cut_req;
-  axi_a48_d512_i9_u0_resp_t wide_cluster_in_iwc_cut_rsp;
+  axi_a48_d512_i8_u0_req_t  wide_cluster_in_iwc_cut_req;
+  axi_a48_d512_i8_u0_resp_t wide_cluster_in_iwc_cut_rsp;
 
   axi_multicut #(
       .NoCuts(1),
-      .aw_chan_t(axi_a48_d512_i9_u0_aw_chan_t),
-      .w_chan_t(axi_a48_d512_i9_u0_w_chan_t),
-      .b_chan_t(axi_a48_d512_i9_u0_b_chan_t),
-      .ar_chan_t(axi_a48_d512_i9_u0_ar_chan_t),
-      .r_chan_t(axi_a48_d512_i9_u0_r_chan_t),
-      .req_t(axi_a48_d512_i9_u0_req_t),
-      .resp_t(axi_a48_d512_i9_u0_resp_t)
+      .aw_chan_t(axi_a48_d512_i8_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d512_i8_u0_w_chan_t),
+      .b_chan_t(axi_a48_d512_i8_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d512_i8_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d512_i8_u0_r_chan_t),
+      .req_t(axi_a48_d512_i8_u0_req_t),
+      .resp_t(axi_a48_d512_i8_u0_resp_t)
   ) i_wide_cluster_in_iwc_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -468,19 +412,19 @@ module occamy_quadrant_s1
       .mst_req_o(wide_cluster_in_iwc_cut_req),
       .mst_resp_i(wide_cluster_in_iwc_cut_rsp)
   );
-  axi_a48_d512_i9_u0_req_t  wide_cluster_in_isolate_req;
-  axi_a48_d512_i9_u0_resp_t wide_cluster_in_isolate_rsp;
+  axi_a48_d512_i8_u0_req_t  wide_cluster_in_isolate_req;
+  axi_a48_d512_i8_u0_resp_t wide_cluster_in_isolate_rsp;
 
   axi_isolate #(
       .NumPending(16),
       .TerminateTransaction(1),
       .AtopSupport(0),
-      .AxiIdWidth(9),
+      .AxiIdWidth(8),
       .AxiAddrWidth(48),
       .AxiDataWidth(512),
       .AxiUserWidth(1),
-      .req_t(axi_a48_d512_i9_u0_req_t),
-      .resp_t(axi_a48_d512_i9_u0_resp_t)
+      .req_t(axi_a48_d512_i8_u0_req_t),
+      .resp_t(axi_a48_d512_i8_u0_resp_t)
   ) i_wide_cluster_in_isolate (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -493,12 +437,12 @@ module occamy_quadrant_s1
   );
 
   axi_id_remap #(
-      .AxiSlvPortIdWidth(9),
+      .AxiSlvPortIdWidth(8),
       .AxiSlvPortMaxUniqIds(8),
       .AxiMaxTxnsPerId(4),
       .AxiMstPortIdWidth(3),
-      .slv_req_t(axi_a48_d512_i9_u0_req_t),
-      .slv_resp_t(axi_a48_d512_i9_u0_resp_t),
+      .slv_req_t(axi_a48_d512_i8_u0_req_t),
+      .slv_resp_t(axi_a48_d512_i8_u0_resp_t),
       .mst_req_t(axi_a48_d512_i3_u0_req_t),
       .mst_resp_t(axi_a48_d512_i3_u0_resp_t)
   ) i_wide_cluster_in_iwc (

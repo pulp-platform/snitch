@@ -307,10 +307,6 @@ def main():
         occamy.cfg["hbi"]["address"])
     am_soc_wide_xbar.attach(am_hbi)
 
-    # Add connection from quadrants AXI xbar to HBI
-    for i in range(nr_s1_quadrants):
-        am_wide_xbar_quadrant_s1[i].attach(am_hbi)
-
     ###########
     # AM: HBM #
     ###########
@@ -501,7 +497,6 @@ def main():
         quadrant_pre_xbar.add_output_entry("quadrant_inter_xbar", am_quadrant_inter_xbar)
         quadrant_pre_xbar.add_output_entry("hbm_xbar", am_hbm_xbar)
         quadrant_pre_xbar.add_input("quadrant")
-        quadrant_pre_xbar.add_input("hbi")
 
         quadrant_pre_xbars.append(quadrant_pre_xbar)
 
@@ -609,10 +604,12 @@ def main():
     soc_narrow_xbar.add_input("soc_wide")
     soc_narrow_xbar.add_input("periph")
     soc_narrow_xbar.add_input("pcie")
+    soc_narrow_xbar.add_input("hbi")
     dts.add_cpu("eth,ariane")
 
     # Default port: wide xbar
     soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
+    soc_narrow_xbar.add_output_entry("hbi", am_hbi)
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
     soc_narrow_xbar.add_output_entry("spm", am_spm)
     soc_narrow_xbar.add_output_entry("regbus_periph",
@@ -702,7 +699,6 @@ def main():
         context="quadrant_s1")
 
     wide_xbar_quadrant_s1.add_output("top", [])
-    wide_xbar_quadrant_s1.add_output_entry("hbi", am_hbi)
     wide_xbar_quadrant_s1.add_input("top")
 
     narrow_xbar_quadrant_s1.add_output("top", [])

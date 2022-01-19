@@ -86,9 +86,6 @@ module occamy_quadrant_s1_reg_top #(
   logic isolate_wide_out_qs;
   logic isolate_wide_out_wd;
   logic isolate_wide_out_we;
-  logic isolate_hbi_out_qs;
-  logic isolate_hbi_out_wd;
-  logic isolate_hbi_out_we;
   logic isolated_narrow_in_qs;
   logic isolated_narrow_in_re;
   logic isolated_narrow_out_qs;
@@ -97,8 +94,6 @@ module occamy_quadrant_s1_reg_top #(
   logic isolated_wide_in_re;
   logic isolated_wide_out_qs;
   logic isolated_wide_out_re;
-  logic isolated_hbi_out_qs;
-  logic isolated_hbi_out_re;
   logic ro_cache_enable_qs;
   logic ro_cache_enable_wd;
   logic ro_cache_enable_we;
@@ -315,32 +310,6 @@ module occamy_quadrant_s1_reg_top #(
   );
 
 
-  //   F[hbi_out]: 4:4
-  prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h1)
-  ) u_isolate_hbi_out (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
-
-    // from register interface
-    .we     (isolate_hbi_out_we),
-    .wd     (isolate_hbi_out_wd),
-
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
-
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.isolate.hbi_out.q ),
-
-    // to register interface (read)
-    .qs     (isolate_hbi_out_qs)
-  );
-
-
   // R[isolated]: V(True)
 
   //   F[narrow_in]: 0:0
@@ -400,21 +369,6 @@ module occamy_quadrant_s1_reg_top #(
     .qe     (),
     .q      (),
     .qs     (isolated_wide_out_qs)
-  );
-
-
-  //   F[hbi_out]: 4:4
-  prim_subreg_ext #(
-    .DW    (1)
-  ) u_isolated_hbi_out (
-    .re     (isolated_hbi_out_re),
-    .we     (1'b0),
-    .wd     ('0),
-    .d      (hw2reg.isolated.hbi_out.d),
-    .qre    (),
-    .qe     (),
-    .q      (),
-    .qs     (isolated_hbi_out_qs)
   );
 
 
@@ -980,9 +934,6 @@ module occamy_quadrant_s1_reg_top #(
   assign isolate_wide_out_we = addr_hit[2] & reg_we & !reg_error;
   assign isolate_wide_out_wd = reg_wdata[3];
 
-  assign isolate_hbi_out_we = addr_hit[2] & reg_we & !reg_error;
-  assign isolate_hbi_out_wd = reg_wdata[4];
-
   assign isolated_narrow_in_re = addr_hit[3] & reg_re & !reg_error;
 
   assign isolated_narrow_out_re = addr_hit[3] & reg_re & !reg_error;
@@ -990,8 +941,6 @@ module occamy_quadrant_s1_reg_top #(
   assign isolated_wide_in_re = addr_hit[3] & reg_re & !reg_error;
 
   assign isolated_wide_out_re = addr_hit[3] & reg_re & !reg_error;
-
-  assign isolated_hbi_out_re = addr_hit[3] & reg_re & !reg_error;
 
   assign ro_cache_enable_we = addr_hit[4] & reg_we & !reg_error;
   assign ro_cache_enable_wd = reg_wdata[0];
@@ -1064,7 +1013,6 @@ module occamy_quadrant_s1_reg_top #(
         reg_rdata_next[1] = isolate_narrow_out_qs;
         reg_rdata_next[2] = isolate_wide_in_qs;
         reg_rdata_next[3] = isolate_wide_out_qs;
-        reg_rdata_next[4] = isolate_hbi_out_qs;
       end
 
       addr_hit[3]: begin
@@ -1072,7 +1020,6 @@ module occamy_quadrant_s1_reg_top #(
         reg_rdata_next[1] = isolated_narrow_out_qs;
         reg_rdata_next[2] = isolated_wide_in_qs;
         reg_rdata_next[3] = isolated_wide_out_qs;
-        reg_rdata_next[4] = isolated_hbi_out_qs;
       end
 
       addr_hit[4]: begin
