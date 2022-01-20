@@ -7,7 +7,7 @@
 import re
 
 PASCAL_RE = re.compile(r"([^\-_\s]+)")
-UNDERSCORE_RE = re.compile(r"([^\-_\s])[\-_\s]+([^\-_\s])")
+UNDERSCORE_RE = re.compile(r"[\-_\s]+([^\-_\s])")
 
 
 def pascalize(s):
@@ -48,7 +48,7 @@ def camelize(s):
 
     return "".join([
         s[0].lower() if not s[:2].isupper() else s[0],
-        UNDERSCORE_RE.sub(lambda m: m.group(1) + m.group(2).upper(), s[1:]),
+        UNDERSCORE_RE.sub(lambda m: m.group(1).upper(), s[1:]),
     ])
 
 

@@ -106,8 +106,8 @@ module occamy_soc
   // Crossbars
 
   /// Address map of the `quadrant_pre_xbar_0` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar0_Addrmap;
-  assign QuadrantPreXbar0_Addrmap = '{
+  xbar_rule_48_t [2:0] QuadrantPreXbar0Addrmap;
+  assign QuadrantPreXbar0Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
@@ -119,7 +119,7 @@ module occamy_soc
   quadrant_pre_xbar_0_out_resp_t [1:0] quadrant_pre_xbar_0_out_rsp;
 
   axi_xbar #(
-      .Cfg          (QuadrantPreXbar0_Cfg),
+      .Cfg          (QuadrantPreXbar0Cfg),
       .Connectivity (2'b11),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
@@ -144,14 +144,14 @@ module occamy_soc
       .slv_ports_resp_o     (quadrant_pre_xbar_0_in_rsp),
       .mst_ports_req_o      (quadrant_pre_xbar_0_out_req),
       .mst_ports_resp_i     (quadrant_pre_xbar_0_out_rsp),
-      .addr_map_i           (QuadrantPreXbar0_Addrmap),
+      .addr_map_i           (QuadrantPreXbar0Addrmap),
       .en_default_mst_port_i('1),
       .default_mst_port_i   ('0)
   );
 
   /// Address map of the `quadrant_pre_xbar_1` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar1_Addrmap;
-  assign QuadrantPreXbar1_Addrmap = '{
+  xbar_rule_48_t [2:0] QuadrantPreXbar1Addrmap;
+  assign QuadrantPreXbar1Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
@@ -163,7 +163,7 @@ module occamy_soc
   quadrant_pre_xbar_1_out_resp_t [1:0] quadrant_pre_xbar_1_out_rsp;
 
   axi_xbar #(
-      .Cfg          (QuadrantPreXbar1_Cfg),
+      .Cfg          (QuadrantPreXbar1Cfg),
       .Connectivity (2'b11),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
@@ -188,14 +188,14 @@ module occamy_soc
       .slv_ports_resp_o     (quadrant_pre_xbar_1_in_rsp),
       .mst_ports_req_o      (quadrant_pre_xbar_1_out_req),
       .mst_ports_resp_i     (quadrant_pre_xbar_1_out_rsp),
-      .addr_map_i           (QuadrantPreXbar1_Addrmap),
+      .addr_map_i           (QuadrantPreXbar1Addrmap),
       .en_default_mst_port_i('1),
       .default_mst_port_i   ('0)
   );
 
   /// Address map of the `quadrant_pre_xbar_2` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar2_Addrmap;
-  assign QuadrantPreXbar2_Addrmap = '{
+  xbar_rule_48_t [2:0] QuadrantPreXbar2Addrmap;
+  assign QuadrantPreXbar2Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
@@ -207,7 +207,7 @@ module occamy_soc
   quadrant_pre_xbar_2_out_resp_t [1:0] quadrant_pre_xbar_2_out_rsp;
 
   axi_xbar #(
-      .Cfg          (QuadrantPreXbar2_Cfg),
+      .Cfg          (QuadrantPreXbar2Cfg),
       .Connectivity (2'b11),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
@@ -232,14 +232,14 @@ module occamy_soc
       .slv_ports_resp_o     (quadrant_pre_xbar_2_in_rsp),
       .mst_ports_req_o      (quadrant_pre_xbar_2_out_req),
       .mst_ports_resp_i     (quadrant_pre_xbar_2_out_rsp),
-      .addr_map_i           (QuadrantPreXbar2_Addrmap),
+      .addr_map_i           (QuadrantPreXbar2Addrmap),
       .en_default_mst_port_i('1),
       .default_mst_port_i   ('0)
   );
 
   /// Address map of the `quadrant_pre_xbar_3` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar3_Addrmap;
-  assign QuadrantPreXbar3_Addrmap = '{
+  xbar_rule_48_t [2:0] QuadrantPreXbar3Addrmap;
+  assign QuadrantPreXbar3Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
@@ -251,7 +251,7 @@ module occamy_soc
   quadrant_pre_xbar_3_out_resp_t [1:0] quadrant_pre_xbar_3_out_rsp;
 
   axi_xbar #(
-      .Cfg          (QuadrantPreXbar3_Cfg),
+      .Cfg          (QuadrantPreXbar3Cfg),
       .Connectivity (2'b11),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
@@ -276,14 +276,14 @@ module occamy_soc
       .slv_ports_resp_o     (quadrant_pre_xbar_3_in_rsp),
       .mst_ports_req_o      (quadrant_pre_xbar_3_out_req),
       .mst_ports_resp_i     (quadrant_pre_xbar_3_out_rsp),
-      .addr_map_i           (QuadrantPreXbar3_Addrmap),
+      .addr_map_i           (QuadrantPreXbar3Addrmap),
       .en_default_mst_port_i('1),
       .default_mst_port_i   ('0)
   );
 
   /// Address map of the `quadrant_pre_xbar_4` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar4_Addrmap;
-  assign QuadrantPreXbar4_Addrmap = '{
+  xbar_rule_48_t [2:0] QuadrantPreXbar4Addrmap;
+  assign QuadrantPreXbar4Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
@@ -295,7 +295,7 @@ module occamy_soc
   quadrant_pre_xbar_4_out_resp_t [1:0] quadrant_pre_xbar_4_out_rsp;
 
   axi_xbar #(
-      .Cfg          (QuadrantPreXbar4_Cfg),
+      .Cfg          (QuadrantPreXbar4Cfg),
       .Connectivity (2'b11),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
@@ -320,14 +320,14 @@ module occamy_soc
       .slv_ports_resp_o     (quadrant_pre_xbar_4_in_rsp),
       .mst_ports_req_o      (quadrant_pre_xbar_4_out_req),
       .mst_ports_resp_i     (quadrant_pre_xbar_4_out_rsp),
-      .addr_map_i           (QuadrantPreXbar4_Addrmap),
+      .addr_map_i           (QuadrantPreXbar4Addrmap),
       .en_default_mst_port_i('1),
       .default_mst_port_i   ('0)
   );
 
   /// Address map of the `quadrant_pre_xbar_5` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar5_Addrmap;
-  assign QuadrantPreXbar5_Addrmap = '{
+  xbar_rule_48_t [2:0] QuadrantPreXbar5Addrmap;
+  assign QuadrantPreXbar5Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
@@ -339,7 +339,7 @@ module occamy_soc
   quadrant_pre_xbar_5_out_resp_t [1:0] quadrant_pre_xbar_5_out_rsp;
 
   axi_xbar #(
-      .Cfg          (QuadrantPreXbar5_Cfg),
+      .Cfg          (QuadrantPreXbar5Cfg),
       .Connectivity (2'b11),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
@@ -364,14 +364,14 @@ module occamy_soc
       .slv_ports_resp_o     (quadrant_pre_xbar_5_in_rsp),
       .mst_ports_req_o      (quadrant_pre_xbar_5_out_req),
       .mst_ports_resp_i     (quadrant_pre_xbar_5_out_rsp),
-      .addr_map_i           (QuadrantPreXbar5_Addrmap),
+      .addr_map_i           (QuadrantPreXbar5Addrmap),
       .en_default_mst_port_i('1),
       .default_mst_port_i   ('0)
   );
 
   /// Address map of the `quadrant_pre_xbar_6` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar6_Addrmap;
-  assign QuadrantPreXbar6_Addrmap = '{
+  xbar_rule_48_t [2:0] QuadrantPreXbar6Addrmap;
+  assign QuadrantPreXbar6Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
@@ -383,7 +383,7 @@ module occamy_soc
   quadrant_pre_xbar_6_out_resp_t [1:0] quadrant_pre_xbar_6_out_rsp;
 
   axi_xbar #(
-      .Cfg          (QuadrantPreXbar6_Cfg),
+      .Cfg          (QuadrantPreXbar6Cfg),
       .Connectivity (2'b11),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
@@ -408,14 +408,14 @@ module occamy_soc
       .slv_ports_resp_o     (quadrant_pre_xbar_6_in_rsp),
       .mst_ports_req_o      (quadrant_pre_xbar_6_out_req),
       .mst_ports_resp_i     (quadrant_pre_xbar_6_out_rsp),
-      .addr_map_i           (QuadrantPreXbar6_Addrmap),
+      .addr_map_i           (QuadrantPreXbar6Addrmap),
       .en_default_mst_port_i('1),
       .default_mst_port_i   ('0)
   );
 
   /// Address map of the `quadrant_pre_xbar_7` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar7_Addrmap;
-  assign QuadrantPreXbar7_Addrmap = '{
+  xbar_rule_48_t [2:0] QuadrantPreXbar7Addrmap;
+  assign QuadrantPreXbar7Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
@@ -427,7 +427,7 @@ module occamy_soc
   quadrant_pre_xbar_7_out_resp_t [1:0] quadrant_pre_xbar_7_out_rsp;
 
   axi_xbar #(
-      .Cfg          (QuadrantPreXbar7_Cfg),
+      .Cfg          (QuadrantPreXbar7Cfg),
       .Connectivity (2'b11),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
@@ -452,7 +452,7 @@ module occamy_soc
       .slv_ports_resp_o     (quadrant_pre_xbar_7_in_rsp),
       .mst_ports_req_o      (quadrant_pre_xbar_7_out_req),
       .mst_ports_resp_i     (quadrant_pre_xbar_7_out_rsp),
-      .addr_map_i           (QuadrantPreXbar7_Addrmap),
+      .addr_map_i           (QuadrantPreXbar7Addrmap),
       .en_default_mst_port_i('1),
       .default_mst_port_i   ('0)
   );

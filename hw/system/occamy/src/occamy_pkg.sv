@@ -229,7 +229,7 @@ package occamy_pkg;
   } quadrant_pre_xbar_0_outputs_e;
 
   /// Configuration of the `quadrant_pre_xbar_0` crossbar.
-  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar0_Cfg = '{
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar0Cfg = '{
   NoSlvPorts:         QUADRANT_PRE_XBAR_0_NUM_INPUTS,
   NoMstPorts:         QUADRANT_PRE_XBAR_0_NUM_OUTPUTS,
   MaxSlvTrans:        4,
@@ -281,7 +281,7 @@ package occamy_pkg;
   } quadrant_pre_xbar_1_outputs_e;
 
   /// Configuration of the `quadrant_pre_xbar_1` crossbar.
-  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar1_Cfg = '{
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar1Cfg = '{
   NoSlvPorts:         QUADRANT_PRE_XBAR_1_NUM_INPUTS,
   NoMstPorts:         QUADRANT_PRE_XBAR_1_NUM_OUTPUTS,
   MaxSlvTrans:        4,
@@ -329,7 +329,7 @@ package occamy_pkg;
   } quadrant_pre_xbar_2_outputs_e;
 
   /// Configuration of the `quadrant_pre_xbar_2` crossbar.
-  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar2_Cfg = '{
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar2Cfg = '{
   NoSlvPorts:         QUADRANT_PRE_XBAR_2_NUM_INPUTS,
   NoMstPorts:         QUADRANT_PRE_XBAR_2_NUM_OUTPUTS,
   MaxSlvTrans:        4,
@@ -377,7 +377,7 @@ package occamy_pkg;
   } quadrant_pre_xbar_3_outputs_e;
 
   /// Configuration of the `quadrant_pre_xbar_3` crossbar.
-  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar3_Cfg = '{
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar3Cfg = '{
   NoSlvPorts:         QUADRANT_PRE_XBAR_3_NUM_INPUTS,
   NoMstPorts:         QUADRANT_PRE_XBAR_3_NUM_OUTPUTS,
   MaxSlvTrans:        4,
@@ -425,7 +425,7 @@ package occamy_pkg;
   } quadrant_pre_xbar_4_outputs_e;
 
   /// Configuration of the `quadrant_pre_xbar_4` crossbar.
-  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar4_Cfg = '{
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar4Cfg = '{
   NoSlvPorts:         QUADRANT_PRE_XBAR_4_NUM_INPUTS,
   NoMstPorts:         QUADRANT_PRE_XBAR_4_NUM_OUTPUTS,
   MaxSlvTrans:        4,
@@ -473,7 +473,7 @@ package occamy_pkg;
   } quadrant_pre_xbar_5_outputs_e;
 
   /// Configuration of the `quadrant_pre_xbar_5` crossbar.
-  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar5_Cfg = '{
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar5Cfg = '{
   NoSlvPorts:         QUADRANT_PRE_XBAR_5_NUM_INPUTS,
   NoMstPorts:         QUADRANT_PRE_XBAR_5_NUM_OUTPUTS,
   MaxSlvTrans:        4,
@@ -521,7 +521,7 @@ package occamy_pkg;
   } quadrant_pre_xbar_6_outputs_e;
 
   /// Configuration of the `quadrant_pre_xbar_6` crossbar.
-  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar6_Cfg = '{
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar6Cfg = '{
   NoSlvPorts:         QUADRANT_PRE_XBAR_6_NUM_INPUTS,
   NoMstPorts:         QUADRANT_PRE_XBAR_6_NUM_OUTPUTS,
   MaxSlvTrans:        4,
@@ -569,7 +569,7 @@ package occamy_pkg;
   } quadrant_pre_xbar_7_outputs_e;
 
   /// Configuration of the `quadrant_pre_xbar_7` crossbar.
-  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar7_Cfg = '{
+  localparam axi_pkg::xbar_cfg_t QuadrantPreXbar7Cfg = '{
   NoSlvPorts:         QUADRANT_PRE_XBAR_7_NUM_INPUTS,
   NoMstPorts:         QUADRANT_PRE_XBAR_7_NUM_OUTPUTS,
   MaxSlvTrans:        4,
