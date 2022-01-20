@@ -4,7 +4,7 @@
 http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width
 ```
 
-ID width of incoming slave ports.
+ID width of narrow crossbar slave ports.
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
