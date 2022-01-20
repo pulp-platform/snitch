@@ -2608,6 +2608,23 @@ module occamy_soc
       .mst_req_o(soc_wide_xbar_in_req[SOC_WIDE_XBAR_IN_HBI]),
       .mst_resp_i(soc_wide_xbar_in_rsp[SOC_WIDE_XBAR_IN_HBI])
   );
+  axi_a48_d512_i6_u0_req_t  wide_to_hbi_trunc_req;
+  axi_a48_d512_i6_u0_resp_t wide_to_hbi_trunc_rsp;
+
+  axi_modify_address #(
+      .slv_req_t (axi_a48_d512_i6_u0_req_t),
+      .mst_addr_t(logic [47:0]),
+      .mst_req_t (axi_a48_d512_i6_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i6_u0_resp_t)
+  ) i_wide_to_hbi_trunc (
+      .slv_req_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_HBI]),
+      .slv_resp_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_HBI]),
+      .mst_aw_addr_i({8'b0, soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_HBI].aw.addr[39:0]}),
+      .mst_ar_addr_i({8'b0, soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_HBI].ar.addr[39:0]}),
+      .mst_req_o(wide_to_hbi_trunc_req),
+      .mst_resp_i(wide_to_hbi_trunc_rsp)
+  );
+
   axi_a48_d512_i6_u0_req_t  wide_to_hbi_cut_req;
   axi_a48_d512_i6_u0_resp_t wide_to_hbi_cut_rsp;
 
@@ -2623,8 +2640,8 @@ module occamy_soc
   ) i_wide_to_hbi_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_HBI]),
-      .slv_resp_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_HBI]),
+      .slv_req_i(wide_to_hbi_trunc_req),
+      .slv_resp_o(wide_to_hbi_trunc_rsp),
       .mst_req_o(wide_to_hbi_cut_req),
       .mst_resp_i(wide_to_hbi_cut_rsp)
   );

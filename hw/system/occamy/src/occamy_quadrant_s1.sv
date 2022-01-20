@@ -42,7 +42,7 @@ module occamy_quadrant_s1
 
   // Signals from Controller
   logic clk_quadrant, rst_quadrant_n;
-  logic [4:0] isolate, isolated;
+  logic [3:0] isolate, isolated;
   logic ro_enable, ro_flush_valid, ro_flush_ready;
   logic [3:0][47:0] ro_start_addr, ro_end_addr;
 

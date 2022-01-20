@@ -50,7 +50,7 @@ module occamy_quadrant_s1
 
   // Signals from Controller
   logic clk_quadrant, rst_quadrant_n;
-  logic [4:0] isolate, isolated;
+  logic [3:0] isolate, isolated;
   logic ro_enable, ro_flush_valid, ro_flush_ready;
   logic [${ro_cache_regions-1}:0][${quadrant_pre_xbars[0].in_quadrant.aw-1}:0] ro_start_addr, ro_end_addr;
 
