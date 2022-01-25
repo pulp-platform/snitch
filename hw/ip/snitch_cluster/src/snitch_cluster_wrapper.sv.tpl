@@ -100,11 +100,6 @@ package ${cfg['pkg_name']};
   localparam snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{
       NrCachedRegionRules: ${len(cfg['pmas']['cached'])},
       CachedRegion: '{
-% if (len(cfg['pmas']['cached']) < 4):
-  % for i in range(4 - len(cfg['pmas']['cached'])):
-            '{base: '0, mask: '0},
-  % endfor
-% endif
 % for i, cp in enumerate(reversed(cfg['pmas']['cached'])):
   % if (i != (len(cfg['pmas']['cached']) - 1)):
             '{base: ${to_sv_hex(cp[0], cfg['addr_width'])}, mask: ${to_sv_hex(cp[1], cfg['addr_width'])}},
