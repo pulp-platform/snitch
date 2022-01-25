@@ -25,6 +25,8 @@ VLOG_FLAGS 	  += -suppress 2583
 VLOG_FLAGS 	  += -suppress 13314
 VLOG_FLAGS 	  += ${QUESTA_64BIT}
 
+VSIM_BENDER 	  += -t occamy
+
 CFG ?= src/occamy_cfg.hjson
 CDEF = ${ROOT}/sw/snRuntime/include/occamy_soc_peripheral.h
 

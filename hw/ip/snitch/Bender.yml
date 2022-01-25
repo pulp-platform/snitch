@@ -19,7 +19,12 @@ export_include_dirs:
 
 sources:
 # Level 0:
-- src/snitch_pma_pkg.sv
+- target: not(occamy)
+  files:
+  - src/snitch_pma_pkg.sv
+- target: occamy
+  files:
+  - src/occamy_snitch_pma_pkg.sv
 - src/riscv_instr.sv
 # Level 1:
 - src/snitch_pkg.sv
