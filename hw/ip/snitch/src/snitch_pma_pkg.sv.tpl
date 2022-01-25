@@ -7,7 +7,7 @@
 // Description: PMA Checks for Snitch.
 package snitch_pma_pkg;
 
-  localparam int unsigned NrMaxRules = 1;
+  localparam int unsigned NrMaxRules = ${nr_max_rules};
 
   typedef struct packed {
       logic [47:0] base; // base which needs to match

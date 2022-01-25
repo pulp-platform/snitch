@@ -38,6 +38,20 @@ class Occamy(Generator):
                                   cfg["rom"]["address"],
                                   cfg["rom"]["length"],
                                   addr_width)
+        
+        # Update snitch_pma_pkg.sv::NrMaxRules
+        nr_max_rules = '  localparam int unsigned NrMaxRules = {};\n'.format(len(pma_cfg.regions))
+        old_nr_max_rules = '  localparam int unsigned NrMaxRules ='
+        new_pkg = ''
+        with open('../../ip/snitch/src/snitch_pma_pkg.sv.tpl', "r") as f:
+            for line in f:
+                if old_nr_max_rules in line:
+                    new_pkg += nr_max_rules
+                else:
+                    new_pkg += line
+        occamy_snitch_pma_pkg_file = open('../../ip/snitch/src/occamy_snitch_pma_pkg.sv', "w")
+        occamy_snitch_pma_pkg_file.write(new_pkg)
+        occamy_snitch_pma_pkg_file.close()
 
         # Store Snitch cluster config in separate variable
         self.cluster = SnitchCluster(cfg["cluster"], pma_cfg)

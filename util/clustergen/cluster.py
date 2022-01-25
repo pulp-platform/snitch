@@ -370,6 +370,21 @@ class SnitchClusterTB(Generator):
         pma_cfg.add_region_length(PMA.CACHED, self.cfg['dram']['address'],
                                   self.cfg['dram']['length'],
                                   self.cfg['cluster']['addr_width'])
+
+        # Update snitch_pma_pkg.sv::NrMaxRules
+        nr_max_rules = '  localparam int unsigned NrMaxRules = {};\n'.format(len(pma_cfg.regions))
+        old_nr_max_rules = '  localparam int unsigned NrMaxRules ='
+        new_pkg = ''
+        with open('../../ip/snitch/src/snitch_pma_pkg.sv.tpl', "r") as f:
+            for line in f:
+                if old_nr_max_rules in line:
+                    new_pkg += nr_max_rules
+                else:
+                    new_pkg += line
+        snitch_pma_pkg_file = open('../../ip/snitch/src/snitch_pma_pkg.sv', "w")
+        snitch_pma_pkg_file.write(new_pkg)
+        snitch_pma_pkg_file.close()
+
         self.cfg['cluster']['tie_ports'] = True
         # Store Snitch cluster config in separate variable
         self.cluster = SnitchCluster(cfg["cluster"], pma_cfg)
