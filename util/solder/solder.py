@@ -742,8 +742,8 @@ class AxiBus(Bus):
         # Modify bus of instance itself if needed
         bus_inst = self
         if use_to_clk_rst:
-           bus_inst.rst = to_rst
-           bus_inst.clk = to_clk
+            bus_inst.rst = to_rst
+            bus_inst.clk = to_clk
 
         # Check bus properties.
         # Do not check clk/rst iff new bus generated in new gated domain
