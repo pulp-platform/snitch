@@ -474,7 +474,7 @@ def main():
     ##################
 
     # Quadrant pre xbars
-    # Each connects one quadrant and one HBI master to the HBM and quadrant xbars
+    # Each connects one quadrant master to the HBM and quadrant xbars
     quadrant_pre_xbars = list()
     for i in range(nr_s1_quadrants):
         quadrant_pre_xbar = solder.AxiXbar(
@@ -524,8 +524,7 @@ def main():
         # Default route passes HBI through quadrant 0
         # --> mask this route, forcing it through default wide xbar
         quadrant_inter_xbar.add_output_entry("quadrant_{}".format(i),
-                                             am_wide_xbar_quadrant_s1[i],
-                                             range_mask=(0, 0x1000000000))
+                                             am_wide_xbar_quadrant_s1[i])
         quadrant_inter_xbar.add_input("quadrant_{}".format(i))
 
     hbm_xbar = solder.AxiXbar(
