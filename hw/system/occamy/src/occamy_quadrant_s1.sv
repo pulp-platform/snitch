@@ -247,8 +247,8 @@ module occamy_quadrant_s1
       .req_t(axi_a48_d64_i4_u0_req_t),
       .resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_narrow_cluster_out_isolate (
-      .clk_i(clk_quadrant),
-      .rst_ni(rst_quadrant_n),
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
       .slv_req_i(narrow_cluster_out_iwc_req),
       .slv_resp_o(narrow_cluster_out_iwc_rsp),
       .mst_req_o(narrow_cluster_out_isolate_req),
@@ -351,8 +351,8 @@ module occamy_quadrant_s1
       .req_t(axi_a48_d512_i4_u0_req_t),
       .resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_cluster_out_isolate (
-      .clk_i(clk_quadrant),
-      .rst_ni(rst_quadrant_n),
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
       .slv_req_i(wide_cluster_out_iwc_req),
       .slv_resp_o(wide_cluster_out_iwc_rsp),
       .mst_req_o(wide_cluster_out_isolate_req),

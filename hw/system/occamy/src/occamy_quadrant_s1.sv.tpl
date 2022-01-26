@@ -77,7 +77,7 @@ module occamy_quadrant_s1
   ///////////////////////////////
   <% narrow_cluster_out_ctrl = narrow_xbar_quadrant_s1.out_top \
     .change_iw(context, soc_narrow_xbar.in_s1_quadrant_0.iw, "narrow_cluster_out_iwc") \
-    .isolate(context, "isolate[1]", "narrow_cluster_out_isolate", isolated="isolated[1]", to_clk="clk_i", to_rst="rst_ni") \
+    .isolate(context, "isolate[1]", "narrow_cluster_out_isolate", isolated="isolated[1]", to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True) \
     .cut(context, cuts_narrx_with_ctrl, "narrow_cluster_out_ctrl")
    %>
 
@@ -105,7 +105,7 @@ module occamy_quadrant_s1
 
     wide_cluster_out_cut = wide_cluster_out_ro_cache \
       .change_iw(context, wide_target_iw, "wide_cluster_out_iwc") \
-      .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni") \
+      .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True) \
       .cut(context, cuts_widexroc_with_wideout)
 
     assert quadrant_pre_xbars[0].in_quadrant.iw == wide_cluster_out_cut.iw, "S1 Quadrant and Cluster Out IW mismatches."

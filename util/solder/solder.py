@@ -721,6 +721,7 @@ class AxiBus(Bus):
                 atop_support=True,
                 to_clk=None,
                 to_rst=None,
+                use_to_clk_rst=False,
                 isolated=None):
 
         # Generate the new bus.
@@ -738,6 +739,12 @@ class AxiBus(Bus):
         else:
             bus = to
 
+        # Modify bus of instance itself if needed
+        bus_inst = self
+        if use_to_clk_rst:
+           bus_inst.rst = to_rst
+           bus_inst.clk = to_clk
+
         # Check bus properties.
         # Do not check clk/rst iff new bus generated in new gated domain
         if (to_clk is None) or (to is not None):
@@ -753,7 +760,7 @@ class AxiBus(Bus):
         bus.declare(context)
         tpl = templates.get_template("solder.axi_isolate.sv.tpl")
         context.write(
-            tpl.render_unicode(axi_in=self,
+            tpl.render_unicode(axi_in=bus_inst,
                                axi_out=bus,
                                name=inst_name or "i_{}".format(name),
                                isolate=isolate,
