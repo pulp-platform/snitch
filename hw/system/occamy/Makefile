@@ -83,6 +83,7 @@ update-plic:
 	@$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
 
 # Update generic control register.
+# $1: config name, $2: output directory, $3: output filename stem, $4: header filename stem
 define update_ctrl_regs
 	$(if $5, @echo "[REGGEN]  Generate $1 config" && \
 		$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir $2 --chip $2/$3.tpl)
