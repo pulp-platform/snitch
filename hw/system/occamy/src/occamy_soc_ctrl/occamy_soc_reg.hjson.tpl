@@ -105,7 +105,7 @@
       fields: [
         {
           bits: "31:0"
-          resval: ${nr_s1_clusters}
+          resval: ${nr_s1_quadrants}
           name: "NUM_QUADRANTS"
           desc: '''
                 Number of quadrants per chip.
