@@ -33,7 +33,16 @@ This is the current address map of occamy. Note that the Quadrants address map h
 | HBM\_PHY\_CFG |   1.0 MB |  used  |      0x0900\_0000 |      0x090f\_ffff |
 | -             |  15.0 MB |  free  |      0x0910\_0000 |      0x09ff\_ffff |
 | HBM\_SEQ      |  64.0 KB |  used  |      0x0a00\_0000 |      0x0a00\_ffff |
-| -             |  31.9 MB |  free  |      0x0a01\_0000 |      0x0bff\_ffff |
+| -             |  15.9 MB |  free  |      0x0a01\_0000 |      0x0aff\_ffff |
+| QUAD\_0\_CFG  |  64.0 KB |  used  |      0x0b00\_0000 |      0x0b00\_ffff |
+| QUAD\_1\_CFG  |  64.0 KB |  used  |      0x0b01\_0000 |      0x0b01\_ffff |
+| QUAD\_2\_CFG  |  64.0 KB |  used  |      0x0b02\_0000 |      0x0b02\_ffff |
+| QUAD\_3\_CFG  |  64.0 KB |  used  |      0x0b03\_0000 |      0x0b03\_ffff |
+| QUAD\_4\_CFG  |  64.0 KB |  used  |      0x0b04\_0000 |      0x0b04\_ffff |
+| QUAD\_5\_CFG  |  64.0 KB |  used  |      0x0b05\_0000 |      0x0b05\_ffff |
+| QUAD\_6\_CFG  |  64.0 KB |  used  |      0x0b06\_0000 |      0x0b06\_ffff |
+| QUAD\_7\_CFG  |  64.0 KB |  used  |      0x0b07\_0000 |      0x0b07\_ffff |
+| -             |  15.5 MB |  free  |      0x0b08\_0000 |      0x0bff\_ffff |
 | PLIC          |  64.0 MB |  used  |      0x0c00\_0000 |      0x0fff\_ffff |
 | QUADRANTS     |   8.0 MB |  used  |      0x1000\_0000 |      0x107f\_ffff |
 | -             | 248.0 MB |  free  |      0x1080\_0000 |      0x1fff\_ffff |

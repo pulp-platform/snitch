@@ -50,12 +50,12 @@ module testharness import occamy_pkg::*; (
   );
 </%def>
 
-% for i in range(8):
-  ${tb_memory(soc_wide_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i))}
+% for i in range(nr_hbm_channels):
+  ${tb_memory(hbm_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i))}
 % endfor
 
   logic tx, rx;
-  ${tb_memory(soc_wide_xbar.out_pcie, "pcie_axi")}
+  ${tb_memory(soc_narrow_xbar.out_pcie, "pcie_axi")}
   ${tb_memory(soc_regbus_periph_xbar.out_bootrom, "bootrom_regbus")}
   ${tb_memory(soc_regbus_periph_xbar.out_clk_mgr, "clk_mgr")}
   occamy_top i_occamy (
@@ -115,15 +115,15 @@ module testharness import occamy_pkg::*; (
     .chip_ctrl_req_o (),
     .chip_ctrl_rsp_i ('0),
     .ext_irq_i ('0),
-% for i in range(8):
+% for i in range(nr_hbm_channels):
     .hbm_${i}_req_o (hbm_channel_${i}_req),
     .hbm_${i}_rsp_i (hbm_channel_${i}_rsp),
 % endfor
-% for i in range(nr_s1_quadrants+1):
-    .hbi_${i}_req_i ('0),
-    .hbi_${i}_rsp_o (),
-    .hbi_${i}_req_o (),
-    .hbi_${i}_rsp_i ('0),
+% for s in ("wide", "narrow"):
+    .hbi_${s}_req_i ('0),
+    .hbi_${s}_rsp_o (),
+    .hbi_${s}_req_o (),
+    .hbi_${s}_rsp_i ('0),
 % endfor
     .pcie_axi_req_o (pcie_axi_req),
     .pcie_axi_rsp_i (pcie_axi_rsp),

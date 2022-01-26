@@ -27,17 +27,17 @@ module testharness import occamy_pkg::*; (
 
 
 
-  axi_a48_d512_i9_u0_req_t hbm_channel_0_req;
-  axi_a48_d512_i9_u0_resp_t hbm_channel_0_rsp;
+  axi_a48_d512_i8_u0_req_t hbm_channel_0_req;
+  axi_a48_d512_i8_u0_resp_t hbm_channel_0_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
-    .AxiIdWidth (9),
+    .AxiIdWidth (8),
     .AxiUserWidth (1),
     .ATOPSupport (0),
-    .req_t (axi_a48_d512_i9_u0_req_t),
-    .rsp_t (axi_a48_d512_i9_u0_resp_t)
+    .req_t (axi_a48_d512_i8_u0_req_t),
+    .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_0_channel (
     .clk_i,
     .rst_ni,
@@ -46,17 +46,17 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  axi_a48_d512_i9_u0_req_t hbm_channel_1_req;
-  axi_a48_d512_i9_u0_resp_t hbm_channel_1_rsp;
+  axi_a48_d512_i8_u0_req_t hbm_channel_1_req;
+  axi_a48_d512_i8_u0_resp_t hbm_channel_1_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
-    .AxiIdWidth (9),
+    .AxiIdWidth (8),
     .AxiUserWidth (1),
     .ATOPSupport (0),
-    .req_t (axi_a48_d512_i9_u0_req_t),
-    .rsp_t (axi_a48_d512_i9_u0_resp_t)
+    .req_t (axi_a48_d512_i8_u0_req_t),
+    .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_1_channel (
     .clk_i,
     .rst_ni,
@@ -65,17 +65,17 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  axi_a48_d512_i9_u0_req_t hbm_channel_2_req;
-  axi_a48_d512_i9_u0_resp_t hbm_channel_2_rsp;
+  axi_a48_d512_i8_u0_req_t hbm_channel_2_req;
+  axi_a48_d512_i8_u0_resp_t hbm_channel_2_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
-    .AxiIdWidth (9),
+    .AxiIdWidth (8),
     .AxiUserWidth (1),
     .ATOPSupport (0),
-    .req_t (axi_a48_d512_i9_u0_req_t),
-    .rsp_t (axi_a48_d512_i9_u0_resp_t)
+    .req_t (axi_a48_d512_i8_u0_req_t),
+    .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_2_channel (
     .clk_i,
     .rst_ni,
@@ -84,17 +84,17 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  axi_a48_d512_i9_u0_req_t hbm_channel_3_req;
-  axi_a48_d512_i9_u0_resp_t hbm_channel_3_rsp;
+  axi_a48_d512_i8_u0_req_t hbm_channel_3_req;
+  axi_a48_d512_i8_u0_resp_t hbm_channel_3_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
-    .AxiIdWidth (9),
+    .AxiIdWidth (8),
     .AxiUserWidth (1),
     .ATOPSupport (0),
-    .req_t (axi_a48_d512_i9_u0_req_t),
-    .rsp_t (axi_a48_d512_i9_u0_resp_t)
+    .req_t (axi_a48_d512_i8_u0_req_t),
+    .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_3_channel (
     .clk_i,
     .rst_ni,
@@ -103,17 +103,17 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  axi_a48_d512_i9_u0_req_t hbm_channel_4_req;
-  axi_a48_d512_i9_u0_resp_t hbm_channel_4_rsp;
+  axi_a48_d512_i8_u0_req_t hbm_channel_4_req;
+  axi_a48_d512_i8_u0_resp_t hbm_channel_4_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
-    .AxiIdWidth (9),
+    .AxiIdWidth (8),
     .AxiUserWidth (1),
     .ATOPSupport (0),
-    .req_t (axi_a48_d512_i9_u0_req_t),
-    .rsp_t (axi_a48_d512_i9_u0_resp_t)
+    .req_t (axi_a48_d512_i8_u0_req_t),
+    .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_4_channel (
     .clk_i,
     .rst_ni,
@@ -122,17 +122,17 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  axi_a48_d512_i9_u0_req_t hbm_channel_5_req;
-  axi_a48_d512_i9_u0_resp_t hbm_channel_5_rsp;
+  axi_a48_d512_i8_u0_req_t hbm_channel_5_req;
+  axi_a48_d512_i8_u0_resp_t hbm_channel_5_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
-    .AxiIdWidth (9),
+    .AxiIdWidth (8),
     .AxiUserWidth (1),
     .ATOPSupport (0),
-    .req_t (axi_a48_d512_i9_u0_req_t),
-    .rsp_t (axi_a48_d512_i9_u0_resp_t)
+    .req_t (axi_a48_d512_i8_u0_req_t),
+    .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_5_channel (
     .clk_i,
     .rst_ni,
@@ -141,17 +141,17 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  axi_a48_d512_i9_u0_req_t hbm_channel_6_req;
-  axi_a48_d512_i9_u0_resp_t hbm_channel_6_rsp;
+  axi_a48_d512_i8_u0_req_t hbm_channel_6_req;
+  axi_a48_d512_i8_u0_resp_t hbm_channel_6_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
-    .AxiIdWidth (9),
+    .AxiIdWidth (8),
     .AxiUserWidth (1),
     .ATOPSupport (0),
-    .req_t (axi_a48_d512_i9_u0_req_t),
-    .rsp_t (axi_a48_d512_i9_u0_resp_t)
+    .req_t (axi_a48_d512_i8_u0_req_t),
+    .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_6_channel (
     .clk_i,
     .rst_ni,
@@ -160,17 +160,17 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  axi_a48_d512_i9_u0_req_t hbm_channel_7_req;
-  axi_a48_d512_i9_u0_resp_t hbm_channel_7_rsp;
+  axi_a48_d512_i8_u0_req_t hbm_channel_7_req;
+  axi_a48_d512_i8_u0_resp_t hbm_channel_7_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (512),
-    .AxiIdWidth (9),
+    .AxiIdWidth (8),
     .AxiUserWidth (1),
     .ATOPSupport (0),
-    .req_t (axi_a48_d512_i9_u0_req_t),
-    .rsp_t (axi_a48_d512_i9_u0_resp_t)
+    .req_t (axi_a48_d512_i8_u0_req_t),
+    .rsp_t (axi_a48_d512_i8_u0_resp_t)
   ) i_hbm_channel_7_channel (
     .clk_i,
     .rst_ni,
@@ -181,17 +181,17 @@ module testharness import occamy_pkg::*; (
 
   logic tx, rx;
 
-  axi_a48_d512_i9_u0_req_t pcie_axi_req;
-  axi_a48_d512_i9_u0_resp_t pcie_axi_rsp;
+  axi_a48_d64_i8_u0_req_t pcie_axi_req;
+  axi_a48_d64_i8_u0_resp_t pcie_axi_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
-    .AxiDataWidth (512),
-    .AxiIdWidth (9),
+    .AxiDataWidth (64),
+    .AxiIdWidth (8),
     .AxiUserWidth (1),
     .ATOPSupport (0),
-    .req_t (axi_a48_d512_i9_u0_req_t),
-    .rsp_t (axi_a48_d512_i9_u0_resp_t)
+    .req_t (axi_a48_d64_i8_u0_req_t),
+    .rsp_t (axi_a48_d64_i8_u0_resp_t)
   ) i_pcie_axi_channel (
     .clk_i,
     .rst_ni,
@@ -304,42 +304,14 @@ module testharness import occamy_pkg::*; (
     .hbm_6_rsp_i (hbm_channel_6_rsp),
     .hbm_7_req_o (hbm_channel_7_req),
     .hbm_7_rsp_i (hbm_channel_7_rsp),
-    .hbi_0_req_i ('0),
-    .hbi_0_rsp_o (),
-    .hbi_0_req_o (),
-    .hbi_0_rsp_i ('0),
-    .hbi_1_req_i ('0),
-    .hbi_1_rsp_o (),
-    .hbi_1_req_o (),
-    .hbi_1_rsp_i ('0),
-    .hbi_2_req_i ('0),
-    .hbi_2_rsp_o (),
-    .hbi_2_req_o (),
-    .hbi_2_rsp_i ('0),
-    .hbi_3_req_i ('0),
-    .hbi_3_rsp_o (),
-    .hbi_3_req_o (),
-    .hbi_3_rsp_i ('0),
-    .hbi_4_req_i ('0),
-    .hbi_4_rsp_o (),
-    .hbi_4_req_o (),
-    .hbi_4_rsp_i ('0),
-    .hbi_5_req_i ('0),
-    .hbi_5_rsp_o (),
-    .hbi_5_req_o (),
-    .hbi_5_rsp_i ('0),
-    .hbi_6_req_i ('0),
-    .hbi_6_rsp_o (),
-    .hbi_6_req_o (),
-    .hbi_6_rsp_i ('0),
-    .hbi_7_req_i ('0),
-    .hbi_7_rsp_o (),
-    .hbi_7_req_o (),
-    .hbi_7_rsp_i ('0),
-    .hbi_8_req_i ('0),
-    .hbi_8_rsp_o (),
-    .hbi_8_req_o (),
-    .hbi_8_rsp_i ('0),
+    .hbi_wide_req_i ('0),
+    .hbi_wide_rsp_o (),
+    .hbi_wide_req_o (),
+    .hbi_wide_rsp_i ('0),
+    .hbi_narrow_req_i ('0),
+    .hbi_narrow_rsp_o (),
+    .hbi_narrow_req_o (),
+    .hbi_narrow_rsp_i ('0),
     .pcie_axi_req_o (pcie_axi_req),
     .pcie_axi_rsp_i (pcie_axi_rsp),
     .pcie_axi_req_i ('0),

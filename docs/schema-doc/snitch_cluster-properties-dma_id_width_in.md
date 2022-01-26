@@ -19,5 +19,5 @@ Id width of the wide AXI plug into the cluster.
 The default value is:
 
 ```json
-2
+1
 ```

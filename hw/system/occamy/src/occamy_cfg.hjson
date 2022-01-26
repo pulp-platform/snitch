@@ -4,7 +4,23 @@
 
 // Cluster configuration for Occamy.
 {
+    quadrant_pre_xbar: {
+      max_slv_trans: 4,
+      max_mst_trans: 4,
+      fall_through: false,
+    },
+    pre_xbar_slv_id_width_no_rocache: 3,
     wide_xbar: {
+      max_slv_trans: 4,
+      max_mst_trans: 4,
+      fall_through: false,
+    },
+    quadrant_inter_xbar: {
+      max_slv_trans: 4,
+      max_mst_trans: 4,
+      fall_through: false,
+    },
+    hbm_xbar: {
       max_slv_trans: 4,
       max_mst_trans: 4,
       fall_through: false,
@@ -14,6 +30,7 @@
       max_mst_trans: 4,
       fall_through: false,
     },
+    narrow_xbar_slv_id_width: 4,
     nr_s1_quadrant: 8,
     s1_quadrant: {
       nr_clusters: 4,
@@ -30,11 +47,15 @@
         max_mst_trans: 4,
         fall_through: false,
       },
+      wide_xbar_slv_id_width: 3
       narrow_xbar: {
         max_slv_trans: 4,
         max_mst_trans: 4,
         fall_through: false,
       },
+      narrow_xbar_slv_id_width: 4
+      cfg_base_addr: 184549376, // 0x0b000000
+      cfg_base_offset: 65536 // 0x10000
     },
     cluster: {
         name: "occamy_cluster"

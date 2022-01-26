@@ -390,8 +390,46 @@ class RegStruct:
         return name
 
 
+# An abstract bus; has simply a request and response which may be assigned.
+class Bus(object):
+    def __init__(self,
+                 name,
+                 name_suffix=None,
+                 declared=False):
+        self.type_prefix = None
+        self.name = name
+        self.name_suffix = name_suffix
+        self.declared = declared
+
+    def assign(self, context, from_bus):
+        context.write("  assign {} = {};\n".format(self.req_name(), from_bus.req_name()))
+        context.write("  assign {} = {};\n\n".format(from_bus.rsp_name(), self.rsp_name()))
+
+    def declare(self, context):
+        if self.declared:
+            return
+        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
+        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
+        self.declared = True
+        return self
+
+    def req_name(self):
+        return "{}_req{}".format(self.name, self.name_suffix or "")
+
+    def rsp_name(self):
+        return "{}_rsp{}".format(self.name, self.name_suffix or "")
+
+    def req_type(self):
+        assert (self.type_prefix is not None)
+        return "{}_req_t".format(self.type_prefix)
+
+    def rsp_type(self):
+        assert (self.type_prefix is not None)
+        return "{}_rsp_t".format(self.type_prefix)
+
+
 # An AXI bus.
-class AxiBus(object):
+class AxiBus(Bus):
     def __init__(self,
                  clk,
                  rst,
@@ -403,6 +441,7 @@ class AxiBus(object):
                  name_suffix=None,
                  type_prefix=None,
                  declared=False):
+        super().__init__(name, name_suffix, declared)
         self.clk = clk
         self.rst = rst
         self.aw = aw
@@ -410,13 +449,10 @@ class AxiBus(object):
         self.iw = iw
         self.uw = uw
         self.type_prefix = type_prefix or self.emit_struct()
-        self.name = name
-        self.name_suffix = name_suffix
-        self.declared = declared
 
-    def copy(self, name=None):
-        return AxiBus(self.clk,
-                      self.rst,
+    def copy(self, name=None, clk=None, rst=None):
+        return AxiBus(clk or self.clk,
+                      rst or self.rst,
                       self.aw,
                       self.dw,
                       self.iw,
@@ -441,23 +477,8 @@ class AxiBus(object):
                                   prefix="s_axi_{}".format(name or ""),
                                   bus=self)
 
-    def declare(self, context):
-        if self.declared:
-            return
-        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
-        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
-        self.declared = True
-        return self
-
-    def req_name(self):
-        return "{}_req{}".format(self.name, self.name_suffix or "")
-
-    def rsp_name(self):
-        return "{}_rsp{}".format(self.name, self.name_suffix or "")
-
-    def req_type(self):
-        return "{}_req_t".format(self.type_prefix)
-
+    # TODO: For some reason the suffix here is nonstandard, hence the override.
+    # This ought to be fixed, but for now, it is everywhere...
     def rsp_type(self):
         return "{}_resp_t".format(self.type_prefix)
 
@@ -561,7 +582,8 @@ class AxiBus(object):
 
     def change_dw(self, context, target_dw, name, inst_name=None, to=None):
         if self.dw == target_dw:
-            return self
+            if to is None:
+                return self
 
         # Generate the new bus.
         if to is None:
@@ -582,6 +604,11 @@ class AxiBus(object):
         assert (bus.iw == self.iw)
         assert (bus.uw == self.uw)
 
+        # Handle to-assignment
+        if self.dw == target_dw:
+            to.assign(context, self)
+            return to
+
         # Emit the remapper instance.
         bus.declare(context)
         tpl = templates.get_template("solder.axi_change_dw.sv.tpl")
@@ -595,7 +622,8 @@ class AxiBus(object):
 
     def cut(self, context, nr_cuts=1, name=None, inst_name=None, to=None):
         if nr_cuts == 0:
-            return self
+            if to is None:
+                return self
 
         name = name or "{}_cut".format(self.name)
 
@@ -615,6 +643,11 @@ class AxiBus(object):
         assert (bus.dw == self.dw)
         assert (bus.iw == self.iw)
         assert (bus.uw == self.uw)
+
+        # Handle to-assignment
+        if nr_cuts == 0:
+            to.assign(context, self)
+            return to
 
         # Emit the cut instance.
         bus.declare(context)
@@ -637,7 +670,8 @@ class AxiBus(object):
             to=None,
             log_depth=2):
         if self.clk == target_clk and self.rst == target_rst:
-            return self
+            if to is None:
+                return self
 
         # Generate the new bus.
         if to is None:
@@ -658,6 +692,11 @@ class AxiBus(object):
         assert (bus.dw == self.dw)
         assert (bus.iw == self.iw)
         assert (bus.uw == self.uw)
+
+        # Handle to-assignment
+        if self.clk == target_clk and self.rst == target_rst:
+            to.assign(context, self)
+            return to
 
         # Emit the CDC instance.
         bus.declare(context)
@@ -680,6 +719,9 @@ class AxiBus(object):
                 num_pending=16,
                 terminated=False,
                 atop_support=True,
+                to_clk=None,
+                to_rst=None,
+                use_to_clk_rst=False,
                 isolated=None):
 
         # Generate the new bus.
@@ -690,12 +732,25 @@ class AxiBus(object):
             bus.type_prefix = bus.emit_struct()
             bus.name = name
             bus.name_suffix = None
+            if to_clk:
+                bus.clk = to_clk
+            if to_rst:
+                bus.rst = to_rst
         else:
             bus = to
 
+        # Modify bus of instance itself if needed
+        bus_inst = self
+        if use_to_clk_rst:
+            bus_inst.rst = to_rst
+            bus_inst.clk = to_clk
+
         # Check bus properties.
-        assert (bus.clk == self.clk)
-        assert (bus.rst == self.rst)
+        # Do not check clk/rst iff new bus generated in new gated domain
+        if (to_clk is None) or (to is not None):
+            assert (bus.clk == self.clk)
+        if (to_rst is None) or (to is not None):
+            assert (bus.rst == self.rst)
         assert (bus.aw == self.aw)
         assert (bus.dw == self.dw)
         assert (bus.iw == self.iw)
@@ -705,7 +760,7 @@ class AxiBus(object):
         bus.declare(context)
         tpl = templates.get_template("solder.axi_isolate.sv.tpl")
         context.write(
-            tpl.render_unicode(axi_in=self,
+            tpl.render_unicode(axi_in=bus_inst,
                                axi_out=bus,
                                name=inst_name or "i_{}".format(name),
                                isolate=isolate,
@@ -836,7 +891,8 @@ class AxiBus(object):
 
     def trunc_addr(self, context, target_aw, name=None, inst_name=None, to=None):
         if self.aw == target_aw:
-            return self
+            if to is None:
+                return self
 
         # Generate the new bus
         if to is None:
@@ -856,6 +912,11 @@ class AxiBus(object):
         assert (bus.iw == self.iw)
         assert (bus.uw == self.uw)
 
+        # Handle to-assignment
+        if self.aw == target_aw:
+            to.assign(context, self)
+            return to
+
         # Emit the addr_trunc instance.
         bus.declare(context)
         tpl = templates.get_template("solder.axi_trunc_addr.sv.tpl")
@@ -870,7 +931,7 @@ class AxiBus(object):
 
 
 # An AXI-Lite bus.
-class AxiLiteBus(object):
+class AxiLiteBus(Bus):
     def __init__(self,
                  clk,
                  rst,
@@ -880,37 +941,15 @@ class AxiLiteBus(object):
                  name_suffix=None,
                  type_prefix=None,
                  declared=False):
+        super().__init__(name, name_suffix, declared)
         self.clk = clk
         self.rst = rst
         self.aw = aw
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
-        self.name = name
-        self.name_suffix = name_suffix
-        self.declared = declared
 
     def emit_struct(self):
         return AxiLiteStruct.emit(self.aw, self.dw)
-
-    def declare(self, context):
-        if self.declared:
-            return
-        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
-        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
-        self.declared = True
-        return self
-
-    def req_name(self):
-        return "{}_req{}".format(self.name, self.name_suffix or "")
-
-    def rsp_name(self):
-        return "{}_rsp{}".format(self.name, self.name_suffix or "")
-
-    def req_type(self):
-        return "{}_req_t".format(self.type_prefix)
-
-    def rsp_type(self):
-        return "{}_rsp_t".format(self.type_prefix)
 
     def cdc(self,
             context,
@@ -921,7 +960,8 @@ class AxiLiteBus(object):
             to=None,
             log_depth=2):
         if self.clk == target_clk and self.rst == target_rst:
-            return self
+            if to is None:
+                return self
 
         # Generate the new bus.
         if to is None:
@@ -940,6 +980,11 @@ class AxiLiteBus(object):
         assert (bus.rst == target_rst)
         assert (bus.aw == self.aw)
         assert (bus.dw == self.dw)
+
+        # Handle to-assignment
+        if self.clk == target_clk and self.rst == target_rst:
+            to.assign(context, self)
+            return to
 
         # Emit the CDC instance.
         bus.declare(context)
@@ -1005,7 +1050,7 @@ class AxiLiteBus(object):
 
 
 # An advanced peripheral bus.
-class ApbBus(object):
+class ApbBus(Bus):
     def __init__(self,
                  clk,
                  rst,
@@ -1015,14 +1060,12 @@ class ApbBus(object):
                  name_suffix=None,
                  type_prefix=None,
                  declared=False):
+        super().__init__(name, name_suffix, declared)
         self.clk = clk
         self.rst = rst
         self.aw = aw
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
-        self.name = name
-        self.name_suffix = name_suffix
-        self.declared = declared
 
     def emit_struct(self):
         return ApbStruct.emit(self.aw, self.dw)
@@ -1041,26 +1084,6 @@ class ApbBus(object):
                                   prefix="s_apb_{}".format(name or ""),
                                   bus=self)
 
-    def declare(self, context):
-        if self.declared:
-            return
-        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
-        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
-        self.declared = True
-        return self
-
-    def req_name(self):
-        return "{}_req{}".format(self.name, self.name_suffix or "")
-
-    def rsp_name(self):
-        return "{}_rsp{}".format(self.name, self.name_suffix or "")
-
-    def req_type(self):
-        return "{}_req_t".format(self.type_prefix)
-
-    def rsp_type(self):
-        return "{}_rsp_t".format(self.type_prefix)
-
     def addr_type(self):
         return "logic [{}:0]".format(self.aw - 1)
 
@@ -1072,7 +1095,7 @@ class ApbBus(object):
 
 
 # A register bus.
-class RegBus(object):
+class RegBus(Bus):
     def __init__(self,
                  clk,
                  rst,
@@ -1082,37 +1105,15 @@ class RegBus(object):
                  name_suffix=None,
                  type_prefix=None,
                  declared=False):
+        super().__init__(name, name_suffix, declared)
         self.clk = clk
         self.rst = rst
         self.aw = aw
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
-        self.name = name
-        self.name_suffix = name_suffix
-        self.declared = declared
 
     def emit_struct(self):
         return RegStruct.emit(self.aw, self.dw)
-
-    def declare(self, context):
-        if self.declared:
-            return
-        context.write("  {} {};\n".format(self.req_type(), self.req_name()))
-        context.write("  {} {};\n\n".format(self.rsp_type(), self.rsp_name()))
-        self.declared = True
-        return self
-
-    def req_name(self):
-        return "{}_req{}".format(self.name, self.name_suffix or "")
-
-    def rsp_name(self):
-        return "{}_rsp{}".format(self.name, self.name_suffix or "")
-
-    def req_type(self):
-        return "{}_req_t".format(self.type_prefix)
-
-    def rsp_type(self):
-        return "{}_rsp_t".format(self.type_prefix)
 
     def addr_type(self):
         return "logic [{}:0]".format(self.aw - 1)
@@ -1208,6 +1209,7 @@ class AxiXbar(Xbar):
                  fall_through=False,
                  no_loopback=False,
                  atop_support=True,
+                 latency_mode=None,
                  **kwargs):
         super().__init__(**kwargs)
         self.aw = aw
@@ -1219,11 +1221,16 @@ class AxiXbar(Xbar):
         self.fall_through = fall_through
         self.no_loopback = no_loopback
         self.symbolic_addrmap = list()
+        self.symbolic_addrmap_multi = list()
         self.atop_support = atop_support
         self.addrmap = list()
+        self.connections = dict()
+        self.latency_mode = latency_mode or "axi_pkg::CUT_ALL_PORTS"
 
-    def add_input(self, name):
+    def add_input(self, name, outputs=None):
         self.inputs.append(name)
+        if outputs:
+            self.connections[name] = outputs
 
     def add_output(self, name, addrs, default=False):
         idx = len(self.outputs)
@@ -1238,13 +1245,23 @@ class AxiXbar(Xbar):
         self.symbolic_addrmap.append((idx, base, length))
         self.outputs.append(name)
 
-    def add_output_entry(self, name, entry):
-        self.add_output(name,
-                        [(r.lo, r.hi)
-                         for r in self.node.get_routes() if r.port == entry])
+    def add_output_symbolic_multi(self, name, entries):
+        idx = len(self.outputs)
+        self.symbolic_addrmap_multi.append((idx, entries))
+        self.outputs.append(name)
+
+    def add_output_entry(self, name, entry, range_mask=None):
+        addrs = [(r.lo, r.hi) for r in self.node.get_routes() if r.port == entry]
+        if range_mask is not None:
+            addrs = filter(lambda r: r[0] >= range_mask[0] and r[1] < range_mask[1], addrs)
+        self.add_output(name, addrs)
 
     def addr_map_len(self):
-        return len(self.addrmap) + len(self.symbolic_addrmap)
+        return len(self.addrmap) + len(self.symbolic_addrmap) + sum(
+            len(am) for am in self.symbolic_addrmap_multi)
+
+    def iw_out(self):
+        return self.iw + int(math.ceil(math.log2(max(1, len(self.inputs)))))
 
     def emit(self):
         global code_module
@@ -1255,7 +1272,7 @@ class AxiXbar(Xbar):
         code_module.setdefault(self.context, "")
         # Compute the ID widths.
         iw_in = self.iw
-        iw_out = self.iw + int(math.ceil(math.log2(max(1, len(self.inputs)))))
+        iw_out = self.iw_out()
 
         # Emit the input enum into the package.
         input_enum_name = "{}_inputs_e".format(self.name)
@@ -1295,7 +1312,7 @@ class AxiXbar(Xbar):
         cfg += "  MaxSlvTrans:        {},\n".format(self.max_slv_trans)
         cfg += "  MaxMstTrans:        {},\n".format(self.max_mst_trans)
         cfg += "  FallThrough:        {},\n".format(int(self.fall_through))
-        cfg += "  LatencyMode:        axi_pkg::CUT_ALL_PORTS,\n"
+        cfg += "  LatencyMode:        {},\n".format(self.latency_mode)
         cfg += "  AxiIdWidthSlvPorts: {},\n".format(self.iw)
         cfg += "  AxiIdUsedSlvPorts:  {},\n".format(self.iw)
         cfg += "  AxiAddrWidth:       {},\n".format(self.aw)
@@ -1312,21 +1329,21 @@ class AxiXbar(Xbar):
             self.aw,
             self.addr_map_len() - 1, addrmap_name)
         addrmap += "assign {} = '{{\n".format(addrmap_name)
+        addrmap_lines = []
         for i in range(len(self.addrmap)):
-            addrmap += "  '{{ idx: {}, start_addr: {aw}'h{:08x}, end_addr: {aw}'h{:08x} }}".format(
-                *self.addrmap[i], aw=self.aw)
-            if i != len(self.addrmap) - 1 or len(self.symbolic_addrmap) > 0:
-                addrmap += ",\n"
-            else:
-                addrmap += "\n"
+            addrmap_lines.append(
+                "  '{{ idx: {}, start_addr: {aw}'h{:08x}, end_addr: {aw}'h{:08x} }}".format(
+                    *self.addrmap[i], aw=self.aw))
         for i, (idx, base, length) in enumerate(self.symbolic_addrmap):
-            addrmap += "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
-                idx, base, base, length, i=i)
-            if i != len(self.symbolic_addrmap) - 1:
-                addrmap += ",\n"
-            else:
-                addrmap += "\n"
-        addrmap += "};\n"
+            addrmap_lines.append(
+                "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
+                    idx, base, base, length, i=i))
+        for i, (idx, entries) in enumerate(self.symbolic_addrmap_multi):
+            for base, length in entries:
+                addrmap_lines.append(
+                    "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
+                        idx, base, base, length, i=i))
+        addrmap += "{}\n}};\n".format(',\n'.join(addrmap_lines))
 
         code_module[self.context] += "\n" + addrmap
 
@@ -1449,17 +1466,11 @@ class AxiXbar(Xbar):
         """Generate a connectivity matrix"""
         length = len(self.outputs) * len(self.inputs)
         connectivity = ""
-        # check if port names match and disable that route
-        if self.no_loopback:
-            for i in self.inputs:
-                for o in self.outputs:
-                    if (i == o):
-                        connectivity += "0"
-                    else:
-                        connectivity += "1"
-        else:
-            connectivity += "1" * length
-
+        for i in self.inputs:
+            for o in self.outputs:
+                # Disable link only if connectivity specified for input or loopback disabled
+                connectivity += "0" if (((i in self.connections) and (o not in self.connections[i]))
+                                        or (self.no_loopback and i == o)) else "1"
         connectivity = "{}'b{}".format(length, connectivity[::-1])
 
         return connectivity
@@ -1475,6 +1486,7 @@ class AxiLiteXbar(Xbar):
                  max_slv_trans=4,
                  max_mst_trans=4,
                  fall_through=False,
+                 latency_mode=None,
                  **kwargs):
         super().__init__(**kwargs)
         self.aw = aw
@@ -1483,6 +1495,7 @@ class AxiLiteXbar(Xbar):
         self.max_mst_trans = max_mst_trans
         self.fall_through = fall_through
         self.addrmap = list()
+        self.latency_mode = latency_mode or "axi_pkg::CUT_ALL_PORTS"
 
     def add_input(self, name):
         self.inputs.append(name)

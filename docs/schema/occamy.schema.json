@@ -11,11 +11,30 @@
         "cluster": {
             "$ref": "http://pulp-platform.org/snitch/snitch_cluster.schema.json"
         },
+        "quadrant_pre_xbar": {
+            "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+        },
+        "pre_xbar_slv_id_width_no_rocache": {
+            "type": "integer",
+            "description": "ID width of quadrant pre-crossbar slave ports assuming no read-only cache.",
+            "default": 3
+        },
         "wide_xbar": {
+            "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+        },
+        "quadrant_inter_xbar": {
+            "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+        },
+        "hbm_xbar": {
             "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
         },
         "narrow_xbar": {
             "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+        },
+        "narrow_xbar_slv_id_width": {
+            "type": "integer",
+            "description": "ID width of narrow crossbar slave ports.",
+            "default": 4
         },
         "nr_s1_quadrant": {
             "title": "Number of S1 Quadrants",
@@ -62,8 +81,28 @@
                 "wide_xbar": {
                     "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
                 },
+                "wide_xbar_slv_id_width": {
+                    "type": "integer",
+                    "description": "ID width of wide quadrant crossbar slave ports.",
+                    "default": 3
+                },
                 "narrow_xbar": {
                     "$ref": "http://pulp-platform.org/snitch/axi_xbar.schema.json"
+                },
+                "narrow_xbar_slv_id_width": {
+                    "type": "integer",
+                    "description": "ID width of narrow quadrant crossbar slave ports.",
+                    "default": 4
+                },
+                "cfg_base_addr": {
+                    "type": "number",
+                    "description": "Base address of the quadrant configuration region.",
+                    "default": 184549376
+                },
+                "cfg_base_offset": {
+                    "type": "number",
+                    "description": "Allocated size and offset of each quadrant configuration.",
+                    "default": 65536
                 }
             }
         },

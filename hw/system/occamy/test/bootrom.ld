@@ -15,10 +15,13 @@ SECTIONS
   .text : { *(.text._start) *(.text) *(.text.*) } > bootrom
   . = ALIGN(16);
   /DISCARD/ : { *(.riscv.attributes) *(.comment) }
+  /* Quadrant Parameters */
+  __quad_stride     = 0x10000;
+  __quad_int_base   = 0x0b000000;
   /* Further addresses */
   __soc_ctrl_scratch0 = 0x02000014;
   __soc_ctrl_bootmode = 0x02000024;
-  __soc_ctrl_isolate  = 0x020000a4;
+  __soc_ctrl_nr_quads = 0x02000028;
   __clint_mtime       = 0x0400bff8;
   __base_uart_sym     = 0x02002000;
   __base_i2c_sym      = 0x02004000;

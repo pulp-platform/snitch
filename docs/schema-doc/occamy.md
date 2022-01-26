@@ -16,36 +16,41 @@ Description of an Occamy-based system.
 
 # Occamy System Schema Properties
 
-| Property                          | Type          | Required | Nullable       | Defined by                                                                                                                                          |
-| :-------------------------------- | :------------ | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [cluster](#cluster)               | `object`      | Required | cannot be null | [Occamy System Schema](occamy-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster") |
-| [wide_xbar](#wide_xbar)           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/wide_xbar")       |
-| [narrow_xbar](#narrow_xbar)       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar")   |
-| [nr_s1_quadrant](#nr_s1_quadrant) | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant") |
-| [s1_quadrant](#s1_quadrant)       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant")    |
-| [debug](#debug)                   | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-debug.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/debug")                           |
-| [rom](#rom)                       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-rom.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/rom")                               |
-| [soc_ctrl](#soc_ctrl)             | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-soc_ctrl.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/soc_ctrl")                     |
-| [clk_mgr](#clk_mgr)               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-clk_mgr.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/clk_mgr")                       |
-| [uart](#uart)                     | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-uart.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/uart")                             |
-| [GPIO](#gpio)                     | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-gpio.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/GPIO")                             |
-| [I2C](#i2c)                       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-i2c.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/I2C")                               |
-| [chip_ctrl](#chip_ctrl)           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-chip_ctrl.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/chip_ctrl")                   |
-| [timer](#timer)                   | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-timer.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/timer")                           |
-| [spim](#spim)                     | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-spim.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spim")                             |
-| [clint](#clint)                   | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-clint.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/clint")                           |
-| [pcie_cfg](#pcie_cfg)             | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-pcie_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie_cfg")                     |
-| [hbi_cfg](#hbi_cfg)               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi_cfg")                       |
-| [hbi_ctl](#hbi_ctl)               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi_ctl.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi_ctl")                       |
-| [hbm_cfg](#hbm_cfg)               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm_cfg")                       |
-| [hbm_phy_cfg](#hbm_phy_cfg)       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm_phy_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm_phy_cfg")               |
-| [hbm_seq](#hbm_seq)               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm_seq.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm_seq")                       |
-| [plic](#plic)                     | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-plic.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/plic")                             |
-| [spm](#spm)                       | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm")                               |
-| [pcie](#pcie)                     | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-pcie.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie")                             |
-| [hbi](#hbi)                       | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi")                               |
-| [hbm](#hbm)                       | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm")                               |
-| [dram](#dram)                     | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-dram.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/dram")                             |
+| Property                                                              | Type          | Required | Nullable       | Defined by                                                                                                                                                                      |
+| :-------------------------------------------------------------------- | :------------ | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [cluster](#cluster)                                                   | `object`      | Required | cannot be null | [Occamy System Schema](occamy-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster")                             |
+| [quadrant_pre_xbar](#quadrant_pre_xbar)                               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_pre_xbar")                           |
+| [pre_xbar_slv_id_width_no_rocache](#pre_xbar_slv_id_width_no_rocache) | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-pre_xbar_slv_id_width_no_rocache.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pre_xbar_slv_id_width_no_rocache") |
+| [wide_xbar](#wide_xbar)                                               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/wide_xbar")                                 |
+| [quadrant_inter_xbar](#quadrant_inter_xbar)                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-2.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_inter_xbar")                       |
+| [hbm_xbar](#hbm_xbar)                                                 | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-3.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/hbm_xbar")                                  |
+| [narrow_xbar](#narrow_xbar)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar")                               |
+| [narrow_xbar_slv_id_width](#narrow_xbar_slv_id_width)                 | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-narrow_xbar_slv_id_width.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width")                 |
+| [nr_s1_quadrant](#nr_s1_quadrant)                                     | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant")                             |
+| [s1_quadrant](#s1_quadrant)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant")                                |
+| [debug](#debug)                                                       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-debug.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/debug")                                                       |
+| [rom](#rom)                                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-rom.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/rom")                                                           |
+| [soc_ctrl](#soc_ctrl)                                                 | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-soc_ctrl.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/soc_ctrl")                                                 |
+| [clk_mgr](#clk_mgr)                                                   | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-clk_mgr.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/clk_mgr")                                                   |
+| [uart](#uart)                                                         | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-uart.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/uart")                                                         |
+| [GPIO](#gpio)                                                         | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-gpio.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/GPIO")                                                         |
+| [I2C](#i2c)                                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-i2c.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/I2C")                                                           |
+| [chip_ctrl](#chip_ctrl)                                               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-chip_ctrl.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/chip_ctrl")                                               |
+| [timer](#timer)                                                       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-timer.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/timer")                                                       |
+| [spim](#spim)                                                         | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-spim.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spim")                                                         |
+| [clint](#clint)                                                       | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-clint.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/clint")                                                       |
+| [pcie_cfg](#pcie_cfg)                                                 | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-pcie_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie_cfg")                                                 |
+| [hbi_cfg](#hbi_cfg)                                                   | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi_cfg")                                                   |
+| [hbi_ctl](#hbi_ctl)                                                   | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi_ctl.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi_ctl")                                                   |
+| [hbm_cfg](#hbm_cfg)                                                   | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm_cfg")                                                   |
+| [hbm_phy_cfg](#hbm_phy_cfg)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm_phy_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm_phy_cfg")                                           |
+| [hbm_seq](#hbm_seq)                                                   | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm_seq.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm_seq")                                                   |
+| [plic](#plic)                                                         | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-plic.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/plic")                                                         |
+| [spm](#spm)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm")                                                           |
+| [pcie](#pcie)                                                         | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-pcie.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie")                                                         |
+| [hbi](#hbi)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi")                                                           |
+| [hbm](#hbm)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm")                                                           |
+| [dram](#dram)                                                         | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-dram.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/dram")                                                         |
 
 ## cluster
 
@@ -65,6 +70,50 @@ Base description of a Snitch cluster and its internal structure and configuratio
 
 `object` ([Snitch Cluster Schema](occamy-properties-snitch-cluster-schema.md))
 
+## quadrant_pre_xbar
+
+AXI Crossbar Properties
+
+`quadrant_pre_xbar`
+
+*   is optional
+
+*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_pre_xbar")
+
+### quadrant_pre_xbar Type
+
+`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
+
+## pre_xbar_slv_id_width_no_rocache
+
+ID width of quadrant pre-crossbar slave ports assuming no read-only cache.
+
+`pre_xbar_slv_id_width_no_rocache`
+
+*   is optional
+
+*   Type: `integer`
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-pre_xbar_slv_id_width_no_rocache.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pre_xbar_slv_id_width_no_rocache")
+
+### pre_xbar_slv_id_width_no_rocache Type
+
+`integer`
+
+### pre_xbar_slv_id_width_no_rocache Default Value
+
+The default value is:
+
+```json
+3
+```
+
 ## wide_xbar
 
 AXI Crossbar Properties
@@ -73,15 +122,51 @@ AXI Crossbar Properties
 
 *   is optional
 
-*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
+*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/wide_xbar")
+*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/wide_xbar")
 
 ### wide_xbar Type
 
-`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
+`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
+
+## quadrant_inter_xbar
+
+AXI Crossbar Properties
+
+`quadrant_inter_xbar`
+
+*   is optional
+
+*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_inter_xbar")
+
+### quadrant_inter_xbar Type
+
+`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
+
+## hbm_xbar
+
+AXI Crossbar Properties
+
+`hbm_xbar`
+
+*   is optional
+
+*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/hbm_xbar")
+
+### hbm_xbar Type
+
+`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
 
 ## narrow_xbar
 
@@ -91,15 +176,41 @@ AXI Crossbar Properties
 
 *   is optional
 
-*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
+*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar")
+*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar")
 
 ### narrow_xbar Type
 
-`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
+`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-4.md))
+
+## narrow_xbar_slv_id_width
+
+ID width of narrow crossbar slave ports.
+
+`narrow_xbar_slv_id_width`
+
+*   is optional
+
+*   Type: `integer`
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-narrow_xbar_slv_id_width.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width")
+
+### narrow_xbar_slv_id_width Type
+
+`integer`
+
+### narrow_xbar_slv_id_width Default Value
+
+The default value is:
+
+```json
+4
+```
 
 ## nr_s1\_quadrant
 
