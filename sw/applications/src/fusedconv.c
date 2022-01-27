@@ -48,23 +48,27 @@ int main() {
 
     snrt_cluster_hw_barrier();
 
-    if (snrt_is_compute_core()) {
+    for (int i = 0; i < 1; i++) {
 
-        benchmark_get_cycle();
+        if (snrt_is_compute_core()) {
 
-        occamy_conv_opt_fp32(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
-                        dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
-                        padding_x_left, padding_x_right, stride_x, stride_y, bias,
-                        bias_shift, out_shift, out_mult, pOutBuffer, dim_out_x,
-                        dim_out_y, k, lambda, pIm2ColBuffer, flag_relu,
-                        flag_batch_norm, flag_y_accumulate_start,
-                        flag_y_accumulate_end, memory_chan);
+            benchmark_get_cycle();
 
-        benchmark_get_cycle();
+            occamy_conv_opt_fp32(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
+                            dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
+                            padding_x_left, padding_x_right, stride_x, stride_y, bias,
+                            bias_shift, out_shift, out_mult, pOutBuffer, dim_out_x,
+                            dim_out_y, k, lambda, pIm2ColBuffer, flag_relu,
+                            flag_batch_norm, flag_y_accumulate_start,
+                            flag_y_accumulate_end, memory_chan);
 
-    } else {
-        // conv kernel has 1 cluster barrier to synchronize
-        snrt_cluster_hw_barrier();
+            benchmark_get_cycle();
+
+        } else {
+            // conv kernel has 1 cluster barrier to synchronize
+            snrt_cluster_hw_barrier();
+        }
+
     }
     snrt_cluster_hw_barrier();
 
