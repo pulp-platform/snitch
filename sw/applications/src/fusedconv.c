@@ -35,6 +35,8 @@ int main() {
         return 1;
     }
 
+    printf("Core %d/%d is com/dma core %d/%d\n", snrt_cluster_core_idx(), snrt_cluster_core_num(), snrt_is_compute_core(), snrt_is_dm_core());
+
     if (snrt_is_dm_core()) {
         snrt_dma_start_1d(pInBuffer, fusedconv_pInBuffer_dram,
                           ifmap_size * sizeof(float));
@@ -50,7 +52,7 @@ int main() {
 
     for (int i = 0; i < 1; i++) {
 
-        if (snrt_is_compute_core()) {
+        if (snrt_is_compute_core() || (snrt_cluster_core_num() == 1)) {
 
             benchmark_get_cycle();
 
@@ -80,7 +82,7 @@ int main() {
         for (uint32_t i = 0; i < ofmap_size; i++) {
             if (fabs(pOutBuffer[i] - ((float *)fusedconv_pCheckOutBuffer_dram)[i]) > 0.01) {
                 errors++;
-                // printf("Error at h %d w %d co %d\n", i / output_h_stride, (i % output_h_stride) / output_w_stride, i % output_w_stride);
+                printf("Error at h %d w %d co %d\n", i / output_h_stride, (i % output_h_stride) / output_w_stride, i % output_w_stride);
             }
         }
         printf("%d/%d Errors\n", errors, ofmap_size);

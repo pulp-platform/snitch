@@ -27,7 +27,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
     int flag_y_accumulate_end, unsigned int* memory_chan) {
     // Parallelization/Pipelining parameters
     const uint32_t compute_id = snrt_cluster_compute_core_idx();
-    const uint32_t compute_num = snrt_cluster_compute_core_num();
+    const uint32_t compute_num = (snrt_cluster_compute_core_num())? snrt_cluster_compute_core_num() : 1;
     const uint32_t max_unroll = 8;  // Maximum number of unrolling
     const uint32_t cleanup_unroll = dim_out_y % max_unroll;
 
@@ -373,7 +373,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
     int flag_y_accumulate_end, unsigned int* memory_chan) {
     // Parallelization/Pipelining parameters
     const uint32_t compute_id = snrt_cluster_compute_core_idx();
-    const uint32_t compute_num = snrt_cluster_compute_core_num();
+    const uint32_t compute_num = (snrt_cluster_compute_core_num())? snrt_cluster_compute_core_num() : 1;
     const uint32_t max_unroll = 8;  // Maximum number of unrolling
     const uint32_t cleanup_unroll = dim_out_y % max_unroll;
 
@@ -776,10 +776,10 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
         // location
         snrt_ssr_loop_2d(SNRT_SSR_DM0, dim_out_x * dim_out_y,
                          ch_out / compute_num / 2, sizeof(float) * ch_out,
-                         sizeof(v2s));
+                         sizeof(v2s) * compute_num);
         snrt_ssr_loop_2d(SNRT_SSR_DM1, dim_out_x * dim_out_y,
                          ch_out / compute_num / 2, sizeof(float) * ch_out,
-                         sizeof(v2s));
+                         sizeof(v2s) * compute_num);
         snrt_ssr_repeat(SNRT_SSR_DM1, 1);  // Disable repeat from conv2d
 
         snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_2D, &pOutBuffer[compute_id * 2]);
