@@ -734,7 +734,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                     case 1:
                         asm volatile(
                             // frep over vfMACs
-                            "frep.o %[n_frep], 2, 0, 0 \n"
+                            "frep.o %[n_frep], 1, 0, 0 \n"
                             "vfmac.s %[sum0], ft0, ft1 \n"
                             // Sum reduce vector
                             "vfsum.s %[reduce_reg0], %[sum0] \n"
