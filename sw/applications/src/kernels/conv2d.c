@@ -395,6 +395,11 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
     const uint32_t kernel_h_stride = kernel_w_stride * dim_kernel_x;
     const uint32_t kernel_co_stride = kernel_h_stride * dim_kernel_y;
 
+    // TODO: remove this once DORY is compatible with floats
+    float out_shift_mul_factor = 1.0;
+    float out_clip = 255.0;
+    for (uint16_t i = 0; i < out_shift; i++) out_shift_mul_factor *= 0.5;
+
     // Reference Loops
     // for (uint32_t co = compute_id; co < ch_out; co += compute_num) {
     //     for (uint32_t h0 = 0; h0 < dim_in_y / max_unroll; h++) {
@@ -794,32 +799,55 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
 
             register v2s tmp;
 
+            register v2s shiftiboy;
+            register v2s clipiboy;
+
             // TODO: unroll to solve RAW dependencies
             if (flag_batch_norm && flag_relu) {
                 asm volatile(
-                    "frep.o %[n_frep], 3, 0, 0\n"
+                    "vfcpka.s.s %[shiftiboy], %[shift], %[shift]\n"
+                    "vfcpka.s.s %[clipiboy], %[clip], %[clip]\n"
+                    "frep.o %[n_frep], 5, 0, 0\n"
                     "vfmul.s %[tmp], ft0, %[k]\n"     // BN kappa
                     "vfadd.s %[tmp], %[tmp], %[l]\n"  // BN lambda
-                    "vfmax.s ft1, %[tmp], %[zero]\n"  // ReLU
-                    : [tmp] "+f"(tmp.f64)
+                    "vfmax.s %[tmp], %[tmp], %[zero]\n"  // ReLU
+                    "vfmul.s %[tmp], %[tmp], %[shiftiboy]\n" // TODO: remove
+                    "vfmin.s ft1, %[tmp], %[clipiboy]\n" // TODO: remove
+                    : [tmp] "+f"(tmp.f64),
+                    [shiftiboy] "+f"(shiftiboy.vec),
+                    [clipiboy] "+f"(clipiboy.vec)
                     : [k] "f"(current_k.f64), [l] "f"(current_lambda.f64),
                       [zero] "f"(zero.f64),
+                      [shift] "f"(out_shift_mul_factor),
+                      [clip] "f"(out_clip),
                       [n_frep] "r"(dim_out_x * dim_out_y - 1)
                     : "ft0", "ft1", "ft2");
             } else if (flag_batch_norm && !flag_relu) {
                 asm volatile(
-                    "frep.o %[n_frep], 2, 0, 0\n"
+                    "frep.o %[n_frep], 4, 0, 0\n"
                     "vfmul.s %[tmp], ft0, %[k]\n"  // BN kappa
-                    "vfadd.s ft1, %[tmp], %[l]\n"  // BN lambda
+                    "vfadd.s %[tmp], %[tmp], %[l]\n"  // BN lambda
+                    "vfmul.s %[tmp], %[tmp], %[shiftiboy]\n" // TODO: remove
+                    "vfmin.s ft1, %[tmp], %[clipiboy]\n" // TODO: remove
                     : [tmp] "+f"(tmp.f64), [k] "+f"(current_k.f64),
-                      [l] "+f"(current_lambda.f64)
-                    : [n_frep] "r"(dim_out_x * dim_out_y - 1)
+                      [l] "+f"(current_lambda.f64),
+                    [shiftiboy] "+f"(shiftiboy.vec),
+                    [clipiboy] "+f"(clipiboy.vec)
+                    : [n_frep] "r"(dim_out_x * dim_out_y - 1),
+                      [shift] "f"(out_shift_mul_factor),
+                      [clip] "f"(out_clip)
                     : "ft0", "ft1", "ft2");
             } else if (!flag_batch_norm && flag_relu) {
                 asm volatile(
-                    "frep.o %[n_frep], 1, 0, 0 \n"
-                    "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
-                    ::[zero] "f"(zero.f64),
+                    "frep.o %[n_frep], 3, 0, 0 \n"
+                    "vfmax.s %[tmp], ft0, %[zero]\n"  // ReLU
+                    "vfmul.s %[tmp], %[tmp], %[shiftiboy]\n" // TODO: remove
+                    "vfmin.s ft1, %[tmp], %[clipiboy]\n" // TODO: remove
+                    :[tmp] "+f"(tmp.f64), [shiftiboy] "+f"(shiftiboy.vec),
+                    [clipiboy] "+f"(clipiboy.vec)
+                    :[zero] "f"(zero.f64),
+                      [shift] "f"(out_shift_mul_factor),
+                      [clip] "f"(out_clip),
                     [n_frep] "r"(dim_out_x * dim_out_y - 1)
                     : "ft0", "ft1", "ft2");
             }

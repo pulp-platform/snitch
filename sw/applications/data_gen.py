@@ -228,7 +228,7 @@ def emit_fusedconv(name='fusedconv', **kwargs):
     layer_str += f'uint16_t stride_y = {kwargs["stride"]["stride_y"]};\n'
     layer_str += 'int8_t *bias;\n'
     layer_str += 'uint16_t bias_shift;\n'
-    layer_str += 'uint16_t out_shift;\n'
+    layer_str += 'uint16_t out_shift = 0;\n'
     layer_str += 'uint16_t out_mult;\n'
     layer_str += f'{dtype} lambda_dram[{co}] = {array_to_cstr(l)} ;\n'
     layer_str += f'{dtype} k_dram[{co}] = {array_to_cstr(k)};\n'
