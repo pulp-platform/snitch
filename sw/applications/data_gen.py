@@ -282,7 +282,7 @@ def batchnorm(ifmap):
     return ofmap, gamma, beta
 
 
-def fused_conv(ifmap, weights, k, l, padding, stride, bn, relu):
+def fused_conv(ifmap, weights, k, l, padding, stride, bn, relu, accumulate):
 
     ih, iw, ci = ifmap.shape
     co, fh, fw, _ = weights.shape
@@ -293,11 +293,15 @@ def fused_conv(ifmap, weights, k, l, padding, stride, bn, relu):
                  padding['padding_x_left']:iw+padding['padding_x_left']] = ifmap
 
     # Don't cover undefined behaviour when there are steps without a complete kernel window
-    assert (ifmap_padded.shape[0] - (fh - 1) - 1) % stride['stride_y'] == 0
-    assert (ifmap_padded.shape[1] - (fw - 1) - 1) % stride['stride_x'] == 0
+    if (ifmap_padded.shape[0] - (fh - 1) - 1) % stride['stride_y'] != 0: print("Warning: rounding h output dimension")
+    if (ifmap_padded.shape[1] - (fw - 1) - 1) % stride['stride_x'] != 0: print("Warning: rounding w output dimension")
 
     ofmap = torch.zeros((ifmap_padded.shape[0] - (fh - 1) - 1) // stride['stride_y'] + 1,
                         (ifmap_padded.shape[1] - (fw - 1) - 1) // stride['stride_x'] + 1, co)
+    if accumulate:
+        ofmap_before = torch.randn_like(ofmap, requires_grad=False)
+    else:
+        ofmap_before = torch.zeros_like(ofmap, requires_grad=False)
 
     print(ifmap.shape, ifmap_padded.shape, ofmap.shape)
 
@@ -308,15 +312,17 @@ def fused_conv(ifmap, weights, k, l, padding, stride, bn, relu):
                 ofmap[h//stride['stride_y'], w//stride['stride_x'],
                       c] = torch.dot(ifmap_padded[h:h+fh, w:w+fw].flatten(), weights[c].flatten())
 
+    ofmap += ofmap_before
+
     # BatchNorm
     if bn:
         ofmap = ofmap * k + l
 
     # ReLU
     if relu:
-        ofmap *= (ofmap > 0)
+        ofmap = torch.nn.functional.relu(ofmap)
 
-    return ofmap, ifmap_padded
+    return ofmap, ofmap_before, ifmap_padded
 
 
 def main():
@@ -425,10 +431,7 @@ def main():
         k = torch.randn(param['ch_out'], requires_grad=False)
         l = torch.randn(param['ch_out'], requires_grad=False)
 
-        ofmap, ifmap_padded = fused_conv(ifmap, kernel, k, l, param['padding'], param['stride'], param['flags']['flag_batch_norm'], param['flags']['flag_relu'])
-        ofmap_before = torch.randn_like(ofmap, requires_grad=False)
-        if not param['flags']['flag_y_accumulate_start']:
-            ofmap += ofmap_before
+        ofmap, ofmap_before, ifmap_padded = fused_conv(ifmap, kernel, k, l, param['padding'], param['stride'], param['flags']['flag_batch_norm'], param['flags']['flag_relu'], not param['flags']['flag_y_accumulate_start'])
 
         kwargs = {
             'ifmap': ifmap,
