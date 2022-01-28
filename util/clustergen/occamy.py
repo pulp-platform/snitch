@@ -35,14 +35,14 @@ class Occamy(Generator):
                                   addr_width)
         # Make the boot ROM cacheable
         pma_cfg.add_region_length(PMA.CACHED,
-                                  cfg["rom"]["address"],
-                                  cfg["rom"]["length"],
+                                  cfg["peripherals"]["rom"]["address"],
+                                  cfg["peripherals"]["rom"]["length"],
                                   addr_width)
 
         # Store Snitch cluster config in separate variable
         self.cluster = SnitchCluster(cfg["cluster"], pma_cfg)
         # Overwrite boot address with base of bootrom
-        self.cluster.cfg["boot_addr"] = self.cfg["rom"]["address"]
+        self.cluster.cfg["boot_addr"] = self.cfg["peripherals"]["rom"]["address"]
 
         self.cluster.cfg['tie_ports'] = False
 

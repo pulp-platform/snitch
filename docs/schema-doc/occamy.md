@@ -28,7 +28,11 @@ Description of an Occamy-based system.
 | [narrow_xbar_slv_id_width](#narrow_xbar_slv_id_width)                 | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-narrow_xbar_slv_id_width.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width")                 |
 | [nr_s1_quadrant](#nr_s1_quadrant)                                     | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant")                             |
 | [s1_quadrant](#s1_quadrant)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant")                                |
-
+| [spm](#spm)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm")                                                           |
+| [pcie](#pcie)                                                         | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-pcie.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie")                                                         |
+| [hbi](#hbi)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi")                                                           |
+| [hbm](#hbm)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm")                                                           |
+| [peripherals](#peripherals)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-peripherals-schema.md "http://pulp-platform.org/snitch/peripherals.schema.json#/properties/peripherals")                               |
 
 ## cluster
 
@@ -234,53 +238,6 @@ The default value is:
 
 `object` ([S1 Quadrant Properties](occamy-properties-s1-quadrant-properties.md))
 
-## debug
-
-Debug module.
-
-`debug`
-
-*   is optional
-
-*   Type: `object` ([Details](occamy-properties-debug.md))
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-debug.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/debug")
-
-### debug Type
-
-`object` ([Details](occamy-properties-debug.md))
-
-## rom
-
-Read-only memory from which *all* harts of the system start to boot.
-
-`rom`
-
-*   is optional
-
-*   Type: `object` ([Details](occamy-properties-rom.md))
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-rom.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/rom")
-
-### rom Type
-
-`object` ([Details](occamy-properties-rom.md))
-
-### rom Default Value
-
-The default value is:
-
-```json
-{
-  "address": 16777216,
-  "length": 131072
-}
-```
-
 ## spm
 
 
@@ -392,86 +349,6 @@ The default value is:
   "size": 128
 }
 ```
-
-## wide_xbar
-
-AXI Crossbar Properties
-
-`wide_xbar`
-
-*   is optional
-
-*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/wide_xbar")
-
-### wide_xbar Type
-
-`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
-
-## narrow_xbar
-
-AXI Crossbar Properties
-
-`narrow_xbar`
-
-*   is optional
-
-*   Type: `object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar")
-
-### narrow_xbar Type
-
-`object` ([AXI Crossbar Schema](occamy-properties-axi-crossbar-schema-1.md))
-
-## nr_s1\_quadrant
-
-
-
-`nr_s1_quadrant`
-
-*   is optional
-
-*   Type: `integer` ([Number of S1 Quadrants](occamy-properties-number-of-s1-quadrants.md))
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1\_quadrant")
-
-### nr_s1\_quadrant Type
-
-`integer` ([Number of S1 Quadrants](occamy-properties-number-of-s1-quadrants.md))
-
-### nr_s1\_quadrant Default Value
-
-The default value is:
-
-```json
-8
-```
-
-## s1\_quadrant
-
-
-
-`s1_quadrant`
-
-*   is optional
-
-*   Type: `object` ([S1 Quadrant Properties](occamy-properties-s1-quadrant-properties.md))
-
-*   cannot be null
-
-*   defined in: [Occamy System Schema](occamy-properties-s1-quadrant-properties.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1\_quadrant")
-
-### s1\_quadrant Type
-
-`object` ([S1 Quadrant Properties](occamy-properties-s1-quadrant-properties.md))
 
 ## peripherals
 

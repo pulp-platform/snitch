@@ -106,24 +106,6 @@
                 }
             }
         },
-        "rom": {
-            "type": "object",
-            "description": "Read-only memory from which _all_ harts of the system start to boot.",
-            "default": {
-                "address": 16777216,
-                "length": 131072
-            },
-            "address": {
-                "type": "number",
-                "description": "Start address of ROM.",
-                "minimum": 0
-            },
-            "length": {
-                "type": "number",
-                "description": "Total size of ROM in bytes.",
-                "minimum": 0
-            }
-        },
         "spm": {
             "default": {
                 "size": 128
