@@ -91,7 +91,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
   logic [0:0]           fpr_wready;
 
   logic ssr_active_d, ssr_active_q;
-  `FFSR(ssr_active_q, Xssr & ssr_active_d, 1'b0, clk_i, rst_i)
+  `FFAR(ssr_active_q, Xssr & ssr_active_d, 1'b0, clk_i, rst_i)
 
   typedef struct packed {
     logic       ssr; // write-back to SSR at rd
@@ -114,7 +114,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
 
   logic [31:0] sb_d, sb_q;
   logic rd_is_fp;
-  `FFSR(sb_q, sb_d, '0, clk_i, rst_i)
+  `FFAR(sb_q, sb_d, '0, clk_i, rst_i)
 
   logic csr_instr;
 

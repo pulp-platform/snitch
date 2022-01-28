@@ -1145,8 +1145,8 @@ module snitch_cluster
   // --------------------
   logic [NrTCDMPortsCores-1:0] flat_acc, flat_con;
   for (genvar i = 0; i < NrTCDMPortsCores; i++) begin  : gen_event_counter
-    `FFSRN(flat_acc[i], tcdm_req[i].q_valid, '0, clk_i, rst_ni)
-    `FFSRN(flat_con[i], tcdm_req[i].q_valid & ~tcdm_rsp[i].q_ready, '0, clk_i, rst_ni)
+    `FFARN(flat_acc[i], tcdm_req[i].q_valid, '0, clk_i, rst_ni)
+    `FFARN(flat_con[i], tcdm_req[i].q_valid & ~tcdm_rsp[i].q_ready, '0, clk_i, rst_ni)
   end
 
   popcount #(

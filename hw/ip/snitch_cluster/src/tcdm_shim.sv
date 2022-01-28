@@ -59,7 +59,7 @@ module tcdm_shim #(
   logic               tcdm_pready;
 
   logic [$clog2(MaxOutStandingReads):0] credits_q, credits_d;
-  `FFSR(credits_q, credits_d, MaxOutStandingReads, clk_i, rst_i)
+  `FFAR(credits_q, credits_d, MaxOutStandingReads, clk_i, rst_i)
 
   fifo #(
     .FALL_THROUGH ( 1'b1                ),

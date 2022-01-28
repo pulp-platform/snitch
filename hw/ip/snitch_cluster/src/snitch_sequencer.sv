@@ -113,11 +113,11 @@ module snitch_sequencer import snitch_pkg::*; #(
   logic [DepthBits-1:0] inst_cnt_d, inst_cnt_q;
   logic [2:0] stagger_cnt_q, stagger_cnt_d;
 
-  `FFSR(rd_pointer_q, rd_pointer_d, '0, clk_i, rst_i)
-  `FFSR(wr_pointer_q, wr_pointer_d, '0, clk_i, rst_i)
-  `FFSR(rpt_cnt_q, rpt_cnt_d, '0, clk_i, rst_i)
-  `FFSR(inst_cnt_q, inst_cnt_d, '0, clk_i, rst_i)
-  `FFSR(stagger_cnt_q, stagger_cnt_d, '0, clk_i, rst_i)
+  `FFAR(rd_pointer_q, rd_pointer_d, '0, clk_i, rst_i)
+  `FFAR(wr_pointer_q, wr_pointer_d, '0, clk_i, rst_i)
+  `FFAR(rpt_cnt_q, rpt_cnt_d, '0, clk_i, rst_i)
+  `FFAR(inst_cnt_q, inst_cnt_d, '0, clk_i, rst_i)
+  `FFAR(stagger_cnt_q, stagger_cnt_d, '0, clk_i, rst_i)
 
   // set by sequencer when done with the entire sequence
 
