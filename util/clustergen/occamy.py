@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from .cluster import Generator, PMA, PMACfg, SnitchCluster, clog2
-
+import pathlib
 
 class Occamy(Generator):
     """
@@ -38,18 +38,21 @@ class Occamy(Generator):
                                   cfg["rom"]["address"],
                                   cfg["rom"]["length"],
                                   addr_width)
-        
-        # Update snitch_pma_pkg.sv::NrMaxRules
+
+        # Update snitch_pma_pkg::NrMaxRules in occamy_snitch_pma_pkg.sv
+        file_path = pathlib.Path(__file__).parent
+        snitch_pma_pkg_tpl_path = file_path / "../../hw/ip/snitch/src/snitch_pma_pkg.sv.tpl"
+        occamy_snitch_pma_pkg_path = file_path / "../../hw/ip/snitch/src/occamy_snitch_pma_pkg.sv"
         nr_max_rules = '  localparam int unsigned NrMaxRules = {};\n'.format(len(pma_cfg.regions))
         old_nr_max_rules = '  localparam int unsigned NrMaxRules ='
         new_pkg = ''
-        with open('../../ip/snitch/src/snitch_pma_pkg.sv.tpl', "r") as f:
+        with open(snitch_pma_pkg_tpl_path, "r") as f:
             for line in f:
                 if old_nr_max_rules in line:
                     new_pkg += nr_max_rules
                 else:
                     new_pkg += line
-        occamy_snitch_pma_pkg_file = open('../../ip/snitch/src/occamy_snitch_pma_pkg.sv', "w")
+        occamy_snitch_pma_pkg_file = open(occamy_snitch_pma_pkg_path, "w")
         occamy_snitch_pma_pkg_file.write(new_pkg)
         occamy_snitch_pma_pkg_file.close()
 
