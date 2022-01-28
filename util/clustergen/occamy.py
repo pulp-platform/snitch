@@ -5,6 +5,7 @@
 from .cluster import Generator, PMA, PMACfg, SnitchCluster, clog2
 import pathlib
 
+
 class Occamy(Generator):
     """
     Generate an Occamy system.
