@@ -97,14 +97,18 @@ package ${cfg['pkg_name']};
   `AXI_TYPEDEF_ALL(wide_in, addr_t, wide_in_id_t, data_dma_t, strb_dma_t, user_t)
   `AXI_TYPEDEF_ALL(wide_out, addr_t, wide_out_id_t, data_dma_t, strb_dma_t, user_t)
 
+  function automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] get_cached_regions();
+    automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] cached_regions;
+    cached_regions = '{default: '0};
+% for i, cp in enumerate(cfg['pmas']['cached']):
+    cached_regions[${i}] = '{base: ${to_sv_hex(cp[0], cfg['addr_width'])}, mask: ${to_sv_hex(cp[1], cfg['addr_width'])}};
+% endfor
+    return cached_regions;
+  endfunction
+
   localparam snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{
       NrCachedRegionRules: ${len(cfg['pmas']['cached'])},
-      CachedRegion: '{
-% for i, cp in enumerate(cfg['pmas']['cached']):
-          ${i}: '{base: ${to_sv_hex(cp[0], cfg['addr_width'])}, mask: ${to_sv_hex(cp[1], cfg['addr_width'])}},
-% endfor
-          default: '0
-      },
+      CachedRegion: get_cached_regions(),
       default: 0
   };
 
