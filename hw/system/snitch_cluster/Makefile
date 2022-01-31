@@ -106,12 +106,12 @@ bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch
 ######
 # SW #
 ######
-sw/build.vsim:
+snRuntime-tests.vsim: clean-sw
 	mkdir -p sw/build
-	cd sw/build && cmake-3.18.1 -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make
+	cd sw/build && cmake-3.18.1 -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make && make test
 
-snRuntime-tests.vsim: sw/build.vsim
-	cd sw/build && cmake-3.18.1 -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make test
+clean-sw:
+	rm -rf sw/build
 
 #########
 # Phony #
