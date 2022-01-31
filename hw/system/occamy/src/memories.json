@@ -4,42 +4,27 @@
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "HBM WR CMD"
+            "HBM Test"
         ],
         "dual_port": true,
         "latency": 1,
         "ports": 2,
         "speed_optimized": true,
-        "width": 74,
-        "words": 16
-    },
-    {
-        "byte_enable": true,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
-            "cva6 data cache array",
-            "cva6 instruction cache array"
-        ],
-        "dual_port": false,
-        "latency": 1,
-        "ports": 1,
-        "speed_optimized": true,
-        "width": 128,
-        "words": 256
+        "width": 48,
+        "words": 64
     },
     {
         "byte_enable": false,
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "HBM RD ID"
+            "HBM ReOrd"
         ],
         "dual_port": true,
         "latency": 1,
         "ports": 2,
         "speed_optimized": true,
-        "width": 585,
+        "width": 641,
         "words": 128
     },
     {
@@ -47,28 +32,42 @@
         "byte_width": 8,
         "density_optimized": true,
         "description": [
-            "ro cache data"
+            "ro cache tag"
         ],
         "dual_port": false,
         "latency": 1,
         "ports": 1,
         "speed_optimized": true,
-        "width": 1024,
+        "width": 37,
         "words": 128
+    },
+    {
+        "byte_enable": true,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "cva6 instruction cache tag"
+        ],
+        "dual_port": false,
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 45,
+        "words": 256
     },
     {
         "byte_enable": false,
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "HBM RD ID"
+            "icache tag (hive 0)"
         ],
-        "dual_port": true,
+        "dual_port": false,
         "latency": 1,
-        "ports": 2,
+        "ports": 1,
         "speed_optimized": true,
-        "width": 6,
-        "words": 64
+        "width": 39,
+        "words": 128
     },
     {
         "byte_enable": true,
@@ -85,32 +84,18 @@
         "words": 128
     },
     {
-        "byte_enable": false,
+        "byte_enable": true,
         "byte_width": 8,
-        "density_optimized": false,
+        "density_optimized": true,
         "description": [
-            "HBM Test/W Data"
+            "SPM"
         ],
-        "dual_port": true,
+        "dual_port": false,
         "latency": 1,
-        "ports": 2,
-        "speed_optimized": true,
-        "width": 576,
-        "words": 16
-    },
-    {
-        "byte_enable": false,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
-            "HBM Test"
-        ],
-        "dual_port": true,
-        "latency": 1,
-        "ports": 2,
-        "speed_optimized": true,
+        "ports": 1,
+        "speed_optimized": false,
         "width": 64,
-        "words": 16
+        "words": 16384
     },
     {
         "byte_enable": false,
@@ -124,6 +109,118 @@
         "ports": 2,
         "speed_optimized": true,
         "width": 204,
+        "words": 16
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "HBM RD ID"
+        ],
+        "dual_port": true,
+        "latency": 1,
+        "ports": 2,
+        "speed_optimized": true,
+        "width": 585,
+        "words": 128
+    },
+    {
+        "byte_enable": true,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "tcdm"
+        ],
+        "dual_port": false,
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 64,
+        "words": 512
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "HBM Fifo"
+        ],
+        "dual_port": true,
+        "latency": 1,
+        "ports": 2,
+        "speed_optimized": true,
+        "width": 14,
+        "words": 64
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "HBM BID"
+        ],
+        "dual_port": true,
+        "latency": 1,
+        "ports": 2,
+        "speed_optimized": true,
+        "width": 11,
+        "words": 16
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "HBM RD CMD"
+        ],
+        "dual_port": true,
+        "latency": 1,
+        "ports": 2,
+        "speed_optimized": true,
+        "width": 56,
+        "words": 8
+    },
+    {
+        "byte_enable": true,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "cva6 data cache tag"
+        ],
+        "dual_port": false,
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": true,
+        "width": 44,
+        "words": 256
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "HBM WR Fifo"
+        ],
+        "dual_port": true,
+        "latency": 1,
+        "ports": 2,
+        "speed_optimized": true,
+        "width": 32,
+        "words": 16
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": false,
+        "description": [
+            "HBM Test/W Data"
+        ],
+        "dual_port": true,
+        "latency": 1,
+        "ports": 2,
+        "speed_optimized": true,
+        "width": 576,
         "words": 16
     },
     {
@@ -145,55 +242,13 @@
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "HBM Fifo"
+            "HBM WR CMD"
         ],
         "dual_port": true,
         "latency": 1,
         "ports": 2,
         "speed_optimized": true,
-        "width": 14,
-        "words": 64
-    },
-    {
-        "byte_enable": false,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
-            "HBM RD CMD"
-        ],
-        "dual_port": true,
-        "latency": 1,
-        "ports": 2,
-        "speed_optimized": true,
-        "width": 56,
-        "words": 8
-    },
-    {
-        "byte_enable": false,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
-            "HBM ReOrd"
-        ],
-        "dual_port": true,
-        "latency": 1,
-        "ports": 2,
-        "speed_optimized": true,
-        "width": 641,
-        "words": 128
-    },
-    {
-        "byte_enable": false,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
-            "HBM BID"
-        ],
-        "dual_port": true,
-        "latency": 1,
-        "ports": 2,
-        "speed_optimized": true,
-        "width": 11,
+        "width": 74,
         "words": 16
     },
     {
@@ -209,62 +264,6 @@
         "speed_optimized": true,
         "width": 64,
         "words": 256
-    },
-    {
-        "byte_enable": false,
-        "byte_width": 8,
-        "density_optimized": true,
-        "description": [
-            "ro cache tag"
-        ],
-        "dual_port": false,
-        "latency": 1,
-        "ports": 1,
-        "speed_optimized": true,
-        "width": 37,
-        "words": 128
-    },
-    {
-        "byte_enable": true,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
-            "tcdm"
-        ],
-        "dual_port": false,
-        "latency": 1,
-        "ports": 1,
-        "speed_optimized": true,
-        "width": 64,
-        "words": 512
-    },
-    {
-        "byte_enable": true,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
-            "cva6 data cache tag"
-        ],
-        "dual_port": false,
-        "latency": 1,
-        "ports": 1,
-        "speed_optimized": true,
-        "width": 44,
-        "words": 256
-    },
-    {
-        "byte_enable": false,
-        "byte_width": 8,
-        "density_optimized": false,
-        "description": [
-            "HBM Test"
-        ],
-        "dual_port": true,
-        "latency": 1,
-        "ports": 2,
-        "speed_optimized": true,
-        "width": 48,
-        "words": 64
     },
     {
         "byte_enable": false,
@@ -285,41 +284,28 @@
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "cva6 instruction cache tag"
+            "cva6 data cache array",
+            "cva6 instruction cache array"
         ],
         "dual_port": false,
         "latency": 1,
         "ports": 1,
         "speed_optimized": true,
-        "width": 45,
+        "width": 128,
         "words": 256
-    },
-    {
-        "byte_enable": true,
-        "byte_width": 8,
-        "density_optimized": true,
-        "description": [
-            "SPM"
-        ],
-        "dual_port": false,
-        "latency": 1,
-        "ports": 1,
-        "speed_optimized": false,
-        "width": 64,
-        "words": 16384
     },
     {
         "byte_enable": false,
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "HBM WR Fifo"
+            "HBM Test"
         ],
         "dual_port": true,
         "latency": 1,
         "ports": 2,
         "speed_optimized": true,
-        "width": 32,
+        "width": 64,
         "words": 16
     },
     {
@@ -327,13 +313,27 @@
         "byte_width": 8,
         "density_optimized": false,
         "description": [
-            "icache tag (hive 0)"
+            "HBM RD ID"
+        ],
+        "dual_port": true,
+        "latency": 1,
+        "ports": 2,
+        "speed_optimized": true,
+        "width": 6,
+        "words": 64
+    },
+    {
+        "byte_enable": false,
+        "byte_width": 8,
+        "density_optimized": true,
+        "description": [
+            "ro cache data"
         ],
         "dual_port": false,
         "latency": 1,
         "ports": 1,
         "speed_optimized": true,
-        "width": 39,
+        "width": 1024,
         "words": 128
     }
 ]
