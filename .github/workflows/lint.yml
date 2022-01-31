@@ -239,4 +239,4 @@ jobs:
         CLANG_FORMAT: clang-format-10
       run: |
         make -C hw/system/occamy all
-        util/git-diff.py --error-msg "::error ::Found differences, run \`make -C hw/system/occamy\` all before committing."
+        util/git-diff.py --error-msg "::error ::Found differences, run \`make -C hw/system/occamy all\` before committing."
