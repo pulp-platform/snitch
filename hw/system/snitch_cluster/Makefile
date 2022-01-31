@@ -103,6 +103,16 @@ bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch
 		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc \
 		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}" -LDFLAGS "-L${FESVR}/lib" -lfesvr
 
+######
+# SW #
+######
+sw/build.vsim:
+	mkdir -p sw/build
+	cd sw/build && cmake-3.18.1 -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make
+
+snRuntime-tests.vsim: sw/build.vsim
+	cd sw/build && cmake-3.18.1 -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make test
+
 #########
 # Phony #
 #########
