@@ -73,15 +73,19 @@ package occamy_cluster_pkg;
   `AXI_TYPEDEF_ALL(wide_in, addr_t, wide_in_id_t, data_dma_t, strb_dma_t, user_t)
   `AXI_TYPEDEF_ALL(wide_out, addr_t, wide_out_id_t, data_dma_t, strb_dma_t, user_t)
 
+  function automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] get_cached_regions();
+    automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] cached_regions;
+    cached_regions = '{default: '0};
+    cached_regions[0] = '{base: 48'h80000000, mask: 48'hffff80000000};
+    cached_regions[1] = '{base: 48'h1000000000, mask: 48'hfffe00000000};
+    cached_regions[2] = '{base: 48'h70000000, mask: 48'hfffffffe0000};
+    cached_regions[3] = '{base: 48'h1000000, mask: 48'hfffffffe0000};
+    return cached_regions;
+  endfunction
+
   localparam snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{
       NrCachedRegionRules: 4,
-      CachedRegion: '{
-          0: '{base: 48'h80000000, mask: 48'hffff80000000},
-          1: '{base: 48'h1000000000, mask: 48'hfffe00000000},
-          2: '{base: 48'h70000000, mask: 48'hfffffffe0000},
-          3: '{base: 48'h1000000, mask: 48'hfffffffe0000},
-          default: '0
-      },
+      CachedRegion: get_cached_regions(),
       default: 0
   };
 
