@@ -96,6 +96,16 @@
           { bits: "31:0", name: "MSIP_CLR", desc: "Clear MSIP register. Writing a value of N clears the interrupt of hart N" }
         ]
     },
+    {
+        name: "MSIP_BCAST",
+        desc: "Set MSIP register bit for all Snitches",
+        hwqe: "true",
+        swaccess: "wo",
+        hwaccess: "hro",
+        fields: [
+          { bits: "0:0", name: "MSIP_BCAST", desc: "Set MSIP register bit for all Snitches" }
+        ]
+    },
   ]
 }
 

@@ -49,8 +49,8 @@ module clint import clint_reg_pkg::*; #(
 
     always_comb begin
         for (int i=1; i<${cores}; i++) begin
-            hw2reg.msip[i].d = 1'b0;
-            hw2reg.msip[i].de = reg2hw.msip_clr.qe && (i == reg2hw.msip_clr.q);
+            hw2reg.msip[i].d = reg2hw.msip_bcast.qe ? 1'b1 : 1'b0;
+            hw2reg.msip[i].de = reg2hw.msip_bcast.qe | (reg2hw.msip_clr.qe && (i == reg2hw.msip_clr.q));
         end
     end
 

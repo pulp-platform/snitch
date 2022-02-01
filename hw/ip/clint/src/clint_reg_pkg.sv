@@ -50,6 +50,11 @@ package clint_reg_pkg;
   } clint_reg2hw_msip_clr_reg_t;
 
   typedef struct packed {
+    logic        q;
+    logic        qe;
+  } clint_reg2hw_msip_bcast_reg_t;
+
+  typedef struct packed {
     logic        d;
     logic        de;
   } clint_hw2reg_msip_mreg_t;
@@ -66,14 +71,15 @@ package clint_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    clint_reg2hw_msip_mreg_t [1:0] msip; // [226:225]
-    clint_reg2hw_mtimecmp_low0_reg_t mtimecmp_low0; // [224:193]
-    clint_reg2hw_mtimecmp_high0_reg_t mtimecmp_high0; // [192:161]
-    clint_reg2hw_mtimecmp_low1_reg_t mtimecmp_low1; // [160:129]
-    clint_reg2hw_mtimecmp_high1_reg_t mtimecmp_high1; // [128:97]
-    clint_reg2hw_mtime_low_reg_t mtime_low; // [96:65]
-    clint_reg2hw_mtime_high_reg_t mtime_high; // [64:33]
-    clint_reg2hw_msip_clr_reg_t msip_clr; // [32:0]
+    clint_reg2hw_msip_mreg_t [1:0] msip; // [228:227]
+    clint_reg2hw_mtimecmp_low0_reg_t mtimecmp_low0; // [226:195]
+    clint_reg2hw_mtimecmp_high0_reg_t mtimecmp_high0; // [194:163]
+    clint_reg2hw_mtimecmp_low1_reg_t mtimecmp_low1; // [162:131]
+    clint_reg2hw_mtimecmp_high1_reg_t mtimecmp_high1; // [130:99]
+    clint_reg2hw_mtime_low_reg_t mtime_low; // [98:67]
+    clint_reg2hw_mtime_high_reg_t mtime_high; // [66:35]
+    clint_reg2hw_msip_clr_reg_t msip_clr; // [34:2]
+    clint_reg2hw_msip_bcast_reg_t msip_bcast; // [1:0]
   } clint_reg2hw_t;
 
   // HW -> register type
@@ -92,6 +98,7 @@ package clint_reg_pkg;
   parameter logic [BlockAw-1:0] CLINT_MTIME_LOW_OFFSET = 16'h bff8;
   parameter logic [BlockAw-1:0] CLINT_MTIME_HIGH_OFFSET = 16'h bffc;
   parameter logic [BlockAw-1:0] CLINT_MSIP_CLR_OFFSET = 16'h c000;
+  parameter logic [BlockAw-1:0] CLINT_MSIP_BCAST_OFFSET = 16'h c004;
 
   // Register index
   typedef enum int {
@@ -102,11 +109,12 @@ package clint_reg_pkg;
     CLINT_MTIMECMP_HIGH1,
     CLINT_MTIME_LOW,
     CLINT_MTIME_HIGH,
-    CLINT_MSIP_CLR
+    CLINT_MSIP_CLR,
+    CLINT_MSIP_BCAST
   } clint_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] CLINT_PERMIT [8] = '{
+  parameter logic [3:0] CLINT_PERMIT [9] = '{
     4'b 0001, // index[0] CLINT_MSIP
     4'b 1111, // index[1] CLINT_MTIMECMP_LOW0
     4'b 1111, // index[2] CLINT_MTIMECMP_HIGH0
@@ -114,7 +122,8 @@ package clint_reg_pkg;
     4'b 1111, // index[4] CLINT_MTIMECMP_HIGH1
     4'b 1111, // index[5] CLINT_MTIME_LOW
     4'b 1111, // index[6] CLINT_MTIME_HIGH
-    4'b 1111  // index[7] CLINT_MSIP_CLR
+    4'b 1111, // index[7] CLINT_MSIP_CLR
+    4'b 0001  // index[8] CLINT_MSIP_BCAST
   };
 
 endpackage
