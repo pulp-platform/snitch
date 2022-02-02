@@ -150,7 +150,7 @@ module snitch_sequencer import snitch_pkg::*; #(
 
   assign inst_last = inst_cnt_q == curr_cfg.max_inst;
   assign rpt_last = rpt_cnt_q == curr_cfg.max_rpt;
-  assign seq_last = inst_last & rpt_last & ~curr_cfg.is_streamctl;
+  assign seq_last = inst_last & rpt_last & ~(seq_cfg_buffer_valid & curr_cfg.is_streamctl);
   assign seq_cfg_buffer_pop = (seq_last & seq_next & seq_cfg_buffer_valid) | seq_done;
 
   always_comb begin : sequence_logic
@@ -188,11 +188,11 @@ module snitch_sequencer import snitch_pkg::*; #(
 
   assign seq_next = seq_out_valid & seq_out_ready;
 
-  always_comb begin : proc_steamctl
+  always_comb begin : proc_streamctl
     seq_out_valid     = ~rb_empty;
     seq_done          = 1'b0;
     streamctl_ready_o = 1'b0;
-    if (curr_cfg.is_outer & curr_cfg.is_streamctl) begin
+    if (seq_cfg_buffer_valid & curr_cfg.is_outer & curr_cfg.is_streamctl) begin
       seq_out_valid     = ~rb_empty & streamctl_valid_i & ~streamctl_done_i;
       seq_done          = ~rb_empty & streamctl_valid_i & streamctl_done_i;
       streamctl_ready_o = (~rb_empty & seq_out_ready) | seq_done;
