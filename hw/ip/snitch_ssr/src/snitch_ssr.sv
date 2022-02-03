@@ -200,7 +200,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .credit_take_i ( credit_take ),
     .credit_init_i ( 1'b0 ),
     .credit_left_o ( has_credit ),
-    .credit_full_o (  )
+    .credit_crit_o (  )
   );
 
   // Repetition counter.
