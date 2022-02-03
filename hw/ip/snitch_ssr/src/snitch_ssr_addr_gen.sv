@@ -324,12 +324,14 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     assign index_ena = enable & loop_enabled[i];
 
     assign index_d[i] = index_q[i] + 1;
-    assign index_clear = index_ena & loop_last[i];
     `FFLARNC(index_q[i], index_d[i], index_ena, index_clear, '0, clk_i, rst_ni)
 
     // Indicate last iteration (loops > 0); base loop handled differently in indirection
-    if (i > 0) begin : gen_loop_last_upper
+    if (i > 0) begin : gen_loop_upper
       assign loop_last[i] = config_q.indir ? 1'b1: (index_q[i] == bound_q[i] || config_q.dims < i);
+      assign index_clear = index_ena & loop_last[i];
+    end else begin : gen_loop_base
+      assign index_clear = (index_ena & loop_last[0]) | (mem_ptr_hs & mem_kill);
     end
   end
 
