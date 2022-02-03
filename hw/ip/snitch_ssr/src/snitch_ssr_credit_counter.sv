@@ -6,6 +6,7 @@
 // Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
 `include "common_cells/registers.svh"
+`include "common_cells/assertions.svh"
 
 module snitch_ssr_credit_counter #(
   parameter int unsigned NumCredits      = 0,
@@ -25,15 +26,19 @@ module snitch_ssr_credit_counter #(
   input  logic credit_init_i,  // Reinitialize (soft-reset) credit; takes priority
 
   output logic credit_left_o,
-  output logic credit_full_o
+  output logic credit_crit_o  // Giving one more credit will fill the credits
 );
 
   credit_cnt_t credit_d, credit_q;
+  logic increment, decrement;
+
+  assign decrement = credit_take_i & ~credit_give_i;
+  assign increment = ~credit_take_i & credit_give_i;
 
   always_comb begin
     credit_d = credit_q;
-    if      (credit_take_i & ~credit_give_i)  credit_d = credit_q - 1;
-    else if (~credit_take_i & credit_give_i)  credit_d = credit_q + 1;
+    if      (decrement) credit_d = credit_q - 1;
+    else if (increment) credit_d = credit_q + 1;
   end
 
   logic credit_load;
@@ -42,6 +47,9 @@ module snitch_ssr_credit_counter #(
 
   assign credit_o       = credit_q;
   assign credit_left_o  = (credit_q != '0);
-  assign credit_full_o  = (credit_q == NumCredits-1);
+  assign credit_crit_o  = (credit_q == NumCredits-1);
+
+  `ASSERT_NEVER(CreditUnderflow, credit_o == '0 && decrement)
+  `ASSERT_NEVER(CreditOverflow, credit_o == NumCredits && increment)
 
 endmodule
