@@ -3753,12 +3753,21 @@
     },
     {
         name: "MSIP_BCAST",
-        desc: "Set MSIP register bit for the first N Snitches, with N-1 being the value set in this register",
+        desc: "Set MSIP register bit for N Snitches, with N=MSIP_BCAST+1, starting from Snitch at index MSIP_BCAST_START",
         hwqe: "true",
         swaccess: "wo",
         hwaccess: "hro",
         fields: [
-          { bits: "31:0", name: "MSIP_BCAST", desc: "Set MSIP register bit for the first N Snitches, with N-1 being the value set in this register" }
+          { bits: "31:0", name: "MSIP_BCAST", desc: "Set MSIP register bit for N Snitches, with N=MSIP_BCAST+1, starting from Snitch at index MSIP_BCAST_START" }
+        ]
+    },
+    {
+        name: "MSIP_BCAST_START",
+        desc: "Set MSIP register bit for N Snitches, with N=MSIP_BCAST+1, starting from Snitch at index MSIP_BCAST_START",
+        swaccess: "wo",
+        hwaccess: "hro",
+        fields: [
+          { bits: "31:0", name: "MSIP_BCAST_START", desc: "Set MSIP register bit for N Snitches, with N=MSIP_BCAST+1, starting from Snitch at index MSIP_BCAST_START" }
         ]
     },
   ]

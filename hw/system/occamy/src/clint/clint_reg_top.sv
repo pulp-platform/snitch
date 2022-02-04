@@ -2031,6 +2031,8 @@ module clint_reg_top #(
   logic msip_clr_we;
   logic [31:0] msip_bcast_wd;
   logic msip_bcast_we;
+  logic [31:0] msip_bcast_start_wd;
+  logic msip_bcast_start_we;
 
   // Register instances
 
@@ -19522,9 +19524,35 @@ module clint_reg_top #(
   );
 
 
+  // R[msip_bcast_start]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("WO"),
+    .RESVAL  (32'h0)
+  ) u_msip_bcast_start (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (msip_bcast_start_we),
+    .wd     (msip_bcast_start_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.msip_bcast_start.q ),
+
+    .qs     ()
+  );
 
 
-  logic [444:0] addr_hit;
+
+
+  logic [445:0] addr_hit;
   always_comb begin
     addr_hit = '0;
     addr_hit[  0] = (reg_addr == CLINT_MSIP_0_OFFSET);
@@ -19972,6 +20000,7 @@ module clint_reg_top #(
     addr_hit[442] = (reg_addr == CLINT_MTIME_HIGH_OFFSET);
     addr_hit[443] = (reg_addr == CLINT_MSIP_CLR_OFFSET);
     addr_hit[444] = (reg_addr == CLINT_MSIP_BCAST_OFFSET);
+    addr_hit[445] = (reg_addr == CLINT_MSIP_BCAST_START_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -20423,7 +20452,8 @@ module clint_reg_top #(
                (addr_hit[441] & (|(CLINT_PERMIT[441] & ~reg_be))) |
                (addr_hit[442] & (|(CLINT_PERMIT[442] & ~reg_be))) |
                (addr_hit[443] & (|(CLINT_PERMIT[443] & ~reg_be))) |
-               (addr_hit[444] & (|(CLINT_PERMIT[444] & ~reg_be)))));
+               (addr_hit[444] & (|(CLINT_PERMIT[444] & ~reg_be))) |
+               (addr_hit[445] & (|(CLINT_PERMIT[445] & ~reg_be)))));
   end
 
   assign msip_0_p_0_we = addr_hit[0] & reg_we & !reg_error;
@@ -22390,6 +22420,9 @@ module clint_reg_top #(
 
   assign msip_bcast_we = addr_hit[444] & reg_we & !reg_error;
   assign msip_bcast_wd = reg_wdata[31:0];
+
+  assign msip_bcast_start_we = addr_hit[445] & reg_we & !reg_error;
+  assign msip_bcast_start_wd = reg_wdata[31:0];
 
   // Read data return
   always_comb begin
@@ -24382,6 +24415,10 @@ module clint_reg_top #(
       end
 
       addr_hit[444]: begin
+        reg_rdata_next[31:0] = '0;
+      end
+
+      addr_hit[445]: begin
         reg_rdata_next[31:0] = '0;
       end
 

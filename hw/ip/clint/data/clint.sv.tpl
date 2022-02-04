@@ -49,10 +49,10 @@ module clint import clint_reg_pkg::*; #(
 
     logic [${cores-1}:0] bcast_mask;
 
-    always_comb bcast_mask[1] = reg2hw.msip_bcast.qe;
+    always_comb bcast_mask[1] = reg2hw.msip_bcast.qe && (reg2hw.msip_bcast_start.q == 0);
     generate
         for (genvar i=2; i<${cores}; i++) begin
-            always_comb bcast_mask[i] = reg2hw.msip_bcast.qe && (reg2hw.msip_bcast.q >= (i-1));
+            always_comb bcast_mask[i] = reg2hw.msip_bcast.qe && (reg2hw.msip_bcast.q >= (i-1)) && (reg2hw.msip_bcast_start.q <= i);
         end
     endgenerate
 
