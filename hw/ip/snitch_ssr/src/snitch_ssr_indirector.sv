@@ -241,7 +241,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
     // Intersector master
     logic isect_mst_hs;
-    logic isect_mst_dom_q;
+    logic isect_mst_dom;
     logic isect_mst_doi_q;
     logic isect_mst_blk_q;
 
@@ -272,20 +272,27 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
       // Launch master termination cleanup when handshaking last index out or done in
       logic isect_mst_cln_init;
-      assign isect_mst_cln_init = isect_mst_hs & (isect_mst_rsp_i.done | idx_ser_last);
+      assign isect_mst_cln_init = isect_mst_hs &
+          (isect_mst_rsp_i.done | (~cfg_flags_i.merge & idx_ser_last));
 
-      // Generate done flag for output to address generator
-      // isect_mst_domp_q denotes the state while waiting for inflight index words
-      logic isect_mst_dom_set, isect_mst_dom_clr, isect_mst_domp_q;
-      assign isect_mst_dom_set = isect_mst_domp_q & ~idx_has_inflight;
+      // Generate done flag for output to address generator.
+      // isect_mst_domp_q denotes the state while waiting for inflight index words; used
+      // only during intersection and ignored during merging as no idx words need flushing.
+      logic isect_mst_dom_set, isect_mst_dom_clr;
+      logic isect_mst_domp_q, isect_mst_dom_q;
+      assign isect_mst_dom_set = cfg_flags_i.merge ? isect_mst_cln_init :
+          (isect_mst_domp_q & ~idx_has_inflight);
       assign isect_mst_dom_clr = mem_hs & isect_mst_dom_q;
       `FFLARNC(isect_mst_domp_q, 1'b1, isect_mst_cln_init, isect_mst_dom_q, 1'b0, clk_i, rst_ni)
       `FFLARNC(isect_mst_dom_q, 1'b1, isect_mst_dom_set, isect_mst_dom_clr, 1'b0, clk_i, rst_ni)
+      // Send done to addrgen ASAP to save time
+      assign isect_mst_dom = isect_mst_dom_q | isect_mst_dom_set;
 
       // Generate done flag for intersector interface
-      logic isect_mst_doi_clr;
+      logic isect_mst_doi_set, isect_mst_doi_clr;
+      assign isect_mst_doi_set = cfg_flags_i.merge ? idx_ser_last : isect_mst_cln_init;
       assign isect_mst_doi_clr = isect_mst_hs & isect_mst_rsp_i.done;
-      `FFLARNC(isect_mst_doi_q, 1'b1, isect_mst_cln_init, isect_mst_doi_clr, 1'b0, clk_i, rst_ni)
+      `FFLARNC(isect_mst_doi_q, 1'b1, isect_mst_doi_set, isect_mst_doi_clr, 1'b0, clk_i, rst_ni)
 
       // Block index pipeline during cleanup
       `FFLARNC(isect_mst_blk_q, 1'b1, isect_mst_cln_init, cfg_done_i, 1'b0, clk_i, rst_ni)
@@ -376,9 +383,9 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
         mem_idx         = idx_isect_q;
         mem_skip        = isect_mst_hs & isect_mst_rsp_i.skip;
         mem_zero_o      = isect_mst_rsp_i.zero;
-        mem_done_o      = isect_mst_dom_q;
+        mem_done_o      = isect_mst_dom;
         mem_last_o      = 1'b0;
-        mem_valid_o     = isect_mst_dom_q |
+        mem_valid_o     = isect_mst_dom |
             (isect_mst_hs & ~isect_mst_rsp_i.skip & ~isect_mst_rsp_i.done);
       end else begin
         isect_mst_req_o = '0;
