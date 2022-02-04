@@ -790,7 +790,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
         snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_2D, &pOutBuffer[compute_id * 2]);
         snrt_ssr_write(SNRT_SSR_DM1, SNRT_SSR_2D, &pOutBuffer[compute_id * 2]);
 
-        snrt_ssr_enable();
+        // snrt_ssr_enable();
 
         for (uint32_t co = compute_id; co < ch_out / 2; co += compute_num) {
             register v2s current_lambda = ((v2s*)lambda)[co];
@@ -805,6 +805,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
             // TODO: unroll to solve RAW dependencies
             if (flag_batch_norm && flag_relu) {
                 asm volatile(
+                    "csrsi 0x7C0, 1\n" // TODO: remove
                     "vfcpka.s.s %[shiftiboy], %[shift], %[shift]\n"
                     "vfcpka.s.s %[clipiboy], %[clip], %[clip]\n"
                     "frep.o %[n_frep], 5, 0, 0\n"
@@ -813,6 +814,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                     "vfmax.s %[tmp], %[tmp], %[zero]\n"  // ReLU
                     "vfmul.s %[tmp], %[tmp], %[shiftiboy]\n" // TODO: remove
                     "vfmin.s ft1, %[tmp], %[clipiboy]\n" // TODO: remove
+                    "csrci 0x7C0, 1\n" // TODO: remove
                     : [tmp] "+f"(tmp.f64),
                     [shiftiboy] "+f"(shiftiboy.vec),
                     [clipiboy] "+f"(clipiboy.vec)
@@ -824,11 +826,13 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                     : "ft0", "ft1", "ft2");
             } else if (flag_batch_norm && !flag_relu) {
                 asm volatile(
+                    "csrsi 0x7C0, 1\n" // TODO: remove
                     "frep.o %[n_frep], 4, 0, 0\n"
                     "vfmul.s %[tmp], ft0, %[k]\n"  // BN kappa
                     "vfadd.s %[tmp], %[tmp], %[l]\n"  // BN lambda
                     "vfmul.s %[tmp], %[tmp], %[shiftiboy]\n" // TODO: remove
                     "vfmin.s ft1, %[tmp], %[clipiboy]\n" // TODO: remove
+                    "csrci 0x7C0, 1\n" // TODO: remove
                     : [tmp] "+f"(tmp.f64), [k] "+f"(current_k.f64),
                       [l] "+f"(current_lambda.f64),
                     [shiftiboy] "+f"(shiftiboy.vec),
@@ -839,10 +843,12 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                     : "ft0", "ft1", "ft2");
             } else if (!flag_batch_norm && flag_relu) {
                 asm volatile(
+                    "csrsi 0x7C0, 1\n" // TODO: remove
                     "frep.o %[n_frep], 3, 0, 0 \n"
                     "vfmax.s %[tmp], ft0, %[zero]\n"  // ReLU
                     "vfmul.s %[tmp], %[tmp], %[shiftiboy]\n" // TODO: remove
                     "vfmin.s ft1, %[tmp], %[clipiboy]\n" // TODO: remove
+                    "csrci 0x7C0, 1\n" // TODO: remove
                     :[tmp] "+f"(tmp.f64), [shiftiboy] "+f"(shiftiboy.vec),
                     [clipiboy] "+f"(clipiboy.vec)
                     :[zero] "f"(zero.f64),
@@ -853,6 +859,6 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
             }
         }
 
-        snrt_ssr_disable();
+        // snrt_ssr_disable();
     }
 }
