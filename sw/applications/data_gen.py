@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# Copyright 2022 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+# Author: Tim Fischer <fischeti@iis.ee.ethz.ch>
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -25,7 +31,9 @@ def array_to_cstr(a):
 def emit_header_file(layer_type: str, **kwargs):
 
     file_path = pathlib.Path(__file__).parent / 'data'
-    emit_str = ''
+    emit_str = "// Copyright 2022 ETH Zurich and University of Bologna.\n" + \
+               "// Licensed under the Apache License, Version 2.0, see LICENSE for details.\n" + \
+               "// SPDX-License-Identifier: Apache-2.0\n\n"
 
     if layer_type == 'Conv2d':
         file = file_path / 'data_conv2d.h'
