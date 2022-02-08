@@ -8,7 +8,7 @@
     kernel: "FusedConv"
     ch_in: 3
     ch_out: 32
-    dim_in_x: 5
+    dim_in_x: 6
     dim_in_y: 4
     dim_kernel_x: 4
     dim_kernel_y: 3

@@ -18,6 +18,19 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     add_subdirectory(../snRuntime snRuntime)
 endif()
 
+add_custom_target(application-update-data
+    COMMAND python ${CMAKE_CURRENT_LIST_DIR}/data_gen.py -c ${CMAKE_CURRENT_LIST_DIR}/data/fusedconv_params.hjson
+    COMMAND python ${CMAKE_CURRENT_LIST_DIR}/data_gen.py -c ${CMAKE_CURRENT_LIST_DIR}/data/batchnorm_params.hjson
+    COMMAND python ${CMAKE_CURRENT_LIST_DIR}/data_gen.py -c ${CMAKE_CURRENT_LIST_DIR}/data/conv2d_params.hjson
+    COMMAND python ${CMAKE_CURRENT_LIST_DIR}/data_gen.py -c ${CMAKE_CURRENT_LIST_DIR}/data/gemm_params.hjson
+    COMMAND python ${CMAKE_CURRENT_LIST_DIR}/data_gen.py -c ${CMAKE_CURRENT_LIST_DIR}/data/maxpool_params.hjson
+    COMMAND clang-format -style=file -i ${CMAKE_CURRENT_LIST_DIR}/data/data_fusedconv.h
+    COMMAND clang-format -style=file -i ${CMAKE_CURRENT_LIST_DIR}/data/data_batchnorm.h
+    COMMAND clang-format -style=file -i ${CMAKE_CURRENT_LIST_DIR}/data/data_conv2d.h
+    COMMAND clang-format -style=file -i ${CMAKE_CURRENT_LIST_DIR}/data/data_gemm.h
+    COMMAND clang-format -style=file -i ${CMAKE_CURRENT_LIST_DIR}/data/data_maxpool.h
+)
+
 include_directories(include data src/layers src/kernels src/utils)
 include_directories(${SNRUNTIME_INCLUDE_DIRS})
 
@@ -43,3 +56,4 @@ target_link_libraries(net-gemm kernels utils)
 add_snitch_executable(fusedconv src/fusedconv.c)
 target_link_libraries(fusedconv kernels utils)
 
+add_snitch_executable(ssr-test src/ssr_test.c)

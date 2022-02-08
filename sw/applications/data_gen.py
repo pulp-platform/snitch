@@ -15,6 +15,8 @@ import hjson
 np.random.seed(42)
 torch.manual_seed(42)
 
+global verbose
+
 
 def array_to_cstr(a):
     out = '{'
@@ -333,7 +335,8 @@ def fused_conv(ifmap, weights, bn_k, bn_l, padding, stride, bn, relu, accumulate
     else:
         ofmap_before = torch.zeros_like(ofmap, requires_grad=False)
 
-    print(ifmap.shape, ifmap_padded.shape, ofmap.shape)
+    if verbose:
+        print(ifmap.shape, ifmap_padded.shape, ofmap.shape)
 
     if (depthwise):
         # depthwise Conv2d
@@ -373,8 +376,17 @@ def main():
         required=True,
         help='Select param config file kernel'
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action='store_true',
+        help='Set verbose'
+    )
 
     args = parser.parse_args()
+
+    global verbose
+    verbose = args.verbose
 
     with args.cfg.open() as f:
         param = hjson.loads(f.read())
