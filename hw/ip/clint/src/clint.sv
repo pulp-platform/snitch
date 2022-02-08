@@ -47,11 +47,19 @@ module clint import clint_reg_pkg::*; #(
       .devmode_i (1'b0)
     );
 
+    always_comb begin
+        for (int i=1; i<2; i++) begin
+            hw2reg.msip[i].d = 1'b0;
+            hw2reg.msip[i].de = reg2hw.msip_clr.qe && (i == reg2hw.msip_clr.q);
+        end
+    end
+
+    assign ipi_o[0] = reg2hw.msip[0].q;
+    assign ipi_o[1] = reg2hw.msip[1].q;
+
     assign mtime_q = {reg2hw.mtime_high.q, reg2hw.mtime_low.q};
     assign mtimecmp_q[0] = {reg2hw.mtimecmp_high0.q, reg2hw.mtimecmp_low0.q};
-    assign ipi_o[0] = reg2hw.msip[0].q;
     assign mtimecmp_q[1] = {reg2hw.mtimecmp_high1.q, reg2hw.mtimecmp_low1.q};
-    assign ipi_o[1] = reg2hw.msip[1].q;
 
     assign {hw2reg.mtime_high.d, hw2reg.mtime_low.d} = mtime_q + 1;
     assign hw2reg.mtime_low.de = increase_timer;

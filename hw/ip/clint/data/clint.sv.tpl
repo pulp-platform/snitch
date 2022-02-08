@@ -47,10 +47,20 @@ module clint import clint_reg_pkg::*; #(
       .devmode_i (1'b0)
     );
 
+    always_comb begin
+        for (int i=1; i<${cores}; i++) begin
+            hw2reg.msip[i].d = 1'b0;
+            hw2reg.msip[i].de = reg2hw.msip_clr.qe && (i == reg2hw.msip_clr.q);
+        end
+    end
+
+% for i in range(cores):
+    assign ipi_o[${i}] = reg2hw.msip[${i}].q;
+% endfor
+
     assign mtime_q = {reg2hw.mtime_high.q, reg2hw.mtime_low.q};
 % for i in range(cores):
     assign mtimecmp_q[${i}] = {reg2hw.mtimecmp_high${i}.q, reg2hw.mtimecmp_low${i}.q};
-    assign ipi_o[${i}] = reg2hw.msip[${i}].q;
 % endfor
 
     assign {hw2reg.mtime_high.d, hw2reg.mtime_low.d} = mtime_q + 1;
