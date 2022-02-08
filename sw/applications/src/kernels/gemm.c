@@ -432,7 +432,8 @@ void gemm_fp16simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
     register volatile double ft2 asm("ft2");
     asm volatile("" : "=f"(ft0), "=f"(ft1), "=f"(ft2));
 
-    // printf("M %d, N %d, K %d, ldA %d, ldB %d, ldC %d, setup_SSR %d\n", M, N, K, ldA, ldB, ldC, setup_SSR);
+    // printf("M %d, N %d, K %d, ldA %d, ldB %d, ldC %d, setup_SSR %d\n", M, N,
+    // K, ldA, ldB, ldC, setup_SSR);
 
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay

@@ -43,8 +43,8 @@ void batchnorm_fp64(double *ifmap, double *gamma, double *beta, double *ofmap,
         // frep over OW dimension
         asm volatile(
             "frep.o %[n_frep], 1, 0, 0 \n"
-            "fmadd.d ft1, ft0, %[g], %[b] \n"
-            :: [ g ] "f"(g), [ b ] "f"(b), [ n_frep ] "r"(n_frep)
+            "fmadd.d ft1, ft0, %[g], %[b] \n" ::[g] "f"(g),
+            [ b ] "f"(b), [ n_frep ] "r"(n_frep)
             : "ft0", "ft1", "ft2");
     }
     snrt_fpu_fence();

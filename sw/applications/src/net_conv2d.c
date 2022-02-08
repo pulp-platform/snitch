@@ -2,25 +2,24 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "layer.h"
-#include "data_conv2d.h"
 #include "conv2d_layer.h"
-#include "utils.h"
-#include "snrt.h"
+#include "data_conv2d.h"
+#include "layer.h"
 #include "math.h"
-#include "printf.h"
 #include "perf_cnt.h"
+#include "printf.h"
+#include "snrt.h"
+#include "utils.h"
 
-#define min(a,b) ((a)<(b)?(a):(b))
-#define max(a,b) ((a)>(b)?(a):(b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#define max(a, b) ((a) > (b) ? (a) : (b))
 
 int main() {
-
     conv2d_l.ifmap = (double*)conv2d_ifmap_dram;
     conv2d_l.weights = (double*)conv2d_weights_dram;
     conv2d_l.ofmap = (double*)conv2d_ofmap_dram;
     conv2d_l.TILE_CI = min(32, conv2d_l.CI);
-    conv2d_l.pad = (conv2d_l.FH-1) / 2;
+    conv2d_l.pad = (conv2d_l.FH - 1) / 2;
     conv2d_l.cluster2cluster = 0;
 
     const layer l1_conv2d_l = conv2d_l;

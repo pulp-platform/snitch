@@ -24,13 +24,13 @@ uint32_t benchmark_get_cycle() { return read_csr(mcycle); }
  * @brief start tracking of dma performance region
  *
  */
-void snrt_dma_start_tracking() { asm volatile ("dmstati t0, 1"); }
+void snrt_dma_start_tracking() { asm volatile("dmstati t0, 1"); }
 
 /**
  * @brief stop tracking of dma performance region
  *
  */
-void snrt_dma_stop_tracking() { asm volatile ("dmstati t0, 3"); }
+void snrt_dma_stop_tracking() { asm volatile("dmstati t0, 3"); }
 
 /**
  * @brief checks correctness of feature map
@@ -128,8 +128,8 @@ uint32_t check_layer(layer l, double *checksum) {
                             }
                         }
                         total++;
-                        if (fabs(checksum_result - ofmap_checksums[oh * l.OW + ow]) >
-                            0.001) {
+                        if (fabs(checksum_result -
+                                 ofmap_checksums[oh * l.OW + ow]) > 0.001) {
                             errors++;
                         }
                         snrt_cluster_hw_barrier();

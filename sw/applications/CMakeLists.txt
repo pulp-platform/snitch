@@ -55,5 +55,3 @@ target_link_libraries(net-gemm kernels utils)
 
 add_snitch_executable(fusedconv src/fusedconv.c)
 target_link_libraries(fusedconv kernels utils)
-
-add_snitch_executable(ssr-test src/ssr_test.c)

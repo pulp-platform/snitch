@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "snrt.h"
 #include "layer.h"
+#include "snrt.h"
 
 /**
  * @brief returns cycle number and injects maker
@@ -41,4 +41,4 @@ uint32_t check_layer(layer l, double* checksum);
  * @param value value to set
  * @param len number of bytes, must be multiple of DMA bus-width
  */
-void dma_memset(void *ptr, uint8_t value, uint32_t len);
+void dma_memset(void* ptr, uint8_t value, uint32_t len);

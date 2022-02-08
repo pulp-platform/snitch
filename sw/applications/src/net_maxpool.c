@@ -2,16 +2,15 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "layer.h"
 #include "data_maxpool.h"
-#include "maxpool_layer.h"
-#include "utils.h"
-#include "snrt.h"
+#include "layer.h"
 #include "math.h"
+#include "maxpool_layer.h"
 #include "printf.h"
+#include "snrt.h"
+#include "utils.h"
 
 int main() {
-
     maxpool_l.ifmap = (double*)maxpool_ifmap_dram;
     maxpool_l.ofmap = (double*)maxpool_ofmap_dram;
     maxpool_l.TILE_CI = 32;
