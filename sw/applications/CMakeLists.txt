@@ -31,27 +31,32 @@ add_custom_target(application-update-data
     COMMAND clang-format -style=file -i ${CMAKE_CURRENT_LIST_DIR}/data/data_maxpool.h
 )
 
-include_directories(include data src/layers src/kernels src/utils)
-include_directories(${SNRUNTIME_INCLUDE_DIRS})
 
-add_library(kernels src/kernels/batchnorm.c src/kernels/maxpool.c src/kernels/gemm.c src/kernels/conv2d.c)
-add_library(layers src/layers/batchnorm_layer.c src/layers/maxpool_layer.c src/layers/conv2d_layer.c)
-add_library(utils src/utils/utils.c)
-target_link_libraries(kernels ${SNITCH_RUNTIME})
-target_link_libraries(layers ${SNITCH_RUNTIME} kernels utils)
-target_link_libraries(utils ${SNITCH_RUNTIME})
 
-add_snitch_executable(net-batchnorm src/net_batchnorm.c)
-target_link_libraries(net-batchnorm kernels layers utils)
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    include_directories(include data src/layers src/kernels src/utils)
+    include_directories(${SNRUNTIME_INCLUDE_DIRS})
 
-add_snitch_executable(net-maxpool src/net_maxpool.c)
-target_link_libraries(net-maxpool kernels layers utils)
+    add_library(kernels src/kernels/batchnorm.c src/kernels/maxpool.c src/kernels/gemm.c src/kernels/conv2d.c)
+    add_library(layers src/layers/batchnorm_layer.c src/layers/maxpool_layer.c src/layers/conv2d_layer.c)
+    add_library(utils src/utils/utils.c)
 
-add_snitch_executable(net-conv2d src/net_conv2d.c)
-target_link_libraries(net-conv2d kernels layers utils)
+    target_link_libraries(kernels ${SNITCH_RUNTIME})
+    target_link_libraries(layers ${SNITCH_RUNTIME} kernels utils)
+    target_link_libraries(utils ${SNITCH_RUNTIME})
 
-add_snitch_executable(net-gemm src/net_gemm.c)
-target_link_libraries(net-gemm kernels utils)
+    add_snitch_executable(net-batchnorm src/net_batchnorm.c)
+    target_link_libraries(net-batchnorm kernels layers utils)
 
-add_snitch_executable(fusedconv src/fusedconv.c)
-target_link_libraries(fusedconv kernels utils)
+    add_snitch_executable(net-maxpool src/net_maxpool.c)
+    target_link_libraries(net-maxpool kernels layers utils)
+
+    add_snitch_executable(net-conv2d src/net_conv2d.c)
+    target_link_libraries(net-conv2d kernels layers utils)
+
+    add_snitch_executable(net-gemm src/net_gemm.c)
+    target_link_libraries(net-gemm kernels utils)
+
+    add_snitch_executable(fusedconv src/fusedconv.c)
+    target_link_libraries(fusedconv kernels utils)
+endif()
