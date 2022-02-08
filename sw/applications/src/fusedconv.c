@@ -54,11 +54,11 @@ int main() {
 
         if (snrt_is_compute_core() || (snrt_cluster_core_num() == 1)) {
 
-            if (dw == 0) {
+            if (dw) {
 
                 benchmark_get_cycle();
 
-                occamy_conv_opt_fp32(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
+                occamy_conv_dw_opt_fp32(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
                                 dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
                                 padding_x_left, padding_x_right, stride_x, stride_y, bias,
                                 bias_shift, out_shift, out_mult, pOutBuffer, dim_out_x,
@@ -68,10 +68,23 @@ int main() {
 
                 benchmark_get_cycle();
 
+            } else if (chw_layer) {
+
+                benchmark_get_cycle();
+
+                occamy_conv_chw_opt_fp32(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
+                                dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
+                                padding_x_left, padding_x_right, stride_x, stride_y, bias,
+                                bias_shift, out_shift, out_mult, pOutBuffer, dim_out_x,
+                                dim_out_y, k, lambda, pIm2ColBuffer, flag_relu,
+                                flag_batch_norm, flag_y_accumulate_start,
+                                flag_y_accumulate_end, memory_chan);
+
+                benchmark_get_cycle();
             } else {
                 benchmark_get_cycle();
 
-                occamy_conv_dw_opt_fp32(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
+                occamy_conv_opt_fp32(pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
                                 dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
                                 padding_x_left, padding_x_right, stride_x, stride_y, bias,
                                 bias_shift, out_shift, out_mult, pOutBuffer, dim_out_x,

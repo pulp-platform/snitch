@@ -197,15 +197,22 @@ def emit_fusedconv(name='fusedconv', **kwargs):
 
     padding = kwargs['padding']
 
-    ih, iw, ci = ifmap.shape
-    oh, ow, co = ofmap.shape
-    if not kwargs['depthwise']:
-        _, fh, fw, _ = kernel.shape
-    else:
+    if kwargs['depthwise']:
+        ih, iw, ci = ifmap.shape
+        oh, ow, co = ofmap.shape
         fh, fw, co = kernel.shape
         ci = co
-
-    ih_pad, iw_pad, _ = ifmap_padded.shape
+        ih_pad, iw_pad, _ = ifmap_padded.shape
+    elif kwargs['chw_layer']:
+        ci, ih, iw = ifmap.shape
+        oh, ow, co = ofmap.shape
+        co, ci, fh, fw = kernel.shape
+        _, ih_pad, iw_pad = ifmap_padded.shape
+    else:
+        ih, iw, ci = ifmap.shape
+        oh, ow, co = ofmap.shape
+        _, fh, fw, _ = kernel.shape
+        ih_pad, iw_pad, _ = ifmap_padded.shape
 
     ctypes = {
         '64': 'double',
@@ -243,7 +250,8 @@ def emit_fusedconv(name='fusedconv', **kwargs):
     layer_str += f'int flag_y_accumulate_start = {kwargs["flags"]["flag_y_accumulate_start"]};\n'
     layer_str += f'int flag_y_accumulate_end = {kwargs["flags"]["flag_y_accumulate_end"]};\n'
     layer_str += 'unsigned int *memory_chan;\n'
-    layer_str += f'unsigned int dw = {kwargs["depthwise"]};\n\n'
+    layer_str += f'unsigned int dw = {kwargs["depthwise"]};\n'
+    layer_str += f'unsigned int chw_layer = {kwargs["chw_layer"]};\n\n'
 
     layer_str += f'static {dtype} {name}_pInBuffer_dram[{ih_pad}][{iw_pad}][{ci}] = ' + \
         array_to_cstr(ifmap_padded) + ';\n\n'
@@ -458,6 +466,11 @@ def main():
 
         ofmap, ofmap_before, ifmap_padded = fused_conv(ifmap, kernel, k, l, param['padding'], param['stride'], param['flags']['flag_batch_norm'], param['flags']['flag_relu'], not param['flags']['flag_y_accumulate_start'], param['depthwise'])
 
+        if param['chw_layer']:
+            ifmap = ifmap.permute(2, 0, 1)
+            ifmap_padded = ifmap_padded.permute(2, 0, 1)
+            kernel = kernel.permute(0, 3, 1, 2)
+
         kwargs = {
             'ifmap': ifmap,
             'ifmap_padded': ifmap_padded,
@@ -470,7 +483,8 @@ def main():
             'stride': param['stride'],
             'prec': param['prec'],
             'flags': param['flags'],
-            'depthwise': param['depthwise']
+            'depthwise': param['depthwise'],
+            'chw_layer': param['chw_layer']
         }
         emit_header_file('FusedConv', **kwargs)
 
