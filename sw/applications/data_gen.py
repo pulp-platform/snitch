@@ -189,8 +189,8 @@ def emit_fusedconv(name='fusedconv', **kwargs):
 
     ifmap = kwargs['ifmap']
     kernel = kwargs['kernel']
-    k = kwargs['k']
-    l = kwargs['l']
+    bn_k = kwargs['bn_k']
+    bn_l = kwargs['bn_l']
     ofmap = kwargs['ofmap']
     ofmap_before = kwargs['ofmap_before']
     ifmap_padded = kwargs['ifmap_padded']
@@ -242,8 +242,8 @@ def emit_fusedconv(name='fusedconv', **kwargs):
     layer_str += 'uint16_t bias_shift;\n'
     layer_str += 'uint16_t out_shift = 0;\n'
     layer_str += 'uint16_t out_mult;\n'
-    layer_str += f'{dtype} lambda_dram[{co}] = {array_to_cstr(l)} ;\n'
-    layer_str += f'{dtype} k_dram[{co}] = {array_to_cstr(k)};\n'
+    layer_str += f'{dtype} lambda_dram[{co}] = {array_to_cstr(bn_l)} ;\n'
+    layer_str += f'{dtype} k_dram[{co}] = {array_to_cstr(bn_k)};\n'
     layer_str += f'{dtype} *pIm2ColBuffer;\n'
     layer_str += f'int flag_relu = {kwargs["flags"]["flag_relu"]};\n'
     layer_str += f'int flag_batch_norm = {kwargs["flags"]["flag_batch_norm"]};\n'
@@ -296,7 +296,7 @@ def batchnorm(ifmap):
     return ofmap, gamma, beta
 
 
-def fused_conv(ifmap, weights, k, l, padding, stride, bn, relu, accumulate, depthwise):
+def fused_conv(ifmap, weights, bn_k, bn_l, padding, stride, bn, relu, accumulate, depthwise):
 
     ih, iw, ci = ifmap.shape
     if not depthwise:
@@ -306,13 +306,17 @@ def fused_conv(ifmap, weights, k, l, padding, stride, bn, relu, accumulate, dept
         ci = co
 
     ifmap_padded = torch.zeros(ih + padding['padding_y_top'] + padding['padding_y_bottom'], iw +
-                               padding['padding_x_left'] + padding['padding_x_right'], ci, requires_grad=False, dtype=ifmap.dtype)
+                               padding['padding_x_left'] + padding['padding_x_right'],
+                               ci,
+                               requires_grad=False, dtype=ifmap.dtype)
     ifmap_padded[padding['padding_y_top']:ih+padding['padding_y_top'],
                  padding['padding_x_left']:iw+padding['padding_x_left']] = ifmap
 
     # Don't cover undefined behaviour when there are steps without a complete kernel window
-    if (ifmap_padded.shape[0] - (fh - 1) - 1) % stride['stride_y'] != 0: print("Warning: rounding h output dimension")
-    if (ifmap_padded.shape[1] - (fw - 1) - 1) % stride['stride_x'] != 0: print("Warning: rounding w output dimension")
+    if (ifmap_padded.shape[0] - (fh - 1) - 1) % stride['stride_y'] != 0:
+        print("Warning: rounding h output dimension")
+    if (ifmap_padded.shape[1] - (fw - 1) - 1) % stride['stride_x'] != 0:
+        print("Warning: rounding w output dimension")
 
     ofmap = torch.zeros((ifmap_padded.shape[0] - (fh - 1) - 1) // stride['stride_y'] + 1,
                         (ifmap_padded.shape[1] - (fw - 1) - 1) // stride['stride_x'] + 1, co)
@@ -329,22 +333,20 @@ def fused_conv(ifmap, weights, k, l, padding, stride, bn, relu, accumulate, dept
             for w in range(0, ifmap_padded.shape[1] - (fw - 1), stride['stride_x']):
                 for c in range(co):
                     ofmap[h//stride['stride_y'], w//stride['stride_x'],
-                        c] = torch.dot(ifmap_padded[h:h+fh, w:w+fw, c].flatten(), weights[:, :, c].flatten())
+                          c] = torch.dot(ifmap_padded[h:h+fh, w:w+fw, c].flatten(), weights[:, :, c].flatten())
     else:
         # Conv2d
         for h in range(0, ifmap_padded.shape[0] - (fh - 1), stride['stride_y']):
             for w in range(0, ifmap_padded.shape[1] - (fw - 1), stride['stride_x']):
                 for c in range(co):
                     ofmap[h//stride['stride_y'], w//stride['stride_x'],
-                        c] = torch.dot(ifmap_padded[h:h+fh, w:w+fw].flatten(), weights[c].flatten())
-
-
+                          c] = torch.dot(ifmap_padded[h:h+fh, w:w+fw].flatten(), weights[c].flatten())
 
     ofmap += ofmap_before
 
     # BatchNorm
     if bn:
-        ofmap = ofmap * k + l
+        ofmap = ofmap * bn_k + bn_l
 
     # ReLU
     if relu:
@@ -456,15 +458,24 @@ def main():
         ifmap = torch.randn(param['dim_in_y'], param['dim_in_x'], param['ch_in'], requires_grad=False, dtype=dtype)
         if not param['depthwise']:
             kernel = torch.randn(param['ch_out'], param['dim_kernel_y'], param['dim_kernel_x'],
-                                    param['ch_in'], requires_grad=False, dtype=dtype)
+                                 param['ch_in'], requires_grad=False, dtype=dtype)
         else:
             kernel = torch.randn(param['dim_kernel_y'], param['dim_kernel_x'],
-                                param['ch_in'], requires_grad=False, dtype=dtype)
+                                 param['ch_in'], requires_grad=False, dtype=dtype)
 
-        k = torch.randn(param['ch_out'], requires_grad=False)
-        l = torch.randn(param['ch_out'], requires_grad=False)
+        bn_k = torch.randn(param['ch_out'], requires_grad=False)
+        bn_l = torch.randn(param['ch_out'], requires_grad=False)
 
-        ofmap, ofmap_before, ifmap_padded = fused_conv(ifmap, kernel, k, l, param['padding'], param['stride'], param['flags']['flag_batch_norm'], param['flags']['flag_relu'], not param['flags']['flag_y_accumulate_start'], param['depthwise'])
+        ofmap, ofmap_before, ifmap_padded = fused_conv(ifmap,
+                                                       kernel,
+                                                       bn_k,
+                                                       bn_l,
+                                                       param['padding'],
+                                                       param['stride'],
+                                                       param['flags']['flag_batch_norm'],
+                                                       param['flags']['flag_relu'],
+                                                       not param['flags']['flag_y_accumulate_start'],
+                                                       param['depthwise'])
 
         if param['chw_layer']:
             ifmap = ifmap.permute(2, 0, 1)
@@ -477,8 +488,8 @@ def main():
             'ofmap': ofmap,
             'ofmap_before': ofmap_before,
             'kernel': kernel,
-            'k': k,
-            'l': l,
+            'bn_k': bn_k,
+            'bn_l': bn_l,
             'padding': param['padding'],
             'stride': param['stride'],
             'prec': param['prec'],
