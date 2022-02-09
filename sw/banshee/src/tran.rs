@@ -3062,26 +3062,26 @@ impl<'a> InstructionTranslator<'a> {
             ),
             riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddS
             | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddD
-            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddQ => LLVMBuildFAdd(
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmaddQ => LLVMBuildFNeg(
                 self.builder,
-                LLVMBuildFNeg(
+                LLVMBuildFAdd(
                     self.builder,
                     LLVMBuildFMul(self.builder, rs1, rs2, NONAME),
+                    rs3,
                     NONAME,
                 ),
-                rs3,
                 name,
             ),
             riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubS
             | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubD
-            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubQ => LLVMBuildFSub(
+            | riscv::OpcodeRdRmRs1Rs2Rs3::FnmsubQ => LLVMBuildFNeg(
                 self.builder,
-                LLVMBuildFNeg(
+                LLVMBuildFSub(
                     self.builder,
                     LLVMBuildFMul(self.builder, rs1, rs2, NONAME),
+                    rs3,
                     NONAME,
                 ),
-                rs3,
                 name,
             ),
             riscv::OpcodeRdRmRs1Rs2Rs3::FmaddH
@@ -4464,14 +4464,14 @@ impl<'a> InstructionTranslator<'a> {
                 let (c1, c0) = self.read_freg_vf64s(data.rd);
                 let res0 = LLVMBuildFSub(
                     self.builder,
-                    LLVMBuildFMul(self.builder, a0, b0, name),
                     c0,
+                    LLVMBuildFMul(self.builder, a0, b0, name),
                     name,
                 );
                 let res1 = LLVMBuildFSub(
                     self.builder,
-                    LLVMBuildFMul(self.builder, a1, b1, name),
                     c1,
+                    LLVMBuildFMul(self.builder, a1, b1, name),
                     name,
                 );
                 self.write_freg_vf64s(data.rd, res1, res0);
@@ -4483,14 +4483,14 @@ impl<'a> InstructionTranslator<'a> {
                 let (c1, c0) = self.read_freg_vf64s(data.rd);
                 let res0 = LLVMBuildFSub(
                     self.builder,
-                    LLVMBuildFMul(self.builder, a0, b0, name),
                     c0,
+                    LLVMBuildFMul(self.builder, a0, b0, name),
                     name,
                 );
                 let res1 = LLVMBuildFSub(
                     self.builder,
-                    LLVMBuildFMul(self.builder, a1, b0, name),
                     c1,
+                    LLVMBuildFMul(self.builder, a1, b0, name),
                     name,
                 );
                 self.write_freg_vf64s(data.rd, res1, res0);

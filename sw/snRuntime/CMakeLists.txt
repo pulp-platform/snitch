@@ -164,4 +164,66 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_snitch_test_executable(openmp tests/openmp.c)
     add_snitch_test_rtl(openmp)
     add_snitch_test_args(openmp openmp --base-hartid=3 --num-cores=9 --num-clusters=1)
+
+    # FP8 tests
+    add_snitch_test_executable(fp8_comparison_vector tests/fp8_comparison_vector.c)
+    add_snitch_test_executable(fp8_comparison_scalar tests/fp8_comparison_scalar.c)
+    add_snitch_test_executable(fp8_computation_scalar tests/fp8_computation_scalar.c)
+    add_snitch_test_executable(fp8_computation_vector tests/fp8_computation_vector.c)
+
+    add_snitch_test_rtl(fp8_comparison_vector tests/fp8_comparison_vector.c)
+    add_snitch_test_rtl(fp8_comparison_scalar tests/fp8_comparison_scalar.c)
+    add_snitch_test_rtl(fp8_computation_scalar tests/fp8_computation_scalar.c)
+    add_snitch_test_rtl(fp8_computation_vector tests/fp8_computation_vector.c)
+
+    # FP8ALT tests
+    add_snitch_test_executable(fp8alt_comparison_vector tests/fp8alt_comparison_vector.c)
+    add_snitch_test_executable(fp8alt_comparison_scalar tests/fp8alt_comparison_scalar.c)
+    add_snitch_test_executable(fp8alt_computation_scalar tests/fp8alt_computation_scalar.c)
+    add_snitch_test_executable(fp8alt_computation_vector tests/fp8alt_computation_vector.c)
+
+    add_snitch_test_rtl(fp8alt_comparison_vector tests/fp8alt_comparison_vector.c)
+    add_snitch_test_rtl(fp8alt_comparison_scalar tests/fp8alt_comparison_scalar.c)
+    add_snitch_test_rtl(fp8alt_computation_scalar tests/fp8alt_computation_scalar.c)
+    add_snitch_test_rtl(fp8alt_computation_vector tests/fp8alt_computation_vector.c)
+
+    # FP16 tests
+    add_snitch_test_executable(fp16_comparison_vector tests/fp16_comparison_vector.c)
+    add_snitch_test_executable(fp16_comparison_scalar tests/fp16_comparison_scalar.c)
+    add_snitch_test_executable(fp16_computation_scalar tests/fp16_computation_scalar.c)
+    add_snitch_test_executable(fp16_computation_vector tests/fp16_computation_vector.c)
+
+    add_snitch_test_rtl(fp16_comparison_vector tests/fp16_comparison_vector.c)
+    add_snitch_test_rtl(fp16_comparison_scalar tests/fp16_comparison_scalar.c)
+    add_snitch_test_rtl(fp16_computation_scalar tests/fp16_computation_scalar.c)
+    add_snitch_test_rtl(fp16_computation_vector tests/fp16_computation_vector.c)
+
+    # FP16ALT tests
+    add_snitch_test_executable(fp16alt_comparison_vector tests/fp16alt_comparison_vector.c)
+    add_snitch_test_executable(fp16alt_comparison_scalar tests/fp16alt_comparison_scalar.c)
+    add_snitch_test_executable(fp16alt_computation_scalar tests/fp16alt_computation_scalar.c)
+    add_snitch_test_executable(fp16alt_computation_vector tests/fp16alt_computation_vector.c)
+
+    add_snitch_test_rtl(fp16alt_comparison_vector tests/fp16alt_comparison_vector.c)
+    add_snitch_test_rtl(fp16alt_comparison_scalar tests/fp16alt_comparison_scalar.c)
+    add_snitch_test_rtl(fp16alt_computation_scalar tests/fp16alt_computation_scalar.c)
+    add_snitch_test_rtl(fp16alt_computation_vector tests/fp16alt_computation_vector.c)
+
+    # FP32 tests
+    add_snitch_test_executable(fp32_comparison_vector tests/fp32_comparison_vector.c)
+    add_snitch_test_executable(fp32_comparison_scalar tests/fp32_comparison_scalar.c)
+    add_snitch_test_executable(fp32_computation_scalar tests/fp32_computation_scalar.c)
+    add_snitch_test_executable(fp32_computation_vector tests/fp32_computation_vector.c)
+
+    add_snitch_test_rtl(fp32_comparison_vector tests/fp32_comparison_vector.c)
+    add_snitch_test_rtl(fp32_comparison_scalar tests/fp32_comparison_scalar.c)
+    add_snitch_test_rtl(fp32_computation_scalar tests/fp32_computation_scalar.c)
+    add_snitch_test_rtl(fp32_computation_vector tests/fp32_computation_vector.c)
+
+    # FP conversion tests
+    add_snitch_test_executable(fp32_conversions_scalar tests/fp32_conversions_scalar.c)
+    add_snitch_test_executable(fp64_conversions_scalar tests/fp64_conversions_scalar.c)
+
+    add_snitch_test_rtl(fp32_conversions_scalar tests/fp32_conversions_scalar.c)
+    add_snitch_test_rtl(fp64_conversions_scalar tests/fp64_conversions_scalar.c)
 endif()
