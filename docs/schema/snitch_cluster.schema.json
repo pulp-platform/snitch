@@ -50,6 +50,14 @@
                 }
             }
         },
+        "periph_size": {
+            "type": "number",
+            "description": "Address region size reserved for cluster peripherals in KiByte.",
+            "examples": [
+                128,
+                64
+            ]
+        },
         "addr_width": {
             "type": "number",
             "description": "Length of the address, should be greater than 30. If the address is larger than 34 the data bus needs to be 64 bits in size.",

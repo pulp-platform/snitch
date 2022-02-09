@@ -18,8 +18,9 @@ are co-located. The top-level ist structured as follows:
 * `vendor`: "Third-party" components which are updated using the vendor script.
   They are not (primarily) developed as part of this repository.
 * `system`: Specific systems built around Snitch components.
-  * `snitch-cluster`: Single cluster with a minimal environment to run
-    meaningful applications.
+    * `snitch-cluster`: Single cluster with a minimal environment to run
+      meaningful applications.
+    * `occamy`: Multi-cluster system with an environment to run applications.
 
 ## Software
 

@@ -56,12 +56,6 @@
       interrupts = <1>;
       reg = <0x0 0x2002000 0x0 0x1000>;
     };
-    clint@4000000 {
-      compatible = "riscv,clint0";
-      interrupts-extended = <&CPU0_intc 3 &CPU0_intc 7>;
-      reg-names = "control";
-      reg = <0x0 0x4000000 0x0 0x100000>;
-    };
     PLIC0: interrupt-controller@c000000 {
       compatible = "riscv,plic0";
       #address-cells = <0>;
@@ -71,6 +65,12 @@
       riscv,max-priority = <7>;
       riscv,ndev = <30>;
       reg = <0x0 0xc000000 0x0 0x4000000>;
+    };
+    clint@4000000 {
+      compatible = "riscv,clint0";
+      interrupts-extended = <&CPU0_intc 3 &CPU0_intc 7>;
+      reg-names = "control";
+      reg = <0x0 0x4000000 0x0 0x100000>;
     };
   };
   htif {

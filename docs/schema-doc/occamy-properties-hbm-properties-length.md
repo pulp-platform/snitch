@@ -1,7 +1,7 @@
 # Untitled number in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie/properties/length
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/length
 ```
 
 Size of SPM based on the address range. The full address range will be mapped to SPM.

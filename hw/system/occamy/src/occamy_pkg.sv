@@ -120,8 +120,8 @@ package occamy_pkg;
 
   /// Outputs of the `soc_axi_lite_periph_xbar` crossbar.
   typedef enum int {
-    SOC_AXI_LITE_PERIPH_XBAR_OUT_DEBUG,
     SOC_AXI_LITE_PERIPH_XBAR_OUT_SOC,
+    SOC_AXI_LITE_PERIPH_XBAR_OUT_DEBUG,
     SOC_AXI_LITE_PERIPH_XBAR_NUM_OUTPUTS
   } soc_axi_lite_periph_xbar_outputs_e;
 
@@ -142,8 +142,8 @@ package occamy_pkg;
 
   /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
   localparam xbar_rule_48_t [1:0] SocAxiLitePeriphXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-  '{ idx: 1, start_addr: 48'h01000000, end_addr: 48'h20000000000 }
+  '{ idx: 0, start_addr: 48'h01000000, end_addr: 48'h20000000000 },
+  '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 }
 };
 
   // AXI plugs of the `soc_axi_lite_periph_xbar` crossbar.
@@ -174,45 +174,45 @@ package occamy_pkg;
 
   /// Outputs of the `soc_regbus_periph_xbar` crossbar.
   typedef enum int {
-    SOC_REGBUS_PERIPH_XBAR_OUT_CLINT,
     SOC_REGBUS_PERIPH_XBAR_OUT_SOC_CTRL,
-    SOC_REGBUS_PERIPH_XBAR_OUT_CHIP_CTRL,
     SOC_REGBUS_PERIPH_XBAR_OUT_CLK_MGR,
-    SOC_REGBUS_PERIPH_XBAR_OUT_BOOTROM,
-    SOC_REGBUS_PERIPH_XBAR_OUT_PLIC,
     SOC_REGBUS_PERIPH_XBAR_OUT_UART,
     SOC_REGBUS_PERIPH_XBAR_OUT_GPIO,
     SOC_REGBUS_PERIPH_XBAR_OUT_I2C,
-    SOC_REGBUS_PERIPH_XBAR_OUT_SPIM,
+    SOC_REGBUS_PERIPH_XBAR_OUT_CHIP_CTRL,
     SOC_REGBUS_PERIPH_XBAR_OUT_TIMER,
+    SOC_REGBUS_PERIPH_XBAR_OUT_SPIM,
     SOC_REGBUS_PERIPH_XBAR_OUT_PCIE_CFG,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CFG,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CTL,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBM_CFG,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBM_PHY_CFG,
     SOC_REGBUS_PERIPH_XBAR_OUT_HBM_SEQ,
+    SOC_REGBUS_PERIPH_XBAR_OUT_PLIC,
+    SOC_REGBUS_PERIPH_XBAR_OUT_BOOTROM,
+    SOC_REGBUS_PERIPH_XBAR_OUT_CLINT,
     SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   } soc_regbus_periph_xbar_outputs_e;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
   localparam xbar_rule_48_t [16:0] SocRegbusPeriphXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h04000000, end_addr: 48'h04100000 },
-  '{ idx: 1, start_addr: 48'h02000000, end_addr: 48'h02001000 },
-  '{ idx: 2, start_addr: 48'h02005000, end_addr: 48'h02006000 },
-  '{ idx: 3, start_addr: 48'h02001000, end_addr: 48'h02002000 },
-  '{ idx: 4, start_addr: 48'h01000000, end_addr: 48'h01020000 },
-  '{ idx: 5, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
-  '{ idx: 6, start_addr: 48'h02002000, end_addr: 48'h02003000 },
-  '{ idx: 7, start_addr: 48'h02003000, end_addr: 48'h02004000 },
-  '{ idx: 8, start_addr: 48'h02004000, end_addr: 48'h02005000 },
-  '{ idx: 9, start_addr: 48'h03000000, end_addr: 48'h03020000 },
-  '{ idx: 10, start_addr: 48'h02006000, end_addr: 48'h02007000 },
-  '{ idx: 11, start_addr: 48'h05000000, end_addr: 48'h05020000 },
-  '{ idx: 12, start_addr: 48'h06000000, end_addr: 48'h06010000 },
-  '{ idx: 13, start_addr: 48'h07000000, end_addr: 48'h07010000 },
-  '{ idx: 14, start_addr: 48'h08000000, end_addr: 48'h08400000 },
-  '{ idx: 15, start_addr: 48'h09000000, end_addr: 48'h09100000 },
-  '{ idx: 16, start_addr: 48'h0a000000, end_addr: 48'h0a010000 }
+  '{ idx: 0, start_addr: 48'h02000000, end_addr: 48'h02001000 },
+  '{ idx: 1, start_addr: 48'h02001000, end_addr: 48'h02002000 },
+  '{ idx: 2, start_addr: 48'h02002000, end_addr: 48'h02003000 },
+  '{ idx: 3, start_addr: 48'h02003000, end_addr: 48'h02004000 },
+  '{ idx: 4, start_addr: 48'h02004000, end_addr: 48'h02005000 },
+  '{ idx: 5, start_addr: 48'h02005000, end_addr: 48'h02006000 },
+  '{ idx: 6, start_addr: 48'h02006000, end_addr: 48'h02007000 },
+  '{ idx: 7, start_addr: 48'h03000000, end_addr: 48'h03020000 },
+  '{ idx: 8, start_addr: 48'h05000000, end_addr: 48'h05020000 },
+  '{ idx: 9, start_addr: 48'h06000000, end_addr: 48'h06010000 },
+  '{ idx: 10, start_addr: 48'h07000000, end_addr: 48'h07010000 },
+  '{ idx: 11, start_addr: 48'h08000000, end_addr: 48'h08400000 },
+  '{ idx: 12, start_addr: 48'h09000000, end_addr: 48'h09100000 },
+  '{ idx: 13, start_addr: 48'h0a000000, end_addr: 48'h0a010000 },
+  '{ idx: 14, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
+  '{ idx: 15, start_addr: 48'h01000000, end_addr: 48'h01020000 },
+  '{ idx: 16, start_addr: 48'h04000000, end_addr: 48'h04100000 }
 };
 
   /// Inputs of the `quadrant_pre_xbar_0` crossbar.

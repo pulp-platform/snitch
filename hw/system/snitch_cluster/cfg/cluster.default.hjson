@@ -77,11 +77,13 @@
         // 0x8000_0000
         length: 2147483648
     },
-    clint: {
-        // 0xffff_0000
-        address: 4294901760,
-        // 0x0000_1000
-        length: 4096
+    peripherals: {
+        clint: {
+            // 0xffff_0000
+            address: 4294901760,
+            // 0x0000_1000
+            length: 4096
+        },
     },
     // Templates.
     compute_core_template: {

@@ -4,7 +4,7 @@
 http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm
 ```
 
-Scratchpad Memory (SPM).
+
 
 | Abstract            | Extensible | Status         | Identifiable | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :----------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
@@ -13,6 +13,16 @@ Scratchpad Memory (SPM).
 ## spm Type
 
 unknown
+
+## spm Default Value
+
+The default value is:
+
+```json
+{
+  "size": 128
+}
+```
 
 # undefined Properties
 
@@ -64,3 +74,9 @@ Size of SPM based on the address range. The full address range will be mapped to
 ### length Constraints
 
 **minimum**: the value of this number must greater than or equal to: `0`
+
+### length Examples
+
+```json
+131072
+```

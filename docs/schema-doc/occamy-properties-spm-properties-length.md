@@ -17,3 +17,9 @@ Size of SPM based on the address range. The full address range will be mapped to
 ## length Constraints
 
 **minimum**: the value of this number must greater than or equal to: `0`
+
+## length Examples
+
+```json
+131072
+```

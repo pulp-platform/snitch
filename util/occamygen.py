@@ -176,111 +176,61 @@ def main():
     ############################
     # AM: Periph AXI Lite XBar #
     ############################
-    am_debug = am.new_leaf(
-        "debug",
-        occamy.cfg["debug"]["length"],
-        occamy.cfg["debug"]["address"]).attach_to(am_soc_axi_lite_periph_xbar)
+    nr_axi_lite_peripherals = len(occamy.cfg["peripherals"]["axi_lite_peripherals"])
+    am_axi_lite_peripherals = []
 
-    dts.add_device("debug", "riscv,debug-013", am_debug, [
-        "interrupts-extended = <&CPU0_intc 65535>", "reg-names = \"control\""
-    ])
+    for p in range(nr_axi_lite_peripherals):
+        am_axi_lite_peripherals.append(
+            am.new_leaf(
+                occamy.cfg["peripherals"]["axi_lite_peripherals"][p]["name"],
+                occamy.cfg["peripherals"]["axi_lite_peripherals"][p]["length"],
+                occamy.cfg["peripherals"]["axi_lite_peripherals"][p]["address"]
+            ).attach_to(am_soc_axi_lite_periph_xbar)
+        )
+        # add debug module to devicetree
+        if occamy.cfg["peripherals"]["axi_lite_peripherals"][p]["name"] == "debug":
+            dts.add_device("debug", "riscv,debug-013", am_axi_lite_peripherals[p], [
+                "interrupts-extended = <&CPU0_intc 65535>", "reg-names = \"control\""
+            ])
 
     ##########################
     # AM: Periph Regbus XBar #
     ##########################
+    nr_regbus_peripherals = len(occamy.cfg["peripherals"]["regbus_peripherals"])
+    am_regbus_peripherals = []
+
+    for p in range(nr_regbus_peripherals):
+        am_regbus_peripherals.append(
+            am.new_leaf(
+                occamy.cfg["peripherals"]["regbus_peripherals"][p]["name"],
+                occamy.cfg["peripherals"]["regbus_peripherals"][p]["length"],
+                occamy.cfg["peripherals"]["regbus_peripherals"][p]["address"]
+            ).attach_to(am_soc_regbus_periph_xbar)
+        )
+        # add uart to devicetree
+        if occamy.cfg["peripherals"]["regbus_peripherals"][p]["name"] == "uart":
+            dts.add_device("serial", "lowrisc,serial", am_regbus_peripherals[p], [
+                "clock-frequency = <50000000>", "current-speed = <115200>",
+                "interrupt-parent = <&PLIC0>", "interrupts = <1>"
+            ])
+        # add plic to devicetree
+        elif occamy.cfg["peripherals"]["regbus_peripherals"][p]["name"] == "plic":
+            dts.add_plic([0], am_regbus_peripherals[p])
+
+    # add bootrom seperately
     am_bootrom = am.new_leaf(
         "bootrom",
-        occamy.cfg["rom"]["length"],
-        occamy.cfg["rom"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["peripherals"]["rom"]["length"],
+        occamy.cfg["peripherals"]["rom"]["address"]).attach_to(am_soc_regbus_periph_xbar)
 
-    am_soc_ctrl = am.new_leaf(
-        "soc_ctrl",
-        occamy.cfg["soc_ctrl"]["length"],
-        occamy.cfg["soc_ctrl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_clk_mgr = am.new_leaf(
-        "clk_mgr",
-        occamy.cfg["clk_mgr"]["length"],
-        occamy.cfg["clk_mgr"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_uart = am.new_leaf(
-        "uart",
-        occamy.cfg["uart"]["length"],
-        occamy.cfg["uart"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    dts.add_device("serial", "lowrisc,serial", am_uart, [
-        "clock-frequency = <50000000>", "current-speed = <115200>",
-        "interrupt-parent = <&PLIC0>", "interrupts = <1>"
-    ])
-
-    am_gpio = am.new_leaf(
-        "gpio",
-        occamy.cfg["gpio"]["length"],
-        occamy.cfg["gpio"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_i2c = am.new_leaf(
-        "i2c",
-        occamy.cfg["i2c"]["length"],
-        occamy.cfg["i2c"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_chip_ctrl = am.new_leaf(
-        "chip_ctrl",
-        occamy.cfg["chip_ctrl"]["length"],
-        occamy.cfg["chip_ctrl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_timer = am.new_leaf(
-        "timer",
-        occamy.cfg["timer"]["length"],
-        occamy.cfg["timer"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_spim = am.new_leaf(
-        "spim",
-        occamy.cfg["spim"]["length"],
-        occamy.cfg["spim"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
+    # add clint seperately
     am_clint = am.new_leaf(
         "clint",
-        occamy.cfg["clint"]["length"],
-        occamy.cfg["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["peripherals"]["clint"]["length"],
+        occamy.cfg["peripherals"]["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+
+    # add clint to devicetree
     dts.add_clint([0], am_clint)
-
-    am_pcie_cfg = am.new_leaf(
-        "pcie_cfg",
-        occamy.cfg["pcie_cfg"]["length"],
-        occamy.cfg["pcie_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    # TODO: Revise address map for HBI config and APB control
-    am_hbi_cfg = am.new_leaf(
-        "hbi_cfg",
-        occamy.cfg["hbi_cfg"]["length"],
-        occamy.cfg["hbi_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_hbi_ctl = am.new_leaf(
-        "hbi_ctl",
-        occamy.cfg["hbi_ctl"]["length"],
-        occamy.cfg["hbi_ctl"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_hbm_cfg = am.new_leaf(
-        "hbm_cfg",
-        occamy.cfg["hbm_cfg"]["length"],
-        occamy.cfg["hbm_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_hbm_phy_cfg = am.new_leaf(
-        "hbm_phy_cfg",
-        occamy.cfg["hbm_phy_cfg"]["length"],
-        occamy.cfg["hbm_phy_cfg"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_hbm_seq = am.new_leaf(
-        "hbm_seq",
-        occamy.cfg["hbm_seq"]["length"],
-        occamy.cfg["hbm_seq"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    am_plic = am.new_leaf(
-        "plic",
-        occamy.cfg["plic"]["length"],
-        occamy.cfg["plic"]["address"]).attach_to(am_soc_regbus_periph_xbar)
-
-    dts.add_plic([0], am_plic)
 
     ##################
     # AM: SPM / PCIE #
@@ -339,20 +289,20 @@ def main():
     ##############################
     # AM: Quadrants and Clusters #
     ##############################
-    cluster_size = occamy.cfg["cluster"]["cluster_base_offset"]
-    cluster_tcdm_size = occamy.cfg["cluster"]["tcdm"]["size"] * 1024
-    cluster_periph_size = cluster_tcdm_size
+    cluster_base_offset = occamy.cfg["cluster"]["cluster_base_offset"]
+    cluster_tcdm_size = occamy.cfg["cluster"]["tcdm"]["size"] * 1024  # config is in KiB
+    cluster_periph_size = occamy.cfg["cluster"]["periph_size"] * 1024
 
-    quadrants_base_addr = occamy.cfg["cluster"]["cluster_base_addr"]
-    quadrant_size = cluster_size * nr_s1_clusters
+    cluster_base_addr = occamy.cfg["cluster"]["cluster_base_addr"]
+    quadrant_size = cluster_base_offset * nr_s1_clusters
 
     for i in range(nr_s1_quadrants):
-        cluster_base_addr = quadrants_base_addr + i * quadrant_size
+        cluster_i_start_addr = cluster_base_addr + i * quadrant_size
 
         am_clusters = list()
         for j in range(nr_s1_clusters):
             bases_cluster = list()
-            bases_cluster.append(cluster_base_addr + j * cluster_size + 0)
+            bases_cluster.append(cluster_i_start_addr + j * cluster_base_offset + 0)
             am_clusters.append(
                 am.new_leaf(
                     "quadrant_{}_cluster_{}_tcdm".format(i, j),
@@ -366,7 +316,7 @@ def main():
             )
 
             bases_cluster = list()
-            bases_cluster.append(cluster_base_addr + j * cluster_size + cluster_tcdm_size)
+            bases_cluster.append(cluster_i_start_addr + j * cluster_base_offset + cluster_tcdm_size)
             am_clusters.append(
                 am.new_leaf(
                     "quadrant_{}_cluster_{}_periph".format(i, j),
@@ -435,9 +385,17 @@ def main():
         node=am_soc_axi_lite_periph_xbar)
 
     soc_axi_lite_periph_xbar.add_input("soc")
-    soc_axi_lite_periph_xbar.add_input("debug")
-    soc_axi_lite_periph_xbar.add_output_entry("debug", am_debug)
     soc_axi_lite_periph_xbar.add_output_entry("soc", am_soc_narrow_xbar)
+
+    # connect AXI lite peripherals
+    for p in range(nr_axi_lite_peripherals):
+        soc_axi_lite_periph_xbar.add_input(
+            occamy.cfg["peripherals"]["axi_lite_peripherals"][p]["name"]
+        )
+        soc_axi_lite_periph_xbar.add_output_entry(
+            occamy.cfg["peripherals"]["axi_lite_peripherals"][p]["name"],
+            am_axi_lite_peripherals[p]
+        )
 
     ##########
     # RegBus #
@@ -451,23 +409,16 @@ def main():
 
     soc_regbus_periph_xbar.add_input("soc")
 
-    soc_regbus_periph_xbar.add_output_entry("clint", am_clint)
-    soc_regbus_periph_xbar.add_output_entry("soc_ctrl", am_soc_ctrl)
-    soc_regbus_periph_xbar.add_output_entry("chip_ctrl", am_chip_ctrl)
-    soc_regbus_periph_xbar.add_output_entry("clk_mgr", am_clk_mgr)
+    # connect Regbus peripherals
+    for p in range(nr_regbus_peripherals):
+        soc_regbus_periph_xbar.add_output_entry(
+            occamy.cfg["peripherals"]["regbus_peripherals"][p]["name"],
+            am_regbus_peripherals[p]
+        )
+
+    # add bootrom and clint seperately
     soc_regbus_periph_xbar.add_output_entry("bootrom", am_bootrom)
-    soc_regbus_periph_xbar.add_output_entry("plic", am_plic)
-    soc_regbus_periph_xbar.add_output_entry("uart", am_uart)
-    soc_regbus_periph_xbar.add_output_entry("gpio", am_gpio)
-    soc_regbus_periph_xbar.add_output_entry("i2c", am_i2c)
-    soc_regbus_periph_xbar.add_output_entry("spim", am_spim)
-    soc_regbus_periph_xbar.add_output_entry("timer", am_timer)
-    soc_regbus_periph_xbar.add_output_entry("pcie_cfg", am_pcie_cfg)
-    soc_regbus_periph_xbar.add_output_entry("hbi_cfg", am_hbi_cfg)
-    soc_regbus_periph_xbar.add_output_entry("hbi_ctl", am_hbi_ctl)
-    soc_regbus_periph_xbar.add_output_entry("hbm_cfg", am_hbm_cfg)
-    soc_regbus_periph_xbar.add_output_entry("hbm_phy_cfg", am_hbm_phy_cfg)
-    soc_regbus_periph_xbar.add_output_entry("hbm_seq", am_hbm_seq)
+    soc_regbus_periph_xbar.add_output_entry("clint", am_clint)
 
     ##################
     # SoC Wide Xbars #
