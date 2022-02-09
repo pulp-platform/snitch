@@ -42,6 +42,12 @@
     #size-cells = <2>;
     compatible = "simple-bus";
     ranges;
+    debug@0 {
+      compatible = "riscv,debug-013";
+      interrupts-extended = <&CPU0_intc 65535>;
+      reg-names = "control";
+      reg = <0x0 0x0 0x0 0x1000>;
+    };
     serial@2002000 {
       compatible = "lowrisc,serial";
       clock-frequency = <50000000>;

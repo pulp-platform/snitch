@@ -188,7 +188,7 @@ def main():
             ).attach_to(am_soc_axi_lite_periph_xbar)
         )
         # add debug module to devicetree
-        if occamy.cfg["peripherals"]["regbus_peripherals"][p]["name"] == "debug":
+        if occamy.cfg["peripherals"]["axi_lite_peripherals"][p]["name"] == "debug":
             dts.add_device("debug", "riscv,debug-013", am_axi_lite_peripherals[p], [
                 "interrupts-extended = <&CPU0_intc 65535>", "reg-names = \"control\""
             ])
