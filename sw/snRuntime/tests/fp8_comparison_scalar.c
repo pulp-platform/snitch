@@ -6,7 +6,7 @@
 #include "printf.h"
 
 int main() {
-    int errs = 40; // total nr of comparisons
+    int errs = 40;
 
     if (snrt_is_compute_core()) {
         uint32_t i8a = 0xFFFFFF42;   // 3.14
