@@ -8,7 +8,7 @@
 typedef float v2s __attribute__((vector_size(8)));
 
 int main() {
-    int errs = 0;
+    int errs = 48;
 
     if (snrt_is_compute_core()) {
         unsigned int res_cvt0 = 0;
@@ -104,8 +104,8 @@ int main() {
             "feq.h %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> B
         asm volatile(
@@ -115,8 +115,8 @@ int main() {
             "feq.b %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // alternative formates
         write_csr(2048, 3);
@@ -137,8 +137,8 @@ int main() {
             "feq.ah %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> AB
         asm volatile(
@@ -148,8 +148,8 @@ int main() {
             "feq.ab %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // VALUE B
         fvalue = 1.618;
@@ -173,8 +173,8 @@ int main() {
             "feq.h %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> B
         asm volatile(
@@ -184,8 +184,8 @@ int main() {
             "feq.b %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // alternative formates
         write_csr(2048, 3);
@@ -206,8 +206,8 @@ int main() {
             "feq.ah %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> AB
         asm volatile(
@@ -217,8 +217,8 @@ int main() {
             "feq.ab %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // VALUE C
         fvalue = 2.39;
@@ -242,8 +242,8 @@ int main() {
             "feq.h %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> B
         asm volatile(
@@ -253,8 +253,8 @@ int main() {
             "feq.b %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // alternative formates
         write_csr(2048, 3);
@@ -275,8 +275,8 @@ int main() {
             "feq.ah %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> AB
         asm volatile(
@@ -286,8 +286,8 @@ int main() {
             "feq.ab %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // VALUE D
         fvalue = 0.250;
@@ -311,8 +311,8 @@ int main() {
             "feq.h %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> B
         asm volatile(
@@ -322,8 +322,8 @@ int main() {
             "feq.b %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // alternative formates
         write_csr(2048, 3);
@@ -344,8 +344,8 @@ int main() {
             "feq.ah %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> AB
         asm volatile(
@@ -355,8 +355,8 @@ int main() {
             "feq.ab %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // VALUE E
         fvalue = 0.5;
@@ -380,8 +380,8 @@ int main() {
             "feq.h %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> B
         asm volatile(
@@ -391,8 +391,8 @@ int main() {
             "feq.b %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // alternative formates
         write_csr(2048, 3);
@@ -413,8 +413,8 @@ int main() {
             "feq.ah %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> AB
         asm volatile(
@@ -424,8 +424,8 @@ int main() {
             "feq.ab %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // VALUE F
         fvalue = 100.12345;
@@ -449,8 +449,8 @@ int main() {
             "feq.h %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> B
         asm volatile(
@@ -460,8 +460,8 @@ int main() {
             "feq.b %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // alternative formates
         write_csr(2048, 3);
@@ -482,8 +482,8 @@ int main() {
             "feq.ah %1, ft7, ft3\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
 
         // D -> AB
         asm volatile(
@@ -493,8 +493,8 @@ int main() {
             "feq.ab %1, ft7, ft5\n"
             : "+r"(res_cvt0), "+r"(res_cvt1), "+f"(fvalue),
               "+f"(fvalue_negative));
-        errs += (res_cvt0 != 0x1);
-        errs += (res_cvt1 != 0x1);
+        errs -= (res_cvt0 == 0x1);
+        errs -= (res_cvt1 == 0x1);
     }
 
     return 0;

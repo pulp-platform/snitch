@@ -4,7 +4,7 @@
 #include <snrt.h>
 
 int main() {
-    int errs = 0;
+    int errs = 46;
 
     if (snrt_is_compute_core()) {
         uint32_t i_a = 0x4048F5C3;   // 3.14 0
@@ -49,150 +49,150 @@ int main() {
             "vfsgnj.ah ft0, ft4, ft4\n"
             "vfeq.ah %0, ft4, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnj.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft5, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnj.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft6, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnj.ah ft0, ft5, ft7\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFSGNJ.R
         asm volatile(
             "vfsgnj.r.ah ft0, ft4, ft4\n"
             "vfeq.ah %0, ft4, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnj.r.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft5, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnj.r.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft4, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnj.r.ah ft0, ft5, ft7\n"
             "vfeq.ah %0, ft5, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFSGNJN
         asm volatile(
             "vfsgnjn.ah ft0, ft4, ft4\n"
             "vfeq.ah %0, ft5, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjn.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft4, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjn.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjn.ah ft0, ft5, ft7\n"
             "vfeq.ah %0, ft6, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFSGNJN.R
         asm volatile(
             "vfsgnjn.r.ah ft0, ft4, ft4\n"
             "vfeq.ah %0, ft5, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjn.r.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft4, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjn.r.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft5, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjn.r.ah ft0, ft5, ft7\n"
             "vfeq.ah %0, ft4, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFSGNJX
         asm volatile(
             "vfsgnjx.ah ft0, ft4, ft4\n"
             "vfeq.ah %0, ft4, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjx.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft5, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjx.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjx.ah ft0, ft5, ft7\n"
             "vfeq.ah %0, ft6, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFSGNJX.R
         asm volatile(
             "vfsgnjx.r.ah ft0, ft4, ft4\n"
             "vfeq.ah %0, ft4, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjx.r.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft5, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjx.r.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft5, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsgnjx.r.ah ft0, ft5, ft7\n"
             "vfeq.ah %0, ft4, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // load new data
         asm volatile(
@@ -234,13 +234,13 @@ int main() {
             "vfadd.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfadd.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFADD.R
         // pack results
@@ -265,13 +265,13 @@ int main() {
             "vfadd.r.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfadd.r.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFSUB
         // pack results
@@ -296,13 +296,13 @@ int main() {
             "vfsub.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsub.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFSUB.R
         // pack results
@@ -327,13 +327,13 @@ int main() {
             "vfsub.r.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfsub.r.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFMUL
         // pack results
@@ -358,13 +358,13 @@ int main() {
             "vfmul.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfmul.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFMUL.R
         // pack results
@@ -389,13 +389,13 @@ int main() {
             "vfmul.r.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfmul.r.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFMAC
         // pack results
@@ -422,13 +422,13 @@ int main() {
             "vfmac.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfmac.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFMAC.R
         // pack results
@@ -455,13 +455,13 @@ int main() {
             "vfmac.r.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfmac.r.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFMRE
         // pack results
@@ -488,13 +488,13 @@ int main() {
             "vfmre.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfmre.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // pack results
         res1 = 0x43090000;
@@ -513,7 +513,7 @@ int main() {
             "vfmre.ah ft0, ft4, ft6\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // VFMRE.R
         // pack results
@@ -540,13 +540,13 @@ int main() {
             "vfmre.r.ah ft0, ft4, ft5\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         asm volatile(
             "vfmre.r.ah ft0, ft5, ft6\n"
             "vfeq.ah %0, ft8, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
 
         // pack results
         res1 = 0x43090000;
@@ -565,7 +565,7 @@ int main() {
             "vfmre.r.ah ft0, ft4, ft6\n"
             "vfeq.ah %0, ft7, ft0\n"
             : "+r"(res0));
-        errs += (res0 != 0xf);
+        errs -= (res0 == 0xf);
     }
 
     return errs;
