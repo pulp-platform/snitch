@@ -184,11 +184,11 @@ package occamy_quadrant_s1_reg_pkg;
   parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3_OFFSET = 9'h 13c;
 
   // Reset values for hwext registers and their fields
-  parameter logic [3:0] OCCAMY_QUADRANT_S1_ISOLATED_RESVAL = 4'h f;
-  parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_NARROW_IN_RESVAL = 1'h 1;
-  parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_NARROW_OUT_RESVAL = 1'h 1;
-  parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_WIDE_IN_RESVAL = 1'h 1;
-  parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_WIDE_OUT_RESVAL = 1'h 1;
+  parameter logic [3:0] OCCAMY_QUADRANT_S1_ISOLATED_RESVAL = 4'h 0;
+  parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_NARROW_IN_RESVAL = 1'h 0;
+  parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_NARROW_OUT_RESVAL = 1'h 0;
+  parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_WIDE_IN_RESVAL = 1'h 0;
+  parameter logic [0:0] OCCAMY_QUADRANT_S1_ISOLATED_WIDE_OUT_RESVAL = 1'h 0;
 
   // Register index
   typedef enum int {

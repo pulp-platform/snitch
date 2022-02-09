@@ -210,7 +210,7 @@ module occamy_quadrant_s1_reg_top #(
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
-    .RESVAL  (1'h1)
+    .RESVAL  (1'h0)
   ) u_isolate_narrow_in (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -236,7 +236,7 @@ module occamy_quadrant_s1_reg_top #(
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
-    .RESVAL  (1'h1)
+    .RESVAL  (1'h0)
   ) u_isolate_narrow_out (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -262,7 +262,7 @@ module occamy_quadrant_s1_reg_top #(
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
-    .RESVAL  (1'h1)
+    .RESVAL  (1'h0)
   ) u_isolate_wide_in (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -288,7 +288,7 @@ module occamy_quadrant_s1_reg_top #(
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
-    .RESVAL  (1'h1)
+    .RESVAL  (1'h0)
   ) u_isolate_wide_out (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),

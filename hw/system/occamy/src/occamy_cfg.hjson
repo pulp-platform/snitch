@@ -31,13 +31,13 @@
       fall_through: false,
     },
     narrow_xbar_slv_id_width: 4,
-    nr_s1_quadrant: 8,
+    nr_s1_quadrant: 1,
     s1_quadrant: {
       nr_clusters: 4,
       // Disable for easier flow trials.
       ro_cache_cfg: {
-          width: 1024,
-          count: 128,
+          width: 512,
+          count: 256,
           sets: 2,
           max_trans: 8,
           address_regions: 4,

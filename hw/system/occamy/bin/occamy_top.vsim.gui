@@ -1,0 +1,2 @@
+#!/bin/bash
+vsim -64 +permissive -work work-vsim -ldflags "-Wl,-rpath,/scratch/sriedel/snitch/hw/system/occamy/work/lib -L/scratch/sriedel/snitch/hw/system/occamy/work/lib -lfesvr -lutil" -t 1ps -voptargs=+acc tb_bin +permissive-off ++$1 -do "log -r /*; do wave.do; run -a"

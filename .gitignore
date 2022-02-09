@@ -2,6 +2,9 @@
 .vscode/
 __pycache__
 
+install/
+hw/ip/snitch_const_cache*
+
 // Modelsim Fiels
 *.wlf
 modelsim.ini

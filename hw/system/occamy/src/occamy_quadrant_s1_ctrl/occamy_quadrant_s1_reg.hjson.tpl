@@ -35,10 +35,10 @@
       hwaccess: "hro",
       // All channels isolated by default
       fields: [
-        {bits: "0:0", name: "narrow_in",  resval: 1, desc: "narrow slave in isolate"},
-        {bits: "1:1", name: "narrow_out", resval: 1, desc: "narrow master out isolate"},
-        {bits: "2:2", name: "wide_in",    resval: 1, desc: "wide slave in isolate"},
-        {bits: "3:3", name: "wide_out",   resval: 1, desc: "wide master out isolate"}
+        {bits: "0:0", name: "narrow_in",  resval: 0, desc: "narrow slave in isolate"},
+        {bits: "1:1", name: "narrow_out", resval: 0, desc: "narrow master out isolate"},
+        {bits: "2:2", name: "wide_in",    resval: 0, desc: "wide slave in isolate"},
+        {bits: "3:3", name: "wide_out",   resval: 0, desc: "wide master out isolate"}
       ]
     },
     { name: "ISOLATED"
@@ -49,10 +49,10 @@
       hwext: "true",
       // All channels isolated by default
       fields: [
-        {bits: "0:0", name: "narrow_in",  resval: 1, desc: "narrow slave in isolation status"},
-        {bits: "1:1", name: "narrow_out", resval: 1, desc: "narrow master out isolation status"},
-        {bits: "2:2", name: "wide_in",    resval: 1, desc: "wide slave in isolation status"},
-        {bits: "3:3", name: "wide_out",   resval: 1, desc: "wide master out isolation status"}
+        {bits: "0:0", name: "narrow_in",  resval: 0, desc: "narrow slave in isolation status"},
+        {bits: "1:1", name: "narrow_out", resval: 0, desc: "narrow master out isolation status"},
+        {bits: "2:2", name: "wide_in",    resval: 0, desc: "wide slave in isolation status"},
+        {bits: "3:3", name: "wide_out",   resval: 0, desc: "wide master out isolation status"}
       ]
     },
     { name: "RO_CACHE_ENABLE",

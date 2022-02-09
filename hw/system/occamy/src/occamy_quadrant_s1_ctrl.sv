@@ -37,12 +37,12 @@ module occamy_quadrant_s1_ctrl
   // Upward (SoC) narrow ports
   output axi_a48_d64_i4_u0_req_t soc_out_req_o,
   input  axi_a48_d64_i4_u0_resp_t soc_out_rsp_i,
-  input  axi_a48_d64_i8_u0_req_t soc_in_req_i,
-  output axi_a48_d64_i8_u0_resp_t soc_in_rsp_o,
+  input  axi_a48_d64_i7_u0_req_t soc_in_req_i,
+  output axi_a48_d64_i7_u0_resp_t soc_in_rsp_o,
 
   // Quadrant narrow ports
-  output axi_a48_d64_i8_u0_req_t quadrant_out_req_o,
-  input  axi_a48_d64_i8_u0_resp_t quadrant_out_rsp_i,
+  output axi_a48_d64_i7_u0_req_t quadrant_out_req_o,
+  input  axi_a48_d64_i7_u0_resp_t quadrant_out_rsp_i,
   input  axi_a48_d64_i4_u0_req_t quadrant_in_req_i,
   output axi_a48_d64_i4_u0_resp_t quadrant_in_rsp_o
 );
@@ -69,19 +69,19 @@ axi_xbar #(
   .Cfg           ( QuadrantS1CtrlSocToQuadXbarCfg ),
   .Connectivity  ( 2'b11 ),
   .AtopSupport   ( 1 ),
-  .slv_aw_chan_t ( axi_a48_d64_i8_u0_aw_chan_t ),
-  .mst_aw_chan_t ( axi_a48_d64_i8_u0_aw_chan_t ),
-  .w_chan_t      ( axi_a48_d64_i8_u0_w_chan_t ),
-  .slv_b_chan_t  ( axi_a48_d64_i8_u0_b_chan_t ),
-  .mst_b_chan_t  ( axi_a48_d64_i8_u0_b_chan_t ),
-  .slv_ar_chan_t ( axi_a48_d64_i8_u0_ar_chan_t ),
-  .mst_ar_chan_t ( axi_a48_d64_i8_u0_ar_chan_t ),
-  .slv_r_chan_t  ( axi_a48_d64_i8_u0_r_chan_t ),
-  .mst_r_chan_t  ( axi_a48_d64_i8_u0_r_chan_t ),
-  .slv_req_t     ( axi_a48_d64_i8_u0_req_t ),
-  .slv_resp_t    ( axi_a48_d64_i8_u0_resp_t ),
-  .mst_req_t     ( axi_a48_d64_i8_u0_req_t ),
-  .mst_resp_t    ( axi_a48_d64_i8_u0_resp_t ),
+  .slv_aw_chan_t ( axi_a48_d64_i7_u0_aw_chan_t ),
+  .mst_aw_chan_t ( axi_a48_d64_i7_u0_aw_chan_t ),
+  .w_chan_t      ( axi_a48_d64_i7_u0_w_chan_t ),
+  .slv_b_chan_t  ( axi_a48_d64_i7_u0_b_chan_t ),
+  .mst_b_chan_t  ( axi_a48_d64_i7_u0_b_chan_t ),
+  .slv_ar_chan_t ( axi_a48_d64_i7_u0_ar_chan_t ),
+  .mst_ar_chan_t ( axi_a48_d64_i7_u0_ar_chan_t ),
+  .slv_r_chan_t  ( axi_a48_d64_i7_u0_r_chan_t ),
+  .mst_r_chan_t  ( axi_a48_d64_i7_u0_r_chan_t ),
+  .slv_req_t     ( axi_a48_d64_i7_u0_req_t ),
+  .slv_resp_t    ( axi_a48_d64_i7_u0_resp_t ),
+  .mst_req_t     ( axi_a48_d64_i7_u0_req_t ),
+  .mst_resp_t    ( axi_a48_d64_i7_u0_resp_t ),
   .rule_t        ( xbar_rule_48_t )
 ) i_quadrant_s1_ctrl_soc_to_quad_xbar (
   .clk_i  ( clk_i ),
@@ -186,7 +186,7 @@ axi_lite_xbar #(
 
   axi_id_serialize #(
     .AtopSupport (1),
-    .AxiSlvPortIdWidth (8),
+    .AxiSlvPortIdWidth (7),
     .AxiSlvPortMaxTxns (4),
     .AxiMstPortIdWidth (1),
     .AxiMstPortMaxUniqIds (2),
@@ -194,8 +194,8 @@ axi_lite_xbar #(
     .AxiAddrWidth (48),
     .AxiDataWidth (64),
     .AxiUserWidth (1),
-    .slv_req_t (axi_a48_d64_i8_u0_req_t),
-    .slv_resp_t (axi_a48_d64_i8_u0_resp_t),
+    .slv_req_t (axi_a48_d64_i7_u0_req_t),
+    .slv_resp_t (axi_a48_d64_i7_u0_resp_t),
     .mst_req_t (axi_a48_d64_i1_u0_req_t),
     .mst_resp_t (axi_a48_d64_i1_u0_resp_t)
   ) i_soc_to_quad_internal_ser (
