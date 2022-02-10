@@ -434,7 +434,6 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
   // Parameter sanity checks
   `ASSERT_INIT(CheckPointerWidth, Cfg.PointerWidth <= AddrWidth);
-  `ASSERT_INIT(CheckIndexWidth, Cfg.IndexWidth <= Cfg.PointerWidth - BytecntWidth);
   // DataWidth 8 (BytecntWidth 0) is not yet supported (complex edge case)
   `ASSERT_INIT(CheckBytecntWidth, BytecntWidth >= 1);
 
