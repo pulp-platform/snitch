@@ -38,6 +38,7 @@ struct snrt_team_root {
     uint32_t cluster_core_num;
     snrt_slice_t global_mem;
     snrt_slice_t cluster_mem;
+    snrt_slice_t zero_mem;
     struct snrt_allocator allocator;
     struct snrt_barrier cluster_barrier;
     uint32_t barrier_reg_ptr;
