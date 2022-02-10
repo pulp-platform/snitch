@@ -295,8 +295,8 @@ def main():
     cluster_zero_mem_size = occamy.cfg["cluster"]["zero_mem_size"] * 1024
 
     # assert memory region allocation
-    assert (cluster_tcdm_size + cluster_periph_size + cluster_zero_mem_size) <= cluster_base_offset, "ERROR: cluster peripherals, zero memory and tcdm do not fit into the allocated memory region!!!"
-
+    error_str = "ERROR: cluster peripherals, zero memory and tcdm do not fit into the allocated memory region!!!"
+    assert (cluster_tcdm_size + cluster_periph_size + cluster_zero_mem_size) <= cluster_base_offset, error_str
 
     cluster_base_addr = occamy.cfg["cluster"]["cluster_base_addr"]
     quadrant_size = cluster_base_offset * nr_s1_clusters
@@ -321,7 +321,8 @@ def main():
             )
 
             bases_cluster = list()
-            bases_cluster.append(cluster_i_start_addr + j * cluster_base_offset + cluster_tcdm_size)
+            bases_cluster.append(cluster_i_start_addr + j * cluster_base_offset
+                                 + cluster_tcdm_size)
             am_clusters.append(
                 am.new_leaf(
                     "quadrant_{}_cluster_{}_periph".format(i, j),
@@ -335,7 +336,8 @@ def main():
             )
 
             bases_cluster = list()
-            bases_cluster.append(cluster_i_start_addr + j * cluster_base_offset + cluster_tcdm_size + cluster_periph_size)
+            bases_cluster.append(cluster_i_start_addr + j * cluster_base_offset +
+                                 cluster_tcdm_size + cluster_periph_size)
             am_clusters.append(
                 am.new_leaf(
                     "quadrant_{}_cluster_{}_zero_mem".format(i, j),
