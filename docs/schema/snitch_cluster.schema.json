@@ -50,9 +50,17 @@
                 }
             }
         },
-        "periph_size": {
+        "cluster_periph_size": {
             "type": "number",
             "description": "Address region size reserved for cluster peripherals in KiByte.",
+            "examples": [
+                128,
+                64
+            ]
+        },
+        "zero_mem_size": {
+            "type": "number",
+            "description": "Address region size reserved for the Zero-Memory in KiByte.",
             "examples": [
                 128,
                 64

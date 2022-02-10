@@ -43,6 +43,10 @@ module snitch_cluster
   parameter int unsigned NrCores            = 8,
   /// Data/TCDM memory depth per cut (in words).
   parameter int unsigned TCDMDepth          = 1024,
+  /// Zero memory address region size (in kB).
+  parameter int unsigned ZeroMemorySize     = 64,
+  /// Cluster peripheral address region size (in kB).
+  parameter int unsigned ClusterPeriphSize  = 64,
   /// Number of TCDM Banks. It is recommended to have twice the number of banks
   /// as cores. If SSRs are enabled, we recommend 4 times the the number of
   /// banks.
@@ -247,7 +251,7 @@ module snitch_cluster
   localparam int unsigned NrWideMasters = 2 + NrHives;
   localparam int unsigned WideIdWidthOut = $clog2(NrWideMasters) + WideIdWidthIn;
   // DMA X-BAR configuration
-  localparam int unsigned NrWideSlaves = 2;
+  localparam int unsigned NrWideSlaves = 3;
 
   // AXI Configuration
   localparam axi_pkg::xbar_cfg_t ClusterXbarCfg = '{
@@ -276,7 +280,7 @@ module snitch_cluster
     AxiIdUsedSlvPorts: WideIdWidthIn,
     AxiAddrWidth: PhysicalAddrWidth,
     AxiDataWidth: WideDataWidth,
-    NoAddrRules: 1
+    NoAddrRules: 2
   };
 
   function automatic int unsigned get_hive_size(int unsigned current_hive);
@@ -417,7 +421,15 @@ module snitch_cluster
   // Calculate start and end address of TCDM based on the `cluster_base_addr_i`.
   addr_t tcdm_start_address, tcdm_end_address;
   assign tcdm_start_address = (cluster_base_addr_i & TCDMMask);
-  assign tcdm_end_address = (tcdm_start_address + TCDMSize) & TCDMMask;
+  assign tcdm_end_address   = (tcdm_start_address + TCDMSize) & TCDMMask;
+
+  addr_t cluster_periph_start_address, cluster_periph_end_address;
+  assign cluster_periph_start_address = tcdm_end_address;
+  assign cluster_periph_end_address   = tcdm_end_address + ClusterPeriphSize * 1024;
+
+  addr_t zero_mem_start_address, zero_mem_end_address;
+  assign zero_mem_start_address = cluster_periph_end_address;
+  assign zero_mem_end_address   = cluster_periph_end_address + ZeroMemorySize * 1024;
 
   // ----------------
   // Wire Definitions
@@ -521,6 +533,11 @@ module snitch_cluster
       idx:        TCDMDMA,
       start_addr: tcdm_start_address,
       end_addr:   tcdm_end_address
+    },
+    '{
+      idx:        ZeroMemory,
+      start_addr: zero_mem_start_address,
+      end_addr:   zero_mem_end_address
     }
   };
   localparam bit [DmaXbarCfg.NoSlvPorts-1:0] DMAEnableDefaultMstPort = '1;
@@ -552,6 +569,22 @@ module snitch_cluster
     .addr_map_i (dma_xbar_rule),
     .en_default_mst_port_i (DMAEnableDefaultMstPort),
     .default_mst_port_i (dma_xbar_default_port)
+  );
+
+  axi_zero_mem #(
+    .axi_req_t (axi_slv_dma_req_t),
+    .axi_resp_t (axi_slv_dma_resp_t),
+    .AddrWidth (PhysicalAddrWidth),
+    .DataWidth (WideDataWidth),
+    .IdWidth (WideIdWidthOut),
+    .NumBanks (1),
+    .BufDepth (1)
+  ) i_axi_zeromem (
+    .clk_i,
+    .rst_ni,
+    .busy_o (),
+    .axi_req_i (wide_axi_slv_req[ZeroMemory]),
+    .axi_resp_o (wide_axi_slv_rsp[ZeroMemory])
   );
 
   addr_t ext_dma_req_q_addr_nontrunc;
@@ -952,7 +985,7 @@ module snitch_cluster
     .in_rsp_o (core_rsp),
     .out_req_o (filtered_core_req),
     .out_rsp_i (filtered_core_rsp),
-    .cluster_periph_start_address_i (tcdm_end_address)
+    .cluster_periph_start_address_i (cluster_periph_start_address)
   );
 
   reqrsp_req_t core_to_axi_req;
@@ -1001,8 +1034,8 @@ module snitch_cluster
     },
     '{
       idx:        ClusterPeripherals,
-      start_addr: tcdm_end_address,
-      end_addr:   tcdm_end_address + TCDMSize
+      start_addr: cluster_periph_start_address,
+      end_addr:   cluster_periph_end_address
     }
   };
 

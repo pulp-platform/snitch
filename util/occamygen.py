@@ -291,7 +291,7 @@ def main():
     ##############################
     cluster_base_offset = occamy.cfg["cluster"]["cluster_base_offset"]
     cluster_tcdm_size = occamy.cfg["cluster"]["tcdm"]["size"] * 1024  # config is in KiB
-    cluster_periph_size = occamy.cfg["cluster"]["periph_size"] * 1024
+    cluster_periph_size = occamy.cfg["cluster"]["cluster_periph_size"] * 1024
 
     cluster_base_addr = occamy.cfg["cluster"]["cluster_base_addr"]
     quadrant_size = cluster_base_offset * nr_s1_clusters
