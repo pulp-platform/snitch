@@ -295,7 +295,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   end
 
   assign mem_write_o  = config_q.write;
-  assign mem_addr_o   = {tcdm_start_address_i[AddrWidth-1:Cfg.PointerWidth], mem_pointer};
+  assign mem_addr_o   = addr_t'(mem_pointer);
 
   // Unpack the configuration address and write signal into a write strobe for
   // the individual registers. Also assign the alias strobe if the address is

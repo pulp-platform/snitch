@@ -689,13 +689,15 @@ module snitch_cc #(
     // If Xssr is enabled, we should at least have one SSR
     `ASSERT_INIT(CheckSsrWithXssr, NumSsrs >= 1);
 
+    localparam TCDMAddrWidth = 17;
+
     snitch_ssr_streamer #(
       .NumSsrs (NumSsrs),
       .RPorts (3),
       .WPorts (1),
       .SsrCfgs (SsrCfgs),
       .SsrRegs (SsrRegs),
-      .AddrWidth (AddrWidth),
+      .AddrWidth (TCDMAddrWidth),
       .DataWidth (DataWidth),
       .tcdm_req_t (tcdm_req_t),
       .tcdm_rsp_t (tcdm_rsp_t),
@@ -723,7 +725,7 @@ module snitch_cc #(
       .streamctl_done_o   ( ssr_streamctl_done  ),
       .streamctl_valid_o  ( ssr_streamctl_valid ),
       .streamctl_ready_i  ( ssr_streamctl_ready ),
-      .tcdm_start_address_i (tcdm_addr_base_i)
+      .tcdm_start_address_i ( '0 )
     );
 
   if (NumSsrs > 1) begin : gen_multi_ssr
@@ -736,7 +738,7 @@ module snitch_cc #(
 
   tcdm_mux #(
     .NrPorts (2),
-    .AddrWidth (AddrWidth),
+    .AddrWidth (TCDMAddrWidth),
     .DataWidth (DataWidth),
     .RespDepth (SsrMuxRespDepth),
     // TODO(zarubaf): USer type

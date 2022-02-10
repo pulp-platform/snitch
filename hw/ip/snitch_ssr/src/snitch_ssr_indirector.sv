@@ -349,8 +349,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   assign cfg_idx_isect_o = idx_isect_q;
 
   // Use external natural iterator; mask lower bits to fetch only entire, aligned words.
-  assign idx_addr = {tcdm_start_address_i[AddrWidth-1:Cfg.PointerWidth],
-      natit_pointer_i[Cfg.PointerWidth-1:BytecntWidth], {BytecntWidth{1'b0}}};
+  assign idx_addr = {natit_pointer_i[Cfg.PointerWidth-1:BytecntWidth], {BytecntWidth{1'b0}}};
 
   // Shift and emit indices
   assign mem_pointer_o = cfg_base_i + ((pointer_t'(mem_idx) << BytecntWidth) << cfg_shift_i);

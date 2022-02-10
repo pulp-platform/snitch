@@ -216,8 +216,9 @@ module snitch_cluster
   // ---------
   /// Minimum width to hold the core number.
   localparam int unsigned CoreIDWidth = cf_math_pkg::idx_width(NrCores);
-  localparam int unsigned TCDMAddrWidth = $clog2(TCDMDepth);
+  localparam int unsigned TCDMMemAddrWidth = $clog2(TCDMDepth);
   localparam int unsigned TCDMSize = NrBanks * TCDMDepth * (NarrowDataWidth/8);
+  localparam int unsigned TCDMAddrWidth = $clog2(TCDMSize);
   localparam int unsigned BanksPerSuperBank = WideDataWidth / NarrowDataWidth;
   localparam int unsigned NrSuperBanks = NrBanks / BanksPerSuperBank;
 
@@ -307,6 +308,7 @@ module snitch_cluster
   typedef logic [WideIdWidthOut-1:0]    id_dma_slv_t;
   typedef logic [UserWidth-1:0]         user_t;
 
+  typedef logic [TCDMMemAddrWidth-1:0]  tcdm_mem_addr_t;
   typedef logic [TCDMAddrWidth-1:0]     tcdm_addr_t;
 
   typedef struct packed {
@@ -322,11 +324,11 @@ module snitch_cluster
 
   `REQRSP_TYPEDEF_ALL(reqrsp, addr_t, data_t, strb_t)
 
-  `MEM_TYPEDEF_ALL(mem, tcdm_addr_t, data_t, strb_t, tcdm_user_t)
-  `MEM_TYPEDEF_ALL(mem_dma, tcdm_addr_t, data_dma_t, strb_dma_t, logic)
+  `MEM_TYPEDEF_ALL(mem, tcdm_mem_addr_t, data_t, strb_t, tcdm_user_t)
+  `MEM_TYPEDEF_ALL(mem_dma, tcdm_mem_addr_t, data_dma_t, strb_dma_t, logic)
 
-  `TCDM_TYPEDEF_ALL(tcdm, addr_t, data_t, strb_t, tcdm_user_t)
-  `TCDM_TYPEDEF_ALL(tcdm_dma, addr_t, data_dma_t, strb_dma_t, logic)
+  `TCDM_TYPEDEF_ALL(tcdm, tcdm_addr_t, data_t, strb_t, tcdm_user_t)
+  `TCDM_TYPEDEF_ALL(tcdm_dma, tcdm_addr_t, data_dma_t, strb_dma_t, logic)
 
   `REG_BUS_TYPEDEF_REQ(reg_req_t, addr_t, data_t, strb_t)
   `REG_BUS_TYPEDEF_RSP(reg_rsp_t, data_t)
@@ -552,6 +554,8 @@ module snitch_cluster
     .default_mst_port_i (dma_xbar_default_port)
   );
 
+  addr_t ext_dma_req_q_addr_nontrunc;
+
   axi_to_mem_interleaved #(
     .axi_req_t (axi_slv_dma_req_t),
     .axi_resp_t (axi_slv_dma_resp_t),
@@ -568,7 +572,7 @@ module snitch_cluster
     .axi_resp_o (wide_axi_slv_rsp[TCDMDMA]),
     .mem_req_o (ext_dma_req.q_valid),
     .mem_gnt_i (ext_dma_rsp.q_ready),
-    .mem_addr_o (ext_dma_req.q.addr),
+    .mem_addr_o (ext_dma_req_q_addr_nontrunc),
     .mem_wdata_o (ext_dma_req.q.data),
     .mem_strb_o (ext_dma_req.q.strb),
     .mem_atop_o (/* The DMA does not support atomics */),
@@ -577,6 +581,7 @@ module snitch_cluster
     .mem_rdata_i (ext_dma_rsp.p.data)
   );
 
+  assign ext_dma_req.q.addr = tcdm_dma_req_t'(ext_dma_req_q_addr_nontrunc);
   assign ext_dma_req.q.amo = reqrsp_pkg::AMONone;
   assign ext_dma_req.q.user = '0;
 
@@ -588,7 +593,7 @@ module snitch_cluster
     .mem_req_t (mem_dma_req_t),
     .mem_rsp_t (mem_dma_rsp_t),
     .user_t (logic),
-    .MemAddrWidth (TCDMAddrWidth),
+    .MemAddrWidth (TCDMMemAddrWidth),
     .DataWidth (WideDataWidth),
     .MemoryResponseLatency (MemoryMacroLatency)
   ) i_dma_interconnect (
@@ -631,7 +636,7 @@ module snitch_cluster
     for (genvar j = 0; j < BanksPerSuperBank; j++) begin : gen_tcdm_bank
 
       logic mem_cs, mem_wen;
-      logic [TCDMAddrWidth-1:0] mem_add;
+      tcdm_mem_addr_t mem_add;
       strb_t mem_be;
       data_t mem_rdata, mem_wdata;
 
@@ -659,7 +664,7 @@ module snitch_cluster
 
       // TODO(zarubaf): Share atomic units between mutltiple cuts
       snitch_amo_shim #(
-        .AddrMemWidth ( TCDMAddrWidth ),
+        .AddrMemWidth ( TCDMMemAddrWidth ),
         .DataWidth ( NarrowDataWidth ),
         .CoreIDWidth ( CoreIDWidth )
       ) i_amo_shim (
@@ -701,7 +706,7 @@ module snitch_cluster
     .tcdm_rsp_t (tcdm_rsp_t),
     .mem_req_t (mem_req_t),
     .mem_rsp_t (mem_rsp_t),
-    .MemAddrWidth (TCDMAddrWidth),
+    .MemAddrWidth (TCDMMemAddrWidth),
     .DataWidth (NarrowDataWidth),
     .user_t (tcdm_user_t),
     .MemoryResponseLatency (1 + RegisterTCDMCuts),
