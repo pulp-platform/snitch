@@ -6,6 +6,7 @@
 // Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
 `include "common_cells/registers.svh"
+`include "common_cells/assertions.svh"
 
 module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   parameter ssr_cfg_t Cfg = '0,
@@ -51,9 +52,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   output logic        mem_zero_o,
   output logic        mem_write_o,
   output logic        mem_valid_o,
-  input  logic        mem_ready_i,
-
-  input  addr_t       tcdm_start_address_i
+  input  logic        mem_ready_i
 );
 
   // Mask for word-aligned address fields
@@ -236,8 +235,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
       .mem_done_o          ( indir_kill       ),
       .mem_last_o          ( indir_last       ),
       .mem_valid_o         ( indir_valid      ),
-      .mem_ready_i         ( spill_in_ready   ),
-      .tcdm_start_address_i
+      .mem_ready_i         ( spill_in_ready   )
     );
 
     // Multiplex natural and indirection datapaths into spill register (if
@@ -433,5 +431,11 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
     cfg_rdata_o = read_map[(cfg_word_i*32)+:32];
   end
+
+  // Parameter sanity checks
+  `ASSERT_INIT(CheckPointerWidth, Cfg.PointerWidth <= AddrWidth);
+  `ASSERT_INIT(CheckIndexWidth, Cfg.IndexWidth <= Cfg.PointerWidth - BytecntWidth);
+  // DataWidth 8 (BytecntWidth 0) is not yet supported (complex edge case)
+  `ASSERT_INIT(CheckBytecntWidth, BytecntWidth >= 1);
 
 endmodule

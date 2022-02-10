@@ -724,8 +724,7 @@ module snitch_cc #(
       .mem_rsp_i      ( ssr_rsp    ),
       .streamctl_done_o   ( ssr_streamctl_done  ),
       .streamctl_valid_o  ( ssr_streamctl_valid ),
-      .streamctl_ready_i  ( ssr_streamctl_ready ),
-      .tcdm_start_address_i ( '0 )
+      .streamctl_ready_i  ( ssr_streamctl_ready )
     );
 
   if (NumSsrs > 1) begin : gen_multi_ssr

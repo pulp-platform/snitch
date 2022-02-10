@@ -48,9 +48,7 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   // From intersector to stream controller
   output logic             streamctl_done_o,
   output logic             streamctl_valid_o,
-  input  logic             streamctl_ready_i,
-
-  input  addr_t            tcdm_start_address_i
+  input  logic             streamctl_ready_i
 );
 
   // Derive intersection-related configuration from SSR configurations.
@@ -162,8 +160,7 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
       .isect_mst_req_o  ( isect_mst_req [i] ),
       .isect_slv_req_o  ( isect_slv_req [i] ),
       .isect_mst_rsp_i  ( isect_mst_rsp [SsrCfgs[i].IsectMasterIdx] ),
-      .isect_slv_rsp_i  ( isect_slv_rsp     ),
-      .tcdm_start_address_i
+      .isect_slv_rsp_i  ( isect_slv_rsp     )
     );
   end
 
