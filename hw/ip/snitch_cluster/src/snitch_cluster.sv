@@ -416,8 +416,8 @@ module snitch_cluster
   // -----------
   // Calculate start and end address of TCDM based on the `cluster_base_addr_i`.
   addr_t tcdm_start_address, tcdm_end_address;
-  assign tcdm_start_address = cluster_base_addr_i;
-  assign tcdm_end_address = cluster_base_addr_i + TCDMSize;
+  assign tcdm_start_address = (cluster_base_addr_i & TCDMMask);
+  assign tcdm_end_address = (tcdm_start_address + TCDMSize) & TCDMMask;
 
   // ----------------
   // Wire Definitions
@@ -811,7 +811,8 @@ module snitch_cluster
         .RegisterCoreReq (RegisterCoreReq),
         .RegisterCoreRsp (RegisterCoreRsp),
         .RegisterFPUReq (RegisterFPUReq),
-        .RegisterSequencer (RegisterSequencer)
+        .RegisterSequencer (RegisterSequencer),
+        .TCDMAddrWidth (TCDMAddrWidth)
       ) i_snitch_cc (
         .clk_i,
         .clk_d2_i (clk_d2),
@@ -832,8 +833,7 @@ module snitch_cluster
         .axi_dma_perf_o (),
         .axi_dma_events_o (dma_core_events),
         .core_events_o (core_events[i]),
-        .tcdm_addr_base_i (tcdm_start_address),
-        .tcdm_addr_mask_i (TCDMMask)
+        .tcdm_addr_base_i (tcdm_start_address)
       );
       for (genvar j = 0; j < TcdmPorts; j++) begin : gen_tcdm_user
         always_comb begin

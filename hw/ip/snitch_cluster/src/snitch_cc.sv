@@ -25,6 +25,8 @@ module snitch_cc #(
   parameter type         dreq_t             = logic,
   /// Data port response type.
   parameter type         drsp_t             = logic,
+  /// TCDM Address Width
+  parameter int unsigned TCDMAddrWidth      = 0,
   /// Data port request type.
   parameter type         tcdm_req_t         = logic,
   /// Data port response type.
@@ -118,8 +120,7 @@ module snitch_cc #(
   output dma_events_t                axi_dma_events_o,
   // Core event strobes
   output snitch_pkg::core_events_t   core_events_o,
-  input  addr_t                      tcdm_addr_base_i,
-  input  addr_t                      tcdm_addr_mask_i
+  input  addr_t                      tcdm_addr_base_i
 );
 
   // FMA architecture is "merged" -> mulexp and macexp instructions are supported
@@ -565,7 +566,7 @@ module snitch_cc #(
   assign addr_map = '{
     idx: 1,
     base: tcdm_addr_base_i,
-    mask: tcdm_addr_mask_i
+    mask: ({AddrWidth{1'b1}} << TCDMAddrWidth)
   };
 
   addr_decode_napot #(
@@ -688,8 +689,6 @@ module snitch_cc #(
 
     // If Xssr is enabled, we should at least have one SSR
     `ASSERT_INIT(CheckSsrWithXssr, NumSsrs >= 1);
-
-    localparam TCDMAddrWidth = 17;
 
     snitch_ssr_streamer #(
       .NumSsrs (NumSsrs),
