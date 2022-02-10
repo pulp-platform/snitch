@@ -292,6 +292,7 @@ def main():
     cluster_base_offset = occamy.cfg["cluster"]["cluster_base_offset"]
     cluster_tcdm_size = occamy.cfg["cluster"]["tcdm"]["size"] * 1024  # config is in KiB
     cluster_periph_size = occamy.cfg["cluster"]["cluster_periph_size"] * 1024
+    cluster_zero_mem_size = occamy.cfg["cluster"]["zero_mem_size"] * 1024
 
     cluster_base_addr = occamy.cfg["cluster"]["cluster_base_addr"]
     quadrant_size = cluster_base_offset * nr_s1_clusters
@@ -321,6 +322,20 @@ def main():
                 am.new_leaf(
                     "quadrant_{}_cluster_{}_periph".format(i, j),
                     cluster_periph_size,
+                    *bases_cluster
+                ).attach_to(
+                    am_wide_xbar_quadrant_s1[i]
+                ).attach_to(
+                    am_narrow_xbar_quadrant_s1[i]
+                )
+            )
+
+            bases_cluster = list()
+            bases_cluster.append(cluster_i_start_addr + j * cluster_base_offset + cluster_tcdm_size + cluster_periph_size)
+            am_clusters.append(
+                am.new_leaf(
+                    "quadrant_{}_cluster_{}_zero_mem".format(i, j),
+                    cluster_zero_mem_size,
                     *bases_cluster
                 ).attach_to(
                     am_wide_xbar_quadrant_s1[i]

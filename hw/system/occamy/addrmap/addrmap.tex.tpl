@@ -15,9 +15,9 @@
   \begin{bytefield}[bitheight=2\baselineskip]{19}
 
   % for i in all_entries:
-    % if i['name'] == 'EMPTY': 
+    % if i['name'] == 'EMPTY':
     \bytefieldsetup{bitheight=1.4\baselineskip}%
-    \bitbox[]{5}{} & 
+    \bitbox[]{5}{} &
     \bitbox{14}{${i['size']} ${i['name']}} \\\
     \bytefieldsetup{bitheight=2\baselineskip}%
 
