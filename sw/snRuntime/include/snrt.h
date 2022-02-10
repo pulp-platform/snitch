@@ -91,8 +91,12 @@ extern int snrt_is_compute_core();
 extern int snrt_is_dm_core();
 extern void snrt_wakeup(uint32_t mask);
 
+/// get start address of global memory
 extern snrt_slice_t snrt_global_memory();
+/// get start address of the cluster's tcdm memory
 extern snrt_slice_t snrt_cluster_memory();
+/// get start address of the cluster's zero memory
+extern snrt_slice_t snrt_zero_memory();
 
 extern void snrt_bcast_send(void *data, size_t len);
 extern void snrt_bcast_recv(void *data, size_t len);
