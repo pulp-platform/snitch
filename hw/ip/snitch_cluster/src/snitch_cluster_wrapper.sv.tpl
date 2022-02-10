@@ -42,7 +42,6 @@ ${',' if not loop.last else ''}
 </%def>\
 
 `include "axi/typedef.svh"
-`include "common_cells/assertions.svh"
 
 // verilog_lint: waive-start package-filename
 package ${cfg['pkg_name']};
