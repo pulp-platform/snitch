@@ -111,7 +111,7 @@ class AddrMapLeaf(AddrMapEntry):
         out = ""
         for i, base in enumerate(self.bases):
             idx = i if len(self.bases) > 1 else ""
-            out += "#define {}{}_BASE_ADDR 0x{:08x}\n".format(
+            out += "#define {}{}_BASE_ADDR 0x{:08X}\n".format(
                 self.name.upper(), idx, base)
         return out
 
