@@ -66,9 +66,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   output logic      mem_zero_o,         // Whether to inject a zero value; overrules pointer!
   output logic      mem_done_o,         // Whether to end job without emitting pointer (inters.)
   output logic      mem_valid_o,
-  input  logic      mem_ready_i,
-  // TCDM base
-  input  addr_t     tcdm_start_address_i
+  input  logic      mem_ready_i
 );
 
   // Address used for external requests
