@@ -213,7 +213,7 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
     nr_q_entries = len(all_quadrant_entries)
 
     # Quadrant latex
-    NR_CLUSTER_ADDR_RANGES = 2  # tcdm and periphs
+    NR_CLUSTER_ADDR_RANGES = 3  # tcdm and periphs
     NR_CLUSTERS_PER_QUADRANT = 4  # hardcoded for now
     NR_QUADRANTS = int(nr_q_entries / NR_CLUSTERS_PER_QUADRANT / NR_CLUSTER_ADDR_RANGES)
 
@@ -232,10 +232,12 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
         items = entry['name'].split('\\_')
         qidx = int(items[1])
         cidx = int(items[3])
+
         tcdm = (items[4] == "TCDM")
+        periph = (items[4] == "PERIPH")
 
         quadrant_string = ""
-        if cidx == QIDX0 and not tcdm:
+        if cidx == QIDX0 and not tcdm and not periph:
             quadrant_string = quadrant_size_str
         elif cidx == QIDX1 and tcdm:
             quadrant_string = "QUADRANT {}".format(qidx)
@@ -243,7 +245,7 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
         quadrant_border = ""
         if (cidx == 0) and tcdm:
             quadrant_border = "lrt"
-        elif (cidx == NR_CLUSTERS_PER_QUADRANT-1) and not tcdm:
+        elif (cidx == NR_CLUSTERS_PER_QUADRANT-1) and not tcdm and not periph:
             quadrant_border = "lrb"
         else:
             quadrant_border = "lr"
@@ -260,10 +262,15 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
             cluster_string = cluster_size_str
             cluster_border = "lrt"
             outer_start_addr = entry['start_addr_str']
-        else:
+        elif periph:
             md_string = "CLUSTER\\_PERIPHERAL"
             inner_string = "{} PERIPHERAL".format(entry['size'])
             cluster_string = "CLUSTER {}".format(cidx)
+            cluster_border = "lr"
+        else:
+            md_string = "CLUSTER\\_ZERO\\_MEM"
+            inner_string = "{} ZERO MEMORY".format(entry['size'])
+            cluster_string = ""
             cluster_border = "lrb"
             outer_end_addr = entry['end_addr_str']
 

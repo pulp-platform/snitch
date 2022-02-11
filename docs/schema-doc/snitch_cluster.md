@@ -22,7 +22,8 @@ Base description of a Snitch cluster and its internal structure and configuratio
 | [boot_addr](#boot_addr)                           | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-boot_addr.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/boot_addr")                           |
 | [cluster_base_addr](#cluster_base_addr)           | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-cluster_base_addr.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster_base_addr")           |
 | [tcdm](#tcdm)                                     | `object`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-tcdm.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/tcdm")                                     |
-| [periph_size](#periph_size)                       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-periph_size.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/periph_size")                       |
+| [cluster_periph_size](#cluster_periph_size)       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-cluster_periph_size.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster_periph_size")       |
+| [zero_mem_size](#zero_mem_size)                   | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-zero_mem_size.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/zero_mem_size")                   |
 | [addr_width](#addr_width)                         | `number`  | Required | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-addr_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/addr_width")                         |
 | [data_width](#data_width)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-data_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/data_width")                         |
 | [dma_data_width](#dma_data_width)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_data_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_data_width")                 |
@@ -137,11 +138,11 @@ The default value is:
 }
 ```
 
-## periph_size
+## cluster_periph_size
 
 Address region size reserved for cluster peripherals in KiByte.
 
-`periph_size`
+`cluster_periph_size`
 
 *   is optional
 
@@ -149,13 +150,41 @@ Address region size reserved for cluster peripherals in KiByte.
 
 *   cannot be null
 
-*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-periph_size.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/periph_size")
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-cluster_periph_size.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster_periph_size")
 
-### periph_size Type
+### cluster_periph_size Type
 
 `number`
 
-### periph_size Examples
+### cluster_periph_size Examples
+
+```json
+128
+```
+
+```json
+64
+```
+
+## zero_mem_size
+
+Address region size reserved for the Zero-Memory in KiByte.
+
+`zero_mem_size`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-zero_mem_size.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/zero_mem_size")
+
+### zero_mem_size Type
+
+`number`
+
+### zero_mem_size Examples
 
 ```json
 128

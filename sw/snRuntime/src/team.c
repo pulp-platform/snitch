@@ -90,4 +90,6 @@ snrt_slice_t snrt_cluster_memory() {
     return _snrt_team_current->root->cluster_mem;
 }
 
+snrt_slice_t snrt_zero_memory() { return _snrt_team_current->root->zero_mem; }
+
 void snrt_wakeup(uint32_t mask) { *snrt_peripherals()->wakeup = mask; }

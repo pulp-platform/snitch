@@ -63,6 +63,9 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->cluster_mem.end = (uint64_t)spm_end;
     team->barrier_reg_ptr = (uint32_t)spm_start + bootdata->tcdm_size +
                             SNITCH_CLUSTER_PERIPHERAL_HW_BARRIER_REG_OFFSET;
+    team->zero_mem.start =
+        (uint64_t)spm_start + bootdata->tcdm_size + bootdata->tcdm_size / 2;
+    team->zero_mem.end = (uint64_t)spm_start + 2 * bootdata->tcdm_size;
 
     // Initialize cluster barrier
     team->cluster_barrier.barrier = 0;

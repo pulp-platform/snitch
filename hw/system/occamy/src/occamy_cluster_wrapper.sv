@@ -386,6 +386,8 @@ module occamy_cluster_wrapper (
     .NrHives (1),
     .NrCores (9),
     .TCDMDepth (512),
+    .ZeroMemorySize (64),
+    .ClusterPeriphSize (64),
     .NrBanks (32),
     .DMAAxiReqFifoDepth (3),
     .DMAReqFifoDepth (3),

@@ -137,14 +137,15 @@ package snitch_pkg;
 
   // Slaves on Cluster DMA AXI Bus
   typedef enum int unsigned {
-    TCDMDMA   = 0,
-    SoCDMAOut = 1
+    TCDMDMA    = 0,
+    SoCDMAOut  = 1,
+    ZeroMemory = 2
   } cluster_slave_dma_e;
 
   typedef enum int unsigned {
-    SDMAMst = 32'd0,
+    SDMAMst  = 32'd0,
     SoCDMAIn = 32'd1,
-    ICache    = 32'd2
+    ICache   = 32'd2
   } cluster_master_dma_e;
 
   /// Possible interconnect implementations.

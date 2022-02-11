@@ -1,7 +1,7 @@
 # Untitled number in Snitch Cluster Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/periph_size
+http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster_periph_size
 ```
 
 Address region size reserved for cluster peripherals in KiByte.
@@ -10,11 +10,11 @@ Address region size reserved for cluster peripherals in KiByte.
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :------------------------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [snitch_cluster.schema.json*](snitch_cluster.schema.json "open original schema") |
 
-## periph_size Type
+## cluster_periph_size Type
 
 `number`
 
-## periph_size Examples
+## cluster_periph_size Examples
 
 ```json
 128
