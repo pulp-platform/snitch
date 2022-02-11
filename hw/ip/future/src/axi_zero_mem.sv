@@ -6,7 +6,11 @@
 // - Gianna Paulin <pauling@iis.ee.ethz.ch>
 
 `include "common_cells/registers.svh"
-/// AXI4+ATOP slave module which translates AXI bursts into a memory stream.
+/// AXI4+ATOP slave module which translates AXI bursts into a memory stream
+/// which behaves as a memory containing only `0` data which cannot be
+/// overwritten by `write` operations.
+/// - `read`: grants the request and returns data `0`.
+/// - `write`: grants the request, write data goes into nothingness (can be used as data sink e.g. when measuring DMA power)
 /// If both read and write channels of the AXI4+ATOP are active, both will have an
 /// utilization of 50%.
 module axi_zero_mem #(
