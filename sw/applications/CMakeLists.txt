@@ -31,6 +31,15 @@ add_custom_target(application-update-data
     COMMAND clang-format -style=file -i ${CMAKE_CURRENT_LIST_DIR}/data/data_maxpool.h
 )
 
+macro(add_snitch_application_executable name)
+    add_snitch_executable(${name} src/net_${name}.c data/data_${name}.h)
+    add_custom_command(
+        OUTPUT data/data_${name}.h
+        COMMAND python data_gen.py -c data/${name}_params.hjson
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    )
+    target_link_libraries(${name} kernels layers utils)
+endmacro()
 
 
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
@@ -45,18 +54,9 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     target_link_libraries(layers ${SNITCH_RUNTIME} kernels utils)
     target_link_libraries(utils ${SNITCH_RUNTIME})
 
-    add_snitch_executable(net-batchnorm src/net_batchnorm.c)
-    target_link_libraries(net-batchnorm kernels layers utils)
-
-    add_snitch_executable(net-maxpool src/net_maxpool.c)
-    target_link_libraries(net-maxpool kernels layers utils)
-
-    add_snitch_executable(net-conv2d src/net_conv2d.c)
-    target_link_libraries(net-conv2d kernels layers utils)
-
-    add_snitch_executable(net-gemm src/net_gemm.c)
-    target_link_libraries(net-gemm kernels utils)
-
-    add_snitch_executable(fusedconv src/fusedconv.c)
-    target_link_libraries(fusedconv kernels utils)
+    add_snitch_application_executable(batchnorm)
+    add_snitch_application_executable(maxpool)
+    add_snitch_application_executable(conv2d)
+    add_snitch_application_executable(gemm)
+    add_snitch_application_executable(fusedconv)
 endif()
