@@ -6,11 +6,10 @@ cmake_minimum_required(VERSION 3.13)
 
 set(SNITCH_SOFTWARE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../sw)
 list(APPEND CMAKE_MODULE_PATH ${SNITCH_SOFTWARE_DIR}/cmake)
-set(SNITCH_RUNTIME snRuntime-cluster CACHE PATH "")
+set(SNITCH_RUNTIME snRuntime-cluster CACHE STRING "")
 set(SNITCH_SIMULATOR ${CMAKE_CURRENT_SOURCE_DIR}/../bin/snitch_cluster.vlt CACHE PATH "")
 
 set(TARGET_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../generated/link.ld" CACHE PATH "")
-set(SNITCH_RUNTIME snRuntime-cluster)
 
 project(snitch_cluster LANGUAGES C ASM)
 include(SnitchUtilities)
