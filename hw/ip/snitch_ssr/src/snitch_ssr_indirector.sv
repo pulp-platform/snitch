@@ -285,8 +285,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
       assign isect_mst_dom_clr = mem_hs & isect_mst_dom_q;
       `FFLARNC(isect_mst_domp_q, 1'b1, isect_mst_cln_init, isect_mst_dom_q, 1'b0, clk_i, rst_ni)
       `FFLARNC(isect_mst_dom_q, 1'b1, isect_mst_dom_set, isect_mst_dom_clr, 1'b0, clk_i, rst_ni)
-      // Send done to addrgen ASAP to save time
-      assign isect_mst_dom = isect_mst_dom_q | isect_mst_dom_set;
+      assign isect_mst_dom = isect_mst_dom_q;
 
       // Generate done flag for intersector interface
       logic isect_mst_doi_set, isect_mst_doi_clr;

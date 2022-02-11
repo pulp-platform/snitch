@@ -22,16 +22,17 @@ module fixture_ssr_streamer import snitch_ssr_pkg::*; #(
   //  Parameters
   // ------------
 
-  // Fixture parameters
-  localparam bit  TcdmLog   = 1;
-  localparam bit  MatchLog  = 1;
-  localparam time Timeout   = 200ns;
-
   // Timing parameters
   localparam time TCK = 10ns;
   localparam time TA  = 2ns;
   localparam time TT  = 8ns;
   localparam int unsigned RstCycles = 10;
+
+  // Fixture parameters
+  localparam bit  TcdmLog   = 1;
+  localparam bit  MatchLog  = 1;
+  localparam time Timeout   = 20*TCK;
+  localparam time MstIsectTimeout = 1*TCK;
 
   // TCDM derived parameters
   localparam int unsigned WordBytes      = DataWidth/8;
@@ -496,6 +497,7 @@ module fixture_ssr_streamer import snitch_ssr_pkg::*; #(
       end
     join
     // Check that SSRs are done (Masters first)
+    #(MstIsectTimeout);
     cfg_read_done(0, done);
     assert(done) else $fatal(1, "Master SSR 0 not done yet");
     cfg_read_done(1, done);
