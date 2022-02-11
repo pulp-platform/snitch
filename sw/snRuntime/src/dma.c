@@ -52,8 +52,8 @@ snrt_dma_txid_t snrt_dma_start_1d(void *dst, const void *src, size_t size) {
 
 /// Initiate an asynchronous 2D DMA transfer with wide 64-bit pointers.
 snrt_dma_txid_t snrt_dma_start_2d_wideptr(uint64_t dst, uint64_t src,
-                                          size_t size, size_t src_stride,
-                                          size_t dst_stride, size_t repeat) {
+                                          size_t size, size_t dst_stride,
+                                          size_t src_stride, size_t repeat) {
     register uint32_t reg_dst_low asm("a0") = dst >> 0;       // 10
     register uint32_t reg_dst_high asm("a1") = dst >> 32;     // 11
     register uint32_t reg_src_low asm("a2") = src >> 0;       // 12
@@ -117,10 +117,10 @@ snrt_dma_txid_t snrt_dma_start_2d_wideptr(uint64_t dst, uint64_t src,
 
 /// Initiate an asynchronous 2D DMA transfer.
 snrt_dma_txid_t snrt_dma_start_2d(void *dst, const void *src, size_t size,
-                                  size_t src_stride, size_t dst_stride,
+                                  size_t dst_stride, size_t src_stride,
                                   size_t repeat) {
-    return snrt_dma_start_2d_wideptr((size_t)dst, (size_t)src, size, src_stride,
-                                     dst_stride, repeat);
+    return snrt_dma_start_2d_wideptr((size_t)dst, (size_t)src, size, dst_stride,
+                                     src_stride, repeat);
 }
 
 /// Block until a transfer finishes.

@@ -22,7 +22,7 @@ int main() {
     ///////////////
     // CORE READ //
     ///////////////
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Populate buffers.
         for (uint32_t i = 0; i < n_inputs; i++) {
             *(buffer_tcdm + i) = 1 + i;
@@ -39,7 +39,7 @@ int main() {
     }
     // Barrier
     snrt_cluster_hw_barrier();
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Check that the main memory buffer contains the correct data.
         for (uint32_t i = 0; i < n_inputs; i++) {
             errors += (int)((uint32_t) * (buffer_tcdm + i) != (uint32_t)0);
@@ -52,7 +52,7 @@ int main() {
     //////////////////
     // DMA 1D WRITE //
     //////////////////
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Populate buffers.
         for (uint32_t i = 0; i < n_inputs; i++) {
             *(buffer_tcdm + i) = 1 + i;
@@ -68,7 +68,7 @@ int main() {
     }
     // Barrier
     snrt_cluster_hw_barrier();
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Check that the main memory buffer contains the correct data.
         for (uint32_t i = 0; i < n_inputs; i++) {
             errors += (int)((uint32_t) * (buffer_tcdm + i) !=
@@ -82,7 +82,7 @@ int main() {
     /////////////////
     // DMA 1D READ //
     /////////////////
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Populate buffers.
         for (uint32_t i = 0; i < n_inputs; i++) {
             *(buffer_tcdm + i) = 1 + i;
@@ -98,7 +98,7 @@ int main() {
     }
     // Barrier
     snrt_cluster_hw_barrier();
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Check that the main memory buffer contains the correct data.
         for (uint32_t i = 0; i < n_inputs; i++) {
             errors += (int)((uint32_t) * (buffer_tcdm + i) != (uint32_t)0);
@@ -113,7 +113,7 @@ int main() {
     //////////////////
     n_inputs = 1;
 
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Populate buffers.
         for (uint32_t i = 0; i < 20 * n_inputs; i++) {
             *(buffer_tcdm + i) = 1 + i;
@@ -124,13 +124,13 @@ int main() {
     snrt_cluster_hw_barrier();
     if (snrt_is_dm_core()) {
         // Copy data from TCDM memory to ZeroMemory.
-        snrt_dma_start_2d(zero_mem, buffer_tcdm, n_inputs * sizeof(uint32_t),
-                          (2 * n_inputs) * sizeof(uint32_t), 0, 4);
+        snrt_dma_start_2d(zero_mem, buffer_tcdm, n_inputs * sizeof(uint32_t), 0,
+                          (2 * n_inputs) * sizeof(uint32_t), 4);
         snrt_dma_wait_all();
     }
     // Barrier
     snrt_cluster_hw_barrier();
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Check that the main memory buffer contains the correct data.
         for (uint32_t i = 0; i < n_inputs; i++) {
             errors += (int)((uint32_t) * (buffer_tcdm + i) !=
@@ -146,7 +146,7 @@ int main() {
     /////////////////
     n_inputs = 1;
 
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Populate buffers.
         for (uint32_t i = 0; i < 20 * n_inputs; i++) {
             *(buffer_tcdm + i) = 1 + i;
@@ -157,13 +157,13 @@ int main() {
     snrt_cluster_hw_barrier();
     if (snrt_is_dm_core()) {
         // Copy data from ZeroMemory to TCDM memory.
-        snrt_dma_start_2d(buffer_tcdm, zero_mem, n_inputs * sizeof(uint32_t), 0,
-                          (2 * n_inputs) * sizeof(uint32_t), 4);
+        snrt_dma_start_2d(buffer_tcdm, zero_mem, n_inputs * sizeof(uint32_t),
+                          (2 * n_inputs) * sizeof(uint32_t), 0, 4);
         snrt_dma_wait_all();
     }
     // Barrier
     snrt_cluster_hw_barrier();
-    if (snrt_is_compute_core()) {
+    if (snrt_cluster_compute_core_idx() == 0) {
         // Check that the main memory buffer contains the correct data.
         for (uint32_t i = 0; i < 4 * 2 * n_inputs; i++) {
             if ((i % 2) == 0) {
