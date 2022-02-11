@@ -581,7 +581,7 @@ module snitch_cluster
     .mem_rdata_i (ext_dma_rsp.p.data)
   );
 
-  assign ext_dma_req.q.addr = tcdm_dma_req_t'(ext_dma_req_q_addr_nontrunc);
+  assign ext_dma_req.q.addr = tcdm_addr_t'(ext_dma_req_q_addr_nontrunc);
   assign ext_dma_req.q.amo = reqrsp_pkg::AMONone;
   assign ext_dma_req.q.user = '0;
 
