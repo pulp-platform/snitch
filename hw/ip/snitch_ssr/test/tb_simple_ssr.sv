@@ -7,7 +7,7 @@
 module tb_simple_ssr;
 
   // Test parameters
-  localparam int unsigned AddrWidth     = 32;
+  localparam int unsigned AddrWidth     = 17;
   localparam int unsigned DataWidth     = 64;
   localparam bit          Indirection   = 1;
   // TODO: Indirect writes fail with one loop level. Why?
@@ -26,8 +26,8 @@ module tb_simple_ssr;
     IsectSlaveSpill: 1,
     IndirOutSpill:  1,
     NumLoops:       NumLoops,
-    IndexWidth:     16,
-    PointerWidth:   18,
+    IndexWidth:     AddrWidth - $clog2(DataWidth/8),
+    PointerWidth:   AddrWidth,
     ShiftWidth:     3,
     IndexCredits:   3,
     DataCredits:    4,

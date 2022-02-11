@@ -500,17 +500,17 @@
                                                 "default": 3
                                             },
                                             "index_width": {
-                                                "type": "number",
-                                                "description": "Internal bitwidth of indices in address generator.",
+                                                "type": ["number", "null"],
+                                                "description": "Internal bitwidth of indices in address generator; default covers full TCDM in a unit-stride 1D loop.",
                                                 "minimum": 1,
                                                 "maximum": 32,
-                                                "default": 16
+                                                "default": null
                                             },
                                             "pointer_width": {
-                                                "type": "number",
-                                                "description": "Internal bitwidth of pointers in address generator; must be larger than the TCDM word address mask.",
+                                                "type": ["number", "null"],
+                                                "description": "Internal bitwidth of pointers in address generator; default covers full TCDM",
                                                 "maximum": 32,
-                                                "default": 18
+                                                "default": null
                                             },
                                             "shift_width": {
                                                 "type": "number",

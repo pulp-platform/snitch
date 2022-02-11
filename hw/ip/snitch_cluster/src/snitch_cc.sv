@@ -25,6 +25,8 @@ module snitch_cc #(
   parameter type         dreq_t             = logic,
   /// Data port response type.
   parameter type         drsp_t             = logic,
+  /// TCDM Address Width
+  parameter int unsigned TCDMAddrWidth      = 0,
   /// Data port request type.
   parameter type         tcdm_req_t         = logic,
   /// Data port response type.
@@ -118,8 +120,7 @@ module snitch_cc #(
   output dma_events_t                axi_dma_events_o,
   // Core event strobes
   output snitch_pkg::core_events_t   core_events_o,
-  input  addr_t                      tcdm_addr_base_i,
-  input  addr_t                      tcdm_addr_mask_i
+  input  addr_t                      tcdm_addr_base_i
 );
 
   // FMA architecture is "merged" -> mulexp and macexp instructions are supported
@@ -565,7 +566,7 @@ module snitch_cc #(
   assign addr_map = '{
     idx: 1,
     base: tcdm_addr_base_i,
-    mask: tcdm_addr_mask_i
+    mask: ({AddrWidth{1'b1}} << TCDMAddrWidth)
   };
 
   addr_decode_napot #(
@@ -695,7 +696,7 @@ module snitch_cc #(
       .WPorts (1),
       .SsrCfgs (SsrCfgs),
       .SsrRegs (SsrRegs),
-      .AddrWidth (AddrWidth),
+      .AddrWidth (TCDMAddrWidth),
       .DataWidth (DataWidth),
       .tcdm_req_t (tcdm_req_t),
       .tcdm_rsp_t (tcdm_rsp_t),
@@ -722,8 +723,7 @@ module snitch_cc #(
       .mem_rsp_i      ( ssr_rsp    ),
       .streamctl_done_o   ( ssr_streamctl_done  ),
       .streamctl_valid_o  ( ssr_streamctl_valid ),
-      .streamctl_ready_i  ( ssr_streamctl_ready ),
-      .tcdm_start_address_i (tcdm_addr_base_i)
+      .streamctl_ready_i  ( ssr_streamctl_ready )
     );
 
   if (NumSsrs > 1) begin : gen_multi_ssr
@@ -736,7 +736,7 @@ module snitch_cc #(
 
   tcdm_mux #(
     .NrPorts (2),
-    .AddrWidth (AddrWidth),
+    .AddrWidth (TCDMAddrWidth),
     .DataWidth (DataWidth),
     .RespDepth (SsrMuxRespDepth),
     // TODO(zarubaf): USer type

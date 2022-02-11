@@ -147,8 +147,7 @@ module fixture_ssr_streamer import snitch_ssr_pkg::*; #(
     .mem_rsp_i,
     .streamctl_done_o,
     .streamctl_valid_o,
-    .streamctl_ready_i,
-    .tcdm_start_address_i
+    .streamctl_ready_i
   );
 
   // ----------------

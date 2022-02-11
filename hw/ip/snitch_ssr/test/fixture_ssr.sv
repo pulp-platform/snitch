@@ -131,8 +131,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     .isect_mst_req_o  (     ),
     .isect_slv_req_o  (     ),
     .isect_mst_rsp_i  ( '0  ),
-    .isect_slv_rsp_i  ( '0  ),
-    .tcdm_start_address_i
+    .isect_slv_rsp_i  ( '0  )
   );
 
   // ----------------

@@ -27,8 +27,8 @@ Description of a single Stream Semantic Register.
 | [index_credits](#index_credits)             | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-index_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/index_credits")             |
 | [data_credits](#data_credits)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-data_credits.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/data_credits")               |
 | [mux_resp_depth](#mux_resp_depth)           | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-mux_resp_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/mux_resp_depth")           |
-| [index_width](#index_width)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-index_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/index_width")                 |
-| [pointer_width](#pointer_width)             | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-pointer_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/pointer_width")             |
+| [index_width](#index_width)                 | `number`  | Optional | can be null    | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-index_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/index_width")                 |
+| [pointer_width](#pointer_width)             | `number`  | Optional | can be null    | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-pointer_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/pointer_width")             |
 | [shift_width](#shift_width)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-shift_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/shift_width")                 |
 | [rpt_width](#rpt_width)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-rpt_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/rpt_width")                     |
 
@@ -280,7 +280,7 @@ The default value is:
 
 ## index_width
 
-Internal bitwidth of indices in address generator.
+Internal bitwidth of indices in address generator; default covers full TCDM in a unit-stride 1D loop.
 
 `index_width`
 
@@ -288,7 +288,7 @@ Internal bitwidth of indices in address generator.
 
 *   Type: `number`
 
-*   cannot be null
+*   can be null
 
 *   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-index_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/index_width")
 
@@ -302,17 +302,9 @@ Internal bitwidth of indices in address generator.
 
 **minimum**: the value of this number must greater than or equal to: `1`
 
-### index_width Default Value
-
-The default value is:
-
-```json
-16
-```
-
 ## pointer_width
 
-Internal bitwidth of pointers in address generator; must be larger than the TCDM word address mask.
+Internal bitwidth of pointers in address generator; default covers full TCDM
 
 `pointer_width`
 
@@ -320,7 +312,7 @@ Internal bitwidth of pointers in address generator; must be larger than the TCDM
 
 *   Type: `number`
 
-*   cannot be null
+*   can be null
 
 *   defined in: [Snitch Cluster Schema](snitch_cluster-properties-hives-hive-description-properties-cores-core-description-properties-ssrs-ssr-description-properties-pointer_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hives/items/properties/cores/items/properties/ssrs/items/properties/pointer_width")
 
@@ -331,14 +323,6 @@ Internal bitwidth of pointers in address generator; must be larger than the TCDM
 ### pointer_width Constraints
 
 **maximum**: the value of this number must smaller than or equal to: `32`
-
-### pointer_width Default Value
-
-The default value is:
-
-```json
-18
-```
 
 ## shift_width
 

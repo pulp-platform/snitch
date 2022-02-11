@@ -9,7 +9,7 @@ module tb_simple_ssr_streamer;
   import snitch_ssr_pkg::*;
 
   // Test parameters
-  localparam int unsigned AddrWidth = 32;
+  localparam int unsigned AddrWidth = 17;
   localparam int unsigned DataWidth = 64;
   localparam int unsigned NumSsrs   = 3;
   localparam int unsigned RPorts    = 3;
@@ -27,8 +27,8 @@ module tb_simple_ssr_streamer;
       Indirection:    1,
       IndirOutSpill:  1,
       NumLoops:       4,
-      IndexWidth:     16,
-      PointerWidth:   18,
+      IndexWidth:     AddrWidth - $clog2(DataWidth/8),
+      PointerWidth:   AddrWidth,
       ShiftWidth:     3,
       IndexCredits:   3,
       DataCredits:    4,

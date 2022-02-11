@@ -20,7 +20,6 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   parameter type isect_mst_rsp_t = logic,
   parameter type ssr_rdata_t = logic,
   /// Derived parameter *Do not override*
-  parameter type addr_t = logic [AddrWidth-1:0],
   parameter type data_t = logic [DataWidth-1:0]
 ) (
   input  logic        clk_i,
@@ -42,9 +41,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   output isect_slv_req_t isect_slv_req_o,
   input  isect_slv_rsp_t isect_slv_rsp_i,
   output isect_mst_req_t isect_mst_req_o,
-  input  isect_mst_rsp_t isect_mst_rsp_i,
-
-  input  addr_t       tcdm_start_address_i
+  input  isect_mst_rsp_t isect_mst_rsp_i
 );
 
   data_t fifo_out, fifo_in;
@@ -105,8 +102,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .mem_zero_o     ( agen_zero         ),
     .mem_write_o    ( agen_write        ),
     .mem_valid_o    ( agen_valid        ),
-    .mem_ready_i    ( agen_ready        ),
-    .tcdm_start_address_i
+    .mem_ready_i    ( agen_ready        )
   );
 
   assign agen_ready = agen_zero ? has_credit : (data_req_qvalid & data_rsp.q_ready);

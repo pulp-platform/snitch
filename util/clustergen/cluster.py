@@ -300,6 +300,12 @@ class SnitchCluster(Generator):
                         ssr['reg_idx'] = next_free_reg
                         next_free_reg += 1
                     self.parse_isect_ssr(ssr, core)
+                # Set default SSR parameters
+                for ssr in core['ssrs']:
+                    if ssr['pointer_width'] is None:
+                        ssr['pointer_width'] = 10 + clog2(self.cfg['tcdm']['size'])
+                    if ssr['index_width'] is None:
+                        ssr['index_width'] = ssr['pointer_width'] - clog2(self.cfg['data_width']/8)
                 # Sort SSRs by register indices (required by decoding logic)
                 core['ssrs'].sort(key=lambda x: x['reg_idx'])
                 # Minimum 1 element to avoid illegal ranges (Xssr prevents generation)
