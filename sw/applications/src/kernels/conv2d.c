@@ -146,11 +146,11 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                     "fmadd.d %[sum5], ft0, ft1, %[sum5] \n"
                     "fmadd.d %[sum6], ft0, ft1, %[sum6] \n"
                     "fmadd.d %[sum7], ft0, ft1, %[sum7] \n"
-                    : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
-                      [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3]),
-                      [ sum4 ] "+f"(sum[4]), [ sum5 ] "+f"(sum[5]),
-                      [ sum6 ] "+f"(sum[6]), [ sum7 ] "+f"(sum[7])
-                    : [ n_frep ] "r"(dim_kernel_y * dim_kernel_x * ch_in - 1)
+                    : [sum0] "+f"(sum[0]), [sum1] "+f"(sum[1]),
+                      [sum2] "+f"(sum[2]), [sum3] "+f"(sum[3]),
+                      [sum4] "+f"(sum[4]), [sum5] "+f"(sum[5]),
+                      [sum6] "+f"(sum[6]), [sum7] "+f"(sum[7])
+                    : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in - 1)
                     : "ft0", "ft1", "ft2");
 
                 snrt_ssr_disable();
@@ -211,12 +211,12 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                             "fmadd.d %[sum4], ft0, ft1, %[sum4] \n"
                             "fmadd.d %[sum5], ft0, ft1, %[sum5] \n"
                             "fmadd.d %[sum6], ft0, ft1, %[sum6] \n"
-                            : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
-                              [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3]),
-                              [ sum4 ] "+f"(sum[4]), [ sum5 ] "+f"(sum[5]),
-                              [ sum6 ] "+f"(sum[6])
-                            : [ n_frep ] "r"(
-                                dim_kernel_y * dim_kernel_x * ch_in - 1)
+                            : [sum0] "+f"(sum[0]), [sum1] "+f"(sum[1]),
+                              [sum2] "+f"(sum[2]), [sum3] "+f"(sum[3]),
+                              [sum4] "+f"(sum[4]), [sum5] "+f"(sum[5]),
+                              [sum6] "+f"(sum[6])
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in -
+                                           1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 6:
@@ -228,11 +228,11 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                             "fmadd.d %[sum3], ft0, ft1, %[sum3] \n"
                             "fmadd.d %[sum4], ft0, ft1, %[sum4] \n"
                             "fmadd.d %[sum5], ft0, ft1, %[sum5] \n"
-                            : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
-                              [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3]),
-                              [ sum4 ] "+f"(sum[4]), [ sum5 ] "+f"(sum[5])
-                            : [ n_frep ] "r"(
-                                dim_kernel_y * dim_kernel_x * ch_in - 1)
+                            : [sum0] "+f"(sum[0]), [sum1] "+f"(sum[1]),
+                              [sum2] "+f"(sum[2]), [sum3] "+f"(sum[3]),
+                              [sum4] "+f"(sum[4]), [sum5] "+f"(sum[5])
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in -
+                                           1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 5:
@@ -243,11 +243,11 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                             "fmadd.d %[sum2], ft0, ft1, %[sum2] \n"
                             "fmadd.d %[sum3], ft0, ft1, %[sum3] \n"
                             "fmadd.d %[sum4], ft0, ft1, %[sum4] \n"
-                            : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
-                              [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3]),
-                              [ sum4 ] "+f"(sum[4])
-                            : [ n_frep ] "r"(
-                                dim_kernel_y * dim_kernel_x * ch_in - 1)
+                            : [sum0] "+f"(sum[0]), [sum1] "+f"(sum[1]),
+                              [sum2] "+f"(sum[2]), [sum3] "+f"(sum[3]),
+                              [sum4] "+f"(sum[4])
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in -
+                                           1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 4:
@@ -257,10 +257,10 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                             "fmadd.d %[sum1], ft0, ft1, %[sum1] \n"
                             "fmadd.d %[sum2], ft0, ft1, %[sum2] \n"
                             "fmadd.d %[sum3], ft0, ft1, %[sum3] \n"
-                            : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
-                              [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3])
-                            : [ n_frep ] "r"(
-                                dim_kernel_y * dim_kernel_x * ch_in - 1)
+                            : [sum0] "+f"(sum[0]), [sum1] "+f"(sum[1]),
+                              [sum2] "+f"(sum[2]), [sum3] "+f"(sum[3])
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in -
+                                           1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 3:
@@ -269,10 +269,10 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                             "fmadd.d %[sum0], ft0, ft1, %[sum0] \n"
                             "fmadd.d %[sum1], ft0, ft1, %[sum1] \n"
                             "fmadd.d %[sum2], ft0, ft1, %[sum2] \n"
-                            : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
-                              [ sum2 ] "+f"(sum[2])
-                            : [ n_frep ] "r"(
-                                dim_kernel_y * dim_kernel_x * ch_in - 1)
+                            : [sum0] "+f"(sum[0]), [sum1] "+f"(sum[1]),
+                              [sum2] "+f"(sum[2])
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in -
+                                           1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 2:
@@ -280,18 +280,18 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                             "frep.o %[n_frep], 2, 0, 0 \n"
                             "fmadd.d %[sum0], ft0, ft1, %[sum0] \n"
                             "fmadd.d %[sum1], ft0, ft1, %[sum1] \n"
-                            : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1])
-                            : [ n_frep ] "r"(
-                                dim_kernel_y * dim_kernel_x * ch_in - 1)
+                            : [sum0] "+f"(sum[0]), [sum1] "+f"(sum[1])
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in -
+                                           1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 1:
                         asm volatile(
                             "frep.o %[n_frep], 1, 0, 0 \n"
                             "fmadd.d %[sum0], ft0, ft1, %[sum0] \n"
-                            : [ sum0 ] "+f"(sum[0])
-                            : [ n_frep ] "r"(
-                                dim_kernel_y * dim_kernel_x * ch_in - 1)
+                            : [sum0] "+f"(sum[0])
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in -
+                                           1)
                             : "ft0", "ft1", "ft2");
                         break;
                 }
@@ -335,24 +335,23 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
                     "frep.o %[n_frep], 2, 0, 0\n"
                     "fmadd.d $[tmp], ft0, %[k] %[l]\n"
                     "fmax.d ft1, %[tmp], %[zero]\n"
-                    : [ tmp ] "+f"(tmp)
-                    : [ k ] "f"(current_k), [ l ] "f"(current_lambda),
-                      [ zero ] "f"(zero),
-                      [ n_frep ] "r"(dim_out_x * dim_out_y - 1)
+                    : [tmp] "+f"(tmp)
+                    : [k] "f"(current_k), [l] "f"(current_lambda),
+                      [zero] "f"(zero), [n_frep] "r"(dim_out_x * dim_out_y - 1)
                     : "ft0", "ft1", "ft2");
             } else if (flag_batch_norm && !flag_relu) {
                 asm volatile(
                     "frep.o %[n_frep], 1, 0, 0\n"
                     "fmadd.d $[tmp], ft0, %[k] %[l]\n"
-                    : [ tmp ] "+f"(tmp), [ k ] "+f"(current_k),
-                      [ l ] "+f"(current_lambda)
-                    : [ n_frep ] "r"(dim_out_x * dim_out_y - 1)
+                    : [tmp] "+f"(tmp), [k] "+f"(current_k),
+                      [l] "+f"(current_lambda)
+                    : [n_frep] "r"(dim_out_x * dim_out_y - 1)
                     : "ft0", "ft1", "ft2");
             } else if (!flag_batch_norm && flag_relu) {
                 asm volatile(
                     "frep.o %[n_frep], 1, 0, 0 \n"
                     "fmax.d ft1, ft0, %[zero]\n" ::[zero] "f"(zero),
-                    [ n_frep ] "r"(dim_out_x * dim_out_y - 1)
+                    [n_frep] "r"(dim_out_x * dim_out_y - 1)
                     : "ft0", "ft1", "ft2");
             }
         }
@@ -519,20 +518,19 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                     "vfsum.s %[reduce_reg5], %[sum5] \n"
                     "vfsum.s %[reduce_reg6], %[sum6] \n"
                     "vfsum.s %[reduce_reg7], %[sum7] \n"
-                    : [ sum0 ] "+f"(sum[0].f64), [ sum1 ] "+f"(sum[1].f64),
-                      [ sum2 ] "+f"(sum[2].f64), [ sum3 ] "+f"(sum[3].f64),
-                      [ sum4 ] "+f"(sum[4].f64), [ sum5 ] "+f"(sum[5].f64),
-                      [ sum6 ] "+f"(sum[6].f64), [ sum7 ] "+f"(sum[7].f64),
-                      [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                      [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                      [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                      [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                      [ reduce_reg4 ] "+f"(reduce_reg[4]),
-                      [ reduce_reg5 ] "+f"(reduce_reg[5]),
-                      [ reduce_reg6 ] "+f"(reduce_reg[6]),
-                      [ reduce_reg7 ] "+f"(reduce_reg[7])
-                    :
-                    [ n_frep ] "r"(dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
+                    : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                      [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                      [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
+                      [sum6] "+f"(sum[6].f64), [sum7] "+f"(sum[7].f64),
+                      [reduce_reg0] "+f"(reduce_reg[0]),
+                      [reduce_reg1] "+f"(reduce_reg[1]),
+                      [reduce_reg2] "+f"(reduce_reg[2]),
+                      [reduce_reg3] "+f"(reduce_reg[3]),
+                      [reduce_reg4] "+f"(reduce_reg[4]),
+                      [reduce_reg5] "+f"(reduce_reg[5]),
+                      [reduce_reg6] "+f"(reduce_reg[6]),
+                      [reduce_reg7] "+f"(reduce_reg[7])
+                    : [n_frep] "r"(dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                     : "ft0", "ft1", "ft2");
 
                 snrt_ssr_disable();
@@ -609,21 +607,18 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg4], %[sum4] \n"
                             "vfsum.s %[reduce_reg5], %[sum5] \n"
                             "vfsum.s %[reduce_reg6], %[sum6] \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64),
-                              [ sum3 ] "+f"(sum[3].f64),
-                              [ sum4 ] "+f"(sum[4].f64),
-                              [ sum5 ] "+f"(sum[5].f64),
-                              [ sum6 ] "+f"(sum[6].f64),
-                              [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                              [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                              [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                              [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                              [ reduce_reg4 ] "+f"(reduce_reg[4]),
-                              [ reduce_reg5 ] "+f"(reduce_reg[5]),
-                              [ reduce_reg6 ] "+f"(reduce_reg[6])
-                            : [ n_frep ] "r"(
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
+                              [sum6] "+f"(sum[6].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2]),
+                              [reduce_reg3] "+f"(reduce_reg[3]),
+                              [reduce_reg4] "+f"(reduce_reg[4]),
+                              [reduce_reg5] "+f"(reduce_reg[5]),
+                              [reduce_reg6] "+f"(reduce_reg[6])
+                            : [n_frep] "r"(
                                 dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
@@ -644,19 +639,16 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg3], %[sum3] \n"
                             "vfsum.s %[reduce_reg4], %[sum4] \n"
                             "vfsum.s %[reduce_reg5], %[sum5] \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64),
-                              [ sum3 ] "+f"(sum[3].f64),
-                              [ sum4 ] "+f"(sum[4].f64),
-                              [ sum5 ] "+f"(sum[5].f64),
-                              [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                              [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                              [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                              [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                              [ reduce_reg4 ] "+f"(reduce_reg[4]),
-                              [ reduce_reg5 ] "+f"(reduce_reg[5])
-                            : [ n_frep ] "r"(
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2]),
+                              [reduce_reg3] "+f"(reduce_reg[3]),
+                              [reduce_reg4] "+f"(reduce_reg[4]),
+                              [reduce_reg5] "+f"(reduce_reg[5])
+                            : [n_frep] "r"(
                                 dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
@@ -675,17 +667,15 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg2], %[sum2] \n"
                             "vfsum.s %[reduce_reg3], %[sum3] \n"
                             "vfsum.s %[reduce_reg4], %[sum4] \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64),
-                              [ sum3 ] "+f"(sum[3].f64),
-                              [ sum4 ] "+f"(sum[4].f64),
-                              [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                              [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                              [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                              [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                              [ reduce_reg4 ] "+f"(reduce_reg[4])
-                            : [ n_frep ] "r"(
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [sum4] "+f"(sum[4].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2]),
+                              [reduce_reg3] "+f"(reduce_reg[3]),
+                              [reduce_reg4] "+f"(reduce_reg[4])
+                            : [n_frep] "r"(
                                 dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
@@ -702,15 +692,13 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg1], %[sum1] \n"
                             "vfsum.s %[reduce_reg2], %[sum2] \n"
                             "vfsum.s %[reduce_reg3], %[sum3] \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64),
-                              [ sum3 ] "+f"(sum[3].f64),
-                              [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                              [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                              [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                              [ reduce_reg3 ] "+f"(reduce_reg[3])
-                            : [ n_frep ] "r"(
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2]),
+                              [reduce_reg3] "+f"(reduce_reg[3])
+                            : [n_frep] "r"(
                                 dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
@@ -725,13 +713,12 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfsum.s %[reduce_reg0], %[sum0] \n"
                             "vfsum.s %[reduce_reg1], %[sum1] \n"
                             "vfsum.s %[reduce_reg2], %[sum2] \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64),
-                              [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                              [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                              [ reduce_reg2 ] "+f"(reduce_reg[2])
-                            : [ n_frep ] "r"(
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1]),
+                              [reduce_reg2] "+f"(reduce_reg[2])
+                            : [n_frep] "r"(
                                 dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
@@ -744,11 +731,10 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             // Sum reduce vector
                             "vfsum.s %[reduce_reg0], %[sum0] \n"
                             "vfsum.s %[reduce_reg1], %[sum1] \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                              [ reduce_reg1 ] "+f"(reduce_reg[1])
-                            : [ n_frep ] "r"(
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [reduce_reg0] "+f"(reduce_reg[0]),
+                              [reduce_reg1] "+f"(reduce_reg[1])
+                            : [n_frep] "r"(
                                 dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
@@ -759,9 +745,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
                             "vfmac.s %[sum0], ft0, ft1 \n"
                             // Sum reduce vector
                             "vfsum.s %[reduce_reg0], %[sum0] \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ reduce_reg0 ] "+f"(reduce_reg[0])
-                            : [ n_frep ] "r"(
+                            : [sum0] "+f"(sum[0].f64), [reduce_reg0] "+f"(
+                                                           reduce_reg[0])
+                            : [n_frep] "r"(
                                 dim_kernel_y * dim_kernel_x * ch_in / 2 - 1)
                             : "ft0", "ft1", "ft2");
                         break;
@@ -782,9 +768,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
     snrt_cluster_hw_barrier();
 
     if (flag_batch_norm | flag_relu) {
-        bn_relu(pOutBuffer, dim_out_x, dim_out_y, ch_out, out_shift_mul_factor,
-                out_clip, k, lambda, flag_relu, flag_batch_norm, compute_id,
-                compute_num);
+        bn_relu(pOutBuffer, dim_out_x, dim_out_y, ch_out, k, lambda, flag_relu, flag_batch_norm);
     }
 }
 
@@ -931,11 +915,11 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
                     "vfmac.s %[sum5], ft0, ft1 \n"
                     "vfmac.s %[sum6], ft0, ft1 \n"
                     "vfmac.s %[sum7], ft0, ft1 \n"
-                    : [ sum0 ] "+f"(sum[0].f64), [ sum1 ] "+f"(sum[1].f64),
-                      [ sum2 ] "+f"(sum[2].f64), [ sum3 ] "+f"(sum[3].f64),
-                      [ sum4 ] "+f"(sum[4].f64), [ sum5 ] "+f"(sum[5].f64),
-                      [ sum6 ] "+f"(sum[6].f64), [ sum7 ] "+f"(sum[7].f64)
-                    : [ n_frep ] "r"(dim_kernel_y * dim_kernel_x - 1)
+                    : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                      [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                      [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
+                      [sum6] "+f"(sum[6].f64), [sum7] "+f"(sum[7].f64)
+                    : [n_frep] "r"(dim_kernel_y * dim_kernel_x - 1)
                     : "ft0", "ft1", "ft2");
 
                 snrt_ssr_disable();
@@ -1000,14 +984,11 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
                             "vfmac.s %[sum4], ft0, ft1 \n"
                             "vfmac.s %[sum5], ft0, ft1 \n"
                             "vfmac.s %[sum6], ft0, ft1 \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64),
-                              [ sum3 ] "+f"(sum[3].f64),
-                              [ sum4 ] "+f"(sum[4].f64),
-                              [ sum5 ] "+f"(sum[5].f64),
-                              [ sum6 ] "+f"(sum[6].f64)
-                            : [ n_frep ] "r"(dim_kernel_y * dim_kernel_x - 1)
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
+                              [sum6] "+f"(sum[6].f64)
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 6:
@@ -1020,13 +1001,10 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
                             "vfmac.s %[sum3], ft0, ft1 \n"
                             "vfmac.s %[sum4], ft0, ft1 \n"
                             "vfmac.s %[sum5], ft0, ft1 \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64),
-                              [ sum3 ] "+f"(sum[3].f64),
-                              [ sum4 ] "+f"(sum[4].f64),
-                              [ sum5 ] "+f"(sum[5].f64)
-                            : [ n_frep ] "r"(dim_kernel_y * dim_kernel_x - 1)
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64)
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 5:
@@ -1038,12 +1016,10 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
                             "vfmac.s %[sum2], ft0, ft1 \n"
                             "vfmac.s %[sum3], ft0, ft1 \n"
                             "vfmac.s %[sum4], ft0, ft1 \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64),
-                              [ sum3 ] "+f"(sum[3].f64),
-                              [ sum4 ] "+f"(sum[4].f64)
-                            : [ n_frep ] "r"(dim_kernel_y * dim_kernel_x - 1)
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                              [sum4] "+f"(sum[4].f64)
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 4:
@@ -1054,11 +1030,9 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
                             "vfmac.s %[sum1], ft0, ft1 \n"
                             "vfmac.s %[sum2], ft0, ft1 \n"
                             "vfmac.s %[sum3], ft0, ft1 \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64),
-                              [ sum3 ] "+f"(sum[3].f64)
-                            : [ n_frep ] "r"(dim_kernel_y * dim_kernel_x - 1)
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64)
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 3:
@@ -1068,10 +1042,9 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
                             "vfmac.s %[sum0], ft0, ft1 \n"
                             "vfmac.s %[sum1], ft0, ft1 \n"
                             "vfmac.s %[sum2], ft0, ft1 \n"
-                            : [ sum0 ] "+f"(sum[0].f64),
-                              [ sum1 ] "+f"(sum[1].f64),
-                              [ sum2 ] "+f"(sum[2].f64)
-                            : [ n_frep ] "r"(dim_kernel_y * dim_kernel_x - 1)
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                              [sum2] "+f"(sum[2].f64)
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 2:
@@ -1080,9 +1053,8 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
                             "frep.o %[n_frep], 2, 0, 0 \n"
                             "vfmac.s %[sum0], ft0, ft1 \n"
                             "vfmac.s %[sum1], ft0, ft1 \n"
-                            :
-                            [ sum0 ] "+f"(sum[0].f64), [ sum1 ] "+f"(sum[1].f64)
-                            : [ n_frep ] "r"(dim_kernel_y * dim_kernel_x - 1)
+                            : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64)
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 1:
@@ -1090,8 +1062,8 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
                             // frep over vfMACs
                             "frep.o %[n_frep], 1, 0, 0 \n"
                             "vfmac.s %[sum0], ft0, ft1 \n"
-                            : [ sum0 ] "+f"(sum[0].f64)
-                            : [ n_frep ] "r"(dim_kernel_y * dim_kernel_x - 1)
+                            : [sum0] "+f"(sum[0].f64)
+                            : [n_frep] "r"(dim_kernel_y * dim_kernel_x - 1)
                             : "ft0", "ft1", "ft2");
                         break;
                 }
@@ -1111,9 +1083,7 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
     snrt_cluster_hw_barrier();
 
     if (flag_batch_norm | flag_relu) {
-        bn_relu(pOutBuffer, dim_out_x, dim_out_y, ch_out, out_shift_mul_factor,
-                out_clip, k, lambda, flag_relu, flag_batch_norm, compute_id,
-                compute_num);
+        bn_relu(pOutBuffer, dim_out_x, dim_out_y, ch_out, k, lambda, flag_relu, flag_batch_norm);
     }
 }
 
@@ -1293,19 +1263,19 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
                         "vfsum.s %[reduce_reg5], %[sum5] \n"
                         "vfsum.s %[reduce_reg6], %[sum6] \n"
                         "vfsum.s %[reduce_reg7], %[sum7] \n"
-                        : [ sum0 ] "+f"(sum[0].f64), [ sum1 ] "+f"(sum[1].f64),
-                          [ sum2 ] "+f"(sum[2].f64), [ sum3 ] "+f"(sum[3].f64),
-                          [ sum4 ] "+f"(sum[4].f64), [ sum5 ] "+f"(sum[5].f64),
-                          [ sum6 ] "+f"(sum[6].f64), [ sum7 ] "+f"(sum[7].f64),
-                          [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                          [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                          [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                          [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                          [ reduce_reg4 ] "+f"(reduce_reg[4]),
-                          [ reduce_reg5 ] "+f"(reduce_reg[5]),
-                          [ reduce_reg6 ] "+f"(reduce_reg[6]),
-                          [ reduce_reg7 ] "+f"(reduce_reg[7])
-                        : [ n_frep ] "r"(dim_kernel_x / 2 * dim_kernel_y - 1)
+                        : [sum0] "+f"(sum[0].f64), [sum1] "+f"(sum[1].f64),
+                          [sum2] "+f"(sum[2].f64), [sum3] "+f"(sum[3].f64),
+                          [sum4] "+f"(sum[4].f64), [sum5] "+f"(sum[5].f64),
+                          [sum6] "+f"(sum[6].f64), [sum7] "+f"(sum[7].f64),
+                          [reduce_reg0] "+f"(reduce_reg[0]),
+                          [reduce_reg1] "+f"(reduce_reg[1]),
+                          [reduce_reg2] "+f"(reduce_reg[2]),
+                          [reduce_reg3] "+f"(reduce_reg[3]),
+                          [reduce_reg4] "+f"(reduce_reg[4]),
+                          [reduce_reg5] "+f"(reduce_reg[5]),
+                          [reduce_reg6] "+f"(reduce_reg[6]),
+                          [reduce_reg7] "+f"(reduce_reg[7])
+                        : [n_frep] "r"(dim_kernel_x / 2 * dim_kernel_y - 1)
                         : "ft0", "ft1", "ft2");
 
                     snrt_ssr_disable();
@@ -1384,22 +1354,22 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
                                 "vfsum.s %[reduce_reg4], %[sum4] \n"
                                 "vfsum.s %[reduce_reg5], %[sum5] \n"
                                 "vfsum.s %[reduce_reg6], %[sum6] \n"
-                                : [ sum0 ] "+f"(sum[0].f64),
-                                  [ sum1 ] "+f"(sum[1].f64),
-                                  [ sum2 ] "+f"(sum[2].f64),
-                                  [ sum3 ] "+f"(sum[3].f64),
-                                  [ sum4 ] "+f"(sum[4].f64),
-                                  [ sum5 ] "+f"(sum[5].f64),
-                                  [ sum6 ] "+f"(sum[6].f64),
-                                  [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                                  [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                                  [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                                  [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                                  [ reduce_reg4 ] "+f"(reduce_reg[4]),
-                                  [ reduce_reg5 ] "+f"(reduce_reg[5]),
-                                  [ reduce_reg6 ] "+f"(reduce_reg[6])
-                                : [ n_frep ] "r"(
-                                    dim_kernel_x / 2 * dim_kernel_y - 1)
+                                : [sum0] "+f"(sum[0].f64),
+                                  [sum1] "+f"(sum[1].f64),
+                                  [sum2] "+f"(sum[2].f64),
+                                  [sum3] "+f"(sum[3].f64),
+                                  [sum4] "+f"(sum[4].f64),
+                                  [sum5] "+f"(sum[5].f64),
+                                  [sum6] "+f"(sum[6].f64),
+                                  [reduce_reg0] "+f"(reduce_reg[0]),
+                                  [reduce_reg1] "+f"(reduce_reg[1]),
+                                  [reduce_reg2] "+f"(reduce_reg[2]),
+                                  [reduce_reg3] "+f"(reduce_reg[3]),
+                                  [reduce_reg4] "+f"(reduce_reg[4]),
+                                  [reduce_reg5] "+f"(reduce_reg[5]),
+                                  [reduce_reg6] "+f"(reduce_reg[6])
+                                : [n_frep] "r"(dim_kernel_x / 2 * dim_kernel_y -
+                                               1)
                                 : "ft0", "ft1", "ft2");
                             break;
                         case 6:
@@ -1419,20 +1389,20 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
                                 "vfsum.s %[reduce_reg3], %[sum3] \n"
                                 "vfsum.s %[reduce_reg4], %[sum4] \n"
                                 "vfsum.s %[reduce_reg5], %[sum5] \n"
-                                : [ sum0 ] "+f"(sum[0].f64),
-                                  [ sum1 ] "+f"(sum[1].f64),
-                                  [ sum2 ] "+f"(sum[2].f64),
-                                  [ sum3 ] "+f"(sum[3].f64),
-                                  [ sum4 ] "+f"(sum[4].f64),
-                                  [ sum5 ] "+f"(sum[5].f64),
-                                  [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                                  [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                                  [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                                  [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                                  [ reduce_reg4 ] "+f"(reduce_reg[4]),
-                                  [ reduce_reg5 ] "+f"(reduce_reg[5])
-                                : [ n_frep ] "r"(
-                                    dim_kernel_x / 2 * dim_kernel_y - 1)
+                                : [sum0] "+f"(sum[0].f64),
+                                  [sum1] "+f"(sum[1].f64),
+                                  [sum2] "+f"(sum[2].f64),
+                                  [sum3] "+f"(sum[3].f64),
+                                  [sum4] "+f"(sum[4].f64),
+                                  [sum5] "+f"(sum[5].f64),
+                                  [reduce_reg0] "+f"(reduce_reg[0]),
+                                  [reduce_reg1] "+f"(reduce_reg[1]),
+                                  [reduce_reg2] "+f"(reduce_reg[2]),
+                                  [reduce_reg3] "+f"(reduce_reg[3]),
+                                  [reduce_reg4] "+f"(reduce_reg[4]),
+                                  [reduce_reg5] "+f"(reduce_reg[5])
+                                : [n_frep] "r"(dim_kernel_x / 2 * dim_kernel_y -
+                                               1)
                                 : "ft0", "ft1", "ft2");
                             break;
                         case 5:
@@ -1450,18 +1420,18 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
                                 "vfsum.s %[reduce_reg2], %[sum2] \n"
                                 "vfsum.s %[reduce_reg3], %[sum3] \n"
                                 "vfsum.s %[reduce_reg4], %[sum4] \n"
-                                : [ sum0 ] "+f"(sum[0].f64),
-                                  [ sum1 ] "+f"(sum[1].f64),
-                                  [ sum2 ] "+f"(sum[2].f64),
-                                  [ sum3 ] "+f"(sum[3].f64),
-                                  [ sum4 ] "+f"(sum[4].f64),
-                                  [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                                  [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                                  [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                                  [ reduce_reg3 ] "+f"(reduce_reg[3]),
-                                  [ reduce_reg4 ] "+f"(reduce_reg[4])
-                                : [ n_frep ] "r"(
-                                    dim_kernel_x / 2 * dim_kernel_y - 1)
+                                : [sum0] "+f"(sum[0].f64),
+                                  [sum1] "+f"(sum[1].f64),
+                                  [sum2] "+f"(sum[2].f64),
+                                  [sum3] "+f"(sum[3].f64),
+                                  [sum4] "+f"(sum[4].f64),
+                                  [reduce_reg0] "+f"(reduce_reg[0]),
+                                  [reduce_reg1] "+f"(reduce_reg[1]),
+                                  [reduce_reg2] "+f"(reduce_reg[2]),
+                                  [reduce_reg3] "+f"(reduce_reg[3]),
+                                  [reduce_reg4] "+f"(reduce_reg[4])
+                                : [n_frep] "r"(dim_kernel_x / 2 * dim_kernel_y -
+                                               1)
                                 : "ft0", "ft1", "ft2");
                             break;
                         case 4:
@@ -1477,16 +1447,16 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
                                 "vfsum.s %[reduce_reg1], %[sum1] \n"
                                 "vfsum.s %[reduce_reg2], %[sum2] \n"
                                 "vfsum.s %[reduce_reg3], %[sum3] \n"
-                                : [ sum0 ] "+f"(sum[0].f64),
-                                  [ sum1 ] "+f"(sum[1].f64),
-                                  [ sum2 ] "+f"(sum[2].f64),
-                                  [ sum3 ] "+f"(sum[3].f64),
-                                  [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                                  [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                                  [ reduce_reg2 ] "+f"(reduce_reg[2]),
-                                  [ reduce_reg3 ] "+f"(reduce_reg[3])
-                                : [ n_frep ] "r"(
-                                    dim_kernel_x / 2 * dim_kernel_y - 1)
+                                : [sum0] "+f"(sum[0].f64),
+                                  [sum1] "+f"(sum[1].f64),
+                                  [sum2] "+f"(sum[2].f64),
+                                  [sum3] "+f"(sum[3].f64),
+                                  [reduce_reg0] "+f"(reduce_reg[0]),
+                                  [reduce_reg1] "+f"(reduce_reg[1]),
+                                  [reduce_reg2] "+f"(reduce_reg[2]),
+                                  [reduce_reg3] "+f"(reduce_reg[3])
+                                : [n_frep] "r"(dim_kernel_x / 2 * dim_kernel_y -
+                                               1)
                                 : "ft0", "ft1", "ft2");
                             break;
                         case 3:
@@ -1500,14 +1470,14 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
                                 "vfsum.s %[reduce_reg0], %[sum0] \n"
                                 "vfsum.s %[reduce_reg1], %[sum1] \n"
                                 "vfsum.s %[reduce_reg2], %[sum2] \n"
-                                : [ sum0 ] "+f"(sum[0].f64),
-                                  [ sum1 ] "+f"(sum[1].f64),
-                                  [ sum2 ] "+f"(sum[2].f64),
-                                  [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                                  [ reduce_reg1 ] "+f"(reduce_reg[1]),
-                                  [ reduce_reg2 ] "+f"(reduce_reg[2])
-                                : [ n_frep ] "r"(
-                                    dim_kernel_x / 2 * dim_kernel_y - 1)
+                                : [sum0] "+f"(sum[0].f64),
+                                  [sum1] "+f"(sum[1].f64),
+                                  [sum2] "+f"(sum[2].f64),
+                                  [reduce_reg0] "+f"(reduce_reg[0]),
+                                  [reduce_reg1] "+f"(reduce_reg[1]),
+                                  [reduce_reg2] "+f"(reduce_reg[2])
+                                : [n_frep] "r"(dim_kernel_x / 2 * dim_kernel_y -
+                                               1)
                                 : "ft0", "ft1", "ft2");
                             break;
                         case 2:
@@ -1519,12 +1489,12 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
                                 // Sum reduce vector
                                 "vfsum.s %[reduce_reg0], %[sum0] \n"
                                 "vfsum.s %[reduce_reg1], %[sum1] \n"
-                                : [ sum0 ] "+f"(sum[0].f64),
-                                  [ sum1 ] "+f"(sum[1].f64),
-                                  [ reduce_reg0 ] "+f"(reduce_reg[0]),
-                                  [ reduce_reg1 ] "+f"(reduce_reg[1])
-                                : [ n_frep ] "r"(
-                                    dim_kernel_x / 2 * dim_kernel_y - 1)
+                                : [sum0] "+f"(sum[0].f64),
+                                  [sum1] "+f"(sum[1].f64),
+                                  [reduce_reg0] "+f"(reduce_reg[0]),
+                                  [reduce_reg1] "+f"(reduce_reg[1])
+                                : [n_frep] "r"(dim_kernel_x / 2 * dim_kernel_y -
+                                               1)
                                 : "ft0", "ft1", "ft2");
                             break;
                         case 1:
@@ -1534,10 +1504,10 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
                                 "vfmac.s %[sum0], ft0, ft1 \n"
                                 // Sum reduce vector
                                 "vfsum.s %[reduce_reg0], %[sum0] \n"
-                                : [ sum0 ] "+f"(sum[0].f64),
-                                  [ reduce_reg0 ] "+f"(reduce_reg[0])
-                                : [ n_frep ] "r"(
-                                    dim_kernel_x / 2 * dim_kernel_y - 1)
+                                : [sum0] "+f"(sum[0].f64), [reduce_reg0] "+f"(
+                                                               reduce_reg[0])
+                                : [n_frep] "r"(dim_kernel_x / 2 * dim_kernel_y -
+                                               1)
                                 : "ft0", "ft1", "ft2");
                             break;
                     }
@@ -1558,23 +1528,37 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
     snrt_cluster_hw_barrier();
 
     if (flag_batch_norm | flag_relu) {
-        bn_relu(pOutBuffer, dim_out_x, dim_out_y, ch_out, out_shift_mul_factor,
-                out_clip, k, lambda, flag_relu, flag_batch_norm, compute_id,
-                compute_num);
+        bn_relu(pOutBuffer, dim_out_x, dim_out_y, ch_out, k, lambda, flag_relu, flag_batch_norm);
     }
 }
 
 void __attribute__((noinline))
 bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y,
-        const uint16_t ch, float out_shift_mul_factor, float out_clip, float* k,
-        float* lambda, int flag_relu, int flag_batch_norm, int compute_id,
-        int compute_num) {
-    // Refernce Loops
+        const uint16_t ch, float* k, float* lambda, int flag_relu,
+        int flag_batch_norm) {
+    // Parallelization/Pipelining parameters
+    const uint32_t compute_id = snrt_cluster_compute_core_idx();
+    const uint32_t compute_num =
+        (snrt_cluster_compute_core_num()) ? snrt_cluster_compute_core_num() : 1;
+    // BN & ReLU require 3 instructions. Unrolling by 4 gives as 12 instruction
+    // which is still feasible with a FPU sequencer that holds 16 instructions
+    const uint32_t n_unroll = 4;
+    const uint32_t cleanup_unroll = dim_y % n_unroll;
+
+    // Feature map (H x W x C)
+    const uint32_t co_stride = 1;
+    const uint32_t w_stride = co_stride * ch;
+    const uint32_t h_stride = w_stride * dim_x;
+
+    // Reference Loops
     // for (int co = 0; co < ch_out; co++) {
-    //     for (int y = 0; y < dim_out_y; y++) {
+    //     for (int y0 = 0; y0 < dim_out_y0; y+=n_unroll) {
     //         for (int x = 0; x < dim_out_x; x++) {
-    //             pOutBuffer[y][x][co] =  max(pOutBuffer[y][x][co] * k[co]
-    //             + l[co], 0);
+    //              for (int y1 = 0; y1 < n_unroll; y1++) {
+    //                  y = y0 * n_unroll + y1;
+    //                  pOutBuffer[y][x][co] =  max(pOutBuffer[y][x][co] * k[co]
+    //                      + l[co], 0);
+    //                  }
     //         }
     //     }
     // }
@@ -1582,77 +1566,224 @@ bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y,
     // Ouput channels are distributed across cores, SIMD operates on pairs
     // of 2 One SSR reads, while the other SSR writes back to the same
     // location
-    snrt_ssr_loop_2d(SNRT_SSR_DM0, dim_x * dim_y, ch / compute_num / 2,
-                     sizeof(float) * ch, sizeof(v2s) * compute_num);
-    snrt_ssr_loop_2d(SNRT_SSR_DM1, dim_x * dim_y, ch / compute_num / 2,
-                     sizeof(float) * ch, sizeof(v2s) * compute_num);
+
+    const uint32_t ssr_b[4] = {n_unroll, dim_x, dim_y / n_unroll,
+                               (ch + compute_num - 1) / compute_num / 2};
+    const uint32_t ssr_i[4] = {
+        h_stride * sizeof(float), w_stride * sizeof(float),
+        n_unroll * h_stride * sizeof(float), compute_num * sizeof(v2s)};
+
+    snrt_ssr_loop_4d(SNRT_SSR_DM0, ssr_b[0], ssr_b[1], ssr_b[2], ssr_b[3],
+                     ssr_i[0], ssr_i[1], ssr_i[2], ssr_i[3]);
+    snrt_ssr_loop_4d(SNRT_SSR_DM1, ssr_b[0], ssr_b[1], ssr_b[2], ssr_b[3],
+                     ssr_i[0], ssr_i[1], ssr_i[2], ssr_i[3]);
     snrt_ssr_repeat(SNRT_SSR_DM1, 1);  // Disable repeat from conv2d
 
-    snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_2D, &pBuffer[compute_id * 2]);
-    snrt_ssr_write(SNRT_SSR_DM1, SNRT_SSR_2D, &pBuffer[compute_id * 2]);
+    snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_4D, &pBuffer[compute_id * 2]);
+    snrt_ssr_write(SNRT_SSR_DM1, SNRT_SSR_4D, &pBuffer[compute_id * 2]);
 
-    for (uint32_t co = compute_id; co < ch / 2; co += compute_num) {
-        register v2s current_lambda = ((v2s*)lambda)[co];
-        register v2s current_k = ((v2s*)k)[co];
-        register v2s zero = (v2s)0.0;
+    // Regular path with max unrolling is only done if dim_y
+    // is at least n_unroll
+    if (dim_y >= n_unroll) {
 
-        register v2s tmp;
+        for (uint32_t co = compute_id; co < ch / 2; co += compute_num) {
+            volatile register v2s current_lambda = ((v2s*)lambda)[co];
+            volatile register v2s current_k = ((v2s*)k)[co];
+            volatile register v2s zero = (v2s)0.0;
 
-        register v2s shiftiboy;
-        register v2s clipiboy;
+            volatile register v2s tmp[n_unroll];
 
-        // TODO: unroll to solve RAW dependencies
-        if (flag_batch_norm && flag_relu) {
-            asm volatile(
-                "csrsi 0x7C0, 1\n"
-                "vfcpka.s.s %[shiftiboy], %[shift], %[shift]\n"
-                "vfcpka.s.s %[clipiboy], %[clip], %[clip]\n"
-                "frep.o %[n_frep], 5, 0, 0\n"
-                "vfmul.s %[tmp], ft0, %[k]\n"             // BN kappa
-                "vfadd.s %[tmp], %[tmp], %[l]\n"          // BN lambda
-                "vfmax.s %[tmp], %[tmp], %[zero]\n"       // ReLU
-                "vfmul.s %[tmp], %[tmp], %[shiftiboy]\n"  // TODO: remove
-                "vfmin.s ft1, %[tmp], %[clipiboy]\n"      // TODO: remove
-                "csrci 0x7C0, 1\n"
-                : [ tmp ] "+f"(tmp.f64), [ shiftiboy ] "+f"(shiftiboy.vec),
-                  [ clipiboy ] "+f"(clipiboy.vec)
-                : [ k ] "f"(current_k.f64), [ l ] "f"(current_lambda.f64),
-                  [ zero ] "f"(zero.f64), [ shift ] "f"(out_shift_mul_factor),
-                  [ clip ] "f"(out_clip), [ n_frep ] "r"(dim_x * dim_y - 1)
-                : "ft0", "ft1", "ft2");
-        } else if (flag_batch_norm && !flag_relu) {
-            asm volatile(
-                "csrsi 0x7C0, 1\n"
-                "vfcpka.s.s %[shiftiboy], %[shift], %[shift]\n"
-                "vfcpka.s.s %[clipiboy], %[clip], %[clip]\n"
-                "frep.o %[n_frep], 4, 0, 0\n"
-                "vfmul.s %[tmp], ft0, %[k]\n"             // BN kappa
-                "vfadd.s %[tmp], %[tmp], %[l]\n"          // BN lambda
-                "vfmul.s %[tmp], %[tmp], %[shiftiboy]\n"  // TODO: remove
-                "vfmin.s ft1, %[tmp], %[clipiboy]\n"      // TODO: remove
-                "csrci 0x7C0, 1\n"
-                : [ tmp ] "+f"(tmp.f64), [ k ] "+f"(current_k.f64),
-                  [ l ] "+f"(current_lambda.f64),
-                  [ shiftiboy ] "+f"(shiftiboy.vec),
-                  [ clipiboy ] "+f"(clipiboy.vec)
-                : [ n_frep ] "r"(dim_x * dim_y - 1),
-                  [ shift ] "f"(out_shift_mul_factor), [ clip ] "f"(out_clip)
-                : "ft0", "ft1", "ft2");
-        } else if (!flag_batch_norm && flag_relu) {
-            asm volatile(
-                "csrsi 0x7C0, 1\n"
-                "vfcpka.s.s %[shiftiboy], %[shift], %[shift]\n"
-                "vfcpka.s.s %[clipiboy], %[clip], %[clip]\n"
-                "frep.o %[n_frep], 3, 0, 0 \n"
-                "vfmax.s %[tmp], ft0, %[zero]\n"          // ReLU
-                "vfmul.s %[tmp], %[tmp], %[shiftiboy]\n"  // TODO: remove
-                "vfmin.s ft1, %[tmp], %[clipiboy]\n"      // TODO: remove
-                "csrci 0x7C0, 1\n"
-                : [ tmp ] "+f"(tmp.f64), [ shiftiboy ] "+f"(shiftiboy.vec),
-                  [ clipiboy ] "+f"(clipiboy.vec)
-                : [ zero ] "f"(zero.f64), [ shift ] "f"(out_shift_mul_factor),
-                  [ clip ] "f"(out_clip), [ n_frep ] "r"(dim_x * dim_y - 1)
-                : "ft0", "ft1", "ft2");
+            snrt_ssr_enable();
+
+            if (flag_batch_norm && flag_relu) {
+                asm volatile(
+                    "frep.o %[n_frep], 12, 0, 0\n"
+                    "vfmul.s %[tmp0], ft0, %[k]\n"      // BN kappa
+                    "vfmul.s %[tmp1], ft0, %[k]\n"      // BN kappa
+                    "vfmul.s %[tmp2], ft0, %[k]\n"      // BN kappa
+                    "vfmul.s %[tmp3], ft0, %[k]\n"      // BN kappa
+                    "vfadd.s %[tmp0], %[tmp0], %[l]\n"  // BN lambda
+                    "vfadd.s %[tmp1], %[tmp1], %[l]\n"  // BN lambda
+                    "vfadd.s %[tmp2], %[tmp2], %[l]\n"  // BN lambda
+                    "vfadd.s %[tmp3], %[tmp3], %[l]\n"  // BN lambda
+                    "vfmax.s ft1, %[tmp0], %[zero]\n"   // ReLU
+                    "vfmax.s ft1, %[tmp1], %[zero]\n"   // ReLU
+                    "vfmax.s ft1, %[tmp2], %[zero]\n"   // ReLU
+                    "vfmax.s ft1, %[tmp3], %[zero]\n"   // ReLU
+                    : [tmp0] "+f"(tmp[0].vec), [tmp1] "+f"(tmp[1].vec),
+                    [tmp2] "+f"(tmp[2].vec), [tmp3] "+f"(tmp[3].vec)
+                    : [k] "f"(current_k.vec), [l] "f"(current_lambda.vec),
+                    [zero] "f"(zero.vec),
+                    [n_frep] "r"(dim_x * (dim_y / n_unroll) - 1)
+                    : "ft0", "ft1", "ft2");
+            } else if (flag_batch_norm && !flag_relu) {
+                asm volatile(
+                    "frep.o %[n_frep], 8, 0, 0\n"
+                    "vfmul.s %[tmp0], ft0, %[k]\n"  // BN kappa
+                    "vfmul.s %[tmp1], ft0, %[k]\n"  // BN kappa
+                    "vfmul.s %[tmp2], ft0, %[k]\n"  // BN kappa
+                    "vfmul.s %[tmp3], ft0, %[k]\n"  // BN kappa
+                    "vfadd.s ft1, %[tmp0], %[l]\n"  // BN lambda
+                    "vfadd.s ft1, %[tmp1], %[l]\n"  // BN lambda
+                    "vfadd.s ft1, %[tmp2], %[l]\n"  // BN lambda
+                    "vfadd.s ft1, %[tmp3], %[l]\n"  // BN lambda
+                    : [tmp0] "+f"(tmp[0].f64), [tmp1] "+f"(tmp[1].f64),
+                    [tmp2] "+f"(tmp[2].f64), [tmp3] "+f"(tmp[3].f64)
+                    : [k] "f"(current_k.f64), [l] "f"(current_lambda.f64), [n_frep] "r"(dim_x * (dim_y / n_unroll) - 1)
+                    : "ft0", "ft1", "ft2");
+            } else if (!flag_batch_norm && flag_relu) {
+                asm volatile(
+                    "frep.o %[n_frep], 4, 0, 0\n"
+                    "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                    "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                    "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                    "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                    ::[k] "f"(current_k.f64),
+                    [l] "f"(current_lambda.f64), [zero] "f"(zero.f64),
+                    [n_frep] "r"(dim_x * (dim_y / n_unroll) - 1)
+                    : "ft0", "ft1", "ft2");
+            }
+            snrt_ssr_disable();
+        }
+    }
+
+    if (cleanup_unroll) {
+
+        // 1st and 3rd SSR dimensions are dependent on n_unroll, in the clean up
+        // loops they need be adjusted to cleanup_unroll
+        snrt_ssr_loop_4d(SNRT_SSR_DM0, cleanup_unroll, ssr_b[1], 1, ssr_b[3],
+                        ssr_i[0], ssr_i[1], cleanup_unroll * h_stride * sizeof(float), ssr_i[3]);
+        snrt_ssr_loop_4d(SNRT_SSR_DM1, cleanup_unroll, ssr_b[1], 1, ssr_b[3],
+                        ssr_i[0], ssr_i[1], cleanup_unroll * h_stride * sizeof(float), ssr_i[3]);
+        snrt_ssr_repeat(SNRT_SSR_DM1, 1);  // Disable repeat from conv2d
+
+        uint32_t h_cleanup_index = dim_y - cleanup_unroll;
+
+        snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_4D, &pBuffer[h_cleanup_index * h_stride + compute_id * 2]);
+        snrt_ssr_write(SNRT_SSR_DM1, SNRT_SSR_4D, &pBuffer[h_cleanup_index * h_stride + compute_id * 2]);
+
+        for (uint32_t co = compute_id; co < ch / 2; co += compute_num) {
+            volatile register v2s current_lambda = ((v2s*)lambda)[co];
+            volatile register v2s current_k = ((v2s*)k)[co];
+            volatile register v2s zero = (v2s)0.0;
+
+            volatile register v2s tmp[n_unroll];
+
+            snrt_ssr_enable();
+
+            switch (cleanup_unroll) {
+                case 3:
+                    if (flag_batch_norm && flag_relu) {
+                        asm volatile(
+                            "frep.o %[n_frep], 9, 0, 0\n"
+                            "vfmul.s %[tmp0], ft0, %[k]\n"      // BN kappa
+                            "vfmul.s %[tmp1], ft0, %[k]\n"      // BN kappa
+                            "vfmul.s %[tmp2], ft0, %[k]\n"      // BN kappa
+                            "vfadd.s %[tmp0], %[tmp0], %[l]\n"  // BN lambda
+                            "vfadd.s %[tmp1], %[tmp1], %[l]\n"  // BN lambda
+                            "vfadd.s %[tmp2], %[tmp2], %[l]\n"  // BN lambda
+                            "vfmax.s ft1, %[tmp0], %[zero]\n"   // ReLU
+                            "vfmax.s ft1, %[tmp1], %[zero]\n"   // ReLU
+                            "vfmax.s ft1, %[tmp2], %[zero]\n"   // ReLU
+                            : [tmp0] "+f"(tmp[0].vec), [tmp1] "+f"(tmp[1].vec),
+                            [tmp2] "+f"(tmp[2].vec)
+                            : [k] "f"(current_k.vec), [l] "f"(current_lambda.vec),
+                            [zero] "f"(zero.vec),
+                            [n_frep] "r"(dim_x - 1)
+                            : "ft0", "ft1", "ft2");
+                    } else if (flag_batch_norm && !flag_relu) {
+                        asm volatile(
+                            "frep.o %[n_frep], 6, 0, 0\n"
+                            "vfmul.s %[tmp0], ft0, %[k]\n"  // BN kappa
+                            "vfmul.s %[tmp1], ft0, %[k]\n"  // BN kappa
+                            "vfmul.s %[tmp2], ft0, %[k]\n"  // BN kappa
+                            "vfadd.s ft1, %[tmp0], %[l]\n"  // BN lambda
+                            "vfadd.s ft1, %[tmp1], %[l]\n"  // BN lambda
+                            "vfadd.s ft1, %[tmp2], %[l]\n"  // BN lambda
+                            : [tmp0] "+f"(tmp[0].f64), [tmp1] "+f"(tmp[1].f64),
+                            [tmp2] "+f"(tmp[2].f64)
+                            : [k] "f"(current_k.f64), [l] "f"(current_lambda.f64), [n_frep] "r"(dim_x - 1)
+                            : "ft0", "ft1", "ft2");
+                    } else if (!flag_batch_norm && flag_relu) {
+                        asm volatile(
+                            "frep.o %[n_frep], 3, 0, 0\n"
+                            "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                            "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                            "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                            ::[k] "f"(current_k.f64),
+                            [l] "f"(current_lambda.f64), [zero] "f"(zero.f64),
+                            [n_frep] "r"(dim_x - 1)
+                            : "ft0", "ft1", "ft2");
+                    }
+                    break;
+                case 2:
+                    if (flag_batch_norm && flag_relu) {
+                        asm volatile(
+                            "frep.o %[n_frep], 6, 0, 0\n"
+                            "vfmul.s %[tmp0], ft0, %[k]\n"      // BN kappa
+                            "vfmul.s %[tmp1], ft0, %[k]\n"      // BN kappa
+                            "vfadd.s %[tmp0], %[tmp0], %[l]\n"  // BN lambda
+                            "vfadd.s %[tmp1], %[tmp1], %[l]\n"  // BN lambda
+                            "vfmax.s ft1, %[tmp0], %[zero]\n"   // ReLU
+                            "vfmax.s ft1, %[tmp1], %[zero]\n"   // ReLU
+                            : [tmp0] "+f"(tmp[0].vec), [tmp1] "+f"(tmp[1].vec)
+                            : [k] "f"(current_k.vec), [l] "f"(current_lambda.vec),
+                            [zero] "f"(zero.vec),
+                            [n_frep] "r"(dim_x - 1)
+                            : "ft0", "ft1", "ft2");
+                    } else if (flag_batch_norm && !flag_relu) {
+                        asm volatile(
+                            "frep.o %[n_frep], 4, 0, 0\n"
+                            "vfmul.s %[tmp0], ft0, %[k]\n"  // BN kappa
+                            "vfmul.s %[tmp1], ft0, %[k]\n"  // BN kappa
+                            "vfadd.s ft1, %[tmp0], %[l]\n"  // BN lambda
+                            "vfadd.s ft1, %[tmp1], %[l]\n"  // BN lambda
+                            : [tmp0] "+f"(tmp[0].f64), [tmp1] "+f"(tmp[1].f64)
+                            : [k] "f"(current_k.f64), [l] "f"(current_lambda.f64), [n_frep] "r"(dim_x - 1)
+                            : "ft0", "ft1", "ft2");
+                    } else if (!flag_batch_norm && flag_relu) {
+                        asm volatile(
+                            "frep.o %[n_frep], 2, 0, 0\n"
+                            "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                            "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                            ::[k] "f"(current_k.f64),
+                            [l] "f"(current_lambda.f64), [zero] "f"(zero.f64),
+                            [n_frep] "r"(dim_x - 1)
+                            : "ft0", "ft1", "ft2");
+                    }
+                    break;
+                case 1:
+                    if (flag_batch_norm && flag_relu) {
+                        asm volatile(
+                            "frep.o %[n_frep], 3, 0, 0\n"
+                            "vfmul.s %[tmp0], ft0, %[k]\n"      // BN kappa
+                            "vfadd.s %[tmp0], %[tmp0], %[l]\n"  // BN lambda
+                            "vfmax.s ft1, %[tmp0], %[zero]\n"   // ReLU
+                            : [tmp0] "+f"(tmp[0].vec)
+                            : [k] "f"(current_k.vec), [l] "f"(current_lambda.vec),
+                            [zero] "f"(zero.vec),
+                            [n_frep] "r"(dim_x - 1)
+                            : "ft0", "ft1", "ft2");
+                    } else if (flag_batch_norm && !flag_relu) {
+                        asm volatile(
+                            "frep.o %[n_frep], 2, 0, 0\n"
+                            "vfmul.s %[tmp0], ft0, %[k]\n"  // BN kappa
+                            "vfadd.s ft1, %[tmp0], %[l]\n"  // BN lambda
+                            : [tmp0] "+f"(tmp[0].f64)
+                            : [k] "f"(current_k.f64), [l] "f"(current_lambda.f64), [n_frep] "r"(dim_x - 1)
+                            : "ft0", "ft1", "ft2");
+                    } else if (!flag_batch_norm && flag_relu) {
+                        asm volatile(
+                            "frep.o %[n_frep], 1, 0, 0\n"
+                            "vfmax.s ft1, ft0, %[zero]\n"  // ReLU
+                            ::[k] "f"(current_k.f64),
+                            [l] "f"(current_lambda.f64), [zero] "f"(zero.f64),
+                            [n_frep] "r"(dim_x - 1)
+                            : "ft0", "ft1", "ft2");
+                    }
+                    break;
+            }
+            snrt_ssr_disable();
         }
     }
 }

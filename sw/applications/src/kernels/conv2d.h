@@ -193,6 +193,5 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
  */
 void __attribute__((noinline))
 bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y,
-        const uint16_t ch, float out_shift_mul_factor, float out_clip, float* k,
-        float* lambda, int flag_relu, int flag_batch_norm, int compute_id,
-        int compute_num);
+        const uint16_t ch, float* k, float* lambda, int flag_relu,
+        int flag_batch_norm);
