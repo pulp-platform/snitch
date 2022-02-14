@@ -51,7 +51,7 @@ module snitch_ptw import snitch_pkg::*; #(
 
   logic [1:0] lvl_d, lvl_q;
 
-  `FFSRN(state_q, state_d, Idle, clk_i, rst_ni)
+  `FFARN(state_q, state_d, Idle, clk_i, rst_ni)
 
   pte_sv32_t pte;
   l0_pte_t pte_d, pte_q;

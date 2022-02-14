@@ -65,7 +65,7 @@ module snitch_l0_tlb import snitch_pkg::*; #(
 
   l0_pte_t pte;
 
-  `FFSR(tag_valid_q, tag_valid_d, '0, clk_i, rst_i)
+  `FFAR(tag_valid_q, tag_valid_d, '0, clk_i, rst_i)
   `FFNR(tag_q, tag_d, clk_i)
   `FFNR(pte_q, pte_d, clk_i)
 
@@ -73,8 +73,8 @@ module snitch_l0_tlb import snitch_pkg::*; #(
   logic miss_d, miss_q; // we got a miss
   logic refill_d, refill_q; // refill request is underway
 
-  `FFSR(miss_q, miss_d, '0, clk_i, rst_i)
-  `FFSR(refill_q, refill_d, '0, clk_i, rst_i)
+  `FFAR(miss_q, miss_d, '0, clk_i, rst_i)
+  `FFAR(refill_q, refill_d, '0, clk_i, rst_i)
 
   // Tag Comparison
   for (genvar i = 0; i < NrEntries; i++) begin : gen_tag_cmp
@@ -149,7 +149,7 @@ module snitch_l0_tlb import snitch_pkg::*; #(
 
   // Eviction strategy: round-robin
   if (NrEntries > 1) begin : gen_evict_counter
-    `FFSR(evict_q, evict_d, '0, clk_i, rst_i)
+    `FFAR(evict_q, evict_d, '0, clk_i, rst_i)
     always_comb begin
       evict_d = evict_q;
       if (valid_o && ready_i) evict_d++;

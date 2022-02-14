@@ -267,27 +267,27 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   `FFNR(tvec_q, tvec_d, clk_i)
   `FFNR(epc_q, epc_d, clk_i)
   `FFNR(satp_q, satp_d, clk_i)
-  `FFSR(cause_q, cause_d, '0, clk_i, rst_i)
-  `FFSR(cause_irq_q, cause_irq_d, '0, clk_i, rst_i)
-  `FFSR(priv_lvl_q, priv_lvl_d, snitch_pkg::PrivLvlM, clk_i, rst_i)
-  `FFSR(mpp_q, mpp_d, snitch_pkg::PrivLvlU, clk_i, rst_i)
-  `FFSR(spp_q, spp_d, 1'b0, clk_i, rst_i)
-  `FFSR(ie_q, ie_d, '0, clk_i, rst_i)
-  `FFSR(pie_q, pie_d, '0, clk_i, rst_i)
+  `FFAR(cause_q, cause_d, '0, clk_i, rst_i)
+  `FFAR(cause_irq_q, cause_irq_d, '0, clk_i, rst_i)
+  `FFAR(priv_lvl_q, priv_lvl_d, snitch_pkg::PrivLvlM, clk_i, rst_i)
+  `FFAR(mpp_q, mpp_d, snitch_pkg::PrivLvlU, clk_i, rst_i)
+  `FFAR(spp_q, spp_d, 1'b0, clk_i, rst_i)
+  `FFAR(ie_q, ie_d, '0, clk_i, rst_i)
+  `FFAR(pie_q, pie_d, '0, clk_i, rst_i)
   // Interrupts
-  `FFSR(eie_q, eie_d, '0, clk_i, rst_i)
-  `FFSR(tie_q, tie_d, '0, clk_i, rst_i)
-  `FFSR(sie_q, sie_d, '0, clk_i, rst_i)
-  `FFSR(cie_q, cie_d, '0, clk_i, rst_i)
-  `FFSR(seip_q, seip_d, '0, clk_i, rst_i)
-  `FFSR(stip_q, stip_d, '0, clk_i, rst_i)
-  `FFSR(ssip_q, ssip_d, '0, clk_i, rst_i)
-  `FFSR(scip_q, scip_d, '0, clk_i, rst_i)
+  `FFAR(eie_q, eie_d, '0, clk_i, rst_i)
+  `FFAR(tie_q, tie_d, '0, clk_i, rst_i)
+  `FFAR(sie_q, sie_d, '0, clk_i, rst_i)
+  `FFAR(cie_q, cie_d, '0, clk_i, rst_i)
+  `FFAR(seip_q, seip_d, '0, clk_i, rst_i)
+  `FFAR(stip_q, stip_d, '0, clk_i, rst_i)
+  `FFAR(ssip_q, ssip_d, '0, clk_i, rst_i)
+  `FFAR(scip_q, scip_d, '0, clk_i, rst_i)
 
-  `FFSR(dcsr_q, dcsr_d, '0, clk_i, rst_i)
+  `FFAR(dcsr_q, dcsr_d, '0, clk_i, rst_i)
   `FFNR(dpc_q, dpc_d, clk_i)
   `FFNR(dscratch_q, dscratch_d, clk_i)
-  `FFSR(debug_q, debug_d, '0, clk_i, rst_i) // Debug mode
+  `FFAR(debug_q, debug_d, '0, clk_i, rst_i) // Debug mode
 
   typedef struct packed {
     fpnew_pkg::roundmode_e frm;
@@ -300,21 +300,21 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign fpu_fmt_mode_o = fcsr_q.fmode;
 
   // Registers
-  `FFSR(pc_q, pc_d, BootAddr, clk_i, rst_i)
-  `FFSR(wfi_q, wfi_d, '0, clk_i, rst_i)
-  `FFSR(sb_q, sb_d, '0, clk_i, rst_i)
-  `FFSR(fcsr_q, fcsr_d, '0, clk_i, rst_i)
+  `FFAR(pc_q, pc_d, BootAddr, clk_i, rst_i)
+  `FFAR(wfi_q, wfi_d, '0, clk_i, rst_i)
+  `FFAR(sb_q, sb_d, '0, clk_i, rst_i)
+  `FFAR(fcsr_q, fcsr_d, '0, clk_i, rst_i)
 
   // performance counter
   `ifdef SNITCH_ENABLE_PERF
   logic [63:0] cycle_q;
   logic [63:0] instret_q;
-  `FFSR(cycle_q, cycle_q + 1, '0, clk_i, rst_i)
-  `FFLSR(instret_q, instret_q + 1, !stall, '0, clk_i, rst_i)
+  `FFAR(cycle_q, cycle_q + 1, '0, clk_i, rst_i)
+  `FFLAR(instret_q, instret_q + 1, !stall, '0, clk_i, rst_i)
   `endif
 
   logic [AddrWidth-32-1:0] mseg_q, mseg_d;
-  `FFSR(mseg_q, mseg_d, '0, clk_i, rst_i)
+  `FFAR(mseg_q, mseg_d, '0, clk_i, rst_i)
 
   // accelerator offloading interface
   // register int destination in scoreboard

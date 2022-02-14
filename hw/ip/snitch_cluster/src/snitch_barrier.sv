@@ -74,7 +74,7 @@ module snitch_barrier
   end
 
   for (genvar i = 0; i < NrPorts; i++) begin : gen_ff
-    `FFSRN(state_q[i], state_d[i], Idle, clk_i, rst_ni)
+    `FFARN(state_q[i], state_d[i], Idle, clk_i, rst_ni)
   end
 
 endmodule
