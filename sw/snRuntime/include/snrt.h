@@ -68,7 +68,7 @@ extern void snrt_cluster_sw_barrier();
 extern void snrt_global_barrier();
 extern void snrt_barrier(struct snrt_barrier *barr, uint32_t n);
 
-extern uint32_t __attribute__((pure)) snrt_hartid();
+static inline uint32_t __attribute__((pure)) snrt_hartid();
 struct snrt_team_root *snrt_current_team();
 extern struct snrt_peripherals *snrt_peripherals();
 extern uint32_t snrt_global_core_base_hartid();
@@ -167,6 +167,16 @@ static inline __attribute__((noreturn)) void snrt_exit(int status) {
     (void)status;
     while (1)
         ;
+}
+
+//================================================================================
+// Team functions
+//================================================================================
+
+static inline uint32_t __attribute__((pure)) snrt_hartid() {
+    uint32_t hartid;
+    asm("csrr %0, mhartid" : "=r"(hartid));
+    return hartid;
 }
 
 //================================================================================
