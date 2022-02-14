@@ -181,15 +181,10 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
  * @param dim_x width of feature map
  * @param dim_y height of feature map
  * @param ch number of channels (SIMD restricts multiple of 2)
- * @param out_shift_mul_factor shift factor by multiplication (to be
- * removed)
- * @param out_clip clipping factor (to be removed)
  * @param k multiplication factor for BatchNorm
  * @param lambda bias for BatchNorm
  * @param flag_relu RELU activation flag
  * @param flag_batch_norm BatchNorm flag
- * @param compute_id compute hart id
- * @param compute_num number of worker cores
  */
 void __attribute__((noinline))
 bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y,
