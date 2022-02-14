@@ -12,12 +12,6 @@ __thread uint32_t _snrt_core_idx;
 const uint32_t _snrt_team_size __attribute__((section(".rodata"))) =
     sizeof(struct snrt_team_root);
 
-uint32_t __attribute__((pure)) snrt_hartid() {
-    uint32_t hartid;
-    asm("csrr %0, mhartid" : "=r"(hartid));
-    return hartid;
-}
-
 struct snrt_team_root *snrt_current_team() {
     return _snrt_team_current->root;
 }
