@@ -80,15 +80,20 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   logic   idx_isect_ena;
   index_t idx_isect_q;
 
-  // Index FIFO credit counter
-  logic idx_cred_take, idx_cred_give, idx_cred_clear;
-  logic idx_cred_left, idx_cred_full;
-
   // Index byte (serializer/deserializer) counter
   logic     idx_bytecnt_ena;
   bytecnt_t idx_bytecnt_d, idx_bytecnt_q;
   bytecnt_t idx_bytecnt_next;
   logic     idx_bytecnt_rovr, idx_bytecnt_rovr_q;
+
+  // Index port handshakes
+  logic idx_q_hs, idx_p_hs;
+  assign idx_q_hs = idx_req_o.q_valid & idx_rsp_i.q_ready;
+  assign idx_p_hs = idx_rsp_i.p_valid;
+
+  // Output port handshake
+  logic mem_hs;
+  assign mem_hs = mem_valid_o & mem_ready_i;
 
   if (Cfg.IsectSlave) begin : gen_isect_slave
 
@@ -99,9 +104,8 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     data_bte_t  idx_data_mask, idx_data_shifted;
     data_bte_t  idx_data_d, idx_data_q;
 
-    // Track whether index writing done and waiting for address emission
-    logic idx_done_set, idx_done_clear;
-    logic idx_done_q, idx_done_flag_q;
+    // Last index handshaked, waiting for new job
+    logic done_pending_q;
 
     // Data from intersector
     index_t isect_slv_idx;
@@ -111,7 +115,11 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
     // Handshaking at request egresses
     logic idx_req_stall;
-    logic mem_hs;
+
+    // Decoupling done FIFO
+    logic done_in_ready;
+    logic done_out_valid, done_out_ready;
+    logic done_out;
 
     // Index TCDM request (write-only)
     assign idx_req_o.q = '{addr: idx_addr, write: 1'b1,
@@ -121,7 +129,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     assign idx_req_o.q_valid = idx_word_valid_q;
 
     // Draw new index data address on each write request
-    assign natit_ready_o = idx_req_o.q_valid & idx_rsp_i.q_ready;
+    assign natit_ready_o = idx_q_hs;
 
     // Cut timing paths from intersector slave port
     spill_register #(
@@ -138,26 +146,21 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
       .data_o   ( {isect_slv_idx, isect_slv_done} )
     );
 
-    // Index counter decouples address emission from index requests.
-    // idx_done_q tracks final done word once no more indices are emitted.
-    // idx_done_flag_q is cleared once the done flag is handshaked.
-    assign isect_slv_hs   = isect_slv_valid & isect_slv_ready;
-    assign mem_hs         = mem_valid_o & mem_ready_i;
-    assign idx_done_set   = isect_slv_hs & isect_slv_done;
-    assign idx_cred_give  = isect_slv_hs & ~isect_slv_done;
-    assign idx_cred_take  = mem_hs & ~mem_done_o;
-    assign idx_done_clear = mem_hs & mem_done_o;
-    assign idx_cred_clear = 1'b0;
-
-    `FFLARNC(idx_done_q, 1'b1, idx_done_set, cfg_done_i, 1'b0, clk_i, rst_ni)
-    `FFLARNC(idx_done_flag_q, 1'b1, idx_done_set, idx_done_clear, 1'b0, clk_i, rst_ni)
+    // Ready to write indices memory not stalled, FIFO ready, and job not done
+    assign idx_req_stall    = idx_req_o.q_valid & ~idx_rsp_i.q_ready;
+    assign isect_slv_ready  = ~idx_req_stall & done_in_ready & ~done_pending_q;
 
     // Advance byte counter on index pop unless done
-    assign idx_bytecnt_ena = idx_cred_give;
+    assign isect_slv_hs     = isect_slv_valid & isect_slv_ready;
+    assign idx_bytecnt_ena  = isect_slv_hs & ~isect_slv_done;
 
-    // Ready to write indices when not done, memory ready, and credits remaining
-    assign idx_req_stall    = idx_word_valid_q & ~idx_rsp_i.q_ready;
-    assign isect_slv_ready  = ~idx_cred_full & ~idx_done_q & ~idx_req_stall;
+    // Advance to next job in upstream address gen once done handshaked;
+    // Swap indirection-related shadowed registers at the same time.
+    logic cfg_indir_next;
+    assign cfg_indir_next = cfg_isect_slv_i & isect_slv_hs & isect_slv_done;
+
+    // Track when the last index word was received and we wait for upstream termination
+    `FFLARNC(done_pending_q, 1'b1, cfg_indir_next, cfg_done_i, 1'b0, clk_i, rst_ni)
 
     // Create coalescing masks
     assign idx_strb_base    = ~({(DataWidth/8){1'b1}} << (1 << cfg_size_i));
@@ -172,29 +175,53 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     // Complete word when uppermost index or last index (delayed due to coalescing regs).
     // On every word transmitted: clear validity *unless* new word loaded.
     assign idx_word_valid_d = idx_bytecnt_rovr | (~idx_bytecnt_rovr_q & isect_slv_done);
-    assign idx_word_clr     = idx_req_o.q_valid & idx_rsp_i.q_ready & ~isect_slv_hs;
+    assign idx_word_clr     = idx_q_hs & ~isect_slv_hs;
 
     `FFLARN(idx_data_q, idx_data_d, idx_bytecnt_ena,  1'b0, clk_i, rst_ni)
     `FFLARN(idx_strb_q, idx_strb_d, idx_bytecnt_ena,  1'b0, clk_i, rst_ni)
     `FFLARNC(idx_word_valid_q, idx_word_valid_d, isect_slv_hs, idx_word_clr, 1'b0, clk_i, rst_ni)
+
+    // Track done and decouple address emission from index write
+    stream_fifo #(
+      .FALL_THROUGH ( 0 ),
+      .DATA_WIDTH   ( 1 ),
+      .DEPTH        ( Cfg.IsectSlaveCredits )
+    ) i_done_fifo (
+      .clk_i,
+      .rst_ni,
+      .flush_i    ( 1'b0 ),
+      .testmode_i ( 1'b0 ),
+      .usage_o    (  ),
+      .data_i     ( isect_slv_done  ),
+      .valid_i    ( isect_slv_hs    ),
+      .ready_o    ( done_in_ready   ),
+      .data_o     ( done_out        ),
+      .valid_o    ( done_out_valid  ),
+      .ready_i    ( done_out_ready  )
+    );
+
+    assign done_out_ready = mem_ready_i;
 
     // Not an intersection master; termination is externally controlled
     assign isect_mst_req_o    = '0;
     assign natit_extraword_o  = 1'b0;
 
     // Intersector slave enable signals
-    assign isect_slv_req_o.ena  = ~(idx_done_q | cfg_done_i) & cfg_isect_slv_i;
-    assign idx_isect_ena        = idx_cred_take;
+    assign isect_slv_req_o.ena  = ~(done_pending_q | cfg_done_i) & cfg_isect_slv_i;
+    assign idx_isect_ena        = done_out_valid & done_out_ready & ~done_out;
 
     // Output to address generator
     assign mem_idx      = idx_isect_q;
     assign mem_skip     = 1'b0;
     assign mem_zero_o   = 1'b0;
     assign mem_last_o   = 1'b0;
-    assign mem_done_o   = ~idx_cred_left & idx_done_flag_q;
-    assign mem_valid_o  = idx_cred_left | mem_done_o;
+    assign mem_done_o   = done_out;
+    assign mem_valid_o  = done_out_valid;
 
   end else begin : gen_no_isect_slave
+
+    // Natural iterator
+    logic   natit_ena;
 
     // Index FIFO signals
     logic   idx_fifo_empty;
@@ -212,30 +239,77 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     bytecnt_t first_idx_byteoffs;
     bytecnt_t last_idx_byteoffs;
 
-    // Intersector master interface
+    // Intersector master
     logic isect_mst_hs;
-    logic isect_done_set, isect_done_clear;
-    logic isect_done_q;
+    logic isect_mst_dom;
+    logic isect_mst_doi_q;
+    logic isect_mst_blk_q;
+
+    // Index credit counter
+    logic idx_cred_left, idx_cred_crit;
 
     if (Cfg.IsectMaster) begin : gen_isect_master
+
+      logic idx_has_inflight;
+
+      // Count inflight index words
+      snitch_ssr_credit_counter #(
+        .NumCredits       ( Cfg.IndexCredits ),
+        .InitCreditEmpty  ( 1 )
+      ) i_mem_inflight_counter (
+        .clk_i,
+        .rst_ni,
+        .credit_o      ( ),
+        .credit_give_i ( idx_q_hs ),
+        .credit_take_i ( idx_p_hs ),
+        .credit_init_i ( 1'b0 ),
+        .credit_left_o ( idx_has_inflight ),
+        .credit_crit_o ( )
+      );
+
+      // Master interface handshake
       assign isect_mst_hs = isect_mst_req_o.valid & isect_mst_rsp_i.ready;
-      // Register tracking whether done, and possibly waiting for counterpart to finish
-      assign isect_done_set   = idx_ser_last & isect_mst_hs;
-      assign isect_done_clear = isect_mst_rsp_i.done & isect_mst_hs;
-      `FFLARNC(isect_done_q, 1'b1, isect_done_set, isect_done_clear, 1'b0, clk_i, rst_ni)
+
+      // Launch master termination cleanup when handshaking last index out or done in
+      logic isect_mst_cln_init;
+      assign isect_mst_cln_init = isect_mst_hs &
+          (isect_mst_rsp_i.done | (~cfg_flags_i.merge & idx_ser_last));
+
+      // Generate done flag for output to address generator.
+      // isect_mst_domp_q denotes the state while waiting for inflight index words; used
+      // only during intersection and ignored during merging as no idx words need flushing.
+      logic isect_mst_dom_set, isect_mst_dom_clr;
+      logic isect_mst_domp_q, isect_mst_dom_q;
+      assign isect_mst_dom_set = cfg_flags_i.merge ? isect_mst_cln_init :
+          (isect_mst_domp_q & ~idx_has_inflight);
+      assign isect_mst_dom_clr = mem_hs & isect_mst_dom_q;
+      `FFLARNC(isect_mst_domp_q, 1'b1, isect_mst_cln_init, isect_mst_dom_q, 1'b0, clk_i, rst_ni)
+      `FFLARNC(isect_mst_dom_q, 1'b1, isect_mst_dom_set, isect_mst_dom_clr, 1'b0, clk_i, rst_ni)
+      assign isect_mst_dom = isect_mst_dom_q;
+
+      // Generate done flag for intersector interface
+      logic isect_mst_doi_set, isect_mst_doi_clr;
+      assign isect_mst_doi_set = cfg_flags_i.merge ? idx_ser_last : isect_mst_cln_init;
+      assign isect_mst_doi_clr = isect_mst_hs & isect_mst_rsp_i.done;
+      `FFLARNC(isect_mst_doi_q, 1'b1, isect_mst_doi_set, isect_mst_doi_clr, 1'b0, clk_i, rst_ni)
+
+      // Block index pipeline during cleanup
+      `FFLARNC(isect_mst_blk_q, 1'b1, isect_mst_cln_init, cfg_done_i, 1'b0, clk_i, rst_ni)
+
     end else begin : gen_no_isect_master
       assign isect_mst_hs     = 1'b0;
-      assign isect_done_set   = 1'b0;
-      assign isect_done_clear = 1'b0;
-      assign isect_done_q     = 1'b0;
+      assign isect_mst_dom    = 1'b0;
+      assign isect_mst_doi_q  = 1'b0;
+      assign isect_mst_blk_q  = 1'b0;
     end
 
     // Index TCDM request (read-only)
     assign idx_req_o.q = '{addr: idx_addr, amo: reqrsp_pkg::AMONone, default: '0};
 
     // Index handshaking
-    assign idx_req_o.q_valid  = cfg_indir_i & idx_cred_left & ~natit_done_i;
-    assign natit_ready_o      = cfg_indir_i & idx_cred_left & idx_rsp_i.q_ready;
+    assign natit_ena          = cfg_indir_i & idx_cred_left & ~isect_mst_blk_q & ~natit_done_i;
+    assign idx_req_o.q_valid  = natit_ena;
+    assign natit_ready_o      = natit_ena & idx_rsp_i.q_ready;
 
     // Index FIFO: stores full unserialized words.
     fifo_v3 #(
@@ -245,26 +319,36 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     ) i_idx_fifo (
       .clk_i,
       .rst_ni,
-      .flush_i    ( isect_done_clear  ),
+      .flush_i    ( isect_mst_blk_q   ),
       .testmode_i ( 1'b0              ),
       .full_o     (  ),                     // Credit counter prevents overflows
       .empty_o    ( idx_fifo_empty    ),
       .usage_o    (  ),
       .data_i     ( idx_rsp_i.p.data  ),
-      .push_i     ( idx_rsp_i.p_valid ),
+      .push_i     ( idx_p_hs          ),
       .data_o     ( idx_fifo_out      ),
       .pop_i      ( idx_fifo_pop      )
     );
 
     // Index counter: keeps track of the number of memory requests in flight
     // to ensure that the FIFO does not overfill.
-    assign idx_cred_take  = idx_req_o.q_valid & idx_rsp_i.q_ready;
-    assign idx_cred_give  = idx_fifo_pop;
-    assign idx_cred_clear = isect_done_clear;
+    snitch_ssr_credit_counter #(
+      .NumCredits       ( Cfg.IndexCredits ),
+      .InitCreditEmpty  ( 0 )
+      ) i_credit_counter (
+      .clk_i,
+      .rst_ni,
+      .credit_o      (  ),
+      .credit_give_i ( idx_fifo_pop     ),
+      .credit_take_i ( idx_q_hs         ),
+      .credit_init_i ( isect_mst_blk_q  ),
+      .credit_left_o ( idx_cred_left    ),
+      .credit_crit_o ( idx_cred_crit    )
+    );
 
     // The initial byte offset and byte offset of the index array bound determine
     // the final index offset and whether an additional index word is needed.
-    assign last_word          = idx_cred_full & natit_done_i;
+    assign last_word          = idx_cred_crit & natit_done_i;
     assign first_idx_byteoffs = bytecnt_t'(natit_pointer_i);
     assign {natit_extraword_o, last_idx_byteoffs} = first_idx_byteoffs + natit_boundoffs_i;
 
@@ -275,14 +359,14 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     // Serialize indices: shift left by current byte offset, then mask out index of given size.
     assign idx_ser_mask   = ~({DataWidth{1'b1}} << (8 << cfg_size_i));
     assign idx_ser_out    = (idx_fifo_out >> {idx_bytecnt_q, 3'b0}) & idx_ser_mask;
-    assign idx_ser_last   = last_word & idx_fifo_pop & ~isect_done_q;
+    assign idx_ser_last   = last_word & idx_fifo_pop & ~isect_mst_blk_q;
     assign idx_ser_valid  = ~idx_fifo_empty;
 
     // Not an intersection slave: tie off slave requests
     assign isect_slv_req_o = '{ena: '0, ready: '0};
 
-    // Advance whenever pointer is available and downstream ready and no zero inject
-    assign idx_bytecnt_ena = (mem_valid_o & mem_ready_i & ~mem_zero_o & ~mem_done_o) | mem_skip;
+    // Advance whenever pointer and not flag emitted, or if skipped
+    assign idx_bytecnt_ena = (mem_hs & ~mem_zero_o & ~mem_done_o) | mem_skip;
 
     // Output index, validity, and zero flag depend on whether we intersect
     always_comb begin
@@ -291,16 +375,17 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
             merge:    cfg_flags_i.merge,
             slv_ena:  cfg_isect_slv_ena_i,
             idx:      idx_ser_out,
-            done:     isect_done_q,
-            valid:    (idx_ser_valid | isect_done_q) & mem_ready_i
+            done:     isect_mst_doi_q,
+            valid:    isect_mst_doi_q | (idx_ser_valid & mem_ready_i)
             };
         idx_isect_ena   = idx_bytecnt_ena;
         mem_idx         = idx_isect_q;
         mem_skip        = isect_mst_hs & isect_mst_rsp_i.skip;
         mem_zero_o      = isect_mst_rsp_i.zero;
-        mem_done_o      = isect_mst_rsp_i.done;
+        mem_done_o      = isect_mst_dom;
         mem_last_o      = 1'b0;
-        mem_valid_o     = isect_mst_hs & ~isect_mst_rsp_i.skip;
+        mem_valid_o     = isect_mst_dom |
+            (isect_mst_hs & ~isect_mst_rsp_i.skip & ~isect_mst_rsp_i.done);
       end else begin
         isect_mst_req_o = '0;
         idx_isect_ena   = 1'b0;
@@ -314,21 +399,6 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     end
 
   end
-
-  // Credit counter: used for index dataflow decoupling
-  snitch_ssr_credit_counter #(
-    .NumCredits       ( Cfg.IsectSlave ? Cfg.IsectSlaveCredits : Cfg.IndexCredits),
-    .InitCreditEmpty  ( Cfg.IsectSlave )
-    ) i_credit_counter (
-    .clk_i,
-    .rst_ni,
-    .credit_o      (  ),
-    .credit_give_i ( idx_cred_give  ),
-    .credit_take_i ( idx_cred_take  ),
-    .credit_init_i ( idx_cred_clear ),
-    .credit_left_o ( idx_cred_left  ),
-    .credit_full_o ( idx_cred_full  )
-  );
 
   // Intersection index counter
   if (Cfg.IsectMaster | Cfg.IsectSlave) begin : gen_isect_ctr
