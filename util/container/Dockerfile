@@ -25,7 +25,7 @@ RUN apt-get update && \
 # Build Rust tools
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH "/root/.cargo/bin:${PATH}"
-RUN cargo install bender
+RUN cargo install bender --version 0.23.2
 
 # Get LLVM 12
 RUN wget https://apt.llvm.org/llvm.sh
