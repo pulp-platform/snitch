@@ -12,7 +12,7 @@ GENERATE_XML = YES
 XML_OUTPUT = xml
 
 # Source
-INPUT = benchmark snBLAS snRuntime
+INPUT = benchmark snBLAS snRuntime applications
 RECURSIVE = YES
 FILE_PATTERNS = *.h *.hpp *.md
 EXAMPLE_PATH = examples snRuntime/test
