@@ -119,8 +119,8 @@ extern snrt_dma_txid_t snrt_dma_start_2d_wideptr(uint64_t dst, uint64_t src,
                                                  size_t repeat);
 /// Initiate an asynchronous 2D DMA transfer.
 extern snrt_dma_txid_t snrt_dma_start_2d(void *dst, const void *src,
-                                         size_t size, size_t src_stride,
-                                         size_t dst_stride, size_t repeat);
+                                         size_t size, size_t dst_stride,
+                                         size_t src_stride, size_t repeat);
 /// Block until a transfer finishes.
 extern void snrt_dma_wait(snrt_dma_txid_t tid);
 /// Block until all operation on the DMA ceases.
