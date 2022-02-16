@@ -29,6 +29,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   input  logic        cfg_write_i,  // 0 = read, 1 = write
   output logic [31:0] cfg_rdata_o,
   input  logic [31:0] cfg_wdata_i,
+  output logic        cfg_wready_o,
   // Register lanes from switch.
   output data_t       lane_rdata_o,
   input  data_t       lane_wdata_i,
@@ -97,6 +98,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .cfg_rdata_o,
     .cfg_wdata_i,
     .cfg_write_i,
+    .cfg_wready_o,
     .reg_rep_o      ( rep_max           ),
     .mem_addr_o     ( data_req.q.addr   ),
     .mem_zero_o     ( agen_zero         ),

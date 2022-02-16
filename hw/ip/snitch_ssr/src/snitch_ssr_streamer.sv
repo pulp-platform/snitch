@@ -30,6 +30,7 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   input  logic             cfg_write_i, // 0 = read, 1 = write
   output logic [31:0]      cfg_rdata_o,
   input  logic [31:0]      cfg_wdata_i,
+  output logic             cfg_wready_o,
   // Read and write streams coming from the processor.
   input  logic  [RPorts-1:0][4:0] ssr_raddr_i,
   output data_t [RPorts-1:0]      ssr_rdata_o,
@@ -107,7 +108,7 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   logic [4:0]               dmcfg_upper_addr;
   logic [NumSsrs-1:0][31:0] dmcfg_rdata;
   logic [NumSsrs-1:0]       dmcfg_strobe; // which data mover is currently addressed
-
+  logic [NumSsrs-1:0]       dmcfg_wready;
   snitch_ssr_switch #(
     .DataWidth ( DataWidth  ),
     .NumSsrs   ( NumSsrs    ),
@@ -151,6 +152,7 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
       .cfg_word_i     ( dmcfg_word        ),
       .cfg_write_i    ( cfg_write_i & dmcfg_strobe[i] ),
       .cfg_rdata_o    ( dmcfg_rdata  [i]  ),
+      .cfg_wready_o   ( dmcfg_wready [i]  ),
       .lane_rdata_o   ( lane_rdata   [i]  ),
       .lane_wdata_i   ( lane_wdata   [i]  ),
       .lane_valid_o   ( lane_valid   [i]  ),
@@ -197,6 +199,8 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
     dmcfg_upper_addr = cfg_word_i[11:7];
     dmcfg_strobe = (dmcfg_upper_addr == '1 ? '1 : (1 << dmcfg_upper_addr));
     cfg_rdata_o = dmcfg_rdata[dmcfg_upper_addr];
+    cfg_wready_o = (cfg_write_i && dmcfg_upper_addr < NumSsrs) ?
+        dmcfg_wready[dmcfg_upper_addr] : 1'b1;
   end
 
 endmodule

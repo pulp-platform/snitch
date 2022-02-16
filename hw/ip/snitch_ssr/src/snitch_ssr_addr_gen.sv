@@ -45,6 +45,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   output logic [31:0] cfg_rdata_o,
   input  logic [31:0] cfg_wdata_i,
   input  logic        cfg_write_i,
+  output logic        cfg_wready_o,
 
   output logic [Cfg.RptWidth-1:0] reg_rep_o,
 
@@ -433,6 +434,10 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
     cfg_rdata_o = read_map[(cfg_word_i*32)+:32];
   end
+
+  // Block configuration writes iff there a pending shadowed job.
+  // This prevents job clobbering and stalls the master as needed.
+  assign cfg_wready_o = config_sq.done;
 
   // Parameter sanity checks
   `ASSERT_INIT(CheckPointerWidth, Cfg.PointerWidth <= AddrWidth);
