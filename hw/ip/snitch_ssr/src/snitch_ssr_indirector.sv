@@ -287,7 +287,8 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
         .credit_take_i ( idx_p_hs ),
         .credit_init_i ( 1'b0 ),
         .credit_left_o ( idx_has_inflight ),
-        .credit_crit_o ( )
+        .credit_crit_o ( ),
+        .credit_full_o ( )
       );
 
       // Master interface handshake
@@ -366,7 +367,8 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
       .credit_take_i ( idx_q_hs         ),
       .credit_init_i ( isect_mst_blk_q  ),
       .credit_left_o ( idx_cred_left    ),
-      .credit_crit_o ( idx_cred_crit    )
+      .credit_crit_o ( idx_cred_crit    ),
+      .credit_full_o ( )
     );
 
     // The initial byte offset and byte offset of the index array bound determine
