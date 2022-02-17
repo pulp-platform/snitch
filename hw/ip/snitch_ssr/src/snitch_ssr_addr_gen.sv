@@ -124,7 +124,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     logic [Cfg.PointerWidth-1:0]  idx_base_q, idx_base_sd, idx_base_sq;
     idx_size_t                    idx_size_q, idx_size_sd, idx_size_sq;
     idx_flags_t                   idx_flags_q, idx_flags_sd, idx_flags_sq;
-    index_t                       idx_isect_sd, idx_isect_sq;
+    index_t                       idx_isect;
 
     // Output spill register, if it exists
     out_spill_t spill_in_data;
@@ -152,7 +152,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     assign indir_read_map = '{
       idx_base:   idx_base_q,
       idx_cfg:    cfg_rdata_idx_ctl,
-      idx_isect:  idx_isect_sq
+      idx_isect:  idx_isect
     };
 
     // Config registers
@@ -164,16 +164,6 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     `FFLARN(idx_size_q, idx_size_sd, config_q.done, '0, clk_i, rst_ni)
     `FFARN(idx_flags_sq, idx_flags_sd, '0, clk_i, rst_ni)
     `FFLARN(idx_flags_q, idx_flags_sd, config_q.done, '0, clk_i, rst_ni)
-
-    // Intersection index count shadow register (read-only, slave-only)
-    if (Cfg.IsectSlave) begin : gen_idx_isect_reg
-      logic done_qq, done_rising;
-      assign done_rising = config_q.done & ~done_qq;
-      `FFARN(done_qq, config_q.done, 1'b0, clk_i, rst_ni)
-      `FFLARN(idx_isect_sq, idx_isect_sd, done_rising, '0, clk_i, rst_ni)
-    end else begin : gen_no_idx_isect_reg
-      assign idx_isect_sq = '0;
-    end
 
     // Delay register for last iteration of base loop, in case additional iteration needed.
     `FFLARNC(natit_base_last_q, natit_base_last_d, enable, natit_done, 1'b0, clk_i, rst_ni)
@@ -225,7 +215,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
       .cfg_base_i          ( idx_base_q       ),
       .cfg_shift_i         ( idx_shift_q      ),
       .cfg_flags_i         ( idx_flags_q      ),
-      .cfg_idx_isect_o     ( idx_isect_sd     ),
+      .cfg_idx_isect_o     ( idx_isect        ),
       .natit_pointer_i     ( pointer_q        ),
       .natit_ready_o       ( natit_ready      ),
       .natit_done_i        ( natit_done       ),

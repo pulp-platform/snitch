@@ -131,6 +131,29 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     // Draw new index data address on each write request
     assign natit_ready_o = idx_q_hs;
 
+    // Handshake at intersector interface before timing cut
+    logic isect_slv_up_hs, isect_cnt_swap;
+    index_t isect_cnt;
+    assign isect_slv_up_hs = isect_slv_rsp_i.valid & isect_slv_req_o.ready;
+    assign isect_cnt_swap  = isect_slv_up_hs & isect_slv_rsp_i.done;
+    `FFLARN(cfg_idx_isect_o, isect_cnt, isect_cnt_swap, '0, clk_i, rst_ni)
+
+    // Counter for number of elements emitted by intersector
+    counter #(
+      .WIDTH            ( Cfg.IndexWidth ),
+      .STICKY_OVERFLOW  ( 1'b0 )
+    ) i_isect_counter (
+      .clk_i,
+      .rst_ni,
+      .clear_i    ( isect_cnt_swap  ),
+      .en_i       ( isect_slv_up_hs ),
+      .load_i     ( '0  ),
+      .down_i     ( '0  ),
+      .d_i        ( '0  ),
+      .q_o        ( isect_cnt ),
+      .overflow_o (     )
+    );
+
     // Cut timing paths from intersector slave port
     spill_register #(
       .T        ( logic [Cfg.IndexWidth:0] ),
@@ -362,8 +385,9 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     assign idx_ser_last   = last_word & idx_fifo_pop & ~isect_mst_blk_q;
     assign idx_ser_valid  = ~idx_fifo_empty;
 
-    // Not an intersection slave: tie off slave requests
+    // Not an intersection slave: tie off slave requests and count register
     assign isect_slv_req_o = '{ena: '0, ready: '0};
+    assign cfg_idx_isect_o = '0;
 
     // Advance whenever pointer and not flag emitted, or if skipped
     assign idx_bytecnt_ena = (mem_hs & ~mem_zero_o & ~mem_done_o) | mem_skip;
@@ -412,9 +436,6 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
   end else begin : gen_no_isect_ctr
     assign idx_isect_q = '0;
   end
-
-  // Expose intersection index for reading from external register
-  assign cfg_idx_isect_o = idx_isect_q;
 
   // Use external natural iterator; mask lower bits to fetch only entire, aligned words.
   assign idx_addr = {natit_pointer_i[Cfg.PointerWidth-1:BytecntWidth], {BytecntWidth{1'b0}}};
