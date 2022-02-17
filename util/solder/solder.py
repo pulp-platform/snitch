@@ -520,6 +520,13 @@ class AxiBus(Bus):
 
     def change_iw(self, context, target_iw, name, inst_name=None, to=None):
         if self.iw == target_iw:
+            # If `to` provided, emit an assign
+            if to is not None:
+                to.declare(context)
+                assgn = "// Change IW with same target IW -> assign\n"
+                assgn += "assign {lhs}={rhs};\n".format(lhs=to.req_name(), rhs=self.req_name())
+                assgn += "assign {lhs}={rhs};".format(lhs=self.rsp_name(), rhs=to.rsp_name())
+                context.write(assgn)
             return self
 
         # Generate the new bus.
