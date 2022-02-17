@@ -935,6 +935,45 @@ class AxiBus(Bus):
             ) + "\n")
         return bus
 
+    def id_deprepend(self,
+                     context,
+                     deprep_id_width,
+                     deprep_id,
+                     name,
+                     inst_name=None,
+                     to=None):
+        # Generate the new bus.
+        if to is None:
+            bus = copy(self)
+            bus.declared = False
+            bus.iw = self.iw - deprep_id_width
+            bus.type_prefix = bus.emit_struct()
+            bus.name = name
+            bus.name_suffix = None
+        else:
+            bus = to
+
+        # Check bus properties.
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+        assert (bus.iw == self.iw - deprep_id_width)
+        assert (bus.uw == self.uw)
+
+        # Emit the remapper instance.
+        bus.declare(context)
+        tpl = templates.get_template("solder.axi_id_deprepend.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                bus_in=self,
+                bus_out=bus,
+                deprep_id_width=deprep_id_width,
+                deprep_id=deprep_id,
+                name=inst_name or "i_{}".format(name),
+            ) + "\n")
+        return bus
+
 
 # An AXI-Lite bus.
 class AxiLiteBus(Bus):
