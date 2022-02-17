@@ -145,12 +145,14 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   always_comb begin
     if (agen_write) begin
       lane_valid_o = ~fifo_full;
-      data_req_qvalid = agen_valid & ~fifo_empty;
+      data_req_qvalid = agen_valid & ~fifo_empty & has_credit;
       fifo_push = lane_ready_i & ~fifo_full;
       fifo_in = lane_wdata_i;
       rep_enable = 0;
       fifo_pop = data_req_qvalid & data_rsp.q_ready;
-      credit_take = fifo_push;
+      // During writes, the credit counter tracks write responses;
+      // This is necessary as inflight responses may break subsequent reads.
+      credit_take = fifo_pop;
       credit_give = data_rsp.p_valid;
     end else begin
       lane_valid_o = ~fifo_empty | (~zero_empty & lane_zero);
