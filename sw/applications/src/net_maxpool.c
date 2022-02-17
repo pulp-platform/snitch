@@ -2,6 +2,9 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
+// SW testbench for profiling MaxPool Layer
+// Automatically checks the correctness of the results
+
 #include "data_maxpool.h"
 #include "layer.h"
 #include "math.h"

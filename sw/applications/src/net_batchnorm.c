@@ -2,6 +2,9 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
+// SW testbench for profiling BatchNorm Layer
+// Automatically checks the correctness of the results
+
 #include "batchnorm_layer.h"
 #include "data_batchnorm.h"
 #include "layer.h"
@@ -9,6 +12,7 @@
 #include "printf.h"
 #include "snrt.h"
 #include "utils.h"
+
 
 int main() {
     batchnorm_l.ifmap = (double *)batchnorm_ifmap_dram;
