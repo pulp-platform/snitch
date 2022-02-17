@@ -110,6 +110,18 @@ module occamy_top
   input  ${soc_narrow_xbar.in_pcie.req_type()} pcie_axi_req_i,
   output ${soc_narrow_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o,
 
+  /// RMQ: Remote Quadrant Ports
+% for i in range(nr_remote_quadrants):
+  output   ${soc_wide_xbar.__dict__["out_rmq_{}".format(i)].req_type()} rmq_${i}_wide_req_o,
+  input  ${soc_wide_xbar.__dict__["out_rmq_{}".format(i)].rsp_type()} rmq_${i}_wide_rsp_i,
+  input   ${soc_wide_xbar.__dict__["in_rmq_{}".format(i)].req_type()} rmq_${i}_wide_req_i,
+  output  ${soc_wide_xbar.__dict__["in_rmq_{}".format(i)].rsp_type()} rmq_${i}_wide_rsp_o,
+  output   ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].req_type()} rmq_${i}_narrow_req_o,
+  input  ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].rsp_type()} rmq_${i}_narrow_rsp_i,
+  input   ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].req_type()} rmq_${i}_narrow_req_i,
+  output  ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].rsp_type()} rmq_${i}_narrow_rsp_o,
+% endfor
+
   /// SRAM configuration
   input sram_cfgs_t sram_cfgs_i
 );
@@ -198,6 +210,23 @@ module occamy_top
       .change_dw(context, 32, "axi_to_axi_lite_dw") \
       .to_axi_lite(context, "axi_to_axi_lite_regbus_periph") \
       .to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_soc) %> \
+
+
+  //////////////////////
+  // Remote Quadrants //
+  //////////////////////
+
+  /// Remote Quadrant Ports
+% for i in range(nr_remote_quadrants):
+  assign rmq_${i}_wide_req_o = ${soc_wide_xbar.__dict__["out_rmq_{}".format(i)].req_name()};
+  assign ${soc_wide_xbar.__dict__["out_rmq_{}".format(i)].rsp_name()} = rmq_${i}_wide_rsp_i;
+  assign rmq_${i}_narrow_req_o = ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].req_name()};
+  assign ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].rsp_name()} = rmq_${i}_narrow_rsp_i;
+  assign ${soc_wide_xbar.__dict__["in_rmq_{}".format(i)].req_name()} = rmq_${i}_wide_req_i;
+  assign rmq_${i}_wide_rsp_o = ${soc_wide_xbar.__dict__["in_rmq_{}".format(i)].req_name()};
+  assign ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].req_name()} = rmq_${i}_narrow_req_i;
+  assign rmq_${i}_narrow_rsp_i = ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].req_name()};
+% endfor
 
   //////////////////////
   // HBI & HBM Config //

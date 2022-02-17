@@ -260,6 +260,18 @@ def main():
     am_soc_wide_xbar.attach(am_hbi)
 
     ###########
+    # AM: RMQ #
+    ###########
+    # Add a remote quadrant port
+    nr_remote_quadrants = len(occamy.cfg["remote_quadrants"])
+    am_remote_quadrants = []
+    for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
+        leaf = am.new_leaf("rmq_{}".format(i), rq["length"], rq["address"])
+        am_soc_narrow_xbar.attach(leaf)
+        am_soc_wide_xbar.attach(leaf)
+        am_remote_quadrants.append(leaf)
+
+    ###########
     # AM: HBM #
     ###########
     am_hbm = list()
@@ -547,6 +559,9 @@ def main():
     soc_wide_xbar.add_input("hbi")
     soc_wide_xbar.add_input("quadrant_inter_xbar")
     soc_wide_xbar.add_input("soc_narrow")
+    for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
+        soc_wide_xbar.add_input("rmq_{}".format(i))
+        soc_wide_xbar.add_output_entry("rmq_{}".format(i), am_remote_quadrants[i])
 
     ###################
     # SoC Narrow Xbar #
@@ -588,6 +603,9 @@ def main():
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)
     soc_narrow_xbar.add_output_entry("pcie", am_pcie)
+    for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
+        soc_narrow_xbar.add_input("rmq_{}".format(i))
+        soc_narrow_xbar.add_output_entry("rmq_{}".format(i), am_remote_quadrants[i])
 
     ##########################
     # S1 Quadrant controller #
@@ -725,6 +743,7 @@ def main():
         "cfg": occamy.cfg,
         "cores": nr_s1_quadrants * nr_s1_clusters * nr_cluster_cores + 1,
         "nr_s1_quadrants": nr_s1_quadrants,
+        "nr_remote_quadrants": nr_remote_quadrants,
         "nr_s1_clusters": nr_s1_clusters,
         "nr_cluster_cores": nr_cluster_cores,
         "hbm_channel_size": hbm_channel_size,
