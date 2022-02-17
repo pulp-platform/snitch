@@ -187,7 +187,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     );
   end else begin : gen_no_isect_master
     // If not an intersection master, we cannot inject zeros.
-    assign zero_empty = 1'b0;
+    assign zero_empty = 1'b1;
     assign lane_zero  = 1'b0;
   end
 
