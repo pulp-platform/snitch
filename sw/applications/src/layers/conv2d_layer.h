@@ -9,4 +9,4 @@
  *
  * @param l conv_layer struct that holds addresses and parameters
  */
-void conv2d_layer(conv_layer l);
+void conv2d_layer(const conv_layer *l);

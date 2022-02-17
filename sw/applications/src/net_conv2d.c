@@ -33,7 +33,7 @@ int main() {
         snrt_start_perf_counter(SNRT_PERF_CNT1, SNRT_PERF_CNT_DMA_BUSY, 0);
     }
 
-    conv2d_layer(l1_conv2d_l);
+    conv2d_layer(&l1_conv2d_l);
 
     if (snrt_global_core_idx() == 0) {
         snrt_stop_perf_counter(SNRT_PERF_CNT0);
@@ -46,7 +46,7 @@ int main() {
 
     snrt_global_barrier();
 
-    uint32_t errors = check_layer(conv2d_l, (double*)conv2d_checksum);
+    uint32_t errors = check_layer(&conv2d_l, (double*)conv2d_checksum);
 
     snrt_global_barrier();
 

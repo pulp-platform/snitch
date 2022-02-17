@@ -9,4 +9,4 @@
  *
  * @param l conv_layer struct that holds addresses and parameters
  */
-void maxpool_layer(conv_layer l);
+void maxpool_layer(const conv_layer *l);

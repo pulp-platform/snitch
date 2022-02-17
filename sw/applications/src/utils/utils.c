@@ -39,11 +39,11 @@ void snrt_dma_stop_tracking() { asm volatile("dmstati t0, 3"); }
  * @param checksum checksum to compare against, reduced over input channels
  * @return uint32_t
  */
-uint32_t check_layer(conv_layer l, double *checksum) {
+uint32_t check_layer(const conv_layer *l, double *checksum) {
     uint32_t errors = 0;
     double *ptr = snrt_cluster_memory().start;
     volatile double *result_buf = ptr;
-    ptr += l.CO;
+    ptr += l->CO;
     volatile double *ofmap_checksums = ptr;
     uint32_t total = 0;
 
@@ -52,14 +52,14 @@ uint32_t check_layer(conv_layer l, double *checksum) {
         if (snrt_is_dm_core()) {
             snrt_dma_txid_t ofmap_checksum_txid =
                 snrt_dma_start_1d((double *)ofmap_checksums, checksum,
-                                  sizeof(double) * l.OW * l.OH);
+                                  sizeof(double) * l->OW * l->OH);
             snrt_dma_wait_all();
 
-            for (uint32_t oh = 0; oh < l.OH; oh++) {
-                for (uint32_t ow = 0; ow < l.OW; ow++) {
+            for (uint32_t oh = 0; oh < l->OH; oh++) {
+                for (uint32_t ow = 0; ow < l->OW; ow++) {
                     snrt_dma_txid_t result_txid = snrt_dma_start_1d(
-                        (double *)result_buf, &l.ofmap[(oh * l.OW + ow) * l.CO],
-                        sizeof(double) * l.CO);
+                        (double *)result_buf, &l->ofmap[(oh * l->OW + ow) * l->CO],
+                        sizeof(double) * l->CO);
                     snrt_dma_wait_all();
                     snrt_cluster_hw_barrier();
                     snrt_cluster_hw_barrier();
@@ -70,10 +70,10 @@ uint32_t check_layer(conv_layer l, double *checksum) {
                 snrt_ssr_repeat(SNRT_SSR_DM0, 1);
 
                 // setup SSRs
-                snrt_ssr_loop_1d(SNRT_SSR_DM0, l.CO, sizeof(double));
+                snrt_ssr_loop_1d(SNRT_SSR_DM0, l->CO, sizeof(double));
 
-                for (uint32_t oh = 0; oh < l.OH; oh++) {
-                    for (uint32_t ow = 0; ow < l.OW; ow++) {
+                for (uint32_t oh = 0; oh < l->OH; oh++) {
+                    for (uint32_t ow = 0; ow < l->OW; ow++) {
                         snrt_cluster_hw_barrier();
 
                         double checksum_result = 0.0;
@@ -83,7 +83,7 @@ uint32_t check_layer(conv_layer l, double *checksum) {
                             snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_1D,
                                           result_buf);
                             snrt_ssr_enable();
-                            register const uint32_t n_frep = l.CO / 8 - 1;
+                            register const uint32_t n_frep = l->CO / 8 - 1;
                             register volatile double checksum_result0 = 0.0;
                             register volatile double checksum_result1 = 0.0;
                             register volatile double checksum_result2 = 0.0;
@@ -123,13 +123,13 @@ uint32_t check_layer(conv_layer l, double *checksum) {
                                 checksum_result4 + checksum_result5 +
                                 checksum_result6 + checksum_result7;
                         } else {
-                            for (uint32_t co = 0; co < l.CO; co++) {
+                            for (uint32_t co = 0; co < l->CO; co++) {
                                 checksum_result += result_buf[co];
                             }
                         }
                         total++;
                         if (fabs(checksum_result -
-                                 ofmap_checksums[oh * l.OW + ow]) > 0.001) {
+                                 ofmap_checksums[oh * l->OW + ow]) > 0.001) {
                             errors++;
                         }
                         snrt_cluster_hw_barrier();
@@ -137,8 +137,8 @@ uint32_t check_layer(conv_layer l, double *checksum) {
                 }
                 // printf("%d/%d Errors\n", errors, total);
             } else {
-                for (uint32_t oh = 0; oh < l.OH; oh++) {
-                    for (uint32_t ow = 0; ow < l.OW; ow++) {
+                for (uint32_t oh = 0; oh < l->OH; oh++) {
+                    for (uint32_t ow = 0; ow < l->OW; ow++) {
                         snrt_cluster_hw_barrier();
                         snrt_cluster_hw_barrier();
                     }

@@ -9,4 +9,4 @@
  *
  * @param l conv_layer struct that holds addresses and parameters
  */
-void batchnorm_layer(conv_layer l);
+void batchnorm_layer(const conv_layer *l);

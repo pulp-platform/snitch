@@ -32,7 +32,7 @@ void snrt_dma_stop_tracking();
  * @param checksum checksum to compare against, reduced over input channels
  * @return uint32_t
  */
-uint32_t check_layer(conv_layer l, double* checksum);
+uint32_t check_layer(const conv_layer *l, double* checksum);
 
 /**
  * @brief fast memset function performed by DMA

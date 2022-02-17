@@ -15,11 +15,11 @@ int main() {
     maxpool_l.ofmap = (double*)maxpool_ofmap_dram;
     maxpool_l.TILE_CI = 32;
 
-    maxpool_layer(maxpool_l);
+    maxpool_layer(&maxpool_l);
 
     snrt_global_barrier();
 
-    uint32_t error = check_layer(maxpool_l, (double*)maxpool_checksum);
+    uint32_t error = check_layer(&maxpool_l, (double*)maxpool_checksum);
 
     snrt_global_barrier();
 

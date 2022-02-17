@@ -17,11 +17,11 @@ int main() {
     batchnorm_l.beta = (double *)batchnorm_beta_dram;
     batchnorm_l.TILE_CI = 32;
 
-    batchnorm_layer(batchnorm_l);
+    batchnorm_layer(&batchnorm_l);
 
     snrt_global_barrier();
 
-    uint32_t errors = check_layer(batchnorm_l, (double *)batchnorm_checksum);
+    uint32_t errors = check_layer(&batchnorm_l, (double *)batchnorm_checksum);
 
     snrt_global_barrier();
 
