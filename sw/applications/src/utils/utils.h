@@ -6,7 +6,7 @@
 #include "snrt.h"
 
 /**
- * @brief returns cycle number and injects maker
+ * @brief returns cycle number and injects marker
  * to track performance
  *
  * @return uint32_t
@@ -14,13 +14,15 @@
 uint32_t benchmark_get_cycle();
 
 /**
- * @brief start tracking of dma performance region
+ * @brief start tracking of dma performance region. Does not have any implications on the HW.
+ * Only injects a marker in the DMA traces that can be analyzed
  *
  */
 void snrt_dma_start_tracking();
 
 /**
- * @brief stop tracking of dma performance region
+ * @brief stop tracking of dma performance region. Does not have any implications on the HW.
+ * Only injects a marker in the DMA traces that can be analyzed
  *
  */
 void snrt_dma_stop_tracking();

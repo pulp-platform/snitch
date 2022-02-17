@@ -8,37 +8,16 @@
 
 #include "../../vendor/riscv-opcodes/encoding.h"
 #include "layer.h"
-#include "math.h"
+#include <math.h>
 #include "printf.h"
 #include "snrt.h"
 
-/**
- * @brief returns cycle number and injects maker
- * to track performance
- *
- * @return uint32_t
- */
 uint32_t benchmark_get_cycle() { return read_csr(mcycle); }
 
-/**
- * @brief start tracking of dma performance region
- *
- */
-void snrt_dma_start_tracking() { asm volatile("dmstati t0, 1"); }
+void snrt_dma_start_tracking() { asm volatile("dmstati zero, 1"); }
 
-/**
- * @brief stop tracking of dma performance region
- *
- */
-void snrt_dma_stop_tracking() { asm volatile("dmstati t0, 3"); }
+void snrt_dma_stop_tracking() { asm volatile("dmstati zero, 3"); }
 
-/**
- * @brief checks correctness of feature map
- *
- * @param l layer struct (Conv2d, BatchNorm, Maxpool)
- * @param checksum checksum to compare against, reduced over input channels
- * @return uint32_t
- */
 uint32_t check_layer(const conv_layer *l, double *checksum) {
     uint32_t errors = 0;
     double *ptr = snrt_cluster_memory().start;
