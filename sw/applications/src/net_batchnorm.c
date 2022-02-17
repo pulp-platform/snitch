@@ -13,7 +13,6 @@
 #include "snrt.h"
 #include "utils.h"
 
-
 int main() {
     batchnorm_l.ifmap = (double *)batchnorm_ifmap_dram;
     batchnorm_l.ofmap = (double *)batchnorm_ofmap_dram;
