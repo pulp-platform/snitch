@@ -274,15 +274,17 @@ def main():
     # Add a remote quadrant port
     nr_remote_quadrants = len(occamy.cfg["remote_quadrants"])
     nr_remote_cores = 0
+    rmq_cluster_cnt = 0
     am_remote_quadrants = []
     for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
-        alen = 0x40000  # cluster address space size
-        addr = 0x10000000 + nr_s1_clusters*nr_s1_quadrants*(i+alen)
+        alen = rq["nr_clusters"]*0x40000
+        addr = 0x10000000 + (nr_s1_clusters*nr_s1_quadrants+rmq_cluster_cnt)*0x40000
         leaf = am.new_leaf("rmq_{}".format(i), alen, addr)
         am_soc_narrow_xbar.attach(leaf)
         am_soc_wide_xbar.attach(leaf)
         am_remote_quadrants.append(leaf)
         nr_remote_cores += rq["nr_clusters"] * rq["nr_cluster_cores"]
+        rmq_cluster_cnt += rq["nr_clusters"]
 
     ###########
     # AM: HBM #
@@ -839,11 +841,20 @@ def main():
     ###############
     # S1 Quadrant #
     ###############
-    write_template(args.quadrant_s1,
-                   outdir,
-                   fname="{}_quadrant_s1.sv".format(args.name),
-                   module=solder.code_module['quadrant_s1'],
-                   **kwargs)
+    if nr_s1_quadrants > 0:
+        write_template(args.quadrant_s1,
+                    outdir,
+                    fname="{}_quadrant_s1.sv".format(args.name),
+                    module=solder.code_module['quadrant_s1'],
+                    **kwargs)
+    else:
+        tpl_path = args.quadrant_s1
+        if tpl_path:
+            tpl_path = pathlib.Path(tpl_path).absolute()
+            if tpl_path.exists():
+                print(outdir, args.name)
+                with open("{}/{}_quadrant_s1.sv".format(outdir, args.name), 'w') as f:
+                    f.write("// no quadrants in this design")
 
 
     ##################
