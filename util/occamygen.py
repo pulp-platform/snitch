@@ -28,7 +28,8 @@ def write_template(tpl_path, outdir, **kwargs):
         tpl_path = pathlib.Path(tpl_path).absolute()
         if tpl_path.exists():
             tpl = Template(filename=str(tpl_path))
-            with open(outdir / tpl_path.with_suffix("").name, "w") as file:
+            fname = tpl_path.with_suffix("").name.replace("occamy", kwargs['args'].name)
+            with open(outdir / fname, "w") as file:
                 code = tpl.render_unicode(**kwargs)
                 code = re_trailws.sub("", code)
                 file.write(code)
@@ -94,6 +95,7 @@ def main():
     parser.add_argument("--am-cheader", "-D", metavar="ADDRMAP_CHEADER")
     parser.add_argument("--am-csv", "-aml", metavar="ADDRMAP_CSV")
     parser.add_argument("--dts", metavar="DTS", help="System's device tree.")
+    parser.add_argument("--name", metavar="NAME", default="occamy", help="System's name.")
 
     parser.add_argument("-v",
                         "--verbose",
@@ -132,11 +134,11 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
 
     if args.wrapper:
-        with open(outdir / "occamy_cluster_wrapper.sv", "w") as f:
+        with open(outdir / f"{args.name}_cluster_wrapper.sv", "w") as f:
             f.write(occamy.render_wrapper())
 
     if args.memories:
-        with open(outdir / "memories.json", "w") as f:
+        with open(outdir / f"{args.name}_memories.json", "w") as f:
             f.write(occamy.cluster.memory_cfg())
 
     ####################
@@ -707,6 +709,7 @@ def main():
     kwargs = {
         "solder": solder,
         "util": util,
+        "args": args,
         "soc_narrow_xbar": soc_narrow_xbar,
         "soc_wide_xbar": soc_wide_xbar,
         "quadrant_pre_xbars": quadrant_pre_xbars,
