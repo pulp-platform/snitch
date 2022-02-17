@@ -11,12 +11,14 @@
 #include "utils.h"
 
 int main() {
-    float *ptr = (void *)snrt_cluster_memory().start;
-
     uint32_t ifmap_size = (dim_in_x + padding_x_left + padding_x_right) *
                           (dim_in_y + padding_y_top + padding_y_bottom) * ch_in;
     uint32_t weights_size = dim_kernel_x * dim_kernel_y * ch_in * ch_out;
     uint32_t ofmap_size = dim_out_x * dim_out_y * ch_out;
+
+    uint32_t total_size = ifmap_size + weights_size + ch_out + ch_out + ofmap_size;
+
+    void *ptr = snrt_l1alloc(total_size * sizeof(float));
 
     float *pInBuffer = ptr;
     ptr += ifmap_size;
@@ -28,11 +30,6 @@ int main() {
     ptr += ch_out;
     float *pOutBuffer = ptr;
     ptr += ofmap_size;
-
-    if (ptr >= snrt_cluster_memory().end) {
-        printf("Not enough TCDM memory to store tile\n");
-        return 1;
-    }
 
     // printf("Core %d/%d is com/dma core %d/%d\n", snrt_cluster_core_idx(),
     // snrt_cluster_core_num(), snrt_is_compute_core(), snrt_is_dm_core());

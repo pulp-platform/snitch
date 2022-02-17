@@ -21,13 +21,21 @@ int main() {
 
     const gemm_layer l1_gemm_l = gemm_l;
 
-    volatile uint32_t cluster_num = snrt_cluster_num();
-    volatile uint32_t cluster_id = snrt_cluster_idx();
-    volatile uint32_t compute_num = snrt_cluster_compute_core_num();
-    volatile uint32_t compute_id = snrt_cluster_compute_core_idx();
+    const uint32_t cluster_num = snrt_cluster_num();
+    const uint32_t cluster_id = snrt_cluster_idx();
+    const uint32_t compute_num = snrt_cluster_compute_core_num();
+    const uint32_t compute_id = snrt_cluster_compute_core_idx();
 
     void *mat_A, *mat_B, *mat_C;
-    void *ptr = (double *)snrt_cluster_memory().start;
+
+    uint32_t mat_A_size = (l1_gemm_l.M * (l1_gemm_l.K + MAT_ROW_PADDING) + MAT_PADDING) *
+           l1_gemm_l.dtype;
+    uint32_t mat_B_size = (l1_gemm_l.K + MAT_ROW_PADDING) * l1_gemm_l.N * l1_gemm_l.dtype;
+    uint32_t mat_C_size = l1_gemm_l.M * l1_gemm_l.N * l1_gemm_l.dtype;
+
+    uint32_t total_size = mat_A_size + mat_B_size + mat_C_size;
+
+    void *ptr = snrt_l1alloc(total_size);
 
     mat_A = ptr;
     ptr += (l1_gemm_l.M * (l1_gemm_l.K + MAT_ROW_PADDING) + MAT_PADDING) *
