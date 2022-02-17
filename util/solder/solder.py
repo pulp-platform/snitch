@@ -518,7 +518,7 @@ class AxiBus(Bus):
     def user_type(self):
         return "logic [{}:0]".format(max(0, self.uw - 1))
 
-    def change_iw(self, context, target_iw, name, inst_name=None, to=None):
+    def change_iw(self, context, target_iw, name, inst_name=None, to=None, max_txns_per_id=4):
         if self.iw == target_iw:
             # If `to` provided, emit an assign
             if to is not None:
@@ -555,6 +555,7 @@ class AxiBus(Bus):
             tpl.render_unicode(
                 axi_in=self,
                 axi_out=bus,
+                max_txns_per_id=max_txns_per_id,
                 name=inst_name or "i_{}".format(name),
             ) + "\n")
         return bus

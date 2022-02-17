@@ -13,6 +13,8 @@
   cuts_narrx_with_ctrl = 1
   cuts_widexroc_with_wideout = 1
   nr_clusters = int(cfg["s1_quadrant"]["nr_clusters"])
+  wide_trans = int(cfg["s1_quadrant"]["wide_trans"])
+  narrow_trans = int(cfg["s1_quadrant"]["narrow_trans"])
   ro_cache_cfg = cfg["s1_quadrant"].get("ro_cache_cfg", {})
   ro_cache_regions = ro_cache_cfg.get("address_regions", 1)
 %>
@@ -68,7 +70,7 @@ module ${name}_quadrant_s1
       .declare(context)
     narrow_cluster_in_ctrl \
       .cut(context, cuts_narrx_with_ctrl) \
-      .isolate(context, "isolate[0]", "narrow_cluster_in_isolate", isolated="isolated[0]", terminated=True, to_clk="clk_quadrant", to_rst="rst_quadrant_n") \
+      .isolate(context, "isolate[0]", "narrow_cluster_in_isolate", isolated="isolated[0]", terminated=True, to_clk="clk_quadrant", to_rst="rst_quadrant_n", num_pending=narrow_trans) \
       .change_iw(context, narrow_xbar_quadrant_s1.in_top.iw, "narrow_cluster_in_iwc", to=narrow_xbar_quadrant_s1.in_top)
   %>
 
@@ -77,7 +79,7 @@ module ${name}_quadrant_s1
   ///////////////////////////////
   <% narrow_cluster_out_ctrl = narrow_xbar_quadrant_s1.out_top \
     .change_iw(context, soc_narrow_xbar.in_s1_quadrant_0.iw, "narrow_cluster_out_iwc") \
-    .isolate(context, "isolate[1]", "narrow_cluster_out_isolate", isolated="isolated[1]", to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True) \
+    .isolate(context, "isolate[1]", "narrow_cluster_out_isolate", isolated="isolated[1]", to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True, num_pending=narrow_trans) \
     .cut(context, cuts_narrx_with_ctrl, "narrow_cluster_out_ctrl")
    %>
 
@@ -104,8 +106,8 @@ module ${name}_quadrant_s1
       wide_cluster_out_ro_cache = wide_xbar_quadrant_s1.out_top
 
     wide_cluster_out_cut = wide_cluster_out_ro_cache \
-      .change_iw(context, wide_target_iw, "wide_cluster_out_iwc") \
-      .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True) \
+      .change_iw(context, wide_target_iw, "wide_cluster_out_iwc", max_txns_per_id=wide_trans) \
+      .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True, num_pending=wide_trans) \
       .cut(context, cuts_widexroc_with_wideout)
 
     assert quadrant_pre_xbars[0].in_quadrant.iw == wide_cluster_out_cut.iw, "S1 Quadrant and Cluster Out IW mismatches."
@@ -122,7 +124,7 @@ module ${name}_quadrant_s1
       .copy(name="wide_cluster_in_iwc") \
       .declare(context) \
       .cut(context, cuts_widexroc_with_wideout) \
-      .isolate(context, "isolate[2]", "wide_cluster_in_isolate", isolated="isolated[2]", terminated=True, atop_support=False, to_clk="clk_quadrant", to_rst="rst_quadrant_n") \
+      .isolate(context, "isolate[2]", "wide_cluster_in_isolate", isolated="isolated[2]", terminated=True, atop_support=False, to_clk="clk_quadrant", to_rst="rst_quadrant_n", num_pending=wide_trans) \
       .change_iw(context, wide_xbar_quadrant_s1.in_top.iw, "wide_cluster_in_iwc", to=wide_xbar_quadrant_s1.in_top)
   %>
   assign wide_cluster_in_iwc_req = quadrant_wide_in_req_i;
@@ -164,7 +166,7 @@ module ${name}_quadrant_s1
     narrow_cluster_in = narrow_xbar_quadrant_s1.__dict__["out_cluster_{}".format(i)].change_iw(context, cfg["cluster"]["id_width_in"], "narrow_in_iwc_{}".format(i)).cut(context, cuts_narrx_with_cluster)
     narrow_cluster_out = narrow_xbar_quadrant_s1.__dict__["in_cluster_{}".format(i)].copy(name="narrow_out_{}".format(i)).declare(context)
     narrow_cluster_out.cut(context, cuts_narrx_with_cluster, to=narrow_xbar_quadrant_s1.__dict__["in_cluster_{}".format(i)])
-    wide_cluster_in = wide_xbar_quadrant_s1.__dict__["out_cluster_{}".format(i)].change_iw(context, cfg["cluster"]["dma_id_width_in"], "wide_in_iwc_{}".format(i)).cut(context, cuts_widex_with_cluster)
+    wide_cluster_in = wide_xbar_quadrant_s1.__dict__["out_cluster_{}".format(i)].change_iw(context, cfg["cluster"]["dma_id_width_in"], "wide_in_iwc_{}".format(i), max_txns_per_id=wide_trans).cut(context, cuts_widex_with_cluster)
     wide_cluster_out = wide_xbar_quadrant_s1.__dict__["in_cluster_{}".format(i)].copy(name="wide_out_{}".format(i)).declare(context)
     wide_cluster_out.cut(context, cuts_widex_with_cluster, to=wide_xbar_quadrant_s1.__dict__["in_cluster_{}".format(i)])
   %>

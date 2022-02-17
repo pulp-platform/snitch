@@ -272,8 +272,8 @@ module snitch_cluster
   localparam axi_pkg::xbar_cfg_t DmaXbarCfg = '{
     NoSlvPorts: NrWideMasters,
     NoMstPorts: NrWideSlaves,
-    MaxMstTrans: 4,
-    MaxSlvTrans: 4,
+    MaxMstTrans: 32,
+    MaxSlvTrans: 32,
     FallThrough: 1'b0,
     LatencyMode: WideXbarLatency,
     AxiIdWidthSlvPorts: WideIdWidthIn,
