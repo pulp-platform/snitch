@@ -467,18 +467,20 @@ class AxiBus(Bus):
     def emit_struct(self):
         return AxiStruct.emit(self.aw, self.dw, self.iw, self.uw)
 
-    def emit_flat_master_port(self, name=None):
+    def emit_flat_master_port(self, name=None, atop=False):
         tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
         return tpl.render_unicode(mst_dir="output",
                                   slv_dir="input",
                                   prefix="m_axi_{}".format(name or ""),
+                                  atop=atop,
                                   bus=self)
 
-    def emit_flat_slave_port(self, name=None):
+    def emit_flat_slave_port(self, name=None, atop=False):
         tpl = templates.get_template("solder.axi_flatten_port.sv.tpl")
         return tpl.render_unicode(mst_dir="input",
                                   slv_dir="output",
                                   prefix="s_axi_{}".format(name or ""),
+                                  atop=atop,
                                   bus=self)
 
     # TODO: For some reason the suffix here is nonstandard, hence the override.
