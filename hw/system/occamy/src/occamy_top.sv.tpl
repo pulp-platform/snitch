@@ -110,7 +110,7 @@ module ${name}_top
   input  ${soc_narrow_xbar.in_pcie.req_type()} pcie_axi_req_i,
   output ${soc_narrow_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o,
 
-  /// RMQ: Remote Quadrant Ports
+  /// RMQ: Remote Quadrant Ports: AXI master/slave and GPIO
 % for i in range(nr_remote_quadrants):
   output   ${soc_wide_xbar.__dict__["out_rmq_{}".format(i)].req_type()} rmq_${i}_wide_req_o,
   input  ${soc_wide_xbar.__dict__["out_rmq_{}".format(i)].rsp_type()} rmq_${i}_wide_rsp_i,
@@ -120,6 +120,7 @@ module ${name}_top
   input  ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].rsp_type()} rmq_${i}_narrow_rsp_i,
   input   ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].req_type()} rmq_${i}_narrow_req_i,
   output  ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].rsp_type()} rmq_${i}_narrow_rsp_o,
+  output rmq_${i}_mst_out_t rmq_${i}_mst_o,
 % endfor
 
   /// SRAM configuration
@@ -223,9 +224,17 @@ module ${name}_top
   assign rmq_${i}_narrow_req_o = ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].req_name()};
   assign ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].rsp_name()} = rmq_${i}_narrow_rsp_i;
   assign ${soc_wide_xbar.__dict__["in_rmq_{}".format(i)].req_name()} = rmq_${i}_wide_req_i;
-  assign rmq_${i}_wide_rsp_o = ${soc_wide_xbar.__dict__["in_rmq_{}".format(i)].req_name()};
+  assign rmq_${i}_wide_rsp_o = ${soc_wide_xbar.__dict__["in_rmq_{}".format(i)].rsp_name()};
   assign ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].req_name()} = rmq_${i}_narrow_req_i;
-  assign rmq_${i}_narrow_rsp_i = ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].req_name()};
+  assign rmq_${i}_narrow_rsp_o = ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].rsp_name()};
+% endfor
+
+  /// GPIO signals
+% for i, rq in enumerate(remote_quadrants):
+  <% rm_cores = rq["nr_clusters"]*rq["nr_cluster_cores"] %>
+  <% rm_core_off = lcl_cores + i*rm_cores %>
+  assign rmq_${i}_mst_o.mtip = mtip[${rm_core_off+rm_cores-1}:${rm_core_off}];
+  assign rmq_${i}_mst_o.msip = msip[${rm_core_off+rm_cores-1}:${rm_core_off}];
 % endfor
 
   //////////////////////
