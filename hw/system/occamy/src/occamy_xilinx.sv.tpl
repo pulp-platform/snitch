@@ -8,8 +8,8 @@
 
 `include "axi_flat.svh"
 
-module occamy_xilinx
-import occamy_pkg::*;
+module ${name}_xilinx
+import ${name}_pkg::*;
 (
   input  logic        clk_i,
   input  logic        rst_ni,
@@ -129,7 +129,7 @@ import occamy_pkg::*;
   ${soc_regbus_periph_xbar.out_clk_mgr.rsp_type()} clk_mgr_rsp;
 
   // Occamy top-level
-  occamy_top i_occamy (
+  ${name}_top i_${name} (
     .bootrom_req_o (bootrom_req),
     .bootrom_rsp_i (bootrom_rsp),
     .clk_mgr_req_o (clk_mgr_req),

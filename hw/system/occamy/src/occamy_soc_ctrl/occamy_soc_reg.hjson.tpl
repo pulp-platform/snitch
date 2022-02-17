@@ -15,7 +15,7 @@
       default: "31"
     },
   ],
-  name: "Occamy_SoC"
+  name: "${name}_SoC"
   clock_primary: "clk_i"
   bus_interfaces: [
     { protocol: "reg_iface", direction: "device" }

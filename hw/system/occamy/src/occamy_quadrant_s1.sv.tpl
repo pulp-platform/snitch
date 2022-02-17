@@ -18,8 +18,8 @@
 %>
 
 /// Occamy Stage 1 Quadrant
-module occamy_quadrant_s1
-  import occamy_pkg::*;
+module ${name}_quadrant_s1
+  import ${name}_pkg::*;
 (
   input  logic                         clk_i,
   input  logic                         rst_ni,
@@ -132,7 +132,7 @@ module occamy_quadrant_s1
   // Quadrant Controller //
   /////////////////////////
 
-  occamy_quadrant_s1_ctrl i_occamy_quadrant_s1_ctrl (
+  ${name}_quadrant_s1_ctrl i_${name}_quadrant_s1_ctrl (
     .clk_i,
     .rst_ni,
     .test_mode_i,
@@ -172,7 +172,7 @@ module occamy_quadrant_s1
   logic [9:0] hart_base_id_${i};
   assign hart_base_id_${i} = HartIdOffset + tile_id_i * NrCoresS1Quadrant + ${i} * NrCoresCluster;
 
-  occamy_cluster_wrapper i_occamy_cluster_${i} (
+  ${name}_cluster_wrapper i_${name}_cluster_${i} (
     .clk_i (clk_quadrant),
     .rst_ni (rst_quadrant_n),
     .debug_req_i (debug_req_i[${i}*NrCoresCluster+:NrCoresCluster]),

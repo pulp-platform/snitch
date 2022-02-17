@@ -22,13 +22,16 @@ from solder import solder, device_tree, util
 # Compile a regex to trim trailing whitespaces on lines.
 re_trailws = re.compile(r'[ \t\r]+$', re.MULTILINE)
 
+# Default name for all generated sources
+DEFAULT_NAME = "occamy"
 
-def write_template(tpl_path, outdir, **kwargs):
+
+def write_template(tpl_path, outdir, fname=None, **kwargs):
     if tpl_path:
         tpl_path = pathlib.Path(tpl_path).absolute()
         if tpl_path.exists():
             tpl = Template(filename=str(tpl_path))
-            fname = tpl_path.with_suffix("").name.replace("occamy", kwargs['args'].name)
+            fname = tpl_path.with_suffix("").name.replace("occamy", kwargs['args'].name) if not fname else fname
             with open(outdir / fname, "w") as file:
                 code = tpl.render_unicode(**kwargs)
                 code = re_trailws.sub("", code)
@@ -95,7 +98,7 @@ def main():
     parser.add_argument("--am-cheader", "-D", metavar="ADDRMAP_CHEADER")
     parser.add_argument("--am-csv", "-aml", metavar="ADDRMAP_CSV")
     parser.add_argument("--dts", metavar="DTS", help="System's device tree.")
-    parser.add_argument("--name", metavar="NAME", default="occamy", help="System's name.")
+    parser.add_argument("--name", metavar="NAME", default=DEFAULT_NAME, help="System's name.")
 
     parser.add_argument("-v",
                         "--verbose",
@@ -115,6 +118,11 @@ def main():
             obj = JsonRef.replace_refs(obj)
         except ValueError:
             raise SystemExit(sys.exc_info()[1])
+
+    # If name argument provided, change config
+    if args.name != DEFAULT_NAME:
+        obj["cluster"]["name"] = args.name+"_cluster"
+        # occamy.cfg["cluster"]["name"] = args.name
 
     occamy = Occamy(obj)
 
@@ -728,6 +736,7 @@ def main():
         "solder": solder,
         "util": util,
         "args": args,
+        "name": args.name,
         "soc_narrow_xbar": soc_narrow_xbar,
         "soc_wide_xbar": soc_wide_xbar,
         "quadrant_pre_xbars": quadrant_pre_xbars,
@@ -756,6 +765,7 @@ def main():
     #############
     write_template(args.top_sv,
                    outdir,
+                   fname="{}_top.sv".format(args.name),
                    module=solder.code_module['default'],
                    soc_periph_xbar=soc_axi_lite_periph_xbar,
                    **kwargs)
@@ -782,6 +792,7 @@ def main():
     ###############
     write_template(args.quadrant_s1,
                    outdir,
+                   fname="{}_quadrant_s1.sv".format(args.name),
                    module=solder.code_module['quadrant_s1'],
                    **kwargs)
 

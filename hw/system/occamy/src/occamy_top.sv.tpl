@@ -9,8 +9,8 @@
 
 `include "common_cells/registers.svh"
 
-module occamy_top
-  import occamy_pkg::*;
+module ${name}_top
+  import ${name}_pkg::*;
 (
   input  logic        clk_i,
   input  logic        rst_ni,
@@ -126,8 +126,8 @@ module occamy_top
   input sram_cfgs_t sram_cfgs_i
 );
 
-  occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
-  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in, soc_ctrl_soc_in;
+  ${name}_soc_reg_pkg::${name}_soc_reg2hw_t soc_ctrl_out;
+  ${name}_soc_reg_pkg::${name}_soc_hw2reg_t soc_ctrl_in, soc_ctrl_soc_in;
   logic [1:0] spm_rerror;
 
   always_comb begin
@@ -142,7 +142,7 @@ module occamy_top
   // Supervisor and machine-mode external interrupt pending.
   logic [1:0] eip;
   logic [0:0] debug_req;
-  occamy_interrupt_t irq;
+  ${name}_interrupt_t irq;
 
   assign irq.ext_irq = ext_irq_i;
 
@@ -162,7 +162,7 @@ module occamy_top
   periph_axi_lite_per2soc = soc_narrow_xbar.in_periph.copy(name="periph_axi_lite_per2soc").declare(context)
   periph_regbus_soc2per = soc_narrow_xbar.out_regbus_periph.copy(name="periph_regbus_soc2per").declare(context)
 %> \
-  occamy_soc i_occamy_soc (
+  ${name}_soc i_${name}_soc (
     .clk_i,
     .rst_ni,
     .test_mode_i,
@@ -369,7 +369,7 @@ module occamy_top
   );
 
   dmi_jtag #(
-    .IdcodeValue (occamy_pkg::IDCode)
+    .IdcodeValue (${name}_pkg::IDCode)
   ) i_dmi_jtag (
     .clk_i (${regbus_debug.clk}),
     .rst_ni (${regbus_debug.rst}),
@@ -410,7 +410,7 @@ module occamy_top
   /////////////////////
   //   SOC CONTROL   //
   /////////////////////
-  occamy_soc_ctrl #(
+  ${name}_soc_ctrl #(
     .reg_req_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.req_type()} ),
     .reg_rsp_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.rsp_type()} )
   ) i_soc_ctrl (

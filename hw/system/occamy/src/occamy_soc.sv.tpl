@@ -31,8 +31,8 @@
 
 `include "common_cells/registers.svh"
 
-module occamy_soc
-  import occamy_pkg::*;
+module ${name}_soc
+  import ${name}_pkg::*;
 (
   input  logic        clk_i,
   input  logic        rst_ni,
@@ -74,9 +74,9 @@ module occamy_soc
   input   ${soc_narrow_xbar.out_regbus_periph.rsp_type()} periph_regbus_rsp_i,
 
   // SoC control register IO
-  // FIXME: reg2hw and hw2reg connections are currently unused; this may change, however. 
-  input  occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out_i,
-  output occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in_o,
+  // FIXME: reg2hw and hw2reg connections are currently unused; this may change, however.
+  input  ${name}_soc_reg_pkg::${name}_soc_reg2hw_t soc_ctrl_out_i,
+  output ${name}_soc_reg_pkg::${name}_soc_hw2reg_t soc_ctrl_in_o,
   output logic [1:0] spm_rerror_o,
 
   // Interrupts and debug requests
@@ -151,7 +151,7 @@ module occamy_soc
     cva6_mst.cut(context, cuts_narrow_to_cva6, to=soc_narrow_xbar.__dict__["in_cva6"])
   %>\
 
-  occamy_cva6 i_occamy_cva6 (
+  ${name}_cva6 i_${name}_cva6 (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
     .irq_i (eip_i),
@@ -187,7 +187,7 @@ module occamy_soc
       .cut(context, cuts_pre_to_hbmx, name="pre_to_hbm_cut_{}".format(i), to=hbm_xbar.__dict__["in_quadrant_{}".format(i)])
   %>\
 
-  occamy_quadrant_s1 i_occamy_quadrant_s1_${i} (
+  ${name}_quadrant_s1 i_${name}_quadrant_s1_${i} (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
     .test_mode_i (test_mode_i),

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: SHL-0.51
 // Licensed under Solderpad Hardware License, Version 0.51, see LICENSE for details.
 {
-  name: "Occamy_quadrant_s1",
+  name: "${name}_quadrant_s1",
   clock_primary: "clk_i",
   bus_interfaces: [
     { protocol: "reg_iface", direction: "device" }

@@ -14,9 +14,9 @@
   ro_cache_regions = ro_cache_cfg.get("address_regions", 1)
 %>
 
-module occamy_quadrant_s1_ctrl
-  import occamy_pkg::*;
-  import occamy_quadrant_s1_reg_pkg::*;
+module ${name}_quadrant_s1_ctrl
+  import ${name}_pkg::*;
+  import ${name}_quadrant_s1_reg_pkg::*;
 (
   input  logic clk_i,
   input  logic rst_ni,
@@ -29,8 +29,8 @@ module occamy_quadrant_s1_ctrl
   output logic rst_quadrant_no,
 
   // Quadrant control signals
-  output occamy_quadrant_s1_reg2hw_isolate_reg_t isolate_o,
-  input  occamy_quadrant_s1_hw2reg_isolated_reg_t isolated_i,
+  output ${name}_quadrant_s1_reg2hw_isolate_reg_t isolate_o,
+  input  ${name}_quadrant_s1_hw2reg_isolated_reg_t isolated_i,
   output logic ro_enable_o,
   output logic ro_flush_valid_o,
   input  logic ro_flush_ready_i,
@@ -85,13 +85,13 @@ module occamy_quadrant_s1_ctrl
   %> \
 
   // Control registers
-  occamy_quadrant_s1_reg2hw_t reg2hw;
-  occamy_quadrant_s1_hw2reg_t hw2reg;
+  ${name}_quadrant_s1_reg2hw_t reg2hw;
+  ${name}_quadrant_s1_hw2reg_t hw2reg;
 
-  occamy_quadrant_s1_reg_top #(
+  ${name}_quadrant_s1_reg_top #(
     .reg_req_t (${quad_regs_regbus.req_type()}),
     .reg_rsp_t (${quad_regs_regbus.rsp_type()})
-  ) i_occamy_quadrant_s1_reg_top (
+  ) i_${name}_quadrant_s1_reg_top (
     .clk_i,
     .rst_ni,
     .reg_req_i (${quad_regs_regbus.req_name()}),
