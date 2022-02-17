@@ -1528,6 +1528,373 @@ class AxiXbar(Xbar):
         return connectivity
 
 
+# An AXI Demultiplexer.
+class AxiDemux(Xbar):
+    configs = dict()
+
+    def __init__(self,
+                 aw,
+                 dw,
+                 iw,
+                 aw_select,
+                 ar_select,
+                 uw=0,
+                 max_trans=8,
+                 fall_through=False,
+                 unique_ids=None,
+                 look_bits=None,
+                 spill_aw=False,
+                 spill_w=False,
+                 spill_b=False,
+                 spill_ar=False,
+                 spill_r=False,
+                 **kwargs):
+        super().__init__(**kwargs)
+        self.aw_select = aw_select
+        self.ar_select = ar_select
+        self.aw = aw
+        self.dw = dw
+        self.iw = iw
+        self.uw = uw
+        self.max_trans = max_trans
+        self.look_bits = iw if not look_bits else look_bits
+        self.unique_ids = 2**iw if not unique_ids else unique_ids
+        self.fall_through = fall_through
+        self.spill_aw = spill_aw
+        self.spill_w = spill_w
+        self.spill_b = spill_b
+        self.spill_ar = spill_ar
+        self.spill_r = spill_r
+
+    def add_output(self, name):
+        self.outputs.append(name)
+
+    # def add_output_symbolic(self, name, base, length):
+    #     idx = len(self.outputs)
+    #     self.symbolic_addrmap.append((idx, base, length))
+    #     self.outputs.append(name)
+
+    # def add_output_entry(self, name, entry):
+    #     self.add_output(name,
+    #                     [(r.lo, r.hi)
+    #                      for r in self.node.get_routes() if r.port == entry])
+
+    def emit(self):
+        global code_module
+        global code_package
+        if self.emitted:
+            return
+        self.emitted = True
+        code_module.setdefault(self.context, "")
+        # Compute the ID widths.
+        iw_in = self.iw
+        iw_out = self.iw
+
+        # Emit the output enum into the package.
+        output_enum_name = "{}_outputs_e".format(self.name)
+        output_enum = "/// Outputs of the `{}` crossbar.\n".format(self.name)
+        output_enum += "typedef enum int {\n"
+        output_enums = list()
+        for name in self.outputs:
+            x = "{}_out_{}".format(self.name, name).upper()
+            output_enums.append(x)
+            output_enum += "  {},\n".format(x)
+        output_enum += "  {}_NUM_OUTPUTS\n".format(self.name.upper())
+        output_enum += "}} {};\n".format(output_enum_name)
+        code_package += "\n" + output_enum
+
+        # Emit the AXI structs into the package.
+        self.input_struct = AxiStruct.emit(self.aw, self.dw, iw_in, self.uw)
+        self.output_struct = AxiStruct.emit(self.aw, self.dw, iw_out, self.uw)
+
+        code_package += "\n"
+        for tds in [
+                "req", "resp", "aw_chan", "w_chan", "b_chan", "ar_chan",
+                "r_chan"
+        ]:
+            code_package += "typedef {}_{tds}_t {}_in_{tds}_t;\n".format(
+                self.input_struct, self.name, tds=tds)
+            code_package += "typedef {}_{tds}_t {}_out_{tds}_t;\n".format(
+                self.output_struct, self.name, tds=tds)
+
+        # Emit the characteristics of the AXI plugs into the package.
+        code_package += "\n"
+        code_package += "// verilog_lint: waive parameter-name-style \n"
+        code_package += "localparam int {}_IW_IN = {};\n".format(
+            self.name.upper(), iw_in)
+        code_package += "// verilog_lint: waive parameter-name-style \n"
+        code_package += "localparam int {}_IW_OUT = {};\n".format(
+            self.name.upper(), iw_out)
+
+        # Emit the input and output signals.
+        code = ""
+        code += "{}_in_req_t {}_in_req;\n".format(
+            self.name, self.name)
+        code += "{}_in_resp_t {}_in_rsp;\n".format(
+            self.name, self.name)
+        code += "{}_out_req_t [{}:0] {}_out_req;\n".format(
+            self.name,
+            len(self.outputs) - 1, self.name)
+        code += "{}_out_resp_t [{}:0] {}_out_rsp;\n".format(
+            self.name,
+            len(self.outputs) - 1, self.name)
+        code_module[self.context] += "\n" + code
+
+        bus = AxiBus(
+            self.clk,
+            self.rst,
+            self.aw,
+            self.dw,
+            iw_in,
+            self.uw,
+            "{}_in".format(self.name),
+            type_prefix=self.input_struct,
+            declared=True,
+        )
+        self.__dict__["in_top"] = bus
+
+        for name, enum in zip(self.outputs, output_enums):
+            bus = AxiBus(
+                self.clk,
+                self.rst,
+                self.aw,
+                self.dw,
+                iw_out,
+                self.uw,
+                "{}_out".format(self.name),
+                "[{}]".format(enum),
+                type_prefix=self.output_struct,
+                declared=True,
+            )
+            self.__dict__["out_" + name] = bus
+
+        # Emit the crossbar instance itself.
+        code = "axi_demux #(\n"
+        code += "  .AxiIdWidth   ( {} ),\n".format(self.iw)
+        code += "  .NoMstPorts   ( {} ),\n".format(len(self.outputs))
+        code += "  .MaxTrans     ( {} ),\n".format(self.max_trans)
+        code += "  .AxiLookBits  ( {} ),\n".format(self.look_bits)
+        # code += "  .UniqueIds    ( {} ),\n".format(self.unique_ids)
+        code += "  .FallThrough  ( {} ),\n".format(int(self.fall_through))
+        code += "  .SpillAw      ( {} ),\n".format(int(self.spill_aw))
+        code += "  .SpillW       ( {} ),\n".format(int(self.spill_w))
+        code += "  .SpillB       ( {} ),\n".format(int(self.spill_b))
+        code += "  .SpillAr      ( {} ),\n".format(int(self.spill_ar))
+        code += "  .SpillR       ( {} ),\n".format(int(self.spill_r))
+        code += "  .aw_chan_t ( {}_aw_chan_t ),\n".format(self.input_struct)
+        code += "  .w_chan_t      ( {}_w_chan_t ),\n".format(self.input_struct)
+        code += "  .b_chan_t  ( {}_b_chan_t ),\n".format(self.input_struct)
+        code += "  .ar_chan_t ( {}_ar_chan_t ),\n".format(self.input_struct)
+        code += "  .r_chan_t  ( {}_r_chan_t ),\n".format(self.input_struct)
+        code += "  .req_t     ( {}_req_t ),\n".format(self.input_struct)
+        code += "  .resp_t    ( {}_resp_t )\n".format(self.input_struct)
+        code += ") i_{name} (\n".format(name=self.name)
+        code += "  .clk_i  ( {clk} ),\n".format(clk=self.clk)
+        code += "  .rst_ni ( {rst} ),\n".format(rst=self.rst)
+        code += "  .test_i ( test_mode_i ),\n"
+        code += "  .slv_req_i  ( {name}_in_req  ),\n".format(
+            name=self.name)
+        code += "  .slv_aw_select_i  ( {} ),\n".format(self.aw_select)
+        code += "  .slv_ar_select_i  ( {} ),\n".format(self.ar_select)
+        code += "  .slv_resp_o ( {name}_in_rsp  ),\n".format(
+            name=self.name)
+        code += "  .mst_reqs_o  ( {name}_out_req ),\n".format(
+            name=self.name)
+        code += "  .mst_resps_i ( {name}_out_rsp )\n".format(
+            name=self.name)
+        code += ");\n"
+
+        code_module[self.context] += "\n" + code
+
+    def connectivity(self):
+        """Generate a connectivity matrix"""
+        length = len(self.outputs) * len(self.inputs)
+        connectivity = ""
+        # check if port names match and disable that route
+        if self.no_loopback:
+            for i in self.inputs:
+                for o in self.outputs:
+                    if (i == o):
+                        connectivity += "0"
+                    else:
+                        connectivity += "1"
+        else:
+            connectivity += "1" * length
+
+        connectivity = "{}'b{}".format(length, connectivity[::-1])
+
+        return connectivity
+
+
+# An AXI Mux.
+class AxiMux(Xbar):
+    configs = dict()
+
+    def __init__(self,
+                 aw,
+                 dw,
+                 iw,
+                 uw=0,
+                 max_w_trans=8,
+                 fall_through=False,
+                 spill_aw=False,
+                 spill_w=False,
+                 spill_b=False,
+                 spill_ar=False,
+                 spill_r=False,
+                 **kwargs):
+        super().__init__(**kwargs)
+        self.aw = aw
+        self.dw = dw
+        self.iw = iw
+        self.uw = uw
+        self.max_w_trans = max_w_trans
+        self.fall_through = fall_through
+        self.spill_aw = spill_aw
+        self.spill_w = spill_w
+        self.spill_b = spill_b
+        self.spill_ar = spill_ar
+        self.spill_r = spill_r
+
+    def add_input(self, name):
+        self.inputs.append(name)
+
+    def emit(self):
+        global code_module
+        global code_package
+        if self.emitted:
+            return
+        self.emitted = True
+        code_module.setdefault(self.context, "")
+        # Compute the ID widths.
+        iw_in = self.iw
+        iw_out = self.iw + int(math.ceil(math.log2(max(1, len(self.inputs)))))
+
+        # Emit the input enum into the package.
+        input_enum_name = "{}_inputs_e".format(self.name)
+        input_enum = "/// Inputs of the `{}` mux.\n".format(self.name)
+        input_enum += "typedef enum int {\n"
+        input_enums = list()
+        for name in self.inputs:
+            x = "{}_in_{}".format(self.name, name).upper()
+            input_enums.append(x)
+            input_enum += "  {},\n".format(x)
+        input_enum += "  {}_NUM_INPUTS\n".format(self.name.upper())
+        input_enum += "}} {};\n".format(input_enum_name)
+        code_package += "\n" + input_enum
+
+        # Emit the AXI structs into the package.
+        self.input_struct = AxiStruct.emit(self.aw, self.dw, iw_in, self.uw)
+        self.output_struct = AxiStruct.emit(self.aw, self.dw, iw_out, self.uw)
+        code_package += "\n"
+        for tds in [
+                "req", "resp", "aw_chan", "w_chan", "b_chan", "ar_chan",
+                "r_chan"
+        ]:
+            code_package += "typedef {}_{tds}_t {}_in_{tds}_t;\n".format(
+                self.input_struct, self.name, tds=tds)
+            code_package += "typedef {}_{tds}_t {}_out_{tds}_t;\n".format(
+                self.output_struct, self.name, tds=tds)
+
+        # Emit the characteristics of the AXI plugs into the package.
+        code_package += "\n"
+        code_package += "// verilog_lint: waive parameter-name-style \n"
+        code_package += "localparam int {}_IW_IN = {};\n".format(
+            self.name.upper(), iw_in)
+        code_package += "// verilog_lint: waive parameter-name-style \n"
+        code_package += "localparam int {}_IW_OUT = {};\n".format(
+            self.name.upper(), iw_out)
+
+        # Emit the input and output signals.
+        code = ""
+        code += "{}_in_req_t [{}:0] {}_in_req;\n".format(
+            self.name,
+            len(self.inputs) - 1, self.name)
+        code += "{}_in_resp_t [{}:0] {}_in_rsp;\n".format(
+            self.name,
+            len(self.inputs) - 1, self.name)
+        code += "{}_out_req_t {}_out_req;\n".format(
+            self.name, self.name)
+        code += "{}_out_resp_t {}_out_rsp;\n".format(
+            self.name, self.name)
+        code_module[self.context] += "\n" + code
+
+        # The inputs
+        for name, enum in zip(self.inputs, input_enums):
+            bus = AxiBus(
+                self.clk,
+                self.rst,
+                self.aw,
+                self.dw,
+                iw_in,
+                self.uw,
+                "{}_in".format(self.name),
+                "[{}]".format(enum),
+                type_prefix=self.input_struct,
+                declared=True,
+            )
+            self.__dict__["in_" + name] = bus
+
+        # The output
+        bus = AxiBus(
+            self.clk,
+            self.rst,
+            self.aw,
+            self.dw,
+            iw_out,
+            self.uw,
+            "{}_out".format(self.name),
+            declared=True,
+        )
+        self.__dict__["out_top"] = bus
+
+        # Emit the crossbar instance itself.
+        code = "axi_mux #(\n"
+        code += "  .MaxWTrans    ( {} ),\n".format(self.max_w_trans)
+        code += "  .FallThrough  ( {} ),\n".format(int(self.fall_through))
+        code += "  .SpillAw      ( {} ),\n".format(int(self.spill_aw))
+        code += "  .SpillW       ( {} ),\n".format(int(self.spill_w))
+        code += "  .SpillB       ( {} ),\n".format(int(self.spill_b))
+        code += "  .SpillAr      ( {} ),\n".format(int(self.spill_ar))
+        code += "  .SpillR       ( {} ),\n".format(int(self.spill_r))
+        code += "  .SlvAxiIDWidth ( {} ), \n".format(iw_in)
+        code += "  .slv_aw_chan_t ( {}_aw_chan_t ),\n".format(
+            self.input_struct)
+        code += "  .mst_aw_chan_t ( {}_aw_chan_t ),\n".format(
+            self.output_struct)
+        code += "  .w_chan_t      ( {}_w_chan_t ),\n".format(self.input_struct)
+        code += "  .slv_b_chan_t  ( {}_b_chan_t ),\n".format(self.input_struct)
+        code += "  .mst_b_chan_t  ( {}_b_chan_t ),\n".format(
+            self.output_struct)
+        code += "  .slv_ar_chan_t ( {}_ar_chan_t ),\n".format(
+            self.input_struct)
+        code += "  .mst_ar_chan_t ( {}_ar_chan_t ),\n".format(
+            self.output_struct)
+        code += "  .slv_r_chan_t  ( {}_r_chan_t ),\n".format(self.input_struct)
+        code += "  .mst_r_chan_t  ( {}_r_chan_t ),\n".format(
+            self.output_struct)
+        code += "  .slv_req_t     ( {}_req_t ),\n".format(self.input_struct)
+        code += "  .slv_resp_t    ( {}_resp_t ),\n".format(self.input_struct)
+        code += "  .mst_req_t     ( {}_req_t ),\n".format(self.output_struct)
+        code += "  .mst_resp_t    ( {}_resp_t ),\n".format(self.output_struct)
+        code += "  .NoSlvPorts    ( {} ) \n".format(len(self.inputs))
+        code += ") i_{name} (\n".format(name=self.name)
+        code += "  .clk_i  ( {clk} ),\n".format(clk=self.clk)
+        code += "  .rst_ni ( {rst} ),\n".format(rst=self.rst)
+        code += "  .test_i ( test_mode_i ),\n"
+        code += "  .slv_reqs_i  ( {name}_in_req  ),\n".format(
+            name=self.name)
+        code += "  .slv_resps_o ( {name}_in_rsp  ),\n".format(
+            name=self.name)
+        code += "  .mst_req_o   ( {name}_out_req ),\n".format(
+            name=self.name)
+        code += "  .mst_resp_i  ( {name}_out_rsp )\n".format(
+            name=self.name)
+        code += ");\n"
+
+        code_module[self.context] += "\n" + code
+
+
 # An AXI-Lite crossbar.
 class AxiLiteXbar(Xbar):
     tpl = templates.get_template("solder.axi_lite_xbar.sv.tpl")
