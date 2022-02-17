@@ -9,7 +9,7 @@
 #include "printf.h"
 #include "snrt.h"
 
-void maxpool_layer(layer l) {
+void maxpool_layer(conv_layer l) {
     uint32_t cluster_num = snrt_cluster_num();
     uint32_t cluster_id = snrt_cluster_idx();
     uint32_t compute_num = snrt_cluster_compute_core_num();

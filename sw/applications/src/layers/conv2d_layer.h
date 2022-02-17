@@ -4,4 +4,4 @@
 
 #include "layer.h"
 
-void conv2d_layer(layer l);
+void conv2d_layer(conv_layer l);

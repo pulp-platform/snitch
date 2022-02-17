@@ -6,20 +6,9 @@
 
 #include <stdint.h>
 
-typedef enum { CONV2D, GEMM, POOLING, BATCH_NORM } LAYER_TYPE;
+typedef enum { FP64 = 8, FP32 = 4, FP16 = 2, FP8 = 1 } precision_t;
 
-typedef enum { RELU, SOFTMAX } ACTIVATION;
-
-typedef enum { FP64 = 8, FP32 = 4, FP16 = 2, FP8 = 1 } PRECISION;
-
-struct layer;
-typedef struct layer_struct layer;
-
-struct layer_struct {
-    LAYER_TYPE type;
-    ACTIVATION activation;
-
-    // GEMM
+typedef struct gemm_layer_struct {
     uint32_t M;
     uint32_t M_p;
     uint32_t N;
@@ -46,6 +35,10 @@ struct layer_struct {
 
     uint32_t ALPHA;
 
+    precision_t dtype;
+} gemm_layer;
+
+typedef struct conv_layer_struct {
     // CONV2D
     uint32_t CO;
     uint32_t CI;
@@ -69,5 +62,5 @@ struct layer_struct {
     double *gamma;
     double *beta;
 
-    PRECISION dtype;
-};
+    precision_t dtype;
+} conv_layer;

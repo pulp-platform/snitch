@@ -19,7 +19,7 @@ int main() {
     gemm_l.B = (void *)gemm_B_dram;
     gemm_l.C = (void *)gemm_C_dram;
 
-    const layer l1_gemm_l = gemm_l;
+    const gemm_layer l1_gemm_l = gemm_l;
 
     volatile uint32_t cluster_num = snrt_cluster_num();
     volatile uint32_t cluster_id = snrt_cluster_idx();

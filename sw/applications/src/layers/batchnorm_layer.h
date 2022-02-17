@@ -4,4 +4,4 @@
 
 #include "layer.h"
 
-void batchnorm_layer(layer l);
+void batchnorm_layer(conv_layer l);

@@ -39,7 +39,7 @@ void snrt_dma_stop_tracking() { asm volatile("dmstati t0, 3"); }
  * @param checksum checksum to compare against, reduced over input channels
  * @return uint32_t
  */
-uint32_t check_layer(layer l, double *checksum) {
+uint32_t check_layer(conv_layer l, double *checksum) {
     uint32_t errors = 0;
     double *ptr = snrt_cluster_memory().start;
     volatile double *result_buf = ptr;

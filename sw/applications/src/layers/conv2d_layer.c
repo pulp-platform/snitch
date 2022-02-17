@@ -1,4 +1,3 @@
-// Copyright 2020 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -13,7 +12,7 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-void conv2d_layer(layer l) {
+void conv2d_layer(conv_layer l) {
     uint32_t cluster_num = snrt_cluster_num();
     uint32_t cluster_id = snrt_cluster_idx();
     uint32_t compute_num = snrt_cluster_compute_core_num();
@@ -65,9 +64,6 @@ void conv2d_layer(layer l) {
 
     int32_t oh_prev = -1;
     int32_t ow_prev = -1;
-
-    l.TA = 0;
-    l.TB = 1;
 
     // snrt_global_barrier();
 
@@ -350,8 +346,8 @@ void conv2d_layer(layer l) {
                                     1, 8, l.FH * l.FW * l.TILE_CI,
                                     &im2col[read_buf * im2col_mat_stride +
                                             compute_id * im2col_row_stride],
-                                    0, l.TA, weights,
-                                    l.FH * l.FW * l.TILE_CI + 1, l.TB,
+                                    0, 0, weights,
+                                    l.FH * l.FW * l.TILE_CI + 1, 1,
                                     &ofmap[write_buf * ofmap_stride +
                                            compute_id * ofmap_co_stride],
                                     0, &alpha, setup_SSR);
@@ -362,8 +358,8 @@ void conv2d_layer(layer l) {
                                     1, 8, l.FH * l.FW * l.TILE_CI,
                                     &im2col[read_buf * im2col_mat_stride +
                                             compute_id * im2col_row_stride],
-                                    0, l.TA, weights,
-                                    l.FH * l.FW * l.TILE_CI + 1, l.TB,
+                                    0, 0, weights,
+                                    l.FH * l.FW * l.TILE_CI + 1, 1,
                                     &ofmap[write_buf * ofmap_stride +
                                            compute_id * ofmap_co_stride],
                                     0, &alpha, setup_SSR);

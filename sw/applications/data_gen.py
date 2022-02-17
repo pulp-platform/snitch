@@ -67,7 +67,7 @@ def emit_conv2d_layer(name='conv2d', **kwargs):
 
     layer_str = ''
     layer_str += '#include "layer.h"\n\n'
-    layer_str += f'layer {name}_l = {{\n'
+    layer_str += f'conv_layer {name}_l = {{\n'
     layer_str += f'\t.CO = {co},\n'
     layer_str += f'\t.CI = {ci},\n'
     layer_str += f'\t.IH = {ih},\n'
@@ -105,8 +105,7 @@ def emit_GEMM_layer(name='gemm', **kwargs):
 
     layer_str = ''
     layer_str += '#include "layer.h"\n\n'
-    layer_str += f'layer {name}_l = {{\n'
-    layer_str += '\t.type = GEMM,\n'
+    layer_str += f'gemm_layer {name}_l = {{\n'
     layer_str += f'\t.M = {m},\n'
     layer_str += f'\t.N = {n},\n'
     layer_str += f'\t.K = {k},\n'
@@ -146,7 +145,7 @@ def emit_batchnorm_layer(name='batchnorm', **kwargs):
 
     layer_str = ''
     layer_str += '#include "layer.h"\n\n'
-    layer_str += f'layer {name}_l = {{\n'
+    layer_str += f'conv_layer {name}_l = {{\n'
     layer_str += f'\t.CO = {co},\n'
     layer_str += f'\t.CI = {ci},\n'
     layer_str += f'\t.IH = {ih},\n'
@@ -176,7 +175,7 @@ def emit_maxpool_layer(name='maxpool', **kwargs):
 
     layer_str = ''
     layer_str += '#include "layer.h"\n\n'
-    layer_str += f'layer {name}_l = {{\n'
+    layer_str += f'conv_layer {name}_l = {{\n'
     layer_str += f'\t.CO = {co},\n'
     layer_str += f'\t.CI = {ci},\n'
     layer_str += f'\t.IH = {ih},\n'

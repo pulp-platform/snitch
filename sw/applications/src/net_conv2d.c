@@ -22,7 +22,7 @@ int main() {
     conv2d_l.pad = (conv2d_l.FH - 1) / 2;
     conv2d_l.cluster2cluster = 0;
 
-    const layer l1_conv2d_l = conv2d_l;
+    const conv_layer l1_conv2d_l = conv2d_l;
 
     uint32_t cycles, dma_busy;
 

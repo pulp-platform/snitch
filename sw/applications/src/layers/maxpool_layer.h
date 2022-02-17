@@ -4,4 +4,4 @@
 
 #include "layer.h"
 
-void maxpool_layer(layer l);
+void maxpool_layer(conv_layer l);
