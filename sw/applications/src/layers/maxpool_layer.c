@@ -33,7 +33,8 @@ void maxpool_layer(const conv_layer *l) {
     uint32_t prev_ci;
 
     // tiles are distributed across clusters
-    for (uint32_t tile = cluster_id; tile < l->OH * l->OW; tile += cluster_num) {
+    for (uint32_t tile = cluster_id; tile < l->OH * l->OW;
+         tile += cluster_num) {
         for (uint32_t ci = 0; ci < l->CI; ci += l->TILE_CI) {
             uint32_t oh = tile / l->OW;
             uint32_t ow = tile % l->OW;
@@ -45,7 +46,7 @@ void maxpool_layer(const conv_layer *l) {
                             &ifmap[write_buf * (ifmap_size / 2) +
                                    fh * l->FW * l->TILE_CI], /* dst */
                             &l->ifmap[((oh * l->FH + fh) * l->IW + ow * l->FW) *
-                                     l->CI], /* src */
+                                      l->CI], /* src */
                             sizeof(double) * l->TILE_CI * l->FW /* size */);
                     } else {
                         // printf("bubu\n");
@@ -53,8 +54,8 @@ void maxpool_layer(const conv_layer *l) {
                             &ifmap[write_buf * (ifmap_size / 2) +
                                    fh * l->FW * l->TILE_CI], /* dst */
                             &l->ifmap[((oh * l->FH + fh) * l->IW + ow * l->FW) *
-                                         l->CI +
-                                     ci],               /* src */
+                                          l->CI +
+                                      ci],               /* src */
                             sizeof(double) * l->TILE_CI, /* size */
                             sizeof(double) * l->TILE_CI, /* dst_stride */
                             sizeof(double) * l->CI,      /* src_stride */
@@ -69,11 +70,11 @@ void maxpool_layer(const conv_layer *l) {
                 if (!(tile == cluster_id && ci == 0)) {
                     snrt_dma_start_2d(
                         &l->ofmap[(prev_oh * l->OW + prev_ow) * l->CI +
-                                 prev_ci],                    /* dst */
+                                  prev_ci],                   /* dst */
                         &ofmap[!read_buf * (ofmap_size / 2)], /* src */
-                        sizeof(double) * l->TILE_CI,           /* size */
-                        sizeof(double) * l->CI,                /* dst_stride */
-                        sizeof(double) * l->TILE_CI,           /* src_stride */
+                        sizeof(double) * l->TILE_CI,          /* size */
+                        sizeof(double) * l->CI,               /* dst_stride */
+                        sizeof(double) * l->TILE_CI,          /* src_stride */
                         1 /* repetitions */);
                 }
 
@@ -104,8 +105,8 @@ void maxpool_layer(const conv_layer *l) {
     if (snrt_is_dm_core()) {
         snrt_dma_start_2d(
             &l->ofmap[(prev_oh * l->OW + prev_ow) * l->CI + prev_ci], /* dst */
-            &ofmap[!read_buf * (ofmap_size / 2)],                  /* src */
-            sizeof(double) * l->TILE_CI,                            /* size */
+            &ofmap[!read_buf * (ofmap_size / 2)],                     /* src */
+            sizeof(double) * l->TILE_CI,                              /* size */
             sizeof(double) * l->CI,      /* dst_stride */
             sizeof(double) * l->TILE_CI, /* src_stride */
             1 /* repetitions */);

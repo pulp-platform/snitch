@@ -56,11 +56,11 @@ void batchnorm_layer(const conv_layer *l) {
                     // data is interleaved
                     snrt_dma_start_2d(
                         &ifmap[write_buf * ifmap_size / 2], /* dst */
-                        &l->ifmap[oh * l->IW * l->CI + ci],    /* src */
-                        sizeof(double) * l->TILE_CI,         /* size */
-                        sizeof(double) * l->TILE_CI,         /* dst_stride */
-                        sizeof(double) * l->CI,              /* src_stride */
-                        l->IW);                              /* repetitions */
+                        &l->ifmap[oh * l->IW * l->CI + ci], /* src */
+                        sizeof(double) * l->TILE_CI,        /* size */
+                        sizeof(double) * l->TILE_CI,        /* dst_stride */
+                        sizeof(double) * l->CI,             /* src_stride */
+                        l->IW);                             /* repetitions */
                 }
 
                 snrt_dma_wait_all();
@@ -76,9 +76,10 @@ void batchnorm_layer(const conv_layer *l) {
                     } else {
                         // data is stored in interleaved layout
                         snrt_dma_start_2d(
-                            &l->ofmap[prev_oh * l->OW * l->CI + prev_ci], /* dst */
-                            &ofmap[!read_buf * (ofmap_size / 2)],      /* src */
-                            sizeof(double) * l->TILE_CI, /* size */
+                            &l->ofmap[prev_oh * l->OW * l->CI +
+                                      prev_ci],                   /* dst */
+                            &ofmap[!read_buf * (ofmap_size / 2)], /* src */
+                            sizeof(double) * l->TILE_CI,          /* size */
                             sizeof(double) * l->CI,      /* dst_stride */
                             sizeof(double) * l->TILE_CI, /* src_stride */
                             l->IW);                      /* repetitions */
@@ -124,11 +125,11 @@ void batchnorm_layer(const conv_layer *l) {
             // data is stored in interleaved layout
             snrt_dma_start_2d(
                 &l->ofmap[prev_oh * l->OW * l->CI + prev_ci], /* dst */
-                &ofmap[!read_buf * (ofmap_size / 2)],      /* src */
-                sizeof(double) * l->TILE_CI,                /* size */
-                sizeof(double) * l->CI,                     /* dst_stride */
-                sizeof(double) * l->TILE_CI,                /* src_stride */
-                l->IW);                                     /* repetitions */
+                &ofmap[!read_buf * (ofmap_size / 2)],         /* src */
+                sizeof(double) * l->TILE_CI,                  /* size */
+                sizeof(double) * l->CI,                       /* dst_stride */
+                sizeof(double) * l->TILE_CI,                  /* src_stride */
+                l->IW);                                       /* repetitions */
         }
 
         snrt_dma_wait_all();

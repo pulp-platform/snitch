@@ -5,7 +5,8 @@
 #include "layer.h"
 
 /**
- * @brief batchnorm layer that handles data transfers in a double buffered fashion
+ * @brief batchnorm layer that handles data transfers in a double buffered
+ * fashion
  *
  * @param l conv_layer struct that holds addresses and parameters
  */

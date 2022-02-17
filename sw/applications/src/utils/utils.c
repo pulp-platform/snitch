@@ -4,11 +4,11 @@
 
 #include "utils.h"
 
+#include <math.h>
 #include <stdint.h>
 
 #include "../../vendor/riscv-opcodes/encoding.h"
 #include "layer.h"
-#include <math.h>
 #include "printf.h"
 #include "snrt.h"
 
@@ -36,9 +36,10 @@ uint32_t check_layer(const conv_layer *l, double *checksum) {
 
             for (uint32_t oh = 0; oh < l->OH; oh++) {
                 for (uint32_t ow = 0; ow < l->OW; ow++) {
-                    snrt_dma_txid_t result_txid = snrt_dma_start_1d(
-                        (double *)result_buf, &l->ofmap[(oh * l->OW + ow) * l->CO],
-                        sizeof(double) * l->CO);
+                    snrt_dma_txid_t result_txid =
+                        snrt_dma_start_1d((double *)result_buf,
+                                          &l->ofmap[(oh * l->OW + ow) * l->CO],
+                                          sizeof(double) * l->CO);
                     snrt_dma_wait_all();
                     snrt_cluster_hw_barrier();
                     snrt_cluster_hw_barrier();

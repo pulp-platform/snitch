@@ -1,3 +1,4 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -87,13 +88,13 @@ void conv2d_layer(const conv_layer *l) {
                         snrt_dma_txid_t weight_txid = snrt_dma_start_1d(
                             &weights[_co * weights_co_stride], /* dst */
                             &l->weights[(co + _co) * l->FH * l->FW *
-                                       l->CI], /* src */
+                                        l->CI], /* src */
                             sizeof(double) * l->CI * l->FH * l->FW /* size */);
                     } else {
                         snrt_dma_txid_t weight_txid = snrt_dma_start_2d(
                             &weights[_co * weights_co_stride], /* dst */
                             &l->weights[(co + _co) * l->FH * l->FW * l->CI +
-                                       ci],             /* src */
+                                        ci],             /* src */
                             sizeof(double) * l->TILE_CI, /* size */
                             sizeof(double) * l->TILE_CI, /* dst_stride */
                             sizeof(double) * l->CI,      /* src_stride */
@@ -128,8 +129,9 @@ void conv2d_layer(const conv_layer *l) {
                                   l->OH;
 
                     if (snrt_is_dm_core()) {
-                        uint32_t n_ifmap_pixel_read = min(
-                            compute_num + l->FW - 1, l->IW - ow + (l->pad << 1));
+                        uint32_t n_ifmap_pixel_read =
+                            min(compute_num + l->FW - 1,
+                                l->IW - ow + (l->pad << 1));
                         uint32_t n_ofmap_pixel_read =
                             min(compute_num, l->OW - ow);
                         uint32_t n_ofmap_pixel_write =
@@ -140,11 +142,11 @@ void conv2d_layer(const conv_layer *l) {
                             snrt_dma_txid_t ofmap_txid = snrt_dma_start_2d(
                                 &ofmap[write_buf * ofmap_stride], /* dst */
                                 &l->ofmap[(oh * l->OW + ow) * l->CO +
-                                         co],          /* src */
-                                sizeof(double) * 8,    /* size */
-                                sizeof(double) * 8,    /* dst_stride */
+                                          co],          /* src */
+                                sizeof(double) * 8,     /* size */
+                                sizeof(double) * 8,     /* dst_stride */
                                 sizeof(double) * l->CO, /* src_stride */
-                                n_ofmap_pixel_read);   /* repetitions */
+                                n_ofmap_pixel_read);    /* repetitions */
                             snrt_dma_wait_all();
                         } else {
                             dma_memset(&ofmap[write_buf * ofmap_stride], 0,
@@ -215,7 +217,8 @@ void conv2d_layer(const conv_layer *l) {
                                                                            */
                                             (double *)&l->ifmap
                                                 [((oh + fh - l->pad) * l->IW +
-                                                  ow - (l->pad - padding_left)) *
+                                                  ow -
+                                                  (l->pad - padding_left)) *
                                                      l->CI +
                                                  ci], /* src */
                                             sizeof(double) *
@@ -310,12 +313,12 @@ void conv2d_layer(const conv_layer *l) {
                         if (oh_prev + ow_prev >= 0) {
                             snrt_dma_txid_t ofmap_txid = snrt_dma_start_2d(
                                 &l->ofmap[(oh_prev * l->OW + ow_prev) * l->CO +
-                                         co],                     /* dst */
+                                          co],                    /* dst */
                                 &ofmap[!read_buf * ofmap_stride], /* src */
                                 sizeof(double) * 8,               /* size */
                                 sizeof(double) * l->CO, /* dst_stride */
-                                sizeof(double) * 8,    /* src_stride */
-                                n_ofmap_pixel_write);  /* repetitions */
+                                sizeof(double) * 8,     /* src_stride */
+                                n_ofmap_pixel_write);   /* repetitions */
                             snrt_dma_wait_all();
                         }
                         oh_prev = oh;
@@ -377,11 +380,12 @@ void conv2d_layer(const conv_layer *l) {
             // Transfer back last output tile
             if (snrt_is_dm_core()) {
                 snrt_dma_txid_t ofmap_txid = snrt_dma_start_2d(
-                    &l->ofmap[(oh_prev * l->OW + ow_prev) * l->CO + co], /* dst */
-                    &ofmap[!read_buf * ofmap_stride],                 /* src */
-                    sizeof(double) * 8,                               /* size */
+                    &l->ofmap[(oh_prev * l->OW + ow_prev) * l->CO +
+                              co],                      /* dst */
+                    &ofmap[!read_buf * ofmap_stride],   /* src */
+                    sizeof(double) * 8,                 /* size */
                     sizeof(double) * l->CO,             /* dst_stride */
-                    sizeof(double) * 8,                /* src_stride */
+                    sizeof(double) * 8,                 /* src_stride */
                     min(compute_num, l->OW - ow_prev)); /* repetitions */
                 snrt_dma_wait_all();
             }

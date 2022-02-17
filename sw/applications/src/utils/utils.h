@@ -14,15 +14,17 @@
 uint32_t benchmark_get_cycle();
 
 /**
- * @brief start tracking of dma performance region. Does not have any implications on the HW.
- * Only injects a marker in the DMA traces that can be analyzed
+ * @brief start tracking of dma performance region. Does not have any
+ * implications on the HW. Only injects a marker in the DMA traces that can be
+ * analyzed
  *
  */
 void snrt_dma_start_tracking();
 
 /**
- * @brief stop tracking of dma performance region. Does not have any implications on the HW.
- * Only injects a marker in the DMA traces that can be analyzed
+ * @brief stop tracking of dma performance region. Does not have any
+ * implications on the HW. Only injects a marker in the DMA traces that can be
+ * analyzed
  *
  */
 void snrt_dma_stop_tracking();
@@ -34,7 +36,7 @@ void snrt_dma_stop_tracking();
  * @param checksum checksum to compare against, reduced over input channels
  * @return uint32_t
  */
-uint32_t check_layer(const conv_layer *l, double* checksum);
+uint32_t check_layer(const conv_layer* l, double* checksum);
 
 /**
  * @brief fast memset function performed by DMA

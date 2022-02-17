@@ -16,7 +16,8 @@ int main() {
     uint32_t weights_size = dim_kernel_x * dim_kernel_y * ch_in * ch_out;
     uint32_t ofmap_size = dim_out_x * dim_out_y * ch_out;
 
-    uint32_t total_size = ifmap_size + weights_size + ch_out + ch_out + ofmap_size;
+    uint32_t total_size =
+        ifmap_size + weights_size + ch_out + ch_out + ofmap_size;
 
     void *ptr = snrt_l1alloc(total_size * sizeof(float));
 

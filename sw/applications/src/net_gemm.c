@@ -28,9 +28,11 @@ int main() {
 
     void *mat_A, *mat_B, *mat_C;
 
-    uint32_t mat_A_size = (l1_gemm_l.M * (l1_gemm_l.K + MAT_ROW_PADDING) + MAT_PADDING) *
-           l1_gemm_l.dtype;
-    uint32_t mat_B_size = (l1_gemm_l.K + MAT_ROW_PADDING) * l1_gemm_l.N * l1_gemm_l.dtype;
+    uint32_t mat_A_size =
+        (l1_gemm_l.M * (l1_gemm_l.K + MAT_ROW_PADDING) + MAT_PADDING) *
+        l1_gemm_l.dtype;
+    uint32_t mat_B_size =
+        (l1_gemm_l.K + MAT_ROW_PADDING) * l1_gemm_l.N * l1_gemm_l.dtype;
     uint32_t mat_C_size = l1_gemm_l.M * l1_gemm_l.N * l1_gemm_l.dtype;
 
     uint32_t total_size = mat_A_size + mat_B_size + mat_C_size;
