@@ -4,4 +4,9 @@
 
 #include "layer.h"
 
+/**
+ * @brief conv2d layer that handles data transfers in a double buffered fashion
+ *
+ * @param l conv_layer struct that holds addresses and parameters
+ */
 void conv2d_layer(conv_layer l);
