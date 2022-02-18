@@ -28,6 +28,7 @@ macro(add_snitch_application_executable name)
     target_link_libraries(${name} kernels layers utils)
 endmacro()
 
+enable_testing()
 
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     include_directories(include data src/layers src/kernels src/utils)
