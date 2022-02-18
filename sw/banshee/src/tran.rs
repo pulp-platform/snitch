@@ -995,6 +995,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::AqrlRdRs1(x) => self.emit_aqrl_rd_rs1(x),
             riscv::Format::AqrlRdRs1Rs2(x) => self.emit_aqrl_rd_rs1_rs2(x),
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
+            riscv::Format::FmPredRdRs1Succ(x) => self.emit_fm_pred_rd_rs1_succ(x),
             riscv::Format::Imm5Rd(x) => self.emit_imm5_rd(x),
             riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
             riscv::Format::Imm5RdRs1(x) => self.emit_imm5_rd_rs1(x),
@@ -1493,6 +1494,32 @@ impl<'a> InstructionTranslator<'a> {
         self.emit_trace();
         LLVMBuildCondBr(self.builder, cmp, self.section.elf.inst_bbs[&target], bb);
         LLVMPositionBuilderAtEnd(self.builder, bb);
+        Ok(())
+    }
+
+    unsafe fn emit_fm_pred_rd_rs1_succ(&self, data: riscv::FormatFmPredRdRs1Succ) -> Result<()> {
+        trace!(
+            "{} fm={:x}, pred={:x}, succ={:x}",
+            data.op,
+            data.fm,
+            data.pred,
+            data.succ
+        );
+        // Required ordering (riscv encoding is pi, po, pr, pw)
+        let ordering = match (data.pred & 0x3, data.succ & 0x3) {
+            (0, 0) => LLVMAtomicOrderingMonotonic,
+            (2, 3) => LLVMAtomicOrderingAcquire,
+            (3, 1) => LLVMAtomicOrderingRelease,
+            (3, 3) => LLVMAtomicOrderingAcquireRelease,
+            _ => LLVMAtomicOrderingAcquireRelease,
+        };
+        #[allow(unreachable_patterns)]
+        match data.op {
+            riscv::OpcodeFmPredRdRs1Succ::Fence => {
+                LLVMBuildFence(self.builder, ordering, 0, NONAME);
+            }
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
         Ok(())
     }
 

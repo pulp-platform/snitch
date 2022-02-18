@@ -15,9 +15,10 @@ address:
   cluster_base_hartid: 0x50000001
   cluster_num: 0x50000002
   cluster_id: 0x50000003
+  cl_clint: 0x40000060
   clint: 0xFFFF0000
 memory:
-  tcdm:
+- tcdm:
     start: 0x0
     end: 0x100000
     latency: 5
@@ -25,6 +26,13 @@ memory:
     start: 0x80000000
     end: 0x80010000
     latency: 10
+  # Not used in MemPool
+  ext_tcdm: []
+  periphs:
+    callbacks: []
+    end: 0x100000
+    latency: 5
+    start: 0x100000
 inst_latency:
   mul: 3
   mulh: 3
