@@ -62,7 +62,7 @@ jobs:
         python-version: '3.9'
         cache: 'pip'
     - name: Install python packages
-      run: pip install -r requirements.txt
+      run: pip install -r sw/applications/requirements.txt
     - name: Install LLVM
       run: sudo apt install llvm-12-dev
     - working-directory: sw/banshee
