@@ -85,6 +85,7 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cm
 
 # Copy repository into tmp directory to execute additional install steps.
 COPY python-requirements.txt /tmp/python-requirements.txt
+COPY sw/applications/requirements.txt /tmp/sw/applications/requirements.txt
 RUN pip3 install -r /tmp/python-requirements.txt -r /tmp/sw/applications/requirements.txt
 
 # Get the precompiled toolchain
