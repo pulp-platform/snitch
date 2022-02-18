@@ -21,8 +21,6 @@ void batchnorm_fp64(double *ifmap, double *gamma, double *beta, double *ofmap,
     snrt_ssr_write(SNRT_SSR_DM1, SNRT_SSR_2D, ofmap);
     snrt_ssr_enable();
 
-    const uint32_t n_frep = OW - 1;
-
     for (uint32_t ci = 0; ci < CI; ci += compute_num) {
         register double g = gamma[ci];
         register double b = beta[ci];
@@ -31,7 +29,7 @@ void batchnorm_fp64(double *ifmap, double *gamma, double *beta, double *ofmap,
         asm volatile(
             "frep.o %[n_frep], 1, 0, 0 \n"
             "fmadd.d ft1, ft0, %[g], %[b] \n" ::[g] "f"(g),
-            [ b ] "f"(b), [ n_frep ] "r"(n_frep)
+            [ b ] "f"(b), [ n_frep ] "r"(OW - 1)
             : "ft0", "ft1", "ft2");
     }
     snrt_fpu_fence();

@@ -6,16 +6,16 @@
 
 {
     kernel: "FusedConv"
-    ch_in: 3
-    ch_out: 32
-    dim_in_x: 6
-    dim_in_y: 4
-    dim_kernel_x: 4
+    ch_in: 16
+    ch_out: 16
+    dim_in_x: 5
+    dim_in_y: 5
+    dim_kernel_x: 3
     dim_kernel_y: 3
     padding: {
-      padding_x_left: 1
+      padding_x_left: 0
       padding_x_right: 0
-      padding_y_top: 1
+      padding_y_top: 0
       padding_y_bottom: 0
     }
     stride: {
@@ -29,6 +29,6 @@
       flag_batch_norm: 1
     }
     depthwise: 0,
-    chw_layer: 1,
+    chw_layer: 0,
     prec: 32
 }

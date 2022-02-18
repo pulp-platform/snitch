@@ -10,6 +10,8 @@
 #include "snrt.h"
 #include "utils.h"
 
+void *share_ptr;
+
 int main() {
     uint32_t ifmap_size = (dim_in_x + padding_x_left + padding_x_right) *
                           (dim_in_y + padding_y_top + padding_y_bottom) * ch_in;
@@ -19,7 +21,16 @@ int main() {
     uint32_t total_size =
         ifmap_size + weights_size + ch_out + ch_out + ofmap_size;
 
-    void *ptr = snrt_l1alloc(total_size * sizeof(float));
+    float *ptr;
+
+    if (snrt_is_dm_core() == 0) {
+        ptr = snrt_l1alloc(total_size * sizeof(float));
+        share_ptr = ptr;
+    }
+
+    snrt_cluster_hw_barrier();
+
+    ptr = share_ptr;
 
     float *pInBuffer = ptr;
     ptr += ifmap_size;

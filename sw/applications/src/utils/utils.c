@@ -115,7 +115,7 @@ uint32_t check_layer(const conv_layer *l, double *checksum) {
                         snrt_cluster_hw_barrier();
                     }
                 }
-                // printf("%d/%d Errors\n", errors, total);
+                printf("%d/%d Errors\n", errors, total);
             } else {
                 for (uint32_t oh = 0; oh < l->OH; oh++) {
                     for (uint32_t ow = 0; ow < l->OW; ow++) {

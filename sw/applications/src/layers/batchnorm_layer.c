@@ -9,10 +9,10 @@
 #include "snrt.h"
 
 void batchnorm_layer(const conv_layer *l) {
-    uint32_t cluster_num = snrt_cluster_num();
-    uint32_t cluster_id = snrt_cluster_idx();
-    uint32_t compute_num = snrt_cluster_compute_core_num();
-    uint32_t compute_id = snrt_cluster_compute_core_idx();
+    const uint32_t cluster_num = snrt_cluster_num();
+    const uint32_t cluster_id = snrt_cluster_idx();
+    const uint32_t compute_num = snrt_cluster_compute_core_num();
+    const uint32_t compute_id = snrt_cluster_compute_core_idx();
 
     // Each cluster loads one tile of a row
     uint32_t ifmap_size = 2 * l->IW * l->TILE_CI;

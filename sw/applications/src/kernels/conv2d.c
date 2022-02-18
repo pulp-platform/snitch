@@ -113,7 +113,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
             // Output width dimension `dim_out_x`
             for (uint32_t w = 0; w < dim_out_x; w++) {
                 // TODO: check if initialization needs to be unrolled by hand
-                register double sum[max_unroll];
+                volatile register double sum[max_unroll];
                 if (flag_y_accumulate_start) {
                     for (uint32_t i = 0; i < max_unroll; i++) {
                         sum[i] = 0.0;
@@ -177,7 +177,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
 
             // Output width dimension `dim_out_x`
             for (uint32_t w = 0; w < dim_out_x; w++) {
-                register double sum[max_unroll];
+                volatile register double sum[max_unroll];
                 if (flag_y_accumulate_start) {
                     for (uint32_t i = 0; i < cleanup_unroll; i++) {
                         sum[i] = 0.0;
@@ -324,11 +324,11 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
         snrt_ssr_enable();
 
         for (uint32_t co = compute_id; co < ch_out; co += compute_num) {
-            register double current_lambda = lambda[co];
-            register double current_k = k[co];
-            register double zero = 0.0;
+            volatile register double current_lambda = lambda[co];
+            volatile register double current_k = k[co];
+            volatile register double zero = 0.0;
 
-            register double tmp;
+            volatile register double tmp;
 
             if (flag_batch_norm && flag_relu) {
                 asm volatile(
@@ -467,8 +467,8 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
         for (h0 = 0; h0 < dim_out_y / max_unroll; h0++) {
             // Output width dimension `dim_out_x`
             for (uint32_t w = 0; w < dim_out_x; w++) {
-                register v2s sum[max_unroll];
-                register float reduce_reg[max_unroll];
+                volatile register v2s sum[max_unroll];
+                volatile register float reduce_reg[max_unroll];
                 // pointer to output buffer location where intermediate values
                 // are read from and stored
                 float* _pOutBuffer =
@@ -558,8 +558,8 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
 
             // Output width dimension `dim_out_x`
             for (uint32_t w = 0; w < dim_out_x; w++) {
-                register v2s sum[max_unroll];
-                register float reduce_reg[max_unroll];
+                volatile register v2s sum[max_unroll];
+                volatile register float reduce_reg[max_unroll];
 
                 // pointer to output buffer location where intermediate values
                 // are read from and stored
@@ -898,7 +898,7 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
 
             // Output width dimension `dim_out_x`
             for (uint32_t w = 0; w < dim_out_x; w++) {
-                register v2s sum[max_unroll];
+                volatile register v2s sum[max_unroll];
                 // pointer to output buffer location where intermediate values
                 // are read from and stored
                 v2s* _pOutBuffer =
@@ -967,7 +967,7 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
 
             // Output width dimension `dim_out_x`
             for (uint32_t w = 0; w < dim_out_x; w++) {
-                register v2s sum[max_unroll];
+                volatile register v2s sum[max_unroll];
 
                 // pointer to output buffer location where intermediate values
                 // are read from and stored
@@ -1237,8 +1237,8 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
             for (h0 = 0; h0 < dim_out_y / max_unroll; h0++, h += max_unroll) {
                 // Output width dimension `dim_out_x`
                 for (uint32_t w = 0; w < dim_out_x; w++) {
-                    register v2s sum[max_unroll];
-                    register float reduce_reg[max_unroll];
+                    volatile register v2s sum[max_unroll];
+                    volatile register float reduce_reg[max_unroll];
                     // pointer to output buffer location where intermediate
                     // values are read from and stored
                     float* _pOutBuffer =
@@ -1329,8 +1329,8 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
 
                 // Output width dimension `dim_out_x`
                 for (uint32_t w = 0; w < dim_out_x; w++) {
-                    register v2s sum[max_unroll];
-                    register float reduce_reg[max_unroll];
+                    volatile register v2s sum[max_unroll];
+                    volatile register float reduce_reg[max_unroll];
 
                     // pointer to output buffer location where intermediate
                     // values are read from and stored
