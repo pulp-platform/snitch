@@ -46,4 +46,11 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_snitch_application_executable(conv2d)
     add_snitch_application_executable(gemm)
     add_snitch_application_executable(fusedconv)
+
+    add_snitch_raw_test_args(batchnorm batchnorm --num-cores=9)
+    add_snitch_raw_test_args(maxpool maxpool --num-cores=9)
+    add_snitch_raw_test_args(conv2d conv2d --num-cores=9)
+    add_snitch_raw_test_args(gemm gemm --num-cores=9)
+    add_snitch_raw_test_args(fusedconv fusedconv --num-cores=9)
+
 endif()

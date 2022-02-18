@@ -103,8 +103,8 @@ jobs:
       working-directory: sw/snBLAS/build
       run: make test
     - name: Test applications
-      working-directory: sw/applications
-      run: python data_gen.py -c data/gemm_params.hjson
+      working-directory: sw/applications/build
+      run: make test
 
   #############################
   # SW on Banshee (Container) #
@@ -149,6 +149,9 @@ jobs:
         }} -DBUILD_TESTS=ON .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
+      run: make test
+    - name: Test applications
+      working-directory: sw/applications/build
       run: make test
 
   ################################
