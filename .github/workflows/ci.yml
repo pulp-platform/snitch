@@ -102,6 +102,10 @@ jobs:
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
       run: make test
+    - name: Build applications
+      working-directory: sw/applications
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test applications
       working-directory: sw/applications/build
       run: make test
@@ -150,6 +154,10 @@ jobs:
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
       run: make test
+    - name: Build applications
+      working-directory: sw/applications
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test applications
       working-directory: sw/applications/build
       run: make test
