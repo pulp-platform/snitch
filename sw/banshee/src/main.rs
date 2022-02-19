@@ -16,6 +16,7 @@ use llvm_sys::{
 };
 use std::{ffi::CString, os::raw::c_int, path::Path, ptr::null_mut};
 
+pub mod bootroms;
 pub mod configuration;
 pub mod engine;
 pub mod peripherals;
@@ -272,6 +273,9 @@ fn main() -> Result<()> {
 
     // Init the peripherals
     engine.init_periphs();
+
+    // Init the Bootrom
+    engine.init_bootrom();
 
     // Execute the binary.
     if !matches.is_present("dry-run") {

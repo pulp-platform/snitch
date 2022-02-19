@@ -15,6 +15,8 @@ pub struct Configuration {
     #[serde(default)]
     pub architecture: Architecture,
     #[serde(default)]
+    pub bootrom: MemoryCallback,
+    #[serde(default)]
     pub memory: Vec<Memories>,
     #[serde(default)]
     pub address: Address,
@@ -30,6 +32,7 @@ impl Default for Configuration {
     fn default() -> Configuration {
         Configuration {
             architecture: Default::default(),
+            bootrom: Default::default(),
             memory: Default::default(),
             address: Default::default(),
             inst_latency: Default::default(),
@@ -49,6 +52,7 @@ impl Configuration {
     pub fn new(num_clusters: usize) -> Self {
         Self {
             architecture: Default::default(),
+            bootrom: Default::default(),
             memory: vec![Default::default(); num_clusters],
             address: Default::default(),
             inst_latency: Default::default(),
