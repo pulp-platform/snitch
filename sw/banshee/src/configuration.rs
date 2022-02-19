@@ -13,6 +13,8 @@ use std::io::prelude::*;
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Configuration {
     #[serde(default)]
+    pub architecture: Architecture,
+    #[serde(default)]
     pub memory: Vec<Memories>,
     #[serde(default)]
     pub address: Address,
@@ -27,6 +29,7 @@ pub struct Configuration {
 impl Default for Configuration {
     fn default() -> Configuration {
         Configuration {
+            architecture: Default::default(),
             memory: Default::default(),
             address: Default::default(),
             inst_latency: Default::default(),
@@ -45,6 +48,7 @@ impl std::fmt::Display for Configuration {
 impl Configuration {
     pub fn new(num_clusters: usize) -> Self {
         Self {
+            architecture: Default::default(),
             memory: vec![Default::default(); num_clusters],
             address: Default::default(),
             inst_latency: Default::default(),
@@ -214,5 +218,23 @@ pub struct Ssr {
 impl Default for Ssr {
     fn default() -> Ssr {
         Ssr { num_dm: 3 }
+    }
+}
+
+/// Description of the hierarchy
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+pub struct Architecture {
+    pub num_cores: usize,
+    pub num_clusters: usize,
+    pub base_hartid: usize,
+}
+
+impl Default for Architecture {
+    fn default() -> Architecture {
+        Architecture {
+            num_cores: 9,
+            num_clusters: 1,
+            base_hartid: 0,
+        }
     }
 }

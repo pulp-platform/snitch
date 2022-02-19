@@ -200,15 +200,6 @@ fn main() -> Result<()> {
     }
     engine.trace = matches.is_present("trace");
     engine.latency = matches.is_present("latency");
-    matches
-        .value_of("num-cores")
-        .map(|x| engine.num_cores = x.parse().unwrap());
-    matches
-        .value_of("num-clusters")
-        .map(|x| engine.num_clusters = x.parse().unwrap());
-    matches
-        .value_of("base-hartid")
-        .map(|x| engine.base_hartid = x.parse().unwrap());
 
     if let Some(file) = matches.value_of("create-configuration") {
         Configuration::print_default(file)?;
@@ -220,6 +211,22 @@ fn main() -> Result<()> {
         Configuration::new(engine.num_clusters)
     };
     debug!("Configuration used:\n{}", engine.config);
+
+    // set architecture based on read architecture
+    engine.num_cores = engine.config.architecture.num_cores;
+    engine.num_clusters = engine.config.architecture.num_clusters;
+    engine.base_hartid = engine.config.architecture.base_hartid;
+
+    // overwrite configuration with parameters if set
+    matches
+        .value_of("num-cores")
+        .map(|x| engine.num_cores = x.parse().unwrap());
+    matches
+        .value_of("num-clusters")
+        .map(|x| engine.num_clusters = x.parse().unwrap());
+    matches
+        .value_of("base-hartid")
+        .map(|x| engine.base_hartid = x.parse().unwrap());
 
     // Read the binary.
     let path = Path::new(matches.value_of("binary").unwrap());
