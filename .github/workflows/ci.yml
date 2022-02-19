@@ -94,21 +94,21 @@ jobs:
         }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test snRuntime
       working-directory: sw/snRuntime/build
-      run: make test
+      run: ctest -L snRuntime
     - name: Build snBLAS
       working-directory: sw/snBLAS
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
-      run: make test
+      run: ctest -L snBLAS
     - name: Build applications
       working-directory: sw/applications
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test applications
       working-directory: sw/applications/build
-      run: make test
+      run: ctest -L snApplications
 
   #############################
   # SW on Banshee (Container) #
@@ -146,21 +146,21 @@ jobs:
         }} -DBUILD_TESTS=ON .. && make
     - name: Test snRuntime
       working-directory: sw/snRuntime/build
-      run: make test
+      run: ctest -L snRuntime
     - name: Build snBLAS
       working-directory: sw/snBLAS
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
-      run: make test
+      run: ctest -L snBLAS
     - name: Build applications
       working-directory: sw/applications
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test applications
       working-directory: sw/applications/build
-      run: make test
+      run: ctest -L snApplications
 
   ################################
   # SW on Default Snitch Cluster #
