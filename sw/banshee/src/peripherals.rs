@@ -120,7 +120,11 @@ pub trait Peripheral {
 /// return a vector containing an instance of each available peripherable type.
 /// To add a new peripheral type, declare it below and add it here.
 pub fn get_peripheral_types() -> Vec<Box<dyn Peripheral>> {
-    vec![Box::new(Semaphores::default()), Box::new(Fence::default()), Box::new(ZeroMemory::default())]
+    vec![
+        Box::new(Semaphores::default()),
+        Box::new(Fence::default()),
+        Box::new(ZeroMemory::default()),
+    ]
 }
 
 #[derive(Default)]
@@ -222,17 +226,14 @@ impl Peripheral for Semaphores {
 }
 
 #[derive(Default)]
-struct ZeroMemory {
-}
+struct ZeroMemory {}
 
 impl Peripheral for ZeroMemory {
     fn get_name(&self) -> &'static str {
         "zero-memory"
     }
 
-    fn store(&self, _addr: u32, _val: u32, _mask: u32, _: u8) {
-
-    }
+    fn store(&self, _: u32, _: u32, _: u32, _: u8) {}
 
     fn load(&self, _: u32, _: u8) -> u32 {
         0
