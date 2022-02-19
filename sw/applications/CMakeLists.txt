@@ -22,7 +22,7 @@ macro(add_snitch_application_executable name)
     add_snitch_executable(${name} src/net_${name}.c data/data_${name}.h)
     add_custom_command(
         OUTPUT data/data_${name}.h
-        COMMAND python data_gen.py -c data/${name}_params.hjson
+        COMMAND ./data_gen.py -c data/${name}_params.hjson
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     )
     target_link_libraries(${name} kernels layers utils)
