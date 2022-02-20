@@ -72,7 +72,9 @@ impl Configuration {
         } else {
             serde_yaml::from_str(&config).expect("Error while reading yaml")
         };
-        config.memory.resize_with(num_clusters, Default::default);
+        if config.architecture.num_clusters == 0 {
+            config.memory.resize_with(num_clusters, Default::default);
+        }
         config
     }
 
