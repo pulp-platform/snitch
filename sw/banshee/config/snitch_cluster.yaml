@@ -14,10 +14,12 @@ address:
   tcdm_start: 0x40000000
   uart: 0xF00B8000
   wakeup_reg: 0x40000028
-  clint: 0xFFFF0000 # Snitch: Bootdata.clint_base
-  cl_clint: 0x120030 # Snitch: cl_peripherals + 0x30
+  # Snitch: Bootdata.clint_base
+  clint: 0xFFFF0000
+  # Snitch: cl_peripherals + 0x30
+  cl_clint: 0x120030
 architecture:
-  num_cores: 9 # per cluster
+  num_cores: 9
   num_clusters: 1
   base_hartid: 0
 bootrom:

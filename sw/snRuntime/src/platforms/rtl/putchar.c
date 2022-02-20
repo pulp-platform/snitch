@@ -17,7 +17,6 @@ static volatile struct putc_buffer {
     char data[PUTC_BUFFER_LEN];
 } *const putc_buffer = (void *)&_edram;
 
-
 // Provide an implementation for putchar.
 void snrt_putchar(char character) {
     volatile struct putc_buffer *buf = &putc_buffer[snrt_hartid()];
