@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-#include "start.S"
+#include "../../start.S"
 
 # Function to determine the initial cluster layout to setup the initial stack.
 #
