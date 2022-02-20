@@ -583,8 +583,9 @@ pub unsafe fn add_llvm_symbols() {
 
 impl CpuState {
     /// Create a new CpuState
-    pub fn new(num_dm: usize, bootrom_addr: u32) -> Self {
+    pub fn new(num_dm: usize, hartid: usize, bootrom_addr: u32) -> Self {
         let mut reg_init: [u32; 32] = [0; 32];
+        reg_init[10] = hartid as u32;
         reg_init[11] = bootrom_addr;
         Self {
             regs: reg_init,
@@ -622,7 +623,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
     ) -> Self {
         Self {
             engine,
-            state: CpuState::new(engine.config.ssr.num_dm, engine.config.bootrom.start),
+            state: CpuState::new(engine.config.ssr.num_dm, hartid, engine.config.bootrom.start),
             tcdm_ptr,
             tcdm_ext_ptr,
             hartid,
