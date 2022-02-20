@@ -88,13 +88,20 @@ jobs:
         sudo mkdir -p /tools/riscv-llvm && sudo chmod 777 /tools/riscv-llvm
         tar -C /tools/riscv-llvm -xf riscv-llvm.tar.gz --strip-components=1
         echo "PATH=$PATH:/tools/riscv-llvm/bin" >> $GITHUB_ENV
-    - name: Build runtime
+    - name: Build runtime for general Banshee
       working-directory: sw/snRuntime
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
-    - name: Test snRuntime
+    - name: Test snRuntime for general Banshee
       working-directory: sw/snRuntime/build
       run: ctest -L snRuntime
+    - name: Build runtime for Snitch Banshee
+      working-directory: sw/snRuntime
+      run: mkdir build-snitch && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} -DSNITCH_RUNTIME=snRuntime-banshee .. && make
+    - name: Test snRuntime for Snitch Banshee
+      working-directory: sw/snRuntime/build-snitch
+      run: make test
     - name: Build snBLAS
       working-directory: sw/snBLAS
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
@@ -140,13 +147,20 @@ jobs:
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         export PATH=$HOME/.cargo/bin:${PATH}
         cargo install --path sw/banshee
-    - name: Build runtime
+    - name: Build runtime for general Banshee
       working-directory: sw/snRuntime
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON .. && make
-    - name: Test snRuntime
+    - name: Test snRuntime for general Banshee
       working-directory: sw/snRuntime/build
       run: ctest -L snRuntime
+    - name: Build runtime for Snitch Banshee
+      working-directory: sw/snRuntime
+      run: mkdir build-snitch && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON -DSNITCH_RUNTIME=snRuntime-banshee .. && make
+    - name: Test snRuntime for Snitch Banshee
+      working-directory: sw/snRuntime/build-snitch
+      run: make test
     - name: Build snBLAS
       working-directory: sw/snBLAS
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
