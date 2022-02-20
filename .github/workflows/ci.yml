@@ -97,7 +97,7 @@ jobs:
       run: ctest -L snRuntime
     - name: Build runtime for Snitch Banshee
       working-directory: sw/snRuntime
-      run: mkdir build-snitch && cd build-snitc && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+      run: mkdir build-snitch && cd build-snitch && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} -DSNITCH_RUNTIME=snRuntime-banshee .. && make
     - name: Test snRuntime for Snitch Banshee
       working-directory: sw/snRuntime/build-snitch
@@ -156,7 +156,7 @@ jobs:
       run: ctest -L snRuntime
     - name: Build runtime for Snitch Banshee
       working-directory: sw/snRuntime
-      run: mkdir build-snitch && cd build-snitc && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+      run: mkdir build-snitch && cd build-snitch && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON -DSNITCH_RUNTIME=snRuntime-banshee .. && make
     - name: Test snRuntime for Snitch Banshee
       working-directory: sw/snRuntime/build-snitch
