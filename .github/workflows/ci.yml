@@ -91,7 +91,7 @@ jobs:
     - name: Build runtime for general Banshee
       working-directory: sw/snRuntime
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
+        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} -DSNITCH_RUNTIME=snRuntime-banshee-general .. && make
     - name: Test snRuntime for general Banshee
       working-directory: sw/snRuntime/build
       run: ctest -L snRuntime
@@ -150,7 +150,7 @@ jobs:
     - name: Build runtime for general Banshee
       working-directory: sw/snRuntime
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON .. && make
+        }} -DBUILD_TESTS=ON -DSNITCH_RUNTIME=snRuntime-banshee-general .. && make
     - name: Test snRuntime for general Banshee
       working-directory: sw/snRuntime/build
       run: ctest -L snRuntime
