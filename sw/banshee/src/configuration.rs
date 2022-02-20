@@ -238,8 +238,8 @@ pub struct Architecture {
 impl Default for Architecture {
     fn default() -> Architecture {
         Architecture {
-            num_cores: 9,
-            num_clusters: 1,
+            num_cores: 0,
+            num_clusters: 0,
             base_hartid: 0,
         }
     }
