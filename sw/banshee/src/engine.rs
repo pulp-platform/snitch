@@ -320,7 +320,11 @@ impl Engine {
 
     pub fn init_bootrom(&mut self) {
         debug!("Adding bootrom");
-        self.bootrom.add_bootrom(&self.config.bootrom.callbacks)
+        if self.config.bootrom.callbacks.is_empty() {
+            self.config.bootrom.end = 0;
+        } else {
+            self.bootrom.add_bootrom(&self.config.bootrom.callbacks)
+        }
     }
 
     // Execute the loaded memory.
@@ -623,7 +627,11 @@ impl<'a, 'b> Cpu<'a, 'b> {
     ) -> Self {
         Self {
             engine,
-            state: CpuState::new(engine.config.ssr.num_dm, hartid, engine.config.bootrom.start),
+            state: CpuState::new(
+                engine.config.ssr.num_dm,
+                hartid,
+                engine.config.bootrom.start,
+            ),
             tcdm_ptr,
             tcdm_ext_ptr,
             hartid,
