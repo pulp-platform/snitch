@@ -6,6 +6,72 @@
 
 #include "snrt.h"
 
+typedef struct
+{
+  float *   pInBuffer;
+  uint16_t  dim_in_x;
+  uint16_t  dim_in_y;
+  uint16_t  ch_in;
+  float *   pWeight;
+  uint16_t  ch_out;
+  uint16_t  dim_kernel_x;
+  uint16_t  dim_kernel_y;
+  uint16_t  padding_y_top;
+  uint16_t  padding_y_bottom;
+  uint16_t  padding_x_left;
+  uint16_t  padding_x_right;
+  uint16_t  stride_x;
+  uint16_t  stride_y;
+  int8_t *  bias;
+  uint16_t  bias_shift;
+  uint16_t  out_shift;
+  uint16_t  out_mult;
+  float *   pOutBuffer;
+  uint16_t  dim_out_x;
+  uint16_t  dim_out_y;
+  float *   kappa;
+  float *   lambda;
+  uint8_t * pIm2ColBuffer;
+  int       flag_relu;
+  int       flag_batch_norm;
+  int       flag_y_accumulate_start;
+  int       flag_y_accumulate_end;
+  unsigned int * memory_chan;
+} kernel_fp32;
+
+typedef struct
+{
+  double *  pInBuffer;
+  uint16_t  dim_in_x;
+  uint16_t  dim_in_y;
+  uint16_t  ch_in;
+  double *  pWeight;
+  uint16_t  ch_out;
+  uint16_t  dim_kernel_x;
+  uint16_t  dim_kernel_y;
+  uint16_t  padding_y_top;
+  uint16_t  padding_y_bottom;
+  uint16_t  padding_x_left;
+  uint16_t  padding_x_right;
+  uint16_t  stride_x;
+  uint16_t  stride_y;
+  int8_t *  bias;
+  uint16_t  bias_shift;
+  uint16_t  out_shift;
+  uint16_t  out_mult;
+  double *  pOutBuffer;
+  uint16_t  dim_out_x;
+  uint16_t  dim_out_y;
+  double *  kappa;
+  double *  lambda;
+  uint8_t * pIm2ColBuffer;
+  int       flag_relu;
+  int       flag_batch_norm;
+  int       flag_y_accumulate_start;
+  int       flag_y_accumulate_end;
+  unsigned int * memory_chan;
+} kernel_fp64;
+
 /**
  * @brief implementation of a double-precision fp convolutional kernel
  * for DORY trials. Currently does a direct convolution without im2col.
@@ -35,7 +101,7 @@
  * @param pOutBuffer pointer to output feature map
  * @param dim_out_x width of output feature map
  * @param dim_out_y height of output feature map
- * @param k multiplication factor for BatchNorm
+ * @param kappa multiplication factor for BatchNorm
  * @param lambda bias for BatchNorm
  * @param flag_relu RELU activation flag
  * @param flag_batch_norm BatchNorm flag
@@ -44,18 +110,7 @@
  * @param flag_y_accumulate_end indicates that BN, RELU can be performed
  * @param memory_chan Not used
  */
-void __attribute__((noinline)) occamy_conv_opt_fp64(
-    const double* pInBuffer, const uint16_t dim_in_x, const uint16_t dim_in_y,
-    const uint16_t ch_in, const double* pWeight, const uint16_t ch_out,
-    const uint16_t dim_kernel_x, const uint16_t dim_kernel_y,
-    const uint16_t padding_y_top, const uint16_t padding_y_bottom,
-    const uint16_t padding_x_left, const uint16_t padding_x_right,
-    const uint16_t stride_x, const uint16_t stride_y, const int8_t* bias,
-    const uint16_t bias_shift, const uint16_t out_shift,
-    const uint16_t out_mult, double* pOutBuffer, const uint16_t dim_out_x,
-    const uint16_t dim_out_y, double* k, double* lambda, double* pIm2ColBuffer,
-    int flag_relu, int flag_batch_norm, int flag_y_accumulate_start,
-    int flag_y_accumulate_end, unsigned int* memory_chan);
+void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k);
 
 /**
  * @brief implementation of a single-precision fp convolutional kernel
@@ -86,7 +141,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
  * @param pOutBuffer pointer to output feature map
  * @param dim_out_x width of output feature map
  * @param dim_out_y height of output feature map
- * @param k multiplication factor for BatchNorm
+ * @param kappa multiplication factor for BatchNorm
  * @param lambda bias for BatchNorm
  * @param flag_relu RELU activation flag
  * @param flag_batch_norm BatchNorm flag
@@ -96,18 +151,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(
  * @param memory_chan Not used
  */
 
-void __attribute__((noinline)) occamy_conv_opt_fp32(
-    const float* pInBuffer, const uint16_t dim_in_x, const uint16_t dim_in_y,
-    const uint16_t ch_in, const float* pWeight, const uint16_t ch_out,
-    const uint16_t dim_kernel_x, const uint16_t dim_kernel_y,
-    const uint16_t padding_y_top, const uint16_t padding_y_bottom,
-    const uint16_t padding_x_left, const uint16_t padding_x_right,
-    const uint16_t stride_x, const uint16_t stride_y, const int8_t* bias,
-    const uint16_t bias_shift, const uint16_t out_shift,
-    const uint16_t out_mult, float* pOutBuffer, const uint16_t dim_out_x,
-    const uint16_t dim_out_y, float* k, float* lambda, float* pIm2ColBuffer,
-    int flag_relu, int flag_batch_norm, int flag_y_accumulate_start,
-    int flag_y_accumulate_end, unsigned int* memory_chan);
+void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k);
 
 /**
  * @brief implementation of a single-precision fp DEPTHWISE convolutional kernel
@@ -138,7 +182,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
  * @param pOutBuffer pointer to output feature map
  * @param dim_out_x width of output feature map
  * @param dim_out_y height of output feature map
- * @param k multiplication factor for BatchNorm
+ * @param kappa multiplication factor for BatchNorm
  * @param lambda bias for BatchNorm
  * @param flag_relu RELU activation flag
  * @param flag_batch_norm BatchNorm flag
@@ -147,18 +191,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(
  * @param flag_y_accumulate_end indicates that BN, RELU can be performed
  * @param memory_chan Not used
  */
-void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
-    const float* pInBuffer, const uint16_t dim_in_x, const uint16_t dim_in_y,
-    const uint16_t ch_in, const float* pWeight, const uint16_t ch_out,
-    const uint16_t dim_kernel_x, const uint16_t dim_kernel_y,
-    const uint16_t padding_y_top, const uint16_t padding_y_bottom,
-    const uint16_t padding_x_left, const uint16_t padding_x_right,
-    const uint16_t stride_x, const uint16_t stride_y, const int8_t* bias,
-    const uint16_t bias_shift, const uint16_t out_shift,
-    const uint16_t out_mult, float* pOutBuffer, const uint16_t dim_out_x,
-    const uint16_t dim_out_y, float* k, float* lambda, float* pIm2ColBuffer,
-    int flag_relu, int flag_batch_norm, int flag_y_accumulate_start,
-    int flag_y_accumulate_end, unsigned int* memory_chan);
+void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k);
 
 /**
  * @brief implementation of a single-precision fp convolutional kernel
@@ -191,7 +224,7 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
  * @param pOutBuffer pointer to output feature map
  * @param dim_out_x width of output feature map
  * @param dim_out_y height of output feature map
- * @param k multiplication factor for BatchNorm
+ * @param kappa multiplication factor for BatchNorm
  * @param lambda bias for BatchNorm
  * @param flag_relu RELU activation flag
  * @param flag_batch_norm BatchNorm flag
@@ -200,18 +233,7 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(
  * @param flag_y_accumulate_end indicates that BN, RELU can be performed
  * @param memory_chan Not used
  */
-void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
-    const float* pInBuffer, const uint16_t dim_in_x, const uint16_t dim_in_y,
-    const uint16_t ch_in, const float* pWeight, const uint16_t ch_out,
-    const uint16_t dim_kernel_x, const uint16_t dim_kernel_y,
-    const uint16_t padding_y_top, const uint16_t padding_y_bottom,
-    const uint16_t padding_x_left, const uint16_t padding_x_right,
-    const uint16_t stride_x, const uint16_t stride_y, const int8_t* bias,
-    const uint16_t bias_shift, const uint16_t out_shift,
-    const uint16_t out_mult, float* pOutBuffer, const uint16_t dim_out_x,
-    const uint16_t dim_out_y, float* k, float* lambda, float* pIm2ColBuffer,
-    int flag_relu, int flag_batch_norm, int flag_y_accumulate_start,
-    int flag_y_accumulate_end, unsigned int* memory_chan);
+void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k);
 
 /**
  * @brief helper function that implements Batch Normalization and ReLU
@@ -220,12 +242,12 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(
  * @param dim_x width of feature map
  * @param dim_y height of feature map
  * @param ch number of channels (SIMD restricts multiple of 2)
- * @param k multiplication factor for BatchNorm
+ * @param kappa multiplication factor for BatchNorm
  * @param lambda bias for BatchNorm
  * @param flag_relu RELU activation flag
  * @param flag_batch_norm BatchNorm flag
  */
 void __attribute__((noinline))
 bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y,
-        const uint16_t ch, float* k, float* lambda, int flag_relu,
+        const uint16_t ch, float* kappa, float* lambda, int flag_relu,
         int flag_batch_norm);

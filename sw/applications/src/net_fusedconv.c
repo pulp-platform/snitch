@@ -13,13 +13,13 @@
 void *share_ptr;
 
 int main() {
-    uint32_t ifmap_size = (dim_in_x + padding_x_left + padding_x_right) *
-                          (dim_in_y + padding_y_top + padding_y_bottom) * ch_in;
-    uint32_t weights_size = dim_kernel_x * dim_kernel_y * ch_in * ch_out;
-    uint32_t ofmap_size = dim_out_x * dim_out_y * ch_out;
+    uint32_t ifmap_size = (k.dim_in_x + k.padding_x_left + k.padding_x_right) *
+                          (k.dim_in_y + k.padding_y_top + k.padding_y_bottom) * k.ch_in;
+    uint32_t weights_size = k.dim_kernel_x * k.dim_kernel_y * k.ch_in * k.ch_out;
+    uint32_t ofmap_size = k.dim_out_x * k.dim_out_y * k.ch_out;
 
     uint32_t total_size =
-        ifmap_size + weights_size + ch_out + ch_out + ofmap_size;
+        ifmap_size + weights_size + k.ch_out + k.ch_out + ofmap_size;
 
     float *ptr;
 
@@ -36,15 +36,12 @@ int main() {
     ptr += ifmap_size;
     float *pWeight = ptr;
     ptr += weights_size;
-    float *k = ptr;
-    ptr += ch_out;
+    float *kappa = ptr;
+    ptr += k.ch_out;
     float *lambda = ptr;
-    ptr += ch_out;
+    ptr += k.ch_out;
     float *pOutBuffer = ptr;
     ptr += ofmap_size;
-
-    // printf("Core %d/%d is com/dma core %d/%d\n", snrt_cluster_core_idx(),
-    // snrt_cluster_core_num(), snrt_is_compute_core(), snrt_is_dm_core());
 
     if (snrt_is_dm_core()) {
         snrt_dma_start_1d(pInBuffer, fusedconv_pInBuffer_dram,
@@ -53,10 +50,16 @@ int main() {
                           weights_size * sizeof(float));
         snrt_dma_start_1d(pOutBuffer, fusedconv_pOutBuffer_dram,
                           ofmap_size * sizeof(float));
-        snrt_dma_start_1d(k, k_dram, sizeof(k_dram));
-        snrt_dma_start_1d(lambda, lambda_dram, sizeof(lambda_dram));
+        snrt_dma_start_1d(kappa, fusedconv_kappa_dram, sizeof(fusedconv_kappa_dram));
+        snrt_dma_start_1d(lambda, fusedconv_lambda_dram, sizeof(fusedconv_lambda_dram));
         snrt_dma_wait_all();
     }
+
+    k.pInBuffer = pInBuffer;
+    k.pWeight = pWeight;
+    k.pOutBuffer = pOutBuffer;
+    k.kappa = kappa;
+    k.lambda = lambda;
 
     snrt_cluster_hw_barrier();
 
@@ -64,43 +67,16 @@ int main() {
         if (snrt_is_compute_core() || (snrt_cluster_core_num() == 1)) {
             if (dw) {
                 benchmark_get_cycle();
-
-                occamy_conv_dw_opt_fp32(
-                    pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
-                    dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
-                    padding_x_left, padding_x_right, stride_x, stride_y, bias,
-                    bias_shift, out_shift, out_mult, pOutBuffer, dim_out_x,
-                    dim_out_y, k, lambda, pIm2ColBuffer, flag_relu,
-                    flag_batch_norm, flag_y_accumulate_start,
-                    flag_y_accumulate_end, memory_chan);
-
+                occamy_conv_dw_opt_fp32(&k);
                 benchmark_get_cycle();
 
             } else if (chw_layer) {
                 benchmark_get_cycle();
-
-                occamy_conv_chw_opt_fp32(
-                    pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
-                    dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
-                    padding_x_left, padding_x_right, stride_x, stride_y, bias,
-                    bias_shift, out_shift, out_mult, pOutBuffer, dim_out_x,
-                    dim_out_y, k, lambda, pIm2ColBuffer, flag_relu,
-                    flag_batch_norm, flag_y_accumulate_start,
-                    flag_y_accumulate_end, memory_chan);
-
+                occamy_conv_chw_opt_fp32(&k);
                 benchmark_get_cycle();
             } else {
                 benchmark_get_cycle();
-
-                occamy_conv_opt_fp32(
-                    pInBuffer, dim_in_x, dim_in_y, ch_in, pWeight, ch_out,
-                    dim_kernel_x, dim_kernel_y, padding_y_top, padding_y_bottom,
-                    padding_x_left, padding_x_right, stride_x, stride_y, bias,
-                    bias_shift, out_shift, out_mult, pOutBuffer, dim_out_x,
-                    dim_out_y, k, lambda, pIm2ColBuffer, flag_relu,
-                    flag_batch_norm, flag_y_accumulate_start,
-                    flag_y_accumulate_end, memory_chan);
-
+                occamy_conv_opt_fp32(&k);
                 benchmark_get_cycle();
             }
 
@@ -114,8 +90,8 @@ int main() {
     uint32_t errors = 0;
     if (snrt_is_dm_core()) {
         // Output feature map (H x W x Co)
-        const uint32_t output_w_stride = ch_out;
-        const uint32_t output_h_stride = output_w_stride * dim_out_x;
+        const uint32_t output_w_stride = k.ch_out;
+        const uint32_t output_h_stride = output_w_stride * k.dim_out_x;
         for (uint32_t i = 0; i < ofmap_size; i++) {
             if (fabs(pOutBuffer[i] -
                      ((float *)fusedconv_pCheckOutBuffer_dram)[i]) > 0.01) {
