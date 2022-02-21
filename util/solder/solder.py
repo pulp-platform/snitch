@@ -548,16 +548,27 @@ class AxiBus(Bus):
         assert (bus.iw == target_iw)
         assert (bus.uw == self.uw)
 
-        # Emit the remapper instance.
+        # Emit the remapper instance. Either a axi_id_remap for down-conversion or a prepend
+        # for up-convert
         bus.declare(context)
-        tpl = templates.get_template("solder.axi_change_iw.sv.tpl")
-        context.write(
-            tpl.render_unicode(
-                axi_in=self,
-                axi_out=bus,
-                max_txns_per_id=max_txns_per_id,
-                name=inst_name or "i_{}".format(name),
-            ) + "\n")
+        if bus.iw < self.iw:
+            tpl = templates.get_template("solder.axi_change_iw.sv.tpl")
+            context.write(
+                tpl.render_unicode(
+                    axi_in=self,
+                    axi_out=bus,
+                    max_txns_per_id=max_txns_per_id,
+                    name=inst_name or "i_{}".format(name),
+                ) + "\n")
+        else:
+            tpl = templates.get_template("solder.axi_id_prepend.sv.tpl")
+            context.write(
+                tpl.render_unicode(
+                    bus_in=self,
+                    bus_out=bus,
+                    deprep_id=0,
+                    name=inst_name or "i_{}".format(name),
+                ) + "\n")
         return bus
 
     def serialize(self, context, name, iw=None, inst_name=None, to=None):
