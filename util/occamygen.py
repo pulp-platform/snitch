@@ -275,16 +275,26 @@ def main():
     nr_remote_quadrants = len(occamy.cfg["remote_quadrants"])
     nr_remote_cores = 0
     rmq_cluster_cnt = 0
-    am_remote_quadrants = []
+    am_remote_quadrants = list()
     for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
+        node = am.new_node("rmq_{}".format(i))
+        am_remote_quadrants.append(node)
         alen = rq["nr_clusters"]*0x40000
         addr = 0x10000000 + (nr_s1_clusters*nr_s1_quadrants+rmq_cluster_cnt)*0x40000
         leaf = am.new_leaf("rmq_{}".format(i), alen, addr)
-        am_soc_narrow_xbar.attach(leaf)
-        am_soc_wide_xbar.attach(leaf)
-        am_remote_quadrants.append(leaf)
+        node.attach(leaf)
+        node.attach_to(am_soc_narrow_xbar)
+        node.attach_to(am_quadrant_inter_xbar)
         nr_remote_cores += rq["nr_clusters"] * rq["nr_cluster_cores"]
         rmq_cluster_cnt += rq["nr_clusters"]
+        # remote quadrant control
+        # TODO: Continue
+        alen = occamy.cfg["s1_quadrant"]["cfg_base_offset"]
+        addr = occamy.cfg["s1_quadrant"]["cfg_base_addr"] + (i + nr_s1_quadrants) * alen
+        leaf = am.new_leaf("rmq_{}_cfg".format(i), alen, addr)
+        node.attach(leaf)
+        node.attach_to(am_soc_narrow_xbar)
+        # node.attach_to(am_quadrant_inter_xbar)
 
     ###########
     # AM: HBM #
@@ -527,6 +537,13 @@ def main():
         quadrant_inter_xbar.add_output_entry("quadrant_{}".format(i),
                                              am_wide_xbar_quadrant_s1[i])
         quadrant_inter_xbar.add_input("quadrant_{}".format(i))
+    for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
+        quadrant_inter_xbar.add_input("rmq_{}".format(i))
+        quadrant_inter_xbar.add_output_entry("rmq_{}".format(i), am_remote_quadrants[i])
+    # Connectrion from remote
+    if is_remote_quadrant:
+        quadrant_inter_xbar.add_output("remote", [])
+        quadrant_inter_xbar.add_input("remote")
 
     hbm_xbar = solder.AxiXbar(
         48,
@@ -575,13 +592,6 @@ def main():
     soc_wide_xbar.add_input("hbi")
     soc_wide_xbar.add_input("quadrant_inter_xbar")
     soc_wide_xbar.add_input("soc_narrow")
-    for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
-        soc_wide_xbar.add_input("rmq_{}".format(i))
-        soc_wide_xbar.add_output_entry("rmq_{}".format(i), am_remote_quadrants[i])
-    # Connectrion from remote
-    if is_remote_quadrant:
-        soc_wide_xbar.add_output("remote", [])
-        soc_wide_xbar.add_input("remote")
 
     ###################
     # SoC Narrow Xbar #
@@ -627,6 +637,10 @@ def main():
     for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
         soc_narrow_xbar.add_input("rmq_{}".format(i))
         soc_narrow_xbar.add_output_entry("rmq_{}".format(i), am_remote_quadrants[i])
+    # Connectrion from remote
+    if is_remote_quadrant:
+        soc_narrow_xbar.add_output("remote", [])
+        soc_narrow_xbar.add_input("remote")
 
     ##########################
     # S1 Quadrant controller #
