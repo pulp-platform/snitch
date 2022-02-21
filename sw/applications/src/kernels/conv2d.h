@@ -6,70 +6,68 @@
 
 #include "snrt.h"
 
-typedef struct
-{
-  float *   pInBuffer;
-  uint16_t  dim_in_x;
-  uint16_t  dim_in_y;
-  uint16_t  ch_in;
-  float *   pWeight;
-  uint16_t  ch_out;
-  uint16_t  dim_kernel_x;
-  uint16_t  dim_kernel_y;
-  uint16_t  padding_y_top;
-  uint16_t  padding_y_bottom;
-  uint16_t  padding_x_left;
-  uint16_t  padding_x_right;
-  uint16_t  stride_x;
-  uint16_t  stride_y;
-  int8_t *  bias;
-  uint16_t  bias_shift;
-  uint16_t  out_shift;
-  uint16_t  out_mult;
-  float *   pOutBuffer;
-  uint16_t  dim_out_x;
-  uint16_t  dim_out_y;
-  float *   kappa;
-  float *   lambda;
-  uint8_t * pIm2ColBuffer;
-  int       flag_relu;
-  int       flag_batch_norm;
-  int       flag_y_accumulate_start;
-  int       flag_y_accumulate_end;
-  unsigned int * memory_chan;
+typedef struct {
+    float *pInBuffer;
+    uint16_t dim_in_x;
+    uint16_t dim_in_y;
+    uint16_t ch_in;
+    float *pWeight;
+    uint16_t ch_out;
+    uint16_t dim_kernel_x;
+    uint16_t dim_kernel_y;
+    uint16_t padding_y_top;
+    uint16_t padding_y_bottom;
+    uint16_t padding_x_left;
+    uint16_t padding_x_right;
+    uint16_t stride_x;
+    uint16_t stride_y;
+    int8_t *bias;
+    uint16_t bias_shift;
+    uint16_t out_shift;
+    uint16_t out_mult;
+    float *pOutBuffer;
+    uint16_t dim_out_x;
+    uint16_t dim_out_y;
+    float *kappa;
+    float *lambda;
+    uint8_t *pIm2ColBuffer;
+    int flag_relu;
+    int flag_batch_norm;
+    int flag_y_accumulate_start;
+    int flag_y_accumulate_end;
+    unsigned int *memory_chan;
 } kernel_fp32;
 
-typedef struct
-{
-  double *  pInBuffer;
-  uint16_t  dim_in_x;
-  uint16_t  dim_in_y;
-  uint16_t  ch_in;
-  double *  pWeight;
-  uint16_t  ch_out;
-  uint16_t  dim_kernel_x;
-  uint16_t  dim_kernel_y;
-  uint16_t  padding_y_top;
-  uint16_t  padding_y_bottom;
-  uint16_t  padding_x_left;
-  uint16_t  padding_x_right;
-  uint16_t  stride_x;
-  uint16_t  stride_y;
-  int8_t *  bias;
-  uint16_t  bias_shift;
-  uint16_t  out_shift;
-  uint16_t  out_mult;
-  double *  pOutBuffer;
-  uint16_t  dim_out_x;
-  uint16_t  dim_out_y;
-  double *  kappa;
-  double *  lambda;
-  uint8_t * pIm2ColBuffer;
-  int       flag_relu;
-  int       flag_batch_norm;
-  int       flag_y_accumulate_start;
-  int       flag_y_accumulate_end;
-  unsigned int * memory_chan;
+typedef struct {
+    double *pInBuffer;
+    uint16_t dim_in_x;
+    uint16_t dim_in_y;
+    uint16_t ch_in;
+    double *pWeight;
+    uint16_t ch_out;
+    uint16_t dim_kernel_x;
+    uint16_t dim_kernel_y;
+    uint16_t padding_y_top;
+    uint16_t padding_y_bottom;
+    uint16_t padding_x_left;
+    uint16_t padding_x_right;
+    uint16_t stride_x;
+    uint16_t stride_y;
+    int8_t *bias;
+    uint16_t bias_shift;
+    uint16_t out_shift;
+    uint16_t out_mult;
+    double *pOutBuffer;
+    uint16_t dim_out_x;
+    uint16_t dim_out_y;
+    double *kappa;
+    double *lambda;
+    uint8_t *pIm2ColBuffer;
+    int flag_relu;
+    int flag_batch_norm;
+    int flag_y_accumulate_start;
+    int flag_y_accumulate_end;
+    unsigned int *memory_chan;
 } kernel_fp64;
 
 /**
@@ -248,6 +246,6 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k);
  * @param flag_batch_norm BatchNorm flag
  */
 void __attribute__((noinline))
-bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y,
-        const uint16_t ch, float* kappa, float* lambda, int flag_relu,
+bn_relu(const float *pBuffer, const uint16_t dim_x, const uint16_t dim_y,
+        const uint16_t ch, float *kappa, float *lambda, int flag_relu,
         int flag_batch_norm);

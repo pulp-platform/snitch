@@ -13,7 +13,7 @@ typedef union {
     v2f32 vec;
 } v2s;
 
-void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
+void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64* k) {
     // Parallelization/Pipelining parameters
     const uint32_t compute_id = snrt_cluster_compute_core_idx();
     const uint32_t compute_num =
@@ -25,8 +25,10 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
     // of input/output feature map and weights
     // Input feature map (H x W x Ci)
     // Calculate effective H, W dimension including padding
-    const uint32_t dim_in_eff_x = k->dim_in_x + k->padding_x_left + k->padding_x_right;
-    const uint32_t dim_in_eff_y = k->dim_in_y + k->padding_y_top + k->padding_y_bottom;
+    const uint32_t dim_in_eff_x =
+        k->dim_in_x + k->padding_x_left + k->padding_x_right;
+    const uint32_t dim_in_eff_y =
+        k->dim_in_y + k->padding_y_top + k->padding_y_bottom;
     const uint32_t input_w_stride = k->ch_in;
     const uint32_t input_h_stride = input_w_stride * dim_in_eff_x;
 
@@ -59,7 +61,8 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
     // }
 
     // Setup SSRs bounds and strides for input feature map
-    const uint32_t ssr0_b[4] = {max_unroll, k->ch_in, k->dim_kernel_x, k->dim_kernel_y};
+    const uint32_t ssr0_b[4] = {max_unroll, k->ch_in, k->dim_kernel_x,
+                                k->dim_kernel_y};
     const uint32_t ssr0_i[4] = {
         input_h_stride * k->stride_y * sizeof(double), 1 * sizeof(double),
         input_w_stride * sizeof(double), input_h_stride * sizeof(double)};
@@ -83,8 +86,8 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
     for (uint32_t co = compute_id; co < k->ch_out; co += compute_num) {
         uint32_t h0 = 0;
 
-        // If `k->dim_out_y` is not divisible by `unroll`, we have to clean up at
-        // the end which modifies the SSR loops, thus initialize it again
+        // If `k->dim_out_y` is not divisible by `unroll`, we have to clean up
+        // at the end which modifies the SSR loops, thus initialize it again
         // correctly
         if (cleanup_unroll) {
             snrt_ssr_loop_4d(SNRT_SSR_DM0, ssr0_b[0], ssr0_b[1], ssr0_b[2],
@@ -139,7 +142,8 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                       [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3]),
                       [ sum4 ] "+f"(sum[4]), [ sum5 ] "+f"(sum[5]),
                       [ sum6 ] "+f"(sum[6]), [ sum7 ] "+f"(sum[7])
-                    : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x * k->ch_in - 1)
+                    : [ n_frep ] "r"(
+                        k->dim_kernel_y * k->dim_kernel_x * k->ch_in - 1)
                     : "ft0", "ft1", "ft2");
 
                 snrt_ssr_disable();
@@ -147,7 +151,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                 // TODO: Check if needs to be unrolled manually
                 for (uint32_t i = 0; i < max_unroll; i++) {
                     k->pOutBuffer[(h0 * max_unroll + i) * output_h_stride +
-                               w * output_w_stride + co] = sum[i];
+                                  w * output_w_stride + co] = sum[i];
                 }
             }
         }
@@ -204,8 +208,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                               [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3]),
                               [ sum4 ] "+f"(sum[4]), [ sum5 ] "+f"(sum[5]),
                               [ sum6 ] "+f"(sum[6])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 6:
@@ -220,8 +225,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                             : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
                               [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3]),
                               [ sum4 ] "+f"(sum[4]), [ sum5 ] "+f"(sum[5])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 5:
@@ -235,8 +241,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                             : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
                               [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3]),
                               [ sum4 ] "+f"(sum[4])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 4:
@@ -248,8 +255,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                             "fmadd.d %[sum3], ft0, ft1, %[sum3] \n"
                             : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
                               [ sum2 ] "+f"(sum[2]), [ sum3 ] "+f"(sum[3])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 3:
@@ -260,8 +268,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                             "fmadd.d %[sum2], ft0, ft1, %[sum2] \n"
                             : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1]),
                               [ sum2 ] "+f"(sum[2])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 2:
@@ -270,8 +279,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                             "fmadd.d %[sum0], ft0, ft1, %[sum0] \n"
                             "fmadd.d %[sum1], ft0, ft1, %[sum1] \n"
                             : [ sum0 ] "+f"(sum[0]), [ sum1 ] "+f"(sum[1])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 1:
@@ -279,8 +289,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                             "frep.o %[n_frep], 1, 0, 0 \n"
                             "fmadd.d %[sum0], ft0, ft1, %[sum0] \n"
                             : [ sum0 ] "+f"(sum[0])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                 }
@@ -290,7 +301,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
                 // TODO: Check if needs to be unrolled manually
                 for (uint32_t i = 0; i < cleanup_unroll; i++) {
                     k->pOutBuffer[(h0 * max_unroll + i) * output_h_stride +
-                               w * output_w_stride + co] = sum[i];
+                                  w * output_w_stride + co] = sum[i];
                 }
             }
         }
@@ -350,7 +361,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp64(kernel_fp64 *k) {
     }
 }
 
-void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
+void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32* k) {
     // Parallelization/Pipelining parameters
     const uint32_t compute_id = snrt_cluster_compute_core_idx();
     const uint32_t compute_num =
@@ -362,8 +373,10 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
     // of input/output feature map and weights
     // Input feature map (H x W x Ci)
     // Calculate effective H, W dimension including padding
-    const uint32_t dim_in_eff_x = k->dim_in_x + k->padding_x_left + k->padding_x_right;
-    const uint32_t dim_in_eff_y = k->dim_in_y + k->padding_y_top + k->padding_y_bottom;
+    const uint32_t dim_in_eff_x =
+        k->dim_in_x + k->padding_x_left + k->padding_x_right;
+    const uint32_t dim_in_eff_y =
+        k->dim_in_y + k->padding_y_top + k->padding_y_bottom;
     const uint32_t input_w_stride = k->ch_in;
     const uint32_t input_h_stride = input_w_stride * dim_in_eff_x;
 
@@ -422,8 +435,8 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
     for (uint32_t co = compute_id; co < k->ch_out; co += compute_num) {
         uint32_t h0 = 0;
 
-        // If `k->dim_out_y` is not divisible by `unroll`, we have to clean up at
-        // the end which modifies the SSR loops, thus initialize it again
+        // If `k->dim_out_y` is not divisible by `unroll`, we have to clean up
+        // at the end which modifies the SSR loops, thus initialize it again
         // correctly
         if (cleanup_unroll) {
             snrt_ssr_loop_4d(SNRT_SSR_DM0, ssr0_b[0], ssr0_b[1], ssr0_b[2],
@@ -446,7 +459,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                 // are read from and stored
                 float* _pOutBuffer =
                     &k->pOutBuffer[(h0 * max_unroll) * output_h_stride +
-                                w * output_w_stride + co];
+                                   w * output_w_stride + co];
 
                 // Initialize registers with zero if the first
                 // tile is processed, otherwise load intermediate values
@@ -504,8 +517,8 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                       [ reduce_reg5 ] "+f"(reduce_reg[5]),
                       [ reduce_reg6 ] "+f"(reduce_reg[6]),
                       [ reduce_reg7 ] "+f"(reduce_reg[7])
-                    :
-                    [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x * k->ch_in / 2 - 1)
+                    : [ n_frep ] "r"(
+                        k->dim_kernel_y * k->dim_kernel_x * k->ch_in / 2 - 1)
                     : "ft0", "ft1", "ft2");
 
                 snrt_ssr_disable();
@@ -538,7 +551,7 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                 // are read from and stored
                 float* _pOutBuffer =
                     &k->pOutBuffer[(h0 * max_unroll) * output_h_stride +
-                                w * output_w_stride + co];
+                                   w * output_w_stride + co];
 
                 if (k->flag_y_accumulate_start) {
                     for (uint32_t i = 0; i < cleanup_unroll; i++) {
@@ -596,8 +609,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                               [ reduce_reg4 ] "+f"(reduce_reg[4]),
                               [ reduce_reg5 ] "+f"(reduce_reg[5]),
                               [ reduce_reg6 ] "+f"(reduce_reg[6])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in / 2 - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in / 2 -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 6:
@@ -629,8 +643,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                               [ reduce_reg3 ] "+f"(reduce_reg[3]),
                               [ reduce_reg4 ] "+f"(reduce_reg[4]),
                               [ reduce_reg5 ] "+f"(reduce_reg[5])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in / 2 - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in / 2 -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 5:
@@ -658,8 +673,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                               [ reduce_reg2 ] "+f"(reduce_reg[2]),
                               [ reduce_reg3 ] "+f"(reduce_reg[3]),
                               [ reduce_reg4 ] "+f"(reduce_reg[4])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in / 2 - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in / 2 -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 4:
@@ -683,8 +699,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                               [ reduce_reg1 ] "+f"(reduce_reg[1]),
                               [ reduce_reg2 ] "+f"(reduce_reg[2]),
                               [ reduce_reg3 ] "+f"(reduce_reg[3])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in / 2 - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in / 2 -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 3:
@@ -704,8 +721,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                               [ reduce_reg0 ] "+f"(reduce_reg[0]),
                               [ reduce_reg1 ] "+f"(reduce_reg[1]),
                               [ reduce_reg2 ] "+f"(reduce_reg[2])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in / 2 - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in / 2 -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 2:
@@ -721,8 +739,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                               [ sum1 ] "+f"(sum[1].f64),
                               [ reduce_reg0 ] "+f"(reduce_reg[0]),
                               [ reduce_reg1 ] "+f"(reduce_reg[1])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in / 2 - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in / 2 -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 1:
@@ -734,8 +753,9 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
                             "vfsum.s %[reduce_reg0], %[sum0] \n"
                             : [ sum0 ] "+f"(sum[0].f64),
                               [ reduce_reg0 ] "+f"(reduce_reg[0])
-                            : [ n_frep ] "r"(
-                                k->dim_kernel_y * k->dim_kernel_x * k->ch_in / 2 - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x *
+                                                 k->ch_in / 2 -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                 }
@@ -755,12 +775,12 @@ void __attribute__((noinline)) occamy_conv_opt_fp32(kernel_fp32 *k) {
     snrt_cluster_hw_barrier();
 
     if (k->flag_batch_norm | k->flag_relu) {
-        bn_relu(k->pOutBuffer, k->dim_out_x, k->dim_out_y, k->ch_out, k->kappa, k->lambda, k->flag_relu,
-                k->flag_batch_norm);
+        bn_relu(k->pOutBuffer, k->dim_out_x, k->dim_out_y, k->ch_out, k->kappa,
+                k->lambda, k->flag_relu, k->flag_batch_norm);
     }
 }
 
-void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
+void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32* k) {
     // Parallelization/Pipelining parameters
     const uint32_t compute_id = snrt_cluster_compute_core_idx();
     const uint32_t compute_num =
@@ -772,8 +792,10 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
     // of input/output feature map and weights
     // Input feature map (H x W x Ci)
     // Calculate effective H, W dimension including padding
-    const uint32_t dim_in_eff_x = k->dim_in_x + k->padding_x_left + k->padding_x_right;
-    const uint32_t dim_in_eff_y = k->dim_in_y + k->padding_y_top + k->padding_y_bottom;
+    const uint32_t dim_in_eff_x =
+        k->dim_in_x + k->padding_x_left + k->padding_x_right;
+    const uint32_t dim_in_eff_y =
+        k->dim_in_y + k->padding_y_top + k->padding_y_bottom;
     const uint32_t input_w_stride = k->ch_in;
     const uint32_t input_h_stride = input_w_stride * dim_in_eff_x;
 
@@ -826,12 +848,13 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
     // Repeat the innermost value `max_unroll` times
     snrt_ssr_repeat(SNRT_SSR_DM1, max_unroll);
 
-    // channel dimension `k->ch_out` (same as `k->ch_in`) is parallelized over cores
+    // channel dimension `k->ch_out` (same as `k->ch_in`) is parallelized over
+    // cores
     for (uint32_t co = compute_id * 2; co < k->ch_out; co += compute_num * 2) {
         uint32_t h0 = 0;
 
-        // If `k->dim_out_y` is not divisible by `unroll`, we have to clean up at
-        // the end which modifies the SSR loops, thus initialize it again
+        // If `k->dim_out_y` is not divisible by `unroll`, we have to clean up
+        // at the end which modifies the SSR loops, thus initialize it again
         // correctly
         if (cleanup_unroll) {
             snrt_ssr_loop_4d(SNRT_SSR_DM0, ssr0_b[0], ssr0_b[1], ssr0_b[2],
@@ -860,7 +883,7 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
                 // are read from and stored
                 v2s* _pOutBuffer =
                     (v2s*)(&k->pOutBuffer[(h0 * max_unroll) * output_h_stride +
-                                       w * output_w_stride + co]);
+                                          w * output_w_stride + co]);
 
                 // Initialize registers with zero if the first
                 // tile is processed, otherwise load intermediate values
@@ -930,7 +953,7 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
                 // are read from and stored
                 v2s* _pOutBuffer =
                     (v2s*)(&k->pOutBuffer[(h0 * max_unroll) * output_h_stride +
-                                       w * output_w_stride + co]);
+                                          w * output_w_stride + co]);
 
                 if (k->flag_y_accumulate_start) {
                     for (uint32_t i = 0; i < cleanup_unroll; i++) {
@@ -963,7 +986,8 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
                               [ sum4 ] "+f"(sum[4].f64),
                               [ sum5 ] "+f"(sum[5].f64),
                               [ sum6 ] "+f"(sum[6].f64)
-                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 6:
@@ -982,7 +1006,8 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
                               [ sum3 ] "+f"(sum[3].f64),
                               [ sum4 ] "+f"(sum[4].f64),
                               [ sum5 ] "+f"(sum[5].f64)
-                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 5:
@@ -999,7 +1024,8 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
                               [ sum2 ] "+f"(sum[2].f64),
                               [ sum3 ] "+f"(sum[3].f64),
                               [ sum4 ] "+f"(sum[4].f64)
-                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 4:
@@ -1014,7 +1040,8 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
                               [ sum1 ] "+f"(sum[1].f64),
                               [ sum2 ] "+f"(sum[2].f64),
                               [ sum3 ] "+f"(sum[3].f64)
-                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 3:
@@ -1027,7 +1054,8 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
                             : [ sum0 ] "+f"(sum[0].f64),
                               [ sum1 ] "+f"(sum[1].f64),
                               [ sum2 ] "+f"(sum[2].f64)
-                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 2:
@@ -1038,7 +1066,8 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
                             "vfmac.s %[sum1], ft0, ft1 \n"
                             :
                             [ sum0 ] "+f"(sum[0].f64), [ sum1 ] "+f"(sum[1].f64)
-                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                     case 1:
@@ -1047,7 +1076,8 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
                             "frep.o %[n_frep], 1, 0, 0 \n"
                             "vfmac.s %[sum0], ft0, ft1 \n"
                             : [ sum0 ] "+f"(sum[0].f64)
-                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x - 1)
+                            : [ n_frep ] "r"(k->dim_kernel_y * k->dim_kernel_x -
+                                             1)
                             : "ft0", "ft1", "ft2");
                         break;
                 }
@@ -1067,12 +1097,12 @@ void __attribute__((noinline)) occamy_conv_dw_opt_fp32(kernel_fp32 *k) {
     snrt_cluster_hw_barrier();
 
     if (k->flag_batch_norm | k->flag_relu) {
-        bn_relu(k->pOutBuffer, k->dim_out_x, k->dim_out_y, k->ch_out, k->kappa, k->lambda, k->flag_relu,
-                k->flag_batch_norm);
+        bn_relu(k->pOutBuffer, k->dim_out_x, k->dim_out_y, k->ch_out, k->kappa,
+                k->lambda, k->flag_relu, k->flag_batch_norm);
     }
 }
 
-void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
+void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32* k) {
     // Parallelization/Pipelining parameters
     const uint32_t compute_id = snrt_cluster_compute_core_idx();
     const uint32_t compute_num =
@@ -1084,8 +1114,10 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
     // of input feature map and weights
     // Input feature map (Ci x H x W)
     // Calculate effective H, W dimension including padding
-    const uint32_t dim_in_eff_x = k->dim_in_x + k->padding_x_left + k->padding_x_right;
-    const uint32_t dim_in_eff_y = k->dim_in_y + k->padding_y_top + k->padding_y_bottom;
+    const uint32_t dim_in_eff_x =
+        k->dim_in_x + k->padding_x_left + k->padding_x_right;
+    const uint32_t dim_in_eff_y =
+        k->dim_in_y + k->padding_y_top + k->padding_y_bottom;
     const uint32_t input_w_stride = 1;
     const uint32_t input_h_stride = dim_in_eff_x;
     const uint32_t input_ci_stride = input_h_stride * dim_in_eff_y;
@@ -1122,8 +1154,8 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
     // }
 
     // Setup SSRs bounds and strides for input feature map
-    const uint32_t ssr0_b[4] = {max_unroll, k->dim_kernel_x / 2, k->dim_kernel_y,
-                                k->dim_out_x};
+    const uint32_t ssr0_b[4] = {max_unroll, k->dim_kernel_x / 2,
+                                k->dim_kernel_y, k->dim_out_x};
     const uint32_t ssr0_i[4] = {input_h_stride * k->stride_y * sizeof(float),
                                 input_w_stride * sizeof(v2s),
                                 input_h_stride * sizeof(float),
@@ -1154,9 +1186,9 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
         for (uint32_t ci = 0; ci < k->ch_in; ci++) {
             uint32_t h = 0, h0 = 0;
 
-            // If `k->dim_out_y` is not divisible by `unroll`, we have to clean up
-            // at the end which modifies the SSR loops, thus initialize it again
-            // correctly
+            // If `k->dim_out_y` is not divisible by `unroll`, we have to clean
+            // up at the end which modifies the SSR loops, thus initialize it
+            // again correctly
             if (cleanup_unroll) {
                 snrt_ssr_loop_4d(SNRT_SSR_DM0, ssr0_b[0], ssr0_b[1], ssr0_b[2],
                                  ssr0_b[3], ssr0_i[0], ssr0_i[1], ssr0_i[2],
@@ -1175,22 +1207,23 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
                                   co * kernel_co_stride));
 
             // Output height dimension `k->dim_out_y` first split
-            for (h0 = 0; h0 < k->dim_out_y / max_unroll; h0++, h += max_unroll) {
+            for (h0 = 0; h0 < k->dim_out_y / max_unroll;
+                 h0++, h += max_unroll) {
                 // Output width dimension `k->dim_out_x`
                 for (uint32_t w = 0; w < k->dim_out_x; w++) {
                     volatile register v2s sum[max_unroll];
                     volatile register float reduce_reg[max_unroll];
                     // pointer to output buffer location where intermediate
                     // values are read from and stored
-                    float* _pOutBuffer =
-                        &k->pOutBuffer[h * output_h_stride + w * output_w_stride +
-                                    co * output_co_stride];
+                    float* _pOutBuffer = &k->pOutBuffer[h * output_h_stride +
+                                                        w * output_w_stride +
+                                                        co * output_co_stride];
 
                     // Initialize registers with zero if the first
                     // tile is processed, otherwise load intermediate values
                     if (k->flag_y_accumulate_start && (ci == 0)) {
-                        // printf("Zero: ci %d/%d h %d/%d w %d/%d\n", ci, k->ch_in,
-                        // h, k->dim_out_y, w, k->dim_out_x);
+                        // printf("Zero: ci %d/%d h %d/%d w %d/%d\n", ci,
+                        // k->ch_in, h, k->dim_out_y, w, k->dim_out_x);
                         for (uint32_t i = 0; i < max_unroll; i++) {
                             sum[i].f64 = 0.0;
                             reduce_reg[i] = 0.0;
@@ -1205,11 +1238,11 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
                     }
 
                     // SSR address setup and enable
-                    snrt_ssr_read(
-                        SNRT_SSR_DM0, SNRT_SSR_4D,
-                        (void*)(k->pInBuffer + h * k->stride_y * input_h_stride +
-                                w * k->stride_x * input_w_stride +
-                                ci * input_ci_stride));
+                    snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_4D,
+                                  (void*)(k->pInBuffer +
+                                          h * k->stride_y * input_h_stride +
+                                          w * k->stride_x * input_w_stride +
+                                          ci * input_ci_stride));
                     snrt_ssr_enable();
 
                     asm volatile(
@@ -1244,7 +1277,8 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
                           [ reduce_reg5 ] "+f"(reduce_reg[5]),
                           [ reduce_reg6 ] "+f"(reduce_reg[6]),
                           [ reduce_reg7 ] "+f"(reduce_reg[7])
-                        : [ n_frep ] "r"(k->dim_kernel_x / 2 * k->dim_kernel_y - 1)
+                        : [ n_frep ] "r"(k->dim_kernel_x / 2 * k->dim_kernel_y -
+                                         1)
                         : "ft0", "ft1", "ft2");
 
                     snrt_ssr_disable();
@@ -1275,9 +1309,9 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
 
                     // pointer to output buffer location where intermediate
                     // values are read from and stored
-                    float* _pOutBuffer =
-                        &k->pOutBuffer[h * output_h_stride + w * output_w_stride +
-                                    co * output_co_stride];
+                    float* _pOutBuffer = &k->pOutBuffer[h * output_h_stride +
+                                                        w * output_w_stride +
+                                                        co * output_co_stride];
 
                     if (k->flag_y_accumulate_start && (ci == 0)) {
                         for (uint32_t i = 0; i < cleanup_unroll; i++) {
@@ -1292,11 +1326,11 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
                     }
 
                     // SSR address setup and enable
-                    snrt_ssr_read(
-                        SNRT_SSR_DM0, SNRT_SSR_4D,
-                        (void*)(k->pInBuffer + h * k->stride_y * input_h_stride +
-                                w * k->stride_x * input_w_stride +
-                                ci * input_ci_stride));
+                    snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_4D,
+                                  (void*)(k->pInBuffer +
+                                          h * k->stride_y * input_h_stride +
+                                          w * k->stride_x * input_w_stride +
+                                          ci * input_ci_stride));
                     snrt_ssr_read(SNRT_SSR_DM1, SNRT_SSR_3D,
                                   (void*)(k->pWeight + ci * kernel_ci_stride +
                                           co * kernel_co_stride));
@@ -1497,8 +1531,8 @@ void __attribute__((noinline)) occamy_conv_chw_opt_fp32(kernel_fp32 *k) {
     snrt_cluster_hw_barrier();
 
     if (k->flag_batch_norm | k->flag_relu) {
-        bn_relu(k->pOutBuffer, k->dim_out_x, k->dim_out_y, k->ch_out, k->kappa, k->lambda, k->flag_relu,
-                k->flag_batch_norm);
+        bn_relu(k->pOutBuffer, k->dim_out_x, k->dim_out_y, k->ch_out, k->kappa,
+                k->lambda, k->flag_relu, k->flag_batch_norm);
     }
 }
 
@@ -1581,8 +1615,8 @@ bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y,
                     "vfmax.s ft1, %[tmp3], %[zero]\n"   // ReLU
                     : [ tmp0 ] "+f"(tmp[0].vec), [ tmp1 ] "+f"(tmp[1].vec),
                       [ tmp2 ] "+f"(tmp[2].vec), [ tmp3 ] "+f"(tmp[3].vec)
-                    : [ k ] "f"(current_kappa.vec), [ l ] "f"(current_lambda.vec),
-                      [ zero ] "f"(zero.vec),
+                    : [ k ] "f"(current_kappa.vec),
+                      [ l ] "f"(current_lambda.vec), [ zero ] "f"(zero.vec),
                       [ n_frep ] "r"(dim_x * (dim_y / n_unroll) - 1)
                     : "ft0", "ft1", "ft2");
             } else if (flag_batch_norm && !flag_relu) {
@@ -1598,7 +1632,8 @@ bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y,
                     "vfadd.s ft1, %[tmp3], %[l]\n"  // BN lambda
                     : [ tmp0 ] "+f"(tmp[0].f64), [ tmp1 ] "+f"(tmp[1].f64),
                       [ tmp2 ] "+f"(tmp[2].f64), [ tmp3 ] "+f"(tmp[3].f64)
-                    : [ k ] "f"(current_kappa.f64), [ l ] "f"(current_lambda.f64),
+                    : [ k ] "f"(current_kappa.f64),
+                      [ l ] "f"(current_lambda.f64),
                       [ n_frep ] "r"(dim_x * (dim_y / n_unroll) - 1)
                     : "ft0", "ft1", "ft2");
             } else if (!flag_batch_norm && flag_relu) {

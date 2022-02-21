@@ -14,8 +14,10 @@ void *share_ptr;
 
 int main() {
     uint32_t ifmap_size = (k.dim_in_x + k.padding_x_left + k.padding_x_right) *
-                          (k.dim_in_y + k.padding_y_top + k.padding_y_bottom) * k.ch_in;
-    uint32_t weights_size = k.dim_kernel_x * k.dim_kernel_y * k.ch_in * k.ch_out;
+                          (k.dim_in_y + k.padding_y_top + k.padding_y_bottom) *
+                          k.ch_in;
+    uint32_t weights_size =
+        k.dim_kernel_x * k.dim_kernel_y * k.ch_in * k.ch_out;
     uint32_t ofmap_size = k.dim_out_x * k.dim_out_y * k.ch_out;
 
     uint32_t total_size =
@@ -50,8 +52,10 @@ int main() {
                           weights_size * sizeof(float));
         snrt_dma_start_1d(pOutBuffer, fusedconv_pOutBuffer_dram,
                           ofmap_size * sizeof(float));
-        snrt_dma_start_1d(kappa, fusedconv_kappa_dram, sizeof(fusedconv_kappa_dram));
-        snrt_dma_start_1d(lambda, fusedconv_lambda_dram, sizeof(fusedconv_lambda_dram));
+        snrt_dma_start_1d(kappa, fusedconv_kappa_dram,
+                          sizeof(fusedconv_kappa_dram));
+        snrt_dma_start_1d(lambda, fusedconv_lambda_dram,
+                          sizeof(fusedconv_lambda_dram));
         snrt_dma_wait_all();
     }
 
