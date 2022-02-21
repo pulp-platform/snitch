@@ -719,8 +719,8 @@ def annotate_insn(
 # -------------------- Performance metrics --------------------
 
 
-def safe_div(dividend, divisor):
-    return dividend / divisor if divisor else None
+def safe_div(dividend, divisor, zero_div=0):
+    return dividend / divisor if divisor else zero_div
 
 
 def eval_perf_metrics(perf_metrics: list):
