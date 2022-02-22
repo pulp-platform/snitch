@@ -22,12 +22,12 @@ module clint import clint_reg_pkg::*; #(
     input  reg_req_t            reg_req_i,
     output reg_rsp_t            reg_rsp_o,
     input  logic                rtc_i,       // Real-time clock in (usually 32.768 kHz)
-    output logic [288:0] timer_irq_o, // Timer interrupts
-    output logic [288:0] ipi_o        // software interrupt (a.k.a inter-process-interrupt)
+    output logic [216:0] timer_irq_o, // Timer interrupts
+    output logic [216:0] ipi_o        // software interrupt (a.k.a inter-process-interrupt)
 );
 
     logic [63:0]               mtime_q;
-    logic [288:0][63:0] mtimecmp_q;
+    logic [216:0][63:0] mtimecmp_q;
     // increase the timer
     logic increase_timer;
 
@@ -482,150 +482,6 @@ module clint import clint_reg_pkg::*; #(
     assign ipi_o[215] = reg2hw.msip[215].q;
     assign mtimecmp_q[216] = {reg2hw.mtimecmp_high216.q, reg2hw.mtimecmp_low216.q};
     assign ipi_o[216] = reg2hw.msip[216].q;
-    assign mtimecmp_q[217] = {reg2hw.mtimecmp_high217.q, reg2hw.mtimecmp_low217.q};
-    assign ipi_o[217] = reg2hw.msip[217].q;
-    assign mtimecmp_q[218] = {reg2hw.mtimecmp_high218.q, reg2hw.mtimecmp_low218.q};
-    assign ipi_o[218] = reg2hw.msip[218].q;
-    assign mtimecmp_q[219] = {reg2hw.mtimecmp_high219.q, reg2hw.mtimecmp_low219.q};
-    assign ipi_o[219] = reg2hw.msip[219].q;
-    assign mtimecmp_q[220] = {reg2hw.mtimecmp_high220.q, reg2hw.mtimecmp_low220.q};
-    assign ipi_o[220] = reg2hw.msip[220].q;
-    assign mtimecmp_q[221] = {reg2hw.mtimecmp_high221.q, reg2hw.mtimecmp_low221.q};
-    assign ipi_o[221] = reg2hw.msip[221].q;
-    assign mtimecmp_q[222] = {reg2hw.mtimecmp_high222.q, reg2hw.mtimecmp_low222.q};
-    assign ipi_o[222] = reg2hw.msip[222].q;
-    assign mtimecmp_q[223] = {reg2hw.mtimecmp_high223.q, reg2hw.mtimecmp_low223.q};
-    assign ipi_o[223] = reg2hw.msip[223].q;
-    assign mtimecmp_q[224] = {reg2hw.mtimecmp_high224.q, reg2hw.mtimecmp_low224.q};
-    assign ipi_o[224] = reg2hw.msip[224].q;
-    assign mtimecmp_q[225] = {reg2hw.mtimecmp_high225.q, reg2hw.mtimecmp_low225.q};
-    assign ipi_o[225] = reg2hw.msip[225].q;
-    assign mtimecmp_q[226] = {reg2hw.mtimecmp_high226.q, reg2hw.mtimecmp_low226.q};
-    assign ipi_o[226] = reg2hw.msip[226].q;
-    assign mtimecmp_q[227] = {reg2hw.mtimecmp_high227.q, reg2hw.mtimecmp_low227.q};
-    assign ipi_o[227] = reg2hw.msip[227].q;
-    assign mtimecmp_q[228] = {reg2hw.mtimecmp_high228.q, reg2hw.mtimecmp_low228.q};
-    assign ipi_o[228] = reg2hw.msip[228].q;
-    assign mtimecmp_q[229] = {reg2hw.mtimecmp_high229.q, reg2hw.mtimecmp_low229.q};
-    assign ipi_o[229] = reg2hw.msip[229].q;
-    assign mtimecmp_q[230] = {reg2hw.mtimecmp_high230.q, reg2hw.mtimecmp_low230.q};
-    assign ipi_o[230] = reg2hw.msip[230].q;
-    assign mtimecmp_q[231] = {reg2hw.mtimecmp_high231.q, reg2hw.mtimecmp_low231.q};
-    assign ipi_o[231] = reg2hw.msip[231].q;
-    assign mtimecmp_q[232] = {reg2hw.mtimecmp_high232.q, reg2hw.mtimecmp_low232.q};
-    assign ipi_o[232] = reg2hw.msip[232].q;
-    assign mtimecmp_q[233] = {reg2hw.mtimecmp_high233.q, reg2hw.mtimecmp_low233.q};
-    assign ipi_o[233] = reg2hw.msip[233].q;
-    assign mtimecmp_q[234] = {reg2hw.mtimecmp_high234.q, reg2hw.mtimecmp_low234.q};
-    assign ipi_o[234] = reg2hw.msip[234].q;
-    assign mtimecmp_q[235] = {reg2hw.mtimecmp_high235.q, reg2hw.mtimecmp_low235.q};
-    assign ipi_o[235] = reg2hw.msip[235].q;
-    assign mtimecmp_q[236] = {reg2hw.mtimecmp_high236.q, reg2hw.mtimecmp_low236.q};
-    assign ipi_o[236] = reg2hw.msip[236].q;
-    assign mtimecmp_q[237] = {reg2hw.mtimecmp_high237.q, reg2hw.mtimecmp_low237.q};
-    assign ipi_o[237] = reg2hw.msip[237].q;
-    assign mtimecmp_q[238] = {reg2hw.mtimecmp_high238.q, reg2hw.mtimecmp_low238.q};
-    assign ipi_o[238] = reg2hw.msip[238].q;
-    assign mtimecmp_q[239] = {reg2hw.mtimecmp_high239.q, reg2hw.mtimecmp_low239.q};
-    assign ipi_o[239] = reg2hw.msip[239].q;
-    assign mtimecmp_q[240] = {reg2hw.mtimecmp_high240.q, reg2hw.mtimecmp_low240.q};
-    assign ipi_o[240] = reg2hw.msip[240].q;
-    assign mtimecmp_q[241] = {reg2hw.mtimecmp_high241.q, reg2hw.mtimecmp_low241.q};
-    assign ipi_o[241] = reg2hw.msip[241].q;
-    assign mtimecmp_q[242] = {reg2hw.mtimecmp_high242.q, reg2hw.mtimecmp_low242.q};
-    assign ipi_o[242] = reg2hw.msip[242].q;
-    assign mtimecmp_q[243] = {reg2hw.mtimecmp_high243.q, reg2hw.mtimecmp_low243.q};
-    assign ipi_o[243] = reg2hw.msip[243].q;
-    assign mtimecmp_q[244] = {reg2hw.mtimecmp_high244.q, reg2hw.mtimecmp_low244.q};
-    assign ipi_o[244] = reg2hw.msip[244].q;
-    assign mtimecmp_q[245] = {reg2hw.mtimecmp_high245.q, reg2hw.mtimecmp_low245.q};
-    assign ipi_o[245] = reg2hw.msip[245].q;
-    assign mtimecmp_q[246] = {reg2hw.mtimecmp_high246.q, reg2hw.mtimecmp_low246.q};
-    assign ipi_o[246] = reg2hw.msip[246].q;
-    assign mtimecmp_q[247] = {reg2hw.mtimecmp_high247.q, reg2hw.mtimecmp_low247.q};
-    assign ipi_o[247] = reg2hw.msip[247].q;
-    assign mtimecmp_q[248] = {reg2hw.mtimecmp_high248.q, reg2hw.mtimecmp_low248.q};
-    assign ipi_o[248] = reg2hw.msip[248].q;
-    assign mtimecmp_q[249] = {reg2hw.mtimecmp_high249.q, reg2hw.mtimecmp_low249.q};
-    assign ipi_o[249] = reg2hw.msip[249].q;
-    assign mtimecmp_q[250] = {reg2hw.mtimecmp_high250.q, reg2hw.mtimecmp_low250.q};
-    assign ipi_o[250] = reg2hw.msip[250].q;
-    assign mtimecmp_q[251] = {reg2hw.mtimecmp_high251.q, reg2hw.mtimecmp_low251.q};
-    assign ipi_o[251] = reg2hw.msip[251].q;
-    assign mtimecmp_q[252] = {reg2hw.mtimecmp_high252.q, reg2hw.mtimecmp_low252.q};
-    assign ipi_o[252] = reg2hw.msip[252].q;
-    assign mtimecmp_q[253] = {reg2hw.mtimecmp_high253.q, reg2hw.mtimecmp_low253.q};
-    assign ipi_o[253] = reg2hw.msip[253].q;
-    assign mtimecmp_q[254] = {reg2hw.mtimecmp_high254.q, reg2hw.mtimecmp_low254.q};
-    assign ipi_o[254] = reg2hw.msip[254].q;
-    assign mtimecmp_q[255] = {reg2hw.mtimecmp_high255.q, reg2hw.mtimecmp_low255.q};
-    assign ipi_o[255] = reg2hw.msip[255].q;
-    assign mtimecmp_q[256] = {reg2hw.mtimecmp_high256.q, reg2hw.mtimecmp_low256.q};
-    assign ipi_o[256] = reg2hw.msip[256].q;
-    assign mtimecmp_q[257] = {reg2hw.mtimecmp_high257.q, reg2hw.mtimecmp_low257.q};
-    assign ipi_o[257] = reg2hw.msip[257].q;
-    assign mtimecmp_q[258] = {reg2hw.mtimecmp_high258.q, reg2hw.mtimecmp_low258.q};
-    assign ipi_o[258] = reg2hw.msip[258].q;
-    assign mtimecmp_q[259] = {reg2hw.mtimecmp_high259.q, reg2hw.mtimecmp_low259.q};
-    assign ipi_o[259] = reg2hw.msip[259].q;
-    assign mtimecmp_q[260] = {reg2hw.mtimecmp_high260.q, reg2hw.mtimecmp_low260.q};
-    assign ipi_o[260] = reg2hw.msip[260].q;
-    assign mtimecmp_q[261] = {reg2hw.mtimecmp_high261.q, reg2hw.mtimecmp_low261.q};
-    assign ipi_o[261] = reg2hw.msip[261].q;
-    assign mtimecmp_q[262] = {reg2hw.mtimecmp_high262.q, reg2hw.mtimecmp_low262.q};
-    assign ipi_o[262] = reg2hw.msip[262].q;
-    assign mtimecmp_q[263] = {reg2hw.mtimecmp_high263.q, reg2hw.mtimecmp_low263.q};
-    assign ipi_o[263] = reg2hw.msip[263].q;
-    assign mtimecmp_q[264] = {reg2hw.mtimecmp_high264.q, reg2hw.mtimecmp_low264.q};
-    assign ipi_o[264] = reg2hw.msip[264].q;
-    assign mtimecmp_q[265] = {reg2hw.mtimecmp_high265.q, reg2hw.mtimecmp_low265.q};
-    assign ipi_o[265] = reg2hw.msip[265].q;
-    assign mtimecmp_q[266] = {reg2hw.mtimecmp_high266.q, reg2hw.mtimecmp_low266.q};
-    assign ipi_o[266] = reg2hw.msip[266].q;
-    assign mtimecmp_q[267] = {reg2hw.mtimecmp_high267.q, reg2hw.mtimecmp_low267.q};
-    assign ipi_o[267] = reg2hw.msip[267].q;
-    assign mtimecmp_q[268] = {reg2hw.mtimecmp_high268.q, reg2hw.mtimecmp_low268.q};
-    assign ipi_o[268] = reg2hw.msip[268].q;
-    assign mtimecmp_q[269] = {reg2hw.mtimecmp_high269.q, reg2hw.mtimecmp_low269.q};
-    assign ipi_o[269] = reg2hw.msip[269].q;
-    assign mtimecmp_q[270] = {reg2hw.mtimecmp_high270.q, reg2hw.mtimecmp_low270.q};
-    assign ipi_o[270] = reg2hw.msip[270].q;
-    assign mtimecmp_q[271] = {reg2hw.mtimecmp_high271.q, reg2hw.mtimecmp_low271.q};
-    assign ipi_o[271] = reg2hw.msip[271].q;
-    assign mtimecmp_q[272] = {reg2hw.mtimecmp_high272.q, reg2hw.mtimecmp_low272.q};
-    assign ipi_o[272] = reg2hw.msip[272].q;
-    assign mtimecmp_q[273] = {reg2hw.mtimecmp_high273.q, reg2hw.mtimecmp_low273.q};
-    assign ipi_o[273] = reg2hw.msip[273].q;
-    assign mtimecmp_q[274] = {reg2hw.mtimecmp_high274.q, reg2hw.mtimecmp_low274.q};
-    assign ipi_o[274] = reg2hw.msip[274].q;
-    assign mtimecmp_q[275] = {reg2hw.mtimecmp_high275.q, reg2hw.mtimecmp_low275.q};
-    assign ipi_o[275] = reg2hw.msip[275].q;
-    assign mtimecmp_q[276] = {reg2hw.mtimecmp_high276.q, reg2hw.mtimecmp_low276.q};
-    assign ipi_o[276] = reg2hw.msip[276].q;
-    assign mtimecmp_q[277] = {reg2hw.mtimecmp_high277.q, reg2hw.mtimecmp_low277.q};
-    assign ipi_o[277] = reg2hw.msip[277].q;
-    assign mtimecmp_q[278] = {reg2hw.mtimecmp_high278.q, reg2hw.mtimecmp_low278.q};
-    assign ipi_o[278] = reg2hw.msip[278].q;
-    assign mtimecmp_q[279] = {reg2hw.mtimecmp_high279.q, reg2hw.mtimecmp_low279.q};
-    assign ipi_o[279] = reg2hw.msip[279].q;
-    assign mtimecmp_q[280] = {reg2hw.mtimecmp_high280.q, reg2hw.mtimecmp_low280.q};
-    assign ipi_o[280] = reg2hw.msip[280].q;
-    assign mtimecmp_q[281] = {reg2hw.mtimecmp_high281.q, reg2hw.mtimecmp_low281.q};
-    assign ipi_o[281] = reg2hw.msip[281].q;
-    assign mtimecmp_q[282] = {reg2hw.mtimecmp_high282.q, reg2hw.mtimecmp_low282.q};
-    assign ipi_o[282] = reg2hw.msip[282].q;
-    assign mtimecmp_q[283] = {reg2hw.mtimecmp_high283.q, reg2hw.mtimecmp_low283.q};
-    assign ipi_o[283] = reg2hw.msip[283].q;
-    assign mtimecmp_q[284] = {reg2hw.mtimecmp_high284.q, reg2hw.mtimecmp_low284.q};
-    assign ipi_o[284] = reg2hw.msip[284].q;
-    assign mtimecmp_q[285] = {reg2hw.mtimecmp_high285.q, reg2hw.mtimecmp_low285.q};
-    assign ipi_o[285] = reg2hw.msip[285].q;
-    assign mtimecmp_q[286] = {reg2hw.mtimecmp_high286.q, reg2hw.mtimecmp_low286.q};
-    assign ipi_o[286] = reg2hw.msip[286].q;
-    assign mtimecmp_q[287] = {reg2hw.mtimecmp_high287.q, reg2hw.mtimecmp_low287.q};
-    assign ipi_o[287] = reg2hw.msip[287].q;
-    assign mtimecmp_q[288] = {reg2hw.mtimecmp_high288.q, reg2hw.mtimecmp_low288.q};
-    assign ipi_o[288] = reg2hw.msip[288].q;
 
     assign {hw2reg.mtime_high.d, hw2reg.mtime_low.d} = mtime_q + 1;
     assign hw2reg.mtime_low.de = increase_timer;
@@ -641,7 +497,7 @@ module clint import clint_reg_pkg::*; #(
     // if interrupts are enabled and the MTIE bit is set in the mie register.
     always_comb begin : irq_gen
         // check that the mtime cmp register is set to a meaningful value
-        for (int unsigned i = 0; i < 289; i++) begin
+        for (int unsigned i = 0; i < 217; i++) begin
             if (mtime_q >= mtimecmp_q[i]) begin
                 timer_irq_o[i] = 1'b1;
             end else begin

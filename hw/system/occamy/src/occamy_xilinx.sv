@@ -68,7 +68,7 @@ module occamy_xilinx
     /// HBM2e Ports
     input  logic                     m_axi_hbm_0_awready,
     output logic                     m_axi_hbm_0_awvalid,
-    output logic             [  7:0] m_axi_hbm_0_awid,
+    output logic             [  6:0] m_axi_hbm_0_awid,
     output logic             [ 47:0] m_axi_hbm_0_awaddr,
     output axi_pkg::len_t            m_axi_hbm_0_awlen,
     output axi_pkg::size_t           m_axi_hbm_0_awsize,
@@ -87,7 +87,7 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_0_wuser,
     input  logic                     m_axi_hbm_0_arready,
     output logic                     m_axi_hbm_0_arvalid,
-    output logic             [  7:0] m_axi_hbm_0_arid,
+    output logic             [  6:0] m_axi_hbm_0_arid,
     output logic             [ 47:0] m_axi_hbm_0_araddr,
     output axi_pkg::len_t            m_axi_hbm_0_arlen,
     output axi_pkg::size_t           m_axi_hbm_0_arsize,
@@ -100,19 +100,19 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_0_aruser,
     output logic                     m_axi_hbm_0_rready,
     input  logic                     m_axi_hbm_0_rvalid,
-    input  logic             [  7:0] m_axi_hbm_0_rid,
+    input  logic             [  6:0] m_axi_hbm_0_rid,
     input  logic             [511:0] m_axi_hbm_0_rdata,
     input  axi_pkg::resp_t           m_axi_hbm_0_rresp,
     input  logic                     m_axi_hbm_0_rlast,
     input  logic             [  0:0] m_axi_hbm_0_ruser,
     output logic                     m_axi_hbm_0_bready,
     input  logic                     m_axi_hbm_0_bvalid,
-    input  logic             [  7:0] m_axi_hbm_0_bid,
+    input  logic             [  6:0] m_axi_hbm_0_bid,
     input  axi_pkg::resp_t           m_axi_hbm_0_bresp,
     input  logic             [  0:0] m_axi_hbm_0_buser,
     input  logic                     m_axi_hbm_1_awready,
     output logic                     m_axi_hbm_1_awvalid,
-    output logic             [  7:0] m_axi_hbm_1_awid,
+    output logic             [  6:0] m_axi_hbm_1_awid,
     output logic             [ 47:0] m_axi_hbm_1_awaddr,
     output axi_pkg::len_t            m_axi_hbm_1_awlen,
     output axi_pkg::size_t           m_axi_hbm_1_awsize,
@@ -131,7 +131,7 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_1_wuser,
     input  logic                     m_axi_hbm_1_arready,
     output logic                     m_axi_hbm_1_arvalid,
-    output logic             [  7:0] m_axi_hbm_1_arid,
+    output logic             [  6:0] m_axi_hbm_1_arid,
     output logic             [ 47:0] m_axi_hbm_1_araddr,
     output axi_pkg::len_t            m_axi_hbm_1_arlen,
     output axi_pkg::size_t           m_axi_hbm_1_arsize,
@@ -144,19 +144,19 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_1_aruser,
     output logic                     m_axi_hbm_1_rready,
     input  logic                     m_axi_hbm_1_rvalid,
-    input  logic             [  7:0] m_axi_hbm_1_rid,
+    input  logic             [  6:0] m_axi_hbm_1_rid,
     input  logic             [511:0] m_axi_hbm_1_rdata,
     input  axi_pkg::resp_t           m_axi_hbm_1_rresp,
     input  logic                     m_axi_hbm_1_rlast,
     input  logic             [  0:0] m_axi_hbm_1_ruser,
     output logic                     m_axi_hbm_1_bready,
     input  logic                     m_axi_hbm_1_bvalid,
-    input  logic             [  7:0] m_axi_hbm_1_bid,
+    input  logic             [  6:0] m_axi_hbm_1_bid,
     input  axi_pkg::resp_t           m_axi_hbm_1_bresp,
     input  logic             [  0:0] m_axi_hbm_1_buser,
     input  logic                     m_axi_hbm_2_awready,
     output logic                     m_axi_hbm_2_awvalid,
-    output logic             [  7:0] m_axi_hbm_2_awid,
+    output logic             [  6:0] m_axi_hbm_2_awid,
     output logic             [ 47:0] m_axi_hbm_2_awaddr,
     output axi_pkg::len_t            m_axi_hbm_2_awlen,
     output axi_pkg::size_t           m_axi_hbm_2_awsize,
@@ -175,7 +175,7 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_2_wuser,
     input  logic                     m_axi_hbm_2_arready,
     output logic                     m_axi_hbm_2_arvalid,
-    output logic             [  7:0] m_axi_hbm_2_arid,
+    output logic             [  6:0] m_axi_hbm_2_arid,
     output logic             [ 47:0] m_axi_hbm_2_araddr,
     output axi_pkg::len_t            m_axi_hbm_2_arlen,
     output axi_pkg::size_t           m_axi_hbm_2_arsize,
@@ -188,19 +188,19 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_2_aruser,
     output logic                     m_axi_hbm_2_rready,
     input  logic                     m_axi_hbm_2_rvalid,
-    input  logic             [  7:0] m_axi_hbm_2_rid,
+    input  logic             [  6:0] m_axi_hbm_2_rid,
     input  logic             [511:0] m_axi_hbm_2_rdata,
     input  axi_pkg::resp_t           m_axi_hbm_2_rresp,
     input  logic                     m_axi_hbm_2_rlast,
     input  logic             [  0:0] m_axi_hbm_2_ruser,
     output logic                     m_axi_hbm_2_bready,
     input  logic                     m_axi_hbm_2_bvalid,
-    input  logic             [  7:0] m_axi_hbm_2_bid,
+    input  logic             [  6:0] m_axi_hbm_2_bid,
     input  axi_pkg::resp_t           m_axi_hbm_2_bresp,
     input  logic             [  0:0] m_axi_hbm_2_buser,
     input  logic                     m_axi_hbm_3_awready,
     output logic                     m_axi_hbm_3_awvalid,
-    output logic             [  7:0] m_axi_hbm_3_awid,
+    output logic             [  6:0] m_axi_hbm_3_awid,
     output logic             [ 47:0] m_axi_hbm_3_awaddr,
     output axi_pkg::len_t            m_axi_hbm_3_awlen,
     output axi_pkg::size_t           m_axi_hbm_3_awsize,
@@ -219,7 +219,7 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_3_wuser,
     input  logic                     m_axi_hbm_3_arready,
     output logic                     m_axi_hbm_3_arvalid,
-    output logic             [  7:0] m_axi_hbm_3_arid,
+    output logic             [  6:0] m_axi_hbm_3_arid,
     output logic             [ 47:0] m_axi_hbm_3_araddr,
     output axi_pkg::len_t            m_axi_hbm_3_arlen,
     output axi_pkg::size_t           m_axi_hbm_3_arsize,
@@ -232,19 +232,19 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_3_aruser,
     output logic                     m_axi_hbm_3_rready,
     input  logic                     m_axi_hbm_3_rvalid,
-    input  logic             [  7:0] m_axi_hbm_3_rid,
+    input  logic             [  6:0] m_axi_hbm_3_rid,
     input  logic             [511:0] m_axi_hbm_3_rdata,
     input  axi_pkg::resp_t           m_axi_hbm_3_rresp,
     input  logic                     m_axi_hbm_3_rlast,
     input  logic             [  0:0] m_axi_hbm_3_ruser,
     output logic                     m_axi_hbm_3_bready,
     input  logic                     m_axi_hbm_3_bvalid,
-    input  logic             [  7:0] m_axi_hbm_3_bid,
+    input  logic             [  6:0] m_axi_hbm_3_bid,
     input  axi_pkg::resp_t           m_axi_hbm_3_bresp,
     input  logic             [  0:0] m_axi_hbm_3_buser,
     input  logic                     m_axi_hbm_4_awready,
     output logic                     m_axi_hbm_4_awvalid,
-    output logic             [  7:0] m_axi_hbm_4_awid,
+    output logic             [  6:0] m_axi_hbm_4_awid,
     output logic             [ 47:0] m_axi_hbm_4_awaddr,
     output axi_pkg::len_t            m_axi_hbm_4_awlen,
     output axi_pkg::size_t           m_axi_hbm_4_awsize,
@@ -263,7 +263,7 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_4_wuser,
     input  logic                     m_axi_hbm_4_arready,
     output logic                     m_axi_hbm_4_arvalid,
-    output logic             [  7:0] m_axi_hbm_4_arid,
+    output logic             [  6:0] m_axi_hbm_4_arid,
     output logic             [ 47:0] m_axi_hbm_4_araddr,
     output axi_pkg::len_t            m_axi_hbm_4_arlen,
     output axi_pkg::size_t           m_axi_hbm_4_arsize,
@@ -276,19 +276,19 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_4_aruser,
     output logic                     m_axi_hbm_4_rready,
     input  logic                     m_axi_hbm_4_rvalid,
-    input  logic             [  7:0] m_axi_hbm_4_rid,
+    input  logic             [  6:0] m_axi_hbm_4_rid,
     input  logic             [511:0] m_axi_hbm_4_rdata,
     input  axi_pkg::resp_t           m_axi_hbm_4_rresp,
     input  logic                     m_axi_hbm_4_rlast,
     input  logic             [  0:0] m_axi_hbm_4_ruser,
     output logic                     m_axi_hbm_4_bready,
     input  logic                     m_axi_hbm_4_bvalid,
-    input  logic             [  7:0] m_axi_hbm_4_bid,
+    input  logic             [  6:0] m_axi_hbm_4_bid,
     input  axi_pkg::resp_t           m_axi_hbm_4_bresp,
     input  logic             [  0:0] m_axi_hbm_4_buser,
     input  logic                     m_axi_hbm_5_awready,
     output logic                     m_axi_hbm_5_awvalid,
-    output logic             [  7:0] m_axi_hbm_5_awid,
+    output logic             [  6:0] m_axi_hbm_5_awid,
     output logic             [ 47:0] m_axi_hbm_5_awaddr,
     output axi_pkg::len_t            m_axi_hbm_5_awlen,
     output axi_pkg::size_t           m_axi_hbm_5_awsize,
@@ -307,7 +307,7 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_5_wuser,
     input  logic                     m_axi_hbm_5_arready,
     output logic                     m_axi_hbm_5_arvalid,
-    output logic             [  7:0] m_axi_hbm_5_arid,
+    output logic             [  6:0] m_axi_hbm_5_arid,
     output logic             [ 47:0] m_axi_hbm_5_araddr,
     output axi_pkg::len_t            m_axi_hbm_5_arlen,
     output axi_pkg::size_t           m_axi_hbm_5_arsize,
@@ -320,19 +320,19 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_5_aruser,
     output logic                     m_axi_hbm_5_rready,
     input  logic                     m_axi_hbm_5_rvalid,
-    input  logic             [  7:0] m_axi_hbm_5_rid,
+    input  logic             [  6:0] m_axi_hbm_5_rid,
     input  logic             [511:0] m_axi_hbm_5_rdata,
     input  axi_pkg::resp_t           m_axi_hbm_5_rresp,
     input  logic                     m_axi_hbm_5_rlast,
     input  logic             [  0:0] m_axi_hbm_5_ruser,
     output logic                     m_axi_hbm_5_bready,
     input  logic                     m_axi_hbm_5_bvalid,
-    input  logic             [  7:0] m_axi_hbm_5_bid,
+    input  logic             [  6:0] m_axi_hbm_5_bid,
     input  axi_pkg::resp_t           m_axi_hbm_5_bresp,
     input  logic             [  0:0] m_axi_hbm_5_buser,
     input  logic                     m_axi_hbm_6_awready,
     output logic                     m_axi_hbm_6_awvalid,
-    output logic             [  7:0] m_axi_hbm_6_awid,
+    output logic             [  6:0] m_axi_hbm_6_awid,
     output logic             [ 47:0] m_axi_hbm_6_awaddr,
     output axi_pkg::len_t            m_axi_hbm_6_awlen,
     output axi_pkg::size_t           m_axi_hbm_6_awsize,
@@ -351,7 +351,7 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_6_wuser,
     input  logic                     m_axi_hbm_6_arready,
     output logic                     m_axi_hbm_6_arvalid,
-    output logic             [  7:0] m_axi_hbm_6_arid,
+    output logic             [  6:0] m_axi_hbm_6_arid,
     output logic             [ 47:0] m_axi_hbm_6_araddr,
     output axi_pkg::len_t            m_axi_hbm_6_arlen,
     output axi_pkg::size_t           m_axi_hbm_6_arsize,
@@ -364,19 +364,19 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_6_aruser,
     output logic                     m_axi_hbm_6_rready,
     input  logic                     m_axi_hbm_6_rvalid,
-    input  logic             [  7:0] m_axi_hbm_6_rid,
+    input  logic             [  6:0] m_axi_hbm_6_rid,
     input  logic             [511:0] m_axi_hbm_6_rdata,
     input  axi_pkg::resp_t           m_axi_hbm_6_rresp,
     input  logic                     m_axi_hbm_6_rlast,
     input  logic             [  0:0] m_axi_hbm_6_ruser,
     output logic                     m_axi_hbm_6_bready,
     input  logic                     m_axi_hbm_6_bvalid,
-    input  logic             [  7:0] m_axi_hbm_6_bid,
+    input  logic             [  6:0] m_axi_hbm_6_bid,
     input  axi_pkg::resp_t           m_axi_hbm_6_bresp,
     input  logic             [  0:0] m_axi_hbm_6_buser,
     input  logic                     m_axi_hbm_7_awready,
     output logic                     m_axi_hbm_7_awvalid,
-    output logic             [  7:0] m_axi_hbm_7_awid,
+    output logic             [  6:0] m_axi_hbm_7_awid,
     output logic             [ 47:0] m_axi_hbm_7_awaddr,
     output axi_pkg::len_t            m_axi_hbm_7_awlen,
     output axi_pkg::size_t           m_axi_hbm_7_awsize,
@@ -395,7 +395,7 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_7_wuser,
     input  logic                     m_axi_hbm_7_arready,
     output logic                     m_axi_hbm_7_arvalid,
-    output logic             [  7:0] m_axi_hbm_7_arid,
+    output logic             [  6:0] m_axi_hbm_7_arid,
     output logic             [ 47:0] m_axi_hbm_7_araddr,
     output axi_pkg::len_t            m_axi_hbm_7_arlen,
     output axi_pkg::size_t           m_axi_hbm_7_arsize,
@@ -408,14 +408,14 @@ module occamy_xilinx
     output logic             [  0:0] m_axi_hbm_7_aruser,
     output logic                     m_axi_hbm_7_rready,
     input  logic                     m_axi_hbm_7_rvalid,
-    input  logic             [  7:0] m_axi_hbm_7_rid,
+    input  logic             [  6:0] m_axi_hbm_7_rid,
     input  logic             [511:0] m_axi_hbm_7_rdata,
     input  axi_pkg::resp_t           m_axi_hbm_7_rresp,
     input  logic                     m_axi_hbm_7_rlast,
     input  logic             [  0:0] m_axi_hbm_7_ruser,
     output logic                     m_axi_hbm_7_bready,
     input  logic                     m_axi_hbm_7_bvalid,
-    input  logic             [  7:0] m_axi_hbm_7_bid,
+    input  logic             [  6:0] m_axi_hbm_7_bid,
     input  axi_pkg::resp_t           m_axi_hbm_7_bresp,
     input  logic             [  0:0] m_axi_hbm_7_buser,
 
@@ -528,43 +528,43 @@ module occamy_xilinx
   /////////
   // HBM //
   /////////
-  axi_a48_d512_i8_u0_req_t  hbm_0_req_o;
-  axi_a48_d512_i8_u0_resp_t hbm_0_rsp_i;
+  axi_a48_d512_i7_u0_req_t  hbm_0_req_o;
+  axi_a48_d512_i7_u0_resp_t hbm_0_rsp_i;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_0, hbm_0_req_o, hbm_0_rsp_i)
-  axi_a48_d512_i8_u0_req_t  hbm_1_req_o;
-  axi_a48_d512_i8_u0_resp_t hbm_1_rsp_i;
+  axi_a48_d512_i7_u0_req_t  hbm_1_req_o;
+  axi_a48_d512_i7_u0_resp_t hbm_1_rsp_i;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_1, hbm_1_req_o, hbm_1_rsp_i)
-  axi_a48_d512_i8_u0_req_t  hbm_2_req_o;
-  axi_a48_d512_i8_u0_resp_t hbm_2_rsp_i;
+  axi_a48_d512_i7_u0_req_t  hbm_2_req_o;
+  axi_a48_d512_i7_u0_resp_t hbm_2_rsp_i;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_2, hbm_2_req_o, hbm_2_rsp_i)
-  axi_a48_d512_i8_u0_req_t  hbm_3_req_o;
-  axi_a48_d512_i8_u0_resp_t hbm_3_rsp_i;
+  axi_a48_d512_i7_u0_req_t  hbm_3_req_o;
+  axi_a48_d512_i7_u0_resp_t hbm_3_rsp_i;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_3, hbm_3_req_o, hbm_3_rsp_i)
-  axi_a48_d512_i8_u0_req_t  hbm_4_req_o;
-  axi_a48_d512_i8_u0_resp_t hbm_4_rsp_i;
+  axi_a48_d512_i7_u0_req_t  hbm_4_req_o;
+  axi_a48_d512_i7_u0_resp_t hbm_4_rsp_i;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_4, hbm_4_req_o, hbm_4_rsp_i)
-  axi_a48_d512_i8_u0_req_t  hbm_5_req_o;
-  axi_a48_d512_i8_u0_resp_t hbm_5_rsp_i;
+  axi_a48_d512_i7_u0_req_t  hbm_5_req_o;
+  axi_a48_d512_i7_u0_resp_t hbm_5_rsp_i;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_5, hbm_5_req_o, hbm_5_rsp_i)
-  axi_a48_d512_i8_u0_req_t  hbm_6_req_o;
-  axi_a48_d512_i8_u0_resp_t hbm_6_rsp_i;
+  axi_a48_d512_i7_u0_req_t  hbm_6_req_o;
+  axi_a48_d512_i7_u0_resp_t hbm_6_rsp_i;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_6, hbm_6_req_o, hbm_6_rsp_i)
-  axi_a48_d512_i8_u0_req_t  hbm_7_req_o;
-  axi_a48_d512_i8_u0_resp_t hbm_7_rsp_i;
+  axi_a48_d512_i7_u0_req_t  hbm_7_req_o;
+  axi_a48_d512_i7_u0_resp_t hbm_7_rsp_i;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_7, hbm_7_req_o, hbm_7_rsp_i)

@@ -58,7 +58,7 @@
       rmq: 4,
     }
     narrow_xbar_slv_id_width: 4,
-    nr_s1_quadrant: 8,
+    nr_s1_quadrant: 6,
     s1_quadrant: {
       nr_clusters: 4,
       // number of pending transactions on the narrow/wide network
