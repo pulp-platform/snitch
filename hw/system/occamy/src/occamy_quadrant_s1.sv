@@ -171,7 +171,7 @@ module occamy_quadrant_s1
   axi_a48_d64_i8_u0_resp_t narrow_cluster_in_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(16),
+      .NumPending(4),
       .TerminateTransaction(1),
       .AtopSupport(1),
       .AxiIdWidth(8),
@@ -237,7 +237,7 @@ module occamy_quadrant_s1
   axi_a48_d64_i4_u0_resp_t narrow_cluster_out_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(16),
+      .NumPending(4),
       .TerminateTransaction(0),
       .AtopSupport(1),
       .AxiIdWidth(4),
@@ -341,7 +341,7 @@ module occamy_quadrant_s1
   axi_a48_d512_i4_u0_resp_t wide_cluster_out_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(16),
+      .NumPending(4),
       .TerminateTransaction(0),
       .AtopSupport(0),
       .AxiIdWidth(4),
@@ -416,7 +416,7 @@ module occamy_quadrant_s1
   axi_a48_d512_i8_u0_resp_t wide_cluster_in_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(16),
+      .NumPending(4),
       .TerminateTransaction(1),
       .AtopSupport(0),
       .AxiIdWidth(8),
