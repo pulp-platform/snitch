@@ -108,9 +108,7 @@ package occamy_pkg;
   /// The address space set aside for the configuration of each slave.
   localparam addr_t S1QuadrantCfgAddressSpace = 'h1_0000;
 
-  /// Struct for signals to/from remote quadrants
 
-  /// Struct for signals to/from remote quadrants
 
   // AXI-Lite bus with 48 bit address and 64 bit data.
   `AXI_LITE_TYPEDEF_ALL(axi_lite_a48_d64, logic [47:0], logic [63:0], logic [7:0])

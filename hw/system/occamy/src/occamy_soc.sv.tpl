@@ -65,8 +65,8 @@ module ${name}_soc
   input  ${soc_narrow_xbar.in_pcie.req_type()} pcie_axi_req_i,
   output ${soc_narrow_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o,
 
-  /// Remote Quadrant Ports: AXI master/slave and GPIO
 % for i in range(nr_remote_quadrants):
+  /// Remote Quadrant ${i} Ports: AXI master/slave and GPIO
   output   ${quadrant_inter_xbar.__dict__["out_rmq_{}".format(i)].req_type()} rmq_${i}_wide_req_o,
   input  ${quadrant_inter_xbar.__dict__["out_rmq_{}".format(i)].rsp_type()} rmq_${i}_wide_rsp_i,
   input   ${quadrant_inter_xbar.__dict__["in_rmq_{}".format(i)].req_type()} rmq_${i}_wide_req_i,
@@ -332,12 +332,13 @@ module ${name}_soc
   assign ${hbi_in_narrow_soc.req_name()} = hbi_narrow_req_i;
   assign hbi_narrow_rsp_o = ${hbi_in_narrow_soc.rsp_name()};
 
+%if nr_remote_quadrants > 0:
   //////////////////////
   // Remote Quadrants //
   //////////////////////
-
-  /// Remote Quadrant Ports
-% for i in range(nr_remote_quadrants):
+%endif
+% for i, rq in enumerate(remote_quadrants):
+  /// Remote Quadrant ${i} Ports
   assign rmq_${i}_wide_req_o = ${quadrant_inter_xbar.__dict__["out_rmq_{}".format(i)].req_name()};
   assign ${quadrant_inter_xbar.__dict__["out_rmq_{}".format(i)].rsp_name()} = rmq_${i}_wide_rsp_i;
   assign rmq_${i}_narrow_req_o = ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].req_name()};
@@ -346,10 +347,7 @@ module ${name}_soc
   assign rmq_${i}_wide_rsp_o = ${quadrant_inter_xbar.__dict__["in_rmq_{}".format(i)].rsp_name()};
   assign ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].req_name()} = rmq_${i}_narrow_req_i;
   assign rmq_${i}_narrow_rsp_o = ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].rsp_name()};
-% endfor
-
-  /// GPIO signals
-% for i, rq in enumerate(remote_quadrants):
+  /// GPIO
   <% rm_cores = rq["nr_clusters"]*rq["nr_cluster_cores"] %>
   <% rm_core_off = lcl_cores + i*rm_cores %>
   assign rmq_${i}_mst_o.mtip = mtip_i[${rm_core_off+rm_cores-1}:${rm_core_off}];

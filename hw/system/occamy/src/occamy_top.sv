@@ -122,7 +122,6 @@ module occamy_top
     input  axi_a48_d64_i4_u0_req_t  pcie_axi_req_i,
     output axi_a48_d64_i4_u0_resp_t pcie_axi_rsp_o,
 
-    /// RMQ: Remote Quadrant Ports: AXI master/slave and GPIO
 
     /// SRAM configuration
     input sram_cfgs_t sram_cfgs_i

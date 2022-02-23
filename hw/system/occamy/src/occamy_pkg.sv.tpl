@@ -108,16 +108,16 @@ package ${name}_pkg;
   /// The address space set aside for the configuration of each slave.
   localparam addr_t S1QuadrantCfgAddressSpace = ${util.to_sv_hex(cfg["s1_quadrant"]["cfg_base_offset"])};
 
-  /// Struct for signals to/from remote quadrants
 % for i, rmq in enumerate(remote_quadrants):
+  /// Struct for signals to/from remote quadrant ${i}
   typedef struct packed {
     logic [${rmq["nr_clusters"]*rmq["nr_cluster_cores"]-1}:0] mtip;
     logic [${rmq["nr_clusters"]*rmq["nr_cluster_cores"]-1}:0] msip;
   } rmq_${i}_mst_out_t;
 % endfor
 
-  /// Struct for signals to/from remote quadrants
 % if is_remote_quadrant:
+  /// Struct for signals to/from remote quadrants
   typedef struct packed {
     logic [${nr_s1_clusters*nr_cluster_cores-1}:0] mtip;
     logic [${nr_s1_clusters*nr_cluster_cores-1}:0] msip;

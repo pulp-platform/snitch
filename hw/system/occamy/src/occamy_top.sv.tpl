@@ -110,8 +110,8 @@ module ${name}_top
   input  ${soc_narrow_xbar.in_pcie.req_type()} pcie_axi_req_i,
   output ${soc_narrow_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o,
 
-  /// RMQ: Remote Quadrant Ports: AXI master/slave and GPIO
 % for i in range(nr_remote_quadrants):
+  /// RMQ: Remote Quadrant ${i} Ports: AXI master/slave and GPIO
   output   ${quadrant_inter_xbar.__dict__["out_rmq_{}".format(i)].req_type()} rmq_${i}_wide_req_o,
   input  ${quadrant_inter_xbar.__dict__["out_rmq_{}".format(i)].rsp_type()} rmq_${i}_wide_rsp_i,
   input   ${quadrant_inter_xbar.__dict__["in_rmq_{}".format(i)].req_type()} rmq_${i}_wide_req_i,

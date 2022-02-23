@@ -54,7 +54,6 @@ module occamy_soc
     input  axi_a48_d64_i4_u0_req_t  pcie_axi_req_i,
     output axi_a48_d64_i4_u0_resp_t pcie_axi_rsp_o,
 
-    /// Remote Quadrant Ports: AXI master/slave and GPIO
 
     // Peripheral Ports (to AXI-lite Xbar)
     output axi_a48_d64_i8_u0_req_t  periph_axi_lite_req_o,
@@ -2698,13 +2697,6 @@ module occamy_soc
   assign hbi_in_narrow_soc_req = hbi_narrow_req_i;
   assign hbi_narrow_rsp_o = hbi_in_narrow_soc_rsp;
 
-  //////////////////////
-  // Remote Quadrants //
-  //////////////////////
-
-  /// Remote Quadrant Ports
-
-  /// GPIO signals
 
   /////////////////
   // Peripherals //
