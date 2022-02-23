@@ -266,6 +266,10 @@ module ${cfg['name']}_wrapper (
     .IsoCrossing (${int(cfg['timing']['iso_crossings'])}),
     .NarrowXbarLatency (axi_pkg::${cfg['timing']['narrow_xbar_latency']}),
     .WideXbarLatency (axi_pkg::${cfg['timing']['wide_xbar_latency']}),
+    .WideMaxMstTrans (${cfg['wide_trans']}),
+    .WideMaxSlvTrans (${cfg['wide_trans']}),
+    .NarrowMaxMstTrans (${cfg['narrow_trans']}),
+    .NarrowMaxSlvTrans (${cfg['narrow_trans']}),
     .sram_cfg_t (${cfg['pkg_name']}::sram_cfg_t),
     .sram_cfgs_t (${cfg['pkg_name']}::sram_cfgs_t)
   ) i_cluster (

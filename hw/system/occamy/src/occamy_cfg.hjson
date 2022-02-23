@@ -104,6 +104,8 @@
         dma_data_width: 512,
         dma_axi_req_fifo_depth: 3,
         dma_req_fifo_depth: 3,
+        narrow_trans: 4,
+        wide_trans: 32,
         // Memory configuration inputs
         sram_cfg_expose: true,
         sram_cfg_fields: {

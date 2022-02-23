@@ -149,6 +149,12 @@ module snitch_cluster
   parameter bit          IsoCrossing        = 0,
   parameter axi_pkg::xbar_latency_e NarrowXbarLatency = axi_pkg::CUT_ALL_PORTS,
   parameter axi_pkg::xbar_latency_e WideXbarLatency = axi_pkg::CUT_ALL_PORTS,
+  /// Outstanding transactions on the wide network
+  parameter int unsigned WideMaxMstTrans    = 4,
+  parameter int unsigned WideMaxSlvTrans    = 4,
+  /// Outstanding transactions on the narrow network
+  parameter int unsigned NarrowMaxMstTrans  = 4,
+  parameter int unsigned NarrowMaxSlvTrans  = 4,
   /// # Interface
   /// AXI Ports
   parameter type         narrow_in_req_t   = logic,
@@ -257,8 +263,8 @@ module snitch_cluster
   localparam axi_pkg::xbar_cfg_t ClusterXbarCfg = '{
     NoSlvPorts: NrNarrowMasters,
     NoMstPorts: NrSlaves,
-    MaxMstTrans: 4,
-    MaxSlvTrans: 4,
+    MaxMstTrans: NarrowMaxMstTrans,
+    MaxSlvTrans: NarrowMaxSlvTrans,
     FallThrough: 1'b0,
     LatencyMode: NarrowXbarLatency,
     AxiIdWidthSlvPorts: NarrowIdWidthIn,
@@ -272,8 +278,8 @@ module snitch_cluster
   localparam axi_pkg::xbar_cfg_t DmaXbarCfg = '{
     NoSlvPorts: NrWideMasters,
     NoMstPorts: NrWideSlaves,
-    MaxMstTrans: 32,
-    MaxSlvTrans: 32,
+    MaxMstTrans: WideMaxMstTrans,
+    MaxSlvTrans: WideMaxSlvTrans,
     FallThrough: 1'b0,
     LatencyMode: WideXbarLatency,
     AxiIdWidthSlvPorts: WideIdWidthIn,
