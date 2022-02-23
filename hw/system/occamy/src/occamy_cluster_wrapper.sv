@@ -436,6 +436,10 @@ module occamy_cluster_wrapper (
     .IsoCrossing (0),
     .NarrowXbarLatency (axi_pkg::CUT_ALL_PORTS),
     .WideXbarLatency (axi_pkg::CUT_ALL_PORTS),
+    .WideMaxMstTrans (32),
+    .WideMaxSlvTrans (32),
+    .NarrowMaxMstTrans (4),
+    .NarrowMaxSlvTrans (4),
     .sram_cfg_t (occamy_cluster_pkg::sram_cfg_t),
     .sram_cfgs_t (occamy_cluster_pkg::sram_cfgs_t)
   ) i_cluster (

@@ -10,7 +10,9 @@
   ${mst_dir} axi_pkg::prot_t    ${prefix}_awprot,
   ${mst_dir} axi_pkg::qos_t     ${prefix}_awqos,
   ${mst_dir} axi_pkg::region_t  ${prefix}_awregion,
-//   ${mst_dir} axi_pkg::atop_t    ${prefix}_awatop,
+% if atop:
+  ${mst_dir} axi_pkg::atop_t    ${prefix}_awatop,
+% endif
   ${mst_dir} ${bus.user_type()} ${prefix}_awuser,
   ${slv_dir} logic              ${prefix}_wready,
   ${mst_dir} logic              ${prefix}_wvalid,

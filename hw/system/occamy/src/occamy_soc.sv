@@ -54,6 +54,7 @@ module occamy_soc
     input  axi_a48_d64_i4_u0_req_t  pcie_axi_req_i,
     output axi_a48_d64_i4_u0_resp_t pcie_axi_rsp_o,
 
+
     // Peripheral Ports (to AXI-lite Xbar)
     output axi_a48_d64_i8_u0_req_t  periph_axi_lite_req_o,
     input  axi_a48_d64_i8_u0_resp_t periph_axi_lite_rsp_i,
@@ -2695,6 +2696,7 @@ module occamy_soc
   assign narrow_to_hbi_cut_rsp = hbi_narrow_rsp_i;
   assign hbi_in_narrow_soc_req = hbi_narrow_req_i;
   assign hbi_narrow_rsp_o = hbi_in_narrow_soc_rsp;
+
 
   /////////////////
   // Peripherals //

@@ -1,4 +1,4 @@
-// Generated register defines for Occamy_quadrant_s1
+// Generated register defines for occamy_quadrant_s1
 
 // Copyright information found in source file:
 // Copyright 2020 ETH Zurich and University of Bologna.
@@ -146,4 +146,4 @@ extern "C" {
 }  // extern "C"
 #endif
 #endif  // _OCCAMY_QUADRANT_S1_REG_DEFS_
-        // End generated register defines for Occamy_quadrant_s1
+        // End generated register defines for occamy_quadrant_s1

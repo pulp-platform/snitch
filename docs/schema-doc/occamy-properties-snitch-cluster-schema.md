@@ -27,6 +27,8 @@ Base description of a Snitch cluster and its internal structure and configuratio
 | [addr_width](#addr_width)                         | `number`  | Required | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-addr_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/addr_width")                         |
 | [data_width](#data_width)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-data_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/data_width")                         |
 | [dma_data_width](#dma_data_width)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_data_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_data_width")                 |
+| [narrow_trans](#narrow_trans)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-narrow_trans.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/narrow_trans")                     |
+| [wide_trans](#wide_trans)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-wide_trans.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/wide_trans")                         |
 | [id_width_in](#id_width_in)                       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-id_width_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/id_width_in")                       |
 | [dma_id_width_in](#dma_id_width_in)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_id_width_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_id_width_in")               |
 | [hart_base_id](#hart_base_id)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hart_base_id.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hart_base_id")                     |
@@ -270,6 +272,58 @@ The default value is:
 
 ```json
 512
+```
+
+## narrow_trans
+
+Outstanding transactions on the narrow AXI network
+
+`narrow_trans`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-narrow_trans.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/narrow_trans")
+
+### narrow_trans Type
+
+`number`
+
+### narrow_trans Default Value
+
+The default value is:
+
+```json
+4
+```
+
+## wide_trans
+
+Outstanding transactions on the wide AXI network
+
+`wide_trans`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-wide_trans.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/wide_trans")
+
+### wide_trans Type
+
+`number`
+
+### wide_trans Default Value
+
+The default value is:
+
+```json
+4
 ```
 
 ## id_width_in

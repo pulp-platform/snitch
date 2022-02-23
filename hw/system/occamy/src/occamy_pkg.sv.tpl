@@ -12,24 +12,24 @@
 `include "register_interface/typedef.svh"
 `include "apb/typedef.svh"
 
-package occamy_pkg;
+package ${name}_pkg;
   localparam int unsigned MaxTransaction = 16;
 
   // Re-exports
-  localparam int unsigned AddrWidth = occamy_cluster_pkg::AddrWidth;
-  localparam int unsigned UserWidth = occamy_cluster_pkg::UserWidth;
+  localparam int unsigned AddrWidth = ${name}_cluster_pkg::AddrWidth;
+  localparam int unsigned UserWidth = ${name}_cluster_pkg::UserWidth;
 
   localparam int unsigned NrClustersS1Quadrant = ${nr_s1_clusters};
-  localparam int unsigned NrCoresCluster = occamy_cluster_pkg::NrCores;
+  localparam int unsigned NrCoresCluster = ${name}_cluster_pkg::NrCores;
   localparam int unsigned NrCoresS1Quadrant = NrClustersS1Quadrant * NrCoresCluster;
 
   // Memory cut configurations: one per memory parameterization
-  typedef occamy_cluster_pkg::sram_cfg_t sram_cfg_t;
+  typedef ${name}_cluster_pkg::sram_cfg_t sram_cfg_t;
 
   typedef struct packed {
     sram_cfg_t rocache_tag;
     sram_cfg_t rocache_data;
-    occamy_cluster_pkg::sram_cfgs_t cluster;
+    ${name}_cluster_pkg::sram_cfgs_t cluster;
   } sram_cfg_quadrant_t;
 
   typedef struct packed {
@@ -76,7 +76,7 @@ package occamy_pkg;
     // 4 programmable, 8 HBM (1x per channel)
     logic [11:0] ext_irq;
     logic zero;
-  } occamy_interrupt_t;
+  } ${name}_interrupt_t;
 
   localparam logic [15:0] PartNum = 2;
   localparam logic [31:0] IDCode = (dm::DbgVersion013 << 28) | (PartNum << 12) | 32'h1;
@@ -107,6 +107,22 @@ package occamy_pkg;
   localparam addr_t S1QuadrantCfgBaseOffset = ${util.to_sv_hex(cfg["s1_quadrant"]["cfg_base_addr"])};
   /// The address space set aside for the configuration of each slave.
   localparam addr_t S1QuadrantCfgAddressSpace = ${util.to_sv_hex(cfg["s1_quadrant"]["cfg_base_offset"])};
+
+% for i, rmq in enumerate(remote_quadrants):
+  /// Struct for signals to/from remote quadrant ${i}
+  typedef struct packed {
+    logic [${rmq["nr_clusters"]*rmq["nr_cluster_cores"]-1}:0] mtip;
+    logic [${rmq["nr_clusters"]*rmq["nr_cluster_cores"]-1}:0] msip;
+  } rmq_${i}_mst_out_t;
+% endfor
+
+% if is_remote_quadrant:
+  /// Struct for signals to/from remote quadrants
+  typedef struct packed {
+    logic [${nr_s1_clusters*nr_cluster_cores-1}:0] mtip;
+    logic [${nr_s1_clusters*nr_cluster_cores-1}:0] msip;
+  } rmq_mst_out_t;
+% endif
 
   ${package}
 

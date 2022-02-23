@@ -9,8 +9,8 @@
 
 `include "common_cells/registers.svh"
 
-module occamy_top
-  import occamy_pkg::*;
+module ${name}_top
+  import ${name}_pkg::*;
 (
   input  logic        clk_i,
   input  logic        rst_ni,
@@ -110,12 +110,25 @@ module occamy_top
   input  ${soc_narrow_xbar.in_pcie.req_type()} pcie_axi_req_i,
   output ${soc_narrow_xbar.in_pcie.rsp_type()} pcie_axi_rsp_o,
 
+% for i in range(nr_remote_quadrants):
+  /// RMQ: Remote Quadrant ${i} Ports: AXI master/slave and GPIO
+  output   ${quadrant_inter_xbar.__dict__["out_rmq_{}".format(i)].req_type()} rmq_${i}_wide_req_o,
+  input  ${quadrant_inter_xbar.__dict__["out_rmq_{}".format(i)].rsp_type()} rmq_${i}_wide_rsp_i,
+  input   ${quadrant_inter_xbar.__dict__["in_rmq_{}".format(i)].req_type()} rmq_${i}_wide_req_i,
+  output  ${quadrant_inter_xbar.__dict__["in_rmq_{}".format(i)].rsp_type()} rmq_${i}_wide_rsp_o,
+  output   ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].req_type()} rmq_${i}_narrow_req_o,
+  input  ${soc_narrow_xbar.__dict__["out_rmq_{}".format(i)].rsp_type()} rmq_${i}_narrow_rsp_i,
+  input   ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].req_type()} rmq_${i}_narrow_req_i,
+  output  ${soc_narrow_xbar.__dict__["in_rmq_{}".format(i)].rsp_type()} rmq_${i}_narrow_rsp_o,
+  output rmq_${i}_mst_out_t rmq_${i}_mst_o,
+% endfor
+
   /// SRAM configuration
   input sram_cfgs_t sram_cfgs_i
 );
 
-  occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
-  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in, soc_ctrl_soc_in;
+  ${name}_soc_reg_pkg::${name}_soc_reg2hw_t soc_ctrl_out;
+  ${name}_soc_reg_pkg::${name}_soc_hw2reg_t soc_ctrl_in, soc_ctrl_soc_in;
   logic [1:0] spm_rerror;
 
   always_comb begin
@@ -130,7 +143,7 @@ module occamy_top
   // Supervisor and machine-mode external interrupt pending.
   logic [1:0] eip;
   logic [0:0] debug_req;
-  occamy_interrupt_t irq;
+  ${name}_interrupt_t irq;
 
   assign irq.ext_irq = ext_irq_i;
 
@@ -150,7 +163,7 @@ module occamy_top
   periph_axi_lite_per2soc = soc_narrow_xbar.in_periph.copy(name="periph_axi_lite_per2soc").declare(context)
   periph_regbus_soc2per = soc_narrow_xbar.out_regbus_periph.copy(name="periph_regbus_soc2per").declare(context)
 %> \
-  occamy_soc i_occamy_soc (
+  ${name}_soc i_${name}_soc (
     .clk_i,
     .rst_ni,
     .test_mode_i,
@@ -168,6 +181,17 @@ module occamy_top
     .pcie_axi_rsp_i,
     .pcie_axi_req_i,
     .pcie_axi_rsp_o,
+% for i in range(nr_remote_quadrants):
+    .rmq_${i}_wide_req_o(rmq_${i}_wide_req_o),
+    .rmq_${i}_wide_rsp_i(rmq_${i}_wide_rsp_i),
+    .rmq_${i}_wide_req_i(rmq_${i}_wide_req_i),
+    .rmq_${i}_wide_rsp_o(rmq_${i}_wide_rsp_o),
+    .rmq_${i}_narrow_req_o(rmq_${i}_narrow_req_o),
+    .rmq_${i}_narrow_rsp_i(rmq_${i}_narrow_rsp_i),
+    .rmq_${i}_narrow_req_i(rmq_${i}_narrow_req_i),
+    .rmq_${i}_narrow_rsp_o(rmq_${i}_narrow_rsp_o),
+    .rmq_${i}_mst_o(rmq_${i}_mst_o),
+% endfor
     .periph_axi_lite_req_o ( periph_axi_lite_soc2per_req ),
     .periph_axi_lite_rsp_i ( periph_axi_lite_soc2per_rsp ),
     .periph_axi_lite_req_i ( periph_axi_lite_per2soc_req ),
@@ -340,7 +364,7 @@ module occamy_top
   );
 
   dmi_jtag #(
-    .IdcodeValue (occamy_pkg::IDCode)
+    .IdcodeValue (${name}_pkg::IDCode)
   ) i_dmi_jtag (
     .clk_i (${regbus_debug.clk}),
     .rst_ni (${regbus_debug.rst}),
@@ -381,7 +405,7 @@ module occamy_top
   /////////////////////
   //   SOC CONTROL   //
   /////////////////////
-  occamy_soc_ctrl #(
+  ${name}_soc_ctrl #(
     .reg_req_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.req_type()} ),
     .reg_rsp_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.rsp_type()} )
   ) i_soc_ctrl (

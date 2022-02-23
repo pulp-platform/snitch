@@ -1,7 +1,7 @@
   axi_id_remap #(
     .AxiSlvPortIdWidth ( ${axi_in.iw} ),
     .AxiSlvPortMaxUniqIds ( ${2**axi_out.iw} ),
-    .AxiMaxTxnsPerId ( 4 ),
+    .AxiMaxTxnsPerId ( ${max_txns_per_id} ),
     .AxiMstPortIdWidth ( ${axi_out.iw} ),
     .slv_req_t ( ${axi_in.req_type()} ),
     .slv_resp_t ( ${axi_in.rsp_type()} ),

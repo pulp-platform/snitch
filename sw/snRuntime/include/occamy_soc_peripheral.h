@@ -1,4 +1,4 @@
-// Generated register defines for Occamy_SoC
+// Generated register defines for occamy_SoC
 
 // Copyright information found in source file:
 // Copyright 2020 ETH Zurich and University of Bologna.
@@ -403,4 +403,4 @@ extern "C" {
 }  // extern "C"
 #endif
 #endif  // _OCCAMY_SOC_REG_DEFS_
-        // End generated register defines for Occamy_SoC
+        // End generated register defines for occamy_SoC

@@ -22,13 +22,17 @@ from solder import solder, device_tree, util
 # Compile a regex to trim trailing whitespaces on lines.
 re_trailws = re.compile(r'[ \t\r]+$', re.MULTILINE)
 
+# Default name for all generated sources
+DEFAULT_NAME = "occamy"
 
-def write_template(tpl_path, outdir, **kwargs):
+
+def write_template(tpl_path, outdir, fname=None, **kwargs):
     if tpl_path:
         tpl_path = pathlib.Path(tpl_path).absolute()
         if tpl_path.exists():
             tpl = Template(filename=str(tpl_path))
-            with open(outdir / tpl_path.with_suffix("").name, "w") as file:
+            fname = tpl_path.with_suffix("").name.replace("occamy", kwargs['args'].name) if not fname else fname
+            with open(outdir / fname, "w") as file:
                 code = tpl.render_unicode(**kwargs)
                 code = re_trailws.sub("", code)
                 file.write(code)
@@ -94,6 +98,7 @@ def main():
     parser.add_argument("--am-cheader", "-D", metavar="ADDRMAP_CHEADER")
     parser.add_argument("--am-csv", "-aml", metavar="ADDRMAP_CSV")
     parser.add_argument("--dts", metavar="DTS", help="System's device tree.")
+    parser.add_argument("--name", metavar="NAME", default=DEFAULT_NAME, help="System's name.")
 
     parser.add_argument("-v",
                         "--verbose",
@@ -114,11 +119,17 @@ def main():
         except ValueError:
             raise SystemExit(sys.exc_info()[1])
 
+    # If name argument provided, change config
+    if args.name != DEFAULT_NAME:
+        obj["cluster"]["name"] = args.name+"_cluster"
+        # occamy.cfg["cluster"]["name"] = args.name
+
     occamy = Occamy(obj)
 
     # Arguments.
     nr_s1_quadrants = occamy.cfg["nr_s1_quadrant"]
     nr_s1_clusters = occamy.cfg["s1_quadrant"]["nr_clusters"]
+    is_remote_quadrant = occamy.cfg["is_remote_quadrant"]
     # Iterate over Hives to get the number of cores.
     nr_cluster_cores = len([
         core for hive in occamy.cfg["cluster"]["hives"]
@@ -132,11 +143,11 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
 
     if args.wrapper:
-        with open(outdir / "occamy_cluster_wrapper.sv", "w") as f:
+        with open(outdir / f"{args.name}_cluster_wrapper.sv", "w") as f:
             f.write(occamy.render_wrapper())
 
     if args.memories:
-        with open(outdir / "memories.json", "w") as f:
+        with open(outdir / f"{args.name}_memories.json", "w") as f:
             f.write(occamy.cluster.memory_cfg())
 
     ####################
@@ -256,6 +267,32 @@ def main():
         occamy.cfg["hbi"]["length"],
         occamy.cfg["hbi"]["address"])
     am_soc_wide_xbar.attach(am_hbi)
+
+    ###########
+    # AM: RMQ #
+    ###########
+    # Add a remote quadrant port
+    nr_remote_quadrants = len(occamy.cfg["remote_quadrants"])
+    nr_remote_cores = 0
+    rmq_cluster_cnt = 0
+    am_remote_quadrants = list()
+    for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
+        node = am.new_node("rmq_{}".format(i))
+        am_remote_quadrants.append(node)
+        alen = rq["nr_clusters"]*0x40000
+        addr = 0x10000000 + (nr_s1_clusters*nr_s1_quadrants+rmq_cluster_cnt)*0x40000
+        leaf = am.new_leaf("rmq_{}".format(i), alen, addr)
+        node.attach(leaf)
+        node.attach_to(am_soc_narrow_xbar)
+        node.attach_to(am_quadrant_inter_xbar)
+        nr_remote_cores += rq["nr_clusters"] * rq["nr_cluster_cores"]
+        rmq_cluster_cnt += rq["nr_clusters"]
+        # remote quadrant control
+        alen = occamy.cfg["s1_quadrant"]["cfg_base_offset"]
+        addr = occamy.cfg["s1_quadrant"]["cfg_base_addr"] + (i + nr_s1_quadrants) * alen
+        leaf = am.new_leaf("rmq_{}_cfg".format(i), alen, addr)
+        node.attach(leaf)
+        node.attach_to(am_soc_narrow_xbar)
 
     ###########
     # AM: HBM #
@@ -498,6 +535,13 @@ def main():
         quadrant_inter_xbar.add_output_entry("quadrant_{}".format(i),
                                              am_wide_xbar_quadrant_s1[i])
         quadrant_inter_xbar.add_input("quadrant_{}".format(i))
+    for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
+        quadrant_inter_xbar.add_input("rmq_{}".format(i))
+        quadrant_inter_xbar.add_output_entry("rmq_{}".format(i), am_remote_quadrants[i])
+    # Connectrion from remote
+    if is_remote_quadrant:
+        quadrant_inter_xbar.add_output("remote", [])
+        quadrant_inter_xbar.add_input("remote")
 
     hbm_xbar = solder.AxiXbar(
         48,
@@ -538,7 +582,8 @@ def main():
         node=am_soc_wide_xbar)
 
     # Default port: HBI (always escalate "upwards" in hierarchy -> off-chip)
-    soc_wide_xbar.add_output_entry("hbi", am_hbi)
+    if not is_remote_quadrant:
+        soc_wide_xbar.add_output_entry("hbi", am_hbi)
     soc_wide_xbar.add_output_entry("hbm_xbar", am_hbm_xbar)
     soc_wide_xbar.add_output_entry("quadrant_inter_xbar", am_quadrant_inter_xbar)
     soc_wide_xbar.add_output_entry("soc_narrow", am_soc_narrow_xbar)
@@ -580,12 +625,20 @@ def main():
 
     # Default port: wide xbar
     soc_narrow_xbar.add_output_entry("soc_wide", am_soc_wide_xbar)
-    soc_narrow_xbar.add_output_entry("hbi", am_hbi)
+    if not is_remote_quadrant:
+        soc_narrow_xbar.add_output_entry("hbi", am_hbi)
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
     soc_narrow_xbar.add_output_entry("spm", am_spm)
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)
     soc_narrow_xbar.add_output_entry("pcie", am_pcie)
+    for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
+        soc_narrow_xbar.add_input("rmq_{}".format(i))
+        soc_narrow_xbar.add_output_entry("rmq_{}".format(i), am_remote_quadrants[i])
+    # Connectrion from remote
+    if is_remote_quadrant:
+        soc_narrow_xbar.add_output("remote", [])
+        soc_narrow_xbar.add_input("remote")
 
     ##########################
     # S1 Quadrant controller #
@@ -686,27 +739,62 @@ def main():
                                                     "ClusterAddressSpace")
         narrow_xbar_quadrant_s1.add_input("cluster_{}".format(i))
 
+    # remote downstream mux
+    rmq_mux = [None]*max(nr_remote_quadrants, 1 if is_remote_quadrant else 0)
+    rmq_demux = [None]*max(nr_remote_quadrants, 1 if is_remote_quadrant else 0)
+    for i in range(max(nr_remote_quadrants, 1 if is_remote_quadrant else 0)):
+        rmq_mux[i] = solder.AxiMux(
+            48,
+            512,
+            4,
+            max_w_trans=occamy.cfg["txns"]["rmq"],
+            context="xilinx_wrapper",
+            name="rmq_mux_{}".format(i),
+            clk="clk_i",
+            rst="rst_ni")
+        rmq_mux[i].add_input("narrow")
+        rmq_mux[i].add_input("wide")
+        rmq_demux[i] = solder.AxiDemux(
+            48,
+            512,
+            5,
+            "rmq_demux_awsel[{}]".format(i),
+            "rmq_demux_arsel[{}]".format(i),
+            max_trans=occamy.cfg["txns"]["rmq"],
+            look_bits=3,
+            context="xilinx_wrapper",
+            name="rmq_demux_{}".format(i),
+            clk="clk_i",
+            rst="rst_ni")
+        rmq_demux[i].add_output("narrow")
+        rmq_demux[i].add_output("wide")
+
     # Generate the Verilog code.
     solder.render()
 
     ###############
     # HBI APB CTL #
     ###############
-    apb_hbi_ctl = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
-                                rst=soc_regbus_periph_xbar.rst,
-                                aw=soc_regbus_periph_xbar.aw,
-                                dw=soc_regbus_periph_xbar.dw,
-                                name="apb_hbi_ctl")
+    if is_remote_quadrant:
+        apb_hbi_ctl = apb_hbm_cfg = None
+    else:
+        apb_hbi_ctl = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
+                                    rst=soc_regbus_periph_xbar.rst,
+                                    aw=soc_regbus_periph_xbar.aw,
+                                    dw=soc_regbus_periph_xbar.dw,
+                                    name="apb_hbi_ctl")
 
-    apb_hbm_cfg = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
-                                rst=soc_regbus_periph_xbar.rst,
-                                aw=soc_regbus_periph_xbar.aw,
-                                dw=soc_regbus_periph_xbar.dw,
-                                name="apb_hbm_cfg")
+        apb_hbm_cfg = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
+                                    rst=soc_regbus_periph_xbar.rst,
+                                    aw=soc_regbus_periph_xbar.aw,
+                                    dw=soc_regbus_periph_xbar.dw,
+                                    name="apb_hbm_cfg")
 
     kwargs = {
         "solder": solder,
         "util": util,
+        "args": args,
+        "name": args.name,
         "soc_narrow_xbar": soc_narrow_xbar,
         "soc_wide_xbar": soc_wide_xbar,
         "quadrant_pre_xbars": quadrant_pre_xbars,
@@ -720,12 +808,18 @@ def main():
         "apb_hbi_ctl": apb_hbi_ctl,
         "apb_hbm_cfg": apb_hbm_cfg,
         "cfg": occamy.cfg,
-        "cores": nr_s1_quadrants * nr_s1_clusters * nr_cluster_cores + 1,
+        "cores": nr_s1_quadrants * nr_s1_clusters * nr_cluster_cores + nr_remote_cores + 1,
+        "lcl_cores": nr_s1_quadrants * nr_s1_clusters * nr_cluster_cores + (0 if is_remote_quadrant else 1),
+        "remote_quadrants": occamy.cfg["remote_quadrants"],
+        "is_remote_quadrant": occamy.cfg["is_remote_quadrant"],
         "nr_s1_quadrants": nr_s1_quadrants,
+        "nr_remote_quadrants": nr_remote_quadrants,
         "nr_s1_clusters": nr_s1_clusters,
         "nr_cluster_cores": nr_cluster_cores,
         "hbm_channel_size": hbm_channel_size,
-        "nr_hbm_channels": nr_hbm_channels
+        "nr_hbm_channels": nr_hbm_channels,
+        "rmq_mux": rmq_mux,
+        "rmq_demux": rmq_demux
     }
 
     # Emit the code.
@@ -734,6 +828,7 @@ def main():
     #############
     write_template(args.top_sv,
                    outdir,
+                   fname="{}_top.sv".format(args.name),
                    module=solder.code_module['default'],
                    soc_periph_xbar=soc_axi_lite_periph_xbar,
                    **kwargs)
@@ -758,20 +853,34 @@ def main():
     ###############
     # S1 Quadrant #
     ###############
-    write_template(args.quadrant_s1,
-                   outdir,
-                   module=solder.code_module['quadrant_s1'],
-                   **kwargs)
-
-    ###########
-    # Package #
-    ###########
-    write_template(args.pkg_sv, outdir, **kwargs, package=solder.code_package)
+    if nr_s1_quadrants > 0:
+        write_template(args.quadrant_s1,
+                       outdir,
+                       fname="{}_quadrant_s1.sv".format(args.name),
+                       module=solder.code_module['quadrant_s1'],
+                       **kwargs)
+    else:
+        tpl_path = args.quadrant_s1
+        if tpl_path:
+            tpl_path = pathlib.Path(tpl_path).absolute()
+            if tpl_path.exists():
+                print(outdir, args.name)
+                with open("{}/{}_quadrant_s1.sv".format(outdir, args.name), 'w') as f:
+                    f.write("// no quadrants in this design")
 
     ##################
     # Xilinx Wrapper #
     ##################
-    write_template(args.xilinx_sv, outdir, **kwargs)
+    has_rmq_code = nr_remote_quadrants > 0 or is_remote_quadrant
+    write_template(args.xilinx_sv,
+                   outdir,
+                   fname="{}_xilinx.sv".format(args.name),
+                   module=solder.code_module['xilinx_wrapper'] if has_rmq_code else "",
+                   **kwargs)
+    ###########
+    # Package #
+    ###########
+    write_template(args.pkg_sv, outdir, **kwargs, package=solder.code_package)
 
     ###############
     # Testharness #

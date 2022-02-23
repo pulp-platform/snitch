@@ -4,6 +4,8 @@
 
 // Cluster configuration for Occamy.
 {
+    is_remote_quadrant: false,
+    remote_quadrants: [],
     quadrant_pre_xbar: {
       max_slv_trans: 4,
       max_mst_trans: 4,
@@ -30,10 +32,38 @@
       max_mst_trans: 4,
       fall_through: false,
     },
+    cuts: {
+      narrow_to_quad: 3,
+      quad_to_narrow: 3,
+      quad_to_pre: 1,
+      pre_to_inter: 1,
+      inter_to_quad: 3,
+      narrow_to_cva6: 1,
+      narrow_conv_to_spm: 1,
+      narrow_and_pcie: 1,
+      narrow_and_wide: 0,
+      wide_to_hbm: 6,
+      wide_and_inter: 3,
+      wide_and_hbi: 3,
+      narrow_and_hbi: 3,
+      pre_to_hbmx: 3,
+      hbmx_to_hbm: 3,
+      periph_regbus: 3,
+      periph_axi_lite: 3,
+    }
+    txns: {
+      wide_and_inter: 4,
+      wide_to_hbm: 4,
+      narrow_and_wide: 4,
+      rmq: 4,
+    }
     narrow_xbar_slv_id_width: 4,
     nr_s1_quadrant: 8,
     s1_quadrant: {
       nr_clusters: 4,
+      // number of pending transactions on the narrow/wide network
+      narrow_trans: 16,
+      wide_trans: 16,
       // Disable for easier flow trials.
       ro_cache_cfg: {
           width: 1024,
@@ -74,6 +104,8 @@
         dma_data_width: 512,
         dma_axi_req_fifo_depth: 3,
         dma_req_fifo_depth: 3,
+        narrow_trans: 4,
+        wide_trans: 32,
         // Memory configuration inputs
         sram_cfg_expose: true,
         sram_cfg_fields: {
