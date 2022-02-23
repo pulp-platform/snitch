@@ -27,6 +27,10 @@ Description of an Occamy-based system.
 | [narrow_xbar](#narrow_xbar)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar")                               |
 | [narrow_xbar_slv_id_width](#narrow_xbar_slv_id_width)                 | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-narrow_xbar_slv_id_width.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width")                 |
 | [nr_s1_quadrant](#nr_s1_quadrant)                                     | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant")                             |
+| [cuts](#cuts)                                                         | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts")                                |
+| [txns](#txns)                                                         | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-outstanding-transactions-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/txns")            |
+| [is_remote_quadrant](#is_remote_quadrant)                             | `boolean`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-is_remote_quadrant.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/is_remote_quadrant")                             |
+| [remote_quadrants](#remote_quadrants)                                 | `array`       | Optional | cannot be null | [Occamy System Schema](occamy-properties-remote-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/remote_quadrants")                                 |
 | [s1_quadrant](#s1_quadrant)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant")                                |
 | [spm](#spm)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm")                                                           |
 | [pcie](#pcie)                                                         | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-pcie.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie")                                                         |
@@ -219,6 +223,82 @@ The default value is:
 ```json
 8
 ```
+
+## cuts
+
+
+
+`cuts`
+
+*   is optional
+
+*   Type: `object` ([Number of cuts on the AXI bus](occamy-properties-number-of-cuts-on-the-axi-bus.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts")
+
+### cuts Type
+
+`object` ([Number of cuts on the AXI bus](occamy-properties-number-of-cuts-on-the-axi-bus.md))
+
+## txns
+
+
+
+`txns`
+
+*   is optional
+
+*   Type: `object` ([Number of outstanding transactions on the AXI bus](occamy-properties-number-of-outstanding-transactions-on-the-axi-bus.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-number-of-outstanding-transactions-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/txns")
+
+### txns Type
+
+`object` ([Number of outstanding transactions on the AXI bus](occamy-properties-number-of-outstanding-transactions-on-the-axi-bus.md))
+
+## is_remote_quadrant
+
+Set if this is a remote quadrant. Only quadrant ant remote interconnect is generated
+
+`is_remote_quadrant`
+
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-is_remote_quadrant.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/is_remote_quadrant")
+
+### is_remote_quadrant Type
+
+`boolean`
+
+## remote_quadrants
+
+List of attached remote quadrants
+
+`remote_quadrants`
+
+*   is optional
+
+*   Type: `object[]` ([Remote Quadrant Description](occamy-properties-remote-quadrants-remote-quadrant-description.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-remote-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/remote_quadrants")
+
+### remote_quadrants Type
+
+`object[]` ([Remote Quadrant Description](occamy-properties-remote-quadrants-remote-quadrant-description.md))
+
+### remote_quadrants Constraints
+
+**minimum number of items**: the minimum number of items for this array is: `0`
 
 ## s1\_quadrant
 

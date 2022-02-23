@@ -81,6 +81,16 @@
             "description": "Data bus size of DMA. Usually this is larger than the integer core as the DMA is used to efficiently transfer bulk of data.",
             "default": 512
         },
+        "narrow_trans": {
+            "type": "number",
+            "description": "Outstanding transactions on the narrow AXI network",
+            "default": 4
+        },
+        "wide_trans": {
+            "type": "number",
+            "description": "Outstanding transactions on the wide AXI network",
+            "default": 4
+        },
         "id_width_in": {
             "type": "number",
             "description": "Id width of the narrower AXI plug into the cluster.",
