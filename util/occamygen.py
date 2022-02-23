@@ -288,13 +288,11 @@ def main():
         nr_remote_cores += rq["nr_clusters"] * rq["nr_cluster_cores"]
         rmq_cluster_cnt += rq["nr_clusters"]
         # remote quadrant control
-        # TODO: Continue
         alen = occamy.cfg["s1_quadrant"]["cfg_base_offset"]
         addr = occamy.cfg["s1_quadrant"]["cfg_base_addr"] + (i + nr_s1_quadrants) * alen
         leaf = am.new_leaf("rmq_{}_cfg".format(i), alen, addr)
         node.attach(leaf)
         node.attach_to(am_soc_narrow_xbar)
-        # node.attach_to(am_quadrant_inter_xbar)
 
     ###########
     # AM: HBM #

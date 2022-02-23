@@ -5,7 +5,6 @@
 // Cluster configuration for Occamy.
 {
     is_remote_quadrant: false,
-    rmq_trans: 32,
     remote_quadrants: [],
     quadrant_pre_xbar: {
       max_slv_trans: 4,
