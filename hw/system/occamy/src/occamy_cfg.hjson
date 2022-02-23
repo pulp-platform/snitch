@@ -52,6 +52,12 @@
       periph_regbus: 3,
       periph_axi_lite: 3,
     }
+    txns: {
+      wide_and_inter: 4,
+      wide_to_hbm: 4,
+      narrow_and_wide: 4,
+      rmq: 4,
+    }
     narrow_xbar_slv_id_width: 4,
     nr_s1_quadrant: 8,
     s1_quadrant: {

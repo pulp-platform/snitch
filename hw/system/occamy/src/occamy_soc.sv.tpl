@@ -25,6 +25,9 @@
   cuts_hbmx_to_hbm = cfg["cuts"]["hbmx_to_hbm"]
   cuts_periph_regbus = cfg["cuts"]["periph_regbus"]
   cuts_periph_axi_lite = cfg["cuts"]["periph_axi_lite"]
+  txns_wide_and_inter = cfg["txns"]["wide_and_inter"]
+  txns_wide_to_hbm = cfg["txns"]["wide_to_hbm"]
+  txns_narrow_and_wide = cfg["txns"]["narrow_and_wide"]
   max_atomics_narrow = 16
   hbi_trunc_addr_width = 40
 %>
@@ -121,23 +124,23 @@ module ${name}_soc
   <%
     #// inter xbar -> wide xbar & wide xbar -> inter xbar
     quadrant_inter_xbar.out_wide_xbar \
-      .change_iw(context, soc_wide_xbar.iw, "inter_to_wide_iw_conv_{}".format(i)) \
+      .change_iw(context, soc_wide_xbar.iw, "inter_to_wide_iw_conv_{}".format(i), max_txns_per_id=txns_wide_and_inter) \
       .cut(context, cuts_wide_and_inter, name="inter_to_wide_cut_{}".format(i), to=soc_wide_xbar.in_quadrant_inter_xbar)
     soc_wide_xbar.out_quadrant_inter_xbar \
       .cut(context, cuts_wide_and_inter, name="wide_to_inter_cut_{}".format(i)) \
-      .change_iw(context, quadrant_inter_xbar.iw, "wide_to_inter_iw_conv_{}".format(i), to=quadrant_inter_xbar.in_wide_xbar)
+      .change_iw(context, quadrant_inter_xbar.iw, "wide_to_inter_iw_conv_{}".format(i), to=quadrant_inter_xbar.in_wide_xbar,  max_txns_per_id=txns_wide_and_inter)
     #// wide xbar -> hbm xbar
     soc_wide_xbar.out_hbm_xbar \
-      .change_iw(context, hbm_xbar.iw, "wide_to_hbm_iw_conv_{}".format(i)) \
+      .change_iw(context, hbm_xbar.iw, "wide_to_hbm_iw_conv_{}".format(i), max_txns_per_id=txns_wide_to_hbm) \
       .cut(context, cuts_wide_to_hbm, name="wide_to_hbm_iw_cut_{}".format(i), to=hbm_xbar.in_wide_xbar)
     #// narrow xbar -> wide xbar & wide xbar -> narrow xbar
     soc_narrow_xbar.out_soc_wide \
       .cut(context, cuts_narrow_and_wide) \
-      .change_iw(context, soc_wide_xbar.in_soc_narrow.iw, "soc_narrow_wide_iwc") \
+      .change_iw(context, soc_wide_xbar.in_soc_narrow.iw, "soc_narrow_wide_iwc", max_txns_per_id=txns_narrow_and_wide) \
       .atomic_adapter(context, max_atomics_narrow, "soc_narrow_wide_amo_adapter") \
       .change_dw(context, soc_wide_xbar.in_soc_narrow.dw, "soc_narrow_wide_dw", to=soc_wide_xbar.in_soc_narrow)
     soc_wide_xbar.out_soc_narrow \
-      .change_iw(context, soc_narrow_xbar.in_soc_wide.iw, "soc_wide_narrow_iwc") \
+      .change_iw(context, soc_narrow_xbar.in_soc_wide.iw, "soc_wide_narrow_iwc", max_txns_per_id=txns_narrow_and_wide) \
       .change_dw(context, soc_narrow_xbar.in_soc_wide.dw, "soc_wide_narrow_dw") \
       .cut(context, cuts_narrow_and_wide, to=soc_narrow_xbar.in_soc_wide)
   %>\
