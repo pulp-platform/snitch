@@ -857,10 +857,10 @@ def main():
     ###############
     if nr_s1_quadrants > 0:
         write_template(args.quadrant_s1,
-                    outdir,
-                    fname="{}_quadrant_s1.sv".format(args.name),
-                    module=solder.code_module['quadrant_s1'],
-                    **kwargs)
+                       outdir,
+                       fname="{}_quadrant_s1.sv".format(args.name),
+                       module=solder.code_module['quadrant_s1'],
+                       **kwargs)
     else:
         tpl_path = args.quadrant_s1
         if tpl_path:
@@ -869,7 +869,6 @@ def main():
                 print(outdir, args.name)
                 with open("{}/{}_quadrant_s1.sv".format(outdir, args.name), 'w') as f:
                     f.write("// no quadrants in this design")
-
 
     ##################
     # Xilinx Wrapper #
