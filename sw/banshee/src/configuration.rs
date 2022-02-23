@@ -49,9 +49,9 @@ impl std::fmt::Display for Configuration {
 }
 
 impl Configuration {
-    pub fn new(num_clusters: usize) -> Self {
+    pub fn new(num_clusters: usize, num_cores: usize, base_hartid: usize) -> Self {
         Self {
-            architecture: Default::default(),
+            architecture: Architecture::new(num_clusters, num_cores, base_hartid),
             bootrom: Default::default(),
             memory: vec![Default::default(); num_clusters],
             address: Default::default(),
@@ -61,7 +61,15 @@ impl Configuration {
         }
     }
     /// Parse a json/yaml file into a `Configuration` struct
-    pub fn parse(name: &str, num_clusters: usize) -> Configuration {
+    pub fn parse(
+        name: &str,
+        num_clusters: usize,
+        has_num_clusters: bool,
+        num_cores: usize,
+        has_num_cores: bool,
+        base_hartid: usize,
+        has_base_hartid: bool,
+    ) -> Configuration {
         let config: String = std::fs::read_to_string(name)
             .unwrap_or_else(|_| panic!("Could not open file {}", name))
             .parse()
@@ -72,8 +80,15 @@ impl Configuration {
         } else {
             serde_yaml::from_str(&config).expect("Error while reading yaml")
         };
-        if config.architecture.num_clusters == 0 {
+        if has_num_cores {
+            config.architecture.num_cores = num_cores;
+        }
+        if has_base_hartid {
+            config.architecture.base_hartid = base_hartid;
+        }
+        if config.architecture.num_clusters == 0 || has_num_clusters {
             config.memory.resize_with(num_clusters, Default::default);
+            config.architecture.num_clusters = num_clusters;
         }
         config
     }
@@ -233,6 +248,16 @@ pub struct Architecture {
     pub num_cores: usize,
     pub num_clusters: usize,
     pub base_hartid: usize,
+}
+
+impl Architecture {
+    pub fn new(num_clusters: usize, num_cores: usize, base_hartid: usize) -> Self {
+        Self {
+            num_cores: num_cores,
+            num_clusters: num_clusters,
+            base_hartid: base_hartid,
+        }
+    }
 }
 
 impl Default for Architecture {

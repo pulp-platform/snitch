@@ -201,6 +201,11 @@ fn main() -> Result<()> {
     }
     engine.trace = matches.is_present("trace");
     engine.latency = matches.is_present("latency");
+
+    let has_num_cores = matches.is_present("num-cores");
+    let has_num_clusters = matches.is_present("num-clusters");
+    let has_base_hartid = matches.is_present("base-hartid");
+
     matches
         .value_of("num-cores")
         .map(|x| engine.num_cores = x.parse().unwrap());
@@ -214,19 +219,28 @@ fn main() -> Result<()> {
     if let Some(file) = matches.value_of("create-configuration") {
         Configuration::print_default(file)?;
     }
+    debug!("Configuration used:\n{}", engine.config);
+    // debug!("Configuration used: {} {} {}\n", engine.num_cores, engine.num_clusters, engine.base_hartid);
 
     engine.config = if let Some(config_file) = matches.value_of("configuration") {
         // if configuration file is given and `architecture` information is set
         // use that configuration, else banshee parameter
-        let config_used: Configuration = Configuration::parse(config_file, engine.num_clusters);
-        if config_used.architecture.num_clusters != 0 {
-            engine.num_cores = config_used.architecture.num_cores;
-            engine.num_clusters = config_used.architecture.num_clusters;
-            engine.base_hartid = config_used.architecture.base_hartid;
-        }
+        let config_used: Configuration = Configuration::parse(
+            config_file,
+            engine.num_clusters,
+            has_num_clusters,
+            engine.num_cores,
+            has_num_cores,
+            engine.base_hartid,
+            has_base_hartid,
+        );
+        // get configuration
+        engine.num_cores = config_used.architecture.num_cores;
+        engine.num_clusters = config_used.architecture.num_clusters;
+        engine.base_hartid = config_used.architecture.base_hartid;
         config_used
     } else {
-        Configuration::new(engine.num_clusters)
+        Configuration::new(engine.num_clusters, engine.num_cores, engine.base_hartid)
     };
     debug!("Configuration used:\n{}", engine.config);
 
