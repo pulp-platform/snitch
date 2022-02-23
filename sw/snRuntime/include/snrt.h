@@ -91,6 +91,9 @@ extern int snrt_is_compute_core();
 extern int snrt_is_dm_core();
 extern void snrt_wakeup(uint32_t mask);
 
+/// get pointer to barrier register
+extern uint32_t _snrt_barrier_reg_ptr();
+
 /// get start address of global memory
 extern snrt_slice_t snrt_global_memory();
 /// get start address of the cluster's tcdm memory

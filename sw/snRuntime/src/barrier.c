@@ -4,8 +4,6 @@
 #include "snrt.h"
 #include "team.h"
 
-extern void _snrt_cluster_barrier();
-
 /// Synchronize cores in a cluster with a hardware barrier
 void snrt_cluster_hw_barrier() { _snrt_cluster_barrier(); }
 

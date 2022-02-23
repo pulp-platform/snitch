@@ -4,13 +4,6 @@
 
 #include "../shared/start_snitch.S"
 
-# Must leave a0 untouched.
-_snrt_cluster_barrier:
-   .globl _snrt_cluster_barrier
-   lw        t0, barrier_reg
-   mv        zero, t0
-   ret
-
 # Function to terminate execution.
 #
 # Expecting:
@@ -43,12 +36,4 @@ _snrt_exit:
 1:  ret
 
 .set scratch_reg, 0x40000020 # used as exit code location
-.set barrier_reg, 0x40000038
 .set cluster_base_hart_id_reg, 0x40000040
-
-
-# TODO(fschuiki): This should be made to not pollute the symbol space with
-# "barrier_reg". It would be better to provide short snippets of
-# platform-specific code where stuff like this can go, together with a proper
-# symbol name like `_snrt_banshee_barrier_reg`.
-.globl barrier_reg
