@@ -68,17 +68,11 @@ set(sources
 )
 
 # platform specific sources
-set(banshee_general_sources
-    src/platforms/banshee-general/start_banshee.S
-    src/platforms/banshee-general/start_banshee.c
-)
 set(banshee_snitch_sources
-    # src/platforms/shared/start_snitch.S
     src/platforms/banshee/start_snitch.S
     src/platforms/banshee/putchar.c
 )
 set(rtl_snitch_sources
-    # src/platforms/shared/start_snitch.S
     src/platforms/rtl/start_snitch.S
     src/platforms/rtl/putchar.c
 )
@@ -109,13 +103,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     add_snitch_library(snRuntime src/start.S ${sources} src/ssr_v2.c)
 
     # Bare Runtimes (with startup code)
-    add_snitch_library(snRuntime-banshee-general ${banshee_general_sources} ${sources} src/ssr_v1.c)
     add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v1.c)
     add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
-    add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources} src/ssr_v1.c)
-    add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S ${sources} src/ssr_v1.c)
-    add_snitch_library(snRuntime-lethifold src/start_lethifold.S ${sources} src/ssr_v1.c)
-    add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources} src/ssr_v1.c)
 
 
 else()
@@ -124,20 +113,10 @@ else()
         # Generic Runtime (requiring bootloader/OS)
         add_snitch_library(snRuntime src/platforms/shared/start.c src/start.S ${sources} src/ssr_v2.c)
     # Bare Runtimes (with startup code)
-    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-banshee-general")
-        add_snitch_library(snRuntime-banshee ${banshee_general_sources} ${sources} src/ssr_v1.c)
     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
         add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v1.c)
     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
         add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
-    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-billywig")
-        add_snitch_library(snRuntime-billywig src/start_billywig.S ${sources} src/ssr_v1.c)
-    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-bowtruckle")
-        add_snitch_library(snRuntime-bowtruckle src/start_bowtruckle.S ${sources} src/ssr_v1.c)
-    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-lethifold")
-        add_snitch_library(snRuntime-lethifold src/start_lethifold.S ${sources} src/ssr_v1.c)
-    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-thestral")
-        add_snitch_library(snRuntime-thestral src/start_thestral.S ${sources} src/ssr_v1.c)
     else()
         message(FATAL_ERROR "Requested runtime not implemented: ${SNITCH_RUNTIME}")
     endif()
@@ -146,13 +125,6 @@ endif()
 # Tests
 enable_testing()
 set(SNITCH_TEST_PREFIX snRuntime-)
-
-# General snRuntime tests only
-if(SNITCH_RUNTIME STREQUAL "snRuntime-banshee-general")
-    #Must run with `--base-hartid=3 --num-cores=4 --num-clusters=2`
-    add_snitch_test_executable(team_global tests/team_global.c)
-    add_snitch_test_args(team_global team_global --base-hartid=3 --num-cores=4 --num-clusters=2)
-endif()
 
 # General snRuntime tests
 add_snitch_test(tls tests/tls.c)
@@ -166,11 +138,8 @@ add_snitch_test(interrupt tests/interrupt.c)
 add_snitch_test(interrupt-local tests/interrupt-local.c)
 add_snitch_test(printf_fmtint tests/printf_fmtint.c)
 add_snitch_test(printf_simple tests/printf_simple.c)
-
-# limited banshee tests
-if(NOT SNITCH_RUNTIME STREQUAL "snRuntime-banshee-general")
-    add_snitch_test(zero_mem tests/zero_mem.c)
-endif()
+add_snitch_test(zero_mem tests/zero_mem.c)
+add_snitch_test(team_global tests/team_global.c)
 
 # RTL only tests
 if(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
