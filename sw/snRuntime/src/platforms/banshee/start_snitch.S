@@ -20,10 +20,6 @@ _snrt_exit:
     lw        t0, 0(sp)
     lw        ra, 4(sp)
     addi      sp, sp, 8
-    # shift core's hartid such that first core is 0
-    lw        t1, cluster_base_hart_id_reg
-    ; csrr      t2, mhartid
-    sub       a0, a0, t1
 
     # Only first core triggers exit.
     # - a0: global core index
@@ -36,4 +32,3 @@ _snrt_exit:
 1:  ret
 
 .set scratch_reg, 0x40000020 # used as exit code location
-.set cluster_base_hart_id_reg, 0x40000040
