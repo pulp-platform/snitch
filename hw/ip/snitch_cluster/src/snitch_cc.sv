@@ -618,10 +618,13 @@ module snitch_cc #(
     ssr_cfg_rsp_t ssr_cfg_rsp, cfg_rsp;
 
     logic cfg_req_valid, cfg_req_valid_q;
+    logic cfg_req_wready, cfg_req_ready, cfg_req_hs;
     logic [31:0] cfg_rsp_data;
-    `FF(cfg_req_valid_q, cfg_req_valid, 0)
-    `FF(cfg_rsp.id, ssr_cfg_req.id, 0)
-    `FF(cfg_rsp.data, cfg_rsp_data, 0)
+    assign cfg_req_ready = ~cfg_req.write | cfg_req_wready;
+    assign cfg_req_hs = cfg_req_valid & cfg_req_ready;
+    `FF(cfg_req_valid_q, cfg_req_hs, 0)
+    `FFL(cfg_rsp.id, ssr_cfg_req.id, cfg_req_hs, 0)
+    `FFL(cfg_rsp.data, cfg_rsp_data, cfg_req_hs, 0)
 
     always_comb begin
       import riscv_instr::*;
@@ -682,7 +685,7 @@ module snitch_cc #(
       .resp_ready_i (ssr_pready),
       .mem_req_o (cfg_req),
       .mem_req_valid_o (cfg_req_valid),
-      .mem_req_ready_i (1'b1),
+      .mem_req_ready_i (cfg_req_ready),
       .mem_resp_i (cfg_rsp),
       .mem_resp_valid_i (cfg_req_valid_q)
     );
@@ -708,6 +711,7 @@ module snitch_cc #(
       .cfg_write_i    ( cfg_req.write & cfg_req_valid ),
       .cfg_rdata_o    ( cfg_rsp_data ),
       .cfg_wdata_i    ( cfg_req.data ),
+      .cfg_wready_o   ( cfg_req_wready ),
 
       .ssr_raddr_i    ( ssr_raddr  ),
       .ssr_rdata_o    ( ssr_rdata  ),

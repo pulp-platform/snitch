@@ -95,6 +95,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   logic         cfg_write_i;
   logic [31:0]  cfg_rdata_o;
   logic [31:0]  cfg_wdata_i;
+  logic         cfg_wready_o;
   logic         lane_valid_o;
   logic         lane_ready_i;
   tcdm_req_t    mem_req_o;
@@ -122,6 +123,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
     .cfg_write_i,
     .cfg_rdata_o,
     .cfg_wdata_i,
+    .cfg_wready_o,
     .lane_rdata_o,
     .lane_wdata_i,
     .lane_valid_o,
@@ -208,7 +210,7 @@ module fixture_ssr import snitch_ssr_pkg::*; #(
   assign cfg_write_i    = cfg_bus.write;
   assign cfg_wdata_i    = cfg_bus.wdata;
   assign cfg_bus.rdata  = cfg_rdata_o;
-  assign cfg_bus.ready  = 1'b1;   // SSR always ready for config write
+  assign cfg_bus.ready  = ~cfg_bus.write | cfg_wready_o;
 
   // Register bus driver
   reg_test::reg_driver #(

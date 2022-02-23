@@ -97,6 +97,7 @@ module fixture_ssr_streamer import snitch_ssr_pkg::*; #(
   logic                     cfg_write_i;
   logic [31:0]              cfg_rdata_o;
   logic [31:0]              cfg_wdata_i;
+  logic                     cfg_wready_o;
   logic  [RPorts-1:0][4:0]  ssr_raddr_i;
   data_t [RPorts-1:0]       ssr_rdata_o;
   logic  [RPorts-1:0]       ssr_rvalid_i;
@@ -134,6 +135,7 @@ module fixture_ssr_streamer import snitch_ssr_pkg::*; #(
     .cfg_write_i,
     .cfg_rdata_o,
     .cfg_wdata_i,
+    .cfg_wready_o,
     .ssr_raddr_i,
     .ssr_rdata_o,
     .ssr_rvalid_i,
@@ -276,7 +278,7 @@ module fixture_ssr_streamer import snitch_ssr_pkg::*; #(
   assign cfg_write_i    = cfg_bus.write;
   assign cfg_wdata_i    = cfg_bus.wdata;
   assign cfg_bus.rdata  = cfg_rdata_o;
-  assign cfg_bus.ready  = 1'b1;   // SSRs always ready for config write
+  assign cfg_bus.ready  = ~cfg_bus.write | cfg_wready_o;
 
   // Register bus driver
   reg_test::reg_driver #(
