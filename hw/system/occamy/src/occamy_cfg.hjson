@@ -62,8 +62,8 @@
     s1_quadrant: {
       nr_clusters: 4,
       // number of pending transactions on the narrow/wide network
-      narrow_trans: 4,
-      wide_trans: 4,
+      narrow_trans: 16,
+      wide_trans: 16,
       // Disable for easier flow trials.
       ro_cache_cfg: {
           width: 1024,

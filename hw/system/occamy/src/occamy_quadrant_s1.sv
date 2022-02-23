@@ -171,7 +171,7 @@ module occamy_quadrant_s1
   axi_a48_d64_i8_u0_resp_t narrow_cluster_in_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(4),
+      .NumPending(16),
       .TerminateTransaction(1),
       .AtopSupport(1),
       .AxiIdWidth(8),
@@ -237,7 +237,7 @@ module occamy_quadrant_s1
   axi_a48_d64_i4_u0_resp_t narrow_cluster_out_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(4),
+      .NumPending(16),
       .TerminateTransaction(0),
       .AtopSupport(1),
       .AxiIdWidth(4),
@@ -323,7 +323,7 @@ module occamy_quadrant_s1
   axi_id_remap #(
       .AxiSlvPortIdWidth(7),
       .AxiSlvPortMaxUniqIds(16),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(16),
       .AxiMstPortIdWidth(4),
       .slv_req_t(axi_a48_d512_i7_u0_req_t),
       .slv_resp_t(axi_a48_d512_i7_u0_resp_t),
@@ -341,7 +341,7 @@ module occamy_quadrant_s1
   axi_a48_d512_i4_u0_resp_t wide_cluster_out_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(4),
+      .NumPending(16),
       .TerminateTransaction(0),
       .AtopSupport(0),
       .AxiIdWidth(4),
@@ -416,7 +416,7 @@ module occamy_quadrant_s1
   axi_a48_d512_i8_u0_resp_t wide_cluster_in_isolate_rsp;
 
   axi_isolate #(
-      .NumPending(4),
+      .NumPending(16),
       .TerminateTransaction(1),
       .AtopSupport(0),
       .AxiIdWidth(8),
@@ -520,7 +520,7 @@ module occamy_quadrant_s1
   axi_id_remap #(
       .AxiSlvPortIdWidth(6),
       .AxiSlvPortMaxUniqIds(2),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(16),
       .AxiMstPortIdWidth(1),
       .slv_req_t(axi_a48_d512_i6_u0_req_t),
       .slv_resp_t(axi_a48_d512_i6_u0_resp_t),
@@ -601,7 +601,7 @@ module occamy_quadrant_s1
   axi_id_remap #(
       .AxiSlvPortIdWidth(6),
       .AxiSlvPortMaxUniqIds(2),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(16),
       .AxiMstPortIdWidth(1),
       .slv_req_t(axi_a48_d512_i6_u0_req_t),
       .slv_resp_t(axi_a48_d512_i6_u0_resp_t),
@@ -682,7 +682,7 @@ module occamy_quadrant_s1
   axi_id_remap #(
       .AxiSlvPortIdWidth(6),
       .AxiSlvPortMaxUniqIds(2),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(16),
       .AxiMstPortIdWidth(1),
       .slv_req_t(axi_a48_d512_i6_u0_req_t),
       .slv_resp_t(axi_a48_d512_i6_u0_resp_t),
@@ -763,7 +763,7 @@ module occamy_quadrant_s1
   axi_id_remap #(
       .AxiSlvPortIdWidth(6),
       .AxiSlvPortMaxUniqIds(2),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(16),
       .AxiMstPortIdWidth(1),
       .slv_req_t(axi_a48_d512_i6_u0_req_t),
       .slv_resp_t(axi_a48_d512_i6_u0_resp_t),
