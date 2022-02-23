@@ -47,7 +47,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
 
   data_t fifo_out, fifo_in;
   logic fifo_push, fifo_pop, fifo_full, fifo_empty;
-  logic has_credit, credit_take, credit_give;
+  logic has_credit, credit_take, credit_give, credit_full;
   logic [Cfg.RptWidth-1:0] rep_max, rep_q, rep_d, rep_done, rep_enable, rep_clear;
 
   fifo_v3 #(
@@ -107,7 +107,20 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .mem_ready_i    ( agen_ready        )
   );
 
-  assign agen_ready = agen_zero ? has_credit : (data_req_qvalid & data_rsp.q_ready);
+  // When the SSR reverses direction, the inflight data *must* be vacated before any
+  // requests can be issued (i.e. addresses consumed) to prevent stream corruption.
+  logic agen_write_q, agen_write_reversing, agen_flush, dm_write;
+  `FFLARN(agen_write_q, agen_write, agen_valid & agen_ready, '0, clk_i, rst_ni)
+
+  // When direction reverses, deassert agen readiness until credits replenished.
+  // The datamover must preserve its directional muxing until the flush is complete.
+  // This will *not* block write preloading of the FIFO.
+  assign agen_write_reversing = agen_write ^ agen_write_q;
+  assign agen_flush = agen_write_reversing & ~credit_full;
+  assign dm_write = agen_flush ? agen_write_q : agen_write;
+
+  assign agen_ready = ~agen_flush & (agen_zero ?
+    has_credit : (data_req_qvalid & data_rsp.q_ready));
   assign data_req.q.write = agen_write;
 
   if (Cfg.Indirection) begin : gen_demux
@@ -143,18 +156,20 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   assign data_req.q.strb = '1;
 
   always_comb begin
-    if (agen_write) begin
+    if (dm_write) begin
       lane_valid_o = ~fifo_full;
-      data_req_qvalid = agen_valid & ~fifo_empty;
+      data_req_qvalid = agen_valid & ~fifo_empty & has_credit & ~agen_flush;
       fifo_push = lane_ready_i & ~fifo_full;
       fifo_in = lane_wdata_i;
       rep_enable = 0;
       fifo_pop = data_req_qvalid & data_rsp.q_ready;
-      credit_take = fifo_push;
+      // During writes, the credit counter tracks write responses;
+      // This is necessary as inflight responses may break subsequent reads.
+      credit_take = fifo_pop;
       credit_give = data_rsp.p_valid;
     end else begin
       lane_valid_o = ~fifo_empty | (~zero_empty & lane_zero);
-      data_req_qvalid = agen_valid & ~fifo_full & has_credit & ~agen_zero;
+      data_req_qvalid = agen_valid & ~fifo_full & has_credit & ~agen_zero & ~agen_flush;
       fifo_push = data_rsp.p_valid;
       fifo_in = data_rsp.p.data;
       rep_enable = lane_ready_i & lane_valid_o;
@@ -179,13 +194,13 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
       .empty_o    ( zero_empty  ),
       .usage_o    (  ),
       .data_i     ( agen_zero   ),
-      .push_i     ( credit_take & ~agen_write ),
+      .push_i     ( credit_take & ~dm_write ),
       .data_o     ( lane_zero   ),
       .pop_i      ( credit_give & ~zero_empty )
     );
   end else begin : gen_no_isect_master
     // If not an intersection master, we cannot inject zeros.
-    assign zero_empty = 1'b0;
+    assign zero_empty = 1'b1;
     assign lane_zero  = 1'b0;
   end
 
@@ -201,8 +216,9 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .credit_give_i ( credit_give ),
     .credit_take_i ( credit_take ),
     .credit_init_i ( 1'b0 ),
-    .credit_left_o ( has_credit ),
-    .credit_crit_o (  )
+    .credit_left_o ( has_credit  ),
+    .credit_crit_o (  ),
+    .credit_full_o ( credit_full )
   );
 
   // Repetition counter.

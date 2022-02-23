@@ -26,7 +26,8 @@ module snitch_ssr_credit_counter #(
   input  logic credit_init_i,  // Reinitialize (soft-reset) credit; takes priority
 
   output logic credit_left_o,
-  output logic credit_crit_o  // Giving one more credit will fill the credits
+  output logic credit_crit_o,  // Giving one more credit will fill the credits
+  output logic credit_full_o
 );
 
   credit_cnt_t credit_d, credit_q;
@@ -48,6 +49,7 @@ module snitch_ssr_credit_counter #(
   assign credit_o       = credit_q;
   assign credit_left_o  = (credit_q != '0);
   assign credit_crit_o  = (credit_q == NumCredits-1);
+  assign credit_full_o  = (credit_q == NumCredits);
 
   `ASSERT_NEVER(CreditUnderflow, credit_o == '0 && decrement)
   `ASSERT_NEVER(CreditOverflow, credit_o == NumCredits && increment)
