@@ -90,8 +90,8 @@ jobs:
         echo "PATH=$PATH:/tools/riscv-llvm/bin" >> $GITHUB_ENV
     - name: Build runtime for Snitch Banshee
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{
-        matrix.toolchain }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} -DSNITCH_RUNTIME=snRuntime-banshee
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} -DSNITCH_RUNTIME=snRuntime-banshee
         .. && make
     - name: Test snRuntime for Snitch Banshee
       working-directory: sw/snRuntime/build
@@ -143,9 +143,8 @@ jobs:
         cargo install --path sw/banshee
     - name: Build runtime for Snitch Banshee
       working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{
-        matrix.toolchain }} -DBUILD_TESTS=ON -DSNITCH_RUNTIME=snRuntime-banshee ..
-        && make
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON -DSNITCH_RUNTIME=snRuntime-banshee .. && make
     - name: Test snRuntime for Snitch Banshee
       working-directory: sw/snRuntime/build
       run: make test
