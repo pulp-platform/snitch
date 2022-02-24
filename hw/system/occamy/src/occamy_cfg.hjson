@@ -272,12 +272,12 @@
                 length: 131072, // 128 kiB 0x2_0000
             },
             {
-                name: "hbi_cfg",
+                name: "hbi_wide_cfg",
                 address: 100663296, // 0x0600_0000
                 length: 65536, // 64 kiB 0x1_0000
             },
             {
-                name: "hbi_ctl",
+                name: "hbi_narrow_cfg",
                 address: 117440512, // 0x0700_0000
                 length: 65536, // 64 kiB 0x1_0000
             },

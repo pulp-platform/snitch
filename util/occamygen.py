@@ -773,17 +773,11 @@ def main():
     solder.render()
 
     ###############
-    # HBI APB CTL #
+    # HBM APB CTL #
     ###############
     if is_remote_quadrant:
-        apb_hbi_ctl = apb_hbm_cfg = None
+        apb_hbm_cfg = None
     else:
-        apb_hbi_ctl = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
-                                    rst=soc_regbus_periph_xbar.rst,
-                                    aw=soc_regbus_periph_xbar.aw,
-                                    dw=soc_regbus_periph_xbar.dw,
-                                    name="apb_hbi_ctl")
-
         apb_hbm_cfg = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
                                     rst=soc_regbus_periph_xbar.rst,
                                     aw=soc_regbus_periph_xbar.aw,
@@ -805,7 +799,6 @@ def main():
         "wide_xbar_quadrant_s1": wide_xbar_quadrant_s1,
         "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
         "soc_regbus_periph_xbar": soc_regbus_periph_xbar,
-        "apb_hbi_ctl": apb_hbi_ctl,
         "apb_hbm_cfg": apb_hbm_cfg,
         "cfg": occamy.cfg,
         "cores": nr_s1_quadrants * nr_s1_clusters * nr_cluster_cores + nr_remote_cores + 1,
