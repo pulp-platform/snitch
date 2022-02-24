@@ -188,5 +188,5 @@ jobs:
       run: |
         cd hw/system/snitch_cluster/sw && mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain }} -DBUILD_TESTS=ON .. && make
     - name: Run Unit Tests
-      run: |
+      run: |-
         cd hw/system/snitch_cluster/sw/build && make test
