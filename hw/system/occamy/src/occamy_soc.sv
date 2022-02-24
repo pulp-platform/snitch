@@ -990,6 +990,23 @@ module occamy_soc
   //////////
   // PCIe //
   //////////
+  axi_a48_d64_i8_u0_req_t  pcie_out_noatop_req;
+  axi_a48_d64_i8_u0_resp_t pcie_out_noatop_rsp;
+
+  axi_atop_filter #(
+      .AxiIdWidth(8),
+      .AxiMaxWriteTxns(32),
+      .req_t(axi_a48_d64_i8_u0_req_t),
+      .resp_t(axi_a48_d64_i8_u0_resp_t)
+  ) i_axi_atop_filter (
+      .clk_i     (clk_i),
+      .rst_ni    (rst_ni),
+      .slv_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_PCIE]),
+      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_PCIE]),
+      .mst_req_o (pcie_out_noatop_req),
+      .mst_resp_i(pcie_out_noatop_rsp)
+  );
+
   axi_a48_d64_i8_u0_req_t  pcie_out_req;
   axi_a48_d64_i8_u0_resp_t pcie_out_rsp;
 
@@ -1005,8 +1022,8 @@ module occamy_soc
   ) i_pcie_out_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_PCIE]),
-      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_PCIE]),
+      .slv_req_i(pcie_out_noatop_req),
+      .slv_resp_o(pcie_out_noatop_rsp),
       .mst_req_o(pcie_out_req),
       .mst_resp_i(pcie_out_rsp)
   );
@@ -2601,6 +2618,23 @@ module occamy_soc
       .mst_resp_i(wide_to_hbi_trunc_rsp)
   );
 
+  axi_a48_d512_i6_u0_req_t  wide_to_hbi_noatop_req;
+  axi_a48_d512_i6_u0_resp_t wide_to_hbi_noatop_rsp;
+
+  axi_atop_filter #(
+      .AxiIdWidth(6),
+      .AxiMaxWriteTxns(32),
+      .req_t(axi_a48_d512_i6_u0_req_t),
+      .resp_t(axi_a48_d512_i6_u0_resp_t)
+  ) i_axi_atop_filter (
+      .clk_i     (clk_i),
+      .rst_ni    (rst_ni),
+      .slv_req_i (wide_to_hbi_trunc_req),
+      .slv_resp_o(wide_to_hbi_trunc_rsp),
+      .mst_req_o (wide_to_hbi_noatop_req),
+      .mst_resp_i(wide_to_hbi_noatop_rsp)
+  );
+
   axi_a48_d512_i6_u0_req_t  wide_to_hbi_cut_req;
   axi_a48_d512_i6_u0_resp_t wide_to_hbi_cut_rsp;
 
@@ -2616,8 +2650,8 @@ module occamy_soc
   ) i_wide_to_hbi_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(wide_to_hbi_trunc_req),
-      .slv_resp_o(wide_to_hbi_trunc_rsp),
+      .slv_req_i(wide_to_hbi_noatop_req),
+      .slv_resp_o(wide_to_hbi_noatop_rsp),
       .mst_req_o(wide_to_hbi_cut_req),
       .mst_resp_i(wide_to_hbi_cut_rsp)
   );
@@ -2676,6 +2710,23 @@ module occamy_soc
   /////////////////
   // Peripherals //
   /////////////////
+  axi_a48_d64_i8_u0_req_t  periph_regbus_out_noatop_req;
+  axi_a48_d64_i8_u0_resp_t periph_regbus_out_noatop_rsp;
+
+  axi_atop_filter #(
+      .AxiIdWidth(8),
+      .AxiMaxWriteTxns(4),
+      .req_t(axi_a48_d64_i8_u0_req_t),
+      .resp_t(axi_a48_d64_i8_u0_resp_t)
+  ) i_axi_atop_filter (
+      .clk_i     (clk_i),
+      .rst_ni    (rst_ni),
+      .slv_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_REGBUS_PERIPH]),
+      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_REGBUS_PERIPH]),
+      .mst_req_o (periph_regbus_out_noatop_req),
+      .mst_resp_i(periph_regbus_out_noatop_rsp)
+  );
+
   axi_a48_d64_i8_u0_req_t  periph_regbus_out_req;
   axi_a48_d64_i8_u0_resp_t periph_regbus_out_rsp;
 
@@ -2691,11 +2742,28 @@ module occamy_soc
   ) i_periph_regbus_out_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_REGBUS_PERIPH]),
-      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_REGBUS_PERIPH]),
+      .slv_req_i(periph_regbus_out_noatop_req),
+      .slv_resp_o(periph_regbus_out_noatop_rsp),
       .mst_req_o(periph_regbus_out_req),
       .mst_resp_i(periph_regbus_out_rsp)
   );
+  axi_a48_d64_i8_u0_req_t  periph_axi_lite_out_noatop_req;
+  axi_a48_d64_i8_u0_resp_t periph_axi_lite_out_noatop_rsp;
+
+  axi_atop_filter #(
+      .AxiIdWidth(8),
+      .AxiMaxWriteTxns(4),
+      .req_t(axi_a48_d64_i8_u0_req_t),
+      .resp_t(axi_a48_d64_i8_u0_resp_t)
+  ) i_axi_atop_filter (
+      .clk_i     (clk_i),
+      .rst_ni    (rst_ni),
+      .slv_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_PERIPH]),
+      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_PERIPH]),
+      .mst_req_o (periph_axi_lite_out_noatop_req),
+      .mst_resp_i(periph_axi_lite_out_noatop_rsp)
+  );
+
   axi_a48_d64_i8_u0_req_t  periph_axi_lite_out_req;
   axi_a48_d64_i8_u0_resp_t periph_axi_lite_out_rsp;
 
@@ -2711,8 +2779,8 @@ module occamy_soc
   ) i_periph_axi_lite_out_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_PERIPH]),
-      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_PERIPH]),
+      .slv_req_i(periph_axi_lite_out_noatop_req),
+      .slv_resp_o(periph_axi_lite_out_noatop_rsp),
       .mst_req_o(periph_axi_lite_out_req),
       .mst_resp_i(periph_axi_lite_out_rsp)
   );
