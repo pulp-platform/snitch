@@ -10,7 +10,9 @@ address:
   cluster_id: 0x40000050
   cluster_num: 0x40000048
   nr_cores: 0x40000010
-  scratch_reg: 0x40000020
+  # Snitch/Occamy: SOC_CTRL + 0x14
+  # in Banshee also used as exit code location
+  scratch_reg: 0x02000014
   tcdm_end: 0x40000008
   tcdm_start: 0x40000000
   uart: 0xF00B8000

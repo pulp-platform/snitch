@@ -31,4 +31,4 @@ _snrt_exit:
     sw        t0, 0(t1)
 1:  ret
 
-.set scratch_reg, 0x40000020 # used as exit code location
+.set scratch_reg, 0x02000014 # used as exit code location
