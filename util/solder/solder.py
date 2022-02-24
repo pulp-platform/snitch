@@ -800,9 +800,12 @@ class AxiBus(Bus):
                        max_trans=1,
                        name=None,
                        inst_name=None,
-                       to=None):
+                       to=None,
+                       # Instantiate filter instead, blocking atomics
+                       filter=False):
 
-        name = name or "{}_atomic_adapter".format(self.name)
+        name = name or ("{}_atomic_adapter" if not filter else
+                        "{}_atop_filter").format(self.name)
 
         # Generate the new bus.
         if to is None:
@@ -823,7 +826,8 @@ class AxiBus(Bus):
 
         # Emit the cut instance.
         bus.declare(context)
-        tpl = templates.get_template("solder.axi_atomic_adapter.sv.tpl")
+        tpl = templates.get_template("solder.axi_atomic_adapter.sv.tpl" if not filter else
+                                     "solder.axi_atop_filter.sv.tpl")
         context.write(
             tpl.render_unicode(
                 bus_in=self,
