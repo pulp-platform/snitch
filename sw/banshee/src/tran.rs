@@ -295,9 +295,7 @@ impl<'a> ElfTranslator<'a> {
         for (addr, inst) in self.all_instructions() {
             match inst {
                 riscv::Format::Imm12RdRs1(
-                    fmt
-                    @
-                    riscv::FormatImm12RdRs1 {
+                    fmt @ riscv::FormatImm12RdRs1 {
                         op: riscv::OpcodeImm12RdRs1::Jalr,
                         ..
                     },
@@ -311,9 +309,7 @@ impl<'a> ElfTranslator<'a> {
                     }
                 }
                 riscv::Format::Jimm20Rd(
-                    fmt
-                    @
-                    riscv::FormatJimm20Rd {
+                    fmt @ riscv::FormatJimm20Rd {
                         op: riscv::OpcodeJimm20Rd::Jal,
                         ..
                     },
