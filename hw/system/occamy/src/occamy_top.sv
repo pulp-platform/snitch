@@ -462,15 +462,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
 
-  //////////////////////
-  // HBI & HBM Config //
-  //////////////////////
+  /////////////////////////////
+  // HBI & HBM & PCIE Config //
+  /////////////////////////////
 
   // RegBus port for HBI
   assign hbi_wide_cfg_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_WIDE_CFG];
   assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_WIDE_CFG] = hbi_wide_cfg_rsp_i;
   assign hbi_narrow_cfg_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_NARROW_CFG];
   assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_NARROW_CFG] = hbi_narrow_cfg_rsp_i;
+
+  // RegBus port for PCIE
+  assign pcie_cfg_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_PCIE_CFG];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_PCIE_CFG] = pcie_cfg_rsp_i;
 
   // APB port for HBM
   apb_a48_d32_req_t apb_hbm_cfg_req;

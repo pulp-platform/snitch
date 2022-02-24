@@ -223,15 +223,19 @@ module ${name}_top
       .to_axi_lite(context, "axi_to_axi_lite_regbus_periph") \
       .to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_soc) %> \
 
-  //////////////////////
-  // HBI & HBM Config //
-  //////////////////////
+  /////////////////////////////
+  // HBI & HBM & PCIE Config //
+  /////////////////////////////
 
   // RegBus port for HBI
   assign hbi_wide_cfg_req_o = ${soc_regbus_periph_xbar.out_hbi_wide_cfg.req_name()};
   assign ${soc_regbus_periph_xbar.out_hbi_wide_cfg.rsp_name()} = hbi_wide_cfg_rsp_i;
   assign hbi_narrow_cfg_req_o = ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.req_name()};
   assign ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.rsp_name()} = hbi_narrow_cfg_rsp_i;
+
+  // RegBus port for PCIE
+  assign pcie_cfg_req_o = ${soc_regbus_periph_xbar.out_pcie_cfg.req_name()};
+  assign ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_name()} = pcie_cfg_rsp_i;
 
   // APB port for HBM
   <% soc_regbus_periph_xbar.out_hbm_cfg.to_apb(context, "apb_hbm_cfg", to=apb_hbm_cfg) %>
