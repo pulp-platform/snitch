@@ -229,7 +229,6 @@ module ${name}_soc
   // SPM //
   //////////
   <% narrow_spm_mst = soc_narrow_xbar.out_spm \
-                      .serialize(context, "spm_serialize", iw=1) \
                       .atomic_adapter(context, max_atomics_narrow, "spm_amo_adapter") \
                       .cut(context, cuts_narrow_conv_to_spm)
   %>\
