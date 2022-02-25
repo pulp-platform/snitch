@@ -66,10 +66,10 @@ module ${name}_top
   input  ${soc_regbus_periph_xbar.out_clk_mgr.rsp_type()} clk_mgr_rsp_i,
 
   /// HBI Config and APB Control
-  output ${soc_regbus_periph_xbar.out_hbi_cfg.req_type()} hbi_cfg_req_o,
-  input  ${soc_regbus_periph_xbar.out_hbi_cfg.rsp_type()} hbi_cfg_rsp_i,
-  output ${apb_hbi_ctl.req_type()} apb_hbi_ctl_req_o,
-  input  ${apb_hbi_ctl.rsp_type()} apb_hbi_ctl_rsp_i,
+  output ${soc_regbus_periph_xbar.out_hbi_wide_cfg.req_type()} hbi_wide_cfg_req_o,
+  input  ${soc_regbus_periph_xbar.out_hbi_wide_cfg.rsp_type()} hbi_wide_cfg_rsp_i,
+  output ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.req_type()} hbi_narrow_cfg_req_o,
+  input  ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.rsp_type()} hbi_narrow_cfg_rsp_i,
   /// HBM Config
   output ${apb_hbm_cfg.req_type()} apb_hbm_cfg_req_o,
   input  ${apb_hbm_cfg.rsp_type()} apb_hbm_cfg_rsp_i,
@@ -223,14 +223,19 @@ module ${name}_top
       .to_axi_lite(context, "axi_to_axi_lite_regbus_periph") \
       .to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_soc) %> \
 
-  //////////////////////
-  // HBI & HBM Config //
-  //////////////////////
+  /////////////////////////////
+  // HBI & HBM & PCIE Config //
+  /////////////////////////////
 
-  // APB port for HBI
-  <% soc_regbus_periph_xbar.out_hbi_ctl.to_apb(context, "apb_hbi_ctl", to=apb_hbi_ctl) %>
-  assign apb_hbi_ctl_req_o = ${apb_hbi_ctl.req_name()};
-  assign ${apb_hbi_ctl.rsp_name()} = apb_hbi_ctl_rsp_i;
+  // RegBus port for HBI
+  assign hbi_wide_cfg_req_o = ${soc_regbus_periph_xbar.out_hbi_wide_cfg.req_name()};
+  assign ${soc_regbus_periph_xbar.out_hbi_wide_cfg.rsp_name()} = hbi_wide_cfg_rsp_i;
+  assign hbi_narrow_cfg_req_o = ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.req_name()};
+  assign ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.rsp_name()} = hbi_narrow_cfg_rsp_i;
+
+  // RegBus port for PCIE
+  assign pcie_cfg_req_o = ${soc_regbus_periph_xbar.out_pcie_cfg.req_name()};
+  assign ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_name()} = pcie_cfg_rsp_i;
 
   // APB port for HBM
   <% soc_regbus_periph_xbar.out_hbm_cfg.to_apb(context, "apb_hbm_cfg", to=apb_hbm_cfg) %>

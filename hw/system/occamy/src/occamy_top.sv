@@ -66,10 +66,10 @@ module occamy_top
     input  reg_a48_d32_rsp_t clk_mgr_rsp_i,
 
     /// HBI Config and APB Control
-    output reg_a48_d32_req_t hbi_cfg_req_o,
-    input reg_a48_d32_rsp_t hbi_cfg_rsp_i,
-    output apb_a48_d32_req_t apb_hbi_ctl_req_o,
-    input apb_a48_d32_rsp_t apb_hbi_ctl_rsp_i,
+    output reg_a48_d32_req_t hbi_wide_cfg_req_o,
+    input reg_a48_d32_rsp_t hbi_wide_cfg_rsp_i,
+    output reg_a48_d32_req_t hbi_narrow_cfg_req_o,
+    input reg_a48_d32_rsp_t hbi_narrow_cfg_rsp_i,
     /// HBM Config
     output apb_a48_d32_req_t apb_hbm_cfg_req_o,
     input apb_a48_d32_rsp_t apb_hbm_cfg_rsp_i,
@@ -462,30 +462,19 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   );
 
 
-  //////////////////////
-  // HBI & HBM Config //
-  //////////////////////
+  /////////////////////////////
+  // HBI & HBM & PCIE Config //
+  /////////////////////////////
 
-  // APB port for HBI
-  apb_a48_d32_req_t apb_hbi_ctl_req;
-  apb_a48_d32_rsp_t apb_hbi_ctl_rsp;
+  // RegBus port for HBI
+  assign hbi_wide_cfg_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_WIDE_CFG];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_WIDE_CFG] = hbi_wide_cfg_rsp_i;
+  assign hbi_narrow_cfg_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_NARROW_CFG];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_NARROW_CFG] = hbi_narrow_cfg_rsp_i;
 
-  reg_to_apb #(
-      .reg_req_t(reg_a48_d32_req_t),
-      .reg_rsp_t(reg_a48_d32_rsp_t),
-      .apb_req_t(apb_a48_d32_req_t),
-      .apb_rsp_t(apb_a48_d32_rsp_t)
-  ) i_apb_hbi_ctl_pc (
-      .clk_i(clk_periph_i),
-      .rst_ni(rst_periph_ni),
-      .reg_req_i(soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CTL]),
-      .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBI_CTL]),
-      .apb_req_o(apb_hbi_ctl_req),
-      .apb_rsp_i(apb_hbi_ctl_rsp)
-  );
-
-  assign apb_hbi_ctl_req_o = apb_hbi_ctl_req;
-  assign apb_hbi_ctl_rsp   = apb_hbi_ctl_rsp_i;
+  // RegBus port for PCIE
+  assign pcie_cfg_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_PCIE_CFG];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_PCIE_CFG] = pcie_cfg_rsp_i;
 
   // APB port for HBM
   apb_a48_d32_req_t apb_hbm_cfg_req;
