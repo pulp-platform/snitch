@@ -8,6 +8,38 @@
 
 typedef enum { FP64 = 8, FP32 = 4, FP16 = 2, FP8 = 1 } precision_t;
 
+/**
+ * @struct gemm_layer_struct
+ * @brief This structure contains all parameters necessary for GEMM.
+ * @var gemm_layer_struct::M
+ * Dimension of matrix product MxK * KxN
+ * @var gemm_layer_struct::M_p
+ * M divided by number of compute cores
+ * @var gemm_layer_struct::N
+ * Dimension of matrix product MxK * KxN
+ * @var gemm_layer_struct::K
+ * Dimension of matrix product MxK * KxN
+ * @var gemm_layer_struct::TA
+ * Transpose matrix A
+ * @var gemm_layer_struct::TB
+ * Transpose matrix B
+ * @var gemm_layer_struct::TILE_M
+ * Tile factor across M dimension
+ * @var gemm_layer_struct::TILE_N
+ * Tile factor across N dimension
+ * @var gemm_layer_struct::TILE_K
+ * Tile factor across K dimension
+ * @var gemm_layer_struct::A
+ * Pointer to matrix A
+ * @var gemm_layer_struct::B
+ * Pointer to matrix B
+ * @var gemm_layer_struct::C
+ * Pointer to matrix C
+ * @var gemm_layer_struct::ALPHA
+ * constant factor: A * B + ALPHA * C
+ * @var gemm_layer_struct::dtype
+ * Precision of GEMM
+ */
 typedef struct gemm_layer_struct {
     uint32_t M;
     uint32_t M_p;
@@ -24,14 +56,6 @@ typedef struct gemm_layer_struct {
     double *A;
     double *B;
     double *C;
-
-    uint32_t A_offset;
-    uint32_t B_offset;
-    uint32_t C_offset;
-
-    uint32_t ldA;
-    uint32_t ldB;
-    uint32_t ldC;
 
     uint32_t ALPHA;
 
