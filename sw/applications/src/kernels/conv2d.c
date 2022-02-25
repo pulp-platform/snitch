@@ -1536,7 +1536,9 @@ void occamy_conv_chw_opt_fp32(kernel_fp32* k) {
     }
 }
 
-void bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y, const uint16_t ch, float* kappa, float* lambda, int flag_relu, int flag_batch_norm) {
+void bn_relu(const float* pBuffer, const uint16_t dim_x, const uint16_t dim_y,
+             const uint16_t ch, float* kappa, float* lambda, int flag_relu,
+             int flag_batch_norm) {
     // Parallelization/Pipelining parameters
     const uint32_t compute_id = snrt_cluster_compute_core_idx();
     const uint32_t compute_num =

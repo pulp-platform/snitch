@@ -64,7 +64,8 @@ typedef struct gemm_layer_struct {
 
 /**
  * @struct conv_layer_struct
- * @brief This structure contains all parameters necessary for Convolutional layers
+ * @brief This structure contains all parameters necessary for Convolutional
+ * layers
  * @var conv_layer_struct::CO
  * Number of output channels
  * @var conv_layer_struct::CI
