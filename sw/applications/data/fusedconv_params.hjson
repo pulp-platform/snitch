@@ -1,0 +1,34 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Parameters for a fused Conv layer
+
+{
+    kernel: "FusedConv"
+    ch_in: 16
+    ch_out: 16
+    dim_in_x: 5
+    dim_in_y: 5
+    dim_kernel_x: 3
+    dim_kernel_y: 3
+    padding: {
+      padding_x_left: 0
+      padding_x_right: 0
+      padding_y_top: 0
+      padding_y_bottom: 0
+    }
+    stride: {
+      stride_x: 1
+      stride_y: 1
+    }
+    flags: {
+      flag_y_accumulate_start: 0
+      flag_y_accumulate_end: 1
+      flag_relu: 1
+      flag_batch_norm: 1
+    }
+    depthwise: 0,
+    chw_layer: 0,
+    prec: 32
+}

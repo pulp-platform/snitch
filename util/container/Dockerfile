@@ -85,7 +85,8 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cm
 
 # Copy repository into tmp directory to execute additional install steps.
 COPY python-requirements.txt /tmp/python-requirements.txt
-RUN pip3 install -r /tmp/python-requirements.txt
+COPY sw/applications/requirements.txt /tmp/sw/applications/requirements.txt
+RUN pip3 install -r /tmp/python-requirements.txt -r /tmp/sw/applications/requirements.txt
 
 # Get the precompiled toolchain
 RUN wget https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-${RISCV_GCC_VERSION}-x86_64-linux-ubuntu14.tar.gz && \

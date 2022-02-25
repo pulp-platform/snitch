@@ -57,6 +57,12 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+        cache: pip
+    - name: Install python packages
+      run: pip install -r sw/applications/requirements.txt
     - name: Install LLVM
       run: sudo apt install llvm-12-dev
     - working-directory: sw/banshee
@@ -88,14 +94,21 @@ jobs:
         }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test snRuntime
       working-directory: sw/snRuntime/build
-      run: make test
+      run: ctest -L snRuntime
     - name: Build snBLAS
       working-directory: sw/snBLAS
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
-      run: make test
+      run: ctest -L snBLAS
+    - name: Build applications
+      working-directory: sw/applications
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
+    - name: Test applications
+      working-directory: sw/applications/build
+      run: ctest -L snApplications
 
   #############################
   # SW on Banshee (Container) #
@@ -133,14 +146,21 @@ jobs:
         }} -DBUILD_TESTS=ON .. && make
     - name: Test snRuntime
       working-directory: sw/snRuntime/build
-      run: make test
+      run: ctest -L snRuntime
     - name: Build snBLAS
       working-directory: sw/snBLAS
       run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
         }} -DBUILD_TESTS=ON .. && make
     - name: Test snBLAS
       working-directory: sw/snBLAS/build
-      run: make test
+      run: ctest -L snBLAS
+    - name: Build applications
+      working-directory: sw/applications
+      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
+        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
+    - name: Test applications
+      working-directory: sw/applications/build
+      run: ctest -L snApplications
 
   ################################
   # SW on Default Snitch Cluster #
