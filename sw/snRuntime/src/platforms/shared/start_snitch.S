@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-#include "start.S"
+#include "../../start.S"
 
 # Function to determine the initial cluster layout to setup the initial stack.
 # See `hw/system/snitch_cluster/test/tb_lib.hh` for details of the bootdata
@@ -47,32 +47,3 @@ _snrt_get_base_hartid:
     .globl _snrt_get_base_hartid
     lw        a0, 8(a0)  # load cluster's hartid offset
     ret
-
-# Function to terminate execution.
-#
-# Expecting:
-# - a0: exit code
-# - a1: device tree ptr
-_snrt_exit:
-    .globl _snrt_exit
-    # Determine global core index.
-    addi      sp, sp, -8
-    sw        a0, 0(sp)
-    sw        ra, 4(sp)
-    call      snrt_global_core_idx
-    lw        t0, 0(sp)
-    lw        ra, 4(sp)
-    addi      sp, sp, 8
-
-    # Only first core triggers exit.
-    bnez      a0, 1f
-    slli      t0, t0, 1
-    ori       t0, t0, 1
-    la        t1, tohost
-    sw        t0, 0(t1)
-1:  ret
-
-# HTIF sections
-.pushsection .htif,"aw",@progbits;
-.align 6; .global tohost; tohost: .dword 0;
-.align 6; .global fromhost; fromhost: .dword 0;

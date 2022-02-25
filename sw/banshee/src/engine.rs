@@ -4,7 +4,10 @@
 
 //! Engine for dynamic binary translation and execution
 
-use crate::{peripherals::Peripherals, riscv, tran::ElfTranslator, util::SiUnit, Configuration};
+use crate::{
+    bootroms::Bootroms, peripherals::Peripherals, riscv, tran::ElfTranslator, util::SiUnit,
+    Configuration,
+};
 extern crate flexfloat;
 extern crate termion;
 use anyhow::{anyhow, bail, Result};
@@ -59,6 +62,8 @@ pub struct Engine {
     pub putchar_buffer: Mutex<HashMap<usize, Vec<u8>>>,
     /// The peripherals for each cluster
     peripherals: Peripherals,
+    /// The bootrom
+    bootrom: Bootroms,
 }
 
 // SAFETY: This is safe because only `context` and `module`
@@ -86,6 +91,7 @@ impl Engine {
             memory: Default::default(),
             putchar_buffer: Default::default(),
             peripherals: Peripherals::new(),
+            bootrom: Bootroms::new(),
         }
     }
 
@@ -305,10 +311,20 @@ impl Engine {
     }
 
     pub fn init_periphs(&mut self) {
+        debug!("Adding peripherals");
         (0..self.num_clusters).for_each(|i| {
             self.peripherals
                 .add_cluster(&self.config.memory[i].periphs.callbacks)
         })
+    }
+
+    pub fn init_bootrom(&mut self) {
+        debug!("Adding bootrom");
+        if self.config.bootrom.callbacks.is_empty() {
+            self.config.bootrom.end = 0;
+        } else {
+            self.bootrom.add_bootrom(&self.config.bootrom.callbacks)
+        }
     }
 
     // Execute the loaded memory.
@@ -571,9 +587,12 @@ pub unsafe fn add_llvm_symbols() {
 
 impl CpuState {
     /// Create a new CpuState
-    pub fn new(num_dm: usize) -> Self {
+    pub fn new(num_dm: usize, hartid: usize, bootrom_addr: u32) -> Self {
+        let mut reg_init: [u32; 32] = [0; 32];
+        reg_init[10] = hartid as u32;
+        reg_init[11] = bootrom_addr;
         Self {
-            regs: [0; 32],
+            regs: reg_init,
             regs_cycle: [0; 32],
             fregs: [0; 32],
             fregs_cycle: [0; 32],
@@ -608,7 +627,11 @@ impl<'a, 'b> Cpu<'a, 'b> {
     ) -> Self {
         Self {
             engine,
-            state: CpuState::new(engine.config.ssr.num_dm),
+            state: CpuState::new(
+                engine.config.ssr.num_dm,
+                hartid,
+                engine.config.bootrom.start,
+            ),
             tcdm_ptr,
             tcdm_ext_ptr,
             hartid,
@@ -685,6 +708,12 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     addr - self.engine.config.memory[self.cluster_id].periphs.start,
                     size,
                 )
+            }
+            // Bootrom
+            x if x >= self.engine.config.bootrom.start && x < self.engine.config.bootrom.end => {
+                self.engine
+                    .bootrom
+                    .load(addr - self.engine.config.bootrom.start)
             }
             // access to the CLINT
             x if x >= self.engine.config.address.clint
@@ -806,6 +835,8 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     size,
                 )
             }
+            // Bootrom
+            x if x >= self.engine.config.bootrom.start && x < self.engine.config.bootrom.end => {}
             // access to the CLINT
             x if x >= self.engine.config.address.clint
                 && x < self.engine.config.address.clint + 0x1000 =>

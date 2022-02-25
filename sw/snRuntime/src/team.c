@@ -76,6 +76,10 @@ int snrt_is_dm_core() {
     return !snrt_is_compute_core();
 }
 
+uint32_t _snrt_barrier_reg_ptr() {
+    return _snrt_team_current->root->barrier_reg_ptr;
+}
+
 snrt_slice_t snrt_global_memory() {
     return _snrt_team_current->root->global_mem;
 }

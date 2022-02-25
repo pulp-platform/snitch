@@ -51,7 +51,7 @@ macro(add_snitch_executable name)
             DEPENDS $<TARGET_FILE:${name}>)
     endif()
     # Run target for RTL simulator
-    if (SNITCH_SIMULATOR AND NOT SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
+    if (SNITCH_SIMULATOR AND SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
         add_custom_target( run-rtl-${name}
             COMMAND ${SNITCH_SIMULATOR} $<TARGET_FILE:${name}>
             COMMAND for f in logs/trace_hart_*.dasm\; do ${SPIKE_DASM} < $$f | ${PYTHON} ${SNRUNTIME_SRC_DIR}/../../util/gen_trace.py > $$\(echo $$f | sed 's/\\.dasm/\\.txt/'\)\; done
@@ -81,7 +81,7 @@ macro(add_snitch_test_args executable_name test_name)
 endmacro()
 
 macro(add_snitch_raw_test_rtl test_name target_name)
-    if (NOT SNITCH_RUNTIME STREQUAL "snRuntime-banshee" AND BUILD_TESTS)
+    if ((NOT SNITCH_RUNTIME STREQUAL "snRuntime-banshee") AND BUILD_TESTS)
         add_test(NAME ${SNITCH_TEST_PREFIX}rtl-${test_name} COMMAND ${SNITCH_SIMULATOR} $<TARGET_FILE:${target_name}>)
         set_property(TEST ${SNITCH_TEST_PREFIX}rtl-${test_name}
         PROPERTY LABELS ${SNITCH_TEST_PREFIX})
@@ -100,9 +100,7 @@ macro(add_snitch_test name)
         message(STATUS "Adding test: ${name}")
         add_snitch_test_executable(${ARGV})
         if (SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
-            add_snitch_test_args(${name} ${name}-core --base-hartid=3)
-            add_snitch_test_args(${name} ${name}-cluster --base-hartid=3 --num-cores=8)
-            add_snitch_test_args(${name} ${name}-system --base-hartid=3 --num-cores=8 --num-clusters=4)
+            add_snitch_test_args(${name} ${name}-snitch --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
         elseif (SNITCH_SIMULATOR)
             add_snitch_test_rtl(${name})
         endif()

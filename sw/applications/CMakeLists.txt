@@ -50,10 +50,10 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
 
     set(SNITCH_TEST_PREFIX snApplications-)
 
-    add_snitch_raw_test_args(batchnorm batchnorm --num-cores=9)
-    add_snitch_raw_test_args(maxpool maxpool --num-cores=9)
-    add_snitch_raw_test_args(conv2d conv2d --num-cores=9)
-    add_snitch_raw_test_args(gemm gemm --num-cores=9)
-    add_snitch_raw_test_args(fusedconv fusedconv --num-cores=9)
+    add_snitch_raw_test_args(batchnorm batchnorm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    add_snitch_raw_test_args(maxpool maxpool --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    add_snitch_raw_test_args(conv2d conv2d --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    add_snitch_raw_test_args(gemm gemm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    add_snitch_raw_test_args(fusedconv fusedconv --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
 
 endif()
