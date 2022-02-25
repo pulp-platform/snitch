@@ -29,6 +29,8 @@
   txns_wide_to_hbm = cfg["txns"]["wide_to_hbm"]
   txns_narrow_and_wide = cfg["txns"]["narrow_and_wide"]
   max_atomics_narrow = 16
+  max_trans_atop_filter_per = 4
+  max_trans_atop_filter_ser = 32
   hbi_trunc_addr_width = 40
 %>
 
@@ -136,8 +138,8 @@ module ${name}_soc
     #// narrow xbar -> wide xbar & wide xbar -> narrow xbar
     soc_narrow_xbar.out_soc_wide \
       .cut(context, cuts_narrow_and_wide) \
-      .change_iw(context, soc_wide_xbar.in_soc_narrow.iw, "soc_narrow_wide_iwc", max_txns_per_id=txns_narrow_and_wide) \
       .atomic_adapter(context, max_atomics_narrow, "soc_narrow_wide_amo_adapter") \
+      .change_iw(context, soc_wide_xbar.in_soc_narrow.iw, "soc_narrow_wide_iwc", max_txns_per_id=txns_narrow_and_wide) \
       .change_dw(context, soc_wide_xbar.in_soc_narrow.dw, "soc_narrow_wide_dw", to=soc_wide_xbar.in_soc_narrow)
     soc_wide_xbar.out_soc_narrow \
       .change_iw(context, soc_narrow_xbar.in_soc_wide.iw, "soc_wide_narrow_iwc", max_txns_per_id=txns_narrow_and_wide) \
@@ -149,7 +151,9 @@ module ${name}_soc
   // PCIe //
   //////////
   <%
-    pcie_out = soc_narrow_xbar.__dict__["out_pcie"].cut(context, cuts_narrow_and_pcie, name="pcie_out", inst_name="i_pcie_out_cut")
+    pcie_out = soc_narrow_xbar.__dict__["out_pcie"] \
+      .atomic_adapter(context, filter=True, max_trans=max_trans_atop_filter_ser, name="pcie_out_noatop", inst_name="pcie_out_atop_filter") \
+      .cut(context, cuts_narrow_and_pcie, name="pcie_out", inst_name="i_pcie_out_cut")
     pcie_in = soc_narrow_xbar.__dict__["in_pcie"].copy(name="pcie_in").declare(context)
     pcie_in.cut(context, cuts_narrow_and_pcie, to=soc_narrow_xbar.__dict__["in_pcie"])
   %>\
@@ -229,7 +233,6 @@ module ${name}_soc
   // SPM //
   //////////
   <% narrow_spm_mst = soc_narrow_xbar.out_spm \
-                      .serialize(context, "spm_serialize", iw=1) \
                       .atomic_adapter(context, max_atomics_narrow, "spm_amo_adapter") \
                       .cut(context, cuts_narrow_conv_to_spm)
   %>\
@@ -315,6 +318,7 @@ module ${name}_soc
     hbi_in_wide_soc.cut(context, cuts_wide_and_hbi, name="hbi_to_wide_cut", to=soc_wide_xbar.in_hbi)
     hbi_out_wide_soc = soc_wide_xbar.out_hbi \
       .trunc_addr(context, hbi_trunc_addr_width, name="wide_to_hbi_trunc") \
+      .atomic_adapter(context, filter=True, max_trans=max_trans_atop_filter_ser, name="wide_to_hbi_noatop", inst_name="wide_to_hbi_atop_filter") \
       .cut(context, cuts_wide_and_hbi, name="wide_to_hbi_cut")
     #// hbi <-> narrow xbar
     hbi_in_narrow_soc = soc_narrow_xbar.in_hbi.copy(name="hbi_in_narrow_soc").declare(context)
@@ -358,10 +362,13 @@ module ${name}_soc
   // Peripherals //
   /////////////////
   <%
-    periph_regbus_out = soc_narrow_xbar.__dict__["out_regbus_periph"].cut(context,
-      cuts_periph_regbus, name="periph_regbus_out", inst_name="i_periph_regbus_out_cut")
-    periph_axi_lite_out = soc_narrow_xbar.__dict__["out_periph"].cut(context,
-      cuts_periph_axi_lite, name="periph_axi_lite_out", inst_name="i_periph_axi_lite_out_cut")
+    periph_regbus_out = soc_narrow_xbar.__dict__["out_regbus_periph"] \
+      .atomic_adapter(context, filter=True, max_trans=max_trans_atop_filter_per, name="periph_regbus_out_noatop", inst_name="periph_regbus_out_atop_filter") \
+      .cut(context, cuts_periph_regbus, name="periph_regbus_out", inst_name="i_periph_regbus_out_cut")
+    periph_axi_lite_out = soc_narrow_xbar.__dict__["out_periph"] \
+      .atomic_adapter(context, filter=True, max_trans=max_trans_atop_filter_per, name="periph_axi_lite_out_noatop", inst_name="periph_axi_lite_out_atop_filter") \
+      .cut(context, cuts_periph_axi_lite, name="periph_axi_lite_out", inst_name="i_periph_axi_lite_out_cut") \
+
     periph_axi_lite_in = soc_narrow_xbar.__dict__["in_periph"].copy(name="periph_axi_lite_in").declare(context)
     periph_axi_lite_in.cut(context, cuts_periph_axi_lite, to=soc_narrow_xbar.__dict__["in_periph"])
   %>\
