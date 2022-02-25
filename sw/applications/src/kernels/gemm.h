@@ -59,10 +59,8 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
  * @param K number of columns of matrix A
  * @param A pointer to matrix A
  * @param ldA row stride in matrix A
- * @param ta transposed memory layout for matrix A
  * @param B pointer to matrix B
  * @param ldB row stride in matrix B
- * @param tb transposed memory layout for matrix B
  * @param C pointer to matrix C
  * @param ldC row stride in matrix C
  * @param ALPHA accmulate factor of C

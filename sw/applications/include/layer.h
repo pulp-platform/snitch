@@ -62,6 +62,46 @@ typedef struct gemm_layer_struct {
     precision_t dtype;
 } gemm_layer;
 
+/**
+ * @struct conv_layer_struct
+ * @brief This structure contains all parameters necessary for Convolutional layers
+ * @var conv_layer_struct::CO
+ * Number of output channels
+ * @var conv_layer_struct::CI
+ * Number of input channels
+ * @var conv_layer_struct::IH
+ * Height of input feature map
+ * @var conv_layer_struct::IW
+ * Width of input feature map
+ * @var conv_layer_struct::OH
+ * Height of output feature map
+ * @var conv_layer_struct::OW
+ * Width of output feature map
+ * @var conv_layer_struct::FH
+ * Height of filter
+ * @var conv_layer_struct::FW
+ * Width of filter
+ * @var conv_layer_struct::pad
+ * Padding on all sides
+ * @var conv_layer_struct::ifmap
+ * Pointer to input feature map
+ * @var conv_layer_struct::weights
+ * Pointer to weights
+ * @var conv_layer_struct::ofmap
+ * Pointer to output feature map
+ * @var conv_layer_struct::TILE_CI
+ * Tiling factor of input channel
+ * @var conv_layer_struct::cluster2cluster
+ * Flag for enabling cluster 2 cluster communication
+ * @var conv_layer_struct::im2col
+ * Flag for enabling im2col + GEMM
+ * @var conv_layer_struct::gamma
+ * Pointer to gamma for BatchNorm
+ * @var conv_layer_struct::beta
+ * Pointer to beta for BatchNorm
+ * @var gemm_layer_struct::dtype
+ * Precision of Convolution layer
+ */
 typedef struct conv_layer_struct {
     // CONV2D
     uint32_t CO;
