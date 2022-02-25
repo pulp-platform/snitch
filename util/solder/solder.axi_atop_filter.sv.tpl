@@ -3,7 +3,7 @@
     .AxiMaxWriteTxns (${max_trans}),
     .req_t (${bus_in.req_type()}),
     .resp_t (${bus_in.rsp_type()})
-  ) i_axi_atop_filter (
+  ) ${name} (
     .clk_i     (${bus_in.clk}),
     .rst_ni    (${bus_in.rst}),
     .slv_req_i (${bus_in.req_name()}),
