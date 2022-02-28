@@ -900,7 +900,7 @@ module occamy_soc
       .AxiMaxWriteTxns(32),
       .req_t(axi_a48_d64_i8_u0_req_t),
       .resp_t(axi_a48_d64_i8_u0_resp_t)
-  ) pcie_out_atop_filter (
+  ) i_pcie_out_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
       .slv_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_PCIE]),
@@ -2252,7 +2252,7 @@ module occamy_soc
       .AxiMaxWriteTxns(32),
       .req_t(axi_a48_d512_i6_u0_req_t),
       .resp_t(axi_a48_d512_i6_u0_resp_t)
-  ) wide_to_hbi_atop_filter (
+  ) i_wide_to_hbi_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
       .slv_req_i (wide_to_hbi_trunc_req),
@@ -2344,7 +2344,7 @@ module occamy_soc
       .AxiMaxWriteTxns(4),
       .req_t(axi_a48_d64_i8_u0_req_t),
       .resp_t(axi_a48_d64_i8_u0_resp_t)
-  ) periph_regbus_out_atop_filter (
+  ) i_periph_regbus_out_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
       .slv_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_REGBUS_PERIPH]),
@@ -2381,7 +2381,7 @@ module occamy_soc
       .AxiMaxWriteTxns(4),
       .req_t(axi_a48_d64_i8_u0_req_t),
       .resp_t(axi_a48_d64_i8_u0_resp_t)
-  ) periph_axi_lite_out_atop_filter (
+  ) i_periph_axi_lite_out_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
       .slv_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_PERIPH]),
