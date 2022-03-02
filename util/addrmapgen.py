@@ -73,6 +73,8 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
     quadrant_range_end = 0
     quadrant_range_size = 0
 
+    max_quadrant_index = 0
+
     all_entries = []
     all_quadrant_entries = []
 
@@ -101,6 +103,9 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
 
         # collect all_quadrant_entries seperately for "zoom-in" graphic
         if("quadrant" in str(row['name'])):
+            quadrant_idx = int(re.search(r'\d+', row['name']).group())
+            if(quadrant_idx > max_quadrant_index):
+                max_quadrant_index = quadrant_idx
             all_quadrant_entries.append(entry)
             if start_addr < quadrant_range_start:
                 quadrant_range_start = start_addr
@@ -213,9 +218,9 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
     nr_q_entries = len(all_quadrant_entries)
 
     # Quadrant latex
+    NR_QUADRANTS = max_quadrant_index + 1
     NR_CLUSTER_ADDR_RANGES = 3  # tcdm and periphs
-    NR_CLUSTERS_PER_QUADRANT = 4  # hardcoded for now
-    NR_QUADRANTS = int(nr_q_entries / NR_CLUSTERS_PER_QUADRANT / NR_CLUSTER_ADDR_RANGES)
+    NR_CLUSTERS_PER_QUADRANT = int(nr_q_entries / NR_CLUSTER_ADDR_RANGES / NR_QUADRANTS)
 
     QUADRANT_SIZE = int(quadrant_range_size / NR_QUADRANTS)
     quadrant_size_str = get_size_string(QUADRANT_SIZE)
@@ -236,11 +241,18 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
         tcdm = (items[4] == "TCDM")
         periph = (items[4] == "PERIPH")
 
+        # special layout when only 1 cluster is used
         quadrant_string = ""
-        if cidx == QIDX0 and not tcdm and not periph:
-            quadrant_string = quadrant_size_str
-        elif cidx == QIDX1 and tcdm:
-            quadrant_string = "QUADRANT {}".format(qidx)
+        if(NR_CLUSTERS_PER_QUADRANT > 1):
+            if cidx == QIDX0 and not tcdm and not periph:
+                quadrant_string = quadrant_size_str
+            elif cidx == QIDX1 and tcdm:
+                quadrant_string = "QUADRANT {}".format(qidx)
+        else:
+            if cidx == QIDX0 and tcdm:
+                quadrant_string = quadrant_size_str
+            elif cidx == QIDX0 and periph:
+                quadrant_string = "QUADRANT {}".format(qidx)
 
         quadrant_border = ""
         if (cidx == 0) and tcdm:
