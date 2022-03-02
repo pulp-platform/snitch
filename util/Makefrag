@@ -2,6 +2,7 @@
 BENDER		   ?= bender
 DASM 	       ?= spike-dasm
 VLT			   ?= verilator
+VERIBLE_FMT    ?= verible-verilog-format
 
 VERILATOR_ROOT ?= $(dir $(shell which $(VLT)))/../share/verilator
 VLT_ROOT	   ?= ${VERILATOR_ROOT}
