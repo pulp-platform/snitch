@@ -709,7 +709,7 @@ module occamy_xilinx
       .pcie_cfg_req_o  (),
       .pcie_cfg_rsp_i  ('0),
       // Tie the HBM interrupts to zero.
-      .ext_irq_i({8'b0, ext_irq_i}),
+      .ext_irq_i ({8'b0, ext_irq_i}),
       .*
   );
 
