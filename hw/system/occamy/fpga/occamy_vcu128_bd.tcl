@@ -124,7 +124,6 @@ set bCheckIPsPassed 1
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
-xilinx.com:ip:aurora_64b66b:12.0\
 xilinx.com:ip:axi_apb_bridge:3.0\
 xilinx.com:ip:axi_bram_ctrl:4.1\
 xilinx.com:ip:axi_dma:7.1\
@@ -133,10 +132,8 @@ xilinx.com:ip:axi_iic:2.0\
 xilinx.com:ip:axi_quad_spi:3.2\
 xilinx.com:ip:blk_mem_gen:8.4\
 xilinx.com:ip:xlconstant:1.1\
-xilinx.com:ip:axis_clock_converter:1.1\
 xilinx.com:ip:clk_wiz:6.0\
 xilinx.com:ip:xlconcat:2.1\
-xilinx.com:ip:axis_dwidth_converter:1.1\
 xilinx.com:ip:hbm:1.0\
 xilinx.com:ip:system_ila:1.1\
 xilinx.com:ip:jtag_axi:1.2\
@@ -209,24 +206,6 @@ proc create_root_design { parentCell } {
 
 
   # Create interface ports
-  set GT_DIFF_REFCLK1_0 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 GT_DIFF_REFCLK1_0 ]
-  set_property -dict [ list \
-   CONFIG.FREQ_HZ {156250000} \
-   ] $GT_DIFF_REFCLK1_0
-
-  set GT_DIFF_REFCLK1_1 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 GT_DIFF_REFCLK1_1 ]
-  set_property -dict [ list \
-   CONFIG.FREQ_HZ {156250000} \
-   ] $GT_DIFF_REFCLK1_1
-
-  set GT_SERIAL_RX_0 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:display_aurora:GT_Serial_Transceiver_Pins_RX_rtl:1.0 GT_SERIAL_RX_0 ]
-
-  set GT_SERIAL_RX_1 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:display_aurora:GT_Serial_Transceiver_Pins_RX_rtl:1.0 GT_SERIAL_RX_1 ]
-
-  set GT_SERIAL_TX_0 [ create_bd_intf_port -mode Master -vlnv xilinx.com:display_aurora:GT_Serial_Transceiver_Pins_TX_rtl:1.0 GT_SERIAL_TX_0 ]
-
-  set GT_SERIAL_TX_1 [ create_bd_intf_port -mode Master -vlnv xilinx.com:display_aurora:GT_Serial_Transceiver_Pins_TX_rtl:1.0 GT_SERIAL_TX_1 ]
-
   set IIC_0 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:iic_rtl:1.0 IIC_0 ]
 
   set default_100mhz_clk [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 default_100mhz_clk ]
@@ -255,52 +234,6 @@ proc create_root_design { parentCell } {
  ] $reset
   set uart_rx_i_0 [ create_bd_port -dir I uart_rx_i_0 ]
   set uart_tx_o_0 [ create_bd_port -dir O uart_tx_o_0 ]
-
-  # Create instance: aurora_64b66b_0, and set properties
-  set aurora_64b66b_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:aurora_64b66b:12.0 aurora_64b66b_0 ]
-  set_property -dict [ list \
-   CONFIG.CHANNEL_ENABLE {X0Y44 X0Y45 X0Y46 X0Y47} \
-   CONFIG.C_AURORA_LANES {4} \
-   CONFIG.C_GT_LOC_2 {2} \
-   CONFIG.C_GT_LOC_3 {3} \
-   CONFIG.C_GT_LOC_4 {4} \
-   CONFIG.C_LINE_RATE {25} \
-   CONFIG.C_REFCLK_SOURCE {MGTREFCLK0_of_Quad_X0Y11} \
-   CONFIG.C_START_LANE {X0Y44} \
-   CONFIG.C_START_QUAD {Quad_X0Y11} \
-   CONFIG.C_UCOLUMN_USED {left} \
-   CONFIG.C_USE_BYTESWAP {true} \
-   CONFIG.C_USE_CHIPSCOPE {false} \
-   CONFIG.RX_TERMINATION {FLOAT} \
-   CONFIG.SupportLevel {1} \
-   CONFIG.TransceiverControl {true} \
-   CONFIG.crc_mode {false} \
-   CONFIG.drp_mode {Native} \
-   CONFIG.interface_mode {Streaming} \
- ] $aurora_64b66b_0
-
-  # Create instance: aurora_64b66b_1, and set properties
-  set aurora_64b66b_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:aurora_64b66b:12.0 aurora_64b66b_1 ]
-  set_property -dict [ list \
-   CONFIG.CHANNEL_ENABLE {X0Y40 X0Y41 X0Y42 X0Y43} \
-   CONFIG.C_AURORA_LANES {4} \
-   CONFIG.C_GT_LOC_2 {2} \
-   CONFIG.C_GT_LOC_3 {3} \
-   CONFIG.C_GT_LOC_4 {4} \
-   CONFIG.C_LINE_RATE {25} \
-   CONFIG.C_REFCLK_SOURCE {MGTREFCLK0_of_Quad_X0Y10} \
-   CONFIG.C_START_LANE {X0Y40} \
-   CONFIG.C_START_QUAD {Quad_X0Y10} \
-   CONFIG.C_UCOLUMN_USED {left} \
-   CONFIG.C_USE_BYTESWAP {true} \
-   CONFIG.C_USE_CHIPSCOPE {false} \
-   CONFIG.RX_TERMINATION {FLOAT} \
-   CONFIG.SupportLevel {1} \
-   CONFIG.TransceiverControl {true} \
-   CONFIG.crc_mode {false} \
-   CONFIG.drp_mode {Native} \
-   CONFIG.interface_mode {Streaming} \
- ] $aurora_64b66b_1
 
   # Create instance: axi_apb_bridge_0, and set properties
   set axi_apb_bridge_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_apb_bridge:3.0 axi_apb_bridge_0 ]
@@ -701,40 +634,6 @@ proc create_root_design { parentCell } {
    CONFIG.NUM_SI {3} \
  ] $smc_spcie
 
-  # Create instance: vio_0, and set properties
-  set vio_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:vio:3.0 vio_0 ]
-  set_property -dict [ list \
-   CONFIG.C_EN_PROBE_IN_ACTIVITY {0} \
-   CONFIG.C_NUM_PROBE_IN {3} \
-   CONFIG.C_NUM_PROBE_OUT {3} \
-   CONFIG.C_PROBE_OUT0_INIT_VAL {0000} \
-   CONFIG.C_PROBE_OUT0_WIDTH {1} \
-   CONFIG.C_PROBE_OUT1_INIT_VAL {0000} \
-   CONFIG.C_PROBE_OUT1_WIDTH {1} \
-   CONFIG.C_PROBE_OUT2_INIT_VAL {0x2} \
-   CONFIG.C_PROBE_OUT2_WIDTH {3} \
-   CONFIG.C_PROBE_OUT7_WIDTH {3} \
-   CONFIG.C_PROBE_OUT8_WIDTH {3} \
-   CONFIG.C_PROBE_OUT9_WIDTH {3} \
- ] $vio_0
-
-  # Create instance: vio_1, and set properties
-  set vio_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:vio:3.0 vio_1 ]
-  set_property -dict [ list \
-   CONFIG.C_EN_PROBE_IN_ACTIVITY {0} \
-   CONFIG.C_NUM_PROBE_IN {3} \
-   CONFIG.C_NUM_PROBE_OUT {3} \
-   CONFIG.C_PROBE_OUT0_INIT_VAL {0000} \
-   CONFIG.C_PROBE_OUT0_WIDTH {1} \
-   CONFIG.C_PROBE_OUT1_INIT_VAL {0000} \
-   CONFIG.C_PROBE_OUT1_WIDTH {1} \
-   CONFIG.C_PROBE_OUT2_INIT_VAL {0x2} \
-   CONFIG.C_PROBE_OUT2_WIDTH {3} \
-   CONFIG.C_PROBE_OUT7_WIDTH {3} \
-   CONFIG.C_PROBE_OUT8_WIDTH {3} \
-   CONFIG.C_PROBE_OUT9_WIDTH {3} \
- ] $vio_1
-
   # Create instance: vio_sys, and set properties
   set vio_sys [ create_bd_cell -type ip -vlnv xilinx.com:ip:vio:3.0 vio_sys ]
   set_property -dict [ list \
@@ -757,12 +656,6 @@ proc create_root_design { parentCell } {
  ] $xlslice_0
 
   # Create interface connections
-  connect_bd_intf_net -intf_net GT_DIFF_REFCLK1_0_1 [get_bd_intf_ports GT_DIFF_REFCLK1_0] [get_bd_intf_pins aurora_64b66b_0/GT_DIFF_REFCLK1]
-  connect_bd_intf_net -intf_net GT_DIFF_REFCLK1_1_1 [get_bd_intf_ports GT_DIFF_REFCLK1_1] [get_bd_intf_pins aurora_64b66b_1/GT_DIFF_REFCLK1]
-  connect_bd_intf_net -intf_net GT_SERIAL_RX_0_1 [get_bd_intf_ports GT_SERIAL_RX_0] [get_bd_intf_pins aurora_64b66b_0/GT_SERIAL_RX]
-  connect_bd_intf_net -intf_net GT_SERIAL_RX_1_1 [get_bd_intf_ports GT_SERIAL_RX_1] [get_bd_intf_pins aurora_64b66b_1/GT_SERIAL_RX]
-  connect_bd_intf_net -intf_net aurora_64b66b_0_GT_SERIAL_TX [get_bd_intf_ports GT_SERIAL_TX_0] [get_bd_intf_pins aurora_64b66b_0/GT_SERIAL_TX]
-  connect_bd_intf_net -intf_net aurora_64b66b_1_GT_SERIAL_TX [get_bd_intf_ports GT_SERIAL_TX_1] [get_bd_intf_pins aurora_64b66b_1/GT_SERIAL_TX]
   connect_bd_intf_net -intf_net axi_apb_bridge_0_APB_M [get_bd_intf_pins axi_apb_bridge_0/APB_M] [get_bd_intf_pins hbm_0/SAPB_0]
   connect_bd_intf_net -intf_net axi_apb_bridge_0_APB_M2 [get_bd_intf_pins axi_apb_bridge_0/APB_M2] [get_bd_intf_pins hbm_0/SAPB_1]
   connect_bd_intf_net -intf_net axi_dma_0_M_AXIS_CNTRL [get_bd_intf_pins axi_dma_0/M_AXIS_CNTRL] [get_bd_intf_pins axi_ethernet_0/s_axis_txc]
@@ -814,15 +707,6 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets axi_ethernet_0_m_axis_rxs] [get_
   connect_bd_intf_net -intf_net smc_pcie_M05_AXI [get_bd_intf_pins axi_iic_0/S_AXI] [get_bd_intf_pins smc_pcie/M05_AXI]
 
   # Create port connections
-  connect_bd_net -net a0_channel_up [get_bd_pins aurora_64b66b_0/channel_up] [get_bd_pins vio_0/probe_in0]
-  connect_bd_net -net a0_hard_err [get_bd_pins aurora_64b66b_0/hard_err] [get_bd_pins vio_0/probe_in2]
-  connect_bd_net -net a0_loopback [get_bd_pins aurora_64b66b_0/loopback] [get_bd_pins vio_0/probe_out2]
-  connect_bd_net -net a0_pma_init [get_bd_pins aurora_64b66b_0/pma_init] [get_bd_pins vio_0/probe_out1]
-  connect_bd_net -net a0_reset_pb [get_bd_pins aurora_64b66b_0/reset_pb] [get_bd_pins vio_0/probe_out0]
-  connect_bd_net -net a0_soft_err [get_bd_pins aurora_64b66b_0/soft_err] [get_bd_pins vio_0/probe_in1]
-  connect_bd_net -net aurora_64b66b_1_channel_up [get_bd_pins aurora_64b66b_1/channel_up] [get_bd_pins vio_1/probe_in0]
-  connect_bd_net -net aurora_64b66b_1_hard_err [get_bd_pins aurora_64b66b_1/hard_err] [get_bd_pins vio_1/probe_in2]
-  connect_bd_net -net aurora_64b66b_1_soft_err [get_bd_pins aurora_64b66b_1/soft_err] [get_bd_pins vio_1/probe_in1]
   connect_bd_net -net axi_dma_0_mm2s_cntrl_reset_out_n [get_bd_pins axi_dma_0/mm2s_cntrl_reset_out_n] [get_bd_pins axi_ethernet_0/axi_txc_arstn]
   connect_bd_net -net axi_dma_0_mm2s_introut [get_bd_pins axi_dma_0/mm2s_introut] [get_bd_pins concat_irq/In2]
   connect_bd_net -net axi_dma_0_mm2s_prmry_reset_out_n [get_bd_pins axi_dma_0/mm2s_prmry_reset_out_n] [get_bd_pins axi_ethernet_0/axi_txd_arstn]
@@ -834,8 +718,8 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets axi_ethernet_0_m_axis_rxs] [get_
   connect_bd_net -net axi_iic_0_iic2intc_irpt [get_bd_pins axi_iic_0/iic2intc_irpt] [get_bd_pins concat_irq/In4]
   connect_bd_net -net axi_quad_spi_0_ip2intc_irpt [get_bd_pins axi_quad_spi_0/ip2intc_irpt] [get_bd_pins concat_irq/In1]
   connect_bd_net -net c_high_dout [get_bd_pins axi_quad_spi_0/keyclearb] [get_bd_pins axi_quad_spi_0/usrdoneo] [get_bd_pins axi_quad_spi_0/usrdonets] [get_bd_pins c_high/dout]
-  connect_bd_net -net clk_wiz_clk_100_bufg [get_bd_pins aurora_64b66b_0/init_clk] [get_bd_pins aurora_64b66b_1/init_clk] [get_bd_pins axi_quad_spi_0/ext_spi_clk] [get_bd_pins clk_wiz/clk_100_bufg] [get_bd_pins psr_100/slowest_sync_clk]
-  connect_bd_net -net clk_wiz_clk_core [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/m_axi_s2mm_aclk] [get_bd_pins axi_dma_0/m_axi_sg_aclk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_ethernet_0/axis_clk] [get_bd_pins axi_ethernet_0/s_axi_lite_clk] [get_bd_pins axi_iic_0/s_axi_aclk] [get_bd_pins axi_quad_spi_0/s_axi4_aclk] [get_bd_pins axis_mm2s_0/clk_i] [get_bd_pins axis_mm2s_1/clk_i] [get_bd_pins blk_mem_gen_0/clkb] [get_bd_pins cdc_apqc_ds_0/s_axis_aclk] [get_bd_pins cdc_apqc_ds_1/s_axis_aclk] [get_bd_pins cdc_apqc_us_0/m_axis_aclk] [get_bd_pins cdc_apqc_us_1/m_axis_aclk] [get_bd_pins clk_wiz/clk_core] [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins ila_25/clk] [get_bd_pins jtag_axi_0/aclk] [get_bd_pins occamy/clk_i] [get_bd_pins occamy/clk_periph_i] [get_bd_pins psr_25/slowest_sync_clk] [get_bd_pins smc_hbm_0/aclk] [get_bd_pins smc_hbm_1/aclk] [get_bd_pins smc_hbm_2/aclk] [get_bd_pins smc_hbm_3/aclk] [get_bd_pins smc_hbm_4/aclk] [get_bd_pins smc_hbm_5/aclk] [get_bd_pins smc_hbm_6/aclk] [get_bd_pins smc_hbm_7/aclk] [get_bd_pins smc_pcie/aclk] [get_bd_pins smc_spcie/aclk] [get_bd_pins vio_sys/clk]
+  connect_bd_net -net clk_wiz_clk_100_bufg [get_bd_pins axi_quad_spi_0/ext_spi_clk] [get_bd_pins clk_wiz/clk_100_bufg] [get_bd_pins psr_100/slowest_sync_clk]
+  connect_bd_net -net clk_wiz_clk_core [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/m_axi_s2mm_aclk] [get_bd_pins axi_dma_0/m_axi_sg_aclk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_ethernet_0/axis_clk] [get_bd_pins axi_ethernet_0/s_axi_lite_clk] [get_bd_pins axi_iic_0/s_axi_aclk] [get_bd_pins axi_quad_spi_0/s_axi4_aclk] [get_bd_pins blk_mem_gen_0/clkb] [get_bd_pins clk_wiz/clk_core] [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins ila_25/clk] [get_bd_pins jtag_axi_0/aclk] [get_bd_pins occamy/clk_i] [get_bd_pins occamy/clk_periph_i] [get_bd_pins psr_25/slowest_sync_clk] [get_bd_pins smc_hbm_0/aclk] [get_bd_pins smc_hbm_1/aclk] [get_bd_pins smc_hbm_2/aclk] [get_bd_pins smc_hbm_3/aclk] [get_bd_pins smc_hbm_4/aclk] [get_bd_pins smc_hbm_5/aclk] [get_bd_pins smc_hbm_6/aclk] [get_bd_pins smc_hbm_7/aclk] [get_bd_pins smc_pcie/aclk] [get_bd_pins smc_spcie/aclk] [get_bd_pins vio_sys/clk]
   connect_bd_net -net clk_wiz_clk_hbm [get_bd_pins clk_wiz/clk_hbm] [get_bd_pins hbm_0/AXI_00_ACLK] [get_bd_pins hbm_0/AXI_01_ACLK] [get_bd_pins hbm_0/AXI_04_ACLK] [get_bd_pins hbm_0/AXI_05_ACLK] [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins hbm_0/AXI_12_ACLK] [get_bd_pins hbm_0/AXI_16_ACLK] [get_bd_pins hbm_0/AXI_20_ACLK] [get_bd_pins hbm_0/AXI_24_ACLK] [get_bd_pins hbm_0/AXI_28_ACLK] [get_bd_pins hbm_0/HBM_REF_CLK_0] [get_bd_pins hbm_0/HBM_REF_CLK_1] [get_bd_pins psr_hbm/slowest_sync_clk] [get_bd_pins smc_hbm_0/aclk1] [get_bd_pins smc_hbm_1/aclk1] [get_bd_pins smc_hbm_2/aclk1] [get_bd_pins smc_hbm_3/aclk1] [get_bd_pins smc_hbm_4/aclk1] [get_bd_pins smc_hbm_5/aclk1] [get_bd_pins smc_hbm_6/aclk1] [get_bd_pins smc_hbm_7/aclk1]
   connect_bd_net -net clk_wiz_clk_rtc [get_bd_pins clk_wiz/clk_rtc] [get_bd_pins occamy/rtc_i]
   connect_bd_net -net const_low_dout [get_bd_pins axi_quad_spi_0/gsr] [get_bd_pins axi_quad_spi_0/gts] [get_bd_pins axi_quad_spi_0/usrcclkts] [get_bd_pins c_low/dout] [get_bd_pins occamy/test_mode_i]
@@ -843,7 +727,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets axi_ethernet_0_m_axis_rxs] [get_
   connect_bd_net -net glbl_rst [get_bd_pins concat_rst/In1] [get_bd_pins vio_sys/probe_out1]
   connect_bd_net -net occamy_bootmode [get_bd_pins occamy/boot_mode_i] [get_bd_pins vio_sys/probe_out2]
   connect_bd_net -net occamy_bootrom_addr_o [get_bd_pins occamy/bootrom_addr_o] [get_bd_pins xlslice_0/Din]
-  connect_bd_net -net occamy_rstn [get_bd_pins axis_mm2s_0/rst_ni] [get_bd_pins axis_mm2s_1/rst_ni] [get_bd_pins cdc_apqc_ds_0/s_axis_aresetn] [get_bd_pins cdc_apqc_ds_1/s_axis_aresetn] [get_bd_pins cdc_apqc_us_0/m_axis_aresetn] [get_bd_pins cdc_apqc_us_1/m_axis_aresetn] [get_bd_pins occamy/rst_ni] [get_bd_pins occamy/rst_periph_ni] [get_bd_pins vio_sys/probe_out0]
+  connect_bd_net -net occamy_rstn [get_bd_pins occamy/rst_ni] [get_bd_pins occamy/rst_periph_ni] [get_bd_pins vio_sys/probe_out0]
   connect_bd_net -net occamy_uart_tx_o [get_bd_ports uart_tx_o_0] [get_bd_pins occamy/uart_tx_o]
   connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins axi_ethernet_0/s_axi_lite_resetn] [get_bd_pins axi_iic_0/s_axi_aresetn] [get_bd_pins axi_quad_spi_0/s_axi4_aresetn] [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins ila_25/resetn] [get_bd_pins jtag_axi_0/aresetn] [get_bd_pins psr_25/peripheral_aresetn] [get_bd_pins smc_hbm_0/aresetn] [get_bd_pins smc_hbm_1/aresetn] [get_bd_pins smc_hbm_2/aresetn] [get_bd_pins smc_hbm_3/aresetn] [get_bd_pins smc_hbm_4/aresetn] [get_bd_pins smc_hbm_5/aresetn] [get_bd_pins smc_hbm_6/aresetn] [get_bd_pins smc_hbm_7/aresetn] [get_bd_pins smc_pcie/aresetn] [get_bd_pins smc_spcie/aresetn]
   connect_bd_net -net psr_hbm_peripheral_aresetn [get_bd_pins hbm_0/AXI_00_ARESET_N] [get_bd_pins hbm_0/AXI_01_ARESET_N] [get_bd_pins hbm_0/AXI_04_ARESET_N] [get_bd_pins hbm_0/AXI_05_ARESET_N] [get_bd_pins hbm_0/AXI_08_ARESET_N] [get_bd_pins hbm_0/AXI_12_ARESET_N] [get_bd_pins hbm_0/AXI_16_ARESET_N] [get_bd_pins hbm_0/AXI_20_ARESET_N] [get_bd_pins hbm_0/AXI_24_ARESET_N] [get_bd_pins hbm_0/AXI_28_ARESET_N] [get_bd_pins psr_hbm/peripheral_aresetn]
@@ -855,10 +739,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets axi_ethernet_0_m_axis_rxs] [get_
   connect_bd_net -net rom_en [get_bd_pins blk_mem_gen_0/enb] [get_bd_pins ila_25/probe4] [get_bd_pins occamy/bootrom_en_o]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets rom_en]
   connect_bd_net -net uart_rx_i_0_1 [get_bd_ports uart_rx_i_0] [get_bd_pins occamy/uart_rx_i]
-  connect_bd_net -net util_reduced_logic_0_Res [get_bd_pins psr_100/ext_reset_in] [get_bd_pins psr_25/ext_reset_in] [get_bd_pins psr_aurora_0/ext_reset_in] [get_bd_pins psr_aurora_1/ext_reset_in] [get_bd_pins psr_hbm/ext_reset_in] [get_bd_pins rst_or/Res]
-  connect_bd_net -net vio_1_probe_out0 [get_bd_pins aurora_64b66b_1/reset_pb] [get_bd_pins vio_1/probe_out0]
-  connect_bd_net -net vio_1_probe_out1 [get_bd_pins aurora_64b66b_1/pma_init] [get_bd_pins vio_1/probe_out1]
-  connect_bd_net -net vio_1_probe_out2 [get_bd_pins aurora_64b66b_1/power_down] [get_bd_pins vio_1/probe_out2]
+  connect_bd_net -net util_reduced_logic_0_Res [get_bd_pins psr_100/ext_reset_in] [get_bd_pins psr_25/ext_reset_in] [get_bd_pins psr_hbm/ext_reset_in] [get_bd_pins rst_or/Res]
   connect_bd_net -net xlconcat_0_dout [get_bd_pins concat_rst/dout] [get_bd_pins rst_or/Op1]
   connect_bd_net -net xlconcat_1_dout [get_bd_pins concat_irq/dout] [get_bd_pins occamy/ext_irq_i]
 
