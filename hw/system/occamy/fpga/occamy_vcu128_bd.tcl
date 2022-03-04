@@ -301,10 +301,12 @@ proc create_root_design { parentCell } {
   set blk_mem_gen_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_0 ]
   set_property -dict [ list \
    CONFIG.Assume_Synchronous_Clk {false} \
-   CONFIG.Byte_Size {8} \
-   CONFIG.EN_SAFETY_CKT {true} \
-   CONFIG.Enable_32bit_Address {true} \
+   CONFIG.Byte_Size {9} \
+   CONFIG.Coe_File {../../../../../../../bootrom/bootrom-spl.coe} \
+   CONFIG.EN_SAFETY_CKT {false} \
+   CONFIG.Enable_32bit_Address {false} \
    CONFIG.Enable_B {Use_ENB_Pin} \
+   CONFIG.Load_Init_File {true} \
    CONFIG.Memory_Type {True_Dual_Port_RAM} \
    CONFIG.Operating_Mode_A {WRITE_FIRST} \
    CONFIG.Operating_Mode_B {WRITE_FIRST} \
@@ -315,14 +317,14 @@ proc create_root_design { parentCell } {
    CONFIG.Port_B_Write_Rate {50} \
    CONFIG.Read_Width_A {32} \
    CONFIG.Read_Width_B {32} \
-   CONFIG.Register_PortA_Output_of_Memory_Primitives {false} \
-   CONFIG.Register_PortB_Output_of_Memory_Primitives {false} \
-   CONFIG.Use_Byte_Write_Enable {true} \
-   CONFIG.Use_RSTA_Pin {true} \
-   CONFIG.Use_RSTB_Pin {true} \
+   CONFIG.Register_PortA_Output_of_Memory_Primitives {true} \
+   CONFIG.Register_PortB_Output_of_Memory_Primitives {true} \
+   CONFIG.Use_Byte_Write_Enable {false} \
+   CONFIG.Use_RSTA_Pin {false} \
+   CONFIG.Use_RSTB_Pin {false} \
    CONFIG.Write_Width_A {32} \
    CONFIG.Write_Width_B {32} \
-   CONFIG.use_bram_block {BRAM_Controller} \
+   CONFIG.use_bram_block {Stand_Alone} \
  ] $blk_mem_gen_0
 
   # Create instance: c_high, and set properties
