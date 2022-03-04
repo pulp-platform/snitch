@@ -32,7 +32,7 @@ bootrom/bootrom-spl.coe:
 	${MAKE} -C bootrom
 
 occamy_vcu128: vivado_ips/occamy_xilinx bootrom/bootrom-spl.coe
-	${VIVADO} -mode batch -source occamy_vcu128.tcl -tclargs $(DEBUG)
+	${VIVADO} -mode batch -source occamy_vcu128.tcl -tclargs $(DEBUG) ${MKFILE_DIR}/bootrom/bootrom-spl.coe
 
 program:
 	${VIVADO} -mode batch -source occamy_vcu128_program.tcl -tclargs $(FPGA_ID)

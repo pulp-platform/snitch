@@ -4,7 +4,9 @@
 #
 # Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 
-# Parse arguments
+# Parse arguments:
+# 0: Debug 1/0
+# 1: Path to coe for bootrom preconfiguration
 set DEBUG false
 if {$argc > 0} {
     # Vivado's boolean properties are not compatible with all tcl boolean variables.
@@ -12,6 +14,7 @@ if {$argc > 0} {
         set DEBUG true
     }
 }
+set coe_path [lindex $argv 1]
 
 # Create project
 set project occamy_vcu128
@@ -24,6 +27,7 @@ set_property ip_repo_paths ./vivado_ips/build [current_project]
 update_ip_catalog
 
 # Create block design
+exec sed -i "s|CONFIG.Coe_File {.*}|CONFIG.Coe_File {$coe_path}|g" occamy_vcu128_bd.tcl
 source occamy_vcu128_bd.tcl
 
 # Add constraint files
