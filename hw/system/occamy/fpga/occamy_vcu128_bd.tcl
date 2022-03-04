@@ -623,8 +623,8 @@ proc create_root_design { parentCell } {
   # Create instance: smc_pcie, and set properties
   set smc_pcie [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smc_pcie ]
   set_property -dict [ list \
-   CONFIG.NUM_CLKS {2} \
-   CONFIG.NUM_MI {6} \
+   CONFIG.NUM_CLKS {1} \
+   CONFIG.NUM_MI {5} \
    CONFIG.NUM_SI {1} \
  ] $smc_pcie
 
@@ -704,7 +704,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets axi_ethernet_0_m_axis_rxs] [get_
   connect_bd_intf_net -intf_net smc_hbm_5_M00_AXI [get_bd_intf_pins hbm_0/SAXI_20] [get_bd_intf_pins smc_hbm_5/M00_AXI]
   connect_bd_intf_net -intf_net smc_hbm_6_M00_AXI [get_bd_intf_pins hbm_0/SAXI_24] [get_bd_intf_pins smc_hbm_6/M00_AXI]
   connect_bd_intf_net -intf_net smc_hbm_7_M00_AXI [get_bd_intf_pins hbm_0/SAXI_28] [get_bd_intf_pins smc_hbm_7/M00_AXI]
-  connect_bd_intf_net -intf_net smc_pcie_M05_AXI [get_bd_intf_pins axi_iic_0/S_AXI] [get_bd_intf_pins smc_pcie/M05_AXI]
+  connect_bd_intf_net -intf_net smc_pcie_M05_AXI [get_bd_intf_pins axi_iic_0/S_AXI] [get_bd_intf_pins smc_pcie/M00_AXI]
 
   # Create port connections
   connect_bd_net -net axi_dma_0_mm2s_cntrl_reset_out_n [get_bd_pins axi_dma_0/mm2s_cntrl_reset_out_n] [get_bd_pins axi_ethernet_0/axi_txc_arstn]
