@@ -23,12 +23,13 @@ stages:
   - package
   - deploy
 
+# Packages and elaborates the vivado IPs where occamy is part of. This ensures
+# that the occamy xilinx IP can be elaborated
 vivado_ip:
   stage: build
   needs: []
   script:
-    - >
-      cd hw/system/occamy/fpga/vivado_ips && make all --debug
+    - make -C hw/system/occamy/fpga/vivado_ips all
 
 # Testing
 bootrom:
