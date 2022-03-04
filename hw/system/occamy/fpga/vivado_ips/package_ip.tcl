@@ -17,6 +17,9 @@ set build [lindex $argv 1]
 set proj_dir ${build}/proj_${ip_name}
 set ip_dir ${build}/${ip_name}
 
+puts "Build: ${build}"
+puts "IP: ${ip_name}"
+
 # Source metadata
 source ${ip_name}/${ip_name}.tcl
 
