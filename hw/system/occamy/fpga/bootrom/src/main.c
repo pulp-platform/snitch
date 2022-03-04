@@ -12,7 +12,14 @@ enum boot_mode_t { JTAG, SPL_ROM };
 
 int main() {
     init_uart(25000000, 115200);
-    print_uart("Hello World!\r\n");
+
+    print_uart("\r\nOccamy VCU128 bootrom ");
+    print_uart(__DATE__);
+    print_uart(" ");
+    print_uart(__TIME__);
+    print_uart(" ");
+    print_uart(GIT_SHA);
+    print_uart(" CVA6 says hi!\r\n");
 
     // Hardcode boot mode for now. TODO(niwis): derive e.g. from GPIO.
     enum boot_mode_t boot_mode = SPL_ROM;

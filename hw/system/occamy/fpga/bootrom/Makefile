@@ -16,11 +16,13 @@ CC = $(ARIANE_SDK)/install/bin/riscv64-unknown-elf-gcc
 OBJDUMP = $(ARIANE_SDK)/install/bin/riscv64-unknown-elf-objdump
 OBJCOPY = $(ARIANE_SDK)/install/bin/riscv64-unknown-elf-objcopy
 
+GIT_SHA := $(shell git describe --match=NeVeRmAtCh --always --abbrev=10 --dirty)
+
 .PHONY: all
 all: bootrom-spl.coe
 
 %.o: %.c
-	$(CC) -Os -ggdb -march=rv64imafd -mabi=lp64d -Wall -mcmodel=medany -mexplicit-relocs -fno-builtin $(INCLUDES) -c $<  -o $@
+	$(CC) -DGIT_SHA=\"$(GIT_SHA)\" -Os -ggdb -march=rv64imafd -mabi=lp64d -Wall -mcmodel=medany -mexplicit-relocs -fno-builtin $(INCLUDES) -c $<  -o $@
 	@echo "CC    <= $<"
 
 %.dtb: %.dts
