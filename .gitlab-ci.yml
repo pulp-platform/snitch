@@ -38,7 +38,7 @@ bootrom:
   script:
     - make -C hw/system/occamy/fpga/bootrom
     - ls -al hw/system/occamy/fpga/bootrom
-    - wc -l hw/system/occamy/fpga/bootrom/bootrom.coe
+    - wc -l hw/system/occamy/fpga/bootrom/bootrom-spl.coe
   artifacts:
     paths:
       - hw/system/occamy/fpga/bootrom
