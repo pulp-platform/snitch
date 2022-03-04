@@ -1,0 +1,37 @@
+diff --git a/hw/system/occamy/src/occamy_cfg.hjson b/hw/system/occamy/src/occamy_cfg.hjson
+index 2d6342f4..27de9073 100644
+--- a/hw/system/occamy/src/occamy_cfg.hjson
++++ b/hw/system/occamy/src/occamy_cfg.hjson
+@@ -58,9 +58,9 @@
+       rmq: 4,
+     }
+     narrow_xbar_slv_id_width: 4,
+-    nr_s1_quadrant: 6,
++    nr_s1_quadrant: 1,
+     s1_quadrant: {
+-      nr_clusters: 4,
++      nr_clusters: 1,
+       // number of pending transactions on the narrow/wide network
+       narrow_trans: 16,
+       wide_trans: 16,
+@@ -146,13 +146,13 @@
+                 },
+                 cores: [
+                     { $ref: "#/compute_core_template" },
+-                    { $ref: "#/compute_core_template" },
+-                    { $ref: "#/compute_core_template" },
+-                    { $ref: "#/compute_core_template" },
+-                    { $ref: "#/compute_core_template" },
+-                    { $ref: "#/compute_core_template" },
+-                    { $ref: "#/compute_core_template" },
+-                    { $ref: "#/compute_core_template" },
++                    // { $ref: "#/compute_core_template" },
++                    // { $ref: "#/compute_core_template" },
++                    // { $ref: "#/compute_core_template" },
++                    // { $ref: "#/compute_core_template" },
++                    // { $ref: "#/compute_core_template" },
++                    // { $ref: "#/compute_core_template" },
++                    // { $ref: "#/compute_core_template" },
+                     { $ref: "#/dma_core_template" },
+                 ]
+             }
