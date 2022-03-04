@@ -37,3 +37,25 @@ bootrom:
   needs: []
   script:
     - make -C hw/system/occamy/fpga/bootrom
+
+# The occamy on vcu128 design
+occamy_vcu128:
+  stage: build
+  needs: []
+  script:
+    # Make Occamy system smaller to fit on FPGA
+    - git apply hw/system/occamy/fpga/occamy_cfg_small.patch
+    - make -C hw/system/occamy update-source
+    # Generate IP
+    - make -C hw/system/occamy/fpga/vivado_ips
+    # Build bootrom
+    - make -C hw/system/occamy/fpga/bootrom
+    # Synthesize and Implement design
+    - make -C hw/system/occamy/fpga occamy_vcu128
+  artifacts:
+    paths:
+      - "hw/vivado_ip/**/*.log"
+      - hw/system/occamy/fpga/occamy_vcu128/*.zip
+      - hw/system/occamy/fpga/occamy_vcu128/*.reports
+      - hw/**/*.bit
+      - hw/**/*.ltx
