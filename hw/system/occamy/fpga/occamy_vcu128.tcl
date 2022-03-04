@@ -151,3 +151,43 @@ wait_on_run impl_1
 # Generate Bitstream
 launch_runs impl_1 -to_step write_bitstream -jobs 12
 wait_on_run impl_1
+
+# Reports
+proc write_report_timing { build project run name } {
+    exec mkdir -p ${build}/${project}.reports
+
+    # Global timing report
+    report_timing_summary -nworst 20 -file ${build}/${project}.reports/${name}_timing_${run}.rpt
+
+    # timing specific to occamy
+    catch {
+        report_timing_summary -nworst 20 -cells [get_cells -hierarchical -filter { ORIG_REF_NAME =~ occamy*_top }] \
+            -file ${build}/${project}.reports/${name}_timing_${run}_occamy.rpt
+    }
+    # 20 worst setup times
+    catch {
+        report_timing_summary -nworst 20 -setup -cells [get_cells -hierarchical -filter { ORIG_REF_NAME =~ occamy*_top }] \
+            -file ${build}/${project}.reports/${name}_timing_${run}_occamy_setup.rpt
+    }
+}
+
+proc write_report_util { build project run name } {
+    exec mkdir -p ${build}/${project}.reports
+    report_utilization -file ${build}/${project}.reports/${name}_util_${run}.rpt
+    report_utilization -hierarchical -hierarchical_percentages -file ${build}/${project}.reports/${name}_utilhierp_${run}.rpt
+    report_utilization -hierarchical -file ${build}/${project}.reports/${name}_utilhier_${run}.rpt
+    report_utilization -hierarchical -hierarchical_percentages -hierarchical_depth 5 -file ${build}/${project}.reports/${name}_utilhierpf_${run}.rpt
+}
+
+if {[get_property PROGRESS [get_run impl_1]] == "100%"} {
+    # implementation report
+    open_run impl_1
+    write_report_timing ${build} ${project} impl_1 2_post_impl
+    write_report_util ${build} ${project} impl_1 2_post_impl
+    close_design
+}
+
+# Archive project
+set sha [exec git rev-parse --short HEAD]
+set date [exec date +%Y-%m-%d-%H%M%S]
+archive_project -include_config_settings -include_local_ip_cache -force ./${build}/${project}-${sha}-${date}.zip
