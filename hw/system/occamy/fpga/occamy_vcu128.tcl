@@ -6,7 +6,8 @@
 
 # Parse arguments:
 # 0: Debug 1/0
-# 1: Path to coe for bootrom preconfiguration
+# 1: nproc
+# 2: Path to coe for bootrom preconfiguration
 set DEBUG false
 if {$argc > 0} {
     # Vivado's boolean properties are not compatible with all tcl boolean variables.
@@ -14,7 +15,8 @@ if {$argc > 0} {
         set DEBUG true
     }
 }
-set coe_path [lindex $argv 1]
+set nproc [lindex $argv 1]
+set coe_path [lindex $argv 2]
 
 # Create project
 set project occamy_vcu128
