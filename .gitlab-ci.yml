@@ -8,6 +8,7 @@ variables:
   PYTHON: /home/huettern/.local/bin/python3.9
   VERIBLE_FMT: /home/huettern/.local/verible-v0.0-807-g10e7c71/bin/verible-verilog-format
   BENDER: '/home/huettern/.cargo/bin/bender'
+  ARIANE_SDK: '/home/huettern/git/ariane-sdk'
 
 before_script:
   - ${PYTHON} -m venv .venv
@@ -28,3 +29,10 @@ vivado_ip:
   script:
     - >
       cd hw/system/occamy/fpga/vivado_ips && make all --debug
+
+# Testing
+bootrom:
+  stage: build
+  needs: []
+  script:
+    - make -C hw/system/occamy/fpga/bootrom
