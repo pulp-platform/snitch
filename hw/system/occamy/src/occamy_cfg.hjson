@@ -282,21 +282,6 @@
                 length: 65536, // 64 kiB 0x1_0000
             },
             {
-                name: "hbm_cfg",
-                address: 134217728, // 0x0800_0000
-                length: 4194304, // 4 MiB 0x40_0000
-            },
-            {
-                name: "hbm_phy_cfg",
-                address: 150994944 // 0x0900_0000
-                length: 1048576, // 1 MiB 0x10_0000
-            },
-            {
-                name: "hbm_seq",
-                address: 167772160, // 0x0A00_0000
-                length: 65536, // 64 kiB 0x1_0000
-            },
-            {
                 name: "plic",
                 address: 201326592, // 0x0C00_0000
                 length: 67108864, // 64 MiB 0x400_0000
@@ -323,6 +308,24 @@
         channel_size: 1073741824, // 1 GiB 0x4000_0000
         nr_channels_total: 8,
         nr_channels_address_0: 2,
+        cfg_regions: {
+            top: {
+                address: 134217728, // 0x0800_0000
+                length: 4194304, // 4 MiB 0x40_0000
+            },
+            phy: {
+                address: 150994944 // 0x0900_0000
+                length: 1048576, // 1 MiB 0x10_0000
+            },
+            seq: {
+                address: 167772160, // 0x0A00_0000
+                length: 65536, // 64 kiB 0x1_0000
+            },
+            ctrl: {
+                address: 176160768, // 0x0A80_0000
+                length: 65536, // 64 kiB 0x1_0000
+            }
+        }
     },
     // dram corresponds to 'hbm address_0' and 'nr_channels_address_0'
     dram: {
