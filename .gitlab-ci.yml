@@ -24,26 +24,21 @@ stages:
   - package
   - deploy
 
-tc-hrv-olinux:
+tc-hrv-obare:
   stage: build1
   needs: []
   script:
     - |
-      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-olinux; then
-        git clone git@github.com:riscv-collab/riscv-gnu-toolchain.git riscv-gnu-toolchain --depth=1 --recurse-submodules
-        mkdir install-riscv-gnu-toolchain
-        cd riscv-gnu-toolchain
-        ./configure --prefix=$CI_PROJECT_DIR/install-riscv-gnu-toolchain
-        make -j`nproc`
-        cd ..
-        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-hrv-olinux
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-obare; then
+        $CI_PROJECT_DIR/.gitlab-ci.d/build-tc-hrv-obare.sh $CI_PROJECT_DIR
+        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-hrv-obare
       fi
 
 bootrom:
   stage: build2
-  needs: [tc-hrv-olinux]
+  needs: [tc-hrv-obare]
   script:
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-obare
     # Build bootrom
     - make -C hw/system/occamy/fpga/bootrom
 
@@ -62,7 +57,7 @@ vivado_ip:
 # The occamy on vcu128 design
 occamy_vcu128:
   stage: build2
-  needs: [tc-hrv-olinux]
+  needs: [tc-hrv-obare]
   script:
     # Make Occamy system smaller to fit on FPGA
     - ./.gitlab-ci.d/occamy_cfg_fpga.sh
@@ -70,7 +65,7 @@ occamy_vcu128:
     # Generate IP
     - make -C hw/system/occamy/fpga/vivado_ips
     # Build bootrom
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-obare
     - make -C hw/system/occamy/fpga/bootrom
     # Synthesize and Implement design
     - make -C hw/system/occamy/fpga occamy_vcu128

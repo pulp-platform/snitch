@@ -1,7 +1,8 @@
 cache_root_dir: /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch
 
 artifacts:
-  tc-hrv-olinux:
+  tc-hrv-obare:
     inputs:
+      - .gitlab-ci.d/build-tc-hrv-obare.sh
     outputs:
-      - install-riscv-gnu-toolchain
+      - tc-hrv-obare
