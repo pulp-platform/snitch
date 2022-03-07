@@ -1,19 +1,19 @@
-# Untitled number in Occamy System Schema Schema
+# Untitled integer in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi/properties/address
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm/properties/channel_size
 ```
 
-Start address of SPM (Scratchpad Memory).
+Size of single HBM channel region.
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [occamy.schema.json*](occamy.schema.json "open original schema") |
 
-## address Type
+## channel_size Type
 
-`number`
+`integer`
 
-## address Constraints
+## channel_size Constraints
 
 **minimum**: the value of this number must greater than or equal to: `0`

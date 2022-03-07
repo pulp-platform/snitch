@@ -1,4 +1,4 @@
-# Untitled number in Occamy System Schema Schema
+# Untitled integer in Occamy System Schema Schema
 
 ```txt
 http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/cfg_base_addr
@@ -12,7 +12,7 @@ Base address of the quadrant configuration region.
 
 ## cfg_base_addr Type
 
-`number`
+`integer`
 
 ## cfg_base_addr Default Value
 

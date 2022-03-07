@@ -16,27 +16,27 @@ Description of an Occamy-based system.
 
 # Occamy System Schema Properties
 
-| Property                                                              | Type          | Required | Nullable       | Defined by                                                                                                                                                                      |
-| :-------------------------------------------------------------------- | :------------ | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [cluster](#cluster)                                                   | `object`      | Required | cannot be null | [Occamy System Schema](occamy-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster")                             |
-| [quadrant_pre_xbar](#quadrant_pre_xbar)                               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_pre_xbar")                           |
-| [pre_xbar_slv_id_width_no_rocache](#pre_xbar_slv_id_width_no_rocache) | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-pre_xbar_slv_id_width_no_rocache.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pre_xbar_slv_id_width_no_rocache") |
-| [wide_xbar](#wide_xbar)                                               | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/wide_xbar")                                 |
-| [quadrant_inter_xbar](#quadrant_inter_xbar)                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-2.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_inter_xbar")                       |
-| [hbm_xbar](#hbm_xbar)                                                 | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-3.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/hbm_xbar")                                  |
-| [narrow_xbar](#narrow_xbar)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar")                               |
-| [narrow_xbar_slv_id_width](#narrow_xbar_slv_id_width)                 | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-narrow_xbar_slv_id_width.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width")                 |
-| [nr_s1_quadrant](#nr_s1_quadrant)                                     | `integer`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant")                             |
-| [cuts](#cuts)                                                         | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts")                                |
-| [txns](#txns)                                                         | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-outstanding-transactions-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/txns")            |
-| [is_remote_quadrant](#is_remote_quadrant)                             | `boolean`     | Optional | cannot be null | [Occamy System Schema](occamy-properties-is_remote_quadrant.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/is_remote_quadrant")                             |
-| [remote_quadrants](#remote_quadrants)                                 | `array`       | Optional | cannot be null | [Occamy System Schema](occamy-properties-remote-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/remote_quadrants")                                 |
-| [s1_quadrant](#s1_quadrant)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant")                                |
-| [spm](#spm)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-spm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm")                                                           |
-| [pcie](#pcie)                                                         | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-pcie.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie")                                                         |
-| [hbi](#hbi)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi")                                                           |
-| [hbm](#hbm)                                                           | Not specified | Optional | cannot be null | [Occamy System Schema](occamy-properties-hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm")                                                           |
-| [peripherals](#peripherals)                                           | `object`      | Optional | cannot be null | [Occamy System Schema](occamy-properties-peripherals-schema.md "http://pulp-platform.org/snitch/peripherals.schema.json#/properties/peripherals")                               |
+| Property                                                              | Type      | Required | Nullable       | Defined by                                                                                                                                                                      |
+| :-------------------------------------------------------------------- | :-------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [cluster](#cluster)                                                   | `object`  | Required | cannot be null | [Occamy System Schema](occamy-properties-snitch-cluster-schema.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster")                             |
+| [quadrant_pre_xbar](#quadrant_pre_xbar)                               | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_pre_xbar")                           |
+| [pre_xbar_slv_id_width_no_rocache](#pre_xbar_slv_id_width_no_rocache) | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-pre_xbar_slv_id_width_no_rocache.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pre_xbar_slv_id_width_no_rocache") |
+| [wide_xbar](#wide_xbar)                                               | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-1.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/wide_xbar")                                 |
+| [quadrant_inter_xbar](#quadrant_inter_xbar)                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-2.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_inter_xbar")                       |
+| [hbm_xbar](#hbm_xbar)                                                 | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-3.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/hbm_xbar")                                  |
+| [narrow_xbar](#narrow_xbar)                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar")                               |
+| [narrow_xbar_slv_id_width](#narrow_xbar_slv_id_width)                 | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-narrow_xbar_slv_id_width.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width")                 |
+| [nr_s1_quadrant](#nr_s1_quadrant)                                     | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant")                             |
+| [cuts](#cuts)                                                         | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts")                                |
+| [txns](#txns)                                                         | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-outstanding-transactions-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/txns")            |
+| [is_remote_quadrant](#is_remote_quadrant)                             | `boolean` | Optional | cannot be null | [Occamy System Schema](occamy-properties-is_remote_quadrant.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/is_remote_quadrant")                             |
+| [remote_quadrants](#remote_quadrants)                                 | `array`   | Optional | cannot be null | [Occamy System Schema](occamy-properties-remote-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/remote_quadrants")                                 |
+| [s1_quadrant](#s1_quadrant)                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant")                                |
+| [spm](#spm)                                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-address-range-schema.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm")                                   |
+| [pcie](#pcie)                                                         | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-configuration-of-external-pcie-port.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie")                          |
+| [hbi](#hbi)                                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-address-range-schema-1.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/hbi")                                 |
+| [hbm](#hbm)                                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-configuration-of-external-hbm-interface.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm")                       |
+| [peripherals](#peripherals)                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-peripherals-schema.md "http://pulp-platform.org/snitch/peripherals.schema.json#/properties/peripherals")                               |
 
 ## cluster
 
@@ -320,31 +320,21 @@ List of attached remote quadrants
 
 ## spm
 
-
+Description of a generic address range
 
 `spm`
 
 *   is optional
 
-*   Type: unknown
+*   Type: `object` ([Address Range Schema](occamy-properties-address-range-schema-1.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-spm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/spm")
+*   defined in: [Occamy System Schema](occamy-properties-address-range-schema-1.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm")
 
 ### spm Type
 
-unknown
-
-### spm Default Value
-
-The default value is:
-
-```json
-{
-  "size": 128
-}
-```
+`object` ([Address Range Schema](occamy-properties-address-range-schema-1.md))
 
 ## pcie
 
@@ -354,53 +344,33 @@ The default value is:
 
 *   is optional
 
-*   Type: unknown
+*   Type: `object` ([Configuration of external PCIe port](occamy-properties-configuration-of-external-pcie-port.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-pcie.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie")
+*   defined in: [Occamy System Schema](occamy-properties-configuration-of-external-pcie-port.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie")
 
 ### pcie Type
 
-unknown
-
-### pcie Default Value
-
-The default value is:
-
-```json
-{
-  "size": 128
-}
-```
+`object` ([Configuration of external PCIe port](occamy-properties-configuration-of-external-pcie-port.md))
 
 ## hbi
 
-
+Description of a generic address range
 
 `hbi`
 
 *   is optional
 
-*   Type: unknown
+*   Type: `object` ([Address Range Schema](occamy-properties-address-range-schema-1.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbi")
+*   defined in: [Occamy System Schema](occamy-properties-address-range-schema-1.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/hbi")
 
 ### hbi Type
 
-unknown
-
-### hbi Default Value
-
-The default value is:
-
-```json
-{
-  "size": 128
-}
-```
+`object` ([Address Range Schema](occamy-properties-address-range-schema-1.md))
 
 ## hbm
 
@@ -410,25 +380,15 @@ The default value is:
 
 *   is optional
 
-*   Type: unknown
+*   Type: `object` ([Configuration of external HBM interface](occamy-properties-configuration-of-external-hbm-interface.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm")
+*   defined in: [Occamy System Schema](occamy-properties-configuration-of-external-hbm-interface.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm")
 
 ### hbm Type
 
-unknown
-
-### hbm Default Value
-
-The default value is:
-
-```json
-{
-  "size": 128
-}
-```
+`object` ([Configuration of external HBM interface](occamy-properties-configuration-of-external-hbm-interface.md))
 
 ## peripherals
 

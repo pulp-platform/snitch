@@ -24,8 +24,8 @@ http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant
 | [wide_xbar_slv_id_width](#wide_xbar_slv_id_width)     | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties-properties-wide_xbar_slv_id_width.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/wide_xbar_slv_id_width")     |
 | [narrow_xbar](#narrow_xbar)                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/s1_quadrant/properties/narrow_xbar")                                                 |
 | [narrow_xbar_slv_id_width](#narrow_xbar_slv_id_width) | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties-properties-narrow_xbar_slv_id_width.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/narrow_xbar_slv_id_width") |
-| [cfg_base_addr](#cfg_base_addr)                       | `number`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties-properties-cfg_base_addr.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/cfg_base_addr")                       |
-| [cfg_base_offset](#cfg_base_offset)                   | `number`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties-properties-cfg_base_offset.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/cfg_base_offset")                   |
+| [cfg_base_addr](#cfg_base_addr)                       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties-properties-cfg_base_addr.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/cfg_base_addr")                       |
+| [cfg_base_offset](#cfg_base_offset)                   | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties-properties-cfg_base_offset.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/cfg_base_offset")                   |
 
 ## nr_clusters
 
@@ -167,7 +167,7 @@ Base address of the quadrant configuration region.
 
 *   is optional
 
-*   Type: `number`
+*   Type: `integer`
 
 *   cannot be null
 
@@ -175,7 +175,7 @@ Base address of the quadrant configuration region.
 
 ### cfg_base_addr Type
 
-`number`
+`integer`
 
 ### cfg_base_addr Default Value
 
@@ -193,7 +193,7 @@ Allocated size and offset of each quadrant configuration.
 
 *   is optional
 
-*   Type: `number`
+*   Type: `integer`
 
 *   cannot be null
 
@@ -201,7 +201,7 @@ Allocated size and offset of each quadrant configuration.
 
 ### cfg_base_offset Type
 
-`number`
+`integer`
 
 ### cfg_base_offset Default Value
 
