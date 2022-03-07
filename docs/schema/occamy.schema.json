@@ -240,94 +240,80 @@
                     "default": 4
                 },
                 "cfg_base_addr": {
-                    "type": "number",
+                    "type": "integer",
                     "description": "Base address of the quadrant configuration region.",
                     "default": 184549376
                 },
                 "cfg_base_offset": {
-                    "type": "number",
+                    "type": "integer",
                     "description": "Allocated size and offset of each quadrant configuration.",
                     "default": 65536
                 }
             }
         },
         "spm": {
-            "default": {
-                "size": 128
-            },
-            "properties": {
-                "address": {
-                    "type": "number",
-                    "description": "Start address of SPM (Scratchpad Memory).",
-                    "minimum": 0
-                },
-                "length": {
-                    "type": "number",
-                    "description": "Size of SPM based on the address range. The full address range will be mapped to SPM.",
-                    "examples": [
-                        131072
-                    ],
-                    "minimum": 0
-                }
-            }
+            "$ref": "http://pulp-platform.org/snitch/address_range.schema.json"
         },
         "pcie": {
-            "default": {
-                "size": 128
-            },
+            "title": "Configuration of external PCIe port",
+            "type": "object",
             "properties": {
-                "address": {
-                    "type": "number",
-                    "description": "Start address of SPM (Scratchpad Memory).",
+                "address_io": {
+                    "type": "integer",
+                    "description": "Base address of PCIe IO range.",
+                    "minimum": 0
+                },
+                "address_mm": {
+                    "type": "integer",
+                    "description": "Base address of PCIe memory-mapped range.",
                     "minimum": 0
                 },
                 "length": {
-                    "type": "number",
-                    "description": "Size of SPM based on the address range. The full address range will be mapped to SPM.",
-                    "examples": [
-                        131072
-                    ],
+                    "type": "integer",
+                    "description": "Size in bytes of all PCIe ranges.",
                     "minimum": 0
                 }
             }
         },
         "hbi": {
-            "default": {
-                "size": 128
-            },
-            "properties": {
-                "address": {
-                    "type": "number",
-                    "description": "Start address of SPM (Scratchpad Memory).",
-                    "minimum": 0
-                },
-                "length": {
-                    "type": "number",
-                    "description": "Size of SPM based on the address range. The full address range will be mapped to SPM.",
-                    "examples": [
-                        131072
-                    ],
-                    "minimum": 0
-                }
-            }
+            "$ref": "http://pulp-platform.org/snitch/address_range.schema.json"
         },
         "hbm": {
-            "default": {
-                "size": 128
-            },
+            "title": "Configuration of external HBM interface",
+            "type": "object",
             "properties": {
-                "address": {
-                    "type": "number",
-                    "description": "Start address of SPM (Scratchpad Memory).",
+                "address_1": {
+                    "type": "integer",
+                    "description": "Start of HBM address region 1.",
                     "minimum": 0
                 },
-                "length": {
-                    "type": "number",
-                    "description": "Size of SPM based on the address range. The full address range will be mapped to SPM.",
-                    "examples": [
-                        131072
-                    ],
+                "address_2": {
+                    "type": "integer",
+                    "description": "Start of HBM address region 1.",
                     "minimum": 0
+                },
+                "channel_size": {
+                    "type": "integer",
+                    "description": "Size of single HBM channel region.",
+                    "minimum": 0
+                },
+                "nr_channels_total": {
+                    "type": "integer",
+                    "description": "Total number of HBM channels.",
+                    "minimum": 0
+                },
+                "nr_channels_address_0": {
+                    "type": "integer",
+                    "description": "Number of lower HBM channels accessible over address region 1",
+                    "minimum": 0
+                },
+                "cfg_regions": {
+                    "properties": {
+                        "top": {"$ref": "http://pulp-platform.org/snitch/address_range.schema.json"},
+                        "phy": {"$ref": "http://pulp-platform.org/snitch/address_range.schema.json"},
+                        "seq": {"$ref": "http://pulp-platform.org/snitch/address_range.schema.json"},
+                        "ctrl": {"$ref": "http://pulp-platform.org/snitch/address_range.schema.json"}
+                    }
                 }
             }
         },
