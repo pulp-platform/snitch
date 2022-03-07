@@ -29,7 +29,6 @@ tc-hrv-olinux:
   needs: []
   script:
     - |
-      mkdir -p /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch
       if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-olinux; then
         git clone git@github.com:riscv-collab/riscv-gnu-toolchain.git riscv-gnu-toolchain --depth=1 --recurse-submodules
         mkdir install-riscv-gnu-toolchain
@@ -44,6 +43,7 @@ bootrom:
   stage: build2
   needs: [tc-hrv-olinux]
   script:
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
     # Build bootrom
     - make -C hw/system/occamy/fpga/bootrom
 
@@ -70,6 +70,7 @@ occamy_vcu128:
     # Generate IP
     - make -C hw/system/occamy/fpga/vivado_ips
     # Build bootrom
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-olinux
     - make -C hw/system/occamy/fpga/bootrom
     # Synthesize and Implement design
     - make -C hw/system/occamy/fpga occamy_vcu128
