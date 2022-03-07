@@ -34,6 +34,7 @@ tc-hrv-obare:
         $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-hrv-obare
       fi
 
+
 bootrom:
   stage: build2
   needs: [tc-hrv-obare]
