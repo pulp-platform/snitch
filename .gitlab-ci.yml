@@ -46,7 +46,7 @@ bootrom:
     - ls -al tc-hrv-obare/bin
     - ls -al tc-hrv-obare/bin/riscv64-unknown-elf-gcc
     - tc-hrv-obare/bin/riscv64-unknown-elf-gcc --version
-    - make -C hw/system/occamy/fpga/bootrom
+    - make -C hw/system/occamy/fpga/bootrom bootrom.coe
 
 # Packages and elaborates the vivado IPs where occamy is part of. This ensures
 # that the occamy xilinx IP can be elaborated
@@ -70,9 +70,10 @@ occamy_vcu128:
     - make -C hw/system/occamy update-source
     # Generate IP
     - make -C hw/system/occamy/fpga/vivado_ips
-    # Build bootrom
+    # Build bootrom (do not use bootrom-spl.coe in the CI so we don't depend on the build of u-boot)
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-obare
-    - make -C hw/system/occamy/fpga/bootrom
+    - make -C hw/system/occamy/fpga/bootrom bootrom.coe
+    - cp hw/system/occamy/fpga/bootrom/bootrom.coe hw/system/occamy/fpga/bootrom/bootrom-spl.coe
     # Synthesize and Implement design
     - make -C hw/system/occamy/fpga occamy_vcu128
   artifacts:
