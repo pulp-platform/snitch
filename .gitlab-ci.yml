@@ -8,7 +8,7 @@ variables:
   PYTHON: /home/huettern/.local/bin/python3.9
   VERIBLE_FMT: /home/huettern/.local/verible-v0.0-807-g10e7c71/bin/verible-verilog-format
   BENDER: '/home/huettern/.cargo/bin/bender'
-  ARIANE_SDK: '/home/huettern/git/ariane-sdk'
+  ARIANE_SDK: $CI_PROJECT_DIR/install-riscv-gnu-toolchain
 
 before_script:
   - ${PYTHON} -m venv .venv
@@ -18,15 +18,39 @@ before_script:
   - ${BENDER} --version
 
 stages:
-  - build
+  - build1
+  - build2
   - test
   - package
   - deploy
 
+tc-hrv-olinux:
+  stage: build1
+  needs: []
+  script:
+    - |
+      mkdir -p /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch
+      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-olinux; then
+        git clone git@github.com:riscv-collab/riscv-gnu-toolchain.git riscv-gnu-toolchain --depth=1 --recurse-submodules
+        mkdir install-riscv-gnu-toolchain
+        cd riscv-gnu-toolchain
+        ./configure --prefix=$CI_PROJECT_DIR/install-riscv-gnu-toolchain
+        make -j`nproc`
+        cd ..
+        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-hrv-olinux
+      fi
+
+bootrom:
+  stage: build2
+  needs: [tc-hrv-olinux]
+  script:
+    # Build bootrom
+    - make -C hw/system/occamy/fpga/bootrom
+
 # Packages and elaborates the vivado IPs where occamy is part of. This ensures
 # that the occamy xilinx IP can be elaborated
 vivado_ip:
-  stage: build
+  stage: build2
   needs: []
   script:
     # Make Occamy system smaller to fit on FPGA
@@ -37,8 +61,8 @@ vivado_ip:
 
 # The occamy on vcu128 design
 occamy_vcu128:
-  stage: build
-  needs: []
+  stage: build2
+  needs: [tc-hrv-olinux]
   script:
     # Make Occamy system smaller to fit on FPGA
     - ./.gitlab-ci.d/occamy_cfg_fpga.sh
