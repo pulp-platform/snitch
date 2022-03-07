@@ -7,14 +7,14 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../../../..
-ARIANE_SDK  ?= ${ROOT}/../ariane-sdk
+ARIANE_SDK  ?= ${ROOT}/../ariane-sdk/install
 INCLUDES = -I./ -I./src
 SRCS_C = src/main.c src/uart.c
 OBJS_C = $(SRCS_C:.c=.o)
 
-CC = $(ARIANE_SDK)/install/bin/riscv64-unknown-elf-gcc
-OBJDUMP = $(ARIANE_SDK)/install/bin/riscv64-unknown-elf-objdump
-OBJCOPY = $(ARIANE_SDK)/install/bin/riscv64-unknown-elf-objcopy
+CC = $(ARIANE_SDK)/bin/riscv64-unknown-elf-gcc
+OBJDUMP = $(ARIANE_SDK)/bin/riscv64-unknown-elf-objdump
+OBJCOPY = $(ARIANE_SDK)/bin/riscv64-unknown-elf-objcopy
 
 GIT_SHA := $(shell git describe --match=NeVeRmAtCh --always --abbrev=10 --dirty)
 

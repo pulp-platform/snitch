@@ -41,6 +41,11 @@ bootrom:
   script:
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-obare
     # Build bootrom
+    - ls -al .
+    - ls -al tc-hrv-obare
+    - ls -al tc-hrv-obare/bin
+    - ls -al tc-hrv-obare/bin/riscv64-unknown-elf-gcc
+    - tc-hrv-obare/bin/riscv64-unknown-elf-gcc --version
     - make -C hw/system/occamy/fpga/bootrom
 
 # Packages and elaborates the vivado IPs where occamy is part of. This ensures
