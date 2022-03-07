@@ -13,6 +13,9 @@ sed -i 's|nr_s1_quadrant.*|nr_s1_quadrant: 1,|' ${occamg_cfg}
 # nr_clusters: -> 1
 sed -i 's|nr_clusters.*|nr_clusters: 1,|' ${occamg_cfg}
 
+# distributed pipeline registers in the FPU to meet timing (vivado is bad at retiming)
+sed -i 's|fpu_pipe_config.*|fpu_pipe_config: "DISTRIBUTED"|' ${occamg_cfg}
+
 # Only a single core in the cluster. { $ref: "#/compute_core_template" },
 # Comment-out all compute cores and add a new one before the DMA
 # sed -i 's|{ $ref: "#/compute_core_template" },|//{ $ref: "#/compute_core_template" },|' ${occamg_cfg}

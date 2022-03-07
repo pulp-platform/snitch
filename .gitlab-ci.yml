@@ -30,7 +30,7 @@ vivado_ip:
   needs: []
   script:
     # Make Occamy system smaller to fit on FPGA
-    - ./.gitlab-ci.d/occamy_cfg_small.sh
+    - ./.gitlab-ci.d/occamy_cfg_fpga.sh
     - make -C hw/system/occamy update-source
     # Package IPs and run test elaboration
     - make -C hw/system/occamy/fpga/vivado_ips all
@@ -41,7 +41,7 @@ occamy_vcu128:
   needs: []
   script:
     # Make Occamy system smaller to fit on FPGA
-    - ./.gitlab-ci.d/occamy_cfg_small.sh
+    - ./.gitlab-ci.d/occamy_cfg_fpga.sh
     - make -C hw/system/occamy update-source
     # Generate IP
     - make -C hw/system/occamy/fpga/vivado_ips
