@@ -466,8 +466,8 @@ def main():
                                      32,
                                      context="hbm_ctrl",
                                      name="hbm_cfg_xbar",
-                                     clk="clk_periph_i",
-                                     rst="rst_periph_ni",
+                                     clk="cfg_clk_i",
+                                     rst="cfg_rst_ni",
                                      node=am_hbm_cfg_xbar)
 
     for name, region in occamy.cfg["hbm"]["cfg_regions"].items():
