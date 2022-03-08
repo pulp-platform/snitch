@@ -56,6 +56,17 @@ vivado_ip:
 occamy_vcu128:
   stage: build2
   needs: [tc-hrv-obare]
+  rules:
+    - changes:
+      - hw/ip/**/*
+      - hw/vendor/**/*
+      - hw/system/occamy/**/*
+      - util/occamygen.py
+      - util/clustergen/**/*
+      - util/solder/**/*
+      - util/Makefrag
+      - util/reggen
+      - util/regtool.py
   script:
     # Make Occamy system smaller to fit on FPGA
     - ./.gitlab-ci.d/occamy_cfg_fpga.sh
