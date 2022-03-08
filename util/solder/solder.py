@@ -1180,6 +1180,14 @@ class RegBus(Bus):
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
 
+    def copy(self, name=None, clk=None, rst=None):
+        return RegBus(clk or self.clk,
+                      rst or self.rst,
+                      self.aw,
+                      self.dw,
+                      name or self.name,
+                      declared=False)
+
     def emit_struct(self):
         return RegStruct.emit(self.aw, self.dw)
 
