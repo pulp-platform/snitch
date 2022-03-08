@@ -1,4 +1,5 @@
 ![CI](https://github.com/pulp-platform/snitch/actions/workflows/ci.yml/badge.svg)
+[![CI status](https://akurth.net/usrv/ig/shields/pipeline/huettern/snitch/master.svg)](https://iis-git.ee.ethz.ch/huettern/snitch/commits/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Snitch System
