@@ -7,6 +7,6 @@ cache_root_dir: /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch
 artifacts:
   tc-hrv-obare:
     inputs:
-      - .gitlab-ci.d/build-tc-hrv-obare.sh
+    - .gitlab-ci.d/build-tc-hrv-obare.sh
     outputs:
-      - tc-hrv-obare
+    - tc-hrv-obare

@@ -5,10 +5,10 @@
 package:
   name: occamy_xilinx
   authors:
-    - Noah Huetter <huettern@iis.ee.ethz.ch>
+  - Noah Huetter <huettern@iis.ee.ethz.ch>
 
 dependencies:
-  occamy: { path: ../../.. }
+  occamy: {path: ../../..}
 
 sources:
   # Level 0:

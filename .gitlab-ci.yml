@@ -11,34 +11,34 @@ variables:
   ARIANE_SDK: $CI_PROJECT_DIR/tc-hrv-obare
 
 before_script:
-  - ${PYTHON} -m venv .venv
-  - source .venv/bin/activate
-  - pip install -r python-requirements.txt
-  - |
-    cd $CI_PROJECT_DIR && mkdir -p .local/bin && cd .local/bin
-    curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh -s -- 0.23.2
-    ${BENDER} --version
-  - |
-    cd $CI_PROJECT_DIR && mkdir -p .local
-    curl -L https://github.com/chipsalliance/verible/releases/download/v0.0-807-g10e7c71/verible-v0.0-807-g10e7c71-CentOS-7.9.2009-Core-x86_64.tar.gz | tar xz -C .local --strip-components=1
-    ${VERIBLE_FMT} --version
+- ${PYTHON} -m venv .venv
+- source .venv/bin/activate
+- pip install -r python-requirements.txt
+- |
+  cd $CI_PROJECT_DIR && mkdir -p .local/bin && cd .local/bin
+  curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh -s -- 0.23.2
+  ${BENDER} --version
+- |
+  cd $CI_PROJECT_DIR && mkdir -p .local
+  curl -L https://github.com/chipsalliance/verible/releases/download/v0.0-807-g10e7c71/verible-v0.0-807-g10e7c71-CentOS-7.9.2009-Core-x86_64.tar.gz | tar xz -C .local --strip-components=1
+  ${VERIBLE_FMT} --version
 
 stages:
-  - build1
-  - build2
-  - test
-  - package
-  - deploy
+- build1
+- build2
+- test
+- package
+- deploy
 
 tc-hrv-obare:
   stage: build1
   needs: []
   script:
-    - |
-      if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-obare; then
-        $CI_PROJECT_DIR/.gitlab-ci.d/build-tc-hrv-obare.sh $CI_PROJECT_DIR
-        $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-hrv-obare
-      fi
+  - |
+    if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-obare; then
+      $CI_PROJECT_DIR/.gitlab-ci.d/build-tc-hrv-obare.sh $CI_PROJECT_DIR
+      $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-hrv-obare
+    fi
 
 # Packages and elaborates the vivado IPs where occamy is part of. This ensures
 # that the occamy xilinx IP can be elaborated
@@ -47,42 +47,42 @@ vivado_ip:
   needs: []
   script:
     # Make Occamy system smaller to fit on FPGA
-    - ./.gitlab-ci.d/occamy_cfg_fpga.sh
-    - make -C hw/system/occamy update-source
+  - ./.gitlab-ci.d/occamy_cfg_fpga.sh
+  - make -C hw/system/occamy update-source
     # Package IPs and run test elaboration
-    - make -C hw/system/occamy/fpga/vivado_ips all
+  - make -C hw/system/occamy/fpga/vivado_ips all
 
 # The occamy on vcu128 design
 occamy_vcu128:
   stage: build2
   needs: [tc-hrv-obare]
   rules:
-    - changes:
-      - hw/ip/**/*
-      - hw/vendor/**/*
-      - hw/system/occamy/**/*
-      - util/occamygen.py
-      - util/clustergen/**/*
-      - util/solder/**/*
-      - util/Makefrag
-      - util/reggen
-      - util/regtool.py
+  - changes:
+    - hw/ip/**/*
+    - hw/vendor/**/*
+    - hw/system/occamy/**/*
+    - util/occamygen.py
+    - util/clustergen/**/*
+    - util/solder/**/*
+    - util/Makefrag
+    - util/reggen
+    - util/regtool.py
   script:
     # Make Occamy system smaller to fit on FPGA
-    - ./.gitlab-ci.d/occamy_cfg_fpga.sh
-    - make -C hw/system/occamy update-source
+  - ./.gitlab-ci.d/occamy_cfg_fpga.sh
+  - make -C hw/system/occamy update-source
     # Generate IP
-    - make -C hw/system/occamy/fpga/vivado_ips
+  - make -C hw/system/occamy/fpga/vivado_ips
     # Build bootrom (do not use bootrom-spl.coe in the CI so we don't depend on the build of u-boot)
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-obare
-    - make -C hw/system/occamy/fpga/bootrom bootrom.coe
-    - cp hw/system/occamy/fpga/bootrom/bootrom.coe hw/system/occamy/fpga/bootrom/bootrom-spl.coe
+  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-obare
+  - make -C hw/system/occamy/fpga/bootrom bootrom.coe
+  - cp hw/system/occamy/fpga/bootrom/bootrom.coe hw/system/occamy/fpga/bootrom/bootrom-spl.coe
     # Synthesize and Implement design
-    - make -C hw/system/occamy/fpga occamy_vcu128
+  - make -C hw/system/occamy/fpga occamy_vcu128
   artifacts:
     paths:
-      - "hw/system/occamy/fpga/**/*.bit"
-      - "hw/system/occamy/fpga/**/*.ltx"
-      - "hw/system/occamy/fpga/**/*.log"
-      - hw/system/occamy/fpga/occamy_vcu128/*.zip
-      - hw/system/occamy/fpga/occamy_vcu128/*.reports
+    - hw/system/occamy/fpga/**/*.bit
+    - hw/system/occamy/fpga/**/*.ltx
+    - hw/system/occamy/fpga/**/*.log
+    - hw/system/occamy/fpga/occamy_vcu128/*.zip
+    - hw/system/occamy/fpga/occamy_vcu128/*.reports
