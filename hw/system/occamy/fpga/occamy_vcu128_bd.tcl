@@ -304,12 +304,10 @@ proc create_root_design { parentCell } {
   set blk_mem_gen_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_0 ]
   set_property -dict [ list \
    CONFIG.Assume_Synchronous_Clk {false} \
-   CONFIG.Byte_Size {9} \
-   CONFIG.Coe_File {../../../../../../../bootrom/bootrom-spl.coe} \
-   CONFIG.EN_SAFETY_CKT {false} \
-   CONFIG.Enable_32bit_Address {false} \
+   CONFIG.Byte_Size {8} \
+   CONFIG.EN_SAFETY_CKT {true} \
+   CONFIG.Enable_32bit_Address {true} \
    CONFIG.Enable_B {Use_ENB_Pin} \
-   CONFIG.Load_Init_File {true} \
    CONFIG.Memory_Type {True_Dual_Port_RAM} \
    CONFIG.Operating_Mode_A {WRITE_FIRST} \
    CONFIG.Operating_Mode_B {WRITE_FIRST} \
@@ -320,15 +318,14 @@ proc create_root_design { parentCell } {
    CONFIG.Port_B_Write_Rate {50} \
    CONFIG.Read_Width_A {32} \
    CONFIG.Read_Width_B {32} \
-   CONFIG.Register_PortA_Output_of_Memory_Primitives {true} \
-   CONFIG.Register_PortB_Output_of_Memory_Primitives {true} \
-   CONFIG.Use_Byte_Write_Enable {false} \
-   CONFIG.Use_RSTA_Pin {false} \
-   CONFIG.Use_RSTB_Pin {false} \
-   CONFIG.Write_Depth_A {262144} \
+   CONFIG.Register_PortA_Output_of_Memory_Primitives {false} \
+   CONFIG.Register_PortB_Output_of_Memory_Primitives {false} \
+   CONFIG.Use_Byte_Write_Enable {true} \
+   CONFIG.Use_RSTA_Pin {true} \
+   CONFIG.Use_RSTB_Pin {true} \
    CONFIG.Write_Width_A {32} \
    CONFIG.Write_Width_B {32} \
-   CONFIG.use_bram_block {Stand_Alone} \
+   CONFIG.use_bram_block {BRAM_Controller} \
  ] $blk_mem_gen_0
 
   # Create instance: c_high, and set properties
@@ -467,9 +464,9 @@ proc create_root_design { parentCell } {
   set ila_25 [ create_bd_cell -type ip -vlnv xilinx.com:ip:system_ila:1.1 ila_25 ]
   set_property -dict [ list \
    CONFIG.C_DATA_DEPTH {4096} \
-   CONFIG.C_MON_TYPE {MIX} \
-   CONFIG.C_NUM_MONITOR_SLOTS {6} \
-   CONFIG.C_NUM_OF_PROBES {7} \
+   CONFIG.C_MON_TYPE {NATIVE} \
+   CONFIG.C_NUM_MONITOR_SLOTS {1} \
+   CONFIG.C_NUM_OF_PROBES {3} \
    CONFIG.C_PROBE0_TYPE {0} \
    CONFIG.C_PROBE1_TYPE {0} \
    CONFIG.C_PROBE2_TYPE {0} \
@@ -665,20 +662,12 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net axi_apb_bridge_0_APB_M [get_bd_intf_pins axi_apb_bridge_0/APB_M] [get_bd_intf_pins hbm_0/SAPB_0]
   connect_bd_intf_net -intf_net axi_apb_bridge_0_APB_M2 [get_bd_intf_pins axi_apb_bridge_0/APB_M2] [get_bd_intf_pins hbm_0/SAPB_1]
   connect_bd_intf_net -intf_net axi_dma_0_M_AXIS_CNTRL [get_bd_intf_pins axi_dma_0/M_AXIS_CNTRL] [get_bd_intf_pins axi_ethernet_0/s_axis_txc]
-connect_bd_intf_net -intf_net [get_bd_intf_nets axi_dma_0_M_AXIS_CNTRL] [get_bd_intf_pins axi_dma_0/M_AXIS_CNTRL] [get_bd_intf_pins ila_25/SLOT_2_AXIS]
-  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_intf_nets axi_dma_0_M_AXIS_CNTRL]
   connect_bd_intf_net -intf_net axi_dma_0_M_AXIS_MM2S [get_bd_intf_pins axi_dma_0/M_AXIS_MM2S] [get_bd_intf_pins axi_ethernet_0/s_axis_txd]
-connect_bd_intf_net -intf_net [get_bd_intf_nets axi_dma_0_M_AXIS_MM2S] [get_bd_intf_pins axi_dma_0/M_AXIS_MM2S] [get_bd_intf_pins ila_25/SLOT_3_AXIS]
-  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_intf_nets axi_dma_0_M_AXIS_MM2S]
   connect_bd_intf_net -intf_net axi_dma_0_M_AXI_MM2S [get_bd_intf_pins axi_dma_0/M_AXI_MM2S] [get_bd_intf_pins smc_spcie/S01_AXI]
   connect_bd_intf_net -intf_net axi_dma_0_M_AXI_S2MM [get_bd_intf_pins axi_dma_0/M_AXI_S2MM] [get_bd_intf_pins smc_spcie/S02_AXI]
   connect_bd_intf_net -intf_net axi_dma_0_M_AXI_SG [get_bd_intf_pins axi_dma_0/M_AXI_SG] [get_bd_intf_pins smc_spcie/S00_AXI]
   connect_bd_intf_net -intf_net axi_ethernet_0_m_axis_rxd [get_bd_intf_pins axi_dma_0/S_AXIS_S2MM] [get_bd_intf_pins axi_ethernet_0/m_axis_rxd]
-connect_bd_intf_net -intf_net [get_bd_intf_nets axi_ethernet_0_m_axis_rxd] [get_bd_intf_pins axi_dma_0/S_AXIS_S2MM] [get_bd_intf_pins ila_25/SLOT_4_AXIS]
-  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_intf_nets axi_ethernet_0_m_axis_rxd]
   connect_bd_intf_net -intf_net axi_ethernet_0_m_axis_rxs [get_bd_intf_pins axi_dma_0/S_AXIS_STS] [get_bd_intf_pins axi_ethernet_0/m_axis_rxs]
-connect_bd_intf_net -intf_net [get_bd_intf_nets axi_ethernet_0_m_axis_rxs] [get_bd_intf_pins axi_dma_0/S_AXIS_STS] [get_bd_intf_pins ila_25/SLOT_5_AXIS]
-  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_intf_nets axi_ethernet_0_m_axis_rxs]
   connect_bd_intf_net -intf_net axi_ethernet_0_mdio [get_bd_intf_ports mdio_mdc_0] [get_bd_intf_pins axi_ethernet_0/mdio]
   connect_bd_intf_net -intf_net axi_ethernet_0_sgmii [get_bd_intf_ports sgmii_lvds] [get_bd_intf_pins axi_ethernet_0/sgmii]
   connect_bd_intf_net -intf_net axi_iic_0_IIC [get_bd_intf_ports IIC_0] [get_bd_intf_pins axi_iic_0/IIC]
@@ -735,14 +724,14 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets axi_ethernet_0_m_axis_rxs] [get_
   connect_bd_net -net occamy_bootrom_addr_o [get_bd_pins occamy/bootrom_addr_o] [get_bd_pins xlslice_0/Din]
   connect_bd_net -net occamy_rstn [get_bd_pins occamy/rst_ni] [get_bd_pins occamy/rst_periph_ni] [get_bd_pins vio_sys/probe_out0]
   connect_bd_net -net occamy_uart_tx_o [get_bd_ports uart_tx_o_0] [get_bd_pins occamy/uart_tx_o]
-  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins axi_ethernet_0/s_axi_lite_resetn] [get_bd_pins axi_iic_0/s_axi_aresetn] [get_bd_pins axi_quad_spi_0/s_axi4_aresetn] [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins ila_25/resetn] [get_bd_pins jtag_axi_0/aresetn] [get_bd_pins psr_25/peripheral_aresetn] [get_bd_pins smc_hbm_0/aresetn] [get_bd_pins smc_hbm_1/aresetn] [get_bd_pins smc_hbm_2/aresetn] [get_bd_pins smc_hbm_3/aresetn] [get_bd_pins smc_hbm_4/aresetn] [get_bd_pins smc_hbm_5/aresetn] [get_bd_pins smc_hbm_6/aresetn] [get_bd_pins smc_hbm_7/aresetn] [get_bd_pins smc_pcie/aresetn] [get_bd_pins smc_spcie/aresetn]
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins axi_ethernet_0/s_axi_lite_resetn] [get_bd_pins axi_iic_0/s_axi_aresetn] [get_bd_pins axi_quad_spi_0/s_axi4_aresetn] [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins jtag_axi_0/aresetn] [get_bd_pins psr_25/peripheral_aresetn] [get_bd_pins smc_hbm_0/aresetn] [get_bd_pins smc_hbm_1/aresetn] [get_bd_pins smc_hbm_2/aresetn] [get_bd_pins smc_hbm_3/aresetn] [get_bd_pins smc_hbm_4/aresetn] [get_bd_pins smc_hbm_5/aresetn] [get_bd_pins smc_hbm_6/aresetn] [get_bd_pins smc_hbm_7/aresetn] [get_bd_pins smc_pcie/aresetn] [get_bd_pins smc_spcie/aresetn]
   connect_bd_net -net psr_hbm_peripheral_aresetn [get_bd_pins hbm_0/AXI_00_ARESET_N] [get_bd_pins hbm_0/AXI_01_ARESET_N] [get_bd_pins hbm_0/AXI_04_ARESET_N] [get_bd_pins hbm_0/AXI_05_ARESET_N] [get_bd_pins hbm_0/AXI_08_ARESET_N] [get_bd_pins hbm_0/AXI_12_ARESET_N] [get_bd_pins hbm_0/AXI_16_ARESET_N] [get_bd_pins hbm_0/AXI_20_ARESET_N] [get_bd_pins hbm_0/AXI_24_ARESET_N] [get_bd_pins hbm_0/AXI_28_ARESET_N] [get_bd_pins psr_hbm/peripheral_aresetn]
   connect_bd_net -net reset_1 [get_bd_ports reset] [get_bd_pins clk_wiz/reset] [get_bd_pins concat_rst/In0]
-  connect_bd_net -net rom_addr [get_bd_pins blk_mem_gen_0/addrb] [get_bd_pins ila_25/probe5] [get_bd_pins xlslice_0/Dout]
+  connect_bd_net -net rom_addr [get_bd_pins blk_mem_gen_0/addrb] [get_bd_pins ila_25/probe1] [get_bd_pins xlslice_0/Dout]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets rom_addr]
-  connect_bd_net -net rom_doutb [get_bd_pins blk_mem_gen_0/doutb] [get_bd_pins ila_25/probe6] [get_bd_pins occamy/bootrom_data_i]
+  connect_bd_net -net rom_doutb [get_bd_pins blk_mem_gen_0/doutb] [get_bd_pins ila_25/probe2] [get_bd_pins occamy/bootrom_data_i]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets rom_doutb]
-  connect_bd_net -net rom_en [get_bd_pins blk_mem_gen_0/enb] [get_bd_pins ila_25/probe4] [get_bd_pins occamy/bootrom_en_o]
+  connect_bd_net -net rom_en [get_bd_pins blk_mem_gen_0/enb] [get_bd_pins ila_25/probe0] [get_bd_pins occamy/bootrom_en_o]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets rom_en]
   connect_bd_net -net uart_rx_i_0_1 [get_bd_ports uart_rx_i_0] [get_bd_pins occamy/uart_rx_i]
   connect_bd_net -net util_reduced_logic_0_Res [get_bd_pins psr_100/ext_reset_in] [get_bd_pins psr_25/ext_reset_in] [get_bd_pins psr_hbm/ext_reset_in] [get_bd_pins rst_or/Res]
