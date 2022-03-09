@@ -397,6 +397,12 @@ axi_lite_xbar #(
   );
 
   // Reset directly from register (i.e. (de)assertion inherently synchronized)
-  assign rst_quadrant_no = reg2hw.reset_n.q;
+  // Multiplex with glitchless multiplexor, top reset for testing purposes
+  tc_clk_mux2 i_tc_reset_mux (
+    .clk0_i (reg2hw.reset_n.q),
+    .clk1_i (rst_ni),
+    .clk_sel_i (test_mode_i),
+    .clk_o (rst_quadrant_no)
+  );
 
 endmodule
