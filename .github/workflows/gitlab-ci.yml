@@ -18,7 +18,7 @@ on:
     - v**         # such branch names conflict with tags
 
 jobs:
-  gitlab-ci:
+  gitlab-ci-vivado_ip:
     if: github.repository == 'pulp-platform/snitch'  # do not run this job on forks (because Gitlab CI
     runs-on: ubuntu-latest                           # will not trigger on forks)
     timeout-minutes: 190
@@ -58,7 +58,7 @@ jobs:
         fi
         while true; do
           resp="$(curl --fail --silent --show-error \
-                https://akurth.net/usrv/ig/shields/pipeline/huettern/snitch/$BRANCH_NAME)"
+                https://akurth.net/usrv/ig/shields/job/huettern/snitch/$BRANCH_NAME/vivado_ip)"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to obtain CI status!"
             exit 1
