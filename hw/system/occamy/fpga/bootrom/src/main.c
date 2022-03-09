@@ -11,7 +11,7 @@
 enum boot_mode_t { JTAG, SPL_ROM };
 
 int main() {
-    init_uart(25000000, 115200);
+    init_uart(50000000, 115200);
 
     print_uart("\r\nOccamy VCU128 bootrom ");
     print_uart(__DATE__);
