@@ -365,7 +365,7 @@ axi_lite_xbar #(
     .reg_rsp_o (axi_lite_to_regbus_regs_rsp),
     .reg2hw,
     .hw2reg,
-    .devmode_i (1'b0)
+    .devmode_i (1'b1)
   );
 
   // Control quadrant control signals

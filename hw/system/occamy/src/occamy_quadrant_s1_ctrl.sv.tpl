@@ -98,7 +98,7 @@ module ${name}_quadrant_s1_ctrl
     .reg_rsp_o (${quad_regs_regbus.rsp_name()}),
     .reg2hw,
     .hw2reg,
-    .devmode_i (1'b0)
+    .devmode_i (1'b1)
   );
 
   // Control quadrant control signals
