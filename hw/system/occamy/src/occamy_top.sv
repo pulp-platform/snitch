@@ -124,12 +124,11 @@ module occamy_top
 );
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
-  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in, soc_ctrl_soc_in;
+  occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
   logic [1:0] spm_rerror;
 
   always_comb begin
-    soc_ctrl_in = soc_ctrl_soc_in;
-    // External SoC register inputs
+    soc_ctrl_in = '0;
     soc_ctrl_in.boot_mode.d = boot_mode_i;
     soc_ctrl_in.chip_id.d = chip_id_i;
   end
@@ -269,8 +268,6 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .periph_axi_lite_rsp_o(periph_axi_lite_per2soc_rsp),
       .periph_regbus_req_o(periph_regbus_soc2per_req),
       .periph_regbus_rsp_i(periph_regbus_soc2per_rsp),
-      .soc_ctrl_out_i(soc_ctrl_out),
-      .soc_ctrl_in_o(soc_ctrl_soc_in),
       .spm_rerror_o(spm_rerror),
       .mtip_i(mtip),
       .msip_i(msip),

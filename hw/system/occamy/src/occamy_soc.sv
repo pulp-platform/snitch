@@ -67,9 +67,6 @@ module occamy_soc
     input  axi_a48_d64_i8_u0_resp_t periph_regbus_rsp_i,
 
     // SoC control register IO
-    // FIXME: reg2hw and hw2reg connections are currently unused; this may change, however.
-    input occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out_i,
-    output occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in_o,
     output logic [1:0] spm_rerror_o,
 
     // Interrupts and debug requests

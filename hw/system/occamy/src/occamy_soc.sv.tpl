@@ -92,9 +92,6 @@ module ${name}_soc
   input   ${soc_narrow_xbar.out_regbus_periph.rsp_type()} periph_regbus_rsp_i,
 
   // SoC control register IO
-  // FIXME: reg2hw and hw2reg connections are currently unused; this may change, however.
-  input  ${name}_soc_reg_pkg::${name}_soc_reg2hw_t soc_ctrl_out_i,
-  output ${name}_soc_reg_pkg::${name}_soc_hw2reg_t soc_ctrl_in_o,
   output logic [1:0] spm_rerror_o,
 
   // Interrupts and debug requests
