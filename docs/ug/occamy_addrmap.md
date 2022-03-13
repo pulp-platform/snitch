@@ -46,8 +46,8 @@ This is the current address map of occamy. Note that the Quadrants address map h
 | -                | 250.0 MB |  free  |      0x1060\_0000 |      0x1fff\_ffff |
 | PCIE             | 640.0 MB |  used  |      0x2000\_0000 |      0x47ff\_ffff |
 | PCIE             | 640.0 MB |  used  |      0x4800\_0000 |      0x6fff\_ffff |
-| SPM              | 128.0 KB |  used  |      0x7000\_0000 |      0x7001\_ffff |
-| -                | 255.9 MB |  free  |      0x7002\_0000 |      0x7fff\_ffff |
+| SPM              | 512.0 KB |  used  |      0x7000\_0000 |      0x7007\_ffff |
+| -                | 255.5 MB |  free  |      0x7008\_0000 |      0x7fff\_ffff |
 | HBM\_0           |   1.0 GB |  used  |      0x8000\_0000 |      0xbfff\_ffff |
 | HBM\_1           |   1.0 GB |  used  |      0xc000\_0000 |      0xffff\_ffff |
 | -                |  60.0 GB |  free  |   0x1\_0000\_0000 |   0xf\_ffff\_ffff |
