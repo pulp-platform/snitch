@@ -55,21 +55,21 @@ module occamy_cva6
     BHTEntries: 128,
   // DRAM -- SPM, SPM -- Boot ROM, Boot ROM -- Debug Module
   NrNonIdempotentRules: 3, NonIdempotentAddrBase: {
-    64'd1879179264, 64'd16908288, 64'h1000
+    64'd1879572480, 64'd16908288, 64'h1000
   }, NonIdempotentLength: {
-    64'd268304384, 64'd1862139904, 64'd16773120
+    64'd267911168, 64'd1862139904, 64'd16773120
   }, NrExecuteRegionRules: 5,
   // DRAM, Boot ROM, SPM, Debug Module
   ExecuteRegionAddrBase: {
     64'h10_0000_0000, 64'h8000_0000, 64'd16777216, 64'd1879048192, 64'h0
   }, ExecuteRegionLength: {
-    64'h2_0000_0000, 64'h8000_0000, 64'd131072, 64'd131072, 64'h1000
+    64'h2_0000_0000, 64'h8000_0000, 64'd131072, 64'd524288, 64'h1000
   },
   // cached region
   NrCachedRegionRules: 2, CachedRegionAddrBase: {
     64'h8000_0000, 64'd1879048192
   }, CachedRegionLength: {
-    (64'hff_ffff_ffff - 64'h8000_0000), 64'd131072
+    (64'hff_ffff_ffff - 64'h8000_0000), 64'd524288
   },
   //  cache config
   Axi64BitCompliant: 1'b1, SwapEndianess: 1'b0,

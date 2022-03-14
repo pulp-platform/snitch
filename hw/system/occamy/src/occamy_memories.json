@@ -72,6 +72,20 @@
     {
         "byte_enable": true,
         "byte_width": 8,
+        "density_optimized": true,
+        "description": [
+            "SPM"
+        ],
+        "dual_port": false,
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": false,
+        "width": 64,
+        "words": 65536
+    },
+    {
+        "byte_enable": true,
+        "byte_width": 8,
         "density_optimized": false,
         "description": [
             "icache data (hive 0)"
@@ -82,20 +96,6 @@
         "speed_optimized": true,
         "width": 256,
         "words": 128
-    },
-    {
-        "byte_enable": true,
-        "byte_width": 8,
-        "density_optimized": true,
-        "description": [
-            "SPM"
-        ],
-        "dual_port": false,
-        "latency": 1,
-        "ports": 1,
-        "speed_optimized": false,
-        "width": 64,
-        "words": 16384
     },
     {
         "byte_enable": false,

@@ -105,7 +105,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_0` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar0Addrmap;
   assign QuadrantPreXbar0Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -149,7 +149,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_1` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar1Addrmap;
   assign QuadrantPreXbar1Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -193,7 +193,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_2` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar2Addrmap;
   assign QuadrantPreXbar2Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -237,7 +237,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_3` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar3Addrmap;
   assign QuadrantPreXbar3Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -281,7 +281,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_4` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar4Addrmap;
   assign QuadrantPreXbar4Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -325,7 +325,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_5` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar5Addrmap;
   assign QuadrantPreXbar5Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70020000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -473,7 +473,7 @@ module occamy_soc
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
   '{ idx: 2, start_addr: 48'h10000000, end_addr: 48'h10600000 },
   '{ idx: 3, start_addr: 48'h00000000, end_addr: 48'h10000000 },
-  '{ idx: 3, start_addr: 48'h20000000, end_addr: 48'h70020000 }
+  '{ idx: 3, start_addr: 48'h20000000, end_addr: 48'h70080000 }
 };
 
   soc_wide_xbar_in_req_t   [2:0] soc_wide_xbar_in_req;
@@ -517,7 +517,7 @@ module occamy_soc
   assign SocNarrowXbarAddrmap = '{
   '{ idx: 6, start_addr: 48'h80000000, end_addr: 48'h20000000000 },
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-  '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70020000 },
+  '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70080000 },
   '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h0a010000 },
   '{ idx: 10, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
   '{ idx: 11, start_addr: 48'h20000000, end_addr: 48'h70000000 },
@@ -1951,7 +1951,7 @@ module occamy_soc
   );
 
 
-  typedef logic [16:0] mem_addr_t;
+  typedef logic [18:0] mem_addr_t;
   typedef logic [63:0] mem_data_t;
   typedef logic [7:0] mem_strb_t;
 
@@ -1963,7 +1963,7 @@ module occamy_soc
   axi_to_mem #(
       .axi_req_t(axi_a48_d64_i8_u0_req_t),
       .axi_resp_t(axi_a48_d64_i8_u0_resp_t),
-      .AddrWidth(17),
+      .AddrWidth(19),
       .DataWidth(64),
       .IdWidth(8),
       .NumBanks(1),
@@ -1986,7 +1986,7 @@ module occamy_soc
   );
 
   spm_1p_adv #(
-      .NumWords(16384),
+      .NumWords(65536),
       .DataWidth(64),
       .ByteWidth(8),
       .EnableInputPipeline(1'b1),
@@ -1998,7 +1998,7 @@ module occamy_soc
       .valid_i(spm_req),
       .ready_o(spm_gnt),
       .we_i(spm_we),
-      .addr_i(spm_addr[16:3]),
+      .addr_i(spm_addr[18:3]),
       .wdata_i(spm_wdata),
       .be_i(spm_strb),
       .rdata_o(spm_rdata),

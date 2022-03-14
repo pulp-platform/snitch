@@ -78,7 +78,7 @@ package occamy_cluster_pkg;
     cached_regions = '{default: '0};
     cached_regions[0] = '{base: 48'h80000000, mask: 48'hffff80000000};
     cached_regions[1] = '{base: 48'h1000000000, mask: 48'hfffe00000000};
-    cached_regions[2] = '{base: 48'h70000000, mask: 48'hfffffffe0000};
+    cached_regions[2] = '{base: 48'h70000000, mask: 48'hfffffff80000};
     cached_regions[3] = '{base: 48'h1000000, mask: 48'hfffffffe0000};
     return cached_regions;
   endfunction
