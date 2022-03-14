@@ -5403,6 +5403,7 @@ impl<'a> InstructionTranslator<'a> {
         // Handle other operations.
         let rs1 = self.read_reg(data.rs1);
         let rs2 = self.read_reg(data.rs2);
+        let rd  = self.read_reg(data.rd);
         let value = match data.op {
             riscv::OpcodeRdRs1Rs2::Add => LLVMBuildAdd(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Sub => LLVMBuildSub(self.builder, rs1, rs2, name),
@@ -5478,6 +5479,20 @@ impl<'a> InstructionTranslator<'a> {
                 "banshee_dma_strt",
                 [self.dma_ptr(), self.section.state_ptr, rs1, rs2],
             ),
+            riscv::OpcodeRdRs1Rs2::PMac => {
+                LLVMBuildAdd(
+                    self.builder, 
+                    rd, 
+                    LLVMBuildMul(self.builder, rs1, rs2, name), 
+                    name)
+            },
+            riscv::OpcodeRdRs1Rs2::PMsu => {
+                LLVMBuildSub(
+                    self.builder, 
+                    rd, 
+                    LLVMBuildMul(self.builder, rs1, rs2, name), 
+                    name)
+            },
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
