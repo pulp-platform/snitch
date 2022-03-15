@@ -466,8 +466,9 @@ def main():
                                      32,
                                      context="hbm_ctrl",
                                      name="hbm_cfg_xbar",
-                                     clk="cfg_clk_i",
-                                     rst="cfg_rst_ni",
+                                     # Use internal clock and reset
+                                     clk="cfg_clk",
+                                     rst="cfg_rst_n",
                                      node=am_hbm_cfg_xbar)
 
     for name, region in occamy.cfg["hbm"]["cfg_regions"].items():
