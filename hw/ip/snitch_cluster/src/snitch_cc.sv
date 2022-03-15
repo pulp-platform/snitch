@@ -202,6 +202,7 @@ module snitch_cc #(
     .FP_EN (FPEn),
     .Xdma (Xdma),
     .Xssr (Xssr),
+    .Xipu (Xipu),    
     .RVF (RVF),
     .RVD (RVD),
     .XDivSqrt (XDivSqrt),
@@ -375,35 +376,25 @@ module snitch_cc #(
   end
 
   if (Xipu) begin : gen_ipu
-    snitch_int_ss # (
-      .AddrWidth (AddrWidth),
-      .DataWidth (DataWidth),
-      .NumIPUSequencerInstr (NumSequencerInstr),
-      .acc_req_t (acc_req_t),
-      .acc_resp_t (acc_resp_t)
-    ) i_snitch_int_ss (
-      .clk_i            ( clk_i                    ),
-      .rst_i            ( (~rst_ni) | (~rst_int_ss_ni) ),
-      .acc_req_i        ( acc_snitch_req           ),
-      .acc_req_valid_i  ( ipu_qvalid               ),
-      .acc_req_ready_o  ( ipu_qready               ),
-      .acc_resp_o       ( ipu_resp                 ),
-      .acc_resp_valid_o ( ipu_pvalid               ),
-      .acc_resp_ready_i ( ipu_pready               ),
-      .ssr_raddr_o      ( /* TODO */               ),
-      .ssr_rdata_i      ('0                        ),
-      .ssr_rvalid_o     ( /* TODO */               ),
-      .ssr_rready_i     ('0                        ),
-      .ssr_rdone_o      ( /* TODO */               ),
-      .ssr_waddr_o      ( /* TODO */               ),
-      .ssr_wdata_o      ( /* TODO */               ),
-      .ssr_wvalid_o     ( /* TODO */               ),
-      .ssr_wready_i     ('0                        ),
-      .ssr_wdone_o      ( /* TODO */               ),
-      .streamctl_done_i   ( /* TODO */             ),
-      .streamctl_valid_i  ( /* TODO */             ),
-      .streamctl_ready_o  ( /* TODO */             )
-    );
+    snitch_ipu #(
+    .IdWidth ( 5 )
+  ) i_snitch_ipu (
+    .clk_i            ( clk_i                    ),
+    .rst_i            ( (~rst_ni) | (~rst_int_ss_ni) ),
+    .acc_qaddr_i      ( acc_req_q.addr      ),
+    .acc_qid_i        ( acc_req_q.id        ),
+    .acc_qdata_op_i   ( acc_req_q.data_op   ),
+    .acc_qdata_arga_i ( acc_req_q.data_arga ),
+    .acc_qdata_argb_i ( acc_req_q.data_argb ),
+    .acc_qdata_argc_i ( acc_req_q.data_argc ),
+    .acc_qvalid_i     ( ipu_qvalid          ),
+    .acc_qready_o     ( ipu_qready          ),
+    .acc_pdata_o      ( acc_resp_d.data     ),
+    .acc_pid_o        ( acc_resp_d.id       ),
+    .acc_perror_o     ( acc_resp_d.error    ),
+    .acc_pvalid_o     ( ipu_pvalid          ),
+    .acc_pready_i     ( ipu_pready          )
+  );
   end else begin : gen_no_ipu
     assign ipu_resp = '0;
     assign ipu_qready = 1'b0;
