@@ -61,11 +61,6 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
                         uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
                         uint32_t tb, double* C, uint32_t ldC,
                         const uint32_t* ALPHA, uint32_t setup_SSR) {
-    register volatile double ft0 asm("ft0");
-    register volatile double ft1 asm("ft1");
-    register volatile double ft2 asm("ft2");
-    asm volatile("" : "=f"(ft0), "=f"(ft1), "=f"(ft2));
-
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
     // for maximum utilization
@@ -188,8 +183,6 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
     }
 
     snrt_ssr_disable();
-
-    asm volatile("" ::"f"(ft0), "f"(ft1), "f"(ft2));
 }
 
 void gemm_fp32simd_tb_ssr_frep(const uint32_t M, const uint32_t N,
@@ -197,11 +190,6 @@ void gemm_fp32simd_tb_ssr_frep(const uint32_t M, const uint32_t N,
                                float* B, const uint32_t ldB, float* C,
                                const uint32_t ldC, const uint32_t* ALPHA,
                                const uint32_t setup_SSR) {
-    register volatile double ft0 asm("ft0");
-    register volatile double ft1 asm("ft1");
-    register volatile double ft2 asm("ft2");
-    asm volatile("" : "=f"(ft0), "=f"(ft1), "=f"(ft2));
-
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
     // for maximum utilization
@@ -347,22 +335,12 @@ void gemm_fp32simd_tb_ssr_frep(const uint32_t M, const uint32_t N,
     }
 
     snrt_ssr_disable();
-
-    asm volatile("" ::"f"(ft0), "f"(ft1), "f"(ft2));
 }
 
 void gemm_fp16simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
                                uint32_t ldA, __fp16* B, uint32_t ldB, __fp16* C,
                                uint32_t ldC, const uint32_t* ALPHA,
                                uint32_t setup_SSR) {
-    register volatile double ft0 asm("ft0");
-    register volatile double ft1 asm("ft1");
-    register volatile double ft2 asm("ft2");
-    asm volatile("" : "=f"(ft0), "=f"(ft1), "=f"(ft2));
-
-    // printf("M %d, N %d, K %d, ldA %d, ldB %d, ldC %d, setup_SSR %d\n", M, N,
-    // K, ldA, ldB, ldC, setup_SSR);
-
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
     // for maximum utilization
@@ -506,5 +484,4 @@ void gemm_fp16simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
 
     snrt_ssr_disable();
 
-    asm volatile("" ::"f"(ft0), "f"(ft1), "f"(ft2));
 }
