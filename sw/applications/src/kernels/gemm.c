@@ -483,5 +483,130 @@ void gemm_fp16simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
     }
 
     snrt_ssr_disable();
+}
 
+void gemm_fp8simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, char* A,
+                              uint32_t ldA, char* B, uint32_t ldB, char* C,
+                              uint32_t ldC, const uint32_t* ALPHA,
+                              uint32_t setup_SSR) {
+    // Accumulating currently not implemented
+    if (*ALPHA != 0) return;
+
+    // Unrolling factor of most inner loop.
+    // Should be at least as high as the FMA delay
+    // for maximum utilization
+    const uint32_t unroll = 8;
+
+    // SSR strides and bounds only have to be configured
+    // once in the beginning
+    if (setup_SSR) {
+        uint32_t ssr0_b[4] = {unroll, K / 8, N / unroll, M};
+        uint32_t ssr0_i[4] = {0, sizeof(char) * 8, 0, sizeof(char) * ldA};
+
+        uint32_t ssr1_b[4] = {unroll, K / 8, N / unroll, M};
+        uint32_t ssr1_i[4] = {sizeof(char) * ldB, sizeof(char) * 8,
+                              sizeof(char) * unroll * ldB, 0};
+
+        snrt_ssr_loop_3d(SNRT_SSR_DM0, ssr0_b[1], ssr0_b[2], ssr0_b[3],
+                         ssr0_i[1], ssr0_i[2], ssr0_i[3]);
+        snrt_ssr_repeat(SNRT_SSR_DM0, unroll);
+
+        snrt_ssr_loop_4d(SNRT_SSR_DM1, ssr1_b[0], ssr1_b[1], ssr1_b[2],
+                         ssr1_b[3], ssr1_i[0], ssr1_i[1], ssr1_i[2], ssr1_i[3]);
+    }
+
+    // SSR start address need to be configured each time
+    snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_4D, A);
+    snrt_ssr_read(SNRT_SSR_DM1, SNRT_SSR_4D, B);
+    snrt_ssr_enable();
+
+    // Kernel progresses by 8 values each step
+    const uint32_t n_frep = K / 8 - 1;
+
+    for (uint32_t m = 0; m < M; m++) {
+        uint32_t n = 0;
+        for (uint32_t n0 = 0; n0 < N / unroll; n0++) {
+            char* _C = &C[m * ldC + n];
+            const register float zero = 0.0;
+            register v8f8 c[unroll];
+            register v4f16 reduce_reg[unroll];
+            uint32_t alpha;
+
+            asm volatile(
+                // Initialize SIMD vector with zeros
+                "fmv.w.x %[c0], zero\n"
+                "fmv.w.x %[c1], zero\n"
+                "fmv.w.x %[c2], zero\n"
+                "fmv.w.x %[c3], zero\n"
+                "fmv.w.x %[c4], zero\n"
+                "fmv.w.x %[c5], zero\n"
+                "fmv.w.x %[c6], zero\n"
+                "fmv.w.x %[c7], zero\n"
+                // Perform expanding sum-dotproducts
+                "frep.o  %[n_frep], 8, 0, 0 \n"
+                "vfdotpex.h.b %[c0], ft1, ft0 \n"
+                "vfdotpex.h.b %[c1], ft1, ft0 \n"
+                "vfdotpex.h.b %[c2], ft1, ft0 \n"
+                "vfdotpex.h.b %[c3], ft1, ft0 \n"
+                "vfdotpex.h.b %[c4], ft1, ft0 \n"
+                "vfdotpex.h.b %[c5], ft1, ft0 \n"
+                "vfdotpex.h.b %[c6], ft1, ft0 \n"
+                "vfdotpex.h.b %[c7], ft1, ft0 \n"
+                // Initialize reduce register to zero
+                "fmv.w.x %[reduce_reg0], zero\n"
+                "fmv.w.x %[reduce_reg1], zero\n"
+                "fmv.w.x %[reduce_reg2], zero\n"
+                "fmv.w.x %[reduce_reg3], zero\n"
+                "fmv.w.x %[reduce_reg4], zero\n"
+                "fmv.w.x %[reduce_reg5], zero\n"
+                "fmv.w.x %[reduce_reg6], zero\n"
+                "fmv.w.x %[reduce_reg7], zero\n"
+                // Sum-reduce vector
+                "vfsumex.s.h %[reduce_reg0], %[c0] \n"
+                "vfsumex.s.h %[reduce_reg1], %[c1] \n"
+                "vfsumex.s.h %[reduce_reg2], %[c2] \n"
+                "vfsumex.s.h %[reduce_reg3], %[c3] \n"
+                "vfsumex.s.h %[reduce_reg4], %[c4] \n"
+                "vfsumex.s.h %[reduce_reg5], %[c5] \n"
+                "vfsumex.s.h %[reduce_reg6], %[c6] \n"
+                "vfsumex.s.h %[reduce_reg7], %[c7] \n"
+                // Pack and convert results to FP8 vectors
+                "vfcpka.b.s %[c0], %[reduce_reg0], %[reduce_reg1] \n"
+                "vfcpkb.b.s %[c0], %[reduce_reg2], %[reduce_reg3] \n"
+                "vfcpkc.b.s %[c0], %[reduce_reg4], %[reduce_reg5] \n"
+                "vfcpkd.b.s %[c0], %[reduce_reg6], %[reduce_reg7] \n"
+                : [ c0 ] "+f"(c[0]), [ c1 ] "+f"(c[1]), [ c2 ] "+f"(c[2]),
+                  [ c3 ] "+f"(c[3]), [ c4 ] "+f"(c[4]), [ c5 ] "+f"(c[5]),
+                  [ c6 ] "+f"(c[6]), [ c7 ] "+f"(c[7]), [ alpha ] "=r"(alpha),
+                  [ reduce_reg0 ] "+f"(reduce_reg[0]),
+                  [ reduce_reg1 ] "+f"(reduce_reg[1]),
+                  [ reduce_reg2 ] "+f"(reduce_reg[2]),
+                  [ reduce_reg3 ] "+f"(reduce_reg[3]),
+                  [ reduce_reg4 ] "+f"(reduce_reg[4]),
+                  [ reduce_reg5 ] "+f"(reduce_reg[5]),
+                  [ reduce_reg6 ] "+f"(reduce_reg[6]),
+                  [ reduce_reg7 ] "+f"(reduce_reg[7])
+                : [ C ] "r"(_C), [ n_frep ] "r"(n_frep), [ ALPHA ] "r"(ALPHA)
+                : "ft0", "ft1", "ft2");
+
+            // Store results back
+            ((v8f8*)_C)[0] = c[0];
+            n += unroll;
+        }
+
+        // Clean up left over column
+        // snrt_ssr_disable();
+
+        // for (; n < N; n++) {
+        //     char c = (*ALPHA) ? C[m * ldC + n] : 0.0;
+        //     for (uint32_t k = 0; k < K; k++) {
+        //         c += A[k + m * ldA] * B[k + n * ldB];
+        //     }
+        //     C[m * ldC + n] = c;
+        // }
+
+        // snrt_ssr_enable();
+    }
+
+    snrt_ssr_disable();
 }

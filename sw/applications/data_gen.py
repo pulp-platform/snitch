@@ -389,7 +389,7 @@ def main():
 
     if param['prec'] == 64:
         dtype = torch.float64
-    elif param['prec'] == 16:
+    elif param['prec'] in [8, 16]:
         dtype = torch.float16
     else:
         dtype = torch.float32

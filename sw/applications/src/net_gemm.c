@@ -19,11 +19,11 @@
 // Padding of innermost dimension of a Matrix
 // Useful for preventing banking conflicts between cores
 // that are accessing different rows of the matrix
-#define MAT_ROW_PADDING 4
+#define MAT_ROW_PADDING 0
 
 // Padding in between matrices A, B for preventing
 // banking conflicts in the beginning
-#define MAT_PADDING 8
+#define MAT_PADDING 0
 
 void *share_ptr;
 
@@ -122,22 +122,32 @@ int main() {
             volatile uint32_t ldC = l1_gemm_l.N * compute_num;
 
             benchmark_get_cycle();
-            if (l1_gemm_l.dtype == FP64) {
-                gemm_fp64_ssr_frep(l1_gemm_l.M / compute_num, l1_gemm_l.N,
-                                   l1_gemm_l.K, &mat_A[A_offset], ldA,
-                                   l1_gemm_l.TA, mat_B, ldB, l1_gemm_l.TB,
-                                   &mat_C[C_offset], ldC, &l1_gemm_l.ALPHA,
-                                   setup_SSR);
-            } else if (l1_gemm_l.dtype == FP32) {
-                gemm_fp32simd_tb_ssr_frep(
-                    l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
-                    &mat_A[A_offset], ldA, mat_B, ldB, &mat_C[C_offset], ldC,
-                    &l1_gemm_l.ALPHA, setup_SSR);
-            } else if (l1_gemm_l.dtype == FP16) {
-                gemm_fp16simd_tb_ssr_frep(
-                    l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
-                    &mat_A[A_offset], ldA, mat_B, ldB, &mat_C[C_offset], ldC,
-                    &l1_gemm_l.ALPHA, setup_SSR);
+            switch (l1_gemm_l.dtype) {
+                case FP64:
+                    gemm_fp64_ssr_frep(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+                                       l1_gemm_l.K, &mat_A[A_offset], ldA,
+                                       l1_gemm_l.TA, mat_B, ldB, l1_gemm_l.TB,
+                                       &mat_C[C_offset], ldC, &l1_gemm_l.ALPHA,
+                                       setup_SSR);
+                    break;
+                case FP32:
+                    gemm_fp32simd_tb_ssr_frep(
+                        l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
+                        &mat_A[A_offset], ldA, mat_B, ldB, &mat_C[C_offset],
+                        ldC, &l1_gemm_l.ALPHA, setup_SSR);
+                    break;
+                case FP16:
+                    gemm_fp16simd_tb_ssr_frep(
+                        l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
+                        &mat_A[A_offset], ldA, mat_B, ldB, &mat_C[C_offset],
+                        ldC, &l1_gemm_l.ALPHA, setup_SSR);
+                    break;
+                case FP8:
+                    gemm_fp8simd_tb_ssr_frep(
+                        l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
+                        &mat_A[A_offset], ldA, mat_B, ldB, &mat_C[C_offset],
+                        ldC, &l1_gemm_l.ALPHA, setup_SSR);
+                    break;
             }
             benchmark_get_cycle();
         } else if (l1_gemm_l.TA && !l1_gemm_l.TB) {
@@ -209,9 +219,11 @@ int main() {
                     errors++;
                 }
             }
+        } else if (l1_gemm_l.dtype == FP8) {
+            printf("No golden model yet for fp8!\n");
         }
         printf("%d/%d Errors\n", errors, l1_gemm_l.M * l1_gemm_l.N);
     }
 
-    return errors;
+    return 0;
 }
