@@ -101,7 +101,9 @@ import ${name}_pkg::*;
   `AXI_FLATTEN_MASTER(hbm_${i}, hbm_${i}_req_o, hbm_${i}_rsp_i)
 % endfor
 
-  /// Boot ROM
+  ///////////////////
+  // Boot ROM      //
+  ///////////////////
   // TODO(niwis, aottaviano) This is a temporary solution. Either put this in a dedicated module for
   // regbus <-> Xilinx memory conversion and add support to solder, or replace by a different ROM
   ${soc_regbus_periph_xbar.out_bootrom.req_type()} bootrom_req;
@@ -110,7 +112,7 @@ import ${name}_pkg::*;
   logic bootrom_req_ready_d, bootrom_req_ready_q;
 
   assign bootrom_en_o        = bootrom_req.valid;
-  assign bootrom_addr_o      = bootrom_req.addr >> 2; // 32-bit addressed
+  assign bootrom_addr_o      = bootrom_req.addr;
   assign bootrom_rsp.ready   = bootrom_req_ready_q;
   assign bootrom_rsp.rdata   = bootrom_data_i;
   assign bootrom_rsp.error   = '0;

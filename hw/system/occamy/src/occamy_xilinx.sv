@@ -569,7 +569,9 @@ module occamy_xilinx
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_7, hbm_7_req_o, hbm_7_rsp_i)
 
-  /// Boot ROM
+  ///////////////////
+  // Boot ROM      //
+  ///////////////////
   // TODO(niwis, aottaviano) This is a temporary solution. Either put this in a dedicated module for
   // regbus <-> Xilinx memory conversion and add support to solder, or replace by a different ROM
   reg_a48_d32_req_t bootrom_req;
@@ -578,7 +580,7 @@ module occamy_xilinx
   logic bootrom_req_ready_d, bootrom_req_ready_q;
 
   assign bootrom_en_o        = bootrom_req.valid;
-  assign bootrom_addr_o      = bootrom_req.addr >> 2;  // 32-bit addressed
+  assign bootrom_addr_o      = bootrom_req.addr;
   assign bootrom_rsp.ready   = bootrom_req_ready_q;
   assign bootrom_rsp.rdata   = bootrom_data_i;
   assign bootrom_rsp.error   = '0;
