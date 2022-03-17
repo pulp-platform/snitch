@@ -16,8 +16,10 @@ module axi_riscv_atomics_synth #(
     parameter integer AXI_DATA_WIDTH = 64,
     parameter integer AXI_ID_WIDTH = 4,
     parameter integer AXI_USER_WIDTH = 0,
-    /// Maximum number of AXI bursts outstanding at the same time
+    /// Maximum number of AXI write bursts outstanding at the same time
     parameter integer AXI_MAX_WRITE_TXNS = 4,
+    /// Maximum number of AXI read bursts outstanding at the same time
+    parameter integer AXI_MAX_READ_TXNS = 4,
     // Word width of the widest RISC-V processor that can issue requests to this module.
     // 32 for RV32; 64 for RV64, where both 32-bit (.W suffix) and 64-bit (.D suffix) AMOs are
     // supported if `aw_strb` is set correctly.
@@ -136,6 +138,7 @@ module axi_riscv_atomics_synth #(
         .AXI_DATA_WIDTH     (AXI_DATA_WIDTH),
         .AXI_ID_WIDTH       (AXI_ID_WIDTH),
         .AXI_USER_WIDTH     (AXI_USER_WIDTH),
+        .AXI_MAX_READ_TXNS  (AXI_MAX_READ_TXNS),
         .AXI_MAX_WRITE_TXNS (AXI_MAX_WRITE_TXNS),
         .RISCV_WORD_WIDTH   (RISCV_WORD_WIDTH)
     ) i_axi_riscv_atomics (

@@ -16,18 +16,16 @@ module axi_res_tbl #(
 ) (
     input  logic                        clk_i,
     input  logic                        rst_ni,
-    input  logic [AXI_ADDR_WIDTH-1:0]   clr_addr_i,
-    input  logic                        clr_req_i,
-    output logic                        clr_gnt_o,
+    input  logic [AXI_ADDR_WIDTH-1:0]   check_clr_addr_i,
+    input  logic [AXI_ID_WIDTH-1:0]     check_id_i,
+    input  logic                        check_clr_excl_i,
+    output logic                        check_res_o,
+    input  logic                        check_clr_req_i,
+    output logic                        check_clr_gnt_o,
     input  logic [AXI_ADDR_WIDTH-1:0]   set_addr_i,
     input  logic [AXI_ID_WIDTH-1:0]     set_id_i,
     input  logic                        set_req_i,
-    output logic                        set_gnt_o,
-    input  logic [AXI_ADDR_WIDTH-1:0]   check_addr_i,
-    input  logic [AXI_ID_WIDTH-1:0]     check_id_i,
-    output logic                        check_res_o,
-    input  logic                        check_req_i,
-    output logic                        check_gnt_o
+    output logic                        set_gnt_o
 );
 
     localparam integer N_IDS = 2**AXI_ID_WIDTH;
@@ -42,7 +40,7 @@ module axi_res_tbl #(
             tbl_d[i] = tbl_q[i];
             if (set && i == set_id_i) begin
                 tbl_d[i] = set_addr_i;
-            end else if (clr && tbl_q[i] == clr_addr_i) begin
+            end else if (clr && tbl_q[i] == check_clr_addr_i) begin
                 tbl_d[i] = '0;
             end
         end
@@ -50,22 +48,20 @@ module axi_res_tbl #(
 
     // Table-Managing Logic
     always_comb begin
-        clr         = 1'b0;
-        set         = 1'b0;
-        clr_gnt_o   = 1'b0;
-        set_gnt_o   = 1'b0;
-        check_res_o = 1'b0;
-        check_gnt_o = 1'b0;
+        clr             = 1'b0;
+        set             = 1'b0;
+        set_gnt_o       = 1'b0;
+        check_res_o     = 1'b0;
+        check_clr_gnt_o = 1'b0;
 
-        if (clr_req_i) begin
-            clr         = 1'b1;
-            clr_gnt_o   = 1'b1;
+        if (check_clr_req_i) begin
+            automatic logic match = (tbl_q[check_id_i] == check_clr_addr_i);
+            check_clr_gnt_o = 1'b1;
+            check_res_o     = match;
+            clr             = !(check_clr_excl_i && !match);
         end else if (set_req_i) begin
             set         = 1'b1;
             set_gnt_o   = 1'b1;
-        end else if (check_req_i) begin
-            check_res_o = (tbl_q[check_id_i] == check_addr_i);
-            check_gnt_o = 1'b1;
         end
     end
 

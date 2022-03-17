@@ -12,15 +12,17 @@
 // Simple standalone synthesis bench for axi_riscv_lrsc
 module axi_riscv_lrsc_synth #(
     /// Exclusively-accessible address range (closed interval from ADDR_BEGIN to ADDR_END)
-    parameter integer ADDR_BEGIN        = 64'h0000_0000_0000_0000,
-    parameter integer ADDR_END          = 64'h0000_7fff_ffff_ffff,
+    parameter [63:0] ADDR_BEGIN             = 64'h0000_0000_0000_0000,
+    parameter [63:0] ADDR_END               = 64'h0000_7fff_ffff_ffff,
     /// AXI Parameters
-    parameter integer AXI_ADDR_WIDTH    = 64,
-    parameter integer AXI_DATA_WIDTH    = 64,
-    parameter integer AXI_ID_WIDTH      = 4,
-    parameter integer AXI_USER_WIDTH    = 0,
+    parameter integer AXI_ADDR_WIDTH        = 64,
+    parameter integer AXI_DATA_WIDTH        = 64,
+    parameter integer AXI_ID_WIDTH          = 4,
+    parameter integer AXI_USER_WIDTH        = 0,
+    parameter integer AXI_MAX_READ_TXNS     = 8,
+    parameter integer AXI_MAX_WRITE_TXNS    = 8,
     /// Derived Parameters (do NOT change manually!)
-    localparam integer AXI_STRB_WIDTH   = AXI_DATA_WIDTH / 8
+    localparam integer AXI_STRB_WIDTH       = AXI_DATA_WIDTH / 8
 ) (
     input                          clk_i,
     input                          rst_ni,
@@ -134,7 +136,10 @@ module axi_riscv_lrsc_synth #(
         .AXI_ADDR_WIDTH     (AXI_ADDR_WIDTH),
         .AXI_DATA_WIDTH     (AXI_DATA_WIDTH),
         .AXI_ID_WIDTH       (AXI_ID_WIDTH),
-        .AXI_USER_WIDTH     (AXI_USER_WIDTH)
+        .AXI_USER_WIDTH     (AXI_USER_WIDTH),
+        .AXI_MAX_READ_TXNS  (AXI_MAX_READ_TXNS),
+        .AXI_MAX_WRITE_TXNS (AXI_MAX_WRITE_TXNS),
+        .DEBUG              (1'b0)
     ) i_axi_riscv_lrsc (
         .clk_i(clk_i),
         .rst_ni(rst_ni),
