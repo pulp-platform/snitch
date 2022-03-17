@@ -271,6 +271,7 @@ def main():
         occamy.cfg["hbi"]["length"],
         occamy.cfg["hbi"]["address"])
     am_soc_wide_xbar.attach(am_hbi)
+    am_soc_narrow_xbar.attach(am_hbi)
 
     ###########
     # AM: RMQ #

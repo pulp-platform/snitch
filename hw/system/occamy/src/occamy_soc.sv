@@ -510,9 +510,10 @@ module occamy_soc
   );
 
   /// Address map of the `soc_narrow_xbar` crossbar.
-  xbar_rule_48_t [17:0] SocNarrowXbarAddrmap;
+  xbar_rule_48_t [18:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
-  '{ idx: 6, start_addr: 48'h80000000, end_addr: 48'h20000000000 },
+  '{ idx: 6, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
+  '{ idx: 7, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
   '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70080000 },
   '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h07010000 },
