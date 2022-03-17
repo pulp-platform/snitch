@@ -28,8 +28,16 @@
 
     \bitbox[]{5}{\texttt{0x0200\_0000} \\ [0\baselineskip] \texttt{0x0200\_0fff}} &
     \bitbox{14}{4.0 KB for SOC\_CTRL} \\
-    \bitbox[]{5}{\texttt{0x0200\_1000} \\ [0\baselineskip] \texttt{0x0200\_1fff}} &
-    \bitbox{14}{4.0 KB for CLK\_MGR} \\
+    \bitbox[]{5}{\texttt{0x0200\_1000} \\ [0\baselineskip] \texttt{0x0200\_13ff}} &
+    \bitbox{14}{1.0 KB for FLL\_SYSTEM} \\
+    \bitbox[]{5}{\texttt{0x0200\_1400} \\ [0\baselineskip] \texttt{0x0200\_17ff}} &
+    \bitbox{14}{1.0 KB for FLL\_PERIPH} \\
+    \bitbox[]{5}{\texttt{0x0200\_1800} \\ [0\baselineskip] \texttt{0x0200\_1bff}} &
+    \bitbox{14}{1.0 KB for FLL\_HBM2E} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{1023.0 B EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
     \bitbox[]{5}{\texttt{0x0200\_2000} \\ [0\baselineskip] \texttt{0x0200\_2fff}} &
     \bitbox{14}{4.0 KB for UART} \\
     \bitbox[]{5}{\texttt{0x0200\_3000} \\ [0\baselineskip] \texttt{0x0200\_3fff}} &

@@ -57,7 +57,9 @@ module testharness import occamy_pkg::*; (
   logic tx, rx;
   ${tb_memory(soc_narrow_xbar.out_pcie, "pcie_axi")}
   ${tb_memory(soc_regbus_periph_xbar.out_bootrom, "bootrom_regbus")}
-  ${tb_memory(soc_regbus_periph_xbar.out_clk_mgr, "clk_mgr")}
+  ${tb_memory(soc_regbus_periph_xbar.out_fll_system, "fll_system")}
+  ${tb_memory(soc_regbus_periph_xbar.out_fll_periph, "fll_periph")}
+  ${tb_memory(soc_regbus_periph_xbar.out_fll_hbm2e, "fll_hbm2e")}
   occamy_top i_occamy (
     .clk_i,
     .rst_ni,
@@ -98,8 +100,12 @@ module testharness import occamy_pkg::*; (
     .spim_sd_i ('0),
     .bootrom_req_o (bootrom_regbus_req),
     .bootrom_rsp_i (bootrom_regbus_rsp),
-    .clk_mgr_req_o (clk_mgr_req),
-    .clk_mgr_rsp_i (clk_mgr_rsp),
+    .fll_system_req_o (fll_system_req),
+    .fll_system_rsp_i (fll_system_rsp),
+    .fll_periph_req_o (fll_periph_req),
+    .fll_periph_rsp_i (fll_periph_rsp),
+    .fll_hbm2e_req_o (fll_hbm2e_req),
+    .fll_hbm2e_rsp_i (fll_hbm2e_rsp),
     .hbi_wide_cfg_req_o (),
     .hbi_wide_cfg_rsp_i ('0),
     .hbi_narrow_cfg_req_o (),

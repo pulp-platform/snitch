@@ -124,18 +124,26 @@ import ${name}_pkg::*;
     end
   end
 
-  /// Clk manager
-  ${soc_regbus_periph_xbar.out_clk_mgr.req_type()} clk_mgr_req;
-  ${soc_regbus_periph_xbar.out_clk_mgr.rsp_type()} clk_mgr_rsp;
+  /// FLLs
+  ${soc_regbus_periph_xbar.out_fll_system.req_type()} fll_system_req;
+  ${soc_regbus_periph_xbar.out_fll_system.rsp_type()} fll_system_rsp;
+  ${soc_regbus_periph_xbar.out_fll_periph.req_type()} fll_periph_req;
+  ${soc_regbus_periph_xbar.out_fll_periph.rsp_type()} fll_periph_rsp;
+  ${soc_regbus_periph_xbar.out_fll_hbm2e.req_type()} fll_hbm2e_req;
+  ${soc_regbus_periph_xbar.out_fll_hbm2e.rsp_type()} fll_hbm2e_rsp;
 
   // Occamy top-level
   ${name}_top i_${name} (
-    .bootrom_req_o (bootrom_req),
-    .bootrom_rsp_i (bootrom_rsp),
-    .clk_mgr_req_o (clk_mgr_req),
-    .clk_mgr_rsp_i (clk_mgr_rsp),
-    .pcie_cfg_req_o (),
-    .pcie_cfg_rsp_i ('0),
+    .bootrom_req_o   (bootrom_req),
+    .bootrom_rsp_i   (bootrom_rsp),
+    .fll_system_req_o(fll_system_req),
+    .fll_system_rsp_i(fll_system_rsp),
+    .fll_periph_req_o(fll_periph_req),
+    .fll_periph_rsp_i(fll_periph_rsp),
+    .fll_hbm2e_req_o (fll_hbm2e_req),
+    .fll_hbm2e_rsp_i (fll_hbm2e_rsp),
+    .pcie_cfg_req_o  (),
+    .pcie_cfg_rsp_i  ('0),
     // Tie the HBM interrupts to zero.
     .ext_irq_i ({8'b0, ext_irq_i}),
     .apb_hbm_cfg_req_o (),
@@ -151,6 +159,8 @@ import ${name}_pkg::*;
     .*
   );
 
-  assign clk_mgr_rsp = '0;
+  assign fll_system_rsp = '0;
+  assign fll_periph_rsp = '0;
+  assign fll_hbm2e_rsp = '0;
 
 endmodule

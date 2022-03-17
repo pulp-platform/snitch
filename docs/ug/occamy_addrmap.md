@@ -11,7 +11,10 @@ This is the current address map of occamy. Note that the Quadrants address map h
 | BOOTROM          | 128.0 KB |  used  |      0x0100\_0000 |      0x0101\_ffff |
 | -                |  15.9 MB |  free  |      0x0102\_0000 |      0x01ff\_ffff |
 | SOC\_CTRL        |   4.0 KB |  used  |      0x0200\_0000 |      0x0200\_0fff |
-| CLK\_MGR         |   4.0 KB |  used  |      0x0200\_1000 |      0x0200\_1fff |
+| FLL\_SYSTEM      |   1.0 KB |  used  |      0x0200\_1000 |      0x0200\_13ff |
+| FLL\_PERIPH      |   1.0 KB |  used  |      0x0200\_1400 |      0x0200\_17ff |
+| FLL\_HBM2E       |   1.0 KB |  used  |      0x0200\_1800 |      0x0200\_1bff |
+| -                | 1023.0 B |  free  |      0x0200\_1c00 |      0x0200\_1fff |
 | UART             |   4.0 KB |  used  |      0x0200\_2000 |      0x0200\_2fff |
 | GPIO             |   4.0 KB |  used  |      0x0200\_3000 |      0x0200\_3fff |
 | I2C              |   4.0 KB |  used  |      0x0200\_4000 |      0x0200\_4fff |

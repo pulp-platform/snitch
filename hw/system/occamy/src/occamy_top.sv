@@ -61,9 +61,13 @@ module occamy_top
     output reg_a48_d32_req_t bootrom_req_o,
     input  reg_a48_d32_rsp_t bootrom_rsp_i,
 
-    /// Clk manager
-    output reg_a48_d32_req_t clk_mgr_req_o,
-    input  reg_a48_d32_rsp_t clk_mgr_rsp_i,
+    /// FLLs
+    output reg_a48_d32_req_t fll_system_req_o,
+    input  reg_a48_d32_rsp_t fll_system_rsp_i,
+    output reg_a48_d32_req_t fll_periph_req_o,
+    input  reg_a48_d32_rsp_t fll_periph_rsp_i,
+    output reg_a48_d32_req_t fll_hbm2e_req_o,
+    input  reg_a48_d32_rsp_t fll_hbm2e_rsp_i,
 
     /// HBI Config and APB Control
     output reg_a48_d32_req_t hbi_wide_cfg_req_o,
@@ -178,8 +182,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [14:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [14:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [16:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [16:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -202,7 +206,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(15),
+      .NoRules(17),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -733,8 +737,12 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
   //   Clk Mgr   //
   /////////////////
 
-  assign clk_mgr_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_CLK_MGR];
-  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_CLK_MGR] = clk_mgr_rsp_i;
+  assign fll_system_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_FLL_SYSTEM];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_FLL_SYSTEM] = fll_system_rsp_i;
+  assign fll_periph_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_FLL_PERIPH];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_FLL_PERIPH] = fll_periph_rsp_i;
+  assign fll_hbm2e_req_o = soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_FLL_HBM2E];
+  assign soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_FLL_HBM2E] = fll_hbm2e_rsp_i;
 
   //////////////
   //   PLIC   //
