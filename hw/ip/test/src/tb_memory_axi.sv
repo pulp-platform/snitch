@@ -60,6 +60,7 @@ module tb_memory_axi #(
       .AXI_DATA_WIDTH (AxiDataWidth),
       .AXI_ID_WIDTH (AxiIdWidth),
       .AXI_USER_WIDTH (AxiUserWidth),
+      .AXI_MAX_READ_TXNS (2),
       .AXI_MAX_WRITE_TXNS (2),
       .RISCV_WORD_WIDTH (32)
     ) i_axi_riscv_atomics_wrap (
