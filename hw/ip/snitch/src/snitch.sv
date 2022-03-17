@@ -1042,13 +1042,13 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       /* Xpulpimg extension */
       // Offload to IPU coprocessor
       // 1 source register (rs1)
-      riscv_instr::P_ABS,                // Xpulpimg: p.abs
-      riscv_instr::P_EXTHS,              // Xpulpimg: p.exths
-      riscv_instr::P_EXTHZ,              // Xpulpimg: p.exthz
-      riscv_instr::P_EXTBS,              // Xpulpimg: p.extbs
-      riscv_instr::P_EXTBZ,              // Xpulpimg: p.extbz
-      riscv_instr::P_CLIP,               // Xpulpimg: p.clip
-      riscv_instr::P_CLIPU: begin        // Xpulpimg: p.clipu
+      P_ABS,                // Xpulpimg: p.abs
+      P_EXTHS,              // Xpulpimg: p.exths
+      P_EXTHZ,              // Xpulpimg: p.exthz
+      P_EXTBS,              // Xpulpimg: p.extbs
+      P_EXTBZ,              // Xpulpimg: p.extbz
+      P_CLIP,               // Xpulpimg: p.clip
+      P_CLIPU: begin        // Xpulpimg: p.clipu
          if (Xipu) begin
             write_rd = 1'b0;
             uses_rd = 1'b1;

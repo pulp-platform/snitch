@@ -379,21 +379,21 @@ module snitch_cc #(
     snitch_ipu #(
     .IdWidth ( 5 )
   ) i_snitch_ipu (
-    .clk_i            ( clk_i                    ),
+    .clk_i            ( clk_i                        ),
     .rst_i            ( (~rst_ni) | (~rst_int_ss_ni) ),
-    .acc_qaddr_i      ( acc_req_q.addr      ),
-    .acc_qid_i        ( acc_req_q.id        ),
-    .acc_qdata_op_i   ( acc_req_q.data_op   ),
-    .acc_qdata_arga_i ( acc_req_q.data_arga ),
-    .acc_qdata_argb_i ( acc_req_q.data_argb ),
-    .acc_qdata_argc_i ( acc_req_q.data_argc ),
-    .acc_qvalid_i     ( ipu_qvalid          ),
-    .acc_qready_o     ( ipu_qready          ),
-    .acc_pdata_o      ( acc_resp_d.data     ),
-    .acc_pid_o        ( acc_resp_d.id       ),
-    .acc_perror_o     ( acc_resp_d.error    ),
-    .acc_pvalid_o     ( ipu_pvalid          ),
-    .acc_pready_i     ( ipu_pready          )
+    .acc_qaddr_i      ( acc_req_q.addr               ),
+    .acc_qid_i        ( acc_req_q.id                 ),
+    .acc_qdata_op_i   ( acc_req_q.data_op            ),
+    .acc_qdata_arga_i ( acc_req_q.data_arga          ),
+    .acc_qdata_argb_i ( acc_req_q.data_argb          ),
+    .acc_qdata_argc_i ( acc_req_q.data_argc          ),
+    .acc_qvalid_i     ( ipu_qvalid                   ),
+    .acc_qready_o     ( ipu_qready                   ),
+    .acc_pdata_o      ( ipu_resp_d.data              ),
+    .acc_pid_o        ( ipu_resp_d.id                ),
+    .acc_perror_o     ( ipu_resp_d.error             ),
+    .acc_pvalid_o     ( ipu_pvalid                   ),
+    .acc_pready_i     ( ipu_pready                   )
   );
   end else begin : gen_no_ipu
     assign ipu_resp = '0;
