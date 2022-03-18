@@ -1,4 +1,4 @@
-# Untitled number in Occamy System Schema Schema
+# Untitled integer in Occamy System Schema Schema
 
 ```txt
 http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant/properties/cfg_base_offset
@@ -12,7 +12,7 @@ Allocated size and offset of each quadrant configuration.
 
 ## cfg_base_offset Type
 
-`number`
+`integer`
 
 ## cfg_base_offset Default Value
 

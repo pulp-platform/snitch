@@ -82,6 +82,9 @@ def main():
     parser.add_argument("--chip",
                         metavar="CHIP_TOP",
                         help="(Optional) Chip Top-level")
+    parser.add_argument("--hbm-ctrl",
+                        metavar="HBM_CTRL",
+                        help="(Optional) HBM controller")
     parser.add_argument("--bootdata",
                         metavar="BOOTDATA",
                         help="Name of the bootdata file (output)")
@@ -183,6 +186,7 @@ def main():
     # Peripheral crossbar address map
     am_soc_axi_lite_periph_xbar = am.new_node("soc_axi_lite_periph_xbar")
     am_soc_regbus_periph_xbar = am.new_node("soc_periph_regbus_xbar")
+    am_hbm_cfg_xbar = am.new_node("hbm_cfg_xbar")
 
     ############################
     # AM: Periph AXI Lite XBar #
@@ -397,9 +401,9 @@ def main():
                 am_soc_narrow_xbar
             )
 
-    ##############################
+    #################
     # AM: Crossbars #
-    ##############################
+    #################
     # Connect quadrants AXI xbar
     for i in range(nr_s1_quadrants):
         am_narrow_xbar_quadrant_s1[i].attach(am_wide_xbar_quadrant_s1[i])
@@ -455,6 +459,27 @@ def main():
             am_axi_lite_peripherals[p]
         )
 
+    ###############
+    # HBM control #
+    ###############
+    hbm_cfg_xbar = solder.RegBusXbar(48,
+                                     32,
+                                     context="hbm_ctrl",
+                                     name="hbm_cfg_xbar",
+                                     # Use internal clock and reset
+                                     clk="cfg_clk",
+                                     rst="cfg_rst_n",
+                                     node=am_hbm_cfg_xbar)
+
+    for name, region in occamy.cfg["hbm"]["cfg_regions"].items():
+        leaf = am.new_leaf(f"hbm_cfg_{name}",
+                           region["length"],
+                           region["address"]
+                           ).attach_to(am_hbm_cfg_xbar)
+        hbm_cfg_xbar.add_output_entry(name, leaf)
+
+    hbm_cfg_xbar.add_input("cfg")
+
     ##########
     # RegBus #
     ##########
@@ -477,6 +502,9 @@ def main():
     # add bootrom and clint seperately
     soc_regbus_periph_xbar.add_output_entry("bootrom", am_bootrom)
     soc_regbus_periph_xbar.add_output_entry("clint", am_clint)
+
+    # add hbm cfg xbar separately
+    soc_regbus_periph_xbar.add_output_entry("hbm_cfg", am_hbm_cfg_xbar)
 
     ##################
     # SoC Wide Xbars #
@@ -799,6 +827,7 @@ def main():
         "wide_xbar_quadrant_s1": wide_xbar_quadrant_s1,
         "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
         "soc_regbus_periph_xbar": soc_regbus_periph_xbar,
+        "hbm_cfg_xbar": hbm_cfg_xbar,
         "apb_hbm_cfg": apb_hbm_cfg,
         "cfg": occamy.cfg,
         "cores": nr_s1_quadrants * nr_s1_clusters * nr_cluster_cores + nr_remote_cores + 1,
@@ -904,6 +933,14 @@ def main():
         with open(args.am_csv, 'w', newline='') as csvfile:
             csv_writer = csv.writer(csvfile, delimiter=',')
             am.print_csv(csv_writer)
+
+    ###############
+    # HBM control #
+    ###############
+    write_template(args.hbm_ctrl,
+                   outdir,
+                   module=solder.code_module['hbm_ctrl'],
+                   **kwargs)
 
     ############
     # CHIP TOP #

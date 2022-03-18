@@ -71,12 +71,8 @@ module ${name}_top
   output ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.req_type()} hbi_narrow_cfg_req_o,
   input  ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.rsp_type()} hbi_narrow_cfg_rsp_i,
   /// HBM Config
-  output ${apb_hbm_cfg.req_type()} apb_hbm_cfg_req_o,
-  input  ${apb_hbm_cfg.rsp_type()} apb_hbm_cfg_rsp_i,
-  output ${soc_regbus_periph_xbar.out_hbm_phy_cfg.req_type()} hbm_phy_cfg_req_o,
-  input  ${soc_regbus_periph_xbar.out_hbm_phy_cfg.rsp_type()} hbm_phy_cfg_rsp_i,
-  output ${soc_regbus_periph_xbar.out_hbm_seq.req_type()} hbm_seq_req_o,
-  input  ${soc_regbus_periph_xbar.out_hbm_seq.rsp_type()} hbm_seq_rsp_i,
+  output ${soc_regbus_periph_xbar.out_hbm_cfg.req_type()} hbm_cfg_req_o,
+  input  ${soc_regbus_periph_xbar.out_hbm_cfg.rsp_type()} hbm_cfg_rsp_i,
   /// PCIe/DDR Config
   output ${soc_regbus_periph_xbar.out_pcie_cfg.req_type()} pcie_cfg_req_o,
   input  ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_type()} pcie_cfg_rsp_i,
@@ -128,12 +124,11 @@ module ${name}_top
 );
 
   ${name}_soc_reg_pkg::${name}_soc_reg2hw_t soc_ctrl_out;
-  ${name}_soc_reg_pkg::${name}_soc_hw2reg_t soc_ctrl_in, soc_ctrl_soc_in;
+  ${name}_soc_reg_pkg::${name}_soc_hw2reg_t soc_ctrl_in;
   logic [1:0] spm_rerror;
 
   always_comb begin
-    soc_ctrl_in = soc_ctrl_soc_in;
-    // External SoC register inputs
+    soc_ctrl_in = '0;
     soc_ctrl_in.boot_mode.d = boot_mode_i;
     soc_ctrl_in.chip_id.d = chip_id_i;
   end
@@ -198,8 +193,6 @@ module ${name}_top
     .periph_axi_lite_rsp_o ( periph_axi_lite_per2soc_rsp ),
     .periph_regbus_req_o ( periph_regbus_soc2per_req ),
     .periph_regbus_rsp_i ( periph_regbus_soc2per_rsp ),
-    .soc_ctrl_out_i ( soc_ctrl_out ),
-    .soc_ctrl_in_o ( soc_ctrl_soc_in ),
     .spm_rerror_o (spm_rerror),
     .mtip_i ( mtip ),
     .msip_i ( msip ),
@@ -238,13 +231,8 @@ module ${name}_top
   assign ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_name()} = pcie_cfg_rsp_i;
 
   // APB port for HBM
-  <% soc_regbus_periph_xbar.out_hbm_cfg.to_apb(context, "apb_hbm_cfg", to=apb_hbm_cfg) %>
-  assign apb_hbm_cfg_req_o = ${apb_hbm_cfg.req_name()};
-  assign ${apb_hbm_cfg.rsp_name()} = apb_hbm_cfg_rsp_i;
-  assign hbm_phy_cfg_req_o = ${soc_regbus_periph_xbar.out_hbm_phy_cfg.req_name()};
-  assign ${soc_regbus_periph_xbar.out_hbm_phy_cfg.rsp_name()} = hbm_phy_cfg_rsp_i;
-  assign hbm_seq_req_o = ${soc_regbus_periph_xbar.out_hbm_seq.req_name()};
-  assign ${soc_regbus_periph_xbar.out_hbm_seq.rsp_name()} = hbm_seq_rsp_i;
+  assign hbm_cfg_req_o = ${soc_regbus_periph_xbar.out_hbm_cfg.req_name()};
+  assign ${soc_regbus_periph_xbar.out_hbm_cfg.rsp_name()} = hbm_cfg_rsp_i;
 
   ///////////
   // Debug //
