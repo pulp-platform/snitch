@@ -320,7 +320,9 @@ module ${name}_soc
     #// hbi <-> narrow xbar
     hbi_in_narrow_soc = soc_narrow_xbar.in_hbi.copy(name="hbi_in_narrow_soc").declare(context)
     hbi_in_narrow_soc.cut(context, cuts_narrow_and_hbi, name="hbi_to_narrow_cut", to=soc_narrow_xbar.in_hbi)
-    hbi_out_narrow_soc = soc_narrow_xbar.out_hbi.cut(context, cuts_narrow_and_hbi, name="narrow_to_hbi_cut")
+    hbi_out_narrow_soc = soc_narrow_xbar.out_hbi \
+      .trunc_addr(context, hbi_trunc_addr_width, name="narrow_to_hbi_trunc") \
+      .cut(context, cuts_narrow_and_hbi, name="narrow_to_hbi_cut")
   %>\
 
   assign hbi_wide_req_o = ${hbi_out_wide_soc.req_name()};
