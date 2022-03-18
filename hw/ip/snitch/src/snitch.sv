@@ -1059,7 +1059,29 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
          end else begin
             illegal_inst = 1'b1;
          end
-      end // case: riscv_instr::P_ABS,...
+      end // case: P_ABS,...
+
+      // 2 source registers (rs1, rs2)
+      P_SLET,              // Xpulpimg: p.slet
+      P_SLETU,             // Xpulpimg: p.sletu
+      P_MIN,               // Xpulpimg: p.min
+      P_MINU,              // Xpulpimg: p.minu
+      P_MAX,               // Xpulpimg: p.max
+      P_MAXU,              // Xpulpimg: p.maxu
+      P_CLIPR,             // Xpulpimg: p.clipr
+      P_CLIPUR: begin      // Xpulpimg: p.clipur
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            acc_qvalid_o = valid_instr;
+            opa_select = Reg;
+            opb_select = Reg;
+            acc_register_rd = 1'b1;
+            acc_qreq_o.addr = INT_SS;
+         end else begin
+            illegal_inst = 1'b1;
+         end // else: !if(Xipu)
+      end // case: P_SLET,...
       
      
       // Offload FP-FP Instructions - fire and forget
