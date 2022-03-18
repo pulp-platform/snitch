@@ -19,6 +19,8 @@ QUESTA_64BIT	= -64
 VSIM      		= vsim ${QUESTA_64BIT}
 VLOG      		= vlog ${QUESTA_64BIT}
 
+VSIM_FLAGS    += -t 1ps
+
 VLOG_FLAGS 	  += -svinputport=compat
 VLOG_FLAGS 	  += -override_timescale 1ns/1ps
 VLOG_FLAGS 	  += -suppress 2583

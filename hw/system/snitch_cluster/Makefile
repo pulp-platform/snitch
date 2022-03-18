@@ -25,6 +25,8 @@ VLOG      		= vlog ${QUESTA_64BIT}
 
 VLT_FLAGS    += --trace
 
+VSIM_FLAGS    += -t 1ps
+
 VLOG_FLAGS 	  += -svinputport=compat
 VLOG_FLAGS 	  += -override_timescale 1ns/1ps
 VLOG_FLAGS 	  += -suppress 2583
