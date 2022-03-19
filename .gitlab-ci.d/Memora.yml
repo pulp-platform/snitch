@@ -10,3 +10,10 @@ artifacts:
     - .gitlab-ci.d/build-tc-hrv-obare.sh
     outputs:
     - tc-hrv-obare
+
+  python:
+    inputs:
+    - .gitlab-ci.d/build-python.sh
+    outputs:
+    - install/python
+    - .venv
