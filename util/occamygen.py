@@ -432,7 +432,8 @@ def main():
     # Connect wide xbar
     am_soc_wide_xbar.attach(am_soc_narrow_xbar)
 
-    # Generate crossbars.
+    # Connect HBM config xbar to regbus xbar
+    am_soc_regbus_periph_xbar.attach(am_hbm_cfg_xbar)
 
     #######################
     # SoC Peripheral Xbar #
@@ -479,8 +480,6 @@ def main():
         hbm_cfg_xbar.add_output_entry(name, leaf)
 
     hbm_cfg_xbar.add_input("cfg")
-
-    am_soc_regbus_periph_xbar.attach(am_hbm_cfg_xbar)
 
     ##########
     # RegBus #
