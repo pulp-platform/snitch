@@ -510,9 +510,10 @@ module occamy_soc
   );
 
   /// Address map of the `soc_narrow_xbar` crossbar.
-  xbar_rule_48_t [17:0] SocNarrowXbarAddrmap;
+  xbar_rule_48_t [18:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
-  '{ idx: 6, start_addr: 48'h80000000, end_addr: 48'h20000000000 },
+  '{ idx: 6, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
+  '{ idx: 7, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
   '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70080000 },
   '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h07010000 },
@@ -2298,6 +2299,23 @@ module occamy_soc
       .mst_req_o(soc_narrow_xbar_in_req[SOC_NARROW_XBAR_IN_HBI]),
       .mst_resp_i(soc_narrow_xbar_in_rsp[SOC_NARROW_XBAR_IN_HBI])
   );
+  axi_a48_d64_i8_u0_req_t  narrow_to_hbi_trunc_req;
+  axi_a48_d64_i8_u0_resp_t narrow_to_hbi_trunc_rsp;
+
+  axi_modify_address #(
+      .slv_req_t (axi_a48_d64_i8_u0_req_t),
+      .mst_addr_t(logic [47:0]),
+      .mst_req_t (axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
+  ) i_narrow_to_hbi_trunc (
+      .slv_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_HBI]),
+      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_HBI]),
+      .mst_aw_addr_i({8'b0, soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_HBI].aw.addr[39:0]}),
+      .mst_ar_addr_i({8'b0, soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_HBI].ar.addr[39:0]}),
+      .mst_req_o(narrow_to_hbi_trunc_req),
+      .mst_resp_i(narrow_to_hbi_trunc_rsp)
+  );
+
   axi_a48_d64_i8_u0_req_t  narrow_to_hbi_cut_req;
   axi_a48_d64_i8_u0_resp_t narrow_to_hbi_cut_rsp;
 
@@ -2313,8 +2331,8 @@ module occamy_soc
   ) i_narrow_to_hbi_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_HBI]),
-      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_HBI]),
+      .slv_req_i(narrow_to_hbi_trunc_req),
+      .slv_resp_o(narrow_to_hbi_trunc_rsp),
       .mst_req_o(narrow_to_hbi_cut_req),
       .mst_resp_i(narrow_to_hbi_cut_rsp)
   );
