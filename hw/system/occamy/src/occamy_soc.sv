@@ -516,7 +516,7 @@ module occamy_soc
   '{ idx: 7, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
   '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70080000 },
-  '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h07010000 },
+  '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h0a810000 },
   '{ idx: 10, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
   '{ idx: 11, start_addr: 48'h20000000, end_addr: 48'h70000000 },
   '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
