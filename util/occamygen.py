@@ -480,6 +480,8 @@ def main():
 
     hbm_cfg_xbar.add_input("cfg")
 
+    am_soc_regbus_periph_xbar.attach(am_hbm_cfg_xbar)
+
     ##########
     # RegBus #
     ##########

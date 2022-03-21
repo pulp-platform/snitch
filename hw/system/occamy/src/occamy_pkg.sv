@@ -218,7 +218,7 @@ package occamy_pkg;
   } soc_regbus_periph_xbar_outputs_e;
 
   /// Address map of the `soc_regbus_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [13:0] SocRegbusPeriphXbarAddrmap = '{
+  localparam xbar_rule_48_t [14:0] SocRegbusPeriphXbarAddrmap = '{
   '{ idx: 0, start_addr: 48'h02000000, end_addr: 48'h02001000 },
   '{ idx: 1, start_addr: 48'h02001000, end_addr: 48'h02002000 },
   '{ idx: 2, start_addr: 48'h02002000, end_addr: 48'h02003000 },
@@ -232,7 +232,8 @@ package occamy_pkg;
   '{ idx: 10, start_addr: 48'h07000000, end_addr: 48'h07010000 },
   '{ idx: 11, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
   '{ idx: 12, start_addr: 48'h01000000, end_addr: 48'h01020000 },
-  '{ idx: 13, start_addr: 48'h04000000, end_addr: 48'h04100000 }
+  '{ idx: 13, start_addr: 48'h04000000, end_addr: 48'h04100000 },
+  '{ idx: 14, start_addr: 48'h08000000, end_addr: 48'h0a810000 }
 };
 
   /// Inputs of the `quadrant_pre_xbar_0` crossbar.
