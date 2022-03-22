@@ -7,7 +7,9 @@
 /// Author: Sergio Mazzola, <smazzola@student.ethz.ch>
 
 module snitch_ipu #(
-  parameter int unsigned IdWidth = 5
+  parameter int unsigned IdWidth = 5,
+  parameter int unsigned DataWidth = 32,                  
+  parameter bit          Xipu = 1                  
 ) (
   input  logic                     clk_i,
   input  logic                     rst_i,
@@ -15,12 +17,12 @@ module snitch_ipu #(
   input  logic [31:0]              acc_qaddr_i,      // unused
   input  logic [IdWidth-1:0]       acc_qid_i,
   input  logic [31:0]              acc_qdata_op_i,   // RISC-V instruction
-  input  logic [31:0]              acc_qdata_arga_i,
-  input  logic [31:0]              acc_qdata_argb_i,
-  input  logic [31:0]              acc_qdata_argc_i,
+  input  logic [DataWidth-1:0]     acc_qdata_arga_i,
+  input  logic [DataWidth-1:0]     acc_qdata_argb_i,
+  input  logic [DataWidth-1:0]     acc_qdata_argc_i,
   input  logic                     acc_qvalid_i,
   output logic                     acc_qready_o,
-  output logic [31:0]              acc_pdata_o,
+  output logic [DataWidth-1:0]     acc_pdata_o,
   output logic [IdWidth-1:0]       acc_pid_o,
   output logic                     acc_perror_o,
   output logic                     acc_pvalid_o,
@@ -29,8 +31,8 @@ module snitch_ipu #(
   `include "common_cells/registers.svh"
 
   typedef struct packed {
-    logic [31:0]        result;
-    logic [IdWidth-1:0] id;
+    logic [DataWidth-1:0]  result;
+    logic [IdWidth-1:0]    id;
   } result_t;
   // input handshake
   logic div_valid_op, div_ready_op;
@@ -57,7 +59,7 @@ module snitch_ipu #(
       riscv_instr::MULH,
       riscv_instr::MULHSU,
       riscv_instr::MULHU: begin
-        if (snitch_pkg::XPULPIMG) begin
+        if (Xipu) begin
           dsp_valid_op = acc_qvalid_i;
           acc_qready_o = dsp_ready_op;
         end else begin
@@ -219,7 +221,7 @@ module snitch_ipu #(
       riscv_instr::PV_SDOTSP_SCI_B,       // Xpulpimg: pv.sdotsp.sci.b
       riscv_instr::PV_SHUFFLE2_H,         // Xpulpimg: pv.shuffle2.h
       riscv_instr::PV_SHUFFLE2_B: begin   // Xpulpimg: pv.shuffle2.b
-        if (snitch_pkg::XPULPIMG) begin
+        if (Xipu) begin
           dsp_valid_op = acc_qvalid_i;
           acc_qready_o = dsp_ready_op;
         end else begin
@@ -231,9 +233,9 @@ module snitch_ipu #(
   end
 
   // Serial Divider
-  serdiv #(
-      .WIDTH       ( 32      ),
-      .IdWidth     ( IdWidth )
+  snitch_shared_muldiv_serdiv #(
+      .WIDTH       ( DataWidth ),
+      .IdWidth     ( IdWidth   )
   ) i_div (
       .clk_i       ( clk_i                ),
       .rst_ni      ( ~rst_i               ),
@@ -249,11 +251,11 @@ module snitch_ipu #(
       .res_o       ( div.result             )
   );
 
-  if (snitch_pkg::XPULPIMG) begin : gen_xpulpimg
+  if (Xipu) begin : gen_xpulpimg
     // DSP Unit
     dspu #(
-        .Width    ( 32      ),
-        .IdWidth  ( IdWidth )
+        .Width    ( DataWidth  ),
+        .IdWidth  ( IdWidth    )
     ) i_dspu (
         .clk_i       ( clk_i                ),
         .rst_i       ( rst_i                ),
@@ -286,8 +288,8 @@ module snitch_ipu #(
   end else begin : gen_vanilla
     // Multiplication
     multiplier #(
-      .Width    ( 32      ),
-      .IdWidth  ( IdWidth )
+      .Width    ( DataWidth   ),
+      .IdWidth  ( IdWidth     )
     ) i_multiplier (
       .clk_i,
       .rst_i,

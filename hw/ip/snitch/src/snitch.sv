@@ -103,6 +103,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // Debug module's base address
   localparam logic [31:0] DmBaseAddress = 0;
   localparam int RegWidth = RVE ? 4 : 5;
+  localparam int RegNrReadPorts = Xipu ? 3 : 2;
+     
   /// Total physical address portion.
   localparam int unsigned PPNSize = AddrWidth - PAGE_SHIFT;
   localparam bit NSX = XF16 | XF16ALT | XF8 | XFVEC;
@@ -121,7 +123,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic wfi_d, wfi_q;
   logic [31:0] consec_pc;
   // Immediates
-  logic [31:0] iimm, uimm, jimm, bimm, simm;
+  logic [31:0] iimm, uimm, jimm, bimm, simm, pbimm;
   /* verilator lint_off WIDTH */
   assign iimm = $signed({inst_data_i[31:20]});
   assign uimm = {inst_data_i[31:12], 12'b0};
@@ -130,6 +132,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign bimm = $signed({inst_data_i[31],
                                     inst_data_i[7], inst_data_i[30:25], inst_data_i[11:8], 1'b0});
   assign simm = $signed({inst_data_i[31:25], inst_data_i[11:7]});
+  assign pbimm = $signed({inst_data_i[24:20]}); // Xpulpimg immediate branching signed immediate
   /* verilator lint_on WIDTH */
 
   logic [31:0] opa, opb;
@@ -139,8 +142,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic [RegWidth-1:0] rd, rs1, rs2;
   logic stall, lsu_stall;
   // Register connections
-  logic [1:0][RegWidth-1:0] gpr_raddr;
-  logic [1:0][31:0]         gpr_rdata;
+  logic [RegNrReadPorts-1:0][RegWidth-1:0] gpr_raddr;
+  logic [RegNrReadPorts-1:0][31:0]         gpr_rdata;
   logic [0:0][RegWidth-1:0] gpr_waddr;
   logic [0:0][31:0]         gpr_wdata;
   logic [0:0]               gpr_we;
@@ -208,7 +211,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   alu_op_e alu_op;
 
   typedef enum logic [3:0] {
-    None, Reg, IImmediate, UImmediate, JImmediate, SImmediate, SFImmediate, PC, CSR, CSRImmmediate
+    None, Reg, IImmediate, UImmediate, JImmediate, SImmediate, SFImmediate, PC, CSR, CSRImmmediate, PBImmediate
   } op_select_e;
   op_select_e opa_select, opb_select;
 
@@ -324,8 +327,10 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign acc_qreq_o.data_op = inst_data_i;
   assign acc_qreq_o.data_arga = {{32{gpr_rdata[0][31]}}, gpr_rdata[0]};
   assign acc_qreq_o.data_argb = {{32{gpr_rdata[1][31]}}, gpr_rdata[1]};
+  assign acc_qreq_o.data_argc = {{32{gpr_rdata[2][31]}}, gpr_rdata[2]};
+   
   // operand C is currently only used for load/store instructions
-  assign acc_qreq_o.data_argc = ls_paddr;
+  //assign acc_qreq_o.data_argc = ls_paddr;
 
   // ---------
   // L0 ITLB
@@ -1040,6 +1045,32 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
 
       /* Xpulpimg extension */
+      // Immediate branching
+      P_BEQIMM: begin // Xpulpimg: p.beqimm
+         if (Xipu) begin
+            is_branch = 1'b1;
+            write_rd = 1'b0;
+            alu_op = Eq;
+            opa_select = Reg;
+            opb_select = PBImmediate;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end // case: P_BEQIMM
+      P_BNEIMM: begin // Xpulpimg: p.bneimm
+         if (Xipu) begin
+            is_branch = 1'b1;
+            write_rd = 1'b0;
+            alu_op = Neq;
+            opa_select = Reg;
+            opb_select = PBImmediate;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end // case: P_BNEIMM        
+            
+            
+               
       // Offload to IPU coprocessor
       // 1 source register (rs1)
       P_ABS,                // Xpulpimg: p.abs
@@ -2566,11 +2597,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   end
 
   snitch_regfile #(
-    .DATA_WIDTH     ( 32       ),
-    .NR_READ_PORTS  ( 2        ),
-    .NR_WRITE_PORTS ( 1        ),
-    .ZERO_REG_ZERO  ( 1        ),
-    .ADDR_WIDTH     ( RegWidth )
+    .DATA_WIDTH     ( 32                    ),
+    .NR_READ_PORTS  ( RegNrReadPorts        ),
+    .NR_WRITE_PORTS ( 1                     ),
+    .ZERO_REG_ZERO  ( 1                     ),
+    .ADDR_WIDTH     ( RegWidth              )
   ) i_snitch_regfile (
     .clk_i,
     .raddr_i   ( gpr_raddr ),
@@ -2602,12 +2633,18 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       SFImmediate, SImmediate: opb = simm;
       PC: opb = pc_q;
       CSR: opb = csr_rvalue;
+      PBImmediate: opb = pbimm;
       default: opb = '0;
     endcase
   end
 
   assign gpr_raddr[0] = rs1;
   assign gpr_raddr[1] = rs2;
+   // connect the third read port only if present
+   if (RegNrReadPorts >= 3) begin: gpr_raddr_2
+      assign gpr_raddr[2] = rd;
+   end
+   
 
   // --------------------
   // ALU

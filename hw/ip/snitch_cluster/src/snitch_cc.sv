@@ -377,7 +377,8 @@ module snitch_cc #(
 
   if (Xipu) begin : gen_ipu
     snitch_ipu #(
-    .IdWidth ( 5 )
+    .IdWidth ( 5 ),
+    .Xipu (Xipu)
   ) i_snitch_ipu (
     .clk_i            ( clk_i                        ),
     .rst_i            ( (~rst_ni) | (~rst_int_ss_ni) ),

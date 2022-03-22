@@ -17,5 +17,5 @@ sources:
 # Level 1:
 - src/snitch_ipu_alu.sv
 # Level 2:
-- src/snitch_int_ss.sv
+- src/snitch_ipu.sv
 
