@@ -16,4 +16,3 @@ artifacts:
     - .gitlab-ci.d/build-python.sh
     outputs:
     - install/python
-    - .venv
