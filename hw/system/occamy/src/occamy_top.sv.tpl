@@ -61,9 +61,13 @@ module ${name}_top
   output ${soc_regbus_periph_xbar.out_bootrom.req_type()} bootrom_req_o,
   input  ${soc_regbus_periph_xbar.out_bootrom.rsp_type()} bootrom_rsp_i,
 
-  /// Clk manager
-  output ${soc_regbus_periph_xbar.out_clk_mgr.req_type()} clk_mgr_req_o,
-  input  ${soc_regbus_periph_xbar.out_clk_mgr.rsp_type()} clk_mgr_rsp_i,
+  /// FLLs
+  output ${soc_regbus_periph_xbar.out_fll_system.req_type()} fll_system_req_o,
+  input  ${soc_regbus_periph_xbar.out_fll_system.rsp_type()} fll_system_rsp_i,
+  output ${soc_regbus_periph_xbar.out_fll_periph.req_type()} fll_periph_req_o,
+  input  ${soc_regbus_periph_xbar.out_fll_periph.rsp_type()} fll_periph_rsp_i,
+  output ${soc_regbus_periph_xbar.out_fll_hbm2e.req_type()} fll_hbm2e_req_o,
+  input  ${soc_regbus_periph_xbar.out_fll_hbm2e.rsp_type()} fll_hbm2e_rsp_i,
 
   /// HBI Config and APB Control
   output ${soc_regbus_periph_xbar.out_hbi_wide_cfg.req_type()} hbi_wide_cfg_req_o,
@@ -459,8 +463,12 @@ module ${name}_top
   //   Clk Mgr   //
   /////////////////
 
-  assign clk_mgr_req_o = ${soc_regbus_periph_xbar.out_clk_mgr.req_name()};
-  assign ${soc_regbus_periph_xbar.out_clk_mgr.rsp_name()} = clk_mgr_rsp_i;
+  assign fll_system_req_o = ${soc_regbus_periph_xbar.out_fll_system.req_name()};
+  assign ${soc_regbus_periph_xbar.out_fll_system.rsp_name()} = fll_system_rsp_i;
+  assign fll_periph_req_o = ${soc_regbus_periph_xbar.out_fll_periph.req_name()};
+  assign ${soc_regbus_periph_xbar.out_fll_periph.rsp_name()} = fll_periph_rsp_i;
+  assign fll_hbm2e_req_o = ${soc_regbus_periph_xbar.out_fll_hbm2e.req_name()};
+  assign ${soc_regbus_periph_xbar.out_fll_hbm2e.rsp_name()} = fll_hbm2e_rsp_i;
 
   //////////////
   //   PLIC   //

@@ -232,9 +232,19 @@
                 length: 4096, // 4 kiB 0x1000
             },
             {
-                name: "clk_mgr",
+                name: "fll_system",
                 address: 33558528, // 0x0200_1000
-                length: 4096, // 4 kiB 0x1000
+                length: 1024, // 1 kiB 0x400
+            },
+            {
+                name: "fll_periph",
+                address: 33559552, // 0x0200_1400
+                length: 1024, // 1 kiB 0x400
+            },
+            {
+                name: "fll_hbm2e",
+                address: 33560576, // 0x0200_1800
+                length: 1024, // 1 kiB 0x400
             },
             {
                 name: "uart",

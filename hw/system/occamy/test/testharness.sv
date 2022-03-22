@@ -216,19 +216,51 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  reg_a48_d32_req_t clk_mgr_req;
-  reg_a48_d32_rsp_t clk_mgr_rsp;
+  reg_a48_d32_req_t fll_system_req;
+  reg_a48_d32_rsp_t fll_system_rsp;
 
   tb_memory_regbus #(
     .AddrWidth (48),
     .DataWidth (32),
     .req_t (reg_a48_d32_req_t),
     .rsp_t (reg_a48_d32_rsp_t)
-  ) i_clk_mgr_channel (
+  ) i_fll_system_channel (
     .clk_i,
     .rst_ni,
-    .req_i (clk_mgr_req),
-    .rsp_o (clk_mgr_rsp)
+    .req_i (fll_system_req),
+    .rsp_o (fll_system_rsp)
+  );
+
+
+  reg_a48_d32_req_t fll_periph_req;
+  reg_a48_d32_rsp_t fll_periph_rsp;
+
+  tb_memory_regbus #(
+    .AddrWidth (48),
+    .DataWidth (32),
+    .req_t (reg_a48_d32_req_t),
+    .rsp_t (reg_a48_d32_rsp_t)
+  ) i_fll_periph_channel (
+    .clk_i,
+    .rst_ni,
+    .req_i (fll_periph_req),
+    .rsp_o (fll_periph_rsp)
+  );
+
+
+  reg_a48_d32_req_t fll_hbm2e_req;
+  reg_a48_d32_rsp_t fll_hbm2e_rsp;
+
+  tb_memory_regbus #(
+    .AddrWidth (48),
+    .DataWidth (32),
+    .req_t (reg_a48_d32_req_t),
+    .rsp_t (reg_a48_d32_rsp_t)
+  ) i_fll_hbm2e_channel (
+    .clk_i,
+    .rst_ni,
+    .req_i (fll_hbm2e_req),
+    .rsp_o (fll_hbm2e_rsp)
   );
 
   occamy_top i_occamy (
@@ -271,8 +303,12 @@ module testharness import occamy_pkg::*; (
     .spim_sd_i ('0),
     .bootrom_req_o (bootrom_regbus_req),
     .bootrom_rsp_i (bootrom_regbus_rsp),
-    .clk_mgr_req_o (clk_mgr_req),
-    .clk_mgr_rsp_i (clk_mgr_rsp),
+    .fll_system_req_o (fll_system_req),
+    .fll_system_rsp_i (fll_system_rsp),
+    .fll_periph_req_o (fll_periph_req),
+    .fll_periph_rsp_i (fll_periph_rsp),
+    .fll_hbm2e_req_o (fll_hbm2e_req),
+    .fll_hbm2e_rsp_i (fll_hbm2e_rsp),
     .hbi_wide_cfg_req_o (),
     .hbi_wide_cfg_rsp_i ('0),
     .hbi_narrow_cfg_req_o (),

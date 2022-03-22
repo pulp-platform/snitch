@@ -592,33 +592,43 @@ module occamy_xilinx
     end
   end
 
-  /// Clk manager
-  reg_a48_d32_req_t clk_mgr_req;
-  reg_a48_d32_rsp_t clk_mgr_rsp;
+  /// FLLs
+  reg_a48_d32_req_t fll_system_req;
+  reg_a48_d32_rsp_t fll_system_rsp;
+  reg_a48_d32_req_t fll_periph_req;
+  reg_a48_d32_rsp_t fll_periph_rsp;
+  reg_a48_d32_req_t fll_hbm2e_req;
+  reg_a48_d32_rsp_t fll_hbm2e_rsp;
 
   // Occamy top-level
   occamy_top i_occamy (
-      .bootrom_req_o(bootrom_req),
-      .bootrom_rsp_i(bootrom_rsp),
-      .clk_mgr_req_o(clk_mgr_req),
-      .clk_mgr_rsp_i(clk_mgr_rsp),
-      .pcie_cfg_req_o(),
-      .pcie_cfg_rsp_i('0),
+      .bootrom_req_o   (bootrom_req),
+      .bootrom_rsp_i   (bootrom_rsp),
+      .fll_system_req_o(fll_system_req),
+      .fll_system_rsp_i(fll_system_rsp),
+      .fll_periph_req_o(fll_periph_req),
+      .fll_periph_rsp_i(fll_periph_rsp),
+      .fll_hbm2e_req_o (fll_hbm2e_req),
+      .fll_hbm2e_rsp_i (fll_hbm2e_rsp),
+      .pcie_cfg_req_o  (),
+      .pcie_cfg_rsp_i  ('0),
       // Tie the HBM interrupts to zero.
-      .ext_irq_i({8'b0, ext_irq_i}),
-      .apb_hbm_cfg_req_o(),
-      .apb_hbm_cfg_rsp_i('0),
-      .hbi_cfg_req_o(),
-      .hbi_cfg_rsp_i('0),
-      .apb_hbi_ctl_req_o(),
-      .apb_hbi_ctl_rsp_i('0),
-      .hbm_phy_cfg_req_o(),
-      .hbm_phy_cfg_rsp_i('0),
-      .hbm_seq_req_o(),
-      .hbm_seq_rsp_i('0),
+      .ext_irq_i ({8'b0, ext_irq_i}),
+      .apb_hbm_cfg_req_o (),
+      .apb_hbm_cfg_rsp_i ('0),
+      .hbi_cfg_req_o (),
+      .hbi_cfg_rsp_i ('0),
+      .apb_hbi_ctl_req_o (),
+      .apb_hbi_ctl_rsp_i ('0),
+      .hbm_phy_cfg_req_o (),
+      .hbm_phy_cfg_rsp_i ('0),
+      .hbm_seq_req_o (),
+      .hbm_seq_rsp_i ('0),
       .*
   );
 
-  assign clk_mgr_rsp = '0;
+  assign fll_system_rsp = '0;
+  assign fll_periph_rsp = '0;
+  assign fll_hbm2e_rsp  = '0;
 
 endmodule
