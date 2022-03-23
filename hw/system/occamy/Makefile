@@ -20,6 +20,8 @@ VSIM      		= vsim ${QUESTA_64BIT}
 VLOG      		= vlog ${QUESTA_64BIT}
 
 VSIM_FLAGS    += -t 1ps
+VSIM_FLAGS    += -voptargs=+acc
+VSIM_FLAGS    += -do "log -r /*; run -a"
 
 VLOG_FLAGS 	  += -svinputport=compat
 VLOG_FLAGS 	  += -override_timescale 1ns/1ps

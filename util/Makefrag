@@ -127,15 +127,13 @@ define QUESTASIM
 	@echo 'echo $$1 > logs/.rtlbinary' >> $@
 	@echo '${VSIM} +permissive ${VSIM_FLAGS} -work ${MKFILE_DIR}/${VSIM_BUILDDIR} -c \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr -lutil" \
-				-voptargs=+acc $1 +permissive-off ++$$1 \
-				-do "log -r /*; run -a"' >> $@
+				$1 +permissive-off ++$$1' >> $@
 	@chmod +x $@
 	@echo "#!/bin/bash" > $@.gui
 	@echo 'echo $$1 > logs/.rtlbinary' >> $@
 	@echo '${VSIM} +permissive ${VSIM_FLAGS} -work ${MKFILE_DIR}/${VSIM_BUILDDIR} \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr -lutil" \
-				-voptargs=+acc $1 +permissive-off ++$$1 \
-				-do "log -r /*; run -a"' >> $@.gui
+				$1 +permissive-off ++$$1' >> $@.gui
 	@chmod +x $@.gui
 endef
 
