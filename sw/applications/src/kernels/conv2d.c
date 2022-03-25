@@ -1171,7 +1171,7 @@ void occamy_conv_chw_opt_fp32(kernel_fp32* k) {
     // Setup SSRs bounds and strides for kernel
     // We use only 3D SSRs here as the inner most dimension is repeated
     const uint32_t ssr1_b[3] = {k->dim_kernel_x / 2, k->dim_kernel_y,
-                                k->dim_out_x * k->dim_out_y};
+                                k->dim_out_x};
     const uint32_t ssr1_i[3] = {kernel_fw_stride * sizeof(v2s),
                                 kernel_fh_stride * sizeof(float), 0};
 
@@ -1200,15 +1200,18 @@ void occamy_conv_chw_opt_fp32(kernel_fp32* k) {
                 snrt_ssr_repeat(SNRT_SSR_DM1, max_unroll);
             }
 
-            // Weights SSR can already start here, all loop dimension below
-            // are irrelevant for the weights
-            snrt_ssr_read(SNRT_SSR_DM1, SNRT_SSR_3D,
-                          (void*)(k->pWeight + ci * kernel_ci_stride +
-                                  co * kernel_co_stride));
-
             // Output height dimension `k->dim_out_y` first split
             for (h0 = 0; h0 < k->dim_out_y / max_unroll;
                  h0++, h += max_unroll) {
+                // SSR address setup and enable
+                snrt_ssr_read(
+                    SNRT_SSR_DM0, SNRT_SSR_4D,
+                    (void*)(k->pInBuffer + h * k->stride_y * input_h_stride +
+                            ci * input_ci_stride));
+                snrt_ssr_read(SNRT_SSR_DM1, SNRT_SSR_3D,
+                              (void*)(k->pWeight + ci * kernel_ci_stride +
+                                      co * kernel_co_stride));
+
                 // Output width dimension `k->dim_out_x`
                 for (uint32_t w = 0; w < k->dim_out_x; w++) {
                     volatile register v2s sum[max_unroll];
@@ -1237,12 +1240,6 @@ void occamy_conv_chw_opt_fp32(kernel_fp32* k) {
                         }
                     }
 
-                    // SSR address setup and enable
-                    snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_4D,
-                                  (void*)(k->pInBuffer +
-                                          h * k->stride_y * input_h_stride +
-                                          w * k->stride_x * input_w_stride +
-                                          ci * input_ci_stride));
                     snrt_ssr_enable();
 
                     asm volatile(
@@ -1302,6 +1299,15 @@ void occamy_conv_chw_opt_fp32(kernel_fp32* k) {
 
                 snrt_ssr_repeat(SNRT_SSR_DM1, cleanup_unroll);
 
+                // SSR address setup and enable
+                snrt_ssr_read(
+                    SNRT_SSR_DM0, SNRT_SSR_4D,
+                    (void*)(k->pInBuffer + h * k->stride_y * input_h_stride +
+                            ci * input_ci_stride));
+                snrt_ssr_read(SNRT_SSR_DM1, SNRT_SSR_3D,
+                              (void*)(k->pWeight + ci * kernel_ci_stride +
+                                      co * kernel_co_stride));
+
                 // Output width dimension `k->dim_out_x`
                 for (uint32_t w = 0; w < k->dim_out_x; w++) {
                     volatile register v2s sum[max_unroll];
@@ -1324,16 +1330,6 @@ void occamy_conv_chw_opt_fp32(kernel_fp32* k) {
                             reduce_reg[i] = _pOutBuffer[i * output_h_stride];
                         }
                     }
-
-                    // SSR address setup and enable
-                    snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_4D,
-                                  (void*)(k->pInBuffer +
-                                          h * k->stride_y * input_h_stride +
-                                          w * k->stride_x * input_w_stride +
-                                          ci * input_ci_stride));
-                    snrt_ssr_read(SNRT_SSR_DM1, SNRT_SSR_3D,
-                                  (void*)(k->pWeight + ci * kernel_ci_stride +
-                                          co * kernel_co_stride));
 
                     snrt_ssr_enable();
 
