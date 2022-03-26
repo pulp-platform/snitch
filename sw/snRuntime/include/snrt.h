@@ -298,8 +298,7 @@ static inline void snrt_mutex_ttas_lock(volatile uint32_t *pmtx) {
  * @brief Release the mutex
  */
 static inline void snrt_mutex_release(volatile uint32_t *pmtx) {
-    asm volatile("amoswap.w.rl  x0,x0,(%0)   # Release lock by storing 0\n"
-                 : "+r"(pmtx));
+    *pmtx = 0;
 }
 
 //================================================================================
