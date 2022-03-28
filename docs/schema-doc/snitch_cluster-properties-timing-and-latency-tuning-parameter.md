@@ -26,6 +26,8 @@ http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing
 | [register_core_req](#register_core_req)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_core_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_core_req")       |
 | [register_core_rsp](#register_core_rsp)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_core_rsp.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_core_rsp")       |
 | [register_fpu_req](#register_fpu_req)         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_fpu_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_fpu_req")         |
+| [register_fpu_in](#register_fpu_in)           | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_fpu_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_fpu_in")           |
+| [register_fpu_out](#register_fpu_out)         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_fpu_out.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_fpu_out")         |
 | [register_tcdm_cuts](#register_tcdm_cuts)     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_tcdm_cuts.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_tcdm_cuts")     |
 | [register_ext_wide](#register_ext_wide)       | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_wide.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_wide")       |
 | [register_ext_narrow](#register_ext_narrow)   | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_ext_narrow.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_ext_narrow")   |
@@ -226,6 +228,42 @@ Insert Pipeline register into the FPU request data path
 *   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_fpu_req.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_fpu_req")
 
 ### register_fpu_req Type
+
+`boolean`
+
+## register_fpu_in
+
+Insert Pipeline registers immediately before FPU datapath
+
+`register_fpu_in`
+
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_fpu_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_fpu_in")
+
+### register_fpu_in Type
+
+`boolean`
+
+## register_fpu_out
+
+Insert Pipeline registers immediately after FPU datapath
+
+`register_fpu_out`
+
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter-properties-register_fpu_out.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing/properties/register_fpu_out")
+
+### register_fpu_out Type
 
 `boolean`
 
