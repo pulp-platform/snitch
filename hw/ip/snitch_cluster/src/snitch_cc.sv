@@ -90,6 +90,10 @@ module snitch_cc #(
   parameter bit          RegisterFPUReq     = 0,
   /// Insert Pipeline registers after sequencer
   parameter bit          RegisterSequencer  = 0,
+  /// Insert Pipeline registers immediately before FPU datapath
+  parameter bit          RegisterFPUIn      = 0,
+  /// Insert Pipeline registers immediately after FPU datapath
+  parameter bit          RegisterFPUOut     = 0,
   snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
   /// Derived parameter *Do not override*
   parameter int unsigned TCDMPorts = (NumSsrs > 1 ? NumSsrs : 1),
@@ -448,7 +452,9 @@ module snitch_cc #(
       .drsp_t (drsp_t),
       .acc_req_t (acc_req_t),
       .acc_resp_t (acc_resp_t),
-      .RegisterSequencer ( RegisterSequencer ),
+      .RegisterSequencer (RegisterSequencer),
+      .RegisterFPUIn (RegisterFPUIn),
+      .RegisterFPUOut (RegisterFPUOut),
       .Xfrep (Xfrep),
       .Xssr (Xssr),
       .RVF (RVF),

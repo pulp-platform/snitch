@@ -262,6 +262,8 @@ module ${cfg['name']}_wrapper (
     .RegisterExtWide (${int(cfg['timing']['register_ext_wide'])}),
     .RegisterExtNarrow (${int(cfg['timing']['register_ext_narrow'])}),
     .RegisterFPUReq (${int(cfg['timing']['register_fpu_req'])}),
+    .RegisterFPUIn (${int(cfg['timing']['register_fpu_in'])}),
+    .RegisterFPUOut (${int(cfg['timing']['register_fpu_out'])}),
     .RegisterSequencer (${int(cfg['timing']['register_sequencer'])}),
     .IsoCrossing (${int(cfg['timing']['iso_crossings'])}),
     .NarrowXbarLatency (axi_pkg::${cfg['timing']['narrow_xbar_latency']}),

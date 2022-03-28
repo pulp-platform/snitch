@@ -15,6 +15,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
   parameter type dreq_t = logic,
   parameter type drsp_t = logic,
   parameter bit RegisterSequencer = 0,
+  parameter bit RegisterFPUIn     = 0,
+  parameter bit RegisterFPUOut    = 0,
   parameter bit Xfrep = 1,
   parameter fpnew_pkg::fpu_implementation_t FPUImplementation = '0,
   parameter bit Xssr = 1,
@@ -2519,7 +2521,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
     .XF8ALT  ( XF8ALT  ),
     .XFVEC   ( XFVEC   ),
     .FLEN    ( FLEN    ),
-    .FPUImplementation (FPUImplementation)
+    .FPUImplementation  (FPUImplementation),
+    .RegisterFPUIn      (RegisterFPUIn),
+    .RegisterFPUOut     (RegisterFPUOut)
   ) i_fpu (
     .clk_i                           ,
     .rst_ni         ( ~rst_i        ),

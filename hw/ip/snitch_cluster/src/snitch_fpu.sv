@@ -12,7 +12,9 @@ module snitch_fpu import snitch_pkg::*; #(
   parameter bit          XF8                = 0,
   parameter bit          XF8ALT             = 0,
   parameter bit          XFVEC              = 0,
-  parameter int unsigned FLEN               = 0
+  parameter int unsigned FLEN               = 0,
+  parameter bit          RegisterFPUIn      = 0,
+  parameter bit          RegisterFPUOut     = 0
 ) (
   input logic                               clk_i,
   input logic                               rst_ni,
@@ -83,7 +85,7 @@ module snitch_fpu import snitch_pkg::*; #(
 
   spill_register #(
     .T      ( fpu_in_t ),
-    .Bypass ( 1'b0     )
+    .Bypass ( ~RegisterFPUIn )
   ) i_spill_register_fpu_in (
     .clk_i                 ,
     .rst_ni                ,
@@ -125,7 +127,7 @@ module snitch_fpu import snitch_pkg::*; #(
 
   spill_register #(
     .T      ( fpu_out_t ),
-    .Bypass ( 1'b0      )
+    .Bypass ( ~RegisterFPUOut )
   ) i_spill_register_fpu_out (
     .clk_i                  ,
     .rst_ni                 ,

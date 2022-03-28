@@ -145,6 +145,10 @@ module snitch_cluster
   parameter bit          RegisterFPUReq     = 1'b0,
   /// Insert Pipeline registers after sequencer
   parameter bit          RegisterSequencer  = 1'b0,
+  /// Insert Pipeline registers immediately before FPU datapath
+  parameter bit          RegisterFPUIn      = 0,
+  /// Insert Pipeline registers immediately after FPU datapath
+  parameter bit          RegisterFPUOut     = 0,
   /// Run Snitch (the integer part) at half of the clock frequency
   parameter bit          IsoCrossing        = 0,
   parameter axi_pkg::xbar_latency_e NarrowXbarLatency = axi_pkg::CUT_ALL_PORTS,
@@ -851,6 +855,8 @@ module snitch_cluster
         .RegisterCoreRsp (RegisterCoreRsp),
         .RegisterFPUReq (RegisterFPUReq),
         .RegisterSequencer (RegisterSequencer),
+        .RegisterFPUIn (RegisterFPUIn),
+        .RegisterFPUOut (RegisterFPUOut),
         .TCDMAddrWidth (TCDMAddrWidth)
       ) i_snitch_cc (
         .clk_i,
