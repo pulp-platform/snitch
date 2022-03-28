@@ -83,7 +83,7 @@ module snitch_fpu import snitch_pkg::*; #(
 
   spill_register #(
     .T      ( fpu_in_t ),
-    .Bypass ( 1'b0     )
+    .Bypass ( 1'b1     )
   ) i_spill_register_fpu_in (
     .clk_i                 ,
     .rst_ni                ,
@@ -125,7 +125,7 @@ module snitch_fpu import snitch_pkg::*; #(
 
   spill_register #(
     .T      ( fpu_out_t ),
-    .Bypass ( 1'b0      )
+    .Bypass ( 1'b1      )
   ) i_spill_register_fpu_out (
     .clk_i                  ,
     .rst_ni                 ,
