@@ -13,23 +13,23 @@
     },
     pre_xbar_slv_id_width_no_rocache: 3,
     wide_xbar: {
-      max_slv_trans: 4,
-      max_mst_trans: 4,
+      max_slv_trans: 32,
+      max_mst_trans: 32,
       fall_through: false,
     },
     quadrant_inter_xbar: {
-      max_slv_trans: 4,
-      max_mst_trans: 4,
+      max_slv_trans: 32,
+      max_mst_trans: 32,
       fall_through: false,
     },
     hbm_xbar: {
-      max_slv_trans: 4,
-      max_mst_trans: 4,
+      max_slv_trans: 32,
+      max_mst_trans: 32,
       fall_through: false,
     },
     narrow_xbar: {
-      max_slv_trans: 4,
-      max_mst_trans: 4,
+      max_slv_trans: 8,
+      max_mst_trans: 8,
       fall_through: false,
     },
     cuts: {
@@ -62,8 +62,8 @@
     s1_quadrant: {
       nr_clusters: 4,
       // number of pending transactions on the narrow/wide network
-      narrow_trans: 16,
-      wide_trans: 16,
+      narrow_trans: 32,
+      wide_trans: 32,
       // Disable for easier flow trials.
       ro_cache_cfg: {
           width: 1024,
@@ -73,14 +73,14 @@
           address_regions: 4,
       }
       wide_xbar: {
-        max_slv_trans: 4,
-        max_mst_trans: 4,
+        max_slv_trans: 32,
+        max_mst_trans: 32,
         fall_through: false,
       },
       wide_xbar_slv_id_width: 3
       narrow_xbar: {
-        max_slv_trans: 4,
-        max_mst_trans: 4,
+        max_slv_trans: 8,
+        max_mst_trans: 8,
         fall_through: false,
       },
       narrow_xbar_slv_id_width: 4
@@ -102,8 +102,8 @@
         cluster_periph_size: 64, // kB
         zero_mem_size: 64, // kB
         dma_data_width: 512,
-        dma_axi_req_fifo_depth: 3,
-        dma_req_fifo_depth: 3,
+        dma_axi_req_fifo_depth: 24,
+        dma_req_fifo_depth: 8,
         narrow_trans: 4,
         wide_trans: 32,
         // Memory configuration inputs
