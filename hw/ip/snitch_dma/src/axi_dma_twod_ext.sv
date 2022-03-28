@@ -85,7 +85,7 @@ module axi_dma_twod_ext #(
         // 1D Case
         //--------------------------------------
         // in the case that we have a 1D transfer, hand the transfer out
-        if (!twod_req_current.is_twod) begin
+        if (!twod_req_current.is_twod || twod_req_current.num_repetitions == 'h1) begin
             // bypass the 1D parameters
             burst_req_o.id           = twod_req_current.id;
             burst_req_o.src          = twod_req_current.src;
