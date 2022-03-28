@@ -206,6 +206,16 @@
                     "description": "Insert Pipeline register into the FPU request data path",
                     "default": false
                 },
+                "register_fpu_in": {
+                    "type": "boolean",
+                    "description": "Insert Pipeline registers immediately before FPU datapath",
+                    "default": false
+                },
+                "register_fpu_out": {
+                    "type": "boolean",
+                    "description": "Insert Pipeline registers immediately after FPU datapath",
+                    "default": false
+                },
                 "register_tcdm_cuts": {
                     "type": "boolean",
                     "description": "Insert Pipeline registers after each memory cut.",
