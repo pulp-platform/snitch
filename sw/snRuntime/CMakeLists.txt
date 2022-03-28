@@ -57,11 +57,11 @@ include_directories(
 # Common sources
 set(sources
     src/barrier.c
-    src/dma.c
+#    src/dma.c
     src/memcpy.c
     src/printf.c
     src/team.c
-    src/ssr.c
+#    src/ssr.c
     src/alloc.c
     src/interrupt.c
     src/perf_cnt.c
@@ -85,7 +85,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
         src/omp/omp.c
         src/omp/kmp.c
         src/omp/eu.c
-        src/dm.c
+#        src/dm.c
     )
     # Check if static OpenMP runtime is requested
     if(OMPSTATIC_NUMTHREADS GREATER 0)

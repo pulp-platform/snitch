@@ -378,6 +378,7 @@ module snitch_cc #(
   if (Xipu) begin : gen_ipu
     snitch_ipu #(
     .IdWidth ( 5 ),
+    .DataWidth ( 32 ),
     .Xipu (Xipu)
   ) i_snitch_ipu (
     .clk_i            ( clk_i                        ),

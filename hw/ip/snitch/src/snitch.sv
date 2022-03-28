@@ -1079,7 +1079,47 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       P_EXTBS,              // Xpulpimg: p.extbs
       P_EXTBZ,              // Xpulpimg: p.extbz
       P_CLIP,               // Xpulpimg: p.clip
-      P_CLIPU: begin        // Xpulpimg: p.clipu
+      P_CLIPU,              // Xpulpimg: p.clipu
+      PV_ADD_SCI_H,         // Xpulpimg: pv.add.sci.h
+      PV_ADD_SCI_B,         // Xpulpimg: pv.add.sci.b
+      PV_SUB_SCI_H,         // Xpulpimg: pv.sub.sci.h
+      PV_SUB_SCI_B,         // Xpulpimg: pv.sub.sci.b
+      PV_AVG_SCI_H,         // Xpulpimg: pv.avg.sci.h
+      PV_AVG_SCI_B,         // Xpulpimg: pv.avg.sci.b
+      PV_AVGU_SCI_H,        // Xpulpimg: pv.avgu.sci.h
+      PV_AVGU_SCI_B,        // Xpulpimg: pv.avgu.sci.b
+      PV_MIN_SCI_H,         // Xpulpimg: pv.min.sci.h
+      PV_MIN_SCI_B,         // Xpulpimg: pv.min.sci.b
+      PV_MINU_SCI_H,        // Xpulpimg: pv.minu.sci.h
+      PV_MINU_SCI_B,        // Xpulpimg: pv.minu.sci.b
+      PV_MAX_SCI_H,         // Xpulpimg: pv.max.sci.h
+      PV_MAX_SCI_B,         // Xpulpimg: pv.max.sci.b
+      PV_MAXU_SCI_H,        // Xpulpimg: pv.maxu.sci.h
+      PV_MAXU_SCI_B,        // Xpulpimg: pv.maxu.sci.b
+      PV_SRL_SCI_H,         // Xpulpimg: pv.srl.sci.h
+      PV_SRL_SCI_B,         // Xpulpimg: pv.srl.sci.b
+      PV_SRA_SCI_H,         // Xpulpimg: pv.sra.sci.h
+      PV_SRA_SCI_B,         // Xpulpimg: pv.sra.sci.b
+      PV_SLL_SCI_H,         // Xpulpimg: pv.sll.sci.h
+      PV_SLL_SCI_B,         // Xpulpimg: pv.sll.sci.b
+      PV_OR_SCI_H,          // Xpulpimg: pv.or.sci.h
+      PV_OR_SCI_B,          // Xpulpimg: pv.or.sci.b
+      PV_XOR_SCI_H,         // Xpulpimg: pv.xor.sci.h
+      PV_XOR_SCI_B,         // Xpulpimg: pv.xor.sci.b
+      PV_AND_SCI_B,         // Xpulpimg: pv.and.sci.b
+      PV_AND_SCI_H,         // Xpulpimg: pv.and.sci.h
+      PV_ABS_H,             // Xpulpimg: pv.abs.h
+      PV_ABS_B,             // Xpulpimg: pv.abs.b
+      PV_EXTRACT_H,         // Xpulpimg: pv.extract.h
+      PV_EXTRACT_B,         // Xpulpimg: pv.extract.b
+      PV_EXTRACTU_H,        // Xpulpimg: pv.extractu.h
+      PV_EXTRACTU_B,        // Xpulpimg: pv.extractu.b
+      PV_DOTUP_SCI_H,       // Xpulpimg: pv.dotup.sci.h
+      PV_DOTUP_SCI_B,       // Xpulpimg: pv.dotup.sci.b
+      PV_DOTUSP_SCI_H,      // Xpulpimg: pv.dotusp.sci.h
+      PV_DOTUSP_SCI_B,      // Xpulpimg: pv.dotusp.sci.b
+      PV_DOTSP_SCI_H,       // Xpulpimg: pv.dotsp.sci.h
+      PV_DOTSP_SCI_B: begin // Xpulpimg: pv.dotsp.sci.b
          if (Xipu) begin
             write_rd = 1'b0;
             uses_rd = 1'b1;
@@ -1090,7 +1130,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
          end else begin
             illegal_inst = 1'b1;
          end
-      end // case: P_ABS,...
+      end 
 
       // 2 source registers (rs1, rs2)
       P_SLET,              // Xpulpimg: p.slet
@@ -1100,7 +1140,75 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       P_MAX,               // Xpulpimg: p.max
       P_MAXU,              // Xpulpimg: p.maxu
       P_CLIPR,             // Xpulpimg: p.clipr
-      P_CLIPUR: begin      // Xpulpimg: p.clipur
+      P_CLIPUR,            // Xpulpimg: p.clipur
+      PV_ADD_H,            // Xpulpimg: pv.add.h
+      PV_ADD_SC_H,         // Xpulpimg: pv.add.sc.h
+      PV_ADD_B,            // Xpulpimg: pv.add.b
+      PV_ADD_SC_B,         // Xpulpimg: pv.add.sc.b
+      PV_SUB_H,            // Xpulpimg: pv.sub.h
+      PV_SUB_SC_H,         // Xpulpimg: pv.sub.sc.h
+      PV_SUB_B,            // Xpulpimg: pv.sub.b
+      PV_SUB_SC_B,         // Xpulpimg: pv.sub.sc.b
+      PV_AVG_H,            // Xpulpimg: pv.avg.h
+      PV_AVG_SC_H,         // Xpulpimg: pv.avg.sc.h
+      PV_AVG_B,            // Xpulpimg: pv.avg.b
+      PV_AVG_SC_B,         // Xpulpimg: pv.avg.sc.b
+      PV_AVGU_H,           // Xpulpimg: pv.avgu.h
+      PV_AVGU_SC_H,        // Xpulpimg: pv.avgu.sc.h
+      PV_AVGU_B,           // Xpulpimg: pv.avgu.b
+      PV_AVGU_SC_B,        // Xpulpimg: pv.avgu.sc.b
+      PV_MIN_H,            // Xpulpimg: pv.min.h
+      PV_MIN_SC_H,         // Xpulpimg: pv.min.sc.h
+      PV_MIN_B,            // Xpulpimg: pv.min.b
+      PV_MIN_SC_B,         // Xpulpimg: pv.min.sc.b
+      PV_MINU_H,           // Xpulpimg: pv.minu.h
+      PV_MINU_SC_H,        // Xpulpimg: pv.minu.sc.h
+      PV_MINU_B,           // Xpulpimg: pv.minu.b
+      PV_MINU_SC_B,        // Xpulpimg: pv.minu.sc.b
+      PV_MAX_H,            // Xpulpimg: pv.max.h
+      PV_MAX_SC_H,         // Xpulpimg: pv.max.sc.h
+      PV_MAX_B,            // Xpulpimg: pv.max.b
+      PV_MAX_SC_B,         // Xpulpimg: pv.max.sc.b
+      PV_MAXU_H,           // Xpulpimg: pv.maxu.h
+      PV_MAXU_SC_H,        // Xpulpimg: pv.maxu.sc.h
+      PV_MAXU_B,           // Xpulpimg: pv.maxu.b
+      PV_MAXU_SC_B,        // Xpulpimg: pv.maxu.sc.b
+      PV_SRL_H,            // Xpulpimg: pv.srl.h
+      PV_SRL_SC_H,         // Xpulpimg: pv.srl.sc.h
+      PV_SRL_B,            // Xpulpimg: pv.srl.b
+      PV_SRL_SC_B,         // Xpulpimg: pv.srl.sc.b
+      PV_SRA_H,            // Xpulpimg: pv.sra.h
+      PV_SRA_SC_H,         // Xpulpimg: pv.sra.sc.h
+      PV_SRA_B,            // Xpulpimg: pv.sra.b
+      PV_SRA_SC_B,         // Xpulpimg: pv.sra.sc.b
+      PV_SLL_H,            // Xpulpimg: pv.sll.h
+      PV_SLL_SC_H,         // Xpulpimg: pv.sll.sc.h
+      PV_SLL_B,            // Xpulpimg: pv.sll.b
+      PV_SLL_SC_B,         // Xpulpimg: pv.sll.sc.b
+      PV_OR_H,             // Xpulpimg: pv.or.h
+      PV_OR_SC_H,          // Xpulpimg: pv.or.sc.h
+      PV_OR_B,             // Xpulpimg: pv.or.b
+      PV_OR_SC_B,          // Xpulpimg: pv.or.sc.b
+      PV_XOR_H,            // Xpulpimg: pv.xor.h
+      PV_XOR_SC_H,         // Xpulpimg: pv.xor.sc.h
+      PV_XOR_B,            // Xpulpimg: pv.xor.b
+      PV_XOR_SC_B,         // Xpulpimg: pv.xor.sc.b
+      PV_AND_H,            // Xpulpimg: pv.and.h
+      PV_AND_SC_H,         // Xpulpimg: pv.and.sc.h
+      PV_AND_B,            // Xpulpimg: pv.and.b
+      PV_AND_SC_B,         // Xpulpimg: pv.and.sc.b
+      PV_DOTUP_H,          // Xpulpimg: pv.dotup.h
+      PV_DOTUP_SC_H,       // Xpulpimg: pv.dotup.sc.h
+      PV_DOTUP_B,          // Xpulpimg: pv.dotup.b
+      PV_DOTUP_SC_B,       // Xpulpimg: pv.dotup.sc.b
+      PV_DOTUSP_H,         // Xpulpimg: pv.dotusp.h
+      PV_DOTUSP_SC_H,      // Xpulpimg: pv.dotusp.sc.h
+      PV_DOTUSP_B,         // Xpulpimg: pv.dotusp.b
+      PV_DOTUSP_SC_B,      // Xpulpimg: pv.dotusp.sc.b
+      PV_DOTSP_H,          // Xpulpimg: pv.dotsp.h
+      PV_DOTSP_SC_H,       // Xpulpimg: pv.dotsp.sc.h
+      PV_DOTSP_B,          // Xpulpimg: pv.dotsp.b
+      PV_DOTSP_SC_B: begin // Xpulpimg: pv.dotsp.sc.b
          if (Xipu) begin
             write_rd = 1'b0;
             uses_rd = 1'b1;
@@ -1111,8 +1219,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             acc_qreq_o.addr = INT_SS;
          end else begin
             illegal_inst = 1'b1;
-         end // else: !if(Xipu)
-      end // case: P_SLET,...
+         end
+      end
       
      
       // Offload FP-FP Instructions - fire and forget
