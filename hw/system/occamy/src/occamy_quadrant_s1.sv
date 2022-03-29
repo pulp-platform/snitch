@@ -16,7 +16,6 @@ module occamy_quadrant_s1
     input  logic                                             rst_ni,
     input  logic                                             test_mode_i,
     input  tile_id_t                                         tile_id_i,
-    input  logic                     [NrCoresS1Quadrant-1:0] debug_req_i,
     input  logic                     [NrCoresS1Quadrant-1:0] meip_i,
     input  logic                     [NrCoresS1Quadrant-1:0] mtip_i,
     input  logic                     [NrCoresS1Quadrant-1:0] msip_i,
@@ -548,7 +547,6 @@ module occamy_quadrant_s1
   occamy_cluster_wrapper i_occamy_cluster_0 (
       .clk_i(clk_quadrant),
       .rst_ni(rst_quadrant_n),
-      .debug_req_i(debug_req_i[0*NrCoresCluster+:NrCoresCluster]),
       .meip_i(meip_i[0*NrCoresCluster+:NrCoresCluster]),
       .mtip_i(mtip_i[0*NrCoresCluster+:NrCoresCluster]),
       .msip_i(msip_i[0*NrCoresCluster+:NrCoresCluster]),
@@ -629,7 +627,6 @@ module occamy_quadrant_s1
   occamy_cluster_wrapper i_occamy_cluster_1 (
       .clk_i(clk_quadrant),
       .rst_ni(rst_quadrant_n),
-      .debug_req_i(debug_req_i[1*NrCoresCluster+:NrCoresCluster]),
       .meip_i(meip_i[1*NrCoresCluster+:NrCoresCluster]),
       .mtip_i(mtip_i[1*NrCoresCluster+:NrCoresCluster]),
       .msip_i(msip_i[1*NrCoresCluster+:NrCoresCluster]),
@@ -710,7 +707,6 @@ module occamy_quadrant_s1
   occamy_cluster_wrapper i_occamy_cluster_2 (
       .clk_i(clk_quadrant),
       .rst_ni(rst_quadrant_n),
-      .debug_req_i(debug_req_i[2*NrCoresCluster+:NrCoresCluster]),
       .meip_i(meip_i[2*NrCoresCluster+:NrCoresCluster]),
       .mtip_i(mtip_i[2*NrCoresCluster+:NrCoresCluster]),
       .msip_i(msip_i[2*NrCoresCluster+:NrCoresCluster]),
@@ -791,7 +787,6 @@ module occamy_quadrant_s1
   occamy_cluster_wrapper i_occamy_cluster_3 (
       .clk_i(clk_quadrant),
       .rst_ni(rst_quadrant_n),
-      .debug_req_i(debug_req_i[3*NrCoresCluster+:NrCoresCluster]),
       .meip_i(meip_i[3*NrCoresCluster+:NrCoresCluster]),
       .mtip_i(mtip_i[3*NrCoresCluster+:NrCoresCluster]),
       .msip_i(msip_i[3*NrCoresCluster+:NrCoresCluster]),

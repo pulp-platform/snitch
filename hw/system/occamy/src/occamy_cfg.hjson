@@ -106,6 +106,8 @@
         dma_req_fifo_depth: 8,
         narrow_trans: 4,
         wide_trans: 32,
+        // We don't need Snitch debugging in Occamy
+        enable_debug: false,
         // Memory configuration inputs
         sram_cfg_expose: true,
         sram_cfg_fields: {

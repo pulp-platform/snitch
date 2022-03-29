@@ -27,7 +27,6 @@ module ${name}_quadrant_s1
   input  logic                         rst_ni,
   input  logic                         test_mode_i,
   input  tile_id_t                     tile_id_i,
-  input  logic [NrCoresS1Quadrant-1:0] debug_req_i,
   input  logic [NrCoresS1Quadrant-1:0] meip_i,
   input  logic [NrCoresS1Quadrant-1:0] mtip_i,
   input  logic [NrCoresS1Quadrant-1:0] msip_i,
@@ -177,7 +176,6 @@ module ${name}_quadrant_s1
   ${name}_cluster_wrapper i_${name}_cluster_${i} (
     .clk_i (clk_quadrant),
     .rst_ni (rst_quadrant_n),
-    .debug_req_i (debug_req_i[${i}*NrCoresCluster+:NrCoresCluster]),
     .meip_i (meip_i[${i}*NrCoresCluster+:NrCoresCluster]),
     .mtip_i (mtip_i[${i}*NrCoresCluster+:NrCoresCluster]),
     .msip_i (msip_i[${i}*NrCoresCluster+:NrCoresCluster]),

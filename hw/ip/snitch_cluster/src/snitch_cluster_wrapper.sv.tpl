@@ -164,7 +164,9 @@ endpackage
 module ${cfg['name']}_wrapper (
   input  logic                                   clk_i,
   input  logic                                   rst_ni,
+% if cfg['enable_debug']:
   input  logic [${cfg['pkg_name']}::NrCores-1:0] debug_req_i,
+% endif
   input  logic [${cfg['pkg_name']}::NrCores-1:0] meip_i,
   input  logic [${cfg['pkg_name']}::NrCores-1:0] mtip_i,
   input  logic [${cfg['pkg_name']}::NrCores-1:0] msip_i,
@@ -277,7 +279,11 @@ module ${cfg['name']}_wrapper (
   ) i_cluster (
     .clk_i,
     .rst_ni,
+% if cfg['enable_debug']:
     .debug_req_i,
+% else:
+    .debug_req_i ('0),
+% endif
     .meip_i,
     .mtip_i,
     .msip_i,

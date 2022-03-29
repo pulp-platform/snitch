@@ -338,7 +338,6 @@ endpackage
 module occamy_cluster_wrapper (
   input  logic                                   clk_i,
   input  logic                                   rst_ni,
-  input  logic [occamy_cluster_pkg::NrCores-1:0] debug_req_i,
   input  logic [occamy_cluster_pkg::NrCores-1:0] meip_i,
   input  logic [occamy_cluster_pkg::NrCores-1:0] mtip_i,
   input  logic [occamy_cluster_pkg::NrCores-1:0] msip_i,
@@ -447,7 +446,7 @@ module occamy_cluster_wrapper (
   ) i_cluster (
     .clk_i,
     .rst_ni,
-    .debug_req_i,
+    .debug_req_i ('0),
     .meip_i,
     .mtip_i,
     .msip_i,
