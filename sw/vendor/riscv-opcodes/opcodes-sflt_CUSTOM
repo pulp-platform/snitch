@@ -1,56 +1,20 @@
-# SMALLFLOAT EXTENSION OPCODES
-#
+# Smallfloat extension
+
 # format of a line in this file:
 # <instruction name> <args> <opcode>
 #
 # <opcode> is given by specifying one or more range/value pairs:
 # hi..lo=value or bit=value or arg=value (e.g. 6..2=0x45 10=1 rd=0)
 #
-# <args> is one of rd, rs1, rs2, rs3, imm20, imm12, imm12lo, imm12hi,
-# shamtw, shamt, rm
+# <args> is one of rd, rs1, rs2, rs3, aqrl, fm, pred, succ, rm,
+# funct3, imm20, jimm20, imm12, imm12hi, bimm12hi, imm12lo,
+# bimm12lo, zimm, shamt, shamtw, imm5, imm6, vd, vs3, vs1, vs2,
+# vm, wd, amoop, nf, simm5, zimm11, prs3, L, uimms, Luimm5,
+# vseglen, stagger_max, stagger_mask
 
-#SMALLFLOAT SCALAR (fmt: 0=s, 1=d, 2=h (ha with rm=0b101) 3=b)
+# SMALLFLOAT SCALAR (fmt: 0=s, 1=d, 2=h (ha with rm=0b101) 3=b)
 # same instrucion format as F extension
 # collected under "Xsmallfloat" name - naming not final
-
-# RV32Xfhalf - half-precision floats
-flh       rd rs1 imm12 14..12=1 6..2=0x01 1..0=3
-fsh       imm12hi rs1 rs2 imm12lo 14..12=1 6..2=0x09 1..0=3
-fmadd.h   rd rs1 rs2 rs3 rm 26..25=2 6..2=0x10 1..0=3
-fmsub.h   rd rs1 rs2 rs3 rm 26..25=2 6..2=0x11 1..0=3
-fnmsub.h  rd rs1 rs2 rs3 rm 26..25=2 6..2=0x12 1..0=3
-fnmadd.h  rd rs1 rs2 rs3 rm 26..25=2 6..2=0x13 1..0=3
-fadd.h    rd rs1 rs2      31..27=0x00 rm       26..25=2 6..2=0x14 1..0=3
-fsub.h    rd rs1 rs2      31..27=0x01 rm       26..25=2 6..2=0x14 1..0=3
-fmul.h    rd rs1 rs2      31..27=0x02 rm       26..25=2 6..2=0x14 1..0=3
-fdiv.h    rd rs1 rs2      31..27=0x03 rm       26..25=2 6..2=0x14 1..0=3
-fsqrt.h   rd rs1 24..20=0 31..27=0x0B rm       26..25=2 6..2=0x14 1..0=3
-fsgnj.h   rd rs1 rs2      31..27=0x04 14..12=0 26..25=2 6..2=0x14 1..0=3
-fsgnjn.h  rd rs1 rs2      31..27=0x04 14..12=1 26..25=2 6..2=0x14 1..0=3
-fsgnjx.h  rd rs1 rs2      31..27=0x04 14..12=2 26..25=2 6..2=0x14 1..0=3
-fmin.h    rd rs1 rs2      31..27=0x05 14..12=0 26..25=2 6..2=0x14 1..0=3
-fmax.h    rd rs1 rs2      31..27=0x05 14..12=1 26..25=2 6..2=0x14 1..0=3
-feq.h     rd rs1 rs2      31..27=0x14 14..12=2 26..25=2 6..2=0x14 1..0=3
-flt.h     rd rs1 rs2      31..27=0x14 14..12=1 26..25=2 6..2=0x14 1..0=3
-fle.h     rd rs1 rs2      31..27=0x14 14..12=0 26..25=2 6..2=0x14 1..0=3
-fcvt.w.h  rd rs1 24..20=0 31..27=0x18 rm       26..25=2 6..2=0x14 1..0=3
-fcvt.wu.h rd rs1 24..20=1 31..27=0x18 rm       26..25=2 6..2=0x14 1..0=3
-fcvt.h.w  rd rs1 24..20=0 31..27=0x1A rm       26..25=2 6..2=0x14 1..0=3
-fcvt.h.wu rd rs1 24..20=1 31..27=0x1A rm       26..25=2 6..2=0x14 1..0=3
-fmv.x.h   rd rs1 24..20=0 31..27=0x1C 14..12=0 26..25=2 6..2=0x14 1..0=3
-fclass.h  rd rs1 24..20=0 31..27=0x1C 14..12=1 26..25=2 6..2=0x14 1..0=3
-fmv.h.x   rd rs1 24..20=0 31..27=0x1E 14..12=0 26..25=2 6..2=0x14 1..0=3
-# RV64Xfhalf: in addition to the above
-fcvt.l.h  rd rs1 24..20=2 31..27=0x18 rm       26..25=2 6..2=0x14 1..0=3
-fcvt.lu.h rd rs1 24..20=3 31..27=0x18 rm       26..25=2 6..2=0x14 1..0=3
-fcvt.h.l  rd rs1 24..20=2 31..27=0x1A rm       26..25=2 6..2=0x14 1..0=3
-fcvt.h.lu rd rs1 24..20=3 31..27=0x1A rm       26..25=2 6..2=0x14 1..0=3
-# XfhalfwithF - half-precision conversions with F extension
-fcvt.s.h  rd rs1 24..20=2 31..27=0x08 14..12=0 26..25=0 6..2=0x14 1..0=3
-fcvt.h.s  rd rs1 24..20=0 31..27=0x08 rm       26..25=2 6..2=0x14 1..0=3
-# XfhalfwithD - half-precision conversions with D extension (in addition to XfhalfwithF)
-fcvt.d.h  rd rs1 24..20=2 31..27=0x08 14..12=0 26..25=1 6..2=0x14 1..0=3
-fcvt.h.d  rd rs1 24..20=1 31..27=0x08 rm       26..25=2 6..2=0x14 1..0=3
 
 # RV32Xfalthalf - alternate half-precision floats
 @flah      rd rs1 imm12 14..12=1 6..2=0x01 1..0=3
@@ -96,8 +60,9 @@ fcvt.ah.h rd rs1 24..20=2 31..27=0x08 14..12=5 26..25=2 6..2=0x14 1..0=3
 
 # RV32Xfquarter - quarter-precision floats
 # b collides with quad precision (q) so they are pseudo here.
-flb       rd rs1 imm12 14..12=0 6..2=0x01 1..0=3
-fsb       imm12hi rs1 rs2 imm12lo 14..12=0 6..2=0x09 1..0=3
+# TODO: might need to change Snitch s.t. flb, fsb are used with @
+@flb       rd rs1 imm12 14..12=0 6..2=0x01 1..0=3
+@fsb       imm12hi rs1 rs2 imm12lo 14..12=0 6..2=0x09 1..0=3
 @fmadd.b   rd rs1 rs2 rs3 rm 26..25=3 6..2=0x10 1..0=3
 @fmsub.b   rd rs1 rs2 rs3 rm 26..25=3 6..2=0x11 1..0=3
 @fnmsub.b  rd rs1 rs2 rs3 rm 26..25=3 6..2=0x12 1..0=3
@@ -134,8 +99,9 @@ fsb       imm12hi rs1 rs2 imm12lo 14..12=0 6..2=0x09 1..0=3
 @fcvt.d.b  rd rs1 24..20=3 31..27=0x08 14..12=0 26..25=1 6..2=0x14 1..0=3
 @fcvt.b.d  rd rs1 24..20=1 31..27=0x08 rm       26..25=3 6..2=0x14 1..0=3
 # Xfquarterwithhalf - quarter-precision conversions with Xfhalf extension
-fcvt.h.b  rd rs1 24..20=3 31..27=0x08 14..12=0 26..25=2 6..2=0x14 1..0=3
-fcvt.b.h  rd rs1 24..20=2 31..27=0x08 rm       26..25=3 6..2=0x14 1..0=3
+# TODO: might need to change Snitch s.t. fcvt.h.b, fcvt.b.h are used with @
+@fcvt.h.b  rd rs1 24..20=3 31..27=0x08 14..12=0 26..25=2 6..2=0x14 1..0=3
+@fcvt.b.h  rd rs1 24..20=2 31..27=0x08 rm       26..25=3 6..2=0x14 1..0=3
 # Xfquarterwithalthalf - quarter-precision conversions with Xfalthalf extension
 fcvt.ah.b rd rs1 24..20=3 31..27=0x08 14..12=5 26..25=2 6..2=0x14 1..0=3
 fcvt.b.ah rd rs1 24..20=6 31..27=0x08 rm       26..25=3 6..2=0x14 1..0=3

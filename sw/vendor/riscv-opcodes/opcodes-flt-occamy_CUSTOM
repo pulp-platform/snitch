@@ -1,4 +1,4 @@
-# SMALLFLOAT EXTENSION OPCODES
+# Smallfloat extension; based on Occamy
 #
 # format of a line in this file:
 # <instruction name> <args> <opcode>
@@ -6,8 +6,14 @@
 # <opcode> is given by specifying one or more range/value pairs:
 # hi..lo=value or bit=value or arg=value (e.g. 6..2=0x45 10=1 rd=0)
 #
-# <args> is one of rd, rs1, rs2, rs3, imm20, imm12, imm12lo, imm12hi,
-# shamtw, shamt, rm
+# <args> is one of rd, rs1, rs2, rs3, aqrl, fm, pred, succ, rm,
+# funct3, imm20, jimm20, imm12, imm12hi, bimm12hi, imm12lo,
+# bimm12lo, zimm, shamt, shamtw, imm5, imm6, vd, vs3, vs1, vs2,
+# vm, wd, amoop, nf, simm5, zimm11, prs3, L, uimms, Luimm5,
+# vseglen, stagger_max, stagger_mask
+
+# INFO: overlaps with opcodes-sflt_CUSTOM, opcodes-rv32d-zfh_DRAFT,
+# opcodes-rv32q-zfh_DRAFT, opcodes-rv32zfh_DRAFT, opcodes-rv64zfh_DRAFT
 
 # ASCII Art from here: https://fsymbols.com/generators/carty/
 
