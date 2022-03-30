@@ -211,12 +211,14 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   alu_op_e alu_op;
 
   typedef enum logic [3:0] {
-    None, Reg, IImmediate, UImmediate, JImmediate, SImmediate, SFImmediate, PC, CSR, CSRImmmediate, PBImmediate
+    None, Reg, IImmediate, UImmediate, JImmediate, SImmediate, SFImmediate, PC, CSR, CSRImmmediate, PBImmediate, RegRd, RegRs2
   } op_select_e;
-  op_select_e opa_select, opb_select;
+  op_select_e opa_select, opb_select, opc_select;
 
   logic write_rd; // write destination this cycle
   logic uses_rd;
+  logic write_rs1; // write rs1 destination this cycle
+  logic uses_rs1;
   typedef enum logic [2:0] {Consec, Alu, Exception, MRet, SRet, DRet} next_pc_e;
   next_pc_e next_pc;
 
@@ -382,7 +384,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // Scoreboard: Keep track of rd dependencies (only loads at the moment)
   logic operands_ready;
   logic dst_ready;
-  logic opa_ready, opb_ready;
+  logic opa_ready, opb_ready, opc_ready;
+  logic dstrd_ready, dstrs1_ready;
+   
 
   always_comb begin
     sb_d = sb_q;
@@ -394,12 +398,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   end
   // TODO(zarubaf): This can probably be described a bit more efficient
   assign opa_ready = (opa_select != Reg) | ~sb_q[rs1];
-  assign opb_ready = (opb_select != Reg & opb_select != SImmediate) | ~sb_q[rs2];
-  assign operands_ready = opa_ready & opb_ready;
+  assign opb_ready = ((opb_select != Reg & opb_select != SImmediate) | ~sb_q[rs2]) & ((opb_select != RegRd) | ~sb_q[rd]);
+  assign opc_ready = ((opc_select != Reg) | ~sb_q[rd]) & ((opc_select != RegRs2) | ~sb_q[rs2]);
+  assign operands_ready = opa_ready & opb_ready & opc_ready;
   // either we are not using the destination register or we need to make
   // sure that its destination operand is not marked busy in the scoreboard.
-  assign dst_ready = ~uses_rd | (uses_rd & ~sb_q[rd]);
-
+  assign dstrd_ready = ~uses_rd | (uses_rd & ~sb_q[rd]);
+  assign dstrs1_ready = ~uses_rs1 | (uses_rs1 & ~sb_q[rs1]);
+  assign dst_ready = dstrd_ready & dstrs1_ready;
+   
   assign valid_instr = inst_ready_i
                       & inst_valid_o
                       & operands_ready
@@ -468,6 +475,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     alu_op = Add;
     opa_select = None;
     opb_select = None;
+    opc_select = None;
 
     flush_i_valid_o = 1'b0;
     tlb_flush = 1'b0;
@@ -478,6 +486,10 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     // if we are writing the field this cycle we need
     // an int destination register
     uses_rd = write_rd;
+    // set up rs1 destination
+    write_rs1 = 1'b0;
+    uses_rs1 = write_rs1;
+     
 
     rd_bypass = '0;
     zero_lsb = 1'b0;
@@ -1215,6 +1227,28 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             acc_qvalid_o = valid_instr;
             opa_select = Reg;
             opb_select = Reg;
+            acc_register_rd = 1'b1;
+            acc_qreq_o.addr = INT_SS;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end
+
+      // 2 source registers (rs1, rd)
+      PV_INSERT_H,           // Xpulpimg: pv.insert.h
+      PV_INSERT_B,           // Xpulpimg: pv.insert.b
+      PV_SDOTUP_SCI_H,       // Xpulpimg: pv.sdotup.sci.h
+      PV_SDOTUP_SCI_B,       // Xpulpimg: pv.sdotup.sci.b
+      PV_SDOTUSP_SCI_H,      // Xpulpimg: pv.sdotusp.sci.h
+      PV_SDOTUSP_SCI_B,      // Xpulpimg: pv.sdotusp.sci.b
+      PV_SDOTSP_SCI_H,       // Xpulpimg: pv.sdotsp.sci.h
+      PV_SDOTSP_SCI_B: begin // Xpulpimg: pv.sdotsp.sci.b
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            acc_qvalid_o = valid_instr;
+            opa_select = Reg;
+            opc_select = Reg;
             acc_register_rd = 1'b1;
             acc_qreq_o.addr = INT_SS;
          end else begin
@@ -2742,16 +2776,17 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       PC: opb = pc_q;
       CSR: opb = csr_rvalue;
       PBImmediate: opb = pbimm;
+      RegRd: opb = gpr_rdata[2];
       default: opb = '0;
     endcase
   end
 
   assign gpr_raddr[0] = rs1;
   assign gpr_raddr[1] = rs2;
-   // connect the third read port only if present
-   if (RegNrReadPorts >= 3) begin: gpr_raddr_2
-      assign gpr_raddr[2] = rd;
-   end
+  // connect the third read port only if present
+  if (RegNrReadPorts >= 3) begin: gpr_raddr_2
+     assign gpr_raddr[2] = rd;
+  end
    
 
   // --------------------
