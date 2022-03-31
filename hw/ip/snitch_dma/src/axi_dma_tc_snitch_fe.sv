@@ -139,8 +139,8 @@ module axi_dma_tc_snitch_fe #(
     //--------------------------------------
     // Buffer twod last
     //--------------------------------------
-    localparam int unsigned TwodBufferDepth = 2 * DMAReqFifoDepth +
-        DMAAxiReqFifoDepth + 3 + 1;
+    localparam int unsigned TwodBufferDepth = 2 * (DMAReqFifoDepth +
+        DMAAxiReqFifoDepth) + 3 + 1;
     logic twod_req_last_realigned;
     fifo_v3 # (
         .DATA_WIDTH  (  1                 ),
