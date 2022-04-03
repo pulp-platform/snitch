@@ -1255,6 +1255,39 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
          end
       end
+
+      // 3 source registers (rs1, rs2, rd)
+      P_MAC,                // Xpulpimg: p.mac
+      P_MSU,                // Xpulpimg: p.msu
+      PV_SDOTUP_H,          // Xpulpimg: pv.sdotup.h
+      PV_SDOTUP_SC_H,       // Xpulpimg: pv.sdotup.sc.h
+      PV_SDOTUP_B,          // Xpulpimg: pv.sdotup.b
+      PV_SDOTUP_SC_B,       // Xpulpimg: pv.sdotup.sc.b
+      PV_SDOTUSP_H,         // Xpulpimg: pv.sdotusp.h
+      PV_SDOTUSP_SC_H,      // Xpulpimg: pv.sdotusp.sc.h
+      PV_SDOTUSP_B,         // Xpulpimg: pv.sdotusp.b
+      PV_SDOTUSP_SC_B,      // Xpulpimg: pv.sdotusp.sc.b
+      PV_SDOTSP_H,          // Xpulpimg: pv.sdotsp.h
+      PV_SDOTSP_SC_H,       // Xpulpimg: pv.sdotsp.sc.h
+      PV_SDOTSP_B,          // Xpulpimg: pv.sdotsp.b
+      PV_SDOTSP_SC_B,       // Xpulpimg: pv.sdotsp.sc.b
+      PV_SHUFFLE2_H,        // Xpulpimg: pv.shuffle2.h
+      PV_SHUFFLE2_B: begin  // Xpulpimg: pv.shuffle2.b
+        if (Xipu) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
+          acc_qvalid_o = valid_instr;
+          opa_select = Reg;
+          opb_select = Reg;
+          opc_select = Reg;
+          acc_register_rd = 1'b1;
+          acc_qreq_o.addr = INT_SS;
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
+      
+      /* end of Xpulpimg extension */
       
      
       // Offload FP-FP Instructions - fire and forget
@@ -2381,6 +2414,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     // Sanitize illegal instructions so that they don't exert any side-effects.
     if (exception) begin
      write_rd = 1'b0;
+     uses_rd = 1'b0;
+     write_rs1 = 1'b0;
+     uses_rs1 = 1'b0;
      acc_qvalid_o = 1'b0;
      next_pc = Exception;
     end
