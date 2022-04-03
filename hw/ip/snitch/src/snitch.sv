@@ -104,6 +104,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   localparam logic [31:0] DmBaseAddress = 0;
   localparam int RegWidth = RVE ? 4 : 5;
   localparam int RegNrReadPorts = Xipu ? 3 : 2;
+  localparam int RegNrWritePorts = 2;
+   
      
   /// Total physical address portion.
   localparam int unsigned PPNSize = AddrWidth - PAGE_SHIFT;
@@ -142,15 +144,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic [RegWidth-1:0] rd, rs1, rs2;
   logic stall, lsu_stall;
   // Register connections
-  logic [RegNrReadPorts-1:0][RegWidth-1:0] gpr_raddr;
-  logic [RegNrReadPorts-1:0][31:0]         gpr_rdata;
-  logic [0:0][RegWidth-1:0] gpr_waddr;
-  logic [0:0][31:0]         gpr_wdata;
-  logic [0:0]               gpr_we;
-  logic [2**RegWidth-1:0]   sb_d, sb_q;
+  logic [RegNrReadPorts-1:0][RegWidth-1:0]  gpr_raddr;
+  logic [RegNrReadPorts-1:0][31:0]          gpr_rdata;
+  logic [RegNrWritePorts-1:0][RegWidth-1:0] gpr_waddr;
+  logic [RegNrWritePorts-1:0][31:0]         gpr_wdata;
+  logic [RegNrWritePorts-1:0]               gpr_we;
+  logic [2**RegWidth-1:0]                   sb_d, sb_q;
 
   // Load/Store Defines
-  logic is_load, is_store, is_signed;
+  logic is_load, is_store, is_signed, is_postincr;
   logic is_fp_load, is_fp_store;
   logic ls_misaligned;
   logic ld_addr_misaligned;
@@ -189,9 +191,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic  lsu_pvalid, lsu_pready;
   logic  lsu_empty;
   addr_t ls_paddr;
+  logic [31:0] ls_addr_sel; // address selection for post-increment load/store or normal addressing mode
   logic [RegWidth-1:0] lsu_rd;
 
   logic retire_load; // retire a load instruction
+  logic retire_p; // retire from post-increment instructions  
   logic retire_i; // retire the rest of the base instruction set
   logic retire_acc; // retire an instruction we offloaded
 
@@ -497,6 +501,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     // LSU interface
     is_load = 1'b0;
     is_store = 1'b0;
+    is_postincr = 1'b0;
     is_fp_load = 1'b0;
     is_fp_store = 1'b0;
     is_signed = 1'b0;
@@ -2777,7 +2782,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   snitch_regfile #(
     .DATA_WIDTH     ( 32                    ),
     .NR_READ_PORTS  ( RegNrReadPorts        ),
-    .NR_WRITE_PORTS ( 1                     ),
+    .NR_WRITE_PORTS ( RegNrWritePorts       ),
     .ZERO_REG_ZERO  ( 1                     ),
     .ADDR_WIDTH     ( RegWidth              )
   ) i_snitch_regfile (
@@ -2945,10 +2950,14 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
   assign dtlb_valid = (lsu_tlb_qvalid & trans_active) | ((is_fp_load | is_fp_store) & trans_active);
 
+  // address can be alu_result (i.e. rs1 + iimm/simm) or rs1 (for post-increment load/stores)
+  assign ls_addr_sel = is_postincr ? gpr_rdata[0] : alu_result;
   // Mulitplexer using and/or as this signal is likely timing critical.
   assign ls_paddr[PPNSize+PAGE_SHIFT-1:PAGE_SHIFT] =
-          (trans_active & dtlb_pa) | (~trans_active & {mseg_q, alu_result[31:PAGE_SHIFT]});
-  assign ls_paddr[PAGE_SHIFT-1:0] = alu_result[PAGE_SHIFT-1:0];
+            (trans_active & dtlb_pa) | (~trans_active & {mseg_q, ls_addr_sel[31:PAGE_SHIFT]});
+  //        (trans_active & dtlb_pa) | (~trans_active & {mseg_q, alu_result[31:PAGE_SHIFT]});
+  assign ls_paddr[PAGE_SHIFT-1:0] = ls_addr_sel[PAGE_SHIFT-1:0];
+  //assign ls_paddr[PAGE_SHIFT-1:0] = alu_result[PAGE_SHIFT-1:0];
 
   assign lsu_qvalid = lsu_tlb_qvalid & trans_ready;
   assign lsu_tlb_qready = lsu_qready & trans_ready;
@@ -2992,7 +3001,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
   assign lsu_tlb_qvalid = valid_instr & (is_load | is_store)
                                       & ~(ld_addr_misaligned | st_addr_misaligned);
-
+   
+  // retire post-incremented address on rs1 if valid postincr instruction and LSU not stalling
+  assign retire_p = write_rs1 & ~stall & (rs1 != 0);
   // we can retire if we are not stalling and if the instruction is writing a register
   assign retire_i = write_rd & valid_instr & (rd != 0);
 
@@ -3038,33 +3049,81 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     endcase
   end
 
-  always_comb begin
-    gpr_we[0] = 1'b0;
-    gpr_waddr[0] = rd;
-    gpr_wdata[0] = alu_writeback;
-    // external interfaces
-    lsu_pready = 1'b0;
-    acc_pready_o = 1'b0;
-    retire_acc = 1'b0;
-    retire_load = 1'b0;
+  if (RegNrWritePorts == 1) begin   
+     always_comb begin
+        gpr_we[0] = 1'b0;
+        gpr_waddr[0] = retire_p ? rs1 : rd; // choose whether to writeback 
+        gpr_wdata[0] = alu_writeback;
+        // external interfaces
+        lsu_pready = 1'b0;
+        acc_pready_o = 1'b0;
+        retire_acc = 1'b0;
+        retire_load = 1'b0;
 
-    if (retire_i) begin
-      gpr_we[0] = 1'b1;
-    // if we are not retiring another instruction retire the load now
-    end else if (lsu_pvalid) begin
-      retire_load = 1'b1;
-      gpr_we[0] = 1'b1;
-      gpr_waddr[0] = lsu_rd;
-      gpr_wdata[0] = ld_result[31:0];
-      lsu_pready = 1'b1;
-    end else if (acc_pvalid_i) begin
-      retire_acc = 1'b1;
-      gpr_we[0] = 1'b1;
-      gpr_waddr[0] = acc_prsp_i.id;
-      gpr_wdata[0] = acc_prsp_i.data[31:0];
-      acc_pready_o = 1'b1;
-    end
+        if (retire_i | retire_p) begin
+           gpr_we[0] = 1'b1;
+        // if we are not retiring another instruction retire the load now
+        end else if (lsu_pvalid) begin
+           retire_load = 1'b1;
+           gpr_we[0] = 1'b1;
+           gpr_waddr[0] = lsu_rd;
+           gpr_wdata[0] = ld_result[31:0];
+           lsu_pready = 1'b1;
+        end else if (acc_pvalid_i) begin
+           retire_acc = 1'b1;
+           gpr_we[0] = 1'b1;
+           gpr_waddr[0] = acc_prsp_i.id;
+           gpr_wdata[0] = acc_prsp_i.data[31:0];
+           acc_pready_o = 1'b1;
+        end
+     end // always_comb
+  end else if (RegNrWritePorts == 2) begin // if (RegNrWritePorts == 1)
+   always_comb begin
+      gpr_we[0] = 1'b0;
+      gpr_waddr[0] = retire_p ? rs1 : rd; // choose whether to writeback at RF[rs1] for post-increment load/stores
+      gpr_wdata[0] = alu_writeback;
+      gpr_we[1] = 1'b0;
+      gpr_waddr[1] = lsu_rd;
+      gpr_wdata[1] = ld_result[31:0];
+      //external interfaces
+      lsu_pready = 1'b0;
+      acc_pready_o = 1'b0;
+      retire_acc = 1'b0;
+      retire_load = 1'b0;
+
+      if (retire_i | retire_p) begin
+         gpr_we[0] = 1'b1;
+         if (lsu_pvalid) begin
+            retire_load = 1'b1;
+            gpr_we[1] = 1'b1;
+            lsu_pready = 1'b1;
+         end else if (acc_pvalid_i) begin
+            retire_acc = 1'b1;
+            gpr_we[1] = 1'b1;
+            gpr_waddr[1] = acc_prsp_i.id;
+            gpr_wdata[1] = acc_prsp_i.data[31:0];
+            acc_pready_o = 1'b1;
+         end
+         // if we are not retiring another instruction retire the load now
+      end else begin // if (retire_i | retire_p)
+         if (acc_pvalid_i) begin
+            retire_acc = 1'b1;
+            gpr_we[0] = 1'b1;
+            gpr_waddr[0] = acc_prsp_i.id;
+            gpr_wdata[0] = acc_prsp_i.data[31:0];
+            acc_pready_o = 1'b1;
+         end
+         if (lsu_pvalid) begin
+            retire_load = 1'b1;
+            gpr_we[1] = 1'b1;
+            lsu_pready = 1'b1;
+         end
+      end // else: !if(retire_i | retire_p)
+   end // always_comb
+  end  else begin // if (RegNrWritePorts == 2)
+   $fatal(1, "[snitch] Unsupported RegNrWritePorts.");
   end
+
 
   assign inst_addr_misaligned = (inst_data_i inside {
     JAL,
