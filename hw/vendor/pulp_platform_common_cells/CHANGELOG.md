@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Patched in from upstream
+
+### Added
+
+- Add `4phase_cdc`: A 4 phase handshaking CDC that allows glitch-free resetting (used internally in the new clearable CDC IPs).
+- Add one-sided clearable and/or async resettable flavors of 2phase CDC (`cdc_2phase_clearable`) and gray-counting FIFO CDCs (`cdc_fifo_gray_clearable`).
+- Add reset CDC controller `cdc_reset_ctrl` that supports reset/synchronous clear sequencing accross clock domain crossings (used internally in clearable CDC IPs).
+
+### Changed
+
+- Add `dont_touch` and `async_reg` attribute to FFs in `sync` cell.
+- Improved reset behavior documentation (in module header) of existing CDC IPs.
+
 ## Unreleased
 
 ### Added

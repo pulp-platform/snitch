@@ -1,0 +1,2557 @@
+From 41f8cdc18733b8f57e0f81a30650e4093b4f3d76 Mon Sep 17 00:00:00 2001
+From: Paul Scheffler <paulsc@iis.ee.ethz.ch>
+Date: Wed, 30 Mar 2022 21:13:57 +0200
+Subject: [PATCH] common_cells: Clearable cdcs (#126)
+
+---
+ Bender.yml                      |   9 +-
+ CHANGELOG.md                    |  13 +
+ src/cdc_2phase.sv               |  24 ++
+ src/cdc_2phase_clearable.sv     | 345 ++++++++++++++++++++++++++
+ src/cdc_4phase.sv               | 327 +++++++++++++++++++++++++
+ src/cdc_fifo_2phase.sv          |  23 ++
+ src/cdc_fifo_gray.sv            |  24 ++
+ src/cdc_fifo_gray_clearable.sv  | 393 +++++++++++++++++++++++++++++
+ src/cdc_reset_ctrlr.sv          | 529 ++++++++++++++++++++++++++++++++++++++++
+ src/cdc_reset_ctrlr_pkg.sv      |  27 ++
+ src/sync.sv                     |   2 +
+ test/cdc_2phase_clearable_tb.sv | 380 +++++++++++++++++++++++++++++
+ test/cdc_fifo_clearable_tb.sv   | 291 ++++++++++++++++++++++
+ 13 files changed, 2386 insertions(+), 1 deletion(-)
+ create mode 100644 hw/vendor/pulp_platform_common_cells/src/cdc_2phase_clearable.sv
+ create mode 100644 hw/vendor/pulp_platform_common_cells/src/cdc_4phase.sv
+ create mode 100644 hw/vendor/pulp_platform_common_cells/src/cdc_fifo_gray_clearable.sv
+ create mode 100644 hw/vendor/pulp_platform_common_cells/src/cdc_reset_ctrlr.sv
+ create mode 100644 hw/vendor/pulp_platform_common_cells/src/cdc_reset_ctrlr_pkg.sv
+ create mode 100644 hw/vendor/pulp_platform_common_cells/test/cdc_2phase_clearable_tb.sv
+ create mode 100644 hw/vendor/pulp_platform_common_cells/test/cdc_fifo_clearable_tb.sv
+
+diff --git a/Bender.yml b/Bender.yml
+index 0631e5c..049d363 100644
+--- a/Bender.yml
++++ b/Bender.yml
+@@ -26,7 +26,6 @@ sources:
+     files:
+     - src/cb_filter_pkg.sv
+   - src/cc_onehot.sv
+-  - src/cdc_2phase.sv
+   - src/cf_math_pkg.sv
+   - src/clk_div.sv
+   - src/delta_counter.sv
+@@ -59,8 +58,11 @@ sources:
+   - src/sync.sv
+   - src/sync_wedge.sv
+   - src/unread.sv
++  - src/cdc_reset_ctrlr_pkg.sv
+   # Level 1
+   - src/addr_decode_napot.sv
++  - src/cdc_2phase.sv
++  - src/cdc_4phase.sv
+   - src/addr_decode.sv
+   - target: not(all(xilinx,vivado_ipx))
+     files:
+@@ -78,6 +80,7 @@ sources:
+   - src/stream_fifo.sv
+   - src/stream_fork_dynamic.sv
+   # Level 2
++  - src/cdc_reset_ctrlr.sv
+   - src/cdc_fifo_gray.sv
+   - src/fall_through_register.sv
+   - src/id_queue.sv
+@@ -86,6 +89,8 @@ sources:
+   - src/stream_register.sv
+   - src/stream_xbar.sv
+   # Level 3
++  - src/cdc_fifo_gray_clearable.sv
++  - src/cdc_2phase_clearable.sv
+   - src/stream_arbiter.sv
+   - src/stream_omega_net.sv
+ 
+@@ -99,7 +104,9 @@ sources:
+       - test/addr_decode_tb.sv
+       - test/cb_filter_tb.sv
+       - test/cdc_2phase_tb.sv
++      - test/cdc_2phase_clearable_tb.sv
+       - test/cdc_fifo_tb.sv
++      - test/cdc_fifo_clearable_tb.sv
+       - test/fifo_tb.sv
+       - test/graycode_tb.sv
+       - test/id_queue_tb.sv
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index e872804..4479c11 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
+ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+ 
++## Patched in from upstream
++
++### Added
++
++- Add `4phase_cdc`: A 4 phase handshaking CDC that allows glitch-free resetting (used internally in the new clearable CDC IPs).
++- Add one-sided clearable and/or async resettable flavors of 2phase CDC (`cdc_2phase_clearable`) and gray-counting FIFO CDCs (`cdc_fifo_gray_clearable`).
++- Add reset CDC controller `cdc_reset_ctrl` that supports reset/synchronous clear sequencing accross clock domain crossings (used internally in clearable CDC IPs).
++
++### Changed
++
++- Add `dont_touch` and `async_reg` attribute to FFs in `sync` cell.
++- Improved reset behavior documentation (in module header) of existing CDC IPs.
++
+ ## Unreleased
+ 
+ ### Added
+diff --git a/src/cdc_2phase.sv b/src/cdc_2phase.sv
+index 8e770ab..e1a67b4 100644
+--- a/src/cdc_2phase.sv
++++ b/src/cdc_2phase.sv
+@@ -13,6 +13,30 @@
+ 
+ /// A two-phase clock domain crossing.
+ ///
++/// # Reset Behavior!!
++///
++/// This module must not be used if warm reset capabily is a requirement. The
++/// only execption is if you consistently use a reset controller that sequences
++/// the resets while gating both clock domains (be very careful if you follow
++/// this strategy!). If you need warm reset/clear/flush capabilities, use (AND
++/// CAREFULLY READ THE DESCRIPTION) the cdc_2phase_clearable module.
++///
++/// After this disclaimer, here is how you connect the src_rst_ni and the
++/// dst_rst_ni of this module for power-on-reset (POR). The src_rst_ni and
++/// dst_rst_ni signal must be asserted SIMULTANEOUSLY (i.e. asynchronous
++/// assertion). Othwerwise, spurious transactions could occur in the domain
++/// where the reset arrives later than the other. The de-assertion of both reset
++/// must be synchronized to their respective clock domain (i.e. src_rst_ni must
++/// be deasserted synchronously to the src_clk_i and dst_rst_ni must be
++/// deasserted synchronously to dst_clk_i.) You can use the rstgen cell in the
++/// common_cells library to achieve this (synchronization of only the
++/// de-assertion). However, be careful about reset domain crossings; If you
++/// reset both domain asynchronously in their entirety (i.e. POR) you are fine.
++/// However, if you use this strategy for warm resets (some parts of the circuit
++/// are not reset) you might introduce metastability in this separate
++/// reset-domain when you assert the reset (the deassertion synchronizer doen't
++/// help here).
++///
+ /// CONSTRAINT: Requires max_delay of min_period(src_clk_i, dst_clk_i) through
+ /// the paths async_req, async_ack, async_data.
+ /* verilator lint_off DECLFILENAME */
+diff --git a/src/cdc_2phase_clearable.sv b/src/cdc_2phase_clearable.sv
+new file mode 100644
+index 0000000..21b6ddd
+--- /dev/null
++++ b/src/cdc_2phase_clearable.sv
+@@ -0,0 +1,345 @@
++// Copyright 2018 ETH Zurich and University of Bologna.
++//
++// Copyright and related rights are licensed under the Solderpad Hardware
++// License, Version 0.51 (the "License"); you may not use this file except in
++// compliance with the License. You may obtain a copy of the License at
++// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
++// or agreed to in writing, software, hardware and materials distributed under
++// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
++// CONDITIONS OF ANY KIND, either express or implied. See the License for the
++// specific language governing permissions and limitations under the License.
++//
++// Fabian Schuiki <fschuiki@iis.ee.ethz.ch> (original CDC)
++// Manuel Eggimann <meggiman@iis.ee.ethz.ch> (clearability feature)
++
++/// A two-phase clock domain crossing.
++///
++/// CONSTRAINT: Requires max_delay of min_period(src_clk_i, dst_clk_i) through
++/// the paths async_req, async_ack, async_data.
++///
++///
++/// Reset Behavior:
++///
++/// In contrast to the cdc_2phase version without clear signal, this module
++/// supports one-sided warm resets (asynchronously and synchronously). The way
++/// this is implemented is described in more detail in the cdc_reset_ctrlr
++/// module. To summarize a synchronous clear request i.e. src/dst_clear_i will
++/// cause the respective other clock domain to reset as well without introducing
++/// any spurious transactions. This is acomplished by an internal module
++/// (cdc_reset_ctrlr) that starts a reset sequence on both sides of the CDC in
++/// lock-step that first isolates the CDC from the outside world and then resets
++/// it. The reset sequencer provides the following behavior:
++/// 1. There are no spurious invalid or duplicated transactions regardless how
++///    the individual sides are reset (can also happen roughly simultaneosly)
++/// 2. The CDC becomes unready at the src side in the next cycle after
++///    synchronous reset request until the reset sequence is completed. A currently
++///    pending transactions might still complete (if the dst accepts at the
++///    exact time the reset is request on the src die).
++/// 3. During the reset sequence the dst might withdraw the valid signal. This
++///    might violate higher level protocols. If you need this feature you would
++///    have to path the existing implementation to wait with the isolate_ack
++///    assertion until all open handshakes were acknowledged.
++/// 4. If the parameter CLEAR_ON_ASYNC_RESET is enabled, the same behavior as
++///    above is also valid for asynchronous resets on either side. However, this
++///    increases the minimum number of synchronization stages (SYNC_STAGES
++///    parameter) from 2 to 3 (read the cdc_reset_ctrlr header to figure out
++///    why).
++///
++///
++/* verilator lint_off DECLFILENAME */
++
++`include "common_cells/registers.svh"
++
++module cdc_2phase_clearable #(
++  parameter type T = logic,
++  parameter int unsigned SYNC_STAGES = 3,
++  parameter int CLEAR_ON_ASYNC_RESET = 1
++)(
++  input  logic src_rst_ni,
++  input  logic src_clk_i,
++  input  logic src_clear_i,
++  output logic src_clear_pending_o,
++  input  T     src_data_i,
++  input  logic src_valid_i,
++  output logic src_ready_o,
++
++  input  logic dst_rst_ni,
++  input  logic dst_clk_i,
++  input  logic dst_clear_i,
++  output logic dst_clear_pending_o,
++  output T     dst_data_o,
++  output logic dst_valid_o,
++  input  logic dst_ready_i
++);
++  logic        s_src_clear_req;
++  logic        s_src_clear_ack_q;
++  logic        s_src_ready;
++  logic        s_src_isolate_req;
++  logic        s_src_isolate_ack_q;
++  logic        s_dst_clear_req;
++  logic        s_dst_clear_ack_q;
++  logic        s_dst_valid;
++  logic        s_dst_isolate_req;
++  logic        s_dst_isolate_ack_q;
++
++  // Asynchronous handshake signals between the CDCs
++  (* dont_touch = "true" *) logic async_req;
++  (* dont_touch = "true" *) logic async_ack;
++  (* dont_touch = "true" *) T async_data;
++
++  if (CLEAR_ON_ASYNC_RESET) begin : gen_elaboration_assertion
++    if (SYNC_STAGES < 3)
++      $error("The clearable 2-phase CDC with async reset",
++             "synchronization requires at least 3 synchronizer stages for the FIFO.");
++  end else begin : gen_elaboration_assertion
++    if (SYNC_STAGES < 2) begin : gen_elaboration_assertion
++      $error("A minimum of 2 synchronizer stages is required for proper functionality.");
++    end
++  end
++
++
++  // The sender in the source domain.
++  cdc_2phase_src_clearable #(
++    .T           ( T           ),
++    .SYNC_STAGES ( SYNC_STAGES )
++  ) i_src (
++    .rst_ni       ( src_rst_ni                       ),
++    .clk_i        ( src_clk_i                        ),
++    .clear_i      ( s_src_clear_req                      ),
++    .data_i       ( src_data_i                       ),
++    .valid_i      ( src_valid_i & !s_src_isolate_req ),
++    .ready_o      ( s_src_ready                      ),
++    .async_req_o  ( async_req                        ),
++    .async_ack_i  ( async_ack                        ),
++    .async_data_o ( async_data                       )
++  );
++
++  assign src_ready_o = s_src_ready & !s_src_isolate_req;
++
++
++  // The receiver in the destination domain.
++  cdc_2phase_dst_clearable #(
++    .T           ( T           ),
++    .SYNC_STAGES ( SYNC_STAGES )
++  ) i_dst (
++    .rst_ni       ( dst_rst_ni                       ),
++    .clk_i        ( dst_clk_i                        ),
++    .clear_i      ( s_dst_clear_req                      ),
++    .data_o       ( dst_data_o                       ),
++    .valid_o      ( s_dst_valid                      ),
++    .ready_i      ( dst_ready_i & !s_dst_isolate_req ),
++    .async_req_i  ( async_req                        ),
++    .async_ack_o  ( async_ack                        ),
++    .async_data_i ( async_data                       )
++  );
++
++  assign dst_valid_o = s_dst_valid & !s_dst_isolate_req;
++
++  // Synchronize the clear and reset signaling in both directions (see header of
++  // the cdc_reset_ctrlr module for more details.)
++  cdc_reset_ctrlr #(
++    .SYNC_STAGES(SYNC_STAGES-1)
++  ) i_cdc_reset_ctrlr (
++    .a_clk_i         ( src_clk_i           ),
++    .a_rst_ni        ( src_rst_ni          ),
++    .a_clear_i       ( src_clear_i         ),
++    .a_clear_o       ( s_src_clear_req     ),
++    .a_clear_ack_i   ( s_src_clear_ack_q   ),
++    .a_isolate_o     ( s_src_isolate_req   ),
++    .a_isolate_ack_i ( s_src_isolate_ack_q ),
++    .b_clk_i         ( dst_clk_i           ),
++    .b_rst_ni        ( dst_rst_ni          ),
++    .b_clear_i       ( dst_clear_i         ),
++    .b_clear_o       ( s_dst_clear_req     ),
++    .b_clear_ack_i   ( s_dst_clear_ack_q   ),
++    .b_isolate_o     ( s_dst_isolate_req   ),
++    .b_isolate_ack_i ( s_dst_isolate_ack_q )
++  );
++
++  // Just delay the isolate request by one cycle. We can ensure isolation within
++  // one cycle by just deasserting valid and ready signals on both sides of the CDC.
++  always_ff @(posedge src_clk_i, negedge src_rst_ni) begin
++    if (!src_rst_ni) begin
++      s_src_isolate_ack_q <= 1'b0;
++      s_src_clear_ack_q   <= 1'b0;
++    end else begin
++      s_src_isolate_ack_q <= s_src_isolate_req;
++      s_src_clear_ack_q   <= s_src_clear_req;
++    end
++  end
++
++  always_ff @(posedge dst_clk_i, negedge dst_rst_ni) begin
++    if (!dst_rst_ni) begin
++      s_dst_isolate_ack_q <= 1'b0;
++      s_dst_clear_ack_q   <= 1'b0;
++    end else begin
++      s_dst_isolate_ack_q <= s_dst_isolate_req;
++      s_dst_clear_ack_q   <= s_dst_clear_req;
++    end
++  end
++
++
++  assign src_clear_pending_o = s_src_isolate_req; // The isolate signal stays
++  // asserted during the whole
++  // clear sequence.
++  assign dst_clear_pending_o = s_dst_isolate_req;
++
++
++`ifndef VERILATOR
++
++  no_valid_i_during_clear_i : assert property (
++    @(posedge src_clk_i) disable iff (!src_rst_ni) src_clear_i |-> !src_valid_i
++  );
++
++`endif
++
++endmodule
++
++
++/// Half of the two-phase clock domain crossing located in the source domain.
++module cdc_2phase_src_clearable #(
++  parameter type T = logic,
++  parameter int unsigned SYNC_STAGES = 2
++) (
++  input  logic rst_ni,
++  input  logic clk_i,
++  input  logic clear_i,
++  input  T     data_i,
++  input  logic valid_i,
++  output logic ready_o,
++  output logic async_req_o,
++  input  logic async_ack_i,
++  output T     async_data_o
++);
++
++  (* dont_touch = "true" *)
++  logic  req_src_d, req_src_q, ack_synced;
++  (* dont_touch = "true" *)
++  T data_src_d, data_src_q;
++
++  // Synchronize the async ACK
++  sync #(
++    .STAGES(SYNC_STAGES)
++  ) i_sync(
++    .clk_i,
++    .rst_ni,
++    .serial_i( async_ack_i ),
++    .serial_o( ack_synced  )
++  );
++
++  // If we receive the clear signal clear the content of the request flip-flop
++  // and the data register
++  always_comb begin
++    data_src_d = data_src_q;
++    req_src_d  = req_src_q;
++    if (clear_i) begin
++      req_src_d  = 1'b0;
++    // The req_src and data_src registers change when a new data item is accepted.
++    end else if (valid_i && ready_o) begin
++      req_src_d  = ~req_src_q;
++      data_src_d = data_i;
++    end
++  end
++
++  `FFNR(data_src_q, data_src_d, clk_i)
++
++  always_ff @(posedge clk_i or negedge rst_ni) begin
++    if (!rst_ni) begin
++      req_src_q  <= 0;
++    end else begin
++      req_src_q  <= req_src_d;
++    end
++  end
++
++  // Output assignments.
++  assign ready_o = (req_src_q == ack_synced);
++  assign async_req_o = req_src_q;
++  assign async_data_o = data_src_q;
++
++// Assertions
++`ifndef VERILATOR
++  // pragma translate_off
++  no_clear_and_request: assume property (
++     @(posedge clk_i) disable iff(~rst_ni) (clear_i |-> ~valid_i))
++    else $fatal(1, "No request allowed while clear_i is asserted.");
++
++  // pragma translate_on
++`endif
++
++endmodule
++
++
++/// Half of the two-phase clock domain crossing located in the destination
++/// domain.
++module cdc_2phase_dst_clearable #(
++  parameter type T = logic,
++  parameter int unsigned SYNC_STAGES = 2
++)(
++  input  logic rst_ni,
++  input  logic clk_i,
++  input  logic clear_i,
++  output T     data_o,
++  output logic valid_o,
++  input  logic ready_i,
++  input  logic async_req_i,
++  output logic async_ack_o,
++  input  T     async_data_i
++);
++
++  (* dont_touch = "true" *)
++  (* async_reg = "true" *)
++ logic ack_dst_d, ack_dst_q, req_synced, req_synced_q1;
++  (* dont_touch = "true" *)
++  T data_dst_d, data_dst_q;
++
++
++  //Synchronize the request
++  sync #(
++    .STAGES(SYNC_STAGES)
++  ) i_sync(
++    .clk_i,
++    .rst_ni,
++    .serial_i( async_req_i ),
++    .serial_o( req_synced  )
++  );
++
++  // The ack_dst register changes when a new data item is accepted.
++  always_comb begin
++    ack_dst_d = ack_dst_q;
++    if (clear_i) begin
++      ack_dst_d = 1'b0;
++    end else if (valid_o && ready_i) begin
++      ack_dst_d = ~ack_dst_q;
++    end
++  end
++
++  // The data_dst register samples when a new data item is presented. This is
++  // indicated by a transition in the req_synced line.
++  always_comb begin
++    data_dst_d = data_dst_q;
++    if (req_synced != req_synced_q1 && !valid_o) begin
++      data_dst_d = async_data_i;
++    end
++  end
++
++  `FFNR(data_dst_q, data_dst_d, clk_i)
++
++  always_ff @(posedge clk_i or negedge rst_ni) begin
++    if (!rst_ni) begin
++      ack_dst_q     <= 0;
++      req_synced_q1 <= 1'b0;
++    end else begin
++      ack_dst_q     <= ack_dst_d;
++      // The req_synced_q1 is the delayed version of the synchronized req_synced
++      // used to detect transitions in the request.
++      req_synced_q1 <= req_synced;
++    end
++  end
++
++  // Output assignments.
++  assign valid_o = (ack_dst_q != req_synced_q1);
++  assign data_o = data_dst_q;
++  assign async_ack_o = ack_dst_q;
++
++endmodule
++/* verilator lint_on DECLFILENAME */
+diff --git a/src/cdc_4phase.sv b/src/cdc_4phase.sv
+new file mode 100644
+index 0000000..bd4c65a
+--- /dev/null
++++ b/src/cdc_4phase.sv
+@@ -0,0 +1,327 @@
++// Copyright 2018 ETH Zurich and University of Bologna.
++//
++// Copyright and related rights are licensed under the Solderpad Hardware
++// License, Version 0.51 (the "License"); you may not use this file except in
++// compliance with the License. You may obtain a copy of the License at
++// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
++// or agreed to in writing, software, hardware and materials distributed under
++// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
++// CONDITIONS OF ANY KIND, either express or implied. See the License for the
++// specific language governing permissions and limitations under the License.
++//
++// Manuel Eggimann <meggimann@iis.ee.ethz.ch>
++
++/// A 4-phase clock domain crossing. While this is less efficient than a 2-phase
++/// CDC, it doesn't suffer from the same issues during one sided resets since
++/// the IDLE state doesn't alternate with every transaction.
++///
++/// Parameters: T - The type of the data to transmit through the CDC.
++///
++/// Decoupled - If decoupled is disabled, the 4phase cdc will not consume the
++/// src item until the handshake with the other side is completed. This
++/// increases the latency of the first transaction but has no effect on
++/// throughput. However, critical paths might be slightly longer. Use this mode
++/// if you want to ensure that there are no in-flight transactions within the
++/// CDC.
++///
++/// SEND_RESET_MSG - If send reset msg is enabled, the 4phase cdc starts sending
++/// the RESET_MSG within its' asynchronous reset state. This can be usefull if
++/// we need to transmit a message to the other side of the CDC immediately
++/// during an async reset even if there is no clock available. This mode is
++/// required for proper functionality of the cdc_reset_ctrlr module.
++///
++/// CONSTRAINT: Requires max_delay of min_period(src_clk_i, dst_clk_i) through
++/// the paths async_req, async_ack, async_data.
++/* verilator lint_off DECLFILENAME */
++module cdc_4phase #(
++  parameter type T = logic,
++  parameter bit DECOUPLED = 1'b1,
++  parameter bit SEND_RESET_MSG = 1'b0,
++  parameter T RESET_MSG = T'('0)
++)(
++  input  logic src_rst_ni,
++  input  logic src_clk_i,
++  input  T     src_data_i,
++  input  logic src_valid_i,
++  output logic src_ready_o,
++
++  input  logic dst_rst_ni,
++  input  logic dst_clk_i,
++  output T     dst_data_o,
++  output logic dst_valid_o,
++  input  logic dst_ready_i
++);
++
++  // Asynchronous handshake signals.
++  (* dont_touch = "true" *) logic async_req;
++  (* dont_touch = "true" *) logic async_ack;
++  (* dont_touch = "true" *) T async_data;
++
++  // The sender in the source domain.
++  cdc_4phase_src #(
++    .T(T),
++    .DECOUPLED(DECOUPLED),
++    .SEND_RESET_MSG(SEND_RESET_MSG),
++    .RESET_MSG(RESET_MSG)
++  ) i_src (
++    .rst_ni       ( src_rst_ni  ),
++    .clk_i        ( src_clk_i   ),
++    .data_i       ( src_data_i  ),
++    .valid_i      ( src_valid_i ),
++    .ready_o      ( src_ready_o ),
++    .async_req_o  ( async_req   ),
++    .async_ack_i  ( async_ack   ),
++    .async_data_o ( async_data  )
++  );
++
++  // The receiver in the destination domain.
++  cdc_4phase_dst #(.T(T), .DECOUPLED(DECOUPLED)) i_dst (
++    .rst_ni       ( dst_rst_ni  ),
++    .clk_i        ( dst_clk_i   ),
++    .data_o       ( dst_data_o  ),
++    .valid_o      ( dst_valid_o ),
++    .ready_i      ( dst_ready_i ),
++    .async_req_i  ( async_req   ),
++    .async_ack_o  ( async_ack   ),
++    .async_data_i ( async_data  )
++  );
++endmodule
++
++
++/// Half of the 4-phase clock domain crossing located in the source domain.
++module cdc_4phase_src #(
++  parameter type T = logic,
++  parameter int unsigned SYNC_STAGES = 2,
++  parameter bit DECOUPLED = 1'b1,
++  parameter bit SEND_RESET_MSG = 1'b0,
++  parameter T RESET_MSG = T'('0)
++)(
++  input  logic rst_ni,
++  input  logic clk_i,
++  input  T     data_i,
++  input  logic valid_i,
++  output logic ready_o,
++  output logic async_req_o,
++  input  logic async_ack_i,
++  output T     async_data_o
++);
++
++  (* dont_touch = "true" *)
++  logic  req_src_d, req_src_q;
++  (* dont_touch = "true" *)
++  T data_src_d, data_src_q;
++  (* dont_touch = "true" *)
++  logic  ack_synced;
++
++  typedef enum logic[1:0] {IDLE, WAIT_ACK_ASSERT, WAIT_ACK_DEASSERT} state_e;
++  state_e state_d, state_q;
++
++  // Synchronize the async ACK
++  sync #(
++    .STAGES(SYNC_STAGES)
++  ) i_sync(
++    .clk_i,
++    .rst_ni,
++    .serial_i( async_ack_i ),
++    .serial_o( ack_synced  )
++  );
++
++  // FSM for the 4-phase handshake
++  always_comb begin
++    state_d    = state_q;
++    req_src_d  = 1'b0;
++    data_src_d = data_src_q;
++    ready_o    = 1'b0;
++    case (state_q)
++      IDLE: begin
++        // If decoupling is disabled, defer assertion of ready until the
++        // handshake with the dst is completed
++        if (DECOUPLED) begin
++          ready_o = 1'b1;
++        end else begin
++          ready_o = 1'b0;
++        end
++        // Sample a new item when the valid signal is asserted.
++        if (valid_i) begin
++          data_src_d = data_i;
++          req_src_d  = 1'b1;
++          state_d = WAIT_ACK_ASSERT;
++        end
++      end
++      WAIT_ACK_ASSERT: begin
++        req_src_d = 1'b1;
++        if (ack_synced == 1'b1) begin
++          req_src_d = 1'b0;
++          state_d   = WAIT_ACK_DEASSERT;
++        end
++      end
++      WAIT_ACK_DEASSERT: begin
++        if (ack_synced == 1'b0) begin
++          state_d = IDLE;
++          if (!DECOUPLED) begin
++            ready_o = 1'b1;
++          end
++        end
++      end
++      default: begin
++        state_d = IDLE;
++      end
++    endcase
++  end
++
++  always_ff @(posedge clk_i, negedge rst_ni) begin
++    if (!rst_ni) begin
++      state_q <= IDLE;
++    end else begin
++      state_q <= state_d;
++    end
++  end
++
++  // Sample the data and the request signal to filter combinational glitches
++  always_ff @(posedge clk_i or negedge rst_ni) begin
++    if (!rst_ni) begin
++      if (SEND_RESET_MSG) begin
++        req_src_q  <= 1'b1;
++        data_src_q <= RESET_MSG;
++      end else begin
++        req_src_q  <= 1'b0;
++        data_src_q <= T'('0);
++      end
++    end else begin
++      req_src_q  <= req_src_d;
++      data_src_q <= data_src_d;
++    end
++  end
++
++  // Async output assignments.
++  assign async_req_o = req_src_q;
++  assign async_data_o = data_src_q;
++
++endmodule
++
++
++/// Half of the 4-phase clock domain crossing located in the destination
++/// domain.
++module cdc_4phase_dst #(
++  parameter type T = logic,
++  parameter int unsigned SYNC_STAGES = 2,
++  parameter bit DECOUPLED = 1
++)(
++  input  logic rst_ni,
++  input  logic clk_i,
++  output T     data_o,
++  output logic valid_o,
++  input  logic ready_i,
++  input  logic async_req_i,
++  output logic async_ack_o,
++  input  T     async_data_i
++);
++
++  (* dont_touch = "true" *)
++  logic  ack_dst_d, ack_dst_q;
++  (* dont_touch = "true" *)
++  logic  req_synced;
++
++  logic  data_valid;
++
++  logic  output_ready;
++
++
++  typedef enum logic[1:0] {IDLE, WAIT_DOWNSTREAM_ACK, WAIT_REQ_DEASSERT} state_e;
++  state_e state_d, state_q;
++
++  //Synchronize the request
++  sync #(
++    .STAGES(SYNC_STAGES)
++  ) i_sync(
++    .clk_i,
++    .rst_ni,
++    .serial_i( async_req_i ),
++    .serial_o( req_synced  )
++  );
++
++  // FSM for the 4-phase handshake
++  always_comb begin
++    state_d    = state_q;
++    data_valid = 1'b0;
++    ack_dst_d  = 1'b0;
++
++    case (state_q)
++      IDLE: begin
++        // Sample the data upon a new request and transition to the next state
++        if (req_synced == 1'b1) begin
++          data_valid = 1'b1;
++          if (output_ready == 1'b1) begin
++            state_d = WAIT_REQ_DEASSERT;
++          end else begin
++            state_d = WAIT_DOWNSTREAM_ACK;
++          end
++        end
++      end
++
++      WAIT_DOWNSTREAM_ACK: begin
++        data_valid       = 1'b1;
++        if (output_ready == 1'b1) begin
++          state_d    = WAIT_REQ_DEASSERT;
++          ack_dst_d  = 1'b1;
++        end
++      end
++
++      WAIT_REQ_DEASSERT: begin
++        ack_dst_d = 1'b1;
++        if (req_synced == 1'b0) begin
++          ack_dst_d = 1'b0;
++          state_d   = IDLE;
++        end
++      end
++
++      default: begin
++        state_d = IDLE;
++      end
++    endcase
++  end
++
++  always_ff @(posedge clk_i, negedge rst_ni) begin
++    if (!rst_ni) begin
++      state_q <= IDLE;
++    end else begin
++      state_q <= state_d;
++    end
++  end
++
++  // Filter glitches on ack signal before sending it through the asynchronous channel
++  always_ff @(posedge clk_i, negedge rst_ni) begin
++    if (!rst_ni) begin
++      ack_dst_q <= 1'b0;
++    end else begin
++      ack_dst_q <= ack_dst_d;
++    end
++  end
++
++  if (DECOUPLED) begin : gen_decoupled
++    // Decouple the output from the asynchronous data bus without introducing
++    // additional latency by inserting a spill register
++    spill_register #(
++      .T(T),
++      .Bypass(1'b0)
++    ) i_spill_register (
++      .clk_i,
++      .rst_ni,
++      .valid_i(data_valid),
++      .ready_o(output_ready),
++      .data_i(async_data_i),
++      .valid_o,
++      .ready_i,
++      .data_o
++    );
++  end else begin : gen_not_decoupled
++    assign valid_o      = data_valid;
++    assign output_ready = ready_i;
++    assign data_o       = async_data_i;
++  end
++
++  // Output assignments.
++  assign async_ack_o = ack_dst_q;
++
++endmodule
++/* verilator lint_on DECLFILENAME */
+diff --git a/src/cdc_fifo_2phase.sv b/src/cdc_fifo_2phase.sv
+index acbb7b0..83fd02f 100644
+--- a/src/cdc_fifo_2phase.sv
++++ b/src/cdc_fifo_2phase.sv
+@@ -17,6 +17,29 @@
+ /// can only be powers of two, which is why its depth is given as 2**LOG_DEPTH.
+ /// LOG_DEPTH must be at least 1.
+ ///
++/// # Reset Behavior!!
++///
++/// This module must not be used if warm reset capabily is a requirement. The
++/// only execption is if you consistently use a reset controller that sequences
++/// the resets while gating both clock domains (be very careful if you follow
++/// this strategy!).
++///
++/// After this disclaimer, here is how you connect the src_rst_ni and the
++/// dst_rst_ni of this module for power-on-reset (POR). The src_rst_ni and
++/// dst_rst_ni signal must be asserted SIMULTANEOUSLY (i.e. asynchronous
++/// assertion). Othwerwise, spurious transactions could occur in the domain
++/// where the reset arrives later than the other. The de-assertion of both reset
++/// must be synchronized to their respective clock domain (i.e. src_rst_ni must
++/// be deasserted synchronously to the src_clk_i and dst_rst_ni must be
++/// deasserted synchronously to dst_clk_i.) You can use the rstgen cell in the
++/// common_cells library to achieve this (synchronization of only the
++/// de-assertion). However, be careful about reset domain crossings; If you
++/// reset both domain asynchronously in their entirety (i.e. POR) you are fine.
++/// However, if you use this strategy for warm resets (some parts of the circuit
++/// are not reset) you might introduce metastability in this separate
++/// reset-domain when you assert the reset (the deassertion synchronizer doen't
++/// help here).
++///
+ /// CONSTRAINT: See the constraints for `cdc_2phase`. An additional maximum
+ /// delay path needs to be specified from fifo_data_q to dst_data_o.
+ module cdc_fifo_2phase #(
+diff --git a/src/cdc_fifo_gray.sv b/src/cdc_fifo_gray.sv
+index 802f295..c6fb4b6 100644
+--- a/src/cdc_fifo_gray.sv
++++ b/src/cdc_fifo_gray.sv
+@@ -50,6 +50,30 @@
+ /// The FIFO size must be powers of two, which is why its depth is
+ /// given as 2**LOG_DEPTH. LOG_DEPTH must be at least 1.
+ ///
++/// # Reset Behavior!!
++///
++/// This module must not be used if warm reset capabily is a requirement. The
++/// only execption is if you consistently use a reset controller that sequences
++/// the resets while gating both clock domains (be very careful if you follow
++/// this strategy!). If you need warm reset/clear/flush capabilities, use (AND
++/// CAREFULLY READ THE DESCRIPTION) the cdc_fifo_gray_clearable module.
++///
++/// After this disclaimer, here is how you connect the src_rst_ni and the
++/// dst_rst_ni of this module for power-on-reset (POR). The src_rst_ni and
++/// dst_rst_ni signal must be asserted SIMULTANEOUSLY (i.e. asynchronous
++/// assertion). Othwerwise, spurious transactions could occur in the domain
++/// where the reset arrives later than the other. The de-assertion of both reset
++/// must be synchronized to their respective clock domain (i.e. src_rst_ni must
++/// be deasserted synchronously to the src_clk_i and dst_rst_ni must be
++/// deasserted synchronously to dst_clk_i.) You can use the rstgen cell in the
++/// common_cells library to achieve this (synchronization of only the
++/// de-assertion). However be carefull about reset domain crossings; If you
++/// reset both domain asynchronously in their entirety (i.e. POR) you are fine.
++/// However, if you use this strategy for warm resets (some parts of the circuit
++/// are not reset) you might introduce metastability in this separate
++/// reset-domain when you assert the reset (the deassertion synchronizer doen't
++/// help here).
++///
+ /// # Constraints
+ ///
+ /// We need to make sure that the propagation delay of the
+diff --git a/src/cdc_fifo_gray_clearable.sv b/src/cdc_fifo_gray_clearable.sv
+new file mode 100644
+index 0000000..6c83866
+--- /dev/null
++++ b/src/cdc_fifo_gray_clearable.sv
+@@ -0,0 +1,393 @@
++// Copyright 2018-2019 ETH Zurich and University of Bologna.
++//
++// Copyright and related rights are licensed under the Solderpad Hardware
++// License, Version 0.51 (the "License"); you may not use this file except in
++// compliance with the License. You may obtain a copy of the License at
++// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
++// or agreed to in writing, software, hardware and materials distributed under
++// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
++// CONDITIONS OF ANY KIND, either express or implied. See the License for the
++// specific language governing permissions and limitations under the License.
++//
++// Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
++// Florian Zaruba <zarubaf@iis.ee.ethz.ch>
++// Manuel Eggimann <meggimann@iis.ee.ethz.ch> (clearability feature)
++
++/// A clock domain crossing FIFO, using gray counters.
++///
++/// # Architecture
++///
++/// The design is split into two parts, each one being clocked and reset
++/// separately.
++/// 1. The data to be transferred  over the clock domain boundary is
++///    is stored in a FIFO. The corresponding write pointer is managed
++///    (incremented) in the source clock domain.
++/// 2. The entire FIFO content is exposed over the `async_data` port.
++///    The destination clock domain increments its read pointer
++///    in its destination clock domain.
++///
++/// Read and write pointers are then gray coded, communicated
++/// and synchronized using a classic multi-stage FF synchronizer
++/// in the other clock domain. The gray coding ensures that only
++/// one bit changes at each pointer increment, preventing the
++/// synchronizer to accidentally latch an inconsistent state
++/// on a multi-bit bus.
++///
++/// The not full signal e.g. `src_ready_o` (on the sending side)
++/// is generated using the local write pointer and the pessimistic
++/// read pointer from the destination clock domain (pessimistic
++/// because it is delayed at least two cycles because of the synchronizer
++/// stages). This prevents the FIFO from overflowing.
++///
++/// The not empty signal e.g. `dst_valid_o` is generated using
++/// the pessimistic write pointer and the local read pointer in
++/// the destination clock domain. This means the FIFO content
++/// does not need to be synchronized as we are sure we are reading
++/// data which has been written at least two cycles earlier.
++/// Furthermore, the read select logic into the FIFO is completely
++/// clocked by the destination clock domain which avoids
++/// inefficient data synchronization.
++///
++/// The FIFO size must be powers of two, which is why its depth is
++/// given as 2**LOG_DEPTH. LOG_DEPTH must be at least 1.
++
++/// Reset Behavior:
++///
++/// In contrast to the cdc_fifo_gray version without clear signal, this module
++/// supports one-sided warm resets (asynchronously and synchronously). The way
++/// this is implemented is described in more detail in the cdc_reset_ctrlr
++/// module. To summarize a synchronous clear request i.e. src/dst_clear_i will
++/// cause the respective other clock domain to reset as well without introducing
++/// any spurious transactions. This is acomplished by an internal module
++/// (cdc_reset_ctrlr) the starts a reset sequence on both sides of the CDC in
++/// lock-step that first isolates the CDC from the outside world and then resets
++/// it. The reset sequencer provides the following behavior:
++/// 1. There are no spurious invalid or duplicated transactions regardless how
++///    the individual sides are reset (can also happen roughly simultaneosly)
++/// 2. The FIFO becomes unready at the src side in the next cycle after
++///    synchronous reset request until the reset sequence is completed. Some of
++///    the pending transactions might still complete (if the dst accepts at the
++///    exact time the reset is request on the src die), some of them will be
++///    dropped (of course still guaranteeing FIFO order).
++/// 3. During the reset sequence the dst might withdraw the valid signal. This
++///    might violate higher level protocols. If you need this feature you would
++///    have to path the existing implementation to wait with the isolate_ack
++///    assertion until all open handshakes were acknowledged.
++/// 4. If the parameter CLEAR_ON_ASYNC_RESET is enabled, the same behavior as
++///    above is also valid for asynchronous resets on either side. However, this
++///    increases the minimum number of synchronization stages (SYNC_STAGES
++///    parameter) from 2 to 3 (read the cdc_reset_ctrlr header to figure out
++///    why).
++///
++///
++/// # Constraints
++///
++/// We need to make sure that the propagation delay of the data, read and write
++/// pointer is bound to the minimum of either the sending or receiving clock
++/// period to prevent an inconsistent state to be latched (if for example the
++/// one bit of the read/write pointer have an excessive delay). Furthermore, we
++/// should deactivate setup and hold checks on the asynchronous signals.
++///
++/// ``` set_ungroup [get_designs cdc_fifo_gray*] false set_boundary_optimization
++/// [get_designs cdc_fifo_gray*] false set_max_delay min(T_src, T_dst) \
++/// -through [get_pins -hierarchical -filter async] \ -through [get_pins
++/// -hierarchical -filter async] set_false_path -hold \ -through [get_pins
++/// -hierarchical -filter async] \ -through [get_pins -hierarchical -filter
++/// async] ```
++
++`include "common_cells/registers.svh"
++
++(* no_ungroup *)
++(* no_boundary_optimization *)
++module cdc_fifo_gray_clearable #(
++  /// The width of the default logic type.
++  parameter int unsigned WIDTH = 1,
++  /// The data type of the payload transported by the FIFO.
++  parameter type T = logic [WIDTH-1:0],
++  /// The FIFO's depth given as 2**LOG_DEPTH.
++  parameter int LOG_DEPTH = 3,
++  /// The number of synchronization registers to insert on the async pointers
++  /// between the FIFOs. If CLEAR_ON_ASYNC reset is enabled, we need at least 4
++  /// synchronizer stages to provide the clear synchronizer lower latency than
++  /// the async reset. I.e. if CLEAR_ON_ASYNC_RESET==1 -> SYNC_STAGES >= 4 else
++  /// SYNC_STAGES >= 2.
++  parameter int SYNC_STAGES = 3,
++  parameter int CLEAR_ON_ASYNC_RESET = 1
++) (
++  input  logic src_rst_ni,
++  input  logic src_clk_i,
++  input  logic src_clear_i,
++  output logic src_clear_pending_o,
++  input  T     src_data_i,
++  input  logic src_valid_i,
++  output logic src_ready_o,
++
++  input  logic dst_rst_ni,
++  input  logic dst_clk_i,
++  input  logic dst_clear_i,
++  output logic dst_clear_pending_o,
++  output T     dst_data_o,
++  output logic dst_valid_o,
++  input  logic dst_ready_i
++);
++
++  logic        s_src_clear_req;
++  logic        s_src_clear_ack_q;
++  logic        s_src_ready;
++  logic        s_src_isolate_req;
++  logic        s_src_isolate_ack_q;
++  logic        s_dst_clear_req;
++  logic        s_dst_clear_ack_q;
++  logic        s_dst_valid;
++  logic        s_dst_isolate_req;
++  logic        s_dst_isolate_ack_q;
++
++
++  T [2**LOG_DEPTH-1:0] async_data;
++  logic [LOG_DEPTH:0]  async_wptr;
++  logic [LOG_DEPTH:0]  async_rptr;
++
++  if (CLEAR_ON_ASYNC_RESET) begin : gen_elaboration_assertion
++    if (SYNC_STAGES < 3)
++      $error("The clearable CDC FIFO with async reset synchronization requires at least",
++             "3 synchronizer stages for the FIFO.");
++  end else begin : gen_elaboration_assertion
++    if (SYNC_STAGES < 2) begin : gen_elaboration_assertion
++      $error("A minimum of 2 synchronizer stages is required for proper functionality.");
++    end
++  end
++
++  if (2*SYNC_STAGES > 2**LOG_DEPTH) begin : gen_elaboration_assertion2
++    $warning("The FIFOs depth of %0d is insufficient to completely hide the latency of",
++             " %0d SYNC_STAGES. The FIFO will stall in the case where f_src ~= f_dst. ",
++             "It is reccomended to increase the FIFO's log depth to at least %0d.",
++             2**LOG_DEPTH, SYNC_STAGES, $clog2(2*SYNC_STAGES));
++  end
++
++
++
++  cdc_fifo_gray_src_clearable #(
++    .T           ( T           ),
++    .LOG_DEPTH   ( LOG_DEPTH   ),
++    .SYNC_STAGES ( SYNC_STAGES )
++  ) i_src (
++    .src_rst_ni,
++    .src_clk_i,
++    .src_clear_i ( s_src_clear_req                  ),
++    .src_data_i,
++    .src_valid_i ( src_valid_i & !s_src_isolate_req ),
++    .src_ready_o ( s_src_ready                      ),
++
++    (* async *) .async_data_o ( async_data ),
++    (* async *) .async_wptr_o ( async_wptr ),
++    (* async *) .async_rptr_i ( async_rptr )
++  );
++
++  assign src_ready_o = s_src_ready & !s_src_isolate_req;
++
++  cdc_fifo_gray_dst_clearable #(
++    .T           ( T           ),
++    .LOG_DEPTH   ( LOG_DEPTH   ),
++    .SYNC_STAGES ( SYNC_STAGES )
++  ) i_dst (
++    .dst_rst_ni,
++    .dst_clk_i,
++    .dst_clear_i ( s_dst_clear_req                  ),
++    .dst_data_o,
++    .dst_valid_o ( s_dst_valid                      ),
++    .dst_ready_i ( dst_ready_i & !s_dst_isolate_req ),
++
++    (* async *) .async_data_i ( async_data ),
++    (* async *) .async_wptr_i ( async_wptr ),
++    (* async *) .async_rptr_o ( async_rptr )
++  );
++
++  assign dst_valid_o = s_dst_valid & !s_dst_isolate_req;
++
++  // Synchronize the clear and reset signaling in both directions (see header of
++  // the cdc_reset_ctrlr module for more details.)
++  cdc_reset_ctrlr #(
++    .SYNC_STAGES(SYNC_STAGES-1)
++  ) i_cdc_reset_ctrlr (
++    .a_clk_i         ( src_clk_i           ),
++    .a_rst_ni        ( src_rst_ni          ),
++    .a_clear_i       ( src_clear_i         ),
++    .a_clear_o       ( s_src_clear_req     ),
++    .a_clear_ack_i   ( s_src_clear_ack_q   ),
++    .a_isolate_o     ( s_src_isolate_req   ),
++    .a_isolate_ack_i ( s_src_isolate_ack_q ),
++    .b_clk_i         ( dst_clk_i           ),
++    .b_rst_ni        ( dst_rst_ni          ),
++    .b_clear_i       ( dst_clear_i         ),
++    .b_clear_o       ( s_dst_clear_req     ),
++    .b_clear_ack_i   ( s_dst_clear_ack_q   ),
++    .b_isolate_o     ( s_dst_isolate_req   ),
++    .b_isolate_ack_i ( s_dst_isolate_ack_q )
++  );
++
++  // Just delay the isolate request by one cycle. We can ensure isolation within
++  // one cycle by just deasserting valid and ready signals on both sides of the CDC.
++  always_ff @(posedge src_clk_i, negedge src_rst_ni) begin
++    if (!src_rst_ni) begin
++      s_src_isolate_ack_q <= 1'b0;
++      s_src_clear_ack_q   <= 1'b0;
++    end else begin
++      s_src_isolate_ack_q <= s_src_isolate_req;
++      s_src_clear_ack_q   <= s_src_clear_req;
++    end
++  end
++
++  always_ff @(posedge dst_clk_i, negedge dst_rst_ni) begin
++    if (!dst_rst_ni) begin
++      s_dst_isolate_ack_q <= 1'b0;
++      s_dst_clear_ack_q   <= 1'b0;
++    end else begin
++      s_dst_isolate_ack_q <= s_dst_isolate_req;
++      s_dst_clear_ack_q   <= s_dst_clear_req;
++    end
++  end
++
++
++  assign src_clear_pending_o = s_src_isolate_req; // The isolate signal stays
++                                                  // asserted during the whole
++                                                  // clear sequence.
++  assign dst_clear_pending_o = s_dst_isolate_req;
++
++  // Check the invariants.
++  // pragma translate_off
++  `ifndef VERILATOR
++  initial assert(LOG_DEPTH > 0);
++  initial assert(SYNC_STAGES >= 2);
++  `endif
++  // pragma translate_on
++
++endmodule
++
++
++(* no_ungroup *)
++(* no_boundary_optimization *)
++module cdc_fifo_gray_src_clearable #(
++  parameter type T = logic,
++  parameter int LOG_DEPTH = 3,
++  parameter int SYNC_STAGES = 2
++)(
++  input  logic src_rst_ni,
++  input  logic src_clk_i,
++  input  logic src_clear_i,
++  input  T     src_data_i,
++  input  logic src_valid_i,
++  output logic src_ready_o,
++
++  output T [2**LOG_DEPTH-1:0] async_data_o,
++  output logic [LOG_DEPTH:0]  async_wptr_o,
++  input  logic [LOG_DEPTH:0]  async_rptr_i
++);
++
++  localparam int PtrWidth = LOG_DEPTH+1;
++  localparam logic [PtrWidth-1:0] PtrFull = (1 << LOG_DEPTH);
++
++  T [2**LOG_DEPTH-1:0] data_q;
++  logic [PtrWidth-1:0] wptr_q, wptr_d, wptr_bin, wptr_next, rptr, rptr_bin;
++
++  // Data FIFO.
++  assign async_data_o = data_q;
++  for (genvar i = 0; i < 2**LOG_DEPTH; i++) begin : gen_word
++    `FFLNR(data_q[i], src_data_i,
++          src_valid_i & src_ready_o & (wptr_bin[LOG_DEPTH-1:0] == i), src_clk_i)
++  end
++
++  // Read pointer.
++  for (genvar i = 0; i < PtrWidth; i++) begin : gen_sync
++    sync #(.STAGES(SYNC_STAGES)) i_sync (
++      .clk_i    ( src_clk_i       ),
++      .rst_ni   ( src_rst_ni      ),
++      .serial_i ( async_rptr_i[i] ),
++      .serial_o ( rptr[i]         )
++    );
++  end
++  gray_to_binary #(PtrWidth) i_rptr_g2b (.A(rptr), .Z(rptr_bin));
++
++  // Write pointer.
++  assign wptr_next = wptr_bin+1;
++  gray_to_binary #(PtrWidth) i_wptr_g2b (.A(wptr_q), .Z(wptr_bin));
++  binary_to_gray #(PtrWidth) i_wptr_b2g (.A(wptr_next), .Z(wptr_d));
++  `FFLARNC(wptr_q, wptr_d, src_valid_i & src_ready_o, src_clear_i, '0, src_clk_i, src_rst_ni)
++  assign async_wptr_o = wptr_q;
++
++  // The pointers into the FIFO are one bit wider than the actual address into
++  // the FIFO. This makes detecting critical states very simple: if all but the
++  // topmost bit of rptr and wptr agree, the FIFO is in a critical state. If the
++  // topmost bit is equal, the FIFO is empty, otherwise it is full.
++  assign src_ready_o = ((wptr_bin ^ rptr_bin) != PtrFull);
++
++endmodule
++
++
++(* no_ungroup *)
++(* no_boundary_optimization *)
++module cdc_fifo_gray_dst_clearable #(
++  parameter type T = logic,
++  parameter int LOG_DEPTH = 3,
++  parameter int SYNC_STAGES = 2
++)(
++  input  logic dst_rst_ni,
++  input  logic dst_clk_i,
++  input  logic dst_clear_i,
++  output T     dst_data_o,
++  output logic dst_valid_o,
++  input  logic dst_ready_i,
++
++  input  T [2**LOG_DEPTH-1:0] async_data_i,
++  input  logic [LOG_DEPTH:0]  async_wptr_i,
++  output logic [LOG_DEPTH:0]  async_rptr_o
++);
++
++  localparam int PtrWidth = LOG_DEPTH+1;
++  localparam logic [PtrWidth-1:0] PtrEmpty = '0;
++
++  T dst_data;
++  logic [PtrWidth-1:0] rptr_q, rptr_d, rptr_bin, rptr_next, wptr, wptr_bin;
++  logic dst_valid, dst_ready;
++  // Data selector and register.
++  assign dst_data = async_data_i[rptr_bin[LOG_DEPTH-1:0]];
++
++  // Read pointer.
++  assign rptr_next = rptr_bin+1;
++  gray_to_binary #(PtrWidth) i_rptr_g2b (.A(rptr_q), .Z(rptr_bin));
++  binary_to_gray #(PtrWidth) i_rptr_b2g (.A(rptr_next), .Z(rptr_d));
++  `FFLARNC(rptr_q, rptr_d, dst_valid & dst_ready, dst_clear_i, '0, dst_clk_i, dst_rst_ni)
++  assign async_rptr_o = rptr_q;
++
++  // Write pointer.
++  for (genvar i = 0; i < PtrWidth; i++) begin : gen_sync
++    sync #(.STAGES(SYNC_STAGES)) i_sync (
++      .clk_i    ( dst_clk_i       ),
++      .rst_ni   ( dst_rst_ni      ),
++      .serial_i ( async_wptr_i[i] ),
++      .serial_o ( wptr[i]         )
++    );
++  end
++  gray_to_binary #(PtrWidth) i_wptr_g2b (.A(wptr), .Z(wptr_bin));
++
++  // The pointers into the FIFO are one bit wider than the actual address into
++  // the FIFO. This makes detecting critical states very simple: if all but the
++  // topmost bit of rptr and wptr agree, the FIFO is in a critical state. If the
++  // topmost bit is equal, the FIFO is empty, otherwise it is full.
++  assign dst_valid = ((wptr_bin ^ rptr_bin) != PtrEmpty);
++
++  // Cut the combinatorial path with a spill register.
++  spill_register_flushable #(
++    .T       ( T           )
++  ) i_spill_register (
++    .clk_i   ( dst_clk_i                ),
++    .rst_ni  ( dst_rst_ni               ),
++    .flush_i ( dst_clear_i              ),
++    .valid_i ( dst_valid & !dst_clear_i ),
++    .ready_o ( dst_ready                ),
++    .data_i  ( dst_data                 ),
++    .valid_o ( dst_valid_o              ),
++    .ready_i ( dst_ready_i              ),
++    .data_o  ( dst_data_o               )
++  );
++
++endmodule
+diff --git a/src/cdc_reset_ctrlr.sv b/src/cdc_reset_ctrlr.sv
+new file mode 100644
+index 0000000..94a63cd
+--- /dev/null
++++ b/src/cdc_reset_ctrlr.sv
+@@ -0,0 +1,529 @@
++//-----------------------------------------------------------------------------
++// Title : CDC Clear Signaling Synchronization
++// -----------------------------------------------------------------------------
++// File : cdc_clear_propagator.sv Author : Manuel Eggimann
++// <meggimann@iis.ee.ethz.ch> Created : 22.12.2021
++// -----------------------------------------------------------------------------
++// Description :
++//
++// This module is mainly used internally to synchronize the clear requests
++// between both sides of a CDC module. It aims to solve the problem of
++// initiating a CDC clear, reset one-sidedly without running into
++// reset-domain-crossing issues and breaking CDC protocol assumption.
++//
++// Problem Formulation:
++//
++// CDC implementations usually face the issue that one side of the CDC must not
++// be cleared without clearing the other side. E.g. clearing the write-pointer
++// without clearing the read-pointer in a gray-counting CDC FIFO results in an
++// invalid fill-state an may cause spurious transactions of invalid data to be
++// propagated accross the CDC. A similar effect is caused in 2-phase CDC
++// implementations.
++//
++// A naive mitigation technique would be to reset both domains asynchronously
++// with the same reset signal. This will cause intra-clock domain RDC issues
++// since the asynchronous clear event (assertion of the reset signal) might
++// happen close to the active edge of the CDC's periphery and thus might induce
++// metastability. A better, but still flawed approach would be to naively
++// synchronize assertion AND deassertion (the usual rst sync only synchronize
++// deassertion) of the resets into the respective other domain. However, this
++// might cause the classic issue of fast-to-slow clock domain crossing where the
++// clear signal is not asserted long enough to be captured by the receiving
++// side. The common mitigation strategy is to use a feedback acknowledge signal
++// to handshake the reset request into the other domain. One even more peculiar
++// corner case this approach might suffer is the scenario where the synchronized
++// clear signal arrives at the other side of the CDC within or even worse after
++// the same clock cylce that the other domain crossing signals (e.g. read/write
++// pointers) are cleared. In this scenario, multiple signals change within the
++// same clock cycle and due to metastability we cannot be sure, that the other
++// side of the CDC sees the reset assertion before the first bits of e.g. the
++// write/read pointer start to switch to their reset state. Care must also be
++// taken to handle the corner cases where both sides are reset simultaneously or
++// the case where one side leaves reset earlier than the other.
++//
++// How this Module Works
++//
++// This module has two interfaces, the 'a' side and the 'b' side. Each side can
++// be triggered using the a/b_clear_i signal or (optionally) by the asynchronous
++// a/b_rst_ni. Once e.g. 'a' is triggered it will initiate a clear sequence that
++// first asserts an 'a_isolate_o' signal, waits until the external circuitry
++// acknowledges isolation using the 'a_isolate_ack_i'. Then the module asserts
++// the 'a_clear_o' signals before some cycles later, the isolate signal is
++// deasserted. This sequence ensures that no transactions can arrive to the CDC
++// while the state is cleared. Now the important part is, that those four phases
++// (asser isolate, assert clear, deassert clear, deassert isolate) are mirrored
++// on the other side ('b') in lock-step. The cdc_reset_ctrlr module uses a
++// dedicated 4-phase handshaking CDC to transmit the current phase of the clear
++// sequence to the other domain. We use a 4-phase rather than a 2-phase CDC to
++// avoid the issues of one-sided async reset that might trigger spurious
++// transactions. Furthermore, the 4-phase CDC within this module is operated in
++// a special mode: DECOUPLED=0 ensures that there are no in-flight transactions.
++// The src side only consumes the item once the destination side acknowledged
++// the receiption. This property is required to transition through the phases in
++// lock-step. Furthermore, (SEND_RESET_MSG=1) will cause the src side of the
++// 4-phase CDC to immediately initiate the isolation phase in the dst domain
++// upon asynchronous reset regardless how long the async reset stays asserted or
++// whether the source clock is gated. Both sides of this module independently
++// generate the sequence signals as an initiator (triggered by the clear_i or
++// rst_ni signal) or receiver (trigerred for the other side). The or-ed version
++// of initiator and receiver are used to generate the actual a/b_isolate_o and
++// a/b_clear_o signal. That way, it doesn't matter wheter both sides
++// simulatenously trigger a clear sequence, proper sequencing is still
++// guaranteed.
++//
++// The time it takes to complete an entire clear sequence can be bounded as follows:
++//
++// t_clear <= 20*T+16*SYNC_STAGES*T, with T=max(T_a, T_b) (clock periods of src and dst)
++//
++// How to Use the Module
++//
++// Instantiate the module within your CDC and connect a/b_clk_i, the
++// asyncrhonous a/b_rst_ni and the synchronous a/b_clear_i signals. The 'a' and
++// 'b' port are entirely symetric so it doesn't matter whether you connect src
++// to 'a' or 'b'. If you enable support for async reset
++// (CLEAR_ON_ASYNC_RESET==1), parametrize the number of synchronization stages
++// (for metastability resolution) to be strictly less than the latency of the
++// CDC. E.g. if your CDC uses 3 (the minimum) sync stages, parametrize this
++// module with SYNC_STAGES < 2! Your CDC must implement a src/dst_clear_i port
++// that SYNCHRONOUSLY clears all FFs on the respective side. Connect the CDC's
++// src/dst_clear ports to this module's a/b_clear_o port. Once the a/b_isolate_o
++// signal is asserted, the respective CDC side (src/dst) must be isolated from
++// the outside world (i.e. must no longer accept any transaction on the src side
++// and cease presenting or even withdrawing data on the dst side). Once your CDC
++// side is isolated (depending on protocol this might take several cycles),
++// assert the a/b_isolate_ack_i signal.
++//
++// -----------------------------------------------------------------------------
++// Copyright (C) 2021 ETH Zurich, University of Bologna Copyright and related
++// rights are licensed under the Solderpad Hardware License, Version 0.51 (the
++// "License"); you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law or
++// agreed to in writing, software, hardware and materials distributed under this
++// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
++// OF ANY KIND, either express or implied. See the License for the specific
++// language governing permissions and limitations under the License.
++// SPDX-License-Identifier: SHL-0.51
++// -----------------------------------------------------------------------------
++
++module cdc_reset_ctrlr
++  import cdc_reset_ctrlr_pkg::*;
++ #(
++  /// The number of synchronization stages to use for the
++  //clear signal request/acknowledge. Must be less or
++  //equal to the number of sync stages used in the CDC
++  parameter int unsigned SYNC_STAGES = 2,
++  /// Whether an asynchronous reset shall cause a clear
++  /// request to be sent to the other side.
++  parameter logic CLEAR_ON_ASYNC_RESET = 1'b1
++)(
++  // Side A (both sides are symmetric)
++  input logic  a_clk_i,
++  input logic  a_rst_ni,
++  input logic  a_clear_i,
++  output logic a_clear_o,
++  input logic a_clear_ack_i,
++  output logic a_isolate_o,
++  input logic  a_isolate_ack_i,
++  // Side B (both sides are symmetric)
++  input logic  b_clk_i,
++  input logic  b_rst_ni,
++  input logic  b_clear_i,
++  output logic b_clear_o,
++  input logic  b_clear_ack_i,
++  output logic b_isolate_o,
++  input logic  b_isolate_ack_i
++);
++
++  (* dont_touch = "true" *)
++  logic        async_a2b_req, async_b2a_ack;
++  (* dont_touch = "true" *)
++  clear_seq_phase_e async_a2b_next_phase;
++  (* dont_touch = "true" *)
++  logic        async_b2a_req, async_a2b_ack;
++  (* dont_touch = "true" *)
++  clear_seq_phase_e async_b2a_next_phase;
++
++  cdc_reset_ctrlr_half #(
++    .SYNC_STAGES          ( SYNC_STAGES          ),
++    .CLEAR_ON_ASYNC_RESET ( CLEAR_ON_ASYNC_RESET )
++  ) i_cdc_reset_ctrlr_half_a (
++    .clk_i              ( a_clk_i              ),
++    .rst_ni             ( a_rst_ni             ),
++    .clear_i            ( a_clear_i            ),
++    .clear_o            ( a_clear_o            ),
++    .clear_ack_i        ( a_clear_ack_i        ),
++    .isolate_o          ( a_isolate_o          ),
++    .isolate_ack_i      ( a_isolate_ack_i      ),
++    (* async *) .async_next_phase_o ( async_a2b_next_phase ),
++    (* async *) .async_req_o        ( async_a2b_req        ),
++    (* async *) .async_ack_i        ( async_b2a_ack        ),
++    (* async *) .async_next_phase_i ( async_b2a_next_phase ),
++    (* async *) .async_req_i        ( async_b2a_req        ),
++    (* async *) .async_ack_o        ( async_a2b_ack        )
++  );
++
++    cdc_reset_ctrlr_half #(
++    .SYNC_STAGES          ( SYNC_STAGES          ),
++    .CLEAR_ON_ASYNC_RESET ( CLEAR_ON_ASYNC_RESET )
++  ) i_cdc_reset_ctrlr_half_b (
++    .clk_i              ( b_clk_i              ),
++    .rst_ni             ( b_rst_ni             ),
++    .clear_i            ( b_clear_i            ),
++    .clear_o            ( b_clear_o            ),
++    .clear_ack_i        ( b_clear_ack_i        ),
++    .isolate_o          ( b_isolate_o          ),
++    .isolate_ack_i      ( b_isolate_ack_i      ),
++    (* async *) .async_next_phase_o ( async_b2a_next_phase ),
++    (* async *) .async_req_o        ( async_b2a_req        ),
++    (* async *) .async_ack_i        ( async_a2b_ack        ),
++    (* async *) .async_next_phase_i ( async_a2b_next_phase ),
++    (* async *) .async_req_i        ( async_a2b_req        ),
++    (* async *) .async_ack_o        ( async_b2a_ack        )
++  );
++endmodule
++
++
++module cdc_reset_ctrlr_half
++  import cdc_reset_ctrlr_pkg::*;
++#(
++  /// The number of synchronization stages to use for the
++  //clear signal request/acknowledge. Must be less or
++  //equal to the number of sync stages used in the CDC
++  parameter int unsigned SYNC_STAGES = 2,
++  /// Whether an asynchronous reset shall cause a clear
++  /// request to be sent to the other side.
++  parameter logic CLEAR_ON_ASYNC_RESET = 1'b1
++)(
++  // Synchronous side
++  input logic                clk_i,
++  input logic                rst_ni,
++  input logic                clear_i,
++  output logic               isolate_o,
++  input logic                isolate_ack_i,
++  output logic               clear_o,
++  input logic                clear_ack_i,
++  // Asynchronous clear sequence hanshaking
++  output clear_seq_phase_e   async_next_phase_o,
++  output logic               async_req_o,
++  input logic                async_ack_i,
++  input clear_seq_phase_e    async_next_phase_i,
++  input logic                async_req_i,
++  output logic               async_ack_o
++);
++
++
++  // How this module works:
++
++  // The module is split into two parts. The initiator part consists of an FSM
++  // that is triggered by the clear_i signal and transitions through reset
++  // sequence. During those transitions, the `initiator_isolate_out` and
++  // `initiator_clear_out` signals are asserted appropriately.
++
++  // The receiver part receives the state transitions from the other clock
++  // domain (initiator part of the `cdc_reset_ctrlr_half` instance in the other
++  // clock domain) and asserts the `receiver_isolate_out` and
++  // `receiver_clear_out` appropriately (considering the `isolate_ack_i`
++  // signal).
++
++  // In both, the initiator and the receiver part, the respective FSM
++  // transitions through 4 phases. In the ISOLATE phase, the isolate signal is
++  // asserted and the connected CDCs are expected to block all further
++  // interactions with the outside world and acknowledge the isolation with the
++  // isolate_ack_i signal. In the CLEAR phase, the clear signal is asserted
++  // which resets the internal state of the CDC while keeping the isolate signal
++  // asserted. In the POST_CLEAR phase, the clear signal is deasserted. Finally,
++  // when returning to the IDLE phase, the isolate signal is deasserted to
++  // continue normal operation. The FSM uses a dedicated 4-phase handshaking CDC
++  // to transition between the phases in lock-step and transmits the current
++  // state to the other domain to avoid issues if the other domain is reset
++  // asynchronously while a clear procedure is pending.
++
++  //---------------------- Initiator Side ----------------------
++  // Sends clear sequence state transitions to the other side.
++   typedef enum logic[3:0] {
++     IDLE,
++     ISOLATE,
++     WAIT_ISOLATE_PHASE_ACK,
++     WAIT_ISOLATE_ACK,
++     CLEAR,
++     WAIT_CLEAR_PHASE_ACK,
++     WAIT_CLEAR_ACK,
++     POST_CLEAR,
++     FINISHED
++  } initiator_state_e;
++  initiator_state_e initiator_state_d, initiator_state_q;
++
++  // The current phase of the clear sequence, sent to the other side using a
++  // 4-phase CDC
++  clear_seq_phase_e          initiator_clear_seq_phase;
++  logic                      initiator_phase_transition_req;
++  logic                      initiator_phase_transition_ack;
++  logic                      initiator_isolate_out;
++  logic                      initiator_clear_out;
++
++  always_comb begin
++    initiator_state_d              = initiator_state_q;
++    initiator_phase_transition_req = 1'b0;
++    initiator_isolate_out          = 1'b0;
++    initiator_clear_out            = 1'b0;
++    initiator_clear_seq_phase      = CLEAR_PHASE_IDLE;
++
++    case (initiator_state_q)
++      IDLE: begin
++        if (clear_i) begin
++          initiator_state_d = ISOLATE;
++        end
++      end
++
++      ISOLATE: begin
++        initiator_phase_transition_req = 1'b1;
++        initiator_clear_seq_phase      = CLEAR_PHASE_ISOLATE;
++        initiator_isolate_out          = 1'b1;
++        initiator_clear_out            = 1'b0;
++        if (initiator_phase_transition_ack && isolate_ack_i) begin
++          initiator_state_d = CLEAR;
++        end else if (initiator_phase_transition_ack) begin
++          initiator_state_d = WAIT_ISOLATE_ACK;
++        end else if (isolate_ack_i) begin
++          initiator_state_d = WAIT_ISOLATE_PHASE_ACK;
++        end
++      end
++
++      WAIT_ISOLATE_ACK: begin
++        initiator_isolate_out     = 1'b1;
++        initiator_clear_out       = 1'b0;
++        initiator_clear_seq_phase = CLEAR_PHASE_ISOLATE;
++        if (isolate_ack_i) begin
++          initiator_state_d = CLEAR;
++        end
++      end
++
++      WAIT_ISOLATE_PHASE_ACK: begin
++        initiator_phase_transition_req = 1'b1;
++        initiator_clear_seq_phase      = CLEAR_PHASE_ISOLATE;
++        initiator_isolate_out          = 1'b1;
++        initiator_clear_out            = 1'b0;
++        if (initiator_phase_transition_ack) begin
++          initiator_state_d = CLEAR;
++        end
++      end
++
++      CLEAR: begin
++        initiator_isolate_out          = 1'b1;
++        initiator_clear_out            = 1'b1;
++        initiator_phase_transition_req = 1'b1;
++        initiator_clear_seq_phase      = CLEAR_PHASE_CLEAR;
++        if (initiator_phase_transition_ack && clear_ack_i) begin
++          initiator_state_d = POST_CLEAR;
++        end else if (initiator_phase_transition_ack) begin
++          initiator_state_d = WAIT_CLEAR_ACK;
++        end else if (clear_ack_i) begin
++          initiator_state_d = WAIT_CLEAR_PHASE_ACK;
++        end
++      end
++
++      WAIT_CLEAR_ACK: begin
++        initiator_isolate_out     = 1'b1;
++        initiator_clear_out       = 1'b1;
++        initiator_clear_seq_phase = CLEAR_PHASE_CLEAR;
++        if (clear_ack_i) begin
++          initiator_state_d = POST_CLEAR;
++        end
++      end
++
++      WAIT_CLEAR_PHASE_ACK: begin
++        initiator_phase_transition_req = 1'b1;
++        initiator_clear_seq_phase      = CLEAR_PHASE_CLEAR;
++        initiator_isolate_out          = 1'b1;
++        initiator_clear_out            = 1'b1;
++        if (initiator_phase_transition_ack) begin
++          initiator_state_d = POST_CLEAR;
++        end
++      end
++
++      POST_CLEAR: begin
++        initiator_isolate_out          = 1'b1;
++        initiator_clear_out            = 1'b0;
++        initiator_phase_transition_req = 1'b1;
++        initiator_clear_seq_phase      = CLEAR_PHASE_POST_CLEAR;
++        if (initiator_phase_transition_ack) begin
++          initiator_state_d = FINISHED;
++        end
++      end
++
++      FINISHED: begin
++        initiator_isolate_out          = 1'b1;
++        initiator_clear_out            = 1'b0;
++        initiator_phase_transition_req = 1'b1;
++        initiator_clear_seq_phase      = CLEAR_PHASE_IDLE;
++        if (initiator_phase_transition_ack) begin
++          initiator_state_d = IDLE;
++        end
++      end
++
++      default: begin
++        initiator_state_d = ISOLATE;
++      end
++    endcase
++  end
++
++  always_ff @(posedge clk_i, negedge rst_ni) begin
++    if (!rst_ni) begin
++      if (CLEAR_ON_ASYNC_RESET) begin
++        initiator_state_q <= ISOLATE; // Start in the ISOLATE state which is
++                                        // the first state of a clear sequence.
++      end else begin
++        initiator_state_q <= IDLE;
++      end
++    end else begin
++      initiator_state_q <= initiator_state_d;
++    end
++  end
++
++  // Initiator CDC SRC
++  // We use 4 phase handshaking. That way it doesn't matter if one side is
++  // sudenly reset asynchronously. With a 2phase CDC, one-sided async resets might
++  // introduce spurios transactions.
++
++  cdc_4phase_src #(
++    .T(clear_seq_phase_e),
++    .SYNC_STAGES(2),
++    .DECOUPLED(0), // Important! The CDC must not be in decoupled mode.
++                   // Otherwise we will proceed to the next state without
++                   // waiting for the new state to arrive on the other side.
++    .SEND_RESET_MSG(CLEAR_ON_ASYNC_RESET), // Send the ISOLATE phase request immediately on async
++                                           // reset if async reset synchronization is enabled.
++    .RESET_MSG(CLEAR_PHASE_ISOLATE)
++  ) i_state_transition_cdc_src(
++    .clk_i,
++    .rst_ni,
++    .data_i(initiator_clear_seq_phase),
++    .valid_i(initiator_phase_transition_req),
++    .ready_o(initiator_phase_transition_ack),
++    .async_req_o,
++    .async_ack_i,
++    .async_data_o(async_next_phase_o)
++  );
++
++
++  //---------------------- Receiver Side ----------------------
++  // This part of the circuit receives clear sequence state transitions from the
++  // other side.
++
++  clear_seq_phase_e receiver_phase_q;
++  clear_seq_phase_e receiver_next_phase;
++  logic receiver_phase_req, receiver_phase_ack;
++
++  logic receiver_isolate_out;
++  logic receiver_clear_out;
++
++  cdc_4phase_dst #(
++    .T(clear_seq_phase_e),
++    .SYNC_STAGES(2),
++    .DECOUPLED(0) // Important! The CDC must not be in decoupled mode. Otherwise
++                  // we will proceed to the next state without waiting for the
++                  // new state to arrive on the other side.
++  ) i_state_transition_cdc_dst(
++    .clk_i,
++    .rst_ni,
++    .data_o(receiver_next_phase),
++    .valid_o(receiver_phase_req),
++    .ready_i(receiver_phase_ack),
++    .async_req_i,
++    .async_ack_o,
++    .async_data_i(async_next_phase_i)
++  );
++
++  always_ff @(posedge clk_i, negedge rst_ni) begin
++    if (!rst_ni) begin
++      receiver_phase_q <= CLEAR_PHASE_IDLE;
++    end else if (receiver_phase_req && receiver_phase_ack) begin
++      receiver_phase_q <= receiver_next_phase;
++    end
++  end
++
++  always_comb begin
++    receiver_isolate_out = 1'b0;
++    receiver_clear_out   = 1'b0;
++    receiver_phase_ack   = 1'b0;
++
++    // If there is a new phase requestd, checkout which one it is and act accordingly
++    if (receiver_phase_req) begin
++      case (receiver_next_phase)
++        CLEAR_PHASE_IDLE: begin
++          receiver_clear_out   = 1'b0;
++          receiver_isolate_out = 1'b0;
++          receiver_phase_ack   = 1'b1;
++        end
++
++        CLEAR_PHASE_ISOLATE: begin
++          receiver_clear_out   = 1'b0;
++          receiver_isolate_out = 1'b1;
++          // Wait for the isolate to be acknowledged before ack'ing the phase
++          receiver_phase_ack = isolate_ack_i;
++        end
++
++        CLEAR_PHASE_CLEAR: begin
++          receiver_clear_out   = 1'b1;
++          receiver_isolate_out = 1'b1;
++          // Wait for the clear to be acknowledged before ack'ing the phase
++          receiver_phase_ack   = clear_ack_i;
++        end
++
++        CLEAR_PHASE_POST_CLEAR: begin
++          receiver_clear_out   = 1'b0;
++          receiver_isolate_out = 1'b1;
++          receiver_phase_ack   = 1'b1;
++        end
++
++        default: begin
++          receiver_clear_out   = 1'b0;
++          receiver_isolate_out = 1'b0;
++          receiver_phase_ack   = 1'b0;
++        end
++      endcase
++
++    end else begin
++      // No phase change is requested for the moment. Act according to the
++      // current phase signal
++      case (receiver_phase_q)
++        CLEAR_PHASE_IDLE: begin
++          receiver_clear_out   = 1'b0;
++          receiver_isolate_out = 1'b0;
++        end
++
++        CLEAR_PHASE_ISOLATE: begin
++          receiver_clear_out   = 1'b0;
++          receiver_isolate_out = 1'b1;
++        end
++
++        CLEAR_PHASE_CLEAR: begin
++          receiver_clear_out   = 1'b1;
++          receiver_isolate_out = 1'b1;
++        end
++
++        CLEAR_PHASE_POST_CLEAR: begin
++          receiver_clear_out   = 1'b0;
++          receiver_isolate_out = 1'b1;
++        end
++
++        default: begin
++          receiver_clear_out   = 1'b0;
++          receiver_isolate_out = 1'b0;
++          receiver_phase_ack   = 1'b0;
++        end
++      endcase
++    end
++  end
++
++  // Output Assignment
++
++  // The clear and isolate signal are the OR combination of the receiver and
++  // initiator's clear/isolate signal. This ensures that the correct sequence is
++  // followed even if both sides are cleared independently at roughly the same
++  // time.
++  assign clear_o = initiator_clear_out || receiver_clear_out;
++  assign isolate_o = initiator_isolate_out || receiver_isolate_out;
++
++endmodule : cdc_reset_ctrlr_half
+diff --git a/src/cdc_reset_ctrlr_pkg.sv b/src/cdc_reset_ctrlr_pkg.sv
+new file mode 100644
+index 0000000..177f0a9
+--- /dev/null
++++ b/src/cdc_reset_ctrlr_pkg.sv
+@@ -0,0 +1,27 @@
++//-----------------------------------------------------------------------------
++// Copyright (C) 2022 ETH Zurich, University of Bologna
++// Copyright and related rights are licensed under the Solderpad Hardware
++// License, Version 0.51 (the "License"); you may not use this file except in
++// compliance with the License. You may obtain a copy of the License at
++// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
++// or agreed to in writing, software, hardware and materials distributed under
++// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
++// CONDITIONS OF ANY KIND, either express or implied. See the License for the
++// specific language governing permissions and limitations under the License.
++// SPDX-License-Identifier: SHL-0.51
++//-----------------------------------------------------------------------------
++//
++// Author: Manuel Eggimann <meggimann@iis.ee.ethz.ch>
++//
++// Contains common defintions for the CDC Clear Synchronization Circuitry
++
++package cdc_reset_ctrlr_pkg;
++
++typedef enum logic[1:0] {
++  CLEAR_PHASE_IDLE,
++  CLEAR_PHASE_ISOLATE,
++  CLEAR_PHASE_CLEAR,
++  CLEAR_PHASE_POST_CLEAR
++} clear_seq_phase_e;
++
++endpackage : cdc_reset_ctrlr_pkg
+diff --git a/src/sync.sv b/src/sync.sv
+index 7d8e0a1..b7bb781 100644
+--- a/src/sync.sv
++++ b/src/sync.sv
+@@ -20,6 +20,8 @@ module sync #(
+     output logic serial_o
+ );
+ 
++   (* dont_touch = "true" *)
++   (* async_reg = "true" *)
+    logic [STAGES-1:0] reg_q;
+ 
+     always_ff @(posedge clk_i, negedge rst_ni) begin
+diff --git a/test/cdc_2phase_clearable_tb.sv b/test/cdc_2phase_clearable_tb.sv
+new file mode 100644
+index 0000000..5ca8fc8
+--- /dev/null
++++ b/test/cdc_2phase_clearable_tb.sv
+@@ -0,0 +1,380 @@
++// Copyright 2018 ETH Zurich and University of Bologna.
++//
++// Copyright and related rights are licensed under the Solderpad Hardware
++// License, Version 0.51 (the "License"); you may not use this file except in
++// compliance with the License. You may obtain a copy of the License at
++// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
++// or agreed to in writing, software, hardware and materials distributed under
++// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
++// CONDITIONS OF ANY KIND, either express or implied. See the License for the
++// specific language governing permissions and limitations under the License.
++//
++// Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
++
++module cdc_2phase_clearable_tb;
++
++  parameter int UNTIL = 100000;
++  parameter bit INJECT_DELAYS = 1;
++  parameter int CLEAR_PPM = 2000;
++  parameter int SYNC_STAGES = 3;
++
++
++  time tck_src                = 10ns;
++  time tck_dst                = 10ns;
++  bit src_done                = 0;
++  bit dst_done                = 0;
++  bit done;
++  assign done = src_done & dst_done;
++
++  // Signals of the design under test.
++  logic        src_rst_ni  = 1;
++  logic        src_clk_i   = 0;
++  logic [31:0] src_data_i  = 0;
++  logic        src_clear_i = 0;
++  logic        src_clear_pending_o;
++  logic        src_valid_i = 0;
++  logic        src_ready_o;
++
++  logic        dst_rst_ni  = 1;
++  logic        dst_clk_i   = 0;
++  logic        dst_clear_i = 0;
++  logic        dst_clear_pending_o;
++  logic [31:0] dst_data_o;
++  logic        dst_valid_o;
++  logic        dst_ready_i = 0;
++
++  // Instantiate the design under test.
++  if (INJECT_DELAYS) begin : g_dut
++    cdc_2phase_clearable_tb_delay_injector #(0.8ns) i_dut (.*);
++  end else begin : g_dut
++    cdc_2phase_clearable #(logic [31:0]) i_dut (.*);
++  end
++
++  typedef struct {
++    int          data;
++    bit          is_stale;
++  } item_t;
++
++
++  // Mailbox with expected items on destination side.
++  item_t dst_mbox[$];
++  int num_sent = 0;
++  int num_received = 0;
++  int num_failed = 0;
++
++  // Clock generators.
++  initial begin
++    static int num_items, num_clks;
++    num_items = 10;
++    num_clks = 0;
++    #10ns;
++    src_rst_ni = 0;
++    #10ns;
++    src_rst_ni = 1;
++    #10ns;
++    while (!done) begin
++      src_clk_i = 1;
++      #(tck_src/2);
++      src_clk_i = 0;
++      #(tck_src/2);
++
++      // Modulate the clock frequency.
++      num_clks++;
++      if (num_sent >= num_items && num_clks > 10) begin
++        num_items = num_sent + 10;
++        num_clks = 0;
++        tck_src = $urandom_range(1000, 10000) * 1ps;
++        assert(tck_src > 0);
++      end
++    end
++  end
++
++  initial begin
++    static int num_items, num_clks;
++    num_items = 10;
++    num_clks = 0;
++    #10ns;
++    dst_rst_ni = 0;
++    #10ns;
++    dst_rst_ni = 1;
++    #10ns;
++    while (!done) begin
++      dst_clk_i = 1;
++      #(tck_dst/2);
++      dst_clk_i = 0;
++      #(tck_dst/2);
++
++      // Modulate the clock frequency.
++      num_clks++;
++      if (num_received >= num_items && num_clks > 10) begin
++        num_items = num_received + 10;
++        num_clks = 0;
++        tck_dst = $urandom_range(1000, 10000) * 1ps;
++        assert(tck_dst > 0);
++      end
++    end
++  end
++
++  // Source side sender.
++  task src_cycle_start;
++    #(tck_src*0.8);
++  endtask
++
++  task src_cycle_end;
++    @(posedge src_clk_i);
++  endtask
++
++  initial begin
++    @(negedge src_rst_ni);
++    @(posedge src_rst_ni);
++    repeat(3) @(posedge src_clk_i);
++    for (int i = 0; i < UNTIL; i++) begin
++      static item_t stimulus;
++      static bit     clear_cdc;
++      stimulus.data  = $random();
++      stimulus.is_stale = 1'b0;
++      src_data_i    <= #(tck_src*0.2) stimulus.data;
++      src_valid_i   <= #(tck_src*0.2) 1;
++      dst_mbox.push_front(stimulus);
++      num_sent++;
++      src_cycle_start();
++      while (!src_ready_o) begin
++        src_cycle_end();
++        src_cycle_start();
++        // Ramdomly clear the CDC. During pending transaction
++        clear_cdc = $urandom_range(0,1e6) < CLEAR_PPM;
++        if (clear_cdc && !src_clear_pending_o) begin
++          // The cdc shall be cleared. Mark all items in the mailbox as stale.
++          foreach(dst_mbox[i]) begin
++            if (!dst_mbox[i].is_stale) begin
++              dst_mbox[i].is_stale = 1'b1;
++              num_sent--;
++            end
++          end
++          // Clear the CDC using either asynchronous or synchronous reset
++          if ($urandom_range(0,1) == 1) begin
++            $info("Randomly clearing CDC source-side synchronously");
++            // Now raise the clear signal for one clock cycle.
++            src_cycle_start();
++            src_clear_i = 1'b1;
++            src_valid_i = 1'b0;
++            src_cycle_end();
++            src_clear_i = #(tck_src*0.2) 1'b0;
++          end else begin
++            $info("Randomly resetting CDC source-side asynchronously");
++            // Now assert the async reset signal for one clock cycle.
++            src_cycle_start();
++            src_rst_ni  = 1'b0;
++            src_valid_i = 1'b0;
++            src_cycle_end();
++            src_rst_ni = #(tck_src*0.2) 1'b1;
++          end
++          break;
++        end
++      end
++      src_cycle_end();
++      src_valid_i <= #(tck_src*0.2) 0;
++    end
++    src_done = 1;
++  end
++
++  // Destination side receiver.
++  task dst_cycle_start;
++    #(tck_dst*0.8);
++  endtask
++
++  task dst_cycle_end;
++    @(posedge dst_clk_i);
++  endtask
++
++  initial begin
++    @(negedge dst_rst_ni);
++    @(posedge dst_rst_ni);
++    repeat(3) @(posedge dst_clk_i);
++    while (!src_done || dst_mbox.size() > 0) begin
++      static item_t expected;
++      static integer actual;
++      static int cooldown;
++      static bit clear_cdc;
++      //randomly drop the transaction by clearing from the destination side
++      clear_cdc = $urandom_range(0,1e6) < CLEAR_PPM;
++      if (clear_cdc && !dst_clear_pending_o) begin
++        // Clear the CDC using either asynchronous or synchronous reset
++        if ($urandom_range(0,1) == 1) begin
++          $info("Randomly clearing CDC destination-side synchronously");
++          // Now raise the clear signal for one clock cycle.
++          dst_cycle_start();
++          dst_clear_i = 1'b1;
++          dst_ready_i = 1'b0;
++          dst_cycle_end();
++          dst_clear_i = #(tck_dst*0.2) 1'b0;
++        end else begin
++          $info("Randomly resetting CDC destination-side asynchronously");
++          // Now assert the async reset signal for one clock cycle.
++          dst_cycle_start();
++          dst_rst_ni  = 1'b0;
++          dst_ready_i = 1'b0;
++          dst_cycle_end();
++          dst_rst_ni = #(tck_dst*0.2) 1'b1;
++        end
++        // Wait for 1 dst clock cycle + SYNC_STAGES source clock cycles for the clear to propagate to the
++        // other domain before clearing the mailbox (the pending item might be
++        // consumsed by destination before the clear request arrives).
++        @(posedge dst_clk_i);
++        repeat(SYNC_STAGES) @(posedge src_clk_i);
++        // and end the loop iteration at the rising edge of the dst clk
++        dst_cycle_end();
++        // Delete all pending items in the mailbox except for the last one
++        while (dst_mbox.size() > 1) begin
++          expected = dst_mbox.pop_back();
++        end
++      end else begin
++        dst_ready_i <= #(tck_dst*0.2) 1;
++        dst_cycle_start();
++        while (!dst_valid_o) begin
++          dst_cycle_end();
++          dst_cycle_start();
++        end
++        actual = dst_data_o;
++        num_received++;
++        if (dst_mbox.size() == 0) begin
++          $error("unexpected transaction: data=%0h", actual);
++          num_failed++;
++        end else begin
++          expected = dst_mbox.pop_back();
++          if (actual != expected.data) begin
++            // Check if the expected item is a stale item. If so, pop all stale
++            // items until we receive a fresh one and check again.
++            while (dst_mbox.size() > 0  && expected.is_stale && expected.data != actual) begin
++              expected = dst_mbox.pop_back();
++            end
++            if (actual != expected.data) begin
++              $error("transaction mismatch: exp=%0h, act=%0h", expected.data, actual);
++              num_failed++;
++            end else begin
++              if (!expected.is_stale) begin
++                num_received++;
++              end
++            end
++          end else if (expected.is_stale) begin
++            $info("Received stale item after clear. This is expected to happen for some cycles after the clear until the clear propagated to the other side.");
++          end else begin
++            num_received++;
++          end
++        end
++        dst_cycle_end();
++        dst_ready_i <= #(tck_dst*0.2) 0;
++
++        // Insert a random cooldown period.
++        cooldown = $urandom_range(0, 40);
++        if (cooldown < 20) repeat(cooldown) @(posedge dst_clk_i);
++      end
++    end
++
++    if (num_failed > 0) begin
++      $error("%0d/%0d items mismatched", num_failed, num_sent);
++    end else begin
++      $info("%0d items passed", num_sent);
++    end
++
++    dst_done = 1;
++  end
++
++endmodule
++
++
++module cdc_2phase_clearable_tb_delay_injector #(
++  parameter time MAX_DELAY = 0ns,
++  parameter int SYNC_STAGES = 3
++)(
++  input  logic        src_rst_ni,
++  input  logic        src_clk_i,
++  input  logic        src_clear_i,
++  output logic        src_clear_pending_o,
++  input  logic [31:0] src_data_i,
++  input  logic        src_valid_i,
++  output logic        src_ready_o,
++
++  input  logic        dst_rst_ni,
++  input  logic        dst_clk_i,
++  input  logic        dst_clear_i,
++  output logic        dst_clear_pending_o,
++  output logic [31:0] dst_data_o,
++  output logic        dst_valid_o,
++  input  logic        dst_ready_i
++);
++
++  logic async_req_o, async_req_i;
++  logic async_ack_o, async_ack_i;
++  logic [31:0] async_data_o, async_data_i;
++
++
++  logic        s_src_clear;
++  logic        s_src_ready;
++  logic        s_dst_clear;
++  logic        s_dst_valid;
++
++  always @(async_req_o) begin
++    automatic time d = $urandom_range(1ps, MAX_DELAY);
++    async_req_i <= #d async_req_o;
++  end
++
++  always @(async_ack_o) begin
++    automatic time d = $urandom_range(1ps, MAX_DELAY);
++    async_ack_i <= #d async_ack_o;
++  end
++
++  for (genvar i = 0; i < 32; i++) begin
++    always @(async_data_o[i]) begin
++      automatic time d = $urandom_range(1ps, MAX_DELAY);
++      async_data_i[i] <= #d async_data_o[i];
++    end
++  end
++
++  cdc_2phase_src_clearable #(logic [31:0], SYNC_STAGES) i_src (
++    .rst_ni       ( src_rst_ni                 ),
++    .clk_i        ( src_clk_i                  ),
++    .clear_i      ( s_src_clear                ),
++    .data_i       ( src_data_i                 ),
++    .valid_i      ( src_valid_i & !s_src_clear ),
++    .ready_o      ( s_src_ready                ),
++    .async_req_o  ( async_req_o                ),
++    .async_ack_i  ( async_ack_i                ),
++    .async_data_o ( async_data_o               )
++  );
++
++  assign src_ready_o = s_src_ready & !s_src_clear;
++
++  cdc_2phase_dst_clearable #(logic [31:0], SYNC_STAGES) i_dst (
++    .rst_ni       ( dst_rst_ni                 ),
++    .clk_i        ( dst_clk_i                  ),
++    .clear_i      ( s_dst_clear                ),
++    .data_o       ( dst_data_o                 ),
++    .valid_o      ( s_dst_valid                ),
++    .ready_i      ( dst_ready_i & !s_dst_clear ),
++    .async_req_i  ( async_req_i                ),
++    .async_ack_o  ( async_ack_o                ),
++    .async_data_i ( async_data_i               )
++  );
++
++  assign dst_valid_o = s_dst_valid & !s_dst_clear;
++
++  // Synchronize the clear and reset signaling in both directions (see header of
++  // the cdc_reset_ctrlr module for more details.)
++  cdc_reset_ctrlr #(
++    .SYNC_STAGES(SYNC_STAGES-1)
++  ) i_cdc_reset_ctrlr (
++    .a_clk_i   ( src_clk_i   ),
++    .a_rst_ni  ( src_rst_ni  ),
++    .a_clear_i ( src_clear_i ),
++    .a_clear_o ( s_src_clear ),
++    .b_clk_i   ( dst_clk_i   ),
++    .b_rst_ni  ( dst_rst_ni  ),
++    .b_clear_i ( dst_clear_i ),
++    .b_clear_o ( s_dst_clear )
++  );
++
++  assign src_clear_pending_o = s_src_clear;
++  assign dst_clear_pending_o = s_dst_clear;
++
++endmodule
+diff --git a/test/cdc_fifo_clearable_tb.sv b/test/cdc_fifo_clearable_tb.sv
+new file mode 100644
+index 0000000..aa70521
+--- /dev/null
++++ b/test/cdc_fifo_clearable_tb.sv
+@@ -0,0 +1,291 @@
++// Copyright 2018 ETH Zurich and University of Bologna.
++//
++// Copyright and related rights are licensed under the Solderpad Hardware
++// License, Version 0.51 (the "License"); you may not use this file except in
++// compliance with the License. You may obtain a copy of the License at
++// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
++// or agreed to in writing, software, hardware and materials distributed under
++// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
++// CONDITIONS OF ANY KIND, either express or implied. See the License for the
++// specific language governing permissions and limitations under the License.
++//
++// Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
++// Manuel Eggimann <meggimann@iis.ee.ethz.ch>
++
++module cdc_fifo_clearable_tb;
++
++  parameter bit INJECT_SRC_STALLS = 0;
++  parameter bit INJECT_DST_STALLS = 0;
++  parameter int UNTIL = 100000;
++  parameter int DEPTH = 3;
++  parameter int CLEAR_PPM = 2000;
++
++  time tck_src       = 10ns;
++  time tck_dst       = 27ns;
++  bit src_done       = 0;
++  bit dst_done       = 0;
++  bit done;
++  assign done = src_done & dst_done;
++
++  // Signals of the design under test.
++  logic        src_rst_ni  = 1;
++  logic        src_clk_i   = 0;
++  logic        src_clear_i = 0;
++  logic        src_clear_pending_o;
++  logic [31:0] src_data_i  = 0;
++  logic        src_valid_i = 0;
++  logic        src_ready_o;
++
++  logic        dst_rst_ni  = 1;
++  logic        dst_clk_i   = 0;
++  logic        dst_clear_i = 0;
++  logic        dst_clear_pending_o;
++  logic [31:0] dst_data_o;
++  logic        dst_valid_o;
++  logic        dst_ready_i = 0;
++
++  assert property (@(posedge src_clk_i) !$isunknown(src_valid_i) && !$isunknown(src_ready_o));
++  assert property (@(posedge dst_clk_i) !$isunknown(dst_valid_o) && !$isunknown(dst_ready_i));
++  assert property (@(posedge src_clk_i) src_valid_i |-> !$isunknown(src_data_i));
++  assert property (@(posedge dst_clk_i) dst_valid_o |-> !$isunknown(dst_data_o));
++
++  // Instantiate the design under test.
++  cdc_fifo_gray_clearable #(.T(logic [31:0]), .LOG_DEPTH(DEPTH)) i_dut (.*);
++
++  typedef struct {
++    int          data;
++    bit          is_stale;
++  } item_t;
++
++  // Mailbox with expected items on destination side.
++  item_t dst_mbox[$];
++  int num_sent = 0;
++  int num_received = 0;
++  int num_failed = 0;
++
++  // Clock generators.
++  initial begin
++    static int num_items, num_clks;
++    num_items = 10;
++    num_clks = 0;
++    #10ns;
++    src_rst_ni = 0;
++    #10ns;
++    src_rst_ni = 1;
++    #10ns;
++    while (!done) begin
++      src_clk_i = 1;
++      #(tck_src/2);
++      src_clk_i = 0;
++      #(tck_src/2);
++
++      // Modulate the clock frequency.
++      num_clks++;
++      if (num_sent >= num_items && num_clks > 10) begin
++        num_items = num_sent + 10;
++        num_clks = 0;
++        tck_src = $urandom_range(1000, 10000) * 1ps;
++        assert(tck_src > 0);
++      end
++    end
++  end
++
++  initial begin
++    static int num_items, num_clks;
++    num_items = 10;
++    num_clks = 0;
++    #10ns;
++    dst_rst_ni = 0;
++    #10ns;
++    dst_rst_ni = 1;
++    #10ns;
++    while (!done) begin
++      dst_clk_i = 1;
++      #(tck_dst/2);
++      dst_clk_i = 0;
++      #(tck_dst/2);
++
++      // Modulate the clock frequency.
++      num_clks++;
++      if (num_received >= num_items && num_clks > 10) begin
++        num_items = num_received + 10;
++        num_clks = 0;
++        tck_dst = $urandom_range(1000, 10000) * 1ps;
++        assert(tck_dst > 0);
++      end
++    end
++  end
++
++  // Source side sender.
++  task src_cycle_start;
++    #(tck_src*0.8);
++  endtask
++
++  task src_cycle_end;
++    @(posedge src_clk_i);
++  endtask
++
++  initial begin
++    @(negedge src_rst_ni);
++    @(posedge src_rst_ni);
++    repeat(3) @(posedge src_clk_i);
++    for (int i = 0; i < UNTIL; i++) begin
++      item_t item;
++      static integer stimulus;
++      static int cooldown;
++      static bit clear_cdc;
++      // Ramdomly clear the CDC. When clearing the CDC, mark all remainig items
++      // in the mailbox as stale. Some of them might still be received
++      // downstream until the clear request propagated to the other side.
++      clear_cdc    = $urandom_range(0,1e6) < CLEAR_PPM;
++      if (!clear_cdc || src_clear_pending_o) begin
++        stimulus       = $random();
++        item.data      = stimulus;
++        item.is_stale  = 1'b0;
++        src_data_i    <= #(tck_src*0.2) stimulus;
++        src_valid_i   <= #(tck_src*0.2) 1;
++        num_sent++;
++        src_cycle_start();
++        while (!src_ready_o) begin
++          src_cycle_end();
++          src_cycle_start();
++        end
++        dst_mbox.push_front(item);
++        src_cycle_end();
++        src_valid_i <= #(tck_src*0.2) 0;
++
++        // Insert a random cooldown period.
++        if (INJECT_SRC_STALLS) begin
++          cooldown = $urandom_range(0, 40);
++          if (cooldown < 20) repeat(cooldown) @(posedge src_clk_i);
++        end
++      end else begin
++        // The cdc shall be cleared. Mark all items in the mailbox as stale.
++        foreach(dst_mbox[i]) begin
++          if (!dst_mbox[i].is_stale) begin
++            dst_mbox[i].is_stale = 1'b1;
++            num_sent--;
++          end
++        end
++        if ($urandom_range(0,1) == 1) begin
++          $info("Randomly clearing CDC synchronously and marking all pending items as stale");
++          // Now raise the clear signal for one clock cycle.
++          src_cycle_start();
++          src_clear_i = 1'b1;
++          src_cycle_end();
++          src_clear_i = #(tck_src*0.2) 1'b0;
++        end else begin
++          $info("Randomly resetting CDC asynchronously and marking all pending items as stale");
++          // Now assert the async reset signal for one clock cycle.
++          src_cycle_start();
++          src_rst_ni = 1'b0;
++          src_cycle_end();
++          src_rst_ni = #(tck_src*0.2) 1'b1;
++        end
++      end
++    end
++    src_done = 1;
++  end
++
++  // Destination side receiver.
++  task dst_cycle_start;
++    #(tck_dst*0.8);
++  endtask
++
++  task dst_cycle_end;
++    @(posedge dst_clk_i);
++  endtask
++
++  initial begin
++    @(negedge dst_rst_ni);
++    @(posedge dst_rst_ni);
++    repeat(3) @(posedge dst_clk_i);
++    while (!src_done || dst_mbox.size() > 0) begin
++      static item_t expected_item;
++      static integer actual;
++      static int cooldown;
++      static bit clear_cdc;
++      // Ramdomly clear the CDC. When clearing the CDC, wait for exactly
++      // DEPTH clock cycle for the clear request to propagate and then clear the
++      // item queue.
++      clear_cdc    = $urandom_range(0,1e6) < CLEAR_PPM;
++      if (!clear_cdc || dst_clear_pending_o) begin
++        dst_ready_i <= #(tck_dst*0.2) 1;
++        dst_cycle_start();
++        while (!dst_valid_o && !src_done) begin
++          dst_cycle_end();
++          dst_cycle_start();
++        end
++        if (src_done) break;
++        actual = dst_data_o;
++        if (dst_mbox.size() == 0) begin
++          $error("unexpected transaction: data=%0h", actual);
++          num_failed++;
++        end else begin
++          expected_item = dst_mbox.pop_back();
++          if (actual != expected_item.data) begin
++            // Check if the expected item is a stale item. If so, pop all stale
++            // items until we receive a fresh one and check again.
++            while (dst_mbox.size() > 0  && expected_item.is_stale && expected_item.data != actual) begin
++              expected_item = dst_mbox.pop_back();
++            end
++            if (actual != expected_item.data) begin
++              $error("transaction mismatch: exp=%0h, act=%0h", expected_item.data, actual);
++              num_failed++;
++            end else begin
++              if (!expected_item.is_stale) begin
++                num_received++;
++              end
++            end
++          end else if (expected_item.is_stale) begin
++            $info("Received stale item after clear. This is expected to happen for some cycles after the clear until the clear propagated to the other side.");
++          end else begin
++            num_received++;
++          end
++        end
++        dst_cycle_end();
++        dst_ready_i <= #(tck_dst*0.2) 0;
++
++        // Insert a random cooldown period.
++        if (INJECT_DST_STALLS) begin
++          cooldown = $urandom_range(0, 40);
++          if (cooldown < 20) repeat(cooldown) @(posedge dst_clk_i);
++        end
++      end else begin
++        // Randomly alternate between async reset and synchronous clear
++        if ($urandom_range(0,1) == 1) begin
++          $info("Randomly clearing CDC synchronously from the destination side");
++          dst_cycle_start();
++          dst_clear_i = 1'b1;
++          dst_cycle_end();
++          dst_clear_i <= #(tck_dst*0.2) 1'b0;
++        end else begin
++          $info("Randomly resettting CDC asynchronously from the destination side");
++          dst_cycle_start();
++          dst_rst_ni = 1'b0;
++          dst_cycle_end();
++          dst_rst_ni <= #(tck_dst*0.2) 1'b1;
++        end
++        // Wait for exactly 1 dst clock cycle and DEPTH src clock cycles for the clear request to
++        // propagate
++        @(posedge dst_clk_i);
++        repeat(DEPTH) @(posedge src_clk_i);
++        // Now clear the item queue
++        num_sent-=dst_mbox.size();
++        dst_mbox.delete();
++
++        // and end the loop iteration at the rising edge of the dst clk
++        dst_cycle_end();
++      end
++    end
++
++    if (num_failed > 0) begin
++      $error("%0d/%0d items mismatched", num_failed, num_sent);
++    end else begin
++      $info("%0d items passed", num_sent);
++    end
++
++    dst_done = 1;
++  end
++
++endmodule
+-- 
+2.16.5
+

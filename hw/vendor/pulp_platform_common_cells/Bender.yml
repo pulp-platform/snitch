@@ -26,7 +26,6 @@ sources:
     files:
     - src/cb_filter_pkg.sv
   - src/cc_onehot.sv
-  - src/cdc_2phase.sv
   - src/cf_math_pkg.sv
   - src/clk_div.sv
   - src/delta_counter.sv
@@ -59,8 +58,11 @@ sources:
   - src/sync.sv
   - src/sync_wedge.sv
   - src/unread.sv
+  - src/cdc_reset_ctrlr_pkg.sv
   # Level 1
   - src/addr_decode_napot.sv
+  - src/cdc_2phase.sv
+  - src/cdc_4phase.sv
   - src/addr_decode.sv
   - target: not(all(xilinx,vivado_ipx))
     files:
@@ -78,6 +80,7 @@ sources:
   - src/stream_fifo.sv
   - src/stream_fork_dynamic.sv
   # Level 2
+  - src/cdc_reset_ctrlr.sv
   - src/cdc_fifo_gray.sv
   - src/fall_through_register.sv
   - src/id_queue.sv
@@ -86,6 +89,8 @@ sources:
   - src/stream_register.sv
   - src/stream_xbar.sv
   # Level 3
+  - src/cdc_fifo_gray_clearable.sv
+  - src/cdc_2phase_clearable.sv
   - src/stream_arbiter.sv
   - src/stream_omega_net.sv
 
@@ -99,7 +104,9 @@ sources:
       - test/addr_decode_tb.sv
       - test/cb_filter_tb.sv
       - test/cdc_2phase_tb.sv
+      - test/cdc_2phase_clearable_tb.sv
       - test/cdc_fifo_tb.sv
+      - test/cdc_fifo_clearable_tb.sv
       - test/fifo_tb.sv
       - test/graycode_tb.sv
       - test/id_queue_tb.sv

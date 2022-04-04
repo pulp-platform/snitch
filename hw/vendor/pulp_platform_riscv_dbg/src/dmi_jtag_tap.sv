@@ -34,7 +34,8 @@ module dmi_jtag_tap #(
   input  logic        testmode_i,
   // JTAG is interested in writing the DTM CSR register
   output logic        tck_o,
-  output logic        trst_no,
+  // Synchronous reset of the dmi module triggered by JTAG TAP
+  output logic        dmi_clear_o,
   output logic        update_o,
   output logic        capture_o,
   output logic        shift_o,
@@ -174,12 +175,12 @@ module dmi_jtag_tap #(
   // ----------------
   logic tck_n, tck_ni;
 
-  tc_clk_inverter i_tck_inv (
+  cluster_clock_inverter i_tck_inv (
     .clk_i ( tck_i  ),
     .clk_o ( tck_ni )
   );
 
-  tc_clk_mux2 i_dft_tck_mux (
+  pulp_clock_mux2 i_dft_tck_mux (
     .clk0_i    ( tck_ni     ),
     .clk1_i    ( tck_i      ), // bypass the inverted clock for testing
     .clk_sel_i ( testmode_i ),
@@ -202,7 +203,7 @@ module dmi_jtag_tap #(
   // Determination of next state; purely combinatorial
   always_comb begin : p_tap_fsm
 
-    trst_no            = trst_ni;
+    dmi_clear_o        = 1'b0;
 
     capture_dr         = 1'b0;
     shift_dr           = 1'b0;
@@ -216,7 +217,7 @@ module dmi_jtag_tap #(
     unique case (tap_state_q)
       TestLogicReset: begin
         tap_state_d = (tms_i) ? TestLogicReset : RunTestIdle;
-        trst_no = 1'b1;
+        dmi_clear_o = 1'b1;
       end
       RunTestIdle: begin
         tap_state_d = (tms_i) ? SelectDrScan : RunTestIdle;
