@@ -39,8 +39,8 @@ SPIKE_INSTALL_DIR ?= $(VENDOR_DIR)/riscv-isa-sim
 
 RISCV_PREFIX ?= $(LLVM_INSTALL_DIR)/bin/riscv$(XLEN)-unknown-elf-
 RISCV_LLVM ?= $(RISCV_PREFIX)clang
-RISCV_LLVM_OPTS ?= -mcmodel=medany -ffast-math -fno-builtin-printf -fno-common -ffunction-sections -Wextra -static
-RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --disassembler-option="march=rv32gxpulpv2" --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
+RISCV_LLVM_OPTS ?= -mcmodel=medany -static -fvisibility=hidden -nostdlib -nostartfiles
+#RISCV_OBJDUMP ?= llvm-objdump --disassembler-options="no-aliases" --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
 RISCV_SIM ?= $(SPIKE_INSTALL_DIR)/bin/spike
 
 vpath %.S $(src_dir)
@@ -48,8 +48,8 @@ vpath %.S $(src_dir)
 #------------------------------------------------------------
 # Build assembly tests
 
-%.dump: %
-	$(RISCV_OBJDUMP) $< > $@
+#%.dump: %
+#	$(RISCV_OBJDUMP) $< > $@
 
 %.out: %
 	PATH="$(VENDOR_DIR)/riscv-isa-sim/bin:$$PATH"; \
