@@ -14,13 +14,13 @@ index 2b5b6a9..8423e48 100644
 --- a/Bender.yml
 +++ b/Bender.yml
 @@ -57,6 +57,7 @@ sources:
-   - src/sync_wedge.sv
    - src/unread.sv
+   - src/cdc_reset_ctrlr_pkg.sv
    # Level 1
 +  - src/addr_decode_napot.sv
+   - src/cdc_2phase.sv
+   - src/cdc_4phase.sv
    - src/addr_decode.sv
-   - src/cb_filter.sv
-   - src/cdc_fifo_2phase.sv
 diff --git a/src/addr_decode_napot.sv b/src/addr_decode_napot.sv
 new file mode 100644
 index 0000000..fb68a01

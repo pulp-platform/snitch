@@ -21,11 +21,13 @@ index 1e06d7b0..0631e5c9 100644
 +    files:
 +    - src/cb_filter_pkg.sv
    - src/cc_onehot.sv
-   - src/cdc_2phase.sv
    - src/cf_math_pkg.sv
+   - src/clk_int_div.sv
 @@ -60,7 +62,9 @@ sources:
    # Level 1
    - src/addr_decode_napot.sv
+   - src/cdc_2phase.sv
+   - src/cdc_4phase.sv
    - src/addr_decode.sv
 -  - src/cb_filter.sv
 +  - target: not(all(xilinx,vivado_ipx))

@@ -47,26 +47,22 @@ module dmi_jtag #(
   dmi_error_e error_d, error_q;
 
   logic tck;
-  logic jtag_dmi_clear; // Synchronous reset of DMI triggered by TestLogicReset in
-                        // jtag TAP
-  logic dmi_clear; // Functional (warm) reset of the entire DMI
+  logic trst_n;
   logic update;
   logic capture;
   logic shift;
   logic tdi;
 
-  logic dtmcs_select;
-
-  assign dmi_clear = jtag_dmi_clear || (dtmcs_select && update && dtmcs_q.dmihardreset);
-
   // -------------------------------
   // Debug Module Control and Status
   // -------------------------------
+  logic dtmcs_select;
 
   dm::dtmcs_t dtmcs_d, dtmcs_q;
 
   always_comb begin
-    dtmcs_d = dtmcs_q;
+    dtmcs_d  = dtmcs_q;
+
     if (capture) begin
       if (dtmcs_select) begin
         dtmcs_d  = '{
@@ -87,8 +83,8 @@ module dmi_jtag #(
     end
   end
 
-  always_ff @(posedge tck or negedge trst_ni) begin
-    if (!trst_ni) begin
+  always_ff @(posedge tck or negedge trst_n) begin
+    if (!trst_n) begin
       dtmcs_q <= '0;
     end else begin
       dtmcs_q <= dtmcs_d;
@@ -98,8 +94,9 @@ module dmi_jtag #(
   // ----------------------------
   // DMI (Debug Module Interface)
   // ----------------------------
-
-  assign dmi_rst_no = dmi_clear;
+  // TODO(zarubaf): Might need to be connected to the `dtmcs_q.dmihardreset`
+  // signal.
+  assign dmi_rst_no = rst_ni;
 
   logic        dmi_select;
   logic        dmi_tdo;
@@ -145,86 +142,79 @@ module dmi_jtag #(
 
     dmi_req_valid = 1'b0;
 
-    if (dmi_clear) begin
-      state_d   = Idle;
-      data_d    = '0;
-      error_d   = DMINoError;
-      address_d = '0;
-    end else begin
-      unique case (state_q)
-        Idle: begin
-          // make sure that no error is sticky
-          if (dmi_select && update && (error_q == DMINoError)) begin
-            // save address and value
-            address_d = dmi.address;
-            data_d = dmi.data;
-            if (dm::dtm_op_e'(dmi.op) == dm::DTM_READ) begin
-              state_d = Read;
-            end else if (dm::dtm_op_e'(dmi.op) == dm::DTM_WRITE) begin
-              state_d = Write;
-            end
-            // else this is a nop and we can stay here
+    unique case (state_q)
+      Idle: begin
+        // make sure that no error is sticky
+        if (dmi_select && update && (error_q == DMINoError)) begin
+          // save address and value
+          address_d = dmi.address;
+          data_d = dmi.data;
+          if (dm::dtm_op_e'(dmi.op) == dm::DTM_READ) begin
+            state_d = Read;
+          end else if (dm::dtm_op_e'(dmi.op) == dm::DTM_WRITE) begin
+            state_d = Write;
           end
+          // else this is a nop and we can stay here
         end
-
-        Read: begin
-          dmi_req_valid = 1'b1;
-          if (dmi_req_ready) begin
-            state_d = WaitReadValid;
-          end
-        end
-
-        WaitReadValid: begin
-          // load data into register and shift out
-          if (dmi_resp_valid) begin
-            data_d = dmi_resp.data;
-            state_d = Idle;
-          end
-        end
-
-        Write: begin
-          dmi_req_valid = 1'b1;
-          // request sent, wait for response before going back to idle
-          if (dmi_req_ready) begin
-            state_d = WaitWriteValid;
-          end
-        end
-
-        WaitWriteValid: begin
-          // got a valid answer go back to idle
-          if (dmi_resp_valid) begin
-            state_d = Idle;
-          end
-        end
-
-        default: begin
-          // just wait for idle here
-          if (dmi_resp_valid) begin
-            state_d = Idle;
-          end
-        end
-      endcase
-
-      // update means we got another request but we didn't finish
-      // the one in progress, this state is sticky
-      if (update && state_q != Idle) begin
-        error_dmi_busy = 1'b1;
       end
 
-      // if capture goes high while we are in the read state
-      // or in the corresponding wait state we are not giving back a valid word
-      // -> throw an error
-      if (capture && state_q inside {Read, WaitReadValid}) begin
-        error_dmi_busy = 1'b1;
+      Read: begin
+        dmi_req_valid = 1'b1;
+        if (dmi_req_ready) begin
+          state_d = WaitReadValid;
+        end
       end
 
-      if (error_dmi_busy) begin
-        error_d = DMIBusy;
+      WaitReadValid: begin
+        // load data into register and shift out
+        if (dmi_resp_valid) begin
+          data_d = dmi_resp.data;
+          state_d = Idle;
+        end
       end
-      // clear sticky error flag
-      if (update && dtmcs_q.dmireset && dtmcs_select) begin
-        error_d = DMINoError;
+
+      Write: begin
+        dmi_req_valid = 1'b1;
+        // request sent, wait for response before going back to idle
+        if (dmi_req_ready) begin
+          state_d = WaitWriteValid;
+        end
       end
+
+      WaitWriteValid: begin
+        // got a valid answer go back to idle
+        if (dmi_resp_valid) begin
+          state_d = Idle;
+        end
+      end
+
+      default: begin
+        // just wait for idle here
+        if (dmi_resp_valid) begin
+          state_d = Idle;
+        end
+      end
+    endcase
+
+    // update means we got another request but we didn't finish
+    // the one in progress, this state is sticky
+    if (update && state_q != Idle) begin
+      error_dmi_busy = 1'b1;
+    end
+
+    // if capture goes high while we are in the read state
+    // or in the corresponding wait state we are not giving back a valid word
+    // -> throw an error
+    if (capture && state_q inside {Read, WaitReadValid}) begin
+      error_dmi_busy = 1'b1;
+    end
+
+    if (error_dmi_busy) begin
+      error_d = DMIBusy;
+    end
+    // clear sticky error flag
+    if (update && dtmcs_q.dmireset && dtmcs_select) begin
+      error_d = DMINoError;
     end
   end
 
@@ -233,30 +223,27 @@ module dmi_jtag #(
 
   always_comb begin : p_shift
     dr_d    = dr_q;
-    if (dmi_clear) begin
-      dr_d = '0;
-    end else begin
-      if (capture) begin
-        if (dmi_select) begin
-          if (error_q == DMINoError && !error_dmi_busy) begin
-            dr_d = {address_q, data_q, DMINoError};
-            // DMI was busy, report an error
-          end else if (error_q == DMIBusy || error_dmi_busy) begin
-            dr_d = {address_q, data_q, DMIBusy};
-          end
+
+    if (capture) begin
+      if (dmi_select) begin
+        if (error_q == DMINoError && !error_dmi_busy) begin
+          dr_d = {address_q, data_q, DMINoError};
+        // DMI was busy, report an error
+        end else if (error_q == DMIBusy || error_dmi_busy) begin
+          dr_d = {address_q, data_q, DMIBusy};
         end
       end
+    end
 
-      if (shift) begin
-        if (dmi_select) begin
-          dr_d = {tdi, dr_q[$bits(dr_q)-1:1]};
-        end
+    if (shift) begin
+      if (dmi_select) begin
+        dr_d = {tdi, dr_q[$bits(dr_q)-1:1]};
       end
     end
   end
 
-  always_ff @(posedge tck or negedge trst_ni) begin
-    if (!trst_ni) begin
+  always_ff @(posedge tck or negedge trst_n) begin
+    if (!trst_n) begin
       dr_q      <= '0;
       state_q   <= Idle;
       address_q <= '0;
@@ -286,7 +273,7 @@ module dmi_jtag #(
     .tdo_oe_o,
     .testmode_i,
     .tck_o          ( tck              ),
-    .dmi_clear_o    ( jtag_dmi_clear   ),
+    .trst_no        ( trst_n           ),
     .update_o       ( update           ),
     .capture_o      ( capture          ),
     .shift_o        ( shift            ),
@@ -302,24 +289,23 @@ module dmi_jtag #(
   // ---------
   dmi_cdc i_dmi_cdc (
     // JTAG side (master side)
-    .tck_i                ( tck              ),
-    .trst_ni              ( trst_ni          ),
-    .jtag_dmi_cdc_clear_i ( dmi_clear        ),
-    .jtag_dmi_req_i       ( dmi_req          ),
-    .jtag_dmi_ready_o     ( dmi_req_ready    ),
-    .jtag_dmi_valid_i     ( dmi_req_valid    ),
-    .jtag_dmi_resp_o      ( dmi_resp         ),
-    .jtag_dmi_valid_o     ( dmi_resp_valid   ),
-    .jtag_dmi_ready_i     ( dmi_resp_ready   ),
+    .tck_i             ( tck              ),
+    .trst_ni           ( trst_n           ),
+    .jtag_dmi_req_i    ( dmi_req          ),
+    .jtag_dmi_ready_o  ( dmi_req_ready    ),
+    .jtag_dmi_valid_i  ( dmi_req_valid    ),
+    .jtag_dmi_resp_o   ( dmi_resp         ),
+    .jtag_dmi_valid_o  ( dmi_resp_valid   ),
+    .jtag_dmi_ready_i  ( dmi_resp_ready   ),
     // core side
     .clk_i,
     .rst_ni,
-    .core_dmi_req_o       ( dmi_req_o        ),
-    .core_dmi_valid_o     ( dmi_req_valid_o  ),
-    .core_dmi_ready_i     ( dmi_req_ready_i  ),
-    .core_dmi_resp_i      ( dmi_resp_i       ),
-    .core_dmi_ready_o     ( dmi_resp_ready_o ),
-    .core_dmi_valid_i     ( dmi_resp_valid_i )
+    .core_dmi_req_o    ( dmi_req_o        ),
+    .core_dmi_valid_o  ( dmi_req_valid_o  ),
+    .core_dmi_ready_i  ( dmi_req_ready_i  ),
+    .core_dmi_resp_i   ( dmi_resp_i       ),
+    .core_dmi_ready_o  ( dmi_resp_ready_o ),
+    .core_dmi_valid_i  ( dmi_resp_valid_i )
   );
 
 endmodule : dmi_jtag
