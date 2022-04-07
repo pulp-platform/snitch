@@ -292,7 +292,7 @@ module occamy_quadrant_s1
       .AxiDataWidth(512),
       .AxiIdWidth(6),
       .AxiUserWidth(1),
-      .MaxTrans(8),
+      .MaxTrans(32),
       .NrAddrRules(4),
       .slv_req_t(axi_a48_d512_i6_u0_req_t),
       .slv_rsp_t(axi_a48_d512_i6_u0_resp_t),

@@ -7,8 +7,8 @@
     is_remote_quadrant: false,
     remote_quadrants: [],
     quadrant_pre_xbar: {
-      max_slv_trans: 4,
-      max_mst_trans: 4,
+      max_slv_trans: 32,
+      max_mst_trans: 32,
       fall_through: false,
     },
     pre_xbar_slv_id_width_no_rocache: 3,
@@ -69,7 +69,7 @@
           width: 1024,
           count: 128,
           sets: 2,
-          max_trans: 8,
+          max_trans: 32,
           address_regions: 4,
       }
       wide_xbar: {
