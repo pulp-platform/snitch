@@ -146,6 +146,7 @@ module axi_dma_data_mover #(
     logic aw_emitter_empty;
     logic aw_emitter_push;
     logic aw_emitter_pop;
+    logic aw_last_full;
 
     // instantiate a fifo to buffer the address write requests
     fifo_v3 #(
@@ -289,7 +290,7 @@ module axi_dma_data_mover #(
         ar_emitter_push    = r_valid_i & r_ready_o;
 
         // Write related channels
-        w_ready_o          = ~aw_emitter_full & ~w_emitter_full;
+        w_ready_o          = ~aw_emitter_full & ~w_emitter_full & ~aw_last_full;
         w_emitter_push     = w_valid_i & w_ready_o;
         aw_emitter_push    = w_valid_i & w_ready_o;
     end
@@ -356,11 +357,11 @@ module axi_dma_data_mover #(
         .rst_ni      ( rst_ni                ),
         .flush_i     ( 1'b0                  ),
         .testmode_i  ( 1'b0                  ),
-        .full_o      ( ),
+        .full_o      ( aw_last_full          ),
         .empty_o     ( ),
         .usage_o     ( ),
-        .data_i      ( current_aw_req.last   ),
-        .push_i      ( aw_emitter_pop        ),
+        .data_i      ( write_req_i.aw.last   ),
+        .push_i      ( aw_emitter_push       ),
         .data_o      ( is_last_aw            ),
         .pop_i       ( axi_dma_res_i.b_valid )
     );
