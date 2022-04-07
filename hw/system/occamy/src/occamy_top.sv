@@ -551,6 +551,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   logic [63:0] sba_rdata;
   logic        sba_rvalid;
+  logic        sba_err;
 
   logic [63:0] sba_addr_long;
 
@@ -582,6 +583,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .master_gnt_i(sba_gnt),
       .master_r_valid_i(sba_rvalid),
       .master_r_rdata_i(sba_rdata),
+      .master_r_err_i(sba_err),
+      .master_r_other_err_i(1'b0),
       .dmi_rst_ni(dmi_rst_n),
       .dmi_req_valid_i(dmi_req_valid),
       .dmi_req_ready_o(dmi_req_ready),
@@ -612,7 +615,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .mem_gnt_o(sba_gnt),
       .mem_rsp_valid_o(sba_rvalid),
       .mem_rsp_rdata_o(sba_rdata),
-      .mem_rsp_error_o(  /* left open */),
+      .mem_rsp_error_o(sba_err),
       .axi_req_o(soc_axi_lite_periph_xbar_in_req[SOC_AXI_LITE_PERIPH_XBAR_IN_DEBUG]),
       .axi_rsp_i(soc_axi_lite_periph_xbar_in_rsp[SOC_AXI_LITE_PERIPH_XBAR_IN_DEBUG])
 
