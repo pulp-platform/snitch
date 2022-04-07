@@ -11,7 +11,7 @@ typedef float v2f32 __attribute__((vector_size(8)));
 typedef __fp16 v4f16 __attribute__((vector_size(8)));
 typedef char v8f8 __attribute__((vector_size(8)));
 
-void gemm_fp64(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
+void gemm_fp64_baseline(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
                uint32_t ta, double* B, uint32_t ldB, uint32_t tb, double* C,
                uint32_t ldC, double ALPHA) {
     if (!ta && !tb) {
@@ -57,7 +57,7 @@ void gemm_fp64(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
     }
 }
 
-void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
+void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
                         uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
                         uint32_t tb, double* C, uint32_t ldC,
                         const uint32_t* ALPHA, uint32_t setup_SSR) {
@@ -185,7 +185,7 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
     snrt_ssr_disable();
 }
 
-void gemm_fp32simd_tb_ssr_frep(const uint32_t M, const uint32_t N,
+void gemm_fp32_opt(const uint32_t M, const uint32_t N,
                                const uint32_t K, float* A, const uint32_t ldA,
                                float* B, const uint32_t ldB, float* C,
                                const uint32_t ldC, const uint32_t* ALPHA,
@@ -337,7 +337,174 @@ void gemm_fp32simd_tb_ssr_frep(const uint32_t M, const uint32_t N,
     snrt_ssr_disable();
 }
 
-void gemm_fp16simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
+void gemm_fp16_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
+                               uint32_t ldA, __fp16* B, uint32_t ldB, __fp16* C,
+                               uint32_t ldC, const uint32_t* ALPHA,
+                               uint32_t setup_SSR) {
+    // Unrolling factor of most inner loop.
+    // Should be at least as high as the FMA delay
+    // for maximum utilization
+    const uint32_t unroll = 8;
+
+    // SSR strides and bounds only have to be configured
+    // once in the beginning
+    if (setup_SSR) {
+        uint32_t ssr0_b[4] = {unroll, K / 4, N / unroll, M};
+        uint32_t ssr0_i[4] = {0, sizeof(__fp16) * 4, 0, sizeof(__fp16) * ldA};
+
+        uint32_t ssr1_b[4] = {unroll, K / 4, N / unroll, M};
+        uint32_t ssr1_i[4] = {sizeof(__fp16) * ldB, sizeof(__fp16) * 4,
+                              sizeof(__fp16) * unroll * ldB, 0};
+
+        snrt_ssr_loop_3d(SNRT_SSR_DM0, ssr0_b[1], ssr0_b[2], ssr0_b[3],
+                         ssr0_i[1], ssr0_i[2], ssr0_i[3]);
+        snrt_ssr_repeat(SNRT_SSR_DM0, unroll);
+
+        snrt_ssr_loop_4d(SNRT_SSR_DM1, ssr1_b[0], ssr1_b[1], ssr1_b[2],
+                         ssr1_b[3], ssr1_i[0], ssr1_i[1], ssr1_i[2], ssr1_i[3]);
+    }
+
+    // SSR start address need to be configured each time
+    snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_4D, A);
+    snrt_ssr_read(SNRT_SSR_DM1, SNRT_SSR_4D, B);
+    snrt_ssr_enable();
+
+    // Kernel progresses by 4 values each step
+    const uint32_t n_frep = K / 4 - 1;
+
+    for (uint32_t m = 0; m < M; m++) {
+        uint32_t n = 0;
+        for (uint32_t n0 = 0; n0 < N / unroll; n0++) {
+            __fp16* _C = &C[m * ldC + n];
+            const register float zero = 0.0;
+            register v4f16 c[unroll];
+            register v2f32 reduce_reg[unroll];
+            uint32_t alpha;
+
+            asm volatile(
+                "lw      %[alpha], 0(%[ALPHA]) \n"
+                "beqz    %[alpha], 1f \n"
+                // Load intermediate results
+                "flw %[c0], 0(%[C]) \n"
+                "flw %[c1], 4(%[C]) \n"
+                "flw %[c2], 8(%[C]) \n"
+                "flw %[c3], 12(%[C]) \n"
+                "flw %[c4], 16(%[C]) \n"
+                "flw %[c5], 20(%[C]) \n"
+                "flw %[c6], 24(%[C]) \n"
+                "flw %[c7], 28(%[C]) \n"
+                // Pack intermediate results into SIMD vector
+                "vfcpka.s.s %[c0], %[c0], %[zero]\n"
+                "vfcpka.s.s %[c1], %[c1], %[zero]\n"
+                "vfcpka.s.s %[c2], %[c2], %[zero]\n"
+                "vfcpka.s.s %[c3], %[c3], %[zero]\n"
+                "vfcpka.s.s %[c4], %[c4], %[zero]\n"
+                "vfcpka.s.s %[c5], %[c5], %[zero]\n"
+                "vfcpka.s.s %[c6], %[c6], %[zero]\n"
+                "vfcpka.s.s %[c7], %[c7], %[zero]\n"
+                "j 2f \n"
+                "1: \n"
+                // Initialize SIMD vector with zeros
+                "vfcpka.s.s %[c0], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c1], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c2], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c3], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c4], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c5], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c6], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c7], %[zero], %[zero]\n"
+                "2: \n"
+                // Perform non-expanding MACs
+                "frep.o  %[n_frep], 8, 0, 0 \n"
+                "vfmac.h %[c0], ft1, ft0 \n"
+                "vfmac.h %[c1], ft1, ft0 \n"
+                "vfmac.h %[c2], ft1, ft0 \n"
+                "vfmac.h %[c3], ft1, ft0 \n"
+                "vfmac.h %[c4], ft1, ft0 \n"
+                "vfmac.h %[c5], ft1, ft0 \n"
+                "vfmac.h %[c6], ft1, ft0 \n"
+                "vfmac.h %[c7], ft1, ft0 \n"
+                // Initialize reduce register to zero
+                "vfcpka.s.s %[reduce_reg0], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg1], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg2], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg3], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg4], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg5], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg6], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg7], %[zero], %[zero]\n"
+                // Sum-reduce vector
+                // EXVSUM is used for the sake of packing afterwards
+                "vfsumex.s.h %[reduce_reg0], %[c0] \n"
+                "vfsumex.s.h %[reduce_reg1], %[c1] \n"
+                "vfsumex.s.h %[reduce_reg2], %[c2] \n"
+                "vfsumex.s.h %[reduce_reg3], %[c3] \n"
+                "vfsumex.s.h %[reduce_reg4], %[c4] \n"
+                "vfsumex.s.h %[reduce_reg5], %[c5] \n"
+                "vfsumex.s.h %[reduce_reg6], %[c6] \n"
+                "vfsumex.s.h %[reduce_reg7], %[c7] \n"
+                // Initialize reduce register to zero
+                "vfcpka.s.s %[c0], %[zero], %[zero] \n"
+                "vfcpka.s.s %[c1], %[zero], %[zero] \n"
+                "vfcpka.s.s %[c2], %[zero], %[zero] \n"
+                "vfcpka.s.s %[c3], %[zero], %[zero] \n"
+                "vfcpka.s.s %[c4], %[zero], %[zero] \n"
+                "vfcpka.s.s %[c5], %[zero], %[zero] \n"
+                "vfcpka.s.s %[c6], %[zero], %[zero] \n"
+                "vfcpka.s.s %[c7], %[zero], %[zero] \n"
+                // Sum-reduce vector
+                "vfsum.s %[c0], %[reduce_reg0] \n"
+                "vfsum.s %[c1], %[reduce_reg1] \n"
+                "vfsum.s %[c2], %[reduce_reg2] \n"
+                "vfsum.s %[c3], %[reduce_reg3] \n"
+                "vfsum.s %[c4], %[reduce_reg4] \n"
+                "vfsum.s %[c5], %[reduce_reg5] \n"
+                "vfsum.s %[c6], %[reduce_reg6] \n"
+                "vfsum.s %[c7], %[reduce_reg7] \n"
+                // Pack results to FP16 vectors
+                "vfcpka.h.s %[c0], %[c0], %[c1] \n"
+                "vfcpkb.h.s %[c1], %[c2], %[c3] \n"
+                "vfcpka.h.s %[c2], %[c4], %[c5] \n"
+                "vfcpkb.h.s %[c3], %[c6], %[c7] \n"
+                : [ c0 ] "+f"(c[0]), [ c1 ] "+f"(c[1]), [ c2 ] "+f"(c[2]),
+                  [ c3 ] "+f"(c[3]), [ c4 ] "+f"(c[4]), [ c5 ] "+f"(c[5]),
+                  [ c6 ] "+f"(c[6]), [ c7 ] "+f"(c[7]), [ alpha ] "=r"(alpha),
+                  [ reduce_reg0 ] "+f"(reduce_reg[0]),
+                  [ reduce_reg1 ] "+f"(reduce_reg[1]),
+                  [ reduce_reg2 ] "+f"(reduce_reg[2]),
+                  [ reduce_reg3 ] "+f"(reduce_reg[3]),
+                  [ reduce_reg4 ] "+f"(reduce_reg[4]),
+                  [ reduce_reg5 ] "+f"(reduce_reg[5]),
+                  [ reduce_reg6 ] "+f"(reduce_reg[6]),
+                  [ reduce_reg7 ] "+f"(reduce_reg[7])
+                : [ C ] "r"(_C), [ zero ] "f"(zero), [ n_frep ] "r"(n_frep),
+                  [ ALPHA ] "r"(ALPHA)
+                : "ft0", "ft1", "ft2");
+
+            // Store results back
+            ((v4f16*)_C)[0] = c[0];
+            ((v4f16*)_C)[1] = c[1];
+            n += unroll;
+        }
+
+        // Clean up left over column
+        // snrt_ssr_disable();
+
+        // for (; n < N; n++) {
+        //     __fp16 c = (*ALPHA) ? C[m * ldC + n] : 0.0;
+        //     for (uint32_t k = 0; k < K; k++) {
+        //         c += A[k + m * ldA] * B[k + n * ldB];
+        //     }
+        //     C[m * ldC + n] = c;
+        // }
+
+        // snrt_ssr_enable();
+    }
+
+    snrt_ssr_disable();
+}
+
+void gemm_fp16_ex_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
                                uint32_t ldA, __fp16* B, uint32_t ldB, __fp16* C,
                                uint32_t ldC, const uint32_t* ALPHA,
                                uint32_t setup_SSR) {
@@ -485,7 +652,7 @@ void gemm_fp16simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
     snrt_ssr_disable();
 }
 
-void gemm_fp8simd_tb_ssr_frep(uint32_t M, uint32_t N, uint32_t K, char* A,
+void gemm_fp8_ex_opt(uint32_t M, uint32_t N, uint32_t K, char* A,
                               uint32_t ldA, char* B, uint32_t ldB, char* C,
                               uint32_t ldC, const uint32_t* ALPHA,
                               uint32_t setup_SSR) {

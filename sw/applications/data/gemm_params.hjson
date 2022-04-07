@@ -12,5 +12,6 @@
     alpha: 0,
     transpose_A: false,
     transpose_B: true,
-    prec: 16
+    prec: 16,
+    expand: 0
 }

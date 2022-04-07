@@ -112,7 +112,8 @@ def emit_GEMM_layer(name='gemm', **kwargs):
     layer_str += f'\t.TA = {int(kwargs["ta"])},\n'
     layer_str += f'\t.TB = {int(kwargs["tb"])},\n'
     layer_str += f'\t.ALPHA = {kwargs["alpha"]},\n'
-    layer_str += f'\t.dtype = FP{kwargs["prec"]}\n'
+    layer_str += f'\t.dtype = FP{kwargs["prec"]},\n'
+    layer_str += f'\t.expand = {kwargs["expand"]}\n'
     layer_str += '};\n\n\n'
 
     ctypes = {
@@ -437,7 +438,8 @@ def main():
             'ta': param['transpose_A'],
             'tb': param['transpose_B'],
             'alpha': param['alpha'],
-            'prec': param['prec']
+            'prec': param['prec'],
+            'expand': param['expand']
         }
 
         emit_header_file('GEMM', **kwargs)
