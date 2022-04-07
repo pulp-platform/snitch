@@ -1062,6 +1062,324 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
 
       /* Xpulpimg extension */
+      // Post-increment loads/stores
+      P_LB_IRPOST: begin // Xpulpimg: p.lb rd, iimm(rs1!)
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            is_signed = 1'b1;
+            opa_select = Reg;
+            opb_select = IImmediate;
+         end else begin
+            illegal_inst = 1'b1;
+         end  
+      end  
+      P_LBU_IRPOST: begin // Xpulpimg: p.lbu
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            opa_select = Reg;
+            opb_select = IImmediate;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end 
+      P_LH_IRPOST: begin // Xpulpimg: p.lh
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            is_signed = 1'b1;
+            ls_size = HalfWord;
+            opa_select = Reg;
+            opb_select = IImmediate;
+         end else begin 
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_LHU_IRPOST: begin // Xpulpimg: p.lhu
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            ls_size = HalfWord;
+            opa_select = Reg;
+            opb_select = IImmediate;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end 
+       P_LW_IRPOST: begin // Xpulpimg: p.lw
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            is_signed = 1'b1;
+            ls_size = Word;
+            opa_select = Reg;
+            opb_select = IImmediate;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_LB_RRPOST: begin // Xpulpimg: p.lb rd rs2(rs1!)
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            is_signed = 1'b1;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_LBU_RRPOST: begin // Xpulpimg: p.lbu
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_LH_RRPOST: begin // Xpulpimg: p.lh
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            is_signed = 1'b1;
+            ls_size = HalfWord;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin 
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_LHU_RRPOST: begin // Xpulpimg: p.lhu
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            ls_size = HalfWord;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_LW_RRPOST: begin // Xpulpimg: p.lw
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            write_rs1 = 1'b1;
+            is_load = 1'b1;
+            is_postincr = 1'b1;
+            is_signed = 1'b1;
+            ls_size = Word;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin 
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_LB_RR: begin // Xpulpimg: p.lb rd,rs2(rs1)
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            is_load = 1'b1;
+            is_signed = 1'b1;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end 
+      P_LBU_RR: begin // Xpulpimg: p.lbu
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            is_load = 1'b1;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end 
+      P_LH_RR: begin // Xpulpimg: p.lh
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            is_load = 1'b1;
+            is_signed = 1'b1;
+            ls_size = HalfWord;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end // case: P_LH_RR
+      P_LHU_RR: begin // Xpulpimg: p.lhu
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            is_load = 1'b1;
+            ls_size = HalfWord;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end         
+      P_LW_RR: begin // Xpulpimg: p.lw
+         if (Xipu) begin
+            write_rd = 1'b0;
+            uses_rd = 1'b1;
+            is_load = 1'b1;
+            is_signed = 1'b1;
+            ls_size = Word;
+            opa_select = Reg;
+            opb_select = Reg;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end      
+      P_SB_IRPOST: begin // Xpulpimg: p.sb rs2, simm(rs1!)        
+         if (Xipu) begin
+            write_rd = 1'b0;
+            write_rs1 = 1'b1;
+            is_store = 1'b1;
+            is_postincr = 1'b1;
+            opa_select = Reg;
+            opb_select = SImmediate;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end 
+      P_SH_IRPOST: begin // Xpulpimg: p.sh
+         if (Xipu) begin
+            write_rd = 1'b0;
+            write_rs1 = 1'b1;
+            is_store = 1'b1;
+            is_postincr = 1'b1;
+            ls_size = HalfWord;
+            opa_select = Reg;
+            opb_select = SImmediate;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_SW_IRPOST: begin // Xpulpimg: p.sw
+         if (Xipu) begin
+            write_rd = 1'b0;
+            write_rs1 = 1'b1;
+            is_store = 1'b1;
+            is_postincr = 1'b1;
+            ls_size = Word;
+            opa_select = Reg;
+            opb_select = SImmediate;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end
+      P_SB_RRPOST: begin // Xpulpimg: p.sb rs2,rs3(rs1!)
+         if (Xipu) begin
+            write_rd = 1'b0;
+            write_rs1 = 1'b1;
+            is_store = 1'b1;
+            is_postincr = 1'b1;
+            opa_select = Reg; // rs1 base address
+            opb_select = RegRd; // rs3 (i.e. rd) offset
+            opc_select = RegRs2; // rs2 source data
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_SH_RRPOST: begin // Xpulpimg: p.sh
+         if (Xipu) begin
+            write_rd = 1'b0;
+            write_rs1 = 1'b1;
+            is_store = 1'b1;
+            is_postincr = 1'b1;
+            ls_size = HalfWord;
+            opa_select = Reg;
+            opb_select = RegRd;
+            opc_select = RegRs2;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end
+      P_SW_RRPOST: begin // Xpulpimg: p.sw
+         if (Xipu) begin
+            write_rd = 1'b0;
+            write_rs1 = 1'b1;
+            is_store = 1'b1;
+            is_postincr = 1'b1;
+            ls_size = Word;
+            opa_select = Reg;
+            opb_select = RegRd;
+            opc_select = RegRs2;
+         end else begin
+            illegal_inst = 1'b1;
+         end 
+      end 
+      P_SB_RR: begin // Xpulpimg: p.sb rs2, rs3(rs1)
+         if (Xipu) begin
+            write_rd = 1'b0;
+            is_store = 1'b1;
+            opa_select = Reg;
+            opb_select = RegRd;
+            opc_select = RegRs2;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end 
+      P_SH_RR: begin // Xpulpimg: p.sh
+         if (Xipu) begin
+            write_rd = 1'b0;
+            is_store = 1'b1;
+            ls_size = HalfWord;
+            opa_select = Reg;
+            opb_select = RegRd;
+            opc_select = RegRs2;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end 
+      P_SW_RR: begin // Xpulpimg: p.sw
+         if (Xipu) begin
+            write_rd = 1'b0;
+            is_store = 1'b1;
+            ls_size = Word;
+            opa_select = Reg;
+            opb_select = RegRd;
+            opc_select = RegRs2;
+         end else begin
+            illegal_inst = 1'b1;
+         end
+      end          
       // Immediate branching
       P_BEQIMM: begin // Xpulpimg: p.beqimm
          if (Xipu) begin
@@ -1073,7 +1391,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
          end else begin
             illegal_inst = 1'b1;
          end
-      end // case: P_BEQIMM
+      end 
       P_BNEIMM: begin // Xpulpimg: p.bneimm
          if (Xipu) begin
             is_branch = 1'b1;
@@ -1084,10 +1402,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
          end else begin
             illegal_inst = 1'b1;
          end
-      end // case: P_BNEIMM        
-            
-            
-               
+      end                    
       // Offload to IPU coprocessor
       // 1 source register (rs1)
       P_ABS,                // Xpulpimg: p.abs
@@ -3151,7 +3466,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // hack but in case of retiring a load we want to relax the unknown
   // constraints a bit.
   `ASSERT(RegWriteKnown, gpr_we & (gpr_waddr != 0) & !retire_load
-                                    |-> !$isunknown(gpr_wdata), clk_i, rst_i)
+                                    |-> !$isunknown(gpr_wdata[0]), clk_i, rst_i)
   // Check that PMA rule counts do not exceed maximum number of rules
   `ASSERT_INIT(CheckPMANonIdempotent,
     SnitchPMACfg.NrNonIdempotentRegionRules <= snitch_pma_pkg::NrMaxRules);
