@@ -2818,11 +2818,11 @@ impl<'a> InstructionTranslator<'a> {
     ) {
         let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
         let (b3, b2, b1, b0) = self.read_freg_vf64h(data.rs2);
-        let zero = LLVMConstNull(LLVMInt16Type());
-        let res0 = self.emit_fp16_op(a0, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res1 = self.emit_fp16_op(a1, b1, zero, ff_op, fpmode_dst); // zero not used
-        let res2 = self.emit_fp16_op(a2, b2, zero, ff_op, fpmode_dst); // zero not used
-        let res3 = self.emit_fp16_op(a3, b3, zero, ff_op, fpmode_dst); // zero not used
+        let (c3, c2, c1, c0) = self.read_freg_vf64h(data.rd);
+        let res0 = self.emit_fp16_op(a0, b0, c0, ff_op, fpmode_dst); // zero not used
+        let res1 = self.emit_fp16_op(a1, b1, c1, ff_op, fpmode_dst); // zero not used
+        let res2 = self.emit_fp16_op(a2, b2, c2, ff_op, fpmode_dst); // zero not used
+        let res3 = self.emit_fp16_op(a3, b3, c3, ff_op, fpmode_dst); // zero not used
         self.write_freg_vf64h(data.rd, res3, res2, res1, res0);
     }
 
@@ -6891,7 +6891,7 @@ impl<'a> InstructionTranslator<'a> {
         self.emit_possible_ssr_read(rs);
         let raw_ptr = self.freg_ptr(rs);
         self.trace_access(
-            TraceAccess::ReadFReg(rs as u8),
+            TraceAccess::Readvf64hReg(rs as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
         // read data0
@@ -7199,7 +7199,7 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildStore(self.builder, data2, ptr_2);
         LLVMBuildStore(self.builder, data3, ptr_3);
         self.trace_access(
-            TraceAccess::WriteFReg(rd as u8),
+            TraceAccess::Writevf64hReg(rd as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
         self.emit_possible_ssr_write(rd);

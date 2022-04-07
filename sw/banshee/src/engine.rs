@@ -1010,7 +1010,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         self.engine.had_error.store(true, Ordering::SeqCst);
     }
 
-    fn binary_trace(&self, addr: u32, inst: u32, accesses: &[TraceAccess], data: &[u64]) {
+    unsafe fn binary_trace(&self, addr: u32, inst: u32, accesses: &[TraceAccess], data: &[u64]) {
         // Assemble the arguments.
         let args = accesses.iter().copied().zip(data.iter().copied());
         let mut args = args.map(|(access, data)| match access {
@@ -1038,6 +1038,22 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 x,
                 f32::from_bits((data >> 32) as u32),
                 f32::from_bits((data) as u32)
+            ),
+            TraceAccess::Readvf64hReg(x) => format!(
+                "f{:02}:[{:>8.4}, {:>8.4}, {:>8.4}, {:>8.4}]",
+                x,
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s((data & 0xffff_0000_0000_0000) >> 48, flexfloat::FfOpCvt::Fcvt16f2f, false, false) as u32),
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s((data & 0x0000_ffff_0000_0000) >> 32, flexfloat::FfOpCvt::Fcvt16f2f, false, false) as u32),
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s((data & 0x0000_0000_ffff_0000) >> 16, flexfloat::FfOpCvt::Fcvt16f2f, false, false) as u32),
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s((data & 0x0000_0000_0000_ffff) >> 0, flexfloat::FfOpCvt::Fcvt16f2f, false, false) as u32),
+            ),
+            TraceAccess::Writevf64hReg(x) => format!(
+                "f{:02}=[{:>8.4}, {:>8.4}, {:>8.4}, {:>8.4}]",
+                x,
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s((data & 0xffff_0000_0000_0000) >> 48, flexfloat::FfOpCvt::Fcvt16f2f, false, false) as u32),
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s((data & 0x0000_ffff_0000_0000) >> 32, flexfloat::FfOpCvt::Fcvt16f2f, false, false) as u32),
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s((data & 0x0000_0000_ffff_0000) >> 16, flexfloat::FfOpCvt::Fcvt16f2f, false, false) as u32),
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s((data & 0x0000_0000_0000_ffff) >> 0, flexfloat::FfOpCvt::Fcvt16f2f, false, false) as u32),
             ),
         });
         let args = args.join(" ");
@@ -1299,11 +1315,13 @@ pub enum TraceAccess {
     ReadFReg(u8),
     ReadF32Reg(u8),
     Readvf64sReg(u8),
+    Readvf64hReg(u8),
     WriteMem,
     WriteReg(u8),
     WriteFReg(u8),
     WriteF32Reg(u8),
     Writevf64sReg(u8),
+    Writevf64hReg(u8),
     RMWMem,
 }
 
