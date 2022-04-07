@@ -293,6 +293,7 @@ module ${name}_top
 
   logic [${regbus_debug.dw-1}:0] sba_rdata;
   logic        sba_rvalid;
+  logic        sba_err;
 
   logic [${regbus_debug.dw-1}:0] sba_addr_long;
 
@@ -324,6 +325,8 @@ module ${name}_top
     .master_gnt_i (sba_gnt),
     .master_r_valid_i (sba_rvalid),
     .master_r_rdata_i (sba_rdata),
+    .master_r_err_i (sba_err),
+    .master_r_other_err_i (1'b0),
     .dmi_rst_ni (dmi_rst_n),
     .dmi_req_valid_i (dmi_req_valid),
     .dmi_req_ready_o (dmi_req_ready),
@@ -354,7 +357,7 @@ module ${name}_top
     .mem_gnt_o (sba_gnt),
     .mem_rsp_valid_o (sba_rvalid),
     .mem_rsp_rdata_o (sba_rdata),
-    .mem_rsp_error_o (/* left open */),
+    .mem_rsp_error_o (sba_err),
     .axi_req_o (${soc_periph_xbar.in_debug.req_name()}),
     .axi_rsp_i (${soc_periph_xbar.in_debug.rsp_name()})
 
