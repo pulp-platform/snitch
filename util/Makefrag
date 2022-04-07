@@ -70,6 +70,9 @@ VLOGAN_FLAGS += -assert disable_cover
 VLOGAN_FLAGS += -full64
 VLOGAN_FLAGS += -kdb
 
+# default on target `all`
+all:
+
 #################
 # Prerequisites #
 #################

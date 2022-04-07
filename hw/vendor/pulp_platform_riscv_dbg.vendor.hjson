@@ -7,15 +7,24 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/riscv-dbg.git",
-    rev: "master",
+    rev: "v0.5.0",
   },
 
   patch_dir: "patches/pulp_platform_riscv_dbg",
 
   exclude_from_upstream: [
     "ci",
-    "tb",
     "sva",
+    "tb/remote_bitbang",
+    "tb/prog",
+    "tb/unused",
+    "tb/*.tcl"
+    "tb/*.c*"
+    "tb/.*",
+    "tb/*vsim*",
+    "tb/LICENSE*",
+    "tb/README*",
+    "tb/Makefile",
     "ips_list.yml",
     "src_files.yml"
   ]

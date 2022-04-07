@@ -10,7 +10,7 @@ package:
 
 dependencies:
   tech_cells_generic: { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: clearable_cdcs}
+  common_cells: {git: "https://github.com/pulp-platform/common_cells.git", version: 1.24.0}
 
 sources:
   files:
@@ -38,3 +38,12 @@ sources:
   - target: simulation
     files:
     - src/dmi_test.sv
+
+  - target: test
+    files:
+    # Level 1
+    - src/dmi_intf.sv
+    - tb/jtag_dmi/jtag_intf.sv
+    - tb/jtag_dmi/jtag_test.sv
+    # Level 3
+    - tb/jtag_dmi/tb_jtag_dmi.sv
