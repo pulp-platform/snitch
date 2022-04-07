@@ -173,6 +173,8 @@ module ${cfg['name']}_wrapper (
 % if not cfg['tie_ports']:
   input  logic [9:0]                             hart_base_id_i,
   input  logic [${cfg['addr_width']-1}:0]                            cluster_base_addr_i,
+% endif
+% if cfg['timing']['iso_crossings']:
   input  logic                                   clk_d2_bypass_i,
 % endif
 % if cfg['sram_cfg_expose']:
@@ -290,11 +292,14 @@ module ${cfg['name']}_wrapper (
 % if cfg['tie_ports']:
     .hart_base_id_i (${to_sv_hex(cfg['hart_base_id'], 10)}),
     .cluster_base_addr_i (${to_sv_hex(cfg['cluster_base_addr'], cfg['addr_width'])}),
-    .clk_d2_bypass_i (1'b0),
 % else:
     .hart_base_id_i,
     .cluster_base_addr_i,
+% endif
+% if cfg['timing']['iso_crossings']:
     .clk_d2_bypass_i,
+% else:
+    .clk_d2_bypass_i (1'b0),
 % endif
 % if cfg['sram_cfg_expose']:
     .sram_cfgs_i (sram_cfgs_i),

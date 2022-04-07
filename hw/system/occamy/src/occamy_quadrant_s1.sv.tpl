@@ -181,7 +181,6 @@ module ${name}_quadrant_s1
     .msip_i (msip_i[${i}*NrCoresCluster+:NrCoresCluster]),
     .hart_base_id_i (hart_base_id_${i}),
     .cluster_base_addr_i (cluster_base_addr[${i}]),
-    .clk_d2_bypass_i (1'b0),
     .narrow_in_req_i (${narrow_cluster_in.req_name()}),
     .narrow_in_resp_o (${narrow_cluster_in.rsp_name()}),
     .narrow_out_req_o  (${narrow_cluster_out.req_name()}),
