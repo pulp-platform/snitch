@@ -63,7 +63,9 @@ module snitch_icache_l0_tb import snitch_pkg::*; #(
     parameter int FILL_AW = AddrWidth,
     parameter int FILL_DW = 64,
     parameter int L0_EARLY_TAG_WIDTH = 8,
-    parameter bit EARLY_LATCH = 0
+    parameter bit EARLY_LATCH = 0,
+    parameter bit BUFFER_LOOKUP = 0,
+    parameter bit GUARANTEE_ORDERING = 0
 );
 
   localparam time ClkPeriod = 10ns;
@@ -75,17 +77,19 @@ module snitch_icache_l0_tb import snitch_pkg::*; #(
   logic [LINE_WIDTH-1:0] memory [logic [AddrWidth-1:0]];
 
   localparam snitch_icache_pkg::config_t CFG = '{
-      NR_FETCH_PORTS:    NR_FETCH_PORTS,
-      LINE_WIDTH:        LINE_WIDTH,
-      LINE_COUNT:        LINE_COUNT,
-      L0_LINE_COUNT:     L0_LINE_COUNT,
-      SET_COUNT:         SET_COUNT,
-      PENDING_COUNT:     2,
-      FETCH_AW:          FETCH_AW,
-      FETCH_DW:          FETCH_DW,
-      FILL_AW:           FILL_AW,
-      FILL_DW:           FILL_DW,
-      EARLY_LATCH:       EARLY_LATCH,
+      NR_FETCH_PORTS:     NR_FETCH_PORTS,
+      LINE_WIDTH:         LINE_WIDTH,
+      LINE_COUNT:         LINE_COUNT,
+      L0_LINE_COUNT:      L0_LINE_COUNT,
+      SET_COUNT:          SET_COUNT,
+      PENDING_COUNT:      2,
+      FETCH_AW:           FETCH_AW,
+      FETCH_DW:           FETCH_DW,
+      FILL_AW:            FILL_AW,
+      FILL_DW:            FILL_DW,
+      EARLY_LATCH:        EARLY_LATCH,
+      BUFFER_LOOKUP:      BUFFER_LOOKUP,
+      GUARANTEE_ORDERING: GUARANTEE_ORDERING,
 
       FETCH_ALIGN: $clog2(FETCH_DW/8),
       FILL_ALIGN:  $clog2(FILL_DW/8),
