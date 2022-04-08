@@ -10,7 +10,7 @@
     rev: "master",
   },
 
-  // patch_dir: "patches/pulp_platform_axi",
+  patch_dir: "patches/pulp_platform_axi",
 
   exclude_from_upstream: [
     ".ci",
