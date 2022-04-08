@@ -17,6 +17,7 @@ find $ROOT/hw/ \
     | xargs verible-verilog-lint \
     --rules=-interface-name-style --lint_fatal --parse_fatal \
     --waiver_files \
+$ROOT/hw/ip/future/lint/waiver.verible,\
 $ROOT/hw/ip/snitch_cluster/lint/waiver.verible,\
 $ROOT/hw/system/occamy/lint/waiver.verible
 
