@@ -275,6 +275,7 @@ module snitch_cluster
     LatencyMode: NarrowXbarLatency,
     AxiIdWidthSlvPorts: NarrowIdWidthIn,
     AxiIdUsedSlvPorts: NarrowIdWidthIn,
+    UniqueIds: 1'b0,
     AxiAddrWidth: PhysicalAddrWidth,
     AxiDataWidth: NarrowDataWidth,
     NoAddrRules: NrRules
@@ -290,6 +291,7 @@ module snitch_cluster
     LatencyMode: WideXbarLatency,
     AxiIdWidthSlvPorts: WideIdWidthIn,
     AxiIdUsedSlvPorts: WideIdWidthIn,
+    UniqueIds: 1'b0,
     AxiAddrWidth: PhysicalAddrWidth,
     AxiDataWidth: WideDataWidth,
     NoAddrRules: 2
@@ -507,8 +509,8 @@ module snitch_cluster
     .b_chan_t (axi_slv_dma_b_chan_t),
     .ar_chan_t (axi_slv_dma_ar_chan_t),
     .r_chan_t (axi_slv_dma_r_chan_t),
-    .req_t (axi_slv_dma_req_t),
-    .resp_t (axi_slv_dma_resp_t)
+    .axi_req_t (axi_slv_dma_req_t),
+    .axi_resp_t (axi_slv_dma_resp_t)
   ) i_cut_ext_wide_out (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
@@ -525,8 +527,8 @@ module snitch_cluster
     .b_chan_t (axi_mst_dma_b_chan_t),
     .ar_chan_t (axi_mst_dma_ar_chan_t),
     .r_chan_t (axi_mst_dma_r_chan_t),
-    .req_t (axi_mst_dma_req_t),
-    .resp_t (axi_mst_dma_resp_t)
+    .axi_req_t (axi_mst_dma_req_t),
+    .axi_resp_t (axi_mst_dma_resp_t)
   ) i_cut_ext_wide_in (
     .clk_i (clk_i),
     .rst_ni (rst_ni),
@@ -555,7 +557,7 @@ module snitch_cluster
   localparam bit [DmaXbarCfg.NoSlvPorts-1:0] DMAEnableDefaultMstPort = '1;
   axi_xbar #(
     .Cfg (DmaXbarCfg),
-    .AtopSupport (0),
+    .ATOPs (0),
     .slv_aw_chan_t (axi_mst_dma_aw_chan_t),
     .mst_aw_chan_t (axi_slv_dma_aw_chan_t),
     .w_chan_t (axi_mst_dma_w_chan_t),
@@ -1094,8 +1096,8 @@ module snitch_cluster
     .b_chan_t (axi_mst_b_chan_t),
     .ar_chan_t (axi_mst_ar_chan_t),
     .r_chan_t (axi_mst_r_chan_t),
-    .req_t (axi_mst_req_t),
-    .resp_t (axi_mst_resp_t)
+    .axi_req_t (axi_mst_req_t),
+    .axi_resp_t (axi_mst_resp_t)
   ) i_cut_ext_narrow_slv (
     .clk_i,
     .rst_ni,
@@ -1177,14 +1179,14 @@ module snitch_cluster
 
   // Optionally decouple the external narrow AXI master ports.
   axi_cut #(
-    .Bypass    ( !RegisterExtNarrow ),
-    .aw_chan_t ( axi_slv_aw_chan_t ),
-    .w_chan_t  ( axi_slv_w_chan_t ),
-    .b_chan_t  ( axi_slv_b_chan_t ),
-    .ar_chan_t ( axi_slv_ar_chan_t ),
-    .r_chan_t  ( axi_slv_r_chan_t ),
-    .req_t     ( axi_slv_req_t ),
-    .resp_t    ( axi_slv_resp_t )
+    .Bypass     ( !RegisterExtNarrow ),
+    .aw_chan_t  ( axi_slv_aw_chan_t ),
+    .w_chan_t   ( axi_slv_w_chan_t ),
+    .b_chan_t   ( axi_slv_b_chan_t ),
+    .ar_chan_t  ( axi_slv_ar_chan_t ),
+    .r_chan_t   ( axi_slv_r_chan_t ),
+    .axi_req_t  ( axi_slv_req_t ),
+    .axi_resp_t ( axi_slv_resp_t )
   ) i_cut_ext_narrow_mst (
     .clk_i      ( clk_i           ),
     .rst_ni     ( rst_ni          ),
