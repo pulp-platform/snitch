@@ -12,7 +12,7 @@
 /// Data path for the AXI DMA. This modules handles the R/W channel of the
 /// AXI protocol.
 /// Module gets read stream, realigns data and emits a write stream.
-/// AXI-like valid/ready handshaking is used to communicate with the rest 
+/// AXI-like valid/ready handshaking is used to communicate with the rest
 /// of the backend.
 module axi_dma_data_path #(
     /// Data width of the AXI bus
@@ -56,11 +56,11 @@ module axi_dma_data_path #(
     /// Ready signal of the AXI r channel
     output logic                   r_ready_o,
 
-    /// number of bytes the end of the read transfer is short to reach a 
+    /// number of bytes the end of the read transfer is short to reach a
     /// Bus-aligned boundary
     input  logic [OffsetWidth-1:0] r_tailer_i,
-    /// number of bytes the read transfers starts after a 
-    /// Bus-aligned boundary    
+    /// number of bytes the read transfers starts after a
+    /// Bus-aligned boundary
     input  logic [OffsetWidth-1:0] r_offset_i,
     /// The amount the read data has to be shifted to write-align it
     input  logic [OffsetWidth-1:0] r_shift_i,
@@ -77,17 +77,17 @@ module axi_dma_data_path #(
     /// Ready signal of the AXI w channel
     input  logic                   w_ready_i,
 
-    /// number of bytes the write transfers starts after a 
-    /// Bus-aligned boundary   
+    /// number of bytes the write transfers starts after a
+    /// Bus-aligned boundary
     input  logic [OffsetWidth-1:0] w_offset_i,
-    /// number of bytes the end of the write transfer is short to reach a 
+    /// number of bytes the end of the write transfer is short to reach a
     /// Bus-aligned boundary
     input  logic [OffsetWidth-1:0] w_tailer_i,
     /// Number of beats requested by this transfer
     input  logic [            7:0] w_num_beats_i,
     /// True if the transfer only consists of a single beat
     input  logic                   w_is_single_i
-); 
+);
 
     // buffer contains 8 data bits per FIFO
     // buffer is at least 3 deep to prevent stalls
@@ -101,8 +101,8 @@ module axi_dma_data_path #(
 
     //--------------------------------------
     // Mask pre-calculation
-    //-------------------------------------- 
-    // in contiguous transfers that are unaligned, there will be some 
+    //--------------------------------------
+    // in contiguous transfers that are unaligned, there will be some
     // invalid bytes at the beginning and the end of the stream
     // example: 25B in 64 bit system
     // iiiivvvv|vvvvvvvv|vvvvvvvv|vvvvviii
@@ -125,7 +125,7 @@ module axi_dma_data_path #(
 
     //--------------------------------------
     // Barrel shifter
-    //-------------------------------------- 
+    //--------------------------------------
     // data arrives in chuncks of length DATA_WDITH, the buffer will be filled with
     // the realigned data. StrbWidth bytes will be inserted starting from the
     // provided address, overflows will naturally wrap
@@ -133,7 +133,7 @@ module axi_dma_data_path #(
     // signals connected to the buffer
     logic [StrbWidth-1:0][7:0] buffer_in;
 
-    // read aligned in mask. needs to be rotated together with the data before 
+    // read aligned in mask. needs to be rotated together with the data before
     // it can be used to fill in valid data into the buffer
     logic [StrbWidth-1:0]      read_aligned_in_mask;
 
@@ -142,13 +142,13 @@ module axi_dma_data_path #(
     logic [StrbWidth-1:0]      in_mask;
 
     // a barrel shifter is a concatenation of the same array with itself and a normal
-    // shift. 
+    // shift.
     assign buffer_in = {r_data_i, r_data_i} >> (r_shift_i * 8);
     assign in_mask   = {read_aligned_in_mask, read_aligned_in_mask}  >> r_shift_i;
 
     //--------------------------------------
     // In mask generation
-    //-------------------------------------- 
+    //--------------------------------------
     // in the case of unaligned reads -> not all data is valid
     logic is_first_r, is_first_r_d;
 
@@ -167,7 +167,7 @@ module axi_dma_data_path #(
 
     //--------------------------------------
     // Read control
-    //-------------------------------------- 
+    //--------------------------------------
     logic [StrbWidth-1:0] buffer_full;
     logic [StrbWidth-1:0] buffer_push;
     logic                 full;
@@ -195,14 +195,14 @@ module axi_dma_data_path #(
         // once valid data is applied, it can be pushed in all the selected (in_mask) buffers
         push        = r_valid_i && ~full;
         buffer_push = push ? in_mask : '0;
-        
+
         // r_dp_ready_o is triggered by the last element arriving from the read
-        r_dp_ready_o = r_dp_valid_i && r_last_i && r_valid_i && ~full;; 
+        r_dp_ready_o = r_dp_valid_i && r_last_i && r_valid_i && ~full;;
     end
 
     //--------------------------------------
     // Out mask generation -> wstrb mask
-    //-------------------------------------- 
+    //--------------------------------------
     // only pop the data actually needed for write from the buffer,
     // determine valid data to pop by calculation the wstrb
     logic [StrbWidth-1:0] out_mask;
@@ -222,7 +222,7 @@ module axi_dma_data_path #(
 
     //--------------------------------------
     // Write control
-    //-------------------------------------- 
+    //--------------------------------------
     // once buffer contains a full line -> all fifos are non-empty
     // push it out.
     // signals connected to the buffer
@@ -233,14 +233,14 @@ module axi_dma_data_path #(
     // write is decoupled from read, due to misalignments in the read/write
     // addresses, page crossing can be encountered at any time.
     // To handle this efficiently, a 2-to-1 or 1-to-2 mapping of r/w beats
-    // is required. The write unit needs to keep track of progress through 
+    // is required. The write unit needs to keep track of progress through
     // a counter and cannot use `r_last` for that.
     logic [7:0] w_num_beats_d, w_num_beats_q;
     logic       w_cnt_valid_d, w_cnt_valid_q;
 
     // data from buffer is popped
     logic       pop;
-    // write happens                 
+    // write happens
     logic       write_happening;
     // buffer is ready to write the requested data
     logic       ready_to_write;
@@ -298,13 +298,13 @@ module axi_dma_data_path #(
         if (ready_to_write == 1'b1) begin
             // assign data from buffers, mask out non valid entries
             for (int i = 0; i < StrbWidth; i++) begin
-                w_data_o[i*8 +: 8] = out_mask[i] ? buffer_out[i] : 8'b0;   
+                w_data_o[i*8 +: 8] = out_mask[i] ? buffer_out[i] : 8'b0;
             end
             // assign the out mask to the strobe
             w_strb_o = out_mask;
         end
 
-        // differentiate between the burst and non-burst case. If a transfer 
+        // differentiate between the burst and non-burst case. If a transfer
         // consists just of one beat the counters are disabled
         if (w_is_single_i) begin
             // in the single case the transfer is both first and last.
@@ -314,8 +314,8 @@ module axi_dma_data_path #(
         // in the bursted case the counters are needed to keep track of the progress of sending
         // beats. The w_last_o depends on the state of the counter
         end else begin
-            // first transfer happens as soon as a) the buffer is ready for a first transfer and b) 
-            // the counter is currently invalid 
+            // first transfer happens as soon as a) the buffer is ready for a first transfer and b)
+            // the counter is currently invalid
             is_first_w = first_possible & ~w_cnt_valid_q;
 
             // last happens as soon as a) the counter is valid and b) the counter is now down to 1

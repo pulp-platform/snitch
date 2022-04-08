@@ -13,6 +13,7 @@
 // the fixture instantiates the DMA backend, a golden model of the backend , and tasks controlling
 // both.
 
+`timescale 1ns/1ns
 module fixture_axi_dma_backend();
 
     // `include "../axi/include/axi/assign.svh"
@@ -57,6 +58,7 @@ module fixture_axi_dma_backend();
         axi_pkg::burst_t    burst_src, burst_dst;
         logic               decouple_rw;
         logic               deburst;
+        logic               serialize;
     } burst_req_t;
 
     `AXI_TYPEDEF_AW_CHAN_T(aw_chan_dma_t, addr_t, axi_id_t, user_t)
@@ -290,6 +292,7 @@ module fixture_axi_dma_backend();
         input logic [           1:0] src_burst_i, dst_burst_i,
         input logic [           3:0] src_cache_i, dst_cache_i,
         input logic                  decouple_rw_i,
+        input logic                  serialize_i,
         input logic                  deburst_i
     );
         burst_req_valid        <= 1'b0;
@@ -307,6 +310,7 @@ module fixture_axi_dma_backend();
         burst_req.burst_dst    <= dst_burst_i;
         burst_req.decouple_rw  <= decouple_rw_i;
         burst_req.deburst      <= deburst_i;
+        burst_req.serialize    <= serialize_i;
         burst_req_valid        <= 1'b1;
         // wait and set to 0
         @(posedge clk);
@@ -347,7 +351,8 @@ module fixture_axi_dma_backend();
         input logic [           1:0] src_burst_i, dst_burst_i,
         input logic [           3:0] src_cache_i, dst_cache_i,
         input logic                  decouple_rw_i,
-        input logic                  deburst_i
+        input logic                  deburst_i,
+        input logic                  serialize_i
     );
         logic [63:0] read_addr,   write_addr;
         logic [63:0] read_word,   write_word;
@@ -426,22 +431,23 @@ module fixture_axi_dma_backend();
         input logic [ AddrWidth-1:0] src_addr_i,  dst_addr_i,  num_bytes_i,
         input logic                  decouple_rw_i,
         input logic                  deburst_i,
+        input logic                  serialize_i,
         input logic                  wait_for_completion_i
     );
         // keep a log file
         int my_file;
         my_file = $fopen("dma_transfers.txt", "a+");
-        $write("ID: %d  SRC: 0x%x  DST: 0x%x  LEN: %d  DECOUPLE: %1b DEBURST: %1b ", transf_id_i, src_addr_i, dst_addr_i, num_bytes_i, decouple_rw_i, deburst_i );
-        $fwrite (my_file, "ID: %d  SRC: 0x%x  DST: 0x%x  LEN: %d  DECOUPLE: %1b DEBURST: %1b\n", transf_id_i, src_addr_i, dst_addr_i, num_bytes_i, decouple_rw_i, deburst_i );
+        $write("ID: %d  SRC: 0x%x  DST: 0x%x  LEN: %d  DECOUPLE: %1b DEBURST: %1b SERIALIZE: %1b", transf_id_i, src_addr_i, dst_addr_i, num_bytes_i, decouple_rw_i, deburst_i, serialize_i );
+        $fwrite (my_file, "ID: %d  SRC: 0x%x  DST: 0x%x  LEN: %d  DECOUPLE: %1b DEBURST: %1b SERIALIZE: %1b\n", transf_id_i, src_addr_i, dst_addr_i, num_bytes_i, decouple_rw_i, deburst_i, serialize_i );
         $fclose(my_file);
 
         // cache and burst is ignored
-        oned_dut_launch(transf_id_i, src_addr_i, dst_addr_i, num_bytes_i, 2'b01, 2'b01, 4'h0, 4'h0, decouple_rw_i, deburst_i);
+        oned_dut_launch(transf_id_i, src_addr_i, dst_addr_i, num_bytes_i, 2'b01, 2'b01, 4'h0, 4'h0, decouple_rw_i, deburst_i, serialize_i);
         // wait if requested
         if (wait_for_completion_i)
             wait_for_dut_completion();
         // run model
-        oned_osmium_launch(transf_id_i, src_addr_i, dst_addr_i, num_bytes_i, 2'b01, 2'b01, 4'h0, 4'h0, decouple_rw_i, deburst_i);
+        oned_osmium_launch(transf_id_i, src_addr_i, dst_addr_i, num_bytes_i, 2'b01, 2'b01, 4'h0, 4'h0, decouple_rw_i, deburst_i, serialize_i);
     endtask
 
     task reset ();
@@ -463,6 +469,7 @@ module fixture_axi_dma_backend();
         logic [ AddrWidth-1:0] src_addr,  dst_addr,  num_bytes;
         logic                  decouple_rw;
         logic                  deburst;
+        logic                  serialize;
 
         transf_id         = $urandom();
         // transf_id         = transaction_id;
@@ -474,10 +481,11 @@ module fixture_axi_dma_backend();
         num_bytes[15: 0]  = $urandom_range(max_len, 1);
         decouple_rw       = $urandom();
         deburst           = $urandom();
+        serialize         = $urandom();
 
         // transaction_id    = transaction_id + 1;
 
-        oned_launch(transf_id, src_addr, dst_addr, num_bytes, decouple_rw, deburst, wait_for_completion);
+        oned_launch(transf_id, src_addr, dst_addr, num_bytes, decouple_rw, deburst, serialize, wait_for_completion);
 
     endtask
 

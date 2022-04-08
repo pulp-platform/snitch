@@ -11,6 +11,7 @@
 
 // top level of the simulation for the AXI DMA backend
 
+`timescale 1ns/1ns
 module tb_axi_dma_backend;
 
     fixture_axi_dma_backend fix ();
@@ -74,4 +75,3 @@ module tb_axi_dma_backend;
     end
 
 endmodule
-

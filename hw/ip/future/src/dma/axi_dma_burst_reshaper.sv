@@ -25,7 +25,7 @@ module axi_dma_burst_reshaper #(
     ///              A value of 0 will cause the backend to discard the transfer prematurely
     /// - src_cache, dst_cache: the configuration of the cache fields in the AX beats
     /// - src_burst, dst_burst: currently only incremental bursts are supported (2'b01)
-    /// - decouple_rw: if set to true, there is no longer exactly one AXI write_request issued for 
+    /// - decouple_rw: if set to true, there is no longer exactly one AXI write_request issued for
     ///   every read request. This mode can improve performance of unaligned transfers when crossing
     ///   the AXI page boundaries.
     /// - deburst: if set, the DMA will split all bursts in single transfers
@@ -109,7 +109,7 @@ module axi_dma_burst_reshaper #(
         logic             valid;
     } burst_chan_t;
 
-    /// Type containing burst description 
+    /// Type containing burst description
     typedef struct packed {
         burst_chan_t  src;
         burst_chan_t  dst;
@@ -120,12 +120,12 @@ module axi_dma_burst_reshaper #(
 
     //--------------------------------------
     // state; internally hold one transfer
-    //-------------------------------------- 
+    //--------------------------------------
     burst_decoupled_t burst_d, burst_q;
 
     //--------------------------------------
     // page boundary check
-    //-------------------------------------- 
+    //--------------------------------------
     logic [PageAddrWidth-1:0] r_page_offset;
     logic [PageAddrWidth  :0] r_num_bytes_to_pb;
     logic [PageAddrWidth-1:0] w_page_offset;
@@ -161,12 +161,12 @@ module axi_dma_burst_reshaper #(
         // take the boundary that is closer
         c_num_bytes_to_pb = (r_num_bytes_to_pb > w_num_bytes_to_pb) ?
                              w_num_bytes_to_pb : r_num_bytes_to_pb;
-                             
+
     end
 
     //--------------------------------------
     // Synchronized R/W process
-    //-------------------------------------- 
+    //--------------------------------------
     logic [PageAddrWidth:0] r_num_bytes_possible;
     logic [PageAddrWidth:0] r_num_bytes;
     logic                   r_finish;
@@ -184,7 +184,7 @@ module axi_dma_burst_reshaper #(
 
         //--------------------------------------
         // Specify read transaction
-        //-------------------------------------- 
+        //--------------------------------------
         // max num bytes according to page(s)
         r_num_bytes_possible = (burst_q.decouple_rw == 1'b1) ?
                                 r_num_bytes_to_pb : c_num_bytes_to_pb;
@@ -202,7 +202,7 @@ module axi_dma_burst_reshaper #(
 
         // remaining bytes fit in one burst
         // reset storage for the read channel to stop this channel
-        end else begin 
+        end else begin
             r_num_bytes   = burst_q.src.num_bytes[PageAddrWidth:0];
             // default: when a transfer is finished, set it to 0
             burst_d.src   = '0;
@@ -222,7 +222,7 @@ module axi_dma_burst_reshaper #(
         read_req_o.ar.last     = r_finish;
         read_req_o.ar.burst    = burst_q.src.burst;
         read_req_o.ar.cache    = burst_q.src.cache;
-        r_valid_o              = burst_q.decouple_rw ? 
+        r_valid_o              = burst_q.decouple_rw ?
                                  burst_q.src.valid : burst_q.src.valid & w_ready_i;
 
         // create the R request
@@ -233,7 +233,7 @@ module axi_dma_burst_reshaper #(
 
         //--------------------------------------
         // Specify write transaction
-        //-------------------------------------- 
+        //--------------------------------------
         // max num bytes according to page(s)
         w_num_bytes_possible = (burst_q.decouple_rw == 1'b1) ?
                                 w_num_bytes_to_pb : c_num_bytes_to_pb;
@@ -251,7 +251,7 @@ module axi_dma_burst_reshaper #(
 
         // remaining bytes fit in one burst
         // reset storage for the write channel to stop this channel
-        end else begin 
+        end else begin
             w_num_bytes   = burst_q.dst.num_bytes[PageAddrWidth:0];
             // default: when a transfer is finished, set it to 0
             burst_d.dst   = '0;
@@ -272,7 +272,7 @@ module axi_dma_burst_reshaper #(
         write_req_o.aw.last     = w_finish;
         write_req_o.aw.burst    = burst_q.dst.burst;
         write_req_o.aw.cache    = burst_q.dst.cache;
-        w_valid_o               = burst_q.decouple_rw ? 
+        w_valid_o               = burst_q.decouple_rw ?
                                   burst_q.dst.valid : burst_q.dst.valid & r_ready_i;
 
         // create the W request
@@ -284,12 +284,12 @@ module axi_dma_burst_reshaper #(
 
         //--------------------------------------
         // Module control
-        //-------------------------------------- 
+        //--------------------------------------
         ready_o = r_finish & w_finish & valid_i & r_ready_i & w_ready_i;
 
         //--------------------------------------
         // Refill
-        //-------------------------------------- 
+        //--------------------------------------
         // new request is taken in if both r and w machines are ready.
         if (ready_o) begin
             // unfortunately this is unpacked
@@ -318,10 +318,10 @@ module axi_dma_burst_reshaper #(
             // assertions
             // pragma translate_off
             `ifndef VERILATOR
-            assert property (@(posedge clk_i) disable iff (~rst_ni) 
+            assert property (@(posedge clk_i) disable iff (~rst_ni)
                     (valid_i |-> burst_req_i.burst_src inside {axi_pkg::BURST_INCR})) else
                 $fatal(1, "Unsupported DMA src_burst request..");
-            assert property (@(posedge clk_i) disable iff (~rst_ni) 
+            assert property (@(posedge clk_i) disable iff (~rst_ni)
                     (valid_i |-> burst_req_i.burst_dst inside {axi_pkg::BURST_INCR})) else
                 $fatal(1, "Unsupported DMA dst_burst request.");
             `endif
@@ -331,9 +331,9 @@ module axi_dma_burst_reshaper #(
 
     //--------------------------------------
     // State
-    //--------------------------------------     
+    //--------------------------------------
     always_ff @(posedge clk_i or negedge rst_ni) begin
-        if (!rst_ni) begin 
+        if (!rst_ni) begin
             burst_q.decouple_rw        <= '0;
             burst_q.deburst            <= '0;
             burst_q.shift              <= '0;
@@ -349,8 +349,8 @@ module axi_dma_burst_reshaper #(
                 if (w_ready_i)              burst_q.dst <= burst_d.dst;
             end else begin
                 if (r_ready_i & w_ready_i)  burst_q.src <= burst_d.src;
-                if (w_ready_i & r_ready_i)  burst_q.dst <= burst_d.dst; 
-            end               
+                if (w_ready_i & r_ready_i)  burst_q.dst <= burst_d.dst;
+            end
         end
     end
 endmodule : axi_dma_burst_reshaper

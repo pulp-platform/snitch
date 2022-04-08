@@ -11,7 +11,7 @@
 
 /// Module, that controls the AXI bus. Takes two configuration structs (R/W) as an
 /// input. Implements the DMA functionality on the AXI bus.
-/// R and W config structs need to appear at the input simultaneously; sending a 
+/// R and W config structs need to appear at the input simultaneously; sending a
 /// R config w/o the corresponding W could lead to wrong AXI transfers.
 module axi_dma_data_mover #(
     /// Data width of the AXI bus
@@ -108,7 +108,7 @@ module axi_dma_data_mover #(
 
     //--------------------------------------
     // AR emitter
-    //-------------------------------------- 
+    //--------------------------------------
     // object currently at the tail of the fifo
     desc_ax_t current_ar_req;
     // control signals
@@ -119,7 +119,7 @@ module axi_dma_data_mover #(
 
     // instanciate a fifo to buffer the address read requests
     fifo_v3 #(
-        .FALL_THROUGH  ( 1'b0                 ), 
+        .FALL_THROUGH  ( 1'b0                 ),
         .DEPTH         ( ReqFifoDepth         ),
         .dtype         ( desc_ax_t            )
     ) i_fifo_ar_emitter (
@@ -138,7 +138,7 @@ module axi_dma_data_mover #(
 
     //--------------------------------------
     // AW emitter
-    //-------------------------------------- 
+    //--------------------------------------
     // object currently at the tail of the fifo
     desc_ax_t current_aw_req;
     // control signals
@@ -150,8 +150,8 @@ module axi_dma_data_mover #(
 
     // instantiate a fifo to buffer the address write requests
     fifo_v3 #(
-        .FALL_THROUGH  ( 1'b0                  ), 
-        .dtype         ( desc_ax_t             ), 
+        .FALL_THROUGH  ( 1'b0                  ),
+        .dtype         ( desc_ax_t             ),
         .DEPTH         ( ReqFifoDepth          )
     ) i_fifo_aw_emitter (
         .clk_i         ( clk_i                 ),
@@ -169,7 +169,7 @@ module axi_dma_data_mover #(
 
     //--------------------------------------
     // R emitter
-    //-------------------------------------- 
+    //--------------------------------------
     // object currently at the tail of the fifo
     desc_r_t current_r_req;
     // control signals
@@ -180,7 +180,7 @@ module axi_dma_data_mover #(
 
     // instantiate a fifo to buffer the read requests
     fifo_v3 #(
-        .FALL_THROUGH  ( 1'b0                 ), 
+        .FALL_THROUGH  ( 1'b0                 ),
         .dtype         ( desc_r_t             ),
         .DEPTH         ( ReqFifoDepth         )
     ) i_fifo_r_emitter (
@@ -200,7 +200,7 @@ module axi_dma_data_mover #(
     //--------------------------------------
     // W emitter
     //--------------------------------------
-    // object currently at the tail of the fifo 
+    // object currently at the tail of the fifo
     desc_w_t current_w_req;
     // control signals
     logic w_emitter_full;
@@ -210,7 +210,7 @@ module axi_dma_data_mover #(
 
     // instanciate a fifo to buffer the read requests
     fifo_v3 #(
-        .FALL_THROUGH  ( 1'b0                  ), 
+        .FALL_THROUGH  ( 1'b0                  ),
         .dtype         ( desc_w_t              ),
         .DEPTH         ( ReqFifoDepth          )
     ) i_fifo_w_emitter (
@@ -230,7 +230,7 @@ module axi_dma_data_mover #(
     //--------------------------------------
     // instantiate of the data path
     //--------------------------------------
-    // AXI bus signals from and to the datapath 
+    // AXI bus signals from and to the datapath
     data_t          r_data;
     axi_pkg::resp_t r_resp;
     logic           r_last;
@@ -280,7 +280,7 @@ module axi_dma_data_mover #(
 
     //--------------------------------------
     // Refill control
-    //-------------------------------------- 
+    //--------------------------------------
     // the ax and x fifos of both channels are filled
     // together, as request come bundled.
     always_comb begin : proc_refill
@@ -297,7 +297,7 @@ module axi_dma_data_mover #(
 
     //--------------------------------------
     // Bus control
-    //-------------------------------------- 
+    //--------------------------------------
     // here the AXI bus is unpacked/packed.
     always_comb begin : proc_bus_packer
         // defaults: not used signals -> 0
@@ -347,7 +347,7 @@ module axi_dma_data_mover #(
 
     //--------------------------------------
     // ID control
-    //-------------------------------------- 
+    //--------------------------------------
     logic is_last_aw;
     fifo_v3 #(
         .DEPTH       ( ReqFifoDepth + BufferDepth ),
