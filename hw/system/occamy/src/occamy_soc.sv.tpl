@@ -209,7 +209,6 @@ module ${name}_soc
     .rst_ni (rst_ni),
     .test_mode_i (test_mode_i),
     .tile_id_i (6'd${i}),
-    .debug_req_i ('0),
     .meip_i ('0),
     .mtip_i (mtip_i[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),
     .msip_i (msip_i[${lower_core + nr_cores_s1_quadrant - 1}:${lower_core}]),

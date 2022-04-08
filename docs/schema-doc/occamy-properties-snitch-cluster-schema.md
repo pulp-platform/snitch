@@ -36,6 +36,7 @@ Base description of a Snitch cluster and its internal structure and configuratio
 | [vm](#vm)                                         | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-vm.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/vm")                                         |
 | [dma_axi_req_fifo_depth](#dma_axi_req_fifo_depth) | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_axi_req_fifo_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_axi_req_fifo_depth") |
 | [dma_req_fifo_depth](#dma_req_fifo_depth)         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_req_fifo_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_req_fifo_depth")         |
+| [enable_debug](#enable_debug)                     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-enable_debug.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/enable_debug")                     |
 | [sram_cfg_expose](#sram_cfg_expose)               | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-sram_cfg_expose.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/sram_cfg_expose")               |
 | [sram_cfg_fields](#sram_cfg_fields)               | `object`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-sram_cfg_fields.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/sram_cfg_fields")               |
 | [timing](#timing)                                 | `object`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-timing-and-latency-tuning-parameter.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/timing")    |
@@ -503,6 +504,32 @@ The default value is:
 
 ```json
 3
+```
+
+## enable_debug
+
+Whether to provide a debug request input and external debug features
+
+`enable_debug`
+
+*   is optional
+
+*   Type: `boolean`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-enable_debug.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/enable_debug")
+
+### enable_debug Type
+
+`boolean`
+
+### enable_debug Default Value
+
+The default value is:
+
+```json
+true
 ```
 
 ## sram_cfg_expose

@@ -131,6 +131,11 @@
             "description": "Number of request entries the DMA can keep",
             "default": 3
         },
+        "enable_debug": {
+            "type": "boolean",
+            "description": "Whether to provide a debug request input and external debug features",
+            "default": true
+        },
         "sram_cfg_expose": {
             "type": "boolean",
             "description": "Whether to expose memory cut configuration inputs for implementation",
