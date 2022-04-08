@@ -9,12 +9,13 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 //
-// Authors: Fabian Schuiki      <fschuiki@iis.ee.ethz.ch>
-//          Andreas Kurth       <akurth@iis.ee.ethz.ch>
-//          Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
-//
-// Description: An AXI4+ATOP to AXI4-Lite adapter with atomic transaction and burst support.
+// Authors:
+// - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
+// - Andreas Kurth <akurth@iis.ee.ethz.ch>
+// - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
+/// An AXI4+ATOP to AXI4-Lite converter with atomic transaction and burst support.
 module axi_to_axi_lite #(
   parameter int unsigned AxiAddrWidth    = 32'd0,
   parameter int unsigned AxiDataWidth    = 32'd0,
@@ -46,8 +47,8 @@ module axi_to_axi_lite #(
   axi_atop_filter #(
     .AxiIdWidth      ( AxiIdWidth      ),
     .AxiMaxWriteTxns ( AxiMaxWriteTxns ),
-    .req_t           ( full_req_t      ),
-    .resp_t          ( full_resp_t     )
+    .axi_req_t       ( full_req_t      ),
+    .axi_resp_t      ( full_resp_t     )
   ) i_axi_atop_filter(
     .clk_i      ( clk_i         ),
     .rst_ni     ( rst_ni        ),
@@ -65,8 +66,8 @@ module axi_to_axi_lite #(
     .DataWidth    ( AxiDataWidth    ),
     .IdWidth      ( AxiIdWidth      ),
     .UserWidth    ( AxiUserWidth    ),
-    .req_t        ( full_req_t      ),
-    .resp_t       ( full_resp_t     )
+    .axi_req_t    ( full_req_t      ),
+    .axi_resp_t   ( full_resp_t     )
   ) i_axi_burst_splitter (
     .clk_i      ( clk_i         ),
     .rst_ni     ( rst_ni        ),

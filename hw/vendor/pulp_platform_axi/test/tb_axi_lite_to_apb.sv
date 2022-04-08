@@ -7,8 +7,10 @@
 // this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
-// Author: Wolfgang Roenninger <wroennin@ethz.ch>
+//
+// Authors:
+// - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
+// - Andreas Kurth <akurth@iis.ee.ethz.ch>
 
 // Description: This testbench sends random generated AXI4-Lite transfers to the bridge
 //              Each APB slave is simulated by randomly updating its response signals each clock
@@ -17,7 +19,10 @@
 `include "axi/typedef.svh"
 `include "axi/assign.svh"
 
-module tb_axi_lite_to_apb;
+module tb_axi_lite_to_apb #(
+  parameter bit TbPipelineRequest = 1'b0,
+  parameter bit TbPipelineResponse = 1'b0
+);
   // Dut parameters
   localparam int unsigned NoApbSlaves = 8;    // How many APB Slaves  there are
   localparam int unsigned NoAddrRules = 9;    // How many address rules for the APB slaves
@@ -78,7 +83,7 @@ module tb_axi_lite_to_apb;
     '{idx: 32'd0, start_addr: 32'h0000_0000, end_addr: 32'h0000_3000}
   };
 
-  typedef axi_test::rand_axi_lite_master #(
+  typedef axi_test::axi_lite_rand_master #(
     // AXI interface parameters
     .AW       ( AxiAddrWidth  ),
     .DW       ( AxiDataWidth  ),
@@ -97,7 +102,7 @@ module tb_axi_lite_to_apb;
     .W_MAX_WAIT_CYCLES  (    5 ),
     .RESP_MIN_WAIT_CYCLES (  0 ),
     .RESP_MAX_WAIT_CYCLES ( 20 )
-  ) rand_axi_lite_master_t;
+  ) axi_lite_rand_master_t;
 
   // -------------
   // DUT signals
@@ -135,11 +140,11 @@ module tb_axi_lite_to_apb;
   // -------------------------------
   // Master controls simulation run time
   initial begin : proc_axi_master
-    static rand_axi_lite_master_t rand_axi_lite_master = new ( master_dv , "axi_lite_mst");
+    static axi_lite_rand_master_t axi_lite_rand_master = new ( master_dv , "axi_lite_mst");
     end_of_sim <= 1'b0;
-    rand_axi_lite_master.reset();
+    axi_lite_rand_master.reset();
     @(posedge rst_n);
-    rand_axi_lite_master.run(NoReads, NoWrites);
+    axi_lite_rand_master.run(NoReads, NoWrites);
     end_of_sim <= 1'b1;
   end
 
@@ -212,8 +217,8 @@ module tb_axi_lite_to_apb;
   // Clock generator
   //-----------------------------------
     clk_rst_gen #(
-    .CLK_PERIOD    ( CyclTime ),
-    .RST_CLK_CYCLES( 5        )
+    .ClkPeriod    ( CyclTime ),
+    .RstClkCycles ( 5        )
   ) i_clk_gen (
     .clk_o  ( clk   ),
     .rst_no ( rst_n )
@@ -223,15 +228,17 @@ module tb_axi_lite_to_apb;
   // DUT
   //-----------------------------------
   axi_lite_to_apb #(
-    .NoApbSlaves    ( NoApbSlaves  ),
-    .NoRules        ( NoAddrRules  ),
-    .AddrWidth      ( AxiAddrWidth ),
-    .DataWidth      ( AxiDataWidth ),
-    .axi_lite_req_t ( axi_req_t    ),
-    .axi_lite_resp_t( axi_resp_t   ),
-    .apb_req_t      ( apb_req_t    ),
-    .apb_resp_t     ( apb_resp_t   ),
-    .rule_t         ( rule_t       )
+    .NoApbSlaves      ( NoApbSlaves         ),
+    .NoRules          ( NoAddrRules         ),
+    .AddrWidth        ( AxiAddrWidth        ),
+    .DataWidth        ( AxiDataWidth        ),
+    .PipelineRequest  ( TbPipelineRequest   ),
+    .PipelineResponse ( TbPipelineResponse  ),
+    .axi_lite_req_t   ( axi_req_t           ),
+    .axi_lite_resp_t  ( axi_resp_t          ),
+    .apb_req_t        ( apb_req_t           ),
+    .apb_resp_t       ( apb_resp_t          ),
+    .rule_t           ( rule_t              )
   ) i_axi_lite_to_apb_dut (
     .clk_i           ( clk          ),
     .rst_ni          ( rst_n        ),
