@@ -116,7 +116,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg          (QuadrantPreXbar0Cfg),
       .Connectivity (2'b11),
-      .AtopSupport  (0),
+      .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .w_chan_t     (axi_a48_d512_i4_u0_w_chan_t),
@@ -160,7 +160,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg          (QuadrantPreXbar1Cfg),
       .Connectivity (2'b11),
-      .AtopSupport  (0),
+      .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .w_chan_t     (axi_a48_d512_i4_u0_w_chan_t),
@@ -204,7 +204,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg          (QuadrantPreXbar2Cfg),
       .Connectivity (2'b11),
-      .AtopSupport  (0),
+      .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .w_chan_t     (axi_a48_d512_i4_u0_w_chan_t),
@@ -248,7 +248,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg          (QuadrantPreXbar3Cfg),
       .Connectivity (2'b11),
-      .AtopSupport  (0),
+      .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .w_chan_t     (axi_a48_d512_i4_u0_w_chan_t),
@@ -292,7 +292,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg          (QuadrantPreXbar4Cfg),
       .Connectivity (2'b11),
-      .AtopSupport  (0),
+      .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .w_chan_t     (axi_a48_d512_i4_u0_w_chan_t),
@@ -336,7 +336,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg          (QuadrantPreXbar5Cfg),
       .Connectivity (2'b11),
-      .AtopSupport  (0),
+      .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .w_chan_t     (axi_a48_d512_i4_u0_w_chan_t),
@@ -385,7 +385,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg          (QuadrantInterXbarCfg),
       .Connectivity (49'b0111111101111111011111110111111101111111011111110),
-      .AtopSupport  (0),
+      .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i7_u0_aw_chan_t),
       .w_chan_t     (axi_a48_d512_i4_u0_w_chan_t),
@@ -436,7 +436,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg          (HbmXbarCfg),
       .Connectivity (56'b11111111111111111111111111111111111111111111111111111111),
-      .AtopSupport  (0),
+      .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i7_u0_aw_chan_t),
       .w_chan_t     (axi_a48_d512_i4_u0_w_chan_t),
@@ -482,7 +482,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg          (SocWideXbarCfg),
       .Connectivity (16'b1111011110111110),
-      .AtopSupport  (0),
+      .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i6_u0_aw_chan_t),
       .w_chan_t     (axi_a48_d512_i4_u0_w_chan_t),
@@ -543,7 +543,7 @@ module occamy_soc
   axi_xbar #(
       .Cfg(SocNarrowXbarCfg),
       .Connectivity  ( 143'b11111011111110111111111111111101111111111111101111111111111111111111111101111111111111011111111111110111111111111101111111111111011111111111110 ),
-      .AtopSupport(1),
+      .ATOPs(1),
       .slv_aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d64_i8_u0_aw_chan_t),
       .w_chan_t(axi_a48_d64_i4_u0_w_chan_t),
@@ -602,8 +602,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_inter_to_wide_cut_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -622,8 +622,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i6_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i6_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i6_u0_r_chan_t),
-      .req_t(axi_a48_d512_i6_u0_req_t),
-      .resp_t(axi_a48_d512_i6_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i6_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i6_u0_resp_t)
   ) i_wide_to_inter_cut_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -676,8 +676,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_to_hbm_iw_cut_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -898,8 +898,8 @@ module occamy_soc
   axi_atop_filter #(
       .AxiIdWidth(8),
       .AxiMaxWriteTxns(32),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_pcie_out_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
@@ -919,8 +919,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_pcie_out_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -939,8 +939,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_pcie_in_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -968,8 +968,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_cva6_mst_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1004,8 +1004,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_narrow_in_0 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1024,8 +1024,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_narrow_out_cut_0 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1044,8 +1044,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_wide_in_0 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1064,8 +1064,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_out_cut_0 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1081,8 +1081,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_inter_cut_0 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1098,8 +1098,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_hbm_cut_0 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1141,8 +1141,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_narrow_in_1 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1161,8 +1161,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_narrow_out_cut_1 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1181,8 +1181,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_wide_in_1 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1201,8 +1201,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_out_cut_1 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1218,8 +1218,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_inter_cut_1 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1235,8 +1235,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_hbm_cut_1 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1278,8 +1278,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_narrow_in_2 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1298,8 +1298,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_narrow_out_cut_2 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1318,8 +1318,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_wide_in_2 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1338,8 +1338,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_out_cut_2 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1355,8 +1355,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_inter_cut_2 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1372,8 +1372,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_hbm_cut_2 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1415,8 +1415,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_narrow_in_3 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1435,8 +1435,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_narrow_out_cut_3 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1455,8 +1455,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_wide_in_3 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1475,8 +1475,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_out_cut_3 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1492,8 +1492,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_inter_cut_3 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1509,8 +1509,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_hbm_cut_3 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1552,8 +1552,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_narrow_in_4 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1572,8 +1572,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_narrow_out_cut_4 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1592,8 +1592,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_wide_in_4 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1612,8 +1612,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_out_cut_4 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1629,8 +1629,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_inter_cut_4 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1646,8 +1646,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_hbm_cut_4 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1689,8 +1689,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_narrow_in_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1709,8 +1709,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_narrow_out_cut_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1729,8 +1729,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_wide_in_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1749,8 +1749,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_wide_out_cut_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1766,8 +1766,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_inter_cut_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1783,8 +1783,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_pre_to_hbm_cut_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -1933,8 +1933,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_spm_amo_adapter_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2011,8 +2011,8 @@ module occamy_soc
   axi_atop_filter #(
       .AxiIdWidth(8),
       .AxiMaxWriteTxns(4),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_out_sys_idma_cfg_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
@@ -2123,8 +2123,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_hbm_out_soc_0 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2147,8 +2147,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_hbm_out_soc_1 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2171,8 +2171,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_hbm_out_soc_2 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2195,8 +2195,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_hbm_out_soc_3 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2219,8 +2219,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_hbm_out_soc_4 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2243,8 +2243,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_hbm_out_soc_5 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2267,8 +2267,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_hbm_out_soc_6 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2291,8 +2291,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
-      .req_t(axi_a48_d512_i7_u0_req_t),
-      .resp_t(axi_a48_d512_i7_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
   ) i_hbm_out_soc_7 (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2320,8 +2320,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
-      .req_t(axi_a48_d512_i4_u0_req_t),
-      .resp_t(axi_a48_d512_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t)
   ) i_hbi_to_wide_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2353,8 +2353,8 @@ module occamy_soc
   axi_atop_filter #(
       .AxiIdWidth(6),
       .AxiMaxWriteTxns(32),
-      .req_t(axi_a48_d512_i6_u0_req_t),
-      .resp_t(axi_a48_d512_i6_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i6_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i6_u0_resp_t)
   ) i_wide_to_hbi_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
@@ -2374,8 +2374,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i6_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i6_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i6_u0_r_chan_t),
-      .req_t(axi_a48_d512_i6_u0_req_t),
-      .resp_t(axi_a48_d512_i6_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i6_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i6_u0_resp_t)
   ) i_wide_to_hbi_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2394,8 +2394,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_hbi_to_narrow_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2431,8 +2431,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_narrow_to_hbi_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2462,8 +2462,8 @@ module occamy_soc
   axi_atop_filter #(
       .AxiIdWidth(8),
       .AxiMaxWriteTxns(4),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_periph_regbus_out_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
@@ -2483,8 +2483,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_periph_regbus_out_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2499,8 +2499,8 @@ module occamy_soc
   axi_atop_filter #(
       .AxiIdWidth(8),
       .AxiMaxWriteTxns(4),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_periph_axi_lite_out_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
@@ -2520,8 +2520,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i8_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i8_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
-      .req_t(axi_a48_d64_i8_u0_req_t),
-      .resp_t(axi_a48_d64_i8_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i8_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
   ) i_periph_axi_lite_out_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2540,8 +2540,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_periph_axi_lite_in_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
