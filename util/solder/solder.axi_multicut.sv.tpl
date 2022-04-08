@@ -5,8 +5,8 @@ axi_multicut #(
   .b_chan_t (${bus_in.type_prefix}_b_chan_t),
   .ar_chan_t (${bus_in.type_prefix}_ar_chan_t),
   .r_chan_t (${bus_in.type_prefix}_r_chan_t),
-  .req_t (${bus_in.req_type()}),
-  .resp_t (${bus_in.rsp_type()})
+  .axi_req_t (${bus_in.req_type()}),
+  .axi_resp_t (${bus_in.rsp_type()})
 ) ${name} (
   .clk_i (${bus_in.clk}),
   .rst_ni (${bus_in.rst}),
