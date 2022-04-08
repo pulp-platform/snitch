@@ -109,7 +109,6 @@ module axi_to_reqrsp_tb import reqrsp_pkg::*; #(
     .IW ( IW ),
     .UW ( UW ),
     // Stimuli application and test time
-    .TA ( ApplTime ),
     .TT ( TestTime )
   ) axi_monitor_t;
 
@@ -209,7 +208,7 @@ module axi_to_reqrsp_tb import reqrsp_pkg::*; #(
   // Driver
   // ------
   // AXI Master
-  typedef axi_test::rand_axi_master #(
+  typedef axi_test::axi_rand_master #(
     // AXI interface parameters
     .AW ( AW ),
     .DW ( DW ),
@@ -231,13 +230,13 @@ module axi_to_reqrsp_tb import reqrsp_pkg::*; #(
     .AXI_ATOPS (1)
   ) rand_axi_master_t;
 
-  rand_axi_master_t rand_axi_master = new (master_dv);
+  rand_axi_master_t axi_rand_master = new (master_dv);
 
   // AXI Random master.
   initial begin
-    rand_axi_master.reset();
+    axi_rand_master.reset();
     @(posedge rst_n);
-    rand_axi_master.run(NrReads, NrWrites);
+    axi_rand_master.run(NrReads, NrWrites);
     // Wait until all transactions have ceased.
     repeat(1000) @(posedge clk);
     $finish;

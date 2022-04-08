@@ -90,7 +90,8 @@ module reqrsp_iso_intf #(
     /// Data width of the interface.
     parameter int unsigned DataWidth = 0,
     /// Bypass.
-    parameter bit          Bypass    = '0
+    parameter bit  BypassReq         = 0,
+    parameter bit  BypassRsp         = 0
 ) (
     /// Clock of source clock domain.
     input  logic src_clk_i,
@@ -120,7 +121,8 @@ module reqrsp_iso_intf #(
     .DataWidth (DataWidth),
     .req_t     (reqrsp_req_t),
     .rsp_t     (reqrsp_rsp_t),
-    .Bypass    (Bypass)
+    .BypassReq (BypassReq),
+    .BypassRsp (BypassRsp)
   ) i_reqrsp_iso (
     .src_clk_i,
     .src_rst_ni,
