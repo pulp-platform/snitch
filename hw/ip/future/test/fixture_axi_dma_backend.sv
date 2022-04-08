@@ -13,7 +13,6 @@
 // the fixture instantiates the DMA backend, a golden model of the backend , and tasks controlling
 // both.
 
-`timescale 1ns/1ns
 module fixture_axi_dma_backend();
 
     // `include "../axi/include/axi/assign.svh"
