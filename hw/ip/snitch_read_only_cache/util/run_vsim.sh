@@ -19,4 +19,4 @@ call_vsim() {
 # call_vsim snitch_read_only_cache_tb
 
 
-vsim -coverage -voptargs="+acc +cover=sbecft" snitch_read_only_cache_tb -do 'log -r /*; do ../util/wave.tcl; run -all'
+vsim -coverage -c -voptargs="+acc +cover=sbecft" snitch_read_only_cache_tb -do 'log -r /*; do ../util/wave.tcl; run -all'

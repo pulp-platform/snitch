@@ -81,7 +81,7 @@ class semirand_axi_master #(
   // Dependent parameters, do not override.
   parameter int   AXI_STRB_WIDTH = DW/8,
   parameter int   N_AXI_IDS = 2**IW
-) extends axi_test::rand_axi_master #(
+) extends axi_test::axi_rand_master #(
   .AW                   ( AW                   ),
   .DW                   ( DW                   ),
   .IW                   ( IW                   ),
@@ -203,7 +203,7 @@ class const_axi_slave #(
   parameter int   R_MAX_WAIT_CYCLES = 5,
   parameter int   RESP_MIN_WAIT_CYCLES = 0,
   parameter int   RESP_MAX_WAIT_CYCLES = 20
-) extends axi_test::rand_axi_slave #(
+) extends axi_test::axi_rand_slave #(
   .AW                   ( AW                   ),
   .DW                   ( DW                   ),
   .IW                   ( IW                   ),
