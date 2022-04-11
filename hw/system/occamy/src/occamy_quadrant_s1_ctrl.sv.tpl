@@ -12,6 +12,8 @@
 <%
   ro_cache_cfg = cfg["s1_quadrant"].get("ro_cache_cfg", {})
   ro_cache_regions = ro_cache_cfg.get("address_regions", 1)
+  narrow_tlb_cfg = cfg["s1_quadrant"].get("narrow_tlb_cfg", {})
+  wide_tlb_cfg = cfg["s1_quadrant"].get("wide_tlb_cfg", {})
 %>
 
 module ${name}_quadrant_s1_ctrl
@@ -43,6 +45,16 @@ module ${name}_quadrant_s1_ctrl
   input  ${soc_narrow_xbar.out_s1_quadrant_0.req_type()} soc_in_req_i,
   output ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} soc_in_rsp_o,
 
+  // TLB narrow and wide configuration ports
+  %if narrow_tlb_cfg:
+  output ${quadrant_s1_ctrl_mux.out_tlb_narrow.req_type()} tlb_narrow_cfg_req_o,
+  input  ${quadrant_s1_ctrl_mux.out_tlb_narrow.rsp_type()} tlb_narrow_cfg_rsp_i,
+  %endif
+  %if wide_tlb_cfg:
+  output ${quadrant_s1_ctrl_mux.out_tlb_wide.req_type()} tlb_wide_cfg_req_o,
+  input  ${quadrant_s1_ctrl_mux.out_tlb_wide.rsp_type()} tlb_wide_cfg_rsp_i,
+  %endif
+
   // Quadrant narrow ports
   output ${soc_narrow_xbar.out_s1_quadrant_0.req_type()} quadrant_out_req_o,
   input  ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} quadrant_out_rsp_i,
@@ -53,6 +65,17 @@ module ${name}_quadrant_s1_ctrl
   // Upper half of quadrant space reserved for internal use (same size as for all clusters)
   addr_t [0:0] internal_xbar_base_addr;
   assign internal_xbar_base_addr = '{S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace};
+
+  %if narrow_tlb_cfg and wide_tlb_cfg:
+    // Split quadrant control space into 1/2 quadrant control, 1/4 TLB narrow, 1/4 TLB wide
+    addr_t [2:0] lite_xbar_base_addrs;
+    % for i in range(3):
+    assign lite_xbar_base_addrs[${i}] = internal_xbar_base_addr[0] + ${i+1 if i else 0} * (S1QuadrantCfgAddressSpace >> 2);
+    %endfor
+  %else:
+    addr_t [0:0] lite_xbar_base_addrs;
+    assign lite_xbar_base_addrs[0] = internal_xbar_base_addr[0];
+  %endif
 
   // TODO: Pipeline appropriately (possibly only outwards)
   // Controller crossbar: shims off for access to internal space
@@ -69,6 +92,17 @@ module ${name}_quadrant_s1_ctrl
   assign ${quadrant_s1_ctrl_xbars["soc_to_quad"].out_out.rsp_name()} = quadrant_out_rsp_i;
   assign ${quadrant_s1_ctrl_xbars["quad_to_soc"].in_in.req_name()} = quadrant_in_req_i;
   assign quadrant_in_rsp_o = ${quadrant_s1_ctrl_xbars["quad_to_soc"].in_in.rsp_name()};
+ 
+  %if narrow_tlb_cfg:
+    // Connect narrow TLB configuration ports
+    assign tlb_narrow_cfg_req_o = ${quadrant_s1_ctrl_mux.out_tlb_narrow.req_name()};
+    assign ${quadrant_s1_ctrl_mux.out_tlb_narrow.rsp_name()} = tlb_narrow_cfg_rsp_i;
+  %endif
+  %if wide_tlb_cfg:
+    // Connect wide TLB configuration ports
+    assign tlb_wide_cfg_req_o = ${quadrant_s1_ctrl_mux.out_tlb_wide.req_name()};
+    assign ${quadrant_s1_ctrl_mux.out_tlb_wide.rsp_name()} = tlb_wide_cfg_rsp_i;
+  %endif
 
   // Convert both internal ports to AXI lite, since only registers for now
   <%
@@ -80,7 +114,7 @@ module ${name}_quadrant_s1_ctrl
       .serialize(context, iw=1, name="soc_internal_serialize") \
       .change_dw(context, 32, "soc_internal_change_dw") \
       .to_axi_lite(context, name="soc_internal_to_axi_lite", to=quadrant_s1_ctrl_mux.in_quad)
-    quad_regs_regbus = quadrant_s1_ctrl_mux.out_out \
+    quad_regs_regbus = quadrant_s1_ctrl_mux.out_quadrant_ctrl \
       .to_reg(context, "axi_lite_to_regbus_regs")
   %> \
 
