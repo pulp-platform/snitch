@@ -918,6 +918,46 @@ class AxiBus(Bus):
             ) + "\n")
         return bus
 
+    def add_tlb(self,
+                context,
+                name,
+                cfg,
+                cfg_bus,
+                inst_name=None,
+                to=None
+                ):
+        # Generate the new bus.
+        if to is None:
+            bus = copy(self)
+            bus.declared = False
+            bus.iw = self.iw
+            bus.type_prefix = bus.emit_struct()
+            bus.name = name
+            bus.name_suffix = None
+        else:
+            bus = to
+
+        # Check bus properties.
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+        assert (bus.iw == self.iw)
+        assert (bus.uw == self.uw)
+
+        # Emit the TLB instance.
+        bus.declare(context)
+        tpl = templates.get_template("solder.axi_tlb.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                axi_in=self,
+                axi_out=bus,
+                axi_lite=cfg_bus,
+                cfg=cfg,
+                name=inst_name or "i_{}".format(name)
+            ) + "\n")
+        return bus
+
     def trunc_addr(self, context, target_aw, name=None, inst_name=None, to=None):
         if self.aw == target_aw:
             if to is None:
