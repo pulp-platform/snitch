@@ -38,6 +38,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   parameter bit          XFDOTP    = 0,
   parameter bit          XFAUX     = 0,
   int unsigned           FLEN      = DataWidth,
+  /// Enable virtual memory support.
+  parameter bit          VMSupport = 1,
   /// Enable experimental IPU extension.
   parameter bit          Xipu      = 1,
   /// Data port request type.
@@ -332,30 +334,40 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // ---------
   assign itlb_va = va_t'(pc_q[31:PAGE_SHIFT]);
 
-  snitch_l0_tlb #(
-    .pa_t (pa_t),
-    .l0_pte_t (l0_pte_t),
-    .NrEntries ( NumITLBEntries )
-  ) i_snitch_l0_tlb_inst (
-    .clk_i,
-    .rst_i,
-    .flush_i ( tlb_flush ),
-    .priv_lvl_i ( priv_lvl_q ),
-    .valid_i ( itlb_valid ),
-    .ready_o ( itlb_ready ),
-    .va_i ( itlb_va ),
-    .write_i ( 1'b0 ),
-    .read_i  ( 1'b0 ),
-    .execute_i ( 1'b1 ),
-    .page_fault_o ( itlb_page_fault ),
-    .pa_o ( itlb_pa ),
-    // Refill port
-    .valid_o ( ptw_valid_o[0] ),
-    .ready_i ( ptw_ready_i[0] ),
-    .va_o ( ptw_va_o[0] ),
-    .pte_i ( ptw_pte_i[0] ),
-    .is_4mega_i ( ptw_is_4mega_i[0] )
-  );
+  if (VMSupport) begin : gen_itlb
+    snitch_l0_tlb #(
+      .pa_t (pa_t),
+      .l0_pte_t (l0_pte_t),
+      .NrEntries ( NumITLBEntries )
+    ) i_snitch_l0_tlb_inst (
+      .clk_i,
+      .rst_i,
+      .flush_i ( tlb_flush ),
+      .priv_lvl_i ( priv_lvl_q ),
+      .valid_i ( itlb_valid ),
+      .ready_o ( itlb_ready ),
+      .va_i ( itlb_va ),
+      .write_i ( 1'b0 ),
+      .read_i  ( 1'b0 ),
+      .execute_i ( 1'b1 ),
+      .page_fault_o ( itlb_page_fault ),
+      .pa_o ( itlb_pa ),
+      // Refill port
+      .valid_o ( ptw_valid_o[0] ),
+      .ready_i ( ptw_ready_i[0] ),
+      .va_o ( ptw_va_o[0] ),
+      .pte_i ( ptw_pte_i[0] ),
+      .is_4mega_i ( ptw_is_4mega_i[0] )
+    );
+  end else begin : gen_no_itlb
+    // Tie off core-side interface (itlb_pa unused as trans_active == '0)
+    assign itlb_pa          = '0;
+    assign itlb_ready       = 1'b0;
+    assign itlb_page_fault  = 1'b0;
+    // Tie off TLB refill request
+    assign ptw_valid_o[0] = 1'b0;
+    assign ptw_va_o[0]    = '0;
+  end
 
   assign itlb_valid = trans_active & inst_valid_o;
   assign itlb_trans_valid = trans_active & itlb_valid & itlb_ready;
@@ -363,10 +375,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // ---------------------------
   // Instruction Fetch Interface
   // ---------------------------
+  // TODO(paulsc) Add CSR-based segmentation solution for case without VM without sudden jump.
   // Mulitplexer using and/or as this signal is likely timing critical.
   assign inst_addr_o[PPNSize+PAGE_SHIFT-1:PAGE_SHIFT] =
-      (trans_active & itlb_pa)
-    | (~trans_active & {{{AddrWidth-32}{1'b0}}, pc_q[31:PAGE_SHIFT]});
+      ({(PPNSize){trans_active}} & itlb_pa)
+    | (~{(PPNSize){trans_active}} & {{{AddrWidth-32}{1'b0}}, pc_q[31:PAGE_SHIFT]});
   assign inst_addr_o[PAGE_SHIFT-1:0] = pc_q[PAGE_SHIFT-1:0];
   assign inst_cacheable_o = snitch_pma_pkg::is_inside_cacheable_regions(SnitchPMACfg, inst_addr_o);
   assign inst_valid_o = ~wfi_q;
@@ -2407,7 +2420,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             csr_rvalue = satp_q;
             if (!exception) begin
               satp_d.ppn = alu_result[21:0];
-              satp_d.mode = alu_result[31];
+              satp_d.mode = VMSupport ? alu_result[31] : 1'b0;
             end
           end
           // F/D Extension
@@ -2647,30 +2660,41 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // L0 DTLB
   // --------------------
   assign dtlb_va = va_t'(alu_result[31:PAGE_SHIFT]);
-  snitch_l0_tlb #(
-    .pa_t (pa_t),
-    .l0_pte_t (l0_pte_t),
-    .NrEntries ( NumDTLBEntries )
-  ) i_snitch_l0_tlb_data (
-    .clk_i,
-    .rst_i,
-    .flush_i ( tlb_flush ),
-    .priv_lvl_i ( priv_lvl_q ),
-    .valid_i ( dtlb_valid ),
-    .ready_o ( dtlb_ready ),
-    .va_i ( dtlb_va ),
-    .write_i ( is_store ),
-    .read_i ( is_load ),
-    .execute_i ( 1'b0 ),
-    .page_fault_o ( dtlb_page_fault ),
-    .pa_o ( dtlb_pa ),
-    // Refill port
-    .valid_o ( ptw_valid_o [1] ),
-    .ready_i ( ptw_ready_i [1] ),
-    .va_o ( ptw_va_o [1] ),
-    .pte_i ( ptw_pte_i [1] ),
-    .is_4mega_i ( ptw_is_4mega_i [1] )
-  );
+
+  if (VMSupport) begin : gen_dtlb
+    snitch_l0_tlb #(
+      .pa_t (pa_t),
+      .l0_pte_t (l0_pte_t),
+      .NrEntries ( NumDTLBEntries )
+    ) i_snitch_l0_tlb_data (
+      .clk_i,
+      .rst_i,
+      .flush_i ( tlb_flush ),
+      .priv_lvl_i ( priv_lvl_q ),
+      .valid_i ( dtlb_valid ),
+      .ready_o ( dtlb_ready ),
+      .va_i ( dtlb_va ),
+      .write_i ( is_store ),
+      .read_i ( is_load ),
+      .execute_i ( 1'b0 ),
+      .page_fault_o ( dtlb_page_fault ),
+      .pa_o ( dtlb_pa ),
+      // Refill port
+      .valid_o ( ptw_valid_o [1] ),
+      .ready_i ( ptw_ready_i [1] ),
+      .va_o ( ptw_va_o [1] ),
+      .pte_i ( ptw_pte_i [1] ),
+      .is_4mega_i ( ptw_is_4mega_i [1] )
+    );
+  end else begin : gen_no_dtlb
+    // Tie off core-side interface (dtlb_pa unused as trans_active == '0)
+    assign dtlb_pa          = pa_t'(dtlb_va);
+    assign dtlb_ready       = 1'b0;
+    assign dtlb_page_fault  = 1'b0;
+    // Tie off TLB refill request
+    assign ptw_valid_o[1] = 1'b0;
+    assign ptw_va_o[1]    = '0;
+  end
 
   assign ptw_ppn_o[0] = $unsigned(satp_q.ppn);
   assign ptw_ppn_o[1] = $unsigned(satp_q.ppn);
@@ -2685,7 +2709,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
   // Mulitplexer using and/or as this signal is likely timing critical.
   assign ls_paddr[PPNSize+PAGE_SHIFT-1:PAGE_SHIFT] =
-          (trans_active & dtlb_pa) | (~trans_active & {mseg_q, alu_result[31:PAGE_SHIFT]});
+          ({(PPNSize){trans_active}} & dtlb_pa) |
+          (~{(PPNSize){trans_active}} & {mseg_q, alu_result[31:PAGE_SHIFT]});
   assign ls_paddr[PAGE_SHIFT-1:0] = alu_result[PAGE_SHIFT-1:0];
 
   assign lsu_qvalid = lsu_tlb_qvalid & trans_ready;
@@ -2837,5 +2862,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   `ASSERT_INIT(CheckPMAExecute, SnitchPMACfg.NrExecuteRegionRules <= snitch_pma_pkg::NrMaxRules);
   `ASSERT_INIT(CheckPMACached, SnitchPMACfg.NrCachedRegionRules <= snitch_pma_pkg::NrMaxRules);
   `ASSERT_INIT(CheckPMAAMORegion, SnitchPMACfg.NrAMORegionRules <= snitch_pma_pkg::NrMaxRules);
+
+  // Make sure that without virtual memory support, translation is never enabled
+  `ASSERT(NoVMSupportNoTranslation, (~VMSupport |-> ~trans_active), clk_i, rst_i)
 
 endmodule
