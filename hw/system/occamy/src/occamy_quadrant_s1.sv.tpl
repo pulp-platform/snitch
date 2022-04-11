@@ -17,6 +17,8 @@
   narrow_trans = int(cfg["s1_quadrant"]["narrow_trans"])
   ro_cache_cfg = cfg["s1_quadrant"].get("ro_cache_cfg", {})
   ro_cache_regions = ro_cache_cfg.get("address_regions", 1)
+  narrow_tlb_cfg = cfg["s1_quadrant"].get("narrow_tlb_cfg", {})
+  wide_tlb_cfg = cfg["s1_quadrant"].get("wide_tlb_cfg", {})
 %>
 
 /// Occamy Stage 1 Quadrant
@@ -76,11 +78,16 @@ module ${name}_quadrant_s1
   ///////////////////////////////
   // Narrow Out + IW Converter //
   ///////////////////////////////
-  <% narrow_cluster_out_ctrl = narrow_xbar_quadrant_s1.out_top \
-    .change_iw(context, soc_narrow_xbar.in_s1_quadrant_0.iw, "narrow_cluster_out_iwc") \
-    .isolate(context, "isolate[1]", "narrow_cluster_out_isolate", isolated="isolated[1]", to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True, num_pending=narrow_trans) \
-    .cut(context, cuts_narrx_with_ctrl, "narrow_cluster_out_ctrl")
-   %>
+  <%
+    narrow_cluster_out_ctrl = narrow_xbar_quadrant_s1.out_top \
+      .change_iw(context, soc_narrow_xbar.in_s1_quadrant_0.iw, "narrow_cluster_out_iwc") \
+      .isolate(context, "isolate[1]", "narrow_cluster_out_isolate", isolated="isolated[1]", to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True, num_pending=narrow_trans)
+    ## Add TLB between isolate and cut
+    if narrow_tlb_cfg:
+      narrow_tlb_cfg_bus = quadrant_s1_ctrl_mux.out_tlb_narrow.copy(name="tlb_narrow_cfg").declare(context)
+      narrow_cluster_out_ctrl = narrow_cluster_out_ctrl.add_tlb(context, "narrow_cluster_out_tlb", cfg=narrow_tlb_cfg, cfg_bus=narrow_tlb_cfg_bus)
+    narrow_cluster_out_ctrl = narrow_cluster_out_ctrl.cut(context, cuts_narrx_with_ctrl, "narrow_cluster_out_ctrl")
+  %>
 
   /////////////////////////////////////////
   // Wide Out + RO Cache + IW Converter  //
@@ -106,9 +113,12 @@ module ${name}_quadrant_s1
 
     wide_cluster_out_cut = wide_cluster_out_ro_cache \
       .change_iw(context, wide_target_iw, "wide_cluster_out_iwc", max_txns_per_id=wide_trans) \
-      .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True, num_pending=wide_trans) \
-      .cut(context, cuts_widexroc_with_wideout)
-
+      .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True, num_pending=wide_trans)
+    if wide_tlb_cfg:
+      wide_tlb_cfg_bus = quadrant_s1_ctrl_mux.out_tlb_wide.copy(name="tlb_wide_cfg").declare(context)
+      wide_cluster_out_cut = wide_cluster_out_cut.add_tlb(context, "wide_cluster_out_tlb", cfg=wide_tlb_cfg, cfg_bus=wide_tlb_cfg_bus)
+    wide_cluster_out_cut = wide_cluster_out_cut.cut(context, cuts_widexroc_with_wideout)
+ 
     assert quadrant_pre_xbars[0].in_quadrant.iw == wide_cluster_out_cut.iw, "S1 Quadrant and Cluster Out IW mismatches."
   %>
 
@@ -151,6 +161,14 @@ module ${name}_quadrant_s1
     .soc_out_rsp_i (quadrant_narrow_out_rsp_i),
     .soc_in_req_i (quadrant_narrow_in_req_i),
     .soc_in_rsp_o (quadrant_narrow_in_rsp_o),
+    %if narrow_tlb_cfg:
+    .tlb_narrow_cfg_req_o (tlb_narrow_cfg_req),
+    .tlb_narrow_cfg_rsp_i (tlb_narrow_cfg_rsp),
+    %endif
+    %if wide_tlb_cfg:
+    .tlb_wide_cfg_req_o (tlb_wide_cfg_req),
+    .tlb_wide_cfg_rsp_i (tlb_wide_cfg_rsp),
+    %endif
     .quadrant_out_req_o (${narrow_cluster_in_ctrl.req_name()}),
     .quadrant_out_rsp_i (${narrow_cluster_in_ctrl.rsp_name()}),
     .quadrant_in_req_i (${narrow_cluster_out_ctrl.req_name()}),

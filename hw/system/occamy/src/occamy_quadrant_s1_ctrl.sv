@@ -40,6 +40,8 @@ module occamy_quadrant_s1_ctrl
   input  axi_a48_d64_i8_u0_req_t soc_in_req_i,
   output axi_a48_d64_i8_u0_resp_t soc_in_rsp_o,
 
+  // TLB narrow and wide configuration ports
+
   // Quadrant narrow ports
   output axi_a48_d64_i8_u0_req_t quadrant_out_req_o,
   input  axi_a48_d64_i8_u0_resp_t quadrant_out_rsp_i,
@@ -50,6 +52,9 @@ module occamy_quadrant_s1_ctrl
   // Upper half of quadrant space reserved for internal use (same size as for all clusters)
   addr_t [0:0] internal_xbar_base_addr;
   assign internal_xbar_base_addr = '{S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace};
+
+    addr_t [0:0] lite_xbar_base_addrs;
+    assign lite_xbar_base_addrs[0] = internal_xbar_base_addr[0];
 
   // TODO: Pipeline appropriately (possibly only outwards)
   // Controller crossbar: shims off for access to internal space
@@ -138,6 +143,12 @@ axi_xbar #(
   .default_mst_port_i    ( '0 )
 );
 
+/// Address map of the `quadrant_s1_ctrl_mux` crossbar.
+xbar_rule_48_t [0:0] QuadrantS1CtrlMuxAddrmap;
+assign QuadrantS1CtrlMuxAddrmap = '{
+  '{ idx: 0, start_addr: lite_xbar_base_addrs[0], end_addr: lite_xbar_base_addrs[0] + (S1QuadrantCfgAddressSpace >> 1) }
+};
+
 axi_lite_a48_d32_req_t [1:0] quadrant_s1_ctrl_mux_in_req;
 axi_lite_a48_d32_rsp_t [1:0] quadrant_s1_ctrl_mux_in_rsp;
 axi_lite_a48_d32_req_t [0:0] quadrant_s1_ctrl_mux_out_req;
@@ -179,6 +190,7 @@ axi_lite_xbar #(
   assign quadrant_s1_ctrl_soc_to_quad_xbar_out_rsp[QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_OUT_OUT] = quadrant_out_rsp_i;
   assign quadrant_s1_ctrl_quad_to_soc_xbar_in_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN] = quadrant_in_req_i;
   assign quadrant_in_rsp_o = quadrant_s1_ctrl_quad_to_soc_xbar_in_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN];
+
 
   // Convert both internal ports to AXI lite, since only registers for now
     axi_a48_d64_i1_u0_req_t soc_to_quad_internal_ser_req;
@@ -344,8 +356,8 @@ axi_lite_xbar #(
   ) i_axi_lite_to_regbus_regs_pc (
     .clk_i          ( clk_i ),
     .rst_ni         ( rst_ni ),
-    .axi_lite_req_i ( quadrant_s1_ctrl_mux_out_req[QUADRANT_S1_CTRL_MUX_OUT_OUT] ),
-    .axi_lite_rsp_o ( quadrant_s1_ctrl_mux_out_rsp[QUADRANT_S1_CTRL_MUX_OUT_OUT] ),
+    .axi_lite_req_i ( quadrant_s1_ctrl_mux_out_req[QUADRANT_S1_CTRL_MUX_OUT_QUADRANT_CTRL] ),
+    .axi_lite_rsp_o ( quadrant_s1_ctrl_mux_out_rsp[QUADRANT_S1_CTRL_MUX_OUT_QUADRANT_CTRL] ),
     .reg_req_o      ( axi_lite_to_regbus_regs_req ),
     .reg_rsp_i      ( axi_lite_to_regbus_regs_rsp )
   );

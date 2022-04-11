@@ -151,6 +151,13 @@ module occamy_top
   //////////////////////////
 
 
+  /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
+  xbar_rule_48_t [1:0] SocAxiLitePeriphXbarAddrmap;
+  assign SocAxiLitePeriphXbarAddrmap = '{
+  '{ idx: 0, start_addr: 48'h01000000, end_addr: 48'h20000000000 },
+  '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 }
+};
+
   axi_lite_a48_d64_req_t [1:0] soc_axi_lite_periph_xbar_in_req;
   axi_lite_a48_d64_rsp_t [1:0] soc_axi_lite_periph_xbar_in_rsp;
   axi_lite_a48_d64_req_t [1:0] soc_axi_lite_periph_xbar_out_req;
