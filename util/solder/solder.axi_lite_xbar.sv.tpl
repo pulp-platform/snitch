@@ -42,18 +42,7 @@ localparam axi_pkg::xbar_cfg_t ${cfg_name} = '{
   AxiIdUsedSlvPorts:  0,
   AxiAddrWidth:       ${xbar.aw},
   AxiDataWidth:       ${xbar.dw},
-  NoAddrRules:        ${len(xbar.addrmap)}
-};
-
-/// Address map of the `${xbar.name}` crossbar.
-localparam xbar_rule_${xbar.aw}_t [${len(xbar.addrmap) - 1}:0] ${addrmap_name} = '{
-% for i in range(len(xbar.addrmap)):
-  ${"'{{ idx: {}, start_addr: {aw}'h{:08x}, end_addr: {aw}'h{:08x} }}{sep}".format(
-    *xbar.addrmap[i],
-    sep="," if i != len(xbar.addrmap) - 1 else "",
-    aw=xbar.aw
-  )}
-% endfor
+  NoAddrRules:        ${xbar.addr_map_len()}
 };
 
 // AXI plugs of the `${xbar.name}` crossbar.

@@ -1985,6 +1985,8 @@ class AxiLiteXbar(Xbar):
         self.max_slv_trans = max_slv_trans
         self.max_mst_trans = max_mst_trans
         self.fall_through = fall_through
+        self.symbolic_addrmap = list()
+        self.symbolic_addrmap_multi = list()
         self.addrmap = list()
         self.latency_mode = latency_mode or "axi_pkg::CUT_ALL_PORTS"
 
@@ -1999,11 +2001,26 @@ class AxiLiteXbar(Xbar):
             self.addrmap.append((idx, lo, hi))
         self.outputs.append(name)
 
-    def add_output_entry(self, name, entry):
-        self.add_output(name,
-                        [(r.lo, r.hi)
-                         for r in self.node.get_routes() if r.port == entry])
+    def add_output_entry(self, name, entry, range_mask=None):
+        addrs = [(r.lo, r.hi) for r in self.node.get_routes() if r.port == entry]
+        if range_mask is not None:
+            addrs = filter(lambda r: r[0] >= range_mask[0] and r[1] < range_mask[1], addrs)
+        self.add_output(name, addrs)
 
+    def add_output_symbolic(self, name, base, length):
+        idx = len(self.outputs)
+        self.symbolic_addrmap.append((idx, base, length))
+        self.outputs.append(name)
+
+    def add_output_symbolic_multi(self, name, entries):
+        idx = len(self.outputs)
+        self.symbolic_addrmap_multi.append((idx, entries))
+        self.outputs.append(name)
+
+    def addr_map_len(self):
+        return len(self.addrmap) + len(self.symbolic_addrmap) + sum(
+            len(am) for am in self.symbolic_addrmap_multi)
+ 
     def emit(self):
         global code_module
         global code_package
@@ -2011,6 +2028,33 @@ class AxiLiteXbar(Xbar):
             return
         self.emitted = True
         code_module.setdefault(self.context, "")
+
+        # Emit the address map into the package.
+        addrmap_name = util.pascalize("{}_addrmap".format(self.name))
+        addrmap = "/// Address map of the `{}` crossbar.\n".format(self.name)
+        addrmap += "xbar_rule_{}_t [{}:0] {};\n".format(
+            self.aw,
+            self.addr_map_len() - 1, addrmap_name)
+        addrmap += "assign {} = '{{\n".format(addrmap_name)
+        addrmap_lines = []
+        for i in range(len(self.addrmap)):
+            addrmap_lines.append(
+                "  '{{ idx: {}, start_addr: {aw}'h{:08x}, end_addr: {aw}'h{:08x} }}".format(
+                    *self.addrmap[i], aw=self.aw))
+        for i, (idx, base, length) in enumerate(self.symbolic_addrmap):
+            addrmap_lines.append(
+                "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
+                    idx, base, base, length, i=i))
+        for i, (idx, entries) in enumerate(self.symbolic_addrmap_multi):
+            for base, length in entries:
+                addrmap_lines.append(
+                    "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
+                        idx, base, base, length, i=i))
+        addrmap += "{}\n}};\n".format(',\n'.join(addrmap_lines))
+
+        code_module[self.context] += "\n" + addrmap
+
+        # Emit the template
         (pkg,
          mod) = self.tpl.render_unicode(xbar=self,
                                         AxiLiteBus=AxiLiteBus,
