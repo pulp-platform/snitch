@@ -1055,6 +1055,14 @@ class AxiLiteBus(Bus):
         self.aw = aw
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
+ 
+    def copy(self, name=None, clk=None, rst=None):
+        return AxiLiteBus(clk or self.clk,
+                          rst or self.rst,
+                          self.aw,
+                          self.dw,
+                          name or self.name,
+                          declared=False)
 
     def emit_struct(self):
         return AxiLiteStruct.emit(self.aw, self.dw)
