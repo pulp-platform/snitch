@@ -392,6 +392,7 @@ module occamy_cluster_wrapper (
     .ICacheLineWidth (occamy_cluster_pkg::ICacheLineWidth),
     .ICacheLineCount (occamy_cluster_pkg::ICacheLineCount),
     .ICacheSets (occamy_cluster_pkg::ICacheSets),
+    .VMSupport (0),
     .RVE (9'b000000000),
     .RVF (9'b111111111),
     .RVD (9'b111111111),
