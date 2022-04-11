@@ -111,15 +111,10 @@
             "description": "Supported mode by the processor, can be msu.",
             "$comment": "Currently ignored."
         },
-        "vm": {
-            "type": "string",
-            "description": "Supported virtual memory mode, can be XSv32.",
-            "enum": [
-                "Sv32",
-                "XSv48"
-            ],
-            "default": "XSv48",
-            "$comment": "Currently ignored."
+        "vm_support": {
+            "type": "boolean",
+            "description": "Whether to provide virtual memory support (Sv32).",
+            "default": true
         },
         "dma_axi_req_fifo_depth": {
             "type": "number",

@@ -63,6 +63,8 @@ module snitch_cc #(
   parameter bit          Xssr               = 1,
   /// Has `IPU` support.
   parameter bit          Xipu               = 1,
+  /// Has virtual memory support.
+  parameter bit          VMSupport          = 1,
   parameter int unsigned NumIntOutstandingLoads = 0,
   parameter int unsigned NumIntOutstandingMem = 0,
   parameter int unsigned NumFPOutstandingLoads = 0,
@@ -200,6 +202,7 @@ module snitch_cc #(
     .SnitchPMACfg (SnitchPMACfg),
     .NumIntOutstandingLoads (NumIntOutstandingLoads),
     .NumIntOutstandingMem (NumIntOutstandingMem),
+    .VMSupport (VMSupport),
     .NumDTLBEntries (NumDTLBEntries),
     .NumITLBEntries (NumITLBEntries),
     .RVE (RVE),

@@ -228,6 +228,7 @@ module ${cfg['name']}_wrapper (
     .ICacheLineWidth (${cfg['pkg_name']}::ICacheLineWidth),
     .ICacheLineCount (${cfg['pkg_name']}::ICacheLineCount),
     .ICacheSets (${cfg['pkg_name']}::ICacheSets),
+    .VMSupport (${int(cfg['vm_support'])}),
     .RVE (${core_isa('e')}),
     .RVF (${core_isa('f')}),
     .RVD (${core_isa('d')}),
