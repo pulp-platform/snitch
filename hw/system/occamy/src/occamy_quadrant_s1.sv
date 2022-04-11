@@ -256,6 +256,40 @@ module occamy_quadrant_s1
       .isolated_o(isolated[1])
   );
 
+  axi_lite_a48_d32_req_t   tlb_narrow_cfg_req;
+  axi_lite_a48_d32_rsp_t   tlb_narrow_cfg_rsp;
+
+  axi_a48_d64_i4_u0_req_t  narrow_cluster_out_tlb_req;
+  axi_a48_d64_i4_u0_resp_t narrow_cluster_out_tlb_rsp;
+
+  axi_tlb #(
+      .AxiSlvPortAddrWidth(48),
+      .AxiMstPortAddrWidth(48),
+      .AxiDataWidth(64),
+      .AxiIdWidth(4),
+      .AxiUserWidth(1),
+      .AxiSlvPortMaxTxns(32),
+      .CfgAxiAddrWidth(48),
+      .CfgAxiDataWidth(32),
+      .L1NumEntries(8),
+      .L1CutAx(1'b1),
+      .slv_req_t(axi_a48_d64_i4_u0_req_t),
+      .mst_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t),
+      .lite_req_t(axi_lite_a48_d32_req_t),
+      .lite_resp_t(axi_lite_a48_d32_rsp_t)
+  ) i_narrow_cluster_out_tlb (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .test_en_i(test_mode_i),
+      .slv_req_i(narrow_cluster_out_isolate_req),
+      .slv_resp_o(narrow_cluster_out_isolate_rsp),
+      .mst_req_o(narrow_cluster_out_tlb_req),
+      .mst_resp_i(narrow_cluster_out_tlb_rsp),
+      .cfg_req_i(tlb_narrow_cfg_req),
+      .cfg_resp_o(tlb_narrow_cfg_rsp)
+  );
+
   axi_a48_d64_i4_u0_req_t  narrow_cluster_out_ctrl_req;
   axi_a48_d64_i4_u0_resp_t narrow_cluster_out_ctrl_rsp;
 
@@ -271,8 +305,8 @@ module occamy_quadrant_s1
   ) i_narrow_cluster_out_ctrl (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(narrow_cluster_out_isolate_req),
-      .slv_resp_o(narrow_cluster_out_isolate_rsp),
+      .slv_req_i(narrow_cluster_out_tlb_req),
+      .slv_resp_o(narrow_cluster_out_tlb_rsp),
       .mst_req_o(narrow_cluster_out_ctrl_req),
       .mst_resp_i(narrow_cluster_out_ctrl_rsp)
   );
@@ -360,8 +394,42 @@ module occamy_quadrant_s1
       .isolated_o(isolated[3])
   );
 
-  axi_a48_d512_i4_u0_req_t  wide_cluster_out_isolate_cut_req;
-  axi_a48_d512_i4_u0_resp_t wide_cluster_out_isolate_cut_rsp;
+  axi_lite_a48_d32_req_t tlb_wide_cfg_req;
+  axi_lite_a48_d32_rsp_t tlb_wide_cfg_rsp;
+
+  axi_a48_d512_i4_u0_req_t wide_cluster_out_tlb_req;
+  axi_a48_d512_i4_u0_resp_t wide_cluster_out_tlb_rsp;
+
+  axi_tlb #(
+      .AxiSlvPortAddrWidth(48),
+      .AxiMstPortAddrWidth(48),
+      .AxiDataWidth(512),
+      .AxiIdWidth(4),
+      .AxiUserWidth(1),
+      .AxiSlvPortMaxTxns(32),
+      .CfgAxiAddrWidth(48),
+      .CfgAxiDataWidth(32),
+      .L1NumEntries(8),
+      .L1CutAx(1'b1),
+      .slv_req_t(axi_a48_d512_i4_u0_req_t),
+      .mst_req_t(axi_a48_d512_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i4_u0_resp_t),
+      .lite_req_t(axi_lite_a48_d32_req_t),
+      .lite_resp_t(axi_lite_a48_d32_rsp_t)
+  ) i_wide_cluster_out_tlb (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .test_en_i(test_mode_i),
+      .slv_req_i(wide_cluster_out_isolate_req),
+      .slv_resp_o(wide_cluster_out_isolate_rsp),
+      .mst_req_o(wide_cluster_out_tlb_req),
+      .mst_resp_i(wide_cluster_out_tlb_rsp),
+      .cfg_req_i(tlb_wide_cfg_req),
+      .cfg_resp_o(tlb_wide_cfg_rsp)
+  );
+
+  axi_a48_d512_i4_u0_req_t  wide_cluster_out_tlb_cut_req;
+  axi_a48_d512_i4_u0_resp_t wide_cluster_out_tlb_cut_rsp;
 
   axi_multicut #(
       .NoCuts(1),
@@ -372,18 +440,18 @@ module occamy_quadrant_s1
       .r_chan_t(axi_a48_d512_i4_u0_r_chan_t),
       .req_t(axi_a48_d512_i4_u0_req_t),
       .resp_t(axi_a48_d512_i4_u0_resp_t)
-  ) i_wide_cluster_out_isolate_cut (
+  ) i_wide_cluster_out_tlb_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(wide_cluster_out_isolate_req),
-      .slv_resp_o(wide_cluster_out_isolate_rsp),
-      .mst_req_o(wide_cluster_out_isolate_cut_req),
-      .mst_resp_i(wide_cluster_out_isolate_cut_rsp)
+      .slv_req_i(wide_cluster_out_tlb_req),
+      .slv_resp_o(wide_cluster_out_tlb_rsp),
+      .mst_req_o(wide_cluster_out_tlb_cut_req),
+      .mst_resp_i(wide_cluster_out_tlb_cut_rsp)
   );
 
 
-  assign quadrant_wide_out_req_o = wide_cluster_out_isolate_cut_req;
-  assign wide_cluster_out_isolate_cut_rsp = quadrant_wide_out_rsp_i;
+  assign quadrant_wide_out_req_o = wide_cluster_out_tlb_cut_req;
+  assign wide_cluster_out_tlb_cut_rsp = quadrant_wide_out_rsp_i;
 
   ////////////////////////////
   // Wide In + IW Converter //
@@ -478,6 +546,10 @@ module occamy_quadrant_s1
       .soc_out_rsp_i(quadrant_narrow_out_rsp_i),
       .soc_in_req_i(quadrant_narrow_in_req_i),
       .soc_in_rsp_o(quadrant_narrow_in_rsp_o),
+      .tlb_narrow_cfg_req_o(tlb_narrow_cfg_req),
+      .tlb_narrow_cfg_rsp_i(tlb_narrow_cfg_rsp),
+      .tlb_wide_cfg_req_o(tlb_wide_cfg_req),
+      .tlb_wide_cfg_rsp_i(tlb_wide_cfg_rsp),
       .quadrant_out_req_o(narrow_cluster_in_ctrl_req),
       .quadrant_out_rsp_i(narrow_cluster_in_ctrl_rsp),
       .quadrant_in_req_i(narrow_cluster_out_ctrl_req),

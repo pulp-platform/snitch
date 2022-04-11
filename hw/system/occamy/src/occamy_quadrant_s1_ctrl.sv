@@ -41,6 +41,10 @@ module occamy_quadrant_s1_ctrl
   output axi_a48_d64_i8_u0_resp_t soc_in_rsp_o,
 
   // TLB narrow and wide configuration ports
+  output axi_lite_a48_d32_req_t tlb_narrow_cfg_req_o,
+  input  axi_lite_a48_d32_rsp_t tlb_narrow_cfg_rsp_i,
+  output axi_lite_a48_d32_req_t tlb_wide_cfg_req_o,
+  input  axi_lite_a48_d32_rsp_t tlb_wide_cfg_rsp_i,
 
   // Quadrant narrow ports
   output axi_a48_d64_i8_u0_req_t quadrant_out_req_o,
@@ -53,8 +57,11 @@ module occamy_quadrant_s1_ctrl
   addr_t [0:0] internal_xbar_base_addr;
   assign internal_xbar_base_addr = '{S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace};
 
-    addr_t [0:0] lite_xbar_base_addrs;
-    assign lite_xbar_base_addrs[0] = internal_xbar_base_addr[0];
+    // Split quadrant control space into 1/2 quadrant control, 1/4 TLB narrow, 1/4 TLB wide
+    addr_t [2:0] lite_xbar_base_addrs;
+    assign lite_xbar_base_addrs[0] = internal_xbar_base_addr[0] + 0 * (S1QuadrantCfgAddressSpace >> 2);
+    assign lite_xbar_base_addrs[1] = internal_xbar_base_addr[0] + 2 * (S1QuadrantCfgAddressSpace >> 2);
+    assign lite_xbar_base_addrs[2] = internal_xbar_base_addr[0] + 3 * (S1QuadrantCfgAddressSpace >> 2);
 
   // TODO: Pipeline appropriately (possibly only outwards)
   // Controller crossbar: shims off for access to internal space
@@ -144,15 +151,17 @@ axi_xbar #(
 );
 
 /// Address map of the `quadrant_s1_ctrl_mux` crossbar.
-xbar_rule_48_t [0:0] QuadrantS1CtrlMuxAddrmap;
+xbar_rule_48_t [2:0] QuadrantS1CtrlMuxAddrmap;
 assign QuadrantS1CtrlMuxAddrmap = '{
-  '{ idx: 0, start_addr: lite_xbar_base_addrs[0], end_addr: lite_xbar_base_addrs[0] + (S1QuadrantCfgAddressSpace >> 1) }
+  '{ idx: 0, start_addr: lite_xbar_base_addrs[0], end_addr: lite_xbar_base_addrs[0] + (S1QuadrantCfgAddressSpace >> 1) },
+  '{ idx: 1, start_addr: lite_xbar_base_addrs[1], end_addr: lite_xbar_base_addrs[1] + (S1QuadrantCfgAddressSpace >> 2) },
+  '{ idx: 2, start_addr: lite_xbar_base_addrs[2], end_addr: lite_xbar_base_addrs[2] + (S1QuadrantCfgAddressSpace >> 2) }
 };
 
 axi_lite_a48_d32_req_t [1:0] quadrant_s1_ctrl_mux_in_req;
 axi_lite_a48_d32_rsp_t [1:0] quadrant_s1_ctrl_mux_in_rsp;
-axi_lite_a48_d32_req_t [0:0] quadrant_s1_ctrl_mux_out_req;
-axi_lite_a48_d32_rsp_t [0:0] quadrant_s1_ctrl_mux_out_rsp;
+axi_lite_a48_d32_req_t [2:0] quadrant_s1_ctrl_mux_out_req;
+axi_lite_a48_d32_rsp_t [2:0] quadrant_s1_ctrl_mux_out_rsp;
 
 // The `quadrant_s1_ctrl_mux` crossbar.
 axi_lite_xbar #(
@@ -191,6 +200,12 @@ axi_lite_xbar #(
   assign quadrant_s1_ctrl_quad_to_soc_xbar_in_req[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN] = quadrant_in_req_i;
   assign quadrant_in_rsp_o = quadrant_s1_ctrl_quad_to_soc_xbar_in_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN];
 
+    // Connect narrow TLB configuration ports
+    assign tlb_narrow_cfg_req_o = quadrant_s1_ctrl_mux_out_req[QUADRANT_S1_CTRL_MUX_OUT_TLB_NARROW];
+    assign quadrant_s1_ctrl_mux_out_rsp[QUADRANT_S1_CTRL_MUX_OUT_TLB_NARROW] = tlb_narrow_cfg_rsp_i;
+    // Connect wide TLB configuration ports
+    assign tlb_wide_cfg_req_o = quadrant_s1_ctrl_mux_out_req[QUADRANT_S1_CTRL_MUX_OUT_TLB_WIDE];
+    assign quadrant_s1_ctrl_mux_out_rsp[QUADRANT_S1_CTRL_MUX_OUT_TLB_WIDE] = tlb_wide_cfg_rsp_i;
 
   // Convert both internal ports to AXI lite, since only registers for now
     axi_a48_d64_i1_u0_req_t soc_to_quad_internal_ser_req;
