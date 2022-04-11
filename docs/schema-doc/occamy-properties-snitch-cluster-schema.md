@@ -33,7 +33,7 @@ Base description of a Snitch cluster and its internal structure and configuratio
 | [dma_id_width_in](#dma_id_width_in)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_id_width_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_id_width_in")               |
 | [hart_base_id](#hart_base_id)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hart_base_id.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hart_base_id")                     |
 | [mode](#mode)                                     | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-mode.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/mode")                                     |
-| [vm](#vm)                                         | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-vm.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/vm")                                         |
+| [vm_support](#vm_support)                         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-vm_support.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/vm_support")                         |
 | [dma_axi_req_fifo_depth](#dma_axi_req_fifo_depth) | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_axi_req_fifo_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_axi_req_fifo_depth") |
 | [dma_req_fifo_depth](#dma_req_fifo_depth)         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_req_fifo_depth.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_req_fifo_depth")         |
 | [enable_debug](#enable_debug)                     | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-enable_debug.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/enable_debug")                     |
@@ -417,41 +417,30 @@ Supported mode by the processor, can be msu.
 
 `string`
 
-## vm
+## vm_support
 
-Supported virtual memory mode, can be XSv32.
+Whether to provide virtual memory support (Sv32).
 
-> Currently ignored.
-
-`vm`
+`vm_support`
 
 *   is optional
 
-*   Type: `string`
+*   Type: `boolean`
 
 *   cannot be null
 
-*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-vm.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/vm")
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-vm_support.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/vm_support")
 
-### vm Type
+### vm_support Type
 
-`string`
+`boolean`
 
-### vm Constraints
-
-**enum**: the value of this property must be equal to one of the following values:
-
-| Value     | Explanation |
-| :-------- | :---------- |
-| `"Sv32"`  |             |
-| `"XSv48"` |             |
-
-### vm Default Value
+### vm_support Default Value
 
 The default value is:
 
 ```json
-"XSv48"
+true
 ```
 
 ## dma_axi_req_fifo_depth
