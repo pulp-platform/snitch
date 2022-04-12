@@ -28,10 +28,6 @@ module axi_tlb #(
   parameter int unsigned AxiUserWidth = 0,
   /// Maximum number of in-flight transactions on main AXI4+ATOP slave port
   parameter int unsigned AxiSlvPortMaxTxns = 0,
-  /// Address width of configuration AXI4-Lite port
-  parameter int unsigned CfgAxiAddrWidth = 0,
-  /// Data width of configuration AXI4-Lite port
-  parameter int unsigned CfgAxiDataWidth = 0,
   /// Number of entries in L1 TLB
   parameter int unsigned L1NumEntries = 0,
   /// Pipeline AW and AR channel after L1 TLB
@@ -42,10 +38,8 @@ module axi_tlb #(
   parameter type mst_req_t = logic,
   /// Response type of main AXI4+ATOP slave and master ports
   parameter type axi_resp_t = logic,
-  /// Request type of configuration AXI4-Lite slave port
-  parameter type lite_req_t = logic,
-  /// Response type of configuration AXI4-Lite slave port
-  parameter type lite_resp_t = logic
+  /// Type of page table entry
+  parameter type entry_t = logic
 ) (
   /// Rising-edge clock of all ports
   input  logic        clk_i,
@@ -61,10 +55,10 @@ module axi_tlb #(
   output mst_req_t    mst_req_o,
   /// Main master port response
   input  axi_resp_t   mst_resp_i,
-  /// Configuration port request
-  input  lite_req_t   cfg_req_i,
-  /// Configuration port response
-  output lite_resp_t  cfg_resp_o
+  /// Configured translation entries
+  input  entry_t [L1NumEntries-1:0] entries_i,
+  /// Whether TLB is bypassed (no translation)
+  input logic         bypass_i
 );
 
   typedef logic [AxiSlvPortAddrWidth-1:0] slv_addr_t;
@@ -120,11 +114,8 @@ module axi_tlb #(
     .InpAddrWidth     ( AxiSlvPortAddrWidth ),
     .OupAddrWidth     ( AxiMstPortAddrWidth ),
     .NumEntries       ( L1NumEntries        ),
-    .CfgAxiAddrWidth  ( CfgAxiAddrWidth     ),
-    .CfgAxiDataWidth  ( CfgAxiDataWidth     ),
-    .lite_req_t       ( lite_req_t          ),
-    .lite_resp_t      ( lite_resp_t         ),
-    .res_t            ( tlb_res_t           )
+    .res_t            ( tlb_res_t           ),
+    .entry_t          ( entry_t             )
   ) i_l1_tlb (
     .clk_i,
     .rst_ni,
@@ -141,8 +132,8 @@ module axi_tlb #(
     .rd_res_o       ( l1_tlb_rd_res       ),
     .rd_res_valid_o ( l1_tlb_rd_res_valid ),
     .rd_res_ready_i ( l1_tlb_rd_res_ready ),
-    .cfg_req_i,
-    .cfg_resp_o
+    .entries_i,
+    .bypass_i
   );
 
   // Join L1 TLB responses with Ax requests into demultiplexer.
@@ -291,14 +282,17 @@ module axi_tlb_intf #(
   parameter int unsigned CFG_AXI_ADDR_WIDTH = 0,
   parameter int unsigned CFG_AXI_DATA_WIDTH = 0,
   parameter int unsigned L1_NUM_ENTRIES = 0,
-  parameter bit L1_CUT_AX = 1'b1
+  parameter bit L1_CUT_AX = 1'b1,
+  // TODO: provide as interface?
+  parameter type entry_t = logic
 ) (
   input  logic    clk_i,
   input  logic    rst_ni,
   input  logic    test_en_i,
   AXI_BUS.Slave   slv,
   AXI_BUS.Master  mst,
-  AXI_LITE.Slave  cfg
+  input  entry_t [L1_NUM_ENTRIES-1:0] entries_i,
+  input logic     bypass_i
 );
 
   typedef logic [AXI_SLV_PORT_ADDR_WIDTH-1:0] slv_addr_t;
@@ -329,23 +323,6 @@ module axi_tlb_intf #(
   `AXI_ASSIGN_FROM_REQ(mst, mst_req)
   `AXI_ASSIGN_TO_RESP(mst_resp, mst)
 
-  typedef logic [CFG_AXI_ADDR_WIDTH-1:0]    lite_addr_t;
-  typedef logic [CFG_AXI_DATA_WIDTH-1:0]    lite_data_t;
-  typedef logic [CFG_AXI_DATA_WIDTH/8-1:0]  lite_strb_t;
-  `AXI_LITE_TYPEDEF_AW_CHAN_T(lite_aw_t, lite_addr_t)
-  `AXI_LITE_TYPEDEF_W_CHAN_T(lite_w_t, lite_data_t, lite_strb_t)
-  `AXI_LITE_TYPEDEF_B_CHAN_T(lite_b_t)
-  `AXI_LITE_TYPEDEF_AR_CHAN_T(lite_ar_t, lite_addr_t)
-  `AXI_LITE_TYPEDEF_R_CHAN_T(lite_r_t, lite_data_t)
-  `AXI_LITE_TYPEDEF_REQ_T(lite_req_t, lite_aw_t, lite_w_t, lite_ar_t)
-  `AXI_LITE_TYPEDEF_RESP_T(lite_resp_t, lite_b_t, lite_r_t)
-
-  lite_req_t  cfg_req;
-  lite_resp_t cfg_resp;
-
-  `AXI_LITE_ASSIGN_TO_REQ(cfg_req, cfg)
-  `AXI_LITE_ASSIGN_FROM_RESP(cfg, cfg_resp)
-
   axi_tlb #(
     .AxiSlvPortAddrWidth  ( AXI_SLV_PORT_ADDR_WIDTH ),
     .AxiMstPortAddrWidth  ( AXI_MST_PORT_ADDR_WIDTH ),
@@ -353,15 +330,12 @@ module axi_tlb_intf #(
     .AxiIdWidth           ( AXI_ID_WIDTH            ),
     .AxiUserWidth         ( AXI_USER_WIDTH          ),
     .AxiSlvPortMaxTxns    ( AXI_SLV_PORT_MAX_TXNS   ),
-    .CfgAxiAddrWidth      ( CFG_AXI_ADDR_WIDTH      ),
-    .CfgAxiDataWidth      ( CFG_AXI_DATA_WIDTH      ),
     .L1NumEntries         ( L1_NUM_ENTRIES          ),
     .L1CutAx              ( L1_CUT_AX               ),
     .slv_req_t            ( slv_req_t               ),
     .mst_req_t            ( mst_req_t               ),
     .axi_resp_t           ( axi_resp_t              ),
-    .lite_req_t           ( lite_req_t              ),
-    .lite_resp_t          ( lite_resp_t             )
+    .entry_t              ( entry_t                 )
   ) i_axi_tlb (
     .clk_i,
     .rst_ni,
@@ -371,7 +345,9 @@ module axi_tlb_intf #(
     .mst_req_o  ( mst_req   ),
     .mst_resp_i ( mst_resp  ),
     .cfg_req_i  ( cfg_req   ),
-    .cfg_resp_o ( cfg_resp  )
+    .cfg_resp_o ( cfg_resp  ),
+    .entries_i,
+    .bypass_i
   );
 
 endmodule

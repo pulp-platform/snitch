@@ -19,17 +19,11 @@ module axi_tlb_l1 #(
   parameter int unsigned OupAddrWidth = 0,
   /// Number of entries in translation table
   parameter int unsigned NumEntries = 0,
-  /// Address width of configuration AXI4-Lite port
-  parameter int unsigned CfgAxiAddrWidth = 0,
-  /// Data width of configuration AXI4-Lite port
-  parameter int unsigned CfgAxiDataWidth = 0,
-  /// Request type of configuration AXI4-Lite slave port
-  parameter type lite_req_t = logic,
-  /// Response type of configuration AXI4-Lite slave port
-  parameter type lite_resp_t = logic,
   /// Type of translation result.  Must have a single-bit field `hit` and an `addr` field as wide as
   /// the output address.
   parameter type res_t = logic,
+  /// Type of page table entry
+  parameter type entry_t = logic,
   /// Derived (=do not override) type of input addresses
   parameter type inp_addr_t = logic [InpAddrWidth-1:0],
   /// Derived (=do not override) type of output addresses
@@ -65,35 +59,11 @@ module axi_tlb_l1 #(
   output logic        rd_res_valid_o,
   /// Read translation result ready
   input  logic        rd_res_ready_i,
-  /// Configuration port request
-  input  lite_req_t   cfg_req_i,
-  /// Configuration port response
-  output lite_resp_t  cfg_resp_o
+  /// Configured translation entries
+  input  entry_t [NumEntries-1:0] entries_i,
+  /// Whether TLB is bypassed (no translation)
+  input logic         bypass_i
 );
-
-  localparam int unsigned InpPageNumWidth = InpAddrWidth - 12;
-  localparam int unsigned OupPageNumWidth = OupAddrWidth - 12;
-
-  /// Page number in input address space
-  typedef logic [InpPageNumWidth-1:0] inp_page_t;
-  /// Page number in output address space
-  typedef logic [OupPageNumWidth-1:0] oup_page_t;
-  /// Translation table entry with 4 KiB page granularity
-  typedef struct packed {
-    /// Defines whether this entry can only be used for read accesses.
-    logic       read_only;
-    /// Defines whether this entry is valid.
-    logic       valid;
-    /// Number of first page in output address segment; that is, the output address segment starts
-    /// at this `base` page.
-    oup_page_t  base;
-    /// Number of last page (inclusive) in input address segment
-    inp_page_t  last;
-    /// Number of first page in input address segment
-    inp_page_t  first;
-  } entry_t;
-
-  entry_t [NumEntries-1:0]  entries;
 
   // Write channel
   axi_tlb_l1_chan #(
@@ -106,7 +76,8 @@ module axi_tlb_l1 #(
     .clk_i,
     .rst_ni,
     .test_en_i,
-    .entries_i    ( entries         ),
+    .entries_i,
+    .bypass_i,
     .req_addr_i   ( wr_req_addr_i   ),
     .req_valid_i  ( wr_req_valid_i  ),
     .req_ready_o  ( wr_req_ready_o  ),
@@ -126,7 +97,8 @@ module axi_tlb_l1 #(
     .clk_i,
     .rst_ni,
     .test_en_i,
-    .entries_i    ( entries         ),
+    .entries_i,
+    .bypass_i,
     .req_addr_i   ( rd_req_addr_i   ),
     .req_valid_i  ( rd_req_valid_i  ),
     .req_ready_o  ( rd_req_ready_o  ),
@@ -134,68 +106,6 @@ module axi_tlb_l1 #(
     .res_valid_o  ( rd_res_valid_o  ),
     .res_ready_i  ( rd_res_ready_i  )
   );
-
-  // Table entries from AXI4-Lite registers, aligned to 32-bit words
-  localparam int unsigned InpPageNumBytes = cf_math_pkg::ceil_div(InpPageNumWidth, 8);
-  localparam int unsigned InpPageNumBytesAligned = cf_math_pkg::ceil_div(InpPageNumBytes, 4) * 4;
-  localparam int unsigned OupPageNumBytes = cf_math_pkg::ceil_div(OupPageNumWidth, 8);
-  localparam int unsigned OupPageNumBytesAligned = cf_math_pkg::ceil_div(OupPageNumBytes, 4) * 4;
-  localparam int unsigned FlagBytes = cf_math_pkg::ceil_div(2, 8);
-  localparam int unsigned FlagBytesAligned = cf_math_pkg::ceil_div(FlagBytes, 4) * 4;
-  localparam int unsigned EntryBytesAligned =
-      2 * InpPageNumBytesAligned + OupPageNumBytesAligned + FlagBytesAligned;
-  localparam int unsigned RegNumBytes = NumEntries * EntryBytesAligned;
-  typedef struct packed {
-    bit [FlagBytesAligned-1:0]        flags;
-    bit [OupPageNumBytesAligned-1:0]  base;
-    bit [InpPageNumBytesAligned-1:0]  last;
-    bit [InpPageNumBytesAligned-1:0]  first;
-  } entry_bits_t;
-  localparam entry_bits_t [NumEntries-1:0] AxiReadOnly = '{NumEntries{'{
-    flags:              {{FlagBytesAligned-FlagBytes{1'b1}},       {FlagBytes{1'b0}}},
-    base:   {{OupPageNumBytesAligned-OupPageNumBytes{1'b1}}, {OupPageNumBytes{1'b0}}},
-    last:   {{InpPageNumBytesAligned-InpPageNumBytes{1'b1}}, {InpPageNumBytes{1'b0}}},
-    first:  {{InpPageNumBytesAligned-InpPageNumBytes{1'b1}}, {InpPageNumBytes{1'b0}}},
-    default: 1'b0 // this should not be needed, but in doubt better make the bytes writeable
-  }}};
-  typedef struct packed {
-    logic [FlagBytesAligned*8-1:0]        flags;
-    logic [OupPageNumBytesAligned*8-1:0]  base;
-    logic [InpPageNumBytesAligned*8-1:0]  last;
-    logic [InpPageNumBytesAligned*8-1:0]  first;
-  } entry_padded_t;
-  typedef logic [7:0] byte_t;
-  byte_t [RegNumBytes-1:0] reg_q;
-  axi_lite_regs #(
-    .RegNumBytes    ( RegNumBytes           ),
-    .AxiAddrWidth   ( CfgAxiAddrWidth       ),
-    .AxiDataWidth   ( CfgAxiDataWidth       ),
-    .PrivProtOnly   ( 1'b0                  ),
-    .SecuProtOnly   ( 1'b0                  ),
-    .AxiReadOnly    ( AxiReadOnly           ),
-    .RegRstVal      ( '{RegNumBytes{8'h00}} ),
-    .req_lite_t     ( lite_req_t            ),
-    .resp_lite_t    ( lite_resp_t           )
-  ) i_regs (
-    .clk_i,
-    .rst_ni,
-    .axi_req_i    ( cfg_req_i             ),
-    .axi_resp_o   ( cfg_resp_o            ),
-    .wr_active_o  ( /* unused */          ),
-    .rd_active_o  ( /* unused */          ),
-    .reg_d_i      ( '{RegNumBytes{8'h00}} ),
-    .reg_load_i   ( '{RegNumBytes{1'b0}}  ),
-    .reg_q_o      ( reg_q                 )
-  );
-  entry_padded_t [NumEntries-1:0] entries_padded;
-  assign {>>{entries_padded}} = reg_q;
-  for (genvar i = 0; i < NumEntries; i++) begin : gen_unpack_entry
-    assign entries[i].first = entries_padded[i].first[InpPageNumWidth-1:0];
-    assign entries[i].last = entries_padded[i].last[InpPageNumWidth-1:0];
-    assign entries[i].base = entries_padded[i].base[OupPageNumWidth-1:0];
-    assign entries[i].valid = entries_padded[i].flags[0];
-    assign entries[i].read_only = entries_padded[i].flags[1];
-  end
 
   `ifndef VERILATOR
   // pragma translate_off
@@ -232,6 +142,8 @@ module axi_tlb_l1_chan #(
   input  logic                    test_en_i,
   /// Translation table entries
   input  entry_t [NumEntries-1:0] entries_i,
+  /// Whether TLB is bypassed (no translation)
+  input logic                     bypass_i,
   /// Request address
   input  req_addr_t               req_addr_i,
   /// Request valid
@@ -278,7 +190,12 @@ module axi_tlb_l1_chan #(
     res_valid = 1'b0;
     req_ready_o = 1'b0;
     res = '{default: '0};
-    if (req_valid_i) begin
+    if (bypass_i) begin
+      // In bypass mode, we always "hit" with the original address
+      res = '{hit: 1'b1, addr: req_addr_i};
+      res_valid = req_valid_i;
+      req_ready_o = res_ready;
+    end else if (req_valid_i) begin
       if (no_match) begin
         res = '{default: '0};
       end else begin
