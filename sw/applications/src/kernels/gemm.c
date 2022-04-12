@@ -701,14 +701,14 @@ void gemm_fp8_ex_opt(uint32_t M, uint32_t N, uint32_t K, char* A,
 
             asm volatile(
                 // Initialize SIMD vector with zeros
-                "fmv.w.x %[c0], zero\n"
-                "fmv.w.x %[c1], zero\n"
-                "fmv.w.x %[c2], zero\n"
-                "fmv.w.x %[c3], zero\n"
-                "fmv.w.x %[c4], zero\n"
-                "fmv.w.x %[c5], zero\n"
-                "fmv.w.x %[c6], zero\n"
-                "fmv.w.x %[c7], zero\n"
+                "vfcpka.s.s %[c0], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c1], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c2], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c3], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c4], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c5], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c6], %[zero], %[zero]\n"
+                "vfcpka.s.s %[c7], %[zero], %[zero]\n"
                 // Perform expanding sum-dotproducts
                 "frep.o  %[n_frep], 8, 0, 0 \n"
                 "vfdotpex.h.b %[c0], ft1, ft0 \n"
@@ -720,14 +720,14 @@ void gemm_fp8_ex_opt(uint32_t M, uint32_t N, uint32_t K, char* A,
                 "vfdotpex.h.b %[c6], ft1, ft0 \n"
                 "vfdotpex.h.b %[c7], ft1, ft0 \n"
                 // Initialize reduce register to zero
-                "fmv.w.x %[reduce_reg0], zero\n"
-                "fmv.w.x %[reduce_reg1], zero\n"
-                "fmv.w.x %[reduce_reg2], zero\n"
-                "fmv.w.x %[reduce_reg3], zero\n"
-                "fmv.w.x %[reduce_reg4], zero\n"
-                "fmv.w.x %[reduce_reg5], zero\n"
-                "fmv.w.x %[reduce_reg6], zero\n"
-                "fmv.w.x %[reduce_reg7], zero\n"
+                "vfcpka.s.s %[reduce_reg0], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg1], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg2], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg3], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg4], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg5], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg6], %[zero], %[zero]\n"
+                "vfcpka.s.s %[reduce_reg7], %[zero], %[zero]\n"
                 // Sum-reduce vector
                 "vfsumex.s.h %[reduce_reg0], %[c0] \n"
                 "vfsumex.s.h %[reduce_reg1], %[c1] \n"
@@ -753,7 +753,8 @@ void gemm_fp8_ex_opt(uint32_t M, uint32_t N, uint32_t K, char* A,
                   [ reduce_reg5 ] "+f"(reduce_reg[5]),
                   [ reduce_reg6 ] "+f"(reduce_reg[6]),
                   [ reduce_reg7 ] "+f"(reduce_reg[7])
-                : [ C ] "r"(_C), [ n_frep ] "r"(n_frep), [ ALPHA ] "r"(ALPHA)
+                : [ C ] "r"(_C), [ n_frep ] "r"(n_frep), [ ALPHA ] "r"(ALPHA),
+                  [ zero ] "f"(zero)
                 : "ft0", "ft1", "ft2");
 
             // Store results back
