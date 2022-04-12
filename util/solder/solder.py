@@ -922,7 +922,9 @@ class AxiBus(Bus):
                 context,
                 name,
                 cfg,
-                cfg_bus,
+                entry_t,
+                entries,
+                bypass,
                 inst_name=None,
                 to=None
                 ):
@@ -952,7 +954,9 @@ class AxiBus(Bus):
             tpl.render_unicode(
                 axi_in=self,
                 axi_out=bus,
-                axi_lite=cfg_bus,
+                entry_t=entry_t,
+                entries=entries,
+                bypass=bypass,
                 cfg=cfg,
                 name=inst_name or "i_{}".format(name)
             ) + "\n")
