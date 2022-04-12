@@ -290,8 +290,8 @@ def rand_data_generator(shape, prec, alt=False):
             return torch.randn(shape, requires_grad=False, dtype=torch.float16), {}
     elif prec == 8:
         sign = torch.randint(0, 2, shape, requires_grad=False, dtype=torch.uint8)  # -1 or 1
-        exponent = torch.randint(0, 31, shape, requires_grad=False, dtype=torch.uint8)  # should not be 0b11111
-        mantissa = torch.randint(0, 3, shape, requires_grad=False, dtype=torch.uint8)  # between
+        exponent = torch.randint(0, 16, shape, requires_grad=False, dtype=torch.uint8)  # < 0b01111
+        mantissa = torch.randint(0, 4, shape, requires_grad=False, dtype=torch.uint8) # can be arbitrary
         bits = {'sign': sign, 'exponent': exponent, 'mantissa': mantissa}
         # TODO: not actually correct
         return ((-1.0)**sign.double())*(2.0**(exponent.double()-15.0))*(1.0 + mantissa.double() / (2**2)), bits
