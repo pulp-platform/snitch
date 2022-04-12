@@ -7,7 +7,7 @@
 package occamy_quadrant_s1_reg_pkg;
 
   // Address widths within the block
-  parameter int BlockAw = 9;
+  parameter int BlockAw = 13;
 
   ////////////////////////////
   // Typedefs for registers //
@@ -43,6 +43,14 @@ package occamy_quadrant_s1_reg_pkg;
   typedef struct packed {
     logic        q;
   } occamy_quadrant_s1_reg2hw_ro_cache_flush_reg_t;
+
+  typedef struct packed {
+    logic        q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_enable_reg_t;
+
+  typedef struct packed {
+    logic        q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_enable_reg_t;
 
   typedef struct packed {
     logic [31:0] q;
@@ -109,6 +117,534 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_ro_end_addr_high_3_reg_t;
 
   typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_flags_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_high_reg_t;
+
+  typedef struct packed {
+    logic [31:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_low_reg_t;
+
+  typedef struct packed {
+    logic [15:0] q;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_high_reg_t;
+
+  typedef struct packed {
+    struct packed {
+      logic        q;
+    } valid;
+    struct packed {
+      logic        q;
+    } read_only;
+  } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_flags_reg_t;
+
+  typedef struct packed {
     struct packed {
       logic        d;
     } narrow_in;
@@ -130,27 +666,141 @@ package occamy_quadrant_s1_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    occamy_quadrant_s1_reg2hw_clk_ena_reg_t clk_ena; // [391:391]
-    occamy_quadrant_s1_reg2hw_reset_n_reg_t reset_n; // [390:390]
-    occamy_quadrant_s1_reg2hw_isolate_reg_t isolate; // [389:386]
-    occamy_quadrant_s1_reg2hw_ro_cache_enable_reg_t ro_cache_enable; // [385:385]
-    occamy_quadrant_s1_reg2hw_ro_cache_flush_reg_t ro_cache_flush; // [384:384]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_low_0_reg_t ro_start_addr_low_0; // [383:352]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_high_0_reg_t ro_start_addr_high_0; // [351:336]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_low_0_reg_t ro_end_addr_low_0; // [335:304]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_high_0_reg_t ro_end_addr_high_0; // [303:288]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_low_1_reg_t ro_start_addr_low_1; // [287:256]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_high_1_reg_t ro_start_addr_high_1; // [255:240]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_low_1_reg_t ro_end_addr_low_1; // [239:208]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_high_1_reg_t ro_end_addr_high_1; // [207:192]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_low_2_reg_t ro_start_addr_low_2; // [191:160]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_high_2_reg_t ro_start_addr_high_2; // [159:144]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_low_2_reg_t ro_end_addr_low_2; // [143:112]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_high_2_reg_t ro_end_addr_high_2; // [111:96]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_low_3_reg_t ro_start_addr_low_3; // [95:64]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_high_3_reg_t ro_start_addr_high_3; // [63:48]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_low_3_reg_t ro_end_addr_low_3; // [47:16]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_high_3_reg_t ro_end_addr_high_3; // [15:0]
+    occamy_quadrant_s1_reg2hw_clk_ena_reg_t clk_ena; // [2729:2729]
+    occamy_quadrant_s1_reg2hw_reset_n_reg_t reset_n; // [2728:2728]
+    occamy_quadrant_s1_reg2hw_isolate_reg_t isolate; // [2727:2724]
+    occamy_quadrant_s1_reg2hw_ro_cache_enable_reg_t ro_cache_enable; // [2723:2723]
+    occamy_quadrant_s1_reg2hw_ro_cache_flush_reg_t ro_cache_flush; // [2722:2722]
+    occamy_quadrant_s1_reg2hw_tlb_wide_enable_reg_t tlb_wide_enable; // [2721:2721]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_enable_reg_t tlb_narrow_enable; // [2720:2720]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_low_0_reg_t ro_start_addr_low_0; // [2719:2688]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_high_0_reg_t ro_start_addr_high_0; // [2687:2672]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_low_0_reg_t ro_end_addr_low_0; // [2671:2640]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_high_0_reg_t ro_end_addr_high_0; // [2639:2624]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_low_1_reg_t ro_start_addr_low_1; // [2623:2592]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_high_1_reg_t ro_start_addr_high_1; // [2591:2576]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_low_1_reg_t ro_end_addr_low_1; // [2575:2544]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_high_1_reg_t ro_end_addr_high_1; // [2543:2528]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_low_2_reg_t ro_start_addr_low_2; // [2527:2496]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_high_2_reg_t ro_start_addr_high_2; // [2495:2480]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_low_2_reg_t ro_end_addr_low_2; // [2479:2448]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_high_2_reg_t ro_end_addr_high_2; // [2447:2432]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_low_3_reg_t ro_start_addr_low_3; // [2431:2400]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_high_3_reg_t ro_start_addr_high_3; // [2399:2384]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_low_3_reg_t ro_end_addr_low_3; // [2383:2352]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_high_3_reg_t ro_end_addr_high_3; // [2351:2336]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_low_reg_t tlb_narrow_entry_0_pagein_first_low; // [2335:2304]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_high_reg_t tlb_narrow_entry_0_pagein_first_high; // [2303:2288]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_low_reg_t tlb_narrow_entry_0_pagein_last_low; // [2287:2256]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_high_reg_t tlb_narrow_entry_0_pagein_last_high; // [2255:2240]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_low_reg_t tlb_narrow_entry_0_pageout_low; // [2239:2208]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_high_reg_t tlb_narrow_entry_0_pageout_high; // [2207:2192]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_flags_reg_t tlb_narrow_entry_0_flags; // [2191:2190]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_low_reg_t tlb_narrow_entry_1_pagein_first_low; // [2189:2158]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_high_reg_t tlb_narrow_entry_1_pagein_first_high; // [2157:2142]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_low_reg_t tlb_narrow_entry_1_pagein_last_low; // [2141:2110]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_high_reg_t tlb_narrow_entry_1_pagein_last_high; // [2109:2094]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_low_reg_t tlb_narrow_entry_1_pageout_low; // [2093:2062]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_high_reg_t tlb_narrow_entry_1_pageout_high; // [2061:2046]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_flags_reg_t tlb_narrow_entry_1_flags; // [2045:2044]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_low_reg_t tlb_narrow_entry_2_pagein_first_low; // [2043:2012]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_high_reg_t tlb_narrow_entry_2_pagein_first_high; // [2011:1996]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_low_reg_t tlb_narrow_entry_2_pagein_last_low; // [1995:1964]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_high_reg_t tlb_narrow_entry_2_pagein_last_high; // [1963:1948]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_low_reg_t tlb_narrow_entry_2_pageout_low; // [1947:1916]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_high_reg_t tlb_narrow_entry_2_pageout_high; // [1915:1900]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_flags_reg_t tlb_narrow_entry_2_flags; // [1899:1898]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_low_reg_t tlb_narrow_entry_3_pagein_first_low; // [1897:1866]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_high_reg_t tlb_narrow_entry_3_pagein_first_high; // [1865:1850]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_low_reg_t tlb_narrow_entry_3_pagein_last_low; // [1849:1818]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_high_reg_t tlb_narrow_entry_3_pagein_last_high; // [1817:1802]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_low_reg_t tlb_narrow_entry_3_pageout_low; // [1801:1770]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_high_reg_t tlb_narrow_entry_3_pageout_high; // [1769:1754]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_flags_reg_t tlb_narrow_entry_3_flags; // [1753:1752]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_low_reg_t tlb_narrow_entry_4_pagein_first_low; // [1751:1720]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_high_reg_t tlb_narrow_entry_4_pagein_first_high; // [1719:1704]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_low_reg_t tlb_narrow_entry_4_pagein_last_low; // [1703:1672]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_high_reg_t tlb_narrow_entry_4_pagein_last_high; // [1671:1656]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_low_reg_t tlb_narrow_entry_4_pageout_low; // [1655:1624]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_high_reg_t tlb_narrow_entry_4_pageout_high; // [1623:1608]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_flags_reg_t tlb_narrow_entry_4_flags; // [1607:1606]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_low_reg_t tlb_narrow_entry_5_pagein_first_low; // [1605:1574]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_high_reg_t tlb_narrow_entry_5_pagein_first_high; // [1573:1558]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_low_reg_t tlb_narrow_entry_5_pagein_last_low; // [1557:1526]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_high_reg_t tlb_narrow_entry_5_pagein_last_high; // [1525:1510]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_low_reg_t tlb_narrow_entry_5_pageout_low; // [1509:1478]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_high_reg_t tlb_narrow_entry_5_pageout_high; // [1477:1462]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_flags_reg_t tlb_narrow_entry_5_flags; // [1461:1460]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_low_reg_t tlb_narrow_entry_6_pagein_first_low; // [1459:1428]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_high_reg_t tlb_narrow_entry_6_pagein_first_high; // [1427:1412]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_low_reg_t tlb_narrow_entry_6_pagein_last_low; // [1411:1380]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_high_reg_t tlb_narrow_entry_6_pagein_last_high; // [1379:1364]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_low_reg_t tlb_narrow_entry_6_pageout_low; // [1363:1332]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_high_reg_t tlb_narrow_entry_6_pageout_high; // [1331:1316]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_flags_reg_t tlb_narrow_entry_6_flags; // [1315:1314]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_low_reg_t tlb_narrow_entry_7_pagein_first_low; // [1313:1282]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_high_reg_t tlb_narrow_entry_7_pagein_first_high; // [1281:1266]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_low_reg_t tlb_narrow_entry_7_pagein_last_low; // [1265:1234]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_high_reg_t tlb_narrow_entry_7_pagein_last_high; // [1233:1218]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_low_reg_t tlb_narrow_entry_7_pageout_low; // [1217:1186]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_high_reg_t tlb_narrow_entry_7_pageout_high; // [1185:1170]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_flags_reg_t tlb_narrow_entry_7_flags; // [1169:1168]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_low_reg_t tlb_wide_entry_0_pagein_first_low; // [1167:1136]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_high_reg_t tlb_wide_entry_0_pagein_first_high; // [1135:1120]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_low_reg_t tlb_wide_entry_0_pagein_last_low; // [1119:1088]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_high_reg_t tlb_wide_entry_0_pagein_last_high; // [1087:1072]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_low_reg_t tlb_wide_entry_0_pageout_low; // [1071:1040]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_high_reg_t tlb_wide_entry_0_pageout_high; // [1039:1024]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_flags_reg_t tlb_wide_entry_0_flags; // [1023:1022]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_low_reg_t tlb_wide_entry_1_pagein_first_low; // [1021:990]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_high_reg_t tlb_wide_entry_1_pagein_first_high; // [989:974]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_low_reg_t tlb_wide_entry_1_pagein_last_low; // [973:942]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_high_reg_t tlb_wide_entry_1_pagein_last_high; // [941:926]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_low_reg_t tlb_wide_entry_1_pageout_low; // [925:894]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_high_reg_t tlb_wide_entry_1_pageout_high; // [893:878]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_flags_reg_t tlb_wide_entry_1_flags; // [877:876]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_low_reg_t tlb_wide_entry_2_pagein_first_low; // [875:844]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_high_reg_t tlb_wide_entry_2_pagein_first_high; // [843:828]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_low_reg_t tlb_wide_entry_2_pagein_last_low; // [827:796]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_high_reg_t tlb_wide_entry_2_pagein_last_high; // [795:780]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_low_reg_t tlb_wide_entry_2_pageout_low; // [779:748]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_high_reg_t tlb_wide_entry_2_pageout_high; // [747:732]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_flags_reg_t tlb_wide_entry_2_flags; // [731:730]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_low_reg_t tlb_wide_entry_3_pagein_first_low; // [729:698]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_high_reg_t tlb_wide_entry_3_pagein_first_high; // [697:682]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_low_reg_t tlb_wide_entry_3_pagein_last_low; // [681:650]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_high_reg_t tlb_wide_entry_3_pagein_last_high; // [649:634]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_low_reg_t tlb_wide_entry_3_pageout_low; // [633:602]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_high_reg_t tlb_wide_entry_3_pageout_high; // [601:586]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_flags_reg_t tlb_wide_entry_3_flags; // [585:584]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_low_reg_t tlb_wide_entry_4_pagein_first_low; // [583:552]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_high_reg_t tlb_wide_entry_4_pagein_first_high; // [551:536]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_low_reg_t tlb_wide_entry_4_pagein_last_low; // [535:504]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_high_reg_t tlb_wide_entry_4_pagein_last_high; // [503:488]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_low_reg_t tlb_wide_entry_4_pageout_low; // [487:456]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_high_reg_t tlb_wide_entry_4_pageout_high; // [455:440]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_flags_reg_t tlb_wide_entry_4_flags; // [439:438]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_low_reg_t tlb_wide_entry_5_pagein_first_low; // [437:406]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_high_reg_t tlb_wide_entry_5_pagein_first_high; // [405:390]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_low_reg_t tlb_wide_entry_5_pagein_last_low; // [389:358]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_high_reg_t tlb_wide_entry_5_pagein_last_high; // [357:342]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_low_reg_t tlb_wide_entry_5_pageout_low; // [341:310]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_high_reg_t tlb_wide_entry_5_pageout_high; // [309:294]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_flags_reg_t tlb_wide_entry_5_flags; // [293:292]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_low_reg_t tlb_wide_entry_6_pagein_first_low; // [291:260]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_high_reg_t tlb_wide_entry_6_pagein_first_high; // [259:244]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_low_reg_t tlb_wide_entry_6_pagein_last_low; // [243:212]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_high_reg_t tlb_wide_entry_6_pagein_last_high; // [211:196]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_low_reg_t tlb_wide_entry_6_pageout_low; // [195:164]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_high_reg_t tlb_wide_entry_6_pageout_high; // [163:148]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_flags_reg_t tlb_wide_entry_6_flags; // [147:146]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_low_reg_t tlb_wide_entry_7_pagein_first_low; // [145:114]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_high_reg_t tlb_wide_entry_7_pagein_first_high; // [113:98]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_low_reg_t tlb_wide_entry_7_pagein_last_low; // [97:66]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_high_reg_t tlb_wide_entry_7_pagein_last_high; // [65:50]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_low_reg_t tlb_wide_entry_7_pageout_low; // [49:18]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_high_reg_t tlb_wide_entry_7_pageout_high; // [17:2]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_flags_reg_t tlb_wide_entry_7_flags; // [1:0]
   } occamy_quadrant_s1_reg2hw_t;
 
   // HW -> register type
@@ -160,28 +810,142 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_hw2reg_t;
 
   // Register offsets
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_CLK_ENA_OFFSET = 9'h 0;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RESET_N_OFFSET = 9'h 4;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_ISOLATE_OFFSET = 9'h 8;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_ISOLATED_OFFSET = 9'h c;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE_OFFSET = 9'h 10;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH_OFFSET = 9'h 14;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0_OFFSET = 9'h 100;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0_OFFSET = 9'h 104;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0_OFFSET = 9'h 108;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0_OFFSET = 9'h 10c;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1_OFFSET = 9'h 110;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1_OFFSET = 9'h 114;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1_OFFSET = 9'h 118;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1_OFFSET = 9'h 11c;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2_OFFSET = 9'h 120;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2_OFFSET = 9'h 124;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2_OFFSET = 9'h 128;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2_OFFSET = 9'h 12c;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3_OFFSET = 9'h 130;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3_OFFSET = 9'h 134;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3_OFFSET = 9'h 138;
-  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3_OFFSET = 9'h 13c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_CLK_ENA_OFFSET = 13'h 0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RESET_N_OFFSET = 13'h 4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_ISOLATE_OFFSET = 13'h 8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_ISOLATED_OFFSET = 13'h c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE_OFFSET = 13'h 10;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH_OFFSET = 13'h 14;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENABLE_OFFSET = 13'h 18;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENABLE_OFFSET = 13'h 1c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0_OFFSET = 13'h 100;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0_OFFSET = 13'h 104;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0_OFFSET = 13'h 108;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0_OFFSET = 13'h 10c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1_OFFSET = 13'h 110;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1_OFFSET = 13'h 114;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1_OFFSET = 13'h 118;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1_OFFSET = 13'h 11c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2_OFFSET = 13'h 120;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2_OFFSET = 13'h 124;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2_OFFSET = 13'h 128;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2_OFFSET = 13'h 12c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3_OFFSET = 13'h 130;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3_OFFSET = 13'h 134;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3_OFFSET = 13'h 138;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3_OFFSET = 13'h 13c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_LOW_OFFSET = 13'h 800;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_HIGH_OFFSET = 13'h 804;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_LOW_OFFSET = 13'h 808;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_HIGH_OFFSET = 13'h 80c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_LOW_OFFSET = 13'h 810;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_HIGH_OFFSET = 13'h 814;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_FLAGS_OFFSET = 13'h 818;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_LOW_OFFSET = 13'h 820;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_HIGH_OFFSET = 13'h 824;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_LOW_OFFSET = 13'h 828;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_HIGH_OFFSET = 13'h 82c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_LOW_OFFSET = 13'h 830;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_HIGH_OFFSET = 13'h 834;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_FLAGS_OFFSET = 13'h 838;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_LOW_OFFSET = 13'h 840;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_HIGH_OFFSET = 13'h 844;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_LOW_OFFSET = 13'h 848;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_HIGH_OFFSET = 13'h 84c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_LOW_OFFSET = 13'h 850;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_HIGH_OFFSET = 13'h 854;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_FLAGS_OFFSET = 13'h 858;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_LOW_OFFSET = 13'h 860;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_HIGH_OFFSET = 13'h 864;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_LOW_OFFSET = 13'h 868;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_HIGH_OFFSET = 13'h 86c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_LOW_OFFSET = 13'h 870;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_HIGH_OFFSET = 13'h 874;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_FLAGS_OFFSET = 13'h 878;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_LOW_OFFSET = 13'h 880;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_HIGH_OFFSET = 13'h 884;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_LOW_OFFSET = 13'h 888;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_HIGH_OFFSET = 13'h 88c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_LOW_OFFSET = 13'h 890;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_HIGH_OFFSET = 13'h 894;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_FLAGS_OFFSET = 13'h 898;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_LOW_OFFSET = 13'h 8a0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_HIGH_OFFSET = 13'h 8a4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_LOW_OFFSET = 13'h 8a8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_HIGH_OFFSET = 13'h 8ac;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_LOW_OFFSET = 13'h 8b0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_HIGH_OFFSET = 13'h 8b4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_FLAGS_OFFSET = 13'h 8b8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_LOW_OFFSET = 13'h 8c0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_HIGH_OFFSET = 13'h 8c4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_LOW_OFFSET = 13'h 8c8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_HIGH_OFFSET = 13'h 8cc;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_LOW_OFFSET = 13'h 8d0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_HIGH_OFFSET = 13'h 8d4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_FLAGS_OFFSET = 13'h 8d8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_LOW_OFFSET = 13'h 8e0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_HIGH_OFFSET = 13'h 8e4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_LOW_OFFSET = 13'h 8e8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH_OFFSET = 13'h 8ec;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_LOW_OFFSET = 13'h 8f0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_HIGH_OFFSET = 13'h 8f4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_FLAGS_OFFSET = 13'h 8f8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_LOW_OFFSET = 13'h 1000;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_HIGH_OFFSET = 13'h 1004;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_LOW_OFFSET = 13'h 1008;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_HIGH_OFFSET = 13'h 100c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_LOW_OFFSET = 13'h 1010;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_HIGH_OFFSET = 13'h 1014;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_FLAGS_OFFSET = 13'h 1018;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_LOW_OFFSET = 13'h 1020;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_HIGH_OFFSET = 13'h 1024;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_LOW_OFFSET = 13'h 1028;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_HIGH_OFFSET = 13'h 102c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_LOW_OFFSET = 13'h 1030;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_HIGH_OFFSET = 13'h 1034;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_FLAGS_OFFSET = 13'h 1038;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_LOW_OFFSET = 13'h 1040;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_HIGH_OFFSET = 13'h 1044;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_LOW_OFFSET = 13'h 1048;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_HIGH_OFFSET = 13'h 104c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_LOW_OFFSET = 13'h 1050;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_HIGH_OFFSET = 13'h 1054;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_FLAGS_OFFSET = 13'h 1058;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_LOW_OFFSET = 13'h 1060;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_HIGH_OFFSET = 13'h 1064;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_LOW_OFFSET = 13'h 1068;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_HIGH_OFFSET = 13'h 106c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_LOW_OFFSET = 13'h 1070;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_HIGH_OFFSET = 13'h 1074;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_FLAGS_OFFSET = 13'h 1078;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_LOW_OFFSET = 13'h 1080;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_HIGH_OFFSET = 13'h 1084;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_LOW_OFFSET = 13'h 1088;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_HIGH_OFFSET = 13'h 108c;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_LOW_OFFSET = 13'h 1090;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_HIGH_OFFSET = 13'h 1094;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_FLAGS_OFFSET = 13'h 1098;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_LOW_OFFSET = 13'h 10a0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_HIGH_OFFSET = 13'h 10a4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_LOW_OFFSET = 13'h 10a8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_HIGH_OFFSET = 13'h 10ac;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_LOW_OFFSET = 13'h 10b0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_HIGH_OFFSET = 13'h 10b4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_FLAGS_OFFSET = 13'h 10b8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_LOW_OFFSET = 13'h 10c0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_HIGH_OFFSET = 13'h 10c4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_LOW_OFFSET = 13'h 10c8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_HIGH_OFFSET = 13'h 10cc;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_LOW_OFFSET = 13'h 10d0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_HIGH_OFFSET = 13'h 10d4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_FLAGS_OFFSET = 13'h 10d8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_LOW_OFFSET = 13'h 10e0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_HIGH_OFFSET = 13'h 10e4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_LOW_OFFSET = 13'h 10e8;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_HIGH_OFFSET = 13'h 10ec;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_LOW_OFFSET = 13'h 10f0;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_HIGH_OFFSET = 13'h 10f4;
+  parameter logic [BlockAw-1:0] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_FLAGS_OFFSET = 13'h 10f8;
 
   // Reset values for hwext registers and their fields
   parameter logic [3:0] OCCAMY_QUADRANT_S1_ISOLATED_RESVAL = 4'h f;
@@ -198,6 +962,8 @@ package occamy_quadrant_s1_reg_pkg;
     OCCAMY_QUADRANT_S1_ISOLATED,
     OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE,
     OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENABLE,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENABLE,
     OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0,
     OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0,
     OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0,
@@ -213,33 +979,259 @@ package occamy_quadrant_s1_reg_pkg;
     OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3,
     OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3,
     OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3,
-    OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3
+    OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_FLAGS,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_LOW,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_HIGH,
+    OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_FLAGS
   } occamy_quadrant_s1_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] OCCAMY_QUADRANT_S1_PERMIT [22] = '{
-    4'b 0001, // index[ 0] OCCAMY_QUADRANT_S1_CLK_ENA
-    4'b 0001, // index[ 1] OCCAMY_QUADRANT_S1_RESET_N
-    4'b 0001, // index[ 2] OCCAMY_QUADRANT_S1_ISOLATE
-    4'b 0001, // index[ 3] OCCAMY_QUADRANT_S1_ISOLATED
-    4'b 0001, // index[ 4] OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE
-    4'b 0001, // index[ 5] OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH
-    4'b 1111, // index[ 6] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0
-    4'b 0011, // index[ 7] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0
-    4'b 1111, // index[ 8] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0
-    4'b 0011, // index[ 9] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0
-    4'b 1111, // index[10] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1
-    4'b 0011, // index[11] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1
-    4'b 1111, // index[12] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1
-    4'b 0011, // index[13] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1
-    4'b 1111, // index[14] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2
-    4'b 0011, // index[15] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2
-    4'b 1111, // index[16] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2
-    4'b 0011, // index[17] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2
-    4'b 1111, // index[18] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3
-    4'b 0011, // index[19] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3
-    4'b 1111, // index[20] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3
-    4'b 0011  // index[21] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3
+  parameter logic [3:0] OCCAMY_QUADRANT_S1_PERMIT [136] = '{
+    4'b 0001, // index[  0] OCCAMY_QUADRANT_S1_CLK_ENA
+    4'b 0001, // index[  1] OCCAMY_QUADRANT_S1_RESET_N
+    4'b 0001, // index[  2] OCCAMY_QUADRANT_S1_ISOLATE
+    4'b 0001, // index[  3] OCCAMY_QUADRANT_S1_ISOLATED
+    4'b 0001, // index[  4] OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE
+    4'b 0001, // index[  5] OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH
+    4'b 0001, // index[  6] OCCAMY_QUADRANT_S1_TLB_WIDE_ENABLE
+    4'b 0001, // index[  7] OCCAMY_QUADRANT_S1_TLB_NARROW_ENABLE
+    4'b 1111, // index[  8] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0
+    4'b 0011, // index[  9] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0
+    4'b 1111, // index[ 10] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0
+    4'b 0011, // index[ 11] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0
+    4'b 1111, // index[ 12] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1
+    4'b 0011, // index[ 13] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1
+    4'b 1111, // index[ 14] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1
+    4'b 0011, // index[ 15] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1
+    4'b 1111, // index[ 16] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2
+    4'b 0011, // index[ 17] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2
+    4'b 1111, // index[ 18] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2
+    4'b 0011, // index[ 19] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2
+    4'b 1111, // index[ 20] OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3
+    4'b 0011, // index[ 21] OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3
+    4'b 1111, // index[ 22] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3
+    4'b 0011, // index[ 23] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3
+    4'b 1111, // index[ 24] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 25] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 26] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 27] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 28] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_LOW
+    4'b 0011, // index[ 29] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_HIGH
+    4'b 0001, // index[ 30] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_FLAGS
+    4'b 1111, // index[ 31] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 32] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 33] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 34] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 35] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_LOW
+    4'b 0011, // index[ 36] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_HIGH
+    4'b 0001, // index[ 37] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_FLAGS
+    4'b 1111, // index[ 38] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 39] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 40] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 41] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 42] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_LOW
+    4'b 0011, // index[ 43] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_HIGH
+    4'b 0001, // index[ 44] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_FLAGS
+    4'b 1111, // index[ 45] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 46] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 47] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 48] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 49] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_LOW
+    4'b 0011, // index[ 50] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_HIGH
+    4'b 0001, // index[ 51] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_FLAGS
+    4'b 1111, // index[ 52] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 53] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 54] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 55] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 56] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_LOW
+    4'b 0011, // index[ 57] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_HIGH
+    4'b 0001, // index[ 58] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_FLAGS
+    4'b 1111, // index[ 59] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 60] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 61] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 62] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 63] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_LOW
+    4'b 0011, // index[ 64] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_HIGH
+    4'b 0001, // index[ 65] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_FLAGS
+    4'b 1111, // index[ 66] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 67] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 68] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 69] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 70] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_LOW
+    4'b 0011, // index[ 71] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_HIGH
+    4'b 0001, // index[ 72] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_FLAGS
+    4'b 1111, // index[ 73] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 74] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 75] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 76] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 77] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_LOW
+    4'b 0011, // index[ 78] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_HIGH
+    4'b 0001, // index[ 79] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_FLAGS
+    4'b 1111, // index[ 80] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 81] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 82] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 83] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 84] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_LOW
+    4'b 0011, // index[ 85] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_HIGH
+    4'b 0001, // index[ 86] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_FLAGS
+    4'b 1111, // index[ 87] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 88] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 89] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 90] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 91] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_LOW
+    4'b 0011, // index[ 92] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_HIGH
+    4'b 0001, // index[ 93] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_FLAGS
+    4'b 1111, // index[ 94] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_LOW
+    4'b 0011, // index[ 95] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[ 96] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_LOW
+    4'b 0011, // index[ 97] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_HIGH
+    4'b 1111, // index[ 98] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_LOW
+    4'b 0011, // index[ 99] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_HIGH
+    4'b 0001, // index[100] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_FLAGS
+    4'b 1111, // index[101] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_LOW
+    4'b 0011, // index[102] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[103] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_LOW
+    4'b 0011, // index[104] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_HIGH
+    4'b 1111, // index[105] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_LOW
+    4'b 0011, // index[106] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_HIGH
+    4'b 0001, // index[107] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_FLAGS
+    4'b 1111, // index[108] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_LOW
+    4'b 0011, // index[109] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[110] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_LOW
+    4'b 0011, // index[111] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_HIGH
+    4'b 1111, // index[112] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_LOW
+    4'b 0011, // index[113] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_HIGH
+    4'b 0001, // index[114] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_FLAGS
+    4'b 1111, // index[115] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_LOW
+    4'b 0011, // index[116] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[117] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_LOW
+    4'b 0011, // index[118] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_HIGH
+    4'b 1111, // index[119] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_LOW
+    4'b 0011, // index[120] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_HIGH
+    4'b 0001, // index[121] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_FLAGS
+    4'b 1111, // index[122] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_LOW
+    4'b 0011, // index[123] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[124] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_LOW
+    4'b 0011, // index[125] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_HIGH
+    4'b 1111, // index[126] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_LOW
+    4'b 0011, // index[127] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_HIGH
+    4'b 0001, // index[128] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_FLAGS
+    4'b 1111, // index[129] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_LOW
+    4'b 0011, // index[130] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_HIGH
+    4'b 1111, // index[131] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_LOW
+    4'b 0011, // index[132] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_HIGH
+    4'b 1111, // index[133] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_LOW
+    4'b 0011, // index[134] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_HIGH
+    4'b 0001  // index[135] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_FLAGS
   };
 
 endpackage

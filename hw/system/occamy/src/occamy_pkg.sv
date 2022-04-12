@@ -889,9 +889,7 @@ package occamy_pkg;
 
   /// Outputs of the `quadrant_s1_ctrl_mux` crossbar.
   typedef enum int {
-    QUADRANT_S1_CTRL_MUX_OUT_QUADRANT_CTRL,
-    QUADRANT_S1_CTRL_MUX_OUT_TLB_NARROW,
-    QUADRANT_S1_CTRL_MUX_OUT_TLB_WIDE,
+    QUADRANT_S1_CTRL_MUX_OUT_OUT,
     QUADRANT_S1_CTRL_MUX_NUM_OUTPUTS
   } quadrant_s1_ctrl_mux_outputs_e;
 
@@ -907,7 +905,7 @@ package occamy_pkg;
   AxiIdUsedSlvPorts:  0,
   AxiAddrWidth:       48,
   AxiDataWidth:       32,
-  NoAddrRules:        3
+  NoAddrRules:        1
 };
 
   // AXI plugs of the `quadrant_s1_ctrl_mux` crossbar.
