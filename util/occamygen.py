@@ -724,15 +724,15 @@ def main():
     quadrant_s1_ctrl_mux.add_output_symbolic("quadrant_ctrl",
                                              "lite_xbar_base_addrs",
                                              "(S1QuadrantCfgAddressSpace >> 1)")
-    if occamy.cfg["s1_quadrant"].get("narrow_tlb_cfg"): 
+    if occamy.cfg["s1_quadrant"].get("narrow_tlb_cfg"):
       quadrant_s1_ctrl_mux.add_output_symbolic("tlb_narrow",
-                                              "lite_xbar_base_addrs",
-                                              "(S1QuadrantCfgAddressSpace >> 2)")
-    if occamy.cfg["s1_quadrant"].get("wide_tlb_cfg"): 
+                                               "lite_xbar_base_addrs",
+                                               "(S1QuadrantCfgAddressSpace >> 2)")
+    if occamy.cfg["s1_quadrant"].get("wide_tlb_cfg"):
       quadrant_s1_ctrl_mux.add_output_symbolic("tlb_wide",
-                                              "lite_xbar_base_addrs",
-                                              "(S1QuadrantCfgAddressSpace >> 2)")
- 
+                                               "lite_xbar_base_addrs",
+                                               "(S1QuadrantCfgAddressSpace >> 2)")
+
     ################
     # S1 Quadrants #
     ################
