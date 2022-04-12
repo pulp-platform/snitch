@@ -714,24 +714,9 @@ def main():
         latency_mode="axi_pkg::CUT_MST_PORTS",
         context="quadrant_s1_ctrl")
 
+    quadrant_s1_ctrl_mux.add_output("out", [(0, (1 << 48) - 1)])
     quadrant_s1_ctrl_mux.add_input("soc")
     quadrant_s1_ctrl_mux.add_input("quad")
-    # Split the quadtrant control space into
-    # 1/2 -> quadrant control
-    # 1/4 -> narrow TLB
-    # 1/4 -> wide TLB
-    alen = occamy.cfg["s1_quadrant"]["cfg_base_offset"]
-    quadrant_s1_ctrl_mux.add_output_symbolic("quadrant_ctrl",
-                                             "lite_xbar_base_addrs",
-                                             "(S1QuadrantCfgAddressSpace >> 1)")
-    if occamy.cfg["s1_quadrant"].get("narrow_tlb_cfg"):
-      quadrant_s1_ctrl_mux.add_output_symbolic("tlb_narrow",
-                                               "lite_xbar_base_addrs",
-                                               "(S1QuadrantCfgAddressSpace >> 2)")
-    if occamy.cfg["s1_quadrant"].get("wide_tlb_cfg"):
-      quadrant_s1_ctrl_mux.add_output_symbolic("tlb_wide",
-                                               "lite_xbar_base_addrs",
-                                               "(S1QuadrantCfgAddressSpace >> 2)")
 
     ################
     # S1 Quadrants #

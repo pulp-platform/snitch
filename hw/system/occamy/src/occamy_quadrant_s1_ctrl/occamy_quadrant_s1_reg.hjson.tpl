@@ -55,6 +55,7 @@
         {bits: "3:3", name: "wide_out",   resval: 1, desc: "wide master out isolation status"}
       ]
     },
+#// TODO: The enable registers below are unconditionally present; conditionalize on config?
     { name: "RO_CACHE_ENABLE",
       desc: "Enable read-only cache of quadrant.",
       swaccess: "rw",
@@ -71,6 +72,16 @@
         { bits: "0:0", resval: 0, name: "flush", desc: "Flush (invalidate) RO cache of S1 quadrant."}
       ]
     },
+% for t in ("wide", "narrow"):
+    { name: "TLB_${t.upper()}_ENABLE",
+      desc: "Enable TLB on ${t} interface of quadrant.",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0:0", resval: 0, name: "enable", desc: "Enable TLB on {t} interface."}
+      ]
+    },
+%endfor
 
     // Start RO cache region fields at regular offset
     { skipto: "0x100" }
@@ -108,6 +119,75 @@
       ]
     }
 % endfor
+
+% for i, t in enumerate(("narrow", "wide")):
+    // Start ${t} TLB fields at regular offset
+    { skipto: "${hex(0x800*(1+i))}" }
+% for e in range(cfg["s1_quadrant"]["{}_tlb_cfg".format(t)].get("l1_num_entries", 1)):
+
+    // ${t} TLB entry ${e}
+    { name: "TLB_${t.upper()}_ENTRY_${e}_PAGEIN_FIRST_LOW",
+      desc: "${t} TLB entry ${e}: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_${t.upper()}_ENTRY_${e}_PAGEIN_FIRST_HIGH",
+      desc: "${t} TLB entry ${e}: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "${soc_wide_xbar.aw-33}:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_${t.upper()}_ENTRY_${e}_PAGEIN_LAST_LOW",
+      desc: "${t} TLB entry ${e}: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_${t.upper()}_ENTRY_${e}_PAGEIN_LAST_HIGH",
+      desc: "${t} TLB entry ${e}: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "${soc_wide_xbar.aw-33}:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_${t.upper()}_ENTRY_${e}_PAGEOUT_LOW",
+      desc: "${t} TLB entry ${e}: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_${t.upper()}_ENTRY_${e}_PAGEOUT_HIGH",
+      desc: "${t} TLB entry ${e}: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "${soc_wide_xbar.aw-33}:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_${t.upper()}_ENTRY_${e}_FLAGS",
+      desc: "${t} TLB entry ${e}: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 1, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 1, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+% endfor
+% endfor
+
+
 
   ]
 }

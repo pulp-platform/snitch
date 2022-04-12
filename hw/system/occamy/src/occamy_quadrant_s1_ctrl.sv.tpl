@@ -13,13 +13,17 @@
   ro_cache_cfg = cfg["s1_quadrant"].get("ro_cache_cfg", {})
   ro_cache_regions = ro_cache_cfg.get("address_regions", 1)
   narrow_tlb_cfg = cfg["s1_quadrant"].get("narrow_tlb_cfg", {})
+  narrow_tlb_entries = narrow_tlb_cfg.get("l1_num_entries", 1)
   wide_tlb_cfg = cfg["s1_quadrant"].get("wide_tlb_cfg", {})
+  wide_tlb_entries = wide_tlb_cfg.get("l1_num_entries", 1)
 %>
 
 module ${name}_quadrant_s1_ctrl
   import ${name}_pkg::*;
   import ${name}_quadrant_s1_reg_pkg::*;
-(
+#(
+  parameter type tlb_entry_t = logic
+)(
   input  logic clk_i,
   input  logic rst_ni,
   input  logic test_mode_i,
@@ -47,12 +51,12 @@ module ${name}_quadrant_s1_ctrl
 
   // TLB narrow and wide configuration ports
   %if narrow_tlb_cfg:
-  output ${quadrant_s1_ctrl_mux.out_tlb_narrow.req_type()} tlb_narrow_cfg_req_o,
-  input  ${quadrant_s1_ctrl_mux.out_tlb_narrow.rsp_type()} tlb_narrow_cfg_rsp_i,
+  output tlb_entry_t [${narrow_tlb_entries-1}:0] narrow_tlb_entries_o,
+  output logic narrow_tlb_enable_o,
   %endif
   %if wide_tlb_cfg:
-  output ${quadrant_s1_ctrl_mux.out_tlb_wide.req_type()} tlb_wide_cfg_req_o,
-  input  ${quadrant_s1_ctrl_mux.out_tlb_wide.rsp_type()} tlb_wide_cfg_rsp_i,
+  output tlb_entry_t [${wide_tlb_entries-1}:0] wide_tlb_entries_o,
+  output logic wide_tlb_enable_o,
   %endif
 
   // Quadrant narrow ports
@@ -63,20 +67,8 @@ module ${name}_quadrant_s1_ctrl
 );
 
   // Upper half of quadrant space reserved for internal use (same size as for all clusters)
-  addr_t internal_xbar_base_addr;
-  assign internal_xbar_base_addr = S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace;
-
-  // Split quadrant control space into 1/2 quadrant control, 1/4 TLB narrow, 1/4 TLB wide
-  addr_t [${bool(narrow_tlb_cfg)+bool(wide_tlb_cfg)}:0] lite_xbar_base_addrs;
-  assign lite_xbar_base_addrs = '{
-    internal_xbar_base_addr
-  %if narrow_tlb_cfg:
-    , internal_xbar_base_addr + 2 * (S1QuadrantCfgAddressSpace >> 2)
-  %endif
-  %if wide_tlb_cfg:
-    , internal_xbar_base_addr + 3 * (S1QuadrantCfgAddressSpace >> 2)
-  %endif
-  };
+  addr_t [0:0] internal_xbar_base_addr;
+  assign internal_xbar_base_addr = '{S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace};
 
   // Controller crossbar: shims off for access to internal space
   ${module}
@@ -92,17 +84,6 @@ module ${name}_quadrant_s1_ctrl
   assign ${quadrant_s1_ctrl_xbars["soc_to_quad"].out_out.rsp_name()} = quadrant_out_rsp_i;
   assign ${quadrant_s1_ctrl_xbars["quad_to_soc"].in_in.req_name()} = quadrant_in_req_i;
   assign quadrant_in_rsp_o = ${quadrant_s1_ctrl_xbars["quad_to_soc"].in_in.rsp_name()};
- 
-  %if narrow_tlb_cfg:
-    // Connect narrow TLB configuration ports
-    assign tlb_narrow_cfg_req_o = ${quadrant_s1_ctrl_mux.out_tlb_narrow.req_name()};
-    assign ${quadrant_s1_ctrl_mux.out_tlb_narrow.rsp_name()} = tlb_narrow_cfg_rsp_i;
-  %endif
-  %if wide_tlb_cfg:
-    // Connect wide TLB configuration ports
-    assign tlb_wide_cfg_req_o = ${quadrant_s1_ctrl_mux.out_tlb_wide.req_name()};
-    assign ${quadrant_s1_ctrl_mux.out_tlb_wide.rsp_name()} = tlb_wide_cfg_rsp_i;
-  %endif
 
   // Convert both internal ports to AXI lite, since only registers for now
   <%
@@ -114,7 +95,7 @@ module ${name}_quadrant_s1_ctrl
       .serialize(context, iw=1, name="soc_internal_serialize") \
       .change_dw(context, 32, "soc_internal_change_dw") \
       .to_axi_lite(context, name="soc_internal_to_axi_lite", to=quadrant_s1_ctrl_mux.in_quad)
-    quad_regs_regbus = quadrant_s1_ctrl_mux.out_quadrant_ctrl \
+    quad_regs_regbus = quadrant_s1_ctrl_mux.out_out \
       .to_reg(context, "axi_lite_to_regbus_regs")
   %> \
 
@@ -146,10 +127,44 @@ module ${name}_quadrant_s1_ctrl
   assign hw2reg.ro_cache_flush.de = reg2hw.ro_cache_flush.q & hw2reg.ro_cache_flush.d;
 
   // Assemble RO cache start and end addresses from registers
-  % for j in range(cfg["s1_quadrant"].get("ro_cache_cfg", {}).get("address_regions", 1)):
+  % for j in range(ro_cache_regions):
   assign ro_start_addr_o[${j}] = {reg2hw.ro_start_addr_high_${j}.q, reg2hw.ro_start_addr_low_${j}.q};
   assign ro_end_addr_o  [${j}] = {reg2hw.ro_end_addr_high_${j}.q,   reg2hw.ro_end_addr_low_${j}.q};
   % endfor
+
+  %if narrow_tlb_cfg:
+  // Narrow TLB enable
+  assign narrow_tlb_enable_o = reg2hw.tlb_narrow_enable.q;
+
+  // Assemble narrow TLB entries
+  % for j in range(narrow_tlb_entries):
+  assign narrow_tlb_entries_o[${j}] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_narrow_entry_${j}_pagein_first_high.q,  reg2hw.tlb_narrow_entry_${j}_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_${j}_pagein_last_high.q,   reg2hw.tlb_narrow_entry_${j}_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_${j}_pageout_high.q,       reg2hw.tlb_narrow_entry_${j}_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_${j}_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_${j}_flags.read_only.q
+  };
+  % endfor
+  % endif
+
+  %if wide_tlb_cfg:
+  // Wide TLB enable
+  assign wide_tlb_enable_o = reg2hw.tlb_wide_enable.q;
+
+  // Assemble wide TLB entries
+  % for j in range(wide_tlb_entries):
+  assign wide_tlb_entries_o[${j}] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_${j}_pagein_first_high.q,  reg2hw.tlb_wide_entry_${j}_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_${j}_pagein_last_high.q,   reg2hw.tlb_wide_entry_${j}_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_${j}_pageout_high.q,       reg2hw.tlb_wide_entry_${j}_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_${j}_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_${j}_flags.read_only.q
+  };
+  % endfor
+  % endif
 
   // Quadrant clock gate controlled by register
   tc_clk_gating i_tc_clk_gating_quadrant (
