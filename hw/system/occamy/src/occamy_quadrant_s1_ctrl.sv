@@ -54,16 +54,17 @@ module occamy_quadrant_s1_ctrl
 );
 
   // Upper half of quadrant space reserved for internal use (same size as for all clusters)
-  addr_t [0:0] internal_xbar_base_addr;
-  assign internal_xbar_base_addr = '{S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace};
+  addr_t internal_xbar_base_addr;
+  assign internal_xbar_base_addr = S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace;
 
-    // Split quadrant control space into 1/2 quadrant control, 1/4 TLB narrow, 1/4 TLB wide
-    addr_t [2:0] lite_xbar_base_addrs;
-    assign lite_xbar_base_addrs[0] = internal_xbar_base_addr[0] + 0 * (S1QuadrantCfgAddressSpace >> 2);
-    assign lite_xbar_base_addrs[1] = internal_xbar_base_addr[0] + 2 * (S1QuadrantCfgAddressSpace >> 2);
-    assign lite_xbar_base_addrs[2] = internal_xbar_base_addr[0] + 3 * (S1QuadrantCfgAddressSpace >> 2);
+  // Split quadrant control space into 1/2 quadrant control, 1/4 TLB narrow, 1/4 TLB wide
+  addr_t [2:0] lite_xbar_base_addrs;
+  assign lite_xbar_base_addrs = '{
+    internal_xbar_base_addr
+    , internal_xbar_base_addr + 2 * (S1QuadrantCfgAddressSpace >> 2)
+    , internal_xbar_base_addr + 3 * (S1QuadrantCfgAddressSpace >> 2)
+  };
 
-  // TODO: Pipeline appropriately (possibly only outwards)
   // Controller crossbar: shims off for access to internal space
 
 /// Address map of the `quadrant_s1_ctrl_soc_to_quad_xbar` crossbar.
