@@ -1055,7 +1055,7 @@ class AxiLiteBus(Bus):
         self.aw = aw
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
- 
+
     def copy(self, name=None, clk=None, rst=None):
         return AxiLiteBus(clk or self.clk,
                           rst or self.rst,
@@ -2020,7 +2020,7 @@ class AxiLiteXbar(Xbar):
     def addr_map_len(self):
         return len(self.addrmap) + len(self.symbolic_addrmap) + sum(
             len(am) for am in self.symbolic_addrmap_multi)
- 
+
     def emit(self):
         global code_module
         global code_package
