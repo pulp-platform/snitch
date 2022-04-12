@@ -1,0 +1,261 @@
+From c2e49403c1aa033cd3c00bb3d8c8357c6da2e216 Mon Sep 17 00:00:00 2001
+From: Paul Scheffler <paulsc@iis.ee.ethz.ch>
+Date: Tue, 12 Apr 2022 17:24:06 +0200
+Subject: [PATCH] axi: Extract entry register file from TLB
+
+---
+ include/axi/typedef.svh | 23 ++++++++++++
+ src/axi_tlb.sv          | 24 ++++++------
+ src/axi_tlb_l1.sv       | 98 +++----------------------------------------------
+ 3 files changed, 42 insertions(+), 103 deletions(-)
+
+diff --git a/include/axi/typedef.svh b/include/axi/typedef.svh
+index cd85660..4e956d2 100644
+--- a/include/axi/typedef.svh
++++ b/include/axi/typedef.svh
+@@ -177,4 +177,27 @@
+   `AXI_LITE_TYPEDEF_REQ_T(__name``_req_t, __name``_aw_chan_t, __name``_w_chan_t, __name``_ar_chan_t) \
+   `AXI_LITE_TYPEDEF_RESP_T(__name``_rsp_t, __name``_b_chan_t, __name``_r_chan_t)
+ 
++////////////////////////////////////////////////////////////////////////////////////////////////////
++// AXI4 TLB type definitions
++//
++// Fields
++// * read_only: Defines whether this entry can only be used for read accesses.
++// * valid:     Defines whether this entry is valid.
++// * base:      Number of first page in output address segment; that is,
++//              the output address segment starts at this `base` page.
++// * last:      Number of last page (inclusive) in input address segment
++// * first:     Number of first page in input address segment
++`define AXI_TLB_TYPEDEF_ENTRY_T(entry_t, oup_page_t, inp_page_t)  \
++  typedef struct packed {                                         \
++    logic       read_only;                                        \
++    logic       valid;                                            \
++    oup_page_t  base;                                             \
++    inp_page_t  last;                                             \
++    inp_page_t  first;                                            \
++  } entry_t;
++////////////////////////////////////////////////////////////////////////////////////////////////////
++
++`define AXI_TLB_TYPEDEF_ALL(name, entry_t, oup_page_t, inp_page_t) \
++  `AXI_TLB_TYPEDEF_ENTRY_T(__name``_entry_t, oup_page_t, inp_page_t)
++
+ `endif
+diff --git a/src/axi_tlb.sv b/src/axi_tlb.sv
+index e600b90..84dd9b9 100644
+--- a/src/axi_tlb.sv
++++ b/src/axi_tlb.sv
+@@ -45,7 +45,9 @@ module axi_tlb #(
+   /// Request type of configuration AXI4-Lite slave port
+   parameter type lite_req_t = logic,
+   /// Response type of configuration AXI4-Lite slave port
+-  parameter type lite_resp_t = logic
++  parameter type lite_resp_t = logic,
++  /// Type of page table entry
++  parameter type entry_t = logic
+ ) (
+   /// Rising-edge clock of all ports
+   input  logic        clk_i,
+@@ -61,10 +63,8 @@ module axi_tlb #(
+   output mst_req_t    mst_req_o,
+   /// Main master port response
+   input  axi_resp_t   mst_resp_i,
+-  /// Configuration port request
+-  input  lite_req_t   cfg_req_i,
+-  /// Configuration port response
+-  output lite_resp_t  cfg_resp_o
++  /// Configured translation entries
++  input  entry_t [NumEntries-1:0] entries_i
+ );
+ 
+   typedef logic [AxiSlvPortAddrWidth-1:0] slv_addr_t;
+@@ -141,8 +141,7 @@ module axi_tlb #(
+     .rd_res_o       ( l1_tlb_rd_res       ),
+     .rd_res_valid_o ( l1_tlb_rd_res_valid ),
+     .rd_res_ready_i ( l1_tlb_rd_res_ready ),
+-    .cfg_req_i,
+-    .cfg_resp_o
++    .entries_i
+   );
+ 
+   // Join L1 TLB responses with Ax requests into demultiplexer.
+@@ -291,14 +290,15 @@ module axi_tlb_intf #(
+   parameter int unsigned CFG_AXI_ADDR_WIDTH = 0,
+   parameter int unsigned CFG_AXI_DATA_WIDTH = 0,
+   parameter int unsigned L1_NUM_ENTRIES = 0,
+-  parameter bit L1_CUT_AX = 1'b1
++  // TODO: provide as interface?
++  parameter type entry_t = logic
+ ) (
+   input  logic    clk_i,
+   input  logic    rst_ni,
+   input  logic    test_en_i,
+   AXI_BUS.Slave   slv,
+   AXI_BUS.Master  mst,
+-  AXI_LITE.Slave  cfg
++  input  entry_t [L1_NUM_ENTRIES-1:0] entries_i
+ );
+ 
+   typedef logic [AXI_SLV_PORT_ADDR_WIDTH-1:0] slv_addr_t;
+@@ -361,7 +361,8 @@ module axi_tlb_intf #(
+     .mst_req_t            ( mst_req_t               ),
+     .axi_resp_t           ( axi_resp_t              ),
+     .lite_req_t           ( lite_req_t              ),
+-    .lite_resp_t          ( lite_resp_t             )
++    .lite_resp_t          ( lite_resp_t             ),
++    .entry_t              ( entry_t                 )
+   ) i_axi_tlb (
+     .clk_i,
+     .rst_ni,
+@@ -371,7 +372,8 @@ module axi_tlb_intf #(
+     .mst_req_o  ( mst_req   ),
+     .mst_resp_i ( mst_resp  ),
+     .cfg_req_i  ( cfg_req   ),
+-    .cfg_resp_o ( cfg_resp  )
++    .cfg_resp_o ( cfg_resp  ),
++    .entries_i
+   );
+ 
+ endmodule
+diff --git a/src/axi_tlb_l1.sv b/src/axi_tlb_l1.sv
+index 06a3536..4c2216d 100644
+--- a/src/axi_tlb_l1.sv
++++ b/src/axi_tlb_l1.sv
+@@ -30,6 +30,8 @@ module axi_tlb_l1 #(
+   /// Type of translation result.  Must have a single-bit field `hit` and an `addr` field as wide as
+   /// the output address.
+   parameter type res_t = logic,
++  /// Type of page table entry
++  parameter type entry_t = logic,
+   /// Derived (=do not override) type of input addresses
+   parameter type inp_addr_t = logic [InpAddrWidth-1:0],
+   /// Derived (=do not override) type of output addresses
+@@ -65,36 +67,10 @@ module axi_tlb_l1 #(
+   output logic        rd_res_valid_o,
+   /// Read translation result ready
+   input  logic        rd_res_ready_i,
+-  /// Configuration port request
+-  input  lite_req_t   cfg_req_i,
+-  /// Configuration port response
+-  output lite_resp_t  cfg_resp_o
++  /// Configured translation entries
++  input  entry_t [NumEntries-1:0] entries_i
+ );
+ 
+-  localparam int unsigned InpPageNumWidth = InpAddrWidth - 12;
+-  localparam int unsigned OupPageNumWidth = OupAddrWidth - 12;
+-
+-  /// Page number in input address space
+-  typedef logic [InpPageNumWidth-1:0] inp_page_t;
+-  /// Page number in output address space
+-  typedef logic [OupPageNumWidth-1:0] oup_page_t;
+-  /// Translation table entry with 4 KiB page granularity
+-  typedef struct packed {
+-    /// Defines whether this entry can only be used for read accesses.
+-    logic       read_only;
+-    /// Defines whether this entry is valid.
+-    logic       valid;
+-    /// Number of first page in output address segment; that is, the output address segment starts
+-    /// at this `base` page.
+-    oup_page_t  base;
+-    /// Number of last page (inclusive) in input address segment
+-    inp_page_t  last;
+-    /// Number of first page in input address segment
+-    inp_page_t  first;
+-  } entry_t;
+-
+-  entry_t [NumEntries-1:0]  entries;
+-
+   // Write channel
+   axi_tlb_l1_chan #(
+     .NumEntries     ( NumEntries  ),
+@@ -106,7 +82,7 @@ module axi_tlb_l1 #(
+     .clk_i,
+     .rst_ni,
+     .test_en_i,
+-    .entries_i    ( entries         ),
++    .entries_i,
+     .req_addr_i   ( wr_req_addr_i   ),
+     .req_valid_i  ( wr_req_valid_i  ),
+     .req_ready_o  ( wr_req_ready_o  ),
+@@ -126,7 +102,7 @@ module axi_tlb_l1 #(
+     .clk_i,
+     .rst_ni,
+     .test_en_i,
+-    .entries_i    ( entries         ),
++    .entries_i,
+     .req_addr_i   ( rd_req_addr_i   ),
+     .req_valid_i  ( rd_req_valid_i  ),
+     .req_ready_o  ( rd_req_ready_o  ),
+@@ -135,68 +111,6 @@ module axi_tlb_l1 #(
+     .res_ready_i  ( rd_res_ready_i  )
+   );
+ 
+-  // Table entries from AXI4-Lite registers, aligned to 32-bit words
+-  localparam int unsigned InpPageNumBytes = cf_math_pkg::ceil_div(InpPageNumWidth, 8);
+-  localparam int unsigned InpPageNumBytesAligned = cf_math_pkg::ceil_div(InpPageNumBytes, 4) * 4;
+-  localparam int unsigned OupPageNumBytes = cf_math_pkg::ceil_div(OupPageNumWidth, 8);
+-  localparam int unsigned OupPageNumBytesAligned = cf_math_pkg::ceil_div(OupPageNumBytes, 4) * 4;
+-  localparam int unsigned FlagBytes = cf_math_pkg::ceil_div(2, 8);
+-  localparam int unsigned FlagBytesAligned = cf_math_pkg::ceil_div(FlagBytes, 4) * 4;
+-  localparam int unsigned EntryBytesAligned =
+-      2 * InpPageNumBytesAligned + OupPageNumBytesAligned + FlagBytesAligned;
+-  localparam int unsigned RegNumBytes = NumEntries * EntryBytesAligned;
+-  typedef struct packed {
+-    bit [FlagBytesAligned-1:0]        flags;
+-    bit [OupPageNumBytesAligned-1:0]  base;
+-    bit [InpPageNumBytesAligned-1:0]  last;
+-    bit [InpPageNumBytesAligned-1:0]  first;
+-  } entry_bits_t;
+-  localparam entry_bits_t [NumEntries-1:0] AxiReadOnly = '{NumEntries{'{
+-    flags:              {{FlagBytesAligned-FlagBytes{1'b1}},       {FlagBytes{1'b0}}},
+-    base:   {{OupPageNumBytesAligned-OupPageNumBytes{1'b1}}, {OupPageNumBytes{1'b0}}},
+-    last:   {{InpPageNumBytesAligned-InpPageNumBytes{1'b1}}, {InpPageNumBytes{1'b0}}},
+-    first:  {{InpPageNumBytesAligned-InpPageNumBytes{1'b1}}, {InpPageNumBytes{1'b0}}},
+-    default: 1'b0 // this should not be needed, but in doubt better make the bytes writeable
+-  }}};
+-  typedef struct packed {
+-    logic [FlagBytesAligned*8-1:0]        flags;
+-    logic [OupPageNumBytesAligned*8-1:0]  base;
+-    logic [InpPageNumBytesAligned*8-1:0]  last;
+-    logic [InpPageNumBytesAligned*8-1:0]  first;
+-  } entry_padded_t;
+-  typedef logic [7:0] byte_t;
+-  byte_t [RegNumBytes-1:0] reg_q;
+-  axi_lite_regs #(
+-    .RegNumBytes    ( RegNumBytes           ),
+-    .AxiAddrWidth   ( CfgAxiAddrWidth       ),
+-    .AxiDataWidth   ( CfgAxiDataWidth       ),
+-    .PrivProtOnly   ( 1'b0                  ),
+-    .SecuProtOnly   ( 1'b0                  ),
+-    .AxiReadOnly    ( AxiReadOnly           ),
+-    .RegRstVal      ( '{RegNumBytes{8'h00}} ),
+-    .req_lite_t     ( lite_req_t            ),
+-    .resp_lite_t    ( lite_resp_t           )
+-  ) i_regs (
+-    .clk_i,
+-    .rst_ni,
+-    .axi_req_i    ( cfg_req_i             ),
+-    .axi_resp_o   ( cfg_resp_o            ),
+-    .wr_active_o  ( /* unused */          ),
+-    .rd_active_o  ( /* unused */          ),
+-    .reg_d_i      ( '{RegNumBytes{8'h00}} ),
+-    .reg_load_i   ( '{RegNumBytes{1'b0}}  ),
+-    .reg_q_o      ( reg_q                 )
+-  );
+-  entry_padded_t [NumEntries-1:0] entries_padded;
+-  assign {>>{entries_padded}} = reg_q;
+-  for (genvar i = 0; i < NumEntries; i++) begin : gen_unpack_entry
+-    assign entries[i].first = entries_padded[i].first[InpPageNumWidth-1:0];
+-    assign entries[i].last = entries_padded[i].last[InpPageNumWidth-1:0];
+-    assign entries[i].base = entries_padded[i].base[OupPageNumWidth-1:0];
+-    assign entries[i].valid = entries_padded[i].flags[0];
+-    assign entries[i].read_only = entries_padded[i].flags[1];
+-  end
+-
+   `ifndef VERILATOR
+   // pragma translate_off
+   initial begin
+-- 
+2.16.5
+
