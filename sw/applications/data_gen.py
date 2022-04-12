@@ -18,14 +18,19 @@ torch.manual_seed(42)
 global verbose
 
 
-def array_to_cstr(a):
+def array_to_cstr(a, fmt=float):
     out = '{'
-    if isinstance(a, np.ndarray):
-        a = a.flat
-    if isinstance(a, torch.Tensor):
-        a = a.numpy().flat
-    for el in a:
-        out += '{}, '.format(el)
+    if fmt == float:
+        if isinstance(a, np.ndarray):
+            a = a.flat
+        if isinstance(a, torch.Tensor):
+            a = a.numpy().flat
+        for el in a:
+            out += '{}, '.format(el)
+    else:
+        for sign, exp, mant in zip(a['sign'].numpy().flat, a['exponent'].numpy().flat, a['mantissa'].numpy().flat):
+            value = sign * 2**7 + exp * 2**2 + mant
+            out += "0x{:02x}, ".format(value)
     out = out[:-2] + '}'
     return out
 
@@ -124,12 +129,16 @@ def emit_GEMM_layer(name='gemm', **kwargs):
     }
 
     dtype = ctypes[str(kwargs['prec'])]
-
-    layer_str += f'static {dtype} {name}_A_dram [{m}][{k}] = ' + array_to_cstr(mat_A) + ';\n\n\n'
-    layer_str += f'static {dtype} {name}_B_dram [{k}][{n}] = ' + array_to_cstr(mat_B) + ';\n\n\n'
-    layer_str += f'static {dtype} {name}_C_dram [{m}][{n}] = ' + array_to_cstr(mat_C) + ';\n\n\n'
-    layer_str += f'static {dtype} {name}_result[{m}][{n}] __attribute__((section(".data")));\n\n'
-    layer_str += f'static {dtype} {name}_checksum[{m}] = ' + array_to_cstr(torch.sum(result, dim=-1)) + ';\n\n\n'
+    if dtype != 'char':
+        layer_str += f'static {dtype} {name}_A_dram [{m}][{k}] = ' + array_to_cstr(mat_A) + ';\n\n\n'
+        layer_str += f'static {dtype} {name}_B_dram [{k}][{n}] = ' + array_to_cstr(mat_B) + ';\n\n\n'
+        layer_str += f'static {dtype} {name}_C_dram [{m}][{n}] = ' + array_to_cstr(mat_C) + ';\n\n\n'
+        layer_str += f'static {dtype} {name}_result[{m}][{n}] __attribute__((section(".data")));\n\n'
+        layer_str += f'static {dtype} {name}_checksum[{m}] = ' + array_to_cstr(torch.sum(result, dim=-1)) + ';\n\n\n'
+    else:
+        layer_str += f'static {dtype} {name}_A_dram [{m}][{k}] = ' + array_to_cstr(kwargs['bits_A'], fmt='char') + ';\n\n\n'
+        layer_str += f'static {dtype} {name}_B_dram [{k}][{n}] = ' + array_to_cstr(kwargs['bits_B'], fmt='char') + ';\n\n\n'
+        layer_str += f'static {dtype} {name}_C_dram [{m}][{n}] = ' + array_to_cstr(kwargs['bits_C'], fmt='char') + ';\n\n\n'
 
     return layer_str
 
@@ -269,6 +278,25 @@ def emit_fusedconv(name='fusedconv', **kwargs):
     return layer_str
 
 
+def rand_data_generator(shape, prec, alt=False):
+    if prec == 64:
+        return torch.randn(shape, requires_grad=False, dtype=torch.float64), {}
+    elif prec == 32:
+        return torch.randn(shape, requires_grad=False, dtype=torch.float32), {}
+    elif prec == 16:
+        if alt:
+            return torch.randn(shape, requires_grad=False, dtype=torch.bfloat16), {}
+        else:
+            return torch.randn(shape, requires_grad=False, dtype=torch.float16), {}
+    elif prec == 8:
+        sign = torch.randint(0, 2, shape, requires_grad=False, dtype=torch.uint8)  # -1 or 1
+        exponent = torch.randint(0, 31, shape, requires_grad=False, dtype=torch.uint8)  # should not be 0b11111
+        mantissa = torch.randint(0, 3, shape, requires_grad=False, dtype=torch.uint8)  # between
+        bits = {'sign': sign, 'exponent': exponent, 'mantissa': mantissa}
+        # TODO: not actually correct
+        return ((-1.0)**sign.double())*(2.0**(exponent.double()-15.0))*(1.0 + mantissa.double() / (2**2)), bits
+
+
 def conv2d(ifmap, weights, padding=1, stride=1):
     n, ci, ih, iw = ifmap.shape
     co, _, fh, fw = weights.shape
@@ -390,8 +418,10 @@ def main():
 
     if param['prec'] == 64:
         dtype = torch.float64
-    elif param['prec'] in [8, 16]:
+    elif param['prec'] == 16:
         dtype = torch.float16
+    elif param['prec'] == 8:
+        dtype = None
     else:
         dtype = torch.float32
 
@@ -416,9 +446,9 @@ def main():
         emit_header_file('Conv2d', **kwargs)
 
     elif param['kernel'] == 'GEMM':
-        mat_A = torch.randn(param['M'], param['K'], requires_grad=False, dtype=dtype)
-        mat_B = torch.randn(param['K'], param['N'], requires_grad=False, dtype=dtype)
-        mat_C = torch.randn(param['M'], param['N'], requires_grad=False, dtype=dtype)
+        mat_A, bits_A = rand_data_generator((param['M'], param['K']), param['prec'])
+        mat_B, bits_B = rand_data_generator((param['K'], param['N']), param['prec'])
+        mat_C, bits_C = rand_data_generator((param['M'], param['N']), param['prec'])
 
         result = param['alpha'] * mat_C + torch.matmul(mat_A, mat_B)
 
@@ -439,7 +469,10 @@ def main():
             'tb': param['transpose_B'],
             'alpha': param['alpha'],
             'prec': param['prec'],
-            'expand': param['expand']
+            'expand': param['expand'],
+            'bits_A': bits_A,
+            'bits_B': bits_B,
+            'bits_C': bits_C
         }
 
         emit_header_file('GEMM', **kwargs)
