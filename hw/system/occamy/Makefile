@@ -22,6 +22,8 @@ VLOG      		= vlog ${QUESTA_64BIT}
 VSIM_FLAGS    += -t 1ps
 VSIM_FLAGS    += -voptargs=+acc
 VSIM_FLAGS    += -do "log -r /*; run -a"
+# TODO: Workaround for known issue; revise
+VSIM_FLAGS += -warning 8386
 
 VLOG_FLAGS 	  += -svinputport=compat
 VLOG_FLAGS 	  += -override_timescale 1ns/1ps
