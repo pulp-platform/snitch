@@ -45,7 +45,9 @@ module axi_tlb #(
   /// Request type of configuration AXI4-Lite slave port
   parameter type lite_req_t = logic,
   /// Response type of configuration AXI4-Lite slave port
-  parameter type lite_resp_t = logic
+  parameter type lite_resp_t = logic,
+  /// Type of page table entry
+  parameter type entry_t = logic
 ) (
   /// Rising-edge clock of all ports
   input  logic        clk_i,
@@ -61,10 +63,8 @@ module axi_tlb #(
   output mst_req_t    mst_req_o,
   /// Main master port response
   input  axi_resp_t   mst_resp_i,
-  /// Configuration port request
-  input  lite_req_t   cfg_req_i,
-  /// Configuration port response
-  output lite_resp_t  cfg_resp_o
+  /// Configured translation entries
+  input  entry_t [NumEntries-1:0] entries_i
 );
 
   typedef logic [AxiSlvPortAddrWidth-1:0] slv_addr_t;
@@ -141,8 +141,7 @@ module axi_tlb #(
     .rd_res_o       ( l1_tlb_rd_res       ),
     .rd_res_valid_o ( l1_tlb_rd_res_valid ),
     .rd_res_ready_i ( l1_tlb_rd_res_ready ),
-    .cfg_req_i,
-    .cfg_resp_o
+    .entries_i
   );
 
   // Join L1 TLB responses with Ax requests into demultiplexer.
@@ -291,14 +290,15 @@ module axi_tlb_intf #(
   parameter int unsigned CFG_AXI_ADDR_WIDTH = 0,
   parameter int unsigned CFG_AXI_DATA_WIDTH = 0,
   parameter int unsigned L1_NUM_ENTRIES = 0,
-  parameter bit L1_CUT_AX = 1'b1
+  // TODO: provide as interface?
+  parameter type entry_t = logic
 ) (
   input  logic    clk_i,
   input  logic    rst_ni,
   input  logic    test_en_i,
   AXI_BUS.Slave   slv,
   AXI_BUS.Master  mst,
-  AXI_LITE.Slave  cfg
+  input  entry_t [L1_NUM_ENTRIES-1:0] entries_i
 );
 
   typedef logic [AXI_SLV_PORT_ADDR_WIDTH-1:0] slv_addr_t;
@@ -361,7 +361,8 @@ module axi_tlb_intf #(
     .mst_req_t            ( mst_req_t               ),
     .axi_resp_t           ( axi_resp_t              ),
     .lite_req_t           ( lite_req_t              ),
-    .lite_resp_t          ( lite_resp_t             )
+    .lite_resp_t          ( lite_resp_t             ),
+    .entry_t              ( entry_t                 )
   ) i_axi_tlb (
     .clk_i,
     .rst_ni,
@@ -371,7 +372,8 @@ module axi_tlb_intf #(
     .mst_req_o  ( mst_req   ),
     .mst_resp_i ( mst_resp  ),
     .cfg_req_i  ( cfg_req   ),
-    .cfg_resp_o ( cfg_resp  )
+    .cfg_resp_o ( cfg_resp  ),
+    .entries_i
   );
 
 endmodule

@@ -177,4 +177,27 @@
   `AXI_LITE_TYPEDEF_REQ_T(__name``_req_t, __name``_aw_chan_t, __name``_w_chan_t, __name``_ar_chan_t) \
   `AXI_LITE_TYPEDEF_RESP_T(__name``_rsp_t, __name``_b_chan_t, __name``_r_chan_t)
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// AXI4 TLB type definitions
+//
+// Fields
+// * read_only: Defines whether this entry can only be used for read accesses.
+// * valid:     Defines whether this entry is valid.
+// * base:      Number of first page in output address segment; that is,
+//              the output address segment starts at this `base` page.
+// * last:      Number of last page (inclusive) in input address segment
+// * first:     Number of first page in input address segment
+`define AXI_TLB_TYPEDEF_ENTRY_T(entry_t, oup_page_t, inp_page_t)  \
+  typedef struct packed {                                         \
+    logic       read_only;                                        \
+    logic       valid;                                            \
+    oup_page_t  base;                                             \
+    inp_page_t  last;                                             \
+    inp_page_t  first;                                            \
+  } entry_t;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+`define AXI_TLB_TYPEDEF_ALL(name, entry_t, oup_page_t, inp_page_t) \
+  `AXI_TLB_TYPEDEF_ENTRY_T(__name``_entry_t, oup_page_t, inp_page_t)
+
 `endif
