@@ -128,7 +128,13 @@
     \bitbox{14}{6.0 MB for QUADRANTS} \\
     \bytefieldsetup{bitheight=1.4\baselineskip}%
     \bitbox[]{5}{} &
-    \bitbox{14}{250.0 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox{14}{10.0 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x1100\_0000} \\ [0\baselineskip] \texttt{0x1100\_ffff}} &
+    \bitbox{14}{64.0 KB for SYS\_IDMA\_CFG} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{239.9 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
 
     \bitbox[]{5}{\texttt{0x2000\_0000} \\ [0\baselineskip] \texttt{0x47ff\_ffff}} &
     \bitbox{14}{640.0 MB for PCIE} \\
@@ -682,9 +688,9 @@
     \bitbox[]{4}{\texttt{0x105f\_0000} \\ [0\baselineskip] \texttt{0x105f\_ffff}} \\
 
     \bytefieldsetup{bitheight=2\baselineskip}%
-    \bitbox[]{4}{\texttt{0x1060\_0000} \\ [0\baselineskip] \texttt{0x1fff\_ffff}} &
-    \bitbox{18}{250.0 MB EMPTY} &
-    \bitbox[]{4}{\texttt{0x1060\_0000} \\ [0\baselineskip] \texttt{0x1fff\_ffff}}  \\
+    \bitbox[]{4}{\texttt{0x1060\_0000} \\ [0\baselineskip] \texttt{0x10ff\_ffff}} &
+    \bitbox{18}{10.0 MB EMPTY} &
+    \bitbox[]{4}{\texttt{0x1060\_0000} \\ [0\baselineskip] \texttt{0x10ff\_ffff}}  \\
   \end{bytefield}
 
 }

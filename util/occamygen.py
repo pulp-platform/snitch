@@ -263,6 +263,14 @@ def main():
         occamy.cfg["spm"]["length"],
         occamy.cfg["spm"]["address"]).attach_to(am_soc_narrow_xbar)
 
+    ############
+    # AM: IDMA #
+    ############
+    am_sys_idma_cfg = am.new_leaf(
+        "sys_idma_cfg",
+        occamy.cfg["sys_idma_cfg"]["length"],
+        occamy.cfg["sys_idma_cfg"]["address"]).attach_to(am_soc_narrow_xbar)
+
     ###########
     # AM: HBI #
     ###########
@@ -620,6 +628,7 @@ def main():
     soc_wide_xbar.add_input("hbi")
     soc_wide_xbar.add_input("quadrant_inter_xbar")
     soc_wide_xbar.add_input("soc_narrow")
+    soc_wide_xbar.add_input("sys_idma_mst")
 
     ###################
     # SoC Narrow Xbar #
@@ -659,6 +668,7 @@ def main():
         soc_narrow_xbar.add_output_entry("hbi", am_hbi)
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
     soc_narrow_xbar.add_output_entry("spm", am_spm)
+    soc_narrow_xbar.add_output_entry("sys_idma_cfg", am_sys_idma_cfg)
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)
     soc_narrow_xbar.add_output_entry("pcie", am_pcie)

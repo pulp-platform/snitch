@@ -35,6 +35,7 @@
 %>
 
 `include "common_cells/registers.svh"
+`include "register_interface/typedef.svh"
 
 module ${name}_soc
   import ${name}_pkg::*;
@@ -289,6 +290,103 @@ module ${name}_soc
     .rvalid_o (spm_rvalid),
     .rerror_o (spm_rerror_o),
     .sram_cfg_i (sram_cfgs_i.spm)
+  );
+
+  //////////////
+  // SYS iDMA //
+  //////////////
+
+  <% out_sys_idma_cfg = soc_narrow_xbar.__dict__["out_sys_idma_cfg"] \
+  .atomic_adapter(context, filter=True, max_trans=max_trans_atop_filter_per, name="out_sys_idma_cfg_noatop", inst_name="i_out_sys_idma_cfg_atop_filter") \
+  %>\
+
+  // .change_dw(context, 32, "out_sys_idma_cfg_dw") \
+
+  <% in_sys_idma_mst  = soc_wide_xbar.__dict__["in_sys_idma_mst"] %>\
+
+  // burst request
+  typedef struct packed {
+    logic [${wide_in.iw-1}:0] id;
+    logic [${wide_in.aw-1}:0] src, dst;
+    logic [${wide_in.aw-1}:0] num_bytes;
+    axi_pkg::cache_t    cache_src, cache_dst;
+    axi_pkg::burst_t    burst_src, burst_dst;
+    logic               decouple_rw;
+    logic               deburst;
+    logic               serialize;
+  } idma_burst_req_t;
+
+  // local regbus definition
+  `REG_BUS_TYPEDEF_ALL(idma_cfg_reg_a${wide_in.aw}_d64, logic [${wide_in.aw-1}:0], logic [63:0], logic [7:0])
+
+  idma_burst_req_t idma_burst_req;
+  logic idma_be_valid;
+  logic idma_be_ready;
+  logic idma_be_idle;
+  logic idma_be_trans_complete;
+
+  idma_cfg_reg_a${wide_in.aw}_d64_req_t idma_cfg_reg_req;
+  idma_cfg_reg_a${wide_in.aw}_d64_rsp_t idma_cfg_reg_rsp;
+
+  axi_to_reg #(
+    .ADDR_WIDTH( ${out_sys_idma_cfg.aw}                 ),
+    .DATA_WIDTH( ${out_sys_idma_cfg.dw}                 ),
+    .ID_WIDTH  ( ${out_sys_idma_cfg.iw}                 ),
+    .USER_WIDTH( ${out_sys_idma_cfg.uw + 1}             ),
+    .axi_req_t ( ${out_sys_idma_cfg.req_type()}         ),
+    .axi_rsp_t ( ${out_sys_idma_cfg.rsp_type()}         ),
+    .reg_req_t ( idma_cfg_reg_a${wide_in.aw}_d64_req_t  ),
+    .reg_rsp_t ( idma_cfg_reg_a${wide_in.aw}_d64_rsp_t  )
+  ) i_axi_to_reg_sys_idma_cfg (
+    .clk_i,
+    .rst_ni,
+    .testmode_i ( 1'b0                           ),
+    .axi_req_i  ( ${out_sys_idma_cfg.req_name()} ),
+    .axi_rsp_o  ( ${out_sys_idma_cfg.rsp_name()} ),
+    .reg_req_o  ( idma_cfg_reg_req               ),
+    .reg_rsp_i  ( idma_cfg_reg_rsp               )
+  );
+
+  idma_reg64_frontend #(
+    .DmaAddrWidth    ( 'd64                                  ),
+    .dma_regs_req_t  ( idma_cfg_reg_a${wide_in.aw}_d64_req_t ),
+    .dma_regs_rsp_t  ( idma_cfg_reg_a${wide_in.aw}_d64_rsp_t ),
+    .burst_req_t     ( idma_burst_req_t                      )
+  ) i_idma_reg64_frontend_sys_idma (
+    .clk_i,
+    .rst_ni,
+    .dma_ctrl_req_i   ( idma_cfg_reg_req       ),
+    .dma_ctrl_rsp_o   ( idma_cfg_reg_rsp       ),
+    .burst_req_o      ( idma_burst_req         ),
+    .valid_o          ( idma_be_valid          ),
+    .ready_i          ( idma_be_ready          ),
+    .backend_idle_i   ( idma_be_idle           ),
+    .trans_complete_i ( idma_be_trans_complete )
+  );
+
+  axi_dma_backend #(
+    .DataWidth      ( ${in_sys_idma_mst.dw}         ),
+    .AddrWidth      ( ${in_sys_idma_mst.aw}         ),
+    .IdWidth        ( ${in_sys_idma_mst.iw}         ),
+    .AxReqFifoDepth ( 'd64                          ),
+    .TransFifoDepth ( 'd16                          ),
+    .BufferDepth    ( 'd3                           ),
+    .axi_req_t      ( ${in_sys_idma_mst.req_type()} ),
+    .axi_res_t      ( ${in_sys_idma_mst.rsp_type()} ),
+    .burst_req_t    ( idma_burst_req_t              ),
+    .DmaIdWidth     ( 'd32                          ),
+    .DmaTracing     ( 1'b1                          )
+  ) i_axi_dma_backend_sys_idma (
+    .clk_i,
+    .rst_ni,
+    .dma_id_i         ( 'd0                           ),
+    .axi_dma_req_o    ( ${in_sys_idma_mst.req_name()} ),
+    .axi_dma_res_i    ( ${in_sys_idma_mst.rsp_name()} ),
+    .burst_req_i      ( idma_burst_req                ),
+    .valid_i          ( idma_be_valid                 ),
+    .ready_o          ( idma_be_ready                 ),
+    .backend_idle_o   ( idma_be_idle                  ),
+    .trans_complete_o ( idma_be_trans_complete        )
   );
 
   ///////////
