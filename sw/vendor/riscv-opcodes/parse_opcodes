@@ -685,7 +685,7 @@ def make_rust():
   print("#[repr(C)]")
   print("pub enum Csr {")
   for csr in csrs+csrs32:
-    print(f'    {make_camel_case(csr[1])} = 0x{csr[0]:03x},')
+    print("    {} = 0x{:03x},".format(make_camel_case(csr[1]), csr[0]))
   print("}")
 
 
@@ -1253,7 +1253,7 @@ def make_chisel():
   print('}')
 
 def print_sverilog_insn(name):
-  s = "  localparam [31:0] %-18s = 32'b" % name.replace('.', '_').upper()
+  s = "  localparam logic [31:0] %-18s = 32'b" % name.replace('.', '_').upper()
   for i in range(31, -1, -1):
     if yank(mask[name], i, 1):
       s = '%s%d' % (s, yank(match[name], i, 1))

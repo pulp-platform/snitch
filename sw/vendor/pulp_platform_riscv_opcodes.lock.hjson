@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/pulp-platform/riscv-opcodes.git
-    rev: 03e374206e2763339607eb641f899611420ff20b
+    rev: 6bda68aa82b78b47a61cbf0c08e39cf83a03f152
   }
 }

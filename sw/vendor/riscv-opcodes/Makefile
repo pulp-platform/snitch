@@ -5,7 +5,7 @@ ALL_REAL_OPCODES := $(ALL_REAL_ILEN32_OPCODES) opcodes-rvc opcodes-rv32c opcodes
 
 # Add your opcodes here
 include config.mk
-MY_OPCODES := $(MEMPOOL_ISA)
+MY_OPCODES ?= $(MEMPOOL_ISA)
 
 ALL_OPCODES := opcodes-pseudo $(ALL_REAL_OPCODES) $(MY_OPCODES) opcodes-rvv-pseudo
 # Opcodes to be discarded
