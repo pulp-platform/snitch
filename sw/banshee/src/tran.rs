@@ -994,11 +994,13 @@ impl<'a> InstructionTranslator<'a> {
         match self.inst {
             riscv::Format::AqrlRdRs1(x) => self.emit_aqrl_rd_rs1(x),
             riscv::Format::AqrlRdRs1Rs2(x) => self.emit_aqrl_rd_rs1_rs2(x),
+            riscv::Format::Bimm12hiBimm12loImm5Rs1(x) => self.emit_bimm12hi_bimm12lo_imm5_rs1(x),
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
             riscv::Format::FmPredRdRs1Succ(x) => self.emit_fm_pred_rd_rs1_succ(x),
             riscv::Format::Imm5Rd(x) => self.emit_imm5_rd(x),
             riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
             riscv::Format::Imm5RdRs1(x) => self.emit_imm5_rd_rs1(x),
+            riscv::Format::Imm6RdRs1(x) => self.emit_imm6_rd_rs1(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
             riscv::Format::Imm12Rs1StaggerMaskStaggerMax(x) => {
                 self.emit_imm12_rs1_staggermask_staggermax(x, fseq)
@@ -1007,6 +1009,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::Imm12hiImm12loRs1Rs2(x) => self.emit_imm12hi_imm12lo_rs1_rs2(x),
             riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
             riscv::Format::Jimm20Rd(x) => self.emit_jimm20_rd(x),
+            riscv::Format::Luimm5RdRs1Rs2(x) => self.emit_luimm5_rd_rs1_rs2(x),
             riscv::Format::RdRmRs1(x) => self.emit_rd_rm_rs1(x),
             riscv::Format::RdRmRs1Rs2(x) => self.emit_rd_rm_rs1_rs2(x),
             riscv::Format::RdRmRs1Rs2Rs3(x) => self.emit_rd_rm_rs1_rs2_rs3(x),
@@ -1469,6 +1472,33 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
+    unsafe fn emit_bimm12hi_bimm12lo_imm5_rs1(&self, data: riscv::FormatBimm12hiBimm12loImm5Rs1,
+    ) -> Result<()> {
+        let target = (self.addr as i64).wrapping_add(data.bimm() as i64) as u64;
+        trace!("{} x{}, x{}, 0x{:x}", data.op, data.rs1, data.imm5, target);
+        let rs1 = self.read_reg(data.rs1);
+        let imm5 = LLVMBuildSExt(
+            self.builder,
+            LLVMConstInt(LLVMIntType(5), // extract only 5 bits to sext
+            data.imm5 as u64, 1),
+            LLVMInt32Type(),
+            NONAME);
+        let name = format!("{}_x{}_x{}\0", data.op, data.rs1, data.imm5);
+        let name = name.as_ptr() as *const _;
+        let predicate = match data.op {
+            riscv::OpcodeBimm12hiBimm12loImm5Rs1::PBeqimm => LLVMIntEQ,
+            riscv::OpcodeBimm12hiBimm12loImm5Rs1::PBneimm => LLVMIntNE,
+        };
+        let cmp = LLVMBuildICmp(self.builder, predicate, rs1, imm5, name);
+        let bb =
+            LLVMCreateBasicBlockInContext(self.section.engine.context, b"\0".as_ptr() as *const _);
+        LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb);
+        self.emit_trace();
+        LLVMBuildCondBr(self.builder, cmp, self.section.elf.inst_bbs[&target], bb);
+        LLVMPositionBuilderAtEnd(self.builder, bb);
+        Ok(())
+    }
+
     unsafe fn emit_bimm12hi_bimm12lo_rs1_rs2(
         &self,
         data: riscv::FormatBimm12hiBimm12loRs1Rs2,
@@ -1675,6 +1705,98 @@ impl<'a> InstructionTranslator<'a> {
                 "banshee_dma_strt",
                 [self.dma_ptr(), self.section.state_ptr, rs1, imm],
             ),
+            // xpulpclip
+            riscv::OpcodeImm5RdRs1::PClip => {
+                // if rs1 <= -2^(Is2-1), rD = -2^(Is2-1),
+                // else if rs1 >= 2^(Is2-1)–1, rD = 2^(Is2-1)-1,
+                // else rD = rs1
+                // Note: If ls2 is equal to 0, -2^(Is2-1)= -1 while (2^(Is2-1)-1)=0;
+
+                let one = LLVMConstInt(LLVMInt32Type(), 1, 0);
+                let zero = LLVMConstNull(LLVMInt32Type());
+
+                // check imm == 0
+                let sel0 = LLVMBuildICmp(self.builder, LLVMIntEQ, imm, zero, NONAME);
+
+                let pow = LLVMBuildShl(
+                    self.builder,
+                    one,
+                    LLVMBuildSub(self.builder, imm, one, NONAME),
+                    NONAME
+                );
+                // conditions
+                let fst = LLVMBuildSelect(self.builder,
+                    sel0,
+                    LLVMConstSub(zero, one),
+                    LLVMBuildSub(
+                        self.builder,
+                        zero,
+                        pow,
+                        NONAME
+                    ),
+                    NONAME
+                );
+                let snd = LLVMBuildSelect(self.builder,
+                    sel0,
+                    zero,
+                    LLVMBuildSub(
+                        self.builder,
+                        pow,
+                        one,
+                        NONAME
+                    ),
+                    NONAME
+                );
+                let sel1 = LLVMBuildICmp(self.builder, LLVMIntSLE, rs1, fst, NONAME);
+                let sel2 = LLVMBuildICmp(self.builder, LLVMIntSGE, rs1, snd, NONAME);
+
+                LLVMBuildSelect(self.builder,
+                    sel1,
+                    fst,
+                    LLVMBuildSelect(self.builder, sel2, snd, rs1, NONAME),
+                    NONAME
+                )
+            },
+            riscv::OpcodeImm5RdRs1::PClipu => {
+                // if rs1 <= 0, rD = 0,
+                // else if rs1 >= 2^(Is2–1)-1, rD = 2^(Is2-1)-1,
+                // else rD = rs1
+                // Note: If ls2 is equal to 0, (2^(Is2-1)-1)=0;
+
+                let one = LLVMConstInt(LLVMInt32Type(), 1, 0);
+                let zero = LLVMConstNull(LLVMInt32Type());
+
+                // check imm == 0
+                let sel0 = LLVMBuildICmp(self.builder, LLVMIntEQ, imm, zero, NONAME);
+
+                let pow = LLVMBuildShl(
+                    self.builder,
+                    one,
+                    LLVMBuildSub(self.builder, imm, one, NONAME),
+                    NONAME
+                );
+                // conditions
+                let snd = LLVMBuildSelect(self.builder,
+                    sel0,
+                    zero,
+                    LLVMBuildSub(
+                        self.builder,
+                        pow,
+                        one,
+                        NONAME
+                    ),
+                    NONAME
+                );
+                let sel1 = LLVMBuildICmp(self.builder, LLVMIntSLE, rs1, zero, NONAME);
+                let sel2 = LLVMBuildICmp(self.builder, LLVMIntSGE, rs1, snd, NONAME);
+
+                LLVMBuildSelect(self.builder,
+                    sel1,
+                    zero,
+                    LLVMBuildSelect(self.builder, sel2, snd, rs1, NONAME),
+                    NONAME
+                )
+            },
             // _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
@@ -3429,6 +3551,63 @@ impl<'a> InstructionTranslator<'a> {
             }
             _ => (),
         }
+
+        // Handle other operations.
+        let rs1 = self.read_reg(data.rs1);
+        let const_zero_32 = LLVMConstInt(LLVMInt32Type(), 0, 0);
+        let value = match data.op {
+            // xpulpabs
+            riscv::OpcodeRdRs1::PAbs => LLVMBuildSelect(self.builder,
+                LLVMBuildICmp(self.builder, LLVMIntSLT, rs1, const_zero_32, NONAME),
+                LLVMBuildNeg(self.builder, rs1, NONAME),
+                rs1,
+                name
+            ),
+            // xpulpbitop
+            riscv::OpcodeRdRs1::PExths => {
+                let sel = LLVMBuildIntCast(
+                    self.builder,
+                    self.select_bits(rs1, 0, 16, false),
+                    LLVMInt16Type(),
+                    NONAME
+                );
+
+                LLVMBuildSExt(self.builder, sel, LLVMInt32Type(), name)
+            },
+            riscv::OpcodeRdRs1::PExthz => {
+                let sel = LLVMBuildIntCast(
+                    self.builder,
+                    self.select_bits(rs1, 0, 16, false),
+                    LLVMInt16Type(),
+                    NONAME
+                );
+
+                LLVMBuildZExt(self.builder, sel, LLVMInt32Type(), name)
+            },
+            riscv::OpcodeRdRs1::PExtbs => {
+                let sel = LLVMBuildIntCast(
+                    self.builder,
+                    self.select_bits(rs1, 0, 8, false),
+                    LLVMInt8Type(),
+                    NONAME
+                );
+
+                LLVMBuildSExt(self.builder, sel, LLVMInt32Type(), name)
+            },
+            riscv::OpcodeRdRs1::PExtbz => {
+                let sel = LLVMBuildIntCast(
+                    self.builder,
+                    self.select_bits(rs1, 0, 8, false),
+                    LLVMInt8Type(),
+                    NONAME
+                );
+
+                LLVMBuildZExt(self.builder, sel, LLVMInt32Type(), name)
+            },
+            _ => bail!("Unsupported opcode {}", data.op),
+        };
+        self.write_reg(data.rd, value);
+
         Ok(())
     }
 
@@ -5396,6 +5575,12 @@ impl<'a> InstructionTranslator<'a> {
         let rs1 = self.read_reg(data.rs1);
         let rs2 = self.read_reg(data.rs2);
         let rd  = self.read_reg(data.rd);
+        // Constans for easier shifting
+        let c24 = LLVMConstInt(LLVMInt32Type(), 24, 1);
+        let c16 = LLVMConstInt(LLVMInt32Type(), 16, 1);41
+        let c8 = LLVMConstInt(LLVMInt32Type(), 8, 1);
+        let c1_16 = LLVMConstInt(LLVMInt16Type(), 1, 0);
+        let c1_8 = LLVMConstInt(LLVMInt8Type(), 1, 0);
         let value = match data.op {
             riscv::OpcodeRdRs1Rs2::Add => LLVMBuildAdd(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Sub => LLVMBuildSub(self.builder, rs1, rs2, name),
@@ -5471,21 +5656,289 @@ impl<'a> InstructionTranslator<'a> {
                 "banshee_dma_strt",
                 [self.dma_ptr(), self.section.state_ptr, rs1, rs2],
             ),
+            // xpulpmacsi
             riscv::OpcodeRdRs1Rs2::PMac => {
                 LLVMBuildAdd(
-                    self.builder, 
-                    rd, 
-                    LLVMBuildMul(self.builder, rs1, rs2, name), 
+                    self.builder,
+                    rd,
+                    LLVMBuildMul(self.builder, rs1, rs2, NONAME),
                     name)
             },
             riscv::OpcodeRdRs1Rs2::PMsu => {
                 LLVMBuildSub(
-                    self.builder, 
-                    rd, 
-                    LLVMBuildMul(self.builder, rs1, rs2, name), 
+                    self.builder,
+                    rd,
+                    LLVMBuildMul(self.builder, rs1, rs2, NONAME),
                     name)
             },
+            // xpulpminmax
+            riscv::OpcodeRdRs1Rs2::PMin => LLVMBuildSelect(self.builder,
+                LLVMBuildICmp(self.builder, LLVMIntSLT, rs1, rs2, NONAME),
+                rs1,
+                rs2,
+                name
+            ),
+            riscv::OpcodeRdRs1Rs2::PMinu => LLVMBuildSelect(self.builder,
+                LLVMBuildICmp(self.builder, LLVMIntULT, rs1, rs2, NONAME),
+                rs1,
+                rs2,
+                name
+            ),
+            riscv::OpcodeRdRs1Rs2::PMax => LLVMBuildSelect(self.builder,
+                LLVMBuildICmp(self.builder, LLVMIntSLT, rs1, rs2, NONAME),
+                rs2,
+                rs1,
+                name
+            ),
+            riscv::OpcodeRdRs1Rs2::PMaxu => LLVMBuildSelect(self.builder,
+                LLVMBuildICmp(self.builder, LLVMIntULT, rs1, rs2, NONAME),
+                rs2,
+                rs1,
+                name
+            ),
+            // xplupslet
+            riscv::OpcodeRdRs1Rs2::PSlet => LLVMBuildZExt(
+                self.builder,
+                LLVMBuildICmp(self.builder, LLVMIntSLE, rs1, rs2, NONAME),
+                LLVMInt32Type(),
+                name,
+            ),
+            riscv::OpcodeRdRs1Rs2::PSletu => LLVMBuildZExt(
+                self.builder,
+                LLVMBuildICmp(self.builder, LLVMIntULE, rs1, rs2, NONAME),
+                LLVMInt32Type(),
+                name,
+            ),
+            // xpulpclip
+            riscv::OpcodeRdRs1Rs2::PClipr => {
+                // if rs1 <= -(rs2+1), rD = -(rs2+1),
+                // else if rs1 >=rs2, rD = rs2,
+                // else rD = rs1
+
+                let one = LLVMConstInt(LLVMInt32Type(), 1, 0);
+                let zero = LLVMConstNull(LLVMInt32Type());
+
+                // conditions
+                let fst = LLVMBuildSub(
+                    self.builder,
+                    zero,
+                    LLVMBuildAdd(self.builder, rs2, one, NONAME),
+                    NONAME
+                );
+                let sel1 = LLVMBuildICmp(self.builder, LLVMIntSLE, rs1, fst, NONAME);
+                let sel2 = LLVMBuildICmp(self.builder, LLVMIntSGE, rs1, rs2, NONAME);
+
+                LLVMBuildSelect(self.builder,
+                    sel1,
+                    fst,
+                    LLVMBuildSelect(self.builder, sel2, rs2, rs1, NONAME),
+                    NONAME
+                )
+            },
+            riscv::OpcodeRdRs1Rs2::PClipur => {
+                // if rs1 <= 0, rD = 0,
+                // else if rs1 >=rs2, rD = rs2,
+                // else rD = rs1
+
+                let zero = LLVMConstNull(LLVMInt32Type());
+
+                let sel1 = LLVMBuildICmp(self.builder, LLVMIntSLE, rs1, zero, NONAME);
+                let sel2 = LLVMBuildICmp(self.builder, LLVMIntSGE, rs1, rs2, NONAME);
+
+                LLVMBuildSelect(self.builder,
+                    sel1,
+                    zero,
+                    LLVMBuildSelect(self.builder, sel2, rs2, rs1, NONAME),
+                    NONAME
+                )
+            },
+            // xpulpvectshufflepack
+            riscv::OpcodeRdRs1Rs2::PvShuffle2H => {
+                // rD[31:16] = ((rs2[17] == 1) ? rs1 : rD)[rs2[16]*16+15:rs2[16]*16]
+                // rD[15:0] = ((rs2[1] == 1) ? rs1 : rD)[rs2[0]*16+15:rs2[0]*16]
+
+                // create top and bottom to fill later
+                let mut bottom = LLVMConstNull(LLVMInt32Type());
+                let mut top = LLVMConstNull(LLVMInt32Type());
+
+                // i defines top half as 1 and bottom half as 0
+                for i in [1, 0] {
+                    // extract 0th and 1st resp. 16th and 17th bit of rs2
+                    let src_sel = self.select_bit(rs2, 1+i*16);
+
+                    let half_sel = self.select_bit(rs2, i*16);
+
+                    // calculate halfword of both options
+                    let rs1h = self.select_half_word(rs1, half_sel);
+                    let rdh = self.select_half_word(rd, half_sel);
+
+                    // select correct source and shift to upper half for top bits
+                    if i == 0 {
+                        bottom = LLVMBuildSelect(self.builder, src_sel, rs1h, rdh, NONAME);
+                    } else {
+                        let sel = LLVMBuildSelect(self.builder, src_sel, rs1h, rdh, NONAME);
+                        top = LLVMBuildShl(self.builder, sel, c16, NONAME);
+                    }
+                }
+
+                // combine both parts
+                LLVMBuildOr(self.builder, top, bottom, NONAME)
+            },
+            riscv::OpcodeRdRs1Rs2::PvShuffle2B => {
+                // rD[31:24] = ((rs2[26] == 1) ? rs1 : rD)[rs2[25:24]*8+7:rs2[25:24]*8]
+                // rD[23:16] = ((rs2[18] == 1) ? rs1 : rD)[rs2[17:16]*8+7:rs2[17:16]*8]
+                // rD[15:8] = ((rs2[10] == 1) ? rs1 : rD)[rs2[9:8]*8+7:rs2[9:8]*8]
+                // rD[7:0] = ((rs2[2] == 1) ? rs1 : rD)[rs2[1:0]*8+7:rs2[1:0]*8]
+
+                // create 4 parts to fill later
+                // part3 = rD[31:24], part2 = rD[23:16], part1 = rD[15:8], part0 = rD[7:0]
+                let mut part3 = LLVMConstNull(LLVMInt32Type());
+                let mut part2 = LLVMConstNull(LLVMInt32Type());
+                let mut part1 = LLVMConstNull(LLVMInt32Type());
+                let mut part0 = LLVMConstNull(LLVMInt32Type());
+
+                // handle each part i seperately
+                for i in [3, 2, 1, 0] {
+                    // extract needed bits
+                    let src_sel = self.select_bit(rs2, 2+i*8);
+                    let half_sel1 = self.select_bit(rs2, 1+i*8);
+                    let half_sel0 = self.select_bit(rs2, i*8);
+
+                    // calculate byte of both options
+                    let rs1b = self.select_byte(rs1, half_sel0, half_sel1);
+                    let rdb = self.select_byte(rd, half_sel0, half_sel1);
+
+                    // select correct source and shift to correct position i if necessary
+                    if i == 0 {
+                        part0 = LLVMBuildSelect(self.builder, src_sel, rs1b, rdb, NONAME);
+                    }
+                    else if i == 1{
+                        let sel = LLVMBuildSelect(self.builder, src_sel, rs1b, rdb, NONAME);
+                        part1 = LLVMBuildShl(self.builder, sel, c8, NONAME);
+                    }
+                    else if i == 2{
+                        let sel = LLVMBuildSelect(self.builder, src_sel, rs1b, rdb, NONAME);
+                        part2 = LLVMBuildShl(self.builder, sel, c16, NONAME);
+                    }
+                    else {
+                        let sel = LLVMBuildSelect(self.builder, src_sel, rs1b, rdb, NONAME);
+                        part3 = LLVMBuildShl(self.builder, sel, c16, NONAME);
+                        part3 = LLVMBuildShl(self.builder, part3, c8, NONAME);
+                    }
+                }
+
+                // combine all parts
+                LLVMBuildOr(
+                    self.builder,
+                    LLVMBuildOr(self.builder, part0, part1, NONAME),
+                    LLVMBuildOr(self.builder, part2, part3, NONAME),
+                    NONAME)
+            },
             _ => bail!("Unsupported opcode {}", data.op),
+        };
+        self.write_reg(data.rd, value);
+        Ok(())
+    }
+
+    // selects n bits of 32bit register reg starting with bit b as lowest bit
+    // inplace==false will move bits to lowest bits
+    unsafe fn select_bits(&self, reg: LLVMValueRef, b: u64, n: u32, inplace: bool) -> LLVMValueRef {
+        // for n bit mask need number 2^n-1, then shifted to correct position with b
+        let m = (2u64.pow(n) - 1) << b;
+        let mask = LLVMConstInt(LLVMInt32Type(), m, 1);
+        // isolate bits, set rest to 0
+        let val = LLVMBuildAnd(self.builder, reg, mask, NONAME);
+
+        if !inplace {
+            // shift into lowest bits
+            LLVMBuildLShr(self.builder, val, LLVMConstInt(LLVMInt32Type(), b as u64, 1), NONAME)
+        } else {val}
+    }
+
+    // selects n bits of 32bit register reg starting with bit b as lowest bit and casts it
+    // into n size LLVMIntType
+    unsafe fn cast_select_bits(&self, reg: LLVMValueRef, b: u64, n: u32) -> LLVMValueRef {
+        let ty = LLVMIntType(n);
+        let sel = self.select_bits(reg, b, n, false);
+
+        LLVMBuildIntCast(self.builder, sel, ty, NONAME)
+    }
+
+    // select bit b of 32bit register reg as lowest bit
+    unsafe fn select_bit(&self, reg: LLVMValueRef, b: u64) -> LLVMValueRef {
+        // for n bit mask need number 2^n-1, then shifted to correct position with b
+        let m = 1u64 << b;
+        let mask = LLVMConstInt(LLVMInt32Type(), m, 1);
+        // isolate bits, set rest to 0
+        let val = LLVMBuildAnd(self.builder, reg, mask, NONAME);
+        // shift into lowest bits
+        let shift = LLVMBuildLShr(self.builder, val, LLVMConstInt(LLVMInt32Type(), b as u64, 1), NONAME);
+        LLVMBuildIntCast(self.builder, shift, LLVMInt1Type(), NONAME)
+    }
+
+    // returns selected half word of reg in lowest bits; based on runtime input
+    unsafe fn select_half_word(&self, reg: LLVMValueRef, sel: LLVMValueRef) -> LLVMValueRef {
+        // build and mask correct half of word
+        let s = LLVMBuildIntCast(self.builder, sel, LLVMInt32Type(), NONAME);
+        let cmask = LLVMConstInt(LLVMInt32Type(), 0x0000FFFF, 0);
+        let shift = LLVMConstInt(LLVMInt32Type(), 16, 1);
+        let mask = LLVMBuildShl(self.builder, cmask, LLVMBuildMul(self.builder, s, shift, NONAME), NONAME);
+        let half = LLVMBuildAnd(self.builder, reg, mask, NONAME);
+
+        // shift half to lowest bits if sel==1, i.e. upper half selected
+        LLVMBuildSelect(
+            self.builder,
+            sel,
+            LLVMBuildLShr(self.builder, half, LLVMConstInt(LLVMInt32Type(), 16, 1), NONAME),
+            half,
+            NONAME)
+    }
+
+    // returns selected byte of reg in lowest bits; based on runtime input
+    unsafe fn select_byte(&self, reg: LLVMValueRef, sel0: LLVMValueRef, sel1: LLVMValueRef) -> LLVMValueRef {
+        // build and mask correct byte of word
+        let s0 = LLVMBuildIntCast2(self.builder, sel0, LLVMInt32Type(), 0, NONAME);
+        let s1 = LLVMBuildIntCast2(self.builder, sel1, LLVMInt32Type(), 0, NONAME);
+        let cmask = LLVMConstInt(LLVMInt32Type(), 0xFF, 0);
+        let c16 = LLVMConstInt(LLVMInt32Type(), 16, 1);
+        let c8 = LLVMConstInt(LLVMInt32Type(), 8, 1);
+        let mut mask = LLVMBuildShl(self.builder, cmask, LLVMBuildMul(self.builder, s1, c16, NONAME), NONAME);
+        mask = LLVMBuildShl(self.builder, mask, LLVMBuildMul(self.builder, s0, c8, NONAME), NONAME);
+        let mut byte = LLVMBuildAnd(self.builder, reg, mask, NONAME);
+
+        // shift byte to lowest bits
+        byte = LLVMBuildSelect(self.builder,
+            sel1,
+            LLVMBuildLShr(self.builder, byte, c16, NONAME),
+            byte,
+            NONAME);
+
+        LLVMBuildSelect(self.builder, sel0, LLVMBuildLShr(self.builder, byte, c8, NONAME), byte, NONAME)
+    }
+
+    unsafe fn emit_luimm5_rd_rs1_rs2(&self, data: riscv::FormatLuimm5RdRs1Rs2) -> Result<()> {
+        trace!("{} x{} = x{}, x{}, x{}", data.op, data.rd, data.rs1, data.rs2, data.luimm5);
+        let name = format!("{}\0", data.op);
+        let name = name.as_ptr() as *const _;
+
+        // Handle other operations.
+        let rs1 = self.read_reg(data.rs1);
+        let rs2 = self.read_reg(data.rs2);
+        let luimm5  = self.read_reg(data.luimm5);
+        let value = match data.op {
+            riscv::OpcodeLuimm5RdRs1Rs2::PAddn => LLVMBuildAShr(
+                self.builder,
+                LLVMBuildAdd(self.builder, rs1, rs2, NONAME),
+                luimm5,
+                name
+            ),
+            riscv::OpcodeLuimm5RdRs1Rs2::PAddun => LLVMBuildLShr(
+                self.builder,
+                LLVMBuildAdd(self.builder, rs1, rs2, NONAME),
+                luimm5,
+                name
+            ),
+            // _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
         Ok(())
@@ -5550,7 +6003,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeRdRs1Shamt::Slli => LLVMBuildShl(self.builder, rs1, shamt, name),
             riscv::OpcodeRdRs1Shamt::Srli => LLVMBuildLShr(self.builder, rs1, shamt, name),
             riscv::OpcodeRdRs1Shamt::Srai => LLVMBuildAShr(self.builder, rs1, shamt, name),
-            _ => bail!("Unsupported opcode {}", data.op),
+            // _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
         Ok(())
@@ -6130,6 +6583,7 @@ impl<'a> InstructionTranslator<'a> {
     }
 
     /// Log an access for the trace.
+    // Can be used for debugging
     fn trace_access(&self, access: TraceAccess, data: LLVMValueRef) {
         if !self.trace_disabled.get() {
             self.trace_accesses.borrow_mut().push((access, data));
