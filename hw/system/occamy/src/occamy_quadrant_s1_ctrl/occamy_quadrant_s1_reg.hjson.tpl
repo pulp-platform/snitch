@@ -179,8 +179,8 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "0:0", name: "valid",  resval: 1, desc: "whether entry is valid and should be mapped"},
-        {bits: "1:1", name: "read_only", resval: 1, desc: "whether entry maps read-only range"},
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
       ]
     },
     { reserved: 1 }
