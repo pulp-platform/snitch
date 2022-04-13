@@ -52,11 +52,11 @@ package clint_reg_pkg;
   typedef struct packed {
     logic [31:0] q;
     logic        qe;
-  } clint_reg2hw_msip_bcast_reg_t;
+  } clint_reg2hw_msip_bcast_length_reg_t;
 
   typedef struct packed {
     logic [31:0] q;
-  } clint_reg2hw_msip_bcast_start_reg_t;
+  } clint_reg2hw_msip_bcast_offset_reg_t;
 
   typedef struct packed {
     logic        d;
@@ -83,8 +83,8 @@ package clint_reg_pkg;
     clint_reg2hw_mtime_low_reg_t mtime_low; // [161:130]
     clint_reg2hw_mtime_high_reg_t mtime_high; // [129:98]
     clint_reg2hw_msip_clr_reg_t msip_clr; // [97:65]
-    clint_reg2hw_msip_bcast_reg_t msip_bcast; // [64:32]
-    clint_reg2hw_msip_bcast_start_reg_t msip_bcast_start; // [31:0]
+    clint_reg2hw_msip_bcast_length_reg_t msip_bcast_length; // [64:32]
+    clint_reg2hw_msip_bcast_offset_reg_t msip_bcast_offset; // [31:0]
   } clint_reg2hw_t;
 
   // HW -> register type
@@ -103,8 +103,8 @@ package clint_reg_pkg;
   parameter logic [BlockAw-1:0] CLINT_MTIME_LOW_OFFSET = 16'h bff8;
   parameter logic [BlockAw-1:0] CLINT_MTIME_HIGH_OFFSET = 16'h bffc;
   parameter logic [BlockAw-1:0] CLINT_MSIP_CLR_OFFSET = 16'h c000;
-  parameter logic [BlockAw-1:0] CLINT_MSIP_BCAST_OFFSET = 16'h c004;
-  parameter logic [BlockAw-1:0] CLINT_MSIP_BCAST_START_OFFSET = 16'h c008;
+  parameter logic [BlockAw-1:0] CLINT_MSIP_BCAST_LENGTH_OFFSET = 16'h c004;
+  parameter logic [BlockAw-1:0] CLINT_MSIP_BCAST_OFFSET_OFFSET = 16'h c008;
 
   // Register index
   typedef enum int {
@@ -116,8 +116,8 @@ package clint_reg_pkg;
     CLINT_MTIME_LOW,
     CLINT_MTIME_HIGH,
     CLINT_MSIP_CLR,
-    CLINT_MSIP_BCAST,
-    CLINT_MSIP_BCAST_START
+    CLINT_MSIP_BCAST_LENGTH,
+    CLINT_MSIP_BCAST_OFFSET
   } clint_id_e;
 
   // Register width information to check illegal writes
@@ -130,8 +130,8 @@ package clint_reg_pkg;
     4'b 1111, // index[5] CLINT_MTIME_LOW
     4'b 1111, // index[6] CLINT_MTIME_HIGH
     4'b 1111, // index[7] CLINT_MSIP_CLR
-    4'b 1111, // index[8] CLINT_MSIP_BCAST
-    4'b 1111  // index[9] CLINT_MSIP_BCAST_START
+    4'b 1111, // index[8] CLINT_MSIP_BCAST_LENGTH
+    4'b 1111  // index[9] CLINT_MSIP_BCAST_OFFSET
   };
 
 endpackage

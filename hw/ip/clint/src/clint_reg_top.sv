@@ -94,10 +94,10 @@ module clint_reg_top #(
   logic mtime_high_we;
   logic [31:0] msip_clr_wd;
   logic msip_clr_we;
-  logic [31:0] msip_bcast_wd;
-  logic msip_bcast_we;
-  logic [31:0] msip_bcast_start_wd;
-  logic msip_bcast_start_we;
+  logic [31:0] msip_bcast_length_wd;
+  logic msip_bcast_length_we;
+  logic [31:0] msip_bcast_offset_wd;
+  logic msip_bcast_offset_we;
 
   // Register instances
 
@@ -345,45 +345,45 @@ module clint_reg_top #(
   );
 
 
-  // R[msip_bcast]: V(False)
+  // R[msip_bcast_length]: V(False)
 
   prim_subreg #(
     .DW      (32),
     .SWACCESS("WO"),
     .RESVAL  (32'h0)
-  ) u_msip_bcast (
+  ) u_msip_bcast_length (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (msip_bcast_we),
-    .wd     (msip_bcast_wd),
+    .we     (msip_bcast_length_we),
+    .wd     (msip_bcast_length_wd),
 
     // from internal hardware
     .de     (1'b0),
     .d      ('0  ),
 
     // to internal hardware
-    .qe     (reg2hw.msip_bcast.qe),
-    .q      (reg2hw.msip_bcast.q ),
+    .qe     (reg2hw.msip_bcast_length.qe),
+    .q      (reg2hw.msip_bcast_length.q ),
 
     .qs     ()
   );
 
 
-  // R[msip_bcast_start]: V(False)
+  // R[msip_bcast_offset]: V(False)
 
   prim_subreg #(
     .DW      (32),
     .SWACCESS("WO"),
     .RESVAL  (32'h0)
-  ) u_msip_bcast_start (
+  ) u_msip_bcast_offset (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (msip_bcast_start_we),
-    .wd     (msip_bcast_start_wd),
+    .we     (msip_bcast_offset_we),
+    .wd     (msip_bcast_offset_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -391,7 +391,7 @@ module clint_reg_top #(
 
     // to internal hardware
     .qe     (),
-    .q      (reg2hw.msip_bcast_start.q ),
+    .q      (reg2hw.msip_bcast_offset.q ),
 
     .qs     ()
   );
@@ -410,8 +410,8 @@ module clint_reg_top #(
     addr_hit[5] = (reg_addr == CLINT_MTIME_LOW_OFFSET);
     addr_hit[6] = (reg_addr == CLINT_MTIME_HIGH_OFFSET);
     addr_hit[7] = (reg_addr == CLINT_MSIP_CLR_OFFSET);
-    addr_hit[8] = (reg_addr == CLINT_MSIP_BCAST_OFFSET);
-    addr_hit[9] = (reg_addr == CLINT_MSIP_BCAST_START_OFFSET);
+    addr_hit[8] = (reg_addr == CLINT_MSIP_BCAST_LENGTH_OFFSET);
+    addr_hit[9] = (reg_addr == CLINT_MSIP_BCAST_OFFSET_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -458,11 +458,11 @@ module clint_reg_top #(
   assign msip_clr_we = addr_hit[7] & reg_we & !reg_error;
   assign msip_clr_wd = reg_wdata[31:0];
 
-  assign msip_bcast_we = addr_hit[8] & reg_we & !reg_error;
-  assign msip_bcast_wd = reg_wdata[31:0];
+  assign msip_bcast_length_we = addr_hit[8] & reg_we & !reg_error;
+  assign msip_bcast_length_wd = reg_wdata[31:0];
 
-  assign msip_bcast_start_we = addr_hit[9] & reg_we & !reg_error;
-  assign msip_bcast_start_wd = reg_wdata[31:0];
+  assign msip_bcast_offset_we = addr_hit[9] & reg_we & !reg_error;
+  assign msip_bcast_offset_wd = reg_wdata[31:0];
 
   // Read data return
   always_comb begin
