@@ -51,13 +51,14 @@ module clint import clint_reg_pkg::*; #(
 
     always_comb bcast_mask[1] = reg2hw.msip_bcast.qe && (reg2hw.msip_bcast_start.q == 0);
     generate
-        for (genvar i=2; i<217; i++) begin
-            always_comb bcast_mask[i] = reg2hw.msip_bcast.qe && (reg2hw.msip_bcast.q >= (i-1)) && (reg2hw.msip_bcast_start.q <= i);
+        for (genvar i = 2; i < 217; i++) begin : g_msip_bcast_mask
+            always_comb bcast_mask[i] = reg2hw.msip_bcast.qe
+                && (reg2hw.msip_bcast.q >= (i-1)) && (reg2hw.msip_bcast_start.q <= i);
         end
     endgenerate
 
     always_comb begin
-        for (int i=1; i<217; i++) begin
+        for (int i = 1; i < 217; i++) begin
             hw2reg.msip[i].d = bcast_mask[i] ? 1'b1 : 1'b0;
             hw2reg.msip[i].de = bcast_mask[i] | (reg2hw.msip_clr.qe && (i == reg2hw.msip_clr.q));
         end
