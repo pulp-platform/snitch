@@ -42,7 +42,7 @@ module occamy_quadrant_s1
   assign cluster_base_addr[3] = ClusterBaseOffset + tile_id_i * NrClustersS1Quadrant * ClusterAddressSpace + 3 * ClusterAddressSpace;
 
   // Define types for IOTLBs
-  `AXI_TLB_TYPEDEF_ALL(tlb, logic [AddrWidth-1:0], logic [AddrWidth-1:0])
+  `AXI_TLB_TYPEDEF_ALL(tlb, logic [AddrWidth-12-1:0], logic [AddrWidth-12-1:0])
 
   // Signals from Controller
   logic clk_quadrant, rst_quadrant_n;

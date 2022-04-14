@@ -237,7 +237,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_0_PAGEIN_LAST_LOW",
@@ -253,7 +253,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_0_PAGEOUT_LOW",
@@ -269,7 +269,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_0_FLAGS",
@@ -297,7 +297,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_1_PAGEIN_LAST_LOW",
@@ -313,7 +313,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_1_PAGEOUT_LOW",
@@ -329,7 +329,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_1_FLAGS",
@@ -357,7 +357,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_2_PAGEIN_LAST_LOW",
@@ -373,7 +373,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_2_PAGEOUT_LOW",
@@ -389,7 +389,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_2_FLAGS",
@@ -417,7 +417,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_3_PAGEIN_LAST_LOW",
@@ -433,7 +433,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_3_PAGEOUT_LOW",
@@ -449,7 +449,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_3_FLAGS",
@@ -477,7 +477,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_4_PAGEIN_LAST_LOW",
@@ -493,7 +493,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_4_PAGEOUT_LOW",
@@ -509,7 +509,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_4_FLAGS",
@@ -537,7 +537,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_5_PAGEIN_LAST_LOW",
@@ -553,7 +553,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_5_PAGEOUT_LOW",
@@ -569,7 +569,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_5_FLAGS",
@@ -597,7 +597,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_6_PAGEIN_LAST_LOW",
@@ -613,7 +613,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_6_PAGEOUT_LOW",
@@ -629,7 +629,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_6_FLAGS",
@@ -657,7 +657,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_7_PAGEIN_LAST_LOW",
@@ -673,7 +673,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_7_PAGEOUT_LOW",
@@ -689,7 +689,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_NARROW_ENTRY_7_FLAGS",
@@ -719,7 +719,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_0_PAGEIN_LAST_LOW",
@@ -735,7 +735,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_0_PAGEOUT_LOW",
@@ -751,7 +751,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_0_FLAGS",
@@ -779,7 +779,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_1_PAGEIN_LAST_LOW",
@@ -795,7 +795,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_1_PAGEOUT_LOW",
@@ -811,7 +811,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_1_FLAGS",
@@ -839,7 +839,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_2_PAGEIN_LAST_LOW",
@@ -855,7 +855,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_2_PAGEOUT_LOW",
@@ -871,7 +871,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_2_FLAGS",
@@ -899,7 +899,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_3_PAGEIN_LAST_LOW",
@@ -915,7 +915,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_3_PAGEOUT_LOW",
@@ -931,7 +931,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_3_FLAGS",
@@ -959,7 +959,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_4_PAGEIN_LAST_LOW",
@@ -975,7 +975,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_4_PAGEOUT_LOW",
@@ -991,7 +991,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_4_FLAGS",
@@ -1019,7 +1019,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_5_PAGEIN_LAST_LOW",
@@ -1035,7 +1035,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_5_PAGEOUT_LOW",
@@ -1051,7 +1051,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_5_FLAGS",
@@ -1079,7 +1079,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_6_PAGEIN_LAST_LOW",
@@ -1095,7 +1095,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_6_PAGEOUT_LOW",
@@ -1111,7 +1111,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_6_FLAGS",
@@ -1139,7 +1139,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_7_PAGEIN_LAST_LOW",
@@ -1155,7 +1155,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_7_PAGEOUT_LOW",
@@ -1171,7 +1171,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "15:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_WIDE_ENTRY_7_FLAGS",

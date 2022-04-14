@@ -157,20 +157,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_narrow_entry_0_pagein_first_low_qs;
   logic [31:0] tlb_narrow_entry_0_pagein_first_low_wd;
   logic tlb_narrow_entry_0_pagein_first_low_we;
-  logic [15:0] tlb_narrow_entry_0_pagein_first_high_qs;
-  logic [15:0] tlb_narrow_entry_0_pagein_first_high_wd;
+  logic [3:0] tlb_narrow_entry_0_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_0_pagein_first_high_wd;
   logic tlb_narrow_entry_0_pagein_first_high_we;
   logic [31:0] tlb_narrow_entry_0_pagein_last_low_qs;
   logic [31:0] tlb_narrow_entry_0_pagein_last_low_wd;
   logic tlb_narrow_entry_0_pagein_last_low_we;
-  logic [15:0] tlb_narrow_entry_0_pagein_last_high_qs;
-  logic [15:0] tlb_narrow_entry_0_pagein_last_high_wd;
+  logic [3:0] tlb_narrow_entry_0_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_0_pagein_last_high_wd;
   logic tlb_narrow_entry_0_pagein_last_high_we;
   logic [31:0] tlb_narrow_entry_0_pageout_low_qs;
   logic [31:0] tlb_narrow_entry_0_pageout_low_wd;
   logic tlb_narrow_entry_0_pageout_low_we;
-  logic [15:0] tlb_narrow_entry_0_pageout_high_qs;
-  logic [15:0] tlb_narrow_entry_0_pageout_high_wd;
+  logic [3:0] tlb_narrow_entry_0_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_0_pageout_high_wd;
   logic tlb_narrow_entry_0_pageout_high_we;
   logic tlb_narrow_entry_0_flags_valid_qs;
   logic tlb_narrow_entry_0_flags_valid_wd;
@@ -181,20 +181,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_narrow_entry_1_pagein_first_low_qs;
   logic [31:0] tlb_narrow_entry_1_pagein_first_low_wd;
   logic tlb_narrow_entry_1_pagein_first_low_we;
-  logic [15:0] tlb_narrow_entry_1_pagein_first_high_qs;
-  logic [15:0] tlb_narrow_entry_1_pagein_first_high_wd;
+  logic [3:0] tlb_narrow_entry_1_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_1_pagein_first_high_wd;
   logic tlb_narrow_entry_1_pagein_first_high_we;
   logic [31:0] tlb_narrow_entry_1_pagein_last_low_qs;
   logic [31:0] tlb_narrow_entry_1_pagein_last_low_wd;
   logic tlb_narrow_entry_1_pagein_last_low_we;
-  logic [15:0] tlb_narrow_entry_1_pagein_last_high_qs;
-  logic [15:0] tlb_narrow_entry_1_pagein_last_high_wd;
+  logic [3:0] tlb_narrow_entry_1_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_1_pagein_last_high_wd;
   logic tlb_narrow_entry_1_pagein_last_high_we;
   logic [31:0] tlb_narrow_entry_1_pageout_low_qs;
   logic [31:0] tlb_narrow_entry_1_pageout_low_wd;
   logic tlb_narrow_entry_1_pageout_low_we;
-  logic [15:0] tlb_narrow_entry_1_pageout_high_qs;
-  logic [15:0] tlb_narrow_entry_1_pageout_high_wd;
+  logic [3:0] tlb_narrow_entry_1_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_1_pageout_high_wd;
   logic tlb_narrow_entry_1_pageout_high_we;
   logic tlb_narrow_entry_1_flags_valid_qs;
   logic tlb_narrow_entry_1_flags_valid_wd;
@@ -205,20 +205,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_narrow_entry_2_pagein_first_low_qs;
   logic [31:0] tlb_narrow_entry_2_pagein_first_low_wd;
   logic tlb_narrow_entry_2_pagein_first_low_we;
-  logic [15:0] tlb_narrow_entry_2_pagein_first_high_qs;
-  logic [15:0] tlb_narrow_entry_2_pagein_first_high_wd;
+  logic [3:0] tlb_narrow_entry_2_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_2_pagein_first_high_wd;
   logic tlb_narrow_entry_2_pagein_first_high_we;
   logic [31:0] tlb_narrow_entry_2_pagein_last_low_qs;
   logic [31:0] tlb_narrow_entry_2_pagein_last_low_wd;
   logic tlb_narrow_entry_2_pagein_last_low_we;
-  logic [15:0] tlb_narrow_entry_2_pagein_last_high_qs;
-  logic [15:0] tlb_narrow_entry_2_pagein_last_high_wd;
+  logic [3:0] tlb_narrow_entry_2_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_2_pagein_last_high_wd;
   logic tlb_narrow_entry_2_pagein_last_high_we;
   logic [31:0] tlb_narrow_entry_2_pageout_low_qs;
   logic [31:0] tlb_narrow_entry_2_pageout_low_wd;
   logic tlb_narrow_entry_2_pageout_low_we;
-  logic [15:0] tlb_narrow_entry_2_pageout_high_qs;
-  logic [15:0] tlb_narrow_entry_2_pageout_high_wd;
+  logic [3:0] tlb_narrow_entry_2_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_2_pageout_high_wd;
   logic tlb_narrow_entry_2_pageout_high_we;
   logic tlb_narrow_entry_2_flags_valid_qs;
   logic tlb_narrow_entry_2_flags_valid_wd;
@@ -229,20 +229,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_narrow_entry_3_pagein_first_low_qs;
   logic [31:0] tlb_narrow_entry_3_pagein_first_low_wd;
   logic tlb_narrow_entry_3_pagein_first_low_we;
-  logic [15:0] tlb_narrow_entry_3_pagein_first_high_qs;
-  logic [15:0] tlb_narrow_entry_3_pagein_first_high_wd;
+  logic [3:0] tlb_narrow_entry_3_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_3_pagein_first_high_wd;
   logic tlb_narrow_entry_3_pagein_first_high_we;
   logic [31:0] tlb_narrow_entry_3_pagein_last_low_qs;
   logic [31:0] tlb_narrow_entry_3_pagein_last_low_wd;
   logic tlb_narrow_entry_3_pagein_last_low_we;
-  logic [15:0] tlb_narrow_entry_3_pagein_last_high_qs;
-  logic [15:0] tlb_narrow_entry_3_pagein_last_high_wd;
+  logic [3:0] tlb_narrow_entry_3_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_3_pagein_last_high_wd;
   logic tlb_narrow_entry_3_pagein_last_high_we;
   logic [31:0] tlb_narrow_entry_3_pageout_low_qs;
   logic [31:0] tlb_narrow_entry_3_pageout_low_wd;
   logic tlb_narrow_entry_3_pageout_low_we;
-  logic [15:0] tlb_narrow_entry_3_pageout_high_qs;
-  logic [15:0] tlb_narrow_entry_3_pageout_high_wd;
+  logic [3:0] tlb_narrow_entry_3_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_3_pageout_high_wd;
   logic tlb_narrow_entry_3_pageout_high_we;
   logic tlb_narrow_entry_3_flags_valid_qs;
   logic tlb_narrow_entry_3_flags_valid_wd;
@@ -253,20 +253,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_narrow_entry_4_pagein_first_low_qs;
   logic [31:0] tlb_narrow_entry_4_pagein_first_low_wd;
   logic tlb_narrow_entry_4_pagein_first_low_we;
-  logic [15:0] tlb_narrow_entry_4_pagein_first_high_qs;
-  logic [15:0] tlb_narrow_entry_4_pagein_first_high_wd;
+  logic [3:0] tlb_narrow_entry_4_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_4_pagein_first_high_wd;
   logic tlb_narrow_entry_4_pagein_first_high_we;
   logic [31:0] tlb_narrow_entry_4_pagein_last_low_qs;
   logic [31:0] tlb_narrow_entry_4_pagein_last_low_wd;
   logic tlb_narrow_entry_4_pagein_last_low_we;
-  logic [15:0] tlb_narrow_entry_4_pagein_last_high_qs;
-  logic [15:0] tlb_narrow_entry_4_pagein_last_high_wd;
+  logic [3:0] tlb_narrow_entry_4_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_4_pagein_last_high_wd;
   logic tlb_narrow_entry_4_pagein_last_high_we;
   logic [31:0] tlb_narrow_entry_4_pageout_low_qs;
   logic [31:0] tlb_narrow_entry_4_pageout_low_wd;
   logic tlb_narrow_entry_4_pageout_low_we;
-  logic [15:0] tlb_narrow_entry_4_pageout_high_qs;
-  logic [15:0] tlb_narrow_entry_4_pageout_high_wd;
+  logic [3:0] tlb_narrow_entry_4_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_4_pageout_high_wd;
   logic tlb_narrow_entry_4_pageout_high_we;
   logic tlb_narrow_entry_4_flags_valid_qs;
   logic tlb_narrow_entry_4_flags_valid_wd;
@@ -277,20 +277,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_narrow_entry_5_pagein_first_low_qs;
   logic [31:0] tlb_narrow_entry_5_pagein_first_low_wd;
   logic tlb_narrow_entry_5_pagein_first_low_we;
-  logic [15:0] tlb_narrow_entry_5_pagein_first_high_qs;
-  logic [15:0] tlb_narrow_entry_5_pagein_first_high_wd;
+  logic [3:0] tlb_narrow_entry_5_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_5_pagein_first_high_wd;
   logic tlb_narrow_entry_5_pagein_first_high_we;
   logic [31:0] tlb_narrow_entry_5_pagein_last_low_qs;
   logic [31:0] tlb_narrow_entry_5_pagein_last_low_wd;
   logic tlb_narrow_entry_5_pagein_last_low_we;
-  logic [15:0] tlb_narrow_entry_5_pagein_last_high_qs;
-  logic [15:0] tlb_narrow_entry_5_pagein_last_high_wd;
+  logic [3:0] tlb_narrow_entry_5_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_5_pagein_last_high_wd;
   logic tlb_narrow_entry_5_pagein_last_high_we;
   logic [31:0] tlb_narrow_entry_5_pageout_low_qs;
   logic [31:0] tlb_narrow_entry_5_pageout_low_wd;
   logic tlb_narrow_entry_5_pageout_low_we;
-  logic [15:0] tlb_narrow_entry_5_pageout_high_qs;
-  logic [15:0] tlb_narrow_entry_5_pageout_high_wd;
+  logic [3:0] tlb_narrow_entry_5_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_5_pageout_high_wd;
   logic tlb_narrow_entry_5_pageout_high_we;
   logic tlb_narrow_entry_5_flags_valid_qs;
   logic tlb_narrow_entry_5_flags_valid_wd;
@@ -301,20 +301,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_narrow_entry_6_pagein_first_low_qs;
   logic [31:0] tlb_narrow_entry_6_pagein_first_low_wd;
   logic tlb_narrow_entry_6_pagein_first_low_we;
-  logic [15:0] tlb_narrow_entry_6_pagein_first_high_qs;
-  logic [15:0] tlb_narrow_entry_6_pagein_first_high_wd;
+  logic [3:0] tlb_narrow_entry_6_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_6_pagein_first_high_wd;
   logic tlb_narrow_entry_6_pagein_first_high_we;
   logic [31:0] tlb_narrow_entry_6_pagein_last_low_qs;
   logic [31:0] tlb_narrow_entry_6_pagein_last_low_wd;
   logic tlb_narrow_entry_6_pagein_last_low_we;
-  logic [15:0] tlb_narrow_entry_6_pagein_last_high_qs;
-  logic [15:0] tlb_narrow_entry_6_pagein_last_high_wd;
+  logic [3:0] tlb_narrow_entry_6_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_6_pagein_last_high_wd;
   logic tlb_narrow_entry_6_pagein_last_high_we;
   logic [31:0] tlb_narrow_entry_6_pageout_low_qs;
   logic [31:0] tlb_narrow_entry_6_pageout_low_wd;
   logic tlb_narrow_entry_6_pageout_low_we;
-  logic [15:0] tlb_narrow_entry_6_pageout_high_qs;
-  logic [15:0] tlb_narrow_entry_6_pageout_high_wd;
+  logic [3:0] tlb_narrow_entry_6_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_6_pageout_high_wd;
   logic tlb_narrow_entry_6_pageout_high_we;
   logic tlb_narrow_entry_6_flags_valid_qs;
   logic tlb_narrow_entry_6_flags_valid_wd;
@@ -325,20 +325,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_narrow_entry_7_pagein_first_low_qs;
   logic [31:0] tlb_narrow_entry_7_pagein_first_low_wd;
   logic tlb_narrow_entry_7_pagein_first_low_we;
-  logic [15:0] tlb_narrow_entry_7_pagein_first_high_qs;
-  logic [15:0] tlb_narrow_entry_7_pagein_first_high_wd;
+  logic [3:0] tlb_narrow_entry_7_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_7_pagein_first_high_wd;
   logic tlb_narrow_entry_7_pagein_first_high_we;
   logic [31:0] tlb_narrow_entry_7_pagein_last_low_qs;
   logic [31:0] tlb_narrow_entry_7_pagein_last_low_wd;
   logic tlb_narrow_entry_7_pagein_last_low_we;
-  logic [15:0] tlb_narrow_entry_7_pagein_last_high_qs;
-  logic [15:0] tlb_narrow_entry_7_pagein_last_high_wd;
+  logic [3:0] tlb_narrow_entry_7_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_7_pagein_last_high_wd;
   logic tlb_narrow_entry_7_pagein_last_high_we;
   logic [31:0] tlb_narrow_entry_7_pageout_low_qs;
   logic [31:0] tlb_narrow_entry_7_pageout_low_wd;
   logic tlb_narrow_entry_7_pageout_low_we;
-  logic [15:0] tlb_narrow_entry_7_pageout_high_qs;
-  logic [15:0] tlb_narrow_entry_7_pageout_high_wd;
+  logic [3:0] tlb_narrow_entry_7_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_7_pageout_high_wd;
   logic tlb_narrow_entry_7_pageout_high_we;
   logic tlb_narrow_entry_7_flags_valid_qs;
   logic tlb_narrow_entry_7_flags_valid_wd;
@@ -349,20 +349,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_wide_entry_0_pagein_first_low_qs;
   logic [31:0] tlb_wide_entry_0_pagein_first_low_wd;
   logic tlb_wide_entry_0_pagein_first_low_we;
-  logic [15:0] tlb_wide_entry_0_pagein_first_high_qs;
-  logic [15:0] tlb_wide_entry_0_pagein_first_high_wd;
+  logic [3:0] tlb_wide_entry_0_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_0_pagein_first_high_wd;
   logic tlb_wide_entry_0_pagein_first_high_we;
   logic [31:0] tlb_wide_entry_0_pagein_last_low_qs;
   logic [31:0] tlb_wide_entry_0_pagein_last_low_wd;
   logic tlb_wide_entry_0_pagein_last_low_we;
-  logic [15:0] tlb_wide_entry_0_pagein_last_high_qs;
-  logic [15:0] tlb_wide_entry_0_pagein_last_high_wd;
+  logic [3:0] tlb_wide_entry_0_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_0_pagein_last_high_wd;
   logic tlb_wide_entry_0_pagein_last_high_we;
   logic [31:0] tlb_wide_entry_0_pageout_low_qs;
   logic [31:0] tlb_wide_entry_0_pageout_low_wd;
   logic tlb_wide_entry_0_pageout_low_we;
-  logic [15:0] tlb_wide_entry_0_pageout_high_qs;
-  logic [15:0] tlb_wide_entry_0_pageout_high_wd;
+  logic [3:0] tlb_wide_entry_0_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_0_pageout_high_wd;
   logic tlb_wide_entry_0_pageout_high_we;
   logic tlb_wide_entry_0_flags_valid_qs;
   logic tlb_wide_entry_0_flags_valid_wd;
@@ -373,20 +373,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_wide_entry_1_pagein_first_low_qs;
   logic [31:0] tlb_wide_entry_1_pagein_first_low_wd;
   logic tlb_wide_entry_1_pagein_first_low_we;
-  logic [15:0] tlb_wide_entry_1_pagein_first_high_qs;
-  logic [15:0] tlb_wide_entry_1_pagein_first_high_wd;
+  logic [3:0] tlb_wide_entry_1_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_1_pagein_first_high_wd;
   logic tlb_wide_entry_1_pagein_first_high_we;
   logic [31:0] tlb_wide_entry_1_pagein_last_low_qs;
   logic [31:0] tlb_wide_entry_1_pagein_last_low_wd;
   logic tlb_wide_entry_1_pagein_last_low_we;
-  logic [15:0] tlb_wide_entry_1_pagein_last_high_qs;
-  logic [15:0] tlb_wide_entry_1_pagein_last_high_wd;
+  logic [3:0] tlb_wide_entry_1_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_1_pagein_last_high_wd;
   logic tlb_wide_entry_1_pagein_last_high_we;
   logic [31:0] tlb_wide_entry_1_pageout_low_qs;
   logic [31:0] tlb_wide_entry_1_pageout_low_wd;
   logic tlb_wide_entry_1_pageout_low_we;
-  logic [15:0] tlb_wide_entry_1_pageout_high_qs;
-  logic [15:0] tlb_wide_entry_1_pageout_high_wd;
+  logic [3:0] tlb_wide_entry_1_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_1_pageout_high_wd;
   logic tlb_wide_entry_1_pageout_high_we;
   logic tlb_wide_entry_1_flags_valid_qs;
   logic tlb_wide_entry_1_flags_valid_wd;
@@ -397,20 +397,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_wide_entry_2_pagein_first_low_qs;
   logic [31:0] tlb_wide_entry_2_pagein_first_low_wd;
   logic tlb_wide_entry_2_pagein_first_low_we;
-  logic [15:0] tlb_wide_entry_2_pagein_first_high_qs;
-  logic [15:0] tlb_wide_entry_2_pagein_first_high_wd;
+  logic [3:0] tlb_wide_entry_2_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_2_pagein_first_high_wd;
   logic tlb_wide_entry_2_pagein_first_high_we;
   logic [31:0] tlb_wide_entry_2_pagein_last_low_qs;
   logic [31:0] tlb_wide_entry_2_pagein_last_low_wd;
   logic tlb_wide_entry_2_pagein_last_low_we;
-  logic [15:0] tlb_wide_entry_2_pagein_last_high_qs;
-  logic [15:0] tlb_wide_entry_2_pagein_last_high_wd;
+  logic [3:0] tlb_wide_entry_2_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_2_pagein_last_high_wd;
   logic tlb_wide_entry_2_pagein_last_high_we;
   logic [31:0] tlb_wide_entry_2_pageout_low_qs;
   logic [31:0] tlb_wide_entry_2_pageout_low_wd;
   logic tlb_wide_entry_2_pageout_low_we;
-  logic [15:0] tlb_wide_entry_2_pageout_high_qs;
-  logic [15:0] tlb_wide_entry_2_pageout_high_wd;
+  logic [3:0] tlb_wide_entry_2_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_2_pageout_high_wd;
   logic tlb_wide_entry_2_pageout_high_we;
   logic tlb_wide_entry_2_flags_valid_qs;
   logic tlb_wide_entry_2_flags_valid_wd;
@@ -421,20 +421,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_wide_entry_3_pagein_first_low_qs;
   logic [31:0] tlb_wide_entry_3_pagein_first_low_wd;
   logic tlb_wide_entry_3_pagein_first_low_we;
-  logic [15:0] tlb_wide_entry_3_pagein_first_high_qs;
-  logic [15:0] tlb_wide_entry_3_pagein_first_high_wd;
+  logic [3:0] tlb_wide_entry_3_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_3_pagein_first_high_wd;
   logic tlb_wide_entry_3_pagein_first_high_we;
   logic [31:0] tlb_wide_entry_3_pagein_last_low_qs;
   logic [31:0] tlb_wide_entry_3_pagein_last_low_wd;
   logic tlb_wide_entry_3_pagein_last_low_we;
-  logic [15:0] tlb_wide_entry_3_pagein_last_high_qs;
-  logic [15:0] tlb_wide_entry_3_pagein_last_high_wd;
+  logic [3:0] tlb_wide_entry_3_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_3_pagein_last_high_wd;
   logic tlb_wide_entry_3_pagein_last_high_we;
   logic [31:0] tlb_wide_entry_3_pageout_low_qs;
   logic [31:0] tlb_wide_entry_3_pageout_low_wd;
   logic tlb_wide_entry_3_pageout_low_we;
-  logic [15:0] tlb_wide_entry_3_pageout_high_qs;
-  logic [15:0] tlb_wide_entry_3_pageout_high_wd;
+  logic [3:0] tlb_wide_entry_3_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_3_pageout_high_wd;
   logic tlb_wide_entry_3_pageout_high_we;
   logic tlb_wide_entry_3_flags_valid_qs;
   logic tlb_wide_entry_3_flags_valid_wd;
@@ -445,20 +445,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_wide_entry_4_pagein_first_low_qs;
   logic [31:0] tlb_wide_entry_4_pagein_first_low_wd;
   logic tlb_wide_entry_4_pagein_first_low_we;
-  logic [15:0] tlb_wide_entry_4_pagein_first_high_qs;
-  logic [15:0] tlb_wide_entry_4_pagein_first_high_wd;
+  logic [3:0] tlb_wide_entry_4_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_4_pagein_first_high_wd;
   logic tlb_wide_entry_4_pagein_first_high_we;
   logic [31:0] tlb_wide_entry_4_pagein_last_low_qs;
   logic [31:0] tlb_wide_entry_4_pagein_last_low_wd;
   logic tlb_wide_entry_4_pagein_last_low_we;
-  logic [15:0] tlb_wide_entry_4_pagein_last_high_qs;
-  logic [15:0] tlb_wide_entry_4_pagein_last_high_wd;
+  logic [3:0] tlb_wide_entry_4_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_4_pagein_last_high_wd;
   logic tlb_wide_entry_4_pagein_last_high_we;
   logic [31:0] tlb_wide_entry_4_pageout_low_qs;
   logic [31:0] tlb_wide_entry_4_pageout_low_wd;
   logic tlb_wide_entry_4_pageout_low_we;
-  logic [15:0] tlb_wide_entry_4_pageout_high_qs;
-  logic [15:0] tlb_wide_entry_4_pageout_high_wd;
+  logic [3:0] tlb_wide_entry_4_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_4_pageout_high_wd;
   logic tlb_wide_entry_4_pageout_high_we;
   logic tlb_wide_entry_4_flags_valid_qs;
   logic tlb_wide_entry_4_flags_valid_wd;
@@ -469,20 +469,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_wide_entry_5_pagein_first_low_qs;
   logic [31:0] tlb_wide_entry_5_pagein_first_low_wd;
   logic tlb_wide_entry_5_pagein_first_low_we;
-  logic [15:0] tlb_wide_entry_5_pagein_first_high_qs;
-  logic [15:0] tlb_wide_entry_5_pagein_first_high_wd;
+  logic [3:0] tlb_wide_entry_5_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_5_pagein_first_high_wd;
   logic tlb_wide_entry_5_pagein_first_high_we;
   logic [31:0] tlb_wide_entry_5_pagein_last_low_qs;
   logic [31:0] tlb_wide_entry_5_pagein_last_low_wd;
   logic tlb_wide_entry_5_pagein_last_low_we;
-  logic [15:0] tlb_wide_entry_5_pagein_last_high_qs;
-  logic [15:0] tlb_wide_entry_5_pagein_last_high_wd;
+  logic [3:0] tlb_wide_entry_5_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_5_pagein_last_high_wd;
   logic tlb_wide_entry_5_pagein_last_high_we;
   logic [31:0] tlb_wide_entry_5_pageout_low_qs;
   logic [31:0] tlb_wide_entry_5_pageout_low_wd;
   logic tlb_wide_entry_5_pageout_low_we;
-  logic [15:0] tlb_wide_entry_5_pageout_high_qs;
-  logic [15:0] tlb_wide_entry_5_pageout_high_wd;
+  logic [3:0] tlb_wide_entry_5_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_5_pageout_high_wd;
   logic tlb_wide_entry_5_pageout_high_we;
   logic tlb_wide_entry_5_flags_valid_qs;
   logic tlb_wide_entry_5_flags_valid_wd;
@@ -493,20 +493,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_wide_entry_6_pagein_first_low_qs;
   logic [31:0] tlb_wide_entry_6_pagein_first_low_wd;
   logic tlb_wide_entry_6_pagein_first_low_we;
-  logic [15:0] tlb_wide_entry_6_pagein_first_high_qs;
-  logic [15:0] tlb_wide_entry_6_pagein_first_high_wd;
+  logic [3:0] tlb_wide_entry_6_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_6_pagein_first_high_wd;
   logic tlb_wide_entry_6_pagein_first_high_we;
   logic [31:0] tlb_wide_entry_6_pagein_last_low_qs;
   logic [31:0] tlb_wide_entry_6_pagein_last_low_wd;
   logic tlb_wide_entry_6_pagein_last_low_we;
-  logic [15:0] tlb_wide_entry_6_pagein_last_high_qs;
-  logic [15:0] tlb_wide_entry_6_pagein_last_high_wd;
+  logic [3:0] tlb_wide_entry_6_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_6_pagein_last_high_wd;
   logic tlb_wide_entry_6_pagein_last_high_we;
   logic [31:0] tlb_wide_entry_6_pageout_low_qs;
   logic [31:0] tlb_wide_entry_6_pageout_low_wd;
   logic tlb_wide_entry_6_pageout_low_we;
-  logic [15:0] tlb_wide_entry_6_pageout_high_qs;
-  logic [15:0] tlb_wide_entry_6_pageout_high_wd;
+  logic [3:0] tlb_wide_entry_6_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_6_pageout_high_wd;
   logic tlb_wide_entry_6_pageout_high_we;
   logic tlb_wide_entry_6_flags_valid_qs;
   logic tlb_wide_entry_6_flags_valid_wd;
@@ -517,20 +517,20 @@ module occamy_quadrant_s1_reg_top #(
   logic [31:0] tlb_wide_entry_7_pagein_first_low_qs;
   logic [31:0] tlb_wide_entry_7_pagein_first_low_wd;
   logic tlb_wide_entry_7_pagein_first_low_we;
-  logic [15:0] tlb_wide_entry_7_pagein_first_high_qs;
-  logic [15:0] tlb_wide_entry_7_pagein_first_high_wd;
+  logic [3:0] tlb_wide_entry_7_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_7_pagein_first_high_wd;
   logic tlb_wide_entry_7_pagein_first_high_we;
   logic [31:0] tlb_wide_entry_7_pagein_last_low_qs;
   logic [31:0] tlb_wide_entry_7_pagein_last_low_wd;
   logic tlb_wide_entry_7_pagein_last_low_we;
-  logic [15:0] tlb_wide_entry_7_pagein_last_high_qs;
-  logic [15:0] tlb_wide_entry_7_pagein_last_high_wd;
+  logic [3:0] tlb_wide_entry_7_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_7_pagein_last_high_wd;
   logic tlb_wide_entry_7_pagein_last_high_we;
   logic [31:0] tlb_wide_entry_7_pageout_low_qs;
   logic [31:0] tlb_wide_entry_7_pageout_low_wd;
   logic tlb_wide_entry_7_pageout_low_we;
-  logic [15:0] tlb_wide_entry_7_pageout_high_qs;
-  logic [15:0] tlb_wide_entry_7_pageout_high_wd;
+  logic [3:0] tlb_wide_entry_7_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_7_pageout_high_wd;
   logic tlb_wide_entry_7_pageout_high_we;
   logic tlb_wide_entry_7_flags_valid_qs;
   logic tlb_wide_entry_7_flags_valid_wd;
@@ -1332,9 +1332,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_0_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_0_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1386,9 +1386,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_0_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_0_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1440,9 +1440,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_0_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_0_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1548,9 +1548,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_1_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_1_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1602,9 +1602,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_1_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_1_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1656,9 +1656,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_1_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_1_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1764,9 +1764,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_2_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_2_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1818,9 +1818,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_2_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_2_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1872,9 +1872,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_2_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_2_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1980,9 +1980,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_3_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_3_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2034,9 +2034,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_3_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_3_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2088,9 +2088,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_3_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_3_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2196,9 +2196,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_4_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_4_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2250,9 +2250,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_4_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_4_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2304,9 +2304,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_4_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_4_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2412,9 +2412,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_5_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_5_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2466,9 +2466,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_5_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_5_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2520,9 +2520,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_5_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_5_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2628,9 +2628,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_6_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_6_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2682,9 +2682,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_6_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_6_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2736,9 +2736,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_6_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_6_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2844,9 +2844,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_7_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_7_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2898,9 +2898,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_7_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_7_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2952,9 +2952,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_narrow_entry_7_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_narrow_entry_7_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3060,9 +3060,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_0_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_0_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3114,9 +3114,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_0_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_0_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3168,9 +3168,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_0_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_0_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3276,9 +3276,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_1_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_1_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3330,9 +3330,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_1_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_1_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3384,9 +3384,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_1_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_1_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3492,9 +3492,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_2_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_2_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3546,9 +3546,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_2_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_2_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3600,9 +3600,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_2_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_2_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3708,9 +3708,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_3_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_3_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3762,9 +3762,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_3_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_3_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3816,9 +3816,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_3_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_3_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3924,9 +3924,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_4_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_4_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3978,9 +3978,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_4_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_4_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4032,9 +4032,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_4_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_4_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4140,9 +4140,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_5_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_5_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4194,9 +4194,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_5_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_5_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4248,9 +4248,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_5_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_5_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4356,9 +4356,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_6_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_6_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4410,9 +4410,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_6_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_6_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4464,9 +4464,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_6_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_6_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4572,9 +4572,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_7_pagein_first_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_7_pagein_first_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4626,9 +4626,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_7_pagein_last_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_7_pagein_last_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4680,9 +4680,9 @@ module occamy_quadrant_s1_reg_top #(
   // R[tlb_wide_entry_7_pageout_high]: V(False)
 
   prim_subreg #(
-    .DW      (16),
+    .DW      (4),
     .SWACCESS("RW"),
-    .RESVAL  (16'h0)
+    .RESVAL  (4'h0)
   ) u_tlb_wide_entry_7_pageout_high (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -5134,19 +5134,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_narrow_entry_0_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_0_pagein_first_high_we = addr_hit[25] & reg_we & !reg_error;
-  assign tlb_narrow_entry_0_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_0_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_0_pagein_last_low_we = addr_hit[26] & reg_we & !reg_error;
   assign tlb_narrow_entry_0_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_0_pagein_last_high_we = addr_hit[27] & reg_we & !reg_error;
-  assign tlb_narrow_entry_0_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_0_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_0_pageout_low_we = addr_hit[28] & reg_we & !reg_error;
   assign tlb_narrow_entry_0_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_0_pageout_high_we = addr_hit[29] & reg_we & !reg_error;
-  assign tlb_narrow_entry_0_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_0_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_0_flags_valid_we = addr_hit[30] & reg_we & !reg_error;
   assign tlb_narrow_entry_0_flags_valid_wd = reg_wdata[0];
@@ -5158,19 +5158,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_narrow_entry_1_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_1_pagein_first_high_we = addr_hit[32] & reg_we & !reg_error;
-  assign tlb_narrow_entry_1_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_1_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_1_pagein_last_low_we = addr_hit[33] & reg_we & !reg_error;
   assign tlb_narrow_entry_1_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_1_pagein_last_high_we = addr_hit[34] & reg_we & !reg_error;
-  assign tlb_narrow_entry_1_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_1_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_1_pageout_low_we = addr_hit[35] & reg_we & !reg_error;
   assign tlb_narrow_entry_1_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_1_pageout_high_we = addr_hit[36] & reg_we & !reg_error;
-  assign tlb_narrow_entry_1_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_1_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_1_flags_valid_we = addr_hit[37] & reg_we & !reg_error;
   assign tlb_narrow_entry_1_flags_valid_wd = reg_wdata[0];
@@ -5182,19 +5182,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_narrow_entry_2_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_2_pagein_first_high_we = addr_hit[39] & reg_we & !reg_error;
-  assign tlb_narrow_entry_2_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_2_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_2_pagein_last_low_we = addr_hit[40] & reg_we & !reg_error;
   assign tlb_narrow_entry_2_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_2_pagein_last_high_we = addr_hit[41] & reg_we & !reg_error;
-  assign tlb_narrow_entry_2_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_2_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_2_pageout_low_we = addr_hit[42] & reg_we & !reg_error;
   assign tlb_narrow_entry_2_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_2_pageout_high_we = addr_hit[43] & reg_we & !reg_error;
-  assign tlb_narrow_entry_2_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_2_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_2_flags_valid_we = addr_hit[44] & reg_we & !reg_error;
   assign tlb_narrow_entry_2_flags_valid_wd = reg_wdata[0];
@@ -5206,19 +5206,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_narrow_entry_3_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_3_pagein_first_high_we = addr_hit[46] & reg_we & !reg_error;
-  assign tlb_narrow_entry_3_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_3_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_3_pagein_last_low_we = addr_hit[47] & reg_we & !reg_error;
   assign tlb_narrow_entry_3_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_3_pagein_last_high_we = addr_hit[48] & reg_we & !reg_error;
-  assign tlb_narrow_entry_3_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_3_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_3_pageout_low_we = addr_hit[49] & reg_we & !reg_error;
   assign tlb_narrow_entry_3_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_3_pageout_high_we = addr_hit[50] & reg_we & !reg_error;
-  assign tlb_narrow_entry_3_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_3_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_3_flags_valid_we = addr_hit[51] & reg_we & !reg_error;
   assign tlb_narrow_entry_3_flags_valid_wd = reg_wdata[0];
@@ -5230,19 +5230,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_narrow_entry_4_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_4_pagein_first_high_we = addr_hit[53] & reg_we & !reg_error;
-  assign tlb_narrow_entry_4_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_4_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_4_pagein_last_low_we = addr_hit[54] & reg_we & !reg_error;
   assign tlb_narrow_entry_4_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_4_pagein_last_high_we = addr_hit[55] & reg_we & !reg_error;
-  assign tlb_narrow_entry_4_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_4_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_4_pageout_low_we = addr_hit[56] & reg_we & !reg_error;
   assign tlb_narrow_entry_4_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_4_pageout_high_we = addr_hit[57] & reg_we & !reg_error;
-  assign tlb_narrow_entry_4_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_4_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_4_flags_valid_we = addr_hit[58] & reg_we & !reg_error;
   assign tlb_narrow_entry_4_flags_valid_wd = reg_wdata[0];
@@ -5254,19 +5254,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_narrow_entry_5_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_5_pagein_first_high_we = addr_hit[60] & reg_we & !reg_error;
-  assign tlb_narrow_entry_5_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_5_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_5_pagein_last_low_we = addr_hit[61] & reg_we & !reg_error;
   assign tlb_narrow_entry_5_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_5_pagein_last_high_we = addr_hit[62] & reg_we & !reg_error;
-  assign tlb_narrow_entry_5_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_5_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_5_pageout_low_we = addr_hit[63] & reg_we & !reg_error;
   assign tlb_narrow_entry_5_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_5_pageout_high_we = addr_hit[64] & reg_we & !reg_error;
-  assign tlb_narrow_entry_5_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_5_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_5_flags_valid_we = addr_hit[65] & reg_we & !reg_error;
   assign tlb_narrow_entry_5_flags_valid_wd = reg_wdata[0];
@@ -5278,19 +5278,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_narrow_entry_6_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_6_pagein_first_high_we = addr_hit[67] & reg_we & !reg_error;
-  assign tlb_narrow_entry_6_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_6_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_6_pagein_last_low_we = addr_hit[68] & reg_we & !reg_error;
   assign tlb_narrow_entry_6_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_6_pagein_last_high_we = addr_hit[69] & reg_we & !reg_error;
-  assign tlb_narrow_entry_6_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_6_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_6_pageout_low_we = addr_hit[70] & reg_we & !reg_error;
   assign tlb_narrow_entry_6_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_6_pageout_high_we = addr_hit[71] & reg_we & !reg_error;
-  assign tlb_narrow_entry_6_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_6_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_6_flags_valid_we = addr_hit[72] & reg_we & !reg_error;
   assign tlb_narrow_entry_6_flags_valid_wd = reg_wdata[0];
@@ -5302,19 +5302,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_narrow_entry_7_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_7_pagein_first_high_we = addr_hit[74] & reg_we & !reg_error;
-  assign tlb_narrow_entry_7_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_7_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_7_pagein_last_low_we = addr_hit[75] & reg_we & !reg_error;
   assign tlb_narrow_entry_7_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_7_pagein_last_high_we = addr_hit[76] & reg_we & !reg_error;
-  assign tlb_narrow_entry_7_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_7_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_7_pageout_low_we = addr_hit[77] & reg_we & !reg_error;
   assign tlb_narrow_entry_7_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_narrow_entry_7_pageout_high_we = addr_hit[78] & reg_we & !reg_error;
-  assign tlb_narrow_entry_7_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_narrow_entry_7_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_narrow_entry_7_flags_valid_we = addr_hit[79] & reg_we & !reg_error;
   assign tlb_narrow_entry_7_flags_valid_wd = reg_wdata[0];
@@ -5326,19 +5326,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_wide_entry_0_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_0_pagein_first_high_we = addr_hit[81] & reg_we & !reg_error;
-  assign tlb_wide_entry_0_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_0_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_0_pagein_last_low_we = addr_hit[82] & reg_we & !reg_error;
   assign tlb_wide_entry_0_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_0_pagein_last_high_we = addr_hit[83] & reg_we & !reg_error;
-  assign tlb_wide_entry_0_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_0_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_0_pageout_low_we = addr_hit[84] & reg_we & !reg_error;
   assign tlb_wide_entry_0_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_0_pageout_high_we = addr_hit[85] & reg_we & !reg_error;
-  assign tlb_wide_entry_0_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_0_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_0_flags_valid_we = addr_hit[86] & reg_we & !reg_error;
   assign tlb_wide_entry_0_flags_valid_wd = reg_wdata[0];
@@ -5350,19 +5350,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_wide_entry_1_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_1_pagein_first_high_we = addr_hit[88] & reg_we & !reg_error;
-  assign tlb_wide_entry_1_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_1_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_1_pagein_last_low_we = addr_hit[89] & reg_we & !reg_error;
   assign tlb_wide_entry_1_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_1_pagein_last_high_we = addr_hit[90] & reg_we & !reg_error;
-  assign tlb_wide_entry_1_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_1_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_1_pageout_low_we = addr_hit[91] & reg_we & !reg_error;
   assign tlb_wide_entry_1_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_1_pageout_high_we = addr_hit[92] & reg_we & !reg_error;
-  assign tlb_wide_entry_1_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_1_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_1_flags_valid_we = addr_hit[93] & reg_we & !reg_error;
   assign tlb_wide_entry_1_flags_valid_wd = reg_wdata[0];
@@ -5374,19 +5374,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_wide_entry_2_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_2_pagein_first_high_we = addr_hit[95] & reg_we & !reg_error;
-  assign tlb_wide_entry_2_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_2_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_2_pagein_last_low_we = addr_hit[96] & reg_we & !reg_error;
   assign tlb_wide_entry_2_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_2_pagein_last_high_we = addr_hit[97] & reg_we & !reg_error;
-  assign tlb_wide_entry_2_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_2_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_2_pageout_low_we = addr_hit[98] & reg_we & !reg_error;
   assign tlb_wide_entry_2_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_2_pageout_high_we = addr_hit[99] & reg_we & !reg_error;
-  assign tlb_wide_entry_2_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_2_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_2_flags_valid_we = addr_hit[100] & reg_we & !reg_error;
   assign tlb_wide_entry_2_flags_valid_wd = reg_wdata[0];
@@ -5398,19 +5398,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_wide_entry_3_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_3_pagein_first_high_we = addr_hit[102] & reg_we & !reg_error;
-  assign tlb_wide_entry_3_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_3_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_3_pagein_last_low_we = addr_hit[103] & reg_we & !reg_error;
   assign tlb_wide_entry_3_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_3_pagein_last_high_we = addr_hit[104] & reg_we & !reg_error;
-  assign tlb_wide_entry_3_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_3_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_3_pageout_low_we = addr_hit[105] & reg_we & !reg_error;
   assign tlb_wide_entry_3_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_3_pageout_high_we = addr_hit[106] & reg_we & !reg_error;
-  assign tlb_wide_entry_3_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_3_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_3_flags_valid_we = addr_hit[107] & reg_we & !reg_error;
   assign tlb_wide_entry_3_flags_valid_wd = reg_wdata[0];
@@ -5422,19 +5422,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_wide_entry_4_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_4_pagein_first_high_we = addr_hit[109] & reg_we & !reg_error;
-  assign tlb_wide_entry_4_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_4_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_4_pagein_last_low_we = addr_hit[110] & reg_we & !reg_error;
   assign tlb_wide_entry_4_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_4_pagein_last_high_we = addr_hit[111] & reg_we & !reg_error;
-  assign tlb_wide_entry_4_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_4_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_4_pageout_low_we = addr_hit[112] & reg_we & !reg_error;
   assign tlb_wide_entry_4_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_4_pageout_high_we = addr_hit[113] & reg_we & !reg_error;
-  assign tlb_wide_entry_4_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_4_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_4_flags_valid_we = addr_hit[114] & reg_we & !reg_error;
   assign tlb_wide_entry_4_flags_valid_wd = reg_wdata[0];
@@ -5446,19 +5446,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_wide_entry_5_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_5_pagein_first_high_we = addr_hit[116] & reg_we & !reg_error;
-  assign tlb_wide_entry_5_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_5_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_5_pagein_last_low_we = addr_hit[117] & reg_we & !reg_error;
   assign tlb_wide_entry_5_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_5_pagein_last_high_we = addr_hit[118] & reg_we & !reg_error;
-  assign tlb_wide_entry_5_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_5_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_5_pageout_low_we = addr_hit[119] & reg_we & !reg_error;
   assign tlb_wide_entry_5_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_5_pageout_high_we = addr_hit[120] & reg_we & !reg_error;
-  assign tlb_wide_entry_5_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_5_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_5_flags_valid_we = addr_hit[121] & reg_we & !reg_error;
   assign tlb_wide_entry_5_flags_valid_wd = reg_wdata[0];
@@ -5470,19 +5470,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_wide_entry_6_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_6_pagein_first_high_we = addr_hit[123] & reg_we & !reg_error;
-  assign tlb_wide_entry_6_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_6_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_6_pagein_last_low_we = addr_hit[124] & reg_we & !reg_error;
   assign tlb_wide_entry_6_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_6_pagein_last_high_we = addr_hit[125] & reg_we & !reg_error;
-  assign tlb_wide_entry_6_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_6_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_6_pageout_low_we = addr_hit[126] & reg_we & !reg_error;
   assign tlb_wide_entry_6_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_6_pageout_high_we = addr_hit[127] & reg_we & !reg_error;
-  assign tlb_wide_entry_6_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_6_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_6_flags_valid_we = addr_hit[128] & reg_we & !reg_error;
   assign tlb_wide_entry_6_flags_valid_wd = reg_wdata[0];
@@ -5494,19 +5494,19 @@ module occamy_quadrant_s1_reg_top #(
   assign tlb_wide_entry_7_pagein_first_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_7_pagein_first_high_we = addr_hit[130] & reg_we & !reg_error;
-  assign tlb_wide_entry_7_pagein_first_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_7_pagein_first_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_7_pagein_last_low_we = addr_hit[131] & reg_we & !reg_error;
   assign tlb_wide_entry_7_pagein_last_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_7_pagein_last_high_we = addr_hit[132] & reg_we & !reg_error;
-  assign tlb_wide_entry_7_pagein_last_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_7_pagein_last_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_7_pageout_low_we = addr_hit[133] & reg_we & !reg_error;
   assign tlb_wide_entry_7_pageout_low_wd = reg_wdata[31:0];
 
   assign tlb_wide_entry_7_pageout_high_we = addr_hit[134] & reg_we & !reg_error;
-  assign tlb_wide_entry_7_pageout_high_wd = reg_wdata[15:0];
+  assign tlb_wide_entry_7_pageout_high_wd = reg_wdata[3:0];
 
   assign tlb_wide_entry_7_flags_valid_we = addr_hit[135] & reg_we & !reg_error;
   assign tlb_wide_entry_7_flags_valid_wd = reg_wdata[0];
@@ -5625,7 +5625,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[25]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_0_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_0_pagein_first_high_qs;
       end
 
       addr_hit[26]: begin
@@ -5633,7 +5633,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[27]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_0_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_0_pagein_last_high_qs;
       end
 
       addr_hit[28]: begin
@@ -5641,7 +5641,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[29]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_0_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_0_pageout_high_qs;
       end
 
       addr_hit[30]: begin
@@ -5654,7 +5654,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[32]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_1_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_1_pagein_first_high_qs;
       end
 
       addr_hit[33]: begin
@@ -5662,7 +5662,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[34]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_1_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_1_pagein_last_high_qs;
       end
 
       addr_hit[35]: begin
@@ -5670,7 +5670,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[36]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_1_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_1_pageout_high_qs;
       end
 
       addr_hit[37]: begin
@@ -5683,7 +5683,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[39]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_2_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_2_pagein_first_high_qs;
       end
 
       addr_hit[40]: begin
@@ -5691,7 +5691,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[41]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_2_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_2_pagein_last_high_qs;
       end
 
       addr_hit[42]: begin
@@ -5699,7 +5699,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[43]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_2_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_2_pageout_high_qs;
       end
 
       addr_hit[44]: begin
@@ -5712,7 +5712,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[46]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_3_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_3_pagein_first_high_qs;
       end
 
       addr_hit[47]: begin
@@ -5720,7 +5720,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[48]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_3_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_3_pagein_last_high_qs;
       end
 
       addr_hit[49]: begin
@@ -5728,7 +5728,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[50]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_3_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_3_pageout_high_qs;
       end
 
       addr_hit[51]: begin
@@ -5741,7 +5741,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[53]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_4_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_4_pagein_first_high_qs;
       end
 
       addr_hit[54]: begin
@@ -5749,7 +5749,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[55]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_4_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_4_pagein_last_high_qs;
       end
 
       addr_hit[56]: begin
@@ -5757,7 +5757,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[57]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_4_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_4_pageout_high_qs;
       end
 
       addr_hit[58]: begin
@@ -5770,7 +5770,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[60]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_5_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_5_pagein_first_high_qs;
       end
 
       addr_hit[61]: begin
@@ -5778,7 +5778,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[62]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_5_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_5_pagein_last_high_qs;
       end
 
       addr_hit[63]: begin
@@ -5786,7 +5786,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[64]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_5_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_5_pageout_high_qs;
       end
 
       addr_hit[65]: begin
@@ -5799,7 +5799,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[67]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_6_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_6_pagein_first_high_qs;
       end
 
       addr_hit[68]: begin
@@ -5807,7 +5807,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[69]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_6_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_6_pagein_last_high_qs;
       end
 
       addr_hit[70]: begin
@@ -5815,7 +5815,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[71]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_6_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_6_pageout_high_qs;
       end
 
       addr_hit[72]: begin
@@ -5828,7 +5828,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[74]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_7_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_7_pagein_first_high_qs;
       end
 
       addr_hit[75]: begin
@@ -5836,7 +5836,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[76]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_7_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_7_pagein_last_high_qs;
       end
 
       addr_hit[77]: begin
@@ -5844,7 +5844,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[78]: begin
-        reg_rdata_next[15:0] = tlb_narrow_entry_7_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_narrow_entry_7_pageout_high_qs;
       end
 
       addr_hit[79]: begin
@@ -5857,7 +5857,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[81]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_0_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_0_pagein_first_high_qs;
       end
 
       addr_hit[82]: begin
@@ -5865,7 +5865,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[83]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_0_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_0_pagein_last_high_qs;
       end
 
       addr_hit[84]: begin
@@ -5873,7 +5873,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[85]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_0_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_0_pageout_high_qs;
       end
 
       addr_hit[86]: begin
@@ -5886,7 +5886,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[88]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_1_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_1_pagein_first_high_qs;
       end
 
       addr_hit[89]: begin
@@ -5894,7 +5894,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[90]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_1_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_1_pagein_last_high_qs;
       end
 
       addr_hit[91]: begin
@@ -5902,7 +5902,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[92]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_1_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_1_pageout_high_qs;
       end
 
       addr_hit[93]: begin
@@ -5915,7 +5915,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[95]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_2_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_2_pagein_first_high_qs;
       end
 
       addr_hit[96]: begin
@@ -5923,7 +5923,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[97]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_2_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_2_pagein_last_high_qs;
       end
 
       addr_hit[98]: begin
@@ -5931,7 +5931,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[99]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_2_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_2_pageout_high_qs;
       end
 
       addr_hit[100]: begin
@@ -5944,7 +5944,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[102]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_3_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_3_pagein_first_high_qs;
       end
 
       addr_hit[103]: begin
@@ -5952,7 +5952,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[104]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_3_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_3_pagein_last_high_qs;
       end
 
       addr_hit[105]: begin
@@ -5960,7 +5960,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[106]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_3_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_3_pageout_high_qs;
       end
 
       addr_hit[107]: begin
@@ -5973,7 +5973,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[109]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_4_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_4_pagein_first_high_qs;
       end
 
       addr_hit[110]: begin
@@ -5981,7 +5981,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[111]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_4_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_4_pagein_last_high_qs;
       end
 
       addr_hit[112]: begin
@@ -5989,7 +5989,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[113]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_4_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_4_pageout_high_qs;
       end
 
       addr_hit[114]: begin
@@ -6002,7 +6002,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[116]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_5_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_5_pagein_first_high_qs;
       end
 
       addr_hit[117]: begin
@@ -6010,7 +6010,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[118]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_5_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_5_pagein_last_high_qs;
       end
 
       addr_hit[119]: begin
@@ -6018,7 +6018,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[120]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_5_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_5_pageout_high_qs;
       end
 
       addr_hit[121]: begin
@@ -6031,7 +6031,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[123]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_6_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_6_pagein_first_high_qs;
       end
 
       addr_hit[124]: begin
@@ -6039,7 +6039,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[125]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_6_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_6_pagein_last_high_qs;
       end
 
       addr_hit[126]: begin
@@ -6047,7 +6047,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[127]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_6_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_6_pageout_high_qs;
       end
 
       addr_hit[128]: begin
@@ -6060,7 +6060,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[130]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_7_pagein_first_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_7_pagein_first_high_qs;
       end
 
       addr_hit[131]: begin
@@ -6068,7 +6068,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[132]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_7_pagein_last_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_7_pagein_last_high_qs;
       end
 
       addr_hit[133]: begin
@@ -6076,7 +6076,7 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[134]: begin
-        reg_rdata_next[15:0] = tlb_wide_entry_7_pageout_high_qs;
+        reg_rdata_next[3:0] = tlb_wide_entry_7_pageout_high_qs;
       end
 
       addr_hit[135]: begin

@@ -139,7 +139,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "${soc_wide_xbar.aw-33}:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+        {bits: "${soc_wide_xbar.aw-12-33}:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
       ]
     },
     { name: "TLB_${t.upper()}_ENTRY_${e}_PAGEIN_LAST_LOW",
@@ -155,7 +155,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "${soc_wide_xbar.aw-33}:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+        {bits: "${soc_wide_xbar.aw-12-33}:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
       ]
     },
     { name: "TLB_${t.upper()}_ENTRY_${e}_PAGEOUT_LOW",
@@ -171,7 +171,7 @@
       swaccess: "rw",
       hwaccess: "hro",
       fields: [
-        {bits: "${soc_wide_xbar.aw-33}:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+        {bits: "${soc_wide_xbar.aw-12-33}:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
       ]
     },
     { name: "TLB_${t.upper()}_ENTRY_${e}_FLAGS",

@@ -139,7 +139,6 @@ module ${name}_quadrant_s1_ctrl
   // Assemble narrow TLB entries
   % for j in range(narrow_tlb_entries):
   assign narrow_tlb_entries_o[${j}] = '{
-    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     first:  {reg2hw.tlb_narrow_entry_${j}_pagein_first_high.q,  reg2hw.tlb_narrow_entry_${j}_pagein_first_low.q},
     last:   {reg2hw.tlb_narrow_entry_${j}_pagein_last_high.q,   reg2hw.tlb_narrow_entry_${j}_pagein_last_low.q},
     base:   {reg2hw.tlb_narrow_entry_${j}_pageout_high.q,       reg2hw.tlb_narrow_entry_${j}_pageout_low.q},

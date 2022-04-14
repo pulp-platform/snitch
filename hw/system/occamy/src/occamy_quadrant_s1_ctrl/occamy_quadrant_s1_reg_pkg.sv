@@ -121,7 +121,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -129,7 +129,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -137,7 +137,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_high_reg_t;
 
   typedef struct packed {
@@ -154,7 +154,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -162,7 +162,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -170,7 +170,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_high_reg_t;
 
   typedef struct packed {
@@ -187,7 +187,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -195,7 +195,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -203,7 +203,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_high_reg_t;
 
   typedef struct packed {
@@ -220,7 +220,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -228,7 +228,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -236,7 +236,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_high_reg_t;
 
   typedef struct packed {
@@ -253,7 +253,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -261,7 +261,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -269,7 +269,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_high_reg_t;
 
   typedef struct packed {
@@ -286,7 +286,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -294,7 +294,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -302,7 +302,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_high_reg_t;
 
   typedef struct packed {
@@ -319,7 +319,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -327,7 +327,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -335,7 +335,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_high_reg_t;
 
   typedef struct packed {
@@ -352,7 +352,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -360,7 +360,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -368,7 +368,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_high_reg_t;
 
   typedef struct packed {
@@ -385,7 +385,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -393,7 +393,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -401,7 +401,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_high_reg_t;
 
   typedef struct packed {
@@ -418,7 +418,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -426,7 +426,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -434,7 +434,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_high_reg_t;
 
   typedef struct packed {
@@ -451,7 +451,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -459,7 +459,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -467,7 +467,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_high_reg_t;
 
   typedef struct packed {
@@ -484,7 +484,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -492,7 +492,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -500,7 +500,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_high_reg_t;
 
   typedef struct packed {
@@ -517,7 +517,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -525,7 +525,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -533,7 +533,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_high_reg_t;
 
   typedef struct packed {
@@ -550,7 +550,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -558,7 +558,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -566,7 +566,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_high_reg_t;
 
   typedef struct packed {
@@ -583,7 +583,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -591,7 +591,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -599,7 +599,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_high_reg_t;
 
   typedef struct packed {
@@ -616,7 +616,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_high_reg_t;
 
   typedef struct packed {
@@ -624,7 +624,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_high_reg_t;
 
   typedef struct packed {
@@ -632,7 +632,7 @@ package occamy_quadrant_s1_reg_pkg;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_low_reg_t;
 
   typedef struct packed {
-    logic [15:0] q;
+    logic [3:0]  q;
   } occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_high_reg_t;
 
   typedef struct packed {
@@ -666,140 +666,140 @@ package occamy_quadrant_s1_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    occamy_quadrant_s1_reg2hw_clk_ena_reg_t clk_ena; // [2729:2729]
-    occamy_quadrant_s1_reg2hw_reset_n_reg_t reset_n; // [2728:2728]
-    occamy_quadrant_s1_reg2hw_isolate_reg_t isolate; // [2727:2724]
-    occamy_quadrant_s1_reg2hw_ro_cache_enable_reg_t ro_cache_enable; // [2723:2723]
-    occamy_quadrant_s1_reg2hw_ro_cache_flush_reg_t ro_cache_flush; // [2722:2722]
-    occamy_quadrant_s1_reg2hw_tlb_wide_enable_reg_t tlb_wide_enable; // [2721:2721]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_enable_reg_t tlb_narrow_enable; // [2720:2720]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_low_0_reg_t ro_start_addr_low_0; // [2719:2688]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_high_0_reg_t ro_start_addr_high_0; // [2687:2672]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_low_0_reg_t ro_end_addr_low_0; // [2671:2640]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_high_0_reg_t ro_end_addr_high_0; // [2639:2624]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_low_1_reg_t ro_start_addr_low_1; // [2623:2592]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_high_1_reg_t ro_start_addr_high_1; // [2591:2576]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_low_1_reg_t ro_end_addr_low_1; // [2575:2544]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_high_1_reg_t ro_end_addr_high_1; // [2543:2528]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_low_2_reg_t ro_start_addr_low_2; // [2527:2496]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_high_2_reg_t ro_start_addr_high_2; // [2495:2480]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_low_2_reg_t ro_end_addr_low_2; // [2479:2448]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_high_2_reg_t ro_end_addr_high_2; // [2447:2432]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_low_3_reg_t ro_start_addr_low_3; // [2431:2400]
-    occamy_quadrant_s1_reg2hw_ro_start_addr_high_3_reg_t ro_start_addr_high_3; // [2399:2384]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_low_3_reg_t ro_end_addr_low_3; // [2383:2352]
-    occamy_quadrant_s1_reg2hw_ro_end_addr_high_3_reg_t ro_end_addr_high_3; // [2351:2336]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_low_reg_t tlb_narrow_entry_0_pagein_first_low; // [2335:2304]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_high_reg_t tlb_narrow_entry_0_pagein_first_high; // [2303:2288]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_low_reg_t tlb_narrow_entry_0_pagein_last_low; // [2287:2256]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_high_reg_t tlb_narrow_entry_0_pagein_last_high; // [2255:2240]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_low_reg_t tlb_narrow_entry_0_pageout_low; // [2239:2208]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_high_reg_t tlb_narrow_entry_0_pageout_high; // [2207:2192]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_flags_reg_t tlb_narrow_entry_0_flags; // [2191:2190]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_low_reg_t tlb_narrow_entry_1_pagein_first_low; // [2189:2158]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_high_reg_t tlb_narrow_entry_1_pagein_first_high; // [2157:2142]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_low_reg_t tlb_narrow_entry_1_pagein_last_low; // [2141:2110]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_high_reg_t tlb_narrow_entry_1_pagein_last_high; // [2109:2094]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_low_reg_t tlb_narrow_entry_1_pageout_low; // [2093:2062]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_high_reg_t tlb_narrow_entry_1_pageout_high; // [2061:2046]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_flags_reg_t tlb_narrow_entry_1_flags; // [2045:2044]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_low_reg_t tlb_narrow_entry_2_pagein_first_low; // [2043:2012]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_high_reg_t tlb_narrow_entry_2_pagein_first_high; // [2011:1996]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_low_reg_t tlb_narrow_entry_2_pagein_last_low; // [1995:1964]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_high_reg_t tlb_narrow_entry_2_pagein_last_high; // [1963:1948]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_low_reg_t tlb_narrow_entry_2_pageout_low; // [1947:1916]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_high_reg_t tlb_narrow_entry_2_pageout_high; // [1915:1900]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_flags_reg_t tlb_narrow_entry_2_flags; // [1899:1898]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_low_reg_t tlb_narrow_entry_3_pagein_first_low; // [1897:1866]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_high_reg_t tlb_narrow_entry_3_pagein_first_high; // [1865:1850]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_low_reg_t tlb_narrow_entry_3_pagein_last_low; // [1849:1818]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_high_reg_t tlb_narrow_entry_3_pagein_last_high; // [1817:1802]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_low_reg_t tlb_narrow_entry_3_pageout_low; // [1801:1770]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_high_reg_t tlb_narrow_entry_3_pageout_high; // [1769:1754]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_flags_reg_t tlb_narrow_entry_3_flags; // [1753:1752]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_low_reg_t tlb_narrow_entry_4_pagein_first_low; // [1751:1720]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_high_reg_t tlb_narrow_entry_4_pagein_first_high; // [1719:1704]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_low_reg_t tlb_narrow_entry_4_pagein_last_low; // [1703:1672]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_high_reg_t tlb_narrow_entry_4_pagein_last_high; // [1671:1656]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_low_reg_t tlb_narrow_entry_4_pageout_low; // [1655:1624]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_high_reg_t tlb_narrow_entry_4_pageout_high; // [1623:1608]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_flags_reg_t tlb_narrow_entry_4_flags; // [1607:1606]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_low_reg_t tlb_narrow_entry_5_pagein_first_low; // [1605:1574]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_high_reg_t tlb_narrow_entry_5_pagein_first_high; // [1573:1558]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_low_reg_t tlb_narrow_entry_5_pagein_last_low; // [1557:1526]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_high_reg_t tlb_narrow_entry_5_pagein_last_high; // [1525:1510]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_low_reg_t tlb_narrow_entry_5_pageout_low; // [1509:1478]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_high_reg_t tlb_narrow_entry_5_pageout_high; // [1477:1462]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_flags_reg_t tlb_narrow_entry_5_flags; // [1461:1460]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_low_reg_t tlb_narrow_entry_6_pagein_first_low; // [1459:1428]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_high_reg_t tlb_narrow_entry_6_pagein_first_high; // [1427:1412]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_low_reg_t tlb_narrow_entry_6_pagein_last_low; // [1411:1380]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_high_reg_t tlb_narrow_entry_6_pagein_last_high; // [1379:1364]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_low_reg_t tlb_narrow_entry_6_pageout_low; // [1363:1332]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_high_reg_t tlb_narrow_entry_6_pageout_high; // [1331:1316]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_flags_reg_t tlb_narrow_entry_6_flags; // [1315:1314]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_low_reg_t tlb_narrow_entry_7_pagein_first_low; // [1313:1282]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_high_reg_t tlb_narrow_entry_7_pagein_first_high; // [1281:1266]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_low_reg_t tlb_narrow_entry_7_pagein_last_low; // [1265:1234]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_high_reg_t tlb_narrow_entry_7_pagein_last_high; // [1233:1218]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_low_reg_t tlb_narrow_entry_7_pageout_low; // [1217:1186]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_high_reg_t tlb_narrow_entry_7_pageout_high; // [1185:1170]
-    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_flags_reg_t tlb_narrow_entry_7_flags; // [1169:1168]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_low_reg_t tlb_wide_entry_0_pagein_first_low; // [1167:1136]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_high_reg_t tlb_wide_entry_0_pagein_first_high; // [1135:1120]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_low_reg_t tlb_wide_entry_0_pagein_last_low; // [1119:1088]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_high_reg_t tlb_wide_entry_0_pagein_last_high; // [1087:1072]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_low_reg_t tlb_wide_entry_0_pageout_low; // [1071:1040]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_high_reg_t tlb_wide_entry_0_pageout_high; // [1039:1024]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_flags_reg_t tlb_wide_entry_0_flags; // [1023:1022]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_low_reg_t tlb_wide_entry_1_pagein_first_low; // [1021:990]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_high_reg_t tlb_wide_entry_1_pagein_first_high; // [989:974]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_low_reg_t tlb_wide_entry_1_pagein_last_low; // [973:942]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_high_reg_t tlb_wide_entry_1_pagein_last_high; // [941:926]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_low_reg_t tlb_wide_entry_1_pageout_low; // [925:894]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_high_reg_t tlb_wide_entry_1_pageout_high; // [893:878]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_flags_reg_t tlb_wide_entry_1_flags; // [877:876]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_low_reg_t tlb_wide_entry_2_pagein_first_low; // [875:844]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_high_reg_t tlb_wide_entry_2_pagein_first_high; // [843:828]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_low_reg_t tlb_wide_entry_2_pagein_last_low; // [827:796]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_high_reg_t tlb_wide_entry_2_pagein_last_high; // [795:780]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_low_reg_t tlb_wide_entry_2_pageout_low; // [779:748]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_high_reg_t tlb_wide_entry_2_pageout_high; // [747:732]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_flags_reg_t tlb_wide_entry_2_flags; // [731:730]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_low_reg_t tlb_wide_entry_3_pagein_first_low; // [729:698]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_high_reg_t tlb_wide_entry_3_pagein_first_high; // [697:682]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_low_reg_t tlb_wide_entry_3_pagein_last_low; // [681:650]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_high_reg_t tlb_wide_entry_3_pagein_last_high; // [649:634]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_low_reg_t tlb_wide_entry_3_pageout_low; // [633:602]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_high_reg_t tlb_wide_entry_3_pageout_high; // [601:586]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_flags_reg_t tlb_wide_entry_3_flags; // [585:584]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_low_reg_t tlb_wide_entry_4_pagein_first_low; // [583:552]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_high_reg_t tlb_wide_entry_4_pagein_first_high; // [551:536]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_low_reg_t tlb_wide_entry_4_pagein_last_low; // [535:504]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_high_reg_t tlb_wide_entry_4_pagein_last_high; // [503:488]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_low_reg_t tlb_wide_entry_4_pageout_low; // [487:456]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_high_reg_t tlb_wide_entry_4_pageout_high; // [455:440]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_flags_reg_t tlb_wide_entry_4_flags; // [439:438]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_low_reg_t tlb_wide_entry_5_pagein_first_low; // [437:406]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_high_reg_t tlb_wide_entry_5_pagein_first_high; // [405:390]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_low_reg_t tlb_wide_entry_5_pagein_last_low; // [389:358]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_high_reg_t tlb_wide_entry_5_pagein_last_high; // [357:342]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_low_reg_t tlb_wide_entry_5_pageout_low; // [341:310]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_high_reg_t tlb_wide_entry_5_pageout_high; // [309:294]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_flags_reg_t tlb_wide_entry_5_flags; // [293:292]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_low_reg_t tlb_wide_entry_6_pagein_first_low; // [291:260]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_high_reg_t tlb_wide_entry_6_pagein_first_high; // [259:244]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_low_reg_t tlb_wide_entry_6_pagein_last_low; // [243:212]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_high_reg_t tlb_wide_entry_6_pagein_last_high; // [211:196]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_low_reg_t tlb_wide_entry_6_pageout_low; // [195:164]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_high_reg_t tlb_wide_entry_6_pageout_high; // [163:148]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_flags_reg_t tlb_wide_entry_6_flags; // [147:146]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_low_reg_t tlb_wide_entry_7_pagein_first_low; // [145:114]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_high_reg_t tlb_wide_entry_7_pagein_first_high; // [113:98]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_low_reg_t tlb_wide_entry_7_pagein_last_low; // [97:66]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_high_reg_t tlb_wide_entry_7_pagein_last_high; // [65:50]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_low_reg_t tlb_wide_entry_7_pageout_low; // [49:18]
-    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_high_reg_t tlb_wide_entry_7_pageout_high; // [17:2]
+    occamy_quadrant_s1_reg2hw_clk_ena_reg_t clk_ena; // [2153:2153]
+    occamy_quadrant_s1_reg2hw_reset_n_reg_t reset_n; // [2152:2152]
+    occamy_quadrant_s1_reg2hw_isolate_reg_t isolate; // [2151:2148]
+    occamy_quadrant_s1_reg2hw_ro_cache_enable_reg_t ro_cache_enable; // [2147:2147]
+    occamy_quadrant_s1_reg2hw_ro_cache_flush_reg_t ro_cache_flush; // [2146:2146]
+    occamy_quadrant_s1_reg2hw_tlb_wide_enable_reg_t tlb_wide_enable; // [2145:2145]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_enable_reg_t tlb_narrow_enable; // [2144:2144]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_low_0_reg_t ro_start_addr_low_0; // [2143:2112]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_high_0_reg_t ro_start_addr_high_0; // [2111:2096]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_low_0_reg_t ro_end_addr_low_0; // [2095:2064]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_high_0_reg_t ro_end_addr_high_0; // [2063:2048]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_low_1_reg_t ro_start_addr_low_1; // [2047:2016]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_high_1_reg_t ro_start_addr_high_1; // [2015:2000]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_low_1_reg_t ro_end_addr_low_1; // [1999:1968]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_high_1_reg_t ro_end_addr_high_1; // [1967:1952]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_low_2_reg_t ro_start_addr_low_2; // [1951:1920]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_high_2_reg_t ro_start_addr_high_2; // [1919:1904]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_low_2_reg_t ro_end_addr_low_2; // [1903:1872]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_high_2_reg_t ro_end_addr_high_2; // [1871:1856]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_low_3_reg_t ro_start_addr_low_3; // [1855:1824]
+    occamy_quadrant_s1_reg2hw_ro_start_addr_high_3_reg_t ro_start_addr_high_3; // [1823:1808]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_low_3_reg_t ro_end_addr_low_3; // [1807:1776]
+    occamy_quadrant_s1_reg2hw_ro_end_addr_high_3_reg_t ro_end_addr_high_3; // [1775:1760]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_low_reg_t tlb_narrow_entry_0_pagein_first_low; // [1759:1728]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_first_high_reg_t tlb_narrow_entry_0_pagein_first_high; // [1727:1724]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_low_reg_t tlb_narrow_entry_0_pagein_last_low; // [1723:1692]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pagein_last_high_reg_t tlb_narrow_entry_0_pagein_last_high; // [1691:1688]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_low_reg_t tlb_narrow_entry_0_pageout_low; // [1687:1656]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_pageout_high_reg_t tlb_narrow_entry_0_pageout_high; // [1655:1652]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_0_flags_reg_t tlb_narrow_entry_0_flags; // [1651:1650]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_low_reg_t tlb_narrow_entry_1_pagein_first_low; // [1649:1618]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_first_high_reg_t tlb_narrow_entry_1_pagein_first_high; // [1617:1614]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_low_reg_t tlb_narrow_entry_1_pagein_last_low; // [1613:1582]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pagein_last_high_reg_t tlb_narrow_entry_1_pagein_last_high; // [1581:1578]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_low_reg_t tlb_narrow_entry_1_pageout_low; // [1577:1546]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_pageout_high_reg_t tlb_narrow_entry_1_pageout_high; // [1545:1542]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_1_flags_reg_t tlb_narrow_entry_1_flags; // [1541:1540]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_low_reg_t tlb_narrow_entry_2_pagein_first_low; // [1539:1508]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_first_high_reg_t tlb_narrow_entry_2_pagein_first_high; // [1507:1504]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_low_reg_t tlb_narrow_entry_2_pagein_last_low; // [1503:1472]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pagein_last_high_reg_t tlb_narrow_entry_2_pagein_last_high; // [1471:1468]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_low_reg_t tlb_narrow_entry_2_pageout_low; // [1467:1436]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_pageout_high_reg_t tlb_narrow_entry_2_pageout_high; // [1435:1432]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_2_flags_reg_t tlb_narrow_entry_2_flags; // [1431:1430]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_low_reg_t tlb_narrow_entry_3_pagein_first_low; // [1429:1398]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_first_high_reg_t tlb_narrow_entry_3_pagein_first_high; // [1397:1394]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_low_reg_t tlb_narrow_entry_3_pagein_last_low; // [1393:1362]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pagein_last_high_reg_t tlb_narrow_entry_3_pagein_last_high; // [1361:1358]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_low_reg_t tlb_narrow_entry_3_pageout_low; // [1357:1326]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_pageout_high_reg_t tlb_narrow_entry_3_pageout_high; // [1325:1322]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_3_flags_reg_t tlb_narrow_entry_3_flags; // [1321:1320]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_low_reg_t tlb_narrow_entry_4_pagein_first_low; // [1319:1288]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_first_high_reg_t tlb_narrow_entry_4_pagein_first_high; // [1287:1284]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_low_reg_t tlb_narrow_entry_4_pagein_last_low; // [1283:1252]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pagein_last_high_reg_t tlb_narrow_entry_4_pagein_last_high; // [1251:1248]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_low_reg_t tlb_narrow_entry_4_pageout_low; // [1247:1216]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_pageout_high_reg_t tlb_narrow_entry_4_pageout_high; // [1215:1212]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_4_flags_reg_t tlb_narrow_entry_4_flags; // [1211:1210]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_low_reg_t tlb_narrow_entry_5_pagein_first_low; // [1209:1178]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_first_high_reg_t tlb_narrow_entry_5_pagein_first_high; // [1177:1174]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_low_reg_t tlb_narrow_entry_5_pagein_last_low; // [1173:1142]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pagein_last_high_reg_t tlb_narrow_entry_5_pagein_last_high; // [1141:1138]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_low_reg_t tlb_narrow_entry_5_pageout_low; // [1137:1106]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_pageout_high_reg_t tlb_narrow_entry_5_pageout_high; // [1105:1102]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_5_flags_reg_t tlb_narrow_entry_5_flags; // [1101:1100]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_low_reg_t tlb_narrow_entry_6_pagein_first_low; // [1099:1068]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_first_high_reg_t tlb_narrow_entry_6_pagein_first_high; // [1067:1064]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_low_reg_t tlb_narrow_entry_6_pagein_last_low; // [1063:1032]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pagein_last_high_reg_t tlb_narrow_entry_6_pagein_last_high; // [1031:1028]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_low_reg_t tlb_narrow_entry_6_pageout_low; // [1027:996]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_pageout_high_reg_t tlb_narrow_entry_6_pageout_high; // [995:992]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_6_flags_reg_t tlb_narrow_entry_6_flags; // [991:990]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_low_reg_t tlb_narrow_entry_7_pagein_first_low; // [989:958]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_first_high_reg_t tlb_narrow_entry_7_pagein_first_high; // [957:954]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_low_reg_t tlb_narrow_entry_7_pagein_last_low; // [953:922]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pagein_last_high_reg_t tlb_narrow_entry_7_pagein_last_high; // [921:918]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_low_reg_t tlb_narrow_entry_7_pageout_low; // [917:886]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_pageout_high_reg_t tlb_narrow_entry_7_pageout_high; // [885:882]
+    occamy_quadrant_s1_reg2hw_tlb_narrow_entry_7_flags_reg_t tlb_narrow_entry_7_flags; // [881:880]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_low_reg_t tlb_wide_entry_0_pagein_first_low; // [879:848]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_first_high_reg_t tlb_wide_entry_0_pagein_first_high; // [847:844]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_low_reg_t tlb_wide_entry_0_pagein_last_low; // [843:812]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pagein_last_high_reg_t tlb_wide_entry_0_pagein_last_high; // [811:808]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_low_reg_t tlb_wide_entry_0_pageout_low; // [807:776]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_pageout_high_reg_t tlb_wide_entry_0_pageout_high; // [775:772]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_0_flags_reg_t tlb_wide_entry_0_flags; // [771:770]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_low_reg_t tlb_wide_entry_1_pagein_first_low; // [769:738]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_first_high_reg_t tlb_wide_entry_1_pagein_first_high; // [737:734]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_low_reg_t tlb_wide_entry_1_pagein_last_low; // [733:702]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pagein_last_high_reg_t tlb_wide_entry_1_pagein_last_high; // [701:698]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_low_reg_t tlb_wide_entry_1_pageout_low; // [697:666]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_pageout_high_reg_t tlb_wide_entry_1_pageout_high; // [665:662]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_1_flags_reg_t tlb_wide_entry_1_flags; // [661:660]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_low_reg_t tlb_wide_entry_2_pagein_first_low; // [659:628]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_first_high_reg_t tlb_wide_entry_2_pagein_first_high; // [627:624]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_low_reg_t tlb_wide_entry_2_pagein_last_low; // [623:592]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pagein_last_high_reg_t tlb_wide_entry_2_pagein_last_high; // [591:588]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_low_reg_t tlb_wide_entry_2_pageout_low; // [587:556]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_pageout_high_reg_t tlb_wide_entry_2_pageout_high; // [555:552]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_2_flags_reg_t tlb_wide_entry_2_flags; // [551:550]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_low_reg_t tlb_wide_entry_3_pagein_first_low; // [549:518]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_first_high_reg_t tlb_wide_entry_3_pagein_first_high; // [517:514]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_low_reg_t tlb_wide_entry_3_pagein_last_low; // [513:482]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pagein_last_high_reg_t tlb_wide_entry_3_pagein_last_high; // [481:478]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_low_reg_t tlb_wide_entry_3_pageout_low; // [477:446]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_pageout_high_reg_t tlb_wide_entry_3_pageout_high; // [445:442]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_3_flags_reg_t tlb_wide_entry_3_flags; // [441:440]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_low_reg_t tlb_wide_entry_4_pagein_first_low; // [439:408]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_first_high_reg_t tlb_wide_entry_4_pagein_first_high; // [407:404]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_low_reg_t tlb_wide_entry_4_pagein_last_low; // [403:372]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pagein_last_high_reg_t tlb_wide_entry_4_pagein_last_high; // [371:368]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_low_reg_t tlb_wide_entry_4_pageout_low; // [367:336]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_pageout_high_reg_t tlb_wide_entry_4_pageout_high; // [335:332]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_4_flags_reg_t tlb_wide_entry_4_flags; // [331:330]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_low_reg_t tlb_wide_entry_5_pagein_first_low; // [329:298]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_first_high_reg_t tlb_wide_entry_5_pagein_first_high; // [297:294]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_low_reg_t tlb_wide_entry_5_pagein_last_low; // [293:262]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pagein_last_high_reg_t tlb_wide_entry_5_pagein_last_high; // [261:258]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_low_reg_t tlb_wide_entry_5_pageout_low; // [257:226]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_pageout_high_reg_t tlb_wide_entry_5_pageout_high; // [225:222]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_5_flags_reg_t tlb_wide_entry_5_flags; // [221:220]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_low_reg_t tlb_wide_entry_6_pagein_first_low; // [219:188]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_first_high_reg_t tlb_wide_entry_6_pagein_first_high; // [187:184]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_low_reg_t tlb_wide_entry_6_pagein_last_low; // [183:152]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pagein_last_high_reg_t tlb_wide_entry_6_pagein_last_high; // [151:148]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_low_reg_t tlb_wide_entry_6_pageout_low; // [147:116]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_pageout_high_reg_t tlb_wide_entry_6_pageout_high; // [115:112]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_6_flags_reg_t tlb_wide_entry_6_flags; // [111:110]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_low_reg_t tlb_wide_entry_7_pagein_first_low; // [109:78]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_first_high_reg_t tlb_wide_entry_7_pagein_first_high; // [77:74]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_low_reg_t tlb_wide_entry_7_pagein_last_low; // [73:42]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pagein_last_high_reg_t tlb_wide_entry_7_pagein_last_high; // [41:38]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_low_reg_t tlb_wide_entry_7_pageout_low; // [37:6]
+    occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_pageout_high_reg_t tlb_wide_entry_7_pageout_high; // [5:2]
     occamy_quadrant_s1_reg2hw_tlb_wide_entry_7_flags_reg_t tlb_wide_entry_7_flags; // [1:0]
   } occamy_quadrant_s1_reg2hw_t;
 
@@ -1121,116 +1121,116 @@ package occamy_quadrant_s1_reg_pkg;
     4'b 1111, // index[ 22] OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3
     4'b 0011, // index[ 23] OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3
     4'b 1111, // index[ 24] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 25] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 25] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 26] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 27] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 27] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 28] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_LOW
-    4'b 0011, // index[ 29] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_HIGH
+    4'b 0001, // index[ 29] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_HIGH
     4'b 0001, // index[ 30] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_FLAGS
     4'b 1111, // index[ 31] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 32] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 32] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 33] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 34] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 34] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 35] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_LOW
-    4'b 0011, // index[ 36] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_HIGH
+    4'b 0001, // index[ 36] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_HIGH
     4'b 0001, // index[ 37] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_FLAGS
     4'b 1111, // index[ 38] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 39] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 39] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 40] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 41] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 41] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 42] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_LOW
-    4'b 0011, // index[ 43] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_HIGH
+    4'b 0001, // index[ 43] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_HIGH
     4'b 0001, // index[ 44] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_FLAGS
     4'b 1111, // index[ 45] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 46] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 46] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 47] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 48] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 48] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 49] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_LOW
-    4'b 0011, // index[ 50] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_HIGH
+    4'b 0001, // index[ 50] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_HIGH
     4'b 0001, // index[ 51] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_FLAGS
     4'b 1111, // index[ 52] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 53] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 53] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 54] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 55] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 55] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 56] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_LOW
-    4'b 0011, // index[ 57] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_HIGH
+    4'b 0001, // index[ 57] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_HIGH
     4'b 0001, // index[ 58] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_FLAGS
     4'b 1111, // index[ 59] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 60] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 60] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 61] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 62] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 62] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 63] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_LOW
-    4'b 0011, // index[ 64] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_HIGH
+    4'b 0001, // index[ 64] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_HIGH
     4'b 0001, // index[ 65] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_FLAGS
     4'b 1111, // index[ 66] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 67] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 67] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 68] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 69] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 69] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 70] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_LOW
-    4'b 0011, // index[ 71] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_HIGH
+    4'b 0001, // index[ 71] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_HIGH
     4'b 0001, // index[ 72] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_FLAGS
     4'b 1111, // index[ 73] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 74] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 74] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 75] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 76] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 76] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 77] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_LOW
-    4'b 0011, // index[ 78] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_HIGH
+    4'b 0001, // index[ 78] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_HIGH
     4'b 0001, // index[ 79] OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_FLAGS
     4'b 1111, // index[ 80] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 81] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 81] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 82] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 83] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 83] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 84] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_LOW
-    4'b 0011, // index[ 85] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_HIGH
+    4'b 0001, // index[ 85] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_HIGH
     4'b 0001, // index[ 86] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_FLAGS
     4'b 1111, // index[ 87] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 88] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 88] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 89] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 90] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 90] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 91] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_LOW
-    4'b 0011, // index[ 92] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_HIGH
+    4'b 0001, // index[ 92] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_HIGH
     4'b 0001, // index[ 93] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_FLAGS
     4'b 1111, // index[ 94] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_LOW
-    4'b 0011, // index[ 95] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[ 95] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_HIGH
     4'b 1111, // index[ 96] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_LOW
-    4'b 0011, // index[ 97] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_HIGH
+    4'b 0001, // index[ 97] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_HIGH
     4'b 1111, // index[ 98] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_LOW
-    4'b 0011, // index[ 99] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_HIGH
+    4'b 0001, // index[ 99] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_HIGH
     4'b 0001, // index[100] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_FLAGS
     4'b 1111, // index[101] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_LOW
-    4'b 0011, // index[102] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[102] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_HIGH
     4'b 1111, // index[103] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_LOW
-    4'b 0011, // index[104] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_HIGH
+    4'b 0001, // index[104] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_HIGH
     4'b 1111, // index[105] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_LOW
-    4'b 0011, // index[106] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_HIGH
+    4'b 0001, // index[106] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_HIGH
     4'b 0001, // index[107] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_FLAGS
     4'b 1111, // index[108] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_LOW
-    4'b 0011, // index[109] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[109] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_HIGH
     4'b 1111, // index[110] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_LOW
-    4'b 0011, // index[111] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_HIGH
+    4'b 0001, // index[111] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_HIGH
     4'b 1111, // index[112] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_LOW
-    4'b 0011, // index[113] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_HIGH
+    4'b 0001, // index[113] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_HIGH
     4'b 0001, // index[114] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_FLAGS
     4'b 1111, // index[115] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_LOW
-    4'b 0011, // index[116] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[116] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_HIGH
     4'b 1111, // index[117] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_LOW
-    4'b 0011, // index[118] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_HIGH
+    4'b 0001, // index[118] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_HIGH
     4'b 1111, // index[119] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_LOW
-    4'b 0011, // index[120] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_HIGH
+    4'b 0001, // index[120] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_HIGH
     4'b 0001, // index[121] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_FLAGS
     4'b 1111, // index[122] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_LOW
-    4'b 0011, // index[123] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[123] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_HIGH
     4'b 1111, // index[124] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_LOW
-    4'b 0011, // index[125] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_HIGH
+    4'b 0001, // index[125] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_HIGH
     4'b 1111, // index[126] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_LOW
-    4'b 0011, // index[127] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_HIGH
+    4'b 0001, // index[127] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_HIGH
     4'b 0001, // index[128] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_FLAGS
     4'b 1111, // index[129] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_LOW
-    4'b 0011, // index[130] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_HIGH
+    4'b 0001, // index[130] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_HIGH
     4'b 1111, // index[131] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_LOW
-    4'b 0011, // index[132] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_HIGH
+    4'b 0001, // index[132] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_HIGH
     4'b 1111, // index[133] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_LOW
-    4'b 0011, // index[134] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_HIGH
+    4'b 0001, // index[134] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_HIGH
     4'b 0001  // index[135] OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_FLAGS
   };
 

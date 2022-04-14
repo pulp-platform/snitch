@@ -56,7 +56,7 @@ module ${name}_quadrant_s1
   %endfor
 
   // Define types for IOTLBs
-  `AXI_TLB_TYPEDEF_ALL(tlb, logic [AddrWidth-1:0], logic [AddrWidth-1:0])
+  `AXI_TLB_TYPEDEF_ALL(tlb, logic [AddrWidth-12-1:0], logic [AddrWidth-12-1:0])
 
   // Signals from Controller
   logic clk_quadrant, rst_quadrant_n;
