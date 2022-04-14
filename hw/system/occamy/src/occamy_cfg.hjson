@@ -108,6 +108,8 @@
         wide_trans: 32,
         // We don't need Snitch debugging in Occamy
         enable_debug: false,
+        // We don't need Snitch (core-internal) virtual memory support
+        vm_support: false,
         // Memory configuration inputs
         sram_cfg_expose: true,
         sram_cfg_fields: {

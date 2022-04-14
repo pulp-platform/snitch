@@ -61,6 +61,8 @@ module snitch_cluster
   parameter int unsigned ICacheLineCount [NrHives] = '{default: 0},
   /// Number of icache sets.
   parameter int unsigned ICacheSets [NrHives]      = '{default: 0},
+  /// Enable virtual memory support.
+  parameter bit          VMSupport          = 1,
   /// Per-core enabling of the standard `E` ISA reduced-register extension.
   parameter bit [NrCores-1:0] RVE           = '0,
   /// Per-core enabling of the standard `F` ISA extensions.
@@ -837,6 +839,7 @@ module snitch_cluster
         .Xfrep (Xfrep[i]),
         .Xssr (Xssr[i]),
         .Xipu (1'b0),
+        .VMSupport (VMSupport),
         .NumIntOutstandingLoads (NumIntOutstandingLoads[i]),
         .NumIntOutstandingMem (NumIntOutstandingMem[i]),
         .NumFPOutstandingLoads (NumFPOutstandingLoads[i]),
@@ -916,6 +919,7 @@ module snitch_cluster
         .AddrWidth (PhysicalAddrWidth),
         .NarrowDataWidth (NarrowDataWidth),
         .WideDataWidth (WideDataWidth),
+        .VMSupport (VMSupport),
         .dreq_t (reqrsp_req_t),
         .drsp_t (reqrsp_rsp_t),
         .hive_req_t (hive_req_t),
