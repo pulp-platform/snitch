@@ -918,6 +918,50 @@ class AxiBus(Bus):
             ) + "\n")
         return bus
 
+    def add_tlb(self,
+                context,
+                name,
+                cfg,
+                entry_t,
+                entries,
+                bypass,
+                inst_name=None,
+                to=None
+                ):
+        # Generate the new bus.
+        if to is None:
+            bus = copy(self)
+            bus.declared = False
+            bus.iw = self.iw
+            bus.type_prefix = bus.emit_struct()
+            bus.name = name
+            bus.name_suffix = None
+        else:
+            bus = to
+
+        # Check bus properties.
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+        assert (bus.iw == self.iw)
+        assert (bus.uw == self.uw)
+
+        # Emit the TLB instance.
+        bus.declare(context)
+        tpl = templates.get_template("solder.axi_tlb.sv.tpl")
+        context.write(
+            tpl.render_unicode(
+                axi_in=self,
+                axi_out=bus,
+                entry_t=entry_t,
+                entries=entries,
+                bypass=bypass,
+                cfg=cfg,
+                name=inst_name or "i_{}".format(name)
+            ) + "\n")
+        return bus
+
     def trunc_addr(self, context, target_aw, name=None, inst_name=None, to=None):
         if self.aw == target_aw:
             if to is None:
@@ -1015,6 +1059,14 @@ class AxiLiteBus(Bus):
         self.aw = aw
         self.dw = dw
         self.type_prefix = type_prefix or self.emit_struct()
+
+    def copy(self, name=None, clk=None, rst=None):
+        return AxiLiteBus(clk or self.clk,
+                          rst or self.rst,
+                          self.aw,
+                          self.dw,
+                          name or self.name,
+                          declared=False)
 
     def emit_struct(self):
         return AxiLiteStruct.emit(self.aw, self.dw)
@@ -1937,6 +1989,8 @@ class AxiLiteXbar(Xbar):
         self.max_slv_trans = max_slv_trans
         self.max_mst_trans = max_mst_trans
         self.fall_through = fall_through
+        self.symbolic_addrmap = list()
+        self.symbolic_addrmap_multi = list()
         self.addrmap = list()
         self.latency_mode = latency_mode or "axi_pkg::CUT_ALL_PORTS"
 
@@ -1951,10 +2005,25 @@ class AxiLiteXbar(Xbar):
             self.addrmap.append((idx, lo, hi))
         self.outputs.append(name)
 
-    def add_output_entry(self, name, entry):
-        self.add_output(name,
-                        [(r.lo, r.hi)
-                         for r in self.node.get_routes() if r.port == entry])
+    def add_output_entry(self, name, entry, range_mask=None):
+        addrs = [(r.lo, r.hi) for r in self.node.get_routes() if r.port == entry]
+        if range_mask is not None:
+            addrs = filter(lambda r: r[0] >= range_mask[0] and r[1] < range_mask[1], addrs)
+        self.add_output(name, addrs)
+
+    def add_output_symbolic(self, name, base, length):
+        idx = len(self.outputs)
+        self.symbolic_addrmap.append((idx, base, length))
+        self.outputs.append(name)
+
+    def add_output_symbolic_multi(self, name, entries):
+        idx = len(self.outputs)
+        self.symbolic_addrmap_multi.append((idx, entries))
+        self.outputs.append(name)
+
+    def addr_map_len(self):
+        return len(self.addrmap) + len(self.symbolic_addrmap) + sum(
+            len(am) for am in self.symbolic_addrmap_multi)
 
     def emit(self):
         global code_module
@@ -1963,6 +2032,33 @@ class AxiLiteXbar(Xbar):
             return
         self.emitted = True
         code_module.setdefault(self.context, "")
+
+        # Emit the address map into the package.
+        addrmap_name = util.pascalize("{}_addrmap".format(self.name))
+        addrmap = "/// Address map of the `{}` crossbar.\n".format(self.name)
+        addrmap += "xbar_rule_{}_t [{}:0] {};\n".format(
+            self.aw,
+            self.addr_map_len() - 1, addrmap_name)
+        addrmap += "assign {} = '{{\n".format(addrmap_name)
+        addrmap_lines = []
+        for i in range(len(self.addrmap)):
+            addrmap_lines.append(
+                "  '{{ idx: {}, start_addr: {aw}'h{:08x}, end_addr: {aw}'h{:08x} }}".format(
+                    *self.addrmap[i], aw=self.aw))
+        for i, (idx, base, length) in enumerate(self.symbolic_addrmap):
+            addrmap_lines.append(
+                "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
+                    idx, base, base, length, i=i))
+        for i, (idx, entries) in enumerate(self.symbolic_addrmap_multi):
+            for base, length in entries:
+                addrmap_lines.append(
+                    "  '{{ idx: {}, start_addr: {}[{i}], end_addr: {}[{i}] + {} }}".format(
+                        idx, base, base, length, i=i))
+        addrmap += "{}\n}};\n".format(',\n'.join(addrmap_lines))
+
+        code_module[self.context] += "\n" + addrmap
+
+        # Emit the template
         (pkg,
          mod) = self.tpl.render_unicode(xbar=self,
                                         AxiLiteBus=AxiLiteBus,

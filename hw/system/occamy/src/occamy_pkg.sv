@@ -142,12 +142,6 @@ package occamy_pkg;
   NoAddrRules:        2
 };
 
-  /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
-  localparam xbar_rule_48_t [1:0] SocAxiLitePeriphXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h01000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 }
-};
-
   // AXI plugs of the `soc_axi_lite_periph_xbar` crossbar.
 
   typedef axi_lite_a48_d64_req_t soc_axi_lite_periph_xbar_in_req_t;
@@ -912,11 +906,6 @@ package occamy_pkg;
   AxiAddrWidth:       48,
   AxiDataWidth:       32,
   NoAddrRules:        1
-};
-
-  /// Address map of the `quadrant_s1_ctrl_mux` crossbar.
-  localparam xbar_rule_48_t [0:0] QuadrantS1CtrlMuxAddrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'hffffffffffff }
 };
 
   // AXI plugs of the `quadrant_s1_ctrl_mux` crossbar.

@@ -14,7 +14,9 @@
 module occamy_quadrant_s1_ctrl
   import occamy_pkg::*;
   import occamy_quadrant_s1_reg_pkg::*;
-(
+#(
+  parameter type tlb_entry_t = logic
+)(
   input  logic clk_i,
   input  logic rst_ni,
   input  logic test_mode_i,
@@ -40,6 +42,12 @@ module occamy_quadrant_s1_ctrl
   input  axi_a48_d64_i8_u0_req_t soc_in_req_i,
   output axi_a48_d64_i8_u0_resp_t soc_in_rsp_o,
 
+  // TLB narrow and wide configuration ports
+  output tlb_entry_t [7:0] narrow_tlb_entries_o,
+  output logic narrow_tlb_enable_o,
+  output tlb_entry_t [7:0] wide_tlb_entries_o,
+  output logic wide_tlb_enable_o,
+
   // Quadrant narrow ports
   output axi_a48_d64_i8_u0_req_t quadrant_out_req_o,
   input  axi_a48_d64_i8_u0_resp_t quadrant_out_rsp_i,
@@ -51,7 +59,6 @@ module occamy_quadrant_s1_ctrl
   addr_t [0:0] internal_xbar_base_addr;
   assign internal_xbar_base_addr = '{S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace};
 
-  // TODO: Pipeline appropriately (possibly only outwards)
   // Controller crossbar: shims off for access to internal space
 
 /// Address map of the `quadrant_s1_ctrl_soc_to_quad_xbar` crossbar.
@@ -137,6 +144,12 @@ axi_xbar #(
   .en_default_mst_port_i ( '1 ),
   .default_mst_port_i    ( '0 )
 );
+
+/// Address map of the `quadrant_s1_ctrl_mux` crossbar.
+xbar_rule_48_t [0:0] QuadrantS1CtrlMuxAddrmap;
+assign QuadrantS1CtrlMuxAddrmap = '{
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'hffffffffffff }
+};
 
 axi_lite_a48_d32_req_t [1:0] quadrant_s1_ctrl_mux_in_req;
 axi_lite_a48_d32_rsp_t [1:0] quadrant_s1_ctrl_mux_in_rsp;
@@ -387,6 +400,136 @@ axi_lite_xbar #(
   assign ro_end_addr_o  [2] = {reg2hw.ro_end_addr_high_2.q,   reg2hw.ro_end_addr_low_2.q};
   assign ro_start_addr_o[3] = {reg2hw.ro_start_addr_high_3.q, reg2hw.ro_start_addr_low_3.q};
   assign ro_end_addr_o  [3] = {reg2hw.ro_end_addr_high_3.q,   reg2hw.ro_end_addr_low_3.q};
+
+  // Narrow TLB enable
+  assign narrow_tlb_enable_o = reg2hw.tlb_narrow_enable.q;
+
+  // Assemble narrow TLB entries
+  assign narrow_tlb_entries_o[0] = '{
+    first:  {reg2hw.tlb_narrow_entry_0_pagein_first_high.q,  reg2hw.tlb_narrow_entry_0_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_0_pagein_last_high.q,   reg2hw.tlb_narrow_entry_0_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_0_pageout_high.q,       reg2hw.tlb_narrow_entry_0_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_0_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_0_flags.read_only.q
+  };
+  assign narrow_tlb_entries_o[1] = '{
+    first:  {reg2hw.tlb_narrow_entry_1_pagein_first_high.q,  reg2hw.tlb_narrow_entry_1_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_1_pagein_last_high.q,   reg2hw.tlb_narrow_entry_1_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_1_pageout_high.q,       reg2hw.tlb_narrow_entry_1_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_1_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_1_flags.read_only.q
+  };
+  assign narrow_tlb_entries_o[2] = '{
+    first:  {reg2hw.tlb_narrow_entry_2_pagein_first_high.q,  reg2hw.tlb_narrow_entry_2_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_2_pagein_last_high.q,   reg2hw.tlb_narrow_entry_2_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_2_pageout_high.q,       reg2hw.tlb_narrow_entry_2_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_2_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_2_flags.read_only.q
+  };
+  assign narrow_tlb_entries_o[3] = '{
+    first:  {reg2hw.tlb_narrow_entry_3_pagein_first_high.q,  reg2hw.tlb_narrow_entry_3_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_3_pagein_last_high.q,   reg2hw.tlb_narrow_entry_3_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_3_pageout_high.q,       reg2hw.tlb_narrow_entry_3_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_3_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_3_flags.read_only.q
+  };
+  assign narrow_tlb_entries_o[4] = '{
+    first:  {reg2hw.tlb_narrow_entry_4_pagein_first_high.q,  reg2hw.tlb_narrow_entry_4_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_4_pagein_last_high.q,   reg2hw.tlb_narrow_entry_4_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_4_pageout_high.q,       reg2hw.tlb_narrow_entry_4_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_4_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_4_flags.read_only.q
+  };
+  assign narrow_tlb_entries_o[5] = '{
+    first:  {reg2hw.tlb_narrow_entry_5_pagein_first_high.q,  reg2hw.tlb_narrow_entry_5_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_5_pagein_last_high.q,   reg2hw.tlb_narrow_entry_5_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_5_pageout_high.q,       reg2hw.tlb_narrow_entry_5_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_5_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_5_flags.read_only.q
+  };
+  assign narrow_tlb_entries_o[6] = '{
+    first:  {reg2hw.tlb_narrow_entry_6_pagein_first_high.q,  reg2hw.tlb_narrow_entry_6_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_6_pagein_last_high.q,   reg2hw.tlb_narrow_entry_6_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_6_pageout_high.q,       reg2hw.tlb_narrow_entry_6_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_6_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_6_flags.read_only.q
+  };
+  assign narrow_tlb_entries_o[7] = '{
+    first:  {reg2hw.tlb_narrow_entry_7_pagein_first_high.q,  reg2hw.tlb_narrow_entry_7_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_7_pagein_last_high.q,   reg2hw.tlb_narrow_entry_7_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_7_pageout_high.q,       reg2hw.tlb_narrow_entry_7_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_7_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_7_flags.read_only.q
+  };
+
+  // Wide TLB enable
+  assign wide_tlb_enable_o = reg2hw.tlb_wide_enable.q;
+
+  // Assemble wide TLB entries
+  assign wide_tlb_entries_o[0] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_0_pagein_first_high.q,  reg2hw.tlb_wide_entry_0_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_0_pagein_last_high.q,   reg2hw.tlb_wide_entry_0_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_0_pageout_high.q,       reg2hw.tlb_wide_entry_0_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_0_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_0_flags.read_only.q
+  };
+  assign wide_tlb_entries_o[1] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_1_pagein_first_high.q,  reg2hw.tlb_wide_entry_1_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_1_pagein_last_high.q,   reg2hw.tlb_wide_entry_1_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_1_pageout_high.q,       reg2hw.tlb_wide_entry_1_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_1_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_1_flags.read_only.q
+  };
+  assign wide_tlb_entries_o[2] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_2_pagein_first_high.q,  reg2hw.tlb_wide_entry_2_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_2_pagein_last_high.q,   reg2hw.tlb_wide_entry_2_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_2_pageout_high.q,       reg2hw.tlb_wide_entry_2_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_2_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_2_flags.read_only.q
+  };
+  assign wide_tlb_entries_o[3] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_3_pagein_first_high.q,  reg2hw.tlb_wide_entry_3_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_3_pagein_last_high.q,   reg2hw.tlb_wide_entry_3_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_3_pageout_high.q,       reg2hw.tlb_wide_entry_3_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_3_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_3_flags.read_only.q
+  };
+  assign wide_tlb_entries_o[4] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_4_pagein_first_high.q,  reg2hw.tlb_wide_entry_4_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_4_pagein_last_high.q,   reg2hw.tlb_wide_entry_4_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_4_pageout_high.q,       reg2hw.tlb_wide_entry_4_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_4_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_4_flags.read_only.q
+  };
+  assign wide_tlb_entries_o[5] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_5_pagein_first_high.q,  reg2hw.tlb_wide_entry_5_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_5_pagein_last_high.q,   reg2hw.tlb_wide_entry_5_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_5_pageout_high.q,       reg2hw.tlb_wide_entry_5_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_5_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_5_flags.read_only.q
+  };
+  assign wide_tlb_entries_o[6] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_6_pagein_first_high.q,  reg2hw.tlb_wide_entry_6_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_6_pagein_last_high.q,   reg2hw.tlb_wide_entry_6_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_6_pageout_high.q,       reg2hw.tlb_wide_entry_6_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_6_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_6_flags.read_only.q
+  };
+  assign wide_tlb_entries_o[7] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_7_pagein_first_high.q,  reg2hw.tlb_wide_entry_7_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_7_pagein_last_high.q,   reg2hw.tlb_wide_entry_7_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_7_pageout_high.q,       reg2hw.tlb_wide_entry_7_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_7_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_7_flags.read_only.q
+  };
 
   // Quadrant clock gate controlled by register
   tc_clk_gating i_tc_clk_gating_quadrant (

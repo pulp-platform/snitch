@@ -72,6 +72,16 @@
           max_trans: 32,
           address_regions: 4,
       }
+      narrow_tlb_cfg: {
+          max_trans: 32,
+          l1_num_entries: 8,
+          l1_cut_ax: true,
+      }
+      wide_tlb_cfg: {
+          max_trans: 32,
+          l1_num_entries: 8,
+          l1_cut_ax: true,
+      }
       wide_xbar: {
         max_slv_trans: 32,
         max_mst_trans: 32,

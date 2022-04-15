@@ -55,6 +55,7 @@
         {bits: "3:3", name: "wide_out",   resval: 1, desc: "wide master out isolation status"}
       ]
     },
+#// TODO: The enable registers below are unconditionally present; conditionalize on config?
     { name: "RO_CACHE_ENABLE",
       desc: "Enable read-only cache of quadrant.",
       swaccess: "rw",
@@ -69,6 +70,22 @@
       hwaccess: "hrw"
       fields: [
         { bits: "0:0", resval: 0, name: "flush", desc: "Flush (invalidate) RO cache of S1 quadrant."}
+      ]
+    },
+    { name: "TLB_WIDE_ENABLE",
+      desc: "Enable TLB on wide interface of quadrant.",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0:0", resval: 0, name: "enable", desc: "Enable TLB on {t} interface."}
+      ]
+    },
+    { name: "TLB_NARROW_ENABLE",
+      desc: "Enable TLB on narrow interface of quadrant.",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0:0", resval: 0, name: "enable", desc: "Enable TLB on {t} interface."}
       ]
     },
 
@@ -202,6 +219,973 @@
         {bits: "15:0", name: "ADDR_HIGH", resval: 4, desc: "Higher 32-bit of read-only region."}
       ]
     }
+
+    // Start narrow TLB fields at regular offset
+    { skipto: "0x800" }
+
+    // narrow TLB entry 0
+    { name: "TLB_NARROW_ENTRY_0_PAGEIN_FIRST_LOW",
+      desc: "narrow TLB entry 0: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_0_PAGEIN_FIRST_HIGH",
+      desc: "narrow TLB entry 0: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_0_PAGEIN_LAST_LOW",
+      desc: "narrow TLB entry 0: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_0_PAGEIN_LAST_HIGH",
+      desc: "narrow TLB entry 0: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_0_PAGEOUT_LOW",
+      desc: "narrow TLB entry 0: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_0_PAGEOUT_HIGH",
+      desc: "narrow TLB entry 0: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_0_FLAGS",
+      desc: "narrow TLB entry 0: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // narrow TLB entry 1
+    { name: "TLB_NARROW_ENTRY_1_PAGEIN_FIRST_LOW",
+      desc: "narrow TLB entry 1: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_1_PAGEIN_FIRST_HIGH",
+      desc: "narrow TLB entry 1: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_1_PAGEIN_LAST_LOW",
+      desc: "narrow TLB entry 1: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_1_PAGEIN_LAST_HIGH",
+      desc: "narrow TLB entry 1: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_1_PAGEOUT_LOW",
+      desc: "narrow TLB entry 1: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_1_PAGEOUT_HIGH",
+      desc: "narrow TLB entry 1: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_1_FLAGS",
+      desc: "narrow TLB entry 1: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // narrow TLB entry 2
+    { name: "TLB_NARROW_ENTRY_2_PAGEIN_FIRST_LOW",
+      desc: "narrow TLB entry 2: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_2_PAGEIN_FIRST_HIGH",
+      desc: "narrow TLB entry 2: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_2_PAGEIN_LAST_LOW",
+      desc: "narrow TLB entry 2: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_2_PAGEIN_LAST_HIGH",
+      desc: "narrow TLB entry 2: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_2_PAGEOUT_LOW",
+      desc: "narrow TLB entry 2: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_2_PAGEOUT_HIGH",
+      desc: "narrow TLB entry 2: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_2_FLAGS",
+      desc: "narrow TLB entry 2: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // narrow TLB entry 3
+    { name: "TLB_NARROW_ENTRY_3_PAGEIN_FIRST_LOW",
+      desc: "narrow TLB entry 3: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_3_PAGEIN_FIRST_HIGH",
+      desc: "narrow TLB entry 3: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_3_PAGEIN_LAST_LOW",
+      desc: "narrow TLB entry 3: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_3_PAGEIN_LAST_HIGH",
+      desc: "narrow TLB entry 3: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_3_PAGEOUT_LOW",
+      desc: "narrow TLB entry 3: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_3_PAGEOUT_HIGH",
+      desc: "narrow TLB entry 3: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_3_FLAGS",
+      desc: "narrow TLB entry 3: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // narrow TLB entry 4
+    { name: "TLB_NARROW_ENTRY_4_PAGEIN_FIRST_LOW",
+      desc: "narrow TLB entry 4: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_4_PAGEIN_FIRST_HIGH",
+      desc: "narrow TLB entry 4: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_4_PAGEIN_LAST_LOW",
+      desc: "narrow TLB entry 4: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_4_PAGEIN_LAST_HIGH",
+      desc: "narrow TLB entry 4: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_4_PAGEOUT_LOW",
+      desc: "narrow TLB entry 4: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_4_PAGEOUT_HIGH",
+      desc: "narrow TLB entry 4: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_4_FLAGS",
+      desc: "narrow TLB entry 4: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // narrow TLB entry 5
+    { name: "TLB_NARROW_ENTRY_5_PAGEIN_FIRST_LOW",
+      desc: "narrow TLB entry 5: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_5_PAGEIN_FIRST_HIGH",
+      desc: "narrow TLB entry 5: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_5_PAGEIN_LAST_LOW",
+      desc: "narrow TLB entry 5: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_5_PAGEIN_LAST_HIGH",
+      desc: "narrow TLB entry 5: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_5_PAGEOUT_LOW",
+      desc: "narrow TLB entry 5: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_5_PAGEOUT_HIGH",
+      desc: "narrow TLB entry 5: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_5_FLAGS",
+      desc: "narrow TLB entry 5: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // narrow TLB entry 6
+    { name: "TLB_NARROW_ENTRY_6_PAGEIN_FIRST_LOW",
+      desc: "narrow TLB entry 6: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_6_PAGEIN_FIRST_HIGH",
+      desc: "narrow TLB entry 6: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_6_PAGEIN_LAST_LOW",
+      desc: "narrow TLB entry 6: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_6_PAGEIN_LAST_HIGH",
+      desc: "narrow TLB entry 6: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_6_PAGEOUT_LOW",
+      desc: "narrow TLB entry 6: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_6_PAGEOUT_HIGH",
+      desc: "narrow TLB entry 6: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_6_FLAGS",
+      desc: "narrow TLB entry 6: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // narrow TLB entry 7
+    { name: "TLB_NARROW_ENTRY_7_PAGEIN_FIRST_LOW",
+      desc: "narrow TLB entry 7: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_7_PAGEIN_FIRST_HIGH",
+      desc: "narrow TLB entry 7: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_7_PAGEIN_LAST_LOW",
+      desc: "narrow TLB entry 7: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH",
+      desc: "narrow TLB entry 7: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_7_PAGEOUT_LOW",
+      desc: "narrow TLB entry 7: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_7_PAGEOUT_HIGH",
+      desc: "narrow TLB entry 7: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_NARROW_ENTRY_7_FLAGS",
+      desc: "narrow TLB entry 7: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+    // Start wide TLB fields at regular offset
+    { skipto: "0x1000" }
+
+    // wide TLB entry 0
+    { name: "TLB_WIDE_ENTRY_0_PAGEIN_FIRST_LOW",
+      desc: "wide TLB entry 0: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_0_PAGEIN_FIRST_HIGH",
+      desc: "wide TLB entry 0: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_0_PAGEIN_LAST_LOW",
+      desc: "wide TLB entry 0: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_0_PAGEIN_LAST_HIGH",
+      desc: "wide TLB entry 0: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_0_PAGEOUT_LOW",
+      desc: "wide TLB entry 0: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_0_PAGEOUT_HIGH",
+      desc: "wide TLB entry 0: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_0_FLAGS",
+      desc: "wide TLB entry 0: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // wide TLB entry 1
+    { name: "TLB_WIDE_ENTRY_1_PAGEIN_FIRST_LOW",
+      desc: "wide TLB entry 1: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_1_PAGEIN_FIRST_HIGH",
+      desc: "wide TLB entry 1: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_1_PAGEIN_LAST_LOW",
+      desc: "wide TLB entry 1: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_1_PAGEIN_LAST_HIGH",
+      desc: "wide TLB entry 1: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_1_PAGEOUT_LOW",
+      desc: "wide TLB entry 1: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_1_PAGEOUT_HIGH",
+      desc: "wide TLB entry 1: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_1_FLAGS",
+      desc: "wide TLB entry 1: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // wide TLB entry 2
+    { name: "TLB_WIDE_ENTRY_2_PAGEIN_FIRST_LOW",
+      desc: "wide TLB entry 2: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_2_PAGEIN_FIRST_HIGH",
+      desc: "wide TLB entry 2: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_2_PAGEIN_LAST_LOW",
+      desc: "wide TLB entry 2: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_2_PAGEIN_LAST_HIGH",
+      desc: "wide TLB entry 2: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_2_PAGEOUT_LOW",
+      desc: "wide TLB entry 2: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_2_PAGEOUT_HIGH",
+      desc: "wide TLB entry 2: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_2_FLAGS",
+      desc: "wide TLB entry 2: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // wide TLB entry 3
+    { name: "TLB_WIDE_ENTRY_3_PAGEIN_FIRST_LOW",
+      desc: "wide TLB entry 3: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_3_PAGEIN_FIRST_HIGH",
+      desc: "wide TLB entry 3: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_3_PAGEIN_LAST_LOW",
+      desc: "wide TLB entry 3: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_3_PAGEIN_LAST_HIGH",
+      desc: "wide TLB entry 3: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_3_PAGEOUT_LOW",
+      desc: "wide TLB entry 3: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_3_PAGEOUT_HIGH",
+      desc: "wide TLB entry 3: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_3_FLAGS",
+      desc: "wide TLB entry 3: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // wide TLB entry 4
+    { name: "TLB_WIDE_ENTRY_4_PAGEIN_FIRST_LOW",
+      desc: "wide TLB entry 4: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_4_PAGEIN_FIRST_HIGH",
+      desc: "wide TLB entry 4: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_4_PAGEIN_LAST_LOW",
+      desc: "wide TLB entry 4: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_4_PAGEIN_LAST_HIGH",
+      desc: "wide TLB entry 4: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_4_PAGEOUT_LOW",
+      desc: "wide TLB entry 4: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_4_PAGEOUT_HIGH",
+      desc: "wide TLB entry 4: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_4_FLAGS",
+      desc: "wide TLB entry 4: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // wide TLB entry 5
+    { name: "TLB_WIDE_ENTRY_5_PAGEIN_FIRST_LOW",
+      desc: "wide TLB entry 5: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_5_PAGEIN_FIRST_HIGH",
+      desc: "wide TLB entry 5: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_5_PAGEIN_LAST_LOW",
+      desc: "wide TLB entry 5: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_5_PAGEIN_LAST_HIGH",
+      desc: "wide TLB entry 5: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_5_PAGEOUT_LOW",
+      desc: "wide TLB entry 5: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_5_PAGEOUT_HIGH",
+      desc: "wide TLB entry 5: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_5_FLAGS",
+      desc: "wide TLB entry 5: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // wide TLB entry 6
+    { name: "TLB_WIDE_ENTRY_6_PAGEIN_FIRST_LOW",
+      desc: "wide TLB entry 6: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_6_PAGEIN_FIRST_HIGH",
+      desc: "wide TLB entry 6: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_6_PAGEIN_LAST_LOW",
+      desc: "wide TLB entry 6: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_6_PAGEIN_LAST_HIGH",
+      desc: "wide TLB entry 6: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_6_PAGEOUT_LOW",
+      desc: "wide TLB entry 6: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_6_PAGEOUT_HIGH",
+      desc: "wide TLB entry 6: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_6_FLAGS",
+      desc: "wide TLB entry 6: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+    // wide TLB entry 7
+    { name: "TLB_WIDE_ENTRY_7_PAGEIN_FIRST_LOW",
+      desc: "wide TLB entry 7: Lower 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_FIRST_LOW", desc: "Lower 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_7_PAGEIN_FIRST_HIGH",
+      desc: "wide TLB entry 7: Upper 32-bit of first page number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_FIRST_HIGH", desc: "Upper 32-bit of first page number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_7_PAGEIN_LAST_LOW",
+      desc: "wide TLB entry 7: Lower 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEIN_LAST_LOW", desc: "Lower 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_7_PAGEIN_LAST_HIGH",
+      desc: "wide TLB entry 7: Upper 32-bit of last page (inclusive) number of input range",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEIN_LAST_HIGH", desc: "Upper 32-bit of last page (inclusive) number of input range"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_7_PAGEOUT_LOW",
+      desc: "wide TLB entry 7: Lower 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "31:0", name: "PAGEOUT_LOW", desc: "Lower 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_7_PAGEOUT_HIGH",
+      desc: "wide TLB entry 7: Upper 32-bit of output base page",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "3:0", name: "PAGEOUT_HIGH", desc: "Upper 32-bit of output base page"}
+      ]
+    },
+    { name: "TLB_WIDE_ENTRY_7_FLAGS",
+      desc: "wide TLB entry 7: Flags",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        {bits: "0:0", name: "valid",  resval: 0, desc: "whether entry is valid and should be mapped"},
+        {bits: "1:1", name: "read_only", resval: 0, desc: "whether entry maps read-only range"},
+      ]
+    },
+    { reserved: 1 }
+
+
 
   ]
 }

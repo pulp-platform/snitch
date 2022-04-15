@@ -12,12 +12,18 @@
 <%
   ro_cache_cfg = cfg["s1_quadrant"].get("ro_cache_cfg", {})
   ro_cache_regions = ro_cache_cfg.get("address_regions", 1)
+  narrow_tlb_cfg = cfg["s1_quadrant"].get("narrow_tlb_cfg", {})
+  narrow_tlb_entries = narrow_tlb_cfg.get("l1_num_entries", 1)
+  wide_tlb_cfg = cfg["s1_quadrant"].get("wide_tlb_cfg", {})
+  wide_tlb_entries = wide_tlb_cfg.get("l1_num_entries", 1)
 %>
 
 module ${name}_quadrant_s1_ctrl
   import ${name}_pkg::*;
   import ${name}_quadrant_s1_reg_pkg::*;
-(
+#(
+  parameter type tlb_entry_t = logic
+)(
   input  logic clk_i,
   input  logic rst_ni,
   input  logic test_mode_i,
@@ -43,6 +49,16 @@ module ${name}_quadrant_s1_ctrl
   input  ${soc_narrow_xbar.out_s1_quadrant_0.req_type()} soc_in_req_i,
   output ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} soc_in_rsp_o,
 
+  // TLB narrow and wide configuration ports
+  %if narrow_tlb_cfg:
+  output tlb_entry_t [${narrow_tlb_entries-1}:0] narrow_tlb_entries_o,
+  output logic narrow_tlb_enable_o,
+  %endif
+  %if wide_tlb_cfg:
+  output tlb_entry_t [${wide_tlb_entries-1}:0] wide_tlb_entries_o,
+  output logic wide_tlb_enable_o,
+  %endif
+
   // Quadrant narrow ports
   output ${soc_narrow_xbar.out_s1_quadrant_0.req_type()} quadrant_out_req_o,
   input  ${soc_narrow_xbar.out_s1_quadrant_0.rsp_type()} quadrant_out_rsp_i,
@@ -54,7 +70,6 @@ module ${name}_quadrant_s1_ctrl
   addr_t [0:0] internal_xbar_base_addr;
   assign internal_xbar_base_addr = '{S1QuadrantCfgBaseOffset + tile_id_i * S1QuadrantCfgAddressSpace};
 
-  // TODO: Pipeline appropriately (possibly only outwards)
   // Controller crossbar: shims off for access to internal space
   ${module}
 
@@ -112,10 +127,43 @@ module ${name}_quadrant_s1_ctrl
   assign hw2reg.ro_cache_flush.de = reg2hw.ro_cache_flush.q & hw2reg.ro_cache_flush.d;
 
   // Assemble RO cache start and end addresses from registers
-  % for j in range(cfg["s1_quadrant"].get("ro_cache_cfg", {}).get("address_regions", 1)):
+  % for j in range(ro_cache_regions):
   assign ro_start_addr_o[${j}] = {reg2hw.ro_start_addr_high_${j}.q, reg2hw.ro_start_addr_low_${j}.q};
   assign ro_end_addr_o  [${j}] = {reg2hw.ro_end_addr_high_${j}.q,   reg2hw.ro_end_addr_low_${j}.q};
   % endfor
+
+  %if narrow_tlb_cfg:
+  // Narrow TLB enable
+  assign narrow_tlb_enable_o = reg2hw.tlb_narrow_enable.q;
+
+  // Assemble narrow TLB entries
+  % for j in range(narrow_tlb_entries):
+  assign narrow_tlb_entries_o[${j}] = '{
+    first:  {reg2hw.tlb_narrow_entry_${j}_pagein_first_high.q,  reg2hw.tlb_narrow_entry_${j}_pagein_first_low.q},
+    last:   {reg2hw.tlb_narrow_entry_${j}_pagein_last_high.q,   reg2hw.tlb_narrow_entry_${j}_pagein_last_low.q},
+    base:   {reg2hw.tlb_narrow_entry_${j}_pageout_high.q,       reg2hw.tlb_narrow_entry_${j}_pageout_low.q},
+    valid:  reg2hw.tlb_narrow_entry_${j}_flags.valid.q,
+    read_only: reg2hw.tlb_narrow_entry_${j}_flags.read_only.q
+  };
+  % endfor
+  % endif
+
+  %if wide_tlb_cfg:
+  // Wide TLB enable
+  assign wide_tlb_enable_o = reg2hw.tlb_wide_enable.q;
+
+  // Assemble wide TLB entries
+  % for j in range(wide_tlb_entries):
+  assign wide_tlb_entries_o[${j}] = '{
+    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
+    first:  {reg2hw.tlb_wide_entry_${j}_pagein_first_high.q,  reg2hw.tlb_wide_entry_${j}_pagein_first_low.q},
+    last:   {reg2hw.tlb_wide_entry_${j}_pagein_last_high.q,   reg2hw.tlb_wide_entry_${j}_pagein_last_low.q},
+    base:   {reg2hw.tlb_wide_entry_${j}_pageout_high.q,       reg2hw.tlb_wide_entry_${j}_pageout_low.q},
+    valid:  reg2hw.tlb_wide_entry_${j}_flags.valid.q,
+    read_only: reg2hw.tlb_wide_entry_${j}_flags.read_only.q
+  };
+  % endfor
+  % endif
 
   // Quadrant clock gate controlled by register
   tc_clk_gating i_tc_clk_gating_quadrant (

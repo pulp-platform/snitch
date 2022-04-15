@@ -10,7 +10,7 @@
 module occamy_quadrant_s1_reg_top #(
     parameter type reg_req_t = logic,
     parameter type reg_rsp_t = logic,
-    parameter int AW = 9
+    parameter int AW = 13
 ) (
   input clk_i,
   input rst_ni,
@@ -100,6 +100,12 @@ module occamy_quadrant_s1_reg_top #(
   logic ro_cache_flush_qs;
   logic ro_cache_flush_wd;
   logic ro_cache_flush_we;
+  logic tlb_wide_enable_qs;
+  logic tlb_wide_enable_wd;
+  logic tlb_wide_enable_we;
+  logic tlb_narrow_enable_qs;
+  logic tlb_narrow_enable_wd;
+  logic tlb_narrow_enable_we;
   logic [31:0] ro_start_addr_low_0_qs;
   logic [31:0] ro_start_addr_low_0_wd;
   logic ro_start_addr_low_0_we;
@@ -148,6 +154,390 @@ module occamy_quadrant_s1_reg_top #(
   logic [15:0] ro_end_addr_high_3_qs;
   logic [15:0] ro_end_addr_high_3_wd;
   logic ro_end_addr_high_3_we;
+  logic [31:0] tlb_narrow_entry_0_pagein_first_low_qs;
+  logic [31:0] tlb_narrow_entry_0_pagein_first_low_wd;
+  logic tlb_narrow_entry_0_pagein_first_low_we;
+  logic [3:0] tlb_narrow_entry_0_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_0_pagein_first_high_wd;
+  logic tlb_narrow_entry_0_pagein_first_high_we;
+  logic [31:0] tlb_narrow_entry_0_pagein_last_low_qs;
+  logic [31:0] tlb_narrow_entry_0_pagein_last_low_wd;
+  logic tlb_narrow_entry_0_pagein_last_low_we;
+  logic [3:0] tlb_narrow_entry_0_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_0_pagein_last_high_wd;
+  logic tlb_narrow_entry_0_pagein_last_high_we;
+  logic [31:0] tlb_narrow_entry_0_pageout_low_qs;
+  logic [31:0] tlb_narrow_entry_0_pageout_low_wd;
+  logic tlb_narrow_entry_0_pageout_low_we;
+  logic [3:0] tlb_narrow_entry_0_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_0_pageout_high_wd;
+  logic tlb_narrow_entry_0_pageout_high_we;
+  logic tlb_narrow_entry_0_flags_valid_qs;
+  logic tlb_narrow_entry_0_flags_valid_wd;
+  logic tlb_narrow_entry_0_flags_valid_we;
+  logic tlb_narrow_entry_0_flags_read_only_qs;
+  logic tlb_narrow_entry_0_flags_read_only_wd;
+  logic tlb_narrow_entry_0_flags_read_only_we;
+  logic [31:0] tlb_narrow_entry_1_pagein_first_low_qs;
+  logic [31:0] tlb_narrow_entry_1_pagein_first_low_wd;
+  logic tlb_narrow_entry_1_pagein_first_low_we;
+  logic [3:0] tlb_narrow_entry_1_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_1_pagein_first_high_wd;
+  logic tlb_narrow_entry_1_pagein_first_high_we;
+  logic [31:0] tlb_narrow_entry_1_pagein_last_low_qs;
+  logic [31:0] tlb_narrow_entry_1_pagein_last_low_wd;
+  logic tlb_narrow_entry_1_pagein_last_low_we;
+  logic [3:0] tlb_narrow_entry_1_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_1_pagein_last_high_wd;
+  logic tlb_narrow_entry_1_pagein_last_high_we;
+  logic [31:0] tlb_narrow_entry_1_pageout_low_qs;
+  logic [31:0] tlb_narrow_entry_1_pageout_low_wd;
+  logic tlb_narrow_entry_1_pageout_low_we;
+  logic [3:0] tlb_narrow_entry_1_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_1_pageout_high_wd;
+  logic tlb_narrow_entry_1_pageout_high_we;
+  logic tlb_narrow_entry_1_flags_valid_qs;
+  logic tlb_narrow_entry_1_flags_valid_wd;
+  logic tlb_narrow_entry_1_flags_valid_we;
+  logic tlb_narrow_entry_1_flags_read_only_qs;
+  logic tlb_narrow_entry_1_flags_read_only_wd;
+  logic tlb_narrow_entry_1_flags_read_only_we;
+  logic [31:0] tlb_narrow_entry_2_pagein_first_low_qs;
+  logic [31:0] tlb_narrow_entry_2_pagein_first_low_wd;
+  logic tlb_narrow_entry_2_pagein_first_low_we;
+  logic [3:0] tlb_narrow_entry_2_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_2_pagein_first_high_wd;
+  logic tlb_narrow_entry_2_pagein_first_high_we;
+  logic [31:0] tlb_narrow_entry_2_pagein_last_low_qs;
+  logic [31:0] tlb_narrow_entry_2_pagein_last_low_wd;
+  logic tlb_narrow_entry_2_pagein_last_low_we;
+  logic [3:0] tlb_narrow_entry_2_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_2_pagein_last_high_wd;
+  logic tlb_narrow_entry_2_pagein_last_high_we;
+  logic [31:0] tlb_narrow_entry_2_pageout_low_qs;
+  logic [31:0] tlb_narrow_entry_2_pageout_low_wd;
+  logic tlb_narrow_entry_2_pageout_low_we;
+  logic [3:0] tlb_narrow_entry_2_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_2_pageout_high_wd;
+  logic tlb_narrow_entry_2_pageout_high_we;
+  logic tlb_narrow_entry_2_flags_valid_qs;
+  logic tlb_narrow_entry_2_flags_valid_wd;
+  logic tlb_narrow_entry_2_flags_valid_we;
+  logic tlb_narrow_entry_2_flags_read_only_qs;
+  logic tlb_narrow_entry_2_flags_read_only_wd;
+  logic tlb_narrow_entry_2_flags_read_only_we;
+  logic [31:0] tlb_narrow_entry_3_pagein_first_low_qs;
+  logic [31:0] tlb_narrow_entry_3_pagein_first_low_wd;
+  logic tlb_narrow_entry_3_pagein_first_low_we;
+  logic [3:0] tlb_narrow_entry_3_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_3_pagein_first_high_wd;
+  logic tlb_narrow_entry_3_pagein_first_high_we;
+  logic [31:0] tlb_narrow_entry_3_pagein_last_low_qs;
+  logic [31:0] tlb_narrow_entry_3_pagein_last_low_wd;
+  logic tlb_narrow_entry_3_pagein_last_low_we;
+  logic [3:0] tlb_narrow_entry_3_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_3_pagein_last_high_wd;
+  logic tlb_narrow_entry_3_pagein_last_high_we;
+  logic [31:0] tlb_narrow_entry_3_pageout_low_qs;
+  logic [31:0] tlb_narrow_entry_3_pageout_low_wd;
+  logic tlb_narrow_entry_3_pageout_low_we;
+  logic [3:0] tlb_narrow_entry_3_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_3_pageout_high_wd;
+  logic tlb_narrow_entry_3_pageout_high_we;
+  logic tlb_narrow_entry_3_flags_valid_qs;
+  logic tlb_narrow_entry_3_flags_valid_wd;
+  logic tlb_narrow_entry_3_flags_valid_we;
+  logic tlb_narrow_entry_3_flags_read_only_qs;
+  logic tlb_narrow_entry_3_flags_read_only_wd;
+  logic tlb_narrow_entry_3_flags_read_only_we;
+  logic [31:0] tlb_narrow_entry_4_pagein_first_low_qs;
+  logic [31:0] tlb_narrow_entry_4_pagein_first_low_wd;
+  logic tlb_narrow_entry_4_pagein_first_low_we;
+  logic [3:0] tlb_narrow_entry_4_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_4_pagein_first_high_wd;
+  logic tlb_narrow_entry_4_pagein_first_high_we;
+  logic [31:0] tlb_narrow_entry_4_pagein_last_low_qs;
+  logic [31:0] tlb_narrow_entry_4_pagein_last_low_wd;
+  logic tlb_narrow_entry_4_pagein_last_low_we;
+  logic [3:0] tlb_narrow_entry_4_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_4_pagein_last_high_wd;
+  logic tlb_narrow_entry_4_pagein_last_high_we;
+  logic [31:0] tlb_narrow_entry_4_pageout_low_qs;
+  logic [31:0] tlb_narrow_entry_4_pageout_low_wd;
+  logic tlb_narrow_entry_4_pageout_low_we;
+  logic [3:0] tlb_narrow_entry_4_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_4_pageout_high_wd;
+  logic tlb_narrow_entry_4_pageout_high_we;
+  logic tlb_narrow_entry_4_flags_valid_qs;
+  logic tlb_narrow_entry_4_flags_valid_wd;
+  logic tlb_narrow_entry_4_flags_valid_we;
+  logic tlb_narrow_entry_4_flags_read_only_qs;
+  logic tlb_narrow_entry_4_flags_read_only_wd;
+  logic tlb_narrow_entry_4_flags_read_only_we;
+  logic [31:0] tlb_narrow_entry_5_pagein_first_low_qs;
+  logic [31:0] tlb_narrow_entry_5_pagein_first_low_wd;
+  logic tlb_narrow_entry_5_pagein_first_low_we;
+  logic [3:0] tlb_narrow_entry_5_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_5_pagein_first_high_wd;
+  logic tlb_narrow_entry_5_pagein_first_high_we;
+  logic [31:0] tlb_narrow_entry_5_pagein_last_low_qs;
+  logic [31:0] tlb_narrow_entry_5_pagein_last_low_wd;
+  logic tlb_narrow_entry_5_pagein_last_low_we;
+  logic [3:0] tlb_narrow_entry_5_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_5_pagein_last_high_wd;
+  logic tlb_narrow_entry_5_pagein_last_high_we;
+  logic [31:0] tlb_narrow_entry_5_pageout_low_qs;
+  logic [31:0] tlb_narrow_entry_5_pageout_low_wd;
+  logic tlb_narrow_entry_5_pageout_low_we;
+  logic [3:0] tlb_narrow_entry_5_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_5_pageout_high_wd;
+  logic tlb_narrow_entry_5_pageout_high_we;
+  logic tlb_narrow_entry_5_flags_valid_qs;
+  logic tlb_narrow_entry_5_flags_valid_wd;
+  logic tlb_narrow_entry_5_flags_valid_we;
+  logic tlb_narrow_entry_5_flags_read_only_qs;
+  logic tlb_narrow_entry_5_flags_read_only_wd;
+  logic tlb_narrow_entry_5_flags_read_only_we;
+  logic [31:0] tlb_narrow_entry_6_pagein_first_low_qs;
+  logic [31:0] tlb_narrow_entry_6_pagein_first_low_wd;
+  logic tlb_narrow_entry_6_pagein_first_low_we;
+  logic [3:0] tlb_narrow_entry_6_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_6_pagein_first_high_wd;
+  logic tlb_narrow_entry_6_pagein_first_high_we;
+  logic [31:0] tlb_narrow_entry_6_pagein_last_low_qs;
+  logic [31:0] tlb_narrow_entry_6_pagein_last_low_wd;
+  logic tlb_narrow_entry_6_pagein_last_low_we;
+  logic [3:0] tlb_narrow_entry_6_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_6_pagein_last_high_wd;
+  logic tlb_narrow_entry_6_pagein_last_high_we;
+  logic [31:0] tlb_narrow_entry_6_pageout_low_qs;
+  logic [31:0] tlb_narrow_entry_6_pageout_low_wd;
+  logic tlb_narrow_entry_6_pageout_low_we;
+  logic [3:0] tlb_narrow_entry_6_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_6_pageout_high_wd;
+  logic tlb_narrow_entry_6_pageout_high_we;
+  logic tlb_narrow_entry_6_flags_valid_qs;
+  logic tlb_narrow_entry_6_flags_valid_wd;
+  logic tlb_narrow_entry_6_flags_valid_we;
+  logic tlb_narrow_entry_6_flags_read_only_qs;
+  logic tlb_narrow_entry_6_flags_read_only_wd;
+  logic tlb_narrow_entry_6_flags_read_only_we;
+  logic [31:0] tlb_narrow_entry_7_pagein_first_low_qs;
+  logic [31:0] tlb_narrow_entry_7_pagein_first_low_wd;
+  logic tlb_narrow_entry_7_pagein_first_low_we;
+  logic [3:0] tlb_narrow_entry_7_pagein_first_high_qs;
+  logic [3:0] tlb_narrow_entry_7_pagein_first_high_wd;
+  logic tlb_narrow_entry_7_pagein_first_high_we;
+  logic [31:0] tlb_narrow_entry_7_pagein_last_low_qs;
+  logic [31:0] tlb_narrow_entry_7_pagein_last_low_wd;
+  logic tlb_narrow_entry_7_pagein_last_low_we;
+  logic [3:0] tlb_narrow_entry_7_pagein_last_high_qs;
+  logic [3:0] tlb_narrow_entry_7_pagein_last_high_wd;
+  logic tlb_narrow_entry_7_pagein_last_high_we;
+  logic [31:0] tlb_narrow_entry_7_pageout_low_qs;
+  logic [31:0] tlb_narrow_entry_7_pageout_low_wd;
+  logic tlb_narrow_entry_7_pageout_low_we;
+  logic [3:0] tlb_narrow_entry_7_pageout_high_qs;
+  logic [3:0] tlb_narrow_entry_7_pageout_high_wd;
+  logic tlb_narrow_entry_7_pageout_high_we;
+  logic tlb_narrow_entry_7_flags_valid_qs;
+  logic tlb_narrow_entry_7_flags_valid_wd;
+  logic tlb_narrow_entry_7_flags_valid_we;
+  logic tlb_narrow_entry_7_flags_read_only_qs;
+  logic tlb_narrow_entry_7_flags_read_only_wd;
+  logic tlb_narrow_entry_7_flags_read_only_we;
+  logic [31:0] tlb_wide_entry_0_pagein_first_low_qs;
+  logic [31:0] tlb_wide_entry_0_pagein_first_low_wd;
+  logic tlb_wide_entry_0_pagein_first_low_we;
+  logic [3:0] tlb_wide_entry_0_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_0_pagein_first_high_wd;
+  logic tlb_wide_entry_0_pagein_first_high_we;
+  logic [31:0] tlb_wide_entry_0_pagein_last_low_qs;
+  logic [31:0] tlb_wide_entry_0_pagein_last_low_wd;
+  logic tlb_wide_entry_0_pagein_last_low_we;
+  logic [3:0] tlb_wide_entry_0_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_0_pagein_last_high_wd;
+  logic tlb_wide_entry_0_pagein_last_high_we;
+  logic [31:0] tlb_wide_entry_0_pageout_low_qs;
+  logic [31:0] tlb_wide_entry_0_pageout_low_wd;
+  logic tlb_wide_entry_0_pageout_low_we;
+  logic [3:0] tlb_wide_entry_0_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_0_pageout_high_wd;
+  logic tlb_wide_entry_0_pageout_high_we;
+  logic tlb_wide_entry_0_flags_valid_qs;
+  logic tlb_wide_entry_0_flags_valid_wd;
+  logic tlb_wide_entry_0_flags_valid_we;
+  logic tlb_wide_entry_0_flags_read_only_qs;
+  logic tlb_wide_entry_0_flags_read_only_wd;
+  logic tlb_wide_entry_0_flags_read_only_we;
+  logic [31:0] tlb_wide_entry_1_pagein_first_low_qs;
+  logic [31:0] tlb_wide_entry_1_pagein_first_low_wd;
+  logic tlb_wide_entry_1_pagein_first_low_we;
+  logic [3:0] tlb_wide_entry_1_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_1_pagein_first_high_wd;
+  logic tlb_wide_entry_1_pagein_first_high_we;
+  logic [31:0] tlb_wide_entry_1_pagein_last_low_qs;
+  logic [31:0] tlb_wide_entry_1_pagein_last_low_wd;
+  logic tlb_wide_entry_1_pagein_last_low_we;
+  logic [3:0] tlb_wide_entry_1_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_1_pagein_last_high_wd;
+  logic tlb_wide_entry_1_pagein_last_high_we;
+  logic [31:0] tlb_wide_entry_1_pageout_low_qs;
+  logic [31:0] tlb_wide_entry_1_pageout_low_wd;
+  logic tlb_wide_entry_1_pageout_low_we;
+  logic [3:0] tlb_wide_entry_1_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_1_pageout_high_wd;
+  logic tlb_wide_entry_1_pageout_high_we;
+  logic tlb_wide_entry_1_flags_valid_qs;
+  logic tlb_wide_entry_1_flags_valid_wd;
+  logic tlb_wide_entry_1_flags_valid_we;
+  logic tlb_wide_entry_1_flags_read_only_qs;
+  logic tlb_wide_entry_1_flags_read_only_wd;
+  logic tlb_wide_entry_1_flags_read_only_we;
+  logic [31:0] tlb_wide_entry_2_pagein_first_low_qs;
+  logic [31:0] tlb_wide_entry_2_pagein_first_low_wd;
+  logic tlb_wide_entry_2_pagein_first_low_we;
+  logic [3:0] tlb_wide_entry_2_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_2_pagein_first_high_wd;
+  logic tlb_wide_entry_2_pagein_first_high_we;
+  logic [31:0] tlb_wide_entry_2_pagein_last_low_qs;
+  logic [31:0] tlb_wide_entry_2_pagein_last_low_wd;
+  logic tlb_wide_entry_2_pagein_last_low_we;
+  logic [3:0] tlb_wide_entry_2_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_2_pagein_last_high_wd;
+  logic tlb_wide_entry_2_pagein_last_high_we;
+  logic [31:0] tlb_wide_entry_2_pageout_low_qs;
+  logic [31:0] tlb_wide_entry_2_pageout_low_wd;
+  logic tlb_wide_entry_2_pageout_low_we;
+  logic [3:0] tlb_wide_entry_2_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_2_pageout_high_wd;
+  logic tlb_wide_entry_2_pageout_high_we;
+  logic tlb_wide_entry_2_flags_valid_qs;
+  logic tlb_wide_entry_2_flags_valid_wd;
+  logic tlb_wide_entry_2_flags_valid_we;
+  logic tlb_wide_entry_2_flags_read_only_qs;
+  logic tlb_wide_entry_2_flags_read_only_wd;
+  logic tlb_wide_entry_2_flags_read_only_we;
+  logic [31:0] tlb_wide_entry_3_pagein_first_low_qs;
+  logic [31:0] tlb_wide_entry_3_pagein_first_low_wd;
+  logic tlb_wide_entry_3_pagein_first_low_we;
+  logic [3:0] tlb_wide_entry_3_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_3_pagein_first_high_wd;
+  logic tlb_wide_entry_3_pagein_first_high_we;
+  logic [31:0] tlb_wide_entry_3_pagein_last_low_qs;
+  logic [31:0] tlb_wide_entry_3_pagein_last_low_wd;
+  logic tlb_wide_entry_3_pagein_last_low_we;
+  logic [3:0] tlb_wide_entry_3_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_3_pagein_last_high_wd;
+  logic tlb_wide_entry_3_pagein_last_high_we;
+  logic [31:0] tlb_wide_entry_3_pageout_low_qs;
+  logic [31:0] tlb_wide_entry_3_pageout_low_wd;
+  logic tlb_wide_entry_3_pageout_low_we;
+  logic [3:0] tlb_wide_entry_3_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_3_pageout_high_wd;
+  logic tlb_wide_entry_3_pageout_high_we;
+  logic tlb_wide_entry_3_flags_valid_qs;
+  logic tlb_wide_entry_3_flags_valid_wd;
+  logic tlb_wide_entry_3_flags_valid_we;
+  logic tlb_wide_entry_3_flags_read_only_qs;
+  logic tlb_wide_entry_3_flags_read_only_wd;
+  logic tlb_wide_entry_3_flags_read_only_we;
+  logic [31:0] tlb_wide_entry_4_pagein_first_low_qs;
+  logic [31:0] tlb_wide_entry_4_pagein_first_low_wd;
+  logic tlb_wide_entry_4_pagein_first_low_we;
+  logic [3:0] tlb_wide_entry_4_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_4_pagein_first_high_wd;
+  logic tlb_wide_entry_4_pagein_first_high_we;
+  logic [31:0] tlb_wide_entry_4_pagein_last_low_qs;
+  logic [31:0] tlb_wide_entry_4_pagein_last_low_wd;
+  logic tlb_wide_entry_4_pagein_last_low_we;
+  logic [3:0] tlb_wide_entry_4_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_4_pagein_last_high_wd;
+  logic tlb_wide_entry_4_pagein_last_high_we;
+  logic [31:0] tlb_wide_entry_4_pageout_low_qs;
+  logic [31:0] tlb_wide_entry_4_pageout_low_wd;
+  logic tlb_wide_entry_4_pageout_low_we;
+  logic [3:0] tlb_wide_entry_4_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_4_pageout_high_wd;
+  logic tlb_wide_entry_4_pageout_high_we;
+  logic tlb_wide_entry_4_flags_valid_qs;
+  logic tlb_wide_entry_4_flags_valid_wd;
+  logic tlb_wide_entry_4_flags_valid_we;
+  logic tlb_wide_entry_4_flags_read_only_qs;
+  logic tlb_wide_entry_4_flags_read_only_wd;
+  logic tlb_wide_entry_4_flags_read_only_we;
+  logic [31:0] tlb_wide_entry_5_pagein_first_low_qs;
+  logic [31:0] tlb_wide_entry_5_pagein_first_low_wd;
+  logic tlb_wide_entry_5_pagein_first_low_we;
+  logic [3:0] tlb_wide_entry_5_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_5_pagein_first_high_wd;
+  logic tlb_wide_entry_5_pagein_first_high_we;
+  logic [31:0] tlb_wide_entry_5_pagein_last_low_qs;
+  logic [31:0] tlb_wide_entry_5_pagein_last_low_wd;
+  logic tlb_wide_entry_5_pagein_last_low_we;
+  logic [3:0] tlb_wide_entry_5_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_5_pagein_last_high_wd;
+  logic tlb_wide_entry_5_pagein_last_high_we;
+  logic [31:0] tlb_wide_entry_5_pageout_low_qs;
+  logic [31:0] tlb_wide_entry_5_pageout_low_wd;
+  logic tlb_wide_entry_5_pageout_low_we;
+  logic [3:0] tlb_wide_entry_5_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_5_pageout_high_wd;
+  logic tlb_wide_entry_5_pageout_high_we;
+  logic tlb_wide_entry_5_flags_valid_qs;
+  logic tlb_wide_entry_5_flags_valid_wd;
+  logic tlb_wide_entry_5_flags_valid_we;
+  logic tlb_wide_entry_5_flags_read_only_qs;
+  logic tlb_wide_entry_5_flags_read_only_wd;
+  logic tlb_wide_entry_5_flags_read_only_we;
+  logic [31:0] tlb_wide_entry_6_pagein_first_low_qs;
+  logic [31:0] tlb_wide_entry_6_pagein_first_low_wd;
+  logic tlb_wide_entry_6_pagein_first_low_we;
+  logic [3:0] tlb_wide_entry_6_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_6_pagein_first_high_wd;
+  logic tlb_wide_entry_6_pagein_first_high_we;
+  logic [31:0] tlb_wide_entry_6_pagein_last_low_qs;
+  logic [31:0] tlb_wide_entry_6_pagein_last_low_wd;
+  logic tlb_wide_entry_6_pagein_last_low_we;
+  logic [3:0] tlb_wide_entry_6_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_6_pagein_last_high_wd;
+  logic tlb_wide_entry_6_pagein_last_high_we;
+  logic [31:0] tlb_wide_entry_6_pageout_low_qs;
+  logic [31:0] tlb_wide_entry_6_pageout_low_wd;
+  logic tlb_wide_entry_6_pageout_low_we;
+  logic [3:0] tlb_wide_entry_6_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_6_pageout_high_wd;
+  logic tlb_wide_entry_6_pageout_high_we;
+  logic tlb_wide_entry_6_flags_valid_qs;
+  logic tlb_wide_entry_6_flags_valid_wd;
+  logic tlb_wide_entry_6_flags_valid_we;
+  logic tlb_wide_entry_6_flags_read_only_qs;
+  logic tlb_wide_entry_6_flags_read_only_wd;
+  logic tlb_wide_entry_6_flags_read_only_we;
+  logic [31:0] tlb_wide_entry_7_pagein_first_low_qs;
+  logic [31:0] tlb_wide_entry_7_pagein_first_low_wd;
+  logic tlb_wide_entry_7_pagein_first_low_we;
+  logic [3:0] tlb_wide_entry_7_pagein_first_high_qs;
+  logic [3:0] tlb_wide_entry_7_pagein_first_high_wd;
+  logic tlb_wide_entry_7_pagein_first_high_we;
+  logic [31:0] tlb_wide_entry_7_pagein_last_low_qs;
+  logic [31:0] tlb_wide_entry_7_pagein_last_low_wd;
+  logic tlb_wide_entry_7_pagein_last_low_we;
+  logic [3:0] tlb_wide_entry_7_pagein_last_high_qs;
+  logic [3:0] tlb_wide_entry_7_pagein_last_high_wd;
+  logic tlb_wide_entry_7_pagein_last_high_we;
+  logic [31:0] tlb_wide_entry_7_pageout_low_qs;
+  logic [31:0] tlb_wide_entry_7_pageout_low_wd;
+  logic tlb_wide_entry_7_pageout_low_we;
+  logic [3:0] tlb_wide_entry_7_pageout_high_qs;
+  logic [3:0] tlb_wide_entry_7_pageout_high_wd;
+  logic tlb_wide_entry_7_pageout_high_we;
+  logic tlb_wide_entry_7_flags_valid_qs;
+  logic tlb_wide_entry_7_flags_valid_wd;
+  logic tlb_wide_entry_7_flags_valid_we;
+  logic tlb_wide_entry_7_flags_read_only_qs;
+  logic tlb_wide_entry_7_flags_read_only_wd;
+  logic tlb_wide_entry_7_flags_read_only_we;
 
   // Register instances
   // R[clk_ena]: V(False)
@@ -423,6 +813,60 @@ module occamy_quadrant_s1_reg_top #(
 
     // to register interface (read)
     .qs     (ro_cache_flush_qs)
+  );
+
+
+  // R[tlb_wide_enable]: V(False)
+
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_enable (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_enable_we),
+    .wd     (tlb_wide_enable_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_enable.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_enable_qs)
+  );
+
+
+  // R[tlb_narrow_enable]: V(False)
+
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_enable (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_enable_we),
+    .wd     (tlb_narrow_enable_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_enable.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_enable_qs)
   );
 
 
@@ -858,33 +1302,3603 @@ module occamy_quadrant_s1_reg_top #(
   );
 
 
+  // R[tlb_narrow_entry_0_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_0_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_0_pagein_first_low_we),
+    .wd     (tlb_narrow_entry_0_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_0_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_0_pagein_first_low_qs)
+  );
 
 
-  logic [21:0] addr_hit;
+  // R[tlb_narrow_entry_0_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_0_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_0_pagein_first_high_we),
+    .wd     (tlb_narrow_entry_0_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_0_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_0_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_0_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_0_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_0_pagein_last_low_we),
+    .wd     (tlb_narrow_entry_0_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_0_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_0_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_0_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_0_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_0_pagein_last_high_we),
+    .wd     (tlb_narrow_entry_0_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_0_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_0_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_0_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_0_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_0_pageout_low_we),
+    .wd     (tlb_narrow_entry_0_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_0_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_0_pageout_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_0_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_0_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_0_pageout_high_we),
+    .wd     (tlb_narrow_entry_0_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_0_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_0_pageout_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_0_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_0_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_0_flags_valid_we),
+    .wd     (tlb_narrow_entry_0_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_0_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_0_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_0_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_0_flags_read_only_we),
+    .wd     (tlb_narrow_entry_0_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_0_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_0_flags_read_only_qs)
+  );
+
+
+  // R[tlb_narrow_entry_1_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_1_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_1_pagein_first_low_we),
+    .wd     (tlb_narrow_entry_1_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_1_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_1_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_1_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_1_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_1_pagein_first_high_we),
+    .wd     (tlb_narrow_entry_1_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_1_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_1_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_1_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_1_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_1_pagein_last_low_we),
+    .wd     (tlb_narrow_entry_1_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_1_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_1_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_1_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_1_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_1_pagein_last_high_we),
+    .wd     (tlb_narrow_entry_1_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_1_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_1_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_1_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_1_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_1_pageout_low_we),
+    .wd     (tlb_narrow_entry_1_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_1_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_1_pageout_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_1_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_1_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_1_pageout_high_we),
+    .wd     (tlb_narrow_entry_1_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_1_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_1_pageout_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_1_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_1_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_1_flags_valid_we),
+    .wd     (tlb_narrow_entry_1_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_1_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_1_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_1_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_1_flags_read_only_we),
+    .wd     (tlb_narrow_entry_1_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_1_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_1_flags_read_only_qs)
+  );
+
+
+  // R[tlb_narrow_entry_2_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_2_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_2_pagein_first_low_we),
+    .wd     (tlb_narrow_entry_2_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_2_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_2_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_2_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_2_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_2_pagein_first_high_we),
+    .wd     (tlb_narrow_entry_2_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_2_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_2_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_2_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_2_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_2_pagein_last_low_we),
+    .wd     (tlb_narrow_entry_2_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_2_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_2_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_2_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_2_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_2_pagein_last_high_we),
+    .wd     (tlb_narrow_entry_2_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_2_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_2_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_2_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_2_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_2_pageout_low_we),
+    .wd     (tlb_narrow_entry_2_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_2_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_2_pageout_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_2_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_2_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_2_pageout_high_we),
+    .wd     (tlb_narrow_entry_2_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_2_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_2_pageout_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_2_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_2_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_2_flags_valid_we),
+    .wd     (tlb_narrow_entry_2_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_2_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_2_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_2_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_2_flags_read_only_we),
+    .wd     (tlb_narrow_entry_2_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_2_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_2_flags_read_only_qs)
+  );
+
+
+  // R[tlb_narrow_entry_3_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_3_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_3_pagein_first_low_we),
+    .wd     (tlb_narrow_entry_3_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_3_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_3_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_3_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_3_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_3_pagein_first_high_we),
+    .wd     (tlb_narrow_entry_3_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_3_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_3_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_3_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_3_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_3_pagein_last_low_we),
+    .wd     (tlb_narrow_entry_3_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_3_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_3_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_3_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_3_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_3_pagein_last_high_we),
+    .wd     (tlb_narrow_entry_3_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_3_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_3_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_3_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_3_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_3_pageout_low_we),
+    .wd     (tlb_narrow_entry_3_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_3_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_3_pageout_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_3_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_3_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_3_pageout_high_we),
+    .wd     (tlb_narrow_entry_3_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_3_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_3_pageout_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_3_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_3_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_3_flags_valid_we),
+    .wd     (tlb_narrow_entry_3_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_3_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_3_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_3_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_3_flags_read_only_we),
+    .wd     (tlb_narrow_entry_3_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_3_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_3_flags_read_only_qs)
+  );
+
+
+  // R[tlb_narrow_entry_4_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_4_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_4_pagein_first_low_we),
+    .wd     (tlb_narrow_entry_4_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_4_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_4_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_4_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_4_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_4_pagein_first_high_we),
+    .wd     (tlb_narrow_entry_4_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_4_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_4_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_4_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_4_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_4_pagein_last_low_we),
+    .wd     (tlb_narrow_entry_4_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_4_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_4_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_4_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_4_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_4_pagein_last_high_we),
+    .wd     (tlb_narrow_entry_4_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_4_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_4_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_4_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_4_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_4_pageout_low_we),
+    .wd     (tlb_narrow_entry_4_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_4_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_4_pageout_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_4_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_4_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_4_pageout_high_we),
+    .wd     (tlb_narrow_entry_4_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_4_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_4_pageout_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_4_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_4_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_4_flags_valid_we),
+    .wd     (tlb_narrow_entry_4_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_4_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_4_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_4_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_4_flags_read_only_we),
+    .wd     (tlb_narrow_entry_4_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_4_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_4_flags_read_only_qs)
+  );
+
+
+  // R[tlb_narrow_entry_5_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_5_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_5_pagein_first_low_we),
+    .wd     (tlb_narrow_entry_5_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_5_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_5_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_5_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_5_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_5_pagein_first_high_we),
+    .wd     (tlb_narrow_entry_5_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_5_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_5_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_5_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_5_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_5_pagein_last_low_we),
+    .wd     (tlb_narrow_entry_5_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_5_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_5_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_5_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_5_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_5_pagein_last_high_we),
+    .wd     (tlb_narrow_entry_5_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_5_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_5_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_5_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_5_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_5_pageout_low_we),
+    .wd     (tlb_narrow_entry_5_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_5_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_5_pageout_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_5_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_5_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_5_pageout_high_we),
+    .wd     (tlb_narrow_entry_5_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_5_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_5_pageout_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_5_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_5_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_5_flags_valid_we),
+    .wd     (tlb_narrow_entry_5_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_5_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_5_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_5_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_5_flags_read_only_we),
+    .wd     (tlb_narrow_entry_5_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_5_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_5_flags_read_only_qs)
+  );
+
+
+  // R[tlb_narrow_entry_6_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_6_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_6_pagein_first_low_we),
+    .wd     (tlb_narrow_entry_6_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_6_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_6_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_6_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_6_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_6_pagein_first_high_we),
+    .wd     (tlb_narrow_entry_6_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_6_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_6_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_6_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_6_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_6_pagein_last_low_we),
+    .wd     (tlb_narrow_entry_6_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_6_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_6_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_6_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_6_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_6_pagein_last_high_we),
+    .wd     (tlb_narrow_entry_6_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_6_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_6_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_6_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_6_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_6_pageout_low_we),
+    .wd     (tlb_narrow_entry_6_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_6_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_6_pageout_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_6_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_6_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_6_pageout_high_we),
+    .wd     (tlb_narrow_entry_6_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_6_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_6_pageout_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_6_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_6_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_6_flags_valid_we),
+    .wd     (tlb_narrow_entry_6_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_6_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_6_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_6_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_6_flags_read_only_we),
+    .wd     (tlb_narrow_entry_6_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_6_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_6_flags_read_only_qs)
+  );
+
+
+  // R[tlb_narrow_entry_7_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_7_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_7_pagein_first_low_we),
+    .wd     (tlb_narrow_entry_7_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_7_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_7_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_7_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_7_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_7_pagein_first_high_we),
+    .wd     (tlb_narrow_entry_7_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_7_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_7_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_7_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_7_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_7_pagein_last_low_we),
+    .wd     (tlb_narrow_entry_7_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_7_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_7_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_7_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_7_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_7_pagein_last_high_we),
+    .wd     (tlb_narrow_entry_7_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_7_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_7_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_7_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_narrow_entry_7_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_7_pageout_low_we),
+    .wd     (tlb_narrow_entry_7_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_7_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_7_pageout_low_qs)
+  );
+
+
+  // R[tlb_narrow_entry_7_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_narrow_entry_7_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_7_pageout_high_we),
+    .wd     (tlb_narrow_entry_7_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_7_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_7_pageout_high_qs)
+  );
+
+
+  // R[tlb_narrow_entry_7_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_7_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_7_flags_valid_we),
+    .wd     (tlb_narrow_entry_7_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_7_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_7_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_narrow_entry_7_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_narrow_entry_7_flags_read_only_we),
+    .wd     (tlb_narrow_entry_7_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_narrow_entry_7_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_narrow_entry_7_flags_read_only_qs)
+  );
+
+
+  // R[tlb_wide_entry_0_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_0_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_0_pagein_first_low_we),
+    .wd     (tlb_wide_entry_0_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_0_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_0_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_0_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_0_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_0_pagein_first_high_we),
+    .wd     (tlb_wide_entry_0_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_0_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_0_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_0_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_0_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_0_pagein_last_low_we),
+    .wd     (tlb_wide_entry_0_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_0_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_0_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_0_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_0_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_0_pagein_last_high_we),
+    .wd     (tlb_wide_entry_0_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_0_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_0_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_0_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_0_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_0_pageout_low_we),
+    .wd     (tlb_wide_entry_0_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_0_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_0_pageout_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_0_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_0_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_0_pageout_high_we),
+    .wd     (tlb_wide_entry_0_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_0_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_0_pageout_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_0_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_0_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_0_flags_valid_we),
+    .wd     (tlb_wide_entry_0_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_0_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_0_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_0_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_0_flags_read_only_we),
+    .wd     (tlb_wide_entry_0_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_0_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_0_flags_read_only_qs)
+  );
+
+
+  // R[tlb_wide_entry_1_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_1_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_1_pagein_first_low_we),
+    .wd     (tlb_wide_entry_1_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_1_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_1_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_1_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_1_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_1_pagein_first_high_we),
+    .wd     (tlb_wide_entry_1_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_1_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_1_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_1_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_1_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_1_pagein_last_low_we),
+    .wd     (tlb_wide_entry_1_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_1_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_1_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_1_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_1_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_1_pagein_last_high_we),
+    .wd     (tlb_wide_entry_1_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_1_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_1_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_1_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_1_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_1_pageout_low_we),
+    .wd     (tlb_wide_entry_1_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_1_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_1_pageout_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_1_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_1_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_1_pageout_high_we),
+    .wd     (tlb_wide_entry_1_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_1_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_1_pageout_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_1_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_1_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_1_flags_valid_we),
+    .wd     (tlb_wide_entry_1_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_1_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_1_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_1_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_1_flags_read_only_we),
+    .wd     (tlb_wide_entry_1_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_1_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_1_flags_read_only_qs)
+  );
+
+
+  // R[tlb_wide_entry_2_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_2_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_2_pagein_first_low_we),
+    .wd     (tlb_wide_entry_2_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_2_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_2_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_2_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_2_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_2_pagein_first_high_we),
+    .wd     (tlb_wide_entry_2_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_2_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_2_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_2_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_2_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_2_pagein_last_low_we),
+    .wd     (tlb_wide_entry_2_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_2_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_2_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_2_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_2_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_2_pagein_last_high_we),
+    .wd     (tlb_wide_entry_2_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_2_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_2_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_2_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_2_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_2_pageout_low_we),
+    .wd     (tlb_wide_entry_2_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_2_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_2_pageout_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_2_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_2_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_2_pageout_high_we),
+    .wd     (tlb_wide_entry_2_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_2_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_2_pageout_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_2_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_2_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_2_flags_valid_we),
+    .wd     (tlb_wide_entry_2_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_2_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_2_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_2_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_2_flags_read_only_we),
+    .wd     (tlb_wide_entry_2_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_2_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_2_flags_read_only_qs)
+  );
+
+
+  // R[tlb_wide_entry_3_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_3_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_3_pagein_first_low_we),
+    .wd     (tlb_wide_entry_3_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_3_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_3_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_3_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_3_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_3_pagein_first_high_we),
+    .wd     (tlb_wide_entry_3_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_3_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_3_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_3_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_3_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_3_pagein_last_low_we),
+    .wd     (tlb_wide_entry_3_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_3_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_3_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_3_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_3_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_3_pagein_last_high_we),
+    .wd     (tlb_wide_entry_3_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_3_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_3_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_3_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_3_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_3_pageout_low_we),
+    .wd     (tlb_wide_entry_3_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_3_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_3_pageout_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_3_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_3_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_3_pageout_high_we),
+    .wd     (tlb_wide_entry_3_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_3_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_3_pageout_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_3_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_3_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_3_flags_valid_we),
+    .wd     (tlb_wide_entry_3_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_3_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_3_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_3_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_3_flags_read_only_we),
+    .wd     (tlb_wide_entry_3_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_3_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_3_flags_read_only_qs)
+  );
+
+
+  // R[tlb_wide_entry_4_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_4_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_4_pagein_first_low_we),
+    .wd     (tlb_wide_entry_4_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_4_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_4_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_4_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_4_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_4_pagein_first_high_we),
+    .wd     (tlb_wide_entry_4_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_4_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_4_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_4_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_4_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_4_pagein_last_low_we),
+    .wd     (tlb_wide_entry_4_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_4_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_4_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_4_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_4_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_4_pagein_last_high_we),
+    .wd     (tlb_wide_entry_4_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_4_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_4_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_4_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_4_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_4_pageout_low_we),
+    .wd     (tlb_wide_entry_4_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_4_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_4_pageout_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_4_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_4_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_4_pageout_high_we),
+    .wd     (tlb_wide_entry_4_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_4_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_4_pageout_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_4_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_4_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_4_flags_valid_we),
+    .wd     (tlb_wide_entry_4_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_4_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_4_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_4_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_4_flags_read_only_we),
+    .wd     (tlb_wide_entry_4_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_4_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_4_flags_read_only_qs)
+  );
+
+
+  // R[tlb_wide_entry_5_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_5_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_5_pagein_first_low_we),
+    .wd     (tlb_wide_entry_5_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_5_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_5_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_5_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_5_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_5_pagein_first_high_we),
+    .wd     (tlb_wide_entry_5_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_5_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_5_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_5_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_5_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_5_pagein_last_low_we),
+    .wd     (tlb_wide_entry_5_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_5_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_5_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_5_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_5_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_5_pagein_last_high_we),
+    .wd     (tlb_wide_entry_5_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_5_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_5_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_5_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_5_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_5_pageout_low_we),
+    .wd     (tlb_wide_entry_5_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_5_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_5_pageout_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_5_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_5_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_5_pageout_high_we),
+    .wd     (tlb_wide_entry_5_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_5_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_5_pageout_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_5_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_5_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_5_flags_valid_we),
+    .wd     (tlb_wide_entry_5_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_5_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_5_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_5_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_5_flags_read_only_we),
+    .wd     (tlb_wide_entry_5_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_5_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_5_flags_read_only_qs)
+  );
+
+
+  // R[tlb_wide_entry_6_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_6_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_6_pagein_first_low_we),
+    .wd     (tlb_wide_entry_6_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_6_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_6_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_6_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_6_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_6_pagein_first_high_we),
+    .wd     (tlb_wide_entry_6_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_6_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_6_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_6_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_6_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_6_pagein_last_low_we),
+    .wd     (tlb_wide_entry_6_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_6_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_6_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_6_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_6_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_6_pagein_last_high_we),
+    .wd     (tlb_wide_entry_6_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_6_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_6_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_6_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_6_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_6_pageout_low_we),
+    .wd     (tlb_wide_entry_6_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_6_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_6_pageout_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_6_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_6_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_6_pageout_high_we),
+    .wd     (tlb_wide_entry_6_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_6_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_6_pageout_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_6_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_6_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_6_flags_valid_we),
+    .wd     (tlb_wide_entry_6_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_6_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_6_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_6_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_6_flags_read_only_we),
+    .wd     (tlb_wide_entry_6_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_6_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_6_flags_read_only_qs)
+  );
+
+
+  // R[tlb_wide_entry_7_pagein_first_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_7_pagein_first_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_7_pagein_first_low_we),
+    .wd     (tlb_wide_entry_7_pagein_first_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_7_pagein_first_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_7_pagein_first_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_7_pagein_first_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_7_pagein_first_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_7_pagein_first_high_we),
+    .wd     (tlb_wide_entry_7_pagein_first_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_7_pagein_first_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_7_pagein_first_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_7_pagein_last_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_7_pagein_last_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_7_pagein_last_low_we),
+    .wd     (tlb_wide_entry_7_pagein_last_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_7_pagein_last_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_7_pagein_last_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_7_pagein_last_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_7_pagein_last_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_7_pagein_last_high_we),
+    .wd     (tlb_wide_entry_7_pagein_last_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_7_pagein_last_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_7_pagein_last_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_7_pageout_low]: V(False)
+
+  prim_subreg #(
+    .DW      (32),
+    .SWACCESS("RW"),
+    .RESVAL  (32'h0)
+  ) u_tlb_wide_entry_7_pageout_low (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_7_pageout_low_we),
+    .wd     (tlb_wide_entry_7_pageout_low_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_7_pageout_low.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_7_pageout_low_qs)
+  );
+
+
+  // R[tlb_wide_entry_7_pageout_high]: V(False)
+
+  prim_subreg #(
+    .DW      (4),
+    .SWACCESS("RW"),
+    .RESVAL  (4'h0)
+  ) u_tlb_wide_entry_7_pageout_high (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_7_pageout_high_we),
+    .wd     (tlb_wide_entry_7_pageout_high_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_7_pageout_high.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_7_pageout_high_qs)
+  );
+
+
+  // R[tlb_wide_entry_7_flags]: V(False)
+
+  //   F[valid]: 0:0
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_7_flags_valid (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_7_flags_valid_we),
+    .wd     (tlb_wide_entry_7_flags_valid_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_7_flags.valid.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_7_flags_valid_qs)
+  );
+
+
+  //   F[read_only]: 1:1
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_tlb_wide_entry_7_flags_read_only (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (tlb_wide_entry_7_flags_read_only_we),
+    .wd     (tlb_wide_entry_7_flags_read_only_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.tlb_wide_entry_7_flags.read_only.q ),
+
+    // to register interface (read)
+    .qs     (tlb_wide_entry_7_flags_read_only_qs)
+  );
+
+
+
+
+  logic [135:0] addr_hit;
   always_comb begin
     addr_hit = '0;
-    addr_hit[ 0] = (reg_addr == OCCAMY_QUADRANT_S1_CLK_ENA_OFFSET);
-    addr_hit[ 1] = (reg_addr == OCCAMY_QUADRANT_S1_RESET_N_OFFSET);
-    addr_hit[ 2] = (reg_addr == OCCAMY_QUADRANT_S1_ISOLATE_OFFSET);
-    addr_hit[ 3] = (reg_addr == OCCAMY_QUADRANT_S1_ISOLATED_OFFSET);
-    addr_hit[ 4] = (reg_addr == OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE_OFFSET);
-    addr_hit[ 5] = (reg_addr == OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH_OFFSET);
-    addr_hit[ 6] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0_OFFSET);
-    addr_hit[ 7] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0_OFFSET);
-    addr_hit[ 8] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0_OFFSET);
-    addr_hit[ 9] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0_OFFSET);
-    addr_hit[10] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1_OFFSET);
-    addr_hit[11] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1_OFFSET);
-    addr_hit[12] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1_OFFSET);
-    addr_hit[13] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1_OFFSET);
-    addr_hit[14] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2_OFFSET);
-    addr_hit[15] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2_OFFSET);
-    addr_hit[16] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2_OFFSET);
-    addr_hit[17] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2_OFFSET);
-    addr_hit[18] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3_OFFSET);
-    addr_hit[19] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3_OFFSET);
-    addr_hit[20] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3_OFFSET);
-    addr_hit[21] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3_OFFSET);
+    addr_hit[  0] = (reg_addr == OCCAMY_QUADRANT_S1_CLK_ENA_OFFSET);
+    addr_hit[  1] = (reg_addr == OCCAMY_QUADRANT_S1_RESET_N_OFFSET);
+    addr_hit[  2] = (reg_addr == OCCAMY_QUADRANT_S1_ISOLATE_OFFSET);
+    addr_hit[  3] = (reg_addr == OCCAMY_QUADRANT_S1_ISOLATED_OFFSET);
+    addr_hit[  4] = (reg_addr == OCCAMY_QUADRANT_S1_RO_CACHE_ENABLE_OFFSET);
+    addr_hit[  5] = (reg_addr == OCCAMY_QUADRANT_S1_RO_CACHE_FLUSH_OFFSET);
+    addr_hit[  6] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENABLE_OFFSET);
+    addr_hit[  7] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENABLE_OFFSET);
+    addr_hit[  8] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_0_OFFSET);
+    addr_hit[  9] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_0_OFFSET);
+    addr_hit[ 10] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_0_OFFSET);
+    addr_hit[ 11] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_0_OFFSET);
+    addr_hit[ 12] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_1_OFFSET);
+    addr_hit[ 13] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_1_OFFSET);
+    addr_hit[ 14] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_1_OFFSET);
+    addr_hit[ 15] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_1_OFFSET);
+    addr_hit[ 16] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_2_OFFSET);
+    addr_hit[ 17] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_2_OFFSET);
+    addr_hit[ 18] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_2_OFFSET);
+    addr_hit[ 19] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_2_OFFSET);
+    addr_hit[ 20] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_LOW_3_OFFSET);
+    addr_hit[ 21] = (reg_addr == OCCAMY_QUADRANT_S1_RO_START_ADDR_HIGH_3_OFFSET);
+    addr_hit[ 22] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_LOW_3_OFFSET);
+    addr_hit[ 23] = (reg_addr == OCCAMY_QUADRANT_S1_RO_END_ADDR_HIGH_3_OFFSET);
+    addr_hit[ 24] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 25] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 26] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 27] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 28] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 29] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 30] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_0_FLAGS_OFFSET);
+    addr_hit[ 31] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 32] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 33] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 34] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 35] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 36] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 37] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_1_FLAGS_OFFSET);
+    addr_hit[ 38] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 39] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 40] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 41] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 42] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 43] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 44] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_2_FLAGS_OFFSET);
+    addr_hit[ 45] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 46] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 47] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 48] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 49] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 50] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 51] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_3_FLAGS_OFFSET);
+    addr_hit[ 52] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 53] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 54] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 55] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 56] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 57] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 58] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_4_FLAGS_OFFSET);
+    addr_hit[ 59] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 60] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 61] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 62] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 63] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 64] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 65] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_5_FLAGS_OFFSET);
+    addr_hit[ 66] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 67] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 68] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 69] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 70] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 71] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 72] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_6_FLAGS_OFFSET);
+    addr_hit[ 73] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 74] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 75] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 76] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 77] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 78] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 79] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_NARROW_ENTRY_7_FLAGS_OFFSET);
+    addr_hit[ 80] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 81] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 82] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 83] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 84] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 85] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 86] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_0_FLAGS_OFFSET);
+    addr_hit[ 87] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 88] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 89] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 90] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 91] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 92] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_PAGEOUT_HIGH_OFFSET);
+    addr_hit[ 93] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_1_FLAGS_OFFSET);
+    addr_hit[ 94] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[ 95] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[ 96] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[ 97] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[ 98] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_LOW_OFFSET);
+    addr_hit[ 99] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_PAGEOUT_HIGH_OFFSET);
+    addr_hit[100] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_2_FLAGS_OFFSET);
+    addr_hit[101] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[102] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[103] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[104] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[105] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_LOW_OFFSET);
+    addr_hit[106] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_PAGEOUT_HIGH_OFFSET);
+    addr_hit[107] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_3_FLAGS_OFFSET);
+    addr_hit[108] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[109] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[110] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[111] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[112] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_LOW_OFFSET);
+    addr_hit[113] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_PAGEOUT_HIGH_OFFSET);
+    addr_hit[114] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_4_FLAGS_OFFSET);
+    addr_hit[115] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[116] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[117] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[118] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[119] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_LOW_OFFSET);
+    addr_hit[120] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_PAGEOUT_HIGH_OFFSET);
+    addr_hit[121] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_5_FLAGS_OFFSET);
+    addr_hit[122] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[123] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[124] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[125] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[126] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_LOW_OFFSET);
+    addr_hit[127] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_PAGEOUT_HIGH_OFFSET);
+    addr_hit[128] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_6_FLAGS_OFFSET);
+    addr_hit[129] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_LOW_OFFSET);
+    addr_hit[130] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_FIRST_HIGH_OFFSET);
+    addr_hit[131] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_LOW_OFFSET);
+    addr_hit[132] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEIN_LAST_HIGH_OFFSET);
+    addr_hit[133] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_LOW_OFFSET);
+    addr_hit[134] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_PAGEOUT_HIGH_OFFSET);
+    addr_hit[135] = (reg_addr == OCCAMY_QUADRANT_S1_TLB_WIDE_ENTRY_7_FLAGS_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -892,28 +4906,142 @@ module occamy_quadrant_s1_reg_top #(
   // Check sub-word write is permitted
   always_comb begin
     wr_err = (reg_we &
-              ((addr_hit[ 0] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 0] & ~reg_be))) |
-               (addr_hit[ 1] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 1] & ~reg_be))) |
-               (addr_hit[ 2] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 2] & ~reg_be))) |
-               (addr_hit[ 3] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 3] & ~reg_be))) |
-               (addr_hit[ 4] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 4] & ~reg_be))) |
-               (addr_hit[ 5] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 5] & ~reg_be))) |
-               (addr_hit[ 6] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 6] & ~reg_be))) |
-               (addr_hit[ 7] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 7] & ~reg_be))) |
-               (addr_hit[ 8] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 8] & ~reg_be))) |
-               (addr_hit[ 9] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 9] & ~reg_be))) |
-               (addr_hit[10] & (|(OCCAMY_QUADRANT_S1_PERMIT[10] & ~reg_be))) |
-               (addr_hit[11] & (|(OCCAMY_QUADRANT_S1_PERMIT[11] & ~reg_be))) |
-               (addr_hit[12] & (|(OCCAMY_QUADRANT_S1_PERMIT[12] & ~reg_be))) |
-               (addr_hit[13] & (|(OCCAMY_QUADRANT_S1_PERMIT[13] & ~reg_be))) |
-               (addr_hit[14] & (|(OCCAMY_QUADRANT_S1_PERMIT[14] & ~reg_be))) |
-               (addr_hit[15] & (|(OCCAMY_QUADRANT_S1_PERMIT[15] & ~reg_be))) |
-               (addr_hit[16] & (|(OCCAMY_QUADRANT_S1_PERMIT[16] & ~reg_be))) |
-               (addr_hit[17] & (|(OCCAMY_QUADRANT_S1_PERMIT[17] & ~reg_be))) |
-               (addr_hit[18] & (|(OCCAMY_QUADRANT_S1_PERMIT[18] & ~reg_be))) |
-               (addr_hit[19] & (|(OCCAMY_QUADRANT_S1_PERMIT[19] & ~reg_be))) |
-               (addr_hit[20] & (|(OCCAMY_QUADRANT_S1_PERMIT[20] & ~reg_be))) |
-               (addr_hit[21] & (|(OCCAMY_QUADRANT_S1_PERMIT[21] & ~reg_be)))));
+              ((addr_hit[  0] & (|(OCCAMY_QUADRANT_S1_PERMIT[  0] & ~reg_be))) |
+               (addr_hit[  1] & (|(OCCAMY_QUADRANT_S1_PERMIT[  1] & ~reg_be))) |
+               (addr_hit[  2] & (|(OCCAMY_QUADRANT_S1_PERMIT[  2] & ~reg_be))) |
+               (addr_hit[  3] & (|(OCCAMY_QUADRANT_S1_PERMIT[  3] & ~reg_be))) |
+               (addr_hit[  4] & (|(OCCAMY_QUADRANT_S1_PERMIT[  4] & ~reg_be))) |
+               (addr_hit[  5] & (|(OCCAMY_QUADRANT_S1_PERMIT[  5] & ~reg_be))) |
+               (addr_hit[  6] & (|(OCCAMY_QUADRANT_S1_PERMIT[  6] & ~reg_be))) |
+               (addr_hit[  7] & (|(OCCAMY_QUADRANT_S1_PERMIT[  7] & ~reg_be))) |
+               (addr_hit[  8] & (|(OCCAMY_QUADRANT_S1_PERMIT[  8] & ~reg_be))) |
+               (addr_hit[  9] & (|(OCCAMY_QUADRANT_S1_PERMIT[  9] & ~reg_be))) |
+               (addr_hit[ 10] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 10] & ~reg_be))) |
+               (addr_hit[ 11] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 11] & ~reg_be))) |
+               (addr_hit[ 12] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 12] & ~reg_be))) |
+               (addr_hit[ 13] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 13] & ~reg_be))) |
+               (addr_hit[ 14] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 14] & ~reg_be))) |
+               (addr_hit[ 15] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 15] & ~reg_be))) |
+               (addr_hit[ 16] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 16] & ~reg_be))) |
+               (addr_hit[ 17] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 17] & ~reg_be))) |
+               (addr_hit[ 18] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 18] & ~reg_be))) |
+               (addr_hit[ 19] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 19] & ~reg_be))) |
+               (addr_hit[ 20] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 20] & ~reg_be))) |
+               (addr_hit[ 21] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 21] & ~reg_be))) |
+               (addr_hit[ 22] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 22] & ~reg_be))) |
+               (addr_hit[ 23] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 23] & ~reg_be))) |
+               (addr_hit[ 24] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 24] & ~reg_be))) |
+               (addr_hit[ 25] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 25] & ~reg_be))) |
+               (addr_hit[ 26] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 26] & ~reg_be))) |
+               (addr_hit[ 27] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 27] & ~reg_be))) |
+               (addr_hit[ 28] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 28] & ~reg_be))) |
+               (addr_hit[ 29] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 29] & ~reg_be))) |
+               (addr_hit[ 30] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 30] & ~reg_be))) |
+               (addr_hit[ 31] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 31] & ~reg_be))) |
+               (addr_hit[ 32] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 32] & ~reg_be))) |
+               (addr_hit[ 33] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 33] & ~reg_be))) |
+               (addr_hit[ 34] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 34] & ~reg_be))) |
+               (addr_hit[ 35] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 35] & ~reg_be))) |
+               (addr_hit[ 36] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 36] & ~reg_be))) |
+               (addr_hit[ 37] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 37] & ~reg_be))) |
+               (addr_hit[ 38] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 38] & ~reg_be))) |
+               (addr_hit[ 39] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 39] & ~reg_be))) |
+               (addr_hit[ 40] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 40] & ~reg_be))) |
+               (addr_hit[ 41] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 41] & ~reg_be))) |
+               (addr_hit[ 42] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 42] & ~reg_be))) |
+               (addr_hit[ 43] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 43] & ~reg_be))) |
+               (addr_hit[ 44] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 44] & ~reg_be))) |
+               (addr_hit[ 45] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 45] & ~reg_be))) |
+               (addr_hit[ 46] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 46] & ~reg_be))) |
+               (addr_hit[ 47] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 47] & ~reg_be))) |
+               (addr_hit[ 48] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 48] & ~reg_be))) |
+               (addr_hit[ 49] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 49] & ~reg_be))) |
+               (addr_hit[ 50] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 50] & ~reg_be))) |
+               (addr_hit[ 51] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 51] & ~reg_be))) |
+               (addr_hit[ 52] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 52] & ~reg_be))) |
+               (addr_hit[ 53] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 53] & ~reg_be))) |
+               (addr_hit[ 54] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 54] & ~reg_be))) |
+               (addr_hit[ 55] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 55] & ~reg_be))) |
+               (addr_hit[ 56] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 56] & ~reg_be))) |
+               (addr_hit[ 57] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 57] & ~reg_be))) |
+               (addr_hit[ 58] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 58] & ~reg_be))) |
+               (addr_hit[ 59] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 59] & ~reg_be))) |
+               (addr_hit[ 60] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 60] & ~reg_be))) |
+               (addr_hit[ 61] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 61] & ~reg_be))) |
+               (addr_hit[ 62] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 62] & ~reg_be))) |
+               (addr_hit[ 63] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 63] & ~reg_be))) |
+               (addr_hit[ 64] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 64] & ~reg_be))) |
+               (addr_hit[ 65] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 65] & ~reg_be))) |
+               (addr_hit[ 66] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 66] & ~reg_be))) |
+               (addr_hit[ 67] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 67] & ~reg_be))) |
+               (addr_hit[ 68] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 68] & ~reg_be))) |
+               (addr_hit[ 69] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 69] & ~reg_be))) |
+               (addr_hit[ 70] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 70] & ~reg_be))) |
+               (addr_hit[ 71] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 71] & ~reg_be))) |
+               (addr_hit[ 72] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 72] & ~reg_be))) |
+               (addr_hit[ 73] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 73] & ~reg_be))) |
+               (addr_hit[ 74] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 74] & ~reg_be))) |
+               (addr_hit[ 75] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 75] & ~reg_be))) |
+               (addr_hit[ 76] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 76] & ~reg_be))) |
+               (addr_hit[ 77] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 77] & ~reg_be))) |
+               (addr_hit[ 78] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 78] & ~reg_be))) |
+               (addr_hit[ 79] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 79] & ~reg_be))) |
+               (addr_hit[ 80] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 80] & ~reg_be))) |
+               (addr_hit[ 81] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 81] & ~reg_be))) |
+               (addr_hit[ 82] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 82] & ~reg_be))) |
+               (addr_hit[ 83] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 83] & ~reg_be))) |
+               (addr_hit[ 84] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 84] & ~reg_be))) |
+               (addr_hit[ 85] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 85] & ~reg_be))) |
+               (addr_hit[ 86] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 86] & ~reg_be))) |
+               (addr_hit[ 87] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 87] & ~reg_be))) |
+               (addr_hit[ 88] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 88] & ~reg_be))) |
+               (addr_hit[ 89] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 89] & ~reg_be))) |
+               (addr_hit[ 90] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 90] & ~reg_be))) |
+               (addr_hit[ 91] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 91] & ~reg_be))) |
+               (addr_hit[ 92] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 92] & ~reg_be))) |
+               (addr_hit[ 93] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 93] & ~reg_be))) |
+               (addr_hit[ 94] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 94] & ~reg_be))) |
+               (addr_hit[ 95] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 95] & ~reg_be))) |
+               (addr_hit[ 96] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 96] & ~reg_be))) |
+               (addr_hit[ 97] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 97] & ~reg_be))) |
+               (addr_hit[ 98] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 98] & ~reg_be))) |
+               (addr_hit[ 99] & (|(OCCAMY_QUADRANT_S1_PERMIT[ 99] & ~reg_be))) |
+               (addr_hit[100] & (|(OCCAMY_QUADRANT_S1_PERMIT[100] & ~reg_be))) |
+               (addr_hit[101] & (|(OCCAMY_QUADRANT_S1_PERMIT[101] & ~reg_be))) |
+               (addr_hit[102] & (|(OCCAMY_QUADRANT_S1_PERMIT[102] & ~reg_be))) |
+               (addr_hit[103] & (|(OCCAMY_QUADRANT_S1_PERMIT[103] & ~reg_be))) |
+               (addr_hit[104] & (|(OCCAMY_QUADRANT_S1_PERMIT[104] & ~reg_be))) |
+               (addr_hit[105] & (|(OCCAMY_QUADRANT_S1_PERMIT[105] & ~reg_be))) |
+               (addr_hit[106] & (|(OCCAMY_QUADRANT_S1_PERMIT[106] & ~reg_be))) |
+               (addr_hit[107] & (|(OCCAMY_QUADRANT_S1_PERMIT[107] & ~reg_be))) |
+               (addr_hit[108] & (|(OCCAMY_QUADRANT_S1_PERMIT[108] & ~reg_be))) |
+               (addr_hit[109] & (|(OCCAMY_QUADRANT_S1_PERMIT[109] & ~reg_be))) |
+               (addr_hit[110] & (|(OCCAMY_QUADRANT_S1_PERMIT[110] & ~reg_be))) |
+               (addr_hit[111] & (|(OCCAMY_QUADRANT_S1_PERMIT[111] & ~reg_be))) |
+               (addr_hit[112] & (|(OCCAMY_QUADRANT_S1_PERMIT[112] & ~reg_be))) |
+               (addr_hit[113] & (|(OCCAMY_QUADRANT_S1_PERMIT[113] & ~reg_be))) |
+               (addr_hit[114] & (|(OCCAMY_QUADRANT_S1_PERMIT[114] & ~reg_be))) |
+               (addr_hit[115] & (|(OCCAMY_QUADRANT_S1_PERMIT[115] & ~reg_be))) |
+               (addr_hit[116] & (|(OCCAMY_QUADRANT_S1_PERMIT[116] & ~reg_be))) |
+               (addr_hit[117] & (|(OCCAMY_QUADRANT_S1_PERMIT[117] & ~reg_be))) |
+               (addr_hit[118] & (|(OCCAMY_QUADRANT_S1_PERMIT[118] & ~reg_be))) |
+               (addr_hit[119] & (|(OCCAMY_QUADRANT_S1_PERMIT[119] & ~reg_be))) |
+               (addr_hit[120] & (|(OCCAMY_QUADRANT_S1_PERMIT[120] & ~reg_be))) |
+               (addr_hit[121] & (|(OCCAMY_QUADRANT_S1_PERMIT[121] & ~reg_be))) |
+               (addr_hit[122] & (|(OCCAMY_QUADRANT_S1_PERMIT[122] & ~reg_be))) |
+               (addr_hit[123] & (|(OCCAMY_QUADRANT_S1_PERMIT[123] & ~reg_be))) |
+               (addr_hit[124] & (|(OCCAMY_QUADRANT_S1_PERMIT[124] & ~reg_be))) |
+               (addr_hit[125] & (|(OCCAMY_QUADRANT_S1_PERMIT[125] & ~reg_be))) |
+               (addr_hit[126] & (|(OCCAMY_QUADRANT_S1_PERMIT[126] & ~reg_be))) |
+               (addr_hit[127] & (|(OCCAMY_QUADRANT_S1_PERMIT[127] & ~reg_be))) |
+               (addr_hit[128] & (|(OCCAMY_QUADRANT_S1_PERMIT[128] & ~reg_be))) |
+               (addr_hit[129] & (|(OCCAMY_QUADRANT_S1_PERMIT[129] & ~reg_be))) |
+               (addr_hit[130] & (|(OCCAMY_QUADRANT_S1_PERMIT[130] & ~reg_be))) |
+               (addr_hit[131] & (|(OCCAMY_QUADRANT_S1_PERMIT[131] & ~reg_be))) |
+               (addr_hit[132] & (|(OCCAMY_QUADRANT_S1_PERMIT[132] & ~reg_be))) |
+               (addr_hit[133] & (|(OCCAMY_QUADRANT_S1_PERMIT[133] & ~reg_be))) |
+               (addr_hit[134] & (|(OCCAMY_QUADRANT_S1_PERMIT[134] & ~reg_be))) |
+               (addr_hit[135] & (|(OCCAMY_QUADRANT_S1_PERMIT[135] & ~reg_be)))));
   end
 
   assign clk_ena_we = addr_hit[0] & reg_we & !reg_error;
@@ -948,53 +5076,443 @@ module occamy_quadrant_s1_reg_top #(
   assign ro_cache_flush_we = addr_hit[5] & reg_we & !reg_error;
   assign ro_cache_flush_wd = reg_wdata[0];
 
-  assign ro_start_addr_low_0_we = addr_hit[6] & reg_we & !reg_error;
+  assign tlb_wide_enable_we = addr_hit[6] & reg_we & !reg_error;
+  assign tlb_wide_enable_wd = reg_wdata[0];
+
+  assign tlb_narrow_enable_we = addr_hit[7] & reg_we & !reg_error;
+  assign tlb_narrow_enable_wd = reg_wdata[0];
+
+  assign ro_start_addr_low_0_we = addr_hit[8] & reg_we & !reg_error;
   assign ro_start_addr_low_0_wd = reg_wdata[31:0];
 
-  assign ro_start_addr_high_0_we = addr_hit[7] & reg_we & !reg_error;
+  assign ro_start_addr_high_0_we = addr_hit[9] & reg_we & !reg_error;
   assign ro_start_addr_high_0_wd = reg_wdata[15:0];
 
-  assign ro_end_addr_low_0_we = addr_hit[8] & reg_we & !reg_error;
+  assign ro_end_addr_low_0_we = addr_hit[10] & reg_we & !reg_error;
   assign ro_end_addr_low_0_wd = reg_wdata[31:0];
 
-  assign ro_end_addr_high_0_we = addr_hit[9] & reg_we & !reg_error;
+  assign ro_end_addr_high_0_we = addr_hit[11] & reg_we & !reg_error;
   assign ro_end_addr_high_0_wd = reg_wdata[15:0];
 
-  assign ro_start_addr_low_1_we = addr_hit[10] & reg_we & !reg_error;
+  assign ro_start_addr_low_1_we = addr_hit[12] & reg_we & !reg_error;
   assign ro_start_addr_low_1_wd = reg_wdata[31:0];
 
-  assign ro_start_addr_high_1_we = addr_hit[11] & reg_we & !reg_error;
+  assign ro_start_addr_high_1_we = addr_hit[13] & reg_we & !reg_error;
   assign ro_start_addr_high_1_wd = reg_wdata[15:0];
 
-  assign ro_end_addr_low_1_we = addr_hit[12] & reg_we & !reg_error;
+  assign ro_end_addr_low_1_we = addr_hit[14] & reg_we & !reg_error;
   assign ro_end_addr_low_1_wd = reg_wdata[31:0];
 
-  assign ro_end_addr_high_1_we = addr_hit[13] & reg_we & !reg_error;
+  assign ro_end_addr_high_1_we = addr_hit[15] & reg_we & !reg_error;
   assign ro_end_addr_high_1_wd = reg_wdata[15:0];
 
-  assign ro_start_addr_low_2_we = addr_hit[14] & reg_we & !reg_error;
+  assign ro_start_addr_low_2_we = addr_hit[16] & reg_we & !reg_error;
   assign ro_start_addr_low_2_wd = reg_wdata[31:0];
 
-  assign ro_start_addr_high_2_we = addr_hit[15] & reg_we & !reg_error;
+  assign ro_start_addr_high_2_we = addr_hit[17] & reg_we & !reg_error;
   assign ro_start_addr_high_2_wd = reg_wdata[15:0];
 
-  assign ro_end_addr_low_2_we = addr_hit[16] & reg_we & !reg_error;
+  assign ro_end_addr_low_2_we = addr_hit[18] & reg_we & !reg_error;
   assign ro_end_addr_low_2_wd = reg_wdata[31:0];
 
-  assign ro_end_addr_high_2_we = addr_hit[17] & reg_we & !reg_error;
+  assign ro_end_addr_high_2_we = addr_hit[19] & reg_we & !reg_error;
   assign ro_end_addr_high_2_wd = reg_wdata[15:0];
 
-  assign ro_start_addr_low_3_we = addr_hit[18] & reg_we & !reg_error;
+  assign ro_start_addr_low_3_we = addr_hit[20] & reg_we & !reg_error;
   assign ro_start_addr_low_3_wd = reg_wdata[31:0];
 
-  assign ro_start_addr_high_3_we = addr_hit[19] & reg_we & !reg_error;
+  assign ro_start_addr_high_3_we = addr_hit[21] & reg_we & !reg_error;
   assign ro_start_addr_high_3_wd = reg_wdata[15:0];
 
-  assign ro_end_addr_low_3_we = addr_hit[20] & reg_we & !reg_error;
+  assign ro_end_addr_low_3_we = addr_hit[22] & reg_we & !reg_error;
   assign ro_end_addr_low_3_wd = reg_wdata[31:0];
 
-  assign ro_end_addr_high_3_we = addr_hit[21] & reg_we & !reg_error;
+  assign ro_end_addr_high_3_we = addr_hit[23] & reg_we & !reg_error;
   assign ro_end_addr_high_3_wd = reg_wdata[15:0];
+
+  assign tlb_narrow_entry_0_pagein_first_low_we = addr_hit[24] & reg_we & !reg_error;
+  assign tlb_narrow_entry_0_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_0_pagein_first_high_we = addr_hit[25] & reg_we & !reg_error;
+  assign tlb_narrow_entry_0_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_0_pagein_last_low_we = addr_hit[26] & reg_we & !reg_error;
+  assign tlb_narrow_entry_0_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_0_pagein_last_high_we = addr_hit[27] & reg_we & !reg_error;
+  assign tlb_narrow_entry_0_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_0_pageout_low_we = addr_hit[28] & reg_we & !reg_error;
+  assign tlb_narrow_entry_0_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_0_pageout_high_we = addr_hit[29] & reg_we & !reg_error;
+  assign tlb_narrow_entry_0_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_0_flags_valid_we = addr_hit[30] & reg_we & !reg_error;
+  assign tlb_narrow_entry_0_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_narrow_entry_0_flags_read_only_we = addr_hit[30] & reg_we & !reg_error;
+  assign tlb_narrow_entry_0_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_narrow_entry_1_pagein_first_low_we = addr_hit[31] & reg_we & !reg_error;
+  assign tlb_narrow_entry_1_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_1_pagein_first_high_we = addr_hit[32] & reg_we & !reg_error;
+  assign tlb_narrow_entry_1_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_1_pagein_last_low_we = addr_hit[33] & reg_we & !reg_error;
+  assign tlb_narrow_entry_1_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_1_pagein_last_high_we = addr_hit[34] & reg_we & !reg_error;
+  assign tlb_narrow_entry_1_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_1_pageout_low_we = addr_hit[35] & reg_we & !reg_error;
+  assign tlb_narrow_entry_1_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_1_pageout_high_we = addr_hit[36] & reg_we & !reg_error;
+  assign tlb_narrow_entry_1_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_1_flags_valid_we = addr_hit[37] & reg_we & !reg_error;
+  assign tlb_narrow_entry_1_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_narrow_entry_1_flags_read_only_we = addr_hit[37] & reg_we & !reg_error;
+  assign tlb_narrow_entry_1_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_narrow_entry_2_pagein_first_low_we = addr_hit[38] & reg_we & !reg_error;
+  assign tlb_narrow_entry_2_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_2_pagein_first_high_we = addr_hit[39] & reg_we & !reg_error;
+  assign tlb_narrow_entry_2_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_2_pagein_last_low_we = addr_hit[40] & reg_we & !reg_error;
+  assign tlb_narrow_entry_2_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_2_pagein_last_high_we = addr_hit[41] & reg_we & !reg_error;
+  assign tlb_narrow_entry_2_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_2_pageout_low_we = addr_hit[42] & reg_we & !reg_error;
+  assign tlb_narrow_entry_2_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_2_pageout_high_we = addr_hit[43] & reg_we & !reg_error;
+  assign tlb_narrow_entry_2_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_2_flags_valid_we = addr_hit[44] & reg_we & !reg_error;
+  assign tlb_narrow_entry_2_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_narrow_entry_2_flags_read_only_we = addr_hit[44] & reg_we & !reg_error;
+  assign tlb_narrow_entry_2_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_narrow_entry_3_pagein_first_low_we = addr_hit[45] & reg_we & !reg_error;
+  assign tlb_narrow_entry_3_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_3_pagein_first_high_we = addr_hit[46] & reg_we & !reg_error;
+  assign tlb_narrow_entry_3_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_3_pagein_last_low_we = addr_hit[47] & reg_we & !reg_error;
+  assign tlb_narrow_entry_3_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_3_pagein_last_high_we = addr_hit[48] & reg_we & !reg_error;
+  assign tlb_narrow_entry_3_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_3_pageout_low_we = addr_hit[49] & reg_we & !reg_error;
+  assign tlb_narrow_entry_3_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_3_pageout_high_we = addr_hit[50] & reg_we & !reg_error;
+  assign tlb_narrow_entry_3_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_3_flags_valid_we = addr_hit[51] & reg_we & !reg_error;
+  assign tlb_narrow_entry_3_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_narrow_entry_3_flags_read_only_we = addr_hit[51] & reg_we & !reg_error;
+  assign tlb_narrow_entry_3_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_narrow_entry_4_pagein_first_low_we = addr_hit[52] & reg_we & !reg_error;
+  assign tlb_narrow_entry_4_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_4_pagein_first_high_we = addr_hit[53] & reg_we & !reg_error;
+  assign tlb_narrow_entry_4_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_4_pagein_last_low_we = addr_hit[54] & reg_we & !reg_error;
+  assign tlb_narrow_entry_4_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_4_pagein_last_high_we = addr_hit[55] & reg_we & !reg_error;
+  assign tlb_narrow_entry_4_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_4_pageout_low_we = addr_hit[56] & reg_we & !reg_error;
+  assign tlb_narrow_entry_4_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_4_pageout_high_we = addr_hit[57] & reg_we & !reg_error;
+  assign tlb_narrow_entry_4_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_4_flags_valid_we = addr_hit[58] & reg_we & !reg_error;
+  assign tlb_narrow_entry_4_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_narrow_entry_4_flags_read_only_we = addr_hit[58] & reg_we & !reg_error;
+  assign tlb_narrow_entry_4_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_narrow_entry_5_pagein_first_low_we = addr_hit[59] & reg_we & !reg_error;
+  assign tlb_narrow_entry_5_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_5_pagein_first_high_we = addr_hit[60] & reg_we & !reg_error;
+  assign tlb_narrow_entry_5_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_5_pagein_last_low_we = addr_hit[61] & reg_we & !reg_error;
+  assign tlb_narrow_entry_5_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_5_pagein_last_high_we = addr_hit[62] & reg_we & !reg_error;
+  assign tlb_narrow_entry_5_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_5_pageout_low_we = addr_hit[63] & reg_we & !reg_error;
+  assign tlb_narrow_entry_5_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_5_pageout_high_we = addr_hit[64] & reg_we & !reg_error;
+  assign tlb_narrow_entry_5_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_5_flags_valid_we = addr_hit[65] & reg_we & !reg_error;
+  assign tlb_narrow_entry_5_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_narrow_entry_5_flags_read_only_we = addr_hit[65] & reg_we & !reg_error;
+  assign tlb_narrow_entry_5_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_narrow_entry_6_pagein_first_low_we = addr_hit[66] & reg_we & !reg_error;
+  assign tlb_narrow_entry_6_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_6_pagein_first_high_we = addr_hit[67] & reg_we & !reg_error;
+  assign tlb_narrow_entry_6_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_6_pagein_last_low_we = addr_hit[68] & reg_we & !reg_error;
+  assign tlb_narrow_entry_6_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_6_pagein_last_high_we = addr_hit[69] & reg_we & !reg_error;
+  assign tlb_narrow_entry_6_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_6_pageout_low_we = addr_hit[70] & reg_we & !reg_error;
+  assign tlb_narrow_entry_6_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_6_pageout_high_we = addr_hit[71] & reg_we & !reg_error;
+  assign tlb_narrow_entry_6_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_6_flags_valid_we = addr_hit[72] & reg_we & !reg_error;
+  assign tlb_narrow_entry_6_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_narrow_entry_6_flags_read_only_we = addr_hit[72] & reg_we & !reg_error;
+  assign tlb_narrow_entry_6_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_narrow_entry_7_pagein_first_low_we = addr_hit[73] & reg_we & !reg_error;
+  assign tlb_narrow_entry_7_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_7_pagein_first_high_we = addr_hit[74] & reg_we & !reg_error;
+  assign tlb_narrow_entry_7_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_7_pagein_last_low_we = addr_hit[75] & reg_we & !reg_error;
+  assign tlb_narrow_entry_7_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_7_pagein_last_high_we = addr_hit[76] & reg_we & !reg_error;
+  assign tlb_narrow_entry_7_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_7_pageout_low_we = addr_hit[77] & reg_we & !reg_error;
+  assign tlb_narrow_entry_7_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_narrow_entry_7_pageout_high_we = addr_hit[78] & reg_we & !reg_error;
+  assign tlb_narrow_entry_7_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_narrow_entry_7_flags_valid_we = addr_hit[79] & reg_we & !reg_error;
+  assign tlb_narrow_entry_7_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_narrow_entry_7_flags_read_only_we = addr_hit[79] & reg_we & !reg_error;
+  assign tlb_narrow_entry_7_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_wide_entry_0_pagein_first_low_we = addr_hit[80] & reg_we & !reg_error;
+  assign tlb_wide_entry_0_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_0_pagein_first_high_we = addr_hit[81] & reg_we & !reg_error;
+  assign tlb_wide_entry_0_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_0_pagein_last_low_we = addr_hit[82] & reg_we & !reg_error;
+  assign tlb_wide_entry_0_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_0_pagein_last_high_we = addr_hit[83] & reg_we & !reg_error;
+  assign tlb_wide_entry_0_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_0_pageout_low_we = addr_hit[84] & reg_we & !reg_error;
+  assign tlb_wide_entry_0_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_0_pageout_high_we = addr_hit[85] & reg_we & !reg_error;
+  assign tlb_wide_entry_0_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_0_flags_valid_we = addr_hit[86] & reg_we & !reg_error;
+  assign tlb_wide_entry_0_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_wide_entry_0_flags_read_only_we = addr_hit[86] & reg_we & !reg_error;
+  assign tlb_wide_entry_0_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_wide_entry_1_pagein_first_low_we = addr_hit[87] & reg_we & !reg_error;
+  assign tlb_wide_entry_1_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_1_pagein_first_high_we = addr_hit[88] & reg_we & !reg_error;
+  assign tlb_wide_entry_1_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_1_pagein_last_low_we = addr_hit[89] & reg_we & !reg_error;
+  assign tlb_wide_entry_1_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_1_pagein_last_high_we = addr_hit[90] & reg_we & !reg_error;
+  assign tlb_wide_entry_1_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_1_pageout_low_we = addr_hit[91] & reg_we & !reg_error;
+  assign tlb_wide_entry_1_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_1_pageout_high_we = addr_hit[92] & reg_we & !reg_error;
+  assign tlb_wide_entry_1_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_1_flags_valid_we = addr_hit[93] & reg_we & !reg_error;
+  assign tlb_wide_entry_1_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_wide_entry_1_flags_read_only_we = addr_hit[93] & reg_we & !reg_error;
+  assign tlb_wide_entry_1_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_wide_entry_2_pagein_first_low_we = addr_hit[94] & reg_we & !reg_error;
+  assign tlb_wide_entry_2_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_2_pagein_first_high_we = addr_hit[95] & reg_we & !reg_error;
+  assign tlb_wide_entry_2_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_2_pagein_last_low_we = addr_hit[96] & reg_we & !reg_error;
+  assign tlb_wide_entry_2_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_2_pagein_last_high_we = addr_hit[97] & reg_we & !reg_error;
+  assign tlb_wide_entry_2_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_2_pageout_low_we = addr_hit[98] & reg_we & !reg_error;
+  assign tlb_wide_entry_2_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_2_pageout_high_we = addr_hit[99] & reg_we & !reg_error;
+  assign tlb_wide_entry_2_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_2_flags_valid_we = addr_hit[100] & reg_we & !reg_error;
+  assign tlb_wide_entry_2_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_wide_entry_2_flags_read_only_we = addr_hit[100] & reg_we & !reg_error;
+  assign tlb_wide_entry_2_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_wide_entry_3_pagein_first_low_we = addr_hit[101] & reg_we & !reg_error;
+  assign tlb_wide_entry_3_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_3_pagein_first_high_we = addr_hit[102] & reg_we & !reg_error;
+  assign tlb_wide_entry_3_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_3_pagein_last_low_we = addr_hit[103] & reg_we & !reg_error;
+  assign tlb_wide_entry_3_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_3_pagein_last_high_we = addr_hit[104] & reg_we & !reg_error;
+  assign tlb_wide_entry_3_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_3_pageout_low_we = addr_hit[105] & reg_we & !reg_error;
+  assign tlb_wide_entry_3_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_3_pageout_high_we = addr_hit[106] & reg_we & !reg_error;
+  assign tlb_wide_entry_3_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_3_flags_valid_we = addr_hit[107] & reg_we & !reg_error;
+  assign tlb_wide_entry_3_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_wide_entry_3_flags_read_only_we = addr_hit[107] & reg_we & !reg_error;
+  assign tlb_wide_entry_3_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_wide_entry_4_pagein_first_low_we = addr_hit[108] & reg_we & !reg_error;
+  assign tlb_wide_entry_4_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_4_pagein_first_high_we = addr_hit[109] & reg_we & !reg_error;
+  assign tlb_wide_entry_4_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_4_pagein_last_low_we = addr_hit[110] & reg_we & !reg_error;
+  assign tlb_wide_entry_4_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_4_pagein_last_high_we = addr_hit[111] & reg_we & !reg_error;
+  assign tlb_wide_entry_4_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_4_pageout_low_we = addr_hit[112] & reg_we & !reg_error;
+  assign tlb_wide_entry_4_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_4_pageout_high_we = addr_hit[113] & reg_we & !reg_error;
+  assign tlb_wide_entry_4_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_4_flags_valid_we = addr_hit[114] & reg_we & !reg_error;
+  assign tlb_wide_entry_4_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_wide_entry_4_flags_read_only_we = addr_hit[114] & reg_we & !reg_error;
+  assign tlb_wide_entry_4_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_wide_entry_5_pagein_first_low_we = addr_hit[115] & reg_we & !reg_error;
+  assign tlb_wide_entry_5_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_5_pagein_first_high_we = addr_hit[116] & reg_we & !reg_error;
+  assign tlb_wide_entry_5_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_5_pagein_last_low_we = addr_hit[117] & reg_we & !reg_error;
+  assign tlb_wide_entry_5_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_5_pagein_last_high_we = addr_hit[118] & reg_we & !reg_error;
+  assign tlb_wide_entry_5_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_5_pageout_low_we = addr_hit[119] & reg_we & !reg_error;
+  assign tlb_wide_entry_5_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_5_pageout_high_we = addr_hit[120] & reg_we & !reg_error;
+  assign tlb_wide_entry_5_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_5_flags_valid_we = addr_hit[121] & reg_we & !reg_error;
+  assign tlb_wide_entry_5_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_wide_entry_5_flags_read_only_we = addr_hit[121] & reg_we & !reg_error;
+  assign tlb_wide_entry_5_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_wide_entry_6_pagein_first_low_we = addr_hit[122] & reg_we & !reg_error;
+  assign tlb_wide_entry_6_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_6_pagein_first_high_we = addr_hit[123] & reg_we & !reg_error;
+  assign tlb_wide_entry_6_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_6_pagein_last_low_we = addr_hit[124] & reg_we & !reg_error;
+  assign tlb_wide_entry_6_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_6_pagein_last_high_we = addr_hit[125] & reg_we & !reg_error;
+  assign tlb_wide_entry_6_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_6_pageout_low_we = addr_hit[126] & reg_we & !reg_error;
+  assign tlb_wide_entry_6_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_6_pageout_high_we = addr_hit[127] & reg_we & !reg_error;
+  assign tlb_wide_entry_6_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_6_flags_valid_we = addr_hit[128] & reg_we & !reg_error;
+  assign tlb_wide_entry_6_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_wide_entry_6_flags_read_only_we = addr_hit[128] & reg_we & !reg_error;
+  assign tlb_wide_entry_6_flags_read_only_wd = reg_wdata[1];
+
+  assign tlb_wide_entry_7_pagein_first_low_we = addr_hit[129] & reg_we & !reg_error;
+  assign tlb_wide_entry_7_pagein_first_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_7_pagein_first_high_we = addr_hit[130] & reg_we & !reg_error;
+  assign tlb_wide_entry_7_pagein_first_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_7_pagein_last_low_we = addr_hit[131] & reg_we & !reg_error;
+  assign tlb_wide_entry_7_pagein_last_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_7_pagein_last_high_we = addr_hit[132] & reg_we & !reg_error;
+  assign tlb_wide_entry_7_pagein_last_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_7_pageout_low_we = addr_hit[133] & reg_we & !reg_error;
+  assign tlb_wide_entry_7_pageout_low_wd = reg_wdata[31:0];
+
+  assign tlb_wide_entry_7_pageout_high_we = addr_hit[134] & reg_we & !reg_error;
+  assign tlb_wide_entry_7_pageout_high_wd = reg_wdata[3:0];
+
+  assign tlb_wide_entry_7_flags_valid_we = addr_hit[135] & reg_we & !reg_error;
+  assign tlb_wide_entry_7_flags_valid_wd = reg_wdata[0];
+
+  assign tlb_wide_entry_7_flags_read_only_we = addr_hit[135] & reg_we & !reg_error;
+  assign tlb_wide_entry_7_flags_read_only_wd = reg_wdata[1];
 
   // Read data return
   always_comb begin
@@ -1031,67 +5549,539 @@ module occamy_quadrant_s1_reg_top #(
       end
 
       addr_hit[6]: begin
-        reg_rdata_next[31:0] = ro_start_addr_low_0_qs;
+        reg_rdata_next[0] = tlb_wide_enable_qs;
       end
 
       addr_hit[7]: begin
-        reg_rdata_next[15:0] = ro_start_addr_high_0_qs;
+        reg_rdata_next[0] = tlb_narrow_enable_qs;
       end
 
       addr_hit[8]: begin
-        reg_rdata_next[31:0] = ro_end_addr_low_0_qs;
+        reg_rdata_next[31:0] = ro_start_addr_low_0_qs;
       end
 
       addr_hit[9]: begin
-        reg_rdata_next[15:0] = ro_end_addr_high_0_qs;
+        reg_rdata_next[15:0] = ro_start_addr_high_0_qs;
       end
 
       addr_hit[10]: begin
-        reg_rdata_next[31:0] = ro_start_addr_low_1_qs;
+        reg_rdata_next[31:0] = ro_end_addr_low_0_qs;
       end
 
       addr_hit[11]: begin
-        reg_rdata_next[15:0] = ro_start_addr_high_1_qs;
+        reg_rdata_next[15:0] = ro_end_addr_high_0_qs;
       end
 
       addr_hit[12]: begin
-        reg_rdata_next[31:0] = ro_end_addr_low_1_qs;
+        reg_rdata_next[31:0] = ro_start_addr_low_1_qs;
       end
 
       addr_hit[13]: begin
-        reg_rdata_next[15:0] = ro_end_addr_high_1_qs;
+        reg_rdata_next[15:0] = ro_start_addr_high_1_qs;
       end
 
       addr_hit[14]: begin
-        reg_rdata_next[31:0] = ro_start_addr_low_2_qs;
+        reg_rdata_next[31:0] = ro_end_addr_low_1_qs;
       end
 
       addr_hit[15]: begin
-        reg_rdata_next[15:0] = ro_start_addr_high_2_qs;
+        reg_rdata_next[15:0] = ro_end_addr_high_1_qs;
       end
 
       addr_hit[16]: begin
-        reg_rdata_next[31:0] = ro_end_addr_low_2_qs;
+        reg_rdata_next[31:0] = ro_start_addr_low_2_qs;
       end
 
       addr_hit[17]: begin
-        reg_rdata_next[15:0] = ro_end_addr_high_2_qs;
+        reg_rdata_next[15:0] = ro_start_addr_high_2_qs;
       end
 
       addr_hit[18]: begin
-        reg_rdata_next[31:0] = ro_start_addr_low_3_qs;
+        reg_rdata_next[31:0] = ro_end_addr_low_2_qs;
       end
 
       addr_hit[19]: begin
-        reg_rdata_next[15:0] = ro_start_addr_high_3_qs;
+        reg_rdata_next[15:0] = ro_end_addr_high_2_qs;
       end
 
       addr_hit[20]: begin
-        reg_rdata_next[31:0] = ro_end_addr_low_3_qs;
+        reg_rdata_next[31:0] = ro_start_addr_low_3_qs;
       end
 
       addr_hit[21]: begin
+        reg_rdata_next[15:0] = ro_start_addr_high_3_qs;
+      end
+
+      addr_hit[22]: begin
+        reg_rdata_next[31:0] = ro_end_addr_low_3_qs;
+      end
+
+      addr_hit[23]: begin
         reg_rdata_next[15:0] = ro_end_addr_high_3_qs;
+      end
+
+      addr_hit[24]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_0_pagein_first_low_qs;
+      end
+
+      addr_hit[25]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_0_pagein_first_high_qs;
+      end
+
+      addr_hit[26]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_0_pagein_last_low_qs;
+      end
+
+      addr_hit[27]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_0_pagein_last_high_qs;
+      end
+
+      addr_hit[28]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_0_pageout_low_qs;
+      end
+
+      addr_hit[29]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_0_pageout_high_qs;
+      end
+
+      addr_hit[30]: begin
+        reg_rdata_next[0] = tlb_narrow_entry_0_flags_valid_qs;
+        reg_rdata_next[1] = tlb_narrow_entry_0_flags_read_only_qs;
+      end
+
+      addr_hit[31]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_1_pagein_first_low_qs;
+      end
+
+      addr_hit[32]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_1_pagein_first_high_qs;
+      end
+
+      addr_hit[33]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_1_pagein_last_low_qs;
+      end
+
+      addr_hit[34]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_1_pagein_last_high_qs;
+      end
+
+      addr_hit[35]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_1_pageout_low_qs;
+      end
+
+      addr_hit[36]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_1_pageout_high_qs;
+      end
+
+      addr_hit[37]: begin
+        reg_rdata_next[0] = tlb_narrow_entry_1_flags_valid_qs;
+        reg_rdata_next[1] = tlb_narrow_entry_1_flags_read_only_qs;
+      end
+
+      addr_hit[38]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_2_pagein_first_low_qs;
+      end
+
+      addr_hit[39]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_2_pagein_first_high_qs;
+      end
+
+      addr_hit[40]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_2_pagein_last_low_qs;
+      end
+
+      addr_hit[41]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_2_pagein_last_high_qs;
+      end
+
+      addr_hit[42]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_2_pageout_low_qs;
+      end
+
+      addr_hit[43]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_2_pageout_high_qs;
+      end
+
+      addr_hit[44]: begin
+        reg_rdata_next[0] = tlb_narrow_entry_2_flags_valid_qs;
+        reg_rdata_next[1] = tlb_narrow_entry_2_flags_read_only_qs;
+      end
+
+      addr_hit[45]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_3_pagein_first_low_qs;
+      end
+
+      addr_hit[46]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_3_pagein_first_high_qs;
+      end
+
+      addr_hit[47]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_3_pagein_last_low_qs;
+      end
+
+      addr_hit[48]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_3_pagein_last_high_qs;
+      end
+
+      addr_hit[49]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_3_pageout_low_qs;
+      end
+
+      addr_hit[50]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_3_pageout_high_qs;
+      end
+
+      addr_hit[51]: begin
+        reg_rdata_next[0] = tlb_narrow_entry_3_flags_valid_qs;
+        reg_rdata_next[1] = tlb_narrow_entry_3_flags_read_only_qs;
+      end
+
+      addr_hit[52]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_4_pagein_first_low_qs;
+      end
+
+      addr_hit[53]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_4_pagein_first_high_qs;
+      end
+
+      addr_hit[54]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_4_pagein_last_low_qs;
+      end
+
+      addr_hit[55]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_4_pagein_last_high_qs;
+      end
+
+      addr_hit[56]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_4_pageout_low_qs;
+      end
+
+      addr_hit[57]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_4_pageout_high_qs;
+      end
+
+      addr_hit[58]: begin
+        reg_rdata_next[0] = tlb_narrow_entry_4_flags_valid_qs;
+        reg_rdata_next[1] = tlb_narrow_entry_4_flags_read_only_qs;
+      end
+
+      addr_hit[59]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_5_pagein_first_low_qs;
+      end
+
+      addr_hit[60]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_5_pagein_first_high_qs;
+      end
+
+      addr_hit[61]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_5_pagein_last_low_qs;
+      end
+
+      addr_hit[62]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_5_pagein_last_high_qs;
+      end
+
+      addr_hit[63]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_5_pageout_low_qs;
+      end
+
+      addr_hit[64]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_5_pageout_high_qs;
+      end
+
+      addr_hit[65]: begin
+        reg_rdata_next[0] = tlb_narrow_entry_5_flags_valid_qs;
+        reg_rdata_next[1] = tlb_narrow_entry_5_flags_read_only_qs;
+      end
+
+      addr_hit[66]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_6_pagein_first_low_qs;
+      end
+
+      addr_hit[67]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_6_pagein_first_high_qs;
+      end
+
+      addr_hit[68]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_6_pagein_last_low_qs;
+      end
+
+      addr_hit[69]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_6_pagein_last_high_qs;
+      end
+
+      addr_hit[70]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_6_pageout_low_qs;
+      end
+
+      addr_hit[71]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_6_pageout_high_qs;
+      end
+
+      addr_hit[72]: begin
+        reg_rdata_next[0] = tlb_narrow_entry_6_flags_valid_qs;
+        reg_rdata_next[1] = tlb_narrow_entry_6_flags_read_only_qs;
+      end
+
+      addr_hit[73]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_7_pagein_first_low_qs;
+      end
+
+      addr_hit[74]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_7_pagein_first_high_qs;
+      end
+
+      addr_hit[75]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_7_pagein_last_low_qs;
+      end
+
+      addr_hit[76]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_7_pagein_last_high_qs;
+      end
+
+      addr_hit[77]: begin
+        reg_rdata_next[31:0] = tlb_narrow_entry_7_pageout_low_qs;
+      end
+
+      addr_hit[78]: begin
+        reg_rdata_next[3:0] = tlb_narrow_entry_7_pageout_high_qs;
+      end
+
+      addr_hit[79]: begin
+        reg_rdata_next[0] = tlb_narrow_entry_7_flags_valid_qs;
+        reg_rdata_next[1] = tlb_narrow_entry_7_flags_read_only_qs;
+      end
+
+      addr_hit[80]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_0_pagein_first_low_qs;
+      end
+
+      addr_hit[81]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_0_pagein_first_high_qs;
+      end
+
+      addr_hit[82]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_0_pagein_last_low_qs;
+      end
+
+      addr_hit[83]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_0_pagein_last_high_qs;
+      end
+
+      addr_hit[84]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_0_pageout_low_qs;
+      end
+
+      addr_hit[85]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_0_pageout_high_qs;
+      end
+
+      addr_hit[86]: begin
+        reg_rdata_next[0] = tlb_wide_entry_0_flags_valid_qs;
+        reg_rdata_next[1] = tlb_wide_entry_0_flags_read_only_qs;
+      end
+
+      addr_hit[87]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_1_pagein_first_low_qs;
+      end
+
+      addr_hit[88]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_1_pagein_first_high_qs;
+      end
+
+      addr_hit[89]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_1_pagein_last_low_qs;
+      end
+
+      addr_hit[90]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_1_pagein_last_high_qs;
+      end
+
+      addr_hit[91]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_1_pageout_low_qs;
+      end
+
+      addr_hit[92]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_1_pageout_high_qs;
+      end
+
+      addr_hit[93]: begin
+        reg_rdata_next[0] = tlb_wide_entry_1_flags_valid_qs;
+        reg_rdata_next[1] = tlb_wide_entry_1_flags_read_only_qs;
+      end
+
+      addr_hit[94]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_2_pagein_first_low_qs;
+      end
+
+      addr_hit[95]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_2_pagein_first_high_qs;
+      end
+
+      addr_hit[96]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_2_pagein_last_low_qs;
+      end
+
+      addr_hit[97]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_2_pagein_last_high_qs;
+      end
+
+      addr_hit[98]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_2_pageout_low_qs;
+      end
+
+      addr_hit[99]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_2_pageout_high_qs;
+      end
+
+      addr_hit[100]: begin
+        reg_rdata_next[0] = tlb_wide_entry_2_flags_valid_qs;
+        reg_rdata_next[1] = tlb_wide_entry_2_flags_read_only_qs;
+      end
+
+      addr_hit[101]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_3_pagein_first_low_qs;
+      end
+
+      addr_hit[102]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_3_pagein_first_high_qs;
+      end
+
+      addr_hit[103]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_3_pagein_last_low_qs;
+      end
+
+      addr_hit[104]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_3_pagein_last_high_qs;
+      end
+
+      addr_hit[105]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_3_pageout_low_qs;
+      end
+
+      addr_hit[106]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_3_pageout_high_qs;
+      end
+
+      addr_hit[107]: begin
+        reg_rdata_next[0] = tlb_wide_entry_3_flags_valid_qs;
+        reg_rdata_next[1] = tlb_wide_entry_3_flags_read_only_qs;
+      end
+
+      addr_hit[108]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_4_pagein_first_low_qs;
+      end
+
+      addr_hit[109]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_4_pagein_first_high_qs;
+      end
+
+      addr_hit[110]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_4_pagein_last_low_qs;
+      end
+
+      addr_hit[111]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_4_pagein_last_high_qs;
+      end
+
+      addr_hit[112]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_4_pageout_low_qs;
+      end
+
+      addr_hit[113]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_4_pageout_high_qs;
+      end
+
+      addr_hit[114]: begin
+        reg_rdata_next[0] = tlb_wide_entry_4_flags_valid_qs;
+        reg_rdata_next[1] = tlb_wide_entry_4_flags_read_only_qs;
+      end
+
+      addr_hit[115]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_5_pagein_first_low_qs;
+      end
+
+      addr_hit[116]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_5_pagein_first_high_qs;
+      end
+
+      addr_hit[117]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_5_pagein_last_low_qs;
+      end
+
+      addr_hit[118]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_5_pagein_last_high_qs;
+      end
+
+      addr_hit[119]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_5_pageout_low_qs;
+      end
+
+      addr_hit[120]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_5_pageout_high_qs;
+      end
+
+      addr_hit[121]: begin
+        reg_rdata_next[0] = tlb_wide_entry_5_flags_valid_qs;
+        reg_rdata_next[1] = tlb_wide_entry_5_flags_read_only_qs;
+      end
+
+      addr_hit[122]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_6_pagein_first_low_qs;
+      end
+
+      addr_hit[123]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_6_pagein_first_high_qs;
+      end
+
+      addr_hit[124]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_6_pagein_last_low_qs;
+      end
+
+      addr_hit[125]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_6_pagein_last_high_qs;
+      end
+
+      addr_hit[126]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_6_pageout_low_qs;
+      end
+
+      addr_hit[127]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_6_pageout_high_qs;
+      end
+
+      addr_hit[128]: begin
+        reg_rdata_next[0] = tlb_wide_entry_6_flags_valid_qs;
+        reg_rdata_next[1] = tlb_wide_entry_6_flags_read_only_qs;
+      end
+
+      addr_hit[129]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_7_pagein_first_low_qs;
+      end
+
+      addr_hit[130]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_7_pagein_first_high_qs;
+      end
+
+      addr_hit[131]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_7_pagein_last_low_qs;
+      end
+
+      addr_hit[132]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_7_pagein_last_high_qs;
+      end
+
+      addr_hit[133]: begin
+        reg_rdata_next[31:0] = tlb_wide_entry_7_pageout_low_qs;
+      end
+
+      addr_hit[134]: begin
+        reg_rdata_next[3:0] = tlb_wide_entry_7_pageout_high_qs;
+      end
+
+      addr_hit[135]: begin
+        reg_rdata_next[0] = tlb_wide_entry_7_flags_valid_qs;
+        reg_rdata_next[1] = tlb_wide_entry_7_flags_read_only_qs;
       end
 
       default: begin

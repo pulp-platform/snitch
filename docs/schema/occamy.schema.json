@@ -41,6 +41,12 @@
             "type": "integer",
             "default": 8
         },
+        "narrow_tlb_cfg": {
+            "$ref": "http://pulp-platform.org/snitch/axi_tlb.schema.json"
+        },
+        "wide_tlb_cfg": {
+            "$ref": "http://pulp-platform.org/snitch/axi_tlb.schema.json"
+        },
         "cuts": {
             "title": "Number of cuts on the AXI bus",
             "type": "object",

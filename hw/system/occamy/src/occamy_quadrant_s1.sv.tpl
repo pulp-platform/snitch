@@ -17,7 +17,13 @@
   narrow_trans = int(cfg["s1_quadrant"]["narrow_trans"])
   ro_cache_cfg = cfg["s1_quadrant"].get("ro_cache_cfg", {})
   ro_cache_regions = ro_cache_cfg.get("address_regions", 1)
+  narrow_tlb_cfg = cfg["s1_quadrant"].get("narrow_tlb_cfg", {})
+  narrow_tlb_entries = narrow_tlb_cfg.get("l1_num_entries", 1)
+  wide_tlb_cfg = cfg["s1_quadrant"].get("wide_tlb_cfg", {})
+  wide_tlb_entries = wide_tlb_cfg.get("l1_num_entries", 1)
 %>
+
+`include "axi/typedef.svh"
 
 /// Occamy Stage 1 Quadrant
 module ${name}_quadrant_s1
@@ -49,11 +55,22 @@ module ${name}_quadrant_s1
   assign cluster_base_addr[${i}] = ClusterBaseOffset + tile_id_i * NrClustersS1Quadrant * ClusterAddressSpace + ${i} * ClusterAddressSpace;
   %endfor
 
+  // Define types for IOTLBs
+  `AXI_TLB_TYPEDEF_ALL(tlb, logic [AddrWidth-12-1:0], logic [AddrWidth-12-1:0])
+
   // Signals from Controller
   logic clk_quadrant, rst_quadrant_n;
   logic [3:0] isolate, isolated;
   logic ro_enable, ro_flush_valid, ro_flush_ready;
   logic [${ro_cache_regions-1}:0][${quadrant_pre_xbars[0].in_quadrant.aw-1}:0] ro_start_addr, ro_end_addr;
+  %if narrow_tlb_cfg:
+  logic narrow_tlb_enable;
+  tlb_entry_t [${narrow_tlb_entries-1}:0] narrow_tlb_entries;
+  % endif
+  %if wide_tlb_cfg:
+  logic wide_tlb_enable;
+  tlb_entry_t [${wide_tlb_entries-1}:0] wide_tlb_entries;
+  % endif
 
   ///////////////////
   //   CROSSBARS   //
@@ -73,10 +90,22 @@ module ${name}_quadrant_s1
       .change_iw(context, narrow_xbar_quadrant_s1.in_top.iw, "narrow_cluster_in_iwc", to=narrow_xbar_quadrant_s1.in_top)
   %>
 
-  ///////////////////////////////
-  // Narrow Out + IW Converter //
-  ///////////////////////////////
-  <% narrow_cluster_out_ctrl = narrow_xbar_quadrant_s1.out_top \
+  /////////////////////////////////////
+  // Narrow Out + TLB + IW Converter //
+  /////////////////////////////////////
+  <%
+  #// Add TLB behind crossbar if enabled
+  if narrow_tlb_cfg:
+    narrow_cluster_out_tlb = narrow_xbar_quadrant_s1.out_top \
+    .add_tlb(context, "narrow_cluster_out_tlb", \
+      cfg=narrow_tlb_cfg, \
+      entry_t="tlb_entry_t", \
+      entries="narrow_tlb_entries", \
+      bypass="~narrow_tlb_enable")
+  else:
+    narrow_cluster_out_tlb = narrow_xbar_quadrant_s1.out_top
+  #// Change ID width, isolate, and cut
+  narrow_cluster_out_ctrl = narrow_cluster_out_tlb \
     .change_iw(context, soc_narrow_xbar.in_s1_quadrant_0.iw, "narrow_cluster_out_iwc") \
     .isolate(context, "isolate[1]", "narrow_cluster_out_isolate", isolated="isolated[1]", to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True, num_pending=narrow_trans) \
     .cut(context, cuts_narrx_with_ctrl, "narrow_cluster_out_ctrl")
@@ -87,9 +116,20 @@ module ${name}_quadrant_s1
   /////////////////////////////////////////
   <%
     wide_target_iw = 3
+    #// Add TLB behind crossbar if enabled
+    if wide_tlb_cfg:
+      wide_cluster_out_tlb = wide_xbar_quadrant_s1.out_top \
+      .add_tlb(context, "wide_cluster_out_tlb", \
+        cfg=wide_tlb_cfg, \
+      entry_t="tlb_entry_t", \
+      entries="wide_tlb_entries", \
+      bypass="~wide_tlb_enable")
+    else:
+      wide_cluster_out_tlb = wide_xbar_quadrant_s1.out_top
+    #// Add RO cache behind TLB if enabled
     if ro_cache_cfg:
       wide_target_iw += 1
-      wide_cluster_out_ro_cache = wide_xbar_quadrant_s1.out_top \
+      wide_cluster_out_ro_cache = wide_cluster_out_tlb \
       .add_ro_cache(context, "snitch_ro_cache", \
         ro_cache_cfg, \
         enable="ro_enable", \
@@ -102,14 +142,14 @@ module ${name}_quadrant_s1
         sram_cfg_data_i="sram_cfg_i.rocache_data", \
         sram_cfg_tag_i="sram_cfg_i.rocache_tag")
     else:
-      wide_cluster_out_ro_cache = wide_xbar_quadrant_s1.out_top
-
+      wide_cluster_out_ro_cache = wide_cluster_out_tlb
+    #// Change ID width, isolate, and cut
     wide_cluster_out_cut = wide_cluster_out_ro_cache \
       .change_iw(context, wide_target_iw, "wide_cluster_out_iwc", max_txns_per_id=wide_trans) \
       .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True, num_pending=wide_trans) \
       .cut(context, cuts_widexroc_with_wideout)
-
-    assert quadrant_pre_xbars[0].in_quadrant.iw == wide_cluster_out_cut.iw, "S1 Quadrant and Cluster Out IW mismatches."
+    #// Assert correct outgoing ID widths
+    assert quadrant_pre_xbars[0].in_quadrant.iw == wide_cluster_out_cut.iw, "S1 Quadrant and SoC IW mismatches."
   %>
 
   assign quadrant_wide_out_req_o = ${wide_cluster_out_cut.req_name()};
@@ -133,7 +173,9 @@ module ${name}_quadrant_s1
   // Quadrant Controller //
   /////////////////////////
 
-  ${name}_quadrant_s1_ctrl i_${name}_quadrant_s1_ctrl (
+  ${name}_quadrant_s1_ctrl #(
+    .tlb_entry_t (tlb_entry_t)
+  ) i_${name}_quadrant_s1_ctrl (
     .clk_i,
     .rst_ni,
     .test_mode_i,
@@ -151,6 +193,14 @@ module ${name}_quadrant_s1
     .soc_out_rsp_i (quadrant_narrow_out_rsp_i),
     .soc_in_req_i (quadrant_narrow_in_req_i),
     .soc_in_rsp_o (quadrant_narrow_in_rsp_o),
+    %if narrow_tlb_cfg:
+    .narrow_tlb_entries_o (narrow_tlb_entries),
+    .narrow_tlb_enable_o (narrow_tlb_enable),
+    %endif
+    %if wide_tlb_cfg:
+    .wide_tlb_entries_o (wide_tlb_entries),
+    .wide_tlb_enable_o (wide_tlb_enable),
+    %endif
     .quadrant_out_req_o (${narrow_cluster_in_ctrl.req_name()}),
     .quadrant_out_rsp_i (${narrow_cluster_in_ctrl.rsp_name()}),
     .quadrant_in_req_i (${narrow_cluster_out_ctrl.req_name()}),

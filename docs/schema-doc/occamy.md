@@ -27,6 +27,8 @@ Description of an Occamy-based system.
 | [narrow_xbar](#narrow_xbar)                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-crossbar-schema-4.md "http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar")                               |
 | [narrow_xbar_slv_id_width](#narrow_xbar_slv_id_width)                 | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-narrow_xbar_slv_id_width.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width")                 |
 | [nr_s1_quadrant](#nr_s1_quadrant)                                     | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-s1-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant")                             |
+| [narrow_tlb_cfg](#narrow_tlb_cfg)                                     | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-tlb-schema.md "http://pulp-platform.org/snitch/axi_tlb.schema.json#/properties/narrow_tlb_cfg")                                    |
+| [wide_tlb_cfg](#wide_tlb_cfg)                                         | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-axi-tlb-schema-1.md "http://pulp-platform.org/snitch/axi_tlb.schema.json#/properties/wide_tlb_cfg")                                    |
 | [cuts](#cuts)                                                         | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts")                                |
 | [txns](#txns)                                                         | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-outstanding-transactions-on-the-axi-bus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/txns")            |
 | [is_remote_quadrant](#is_remote_quadrant)                             | `boolean` | Optional | cannot be null | [Occamy System Schema](occamy-properties-is_remote_quadrant.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/is_remote_quadrant")                             |
@@ -223,6 +225,42 @@ The default value is:
 ```json
 8
 ```
+
+## narrow_tlb_cfg
+
+AXI TLB Properties
+
+`narrow_tlb_cfg`
+
+*   is optional
+
+*   Type: `object` ([AXI TLB Schema](occamy-properties-axi-tlb-schema-1.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-axi-tlb-schema-1.md "http://pulp-platform.org/snitch/axi_tlb.schema.json#/properties/narrow_tlb_cfg")
+
+### narrow_tlb_cfg Type
+
+`object` ([AXI TLB Schema](occamy-properties-axi-tlb-schema-1.md))
+
+## wide_tlb_cfg
+
+AXI TLB Properties
+
+`wide_tlb_cfg`
+
+*   is optional
+
+*   Type: `object` ([AXI TLB Schema](occamy-properties-axi-tlb-schema-1.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-axi-tlb-schema-1.md "http://pulp-platform.org/snitch/axi_tlb.schema.json#/properties/wide_tlb_cfg")
+
+### wide_tlb_cfg Type
+
+`object` ([AXI TLB Schema](occamy-properties-axi-tlb-schema-1.md))
 
 ## cuts
 
