@@ -10,6 +10,7 @@
 
 
 `include "common_cells/registers.svh"
+`include "register_interface/typedef.svh"
 
 module occamy_soc
   import occamy_pkg::*;
@@ -367,7 +368,7 @@ module occamy_soc
   xbar_rule_48_t [7:0] QuadrantInterXbarAddrmap;
   assign QuadrantInterXbarAddrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h10000000 },
-  '{ idx: 0, start_addr: 48'h20000000, end_addr: 48'h20000000000 },
+  '{ idx: 0, start_addr: 48'h11000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h10000000, end_addr: 48'h10100000 },
   '{ idx: 2, start_addr: 48'h10100000, end_addr: 48'h10200000 },
   '{ idx: 3, start_addr: 48'h10200000, end_addr: 48'h10300000 },
@@ -470,17 +471,17 @@ module occamy_soc
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
   '{ idx: 2, start_addr: 48'h10000000, end_addr: 48'h10600000 },
   '{ idx: 3, start_addr: 48'h00000000, end_addr: 48'h10000000 },
-  '{ idx: 3, start_addr: 48'h20000000, end_addr: 48'h70080000 }
+  '{ idx: 3, start_addr: 48'h11000000, end_addr: 48'h70080000 }
 };
 
-  soc_wide_xbar_in_req_t   [2:0] soc_wide_xbar_in_req;
-  soc_wide_xbar_in_resp_t  [2:0] soc_wide_xbar_in_rsp;
+  soc_wide_xbar_in_req_t   [3:0] soc_wide_xbar_in_req;
+  soc_wide_xbar_in_resp_t  [3:0] soc_wide_xbar_in_rsp;
   soc_wide_xbar_out_req_t  [3:0] soc_wide_xbar_out_req;
   soc_wide_xbar_out_resp_t [3:0] soc_wide_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg          (SocWideXbarCfg),
-      .Connectivity (12'b011110111110),
+      .Connectivity (16'b1111011110111110),
       .AtopSupport  (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i6_u0_aw_chan_t),
@@ -510,15 +511,16 @@ module occamy_soc
   );
 
   /// Address map of the `soc_narrow_xbar` crossbar.
-  xbar_rule_48_t [18:0] SocNarrowXbarAddrmap;
+  xbar_rule_48_t [19:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
   '{ idx: 6, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
   '{ idx: 7, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
   '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70080000 },
-  '{ idx: 10, start_addr: 48'h01000000, end_addr: 48'h0a810000 },
-  '{ idx: 10, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
-  '{ idx: 11, start_addr: 48'h20000000, end_addr: 48'h70000000 },
+  '{ idx: 10, start_addr: 48'h11000000, end_addr: 48'h11010000 },
+  '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h0a810000 },
+  '{ idx: 11, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
+  '{ idx: 12, start_addr: 48'h20000000, end_addr: 48'h70000000 },
   '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
   '{ idx: 0, start_addr: s1_quadrant_cfg_base_addr[0], end_addr: s1_quadrant_cfg_base_addr[0] + S1QuadrantCfgAddressSpace },
   '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
@@ -535,12 +537,12 @@ module occamy_soc
 
   soc_narrow_xbar_in_req_t   [10:0] soc_narrow_xbar_in_req;
   soc_narrow_xbar_in_resp_t  [10:0] soc_narrow_xbar_in_rsp;
-  soc_narrow_xbar_out_req_t  [11:0] soc_narrow_xbar_out_req;
-  soc_narrow_xbar_out_resp_t [11:0] soc_narrow_xbar_out_rsp;
+  soc_narrow_xbar_out_req_t  [12:0] soc_narrow_xbar_out_req;
+  soc_narrow_xbar_out_resp_t [12:0] soc_narrow_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg(SocNarrowXbarCfg),
-      .Connectivity  ( 132'b111101111111011111111111111011111111111110111111111111111111111111011111111111101111111111110111111111111011111111111101111111111110 ),
+      .Connectivity  ( 143'b11111011111110111111111111111101111111111111101111111111111111111111111101111111111111011111111111110111111111111101111111111111011111111111110 ),
       .AtopSupport(1),
       .slv_aw_chan_t(axi_a48_d64_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d64_i8_u0_aw_chan_t),
@@ -1997,6 +1999,115 @@ module occamy_soc
       .rvalid_o(spm_rvalid),
       .rerror_o(spm_rerror_o),
       .sram_cfg_i(sram_cfgs_i.spm)
+  );
+
+  //////////////
+  // SYS iDMA //
+  //////////////
+
+  axi_a48_d64_i8_u0_req_t  out_sys_idma_cfg_noatop_req;
+  axi_a48_d64_i8_u0_resp_t out_sys_idma_cfg_noatop_rsp;
+
+  axi_atop_filter #(
+      .AxiIdWidth(8),
+      .AxiMaxWriteTxns(4),
+      .req_t(axi_a48_d64_i8_u0_req_t),
+      .resp_t(axi_a48_d64_i8_u0_resp_t)
+  ) i_out_sys_idma_cfg_atop_filter (
+      .clk_i     (clk_i),
+      .rst_ni    (rst_ni),
+      .slv_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SYS_IDMA_CFG]),
+      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SYS_IDMA_CFG]),
+      .mst_req_o (out_sys_idma_cfg_noatop_req),
+      .mst_resp_i(out_sys_idma_cfg_noatop_rsp)
+  );
+
+
+  // .change_dw(context, 32, "out_sys_idma_cfg_dw")
+
+  // burst request
+  typedef struct packed {
+    logic [6:0] id;
+    logic [47:0] src, dst;
+    logic [47:0] num_bytes;
+    axi_pkg::cache_t cache_src, cache_dst;
+    axi_pkg::burst_t burst_src, burst_dst;
+    logic decouple_rw;
+    logic deburst;
+    logic serialize;
+  } idma_burst_req_t;
+
+  // local regbus definition
+  `REG_BUS_TYPEDEF_ALL(idma_cfg_reg_a48_d64, logic [47:0], logic [63:0], logic [7:0])
+
+  idma_burst_req_t idma_burst_req;
+  logic idma_be_valid;
+  logic idma_be_ready;
+  logic idma_be_idle;
+  logic idma_be_trans_complete;
+
+  idma_cfg_reg_a48_d64_req_t idma_cfg_reg_req;
+  idma_cfg_reg_a48_d64_rsp_t idma_cfg_reg_rsp;
+
+  axi_to_reg #(
+      .ADDR_WIDTH(48),
+      .DATA_WIDTH(64),
+      .ID_WIDTH  (8),
+      .USER_WIDTH(1),
+      .axi_req_t (axi_a48_d64_i8_u0_req_t),
+      .axi_rsp_t (axi_a48_d64_i8_u0_resp_t),
+      .reg_req_t (idma_cfg_reg_a48_d64_req_t),
+      .reg_rsp_t (idma_cfg_reg_a48_d64_rsp_t)
+  ) i_axi_to_reg_sys_idma_cfg (
+      .clk_i,
+      .rst_ni,
+      .testmode_i(1'b0),
+      .axi_req_i (out_sys_idma_cfg_noatop_req),
+      .axi_rsp_o (out_sys_idma_cfg_noatop_rsp),
+      .reg_req_o (idma_cfg_reg_req),
+      .reg_rsp_i (idma_cfg_reg_rsp)
+  );
+
+  idma_reg64_frontend #(
+      .DmaAddrWidth  ('d64),
+      .dma_regs_req_t(idma_cfg_reg_a48_d64_req_t),
+      .dma_regs_rsp_t(idma_cfg_reg_a48_d64_rsp_t),
+      .burst_req_t   (idma_burst_req_t)
+  ) i_idma_reg64_frontend_sys_idma (
+      .clk_i,
+      .rst_ni,
+      .dma_ctrl_req_i  (idma_cfg_reg_req),
+      .dma_ctrl_rsp_o  (idma_cfg_reg_rsp),
+      .burst_req_o     (idma_burst_req),
+      .valid_o         (idma_be_valid),
+      .ready_i         (idma_be_ready),
+      .backend_idle_i  (idma_be_idle),
+      .trans_complete_i(idma_be_trans_complete)
+  );
+
+  axi_dma_backend #(
+      .DataWidth     (512),
+      .AddrWidth     (48),
+      .IdWidth       (4),
+      .AxReqFifoDepth('d64),
+      .TransFifoDepth('d16),
+      .BufferDepth   ('d3),
+      .axi_req_t     (axi_a48_d512_i4_u0_req_t),
+      .axi_res_t     (axi_a48_d512_i4_u0_resp_t),
+      .burst_req_t   (idma_burst_req_t),
+      .DmaIdWidth    ('d32),
+      .DmaTracing    (1'b1)
+  ) i_axi_dma_backend_sys_idma (
+      .clk_i,
+      .rst_ni,
+      .dma_id_i        ('d0),
+      .axi_dma_req_o   (soc_wide_xbar_in_req[SOC_WIDE_XBAR_IN_SYS_IDMA_MST]),
+      .axi_dma_res_i   (soc_wide_xbar_in_rsp[SOC_WIDE_XBAR_IN_SYS_IDMA_MST]),
+      .burst_req_i     (idma_burst_req),
+      .valid_i         (idma_be_valid),
+      .ready_o         (idma_be_ready),
+      .backend_idle_o  (idma_be_idle),
+      .trans_complete_o(idma_be_trans_complete)
   );
 
   ///////////

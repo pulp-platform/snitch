@@ -48,7 +48,9 @@ This is the current address map of occamy. Note that the Quadrants address map h
 | -                |  15.6 MB |  free  |      0x0b06\_0000 |      0x0bff\_ffff |
 | PLIC             |  64.0 MB |  used  |      0x0c00\_0000 |      0x0fff\_ffff |
 | QUADRANTS        |   6.0 MB |  used  |      0x1000\_0000 |      0x105f\_ffff |
-| -                | 250.0 MB |  free  |      0x1060\_0000 |      0x1fff\_ffff |
+| -                |  10.0 MB |  free  |      0x1060\_0000 |      0x10ff\_ffff |
+| SYS\_IDMA\_CFG   |  64.0 KB |  used  |      0x1100\_0000 |      0x1100\_ffff |
+| -                | 239.9 MB |  free  |      0x1101\_0000 |      0x1fff\_ffff |
 | PCIE             | 640.0 MB |  used  |      0x2000\_0000 |      0x47ff\_ffff |
 | PCIE             | 640.0 MB |  used  |      0x4800\_0000 |      0x6fff\_ffff |
 | SPM              | 512.0 KB |  used  |      0x7000\_0000 |      0x7007\_ffff |
@@ -144,5 +146,5 @@ This is the current address map of occamy. Note that the Quadrants address map h
 |    5     |    3    | CLUSTER\_TCDM       | 128.0 KB | 0x105c\_0000 | 0x105d\_ffff |
 |    5     |    3    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x105e\_0000 | 0x105e\_ffff |
 |    5     |    3    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x105f\_0000 | 0x105f\_ffff |
-|    -     |    -    | EMPTY               | 250.0 MB | 0x1060\_0000 | 0x1fff\_ffff |
+|    -     |    -    | EMPTY               |  10.0 MB | 0x1060\_0000 | 0x10ff\_ffff |
 
