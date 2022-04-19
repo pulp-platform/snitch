@@ -74,7 +74,7 @@
         "byte_width": 8,
         "density_optimized": true,
         "description": [
-            "SPM"
+            "SPM Narrow"
         ],
         "dual_port": false,
         "latency": 1,

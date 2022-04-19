@@ -250,18 +250,18 @@ def main():
     ##################
     # AM: SPM / PCIE #
     ##################
-    # Connect PCIE to Wide AXI
+    # Connect PCIE to Narrow AXI
     am_pcie = am.new_leaf(
         "pcie",
         occamy.cfg["pcie"]["length"],
         occamy.cfg["pcie"]["address_io"],
         occamy.cfg["pcie"]["address_mm"]).attach_to(am_soc_narrow_xbar)
 
-    # Connect SPM to Narrow AXI
-    am_spm = am.new_leaf(
-        "spm",
-        occamy.cfg["spm"]["length"],
-        occamy.cfg["spm"]["address"]).attach_to(am_soc_narrow_xbar)
+    # Connect narrow SPM to Narrow AXI
+    am_spm_narrow = am.new_leaf(
+        "spm_narrow",
+        occamy.cfg["spm_narrow"]["length"],
+        occamy.cfg["spm_narrow"]["address"]).attach_to(am_soc_narrow_xbar)
 
     ############
     # AM: IDMA #
@@ -667,7 +667,7 @@ def main():
     if not is_remote_quadrant:
         soc_narrow_xbar.add_output_entry("hbi", am_hbi)
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
-    soc_narrow_xbar.add_output_entry("spm", am_spm)
+    soc_narrow_xbar.add_output_entry("spm_narrow", am_spm_narrow)
     soc_narrow_xbar.add_output_entry("sys_idma_cfg", am_sys_idma_cfg)
     soc_narrow_xbar.add_output_entry("regbus_periph",
                                      am_soc_regbus_periph_xbar)

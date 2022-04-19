@@ -41,7 +41,7 @@ package occamy_pkg;
   } sram_cfg_cva6_t;
 
   typedef struct packed {
-    sram_cfg_t spm;
+    sram_cfg_t spm_narrow;
     sram_cfg_cva6_t cva6;
     sram_cfg_quadrant_t quadrant;
   } sram_cfgs_t;
@@ -743,7 +743,7 @@ package occamy_pkg;
     SOC_NARROW_XBAR_OUT_SOC_WIDE,
     SOC_NARROW_XBAR_OUT_HBI,
     SOC_NARROW_XBAR_OUT_PERIPH,
-    SOC_NARROW_XBAR_OUT_SPM,
+    SOC_NARROW_XBAR_OUT_SPM_NARROW,
     SOC_NARROW_XBAR_OUT_SYS_IDMA_CFG,
     SOC_NARROW_XBAR_OUT_REGBUS_PERIPH,
     SOC_NARROW_XBAR_OUT_PCIE,

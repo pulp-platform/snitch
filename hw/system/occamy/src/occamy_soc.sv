@@ -68,7 +68,7 @@ module occamy_soc
     input  axi_a48_d64_i8_u0_resp_t periph_regbus_rsp_i,
 
     // SoC control register IO
-    output logic [1:0] spm_rerror_o,
+    output logic [1:0] spm_narrow_rerror_o,
 
     // Interrupts and debug requests
     input logic [216:0] mtip_i,
@@ -1814,11 +1814,11 @@ module occamy_soc
   );
 
 
-  //////////
-  // SPM //
-  //////////
-  axi_a48_d64_i8_u0_req_t  spm_amo_adapter_req;
-  axi_a48_d64_i8_u0_resp_t spm_amo_adapter_rsp;
+  ////////////////
+  // SPM NARROW //
+  ////////////////
+  axi_a48_d64_i8_u0_req_t  spm_narrow_amo_adapter_req;
+  axi_a48_d64_i8_u0_resp_t spm_narrow_amo_adapter_rsp;
 
   axi_riscv_atomics #(
       .AXI_ADDR_WIDTH(48),
@@ -1827,104 +1827,104 @@ module occamy_soc
       .AXI_USER_WIDTH(1),
       .AXI_MAX_WRITE_TXNS(16),
       .RISCV_WORD_WIDTH(64)
-  ) i_spm_amo_adapter (
+  ) i_spm_narrow_amo_adapter (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_aw_addr_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.addr),
-      .slv_aw_prot_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.prot),
-      .slv_aw_region_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.region),
-      .slv_aw_atop_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.atop),
-      .slv_aw_len_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.len),
-      .slv_aw_size_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.size),
-      .slv_aw_burst_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.burst),
-      .slv_aw_lock_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.lock),
-      .slv_aw_cache_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.cache),
-      .slv_aw_qos_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.qos),
-      .slv_aw_id_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.id),
-      .slv_aw_user_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw.user),
-      .slv_aw_ready_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].aw_ready),
-      .slv_aw_valid_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].aw_valid),
-      .slv_ar_addr_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.addr),
-      .slv_ar_prot_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.prot),
-      .slv_ar_region_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.region),
-      .slv_ar_len_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.len),
-      .slv_ar_size_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.size),
-      .slv_ar_burst_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.burst),
-      .slv_ar_lock_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.lock),
-      .slv_ar_cache_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.cache),
-      .slv_ar_qos_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.qos),
-      .slv_ar_id_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.id),
-      .slv_ar_user_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar.user),
-      .slv_ar_ready_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].ar_ready),
-      .slv_ar_valid_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].ar_valid),
-      .slv_w_data_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].w.data),
-      .slv_w_strb_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].w.strb),
-      .slv_w_user_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].w.user),
-      .slv_w_last_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].w.last),
-      .slv_w_ready_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].w_ready),
-      .slv_w_valid_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].w_valid),
-      .slv_r_data_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].r.data),
-      .slv_r_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].r.resp),
-      .slv_r_last_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].r.last),
-      .slv_r_id_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].r.id),
-      .slv_r_user_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].r.user),
-      .slv_r_ready_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].r_ready),
-      .slv_r_valid_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].r_valid),
-      .slv_b_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].b.resp),
-      .slv_b_id_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].b.id),
-      .slv_b_user_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].b.user),
-      .slv_b_ready_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM].b_ready),
-      .slv_b_valid_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM].b_valid),
+      .slv_aw_addr_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.addr),
+      .slv_aw_prot_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.prot),
+      .slv_aw_region_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.region),
+      .slv_aw_atop_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.atop),
+      .slv_aw_len_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.len),
+      .slv_aw_size_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.size),
+      .slv_aw_burst_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.burst),
+      .slv_aw_lock_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.lock),
+      .slv_aw_cache_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.cache),
+      .slv_aw_qos_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.qos),
+      .slv_aw_id_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.id),
+      .slv_aw_user_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw.user),
+      .slv_aw_ready_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw_ready),
+      .slv_aw_valid_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].aw_valid),
+      .slv_ar_addr_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.addr),
+      .slv_ar_prot_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.prot),
+      .slv_ar_region_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.region),
+      .slv_ar_len_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.len),
+      .slv_ar_size_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.size),
+      .slv_ar_burst_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.burst),
+      .slv_ar_lock_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.lock),
+      .slv_ar_cache_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.cache),
+      .slv_ar_qos_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.qos),
+      .slv_ar_id_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.id),
+      .slv_ar_user_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar.user),
+      .slv_ar_ready_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar_ready),
+      .slv_ar_valid_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].ar_valid),
+      .slv_w_data_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].w.data),
+      .slv_w_strb_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].w.strb),
+      .slv_w_user_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].w.user),
+      .slv_w_last_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].w.last),
+      .slv_w_ready_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].w_ready),
+      .slv_w_valid_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].w_valid),
+      .slv_r_data_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].r.data),
+      .slv_r_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].r.resp),
+      .slv_r_last_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].r.last),
+      .slv_r_id_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].r.id),
+      .slv_r_user_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].r.user),
+      .slv_r_ready_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].r_ready),
+      .slv_r_valid_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].r_valid),
+      .slv_b_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].b.resp),
+      .slv_b_id_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].b.id),
+      .slv_b_user_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].b.user),
+      .slv_b_ready_i(soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_SPM_NARROW].b_ready),
+      .slv_b_valid_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_SPM_NARROW].b_valid),
 
-      .mst_aw_addr_o(spm_amo_adapter_req.aw.addr),
-      .mst_aw_prot_o(spm_amo_adapter_req.aw.prot),
-      .mst_aw_region_o(spm_amo_adapter_req.aw.region),
-      .mst_aw_atop_o(spm_amo_adapter_req.aw.atop),
-      .mst_aw_len_o(spm_amo_adapter_req.aw.len),
-      .mst_aw_size_o(spm_amo_adapter_req.aw.size),
-      .mst_aw_burst_o(spm_amo_adapter_req.aw.burst),
-      .mst_aw_lock_o(spm_amo_adapter_req.aw.lock),
-      .mst_aw_cache_o(spm_amo_adapter_req.aw.cache),
-      .mst_aw_qos_o(spm_amo_adapter_req.aw.qos),
-      .mst_aw_id_o(spm_amo_adapter_req.aw.id),
-      .mst_aw_user_o(spm_amo_adapter_req.aw.user),
-      .mst_aw_ready_i(spm_amo_adapter_rsp.aw_ready),
-      .mst_aw_valid_o(spm_amo_adapter_req.aw_valid),
-      .mst_ar_addr_o(spm_amo_adapter_req.ar.addr),
-      .mst_ar_prot_o(spm_amo_adapter_req.ar.prot),
-      .mst_ar_region_o(spm_amo_adapter_req.ar.region),
-      .mst_ar_len_o(spm_amo_adapter_req.ar.len),
-      .mst_ar_size_o(spm_amo_adapter_req.ar.size),
-      .mst_ar_burst_o(spm_amo_adapter_req.ar.burst),
-      .mst_ar_lock_o(spm_amo_adapter_req.ar.lock),
-      .mst_ar_cache_o(spm_amo_adapter_req.ar.cache),
-      .mst_ar_qos_o(spm_amo_adapter_req.ar.qos),
-      .mst_ar_id_o(spm_amo_adapter_req.ar.id),
-      .mst_ar_user_o(spm_amo_adapter_req.ar.user),
-      .mst_ar_ready_i(spm_amo_adapter_rsp.ar_ready),
-      .mst_ar_valid_o(spm_amo_adapter_req.ar_valid),
-      .mst_w_data_o(spm_amo_adapter_req.w.data),
-      .mst_w_strb_o(spm_amo_adapter_req.w.strb),
-      .mst_w_user_o(spm_amo_adapter_req.w.user),
-      .mst_w_last_o(spm_amo_adapter_req.w.last),
-      .mst_w_ready_i(spm_amo_adapter_rsp.w_ready),
-      .mst_w_valid_o(spm_amo_adapter_req.w_valid),
-      .mst_r_data_i(spm_amo_adapter_rsp.r.data),
-      .mst_r_resp_i(spm_amo_adapter_rsp.r.resp),
-      .mst_r_last_i(spm_amo_adapter_rsp.r.last),
-      .mst_r_id_i(spm_amo_adapter_rsp.r.id),
-      .mst_r_user_i(spm_amo_adapter_rsp.r.user),
-      .mst_r_ready_o(spm_amo_adapter_req.r_ready),
-      .mst_r_valid_i(spm_amo_adapter_rsp.r_valid),
-      .mst_b_resp_i(spm_amo_adapter_rsp.b.resp),
-      .mst_b_id_i(spm_amo_adapter_rsp.b.id),
-      .mst_b_user_i(spm_amo_adapter_rsp.b.user),
-      .mst_b_ready_o(spm_amo_adapter_req.b_ready),
-      .mst_b_valid_i(spm_amo_adapter_rsp.b_valid)
+      .mst_aw_addr_o(spm_narrow_amo_adapter_req.aw.addr),
+      .mst_aw_prot_o(spm_narrow_amo_adapter_req.aw.prot),
+      .mst_aw_region_o(spm_narrow_amo_adapter_req.aw.region),
+      .mst_aw_atop_o(spm_narrow_amo_adapter_req.aw.atop),
+      .mst_aw_len_o(spm_narrow_amo_adapter_req.aw.len),
+      .mst_aw_size_o(spm_narrow_amo_adapter_req.aw.size),
+      .mst_aw_burst_o(spm_narrow_amo_adapter_req.aw.burst),
+      .mst_aw_lock_o(spm_narrow_amo_adapter_req.aw.lock),
+      .mst_aw_cache_o(spm_narrow_amo_adapter_req.aw.cache),
+      .mst_aw_qos_o(spm_narrow_amo_adapter_req.aw.qos),
+      .mst_aw_id_o(spm_narrow_amo_adapter_req.aw.id),
+      .mst_aw_user_o(spm_narrow_amo_adapter_req.aw.user),
+      .mst_aw_ready_i(spm_narrow_amo_adapter_rsp.aw_ready),
+      .mst_aw_valid_o(spm_narrow_amo_adapter_req.aw_valid),
+      .mst_ar_addr_o(spm_narrow_amo_adapter_req.ar.addr),
+      .mst_ar_prot_o(spm_narrow_amo_adapter_req.ar.prot),
+      .mst_ar_region_o(spm_narrow_amo_adapter_req.ar.region),
+      .mst_ar_len_o(spm_narrow_amo_adapter_req.ar.len),
+      .mst_ar_size_o(spm_narrow_amo_adapter_req.ar.size),
+      .mst_ar_burst_o(spm_narrow_amo_adapter_req.ar.burst),
+      .mst_ar_lock_o(spm_narrow_amo_adapter_req.ar.lock),
+      .mst_ar_cache_o(spm_narrow_amo_adapter_req.ar.cache),
+      .mst_ar_qos_o(spm_narrow_amo_adapter_req.ar.qos),
+      .mst_ar_id_o(spm_narrow_amo_adapter_req.ar.id),
+      .mst_ar_user_o(spm_narrow_amo_adapter_req.ar.user),
+      .mst_ar_ready_i(spm_narrow_amo_adapter_rsp.ar_ready),
+      .mst_ar_valid_o(spm_narrow_amo_adapter_req.ar_valid),
+      .mst_w_data_o(spm_narrow_amo_adapter_req.w.data),
+      .mst_w_strb_o(spm_narrow_amo_adapter_req.w.strb),
+      .mst_w_user_o(spm_narrow_amo_adapter_req.w.user),
+      .mst_w_last_o(spm_narrow_amo_adapter_req.w.last),
+      .mst_w_ready_i(spm_narrow_amo_adapter_rsp.w_ready),
+      .mst_w_valid_o(spm_narrow_amo_adapter_req.w_valid),
+      .mst_r_data_i(spm_narrow_amo_adapter_rsp.r.data),
+      .mst_r_resp_i(spm_narrow_amo_adapter_rsp.r.resp),
+      .mst_r_last_i(spm_narrow_amo_adapter_rsp.r.last),
+      .mst_r_id_i(spm_narrow_amo_adapter_rsp.r.id),
+      .mst_r_user_i(spm_narrow_amo_adapter_rsp.r.user),
+      .mst_r_ready_o(spm_narrow_amo_adapter_req.r_ready),
+      .mst_r_valid_i(spm_narrow_amo_adapter_rsp.r_valid),
+      .mst_b_resp_i(spm_narrow_amo_adapter_rsp.b.resp),
+      .mst_b_id_i(spm_narrow_amo_adapter_rsp.b.id),
+      .mst_b_user_i(spm_narrow_amo_adapter_rsp.b.user),
+      .mst_b_ready_o(spm_narrow_amo_adapter_req.b_ready),
+      .mst_b_valid_i(spm_narrow_amo_adapter_rsp.b_valid)
   );
 
-  axi_a48_d64_i8_u0_req_t  spm_amo_adapter_cut_req;
-  axi_a48_d64_i8_u0_resp_t spm_amo_adapter_cut_rsp;
+  axi_a48_d64_i8_u0_req_t  spm_narrow_amo_adapter_cut_req;
+  axi_a48_d64_i8_u0_resp_t spm_narrow_amo_adapter_cut_rsp;
 
   axi_multicut #(
       .NoCuts(1),
@@ -1935,24 +1935,24 @@ module occamy_soc
       .r_chan_t(axi_a48_d64_i8_u0_r_chan_t),
       .axi_req_t(axi_a48_d64_i8_u0_req_t),
       .axi_resp_t(axi_a48_d64_i8_u0_resp_t)
-  ) i_spm_amo_adapter_cut (
+  ) i_spm_narrow_amo_adapter_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(spm_amo_adapter_req),
-      .slv_resp_o(spm_amo_adapter_rsp),
-      .mst_req_o(spm_amo_adapter_cut_req),
-      .mst_resp_i(spm_amo_adapter_cut_rsp)
+      .slv_req_i(spm_narrow_amo_adapter_req),
+      .slv_resp_o(spm_narrow_amo_adapter_rsp),
+      .mst_req_o(spm_narrow_amo_adapter_cut_req),
+      .mst_resp_i(spm_narrow_amo_adapter_cut_rsp)
   );
 
 
-  typedef logic [18:0] mem_addr_t;
-  typedef logic [63:0] mem_data_t;
-  typedef logic [7:0] mem_strb_t;
+  typedef logic [18:0] mem_narrow_addr_t;
+  typedef logic [63:0] mem_narrow_data_t;
+  typedef logic [7:0] mem_narrow_strb_t;
 
-  logic spm_req, spm_gnt, spm_we, spm_rvalid;
-  mem_addr_t spm_addr;
-  mem_data_t spm_wdata, spm_rdata;
-  mem_strb_t spm_strb;
+  logic spm_narrow_req, spm_narrow_gnt, spm_narrow_we, spm_narrow_rvalid;
+  mem_narrow_addr_t spm_narrow_addr;
+  mem_narrow_data_t spm_narrow_wdata, spm_narrow_rdata;
+  mem_narrow_strb_t spm_narrow_strb;
 
   axi_to_mem #(
       .axi_req_t(axi_a48_d64_i8_u0_req_t),
@@ -1966,17 +1966,17 @@ module occamy_soc
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .busy_o(),
-      .axi_req_i(spm_amo_adapter_cut_req),
-      .axi_resp_o(spm_amo_adapter_cut_rsp),
-      .mem_req_o(spm_req),
-      .mem_gnt_i(spm_gnt),
-      .mem_addr_o(spm_addr),
-      .mem_wdata_o(spm_wdata),
-      .mem_strb_o(spm_strb),
+      .axi_req_i(spm_narrow_amo_adapter_cut_req),
+      .axi_resp_o(spm_narrow_amo_adapter_cut_rsp),
+      .mem_req_o(spm_narrow_req),
+      .mem_gnt_i(spm_narrow_gnt),
+      .mem_addr_o(spm_narrow_addr),
+      .mem_wdata_o(spm_narrow_wdata),
+      .mem_strb_o(spm_narrow_strb),
       .mem_atop_o(),
-      .mem_we_o(spm_we),
-      .mem_rvalid_i(spm_rvalid),
-      .mem_rdata_i(spm_rdata)
+      .mem_we_o(spm_narrow_we),
+      .mem_rvalid_i(spm_narrow_rvalid),
+      .mem_rdata_i(spm_narrow_rdata)
   );
 
   spm_1p_adv #(
@@ -1986,19 +1986,19 @@ module occamy_soc
       .EnableInputPipeline(1'b1),
       .EnableOutputPipeline(1'b1),
       .sram_cfg_t(sram_cfg_t)
-  ) i_spm_cut (
+  ) i_spm_narrow_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .valid_i(spm_req),
-      .ready_o(spm_gnt),
-      .we_i(spm_we),
-      .addr_i(spm_addr[18:3]),
-      .wdata_i(spm_wdata),
-      .be_i(spm_strb),
-      .rdata_o(spm_rdata),
-      .rvalid_o(spm_rvalid),
-      .rerror_o(spm_rerror_o),
-      .sram_cfg_i(sram_cfgs_i.spm)
+      .valid_i(spm_narrow_req),
+      .ready_o(spm_narrow_gnt),
+      .we_i(spm_narrow_we),
+      .addr_i(spm_narrow_addr[18:3]),
+      .wdata_i(spm_narrow_wdata),
+      .be_i(spm_narrow_strb),
+      .rdata_o(spm_narrow_rdata),
+      .rvalid_o(spm_narrow_rvalid),
+      .rerror_o(spm_narrow_rerror_o),
+      .sram_cfg_i(sram_cfgs_i.spm_narrow)
   );
 
   //////////////

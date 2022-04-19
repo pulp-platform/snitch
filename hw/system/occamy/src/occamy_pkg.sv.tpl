@@ -41,7 +41,7 @@ package ${name}_pkg;
   } sram_cfg_cva6_t;
 
   typedef struct packed {
-    sram_cfg_t spm;
+    sram_cfg_t spm_narrow;
     sram_cfg_cva6_t cva6;
     sram_cfg_quadrant_t quadrant;
   } sram_cfgs_t;

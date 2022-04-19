@@ -257,7 +257,7 @@
                 }
             }
         },
-        "spm": {
+        "spm_narrow": {
             "$ref": "http://pulp-platform.org/snitch/address_range.schema.json"
         },
         "pcie": {

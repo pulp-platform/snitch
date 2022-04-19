@@ -39,7 +39,7 @@
       pre_to_inter: 1,
       inter_to_quad: 3,
       narrow_to_cva6: 1,
-      narrow_conv_to_spm: 1,
+      narrow_conv_to_spm_narrow: 1,
       narrow_and_pcie: 1,
       narrow_and_wide: 0,
       wide_to_hbm: 6,
@@ -318,7 +318,7 @@
       address_mm: 1207959552, // 0x4800_0000
       length: 671088640, // 640 MiB 0x2800_0000
     },
-    spm: {
+    spm_narrow: {
       address: 1879048192, // 0x7000_0000
       length: 524288, // 512 kiB 0x8_0000
     },

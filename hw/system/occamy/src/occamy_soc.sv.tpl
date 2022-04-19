@@ -14,7 +14,7 @@
   cuts_pre_to_inter = cfg["cuts"]["pre_to_inter"]
   cuts_inter_to_quad = cfg["cuts"]["inter_to_quad"]
   cuts_narrow_to_cva6 = cfg["cuts"]["narrow_to_cva6"]
-  cuts_narrow_conv_to_spm = cfg["cuts"]["narrow_conv_to_spm"]
+  cuts_narrow_conv_to_spm_narrow = cfg["cuts"]["narrow_conv_to_spm_narrow"]
   cuts_narrow_and_pcie = cfg["cuts"]["narrow_and_pcie"]
   cuts_narrow_and_wide = cfg["cuts"]["narrow_and_wide"]
   cuts_wide_to_hbm = cfg["cuts"]["wide_to_hbm"]
@@ -93,7 +93,7 @@ module ${name}_soc
   input   ${soc_narrow_xbar.out_regbus_periph.rsp_type()} periph_regbus_rsp_i,
 
   // SoC control register IO
-  output logic [1:0] spm_rerror_o,
+  output logic [1:0] spm_narrow_rerror_o,
 
   // Interrupts and debug requests
   input  logic [${cores-1}:0] mtip_i,
@@ -226,29 +226,29 @@ module ${name}_soc
 
   % endfor
 
-  //////////
-  // SPM //
-  //////////
-  <% narrow_spm_mst = soc_narrow_xbar.out_spm \
-                      .atomic_adapter(context, max_atomics_narrow, "spm_amo_adapter") \
-                      .cut(context, cuts_narrow_conv_to_spm)
+  ////////////////
+  // SPM NARROW //
+  ////////////////
+  <% narrow_spm_mst = soc_narrow_xbar.out_spm_narrow \
+                      .atomic_adapter(context, max_atomics_narrow, "spm_narrow_amo_adapter") \
+                      .cut(context, cuts_narrow_conv_to_spm_narrow)
   %>\
 
-  <% spm_words = cfg["spm"]["length"]//(soc_narrow_xbar.out_spm.dw//8) %>\
+  <% spm_narrow_words = cfg["spm_narrow"]["length"]//(soc_narrow_xbar.out_spm_narrow.dw//8) %>\
 
-  typedef logic [${util.clog2(spm_words) + util.clog2(soc_narrow_xbar.out_spm.dw//8)-1}:0] mem_addr_t;
-  typedef logic [${soc_narrow_xbar.out_spm.dw-1}:0] mem_data_t;
-  typedef logic [${soc_narrow_xbar.out_spm.dw//8-1}:0] mem_strb_t;
+  typedef logic [${util.clog2(spm_narrow_words) + util.clog2(soc_narrow_xbar.out_spm_narrow.dw//8)-1}:0] mem_narrow_addr_t;
+  typedef logic [${soc_narrow_xbar.out_spm_narrow.dw-1}:0] mem_narrow_data_t;
+  typedef logic [${soc_narrow_xbar.out_spm_narrow.dw//8-1}:0] mem_narrow_strb_t;
 
-  logic spm_req, spm_gnt, spm_we, spm_rvalid;
-  mem_addr_t spm_addr;
-  mem_data_t spm_wdata, spm_rdata;
-  mem_strb_t spm_strb;
+  logic spm_narrow_req, spm_narrow_gnt, spm_narrow_we, spm_narrow_rvalid;
+  mem_narrow_addr_t spm_narrow_addr;
+  mem_narrow_data_t spm_narrow_wdata, spm_narrow_rdata;
+  mem_narrow_strb_t spm_narrow_strb;
 
   axi_to_mem #(
     .axi_req_t (${narrow_spm_mst.req_type()}),
     .axi_resp_t (${narrow_spm_mst.rsp_type()}),
-    .AddrWidth (${util.clog2(spm_words) + util.clog2(narrow_spm_mst.dw//8)}),
+    .AddrWidth (${util.clog2(spm_narrow_words) + util.clog2(narrow_spm_mst.dw//8)}),
     .DataWidth (${narrow_spm_mst.dw}),
     .IdWidth (${narrow_spm_mst.iw}),
     .NumBanks (1),
@@ -259,37 +259,37 @@ module ${name}_soc
     .busy_o (),
     .axi_req_i (${narrow_spm_mst.req_name()}),
     .axi_resp_o (${narrow_spm_mst.rsp_name()}),
-    .mem_req_o (spm_req),
-    .mem_gnt_i (spm_gnt),
-    .mem_addr_o (spm_addr),
-    .mem_wdata_o (spm_wdata),
-    .mem_strb_o (spm_strb),
+    .mem_req_o (spm_narrow_req),
+    .mem_gnt_i (spm_narrow_gnt),
+    .mem_addr_o (spm_narrow_addr),
+    .mem_wdata_o (spm_narrow_wdata),
+    .mem_strb_o (spm_narrow_strb),
     .mem_atop_o (),
-    .mem_we_o (spm_we),
-    .mem_rvalid_i (spm_rvalid),
-    .mem_rdata_i (spm_rdata)
+    .mem_we_o (spm_narrow_we),
+    .mem_rvalid_i (spm_narrow_rvalid),
+    .mem_rdata_i (spm_narrow_rdata)
   );
 
   spm_1p_adv #(
-    .NumWords (${spm_words}),
+    .NumWords (${spm_narrow_words}),
     .DataWidth (${narrow_spm_mst.dw}),
     .ByteWidth (8),
     .EnableInputPipeline (1'b1),
     .EnableOutputPipeline (1'b1),
     .sram_cfg_t (sram_cfg_t)
-  ) i_spm_cut (
+  ) i_spm_narrow_cut (
     .clk_i (${narrow_spm_mst.clk}),
     .rst_ni (${narrow_spm_mst.rst}),
-    .valid_i (spm_req),
-    .ready_o (spm_gnt),
-    .we_i (spm_we),
-    .addr_i (spm_addr[${util.clog2(spm_words) + util.clog2(narrow_spm_mst.dw//8)-1}:${util.clog2(narrow_spm_mst.dw//8)}]),
-    .wdata_i (spm_wdata),
-    .be_i (spm_strb),
-    .rdata_o (spm_rdata),
-    .rvalid_o (spm_rvalid),
-    .rerror_o (spm_rerror_o),
-    .sram_cfg_i (sram_cfgs_i.spm)
+    .valid_i (spm_narrow_req),
+    .ready_o (spm_narrow_gnt),
+    .we_i (spm_narrow_we),
+    .addr_i (spm_narrow_addr[${util.clog2(spm_narrow_words) + util.clog2(narrow_spm_mst.dw//8)-1}:${util.clog2(narrow_spm_mst.dw//8)}]),
+    .wdata_i (spm_narrow_wdata),
+    .be_i (spm_narrow_strb),
+    .rdata_o (spm_narrow_rdata),
+    .rvalid_o (spm_narrow_rvalid),
+    .rerror_o (spm_narrow_rerror_o),
+    .sram_cfg_i (sram_cfgs_i.spm_narrow)
   );
 
   //////////////
