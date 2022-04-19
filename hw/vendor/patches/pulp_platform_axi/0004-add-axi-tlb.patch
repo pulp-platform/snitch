@@ -16,13 +16,15 @@ diff --git a/Bender.yml b/Bender.yml
 index a3f49ba..18c99b3 100644
 --- a/Bender.yml
 +++ b/Bender.yml
-@@ -53,9 +53,11 @@ sources:
+@@ -51,11 +51,13 @@ sources:
    - src/axi_err_slv.sv
    - src/axi_dw_converter.sv
+   - src/axi_id_serialize.sv
    - src/axi_multicut.sv
 +  - src/axi_tlb_l1.sv
    - src/axi_to_axi_lite.sv
    # Level 4
+   - src/axi_iw_converter.sv
    - src/axi_lite_xbar.sv
 +  - src/axi_tlb.sv
    - src/axi_xbar.sv
