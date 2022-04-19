@@ -137,23 +137,23 @@ module axi_dma_data_mover #(
       .pop_i     (ar_emitter_pop)
   );
 
-    //--------------------------------------
-    // AW emitter
-    //--------------------------------------
-    // object currently at the tail of the fifo
-    desc_ax_t current_aw_req;
-    // control signals
-    logic aw_emitter_full;
-    logic aw_emitter_empty;
-    logic aw_emitter_push;
-    logic aw_emitter_pop;
-    logic aw_last_full;
+  //--------------------------------------
+  // AW emitter
+  //--------------------------------------
+  // object currently at the tail of the fifo
+  desc_ax_t current_aw_req;
+  // control signals
+  logic aw_emitter_full;
+  logic aw_emitter_empty;
+  logic aw_emitter_push;
+  logic aw_emitter_pop;
+  logic aw_last_full;
 
   // instantiate a fifo to buffer the address write requests
   fifo_v3 #(
-      .FALL_THROUGH(1'b0),
-      .dtype       (desc_ax_t),
-      .DEPTH       (ReqFifoDepth)
+    .FALL_THROUGH(1'b0),
+    .dtype       (desc_ax_t),
+    .DEPTH       (ReqFifoDepth)
   ) i_fifo_aw_emitter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
@@ -290,11 +290,11 @@ module axi_dma_data_mover #(
     r_emitter_push  = r_valid_i & r_ready_o;
     ar_emitter_push = r_valid_i & r_ready_o;
 
-        // Write related channels
-        w_ready_o          = ~aw_emitter_full & ~w_emitter_full & ~aw_last_full;
-        w_emitter_push     = w_valid_i & w_ready_o;
-        aw_emitter_push    = w_valid_i & w_ready_o;
-    end
+    // Write related channels
+    w_ready_o          = ~aw_emitter_full & ~w_emitter_full & ~aw_last_full;
+    w_emitter_push     = w_valid_i & w_ready_o;
+    aw_emitter_push    = w_valid_i & w_ready_o;
+  end
 
   //--------------------------------------
   // Bus control
@@ -358,11 +358,11 @@ module axi_dma_data_mover #(
       .rst_ni    (rst_ni),
       .flush_i   (1'b0),
       .testmode_i(1'b0),
-      .full_o    (),
+      .full_o    (aw_last_full),
       .empty_o   (),
       .usage_o   (),
-      .data_i    (current_aw_req.last),
-      .push_i    (aw_emitter_pop),
+      .data_i    (write_req_i.aw.last),
+      .push_i    (aw_emitter_push),
       .data_o    (is_last_aw),
       .pop_i     (axi_dma_res_i.b_valid)
   );
