@@ -324,8 +324,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
   assign acc_qreq_o.id = rd;
   assign acc_qreq_o.data_op = inst_data_i;
-  assign acc_qreq_o.data_arga = {{32{gpr_rdata[0][31]}}, gpr_rdata[0]};
-  assign acc_qreq_o.data_argb = {{32{gpr_rdata[1][31]}}, gpr_rdata[1]};
+  assign acc_qreq_o.data_arga = {{32{opa[31]}}, opa};
+  assign acc_qreq_o.data_argb = {{32{opb[31]}}, opb};
   // operand C is currently only used for load/store instructions
   assign acc_qreq_o.data_argc = ls_paddr;
 
@@ -2115,7 +2115,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       DMSTAT: begin
         if (Xdma) begin
           acc_qreq_o.addr     = DMA_SS;
-          opa_select      = Reg;
+          opb_select      = Reg;
           acc_qvalid_o    = valid_instr;
           write_rd        = 1'b0;
           uses_rd         = 1'b1;
