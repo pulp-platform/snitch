@@ -42,6 +42,7 @@ package occamy_pkg;
 
   typedef struct packed {
     sram_cfg_t spm_narrow;
+    sram_cfg_t spm_wide;
     sram_cfg_cva6_t cva6;
     sram_cfg_quadrant_t quadrant;
   } sram_cfgs_t;
@@ -71,8 +72,10 @@ package occamy_pkg;
     logic i2c_acq_overflow;
     logic i2c_ack_stop;
     logic i2c_host_timeout;
-    logic ecc_uncorrectable;
-    logic ecc_correctable;
+    logic ecc_narrow_uncorrectable;
+    logic ecc_narrow_correctable;
+    logic ecc_wide_uncorrectable;
+    logic ecc_wide_correctable;
     // 4 programmable, 8 HBM (1x per channel)
     logic [11:0] ext_irq;
     logic zero;
@@ -673,6 +676,7 @@ package occamy_pkg;
     SOC_WIDE_XBAR_OUT_HBM_XBAR,
     SOC_WIDE_XBAR_OUT_QUADRANT_INTER_XBAR,
     SOC_WIDE_XBAR_OUT_SOC_NARROW,
+    SOC_WIDE_XBAR_OUT_SPM_WIDE,
     SOC_WIDE_XBAR_NUM_OUTPUTS
   } soc_wide_xbar_outputs_e;
 
@@ -689,7 +693,7 @@ package occamy_pkg;
   UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        5
+  NoAddrRules:        6
 };
 
   // AXI bus with 48 bit address, 512 bit data, 6 bit IDs, and 0 bit user data.

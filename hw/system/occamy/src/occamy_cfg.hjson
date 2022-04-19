@@ -42,6 +42,7 @@
       narrow_conv_to_spm_narrow: 1,
       narrow_and_pcie: 1,
       narrow_and_wide: 0,
+      wide_conv_to_spm_wide: 1,
       wide_to_hbm: 6,
       wide_and_inter: 3,
       wide_and_hbi: 3,
@@ -321,6 +322,10 @@
     spm_narrow: {
       address: 1879048192, // 0x7000_0000
       length: 524288, // 512 kiB 0x8_0000
+    },
+    spm_wide: {
+      address: 1895825408, // 0x7100_0000
+      length: 2097152, // 2 MiB 0x20_0000
     },
     sys_idma_cfg: {
       address: 285212672, // 0x1100_0000

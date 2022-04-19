@@ -263,6 +263,12 @@ def main():
         occamy.cfg["spm_narrow"]["length"],
         occamy.cfg["spm_narrow"]["address"]).attach_to(am_soc_narrow_xbar)
 
+    # Connect wide SPM to Wide AXI
+    am_spm_wide = am.new_leaf(
+        "spm_wide",
+        occamy.cfg["spm_wide"]["length"],
+        occamy.cfg["spm_wide"]["address"]).attach_to(am_soc_wide_xbar)
+
     ############
     # AM: IDMA #
     ############
@@ -629,6 +635,7 @@ def main():
     soc_wide_xbar.add_input("quadrant_inter_xbar")
     soc_wide_xbar.add_input("soc_narrow")
     soc_wide_xbar.add_input("sys_idma_mst")
+    soc_wide_xbar.add_output_entry("spm_wide", am_spm_wide)
 
     ###################
     # SoC Narrow Xbar #

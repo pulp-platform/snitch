@@ -69,6 +69,7 @@ module occamy_soc
 
     // SoC control register IO
     output logic [1:0] spm_narrow_rerror_o,
+    output logic [1:0] spm_wide_rerror_o,
 
     // Interrupts and debug requests
     input logic [216:0] mtip_i,
@@ -103,7 +104,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_0` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar0Addrmap;
   assign QuadrantPreXbar0Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -147,7 +148,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_1` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar1Addrmap;
   assign QuadrantPreXbar1Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -191,7 +192,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_2` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar2Addrmap;
   assign QuadrantPreXbar2Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -235,7 +236,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_3` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar3Addrmap;
   assign QuadrantPreXbar3Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -279,7 +280,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_4` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar4Addrmap;
   assign QuadrantPreXbar4Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -323,7 +324,7 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_5` crossbar.
   xbar_rule_48_t [2:0] QuadrantPreXbar5Addrmap;
   assign QuadrantPreXbar5Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h70080000 },
+  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
 };
@@ -465,23 +466,24 @@ module occamy_soc
   );
 
   /// Address map of the `soc_wide_xbar` crossbar.
-  xbar_rule_48_t [4:0] SocWideXbarAddrmap;
+  xbar_rule_48_t [5:0] SocWideXbarAddrmap;
   assign SocWideXbarAddrmap = '{
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
   '{ idx: 2, start_addr: 48'h10000000, end_addr: 48'h10600000 },
   '{ idx: 3, start_addr: 48'h00000000, end_addr: 48'h10000000 },
-  '{ idx: 3, start_addr: 48'h11000000, end_addr: 48'h70080000 }
+  '{ idx: 3, start_addr: 48'h11000000, end_addr: 48'h70080000 },
+  '{ idx: 4, start_addr: 48'h71000000, end_addr: 48'h71200000 }
 };
 
   soc_wide_xbar_in_req_t   [3:0] soc_wide_xbar_in_req;
   soc_wide_xbar_in_resp_t  [3:0] soc_wide_xbar_in_rsp;
-  soc_wide_xbar_out_req_t  [3:0] soc_wide_xbar_out_req;
-  soc_wide_xbar_out_resp_t [3:0] soc_wide_xbar_out_rsp;
+  soc_wide_xbar_out_req_t  [4:0] soc_wide_xbar_out_req;
+  soc_wide_xbar_out_resp_t [4:0] soc_wide_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg          (SocWideXbarCfg),
-      .Connectivity (16'b1111011110111110),
+      .Connectivity (20'b11111101111101111110),
       .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i6_u0_aw_chan_t),
@@ -513,7 +515,7 @@ module occamy_soc
   /// Address map of the `soc_narrow_xbar` crossbar.
   xbar_rule_48_t [19:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
-  '{ idx: 6, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
+  '{ idx: 6, start_addr: 48'h71000000, end_addr: 48'h1200000000 },
   '{ idx: 7, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
   '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
   '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70080000 },
@@ -1962,7 +1964,7 @@ module occamy_soc
       .IdWidth(8),
       .NumBanks(1),
       .BufDepth(1)
-  ) i_axi_to_mem (
+  ) i_axi_to_wide_mem (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
       .busy_o(),
@@ -1999,6 +2001,193 @@ module occamy_soc
       .rvalid_o(spm_narrow_rvalid),
       .rerror_o(spm_narrow_rerror_o),
       .sram_cfg_i(sram_cfgs_i.spm_narrow)
+  );
+
+  //////////////
+  // SPM WIDE //
+  //////////////
+  axi_a48_d512_i6_u0_req_t  spm_wide_amo_adapter_req;
+  axi_a48_d512_i6_u0_resp_t spm_wide_amo_adapter_rsp;
+
+  axi_riscv_atomics #(
+      .AXI_ADDR_WIDTH(48),
+      .AXI_DATA_WIDTH(512),
+      .AXI_ID_WIDTH(6),
+      .AXI_USER_WIDTH(1),
+      .AXI_MAX_WRITE_TXNS(16),
+      .RISCV_WORD_WIDTH(64)
+  ) i_spm_wide_amo_adapter (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_aw_addr_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.addr),
+      .slv_aw_prot_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.prot),
+      .slv_aw_region_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.region),
+      .slv_aw_atop_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.atop),
+      .slv_aw_len_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.len),
+      .slv_aw_size_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.size),
+      .slv_aw_burst_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.burst),
+      .slv_aw_lock_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.lock),
+      .slv_aw_cache_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.cache),
+      .slv_aw_qos_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.qos),
+      .slv_aw_id_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.id),
+      .slv_aw_user_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw.user),
+      .slv_aw_ready_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw_ready),
+      .slv_aw_valid_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].aw_valid),
+      .slv_ar_addr_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.addr),
+      .slv_ar_prot_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.prot),
+      .slv_ar_region_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.region),
+      .slv_ar_len_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.len),
+      .slv_ar_size_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.size),
+      .slv_ar_burst_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.burst),
+      .slv_ar_lock_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.lock),
+      .slv_ar_cache_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.cache),
+      .slv_ar_qos_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.qos),
+      .slv_ar_id_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.id),
+      .slv_ar_user_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar.user),
+      .slv_ar_ready_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar_ready),
+      .slv_ar_valid_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].ar_valid),
+      .slv_w_data_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].w.data),
+      .slv_w_strb_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].w.strb),
+      .slv_w_user_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].w.user),
+      .slv_w_last_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].w.last),
+      .slv_w_ready_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].w_ready),
+      .slv_w_valid_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].w_valid),
+      .slv_r_data_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].r.data),
+      .slv_r_resp_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].r.resp),
+      .slv_r_last_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].r.last),
+      .slv_r_id_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].r.id),
+      .slv_r_user_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].r.user),
+      .slv_r_ready_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].r_ready),
+      .slv_r_valid_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].r_valid),
+      .slv_b_resp_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].b.resp),
+      .slv_b_id_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].b.id),
+      .slv_b_user_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].b.user),
+      .slv_b_ready_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_SPM_WIDE].b_ready),
+      .slv_b_valid_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_SPM_WIDE].b_valid),
+
+      .mst_aw_addr_o(spm_wide_amo_adapter_req.aw.addr),
+      .mst_aw_prot_o(spm_wide_amo_adapter_req.aw.prot),
+      .mst_aw_region_o(spm_wide_amo_adapter_req.aw.region),
+      .mst_aw_atop_o(spm_wide_amo_adapter_req.aw.atop),
+      .mst_aw_len_o(spm_wide_amo_adapter_req.aw.len),
+      .mst_aw_size_o(spm_wide_amo_adapter_req.aw.size),
+      .mst_aw_burst_o(spm_wide_amo_adapter_req.aw.burst),
+      .mst_aw_lock_o(spm_wide_amo_adapter_req.aw.lock),
+      .mst_aw_cache_o(spm_wide_amo_adapter_req.aw.cache),
+      .mst_aw_qos_o(spm_wide_amo_adapter_req.aw.qos),
+      .mst_aw_id_o(spm_wide_amo_adapter_req.aw.id),
+      .mst_aw_user_o(spm_wide_amo_adapter_req.aw.user),
+      .mst_aw_ready_i(spm_wide_amo_adapter_rsp.aw_ready),
+      .mst_aw_valid_o(spm_wide_amo_adapter_req.aw_valid),
+      .mst_ar_addr_o(spm_wide_amo_adapter_req.ar.addr),
+      .mst_ar_prot_o(spm_wide_amo_adapter_req.ar.prot),
+      .mst_ar_region_o(spm_wide_amo_adapter_req.ar.region),
+      .mst_ar_len_o(spm_wide_amo_adapter_req.ar.len),
+      .mst_ar_size_o(spm_wide_amo_adapter_req.ar.size),
+      .mst_ar_burst_o(spm_wide_amo_adapter_req.ar.burst),
+      .mst_ar_lock_o(spm_wide_amo_adapter_req.ar.lock),
+      .mst_ar_cache_o(spm_wide_amo_adapter_req.ar.cache),
+      .mst_ar_qos_o(spm_wide_amo_adapter_req.ar.qos),
+      .mst_ar_id_o(spm_wide_amo_adapter_req.ar.id),
+      .mst_ar_user_o(spm_wide_amo_adapter_req.ar.user),
+      .mst_ar_ready_i(spm_wide_amo_adapter_rsp.ar_ready),
+      .mst_ar_valid_o(spm_wide_amo_adapter_req.ar_valid),
+      .mst_w_data_o(spm_wide_amo_adapter_req.w.data),
+      .mst_w_strb_o(spm_wide_amo_adapter_req.w.strb),
+      .mst_w_user_o(spm_wide_amo_adapter_req.w.user),
+      .mst_w_last_o(spm_wide_amo_adapter_req.w.last),
+      .mst_w_ready_i(spm_wide_amo_adapter_rsp.w_ready),
+      .mst_w_valid_o(spm_wide_amo_adapter_req.w_valid),
+      .mst_r_data_i(spm_wide_amo_adapter_rsp.r.data),
+      .mst_r_resp_i(spm_wide_amo_adapter_rsp.r.resp),
+      .mst_r_last_i(spm_wide_amo_adapter_rsp.r.last),
+      .mst_r_id_i(spm_wide_amo_adapter_rsp.r.id),
+      .mst_r_user_i(spm_wide_amo_adapter_rsp.r.user),
+      .mst_r_ready_o(spm_wide_amo_adapter_req.r_ready),
+      .mst_r_valid_i(spm_wide_amo_adapter_rsp.r_valid),
+      .mst_b_resp_i(spm_wide_amo_adapter_rsp.b.resp),
+      .mst_b_id_i(spm_wide_amo_adapter_rsp.b.id),
+      .mst_b_user_i(spm_wide_amo_adapter_rsp.b.user),
+      .mst_b_ready_o(spm_wide_amo_adapter_req.b_ready),
+      .mst_b_valid_i(spm_wide_amo_adapter_rsp.b_valid)
+  );
+
+  axi_a48_d512_i6_u0_req_t  spm_wide_amo_adapter_cut_req;
+  axi_a48_d512_i6_u0_resp_t spm_wide_amo_adapter_cut_rsp;
+
+  axi_multicut #(
+      .NoCuts(1),
+      .aw_chan_t(axi_a48_d512_i6_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d512_i6_u0_w_chan_t),
+      .b_chan_t(axi_a48_d512_i6_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d512_i6_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d512_i6_u0_r_chan_t),
+      .req_t(axi_a48_d512_i6_u0_req_t),
+      .resp_t(axi_a48_d512_i6_u0_resp_t)
+  ) i_spm_wide_amo_adapter_cut (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .slv_req_i(spm_wide_amo_adapter_req),
+      .slv_resp_o(spm_wide_amo_adapter_rsp),
+      .mst_req_o(spm_wide_amo_adapter_cut_req),
+      .mst_resp_i(spm_wide_amo_adapter_cut_rsp)
+  );
+
+
+  typedef logic [20:0] mem_wide_addr_t;
+  typedef logic [511:0] mem_wide_data_t;
+  typedef logic [63:0] mem_wide_strb_t;
+
+  logic spm_wide_req, spm_wide_gnt, spm_wide_we, spm_wide_rvalid;
+  mem_wide_addr_t spm_wide_addr;
+  mem_wide_data_t spm_wide_wdata, spm_wide_rdata;
+  mem_wide_strb_t spm_wide_strb;
+
+  axi_to_mem #(
+      .axi_req_t(axi_a48_d512_i6_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i6_u0_resp_t),
+      .AddrWidth(21),
+      .DataWidth(512),
+      .IdWidth(6),
+      .NumBanks(1),
+      .BufDepth(1)
+  ) i_axi_to_mem (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .busy_o(),
+      .axi_req_i(spm_wide_amo_adapter_cut_req),
+      .axi_resp_o(spm_wide_amo_adapter_cut_rsp),
+      .mem_req_o(spm_wide_req),
+      .mem_gnt_i(spm_wide_gnt),
+      .mem_addr_o(spm_wide_addr),
+      .mem_wdata_o(spm_wide_wdata),
+      .mem_strb_o(spm_wide_strb),
+      .mem_atop_o(),
+      .mem_we_o(spm_wide_we),
+      .mem_rvalid_i(spm_wide_rvalid),
+      .mem_rdata_i(spm_wide_rdata)
+  );
+
+  spm_1p_adv #(
+      .NumWords(32768),
+      .DataWidth(512),
+      .ByteWidth(8),
+      .EnableInputPipeline(1'b1),
+      .EnableOutputPipeline(1'b1),
+      .sram_cfg_t(sram_cfg_t)
+  ) i_spm_wide_cut (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .valid_i(spm_wide_req),
+      .ready_o(spm_wide_gnt),
+      .we_i(spm_wide_we),
+      .addr_i(spm_wide_addr[20:6]),
+      .wdata_i(spm_wide_wdata),
+      .be_i(spm_wide_strb),
+      .rdata_o(spm_wide_rdata),
+      .rvalid_o(spm_wide_rvalid),
+      .rerror_o(spm_wide_rerror_o),
+      .sram_cfg_i(sram_cfgs_i.spm_wide)
   );
 
   //////////////

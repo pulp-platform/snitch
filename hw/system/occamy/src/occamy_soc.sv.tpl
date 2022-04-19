@@ -17,6 +17,7 @@
   cuts_narrow_conv_to_spm_narrow = cfg["cuts"]["narrow_conv_to_spm_narrow"]
   cuts_narrow_and_pcie = cfg["cuts"]["narrow_and_pcie"]
   cuts_narrow_and_wide = cfg["cuts"]["narrow_and_wide"]
+  cuts_wide_conv_to_spm_wide = cfg["cuts"]["wide_conv_to_spm_wide"]
   cuts_wide_to_hbm = cfg["cuts"]["wide_to_hbm"]
   cuts_wide_and_inter = cfg["cuts"]["wide_and_inter"]
   cuts_wide_and_hbi = cfg["cuts"]["wide_and_hbi"]
@@ -29,6 +30,7 @@
   txns_wide_to_hbm = cfg["txns"]["wide_to_hbm"]
   txns_narrow_and_wide = cfg["txns"]["narrow_and_wide"]
   max_atomics_narrow = 16
+  max_atomics_wide = 16
   max_trans_atop_filter_per = 4
   max_trans_atop_filter_ser = 32
   hbi_trunc_addr_width = 40
@@ -94,6 +96,7 @@ module ${name}_soc
 
   // SoC control register IO
   output logic [1:0] spm_narrow_rerror_o,
+  output logic [1:0] spm_wide_rerror_o,
 
   // Interrupts and debug requests
   input  logic [${cores-1}:0] mtip_i,
@@ -253,7 +256,7 @@ module ${name}_soc
     .IdWidth (${narrow_spm_mst.iw}),
     .NumBanks (1),
     .BufDepth (1)
-  ) i_axi_to_mem (
+  ) i_axi_to_wide_mem (
     .clk_i (${narrow_spm_mst.clk}),
     .rst_ni (${narrow_spm_mst.rst}),
     .busy_o (),
@@ -290,6 +293,72 @@ module ${name}_soc
     .rvalid_o (spm_narrow_rvalid),
     .rerror_o (spm_narrow_rerror_o),
     .sram_cfg_i (sram_cfgs_i.spm_narrow)
+  );
+
+  //////////////
+  // SPM WIDE //
+  //////////////
+  <% wide_spm_mst = soc_wide_xbar.out_spm_wide \
+                    .atomic_adapter(context, max_atomics_wide, "spm_wide_amo_adapter") \
+                    .cut(context, cuts_wide_conv_to_spm_wide)
+  %>\
+
+  <% spm_wide_words = cfg["spm_wide"]["length"]//(soc_wide_xbar.out_spm_wide.dw//8) %>\
+
+  typedef logic [${util.clog2(spm_wide_words) + util.clog2(soc_wide_xbar.out_spm_wide.dw//8)-1}:0] mem_wide_addr_t;
+  typedef logic [${soc_wide_xbar.out_spm_wide.dw-1}:0] mem_wide_data_t;
+  typedef logic [${soc_wide_xbar.out_spm_wide.dw//8-1}:0] mem_wide_strb_t;
+
+  logic spm_wide_req, spm_wide_gnt, spm_wide_we, spm_wide_rvalid;
+  mem_wide_addr_t spm_wide_addr;
+  mem_wide_data_t spm_wide_wdata, spm_wide_rdata;
+  mem_wide_strb_t spm_wide_strb;
+
+  axi_to_mem #(
+    .axi_req_t (${wide_spm_mst.req_type()}),
+    .axi_resp_t (${wide_spm_mst.rsp_type()}),
+    .AddrWidth (${util.clog2(spm_wide_words) + util.clog2(wide_spm_mst.dw//8)}),
+    .DataWidth (${wide_spm_mst.dw}),
+    .IdWidth (${wide_spm_mst.iw}),
+    .NumBanks (1),
+    .BufDepth (1)
+  ) i_axi_to_mem (
+    .clk_i (${wide_spm_mst.clk}),
+    .rst_ni (${wide_spm_mst.rst}),
+    .busy_o (),
+    .axi_req_i (${wide_spm_mst.req_name()}),
+    .axi_resp_o (${wide_spm_mst.rsp_name()}),
+    .mem_req_o (spm_wide_req),
+    .mem_gnt_i (spm_wide_gnt),
+    .mem_addr_o (spm_wide_addr),
+    .mem_wdata_o (spm_wide_wdata),
+    .mem_strb_o (spm_wide_strb),
+    .mem_atop_o (),
+    .mem_we_o (spm_wide_we),
+    .mem_rvalid_i (spm_wide_rvalid),
+    .mem_rdata_i (spm_wide_rdata)
+  );
+
+  spm_1p_adv #(
+    .NumWords (${spm_wide_words}),
+    .DataWidth (${wide_spm_mst.dw}),
+    .ByteWidth (8),
+    .EnableInputPipeline (1'b1),
+    .EnableOutputPipeline (1'b1),
+    .sram_cfg_t (sram_cfg_t)
+  ) i_spm_wide_cut (
+    .clk_i (${wide_spm_mst.clk}),
+    .rst_ni (${wide_spm_mst.rst}),
+    .valid_i (spm_wide_req),
+    .ready_o (spm_wide_gnt),
+    .we_i (spm_wide_we),
+    .addr_i (spm_wide_addr[${util.clog2(spm_wide_words) + util.clog2(wide_spm_mst.dw//8)-1}:${util.clog2(wide_spm_mst.dw//8)}]),
+    .wdata_i (spm_wide_wdata),
+    .be_i (spm_wide_strb),
+    .rdata_o (spm_wide_rdata),
+    .rvalid_o (spm_wide_rvalid),
+    .rerror_o (spm_wide_rerror_o),
+    .sram_cfg_i (sram_cfgs_i.spm_wide)
   );
 
   //////////////

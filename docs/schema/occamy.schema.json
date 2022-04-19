@@ -81,7 +81,7 @@
                     "description": "narrow -> cva6",
                     "default": 1
                 },
-                "narrow_conv_to_spm": {
+                "narrow_conv_to_spm_narrow": {
                     "type": "integer",
                     "description": "narrow -> SPM",
                     "default": 1
@@ -95,6 +95,11 @@
                     "type": "integer",
                     "description": "narrow xbar -> wide xbar & wide xbar -> narrow xbar",
                     "default": 0
+                },
+                "wide_conv_to_spm_wide": {
+                    "type": "integer",
+                    "description": "wide xbar -> wide spm",
+                    "default": 1
                 },
                 "wide_to_hbm": {
                     "type": "integer",
@@ -258,6 +263,9 @@
             }
         },
         "spm_narrow": {
+            "$ref": "http://pulp-platform.org/snitch/address_range.schema.json"
+        },
+        "spm_wide": {
             "$ref": "http://pulp-platform.org/snitch/address_range.schema.json"
         },
         "pcie": {
