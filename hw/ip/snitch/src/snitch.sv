@@ -2115,7 +2115,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       DMSTAT: begin
         if (Xdma) begin
           acc_qreq_o.addr     = DMA_SS;
-          opa_select      = Reg;
+          opb_select      = Reg;
           acc_qvalid_o    = valid_instr;
           write_rd        = 1'b0;
           uses_rd         = 1'b1;
