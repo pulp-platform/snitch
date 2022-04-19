@@ -264,7 +264,7 @@ package occamy_pkg;
   UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        3
+  NoAddrRules:        5
 };
 
   // AXI bus with 48 bit address, 512 bit data, 4 bit IDs, and 0 bit user data.
@@ -317,7 +317,7 @@ package occamy_pkg;
   UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        3
+  NoAddrRules:        5
 };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_1_in_req_t;
@@ -366,7 +366,7 @@ package occamy_pkg;
   UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        3
+  NoAddrRules:        5
 };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_2_in_req_t;
@@ -415,7 +415,7 @@ package occamy_pkg;
   UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        3
+  NoAddrRules:        5
 };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_3_in_req_t;
@@ -464,7 +464,7 @@ package occamy_pkg;
   UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        3
+  NoAddrRules:        5
 };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_4_in_req_t;
@@ -513,7 +513,7 @@ package occamy_pkg;
   UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        3
+  NoAddrRules:        5
 };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_5_in_req_t;
@@ -677,6 +677,7 @@ package occamy_pkg;
     SOC_WIDE_XBAR_OUT_QUADRANT_INTER_XBAR,
     SOC_WIDE_XBAR_OUT_SOC_NARROW,
     SOC_WIDE_XBAR_OUT_SPM_WIDE,
+    SOC_WIDE_XBAR_OUT_WIDE_ZERO_MEM,
     SOC_WIDE_XBAR_NUM_OUTPUTS
   } soc_wide_xbar_outputs_e;
 
@@ -693,7 +694,7 @@ package occamy_pkg;
   UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
-  NoAddrRules:        6
+  NoAddrRules:        8
 };
 
   // AXI bus with 48 bit address, 512 bit data, 6 bit IDs, and 0 bit user data.

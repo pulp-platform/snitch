@@ -269,6 +269,12 @@ def main():
         occamy.cfg["spm_wide"]["length"],
         occamy.cfg["spm_wide"]["address"]).attach_to(am_soc_wide_xbar)
 
+    # Connect wide Zero Memory to Wide AXI
+    am_wide_zero_mem = am.new_leaf(
+        "wide_zero_mem",
+        occamy.cfg["wide_zero_mem"]["length"],
+        occamy.cfg["wide_zero_mem"]["address"]).attach_to(am_soc_wide_xbar)
+
     ############
     # AM: IDMA #
     ############
@@ -636,6 +642,7 @@ def main():
     soc_wide_xbar.add_input("soc_narrow")
     soc_wide_xbar.add_input("sys_idma_mst")
     soc_wide_xbar.add_output_entry("spm_wide", am_spm_wide)
+    soc_wide_xbar.add_output_entry("wide_zero_mem", am_wide_zero_mem)
 
     ###################
     # SoC Narrow Xbar #

@@ -59,7 +59,8 @@ This is the current address map of occamy. Note that the Quadrants address map h
 | -                | 238.0 MB |  free  |      0x7120\_0000 |      0x7fff\_ffff |
 | HBM\_0           |   1.0 GB |  used  |      0x8000\_0000 |      0xbfff\_ffff |
 | HBM\_1           |   1.0 GB |  used  |      0xc000\_0000 |      0xffff\_ffff |
-| -                |  60.0 GB |  free  |   0x1\_0000\_0000 |   0xf\_ffff\_ffff |
+| WIDE\_ZERO\_MEM  |   8.0 GB |  used  |   0x1\_0000\_0000 |   0x2\_ffff\_ffff |
+| -                |  52.0 GB |  free  |   0x3\_0000\_0000 |   0xf\_ffff\_ffff |
 | HBM\_0           |   1.0 GB |  used  |  0x10\_0000\_0000 |  0x10\_3fff\_ffff |
 | HBM\_1           |   1.0 GB |  used  |  0x10\_4000\_0000 |  0x10\_7fff\_ffff |
 | HBM\_2           |   1.0 GB |  used  |  0x10\_8000\_0000 |  0x10\_bfff\_ffff |

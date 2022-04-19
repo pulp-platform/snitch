@@ -43,6 +43,7 @@
       narrow_and_pcie: 1,
       narrow_and_wide: 0,
       wide_conv_to_spm_wide: 1,
+      wide_to_wide_zero_mem: 0,
       wide_to_hbm: 6,
       wide_and_inter: 3,
       wide_and_hbi: 3,
@@ -326,6 +327,10 @@
     spm_wide: {
       address: 1895825408, // 0x7100_0000
       length: 2097152, // 2 MiB 0x20_0000
+    },
+    wide_zero_mem: {
+      address: 4294967296, // 0x1_0000_0000
+      length: 8589934592, // 8 GiB 0x2_0000_0000
     },
     sys_idma_cfg: {
       address: 285212672, // 0x1100_0000

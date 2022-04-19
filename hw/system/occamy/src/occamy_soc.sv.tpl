@@ -18,6 +18,7 @@
   cuts_narrow_and_pcie = cfg["cuts"]["narrow_and_pcie"]
   cuts_narrow_and_wide = cfg["cuts"]["narrow_and_wide"]
   cuts_wide_conv_to_spm_wide = cfg["cuts"]["wide_conv_to_spm_wide"]
+  cuts_wide_to_wide_zero_mem = cfg["cuts"]["wide_to_wide_zero_mem"]
   cuts_wide_to_hbm = cfg["cuts"]["wide_to_hbm"]
   cuts_wide_and_inter = cfg["cuts"]["wide_and_inter"]
   cuts_wide_and_hbi = cfg["cuts"]["wide_and_hbi"]
@@ -359,6 +360,31 @@ module ${name}_soc
     .rvalid_o (spm_wide_rvalid),
     .rerror_o (spm_wide_rerror_o),
     .sram_cfg_i (sram_cfgs_i.spm_wide)
+  );
+
+  //////////////////////
+  // WIDE ZERO MEMORY //
+  //////////////////////
+  <% wide_zero_mem_mst = soc_wide_xbar.out_wide_zero_mem \
+                         .cut(context, cuts_wide_to_wide_zero_mem)
+  %>\
+
+  <% wide_zero_mem_words = cfg["wide_zero_mem"]["length"]//(soc_wide_xbar.out_wide_zero_mem.dw//8) %>\
+
+  axi_zero_mem #(
+    .axi_req_t (${wide_zero_mem_mst.req_type()}),
+    .axi_resp_t (${wide_zero_mem_mst.rsp_type()}),
+    .AddrWidth (${util.clog2(wide_zero_mem_words) + util.clog2(wide_zero_mem_mst.dw//8)}),
+    .DataWidth (${wide_zero_mem_mst.dw}),
+    .IdWidth (${wide_zero_mem_mst.iw}),
+    .NumBanks (1),
+    .BufDepth (1)
+  ) i_axi_wide_zero_mem (
+    .clk_i (${wide_zero_mem_mst.clk}),
+    .rst_ni (${wide_zero_mem_mst.rst}),
+    .busy_o (),
+    .axi_req_i (${wide_zero_mem_mst.req_name()}),
+    .axi_resp_o (${wide_zero_mem_mst.rsp_name()})
   );
 
   //////////////

@@ -102,11 +102,13 @@ module occamy_soc
   // Crossbars
 
   /// Address map of the `quadrant_pre_xbar_0` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar0Addrmap;
+  xbar_rule_48_t [4:0] QuadrantPreXbar0Addrmap;
   assign QuadrantPreXbar0Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
+  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
+  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
+  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
 };
 
   quadrant_pre_xbar_0_in_req_t   [0:0] quadrant_pre_xbar_0_in_req;
@@ -146,11 +148,13 @@ module occamy_soc
   );
 
   /// Address map of the `quadrant_pre_xbar_1` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar1Addrmap;
+  xbar_rule_48_t [4:0] QuadrantPreXbar1Addrmap;
   assign QuadrantPreXbar1Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
+  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
+  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
+  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
 };
 
   quadrant_pre_xbar_1_in_req_t   [0:0] quadrant_pre_xbar_1_in_req;
@@ -190,11 +194,13 @@ module occamy_soc
   );
 
   /// Address map of the `quadrant_pre_xbar_2` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar2Addrmap;
+  xbar_rule_48_t [4:0] QuadrantPreXbar2Addrmap;
   assign QuadrantPreXbar2Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
+  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
+  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
+  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
 };
 
   quadrant_pre_xbar_2_in_req_t   [0:0] quadrant_pre_xbar_2_in_req;
@@ -234,11 +240,13 @@ module occamy_soc
   );
 
   /// Address map of the `quadrant_pre_xbar_3` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar3Addrmap;
+  xbar_rule_48_t [4:0] QuadrantPreXbar3Addrmap;
   assign QuadrantPreXbar3Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
+  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
+  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
+  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
 };
 
   quadrant_pre_xbar_3_in_req_t   [0:0] quadrant_pre_xbar_3_in_req;
@@ -278,11 +286,13 @@ module occamy_soc
   );
 
   /// Address map of the `quadrant_pre_xbar_4` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar4Addrmap;
+  xbar_rule_48_t [4:0] QuadrantPreXbar4Addrmap;
   assign QuadrantPreXbar4Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
+  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
+  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
+  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
 };
 
   quadrant_pre_xbar_4_in_req_t   [0:0] quadrant_pre_xbar_4_in_req;
@@ -322,11 +332,13 @@ module occamy_soc
   );
 
   /// Address map of the `quadrant_pre_xbar_5` crossbar.
-  xbar_rule_48_t [2:0] QuadrantPreXbar5Addrmap;
+  xbar_rule_48_t [4:0] QuadrantPreXbar5Addrmap;
   assign QuadrantPreXbar5Addrmap = '{
   '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71200000 },
+  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 }
+  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
+  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
 };
 
   quadrant_pre_xbar_5_in_req_t   [0:0] quadrant_pre_xbar_5_in_req;
@@ -466,24 +478,26 @@ module occamy_soc
   );
 
   /// Address map of the `soc_wide_xbar` crossbar.
-  xbar_rule_48_t [5:0] SocWideXbarAddrmap;
+  xbar_rule_48_t [7:0] SocWideXbarAddrmap;
   assign SocWideXbarAddrmap = '{
   '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h1200000000 },
+  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
+  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 },
   '{ idx: 2, start_addr: 48'h10000000, end_addr: 48'h10600000 },
   '{ idx: 3, start_addr: 48'h00000000, end_addr: 48'h10000000 },
   '{ idx: 3, start_addr: 48'h11000000, end_addr: 48'h70080000 },
-  '{ idx: 4, start_addr: 48'h71000000, end_addr: 48'h71200000 }
+  '{ idx: 4, start_addr: 48'h71000000, end_addr: 48'h71200000 },
+  '{ idx: 5, start_addr: 48'h100000000, end_addr: 48'h300000000 }
 };
 
   soc_wide_xbar_in_req_t   [3:0] soc_wide_xbar_in_req;
   soc_wide_xbar_in_resp_t  [3:0] soc_wide_xbar_in_rsp;
-  soc_wide_xbar_out_req_t  [4:0] soc_wide_xbar_out_req;
-  soc_wide_xbar_out_resp_t [4:0] soc_wide_xbar_out_rsp;
+  soc_wide_xbar_out_req_t  [5:0] soc_wide_xbar_out_req;
+  soc_wide_xbar_out_resp_t [5:0] soc_wide_xbar_out_rsp;
 
   axi_xbar #(
       .Cfg          (SocWideXbarCfg),
-      .Connectivity (20'b11111101111101111110),
+      .Connectivity (24'b111111110111111011111110),
       .ATOPs        (0),
       .slv_aw_chan_t(axi_a48_d512_i4_u0_aw_chan_t),
       .mst_aw_chan_t(axi_a48_d512_i6_u0_aw_chan_t),
@@ -2188,6 +2202,27 @@ module occamy_soc
       .rvalid_o(spm_wide_rvalid),
       .rerror_o(spm_wide_rerror_o),
       .sram_cfg_i(sram_cfgs_i.spm_wide)
+  );
+
+  //////////////////////
+  // WIDE ZERO MEMORY //
+  //////////////////////
+
+
+  axi_zero_mem #(
+      .axi_req_t(axi_a48_d512_i6_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i6_u0_resp_t),
+      .AddrWidth(33),
+      .DataWidth(512),
+      .IdWidth(6),
+      .NumBanks(1),
+      .BufDepth(1)
+  ) i_axi_wide_zero_mem (
+      .clk_i(clk_i),
+      .rst_ni(rst_ni),
+      .busy_o(),
+      .axi_req_i(soc_wide_xbar_out_req[SOC_WIDE_XBAR_OUT_WIDE_ZERO_MEM]),
+      .axi_resp_o(soc_wide_xbar_out_rsp[SOC_WIDE_XBAR_OUT_WIDE_ZERO_MEM])
   );
 
   //////////////

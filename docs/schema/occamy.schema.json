@@ -101,6 +101,11 @@
                     "description": "wide xbar -> wide spm",
                     "default": 1
                 },
+                "wide_to_wide_zero_mem": {
+                    "type": "integer",
+                    "description": "wide xbar -> wide zero memory",
+                    "default": 0
+                },
                 "wide_to_hbm": {
                     "type": "integer",
                     "description": "wide xbar -> hbm xbar",
@@ -266,6 +271,9 @@
             "$ref": "http://pulp-platform.org/snitch/address_range.schema.json"
         },
         "spm_wide": {
+            "$ref": "http://pulp-platform.org/snitch/address_range.schema.json"
+        },
+        "wide_zero_mem": {
             "$ref": "http://pulp-platform.org/snitch/address_range.schema.json"
         },
         "pcie": {
