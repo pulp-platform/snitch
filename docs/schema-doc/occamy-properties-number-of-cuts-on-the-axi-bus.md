@@ -16,25 +16,27 @@ http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts
 
 # Number of cuts on the AXI bus Properties
 
-| Property                                  | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                   |
-| :---------------------------------------- | :-------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [narrow_to_quad](#narrow_to_quad)         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_to_quad.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_to_quad")         |
-| [quad_to_narrow](#quad_to_narrow)         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-quad_to_narrow.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/quad_to_narrow")         |
-| [quad_to_pre](#quad_to_pre)               | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-quad_to_pre.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/quad_to_pre")               |
-| [pre_to_inter](#pre_to_inter)             | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-pre_to_inter.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/pre_to_inter")             |
-| [inter_to_quad](#inter_to_quad)           | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-inter_to_quad.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/inter_to_quad")           |
-| [narrow_to_cva6](#narrow_to_cva6)         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_to_cva6.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_to_cva6")         |
-| [narrow_conv_to_spm](#narrow_conv_to_spm) | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_conv_to_spm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_conv_to_spm") |
-| [narrow_and_pcie](#narrow_and_pcie)       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_pcie.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_pcie")       |
-| [narrow_and_wide](#narrow_and_wide)       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_wide.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_wide")       |
-| [wide_to_hbm](#wide_to_hbm)               | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_to_hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_to_hbm")               |
-| [wide_and_inter](#wide_and_inter)         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_and_inter.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_and_inter")         |
-| [wide_and_hbi](#wide_and_hbi)             | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_and_hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_and_hbi")             |
-| [narrow_and_hbi](#narrow_and_hbi)         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_hbi")         |
-| [pre_to_hbmx](#pre_to_hbmx)               | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-pre_to_hbmx.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/pre_to_hbmx")               |
-| [hbmx_to_hbm](#hbmx_to_hbm)               | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-hbmx_to_hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/hbmx_to_hbm")               |
-| [periph_regbus](#periph_regbus)           | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-periph_regbus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/periph_regbus")           |
-| [periph_axi_lite](#periph_axi_lite)       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-periph_axi_lite.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/periph_axi_lite")       |
+| Property                                                | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                 |
+| :------------------------------------------------------ | :-------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [narrow_to_quad](#narrow_to_quad)                       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_to_quad.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_to_quad")                       |
+| [quad_to_narrow](#quad_to_narrow)                       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-quad_to_narrow.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/quad_to_narrow")                       |
+| [quad_to_pre](#quad_to_pre)                             | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-quad_to_pre.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/quad_to_pre")                             |
+| [pre_to_inter](#pre_to_inter)                           | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-pre_to_inter.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/pre_to_inter")                           |
+| [inter_to_quad](#inter_to_quad)                         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-inter_to_quad.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/inter_to_quad")                         |
+| [narrow_to_cva6](#narrow_to_cva6)                       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_to_cva6.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_to_cva6")                       |
+| [narrow_conv_to_spm_narrow](#narrow_conv_to_spm_narrow) | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_conv_to_spm_narrow.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_conv_to_spm_narrow") |
+| [narrow_and_pcie](#narrow_and_pcie)                     | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_pcie.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_pcie")                     |
+| [narrow_and_wide](#narrow_and_wide)                     | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_wide.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_wide")                     |
+| [wide_conv_to_spm_wide](#wide_conv_to_spm_wide)         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_conv_to_spm_wide.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_conv_to_spm_wide")         |
+| [wide_to_wide_zero_mem](#wide_to_wide_zero_mem)         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_to_wide_zero_mem.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_to_wide_zero_mem")         |
+| [wide_to_hbm](#wide_to_hbm)                             | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_to_hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_to_hbm")                             |
+| [wide_and_inter](#wide_and_inter)                       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_and_inter.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_and_inter")                       |
+| [wide_and_hbi](#wide_and_hbi)                           | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_and_hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_and_hbi")                           |
+| [narrow_and_hbi](#narrow_and_hbi)                       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_hbi")                       |
+| [pre_to_hbmx](#pre_to_hbmx)                             | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-pre_to_hbmx.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/pre_to_hbmx")                             |
+| [hbmx_to_hbm](#hbmx_to_hbm)                             | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-hbmx_to_hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/hbmx_to_hbm")                             |
+| [periph_regbus](#periph_regbus)                         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-periph_regbus.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/periph_regbus")                         |
+| [periph_axi_lite](#periph_axi_lite)                     | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-periph_axi_lite.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/periph_axi_lite")                     |
 
 ## narrow_to_quad
 
@@ -192,11 +194,11 @@ The default value is:
 1
 ```
 
-## narrow_conv_to_spm
+## narrow_conv_to_spm_narrow
 
 narrow -> SPM
 
-`narrow_conv_to_spm`
+`narrow_conv_to_spm_narrow`
 
 *   is optional
 
@@ -204,13 +206,13 @@ narrow -> SPM
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_conv_to_spm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_conv_to_spm")
+*   defined in: [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_conv_to_spm_narrow.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_conv_to_spm_narrow")
 
-### narrow_conv_to_spm Type
+### narrow_conv_to_spm_narrow Type
 
 `integer`
 
-### narrow_conv_to_spm Default Value
+### narrow_conv_to_spm_narrow Default Value
 
 The default value is:
 
@@ -259,6 +261,50 @@ narrow xbar -> wide xbar & wide xbar -> narrow xbar
 *   defined in: [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_wide.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_wide")
 
 ### narrow_and_wide Type
+
+`integer`
+
+## wide_conv_to_spm_wide
+
+wide xbar -> wide spm
+
+`wide_conv_to_spm_wide`
+
+*   is optional
+
+*   Type: `integer`
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_conv_to_spm_wide.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_conv_to_spm_wide")
+
+### wide_conv_to_spm_wide Type
+
+`integer`
+
+### wide_conv_to_spm_wide Default Value
+
+The default value is:
+
+```json
+1
+```
+
+## wide_to_wide_zero_mem
+
+wide xbar -> wide zero memory
+
+`wide_to_wide_zero_mem`
+
+*   is optional
+
+*   Type: `integer`
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-wide_to_wide_zero_mem.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/wide_to_wide_zero_mem")
+
+### wide_to_wide_zero_mem Type
 
 `integer`
 
