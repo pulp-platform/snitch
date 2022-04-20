@@ -646,6 +646,7 @@ module snitch_cc #(
       ssr_cfg_req.word = '0;
       ssr_cfg_req.write = '0;
 
+      addr = '0;
       unique casez (acc_snitch_demux_q.data_op)
         SCFGRI,
         SCFGWI: begin
