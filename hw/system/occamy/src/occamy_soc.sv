@@ -2136,8 +2136,8 @@ module occamy_soc
       .b_chan_t(axi_a48_d512_i6_u0_b_chan_t),
       .ar_chan_t(axi_a48_d512_i6_u0_ar_chan_t),
       .r_chan_t(axi_a48_d512_i6_u0_r_chan_t),
-      .req_t(axi_a48_d512_i6_u0_req_t),
-      .resp_t(axi_a48_d512_i6_u0_resp_t)
+      .axi_req_t(axi_a48_d512_i6_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i6_u0_resp_t)
   ) i_spm_wide_amo_adapter_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
