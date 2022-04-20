@@ -1443,6 +1443,7 @@ class AxiXbar(Xbar):
         cfg += "  LatencyMode:        {},\n".format(self.latency_mode)
         cfg += "  AxiIdWidthSlvPorts: {},\n".format(self.iw)
         cfg += "  AxiIdUsedSlvPorts:  {},\n".format(self.iw)
+        cfg += "  UniqueIds:          {},\n".format(0)
         cfg += "  AxiAddrWidth:       {},\n".format(self.aw)
         cfg += "  AxiDataWidth:       {},\n".format(self.dw)
         cfg += "  NoAddrRules:        {}\n".format(self.addr_map_len())
@@ -1549,7 +1550,7 @@ class AxiXbar(Xbar):
         code += "  .Cfg           ( {cfg_name} ),\n".format(
             cfg_name=self.cfg_name)
         code += "  .Connectivity  ( {} ), \n".format(self.connectivity())
-        code += "  .AtopSupport   ( {} ), \n".format(int(self.atop_support))
+        code += "  .ATOPs         ( {} ), \n".format(int(self.atop_support))
         code += "  .slv_aw_chan_t ( {}_aw_chan_t ),\n".format(
             self.input_struct)
         code += "  .mst_aw_chan_t ( {}_aw_chan_t ),\n".format(
@@ -1750,7 +1751,7 @@ class AxiDemux(Xbar):
         code += "  .NoMstPorts   ( {} ),\n".format(len(self.outputs))
         code += "  .MaxTrans     ( {} ),\n".format(self.max_trans)
         code += "  .AxiLookBits  ( {} ),\n".format(self.look_bits)
-        # code += "  .UniqueIds    ( {} ),\n".format(self.unique_ids)
+        code += "  .UniqueIds    ( {} ),\n".format("1'b0")
         code += "  .FallThrough  ( {} ),\n".format(int(self.fall_through))
         code += "  .SpillAw      ( {} ),\n".format(int(self.spill_aw))
         code += "  .SpillW       ( {} ),\n".format(int(self.spill_w))
@@ -1762,8 +1763,8 @@ class AxiDemux(Xbar):
         code += "  .b_chan_t  ( {}_b_chan_t ),\n".format(self.input_struct)
         code += "  .ar_chan_t ( {}_ar_chan_t ),\n".format(self.input_struct)
         code += "  .r_chan_t  ( {}_r_chan_t ),\n".format(self.input_struct)
-        code += "  .req_t     ( {}_req_t ),\n".format(self.input_struct)
-        code += "  .resp_t    ( {}_resp_t )\n".format(self.input_struct)
+        code += "  .axi_req_t     ( {}_req_t ),\n".format(self.input_struct)
+        code += "  .axi_resp_t    ( {}_resp_t )\n".format(self.input_struct)
         code += ") i_{name} (\n".format(name=self.name)
         code += "  .clk_i  ( {clk} ),\n".format(clk=self.clk)
         code += "  .rst_ni ( {rst} ),\n".format(rst=self.rst)

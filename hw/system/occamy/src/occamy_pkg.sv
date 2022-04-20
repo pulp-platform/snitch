@@ -137,6 +137,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 0,
   AxiIdUsedSlvPorts:  0,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       64,
   NoAddrRules:        2
@@ -257,6 +258,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        3
@@ -309,6 +311,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        3
@@ -357,6 +360,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        3
@@ -405,6 +409,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        3
@@ -453,6 +458,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        3
@@ -501,6 +507,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        3
@@ -560,6 +567,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        8
@@ -624,6 +632,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        10
@@ -677,6 +686,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        5
@@ -750,6 +760,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       64,
   NoAddrRules:        20
@@ -806,6 +817,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_SLV_PORTS,
   AxiIdWidthSlvPorts: 8,
   AxiIdUsedSlvPorts:  8,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       64,
   NoAddrRules:        1
@@ -854,6 +866,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_MST_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       64,
   NoAddrRules:        1
@@ -905,6 +918,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_MST_PORTS,
   AxiIdWidthSlvPorts: 0,
   AxiIdUsedSlvPorts:  0,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       32,
   NoAddrRules:        1
@@ -957,6 +971,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 3,
   AxiIdUsedSlvPorts:  3,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       512,
   NoAddrRules:        4
@@ -1016,6 +1031,7 @@ package occamy_pkg;
   LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 4,
   AxiIdUsedSlvPorts:  4,
+  UniqueIds:          0,
   AxiAddrWidth:       48,
   AxiDataWidth:       64,
   NoAddrRules:        4

@@ -1,0 +1,25 @@
+From 4861545efbcc3b2a51d621993be6fc66d9e0b0bb Mon Sep 17 00:00:00 2001
+From: Gianna Paulin <pauling@student.ethz.ch>
+Date: Fri, 8 Apr 2022 19:45:03 +0200
+Subject: [PATCH] pulp_platform_axi: rename axi lite responses to *_rsp
+
+---
+ hw/vendor/pulp_platform_axi/include/axi/typedef.svh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/axi/typedef.svh b/include/axi/typedef.svh
+index a2a860e..7be9027 100644
+--- a/include/axi/typedef.svh
++++ b/include/axi/typedef.svh
+@@ -204,7 +204,7 @@
+   `AXI_LITE_TYPEDEF_AR_CHAN_T(__name``_ar_chan_t, __addr_t)                                           \
+   `AXI_LITE_TYPEDEF_R_CHAN_T(__name``_r_chan_t, __data_t)                                             \
+   `AXI_LITE_TYPEDEF_REQ_T(__name``_req_t, __name``_aw_chan_t, __name``_w_chan_t, __name``_ar_chan_t)  \
+-  `AXI_LITE_TYPEDEF_RESP_T(__name``_resp_t, __name``_b_chan_t, __name``_r_chan_t)
++  `AXI_LITE_TYPEDEF_RESP_T(__name``_rsp_t, __name``_b_chan_t, __name``_r_chan_t)
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+--
+2.16.5
+

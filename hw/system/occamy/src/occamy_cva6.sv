@@ -33,8 +33,8 @@ module occamy_cva6
       .b_chan_t(axi_a48_d64_i4_u0_b_chan_t),
       .ar_chan_t(axi_a48_d64_i4_u0_ar_chan_t),
       .r_chan_t(axi_a48_d64_i4_u0_r_chan_t),
-      .req_t(axi_a48_d64_i4_u0_req_t),
-      .resp_t(axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t(axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t(axi_a48_d64_i4_u0_resp_t)
   ) i_cva6_axi_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),

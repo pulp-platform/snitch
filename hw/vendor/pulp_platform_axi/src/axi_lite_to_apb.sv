@@ -7,8 +7,11 @@
 // this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
-// Author: Wolfgang Roenninger <wroennin@ethz.ch>
+//
+// Authors:
+// - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
+// - Andreas Kurth <akurth@iis.ee.ethz.ch>
+// - Samuel Riedel <sriedel@iis.ee.ethz.ch>
 
 // Description: AXI4-Lite to APB4 bridge
 //
@@ -49,6 +52,8 @@ module axi_lite_to_apb #(
   parameter int unsigned NoRules     = 32'd1,  // Number of APB address rules
   parameter int unsigned AddrWidth   = 32'd32, // Address width
   parameter int unsigned DataWidth   = 32'd32, // Data width
+  parameter bit PipelineRequest      = 1'b0,   // Pipeline request path
+  parameter bit PipelineResponse     = 1'b0,   // Pipeline response path
   parameter type      axi_lite_req_t = logic,  // AXI4-Lite request struct
   parameter type     axi_lite_resp_t = logic,  // AXI4-Lite response sruct
   parameter type           apb_req_t = logic,  // APB4 request struct
@@ -161,47 +166,94 @@ module axi_lite_to_apb #(
     .idx_o   ( /*not used*/  )
   );
 
-  spill_register #(
-    .T      ( int_req_t ),
-    .Bypass ( 1'b0      )
-  ) i_req_spill (
-    .clk_i,
-    .rst_ni,
-    .valid_i ( arb_req_valid ),
-    .ready_o ( arb_req_ready ),
-    .data_i  ( arb_req       ),
-    .valid_o ( apb_req_valid ),
-    .ready_i ( apb_req_ready ),
-    .data_o  ( apb_req       )
-  );
+  if (PipelineRequest) begin : gen_req_spill
+    spill_register #(
+      .T      ( int_req_t ),
+      .Bypass ( 1'b0      )
+    ) i_req_spill (
+      .clk_i,
+      .rst_ni,
+      .valid_i ( arb_req_valid ),
+      .ready_o ( arb_req_ready ),
+      .data_i  ( arb_req       ),
+      .valid_o ( apb_req_valid ),
+      .ready_i ( apb_req_ready ),
+      .data_o  ( apb_req       )
+    );
+  end else begin : gen_req_ft_reg
+    fall_through_register #(
+      .T  ( int_req_t )
+    ) i_req_ft_reg (
+      .clk_i,
+      .rst_ni,
+      .clr_i      ( 1'b0          ),
+      .testmode_i ( 1'b0          ),
+      .valid_i    ( arb_req_valid ),
+      .ready_o    ( arb_req_ready ),
+      .data_i     ( arb_req       ),
+      .valid_o    ( apb_req_valid ),
+      .ready_i    ( apb_req_ready ),
+      .data_o     ( apb_req       )
+    );
+  end
 
-  spill_register #(
-    .T      ( axi_pkg::resp_t ),
-    .Bypass ( 1'b0            )
-  ) i_write_resp_spill (
-    .clk_i,
-    .rst_ni,
-    .valid_i ( apb_wresp_valid        ),
-    .ready_o ( apb_wresp_ready        ),
-    .data_i  ( apb_wresp              ),
-    .valid_o ( axi_bresp_valid        ),
-    .ready_i ( axi_lite_req_i.b_ready ),
-    .data_o  ( axi_bresp              )
-  );
-
-  spill_register #(
-    .T      ( int_resp_t ),
-    .Bypass ( 1'b0       )
-  ) i_read_resp_spill (
-    .clk_i,
-    .rst_ni,
-    .valid_i ( apb_rresp_valid        ),
-    .ready_o ( apb_rresp_ready        ),
-    .data_i  ( apb_rresp              ),
-    .valid_o ( axi_rresp_valid        ),
-    .ready_i ( axi_lite_req_i.r_ready ),
-    .data_o  ( axi_rresp              )
-  );
+  if (PipelineResponse) begin : gen_resp_spill
+    spill_register #(
+      .T      ( axi_pkg::resp_t ),
+      .Bypass ( 1'b0            )
+    ) i_write_resp_spill (
+      .clk_i,
+      .rst_ni,
+      .valid_i ( apb_wresp_valid        ),
+      .ready_o ( apb_wresp_ready        ),
+      .data_i  ( apb_wresp              ),
+      .valid_o ( axi_bresp_valid        ),
+      .ready_i ( axi_lite_req_i.b_ready ),
+      .data_o  ( axi_bresp              )
+    );
+    spill_register #(
+      .T      ( int_resp_t  ),
+      .Bypass ( 1'b0        )
+    ) i_read_resp_spill (
+      .clk_i,
+      .rst_ni,
+      .valid_i ( apb_rresp_valid        ),
+      .ready_o ( apb_rresp_ready        ),
+      .data_i  ( apb_rresp              ),
+      .valid_o ( axi_rresp_valid        ),
+      .ready_i ( axi_lite_req_i.r_ready ),
+      .data_o  ( axi_rresp              )
+    );
+  end else begin : gen_resp_ft_reg
+    fall_through_register #(
+      .T  ( axi_pkg::resp_t )
+    ) i_write_resp_ft_reg (
+      .clk_i,
+      .rst_ni,
+      .clr_i      ( 1'b0                    ),
+      .testmode_i ( 1'b0                    ),
+      .valid_i    ( apb_wresp_valid         ),
+      .ready_o    ( apb_wresp_ready         ),
+      .data_i     ( apb_wresp               ),
+      .valid_o    ( axi_bresp_valid         ),
+      .ready_i    ( axi_lite_req_i.b_ready  ),
+      .data_o     ( axi_bresp               )
+    );
+    fall_through_register #(
+      .T  ( int_resp_t )
+    ) i_read_resp_ft_reg (
+      .clk_i,
+      .rst_ni,
+      .clr_i      ( 1'b0                    ),
+      .testmode_i ( 1'b0                    ),
+      .valid_i    ( apb_rresp_valid         ),
+      .ready_o    ( apb_rresp_ready         ),
+      .data_i     ( apb_rresp               ),
+      .valid_o    ( axi_rresp_valid         ),
+      .ready_i    ( axi_lite_req_i.r_ready  ),
+      .data_o     ( axi_rresp               )
+    );
+  end
 
   // -----------------------------------------------------------------------------------------------
   // APB master FSM
@@ -283,7 +335,7 @@ module axi_lite_to_apb #(
           pstrb:   apb_req.strb
         };
         if (apb_resp_i[apb_sel_idx].pready) begin
-          // transfer, pop the request, genereate response and update state
+          // transfer, pop the request, generate response and update state
           apb_req_ready = 1'b1;
           // we are only in this state if the response spill registers are ready anyway
           if (apb_req.write) begin
@@ -333,6 +385,8 @@ module axi_lite_to_apb_intf #(
   parameter int unsigned NoRules     = 32'd1,  // Number of APB address rules
   parameter int unsigned AddrWidth   = 32'd32, // Address width
   parameter int unsigned DataWidth   = 32'd32, // Data width
+  parameter bit PipelineRequest      = 1'b0,   // Pipeline request path
+  parameter bit PipelineResponse     = 1'b0,   // Pipeline response path
   parameter type         rule_t      = logic,  // Address Decoder rule from `common_cells`
   // DEPENDENT PARAMERETS, DO NOT OVERWRITE!
   parameter type              addr_t = logic [AddrWidth-1:0],
@@ -414,15 +468,17 @@ module axi_lite_to_apb_intf #(
   end
 
   axi_lite_to_apb #(
-    .NoApbSlaves     ( NoApbSlaves ),
-    .NoRules         ( NoRules     ),
-    .AddrWidth       ( AddrWidth   ),
-    .DataWidth       ( DataWidth   ),
-    .axi_lite_req_t  ( axi_req_t   ),
-    .axi_lite_resp_t ( axi_resp_t  ),
-    .apb_req_t       ( apb_req_t   ),
-    .apb_resp_t      ( apb_resp_t  ),
-    .rule_t          ( rule_t      )
+    .NoApbSlaves      ( NoApbSlaves       ),
+    .NoRules          ( NoRules           ),
+    .AddrWidth        ( AddrWidth         ),
+    .DataWidth        ( DataWidth         ),
+    .PipelineRequest  ( PipelineRequest   ),
+    .PipelineResponse ( PipelineResponse  ),
+    .axi_lite_req_t   ( axi_req_t         ),
+    .axi_lite_resp_t  ( axi_resp_t        ),
+    .apb_req_t        ( apb_req_t         ),
+    .apb_resp_t       ( apb_resp_t        ),
+    .rule_t           ( rule_t            )
   ) i_axi_lite_to_apb (
     .clk_i,     // Clock
     .rst_ni,    // Asynchronous reset active low

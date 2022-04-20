@@ -9,10 +9,12 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 //
-// Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
-// Andreas Kurth  <akurth@iis.ee.ethz.ch>
-//
-// This file defines the interfaces we support.
+// Authors:
+// - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
+// - Andreas Kurth <akurth@iis.ee.ethz.ch>
+// - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+// - Matheus Cavalcante <matheusd@iis.ee.ethz.ch>
 
 
 /// A set of testbench utilities for AXI interfaces.
@@ -589,7 +591,7 @@ package axi_test;
       axi.r_ready <= #TA 0;
     endtask
 
-    /// Monitor for a beat on the AW channel.
+    /// Monitor the AW channel and return the next beat.
     task mon_aw (
       output ax_beat_t beat
     );
@@ -611,7 +613,7 @@ package axi_test;
       cycle_end();
     endtask
 
-    /// Monitor for a beat on the W channel.
+    /// Monitor the W channel and return the next beat.
     task mon_w (
       output w_beat_t beat
     );
@@ -625,7 +627,7 @@ package axi_test;
       cycle_end();
     endtask
 
-    /// Monitor for a beat on the B channel.
+    /// Monitor the B channel and return the next beat.
     task mon_b (
       output b_beat_t beat
     );
@@ -638,7 +640,7 @@ package axi_test;
       cycle_end();
     endtask
 
-    /// Monitor for a beat on the AR channel.
+    /// Monitor the AR channel and return the next beat.
     task mon_ar (
       output ax_beat_t beat
     );
@@ -660,7 +662,7 @@ package axi_test;
       cycle_end();
     endtask
 
-    /// Monitor for a beat on the R channel.
+    /// Monitor the R channel and return the next beat.
     task mon_r (
       output r_beat_t beat
     );
@@ -674,9 +676,10 @@ package axi_test;
       beat.r_user = axi.r_user;
       cycle_end();
     endtask
+
   endclass
 
-  class rand_axi_master #(
+  class axi_rand_master #(
     // AXI interface parameters
     parameter int   AW = 32,
     parameter int   DW = 32,
@@ -703,6 +706,9 @@ package axi_test;
     parameter bit   AXI_BURST_FIXED   = 1'b1,
     parameter bit   AXI_BURST_INCR    = 1'b1,
     parameter bit   AXI_BURST_WRAP    = 1'b0,
+    parameter bit   UNIQUE_IDS        = 1'b0, // guarantee that the ID of each transaction is
+                                              // unique among all in-flight transactions in the
+                                              // same direction
     // Dependent parameters, do not override.
     parameter int   AXI_STRB_WIDTH = DW/8,
     parameter int   N_AXI_IDS = 2**IW
@@ -921,7 +927,9 @@ package axi_test;
 
       ax_beat.ax_addr = addr;
       rand_success = std::randomize(id); assert(rand_success);
-      assert(std::randomize(qos));
+      rand_success = std::randomize(qos); assert(rand_success);
+      // The random ID *must* be legalized with `legalize_id()` before the beat is sent!  This is
+      // currently done in the functions `create_aws()` and `send_ars()`.
       ax_beat.ax_id = id;
       ax_beat.ax_qos = qos;
       return ax_beat;
@@ -929,8 +937,12 @@ package axi_test;
 
     task rand_atop_burst(inout ax_beat_t beat);
       automatic logic rand_success;
-      automatic id_t id;
       beat.ax_atop[5:4] = $random();
+      if (beat.ax_atop[5:4] != 2'b00 && !AXI_BURST_INCR) begin
+        // We can emit ATOPs only if INCR bursts are allowed.
+        $warning("ATOP suppressed because INCR bursts are disabled!");
+        beat.ax_atop[5:4] = 2'b00;
+      end
       if (beat.ax_atop[5:4] != 2'b00) begin // ATOP
         // Determine `ax_atop`.
         if (beat.ax_atop[5:4] == axi_pkg::ATOP_ATOMICSTORE ||
@@ -945,7 +957,7 @@ package axi_test;
         end
         // Determine `ax_size` and `ax_len`.
         if (2**beat.ax_size < AXI_STRB_WIDTH) begin
-          // Transaction does *not* occupy full data bus, so we must send just one beat. [E2.1.3]
+          // Transaction does *not* occupy full data bus, so we must send just one beat. [E1.1.3]
           beat.ax_len = '0;
         end else begin
           automatic int unsigned bytes;
@@ -971,10 +983,10 @@ package axi_test;
         end
         // Determine `ax_addr` and `ax_burst`.
         if (beat.ax_atop == axi_pkg::ATOP_ATOMICCMP) begin
-          // The address must be aligned to half the outbound data size. [E2-337]
+          // The address must be aligned to half the outbound data size. [E1.1.3]
           beat.ax_addr = beat.ax_addr & ~((1'b1 << beat.ax_size) - 1);
           // If the address is aligned to the total size of outgoing data, the burst type must be
-          // INCR. Otherwise, it must be WRAP. [E2-338]
+          // INCR. Otherwise, it must be WRAP. [E1.1.3]
           beat.ax_burst = (beat.ax_addr % ((beat.ax_len+1) * 2**beat.ax_size) == 0) ?
               axi_pkg::BURST_INCR : axi_pkg::BURST_WRAP;
           // If we are not allowed to emit WRAP bursts, align the address to the total size of
@@ -984,46 +996,12 @@ package axi_test;
             beat.ax_burst = axi_pkg::BURST_INCR;
           end
         end else begin
-          // The address must be aligned to the data size. [E2-337]
+          // The address must be aligned to the data size. [E1.1.3]
           beat.ax_addr = beat.ax_addr & ~((1'b1 << (beat.ax_size+1)) - 1);
           // Only INCR allowed.
           beat.ax_burst = axi_pkg::BURST_INCR;
         end
-        // Determine `ax_id`, which must not be the same as that of any other in-flight AXI
-        // transaction.
-        forever begin
-          cnt_sem.get();
-          rand_success = std::randomize(id); assert(rand_success);
-          if (r_flight_cnt[id] == 0 && w_flight_cnt[id] == 0 && !atop_resp_b[id] &&
-              !atop_resp_r[id]) begin
-            break;
-          end else begin
-            // The random ID does not meet the requirements, so try another ID in the next cycle.
-            cnt_sem.put();
-            rand_wait(1, 1);
-          end
-        end
-        atop_resp_b[id] = 1'b1;
-        if (beat.ax_atop[5] == 1'b1) begin
-          atop_resp_r[id] = 1'b1;
-        end
-      end else begin
-        // Determine `ax_id`, which must not be the same as that of any in-flight ATOP.
-        forever begin
-          cnt_sem.get();
-          rand_success = std::randomize(id); assert(rand_success);
-          if (!atop_resp_b[id] && !atop_resp_r[id]) begin
-            break;
-          end else begin
-            // The random ID does not meet the requirements, so try another ID in the next cycle.
-            cnt_sem.put();
-            rand_wait(1, 1);
-          end
-        end
       end
-      beat.ax_id = id;
-      w_flight_cnt[id]++;
-      cnt_sem.put();
     endtask
 
     function void rand_excl_ar(inout ax_beat_t ar_beat);
@@ -1067,6 +1045,71 @@ package axi_test;
       repeat (cycles) @(posedge this.drv.axi.clk_i);
     endtask
 
+    // Determine if the ID of an AXI Ax beat is currently legal.  This function may only be called
+    // while holding the `cnt_sem` semaphore.
+    function bit id_is_legal(input bit is_read, input ax_beat_t beat);
+      if (AXI_ATOPS) begin
+        // The ID must not be the same as that of any in-flight ATOP.
+        if (atop_resp_b[beat.ax_id] || atop_resp_r[beat.ax_id]) return 1'b0;
+        // If this beat starts an ATOP, its ID must not be the same as that of any other in-flight
+        // AXI transaction.
+        if (!is_read && beat.ax_atop[5:4] != 2'b00 && (
+          r_flight_cnt[beat.ax_id] != 0 || w_flight_cnt[beat.ax_id] !=0
+        )) return 1'b0;
+      end
+      if (UNIQUE_IDS) begin
+        // This master may only emit transactions with an ID that is unique among all in-flight
+        // transactions in the same direction.
+        if (is_read && r_flight_cnt[beat.ax_id] != 0) return 1'b0;
+        if (!is_read && w_flight_cnt[beat.ax_id] != 0) return 1'b0;
+      end
+      // There is no reason why this ID would be illegal, so it is legal.
+      return 1'b1;
+    endfunction
+
+    // Legalize the ID of an AXI Ax beat (drawing a new ID at random if the existing ID is currently
+    // not legal) and add it to the in-flight transactions.
+    task legalize_id(input bit is_read, inout ax_beat_t beat);
+      automatic logic rand_success;
+      automatic id_t id = beat.ax_id;
+      // Loop until a legal ID is found.
+      forever begin
+        // Acquire semaphore on in-flight counters.
+        cnt_sem.get();
+        // Exit loop if the current ID is legal.
+        if (id_is_legal(is_read, beat)) begin
+          break;
+        end else begin
+          // The current ID is currently not legal, so try another ID in the next cycle and
+          // release the semaphore until then.
+          cnt_sem.put();
+          rand_wait(1, 1);
+          if (!beat.ax_lock) begin // The ID of an exclusive transfer must not be changed.
+            rand_success = std::randomize(id); assert(rand_success);
+            beat.ax_id = id;
+          end
+        end
+      end
+      // Mark transfer for decided ID as in flight.
+      if (!is_read) begin
+        w_flight_cnt[beat.ax_id]++;
+        tot_w_flight_cnt++;
+        if (beat.ax_atop != 2'b00) begin
+          // This is an ATOP, so it gives rise to a write response.
+          atop_resp_b[beat.ax_id] = 1'b1;
+          if (beat.ax_atop[axi_pkg::ATOP_R_RESP]) begin
+            // This ATOP type additionally gives rise to a read response.
+            atop_resp_r[beat.ax_id] = 1'b1;
+          end
+        end
+      end else begin
+        r_flight_cnt[beat.ax_id]++;
+        tot_r_flight_cnt++;
+      end
+      // Release semaphore on in-flight counters.
+      cnt_sem.put();
+    endtask
+
     task send_ars(input int n_reads);
       automatic logic rand_success;
       repeat (n_reads) begin
@@ -1078,26 +1121,7 @@ package axi_test;
         if (AXI_EXCLS) begin
           rand_excl_ar(ar_beat);
         end
-        if (AXI_ATOPS) begin
-          // The ID must not be the same as that of any in-flight ATOP.
-          forever begin
-            cnt_sem.get();
-            rand_success = std::randomize(id); assert(rand_success);
-            if (!atop_resp_b[id] && !atop_resp_r[id]) begin
-              break;
-            end else begin
-              // The random ID does not meet the requirements, so try another ID in the next cycle.
-              cnt_sem.put();
-              rand_wait(1, 1);
-            end
-          end
-          ar_beat.ax_id = id;
-        end else begin
-          cnt_sem.get();
-        end
-        r_flight_cnt[ar_beat.ax_id]++;
-        tot_r_flight_cnt++;
-        cnt_sem.put();
+        legalize_id(1'b1, ar_beat);
         rand_wait(AX_MIN_WAIT_CYCLES, AX_MAX_WAIT_CYCLES);
         drv.send_ar(ar_beat);
         if (ar_beat.ax_lock) excl_queue.push_back(ar_beat);
@@ -1136,35 +1160,12 @@ package axi_test;
           aw_beat = excl_queue.pop_front();
         end else begin
           aw_beat = new_rand_burst(1'b0);
+          if (AXI_ATOPS) rand_atop_burst(aw_beat);
         end
         while (tot_w_flight_cnt >= MAX_WRITE_TXNS) begin
           rand_wait(1, 1);
         end
-        if (AXI_ATOPS) begin
-          if (excl) begin
-            // Make sure the exclusive transfer does not have the same ID as an in-flight ATOP.
-            forever begin
-              cnt_sem.get();
-              if (!atop_resp_b[aw_beat.ax_id] && !atop_resp_r[aw_beat.ax_id]) break;
-              cnt_sem.put();
-              rand_wait(1, 1);
-            end
-            w_flight_cnt[aw_beat.ax_id]++;
-            cnt_sem.put();
-          end else begin
-            if (AXI_BURST_INCR) begin
-              // We can emit ATOPs only if INCR bursts are allowed.
-              rand_atop_burst(aw_beat);
-            end else begin
-              $warning("ATOP suppressed because INCR bursts are disabled!");
-            end
-          end
-        end else begin
-          cnt_sem.get();
-          w_flight_cnt[aw_beat.ax_id]++;
-          cnt_sem.put();
-        end
-        tot_w_flight_cnt++;
+        legalize_id(1'b0, aw_beat);
         aw_queue.push_back(aw_beat);
         w_queue.push_back(aw_beat);
       end
@@ -1250,7 +1251,7 @@ package axi_test;
 
   endclass
 
-  class rand_axi_slave #(
+  class axi_rand_slave #(
     // AXI interface parameters
     parameter int   AW = 32,
     parameter int   DW = 32,
@@ -1329,11 +1330,11 @@ package axi_test;
         automatic logic rand_success;
         automatic ax_beat_t ar_beat;
         automatic r_beat_t r_beat = new;
-        while (ar_queue.empty()) @(posedge this.drv.axi.clk_i);
+        wait (ar_queue.size > 0);
         ar_beat = ar_queue.peek();
         rand_success = r_beat.randomize(); assert(rand_success);
         r_beat.r_id = ar_beat.ax_id;
-        if (RAND_RESP && !ar_beat.ax_atop[5])
+        if (RAND_RESP && !ar_beat.ax_atop[axi_pkg::ATOP_R_RESP])
           r_beat.r_resp[1] = $random();
         if (ar_beat.ax_lock)
           r_beat.r_resp[0]= $random();
@@ -1356,7 +1357,7 @@ package axi_test;
         drv.recv_aw(aw_beat);
         aw_queue.push_back(aw_beat);
         // Atomic{Load,Swap,Compare}s require an R response.
-        if (aw_beat.ax_atop[5]) begin
+        if (aw_beat.ax_atop[axi_pkg::ATOP_R_RESP]) begin
           ar_queue.push(aw_beat.ax_id, aw_beat);
         end
       end
@@ -1385,7 +1386,7 @@ package axi_test;
         aw_beat = aw_queue.pop_front();
         rand_success = b_beat.randomize(); assert(rand_success);
         b_beat.b_id = aw_beat.ax_id;
-        if (RAND_RESP && !aw_beat.ax_atop[5])
+        if (RAND_RESP && !aw_beat.ax_atop[axi_pkg::ATOP_R_RESP])
           b_beat.b_resp[1] = $random();
         if (aw_beat.ax_lock) begin
           b_beat.b_resp[0]= $random();
@@ -1409,13 +1410,13 @@ package axi_test;
   endclass
 
   // AXI4-Lite random master and slave
-  class rand_axi_lite_master #(
+  class axi_lite_rand_master #(
     // AXI interface parameters
-    parameter int   AW,
-    parameter int   DW,
+    parameter int unsigned AW = 0,
+    parameter int unsigned DW = 0,
     // Stimuli application and test time
-    parameter time  TA,
-    parameter time  TT,
+    parameter time  TA = 2ns,
+    parameter time  TT = 8ns,
     parameter int unsigned MIN_ADDR = 32'h0000_0000,
     parameter int unsigned MAX_ADDR = 32'h1000_0000,
     // Maximum number of open transactions
@@ -1453,6 +1454,8 @@ package axi_test;
     );
       this.drv  = new(axi);
       this.name = name;
+      assert(AW != 0) else $fatal(1, "Address width must be non-zero!");
+      assert(DW != 0) else $fatal(1, "Data width must be non-zero!");
     endfunction
 
     function void reset();
@@ -1576,13 +1579,13 @@ package axi_test;
     endtask : read
   endclass
 
-  class rand_axi_lite_slave #(
+  class axi_lite_rand_slave #(
     // AXI interface parameters
-    parameter int   AW,
-    parameter int   DW,
+    parameter int unsigned AW = 0,
+    parameter int unsigned DW = 0,
     // Stimuli application and test time
-    parameter time  TA,
-    parameter time  TT,
+    parameter time  TA = 2ns,
+    parameter time  TT = 8ns,
     // Upper and lower bounds on wait cycles on Ax, W, and resp (R and B) channels
     parameter int   AX_MIN_WAIT_CYCLES = 0,
     parameter int   AX_MAX_WAIT_CYCLES = 100,
@@ -1614,6 +1617,8 @@ package axi_test;
     );
       this.drv = new(axi);
       this.name = name;
+      assert(AW != 0) else $fatal(1, "Address width must be non-zero!");
+      assert(DW != 0) else $fatal(1, "Data width must be non-zero!");
     endfunction
 
     function void reset();
@@ -1707,20 +1712,19 @@ package axi_test;
   /// AXI Monitor.
   class axi_monitor #(
     /// AXI4+ATOP ID width
-    parameter int unsigned IW,
+    parameter int unsigned IW = 0,
     /// AXI4+ATOP address width
-    parameter int unsigned AW,
+    parameter int unsigned AW = 0,
     /// AXI4+ATOP data width
-    parameter int unsigned DW,
+    parameter int unsigned DW = 0,
     /// AXI4+ATOP user width
-    parameter int unsigned UW,
+    parameter int unsigned UW = 0,
     /// Stimuli test time
-    parameter time TT,
-    parameter time TA
+    parameter time TT = 0ns
   );
 
     typedef axi_test::axi_driver #(
-      .AW(AW), .DW(DW), .IW(IW), .UW(UW), .TA(TA), .TT(TT)
+      .AW(AW), .DW(DW), .IW(IW), .UW(UW), .TA(TT), .TT(TT)
     ) axi_driver_t;
 
     typedef axi_driver_t::ax_beat_t ax_beat_t;
@@ -1803,15 +1807,15 @@ package axi_test;
   /// end
   class axi_scoreboard #(
     /// AXI4+ATOP ID width
-    parameter int unsigned IW,
+    parameter int unsigned IW = 0,
     /// AXI4+ATOP address width
-    parameter int unsigned AW,
+    parameter int unsigned AW = 0,
     /// AXI4+ATOP data width
-    parameter int unsigned DW,
+    parameter int unsigned DW = 0,
     /// AXI4+ATOP user width
-    parameter int unsigned UW,
+    parameter int unsigned UW = 0,
     /// Stimuli test time
-    parameter time TT
+    parameter time TT = 0ns
   );
     // Number of checks
     localparam int unsigned NUM_CHECKS  = 32'd3;
@@ -2251,7 +2255,7 @@ module axi_chan_logger #(
         end
 
         // inject AR into queue, if there is an atomic
-        if (aw_chan_i.atop[5]) begin
+        if (aw_chan_i.atop[axi_pkg::ATOP_R_RESP]) begin
           $display("Atomic detected with response");
           ar_beat.id     = aw_chan_i.id;
           ar_beat.addr   = aw_chan_i.addr;

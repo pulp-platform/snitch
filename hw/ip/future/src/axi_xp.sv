@@ -111,6 +111,7 @@ module axi_xp #(
     LatencyMode:        axi_pkg::CUT_ALL_PORTS,
     AxiIdWidthSlvPorts: AxiIdWidth,
     AxiIdUsedSlvPorts:  AxiIdWidth,
+    UniqueIds:          1'b0,
     AxiAddrWidth:       AxiAddrWidth,
     AxiDataWidth:       AxiDataWidth,
     NoAddrRules:        NumAddrRules

@@ -165,15 +165,15 @@ module occamy_top
 
   // The `soc_axi_lite_periph_xbar` crossbar.
   axi_lite_xbar #(
-      .Cfg      (SocAxiLitePeriphXbarCfg),
-      .aw_chan_t(axi_lite_a48_d64_aw_chan_t),
-      .w_chan_t (axi_lite_a48_d64_w_chan_t),
-      .b_chan_t (axi_lite_a48_d64_b_chan_t),
-      .ar_chan_t(axi_lite_a48_d64_ar_chan_t),
-      .r_chan_t (axi_lite_a48_d64_r_chan_t),
-      .req_t    (axi_lite_a48_d64_req_t),
-      .resp_t   (axi_lite_a48_d64_rsp_t),
-      .rule_t   (xbar_rule_48_t)
+      .Cfg       (SocAxiLitePeriphXbarCfg),
+      .aw_chan_t (axi_lite_a48_d64_aw_chan_t),
+      .w_chan_t  (axi_lite_a48_d64_w_chan_t),
+      .b_chan_t  (axi_lite_a48_d64_b_chan_t),
+      .ar_chan_t (axi_lite_a48_d64_ar_chan_t),
+      .r_chan_t  (axi_lite_a48_d64_r_chan_t),
+      .axi_req_t (axi_lite_a48_d64_req_t),
+      .axi_resp_t(axi_lite_a48_d64_rsp_t),
+      .rule_t    (xbar_rule_48_t)
   ) i_soc_axi_lite_periph_xbar (
       .clk_i                (clk_periph_i),
       .rst_ni               (rst_periph_ni),
@@ -361,8 +361,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .AxiDataWidth(64),
       .req_lite_t  (axi_lite_a48_d64_req_t),
       .resp_lite_t (axi_lite_a48_d64_rsp_t),
-      .req_t       (axi_a48_d64_i4_u0_req_t),
-      .resp_t      (axi_a48_d64_i4_u0_resp_t)
+      .axi_req_t   (axi_a48_d64_i4_u0_req_t),
+      .axi_resp_t  (axi_a48_d64_i4_u0_resp_t)
   ) i_axi_lite_to_axi_periph_pc (
       .slv_req_lite_i (axi_lite_to_soc_cdc_req),
       .slv_resp_lite_o(axi_lite_to_soc_cdc_rsp),

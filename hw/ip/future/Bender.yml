@@ -17,6 +17,7 @@ sources:
 - src/mem_to_axi_lite.sv
 - src/idma_reg64_frontend_reg_pkg.sv
 - src/idma_tf_id_gen.sv
+- src/dma/axi_dma_data_path.sv
 # Level 1:
 - src/axi_iw_converter.sv
 - src/axi_xp.sv
@@ -24,3 +25,12 @@ sources:
 - src/idma_reg64_frontend_reg_top.sv
 # Level 2:
 - src/idma_reg64_frontend.sv
+- src/dma/axi_dma_data_mover.sv
+- src/dma/axi_dma_burst_reshaper.sv
+# Level 2
+- src/dma/axi_dma_backend.sv
+
+- target: test
+  files:
+  - test/fixture_axi_dma_backend.sv
+  - test/tb_axi_dma_backend.sv

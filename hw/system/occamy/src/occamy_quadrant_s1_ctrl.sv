@@ -75,7 +75,7 @@ quadrant_s1_ctrl_soc_to_quad_xbar_out_resp_t [1:0] quadrant_s1_ctrl_soc_to_quad_
 axi_xbar #(
   .Cfg           ( QuadrantS1CtrlSocToQuadXbarCfg ),
   .Connectivity  ( 2'b11 ),
-  .AtopSupport   ( 1 ),
+  .ATOPs         ( 1 ),
   .slv_aw_chan_t ( axi_a48_d64_i8_u0_aw_chan_t ),
   .mst_aw_chan_t ( axi_a48_d64_i8_u0_aw_chan_t ),
   .w_chan_t      ( axi_a48_d64_i8_u0_w_chan_t ),
@@ -117,7 +117,7 @@ quadrant_s1_ctrl_quad_to_soc_xbar_out_resp_t [1:0] quadrant_s1_ctrl_quad_to_soc_
 axi_xbar #(
   .Cfg           ( QuadrantS1CtrlQuadToSocXbarCfg ),
   .Connectivity  ( 2'b11 ),
-  .AtopSupport   ( 1 ),
+  .ATOPs         ( 1 ),
   .slv_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
   .mst_aw_chan_t ( axi_a48_d64_i4_u0_aw_chan_t ),
   .w_chan_t      ( axi_a48_d64_i4_u0_w_chan_t ),
@@ -158,15 +158,15 @@ axi_lite_a48_d32_rsp_t [0:0] quadrant_s1_ctrl_mux_out_rsp;
 
 // The `quadrant_s1_ctrl_mux` crossbar.
 axi_lite_xbar #(
-  .Cfg       ( QuadrantS1CtrlMuxCfg ),
-  .aw_chan_t ( axi_lite_a48_d32_aw_chan_t ),
-  .w_chan_t  ( axi_lite_a48_d32_w_chan_t ),
-  .b_chan_t  ( axi_lite_a48_d32_b_chan_t ),
-  .ar_chan_t ( axi_lite_a48_d32_ar_chan_t ),
-  .r_chan_t  ( axi_lite_a48_d32_r_chan_t ),
-  .req_t     ( axi_lite_a48_d32_req_t ),
-  .resp_t    ( axi_lite_a48_d32_rsp_t ),
-  .rule_t    ( xbar_rule_48_t )
+  .Cfg        ( QuadrantS1CtrlMuxCfg ),
+  .aw_chan_t  ( axi_lite_a48_d32_aw_chan_t ),
+  .w_chan_t   ( axi_lite_a48_d32_w_chan_t ),
+  .b_chan_t   ( axi_lite_a48_d32_b_chan_t ),
+  .ar_chan_t  ( axi_lite_a48_d32_ar_chan_t ),
+  .r_chan_t   ( axi_lite_a48_d32_r_chan_t ),
+  .axi_req_t  ( axi_lite_a48_d32_req_t ),
+  .axi_resp_t ( axi_lite_a48_d32_rsp_t ),
+  .rule_t     ( xbar_rule_48_t )
 ) i_quadrant_s1_ctrl_mux (
   .clk_i  ( clk_i ),
   .rst_ni ( rst_ni ),

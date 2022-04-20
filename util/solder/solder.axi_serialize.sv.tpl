@@ -2,8 +2,8 @@
     .MaxReadTxns ( 4 ),
     .MaxWriteTxns ( 4 ),
     .AxiIdWidth ( ${axi_in.iw} ),
-    .req_t ( ${axi_in.req_type()} ),
-    .resp_t ( ${axi_in.rsp_type()} )
+    .axi_req_t ( ${axi_in.req_type()} ),
+    .axi_resp_t ( ${axi_in.rsp_type()} )
   ) ${name} (
     .clk_i ( ${axi_in.clk} ),
     .rst_ni ( ${axi_in.rst} ),

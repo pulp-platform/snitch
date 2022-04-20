@@ -179,8 +179,8 @@ module axi_tlb #(
     .b_chan_t     ( b_t               ),
     .ar_chan_t    ( slv_ar_t          ),
     .r_chan_t     ( r_t               ),
-    .req_t        ( slv_req_t         ),
-    .resp_t       ( axi_resp_t        ),
+    .axi_req_t    ( slv_req_t         ),
+    .axi_resp_t   ( axi_resp_t        ),
     .NoMstPorts   ( 2                 ),
     .MaxTrans     ( AxiSlvPortMaxTxns ),
     .AxiLookBits  ( AxiIdWidth        ),
@@ -250,8 +250,8 @@ module axi_tlb #(
   // Handle TLB misses: Absorb burst and respond with slave error.
   axi_err_slv #(
     .AxiIdWidth   ( AxiIdWidth            ),
-    .req_t        ( slv_req_t             ),
-    .resp_t       ( axi_resp_t            ),
+    .axi_req_t    ( slv_req_t             ),
+    .axi_resp_t   ( axi_resp_t            ),
     .Resp         ( axi_pkg::RESP_SLVERR  ),
     .RespWidth    ( 32'd32                ),
     .RespData     ( 32'hDEC0FFEE          ),

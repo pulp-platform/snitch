@@ -64,6 +64,7 @@ module axi_dma_tc_snitch_fe #(
         axi_pkg::burst_t  burst_src, burst_dst;
         logic             decouple_rw;
         logic             deburst;
+        logic             serialize;
     } burst_req_t;
 
     typedef struct packed {

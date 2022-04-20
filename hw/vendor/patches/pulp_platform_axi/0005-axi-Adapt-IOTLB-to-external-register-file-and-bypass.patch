@@ -13,10 +13,12 @@ diff --git a/include/axi/typedef.svh b/include/axi/typedef.svh
 index cd85660..7fa5e0d 100644
 --- a/include/axi/typedef.svh
 +++ b/include/axi/typedef.svh
-@@ -177,4 +177,27 @@
-   `AXI_LITE_TYPEDEF_REQ_T(__name``_req_t, __name``_aw_chan_t, __name``_w_chan_t, __name``_ar_chan_t) \
+@@ -177,6 +177,29 @@
+   `AXI_LITE_TYPEDEF_REQ_T(__name``_req_t, __name``_aw_chan_t, __name``_w_chan_t, __name``_ar_chan_t)  \
    `AXI_LITE_TYPEDEF_RESP_T(__name``_rsp_t, __name``_b_chan_t, __name``_r_chan_t)
- 
+ ////////////////////////////////////////////////////////////////////////////////////////////////////
+
++
 +////////////////////////////////////////////////////////////////////////////////////////////////////
 +// AXI4 TLB type definitions
 +//
@@ -39,7 +41,7 @@ index cd85660..7fa5e0d 100644
 +
 +`define AXI_TLB_TYPEDEF_ALL(__name, __oup_page_t, __inp_page_t) \
 +  `AXI_TLB_TYPEDEF_ENTRY_T(__name``_entry_t, __oup_page_t, __inp_page_t)
-+
+
  `endif
 diff --git a/src/axi_tlb.sv b/src/axi_tlb.sv
 index e600b90..38a7fa4 100644

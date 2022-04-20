@@ -40,6 +40,7 @@ localparam axi_pkg::xbar_cfg_t ${cfg_name} = '{
   LatencyMode:        ${xbar.latency_mode},
   AxiIdWidthSlvPorts: 0,
   AxiIdUsedSlvPorts:  0,
+  UniqueIds:          0,
   AxiAddrWidth:       ${xbar.aw},
   AxiDataWidth:       ${xbar.dw},
   NoAddrRules:        ${xbar.addr_map_len()}
@@ -61,15 +62,15 @@ ${struct}_rsp_t [${len(xbar.outputs)-1}:0] ${xbar.name}_out_rsp;
 
 // The `${xbar.name}` crossbar.
 axi_lite_xbar #(
-  .Cfg       ( ${cfg_name} ),
-  .aw_chan_t ( ${struct}_aw_chan_t ),
-  .w_chan_t  ( ${struct}_w_chan_t ),
-  .b_chan_t  ( ${struct}_b_chan_t ),
-  .ar_chan_t ( ${struct}_ar_chan_t ),
-  .r_chan_t  ( ${struct}_r_chan_t ),
-  .req_t     ( ${struct}_req_t ),
-  .resp_t    ( ${struct}_rsp_t ),
-  .rule_t    ( xbar_rule_${xbar.aw}_t )
+  .Cfg        ( ${cfg_name} ),
+  .aw_chan_t  ( ${struct}_aw_chan_t ),
+  .w_chan_t   ( ${struct}_w_chan_t ),
+  .b_chan_t   ( ${struct}_b_chan_t ),
+  .ar_chan_t  ( ${struct}_ar_chan_t ),
+  .r_chan_t   ( ${struct}_r_chan_t ),
+  .axi_req_t  ( ${struct}_req_t ),
+  .axi_resp_t ( ${struct}_rsp_t ),
+  .rule_t     ( xbar_rule_${xbar.aw}_t )
 ) i_${xbar.name} (
   .clk_i  ( ${xbar.clk} ),
   .rst_ni ( ${xbar.rst} ),

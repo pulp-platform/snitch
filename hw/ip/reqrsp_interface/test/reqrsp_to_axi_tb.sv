@@ -111,7 +111,6 @@ module reqrsp_to_axi_tb import reqrsp_pkg::*; #(
     .IW ( IW ),
     .UW ( UW ),
     // Stimuli application and test time
-    .TA ( ApplTime ),
     .TT ( TestTime )
   ) axi_monitor_t;
 
@@ -203,7 +202,7 @@ module reqrsp_to_axi_tb import reqrsp_pkg::*; #(
   // Driver
   // ------
   // AXI Driver
-  typedef axi_test::rand_axi_slave #(
+  typedef axi_test::axi_rand_slave #(
     // AXI interface parameters
     .AW ( AW ),
     .DW ( DW ),
@@ -217,7 +216,7 @@ module reqrsp_to_axi_tb import reqrsp_pkg::*; #(
     .AX_MAX_WAIT_CYCLES (20)
   ) rand_axi_slave_t;
 
-  rand_axi_slave_t rand_axi_slave = new (slave_dv);
+  rand_axi_slave_t axi_rand_slave = new (slave_dv);
 
   typedef reqrsp_test::rand_reqrsp_master #(
     // Reqrsp bus interface paramaters;
@@ -232,9 +231,9 @@ module reqrsp_to_axi_tb import reqrsp_pkg::*; #(
 
   // AXI side.
   initial begin
-    rand_axi_slave.reset();
+    axi_rand_slave.reset();
     @(posedge rst_n);
-    rand_axi_slave.run();
+    axi_rand_slave.run();
   end
 
   // Reqrsp master side.
