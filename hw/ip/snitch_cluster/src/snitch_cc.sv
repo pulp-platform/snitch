@@ -381,21 +381,21 @@ module snitch_cc #(
     .DataWidth ( 32 ),
     .Xipu (Xipu)
   ) i_snitch_ipu (
-    .clk_i            ( clk_i                        ),
-    .rst_i            ( (~rst_ni) | (~rst_int_ss_ni) ),
-    .acc_qaddr_i      ( acc_snitch_req.addr          ),
-    .acc_qid_i        ( acc_snitch_req.id            ),
-    .acc_qdata_op_i   ( acc_snitch_req.data_op       ),
-    .acc_qdata_arga_i ( acc_snitch_req.data_arga     ),
-    .acc_qdata_argb_i ( acc_snitch_req.data_argb     ),
-    .acc_qdata_argc_i ( acc_snitch_req.data_argc     ),
-    .acc_qvalid_i     ( ipu_qvalid                   ),
-    .acc_qready_o     ( ipu_qready                   ),
-    .acc_pdata_o      ( ipu_resp.data                ),
-    .acc_pid_o        ( ipu_resp.id                  ),
-    .acc_perror_o     ( ipu_resp.error               ),
-    .acc_pvalid_o     ( ipu_pvalid                   ),
-    .acc_pready_i     ( ipu_pready                   )
+    .clk_i            ( clk_i                          ),
+    .rst_i            ( (~rst_ni) | (~rst_int_ss_ni)   ),
+    .acc_qaddr_i      ( acc_snitch_req.addr            ),
+    .acc_qid_i        ( acc_snitch_req.id              ),
+    .acc_qdata_op_i   ( acc_snitch_req.data_op         ),
+    .acc_qdata_arga_i ( acc_snitch_req.data_arga[31:0] ),
+    .acc_qdata_argb_i ( acc_snitch_req.data_argb[31:0] ),
+    .acc_qdata_argc_i ( acc_snitch_req.data_argc[31:0] ),
+    .acc_qvalid_i     ( ipu_qvalid                     ),
+    .acc_qready_o     ( ipu_qready                     ),
+    .acc_pdata_o      ( ipu_resp.data[31:0]            ),
+    .acc_pid_o        ( ipu_resp.id                    ),
+    .acc_perror_o     ( ipu_resp.error                 ),
+    .acc_pvalid_o     ( ipu_pvalid                     ),
+    .acc_pready_i     ( ipu_pready                     )
   );
   end else begin : gen_no_ipu
     assign ipu_resp = '0;

@@ -360,6 +360,12 @@
                                     "description": "Direct memory access (Xdma) custom extension.",
                                     "default": false
                                 },
+                                "xipu": {
+                                    "type": "boolean",
+                                    "title": "Xpulpimg Extension",
+                                    "description": "Xpulpimg (Xipu) custom extension.",
+                                    "default": true
+                                },
                                 "xf8": {
                                     "type": "boolean",
                                     "title": "Xf8 8-bit Float Extension",

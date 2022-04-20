@@ -91,6 +91,7 @@
     compute_core_template: {
         isa: "rv32imafd",
         xssr: true
+        xipu: true
         xfrep: true
         xf16: true,
         xf16alt: true,

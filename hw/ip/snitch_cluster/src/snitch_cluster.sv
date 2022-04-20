@@ -834,7 +834,7 @@ module snitch_cluster
         .IsoCrossing (IsoCrossing),
         .Xfrep (Xfrep[i]),
         .Xssr (Xssr[i]),
-        .Xipu (1'b1),
+        .Xipu (Xipu[i]),
         .NumIntOutstandingLoads (NumIntOutstandingLoads[i]),
         .NumIntOutstandingMem (NumIntOutstandingMem[i]),
         .NumFPOutstandingLoads (NumFPOutstandingLoads[i]),
