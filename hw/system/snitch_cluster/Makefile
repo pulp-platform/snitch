@@ -31,6 +31,14 @@ VLOG_FLAGS 	  += -suppress 2583
 VLOG_FLAGS 	  += -suppress 13314
 VLOG_FLAGS 	  += ${QUESTA_64BIT}
 
+app_path 		?= $(ROOT)/sw/riscv-tests/isa
+buildpath 	?= build
+resultpath 	?= result
+$(buildpath):
+	mkdir -p $(buildpath)
+$(resultpath):
+	mkdir -p $(resultpath)
+TESTS_DIR ?= $(ROOT)/sw/riscv-tests/isa
 #######
 # RTL #
 #######
@@ -125,6 +133,17 @@ sw/test.vlt: sw/build.vlt
 # Clean
 clean-sw:
 	rm -rf sw/build
+
+############################
+# Unit tests simulation    #
+############################
+
+test_bin := ../../../sw/riscv-tests/isa
+sim_test: $(test)
+test:
+	echo "${test_bin}/rv32uxpulpimg-p-p_abs > logs/.rtlbinary"
+	vsim -64 +permissive -work /scratch/msc22f9/snitch/hw/system/snitch_cluster//work-vsim -c -ldflags "-Wl,-rpath,/scratch/msc22f9/snitch/hw/system/snitch_cluster/work/lib -L/scratch/msc22f9/snitch/hw/system/snitch_cluster/work/lib -lfesvr -lutil" -t 1ps -voptargs=+acc tb_bin +permissive-off ++${test_bin}/rv32uxpulpimg-p-p_abs -do "log -r /*; run -a"
+	echo "${test_bin}/rv32uxpulpimg-p-p_abs > logs/.rtlbinary"
 
 #########
 # Phony #
