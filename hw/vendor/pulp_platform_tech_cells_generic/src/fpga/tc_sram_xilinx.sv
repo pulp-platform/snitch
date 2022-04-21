@@ -182,7 +182,7 @@ module tc_sram #(
 // Validate parameters.
 // pragma translate_off
 `ifndef VERILATOR
-`ifndef TARGET_SYNTHESYS
+`ifndef TARGET_SYNTHESIS
   initial begin: p_assertions
     assert (SimInit == "zeros") else $fatal(1, "The Xilinx `tc_sram` has fixed SimInit: zeros");
     assert ($bits(addr_i)  == NumPorts * AddrWidth) else $fatal(1, "AddrWidth problem on `addr_i`");

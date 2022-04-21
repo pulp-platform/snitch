@@ -1,0 +1,26 @@
+From 01204b48dbd89d66465dc30ccb19bc2d15a6c814 Mon Sep 17 00:00:00 2001
+From: Paul Scheffler <paulsc@iis.ee.ethz.ch>
+Date: Thu, 21 Apr 2022 00:40:54 +0200
+Subject: [PATCH] spi_host: Fix CSAAT behavior (See #387)
+
+---
+ rtl/spi_host_fsm.sv | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/rtl/spi_host_fsm.sv b/rtl/spi_host_fsm.sv
+index 4fb1360d..9c28a419 100644
+--- a/rtl/spi_host_fsm.sv
++++ b/rtl/spi_host_fsm.sv
+@@ -250,7 +250,8 @@ module spi_host_fsm
+           // and of CSAAT is asserted, the details of the subsequent command.
+           if (!last_bit || !last_byte) begin
+             prestall_st_d = InternalClkLow;
+-          end else if (!command_i.segment.csaat) begin
++          // Check value of csaat for the previously submitted segment
++          end else if (!csaat_q) begin
+             prestall_st_d = WaitTrail;
+           end else if (!command_valid_i) begin
+             prestall_st_d = IdleCSBActive;
+-- 
+2.16.5
+

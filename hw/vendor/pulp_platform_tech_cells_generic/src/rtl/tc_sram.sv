@@ -192,7 +192,7 @@ module tc_sram #(
 // Validate parameters.
 // pragma translate_off
 `ifndef VERILATOR
-`ifndef TARGET_SYNTHESYS
+`ifndef TARGET_SYNTHESIS
   initial begin: p_assertions
     assert ($bits(addr_i)  == NumPorts * AddrWidth) else $fatal(1, "AddrWidth problem on `addr_i`");
     assert ($bits(wdata_i) == NumPorts * DataWidth) else $fatal(1, "DataWidth problem on `wdata_i`");

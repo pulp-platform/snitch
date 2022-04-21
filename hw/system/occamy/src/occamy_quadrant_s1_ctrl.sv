@@ -467,7 +467,6 @@ axi_lite_xbar #(
 
   // Assemble wide TLB entries
   assign wide_tlb_entries_o[0] = '{
-    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     first:  {reg2hw.tlb_wide_entry_0_pagein_first_high.q,  reg2hw.tlb_wide_entry_0_pagein_first_low.q},
     last:   {reg2hw.tlb_wide_entry_0_pagein_last_high.q,   reg2hw.tlb_wide_entry_0_pagein_last_low.q},
     base:   {reg2hw.tlb_wide_entry_0_pageout_high.q,       reg2hw.tlb_wide_entry_0_pageout_low.q},
@@ -475,7 +474,6 @@ axi_lite_xbar #(
     read_only: reg2hw.tlb_wide_entry_0_flags.read_only.q
   };
   assign wide_tlb_entries_o[1] = '{
-    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     first:  {reg2hw.tlb_wide_entry_1_pagein_first_high.q,  reg2hw.tlb_wide_entry_1_pagein_first_low.q},
     last:   {reg2hw.tlb_wide_entry_1_pagein_last_high.q,   reg2hw.tlb_wide_entry_1_pagein_last_low.q},
     base:   {reg2hw.tlb_wide_entry_1_pageout_high.q,       reg2hw.tlb_wide_entry_1_pageout_low.q},
@@ -483,7 +481,6 @@ axi_lite_xbar #(
     read_only: reg2hw.tlb_wide_entry_1_flags.read_only.q
   };
   assign wide_tlb_entries_o[2] = '{
-    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     first:  {reg2hw.tlb_wide_entry_2_pagein_first_high.q,  reg2hw.tlb_wide_entry_2_pagein_first_low.q},
     last:   {reg2hw.tlb_wide_entry_2_pagein_last_high.q,   reg2hw.tlb_wide_entry_2_pagein_last_low.q},
     base:   {reg2hw.tlb_wide_entry_2_pageout_high.q,       reg2hw.tlb_wide_entry_2_pageout_low.q},
@@ -491,7 +488,6 @@ axi_lite_xbar #(
     read_only: reg2hw.tlb_wide_entry_2_flags.read_only.q
   };
   assign wide_tlb_entries_o[3] = '{
-    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     first:  {reg2hw.tlb_wide_entry_3_pagein_first_high.q,  reg2hw.tlb_wide_entry_3_pagein_first_low.q},
     last:   {reg2hw.tlb_wide_entry_3_pagein_last_high.q,   reg2hw.tlb_wide_entry_3_pagein_last_low.q},
     base:   {reg2hw.tlb_wide_entry_3_pageout_high.q,       reg2hw.tlb_wide_entry_3_pageout_low.q},
@@ -499,7 +495,6 @@ axi_lite_xbar #(
     read_only: reg2hw.tlb_wide_entry_3_flags.read_only.q
   };
   assign wide_tlb_entries_o[4] = '{
-    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     first:  {reg2hw.tlb_wide_entry_4_pagein_first_high.q,  reg2hw.tlb_wide_entry_4_pagein_first_low.q},
     last:   {reg2hw.tlb_wide_entry_4_pagein_last_high.q,   reg2hw.tlb_wide_entry_4_pagein_last_low.q},
     base:   {reg2hw.tlb_wide_entry_4_pageout_high.q,       reg2hw.tlb_wide_entry_4_pageout_low.q},
@@ -507,7 +502,6 @@ axi_lite_xbar #(
     read_only: reg2hw.tlb_wide_entry_4_flags.read_only.q
   };
   assign wide_tlb_entries_o[5] = '{
-    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     first:  {reg2hw.tlb_wide_entry_5_pagein_first_high.q,  reg2hw.tlb_wide_entry_5_pagein_first_low.q},
     last:   {reg2hw.tlb_wide_entry_5_pagein_last_high.q,   reg2hw.tlb_wide_entry_5_pagein_last_low.q},
     base:   {reg2hw.tlb_wide_entry_5_pageout_high.q,       reg2hw.tlb_wide_entry_5_pageout_low.q},
@@ -515,7 +509,6 @@ axi_lite_xbar #(
     read_only: reg2hw.tlb_wide_entry_5_flags.read_only.q
   };
   assign wide_tlb_entries_o[6] = '{
-    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     first:  {reg2hw.tlb_wide_entry_6_pagein_first_high.q,  reg2hw.tlb_wide_entry_6_pagein_first_low.q},
     last:   {reg2hw.tlb_wide_entry_6_pagein_last_high.q,   reg2hw.tlb_wide_entry_6_pagein_last_low.q},
     base:   {reg2hw.tlb_wide_entry_6_pageout_high.q,       reg2hw.tlb_wide_entry_6_pageout_low.q},
@@ -523,7 +516,6 @@ axi_lite_xbar #(
     read_only: reg2hw.tlb_wide_entry_6_flags.read_only.q
   };
   assign wide_tlb_entries_o[7] = '{
-    //TLB_NARROW_ENTRY_7_PAGEIN_LAST_HIGH
     first:  {reg2hw.tlb_wide_entry_7_pagein_first_high.q,  reg2hw.tlb_wide_entry_7_pagein_first_low.q},
     last:   {reg2hw.tlb_wide_entry_7_pagein_last_high.q,   reg2hw.tlb_wide_entry_7_pagein_last_low.q},
     base:   {reg2hw.tlb_wide_entry_7_pageout_high.q,       reg2hw.tlb_wide_entry_7_pageout_low.q},

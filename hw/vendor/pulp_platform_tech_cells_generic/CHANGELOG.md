@@ -6,8 +6,36 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.2.9 - 2022-03-17
+### Changed
+- Added optional `IS_FUNCTIONAL` flag to `tc_clk_gating` cell to optionally mark them as *not required for functionality*.
+
+## 0.2.8
+*Skipped*
+
+## 0.2.7
+*Skipped*
+
+## 0.2.6 - 2021-10-04
+### Added
+- Add `pad_functional_xilinx
+
+### Fixed
+- Bender targets
+
+### Removed
+- Deprecated xilinx `clk_cell`s replaced by wrappers
+
+## 0.2.5
+*Skipped*
+
+## 0.2.4 - 2021-02-04
+- Add `deprecated/pulp_clk_cells_xilinx.sv` to `Bender.yml`
+
+## 0.2.3 - 2021-01-28
 ### Fixed
 - `tc_sram_xilinx`: Remove unsupported `string` type from `SimInit` parameter.
+- `IPApproX:` Add `tc_sram` to `src_files.yml` for proper compilation with IPApproX
 
 ## 0.2.2 - 2020-11-11
 ### Fixed

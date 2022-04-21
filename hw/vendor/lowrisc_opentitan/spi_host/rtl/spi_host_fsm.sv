@@ -250,7 +250,8 @@ module spi_host_fsm
           // and of CSAAT is asserted, the details of the subsequent command.
           if (!last_bit || !last_byte) begin
             prestall_st_d = InternalClkLow;
-          end else if (!command_i.segment.csaat) begin
+          // Check value of csaat for the previously submitted segment
+          end else if (!csaat_q) begin
             prestall_st_d = WaitTrail;
           end else if (!command_valid_i) begin
             prestall_st_d = IdleCSBActive;

@@ -268,6 +268,7 @@ module axi_dma_tc_snitch_fe #(
                   automatic logic [1:0] cfg;
 
                   // Parse the transfer parameters from the register or immediate.
+                  cfg = '0;
                   unique casez (acc_qdata_op_i)
                       riscv_instr::DMCPYI : cfg = acc_qdata_op_i[24:20];
                       riscv_instr::DMCPY :  cfg = acc_qdata_argb_i;
@@ -304,6 +305,7 @@ module axi_dma_tc_snitch_fe #(
                   automatic logic [1:0] status;
 
                   // Parse the status index from the register or immediate.
+                  status = '0;
                   unique casez (acc_qdata_op_i)
                       riscv_instr::DMSTATI: status = acc_qdata_op_i[24:20];
                       riscv_instr::DMSTAT:  status = acc_qdata_argb_i;

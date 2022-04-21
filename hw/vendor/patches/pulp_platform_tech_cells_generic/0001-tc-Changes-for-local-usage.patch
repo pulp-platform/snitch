@@ -1,14 +1,14 @@
-From 4a4865f4d5aee77a505bdff1ceb3b318eea2c5ed Mon Sep 17 00:00:00 2001
-From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-Date: Thu, 26 Nov 2020 17:15:01 +0100
-Subject: [PATCH 1/2] tc: Changes for local usage
+From 83d3dbf4a06b6d2b8c4cf4c7ed48e6767485d5be Mon Sep 17 00:00:00 2001
+From: Paul Scheffler <paulsc@iis.ee.ethz.ch>
+Date: Thu, 21 Apr 2022 00:27:30 +0200
+Subject: [PATCH] tc: Changes for local usage
 
 ---
- Bender.yml | 12 +-----------
- 1 file changed, 1 insertion(+), 11 deletions(-)
+ Bender.yml | 16 +---------------
+ 1 file changed, 1 insertion(+), 15 deletions(-)
 
 diff --git a/Bender.yml b/Bender.yml
-index 8fe986b..bcf121e 100644
+index 7077953e..9b486086 100644
 --- a/Bender.yml
 +++ b/Bender.yml
 @@ -3,7 +3,7 @@ package:
@@ -19,36 +19,32 @@ index 8fe986b..bcf121e 100644
 +  common_verification: { git: "https://github.com/pulp-platform/common_verification.git", version: 0.1.1 }
  
  sources:
-   - target: rtl
-@@ -13,28 +13,18 @@ sources:
- 
-   - target: all(fpga, xilinx)
-     files:
--      - src/deprecated/cluster_clk_cells_xilinx.sv
+   - target: all(any(all(not(asic), not(fpga)), tech_cells_generic_include_tc_sram), not(tech_cells_generic_exclude_tc_sram))
+@@ -21,15 +21,6 @@ sources:
+       - src/fpga/pad_functional_xilinx.sv
        - src/fpga/tc_clk_xilinx.sv
        - src/fpga/tc_sram_xilinx.sv
- 
-   - target: not(all(fpga, xilinx))
-     files:
-       # Level 0
--      - src/deprecated/cluster_clk_cells.sv
--      - src/deprecated/pulp_clk_cells.sv
-       - src/rtl/tc_clk.sv
- 
-   - target: not(synthesis)
-     files:
+-
+-  - target: all(any(not(synthesis), tech_cells_generic_include_deprecated), not(tech_cells_generic_exclude_deprecated))
+-    files:
 -      - src/deprecated/cluster_pwr_cells.sv
 -      - src/deprecated/generic_memory.sv
 -      - src/deprecated/generic_rom.sv
 -      - src/deprecated/pad_functional.sv
 -      - src/deprecated/pulp_buffer.sv
 -      - src/deprecated/pulp_pwr_cells.sv
-       - src/tc_pwr.sv
- 
-   - target: test
+       
+   - target: all(any(not(synthesis), tech_cells_generic_include_pwr_cells), not(tech_cells_generic_exclude_pwr_cells))
+     files:
+@@ -38,8 +29,3 @@ sources:
+   - target: all(any(test, tech_cells_generic_include_tb_cells), not(tech_cells_generic_exclude_tb_cells))
      files:
        - test/tb_tc_sram.sv
 -  - src/deprecated/pulp_clock_gating_async.sv
+-
+-  # These simply wrap tc_* cells and are fine to use in any case
+-  - src/deprecated/cluster_clk_cells.sv
+-  - src/deprecated/pulp_clk_cells.sv
 -- 
-2.24.3 (Apple Git-128)
+2.16.5
 
