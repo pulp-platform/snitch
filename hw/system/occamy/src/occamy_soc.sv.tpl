@@ -106,8 +106,17 @@ module ${name}_soc
   input  logic [0:0] debug_req_i,
 
   /// SRAM configuration
-  input sram_cfgs_t sram_cfgs_i
+  input sram_cfgs_t sram_cfgs_i,
+
+  /// HBM XBAR configuration
+  input logic hbm_xbar_interleaved_mode_ena_i
 );
+
+  ///////////////////
+  // HBM XBAR CTRL //
+  ///////////////////
+  logic       hbm_xbar_interleaved_mode_ena;
+  assign hbm_xbar_interleaved_mode_ena  = hbm_xbar_interleaved_mode_ena_i;
 
   ///////////////
   // Crossbars //

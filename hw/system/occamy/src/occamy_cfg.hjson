@@ -288,6 +288,11 @@
                 length: 4096, // 4 kiB 0x1000
             },
             {
+                name: "hbm_xbar_cfg",
+                address: 33583104, // 0x0200_7000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
                 name: "spim",
                 address: 50331648, // 0x0300_0000
                 length: 131072, // 4 kiB 0x2_0000

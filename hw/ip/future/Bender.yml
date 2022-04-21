@@ -18,6 +18,7 @@ sources:
 - src/idma_reg64_frontend_reg_pkg.sv
 - src/idma_tf_id_gen.sv
 - src/dma/axi_dma_data_path.sv
+- src/axi_interleaved_xbar.sv
 # Level 1:
 - src/axi_iw_converter.sv
 - src/axi_xp.sv

@@ -10,5 +10,5 @@ waive --rule=explicit-parameter-storage-type --location="fixture_axi_dma_backend
 waive --rule=explicit-task-lifetime --location="fixture_axi_dma_backend.sv"
 waive --rule=explicit-function-task-parameter-type --location="fixture_axi_dma_backend.sv"
 waive --rule=line-length --location="fixture_axi_dma_backend.sv"
-
-
+waive --rule=parameter-name-style --location="axi_interleaved_xbar.sv"
+waive --rule=unpacked-dimensions-range-ordering --location="axi_interleaved_xbar.sv"

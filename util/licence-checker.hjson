@@ -21,6 +21,7 @@
         'sw/snRuntime/include/snitch_cluster_peripheral.h',
         'sw/snRuntime/include/occamy_quad_peripheral.h',
         'sw/snRuntime/include/occamy_soc_peripheral.h',
+        'sw/snRuntime/include/occamy_hbm_xbar_peripheral.h',
         // Do not check solder snippets, they generally do not contain valid
         // stand-alone code.
         'util/solder/*.sv.tpl',

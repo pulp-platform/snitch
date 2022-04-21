@@ -605,6 +605,7 @@ def main():
         fall_through=occamy.cfg["hbm_xbar"]["fall_through"],
         no_loopback=True,
         atop_support=False,
+        interleaved_ena=True,
         context="soc",
         node=am_hbm_xbar)
 
