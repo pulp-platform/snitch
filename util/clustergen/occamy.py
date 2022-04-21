@@ -30,8 +30,8 @@ class Occamy(Generator):
                                   addr_width)
         # Make the SPM cacheable
         pma_cfg.add_region_length(PMA.CACHED,
-                                  cfg["spm"]["address"],
-                                  cfg["spm"]["length"],
+                                  cfg["spm_narrow"]["address"],
+                                  cfg["spm_narrow"]["length"],
                                   addr_width)
         # Make the boot ROM cacheable
         pma_cfg.add_region_length(PMA.CACHED,
@@ -63,9 +63,15 @@ class Occamy(Generator):
                                  speed_optimized=True,
                                  density_optimized=True)
 
-        self.cluster.add_mem(cfg["spm"]["length"] // 8,
+        self.cluster.add_mem(cfg["spm_narrow"]["length"] // 8,
                              64,
-                             desc="SPM",
+                             desc="SPM Narrow",
+                             speed_optimized=False,
+                             density_optimized=True)
+
+        self.cluster.add_mem(cfg["spm_wide"]["length"] // 64,
+                             512,
+                             desc="SPM Wide",
                              speed_optimized=False,
                              density_optimized=True)
 

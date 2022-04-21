@@ -34,9 +34,11 @@ Description of an Occamy-based system.
 | [is_remote_quadrant](#is_remote_quadrant)                             | `boolean` | Optional | cannot be null | [Occamy System Schema](occamy-properties-is_remote_quadrant.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/is_remote_quadrant")                             |
 | [remote_quadrants](#remote_quadrants)                                 | `array`   | Optional | cannot be null | [Occamy System Schema](occamy-properties-remote-quadrants.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/remote_quadrants")                                 |
 | [s1_quadrant](#s1_quadrant)                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-s1-quadrant-properties.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant")                                |
-| [spm](#spm)                                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-address-range-schema.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm")                                   |
+| [spm_narrow](#spm_narrow)                                             | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-address-range-schema.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm_narrow")                            |
+| [spm_wide](#spm_wide)                                                 | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-address-range-schema-1.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm_wide")                            |
+| [wide_zero_mem](#wide_zero_mem)                                       | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-address-range-schema-2.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/wide_zero_mem")                       |
 | [pcie](#pcie)                                                         | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-configuration-of-external-pcie-port.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie")                          |
-| [hbi](#hbi)                                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-address-range-schema-1.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/hbi")                                 |
+| [hbi](#hbi)                                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-address-range-schema-3.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/hbi")                                 |
 | [hbm](#hbm)                                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-configuration-of-external-hbm-interface.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm")                       |
 | [peripherals](#peripherals)                                           | `object`  | Optional | cannot be null | [Occamy System Schema](occamy-properties-peripherals-schema.md "http://pulp-platform.org/snitch/peripherals.schema.json#/properties/peripherals")                               |
 
@@ -356,23 +358,59 @@ List of attached remote quadrants
 
 `object` ([S1 Quadrant Properties](occamy-properties-s1-quadrant-properties.md))
 
-## spm
+## spm_narrow
 
 Description of a generic address range
 
-`spm`
+`spm_narrow`
 
 *   is optional
 
-*   Type: `object` ([Address Range Schema](occamy-properties-address-range-schema-1.md))
+*   Type: `object` ([Address Range Schema](occamy-properties-address-range-schema-3.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-address-range-schema-1.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm")
+*   defined in: [Occamy System Schema](occamy-properties-address-range-schema-3.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm_narrow")
 
-### spm Type
+### spm_narrow Type
 
-`object` ([Address Range Schema](occamy-properties-address-range-schema-1.md))
+`object` ([Address Range Schema](occamy-properties-address-range-schema-3.md))
+
+## spm_wide
+
+Description of a generic address range
+
+`spm_wide`
+
+*   is optional
+
+*   Type: `object` ([Address Range Schema](occamy-properties-address-range-schema-3.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-address-range-schema-3.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm_wide")
+
+### spm_wide Type
+
+`object` ([Address Range Schema](occamy-properties-address-range-schema-3.md))
+
+## wide_zero_mem
+
+Description of a generic address range
+
+`wide_zero_mem`
+
+*   is optional
+
+*   Type: `object` ([Address Range Schema](occamy-properties-address-range-schema-3.md))
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-address-range-schema-3.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/wide_zero_mem")
+
+### wide_zero_mem Type
+
+`object` ([Address Range Schema](occamy-properties-address-range-schema-3.md))
 
 ## pcie
 
@@ -400,15 +438,15 @@ Description of a generic address range
 
 *   is optional
 
-*   Type: `object` ([Address Range Schema](occamy-properties-address-range-schema-1.md))
+*   Type: `object` ([Address Range Schema](occamy-properties-address-range-schema-3.md))
 
 *   cannot be null
 
-*   defined in: [Occamy System Schema](occamy-properties-address-range-schema-1.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/hbi")
+*   defined in: [Occamy System Schema](occamy-properties-address-range-schema-3.md "http://pulp-platform.org/snitch/address_range.schema.json#/properties/hbi")
 
 ### hbi Type
 
-`object` ([Address Range Schema](occamy-properties-address-range-schema-1.md))
+`object` ([Address Range Schema](occamy-properties-address-range-schema-3.md))
 
 ## hbm
 

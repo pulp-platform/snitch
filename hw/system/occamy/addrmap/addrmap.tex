@@ -141,18 +141,26 @@
     \bitbox[]{5}{\texttt{0x4800\_0000} \\ [0\baselineskip] \texttt{0x6fff\_ffff}} &
     \bitbox{14}{640.0 MB for PCIE} \\
     \bitbox[]{5}{\texttt{0x7000\_0000} \\ [0\baselineskip] \texttt{0x7007\_ffff}} &
-    \bitbox{14}{512.0 KB for SPM} \\
+    \bitbox{14}{512.0 KB for SPM\_NARROW} \\
     \bytefieldsetup{bitheight=1.4\baselineskip}%
     \bitbox[]{5}{} &
-    \bitbox{14}{255.5 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox{14}{15.5 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+
+    \bitbox[]{5}{\texttt{0x7100\_0000} \\ [0\baselineskip] \texttt{0x711f\_ffff}} &
+    \bitbox{14}{2.0 MB for SPM\_WIDE} \\
+    \bytefieldsetup{bitheight=1.4\baselineskip}%
+    \bitbox[]{5}{} &
+    \bitbox{14}{238.0 MB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
 
     \bitbox[]{5}{\texttt{0x8000\_0000} \\ [0\baselineskip] \texttt{0xbfff\_ffff}} &
     \bitbox{14}{1.0 GB for HBM\_0} \\
     \bitbox[]{5}{\texttt{0xc000\_0000} \\ [0\baselineskip] \texttt{0xffff\_ffff}} &
     \bitbox{14}{1.0 GB for HBM\_1} \\
+    \bitbox[]{5}{\texttt{0x1\_0000\_0000} \\ [0\baselineskip] \texttt{0x2\_ffff\_ffff}} &
+    \bitbox{14}{8.0 GB for WIDE\_ZERO\_MEM} \\
     \bytefieldsetup{bitheight=1.4\baselineskip}%
     \bitbox[]{5}{} &
-    \bitbox{14}{60.0 GB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
+    \bitbox{14}{52.0 GB EMPTY} \\    \bytefieldsetup{bitheight=2\baselineskip}%
 
     \bitbox[]{5}{\texttt{0x10\_0000\_0000} \\ [0\baselineskip] \texttt{0x10\_3fff\_ffff}} &
     \bitbox{14}{1.0 GB for HBM\_0} \\

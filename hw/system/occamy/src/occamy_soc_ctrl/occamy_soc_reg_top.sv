@@ -68,22 +68,38 @@ module occamy_soc_reg_top #(
   // Define SW related signals
   // Format: <reg>_<field>_{wd|we|qs}
   //        or <reg>_{wd|we|qs} if field == 1 or 0
-  logic intr_state_ecc_uncorrectable_qs;
-  logic intr_state_ecc_uncorrectable_wd;
-  logic intr_state_ecc_uncorrectable_we;
-  logic intr_state_ecc_correctable_qs;
-  logic intr_state_ecc_correctable_wd;
-  logic intr_state_ecc_correctable_we;
-  logic intr_enable_ecc_uncorrectable_qs;
-  logic intr_enable_ecc_uncorrectable_wd;
-  logic intr_enable_ecc_uncorrectable_we;
-  logic intr_enable_ecc_correctable_qs;
-  logic intr_enable_ecc_correctable_wd;
-  logic intr_enable_ecc_correctable_we;
-  logic intr_test_ecc_uncorrectable_wd;
-  logic intr_test_ecc_uncorrectable_we;
-  logic intr_test_ecc_correctable_wd;
-  logic intr_test_ecc_correctable_we;
+  logic intr_state_ecc_narrow_uncorrectable_qs;
+  logic intr_state_ecc_narrow_uncorrectable_wd;
+  logic intr_state_ecc_narrow_uncorrectable_we;
+  logic intr_state_ecc_narrow_correctable_qs;
+  logic intr_state_ecc_narrow_correctable_wd;
+  logic intr_state_ecc_narrow_correctable_we;
+  logic intr_state_ecc_wide_uncorrectable_qs;
+  logic intr_state_ecc_wide_uncorrectable_wd;
+  logic intr_state_ecc_wide_uncorrectable_we;
+  logic intr_state_ecc_wide_correctable_qs;
+  logic intr_state_ecc_wide_correctable_wd;
+  logic intr_state_ecc_wide_correctable_we;
+  logic intr_enable_ecc_narrow_uncorrectable_qs;
+  logic intr_enable_ecc_narrow_uncorrectable_wd;
+  logic intr_enable_ecc_narrow_uncorrectable_we;
+  logic intr_enable_ecc_narrow_correctable_qs;
+  logic intr_enable_ecc_narrow_correctable_wd;
+  logic intr_enable_ecc_narrow_correctable_we;
+  logic intr_enable_ecc_wide_uncorrectable_qs;
+  logic intr_enable_ecc_wide_uncorrectable_wd;
+  logic intr_enable_ecc_wide_uncorrectable_we;
+  logic intr_enable_ecc_wide_correctable_qs;
+  logic intr_enable_ecc_wide_correctable_wd;
+  logic intr_enable_ecc_wide_correctable_we;
+  logic intr_test_ecc_narrow_uncorrectable_wd;
+  logic intr_test_ecc_narrow_uncorrectable_we;
+  logic intr_test_ecc_narrow_correctable_wd;
+  logic intr_test_ecc_narrow_correctable_we;
+  logic intr_test_ecc_wide_uncorrectable_wd;
+  logic intr_test_ecc_wide_uncorrectable_we;
+  logic intr_test_ecc_wide_correctable_wd;
+  logic intr_test_ecc_wide_correctable_we;
   logic [15:0] version_qs;
   logic [1:0] chip_id_qs;
   logic chip_id_re;
@@ -386,72 +402,124 @@ module occamy_soc_reg_top #(
   // Register instances
   // R[intr_state]: V(False)
 
-  //   F[ecc_uncorrectable]: 0:0
+  //   F[ecc_narrow_uncorrectable]: 0:0
   prim_subreg #(
     .DW      (1),
     .SWACCESS("W1C"),
     .RESVAL  (1'h0)
-  ) u_intr_state_ecc_uncorrectable (
+  ) u_intr_state_ecc_narrow_uncorrectable (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (intr_state_ecc_uncorrectable_we),
-    .wd     (intr_state_ecc_uncorrectable_wd),
+    .we     (intr_state_ecc_narrow_uncorrectable_we),
+    .wd     (intr_state_ecc_narrow_uncorrectable_wd),
 
     // from internal hardware
-    .de     (hw2reg.intr_state.ecc_uncorrectable.de),
-    .d      (hw2reg.intr_state.ecc_uncorrectable.d ),
+    .de     (hw2reg.intr_state.ecc_narrow_uncorrectable.de),
+    .d      (hw2reg.intr_state.ecc_narrow_uncorrectable.d ),
 
     // to internal hardware
     .qe     (),
-    .q      (reg2hw.intr_state.ecc_uncorrectable.q ),
+    .q      (reg2hw.intr_state.ecc_narrow_uncorrectable.q ),
 
     // to register interface (read)
-    .qs     (intr_state_ecc_uncorrectable_qs)
+    .qs     (intr_state_ecc_narrow_uncorrectable_qs)
   );
 
 
-  //   F[ecc_correctable]: 1:1
+  //   F[ecc_narrow_correctable]: 1:1
   prim_subreg #(
     .DW      (1),
     .SWACCESS("W1C"),
     .RESVAL  (1'h0)
-  ) u_intr_state_ecc_correctable (
+  ) u_intr_state_ecc_narrow_correctable (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (intr_state_ecc_correctable_we),
-    .wd     (intr_state_ecc_correctable_wd),
+    .we     (intr_state_ecc_narrow_correctable_we),
+    .wd     (intr_state_ecc_narrow_correctable_wd),
 
     // from internal hardware
-    .de     (hw2reg.intr_state.ecc_correctable.de),
-    .d      (hw2reg.intr_state.ecc_correctable.d ),
+    .de     (hw2reg.intr_state.ecc_narrow_correctable.de),
+    .d      (hw2reg.intr_state.ecc_narrow_correctable.d ),
 
     // to internal hardware
     .qe     (),
-    .q      (reg2hw.intr_state.ecc_correctable.q ),
+    .q      (reg2hw.intr_state.ecc_narrow_correctable.q ),
 
     // to register interface (read)
-    .qs     (intr_state_ecc_correctable_qs)
+    .qs     (intr_state_ecc_narrow_correctable_qs)
+  );
+
+
+  //   F[ecc_wide_uncorrectable]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("W1C"),
+    .RESVAL  (1'h0)
+  ) u_intr_state_ecc_wide_uncorrectable (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (intr_state_ecc_wide_uncorrectable_we),
+    .wd     (intr_state_ecc_wide_uncorrectable_wd),
+
+    // from internal hardware
+    .de     (hw2reg.intr_state.ecc_wide_uncorrectable.de),
+    .d      (hw2reg.intr_state.ecc_wide_uncorrectable.d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.intr_state.ecc_wide_uncorrectable.q ),
+
+    // to register interface (read)
+    .qs     (intr_state_ecc_wide_uncorrectable_qs)
+  );
+
+
+  //   F[ecc_wide_correctable]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("W1C"),
+    .RESVAL  (1'h0)
+  ) u_intr_state_ecc_wide_correctable (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (intr_state_ecc_wide_correctable_we),
+    .wd     (intr_state_ecc_wide_correctable_wd),
+
+    // from internal hardware
+    .de     (hw2reg.intr_state.ecc_wide_correctable.de),
+    .d      (hw2reg.intr_state.ecc_wide_correctable.d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.intr_state.ecc_wide_correctable.q ),
+
+    // to register interface (read)
+    .qs     (intr_state_ecc_wide_correctable_qs)
   );
 
 
   // R[intr_enable]: V(False)
 
-  //   F[ecc_uncorrectable]: 0:0
+  //   F[ecc_narrow_uncorrectable]: 0:0
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
     .RESVAL  (1'h0)
-  ) u_intr_enable_ecc_uncorrectable (
+  ) u_intr_enable_ecc_narrow_uncorrectable (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (intr_enable_ecc_uncorrectable_we),
-    .wd     (intr_enable_ecc_uncorrectable_wd),
+    .we     (intr_enable_ecc_narrow_uncorrectable_we),
+    .wd     (intr_enable_ecc_narrow_uncorrectable_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -459,25 +527,25 @@ module occamy_soc_reg_top #(
 
     // to internal hardware
     .qe     (),
-    .q      (reg2hw.intr_enable.ecc_uncorrectable.q ),
+    .q      (reg2hw.intr_enable.ecc_narrow_uncorrectable.q ),
 
     // to register interface (read)
-    .qs     (intr_enable_ecc_uncorrectable_qs)
+    .qs     (intr_enable_ecc_narrow_uncorrectable_qs)
   );
 
 
-  //   F[ecc_correctable]: 1:1
+  //   F[ecc_narrow_correctable]: 1:1
   prim_subreg #(
     .DW      (1),
     .SWACCESS("RW"),
     .RESVAL  (1'h0)
-  ) u_intr_enable_ecc_correctable (
+  ) u_intr_enable_ecc_narrow_correctable (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
 
     // from register interface
-    .we     (intr_enable_ecc_correctable_we),
-    .wd     (intr_enable_ecc_correctable_wd),
+    .we     (intr_enable_ecc_narrow_correctable_we),
+    .wd     (intr_enable_ecc_narrow_correctable_wd),
 
     // from internal hardware
     .de     (1'b0),
@@ -485,41 +553,123 @@ module occamy_soc_reg_top #(
 
     // to internal hardware
     .qe     (),
-    .q      (reg2hw.intr_enable.ecc_correctable.q ),
+    .q      (reg2hw.intr_enable.ecc_narrow_correctable.q ),
 
     // to register interface (read)
-    .qs     (intr_enable_ecc_correctable_qs)
+    .qs     (intr_enable_ecc_narrow_correctable_qs)
+  );
+
+
+  //   F[ecc_wide_uncorrectable]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_intr_enable_ecc_wide_uncorrectable (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (intr_enable_ecc_wide_uncorrectable_we),
+    .wd     (intr_enable_ecc_wide_uncorrectable_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.intr_enable.ecc_wide_uncorrectable.q ),
+
+    // to register interface (read)
+    .qs     (intr_enable_ecc_wide_uncorrectable_qs)
+  );
+
+
+  //   F[ecc_wide_correctable]: 3:3
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_intr_enable_ecc_wide_correctable (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (intr_enable_ecc_wide_correctable_we),
+    .wd     (intr_enable_ecc_wide_correctable_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.intr_enable.ecc_wide_correctable.q ),
+
+    // to register interface (read)
+    .qs     (intr_enable_ecc_wide_correctable_qs)
   );
 
 
   // R[intr_test]: V(True)
 
-  //   F[ecc_uncorrectable]: 0:0
+  //   F[ecc_narrow_uncorrectable]: 0:0
   prim_subreg_ext #(
     .DW    (1)
-  ) u_intr_test_ecc_uncorrectable (
+  ) u_intr_test_ecc_narrow_uncorrectable (
     .re     (1'b0),
-    .we     (intr_test_ecc_uncorrectable_we),
-    .wd     (intr_test_ecc_uncorrectable_wd),
+    .we     (intr_test_ecc_narrow_uncorrectable_we),
+    .wd     (intr_test_ecc_narrow_uncorrectable_wd),
     .d      ('0),
     .qre    (),
-    .qe     (reg2hw.intr_test.ecc_uncorrectable.qe),
-    .q      (reg2hw.intr_test.ecc_uncorrectable.q ),
+    .qe     (reg2hw.intr_test.ecc_narrow_uncorrectable.qe),
+    .q      (reg2hw.intr_test.ecc_narrow_uncorrectable.q ),
     .qs     ()
   );
 
 
-  //   F[ecc_correctable]: 1:1
+  //   F[ecc_narrow_correctable]: 1:1
   prim_subreg_ext #(
     .DW    (1)
-  ) u_intr_test_ecc_correctable (
+  ) u_intr_test_ecc_narrow_correctable (
     .re     (1'b0),
-    .we     (intr_test_ecc_correctable_we),
-    .wd     (intr_test_ecc_correctable_wd),
+    .we     (intr_test_ecc_narrow_correctable_we),
+    .wd     (intr_test_ecc_narrow_correctable_wd),
     .d      ('0),
     .qre    (),
-    .qe     (reg2hw.intr_test.ecc_correctable.qe),
-    .q      (reg2hw.intr_test.ecc_correctable.q ),
+    .qe     (reg2hw.intr_test.ecc_narrow_correctable.qe),
+    .q      (reg2hw.intr_test.ecc_narrow_correctable.q ),
+    .qs     ()
+  );
+
+
+  //   F[ecc_wide_uncorrectable]: 2:2
+  prim_subreg_ext #(
+    .DW    (1)
+  ) u_intr_test_ecc_wide_uncorrectable (
+    .re     (1'b0),
+    .we     (intr_test_ecc_wide_uncorrectable_we),
+    .wd     (intr_test_ecc_wide_uncorrectable_wd),
+    .d      ('0),
+    .qre    (),
+    .qe     (reg2hw.intr_test.ecc_wide_uncorrectable.qe),
+    .q      (reg2hw.intr_test.ecc_wide_uncorrectable.q ),
+    .qs     ()
+  );
+
+
+  //   F[ecc_wide_correctable]: 3:3
+  prim_subreg_ext #(
+    .DW    (1)
+  ) u_intr_test_ecc_wide_correctable (
+    .re     (1'b0),
+    .we     (intr_test_ecc_wide_correctable_we),
+    .wd     (intr_test_ecc_wide_correctable_wd),
+    .d      ('0),
+    .qre    (),
+    .qe     (reg2hw.intr_test.ecc_wide_correctable.qe),
+    .q      (reg2hw.intr_test.ecc_wide_correctable.q ),
     .qs     ()
   );
 
@@ -3299,23 +3449,41 @@ module occamy_soc_reg_top #(
                (addr_hit[41] & (|(OCCAMY_SOC_PERMIT[41] & ~reg_be)))));
   end
 
-  assign intr_state_ecc_uncorrectable_we = addr_hit[0] & reg_we & !reg_error;
-  assign intr_state_ecc_uncorrectable_wd = reg_wdata[0];
+  assign intr_state_ecc_narrow_uncorrectable_we = addr_hit[0] & reg_we & !reg_error;
+  assign intr_state_ecc_narrow_uncorrectable_wd = reg_wdata[0];
 
-  assign intr_state_ecc_correctable_we = addr_hit[0] & reg_we & !reg_error;
-  assign intr_state_ecc_correctable_wd = reg_wdata[1];
+  assign intr_state_ecc_narrow_correctable_we = addr_hit[0] & reg_we & !reg_error;
+  assign intr_state_ecc_narrow_correctable_wd = reg_wdata[1];
 
-  assign intr_enable_ecc_uncorrectable_we = addr_hit[1] & reg_we & !reg_error;
-  assign intr_enable_ecc_uncorrectable_wd = reg_wdata[0];
+  assign intr_state_ecc_wide_uncorrectable_we = addr_hit[0] & reg_we & !reg_error;
+  assign intr_state_ecc_wide_uncorrectable_wd = reg_wdata[2];
 
-  assign intr_enable_ecc_correctable_we = addr_hit[1] & reg_we & !reg_error;
-  assign intr_enable_ecc_correctable_wd = reg_wdata[1];
+  assign intr_state_ecc_wide_correctable_we = addr_hit[0] & reg_we & !reg_error;
+  assign intr_state_ecc_wide_correctable_wd = reg_wdata[3];
 
-  assign intr_test_ecc_uncorrectable_we = addr_hit[2] & reg_we & !reg_error;
-  assign intr_test_ecc_uncorrectable_wd = reg_wdata[0];
+  assign intr_enable_ecc_narrow_uncorrectable_we = addr_hit[1] & reg_we & !reg_error;
+  assign intr_enable_ecc_narrow_uncorrectable_wd = reg_wdata[0];
 
-  assign intr_test_ecc_correctable_we = addr_hit[2] & reg_we & !reg_error;
-  assign intr_test_ecc_correctable_wd = reg_wdata[1];
+  assign intr_enable_ecc_narrow_correctable_we = addr_hit[1] & reg_we & !reg_error;
+  assign intr_enable_ecc_narrow_correctable_wd = reg_wdata[1];
+
+  assign intr_enable_ecc_wide_uncorrectable_we = addr_hit[1] & reg_we & !reg_error;
+  assign intr_enable_ecc_wide_uncorrectable_wd = reg_wdata[2];
+
+  assign intr_enable_ecc_wide_correctable_we = addr_hit[1] & reg_we & !reg_error;
+  assign intr_enable_ecc_wide_correctable_wd = reg_wdata[3];
+
+  assign intr_test_ecc_narrow_uncorrectable_we = addr_hit[2] & reg_we & !reg_error;
+  assign intr_test_ecc_narrow_uncorrectable_wd = reg_wdata[0];
+
+  assign intr_test_ecc_narrow_correctable_we = addr_hit[2] & reg_we & !reg_error;
+  assign intr_test_ecc_narrow_correctable_wd = reg_wdata[1];
+
+  assign intr_test_ecc_wide_uncorrectable_we = addr_hit[2] & reg_we & !reg_error;
+  assign intr_test_ecc_wide_uncorrectable_wd = reg_wdata[2];
+
+  assign intr_test_ecc_wide_correctable_we = addr_hit[2] & reg_we & !reg_error;
+  assign intr_test_ecc_wide_correctable_wd = reg_wdata[3];
 
   assign chip_id_re = addr_hit[4] & reg_re & !reg_error;
 
@@ -3619,18 +3787,24 @@ module occamy_soc_reg_top #(
     reg_rdata_next = '0;
     unique case (1'b1)
       addr_hit[0]: begin
-        reg_rdata_next[0] = intr_state_ecc_uncorrectable_qs;
-        reg_rdata_next[1] = intr_state_ecc_correctable_qs;
+        reg_rdata_next[0] = intr_state_ecc_narrow_uncorrectable_qs;
+        reg_rdata_next[1] = intr_state_ecc_narrow_correctable_qs;
+        reg_rdata_next[2] = intr_state_ecc_wide_uncorrectable_qs;
+        reg_rdata_next[3] = intr_state_ecc_wide_correctable_qs;
       end
 
       addr_hit[1]: begin
-        reg_rdata_next[0] = intr_enable_ecc_uncorrectable_qs;
-        reg_rdata_next[1] = intr_enable_ecc_correctable_qs;
+        reg_rdata_next[0] = intr_enable_ecc_narrow_uncorrectable_qs;
+        reg_rdata_next[1] = intr_enable_ecc_narrow_correctable_qs;
+        reg_rdata_next[2] = intr_enable_ecc_wide_uncorrectable_qs;
+        reg_rdata_next[3] = intr_enable_ecc_wide_correctable_qs;
       end
 
       addr_hit[2]: begin
         reg_rdata_next[0] = '0;
         reg_rdata_next[1] = '0;
+        reg_rdata_next[2] = '0;
+        reg_rdata_next[3] = '0;
       end
 
       addr_hit[3]: begin

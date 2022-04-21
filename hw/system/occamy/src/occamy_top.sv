@@ -129,7 +129,8 @@ module occamy_top
 
   occamy_soc_reg_pkg::occamy_soc_reg2hw_t soc_ctrl_out;
   occamy_soc_reg_pkg::occamy_soc_hw2reg_t soc_ctrl_in;
-  logic [1:0] spm_rerror;
+  logic [1:0] spm_narrow_rerror;
+  logic [1:0] spm_wide_rerror;
 
   always_comb begin
     soc_ctrl_in = '0;
@@ -279,7 +280,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .periph_axi_lite_rsp_o(periph_axi_lite_per2soc_rsp),
       .periph_regbus_req_o(periph_regbus_soc2per_req),
       .periph_regbus_rsp_i(periph_regbus_soc2per_rsp),
-      .spm_rerror_o(spm_rerror),
+      .spm_narrow_rerror_o(spm_narrow_rerror),
+      .spm_wide_rerror_o(spm_wide_rerror),
       .mtip_i(mtip),
       .msip_i(msip),
       .eip_i(eip),
@@ -680,9 +682,12 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .reg_rsp_o(soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_SOC_CTRL]),
       .reg2hw_o(soc_ctrl_out),
       .hw2reg_i(soc_ctrl_in),
-      .event_ecc_rerror_i(spm_rerror),
-      .intr_ecc_uncorrectable_o(irq.ecc_uncorrectable),
-      .intr_ecc_correctable_o(irq.ecc_correctable)
+      .event_ecc_rerror_narrow_i(spm_narrow_rerror),
+      .event_ecc_rerror_wide_i(spm_wide_rerror),
+      .intr_ecc_narrow_uncorrectable_o(irq.ecc_narrow_uncorrectable),
+      .intr_ecc_narrow_correctable_o(irq.ecc_narrow_correctable),
+      .intr_ecc_wide_uncorrectable_o(irq.ecc_wide_uncorrectable),
+      .intr_ecc_wide_correctable_o(irq.ecc_wide_correctable)
   );
 
   //////////////////////

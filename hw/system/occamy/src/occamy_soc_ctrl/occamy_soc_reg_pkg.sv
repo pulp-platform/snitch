@@ -20,30 +20,50 @@ package occamy_soc_reg_pkg;
   typedef struct packed {
     struct packed {
       logic        q;
-    } ecc_uncorrectable;
+    } ecc_narrow_uncorrectable;
     struct packed {
       logic        q;
-    } ecc_correctable;
+    } ecc_narrow_correctable;
+    struct packed {
+      logic        q;
+    } ecc_wide_uncorrectable;
+    struct packed {
+      logic        q;
+    } ecc_wide_correctable;
   } occamy_soc_reg2hw_intr_state_reg_t;
 
   typedef struct packed {
     struct packed {
       logic        q;
-    } ecc_uncorrectable;
+    } ecc_narrow_uncorrectable;
     struct packed {
       logic        q;
-    } ecc_correctable;
+    } ecc_narrow_correctable;
+    struct packed {
+      logic        q;
+    } ecc_wide_uncorrectable;
+    struct packed {
+      logic        q;
+    } ecc_wide_correctable;
   } occamy_soc_reg2hw_intr_enable_reg_t;
 
   typedef struct packed {
     struct packed {
       logic        q;
       logic        qe;
-    } ecc_uncorrectable;
+    } ecc_narrow_uncorrectable;
     struct packed {
       logic        q;
       logic        qe;
-    } ecc_correctable;
+    } ecc_narrow_correctable;
+    struct packed {
+      logic        q;
+      logic        qe;
+    } ecc_wide_uncorrectable;
+    struct packed {
+      logic        q;
+      logic        qe;
+    } ecc_wide_correctable;
   } occamy_soc_reg2hw_intr_test_reg_t;
 
   typedef struct packed {
@@ -62,11 +82,19 @@ package occamy_soc_reg_pkg;
     struct packed {
       logic        d;
       logic        de;
-    } ecc_uncorrectable;
+    } ecc_narrow_uncorrectable;
     struct packed {
       logic        d;
       logic        de;
-    } ecc_correctable;
+    } ecc_narrow_correctable;
+    struct packed {
+      logic        d;
+      logic        de;
+    } ecc_wide_uncorrectable;
+    struct packed {
+      logic        d;
+      logic        de;
+    } ecc_wide_correctable;
   } occamy_soc_hw2reg_intr_state_reg_t;
 
   typedef struct packed {
@@ -79,15 +107,15 @@ package occamy_soc_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    occamy_soc_reg2hw_intr_state_reg_t intr_state; // [131:130]
-    occamy_soc_reg2hw_intr_enable_reg_t intr_enable; // [129:128]
-    occamy_soc_reg2hw_intr_test_reg_t intr_test; // [127:124]
+    occamy_soc_reg2hw_intr_state_reg_t intr_state; // [139:136]
+    occamy_soc_reg2hw_intr_enable_reg_t intr_enable; // [135:132]
+    occamy_soc_reg2hw_intr_test_reg_t intr_test; // [131:124]
     occamy_soc_reg2hw_pad_mreg_t [30:0] pad; // [123:0]
   } occamy_soc_reg2hw_t;
 
   // HW -> register type
   typedef struct packed {
-    occamy_soc_hw2reg_intr_state_reg_t intr_state; // [7:4]
+    occamy_soc_hw2reg_intr_state_reg_t intr_state; // [11:4]
     occamy_soc_hw2reg_chip_id_reg_t chip_id; // [3:2]
     occamy_soc_hw2reg_boot_mode_reg_t boot_mode; // [1:0]
   } occamy_soc_hw2reg_t;
@@ -137,9 +165,11 @@ package occamy_soc_reg_pkg;
   parameter logic [BlockAw-1:0] OCCAMY_SOC_PAD_30_OFFSET = 8'h a4;
 
   // Reset values for hwext registers and their fields
-  parameter logic [1:0] OCCAMY_SOC_INTR_TEST_RESVAL = 2'h 0;
-  parameter logic [0:0] OCCAMY_SOC_INTR_TEST_ECC_UNCORRECTABLE_RESVAL = 1'h 0;
-  parameter logic [0:0] OCCAMY_SOC_INTR_TEST_ECC_CORRECTABLE_RESVAL = 1'h 0;
+  parameter logic [3:0] OCCAMY_SOC_INTR_TEST_RESVAL = 4'h 0;
+  parameter logic [0:0] OCCAMY_SOC_INTR_TEST_ECC_NARROW_UNCORRECTABLE_RESVAL = 1'h 0;
+  parameter logic [0:0] OCCAMY_SOC_INTR_TEST_ECC_NARROW_CORRECTABLE_RESVAL = 1'h 0;
+  parameter logic [0:0] OCCAMY_SOC_INTR_TEST_ECC_WIDE_UNCORRECTABLE_RESVAL = 1'h 0;
+  parameter logic [0:0] OCCAMY_SOC_INTR_TEST_ECC_WIDE_CORRECTABLE_RESVAL = 1'h 0;
   parameter logic [1:0] OCCAMY_SOC_CHIP_ID_RESVAL = 2'h 0;
   parameter logic [1:0] OCCAMY_SOC_CHIP_ID_CHIP_ID_RESVAL = 2'h 0;
   parameter logic [1:0] OCCAMY_SOC_BOOT_MODE_RESVAL = 2'h 0;

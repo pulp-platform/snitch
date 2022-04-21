@@ -41,7 +41,8 @@ package ${name}_pkg;
   } sram_cfg_cva6_t;
 
   typedef struct packed {
-    sram_cfg_t spm;
+    sram_cfg_t spm_narrow;
+    sram_cfg_t spm_wide;
     sram_cfg_cva6_t cva6;
     sram_cfg_quadrant_t quadrant;
   } sram_cfgs_t;
@@ -71,8 +72,10 @@ package ${name}_pkg;
     logic i2c_acq_overflow;
     logic i2c_ack_stop;
     logic i2c_host_timeout;
-    logic ecc_uncorrectable;
-    logic ecc_correctable;
+    logic ecc_narrow_uncorrectable;
+    logic ecc_narrow_correctable;
+    logic ecc_wide_uncorrectable;
+    logic ecc_wide_correctable;
     // 4 programmable, 8 HBM (1x per channel)
     logic [11:0] ext_irq;
     logic zero;
