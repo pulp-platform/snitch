@@ -3,6 +3,7 @@ BENDER		   ?= bender
 DASM 	       ?= spike-dasm
 VLT			   ?= verilator
 VERIBLE_FMT    ?= verible-verilog-format
+BIN2JTAG     ?=  $(ROOT)/util/bin2jtag.py
 
 VERILATOR_ROOT ?= $(dir $(shell which $(VLT)))/../share/verilator
 VLT_ROOT	   ?= ${VERILATOR_ROOT}
@@ -167,3 +168,10 @@ logs/trace_hart_%.s: logs/trace_hart_%.txt ${ROOT}/util/trace/annotate.py
 	$(PYTHON) ${ROOT}/util/trace/annotate.py -q -o $@ $(BINARY) $<
 BINARY ?= $(shell cat logs/.rtlbinary)
 annotate: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.s/') || echo "")
+
+# Arg 1: binary
+# Arg 2: max size in bytes
+define BINRAY_SIZE_CHECK
+  echo "Binary size: $$(stat -c %s $(1))B"
+  @[ "$$(stat -c %s $(1))" -lt "$(2)" ] || (echo "Binary exceeds specified size of $(2)B"; exit 1)
+endef

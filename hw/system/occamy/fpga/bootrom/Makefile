@@ -7,6 +7,9 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../../../..
+
+include $(ROOT)/util/Makefrag
+
 ARIANE_SDK  ?= ${ROOT}/../ariane-sdk/install
 INCLUDES = -I./ -I./src
 SRCS_C = src/main.c src/uart.c
@@ -19,7 +22,7 @@ OBJCOPY = $(ARIANE_SDK)/bin/riscv64-unknown-elf-objcopy
 GIT_SHA := $(shell git describe --match=NeVeRmAtCh --always --abbrev=10 --dirty)
 
 .PHONY: all
-all: bootrom-spl.coe
+all: bootrom-spl.coe bootrom.tcl
 
 %.o: %.c
 	$(CC) -DGIT_SHA=\"$(GIT_SHA)\" -Os -ggdb -march=rv64imafd -mabi=lp64d -Wall -mcmodel=medany -mexplicit-relocs -fno-builtin $(INCLUDES) -c $<  -o $@
@@ -41,3 +44,9 @@ bootrom-spl.bin: bootrom.bin  $(ARIANE_SDK)/u-boot/spl/u-boot-spl.bin
 
 clean:
 	rm -rf *.bin *.coe *.dump src/*.o *.dtb
+
+# Generate a TCL script to configure the bootrom on the FPGA
+%.tcl:  %.bin
+	@echo "TCL   <= $<"
+	@$(call BINRAY_SIZE_CHECK,$<,1000000)
+	@$(BIN2JTAG) -c32 -b 0 -d hw_axi_1 $< > $@

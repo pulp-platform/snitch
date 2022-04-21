@@ -1482,10 +1482,10 @@ Disassembly of section .text.startup:
 
 0000000001000d14 <main>:
  1000d14:	0001c5b7          	lui	a1,0x1c
- 1000d18:	017d8537          	lui	a0,0x17d8
+ 1000d18:	02faf537          	lui	a0,0x2faf
  1000d1c:	ff010113          	addi	sp,sp,-16
  1000d20:	20058593          	addi	a1,a1,512 # 1c200 <_start-0xfe3e00>
- 1000d24:	84050513          	addi	a0,a0,-1984 # 17d7840 <bin_to_hex_table+0x7d69d0>
+ 1000d24:	08050513          	addi	a0,a0,128 # 2faf080 <bin_to_hex_table+0x1fae210>
  1000d28:	00113423          	sd	ra,8(sp)
  1000d2c:	e55ff0ef          	jal	ra,1000b80 <init_uart>
  1000d30:	00000517          	auipc	a0,0x0
