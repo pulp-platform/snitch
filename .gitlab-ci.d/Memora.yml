@@ -1,0 +1,26 @@
+# Copyright 2022 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+cache_root_dir: /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch
+
+artifacts:
+  tc-hrv-obare:
+    inputs:
+    - .gitlab-ci.d/build-tc-hrv-obare.sh
+    outputs:
+    - tc-hrv-obare
+
+  python:
+    inputs:
+    - .gitlab-ci.d/build-python.sh
+    outputs:
+    - install/python
+
+  occamy_vcu128:
+    inputs:
+    - hw/system/occamy
+    - hw/ip
+    - hw/vendor
+    outputs:
+    - hw/system/occamy/fpga/occamy_vcu128
