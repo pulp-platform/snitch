@@ -164,16 +164,6 @@ import ${name}_pkg::*;
     .pcie_cfg_rsp_i  ('0),
     // Tie the HBM interrupts to zero.
     .ext_irq_i ({8'b0, ext_irq_i}),
-    .apb_hbm_cfg_req_o (),
-    .apb_hbm_cfg_rsp_i ('0),
-    .hbi_cfg_req_o (),
-    .hbi_cfg_rsp_i ('0),
-    .apb_hbi_ctl_req_o (),
-    .apb_hbi_ctl_rsp_i ('0),
-    .hbm_phy_cfg_req_o (),
-    .hbm_phy_cfg_rsp_i ('0),
-    .hbm_seq_req_o (),
-    .hbm_seq_rsp_i ('0),
     .*
   );
 
