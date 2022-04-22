@@ -64,6 +64,7 @@ occamy_vcu128:
   needs: [tc-hrv-obare]
   rules:
   - changes:
+    - .gitlab-ci.d/occamy_cfg_fpga.sh
     - hw/ip/**/*
     - hw/vendor/**/*
     - hw/system/occamy/**/*

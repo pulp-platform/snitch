@@ -19,6 +19,7 @@ artifacts:
 
   occamy_vcu128:
     inputs:
+    - .gitlab-ci.d/occamy_cfg_fpga.sh
     # all occamy sources
     - hw/system/occamy/src
     # Other RTL sources
