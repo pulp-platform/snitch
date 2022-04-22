@@ -689,13 +689,6 @@ module occamy_xilinx
 
 
 
-  reg_a48_d32_req_t fll_system_req;
-  reg_a48_d32_rsp_t fll_system_rsp;
-  reg_a48_d32_req_t fll_periph_req;
-  reg_a48_d32_rsp_t fll_periph_rsp;
-  reg_a48_d32_req_t fll_hbm2e_req;
-  reg_a48_d32_rsp_t fll_hbm2e_rsp;
-
   // Occamy top-level
   occamy_top i_occamy (
       .bootrom_req_o   (bootrom_axi_lite_req),
@@ -710,11 +703,21 @@ module occamy_xilinx
       .pcie_cfg_rsp_i  ('0),
       // Tie the HBM interrupts to zero.
       .ext_irq_i ({8'b0, ext_irq_i}),
+      // Tie-off unused ports
+      .pcie_cfg_rsp_i  ('0),
+      .hbi_wide_cfg_rsp_i ('0),
+      .hbi_narrow_cfg_rsp_i ('0),
+      .hbm_cfg_rsp_i ('0),
+      .chip_ctrl_rsp_i ('0),
+      .hbi_wide_req_i ('0),
+      .hbi_wide_rsp_i ('0),
+      .hbi_narrow_req_i ('0),
+      .hbi_narrow_rsp_i ('0),
       .*
   );
 
-  assign fll_system_rsp = '0;
-  assign fll_periph_rsp = '0;
-  assign fll_hbm2e_rsp  = '0;
+  assign fll_system_axi_lite_rsp = '0;
+  assign fll_periph_axi_lite_rsp = '0;
+  assign fll_hbm2e_axi_lite_rsp  = '0;
 
 endmodule

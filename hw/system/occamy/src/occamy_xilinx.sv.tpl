@@ -145,13 +145,6 @@ import ${name}_pkg::*;
   <% regbus_fll_periph = soc_axi_lite_narrow_periph_xbar.out_fll_periph.to_reg(context, "fll_periph", fr="fll_periph_axi_lite") %>
   <% regbus_fll_hbm2e = soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e.to_reg(context,   "fll_hbm2e", fr="fll_hbm2e_axi_lite") %>
 
-  ${regbus_fll_system.req_type()} fll_system_req;
-  ${regbus_fll_system.rsp_type()} fll_system_rsp;
-  ${regbus_fll_periph.req_type()} fll_periph_req;
-  ${regbus_fll_periph.rsp_type()} fll_periph_rsp;
-  ${regbus_fll_hbm2e.req_type()} fll_hbm2e_req;
-  ${regbus_fll_hbm2e.rsp_type()} fll_hbm2e_rsp;
-
   // Occamy top-level
   ${name}_top i_${name} (
     .bootrom_req_o   (bootrom_axi_lite_req),
@@ -166,11 +159,21 @@ import ${name}_pkg::*;
     .pcie_cfg_rsp_i  ('0),
     // Tie the HBM interrupts to zero.
     .ext_irq_i ({8'b0, ext_irq_i}),
+    // Tie-off unused ports
+    .pcie_cfg_rsp_i  ('0),
+    .hbi_wide_cfg_rsp_i ('0),
+    .hbi_narrow_cfg_rsp_i ('0),
+    .hbm_cfg_rsp_i ('0),
+    .chip_ctrl_rsp_i ('0),
+    .hbi_wide_req_i ('0),
+    .hbi_wide_rsp_i ('0),
+    .hbi_narrow_req_i ('0),
+    .hbi_narrow_rsp_i ('0),
     .*
   );
 
-  assign fll_system_rsp = '0;
-  assign fll_periph_rsp = '0;
-  assign fll_hbm2e_rsp = '0;
+  assign fll_system_axi_lite_rsp = '0;
+  assign fll_periph_axi_lite_rsp = '0;
+  assign fll_hbm2e_axi_lite_rsp = '0;
 
 endmodule
