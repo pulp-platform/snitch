@@ -72,33 +72,33 @@ impl SequencerContext {
     }
 
     /// Initialize a sequence job.
-    fn init_rep(
-        &mut self,
-        max_inst: u8,
-        is_outer: bool,
-        stagger_max: u8,
-        stagger_mask: u8,
-    ) -> Result<()> {
-        if !self.active {
-            self.active = true;
-            self.max_inst = max_inst;
-            self.is_outer = is_outer;
-            self.stagger_mask = stagger_mask;
-            self.stagger_max = stagger_max;
-            self.buffer_pos = 0;
-            if max_inst < SEQ_BUFFER_LEN {
-                Ok(())
-            } else {
-                Err(anyhow!(
-                    "Sequencer buffer not large enough: set {}, max {}",
-                    max_inst,
-                    SEQ_BUFFER_LEN
-                ))
-            }
-        } else {
-            Err(anyhow!("Illegal sequencer repetition nesting"))
-        }
-    }
+    // fn init_rep(
+    //     &mut self,
+    //     max_inst: u8,
+    //     is_outer: bool,
+    //     stagger_max: u8,
+    //     stagger_mask: u8,
+    // ) -> Result<()> {
+    //     if !self.active {
+    //         self.active = true;
+    //         self.max_inst = max_inst;
+    //         self.is_outer = is_outer;
+    //         self.stagger_mask = stagger_mask;
+    //         self.stagger_max = stagger_max;
+    //         self.buffer_pos = 0;
+    //         if max_inst < SEQ_BUFFER_LEN {
+    //             Ok(())
+    //         } else {
+    //             Err(anyhow!(
+    //                 "Sequencer buffer not large enough: set {}, max {}",
+    //                 max_inst,
+    //                 SEQ_BUFFER_LEN
+    //             ))
+    //         }
+    //     } else {
+    //         Err(anyhow!("Illegal sequencer repetition nesting"))
+    //     }
+    // }
 
     /// Push an instruction into the sequence buffer.
     fn push_rep_instruction(&mut self, addr: u64, inst: riscv::Format) -> Result<()> {
@@ -997,15 +997,15 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::Bimm12hiBimm12loImm5Rs1(x) => self.emit_bimm12hi_bimm12lo_imm5_rs1(x),
             riscv::Format::Bimm12hiBimm12loRs1Rs2(x) => self.emit_bimm12hi_bimm12lo_rs1_rs2(x),
             riscv::Format::FmPredRdRs1Succ(x) => self.emit_fm_pred_rd_rs1_succ(x),
-            riscv::Format::Imm5Rd(x) => self.emit_imm5_rd(x),
-            riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
+            // riscv::Format::Imm5Rd(x) => self.emit_imm5_rd(x),
+            // riscv::Format::Imm12Rd(x) => self.emit_imm12_rd(x),
             riscv::Format::Imm5RdRs1(x) => self.emit_imm5_rd_rs1(x),
             riscv::Format::Imm6RdRs1(x) => self.emit_imm6_rd_rs1(x),
             riscv::Format::Imm12RdRs1(x) => self.emit_imm12_rd_rs1(x),
-            riscv::Format::Imm12Rs1StaggerMaskStaggerMax(x) => {
-                self.emit_imm12_rs1_staggermask_staggermax(x, fseq)
-            }
-            riscv::Format::Imm12Rs1(x) => self.emit_imm12_rs1(x),
+            // riscv::Format::Imm12Rs1StaggerMaskStaggerMax(x) => {
+            //     self.emit_imm12_rs1_staggermask_staggermax(x, fseq)
+            // }
+            // riscv::Format::Imm12Rs1(x) => self.emit_imm12_rs1(x),
             riscv::Format::Imm12hiImm12loRs1Rs2(x) => self.emit_imm12hi_imm12lo_rs1_rs2(x),
             riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
             riscv::Format::Jimm20Rd(x) => self.emit_jimm20_rd(x),
@@ -1016,9 +1016,9 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::RdRs1(x) => self.emit_rd_rs1(x),
             riscv::Format::RdRs1Rs2(x) => self.emit_rd_rs1_rs2(x),
             riscv::Format::RdRs1Shamt(x) => self.emit_rd_rs1_shamt(x),
-            riscv::Format::Rs1(x) => self.emit_rs1(x),
-            riscv::Format::Rs1Rs2(x) => self.emit_rs1_rs2(x),
-            riscv::Format::RdRs2(x) => self.emit_rd_rs2(x),
+            // riscv::Format::Rs1(x) => self.emit_rs1(x),
+            // riscv::Format::Rs1Rs2(x) => self.emit_rs1_rs2(x),
+            // riscv::Format::RdRs2(x) => self.emit_rd_rs2(x),
             riscv::Format::Unit(x) => self.emit_unit(x),
             _ => Err(anyhow!("Unsupported instruction format")),
         }
@@ -1553,36 +1553,36 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
-    unsafe fn emit_imm12_rs1(&self, data: riscv::FormatImm12Rs1) -> Result<()> {
-        let imm = data.imm();
-        trace!("{} x{}, {}", data.op, data.rs1, imm);
+    // unsafe fn emit_imm12_rs1(&self, data: riscv::FormatImm12Rs1) -> Result<()> {
+    //     let imm = data.imm();
+    //     trace!("{} x{}, {}", data.op, data.rs1, imm);
 
-        // Compute the address.
-        let rs1 = self.read_reg(data.rs1);
+    //     // Compute the address.
+    //     let rs1 = self.read_reg(data.rs1);
 
-        // Perform the operation.
-        // suppress compiler warning that detects the bail! statement as unrechable
-        // Scfgwi is currently the OpcodeImm12Rs1 but this might change
-        #[allow(unreachable_patterns)]
-        match data.op {
-            riscv::OpcodeImm12Rs1::Scfgwi => {
-                // ssr write immediate holds address offset in imm12, content in rs1
-                // imm12[11:5]=reg_word imm12[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
-                let dm = (imm as u64) & 0x1f;
-                let reg_word = ((imm as u64) >> 5) & 0x1f;
-                let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
-                let addr = LLVMBuildAdd(
-                    self.builder,
-                    LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
-                    addr_off,
-                    NONAME,
-                );
-                self.write_mem(addr, rs1, 2);
-            }
-            _ => bail!("Unsupported opcode {}", data.op),
-        };
-        Ok(())
-    }
+    //     // Perform the operation.
+    //     // suppress compiler warning that detects the bail! statement as unrechable
+    //     // Scfgwi is currently the OpcodeImm12Rs1 but this might change
+    //     #[allow(unreachable_patterns)]
+    //     match data.op {
+    //         riscv::OpcodeImm12Rs1::Scfgwi => {
+    //             // ssr write immediate holds address offset in imm12, content in rs1
+    //             // imm12[11:5]=reg_word imm12[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+    //             let dm = (imm as u64) & 0x1f;
+    //             let reg_word = ((imm as u64) >> 5) & 0x1f;
+    //             let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
+    //             let addr = LLVMBuildAdd(
+    //                 self.builder,
+    //                 LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
+    //                 addr_off,
+    //                 NONAME,
+    //             );
+    //             self.write_mem(addr, rs1, 2);
+    //         }
+    //         _ => bail!("Unsupported opcode {}", data.op),
+    //     };
+    //     Ok(())
+    // }
 
     unsafe fn emit_imm12hi_imm12lo_rs1_rs2(
         &self,
@@ -1653,58 +1653,58 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
-    unsafe fn emit_imm5_rd(&self, data: riscv::FormatImm5Rd) -> Result<()> {
-        let imm = data.imm5;
-        trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
-        let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
-        let name = format!("{}\0", data.op);
-        let _name = name.as_ptr() as *const _;
+    // unsafe fn emit_imm5_rd(&self, data: riscv::FormatImm5Rd) -> Result<()> {
+    //     let imm = data.imm5;
+    //     trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
+    //     let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
+    //     let name = format!("{}\0", data.op);
+    //     let _name = name.as_ptr() as *const _;
 
-        let value = match data.op {
-            riscv::OpcodeImm5Rd::Dmstati => self
-                .section
-                .emit_call("banshee_dma_stat", [self.dma_ptr(), imm]),
-        };
-        self.write_reg(data.rd, value);
-        Ok(())
-    }
+    //     let value = match data.op {
+    //         riscv::OpcodeImm5Rd::Dmstati => self
+    //             .section
+    //             .emit_call("banshee_dma_stat", [self.dma_ptr(), imm]),
+    //     };
+    //     self.write_reg(data.rd, value);
+    //     Ok(())
+    // }
 
-    unsafe fn emit_imm12_rd(&self, data: riscv::FormatImm12Rd) -> Result<()> {
-        let imm = data.imm();
-        trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
-        let name = format!("{}\0", data.op);
-        let _name = name.as_ptr() as *const _;
+    // unsafe fn emit_imm12_rd(&self, data: riscv::FormatImm12Rd) -> Result<()> {
+    //     let imm = data.imm();
+    //     trace!("{} x{} = 0x{:x}", data.op, data.rd, imm);
+    //     let name = format!("{}\0", data.op);
+    //     let _name = name.as_ptr() as *const _;
 
-        let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
+    //     let ssr_start = LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0);
 
-        // suppress compiler warning that detects the bail! statement as unrechable
-        // Scfgri is currently the OpcodeImm12Rd but this might change
-        #[allow(unreachable_patterns)]
-        match data.op {
-            riscv::OpcodeImm12Rd::Scfgri => {
-                // srr load immediate from offset in imm12
-                // reorder imm12 to form address
-                // imm12[11:5]=reg_word imm12[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
-                let dm = (imm as u64) & 0x1f;
-                let reg_word = ((imm as u64) >> 5) & 0x1f;
-                let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
-                let value = self.emit_load(ssr_start, addr_off, 2, true);
-                self.write_reg(data.rd, value);
-            }
-            _ => bail!("Unsupported opcode {}", data.op),
-        };
-        Ok(())
-    }
+    //     // suppress compiler warning that detects the bail! statement as unrechable
+    //     // Scfgri is currently the OpcodeImm12Rd but this might change
+    //     #[allow(unreachable_patterns)]
+    //     match data.op {
+    //         riscv::OpcodeImm12Rd::Scfgri => {
+    //             // srr load immediate from offset in imm12
+    //             // reorder imm12 to form address
+    //             // imm12[11:5]=reg_word imm12[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+    //             let dm = (imm as u64) & 0x1f;
+    //             let reg_word = ((imm as u64) >> 5) & 0x1f;
+    //             let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
+    //             let value = self.emit_load(ssr_start, addr_off, 2, true);
+    //             self.write_reg(data.rd, value);
+    //         }
+    //         _ => bail!("Unsupported opcode {}", data.op),
+    //     };
+    //     Ok(())
+    // }
 
     unsafe fn emit_imm5_rd_rs1(&self, data: riscv::FormatImm5RdRs1) -> Result<()> {
         let imm = data.imm5;
         let rs1 = self.read_reg(data.rs1);
         let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
         let value = match data.op {
-            riscv::OpcodeImm5RdRs1::Dmcpyi => self.section.emit_call(
-                "banshee_dma_strt",
-                [self.dma_ptr(), self.section.state_ptr, rs1, imm],
-            ),
+            // riscv::OpcodeImm5RdRs1::Dmcpyi => self.section.emit_call(
+            //     "banshee_dma_strt",
+            //     [self.dma_ptr(), self.section.state_ptr, rs1, imm],
+            // ),
             // xpulpclip
             riscv::OpcodeImm5RdRs1::PClip => {
                 // if rs1 <= -2^(Is2-1), rD = -2^(Is2-1),
@@ -2577,56 +2577,56 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
-    unsafe fn emit_rd_rs2(&self, data: riscv::FormatRdRs2) -> Result<()> {
-        trace!("{} x{}, f{}", data.op, data.rd, data.rs2);
-        let rs2 = self.read_reg(data.rs2);
+    // unsafe fn emit_rd_rs2(&self, data: riscv::FormatRdRs2) -> Result<()> {
+    //     trace!("{} x{}, f{}", data.op, data.rd, data.rs2);
+    //     let rs2 = self.read_reg(data.rs2);
 
-        let value = match data.op {
-            riscv::OpcodeRdRs2::Scfgr => {
-                // reorder rs2 to form address
-                // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
-                let reg = LLVMBuildLShr(
-                    self.builder,
-                    rs2,
-                    LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
-                    NONAME,
-                );
-                let reg_masked = LLVMBuildAnd(
-                    self.builder,
-                    reg,
-                    LLVMConstInt(LLVMInt32Type(), 0xf8 as u64, 0),
-                    NONAME,
-                );
-                let rs2_dm = LLVMBuildAnd(
-                    self.builder,
-                    rs2,
-                    LLVMConstInt(LLVMInt32Type(), 0x1f as u64, 0),
-                    NONAME,
-                );
-                let rs2_dm_shifted = LLVMBuildShl(
-                    self.builder,
-                    rs2_dm,
-                    LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
-                    NONAME,
-                );
-                let addr_off = LLVMBuildOr(self.builder, rs2_dm_shifted, reg_masked, NONAME);
-                // perform load
-                self.emit_load(
-                    LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
-                    addr_off,
-                    2,
-                    true,
-                )
-            }
-            riscv::OpcodeRdRs2::Dmstat => self
-                .section
-                .emit_call("banshee_dma_stat", [self.dma_ptr(), rs2]),
-            // _ => bail!("Unsupported opcode {}", data.op),
-        };
+    //     let value = match data.op {
+    //         riscv::OpcodeRdRs2::Scfgr => {
+    //             // reorder rs2 to form address
+    //             // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+    //             let reg = LLVMBuildLShr(
+    //                 self.builder,
+    //                 rs2,
+    //                 LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
+    //                 NONAME,
+    //             );
+    //             let reg_masked = LLVMBuildAnd(
+    //                 self.builder,
+    //                 reg,
+    //                 LLVMConstInt(LLVMInt32Type(), 0xf8 as u64, 0),
+    //                 NONAME,
+    //             );
+    //             let rs2_dm = LLVMBuildAnd(
+    //                 self.builder,
+    //                 rs2,
+    //                 LLVMConstInt(LLVMInt32Type(), 0x1f as u64, 0),
+    //                 NONAME,
+    //             );
+    //             let rs2_dm_shifted = LLVMBuildShl(
+    //                 self.builder,
+    //                 rs2_dm,
+    //                 LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
+    //                 NONAME,
+    //             );
+    //             let addr_off = LLVMBuildOr(self.builder, rs2_dm_shifted, reg_masked, NONAME);
+    //             // perform load
+    //             self.emit_load(
+    //                 LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
+    //                 addr_off,
+    //                 2,
+    //                 true,
+    //             )
+    //         }
+    //         riscv::OpcodeRdRs2::Dmstat => self
+    //             .section
+    //             .emit_call("banshee_dma_stat", [self.dma_ptr(), rs2]),
+    //         // _ => bail!("Unsupported opcode {}", data.op),
+    //     };
 
-        self.write_reg(data.rd, value);
-        Ok(())
-    }
+    //     self.write_reg(data.rd, value);
+    //     Ok(())
+    // }
 
     unsafe fn emit_rd_rm_rs1_rs2(&self, data: riscv::FormatRdRmRs1Rs2) -> Result<()> {
         self.was_freppable.set(true);
@@ -2929,50 +2929,50 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
-    unsafe fn emit_imm12_rs1_staggermask_staggermax(
-        &self,
-        data: riscv::FormatImm12Rs1StaggerMaskStaggerMax,
-        fseq: &mut SequencerContext,
-    ) -> Result<()> {
-        trace!(
-            "{} x{}, {}, 0b{:b}, {}",
-            data.op,
-            data.rs1,          // register containing max repetition
-            data.imm12,        // max instruction
-            data.stagger_mask, // stagger mask
-            data.stagger_max   // stagger max
-        );
-        // Initialize repetition iterator to 0
-        LLVMBuildStore(
-            self.builder,
-            LLVMConstInt(LLVMInt32Type(), 0, 0),
-            self.section.fseq_iter.rpt_ptr_ref,
-        );
-        // Initialize repetition bound
-        LLVMBuildStore(
-            self.builder,
-            self.read_reg(data.rs1),
-            self.section.fseq_iter.max_rpt_ref,
-        );
-        // suppress compiler warning that detects the bail! statement as unrechable
-        // Frep* are currently the only OpcodeImm12Rs1Stagger_maskStagger_max but this might change
-        #[allow(unreachable_patterns)]
-        match data.op {
-            riscv::OpcodeImm12Rs1StaggerMaskStaggerMax::FrepO => fseq.init_rep(
-                data.imm12 as u8,
-                true,
-                data.stagger_max as u8,
-                data.stagger_mask as u8,
-            ),
-            riscv::OpcodeImm12Rs1StaggerMaskStaggerMax::FrepI => fseq.init_rep(
-                data.imm12 as u8,
-                false,
-                data.stagger_max as u8,
-                data.stagger_mask as u8,
-            ),
-            _ => bail!("Unsupported opcode {}", data.op),
-        }
-    }
+    // unsafe fn emit_imm12_rs1_staggermask_staggermax(
+    //     &self,
+    //     data: riscv::FormatImm12Rs1StaggerMaskStaggerMax,
+    //     fseq: &mut SequencerContext,
+    // ) -> Result<()> {
+    //     trace!(
+    //         "{} x{}, {}, 0b{:b}, {}",
+    //         data.op,
+    //         data.rs1,          // register containing max repetition
+    //         data.imm12,        // max instruction
+    //         data.stagger_mask, // stagger mask
+    //         data.stagger_max   // stagger max
+    //     );
+    //     // Initialize repetition iterator to 0
+    //     LLVMBuildStore(
+    //         self.builder,
+    //         LLVMConstInt(LLVMInt32Type(), 0, 0),
+    //         self.section.fseq_iter.rpt_ptr_ref,
+    //     );
+    //     // Initialize repetition bound
+    //     LLVMBuildStore(
+    //         self.builder,
+    //         self.read_reg(data.rs1),
+    //         self.section.fseq_iter.max_rpt_ref,
+    //     );
+    //     // suppress compiler warning that detects the bail! statement as unrechable
+    //     // Frep* are currently the only OpcodeImm12Rs1Stagger_maskStagger_max but this might change
+    //     #[allow(unreachable_patterns)]
+    //     match data.op {
+    //         riscv::OpcodeImm12Rs1StaggerMaskStaggerMax::FrepO => fseq.init_rep(
+    //             data.imm12 as u8,
+    //             true,
+    //             data.stagger_max as u8,
+    //             data.stagger_mask as u8,
+    //         ),
+    //         riscv::OpcodeImm12Rs1StaggerMaskStaggerMax::FrepI => fseq.init_rep(
+    //             data.imm12 as u8,
+    //             false,
+    //             data.stagger_max as u8,
+    //             data.stagger_mask as u8,
+    //         ),
+    //         _ => bail!("Unsupported opcode {}", data.op),
+    //     }
+    // }
 
     /// get fpmode_src and fpmode_dst bits for fpmode CSR
     unsafe fn read_fpmode(&self) -> (LLVMValueRef, LLVMValueRef) {
@@ -6005,10 +6005,10 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeRdRs1Rs2::Sll => LLVMBuildShl(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Srl => LLVMBuildLShr(self.builder, rs1, rs2, name),
             riscv::OpcodeRdRs1Rs2::Sra => LLVMBuildAShr(self.builder, rs1, rs2, name),
-            riscv::OpcodeRdRs1Rs2::Dmcpy => self.section.emit_call(
-                "banshee_dma_strt",
-                [self.dma_ptr(), self.section.state_ptr, rs1, rs2],
-            ),
+            // riscv::OpcodeRdRs1Rs2::Dmcpy => self.section.emit_call(
+            //     "banshee_dma_strt",
+            //     [self.dma_ptr(), self.section.state_ptr, rs1, rs2],
+            // ),
             // xpulpmacsi
             riscv::OpcodeRdRs1Rs2::PMac => {
                 LLVMBuildAdd(
@@ -6985,88 +6985,88 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
-    unsafe fn emit_rs1(&self, data: riscv::FormatRs1) -> Result<()> {
-        trace!("{} x{}", data.op, data.rs1);
-        let name = format!("{}\0", data.op);
-        let _name = name.as_ptr() as *const _;
-        let rs1 = self.read_reg(data.rs1);
+    // unsafe fn emit_rs1(&self, data: riscv::FormatRs1) -> Result<()> {
+    //     trace!("{} x{}", data.op, data.rs1);
+    //     let name = format!("{}\0", data.op);
+    //     let _name = name.as_ptr() as *const _;
+    //     let rs1 = self.read_reg(data.rs1);
 
-        // suppress compiler warning that detects the bail! statement as unrechable
-        // Dmrep is currently the OpcodeRs1 but this might change
-        #[allow(unreachable_patterns)]
-        match data.op {
-            riscv::OpcodeRs1::Dmrep => self
-                .section
-                .emit_call("banshee_dma_rep", [self.dma_ptr(), rs1]),
-            _ => bail!("Unsupported opcode {}", data.op),
-        };
-        Ok(())
-    }
+    //     // suppress compiler warning that detects the bail! statement as unrechable
+    //     // Dmrep is currently the OpcodeRs1 but this might change
+    //     #[allow(unreachable_patterns)]
+    //     match data.op {
+    //         riscv::OpcodeRs1::Dmrep => self
+    //             .section
+    //             .emit_call("banshee_dma_rep", [self.dma_ptr(), rs1]),
+    //         _ => bail!("Unsupported opcode {}", data.op),
+    //     };
+    //     Ok(())
+    // }
 
-    unsafe fn emit_rs1_rs2(&self, data: riscv::FormatRs1Rs2) -> Result<()> {
-        trace!("{} x{}, x{}", data.op, data.rs1, data.rs2);
-        let name = format!("{}\0", data.op);
-        let _name = name.as_ptr() as *const _;
-        let rs1 = self.read_reg(data.rs1);
-        let rs2 = self.read_reg(data.rs2);
+    // unsafe fn emit_rs1_rs2(&self, data: riscv::FormatRs1Rs2) -> Result<()> {
+    //     trace!("{} x{}, x{}", data.op, data.rs1, data.rs2);
+    //     let name = format!("{}\0", data.op);
+    //     let _name = name.as_ptr() as *const _;
+    //     let rs1 = self.read_reg(data.rs1);
+    //     let rs2 = self.read_reg(data.rs2);
 
-        // Perform the SSR write op
-        match data.op {
-            riscv::OpcodeRs1Rs2::Scfgw => {
-                // reorder rs2 to form address
-                // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
-                let reg = LLVMBuildLShr(
-                    self.builder,
-                    rs2,
-                    LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
-                    NONAME,
-                );
-                let reg_masked = LLVMBuildAnd(
-                    self.builder,
-                    reg,
-                    LLVMConstInt(LLVMInt32Type(), 0xf8 as u64, 0),
-                    NONAME,
-                );
-                let rs2_dm = LLVMBuildAnd(
-                    self.builder,
-                    rs2,
-                    LLVMConstInt(LLVMInt32Type(), 0x1f as u64, 0),
-                    NONAME,
-                );
-                let rs2_dm_shifted = LLVMBuildShl(
-                    self.builder,
-                    rs2_dm,
-                    LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
-                    NONAME,
-                );
-                let addr_off = LLVMBuildOr(self.builder, rs2_dm_shifted, reg_masked, NONAME);
+    //     // Perform the SSR write op
+    //     match data.op {
+    //         riscv::OpcodeRs1Rs2::Scfgw => {
+    //             // reorder rs2 to form address
+    //             // rs2[11:5]=reg_word rs2[4:0]=dm -> addr_off = {dm, reg_word[4:0], 000}
+    //             let reg = LLVMBuildLShr(
+    //                 self.builder,
+    //                 rs2,
+    //                 LLVMConstInt(LLVMInt32Type(), 2 as u64, 0),
+    //                 NONAME,
+    //             );
+    //             let reg_masked = LLVMBuildAnd(
+    //                 self.builder,
+    //                 reg,
+    //                 LLVMConstInt(LLVMInt32Type(), 0xf8 as u64, 0),
+    //                 NONAME,
+    //             );
+    //             let rs2_dm = LLVMBuildAnd(
+    //                 self.builder,
+    //                 rs2,
+    //                 LLVMConstInt(LLVMInt32Type(), 0x1f as u64, 0),
+    //                 NONAME,
+    //             );
+    //             let rs2_dm_shifted = LLVMBuildShl(
+    //                 self.builder,
+    //                 rs2_dm,
+    //                 LLVMConstInt(LLVMInt32Type(), 8 as u64, 0),
+    //                 NONAME,
+    //             );
+    //             let addr_off = LLVMBuildOr(self.builder, rs2_dm_shifted, reg_masked, NONAME);
 
-                let addr = LLVMBuildAdd(
-                    self.builder,
-                    LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
-                    addr_off,
-                    NONAME,
-                );
-                self.write_mem(addr, rs1, 2);
-                return Ok(());
-            }
-            _ => (),
-        };
+    //             let addr = LLVMBuildAdd(
+    //                 self.builder,
+    //                 LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
+    //                 addr_off,
+    //                 NONAME,
+    //             );
+    //             self.write_mem(addr, rs1, 2);
+    //             return Ok(());
+    //         }
+    //         _ => (),
+    //     };
 
-        match data.op {
-            riscv::OpcodeRs1Rs2::Dmsrc => self
-                .section
-                .emit_call("banshee_dma_src", [self.dma_ptr(), rs1, rs2]),
-            riscv::OpcodeRs1Rs2::Dmdst => self
-                .section
-                .emit_call("banshee_dma_dst", [self.dma_ptr(), rs1, rs2]),
-            riscv::OpcodeRs1Rs2::Dmstr => self
-                .section
-                .emit_call("banshee_dma_str", [self.dma_ptr(), rs1, rs2]),
-            _ => bail!("Unsupported opcode {}", data.op),
-        };
-        Ok(())
-    }
+    //     match data.op {
+    //         riscv::OpcodeRs1Rs2::Dmsrc => self
+    //             .section
+    //             .emit_call("banshee_dma_src", [self.dma_ptr(), rs1, rs2]),
+    //         riscv::OpcodeRs1Rs2::Dmdst => self
+    //             .section
+    //             .emit_call("banshee_dma_dst", [self.dma_ptr(), rs1, rs2]),
+    //         riscv::OpcodeRs1Rs2::Dmstr => self
+    //             .section
+    //             .emit_call("banshee_dma_str", [self.dma_ptr(), rs1, rs2]),
+    //         _ => bail!("Unsupported opcode {}", data.op),
+    //     };
+    //     Ok(())
+    // }
 
     unsafe fn emit_unit(&self, data: riscv::FormatUnit) -> Result<()> {
         trace!("{}", data.op,);
@@ -9007,10 +9007,10 @@ impl<'a> InstructionTranslator<'a> {
         )
     }
 
-    unsafe fn dma_ptr(&self) -> LLVMValueRef {
-        self.section
-            .emit_call_with_name("banshee_dma_ptr", [self.section.state_ptr], "ptr_dma")
-    }
+    // unsafe fn dma_ptr(&self) -> LLVMValueRef {
+    //     self.section
+    //         .emit_call_with_name("banshee_dma_ptr", [self.section.state_ptr], "ptr_dma")
+    // }
 
     /// Extract latency from the config file or assign default value
     unsafe fn get_latency(&self, op: String, default_value: u64) -> u64 {
