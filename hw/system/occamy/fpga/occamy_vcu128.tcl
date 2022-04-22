@@ -195,8 +195,3 @@ if {[get_property PROGRESS [get_run impl_1]] == "100%"} {
     puts "ERROR: Something went wrong in implementation, it should have 100% PROGRESS by now."
     exit 2
 }
-
-# Archive project
-set sha [exec git rev-parse --short HEAD]
-set date [exec date +%Y-%m-%d-%H%M%S]
-archive_project -include_config_settings -include_local_ip_cache -force ./${build}/${project}-${sha}-${date}.zip

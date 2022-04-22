@@ -9,6 +9,7 @@ variables:
   VERIBLE_FMT: $CI_PROJECT_DIR/.local/bin/verible-verilog-format
   BENDER: $CI_PROJECT_DIR/.local/bin/bender
   ARIANE_SDK: $CI_PROJECT_DIR/tc-hrv-obare
+  RUST_LOG: 'memora=debug'
 
 before_script:
 - >
@@ -73,20 +74,21 @@ occamy_vcu128:
     - util/reggen
     - util/regtool.py
   script:
-    # Make Occamy system smaller to fit on FPGA
-  - ./.gitlab-ci.d/occamy_cfg_fpga.sh
-  - make -C hw/system/occamy update-source
-    # Generate IP
-  - make -C hw/system/occamy/fpga/vivado_ips
-    # Build bootrom (do not use bootrom-spl.coe in the CI so we don't depend on the build of u-boot)
-  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-obare
-  - make -C hw/system/occamy/fpga/bootrom bootrom.coe
-  - cp hw/system/occamy/fpga/bootrom/bootrom.coe hw/system/occamy/fpga/bootrom/bootrom-spl.coe
-    # Synthesize and Implement design
-  - make -C hw/system/occamy/fpga occamy_vcu128
-    # Cache
-  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert occamy_vcu128
+  # Make Occamy system smaller to fit on FPGA, Generate IP, Build bootrom, Synthesize and Implement design, Cache
+  - |
+    if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup occamy_vcu128; then
+      ./.gitlab-ci.d/occamy_cfg_fpga.sh
+      make -C hw/system/occamy update-source
+      make -C hw/system/occamy/fpga/vivado_ips
+      $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get tc-hrv-obare
+      make -C hw/system/occamy/fpga/bootrom bootrom.coe
+      cp hw/system/occamy/fpga/bootrom/bootrom.coe hw/system/occamy/fpga/bootrom/bootrom-spl.coe
+      make -C hw/system/occamy/fpga occamy_vcu128
+      git checkout -- hw/system/occamy/src
+      $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert occamy_vcu128
+    fi
   artifacts:
+    when: always
     paths:
     - hw/system/occamy/fpga/**/*.bit
     - hw/system/occamy/fpga/**/*.ltx

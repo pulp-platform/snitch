@@ -19,7 +19,9 @@ artifacts:
 
   occamy_vcu128:
     inputs:
-    - hw/system/occamy
+    # all occamy sources
+    - hw/system/occamy/src
+    # Other RTL sources
     - hw/ip
     - hw/vendor
     outputs:
