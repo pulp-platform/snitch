@@ -17,27 +17,38 @@
   };
   memory@80000000 {
     device_type = "memory";
-    reg = <0x0 0x80000000 0x0 0x40000000>;
+    reg = <0x0 0x80000000 0x0 0x80000000>;
   };
   cpus {
     #address-cells = <1>;
     #size-cells = <0>;
-    timebase-frequency = <7500000>;
+    timebase-frequency = <12500000>;
     CPU0: cpu@0 {
       device_type = "cpu";
       status = "okay";
       compatible = "eth,ariane", "riscv";
-      clock-frequency = <25000000>;
+      clock-frequency = <50000000>;
       riscv,isa = "rv64fimafd";
       mmu-type = "riscv,sv39";
       tlb-split;
       reg = <0>;
+      // represents the destination of the mcause bits
+      // ariane has 3 interrupt inputs:
+      // - software (ipi_i[0], IRQ_M_SOFT)
+      // - timer (time_irq_i[0], IRQ_M_TIMER)
+      // - external (irq_i[1:0], {IRQ_S_EXT, IRQ_M_EXT})
       CPU0_intc: interrupt-controller {
         #interrupt-cells = <1>;
+        #address-cells = <1>;
         interrupt-controller;
         compatible = "riscv,cpu-intc";
       };
     };
+  };
+  sysclk: virt_50mhz {
+    #clock-cells = <0>;
+    compatible = "fixed-clock";
+    clock-frequency = <50000000>;
   };
   soc: soc {
     #address-cells = <2>;
@@ -51,33 +62,28 @@
       reg = <0x0 0x0 0x0 0x1000>;
     };
     serial@2002000 {
-      compatible = "ns16550";
+      compatible = "ns16550a";
       reg = <0x0 0x2002000 0x0 0x1000>;
-      clock-frequency = <25000000>;
+      clock-frequency = <50000000>;
       current-speed = <115200>;
       interrupt-parent = <&PLIC0>;
       interrupts = <33>;
       reg-offset = <0>;
-      reg-shift = <2>;
-      reg-io-width = <4>;
+      reg-shift = <2>; // regs are spaced on 32 bit boundary
+      reg-io-width = <4>; // only 32-bit access are supported
+      // fifo-size = <64>;
     };
     timer@2006000 {
       compatible = "pulp,apb_timer";
-      interrupts = <0x00000067 0x00000068 0x00000069 0x00000070>;
-      reg = <0x00000000 0x2006000 0x00000000 0x00001000>;
       interrupt-parent = <&PLIC0>;
+      interrupts = <66 67 68 69>;
+      reg = <0x00000000 0x2006000 0x00000000 0x00001000>;
       reg-names = "control";
-    };
-    spiclk: virt_100mhz {
-      #clock-cells = <0>;
-      compatible = "fixed-clock";
-      clock-frequency = <100000000>;
     };
     axi_quad_spi_1: spi@4c000000 {
       compatible = "xlnx,axi-quad-spi-3.2", "xlnx,xps-spi-2.00.a";
-      interrupt-parent = <&PLIC0>;
-      interrupts = <2>;
-      clocks = <&spiclk>;
+      interrupts-extended = <&PLIC0 2>;
+      clocks = <&sysclk>;
       reg = <0x0 0x4c000000 0x0 0x10000>;
       xlnx,num-ss-bits = <1>;
       xlnx,num-transfer-bits = <0x8>;
@@ -114,11 +120,16 @@
         };
       };
     };
-    clint@4000000 {
-      clock-frequency = <7500000>;
+    clint0: clint@4000000 {
+      clock-frequency = <12500000>;
       compatible = "riscv,clint0";
+      // clint generates software and timer interrupts to the core. Attach them
+      // to the CPU
+      // bits in mip and exception code in mcause:
+      // - IRQ_M_SOFT = 3: Machine software interrupt
+      // - IRQ_M_TIMER = 7: Machine timer interrupt
       interrupts-extended = <&CPU0_intc 3 &CPU0_intc 7>;
-      reg-names = "control";
+      reg-names = "clint";
       reg = <0x0 0x4000000 0x0 0x100000>;
     };
     PLIC0: interrupt-controller@c000000 {
@@ -126,10 +137,86 @@
       #address-cells = <0>;
       #interrupt-cells = <1>;
       interrupt-controller;
+      // PLIC generates external interrupts to the core, M and S mode
+      // - IRQ_M_EXT = 11: Machine external interrupt
+      // - IRQ_S_EXT = 9:  Supervisor external interrupt
       interrupts-extended = <&CPU0_intc 11 &CPU0_intc 9>;
       riscv,max-priority = <6>;
-      riscv,ndev = <73>;
+      riscv,ndev = <70>;
       reg = <0x0 0xc000000 0x0 0x4000000>;
+    };
+    eth_dma0: eth_dma@4d000000 {
+      #dma-cells = <1>;
+      #address-cells = <1>;
+      #size-cells = <1>;
+      compatible = "xlnx,axi-dma-1.00.a";
+      reg = <0x0 0x4d000000 0x0 0x10000>;
+      interrupts-extended = <&PLIC0 3 &PLIC0 4>;
+      xlnx,addrwidth = <0x40>;
+      xlnx,include-sg;
+      dma-channel@4d000000 {
+        compatible = "xlnx,axi-dma-mm2s-channel";
+        reg = <0 0>;
+        dma-channels = <0x1>;
+        interrupts-extended = <&PLIC0 3>;
+        xlnx,datawidth = <0x20>;
+        xlnx,device-id = <0x0>;
+        xlnx,include-dre ;
+      };
+      dma-channel@4d000030 {
+        compatible = "xlnx,axi-dma-s2mm-channel";
+        reg = <0 0>;
+        dma-channels = <0x1>;
+        interrupts-extended = <&PLIC0 4>;
+        xlnx,datawidth = <0x20>;
+        xlnx,device-id = <0x0>;
+        xlnx,include-dre ;
+      };
+    };
+    eth0: eth0@4c400000 {
+      compatible = "xlnx,axi-ethernet-1.00.a";
+      reg = <0x0 0x4c400000 0x0 0x40000>;
+      // attacked to system clock, provide name for matching
+      clocks = <&sysclk>, <&sysclk>;
+      clock-names = "s_axi_lite_clk", "axis_clk";
+      // interrupt and mac_irq
+      interrupts-extended = <&PLIC0 1 &PLIC0 6>;
+      // local-mac-address = [ 00 0A 35 04 E1 60 ]; // hero-vcu128-01
+      local-mac-address = [ 00 0A 35 04 E1 52 ]; // hero-vcu128-02
+      mac-address = [ 00 0A 35 04 E1 52 ];
+      device_type = "network";
+      axistream-connected = <&eth_dma0>;
+      axistream-control-connected = <&eth_dma0>;
+      phy-handle = <&dp83867_0>;
+      // xlnx,phy-type = <0x4>; // XAE_PHY_TYPE_SGMII. linux: deprecated, use phy-mode
+      phy-mode = "sgmii";
+      xlnx,phyaddr = <0x0>;
+      xlnx,rxcsum = <0x2>; // 0, 1, 2 for no/partial/full offloading
+      xlnx,rxmem = <0x1000>;
+      xlnx,txcsum = <0x2>; // 0, 1, 2 for no/partial/full offloading
+      xlnx,txmem = <0x1000>;
+
+      mdio: mdio {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        // reset-gpios = <&tca6416a 6 GPIO_ACTIVE_LOW>;
+        // reset-delay-us = <2>;
+        // PCS/PMA PHY
+        xilinx_phy: ethernet-phy@0 {
+          #phy-cells = <1>;
+          device_type = "ethernet-phy";
+          reg = <0>;
+        };
+        // External PHY
+        dp83867_0: ethernet-phy@3 {
+          compatible = "ethernet-phy-ieee802.3-c22";
+          reg = <3>;
+          #phy-cells = <1>;
+          device_type = "ethernet-phy";
+          ti,sgmii-ref-clock-output-enable;
+          ti,dp83867-rxctrl-strap-quirk;
+        };
+      };
     };
   };
 };
