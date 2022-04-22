@@ -198,7 +198,6 @@ axi_lite_xbar #(
   axi_a48_d64_i1_u5_resp_t soc_to_quad_internal_ser_rsp;
 
   axi_id_serialize #(
-    .AtopSupport (1),
     .AxiSlvPortIdWidth (8),
     .AxiSlvPortMaxTxns (4),
     .AxiMstPortIdWidth (1),
@@ -273,7 +272,6 @@ axi_lite_xbar #(
   axi_a48_d64_i1_u5_resp_t soc_internal_serialize_rsp;
 
   axi_id_serialize #(
-    .AtopSupport (1),
     .AxiSlvPortIdWidth (4),
     .AxiSlvPortMaxTxns (4),
     .AxiMstPortIdWidth (1),
