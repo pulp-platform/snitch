@@ -1119,7 +1119,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
          end 
       end 
-       P_LW_IRPOST: begin // Xpulpimg: p.lw
+      P_LW_IRPOST: begin // Xpulpimg: p.lw
          if (Xipu) begin
             write_rd = 1'b0;
             uses_rd = 1'b1;
@@ -2510,6 +2510,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       // FP Sequencer
+      /*
       FREP_O,
       FREP_I: begin
         if (FP_EN) begin
@@ -2520,6 +2521,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      */
       // Floating-Point Load/Store
       // Single Precision Floating-Point
       FLW: begin

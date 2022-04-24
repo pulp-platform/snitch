@@ -31,14 +31,7 @@ VLOG_FLAGS 	  += -suppress 2583
 VLOG_FLAGS 	  += -suppress 13314
 VLOG_FLAGS 	  += ${QUESTA_64BIT}
 
-app_path 		?= $(ROOT)/sw/riscv-tests/isa
-buildpath 	?= build
-resultpath 	?= result
-$(buildpath):
-	mkdir -p $(buildpath)
-$(resultpath):
-	mkdir -p $(resultpath)
-TESTS_DIR ?= $(ROOT)/sw/riscv-tests/isa
+
 #######
 # RTL #
 #######
@@ -137,19 +130,40 @@ clean-sw:
 ############################
 # Unit tests simulation    #
 ############################
+SHELL = /usr/bin/env bash
+resultpath 	?= result
 
-test_bin := ../../../sw/riscv-tests/isa
-sim_test: $(test)
+test_dir := $(abspath /scratch/msc22f9/snitch/sw/riscv-tests/isa)
+app_path ?= $(abspath /scratch/msc22f9/snitch/sw/bin)
+include $(test_dir)/snitch_isa.mk
+test_result_dir_vsim := $(resultpath)/test_result_vsim
+
+tests_vsim := $(addsuffix .out,$(addprefix $(test_result_dir_vsim)/,$(rtl_mempool_tests)))
+
+simc_test: $(tests_vsim)
+
+$(tests_vsim): $(test_result_dir_vsim)/%.out : $(app_path)/%
+	mkdir -p $(test_result_dir_vsim)
+	echo "$< > logs/.rtlbinary" 
+	vsim -64 +permissive -work /scratch/msc22f9/snitch/hw/system/snitch_cluster//work-vsim -c -ldflags "-Wl,-rpath,/scratch/msc22f9/snitch/hw/system/snitch_cluster/work/lib -L/scratch/msc22f9/snitch/hw/system/snitch_cluster/work/lib -lfesvr -lutil" \
+	-t 1ps -voptargs=+acc tb_bin +permissive-off ++$< -do "log -r/*; run -a" | tee >$@
+
 test:
-	echo "${test_bin}/rv32uxpulpimg-p-p_abs > logs/.rtlbinary"
-	vsim -64 +permissive -work /scratch/msc22f9/snitch/hw/system/snitch_cluster//work-vsim -c -ldflags "-Wl,-rpath,/scratch/msc22f9/snitch/hw/system/snitch_cluster/work/lib -L/scratch/msc22f9/snitch/hw/system/snitch_cluster/work/lib -lfesvr -lutil" -t 1ps -voptargs=+acc tb_bin +permissive-off ++${test_bin}/rv32uxpulpimg-p-p_abs -do "log -r /*; run -a"
-	echo "${test_bin}/rv32uxpulpimg-p-p_abs > logs/.rtlbinary"
+	echo "${app_path}/rv32uxpulpimg-p_abs > logs/.rtlbinary"
+	vsim -64 +permissive -work /scratch/msc22f9/snitch/hw/system/snitch_cluster//work-vsim -c -ldflags "-Wl,-rpath,/scratch/msc22f9/snitch/hw/system/snitch_cluster/work/lib -L/scratch/msc22f9/snitch/hw/system/snitch_cluster/work/lib -lfesvr -lutil" \
+	-t 1ps -voptargs=+acc tb_bin +permissive-off ++${app_path}/rv32uxpulpimg-p_abs -do "log -r /*; run -a"
+
 
 #########
 # Phony #
 #########
 clean:
 	rm -rf ${VLT_BUILDDIR} Bender.lock .bender/
-	# work/
+	work/
+
+clean_test:
+	rm -rf result
+	rm -rf simc_test
+	rm -rf simc_test.gui
 
 .PHONY: clean vlt.build vsim.build all
