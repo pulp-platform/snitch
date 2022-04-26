@@ -1338,6 +1338,7 @@ class AxiXbar(Xbar):
                  no_loopback=False,
                  atop_support=True,
                  latency_mode=None,
+                 interleaved_ena=False,
                  **kwargs):
         super().__init__(**kwargs)
         self.aw = aw
@@ -1351,6 +1352,7 @@ class AxiXbar(Xbar):
         self.symbolic_addrmap = list()
         self.symbolic_addrmap_multi = list()
         self.atop_support = atop_support
+        self.interleaved_ena = interleaved_ena
         self.addrmap = list()
         self.connections = dict()
         self.latency_mode = latency_mode or "axi_pkg::CUT_ALL_PORTS"
@@ -1546,7 +1548,10 @@ class AxiXbar(Xbar):
             self.__dict__["out_" + name] = bus
 
         # Emit the crossbar instance itself.
-        code = "axi_xbar #(\n"
+        if not self.interleaved_ena:
+            code = "axi_xbar #(\n"
+        else:
+            code = "axi_interleaved_xbar #(\n"
         code += "  .Cfg           ( {cfg_name} ),\n".format(
             cfg_name=self.cfg_name)
         code += "  .Connectivity  ( {} ), \n".format(self.connectivity())
@@ -1585,6 +1590,9 @@ class AxiXbar(Xbar):
             name=self.name)
         code += "  .addr_map_i       ( {addrmap_name} ),\n".format(
             addrmap_name=addrmap_name)
+        if self.interleaved_ena:
+            code += "  .interleaved_mode_ena_i ( {name}_interleaved_mode_ena ),\n".format(
+                name=self.name)
         code += "  .en_default_mst_port_i ( '1 ),\n"
         code += "  .default_mst_port_i    ( '0 )\n"
         code += ");\n"

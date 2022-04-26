@@ -153,6 +153,46 @@ module ${name}_top
 
   ${module}
 
+  //////////////////////////
+  //   HBM XBAR CFG       //
+  //////////////////////////
+
+  ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.req_type()} reg_hbm_xbar_cfg_req;
+  ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.rsp_type()} reg_hbm_xbar_cfg_rsp;
+
+  occamy_hbm_xbar_reg_pkg::occamy_hbm_xbar_reg2hw_t hbm_xbar_reg2hw;
+
+  reg_cdc #(
+    .req_t  ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.req_type()} ),
+    .rsp_t  ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.rsp_type()} )
+  ) i_reg_cdc_hbm_xbar_cfg (
+    .src_clk_i  ( clk_periph_i                                          ),
+    .src_rst_ni ( rst_periph_ni                                         ),
+    .src_req_i  ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.req_name()} ),
+    .src_rsp_o  ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.rsp_name()} ),
+
+    .dst_clk_i  ( clk_i                 ),
+    .dst_rst_ni ( rst_ni                ),
+    .dst_req_o  ( reg_hbm_xbar_cfg_req  ),
+    .dst_rsp_i  ( reg_hbm_xbar_cfg_rsp  )
+  );
+
+  occamy_hbm_xbar_reg_top #(
+    .reg_req_t ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.req_type()}  ),
+    .reg_rsp_t ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.rsp_type()}  )
+  ) i_occamy_hbm_xbar_reg_top (
+    .clk_i     ( clk_i                ),
+    .rst_ni    ( rst_ni               ),
+    .reg_req_i ( reg_hbm_xbar_cfg_req ),
+    .reg_rsp_o ( reg_hbm_xbar_cfg_rsp ),
+    .reg2hw    ( hbm_xbar_reg2hw      ),
+    `ifndef SYNTHESIS
+    .devmode_i ( 1'b1 )
+    `else
+    .devmode_i ( 1'b0 )
+    `endif
+  );
+
   ///////////////////////////////
   //   Synchronous top level   //
   ///////////////////////////////
@@ -204,7 +244,8 @@ module ${name}_top
     .msip_i ( msip ),
     .eip_i ( eip ),
     .debug_req_i ( debug_req ),
-    .sram_cfgs_i
+    .sram_cfgs_i,
+    .hbm_xbar_interleaved_mode_ena_i (hbm_xbar_reg2hw.interleaved_ena.q )
   );
 
   // Connect AXI-lite master

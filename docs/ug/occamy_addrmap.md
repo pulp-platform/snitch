@@ -20,7 +20,8 @@ This is the current address map of occamy. Note that the Quadrants address map h
 | I2C              |   4.0 KB |  used  |      0x0200\_4000 |      0x0200\_4fff |
 | CHIP\_CTRL       |   4.0 KB |  used  |      0x0200\_5000 |      0x0200\_5fff |
 | TIMER            |   4.0 KB |  used  |      0x0200\_6000 |      0x0200\_6fff |
-| -                |  16.0 MB |  free  |      0x0200\_7000 |      0x02ff\_ffff |
+| HBM\_XBAR\_CFG   |   4.0 KB |  used  |      0x0200\_7000 |      0x0200\_7fff |
+| -                |  16.0 MB |  free  |      0x0200\_8000 |      0x02ff\_ffff |
 | SPIM             | 128.0 KB |  used  |      0x0300\_0000 |      0x0301\_ffff |
 | -                |  15.9 MB |  free  |      0x0302\_0000 |      0x03ff\_ffff |
 | CLINT            |   1.0 MB |  used  |      0x0400\_0000 |      0x040f\_ffff |

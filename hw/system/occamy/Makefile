@@ -104,6 +104,7 @@ endef
 
 update-socreg:
 	$(call update_ctrl_regs,SOCREGS,src/occamy_soc_ctrl,occamy_soc_reg.hjson,occamy_soc_peripheral,1)
+	$(call update_ctrl_regs,HBMXBARREGS,src/occamy_hbm_xbar_ctrl,occamy_hbm_xbar_reg.hjson,occamy_hbm_xbar_peripheral,1)
 
 update-quadreg:
 	$(call update_ctrl_regs,QUADREGS,src/occamy_quadrant_s1_ctrl,occamy_quadrant_s1_reg.hjson,occamy_quad_peripheral,1)

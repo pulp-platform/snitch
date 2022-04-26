@@ -78,8 +78,17 @@ module occamy_soc
     input logic [  0:0] debug_req_i,
 
     /// SRAM configuration
-    input sram_cfgs_t sram_cfgs_i
+    input sram_cfgs_t sram_cfgs_i,
+
+    /// HBM XBAR configuration
+    input logic hbm_xbar_interleaved_mode_ena_i
 );
+
+  ///////////////////
+  // HBM XBAR CTRL //
+  ///////////////////
+  logic hbm_xbar_interleaved_mode_ena;
+  assign hbm_xbar_interleaved_mode_ena = hbm_xbar_interleaved_mode_ena_i;
 
   ///////////////
   // Crossbars //
@@ -446,7 +455,7 @@ module occamy_soc
   hbm_xbar_out_req_t  [7:0] hbm_xbar_out_req;
   hbm_xbar_out_resp_t [7:0] hbm_xbar_out_rsp;
 
-  axi_xbar #(
+  axi_interleaved_xbar #(
       .Cfg          (HbmXbarCfg),
       .Connectivity (56'b11111111111111111111111111111111111111111111111111111111),
       .ATOPs        (0),
@@ -465,16 +474,17 @@ module occamy_soc
       .mst_resp_t   (axi_a48_d512_i7_u0_resp_t),
       .rule_t       (xbar_rule_48_t)
   ) i_hbm_xbar (
-      .clk_i                (clk_i),
-      .rst_ni               (rst_ni),
-      .test_i               (test_mode_i),
-      .slv_ports_req_i      (hbm_xbar_in_req),
-      .slv_ports_resp_o     (hbm_xbar_in_rsp),
-      .mst_ports_req_o      (hbm_xbar_out_req),
-      .mst_ports_resp_i     (hbm_xbar_out_rsp),
-      .addr_map_i           (HbmXbarAddrmap),
-      .en_default_mst_port_i('1),
-      .default_mst_port_i   ('0)
+      .clk_i                 (clk_i),
+      .rst_ni                (rst_ni),
+      .test_i                (test_mode_i),
+      .slv_ports_req_i       (hbm_xbar_in_req),
+      .slv_ports_resp_o      (hbm_xbar_in_rsp),
+      .mst_ports_req_o       (hbm_xbar_out_req),
+      .mst_ports_resp_i      (hbm_xbar_out_rsp),
+      .addr_map_i            (HbmXbarAddrmap),
+      .interleaved_mode_ena_i(hbm_xbar_interleaved_mode_ena),
+      .en_default_mst_port_i ('1),
+      .default_mst_port_i    ('0)
   );
 
   /// Address map of the `soc_wide_xbar` crossbar.

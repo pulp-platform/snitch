@@ -190,8 +190,8 @@ module occamy_top
 
   reg_a48_d32_req_t [0:0] soc_regbus_periph_xbar_in_req;
   reg_a48_d32_rsp_t [0:0] soc_regbus_periph_xbar_in_rsp;
-  reg_a48_d32_req_t [16:0] soc_regbus_periph_xbar_out_req;
-  reg_a48_d32_rsp_t [16:0] soc_regbus_periph_xbar_out_rsp;
+  reg_a48_d32_req_t [17:0] soc_regbus_periph_xbar_out_req;
+  reg_a48_d32_rsp_t [17:0] soc_regbus_periph_xbar_out_rsp;
 
   logic [cf_math_pkg::idx_width(
 SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
@@ -214,7 +214,7 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
 
   addr_decode #(
       .NoIndices(SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS),
-      .NoRules(17),
+      .NoRules(18),
       .addr_t(logic [47:0]),
       .rule_t(xbar_rule_48_t)
   ) i_addr_decode_soc_regbus_periph_xbar (
@@ -227,6 +227,46 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .default_idx_i('0)
   );
 
+
+  //////////////////////////
+  //   HBM XBAR CFG       //
+  //////////////////////////
+
+  reg_a48_d32_req_t reg_hbm_xbar_cfg_req;
+  reg_a48_d32_rsp_t reg_hbm_xbar_cfg_rsp;
+
+  occamy_hbm_xbar_reg_pkg::occamy_hbm_xbar_reg2hw_t hbm_xbar_reg2hw;
+
+  reg_cdc #(
+      .req_t(reg_a48_d32_req_t),
+      .rsp_t(reg_a48_d32_rsp_t)
+  ) i_reg_cdc_hbm_xbar_cfg (
+      .src_clk_i (clk_periph_i),
+      .src_rst_ni(rst_periph_ni),
+      .src_req_i (soc_regbus_periph_xbar_out_req[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_XBAR_CFG]),
+      .src_rsp_o (soc_regbus_periph_xbar_out_rsp[SOC_REGBUS_PERIPH_XBAR_OUT_HBM_XBAR_CFG]),
+
+      .dst_clk_i (clk_i),
+      .dst_rst_ni(rst_ni),
+      .dst_req_o (reg_hbm_xbar_cfg_req),
+      .dst_rsp_i (reg_hbm_xbar_cfg_rsp)
+  );
+
+  occamy_hbm_xbar_reg_top #(
+      .reg_req_t(reg_a48_d32_req_t),
+      .reg_rsp_t(reg_a48_d32_rsp_t)
+  ) i_occamy_hbm_xbar_reg_top (
+      .clk_i    (clk_i),
+      .rst_ni   (rst_ni),
+      .reg_req_i(reg_hbm_xbar_cfg_req),
+      .reg_rsp_o(reg_hbm_xbar_cfg_rsp),
+      .reg2hw   (hbm_xbar_reg2hw),
+`ifndef SYNTHESIS
+      .devmode_i(1'b1)
+`else
+      .devmode_i(1'b0)
+`endif
+  );
 
   ///////////////////////////////
   //   Synchronous top level   //
@@ -286,7 +326,8 @@ SOC_REGBUS_PERIPH_XBAR_NUM_OUTPUTS
       .msip_i(msip),
       .eip_i(eip),
       .debug_req_i(debug_req),
-      .sram_cfgs_i
+      .sram_cfgs_i,
+      .hbm_xbar_interleaved_mode_ena_i(hbm_xbar_reg2hw.interleaved_ena.q)
   );
 
   // Connect AXI-lite master
