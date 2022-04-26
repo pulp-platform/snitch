@@ -291,7 +291,7 @@ module spi_host_fsm
           if (idle_cntr_q == 4'h0) begin
             prestall_st_d = WaitLead;
           end else begin
-            prestall_st_d = WaitIdle;
+            prestall_st_d = CSBSwitch;
           end
         end
         IdleCSBActive: begin
@@ -483,7 +483,7 @@ module spi_host_fsm
 
   assign wr_en_internal    = byte_starting & cmd_wr_en;
   assign shift_en_internal = bit_shifting;
-  assign rd_en_internal    = byte_ending & cmd_rd_en;
+  assign rd_en_internal    = byte_ending & cmd_rd_en_q;
   assign speed_o           = cmd_speed;
   assign sample_en_d       = byte_starting | shift_en_o;
   assign full_cyc_o        = full_cyc;
