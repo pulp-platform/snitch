@@ -1009,6 +1009,7 @@ impl<'a> InstructionTranslator<'a> {
             riscv::Format::Imm12hiImm12loRs1Rs2(x) => self.emit_imm12hi_imm12lo_rs1_rs2(x),
             riscv::Format::Imm20Rd(x) => self.emit_imm20_rd(x),
             riscv::Format::Jimm20Rd(x) => self.emit_jimm20_rd(x),
+            riscv::Format::Prs3Rs1Rs2(x) => self.emit_prs3_rs1_rs2(x),
             riscv::Format::Luimm5RdRs1Rs2(x) => self.emit_luimm5_rd_rs1_rs2(x),
             riscv::Format::RdRmRs1(x) => self.emit_rd_rm_rs1(x),
             riscv::Format::RdRmRs1Rs2(x) => self.emit_rd_rm_rs1_rs2(x),
@@ -1662,6 +1663,46 @@ impl<'a> InstructionTranslator<'a> {
                     2,
                 );
             }
+            // Xpulppostmod
+            riscv::OpcodeImm12hiImm12loRs1Rs2::PSbIrpost => {
+                self.emit_postmod(
+                    PostmodInsn::S,
+                    PostmodMode::Irpost,
+                    PostmodSize::B,
+                    true,
+                    data.rs1,
+                    rs1,
+                    imm,
+                    data.rs2,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeImm12hiImm12loRs1Rs2::PShIrpost => {
+                self.emit_postmod(
+                    PostmodInsn::S,
+                    PostmodMode::Irpost,
+                    PostmodSize::H,
+                    true,
+                    data.rs1,
+                    rs1,
+                    imm,
+                    data.rs2,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeImm12hiImm12loRs1Rs2::PSwIrpost => {
+                self.emit_postmod(
+                    PostmodInsn::S,
+                    PostmodMode::Irpost,
+                    PostmodSize::W,
+                    true,
+                    data.rs1,
+                    rs1,
+                    imm,
+                    data.rs2,
+                );
+                return Ok(());
+            }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         Ok(())
@@ -1800,8 +1841,7 @@ impl<'a> InstructionTranslator<'a> {
                     LLVMBuildSelect(self.builder, sel2, snd, rs1, NONAME),
                     NONAME,
                 )
-            }
-            // _ => bail!("Unsupported opcode {}", data.op),
+            } // _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
         Ok(())
@@ -2445,6 +2485,7 @@ impl<'a> InstructionTranslator<'a> {
         let imm = LLVMConstInt(LLVMInt32Type(), (imm as i64) as u64, 0);
         let name = format!("{}\0", data.op);
         let name = name.as_ptr() as *const _;
+
         let value = match data.op {
             riscv::OpcodeImm12RdRs1::Addi => LLVMBuildAdd(self.builder, rs1, imm, name),
             riscv::OpcodeImm12RdRs1::Slti => LLVMBuildZExt(
@@ -2526,10 +2567,140 @@ impl<'a> InstructionTranslator<'a> {
                 self.emit_fld(data.rd, LLVMBuildAdd(self.builder, rs1, imm, NONAME));
                 return Ok(());
             }
+            // Xpulppostmod
+            riscv::OpcodeImm12RdRs1::PLbIrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Irpost,
+                    PostmodSize::B,
+                    true,
+                    data.rs1,
+                    rs1,
+                    imm,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeImm12RdRs1::PLbuIrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Irpost,
+                    PostmodSize::B,
+                    false,
+                    data.rs1,
+                    rs1,
+                    imm,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeImm12RdRs1::PLhIrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Irpost,
+                    PostmodSize::H,
+                    true,
+                    data.rs1,
+                    rs1,
+                    imm,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeImm12RdRs1::PLhuIrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Irpost,
+                    PostmodSize::H,
+                    false,
+                    data.rs1,
+                    rs1,
+                    imm,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeImm12RdRs1::PLwIrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Irpost,
+                    PostmodSize::W,
+                    true,
+                    data.rs1,
+                    rs1,
+                    imm,
+                    data.rd,
+                );
+                return Ok(());
+            }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
         Ok(())
+    }
+
+    /// This function creates the correct output for the xpulppostmod extension.
+    /// It takes the the instruction type, mode, size and sext as well as 3 operands
+    /// to construct the the needed LLVM code.
+    unsafe fn emit_postmod(
+        &self,
+        insn: PostmodInsn,
+        mode: PostmodMode,
+        size: PostmodSize,
+        sext: bool,
+        op1: u32,              //L: rs1,        S: rs1
+        op1_ref: LLVMValueRef,
+        op2_ref: LLVMValueRef, //L: rs2, imm,   S: rs3, imm
+        op3: u32,              //L: rd,         S: rs2
+    ) {
+        let c0_32 = LLVMConstInt(LLVMInt32Type(), 0, 1);
+
+        let offset = match size {
+            PostmodSize::W => 2,
+            PostmodSize::H => 1,
+            PostmodSize::B => 0,
+        };
+
+        // let op1_ref = self.read_reg(op1);
+
+        let rr = LLVMBuildAdd(self.builder, op1_ref, op2_ref, NONAME);
+
+        // Determine address and load memory there
+        let (mem, addr) = match mode {
+            PostmodMode::Irpost => {
+                // Increment rs1
+                let inc = LLVMBuildSExt(self.builder, op2_ref, LLVMInt32Type(), NONAME);
+
+                let add = LLVMBuildAdd(self.builder, op1_ref, inc, NONAME);
+                self.write_reg(op1, add);
+
+                // Load from memory
+                (self.emit_load(op1_ref, c0_32, offset, sext), op1_ref)
+            }
+            PostmodMode::Rrpost => {
+                // Increment rs1
+                let add = LLVMBuildAdd(self.builder, op1_ref, op2_ref, NONAME);
+                self.write_reg(op1, add);
+
+                // Load from memory
+                (self.emit_load(op1_ref, c0_32, offset, sext), op1_ref)
+            }
+            PostmodMode::Rr => {
+                // Load from memory
+                (self.emit_load(rr, c0_32, offset, sext), rr)
+            }
+        };
+
+        self.trace_access(TraceAccess::ReadMem, op3_ref);
+        self.trace_access(TraceAccess::ReadMem, mem);
+
+        match insn {
+            PostmodInsn::L => self.write_reg(op3, mem),
+            PostmodInsn::S => {
+                let op3_ref = self.read_reg(op3);
+                self.write_mem(addr, op3_ref, offset)
+            }
+        }
     }
 
     unsafe fn emit_fld(&self, rd: u32, addr: LLVMValueRef) {
@@ -2610,6 +2781,93 @@ impl<'a> InstructionTranslator<'a> {
                 Ok(())
             }
         }
+    }
+
+    unsafe fn emit_prs3_rs1_rs2(&self, data: riscv::FormatPrs3Rs1Rs2) -> Result<()> {
+        let rs1 = self.read_reg(data.rs1);
+        let rs3 = self.read_reg(data.prs3);
+
+        match data.op {
+            // Xpulppostmod
+            riscv::OpcodePrs3Rs1Rs2::PSbRrpost => {
+                self.emit_postmod(
+                    PostmodInsn::S,
+                    PostmodMode::Rrpost,
+                    PostmodSize::B,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs3,
+                    data.rs2,
+                );
+                return Ok(());
+            }
+            riscv::OpcodePrs3Rs1Rs2::PShRrpost => {
+                self.emit_postmod(
+                    PostmodInsn::S,
+                    PostmodMode::Rrpost,
+                    PostmodSize::H,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs3,
+                    data.rs2,
+                );
+                return Ok(());
+            }
+            riscv::OpcodePrs3Rs1Rs2::PSwRrpost => {
+                self.emit_postmod(
+                    PostmodInsn::S,
+                    PostmodMode::Rrpost,
+                    PostmodSize::W,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs3,
+                    data.rs2,
+                );
+                return Ok(());
+            }
+            riscv::OpcodePrs3Rs1Rs2::PSbRr => {
+                self.emit_postmod(
+                    PostmodInsn::S,
+                    PostmodMode::Rr,
+                    PostmodSize::B,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs3,
+                    data.rs2,
+                );
+                return Ok(());
+            }
+            riscv::OpcodePrs3Rs1Rs2::PShRr => {
+                self.emit_postmod(
+                    PostmodInsn::S,
+                    PostmodMode::Rr,
+                    PostmodSize::H,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs3,
+                    data.rs2,
+                );
+                return Ok(());
+            }
+            riscv::OpcodePrs3Rs1Rs2::PSwRr => {
+                self.emit_postmod(
+                    PostmodInsn::S,
+                    PostmodMode::Rr,
+                    PostmodSize::W,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs3,
+                    data.rs2,
+                );
+                return Ok(());
+            }
+        };
     }
 
     unsafe fn emit_rd_rm_rs1(&self, data: riscv::FormatRdRmRs1) -> Result<()> {
@@ -7333,6 +7591,137 @@ impl<'a> InstructionTranslator<'a> {
 
                 LLVMBuildAdd(self.builder, res, rd, NONAME)
             }
+            // Xpulppostmod
+            riscv::OpcodeRdRs1Rs2::PLbRrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rrpost,
+                    PostmodSize::B,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::PLbuRrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rrpost,
+                    PostmodSize::B,
+                    false,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::PLhRrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rrpost,
+                    PostmodSize::H,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::PLhuRrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rrpost,
+                    PostmodSize::H,
+                    false,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::PLwRrpost => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rrpost,
+                    PostmodSize::W,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::PLbRr => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rr,
+                    PostmodSize::B,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::PLbuRr => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rr,
+                    PostmodSize::B,
+                    false,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::PLhRr => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rr,
+                    PostmodSize::H,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::PLhuRr => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rr,
+                    PostmodSize::H,
+                    false,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
+            riscv::OpcodeRdRs1Rs2::PLwRr => {
+                self.emit_postmod(
+                    PostmodInsn::L,
+                    PostmodMode::Rr,
+                    PostmodSize::W,
+                    true,
+                    data.rs1,
+                    rs1,
+                    rs2,
+                    data.rd,
+                );
+                return Ok(());
+            }
             _ => bail!("Unsupported opcode {}", data.op),
         };
         self.write_reg(data.rd, value);
@@ -8799,7 +9188,7 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn write_reg(&self, rd: u32, data: LLVMValueRef) {
         if rd != 0 {
             let ptr = self.reg_ptr(rd);
-            // self.trace_access(TraceAccess::WriteReg(rd as u8), data);
+            self.trace_access(TraceAccess::WriteReg(rd as u8), data);
             LLVMBuildStore(self.builder, data, ptr);
         }
     }
@@ -9911,4 +10300,32 @@ enum SIMDInsn {
 enum Combination {
     Or,
     Add,
+}
+
+/// Sizes of xpulppostmod instructions
+/// W = word, H = halfword, B = byte
+#[derive(Debug, Clone, Copy)]
+enum PostmodSize {
+    W,
+    H,
+    B,
+}
+
+/// Modes of xpulppostmod instructions
+/// Irpost = Register-Immediate instr. with post-increment
+/// Rrpost = Register-Register instr. with post-increment
+/// Rr = Register-Register instr.
+#[derive(Debug, Clone, Copy)]
+enum PostmodMode {
+    Irpost,
+    Rrpost,
+    Rr,
+}
+
+/// Instruction types of xpulppostmod instructions
+/// L = load, S = store
+#[derive(Debug, Clone, Copy)]
+enum PostmodInsn {
+    L,
+    S,
 }
