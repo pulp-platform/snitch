@@ -313,12 +313,20 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   `ifdef SNITCH_ENABLE_PERF
   logic [63:0] cycle_q;
   logic [63:0] instret_q;
+  logic retired_instr_q;
+  logic retired_load_q;
+  logic retired_i_q;
+  logic retired_acc_q;
   `FFAR(cycle_q, cycle_q + 1, '0, clk_i, rst_i)
   `FFLAR(instret_q, instret_q + 1, !stall, '0, clk_i, rst_i)
-  assign core_events_o.retired_instr = !stall;
-  assign core_events_o.retired_load = retire_load;
-  assign core_events_o.retired_i = retire_i;
-  assign core_events_o.retired_acc = retire_acc;
+  `FFAR(retired_instr_q, !stall, '0, clk_i, rst_ni)
+  `FFAR(retired_load_q, retire_load, '0, clk_i, rst_ni)
+  `FFAR(retired_i_q, retire_i, '0, clk_i, rst_ni)
+  `FFAR(retired_acc_q, retire_acc, '0, clk_i, rst_ni)
+  assign core_events_o.retired_instr = retired_instr_q;
+  assign core_events_o.retired_load = retired_load_q;
+  assign core_events_o.retired_i = retired_i_q;
+  assign core_events_o.retired_acc = retired_acc_q;
   `endif
 
   logic [AddrWidth-32-1:0] mseg_q, mseg_d;
