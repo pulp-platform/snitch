@@ -2450,8 +2450,9 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
-    /// Builds mask of n bits starting at position b
-    /// inverse==true will flip bits
+    /// Builds mask of `n` bits starting at bit `b`.
+    ///
+    /// If `inverse` is `true` the bits will flipped to get an inverse mask.
     unsafe fn build_mask(&self, b: u64, n: u32, inverse: bool) -> LLVMValueRef {
         // for n bit mask need number 2^n-1, then shifted to correct position with b
         let m = (2u64.pow(n) - 1) << b;
@@ -2639,9 +2640,20 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
-    /// This function creates the correct output for the xpulppostmod extension.
-    /// It takes the the instruction type, mode, size and sext as well as 3 operands
-    /// to construct the the needed LLVM code.
+    /// Emit the correct LLVM code for the _xpulppostmod_ extension.
+    ///
+    /// All _postmod_ instructions depend on four attributes: instruction `type`, `mode`,
+    /// `size` and if they are sign extended (`sext`).
+    ///
+    /// There are 3 operands which are used differently depending on instruction `type` and
+    /// `mode`:
+    ///
+    /// |         | L        | S        |
+    /// | ------- | -------- | -------- |
+    /// | **op1** | rs1      | rs1      |
+    /// | **op2** | rs2, imm | rs3, imm |
+    /// | **op3** | rd       | rs2      |
+    ///
     unsafe fn emit_postmod(
         &self,
         insn: PostmodInsn,
@@ -2690,9 +2702,6 @@ impl<'a> InstructionTranslator<'a> {
                 (self.emit_load(rr, c0_32, offset, sext), rr)
             }
         };
-
-        self.trace_access(TraceAccess::ReadMem, op3_ref);
-        self.trace_access(TraceAccess::ReadMem, mem);
 
         match insn {
             PostmodInsn::L => self.write_reg(op3, mem),
@@ -7728,8 +7737,15 @@ impl<'a> InstructionTranslator<'a> {
         Ok(())
     }
 
-    /// This function creates the for loop to go over the 2 halfwords or 4 bytes and calls
-    /// simd_mode for the instruction code.
+    /// Emit the correct LLVM code for the _xpulpvect_ extension.
+    ///
+    /// All _postmod_ instructions depend on four attributes: instruction `type`, `mode`,
+    /// `size` and the way they are combined (`comb`).
+    ///
+    /// There are 2 operands. `op1` is always rs1. Depending on the instruction `mode`, `op2`
+    /// can be rs2, and immediate or the constant 0.
+    ///
+    /// This is the outer-most loop and calls `simd_mode()` for the instruction code.
     unsafe fn simd_alu_op(
         &self,
         insn: SIMDInsn,
@@ -7824,7 +7840,12 @@ impl<'a> InstructionTranslator<'a> {
         }
     }
 
-    /// This function extracts all the partial words and hands it to simd_insn() to do the needed calculation on it
+    /// Emit the correct LLVM code for the _xpulpvect_ extension depending on the mode.
+    ///
+    /// Called by `simd_alu_op()`.
+    ///
+    /// Will select the correct partial words and then call `simd_insn()` to execute
+    /// instruction code.
     unsafe fn simd_mode(
         &self,
         is_hw: bool,
@@ -7868,7 +7889,11 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildIntCast2(self.builder, res, LLVMInt32Type(), 0, NONAME)
     }
 
-    /// This function will emit the instruction specific code
+    /// Emit the correct LLVM code for the _xpulpvect_ extension depending on the instruction.
+    ///
+    /// Called by `simd_mode()`.
+    ///
+    /// Will emit the correct code depending on the instruction type.
     unsafe fn simd_insn(
         &self,
         is_hw: bool,
@@ -7994,9 +8019,11 @@ impl<'a> InstructionTranslator<'a> {
         }
     }
 
-    /// Selects n bits of 32bit register reg starting with bit b as lowest bit
-    /// inplace==false will move bits to lowest bits
-    /// returns them as a LLVMInt32Type()
+    /// Selects `n` bits of 32bit register `reg` starting with bit `b` as lowest bit and
+    /// returns them as a LLVMInt32Type().
+    ///
+    /// If `inplace` is `true` it will keep the bits in their original position, else it will move
+    /// bits to lowest bits.
     unsafe fn select_bits(&self, reg: LLVMValueRef, b: u64, n: u32, inplace: bool) -> LLVMValueRef {
         // for n bit mask need number 2^n-1, then shifted to correct position with b
         let m = (2u64.pow(n) - 1) << b;
@@ -8017,8 +8044,8 @@ impl<'a> InstructionTranslator<'a> {
         }
     }
 
-    /// Selects n bits of 32bit register reg starting with bit b as lowest bit and casts it
-    /// into n size LLVMIntType
+    /// Selects `n` bits of 32bit register `reg` starting with bit `b` as lowest bit and casts it
+    /// into `n` size LLVMIntType().
     unsafe fn cast_select_bits(&self, reg: LLVMValueRef, b: u64, n: u32) -> LLVMValueRef {
         let ty = LLVMIntType(n);
         let sel = self.select_bits(reg, b, n, false);
@@ -8026,8 +8053,7 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildIntCast(self.builder, sel, ty, NONAME)
     }
 
-    /// Select bit b of 32bit register reg as lowest bit and
-    /// returns it as a LLVMInt1Type()
+    /// Select bit `b` of 32bit register `reg` as lowest bit and returns it as a LLVMInt1Type().
     unsafe fn select_bit(&self, reg: LLVMValueRef, b: u64) -> LLVMValueRef {
         // for n bit mask need number 2^n-1, then shifted to correct position with b
         let m = 1u64 << b;
@@ -8044,8 +8070,10 @@ impl<'a> InstructionTranslator<'a> {
         LLVMBuildIntCast(self.builder, shift, LLVMInt1Type(), NONAME)
     }
 
-    /// Returns selected half word of reg in lowest bits as a LLVMInt32Type()
-    /// based on runtime input
+    /// Returns selected half word `sel` of register `reg` in lowest bits as a LLVMInt32Type()
+    /// based on runtime input.
+    ///
+    /// If `sel` is 1 then the top half word is selected.
     unsafe fn select_half_word(&self, reg: LLVMValueRef, sel: LLVMValueRef) -> LLVMValueRef {
         // build and mask correct half of word
         let s = LLVMBuildIntCast(self.builder, sel, LLVMInt32Type(), NONAME);
@@ -8074,8 +8102,10 @@ impl<'a> InstructionTranslator<'a> {
         )
     }
 
-    /// Returns selected byte of reg in lowest bits as a LLVMInt32Type()
-    /// based on runtime input
+    /// Returns selected byte \[`sel1`:`sel0`\] of `reg` in lowest bits as a LLVMInt32Type()
+    /// based on runtime input.
+    ///
+    /// \[`sel1`:`sel0`\] index which byte is selected with `11` as highest and `00` as lowest byte.
     unsafe fn select_byte(
         &self,
         reg: LLVMValueRef,
