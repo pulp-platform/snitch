@@ -114,7 +114,7 @@ module spm_1p_adv #(
     );
 
     assign be_d = '1;
-    assign rerror_o = rerror_q | {double_error, single_error | parity_error};
+    assign rerror_o = rerror_q | {double_error & rvalid_q, (single_error | parity_error) & rvalid_q};
 
     // Read-path, decode
     ecc_decode #(
