@@ -4,8 +4,8 @@
 
 ---
 address:
-  # Snitch: cl_peripherals + 0x40
-  barrier_reg: 0x120040
+  # Snitch: cl_peripherals + 0x190
+  barrier_reg: 0x120190
   cluster_base_hartid: 0x40000040
   cluster_id: 0x40000050
   cluster_num: 0x40000048
@@ -19,8 +19,8 @@ address:
   wakeup_reg: 0x40000028
   # Snitch: Bootdata.clint_base
   clint: 0xFFFF0000
-  # Snitch: cl_peripherals + 0x30
-  cl_clint: 0x120030
+  # Snitch: cl_peripherals + 0x180
+  cl_clint: 0x120180
 architecture:
   num_cores: 9
   num_clusters: 1
