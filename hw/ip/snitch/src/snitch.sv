@@ -319,10 +319,10 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic retired_acc_q;
   `FFAR(cycle_q, cycle_q + 1, '0, clk_i, rst_i)
   `FFLAR(instret_q, instret_q + 1, !stall, '0, clk_i, rst_i)
-  `FFAR(retired_instr_q, !stall, '0, clk_i, rst_ni)
-  `FFAR(retired_load_q, retire_load, '0, clk_i, rst_ni)
-  `FFAR(retired_i_q, retire_i, '0, clk_i, rst_ni)
-  `FFAR(retired_acc_q, retire_acc, '0, clk_i, rst_ni)
+  `FFAR(retired_instr_q, !stall, '0, clk_i, rst_i)
+  `FFAR(retired_load_q, retire_load, '0, clk_i, rst_i)
+  `FFAR(retired_i_q, retire_i, '0, clk_i, rst_i)
+  `FFAR(retired_acc_q, retire_acc, '0, clk_i, rst_i)
   assign core_events_o.retired_instr = retired_instr_q;
   assign core_events_o.retired_load = retired_load_q;
   assign core_events_o.retired_i = retired_i_q;
