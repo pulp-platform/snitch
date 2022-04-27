@@ -69,6 +69,8 @@ module spm_1p_adv #(
   spm_data_t  rdata_q,  rdata_d;
   spm_data_t  rdata_sram;
   logic [1:0] rerror_q, rerror_d;
+  logic       dec_active_q, dec_active_d;
+  logic       we_sram_delay_q;
 
   ////////////////////
   // (Optional) ECC //
@@ -114,7 +116,7 @@ module spm_1p_adv #(
     );
 
     assign be_d = '1;
-    assign rerror_o = rerror_q | {double_error & rvalid_q, (single_error | parity_error) & rvalid_q};
+    assign rerror_o = rerror_q | {double_error & dec_active_q, (single_error | parity_error) & dec_active_q};
 
     // Read-path, decode
     ecc_decode #(
@@ -184,8 +186,10 @@ module spm_1p_adv #(
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
       rvalid_sram_q <= 1'b0;
+      we_sram_delay_q <= 1'b0;
     end else begin
       rvalid_sram_q <= req_q;
+      we_sram_delay_q <= we_q;
     end
   end
 
@@ -193,6 +197,7 @@ module spm_1p_adv #(
   assign rerror_d = '0;
 
   assign rvalid_d = rvalid_sram_q;
+  assign dec_active_d = rvalid_sram_q && ~we_sram_delay_q;
 
   /////////////////////////////////////
   // Input/Output Pipeline Registers //
@@ -207,12 +212,14 @@ module spm_1p_adv #(
         addr_q  <= '0;
         wdata_q <= '0;
         be_q    <= '0;
+        dec_active_q <= '0;
       end else begin
         req_q   <= req_d;
         we_q    <= we_d;
         addr_q  <= addr_d;
         wdata_q <= wdata_d;
         be_q    <= be_d;
+        dec_active_q <= dec_active_d;
       end
     end
   end else begin : gen_dirconnect_input
@@ -221,6 +228,7 @@ module spm_1p_adv #(
     assign addr_q  = addr_d;
     assign wdata_q = wdata_d;
     assign be_q = be_d;
+    assign dec_active_q = dec_active_d;
   end
 
   if (EnableOutputPipeline) begin : gen_regslice_output
