@@ -34,7 +34,9 @@ module snitch_cluster
   /// AXI: dma id with in *currently not available*
   parameter int unsigned WideIdWidthIn      = 2,
   /// AXI: user width.
-  parameter int unsigned UserWidth          = 1,
+  parameter int unsigned NarrowUserWidth    = 1,
+  /// AXI: dma user width.
+  parameter int unsigned WideUserWidth      = 1,
   /// Address from which to fetch the first instructions.
   parameter logic [31:0] BootAddr           = 32'h0,
   /// Number of Hives. Each Hive can hold 1-many cores.
@@ -324,7 +326,8 @@ module snitch_cluster
   typedef logic [NarrowIdWidthOut-1:0]  id_slv_t;
   typedef logic [WideIdWidthIn-1:0]     id_dma_mst_t;
   typedef logic [WideIdWidthOut-1:0]    id_dma_slv_t;
-  typedef logic [UserWidth-1:0]         user_t;
+  typedef logic [NarrowUserWidth-1:0]   user_t;
+  typedef logic [WideUserWidth-1:0]     user_dma_t;
 
   typedef logic [TCDMMemAddrWidth-1:0]  tcdm_mem_addr_t;
   typedef logic [TCDMAddrWidth-1:0]     tcdm_addr_t;
@@ -337,8 +340,8 @@ module snitch_cluster
   // Regbus peripherals.
   `AXI_TYPEDEF_ALL(axi_mst, addr_t, id_mst_t, data_t, strb_t, user_t)
   `AXI_TYPEDEF_ALL(axi_slv, addr_t, id_slv_t, data_t, strb_t, user_t)
-  `AXI_TYPEDEF_ALL(axi_mst_dma, addr_t, id_dma_mst_t, data_dma_t, strb_dma_t, user_t)
-  `AXI_TYPEDEF_ALL(axi_slv_dma, addr_t, id_dma_slv_t, data_dma_t, strb_dma_t, user_t)
+  `AXI_TYPEDEF_ALL(axi_mst_dma, addr_t, id_dma_mst_t, data_dma_t, strb_dma_t, user_dma_t)
+  `AXI_TYPEDEF_ALL(axi_slv_dma, addr_t, id_dma_slv_t, data_dma_t, strb_dma_t, user_dma_t)
 
   `REQRSP_TYPEDEF_ALL(reqrsp, addr_t, data_t, strb_t)
 
@@ -1138,7 +1141,7 @@ module snitch_cluster
     .AXI_MAX_READ_TXNS (1),
     .DECOUPLE_W (0),
     .ID_WIDTH (NarrowIdWidthOut),
-    .USER_WIDTH (UserWidth),
+    .USER_WIDTH (NarrowUserWidth),
     .axi_req_t (axi_slv_req_t),
     .axi_rsp_t (axi_slv_resp_t),
     .reg_req_t (reg_req_t),

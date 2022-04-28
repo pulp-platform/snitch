@@ -61,7 +61,8 @@ package ${cfg['pkg_name']};
   localparam int unsigned WideIdWidthIn = ${cfg['dma_id_width_in']};
   localparam int unsigned WideIdWidthOut = $clog2(NrDmaMasters) + WideIdWidthIn;
 
-  localparam int unsigned UserWidth = 1;
+  localparam int unsigned NarrowUserWidth = ${cfg['user_width']};
+  localparam int unsigned WideUserWidth = ${cfg['dma_user_width']};
 
   localparam int unsigned ICacheLineWidth [NrHives] = '{${icache_cfg('cacheline')}};
   localparam int unsigned ICacheLineCount [NrHives] = '{${icache_cfg('depth')}};
@@ -90,12 +91,13 @@ package ${cfg['pkg_name']};
   typedef logic [NarrowIdWidthOut-1:0]  narrow_out_id_t;
   typedef logic [WideIdWidthIn-1:0]     wide_in_id_t;
   typedef logic [WideIdWidthOut-1:0]    wide_out_id_t;
-  typedef logic [UserWidth-1:0]         user_t;
+  typedef logic [NarrowUserWidth-1:0]   user_t;
+  typedef logic [WideUserWidth-1:0]     user_dma_t;
 
   `AXI_TYPEDEF_ALL(narrow_in, addr_t, narrow_in_id_t, data_t, strb_t, user_t)
   `AXI_TYPEDEF_ALL(narrow_out, addr_t, narrow_out_id_t, data_t, strb_t, user_t)
-  `AXI_TYPEDEF_ALL(wide_in, addr_t, wide_in_id_t, data_dma_t, strb_dma_t, user_t)
-  `AXI_TYPEDEF_ALL(wide_out, addr_t, wide_out_id_t, data_dma_t, strb_dma_t, user_t)
+  `AXI_TYPEDEF_ALL(wide_in, addr_t, wide_in_id_t, data_dma_t, strb_dma_t, user_dma_t)
+  `AXI_TYPEDEF_ALL(wide_out, addr_t, wide_out_id_t, data_dma_t, strb_dma_t, user_dma_t)
 
   function automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] get_cached_regions();
     automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] cached_regions;
@@ -207,7 +209,8 @@ module ${cfg['name']}_wrapper (
     .WideDataWidth (${cfg['dma_data_width']}),
     .NarrowIdWidthIn (${cfg['pkg_name']}::NarrowIdWidthIn),
     .WideIdWidthIn (${cfg['pkg_name']}::WideIdWidthIn),
-    .UserWidth (${cfg['pkg_name']}::UserWidth),
+    .NarrowUserWidth (${cfg['pkg_name']}::NarrowUserWidth),
+    .WideUserWidth (${cfg['pkg_name']}::WideUserWidth),
     .BootAddr (${to_sv_hex(cfg['boot_addr'], 32)}),
     .narrow_in_req_t (${cfg['pkg_name']}::narrow_in_req_t),
     .narrow_in_resp_t (${cfg['pkg_name']}::narrow_in_resp_t),
