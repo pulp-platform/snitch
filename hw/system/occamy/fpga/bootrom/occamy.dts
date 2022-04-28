@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
+
 // TODO(niwis) auto generate
 /dts-v1/;
 / {
@@ -57,7 +58,6 @@
     ranges;
     debug@0 {
       compatible = "riscv,debug-013";
-      interrupts-extended = <&CPU0_intc 65535>;
       reg-names = "control";
       reg = <0x0 0x0 0x0 0x1000>;
     };
@@ -93,9 +93,9 @@
       nor@0 {
         #address-cells = <0x1>;
         #size-cells = <0x1>;
-        compatible = "micron,m25p80";
+        compatible = "micron,mt25qu02g";
         reg = <0x0 0x0>;
-        spi-max-frequency = <25000000>;
+        spi-max-frequency = <50000000>;
         spi-rx-bus-width = <0x4>;
         spi-tx-bus-width = <0x4>;
         m25p,fast-read;
