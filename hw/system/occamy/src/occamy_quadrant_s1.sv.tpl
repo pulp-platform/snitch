@@ -11,7 +11,9 @@
   cuts_narrx_with_cluster = 0
   cuts_widex_with_cluster = 0
   cuts_narrx_with_ctrl = 1
-  cuts_widexroc_with_wideout = 1
+  cuts_widexpost_with_wideiwc_out = 0
+  cuts_wideisolate_with_wideiwc_in = 0
+  cuts_wideiwc_with_wideout = 1
   nr_clusters = int(cfg["s1_quadrant"]["nr_clusters"])
   wide_trans = int(cfg["s1_quadrant"]["wide_trans"])
   narrow_trans = int(cfg["s1_quadrant"]["narrow_trans"])
@@ -143,11 +145,13 @@ module ${name}_quadrant_s1
         sram_cfg_tag_i="sram_cfg_i.rocache_tag")
     else:
       wide_cluster_out_ro_cache = wide_cluster_out_tlb
+    #// Add another multicut as configured before IWC
+    wide_cluster_out_ro_cache = wide_cluster_out_ro_cache.cut(context, cuts_widexpost_with_wideiwc_out)
     #// Change ID width, isolate, and cut
     wide_cluster_out_cut = wide_cluster_out_ro_cache \
       .change_iw(context, wide_target_iw, "wide_cluster_out_iwc", max_txns_per_id=wide_trans) \
       .isolate(context, "isolate[3]", "wide_cluster_out_isolate", isolated="isolated[3]", atop_support=False, to_clk="clk_i", to_rst="rst_ni", use_to_clk_rst=True, num_pending=wide_trans) \
-      .cut(context, cuts_widexroc_with_wideout)
+      .cut(context, cuts_wideiwc_with_wideout)
     #// Assert correct outgoing ID widths
     assert quadrant_pre_xbars[0].in_quadrant.iw == wide_cluster_out_cut.iw, "S1 Quadrant and SoC IW mismatches."
   %>
@@ -162,8 +166,9 @@ module ${name}_quadrant_s1
     quadrant_inter_xbar.out_quadrant_0 \
       .copy(name="wide_cluster_in_iwc") \
       .declare(context) \
-      .cut(context, cuts_widexroc_with_wideout) \
+      .cut(context, cuts_wideiwc_with_wideout) \
       .isolate(context, "isolate[2]", "wide_cluster_in_isolate", isolated="isolated[2]", terminated=True, atop_support=False, to_clk="clk_quadrant", to_rst="rst_quadrant_n", num_pending=wide_trans) \
+      .cut(context, cuts_wideisolate_with_wideiwc_in) \
       .change_iw(context, wide_xbar_quadrant_s1.in_top.iw, "wide_cluster_in_iwc", to=wide_xbar_quadrant_s1.in_top)
   %>
   assign wide_cluster_in_iwc_req = quadrant_wide_in_req_i;
