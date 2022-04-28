@@ -973,11 +973,13 @@ module snitch_cluster
     .slv_req_i (ptw_req),
     .slv_rsp_o (ptw_rsp),
     .mst_req_o (ptw_to_axi_req),
-    .mst_rsp_i (ptw_to_axi_rsp)
+    .mst_rsp_i (ptw_to_axi_rsp),
+    .idx_o (/*not connected*/)
   );
 
   reqrsp_to_axi #(
     .DataWidth (NarrowDataWidth),
+    .UserWidth (NarrowUserWidth),
     .reqrsp_req_t (reqrsp_req_t),
     .reqrsp_rsp_t (reqrsp_rsp_t),
     .axi_req_t (axi_mst_req_t),
@@ -985,6 +987,7 @@ module snitch_cluster
   ) i_reqrsp_to_axi_ptw (
     .clk_i,
     .rst_ni,
+    .user_i ('0),
     .reqrsp_req_i (ptw_to_axi_req),
     .reqrsp_rsp_o (ptw_to_axi_rsp),
     .axi_req_o (narrow_axi_mst_req[PTW]),
@@ -1011,6 +1014,9 @@ module snitch_cluster
 
   reqrsp_req_t core_to_axi_req;
   reqrsp_rsp_t core_to_axi_rsp;
+  logic [$clog2(NrCores)-1:0] core_req_idx;
+  user_t core_user;
+  assign core_user = hart_base_id_i + core_req_idx + 1'b1;
 
   reqrsp_mux #(
     .NrPorts (NrCores),
@@ -1025,11 +1031,13 @@ module snitch_cluster
     .slv_req_i (filtered_core_req),
     .slv_rsp_o (filtered_core_rsp),
     .mst_req_o (core_to_axi_req),
-    .mst_rsp_i (core_to_axi_rsp)
+    .mst_rsp_i (core_to_axi_rsp),
+    .idx_o (core_req_idx)
   );
 
   reqrsp_to_axi #(
     .DataWidth (NarrowDataWidth),
+    .UserWidth (NarrowUserWidth),
     .reqrsp_req_t (reqrsp_req_t),
     .reqrsp_rsp_t (reqrsp_rsp_t),
     .axi_req_t (axi_mst_req_t),
@@ -1037,6 +1045,7 @@ module snitch_cluster
   ) i_reqrsp_to_axi_core (
     .clk_i,
     .rst_ni,
+    .user_i (core_user),
     .reqrsp_req_i (core_to_axi_req),
     .reqrsp_rsp_o (core_to_axi_rsp),
     .axi_req_o (narrow_axi_mst_req[CoreReq]),

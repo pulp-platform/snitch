@@ -22,14 +22,18 @@ module reqrsp_mux #(
     parameter int unsigned               RespDepth    = 8,
     /// Cut timing paths on the request path. Incurs a cycle additional latency.
     /// Registers are inserted at the slave side.
-    parameter bit          [NrPorts-1:0] RegisterReq  = '0
+    parameter bit          [NrPorts-1:0] RegisterReq  = '0,
+    /// Dependent parameter, do **not** overwrite.
+    /// Width of the arbitrated index.
+    parameter int unsigned IdxWidth   = (NrPorts > 32'd1) ? unsigned'($clog2(NrPorts)) : 32'd1
 ) (
-    input  logic               clk_i,
-    input  logic               rst_ni,
-    input  req_t [NrPorts-1:0] slv_req_i,
-    output rsp_t [NrPorts-1:0] slv_rsp_o,
-    output req_t               mst_req_o,
-    input  rsp_t               mst_rsp_i
+    input  logic                clk_i,
+    input  logic                rst_ni,
+    input  req_t [NrPorts-1:0]  slv_req_i,
+    output rsp_t [NrPorts-1:0]  slv_rsp_o,
+    output req_t                mst_req_o,
+    input  rsp_t                mst_rsp_i,
+    output logic [IdxWidth-1:0] idx_o
 );
 
   typedef logic [AddrWidth-1:0] addr_t;
@@ -93,7 +97,7 @@ module reqrsp_mux #(
     .gnt_i (mst_rsp_i.q_ready),
     .req_o (mst_req_o.q_valid),
     .data_o (mst_req_o.q),
-    .idx_o ()
+    .idx_o (idx_o)
   );
 
   // De-generate version does not need a fifo. We always know where to route
@@ -164,7 +168,8 @@ module reqrsp_mux_intf #(
     input  logic clk_i,
     input  logic rst_ni,
     REQRSP_BUS   slv [NrPorts],
-    REQRSP_BUS   mst
+    REQRSP_BUS   mst,
+    output logic [$clog2(NrPorts)-1:0] idx_o
 );
 
   typedef logic [AddrWidth-1:0] addr_t;
@@ -193,7 +198,8 @@ module reqrsp_mux_intf #(
     .slv_req_i (reqrsp_slv_req),
     .slv_rsp_o (reqrsp_slv_rsp),
     .mst_req_o (reqrsp_mst_req),
-    .mst_rsp_i (reqrsp_mst_rsp)
+    .mst_rsp_i (reqrsp_mst_rsp),
+    .idx_o (idx_o)
   );
 
   for (genvar i = 0; i < NrPorts; i++) begin : gen_interface_assignment
