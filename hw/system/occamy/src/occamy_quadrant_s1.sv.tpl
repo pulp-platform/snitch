@@ -11,8 +11,8 @@
   cuts_narrx_with_cluster = 0
   cuts_widex_with_cluster = 0
   cuts_narrx_with_ctrl = 1
-  cuts_widexpost_with_wideiwc_out = 0
-  cuts_wideisolate_with_wideiwc_in = 0
+  cuts_widexpost_with_wideiwc_out = 1
+  cuts_wideisolate_with_wideiwc_in = 1
   cuts_wideiwc_with_wideout = 1
   nr_clusters = int(cfg["s1_quadrant"]["nr_clusters"])
   wide_trans = int(cfg["s1_quadrant"]["wide_trans"])

@@ -381,6 +381,26 @@ module occamy_quadrant_s1
       .sram_cfg_tag_i(sram_cfg_i.rocache_tag)
   );
 
+  axi_a48_d512_i7_u0_req_t  snitch_ro_cache_cut_req;
+  axi_a48_d512_i7_u0_resp_t snitch_ro_cache_cut_rsp;
+
+  axi_multicut #(
+      .NoCuts(1),
+      .aw_chan_t(axi_a48_d512_i7_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d512_i7_u0_w_chan_t),
+      .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
+  ) i_snitch_ro_cache_cut (
+      .clk_i(clk_quadrant),
+      .rst_ni(rst_quadrant_n),
+      .slv_req_i(snitch_ro_cache_req),
+      .slv_resp_o(snitch_ro_cache_rsp),
+      .mst_req_o(snitch_ro_cache_cut_req),
+      .mst_resp_i(snitch_ro_cache_cut_rsp)
+  );
   axi_a48_d512_i4_u0_req_t  wide_cluster_out_iwc_req;
   axi_a48_d512_i4_u0_resp_t wide_cluster_out_iwc_rsp;
 
@@ -396,8 +416,8 @@ module occamy_quadrant_s1
   ) i_wide_cluster_out_iwc (
       .clk_i(clk_quadrant),
       .rst_ni(rst_quadrant_n),
-      .slv_req_i(snitch_ro_cache_req),
-      .slv_resp_o(snitch_ro_cache_rsp),
+      .slv_req_i(snitch_ro_cache_cut_req),
+      .slv_resp_o(snitch_ro_cache_cut_rsp),
       .mst_req_o(wide_cluster_out_iwc_req),
       .mst_resp_i(wide_cluster_out_iwc_rsp)
   );
@@ -500,6 +520,26 @@ module occamy_quadrant_s1
       .isolated_o(isolated[2])
   );
 
+  axi_a48_d512_i7_u0_req_t  wide_cluster_in_isolate_cut_req;
+  axi_a48_d512_i7_u0_resp_t wide_cluster_in_isolate_cut_rsp;
+
+  axi_multicut #(
+      .NoCuts(1),
+      .aw_chan_t(axi_a48_d512_i7_u0_aw_chan_t),
+      .w_chan_t(axi_a48_d512_i7_u0_w_chan_t),
+      .b_chan_t(axi_a48_d512_i7_u0_b_chan_t),
+      .ar_chan_t(axi_a48_d512_i7_u0_ar_chan_t),
+      .r_chan_t(axi_a48_d512_i7_u0_r_chan_t),
+      .axi_req_t(axi_a48_d512_i7_u0_req_t),
+      .axi_resp_t(axi_a48_d512_i7_u0_resp_t)
+  ) i_wide_cluster_in_isolate_cut (
+      .clk_i(clk_quadrant),
+      .rst_ni(rst_quadrant_n),
+      .slv_req_i(wide_cluster_in_isolate_req),
+      .slv_resp_o(wide_cluster_in_isolate_rsp),
+      .mst_req_o(wide_cluster_in_isolate_cut_req),
+      .mst_resp_i(wide_cluster_in_isolate_cut_rsp)
+  );
   axi_id_remap #(
       .AxiSlvPortIdWidth(7),
       .AxiSlvPortMaxUniqIds(8),
@@ -512,8 +552,8 @@ module occamy_quadrant_s1
   ) i_wide_cluster_in_iwc (
       .clk_i(clk_quadrant),
       .rst_ni(rst_quadrant_n),
-      .slv_req_i(wide_cluster_in_isolate_req),
-      .slv_resp_o(wide_cluster_in_isolate_rsp),
+      .slv_req_i(wide_cluster_in_isolate_cut_req),
+      .slv_resp_o(wide_cluster_in_isolate_cut_rsp),
       .mst_req_o(wide_xbar_quadrant_s1_in_req[WIDE_XBAR_QUADRANT_S1_IN_TOP]),
       .mst_resp_i(wide_xbar_quadrant_s1_in_rsp[WIDE_XBAR_QUADRANT_S1_IN_TOP])
   );
