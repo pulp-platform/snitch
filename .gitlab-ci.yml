@@ -4,11 +4,11 @@
 
 variables:
   GIT_STRATEGY: clone
+  PATH: '/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin'
   VIVADO: vitis-2020.2 vivado
   PYTHON: $CI_PROJECT_DIR/install/python/bin/python3.9
   VERIBLE_FMT: $CI_PROJECT_DIR/.local/bin/verible-verilog-format
   BENDER: $CI_PROJECT_DIR/.local/bin/bender
-  ARIANE_SDK: $CI_PROJECT_DIR/tc-hrv-obare
   RUST_LOG: 'memora=debug'
 
 before_script:
@@ -36,15 +36,17 @@ stages:
 - package
 - deploy
 
-tc-hrv-obare:
+br-hrv-vcu128:
   stage: build1
   needs: []
   script:
-  - |
-    if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup tc-hrv-obare; then
-      $CI_PROJECT_DIR/.gitlab-ci.d/build-tc-hrv-obare.sh $CI_PROJECT_DIR
-      $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert tc-hrv-obare
-    fi
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-vcu128; then
+        exit 0
+      fi
+    - make -C hw/system/occamy/fpga br-hrv-vcu128
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-vcu128
+
 
 # Packages and elaborates the vivado IPs where occamy is part of. This ensures
 # that the occamy xilinx IP can be elaborated
@@ -61,7 +63,6 @@ vivado_ip:
 # The occamy on vcu128 design
 occamy_vcu128:
   stage: build2
-  needs: [tc-hrv-obare]
   rules:
   - changes:
     - .gitlab-ci.d/occamy_cfg_fpga.sh
@@ -74,6 +75,7 @@ occamy_vcu128:
     - util/Makefrag
     - util/reggen
     - util/regtool.py
+  needs: []
   script:
   # Make Occamy system smaller to fit on FPGA, Generate IP, Build bootrom, Synthesize and Implement design, Cache
   - |
