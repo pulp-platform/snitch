@@ -645,6 +645,43 @@ class AxiBus(Bus):
             ) + "\n")
         return bus
 
+    def change_uw(self, context, target_uw, name, inst_name=None, to=None):
+        if self.uw == target_uw:
+            if to is None:
+                return self
+
+        # Generate the new bus.
+        if to is None:
+            bus = copy(self)
+            bus.declared = False
+            bus.uw = target_uw
+            bus.type_prefix = bus.emit_struct()
+            bus.name = name
+            bus.name_suffix = None
+        else:
+            bus = to
+
+        # Check bus properties.
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+        assert (bus.iw == self.iw)
+        assert (bus.uw == target_uw)
+
+        # Handle to-assignment
+        if self.uw == target_uw:
+            to.assign(context, self)
+            return to
+
+        # Emit the remapper instance.
+        bus.declare(context)
+        assgn = "// Change UW\n"
+        assgn += "`AXI_ASSIGN_REQ_STRUCT({lhs},{rhs})\n".format(lhs=bus.req_name(), rhs=self.req_name())
+        assgn += "`AXI_ASSIGN_RESP_STRUCT({lhs},{rhs})\n".format(lhs=self.rsp_name(), rhs=bus.rsp_name())
+        context.write(assgn)
+        return bus
+
     def cut(self, context, nr_cuts=1, name=None, inst_name=None, to=None):
         if nr_cuts == 0:
             if to is None:
