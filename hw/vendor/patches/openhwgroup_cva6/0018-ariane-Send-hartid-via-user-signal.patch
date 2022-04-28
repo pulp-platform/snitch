@@ -1,0 +1,189 @@
+From 010fa40fdb04dfa8ab8112f3bdc8868c77e44422 Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Fri, 29 Apr 2022 00:30:41 +0200
+Subject: [PATCH] ariane: Send hartid via user signal
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ src/ariane.sv                              | 1 +
+ src/axi_adapter.sv                         | 8 +++++---
+ src/cache_subsystem/miss_handler.sv        | 6 ++++++
+ src/cache_subsystem/std_cache_subsystem.sv | 3 +++
+ src/cache_subsystem/std_nbdcache.sv        | 4 ++++
+ 5 files changed, 19 insertions(+), 3 deletions(-)
+
+diff --git a/src/ariane.sv b/src/ariane.sv
+index 3dfa453..7ac9a4b 100644
+--- a/src/ariane.sv
++++ b/src/ariane.sv
+@@ -732,6 +732,7 @@ module ariane import ariane_pkg::*; #(
+     .busy_o                ( busy_cache_ctrl             ),
+     .stall_i               ( stall_ctrl_cache            ),
+     .init_ni               ( init_ctrl_cache_n           ),
++    .hart_id_i             ( hart_id_i                   ),
+     // SRAM config
+     .sram_cfg_idata_i        ( sram_cfg_idata_i          ),
+     .sram_cfg_itag_i         ( sram_cfg_itag_i           ),
+diff --git a/src/axi_adapter.sv b/src/axi_adapter.sv
+index e291d6f..56b67b5 100644
+--- a/src/axi_adapter.sv
++++ b/src/axi_adapter.sv
+@@ -23,6 +23,7 @@ module axi_adapter #(
+   parameter int unsigned AXI_ADDR_WIDTH        = 0,
+   parameter int unsigned AXI_DATA_WIDTH        = 0,
+   parameter int unsigned AXI_ID_WIDTH          = 0,
++  parameter int unsigned AXI_USER_WIDTH        = 0,
+   parameter type axi_req_t = ariane_axi::req_t,
+   parameter type axi_rsp_t = ariane_axi::resp_t
+ )(
+@@ -40,6 +41,7 @@ module axi_adapter #(
+   input  logic [(DATA_WIDTH/AXI_DATA_WIDTH)-1:0][(AXI_DATA_WIDTH/8)-1:0]  be_i,
+   input  logic [1:0]                       size_i,
+   input  logic [AXI_ID_WIDTH-1:0]          id_i,
++  input  logic [AXI_USER_WIDTH-1:0]        user_i,
+   // read port
+   output logic                             valid_o,
+   output logic [(DATA_WIDTH/AXI_DATA_WIDTH)-1:0][AXI_DATA_WIDTH-1:0] rdata_o,
+@@ -87,7 +89,7 @@ module axi_adapter #(
+     axi_req_o.aw.qos    = 4'b0;
+     axi_req_o.aw.id     = id_i;
+     axi_req_o.aw.atop   = atop_from_amo(amo_i);
+-    axi_req_o.aw.user   = '0;
++    axi_req_o.aw.user   = user_i;
+ 
+     axi_req_o.ar_valid  = 1'b0;
+     // in case of a single request or wrapping transfer we can simply begin at the address, if we want to request a cache-line
+@@ -102,13 +104,13 @@ module axi_adapter #(
+     axi_req_o.ar.cache  = axi_pkg::CACHE_MODIFIABLE;
+     axi_req_o.ar.qos    = 4'b0;
+     axi_req_o.ar.id     = id_i;
+-    axi_req_o.ar.user   = '0;
++    axi_req_o.ar.user   = user_i;
+ 
+     axi_req_o.w_valid   = 1'b0;
+     axi_req_o.w.data    = wdata_i[0];
+     axi_req_o.w.strb    = be_i[0];
+     axi_req_o.w.last    = 1'b0;
+-    axi_req_o.w.user    = '0;
++    axi_req_o.w.user    = user_i;
+ 
+     axi_req_o.b_ready   = 1'b0;
+     axi_req_o.r_ready   = 1'b0;
+diff --git a/src/cache_subsystem/miss_handler.sv b/src/cache_subsystem/miss_handler.sv
+index 7bf2221..4fbc25a 100644
+--- a/src/cache_subsystem/miss_handler.sv
++++ b/src/cache_subsystem/miss_handler.sv
+@@ -21,6 +21,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+     parameter int unsigned AXI_ADDR_WIDTH = 0,
+     parameter int unsigned AXI_DATA_WIDTH = 0,
+     parameter int unsigned AXI_ID_WIDTH   = 0,
++    parameter int unsigned AXI_USER_WIDTH = 0,
+     parameter type axi_req_t = ariane_axi::req_t,
+     parameter type axi_rsp_t = ariane_axi::resp_t
+ )(
+@@ -32,6 +33,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+     output logic                                        miss_o,
+     input  logic                                        busy_i,       // dcache is busy with something
+     input  logic                                        init_ni,      // do not init after reset
++    input  logic [63:0]                                 hart_id_i,    // hart id in a multicore environment (to be sent via the AXI user signal)
+     // Bypass or miss
+     input  logic [NR_PORTS-1:0][$bits(miss_req_t)-1:0]  miss_req_i,
+     // Bypass handling
+@@ -576,6 +578,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+         .CACHELINE_BYTE_OFFSET(DCACHE_BYTE_OFFSET),
+         .AXI_ADDR_WIDTH       (AXI_ADDR_WIDTH),
+         .AXI_DATA_WIDTH       (AXI_DATA_WIDTH),
++        .AXI_USER_WIDTH       (AXI_USER_WIDTH),
+         .axi_req_t            (axi_req_t),
+         .axi_rsp_t            (axi_rsp_t)
+     ) i_bypass_axi_adapter (
+@@ -586,6 +589,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+         .type_i               (bypass_adapter_req.reqtype),
+         .amo_i                (bypass_adapter_req.amo),
+         .id_i                 (bypass_adapter_req.id),
++        .user_i               (hart_id_i[AXI_USER_WIDTH-1:0] + 1'b1),
+         .addr_i               (bypass_adapter_req.addr),
+         .wdata_i              (bypass_adapter_req.wdata),
+         .we_i                 (bypass_adapter_req.we),
+@@ -610,6 +614,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+         .AXI_ADDR_WIDTH        ( AXI_ADDR_WIDTH     ),
+         .AXI_DATA_WIDTH        ( AXI_DATA_WIDTH     ),
+         .AXI_ID_WIDTH          ( AXI_ID_WIDTH       ),
++        .AXI_USER_WIDTH        ( AXI_USER_WIDTH     ),
+         .axi_req_t             ( axi_req_t          ),
+         .axi_rsp_t             ( axi_rsp_t          )
+     ) i_miss_axi_adapter (
+@@ -626,6 +631,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
+         .be_i                ( req_fsm_miss_be    ),
+         .size_i              ( req_fsm_miss_size  ),
+         .id_i                ( 4'b1100            ),
++        .user_i              ( hart_id_i[AXI_USER_WIDTH-1:0] + 1'b1 ),
+         .valid_o             ( valid_miss_fsm     ),
+         .rdata_o             ( data_miss_fsm      ),
+         .id_o                (                    ),
+diff --git a/src/cache_subsystem/std_cache_subsystem.sv b/src/cache_subsystem/std_cache_subsystem.sv
+index 3fe4566..a9cd1cb 100644
+--- a/src/cache_subsystem/std_cache_subsystem.sv
++++ b/src/cache_subsystem/std_cache_subsystem.sv
+@@ -34,6 +34,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+     output logic                           busy_o,
+     input  logic                           stall_i,                // stall new memory requests
+     input  logic                           init_ni,                // do not init after reset
++    input  logic [63:0]                    hart_id_i,              // hart id in a multicore environment (to be sent via the AXI user signal)
+     // SRAM config
+     input sram_cfg_t                       sram_cfg_idata_i,
+     input sram_cfg_t                       sram_cfg_itag_i,
+@@ -119,6 +120,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+       .AXI_ADDR_WIDTH   ( AxiAddrWidth                   ),
+       .AXI_DATA_WIDTH   ( AxiDataWidth                   ),
+       .AXI_ID_WIDTH     ( AxiIdWidth                     ),
++      .AXI_USER_WIDTH   ( AxiUserWidth                   ),
+       .axi_req_t        ( axi_req_t                      ),
+       .axi_rsp_t        ( axi_rsp_t                      ),
+       .sram_cfg_t       ( sram_cfg_t                     )
+@@ -135,6 +137,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+       .busy_o       ( dcache_busy            ),
+       .stall_i      ( stall_i                ),
+       .init_ni      ( init_ni                ),
++      .hart_id_i    ( hart_id_i              ),
+       .axi_bypass_o ( axi_req_bypass         ),
+       .axi_bypass_i ( axi_resp_bypass        ),
+       .axi_data_o   ( axi_req_data           ),
+diff --git a/src/cache_subsystem/std_nbdcache.sv b/src/cache_subsystem/std_nbdcache.sv
+index 5703bd1..d40999d 100644
+--- a/src/cache_subsystem/std_nbdcache.sv
++++ b/src/cache_subsystem/std_nbdcache.sv
+@@ -18,6 +18,7 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
+     parameter int unsigned AXI_ADDR_WIDTH   = 0,
+     parameter int unsigned AXI_DATA_WIDTH   = 0,
+     parameter int unsigned AXI_ID_WIDTH     = 0,
++    parameter int unsigned AXI_USER_WIDTH   = 0,
+     parameter type axi_req_t = ariane_axi::req_t,
+     parameter type axi_rsp_t = ariane_axi::resp_t,
+     parameter type sram_cfg_t = logic
+@@ -36,6 +37,7 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
+     output logic                           busy_o,
+     input  logic                           stall_i,   // stall new memory requests
+     input  logic                           init_ni,
++    input  logic [63:0]                    hart_id_i,    // hart id in a multicore environment (to be sent via the AXI user signal)
+     // AMOs
+     input  amo_req_t                       amo_req_i,
+     output amo_resp_t                      amo_resp_o,
+@@ -149,12 +151,14 @@ import std_cache_pkg::*;
+         .AXI_ADDR_WIDTH         ( AXI_ADDR_WIDTH       ),
+         .AXI_DATA_WIDTH         ( AXI_DATA_WIDTH       ),
+         .AXI_ID_WIDTH           ( AXI_ID_WIDTH         ),
++        .AXI_USER_WIDTH         ( AXI_USER_WIDTH       ),
+         .axi_req_t              ( axi_req_t            ),
+         .axi_rsp_t              ( axi_rsp_t            )
+     ) i_miss_handler (
+         .busy_o                 ( miss_handler_busy    ),
+         .flush_i                ( flush_i              ),
+         .busy_i                 ( |busy                ),
++        .hart_id_i              ( hart_id_i            ),
+         // AMOs
+         .amo_req_i              ( amo_req_i            ),
+         .amo_resp_o             ( amo_resp_o           ),
+-- 
+2.16.5
+

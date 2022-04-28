@@ -732,6 +732,7 @@ module ariane import ariane_pkg::*; #(
     .busy_o                ( busy_cache_ctrl             ),
     .stall_i               ( stall_ctrl_cache            ),
     .init_ni               ( init_ctrl_cache_n           ),
+    .hart_id_i             ( hart_id_i                   ),
     // SRAM config
     .sram_cfg_idata_i        ( sram_cfg_idata_i          ),
     .sram_cfg_itag_i         ( sram_cfg_itag_i           ),

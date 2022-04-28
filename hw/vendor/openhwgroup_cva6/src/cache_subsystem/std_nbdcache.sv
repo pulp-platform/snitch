@@ -18,6 +18,7 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
     parameter int unsigned AXI_ADDR_WIDTH   = 0,
     parameter int unsigned AXI_DATA_WIDTH   = 0,
     parameter int unsigned AXI_ID_WIDTH     = 0,
+    parameter int unsigned AXI_USER_WIDTH   = 0,
     parameter type axi_req_t = ariane_axi::req_t,
     parameter type axi_rsp_t = ariane_axi::resp_t,
     parameter type sram_cfg_t = logic
@@ -36,6 +37,7 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
     output logic                           busy_o,
     input  logic                           stall_i,   // stall new memory requests
     input  logic                           init_ni,
+    input  logic [63:0]                    hart_id_i,    // hart id in a multicore environment (to be sent via the AXI user signal)
     // AMOs
     input  amo_req_t                       amo_req_i,
     output amo_resp_t                      amo_resp_o,
@@ -149,12 +151,14 @@ import std_cache_pkg::*;
         .AXI_ADDR_WIDTH         ( AXI_ADDR_WIDTH       ),
         .AXI_DATA_WIDTH         ( AXI_DATA_WIDTH       ),
         .AXI_ID_WIDTH           ( AXI_ID_WIDTH         ),
+        .AXI_USER_WIDTH         ( AXI_USER_WIDTH       ),
         .axi_req_t              ( axi_req_t            ),
         .axi_rsp_t              ( axi_rsp_t            )
     ) i_miss_handler (
         .busy_o                 ( miss_handler_busy    ),
         .flush_i                ( flush_i              ),
         .busy_i                 ( |busy                ),
+        .hart_id_i              ( hart_id_i            ),
         // AMOs
         .amo_req_i              ( amo_req_i            ),
         .amo_resp_o             ( amo_resp_o           ),
