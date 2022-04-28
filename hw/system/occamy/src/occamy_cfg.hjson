@@ -60,6 +60,7 @@
       rmq: 4,
     }
     narrow_xbar_slv_id_width: 4,
+    narrow_xbar_user_width: 9, // clog2(total number of cores)
     nr_s1_quadrant: 6,
     s1_quadrant: {
       nr_clusters: 4,
@@ -95,7 +96,8 @@
         max_mst_trans: 8,
         fall_through: false,
       },
-      narrow_xbar_slv_id_width: 4
+      narrow_xbar_slv_id_width: 4,
+      narrow_xbar_user_width: 9, // clog2(total number of cores)
       cfg_base_addr: 184549376, // 0x0b000000
       cfg_base_offset: 65536 // 0x10000
     },
@@ -107,6 +109,7 @@
         cluster_base_hartid: 1,
         addr_width: 48,
         data_width: 64,
+        user_width: 9, // clog2(total number of cores)
         tcdm: {
             size: 128, // 128 kiB
             banks: 32,
@@ -118,6 +121,7 @@
         dma_req_fifo_depth: 8,
         narrow_trans: 4,
         wide_trans: 32,
+        dma_user_width: 1,
         // We don't need Snitch debugging in Occamy
         enable_debug: false,
         // We don't need Snitch (core-internal) virtual memory support

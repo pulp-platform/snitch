@@ -72,7 +72,7 @@ module ${name}_cva6 import ${name}_pkg::*; (
     .AxiAddrWidth (${soc_narrow_xbar.in_cva6.aw}),
     .AxiDataWidth (${soc_narrow_xbar.in_cva6.dw}),
     .AxiIdWidth (${soc_narrow_xbar.in_cva6.iw}),
-    .AxiUserWidth (${soc_narrow_xbar.in_cva6.uw + 1}),
+    .AxiUserWidth (${max(1, soc_narrow_xbar.in_cva6.uw)}),
     .axi_ar_chan_t(${soc_narrow_xbar.in_cva6.ar_chan_type()}),
     .axi_aw_chan_t(${soc_narrow_xbar.in_cva6.aw_chan_type()}),
     .axi_w_chan_t(${soc_narrow_xbar.in_cva6.w_chan_type()}),

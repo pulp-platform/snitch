@@ -181,17 +181,17 @@ module testharness import occamy_pkg::*; (
 
   logic tx, rx;
 
-  axi_a48_d64_i8_u0_req_t pcie_axi_req;
-  axi_a48_d64_i8_u0_resp_t pcie_axi_rsp;
+  axi_a48_d64_i8_u9_req_t pcie_axi_req;
+  axi_a48_d64_i8_u9_resp_t pcie_axi_rsp;
 
   tb_memory_axi #(
     .AxiAddrWidth (48),
     .AxiDataWidth (64),
     .AxiIdWidth (8),
-    .AxiUserWidth (1),
+    .AxiUserWidth (10),
     .ATOPSupport (0),
-    .req_t (axi_a48_d64_i8_u0_req_t),
-    .rsp_t (axi_a48_d64_i8_u0_resp_t)
+    .req_t (axi_a48_d64_i8_u9_req_t),
+    .rsp_t (axi_a48_d64_i8_u9_resp_t)
   ) i_pcie_axi_channel (
     .clk_i,
     .rst_ni,

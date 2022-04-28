@@ -31,7 +31,8 @@ package occamy_cluster_pkg;
   localparam int unsigned WideIdWidthIn = 1;
   localparam int unsigned WideIdWidthOut = $clog2(NrDmaMasters) + WideIdWidthIn;
 
-  localparam int unsigned UserWidth = 1;
+  localparam int unsigned NarrowUserWidth = 9;
+  localparam int unsigned WideUserWidth = 1;
 
   localparam int unsigned ICacheLineWidth [NrHives] = '{
     256
@@ -66,12 +67,13 @@ package occamy_cluster_pkg;
   typedef logic [NarrowIdWidthOut-1:0]  narrow_out_id_t;
   typedef logic [WideIdWidthIn-1:0]     wide_in_id_t;
   typedef logic [WideIdWidthOut-1:0]    wide_out_id_t;
-  typedef logic [UserWidth-1:0]         user_t;
+  typedef logic [NarrowUserWidth-1:0]   user_t;
+  typedef logic [WideUserWidth-1:0]     user_dma_t;
 
   `AXI_TYPEDEF_ALL(narrow_in, addr_t, narrow_in_id_t, data_t, strb_t, user_t)
   `AXI_TYPEDEF_ALL(narrow_out, addr_t, narrow_out_id_t, data_t, strb_t, user_t)
-  `AXI_TYPEDEF_ALL(wide_in, addr_t, wide_in_id_t, data_dma_t, strb_dma_t, user_t)
-  `AXI_TYPEDEF_ALL(wide_out, addr_t, wide_out_id_t, data_dma_t, strb_dma_t, user_t)
+  `AXI_TYPEDEF_ALL(wide_in, addr_t, wide_in_id_t, data_dma_t, strb_dma_t, user_dma_t)
+  `AXI_TYPEDEF_ALL(wide_out, addr_t, wide_out_id_t, data_dma_t, strb_dma_t, user_dma_t)
 
   function automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] get_cached_regions();
     automatic snitch_pma_pkg::rule_t [snitch_pma_pkg::NrMaxRules-1:0] cached_regions;
@@ -371,7 +373,8 @@ module occamy_cluster_wrapper (
     .WideDataWidth (512),
     .NarrowIdWidthIn (occamy_cluster_pkg::NarrowIdWidthIn),
     .WideIdWidthIn (occamy_cluster_pkg::WideIdWidthIn),
-    .UserWidth (occamy_cluster_pkg::UserWidth),
+    .NarrowUserWidth (occamy_cluster_pkg::NarrowUserWidth),
+    .WideUserWidth (occamy_cluster_pkg::WideUserWidth),
     .BootAddr (32'h1000000),
     .narrow_in_req_t (occamy_cluster_pkg::narrow_in_req_t),
     .narrow_in_resp_t (occamy_cluster_pkg::narrow_in_resp_t),
