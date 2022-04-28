@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# fixup        Prepares network and dropbear
+#
+
+umask 077
+
+start() {
+	chown root:root /etc/dropbear/dropbear_*_host_key
+	chmod 600 /etc/dropbear/dropbear_*_host_key
+  # Read MAC address from eeprom
+  # dd if=/sys/bus/i2c/drivers/at24/5-0054/eeprom of=/tmp/eeprom.bin bs=1 count=6 skip=35 seek=0
+}
+stop() {
+	echo "OK"
+}
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	restart
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+

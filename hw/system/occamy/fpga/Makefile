@@ -25,6 +25,16 @@ all: occamy_vcu128
 
 include $(ROOT)/util/Makefrag
 
+# Clone a repo or pull if it exists
+# Args: path, repo, branch
+define clone
+if [ ! -d "$1" ]; then \
+  git clone --depth 1 --branch $3 $2 $1; \
+else \
+  git fetch -a; \
+	git pull ; \
+fi
+endef
 
 vivado_ips/occamy_xilinx:
 	${MAKE} -C vivado_ips occamy_xilinx
@@ -47,6 +57,13 @@ flash-u-boot:
 
 flash-uimage:
 	${MAKE} flash FILE=${ARIANE_SDK}/uImage OFFSET=0x6100000
+
+.PHONY: br-hrv-vcu128
+br-hrv-vcu128:
+	$(call clone,buildroot,git://git.buildroot.net/buildroot,2021.11.2)
+	mkdir -p $(CURDIR)/output/$@
+	HOST_DIR=$(CURDIR)/install $(MAKE) O=$(CURDIR)/output/$@ BR2_EXTERNAL=$(CURDIR)/br2_external -C $(CURDIR)/buildroot occamy_vcu128_defconfig
+	$(MAKE) -C $(CURDIR)/output/$@
 
 clean:
 	rm -rf .Xil occamy_vcu128 *.jou *.log *.str
