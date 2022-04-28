@@ -23,6 +23,7 @@ module axi_adapter #(
   parameter int unsigned AXI_ADDR_WIDTH        = 0,
   parameter int unsigned AXI_DATA_WIDTH        = 0,
   parameter int unsigned AXI_ID_WIDTH          = 0,
+  parameter int unsigned AXI_USER_WIDTH        = 0,
   parameter type axi_req_t = ariane_axi::req_t,
   parameter type axi_rsp_t = ariane_axi::resp_t
 )(
@@ -40,6 +41,7 @@ module axi_adapter #(
   input  logic [(DATA_WIDTH/AXI_DATA_WIDTH)-1:0][(AXI_DATA_WIDTH/8)-1:0]  be_i,
   input  logic [1:0]                       size_i,
   input  logic [AXI_ID_WIDTH-1:0]          id_i,
+  input  logic [AXI_USER_WIDTH-1:0]        user_i,
   // read port
   output logic                             valid_o,
   output logic [(DATA_WIDTH/AXI_DATA_WIDTH)-1:0][AXI_DATA_WIDTH-1:0] rdata_o,
@@ -87,7 +89,7 @@ module axi_adapter #(
     axi_req_o.aw.qos    = 4'b0;
     axi_req_o.aw.id     = id_i;
     axi_req_o.aw.atop   = atop_from_amo(amo_i);
-    axi_req_o.aw.user   = '0;
+    axi_req_o.aw.user   = user_i;
 
     axi_req_o.ar_valid  = 1'b0;
     // in case of a single request or wrapping transfer we can simply begin at the address, if we want to request a cache-line
@@ -102,13 +104,13 @@ module axi_adapter #(
     axi_req_o.ar.cache  = axi_pkg::CACHE_MODIFIABLE;
     axi_req_o.ar.qos    = 4'b0;
     axi_req_o.ar.id     = id_i;
-    axi_req_o.ar.user   = '0;
+    axi_req_o.ar.user   = user_i;
 
     axi_req_o.w_valid   = 1'b0;
     axi_req_o.w.data    = wdata_i[0];
     axi_req_o.w.strb    = be_i[0];
     axi_req_o.w.last    = 1'b0;
-    axi_req_o.w.user    = '0;
+    axi_req_o.w.user    = user_i;
 
     axi_req_o.b_ready   = 1'b0;
     axi_req_o.r_ready   = 1'b0;

@@ -21,6 +21,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
     parameter int unsigned AXI_ADDR_WIDTH = 0,
     parameter int unsigned AXI_DATA_WIDTH = 0,
     parameter int unsigned AXI_ID_WIDTH   = 0,
+    parameter int unsigned AXI_USER_WIDTH = 0,
     parameter type axi_req_t = ariane_axi::req_t,
     parameter type axi_rsp_t = ariane_axi::resp_t
 )(
@@ -32,6 +33,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
     output logic                                        miss_o,
     input  logic                                        busy_i,       // dcache is busy with something
     input  logic                                        init_ni,      // do not init after reset
+    input  logic [63:0]                                 hart_id_i,    // hart id in a multicore environment (to be sent via the AXI user signal)
     // Bypass or miss
     input  logic [NR_PORTS-1:0][$bits(miss_req_t)-1:0]  miss_req_i,
     // Bypass handling
@@ -576,6 +578,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
         .CACHELINE_BYTE_OFFSET(DCACHE_BYTE_OFFSET),
         .AXI_ADDR_WIDTH       (AXI_ADDR_WIDTH),
         .AXI_DATA_WIDTH       (AXI_DATA_WIDTH),
+        .AXI_USER_WIDTH       (AXI_USER_WIDTH),
         .axi_req_t            (axi_req_t),
         .axi_rsp_t            (axi_rsp_t)
     ) i_bypass_axi_adapter (
@@ -586,6 +589,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
         .type_i               (bypass_adapter_req.reqtype),
         .amo_i                (bypass_adapter_req.amo),
         .id_i                 (bypass_adapter_req.id),
+        .user_i               (hart_id_i[AXI_USER_WIDTH-1:0] + 1'b1),
         .addr_i               (bypass_adapter_req.addr),
         .wdata_i              (bypass_adapter_req.wdata),
         .we_i                 (bypass_adapter_req.we),
@@ -610,6 +614,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
         .AXI_ADDR_WIDTH        ( AXI_ADDR_WIDTH     ),
         .AXI_DATA_WIDTH        ( AXI_DATA_WIDTH     ),
         .AXI_ID_WIDTH          ( AXI_ID_WIDTH       ),
+        .AXI_USER_WIDTH        ( AXI_USER_WIDTH     ),
         .axi_req_t             ( axi_req_t          ),
         .axi_rsp_t             ( axi_rsp_t          )
     ) i_miss_axi_adapter (
@@ -626,6 +631,7 @@ module miss_handler import ariane_pkg::*; import std_cache_pkg::*; #(
         .be_i                ( req_fsm_miss_be    ),
         .size_i              ( req_fsm_miss_size  ),
         .id_i                ( 4'b1100            ),
+        .user_i              ( hart_id_i[AXI_USER_WIDTH-1:0] + 1'b1 ),
         .valid_o             ( valid_miss_fsm     ),
         .rdata_o             ( data_miss_fsm      ),
         .id_o                (                    ),
