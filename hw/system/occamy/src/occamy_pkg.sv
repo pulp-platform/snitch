@@ -922,7 +922,7 @@ package occamy_pkg;
   MaxSlvTrans:        32,
   MaxMstTrans:        32,
   FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_MST_PORTS,
+  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
   AxiIdWidthSlvPorts: 0,
   AxiIdUsedSlvPorts:  0,
   UniqueIds:          0,
