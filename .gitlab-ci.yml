@@ -47,6 +47,17 @@ br-hrv-vcu128:
     - make -C hw/system/occamy/fpga br-hrv-vcu128
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-vcu128
 
+occamy-bootrom:
+  stage: build2
+  needs: [br-hrv-vcu128]
+  script:
+    - >
+      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup occamy-vcu128-bootrom; then
+        exit 0
+      fi
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get br-hrv-vcu128
+    - make -C hw/system/occamy/fpga/bootrom all
+    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert occamy-vcu128-bootrom
 
 # Packages and elaborates the vivado IPs where occamy is part of. This ensures
 # that the occamy xilinx IP can be elaborated

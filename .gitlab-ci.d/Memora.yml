@@ -39,3 +39,14 @@ artifacts:
     - hw/system/occamy/fpga/br2_external/Config.in
     outputs:
     - hw/system/occamy/fpga/br2_external/install
+
+  occamy-vcu128-bootrom:
+    inputs:
+    - hw/system/occamy/fpga/bootrom/occamy.dts
+    - hw/system/occamy/fpga/bootrom/src
+    - hw/system/occamy/fpga/bootrom/Makefile
+    outputs:
+    - hw/system/occamy/fpga/bootrom/bootrom-spl.bin
+    - hw/system/occamy/fpga/bootrom/bootrom-spl.coe
+    - hw/system/occamy/fpga/bootrom/bootrom-spl.dump
+    - hw/system/occamy/fpga/bootrom/bootrom-spl.elf
