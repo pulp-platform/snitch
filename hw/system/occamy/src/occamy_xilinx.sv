@@ -56,7 +56,7 @@ module occamy_xilinx
     output logic [ 3:0]      spim_sd_en_o,
     input        [ 3:0]      spim_sd_i,
 
-    input logic [3:0] ext_irq_i,
+    input logic [11:0] ext_irq_i,
 
     // Boot ROM
     output logic        bootrom_en_o,
@@ -701,8 +701,7 @@ module occamy_xilinx
       .fll_hbm2e_rsp_i (fll_hbm2e_axi_lite_rsp),
       .pcie_cfg_req_o  (),
       .pcie_cfg_rsp_i  ('0),
-      // Tie the HBM interrupts to zero.
-      .ext_irq_i ({8'b0, ext_irq_i}),
+      .ext_irq_i(ext_irq_i),
       // Tie-off unused ports
       .pcie_cfg_rsp_i  ('0),
       .hbi_wide_cfg_rsp_i ('0),
