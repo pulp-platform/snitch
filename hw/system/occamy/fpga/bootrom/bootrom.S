@@ -2,6 +2,7 @@
 # Solderpad Hardware License, Version 0.51, see LICENSE for details.
 # SPDX-License-Identifier: SHL-0.51
 
+.section .entry, "ax", %progbits
 .global _start
 _start:
     li    sp, 0x84000000
@@ -17,7 +18,15 @@ exception:
 entry_addr:
     .word exception
 
+.section .rodata
 .align 3
 .globl device_tree
 device_tree:
     .incbin "occamy.dtb"
+
+#ifdef SPLBIN
+.align 3
+.section .spl
+spl:
+    .incbin SPLBIN
+#endif

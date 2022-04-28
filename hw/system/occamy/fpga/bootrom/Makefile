@@ -10,34 +10,46 @@ ROOT        := ${MKFILE_DIR}../../../../..
 
 include $(ROOT)/util/Makefrag
 
-ARIANE_SDK  ?= ${ROOT}/../ariane-sdk/install
+CROSS_COMPILE = ${MKFILE_DIR}/../br2_external/install/bin/riscv64-buildroot-linux-gnu-
 INCLUDES = -I./ -I./src
 SRCS_C = src/main.c src/uart.c
 OBJS_C = $(SRCS_C:.c=.o)
 
-CC = $(ARIANE_SDK)/bin/riscv64-unknown-elf-gcc
-OBJDUMP = $(ARIANE_SDK)/bin/riscv64-unknown-elf-objdump
-OBJCOPY = $(ARIANE_SDK)/bin/riscv64-unknown-elf-objcopy
+CC = $(CROSS_COMPILE)gcc
+OBJDUMP = $(CROSS_COMPILE)objdump
+OBJCOPY = $(CROSS_COMPILE)objcopy
+
+CFLAGS 	=	-Os -g -Werror -ffreestanding -fno-strict-aliasing
+CFLAGS += -static -nostartfiles -nostartfiles
+CFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-stack-protector
+CFLAGS += -mno-save-restore -mstrict-align
+CFLAGS += -mabi=lp64d -march=rv64imafd
+CFLAGS += -mcmodel=medany
 
 GIT_SHA := $(shell git describe --match=NeVeRmAtCh --always --abbrev=10 --dirty)
 
+# u-boot SPL bianry
+UBOOT_SPL_BIN = ../output/br-hrv-vcu128/images/u-boot-spl.bin
+
 .PHONY: all
-all: bootrom-spl.coe bootrom.tcl
+all: bootrom-spl.coe bootrom.tcl bootrom-spl.tcl
 
 %.o: %.c
-	$(CC) -DGIT_SHA=\"$(GIT_SHA)\" -Os -ggdb -march=rv64imafd -mabi=lp64d -Wall -mcmodel=medany -mexplicit-relocs -fno-builtin $(INCLUDES) -c $<  -o $@
+	$(CC) $(CFLAGS) -DGIT_SHA=\"$(GIT_SHA)\"  $(INCLUDES) -c $<  -o $@
 	@echo "CC    <= $<"
 
 %.dtb: %.dts
 	dtc -I dts $< -O dtb -o $@
 
 bootrom.elf bootrom.dump bootrom.bin: bootrom.S $(OBJS_C) bootrom.ld occamy.dtb
-	$(CC) -mabi=lp64d -march=rv64imafd -static -nostartfiles $(INCLUDES) -Tbootrom.ld $< $(OBJS_C) -o bootrom.elf
+	$(CC) $(CFLAGS) $(INCLUDES) -Tbootrom.ld $< $(OBJS_C) -o bootrom.elf
 	$(OBJDUMP) -d bootrom.elf > bootrom.dump
 	$(OBJCOPY) --pad-to 0x1001000 -O binary bootrom.elf bootrom.bin
 
-bootrom-spl.bin: bootrom.bin  $(ARIANE_SDK)/u-boot/spl/u-boot-spl.bin
-	cat $^ > $@
+bootrom-spl.bin: bootrom.S $(OBJS_C) bootrom.ld occamy.dtb $(UBOOT_SPL_BIN)
+	$(CC) -mabi=lp64d -march=rv64imafd -static -nostartfiles $(INCLUDES) -Tbootrom.ld -DSPLBIN=\"$(UBOOT_SPL_BIN)\" $< $(OBJS_C) -o bootrom-spl.elf
+	$(OBJDUMP) -d bootrom-spl.elf > bootrom-spl.dump
+	$(OBJCOPY) -O binary bootrom-spl.elf bootrom-spl.bin
 
 %.coe: %.bin
 	bin2coe -i $< -o $@ -w 32
