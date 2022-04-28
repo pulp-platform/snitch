@@ -31,6 +31,8 @@ Base description of a Snitch cluster and its internal structure and configuratio
 | [wide_trans](#wide_trans)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-wide_trans.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/wide_trans")                         |
 | [id_width_in](#id_width_in)                       | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-id_width_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/id_width_in")                       |
 | [dma_id_width_in](#dma_id_width_in)               | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_id_width_in.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_id_width_in")               |
+| [user_width](#user_width)                         | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-user_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/user_width")                         |
+| [dma_user_width](#dma_user_width)                 | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-dma_user_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_user_width")                 |
 | [hart_base_id](#hart_base_id)                     | `number`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-hart_base_id.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/hart_base_id")                     |
 | [mode](#mode)                                     | `string`  | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-mode.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/mode")                                     |
 | [vm_support](#vm_support)                         | `boolean` | Optional | cannot be null | [Snitch Cluster Schema](snitch_cluster-properties-vm_support.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/vm_support")                         |
@@ -372,6 +374,58 @@ Id width of the wide AXI plug into the cluster.
 `number`
 
 ### dma_id_width_in Default Value
+
+The default value is:
+
+```json
+1
+```
+
+## user_width
+
+User width of the narrower AXI plug into the cluster.
+
+`user_width`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-user_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/user_width")
+
+### user_width Type
+
+`number`
+
+### user_width Default Value
+
+The default value is:
+
+```json
+1
+```
+
+## dma_user_width
+
+User width of the wide AXI plug into the cluster.
+
+`dma_user_width`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [Snitch Cluster Schema](snitch_cluster-properties-dma_user_width.md "http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/dma_user_width")
+
+### dma_user_width Type
+
+`number`
+
+### dma_user_width Default Value
 
 The default value is:
 

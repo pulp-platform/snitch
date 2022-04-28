@@ -521,7 +521,8 @@ module snitch_cc #(
       .slv_req_i ({fpu_dreq, snitch_dreq_q}),
       .slv_rsp_o ({fpu_drsp, snitch_drsp_q}),
       .mst_req_o (merged_dreq),
-      .mst_rsp_i (merged_drsp)
+      .mst_rsp_i (merged_drsp),
+      .idx_o (/*not connected*/)
     );
 
     assign core_events_o.issue_fpu = fp_ss_core_events.issue_fpu;

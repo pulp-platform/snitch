@@ -62,6 +62,7 @@ module reqrsp_to_axi_tb import reqrsp_pkg::*; #(
   ) i_reqrsp_to_axi (
     .clk_i (clk),
     .rst_ni (rst_n),
+    .user_i ('0),
     .reqrsp (master),
     .axi (slave)
   );

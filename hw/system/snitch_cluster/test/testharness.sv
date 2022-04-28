@@ -48,7 +48,7 @@ module testharness import snitch_cluster_pkg::*; (
     .AxiAddrWidth (AddrWidth),
     .AxiDataWidth (NarrowDataWidth),
     .AxiIdWidth (NarrowIdWidthOut),
-    .AxiUserWidth (UserWidth),
+    .AxiUserWidth (NarrowUserWidth),
     .req_t (narrow_out_req_t),
     .rsp_t (narrow_out_resp_t)
   ) i_mem (
@@ -63,7 +63,7 @@ module testharness import snitch_cluster_pkg::*; (
     .AxiAddrWidth (AddrWidth),
     .AxiDataWidth (WideDataWidth),
     .AxiIdWidth (WideIdWidthOut),
-    .AxiUserWidth (UserWidth),
+    .AxiUserWidth (WideUserWidth),
     .req_t (wide_out_req_t),
     .rsp_t (wide_out_resp_t)
   ) i_dma (
