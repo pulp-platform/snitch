@@ -67,7 +67,7 @@
       clock-frequency = <50000000>;
       current-speed = <115200>;
       interrupt-parent = <&PLIC0>;
-      interrupts = <33>;
+      interrupts = <35>;
       reg-offset = <0>;
       reg-shift = <2>; // regs are spaced on 32 bit boundary
       reg-io-width = <4>; // only 32-bit access are supported
@@ -76,7 +76,7 @@
     timer@2006000 {
       compatible = "pulp,apb_timer";
       interrupt-parent = <&PLIC0>;
-      interrupts = <66 67 68 69>;
+      interrupts = <68 69 70 71>;
       reg = <0x00000000 0x2006000 0x00000000 0x00001000>;
       reg-names = "control";
     };
@@ -142,7 +142,7 @@
       // - IRQ_S_EXT = 9:  Supervisor external interrupt
       interrupts-extended = <&CPU0_intc 11 &CPU0_intc 9>;
       riscv,max-priority = <6>;
-      riscv,ndev = <70>;
+      riscv,ndev = <72>;
       reg = <0x0 0xc000000 0x0 0x4000000>;
     };
     eth_dma0: eth_dma@4d000000 {
