@@ -92,8 +92,8 @@ module snitch_fp_ss import snitch_pkg::*; #(
   logic [0:0]           fpr_wvalid;
   logic [0:0]           fpr_wready;
 
-  logic ssr_active_d, ssr_active_q;
-  `FFAR(ssr_active_q, Xssr & ssr_active_d, 1'b0, clk_i, rst_i)
+  logic ssr_active_d, ssr_active_q, ssr_active_ena;
+  `FFLAR(ssr_active_q, Xssr & ssr_active_d, ssr_active_ena, 1'b0, clk_i, rst_i)
 
   typedef struct packed {
     logic       ssr; // write-back to SSR at rd
@@ -214,6 +214,9 @@ module snitch_fp_ss import snitch_pkg::*; #(
     .ready_i ( acc_req_ready_q ),
     .data_o  ( acc_req_q       )
   );
+
+  // Ensure SSR CSR only written on instruction commit
+  assign ssr_active_ena = acc_req_valid_q & acc_req_ready_q;
 
   // this handles WAW Hazards - Potentially this can be relaxed if necessary
   // at the expense of increased timing pressure
