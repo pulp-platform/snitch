@@ -8,6 +8,8 @@ define_defines_includes_no_simset.tcl
 *.str
 *.mif
 *.html*
+*.prm
+*.mcs
 
 # Buildroot products
 br2_external/install

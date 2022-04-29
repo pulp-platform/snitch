@@ -1,0 +1,25 @@
+/dts-v1/;
+
+/{
+  #address-cells = <1>;
+
+  images {
+    // Older u-boot images don't accept '@' in node names and fail verification
+    kernel0 {
+      // description = "Linux kernel";
+      data = /incbin/("bootrom/osbi_uboot.bin");
+      type = "firmware";
+      arch = "riscv";
+      os = "opensbi";
+      compression = "none";
+      // load = <0x85000000>;
+      // entry = <0x85000000>;
+    };
+  };
+  configurations {
+    default = "conf0";
+    conf0 {
+      firmware = "opensbi";
+    };
+  };
+};
