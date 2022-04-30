@@ -153,6 +153,9 @@ if(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
     add_snitch_test_executable(multi_cluster tests/multi_cluster.c)
     add_snitch_test_rtl(multi_cluster)
 
+    add_snitch_test_executable(atomics tests/atomics.c)
+    add_snitch_test_rtl(atomics)
+
     # Tests exclusive to LLVM
     if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
         add_snitch_test_executable(data_mover tests/data_mover.c)
