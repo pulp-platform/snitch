@@ -736,7 +736,6 @@ def main():
         max_slv_trans=occamy.cfg["narrow_xbar"]["max_slv_trans"],
         max_mst_trans=occamy.cfg["narrow_xbar"]["max_mst_trans"],
         fall_through=False,
-        latency_mode="axi_pkg::CUT_MST_PORTS",
         context="quadrant_s1_ctrl")
 
     quadrant_s1_ctrl_mux.add_output("out", [(0, (1 << 48) - 1)])
