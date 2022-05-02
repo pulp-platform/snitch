@@ -327,6 +327,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign core_events_o.retired_load = retired_load_q;
   assign core_events_o.retired_i = retired_i_q;
   assign core_events_o.retired_acc = retired_acc_q;
+  `else
+  assign core_events_o = '0;
   `endif
 
   logic [AddrWidth-32-1:0] mseg_q, mseg_d;
