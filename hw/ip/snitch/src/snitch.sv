@@ -98,9 +98,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   input  l0_pte_t [1:0] ptw_pte_i,
   input  logic    [1:0] ptw_is_4mega_i,
   // FPU **un-timed** Side-channel
-  output fpnew_pkg::roundmode_e fpu_rnd_mode_o,
-  output fpnew_pkg::fmt_mode_t  fpu_fmt_mode_o,
-  input  fpnew_pkg::status_t    fpu_status_i
+  output fpnew_pkg::roundmode_e     fpu_rnd_mode_o,
+  output fpnew_pkg::fmt_mode_t      fpu_fmt_mode_o,
+  input  fpnew_pkg::status_t        fpu_status_i,
+  // Core events for performance counters
+  output snitch_pkg::core_events_t  core_events_o
 );
   // Debug module's base address
   localparam logic [31:0] DmBaseAddress = 0;
@@ -311,8 +313,22 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   `ifdef SNITCH_ENABLE_PERF
   logic [63:0] cycle_q;
   logic [63:0] instret_q;
+  logic retired_instr_q;
+  logic retired_load_q;
+  logic retired_i_q;
+  logic retired_acc_q;
   `FFAR(cycle_q, cycle_q + 1, '0, clk_i, rst_i)
   `FFLAR(instret_q, instret_q + 1, !stall, '0, clk_i, rst_i)
+  `FFAR(retired_instr_q, !stall, '0, clk_i, rst_i)
+  `FFAR(retired_load_q, retire_load, '0, clk_i, rst_i)
+  `FFAR(retired_i_q, retire_i, '0, clk_i, rst_i)
+  `FFAR(retired_acc_q, retire_acc, '0, clk_i, rst_i)
+  assign core_events_o.retired_instr = retired_instr_q;
+  assign core_events_o.retired_load = retired_load_q;
+  assign core_events_o.retired_i = retired_i_q;
+  assign core_events_o.retired_acc = retired_acc_q;
+  `else
+  assign core_events_o = '0;
   `endif
 
   logic [AddrWidth-32-1:0] mseg_q, mseg_d;
