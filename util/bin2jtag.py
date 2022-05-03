@@ -98,8 +98,8 @@ def convert(output, data, width, radix, adr=0, little_endian=True, dev='hw_axi_1
             output.write(out)
             output.write(f"run_hw_axi {'wb'}\n")
             output.write("set resp [get_property DATA [get_hw_axi_txns wb]]\n")
-            output.write("puts $resp\n")
-            output.write(f"puts {''.join(d_buf)}\n")
+            # output.write("puts $resp\n")
+            # output.write(f"puts {''.join(d_buf)}\n")
             s = f"set exp {''.join(d_buf)}\n"
             s += "if {$exp ne $resp} { puts Error; incr errs }\n"
             # output.write(f"puts {''.join(d_buf)}\n")

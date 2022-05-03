@@ -47,16 +47,20 @@ proc occ_refresh {} {
   display_hw_ila_data
 }
 
-proc occ_program_bit { } {
+proc occ_program { bit_stem } {
     global occ_hw_device
-    global occ_bit_stem
-
-    set_property PROBES.FILE "${occ_bit_stem}.ltx" [get_hw_devices ${occ_hw_device}]
-    set_property FULL_PROBES.FILE "${occ_bit_stem}.ltx" [get_hw_devices ${occ_hw_device}]
-    set_property PROGRAM.FILE "${occ_bit_stem}.bit" [get_hw_devices ${occ_hw_device}]
+    puts "Programming ${bit_stem}.bit"
+    set_property PROBES.FILE "${bit_stem}.ltx" [get_hw_devices ${occ_hw_device}]
+    set_property FULL_PROBES.FILE "${bit_stem}.ltx" [get_hw_devices ${occ_hw_device}]
+    set_property PROGRAM.FILE "${bit_stem}.bit" [get_hw_devices ${occ_hw_device}]
     current_hw_device [get_hw_devices  ${occ_hw_device}]
     program_hw_devices [get_hw_devices ${occ_hw_device}]
     refresh_hw_device [lindex [get_hw_devices ${occ_hw_device}] 0]
+}
+
+proc occ_program_bit { } {
+    global occ_bit_stem
+    occ_program $occ_bit_stem
 }
 
 proc occ_rst { } {
