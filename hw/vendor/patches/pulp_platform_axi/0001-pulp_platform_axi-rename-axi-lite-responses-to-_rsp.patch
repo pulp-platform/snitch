@@ -4,7 +4,7 @@ Date: Fri, 8 Apr 2022 19:45:03 +0200
 Subject: [PATCH] pulp_platform_axi: rename axi lite responses to *_rsp
 
 ---
- hw/vendor/pulp_platform_axi/include/axi/typedef.svh | 2 +-
+ include/axi/typedef.svh | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/include/axi/typedef.svh b/include/axi/typedef.svh

@@ -11,40 +11,25 @@ diff --git a/src/axi_demux.sv b/src/axi_demux.sv
 index 9ba3ef3..8124d12 100644
 --- a/src/axi_demux.sv
 +++ b/src/axi_demux.sv
-@@ -65,14 +65,6 @@ module axi_demux #(
-   //--------------------------------------
-   // Typedefs for the FIFOs / Queues
-   //--------------------------------------
--  typedef struct packed {
--    aw_chan_t aw_chan;
--    select_t  aw_select;
--  } aw_chan_select_t;
--  typedef struct packed {
--    ar_chan_t ar_chan;
--    select_t  ar_select;
--  } ar_chan_select_t;
- 
-   // pass through if only one master port
-   if (NoMstPorts == 32'h1) begin : gen_no_demux
-@@ -155,8 +147,11 @@ module axi_demux #(
+@@ -155,8 +147,12 @@ module axi_demux #(
      // Write Transaction
      //--------------------------------------
      // comes from spill register at input
--    aw_chan_select_t          slv_aw_chan_select;
+     aw_chan_select_t          slv_aw_chan_select;
 -    logic                     slv_aw_valid,       slv_aw_ready;
 +    aw_chan_t                 slv_aw_chan;
 +    select_t                  slv_aw_select;
 +
-+    logic                     slv_aW_valid, aw_valid_chan, aw_valid_sel;
++    logic                     slv_aw_valid, aw_valid_chan, aw_valid_sel;
 +    logic                     slv_aw_ready, slv_aw_ready_chan, slv_aw_ready_sel;
  
      // AW ID counter
      select_t                  lookup_aw_select;
-@@ -190,8 +185,8 @@ module axi_demux #(
+@@ -190,8 +185,9 @@ module axi_demux #(
      // Read Transaction
      //--------------------------------------
      // comes from spill register at input
--    ar_chan_select_t          slv_ar_chan_select;
+     ar_chan_select_t          slv_ar_chan_select;
 -    logic                     slv_ar_valid,       slv_ar_ready;
 +    logic                     slv_ar_valid, ar_valid_chan, ar_valid_sel;
 +    logic                     slv_ar_ready, slv_ar_ready_chan, slv_ar_ready_sel;
