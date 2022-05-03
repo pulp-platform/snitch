@@ -34,6 +34,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
     output logic                           busy_o,
     input  logic                           stall_i,                // stall new memory requests
     input  logic                           init_ni,                // do not init after reset
+    input  logic [63:0]                    hart_id_i,              // hart id in a multicore environment (to be sent via the AXI user signal)
     // SRAM config
     input sram_cfg_t                       sram_cfg_idata_i,
     input sram_cfg_t                       sram_cfg_itag_i,
@@ -119,6 +120,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
       .AXI_ADDR_WIDTH   ( AxiAddrWidth                   ),
       .AXI_DATA_WIDTH   ( AxiDataWidth                   ),
       .AXI_ID_WIDTH     ( AxiIdWidth                     ),
+      .AXI_USER_WIDTH   ( AxiUserWidth                   ),
       .axi_req_t        ( axi_req_t                      ),
       .axi_rsp_t        ( axi_rsp_t                      ),
       .sram_cfg_t       ( sram_cfg_t                     )
@@ -135,6 +137,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
       .busy_o       ( dcache_busy            ),
       .stall_i      ( stall_i                ),
       .init_ni      ( init_ni                ),
+      .hart_id_i    ( hart_id_i              ),
       .axi_bypass_o ( axi_req_bypass         ),
       .axi_bypass_i ( axi_resp_bypass        ),
       .axi_data_o   ( axi_req_data           ),

@@ -48,6 +48,7 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   parameter int unsigned ID = 0,
   /// Data width of bus, must be 32 or 64.
   parameter int unsigned DataWidth = 32'b0,
+  parameter int unsigned UserWidth = 32'b0,
   parameter type reqrsp_req_t = logic,
   parameter type reqrsp_rsp_t = logic,
   parameter type axi_req_t = logic,
@@ -55,6 +56,7 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
 ) (
   input  logic clk_i,
   input  logic rst_ni,
+  input  logic [UserWidth-1:0] user_i,
   input  reqrsp_req_t reqrsp_req_i,
   output reqrsp_rsp_t reqrsp_rsp_o,
   output axi_req_t axi_req_o,
@@ -173,6 +175,7 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   assign axi_req_o.ar.lock   = (reqrsp_req_i.q.amo == AMOLR);
   assign axi_req_o.ar.cache  = axi_pkg::CACHE_MODIFIABLE;
   assign axi_req_o.ar.id     = $unsigned(ID);
+  assign axi_req_o.ar.user   = user_i;
   assign axi_req_o.ar_valid  = q_valid_read;
   assign q_ready_read        = axi_rsp_i.ar_ready;
 
@@ -187,9 +190,11 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
   assign axi_req_o.aw.lock   = (reqrsp_req_i.q.amo == AMOSC);
   assign axi_req_o.aw.cache  = axi_pkg::CACHE_MODIFIABLE;
   assign axi_req_o.aw.id     = $unsigned(ID);
+  assign axi_req_o.aw.user   = user_i;
   assign axi_req_o.w.data    = write_data;
   assign axi_req_o.w.strb    = reqrsp_req_i.q.strb;
   assign axi_req_o.w.last    = 1'b1;
+  assign axi_req_o.w.user    = user_i;
 
   // Both channels need to handshake (independently).
   stream_fork #(
@@ -265,16 +270,13 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
 
   // AXI auxiliary signal
   assign axi_req_o.aw.len = '0;
-  assign axi_req_o.aw.user = '0;
   assign axi_req_o.aw.qos = 4'b0;
   assign axi_req_o.aw.prot = 3'b0;
   assign axi_req_o.aw.region = 4'b0;
   assign axi_req_o.ar.len = '0;
-  assign axi_req_o.ar.user = '0;
   assign axi_req_o.ar.qos = 4'b0;
   assign axi_req_o.ar.prot = 3'b0;
   assign axi_req_o.ar.region = 4'b0;
-  assign axi_req_o.w.user = '0;
 
   // Assertions:
   // Make sure that write is never set for AMOs.
@@ -308,6 +310,7 @@ module reqrsp_to_axi_intf #(
 ) (
   input logic clk_i,
   input logic rst_ni,
+  input logic [AxiUserWidth-1:0] user_i,
   REQRSP_BUS  reqrsp,
   AXI_BUS     axi
 );
@@ -344,6 +347,7 @@ module reqrsp_to_axi_intf #(
   ) i_reqrsp_to_axi (
     .clk_i,
     .rst_ni,
+    .user_i,
     .reqrsp_req_i (reqrsp_req),
     .reqrsp_rsp_o (reqrsp_rsp),
     .axi_req_o (axi_req),

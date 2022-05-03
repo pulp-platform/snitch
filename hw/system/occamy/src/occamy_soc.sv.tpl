@@ -39,6 +39,7 @@
 
 `include "common_cells/registers.svh"
 `include "register_interface/typedef.svh"
+`include "axi/assign.svh"
 
 module ${name}_soc
   import ${name}_pkg::*;
@@ -149,11 +150,13 @@ module ${name}_soc
     #// narrow xbar -> wide xbar & wide xbar -> narrow xbar
     soc_narrow_xbar.out_soc_wide \
       .cut(context, cuts_narrow_and_wide) \
-      .atomic_adapter(context, max_trans=max_atomics_narrow, user_as_id=0, user_id_msb=0 , user_id_lsb=0, name="soc_narrow_wide_amo_adapter") \
+      .atomic_adapter(context, max_trans=max_atomics_narrow, user_as_id=1, user_id_msb=soc_narrow_xbar.out_soc_wide.uw-1, user_id_lsb=0, name="soc_narrow_wide_amo_adapter") \
       .change_iw(context, soc_wide_xbar.in_soc_narrow.iw, "soc_narrow_wide_iwc", max_txns_per_id=txns_narrow_and_wide) \
+      .change_uw(context, soc_wide_xbar.in_soc_narrow.uw, "soc_narrow_wide_uwc") \
       .change_dw(context, soc_wide_xbar.in_soc_narrow.dw, "soc_narrow_wide_dw", to=soc_wide_xbar.in_soc_narrow)
     soc_wide_xbar.out_soc_narrow \
       .change_iw(context, soc_narrow_xbar.in_soc_wide.iw, "soc_wide_narrow_iwc", max_txns_per_id=txns_narrow_and_wide) \
+      .change_uw(context, soc_narrow_xbar.in_soc_wide.uw, "soc_wide_narrow_uwc") \
       .change_dw(context, soc_narrow_xbar.in_soc_wide.dw, "soc_wide_narrow_dw") \
       .cut(context, cuts_narrow_and_wide, to=soc_narrow_xbar.in_soc_wide)
   %>\
@@ -243,7 +246,7 @@ module ${name}_soc
   // SPM NARROW //
   ////////////////
   <% narrow_spm_mst = soc_narrow_xbar.out_spm_narrow \
-                      .atomic_adapter(context, max_trans=max_atomics_narrow, user_as_id=0, user_id_msb=0, user_id_lsb=0, name="spm_narrow_amo_adapter") \
+                      .atomic_adapter(context, max_trans=max_atomics_narrow, user_as_id=1, user_id_msb=soc_narrow_xbar.out_spm_narrow.uw-1, user_id_lsb=0, name="spm_narrow_amo_adapter") \
                       .cut(context, cuts_narrow_conv_to_spm_narrow)
   %>\
 
@@ -435,7 +438,7 @@ module ${name}_soc
     .ADDR_WIDTH( ${out_sys_idma_cfg.aw}                 ),
     .DATA_WIDTH( ${out_sys_idma_cfg.dw}                 ),
     .ID_WIDTH  ( ${out_sys_idma_cfg.iw}                 ),
-    .USER_WIDTH( ${out_sys_idma_cfg.uw + 1}             ),
+    .USER_WIDTH( ${out_sys_idma_cfg.uw}                 ),
     .axi_req_t ( ${out_sys_idma_cfg.req_type()}         ),
     .axi_rsp_t ( ${out_sys_idma_cfg.rsp_type()}         ),
     .reg_req_t ( idma_cfg_reg_a${wide_in.aw}_d64_req_t  ),

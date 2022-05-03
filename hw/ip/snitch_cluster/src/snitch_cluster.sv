@@ -34,7 +34,9 @@ module snitch_cluster
   /// AXI: dma id with in *currently not available*
   parameter int unsigned WideIdWidthIn      = 2,
   /// AXI: user width.
-  parameter int unsigned UserWidth          = 1,
+  parameter int unsigned NarrowUserWidth    = 1,
+  /// AXI: dma user width.
+  parameter int unsigned WideUserWidth      = 1,
   /// Address from which to fetch the first instructions.
   parameter logic [31:0] BootAddr           = 32'h0,
   /// Number of Hives. Each Hive can hold 1-many cores.
@@ -324,7 +326,8 @@ module snitch_cluster
   typedef logic [NarrowIdWidthOut-1:0]  id_slv_t;
   typedef logic [WideIdWidthIn-1:0]     id_dma_mst_t;
   typedef logic [WideIdWidthOut-1:0]    id_dma_slv_t;
-  typedef logic [UserWidth-1:0]         user_t;
+  typedef logic [NarrowUserWidth-1:0]   user_t;
+  typedef logic [WideUserWidth-1:0]     user_dma_t;
 
   typedef logic [TCDMMemAddrWidth-1:0]  tcdm_mem_addr_t;
   typedef logic [TCDMAddrWidth-1:0]     tcdm_addr_t;
@@ -337,8 +340,8 @@ module snitch_cluster
   // Regbus peripherals.
   `AXI_TYPEDEF_ALL(axi_mst, addr_t, id_mst_t, data_t, strb_t, user_t)
   `AXI_TYPEDEF_ALL(axi_slv, addr_t, id_slv_t, data_t, strb_t, user_t)
-  `AXI_TYPEDEF_ALL(axi_mst_dma, addr_t, id_dma_mst_t, data_dma_t, strb_dma_t, user_t)
-  `AXI_TYPEDEF_ALL(axi_slv_dma, addr_t, id_dma_slv_t, data_dma_t, strb_dma_t, user_t)
+  `AXI_TYPEDEF_ALL(axi_mst_dma, addr_t, id_dma_mst_t, data_dma_t, strb_dma_t, user_dma_t)
+  `AXI_TYPEDEF_ALL(axi_slv_dma, addr_t, id_dma_slv_t, data_dma_t, strb_dma_t, user_dma_t)
 
   `REQRSP_TYPEDEF_ALL(reqrsp, addr_t, data_t, strb_t)
 
@@ -970,11 +973,13 @@ module snitch_cluster
     .slv_req_i (ptw_req),
     .slv_rsp_o (ptw_rsp),
     .mst_req_o (ptw_to_axi_req),
-    .mst_rsp_i (ptw_to_axi_rsp)
+    .mst_rsp_i (ptw_to_axi_rsp),
+    .idx_o (/*not connected*/)
   );
 
   reqrsp_to_axi #(
     .DataWidth (NarrowDataWidth),
+    .UserWidth (NarrowUserWidth),
     .reqrsp_req_t (reqrsp_req_t),
     .reqrsp_rsp_t (reqrsp_rsp_t),
     .axi_req_t (axi_mst_req_t),
@@ -982,6 +987,7 @@ module snitch_cluster
   ) i_reqrsp_to_axi_ptw (
     .clk_i,
     .rst_ni,
+    .user_i ('0),
     .reqrsp_req_i (ptw_to_axi_req),
     .reqrsp_rsp_o (ptw_to_axi_rsp),
     .axi_req_o (narrow_axi_mst_req[PTW]),
@@ -1008,6 +1014,9 @@ module snitch_cluster
 
   reqrsp_req_t core_to_axi_req;
   reqrsp_rsp_t core_to_axi_rsp;
+  logic [$clog2(NrCores)-1:0] core_req_idx;
+  user_t core_user;
+  assign core_user = hart_base_id_i + core_req_idx + 1'b1;
 
   reqrsp_mux #(
     .NrPorts (NrCores),
@@ -1022,11 +1031,13 @@ module snitch_cluster
     .slv_req_i (filtered_core_req),
     .slv_rsp_o (filtered_core_rsp),
     .mst_req_o (core_to_axi_req),
-    .mst_rsp_i (core_to_axi_rsp)
+    .mst_rsp_i (core_to_axi_rsp),
+    .idx_o (core_req_idx)
   );
 
   reqrsp_to_axi #(
     .DataWidth (NarrowDataWidth),
+    .UserWidth (NarrowUserWidth),
     .reqrsp_req_t (reqrsp_req_t),
     .reqrsp_rsp_t (reqrsp_rsp_t),
     .axi_req_t (axi_mst_req_t),
@@ -1034,6 +1045,7 @@ module snitch_cluster
   ) i_reqrsp_to_axi_core (
     .clk_i,
     .rst_ni,
+    .user_i (core_user),
     .reqrsp_req_i (core_to_axi_req),
     .reqrsp_rsp_o (core_to_axi_rsp),
     .axi_req_o (narrow_axi_mst_req[CoreReq]),
@@ -1138,7 +1150,7 @@ module snitch_cluster
     .AXI_MAX_READ_TXNS (1),
     .DECOUPLE_W (0),
     .ID_WIDTH (NarrowIdWidthOut),
-    .USER_WIDTH (UserWidth),
+    .USER_WIDTH (NarrowUserWidth),
     .axi_req_t (axi_slv_req_t),
     .axi_rsp_t (axi_slv_resp_t),
     .reg_req_t (reg_req_t),

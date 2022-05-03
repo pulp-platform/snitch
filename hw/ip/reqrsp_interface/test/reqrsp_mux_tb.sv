@@ -55,7 +55,8 @@ module reqrsp_mux_tb import reqrsp_pkg::*; #(
     .clk_i (clk),
     .rst_ni (rst_n),
     .slv (master),
-    .mst (slave)
+    .mst (slave),
+    .idx_o (/*not connected*/)
   );
 
   `REQRSP_ASSIGN(slave_dv, slave)

@@ -17,7 +17,8 @@ package ${name}_pkg;
 
   // Re-exports
   localparam int unsigned AddrWidth = ${name}_cluster_pkg::AddrWidth;
-  localparam int unsigned UserWidth = ${name}_cluster_pkg::UserWidth;
+  localparam int unsigned NarrowUserWidth = ${name}_cluster_pkg::NarrowUserWidth;
+  localparam int unsigned WideUserWidth = ${name}_cluster_pkg::WideUserWidth;
 
   localparam int unsigned NrClustersS1Quadrant = ${nr_s1_clusters};
   localparam int unsigned NrCoresCluster = ${name}_cluster_pkg::NrCores;
@@ -87,7 +88,8 @@ package ${name}_pkg;
   typedef logic [5:0] tile_id_t;
 
   typedef logic [AddrWidth-1:0] addr_t;
-  typedef logic [UserWidth-1:0] user_t;
+  typedef logic [NarrowUserWidth-1:0] user_narrow_t;
+  typedef logic [WideUserWidth-1:0] user_wide_t;
 
   typedef struct packed {
     logic [31:0] idx;
