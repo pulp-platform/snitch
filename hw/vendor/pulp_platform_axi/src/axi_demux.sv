@@ -65,6 +65,14 @@ module axi_demux #(
   //--------------------------------------
   // Typedefs for the FIFOs / Queues
   //--------------------------------------
+  typedef struct packed {
+    aw_chan_t aw_chan;
+    select_t  aw_select;
+  } aw_chan_select_t;
+  typedef struct packed {
+    ar_chan_t ar_chan;
+    select_t  ar_select;
+  } ar_chan_select_t;
 
   // pass through if only one master port
   if (NoMstPorts == 32'h1) begin : gen_no_demux
@@ -147,6 +155,7 @@ module axi_demux #(
     // Write Transaction
     //--------------------------------------
     // comes from spill register at input
+    aw_chan_select_t          slv_aw_chan_select;
     aw_chan_t                 slv_aw_chan;
     select_t                  slv_aw_select;
 
@@ -185,6 +194,7 @@ module axi_demux #(
     // Read Transaction
     //--------------------------------------
     // comes from spill register at input
+    ar_chan_select_t          slv_ar_chan_select;
     logic                     slv_ar_valid, ar_valid_chan, ar_valid_sel;
     logic                     slv_ar_ready, slv_ar_ready_chan, slv_ar_ready_sel;
 
