@@ -4,7 +4,7 @@ Date: Mon, 11 Apr 2022 10:54:00 +0200
 Subject: [PATCH] axi: vcs compatibility of axi_isolate
 
 ---
- hw/vendor/pulp_platform_axi/src/axi_isolate.sv | 8 ++++----
+ hw/vendor/src/axi_isolate.sv | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/src/axi_isolate.sv b/src/axi_isolate.sv

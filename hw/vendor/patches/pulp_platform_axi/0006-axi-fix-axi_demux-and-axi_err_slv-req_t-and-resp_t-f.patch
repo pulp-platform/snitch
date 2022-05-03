@@ -5,10 +5,10 @@ Subject: [PATCH] axi: fix axi_demux and axi_err_slv req_t and resp_t for
  axi_tlb
 
 ---
- pulp_platform_axi/src/axi_tlb.sv | 8 ++++----
+ src/axi_tlb.sv | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/src/axi_tlb.sv b/pulp_platform_axi/src/axi_tlb.sv
+diff --git a/src/axi_tlb.sv b/src/axi_tlb.sv
 index 38a7fa4..50fc02a 100644
 --- a/src/axi_tlb.sv
 +++ b/src/axi_tlb.sv
