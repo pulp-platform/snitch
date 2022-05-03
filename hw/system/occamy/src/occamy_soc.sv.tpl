@@ -309,7 +309,6 @@ module ${name}_soc
   // SPM WIDE //
   //////////////
   <% wide_spm_mst = soc_wide_xbar.out_spm_wide \
-                    .atomic_adapter(context, max_atomics_wide, "spm_wide_amo_adapter") \
                     .cut(context, cuts_wide_conv_to_spm_wide)
   %>\
 
