@@ -798,6 +798,9 @@ class AxiBus(Bus):
     def atomic_adapter(self,
                        context,
                        max_trans=1,
+                       user_as_id=0,
+                       user_id_msb=0,
+                       user_id_lsb=0,
                        name=None,
                        inst_name=None,
                        to=None,
@@ -826,15 +829,27 @@ class AxiBus(Bus):
 
         # Emit the cut instance.
         bus.declare(context)
-        tpl = templates.get_template("solder.axi_atomic_adapter.sv.tpl" if not filter else
-                                     "solder.axi_atop_filter.sv.tpl")
-        context.write(
-            tpl.render_unicode(
-                bus_in=self,
-                bus_out=bus,
-                max_trans=max_trans,
-                name=inst_name or "i_{}".format(name),
-            ) + "\n")
+        if not filter:
+            tpl = templates.get_template("solder.axi_atomic_adapter.sv.tpl")
+            context.write(
+                tpl.render_unicode(
+                    bus_in=self,
+                    bus_out=bus,
+                    max_trans=max_trans,
+                    user_as_id=user_as_id,
+                    user_id_msb=user_id_msb,
+                    user_id_lsb=user_id_lsb,
+                    name=inst_name or "i_{}".format(name),
+                ) + "\n")
+        else:
+            tpl = templates.get_template("solder.axi_atop_filter.sv.tpl")
+            context.write(
+                tpl.render_unicode(
+                    bus_in=self,
+                    bus_out=bus,
+                    max_trans=max_trans,
+                    name=inst_name or "i_{}".format(name),
+                ) + "\n")
         return bus
 
     def to_axi_lite(self, context, name, inst_name=None, to=None):

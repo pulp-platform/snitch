@@ -7,10 +7,10 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/axi_riscv_atomics.git",
-    rev: "master",
+    rev: "v0.5.0",
   },
 
-//   patch_dir: "patches/pulp_platform_axi_riscv_atomics",
+  patch_dir: "patches/pulp_platform_axi_riscv_atomics",
 
 //   exclude_from_upstream: [
 //     ".ci",

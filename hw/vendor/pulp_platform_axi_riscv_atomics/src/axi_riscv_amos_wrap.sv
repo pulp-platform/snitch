@@ -9,30 +9,26 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-// Wrapper for the AXI RISC-V LR/SC Adapter that exposes AXI SystemVerilog interfaces.
+// Wrapper for the AXI RISC-V AMO Adapter that exposes AXI SystemVerilog interfaces.
 //
-// See the header of `axi_riscv_lrsc` for a description.
+// See the header of `axi_riscv_amos` for a description.
 //
 // Maintainer: Andreas Kurth <akurth@iis.ee.ethz.ch>
 
-module axi_riscv_lrsc_wrap #(
-    /// Exclusively-accessible address range (closed interval from ADDR_BEGIN to ADDR_END)
-    parameter longint unsigned ADDR_BEGIN = 0,
-    parameter longint unsigned ADDR_END = 0,
+module axi_riscv_amos_wrap #(
     /// AXI Parameters
-    parameter int unsigned AXI_ADDR_WIDTH = 0,
-    parameter int unsigned AXI_DATA_WIDTH = 0,
-    parameter int unsigned AXI_ID_WIDTH = 0,
-    parameter int unsigned AXI_USER_WIDTH = 0,
-    parameter int unsigned AXI_MAX_READ_TXNS = 0,  // Maximum number of in-flight read transactions
-    parameter int unsigned AXI_MAX_WRITE_TXNS = 0, // Maximum number of in-flight write transactions
-    parameter bit AXI_USER_AS_ID = 1'b0,           // Use the AXI User signal instead of the AXI ID to track reservations
-    parameter int unsigned AXI_USER_ID_MSB = 0,    // MSB of the ID in the user signal
-    parameter int unsigned AXI_USER_ID_LSB = 0,    // LSB of the ID in the user signal
-    /// Enable debug prints (not synthesizable).
-    parameter bit DEBUG = 1'b0,
+    parameter int unsigned AXI_ADDR_WIDTH       = 0,
+    parameter int unsigned AXI_DATA_WIDTH       = 0,
+    parameter int unsigned AXI_ID_WIDTH         = 0,
+    parameter int unsigned AXI_USER_WIDTH       = 0,
+    // Maximum number of AXI write transactions outstanding at the same time
+    parameter int unsigned AXI_MAX_WRITE_TXNS   = 0,
+    // Word width of the widest RISC-V processor that can issue requests to this module.
+    // 32 for RV32; 64 for RV64, where both 32-bit (.W suffix) and 64-bit (.D suffix) AMOs are
+    // supported if `aw_strb` is set correctly.
+    parameter int unsigned RISCV_WORD_WIDTH     = 0,
     /// Derived Parameters (do NOT change manually!)
-    localparam int unsigned AXI_STRB_WIDTH = AXI_DATA_WIDTH / 8
+    localparam int unsigned AXI_STRB_WIDTH      = AXI_DATA_WIDTH / 8
 ) (
     input  logic    clk_i,
     input  logic    rst_ni,
@@ -40,20 +36,14 @@ module axi_riscv_lrsc_wrap #(
     AXI_BUS.Slave   slv
 );
 
-    axi_riscv_lrsc #(
-        .ADDR_BEGIN             (ADDR_BEGIN),
-        .ADDR_END               (ADDR_END),
-        .AXI_ADDR_WIDTH         (AXI_ADDR_WIDTH),
-        .AXI_DATA_WIDTH         (AXI_DATA_WIDTH),
-        .AXI_ID_WIDTH           (AXI_ID_WIDTH),
-        .AXI_USER_WIDTH         (AXI_USER_WIDTH),
-        .AXI_MAX_READ_TXNS      (AXI_MAX_READ_TXNS),
-        .AXI_MAX_WRITE_TXNS     (AXI_MAX_WRITE_TXNS),
-        .AXI_USER_AS_ID         (AXI_USER_AS_ID),
-        .AXI_USER_ID_MSB        (AXI_USER_ID_MSB),
-        .AXI_USER_ID_LSB        (AXI_USER_ID_LSB),
-        .DEBUG                  (DEBUG)
-    ) i_lrsc (
+    axi_riscv_amos #(
+        .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH     ),
+        .AXI_DATA_WIDTH     ( AXI_DATA_WIDTH     ),
+        .AXI_ID_WIDTH       ( AXI_ID_WIDTH       ),
+        .AXI_USER_WIDTH     ( AXI_USER_WIDTH     ),
+        .AXI_MAX_WRITE_TXNS ( AXI_MAX_WRITE_TXNS ),
+        .RISCV_WORD_WIDTH   ( RISCV_WORD_WIDTH   )
+    ) i_amos (
         .clk_i           ( clk_i         ),
         .rst_ni          ( rst_ni        ),
         .slv_aw_addr_i   ( slv.aw_addr   ),

@@ -3,7 +3,11 @@
     .AXI_DATA_WIDTH (${bus_in.dw}),
     .AXI_ID_WIDTH (${bus_in.iw}),
     .AXI_USER_WIDTH (${max(bus_in.uw, 1)}),
+    .AXI_MAX_READ_TXNS (${max_trans}),
     .AXI_MAX_WRITE_TXNS (${max_trans}),
+    .AXI_USER_AS_ID (${user_as_id}),
+    .AXI_USER_ID_MSB (${user_id_msb}),
+    .AXI_USER_ID_LSB (${user_id_lsb}),
     .RISCV_WORD_WIDTH (64)
   ) ${name} (
     .clk_i (${bus_in.clk}),
