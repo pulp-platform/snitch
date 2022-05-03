@@ -24,6 +24,12 @@ module testharness import occamy_pkg::*; (
     end
   end
 
+  logic clk_periph_i, rst_periph_ni;
+  assign clk_periph_i = clk_i;
+  assign rst_periph_ni = rst_ni;
+
+
+
 
 
 
@@ -180,6 +186,96 @@ module testharness import occamy_pkg::*; (
 
 
   logic tx, rx;
+  axi_lite_a48_d32_req_t axi_lite_bootrom_req;
+  axi_lite_a48_d32_req_t axi_lite_fll_system_req;
+  axi_lite_a48_d32_req_t axi_lite_fll_periph_req;
+  axi_lite_a48_d32_req_t axi_lite_fll_hbm2e_req;
+
+  axi_lite_a48_d32_rsp_t axi_lite_bootrom_rsp;
+  axi_lite_a48_d32_rsp_t axi_lite_fll_system_rsp;
+  axi_lite_a48_d32_rsp_t axi_lite_fll_periph_rsp;
+  axi_lite_a48_d32_rsp_t axi_lite_fll_hbm2e_rsp;
+  reg_a48_d32_req_t bootrom_regbus_req;
+  reg_a48_d32_rsp_t bootrom_regbus_rsp;
+
+  axi_lite_to_reg #(
+    .ADDR_WIDTH     ( 48 ),
+    .DATA_WIDTH     ( 32 ),
+    .axi_lite_req_t ( axi_lite_a48_d32_req_t ),
+    .axi_lite_rsp_t ( axi_lite_a48_d32_rsp_t ),
+    .reg_req_t      ( reg_a48_d32_req_t ),
+    .reg_rsp_t      ( reg_a48_d32_rsp_t )
+  ) i_bootrom_regbus_pc (
+    .clk_i          ( clk_periph_i ),
+    .rst_ni         ( rst_periph_ni ),
+    .axi_lite_req_i ( axi_lite_bootrom_req ),
+    .axi_lite_rsp_o ( axi_lite_bootrom_rsp ),
+    .reg_req_o      ( bootrom_regbus_req ),
+    .reg_rsp_i      ( bootrom_regbus_rsp )
+  );
+
+
+  reg_a48_d32_req_t fll_system_req;
+  reg_a48_d32_rsp_t fll_system_rsp;
+
+  axi_lite_to_reg #(
+    .ADDR_WIDTH     ( 48 ),
+    .DATA_WIDTH     ( 32 ),
+    .axi_lite_req_t ( axi_lite_a48_d32_req_t ),
+    .axi_lite_rsp_t ( axi_lite_a48_d32_rsp_t ),
+    .reg_req_t      ( reg_a48_d32_req_t ),
+    .reg_rsp_t      ( reg_a48_d32_rsp_t )
+  ) i_fll_system_pc (
+    .clk_i          ( clk_periph_i ),
+    .rst_ni         ( rst_periph_ni ),
+    .axi_lite_req_i ( axi_lite_fll_system_req ),
+    .axi_lite_rsp_o ( axi_lite_fll_system_rsp ),
+    .reg_req_o      ( fll_system_req ),
+    .reg_rsp_i      ( fll_system_rsp )
+  );
+
+
+  reg_a48_d32_req_t fll_periph_req;
+  reg_a48_d32_rsp_t fll_periph_rsp;
+
+  axi_lite_to_reg #(
+    .ADDR_WIDTH     ( 48 ),
+    .DATA_WIDTH     ( 32 ),
+    .axi_lite_req_t ( axi_lite_a48_d32_req_t ),
+    .axi_lite_rsp_t ( axi_lite_a48_d32_rsp_t ),
+    .reg_req_t      ( reg_a48_d32_req_t ),
+    .reg_rsp_t      ( reg_a48_d32_rsp_t )
+  ) i_fll_periph_pc (
+    .clk_i          ( clk_periph_i ),
+    .rst_ni         ( rst_periph_ni ),
+    .axi_lite_req_i ( axi_lite_fll_periph_req ),
+    .axi_lite_rsp_o ( axi_lite_fll_periph_rsp ),
+    .reg_req_o      ( fll_periph_req ),
+    .reg_rsp_i      ( fll_periph_rsp )
+  );
+
+
+  reg_a48_d32_req_t fll_hbm2e_req;
+  reg_a48_d32_rsp_t fll_hbm2e_rsp;
+
+  axi_lite_to_reg #(
+    .ADDR_WIDTH     ( 48 ),
+    .DATA_WIDTH     ( 32 ),
+    .axi_lite_req_t ( axi_lite_a48_d32_req_t ),
+    .axi_lite_rsp_t ( axi_lite_a48_d32_rsp_t ),
+    .reg_req_t      ( reg_a48_d32_req_t ),
+    .reg_rsp_t      ( reg_a48_d32_rsp_t )
+  ) i_fll_hbm2e_pc (
+    .clk_i          ( clk_periph_i ),
+    .rst_ni         ( rst_periph_ni ),
+    .axi_lite_req_i ( axi_lite_fll_hbm2e_req ),
+    .axi_lite_rsp_o ( axi_lite_fll_hbm2e_rsp ),
+    .reg_req_o      ( fll_hbm2e_req ),
+    .reg_rsp_i      ( fll_hbm2e_rsp )
+  );
+
+
+
 
   axi_a48_d64_i8_u9_req_t pcie_axi_req;
   axi_a48_d64_i8_u9_resp_t pcie_axi_rsp;
@@ -200,9 +296,6 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  reg_a48_d32_req_t bootrom_regbus_req;
-  reg_a48_d32_rsp_t bootrom_regbus_rsp;
-
   tb_memory_regbus #(
     .AddrWidth (48),
     .DataWidth (32),
@@ -215,9 +308,6 @@ module testharness import occamy_pkg::*; (
     .rsp_o (bootrom_regbus_rsp)
   );
 
-
-  reg_a48_d32_req_t fll_system_req;
-  reg_a48_d32_rsp_t fll_system_rsp;
 
   tb_memory_regbus #(
     .AddrWidth (48),
@@ -232,9 +322,6 @@ module testharness import occamy_pkg::*; (
   );
 
 
-  reg_a48_d32_req_t fll_periph_req;
-  reg_a48_d32_rsp_t fll_periph_rsp;
-
   tb_memory_regbus #(
     .AddrWidth (48),
     .DataWidth (32),
@@ -247,9 +334,6 @@ module testharness import occamy_pkg::*; (
     .rsp_o (fll_periph_rsp)
   );
 
-
-  reg_a48_d32_req_t fll_hbm2e_req;
-  reg_a48_d32_rsp_t fll_hbm2e_rsp;
 
   tb_memory_regbus #(
     .AddrWidth (48),
@@ -267,8 +351,8 @@ module testharness import occamy_pkg::*; (
     .clk_i,
     .rst_ni,
     .sram_cfgs_i ('0),
-    .clk_periph_i (clk_i),
-    .rst_periph_ni (rst_ni),
+    .clk_periph_i,
+    .rst_periph_ni,
     .rtc_i,
     .test_mode_i (1'b0),
     .chip_id_i ('0),
@@ -301,14 +385,14 @@ module testharness import occamy_pkg::*; (
     .spim_sd_o (),
     .spim_sd_en_o (),
     .spim_sd_i ('0),
-    .bootrom_req_o (bootrom_regbus_req),
-    .bootrom_rsp_i (bootrom_regbus_rsp),
-    .fll_system_req_o (fll_system_req),
-    .fll_system_rsp_i (fll_system_rsp),
-    .fll_periph_req_o (fll_periph_req),
-    .fll_periph_rsp_i (fll_periph_rsp),
-    .fll_hbm2e_req_o (fll_hbm2e_req),
-    .fll_hbm2e_rsp_i (fll_hbm2e_rsp),
+    .bootrom_req_o (axi_lite_bootrom_req),
+    .bootrom_rsp_i (axi_lite_bootrom_rsp),
+    .fll_system_req_o (axi_lite_fll_system_req),
+    .fll_system_rsp_i (axi_lite_fll_system_rsp),
+    .fll_periph_req_o (axi_lite_fll_periph_req),
+    .fll_periph_rsp_i (axi_lite_fll_periph_rsp),
+    .fll_hbm2e_req_o (axi_lite_fll_hbm2e_req),
+    .fll_hbm2e_rsp_i (axi_lite_fll_hbm2e_rsp),
     .hbi_wide_cfg_req_o (),
     .hbi_wide_cfg_rsp_i ('0),
     .hbi_narrow_cfg_req_o (),

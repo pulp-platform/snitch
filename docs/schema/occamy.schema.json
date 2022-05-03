@@ -136,7 +136,7 @@
                     "description": "hbmx -> hbm",
                     "default": 3
                 },
-                "periph_regbus": {
+                "periph_axi_lite_narrow": {
                     "type": "integer",
                     "description": "soc narrow -> periph regbus",
                     "default": 3

@@ -25,7 +25,7 @@
   cuts_narrow_and_hbi = cfg["cuts"]["narrow_and_hbi"]
   cuts_pre_to_hbmx = cfg["cuts"]["pre_to_hbmx"]
   cuts_hbmx_to_hbm = cfg["cuts"]["hbmx_to_hbm"]
-  cuts_periph_regbus = cfg["cuts"]["periph_regbus"]
+  cuts_periph_axi_lite_narrow = cfg["cuts"]["periph_axi_lite_narrow"]
   cuts_periph_axi_lite = cfg["cuts"]["periph_axi_lite"]
   txns_wide_and_inter = cfg["txns"]["wide_and_inter"]
   txns_wide_to_hbm = cfg["txns"]["wide_to_hbm"]
@@ -93,8 +93,8 @@ module ${name}_soc
   output  ${soc_narrow_xbar.in_periph.rsp_type()} periph_axi_lite_rsp_o,
 
   // Peripheral Ports (to Regbus Xbar)
-  output  ${soc_narrow_xbar.out_regbus_periph.req_type()} periph_regbus_req_o,
-  input   ${soc_narrow_xbar.out_regbus_periph.rsp_type()} periph_regbus_rsp_i,
+  output  ${soc_narrow_xbar.out_axi_lite_narrow_periph.req_type()} periph_axi_lite_narrow_req_o,
+  input   ${soc_narrow_xbar.out_axi_lite_narrow_periph.rsp_type()} periph_axi_lite_narrow_rsp_i,
 
   // SoC control register IO
   output logic [1:0] spm_narrow_rerror_o,
@@ -564,9 +564,9 @@ module ${name}_soc
   // Peripherals //
   /////////////////
   <%
-    periph_regbus_out = soc_narrow_xbar.__dict__["out_regbus_periph"] \
-      .atomic_adapter(context, filter=True, max_trans=max_trans_atop_filter_per, name="periph_regbus_out_noatop", inst_name="i_periph_regbus_out_atop_filter") \
-      .cut(context, cuts_periph_regbus, name="periph_regbus_out", inst_name="i_periph_regbus_out_cut")
+    periph_axi_lite_narrow_out = soc_narrow_xbar.__dict__["out_axi_lite_narrow_periph"] \
+      .atomic_adapter(context, filter=True, max_trans=max_trans_atop_filter_per, name="periph_axi_lite_narrow_out_noatop", inst_name="i_periph_axi_lite_narrow_out_atop_filter") \
+      .cut(context, cuts_periph_axi_lite_narrow, name="periph_axi_lite_narrow_out", inst_name="i_periph_axi_lite_narrow_out_cut")
     periph_axi_lite_out = soc_narrow_xbar.__dict__["out_periph"] \
       .atomic_adapter(context, filter=True, max_trans=max_trans_atop_filter_per, name="periph_axi_lite_out_noatop", inst_name="i_periph_axi_lite_out_atop_filter") \
       .cut(context, cuts_periph_axi_lite, name="periph_axi_lite_out", inst_name="i_periph_axi_lite_out_cut") \
@@ -582,7 +582,7 @@ module ${name}_soc
   // Outputs
   assign periph_axi_lite_req_o = ${periph_axi_lite_out.req_name()};
   assign ${periph_axi_lite_out.rsp_name()} = periph_axi_lite_rsp_i;
-  assign periph_regbus_req_o = ${periph_regbus_out.req_name()};
-  assign ${periph_regbus_out.rsp_name()} = periph_regbus_rsp_i;
+  assign periph_axi_lite_narrow_req_o = ${periph_axi_lite_narrow_out.req_name()};
+  assign ${periph_axi_lite_narrow_out.rsp_name()} = periph_axi_lite_narrow_rsp_i;
 
 endmodule

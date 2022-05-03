@@ -58,31 +58,31 @@ module ${name}_top
   input        [3:0]  spim_sd_i,
 
   /// Boot ROM
-  output ${soc_regbus_periph_xbar.out_bootrom.req_type()} bootrom_req_o,
-  input  ${soc_regbus_periph_xbar.out_bootrom.rsp_type()} bootrom_rsp_i,
+  output ${soc_axi_lite_narrow_periph_xbar.out_bootrom.req_type()} bootrom_req_o,
+  input  ${soc_axi_lite_narrow_periph_xbar.out_bootrom.rsp_type()} bootrom_rsp_i,
 
   /// FLLs
-  output ${soc_regbus_periph_xbar.out_fll_system.req_type()} fll_system_req_o,
-  input  ${soc_regbus_periph_xbar.out_fll_system.rsp_type()} fll_system_rsp_i,
-  output ${soc_regbus_periph_xbar.out_fll_periph.req_type()} fll_periph_req_o,
-  input  ${soc_regbus_periph_xbar.out_fll_periph.rsp_type()} fll_periph_rsp_i,
-  output ${soc_regbus_periph_xbar.out_fll_hbm2e.req_type()} fll_hbm2e_req_o,
-  input  ${soc_regbus_periph_xbar.out_fll_hbm2e.rsp_type()} fll_hbm2e_rsp_i,
+  output ${soc_axi_lite_narrow_periph_xbar.out_fll_system.req_type()} fll_system_req_o,
+  input  ${soc_axi_lite_narrow_periph_xbar.out_fll_system.rsp_type()} fll_system_rsp_i,
+  output ${soc_axi_lite_narrow_periph_xbar.out_fll_periph.req_type()} fll_periph_req_o,
+  input  ${soc_axi_lite_narrow_periph_xbar.out_fll_periph.rsp_type()} fll_periph_rsp_i,
+  output ${soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e.req_type()} fll_hbm2e_req_o,
+  input  ${soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e.rsp_type()} fll_hbm2e_rsp_i,
 
   /// HBI Config and APB Control
-  output ${soc_regbus_periph_xbar.out_hbi_wide_cfg.req_type()} hbi_wide_cfg_req_o,
-  input  ${soc_regbus_periph_xbar.out_hbi_wide_cfg.rsp_type()} hbi_wide_cfg_rsp_i,
-  output ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.req_type()} hbi_narrow_cfg_req_o,
-  input  ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.rsp_type()} hbi_narrow_cfg_rsp_i,
+  output ${soc_axi_lite_narrow_periph_xbar.out_hbi_wide_cfg.req_type()} hbi_wide_cfg_req_o,
+  input  ${soc_axi_lite_narrow_periph_xbar.out_hbi_wide_cfg.rsp_type()} hbi_wide_cfg_rsp_i,
+  output ${soc_axi_lite_narrow_periph_xbar.out_hbi_narrow_cfg.req_type()} hbi_narrow_cfg_req_o,
+  input  ${soc_axi_lite_narrow_periph_xbar.out_hbi_narrow_cfg.rsp_type()} hbi_narrow_cfg_rsp_i,
   /// HBM Config
-  output ${soc_regbus_periph_xbar.out_hbm_cfg.req_type()} hbm_cfg_req_o,
-  input  ${soc_regbus_periph_xbar.out_hbm_cfg.rsp_type()} hbm_cfg_rsp_i,
+  output ${soc_axi_lite_narrow_periph_xbar.out_hbm_cfg.req_type()} hbm_cfg_req_o,
+  input  ${soc_axi_lite_narrow_periph_xbar.out_hbm_cfg.rsp_type()} hbm_cfg_rsp_i,
   /// PCIe/DDR Config
-  output ${soc_regbus_periph_xbar.out_pcie_cfg.req_type()} pcie_cfg_req_o,
-  input  ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_type()} pcie_cfg_rsp_i,
+  output ${soc_axi_lite_narrow_periph_xbar.out_pcie_cfg.req_type()} pcie_cfg_req_o,
+  input  ${soc_axi_lite_narrow_periph_xbar.out_pcie_cfg.rsp_type()} pcie_cfg_rsp_i,
   /// Chip specific control registers
-  output ${soc_regbus_periph_xbar.out_chip_ctrl.req_type()} chip_ctrl_req_o,
-  input  ${soc_regbus_periph_xbar.out_chip_ctrl.rsp_type()} chip_ctrl_rsp_i,
+  output ${soc_axi_lite_narrow_periph_xbar.out_chip_ctrl.req_type()} chip_ctrl_req_o,
+  input  ${soc_axi_lite_narrow_periph_xbar.out_chip_ctrl.rsp_type()} chip_ctrl_rsp_i,
   // "external interrupts from uncore - "programmable"
   input logic [11:0] ext_irq_i,
 
@@ -127,6 +127,27 @@ module ${name}_top
   input sram_cfgs_t sram_cfgs_i
 );
 
+<%
+  cuts_hbm_xbar_cfg = cfg["cuts"]["periph_axi_lite_narrow_hbm_xbar_cfg"]
+  cuts_hbi_wide_cfg = cfg["cuts"]["periph_axi_lite_narrow_hbi_wide_cfg"]
+  cuts_hbi_narrow_cfg = cfg["cuts"]["periph_axi_lite_narrow_hbi_narrow_cfg"]
+  cuts_pcie_cfg = cfg["cuts"]["periph_axi_lite_narrow_pcie_cfg"]
+  cuts_hbm_cfg = cfg["cuts"]["periph_axi_lite_narrow_hbm_cfg"]
+  cuts_clint_cfg = cfg["cuts"]["periph_axi_lite_narrow_clint_cfg"]
+  cuts_soc_ctrl_cfg = cfg["cuts"]["periph_axi_lite_narrow_soc_ctrl_cfg"]
+  cuts_chip_ctrl_cfg = cfg["cuts"]["periph_axi_lite_narrow_chip_ctrl_cfg"]
+  cuts_uart_cfg = cfg["cuts"]["periph_axi_lite_narrow_uart_cfg"]
+  cuts_bootrom_cfg = cfg["cuts"]["periph_axi_lite_narrow_bootrom_cfg"]
+  cuts_fll_system_cfg = cfg["cuts"]["periph_axi_lite_narrow_fll_system_cfg"]
+  cuts_fll_periph_cfg = cfg["cuts"]["periph_axi_lite_narrow_fll_periph_cfg"]
+  cuts_fll_hbm2e_cfg = cfg["cuts"]["periph_axi_lite_narrow_fll_hbm2e_cfg"]
+  cuts_plic_cfg = cfg["cuts"]["periph_axi_lite_narrow_plic_cfg"]
+  cuts_spim_cfg = cfg["cuts"]["periph_axi_lite_narrow_spim_cfg"]
+  cuts_gpio_cfg = cfg["cuts"]["periph_axi_lite_narrow_gpio_cfg"]
+  cuts_i2c_cfg = cfg["cuts"]["periph_axi_lite_narrow_i2c_cfg"]
+  cuts_timer_cfg = cfg["cuts"]["periph_axi_lite_narrow_timer_cfg"]
+%>
+
   ${name}_soc_reg_pkg::${name}_soc_reg2hw_t soc_ctrl_out;
   ${name}_soc_reg_pkg::${name}_soc_hw2reg_t soc_ctrl_in;
   logic [1:0] spm_narrow_rerror;
@@ -157,19 +178,23 @@ module ${name}_top
   //   HBM XBAR CFG       //
   //////////////////////////
 
-  ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.req_type()} reg_hbm_xbar_cfg_req;
-  ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.rsp_type()} reg_hbm_xbar_cfg_rsp;
+  <% regbus_hbm_xbar_cfg = soc_axi_lite_narrow_periph_xbar.out_hbm_xbar_cfg \
+    .cut(context, cuts_hbm_xbar_cfg, name="soc_axi_lite_narrow_periph_xbar_out_hbm_xbar_cfg_cut") \
+    .to_reg(context, "axi_lite_to_reg_hbm_xbar_cfg") %>
+
+  ${regbus_hbm_xbar_cfg.req_type()} reg_hbm_xbar_cfg_req;
+  ${regbus_hbm_xbar_cfg.rsp_type()} reg_hbm_xbar_cfg_rsp;
 
   occamy_hbm_xbar_reg_pkg::occamy_hbm_xbar_reg2hw_t hbm_xbar_reg2hw;
 
   reg_cdc #(
-    .req_t  ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.req_type()} ),
-    .rsp_t  ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.rsp_type()} )
+    .req_t  ( ${regbus_hbm_xbar_cfg.req_type()} ),
+    .rsp_t  ( ${regbus_hbm_xbar_cfg.rsp_type()} )
   ) i_reg_cdc_hbm_xbar_cfg (
-    .src_clk_i  ( clk_periph_i                                          ),
-    .src_rst_ni ( rst_periph_ni                                         ),
-    .src_req_i  ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.req_name()} ),
-    .src_rsp_o  ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.rsp_name()} ),
+    .src_clk_i  ( ${regbus_hbm_xbar_cfg.clk}                                ),
+    .src_rst_ni ( ${regbus_hbm_xbar_cfg.rst}                                ),
+    .src_req_i  ( ${regbus_hbm_xbar_cfg.req_name()} ),
+    .src_rsp_o  ( ${regbus_hbm_xbar_cfg.rsp_name()} ),
 
     .dst_clk_i  ( clk_i                 ),
     .dst_rst_ni ( rst_ni                ),
@@ -178,8 +203,8 @@ module ${name}_top
   );
 
   occamy_hbm_xbar_reg_top #(
-    .reg_req_t ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.req_type()}  ),
-    .reg_rsp_t ( ${soc_regbus_periph_xbar.out_hbm_xbar_cfg.rsp_type()}  )
+    .reg_req_t ( ${regbus_hbm_xbar_cfg.req_type()}  ),
+    .reg_rsp_t ( ${regbus_hbm_xbar_cfg.rsp_type()}  )
   ) i_occamy_hbm_xbar_reg_top (
     .clk_i     ( clk_i                ),
     .rst_ni    ( rst_ni               ),
@@ -201,7 +226,7 @@ module ${name}_top
 <%
   periph_axi_lite_soc2per = soc_narrow_xbar.out_periph.copy(name="periph_axi_lite_soc2per").declare(context)
   periph_axi_lite_per2soc = soc_narrow_xbar.in_periph.copy(name="periph_axi_lite_per2soc").declare(context)
-  periph_regbus_soc2per = soc_narrow_xbar.out_regbus_periph.copy(name="periph_regbus_soc2per").declare(context)
+  periph_regbus_soc2per = soc_narrow_xbar.out_axi_lite_narrow_periph.copy(name="periph_regbus_soc2per").declare(context)
 %> \
   ${name}_soc i_${name}_soc (
     .clk_i,
@@ -236,8 +261,8 @@ module ${name}_top
     .periph_axi_lite_rsp_i ( periph_axi_lite_soc2per_rsp ),
     .periph_axi_lite_req_i ( periph_axi_lite_per2soc_req ),
     .periph_axi_lite_rsp_o ( periph_axi_lite_per2soc_rsp ),
-    .periph_regbus_req_o ( periph_regbus_soc2per_req ),
-    .periph_regbus_rsp_i ( periph_regbus_soc2per_rsp ),
+    .periph_axi_lite_narrow_req_o ( periph_regbus_soc2per_req ),
+    .periph_axi_lite_narrow_rsp_i ( periph_regbus_soc2per_rsp ),
     .spm_narrow_rerror_o (spm_narrow_rerror),
     .spm_wide_rerror_o (spm_wide_rerror),
     .mtip_i ( mtip ),
@@ -256,30 +281,34 @@ module ${name}_top
   <% soc_periph_xbar.out_soc \
       .cdc(context, "clk_i", "rst_ni", "axi_lite_to_soc_cdc") \
       .to_axi(context, "axi_lite_to_axi_periph", to=periph_axi_lite_per2soc) %> \
-  // Connect Regbus master
-  <% periph_regbus_soc2per \
-      .cdc(context, "clk_periph_i", "rst_periph_ni", "periph_cdc") \
-      .change_dw(context, 32, "axi_to_axi_lite_dw") \
-      .to_axi_lite(context, "axi_to_axi_lite_regbus_periph") \
-      .to_reg(context, "axi_lite_to_regbus_periph", to=soc_regbus_periph_xbar.in_soc) %> \
 
   /////////////////////////////
   // HBI & HBM & PCIE Config //
   /////////////////////////////
 
   // RegBus port for HBI
-  assign hbi_wide_cfg_req_o = ${soc_regbus_periph_xbar.out_hbi_wide_cfg.req_name()};
-  assign ${soc_regbus_periph_xbar.out_hbi_wide_cfg.rsp_name()} = hbi_wide_cfg_rsp_i;
-  assign hbi_narrow_cfg_req_o = ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.req_name()};
-  assign ${soc_regbus_periph_xbar.out_hbi_narrow_cfg.rsp_name()} = hbi_narrow_cfg_rsp_i;
+  <% axi_lite_cut_hbi_wide_cfg = soc_axi_lite_narrow_periph_xbar.out_hbi_wide_cfg \
+    .cut(context, cuts_hbi_wide_cfg, name="soc_axi_lite_narrow_periph_xbar_out_hbi_wide_cfg_cut")  %>
+  assign hbi_wide_cfg_req_o = ${axi_lite_cut_hbi_wide_cfg.req_name()};
+  assign ${axi_lite_cut_hbi_wide_cfg.rsp_name()} = hbi_wide_cfg_rsp_i;
+
+  <% axi_lite_cut_hbi_narrow_cfg = soc_axi_lite_narrow_periph_xbar.out_hbi_narrow_cfg \
+    .cut(context, cuts_hbi_narrow_cfg, name="soc_axi_lite_narrow_periph_xbar_out_hbi_narrow_cfg_cut")  %>
+  assign hbi_narrow_cfg_req_o = ${axi_lite_cut_hbi_narrow_cfg.req_name()};
+  assign ${axi_lite_cut_hbi_narrow_cfg.rsp_name()} = hbi_narrow_cfg_rsp_i;
 
   // RegBus port for PCIE
-  assign pcie_cfg_req_o = ${soc_regbus_periph_xbar.out_pcie_cfg.req_name()};
-  assign ${soc_regbus_periph_xbar.out_pcie_cfg.rsp_name()} = pcie_cfg_rsp_i;
+  <% axi_lite_cut_pcie_cfg = soc_axi_lite_narrow_periph_xbar.out_pcie_cfg \
+    .cut(context, cuts_pcie_cfg, name="soc_axi_lite_narrow_periph_xbar_out_pcie_cfg_cut")  %>
+  assign pcie_cfg_req_o = ${axi_lite_cut_pcie_cfg.req_name()};
+  assign ${axi_lite_cut_pcie_cfg.rsp_name()} = pcie_cfg_rsp_i;
 
   // APB port for HBM
-  assign hbm_cfg_req_o = ${soc_regbus_periph_xbar.out_hbm_cfg.req_name()};
-  assign ${soc_regbus_periph_xbar.out_hbm_cfg.rsp_name()} = hbm_cfg_rsp_i;
+  <% axi_lite_cut_hbm_cfg = soc_axi_lite_narrow_periph_xbar.out_hbm_cfg \
+    .cut(context, cuts_hbm_cfg, name="soc_axi_lite_narrow_periph_xbar_out_hbm_cfg_cut")  %>
+
+  assign hbm_cfg_req_o = ${axi_lite_cut_hbm_cfg.req_name()};
+  assign ${axi_lite_cut_hbm_cfg.rsp_name()} = hbm_cfg_rsp_i;
 
   ///////////
   // Debug //
@@ -431,15 +460,19 @@ module ${name}_top
   ///////////////
   //   CLINT   //
   ///////////////
+
+  <% regbus_clint = soc_axi_lite_narrow_periph_xbar.out_clint \
+    .cut(context, cuts_clint_cfg, name="soc_axi_lite_narrow_periph_xbar_out_clint_cut") \
+    .to_reg(context, "axi_lite_to_reg_clint") %>
   clint #(
-    .reg_req_t ( ${soc_regbus_periph_xbar.out_clint.req_type()} ),
-    .reg_rsp_t ( ${soc_regbus_periph_xbar.out_clint.rsp_type()} )
+    .reg_req_t ( ${regbus_clint.req_type()} ),
+    .reg_rsp_t ( ${regbus_clint.rsp_type()} )
   ) i_clint (
-    .clk_i (${soc_regbus_periph_xbar.out_clint.clk}),
-    .rst_ni (${soc_regbus_periph_xbar.out_clint.rst}),
+    .clk_i (${regbus_clint.clk}),
+    .rst_ni (${regbus_clint.rst}),
     .testmode_i (1'b0),
-    .reg_req_i (${soc_regbus_periph_xbar.out_clint.req_name()}),
-    .reg_rsp_o (${soc_regbus_periph_xbar.out_clint.rsp_name()}),
+    .reg_req_i (${regbus_clint.req_name()}),
+    .reg_rsp_o (${regbus_clint.rsp_name()}),
     .rtc_i (rtc_i),
     .timer_irq_o (mtip),
     .ipi_o (msip)
@@ -448,14 +481,18 @@ module ${name}_top
   /////////////////////
   //   SOC CONTROL   //
   /////////////////////
+
+  <% regbus_soc_ctrl = soc_axi_lite_narrow_periph_xbar.out_soc_ctrl \
+    .cut(context, cuts_soc_ctrl_cfg, name="soc_axi_lite_narrow_periph_xbar_out_soc_ctrl_cut") \
+    .to_reg(context, "axi_lite_to_reg_soc_ctrl") %>
   ${name}_soc_ctrl #(
-    .reg_req_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.req_type()} ),
-    .reg_rsp_t ( ${soc_regbus_periph_xbar.out_soc_ctrl.rsp_type()} )
+    .reg_req_t ( ${regbus_soc_ctrl.req_type()} ),
+    .reg_rsp_t ( ${regbus_soc_ctrl.rsp_type()} )
   ) i_soc_ctrl (
-    .clk_i     ( clk_i  ),
-    .rst_ni    ( rst_ni ),
-    .reg_req_i ( ${soc_regbus_periph_xbar.out_soc_ctrl.req_name()} ),
-    .reg_rsp_o ( ${soc_regbus_periph_xbar.out_soc_ctrl.rsp_name()} ),
+    .clk_i     ( ${regbus_soc_ctrl.clk} ),
+    .rst_ni    ( ${regbus_soc_ctrl.rst} ),
+    .reg_req_i ( ${regbus_soc_ctrl.req_name()} ),
+    .reg_rsp_o ( ${regbus_soc_ctrl.rsp_name()} ),
     .reg2hw_o  ( soc_ctrl_out ),
     .hw2reg_i  ( soc_ctrl_in ),
     .event_ecc_rerror_narrow_i(spm_narrow_rerror),
@@ -470,14 +507,19 @@ module ${name}_top
   //   CHIP CONTROL   //
   //////////////////////
   // Contains NDA and chip specific information.
-  assign chip_ctrl_req_o = ${soc_regbus_periph_xbar.out_chip_ctrl.req_name()};
-  assign ${soc_regbus_periph_xbar.out_chip_ctrl.rsp_name()} = chip_ctrl_rsp_i;
+  <% axi_lite_cut_chip_ctrl = soc_axi_lite_narrow_periph_xbar.out_chip_ctrl.cut(context, cuts_chip_ctrl_cfg, name="soc_axi_lite_narrow_periph_xbar_out_chip_ctrl_cut")  %>
+
+  assign chip_ctrl_req_o = ${axi_lite_cut_chip_ctrl.req_name()};
+  assign ${axi_lite_cut_chip_ctrl.rsp_name()} = chip_ctrl_rsp_i;
 
   //////////////
   //   UART   //
   //////////////
 
-  <% uart_apb = soc_regbus_periph_xbar.out_uart.to_apb(context, "uart_apb") %>
+  <% regbus_uart = soc_axi_lite_narrow_periph_xbar.out_uart \
+    .cut(context, cuts_uart_cfg, name="soc_axi_lite_narrow_periph_xbar_out_uart_cut") \
+    .to_reg(context, "axi_lite_to_reg_uart") %>
+  <% uart_apb = regbus_uart.to_apb(context, "uart_apb") %>
   apb_uart_wrap #(
     .apb_req_t (${uart_apb.req_type()} ),
     .apb_rsp_t (${uart_apb.rsp_type()} )
@@ -505,35 +547,43 @@ module ${name}_top
 
   // This is very system specific, so we might be better off
   // placing it outside the top-level.
-  assign bootrom_req_o = ${soc_regbus_periph_xbar.out_bootrom.req_name()};
-  assign ${soc_regbus_periph_xbar.out_bootrom.rsp_name()} = bootrom_rsp_i;
+  <% axi_lite_cut_bootrom = soc_axi_lite_narrow_periph_xbar.out_bootrom.cut(context, cuts_bootrom_cfg, name="soc_axi_lite_narrow_periph_xbar_out_bootrom_cut")  %>
+  assign bootrom_req_o = ${axi_lite_cut_bootrom.req_name()};
+  assign ${axi_lite_cut_bootrom.rsp_name()} = bootrom_rsp_i;
 
   /////////////////
   //   Clk Mgr   //
   /////////////////
 
-  assign fll_system_req_o = ${soc_regbus_periph_xbar.out_fll_system.req_name()};
-  assign ${soc_regbus_periph_xbar.out_fll_system.rsp_name()} = fll_system_rsp_i;
-  assign fll_periph_req_o = ${soc_regbus_periph_xbar.out_fll_periph.req_name()};
-  assign ${soc_regbus_periph_xbar.out_fll_periph.rsp_name()} = fll_periph_rsp_i;
-  assign fll_hbm2e_req_o = ${soc_regbus_periph_xbar.out_fll_hbm2e.req_name()};
-  assign ${soc_regbus_periph_xbar.out_fll_hbm2e.rsp_name()} = fll_hbm2e_rsp_i;
+  <% axi_lite_cut_fll_system = soc_axi_lite_narrow_periph_xbar.out_fll_system.cut(context, cuts_fll_system_cfg, name="soc_axi_lite_narrow_periph_xbar_out_fll_system_cut")  %>
+  <% axi_lite_cut_fll_periph = soc_axi_lite_narrow_periph_xbar.out_fll_periph.cut(context, cuts_fll_periph_cfg, name="soc_axi_lite_narrow_periph_xbar_out_fll_periph_cut")  %>
+  <% axi_lite_cut_fll_hbm2e = soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e.cut(context, cuts_fll_hbm2e_cfg, name="soc_axi_lite_narrow_periph_xbar_out_fll_hbm2e_cut")  %>
+
+  assign fll_system_req_o = ${axi_lite_cut_fll_system.req_name()};
+  assign ${axi_lite_cut_fll_system.rsp_name()} = fll_system_rsp_i;
+  assign fll_periph_req_o = ${axi_lite_cut_fll_periph.req_name()};
+  assign ${axi_lite_cut_fll_periph.rsp_name()} = fll_periph_rsp_i;
+  assign fll_hbm2e_req_o = ${axi_lite_cut_fll_hbm2e.req_name()};
+  assign ${axi_lite_cut_fll_hbm2e.rsp_name()} = fll_hbm2e_rsp_i;
 
   //////////////
   //   PLIC   //
   //////////////
+  <% regbus_plic = soc_axi_lite_narrow_periph_xbar.out_plic \
+    .cut(context, cuts_plic_cfg, name="soc_axi_lite_narrow_periph_xbar_out_plic_cut") \
+    .to_reg(context, "axi_lite_to_reg_plic") %>
   rv_plic #(
-    .reg_req_t (${soc_regbus_periph_xbar.out_plic.req_type()}),
-    .reg_rsp_t (${soc_regbus_periph_xbar.out_plic.rsp_type()})
+    .reg_req_t (${regbus_plic.req_type()}),
+    .reg_rsp_t (${regbus_plic.rsp_type()})
   ) i_rv_plic (
-    .clk_i (${soc_regbus_periph_xbar.out_plic.clk}),
-    .rst_ni (${soc_regbus_periph_xbar.out_plic.rst}),
-    .reg_req_i (${soc_regbus_periph_xbar.out_plic.req_name()}),
-    .reg_rsp_o (${soc_regbus_periph_xbar.out_plic.rsp_name()}),
-    .intr_src_i (irq),
-    .irq_o (eip),
-    .irq_id_o (),
-    .msip_o ()
+    .clk_i      ( ${regbus_plic.clk} ),
+    .rst_ni     ( ${regbus_plic.rst} ),
+    .reg_req_i  ( ${regbus_plic.req_name()} ),
+    .reg_rsp_o  ( ${regbus_plic.rsp_name()} ),
+    .intr_src_i ( irq ),
+    .irq_o      ( eip ),
+    .irq_id_o   ( ),
+    .msip_o     ( )
   );
 
   assign irq.zero = 1'b0;
@@ -541,17 +591,20 @@ module ${name}_top
   //////////////////
   //   SPI Host   //
   //////////////////
+  <% regbus_spim = soc_axi_lite_narrow_periph_xbar.out_spim \
+    .cut(context, cuts_spim_cfg, name="soc_axi_lite_narrow_periph_xbar_out_spim_cut") \
+    .to_reg(context, "axi_lite_to_reg_spim") %>
   spi_host #(
-    .reg_req_t (${soc_regbus_periph_xbar.out_spim.req_type()}),
-    .reg_rsp_t (${soc_regbus_periph_xbar.out_spim.rsp_type()})
+    .reg_req_t (${regbus_spim.req_type()}),
+    .reg_rsp_t (${regbus_spim.rsp_type()})
   ) i_spi_host (
     // TODO(zarubaf): Fix clock assignment
-    .clk_i  (${soc_regbus_periph_xbar.out_spim.clk}),
-    .rst_ni (${soc_regbus_periph_xbar.out_spim.rst}),
-    .clk_core_i (${soc_regbus_periph_xbar.out_spim.clk}),
-    .rst_core_ni (${soc_regbus_periph_xbar.out_spim.rst}),
-    .reg_req_i (${soc_regbus_periph_xbar.out_spim.req_name()}),
-    .reg_rsp_o (${soc_regbus_periph_xbar.out_spim.rsp_name()}),
+    .clk_i  (${regbus_spim.clk}),
+    .rst_ni (${regbus_spim.rst}),
+    .clk_core_i (${regbus_spim.clk}),
+    .rst_core_ni (${regbus_spim.rst}),
+    .reg_req_i (${regbus_spim.req_name()}),
+    .reg_rsp_o (${regbus_spim.rsp_name()}),
     .cio_sck_o (spim_sck_o),
     .cio_sck_en_o (spim_sck_en_o),
     .cio_csb_o (spim_csb_o),
@@ -566,14 +619,17 @@ module ${name}_top
   //////////////
   //   GPIO   //
   //////////////
+  <% regbus_gpio = soc_axi_lite_narrow_periph_xbar.out_gpio \
+    .cut(context, cuts_gpio_cfg, name="soc_axi_lite_narrow_periph_xbar_out_gpio_cut") \
+    .to_reg(context, "axi_lite_to_reg_gpio") %>
   gpio #(
-    .reg_req_t (${soc_regbus_periph_xbar.out_gpio.req_type()}),
-    .reg_rsp_t (${soc_regbus_periph_xbar.out_gpio.rsp_type()})
+    .reg_req_t (${regbus_gpio.req_type()}),
+    .reg_rsp_t (${regbus_gpio.rsp_type()})
   ) i_gpio (
-    .clk_i (${soc_regbus_periph_xbar.out_gpio.clk}),
-    .rst_ni (${soc_regbus_periph_xbar.out_gpio.rst}),
-    .reg_req_i (${soc_regbus_periph_xbar.out_gpio.req_name()}),
-    .reg_rsp_o (${soc_regbus_periph_xbar.out_gpio.rsp_name()}),
+    .clk_i (${regbus_gpio.clk}),
+    .rst_ni (${regbus_gpio.rst}),
+    .reg_req_i (${regbus_gpio.req_name()}),
+    .reg_rsp_o (${regbus_gpio.rsp_name()}),
     .cio_gpio_i (gpio_d_i),
     .cio_gpio_o (gpio_d_o),
     .cio_gpio_en_o (gpio_oe_o),
@@ -583,14 +639,17 @@ module ${name}_top
   /////////////
   //   I2C   //
   /////////////
+  <% regbus_i2c = soc_axi_lite_narrow_periph_xbar.out_i2c \
+    .cut(context, cuts_i2c_cfg, name="soc_axi_lite_narrow_periph_xbar_out_i2c_cut") \
+    .to_reg(context, "axi_lite_to_reg_i2c") %>
   i2c #(
-    .reg_req_t (${soc_regbus_periph_xbar.out_i2c.req_type()}),
-    .reg_rsp_t (${soc_regbus_periph_xbar.out_i2c.rsp_type()})
+    .reg_req_t (${regbus_i2c.req_type()}),
+    .reg_rsp_t (${regbus_i2c.rsp_type()})
   ) i_i2c (
-    .clk_i (${soc_regbus_periph_xbar.out_i2c.clk}),
-    .rst_ni (${soc_regbus_periph_xbar.out_i2c.rst}),
-    .reg_req_i (${soc_regbus_periph_xbar.out_i2c.req_name()}),
-    .reg_rsp_o (${soc_regbus_periph_xbar.out_i2c.rsp_name()}),
+    .clk_i (${regbus_i2c.clk}),
+    .rst_ni (${regbus_i2c.rst}),
+    .reg_req_i (${regbus_i2c.req_name()}),
+    .reg_rsp_o (${regbus_i2c.rsp_name()}),
     .cio_scl_i (i2c_scl_i),
     .cio_scl_o (i2c_scl_o),
     .cio_scl_en_o (i2c_scl_en_o),
@@ -618,13 +677,16 @@ module ${name}_top
   /////////////
   //  Timer  //
   /////////////
-  <% apb_timer_bus = soc_regbus_periph_xbar.out_timer.to_apb(context, "apb_timer") %>
+  <% regbus_timer = soc_axi_lite_narrow_periph_xbar.out_timer \
+    .cut(context, cuts_timer_cfg, name="soc_axi_lite_narrow_periph_xbar_out_timer_cut") \
+    .to_reg(context, "axi_lite_to_reg_timer") %>
+  <% apb_timer_bus = regbus_timer.to_apb(context, "apb_timer") %>
   apb_timer #(
     .APB_ADDR_WIDTH (${apb_timer_bus.aw}),
     .TIMER_CNT (2)
   ) i_apb_timer (
-    .HCLK (${soc_regbus_periph_xbar.out_timer.clk}),
-    .HRESETn (${soc_regbus_periph_xbar.out_timer.rst}),
+    .HCLK (${apb_timer_bus.clk}),
+    .HRESETn (${apb_timer_bus.rst}),
     .PADDR (apb_timer_req.paddr),
     .PWDATA (apb_timer_req.pwdata),
     .PWRITE (apb_timer_req.pwrite),
