@@ -10,8 +10,6 @@ dependencies:
 
 sources:
 # Level 0:
-- src/axi_id_remap.sv
-- src/axi_id_serialize.sv
 - src/axi_to_mem.sv
 - src/axi_to_mem_interleaved.sv
 - src/mem_to_axi_lite.sv
@@ -20,7 +18,6 @@ sources:
 - src/dma/axi_dma_data_path.sv
 - src/axi_interleaved_xbar.sv
 # Level 1:
-- src/axi_iw_converter.sv
 - src/axi_xp.sv
 - src/axi_zero_mem.sv
 - src/idma_reg64_frontend_reg_top.sv
