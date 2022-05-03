@@ -31,9 +31,6 @@ module axi_riscv_lrsc_tb #(
     parameter bit VERBOSE = 1'b0
 );
 
-    timeunit 1ns;
-    timeprecision 10ps;
-
     localparam time TCLK = 10ns;
     localparam time TA = TCLK * 1/4;
     localparam time TT = TCLK * 3/4;
