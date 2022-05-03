@@ -24,9 +24,10 @@
       desc: "Quadrant-internal asynchronous active-low reset",
       swaccess: "rw",
       hwaccess: "hro",
-      // Held in reset (i.e. signal low) by default
+      // *Not* held in reset (i.e. signal high) by default.
+      // Since clock is gated on reset, inner quadrant state should *not* change until ungate.
       fields: [
-        {bits: "0:0", name: "reset_n", resval: 0, desc: "Asynchronous active-low reset"}
+        {bits: "0:0", name: "reset_n", resval: 1, desc: "Asynchronous active-low reset"}
       ]
     },
     { name: "ISOLATE",
