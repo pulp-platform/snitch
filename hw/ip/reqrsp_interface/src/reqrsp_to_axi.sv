@@ -257,7 +257,9 @@ module reqrsp_to_axi import reqrsp_pkg::*; #(
     // store conditional for the reqrsp interface.
     if ((axi_rsp_i.b_valid && ~atomic_in_flight_q
           && axi_rsp_i.b.resp != axi_pkg::RESP_EXOKAY)) begin
-      reqrsp_rsp_o.p.data = 1;
+      // Set all 32-bit words to 1 since we don't know the alignment
+      // and which bits are cut off by the core.
+      reqrsp_rsp_o.p.data = {DataWidth/32{32'h1}};
     end
   end
 

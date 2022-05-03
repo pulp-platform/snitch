@@ -136,7 +136,7 @@ module snitch_amo_shim
   end
 
   // In case of a SC we must forward SC result from the cycle earlier.
-  assign rdata_o = sc_q ? $unsigned(~sc_successful_q) : mem_rdata_i;
+  assign rdata_o = sc_q ? {DataWidth/32{31'h0,~sc_successful_q}} : mem_rdata_i;
   assign amo_conflict_o = dma_access_i & (state_q != Idle) & (addr_q == addr_i);
 
   // -----
