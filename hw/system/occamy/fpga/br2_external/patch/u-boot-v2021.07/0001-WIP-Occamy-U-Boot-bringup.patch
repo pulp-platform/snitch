@@ -1,0 +1,422 @@
+From Mon Sep 17 00:00:00 2001
+From: Noah Huetter <huettern@iis.ee.ethz.ch>
+Date: Wed, 04 May 2022 15:13:31 +0200
+Subject: Occamy U-Boot bringup
+
+---
+ arch/riscv/Kconfig                      |   4 +
+ arch/riscv/dts/Makefile                 |   1 +
+ arch/riscv/dts/occamy-u-boot.dtsi       |   1 +
+ arch/riscv/dts/occamy.dts               | 131 ++++++++++++++++++++++++++++++++
+ board/pulp-platform/occamy/Kconfig      |  31 ++++++++
+ board/pulp-platform/occamy/Makefile     |   5 ++
+ board/pulp-platform/occamy/occamy.c     |   5 ++
+ board/pulp-platform/occamy/occamy_spl.c |  23 ++++++
+ configs/pulp-platform_occamy_defconfig  |  75 ++++++++++++++++++
+ include/configs/pulp-platform_occamy.h  |  39 ++++++++++
+ 10 files changed, 315 insertions(+)
+ create mode 100644 arch/riscv/dts/occamy-u-boot.dtsi
+ create mode 100644 arch/riscv/dts/occamy.dts
+ create mode 100644 board/pulp-platform/occamy/Kconfig
+ create mode 100644 board/pulp-platform/occamy/Makefile
+ create mode 100644 board/pulp-platform/occamy/occamy.c
+ create mode 100644 board/pulp-platform/occamy/occamy_spl.c
+ create mode 100644 configs/pulp-platform_occamy_defconfig
+ create mode 100644 include/configs/pulp-platform_occamy.h
+
+diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+index b3d7fd84ce..d193ea497d 100644
+--- a/arch/riscv/Kconfig
++++ b/arch/riscv/Kconfig
+@@ -23,6 +23,9 @@ config TARGET_SIFIVE_UNLEASHED
+ config TARGET_SIFIVE_UNMATCHED
+ 	bool "Support SiFive Unmatched Board"
+ 
++config TARGET_PULP_PLATFORM_OCCAMY
++	bool "Target Occamy Chiplet Architecture"
++
+ config TARGET_SIPEED_MAIX
+ 	bool "Support Sipeed Maix Board"
+ 
+@@ -61,6 +64,7 @@ source "board/microchip/mpfs_icicle/Kconfig"
+ source "board/sifive/unleashed/Kconfig"
+ source "board/sifive/unmatched/Kconfig"
+ source "board/sipeed/maix/Kconfig"
++source "board/pulp-platform/occamy/Kconfig"
+ 
+ # platform-specific options below
+ source "arch/riscv/cpu/ax25/Kconfig"
+diff --git a/arch/riscv/dts/Makefile b/arch/riscv/dts/Makefile
+index 7778874831..04a0fccacf 100644
+--- a/arch/riscv/dts/Makefile
++++ b/arch/riscv/dts/Makefile
+@@ -6,6 +6,7 @@ dtb-$(CONFIG_TARGET_QEMU_VIRT) += qemu-virt.dtb
+ dtb-$(CONFIG_TARGET_SIFIVE_UNLEASHED) += hifive-unleashed-a00.dtb
+ dtb-$(CONFIG_TARGET_SIFIVE_UNMATCHED) += hifive-unmatched-a00.dtb
+ dtb-$(CONFIG_TARGET_SIPEED_MAIX) += k210-maix-bit.dtb
++dtb-$(CONFIG_TARGET_PULP_PLATFORM_OCCAMY) += occamy.dtb
+ 
+ targets += $(dtb-y)
+ 
+diff --git a/arch/riscv/dts/occamy-u-boot.dtsi b/arch/riscv/dts/occamy-u-boot.dtsi
+new file mode 100644
+index 0000000000..aa7cdbfb18
+--- /dev/null
++++ b/arch/riscv/dts/occamy-u-boot.dtsi
+@@ -0,0 +1 @@
++#include "binman.dtsi"
+diff --git a/arch/riscv/dts/occamy.dts b/arch/riscv/dts/occamy.dts
+new file mode 100644
+index 0000000000..7f6e322f9b
+--- /dev/null
++++ b/arch/riscv/dts/occamy.dts
+@@ -0,0 +1,131 @@
++/dts-v1/;
++/ {
++  #address-cells = <2>;
++  #size-cells = <2>;
++  compatible = "eth,occamy-dev";
++  model = "eth,occamy";
++  config {
++    u-boot,spl-payload-offset = <0x6000000>;
++  };
++  chosen {
++    stdout-path = "/soc/serial@40000000:115200";
++  };
++  memory@80000000 {
++    device_type = "memory";
++    reg = <0x0 0x80000000 0x0 0x40000000>;
++  };
++  cpus {
++    #address-cells = <1>;
++    #size-cells = <0>;
++    timebase-frequency = <50000000>;
++    CPU0: cpu@0 {
++      device_type = "cpu";
++      status = "okay";
++      compatible = "eth,ariane", "riscv";
++      clock-frequency = <50000000>;
++      riscv,isa = "rv64fimafd";
++      mmu-type = "riscv,sv39";
++      tlb-split;
++      reg = <0>;
++      CPU0_intc: interrupt-controller {
++        #interrupt-cells = <1>;
++        interrupt-controller;
++        compatible = "riscv,cpu-intc";
++      };
++    };
++  };
++  soc: soc {
++    #address-cells = <2>;
++    #size-cells = <2>;
++    compatible = "simple-bus";
++    ranges;
++    debug@0 {
++      compatible = "riscv,debug-013";
++      interrupts-extended = <&CPU0_intc 65535>;
++      reg-names = "control";
++      reg = <0x0 0x0 0x0 0x1000>;
++    };
++    serial@2002000 {
++      compatible = "lowrisc,uart0";
++      reg = <0x0 0x2002000 0x0 0x1000>;
++      clock-frequency = <50000000>;
++      current-speed = <115200>;
++    };
++    axi_uart0: serial@40000000 {
++      clock-frequency = <50000000>;
++      compatible = "xlnx,axi-uart16550-1.01.a", "xlnx,xps-uart16550-2.00.a", "ns16550";
++      current-speed = <115200>;
++      interrupt-parent = <&PLIC0>;
++      interrupts = <1>;
++      reg = <0x0 0x40000000 0x0 0x10000>;
++      reg-offset = <0>;
++      reg-shift = <2>;
++      xlnx,is-a-16550 = <0x1>;
++      xlnx,use-modem-ports = <0x0>;
++      xlnx,use-user-ports = <0x0>;
++    };
++    spiclk: virt_100mhz {
++      #clock-cells = <0>;
++      compatible = "fixed-clock";
++      clock-frequency = <100000000>;
++    };
++    axi_quad_spi_1: spi@4c000000 {
++      compatible = "xlnx,axi-quad-spi-3.2", "xlnx,xps-spi-2.00.a";
++      interrupt-parent = <&PLIC0>;
++      interrupts = <2>;
++      clocks = <&spiclk>;
++      reg = <0x0 0x4c000000 0x0 0x10000>;
++      xlnx,num-ss-bits = <1>;
++      xlnx,num-transfer-bits = <0x8>;
++      fifo-size = <16>;
++      #address-cells = <1>;
++      #size-cells = <0>;
++      nor@0 {
++        #address-cells = <0x1>;
++        #size-cells = <0x1>;
++        compatible = "micron,m25p80";
++        reg = <0x0 0x0>;
++        spi-max-frequency = <25000000>;
++        spi-rx-bus-width = <0x4>;
++        spi-tx-bus-width = <0x4>;
++        m25p,fast-read;
++        partition@0 {
++          label = "bitstream";
++          reg = <0x0 0x6000000>; // 96 MB
++          read-only;
++        };
++        partition@6000000 {
++          label = "u-boot";
++          reg = <0x6000000 0x100000>; // 1 MB
++          read-only;
++        };
++        uimage@6100000 {
++          label = "uimage";
++          reg = <0x6100000 0x1000000>; // 16 MB
++          read-only;
++        };
++        partition@7100000 {
++          label = "filesystem";
++          reg = <0x7100000 0x8f00000>; // 143 MB
++        };
++      };
++    };
++    clint@4000000 {
++      clock-frequency = <50000000>;
++      compatible = "riscv,clint0";
++      interrupts-extended = <&CPU0_intc 3 &CPU0_intc 7>;
++      reg-names = "control";
++      reg = <0x0 0x4000000 0x0 0x100000>;
++    };
++    PLIC0: interrupt-controller@c000000 {
++      compatible = "riscv,plic0";
++      #address-cells = <0>;
++      #interrupt-cells = <1>;
++      interrupt-controller;
++      interrupts-extended = <&CPU0_intc 11 &CPU0_intc 9>;
++      riscv,max-priority = <6>;
++      riscv,ndev = <62>;
++      reg = <0x0 0xc000000 0x0 0x4000000>;
++    };
++  };
++};
+diff --git a/board/pulp-platform/occamy/Kconfig b/board/pulp-platform/occamy/Kconfig
+new file mode 100644
+index 0000000000..d98305ba33
+--- /dev/null
++++ b/board/pulp-platform/occamy/Kconfig
+@@ -0,0 +1,31 @@
++if TARGET_PULP_PLATFORM_OCCAMY
++
++config SYS_BOARD
++	default "occamy"
++
++config SYS_VENDOR
++	default "pulp-platform"
++
++config SYS_CPU
++	default "generic"
++
++config SYS_CONFIG_NAME
++	default "pulp-platform_occamy"
++
++config SYS_TEXT_BASE
++	default 0x80200000 if SPL
++	default 0x80000000 if !RISCV_SMODE
++	default 0x80200000 if RISCV_SMODE
++
++config SPL_TEXT_BASE
++	default 0x70000000
++
++config SPL_OPENSBI_LOAD_ADDR
++	default 0x80000000
++
++config BOARD_SPECIFIC_OPTIONS # dummy
++	def_bool y
++	select GENERIC_RISCV
++	select SUPPORT_SPL
++
++endif
+diff --git a/board/pulp-platform/occamy/Makefile b/board/pulp-platform/occamy/Makefile
+new file mode 100644
+index 0000000000..fc8f63bbeb
+--- /dev/null
++++ b/board/pulp-platform/occamy/Makefile
+@@ -0,0 +1,5 @@
++obj-y	+= occamy.o
++
++ifdef CONFIG_SPL_BUILD
++obj-y += occamy_spl.o
++endif
+diff --git a/board/pulp-platform/occamy/occamy.c b/board/pulp-platform/occamy/occamy.c
+new file mode 100644
+index 0000000000..d703634b1a
+--- /dev/null
++++ b/board/pulp-platform/occamy/occamy.c
+@@ -0,0 +1,5 @@
++#include <init.h>
++
++int board_init(void) { return 0; }
++
++int ft_board_setup(void *fdt, struct bd_info *bd) { return 0; }
+diff --git a/board/pulp-platform/occamy/occamy_spl.c b/board/pulp-platform/occamy/occamy_spl.c
+new file mode 100644
+index 0000000000..bc48d4d1da
+--- /dev/null
++++ b/board/pulp-platform/occamy/occamy_spl.c
+@@ -0,0 +1,23 @@
++#include <init.h>
++#include <spl.h>
++#include <misc.h>
++#include <log.h>
++#include <asm/spl.h>
++
++int spl_board_init_f(void)
++{
++	return 0;
++}
++
++u32 spl_boot_device(void)
++{
++	return BOOT_DEVICE_SPI;
++}
++
++#ifdef CONFIG_SPL_LOAD_FIT
++int board_fit_config_name_match(const char *name)
++{
++	/* boot using first FIT config */
++	return 0;
++}
++#endif
+diff --git a/configs/pulp-platform_occamy_defconfig b/configs/pulp-platform_occamy_defconfig
+new file mode 100644
+index 0000000000..3cdb710ef7
+--- /dev/null
++++ b/configs/pulp-platform_occamy_defconfig
+@@ -0,0 +1,75 @@
++CONFIG_RISCV=y
++CONFIG_SYS_MALLOC_F_LEN=0x3000
++CONFIG_DM_GPIO=y
++CONFIG_SPL_DM_SPI=y
++CONFIG_SPL=y
++CONFIG_SPL_SPI_FLASH_SUPPORT=y
++CONFIG_SPL_SPI_SUPPORT=y
++CONFIG_DEFAULT_DEVICE_TREE="occamy"
++CONFIG_TARGET_PULP_PLATFORM_OCCAMY=y
++CONFIG_ARCH_RV64I=y
++CONFIG_RISCV_SMODE=y
++CONFIG_FIT=y
++CONFIG_SPL_LOAD_FIT_ADDRESS=0x90000000
++CONFIG_OF_BOARD_SETUP=y
++CONFIG_BOOTDELAY=1
++CONFIG_USE_BOOTCOMMAND=y
++CONFIG_BOOTCOMMAND="dhcp; tftp 0x83000000 129.132.24.199:vcu128-01/Image.itb; bootm 0x83000000"
++CONFIG_USE_BOOTARGS=y
++CONFIG_BOOTARGS="earlyprintk"
++CONFIG_LOG=y
++CONFIG_LOG_MAX_LEVEL=9
++CONFIG_LOGF_FUNC=y
++CONFIG_LOG_ERROR_RETURN=y
++CONFIG_DISPLAY_CPUINFO=y
++CONFIG_SPL_MTD_SUPPORT=y
++CONFIG_SPL_DM_SPI_FLASH=y
++CONFIG_SPL_RAM_SUPPORT=y
++CONFIG_SPL_RAM_DEVICE=y
++CONFIG_SPL_SPI_FLASH_MTD=y
++CONFIG_SPL_SPI_LOAD=y
++CONFIG_CMD_MEMTEST=n
++CONFIG_CMD_GPIO=n
++CONFIG_CMD_I2C=y
++CONFIG_CMD_SF_TEST=y
++CONFIG_CMD_AXI=n
++CONFIG_CMD_DHCP=y
++CONFIG_CMD_MII=y
++CONFIG_CMD_PING=y
++CONFIG_CMD_DNS=n
++CONFIG_CMD_MTDPARTS=y
++CONFIG_CMD_FDT=y
++CONFIG_MTDIDS_DEFAULT="nor0=spi0.0"
++CONFIG_MTDPARTS_DEFAULT="mtdparts=spi0.0:96m(bitstream),1m(u-boot),16m(uimage),-(filesystem)"
++CONFIG_OF_PRIOR_STAGE=y
++CONFIG_PROT_UDP=y
++CONFIG_NET_RANDOM_ETHADDR=y
++CONFIG_AXI=y
++CONFIG_DM_PCA953X=y
++CONFIG_DM_I2C=y
++CONFIG_SYS_I2C_XILINX_XIIC=y
++CONFIG_I2C_MUX=y
++CONFIG_I2C_MUX_PCA954x=y
++CONFIG_DM_MTD=y
++CONFIG_SPI_FLASH_ATMEL=y
++CONFIG_SPI_FLASH_EON=y
++CONFIG_SPI_FLASH_GIGADEVICE=y
++CONFIG_SPI_FLASH_ISSI=y
++CONFIG_SPI_FLASH_MACRONIX=y
++CONFIG_SPI_FLASH_SPANSION=y
++CONFIG_SPI_FLASH_STMICRO=y
++CONFIG_SPI_FLASH_SST=y
++CONFIG_SPI_FLASH_WINBOND=y
++CONFIG_SPI_FLASH_XMC=y
++# CONFIG_SPI_FLASH_USE_4K_SECTORS is not set
++CONFIG_SPI_FLASH_MTD=y
++CONFIG_PHY_TI_DP83867=y
++CONFIG_PHY_XILINX=y
++CONFIG_DM_MDIO=y
++CONFIG_DM_ETH_PHY=y
++CONFIG_XILINX_AXIEMAC=y
++CONFIG_PHY=y
++CONFIG_SYS_NS16550=y
++CONFIG_SPI=y
++CONFIG_XILINX_SPI=y
++CONFIG_CLINT_TIMER=y
+\ No newline at end of file
+diff --git a/include/configs/pulp-platform_occamy.h b/include/configs/pulp-platform_occamy.h
+new file mode 100644
+index 0000000000..ed20ca4709
+--- /dev/null
++++ b/include/configs/pulp-platform_occamy.h
+@@ -0,0 +1,39 @@
++#ifndef __CONFIG_H
++#define __CONFIG_H
++
++#include <linux/sizes.h>
++
++#define CONFIG_TFTP_TSIZE
++
++// fdt_high=~0UL to use FDT in-place
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	"fdt_high=0xe0000000\0" \
++	"tftptimeout=1000\0" \
++	"tftptimeoutcountmax=1000\0"
++
++#ifdef CONFIG_SPL
++#define CONFIG_SPL_MAX_SIZE		0x00020000
++
++#define CONFIG_SPL_BSS_START_ADDR	0x70018000
++#define CONFIG_SPL_BSS_MAX_SIZE		0x00008000
++
++// We need more space than the SPM can provide, so put the heap into HBM.
++// malloc should only be available _after_ the HBM is initialised.
++#define CONFIG_SYS_SPL_MALLOC_START	0x84000000
++#define CONFIG_SYS_SPL_MALLOC_SIZE	0x00100000
++
++#define CONFIG_SPL_STACK	0x70018000
++#endif
++
++// OpenSBI is at 0x80000000
++#define CONFIG_SYS_SDRAM_BASE		0x80200000
++#define CONFIG_SYS_INIT_SP_ADDR		(CONFIG_SYS_SDRAM_BASE + SZ_2M)
++
++#define CONFIG_SYS_LOAD_ADDR		(CONFIG_SYS_SDRAM_BASE + SZ_2M)
++
++#define CONFIG_SYS_MALLOC_LEN       SZ_8M
++#define CONFIG_SYS_BOOTM_LEN        SZ_128M
++
++#define CONFIG_SYS_MAX_FLASH_BANKS 1
++#define CONFIG_SYS_FLASH_BASE 0x0
++#endif
+-- 
+2.16.5
+

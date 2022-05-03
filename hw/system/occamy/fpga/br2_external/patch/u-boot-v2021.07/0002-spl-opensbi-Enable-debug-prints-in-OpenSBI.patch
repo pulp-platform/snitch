@@ -1,0 +1,39 @@
+From 734edaa728d6cdc237184db4b2b46df240e4d334 Mon Sep 17 00:00:00 2001
+From: Noah Huetter <noahhuetter@gmail.com>
+Date: Tue, 26 Apr 2022 15:16:30 +0200
+Subject: spl/opensbi: Enable debug prints in OpenSBI
+
+---
+ common/spl/spl_opensbi.c | 2 +-
+ include/opensbi.h        | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/common/spl/spl_opensbi.c b/common/spl/spl_opensbi.c
+index 1c0abf8553..c05d34f412 100644
+--- a/common/spl/spl_opensbi.c
++++ b/common/spl/spl_opensbi.c
+@@ -71,7 +71,7 @@ void spl_invoke_opensbi(struct spl_image_info *spl_image)
+ 	opensbi_info.version = FW_DYNAMIC_INFO_VERSION;
+ 	opensbi_info.next_addr = uboot_entry;
+ 	opensbi_info.next_mode = FW_DYNAMIC_INFO_NEXT_MODE_S;
+-	opensbi_info.options = SBI_SCRATCH_NO_BOOT_PRINTS;
++	opensbi_info.options = SBI_SCRATCH_DEBUG_PRINTS; // SBI_SCRATCH_NO_BOOT_PRINTS
+ 	opensbi_info.boot_hart = gd->arch.boot_hart;
+ 
+ 	opensbi_entry = (void (*)(ulong, ulong, ulong))spl_image->entry_point;
+diff --git a/include/opensbi.h b/include/opensbi.h
+index d812cc8ccd..6af38005c3 100644
+--- a/include/opensbi.h
++++ b/include/opensbi.h
+@@ -21,6 +21,8 @@
+ enum sbi_scratch_options {
+ 	/** Disable prints during boot */
+ 	SBI_SCRATCH_NO_BOOT_PRINTS = (1 << 0),
++	/** Enable runtime debug prints */
++	SBI_SCRATCH_DEBUG_PRINTS = (1 << 1),
+ };
+ 
+ /** Representation dynamic info passed by previous booting stage */
+-- 
+2.16.5
+
