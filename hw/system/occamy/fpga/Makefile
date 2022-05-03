@@ -60,6 +60,10 @@ occamy_vcu128: vivado_ips/occamy_xilinx bootrom/bootrom-spl.coe
 program:
 	${VIVADO} -mode batch -source occamy_vcu128_program.tcl -tclargs ${VCU}
 
+flashrun: ${UBOOT_ITB}
+	${VIVADO} -mode batch -source occamy_vcu128_flashrun.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs 6000000 ${UBOOT_ITB}
+	rm flash.mcs
+
 flash: ${UBOOT_ITB}
 	${VIVADO} -mode batch -source occamy_vcu128_flash.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs 6000000 ${UBOOT_ITB}
 	rm flash.mcs
