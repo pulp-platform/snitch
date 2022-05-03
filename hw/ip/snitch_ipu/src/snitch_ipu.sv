@@ -8,8 +8,8 @@
 
 module snitch_ipu #(
   parameter int unsigned IdWidth = 5,
-  parameter int unsigned DataWidth = 32,                  
-  parameter bit          Xipu = 1                  
+  parameter int unsigned DataWidth = 32,      
+  parameter bit          Xipu = 1
 ) (
   input  logic                     clk_i,
   input  logic                     rst_i,
@@ -357,29 +357,29 @@ module dspu #(
 
   // Internal control signals
   logic cmp_signed;            // comparator operation is signed
-  enum logic [1:0] {
+  typedef enum logic [1:0] {
     None, Reg, Zero, ClipBound
   } cmp_op_b_sel;              // selection of shared comparator operands
   logic clip_unsigned;         // clip operation has "0" as lower bound
   logic clip_register;         // if 1 clip operation uses rs2, else imm5
-  enum logic [1:0] {
+  typedef enum logic [1:0] {
     NoMul, MulLow, MulHigh, MulMac
   } mul_op;                    // type of multiplication operation
   logic mac_msu;               // multiplication operation is MSU
   logic mul_op_a_sign;         // sign of multiplier operand a
   logic mac_op_b_sign;         // sign of multiplier operand b
-  enum logic [3:0] {
+  typedef enum logic [3:0] {
     Nop, Abs, Sle, Min, Max, Exths, Exthz, Extbs, Extbz, Clip, Mac, Simd
   } res_sel;                   // result selection
 
-  enum logic [4:0] {
+  typedef enum logic [4:0] {
     SimdNop, SimdAdd, SimdSub, SimdAvg, SimdMin, SimdMax, SimdSrl, SimdSra, SimdSll, SimdOr,
     SimdXor, SimdAnd, SimdAbs, SimdExt, SimdIns, SimdDotp, SimdShuffle
   } simd_op;                   // SIMD operation
-  enum logic {
+  typedef enum logic {
     HalfWord, Byte
   } simd_size;                 // SIMD granularity
-  enum logic [1:0] {
+  typedef enum logic [1:0] {
     Vect, Sc, Sci
   } simd_mode;                 // SIMD mode
   logic simd_signed;           // SIMD operation is signed and uses sign-extended imm6
@@ -1314,7 +1314,8 @@ module dspu #(
   end
 
   // Instantiate comparator
-  assign cmp_result = $signed({cmp_op_a[Width-1] & cmp_signed, cmp_op_a}) <= $signed({cmp_op_b[Width-1] & cmp_signed, cmp_op_b});
+  assign cmp_result = $signed({cmp_op_a[Width-1] & cmp_signed, cmp_op_a}) <= 
+                      $signed({cmp_op_b[Width-1] & cmp_signed, cmp_op_b});
 
   // --------------------
   // Multiplier & acc
@@ -1325,10 +1326,12 @@ module dspu #(
   logic [2*Width-1:0] mul_result;
   logic [Width-1:0] mac_result;
 
-  assign mul_op_a = mac_msu ? -op_a_i : op_a_i; // op_a_i is sign-inverted if mac_msu=1, to have -op_a*op_b
+  // op_a_i is sign-inverted if mac_msu=1, to have -op_a*op_b
+  assign mul_op_a = mac_msu ? -op_a_i : op_a_i;
 
   // 32-bits input, 64-bits output multiplier
-  assign mul_result = $signed({mul_op_a[Width-1] & mul_op_a_sign, mul_op_a}) * $signed({op_b_i[Width-1] & mac_op_b_sign, op_b_i});
+  assign mul_result = $signed({mul_op_a[Width-1] & mul_op_a_sign, mul_op_a}) * 
+                      $signed({op_b_i[Width-1] & mac_op_b_sign, op_b_i});
 
   always_comb begin
     unique case (mul_op)
@@ -1363,7 +1366,8 @@ module dspu #(
         for (int i = 0; i < Width/16; i++) begin
           simd_op_a[2*i +: 2] = op_a_i[16*i +: 16]; // operands A are the half-words of op_a_i
           // operands B are the half-words of op_b_i, replicated lowest half-word of op_b_i or replicated 6-bit immediate
-          simd_op_b[2*i +: 2] = (simd_mode == Vect) ? op_b_i[16*i +: 16] : ((simd_mode == Sc) ? op_b_i[15:0] : simd_imm);
+          simd_op_b[2*i +: 2] = (simd_mode == Vect) ? op_b_i[16*i +: 16] : 
+                                ((simd_mode == Sc) ? op_b_i[15:0] : simd_imm);
           simd_op_c[2*i +: 2] = op_c_i[16*i +: 16]; // operands C are the half-words of op_c_i
         end
       // byte granularity
@@ -1371,7 +1375,8 @@ module dspu #(
         for (int i = 0; i < Width/8; i++) begin
           simd_op_a[i] = op_a_i[8*i +: 8]; // operands A are the bytes of op_a_i
           // operands B are the bytes of op_b_i, replicated lowest byte of op_b_i or replicated 6-bit immediate
-          simd_op_b[i] = (simd_mode == Vect) ? op_b_i[8*i +: 8] : ((simd_mode == Sc) ? op_b_i[7:0] : simd_imm[0]);
+          simd_op_b[i] = (simd_mode == Vect) ? op_b_i[8*i +: 8] : 
+                         ((simd_mode == Sc) ? op_b_i[7:0] : simd_imm[0]);
           simd_op_c[i] = op_c_i[8*i +: 8]; // operands C are the bytes of op_c_i
         end
       default: ;
@@ -1394,18 +1399,21 @@ module dspu #(
           SimdAvg:
             for (int i = 0; i < Width/16; i++) begin
               simd_result[2*i +: 2] = $signed(simd_op_a[2*i +: 2]) + $signed(simd_op_b[2*i +: 2]);
-              simd_result[2*i +: 2] = {simd_result[2*i+1][7] & simd_signed, simd_result[2*i +: 2]} >> 1;
+              simd_result[2*i +: 2] = {simd_result[2*i+1][7] & simd_signed,
+                                                                       simd_result[2*i +: 2]} >> 1;
             end
           SimdMin:
             for (int i = 0; i < Width/16; i++)
-              simd_result[2*i +: 2] = $signed({simd_op_a[2*i+1][7] & simd_signed, simd_op_a[2*i +: 2]}) <=
-                                       $signed({simd_op_b[2*i+1][7] & simd_signed, simd_op_b[2*i +: 2]}) ?
-                                       simd_op_a[2*i +: 2] : simd_op_b[2*i +: 2];
+              simd_result[2*i +: 2] =
+                         $signed({simd_op_a[2*i+1][7] & simd_signed,simd_op_a[2*i +: 2]}) <=
+                          $signed({simd_op_b[2*i+1][7] & simd_signed, simd_op_b[2*i +: 2]}) ?
+                           simd_op_a[2*i +: 2] : simd_op_b[2*i +: 2];
           SimdMax:
             for (int i = 0; i < Width/16; i++)
-              simd_result[2*i +: 2] = $signed({simd_op_a[2*i+1][7] & simd_signed, simd_op_a[2*i +: 2]}) >
-                                       $signed({simd_op_b[2*i+1][7] & simd_signed, simd_op_b[2*i +: 2]}) ?
-                                       simd_op_a[2*i +: 2] : simd_op_b[2*i +: 2];
+              simd_result[2*i +: 2] = 
+                         $signed({simd_op_a[2*i+1][7] & simd_signed, simd_op_a[2*i +: 2]}) >
+                          $signed({simd_op_b[2*i+1][7] & simd_signed, simd_op_b[2*i +: 2]}) ?
+                           simd_op_a[2*i +: 2] : simd_op_b[2*i +: 2];
           SimdSrl:
             for (int i = 0; i < Width/16; i++)
               simd_result[2*i +: 2] = $unsigned(simd_op_a[2*i +: 2]) >> simd_op_b[2*i][3:0];
@@ -1420,7 +1428,8 @@ module dspu #(
           SimdAnd: simd_result = simd_op_a & simd_op_b;
           SimdAbs:
             for (int i = 0; i < Width/16; i++)
-              simd_result[2*i +: 2] = $signed(simd_op_a[2*i +: 2]) > 0 ? simd_op_a[2*i +: 2] : -$signed(simd_op_a[2*i +: 2]);
+              simd_result[2*i +: 2] = $signed(simd_op_a[2*i +: 2]) > 0 ?
+                                      simd_op_a[2*i +: 2] : -$signed(simd_op_a[2*i +: 2]);
           SimdExt: begin
             simd_result[1:0] = simd_op_a[2*imm6[0] +: 2];
             // sign- or zero-extend
@@ -1433,13 +1442,15 @@ module dspu #(
           SimdDotp: begin
             simd_result = op_c_i & {(Width){simd_dotp_acc}}; // accumulate on rd or start from zero
             for (int i = 0; i < Width/16; i++) begin
-              simd_result = $signed(simd_result) + $signed({simd_op_a[2*i+1][7] & simd_dotp_op_a_signed, simd_op_a[2*i +: 2]}) *
-                                                   $signed({simd_op_b[2*i+1][7] & simd_dotp_op_b_signed, simd_op_b[2*i +: 2]});
+              simd_result = $signed(simd_result) + 
+                       $signed({simd_op_a[2*i+1][7] & simd_dotp_op_a_signed, simd_op_a[2*i +: 2]}) *
+                       $signed({simd_op_b[2*i+1][7] & simd_dotp_op_b_signed, simd_op_b[2*i +: 2]});
             end
           end
           SimdShuffle:
             for (int i = 0; i < Width/16; i++)
-              simd_result[2*i +: 2] = simd_op_b[2*i][1] ? simd_op_a[2*simd_op_b[2*i][0] +: 2] : simd_op_c[2*simd_op_b[2*i][0] +: 2];
+              simd_result[2*i +: 2] = simd_op_b[2*i][1] ? simd_op_a[2*simd_op_b[2*i][0] +: 2] : 
+                                      simd_op_c[2*simd_op_b[2*i][0] +: 2];
           default: ;
         endcase
       end
@@ -1460,13 +1471,13 @@ module dspu #(
           SimdMin:
             for (int i = 0; i < Width/8; i++)
               simd_result[i] = $signed({simd_op_a[i][7] & simd_signed, simd_op_a[i]}) <=
-                               $signed({simd_op_b[i][7] & simd_signed, simd_op_b[i]}) ?
-                               simd_op_a[i] : simd_op_b[i];
+                                $signed({simd_op_b[i][7] & simd_signed, simd_op_b[i]}) ?
+                                 simd_op_a[i] : simd_op_b[i];
           SimdMax:
             for (int i = 0; i < Width/8; i++)
               simd_result[i] = $signed({simd_op_a[i][7] & simd_signed, simd_op_a[i]}) >
-                               $signed({simd_op_b[i][7] & simd_signed, simd_op_b[i]}) ?
-                               simd_op_a[i] : simd_op_b[i];
+                                $signed({simd_op_b[i][7] & simd_signed, simd_op_b[i]}) ?
+                                 simd_op_a[i] : simd_op_b[i];
           SimdSrl:
             for (int i = 0; i < Width/8; i++)
               simd_result[i] = $unsigned(simd_op_a[i]) >> simd_op_b[i][2:0];
@@ -1494,12 +1505,14 @@ module dspu #(
           SimdDotp: begin
             simd_result = op_c_i & {(Width){simd_dotp_acc}}; // accumulate on rd or start from zero
             for (int i = 0; i < Width/8; i++)
-              simd_result = $signed(simd_result) + $signed({simd_op_a[i][7] & simd_dotp_op_a_signed, simd_op_a[i]}) *
-                                                   $signed({simd_op_b[i][7] & simd_dotp_op_b_signed, simd_op_b[i]});
+              simd_result = $signed(simd_result) + 
+                             $signed({simd_op_a[i][7] & simd_dotp_op_a_signed, simd_op_a[i]}) *
+                              $signed({simd_op_b[i][7] & simd_dotp_op_b_signed, simd_op_b[i]});
           end
           SimdShuffle:
             for (int i = 0; i < Width/8; i++)
-              simd_result[i] = simd_op_b[i][2] ? simd_op_a[simd_op_b[i][1:0]] : simd_op_c[simd_op_b[i][1:0]];
+              simd_result[i] = simd_op_b[i][2] ? simd_op_a[simd_op_b[i][1:0]] : 
+                                                                      simd_op_c[simd_op_b[i][1:0]];
           default: ;
         endcase
       end
@@ -1536,7 +1549,8 @@ module dspu #(
       //       so result_o is clipped to clip_op_b
       //     + if clip_op_b >= 0: clip_comp=clip_op_b (i.e. rs1>=0 and clip_op_b>=0) and the result must
       //       be clipped to the upper bound since rs1 > clip_op_b
-      Clip: result_o = cmp_result ? (clip_use_n_bound ? clip_op_b_n : op_a_i) : (op_a_i[Width-1] ? op_a_i : clip_op_b);
+      Clip: result_o = cmp_result ? (clip_use_n_bound ? clip_op_b_n : op_a_i) : 
+                       (op_a_i[Width-1] ? op_a_i : clip_op_b);
       Mac: result_o = mac_result;
       Simd: result_o = simd_result;
       default: result_o = '0;

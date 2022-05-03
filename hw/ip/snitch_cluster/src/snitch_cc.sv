@@ -202,7 +202,7 @@ module snitch_cc #(
     .FP_EN (FPEn),
     .Xdma (Xdma),
     .Xssr (Xssr),
-    .Xipu (Xipu),    
+    .Xipu (Xipu),
     .RVF (RVF),
     .RVD (RVD),
     .XDivSqrt (XDivSqrt),
@@ -380,7 +380,7 @@ module snitch_cc #(
     .IdWidth ( 5 ),
     .DataWidth ( 32 ),
     .Xipu (Xipu)
-  ) i_snitch_ipu (
+    ) i_snitch_ipu (
     .clk_i            ( clk_i                          ),
     .rst_i            ( (~rst_ni) | (~rst_int_ss_ni)   ),
     .acc_qaddr_i      ( acc_snitch_req.addr            ),
@@ -396,7 +396,7 @@ module snitch_cc #(
     .acc_perror_o     ( ipu_resp.error                 ),
     .acc_pvalid_o     ( ipu_pvalid                     ),
     .acc_pready_i     ( ipu_pready                     )
-  );
+    );
   end else begin : gen_no_ipu
     assign ipu_resp = '0;
     assign ipu_qready = 1'b0;

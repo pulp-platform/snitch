@@ -20,7 +20,7 @@ set(CMAKE_CXX_COMPILER_RANLIB "${CMAKE_RANLIB}")
 ##
 ## Compile options
 ##
-add_compile_options(-march=xpulpv2 -march=rv32imafd -mabi=ilp32d -mcmodel=medany -ffast-math -fno-builtin-printf -fno-common)
+add_compile_options(-mcpu=snitch -mcmodel=medany -ffast-math -fno-builtin-printf -fno-common)
 add_compile_options(-ffunction-sections)
 add_compile_options(-Wextra)
 add_compile_options(-static)
@@ -36,7 +36,7 @@ add_compile_options(-menable-experimental-extensions)
 ## Link options
 ##
 
-add_link_options(-march=xpulpv2 -march=rv32imafd -mabi=ilp32d -nostartfiles -fuse-ld=lld -Wl,--image-base=0x80000000)
+add_link_options(-mcpu=snitch -nostartfiles -fuse-ld=lld -Wl,--image-base=0x80000000)
 add_link_options(-static)
 # LLD defaults to -z relro which we don't want in a static ELF
 add_link_options(-Wl,-z,norelro)
