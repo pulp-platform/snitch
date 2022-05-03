@@ -150,7 +150,7 @@ module axi_demux #(
     aw_chan_t                 slv_aw_chan;
     select_t                  slv_aw_select;
 
-    logic                     slv_aW_valid, aw_valid_chan, aw_valid_sel;
+    logic                     slv_aw_valid, aw_valid_chan, aw_valid_sel;
     logic                     slv_aw_ready, slv_aw_ready_chan, slv_aw_ready_sel;
 
     // AW ID counter
