@@ -294,9 +294,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   `FFAR(debug_q, debug_d, '0, clk_i, rst_i) // Debug mode
 
   typedef struct packed {
+    fpnew_pkg::fmt_mode_t  fmode;
     fpnew_pkg::roundmode_e frm;
     fpnew_pkg::status_t    fflags;
-    fpnew_pkg::fmt_mode_t  fmode;
   } fcsr_t;
   fcsr_t fcsr_d, fcsr_q;
 
@@ -2452,16 +2452,16 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
               if (!exception) fcsr_d.frm = fpnew_pkg::roundmode_e'(alu_result[2:0]);
             end else illegal_csr = 1'b1;
           end
-          CSR_FCSR: begin
-            if (FP_EN) begin
-              csr_rvalue = {24'b0, fcsr_q};
-              if (!exception) fcsr_d = fcsr_t'(alu_result[7:0]);
-            end else illegal_csr = 1'b1;
-          end
           CSR_FMODE: begin
             if (FP_EN) begin
               csr_rvalue = {30'b0, fcsr_q.fmode};
               if (!exception) fcsr_d.fmode = fpnew_pkg::fmt_mode_t'(alu_result[1:0]);
+            end else illegal_csr = 1'b1;
+          end
+          CSR_FCSR: begin
+            if (FP_EN) begin
+              csr_rvalue = {22'b0, fcsr_q};
+              if (!exception) fcsr_d = fcsr_t'(alu_result[9:0]);
             end else illegal_csr = 1'b1;
           end
           default: csr_rvalue = '0;
