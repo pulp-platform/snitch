@@ -261,7 +261,13 @@ module ariane import ariane_pkg::*; #(
   logic                     dcache_commit_wbuffer_empty;
   logic                     dcache_commit_wbuffer_not_ni;
 
-  assign rst_uarch_n = rst_ni & rst_uarch_controller_n;
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if (~rst_ni) begin
+      rst_uarch_n <= 1'b0;
+    end else begin
+      rst_uarch_n <= rst_uarch_controller_n;
+    end
+  end
 
   // --------------
   // Frontend

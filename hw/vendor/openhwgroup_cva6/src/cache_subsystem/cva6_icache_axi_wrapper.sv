@@ -35,6 +35,7 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
   input  logic              en_i,        // enable icache
   output logic              miss_o,      // to performance counter
   output logic              busy_o,
+  input  logic              stall_i,
   input  logic              init_ni,
   // address translation requests
   input  icache_areq_i_t    areq_i,
@@ -120,6 +121,7 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
     .en_i               ( en_i                ),
     .miss_o             ( miss_o              ),
     .busy_o             ( busy_o              ),
+    .stall_i            ( stall_i             ),
     .init_ni            ( init_ni             ),
     .areq_i             ( areq_i              ),
     .areq_o             ( areq_o              ),

@@ -1,0 +1,32 @@
+From 88f0a4e154537b3e88d5b60fff508f6ca41f23d4 Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Tue, 3 May 2022 22:48:53 +0200
+Subject: [PATCH] ariane: Latch fence.t to avoid glitches
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ src/ariane.sv | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/ariane.sv b/src/ariane.sv
+index 3dfa453..d7981bc 100644
+--- a/src/ariane.sv
++++ b/src/ariane.sv
+@@ -261,7 +261,13 @@ module ariane import ariane_pkg::*; #(
+   logic                     dcache_commit_wbuffer_empty;
+   logic                     dcache_commit_wbuffer_not_ni;
+ 
+-  assign rst_uarch_n = rst_ni & rst_uarch_controller_n;
++  always_ff @(posedge clk_i or negedge rst_ni) begin
++    if (~rst_ni) begin
++      rst_uarch_n <= 1'b0;
++    end else begin
++      rst_uarch_n <= rst_uarch_controller_n;
++    end
++  end
+ 
+   // --------------
+   // Frontend
+-- 
+2.16.5
+
