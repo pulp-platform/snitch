@@ -1,0 +1,11 @@
+#=======================================================================
+# Makefrag for rv32uxpulpbr tests
+#-----------------------------------------------------------------------
+
+rv32uxpulpbr_sc_tests = \
+  p_beqimm p_bneimm \
+
+rv32uxpulpbr_p_tests = $(addprefix rv32uxpulpbr-p-, $(rv32uxpulpbr_sc_tests))
+rv32uxpulpbr_v_tests = $(addprefix rv32uxpulpbr-v-, $(rv32uxpulpbr_sc_tests))
+
+spike32_tests += $(rv32uxpulpbr_p_tests) $(rv32uxpulpbr_v_tests)

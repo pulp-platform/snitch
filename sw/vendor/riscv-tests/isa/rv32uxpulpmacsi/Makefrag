@@ -1,0 +1,11 @@
+#=======================================================================
+# Makefrag for rv32uxpulpmacsi tests
+#-----------------------------------------------------------------------
+
+rv32uxpulpmacsi_sc_tests = \
+  p_mac p_msu \
+
+rv32uxpulpmacsi_p_tests = $(addprefix rv32uxpulpmacsi-p-, $(rv32uxpulpmacsi_sc_tests))
+rv32uxpulpmacsi_v_tests = $(addprefix rv32uxpulpmacsi-v-, $(rv32uxpulpmacsi_sc_tests))
+
+spike32_tests += $(rv32uxpulpmacsi_p_tests) $(rv32uxpulpmacsi_v_tests)

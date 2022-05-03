@@ -1,0 +1,12 @@
+#=======================================================================
+# Makefrag for rv32uxpulpvectshufflepack tests
+#-----------------------------------------------------------------------
+
+rv32uxpulpvectshufflepack_sc_tests = \
+  pv_shuffle2 \
+#  pv_shuffle \
+
+rv32uxpulpvectshufflepack_p_tests = $(addprefix rv32uxpulpvectshufflepack-p-, $(rv32uxpulpvectshufflepack_sc_tests))
+rv32uxpulpvectshufflepack_v_tests = $(addprefix rv32uxpulpvectshufflepack-v-, $(rv32uxpulpvectshufflepack_sc_tests))
+
+spike32_tests += $(rv32uxpulpvectshufflepack_p_tests) $(rv32uxpulpvectshufflepack_v_tests)
