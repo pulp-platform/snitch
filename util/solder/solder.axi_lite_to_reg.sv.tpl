@@ -6,8 +6,8 @@
     .reg_req_t      ( ${bus_out.req_type()} ),
     .reg_rsp_t      ( ${bus_out.rsp_type()} )
   ) ${name} (
-    .clk_i          ( ${bus_in.clk} ),
-    .rst_ni         ( ${bus_in.rst} ),
+    .clk_i          ( ${bus_clk} ),
+    .rst_ni         ( ${bus_rst} ),
     .axi_lite_req_i ( ${bus_in.req_name()} ),
     .axi_lite_rsp_o ( ${bus_in.rsp_name()} ),
     .reg_req_o      ( ${bus_out.req_name()} ),

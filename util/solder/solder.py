@@ -1196,7 +1196,7 @@ class AxiLiteBus(Bus):
             ) + "\n")
         return bus
 
-    def to_reg(self, context, name, inst_name=None, to=None, fr=None):
+    def to_reg(self, context, name, inst_name=None, to=None, fr=None, clk=None, rst=None):
         # Generate the new bus.
         if to is None:
             bus = RegBus(self.clk, self.rst, self.aw, self.dw, name=name)
@@ -1207,6 +1207,16 @@ class AxiLiteBus(Bus):
             bus_in = self
         else:
             bus_in = AxiLiteBus(self.clk, self.rst, self.aw, self.dw, name=fr)
+
+        if clk is None:
+            bus_clk = self.clk
+        else:
+            bus_clk = clk
+
+        if rst is None:
+            bus_rst = self.rst
+        else:
+            bus_rst = rst
 
         # Check bus properties.
         assert (bus.clk == self.clk)
@@ -1226,6 +1236,8 @@ class AxiLiteBus(Bus):
             tpl.render_unicode(
                 bus_in=bus_in,
                 bus_out=bus,
+                bus_clk=bus_clk,
+                bus_rst=bus_rst,
                 name=inst_name or "i_{}_pc".format(name),
             ) + "\n")
         return bus
