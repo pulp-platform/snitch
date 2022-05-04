@@ -185,7 +185,7 @@ def main():
 
     # Peripheral crossbar address map
     am_soc_axi_lite_periph_xbar = am.new_node("soc_axi_lite_periph_xbar")
-    am_soc_regbus_periph_xbar = am.new_node("soc_periph_regbus_xbar")
+    am_soc_axi_lite_narrow_periph_xbar = am.new_node("soc_axi_lite_narrow_periph_xbar")
     am_hbm_cfg_xbar = am.new_node("hbm_cfg_xbar")
 
     ############################
@@ -211,38 +211,38 @@ def main():
     ##########################
     # AM: Periph Regbus XBar #
     ##########################
-    nr_regbus_peripherals = len(occamy.cfg["peripherals"]["regbus_peripherals"])
-    am_regbus_peripherals = []
+    nr_axi_lite_narrow_peripherals = len(occamy.cfg["peripherals"]["axi_lite_narrow_peripherals"])
+    am_axi_lite_narrow_peripherals = []
 
-    for p in range(nr_regbus_peripherals):
-        am_regbus_peripherals.append(
+    for p in range(nr_axi_lite_narrow_peripherals):
+        am_axi_lite_narrow_peripherals.append(
             am.new_leaf(
-                occamy.cfg["peripherals"]["regbus_peripherals"][p]["name"],
-                occamy.cfg["peripherals"]["regbus_peripherals"][p]["length"],
-                occamy.cfg["peripherals"]["regbus_peripherals"][p]["address"]
-            ).attach_to(am_soc_regbus_periph_xbar)
+                occamy.cfg["peripherals"]["axi_lite_narrow_peripherals"][p]["name"],
+                occamy.cfg["peripherals"]["axi_lite_narrow_peripherals"][p]["length"],
+                occamy.cfg["peripherals"]["axi_lite_narrow_peripherals"][p]["address"]
+            ).attach_to(am_soc_axi_lite_narrow_periph_xbar)
         )
         # add uart to devicetree
-        if occamy.cfg["peripherals"]["regbus_peripherals"][p]["name"] == "uart":
-            dts.add_device("serial", "lowrisc,serial", am_regbus_peripherals[p], [
+        if occamy.cfg["peripherals"]["axi_lite_narrow_peripherals"][p]["name"] == "uart":
+            dts.add_device("serial", "lowrisc,serial", am_axi_lite_narrow_peripherals[p], [
                 "clock-frequency = <50000000>", "current-speed = <115200>",
                 "interrupt-parent = <&PLIC0>", "interrupts = <1>"
             ])
         # add plic to devicetree
-        elif occamy.cfg["peripherals"]["regbus_peripherals"][p]["name"] == "plic":
-            dts.add_plic([0], am_regbus_peripherals[p])
+        elif occamy.cfg["peripherals"]["axi_lite_narrow_peripherals"][p]["name"] == "plic":
+            dts.add_plic([0], am_axi_lite_narrow_peripherals[p])
 
     # add bootrom seperately
     am_bootrom = am.new_leaf(
         "bootrom",
         occamy.cfg["peripherals"]["rom"]["length"],
-        occamy.cfg["peripherals"]["rom"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["peripherals"]["rom"]["address"]).attach_to(am_soc_axi_lite_narrow_periph_xbar)
 
     # add clint seperately
     am_clint = am.new_leaf(
         "clint",
         occamy.cfg["peripherals"]["clint"]["length"],
-        occamy.cfg["peripherals"]["clint"]["address"]).attach_to(am_soc_regbus_periph_xbar)
+        occamy.cfg["peripherals"]["clint"]["address"]).attach_to(am_soc_axi_lite_narrow_periph_xbar)
 
     # add clint to devicetree
     dts.add_clint([0], am_clint)
@@ -445,7 +445,7 @@ def main():
 
     # Connect narrow xbar
     am_soc_narrow_xbar.attach(am_soc_axi_lite_periph_xbar)
-    am_soc_narrow_xbar.attach(am_soc_regbus_periph_xbar)
+    am_soc_narrow_xbar.attach(am_soc_axi_lite_narrow_periph_xbar)
     am_soc_narrow_xbar.attach(am_soc_wide_xbar)
 
     am_soc_axi_lite_periph_xbar.attach(am_soc_narrow_xbar)
@@ -454,7 +454,7 @@ def main():
     am_soc_wide_xbar.attach(am_soc_narrow_xbar)
 
     # Connect HBM config xbar to regbus xbar
-    am_soc_regbus_periph_xbar.attach(am_hbm_cfg_xbar)
+    am_soc_axi_lite_narrow_periph_xbar.attach(am_hbm_cfg_xbar)
 
     #######################
     # SoC Peripheral Xbar #
@@ -466,6 +466,7 @@ def main():
         name="soc_axi_lite_periph_xbar",
         clk="clk_periph_i",
         rst="rst_periph_ni",
+        context="top_axi_lite_periph",
         node=am_soc_axi_lite_periph_xbar)
 
     soc_axi_lite_periph_xbar.add_input("soc")
@@ -502,31 +503,34 @@ def main():
 
     hbm_cfg_xbar.add_input("cfg")
 
-    ##########
-    # RegBus #
-    ##########
-    soc_regbus_periph_xbar = solder.RegBusXbar(48,
-                                               32,
-                                               name="soc_regbus_periph_xbar",
-                                               clk="clk_periph_i",
-                                               rst="rst_periph_ni",
-                                               node=am_soc_regbus_periph_xbar)
+    ##################
+    # AxiLite Narrow #
+    ##################
+    soc_axi_lite_narrow_periph_xbar = solder.AxiLiteXbar(
+        48,
+        32,
+        name="soc_axi_lite_narrow_periph_xbar",
+        clk="clk_periph_i",
+        rst="rst_periph_ni",
+        fall_through=False,
+        context="top_axi_lite_periph",
+        node=am_soc_axi_lite_narrow_periph_xbar)
 
-    soc_regbus_periph_xbar.add_input("soc")
+    soc_axi_lite_narrow_periph_xbar.add_input("soc")
 
     # connect Regbus peripherals
-    for p in range(nr_regbus_peripherals):
-        soc_regbus_periph_xbar.add_output_entry(
-            occamy.cfg["peripherals"]["regbus_peripherals"][p]["name"],
-            am_regbus_peripherals[p]
+    for p in range(nr_axi_lite_narrow_peripherals):
+        soc_axi_lite_narrow_periph_xbar.add_output_entry(
+            occamy.cfg["peripherals"]["axi_lite_narrow_peripherals"][p]["name"],
+            am_axi_lite_narrow_peripherals[p]
         )
 
     # add bootrom and clint seperately
-    soc_regbus_periph_xbar.add_output_entry("bootrom", am_bootrom)
-    soc_regbus_periph_xbar.add_output_entry("clint", am_clint)
+    soc_axi_lite_narrow_periph_xbar.add_output_entry("bootrom", am_bootrom)
+    soc_axi_lite_narrow_periph_xbar.add_output_entry("clint", am_clint)
 
     # add hbm cfg xbar separately
-    soc_regbus_periph_xbar.add_output_entry("hbm_cfg", am_hbm_cfg_xbar)
+    soc_axi_lite_narrow_periph_xbar.add_output_entry("hbm_cfg", am_hbm_cfg_xbar)
 
     ##################
     # SoC Wide Xbars #
@@ -685,8 +689,8 @@ def main():
     soc_narrow_xbar.add_output_entry("periph", am_soc_axi_lite_periph_xbar)
     soc_narrow_xbar.add_output_entry("spm_narrow", am_spm_narrow)
     soc_narrow_xbar.add_output_entry("sys_idma_cfg", am_sys_idma_cfg)
-    soc_narrow_xbar.add_output_entry("regbus_periph",
-                                     am_soc_regbus_periph_xbar)
+    soc_narrow_xbar.add_output_entry("axi_lite_narrow_periph",
+                                     am_soc_axi_lite_narrow_periph_xbar)
     soc_narrow_xbar.add_output_entry("pcie", am_pcie)
     for i, rq in enumerate(occamy.cfg["remote_quadrants"]):
         soc_narrow_xbar.add_input("rmq_{}".format(i))
@@ -835,10 +839,10 @@ def main():
     if is_remote_quadrant:
         apb_hbm_cfg = None
     else:
-        apb_hbm_cfg = solder.ApbBus(clk=soc_regbus_periph_xbar.clk,
-                                    rst=soc_regbus_periph_xbar.rst,
-                                    aw=soc_regbus_periph_xbar.aw,
-                                    dw=soc_regbus_periph_xbar.dw,
+        apb_hbm_cfg = solder.ApbBus(clk=soc_axi_lite_narrow_periph_xbar.clk,
+                                    rst=soc_axi_lite_narrow_periph_xbar.rst,
+                                    aw=soc_axi_lite_narrow_periph_xbar.aw,
+                                    dw=soc_axi_lite_narrow_periph_xbar.dw,
                                     name="apb_hbm_cfg")
 
     kwargs = {
@@ -855,7 +859,7 @@ def main():
         "quadrant_s1_ctrl_mux": quadrant_s1_ctrl_mux,
         "wide_xbar_quadrant_s1": wide_xbar_quadrant_s1,
         "narrow_xbar_quadrant_s1": narrow_xbar_quadrant_s1,
-        "soc_regbus_periph_xbar": soc_regbus_periph_xbar,
+        "soc_axi_lite_narrow_periph_xbar": soc_axi_lite_narrow_periph_xbar,
         "hbm_cfg_xbar": hbm_cfg_xbar,
         "apb_hbm_cfg": apb_hbm_cfg,
         "cfg": occamy.cfg,
@@ -880,7 +884,7 @@ def main():
     write_template(args.top_sv,
                    outdir,
                    fname="{}_top.sv".format(args.name),
-                   module=solder.code_module['default'],
+                   module=solder.code_module['top_axi_lite_periph'],
                    soc_periph_xbar=soc_axi_lite_periph_xbar,
                    **kwargs)
 

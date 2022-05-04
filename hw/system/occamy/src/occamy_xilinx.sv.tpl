@@ -62,8 +62,8 @@ import ${name}_pkg::*;
   output logic                                             bootrom_en_o,
   // This is actually too wide. But the address width depends on the ROM size, so let Vivado handle
   // this for now
-  output ${soc_regbus_periph_xbar.out_bootrom.addr_type()} bootrom_addr_o,
-  input  ${soc_regbus_periph_xbar.out_bootrom.data_type()} bootrom_data_i,
+  output logic [47:0] bootrom_addr_o,
+  input  logic [31:0] bootrom_data_i,
 
   /// HBM2e Ports
 % for i in range(8):
@@ -104,8 +104,13 @@ import ${name}_pkg::*;
   /// Boot ROM
   // TODO(niwis, aottaviano) This is a temporary solution. Either put this in a dedicated module for
   // regbus <-> Xilinx memory conversion and add support to solder, or replace by a different ROM
-  ${soc_regbus_periph_xbar.out_bootrom.req_type()} bootrom_req;
-  ${soc_regbus_periph_xbar.out_bootrom.rsp_type()} bootrom_rsp;
+
+  ${soc_axi_lite_narrow_periph_xbar.out_bootrom.req_type()} bootrom_axi_lite_req;
+  ${soc_axi_lite_narrow_periph_xbar.out_bootrom.rsp_type()} bootrom_axi_lite_rsp;
+
+  <% regbus_bootrom = soc_axi_lite_narrow_periph_xbar.out_bootrom.to_reg(context, "bootrom", fr="bootrom_axi_lite") %>
+  ${regbus_bootrom.req_type()} bootrom_req;
+  ${regbus_bootrom.rsp_type()} bootrom_rsp;
 
   logic bootrom_req_ready_d, bootrom_req_ready_q;
 
@@ -125,23 +130,36 @@ import ${name}_pkg::*;
   end
 
   /// FLLs
-  ${soc_regbus_periph_xbar.out_fll_system.req_type()} fll_system_req;
-  ${soc_regbus_periph_xbar.out_fll_system.rsp_type()} fll_system_rsp;
-  ${soc_regbus_periph_xbar.out_fll_periph.req_type()} fll_periph_req;
-  ${soc_regbus_periph_xbar.out_fll_periph.rsp_type()} fll_periph_rsp;
-  ${soc_regbus_periph_xbar.out_fll_hbm2e.req_type()} fll_hbm2e_req;
-  ${soc_regbus_periph_xbar.out_fll_hbm2e.rsp_type()} fll_hbm2e_rsp;
+  ${soc_axi_lite_narrow_periph_xbar.out_fll_system.req_type()} fll_system_axi_lite_req;
+  ${soc_axi_lite_narrow_periph_xbar.out_fll_system.rsp_type()} fll_system_axi_lite_rsp;
+
+  ${soc_axi_lite_narrow_periph_xbar.out_fll_periph.req_type()} fll_periph_axi_lite_req;
+  ${soc_axi_lite_narrow_periph_xbar.out_fll_periph.rsp_type()} fll_periph_axi_lite_rsp;
+
+  ${soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e.req_type()} fll_hbm2e_axi_lite_req;
+  ${soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e.rsp_type()} fll_hbm2e_axi_lite_rsp;
+
+  <% regbus_fll_system = soc_axi_lite_narrow_periph_xbar.out_fll_system.to_reg(context, "fll_system", fr="fll_system_axi_lite") %>
+  <% regbus_fll_periph = soc_axi_lite_narrow_periph_xbar.out_fll_periph.to_reg(context, "fll_periph", fr="fll_periph_axi_lite") %>
+  <% regbus_fll_hbm2e = soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e.to_reg(context,   "fll_hbm2e", fr="fll_hbm2e_axi_lite") %>
+
+  ${regbus_fll_system.req_type()} fll_system_req;
+  ${regbus_fll_system.rsp_type()} fll_system_rsp;
+  ${regbus_fll_periph.req_type()} fll_periph_req;
+  ${regbus_fll_periph.rsp_type()} fll_periph_rsp;
+  ${regbus_fll_hbm2e.req_type()} fll_hbm2e_req;
+  ${regbus_fll_hbm2e.rsp_type()} fll_hbm2e_rsp;
 
   // Occamy top-level
   ${name}_top i_${name} (
-    .bootrom_req_o   (bootrom_req),
-    .bootrom_rsp_i   (bootrom_rsp),
-    .fll_system_req_o(fll_system_req),
-    .fll_system_rsp_i(fll_system_rsp),
-    .fll_periph_req_o(fll_periph_req),
-    .fll_periph_rsp_i(fll_periph_rsp),
-    .fll_hbm2e_req_o (fll_hbm2e_req),
-    .fll_hbm2e_rsp_i (fll_hbm2e_rsp),
+    .bootrom_req_o   (bootrom_axi_lite_req),
+    .bootrom_rsp_i   (bootrom_axi_lite_rsp),
+    .fll_system_req_o(fll_system_axi_lite_req),
+    .fll_system_rsp_i(fll_system_axi_lite_rsp),
+    .fll_periph_req_o(fll_periph_axi_lite_req),
+    .fll_periph_rsp_i(fll_periph_axi_lite_rsp),
+    .fll_hbm2e_req_o (fll_hbm2e_axi_lite_req),
+    .fll_hbm2e_rsp_i (fll_hbm2e_axi_lite_rsp),
     .pcie_cfg_req_o  (),
     .pcie_cfg_rsp_i  ('0),
     // Tie the HBM interrupts to zero.

@@ -1196,12 +1196,27 @@ class AxiLiteBus(Bus):
             ) + "\n")
         return bus
 
-    def to_reg(self, context, name, inst_name=None, to=None):
+    def to_reg(self, context, name, inst_name=None, to=None, fr=None, clk=None, rst=None):
         # Generate the new bus.
         if to is None:
             bus = RegBus(self.clk, self.rst, self.aw, self.dw, name=name)
         else:
             bus = to
+
+        if fr is None:
+            bus_in = self
+        else:
+            bus_in = AxiLiteBus(self.clk, self.rst, self.aw, self.dw, name=fr)
+
+        if clk is None:
+            bus_clk = self.clk
+        else:
+            bus_clk = clk
+
+        if rst is None:
+            bus_rst = self.rst
+        else:
+            bus_rst = rst
 
         # Check bus properties.
         assert (bus.clk == self.clk)
@@ -1209,14 +1224,60 @@ class AxiLiteBus(Bus):
         assert (bus.aw == self.aw)
         assert (bus.dw == self.dw)
 
+        assert (bus_in.clk == self.clk)
+        assert (bus_in.rst == self.rst)
+        assert (bus_in.aw == self.aw)
+        assert (bus_in.dw == self.dw)
+
         # Emit the converter instance.
         bus.declare(context)
         tpl = templates.get_template("solder.axi_lite_to_reg.sv.tpl")
         context.write(
             tpl.render_unicode(
+                bus_in=bus_in,
+                bus_out=bus,
+                bus_clk=bus_clk,
+                bus_rst=bus_rst,
+                name=inst_name or "i_{}_pc".format(name),
+            ) + "\n")
+        return bus
+
+    def cut(self, context, nr_cuts=1, name=None, inst_name=None, to=None):
+        if nr_cuts == 0:
+            if to is None:
+                return self
+
+        name = name or "{}_cut".format(self.name)
+
+        # Generate the new bus.
+        if to is None:
+            bus = copy(self)
+            bus.declared = False
+            bus.type_prefix = bus.emit_struct()
+            bus.name = name
+            bus.name_suffix = None
+        else:
+            bus = to
+
+        assert (bus.clk == self.clk)
+        assert (bus.rst == self.rst)
+        assert (bus.aw == self.aw)
+        assert (bus.dw == self.dw)
+
+        # Handle to-assignment
+        if nr_cuts == 0:
+            to.assign(context, self)
+            return to
+
+        # Emit the cut instance.
+        bus.declare(context)
+        tpl = templates.get_template("solder.axi_multicut.sv.tpl")
+        context.write(
+            tpl.render_unicode(
                 bus_in=self,
                 bus_out=bus,
-                name=inst_name or "i_{}_pc".format(name),
+                nr_cuts=nr_cuts,
+                name=inst_name or "i_{}".format(name),
             ) + "\n")
         return bus
 

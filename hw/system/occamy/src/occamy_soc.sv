@@ -65,8 +65,8 @@ module occamy_soc
     output axi_a48_d64_i4_u9_resp_t periph_axi_lite_rsp_o,
 
     // Peripheral Ports (to Regbus Xbar)
-    output axi_a48_d64_i8_u9_req_t  periph_regbus_req_o,
-    input  axi_a48_d64_i8_u9_resp_t periph_regbus_rsp_i,
+    output axi_a48_d64_i8_u9_req_t  periph_axi_lite_narrow_req_o,
+    input  axi_a48_d64_i8_u9_resp_t periph_axi_lite_narrow_rsp_i,
 
     // SoC control register IO
     output logic [1:0] spm_narrow_rerror_o,
@@ -2605,25 +2605,25 @@ module occamy_soc
   /////////////////
   // Peripherals //
   /////////////////
-  axi_a48_d64_i8_u9_req_t  periph_regbus_out_noatop_req;
-  axi_a48_d64_i8_u9_resp_t periph_regbus_out_noatop_rsp;
+  axi_a48_d64_i8_u9_req_t  periph_axi_lite_narrow_out_noatop_req;
+  axi_a48_d64_i8_u9_resp_t periph_axi_lite_narrow_out_noatop_rsp;
 
   axi_atop_filter #(
       .AxiIdWidth(8),
       .AxiMaxWriteTxns(4),
       .axi_req_t(axi_a48_d64_i8_u9_req_t),
       .axi_resp_t(axi_a48_d64_i8_u9_resp_t)
-  ) i_periph_regbus_out_atop_filter (
+  ) i_periph_axi_lite_narrow_out_atop_filter (
       .clk_i     (clk_i),
       .rst_ni    (rst_ni),
-      .slv_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_REGBUS_PERIPH]),
-      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_REGBUS_PERIPH]),
-      .mst_req_o (periph_regbus_out_noatop_req),
-      .mst_resp_i(periph_regbus_out_noatop_rsp)
+      .slv_req_i (soc_narrow_xbar_out_req[SOC_NARROW_XBAR_OUT_AXI_LITE_NARROW_PERIPH]),
+      .slv_resp_o(soc_narrow_xbar_out_rsp[SOC_NARROW_XBAR_OUT_AXI_LITE_NARROW_PERIPH]),
+      .mst_req_o (periph_axi_lite_narrow_out_noatop_req),
+      .mst_resp_i(periph_axi_lite_narrow_out_noatop_rsp)
   );
 
-  axi_a48_d64_i8_u9_req_t  periph_regbus_out_req;
-  axi_a48_d64_i8_u9_resp_t periph_regbus_out_rsp;
+  axi_a48_d64_i8_u9_req_t  periph_axi_lite_narrow_out_req;
+  axi_a48_d64_i8_u9_resp_t periph_axi_lite_narrow_out_rsp;
 
   axi_multicut #(
       .NoCuts(3),
@@ -2634,13 +2634,13 @@ module occamy_soc
       .r_chan_t(axi_a48_d64_i8_u9_r_chan_t),
       .axi_req_t(axi_a48_d64_i8_u9_req_t),
       .axi_resp_t(axi_a48_d64_i8_u9_resp_t)
-  ) i_periph_regbus_out_cut (
+  ) i_periph_axi_lite_narrow_out_cut (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
-      .slv_req_i(periph_regbus_out_noatop_req),
-      .slv_resp_o(periph_regbus_out_noatop_rsp),
-      .mst_req_o(periph_regbus_out_req),
-      .mst_resp_i(periph_regbus_out_rsp)
+      .slv_req_i(periph_axi_lite_narrow_out_noatop_req),
+      .slv_resp_o(periph_axi_lite_narrow_out_noatop_rsp),
+      .mst_req_o(periph_axi_lite_narrow_out_req),
+      .mst_resp_i(periph_axi_lite_narrow_out_rsp)
   );
   axi_a48_d64_i8_u9_req_t  periph_axi_lite_out_noatop_req;
   axi_a48_d64_i8_u9_resp_t periph_axi_lite_out_noatop_rsp;
@@ -2707,7 +2707,7 @@ module occamy_soc
   // Outputs
   assign periph_axi_lite_req_o = periph_axi_lite_out_req;
   assign periph_axi_lite_out_rsp = periph_axi_lite_rsp_i;
-  assign periph_regbus_req_o = periph_regbus_out_req;
-  assign periph_regbus_out_rsp = periph_regbus_rsp_i;
+  assign periph_axi_lite_narrow_req_o = periph_axi_lite_narrow_out_req;
+  assign periph_axi_lite_narrow_out_rsp = periph_axi_lite_narrow_rsp_i;
 
 endmodule
