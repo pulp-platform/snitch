@@ -261,14 +261,14 @@ module ${name}_soc
   mem_narrow_data_t spm_narrow_wdata, spm_narrow_rdata;
   mem_narrow_strb_t spm_narrow_strb;
 
-  axi_to_mem #(
+  axi_to_mem_interleaved #(
     .axi_req_t (${narrow_spm_mst.req_type()}),
     .axi_resp_t (${narrow_spm_mst.rsp_type()}),
     .AddrWidth (${util.clog2(spm_narrow_words) + util.clog2(narrow_spm_mst.dw//8)}),
     .DataWidth (${narrow_spm_mst.dw}),
     .IdWidth (${narrow_spm_mst.iw}),
     .NumBanks (1),
-    .BufDepth (1)
+    .BufDepth (16)
   ) i_axi_to_wide_mem (
     .clk_i (${narrow_spm_mst.clk}),
     .rst_ni (${narrow_spm_mst.rst}),
@@ -326,14 +326,14 @@ module ${name}_soc
   mem_wide_data_t spm_wide_wdata, spm_wide_rdata;
   mem_wide_strb_t spm_wide_strb;
 
-  axi_to_mem #(
+  axi_to_mem_interleaved #(
     .axi_req_t (${wide_spm_mst.req_type()}),
     .axi_resp_t (${wide_spm_mst.rsp_type()}),
     .AddrWidth (${util.clog2(spm_wide_words) + util.clog2(wide_spm_mst.dw//8)}),
     .DataWidth (${wide_spm_mst.dw}),
     .IdWidth (${wide_spm_mst.iw}),
     .NumBanks (1),
-    .BufDepth (1)
+    .BufDepth (16)
   ) i_axi_to_mem (
     .clk_i (${wide_spm_mst.clk}),
     .rst_ni (${wide_spm_mst.rst}),
@@ -389,7 +389,7 @@ module ${name}_soc
     .DataWidth (${wide_zero_mem_mst.dw}),
     .IdWidth (${wide_zero_mem_mst.iw}),
     .NumBanks (1),
-    .BufDepth (1)
+    .BufDepth (4)
   ) i_axi_wide_zero_mem (
     .clk_i (${wide_zero_mem_mst.clk}),
     .rst_ni (${wide_zero_mem_mst.rst}),

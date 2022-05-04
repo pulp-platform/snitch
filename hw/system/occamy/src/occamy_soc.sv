@@ -2001,14 +2001,14 @@ module occamy_soc
   mem_narrow_data_t spm_narrow_wdata, spm_narrow_rdata;
   mem_narrow_strb_t spm_narrow_strb;
 
-  axi_to_mem #(
+  axi_to_mem_interleaved #(
       .axi_req_t(axi_a48_d64_i8_u9_req_t),
       .axi_resp_t(axi_a48_d64_i8_u9_resp_t),
       .AddrWidth(19),
       .DataWidth(64),
       .IdWidth(8),
       .NumBanks(1),
-      .BufDepth(1)
+      .BufDepth(16)
   ) i_axi_to_wide_mem (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2082,14 +2082,14 @@ module occamy_soc
   mem_wide_data_t spm_wide_wdata, spm_wide_rdata;
   mem_wide_strb_t spm_wide_strb;
 
-  axi_to_mem #(
+  axi_to_mem_interleaved #(
       .axi_req_t(axi_a48_d512_i6_u0_req_t),
       .axi_resp_t(axi_a48_d512_i6_u0_resp_t),
       .AddrWidth(21),
       .DataWidth(512),
       .IdWidth(6),
       .NumBanks(1),
-      .BufDepth(1)
+      .BufDepth(16)
   ) i_axi_to_mem (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
@@ -2141,7 +2141,7 @@ module occamy_soc
       .DataWidth(512),
       .IdWidth(6),
       .NumBanks(1),
-      .BufDepth(1)
+      .BufDepth(4)
   ) i_axi_wide_zero_mem (
       .clk_i(clk_i),
       .rst_ni(rst_ni),
