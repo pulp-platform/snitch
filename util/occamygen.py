@@ -516,7 +516,6 @@ def main():
         context="top_axi_lite_periph",
         node=am_soc_axi_lite_narrow_periph_xbar)
 
-
     soc_axi_lite_narrow_periph_xbar.add_input("soc")
     soc_axi_lite_narrow_periph_xbar.add_output_entry("soc", am_soc_narrow_xbar)
 

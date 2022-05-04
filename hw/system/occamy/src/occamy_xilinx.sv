@@ -573,8 +573,11 @@ module occamy_xilinx
   // TODO(niwis, aottaviano) This is a temporary solution. Either put this in a dedicated module for
   // regbus <-> Xilinx memory conversion and add support to solder, or replace by a different ROM
 
-  reg_a48_d32_req_t axi_lite_to_reg_bootrom_req;
-  reg_a48_d32_rsp_t axi_lite_to_reg_bootrom_rsp;
+  axi_lite_a48_d32_req_t bootrom_axi_lite_req;
+  axi_lite_a48_d32_rsp_t bootrom_axi_lite_rsp;
+
+  reg_a48_d32_req_t bootrom_req;
+  reg_a48_d32_rsp_t bootrom_rsp;
 
   axi_lite_to_reg #(
       .ADDR_WIDTH    (48),
@@ -583,13 +586,13 @@ module occamy_xilinx
       .axi_lite_rsp_t(axi_lite_a48_d32_rsp_t),
       .reg_req_t     (reg_a48_d32_req_t),
       .reg_rsp_t     (reg_a48_d32_rsp_t)
-  ) i_axi_lite_to_reg_bootrom_pc (
-      .clk_i(clk_periph_i),
-      .rst_ni(rst_periph_ni),
-      .axi_lite_req_i ( soc_axi_lite_narrow_periph_xbar_out_req[SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_BOOTROM] ),
-      .axi_lite_rsp_o ( soc_axi_lite_narrow_periph_xbar_out_rsp[SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_BOOTROM] ),
-      .reg_req_o(axi_lite_to_reg_bootrom_req),
-      .reg_rsp_i(axi_lite_to_reg_bootrom_rsp)
+  ) i_bootrom_pc (
+      .clk_i         (clk_periph_i),
+      .rst_ni        (rst_periph_ni),
+      .axi_lite_req_i(bootrom_axi_lite_req),
+      .axi_lite_rsp_o(bootrom_axi_lite_rsp),
+      .reg_req_o     (bootrom_req),
+      .reg_rsp_i     (bootrom_rsp)
   );
 
 
@@ -614,8 +617,17 @@ module occamy_xilinx
   end
 
   /// FLLs
-  reg_a48_d32_req_t axi_lite_to_reg_fll_system_req;
-  reg_a48_d32_rsp_t axi_lite_to_reg_fll_system_rsp;
+  axi_lite_a48_d32_req_t fll_system_axi_lite_req;
+  axi_lite_a48_d32_rsp_t fll_system_axi_lite_rsp;
+
+  axi_lite_a48_d32_req_t fll_periph_axi_lite_req;
+  axi_lite_a48_d32_rsp_t fll_periph_axi_lite_rsp;
+
+  axi_lite_a48_d32_req_t fll_hbm2e_axi_lite_req;
+  axi_lite_a48_d32_rsp_t fll_hbm2e_axi_lite_rsp;
+
+  reg_a48_d32_req_t fll_system_req;
+  reg_a48_d32_rsp_t fll_system_rsp;
 
   axi_lite_to_reg #(
       .ADDR_WIDTH    (48),
@@ -624,18 +636,18 @@ module occamy_xilinx
       .axi_lite_rsp_t(axi_lite_a48_d32_rsp_t),
       .reg_req_t     (reg_a48_d32_req_t),
       .reg_rsp_t     (reg_a48_d32_rsp_t)
-  ) i_axi_lite_to_reg_fll_system_pc (
-      .clk_i(clk_periph_i),
-      .rst_ni(rst_periph_ni),
-      .axi_lite_req_i ( soc_axi_lite_narrow_periph_xbar_out_req[SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_FLL_SYSTEM] ),
-      .axi_lite_rsp_o ( soc_axi_lite_narrow_periph_xbar_out_rsp[SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_FLL_SYSTEM] ),
-      .reg_req_o(axi_lite_to_reg_fll_system_req),
-      .reg_rsp_i(axi_lite_to_reg_fll_system_rsp)
+  ) i_fll_system_pc (
+      .clk_i         (clk_periph_i),
+      .rst_ni        (rst_periph_ni),
+      .axi_lite_req_i(fll_system_axi_lite_req),
+      .axi_lite_rsp_o(fll_system_axi_lite_rsp),
+      .reg_req_o     (fll_system_req),
+      .reg_rsp_i     (fll_system_rsp)
   );
 
 
-  reg_a48_d32_req_t axi_lite_to_reg_fll_periph_req;
-  reg_a48_d32_rsp_t axi_lite_to_reg_fll_periph_rsp;
+  reg_a48_d32_req_t fll_periph_req;
+  reg_a48_d32_rsp_t fll_periph_rsp;
 
   axi_lite_to_reg #(
       .ADDR_WIDTH    (48),
@@ -644,18 +656,18 @@ module occamy_xilinx
       .axi_lite_rsp_t(axi_lite_a48_d32_rsp_t),
       .reg_req_t     (reg_a48_d32_req_t),
       .reg_rsp_t     (reg_a48_d32_rsp_t)
-  ) i_axi_lite_to_reg_fll_periph_pc (
-      .clk_i(clk_periph_i),
-      .rst_ni(rst_periph_ni),
-      .axi_lite_req_i ( soc_axi_lite_narrow_periph_xbar_out_req[SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_FLL_PERIPH] ),
-      .axi_lite_rsp_o ( soc_axi_lite_narrow_periph_xbar_out_rsp[SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_FLL_PERIPH] ),
-      .reg_req_o(axi_lite_to_reg_fll_periph_req),
-      .reg_rsp_i(axi_lite_to_reg_fll_periph_rsp)
+  ) i_fll_periph_pc (
+      .clk_i         (clk_periph_i),
+      .rst_ni        (rst_periph_ni),
+      .axi_lite_req_i(fll_periph_axi_lite_req),
+      .axi_lite_rsp_o(fll_periph_axi_lite_rsp),
+      .reg_req_o     (fll_periph_req),
+      .reg_rsp_i     (fll_periph_rsp)
   );
 
 
-  reg_a48_d32_req_t axi_lite_to_reg_fll_hbm2e_req;
-  reg_a48_d32_rsp_t axi_lite_to_reg_fll_hbm2e_rsp;
+  reg_a48_d32_req_t fll_hbm2e_req;
+  reg_a48_d32_rsp_t fll_hbm2e_rsp;
 
   axi_lite_to_reg #(
       .ADDR_WIDTH    (48),
@@ -664,13 +676,13 @@ module occamy_xilinx
       .axi_lite_rsp_t(axi_lite_a48_d32_rsp_t),
       .reg_req_t     (reg_a48_d32_req_t),
       .reg_rsp_t     (reg_a48_d32_rsp_t)
-  ) i_axi_lite_to_reg_fll_hbm2e_pc (
-      .clk_i(clk_periph_i),
-      .rst_ni(rst_periph_ni),
-      .axi_lite_req_i ( soc_axi_lite_narrow_periph_xbar_out_req[SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_FLL_HBM2E] ),
-      .axi_lite_rsp_o ( soc_axi_lite_narrow_periph_xbar_out_rsp[SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_FLL_HBM2E] ),
-      .reg_req_o(axi_lite_to_reg_fll_hbm2e_req),
-      .reg_rsp_i(axi_lite_to_reg_fll_hbm2e_rsp)
+  ) i_fll_hbm2e_pc (
+      .clk_i         (clk_periph_i),
+      .rst_ni        (rst_periph_ni),
+      .axi_lite_req_i(fll_hbm2e_axi_lite_req),
+      .axi_lite_rsp_o(fll_hbm2e_axi_lite_rsp),
+      .reg_req_o     (fll_hbm2e_req),
+      .reg_rsp_i     (fll_hbm2e_rsp)
   );
 
 
@@ -684,14 +696,14 @@ module occamy_xilinx
 
   // Occamy top-level
   occamy_top i_occamy (
-      .bootrom_req_o   (bootrom_req),
-      .bootrom_rsp_i   (bootrom_rsp),
-      .fll_system_req_o(fll_system_req),
-      .fll_system_rsp_i(fll_system_rsp),
-      .fll_periph_req_o(fll_periph_req),
-      .fll_periph_rsp_i(fll_periph_rsp),
-      .fll_hbm2e_req_o (fll_hbm2e_req),
-      .fll_hbm2e_rsp_i (fll_hbm2e_rsp),
+      .bootrom_req_o   (bootrom_axi_lite_req),
+      .bootrom_rsp_i   (bootrom_axi_lite_rsp),
+      .fll_system_req_o(fll_system_axi_lite_req),
+      .fll_system_rsp_i(fll_system_axi_lite_rsp),
+      .fll_periph_req_o(fll_periph_axi_lite_req),
+      .fll_periph_rsp_i(fll_periph_axi_lite_rsp),
+      .fll_hbm2e_req_o (fll_hbm2e_axi_lite_req),
+      .fll_hbm2e_rsp_i (fll_hbm2e_axi_lite_rsp),
       .pcie_cfg_req_o  (),
       .pcie_cfg_rsp_i  ('0),
       // Tie the HBM interrupts to zero.
