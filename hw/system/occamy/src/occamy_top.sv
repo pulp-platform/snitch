@@ -251,7 +251,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_hbm_xbar_cfg_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(4),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -556,7 +556,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_hbi_wide_cfg_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(4),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -580,7 +580,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_hbi_narrow_cfg_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(4),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -630,7 +630,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_hbm_cfg_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(4),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -883,7 +883,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_soc_ctrl_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(1),
+      .NoCuts(2),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -945,7 +945,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_chip_ctrl_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(1),
+      .NoCuts(2),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -1058,7 +1058,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_bootrom_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(4),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -1086,7 +1086,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_fll_system_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(4),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -1107,7 +1107,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_fll_periph_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(4),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -1128,7 +1128,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_fll_hbm2e_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(4),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
