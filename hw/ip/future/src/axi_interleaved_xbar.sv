@@ -86,7 +86,7 @@ import cf_math_pkg::idx_width;
     logic                                 dec_aw_valid,  dec_aw_error;
     logic                                 dec_ar_valid,  dec_ar_error;
 
-    localparam int unsigned BankSelLow  = 'd12;
+    localparam int unsigned BankSelLow  = 'd16;
     localparam int unsigned BankSelHigh = BankSelLow + MstPortsIdxWidth;
 
     // interleaved select (4kiB blocks)
