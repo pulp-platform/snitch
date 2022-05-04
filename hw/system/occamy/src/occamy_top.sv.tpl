@@ -282,6 +282,11 @@ module ${name}_top
       .cdc(context, "clk_i", "rst_ni", "axi_lite_to_soc_cdc") \
       .to_axi(context, "axi_lite_to_axi_periph", to=periph_axi_lite_per2soc) %> \
 
+  <% periph_regbus_soc2per \
+    .cdc(context, "clk_periph_i", "rst_periph_ni", "periph_cdc") \
+    .change_dw(context, 32, "axi_to_axi_lite_dw") \
+    .to_axi_lite(context, "axi_to_axi_lite_regbus_periph", to=soc_axi_lite_narrow_periph_xbar.in_soc) %>
+
   /////////////////////////////
   // HBI & HBM & PCIE Config //
   /////////////////////////////

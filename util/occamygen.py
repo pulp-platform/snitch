@@ -517,7 +517,6 @@ def main():
         node=am_soc_axi_lite_narrow_periph_xbar)
 
     soc_axi_lite_narrow_periph_xbar.add_input("soc")
-    soc_axi_lite_narrow_periph_xbar.add_output_entry("soc", am_soc_narrow_xbar)
 
     # connect Regbus peripherals
     for p in range(nr_axi_lite_narrow_peripherals):

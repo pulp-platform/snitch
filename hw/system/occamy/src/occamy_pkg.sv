@@ -202,7 +202,6 @@ package occamy_pkg;
 
   /// Outputs of the `soc_axi_lite_narrow_periph_xbar` crossbar.
   typedef enum int {
-    SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_SOC,
     SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_SOC_CTRL,
     SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_FLL_SYSTEM,
     SOC_AXI_LITE_NARROW_PERIPH_XBAR_OUT_FLL_PERIPH,
@@ -1085,6 +1084,10 @@ package occamy_pkg;
   // APB bus with 48 bit address, 32 bit data.
   `APB_TYPEDEF_REQ_T(apb_a48_d32_req_t, logic [47:0], logic [31:0], logic [3:0])
   `APB_TYPEDEF_RESP_T(apb_a48_d32_rsp_t, logic [31:0])
+
+  // AXI bus with 48 bit address, 32 bit data, 8 bit IDs, and 9 bit user data.
+  `AXI_TYPEDEF_ALL(axi_a48_d32_i8_u9, logic [47:0], logic [7:0], logic [31:0], logic [3:0],
+                   logic [8:0])
 
   // Register bus with 48 bit address and 64 bit data.
   `REG_BUS_TYPEDEF_ALL(reg_a48_d64, logic [47:0], logic [63:0], logic [7:0])
