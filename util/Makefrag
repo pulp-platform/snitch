@@ -69,6 +69,7 @@ VLOGAN_FLAGS := -assert svaext
 VLOGAN_FLAGS += -assert disable_cover
 VLOGAN_FLAGS += -full64
 VLOGAN_FLAGS += -kdb
+VHDLAN_FLAGS := -full64
 
 # default on target `all`
 all:
@@ -145,7 +146,7 @@ endef
 #######
 work-vcs/compile.sh: ${VSIM_SOURCES} ${TB_SRCS}
 	mkdir -p work-vcs
-	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="${VLOGAN_FLAGS}" > $@
+	${BENDER} script vcs ${VSIM_BENDER} --vlog-arg="${VLOGAN_FLAGS}" --vcom-arg="${VHDLAN_FLAGS}" > $@
 	chmod +x $@
 	$@ > work-vcs/compile.log
 
