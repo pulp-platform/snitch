@@ -54,9 +54,9 @@
       periph_axi_lite: 3,
     }
     txns: {
-      wide_and_inter: 4,
-      wide_to_hbm: 4,
-      narrow_and_wide: 4,
+      wide_and_inter: 128,
+      wide_to_hbm: 128,
+      narrow_and_wide: 16,
       rmq: 4,
     }
     narrow_xbar_slv_id_width: 4,

@@ -608,7 +608,7 @@ module occamy_soc
   axi_id_remap #(
       .AxiSlvPortIdWidth(7),
       .AxiSlvPortMaxUniqIds(16),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(128),
       .AxiMstPortIdWidth(4),
       .slv_req_t(axi_a48_d512_i7_u0_req_t),
       .slv_resp_t(axi_a48_d512_i7_u0_resp_t),
@@ -662,7 +662,7 @@ module occamy_soc
   axi_id_remap #(
       .AxiSlvPortIdWidth(6),
       .AxiSlvPortMaxUniqIds(16),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(128),
       .AxiMstPortIdWidth(4),
       .slv_req_t(axi_a48_d512_i6_u0_req_t),
       .slv_resp_t(axi_a48_d512_i6_u0_resp_t),
@@ -682,7 +682,7 @@ module occamy_soc
   axi_id_remap #(
       .AxiSlvPortIdWidth(6),
       .AxiSlvPortMaxUniqIds(16),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(128),
       .AxiMstPortIdWidth(4),
       .slv_req_t(axi_a48_d512_i6_u0_req_t),
       .slv_resp_t(axi_a48_d512_i6_u0_resp_t),
@@ -829,7 +829,7 @@ module occamy_soc
   axi_id_remap #(
       .AxiSlvPortIdWidth(8),
       .AxiSlvPortMaxUniqIds(16),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(16),
       .AxiMstPortIdWidth(4),
       .slv_req_t(axi_a48_d64_i8_u9_req_t),
       .slv_resp_t(axi_a48_d64_i8_u9_resp_t),
@@ -880,7 +880,7 @@ module occamy_soc
   axi_id_remap #(
       .AxiSlvPortIdWidth(6),
       .AxiSlvPortMaxUniqIds(16),
-      .AxiMaxTxnsPerId(4),
+      .AxiMaxTxnsPerId(16),
       .AxiMstPortIdWidth(4),
       .slv_req_t(axi_a48_d512_i6_u0_req_t),
       .slv_resp_t(axi_a48_d512_i6_u0_resp_t),
