@@ -46,6 +46,10 @@ br-hrv-vcu128:
       fi
     - make -C hw/system/occamy/fpga br-hrv-vcu128
     - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-vcu128
+  artifacts:
+    when: always
+    paths:
+    - hw/system/occamy/fpga/output/br-hrv-vcu128/images/
 
 occamy-bootrom:
   stage: build2
