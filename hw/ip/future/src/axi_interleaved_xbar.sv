@@ -86,7 +86,7 @@ import cf_math_pkg::idx_width;
     logic                                 dec_aw_valid,  dec_aw_error;
     logic                                 dec_ar_valid,  dec_ar_error;
 
-    localparam int unsigned BankSelLow  = 'd12;
+    localparam int unsigned BankSelLow  = 'd16;
     localparam int unsigned BankSelHigh = BankSelLow + MstPortsIdxWidth;
 
     // interleaved select (4kiB blocks)
@@ -331,6 +331,7 @@ import cf_math_pkg::idx_width;
   AXI_BUS.Master                                                    mst_ports [Cfg.NoMstPorts-1:0],
   input  rule_t [Cfg.NoAddrRules-1:0]                               addr_map_i,
   input  logic  [Cfg.NoSlvPorts-1:0]                                en_default_mst_port_i,
+  input  logic                                                      interleaved_mode_ena_i,
 `ifdef VCS
   input  logic  [Cfg.NoSlvPorts-1:0][MstPortsIdxWidth-1:0]          default_mst_port_i
 `else
@@ -403,6 +404,7 @@ import cf_math_pkg::idx_width;
     .mst_ports_req_o  (mst_reqs ),
     .mst_ports_resp_i (mst_resps),
     .addr_map_i,
+    .interleaved_mode_ena_i,
     .en_default_mst_port_i,
     .default_mst_port_i
   );
