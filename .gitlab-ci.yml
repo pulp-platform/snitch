@@ -36,17 +36,13 @@ stages:
 - package
 - deploy
 
-.default_rules:
-  skip_schedule:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-
 # Buildroot flow for toolchain and Linux binaries
 br-hrv-vcu128:
   stage: build1
   needs: []
   rules:
-    - !reference [.default_rules, skip_schedule]
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-vcu128; then
@@ -59,25 +55,14 @@ br-hrv-vcu128:
     paths:
     - hw/system/occamy/fpga/output/br-hrv-vcu128/images/
 
-occamy-bootrom:
-  stage: build2
-  needs: [br-hrv-vcu128]
-  script:
-    - >
-      if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup occamy-vcu128-bootrom; then
-        exit 0
-      fi
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get br-hrv-vcu128
-    - make -C hw/system/occamy/fpga/bootrom all
-    - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert occamy-vcu128-bootrom
-
 # Packages and elaborates the vivado IPs where occamy is part of. This ensures
 # that the occamy xilinx IP can be elaborated
 vivado_ip:
   stage: build2
   needs: []
   rules:
-    - !reference [.default_rules, skip_schedule]
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
   script:
     # Make Occamy system smaller to fit on FPGA
   - ./.gitlab-ci.d/occamy_cfg_fpga.sh
@@ -89,7 +74,8 @@ vivado_ip:
 occamy_vcu128:
   stage: build2
   rules:
-    - !reference [.default_rules, skip_schedule]
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     - changes:
       - .gitlab-ci.d/occamy_cfg_fpga.sh
       - hw/ip/**/*
