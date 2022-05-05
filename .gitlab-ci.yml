@@ -36,9 +36,17 @@ stages:
 - package
 - deploy
 
+.default_rules:
+  skip_schedule:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+
+# Buildroot flow for toolchain and Linux binaries
 br-hrv-vcu128:
   stage: build1
   needs: []
+  rules:
+    - !reference [.default_rules, skip_schedule]
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-vcu128; then
@@ -68,6 +76,8 @@ occamy-bootrom:
 vivado_ip:
   stage: build2
   needs: []
+  rules:
+    - !reference [.default_rules, skip_schedule]
   script:
     # Make Occamy system smaller to fit on FPGA
   - ./.gitlab-ci.d/occamy_cfg_fpga.sh
@@ -79,17 +89,18 @@ vivado_ip:
 occamy_vcu128:
   stage: build2
   rules:
-  - changes:
-    - .gitlab-ci.d/occamy_cfg_fpga.sh
-    - hw/ip/**/*
-    - hw/vendor/**/*
-    - hw/system/occamy/**/*
-    - util/occamygen.py
-    - util/clustergen/**/*
-    - util/solder/**/*
-    - util/Makefrag
-    - util/reggen
-    - util/regtool.py
+    - !reference [.default_rules, skip_schedule]
+    - changes:
+      - .gitlab-ci.d/occamy_cfg_fpga.sh
+      - hw/ip/**/*
+      - hw/vendor/**/*
+      - hw/system/occamy/**/*
+      - util/occamygen.py
+      - util/clustergen/**/*
+      - util/solder/**/*
+      - util/Makefrag
+      - util/reggen
+      - util/regtool.py
   needs: []
   script:
   # Make Occamy system smaller to fit on FPGA, Generate IP, Synthesize and Implement design, Cache
