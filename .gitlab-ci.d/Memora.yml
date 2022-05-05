@@ -33,7 +33,7 @@ artifacts:
     - hw/system/occamy/fpga/br2_external/Config.in
     outputs:
     - hw/system/occamy/fpga/br2_external/install
-    - hw/system/occamy/fpga/br2_external/output/images
+    - hw/system/occamy/fpga/output/br-hrv-vcu128/images
 
   occamy-vcu128-bootrom:
     inputs:
