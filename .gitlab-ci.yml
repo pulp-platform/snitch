@@ -40,9 +40,6 @@ stages:
 br-hrv-vcu128:
   stage: build1
   needs: []
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
   script:
     - >
       if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-vcu128; then
@@ -111,6 +108,7 @@ occamy_vcu128:
 # Boot Linux on the VCU128 FPGA and check for prompt
 occamy_vcu128_fpga:
   stage: test
+  needs: [br-hrv-vcu128]
   only:
     refs:
       - schedules
@@ -123,7 +121,6 @@ occamy_vcu128_fpga:
       - hw/ip/**/*
       - hw/vendor/**/*
       - hw/system/occamy/**/*
-  needs: []
   script:
   # We need the bitstream, bootrom (tracked in the repo) and linux binaries
   - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get br-hrv-vcu128
