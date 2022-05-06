@@ -4,13 +4,26 @@
 # SPDX-License-Identifier: SHL-0.51
 
 # Configure a VCU128 board and check if it can boot linux
+# Settings from environment or default in parenthesis:
+# 
+# VCU    (02)                       Which VCU128 board to target (01/02)
+# PROMPT ("Welcome to Buildroot")   Poll for this message in the UART and succeed if found
 
 ############
 # SETTINGS #
 ############
 
-# vcu=01
-vcu=02
+if [ -z "$VCU" ]; then
+  VCU=02
+fi
+if [ -z "$PROMPT" ]; then
+  PROMPT="Welcome to Buildroot"
+fi
+
+prompt=$PROMPT
+vcu=$VCU
+
+echo "Board: vcu128-$vcu prompt: '$prompt'"
 
 #############
 # FUNCTIONS #
@@ -87,7 +100,7 @@ EOF
 
 # Stop the serial logger
 function _stop_serial_logger {
-  ssh -qo "StrictHostKeyChecking no" -t vcu128-$vcu@bordcomputer.ee.ethz.ch 'kill $(cat occamy_ci/serlog.pid)'
+  ssh -qo "StrictHostKeyChecking no" -t vcu128-$vcu@bordcomputer.ee.ethz.ch 'kill $(cat occamy_ci/serlog.pid); rm `cat serlog.file`'
 }
 
 # Polls the serial console for the "Welcome to Buildroot" prompt that confirms successful boot
@@ -100,9 +113,6 @@ function _wait_shell {
   }
 
   wait_shell_success=0
-
-  # prompt="Loading U-Boot"
-  prompt="Welcome to Buildroot"
 
   _screenlog_lcl=$(mktemp -p .)
   _screenlog=$(ssh -qo "StrictHostKeyChecking no" -t vcu128-$vcu@bordcomputer.ee.ethz.ch "cat occamy_ci/serlog.file" | tr -d '\r')
