@@ -88,7 +88,7 @@ $(FITIMG): $(FITIMG_ITS) output/br-hrv-vcu128/images/Image $(DTB)
 
 .PHONY : upload-linux-image
 upload-linux-image: $(FITIMG)
-	scp $(FITIMG) vcu128-$(VCU)@bordcomputer:/srv/tftp/vcu128-$(VCU)
+	scp $(FITIMG) vcu128-$(VCU)@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-$(VCU)
 
 clean:
 	rm -rf .Xil occamy_vcu128 *.jou *.log *.str
