@@ -7,14 +7,15 @@ We currently support the Xilinx VCU128 evaluation board.
 
 ## Features
 
-_tbd._
-
+- Boot through SPI flash and TFTP
+- Generation of all images through buildroot with upstream versions and patches (`br2_external/patch`)
+- SSH into the Linux running on the VCU128 with `ssh root@hero-vcu128-02.ee.ethz.ch`
 
 ---
 
 ## Generating the Bitstream
 
-To create the bitstream for Occamy on the VCU128, you currently need to follow two steps.
+To create the bitstream for Occamy on the VCU128, you currently need to follow three steps.
 
 
 ### Reducing Occamy's Size
@@ -26,6 +27,15 @@ make update-sources
 ```
 
 
+### Compiling Occamy IP
+
+To package the Occamy IP for use in Vivado (and run an elaboration to check for syntax errors), run the following command from this directory:
+
+```
+make -C vivado_ips
+```
+
+
 ### Compiling Occamy
 
 To compile Occamy for the VCU128, run the following command from this directory:
@@ -34,6 +44,11 @@ To compile Occamy for the VCU128, run the following command from this directory:
 make occamy_vcu128
 ```
 
+At IIS, you can download a cached version with the following command:
+
+```
+memora get occamy_vcu128
+```
 
 ---
 
@@ -47,43 +62,65 @@ This is the current boot flow for Linux on Occamy:
 
 3. OpenSBI sets up the M-mode environment and drops to U-Boot in S-mode.
 
-4. U-Boot loads the Linux image from the SPI flash into DRAM, decompresses and boots it.
+4. U-Boot loads the Linux image from a TFTP server into DRAM, decompresses and boots it.
 
 
 ### Compiling Linux and U-Boot
 
-First, we need to compile the required SW binaries and images, including Linux, OpenSBI and U-Boot. For that, navigate to a suitable location, clone and build the `occamy` branch of [Ariane SDK](https://github.com/pulp-platform/ariane-sdk/tree/occamy) as follows:
+We use [buildroot](https://buildroot.org/) to generate a cross-compile toolchain and compile the images in `output/br-hrv-vcu128`:
+
+- u-boot SPL secondary program loader (`u-boot-spl.bin`)
+- OpenSBI M-Mode firmware (`fw_dynamic.bin`)
+- u-boot proper (`u-boot.bin`) packaged together with OpenSBI in a FIT image for SPL (`u-boot.itb`)
+- Linux image with rootfs (`Image`)
+
+Everything is generated with a single command
 
 ```
-git clone --recursive git@github.com:pulp-platform/ariane-sdk.git
-cd ariane-sdk
-git checkout occamy
-make u-boot/u-boot.itb
-make uImage
+make br-hrv-vcu218
 ```
-`u-boot.itb` ist the image containing OpenSBI + U-Boot, `uImage` is the Linux image in U-Boot format.
 
+At IIS, you can download a cached version with the following command:
+
+```
+memora get br-hrv-vcu218
+```
 
 ### Preparing the VCU128's Flash
 
-Next, we need to load the required images into the VCU128's SPI flash. `u-boot.itb` is expected at address `0x6000000` of the flash, `uImage` at `0x6100000`.
+Next, we need to load the required image into the VCU128's SPI flash: `u-boot.itb` is expected at address `0x6000000`.
 
-For flashing, we provide an example Vivado script (`occamy_vcu128_flash.tcl`). At IIS, after starting `hw_server` on bordcomputer, you can use the following `make` targets to load the images to the appropriate location in flash:
+For flashing, we provide an example Vivado script (`occamy_vcu128_flash.tcl`). At IIS, you can use the following `make` targets to load the images to the appropriate location in flash:
 
 ```
-make flash-u-boot VCU=[01|02] ARIANE_SDK=path/to/ariane-sdk
-make flash-uimage VCU=[01|02] ARIANE_SDK=path/to/ariane-sdk
+make VCU=[01|02] flash
 ```
 
-`VCU` specifies which VCU128 we want to target (`vcu-01` or `vcu-02`, default `01`). `ARIANE_SDK` defaults to `path/to/snitch/../ariane-sdk`.
+`VCU` specifies which VCU128 we want to target (`vcu-01` or `vcu-02`, default `01`).
 
+
+### Preparing the Linux image on the TFTP server
+
+Next, we need to load the required Linux image onto the TFTP server. At IIS, you can use the following `make` target to generate the image and upload it to the appropriate location:
+
+```
+make linux-image
+make upload-linux-image
+```
+
+The URL is currently hard-coded to `bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-01` since this is where the u-boot configuration will load it from.
 
 ### Programming the FPGA
 
 Finally, we can program the FPGA with the bitstream generated earlier. At IIS, this can be done with the following `make` command:
 
 ```
-make program VCU=[01|02]
+make VCU=[01|02] program
 ```
 
-Linux should now boot in the sequence described above.
+Linux should now boot in the sequence described above. Observe the serial port on `bordcomputer` with the following command:
+
+```
+screen /dev/serial/by-id/usb-Xilinx_VCU128_091847100576-if01-port0 115200 # For VCU=01
+screen /dev/serial/by-id/usb-Xilinx_VCU128_091847100638-if01-port0 115200 # For VCU=02
+```
