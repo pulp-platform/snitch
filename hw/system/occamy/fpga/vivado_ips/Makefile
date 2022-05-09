@@ -17,7 +17,7 @@ VIVADO_ARGS = -nojournal -nolog
 IPS += occamy_xilinx
 
 # IP-specific bender flags
-BENDER_FLAGS-occamy_xilinx = -t bscane
+BENDER_FLAGS-occamy_xilinx = 
 
 # Output directory
 BUILD = build

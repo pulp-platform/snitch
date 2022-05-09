@@ -149,6 +149,12 @@ if ($DEBUG) {
     write_debug_probes -force probes.ltx
 }
 
+# Incremental implementation
+set incremental_impl_dcp occamy_vcu128_old/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper_routed.dcp
+if { [info exists incremental_impl_dcp]} {
+  set_property incremental_checkpoint ${incremental_impl_dcp} [get_runs impl_1]
+}
+
 # Implement
 set_property strategy Congestion_SpreadLogic_high [get_runs impl_1]
 launch_runs impl_1 -jobs 12
