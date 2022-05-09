@@ -84,6 +84,10 @@ def convert(output, data, width, radix, adr=0, little_endian=True, dev='hw_axi_1
     d_buf = []
     chunk_cnt = 0
 
+    output.write("# Copyright 2020 ETH Zurich and University of Bologna.\n")
+    output.write("# Solderpad Hardware License, Version 0.51, see LICENSE for details.\n")
+    output.write("# SPDX-License-Identifier: SHL-0.51\n")
+
     output.write("set errs 0\n")
 
     def dump(adr, d_buf):
