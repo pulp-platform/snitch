@@ -58,7 +58,7 @@ jobs:
         fi
         while true; do
           resp="$(curl --fail --silent --show-error \
-                https://akurth.net/usrv/ig/shields/job/huettern/snitch/$BRANCH_NAME/vivado_ip)"
+                https://akurth.net/usrv/ig/shields/job/occamy/snitch-mirror/$BRANCH_NAME/vivado_ip)"
           if [ $? -ne 0 ]; then
             echo "Error: Failed to obtain CI status!"
             exit 1
