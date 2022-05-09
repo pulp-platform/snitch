@@ -57,9 +57,6 @@ br-hrv-vcu128:
 vivado_ip:
   stage: build2
   needs: []
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
   script:
     # Make Occamy system smaller to fit on FPGA
   - ./.gitlab-ci.d/occamy_cfg_fpga.sh
