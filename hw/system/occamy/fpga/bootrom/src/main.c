@@ -34,9 +34,9 @@ int main() {
             break;
         case SPL_ROM:
             print_uart("Loading U-Boot SPL from ROM ");
-            for (uint32_t i = 0; i < (__spl_src_end - __spl_src_start); i += 1) {
-                if(i % 1024 == 0)
-                  print_uart(".");
+            for (uint32_t i = 0; i < (__spl_src_end - __spl_src_start);
+                 i += 1) {
+                if (i % 1024 == 0) print_uart(".");
                 *(uint8_t *)(SPL_DEST + i) = *(uint8_t *)(__spl_src_start + i);
             }
             print_uart("done\r\n");
