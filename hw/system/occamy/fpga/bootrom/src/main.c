@@ -19,10 +19,6 @@ int main() {
     init_uart(50000000, 115200);
 
     print_uart("\r\nOccamy VCU128 bootrom ");
-    print_uart(__DATE__);
-    print_uart(" ");
-    print_uart(__TIME__);
-    print_uart(" ");
     print_uart(GIT_SHA);
     print_uart("\r\n");
 
