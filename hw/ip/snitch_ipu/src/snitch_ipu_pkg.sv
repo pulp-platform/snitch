@@ -111,4 +111,8 @@ package snitch_ipu_pkg;
     ALU_CRC32C_W
   } alu_op_e;
 
+  typedef enum logic [4:0] {
+    SimdNop, SimdAdd, SimdSub, SimdAvg, SimdMin, SimdMax, SimdSrl, SimdSra, SimdSll, SimdOr,
+    SimdXor, SimdAnd, SimdAbs, SimdExt, SimdIns, SimdDotp, SimdShuffle
+  } simd_op_t;                   // SIMD operation
 endpackage

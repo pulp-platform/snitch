@@ -15,7 +15,7 @@ sources:
 # Level 0:
 - src/snitch_ipu_pkg.sv
 # Level 1:
-- src/snitch_ipu_alu.sv
+- src/snitch_ipu_simd_logic.sv
 # Level 2:
 - src/snitch_ipu.sv
 
