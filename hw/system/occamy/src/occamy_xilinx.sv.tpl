@@ -155,8 +155,6 @@ import ${name}_pkg::*;
     .fll_periph_rsp_i(fll_periph_axi_lite_rsp),
     .fll_hbm2e_req_o (fll_hbm2e_axi_lite_req),
     .fll_hbm2e_rsp_i (fll_hbm2e_axi_lite_rsp),
-    .pcie_cfg_req_o  (),
-    .pcie_cfg_rsp_i  ('0),
     .ext_irq_i(ext_irq_i),
     // Tie-off unused ports
     .pcie_cfg_rsp_i  ('0),
