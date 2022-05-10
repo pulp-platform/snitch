@@ -1763,7 +1763,7 @@ module dspu #(
   .simd_op_b                                ,
   .simd_op_c                                ,
   .simd_imm                                 ,
-  .simd_result           (simd_result_nibble),
+  .simd_result          (simd_result_nibble),
   .simd_op
   );
 

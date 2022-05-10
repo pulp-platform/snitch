@@ -334,7 +334,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign acc_qreq_o.data_op = inst_data_i;
   assign acc_qreq_o.data_arga = {{32{gpr_rdata[0][31]}}, gpr_rdata[0]};
   assign acc_qreq_o.data_argb = {{32{gpr_rdata[1][31]}}, gpr_rdata[1]};
-  assign acc_qreq_o.data_argc = (~FP_EN & Xipu) ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
+  assign acc_qreq_o.data_argc = {{32{gpr_rdata[2][31]}}, gpr_rdata[2]};
+  //assign acc_qreq_o.data_argc = (~FP_EN & Xipu) ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
 
   // ---------
   // L0 ITLB
@@ -1060,7 +1061,6 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
       /* Xpulpimg extension */
       // Post-increment loads/stores
-      /*
       P_LB_IRPOST: begin // Xpulpimg: p.lb rd, iimm(rs1!)
          if (Xipu) begin
             write_rd = 1'b0;
@@ -1378,7 +1378,6 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
          end
       end   
-       */   
       // Immediate branching
       P_BEQIMM: begin // Xpulpimg: p.beqimm
          if (Xipu) begin
@@ -1441,6 +1440,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       PV_AND_SCI_H,         // Xpulpimg: pv.and.sci.h
       PV_ABS_H,             // Xpulpimg: pv.abs.h
       PV_ABS_B,             // Xpulpimg: pv.abs.b
+      PV_ABS_N,             // Xpulpimg: pv.abs.n
       PV_EXTRACT_H,         // Xpulpimg: pv.extract.h
       PV_EXTRACT_B,         // Xpulpimg: pv.extract.b
       PV_EXTRACTU_H,        // Xpulpimg: pv.extractu.h
@@ -2548,6 +2548,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       // FP Sequencer
+      /*
       FREP_O,
       FREP_I: begin
         if (FP_EN) begin
@@ -2558,6 +2559,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      */
       // Floating-Point Load/Store
       // Single Precision Floating-Point
       FLW: begin
@@ -2660,7 +2662,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       // DMA instructions
-      DMSRC,
+      /*DMSRC,
       DMDST,
       DMSTR: begin
         if (Xdma) begin
@@ -2763,7 +2765,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           write_rd = 1'b0;
         end else illegal_inst = 1'b1;
       end
-
+*/
       default: begin
         illegal_inst = 1'b1;
       end
