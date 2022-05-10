@@ -41,6 +41,14 @@ RVTEST_CODE_BEGIN
   TEST_UIMM6_OP( 17, pv.xor.sci.b, 0x2D2D131C, 0x26261817, 11 );
   TEST_UIMM6_OP( 18, pv.xor.sci.b, 0x23EC42D8, 0x28E749D3, 11 );
   TEST_UIMM6_OP( 19, pv.xor.sci.b, 0xCAA811C9, 0xC1A31AC2, 11 );
+  # pv.xor.n
+  TEST_RR_OP( 20, pv.xor.n, 0x2da74b3f, 0xd2d05d67, 0xff771658 );
+  TEST_RR_OP( 21, pv.xor.n, 0x20144ac7, 0xd63ac505, 0xf62e8fc2 );
+  TEST_RR_OP( 22, pv.xor.n, 0xef4972dd, 0x7aec28c4, 0x95a55a19 );
+  # pv.xor.sc.n
+  TEST_RR_OP( 23, pv.xor.sc.n, 0x9918fa38, 0x77f614d6, 0xeeeeeeee );
+  TEST_RR_OP( 24, pv.xor.sc.n, 0x2c8f6e30, 0xd37091cf, 0xffffffff );
+  TEST_RR_OP( 25, pv.xor.sc.n, 0x9eb96170, 0x3413cbda, 0xaaaaaaaa );
 
   #-------------------------------------------------------------
   # Source/Destination tests

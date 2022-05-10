@@ -1,40 +1,24 @@
 SHELL = /usr/bin/env bash
 ROOT_DIR := /scratch/msc22f9/mempool/software
 SNITCH_DIR := /scratch/msc22f9/snitch
-APPS_DIR := $(ROOT_DIR)/apps
-HALIDE_DIR := $(ROOT_DIR)/halide
 RUNTIME_DIR := $(ROOT_DIR)/runtime
 TESTS_DIR := $(SNITCH_DIR)/sw/riscv-tests/isa
 TOOLCHAIN_DIR := $(abspath $(ROOT_DIR)/../toolchain)
 
 MEMPOOL_DIR       := $(shell git rev-parse --show-toplevel 2>/dev/null || echo $$MEMPOOL_DIR)
+MEMPOOL_NEW_DIR	  ?= /scratch/msc22f9/mempool-archived
 INSTALL_DIR       ?= /scratch/msc22f9/mempool/install
 GCC_INSTALL_DIR   ?= $(INSTALL_DIR)/riscv-gcc
 SPIKE_INSTALL_DIR ?= $(INSTALL_DIR)/riscv-isa-sim
+GCC_NEW_DIR				?= /usr/scratch2/toscana/sriedel/tc-riscv-gcc-xpulpnn/install/riscv-gcc
 
-RISCV_PREFIX ?= $(GCC_INSTALL_DIR)/bin/riscv32-unknown-elf-
+RISCV_PREFIX ?= $(GCC_NEW_DIR)/bin/riscv32-unknown-elf-
 RISCV_GCC ?= $(RISCV_PREFIX)gcc
 RISCV_GCC_OPTS ?= -static -march=rv32imaXpulpimg -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
+
 # This will overwrite the ROOT_DIR variable from the included makefile
 #include $(RUNTIME_DIR)/runtime.mk
 include $(TESTS_DIR)/snitch_isa.mk
-
-# Applications
-.PHONY: apps
-apps:
-	make -C $(APPS_DIR) all
-
-.PHONY: halide-apps
-halide-apps:
-	make -C $(HALIDE_DIR) all
-
-.PHONY: clean-apps
-clean-apps:
-	make -C $(APPS_DIR) clean
-
-.PHONY: clean-halide-apps
-clean-halide-apps:
-	make -C $(HALIDE_DIR) clean
 
 # Unit tests
 TESTS := $(addprefix bin/,$(rtl_mempool_tests))
@@ -54,7 +38,6 @@ $$(TESTS_$(1)): bin/$(1)-%: $(TESTS_DIR)/$(1)/%.S
 
 endef
 
-
 $(eval $(call rtl_mempool_tests_template,rv32uxpulpimg))
 
 test:  update_opcodes $(TESTS)
@@ -68,7 +51,7 @@ clean-test:
 # Helper targets
 .PHONY: update_opcodes
 update_opcodes:
-	make -C $(TOOLCHAIN_DIR)/riscv-opcodes all
+	make -C $(MEMPOOL_NEW_DIR)/toolchain/riscv-opcodes all
 
 .PHONY: clean
-clean: clean-test clean-apps clean-halide-apps
+clean: clean-test

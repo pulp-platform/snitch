@@ -25,6 +25,10 @@ RVTEST_CODE_BEGIN
   TEST_R_OP( 5, pv.abs.b, 0x3A444335, 0x3ABC4335 );
   TEST_R_OP( 6, pv.abs.b, 0x2B743B7C, 0x2B8C3B7C );
   TEST_R_OP( 7, pv.abs.b, 0x70362066, 0x70362066 );
+  # pv.abs.n
+  TEST_R_OP( 10, pv.abs.n, 0x04483151, 0x0cc8dfbf );
+  TEST_R_OP( 11, pv.abs.n, 0x57462364, 0x594a2d6c );
+  TEST_R_OP( 12, pv.abs.n, 0x63318764, 0x6331896c );
 
   #-------------------------------------------------------------
   # Source/Destination tests

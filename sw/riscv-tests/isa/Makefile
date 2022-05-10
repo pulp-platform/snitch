@@ -35,9 +35,9 @@ default: all
 SNITCH_DIR       := $(shell git rev-parse --show-toplevel 2>/dev/null || echo $$SNITCH_DIR)
 MEMPOOL_DIR      := /scratch/msc22f9/mempool
 INSTALL_DIR       ?= $(MEMPOOL_DIR)/install
-GCC_INSTALL_DIR   ?= /scratch/msc22f9/mempool/install/riscv-gcc
-SPIKE_INSTALL_DIR ?= /scratch/msc22f9/mempool/install/riscv-isa-sim
-HW_DIR					 := /hw/system/snitch_cluster
+#GCC_INSTALL_DIR   ?= /scratch/msc22f9/mempool/install/riscv-gcc
+GCC_INSTALL_DIR ?= /usr/scratch2/toscana/sriedel/tc-riscv-gcc-xpulpnn/install/riscv-gcc
+SPIKE_INSTALL_DIR ?= /scratch/msc22f9/mempool-archived/install/riscv-isa-sim
 
 RISCV_PREFIX ?= $(GCC_INSTALL_DIR)/bin/riscv$(XLEN)-unknown-elf-
 RISCV_GCC ?= $(RISCV_PREFIX)gcc

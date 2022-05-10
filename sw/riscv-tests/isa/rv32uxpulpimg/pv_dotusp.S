@@ -41,6 +41,14 @@ RVTEST_CODE_BEGIN
   TEST_SIMM6_OP( 17, pv.dotusp.sci.b, 0x0000016E, 0x4CD92920,  1 );
   TEST_SIMM6_OP( 18, pv.dotusp.sci.b, 0xFFFFF420, 0xAFCE7172, -5 );
   TEST_SIMM6_OP( 19, pv.dotusp.sci.b, 0x000014FD, 0xDB25ABAA,  9 );
+  # pv.dotusp.n
+  TEST_RR_OP( 20, pv.dotusp.n, 0xffffffbc, 0xc97a53ab, 0xfbb710cf );
+  TEST_RR_OP( 21, pv.dotusp.n, 0xfffffffa, 0xae5af144, 0x8093652a );
+  TEST_RR_OP( 22, pv.dotusp.n, 0xffffff86, 0x8b422e09, 0x3cd8ca12 );
+  # pv.dotusp.sc.n
+  TEST_RR_OP( 23, pv.dotusp.sc.n, 0xffffffd3, 0x083fc052, 0xffffffff );
+  TEST_RR_OP( 24, pv.dotusp.sc.n, 0x00000000, 0xaf26ced7, 0x00000000 );
+  TEST_RR_OP( 25, pv.dotusp.sc.n, 0xffffff92, 0xe80473c7, 0xeeeeeeee );
 
   #-------------------------------------------------------------
   # Source/Destination tests

@@ -39,6 +39,10 @@ RVTEST_CODE_BEGIN
   TEST_RRR_OP( 19, pv.shuffle2.b, 0x73AB4CAB, 0x43AB21CB, 0x4B2EC0BE, 0x7306984C );
   TEST_RRR_OP( 20, pv.shuffle2.b, 0x5235C41D, 0x052B5263, 0x85BB52D0, 0x35C4A31D );
   TEST_RRR_OP( 21, pv.shuffle2.b, 0xF1E0F194, 0xFFABF194, 0x35CBE594, 0xE0A7A1D1 );
+  # pv.shuffle2.n
+  TEST_RRR_OP( 22, pv.shuffle2.n, 0x02ab3c5e, 0xcce62fa0, 0x8b946f02, 0x435bde45 );
+  TEST_RRR_OP( 23, pv.shuffle2.n, 0xef58bbee, 0xfe9f3448, 0x2f48562e, 0x7bb52e32 );
+  TEST_RRR_OP( 24, pv.shuffle2.n, 0xddfb2425, 0x0fb22ab1, 0x44edb0b1, 0xb89d2c54 );
 
   #-------------------------------------------------------------
   # Source/Destination tests

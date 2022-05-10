@@ -41,6 +41,14 @@ RVTEST_CODE_BEGIN
   TEST_UIMM6_OP( 17, pv.sll.sci.b, 0x60002020, 0x8BA0A901, 5 );
   TEST_UIMM6_OP( 18, pv.sll.sci.b, 0x604020E0, 0x83CAE947, 5 );
   TEST_UIMM6_OP( 19, pv.sll.sci.b, 0x0020A060, 0x98F185C3, 5 );
+  # pv.sll.n
+  TEST_RR_OP( 20, pv.sll.n, 0x8908480c, 0x590457a3, 0x30d16fb2 );
+  TEST_RR_OP( 21, pv.sll.n, 0x0438c018, 0xaa3cc814, 0x314d09c1 );
+  TEST_RR_OP( 22, pv.sll.n, 0x85c00800, 0x45f80604, 0x10ae961f );
+  # pv.sll.sc.n
+  TEST_RR_OP( 23, pv.sll.sc.n, 0x860c866c, 0x4386c336, 0x55555555 );
+  TEST_RR_OP( 24, pv.sll.sc.n, 0x80888cc4, 0xe4eaabf5, 0xaaaaaaaa );
+  TEST_RR_OP( 25, pv.sll.sc.n, 0x86a86ae6, 0x4354bd73, 0x99999999 );
 
   #-------------------------------------------------------------
   # Source/Destination tests

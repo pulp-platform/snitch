@@ -41,6 +41,14 @@ RVTEST_CODE_BEGIN
   TEST_RR_SIMM6_OP( 17, pv.sdotusp.sci.b, 0x86CD85EE, 0x4CD92920,  1, 0x86CD8480 );
   TEST_RR_SIMM6_OP( 18, pv.sdotusp.sci.b, 0x82399403, 0xAFCE7172, -5, 0x82399FE3 );
   TEST_RR_SIMM6_OP( 19, pv.sdotusp.sci.b, 0x3F753F92, 0xDB25ABAA,  9, 0x3F752A95 );
+  # pv.sdotusp.n
+  TEST_RRR_OP( 20, pv.sdotusp.n, 0x2e7a2548, 0x9b29be05, 0x8a6d2ac2, 0x2e7a2615 );
+  TEST_RRR_OP( 21, pv.sdotusp.n, 0x9caa1a82, 0xfe1b8b19, 0xe04fc03d, 0x9caa1adf );
+  TEST_RRR_OP( 22, pv.sdotusp.n, 0xe86d4884, 0xcd6216c2, 0x1e423b3f, 0xe86d486f );
+  # pv.sdotusp.sc.n
+  TEST_RRR_OP( 23, pv.sdotusp.sc.n, 0x5b7e4778, 0x4a617210, 0xdddddddd, 0x5b7e47d5 );
+  TEST_RRR_OP( 24, pv.sdotusp.sc.n, 0x17557b4f, 0x3740ceba, 0x66666666, 0x175579e1 );
+  TEST_RRR_OP( 25, pv.sdotusp.sc.n, 0x0c3c5e6e, 0x1e307f0f, 0xeeeeeeee, 0x0c3c5edc );
 
   #-------------------------------------------------------------
   # Source/Destination tests
