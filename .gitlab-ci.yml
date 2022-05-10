@@ -92,6 +92,7 @@ occamy_vcu128:
       make -C hw/system/occamy/fpga occamy_vcu128
       git checkout -- hw/system/occamy/src
       $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert occamy_vcu128
+      cp -v hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper_routed.dcp /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch-incremental/occamy_vcu128_wrapper_routed.dcp
     fi
   artifacts:
     when: always
