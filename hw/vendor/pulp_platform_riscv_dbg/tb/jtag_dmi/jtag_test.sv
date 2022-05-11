@@ -87,15 +87,16 @@ package jtag_test;
       jtag.tms <= #TA 0;
     endtask
 
+    // Assumes JTAG FSM is already in shift DR state
     task readwrite_bits(output logic rdata [$], input logic wdata [$], input logic tms_last);
       for (int i = 0; i < wdata.size(); i++) begin
         jtag.tdi <= #TA wdata[i];
-        if (i == (wdata.size() - 1)) jtag.tms <= #TA tms_last;
+        if (i == (wdata.size() - 1)) jtag.tms <= #TA tms_last; // tms_last ? exit1 DR : shift DR
         cycle_start();
         rdata[i] = jtag.tdo;
         cycle_end();
       end
-      jtag.tms <= #TA 0;
+      jtag.tms <= #TA 0; // tms_last ? pause DR : shift DR
     endtask
 
     task wait_idle(int cycles);
@@ -181,6 +182,11 @@ package jtag_test;
       data = dm::dtmcs_t'({<<{read_data}});
     endtask
 
+    task reset_dmi();
+      logic [31:0] dmireset = 1 << 16;
+      write_dtmcs(dmireset);
+    endtask
+
     task write_dmi(input dm::dm_csr_e address, input logic [31:0] data);
       logic write_data [DMIWidth];
       logic [DMIWidth-1:0] write_data_packed = {address, data, dm::DTM_WRITE};
@@ -191,29 +197,54 @@ package jtag_test;
       jtag.update_dr(1'b0);
     endtask
 
-    task read_dmi(input dm::dm_csr_e address, output logic [31:0] data, input int wait_cycles = 10);
+    task read_dmi(input dm::dm_csr_e address, output logic [31:0] data, input int wait_cycles = 10,
+                  output dm::dtm_op_status_e op);
       logic read_data [DMIWidth], write_data [DMIWidth];
       logic [DMIWidth-1:0] data_out = 0;
       automatic logic [DMIWidth-1:0] write_data_packed = {address, 32'b0, dm::DTM_READ};
       {<<{write_data}} = write_data_packed;
       jtag.set_ir(DMIACCESS);
-      jtag.shift_dr();
       // send read command
+      jtag.shift_dr();
       jtag.write_bits(write_data, 1'b1);
       jtag.update_dr(1'b0);
       jtag.wait_idle(wait_cycles);
-      jtag.shift_dr();
       // shift out read data
+      jtag.shift_dr();
       write_data_packed = {address, 32'b0, dm::DTM_NOP};
       {<<{write_data}} = write_data_packed;
       jtag.readwrite_bits(read_data, write_data, 1'b1);
-      // I am pretty sure this should be `update_dr` here.
-      // jtag.update_dr(1'b0);
-      jtag.shift_dr();
+      jtag.update_dr(1'b0);
       data_out = {<<{read_data}};
+      op = dm::dtm_op_status_e'(data_out[1:0]);
       data = data_out[33:2];
     endtask
 
+    // Repeatedly read DMI until we get a valid response. 
+    // The delay between Update-DR and Capture-DR of
+    // successive operations is automatically adjusted through
+    // an exponential backoff scheme.
+    // Note: read operations which have side-effects (e.g.
+    // reading SBData0) should not use this
+    task read_dmi_exp_backoff(input dm::dm_csr_e address, output logic [31:0] data);
+      logic read_data [DMIWidth], write_data [DMIWidth];
+      logic [DMIWidth-1:0] write_data_packed;
+      logic [DMIWidth-1:0] data_out = 0;
+      dm::dtm_op_status_e op = dm::DTM_OK;
+      int trial_idx = 0;
+      int wait_cycles = 8;
+
+      do begin
+        if (trial_idx != 0) begin
+          // Not entered upon first iteration, resets the
+          // sticky error state if previous read was unsuccessful
+          reset_dmi();
+        end
+        read_dmi(address, data, wait_cycles, op);
+        wait_cycles *= 2;
+        trial_idx++;
+      end while (op == dm::DTM_BUSY);
+    endtask
 
   endclass
 endpackage
