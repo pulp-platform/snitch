@@ -570,9 +570,9 @@ void gemm_fp16_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
                 "vfsum.s %[c7], %[reduce_reg7] \n"
                 // Pack results to FP16 vectors
                 "vfcpka.h.s %[c0], %[c0], %[c1] \n"
-                "vfcpkb.h.s %[c1], %[c2], %[c3] \n"
-                "vfcpka.h.s %[c2], %[c4], %[c5] \n"
-                "vfcpkb.h.s %[c3], %[c6], %[c7] \n"
+                "vfcpkb.h.s %[c0], %[c2], %[c3] \n"
+                "vfcpka.h.s %[c1], %[c4], %[c5] \n"
+                "vfcpkb.h.s %[c1], %[c6], %[c7] \n"
                 : [ c0 ] "+f"(c[0]), [ c1 ] "+f"(c[1]), [ c2 ] "+f"(c[2]),
                   [ c3 ] "+f"(c[3]), [ c4 ] "+f"(c[4]), [ c5 ] "+f"(c[5]),
                   [ c6 ] "+f"(c[6]), [ c7 ] "+f"(c[7]), [ alpha ] "=r"(alpha),
