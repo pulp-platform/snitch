@@ -12,6 +12,7 @@
 ############
 # SETTINGS #
 ############
+set -e
 
 if [ -z "$VCU" ]; then
   VCU=02
@@ -30,8 +31,9 @@ echo "Board: vcu128-$vcu prompt: '$prompt'"
 #############
 function _cleanup {
   echo "Cleanup"
-  _release_lock
   rm -f serlog.py start_ser.sh
+  _stop_serial_logger
+  _release_lock
 }
 
 # Simple file-based lock on remote server
@@ -47,8 +49,9 @@ function _release_lock {
 }
 
 # Generate linux image and upload to TFTP server
+# u-boot expects image in the vcu-01 user
 function _prep_linux {
-  make -C hw/system/occamy/fpga linux-image upload-linux-image
+  make VCU=01 -C hw/system/occamy/fpga linux-image upload-linux-image
 }
 
 function _prep_fpga {
@@ -85,6 +88,7 @@ EOF
   cat <<\EOF > start_ser.sh
 pkill -f "python3 serlog.py" ||:
 _tty=$(find /dev/serial/by-id -name "*$(cat fpga_id)*-if01*")
+lsof -t $_tty 2>/dev/null | xargs -r kill
 _screenlog=$(mktemp -p .)
 echo "[remote]: Logging $_tty to $_screenlog"
 nohup python3 serlog.py $_tty 115200 $_screenlog > serlog.log 2>&1 &
@@ -100,7 +104,7 @@ EOF
 
 # Stop the serial logger
 function _stop_serial_logger {
-  ssh -qo "StrictHostKeyChecking no" -t vcu128-$vcu@bordcomputer.ee.ethz.ch 'kill $(cat occamy_ci/serlog.pid); rm `cat serlog.file`'
+  ssh -qo "StrictHostKeyChecking no" -t vcu128-$vcu@bordcomputer.ee.ethz.ch 'kill $(cat occamy_ci/serlog.pid); rm -f `cat occamy_ci/serlog.file`'
 }
 
 # Polls the serial console for the "Welcome to Buildroot" prompt that confirms successful boot
