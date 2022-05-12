@@ -1,4 +1,5 @@
   axi_id_serialize #(
+    .AtopSupport (1),
     .AxiSlvPortIdWidth (${axi_in.iw}),
     .AxiSlvPortMaxTxns (4),
     .AxiMstPortIdWidth (${axi_out.iw}),
