@@ -78,7 +78,7 @@ package occamy_pkg;
     logic ecc_wide_uncorrectable;
     logic ecc_wide_correctable;
     // 4 programmable, 8 HBM (1x per channel)
-    logic [11:0] ext_irq;
+    logic [12:0] ext_irq;
     logic zero;
   } occamy_interrupt_t;
 

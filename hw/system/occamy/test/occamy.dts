@@ -63,7 +63,7 @@
       interrupt-controller;
       interrupts-extended = <&CPU0_intc 11 &CPU0_intc 9>;
       riscv,max-priority = <7>;
-      riscv,ndev = <30>;
+      riscv,ndev = <73>;
       reg = <0x0 0xc000000 0x0 0x4000000>;
     };
     clint@4000000 {
