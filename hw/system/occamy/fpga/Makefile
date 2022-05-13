@@ -60,6 +60,10 @@ occamy_vcu128: vivado_ips/occamy_xilinx bootrom/bootrom-spl.coe
 program:
 	${VIVADO} -mode batch -source occamy_vcu128_program.tcl -tclargs ${VCU}
 
+flash: ${FILE}
+	${VIVADO} -mode batch -source occamy_vcu128_flash.tcl -tclargs ${FPGA_ID} ${FILE} ${OFFSET}
+	rm data.mcs
+
 flashrun: ${UBOOT_ITB}
 	${VIVADO} -mode batch -source occamy_vcu128_flashrun.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs 6000000 ${UBOOT_ITB}
 	rm flash.mcs
@@ -69,6 +73,12 @@ flash: ${UBOOT_ITB}
 	rm flash.mcs
 ${UBOOT_ITB}:
 	@echo "To generate u-boot.itb, run make 'br-hrv-vcu128'"
+
+flash-u-boot:
+	${MAKE} flash FILE=${ARIANE_SDK}/u-boot/u-boot.itb OFFSET=0x6000000
+
+flash-uimage:
+	${MAKE} flash FILE=${ARIANE_SDK}/uImage OFFSET=0x6100000
 
 .PHONY: br-hrv-vcu128
 br-hrv-vcu128:
