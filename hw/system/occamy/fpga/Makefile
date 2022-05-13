@@ -80,12 +80,15 @@ flash-u-boot:
 flash-uimage:
 	${MAKE} flash FILE=${ARIANE_SDK}/uImage OFFSET=0x6100000
 
+# `prepare-sdk` makes the host directory relocatable which is required 
+# when cached with Memora
 .PHONY: br-hrv-vcu128
 br-hrv-vcu128:
 	$(call clone,buildroot,git://git.buildroot.net/buildroot,2021.11.2)
 	mkdir -p $(CURDIR)/output/$@
 	HOST_DIR=$(CURDIR)/install $(MAKE) O=$(CURDIR)/output/$@ BR2_EXTERNAL=$(CURDIR)/br2_external -C $(CURDIR)/buildroot occamy_vcu128_defconfig
 	$(MAKE) -C $(CURDIR)/output/$@
+	$(MAKE) -C $(CURDIR)/output/$@ make prepare-sdk
 
 .PHONY : linux-image
 linux-image: $(FITIMG)
