@@ -99,7 +99,7 @@ class DeviceTree(object):
             "#address-cells = <0>", "#interrupt-cells = <1>",
             "interrupt-controller",
             "interrupts-extended = <{}>".format(interrupt_sources),
-            "riscv,max-priority = <7>", "riscv,ndev = <30>"
+            "riscv,max-priority = <7>", "riscv,ndev = <73>"
         ], "PLIC0")
 
     # Main memory node.

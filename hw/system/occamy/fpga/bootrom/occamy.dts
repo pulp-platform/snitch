@@ -128,7 +128,7 @@
       interrupt-controller;
       interrupts-extended = <&CPU0_intc 11 &CPU0_intc 9>;
       riscv,max-priority = <6>;
-      riscv,ndev = <62>;
+      riscv,ndev = <73>;
       reg = <0x0 0xc000000 0x0 0x4000000>;
     };
   };

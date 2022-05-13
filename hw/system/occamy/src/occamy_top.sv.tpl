@@ -84,7 +84,7 @@ module ${name}_top
   output ${soc_axi_lite_narrow_periph_xbar.out_chip_ctrl.req_type()} chip_ctrl_req_o,
   input  ${soc_axi_lite_narrow_periph_xbar.out_chip_ctrl.rsp_type()} chip_ctrl_rsp_i,
   // "external interrupts from uncore - "programmable"
-  input logic [11:0] ext_irq_i,
+  input logic [12:0] ext_irq_i,
 
   /// HBM2e Ports
 % for i in range(nr_hbm_channels):

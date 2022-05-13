@@ -84,7 +84,7 @@ module occamy_top
     output axi_lite_a48_d32_req_t chip_ctrl_req_o,
     input axi_lite_a48_d32_rsp_t chip_ctrl_rsp_i,
     // "external interrupts from uncore - "programmable"
-    input logic [11:0] ext_irq_i,
+    input logic [12:0] ext_irq_i,
 
     /// HBM2e Ports
     output axi_a48_d512_i7_u0_req_t  hbm_0_req_o,
