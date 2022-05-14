@@ -70,6 +70,7 @@ VLOGAN_FLAGS += -assert disable_cover
 VLOGAN_FLAGS += -full64
 VLOGAN_FLAGS += -kdb
 VHDLAN_FLAGS := -full64
+VHDLAN_FLAGS += -kdb
 
 # default on target `all`
 all:
