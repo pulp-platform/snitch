@@ -36,6 +36,20 @@ void *snrt_l1alloc(size_t size) {
 }
 
 /**
+ * @brief Reset the L1 allocator to its initial state so that memmory can be re-allocated in L1. 
+ * @details This is a temporary solution until l1free() is implemented
+ * @param base base address to reset to. 0 for initial base, non-zero for custom base
+ */
+void snrt_l1alloc_reset(void* base) {
+    struct snrt_allocator_inst *alloc = &snrt_current_team()->allocator.l1;
+    // team->allocator.l1.base/size is not modified by alloc()
+    if(base == 0)
+      alloc->next = alloc->base;
+    else 
+      alloc->next = base;
+}
+
+/**
  * @brief Allocate a chunk of memory in the L3 memory
  * @details This currently does not support free-ing of memory
  *
