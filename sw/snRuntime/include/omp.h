@@ -8,7 +8,6 @@
 
 #include "eu.h"
 #include "kmp.h"
-#include "snrt.h"
 
 //================================================================================
 // debug
@@ -24,21 +23,6 @@
 #define OMP_PROF(X) \
     do {            \
     } while (0)
-#endif
-
-#ifdef OMP_DEBUG_LEVEL
-#include "encoding.h"
-#include "printf.h"
-#define _OMP_PRINTF(...)             \
-    if (1) {                         \
-        printf("[omp] "__VA_ARGS__); \
-    }
-#define OMP_PRINTF(d, ...)        \
-    if (OMP_DEBUG_LEVEL >= d) {   \
-        _OMP_PRINTF(__VA_ARGS__); \
-    }
-#else
-#define OMP_PRINTF(d, ...)
 #endif
 
 //================================================================================

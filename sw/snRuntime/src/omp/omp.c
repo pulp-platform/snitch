@@ -20,6 +20,27 @@
 #define KMP_FORK_MAX_NARGS 12
 
 //================================================================================
+// debug
+//================================================================================
+
+#define OMP_DEBUG_LEVEL 100
+
+#ifdef OMP_DEBUG_LEVEL
+#define DEBUG
+#include "debug.h"
+#define _OMP_PRINTF(...)             \
+    if (1) {                         \
+        snrt_trace("[omp] "__VA_ARGS__); \
+    }
+#define OMP_PRINTF(d, ...)        \
+    if (OMP_DEBUG_LEVEL >= d) {   \
+        _OMP_PRINTF(__VA_ARGS__); \
+    }
+#else
+#define OMP_PRINTF(d, ...)
+#endif
+
+//================================================================================
 // data
 //================================================================================
 static omp_t *volatile omp_p_global;
@@ -91,7 +112,7 @@ void omp_init(void) {
 #endif
     }
 
-    OMP_PRINTF(10, "omp_init numThreads=%d maxThreads=%d\n", omp_p->numThreads,
+    OMP_PRINTF(10, "omp_init numThreads=%d maxThreads=%d\r\n", omp_p->numThreads,
                omp_p->maxThreads);
 }
 
@@ -134,13 +155,13 @@ void partialParallelRegion(int32_t argc, void *data,
     omp_p->plainTeam.nbThreads = num_threads;
 #endif
 
-    OMP_PRINTF(10, "num_threads=%d nbThreads=%d omp_p->numThreads=%d\n",
+    OMP_PRINTF(10, "num_threads=%d nbThreads=%d omp_p->numThreads=%d\r\n",
                num_threads, omp_p->plainTeam.nbThreads, omp_p->numThreads);
     parallelRegionExec(argc, data, fn, num_threads);
 }
 
 #ifdef OPENMP_PROFILE
 void omp_print_prof(void) {
-    printf("%-20s %d\n", "fork_oh", omp_prof->fork_oh);
+    printf("%-20s %d\r\n", "fork_oh", omp_prof->fork_oh);
 }
 #endif

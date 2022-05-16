@@ -24,7 +24,6 @@ void *snrt_l1alloc(size_t size) {
 
     if (alloc->next + size > alloc->base + alloc->size) {
         snrt_trace(
-            SNRT_TRACE_ALLOC,
             "Not enough memory to allocate: base %#x size %#x next %#x\n",
             alloc->base, alloc->size, alloc->next);
         return 0;
