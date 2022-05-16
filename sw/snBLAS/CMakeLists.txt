@@ -21,6 +21,11 @@ endif()
 include_directories(include)
 include_directories(${SNRUNTIME_INCLUDE_DIRS})
 
+# Public headers to install
+set(public_headers
+  include/snblas.h
+)
+
 add_snitch_library(snBLAS src/axpy.c)
 
 # Tests

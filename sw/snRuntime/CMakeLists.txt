@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.13)
 
 # Allow snRuntime to be built as a standalone library.
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    message(STATUS "Building standlone library")
     # Read SnitchUtilities
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
     include(SnitchUtilities)
@@ -23,14 +24,9 @@ else()
         PARENT_SCOPE)
 endif()
 
-# Default memory regions
-if(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
-    set(MEM_DRAM_ORIGIN "0x80000000" CACHE STRING "Base address of external memory")
-    set(MEM_DRAM_SIZE "0x80000000" CACHE STRING "Size of external memory")
-else()
-    set(MEM_DRAM_ORIGIN "0x80000000" CACHE STRING "Base address of external memory")
-    set(MEM_DRAM_SIZE "256M" CACHE STRING "Size of external memory")
-endif()
+# Generate linker script
+set(MEM_DRAM_ORIGIN 0x80000000 CACHE STRING "Base address of external memory")
+set(MEM_DRAM_SIZE 0x80000000 CACHE STRING "Size of external memory")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/link/common.ld.in common.ld @ONLY)
 set(LINKER_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/common.ld CACHE PATH "")
 
@@ -52,6 +48,26 @@ include_directories(
     include
     vendor
     vendor/riscv-opcodes
+)
+
+# Public headers to install
+set(public_headers
+  include/debug.h
+  include/dm.h
+  include/eu.h
+  include/interface.h
+  include/kmp.h
+  include/occamy_base_addr.h
+  include/occamy_hbm_xbar_peripheral.h
+  include/occamy_quad_peripheral.h
+  include/occamy_soc_peripheral.h
+  include/omp.h
+  include/perf_cnt.h
+  include/snitch_cluster_peripheral.h
+  include/snitch_hero_support.h
+  include/snrt.h
+  vendor/printf.h
+  vendor/riscv-opcodes/encoding.h
 )
 
 # Common sources
@@ -105,7 +121,9 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     # Bare Runtimes (with startup code)
     add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v1.c)
     add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
-
+ 
+    # Install linker script
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/common.ld DESTINATION lib)
 
 else()
     # snRuntime is added externally, only build required runtime

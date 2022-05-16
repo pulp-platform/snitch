@@ -32,6 +32,13 @@ macro(add_snitch_library name)
         TARGET ${name}
         POST_BUILD
         COMMAND ${CMAKE_OBJDUMP} -dhS $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.s)
+    set_target_properties(${name} PROPERTIES
+      PUBLIC_HEADER "${public_headers}")
+    install(TARGETS ${name}
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib/static
+      PUBLIC_HEADER DESTINATION include)
 endmacro()
 
 macro(add_snitch_executable name)
