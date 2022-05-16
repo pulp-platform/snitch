@@ -121,6 +121,7 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     # Bare Runtimes (with startup code)
     add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v1.c)
     add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
+    add_snitch_library(snRuntime-hero src/platforms/shared/start.c ${rtl_snitch_sources} src/start_hero.c src/snitch_hero_support.c ${sources} src/ssr_v2.c)
  
     # Install linker script
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/common.ld DESTINATION lib)
@@ -135,6 +136,10 @@ else()
         add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v1.c)
     elseif(SNITCH_RUNTIME STREQUAL "snRuntime-cluster")
         add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
+    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-hero")
+        # Supported only with the LLVM toolchain
+        add_snitch_library(snRuntime-hero src/start_cluster.S src/start_hero.c src/snitch_hero_support.c ${sources} src/ssr_v3.c)
+        set(public_headers ${public_headers} include/snitch_hero_support.h)
     else()
         message(FATAL_ERROR "Requested runtime not implemented: ${SNITCH_RUNTIME}")
     endif()
