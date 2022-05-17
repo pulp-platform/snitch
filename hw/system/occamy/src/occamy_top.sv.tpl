@@ -22,10 +22,6 @@ module ${name}_top
   input  logic        test_mode_i,
   input  logic [1:0]  chip_id_i,
   input  logic [1:0]  boot_mode_i,
-  // pad cfg
-  output logic [31:0]      pad_slw_o,
-  output logic [31:0]      pad_smt_o,
-  output logic [31:0][1:0] pad_drv_o,
   // `uart` Interface
   output logic        uart_tx_o,
   input  logic        uart_rx_i,
@@ -33,8 +29,6 @@ module ${name}_top
   input  logic [31:0] gpio_d_i,
   output logic [31:0] gpio_d_o,
   output logic [31:0] gpio_oe_o,
-  output logic [31:0] gpio_puen_o,
-  output logic [31:0] gpio_pden_o,
   // `jtag` Interface
   input  logic        jtag_trst_ni,
   input  logic        jtag_tck_i,
