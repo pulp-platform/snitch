@@ -102,16 +102,56 @@ package occamy_cluster_pkg;
                         1, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: 1},   // NONCOMP
-                    '{default: 2},   // CONV
-                    '{default: 3}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{1,
+                      1,
+                      1,
+                      1,
+                      1,
+                      1},   // NONCOMP
+                    '{2,
+                      2,
+                      2,
+                      2,
+                      2,
+                      2},   // CONV
+                    '{3,
+                      3,
+                      3,
+                      3,
+                      3,
+                      3}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     },
     '{
@@ -124,16 +164,56 @@ package occamy_cluster_pkg;
                         1, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: 1},   // NONCOMP
-                    '{default: 2},   // CONV
-                    '{default: 3}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{1,
+                      1,
+                      1,
+                      1,
+                      1,
+                      1},   // NONCOMP
+                    '{2,
+                      2,
+                      2,
+                      2,
+                      2,
+                      2},   // CONV
+                    '{3,
+                      3,
+                      3,
+                      3,
+                      3,
+                      3}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     },
     '{
@@ -146,16 +226,56 @@ package occamy_cluster_pkg;
                         1, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: 1},   // NONCOMP
-                    '{default: 2},   // CONV
-                    '{default: 3}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{1,
+                      1,
+                      1,
+                      1,
+                      1,
+                      1},   // NONCOMP
+                    '{2,
+                      2,
+                      2,
+                      2,
+                      2,
+                      2},   // CONV
+                    '{3,
+                      3,
+                      3,
+                      3,
+                      3,
+                      3}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     },
     '{
@@ -168,16 +288,56 @@ package occamy_cluster_pkg;
                         1, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: 1},   // NONCOMP
-                    '{default: 2},   // CONV
-                    '{default: 3}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{1,
+                      1,
+                      1,
+                      1,
+                      1,
+                      1},   // NONCOMP
+                    '{2,
+                      2,
+                      2,
+                      2,
+                      2,
+                      2},   // CONV
+                    '{3,
+                      3,
+                      3,
+                      3,
+                      3,
+                      3}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     },
     '{
@@ -190,16 +350,56 @@ package occamy_cluster_pkg;
                         1, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: 1},   // NONCOMP
-                    '{default: 2},   // CONV
-                    '{default: 3}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{1,
+                      1,
+                      1,
+                      1,
+                      1,
+                      1},   // NONCOMP
+                    '{2,
+                      2,
+                      2,
+                      2,
+                      2,
+                      2},   // CONV
+                    '{3,
+                      3,
+                      3,
+                      3,
+                      3,
+                      3}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     },
     '{
@@ -212,16 +412,56 @@ package occamy_cluster_pkg;
                         1, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: 1},   // NONCOMP
-                    '{default: 2},   // CONV
-                    '{default: 3}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{1,
+                      1,
+                      1,
+                      1,
+                      1,
+                      1},   // NONCOMP
+                    '{2,
+                      2,
+                      2,
+                      2,
+                      2,
+                      2},   // CONV
+                    '{3,
+                      3,
+                      3,
+                      3,
+                      3,
+                      3}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     },
     '{
@@ -234,16 +474,56 @@ package occamy_cluster_pkg;
                         1, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: 1},   // NONCOMP
-                    '{default: 2},   // CONV
-                    '{default: 3}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{1,
+                      1,
+                      1,
+                      1,
+                      1,
+                      1},   // NONCOMP
+                    '{2,
+                      2,
+                      2,
+                      2,
+                      2,
+                      2},   // CONV
+                    '{3,
+                      3,
+                      3,
+                      3,
+                      3,
+                      3}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     },
     '{
@@ -256,16 +536,56 @@ package occamy_cluster_pkg;
                         1, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: 1},   // NONCOMP
-                    '{default: 2},   // CONV
-                    '{default: 3}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{1,
+                      1,
+                      1,
+                      1,
+                      1,
+                      1},   // NONCOMP
+                    '{2,
+                      2,
+                      2,
+                      2,
+                      2,
+                      2},   // CONV
+                    '{3,
+                      3,
+                      3,
+                      3,
+                      3,
+                      3}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}},  // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     },
     '{
@@ -278,16 +598,56 @@ package occamy_cluster_pkg;
                         1, // FP16alt
                         1  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: 1},   // NONCOMP
-                    '{default: 2},   // CONV
-                    '{default: 3}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{1,
+                      1,
+                      1,
+                      1,
+                      1,
+                      1},   // NONCOMP
+                    '{2,
+                      2,
+                      2,
+                      2,
+                      2,
+                      2},   // CONV
+                    '{3,
+                      3,
+                      3,
+                      3,
+                      3,
+                      3}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
-                    '{default: fpnew_pkg::DISABLED}}, // DOTP
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}}, // DOTP
         PipeConfig: fpnew_pkg::BEFORE
     }
   };
