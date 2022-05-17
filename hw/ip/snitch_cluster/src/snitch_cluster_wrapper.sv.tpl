@@ -126,23 +126,73 @@ package ${cfg['pkg_name']};
                         ${cfg['timing']['lat_comp_fp16_alt']}, // FP16alt
                         ${cfg['timing']['lat_comp_fp8_alt']}  // FP8alt
                       },
-                    '{default: 1},   // DIVSQRT
-                    '{default: ${cfg['timing']['lat_noncomp']}},   // NONCOMP
-                    '{default: ${cfg['timing']['lat_conv']}},   // CONV
-                    '{default: ${cfg['timing']['lat_sdotp']}}    // DOTP
+                    '{1, 1, 1, 1, 1, 1},   // DIVSQRT
+                    '{${cfg['timing']['lat_noncomp']},
+                      ${cfg['timing']['lat_noncomp']},
+                      ${cfg['timing']['lat_noncomp']},
+                      ${cfg['timing']['lat_noncomp']},
+                      ${cfg['timing']['lat_noncomp']},
+                      ${cfg['timing']['lat_noncomp']}},   // NONCOMP
+                    '{${cfg['timing']['lat_conv']},
+                      ${cfg['timing']['lat_conv']},
+                      ${cfg['timing']['lat_conv']},
+                      ${cfg['timing']['lat_conv']},
+                      ${cfg['timing']['lat_conv']},
+                      ${cfg['timing']['lat_conv']}},   // CONV
+                    '{${cfg['timing']['lat_sdotp']},
+                      ${cfg['timing']['lat_sdotp']},
+                      ${cfg['timing']['lat_sdotp']},
+                      ${cfg['timing']['lat_sdotp']},
+                      ${cfg['timing']['lat_sdotp']},
+                      ${cfg['timing']['lat_sdotp']}}    // DOTP
                     },
-        UnitTypes: '{'{default: fpnew_pkg::MERGED},  // FMA
+        UnitTypes: '{'{fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED,
+                       fpnew_pkg::MERGED},  // FMA
 % if c["Xdiv_sqrt"]:
-                    '{default: fpnew_pkg::MERGED}, // DIVSQRT
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}, // DIVSQRT
 % else:
-                    '{default: fpnew_pkg::DISABLED}, // DIVSQRT
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}, // DIVSQRT
 % endif
-                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                    '{default: fpnew_pkg::MERGED},   // CONV
+                    '{fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL,
+                        fpnew_pkg::PARALLEL}, // NONCOMP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED},   // CONV
 % if c["xfdotp"]:
-                    '{default: fpnew_pkg::MERGED}},  // DOTP
+                    '{fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED,
+                        fpnew_pkg::MERGED}},  // DOTP
 % else:
-                    '{default: fpnew_pkg::DISABLED}}, // DOTP
+                    '{fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED,
+                        fpnew_pkg::DISABLED}}, // DOTP
 % endif
         PipeConfig: fpnew_pkg::${cfg['timing']['fpu_pipe_config']}
     }${',\n' if not loop.last else '\n'}\
