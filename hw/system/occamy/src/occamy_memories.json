@@ -28,6 +28,20 @@
         "words": 128
     },
     {
+        "byte_enable": true,
+        "byte_width": 8,
+        "density_optimized": true,
+        "description": [
+            "SPM Wide"
+        ],
+        "dual_port": false,
+        "latency": 1,
+        "ports": 1,
+        "speed_optimized": false,
+        "width": 512,
+        "words": 16384
+    },
+    {
         "byte_enable": false,
         "byte_width": 8,
         "density_optimized": true,
@@ -96,20 +110,6 @@
         "speed_optimized": true,
         "width": 256,
         "words": 128
-    },
-    {
-        "byte_enable": true,
-        "byte_width": 8,
-        "density_optimized": true,
-        "description": [
-            "SPM Wide"
-        ],
-        "dual_port": false,
-        "latency": 1,
-        "ports": 1,
-        "speed_optimized": false,
-        "width": 512,
-        "words": 32768
     },
     {
         "byte_enable": false,
