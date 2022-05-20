@@ -8,7 +8,8 @@
     .AXI_USER_AS_ID (${user_as_id}),
     .AXI_USER_ID_MSB (${user_id_msb}),
     .AXI_USER_ID_LSB (${user_id_lsb}),
-    .RISCV_WORD_WIDTH (64)
+    .RISCV_WORD_WIDTH (64),
+    .N_AXI_CUT(1)
   ) ${name} (
     .clk_i (${bus_in.clk}),
     .rst_ni (${bus_in.rst}),
