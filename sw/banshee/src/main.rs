@@ -14,10 +14,24 @@ use clap::Arg;
 use llvm_sys::{
     bit_writer::*, core::*, execution_engine::*, initialization::*, support::*, target::*,
 };
-use std::{ffi::CString, os::raw::c_int, path::Path, ptr::null_mut};
+
+use std::{
+    collections::HashMap,
+    ffi::CString,
+    fs,
+    fs::File,
+    io::prelude::*,
+    io::{BufReader, ErrorKind, Read, Seek, SeekFrom, Write},
+    num::ParseIntError,
+    os::raw::c_int,
+    path::Path,
+    ptr::null_mut,
+    str::FromStr,
+};
 
 pub mod bootroms;
 pub mod configuration;
+pub mod dram_preload;
 pub mod engine;
 pub mod peripherals;
 pub mod riscv;
@@ -27,7 +41,13 @@ pub mod tran;
 pub mod util;
 
 use crate::configuration::*;
+use crate::dram_preload::*;
 use crate::engine::*;
+use crate::readmem::{readmem, ContentType};
+
+use bytebuffer::ByteBuffer;
+use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
+use to_binary::{BinaryError, BinaryString};
 
 fn main() -> Result<()> {
     // Parse the command line arguments.
@@ -137,6 +157,30 @@ fn main() -> Result<()> {
                 .multiple(true)
                 .help("Pass command line arguments to LLVM"),
         )
+        .arg(
+            Arg::with_name("train-data-bin-file-path")
+                .long("train-data-bin-file-path")
+                .takes_value(true)
+                .help("Path to the binary file of the data for training."),
+        )
+        .arg(
+            Arg::with_name("train-data-mem-offset")
+                .long("train-data-mem-offset")
+                .takes_value(true)
+                .help("Define the offset at which the train data should be written into DRAM."),
+        )
+        .arg(
+            Arg::with_name("train-labels-bin-file-path")
+                .long("train-labels-bin-file-path")
+                .takes_value(true)
+                .help("Path to the binary file of the labels for training."),
+        )
+        .arg(
+            Arg::with_name("train-labels-mem-offset")
+                .long("train-labels-mem-offset")
+                .takes_value(true)
+                .help("Define the offset at which the train labels should be written into DRAM."),
+        )
         .get_matches();
 
     // Configure the logger.
@@ -205,6 +249,8 @@ fn main() -> Result<()> {
     let has_num_cores = matches.is_present("num-cores");
     let has_num_clusters = matches.is_present("num-clusters");
     let has_base_hartid = matches.is_present("base-hartid");
+    let has_train_bin = matches.is_present("train-data-bin-file-path");
+    let has_train_labels_bin = matches.is_present("train-labels-bin-file-path");
 
     matches
         .value_of("num-cores")
@@ -259,6 +305,57 @@ fn main() -> Result<()> {
     engine
         .translate_elf(&elf)
         .context("Failed to translate ELF binary")?;
+
+    if has_train_bin {
+        let bin_path = matches.value_of("train-data-bin-file-path").unwrap();
+
+        trace!("Loading train data from binary file: {}", bin_path);
+
+        // get memory offset from argument
+        let mut memory_offset = matches
+            .value_of("train-data-mem-offset")
+            .unwrap()
+            .trim_start_matches("0x");
+        // turn the string into a u64
+        let mut mem_offset = u64::from_str_radix(memory_offset, 16).unwrap();
+
+        trace!("Train data starts at address: 0x{:x}", mem_offset);
+
+        let train_data = dram_preload::bin_read(bin_path, mem_offset).unwrap();
+
+        let train_data_length = train_data.len() as u64;
+
+        let mut mem = engine.memory.lock().unwrap();
+
+        mem.extend(train_data);
+
+        for addr in mem_offset..mem_offset + train_data_length {
+            let val: u32 = mem.get(&(addr)).copied().unwrap_or(0);
+            trace!("address = 0x{:x}, binary value = {:#034b}", addr, val);
+        }
+    }
+
+    if has_train_labels_bin {
+        let bin_path = matches.value_of("train-labels-bin-file-path").unwrap();
+        trace!("Loading train labels from binary file: {}", bin_path);
+        // get memory offset from argument
+        let mut memory_offset = matches
+            .value_of("train-labels-mem-offset")
+            .unwrap()
+            .trim_start_matches("0x");
+        // turn the string into a u64
+        let mut mem_offset = u64::from_str_radix(memory_offset, 16).unwrap();
+        trace!("Train labels starts at address: 0x{:x}", mem_offset);
+        let dtype = "U32";
+        let train_labels = dram_preload::bin_u32_read(bin_path, mem_offset).unwrap();
+        let train_labels_length = train_labels.len() as u64;
+        let mut mem = engine.memory.lock().unwrap();
+        mem.extend(train_labels);
+        for addr in mem_offset..mem_offset + train_labels_length {
+            let val: u32 = mem.get(&(addr)).copied().unwrap_or(0);
+            trace!("address = 0x{:x}, binary value = {:#034b}", addr, val);
+        }
+    }
 
     // Write the module to disk if requested.
     if let Some(path) = matches.value_of("emit-llvm") {
