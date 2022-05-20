@@ -36,6 +36,8 @@ module axi_riscv_atomics #(
     // 32 for RV32; 64 for RV64, where both 32-bit (.W suffix) and 64-bit (.D suffix) AMOs are
     // supported if `aw_strb` is set correctly.
     parameter int unsigned RISCV_WORD_WIDTH = 0,
+    // Add a cut between axi_riscv_amos and axi_riscv_lrsc
+    parameter int unsigned N_AXI_CUT = 0,
     /// Derived Parameters (do NOT change manually!)
     localparam int unsigned AXI_STRB_WIDTH = AXI_DATA_WIDTH / 8
 ) (
@@ -150,6 +152,15 @@ module axi_riscv_atomics #(
     // module.
     localparam longint unsigned ADDR_BEGIN  = '0;
     localparam longint unsigned ADDR_END    = {AXI_ADDR_WIDTH{1'b1}};
+
+    `AXI_TYPEDEF_ALL(int_axi, logic [AXI_ADDR_WIDTH-1:0],
+                     logic [AXI_ID_WIDTH-1:0], \
+                     logic [AXI_DATA_WIDTH-1:0], \
+                     logic [AXI_STRB_WIDTH-1:0], \
+                     logic [AXI_USER_WIDTH-1:0])
+
+    int_axi_req_t int_axi_req, int_axi_cut_req;
+    int_axi_rsp_t int_axi_rsp, int_axi_cut_rsp;
 
     logic [AXI_ADDR_WIDTH-1:0]   int_axi_aw_addr;
     logic [2:0]                  int_axi_aw_prot;
@@ -303,6 +314,70 @@ module axi_riscv_atomics #(
         .mst_b_valid_i      ( int_axi_b_valid   )
     );
 
+    assign int_axi_req.aw.addr   = int_axi_req_aw_addr;
+    assign int_axi_req.aw.prot   = int_axi_req_aw_prot;
+    assign int_axi_req.aw.region = int_axi_req_aw_region;
+    assign int_axi_req.aw.atop   = int_axi_req_aw_atop;
+    assign int_axi_req.aw.len    = int_axi_req_aw_len;
+    assign int_axi_req.aw.size   = int_axi_req_aw_size;
+    assign int_axi_req.aw.burst  = int_axi_req_aw_burst;
+    assign int_axi_req.aw.lock   = int_axi_req_aw_lock;
+    assign int_axi_req.aw.cache  = int_axi_req_aw_cache;
+    assign int_axi_req.aw.qos    = int_axi_req_aw_qos;
+    assign int_axi_req.aw.id     = int_axi_req_aw_id;
+    assign int_axi_req.aw.user   = int_axi_req_aw_user;
+    assign int_axi_req.aw_ready  = int_axi_req_aw_ready;
+    assign int_axi_rsp.aw_valid  = int_axi_rsp_aw_valid;
+    assign int_axi_req.ar.addr   = int_axi_req_ar_addr;
+    assign int_axi_req.ar.prot   = int_axi_req_ar_prot;
+    assign int_axi_req.ar.region = int_axi_req_ar_region;
+    assign int_axi_req.ar.len    = int_axi_req_ar_len;
+    assign int_axi_req.ar.size   = int_axi_req_ar_size;
+    assign int_axi_req.ar.burst  = int_axi_req_ar_burst;
+    assign int_axi_req.ar.lock   = int_axi_req_ar_lock;
+    assign int_axi_req.ar.cache  = int_axi_req_ar_cache;
+    assign int_axi_req.ar.qos    = int_axi_req_ar_qos;
+    assign int_axi_req.ar.id     = int_axi_req_ar_id;
+    assign int_axi_req.ar.user   = int_axi_req_ar_user;
+    assign int_axi_rsp.ar_ready  = int_axi_rsp_ar_ready;
+    assign int_axi_req.ar_valid  = int_axi_req_ar_valid;
+    assign int_axi_req.w.data    = int_axi_req_w_data;
+    assign int_axi_req.w.strb    = int_axi_req_w_strb;
+    assign int_axi_req.w.user    = int_axi_req_w_user;
+    assign int_axi_req.w.last    = int_axi_req_w_last;
+    assign int_axi_rsp.w_ready   = int_axi_rsp_w_ready;
+    assign int_axi_req.w_valid   = int_axi_req_w_valid;
+    assign int_axi_rsp.r.data    = int_axi_rsp_r_data;
+    assign int_axi_rsp.r.resp    = int_axi_rsp_r_resp;
+    assign int_axi_rsp.r.last    = int_axi_rsp_r_last;
+    assign int_axi_rsp.r.id      = int_axi_rsp_r_id;
+    assign int_axi_rsp.r.user    = int_axi_rsp_r_user;
+    assign int_axi_req.r_ready   = int_axi_req_r_ready;
+    assign int_axi_rsp.r_valid   = int_axi_rsp_r_valid;
+    assign int_axi_rsp.b.resp    = int_axi_rsp_b_resp;
+    assign int_axi_rsp.b.id      = int_axi_rsp_b_id;
+    assign int_axi_rsp.b.user    = int_axi_rsp_b_user;
+    assign int_axi_req.b_ready   = int_axi_req_b_ready;
+    assign int_axi_rsp.b_valid   = int_axi_rsp_b_valid;
+
+    axi_multicut #(
+        .NoCuts     ( N_AXI_CUT             ),
+        .aw_chan_t  ( int_axi_req_aw_chan_t ),
+        .w_chan_t   ( int_axi_req_w_chan_t  ),
+        .b_chan_t   ( int_axi_req_b_chan_t  ),
+        .ar_chan_t  ( int_axi_req_ar_chan_t ),
+        .r_chan_t   ( int_axi_req_r_chan_t  ),
+        .axi_req_t  ( int_axi_req_req_t     ),
+        .axi_resp_t ( int_axi_req_resp_t    )
+    ) i_axi_wide_in_cut (
+        .clk_i      ( clk_i           ),
+        .rst_ni     ( rst_ni          ),
+        .slv_req_i  ( int_axi_req     ),
+        .slv_resp_o ( int_axi_rsp     ),
+        .mst_req_o  ( int_axi_cut_req ),
+        .mst_resp_i ( int_axi_cut_rsp )
+    );
+
     axi_riscv_lrsc #(
         .ADDR_BEGIN         (ADDR_BEGIN),
         .ADDR_END           (ADDR_END),
@@ -318,51 +393,51 @@ module axi_riscv_atomics #(
     ) i_lrsc (
         .clk_i              ( clk_i             ),
         .rst_ni             ( rst_ni            ),
-        .slv_aw_addr_i      ( int_axi_aw_addr   ),
-        .slv_aw_prot_i      ( int_axi_aw_prot   ),
-        .slv_aw_region_i    ( int_axi_aw_region ),
-        .slv_aw_atop_i      ( int_axi_aw_atop   ),
-        .slv_aw_len_i       ( int_axi_aw_len    ),
-        .slv_aw_size_i      ( int_axi_aw_size   ),
-        .slv_aw_burst_i     ( int_axi_aw_burst  ),
-        .slv_aw_lock_i      ( int_axi_aw_lock   ),
-        .slv_aw_cache_i     ( int_axi_aw_cache  ),
-        .slv_aw_qos_i       ( int_axi_aw_qos    ),
-        .slv_aw_id_i        ( int_axi_aw_id     ),
-        .slv_aw_user_i      ( int_axi_aw_user   ),
-        .slv_aw_ready_o     ( int_axi_aw_ready  ),
-        .slv_aw_valid_i     ( int_axi_aw_valid  ),
-        .slv_ar_addr_i      ( int_axi_ar_addr   ),
-        .slv_ar_prot_i      ( int_axi_ar_prot   ),
-        .slv_ar_region_i    ( int_axi_ar_region ),
-        .slv_ar_len_i       ( int_axi_ar_len    ),
-        .slv_ar_size_i      ( int_axi_ar_size   ),
-        .slv_ar_burst_i     ( int_axi_ar_burst  ),
-        .slv_ar_lock_i      ( int_axi_ar_lock   ),
-        .slv_ar_cache_i     ( int_axi_ar_cache  ),
-        .slv_ar_qos_i       ( int_axi_ar_qos    ),
-        .slv_ar_id_i        ( int_axi_ar_id     ),
-        .slv_ar_user_i      ( int_axi_ar_user   ),
-        .slv_ar_ready_o     ( int_axi_ar_ready  ),
-        .slv_ar_valid_i     ( int_axi_ar_valid  ),
-        .slv_w_data_i       ( int_axi_w_data    ),
-        .slv_w_strb_i       ( int_axi_w_strb    ),
-        .slv_w_user_i       ( int_axi_w_user    ),
-        .slv_w_last_i       ( int_axi_w_last    ),
-        .slv_w_ready_o      ( int_axi_w_ready   ),
-        .slv_w_valid_i      ( int_axi_w_valid   ),
-        .slv_r_data_o       ( int_axi_r_data    ),
-        .slv_r_resp_o       ( int_axi_r_resp    ),
-        .slv_r_last_o       ( int_axi_r_last    ),
-        .slv_r_id_o         ( int_axi_r_id      ),
-        .slv_r_user_o       ( int_axi_r_user    ),
-        .slv_r_ready_i      ( int_axi_r_ready   ),
-        .slv_r_valid_o      ( int_axi_r_valid   ),
-        .slv_b_resp_o       ( int_axi_b_resp    ),
-        .slv_b_id_o         ( int_axi_b_id      ),
-        .slv_b_user_o       ( int_axi_b_user    ),
-        .slv_b_ready_i      ( int_axi_b_ready   ),
-        .slv_b_valid_o      ( int_axi_b_valid   ),
+        .slv_aw_addr_i      ( int_axi_cut_req.aw.addr   ),
+        .slv_aw_prot_i      ( int_axi_cut_req.aw.prot   ),
+        .slv_aw_region_i    ( int_axi_cut_req.aw.region ),
+        .slv_aw_atop_i      ( int_axi_cut_req.aw.atop   ),
+        .slv_aw_len_i       ( int_axi_cut_req.aw.len    ),
+        .slv_aw_size_i      ( int_axi_cut_req.aw.size   ),
+        .slv_aw_burst_i     ( int_axi_cut_req.aw.burst  ),
+        .slv_aw_lock_i      ( int_axi_cut_req.aw.lock   ),
+        .slv_aw_cache_i     ( int_axi_cut_req.aw.cache  ),
+        .slv_aw_qos_i       ( int_axi_cut_req.aw.qos    ),
+        .slv_aw_id_i        ( int_axi_cut_req.aw.id     ),
+        .slv_aw_user_i      ( int_axi_cut_req.aw.user   ),
+        .slv_aw_ready_o     ( int_axi_cut_req.aw_ready  ),
+        .slv_aw_valid_i     ( int_axi_cut_rsp.aw_valid  ),
+        .slv_ar_addr_i      ( int_axi_cut_req.ar.addr   ),
+        .slv_ar_prot_i      ( int_axi_cut_req.ar.prot   ),
+        .slv_ar_region_i    ( int_axi_cut_req.ar.region ),
+        .slv_ar_len_i       ( int_axi_cut_req.ar.len    ),
+        .slv_ar_size_i      ( int_axi_cut_req.ar.size   ),
+        .slv_ar_burst_i     ( int_axi_cut_req.ar.burst  ),
+        .slv_ar_lock_i      ( int_axi_cut_req.ar.lock   ),
+        .slv_ar_cache_i     ( int_axi_cut_req.ar.cache  ),
+        .slv_ar_qos_i       ( int_axi_cut_req.ar.qos    ),
+        .slv_ar_id_i        ( int_axi_cut_req.ar.id     ),
+        .slv_ar_user_i      ( int_axi_cut_req.ar.user   ),
+        .slv_ar_ready_o     ( int_axi_cut_rsp.ar_ready  ),
+        .slv_ar_valid_i     ( int_axi_cut_req.ar_valid  ),
+        .slv_w_data_i       ( int_axi_cut_req.w.data    ),
+        .slv_w_strb_i       ( int_axi_cut_req.w.strb    ),
+        .slv_w_user_i       ( int_axi_cut_req.w.user    ),
+        .slv_w_last_i       ( int_axi_cut_req.w.last    ),
+        .slv_w_ready_o      ( int_axi_cut_rsp.w_ready   ),
+        .slv_w_valid_i      ( int_axi_cut_req.w_valid   ),
+        .slv_r_data_o       ( int_axi_cut_rsp.r.data    ),
+        .slv_r_resp_o       ( int_axi_cut_rsp.r.resp    ),
+        .slv_r_last_o       ( int_axi_cut_rsp.r.last    ),
+        .slv_r_id_o         ( int_axi_cut_rsp.r.id      ),
+        .slv_r_user_o       ( int_axi_cut_rsp.r.user    ),
+        .slv_r_ready_i      ( int_axi_cut_req.r_ready   ),
+        .slv_r_valid_o      ( int_axi_cut_rsp.r_valid   ),
+        .slv_b_resp_o       ( int_axi_cut_rsp.b.resp    ),
+        .slv_b_id_o         ( int_axi_cut_rsp.b.id      ),
+        .slv_b_user_o       ( int_axi_cut_rsp.b.user    ),
+        .slv_b_ready_i      ( int_axi_cut_req.b_ready   ),
+        .slv_b_valid_o      ( int_axi_cut_rsp.b_valid   ),
         .mst_aw_addr_o      ( mst_aw_addr_o     ),
         .mst_aw_prot_o      ( mst_aw_prot_o     ),
         .mst_aw_region_o    ( mst_aw_region_o   ),
