@@ -24,6 +24,7 @@ http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts
 | [pre_to_inter](#pre_to_inter)                                                   | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-pre_to_inter.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/pre_to_inter")                                                   |
 | [inter_to_quad](#inter_to_quad)                                                 | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-inter_to_quad.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/inter_to_quad")                                                 |
 | [narrow_to_cva6](#narrow_to_cva6)                                               | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_to_cva6.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_to_cva6")                                               |
+| [narrow_conv_to_spm_narrow_pre](#narrow_conv_to_spm_narrow_pre)                 | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_conv_to_spm_narrow_pre.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_conv_to_spm_narrow_pre")                 |
 | [narrow_conv_to_spm_narrow](#narrow_conv_to_spm_narrow)                         | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_conv_to_spm_narrow.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_conv_to_spm_narrow")                         |
 | [narrow_and_pcie](#narrow_and_pcie)                                             | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_pcie.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_pcie")                                             |
 | [narrow_and_wide](#narrow_and_wide)                                             | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_wide.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_wide")                                             |
@@ -212,9 +213,35 @@ The default value is:
 1
 ```
 
+## narrow_conv_to_spm_narrow_pre
+
+narrow -> SPM pre atomic adapter
+
+`narrow_conv_to_spm_narrow_pre`
+
+*   is optional
+
+*   Type: `integer`
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_conv_to_spm_narrow_pre.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_conv_to_spm_narrow_pre")
+
+### narrow_conv_to_spm_narrow_pre Type
+
+`integer`
+
+### narrow_conv_to_spm_narrow_pre Default Value
+
+The default value is:
+
+```json
+1
+```
+
 ## narrow_conv_to_spm_narrow
 
-narrow -> SPM
+narrow -> SPM post atomic adapter
 
 `narrow_conv_to_spm_narrow`
 

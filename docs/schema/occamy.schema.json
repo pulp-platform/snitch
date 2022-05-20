@@ -81,9 +81,14 @@
                     "description": "narrow -> cva6",
                     "default": 1
                 },
+                "narrow_conv_to_spm_narrow_pre": {
+                    "type": "integer",
+                    "description": "narrow -> SPM pre atomic adapter",
+                    "default": 1
+                },
                 "narrow_conv_to_spm_narrow": {
                     "type": "integer",
-                    "description": "narrow -> SPM",
+                    "description": "narrow -> SPM post atomic adapter",
                     "default": 1
                 },
                 "narrow_and_pcie": {
