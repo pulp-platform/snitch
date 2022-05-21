@@ -22,6 +22,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   /// Enable Snitch DMA as accelerator.
   parameter bit          Xdma      = 0,
   parameter bit          Xssr      = 0,
+  parameter int unsigned                 NumIntSsrs =  0,
+  parameter logic [NumIntSsrs-1:0][4:0]  IntSsrRegs = '0,
   /// Enable FP in general
   parameter bit          FP_EN     = 1,
   /// Enable F Extension.
@@ -98,13 +100,24 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // FPU **un-timed** Side-channel
   output fpnew_pkg::roundmode_e fpu_rnd_mode_o,
   output fpnew_pkg::fmt_mode_t  fpu_fmt_mode_o,
-  input  fpnew_pkg::status_t    fpu_status_i
+  input  fpnew_pkg::status_t    fpu_status_i,
+  // SSR Interface
+  output logic  [1:0][4:0] ssr_raddr_o,
+  input  data_t [1:0]      ssr_rdata_i,
+  output logic  [1:0]      ssr_rvalid_o,
+  input  logic  [1:0]      ssr_rready_i,
+  output logic  [1:0]      ssr_rdone_o,
+  output logic  [0:0][4:0] ssr_waddr_o,
+  output data_t [0:0]      ssr_wdata_o,
+  output logic  [0:0]      ssr_wvalid_o,
+  input  logic  [0:0]      ssr_wready_i,
+  output logic  [0:0]      ssr_wdone_o
 );
   // Debug module's base address
   localparam logic [31:0] DmBaseAddress = 0;
   localparam int RegWidth = RVE ? 4 : 5;
   localparam int RegNrReadPorts = Xipu ? 3 : 2;
-  localparam int RegNrWritePorts = 2;
+  localparam int RegNrWritePorts = Xipu ? 2 : 1;
    
   /// Total physical address portion.
   localparam int unsigned PPNSize = AddrWidth - PAGE_SHIFT;
@@ -260,6 +273,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic       stip_d, stip_q;
   logic       ssip_d, ssip_q;
   logic       scip_d, scip_q;
+  logic       ssr_active_d, ssr_active_q;
   snitch_pkg::priv_lvl_t priv_lvl_d, priv_lvl_q;
 
   typedef struct packed {
@@ -284,6 +298,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   `FFAR(spp_q, spp_d, 1'b0, clk_i, rst_i)
   `FFAR(ie_q, ie_d, '0, clk_i, rst_i)
   `FFAR(pie_q, pie_d, '0, clk_i, rst_i)
+  `FFAR(ssr_active_q, Xssr & ssr_active_d, 1'b0, clk_i, rst_i);
   // Interrupts
   `FFAR(eie_q, eie_d, '0, clk_i, rst_i)
   `FFAR(tie_q, tie_d, '0, clk_i, rst_i)
@@ -329,13 +344,13 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // accelerator offloading interface
   // register int destination in scoreboard
   logic  acc_register_rd;
+  logic  acc_opc_sel;
 
   assign acc_qreq_o.id = rd;
   assign acc_qreq_o.data_op = inst_data_i;
   assign acc_qreq_o.data_arga = {{32{gpr_rdata[0][31]}}, gpr_rdata[0]};
   assign acc_qreq_o.data_argb = {{32{gpr_rdata[1][31]}}, gpr_rdata[1]};
-  assign acc_qreq_o.data_argc = {{32{gpr_rdata[2][31]}}, gpr_rdata[2]};
-  //assign acc_qreq_o.data_argc = (~FP_EN & Xipu) ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
+  assign acc_qreq_o.data_argc = acc_opc_sel ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
 
   // ---------
   // L0 ITLB
@@ -396,11 +411,23 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     // only place the reservation if we actually executed the load or offload instruction
     if ((is_load | acc_register_rd) && !stall && !exception) sb_d[rd] = 1'b1;
     if (retire_acc) sb_d[acc_prsp_i.id[RegWidth-1:0]] = 1'b0;
+    if (ssr_active_q) begin
+       for (int i = 0; i < NumIntSsrs; i++) sb_d[IntSsrRegs[i]] = 1'b0;
+    end
     sb_d[0] = 1'b0;
   end
+
+  // Determine whether destination register is SSR
+  logic is_rd_ssr;
+  always_comb begin
+    is_rd_ssr = 1'b0;
+    for (int s = 0; s < NumIntSsrs; s++)
+      is_rd_ssr |= (IntSsrRegs[s] == rd);
+  end
   // TODO(zarubaf): This can probably be described a bit more efficient
-  assign opa_ready = (opa_select != Reg) | ~sb_q[rs1];
-  assign opb_ready = ((opb_select != Reg & opb_select != SImmediate) | ~sb_q[rs2]) &
+  assign opa_ready = (opa_select != Reg) | (~sb_q[rs1] & (~ssr_rvalid_o[0] | ssr_rready_i[0]));
+  assign opb_ready = ((opb_select != Reg & opb_select != SImmediate) | 
+                      (~sb_q[rs2] & (~ssr_rvalid_o[1] | ssr_rready_i[1]))) &
                      ((opb_select != RegRd) | ~sb_q[rd]);
   assign opc_ready = ((opc_select != Reg) | ~sb_q[rd]) & ((opc_select != RegRs2) | ~sb_q[rs2]);
   assign operands_ready = opa_ready & opb_ready & opc_ready;
@@ -509,6 +536,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     acc_qvalid_o = 1'b0;
     acc_qreq_o.addr = FP_SS;
     acc_register_rd = 1'b0;
+    acc_opc_sel = 1'b0;
 
     debug_d = (!debug_q && (
           // the external debugger or an ebreak instruction triggerd the
@@ -1264,6 +1292,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
          end
       end
+      /*
       P_SB_IRPOST: begin // Xpulpimg: p.sb rs2, simm(rs1!)        
          if (Xipu) begin
             write_rd = 1'b0;
@@ -1377,7 +1406,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
          end else begin
             illegal_inst = 1'b1;
          end
-      end   
+      end
+      */
       // Immediate branching
       P_BEQIMM: begin // Xpulpimg: p.beqimm
          if (Xipu) begin
@@ -1604,6 +1634,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             opc_select = Reg;
             acc_register_rd = 1'b1;
             acc_qreq_o.addr = INT_SS;
+            acc_opc_sel = 1'b1;
          end else begin
             illegal_inst = 1'b1;
          end
@@ -1642,6 +1673,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           opc_select = Reg;
           acc_register_rd = 1'b1;
           acc_qreq_o.addr = INT_SS;
+          acc_opc_sel = 1'b1;
         end else begin
           illegal_inst = 1'b1;
         end
@@ -2733,6 +2765,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      */
       SCFGRI: begin
         if (Xssr) begin
           acc_qreq_o.addr = SSR_CFG;
@@ -2765,7 +2798,6 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           write_rd = 1'b0;
         end else illegal_inst = 1'b1;
       end
-*/
       default: begin
         illegal_inst = 1'b1;
       end
@@ -2839,6 +2871,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     ie_d = ie_q;
     pie_d = pie_q;
     spp_d = spp_q;
+    // SSR register
+    ssr_active_d = ssr_active_q;
     // Interrupts
     eie_d = eie_q;
     tie_d = tie_q;
@@ -3152,7 +3186,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // --------------------
   // Operand Select
   // --------------------
-  always_comb begin
+/*  always_comb begin
     unique case (opa_select)
       None: opa = '0;
       Reg: opa = gpr_rdata[0];
@@ -3176,15 +3210,50 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       default: opb = '0;
     endcase
   end
-
+*/
   assign gpr_raddr[0] = rs1;
   assign gpr_raddr[1] = rs2;
   // connect the third read port only if present
   if (RegNrReadPorts >= 3) begin: gpr_raddr_2
      assign gpr_raddr[2] = rd;
   end
-
-
+                           
+  always_comb begin
+    ssr_rvalid_o = '0;                   
+    unique case (opa_select)
+      None: opa = '0;
+      Reg: begin 
+        ssr_rvalid_o[0] = ssr_active_q & (IntSsrRegs[0] == gpr_raddr[0]);
+        opa = ssr_rvalid_o[0] ? ssr_rdata_i[0] : gpr_rdata[0];
+      end                 
+      UImmediate: opa = uimm;
+      JImmediate: opa = jimm;
+      CSRImmmediate: opa = {{{32-RegWidth}{1'b0}}, rs1};
+      default: opa = '0;
+    endcase
+        
+    unique case (opb_select)
+      None: opb = '0;
+      Reg: begin
+        ssr_rvalid_o[1] = ssr_active_q & (IntSsrRegs[1] == gpr_raddr[1]);               
+        opb = ssr_rvalid_o[1] ? ssr_rdata_i[0] : gpr_rdata[1];
+      end
+      IImmediate: opb = iimm;
+      SFImmediate, SImmediate: opb = simm;
+      PC: opb = pc_q;
+      CSR: opb = csr_rvalue;
+      PBImmediate: opb = pbimm;
+      RegRd: opb = gpr_rdata[2];
+      default: opb = '0;
+    endcase
+  end
+  
+  // SSRs   
+  assign ssr_waddr_o = gpr_waddr[0];
+  assign ssr_wdata_o = gpr_wdata[0];
+  for (genvar i = 0; i < 2; i++) assign ssr_rdone_o[i] = ssr_rvalid_o[i];
+  assign ssr_raddr_o = gpr_raddr;
+              
   // --------------------
   // ALU
   // --------------------
@@ -3402,6 +3471,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     endcase
   end
 
+  logic is_ssr_write;
+  assign is_ssr_write = ssr_active_q & is_rd_ssr;
+
   if (RegNrWritePorts == 1) begin
      always_comb begin
         gpr_we[0] = 1'b0;
@@ -3429,7 +3501,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
            gpr_wdata[0] = acc_prsp_i.data[31:0];
            acc_pready_o = 1'b1;
         end
-     end // always_comb
+     end
   end else if (RegNrWritePorts == 2) begin
    always_comb begin
       gpr_we[0] = 1'b0;
@@ -3443,6 +3515,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       acc_pready_o = 1'b0;
       retire_acc = 1'b0;
       retire_load = 1'b0;
+      ssr_wvalid_o = 1'b0;
+      ssr_wdone_o = 1'b1;
 
       if (retire_i | retire_p) begin
          gpr_we[0] = 1'b1;
@@ -3471,6 +3545,16 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             gpr_we[1] = 1'b1;
             lsu_pready = 1'b1;
          end
+         if (is_ssr_write) begin
+            ssr_wvalid_o = 1'b1;
+            gpr_we[0] = 1'b1;
+            // stall write-back to SSR
+            if (!ssr_wready_i) begin
+               gpr_we[0] = 1'b0;
+            end else begin
+               ssr_wdone_o = 1'b1;
+            end
+         end            
       end
    end
   end  else begin 

@@ -213,7 +213,9 @@ module snitch_cc #(
     .XFVEC (XFVEC),
     .XFDOTP (XFDOTP),
     .XFAUX (XFauxMerged),
-    .FLEN (FLEN)
+    .FLEN (FLEN),
+    .NumIntSsrs (),
+    .IntSsrRegs ()       
   ) i_snitch (
     .clk_i ( clk_d2_i ), // if necessary operate on half the frequency
     .rst_i ( ~rst_ni ),
@@ -242,7 +244,17 @@ module snitch_cc #(
     .ptw_is_4mega_i (hive_rsp_i.ptw_is_4mega),
     .fpu_rnd_mode_o ( fpu_rnd_mode ),
     .fpu_fmt_mode_o ( fpu_fmt_mode ),
-    .fpu_status_i ( fpu_status )
+    .fpu_status_i ( fpu_status ),
+    .ssr_raddr_o      (      ),
+    .ssr_rdata_i      (       ),
+    .ssr_rvalid_o     (      ),
+    .ssr_rready_i     (     ),
+    .ssr_rdone_o      (       ),
+    .ssr_waddr_o      (       ),
+    .ssr_wdata_o      (       ),
+    .ssr_wvalid_o     (      ),
+    .ssr_wready_i     (      ),
+    .ssr_wdone_o      (      )
   );
 
   reqrsp_iso #(
@@ -422,6 +434,28 @@ module snitch_cc #(
   logic             ssr_streamctl_valid;
   logic             ssr_streamctl_ready;
 
+  logic  [2:0][4:0] ssr_fp_raddr;
+  data_t [2:0]      ssr_fp_rdata;
+  logic  [2:0]      ssr_fp_rvalid;
+  logic  [2:0]      ssr_fp_rready;
+  logic  [2:0]      ssr_fp_rdone;
+  logic  [0:0][4:0] ssr_fp_waddr;
+  data_t [0:0]      ssr_fp_wdata;
+  logic  [0:0]      ssr_fp_wvalid;
+  logic  [0:0]      ssr_fp_wready;
+  logic  [0:0]      ssr_fp_wdone;
+   
+  logic  [1:0][4:0] ssr_int_raddr;
+  data_t [1:0]      ssr_int_rdata;
+  logic  [1:0]      ssr_int_rvalid;
+  logic  [1:0]      ssr_int_rready;
+  logic  [1:0]      ssr_int_rdone;
+  logic  [0:0][4:0] ssr_int_waddr;
+  data_t [0:0]      ssr_int_wdata;
+  logic  [0:0]      ssr_int_wvalid;
+  logic  [0:0]      ssr_int_wready;
+  logic  [0:0]      ssr_int_wdone;
+   
   if (FPEn) begin : gen_fpu
     snitch_pkg::core_events_t fp_ss_core_events;
 
@@ -686,6 +720,46 @@ module snitch_cc #(
     // If Xssr is enabled, we should at least have one SSR
     `ASSERT_INIT(CheckSsrWithXssr, NumSsrs >= 1);
 
+    snitch_ssr_mux #(
+      .AddrWidth (TCDMAddrWidth),
+      .DataWidth (DataWidth)
+    ) i_snitch_ssr_mux (
+      .clk_i,
+      .rst_ni ( rst_ni ),
+      .ssr_int_raddr_i ( ssr_int_raddr ),
+      .ssr_int_rdata_o ( ssr_int_rdata ),
+      .ssr_int_rvalid_i( ssr_int_rvalid),
+      .ssr_int_rready_o( ssr_int_rready),
+      .ssr_int_rdone_i ( ssr_int_rdone ),
+      .ssr_int_waddr_i ( ssr_int_waddr ),
+      .ssr_int_wdata_i ( ssr_int_wdata ),
+      .ssr_int_wvalid_i( ssr_int_wvalid),
+      .ssr_int_wready_o( ssr_int_wready),
+      .ssr_int_wdone_i ( ssr_int_wdone ),
+                        
+      .ssr_fp_raddr_i ( ),
+      .ssr_fp_rdata_o ( ),
+      .ssr_fp_rvalid_i( ),
+      .ssr_fp_rready_o( ),
+      .ssr_fp_rdone_i ( ),
+      .ssr_fp_waddr_i ( ),
+      .ssr_fp_wdata_i ( ),
+      .ssr_fp_wvalid_i( ),
+      .ssr_fp_wready_o( ),
+      .ssr_fp_wdone_i ( ),
+                        
+      .ssr_raddr_o     ( ssr_raddr  ),
+      .ssr_rdata_i     ( ssr_rdata  ),
+      .ssr_rvalid_o    ( ssr_rvalid ),
+      .ssr_rready_i    ( ssr_rready ),
+      .ssr_rdone_o     ( ssr_rdone  ),
+      .ssr_waddr_o     ( ssr_waddr  ),
+      .ssr_wdata_o     ( ssr_wdata  ),
+      .ssr_wvalid_o    ( ssr_wvalid ),
+      .ssr_wready_i    ( ssr_wready ),
+      .ssr_wdone_o     ( ssr_wdone  )
+    );
+             
     snitch_ssr_streamer #(
       .NumSsrs (NumSsrs),
       .RPorts (3),

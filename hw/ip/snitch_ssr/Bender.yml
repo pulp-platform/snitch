@@ -31,6 +31,7 @@ sources:
 - src/snitch_ssr.sv
 # Level 4:
 - src/snitch_ssr_streamer.sv
+- src/snitch_ssr_mux.sv
 - target: test
   files:
   # Level 0
