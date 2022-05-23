@@ -32,7 +32,7 @@
   txns_wide_to_hbm = cfg["txns"]["wide_to_hbm"]
   txns_narrow_and_wide = cfg["txns"]["narrow_and_wide"]
   max_atomics_narrow = 8
-  max_atomics_wide = 16
+  max_atomics_wide = 8
   max_trans_atop_filter_per = 4
   max_trans_atop_filter_ser = 32
   hbi_trunc_addr_width = 40
