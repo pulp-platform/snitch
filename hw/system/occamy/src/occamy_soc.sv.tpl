@@ -247,7 +247,7 @@ module ${name}_soc
   // SPM NARROW //
   ////////////////
   <% narrow_spm_mst = soc_narrow_xbar.out_spm_narrow \
-                      .cut(context, cuts_narrow_conv_to_spm_narrow) \
+                      .cut(context, cuts_narrow_conv_to_spm_narrow_pre) \
                       .atomic_adapter(context, max_trans=max_atomics_narrow, user_as_id=1, user_id_msb=soc_narrow_xbar.out_spm_narrow.uw-1, user_id_lsb=0, name="spm_narrow_amo_adapter") \
                       .cut(context, cuts_narrow_conv_to_spm_narrow)
   %>\
