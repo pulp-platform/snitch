@@ -81,9 +81,14 @@
                     "description": "narrow -> cva6",
                     "default": 1
                 },
+                "narrow_conv_to_spm_narrow_pre": {
+                    "type": "integer",
+                    "description": "narrow -> SPM pre atomic adapter",
+                    "default": 1
+                },
                 "narrow_conv_to_spm_narrow": {
                     "type": "integer",
-                    "description": "narrow -> SPM",
+                    "description": "narrow -> SPM post atomic adapter",
                     "default": 1
                 },
                 "narrow_and_pcie": {
@@ -135,6 +140,16 @@
                     "type": "integer",
                     "description": "hbmx -> hbm",
                     "default": 3
+                },
+                "atomic_adapter_narrow": {
+                    "type": "integer",
+                    "description": "narrow spm atomic adapter internal cuts",
+                    "default": 1
+                },
+                "atomic_adapter_narrow_wide": {
+                    "type": "integer",
+                    "description": "narrow_to_wide atomic adapter internal cuts",
+                    "default": 1
                 },
                 "periph_axi_lite_narrow": {
                     "type": "integer",

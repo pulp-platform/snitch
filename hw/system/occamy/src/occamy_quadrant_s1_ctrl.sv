@@ -37,10 +37,10 @@ module occamy_quadrant_s1_ctrl
   output logic [3:0][47:0] ro_end_addr_o,
 
   // Upward (SoC) narrow ports
-  output axi_a48_d64_i4_u9_req_t soc_out_req_o,
-  input  axi_a48_d64_i4_u9_resp_t soc_out_rsp_i,
-  input  axi_a48_d64_i8_u9_req_t soc_in_req_i,
-  output axi_a48_d64_i8_u9_resp_t soc_in_rsp_o,
+  output axi_a48_d64_i4_u8_req_t soc_out_req_o,
+  input  axi_a48_d64_i4_u8_resp_t soc_out_rsp_i,
+  input  axi_a48_d64_i8_u8_req_t soc_in_req_i,
+  output axi_a48_d64_i8_u8_resp_t soc_in_rsp_o,
 
   // TLB narrow and wide configuration ports
   output tlb_entry_t [7:0] narrow_tlb_entries_o,
@@ -49,10 +49,10 @@ module occamy_quadrant_s1_ctrl
   output logic wide_tlb_enable_o,
 
   // Quadrant narrow ports
-  output axi_a48_d64_i8_u9_req_t quadrant_out_req_o,
-  input  axi_a48_d64_i8_u9_resp_t quadrant_out_rsp_i,
-  input  axi_a48_d64_i4_u9_req_t quadrant_in_req_i,
-  output axi_a48_d64_i4_u9_resp_t quadrant_in_rsp_o
+  output axi_a48_d64_i8_u8_req_t quadrant_out_req_o,
+  input  axi_a48_d64_i8_u8_resp_t quadrant_out_rsp_i,
+  input  axi_a48_d64_i4_u8_req_t quadrant_in_req_i,
+  output axi_a48_d64_i4_u8_resp_t quadrant_in_rsp_o
 );
 
   // Upper half of quadrant space reserved for internal use (same size as for all clusters)
@@ -76,19 +76,19 @@ axi_xbar #(
   .Cfg           ( QuadrantS1CtrlSocToQuadXbarCfg ),
   .Connectivity  ( 2'b11 ),
   .ATOPs         ( 1 ),
-  .slv_aw_chan_t ( axi_a48_d64_i8_u9_aw_chan_t ),
-  .mst_aw_chan_t ( axi_a48_d64_i8_u9_aw_chan_t ),
-  .w_chan_t      ( axi_a48_d64_i8_u9_w_chan_t ),
-  .slv_b_chan_t  ( axi_a48_d64_i8_u9_b_chan_t ),
-  .mst_b_chan_t  ( axi_a48_d64_i8_u9_b_chan_t ),
-  .slv_ar_chan_t ( axi_a48_d64_i8_u9_ar_chan_t ),
-  .mst_ar_chan_t ( axi_a48_d64_i8_u9_ar_chan_t ),
-  .slv_r_chan_t  ( axi_a48_d64_i8_u9_r_chan_t ),
-  .mst_r_chan_t  ( axi_a48_d64_i8_u9_r_chan_t ),
-  .slv_req_t     ( axi_a48_d64_i8_u9_req_t ),
-  .slv_resp_t    ( axi_a48_d64_i8_u9_resp_t ),
-  .mst_req_t     ( axi_a48_d64_i8_u9_req_t ),
-  .mst_resp_t    ( axi_a48_d64_i8_u9_resp_t ),
+  .slv_aw_chan_t ( axi_a48_d64_i8_u8_aw_chan_t ),
+  .mst_aw_chan_t ( axi_a48_d64_i8_u8_aw_chan_t ),
+  .w_chan_t      ( axi_a48_d64_i8_u8_w_chan_t ),
+  .slv_b_chan_t  ( axi_a48_d64_i8_u8_b_chan_t ),
+  .mst_b_chan_t  ( axi_a48_d64_i8_u8_b_chan_t ),
+  .slv_ar_chan_t ( axi_a48_d64_i8_u8_ar_chan_t ),
+  .mst_ar_chan_t ( axi_a48_d64_i8_u8_ar_chan_t ),
+  .slv_r_chan_t  ( axi_a48_d64_i8_u8_r_chan_t ),
+  .mst_r_chan_t  ( axi_a48_d64_i8_u8_r_chan_t ),
+  .slv_req_t     ( axi_a48_d64_i8_u8_req_t ),
+  .slv_resp_t    ( axi_a48_d64_i8_u8_resp_t ),
+  .mst_req_t     ( axi_a48_d64_i8_u8_req_t ),
+  .mst_resp_t    ( axi_a48_d64_i8_u8_resp_t ),
   .rule_t        ( xbar_rule_48_t )
 ) i_quadrant_s1_ctrl_soc_to_quad_xbar (
   .clk_i  ( clk_i ),
@@ -118,19 +118,19 @@ axi_xbar #(
   .Cfg           ( QuadrantS1CtrlQuadToSocXbarCfg ),
   .Connectivity  ( 2'b11 ),
   .ATOPs         ( 1 ),
-  .slv_aw_chan_t ( axi_a48_d64_i4_u9_aw_chan_t ),
-  .mst_aw_chan_t ( axi_a48_d64_i4_u9_aw_chan_t ),
-  .w_chan_t      ( axi_a48_d64_i4_u9_w_chan_t ),
-  .slv_b_chan_t  ( axi_a48_d64_i4_u9_b_chan_t ),
-  .mst_b_chan_t  ( axi_a48_d64_i4_u9_b_chan_t ),
-  .slv_ar_chan_t ( axi_a48_d64_i4_u9_ar_chan_t ),
-  .mst_ar_chan_t ( axi_a48_d64_i4_u9_ar_chan_t ),
-  .slv_r_chan_t  ( axi_a48_d64_i4_u9_r_chan_t ),
-  .mst_r_chan_t  ( axi_a48_d64_i4_u9_r_chan_t ),
-  .slv_req_t     ( axi_a48_d64_i4_u9_req_t ),
-  .slv_resp_t    ( axi_a48_d64_i4_u9_resp_t ),
-  .mst_req_t     ( axi_a48_d64_i4_u9_req_t ),
-  .mst_resp_t    ( axi_a48_d64_i4_u9_resp_t ),
+  .slv_aw_chan_t ( axi_a48_d64_i4_u8_aw_chan_t ),
+  .mst_aw_chan_t ( axi_a48_d64_i4_u8_aw_chan_t ),
+  .w_chan_t      ( axi_a48_d64_i4_u8_w_chan_t ),
+  .slv_b_chan_t  ( axi_a48_d64_i4_u8_b_chan_t ),
+  .mst_b_chan_t  ( axi_a48_d64_i4_u8_b_chan_t ),
+  .slv_ar_chan_t ( axi_a48_d64_i4_u8_ar_chan_t ),
+  .mst_ar_chan_t ( axi_a48_d64_i4_u8_ar_chan_t ),
+  .slv_r_chan_t  ( axi_a48_d64_i4_u8_r_chan_t ),
+  .mst_r_chan_t  ( axi_a48_d64_i4_u8_r_chan_t ),
+  .slv_req_t     ( axi_a48_d64_i4_u8_req_t ),
+  .slv_resp_t    ( axi_a48_d64_i4_u8_resp_t ),
+  .mst_req_t     ( axi_a48_d64_i4_u8_req_t ),
+  .mst_resp_t    ( axi_a48_d64_i4_u8_resp_t ),
   .rule_t        ( xbar_rule_48_t )
 ) i_quadrant_s1_ctrl_quad_to_soc_xbar (
   .clk_i  ( clk_i ),
@@ -194,8 +194,8 @@ axi_lite_xbar #(
   assign quadrant_in_rsp_o = quadrant_s1_ctrl_quad_to_soc_xbar_in_rsp[QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_IN_IN];
 
   // Convert both internal ports to AXI lite, since only registers for now
-    axi_a48_d64_i1_u9_req_t soc_to_quad_internal_ser_req;
-  axi_a48_d64_i1_u9_resp_t soc_to_quad_internal_ser_rsp;
+    axi_a48_d64_i1_u8_req_t soc_to_quad_internal_ser_req;
+  axi_a48_d64_i1_u8_resp_t soc_to_quad_internal_ser_rsp;
 
   axi_id_serialize #(
     .AtopSupport (1),
@@ -206,11 +206,11 @@ axi_lite_xbar #(
     .AxiMstPortMaxTxnsPerId (2),
     .AxiAddrWidth (48),
     .AxiDataWidth (64),
-    .AxiUserWidth (9),
-    .slv_req_t (axi_a48_d64_i8_u9_req_t),
-    .slv_resp_t (axi_a48_d64_i8_u9_resp_t),
-    .mst_req_t (axi_a48_d64_i1_u9_req_t),
-    .mst_resp_t (axi_a48_d64_i1_u9_resp_t)
+    .AxiUserWidth (8),
+    .slv_req_t (axi_a48_d64_i8_u8_req_t),
+    .slv_resp_t (axi_a48_d64_i8_u8_resp_t),
+    .mst_req_t (axi_a48_d64_i1_u8_req_t),
+    .mst_resp_t (axi_a48_d64_i1_u8_resp_t)
   ) i_soc_to_quad_internal_ser (
     .clk_i ( clk_i ),
     .rst_ni ( rst_ni ),
@@ -219,25 +219,25 @@ axi_lite_xbar #(
     .mst_req_o ( soc_to_quad_internal_ser_req ),
     .mst_resp_i ( soc_to_quad_internal_ser_rsp )
   );
-  axi_a48_d32_i1_u9_req_t axi_to_axi_lite_dw_req;
-  axi_a48_d32_i1_u9_resp_t axi_to_axi_lite_dw_rsp;
+  axi_a48_d32_i1_u8_req_t axi_to_axi_lite_dw_req;
+  axi_a48_d32_i1_u8_resp_t axi_to_axi_lite_dw_rsp;
 
   axi_dw_converter #(
     .AxiSlvPortDataWidth ( 64 ),
     .AxiMstPortDataWidth ( 32 ),
     .AxiAddrWidth ( 48 ),
     .AxiIdWidth ( 1 ),
-    .aw_chan_t ( axi_a48_d32_i1_u9_aw_chan_t ),
-    .mst_w_chan_t ( axi_a48_d32_i1_u9_w_chan_t ),
-    .slv_w_chan_t ( axi_a48_d64_i1_u9_w_chan_t ),
-    .b_chan_t ( axi_a48_d32_i1_u9_b_chan_t ),
-    .ar_chan_t ( axi_a48_d32_i1_u9_ar_chan_t ),
-    .mst_r_chan_t ( axi_a48_d32_i1_u9_r_chan_t ),
-    .slv_r_chan_t ( axi_a48_d64_i1_u9_r_chan_t ),
-    .axi_mst_req_t ( axi_a48_d32_i1_u9_req_t ),
-    .axi_mst_resp_t ( axi_a48_d32_i1_u9_resp_t ),
-    .axi_slv_req_t ( axi_a48_d64_i1_u9_req_t ),
-    .axi_slv_resp_t ( axi_a48_d64_i1_u9_resp_t )
+    .aw_chan_t ( axi_a48_d32_i1_u8_aw_chan_t ),
+    .mst_w_chan_t ( axi_a48_d32_i1_u8_w_chan_t ),
+    .slv_w_chan_t ( axi_a48_d64_i1_u8_w_chan_t ),
+    .b_chan_t ( axi_a48_d32_i1_u8_b_chan_t ),
+    .ar_chan_t ( axi_a48_d32_i1_u8_ar_chan_t ),
+    .mst_r_chan_t ( axi_a48_d32_i1_u8_r_chan_t ),
+    .slv_r_chan_t ( axi_a48_d64_i1_u8_r_chan_t ),
+    .axi_mst_req_t ( axi_a48_d32_i1_u8_req_t ),
+    .axi_mst_resp_t ( axi_a48_d32_i1_u8_resp_t ),
+    .axi_slv_req_t ( axi_a48_d64_i1_u8_req_t ),
+    .axi_slv_resp_t ( axi_a48_d64_i1_u8_resp_t )
   ) i_axi_to_axi_lite_dw (
     .clk_i ( clk_i ),
     .rst_ni ( rst_ni ),
@@ -251,12 +251,12 @@ axi_lite_xbar #(
     .AxiAddrWidth ( 48 ),
     .AxiDataWidth ( 32 ),
     .AxiIdWidth ( 1 ),
-    .AxiUserWidth ( 9 ),
+    .AxiUserWidth ( 8 ),
     .AxiMaxWriteTxns ( 4  ),
     .AxiMaxReadTxns ( 4  ),
     .FallThrough ( 0  ),
-    .full_req_t ( axi_a48_d32_i1_u9_req_t ),
-    .full_resp_t ( axi_a48_d32_i1_u9_resp_t ),
+    .full_req_t ( axi_a48_d32_i1_u8_req_t ),
+    .full_resp_t ( axi_a48_d32_i1_u8_resp_t ),
     .lite_req_t ( axi_lite_a48_d32_req_t ),
     .lite_resp_t ( axi_lite_a48_d32_rsp_t )
   ) i_quad_to_soc_internal_ser_pc (
@@ -269,8 +269,8 @@ axi_lite_xbar #(
     .mst_resp_i (quadrant_s1_ctrl_mux_in_rsp[QUADRANT_S1_CTRL_MUX_IN_SOC])
   );
 
-  axi_a48_d64_i1_u9_req_t soc_internal_serialize_req;
-  axi_a48_d64_i1_u9_resp_t soc_internal_serialize_rsp;
+  axi_a48_d64_i1_u8_req_t soc_internal_serialize_req;
+  axi_a48_d64_i1_u8_resp_t soc_internal_serialize_rsp;
 
   axi_id_serialize #(
     .AtopSupport (1),
@@ -281,11 +281,11 @@ axi_lite_xbar #(
     .AxiMstPortMaxTxnsPerId (2),
     .AxiAddrWidth (48),
     .AxiDataWidth (64),
-    .AxiUserWidth (9),
-    .slv_req_t (axi_a48_d64_i4_u9_req_t),
-    .slv_resp_t (axi_a48_d64_i4_u9_resp_t),
-    .mst_req_t (axi_a48_d64_i1_u9_req_t),
-    .mst_resp_t (axi_a48_d64_i1_u9_resp_t)
+    .AxiUserWidth (8),
+    .slv_req_t (axi_a48_d64_i4_u8_req_t),
+    .slv_resp_t (axi_a48_d64_i4_u8_resp_t),
+    .mst_req_t (axi_a48_d64_i1_u8_req_t),
+    .mst_resp_t (axi_a48_d64_i1_u8_resp_t)
   ) i_soc_internal_serialize (
     .clk_i ( clk_i ),
     .rst_ni ( rst_ni ),
@@ -294,25 +294,25 @@ axi_lite_xbar #(
     .mst_req_o ( soc_internal_serialize_req ),
     .mst_resp_i ( soc_internal_serialize_rsp )
   );
-  axi_a48_d32_i1_u9_req_t soc_internal_change_dw_req;
-  axi_a48_d32_i1_u9_resp_t soc_internal_change_dw_rsp;
+  axi_a48_d32_i1_u8_req_t soc_internal_change_dw_req;
+  axi_a48_d32_i1_u8_resp_t soc_internal_change_dw_rsp;
 
   axi_dw_converter #(
     .AxiSlvPortDataWidth ( 64 ),
     .AxiMstPortDataWidth ( 32 ),
     .AxiAddrWidth ( 48 ),
     .AxiIdWidth ( 1 ),
-    .aw_chan_t ( axi_a48_d32_i1_u9_aw_chan_t ),
-    .mst_w_chan_t ( axi_a48_d32_i1_u9_w_chan_t ),
-    .slv_w_chan_t ( axi_a48_d64_i1_u9_w_chan_t ),
-    .b_chan_t ( axi_a48_d32_i1_u9_b_chan_t ),
-    .ar_chan_t ( axi_a48_d32_i1_u9_ar_chan_t ),
-    .mst_r_chan_t ( axi_a48_d32_i1_u9_r_chan_t ),
-    .slv_r_chan_t ( axi_a48_d64_i1_u9_r_chan_t ),
-    .axi_mst_req_t ( axi_a48_d32_i1_u9_req_t ),
-    .axi_mst_resp_t ( axi_a48_d32_i1_u9_resp_t ),
-    .axi_slv_req_t ( axi_a48_d64_i1_u9_req_t ),
-    .axi_slv_resp_t ( axi_a48_d64_i1_u9_resp_t )
+    .aw_chan_t ( axi_a48_d32_i1_u8_aw_chan_t ),
+    .mst_w_chan_t ( axi_a48_d32_i1_u8_w_chan_t ),
+    .slv_w_chan_t ( axi_a48_d64_i1_u8_w_chan_t ),
+    .b_chan_t ( axi_a48_d32_i1_u8_b_chan_t ),
+    .ar_chan_t ( axi_a48_d32_i1_u8_ar_chan_t ),
+    .mst_r_chan_t ( axi_a48_d32_i1_u8_r_chan_t ),
+    .slv_r_chan_t ( axi_a48_d64_i1_u8_r_chan_t ),
+    .axi_mst_req_t ( axi_a48_d32_i1_u8_req_t ),
+    .axi_mst_resp_t ( axi_a48_d32_i1_u8_resp_t ),
+    .axi_slv_req_t ( axi_a48_d64_i1_u8_req_t ),
+    .axi_slv_resp_t ( axi_a48_d64_i1_u8_resp_t )
   ) i_soc_internal_change_dw (
     .clk_i ( clk_i ),
     .rst_ni ( rst_ni ),
@@ -326,12 +326,12 @@ axi_lite_xbar #(
     .AxiAddrWidth ( 48 ),
     .AxiDataWidth ( 32 ),
     .AxiIdWidth ( 1 ),
-    .AxiUserWidth ( 9 ),
+    .AxiUserWidth ( 8 ),
     .AxiMaxWriteTxns ( 4  ),
     .AxiMaxReadTxns ( 4  ),
     .FallThrough ( 0  ),
-    .full_req_t ( axi_a48_d32_i1_u9_req_t ),
-    .full_resp_t ( axi_a48_d32_i1_u9_resp_t ),
+    .full_req_t ( axi_a48_d32_i1_u8_req_t ),
+    .full_resp_t ( axi_a48_d32_i1_u8_resp_t ),
     .lite_req_t ( axi_lite_a48_d32_req_t ),
     .lite_resp_t ( axi_lite_a48_d32_rsp_t )
   ) i_soc_internal_to_axi_lite_pc (

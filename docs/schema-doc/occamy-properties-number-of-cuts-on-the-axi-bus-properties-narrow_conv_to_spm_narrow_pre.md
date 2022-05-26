@@ -1,20 +1,20 @@
 # Untitled integer in Occamy System Schema Schema
 
 ```txt
-http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_conv_to_spm_narrow
+http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_conv_to_spm_narrow_pre
 ```
 
-narrow -> SPM post atomic adapter
+narrow -> SPM pre atomic adapter
 
 | Abstract            | Extensible | Status         | Identifiable            | Custom Properties | Additional Properties | Access Restrictions | Defined In                                                       |
 | :------------------ | :--------- | :------------- | :---------------------- | :---------------- | :-------------------- | :------------------ | :--------------------------------------------------------------- |
 | Can be instantiated | No         | Unknown status | Unknown identifiability | Forbidden         | Allowed               | none                | [occamy.schema.json*](occamy.schema.json "open original schema") |
 
-## narrow_conv_to_spm_narrow Type
+## narrow_conv_to_spm_narrow_pre Type
 
 `integer`
 
-## narrow_conv_to_spm_narrow Default Value
+## narrow_conv_to_spm_narrow_pre Default Value
 
 The default value is:
 
