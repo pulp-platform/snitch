@@ -36,6 +36,8 @@ http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts
 | [narrow_and_hbi](#narrow_and_hbi)                                               | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-narrow_and_hbi.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/narrow_and_hbi")                                               |
 | [pre_to_hbmx](#pre_to_hbmx)                                                     | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-pre_to_hbmx.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/pre_to_hbmx")                                                     |
 | [hbmx_to_hbm](#hbmx_to_hbm)                                                     | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-hbmx_to_hbm.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/hbmx_to_hbm")                                                     |
+| [atomic_adapter_narrow](#atomic_adapter_narrow)                                 | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-atomic_adapter_narrow.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/atomic_adapter_narrow")                                 |
+| [atomic_adapter_narrow_wide](#atomic_adapter_narrow_wide)                       | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-atomic_adapter_narrow_wide.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/atomic_adapter_narrow_wide")                       |
 | [periph_axi_lite_narrow](#periph_axi_lite_narrow)                               | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-periph_axi_lite_narrow.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/periph_axi_lite_narrow")                               |
 | [periph_axi_lite](#periph_axi_lite)                                             | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-periph_axi_lite.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/periph_axi_lite")                                             |
 | [periph_axi_lite_narrow_hbm_xbar_cfg](#periph_axi_lite_narrow_hbm_xbar_cfg)     | `integer` | Optional | cannot be null | [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-periph_axi_lite_narrow_hbm_xbar_cfg.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/periph_axi_lite_narrow_hbm_xbar_cfg")     |
@@ -507,6 +509,58 @@ The default value is:
 
 ```json
 3
+```
+
+## atomic_adapter_narrow
+
+narrow spm atomic adapter internal cuts
+
+`atomic_adapter_narrow`
+
+*   is optional
+
+*   Type: `integer`
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-atomic_adapter_narrow.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/atomic_adapter_narrow")
+
+### atomic_adapter_narrow Type
+
+`integer`
+
+### atomic_adapter_narrow Default Value
+
+The default value is:
+
+```json
+1
+```
+
+## atomic_adapter_narrow_wide
+
+narrow_to_wide atomic adapter internal cuts
+
+`atomic_adapter_narrow_wide`
+
+*   is optional
+
+*   Type: `integer`
+
+*   cannot be null
+
+*   defined in: [Occamy System Schema](occamy-properties-number-of-cuts-on-the-axi-bus-properties-atomic_adapter_narrow_wide.md "http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts/properties/atomic_adapter_narrow_wide")
+
+### atomic_adapter_narrow_wide Type
+
+`integer`
+
+### atomic_adapter_narrow_wide Default Value
+
+The default value is:
+
+```json
+1
 ```
 
 ## periph_axi_lite_narrow

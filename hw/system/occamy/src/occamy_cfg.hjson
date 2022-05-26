@@ -51,6 +51,8 @@
       narrow_and_hbi: 3,
       pre_to_hbmx: 3,
       hbmx_to_hbm: 3,
+      atomic_adapter_narrow: 1,
+      atomic_adapter_narrow_wide: 1,
       // Give some flexibility in peripheral xbar placement
       periph_axi_lite_narrow: 2,
       periph_axi_lite: 2,

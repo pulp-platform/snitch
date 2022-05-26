@@ -141,6 +141,16 @@
                     "description": "hbmx -> hbm",
                     "default": 3
                 },
+                "atomic_adapter_narrow": {
+                    "type": "integer",
+                    "description": "narrow spm atomic adapter internal cuts",
+                    "default": 1
+                },
+                "atomic_adapter_narrow_wide": {
+                    "type": "integer",
+                    "description": "narrow_to_wide atomic adapter internal cuts",
+                    "default": 1
+                },
                 "periph_axi_lite_narrow": {
                     "type": "integer",
                     "description": "soc narrow -> periph regbus",

@@ -31,6 +31,8 @@
   txns_wide_and_inter = cfg["txns"]["wide_and_inter"]
   txns_wide_to_hbm = cfg["txns"]["wide_to_hbm"]
   txns_narrow_and_wide = cfg["txns"]["narrow_and_wide"]
+  cuts_withing_atomic_adapter_narrow = cfg["cuts"]["atomic_adapter_narrow"]
+  cuts_withing_atomic_adapter_narrow_wide = cfg["cuts"]["atomic_adapter_narrow_wide"]
   max_atomics_narrow = 8
   max_atomics_wide = 8
   max_trans_atop_filter_per = 4
@@ -150,7 +152,7 @@ module ${name}_soc
       .cut(context, cuts_wide_to_hbm, name="wide_to_hbm_iw_cut_{}".format(i), to=hbm_xbar.in_wide_xbar)
     #// narrow xbar -> wide xbar & wide xbar -> narrow xbar
     soc_narrow_xbar.out_soc_wide \
-      .atomic_adapter(context, max_trans=max_atomics_wide, user_as_id=1, user_id_msb=soc_narrow_xbar.out_soc_wide.uw-1, user_id_lsb=0, name="soc_narrow_wide_amo_adapter") \
+      .atomic_adapter(context, max_trans=max_atomics_wide, user_as_id=1, user_id_msb=soc_narrow_xbar.out_soc_wide.uw-1, user_id_lsb=0, n_cuts= cuts_withing_atomic_adapter_narrow_wide, name="soc_narrow_wide_amo_adapter") \
       .cut(context, cuts_narrow_and_wide) \
       .change_iw(context, soc_wide_xbar.in_soc_narrow.iw, "soc_narrow_wide_iwc", max_txns_per_id=txns_narrow_and_wide) \
       .change_uw(context, soc_wide_xbar.in_soc_narrow.uw, "soc_narrow_wide_uwc") \
@@ -248,7 +250,7 @@ module ${name}_soc
   ////////////////
   <% narrow_spm_mst = soc_narrow_xbar.out_spm_narrow \
                       .cut(context, cuts_narrow_conv_to_spm_narrow_pre) \
-                      .atomic_adapter(context, max_trans=max_atomics_narrow, user_as_id=1, user_id_msb=soc_narrow_xbar.out_spm_narrow.uw-1, user_id_lsb=0, name="spm_narrow_amo_adapter") \
+                      .atomic_adapter(context, max_trans=max_atomics_narrow, user_as_id=1, user_id_msb=soc_narrow_xbar.out_spm_narrow.uw-1, user_id_lsb=0, n_cuts= cuts_withing_atomic_adapter_narrow,name="spm_narrow_amo_adapter") \
                       .cut(context, cuts_narrow_conv_to_spm_narrow)
   %>\
 
