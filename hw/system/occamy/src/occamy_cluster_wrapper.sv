@@ -31,7 +31,7 @@ package occamy_cluster_pkg;
   localparam int unsigned WideIdWidthIn = 1;
   localparam int unsigned WideIdWidthOut = $clog2(NrDmaMasters) + WideIdWidthIn;
 
-  localparam int unsigned NarrowUserWidth = 9;
+  localparam int unsigned NarrowUserWidth = 8;
   localparam int unsigned WideUserWidth = 1;
 
   localparam int unsigned ICacheLineWidth [NrHives] = '{
