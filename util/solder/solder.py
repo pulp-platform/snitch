@@ -838,6 +838,7 @@ class AxiBus(Bus):
                        user_as_id=0,
                        user_id_msb=0,
                        user_id_lsb=0,
+                       n_cuts=0,
                        name=None,
                        inst_name=None,
                        to=None,
@@ -876,6 +877,7 @@ class AxiBus(Bus):
                     user_as_id=user_as_id,
                     user_id_msb=user_id_msb,
                     user_id_lsb=user_id_lsb,
+                    n_cuts=n_cuts,
                     name=inst_name or "i_{}".format(name),
                 ) + "\n")
         else:
