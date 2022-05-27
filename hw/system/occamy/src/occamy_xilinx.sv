@@ -432,13 +432,13 @@ module occamy_xilinx
     output axi_pkg::prot_t          m_axi_pcie_awprot,
     output axi_pkg::qos_t           m_axi_pcie_awqos,
     output axi_pkg::region_t        m_axi_pcie_awregion,
-    output logic             [ 7:0] m_axi_pcie_awuser,
+    output logic             [ 4:0] m_axi_pcie_awuser,
     input  logic                    m_axi_pcie_wready,
     output logic                    m_axi_pcie_wvalid,
     output logic             [63:0] m_axi_pcie_wdata,
     output logic             [ 7:0] m_axi_pcie_wstrb,
     output logic                    m_axi_pcie_wlast,
-    output logic             [ 7:0] m_axi_pcie_wuser,
+    output logic             [ 4:0] m_axi_pcie_wuser,
     input  logic                    m_axi_pcie_arready,
     output logic                    m_axi_pcie_arvalid,
     output logic             [ 7:0] m_axi_pcie_arid,
@@ -451,19 +451,19 @@ module occamy_xilinx
     output axi_pkg::prot_t          m_axi_pcie_arprot,
     output axi_pkg::qos_t           m_axi_pcie_arqos,
     output axi_pkg::region_t        m_axi_pcie_arregion,
-    output logic             [ 7:0] m_axi_pcie_aruser,
+    output logic             [ 4:0] m_axi_pcie_aruser,
     output logic                    m_axi_pcie_rready,
     input  logic                    m_axi_pcie_rvalid,
     input  logic             [ 7:0] m_axi_pcie_rid,
     input  logic             [63:0] m_axi_pcie_rdata,
     input  axi_pkg::resp_t          m_axi_pcie_rresp,
     input  logic                    m_axi_pcie_rlast,
-    input  logic             [ 7:0] m_axi_pcie_ruser,
+    input  logic             [ 4:0] m_axi_pcie_ruser,
     output logic                    m_axi_pcie_bready,
     input  logic                    m_axi_pcie_bvalid,
     input  logic             [ 7:0] m_axi_pcie_bid,
     input  axi_pkg::resp_t          m_axi_pcie_bresp,
-    input  logic             [ 7:0] m_axi_pcie_buser,
+    input  logic             [ 4:0] m_axi_pcie_buser,
     output logic                    s_axi_pcie_awready,
     input  logic                    s_axi_pcie_awvalid,
     input  logic             [ 3:0] s_axi_pcie_awid,
@@ -476,13 +476,13 @@ module occamy_xilinx
     input  axi_pkg::prot_t          s_axi_pcie_awprot,
     input  axi_pkg::qos_t           s_axi_pcie_awqos,
     input  axi_pkg::region_t        s_axi_pcie_awregion,
-    input  logic             [ 7:0] s_axi_pcie_awuser,
+    input  logic             [ 4:0] s_axi_pcie_awuser,
     output logic                    s_axi_pcie_wready,
     input  logic                    s_axi_pcie_wvalid,
     input  logic             [63:0] s_axi_pcie_wdata,
     input  logic             [ 7:0] s_axi_pcie_wstrb,
     input  logic                    s_axi_pcie_wlast,
-    input  logic             [ 7:0] s_axi_pcie_wuser,
+    input  logic             [ 4:0] s_axi_pcie_wuser,
     output logic                    s_axi_pcie_arready,
     input  logic                    s_axi_pcie_arvalid,
     input  logic             [ 3:0] s_axi_pcie_arid,
@@ -495,19 +495,19 @@ module occamy_xilinx
     input  axi_pkg::prot_t          s_axi_pcie_arprot,
     input  axi_pkg::qos_t           s_axi_pcie_arqos,
     input  axi_pkg::region_t        s_axi_pcie_arregion,
-    input  logic             [ 7:0] s_axi_pcie_aruser,
+    input  logic             [ 4:0] s_axi_pcie_aruser,
     input  logic                    s_axi_pcie_rready,
     output logic                    s_axi_pcie_rvalid,
     output logic             [ 3:0] s_axi_pcie_rid,
     output logic             [63:0] s_axi_pcie_rdata,
     output axi_pkg::resp_t          s_axi_pcie_rresp,
     output logic                    s_axi_pcie_rlast,
-    output logic             [ 7:0] s_axi_pcie_ruser,
+    output logic             [ 4:0] s_axi_pcie_ruser,
     input  logic                    s_axi_pcie_bready,
     output logic                    s_axi_pcie_bvalid,
     output logic             [ 3:0] s_axi_pcie_bid,
     output axi_pkg::resp_t          s_axi_pcie_bresp,
-    output logic             [ 7:0] s_axi_pcie_buser
+    output logic             [ 4:0] s_axi_pcie_buser
     /// HBI Ports
 );
 
@@ -515,11 +515,11 @@ module occamy_xilinx
   //////////
   // PCIe //
   //////////
-  axi_a48_d64_i8_u8_req_t  pcie_axi_req_o;
-  axi_a48_d64_i8_u8_resp_t pcie_axi_rsp_i;
+  axi_a48_d64_i8_u5_req_t  pcie_axi_req_o;
+  axi_a48_d64_i8_u5_resp_t pcie_axi_rsp_i;
 
-  axi_a48_d64_i4_u8_req_t  pcie_axi_req_i;
-  axi_a48_d64_i4_u8_resp_t pcie_axi_rsp_o;
+  axi_a48_d64_i4_u5_req_t  pcie_axi_req_i;
+  axi_a48_d64_i4_u5_resp_t pcie_axi_rsp_o;
 
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(pcie, pcie_axi_req_o, pcie_axi_rsp_i)

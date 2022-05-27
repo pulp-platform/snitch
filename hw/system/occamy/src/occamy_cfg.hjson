@@ -84,7 +84,7 @@
       rmq: 4,
     }
     narrow_xbar_slv_id_width: 4,
-    narrow_xbar_user_width: 8, // clog2(total number of cores)
+    narrow_xbar_user_width: 5, // clog2(total number of clusters)
     nr_s1_quadrant: 6,
     s1_quadrant: {
       nr_clusters: 4,
@@ -121,7 +121,7 @@
         fall_through: false,
       },
       narrow_xbar_slv_id_width: 4,
-      narrow_xbar_user_width: 8, // clog2(total number of cores)
+      narrow_xbar_user_width: 5, // clog2(total number of clusters)
       cfg_base_addr: 184549376, // 0x0b000000
       cfg_base_offset: 65536 // 0x10000
     },
@@ -133,7 +133,7 @@
         cluster_base_hartid: 1,
         addr_width: 48,
         data_width: 64,
-        user_width: 8, // clog2(total number of cores)
+        user_width: 5, // clog2(total number of clusters)
         tcdm: {
             size: 128, // 128 kiB
             banks: 32,

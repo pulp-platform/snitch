@@ -1014,9 +1014,10 @@ module snitch_cluster
 
   reqrsp_req_t core_to_axi_req;
   reqrsp_rsp_t core_to_axi_rsp;
-  logic [$clog2(NrCores)-1:0] core_req_idx;
-  user_t core_user;
-  assign core_user = hart_base_id_i + core_req_idx + 1'b1;
+  user_t cluster_user;
+  // Atomic ID, needs to be unique ID of cluster
+  // cluster_id + HartIdOffset + 1 (because 0 is for non-atomic masters)
+  assign cluster_user = (hart_base_id_i / NrCores) +  (hart_base_id_i % NrCores) + 1'b1;
 
   reqrsp_mux #(
     .NrPorts (NrCores),
@@ -1032,7 +1033,7 @@ module snitch_cluster
     .slv_rsp_o (filtered_core_rsp),
     .mst_req_o (core_to_axi_req),
     .mst_rsp_i (core_to_axi_rsp),
-    .idx_o (core_req_idx)
+    .idx_o (/*unused*/)
   );
 
   reqrsp_to_axi #(
@@ -1045,7 +1046,7 @@ module snitch_cluster
   ) i_reqrsp_to_axi_core (
     .clk_i,
     .rst_ni,
-    .user_i (core_user),
+    .user_i (cluster_user),
     .reqrsp_req_i (core_to_axi_req),
     .reqrsp_rsp_o (core_to_axi_rsp),
     .axi_req_o (narrow_axi_mst_req[CoreReq]),
