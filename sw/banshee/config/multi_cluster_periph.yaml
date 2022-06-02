@@ -18,9 +18,9 @@ address:
   cl_clint: 0x40000060
 memory:
 - dram:
-    end: 0x80010000
+    end: 0x80020000
     latency: 10
-    start: 0x80000000
+    start: 0x80010000
   ext_tcdm: []
   periphs:
     callbacks:
@@ -36,9 +36,9 @@ memory:
     latency: 5
     start: 0x0
 - dram:
-    end: 0x80010000
+    end: 0x80020000
     latency: 10
-    start: 0x80000000
+    start: 0x80010000
   ext_tcdm:
   - cluster: 0
     start: 0x10000
