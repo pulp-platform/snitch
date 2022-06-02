@@ -1054,7 +1054,7 @@ impl<'a> InstructionTranslator<'a> {
         // Get the address from the register
         let addr = self.read_reg(data.rs1);
 
-        self.trace_access(TraceAccess::ReadMem, addr);
+        self.trace_access(TraceAccess::ReadMem(data.rd as u8), addr);
 
         // Start emitting LLVM IR
         let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
@@ -1735,7 +1735,7 @@ impl<'a> InstructionTranslator<'a> {
     //             let dm = (imm as u64) & 0x1f;
     //             let reg_word = ((imm as u64) >> 5) & 0x1f;
     //             let addr_off = LLVMConstInt(LLVMInt32Type(), (dm << 8) | (reg_word << 3), 0);
-    //             let value = self.emit_load(ssr_start, addr_off, 2, true);
+    //             let value = self.emit_load(ssr_start, addr_off, data.rd, 2, true);
     //             self.write_reg(data.rd, value);
     //         }
     //         _ => bail!("Unsupported opcode {}", data.op),
@@ -2496,11 +2496,11 @@ impl<'a> InstructionTranslator<'a> {
             riscv::OpcodeImm12RdRs1::Andi => LLVMBuildAnd(self.builder, rs1, imm, name),
             riscv::OpcodeImm12RdRs1::Ori => LLVMBuildOr(self.builder, rs1, imm, name),
             riscv::OpcodeImm12RdRs1::Xori => LLVMBuildXor(self.builder, rs1, imm, name),
-            riscv::OpcodeImm12RdRs1::Lb => self.emit_load(rs1, imm, 0, true),
-            riscv::OpcodeImm12RdRs1::Lh => self.emit_load(rs1, imm, 1, true),
-            riscv::OpcodeImm12RdRs1::Lw => self.emit_load(rs1, imm, 2, true),
-            riscv::OpcodeImm12RdRs1::Lbu => self.emit_load(rs1, imm, 0, false),
-            riscv::OpcodeImm12RdRs1::Lhu => self.emit_load(rs1, imm, 1, false),
+            riscv::OpcodeImm12RdRs1::Lb => self.emit_load(rs1, imm, data.rd, 0, true),
+            riscv::OpcodeImm12RdRs1::Lh => self.emit_load(rs1, imm, data.rd, 1, true),
+            riscv::OpcodeImm12RdRs1::Lw => self.emit_load(rs1, imm, data.rd, 2, true),
+            riscv::OpcodeImm12RdRs1::Lbu => self.emit_load(rs1, imm, data.rd, 0, false),
+            riscv::OpcodeImm12RdRs1::Lhu => self.emit_load(rs1, imm, data.rd, 1, false),
             riscv::OpcodeImm12RdRs1::FenceI => return Ok(()), /* NOP */
             riscv::OpcodeImm12RdRs1::Csrrw
             | riscv::OpcodeImm12RdRs1::Csrrs
@@ -2532,7 +2532,7 @@ impl<'a> InstructionTranslator<'a> {
             }
             riscv::OpcodeImm12RdRs1::Flb => {
                 self.was_freppable.set(true);
-                let raw = self.emit_load(rs1, imm, 1, false);
+                let raw = self.emit_load(rs1, imm, data.rd, 1, false);
                 let raw = LLVMBuildZExt(self.builder, raw, LLVMInt64Type(), NONAME);
                 let pad = LLVMConstInt(LLVMInt64Type(), (-1i64 as u64) << 8, 0);
                 let value = LLVMBuildOr(self.builder, raw, pad, NONAME);
@@ -2541,7 +2541,7 @@ impl<'a> InstructionTranslator<'a> {
             }
             riscv::OpcodeImm12RdRs1::Flh => {
                 self.was_freppable.set(true);
-                let raw = self.emit_load(rs1, imm, 1, false);
+                let raw = self.emit_load(rs1, imm, data.rd, 1, false);
                 let raw = LLVMBuildZExt(self.builder, raw, LLVMInt64Type(), NONAME);
                 let pad = LLVMConstInt(LLVMInt64Type(), (-1i64 as u64) << 16, 0);
                 let value = LLVMBuildOr(self.builder, raw, pad, NONAME);
@@ -2550,7 +2550,7 @@ impl<'a> InstructionTranslator<'a> {
             }
             riscv::OpcodeImm12RdRs1::Flw => {
                 self.was_freppable.set(true);
-                let raw = self.emit_load(rs1, imm, 2, false);
+                let raw = self.emit_load(rs1, imm, data.rd, 2, false);
                 let value = LLVMBuildBitCast(self.builder, raw, LLVMFloatType(), NONAME);
                 self.write_freg_f32(data.rd, value);
                 return Ok(());
@@ -2652,60 +2652,85 @@ impl<'a> InstructionTranslator<'a> {
         mode: PostmodMode,
         size: PostmodSize,
         sext: bool,
-        op1: u32,              //L: rs1,        S: rs1
+        op1: u32, //L: rs1,        S: rs1
         op1_ref: LLVMValueRef,
         op2_ref: LLVMValueRef, //L: rs2, imm,   S: rs3, imm
         op3: u32,              //L: rd,         S: rs2
     ) {
-        let c0_32 = LLVMConstInt(LLVMInt32Type(), 0, 1);
-
         let offset = match size {
             PostmodSize::W => 2,
             PostmodSize::H => 1,
             PostmodSize::B => 0,
         };
 
-        // let op1_ref = self.read_reg(op1);
-
         let rr = LLVMBuildAdd(self.builder, op1_ref, op2_ref, NONAME);
 
-        // Determine address and load memory there
-        let (mem, addr) = match mode {
+        // Increment rs1
+        match mode {
             PostmodMode::Irpost => {
                 // Increment rs1
                 let inc = LLVMBuildSExt(self.builder, op2_ref, LLVMInt32Type(), NONAME);
 
                 let add = LLVMBuildAdd(self.builder, op1_ref, inc, NONAME);
                 self.write_reg(op1, add);
-
-                // Load from memory
-                (self.emit_load(op1_ref, c0_32, offset, sext), op1_ref)
             }
             PostmodMode::Rrpost => {
                 // Increment rs1
                 let add = LLVMBuildAdd(self.builder, op1_ref, op2_ref, NONAME);
                 self.write_reg(op1, add);
-
-                // Load from memory
-                (self.emit_load(op1_ref, c0_32, offset, sext), op1_ref)
             }
-            PostmodMode::Rr => {
-                // Load from memory
-                (self.emit_load(rr, c0_32, offset, sext), rr)
-            }
-        };
+            PostmodMode::Rr => {}
+        }
 
         match insn {
-            PostmodInsn::L => self.write_reg(op3, mem),
+            PostmodInsn::L => {
+                let mem = self.emit_postmod_load(mode, sext, op1_ref, op3, offset, rr);
+
+                self.write_reg(op3, mem)
+            }
             PostmodInsn::S => {
+                // Determine address
+                let addr = match mode {
+                    PostmodMode::Irpost => op1_ref,
+                    PostmodMode::Rrpost => op1_ref,
+                    PostmodMode::Rr => rr,
+                };
                 let op3_ref = self.read_reg(op3);
                 self.write_mem(addr, op3_ref, offset)
             }
         }
     }
 
+    unsafe fn emit_postmod_load(
+        &self,
+        mode: PostmodMode,
+        sext: bool,
+        op1_ref: LLVMValueRef,
+        rd: u32,
+        offset: usize,
+        rr: LLVMValueRef,
+    ) -> LLVMValueRef {
+        let c0_32 = LLVMConstInt(LLVMInt32Type(), 0, 1);
+
+        // Load from memory
+        match mode {
+            PostmodMode::Irpost => {
+                // Load from memory
+                self.emit_load(op1_ref, c0_32, rd, offset, sext)
+            }
+            PostmodMode::Rrpost => {
+                // Load from memory
+                self.emit_load(op1_ref, c0_32, rd, offset, sext)
+            }
+            PostmodMode::Rr => {
+                // Load from memory
+                self.emit_load(rr, c0_32, rd, offset, sext)
+            }
+        }
+    }
+
     unsafe fn emit_fld(&self, rd: u32, addr: LLVMValueRef) {
-        let raw_lo = self.read_mem(addr, 2, false);
+        let raw_lo = self.read_mem(addr, rd, 2, false);
         let raw_hi = self.read_mem(
             LLVMBuildAdd(
                 self.builder,
@@ -2713,6 +2738,7 @@ impl<'a> InstructionTranslator<'a> {
                 LLVMConstInt(LLVMInt32Type(), 4, 0),
                 NONAME,
             ),
+            rd,
             2,
             false,
         );
@@ -3147,6 +3173,7 @@ impl<'a> InstructionTranslator<'a> {
     //             self.emit_load(
     //                 LLVMConstInt(LLVMInt32Type(), SSR_BASE, 0),
     //                 addr_off,
+    //                 data.rd,
     //                 2,
     //                 true,
     //             )
@@ -8396,10 +8423,16 @@ impl<'a> InstructionTranslator<'a> {
         &self,
         base: LLVMValueRef,
         offset: LLVMValueRef,
+        rs: u32,
         size: usize,
         sext: bool,
     ) -> LLVMValueRef {
-        self.read_mem(LLVMBuildAdd(self.builder, base, offset, NONAME), size, sext)
+        self.read_mem(
+            LLVMBuildAdd(self.builder, base, offset, NONAME),
+            rs,
+            size,
+            sext,
+        )
     }
 
     /// Emit the code to check for any interrupt
@@ -8642,6 +8675,44 @@ impl<'a> InstructionTranslator<'a> {
         LLVMPositionBuilderAtEnd(self.builder, bb_noirq);
     }
 
+    /// Emit code to calculate new latency of WriteReg.
+    ///
+    /// Checks if register `i` which has a WriteReg access gets value from some ReadMem in `mem_latencies`
+    /// by comparing to all memory accesses. If so, it associates the ReadMem latency to register `i`.
+    /// Else it will assign the instruction latency `gen_latency`. The resulting latency is added to `max_cycle`,
+    /// the cycle where all prerequisites are ready for this instruction.
+    ///
+    /// `i` is the register number.
+    unsafe fn emit_latency_cycle(
+        &self,
+        i: u8,
+        mem_latencies: &Vec<(Option<&u8>, LLVMValueRef)>,
+        gen_latency: LLVMValueRef,
+        max_cycle: LLVMValueRef,
+    ) -> LLVMValueRef {
+        // If there is a register `i`, where memory loads to as well, get it
+        let mem_latency = mem_latencies.iter().find(|(r, _)| match r {
+            Some(reg) => {
+                if **reg == i {
+                    true
+                } else {
+                    false
+                }
+            }
+            None => false,
+        });
+
+        // If there was memory access, use that latency, else use generic latency
+        let latency = if let Some((_, l)) = mem_latency {
+            *l
+        } else {
+            gen_latency
+        };
+
+        // Add latency to max_cycle to determine when register is ready
+        LLVMBuildAdd(self.builder, max_cycle, latency, NONAME)
+    }
+
     /// Emit the code for instruction tracing.
     ///
     /// Only emits the code once if called multiple times. Does nothing if the
@@ -8698,19 +8769,23 @@ impl<'a> InstructionTranslator<'a> {
             LLVMBuildStore(self.builder, max_cycle, self.cycle_ptr());
 
             // Check if instruction is a memory access
-            let mem_access = accesses.iter().find(|(a, _)| match a {
-                TraceAccess::ReadMem => true,
+            let mem_accesses = accesses.iter().filter(|(a, _)| match a {
+                TraceAccess::ReadMem(_x) => true,
                 TraceAccess::RMWMem => true,
                 _ => false,
             });
 
-            // Get the instruction mnemonic (generated by riscv-opcodes)
-            let inst_name = riscv::inst_to_string(self.inst);
-
-            let latency = if let Some(access) = mem_access {
+            // Save latency for all memory accesses in vector
+            let mut mem_latencies = Vec::new();
+            for access in mem_accesses {
+                // Extract register to read to
+                let reg_for_mem = match access {
+                    (TraceAccess::ReadMem(reg), _) => Some(reg),
+                    _ => None,
+                };
                 // Check config
                 let (is_tcdm, _tcdm_ptr) = self.emit_tcdm_check(access.1);
-                LLVMBuildSelect(
+                let latency = LLVMBuildSelect(
                     self.builder,
                     is_tcdm,
                     LLVMConstInt(
@@ -8728,27 +8803,33 @@ impl<'a> InstructionTranslator<'a> {
                         0,
                     ),
                     NONAME,
-                )
-            } else {
-                // Get instruction's latency or use default of one cycle
-                LLVMConstInt(
-                    LLVMTypeOf(max_cycle),
-                    self.get_latency(inst_name, 1) as u64,
-                    0,
-                )
-            };
+                );
+                mem_latencies.push((reg_for_mem, latency));
+            }
 
-            // Add latency of this instruction
-            let cycle = LLVMBuildAdd(self.builder, max_cycle, latency, NONAME);
+            // Get the instruction mnemonic (generated by riscv-opcodes)
+            let inst_name = riscv::inst_to_string(self.inst);
+
+            // Get instruction's latency or use default of one cycle
+            let gen_latency = LLVMConstInt(
+                LLVMTypeOf(max_cycle),
+                self.get_latency(inst_name, 1) as u64,
+                0,
+            );
 
             // Write new dependencies
             for &(access, _data) in accesses.iter().take(TRACE_BUFFER_LEN as usize) {
                 match access {
-                    // ReadMem => random latency,
                     TraceAccess::WriteReg(i) => {
+                        let cycle =
+                            self.emit_latency_cycle(i, &mem_latencies, gen_latency, max_cycle);
+
                         LLVMBuildStore(self.builder, cycle, self.reg_cycle_ptr(i as u32))
                     }
                     TraceAccess::WriteFReg(i) => {
+                        let cycle =
+                            self.emit_latency_cycle(i, &mem_latencies, gen_latency, max_cycle);
+
                         LLVMBuildStore(self.builder, cycle, self.freg_cycle_ptr(i as u32))
                     }
                     _ => continue,
@@ -8875,8 +8956,14 @@ impl<'a> InstructionTranslator<'a> {
     }
 
     /// Emit the code necessary to load a value from memory.
-    unsafe fn read_mem(&self, addr: LLVMValueRef, size: usize, sext: bool) -> LLVMValueRef {
-        self.trace_access(TraceAccess::ReadMem, addr);
+    unsafe fn read_mem(
+        &self,
+        addr: LLVMValueRef,
+        rs: u32,
+        size: usize,
+        sext: bool,
+    ) -> LLVMValueRef {
+        self.trace_access(TraceAccess::ReadMem(rs as u8), addr);
         let bb_end = LLVMCreateBasicBlockInContext(self.section.engine.context, NONAME);
         LLVMInsertExistingBasicBlockAfterInsertBlock(self.builder, bb_end);
 
@@ -9195,6 +9282,9 @@ impl<'a> InstructionTranslator<'a> {
     }
 
     /// Emit the code necessary to read a value from a register.
+    ///
+    /// `rs` can be from 0 to 31. Values over 31 are accepted but will cause problems
+    /// with tracing. If `rs==0` will load value 0.
     unsafe fn read_reg(&self, rs: u32) -> LLVMValueRef {
         if rs == 0 {
             LLVMConstInt(LLVMInt32Type(), 0, 0)

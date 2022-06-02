@@ -994,7 +994,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         // Assemble the arguments.
         let args = accesses.iter().copied().zip(data.iter().copied());
         let mut args = args.map(|(access, data)| match access {
-            TraceAccess::ReadMem => format!("RA:{:08x}", data as u32),
+            TraceAccess::ReadMem(_x) => format!("RA:{:08x}", data as u32),
             TraceAccess::WriteMem => format!("WA:{:08x}", data as u32),
             TraceAccess::RMWMem => format!("AMO:{:08x}", data as u32),
             TraceAccess::ReadReg(x) => format!("x{}:{:08x}", x, data as u32),
@@ -1274,7 +1274,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
 #[derive(Debug, Clone, Copy)]
 #[repr(C, u8)]
 pub enum TraceAccess {
-    ReadMem,
+    ReadMem(u8),
     ReadReg(u8),
     ReadFReg(u8),
     ReadF32Reg(u8),
