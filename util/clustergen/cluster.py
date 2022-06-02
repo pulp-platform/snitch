@@ -294,7 +294,7 @@ class SnitchCluster(Generator):
                     core['xssr'] = False
                     core['ssrs'] = []
                 # Assign SSR register indices and intersection roles
-                next_free_reg = 0
+                next_free_reg = 5
                 for ssr in core['ssrs']:
                     if ssr['reg_idx'] in (None, next_free_reg):
                         ssr['reg_idx'] = next_free_reg

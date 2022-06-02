@@ -68,7 +68,7 @@
                     { $ref: "#/compute_core_template" },
                     { $ref: "#/compute_core_template" },
                     { $ref: "#/compute_core_template" },
-                    { $ref: "#/dma_core_template" },
+                    #{ $ref: "#/dma_core_template" },
                 ]
             },
         ]
