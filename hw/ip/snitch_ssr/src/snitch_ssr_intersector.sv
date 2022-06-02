@@ -5,6 +5,7 @@
 // Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
 `include "common_cells/registers.svh"
+`include "common_cells/assertions.svh"
 
 module snitch_ssr_intersector import snitch_ssr_pkg::*; #(
   parameter int unsigned StreamctlDepth = 0,
@@ -83,10 +84,15 @@ module snitch_ssr_intersector import snitch_ssr_pkg::*; #(
     valid:  src_valid & dst_str_ready & isect_ena & slv_req_i.ena
   };
 
-  // Stream controller interface
+  // Stream controller interface: To completely cut timing paths, we use
+  // a fall-through FIFO of depth-2 followed by a spill register here.
+  logic streamctl_spill_done;
+  logic streamctl_spill_valid;
+  logic streamctl_spill_ready;
+
   stream_fifo #(
-    .FALL_THROUGH ( 0 ),
-    .DEPTH        ( StreamctlDepth ),
+    .FALL_THROUGH ( 1 ),
+    .DEPTH        ( StreamctlDepth - 2 ),
     .DATA_WIDTH   ( 1 )
   ) i_fifo_streamctl (
     .clk_i,
@@ -97,9 +103,26 @@ module snitch_ssr_intersector import snitch_ssr_pkg::*; #(
     .data_i    ( isect_done ),
     .valid_i   ( src_valid & dst_slv_ready & isect_ena ),
     .ready_o   ( dst_str_ready      ),
-    .data_o    ( streamctl_done_o   ),
-    .valid_o   ( streamctl_valid_o  ),
-    .ready_i   ( streamctl_ready_i  )
+    .data_o    ( streamctl_spill_done   ),
+    .valid_o   ( streamctl_spill_valid  ),
+    .ready_i   ( streamctl_spill_ready  )
   );
+
+  spill_register #(
+    .T       ( logic ),
+    .Bypass  ( 0 )
+  ) i_spill_streamctl (
+    .clk_i,
+    .rst_ni,
+    .data_i   ( streamctl_spill_done  ),
+    .valid_i  ( streamctl_spill_valid ),
+    .ready_o  ( streamctl_spill_ready ),
+    .data_o   ( streamctl_done_o  ),
+    .valid_o  ( streamctl_valid_o ),
+    .ready_i  ( streamctl_ready_i )
+  );
+
+  // Check that StreamctlDepth is at least 2, since we always use a spill register
+  `ASSERT_INIT(CheckStreamctlDepth, StreamctlDepth >= 2);
 
 endmodule
