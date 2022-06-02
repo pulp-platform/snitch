@@ -47,6 +47,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
   output acc_resp_t        acc_resp_o,
   output logic             acc_resp_valid_o,
   input  logic             acc_resp_ready_i,
+  output logic             acc_ssr_status_o,
   // TCDM Data Interface for regular FP load/stores.
   output dreq_t            data_req_o,
   input  drsp_t            data_rsp_i,
@@ -92,6 +93,7 @@ module snitch_fp_ss import snitch_pkg::*; #(
 
   logic ssr_active_d, ssr_active_q;
   `FFAR(ssr_active_q, Xssr & ssr_active_d, 1'b0, clk_i, rst_i)
+  assign acc_ssr_status_o = ssr_active_q;
 
   typedef struct packed {
     logic       ssr; // write-back to SSR at rd
