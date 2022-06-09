@@ -20,6 +20,7 @@ export_include_dirs:
 sources:
 # Level 0:
 - src/snitch_ssr_pkg.sv
+- src/snitch_ssr_mux.sv
 - src/snitch_ssr_switch.sv
 - src/snitch_ssr_credit_counter.sv
 # Level 1:
@@ -31,7 +32,6 @@ sources:
 - src/snitch_ssr.sv
 # Level 4:
 - src/snitch_ssr_streamer.sv
-- src/snitch_ssr_mux.sv
 - target: test
   files:
   # Level 0
