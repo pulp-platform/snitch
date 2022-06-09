@@ -230,7 +230,7 @@ module snitch_cc #(
     .XFAUX (XFauxMerged),
     .FLEN (FLEN),
     .NumSsrs (NumSsrs),       
-    .IntSsrRegs (SsrRegs)       
+    .IntSsrRegs (IntSsrRegs)       
   ) i_snitch (
     .clk_i ( clk_d2_i ), // if necessary operate on half the frequency
     .rst_i ( ~rst_ni ),
@@ -734,7 +734,7 @@ module snitch_cc #(
       .WPorts (1),
       .SsrCfgs (SsrCfgs),
       .SsrRegs (SsrRegs),
-      .IntSsrRegs (SsrRegs),                    
+      .IntSsrRegs (IntSsrRegs),                    
       .AddrWidth (TCDMAddrWidth),
       .DataWidth (DataWidth),
       .tcdm_req_t (tcdm_req_t),

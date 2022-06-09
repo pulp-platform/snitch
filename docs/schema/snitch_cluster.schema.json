@@ -477,6 +477,13 @@
                                                 "maximum": 31,
                                                 "default": null
                                             },
+                                            "ireg_idx": {
+                                                "type": ["number", "null"],
+                                                "description": "The integer register index this SSR is assigned to. If not assigned, the next available index counting from 5 is chosen.",
+                                                "minimum": 5,
+                                                "maximum": 31,
+                                                "default": null
+                                            },
                                             "indirection": {
                                                 "type": "boolean",
                                                 "description": "Enable indirection extension.",

@@ -276,6 +276,14 @@ class SnitchCluster(Generator):
             if ssr['reg_idx'] == ssr_isect_triple[2]:
                 ssr['indirection'] = True   # Required for indirector generation, but not functional
                 ssr['isect_slave'] = True
+            if ssr['ireg_idx'] in ssr_isect_triple[0:2]:
+                if not ssr['indirection']:
+                    raise ValueError('An intersection master SSR must be indirection-capable')
+                ssr['isect_master'] = True
+                ssr['isect_master_idx'] = (ssr['ireg_idx'] == ssr_isect_triple[1])
+            if ssr['ireg_idx'] == ssr_isect_triple[2]:
+                ssr['indirection'] = True   # Required for indirector generation, but not functional
+                ssr['isect_slave'] = True
 
     def parse_cores(self):
         """Parse cores struct"""
@@ -294,11 +302,15 @@ class SnitchCluster(Generator):
                     core['xssr'] = False
                     core['ssrs'] = []
                 # Assign SSR register indices and intersection roles
-                next_free_reg = 5
+                next_free_reg = 0 #fp
+                next_free_ireg = 5 #integer
                 for ssr in core['ssrs']:
                     if ssr['reg_idx'] in (None, next_free_reg):
                         ssr['reg_idx'] = next_free_reg
                         next_free_reg += 1
+                    if ssr['ireg_idx'] in (None, next_free_ireg):
+                        ssr['ireg_idx'] = next_free_ireg
+                        next_free_ireg += 1
                     self.parse_isect_ssr(ssr, core)
                 # Set default SSR parameters
                 for ssr in core['ssrs']:
@@ -308,6 +320,7 @@ class SnitchCluster(Generator):
                         ssr['index_width'] = ssr['pointer_width'] - clog2(self.cfg['data_width']/8)
                 # Sort SSRs by register indices (required by decoding logic)
                 core['ssrs'].sort(key=lambda x: x['reg_idx'])
+                core['ssrs'].sort(key=lambda x: x['ireg_idx'])
                 # Minimum 1 element to avoid illegal ranges (Xssr prevents generation)
                 core['num_ssrs'] = max(len(core['ssrs']), 1)
 

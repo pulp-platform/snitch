@@ -117,8 +117,10 @@ module snitch_cluster
   parameter int unsigned SsrMuxRespDepth [NrCores] = '{default: 0},
   /// Per-core internal parameters for each SSR.
   parameter snitch_ssr_pkg::ssr_cfg_t [NumSsrsMax-1:0] SsrCfgs [NrCores] = '{default: '0},
-  /// Per-core register indices for each SSR.
+  /// Per-core register indices for each FP SSR.
   parameter logic [NumSsrsMax-1:0][4:0]  SsrRegs [NrCores] = '{default: 0},
+  /// Per-core register indices for each Integer SSR.
+  parameter logic [NumSsrsMax-1:0][4:0]  IntSsrRegs [NrCores] = '{default: 0},
   /// Per-core amount of sequencer instructions for IPU and FPU if enabled.
   parameter int unsigned NumSequencerInstr [NrCores] = '{default: 0},
   /// Parent Hive id, a.k.a a mapping which core is assigned to which Hive.
@@ -847,6 +849,7 @@ module snitch_cluster
         .SsrMuxRespDepth (SsrMuxRespDepth[i]),
         .SsrCfgs (SsrCfgs[i][NumSsrs[i]-1:0]),
         .SsrRegs (SsrRegs[i][NumSsrs[i]-1:0]),
+        .IntSsrRegs (IntSsrRegs[i][NumSsrs[i]-1:0]),
         .RegisterOffloadReq (RegisterOffloadReq),
         .RegisterOffloadRsp (RegisterOffloadRsp),
         .RegisterCoreReq (RegisterCoreReq),

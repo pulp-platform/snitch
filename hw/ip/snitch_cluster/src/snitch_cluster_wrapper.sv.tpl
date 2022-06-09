@@ -158,6 +158,9 @@ ${ssr_cfg(core, "'{{{indirection:d}, {isect_master:d}, {isect_master_idx:d}, {is
 ${ssr_cfg(core, '{reg_idx}', '/*None*/ 0', ',')}\
   };
 
+ localparam logic [${cfg['num_ssrs_max']}-1:0][4:0] IntSsrRegs [${cfg['nr_cores']}] = '{
+${ssr_cfg(core, '{ireg_idx}', '/*None*/ 0', ',')}\
+  };
 endpackage
 // verilog_lint: waive-stop package-filename
 
@@ -250,6 +253,7 @@ module ${cfg['name']}_wrapper (
     .NumSsrs (NumSsrs),
     .SsrMuxRespDepth (SsrMuxRespDepth),
     .SsrRegs (${cfg['pkg_name']}::SsrRegs),
+    .IntSsrRegs (${cfg['pkg_name']}::IntSsrRegs),
     .SsrCfgs (${cfg['pkg_name']}::SsrCfgs),
     .NumSequencerInstr (NumSequencerInstr),
     .Hive (${cfg['pkg_name']}::Hive),
