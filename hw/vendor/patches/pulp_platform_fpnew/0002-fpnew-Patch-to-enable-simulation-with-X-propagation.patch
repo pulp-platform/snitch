@@ -1,0 +1,26 @@
+From 54c07fdff9a40a35d6d89c6f68d1f21b36fe152d Mon Sep 17 00:00:00 2001
+From: Luca Colagrande <luca.colagrande3@gmail.com>
+Date: Mon, 13 Jun 2022 12:54:35 +0200
+Subject: [PATCH] fpnew: Patch to enable simulation with X-propagation
+
+---
+ src/fpnew_pkg.sv | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/fpnew_pkg.sv b/src/fpnew_pkg.sv
+index 5de1247..35dc6f7 100644
+--- a/src/fpnew_pkg.sv
++++ b/src/fpnew_pkg.sv
+@@ -99,7 +99,8 @@ package fpnew_pkg;
+       INT64: return 64;
+       default: begin
+         // pragma translate_off
+-        $fatal(1, "Invalid INT format supplied");
++        assert ($isunknown(ifmt)) $warning("Invalid INT format supplied");
++          else $error(1, "Invalid INT format supplied");
+         // pragma translate_on
+         // just return any integer to avoid any latches
+         // hopefully this error is caught by simulation
+-- 
+2.28.0
+
