@@ -256,7 +256,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   } ssr_state_e;
   ssr_state_e ssr_state_q, ssr_state_d;
   logic is_fp_ssr, is_int_ssr;
-
+  logic int_ssr_disable;
   logic is_branch;
 
   // -----
@@ -286,7 +286,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic       stip_d, stip_q;
   logic       ssip_d, ssip_q;
   logic       scip_d, scip_q;
-  logic       ssr_active_d, ssr_active_q;
+  logic       int_ssr_active_d, int_ssr_active_q;
   snitch_pkg::priv_lvl_t priv_lvl_d, priv_lvl_q;
 
   typedef struct packed {
@@ -311,7 +311,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   `FFAR(spp_q, spp_d, 1'b0, clk_i, rst_i)
   `FFAR(ie_q, ie_d, '0, clk_i, rst_i)
   `FFAR(pie_q, pie_d, '0, clk_i, rst_i)
-  `FFAR(ssr_active_q, Xssr & ssr_active_d, 1'b0, clk_i, rst_i);
+  `FFAR(int_ssr_active_q, Xssr & int_ssr_active_d, 1'b0, clk_i, rst_i);
   // Interrupts
   `FFAR(eie_q, eie_d, '0, clk_i, rst_i)
   `FFAR(tie_q, tie_d, '0, clk_i, rst_i)
@@ -425,7 +425,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     // only place the reservation if we actually executed the load or offload instruction
     if ((is_load | acc_register_rd) && !stall && !exception) sb_d[rd] = 1'b1;
     if (retire_acc) sb_d[acc_prsp_i.id[RegWidth-1:0]] = 1'b0;
-    if (ssr_active_q) begin
+    if (int_ssr_active_q) begin
        for (int i = 0; i < NumSsrs; i++) sb_d[IntSsrRegs[i]] = 1'b0;
     end
     sb_d[0] = 1'b0;
@@ -547,6 +547,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
     is_fp_ssr = 1'b0;
     is_int_ssr = 1'b0;
+    int_ssr_disable = 1'b0;
 
     debug_d = (!debug_q && (
           // the external debugger or an ebreak instruction triggerd the
@@ -818,12 +819,20 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           rd_bypass = csr_rvalue;
           csr_en = valid_instr;
           if (inst_data_i[31:20] == CSR_INT_SSR) begin
-            is_int_ssr = 1'b1;
+            if (ssr_state_q == Idle) begin
+              is_int_ssr = 1'b1;
+            end else begin
+              illegal_inst = 1'b1;
+            end
           end
         end else begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
-          is_fp_ssr = 1'b1;
+          if (ssr_state_q == Idle) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+            is_fp_ssr = 1'b1;
+          end else begin
+            illegal_inst = 1'b1;
+          end
         end
       end
        /* if (inst_data_i[31:20] == CSR_INT_SSR) begin
@@ -866,6 +875,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           rd_select = RdBypass;
           rd_bypass = csr_rvalue;
           csr_en = valid_instr;
+          if (inst_data_i[31:20] == CSR_INT_SSR) begin
+            int_ssr_disable = 1'b1;
+          end
         end else begin
           write_rd = 1'b0;
           acc_qvalid_o = valid_instr;
@@ -2910,7 +2922,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     pie_d = pie_q;
     spp_d = spp_q;
     // SSR register
-    ssr_active_d = ssr_active_q;
+    int_ssr_active_d = int_ssr_active_q;
     // Interrupts
     eie_d = eie_q;
     tie_d = tie_q;
@@ -3098,8 +3110,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             end
           end
           CSR_INT_SSR: begin
-             csr_rvalue = {31'b0, ssr_active_q};
-             if (!exception) ssr_active_d = alu_result[0];
+             csr_rvalue = {31'b0, int_ssr_active_q};
+             if (!exception) int_ssr_active_d = alu_result[0];
           end
           // F/D Extension
           CSR_FFLAGS: begin
@@ -3245,7 +3257,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
          for (int s = 0; s < NumSsrs; s++) begin
            is_raddr_ssr |= (IntSsrRegs[s] == gpr_raddr[0]);
          end
-        ssr_rvalid_o[0] = ssr_active_q & is_raddr_ssr;
+        ssr_rvalid_o[0] = int_ssr_active_q & is_raddr_ssr;
         opa = ssr_rvalid_o[0] ? ssr_rdata_i[0] : gpr_rdata[0];
       end
       UImmediate: opa = uimm;
@@ -3260,7 +3272,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
          for (int s = 0; s < NumSsrs; s++) begin
            is_raddr_ssr |= (IntSsrRegs[s] == gpr_raddr[1]);
          end
-        ssr_rvalid_o[1] = ssr_active_q & is_raddr_ssr;
+        ssr_rvalid_o[1] = int_ssr_active_q & is_raddr_ssr;
         opb = ssr_rvalid_o[1] ? ssr_rdata_i[1] : gpr_rdata[1];
       end
       IImmediate: opb = iimm;
@@ -3293,8 +3305,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         end
       end
       IActive: begin
-        if (!ssr_active_q) begin
-            ssr_state_d = Idle;
+        if (int_ssr_disable) begin
+           ssr_state_d = Idle;
         end
       end
       FPIssue: begin
@@ -3546,7 +3558,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   end
 
   logic is_ssr_write;
-  assign is_ssr_write = ssr_active_q & is_rd_ssr;
+  assign is_ssr_write = int_ssr_active_q & is_rd_ssr;
 
   if (RegNrWritePorts == 1) begin
     always_comb begin
@@ -3626,19 +3638,16 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           end
         end 
       // if we are not retiring another instruction retire the load now
-      end else begin
-        if (acc_pvalid_i) begin
-          retire_acc = 1'b1;
-          gpr_we[0] = 1'b1;
-          gpr_waddr[0] = acc_prsp_i.id;
-          gpr_wdata[0] = acc_prsp_i.data[31:0];
-          acc_pready_o = 1'b1;
-        end
-        if (lsu_pvalid) begin
-          retire_load = 1'b1;
-          gpr_we[1] = 1'b1;
-          lsu_pready = 1'b1;
-        end      
+      end else if (acc_pvalid_i) begin
+        retire_acc = 1'b1;
+        gpr_we[0] = 1'b1;
+        gpr_waddr[0] = acc_prsp_i.id;
+        gpr_wdata[0] = acc_prsp_i.data[31:0];
+        acc_pready_o = 1'b1;
+      end else if (lsu_pvalid) begin
+        retire_load = 1'b1;
+        gpr_we[1] = 1'b1;
+        lsu_pready = 1'b1;
       end
     end
   end else begin 
