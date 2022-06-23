@@ -48,7 +48,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   output logic        cfg_wready_o,
 
   output logic [Cfg.RptWidth-1:0] reg_rep_o,
-
+  output logic        stream_last_o,
+  
   output addr_t       mem_addr_o,
   output logic        mem_zero_o,
   output logic        mem_write_o,
@@ -57,7 +58,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 );
 
   // Mask for word-aligned address fields
-  localparam logic [31:0] WordAddrMask = {{(32-BytecntWidth){1'b1}}, {(BytecntWidth){1'b0}}};
+  localparam logic [31:0] WordAddrMask = {{(32-BytecntWidth){1'b1}}, {(BytecntWidth-1){1'b0}}};
 
   pointer_t [Cfg.NumLoops-1:0] stride_q, stride_sd, stride_sq;
   pointer_t pointer_q, pointer_qn, pointer_sd, pointer_sq, pointer_sqn, selected_stride;
@@ -285,6 +286,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
   assign mem_write_o  = config_q.write;
   assign mem_addr_o   = addr_t'(mem_pointer);
+  assign stream_last_o = mem_last;
 
   // Unpack the configuration address and write signal into a write strobe for
   // the individual registers. Also assign the alias strobe if the address is

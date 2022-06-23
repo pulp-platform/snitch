@@ -14,7 +14,6 @@ enum {
     REG_REPEAT = 1,
     REG_BOUNDS = 2,   // + loop index
     REG_STRIDES = 6,  // + loop index
-    REG_DW   = 10,
     REG_RPTR = 24,    // + snrt_ssr_dim
     REG_WPTR = 28,    // + snrt_ssr_dim
 };
@@ -53,9 +52,7 @@ void issr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
 void issr_repeat(enum snrt_ssr_dm dm, size_t count) {
     write_issr_cfg(REG_REPEAT, dm, count - 1);
 }
-void issr_dw(enum snrt_ssr_dm dm, size_t count) {
-    write_issr_cfg(REG_DW, dm, count);
-}
+
 
 int main()
 { 
@@ -66,20 +63,16 @@ int main()
   size_t core_num = snrt_cluster_compute_core_num();
 
   if (core_id % core_num == 0)
-    {
+  {
   register volatile int t0 asm ("t0");
   register volatile int t1 asm ("t1");
   register volatile int t2 asm ("t2");
-  issr_dw(SNRT_SSR_DM0, 1);
-  issr_dw(SNRT_SSR_DM1, 1);
-  issr_loop_1d(SNRT_SSR_DM0, 16, 8);
-  issr_repeat(SNRT_SSR_DM0, 2);
-  issr_loop_1d(SNRT_SSR_DM1, 16, 8);
-  issr_repeat(SNRT_SSR_DM1, 2);
-  issr_loop_1d(SNRT_SSR_DM2, 16, 8);
+  issr_loop_1d(SNRT_SSR_DM0, 16, 4);
+  issr_loop_1d(SNRT_SSR_DM1, 16, 4);
+  //issr_loop_1d(SNRT_SSR_DM2, 16, 8);
   issr_read(SNRT_SSR_DM0, SNRT_SSR_1D, A);
   issr_read(SNRT_SSR_DM1, SNRT_SSR_1D, B);
-  issr_write(SNRT_SSR_DM2, SNRT_SSR_1D, t2);
+  //issr_write(SNRT_SSR_DM2, SNRT_SSR_1D, t2);
   /* robustness test 1 */
   /*
   asm volatile ("csrsi 0x7C2, 1");
