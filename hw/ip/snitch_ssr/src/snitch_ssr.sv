@@ -75,7 +75,12 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   tcdm_rsp_t idx_rsp, data_rsp;
   logic agen_valid, agen_ready, agen_write;
   logic agen_zero, lane_zero, zero_empty;
-  tcdm_addr_t gen_addr, gen_addr_d, gen_addr_q;
+   
+  logic stream_last;
+  tcdm_addr_t gen_addr;
+   
+/* 
+ tcdm_addr_t gen_addr, gen_addr_d, gen_addr_q;
 
   typedef struct packed {
     logic stream_last;
@@ -92,7 +97,8 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
 
   data_core_t data_mux_out_d, data_mux_out_q;
   data_t fifo_out_q;
-
+*/
+   logic addr_gen_ready;
   snitch_ssr_addr_gen #(
     .Cfg          ( Cfg         ),
     .AddrWidth    ( AddrWidth   ),
@@ -119,14 +125,68 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .cfg_write_i,
     .cfg_wready_o,
     .reg_rep_o      ( rep_max           ),
-    .stream_last_o  ( meta_data_in.stream_last ),            
+    .stream_last_o  ( stream_last       ),            
     .mem_addr_o     ( gen_addr          ),
     .mem_zero_o     ( agen_zero         ),
     .mem_write_o    ( agen_write        ),
     .mem_valid_o    ( agen_valid        ),
-    .mem_ready_i    ( addr_in_ready     )
+    .mem_ready_i    ( addr_gen_ready     )
   );
- 
+
+  
+   logic mem_req_valid;
+   logic meta_valid;
+   meta_data_t meta_fifo_in, meta_fifo_out_d, meta_fifo_out_q;
+   logic meta_in_ready, meta_out_valid, meta_out_ready;
+   logic pop_flag;
+
+   tcdm_addr_t filter_addr;
+   
+   logic data_in_ready;
+   
+
+  data_core_t data_mux_out_d;
+  data_t fifo_out_q;
+
+  snitch_ssr_addr_filter
+    i_addr_filter(
+    .clk_i,
+    .rst_ni,
+    .agen_valid_i (agen_valid),
+    .agen_ready_o (addr_gen_ready),
+    .gen_addr_i (gen_addr),
+    .agen_stream_last_i (stream_last),
+    .gen_addr_o (filter_addr),
+    .mem_req_valid_o(mem_req_valid),
+    .mem_rsp_ready_i(agen_ready),
+    .meta_data_o (meta_fifo_in),
+    .meta_valid_o (meta_valid),
+    .meta_ready_i (meta_in_ready)
+  );
+
+  // To store the meta data: last address flag of the stream, fetch from the memory and pop the data fifo
+  snitch_ssr_lookahead_fifo #(
+    .FALL_THROUGH ( 0 ),
+    .DATA_WIDTH   ( 3 ),
+    .DEPTH        ( 8 )
+  ) i_meta_fifo (
+    .clk_i,
+    .rst_ni,
+    .testmode_i ( 1'b0 ),
+    .clr_i      ( '0   ),
+    .usage_o    (      ),
+    .valid_i    ( meta_valid      ),
+    .ready_o    ( meta_in_ready   ),
+    .data_i     ( meta_fifo_in    ),
+    .data_d_o   ( meta_fifo_out_d ),
+    .valid_o    ( meta_out_valid  ),
+    .ready_i    ( meta_out_ready  ),
+    .data_q_o   ( meta_fifo_out_q )
+  );
+
+  assign pop_flag = (meta_fifo_out_d.fetch | meta_fifo_out_q.stream_last); 
+  assign meta_out_ready = lane_ready_i;
+ /*
   stream_register #(
     .T(tcdm_addr_t)
   ) i_addr_stream_register(
@@ -151,26 +211,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
    assign meta_fifo_pop = data_in_ready;
    
   assign pop_flag = meta_out_valid & (meta_data_out_d.fetch | meta_data_out_q.stream_last);              
-
-  // To store the meta data: last address flag of the stream, fetch from the memory and pop the data fifo
-  snitch_ssr_lookahead_fifo #(
-    .FALL_THROUGH ( 0 ),
-    .DATA_WIDTH   ( 3 ),
-    .DEPTH        ( 8 )
-  ) i_meta_fifo (
-    .clk_i,
-    .rst_ni,
-    .testmode_i ( 1'b0 ),
-    .clr_i      ( '0   ),
-    .usage_o    (      ),
-    .valid_i    ( meta_fifo_push  ),
-    .ready_o    ( meta_in_ready   ),
-    .data_i     ( meta_data_in    ),
-    .data_d_o   ( meta_data_out_d ),
-    .valid_o    ( meta_out_valid  ),
-    .ready_i    ( meta_fifo_pop   ),
-    .data_q_o   ( meta_data_out_q )
-  );
+*/
   
   // When the SSR reverses direction, the inflight data *must* be vacated before any
   // requests can be issued (i.e. addresses consumed) to prevent stream corruption.
@@ -212,15 +253,15 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     assign idx_rsp = '0;
   end
 
-  assign data_req.q.addr = gen_addr_d;
-  assign data_req.q_valid = data_req_qvalid & meta_data_in.fetch;
+  assign data_req.q.addr = filter_addr;
+  assign data_req.q_valid = data_req_qvalid & mem_req_valid;
   assign data_req.q.amo = reqrsp_pkg::AMONone;
   assign data_req.q.user = '0;
 
   assign lane_rdata_o = lane_zero ? '0 : data_mux_out_d; //*TODO: mux 64 bit and 32 bit
   assign data_req.q.data = fifo_out;
   assign data_req.q.strb = '1;
-  assign data_mux_out_d = meta_data_out_q.offset ? fifo_out_q[63:32] : fifo_out_q[31:0];
+  assign data_mux_out_d = meta_fifo_out_q.offset ? fifo_out_q[63:32] : fifo_out_q[31:0];
    
   stream_register #(
     .T(data_t)
@@ -256,7 +297,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
       fifo_in = data_rsp.p.data;
       rep_enable = lane_ready_i & lane_valid_o;
       fifo_pop = rep_enable & rep_done & ~(~zero_empty & lane_zero) & pop_flag;
-      credit_take = agen_valid & agen_ready;
+      credit_take = agen_valid & agen_ready & mem_req_valid;
       credit_give = rep_enable & rep_done & pop_flag;
     end
   end
