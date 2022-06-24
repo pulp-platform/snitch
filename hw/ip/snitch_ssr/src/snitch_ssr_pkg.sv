@@ -67,4 +67,11 @@ package snitch_ssr_pkg;
     logic [7:0] size;
   } cfg_idx_ctl_t;
 
+  typedef struct packed {
+    logic stream_last;
+    logic fetch;
+    logic offset;
+  } meta_data_t;
+  meta_data_t meta_data;
+
 endpackage
