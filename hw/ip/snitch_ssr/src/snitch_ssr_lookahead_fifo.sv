@@ -23,34 +23,9 @@ module snitch_ssr_lookahead_fifo #(
 ); 
 
   logic fifo_out_ready, fifo_out_valid;
-  //logic push, pop;
-  //logic full, empty;
+  logic head_out_valid;
   logic stream_in_valid, stream_in_ready;
-  //assign push = valid_i & ~full;
- // assign pop = ready_i & ~empty & stream_in_ready;
-/*
-  fifo_v3 #(
-    .FALL_THROUGH ( FALL_THROUGH ),
-    .DATA_WIDTH   ( DATA_WIDTH   ),
-    .DEPTH        ( DEPTH )
-  ) i_fifo (
-    .clk_i,
-    .rst_ni,
-    .testmode_i,
-    .flush_i    ( clr_i      ),
-    .full_o     ( full       ),
-    .empty_o    ( empty      ),
-    .usage_o,
-    .data_i     ( data_i     ),
-    .push_i     ( push       ),
-    .data_o     ( data_d_o   ),
-    .pop_i      ( pop        )
-  );
 
-  assign stream_in_valid = pop;
-  assign ready_o = ~full;
- */  
-   
   stream_fifo #(
     .FALL_THROUGH (FALL_THROUGH),
     .DATA_WIDTH   (DATA_WIDTH),
@@ -69,9 +44,10 @@ module snitch_ssr_lookahead_fifo #(
     .valid_o (fifo_out_valid),
     .ready_i (fifo_out_ready)
   );
-  assign fifo_out_ready = ready_i & stream_in_ready;
-  assign stream_in_valid = fifo_out_valid & fifo_out_ready;
-   
+
+  assign fifo_out_ready = ready_i & stream_in_ready;   
+  assign stream_in_valid = fifo_out_valid & ready_i;
+
   stream_register #(
     .T(T)
   ) i_stream_register(
@@ -81,11 +57,13 @@ module snitch_ssr_lookahead_fifo #(
     .testmode_i,
     .valid_i (stream_in_valid),
     .ready_o (stream_in_ready),
-    .data_i  (data_d_o),
-    .valid_o,
+    .data_i  (data_d_o      ),
+    .valid_o (head_out_valid),
     .ready_i,
     .data_o  (data_q_o)
   );
 
+  assign valid_o = fifo_out_valid ? head_out_valid & fifo_out_valid : head_out_valid;
+   
 endmodule 
                             
