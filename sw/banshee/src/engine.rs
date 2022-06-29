@@ -453,6 +453,9 @@ impl Engine {
 
         // Print some final statistics.
         trace!("Final state hart {}: {:#?}", cpus[0].hartid, cpus[0].state);
+        for cpu in &cpus {
+            trace!("Final state hart {}: {:#?}", cpu.hartid, cpu.state);
+        }
         // Fetch the return value {ret[31:1] = exit_code, ret[0] = exit_code_valid}
         let ret = self.exit_code.load(Ordering::SeqCst);
         if (ret & 0x1) == 0x1 {
