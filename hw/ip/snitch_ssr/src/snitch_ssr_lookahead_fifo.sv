@@ -45,8 +45,8 @@ module snitch_ssr_lookahead_fifo #(
     .ready_i (fifo_out_ready)
   );
 
-  assign fifo_out_ready = ready_i & stream_in_ready;   
-  assign stream_in_valid = fifo_out_valid & ready_i;
+  assign fifo_out_ready = stream_in_ready;   
+  assign stream_in_valid = fifo_out_valid;
 
   stream_register #(
     .T(T)

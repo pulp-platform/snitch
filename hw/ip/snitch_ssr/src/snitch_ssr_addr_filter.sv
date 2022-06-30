@@ -22,8 +22,8 @@ module snitch_ssr_addr_filter import snitch_ssr_pkg::*; #(
 
   tcdm_addr_t gen_addr_q;
 
-  logic meta_hs;
-  logic meta_in_ready;
+ // logic meta_hs;
+ // logic meta_in_ready;
 
   meta_data_t meta_data;
   logic agen_hs;
@@ -32,12 +32,12 @@ module snitch_ssr_addr_filter import snitch_ssr_pkg::*; #(
 
   `FFLARN(gen_addr_q, gen_addr_i, agen_hs, '0, clk_i, rst_ni)
   assign gen_addr_o = gen_addr_i;
-  assign agen_ready_o = mem_rsp_ready_i & meta_in_ready;
+  assign agen_ready_o =  mem_rsp_ready_i & meta_ready_i;
 
   assign meta_data.stream_last = agen_stream_last_i;
   assign meta_data.offset = gen_addr_i[2];
   assign meta_data.fetch = (gen_addr_q[16:3] ^ gen_addr_i[16:3]) ? 1'b1 : 1'b0;
-
+/*
   assign meta_hs = agen_valid_i & agen_ready_o;
   stream_register #(
     .T(meta_data_t)
@@ -53,8 +53,13 @@ module snitch_ssr_addr_filter import snitch_ssr_pkg::*; #(
     .ready_i ( meta_ready_i   ),
     .data_o  ( meta_data_o    )
   );
+*/
+   assign meta_data_o = meta_data;
+   assign meta_valid_o = agen_hs ;
+   //assign mem_req_valid_o = agen_hs & meta_data.fetch;
 
- assign mem_req_valid_o = agen_hs & meta_data.fetch;
+   assign mem_req_valid_o = agen_valid_i & meta_data.fetch;
+   
 
 endmodule
 
