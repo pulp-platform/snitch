@@ -80,8 +80,8 @@ pub struct SsrState {
     repeat_count: u16,
     repeat_bound: u16,
     write: bool,
-    dims: u8,
-    done: bool,
+    pub dims: u8,
+    pub done: bool,
     indir: bool,
     accessed: bool,
 }
