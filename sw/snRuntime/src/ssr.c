@@ -22,4 +22,9 @@ void snrt_ssr_disable() {
 }
 
 /// Synchronize the integer and float pipelines.
-void snrt_fpu_fence() { asm volatile("fmv.x.w zero, fa0"); }
+void snrt_fpu_fence() {
+  unsigned tmp;
+  asm volatile("fmv.x.w %0, fa0\n"
+               "mv      %0, %0"
+               : "+r"(tmp)::);
+}
