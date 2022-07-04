@@ -19,11 +19,13 @@
 // Padding of innermost dimension of a Matrix
 // Useful for preventing banking conflicts between cores
 // that are accessing different rows of the matrix
-#define MAT_ROW_PADDING 0
+#define MAT_ROW_PADDING 4
 
 // Padding in between matrices A, B for preventing
 // banking conflicts in the beginning
-#define MAT_PADDING 0
+#define MAT_PADDING 8
+
+#define CHECK_RESULT
 
 void *share_ptr;
 
@@ -106,7 +108,7 @@ int main() {
             volatile uint32_t ldC = l1_gemm_l.N * compute_num;
 
             benchmark_get_cycle();
-            gemm_fp64_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+            gemm_fp64_3ssr_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
                                l1_gemm_l.K, &mat_A[A_offset], ldA, l1_gemm_l.TA,
                                mat_B, ldB, l1_gemm_l.TB, &mat_C[C_offset], ldC,
                                &l1_gemm_l.ALPHA, setup_SSR);
@@ -124,7 +126,7 @@ int main() {
             benchmark_get_cycle();
             switch (l1_gemm_l.dtype) {
                 case FP64:
-                    gemm_fp64_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+                    gemm_fp64_3ssr_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
                                        l1_gemm_l.K, &mat_A[A_offset], ldA,
                                        l1_gemm_l.TA, mat_B, ldB, l1_gemm_l.TB,
                                        &mat_C[C_offset], ldC, &l1_gemm_l.ALPHA,
@@ -166,7 +168,7 @@ int main() {
             volatile uint32_t ldC = l1_gemm_l.N * compute_num;
 
             benchmark_get_cycle();
-            gemm_fp64_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+            gemm_fp64_3ssr_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
                                l1_gemm_l.K, &mat_A[A_offset], ldA, l1_gemm_l.TA,
                                mat_B, ldB, l1_gemm_l.TB, &mat_C[C_offset], ldC,
                                &l1_gemm_l.ALPHA, setup_SSR);
@@ -180,7 +182,7 @@ int main() {
             volatile uint32_t ldC = l1_gemm_l.N * compute_num;
 
             benchmark_get_cycle();
-            gemm_fp64_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+            gemm_fp64_3ssr_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
                                l1_gemm_l.K, &mat_A[A_offset], ldA, l1_gemm_l.TA,
                                mat_B, ldB, l1_gemm_l.TB, &mat_C[C_offset], ldC,
                                &l1_gemm_l.ALPHA, setup_SSR);
@@ -191,6 +193,8 @@ int main() {
         snrt_cluster_hw_barrier();
     }
     snrt_cluster_hw_barrier();
+
+#ifdef CHECK_RESULT
 
     if (compute_id == 0) {
         if (l1_gemm_l.dtype == FP64) {
@@ -231,6 +235,8 @@ int main() {
         }
         printf("%d/%d Errors\n", errors, l1_gemm_l.M * l1_gemm_l.N);
     }
+
+#endif
 
     // TODO: change back!!!
     return 0;
