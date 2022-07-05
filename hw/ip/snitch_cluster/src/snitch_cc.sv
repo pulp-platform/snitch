@@ -771,17 +771,7 @@ module snitch_cc #(
       .ssr_fp_wvalid_i( ssr_fp_wvalid ),
       .ssr_fp_wready_o( ssr_fp_wready ),
       .ssr_fp_wdone_i ( ssr_fp_wdone  ),
-      /*                 
-      .ssr_raddr_i    ( ssr_raddr  ),
-      .ssr_rdata_o    ( ssr_rdata  ),
-      .ssr_rvalid_i   ( ssr_rvalid ),
-      .ssr_rready_o   ( ssr_rready ),
-      .ssr_rdone_i    ( ssr_rdone  ),
-      .ssr_waddr_i    ( ssr_waddr  ),
-      .ssr_wdata_i    ( ssr_wdata  ),
-      .ssr_wvalid_i   ( ssr_wvalid ),
-      .ssr_wready_o   ( ssr_wready ),
-      .ssr_wdone_i    ( ssr_wdone  ),*/
+
       .mem_req_o      ( ssr_req    ),
       .mem_rsp_i      ( ssr_rsp    ),
       .streamctl_done_o   ( ssr_streamctl_done  ),

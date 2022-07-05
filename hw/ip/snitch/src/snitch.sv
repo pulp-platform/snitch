@@ -3290,7 +3290,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // --------------------  
   assign ssr_waddr_o = gpr_waddr[0];
   assign ssr_wdata_o = gpr_wdata[0];
-  for (genvar i = 0; i < 2; i++) assign ssr_rdone_o[i] = ssr_rvalid_o[i];
+  for (genvar i = 0; i < 2; i++) assign ssr_rdone_o[i] = ssr_rvalid_o[i] & valid_instr;
   assign ssr_raddr_o = gpr_raddr;
 
   always_comb begin
@@ -3679,7 +3679,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // wide, there is a potential of `x`s to be returned. Its a bit of a nasty
   // hack but in case of retiring a load we want to relax the unknown
   // constraints a bit.
-  `ASSERT(RegWriteKnown, gpr_we & (gpr_waddr != 0) & !retire_load
+  `ASSERT(RegWriteKnown, gpr_we[0] & (gpr_waddr[0] != 0) & !retire_load
                                     |-> !$isunknown(gpr_wdata[0]), clk_i, rst_i)
   // Check that PMA rule counts do not exceed maximum number of rules
   `ASSERT_INIT(CheckPMANonIdempotent,
