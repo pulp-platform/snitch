@@ -37,9 +37,9 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   input  data_t       lane_wdata_i,
   output logic        lane_valid_o,
   input  logic        lane_ready_i,
-  //output logic        meta_valid_o,
-  //input  logic        meta_ready_i,
-  //output logic        meta_data_o,
+  output logic        meta_valid_o,
+  input  logic        meta_ready_i,
+  output logic        meta_data_o,
   // Ports into memory.
   output tcdm_req_t   mem_req_o,
   input  tcdm_rsp_t   mem_rsp_i,
@@ -126,10 +126,10 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   logic offset_in_ready;
   logic data_in_ready;
 
-   // int
-   assign mem_rsp_ready = ~fifo_full & has_credit;
-   // fp
-   //assign mem_rsp_ready = data_rsp.q_ready;
+  // int
+  assign mem_rsp_ready = ~fifo_full & has_credit;
+  // fp
+  //assign mem_rsp_ready = data_rsp.q_ready;
   
   snitch_ssr_addr_filter
     i_addr_filter(
@@ -168,10 +168,9 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   );
 
   assign pop_flag = (meta_fifo_out_d.fetch | meta_fifo_out_q.stream_last) & meta_out_valid;
-  //assign meta_out_ready = offset_in_ready;
-//  assign meta_valid_o = meta_out_valid;
- // assign meta_data_o = meta_fifo_out_q;
-  assign meta_out_ready = lane_ready_i;
+  assign meta_out_ready = meta_ready_i;
+  assign meta_valid_o = meta_out_valid;
+  assign meta_data_o = meta_fifo_out_q.offset;
 
   // When the SSR reverses direction, the inflight data *must* be vacated before any
   // requests can be issued (i.e. addresses consumed) to prevent stream corruption.
@@ -218,30 +217,10 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   assign data_req.q.amo = reqrsp_pkg::AMONone;
   assign data_req.q.user = '0;
 
-  // fp
-  //assign lane_rdata_o = lane_zero ? '0 : fifo_out; //*TODO: mux 64 bit and 32 bit
-  // int
-  assign lane_rdata_o = lane_zero ? '0 : fifo_out_q;
+  assign lane_rdata_o = lane_zero ? '0 : fifo_out;
   assign data_req.q.data = fifo_out;
   assign data_req.q.strb = '1;
-  ///assign fifo_out_q = meta_fifo_out_q.offset ? fifo_out[63:32] : fifo_out[31:0];
-
-  snitch_ssr_dataoutput #(
-    .DataWidth(DataWidth)
-  )i_ssr_data_output(
-    .clk_i,
-    .rst_ni,
-    .offset_in_valid_i (meta_out_valid),
-    .offset_in_ready_o (offset_in_ready),
-    .offset_i (meta_fifo_out_q.offset),
-    .data_in_valid_i (~fifo_empty),
-    .data_in_ready_o (data_in_ready),
-    .data_i (fifo_out),
-    .data_out_valid_o (lane_valid_o),
-    .data_out_ready_i (lane_ready_i),
-    .data_o (fifo_out_q)
-   );
-                    
+                
   always_comb begin
     if (dm_write) begin
       lane_valid_o = ~fifo_full;
@@ -255,19 +234,14 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
       credit_take = fifo_pop;
       credit_give = data_rsp.p_valid;
     end else begin
-      // fp
-      //lane_valid_o = ~fifo_empty | (~zero_empty & lane_zero);
-      // int
-      lane_valid_o = ~fifo_empty & meta_out_valid | (~zero_empty & lane_zero); 
+      lane_valid_o = ~fifo_empty | (~zero_empty & lane_zero);
       data_req_qvalid = agen_valid & ~fifo_full & has_credit & ~agen_zero & ~agen_flush & mem_req_valid;
       fifo_push = data_rsp.p_valid;
       fifo_in = data_rsp.p.data;
       rep_enable = lane_ready_i & lane_valid_o;
       fifo_pop = rep_enable & rep_done & ~(~zero_empty & lane_zero) & pop_flag;
-      //fifo_pop = ~fifo_empty & pop_flag;  
       credit_take = agen_valid & agen_ready & mem_req_valid;
-      credit_give = rep_enable & rep_done & pop_flag;
-      // credit_give = fifo_pop;      
+      credit_give = rep_enable & rep_done & pop_flag; 
     end
   end
 

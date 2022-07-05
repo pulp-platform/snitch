@@ -117,6 +117,10 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   logic  [NumSsrs-1:0] lane_valid;
   logic  [NumSsrs-1:0] lane_ready;
 
+  logic  [NumSsrs-1:0] meta_data;
+  logic  [NumSsrs-1:0] meta_valid;
+  logic  [NumSsrs-1:0] meta_ready;
+
   logic [4:0]               dmcfg_word;
   logic [4:0]               dmcfg_upper_addr;
   logic [NumSsrs-1:0][31:0] dmcfg_rdata;
@@ -156,7 +160,10 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
     .lane_wdata_o ( lane_wdata ),
     .lane_write_o ( lane_write ),
     .lane_valid_i ( lane_valid ),
-    .lane_ready_o ( lane_ready )
+    .lane_ready_o ( lane_ready ),
+    .meta_valid_i ( meta_valid ),
+    .meta_ready_o ( meta_ready ),
+    .meta_data_i  ( meta_data  )      
   );
 
   for (genvar i = 0; i < NumSsrs; i++) begin : gen_ssrs
@@ -183,6 +190,9 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
       .lane_wdata_i   ( lane_wdata   [i]  ),
       .lane_valid_o   ( lane_valid   [i]  ),
       .lane_ready_i   ( lane_ready   [i]  ),
+      .meta_valid_o   ( meta_valid   [i]  ),
+      .meta_ready_i   ( meta_ready   [i]  ),
+      .meta_data_o    ( meta_data    [i]  ),       
       .mem_req_o      ( mem_req_o    [i]  ),
       .mem_rsp_i      ( mem_rsp_i    [i]  ),
       .isect_mst_req_o  ( isect_mst_req [i] ),

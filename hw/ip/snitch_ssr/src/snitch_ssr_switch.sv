@@ -46,7 +46,10 @@ module snitch_ssr_switch #(
   output data_t [NumSsrs-1:0]     lane_wdata_o,
   output logic  [NumSsrs-1:0]     lane_write_o,
   input  logic  [NumSsrs-1:0]     lane_valid_i,
-  output logic  [NumSsrs-1:0]     lane_ready_o
+  output logic  [NumSsrs-1:0]     lane_ready_o,
+  input  logic  [NumSsrs-1:0]     meta_valid_i,
+  output logic  [NumSsrs-1:0]     meta_ready_o,
+  input  logic  [NumSsrs-1:0]     meta_data_i
 );
 
   logic   [Ports-1:0][4:0] ssr_addr;
@@ -56,11 +59,8 @@ module snitch_ssr_switch #(
   logic   [Ports-1:0]      ssr_ready;
   logic   [Ports-1:0]      ssr_done;
   logic   [Ports-1:0]      ssr_write;
-  logic   [1:0][31:0]      rdata;
+  data_t  [1:0]            rdata;
 
-  for(genvar i=0; i<2; i++) begin: gen_rdata
-    assign rdata[i][31:0] = ssr_rdata[i][31:0];
-  end
   // Unify the read and write ports into one structure that we can easily
   // switch.
   always_comb begin
@@ -119,6 +119,8 @@ module snitch_ssr_switch #(
     lane_write_o = '0;
     ssr_rdata = '0;
     ssr_ready = '0;
+    meta_ready_o = '0;
+    rdata = '0;
 
     for (int o = 0; o < NumSsrs; o++) begin
       for (int i = 0; i < Ports; i++) begin
@@ -131,11 +133,13 @@ module snitch_ssr_switch #(
           ssr_ready[i] = lane_valid_i[o];        
        end else if (ssr_valid[i] && ssr_addr[i] == IntSsrRegs[o]) begin
           lane_wdata_o[o] = ssr_wdata[i];
-          lane_ready_o[o] = ssr_done[i];
+          lane_ready_o[o] = ssr_done[i] & meta_valid_i;
           lane_wdata_o[o] = ssr_wdata[i];
           lane_write_o[o] = ssr_write[i];
           ssr_rdata[i] = lane_rdata_i[o];
-          ssr_ready[i] = lane_valid_i[o];
+          ssr_ready[i] = lane_valid_i[o] & meta_valid_i[o];
+          meta_ready_o[o] = ssr_done[i] & lane_valid_i[o];
+          rdata[i] = meta_data_i ? lane_rdata_i[o][63:32] : lane_rdata_i[o][31:0];      
         end
       end
     end
