@@ -732,7 +732,17 @@ impl<'a, 'b> Cpu<'a, 'b> {
             {
                 0
             }
+            // DRAM
             _ => {
+                // Map all remaining addresses to the hash map but throw a warning if we read outside the memory map
+                if addr < self.engine.config.memory[self.cluster_id].dram.start
+                    || addr >= self.engine.config.memory[self.cluster_id].dram.end
+                {
+                    warn!(
+                        "Hart {} (pc=0x{:08x}) is reading outside the memory map at 0x{:08x}",
+                        self.hartid, self.state.pc, addr
+                    );
+                }
                 // trace!("Load 0x{:x} ({}B)", addr, 8 << size);
                 self.engine
                     .memory
@@ -881,7 +891,17 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 self.cl_clint
                     .fetch_and(!(value & mask) as usize, Ordering::SeqCst);
             }
+            // DRAM
             _ => {
+                // Map all remaining addresses to the hash map but throw a warning if we write outside the memory map
+                if addr < self.engine.config.memory[self.cluster_id].dram.start
+                    || addr >= self.engine.config.memory[self.cluster_id].dram.end
+                {
+                    warn!(
+                        "Hart {} (pc=0x{:08x}) is writing outside the memory map at 0x{:08x}",
+                        self.hartid, self.state.pc, addr
+                    );
+                }
                 trace!(
                     "Store 0x{:x} = 0x{:x} if 0x{:x} ({}B)",
                     addr,
