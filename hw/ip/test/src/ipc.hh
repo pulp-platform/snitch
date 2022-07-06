@@ -96,6 +96,7 @@ private:
                     } while (read & mask == expected & mask);
                     // Send back read 32b word
                     fwrite(&read, sizeof(uint32_t), 1, rx);
+                    fflush(rx);
                     break;
             }
             printf("[IPC] ... done\n");

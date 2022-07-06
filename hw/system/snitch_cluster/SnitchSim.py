@@ -10,8 +10,6 @@ import sys
 import tempfile
 import subprocess
 import struct
-import array
-import threading
 
 
 class SnitchSim:
@@ -23,9 +21,8 @@ class SnitchSim:
         self.tmpdir = None
 
     def start(self):
-        # Make sure we clean up after ourselves
-        self.tmpdir = tempfile.TemporaryDirectory()
         # Create FIFOs
+        self.tmpdir = tempfile.TemporaryDirectory()
         tx_fd = os.path.join(self.tmpdir.name, 'tx')
         os.mkfifo(tx_fd)
         rx_fd = os.path.join(self.tmpdir.name, 'rx')
@@ -34,8 +31,8 @@ class SnitchSim:
         ipc_arg = f'--ipc,{tx_fd},{rx_fd}'
         self.sim = subprocess.Popen([self.sim_bin, self.snitch_bin, ipc_arg])
         # Open FIFOs
-        self.tx = open(tx_fd, 'wb', 0)
-        self.rx = open(rx_fd, 'rb', 0)
+        self.tx = open(tx_fd, 'wb')
+        self.rx = open(rx_fd, 'rb')
 
     def __sim_active(func):
         def inner(self, *args, **kwargs):
@@ -48,6 +45,7 @@ class SnitchSim:
     def read(self, addr: int, length: int) -> bytes:
         op = struct.pack('QQQ', 0, addr, length)
         self.tx.write(op)
+        self.tx.flush()
         return self.rx.read(length)
 
     @__sim_active
@@ -55,12 +53,14 @@ class SnitchSim:
         op = struct.pack('QQQ', 1, addr, len(data))
         self.tx.write(op)
         self.tx.write(data)
+        self.tx.flush()
 
     @__sim_active
     def poll(self, addr: int, mask32: int, exp32: int):
         # TODO: check endiannesses
         op = struct.pack('QQLL', 2, addr, mask32, exp32)
         self.tx.write(op)
+        self.tx.flush()
         return int.from_bytes(self.rx.read(4))
 
     # Simulator can exit only once TX FIFO closes
@@ -83,6 +83,6 @@ if __name__ == "__main__":
     wstr = b'I am a string! Look at me!'
     sim.write(0xdeadbeef, wstr)
     rstr = sim.read(0xdeadbeef, len(wstr)+5)
-    print(rstr)
+    print(f'Read back string: `{rstr}`')
 
     sim.finish(wait_for_sim=False)
