@@ -22,9 +22,10 @@
  * @param ldC row stride in matrix C
  * @param ALPHA accmulate factor of C
  */
-void gemm_fp64_baseline(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
-               uint32_t ta, double* B, uint32_t ldB, uint32_t tb, double* C,
-               uint32_t ldC, const double ALPHA);
+void gemm_fp64_baseline(uint32_t M, uint32_t N, uint32_t K, double* A,
+                        uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
+                        uint32_t tb, double* C, uint32_t ldC,
+                        const double ALPHA);
 
 /**
  * @brief implementation of a FP64 GEMM with configured
@@ -44,10 +45,9 @@ void gemm_fp64_baseline(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t 
  * @param ALPHA accmulate factor of C
  * @param setup_SSR setup SSR bounds and strides
  */
-void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
-                        uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
-                        uint32_t tb, double* C, uint32_t ldC,
-                        const uint32_t* ALPHA, uint32_t setup_SSR);
+void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
+                   uint32_t ta, double* B, uint32_t ldB, uint32_t tb, double* C,
+                   uint32_t ldC, const uint32_t* ALPHA, uint32_t setup_SSR);
 /**
  * @brief implementation of a FP64 GEMM with configured
  * SSRs and frep loop.
@@ -89,11 +89,10 @@ void gemm_fp64_3ssr_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
  * @param setup_SSR setup SSR bounds and strides
  * @return * void
  */
-void gemm_fp32_opt(const uint32_t M, const uint32_t N,
-                               const uint32_t K, float* A, const uint32_t ldA,
-                               float* B, const uint32_t ldB, float* C,
-                               const uint32_t ldC, const uint32_t* ALPHA,
-                               const uint32_t setup_SSR);
+void gemm_fp32_opt(const uint32_t M, const uint32_t N, const uint32_t K,
+                   float* A, const uint32_t ldA, float* B, const uint32_t ldB,
+                   float* C, const uint32_t ldC, const uint32_t* ALPHA,
+                   const uint32_t setup_SSR);
 
 /**
  * @brief implementation of a non-expanding SIMD GEMM with configured
@@ -113,10 +112,9 @@ void gemm_fp32_opt(const uint32_t M, const uint32_t N,
  * @param setup_SSR setup SSR bounds and strides
  * @return * void
  */
-void gemm_fp16_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
-                               uint32_t ldA, __fp16* B, uint32_t ldB, __fp16* C,
-                               uint32_t ldC, const uint32_t* ALPHA,
-                               uint32_t setup_SSR);
+void gemm_fp16_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A, uint32_t ldA,
+                   __fp16* B, uint32_t ldB, __fp16* C, uint32_t ldC,
+                   const uint32_t* ALPHA, uint32_t setup_SSR);
 /**
  * @brief implementation of a FP16 -> FP32 expanding SIMD GEMM with configured
  * SSRs and frep loop. Matrix B has to be stored in transposed/consecutive
@@ -136,9 +134,8 @@ void gemm_fp16_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
  * @return * void
  */
 void gemm_fp16_ex_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
-                               uint32_t ldA, __fp16* B, uint32_t ldB, __fp16* C,
-                               uint32_t ldC, const uint32_t* ALPHA,
-                               uint32_t setup_SSR);
+                      uint32_t ldA, __fp16* B, uint32_t ldB, __fp16* C,
+                      uint32_t ldC, const uint32_t* ALPHA, uint32_t setup_SSR);
 
 /**
  * @brief implementation of a FP8->FP16 expanding SIMD GEMM with configured
@@ -158,7 +155,6 @@ void gemm_fp16_ex_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
  * @param setup_SSR setup SSR bounds and strides
  * @return * void
  */
-void gemm_fp8_ex_opt(uint32_t M, uint32_t N, uint32_t K, char* A,
-                              uint32_t ldA, char* B, uint32_t ldB, char* C,
-                              uint32_t ldC, const uint32_t* ALPHA,
-                              uint32_t setup_SSR);
+void gemm_fp8_ex_opt(uint32_t M, uint32_t N, uint32_t K, char* A, uint32_t ldA,
+                     char* B, uint32_t ldB, char* C, uint32_t ldC,
+                     const uint32_t* ALPHA, uint32_t setup_SSR);

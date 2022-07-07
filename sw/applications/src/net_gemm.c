@@ -133,29 +133,29 @@ int main() {
                                        setup_SSR);
                     break;
                 case FP32:
-                    gemm_fp32_opt(
-                        l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
-                        &mat_A[A_offset], ldA, mat_B, ldB, &mat_C[C_offset],
-                        ldC, &l1_gemm_l.ALPHA, setup_SSR);
+                    gemm_fp32_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+                                  l1_gemm_l.K, &mat_A[A_offset], ldA, mat_B,
+                                  ldB, &mat_C[C_offset], ldC, &l1_gemm_l.ALPHA,
+                                  setup_SSR);
                     break;
                 case FP16:
                     if (l1_gemm_l.expand) {
-                        gemm_fp16_ex_opt(
-                            l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
-                            &mat_A[A_offset], ldA, mat_B, ldB, &mat_C[C_offset],
-                            ldC, &l1_gemm_l.ALPHA, setup_SSR);
+                        gemm_fp16_ex_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+                                         l1_gemm_l.K, &mat_A[A_offset], ldA,
+                                         mat_B, ldB, &mat_C[C_offset], ldC,
+                                         &l1_gemm_l.ALPHA, setup_SSR);
                     } else {
-                        gemm_fp16_opt(
-                            l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
-                            &mat_A[A_offset], ldA, mat_B, ldB, &mat_C[C_offset],
-                            ldC, &l1_gemm_l.ALPHA, setup_SSR);
+                        gemm_fp16_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+                                      l1_gemm_l.K, &mat_A[A_offset], ldA, mat_B,
+                                      ldB, &mat_C[C_offset], ldC,
+                                      &l1_gemm_l.ALPHA, setup_SSR);
                     }
                     break;
                 case FP8:
-                    gemm_fp8_ex_opt(
-                        l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
-                        &mat_A[A_offset], ldA, mat_B, ldB, &mat_C[C_offset],
-                        ldC, &l1_gemm_l.ALPHA, setup_SSR);
+                    gemm_fp8_ex_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+                                    l1_gemm_l.K, &mat_A[A_offset], ldA, mat_B,
+                                    ldB, &mat_C[C_offset], ldC,
+                                    &l1_gemm_l.ALPHA, setup_SSR);
                     break;
             }
             benchmark_get_cycle();

@@ -11,9 +11,9 @@ typedef float v2f32 __attribute__((vector_size(8)));
 typedef __fp16 v4f16 __attribute__((vector_size(8)));
 typedef char v8f8 __attribute__((vector_size(8)));
 
-void gemm_fp64_baseline(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
-               uint32_t ta, double* B, uint32_t ldB, uint32_t tb, double* C,
-               uint32_t ldC, double ALPHA) {
+void gemm_fp64_baseline(uint32_t M, uint32_t N, uint32_t K, double* A,
+                        uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
+                        uint32_t tb, double* C, uint32_t ldC, double ALPHA) {
     if (!ta && !tb) {
         for (uint32_t m = 0; m < M; m++) {
             for (uint32_t n = 0; n < N; n++) {
@@ -57,10 +57,9 @@ void gemm_fp64_baseline(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t 
     }
 }
 
-void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
-                        uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
-                        uint32_t tb, double* C, uint32_t ldC,
-                        const uint32_t* ALPHA, uint32_t setup_SSR) {
+void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
+                   uint32_t ta, double* B, uint32_t ldB, uint32_t tb, double* C,
+                   uint32_t ldC, const uint32_t* ALPHA, uint32_t setup_SSR) {
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
     // for maximum utilization
@@ -236,9 +235,10 @@ void gemm_fp64_3ssr_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
 
         // Output matrix stream
         const uint32_t ssr2_b[3] = {unroll, N / unroll, M};
-        const uint32_t ssr2_i[3] = {sizeof(double), sizeof(double) * unroll, sizeof(double) * ldC};
+        const uint32_t ssr2_i[3] = {sizeof(double), sizeof(double) * unroll,
+                                    sizeof(double) * ldC};
         snrt_ssr_loop_3d(SNRT_SSR_DM2, ssr2_b[0], ssr2_b[1], ssr2_b[2],
-                             ssr2_i[0], ssr2_i[1], ssr2_i[2]);
+                         ssr2_i[0], ssr2_i[1], ssr2_i[2]);
     }
 
     // SSR start address need to be configured each time
@@ -281,22 +281,19 @@ void gemm_fp64_3ssr_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
             "fmadd.d ft2, ft0, ft1, %[c6] \n"
             "fmadd.d ft2, ft0, ft1, %[c7] \n"
             : [ c0 ] "+f"(c[0]), [ c1 ] "+f"(c[1]), [ c2 ] "+f"(c[2]),
-            [ c3 ] "+f"(c[3]), [ c4 ] "+f"(c[4]), [ c5 ] "+f"(c[5]),
-            [ c6 ] "+f"(c[6]), [ c7 ] "+f"(c[7])
+              [ c3 ] "+f"(c[3]), [ c4 ] "+f"(c[4]), [ c5 ] "+f"(c[5]),
+              [ c6 ] "+f"(c[6]), [ c7 ] "+f"(c[7])
             : [ n_frep ] "r"((K - 2) - 1)
-            : "ft0", "ft1", "ft2"
-        );
+            : "ft0", "ft1", "ft2");
     }
     snrt_fpu_fence();
     snrt_ssr_disable();
 }
 
-
-void gemm_fp32_opt(const uint32_t M, const uint32_t N,
-                               const uint32_t K, float* A, const uint32_t ldA,
-                               float* B, const uint32_t ldB, float* C,
-                               const uint32_t ldC, const uint32_t* ALPHA,
-                               const uint32_t setup_SSR) {
+void gemm_fp32_opt(const uint32_t M, const uint32_t N, const uint32_t K,
+                   float* A, const uint32_t ldA, float* B, const uint32_t ldB,
+                   float* C, const uint32_t ldC, const uint32_t* ALPHA,
+                   const uint32_t setup_SSR) {
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
     // for maximum utilization
@@ -444,10 +441,9 @@ void gemm_fp32_opt(const uint32_t M, const uint32_t N,
     snrt_ssr_disable();
 }
 
-void gemm_fp16_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
-                               uint32_t ldA, __fp16* B, uint32_t ldB, __fp16* C,
-                               uint32_t ldC, const uint32_t* ALPHA,
-                               uint32_t setup_SSR) {
+void gemm_fp16_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A, uint32_t ldA,
+                   __fp16* B, uint32_t ldB, __fp16* C, uint32_t ldC,
+                   const uint32_t* ALPHA, uint32_t setup_SSR) {
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
     // for maximum utilization
@@ -612,9 +608,8 @@ void gemm_fp16_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
 }
 
 void gemm_fp16_ex_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
-                               uint32_t ldA, __fp16* B, uint32_t ldB, __fp16* C,
-                               uint32_t ldC, const uint32_t* ALPHA,
-                               uint32_t setup_SSR) {
+                      uint32_t ldA, __fp16* B, uint32_t ldB, __fp16* C,
+                      uint32_t ldC, const uint32_t* ALPHA, uint32_t setup_SSR) {
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
     // for maximum utilization
@@ -759,10 +754,9 @@ void gemm_fp16_ex_opt(uint32_t M, uint32_t N, uint32_t K, __fp16* A,
     snrt_ssr_disable();
 }
 
-void gemm_fp8_ex_opt(uint32_t M, uint32_t N, uint32_t K, char* A,
-                              uint32_t ldA, char* B, uint32_t ldB, char* C,
-                              uint32_t ldC, const uint32_t* ALPHA,
-                              uint32_t setup_SSR) {
+void gemm_fp8_ex_opt(uint32_t M, uint32_t N, uint32_t K, char* A, uint32_t ldA,
+                     char* B, uint32_t ldB, char* C, uint32_t ldC,
+                     const uint32_t* ALPHA, uint32_t setup_SSR) {
     // Accumulating currently not implemented
     if (*ALPHA != 0) return;
 
