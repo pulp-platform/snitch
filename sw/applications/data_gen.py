@@ -136,9 +136,12 @@ def emit_GEMM_layer(name='gemm', **kwargs):
         layer_str += f'static {dtype} {name}_result[{m}][{n}] __attribute__((section(".data")));\n\n'
         layer_str += f'static {dtype} {name}_checksum[{m}] = ' + array_to_cstr(torch.sum(result, dim=-1)) + ';\n\n\n'
     else:
-        layer_str += f'static {dtype} {name}_A_dram [{m}][{k}] = ' + array_to_cstr(kwargs['bits_A'], fmt='char') + ';\n\n\n'
-        layer_str += f'static {dtype} {name}_B_dram [{k}][{n}] = ' + array_to_cstr(kwargs['bits_B'], fmt='char') + ';\n\n\n'
-        layer_str += f'static {dtype} {name}_C_dram [{m}][{n}] = ' + array_to_cstr(kwargs['bits_C'], fmt='char') + ';\n\n\n'
+        layer_str += f'static {dtype} {name}_A_dram [{m}][{k}] = ' + \
+            array_to_cstr(kwargs['bits_A'], fmt='char') + ';\n\n\n'
+        layer_str += f'static {dtype} {name}_B_dram [{k}][{n}] = ' + \
+            array_to_cstr(kwargs['bits_B'], fmt='char') + ';\n\n\n'
+        layer_str += f'static {dtype} {name}_C_dram [{m}][{n}] = ' + \
+            array_to_cstr(kwargs['bits_C'], fmt='char') + ';\n\n\n'
 
     return layer_str
 
@@ -291,7 +294,7 @@ def rand_data_generator(shape, prec, alt=False):
     elif prec == 8:
         sign = torch.randint(0, 2, shape, requires_grad=False, dtype=torch.uint8)  # -1 or 1
         exponent = torch.randint(0, 16, shape, requires_grad=False, dtype=torch.uint8)  # < 0b01111
-        mantissa = torch.randint(0, 4, shape, requires_grad=False, dtype=torch.uint8) # can be arbitrary
+        mantissa = torch.randint(0, 4, shape, requires_grad=False, dtype=torch.uint8)  # can be arbitrary
         bits = {'sign': sign, 'exponent': exponent, 'mantissa': mantissa}
         # TODO: not actually correct
         return ((-1.0)**sign.double())*(2.0**(exponent.double()-15.0))*(1.0 + mantissa.double() / (2**2)), bits
