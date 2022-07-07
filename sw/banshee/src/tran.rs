@@ -2776,15 +2776,15 @@ impl<'a> InstructionTranslator<'a> {
     ) {
         let (a7, a6, a5, a4, a3, a2, a1, a0) = self.read_freg_vf64b(data.rs1);
         let (b7, b6, b5, b4, b3, b2, b1, b0) = self.read_freg_vf64b(data.rs2);
-        let zero = LLVMConstNull(LLVMInt8Type());
-        let res0 = self.emit_fp8_op(a0, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res1 = self.emit_fp8_op(a1, b1, zero, ff_op, fpmode_dst); // zero not used
-        let res2 = self.emit_fp8_op(a2, b2, zero, ff_op, fpmode_dst); // zero not used
-        let res3 = self.emit_fp8_op(a3, b3, zero, ff_op, fpmode_dst); // zero not used
-        let res4 = self.emit_fp8_op(a4, b4, zero, ff_op, fpmode_dst); // zero not used
-        let res5 = self.emit_fp8_op(a5, b5, zero, ff_op, fpmode_dst); // zero not used
-        let res6 = self.emit_fp8_op(a6, b6, zero, ff_op, fpmode_dst); // zero not used
-        let res7 = self.emit_fp8_op(a7, b7, zero, ff_op, fpmode_dst); // zero not used
+        let (c7, c6, c5, c4, c3, c2, c1, c0) = self.read_freg_vf64b(data.rd);
+        let res0 = self.emit_fp8_op(a0, b0, c0, ff_op, fpmode_dst);
+        let res1 = self.emit_fp8_op(a1, b1, c1, ff_op, fpmode_dst);
+        let res2 = self.emit_fp8_op(a2, b2, c2, ff_op, fpmode_dst);
+        let res3 = self.emit_fp8_op(a3, b3, c3, ff_op, fpmode_dst);
+        let res4 = self.emit_fp8_op(a4, b4, c4, ff_op, fpmode_dst);
+        let res5 = self.emit_fp8_op(a5, b5, c5, ff_op, fpmode_dst);
+        let res6 = self.emit_fp8_op(a6, b6, c6, ff_op, fpmode_dst);
+        let res7 = self.emit_fp8_op(a7, b7, c7, ff_op, fpmode_dst);
         self.write_freg_vf64b(data.rd, res7, res6, res5, res4, res3, res2, res1, res0);
     }
 
@@ -2797,15 +2797,15 @@ impl<'a> InstructionTranslator<'a> {
     ) {
         let (a7, a6, a5, a4, a3, a2, a1, a0) = self.read_freg_vf64b(data.rs1);
         let (_b7, _b6, _b5, _b4, _b3, _b2, _b1, b0) = self.read_freg_vf64b(data.rs2);
-        let zero = LLVMConstNull(LLVMInt8Type());
-        let res0 = self.emit_fp8_op(a0, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res1 = self.emit_fp8_op(a1, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res2 = self.emit_fp8_op(a2, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res3 = self.emit_fp8_op(a3, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res4 = self.emit_fp8_op(a4, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res5 = self.emit_fp8_op(a5, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res6 = self.emit_fp8_op(a6, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res7 = self.emit_fp8_op(a7, b0, zero, ff_op, fpmode_dst); // zero not used
+        let (c7, c6, c5, c4, c3, c2, c1, c0) = self.read_freg_vf64b(data.rd);
+        let res0 = self.emit_fp8_op(a0, b0, c0, ff_op, fpmode_dst);
+        let res1 = self.emit_fp8_op(a1, b0, c1, ff_op, fpmode_dst);
+        let res2 = self.emit_fp8_op(a2, b0, c2, ff_op, fpmode_dst);
+        let res3 = self.emit_fp8_op(a3, b0, c3, ff_op, fpmode_dst);
+        let res4 = self.emit_fp8_op(a4, b0, c4, ff_op, fpmode_dst);
+        let res5 = self.emit_fp8_op(a5, b0, c5, ff_op, fpmode_dst);
+        let res6 = self.emit_fp8_op(a6, b0, c6, ff_op, fpmode_dst);
+        let res7 = self.emit_fp8_op(a7, b0, c7, ff_op, fpmode_dst);
         self.write_freg_vf64b(data.rd, res7, res6, res5, res4, res3, res2, res1, res0);
     }
 
@@ -2819,10 +2819,10 @@ impl<'a> InstructionTranslator<'a> {
         let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
         let (b3, b2, b1, b0) = self.read_freg_vf64h(data.rs2);
         let (c3, c2, c1, c0) = self.read_freg_vf64h(data.rd);
-        let res0 = self.emit_fp16_op(a0, b0, c0, ff_op, fpmode_dst); // zero not used
-        let res1 = self.emit_fp16_op(a1, b1, c1, ff_op, fpmode_dst); // zero not used
-        let res2 = self.emit_fp16_op(a2, b2, c2, ff_op, fpmode_dst); // zero not used
-        let res3 = self.emit_fp16_op(a3, b3, c3, ff_op, fpmode_dst); // zero not used
+        let res0 = self.emit_fp16_op(a0, b0, c0, ff_op, fpmode_dst);
+        let res1 = self.emit_fp16_op(a1, b1, c1, ff_op, fpmode_dst);
+        let res2 = self.emit_fp16_op(a2, b2, c2, ff_op, fpmode_dst);
+        let res3 = self.emit_fp16_op(a3, b3, c3, ff_op, fpmode_dst);
         self.write_freg_vf64h(data.rd, res3, res2, res1, res0);
     }
 
@@ -2835,11 +2835,11 @@ impl<'a> InstructionTranslator<'a> {
     ) {
         let (a3, a2, a1, a0) = self.read_freg_vf64h(data.rs1);
         let (_b3, _b2, _b1, b0) = self.read_freg_vf64h(data.rs2);
-        let zero = LLVMConstNull(LLVMInt16Type());
-        let res0 = self.emit_fp16_op(a0, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res1 = self.emit_fp16_op(a1, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res2 = self.emit_fp16_op(a2, b0, zero, ff_op, fpmode_dst); // zero not used
-        let res3 = self.emit_fp16_op(a3, b0, zero, ff_op, fpmode_dst); // zero not used
+        let (c3, c2, c1, c0) = self.read_freg_vf64h(data.rd);
+        let res0 = self.emit_fp16_op(a0, b0, c0, ff_op, fpmode_dst);
+        let res1 = self.emit_fp16_op(a1, b0, c1, ff_op, fpmode_dst);
+        let res2 = self.emit_fp16_op(a2, b0, c2, ff_op, fpmode_dst);
+        let res3 = self.emit_fp16_op(a3, b0, c3, ff_op, fpmode_dst);
         self.write_freg_vf64h(data.rd, res3, res2, res1, res0);
     }
 
