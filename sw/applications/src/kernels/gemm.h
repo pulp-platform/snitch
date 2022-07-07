@@ -45,31 +45,10 @@ void gemm_fp64_baseline(uint32_t M, uint32_t N, uint32_t K, double* A,
  * @param ALPHA accmulate factor of C
  * @param setup_SSR setup SSR bounds and strides
  */
-void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
-                   uint32_t ta, double* B, uint32_t ldB, uint32_t tb, double* C,
-                   uint32_t ldC, const uint32_t* ALPHA, uint32_t setup_SSR);
-/**
- * @brief implementation of a FP64 GEMM with configured
- * SSRs and frep loop.
- *
- * @param M number of rows of matrix A
- * @param N number of columns of matrix B
- * @param K number of columns of matrix A
- * @param A pointer to matrix A
- * @param ldA row stride in matrix A
- * @param ta transposed memory layout for matrix A
- * @param B pointer to matrix B
- * @param ldB row stride in matrix B
- * @param tb transposed memory layout for matrix B
- * @param C pointer to matrix C
- * @param ldC row stride in matrix C
- * @param ALPHA accmulate factor of C
- * @param setup_SSR setup SSR bounds and strides
- */
-void gemm_fp64_3ssr_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
-                        uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
-                        uint32_t tb, double* C, uint32_t ldC,
-                        const uint32_t* ALPHA, uint32_t setup_SSR);
+void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
+                   uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
+                   uint32_t tb, double* C, uint32_t ldC,
+                   const uint32_t* ALPHA, uint32_t setup_SSR);
 
 /**
  * @brief implementation of a FP32 SIMD GEMM with configured

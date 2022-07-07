@@ -19,11 +19,11 @@
 // Padding of innermost dimension of a Matrix
 // Useful for preventing banking conflicts between cores
 // that are accessing different rows of the matrix
-#define MAT_ROW_PADDING 4
+#define MAT_ROW_PADDING 0
 
 // Padding in between matrices A, B for preventing
 // banking conflicts in the beginning
-#define MAT_PADDING 8
+#define MAT_PADDING 0
 
 #define CHECK_RESULT
 
@@ -104,11 +104,11 @@ int main() {
                 compute_id * l1_gemm_l.N * l1_gemm_l.dtype;
             volatile uint32_t ldA =
                 compute_num * (l1_gemm_l.K + MAT_ROW_PADDING);
-            volatile uint32_t ldB = l1_gemm_l.K + MAT_ROW_PADDING;
+            volatile uint32_t ldB = l1_gemm_l.N + MAT_ROW_PADDING;
             volatile uint32_t ldC = l1_gemm_l.N * compute_num;
 
             benchmark_get_cycle();
-            gemm_fp64_3ssr_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+            gemm_fp64_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
                                l1_gemm_l.K, &mat_A[A_offset], ldA, l1_gemm_l.TA,
                                mat_B, ldB, l1_gemm_l.TB, &mat_C[C_offset], ldC,
                                &l1_gemm_l.ALPHA, setup_SSR);
@@ -126,7 +126,7 @@ int main() {
             benchmark_get_cycle();
             switch (l1_gemm_l.dtype) {
                 case FP64:
-                    gemm_fp64_3ssr_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
+                    gemm_fp64_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
                                        l1_gemm_l.K, &mat_A[A_offset], ldA,
                                        l1_gemm_l.TA, mat_B, ldB, l1_gemm_l.TB,
                                        &mat_C[C_offset], ldC, &l1_gemm_l.ALPHA,
@@ -159,34 +159,8 @@ int main() {
                     break;
             }
             benchmark_get_cycle();
-        } else if (l1_gemm_l.TA && !l1_gemm_l.TB) {
-            volatile uint32_t A_offset = compute_id * l1_gemm_l.dtype;
-            volatile uint32_t C_offset =
-                compute_id * l1_gemm_l.N * l1_gemm_l.dtype;
-            volatile uint32_t ldA = (l1_gemm_l.K + MAT_ROW_PADDING);
-            volatile uint32_t ldB = l1_gemm_l.K + MAT_ROW_PADDING;
-            volatile uint32_t ldC = l1_gemm_l.N * compute_num;
-
-            benchmark_get_cycle();
-            gemm_fp64_3ssr_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
-                               l1_gemm_l.K, &mat_A[A_offset], ldA, l1_gemm_l.TA,
-                               mat_B, ldB, l1_gemm_l.TB, &mat_C[C_offset], ldC,
-                               &l1_gemm_l.ALPHA, setup_SSR);
-            benchmark_get_cycle();
-        } else if (l1_gemm_l.TA && l1_gemm_l.TB) {
-            volatile uint32_t A_offset = compute_id * l1_gemm_l.dtype;
-            volatile uint32_t C_offset =
-                compute_id * l1_gemm_l.N * l1_gemm_l.dtype;
-            volatile uint32_t ldA = (l1_gemm_l.K + MAT_ROW_PADDING);
-            volatile uint32_t ldB = l1_gemm_l.K + MAT_ROW_PADDING;
-            volatile uint32_t ldC = l1_gemm_l.N * compute_num;
-
-            benchmark_get_cycle();
-            gemm_fp64_3ssr_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
-                               l1_gemm_l.K, &mat_A[A_offset], ldA, l1_gemm_l.TA,
-                               mat_B, ldB, l1_gemm_l.TB, &mat_C[C_offset], ldC,
-                               &l1_gemm_l.ALPHA, setup_SSR);
-            benchmark_get_cycle();
+        } else if (l1_gemm_l.TA) {
+            printf("transpose TA not supported\n");
         }
         snrt_cluster_hw_barrier();
     } else {
