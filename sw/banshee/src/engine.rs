@@ -1146,7 +1146,6 @@ impl<'a, 'b> Cpu<'a, 'b> {
                     false,
                     false
                 ) as u32),
-
             ),
             TraceAccess::Writevf64bReg(x) => format!(
                 "f{:02}=[{:>5.3}, {:>5.3}, {:>5.3}, {:>5.3}, {:>5.3}, {:>5.3}, {:>5.3}, {:>5.3}]",
