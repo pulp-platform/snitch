@@ -267,6 +267,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
     logic isect_mst_dom;
     logic isect_mst_doi_q;
     logic isect_mst_blk_q;
+    logic isect_idx_lockin;
 
     // Index credit counter
     logic idx_cred_left, idx_cred_crit;
@@ -302,10 +303,11 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
       // Generate done flag for output to address generator.
       // isect_mst_domp_q denotes the state while waiting for inflight index words; used
       // only during intersection and ignored during merging as no idx words need flushing.
+      // Do not advance intersection flush in request lock-in (i.e. idx_req_o.q_valid is high).
       logic isect_mst_dom_set, isect_mst_dom_clr;
       logic isect_mst_domp_q, isect_mst_dom_q;
       assign isect_mst_dom_set = cfg_flags_i.merge ? isect_mst_cln_init :
-          (isect_mst_domp_q & ~idx_has_inflight);
+          (isect_mst_domp_q & ~(idx_req_o.q_valid | idx_has_inflight));
       assign isect_mst_dom_clr = mem_hs & isect_mst_dom_q;
       `FFLARNC(isect_mst_domp_q, 1'b1, isect_mst_cln_init, isect_mst_dom_q, 1'b0, clk_i, rst_ni)
       `FFLARNC(isect_mst_dom_q, 1'b1, isect_mst_dom_set, isect_mst_dom_clr, 1'b0, clk_i, rst_ni)
@@ -320,11 +322,17 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
       // Block index pipeline during cleanup
       `FFLARNC(isect_mst_blk_q, 1'b1, isect_mst_cln_init, cfg_done_i, 1'b0, clk_i, rst_ni)
 
+      // Once locked in, keep any index requests asserted even if starting cleanup
+      logic isect_idx_lockin_set;
+      assign isect_idx_lockin_set = isect_mst_cln_init & idx_req_o.q_valid;
+      `FFLARNC(isect_idx_lockin, 1'b1, isect_idx_lockin_set, idx_q_hs, 1'b0, clk_i, rst_ni)
+
     end else begin : gen_no_isect_master
       assign isect_mst_hs     = 1'b0;
       assign isect_mst_dom    = 1'b0;
       assign isect_mst_doi_q  = 1'b0;
       assign isect_mst_blk_q  = 1'b0;
+      assign isect_idx_lockin = 1'b0;
     end
 
     // Index TCDM request (read-only)
@@ -332,7 +340,7 @@ module snitch_ssr_indirector import snitch_ssr_pkg::*; #(
 
     // Index handshaking
     assign natit_ena          = cfg_indir_i & idx_cred_left & ~isect_mst_blk_q & ~natit_done_i;
-    assign idx_req_o.q_valid  = natit_ena;
+    assign idx_req_o.q_valid  = natit_ena | isect_idx_lockin;
     assign natit_ready_o      = natit_ena & idx_rsp_i.q_ready;
 
     // Index FIFO: stores full unserialized words.
