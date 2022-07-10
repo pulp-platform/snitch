@@ -130,7 +130,8 @@ module snitch_ssr_switch #(
           lane_wdata_o[o] = ssr_wdata[i];
           lane_write_o[o] = ssr_write[i];
           ssr_rdata[i] = lane_rdata_i[o];
-          ssr_ready[i] = lane_valid_i[o];        
+          ssr_ready[i] = lane_valid_i[o];
+          meta_ready_o[o] = ssr_done[i];
        end else if (ssr_valid[i] && ssr_addr[i] == IntSsrRegs[o]) begin
           lane_wdata_o[o] = ssr_wdata[i];
           lane_ready_o[o] = ssr_done[i] & meta_valid_i;
@@ -139,7 +140,7 @@ module snitch_ssr_switch #(
           ssr_rdata[i] = lane_rdata_i[o];
           ssr_ready[i] = lane_valid_i[o] & meta_valid_i[o];
           meta_ready_o[o] = ssr_done[i] & lane_valid_i[o];
-          rdata[i] = meta_data_i ? lane_rdata_i[o][63:32] : lane_rdata_i[o][31:0];      
+          rdata[i] = meta_data_i[o] ? lane_rdata_i[o][63:32] : lane_rdata_i[o][31:0];      
         end
       end
     end

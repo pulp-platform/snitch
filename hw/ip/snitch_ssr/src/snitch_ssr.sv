@@ -122,15 +122,6 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   logic meta_in_valid, meta_in_ready, meta_out_valid, meta_out_ready;
   logic pop_flag;
 
-  data_t fifo_out_q;
-  logic offset_in_ready;
-  logic data_in_ready;
-
-  // int
-  assign mem_rsp_ready = ~fifo_full & has_credit;
-  // fp
-  //assign mem_rsp_ready = data_rsp.q_ready;
-  
   snitch_ssr_addr_filter
     i_addr_filter(
     .clk_i,
@@ -147,7 +138,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .meta_ready_i       ( meta_in_ready  )
   );
 
-  // To store the meta data: last address flag of the stream, fetch from the memory and pop the data fifo
+  // To store the meta data: last address flag of the stream, fetch from the memory and address offset
   snitch_ssr_lookahead_fifo #(
     .FALL_THROUGH ( 0 ),
     .DATA_WIDTH   ( 3 ),
@@ -186,6 +177,8 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
 
   assign agen_ready = ~agen_flush & (agen_zero ?
     has_credit : (data_req_qvalid & data_rsp.q_ready));
+  assign mem_rsp_ready = ~agen_flush & (agen_zero ?
+    has_credit : (data_req_qvalid & data_rsp.q_ready | ~mem_req_valid & ~fifo_full & has_credit));
   assign data_req.q.write = agen_write;
 
   if (Cfg.Indirection) begin : gen_demux

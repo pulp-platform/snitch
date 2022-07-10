@@ -32,13 +32,10 @@ module snitch_ssr_addr_filter import snitch_ssr_pkg::*; #(
 
   assign meta_data.stream_last = agen_stream_last_i;
   assign meta_data.offset = gen_addr_i[2];
-  assign meta_data.fetch = (gen_addr_q[16:3] ^ gen_addr_i[16:3]) ? 1'b1 : 1'b0;
+  assign meta_data.fetch = ((gen_addr_q[16:3] ^ gen_addr_i[16:3]) | gen_addr_i == 17'h0) ? 1'b1 : 1'b0;
 
   assign meta_data_o = meta_data;
   assign meta_valid_o = agen_hs ;
-  assign mem_req_valid_o = agen_hs & meta_data.fetch;  
+  assign mem_req_valid_o = agen_valid_i & meta_data.fetch;
 
 endmodule
-
-   
-   
