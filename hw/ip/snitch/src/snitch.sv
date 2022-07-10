@@ -230,8 +230,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   alu_op_e alu_op;
 
   typedef enum logic [3:0] {
-    None, Reg, IImmediate, UImmediate, JImmediate, 
-    SImmediate, SFImmediate, PC, CSR, 
+    None, Reg, IImmediate, UImmediate, JImmediate, SImmediate, SFImmediate, PC, CSR,
     CSRImmmediate, PBImmediate, RegRd, RegRs2
   } op_select_e;
   op_select_e opa_select, opb_select, opc_select;
@@ -362,8 +361,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
   assign acc_qreq_o.id = rd;
   assign acc_qreq_o.data_op = inst_data_i;
-  assign acc_qreq_o.data_arga = {{32{gpr_rdata[0][31]}}, gpr_rdata[0]};
-  assign acc_qreq_o.data_argb = {{32{gpr_rdata[1][31]}}, gpr_rdata[1]};
+  assign acc_qreq_o.data_arga = {{32{opa[31]}}, opa};
+  assign acc_qreq_o.data_argb = {{32{opb[31]}}, opb};
   assign acc_qreq_o.data_argc = acc_opc_sel ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
 
   // ---------
@@ -426,7 +425,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     if ((is_load | acc_register_rd) && !stall && !exception) sb_d[rd] = 1'b1;
     if (retire_acc) sb_d[acc_prsp_i.id[RegWidth-1:0]] = 1'b0;
     if (int_ssr_active_q) begin
-       for (int i = 0; i < NumSsrs; i++) sb_d[IntSsrRegs[i]] = 1'b0;
+      for (int i = 0; i < NumSsrs; i++) sb_d[IntSsrRegs[i]] = 1'b0;
     end
     sb_d[0] = 1'b0;
   end
@@ -1533,16 +1532,16 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       PV_DOTUSP_SCI_B,      // Xpulpimg: pv.dotusp.sci.b
       PV_DOTSP_SCI_H,       // Xpulpimg: pv.dotsp.sci.h
       PV_DOTSP_SCI_B: begin // Xpulpimg: pv.dotsp.sci.b
-         if (Xipu) begin
-            write_rd = 1'b0;
-            uses_rd = 1'b1;
-            acc_qvalid_o = valid_instr;
-            opa_select = Reg;
-            acc_register_rd = 1'b1;
-            acc_qreq_o.addr = INT_SS;
-         end else begin
-            illegal_inst = 1'b1;
-         end
+        if (Xipu) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
+          acc_qvalid_o = valid_instr;
+          opa_select = Reg;
+          acc_register_rd = 1'b1;
+          acc_qreq_o.addr = INT_SS;
+        end else begin
+          illegal_inst = 1'b1;
+        end
       end
 
       // 2 source registers (rs1, rs2)
@@ -1656,17 +1655,17 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       PV_DOTSP_SC_B,       // Xpulpimg: pv.dotsp.sc.b
       PV_DOTSP_N,          // Xpulpimg: pv.dotsp.n
       PV_DOTSP_SC_N: begin       // Xpulpimg: pv.dotsp.sc.n
-         if (Xipu) begin
-            write_rd = 1'b0;
-            uses_rd = 1'b1;
-            acc_qvalid_o = valid_instr;
-            opa_select = Reg;
-            opb_select = Reg;
-            acc_register_rd = 1'b1;
-            acc_qreq_o.addr = INT_SS;
-         end else begin
-            illegal_inst = 1'b1;
-         end
+        if (Xipu) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
+          acc_qvalid_o = valid_instr;
+          opa_select = Reg;
+          opb_select = Reg;
+          acc_register_rd = 1'b1;
+          acc_qreq_o.addr = INT_SS;
+        end else begin
+          illegal_inst = 1'b1;
+        end
       end
 
       // 2 source registers (rs1, rd)
@@ -1678,18 +1677,18 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       PV_SDOTUSP_SCI_B,      // Xpulpimg: pv.sdotusp.sci.b
       PV_SDOTSP_SCI_H,       // Xpulpimg: pv.sdotsp.sci.h
       PV_SDOTSP_SCI_B: begin // Xpulpimg: pv.sdotsp.sci.b
-         if (Xipu) begin
-            write_rd = 1'b0;
-            uses_rd = 1'b1;
-            acc_qvalid_o = valid_instr;
-            opa_select = Reg;
-            opc_select = Reg;
-            acc_register_rd = 1'b1;
-            acc_qreq_o.addr = INT_SS;
-            acc_opc_sel = 1'b1;
-         end else begin
-            illegal_inst = 1'b1;
-         end
+        if (Xipu) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
+          acc_qvalid_o = valid_instr;
+          opa_select = Reg;
+          opc_select = Reg;
+          acc_register_rd = 1'b1;
+          acc_qreq_o.addr = INT_SS;
+          acc_opc_sel = 1'b1;
+        end else begin
+           illegal_inst = 1'b1;
+        end
       end
 
       // 3 source registers (rs1, rs2, rd)

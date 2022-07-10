@@ -426,6 +426,7 @@ module snitch_cc #(
     .acc_pvalid_o     ( ipu_pvalid                     ),
     .acc_pready_i     ( ipu_pready                     )
     );
+    assign ipu_resp.data[63:32] = {32{ipu_resp.data[31]}};
   end else begin : gen_no_ipu
     assign ipu_resp = '0;
     assign ipu_qready = 1'b0;
