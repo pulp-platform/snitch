@@ -1773,15 +1773,15 @@ module dspu #(
     unique case (simd_size)
       // half-word granularity
       HalfWord: begin
-        assign simd_result = simd_result_half;
+        simd_result = simd_result_half;
       end
       // byte granularity
       Byte: begin
-        assign simd_result = simd_result_byte;
+        simd_result = simd_result_byte;
       end
       // nibble granularity
       Nibble: begin
-        assign simd_result = simd_result_nibble;
+        simd_result = simd_result_nibble;
       end
       default: ;
     endcase
