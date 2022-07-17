@@ -96,7 +96,7 @@ module snitch_cc #(
   parameter int unsigned TCDMPorts = (NumSsrs > 1 ? NumSsrs : 1),
   parameter type addr_t = logic [AddrWidth-1:0],
   parameter type data_t = logic [DataWidth-1:0],
-  parameter type data_t_core = logic [31:0]                 
+  parameter type data_core_t = logic [31:0]                 
 ) (
   input  logic                       clk_i,
   input  logic                       clk_d2_i,
@@ -175,12 +175,12 @@ module snitch_cc #(
   logic acc_ssr_status;
      
   logic       [1:0][4:0] ssr_int_raddr;
-  data_t_core [1:0]      ssr_int_rdata;
+  data_core_t [1:0]      ssr_int_rdata;
   logic       [1:0]      ssr_int_rvalid;
   logic       [1:0]      ssr_int_rready;
   logic       [1:0]      ssr_int_rdone;
   logic       [0:0][4:0] ssr_int_waddr;
-  data_t_core [0:0]      ssr_int_wdata;
+  data_core_t [0:0]      ssr_int_wdata;
   logic       [0:0]      ssr_int_wvalid;
   logic       [0:0]      ssr_int_wready;
   logic       [0:0]      ssr_int_wdone;
@@ -732,7 +732,7 @@ module snitch_cc #(
     snitch_ssr_streamer #(
       .NumSsrs (NumSsrs),                    
       .RPorts (3),
-      .WPorts (1),
+      .WPorts (1),           
       .SsrCfgs (SsrCfgs),
       .SsrRegs (SsrRegs),
       .IntSsrRegs (IntSsrRegs),                    

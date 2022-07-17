@@ -362,7 +362,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign acc_qreq_o.data_op = inst_data_i;
   assign acc_qreq_o.data_arga = {{32{opa[31]}}, opa};
   assign acc_qreq_o.data_argb = {{32{opb[31]}}, opb};
-  assign acc_qreq_o.data_argc = acc_opc_sel ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
+  assign acc_qreq_o.data_argc = (Xipu & acc_opc_sel) ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
 
   // ---------
   // L0 ITLB
@@ -800,28 +800,55 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         csr_en = valid_instr;
       end
       CSRRS: begin  // Atomic Read and Set Bits in CSR
-          alu_op = LOr;
-          opa_select = Reg;
-          opb_select = CSR;
-          rd_select = RdBypass;
-          rd_bypass = csr_rvalue;
-          csr_en = valid_instr;
+        alu_op = LOr;
+        opa_select = Reg;
+        opb_select = CSR;
+        rd_select = RdBypass;
+        rd_bypass = csr_rvalue;
+        csr_en = valid_instr;
       end
       CSRRSI: begin
         // offload CSR enable to FP SS
-        if (inst_data_i[31:20] != CSR_SSR) begin
+        if (inst_data_i[31:20] == CSR_SSR) begin
+          if (ssr_state_q == Idle) begin
+           write_rd = 1'b0;
+           acc_qvalid_o = valid_instr;
+           is_fp_ssr = 1'b1;
+          end else begin
+             illegal_inst = 1'b1;
+          end
+        end else if (inst_data_i[31:20] == CSR_INT_SSR) begin
           alu_op = LOr;
           opa_select = CSRImmmediate;
           opb_select = CSR;
           rd_select = RdBypass;
           rd_bypass = csr_rvalue;
           csr_en = valid_instr;
-          if (inst_data_i[31:20] == CSR_INT_SSR) begin
-            if (ssr_state_q == Idle) begin
-              is_int_ssr = 1'b1;
-            end else begin
-              illegal_inst = 1'b1;
-            end
+          if (ssr_state_q == Idle) begin
+            is_int_ssr = 1'b1;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          alu_op = LOr;
+          opa_select = CSRImmmediate;
+          opb_select = CSR;
+          rd_select = RdBypass;
+          rd_bypass = csr_rvalue;
+          csr_en = valid_instr;
+        end
+      end    
+  /*      if (inst_data_i[31:20] != CSR_SSR) begin
+          alu_op = LOr;
+          opa_select = CSRImmmediate;
+          opb_select = CSR;
+          rd_select = RdBypass;
+          rd_bypass = csr_rvalue;
+          csr_en = valid_instr;
+          if (inst_data_i[31:20] == CSR_INT_SSR && ssr_state_q == Idle) begin
+            is_int_ssr = 1'b1;
+          end else begin
+            illegal_inst = 1'b1;
           end
         end else begin
           if (ssr_state_q == Idle) begin
@@ -832,7 +859,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
           end
         end
-      end
+      end*/
       CSRRC: begin // Atomic Read and Clear Bits in CSR
         alu_op = LNAnd;
         opa_select = Reg;
@@ -1037,30 +1064,6 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         opb_select = Reg;
         acc_register_rd = 1'b1;
         acc_qreq_o.addr = SHARED_MULDIV;
-      end
-      // Off-loaded to IPU
-      ANDN, ORN, XNOR, SLO, SRO, ROL, ROR, SBCLR, SBSET, SBINV, SBEXT,
-      GORC, GREV, CLZ, CTZ, PCNT, SEXT_B,
-      SEXT_H, CRC32_B, CRC32_H, CRC32_W, CRC32C_B, CRC32C_H, CRC32C_W,
-      CLMUL, CLMULR, CLMULH, MIN, MAX, MINU, MAXU, SHFL, UNSHFL, BEXT,
-      BDEP, PACK, PACKU, PACKH, BFP: begin
-        write_rd = 1'b0;
-        uses_rd = 1'b1;
-        acc_qvalid_o = valid_instr;
-        opa_select = Reg;
-        opb_select = Reg;
-        acc_register_rd = 1'b1;
-        acc_qreq_o.addr = INT_SS;
-      end
-      SLOI, SROI, RORI, SBCLRI, SBSETI, SBINVI, SBEXTI, GORCI,
-      GREVI, SHFLI, UNSHFLI: begin
-        write_rd = 1'b0;
-        uses_rd = 1'b1;
-        acc_qvalid_o = valid_instr;
-        opa_select = Reg;
-        opb_select = IImmediate;
-        acc_register_rd = 1'b1;
-        acc_qreq_o.addr = INT_SS;
       end
 
       /* Xpulpimg extension */
@@ -3171,17 +3174,18 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
      assign gpr_raddr[2] = rd;
   end
 
-  logic is_raddr_ssr;
+  logic is_opa_ssr, is_opb_ssr;
+
   always_comb begin
-    ssr_rvalid_o = '0;
-    is_raddr_ssr = 1'b0;             
+    ssr_rvalid_o[0] = '0;
+    is_opa_ssr = 1'b0;             
     unique case (opa_select)
       None: opa = '0;
       Reg: begin
          for (int s = 0; s < NumSsrs; s++) begin
-           is_raddr_ssr |= (IntSsrRegs[s] == gpr_raddr[0]);
+           is_opa_ssr |= (IntSsrRegs[s] == gpr_raddr[0]);
          end
-        ssr_rvalid_o[0] = int_ssr_active_q & is_raddr_ssr;
+        ssr_rvalid_o[0] = int_ssr_active_q & is_opa_ssr;
         opa = ssr_rvalid_o[0] ? ssr_rdata_i[0] : gpr_rdata[0];
       end
       UImmediate: opa = uimm;
@@ -3189,14 +3193,18 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       CSRImmmediate: opa = {{{32-RegWidth}{1'b0}}, rs1};
       default: opa = '0;
     endcase
+  end
 
+  always_comb begin
+    ssr_rvalid_o[1] = 1'b0;
+    is_opb_ssr = 1'b0;
     unique case (opb_select)
       None: opb = '0;
       Reg: begin
          for (int s = 0; s < NumSsrs; s++) begin
-           is_raddr_ssr |= (IntSsrRegs[s] == gpr_raddr[1]);
+           is_opb_ssr |= (IntSsrRegs[s] == gpr_raddr[1]);
          end
-        ssr_rvalid_o[1] = int_ssr_active_q & is_raddr_ssr;
+        ssr_rvalid_o[1] = int_ssr_active_q & is_opb_ssr;
         opb = ssr_rvalid_o[1] ? ssr_rdata_i[1] : gpr_rdata[1];
       end
       IImmediate: opb = iimm;
@@ -3536,7 +3544,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   end else begin : gen_one_gpr_write_port
     always_comb begin
       gpr_we[0] = 1'b0;
-      gpr_waddr[0] = retire_p ? rs1 : rd; // choose whether to writeback
+      gpr_waddr[0] = rd; // choose whether to writeback
       gpr_wdata[0] = alu_writeback;
       // external interfaces
       lsu_pready = 1'b0;
@@ -3546,7 +3554,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       ssr_wvalid_o = 1'b0;
       ssr_wdone_o = 1'b1;
 
-      if (retire_i | retire_p) begin
+      if (retire_i) begin
         gpr_we[0] = 1'b1;
         if (is_ssr_write) begin
           ssr_wvalid_o = 1'b1;
