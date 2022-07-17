@@ -1,5 +1,4 @@
-module snitch_ipu_simd_logic
-  #(
+module snitch_ipu_simd_logic #(
   parameter int unsigned Width = 32,
   parameter int unsigned Factor = 4
 ) (
@@ -112,7 +111,7 @@ module snitch_ipu_simd_logic
           simd_result[Factor*i +: Factor] = simd_op_b[Factor*i][3-$clog2(Factor)] ? 
                      simd_op_a[Factor*simd_op_b[Factor*i][$clog2(4/Factor):0] +: Factor] : 
                      simd_op_c[Factor*simd_op_b[Factor*i][$clog2(4/Factor):0] +: Factor];
-      default: ;
+      default: simd_result = '0;
     endcase
   end
 endmodule

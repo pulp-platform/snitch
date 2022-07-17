@@ -1783,7 +1783,7 @@ module dspu #(
       Nibble: begin
         simd_result = simd_result_nibble;
       end
-      default: ;
+      default: simd_result = '0;
     endcase
   end
 
