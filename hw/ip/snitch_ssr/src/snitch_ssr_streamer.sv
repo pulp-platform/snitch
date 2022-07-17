@@ -131,7 +131,7 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
     .DataWidth ( DataWidth  ),
     .NumSsrs   ( NumSsrs    ),                  
     .RPorts    ( RPorts     ),
-    .WPorts    ( WPorts     ),
+    .WPorts    ( WPorts     ),          
     .SsrRegs   ( SsrRegs    ),
     .IntSsrRegs( IntSsrRegs )                  
   ) i_switch (

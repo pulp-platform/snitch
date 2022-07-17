@@ -10,6 +10,8 @@ module snitch_ssr_switch #(
   parameter int unsigned NumSsrs    = 0,
   parameter int unsigned RPorts     = 0,
   parameter int unsigned WPorts     = 0,
+  parameter int unsigned IntRPorts  = 2,
+  parameter int unsigned IntWPorts  = 1,
   parameter logic [NumSsrs-1:0][4:0] SsrRegs = '0,
   parameter logic [NumSsrs-1:0][4:0] IntSsrRegs = '0,
   /// Derived parameter *Do not override*
@@ -30,17 +32,18 @@ module snitch_ssr_switch #(
   output logic  [WPorts-1:0]      ssr_fp_wready_o,
   input  logic  [WPorts-1:0]      ssr_fp_wdone_i,
   // Read and write streams coming from the core
-  input  logic       [RPorts-2:0][4:0]   ssr_int_raddr_i,
-  output data_core_t [RPorts-2:0]        ssr_int_rdata_o,
-  input  logic       [RPorts-2:0]        ssr_int_rvalid_i,
-  output logic       [RPorts-2:0]        ssr_int_rready_o,
-  input  logic       [RPorts-2:0]        ssr_int_rdone_i,
-  input  logic       [WPorts-1:0][4:0]   ssr_int_waddr_i,
-  input  data_core_t [WPorts-1:0]        ssr_int_wdata_i,
-  input  logic       [WPorts-1:0]        ssr_int_wvalid_i,
-  output logic       [WPorts-1:0]        ssr_int_wready_o,
-  input  logic       [WPorts-1:0]        ssr_int_wdone_i,
-  input  logic                           ssr_sel_i,
+  input  logic       [IntRPorts-1:0][4:0]   ssr_int_raddr_i,
+  output data_core_t [IntRPorts-1:0]        ssr_int_rdata_o,
+  input  logic       [IntRPorts-1:0]        ssr_int_rvalid_i,
+  output logic       [IntRPorts-1:0]        ssr_int_rready_o,
+  input  logic       [IntRPorts-1:0]        ssr_int_rdone_i,
+  
+  input  logic       [IntWPorts-1:0][4:0]   ssr_int_waddr_i,
+  input  data_core_t [IntWPorts-1:0]        ssr_int_wdata_i,
+  input  logic       [IntWPorts-1:0]        ssr_int_wvalid_i,
+  output logic       [IntWPorts-1:0]        ssr_int_wready_o,
+  input  logic       [IntWPorts-1:0]        ssr_int_wdone_i,
+  input  logic                              ssr_sel_i,
   // Ports into memory.
   input  data_t [NumSsrs-1:0]     lane_rdata_i,
   output data_t [NumSsrs-1:0]     lane_wdata_o,
@@ -59,7 +62,7 @@ module snitch_ssr_switch #(
   logic   [Ports-1:0]      ssr_ready;
   logic   [Ports-1:0]      ssr_done;
   logic   [Ports-1:0]      ssr_write;
-  data_t  [1:0]            rdata;
+  data_core_t  [IntRPorts-1:0]  ssr_int_rdata;
 
   // Unify the read and write ports into one structure that we can easily
   // switch.
@@ -82,33 +85,42 @@ module snitch_ssr_switch #(
         ssr_write[i+RPorts] = 1;
         ssr_fp_wready_o[i] = ssr_ready[i+RPorts];
       end
+      for (int i = 0; i < IntRPorts; i++) begin
+        ssr_int_rdata_o[i] = '0;
+        ssr_int_rready_o[i] = '0;
+      end
+      for (int i = 0; i < IntWPorts; i++) begin
+        ssr_int_wready_o[i] = '0;
+      end
     end else begin
-      for (int i = 0; i < RPorts-1; i++) begin
+      for (int i = 0; i < IntRPorts; i++) begin
         ssr_addr[i] = ssr_int_raddr_i[i];
-        ssr_int_rdata_o[i] = rdata[i];
+        ssr_int_rdata_o[i] = ssr_int_rdata[i];
         ssr_int_rready_o[i] = ssr_ready[i];
         ssr_wdata[i] = '0;
         ssr_valid[i] = ssr_int_rvalid_i[i];
         ssr_done[i] = ssr_int_rdone_i[i];
         ssr_write[i] = 0;
-        ssr_addr[2] = 0;
-        ssr_valid[2] = 0;
-        ssr_done[2] = 0;
-        ssr_write[2] = 0;
-        ssr_wdata[2] = '0;
       end
+      for (int i = 0; i < IntWPorts; i++) begin
+        ssr_addr[i+IntRPorts]  = ssr_int_waddr_i[i];
+        ssr_wdata[i+IntRPorts] = ssr_int_wdata_i[i];
+        ssr_valid[i+IntRPorts] = ssr_int_wvalid_i[i];
+        ssr_done[i+IntRPorts]  = ssr_int_wdone_i[i];
+        ssr_write[i+IntRPorts] = 1;
+        ssr_int_wready_o[i] = ssr_ready[i+IntRPorts];
+      end
+      ssr_done[3] = '0;
+      ssr_wdata[3] = '0;
+      ssr_addr[3] = '0;
+      ssr_write[3] = '0;
+      ssr_valid[3] = '0;    
       for (int i = 0; i < RPorts; i++) begin
         ssr_fp_rdata_o[i] = '0;
         ssr_fp_rready_o[i] = '0;
       end
       for (int i = 0; i < WPorts; i++) begin
-        ssr_addr[i+RPorts]  = ssr_int_waddr_i[i];
-        ssr_wdata[i+RPorts] = ssr_int_wdata_i[i];
-        ssr_valid[i+RPorts] = ssr_int_wvalid_i[i];
-        ssr_done[i+RPorts]  = ssr_int_wdone_i[i];
-        ssr_write[i+RPorts] = 1;
-        ssr_int_wready_o[i] = ssr_ready[i+RPorts];
-        ssr_fp_wready_o[i] = 0;
+        ssr_fp_wready_o[i] = '0;
       end 
     end
   end
@@ -120,7 +132,7 @@ module snitch_ssr_switch #(
     ssr_rdata = '0;
     ssr_ready = '0;
     meta_ready_o = '0;
-    rdata = '0;
+    ssr_int_rdata = '0;
 
     for (int o = 0; o < NumSsrs; o++) begin
       for (int i = 0; i < Ports; i++) begin
@@ -137,10 +149,9 @@ module snitch_ssr_switch #(
           lane_ready_o[o] = ssr_done[i] & meta_valid_i;
           lane_wdata_o[o] = ssr_wdata[i];
           lane_write_o[o] = ssr_write[i];
-          ssr_rdata[i] = lane_rdata_i[o];
           ssr_ready[i] = lane_valid_i[o] & meta_valid_i[o];
           meta_ready_o[o] = ssr_done[i] & lane_valid_i[o];
-          rdata[i] = meta_data_i[o] ? lane_rdata_i[o][63:32] : lane_rdata_i[o][31:0];      
+          ssr_int_rdata[i] = meta_data_i[o] ? lane_rdata_i[o][63:32] : lane_rdata_i[o][31:0];      
         end
       end
     end
