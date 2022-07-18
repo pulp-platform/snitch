@@ -808,49 +808,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         csr_en = valid_instr;
       end
       CSRRSI: begin
-        // offload CSR enable to FP SS
         if (inst_data_i[31:20] == CSR_SSR) begin
-          if (ssr_state_q == Idle) begin
-           write_rd = 1'b0;
-           acc_qvalid_o = valid_instr;
-           is_fp_ssr = 1'b1;
-          end else begin
-             illegal_inst = 1'b1;
-          end
-        end else if (inst_data_i[31:20] == CSR_INT_SSR) begin
-          alu_op = LOr;
-          opa_select = CSRImmmediate;
-          opb_select = CSR;
-          rd_select = RdBypass;
-          rd_bypass = csr_rvalue;
-          csr_en = valid_instr;
-          if (ssr_state_q == Idle) begin
-            is_int_ssr = 1'b1;
-          end else begin
-            illegal_inst = 1'b1;
-          end
-        end else begin
-          alu_op = LOr;
-          opa_select = CSRImmmediate;
-          opb_select = CSR;
-          rd_select = RdBypass;
-          rd_bypass = csr_rvalue;
-          csr_en = valid_instr;
-        end
-      end    
-  /*      if (inst_data_i[31:20] != CSR_SSR) begin
-          alu_op = LOr;
-          opa_select = CSRImmmediate;
-          opb_select = CSR;
-          rd_select = RdBypass;
-          rd_bypass = csr_rvalue;
-          csr_en = valid_instr;
-          if (inst_data_i[31:20] == CSR_INT_SSR && ssr_state_q == Idle) begin
-            is_int_ssr = 1'b1;
-          end else begin
-            illegal_inst = 1'b1;
-          end
-        end else begin
           if (ssr_state_q == Idle) begin
             write_rd = 1'b0;
             acc_qvalid_o = valid_instr;
@@ -858,8 +816,27 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           end else begin
             illegal_inst = 1'b1;
           end
+        end else if (inst_data_i[31:20] == CSR_INT_SSR) begin
+          if (ssr_state_q == Idle) begin
+            alu_op = LOr;
+            opa_select = CSRImmmediate;
+            opb_select = CSR;
+            rd_select = RdBypass;
+            rd_bypass = csr_rvalue;
+            csr_en = valid_instr;
+            is_int_ssr = 1'b1;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          alu_op = LOr;
+          opa_select = CSRImmmediate;
+          opb_select = CSR;
+          rd_select = RdBypass;
+          rd_bypass = csr_rvalue;
+          csr_en = valid_instr;
         end
-      end*/
+      end
       CSRRC: begin // Atomic Read and Clear Bits in CSR
         alu_op = LNAnd;
         opa_select = Reg;
@@ -869,19 +846,24 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         csr_en = valid_instr;
       end
       CSRRCI: begin
-        if (inst_data_i[31:20] != CSR_SSR) begin
+        if (inst_data_i[31:20] == CSR_SSR) begin
+          write_rd = 1'b0;
+          acc_qvalid_o = valid_instr;
+        end else if (inst_data_i[31:20] == CSR_INT_SSR) begin
           alu_op = LNAnd;
           opa_select = CSRImmmediate;
           opb_select = CSR;
           rd_select = RdBypass;
           rd_bypass = csr_rvalue;
           csr_en = valid_instr;
-          if (inst_data_i[31:20] == CSR_INT_SSR) begin
-            int_ssr_disable = 1'b1;
-          end
+          int_ssr_disable = 1'b1;
         end else begin
-          write_rd = 1'b0;
-          acc_qvalid_o = valid_instr;
+          alu_op = LNAnd;
+          opa_select = CSRImmmediate;
+          opb_select = CSR;
+          rd_select = RdBypass;
+          rd_bypass = csr_rvalue;
+          csr_en = valid_instr;
         end
       end
       ECALL: ecall = 1'b1;
