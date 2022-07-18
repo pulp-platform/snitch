@@ -21,12 +21,12 @@ sources:
 # Level 0:
 - src/snitch_ssr_pkg.sv
 - src/snitch_ssr_lookahead_fifo.sv
+- src/snitch_ssr_addr_filter.sv
 - src/snitch_ssr_switch.sv
 - src/snitch_ssr_credit_counter.sv
 # Level 1:
 - src/snitch_ssr_indirector.sv
 - src/snitch_ssr_intersector.sv
-- src/snitch_ssr_addr_filter.sv
 # Level 2
 - src/snitch_ssr_addr_gen.sv
 # Level 3:
