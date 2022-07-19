@@ -438,16 +438,6 @@ module snitch_cc #(
   snitch_pkg::fpu_sequencer_trace_port_t fpu_sequencer_trace;
   // pragma translate_on
 
-  logic  [2:0][4:0] ssr_raddr;
-  data_t [2:0]      ssr_rdata;
-  logic  [2:0]      ssr_rvalid;
-  logic  [2:0]      ssr_rready;
-  logic  [2:0]      ssr_rdone;
-  logic  [0:0][4:0] ssr_waddr;
-  data_t [0:0]      ssr_wdata;
-  logic  [0:0]      ssr_wvalid;
-  logic  [0:0]      ssr_wready;
-  logic  [0:0]      ssr_wdone;
   logic             ssr_streamctl_done;
   logic             ssr_streamctl_valid;
   logic             ssr_streamctl_ready;
@@ -732,7 +722,7 @@ module snitch_cc #(
     snitch_ssr_streamer #(
       .NumSsrs (NumSsrs),                    
       .RPorts (3),
-      .WPorts (1),           
+      .WPorts (1),
       .SsrCfgs (SsrCfgs),
       .SsrRegs (SsrRegs),
       .IntSsrRegs (IntSsrRegs),                    
@@ -815,9 +805,12 @@ module snitch_cc #(
     assign ssr_resp       = '0;
     assign ssr_pvalid     = '0;
     // Tie off SSR data stream
-    assign ssr_rdata      = '0;
-    assign ssr_rready     = '0;
-    assign ssr_wready     = '0;
+    assign ssr_int_rdata = '0;
+    assign ssr_int_rready = '0;
+    assign ssr_int_wready = '0;
+    assign ssr_fp_rdata      = '0;
+    assign ssr_fp_rready     = '0;
+    assign ssr_fp_wready     = '0;
     // Tie off SSR stream control
     assign ssr_streamctl_done   = '0;
     assign ssr_streamctl_valid  = '0;

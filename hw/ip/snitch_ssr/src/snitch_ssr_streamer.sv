@@ -129,11 +129,11 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
   
   snitch_ssr_switch #(
     .DataWidth ( DataWidth  ),
-    .NumSsrs   ( NumSsrs    ),                  
+    .NumSsrs   ( NumSsrs    ),                 
     .RPorts    ( RPorts     ),
-    .WPorts    ( WPorts     ),          
+    .WPorts    ( WPorts     ),
     .SsrRegs   ( SsrRegs    ),
-    .IntSsrRegs( IntSsrRegs )                  
+    .IntSsrRegs( IntSsrRegs )         
   ) i_switch (
     .ssr_int_raddr_i,
     .ssr_int_rdata_o,
