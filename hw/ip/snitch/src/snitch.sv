@@ -149,7 +149,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign bimm = $signed({inst_data_i[31],
                                     inst_data_i[7], inst_data_i[30:25], inst_data_i[11:8], 1'b0});
   assign simm = $signed({inst_data_i[31:25], inst_data_i[11:7]});
-  assign pbimm = $signed({inst_data_i[24:20]}); // Xpulpimg immediate branching signed immediate
+  if (Xipu) begin : immediate_branching
+    assign pbimm = $signed({inst_data_i[24:20]}); // Xpulpimg immediate branching signed immediate
+  end
   /* verilator lint_on WIDTH */
 
   logic [31:0] opa, opb;
@@ -255,6 +257,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   ssr_state_e ssr_state_q, ssr_state_d;
   logic is_fp_ssr, is_int_ssr;
   logic int_ssr_disable;
+  logic is_ssr_write;
   logic is_branch;
 
   // -----
@@ -362,7 +365,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign acc_qreq_o.data_op = inst_data_i;
   assign acc_qreq_o.data_arga = {{32{opa[31]}}, opa};
   assign acc_qreq_o.data_argb = {{32{opb[31]}}, opb};
-  assign acc_qreq_o.data_argc = (Xipu & acc_opc_sel) ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
+  if (Xipu) begin : gen_acc_argc_ipu
+     assign acc_qreq_o.data_argc = acc_opc_sel ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
+  end else begin: gen_acc_argc
+     assign acc_qreq_o.data_argc = ls_paddr;
+  end
 
   // ---------
   // L0 ITLB
@@ -1293,7 +1300,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
             illegal_inst = 1'b1;
          end
       end
-       */
+      */
       P_SB_RRPOST: begin // Xpulpimg: p.sb rs2,rs3(rs1!)
          if (Xipu) begin
             write_rd = 1'b0;
@@ -3146,29 +3153,97 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     .we_i      ( gpr_we    )
   );
 
+   // --------------------
+  // SSRs
+  // --------------------
+  if (Xssr) begin : gen_ssr_extension
+    assign ssr_waddr_o = gpr_waddr[0];
+    assign ssr_wdata_o = gpr_wdata[0];
+    for (genvar i = 0; i < 2; i++) assign ssr_rdone_o[i] = ssr_rvalid_o[i] & valid_instr;
+    assign ssr_raddr_o = gpr_raddr;
+
+    // Determine whether destination register is SSR
+    logic is_rd_ssr;
+    always_comb begin
+      is_rd_ssr = 1'b0;
+      for (int s = 0; s < NumSsrs; s++)
+        is_rd_ssr |= (IntSsrRegs[s] == rd);
+    end
+
+    assign is_ssr_write = int_ssr_active_q & is_rd_ssr;
+
+    always_comb begin
+      ssr_state_d = ssr_state_q;
+      ssr_sel_o = 1'b0;
+      unique case (ssr_state_q)
+        Idle: begin
+          if (is_int_ssr) begin
+            ssr_state_d = IActive;
+          end else if (is_fp_ssr) begin
+            ssr_state_d = FPIssue;
+          end
+        end
+        IActive: begin
+          if (int_ssr_disable) begin
+            ssr_state_d = Idle;
+          end
+        end
+        FPIssue: begin
+          if (acc_ssr_status_i) begin
+            ssr_state_d = FPActive;
+          end
+        end
+        FPActive: begin
+          ssr_sel_o = 1'b1;
+          if (!acc_ssr_status_i) begin
+            ssr_state_d = Idle;
+          end
+        end
+        default: ssr_state_d = Idle;
+      endcase
+    end
+
+    always_ff @(posedge clk_i or posedge rst_i) begin
+      if (rst_i) begin
+        ssr_state_q <= Idle;
+      end else begin
+        ssr_state_q <= ssr_state_d;
+      end
+    end
+  end else begin: gen_no_ssr
+    assign ssr_waddr_o = '0;
+    assign ssr_wdata_o = '0;
+    assign ssr_rdone_o = '0;  
+    assign ssr_raddr_o = '0;
+    assign is_ssr_write = '0;
+  end
+  
   // --------------------
   // Operand Select
   // --------------------
   assign gpr_raddr[0] = rs1;
   assign gpr_raddr[1] = rs2;
   // connect the third read port only if present
-  if (RegNrReadPorts >= 3) begin: gpr_raddr_2
-     assign gpr_raddr[2] = rd;
+  if (Xipu) begin: gpr_raddr_2
+    assign gpr_raddr[2] = rd;
   end
 
   logic is_opa_ssr, is_opb_ssr;
-
   always_comb begin
     ssr_rvalid_o[0] = '0;
     is_opa_ssr = 1'b0;             
     unique case (opa_select)
       None: opa = '0;
       Reg: begin
-         for (int s = 0; s < NumSsrs; s++) begin
-           is_opa_ssr |= (IntSsrRegs[s] == gpr_raddr[0]);
+         if (Xssr) begin
+           for (int s = 0; s < NumSsrs; s++) begin
+             is_opa_ssr |= (IntSsrRegs[s] == gpr_raddr[0]);
+           end
+           ssr_rvalid_o[0] = int_ssr_active_q & is_opa_ssr;
+           opa = ssr_rvalid_o[0] ? ssr_rdata_i[0] : gpr_rdata[0];
+         end else begin
+           opa = gpr_rdata[0];
          end
-        ssr_rvalid_o[0] = int_ssr_active_q & is_opa_ssr;
-        opa = ssr_rvalid_o[0] ? ssr_rdata_i[0] : gpr_rdata[0];
       end
       UImmediate: opa = uimm;
       JImmediate: opa = jimm;
@@ -3183,11 +3258,15 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     unique case (opb_select)
       None: opb = '0;
       Reg: begin
-         for (int s = 0; s < NumSsrs; s++) begin
-           is_opb_ssr |= (IntSsrRegs[s] == gpr_raddr[1]);
+         if (Xssr) begin
+           for (int s = 0; s < NumSsrs; s++) begin
+             is_opb_ssr |= (IntSsrRegs[s] == gpr_raddr[1]);
+           end
+           ssr_rvalid_o[1] = int_ssr_active_q & is_opb_ssr;
+           opb = ssr_rvalid_o[1] ? ssr_rdata_i[1] : gpr_rdata[1];
+         end else begin
+           opb = gpr_rdata[1];
          end
-        ssr_rvalid_o[1] = int_ssr_active_q & is_opb_ssr;
-        opb = ssr_rvalid_o[1] ? ssr_rdata_i[1] : gpr_rdata[1];
       end
       IImmediate: opb = iimm;
       SFImmediate, SImmediate: opb = simm;
@@ -3198,54 +3277,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       default: opb = '0;
     endcase
   end
-
-  // --------------------
-  // SSRs
-  // --------------------  
-  assign ssr_waddr_o = gpr_waddr[0];
-  assign ssr_wdata_o = gpr_wdata[0];
-  for (genvar i = 0; i < 2; i++) assign ssr_rdone_o[i] = ssr_rvalid_o[i] & valid_instr;
-  assign ssr_raddr_o = gpr_raddr;
-
-  always_comb begin
-    ssr_state_d = ssr_state_q;
-    ssr_sel_o = 1'b0;
-    unique case (ssr_state_q)
-      Idle: begin
-        if (is_int_ssr) begin
-            ssr_state_d = IActive;
-        end else if (is_fp_ssr) begin
-            ssr_state_d = FPIssue;
-        end
-      end
-      IActive: begin
-        if (int_ssr_disable) begin
-           ssr_state_d = Idle;
-        end
-      end
-      FPIssue: begin
-        if (acc_ssr_status_i) begin
-          ssr_state_d = FPActive;
-        end
-      end
-      FPActive: begin
-        ssr_sel_o = 1'b1;
-        if (!acc_ssr_status_i) begin
-          ssr_state_d = Idle;
-        end
-      end
-      default: ssr_state_d = Idle;
-    endcase
-  end
-
-  always_ff @(posedge clk_i or posedge rst_i) begin
-    if (rst_i) begin
-      ssr_state_q <= Idle;
-    end else begin
-      ssr_state_q <= ssr_state_d;
-    end
-  end
-              
+           
   // --------------------
   // ALU
   // --------------------
@@ -3366,8 +3398,12 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
   assign dtlb_valid = (lsu_tlb_qvalid & trans_active) | ((is_fp_load | is_fp_store) & trans_active);
 
-  // address can be alu_result (i.e. rs1 + iimm/simm) or rs1 (for post-increment load/stores)
-  assign ls_addr_sel = is_postincr ? gpr_rdata[0] : alu_result;
+  if (Xipu) begin: postincr_lsu_addr
+    // address can be alu_result (i.e. rs1 + iimm/simm) or rs1 (for post-increment load/stores)
+    assign ls_addr_sel = is_postincr ? gpr_rdata[0] : alu_result;
+  end else begin: no_postincr_lsu_addr
+    assign ls_addr_sel = alu_result;
+  end
   // Mulitplexer using and/or as this signal is likely timing critical.
   assign ls_paddr[PPNSize+PAGE_SHIFT-1:PAGE_SHIFT] =
             (trans_active & dtlb_pa) | (~trans_active & {mseg_q, ls_addr_sel[31:PAGE_SHIFT]});
@@ -3416,8 +3452,10 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign lsu_tlb_qvalid = valid_instr & (is_load | is_store)
                                       & ~(ld_addr_misaligned | st_addr_misaligned);
 
-  // retire post-incremented address on rs1 if valid postincr instruction and LSU not stalling
-  assign retire_p = write_rs1 & ~stall & (rs1 != 0);
+  if (Xipu) begin : gen_retire_post
+    // retire post-incremented address on rs1 if valid postincr instruction and LSU not stalling
+    assign retire_p = write_rs1 & ~stall & (rs1 != 0);
+  end
   // we can retire if we are not stalling and if the instruction is writing a register
   assign retire_i = write_rd & valid_instr & (rd != 0);
 
@@ -3462,17 +3500,6 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       default: alu_writeback = alu_result;
     endcase
   end
-
-  // Determine whether destination register is SSR
-  logic is_rd_ssr;
-  always_comb begin
-    is_rd_ssr = 1'b0;
-    for (int s = 0; s < NumSsrs; s++)
-      is_rd_ssr |= (IntSsrRegs[s] == rd);
-  end
-
-  logic is_ssr_write;
-  assign is_ssr_write = int_ssr_active_q & is_rd_ssr;
 
   if (Xipu) begin : gen_two_gpr_write_ports
     always_comb begin
