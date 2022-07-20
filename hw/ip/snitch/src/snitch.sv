@@ -3206,6 +3206,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     assign ssr_wdata_o = '0;
     assign ssr_rdone_o = '0;  
     assign ssr_raddr_o = '0;
+    assign ssr_sel_o   = '0;
     assign is_ssr_write = '0;
   end
   
@@ -3222,7 +3223,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   logic is_opa_ssr, is_opb_ssr;
   always_comb begin
     ssr_rvalid_o[0] = '0;
-    is_opa_ssr = 1'b0;             
+    is_opa_ssr = 1'b0;  
     unique case (opa_select)
       None: opa = '0;
       Reg: begin
@@ -3389,12 +3390,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
   assign dtlb_valid = (lsu_tlb_qvalid & trans_active) | ((is_fp_load | is_fp_store) & trans_active);
 
-  if (Xipu) begin: postincr_lsu_addr
-    // address can be alu_result (i.e. rs1 + iimm/simm) or rs1 (for post-increment load/stores)
-    assign ls_addr_sel = is_postincr ? gpr_rdata[0] : alu_result;
-  end else begin: no_postincr_lsu_addr
-    assign ls_addr_sel = alu_result;
-  end
+  // address can be alu_result (i.e. rs1 + iimm/simm) or rs1 (for post-increment load/stores)
+  assign ls_addr_sel = is_postincr ? gpr_rdata[0] : alu_result;
   // Mulitplexer using and/or as this signal is likely timing critical.
   assign ls_paddr[PPNSize+PAGE_SHIFT-1:PAGE_SHIFT] =
             (trans_active & dtlb_pa) | (~trans_active & {mseg_q, ls_addr_sel[31:PAGE_SHIFT]});
@@ -3503,9 +3500,10 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       acc_pready_o = 1'b0;
       retire_acc = 1'b0;
       retire_load = 1'b0;
+
       ssr_wvalid_o = 1'b0;
       ssr_wdone_o = 1'b1;
-
+ 
       if (retire_i | retire_p) begin
         gpr_we[0] = 1'b1;
         if (lsu_pvalid) begin
@@ -3549,6 +3547,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       acc_pready_o = 1'b0;
       retire_acc = 1'b0;
       retire_load = 1'b0;
+
       ssr_wvalid_o = 1'b0;
       ssr_wdone_o = 1'b1;
 

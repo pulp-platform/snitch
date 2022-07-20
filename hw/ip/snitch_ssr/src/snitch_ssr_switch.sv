@@ -85,13 +85,9 @@ module snitch_ssr_switch #(
         ssr_write[i+RPorts] = 1;
         ssr_fp_wready_o[i] = ssr_ready[i+RPorts];
       end
-      for (int i = 0; i < IntRPorts; i++) begin
-        ssr_int_rdata_o[i] = '0;
-        ssr_int_rready_o[i] = '0;
-      end
-      for (int i = 0; i < IntWPorts; i++) begin
-        ssr_int_wready_o[i] = '0;
-      end
+      ssr_int_rdata_o = '0;
+      ssr_int_rready_o = '0;
+      ssr_int_wready_o = '0;
     end else begin
       for (int i = 0; i < IntRPorts; i++) begin
         ssr_addr[i] = ssr_int_raddr_i[i];
@@ -108,20 +104,16 @@ module snitch_ssr_switch #(
         ssr_valid[i+IntRPorts] = ssr_int_wvalid_i[i];
         ssr_done[i+IntRPorts]  = ssr_int_wdone_i[i];
         ssr_write[i+IntRPorts] = 1;
-        ssr_int_wready_o[i] = ssr_ready[i+IntRPorts];
+        ssr_int_wready_o[i] = lane_valid_i[i+IntRPorts];
       end
       ssr_done[3] = '0;
       ssr_wdata[3] = '0;
       ssr_addr[3] = '0;
       ssr_write[3] = '0;
       ssr_valid[3] = '0;    
-      for (int i = 0; i < RPorts; i++) begin
-        ssr_fp_rdata_o[i] = '0;
-        ssr_fp_rready_o[i] = '0;
-      end
-      for (int i = 0; i < WPorts; i++) begin
-        ssr_fp_wready_o[i] = '0;
-      end 
+      ssr_fp_rdata_o = '0;
+      ssr_fp_rready_o = '0;
+      ssr_fp_wready_o = '0;
     end
   end
 
