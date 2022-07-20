@@ -58,7 +58,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   /// Derived parameter *Do not override*
   parameter type addr_t = logic [AddrWidth-1:0],
   parameter type data_t = logic [DataWidth-1:0],
-  parameter type data_t_core = logic [31:0]                                                           
+  parameter type data_core_t = logic [31:0]                                                           
 ) (
   input  logic          clk_i,
   input  logic          rst_i,
@@ -105,12 +105,12 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   input  fpnew_pkg::status_t    fpu_status_i,
   // SSR Interface
   output logic       [1:0][4:0] ssr_raddr_o,
-  input  data_t_core [1:0]      ssr_rdata_i,
+  input  data_core_t [1:0]      ssr_rdata_i,
   output logic       [1:0]      ssr_rvalid_o,
   input  logic       [1:0]      ssr_rready_i,
   output logic       [1:0]      ssr_rdone_o,
   output logic       [0:0][4:0] ssr_waddr_o,
-  output data_t_core [0:0]      ssr_wdata_o,
+  output data_core_t [0:0]      ssr_wdata_o,
   output logic       [0:0]      ssr_wvalid_o,
   input  logic       [0:0]      ssr_wready_i,
   output logic       [0:0]      ssr_wdone_o,
@@ -149,9 +149,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign bimm = $signed({inst_data_i[31],
                                     inst_data_i[7], inst_data_i[30:25], inst_data_i[11:8], 1'b0});
   assign simm = $signed({inst_data_i[31:25], inst_data_i[11:7]});
-  if (Xipu) begin : immediate_branching
-    assign pbimm = $signed({inst_data_i[24:20]}); // Xpulpimg immediate branching signed immediate
-  end
+  assign pbimm = $signed({inst_data_i[24:20]}); // Xpulpimg immediate branching signed immediate
+
   /* verilator lint_on WIDTH */
 
   logic [31:0] opa, opb;
@@ -358,18 +357,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   // accelerator offloading interface
   // register int destination in scoreboard
   logic  acc_register_rd;
-  // multiplexing argc for the fp_ss and ipu
-  logic  acc_opc_sel;
 
   assign acc_qreq_o.id = rd;
   assign acc_qreq_o.data_op = inst_data_i;
   assign acc_qreq_o.data_arga = {{32{opa[31]}}, opa};
   assign acc_qreq_o.data_argb = {{32{opb[31]}}, opb};
-  if (Xipu) begin : gen_acc_argc_ipu
-     assign acc_qreq_o.data_argc = acc_opc_sel ? {{32{gpr_rdata[2][31]}}, gpr_rdata[2]} : ls_paddr;
-  end else begin: gen_acc_argc
-     assign acc_qreq_o.data_argc = ls_paddr;
-  end
 
   // ---------
   // L0 ITLB
@@ -547,8 +539,9 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
 
     acc_qvalid_o = 1'b0;
     acc_qreq_o.addr = FP_SS;
+    acc_qreq_o.data_argc = ls_paddr;
+
     acc_register_rd = 1'b0;
-    acc_opc_sel = 1'b0;
 
     is_fp_ssr = 1'b0;
     is_int_ssr = 1'b0;
@@ -1603,7 +1596,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           opc_select = Reg;
           acc_register_rd = 1'b1;
           acc_qreq_o.addr = INT_SS;
-          acc_opc_sel = 1'b1;
+          acc_qreq_o.data_argc = {{32{gpr_rdata[2][31]}}, gpr_rdata[2]};
         end else begin
            illegal_inst = 1'b1;
         end
@@ -1642,7 +1635,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           opc_select = Reg;
           acc_register_rd = 1'b1;
           acc_qreq_o.addr = INT_SS;
-          acc_opc_sel = 1'b1;
+          acc_qreq_o.data_argc = {{32{gpr_rdata[2][31]}}, gpr_rdata[2]};
         end else begin
           illegal_inst = 1'b1;
         end
@@ -2772,9 +2765,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     // Sanitize illegal instructions so that they don't exert any side-effects.
     if (exception) begin
      write_rd = 1'b0;
-     uses_rd = 1'b0;
      write_rs1 = 1'b0;
-     uses_rs1 = 1'b0;
      acc_qvalid_o = 1'b0;
      next_pc = Exception;
     end
@@ -3452,10 +3443,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   assign lsu_tlb_qvalid = valid_instr & (is_load | is_store)
                                       & ~(ld_addr_misaligned | st_addr_misaligned);
 
-  if (Xipu) begin : gen_retire_post
-    // retire post-incremented address on rs1 if valid postincr instruction and LSU not stalling
-    assign retire_p = write_rs1 & ~stall & (rs1 != 0);
-  end
+  // retire post-incremented address on rs1 if valid postincr instruction and LSU not stalling
+  assign retire_p = write_rs1 & ~stall & (rs1 != 0);
   // we can retire if we are not stalling and if the instruction is writing a register
   assign retire_i = write_rd & valid_instr & (rd != 0);
 

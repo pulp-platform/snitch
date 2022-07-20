@@ -805,9 +805,9 @@ module snitch_cc #(
     assign ssr_resp       = '0;
     assign ssr_pvalid     = '0;
     // Tie off SSR data stream
-    assign ssr_int_rdata = '0;
-    assign ssr_int_rready = '0;
-    assign ssr_int_wready = '0;
+    assign ssr_int_rdata     = '0;
+    assign ssr_int_rready    = '0;
+    assign ssr_int_wready    = '0;
     assign ssr_fp_rdata      = '0;
     assign ssr_fp_rready     = '0;
     assign ssr_fp_wready     = '0;
