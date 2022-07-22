@@ -4,8 +4,8 @@
 
 #include <printf.h>
 
-#include "sim.hh"
 #include "ipc.hh"
+#include "sim.hh"
 
 int main(int argc, char **argv, char **env) {
     // Write binary path to logs/binary for the `make annotate` target

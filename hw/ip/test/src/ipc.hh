@@ -6,22 +6,20 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
 #include <pthread.h>
-#include <algorithm>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
+#include <algorithm>
 #include <tb_lib.hh>
 
 class IpcIface {
-
-private:
-
+   private:
     static const int IPC_BUF_SIZE = 4096;
-    static const int IPC_BUF_SIZE_STRB = IPC_BUF_SIZE/8+1;
+    static const int IPC_BUF_SIZE_STRB = IPC_BUF_SIZE / 8 + 1;
     static const int IPC_ERR_DOUBLE_ARG = 30;
     static const long IPC_POLL_PERIOD_NS = 100000L;
 
@@ -41,8 +39,8 @@ private:
 
     // Args passed to IPC thread
     typedef struct {
-        char * tx;
-        char * rx;
+        char* tx;
+        char* rx;
     } ipc_targs_t;
 
     // Thread to asynchronously handle FIFOs
@@ -50,14 +48,14 @@ private:
     pthread_t thread;
     bool active;
 
-    static void *ipc_thread_handle(void* in) {
-        ipc_targs_t* targs = (ipc_targs_t*) in;
+    static void* ipc_thread_handle(void* in) {
+        ipc_targs_t* targs = (ipc_targs_t*)in;
         // Open FIFOs
-        FILE * tx = fopen(targs->tx, "rb");
-        FILE * rx = fopen(targs->rx, "wb");
+        FILE* tx = fopen(targs->tx, "rb");
+        FILE* rx = fopen(targs->rx, "wb");
         // Prepare data and full-strobe array
-        uint8_t buf_data [IPC_BUF_SIZE] ;
-        uint8_t buf_strb [IPC_BUF_SIZE_STRB];
+        uint8_t buf_data[IPC_BUF_SIZE];
+        uint8_t buf_strb[IPC_BUF_SIZE_STRB];
         std::fill_n(buf_strb, IPC_BUF_SIZE_STRB, 0xFF);
         // Handle commands
         ipc_op_t op;
@@ -65,8 +63,10 @@ private:
             switch (op.opcode) {
                 case Read:
                     // Read full blocks until one full block or less left
-                    printf("[IPC] Read from 0x%x len %d ...\n", op.addr, op.len);
-                    for (uint64_t i = op.len; i > IPC_BUF_SIZE; i -= IPC_BUF_SIZE) {
+                    printf("[IPC] Read from 0x%x len %d ...\n", op.addr,
+                           op.len);
+                    for (uint64_t i = op.len; i > IPC_BUF_SIZE;
+                         i -= IPC_BUF_SIZE) {
                         sim::MEM.read(op.addr, IPC_BUF_SIZE, buf_data);
                         fwrite(buf_data, IPC_BUF_SIZE, 1, rx);
                     }
@@ -77,9 +77,11 @@ private:
                 case Write:
                     // Write full blocks until one full block or less left
                     printf("[IPC] Write to 0x%x len %d ...\n", op.addr, op.len);
-                    for (uint64_t i = op.len; i > IPC_BUF_SIZE; i -= IPC_BUF_SIZE) {
+                    for (uint64_t i = op.len; i > IPC_BUF_SIZE;
+                         i -= IPC_BUF_SIZE) {
                         fread(buf_data, IPC_BUF_SIZE, 1, tx);
-                        sim::MEM.write(op.addr, IPC_BUF_SIZE, buf_data, buf_strb);
+                        sim::MEM.write(op.addr, IPC_BUF_SIZE, buf_data,
+                                       buf_strb);
                     }
                     fread(buf_data, op.len, 1, tx);
                     sim::MEM.write(op.addr, op.len, buf_data, buf_strb);
@@ -88,11 +90,15 @@ private:
                     // Unpack 32b checking mask and expected value from length
                     uint32_t mask = op.len & 0xFFFFFFFF;
                     uint32_t expected = (op.len >> 32) & 0xFFFFFFFF;
-                    printf("[IPC] Poll on 0x%x mask 0x%x expected 0x%x ...\n", op.addr, mask, expected);
+                    printf("[IPC] Poll on 0x%x mask 0x%x expected 0x%x ...\n",
+                           op.addr, mask, expected);
                     uint32_t read;
                     do {
-                        sim::MEM.read(op.addr, sizeof(uint32_t), (uint8_t*)(void*) &read);
-                        nanosleep((const struct timespec[]){{0, IPC_POLL_PERIOD_NS}}, NULL);
+                        sim::MEM.read(op.addr, sizeof(uint32_t),
+                                      (uint8_t*)(void*)&read);
+                        nanosleep(
+                            (const struct timespec[]){{0, IPC_POLL_PERIOD_NS}},
+                            NULL);
                     } while (read & mask == expected & mask);
                     // Send back read 32b word
                     fwrite(&read, sizeof(uint32_t), 1, rx);
@@ -107,8 +113,7 @@ private:
         pthread_exit(NULL);
     }
 
-public:
-
+   public:
     // Conditionally construct IPC iff any arguments specify it
     IpcIface(int argc, char** argv) {
         static constexpr char IPC_FLAG[6] = "--ipc";
@@ -117,16 +122,20 @@ public:
             if (strncmp(argv[i], IPC_FLAG, strlen(IPC_FLAG)) == 0) {
                 // Check for duplicate args
                 if (active) {
-                    fprintf(stderr, "[IPC] Duplicate IPC thread args: %s", argv[i]);
+                    fprintf(stderr, "[IPC] Duplicate IPC thread args: %s",
+                            argv[i]);
                     exit(IPC_ERR_DOUBLE_ARG);
                 }
                 // Parse IPC thread arguments
-                char * ipc_args = argv[i] + strlen(IPC_FLAG) + 1;
+                char* ipc_args = argv[i] + strlen(IPC_FLAG) + 1;
                 targs.tx = strtok(ipc_args, ",");
                 targs.rx = strtok(NULL, ",");
                 // Initialize IO thread which will handle TX, RX pipes
-                pthread_create(&thread, NULL, *ipc_thread_handle, (void *) &targs);
-                printf("[IPC] Thread launched with TX FIFO `%s`, RX FIFO `%s`\n", targs.tx, targs.rx);
+                pthread_create(&thread, NULL, *ipc_thread_handle,
+                               (void*)&targs);
+                printf(
+                    "[IPC] Thread launched with TX FIFO `%s`, RX FIFO `%s`\n",
+                    targs.tx, targs.rx);
                 active = true;
             }
         }
@@ -140,5 +149,4 @@ public:
             active = false;
         }
     }
-
 };
