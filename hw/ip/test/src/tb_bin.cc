@@ -4,6 +4,7 @@
 
 #include <printf.h>
 
+#include "ipc.hh"
 #include "sim.hh"
 
 int main(int argc, char **argv, char **env) {
@@ -17,6 +18,9 @@ int main(int argc, char **argv, char **env) {
         fprintf(stderr,
                 "Warning: Failed to write binary name to logs/.rtlbinary\n");
     }
+
+    // Initialize IPC bridge if specified
+    IpcIface ipc_iface(argc, argv);
 
     auto sim = std::make_unique<sim::Sim>(argc, argv);
     return sim->run();
