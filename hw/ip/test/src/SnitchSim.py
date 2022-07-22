@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: SHL-0.51
 #
 # Paul Scheffler <paulsc@iis.ee.ethz.ch>
+#
+# This class implements a minimal wrapping IPC server for `tb_lib`.
+# `__main__` shows a demonstrator for it, running a simulation and accessing its memory.
 
 import os
 import sys
@@ -80,7 +83,7 @@ if __name__ == "__main__":
     sim = SnitchSim(*sys.argv[1:])
     sim.start()
 
-    wstr = b'I am a string! Look at me!'
+    wstr = b'This is a test string to be written to testbench memory.'
     sim.write(0xdeadbeef, wstr)
     rstr = sim.read(0xdeadbeef, len(wstr)+5)
     print(f'Read back string: `{rstr}`')
