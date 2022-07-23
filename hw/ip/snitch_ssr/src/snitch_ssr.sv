@@ -154,7 +154,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .data_i     ( meta_fifo_in    ),
     .data_d_o   ( meta_fifo_out_d ),
     .valid_o    ( meta_out_valid  ),
-    .ready_i    ( meta_out_ready  ),
+    .ready_i    ( meta_out_ready & rep_done[0] ),
     .data_q_o   ( meta_fifo_out_q )
   );
 
