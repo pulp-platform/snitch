@@ -3487,7 +3487,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     endcase
   end
 
-  if (Xipu) begin : gen_two_gpr_write_ports
+  if (Xipu) begin : gen_two_gpr_write
     always_comb begin
       gpr_we[0] = 1'b0;
       gpr_waddr[0] = retire_p ? rs1 : rd; 
@@ -3496,19 +3496,19 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       gpr_waddr[1] = lsu_rd;
       gpr_wdata[1] = ld_result[31:0];
       //external interfaces
-      lsu_pready = 1'b1;
+      lsu_pready = 1'b0;
       acc_pready_o = 1'b0;
       retire_acc = 1'b0;
       retire_load = 1'b0;
-
       ssr_wvalid_o = 1'b0;
       ssr_wdone_o = 1'b1;
- 
+
       if (retire_i | retire_p) begin
         gpr_we[0] = 1'b1;
         if (lsu_pvalid) begin
           retire_load = 1'b1;
           gpr_we[1] = 1'b1;
+          lsu_pready = 1'b1;
         end else if (acc_pvalid_i) begin
           retire_acc = 1'b1;
           gpr_we[1] = 1'b1;
@@ -3535,9 +3535,10 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end else if (lsu_pvalid) begin
         retire_load = 1'b1;
         gpr_we[1] = 1'b1;
+        lsu_pready = 1'b1;
       end
     end
-  end else begin : gen_one_gpr_write_port
+  end else begin : gen_one_gpr_write
     always_comb begin
       gpr_we[0] = 1'b0;
       gpr_waddr[0] = rd; // choose whether to writeback
@@ -3547,7 +3548,6 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       acc_pready_o = 1'b0;
       retire_acc = 1'b0;
       retire_load = 1'b0;
-
       ssr_wvalid_o = 1'b0;
       ssr_wdone_o = 1'b1;
 
@@ -3577,8 +3577,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         acc_pready_o = 1'b1;
       end
     end
-  end
-
+  end 
+   
   assign inst_addr_misaligned = (inst_data_i inside {
     JAL,
     JALR,
