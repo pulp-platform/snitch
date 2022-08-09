@@ -1,7 +1,7 @@
 From 23a63c28848ba854a7ffa69243b9143798d7fd37 Mon Sep 17 00:00:00 2001
 From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 Date: Wed, 3 Mar 2021 10:59:07 +0100
-Subject: [PATCH 1/2] cva6: Use `tc_srams`
+Subject: [PATCH 1/2] cva6: Use `tc_sram_impls`
 
 ---
  src/cache_subsystem/cva6_icache.sv   | 14 ++++++++------
@@ -18,7 +18,7 @@ index 7c0b330..010ba47 100644
    for (genvar i = 0; i < ICACHE_SET_ASSOC; i++) begin : gen_sram
      // Tag RAM
 -    sram #(
-+    tc_sram #(
++    tc_sram_impl #(
        // tag + valid bit
 -      .DATA_WIDTH ( ICACHE_TAG_WIDTH+1 ),
 -      .NUM_WORDS  ( ICACHE_NUM_WORDS   )
@@ -35,7 +35,7 @@ index 7c0b330..010ba47 100644
 -    sram #(
 -      .DATA_WIDTH ( ICACHE_LINE_WIDTH ),
 -      .NUM_WORDS  ( ICACHE_NUM_WORDS  )
-+    tc_sram #(
++    tc_sram_impl #(
 +      .DataWidth ( ICACHE_LINE_WIDTH ),
 +      .NumWords  ( ICACHE_NUM_WORDS  ),
 +      .NumPorts  ( 1                 )
@@ -53,7 +53,7 @@ index 873d1b6..6c7c4e8 100644
 -        sram #(
 -            .DATA_WIDTH ( DCACHE_LINE_WIDTH                 ),
 -            .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
-+        tc_sram #(
++        tc_sram_impl #(
 +            .DataWidth ( DCACHE_LINE_WIDTH                  ),
 +            .NumWords  ( DCACHE_NUM_WORDS                   ),
 +            .NumPorts  ( 1                                  )
@@ -67,7 +67,7 @@ index 873d1b6..6c7c4e8 100644
 -        sram #(
 -            .DATA_WIDTH ( DCACHE_TAG_WIDTH                  ),
 -            .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
-+        tc_sram #(
++        tc_sram_impl #(
 +            .DataWidth ( DCACHE_TAG_WIDTH                   ),
 +            .NumWords  ( DCACHE_NUM_WORDS                   ),
 +            .NumPorts  ( 1                                  )
@@ -81,7 +81,7 @@ index 873d1b6..6c7c4e8 100644
 -    sram #(
 -        .DATA_WIDTH ( 4*DCACHE_DIRTY_WIDTH             ),
 -        .NUM_WORDS  ( DCACHE_NUM_WORDS                 )
-+    tc_sram #(
++    tc_sram_impl #(
 +        .DataWidth ( 4*DCACHE_DIRTY_WIDTH             ),
 +        .NumWords  ( DCACHE_NUM_WORDS                 ),
 +        .NumPorts  ( 1                                )
@@ -99,7 +99,7 @@ index 54833c8..979c8f3 100644
 -    sram #(
 -      .DATA_WIDTH ( ariane_pkg::DCACHE_SET_ASSOC * 64 ),
 -      .NUM_WORDS  ( wt_cache_pkg::DCACHE_NUM_WORDS    )
-+    tc_sram #(
++    tc_sram_impl #(
 +      .DataWidth ( ariane_pkg::DCACHE_SET_ASSOC * 64 ),
 +      .NumWords  ( wt_cache_pkg::DCACHE_NUM_WORDS    ),
 +      .NumPorts  ( 1                                 )
@@ -111,7 +111,7 @@ index 54833c8..979c8f3 100644
  
      // Tag RAM
 -    sram #(
-+    tc_sram #(
++    tc_sram_impl #(
        // tag + valid bit
 -      .DATA_WIDTH ( ariane_pkg::DCACHE_TAG_WIDTH + 1 ),
 -      .NUM_WORDS  ( wt_cache_pkg::DCACHE_NUM_WORDS   )

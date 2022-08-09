@@ -162,7 +162,7 @@ module spm_1p_adv #(
   // RAM Primitive Instance //
   ////////////////////////////
 
-  tc_sram #(
+  tc_sram_impl #(
     .NumWords (NumWords),
     .DataWidth(SPMDataWidth),
     .ByteWidth(ByteWidth),
