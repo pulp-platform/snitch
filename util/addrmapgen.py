@@ -102,9 +102,9 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
         }
 
         # collect all_quadrant_entries seperately for "zoom-in" graphic
-        if("quadrant" in str(row['name'])):
+        if ("quadrant" in str(row['name'])):
             quadrant_idx = int(re.search(r'\d+', row['name']).group())
-            if(quadrant_idx > max_quadrant_index):
+            if (quadrant_idx > max_quadrant_index):
                 max_quadrant_index = quadrant_idx
             all_quadrant_entries.append(entry)
             if start_addr < quadrant_range_start:
@@ -243,7 +243,7 @@ def main(file: str, outdir: pathlib.Path, tex_filename: str, md_filename: str):
 
         # special layout when only 1 cluster is used
         quadrant_string = ""
-        if(NR_CLUSTERS_PER_QUADRANT > 1):
+        if (NR_CLUSTERS_PER_QUADRANT > 1):
             if cidx == QIDX0 and not tcdm and not periph:
                 quadrant_string = quadrant_size_str
             elif cidx == QIDX1 and tcdm:
