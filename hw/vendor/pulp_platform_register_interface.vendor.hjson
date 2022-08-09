@@ -9,7 +9,7 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/register_interface.git",
-    rev: "master",
+    rev: "v0.3.3",
   }
 
   exclude_from_upstream: [
