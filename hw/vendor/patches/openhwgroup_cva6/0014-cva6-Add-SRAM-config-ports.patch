@@ -111,7 +111,7 @@ index e2d703e..d4e9563 100644
 @@ -417,6 +422,7 @@ end else begin : gen_piton_offset
    for (genvar i = 0; i < ICACHE_SET_ASSOC; i++) begin : gen_sram
      // Tag RAM
-     tc_sram #(
+     tc_sram_impl #(
 +      .impl_in_t ( sram_cfg_t         ),
        // tag + valid bit
        .DataWidth ( ICACHE_TAG_WIDTH+1 ),
@@ -128,7 +128,7 @@ index e2d703e..d4e9563 100644
 @@ -439,12 +447,15 @@ end else begin : gen_piton_offset
  
      // Data RAM
-     tc_sram #(
+     tc_sram_impl #(
 +      .impl_in_t ( sram_cfg_t        ),
        .DataWidth ( ICACHE_LINE_WIDTH ),
        .NumWords  ( ICACHE_NUM_WORDS  ),
@@ -262,7 +262,7 @@ index 3658597..5703bd1 100644
 @@ -184,12 +189,15 @@ import std_cache_pkg::*;
      // --------------
      for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
-         tc_sram #(
+         tc_sram_impl #(
 +            .impl_in_t ( sram_cfg_t                         ),
              .DataWidth ( DCACHE_LINE_WIDTH                  ),
              .NumWords  ( DCACHE_NUM_WORDS                   ),
@@ -278,7 +278,7 @@ index 3658597..5703bd1 100644
 @@ -199,12 +207,15 @@ import std_cache_pkg::*;
          );
  
-         tc_sram #(
+         tc_sram_impl #(
 +            .impl_in_t ( sram_cfg_t                         ),
              .DataWidth ( DCACHE_TAG_WIDTH                   ),
              .NumWords  ( DCACHE_NUM_WORDS                   ),
@@ -294,7 +294,7 @@ index 3658597..5703bd1 100644
 @@ -232,12 +243,15 @@ import std_cache_pkg::*;
      end
  
-     tc_sram #(
+     tc_sram_impl #(
 +        .impl_in_t ( sram_cfg_t                       ),
          .DataWidth ( 4*DCACHE_DIRTY_WIDTH             ),
          .NumWords  ( DCACHE_NUM_WORDS                 ),
@@ -426,7 +426,7 @@ index 979c8f3..2b1cef1 100644
 @@ -253,12 +258,15 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
    for (genvar k = 0; k < DCACHE_NUM_BANKS; k++) begin : gen_data_banks
      // Data RAM
-     tc_sram #(
+     tc_sram_impl #(
 +      .impl_in_t ( sram_cfg_t                        ),
        .DataWidth ( ariane_pkg::DCACHE_SET_ASSOC * 64 ),
        .NumWords  ( wt_cache_pkg::DCACHE_NUM_WORDS    ),
@@ -442,7 +442,7 @@ index 979c8f3..2b1cef1 100644
 @@ -275,6 +283,7 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
  
      // Tag RAM
-     tc_sram #(
+     tc_sram_impl #(
 +      .impl_in_t ( sram_cfg_t                       ),
        // tag + valid bit
        .DataWidth ( ariane_pkg::DCACHE_TAG_WIDTH + 1 ),
