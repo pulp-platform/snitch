@@ -25,9 +25,6 @@ module tc_sram #(
   parameter              SimInit      = "zeros",  // Simulation initialization, fixed to zero here!
   parameter bit          PrintSimCfg  = 1'b0,     // Print configuration
   parameter              ImplKey      = "none",   // Reference to specific implementation
-  parameter type         impl_in_t    = logic,    // Type for implementation inputs
-  parameter type         impl_out_t   = logic,    // Type for implementation outputs
-  parameter impl_out_t   ImplOutSim   = 'X,       // Implementation output in simulation
   // DEPENDENT PARAMETERS, DO NOT OVERWRITE!
   parameter int unsigned AddrWidth = (NumWords > 32'd1) ? $clog2(NumWords) : 32'd1,
   parameter int unsigned BeWidth   = (DataWidth + ByteWidth - 32'd1) / ByteWidth, // ceil_div
@@ -37,11 +34,6 @@ module tc_sram #(
 ) (
   input  logic                clk_i,      // Clock
   input  logic                rst_ni,     // Asynchronous reset active low
-`ifndef PULP_TC_SRAM_NOIMPL
-  // Implementation-related IO
-  input  impl_in_t             impl_i,
-  output impl_out_t            impl_o,
-`endif
   // input ports
   input  logic  [NumPorts-1:0] req_i,      // request
   input  logic  [NumPorts-1:0] we_i,       // write enable
@@ -51,11 +43,6 @@ module tc_sram #(
   // output ports
   output data_t [NumPorts-1:0] rdata_o     // read data
 );
-
-`ifndef PULP_TC_SRAM_NOIMPL
-  // constant implementation output in behavioral simulation
-  assign impl_o = ImplOutSim;
-`endif
 
   localparam int unsigned DataWidthAligned = ByteWidth * BeWidth;
   localparam int unsigned Size             = NumWords * DataWidthAligned;
