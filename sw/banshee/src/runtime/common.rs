@@ -68,8 +68,8 @@ pub struct CpuState {
 #[derive(Default, Clone)]
 #[repr(C)]
 pub struct SsrState {
-    index: [u32; 4],
-    bound: [u32; 4],
+    pub index: [u32; 4],
+    pub bound: [u32; 4],
     stride: [u32; 4],
     idx_shift: u32,
     idx_base: u32,
