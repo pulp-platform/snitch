@@ -690,7 +690,7 @@ module snitch_cluster
       strb_t mem_be;
       data_t mem_rdata, mem_wdata;
 
-      tc_sram #(
+      tc_sram_impl #(
         .NumWords (TCDMDepth),
         .DataWidth (NarrowDataWidth),
         .ByteWidth (8),

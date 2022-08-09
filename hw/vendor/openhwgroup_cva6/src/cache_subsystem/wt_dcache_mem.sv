@@ -257,7 +257,7 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
 
   for (genvar k = 0; k < DCACHE_NUM_BANKS; k++) begin : gen_data_banks
     // Data RAM
-    tc_sram #(
+    tc_sram_impl #(
       .impl_in_t ( sram_cfg_t                        ),
       .DataWidth ( ariane_pkg::DCACHE_SET_ASSOC * 64 ),
       .NumWords  ( wt_cache_pkg::DCACHE_NUM_WORDS    ),
@@ -282,7 +282,7 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
     assign rd_vld_bits_o[i] = vld_tag_rdata[i][DCACHE_TAG_WIDTH];
 
     // Tag RAM
-    tc_sram #(
+    tc_sram_impl #(
       .impl_in_t ( sram_cfg_t                       ),
       // tag + valid bit
       .DataWidth ( ariane_pkg::DCACHE_TAG_WIDTH + 1 ),

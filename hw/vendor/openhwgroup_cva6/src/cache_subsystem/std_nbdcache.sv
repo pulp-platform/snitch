@@ -192,7 +192,7 @@ import std_cache_pkg::*;
     // Memory Arrays
     // --------------
     for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
-        tc_sram #(
+        tc_sram_impl #(
             .impl_in_t ( sram_cfg_t                         ),
             .DataWidth ( DCACHE_LINE_WIDTH                  ),
             .NumWords  ( DCACHE_NUM_WORDS                   ),
@@ -210,7 +210,7 @@ import std_cache_pkg::*;
             .*
         );
 
-        tc_sram #(
+        tc_sram_impl #(
             .impl_in_t ( sram_cfg_t                         ),
             .DataWidth ( DCACHE_TAG_WIDTH                   ),
             .NumWords  ( DCACHE_NUM_WORDS                   ),
@@ -246,7 +246,7 @@ import std_cache_pkg::*;
         assign rdata_ram[i].valid = dirty_rdata[8*i+1];
     end
 
-    tc_sram #(
+    tc_sram_impl #(
         .impl_in_t ( sram_cfg_t                       ),
         .DataWidth ( 4*DCACHE_DIRTY_WIDTH             ),
         .NumWords  ( DCACHE_NUM_WORDS                 ),
