@@ -461,7 +461,7 @@ impl Engine {
             let mut ssr_id = 0;
             for ssr in ssr_vec {
                 for idx in 0 .. ssr.index.len() {
-                    if ssr.index[idx] != ssr.bound[idx] {
+                    if ssr.index[idx] != ssr.bound[idx] && ssr.index[idx] != 0 {
                         warn!("Final state hart {}: SSR {} NOT fully consumed.", cpu.hartid, ssr_id);
                         warn!("index != bound : {:?} != {:?}", ssr.index[idx], ssr.bound[idx]);
                     }
