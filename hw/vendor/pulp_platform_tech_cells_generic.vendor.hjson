@@ -7,14 +7,13 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/tech_cells_generic.git",
-    rev: "v0.2.9",
+    rev: "d630579ee989bcef62414373fca3a4854e504bbb",
   },
 
   patch_dir: "patches/pulp_platform_tech_cells_generic",
 
   exclude_from_upstream: [
     "scripts",
-    "src/deprecated",
     "ips_list.yml",
     "src_files.yml"
   ]
