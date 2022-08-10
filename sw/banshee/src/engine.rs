@@ -460,17 +460,34 @@ impl Engine {
             let ssr_vec = &cpu.state.ssrs;
             let mut ssr_id = 0;
             for ssr in ssr_vec {
-                for idx in 0 .. ssr.index.len() {
+                for idx in 0..ssr.index.len() {
                     if ssr.index[idx] != ssr.bound[idx] && ssr.index[idx] != 0 {
-                        warn!("Final state hart {}: SSR {} NOT fully consumed.", cpu.hartid, ssr_id);
-                        warn!("index != bound : {:?} != {:?}", ssr.index[idx], ssr.bound[idx]);
+                        warn!(
+                            "Final state hart {}: SSR {} NOT fully consumed.",
+                            cpu.hartid, ssr_id
+                        );
+                        warn!(
+                            "index != bound : {:?} != {:?}",
+                            ssr.index[idx], ssr.bound[idx]
+                        );
                     }
                 }
-                if ((ssr.dims != 0) && !(ssr.done)){
-                    trace!("Final state hart {}: SSR {} NOT fully consumed.", cpu.hartid, ssr_id);
-                    warn!("Final state hart {}: SSR {} NOT fully consumed.", cpu.hartid, ssr_id);
-                } else if((ssr.dims != 0) && ssr.done) {
-                    trace!("Final state hart {}: SSR {} fully consumed.", cpu.hartid, ssr_id);
+                if ((ssr.dims != 0) && !(ssr.done)) {
+                    trace!(
+                        "Final state hart {}: SSR {} NOT fully consumed.",
+                        cpu.hartid,
+                        ssr_id
+                    );
+                    warn!(
+                        "Final state hart {}: SSR {} NOT fully consumed.",
+                        cpu.hartid, ssr_id
+                    );
+                } else if ((ssr.dims != 0) && ssr.done) {
+                    trace!(
+                        "Final state hart {}: SSR {} fully consumed.",
+                        cpu.hartid,
+                        ssr_id
+                    );
                 } else {
                     trace!("Final state hart {}: SSR {} not used.", cpu.hartid, ssr_id);
                 }
