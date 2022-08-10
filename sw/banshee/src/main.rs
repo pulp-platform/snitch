@@ -21,7 +21,6 @@ use std::{
     fs,
     fs::File,
     io::prelude::*,
-    io::{BufReader, ErrorKind, Read, Seek, SeekFrom, Write},
     num::ParseIntError,
     os::raw::c_int,
     path::Path,
@@ -41,13 +40,9 @@ pub mod tran;
 pub mod util;
 
 use crate::configuration::*;
-use crate::dram_preload::*;
 use crate::engine::*;
-use crate::readmem::{readmem, ContentType};
 
-use bytebuffer::ByteBuffer;
 use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
-use to_binary::{BinaryError, BinaryString};
 
 fn main() -> Result<()> {
     // Parse the command line arguments.
