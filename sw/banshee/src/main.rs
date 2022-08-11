@@ -16,16 +16,8 @@ use llvm_sys::{
 };
 
 use std::{
-    collections::HashMap,
-    ffi::CString,
-    fs,
-    fs::File,
-    io::prelude::*,
-    num::ParseIntError,
-    os::raw::c_int,
-    path::Path,
-    ptr::null_mut,
-    str::FromStr,
+    collections::HashMap, ffi::CString, fs, fs::File, io::prelude::*, num::ParseIntError,
+    os::raw::c_int, path::Path, ptr::null_mut, str::FromStr,
 };
 
 pub mod bootroms;
