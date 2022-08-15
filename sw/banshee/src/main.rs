@@ -333,7 +333,6 @@ fn main() -> Result<()> {
         // turn the string into a u64
         let mut mem_offset = u64::from_str_radix(memory_offset, 16).unwrap();
         trace!("Train labels starts at address: 0x{:x}", mem_offset);
-        let dtype = "U32";
         let train_labels = dram_preload::bin_u32_read(bin_path, mem_offset).unwrap();
         let train_labels_length = train_labels.len() as u64;
         let mut mem = engine.memory.lock().unwrap();
