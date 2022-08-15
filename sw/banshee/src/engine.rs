@@ -491,7 +491,6 @@ impl Engine {
                 } else {
                     trace!("Final state hart {}: SSR {} not used.", cpu.hartid, ssr_id);
                 }
-                // trace!("Final state hart {}: SSR dim(s) {:#?}, SSR done? {:#?}", cpu.hartid, ssr.dims, ssr.done);
                 ssr_id += 1;
             }
         }
