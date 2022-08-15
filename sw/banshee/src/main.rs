@@ -308,7 +308,7 @@ fn main() -> Result<()> {
 
         trace!("Train data starts at address: 0x{:x}", mem_offset);
 
-        let train_data = dram_preload::bin_read(bin_path, mem_offset).unwrap();
+        let train_data = dram_preload::generic_bin_read::<4>(bin_path, mem_offset).unwrap();
 
         let train_data_length = train_data.len() as u64;
 
@@ -333,7 +333,7 @@ fn main() -> Result<()> {
         // turn the string into a u64
         let mut mem_offset = u64::from_str_radix(memory_offset, 16).unwrap();
         trace!("Train labels starts at address: 0x{:x}", mem_offset);
-        let train_labels = dram_preload::bin_u32_read(bin_path, mem_offset).unwrap();
+        let train_labels = dram_preload::generic_bin_read::<8>(bin_path, mem_offset).unwrap();
         let train_labels_length = train_labels.len() as u64;
         let mut mem = engine.memory.lock().unwrap();
         mem.extend(train_labels);
