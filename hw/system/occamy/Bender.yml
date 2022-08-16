@@ -22,6 +22,8 @@ dependencies:
   apb: {path: ../../vendor/pulp_platform_apb}
   apb_timer: {path: ../../vendor/pulp_platform_apb_timer}
   axi: {path: ../../vendor/pulp_platform_axi}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  register_interface: {path: ../../vendor/pulp_platform_register_interface}
 
 sources:
 # Level 0:
