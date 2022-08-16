@@ -9,7 +9,8 @@ package:
   - Thomas Benz <tbenz@iis.ee.ethz.ch>
 
 dependencies:
-  snitch-cluster: {path: ../../ip/snitch_cluster}
+  snitch_cluster: {path: ../../ip/snitch_cluster}
+  axi: {path: ../../vendor/pulp_platform_axi}
   test: {path: ../../ip/test}
 
 sources:
