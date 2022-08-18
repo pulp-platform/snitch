@@ -60,12 +60,10 @@ sources:
   # Level 0 (generated, see README for regeneration)
   - src/gpio/rtl/gpio_reg_pkg.sv
   - src/i2c/rtl/i2c_reg_pkg.sv
-  - src/rv_plic/rtl/rv_plic_reg_pkg.sv
   - src/spi_host/rtl/spi_host_reg_pkg.sv
   # Level 1 (generated, see README for regeneration)
   - src/gpio/rtl/gpio_reg_top.sv
   - src/i2c/rtl/i2c_reg_top.sv
-  - src/rv_plic/rtl/rv_plic_reg_top.sv
   - src/spi_host/rtl/spi_host_reg_top.sv
   # Level 2
   - src/i2c/rtl/i2c_fsm.sv
@@ -87,4 +85,3 @@ sources:
   - src/gpio/rtl/gpio.sv
   - src/i2c/rtl/i2c.sv
   - src/spi_host/rtl/spi_host.sv
-  - src/rv_plic/rtl/rv_plic.sv
