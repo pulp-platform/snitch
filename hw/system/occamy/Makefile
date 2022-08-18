@@ -86,8 +86,8 @@ update-clint:
 update-plic:
 	@mkdir -p src/rv_plic
 	@echo "[REGGEN]  Generate PLIC"
-	@$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv
-	@$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
+	@$(ROOT)/hw/vendor/pulp_platform_opentitan_peripherals/src/rv_plic/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(ROOT)/hw/vendor/pulp_platform_opentitan_peripherals/src/rv_plic/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv
+	@$(ROOT)/hw/vendor/pulp_platform_opentitan_peripherals/src/rv_plic/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(ROOT)/hw/vendor/pulp_platform_opentitan_peripherals/src/rv_plic/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
 	@$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
 
 # Update generic control register.
