@@ -1,3 +1,4 @@
+`include "common_cells/registers.svh"
 module snitch_ssr_lookahead_fifo #(
   parameter bit          FALL_THROUGH = 1'b0, // fifo is in fall-through mode
   parameter int unsigned DATA_WIDTH   = 3,    // default data width if the fifo is of type logic
@@ -29,7 +30,7 @@ module snitch_ssr_lookahead_fifo #(
   stream_fifo #(
     .FALL_THROUGH (FALL_THROUGH),
     .DATA_WIDTH   (DATA_WIDTH),
-    .DEPTH        (DEPTH),
+    .DEPTH        (DEPTH-1),
     .T            (T)
   ) i_stream_fifo(
     .clk_i,
@@ -45,10 +46,10 @@ module snitch_ssr_lookahead_fifo #(
     .ready_i (fifo_out_ready)
   );
 
-  assign fifo_out_ready = stream_in_ready;   
+  assign fifo_out_ready = stream_in_ready;
   assign stream_in_valid = fifo_out_valid;
 
-  stream_register #(
+  stream_register_new #(
     .T(T)
   ) i_stream_register(
     .clk_i,
@@ -64,6 +65,5 @@ module snitch_ssr_lookahead_fifo #(
   );
 
   assign valid_o = fifo_out_valid ? head_out_valid & fifo_out_valid : head_out_valid;
-   
 endmodule 
                             

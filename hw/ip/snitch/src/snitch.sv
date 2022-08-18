@@ -3487,7 +3487,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
     endcase
   end
 
-  if (Xipu) begin : gen_two_gpr_write
+  if (Xipu) begin : gen_two_gpr_write_ports
     always_comb begin
       gpr_we[0] = 1'b0;
       gpr_waddr[0] = retire_p ? rs1 : rd; 
@@ -3538,7 +3538,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         lsu_pready = 1'b1;
       end
     end
-  end else begin : gen_one_gpr_write
+  end else begin : gen_one_gpr_write_port
     always_comb begin
       gpr_we[0] = 1'b0;
       gpr_waddr[0] = rd; // choose whether to writeback
@@ -3577,8 +3577,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
         acc_pready_o = 1'b1;
       end
     end
-  end 
-   
+  end
+
   assign inst_addr_misaligned = (inst_data_i inside {
     JAL,
     JALR,
