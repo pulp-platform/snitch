@@ -8,8 +8,9 @@ package:
   - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
 dependencies:
-  common_cells: {path: ../../vendor/pulp_platform_common_cells}
-  tech_cells_generic: {path: ../../vendor/pulp_platform_tech_cells_generic}
+  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
+  tech_cells_generic: {git: https://github.com/pulp-platform/tech_cells_generic.git,
+    rev: v0.2.11}
   snitch: {path: ../../ip/snitch}
 
 sources:

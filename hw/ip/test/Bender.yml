@@ -8,11 +8,13 @@ package:
   - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 
 dependencies:
-  axi: {path: ../../vendor/pulp_platform_axi}
+  axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
+  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
   reqrsp_interface: {path: ../reqrsp_interface}
-  axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
-  common_cells: {path: ../../vendor/pulp_platform_common_cells}
-  register_interface: {path: ../../vendor/pulp_platform_register_interface}
+  axi_riscv_atomics: {git: https://github.com/pulp-platform/axi_riscv_atomics.git,
+    rev: v0.6.0}
+  register_interface: {git: https://github.com/pulp-platform/register_interface.git,
+    rev: v0.3.3}
 
 sources:
 # Level 1:

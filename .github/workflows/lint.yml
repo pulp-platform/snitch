@@ -54,7 +54,7 @@ jobs:
         find . \
             -name '*.vendor.hjson' \
             | xargs -n1 util/vendor.py --verbose \
-            && util/git-diff.py --error-msg "::error ::Found differences, please re-vendor."
+            && util/git-diff.py --error-msg "::error::Found differences, please re-vendor."
 
   ######################
   # Opcodes Up-to-Date #
@@ -234,6 +234,10 @@ jobs:
         sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
         tar -C /tools/verible -xf verible.tar.gz --strip-components=1
         echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
+    - name: Install Bender
+      run: |
+        curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh
+        mkdir -p ~/.local/bin && mv bender ~/.local/bin/
     - name: Generated Files Up-to-Date
       env:
         CLANG_FORMAT: clang-format-10
