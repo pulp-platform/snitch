@@ -7,7 +7,7 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/common_cells.git",
-    rev: "v1.24.0",
+    rev: "v1.25.0",
   },
 
   patch_dir: "patches/pulp_platform_common_cells",
