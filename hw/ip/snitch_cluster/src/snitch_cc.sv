@@ -628,9 +628,9 @@ module snitch_cc #(
   // ----
   // SSRs
   // ----
+  tcdm_req_t [NumSsrs-1:0] ssr_req;
+  tcdm_rsp_t [NumSsrs-1:0] ssr_rsp;
   if (Xssr) begin : gen_ssrs
-    tcdm_req_t [NumSsrs-1:0] ssr_req;
-    tcdm_rsp_t [NumSsrs-1:0] ssr_rsp;
     tcdm_req_t tcdm_req;
     tcdm_rsp_t tcdm_rsp;
 
@@ -804,8 +804,8 @@ module snitch_cc #(
   // Tracer
   // --------------------------
   // pragma translate_off
-  int f;
-  string fn;
+  int f, fp;
+  string fn, fpn;
   logic [63:0] cycle = 0;
   initial begin
     // We need to schedule the assignment into a safe region, otherwise
@@ -817,8 +817,30 @@ module snitch_cc #(
     $system("mkdir logs -p");
     $sformat(fn, "logs/trace_hart_%05x.dasm", hart_id_i);
     f = $fopen(fn, "w");
+    $sformat(fpn, "logs/trace_hart_%05x.pow", hart_id_i);
+    fp = $fopen(fpn, "w");
     $display("[Tracer] Logging Hart %d to %s", hart_id_i, fn);
   end
+
+  typedef struct packed {
+    bit snitch_issue;
+    bit snitch_mcopb;
+    bit snitch_lsu;
+    bit fpss_issue;
+    bit fpss_fpu;
+    bit fpss_lsu;
+    bit dma_issue;
+    bit dma_busy;
+    bit acc_req;
+    bit merged_rreq;
+    bit data_req_o;
+    bit ssr_req_0;
+    bit ssr_req_1;
+    bit ssr_req_2;
+    bit tcdm_req_0;
+    bit tcdm_req_1;
+    bit tcdm_req_2;
+  } extras_pow_t;
 
   // verilog_lint: waive-start always-ff-non-blocking
   always_ff @(posedge clk_i) begin
@@ -827,6 +849,7 @@ module snitch_cc #(
     automatic snitch_pkg::snitch_trace_port_t extras_snitch;
     automatic snitch_pkg::fpu_trace_port_t extras_fpu;
     automatic snitch_pkg::fpu_sequencer_trace_port_t extras_fpu_seq_out;
+    automatic extras_pow_t extras_pow;
 
     if (rst_ni) begin
       extras_snitch = '{
@@ -870,6 +893,28 @@ module snitch_cc #(
         is_seq_insn:  (i_snitch.inst_data_i inside {riscv_instr::FREP_I, riscv_instr::FREP_O})
       };
 
+      extras_pow = '{
+        // Additional ports for activity estimation
+        snitch_issue: !i_snitch.stall,
+        snitch_mcopb: !i_snitch.stall && (i_snitch.opb_select == 8)
+                        && (i_snitch.inst_data_i[31:20] == riscv_instr::CSR_MCYCLE),
+        snitch_lsu:   !i_snitch.stall && (i_snitch.is_load || i_snitch.is_store),
+        fpss_issue:   fpu_trace.acc_q_hs,
+        fpss_fpu:     fpu_trace.acc_q_hs && fpu_trace.use_fpu,
+        fpss_lsu:     fpu_trace.acc_q_hs && (fpu_trace.is_load || fpu_trace.is_store),
+        dma_issue:    dma_qvalid && dma_qready,
+        dma_busy:     axi_dma_busy_o,
+        acc_req:      i_snitch.acc_qvalid_o && i_snitch.acc_qready_i,
+        merged_rreq:  merged_dreq.q_valid && merged_drsp.q_ready,
+        data_req_o:   data_req_o.q_valid && data_rsp_i.q_ready,
+        ssr_req_0:    NumSsrs > 0 ? ssr_req[0].q_valid && ssr_rsp[0].q_ready : 0,
+        ssr_req_1:    NumSsrs > 1 ? ssr_req[1].q_valid && ssr_rsp[1].q_ready : 0,
+        ssr_req_2:    NumSsrs > 2 ? ssr_req[2].q_valid && ssr_rsp[2].q_ready : 0,
+        tcdm_req_0:   TCDMPorts > 0 ? tcdm_req_o[0].q_valid && tcdm_rsp_i[0].q_ready : 0,
+        tcdm_req_1:   TCDMPorts > 1 ? tcdm_req_o[1].q_valid && tcdm_rsp_i[1].q_ready : 0,
+        tcdm_req_2:   TCDMPorts > 2 ? tcdm_req_o[2].q_valid && tcdm_rsp_i[2].q_ready : 0
+      };
+
       if (FPEn) begin
         extras_fpu = fpu_trace;
         if (Xfrep) begin
@@ -879,6 +924,11 @@ module snitch_cc #(
       end
 
       cycle++;
+      // Trace power whenever a flag is high (otherwise assumed 0)
+      if (|extras_pow) begin
+        $sformat(trace_entry, "%t %1d %p\n", $time, cycle, extras_pow);
+        $fwrite(fp, trace_entry);
+      end
       // Trace snitch iff:
       // we are not stalled <==> we have issued and processed an instruction (including offloads)
       // OR we are retiring (issuing a writeback from) a load or accelerator instruction
@@ -918,8 +968,11 @@ module snitch_cc #(
     end
   end
 
+  // Trace power info in every cycle
+
   final begin
     $fclose(f);
+    $fclose(fp);
   end
   // verilog_lint: waive-stop always-ff-non-blocking
   // pragma translate_on
