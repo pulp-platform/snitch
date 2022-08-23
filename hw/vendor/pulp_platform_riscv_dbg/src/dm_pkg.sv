@@ -198,9 +198,9 @@ package dm;
   } dtm_op_e;
 
   typedef enum logic [1:0] {
-    DTM_OK   = 2'h0,
-    DTM_ERR  = 2'h2,
-    DTM_BUSY = 2'h3
+    DTM_SUCCESS = 2'h0,
+    DTM_ERR     = 2'h2,
+    DTM_BUSY    = 2'h3
   } dtm_op_status_e;
 
   typedef struct packed {
@@ -220,9 +220,6 @@ package dm;
     logic         sbaccess16;
     logic         sbaccess8;
   } sbcs_t;
-
-  // TODO: rename DTM_OK above to DTM_SUCCESS and remove this
-  localparam logic [1:0] DTM_SUCCESS = 2'h0;
 
   typedef struct packed {
     logic [6:0]  addr;
