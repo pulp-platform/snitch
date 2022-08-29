@@ -124,6 +124,14 @@ module snitch_cc #(
   output logic                       axi_dma_busy_o,
   output axi_dma_pkg::dma_perf_t     axi_dma_perf_o,
   output dma_events_t                axi_dma_events_o,
+  // Icache events (power tracing only)
+`ifndef SYNTHESIS
+  input snitch_icache_pkg::icache_events_t icache_events_i,
+  input logic                        dma_ext_req_i,
+  input logic                        ich_r_beat_i,
+  input logic                        dma_r_beat_i,
+  input logic                        dma_w_beat_i,
+`endif
   // Core event strobes
   output snitch_pkg::core_events_t   core_events_o,
   input  addr_t                      tcdm_addr_base_i
@@ -831,6 +839,16 @@ module snitch_cc #(
     bit fpss_lsu;
     bit dma_issue;
     bit dma_busy;
+    int unsigned dma_wbytes;
+    bit dma_r_beat;
+    bit dma_w_beat;
+    bit dma_ext_req;
+    bit ich_r_beat;
+    bit l0_miss;
+    bit l0_hit;
+    bit l0_prefetch;
+    bit l0_doub_hit;
+    bit l0_stall;
     bit acc_req;
     bit merged_rreq;
     bit data_req_o;
@@ -903,7 +921,17 @@ module snitch_cc #(
         fpss_fpu:     fpu_trace.acc_q_hs && fpu_trace.use_fpu,
         fpss_lsu:     fpu_trace.acc_q_hs && (fpu_trace.is_load || fpu_trace.is_store),
         dma_issue:    dma_qvalid && dma_qready,
-        dma_busy:     axi_dma_busy_o,
+        dma_busy:     Xdma ? axi_dma_busy_o : 0,
+        dma_wbytes:   Xdma ? axi_dma_events_o.num_bytes_written : 0,
+        dma_r_beat:   Xdma ? dma_r_beat_i : 0,
+        dma_w_beat:   Xdma ? dma_w_beat_i : 0,
+        dma_ext_req:  Xdma ? dma_ext_req_i : 0,
+        ich_r_beat:   ich_r_beat_i,
+        l0_miss:      icache_events_i.l0_miss,
+        l0_hit:       icache_events_i.l0_hit,
+        l0_prefetch:  icache_events_i.l0_prefetch,
+        l0_doub_hit:  icache_events_i.l0_double_hit,
+        l0_stall:     icache_events_i.l0_stall,
         acc_req:      i_snitch.acc_qvalid_o && i_snitch.acc_qready_i,
         merged_rreq:  merged_dreq.q_valid && merged_drsp.q_ready,
         data_req_o:   data_req_o.q_valid && data_rsp_i.q_ready,

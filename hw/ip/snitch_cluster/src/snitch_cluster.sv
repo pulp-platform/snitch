@@ -885,6 +885,13 @@ module snitch_cluster
         .axi_dma_busy_o (),
         .axi_dma_perf_o (),
         .axi_dma_events_o (dma_core_events),
+`ifndef SYNTHESIS
+        .ich_r_beat_i (wide_axi_mst_rsp[ICache].r_valid & wide_axi_mst_req[ICache].r_ready),
+        .dma_r_beat_i (wide_axi_mst_rsp[SDMAMst].r_valid & wide_axi_mst_req[SDMAMst].r_ready),
+        .dma_w_beat_i (wide_axi_mst_req[SDMAMst].w_valid & wide_axi_mst_rsp[SDMAMst].w_ready),
+        .dma_ext_req_i (ext_dma_req.q_valid & ext_dma_rsp.q_ready),
+        .icache_events_i (icache_events[i]),
+`endif
         .core_events_o (core_events[i]),
         .tcdm_addr_base_i (tcdm_start_address)
       );
