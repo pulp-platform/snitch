@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/pulp-platform/register_interface.git
-    rev: 73de8e51b79f416350229b1d2420b2c527e002b8
+    rev: 1e23b79db80cb89b4d27fdbd10776df33d6a2ff4
   }
 }
