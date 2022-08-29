@@ -8,6 +8,7 @@ package:
 
 dependencies:
   reqrsp_interface: {path: ../reqrsp_interface}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
 
 export_include_dirs:
 - include

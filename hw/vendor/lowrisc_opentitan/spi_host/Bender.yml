@@ -5,6 +5,7 @@ package:
 
 dependencies:
   lowrisc_prim: {path: ../prim}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
 
 sources:
 # Level 0:
