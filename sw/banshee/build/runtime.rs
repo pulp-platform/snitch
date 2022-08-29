@@ -23,6 +23,7 @@ pub fn build() {
             "-Copt-level=3",
             "-Cdebuginfo=0",
             "-Cpanic=abort",
+            "-Cllvm-args=-opaque-pointers=0",
         ])
         .status()
         .unwrap();
