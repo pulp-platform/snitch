@@ -222,7 +222,7 @@ pub unsafe fn ff_instruction_cvt_from_b(
 
     let rd = match op {
         FfOpCvt::Fcvtf2w => double_to_int((*ff_a8).value),
-        FfOpCvt::Fcvtf2wu => (double_to_uint((*ff_a8).value) as i32),
+        FfOpCvt::Fcvtf2wu => double_to_uint((*ff_a8).value) as i32,
         _ => 0,
     };
 
@@ -312,7 +312,7 @@ pub unsafe fn ff_instruction_cvt_from_h(
     let rd = match op {
         // FfOpCvt::Fmvf2x   => ff_cast(ff_res, ff_a, env_dst),
         FfOpCvt::Fcvtf2w => double_to_int((*ff_a16).value),
-        FfOpCvt::Fcvtf2wu => (double_to_uint((*ff_a16).value) as i32),
+        FfOpCvt::Fcvtf2wu => double_to_uint((*ff_a16).value) as i32,
         _ => 0,
     };
 
