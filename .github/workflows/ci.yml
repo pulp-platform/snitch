@@ -18,7 +18,7 @@ jobs:
         - stable
         - beta
         - nightly
-        - 1.56.1   # minimum supported version
+        - 1.63.0   # minimum supported version
     steps:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
