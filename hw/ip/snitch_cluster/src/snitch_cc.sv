@@ -96,7 +96,7 @@ module snitch_cc #(
   parameter bit          RegisterFPUIn      = 0,
   /// Insert Pipeline registers immediately after FPU datapath
   parameter bit          RegisterFPUOut     = 0,
-  snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
+  parameter snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
   /// Derived parameter *Do not override*
   parameter int unsigned TCDMPorts = (NumSsrs > 1 ? NumSsrs : 1),
   parameter type addr_t = logic [AddrWidth-1:0],

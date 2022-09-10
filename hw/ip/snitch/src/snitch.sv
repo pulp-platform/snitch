@@ -54,7 +54,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   parameter int unsigned NumIntOutstandingMem = 0,
   parameter int unsigned NumDTLBEntries = 0,
   parameter int unsigned NumITLBEntries = 0,
-  snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
+  parameter snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
   /// Derived parameter *Do not override*
   parameter type addr_t = logic [AddrWidth-1:0],
   parameter type data_t = logic [DataWidth-1:0]
