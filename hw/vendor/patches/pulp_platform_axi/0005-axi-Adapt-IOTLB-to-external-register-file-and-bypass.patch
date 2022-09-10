@@ -172,12 +172,11 @@ index e600b90..38a7fa4 100644
    ) i_axi_tlb (
      .clk_i,
      .rst_ni,
-@@ -371,7 +345,9 @@ module axi_tlb_intf #(
+@@ -371,7 +345,7 @@ module axi_tlb_intf #(
      .mst_req_o  ( mst_req   ),
      .mst_resp_i ( mst_resp  ),
-     .cfg_req_i  ( cfg_req   ),
+-    .cfg_req_i  ( cfg_req   ),
 -    .cfg_resp_o ( cfg_resp  )
-+    .cfg_resp_o ( cfg_resp  ),
 +    .entries_i,
 +    .bypass_i
    );
