@@ -344,8 +344,6 @@ module axi_tlb_intf #(
     .slv_resp_o ( slv_resp  ),
     .mst_req_o  ( mst_req   ),
     .mst_resp_i ( mst_resp  ),
-    .cfg_req_i  ( cfg_req   ),
-    .cfg_resp_o ( cfg_resp  ),
     .entries_i,
     .bypass_i
   );
