@@ -52,11 +52,11 @@ This is the current boot flow for Linux on Occamy:
 
 ### Compiling Linux and U-Boot
 
-First, we need to compile the required SW binaries and images, including Linux, OpenSBI and U-Boot. For that, navigate to a suitable location, clone and build the `occamy` branch of [Ariane SDK](https://github.com/pulp-platform/ariane-sdk/tree/occamy) as follows:
+First, we need to compile the required SW binaries and images, including Linux, OpenSBI and U-Boot. For that, navigate to a suitable location, clone and build the `occamy` branch of [CVA6 SDK](https://github.com/openhwgroup/cva6-sdk/tree/occamy) as follows:
 
 ```
-git clone --recursive git@github.com:pulp-platform/ariane-sdk.git
-cd ariane-sdk
+git clone --recursive git@github.com:openhwgroup/cva6-sdk.git
+cd cva6-sdk
 git checkout occamy
 make u-boot/u-boot.itb
 make uImage
@@ -71,11 +71,11 @@ Next, we need to load the required images into the VCU128's SPI flash. `u-boot.i
 For flashing, we provide an example Vivado script (`occamy_vcu128_flash.tcl`). At IIS, after starting `hw_server` on bordcomputer, you can use the following `make` targets to load the images to the appropriate location in flash:
 
 ```
-make flash-u-boot VCU=[01|02] ARIANE_SDK=path/to/ariane-sdk
-make flash-uimage VCU=[01|02] ARIANE_SDK=path/to/ariane-sdk
+make flash-u-boot VCU=[01|02] CVA6_SDK=path/to/cva6-sdk
+make flash-uimage VCU=[01|02] CVA6_SDK=path/to/cva6-sdk
 ```
 
-`VCU` specifies which VCU128 we want to target (`vcu-01` or `vcu-02`, default `01`). `ARIANE_SDK` defaults to `path/to/snitch/../ariane-sdk`.
+`VCU` specifies which VCU128 we want to target (`vcu-01` or `vcu-02`, default `01`). `CVA6_SDK` defaults to `path/to/snitch/../cva6-sdk`.
 
 
 ### Programming the FPGA
