@@ -134,7 +134,6 @@ clean-sw:
 # Phony #
 #########
 clean:
-	rm -rf ${VLT_BUILDDIR} Bender.lock .bender/
-	# work/
+	rm -rf ${VLT_BUILDDIR} ${VSIM_BUILDDIR} work work-vcs Bender.lock .bender/ bin/ ${MKFILE_DIR}generated
 
-.PHONY: clean vlt.build vsim.build all
+.PHONY: clean all
