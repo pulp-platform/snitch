@@ -31,7 +31,7 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
  * @param setup_ssr Set to non-zero if the problem size changed since the last call or the SSRs have
  * been used with a different configuration. Set to zero for faster execution
  */
-void axpy(uint32_t n, double *alpha, double *dx, double *dy, uint32_t setup_ssr);
+uint32_t axpy(uint32_t n, double *alpha, double *dx, double *dy, uint32_t setup_ssr);
 
 /**
  * @brief Test `axpy` and return number of mismatches
