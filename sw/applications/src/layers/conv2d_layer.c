@@ -24,6 +24,11 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
 
     const uint32_t cluster_per_quadrant = min(4, cluster_num);
 
+    // The factor by which we unroll computation in the gemm kernel. This
+    // mitigates RAW hazards by computing `gemm_unroll` output channels per
+    // core in parallel
+    const uint32_t gemm_unroll = 8;
+
     // typedef struct cluster_mem_alloc_struct {
     //     double im2col[2][compute_num][l.FW*l.FH*l.TILE_CI+1];
     //     double ifmap[2][l.FH][compute_num + l.FW - 1][l.TILE_CI];
@@ -43,12 +48,12 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
     uint32_t ifmap_stride = ifmap_row_stride * l.FH;
     uint32_t ifmap_size = 2 * ifmap_stride;
 
-    // weights[compute_num][l.FH*l.FW*l.TILE_CI+1];
+    // weights[gemm_unroll][l.FH*l.FW*l.TILE_CI+1];
     uint32_t weights_co_stride = l.FH*l.FW*l.TILE_CI+1;
-    uint32_t weights_size = compute_num * weights_co_stride;
+    uint32_t weights_size = gemm_unroll * weights_co_stride;
 
-    // ofmap[2][compute_num][8];
-    uint32_t ofmap_co_stride = 8;
+    // ofmap[2][compute_num][gemm_unroll];
+    uint32_t ofmap_co_stride = gemm_unroll;
     uint32_t ofmap_stride = compute_num * ofmap_co_stride;
     uint32_t ofmap_size = 2 * ofmap_stride;
 
@@ -76,8 +81,9 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
 
     benchmark_get_cycle();
 
-    // Distribute output channels across clusters
-    for (uint32_t co = cluster_id*compute_num; co < l.CO; co+=cluster_num*compute_num){
+    // Distribute output channels across clusters where each cluster computes `gemm_unroll`
+    // output channels per core in parallel
+    for (uint32_t co = cluster_id*gemm_unroll; co < l.CO; co+=cluster_num*gemm_unroll){
 
         // Tile CI dimension
         for (uint32_t ci = 0; ci < l.CI; ci+= l.TILE_CI) {
@@ -91,8 +97,7 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
 
                 // Weights are stored in CO x FH x FW x CI format with additional padding
                 // (CI + 1) to prevent banking conflicts
-                // a cluster of 8 cores needs 8 sets of filters, each core computes an output channel
-                for (uint32_t _co = 0; _co < 8; _co++) {
+                for (uint32_t _co = 0; _co < gemm_unroll; _co++) {
 
                     if (l.TILE_CI == l.CI) {
                         snrt_dma_txid_t weight_txid = \
@@ -147,8 +152,8 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                             snrt_dma_txid_t ofmap_txid = \
                                 snrt_dma_start_2d(&ofmap[write_buf * ofmap_stride], /* dst */
                                                   &l.ofmap[(oh*l.OW+ow)*l.CO + co], /* src */
-                                                  sizeof(double)*8, /* size */
-                                                  sizeof(double)*8, /* dst_stride */
+                                                  sizeof(double)*gemm_unroll, /* size */
+                                                  sizeof(double)*gemm_unroll, /* dst_stride */
                                                   sizeof(double)*l.CO, /* src_stride */
                                                   n_ofmap_pixel_read); /* repetitions */
                             snrt_dma_wait_all();
@@ -274,9 +279,9 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                             snrt_dma_txid_t ofmap_txid = \
                                 snrt_dma_start_2d(&l.ofmap[(oh_prev*l.OW+ow_prev)*l.CO + co], /* dst */
                                                   &ofmap[!read_buf * ofmap_stride], /* src */
-                                                  sizeof(double)*8, /* size */
+                                                  sizeof(double)*gemm_unroll, /* size */
                                                   sizeof(double)*l.CO, /* dst_stride */
-                                                  sizeof(double)*8, /* src_stride */
+                                                  sizeof(double)*gemm_unroll, /* src_stride */
                                                   n_ofmap_pixel_write); /* repetitions */
                             snrt_dma_wait_all();
 
@@ -303,19 +308,19 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                             ccfg->stmps[--ccfg->max_stmps] = read_csr(mcycle);
 
                         // Each core performs a matrix multiplication on the im2col buffer
-                        // Of size (1 x FHxFWxCI) x (FHxFWxCI x 8), 8 represents CO and is the
+                        // Of size (1 x FHxFWxCI) x (FHxFWxCI x gemm_unroll), gemm_unroll represents CO and is the
                         // unrolling factor needed to prevent RAW conflicts.
-                        // Thus, a  call to `gemm` computes 8 out channels for 1 out pixel over TILCE_CI
+                        // Thus, a  call to `gemm` computes gemm_unroll out channels for 1 out pixel over TILCE_CI
                         // input channels. If CI == TILE_CI, this call completely computes this output
                         // pixel. CI/TILE_CI calls are required for a complete output pixel.
-                        // Nmm_tot = CO/8 * CI/TILE_CI * OH * OW
+                        // Nmm_tot = CO/(compute_num*cluster_num) * CI/TILE_CI * OH * OW/gemm_unroll
                         if (ow + compute_id < l.OW) {
 
                             uint32_t setup_SSR = (ci == 0 && ow == 0 && _oh == 0)? 1 : 0;
 
                             if (ci != 0 && l.TILE_CI != l.CI) {
                                 const uint32_t alpha = 0;
-                                gemm_fp64_ssr_frep(1, 8, l.FH*l.FW*l.TILE_CI,
+                                gemm_fp64_ssr_frep(1, gemm_unroll, l.FH*l.FW*l.TILE_CI,
                                                  &im2col[read_buf * im2col_mat_stride + compute_id * im2col_row_stride], 0, l.TA,
                                                  weights, l.FH*l.FW*l.TILE_CI+1, l.TB,
                                                  &ofmap[write_buf * ofmap_stride + compute_id * ofmap_co_stride], 0, &alpha, setup_SSR);
@@ -323,7 +328,7 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                             }
                             else {
                                 const uint32_t alpha = 1;
-                                gemm_fp64_ssr_frep(1, 8, l.FH*l.FW*l.TILE_CI,
+                                gemm_fp64_ssr_frep(1, gemm_unroll, l.FH*l.FW*l.TILE_CI,
                                                    &im2col[read_buf * im2col_mat_stride + compute_id * im2col_row_stride], 0, l.TA,
                                                    weights, l.FH*l.FW*l.TILE_CI+1, l.TB,
                                                    &ofmap[write_buf * ofmap_stride + compute_id * ofmap_co_stride], 0, &alpha, setup_SSR);
@@ -352,9 +357,9 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                 snrt_dma_txid_t ofmap_txid = \
                     snrt_dma_start_2d(&l.ofmap[(oh_prev*l.OW+ow_prev)*l.CO+co], /* dst */
                                       &ofmap[!read_buf * ofmap_stride], /* src */
-                                      sizeof(double)*8, /* size */
+                                      sizeof(double)*gemm_unroll, /* size */
                                       sizeof(double)*l.CO, /* dst_stride */
-                                      sizeof(double)*8, /* src_stride */
+                                      sizeof(double)*gemm_unroll, /* src_stride */
                                       min(compute_num, l.OW - ow_prev)); /* repetitions */
                 snrt_dma_wait_all();
             }
