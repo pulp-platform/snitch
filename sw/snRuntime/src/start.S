@@ -182,6 +182,7 @@ snrt.crt0.init_interrupt:
 
     # Synchronize cores.
 snrt.crt0.pre_barrier:
+    call      _snrt_hier_wakeup
     call      _snrt_cluster_barrier
 
     # Execute the main function.
