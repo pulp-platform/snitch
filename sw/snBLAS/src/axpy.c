@@ -140,14 +140,14 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
                        &l1_dy[element_start + bsel * buf_stride], ni == 0);
         t_stop = read_csr(mcycle);
 
-        // if (ccfg->cycle_start == 0)
-        //   ccfg->cycle_start = t_start;
-        // if (ccfg->max_stmps)
-        //   ccfg->stmps[--ccfg->max_stmps] = t_start;
+        if (ccfg->cycle_start == 0)
+          ccfg->cycle_start = t_start;
+        if (ccfg->max_stmps)
+          ccfg->stmps[--ccfg->max_stmps] = t_start;
 
-        // ccfg->cycle_end = t_stop;
-        // if (ccfg->max_stmps)
-        //   ccfg->stmps[--ccfg->max_stmps] = t_stop;
+        ccfg->cycle_end = t_stop;
+        if (ccfg->max_stmps)
+          ccfg->stmps[--ccfg->max_stmps] = t_stop;
 
         // switch buffers
         bsel = !bsel;
