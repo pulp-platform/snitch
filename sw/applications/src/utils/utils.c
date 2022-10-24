@@ -24,13 +24,13 @@ uint32_t benchmark_get_cycle() { return read_csr(mcycle); }
  * @brief start tracking of dma performance region
  *
  */
-void snrt_dma_start_tracking() { asm volatile ("dmstati t0, 1"); }
+void snrt_dma_start_tracking() { asm volatile ("dmstati zero, 1"); }
 
 /**
  * @brief stop tracking of dma performance region
  *
  */
-void snrt_dma_stop_tracking() { asm volatile ("dmstati t0, 3"); }
+void snrt_dma_stop_tracking() { asm volatile ("dmstati zero, 3"); }
 
 /**
  * @brief A nested function called in `check_layer` by the compute cores.
@@ -174,6 +174,7 @@ uint32_t check_layer(layer l, double *checksum) {
  * @param len number of bytes, must be multiple of DMA bus-width
  */
 void dma_memset(void *ptr, uint8_t value, uint32_t len) {
+    // TODO: Sanitize for len < 64 and remainder bytes
     // set first 64bytes to value
     // memset(ptr, value, 64);
     uint8_t *p = ptr;
