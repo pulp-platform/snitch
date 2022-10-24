@@ -107,23 +107,41 @@ __thread uint32_t cluster_dm_core_idx;
 static void wfi_dm(uint32_t cluster_core_idx);
 static void wake_dm(void);
 
-//================================================================================
-// Debug
-//================================================================================
-// #define DM_DEBUG_LEVEL 100
+//=============================================================================
+// debug
+//=============================================================================
+
+#define DM_DEBUG_LEVEL 100
 
 #ifdef DM_DEBUG_LEVEL
-#include "printf.h"
-#define _DM_PRINTF(...)             \
-    if (1) {                        \
-        printf("[dm] "__VA_ARGS__); \
-    }
-#define DM_PRINTF(d, ...)        \
-    if (DM_DEBUG_LEVEL >= d) {   \
-        _DM_PRINTF(__VA_ARGS__); \
-    }
+#define DEBUG
+#include "debug.h"
+#define PR_DEBUG(...)                                                                                 \
+  if (DM_DEBUG_LEVEL >= LOG_DEBUG) {                                                              \
+    snrt_debug("[kmpc] "__VA_ARGS__);                                                              \
+  }
+#define PR_TRACE(...)                                                                                 \
+  if (DM_DEBUG_LEVEL >= LOG_TRACE) {                                                              \
+    snrt_trace("[kmpc] "__VA_ARGS__);                                                              \
+  }
+#define PR_INFO(...)                                                                                  \
+  if (DM_DEBUG_LEVEL >= LOG_INFO) {                                                                \
+    snrt_info("[kmpc] "__VA_ARGS__);                                                               \
+  }
+#define PR_WARN(...)                                                                                  \
+  if (DM_DEBUG_LEVEL >= LOG_WARN) {                                                                \
+    snrt_warn("[kmpc] "__VA_ARGS__);                                                               \
+  }
+#define PR_ERROR(...)                                                                                 \
+  if (DM_DEBUG_LEVEL >= LOG_ERROR) {                                                              \
+    snrt_error("[kmpc] "__VA_ARGS__);                                                              \
+  }
 #else
-#define DM_PRINTF(d, ...)
+#define PR_TRACE(d, ...)
+#define PR_DEBUG(d, ...)
+#define PR_WARN(d, ...)
+#define PR_INFO(d, ...)
+#define PR_ERROR(d, ...)
 #endif
 
 //================================================================================
@@ -153,7 +171,7 @@ void dm_main(void) {
     uint32_t do_exit = 0;
     uint32_t cluster_core_idx = snrt_cluster_core_idx();
 
-    DM_PRINTF(10, "enter main\n");
+    PR_DEBUG("enter main\n");
 
     while (!do_exit) {
         /// New transaction to issue?
@@ -165,11 +183,11 @@ void dm_main(void) {
             t = &dm_p->queue[dm_p->queue_back];
 
             if (t->twod) {
-                DM_PRINTF(10, "start twod\n");
+                PR_DEBUG("start twod\n");
                 __builtin_sdma_start_twod(t->src, t->dst, t->size, t->sstrd,
                                           t->dstrd, t->nreps, t->cfg);
             } else {
-                DM_PRINTF(10, "start oned\n");
+                PR_DEBUG("start oned\n");
                 __builtin_sdma_start_oned(t->src, t->dst, t->size, t->cfg);
             }
 
@@ -185,7 +203,7 @@ void dm_main(void) {
                     // check status and set pvalid if DMA is idle and clear
                     // request
                     if (__builtin_sdma_stat(DM_STATUS_BUSY) == 0) {
-                        DM_PRINTF(50, "idle\n");
+                        PR_TRACE("idle\n");
                         dm_p->stat_pvalid = 1;
                         dm_p->stat_q = 0;
                     }
@@ -194,7 +212,7 @@ void dm_main(void) {
                     do_exit = 1;
                     break;
                 case STAT_READY:
-                    DM_PRINTF(50, "ready\n");
+                    PR_TRACE("ready\n");
                     dm_p->stat_pvalid = 1;
                     dm_p->stat_q = 0;
                     break;
@@ -206,7 +224,7 @@ void dm_main(void) {
             wfi_dm(cluster_core_idx);
         }
     }
-    DM_PRINTF(10, "dm: exit\n");
+    PR_DEBUG("dm: exit\n");
 #ifdef DM_USE_GLOBAL_CLINT
     snrt_interrupt_disable(IRQ_M_SOFT);
 #else
@@ -219,7 +237,7 @@ void dm_memcpy_async(void *dest, const void *src, size_t n) {
     uint32_t s;
     volatile dm_task_t *t;
 
-    DM_PRINTF(10, "dm_memcpy_async %#x -> %#x size %d\n", src, dest,
+    PR_DEBUG("dm_memcpy_async %#x -> %#x size %d\n", src, dest,
               (uint32_t)n);
 
     // poll queue size
@@ -249,7 +267,7 @@ void dm_memcpy2d_async(uint64_t src, uint64_t dst, uint32_t size,
     uint32_t s;
     volatile dm_task_t *t;
 
-    DM_PRINTF(10, "dm_memcpy2d_async %#x -> %#x size %d\n", src, dst,
+    PR_DEBUG("dm_memcpy2d_async %#x -> %#x size %d\n", src, dst,
               (uint32_t)size);
 
     // poll queue size

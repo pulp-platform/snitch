@@ -23,6 +23,25 @@
 // #define EU_USE_GLOBAL_CLINT
 
 //================================================================================
+// debug
+//================================================================================
+#define EU_DEBUG_LEVEL 10
+#ifdef EU_DEBUG_LEVEL
+#define DEBUG
+#include "debug.h"
+#define _EU_PRINTF(...)             \
+    if (1) {                        \
+        snrt_trace("[eu] "__VA_ARGS__); \
+    }
+#define EU_PRINTF(d, ...)        \
+    if (EU_DEBUG_LEVEL >= d) {   \
+        _EU_PRINTF(__VA_ARGS__); \
+    }
+#else
+#define EU_PRINTF(d, ...)
+#endif
+
+//================================================================================
 // Types
 //================================================================================
 
@@ -113,7 +132,7 @@ uint32_t eu_get_workers_in_wfi() {
  *
  */
 void eu_print_status() {
-    EU_PRINTF(0, "workers_in_loop=%d\n", eu_p->workers_in_loop);
+    EU_PRINTF(0, "workers_in_loop=%d\r\n", eu_p->workers_in_loop);
 }
 
 /**
@@ -135,7 +154,7 @@ void eu_event_loop(uint32_t cluster_core_idx) {
     snrt_interrupt_enable(IRQ_M_CLUSTER);
 #endif
 
-    EU_PRINTF(0, "#%d entered event loop\n", cluster_core_idx);
+    EU_PRINTF(0, "#%d entered event loop\r\n", cluster_core_idx);
 
     while (1) {
         // check for exit
@@ -153,7 +172,7 @@ void eu_event_loop(uint32_t cluster_core_idx) {
             // hart will reset eu_p->e.nthreads as soon as all workers finished
             // which might cause a race condition
             nthds = eu_p->e.nthreads;
-            EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\n", eu_p->e.fn,
+            EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
                       ((uint32_t *)eu_p->e.data)[0]);
             // call
             eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
@@ -185,7 +204,7 @@ int eu_dispatch_push(void (*fn)(void *, uint32_t), uint32_t argc, void *data,
     eu_p->e.argc = argc;
     eu_p->e.nthreads = nthreads;
 
-    EU_PRINTF(10, "eu_dispatch_push success, workers %d in loop %d\n", nthreads,
+    EU_PRINTF(10, "eu_dispatch_push success, workers %d in loop %d\r\n", nthreads,
               eu_p->workers_in_loop);
 
     return 0;
@@ -199,7 +218,7 @@ void eu_run_empty(uint32_t core_idx) {
     unsigned nfini, scratch;
     scratch = eu_p->e.nthreads;
     if (!scratch) return;
-    EU_PRINTF(10, "eu_run_empty enter: q size %d\n", eu_p->e.nthreads);
+    EU_PRINTF(10, "enter: q size %d\r\n", eu_p->e.nthreads);
 
     eu_p->e.fini_count = 0;
     if (scratch > 1) wake_workers();
@@ -207,7 +226,7 @@ void eu_run_empty(uint32_t core_idx) {
     // Am i also part of the team?
     if (core_idx < eu_p->e.nthreads) {
         // call
-        EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\n", eu_p->e.fn,
+        EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
                   ((uint32_t *)eu_p->e.data)[0]);
         eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
     }
@@ -223,7 +242,7 @@ void eu_run_empty(uint32_t core_idx) {
     // stop workers from re-executing the task
     eu_p->e.nthreads = 0;
 
-    EU_PRINTF(10, "eu_run_empty exit\n");
+    EU_PRINTF(10, "exit\r\n");
 }
 
 /**

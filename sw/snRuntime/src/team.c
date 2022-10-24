@@ -9,6 +9,9 @@
 __thread struct snrt_team *_snrt_team_current;
 __thread uint32_t _snrt_core_idx;
 
+// Global log level
+uint32_t snrt_log_level = 0;
+
 const uint32_t _snrt_team_size __attribute__((section(".rodata"))) =
     sizeof(struct snrt_team_root);
 

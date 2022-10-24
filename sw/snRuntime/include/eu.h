@@ -65,21 +65,3 @@ void eu_mutex_release();
  */
 uint32_t eu_get_workers_in_loop();
 uint32_t eu_get_workers_in_wfi();
-
-//================================================================================
-// debug
-//================================================================================
-
-#ifdef EU_DEBUG_LEVEL
-#include "printf.h"
-#define _EU_PRINTF(...)             \
-    if (1) {                        \
-        printf("[eu] "__VA_ARGS__); \
-    }
-#define EU_PRINTF(d, ...)        \
-    if (EU_DEBUG_LEVEL >= d) {   \
-        _EU_PRINTF(__VA_ARGS__); \
-    }
-#else
-#define EU_PRINTF(d, ...)
-#endif

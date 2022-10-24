@@ -11,6 +11,43 @@
 #include "encoding.h"
 #include "omp.h"
 
+//=============================================================================
+// debug
+//=============================================================================
+
+#define KMP_LOG_LEVEL 100
+
+#ifdef KMP_LOG_LEVEL
+#define DEBUG
+#include "debug.h"
+#define PR_DEBUG(...)                                                                                 \
+  if (KMP_LOG_LEVEL >= LOG_DEBUG) {                                                              \
+    snrt_debug("[kmpc] "__VA_ARGS__);                                                              \
+  }
+#define PR_TRACE(...)                                                                                 \
+  if (KMP_LOG_LEVEL >= LOG_TRACE) {                                                              \
+    snrt_trace("[kmpc] "__VA_ARGS__);                                                              \
+  }
+#define PR_INFO(...)                                                                                  \
+  if (KMP_LOG_LEVEL >= LOG_INFO) {                                                                \
+    snrt_info("[kmpc] "__VA_ARGS__);                                                               \
+  }
+#define PR_WARN(...)                                                                                  \
+  if (KMP_LOG_LEVEL >= LOG_WARN) {                                                                \
+    snrt_warn("[kmpc] "__VA_ARGS__);                                                               \
+  }
+#define PR_ERROR(...)                                                                                 \
+  if (KMP_LOG_LEVEL >= LOG_ERROR) {                                                              \
+    snrt_error("[kmpc] "__VA_ARGS__);                                                              \
+  }
+#else
+#define PR_TRACE(d, ...)
+#define PR_DEBUG(d, ...)
+#define PR_WARN(d, ...)
+#define PR_INFO(d, ...)
+#define PR_ERROR(d, ...)
+#endif
+
 typedef void (*__task_type32)(_kmp_ptr32, _kmp_ptr32, _kmp_ptr32);
 typedef void (*__task_type64)(_kmp_ptr64, _kmp_ptr64, _kmp_ptr64);
 
@@ -37,9 +74,16 @@ static void __microtask_wrapper(void *arg, uint32_t argc) {
     OMP_PROF(if (snrt_hartid() == 1) omp_prof->fork_oh =
                  cycle - omp_prof->fork_oh);
 
+    if(snrt_hartid() == 1) {
+      PR_DEBUG("fn %08x argc %d\r\n", fn, argc);
+      for(unsigned i = 0; i < argc; ++i)
+        // PR_DEBUG("  p_argv %d = %08x *%08x **%08x\r\n", i, (uint32_t)p_argv[i], *(uint32_t*)p_argv[i], **(uint32_t**)p_argv[i] );
+        PR_DEBUG("  p_argv %d = %08x\r\n", i, (uint32_t)p_argv[i]);
+    }
+
     switch (argc) {
         default:
-            // printf("Too many args to __microtask_wrapper: %d!\n", argc);
+            PR_ERROR("Too many args to __microtask_wrapper: %d!\r\n", argc);
             snrt_exit(-1);
         case 0:
             fn(&gtid, id_addr);
@@ -114,7 +158,7 @@ kmp_int32 __kmpc_global_thread_num(ident_t *loc) {
     (void)loc;
     // return csr value of hartware thread ID
     kmp_int32 gtid = read_csr(mhartid);
-    KMP_PRINTF(10, "__kmpc_global_thread_num: T#%d\n", gtid);
+    PR_DEBUG("__kmpc_global_thread_num: T#%d\r\n", gtid);
     return gtid;
 }
 
@@ -123,7 +167,7 @@ void __kmpc_barrier(ident_t *loc, kmp_int32 tid) {
     (void)tid;
     _OMP_T *_this = omp_getData();
     uint32_t ret;
-    KMP_PRINTF(50, "barrier numThreads: %d\n", (uint32_t)_this->numThreads);
+    PR_TRACE("barrier numThreads: %d\r\n", (uint32_t)_this->numThreads);
     snrt_barrier(_this->kmpc_barrier, (uint32_t)_this->numThreads);
 }
 
@@ -141,7 +185,7 @@ void __kmpc_push_num_threads(ident_t *loc, kmp_int32 global_tid,
     (void)loc;
     (void)global_tid;
     (void)num_threads;
-    KMP_PRINTF(20, "__kmpc_push_num_threads: enter T#%d num_threads=%d\n",
+    PR_DEBUG("__kmpc_push_num_threads: enter T#%d num_threads=%d\r\n",
                global_tid, num_threads);
 #ifndef OMPSTATIC_NUMTHREADS
     omp_t *omp = omp_getData();
@@ -166,6 +210,8 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
     (void)loc;
     _OMP_T *omp = omp_getData();
 
+    PR_DEBUG("__kmpc_fork_call: argc=%d\r\n", argc);
+
     OMP_PROF(omp_prof->fork_oh = read_csr(mcycle));
 
     va_list vl;
@@ -182,17 +228,13 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
     va_start(vl, microtask);
     for (int i = 1; i <= argc; ++i) {
         kmpc_args[i] = (_kmp_ptr32)va_arg(vl, _kmp_ptr32);
+        PR_DEBUG("  arg %d = %08x (*%08x)\r\n", i, (uint32_t)kmpc_args[i], *(uint32_t*)kmpc_args[i]);
     }
     va_end(vl);
 
-    KMP_PRINTF(10,
-               "__kmpc_fork_call: argc=%d numthreads=%d omp->numThreads=%d "
-               "microtask @%#x\n",
-               argc, omp->numThreads, omp->numThreads, (uint32_t)microtask);
-
     /// a worker enters this fork call: this means nested parallelism
     if (snrt_cluster_core_idx() != 0) {
-        KMP_PRINTF(0, "error: nested parallelism\n");
+        PR_ERROR("error: nested parallelism\r\n");
         snrt_exit(-1);
         /// TODO: This almost works. The problem is, that the current task in
         /// the EU is not yet completed (due to this thread forking). Correctly,
@@ -242,18 +284,12 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
     kmp_uint32 loopSize = (*pupper - *plower) / incr + 1;
     kmp_int32 globalUpper = *pupper;
 
-    KMP_PRINTF(50,
-               "__kmpc_for_static_init_4 gtid %d schedtype %d plast %#x p[%#x, "
-               "%#x, %#x] incr %d chunk %d\n",
-               gtid, sched, (uint32_t)plastiter, (uint32_t)plower,
-               (uint32_t)pupper, (uint32_t)pstride, incr, chunk);
-    KMP_PRINTF(50, "    plast %4d p[%4d, %4d, %4d]\n", *plastiter, *plower,
-               *pupper, *pstride);
-    KMP_PRINTF(50, "    loopsize %d\n", loopSize);
+    PR_TRACE(
+               "fsi_4 %d %d %d [%d,%d,%d] %d %d\r\n",
+               gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
 
     // chunk size is specified
     if (sched == kmp_sch_static_chunked) {
-        KMP_PRINTF(50, "    sched: static_chunked\n");
         int span = incr * chunk;
         *pstride = span * team->nbThreads;
         *plower = *plower + span * threadNum;
@@ -264,7 +300,6 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
 
     // no specified chunk size
     else if (sched == kmp_sch_static) {
-        KMP_PRINTF(50, "    sched: static\n");
         chunk = loopSize / team->nbThreads;
         int leftOver = loopSize - chunk * team->nbThreads;
 
@@ -279,15 +314,11 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
         if (plastiter != NULL)
             *plastiter = (*pupper == globalUpper && *plower <= globalUpper);
         *pstride = loopSize;
-
-        KMP_PRINTF(50, "    team thds: %d chunk: %d leftOver: %d\n",
-                   team->nbThreads, chunk, leftOver);
     }
 
-    KMP_PRINTF(10,
-               "__kmpc_for_static_init_4 plast %4d p[l %4d, u %4d, i %4d, str "
-               "%4d] chunk %d\n",
-               *plastiter, *plower, *pupper, incr, *pstride, chunk);
+    PR_TRACE(
+               " ->   %d %d %d [%d,%d,%d] %d %d\r\n",
+               gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
 }
 
 /*!
@@ -300,6 +331,11 @@ void __kmpc_for_static_init_4u(ident_t *loc, kmp_int32 gtid,
                                kmp_int32 chunk) {
     kmp_int32 ilower = *plower;
     kmp_int32 iupper = *pupper;
+    if(gtid==0) {
+      PR_TRACE("fsi_4u p[%p,%p,%p,%p] \r\n", plastiter, plower, pupper, pstride);
+    }
+    PR_TRACE("fsi_4u [%"PRIu32",%"PRIu32",%"PRIu32",%"PRId32"]\r\n", *plastiter, *plower, *pupper, *pstride);
+
     __kmpc_for_static_init_4(loc, gtid, schedtype, plastiter, &ilower, &iupper,
                              pstride, incr, chunk);
     *plower = ilower;
@@ -309,10 +345,7 @@ void __kmpc_for_static_init_4u(ident_t *loc, kmp_int32 gtid,
 void __kmpc_for_static_fini(ident_t *loc, kmp_int32 globaltid) {
     (void)loc;
     (void)globaltid;
-    KMP_PRINTF(10, "__kmpc_for_static_fini\n");
-    // TODO: Implement
-    // omp_t *omp = omp_getData();
-    // doBarrier(getTeam(omp));
+    PR_DEBUG("__kmpc_for_static_fini\r\n");
 }
 
 void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
@@ -327,19 +360,13 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
     kmp_uint64 loopSize = (*pupper - *plower) / incr + 1;
     kmp_uint64 globalUpper = *pupper;
 
-    KMP_PRINTF(50,
-               "__kmpc_for_static_init_8u gtid %d schedtype %d incr %" PRId64
-               " chunk %" PRId64 "\n",
-               gtid, sched, incr, chunk);
-    KMP_PRINTF(50,
-               "    plast %" PRIu32 " lo,up,strd = [%" PRIu64 ", %" PRIu64
-               ", %" PRId64 "]\n",
-               *plastiter, *plower, *pupper, *pstride);
-    KMP_PRINTF(50, "    loopsize %" PRIu64 "\n", loopSize);
+    PR_TRACE(
+               "fsi_8u %"PRId32" %"PRId32" %"PRId32" [%"PRIu64",%"PRIu64",%"PRId64"] %"PRId64" %"PRId64"\r\n",
+               gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
 
     // chunk size is specified
     if (sched == kmp_sch_static_chunked) {
-        KMP_PRINTF(50, "    sched: static_chunked\n");
+        PR_TRACE("    sched: static_chunked\r\n");
         kmp_int64 span = incr * chunk;
         *pstride = span * team->nbThreads;
         *plower = *plower + span * threadNum;
@@ -350,7 +377,7 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
 
     // no specified chunk size
     else if (sched == kmp_sch_static) {
-        KMP_PRINTF(50, "    sched: static\n");
+        PR_TRACE("    sched: static\r\n");
         chunk = loopSize / team->nbThreads;
         kmp_int64 leftOver = loopSize - chunk * team->nbThreads;
 
@@ -366,16 +393,17 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
             *plastiter = (*pupper == globalUpper && *plower <= globalUpper);
         *pstride = loopSize;
 
-        KMP_PRINTF(
-            50, "    team thds: %d chunk: %" PRId64 " leftOver: %" PRId64 "\n",
+        PR_TRACE(
+            "    team thds: %d chunk: %" PRId64 " leftOver: %" PRId64 "\r\n",
             team->nbThreads, chunk, leftOver);
     }
 
-    KMP_PRINTF(10,
-               "__kmpc_for_static_init_8u plast %4" PRId32 "p[l %4" PRIu64
-               ", u %4" PRIu64 ", i %4" PRId64 ", str %4" PRId64
-               "] chunk %" PRId64 "\n",
-               *plastiter, *plower, *pupper, incr, *pstride, chunk);
+
+    PR_TRACE(
+               " ->   %"PRId32" %"PRId32" %"PRId32" [%"PRIu64",%"PRIu64",%"PRId64"] %"PRId64" %"PRId64"\r\n",
+               gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
+}
+
 }
 
 //================================================================================
@@ -413,8 +441,8 @@ void __kmpc_dispatch_init_4(ident_t *loc, kmp_int32 gtid,
     // {
     //   eu_mutex_release();
     //   team->core_epoch[core_id]++;
-    //   KMP_PRINTF(10, "__kmpc_dispatch_init_4 core_epoch[%d] =
-    //   %d\n",core_id,team->core_epoch[core_id]); return;
+    //   PR_DEBUG("__kmpc_dispatch_init_4 core_epoch[%d] =
+    //   %d\r\n",core_id,team->core_epoch[core_id]); return;
     // }
 
     if (!team->loop_is_setup) {
@@ -423,9 +451,8 @@ void __kmpc_dispatch_init_4(ident_t *loc, kmp_int32 gtid,
         team->loop_end = ub;
         team->loop_incr = st;
         team->loop_chunk = chunk;
-        KMP_PRINTF(
-            10,
-            "__kmpc_dispatch_init_4 setup: start %d end %d incr %d chunk %d\n",
+        PR_DEBUG(
+            "__kmpc_dispatch_init_4 setup: start %d end %d incr %d chunk %d\r\n",
             team->loop_start, team->loop_end, team->loop_incr,
             team->loop_chunk);
     }
@@ -472,9 +499,6 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
     // have already iterated over all the iterations(no more work), return 0
     if (team->loop_start > team->loop_end) {
         team->loop_is_setup = 0;
-        KMP_PRINTF(
-            10, "__kmpc_dispatch_next_4 start > end: team->loop_is_setup %d\n",
-            team->loop_is_setup);
         eu_mutex_release();
         return 0;
     }
@@ -487,9 +511,9 @@ int __kmpc_dispatch_next_4(ident_t *loc, kmp_int32 gtid, kmp_int32 *p_last,
     }
 
     team->loop_start += team->loop_chunk;
-    KMP_PRINTF(10,
+    PR_DEBUG(
                "__kmpc_dispatch_next_4 : last: %d [l %4d u %4d s %4d] "
-               "team->loop_start %d\n",
+               "team->loop_start %d\r\n",
                *p_last, *p_lb, *p_ub, *p_st, team->loop_start);
     eu_mutex_release();
     return 1;

@@ -234,6 +234,11 @@ static inline __attribute__((noreturn)) void snrt_exit(int status) {
 }
 
 //================================================================================
+// print functions
+//================================================================================
+extern void snrt_printf(const char *format, ...);
+
+//================================================================================
 // Allocation functions
 //================================================================================
 extern void snrt_alloc_init(struct snrt_team_root *team, uint32_t l3off);
