@@ -36,6 +36,8 @@ void irq_m_cluster(uint32_t core_idx);
 //================================================================================
 
 void snrt_int_init(struct snrt_team_root *team) {
+    // TODO: this is highly dangerous in multi-cluster systems and must be removed
+    clint_mutex = 0;
     // Put the clint address in tls for faster access
     clint_p = team->peripherals.clint;
     cl_clint_p = team->peripherals.cl_clint;
