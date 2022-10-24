@@ -132,9 +132,6 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
 
 void __attribute__((noinline))
 axpy(uint32_t n, double *alpha, double *dx, double *dy, uint32_t setup_ssr) {
-  uint32_t compute_id = snrt_cluster_compute_core_idx();
-  uint32_t compute_num = snrt_cluster_compute_core_num();
-
   double alpha_load = *alpha;
 
   if (setup_ssr) {
