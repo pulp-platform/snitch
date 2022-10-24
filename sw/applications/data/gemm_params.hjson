@@ -1,0 +1,16 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Parameters for a GEMM
+
+{
+    kernel: "GEMM"
+    M: 16,
+    N: 16,
+    K: 16,
+    alpha: 0,
+    transpose_A: false,
+    transpose_B: true,
+    prec: 16
+}
