@@ -29,6 +29,13 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
   double *l1_alpha = ptr;
   ptr += 1;
 
+  // Distribute vector across clusters
+  const uint32_t chunk = n / ccfg->cluster_num;
+  const uint32_t left_over = n - chunk * ccfg->cluster_num;
+  dx += chunk * ccfg->cluster_idx;
+  dy += chunk * ccfg->cluster_idx;
+  n = ccfg->cluster_idx == ccfg->cluster_num ? chunk + left_over : chunk;
+
   // ------------------
   //   Data mover
   // ------------------
