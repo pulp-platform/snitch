@@ -94,10 +94,6 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     snrt_int_init(team);
 }
 
-uint32_t _snrt_barrier_reg_ptr() {
-    return _snrt_team_current->root->barrier_reg_ptr;
-}
-
 extern uintptr_t volatile tohost, fromhost;
 
 // Provide an implementation for putchar.

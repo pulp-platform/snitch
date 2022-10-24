@@ -21,13 +21,6 @@ _snrt_init_core_info:
     lw        a3, tcdm_end_address_reg   # end address of the TCDM
     ret
 
-# Must leave a0 untouched.
-_snrt_cluster_barrier:
-    .globl _snrt_cluster_barrier
-    lw        t0, barrier_reg
-    mv        zero, t0
-    ret
-
 # Mustn't use any non-temporary registers
 # a0 = base_hartid - cluster_id*core_num
 _snrt_get_base_hartid:

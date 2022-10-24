@@ -27,18 +27,6 @@ _snrt_init_core_info:
     remu      a0, a0, a1 # calculate cluster-local core id
     ret
 
-# Must leave a0 untouched.
-_snrt_cluster_barrier:
-    .globl _snrt_cluster_barrier
-    addi      sp, sp, -4
-    sw        ra, 0(sp)
-    call      _snrt_barrier_reg_ptr
-    lw        a0, 0(a0)
-    mv        zero, a0
-    lw        ra, 0(sp)
-    addi      sp, sp, 4
-    ret
-
 # Mustn't use any non-temporary registers
 # Expecting:
 # - a0: device tree ptr ("bootdata" in `tb_lib.hh`)

@@ -4,10 +4,19 @@
 #include "snrt.h"
 #include "team.h"
 
-extern void _snrt_cluster_barrier();
 
-/// Synchronize cores in a cluster with a hardware barrier
-void snrt_cluster_hw_barrier() { _snrt_cluster_barrier(); }
+
+/**
+ * @brief Synchronize cores in a cluster with a hardware barrier
+ *
+ */
+void _snrt_cluster_hw_barrier() {
+    asm volatile("lw  t0, 0(%[barrier_reg_p])\n"
+                "mv  zero, t0\n"
+                :
+                : [ barrier_reg_p ] "r"(_snrt_team_current->root->barrier_reg_ptr)
+                : "t0" );
+}
 
 /// Synchronize cores in a cluster with a software barrier
 void snrt_cluster_sw_barrier() {

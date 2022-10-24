@@ -35,6 +35,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->global_mem.end = _snrt_banshee_global_end;
     team->cluster_mem.start = (uint64_t)spm_start;
     team->cluster_mem.end = (uint64_t)spm_end;
+    _snrt_team_current->root->barrier_reg_ptr = 0x40000038;
 
     // TLS caches of frequently used data
     _snrt_team_current = &team->base;

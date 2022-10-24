@@ -183,7 +183,7 @@ snrt.crt0.init_interrupt:
     # Synchronize cores.
 snrt.crt0.pre_barrier:
     call      _snrt_hier_wakeup
-    call      _snrt_cluster_barrier
+    call      _snrt_cluster_hw_barrier
 
     # Execute the main function.
 snrt.crt0.main:
@@ -195,7 +195,7 @@ snrt.crt0.main:
 
     # Synchronize cores.
 snrt.crt0.post_barrier:
-    call      _snrt_cluster_barrier
+    call      _snrt_cluster_hw_barrier
 
     # Write execution result to EOC register.
 snrt.crt0.end:

@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "encoding.h"
+#include "team.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,11 +32,9 @@ extern "C" {
 #define snrt_max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-static inline void *snrt_memset(void *ptr, int value, size_t num) {
-    for (uint32_t i = 0; i < num; ++i)
-        *((uint8_t *)ptr + i) = (unsigned char)value;
-    return ptr;
-}
+//================================================================================
+// Typedefs
+//================================================================================
 
 /// A slice of memory.
 typedef struct snrt_slice {
@@ -61,9 +60,70 @@ struct snrt_barrier {
     uint32_t volatile barrier_iteration;
 };
 
+
+struct snrt_team {
+    /// Pointer to the root team description of this cluster.
+    struct snrt_team_root *root;
+};
+
+struct snrt_allocator_inst {
+    // Base address from where allocation starts
+    uint32_t base;
+    // Number of bytes alloctable
+    uint32_t size;
+    // Address of the next allocated block
+    uint32_t next;
+};
+struct snrt_allocator {
+    struct snrt_allocator_inst l1;
+    struct snrt_allocator_inst l3;
+};
+
+// This struct is placed at the end of each clusters TCDM
+struct snrt_team_root {
+    struct snrt_team base;
+    const void *bootdata;
+    uint32_t global_core_base_hartid;
+    uint32_t global_core_num;
+    uint32_t cluster_idx;
+    uint32_t cluster_num;
+    uint32_t cluster_core_base_hartid;
+    uint32_t cluster_core_num;
+    snrt_slice_t global_mem;
+    snrt_slice_t cluster_mem;
+    struct snrt_allocator allocator;
+    struct snrt_barrier cluster_barrier;
+    uint32_t barrier_reg_ptr;
+    struct snrt_peripherals peripherals;
+};
+
+//================================================================================
+// Inline Functions
+//================================================================================
+
+static inline void *snrt_memset(void *ptr, int value, size_t num) {
+    for (uint32_t i = 0; i < num; ++i)
+        *((uint8_t *)ptr + i) = (unsigned char)value;
+    return ptr;
+}
+
 static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
 
-extern void snrt_cluster_hw_barrier();
+extern __thread struct snrt_team *_snrt_team_current;
+
+/**
+ * @brief Synchronize cores in a cluster with a hardware barrier
+ *
+ */
+inline void snrt_cluster_hw_barrier() {
+    asm volatile("lw  t0, 0(%[barrier_reg_p])\n"
+                "mv  zero, t0\n"
+                :
+                : [ barrier_reg_p ] "r"(_snrt_team_current->root->barrier_reg_ptr)
+                : "t0" );
+}
+
+// extern void snrt_cluster_hw_barrier();
 extern void snrt_cluster_sw_barrier();
 extern void snrt_global_barrier();
 extern void snrt_barrier(struct snrt_barrier *barr, uint32_t n);
