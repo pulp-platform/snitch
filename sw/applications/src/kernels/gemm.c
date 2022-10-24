@@ -95,10 +95,12 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
                         uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
                         uint32_t tb, double* C, uint32_t ldC,
                         const uint32_t* ALPHA, uint32_t setup_SSR) {
+#if !defined(__TOOLCHAIN_LLVM__)
     register volatile double ft0 asm("ft0");
     register volatile double ft1 asm("ft1");
     register volatile double ft2 asm("ft2");
     asm volatile("" : "=f"(ft0), "=f"(ft1), "=f"(ft2));
+#endif
 
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
@@ -221,7 +223,9 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
         }
     }
 
+#if !defined(__TOOLCHAIN_LLVM__)
     asm volatile("" ::"f"(ft0), "f"(ft1), "f"(ft2));
+#endif
 }
 
 /**
