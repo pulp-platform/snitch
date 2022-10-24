@@ -102,7 +102,7 @@ uint32_t _snrt_barrier_reg_ptr() {
 extern uintptr_t volatile tohost, fromhost;
 
 // Provide an implementation for putchar.
-void snrt_putchar(char character) {
+void __attribute__((weak)) snrt_putchar(char character) {
     volatile struct putc_buffer *buf = &putc_buffer[snrt_hartid()];
     buf->data[buf->hdr.size++] = character;
     if (buf->hdr.size == PUTC_BUFFER_LEN || character == '\n') {
