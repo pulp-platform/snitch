@@ -5,10 +5,8 @@
 #include "kmp.h"
 
 #include <inttypes.h>  // for PRIx##
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdarg.h>    // for vararg
 
-#include "encoding.h"
 #include "omp.h"
 
 //=============================================================================
@@ -283,6 +281,7 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
     unsigned threadNum = omp_get_thread_num();
     kmp_uint32 loopSize = (*pupper - *plower) / incr + 1;
     kmp_int32 globalUpper = *pupper;
+    int leftOver;
 
     PR_TRACE(
                "fsi_4 %d %d %d [%d,%d,%d] %d %d\r\n",
@@ -301,7 +300,7 @@ void __kmpc_for_static_init_4(ident_t *loc, kmp_int32 gtid,
     // no specified chunk size
     else if (sched == kmp_sch_static) {
         chunk = loopSize / team->nbThreads;
-        int leftOver = loopSize - chunk * team->nbThreads;
+        leftOver = loopSize - chunk * team->nbThreads;
 
         // calculate precise chunk size and lower and upper bound
         if ((int)threadNum < leftOver) {
@@ -404,6 +403,18 @@ void __kmpc_for_static_init_8u(ident_t *loc, kmp_int32 gtid, kmp_int32 sched,
                gtid, sched, *plastiter, *plower, *pupper, *pstride, incr, chunk);
 }
 
+void __kmpc_for_static_init_8(ident_t *loc, kmp_int32 gtid,
+                               kmp_int32 schedtype, kmp_int32 *plastiter,
+                               kmp_int64 *plower, kmp_int64 *pupper,
+                               kmp_int64 *pstride, kmp_int64 incr,
+                               kmp_int32 chunk) {
+    // TODO: This is handling the different data types compleletly wrong and must be corrected to support all cases
+    kmp_uint64 ilower = *plower;
+    kmp_uint64 iupper = *pupper;
+    __kmpc_for_static_init_8u(loc, gtid, schedtype, plastiter, &ilower, &iupper,
+                             pstride, incr, chunk);
+    *plower = ilower;
+    *pupper = iupper;
 }
 
 //================================================================================
