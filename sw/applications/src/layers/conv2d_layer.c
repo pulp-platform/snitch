@@ -50,7 +50,7 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
     uint32_t ifmap_size = 2 * ifmap_stride;
 
     // weights[gemm_unroll][l.FH*l.FW*l.TILE_CI+1];
-    uint32_t weights_co_stride = l.FH*l.FW*l.TILE_CI+1;
+    uint32_t weights_co_stride = l.FH*l.FW*l.TILE_CI+3;
     uint32_t weights_size = gemm_unroll * weights_co_stride;
 
     // ofmap[2][compute_num][gemm_unroll];
@@ -336,12 +336,12 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                         // requires that OH is bigger than cluster_num (per quadrant at least)
                         uint32_t oh = ((cluster_per_quadrant - 1) - (cluster_id % cluster_per_quadrant) + _oh) % l.OH;
 
-                        if(compute_id == 0) {
-                            snrt_stop_perf_counter(SNRT_PERF_CNT0);
-                            snrt_stop_perf_counter(SNRT_PERF_CNT1);
-                            ccfg->stmps[--ccfg->max_stmps] = snrt_get_perf_counter(SNRT_PERF_CNT0);
-                            ccfg->stmps[--ccfg->max_stmps] = snrt_get_perf_counter(SNRT_PERF_CNT1);
-                        }
+                        // if(compute_id == 0) {
+                        //     snrt_stop_perf_counter(SNRT_PERF_CNT0);
+                        //     snrt_stop_perf_counter(SNRT_PERF_CNT1);
+                        //     ccfg->stmps[--ccfg->max_stmps] = snrt_get_perf_counter(SNRT_PERF_CNT0);
+                        //     ccfg->stmps[--ccfg->max_stmps] = snrt_get_perf_counter(SNRT_PERF_CNT1);
+                        // }
 
                         // Wait until DMA core has finished the im2col transform
                         benchmark_get_cycle();
@@ -350,18 +350,18 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
 
                         if(compute_id == 0 && ccfg->cycle_start == 0)
                             ccfg->cycle_start = read_csr(mcycle);
-                        // if(compute_id == 0 && ccfg->max_stmps)
-                        //     ccfg->stmps[--ccfg->max_stmps] = read_csr(mcycle);
-                        if(compute_id == 0) {
-                            snrt_reset_perf_counter(SNRT_PERF_CNT0);
-                            snrt_reset_perf_counter(SNRT_PERF_CNT1);
-                            // for congestion
-                            // snrt_start_perf_counter(SNRT_PERF_CNT0, SNRT_PERF_CNT_TCDM_ACCESSED, 0);
-                            // snrt_start_perf_counter(SNRT_PERF_CNT1, SNRT_PERF_CNT_TCDM_CONGESTED, 0);
-                            // for FPU util
-                            snrt_start_perf_counter(SNRT_PERF_CNT0, SNRT_PERF_CNT_CYCLES, 0);
-                            snrt_start_perf_counter(SNRT_PERF_CNT1, SNRT_PERF_CNT_ISSUE_FPU, 0);
-                        }
+                        if(compute_id == 0 && ccfg->max_stmps)
+                            ccfg->stmps[--ccfg->max_stmps] = read_csr(mcycle);
+                        // if(compute_id == 0) {
+                        //     snrt_reset_perf_counter(SNRT_PERF_CNT0);
+                        //     snrt_reset_perf_counter(SNRT_PERF_CNT1);
+                        //     // for congestion
+                        //     // snrt_start_perf_counter(SNRT_PERF_CNT0, SNRT_PERF_CNT_TCDM_ACCESSED, 0);
+                        //     // snrt_start_perf_counter(SNRT_PERF_CNT1, SNRT_PERF_CNT_TCDM_CONGESTED, 0);
+                        //     // for FPU util
+                        //     snrt_start_perf_counter(SNRT_PERF_CNT0, SNRT_PERF_CNT_CYCLES, 0);
+                        //     snrt_start_perf_counter(SNRT_PERF_CNT1, SNRT_PERF_CNT_ISSUE_FPU, 0);
+                        // }
 
                         // Each core performs a matrix multiplication on the im2col buffer
                         // Of size (1 x FHxFWxCI) x (FHxFWxCI x gemm_unroll), gemm_unroll represents CO and is the
@@ -378,7 +378,7 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                                 const uint32_t alpha = 0;
                                 gemm_fp64_ssr_frep(1, gemm_unroll, l.FH*l.FW*l.TILE_CI,
                                                 &im2col[read_buf * im2col_mat_stride + compute_id * im2col_row_stride], 0, l.TA,
-                                                weights, l.FH*l.FW*l.TILE_CI+1, l.TB,
+                                                weights, weights_co_stride, l.TB,
                                                 &ofmap[write_buf * ofmap_stride + compute_id * ofmap_co_stride], 0, &alpha, setup_SSR);
 
                             }
@@ -386,7 +386,7 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                                 const uint32_t alpha = 1;
                                 gemm_fp64_ssr_frep(1, gemm_unroll, l.FH*l.FW*l.TILE_CI,
                                                 &im2col[read_buf * im2col_mat_stride + compute_id * im2col_row_stride], 0, l.TA,
-                                                weights, l.FH*l.FW*l.TILE_CI+1, l.TB,
+                                                weights, weights_co_stride, l.TB,
                                                 &ofmap[write_buf * ofmap_stride + compute_id * ofmap_co_stride], 0, &alpha, setup_SSR);
 
                             }
@@ -395,8 +395,8 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                         if(compute_id == 0) {
                             ccfg->cycle_end = read_csr(mcycle);
                         }
-                        // if(compute_id == 0 && ccfg->max_stmps)
-                        //     ccfg->stmps[--ccfg->max_stmps] = read_csr(mcycle);
+                        if(compute_id == 0 && ccfg->max_stmps)
+                            ccfg->stmps[--ccfg->max_stmps] = read_csr(mcycle);
 
                         // Toggle read and write buffer
                         read_buf = !read_buf;
