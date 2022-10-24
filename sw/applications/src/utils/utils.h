@@ -11,6 +11,11 @@ typedef struct computeConfig
 {
     uint32_t cluster_num;
     uint32_t compute_num;
+    uint32_t cluster_idx;
+    uint32_t cycle_start;
+    uint32_t cycle_end;
+    uint32_t *stmps;
+    uint32_t max_stmps;
 } computeConfig_t;
 
 

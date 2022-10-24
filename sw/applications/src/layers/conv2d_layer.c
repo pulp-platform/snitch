@@ -12,10 +12,13 @@
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 
+#define _printf(...) if(compute_id==0) printf(__VA_ARGS__)
+// #define _printf(...)
+
 void conv2d_layer(layer l, computeConfig_t *ccfg) {
 
     uint32_t cluster_num = ccfg->cluster_num;
-    uint32_t cluster_id = snrt_cluster_idx();
+    uint32_t cluster_id = ccfg->cluster_idx;
     uint32_t compute_num = ccfg->compute_num;
     uint32_t compute_id = snrt_cluster_compute_core_idx();
 
@@ -294,9 +297,18 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                         snrt_cluster_hw_barrier();
                         benchmark_get_cycle();
 
+                        if(compute_id == 0 && ccfg->cycle_start == 0)
+                            ccfg->cycle_start = read_csr(mcycle);
+                        if(compute_id == 0 && ccfg->max_stmps)
+                            ccfg->stmps[--ccfg->max_stmps] = read_csr(mcycle);
+
                         // Each core performs a matrix multiplication on the im2col buffer
                         // Of size (1 x FHxFWxCI) x (FHxFWxCI x 8), 8 represents CO and is the
                         // unrolling factor needed to prevent RAW conflicts.
+                        // Thus, a  call to `gemm` computes 8 out channels for 1 out pixel over TILCE_CI
+                        // input channels. If CI == TILE_CI, this call completely computes this output
+                        // pixel. CI/TILE_CI calls are required for a complete output pixel.
+                        // Nmm_tot = CO/8 * CI/TILE_CI * OH * OW
                         if (ow + compute_id < l.OW) {
 
                             uint32_t setup_SSR = (ci == 0 && ow == 0 && _oh == 0)? 1 : 0;
@@ -317,8 +329,13 @@ void conv2d_layer(layer l, computeConfig_t *ccfg) {
                                                    &ofmap[write_buf * ofmap_stride + compute_id * ofmap_co_stride], 0, &alpha, setup_SSR);
 
                             }
-
                         }
+
+                        if(compute_id == 0)
+                            ccfg->cycle_end = read_csr(mcycle);
+                        if(compute_id == 0 && ccfg->max_stmps)
+                            ccfg->stmps[--ccfg->max_stmps] = read_csr(mcycle);
+
                         // Toggle read and write buffer
                         read_buf = !read_buf;
                         write_buf = !write_buf;
