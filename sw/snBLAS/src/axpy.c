@@ -6,17 +6,20 @@
 #include <snblas.h>
 #include <snrt.h>
 
+#include <stdbool.h>
+
 void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *dy,
                 computeConfig_t *ccfg) {
-  uint32_t compute_id = snrt_cluster_compute_core_idx();
-  uint32_t compute_num = ccfg->compute_num;
+  const uint32_t compute_id = snrt_cluster_compute_core_idx();
+  const uint32_t compute_num = ccfg->compute_num;
   const size_t bpw = sizeof(double);
   // padding to mis-align between buffers for each hart to reduce TCDM congestion
   const size_t padding = 1;
   uint32_t ni = 0;
   uint32_t cs = 0;
   int waiter = 0;
-  uint64_t t1, t2, bsel = 0;
+  uint64_t t1, t2;
+  bool bsel = 0;
 
   // allocate data
   const size_t tile_stride = tile_n / compute_num + padding;
@@ -41,18 +44,19 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
   // ------------------
 
   if (snrt_is_dm_core()) {
+    const uint32_t xfer_inner_size = bpw * tile_n / compute_num;
+
     // initial copy-in
     snrt_dma_start_1d(l1_alpha, alpha, bpw * 1);
     if (compute_num > 1) {
-      snrt_dma_start_2d(&l1_dx[bsel * buf_stride],             /* dst */
-                        &dx[ni],                               /* src */
-                        bpw * tile_n / compute_num,            /* size */
-                        sizeof(double) * tile_stride,          /* dst_stride */
-                        sizeof(double) * tile_n / compute_num, /* src_stride */
+      snrt_dma_start_2d(&l1_dx[bsel * buf_stride], /* dst */
+                        &dx[ni],                   /* src */
+                        xfer_inner_size,           /* size */
+                        bpw * tile_stride,         /* dst_stride */
+                        xfer_inner_size,           /* src_stride */
                         compute_num /* repetitions */);
-      snrt_dma_start_2d(&l1_dy[bsel * buf_stride], &dy[ni], bpw * tile_n / compute_num,
-                        sizeof(double) * tile_stride, sizeof(double) * tile_n / compute_num,
-                        compute_num);
+      snrt_dma_start_2d(&l1_dy[bsel * buf_stride], &dy[ni], xfer_inner_size, bpw * tile_stride,
+                        xfer_inner_size, compute_num);
     } else {
       snrt_dma_start_1d(&l1_dx[bsel * buf_stride], &dx[ni], bpw * tile_n);
       snrt_dma_start_1d(&l1_dy[bsel * buf_stride], &dy[ni], bpw * tile_n);
@@ -71,9 +75,8 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
       // copy-out
       if (ni > tile_n) {
         if (compute_num > 1) {
-          snrt_dma_start_2d(&dy[ni - 2 * tile_n], &l1_dy[bsel * buf_stride],
-                            bpw * tile_n / compute_num, sizeof(double) * tile_n / compute_num,
-                            sizeof(double) * tile_stride, compute_num);
+          snrt_dma_start_2d(&dy[ni - 2 * tile_n], &l1_dy[bsel * buf_stride], xfer_inner_size,
+                            xfer_inner_size, bpw * tile_stride, compute_num);
         } else {
           snrt_dma_start_1d(&dy[ni - 2 * tile_n], &l1_dy[bsel * buf_stride], bpw * tile_n);
         }
@@ -81,12 +84,10 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
 
       // copy-in
       if (compute_num > 1) {
-        snrt_dma_start_2d(&l1_dx[bsel * buf_stride], &dx[ni], bpw * tile_n / compute_num,
-                          sizeof(double) * tile_stride, sizeof(double) * tile_n / compute_num,
-                          compute_num);
-        snrt_dma_start_2d(&l1_dy[bsel * buf_stride], &dy[ni], bpw * tile_n / compute_num,
-                          sizeof(double) * tile_stride, sizeof(double) * tile_n / compute_num,
-                          compute_num);
+        snrt_dma_start_2d(&l1_dx[bsel * buf_stride], &dx[ni], xfer_inner_size, bpw * tile_stride,
+                          xfer_inner_size, compute_num);
+        snrt_dma_start_2d(&l1_dy[bsel * buf_stride], &dy[ni], xfer_inner_size, bpw * tile_stride,
+                          xfer_inner_size, compute_num);
       } else {
         snrt_dma_start_1d(&l1_dx[bsel * buf_stride], &dx[ni], bpw * tile_n);
         snrt_dma_start_1d(&l1_dy[bsel * buf_stride], &dy[ni], bpw * tile_n);
@@ -103,12 +104,10 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
     // last two copy-out
     if (n / tile_n > 1) {
       if (compute_num > 1) {
-        snrt_dma_start_2d(&dy[ni - 2 * tile_n], &l1_dy[bsel * buf_stride],
-                          bpw * tile_n / compute_num, sizeof(double) * tile_n / compute_num,
-                          sizeof(double) * tile_stride, compute_num);
-        snrt_dma_start_2d(&dy[ni - 2 * tile_n], &l1_dy[bsel * buf_stride],
-                          bpw * tile_n / compute_num, sizeof(double) * tile_n / compute_num,
-                          sizeof(double) * tile_stride, compute_num);
+        snrt_dma_start_2d(&dy[ni - 2 * tile_n], &l1_dy[bsel * buf_stride], xfer_inner_size,
+                          xfer_inner_size, bpw * tile_stride, compute_num);
+        snrt_dma_start_2d(&dy[ni - 2 * tile_n], &l1_dy[bsel * buf_stride], xfer_inner_size,
+                          xfer_inner_size, bpw * tile_stride, compute_num);
       } else {
         snrt_dma_start_1d(&dy[ni - 2 * tile_n], &l1_dy[bsel * buf_stride], bpw * tile_n);
       }
@@ -117,12 +116,10 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
     snrt_cluster_hw_barrier();
 
     if (compute_num > 1) {
-      snrt_dma_start_2d(&dy[ni - 1 * tile_n], &l1_dy[bsel * buf_stride], bpw * tile_n / compute_num,
-                        sizeof(double) * tile_n / compute_num, sizeof(double) * tile_stride,
-                        compute_num);
-      snrt_dma_start_2d(&dy[ni - 1 * tile_n], &l1_dy[bsel * buf_stride], bpw * tile_n / compute_num,
-                        sizeof(double) * tile_n / compute_num, sizeof(double) * tile_stride,
-                        compute_num);
+      snrt_dma_start_2d(&dy[ni - 1 * tile_n], &l1_dy[bsel * buf_stride], xfer_inner_size,
+                        xfer_inner_size, bpw * tile_stride, compute_num);
+      snrt_dma_start_2d(&dy[ni - 1 * tile_n], &l1_dy[bsel * buf_stride], xfer_inner_size,
+                        xfer_inner_size, bpw * tile_stride, compute_num);
     } else {
       snrt_dma_start_1d(&dy[ni - 1 * tile_n], &l1_dy[bsel * buf_stride], bpw * tile_n);
     }
@@ -143,14 +140,14 @@ void axpy_block(uint32_t n, uint32_t tile_n, double *alpha, double *dx, double *
                        &l1_dy[element_start + bsel * buf_stride], ni == 0);
         t_stop = read_csr(mcycle);
 
-        if (ccfg->cycle_start == 0)
-          ccfg->cycle_start = t_start;
-        if (ccfg->max_stmps)
-          ccfg->stmps[--ccfg->max_stmps] = t_start;
+        // if (ccfg->cycle_start == 0)
+        //   ccfg->cycle_start = t_start;
+        // if (ccfg->max_stmps)
+        //   ccfg->stmps[--ccfg->max_stmps] = t_start;
 
-        ccfg->cycle_end = t_stop;
-        if (ccfg->max_stmps)
-          ccfg->stmps[--ccfg->max_stmps] = t_stop;
+        // ccfg->cycle_end = t_stop;
+        // if (ccfg->max_stmps)
+        //   ccfg->stmps[--ccfg->max_stmps] = t_stop;
 
         // switch buffers
         bsel = !bsel;
