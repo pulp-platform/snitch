@@ -12,6 +12,8 @@ MEMORY
 
 SECTIONS
 {
+  /* make sure the init section is at the beginning of the binary */
+  .init : { *(.init) } >DRAM
   /* The program code and other data goes into DRAM */
   .text :
   {

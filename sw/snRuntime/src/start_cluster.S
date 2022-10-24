@@ -70,6 +70,9 @@ _snrt_exit:
     ori       t0, t0, 1
     la        t1, tohost
     sw        t0, 0(t1)
+
+    # load 1 -> a0 to jump out of snRuntime after this function
+    li        a0, 1
 1:  ret
 
 # HTIF sections

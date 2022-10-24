@@ -22,6 +22,8 @@ snrt.crt0.init_global_pointer:
     .option pop
 
 snrt.crt0.init_core_info:
+    # store return address and later push it to the stack
+    mv        s1, ra
     # Information passed into the call:
     # - a0: mhartid (from bootloader)
     # - a1: device tree ptr (from bootloader)
@@ -153,6 +155,10 @@ snrt.crt0.init_tls:
     blt       t0, t2, 1b
 2:
 
+    # Store bootloader return address on top of stack
+    addi      sp, sp, -4
+    sw        s1, 0(sp)
+
     # Initialize the root team.
 snrt.crt0.init_team:
     addi      sp, sp, -20
@@ -193,10 +199,19 @@ snrt.crt0.post_barrier:
     # Write execution result to EOC register.
 snrt.crt0.end:
     mv        a0, s0 # recover return value of main function in s0
+    # Return value
+    # a0 - non-zero instructs jump outside of snRuntime to ra when entered snrt
     call      _snrt_exit
+    bnez      a0, snrt.crt0.exit
 1:
     wfi
     j       1b
+
+snrt.crt0.exit:
+    # load bootloader return address from stack and jump out of snRuntime
+    lw        ra, 0(sp)
+    addi      sp, sp, 4
+    jr        ra
 
 __snrt_crt0_interrupt_handler:
     .align 4
@@ -258,7 +273,7 @@ __snrt_crt0_interrupt_handler:
     fsd     f30, 8(sp)
     fsd     f31, 0(sp)
     # state is stored, can now handle the interrupt
-1:  
+1:
     call    __snrt_isr
     # restore fp context
     csrr    t0, misa

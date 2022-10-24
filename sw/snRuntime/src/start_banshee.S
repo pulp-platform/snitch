@@ -52,6 +52,9 @@ _snrt_exit:
     ori       a0, a0, 1
     la        t0, scratch_reg
     sw        a0, 0(t0)
+
+    # load 0 -> a0 to idle-loop after this function
+    li        a0, 0
 1:  ret
 
 .set tcdm_start_address_reg, 0x40000000
