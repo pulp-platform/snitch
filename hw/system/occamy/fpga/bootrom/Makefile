@@ -7,7 +7,7 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../../../..
-ARIANE_SDK  ?= ${ROOT}/../ariane-sdk
+CVA6_SDK  ?= ${ROOT}/../cva6-sdk
 INCLUDES = -I./ -I./src
 SRCS_C = src/main.c src/uart.c
 OBJS_C = $(SRCS_C:.c=.o)
@@ -27,7 +27,7 @@ bootrom.elf bootrom.dump bootrom.bin: bootrom.S $(OBJS_C) bootrom.ld occamy.dtb
 	riscv64-unknown-elf-objdump -d bootrom.elf > bootrom.dump
 	riscv64-unknown-elf-objcopy --pad-to 0x1001000 -O binary bootrom.elf bootrom.bin
 
-bootrom-spl.bin: bootrom.bin  $(ARIANE_SDK)/u-boot/spl/u-boot-spl.bin
+bootrom-spl.bin: bootrom.bin  $(CVA6_SDK)/u-boot/spl/u-boot-spl.bin
 	cat $^ > $@
 
 %.coe: %.bin

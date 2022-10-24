@@ -7,7 +7,7 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../../..
-ARIANE_SDK  ?= ${ROOT}/../ariane-sdk
+CVA6_SDK    ?= ${ROOT}/../cva6-sdk
 DEBUG       ?= 0
 VCU         ?= 01
 FPGA_ID     := 091847100576A
@@ -41,10 +41,10 @@ flash: ${FILE}
 	rm data.mcs
 
 flash-u-boot:
-	${MAKE} flash FILE=${ARIANE_SDK}/u-boot/u-boot.itb OFFSET=0x6000000
+	${MAKE} flash FILE=${CVA6_SDK}/u-boot/u-boot.itb OFFSET=0x6000000
 
 flash-uimage:
-	${MAKE} flash FILE=${ARIANE_SDK}/uImage OFFSET=0x6100000
+	${MAKE} flash FILE=${CVA6_SDK}/uImage OFFSET=0x6100000
 
 clean:
 	${MAKE} -C vivado_ips clean
