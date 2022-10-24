@@ -2,8 +2,17 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
+#pragma once
+
 #include "snrt.h"
 #include "layer.h"
+
+typedef struct computeConfig
+{
+    uint32_t cluster_num;
+    uint32_t compute_num;
+} computeConfig_t;
+
 
 /**
  * @brief returns cycle number and injects maker

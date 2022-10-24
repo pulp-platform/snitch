@@ -146,7 +146,6 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
     // SSR start address need to be configured each time
     snrt_ssr_read(SNRT_SSR_DM0, SNRT_SSR_4D, A);
     snrt_ssr_read(SNRT_SSR_DM1, SNRT_SSR_4D, B);
-    snrt_ssr_enable();
 
     for (uint32_t m = 0; m < M; m++) {
         uint32_t n = 0;
@@ -174,6 +173,8 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
                 c[7] = 0.0;
             }
 
+            snrt_ssr_enable();
+
             asm volatile(
                 "frep.o %[n_frep], 8, 0, 0 \n"
                 "fmadd.d %[c0], ft0, ft1, %[c0] \n"
@@ -190,6 +191,8 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
                 : [ n_frep ] "r"(K - 1)
                 : "ft0", "ft1");
 
+            snrt_ssr_disable();
+
             // Store results back
             C[m * ldC + n + 0] = c[0];
             C[m * ldC + n + 1] = c[1];
@@ -203,7 +206,6 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
         }
 
         // Clean up of leftover columns
-        snrt_ssr_disable();
 
         for (; n < N; n++) {
             double c;
@@ -217,11 +219,7 @@ void gemm_fp64_ssr_frep(uint32_t M, uint32_t N, uint32_t K, double* A,
             }
             C[m * ldC + n] = c;
         }
-
-        snrt_ssr_enable();
     }
-
-    snrt_ssr_disable();
 
     asm volatile("" ::"f"(ft0), "f"(ft1), "f"(ft2));
 }

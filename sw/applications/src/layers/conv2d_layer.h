@@ -2,4 +2,9 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-void conv2d_layer(layer l);
+#pragma once
+
+#include "layer.h"
+#include "utils.h"
+
+void conv2d_layer(layer l, computeConfig_t *ccfg);

@@ -12,11 +12,11 @@
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 
-void conv2d_layer(layer l) {
+void conv2d_layer(layer l, computeConfig_t *ccfg) {
 
-    uint32_t cluster_num = snrt_cluster_num();
+    uint32_t cluster_num = ccfg->cluster_num;
     uint32_t cluster_id = snrt_cluster_idx();
-    uint32_t compute_num = snrt_cluster_compute_core_num();
+    uint32_t compute_num = ccfg->compute_num;
     uint32_t compute_id = snrt_cluster_compute_core_idx();
 
     const uint32_t cluster_per_quadrant = min(4, cluster_num);
@@ -88,6 +88,7 @@ void conv2d_layer(layer l) {
 
                 // Weights are stored in CO x FH x FW x CI format with additional padding
                 // (CI + 1) to prevent banking conflicts
+                // a cluster of 8 cores needs 8 sets of filters, each core computes an output channel
                 for (uint32_t _co = 0; _co < 8; _co++) {
 
                     if (l.TILE_CI == l.CI) {
@@ -261,7 +262,7 @@ void conv2d_layer(layer l) {
                         // Wait for im2col transform to end, and synchronize with compute cores
                         snrt_dma_wait_all();
                         snrt_dma_stop_tracking();
-                        snrt_cluster_sw_barrier();
+                        snrt_cluster_hw_barrier();
                         benchmark_get_cycle();
 
                         // Transfer back the output feature maps
@@ -290,7 +291,7 @@ void conv2d_layer(layer l) {
 
                         // Wait until DMA core has finished the im2col transform
                         benchmark_get_cycle();
-                        snrt_cluster_sw_barrier();
+                        snrt_cluster_hw_barrier();
                         benchmark_get_cycle();
 
                         // Each core performs a matrix multiplication on the im2col buffer
@@ -325,7 +326,7 @@ void conv2d_layer(layer l) {
                 }
             }
 
-            snrt_cluster_sw_barrier();
+            snrt_cluster_hw_barrier();
 
 
             // Transfer back last output tile
