@@ -27,6 +27,9 @@ SECTIONS
     _etext = .;
   } >DRAM
 
+  /* HTIF */
+  .htif         : { } >DRAM
+
   .rodata :
   {
     . = ALIGN(4);
@@ -34,9 +37,6 @@ SECTIONS
     *(.rodata*)
     . = ALIGN(4);
   } >DRAM
-
-  /* HTIF */
-  .htif         : { } >DRAM
 
   /* Thread Local Storage sections  */
   .tdata    :
