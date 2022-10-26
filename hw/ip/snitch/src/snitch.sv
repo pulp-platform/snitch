@@ -2152,9 +2152,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       SCFGRI: begin
         if (Xssr) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
           acc_qreq_o.addr = SSR_CFG;
           acc_qvalid_o = valid_instr;
-          acc_register_rd = 1'b1;
+          acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
         end else illegal_inst = 1'b1;
       end
       SCFGWI: begin
@@ -2167,6 +2169,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       SCFGR: begin
         if (Xssr) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
           acc_qreq_o.addr = SSR_CFG;
           opb_select = Reg;
           acc_qvalid_o = valid_instr;
