@@ -27,6 +27,23 @@ SCFGR and SCFGW read and write a value from or to an SSR configuration register.
 
 ## "Xfrep" Extension for Floating-Point Repetition
 
+With the "Xfrep" extension we can automatically repeat a sequence of instructions without the need to manage a loop in software, issuing the instructions from Snitch's FPU sequencer buffer. This has a number of benefits, including alleviating the pressure on the I$ bandwidth. Furthermore, after the first iteration the instructions can be fetched from the FPU sequencer, which has a lower energy access cost than the L1 I$.
+
+The FREP instruction has the following signature:
+
+| imm1     | rs1     | imm2        | imm3         | is_outer | opcode     | operation |
+|:--------:|:-------:|:-----------:|:------------:|:--------:|:----------:|:---------:|
+| 12       | 5       | 3           | 4            | 1        | 7          |           |
+| max_inst | max_rpt | stagger_max | stagger_mask | 0        | OP-CUSTOM1 | FREP.I    |
+| max_inst | max_rpt | stagger_max | stagger_mask | 1        | OP-CUSTOM1 | FREP.O    |
+
+FREP.I and FREP.O repeat the *max_inst* instructions following the FREP instruction for *max_rpt + 1* times. The FREP.I instruction (*I* stands for inner) repeats every instruction the specified number of times and moves on to executing and repeating the next. The FREP.O instruction (*O* stands for outer) repeats the whole sequence of instructions *max_rpt + 1* times. Register staggering can be enabled and configured via the *stagger_mask* and *stagger_max* immediates. A detailed explanation of their use can be found in the Snitch [paper](/publications).
+
+The assembly instruction signature follows:
+
+    frep.i   rs1, imm1, imm2, imm3
+
+
 ## "Xdma" Extension for Asynchronous Data Movement
 
 The "Xdma" extension provides custom instructions to control an asynchronous data movement engine tightly coupled to the processor core.
