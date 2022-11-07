@@ -84,7 +84,7 @@ jobs:
     - name: Install RISC-V LLVM Toolchain
       if: ${{ matrix.toolchain == 'llvm' }}
       run: |
-        curl -Ls -o riscv-llvm.tar.gz https://sourceforge.net/projects/pulp-llvm-project/files/nightly/riscv32-pulp-llvm-ubuntu2004.tar.gz/download
+        curl -Ls -o riscv-llvm.tar.gz https://github.com/pulp-platform/llvm-project/releases/download/0.12.0/riscv32-pulp-llvm-ubuntu1804-0.12.0.tar.gz
         sudo mkdir -p /tools/riscv-llvm && sudo chmod 777 /tools/riscv-llvm
         tar -C /tools/riscv-llvm -xf riscv-llvm.tar.gz --strip-components=1
         echo "PATH=$PATH:/tools/riscv-llvm/bin" >> $GITHUB_ENV
