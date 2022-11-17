@@ -231,6 +231,8 @@ void ff_mul(flexfloat_t *dest, const flexfloat_t *a, const flexfloat_t *b);
 void ff_mul_any(flexfloat_t *dest, const flexfloat_t *a, const flexfloat_t *b);
 void ff_div(flexfloat_t *dest, const flexfloat_t *a, const flexfloat_t *b);
 void ff_div_any(flexfloat_t *dest, const flexfloat_t *a, const flexfloat_t *b);
+void ff_sqrt(flexfloat_t *dest, const flexfloat_t *a);
+void ff_sqrt_any(flexfloat_t *dest, const flexfloat_t *a);
 void ff_acc(flexfloat_t *dest, const flexfloat_t *a);
 void ff_acc_any(flexfloat_t *dest, const flexfloat_t *a);
 void ff_min(flexfloat_t *dest, const flexfloat_t *a, const flexfloat_t *b);
@@ -272,6 +274,7 @@ typedef struct {
     uint64_t sub;
     uint64_t mul;
     uint64_t div;
+    uint64_t sqrt;
     uint64_t minmax;
     uint64_t fma;
     uint64_t cmp;
