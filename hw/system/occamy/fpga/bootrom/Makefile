@@ -11,6 +11,7 @@ ROOT        := ${MKFILE_DIR}../../../../..
 include $(ROOT)/util/Makefrag
 
 CROSS_COMPILE = ${MKFILE_DIR}/../br2_external/install/bin/riscv64-buildroot-linux-gnu-
+CVA6_SDK  ?= ${ROOT}/../cva6-sdk
 INCLUDES = -I./ -I./src
 SRCS_C = src/main.c src/uart.c
 OBJS_C = $(SRCS_C:.c=.o)
@@ -46,10 +47,8 @@ bootrom.elf bootrom.dump bootrom.bin: bootrom.S $(OBJS_C) bootrom.ld occamy.dtb
 	$(OBJDUMP) -d bootrom.elf > bootrom.dump
 	$(OBJCOPY) --pad-to 0x1001000 -O binary bootrom.elf bootrom.bin
 
-bootrom-spl.bin: bootrom.S $(OBJS_C) bootrom.ld occamy.dtb $(UBOOT_SPL_BIN)
-	$(CC) -mabi=lp64d -march=rv64imafd -static -nostartfiles $(INCLUDES) -Tbootrom.ld -DSPLBIN=\"$(UBOOT_SPL_BIN)\" $< $(OBJS_C) -o bootrom-spl.elf
-	$(OBJDUMP) -d bootrom-spl.elf > bootrom-spl.dump
-	$(OBJCOPY) -O binary bootrom-spl.elf bootrom-spl.bin
+bootrom-spl.bin: bootrom.bin  $(CVA6_SDK)/u-boot/spl/u-boot-spl.bin
+	cat $^ > $@
 
 %.coe: %.bin
 	bin2coe -i $< -o $@ -w 32

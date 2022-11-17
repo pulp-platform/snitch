@@ -11,6 +11,8 @@ dependencies:
   axi: {path: ../../vendor/pulp_platform_axi}
   reqrsp_interface: {path: ../reqrsp_interface}
   axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  register_interface: {path: ../../vendor/pulp_platform_register_interface}
 
 sources:
 # Level 1:

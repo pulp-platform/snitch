@@ -7,7 +7,7 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../../..
-ARIANE_SDK  ?= ${ROOT}/../ariane-sdk
+CVA6_SDK    ?= ${ROOT}/../cva6-sdk
 DEBUG       ?= 0
 VCU         ?= 01
 FPGA_ID     := 091847100576A
@@ -75,10 +75,10 @@ ${UBOOT_ITB}:
 	@echo "To generate u-boot.itb, run make 'br-hrv-vcu128'"
 
 flash-u-boot:
-	${MAKE} flash FILE=${ARIANE_SDK}/u-boot/u-boot.itb OFFSET=0x6000000
+	${MAKE} flash FILE=${CVA6_SDK}/u-boot/u-boot.itb OFFSET=0x6000000
 
 flash-uimage:
-	${MAKE} flash FILE=${ARIANE_SDK}/uImage OFFSET=0x6100000
+	${MAKE} flash FILE=${CVA6_SDK}/uImage OFFSET=0x6100000
 
 # `prepare-sdk` makes the host directory relocatable which is required 
 # when cached with Memora

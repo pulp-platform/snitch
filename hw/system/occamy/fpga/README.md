@@ -67,6 +67,8 @@ This is the current boot flow for Linux on Occamy:
 
 ### Compiling Linux and U-Boot
 
+## Using Buildroot
+
 We use [buildroot](https://buildroot.org/) to generate a cross-compile toolchain and compile the images in `output/br-hrv-vcu128`:
 
 - u-boot SPL secondary program loader (`u-boot-spl.bin`)
@@ -79,11 +81,23 @@ Everything is generated with a single command
 ```
 make br-hrv-vcu218
 ```
+First, we need to compile the required SW binaries and images, including Linux, OpenSBI and U-Boot. For that, navigate to a suitable location, clone and build the `occamy` branch of [CVA6 SDK](https://github.com/openhwgroup/cva6-sdk/tree/occamy) as follows:
+
 
 At IIS, you can download a cached version with the following command:
 
 ```
 memora get br-hrv-vcu218
+```
+
+## Using the CVA6 SDK
+
+```
+git clone --recursive git@github.com:openhwgroup/cva6-sdk.git
+cd cva6-sdk
+git checkout occamy
+make u-boot/u-boot.itb
+make uImage
 ```
 
 ### Preparing the VCU128's Flash

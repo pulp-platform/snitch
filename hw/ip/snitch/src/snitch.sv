@@ -54,7 +54,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   parameter int unsigned NumIntOutstandingMem = 0,
   parameter int unsigned NumDTLBEntries = 0,
   parameter int unsigned NumITLBEntries = 0,
-  snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
+  parameter snitch_pma_pkg::snitch_pma_t SnitchPMACfg = '{default: 0},
   /// Derived parameter *Do not override*
   parameter type addr_t = logic [AddrWidth-1:0],
   parameter type data_t = logic [DataWidth-1:0]
@@ -2152,9 +2152,11 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       SCFGRI: begin
         if (Xssr) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
           acc_qreq_o.addr = SSR_CFG;
           acc_qvalid_o = valid_instr;
-          acc_register_rd = 1'b1;
+          acc_register_rd = 1'b1; // No RS in GPR but RD in GPR, register in int scoreboard
         end else illegal_inst = 1'b1;
       end
       SCFGWI: begin
@@ -2167,6 +2169,8 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
       end
       SCFGR: begin
         if (Xssr) begin
+          write_rd = 1'b0;
+          uses_rd = 1'b1;
           acc_qreq_o.addr = SSR_CFG;
           opb_select = Reg;
           acc_qvalid_o = valid_instr;

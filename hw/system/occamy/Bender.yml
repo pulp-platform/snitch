@@ -10,8 +10,8 @@ package:
 dependencies:
   # axi_riscv_atomics: {path: ../../vendor/pulp_platform_axi_riscv_atomics}
   snitch_read_only_cache: {path: ../../ip/snitch_read_only_cache}
-  snitch-cluster: {path: ../../ip/snitch_cluster}
-  spm-interface: {path: ../../ip/spm_interface}
+  snitch_cluster: {path: ../../ip/snitch_cluster}
+  spm_interface: {path: ../../ip/spm_interface}
   cva6: {path: ../../vendor/openhwgroup_cva6}
   apb_uart: {path: ../../vendor/pulp_platform_apb_uart}
   lowrisc_rv_plic: {path: ../../vendor/lowrisc_opentitan/rv_plic}
@@ -20,7 +20,10 @@ dependencies:
   lowrisc_i2c: {path: ../../vendor/lowrisc_opentitan/i2c}
   test: {path: ../../ip/test}
   apb: {path: ../../vendor/pulp_platform_apb}
-  timer: {path: ../../vendor/pulp_platform_apb_timer}
+  apb_timer: {path: ../../vendor/pulp_platform_apb_timer}
+  axi: {path: ../../vendor/pulp_platform_axi}
+  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  register_interface: {path: ../../vendor/pulp_platform_register_interface}
 
 sources:
 # Level 0:
