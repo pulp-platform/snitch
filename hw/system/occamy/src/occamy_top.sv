@@ -81,22 +81,22 @@ module occamy_top
     input logic [12:0] ext_irq_i,
 
     /// HBM2e Ports
-    output axi_a48_d512_i7_u0_req_t  hbm_0_req_o,
-    input  axi_a48_d512_i7_u0_resp_t hbm_0_rsp_i,
-    output axi_a48_d512_i7_u0_req_t  hbm_1_req_o,
-    input  axi_a48_d512_i7_u0_resp_t hbm_1_rsp_i,
-    output axi_a48_d512_i7_u0_req_t  hbm_2_req_o,
-    input  axi_a48_d512_i7_u0_resp_t hbm_2_rsp_i,
-    output axi_a48_d512_i7_u0_req_t  hbm_3_req_o,
-    input  axi_a48_d512_i7_u0_resp_t hbm_3_rsp_i,
-    output axi_a48_d512_i7_u0_req_t  hbm_4_req_o,
-    input  axi_a48_d512_i7_u0_resp_t hbm_4_rsp_i,
-    output axi_a48_d512_i7_u0_req_t  hbm_5_req_o,
-    input  axi_a48_d512_i7_u0_resp_t hbm_5_rsp_i,
-    output axi_a48_d512_i7_u0_req_t  hbm_6_req_o,
-    input  axi_a48_d512_i7_u0_resp_t hbm_6_rsp_i,
-    output axi_a48_d512_i7_u0_req_t  hbm_7_req_o,
-    input  axi_a48_d512_i7_u0_resp_t hbm_7_rsp_i,
+    output axi_a48_d512_i5_u0_req_t  hbm_0_req_o,
+    input  axi_a48_d512_i5_u0_resp_t hbm_0_rsp_i,
+    output axi_a48_d512_i5_u0_req_t  hbm_1_req_o,
+    input  axi_a48_d512_i5_u0_resp_t hbm_1_rsp_i,
+    output axi_a48_d512_i5_u0_req_t  hbm_2_req_o,
+    input  axi_a48_d512_i5_u0_resp_t hbm_2_rsp_i,
+    output axi_a48_d512_i5_u0_req_t  hbm_3_req_o,
+    input  axi_a48_d512_i5_u0_resp_t hbm_3_rsp_i,
+    output axi_a48_d512_i5_u0_req_t  hbm_4_req_o,
+    input  axi_a48_d512_i5_u0_resp_t hbm_4_rsp_i,
+    output axi_a48_d512_i5_u0_req_t  hbm_5_req_o,
+    input  axi_a48_d512_i5_u0_resp_t hbm_5_rsp_i,
+    output axi_a48_d512_i5_u0_req_t  hbm_6_req_o,
+    input  axi_a48_d512_i5_u0_resp_t hbm_6_rsp_i,
+    output axi_a48_d512_i5_u0_req_t  hbm_7_req_o,
+    input  axi_a48_d512_i5_u0_resp_t hbm_7_rsp_i,
 
     /// HBI Ports
     input  axi_a48_d512_i4_u0_req_t  hbi_wide_req_i,
@@ -106,12 +106,12 @@ module occamy_top
 
     input  axi_a48_d64_i4_u5_req_t  hbi_narrow_req_i,
     output axi_a48_d64_i4_u5_resp_t hbi_narrow_rsp_o,
-    output axi_a48_d64_i8_u5_req_t  hbi_narrow_req_o,
-    input  axi_a48_d64_i8_u5_resp_t hbi_narrow_rsp_i,
+    output axi_a48_d64_i7_u5_req_t  hbi_narrow_req_o,
+    input  axi_a48_d64_i7_u5_resp_t hbi_narrow_rsp_i,
 
     /// PCIe Ports
-    output axi_a48_d64_i8_u5_req_t  pcie_axi_req_o,
-    input  axi_a48_d64_i8_u5_resp_t pcie_axi_rsp_i,
+    output axi_a48_d64_i7_u5_req_t  pcie_axi_req_o,
+    input  axi_a48_d64_i7_u5_resp_t pcie_axi_rsp_i,
 
     input  axi_a48_d64_i4_u5_req_t  pcie_axi_req_i,
     output axi_a48_d64_i4_u5_resp_t pcie_axi_rsp_o,
@@ -135,7 +135,7 @@ module occamy_top
   end
 
   // Machine timer and machine software interrupt pending.
-  logic [216:0] mtip, msip;
+  logic [9:0] mtip, msip;
   // Supervisor and machine-mode external interrupt pending.
   logic [1:0] eip;
   logic [0:0] debug_req;
@@ -151,9 +151,9 @@ module occamy_top
   /// Address map of the `soc_axi_lite_periph_xbar` crossbar.
   xbar_rule_48_t [1:0] SocAxiLitePeriphXbarAddrmap;
   assign SocAxiLitePeriphXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h01000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000 }
-};
+          '{idx: 0, start_addr: 48'h01000000, end_addr: 48'h20000000000},
+          '{idx: 1, start_addr: 48'h00000000, end_addr: 48'h00001000}
+      };
 
   axi_lite_a48_d64_req_t [1:0] soc_axi_lite_periph_xbar_in_req;
   axi_lite_a48_d64_rsp_t [1:0] soc_axi_lite_periph_xbar_in_rsp;
@@ -187,25 +187,25 @@ module occamy_top
   /// Address map of the `soc_axi_lite_narrow_periph_xbar` crossbar.
   xbar_rule_48_t [17:0] SocAxiLiteNarrowPeriphXbarAddrmap;
   assign SocAxiLiteNarrowPeriphXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h02000000, end_addr: 48'h02001000 },
-  '{ idx: 1, start_addr: 48'h02001000, end_addr: 48'h02001400 },
-  '{ idx: 2, start_addr: 48'h02001400, end_addr: 48'h02001800 },
-  '{ idx: 3, start_addr: 48'h02001800, end_addr: 48'h02001c00 },
-  '{ idx: 4, start_addr: 48'h02002000, end_addr: 48'h02003000 },
-  '{ idx: 5, start_addr: 48'h02003000, end_addr: 48'h02004000 },
-  '{ idx: 6, start_addr: 48'h02004000, end_addr: 48'h02005000 },
-  '{ idx: 7, start_addr: 48'h02005000, end_addr: 48'h02006000 },
-  '{ idx: 8, start_addr: 48'h02006000, end_addr: 48'h02007000 },
-  '{ idx: 9, start_addr: 48'h02007000, end_addr: 48'h02008000 },
-  '{ idx: 10, start_addr: 48'h03000000, end_addr: 48'h03020000 },
-  '{ idx: 11, start_addr: 48'h05000000, end_addr: 48'h05020000 },
-  '{ idx: 12, start_addr: 48'h06000000, end_addr: 48'h06010000 },
-  '{ idx: 13, start_addr: 48'h07000000, end_addr: 48'h07010000 },
-  '{ idx: 14, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
-  '{ idx: 15, start_addr: 48'h01000000, end_addr: 48'h01020000 },
-  '{ idx: 16, start_addr: 48'h04000000, end_addr: 48'h04100000 },
-  '{ idx: 17, start_addr: 48'h08000000, end_addr: 48'h0a810000 }
-};
+          '{idx: 0, start_addr: 48'h02000000, end_addr: 48'h02001000},
+          '{idx: 1, start_addr: 48'h02001000, end_addr: 48'h02001400},
+          '{idx: 2, start_addr: 48'h02001400, end_addr: 48'h02001800},
+          '{idx: 3, start_addr: 48'h02001800, end_addr: 48'h02001c00},
+          '{idx: 4, start_addr: 48'h02002000, end_addr: 48'h02003000},
+          '{idx: 5, start_addr: 48'h02003000, end_addr: 48'h02004000},
+          '{idx: 6, start_addr: 48'h02004000, end_addr: 48'h02005000},
+          '{idx: 7, start_addr: 48'h02005000, end_addr: 48'h02006000},
+          '{idx: 8, start_addr: 48'h02006000, end_addr: 48'h02007000},
+          '{idx: 9, start_addr: 48'h02007000, end_addr: 48'h02008000},
+          '{idx: 10, start_addr: 48'h03000000, end_addr: 48'h03020000},
+          '{idx: 11, start_addr: 48'h05000000, end_addr: 48'h05020000},
+          '{idx: 12, start_addr: 48'h06000000, end_addr: 48'h06010000},
+          '{idx: 13, start_addr: 48'h07000000, end_addr: 48'h07010000},
+          '{idx: 14, start_addr: 48'h0c000000, end_addr: 48'h10000000},
+          '{idx: 15, start_addr: 48'h01000000, end_addr: 48'h01020000},
+          '{idx: 16, start_addr: 48'h04000000, end_addr: 48'h04100000},
+          '{idx: 17, start_addr: 48'h08000000, end_addr: 48'h0a810000}
+      };
 
   axi_lite_a48_d32_req_t [ 0:0] soc_axi_lite_narrow_periph_xbar_in_req;
   axi_lite_a48_d32_rsp_t [ 0:0] soc_axi_lite_narrow_periph_xbar_in_rsp;
@@ -245,7 +245,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_hbm_xbar_cfg_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(2),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -323,14 +323,14 @@ module occamy_top
   ///////////////////////////////
 
   // Peripheral Xbar connections
-  axi_a48_d64_i8_u5_req_t  periph_axi_lite_soc2per_req;
-  axi_a48_d64_i8_u5_resp_t periph_axi_lite_soc2per_rsp;
+  axi_a48_d64_i7_u5_req_t  periph_axi_lite_soc2per_req;
+  axi_a48_d64_i7_u5_resp_t periph_axi_lite_soc2per_rsp;
 
   axi_a48_d64_i4_u5_req_t  periph_axi_lite_per2soc_req;
   axi_a48_d64_i4_u5_resp_t periph_axi_lite_per2soc_rsp;
 
-  axi_a48_d64_i8_u5_req_t  periph_regbus_soc2per_req;
-  axi_a48_d64_i8_u5_resp_t periph_regbus_soc2per_rsp;
+  axi_a48_d64_i7_u5_req_t  periph_regbus_soc2per_req;
+  axi_a48_d64_i7_u5_resp_t periph_regbus_soc2per_rsp;
 
   occamy_soc i_occamy_soc (
       .clk_i,
@@ -381,17 +381,17 @@ module occamy_top
   );
 
   // Connect AXI-lite master
-  axi_a48_d64_i8_u5_req_t  axi_lite_from_soc_cdc_req;
-  axi_a48_d64_i8_u5_resp_t axi_lite_from_soc_cdc_rsp;
+  axi_a48_d64_i7_u5_req_t  axi_lite_from_soc_cdc_req;
+  axi_a48_d64_i7_u5_resp_t axi_lite_from_soc_cdc_rsp;
 
   axi_cdc #(
-      .aw_chan_t (axi_a48_d64_i8_u5_aw_chan_t),
-      .w_chan_t  (axi_a48_d64_i8_u5_w_chan_t),
-      .b_chan_t  (axi_a48_d64_i8_u5_b_chan_t),
-      .ar_chan_t (axi_a48_d64_i8_u5_ar_chan_t),
-      .r_chan_t  (axi_a48_d64_i8_u5_r_chan_t),
-      .axi_req_t (axi_a48_d64_i8_u5_req_t),
-      .axi_resp_t(axi_a48_d64_i8_u5_resp_t),
+      .aw_chan_t (axi_a48_d64_i7_u5_aw_chan_t),
+      .w_chan_t  (axi_a48_d64_i7_u5_w_chan_t),
+      .b_chan_t  (axi_a48_d64_i7_u5_b_chan_t),
+      .ar_chan_t (axi_a48_d64_i7_u5_ar_chan_t),
+      .r_chan_t  (axi_a48_d64_i7_u5_r_chan_t),
+      .axi_req_t (axi_a48_d64_i7_u5_req_t),
+      .axi_resp_t(axi_a48_d64_i7_u5_resp_t),
       .LogDepth  (2)
   ) i_axi_lite_from_soc_cdc (
       .src_clk_i (clk_i),
@@ -407,13 +407,13 @@ module occamy_top
   axi_to_axi_lite #(
       .AxiAddrWidth(48),
       .AxiDataWidth(64),
-      .AxiIdWidth(8),
+      .AxiIdWidth(7),
       .AxiUserWidth(5),
       .AxiMaxWriteTxns(4),
       .AxiMaxReadTxns(4),
       .FallThrough(0),
-      .full_req_t(axi_a48_d64_i8_u5_req_t),
-      .full_resp_t(axi_a48_d64_i8_u5_resp_t),
+      .full_req_t(axi_a48_d64_i7_u5_req_t),
+      .full_resp_t(axi_a48_d64_i7_u5_resp_t),
       .lite_req_t(axi_lite_a48_d64_req_t),
       .lite_resp_t(axi_lite_a48_d64_rsp_t)
   ) i_axi_to_axi_lite_periph_pc (
@@ -466,17 +466,17 @@ module occamy_top
   );
 
 
-  axi_a48_d64_i8_u5_req_t  periph_cdc_req;
-  axi_a48_d64_i8_u5_resp_t periph_cdc_rsp;
+  axi_a48_d64_i7_u5_req_t  periph_cdc_req;
+  axi_a48_d64_i7_u5_resp_t periph_cdc_rsp;
 
   axi_cdc #(
-      .aw_chan_t (axi_a48_d64_i8_u5_aw_chan_t),
-      .w_chan_t  (axi_a48_d64_i8_u5_w_chan_t),
-      .b_chan_t  (axi_a48_d64_i8_u5_b_chan_t),
-      .ar_chan_t (axi_a48_d64_i8_u5_ar_chan_t),
-      .r_chan_t  (axi_a48_d64_i8_u5_r_chan_t),
-      .axi_req_t (axi_a48_d64_i8_u5_req_t),
-      .axi_resp_t(axi_a48_d64_i8_u5_resp_t),
+      .aw_chan_t (axi_a48_d64_i7_u5_aw_chan_t),
+      .w_chan_t  (axi_a48_d64_i7_u5_w_chan_t),
+      .b_chan_t  (axi_a48_d64_i7_u5_b_chan_t),
+      .ar_chan_t (axi_a48_d64_i7_u5_ar_chan_t),
+      .r_chan_t  (axi_a48_d64_i7_u5_r_chan_t),
+      .axi_req_t (axi_a48_d64_i7_u5_req_t),
+      .axi_resp_t(axi_a48_d64_i7_u5_resp_t),
       .LogDepth  (2)
   ) i_periph_cdc (
       .src_clk_i (clk_i),
@@ -489,25 +489,25 @@ module occamy_top
       .dst_resp_i(periph_cdc_rsp)
   );
 
-  axi_a48_d32_i8_u5_req_t  axi_to_axi_lite_dw_req;
-  axi_a48_d32_i8_u5_resp_t axi_to_axi_lite_dw_rsp;
+  axi_a48_d32_i7_u5_req_t  axi_to_axi_lite_dw_req;
+  axi_a48_d32_i7_u5_resp_t axi_to_axi_lite_dw_rsp;
 
   axi_dw_converter #(
       .AxiSlvPortDataWidth(64),
       .AxiMstPortDataWidth(32),
       .AxiAddrWidth(48),
-      .AxiIdWidth(8),
-      .aw_chan_t(axi_a48_d32_i8_u5_aw_chan_t),
-      .mst_w_chan_t(axi_a48_d32_i8_u5_w_chan_t),
-      .slv_w_chan_t(axi_a48_d64_i8_u5_w_chan_t),
-      .b_chan_t(axi_a48_d32_i8_u5_b_chan_t),
-      .ar_chan_t(axi_a48_d32_i8_u5_ar_chan_t),
-      .mst_r_chan_t(axi_a48_d32_i8_u5_r_chan_t),
-      .slv_r_chan_t(axi_a48_d64_i8_u5_r_chan_t),
-      .axi_mst_req_t(axi_a48_d32_i8_u5_req_t),
-      .axi_mst_resp_t(axi_a48_d32_i8_u5_resp_t),
-      .axi_slv_req_t(axi_a48_d64_i8_u5_req_t),
-      .axi_slv_resp_t(axi_a48_d64_i8_u5_resp_t)
+      .AxiIdWidth(7),
+      .aw_chan_t(axi_a48_d32_i7_u5_aw_chan_t),
+      .mst_w_chan_t(axi_a48_d32_i7_u5_w_chan_t),
+      .slv_w_chan_t(axi_a48_d64_i7_u5_w_chan_t),
+      .b_chan_t(axi_a48_d32_i7_u5_b_chan_t),
+      .ar_chan_t(axi_a48_d32_i7_u5_ar_chan_t),
+      .mst_r_chan_t(axi_a48_d32_i7_u5_r_chan_t),
+      .slv_r_chan_t(axi_a48_d64_i7_u5_r_chan_t),
+      .axi_mst_req_t(axi_a48_d32_i7_u5_req_t),
+      .axi_mst_resp_t(axi_a48_d32_i7_u5_resp_t),
+      .axi_slv_req_t(axi_a48_d64_i7_u5_req_t),
+      .axi_slv_resp_t(axi_a48_d64_i7_u5_resp_t)
   ) i_axi_to_axi_lite_dw (
       .clk_i(clk_periph_i),
       .rst_ni(rst_periph_ni),
@@ -520,13 +520,13 @@ module occamy_top
   axi_to_axi_lite #(
       .AxiAddrWidth(48),
       .AxiDataWidth(32),
-      .AxiIdWidth(8),
+      .AxiIdWidth(7),
       .AxiUserWidth(5),
       .AxiMaxWriteTxns(4),
       .AxiMaxReadTxns(4),
       .FallThrough(0),
-      .full_req_t(axi_a48_d32_i8_u5_req_t),
-      .full_resp_t(axi_a48_d32_i8_u5_resp_t),
+      .full_req_t(axi_a48_d32_i7_u5_req_t),
+      .full_resp_t(axi_a48_d32_i7_u5_resp_t),
       .lite_req_t(axi_lite_a48_d32_req_t),
       .lite_resp_t(axi_lite_a48_d32_rsp_t)
   ) i_axi_to_axi_lite_regbus_periph_pc (
@@ -550,7 +550,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_hbi_wide_cfg_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -574,7 +574,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_hbi_narrow_cfg_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -599,7 +599,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_pcie_cfg_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -624,7 +624,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_hbm_cfg_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -724,7 +724,7 @@ module occamy_top
   logic [63:0] sba_addr_long;
 
   dm_top #(
-      // .NrHarts (217),
+      // .NrHarts (10),
       .NrHarts(1),
       .BusWidth(64),
       .DmBaseAddress('h0)
@@ -939,7 +939,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_chip_ctrl_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -1052,7 +1052,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_bootrom_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -1080,7 +1080,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_fll_system_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -1101,7 +1101,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_fll_periph_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),
@@ -1122,7 +1122,7 @@ module occamy_top
   axi_lite_a48_d32_rsp_t soc_axi_lite_narrow_periph_xbar_out_fll_hbm2e_cut_rsp;
 
   axi_multicut #(
-      .NoCuts(3),
+      .NoCuts(1),
       .aw_chan_t(axi_lite_a48_d32_aw_chan_t),
       .w_chan_t(axi_lite_a48_d32_w_chan_t),
       .b_chan_t(axi_lite_a48_d32_b_chan_t),

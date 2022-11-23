@@ -5,4 +5,4 @@
 # Noah Huetter <huettern@iis.ee.ethz.ch>
 
 # Create a simple clock for better OOC synthesis results
-create_clock -name occamy_ooc_synth_clk -period 20 [get_ports clk_i]
+create_clock -name occamy_ooc_synth_clk -period 40 [get_ports clk_i]

@@ -54,7 +54,7 @@ package ${name}_pkg;
   typedef struct packed {
     logic [3:0] timer;
     logic [31:0] gpio;
-    logic uart;
+    logic uart; // 37
     logic spim_error;
     logic spim_spi_event;
     logic i2c_fmt_watermark;
@@ -75,11 +75,11 @@ package ${name}_pkg;
     logic i2c_host_timeout;
     logic ecc_narrow_uncorrectable;
     logic ecc_narrow_correctable;
-    logic ecc_wide_uncorrectable;
-    logic ecc_wide_correctable;
+    logic ecc_wide_uncorrectable; // 16
+    logic ecc_wide_correctable; // 15
     // 4 programmable, 8 HBM (1x per channel)
-    logic [12:0] ext_irq;
-    logic zero;
+    logic [12:0] ext_irq; // 1-14
+    logic zero; // 0
   } ${name}_interrupt_t;
 
   localparam logic [15:0] PartNum = 2;

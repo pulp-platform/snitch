@@ -29,16 +29,16 @@ set_false_path -to occamy_vcu128_i/occamy_xilinx_0/inst/i_occamy/i_clint/i_sync_
 # | 6  | LA11_P | TDI  |
 # | 8  | LA11_N | TDO  |
 # | 13 | LA00_CC_P | TCK  |
-set_property -dict {PACKAGE_PIN A23 IOSTANDARD LVCMOS18} [get_ports jtag_tms_i ]; # LA10_N
-set_property -dict {PACKAGE_PIN E24 IOSTANDARD LVCMOS18} [get_ports jtag_tck_i ]; # LA00_CC_P
+#set_property -dict {PACKAGE_PIN A23 IOSTANDARD LVCMOS18} [get_ports jtag_tms_i ]; # LA10_N
+#set_property -dict {PACKAGE_PIN E24 IOSTANDARD LVCMOS18} [get_ports jtag_tck_i ]; # LA00_CC_P
 # Cross TDI/TDO
-set_property -dict {PACKAGE_PIN B25 IOSTANDARD LVCMOS18} [get_ports jtag_tdi_i  ]; # LA11_N
-set_property -dict {PACKAGE_PIN B26 IOSTANDARD LVCMOS18} [get_ports jtag_tdo_o]; # LA11_P
+#set_property -dict {PACKAGE_PIN B25 IOSTANDARD LVCMOS18} [get_ports jtag_tdi_i  ]; # LA11_N
+#set_property -dict {PACKAGE_PIN B26 IOSTANDARD LVCMOS18} [get_ports jtag_tdo_o]; # LA11_P
 # JTAG clock
-create_clock -name jtag_clk -period 100	 [get_ports jtag_tck_i]
+#create_clock -name jtag_clk -period 100	 [get_ports jtag_tck_i]
 
 # i/o delay of JTAG lines
-set_input_delay 10 -max -clock jtag_clk [get_ports jtag_tms_i jtag_tdi_i]
+#set_input_delay 10 -max -clock jtag_clk [get_ports jtag_tms_i jtag_tdi_i]
 
 # CDC 2phase clearable of DM: i_cdc_resp/i_cdc_req
 # CONSTRAINT: Requires max_delay of min_period(src_clk_i, dst_clk_i) through the paths async_req, async_ack, async_data.

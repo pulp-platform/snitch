@@ -16,7 +16,7 @@ uint64_t __spl_src_end = (uint64_t)(&__spl_end);
 enum boot_mode_t { JTAG, SPL_ROM };
 
 int main() {
-    init_uart(50000000, 115200);
+    init_uart(25000000, 115200);
 
     print_uart("\r\nOccamy VCU128 bootrom ");
     print_uart(GIT_SHA);
@@ -33,10 +33,12 @@ int main() {
                 "ebreak;");
             break;
         case SPL_ROM:
-            print_uart("Loading U-Boot SPL from ROM ");
+            print_uart("Loading U-Boot SPL from ROM (0x");
+            print_uart_addr(__spl_src_end - __spl_src_start);
+            print_uart(") bytes\r\n");
             for (uint32_t i = 0; i < (__spl_src_end - __spl_src_start);
                  i += 1) {
-                if (i % 1024 == 0) print_uart(".");
+                //if (i % 1024 == 0) print_uart(".");
                 *(uint8_t *)(SPL_DEST + i) = *(uint8_t *)(__spl_src_start + i);
             }
             print_uart("done\r\n");

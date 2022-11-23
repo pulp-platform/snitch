@@ -28,7 +28,7 @@
       device_type = "cpu";
       status = "okay";
       compatible = "eth,ariane", "riscv";
-      clock-frequency = <50000000>;
+      clock-frequency = <25000000>;
       riscv,isa = "rv64fimafd";
       mmu-type = "riscv,sv39";
       tlb-split;
@@ -49,7 +49,7 @@
   sysclk: virt_50mhz {
     #clock-cells = <0>;
     compatible = "fixed-clock";
-    clock-frequency = <50000000>;
+    clock-frequency = <25000000>;
   };
   soc: soc {
     #address-cells = <2>;
@@ -64,10 +64,10 @@
     serial@2002000 {
       compatible = "ns16550a";
       reg = <0x0 0x2002000 0x0 0x1000>;
-      clock-frequency = <50000000>;
+      clock-frequency = <25000000>;
       current-speed = <115200>;
       interrupt-parent = <&PLIC0>;
-      interrupts = <35>;
+      interrupts = <37>;
       reg-offset = <0>;
       reg-shift = <2>; // regs are spaced on 32 bit boundary
       reg-io-width = <4>; // only 32-bit access are supported
@@ -95,7 +95,7 @@
         #size-cells = <0x1>;
         compatible = "micron,mt25qu02g";
         reg = <0x0 0x0>;
-        spi-max-frequency = <50000000>;
+        spi-max-frequency = <25000000>;
         spi-rx-bus-width = <0x4>;
         spi-tx-bus-width = <0x4>;
         m25p,fast-read;

@@ -28,8 +28,8 @@ if {[file exists ${ooc_constraint_file}]} {
 }
 
 # Buggy Vivado doesn't like these files. That's ok, we don't need them anyways.
-set_property IS_ENABLED 0 [get_files $ROOT/../../vendor/pulp_platform_axi/src/axi_intf.sv]
-set_property IS_ENABLED 0 [get_files $ROOT/../../vendor/pulp_platform_register_interface/src/reg_intf.sv]
+set_property IS_ENABLED 0 [get_files -regex .*/axi_intf.sv]
+set_property IS_ENABLED 0 [get_files -regex .*/reg_intf.sv]
 
 # Package IP
 set_property top occamy_xilinx [current_fileset]

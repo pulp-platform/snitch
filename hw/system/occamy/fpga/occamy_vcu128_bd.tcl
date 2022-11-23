@@ -178,7 +178,7 @@ if { $bCheckIPsPassed != 1 } {
 
 # Procedure to create entire design; Provide argument to make
 # procedure reusable. If parentCell is "", will use root.
-proc create_root_design { parentCell } {
+proc create_root_design { parentCell DEBUG EXT_JTAG } {
 
   variable script_folder
   variable design_name
@@ -231,10 +231,15 @@ proc create_root_design { parentCell } {
   set_property -dict [ list \
    CONFIG.POLARITY {ACTIVE_HIGH} \
  ] $dummy_port_in
+
+if { $EXT_JTAG } {
   set jtag_tck_i [ create_bd_port -dir I jtag_tck_i ]
   set jtag_tdi_i [ create_bd_port -dir I jtag_tdi_i ]
   set jtag_tdo_o [ create_bd_port -dir O jtag_tdo_o ]
   set jtag_tms_i [ create_bd_port -dir I jtag_tms_i ]
+  set jtag_vdd_o   [ create_bd_port -dir O jtag_vdd_o ]
+  set jtag_gnd_o   [ create_bd_port -dir O jtag_gnd_o ]
+}
   set reset [ create_bd_port -dir I -type rst reset ]
   set_property -dict [ list \
    CONFIG.POLARITY {ACTIVE_HIGH} \
@@ -305,6 +310,7 @@ proc create_root_design { parentCell } {
  ] $axi_quad_spi_0
 
   # Create instance: blk_mem_gen_0, and set properties
+  # TODO(cykoenig) add COE file ?
   set blk_mem_gen_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_0 ]
   set_property -dict [ list \
    CONFIG.Assume_Synchronous_Clk {false} \
@@ -349,9 +355,9 @@ proc create_root_design { parentCell } {
    CONFIG.CLKOUT1_JITTER {115.831} \
    CONFIG.CLKOUT1_PHASE_ERROR {87.180} \
    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100} \
-   CONFIG.CLKOUT2_JITTER {132.683} \
-   CONFIG.CLKOUT2_PHASE_ERROR {87.180} \
-   CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {50} \
+   CONFIG.CLKOUT2_JITTER {183.467} \
+   CONFIG.CLKOUT2_PHASE_ERROR {105.461} \
+   CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {25} \
    CONFIG.CLKOUT2_USED {true} \
    CONFIG.CLKOUT3_JITTER {180.712} \
    CONFIG.CLKOUT3_PHASE_ERROR {87.180} \
@@ -724,9 +730,13 @@ proc create_root_design { parentCell } {
   connect_bd_net -net const_low_dout [get_bd_pins axi_quad_spi_0/gsr] [get_bd_pins axi_quad_spi_0/gts] [get_bd_pins axi_quad_spi_0/usrcclkts] [get_bd_pins c_low/dout] [get_bd_pins occamy/test_mode_i]
   connect_bd_net -net dummy_port_in_1 [get_bd_ports dummy_port_in] [get_bd_pins axi_ethernet_0/dummy_port_in]
   connect_bd_net -net glbl_rst [get_bd_pins concat_rst/In1] [get_bd_pins vio_sys/probe_out1]
-  connect_bd_net -net jtag_tck_i_0_1 [get_bd_ports jtag_tck_i] [get_bd_pins occamy/jtag_tck_i]
-  connect_bd_net -net jtag_tdi_i_0_1 [get_bd_ports jtag_tdi_i] [get_bd_pins occamy/jtag_tdi_i]
-  connect_bd_net -net jtag_tms_i_0_1 [get_bd_ports jtag_tms_i] [get_bd_pins occamy/jtag_tms_i]
+  if { $EXT_JTAG } {
+   connect_bd_net -net jtag_tck_i_0_1 [get_bd_ports jtag_tck_i] [get_bd_pins occamy/jtag_tck_i]
+   connect_bd_net -net jtag_tdi_i_0_1 [get_bd_ports jtag_tdi_i] [get_bd_pins occamy/jtag_tdi_i]
+   connect_bd_net -net jtag_tms_i_0_1 [get_bd_ports jtag_tms_i] [get_bd_pins occamy/jtag_tms_i]
+   connect_bd_net [get_bd_ports jtag_vdd_o] [get_bd_pins c_high/dout]
+   connect_bd_net [get_bd_ports jtag_gnd_o] [get_bd_pins c_low/dout]
+  }
   connect_bd_net -net occamy_bootmode [get_bd_pins occamy/boot_mode_i] [get_bd_pins vio_sys/probe_out2]
   connect_bd_net -net occamy_bootrom_addr_o [get_bd_pins occamy/bootrom_addr_o] [get_bd_pins xlslice_0/Din]
   connect_bd_net -net occamy_jtag_tdo_o [get_bd_ports jtag_tdo_o] [get_bd_pins occamy/jtag_tdo_o]
@@ -1094,6 +1104,6 @@ proc create_root_design { parentCell } {
 # MAIN FLOW
 ##################################################################
 
-create_root_design ""
+create_root_design "" $DEBUG $EXT_JTAG
 
 

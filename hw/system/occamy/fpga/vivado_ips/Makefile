@@ -12,7 +12,7 @@ DEBUG       ?= 0
 VIVADO ?= vivado
 BENDER ?= bender
 
-ifeq ($(EXT_JTAG), 1)
+ifeq ($(EXT_JTAG), 0)
 	BENDER_TARGETS := $(BENDER_TARGETS) -t bscane
 endif
 
@@ -26,4 +26,4 @@ define-sources.tcl:
 	${BENDER} script vivado $(BENDER_TARGETS) > $@
 
 clean:
-	rm -rf .Xil occamy_xilinx vivado* define-sources.tcl component.xml
+	rm -rf .Xil occamy_xilinx vivado* define-sources.tcl component.xml xgui

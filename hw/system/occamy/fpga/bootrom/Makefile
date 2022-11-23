@@ -10,8 +10,10 @@ ROOT        := ${MKFILE_DIR}../../../../..
 
 include $(ROOT)/util/Makefrag
 
-CROSS_COMPILE = ${MKFILE_DIR}/../br2_external/install/bin/riscv64-buildroot-linux-gnu-
 CVA6_SDK  ?= ${ROOT}/../cva6-sdk
+UBOOT_SPL_BIN = $(CVA6_SDK)/u-boot/spl/u-boot-spl.bin
+
+CROSS_COMPILE = riscv64-unknown-linux-gnu-
 INCLUDES = -I./ -I./src
 SRCS_C = src/main.c src/uart.c
 OBJS_C = $(SRCS_C:.c=.o)
@@ -20,7 +22,7 @@ CC = $(CROSS_COMPILE)gcc
 OBJDUMP = $(CROSS_COMPILE)objdump
 OBJCOPY = $(CROSS_COMPILE)objcopy
 
-CFLAGS 	=	-Os -g -Werror -ffreestanding -fno-strict-aliasing
+CFLAGS 	= -Os -g -Werror -ffreestanding -fno-strict-aliasing
 CFLAGS += -static -nostartfiles -nostartfiles
 CFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-stack-protector
 CFLAGS += -mno-save-restore -mstrict-align
@@ -28,9 +30,6 @@ CFLAGS += -mabi=lp64d -march=rv64imafd
 CFLAGS += -mcmodel=medany
 
 GIT_SHA := $(shell git describe --match=NeVeRmAtCh --always --abbrev=10 --dirty)
-
-# u-boot SPL bianry
-UBOOT_SPL_BIN = ../output/br-hrv-vcu128/images/u-boot-spl.bin
 
 .PHONY: all
 all: bootrom-spl.coe bootrom.tcl bootrom-spl.tcl
@@ -45,16 +44,18 @@ all: bootrom-spl.coe bootrom.tcl bootrom-spl.tcl
 bootrom.elf bootrom.dump bootrom.bin: bootrom.S $(OBJS_C) bootrom.ld occamy.dtb
 	$(CC) $(CFLAGS) $(INCLUDES) -Tbootrom.ld $< $(OBJS_C) -o bootrom.elf
 	$(OBJDUMP) -d bootrom.elf > bootrom.dump
-	$(OBJCOPY) --pad-to 0x1001000 -O binary bootrom.elf bootrom.bin
+	$(OBJCOPY) -O binary bootrom.elf bootrom.bin
 
-bootrom-spl.bin: bootrom.bin  $(CVA6_SDK)/u-boot/spl/u-boot-spl.bin
-	cat $^ > $@
+bootrom-spl.bin: bootrom.S $(OBJS_C) bootrom.ld occamy.dtb
+	$(CC) $(CFLAGS) $(INCLUDES) -Tbootrom.ld -DSPLBIN=\"$(UBOOT_SPL_BIN)\" $< $(OBJS_C) -o bootrom-spl.elf
+	$(OBJDUMP) -d bootrom-spl.elf > bootrom-spl.dump
+	$(OBJCOPY) -O binary bootrom-spl.elf bootrom-spl.bin
 
 %.coe: %.bin
 	bin2coe -i $< -o $@ -w 32
 
 clean:
-	rm -rf *.bin *.coe *.dump src/*.o *.dtb
+	rm -rf *.bin *.coe *.dump src/*.o *.dtb *.elf *.tcl
 
 # Generate a TCL script to configure the bootrom on the FPGA
 %.tcl:  %.bin

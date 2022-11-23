@@ -9,6 +9,7 @@ MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../../..
 CVA6_SDK    ?= ${ROOT}/../cva6-sdk
 DEBUG       ?= 0
+EXT_JTAG    ?= 0
 VCU         ?= 01
 FPGA_ID     := 091847100576A
 HW_SERVER   := bordcomputer:3231
@@ -16,7 +17,7 @@ HW_SERVER   := bordcomputer:3231
 # Select VCU128-02
 ifeq ($(VCU),02)
 	FPGA_ID := 091847100638A
-	HW_SERVER := bordcomputer:3232
+	HW_SERVER := wuerzburg:3232
 endif
 
 VIVADO ?= vivado
@@ -54,23 +55,26 @@ vivado_ips/occamy_xilinx:
 bootrom/bootrom-spl.coe:
 	${MAKE} -C bootrom
 
-occamy_vcu128: vivado_ips/occamy_xilinx bootrom/bootrom-spl.coe
-	${VIVADO} -mode batch -source occamy_vcu128.tcl -tclargs $(DEBUG) $(NPROC) ${MKFILE_DIR}/bootrom/bootrom-spl.coe
+occamy_vcu128: vivado_ips/occamy_xilinx bootrom/bootrom-spl.coe define_defines_includes_no_simset.tcl
+	${VIVADO} -mode gui -source occamy_vcu128.tcl -tclargs $(DEBUG) $(EXT_JTAG) $(NPROC) ${MKFILE_DIR}/bootrom/bootrom-spl.coe
+
+define_defines_includes_no_simset.tcl: $(BENDER_FILES)
+	${BENDER} script vivado --only-defines --only-includes --no-simset > $@
 
 program:
 	${VIVADO} -mode batch -source occamy_vcu128_program.tcl -tclargs ${VCU}
 
 flash: ${FILE}
-	${VIVADO} -mode batch -source occamy_vcu128_flash.tcl -tclargs ${FPGA_ID} ${FILE} ${OFFSET}
-	rm data.mcs
+	${VIVADO} -mode batch -source occamy_vcu128_flash.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs ${OFFSET} ${FILE}
+	rm flash.mcs
 
 flashrun: ${UBOOT_ITB}
 	${VIVADO} -mode batch -source occamy_vcu128_flashrun.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs 6000000 ${UBOOT_ITB}
 	rm flash.mcs
 
-flash: ${UBOOT_ITB}
-	${VIVADO} -mode batch -source occamy_vcu128_flash.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs 6000000 ${UBOOT_ITB}
-	rm flash.mcs
+#flash: ${UBOOT_ITB}
+#	${VIVADO} -mode batch -source occamy_vcu128_flash.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs 6000000 ${UBOOT_ITB}
+#	rm flash.mcs
 ${UBOOT_ITB}:
 	@echo "To generate u-boot.itb, run make 'br-hrv-vcu128'"
 
@@ -104,6 +108,6 @@ upload-linux-image: $(FITIMG)
 	scp $(FITIMG) vcu128-$(VCU)@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-$(VCU)
 
 clean:
-	rm -rf .Xil occamy_vcu128 *.jou *.log *.str
+	rm -rf .Xil occamy_vcu128 *.jou *.log *.str define_defines_includes_no_simset.tcl
 
 .PHONY: program flash clean

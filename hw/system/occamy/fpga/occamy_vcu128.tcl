@@ -9,14 +9,11 @@
 # 1: nproc
 # 2: Path to coe for bootrom preconfiguration
 set DEBUG false
-if {$argc > 0} {
-    # Vivado's boolean properties are not compatible with all tcl boolean variables.
-    if {[lindex $argv 0]} {
-        set DEBUG true
-    }
-}
-set nproc [lindex $argv 1]
-set coe_path [lindex $argv 2]
+set EXT_JTAG false
+if {$argc > 0 && [lindex $argv 0]} { set DEBUG true }
+if {$argc > 1 && [lindex $argv 1]} { set EXT_JTAG true }
+set nproc [lindex $argv 2]
+set coe_path [lindex $argv 3]
 
 # Create project
 set project occamy_vcu128
@@ -25,7 +22,7 @@ create_project $project ./$project -force -part xcvu37p-fsvh2892-2L-e
 set_property board_part xilinx.com:vcu128:part0:1.0 [current_project]
 set_property XPM_LIBRARIES XPM_MEMORY [current_project]
 
-set_property ip_repo_paths ./vivado_ips/build [current_project]
+set_property ip_repo_paths ./vivado_ips [current_project]
 update_ip_catalog
 
 # Create block design
@@ -36,6 +33,11 @@ source occamy_vcu128_bd.tcl
 add_files -fileset constrs_1 -norecurse occamy_vcu128_impl.xdc
 import_files -fileset constrs_1 occamy_vcu128_impl.xdc
 set_property used_in_synthesis false [get_files occamy_vcu128/occamy_vcu128.srcs/constrs_1/imports/fpga/occamy_vcu128_impl.xdc]
+if { $EXT_JTAG } {
+    add_files -fileset constrs_1 -norecurse occamy_vcu128_impl_ext_jtag.xdc
+    import_files -fileset constrs_1 occamy_vcu128_impl_ext_jtag.xdc
+    set_property used_in_synthesis false [get_files occamy_vcu128/occamy_vcu128.srcs/constrs_1/imports/fpga/occamy_vcu128_impl_ext_jtag.xdc]
+}
 
 # Generate wrapper
 make_wrapper -files [get_files ./occamy_vcu128/occamy_vcu128.srcs/sources_1/bd/occamy_vcu128/occamy_vcu128.bd] -top
@@ -49,7 +51,9 @@ create_ip_run [get_files -of_objects [get_fileset sources_1] ./occamy_vcu128/occ
 
 # Re-add occamy includes
 set build occamy_vcu128
-source fix_includes.tcl
+# Re-add occamy includes
+export_ip_user_files -of_objects [get_ips occamy_vcu128_occamy_0] -no_script -sync -force -quiet
+eval [exec sed {s/current_fileset/get_filesets occamy_vcu128_occamy_0/} define_defines_includes_no_simset.tcl]
 
 # Do NOT insert BUFGs on high-fanout nets (e.g. reset). This will backfire during placement.
 set_param logicopt.enableBUFGinsertHFN no
@@ -142,6 +146,9 @@ if ($DEBUG) {
     }
 
     set_property target_constrs_file occamy_vcu128/occamy_vcu128.srcs/constrs_1/imports/fpga/occamy_vcu128_impl.xdc [current_fileset -constrset]
+    if { $EXT_JTAG } {
+        set_property target_constrs_file occamy_vcu128/occamy_vcu128.srcs/constrs_1/imports/fpga/occamy_vcu128_impl_ext_jtag.xdc [current_fileset -constrset]
+    }
     save_constraints -force
 
     implement_debug_core
@@ -196,8 +203,8 @@ proc write_report_util { build project run name } {
 if {[get_property PROGRESS [get_run impl_1]] == "100%"} {
     # implementation report
     open_run impl_1
-    write_report_timing ${build} ${project} impl_1 2_post_impl
-    write_report_util ${build} ${project} impl_1 2_post_impl
+    #write_report_timing ${build} ${project} impl_1 2_post_impl
+    #write_report_util ${build} ${project} impl_1 2_post_impl
     close_design
 } else {
     puts "ERROR: Something went wrong in implementation, it should have 100% PROGRESS by now."
