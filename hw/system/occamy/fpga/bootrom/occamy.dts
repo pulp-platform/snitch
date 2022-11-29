@@ -67,7 +67,7 @@
       clock-frequency = <25000000>;
       current-speed = <115200>;
       interrupt-parent = <&PLIC0>;
-      interrupts = <37>;
+      interrupts = <36>;
       reg-offset = <0>;
       reg-shift = <2>; // regs are spaced on 32 bit boundary
       reg-io-width = <4>; // only 32-bit access are supported
@@ -76,7 +76,7 @@
     timer@2006000 {
       compatible = "pulp,apb_timer";
       interrupt-parent = <&PLIC0>;
-      interrupts = <68 69 70 71>;
+      interrupts = <69 70 71 72>;
       reg = <0x00000000 0x2006000 0x00000000 0x00001000>;
       reg-names = "control";
     };
