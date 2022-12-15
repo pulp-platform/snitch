@@ -173,8 +173,8 @@ package occamy_soc_reg_pkg;
   parameter logic [1:0] OCCAMY_SOC_CHIP_ID_RESVAL = 2'h 0;
   parameter logic [1:0] OCCAMY_SOC_CHIP_ID_CHIP_ID_RESVAL = 2'h 0;
   parameter logic [1:0] OCCAMY_SOC_BOOT_MODE_RESVAL = 2'h 0;
-  parameter logic [31:0] OCCAMY_SOC_NUM_QUADRANTS_RESVAL = 32'h 6;
-  parameter logic [31:0] OCCAMY_SOC_NUM_QUADRANTS_NUM_QUADRANTS_RESVAL = 32'h 6;
+  parameter logic [31:0] OCCAMY_SOC_NUM_QUADRANTS_RESVAL = 32'h 1;
+  parameter logic [31:0] OCCAMY_SOC_NUM_QUADRANTS_NUM_QUADRANTS_RESVAL = 32'h 1;
 
   // Register index
   typedef enum int {

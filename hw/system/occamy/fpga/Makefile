@@ -17,7 +17,7 @@ HW_SERVER   := bordcomputer:3231
 # Select VCU128-02
 ifeq ($(VCU),02)
 	FPGA_ID := 091847100638A
-	HW_SERVER := wuerzburg:3232
+	HW_SERVER := bordcomputer:3232
 endif
 
 VIVADO ?= vivado
@@ -25,9 +25,10 @@ MKIMAGE ?= $(CURDIR)/br2_external/install/bin/mkimage
 NPROC  ?= $(shell nproc)
 
 # u-boot and OpenSBI wrapped in an mkimage wrapper
-UBOOT_ITB = output/br-hrv-vcu128/images/u-boot.itb
+UBOOT_ITB = ${CVA6_SDK}/u-boot/u-boot.itb
 # u-boot-wrapped image with kernel, rootfs and device tree blob. Name must match
 # with the file fetched in u-boot command from TFTP server
+IMG = 
 FITIMG = output/br-hrv-vcu128/images/Image.itb
 FITIMG_ITS = occamy_vcu128.its
 
@@ -56,7 +57,7 @@ bootrom/bootrom-spl.coe:
 	${MAKE} -C bootrom
 
 occamy_vcu128: vivado_ips/occamy_xilinx bootrom/bootrom-spl.coe define_defines_includes_no_simset.tcl
-	${VIVADO} -mode gui -source occamy_vcu128.tcl -tclargs $(DEBUG) $(EXT_JTAG) $(NPROC) ${MKFILE_DIR}/bootrom/bootrom-spl.coe
+	${VIVADO} -mode batch -source occamy_vcu128.tcl -tclargs $(DEBUG) $(EXT_JTAG) $(NPROC) ${MKFILE_DIR}/bootrom/bootrom-spl.coe
 
 define_defines_includes_no_simset.tcl: $(BENDER_FILES)
 	${BENDER} script vivado --only-defines --only-includes --no-simset > $@
@@ -79,7 +80,7 @@ ${UBOOT_ITB}:
 	@echo "To generate u-boot.itb, run make 'br-hrv-vcu128'"
 
 flash-u-boot:
-	${MAKE} flash FILE=${CVA6_SDK}/u-boot/u-boot.itb OFFSET=0x6000000
+	${MAKE} flash FILE=/scratch/cykoenig/development/hero-occamy/output/br-hrv-occamy/images/u-boot.itb OFFSET=0x6000000
 
 flash-uimage:
 	${MAKE} flash FILE=${CVA6_SDK}/uImage OFFSET=0x6100000
@@ -104,8 +105,8 @@ $(FITIMG): $(FITIMG_ITS) output/br-hrv-vcu128/images/Image $(DTB)
 	$(MKIMAGE) -f $(@D)/$(notdir $(FITIMG_ITS)) $(FITIMG)
 
 .PHONY : upload-linux-image
-upload-linux-image: $(FITIMG)
-	scp $(FITIMG) vcu128-$(VCU)@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-$(VCU)
+upload-linux-image:
+	scp /scratch/cykoenig/development/hero-occamy/output/br-hrv-occamy/images/Image.itb vcu128-$(VCU)@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-$(VCU)/Image.itb
 
 clean:
 	rm -rf .Xil occamy_vcu128 *.jou *.log *.str define_defines_includes_no_simset.tcl

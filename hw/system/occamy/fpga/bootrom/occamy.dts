@@ -46,7 +46,7 @@
       };
     };
   };
-  sysclk: virt_50mhz {
+  sysclk: virt_25mhz {
     #clock-cells = <0>;
     compatible = "fixed-clock";
     clock-frequency = <25000000>;
@@ -76,7 +76,7 @@
     timer@2006000 {
       compatible = "pulp,apb_timer";
       interrupt-parent = <&PLIC0>;
-      interrupts = <69 70 71 72>;
+      interrupts = <68 69 70 71>; // todo review
       reg = <0x00000000 0x2006000 0x00000000 0x00001000>;
       reg-names = "control";
     };

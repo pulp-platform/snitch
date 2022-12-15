@@ -15,4 +15,6 @@ SECTIONS
     *(.spl)
     __spl_end = .;
   }
+  __soc_ctrl_scratch0 = 0x02000014;
+  __soc_ctrl_scratch1 = 0x02000018;
 }

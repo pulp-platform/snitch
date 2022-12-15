@@ -25,6 +25,8 @@ set FILE0     [lindex $argv 4]
 # set OFFSET1   [lindex $argv 5]
 # set FILE1     [lindex $argv 6]
 
+set IS_GUI [expr {$rdi::mode == "gui" ? true: false}]
+
 set mcs_file $MCS
 
 # Create flash configuration file

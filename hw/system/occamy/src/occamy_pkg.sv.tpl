@@ -52,34 +52,34 @@ package ${name}_pkg;
   localparam int unsigned SramCfgCount = $bits(sram_cfgs_t)/SramCfgWidth;
 
   typedef struct packed {
-    logic [3:0] timer;
-    logic [31:0] gpio;
-    logic uart; // 37
-    logic spim_error;
-    logic spim_spi_event;
-    logic i2c_fmt_watermark;
-    logic i2c_rx_watermark;
-    logic i2c_fmt_overflow;
-    logic i2c_rx_overflow;
-    logic i2c_nak;
-    logic i2c_scl_interference;
-    logic i2c_sda_interference;
-    logic i2c_stretch_timeout;
-    logic i2c_sda_unstable;
-    logic i2c_trans_complete;
-    logic i2c_tx_empty;
-    logic i2c_tx_nonempty;
-    logic i2c_tx_overflow;
-    logic i2c_acq_overflow;
-    logic i2c_ack_stop;
-    logic i2c_host_timeout;
-    logic ecc_narrow_uncorrectable;
-    logic ecc_narrow_correctable;
-    logic ecc_wide_uncorrectable; // 16
-    logic ecc_wide_correctable; // 15
+    logic [3:0] timer;               // 69 - 72
+    logic [31:0] gpio;               // 37 - 68
+    logic uart;                      // 36
+    logic spim_error;                // 35
+    logic spim_spi_event;            // 34
+    logic i2c_fmt_watermark;         // 33
+    logic i2c_rx_watermark;          // 32
+    logic i2c_fmt_overflow;          // 31
+    logic i2c_rx_overflow;           // 30
+    logic i2c_nak;                   // 29
+    logic i2c_scl_interference;      // 28
+    logic i2c_sda_interference;      // 27
+    logic i2c_stretch_timeout;       // 26
+    logic i2c_sda_unstable;          // 25
+    logic i2c_trans_complete;        // 24
+    logic i2c_tx_empty;              // 23
+    logic i2c_tx_nonempty;           // 22
+    logic i2c_tx_overflow;           // 21
+    logic i2c_acq_overflow;          // 20
+    logic i2c_ack_stop;              // 19
+    logic i2c_host_timeout;          // 18
+    logic ecc_narrow_uncorrectable;  // 17
+    logic ecc_narrow_correctable;    // 16
+    logic ecc_wide_uncorrectable;    // 15
+    logic ecc_wide_correctable;      // 14
     // 4 programmable, 8 HBM (1x per channel)
-    logic [12:0] ext_irq; // 1-14
-    logic zero; // 0
+    logic [12:0] ext_irq;            // 01-13
+    logic zero;                      // 00
   } ${name}_interrupt_t;
 
   localparam logic [15:0] PartNum = 2;

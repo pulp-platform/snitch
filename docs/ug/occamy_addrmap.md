@@ -41,15 +41,10 @@ This is the current address map of occamy. Note that the Quadrants address map h
 | HBM\_CFG\_CTRL   |  64.0 KB |  used  |      0x0a80\_0000 |      0x0a80\_ffff |
 | -                |   7.9 MB |  free  |      0x0a81\_0000 |      0x0aff\_ffff |
 | QUAD\_0\_CFG     |  64.0 KB |  used  |      0x0b00\_0000 |      0x0b00\_ffff |
-| QUAD\_1\_CFG     |  64.0 KB |  used  |      0x0b01\_0000 |      0x0b01\_ffff |
-| QUAD\_2\_CFG     |  64.0 KB |  used  |      0x0b02\_0000 |      0x0b02\_ffff |
-| QUAD\_3\_CFG     |  64.0 KB |  used  |      0x0b03\_0000 |      0x0b03\_ffff |
-| QUAD\_4\_CFG     |  64.0 KB |  used  |      0x0b04\_0000 |      0x0b04\_ffff |
-| QUAD\_5\_CFG     |  64.0 KB |  used  |      0x0b05\_0000 |      0x0b05\_ffff |
-| -                |  15.6 MB |  free  |      0x0b06\_0000 |      0x0bff\_ffff |
+| -                |  15.9 MB |  free  |      0x0b01\_0000 |      0x0bff\_ffff |
 | PLIC             |  64.0 MB |  used  |      0x0c00\_0000 |      0x0fff\_ffff |
-| QUADRANTS        |   6.0 MB |  used  |      0x1000\_0000 |      0x105f\_ffff |
-| -                |  10.0 MB |  free  |      0x1060\_0000 |      0x10ff\_ffff |
+| QUADRANTS        | 256.0 KB |  used  |      0x1000\_0000 |      0x1003\_ffff |
+| -                |  15.7 MB |  free  |      0x1004\_0000 |      0x10ff\_ffff |
 | SYS\_IDMA\_CFG   |  64.0 KB |  used  |      0x1100\_0000 |      0x1100\_ffff |
 | -                | 239.9 MB |  free  |      0x1101\_0000 |      0x1fff\_ffff |
 | PCIE             | 640.0 MB |  used  |      0x2000\_0000 |      0x47ff\_ffff |
@@ -81,74 +76,5 @@ This is the current address map of occamy. Note that the Quadrants address map h
 |    0     |    0    | CLUSTER\_TCDM       | 128.0 KB | 0x1000\_0000 | 0x1001\_ffff |
 |    0     |    0    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1002\_0000 | 0x1002\_ffff |
 |    0     |    0    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1003\_0000 | 0x1003\_ffff |
-|    0     |    1    | CLUSTER\_TCDM       | 128.0 KB | 0x1004\_0000 | 0x1005\_ffff |
-|    0     |    1    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1006\_0000 | 0x1006\_ffff |
-|    0     |    1    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1007\_0000 | 0x1007\_ffff |
-|    0     |    2    | CLUSTER\_TCDM       | 128.0 KB | 0x1008\_0000 | 0x1009\_ffff |
-|    0     |    2    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x100a\_0000 | 0x100a\_ffff |
-|    0     |    2    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x100b\_0000 | 0x100b\_ffff |
-|    0     |    3    | CLUSTER\_TCDM       | 128.0 KB | 0x100c\_0000 | 0x100d\_ffff |
-|    0     |    3    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x100e\_0000 | 0x100e\_ffff |
-|    0     |    3    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x100f\_0000 | 0x100f\_ffff |
-|    1     |    0    | CLUSTER\_TCDM       | 128.0 KB | 0x1010\_0000 | 0x1011\_ffff |
-|    1     |    0    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1012\_0000 | 0x1012\_ffff |
-|    1     |    0    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1013\_0000 | 0x1013\_ffff |
-|    1     |    1    | CLUSTER\_TCDM       | 128.0 KB | 0x1014\_0000 | 0x1015\_ffff |
-|    1     |    1    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1016\_0000 | 0x1016\_ffff |
-|    1     |    1    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1017\_0000 | 0x1017\_ffff |
-|    1     |    2    | CLUSTER\_TCDM       | 128.0 KB | 0x1018\_0000 | 0x1019\_ffff |
-|    1     |    2    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x101a\_0000 | 0x101a\_ffff |
-|    1     |    2    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x101b\_0000 | 0x101b\_ffff |
-|    1     |    3    | CLUSTER\_TCDM       | 128.0 KB | 0x101c\_0000 | 0x101d\_ffff |
-|    1     |    3    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x101e\_0000 | 0x101e\_ffff |
-|    1     |    3    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x101f\_0000 | 0x101f\_ffff |
-|    2     |    0    | CLUSTER\_TCDM       | 128.0 KB | 0x1020\_0000 | 0x1021\_ffff |
-|    2     |    0    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1022\_0000 | 0x1022\_ffff |
-|    2     |    0    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1023\_0000 | 0x1023\_ffff |
-|    2     |    1    | CLUSTER\_TCDM       | 128.0 KB | 0x1024\_0000 | 0x1025\_ffff |
-|    2     |    1    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1026\_0000 | 0x1026\_ffff |
-|    2     |    1    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1027\_0000 | 0x1027\_ffff |
-|    2     |    2    | CLUSTER\_TCDM       | 128.0 KB | 0x1028\_0000 | 0x1029\_ffff |
-|    2     |    2    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x102a\_0000 | 0x102a\_ffff |
-|    2     |    2    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x102b\_0000 | 0x102b\_ffff |
-|    2     |    3    | CLUSTER\_TCDM       | 128.0 KB | 0x102c\_0000 | 0x102d\_ffff |
-|    2     |    3    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x102e\_0000 | 0x102e\_ffff |
-|    2     |    3    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x102f\_0000 | 0x102f\_ffff |
-|    3     |    0    | CLUSTER\_TCDM       | 128.0 KB | 0x1030\_0000 | 0x1031\_ffff |
-|    3     |    0    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1032\_0000 | 0x1032\_ffff |
-|    3     |    0    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1033\_0000 | 0x1033\_ffff |
-|    3     |    1    | CLUSTER\_TCDM       | 128.0 KB | 0x1034\_0000 | 0x1035\_ffff |
-|    3     |    1    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1036\_0000 | 0x1036\_ffff |
-|    3     |    1    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1037\_0000 | 0x1037\_ffff |
-|    3     |    2    | CLUSTER\_TCDM       | 128.0 KB | 0x1038\_0000 | 0x1039\_ffff |
-|    3     |    2    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x103a\_0000 | 0x103a\_ffff |
-|    3     |    2    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x103b\_0000 | 0x103b\_ffff |
-|    3     |    3    | CLUSTER\_TCDM       | 128.0 KB | 0x103c\_0000 | 0x103d\_ffff |
-|    3     |    3    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x103e\_0000 | 0x103e\_ffff |
-|    3     |    3    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x103f\_0000 | 0x103f\_ffff |
-|    4     |    0    | CLUSTER\_TCDM       | 128.0 KB | 0x1040\_0000 | 0x1041\_ffff |
-|    4     |    0    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1042\_0000 | 0x1042\_ffff |
-|    4     |    0    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1043\_0000 | 0x1043\_ffff |
-|    4     |    1    | CLUSTER\_TCDM       | 128.0 KB | 0x1044\_0000 | 0x1045\_ffff |
-|    4     |    1    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1046\_0000 | 0x1046\_ffff |
-|    4     |    1    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1047\_0000 | 0x1047\_ffff |
-|    4     |    2    | CLUSTER\_TCDM       | 128.0 KB | 0x1048\_0000 | 0x1049\_ffff |
-|    4     |    2    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x104a\_0000 | 0x104a\_ffff |
-|    4     |    2    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x104b\_0000 | 0x104b\_ffff |
-|    4     |    3    | CLUSTER\_TCDM       | 128.0 KB | 0x104c\_0000 | 0x104d\_ffff |
-|    4     |    3    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x104e\_0000 | 0x104e\_ffff |
-|    4     |    3    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x104f\_0000 | 0x104f\_ffff |
-|    5     |    0    | CLUSTER\_TCDM       | 128.0 KB | 0x1050\_0000 | 0x1051\_ffff |
-|    5     |    0    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1052\_0000 | 0x1052\_ffff |
-|    5     |    0    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1053\_0000 | 0x1053\_ffff |
-|    5     |    1    | CLUSTER\_TCDM       | 128.0 KB | 0x1054\_0000 | 0x1055\_ffff |
-|    5     |    1    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x1056\_0000 | 0x1056\_ffff |
-|    5     |    1    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x1057\_0000 | 0x1057\_ffff |
-|    5     |    2    | CLUSTER\_TCDM       | 128.0 KB | 0x1058\_0000 | 0x1059\_ffff |
-|    5     |    2    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x105a\_0000 | 0x105a\_ffff |
-|    5     |    2    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x105b\_0000 | 0x105b\_ffff |
-|    5     |    3    | CLUSTER\_TCDM       | 128.0 KB | 0x105c\_0000 | 0x105d\_ffff |
-|    5     |    3    | CLUSTER\_PERIPHERAL |  64.0 KB | 0x105e\_0000 | 0x105e\_ffff |
-|    5     |    3    | CLUSTER\_ZERO\_MEM  |  64.0 KB | 0x105f\_0000 | 0x105f\_ffff |
-|    -     |    -    | EMPTY               |  10.0 MB | 0x1060\_0000 | 0x10ff\_ffff |
+|    -     |    -    | EMPTY               |  15.7 MB | 0x1004\_0000 | 0x10ff\_ffff |
 

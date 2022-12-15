@@ -109,7 +109,7 @@
       fields: [
         {
           bits: "31:0"
-          resval: 6
+          resval: 1
           name: "NUM_QUADRANTS"
           desc: '''
                 Number of quadrants per chip.
