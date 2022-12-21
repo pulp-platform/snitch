@@ -2,6 +2,8 @@
 # Solderpad Hardware License, Version 0.51, see LICENSE for details.
 # SPDX-License-Identifier: SHL-0.51
 
+#define MSTATUS_MIE 8
+
 .global _start
 
 _start:
@@ -9,50 +11,53 @@ _start:
     csrr    t0, misa
     bltz    t0, _cva6_init
 
-_snitch_init:
-    la      t1, exception
-    csrw    mtvec, t1
-    csrr    a0, mhartid
-    la      a1, boot_data
-    lw      t2, entry_addr
-    jalr    t2
+# WARNING: Do *not* use rv64 instructions in this option block!
+# Check the dumps to be certain!
+.option push
+.option norvc
 
-_cva6_init:
-    # Reset, ungate, deisolate each quadrant
-    la      t0, __soc_ctrl_nr_quads
-    lw      t0, 0(t0)
-    la      t1, __quad_int_base
-    la      t2, __quad_stride
-    li      t3, 1
-1:  addi    t0, t0, -1
-    # Assert reset
-    sw      zero, 4(t1)
-    fence
-    # Ungate clock (sync reset)
-    sw      t3, 0(t1)
-    fence
-    # Deassert reset
-    sw      t3, 4(t1)
-    fence
-    # Deisolate quadrant
-    sw      zero, 8(t1)
-    fence
-    # Move onto next quadrant
-    add     t1, t1, t2
-    bnez    t0, 1b
-
+_snitch_park:
+    # Prepare arguments for snRuntime
+    csrr  a0, mhartid
+    la    a1, device_tree
     # Set trap vector
+    la      t0, _snitch_resume
+    csrw    mtvec, t0
+    # Enable software and cluster interrupts
+    csrsi   mstatus, MSTATUS_MIE
+    lui     t0, 0x80  # (1 << 19) cluster interrupts
+    addi    t0, t0, 8 # (1 << 3) software interrupts
+    csrw    mie, t0
+    wfi
+
+_snitch_resume:
+    la      t0, __soc_ctrl_scratch1
+    lw      t0, 0(t0)
+    jalr    ra, 0(t0)
+    j       _snitch_park
+
+.option pop
+
+# You may use rv64 instuctions in this block.
+_cva6_init:
+    # Set global pointer
+    .option push
+    .option norelax
+    la      gp, __global_pointer$
+    .option pop
+    # Set stack pointer
+    la      sp, __stack_pointer$
     la      t2, exception
     csrw    mtvec, t2
-    j       exception
+    lwu     t0, entry_addr
+    jalr    t0
 exception:
     wfi
     j     exception
-.align 3
-device_tree:
-    .incbin "test/occamy.dtb"
 
-.pushsection .boot_section,"aw",@progbits;
+# Create a new section to place at the end of binary,
+# as expected by test/common_lib.cc
+.pushsection end, "ax"
 entry_addr:
-    .word exception
-boot_data:
+.word 0
+device_tree:

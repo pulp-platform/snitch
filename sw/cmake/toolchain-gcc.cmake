@@ -2,6 +2,8 @@
 # Solderpad Hardware License, Version 0.51, see LICENSE for details.
 # SPDX-License-Identifier: SHL-0.51
 
+option(DEBUG "Produce debugging symbols during compilation" OFF)
+
 set(CMAKE_C_COMPILER riscv32-unknown-elf-gcc)
 set(CMAKE_CXX_COMPILER riscv32-unknown-elf-g++)
 set(CMAKE_OBJCOPY riscv32-unknown-elf-objcopy)
@@ -9,6 +11,9 @@ set(CMAKE_OBJDUMP riscv32-unknown-elf-objdump)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION true)
 
 add_compile_options(-march=rv32imafd -mabi=ilp32d -mcmodel=medany -mno-fdiv -ffast-math -fno-builtin-printf -fno-common)
+if(DEBUG)
+    add_compile_options(-g)
+endif()
 add_link_options(-march=rv32imafd -mabi=ilp32d -nostartfiles -Wl,-Ttext-segment=0x80000000)
 # add_link_options(-Wl,--verbose)
 

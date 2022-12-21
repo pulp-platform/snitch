@@ -189,3 +189,20 @@ jobs:
     - name: Run Unit Tests
       run: |
         cd hw/system/snitch_cluster/sw/build && make test
+
+  ####################################
+  # SW on Small Occamy Configuration #
+  ####################################
+  sw-occamy-small:
+    container:
+      image: ghcr.io/pulp-platform/snitch
+    name: SW on Small Occamy Configuration
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    # - name: Build Hardware
+    #   run: |
+    #     cd hw/system/occamy && make bin/occamy_top.vlt
+    - name: Build Software
+      run: |
+        cd hw/system/occamy && make update-sw
