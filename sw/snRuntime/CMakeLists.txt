@@ -73,6 +73,7 @@ set(banshee_snitch_sources
     src/platforms/banshee/putchar.c
 )
 set(rtl_snitch_sources
+    src/platforms/rtl/start_snitch.c
     src/platforms/rtl/start_snitch.S
     src/platforms/rtl/putchar.c
 )

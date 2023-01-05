@@ -61,7 +61,46 @@ struct snrt_barrier {
     uint32_t volatile barrier_iteration;
 };
 
+struct snrt_allocator_inst {
+    // Base address from where allocation starts
+    uint32_t base;
+    // Number of bytes alloctable
+    uint32_t size;
+    // Address of the next allocated block
+    uint32_t next;
+};
+struct snrt_allocator {
+    struct snrt_allocator_inst l1;
+    struct snrt_allocator_inst l3;
+};
+
+struct snrt_team {
+    /// Pointer to the root team description of this cluster.
+    struct snrt_team_root *root;
+};
+
+// This struct is placed at the end of each clusters TCDM
+struct snrt_team_root {
+    struct snrt_team base;
+    const void *bootdata;
+    uint32_t global_core_base_hartid;
+    uint32_t global_core_num;
+    uint32_t cluster_idx;
+    uint32_t cluster_num;
+    uint32_t cluster_core_base_hartid;
+    uint32_t cluster_core_num;
+    snrt_slice_t global_mem;
+    snrt_slice_t cluster_mem;
+    snrt_slice_t zero_mem;
+    struct snrt_allocator allocator;
+    struct snrt_barrier cluster_barrier;
+    uint32_t barrier_reg_ptr;
+    struct snrt_peripherals peripherals;
+};
+
 static inline size_t snrt_slice_len(snrt_slice_t s) { return s.end - s.start; }
+
+extern __thread struct snrt_team *_snrt_team_current;
 
 extern void snrt_cluster_hw_barrier();
 extern void snrt_cluster_sw_barrier();
@@ -69,26 +108,22 @@ extern void snrt_global_barrier();
 extern void snrt_barrier(struct snrt_barrier *barr, uint32_t n);
 
 static inline uint32_t __attribute__((pure)) snrt_hartid();
-struct snrt_team_root *snrt_current_team();
-extern struct snrt_peripherals *snrt_peripherals();
-extern uint32_t snrt_global_core_base_hartid();
-extern uint32_t snrt_global_core_idx();
-extern uint32_t snrt_global_core_num();
-extern uint32_t snrt_global_compute_core_idx();
-extern uint32_t snrt_global_compute_core_num();
-extern uint32_t snrt_global_dm_core_idx();
-extern uint32_t snrt_global_dm_core_num();
-extern uint32_t snrt_cluster_core_base_hartid();
-extern uint32_t snrt_cluster_core_idx();
-extern uint32_t snrt_cluster_core_num();
-extern uint32_t snrt_cluster_compute_core_idx();
-extern uint32_t snrt_cluster_compute_core_num();
-extern uint32_t snrt_cluster_dm_core_idx();
-extern uint32_t snrt_cluster_dm_core_num();
-extern uint32_t snrt_cluster_idx();
-extern uint32_t snrt_cluster_num();
-extern int snrt_is_compute_core();
-extern int snrt_is_dm_core();
+static inline struct snrt_team_root *snrt_current_team();
+static inline struct snrt_peripherals *snrt_peripherals();
+static inline uint32_t snrt_global_core_base_hartid();
+static inline uint32_t snrt_global_core_idx();
+static inline uint32_t snrt_global_core_num();
+static inline uint32_t snrt_cluster_idx();
+static inline uint32_t snrt_cluster_num();
+static inline uint32_t snrt_cluster_core_base_hartid();
+static inline uint32_t snrt_cluster_core_idx();
+static inline uint32_t snrt_cluster_core_num();
+static inline uint32_t snrt_cluster_compute_core_idx();
+static inline uint32_t snrt_cluster_compute_core_num();
+static inline uint32_t snrt_cluster_dm_core_idx();
+static inline uint32_t snrt_cluster_dm_core_num();
+static inline int snrt_is_compute_core();
+static inline int snrt_is_dm_core();
 extern void snrt_wakeup(uint32_t mask);
 
 /// get pointer to barrier register
@@ -176,10 +211,80 @@ static inline __attribute__((noreturn)) void snrt_exit(int status) {
 // Team functions
 //================================================================================
 
+static inline struct snrt_team_root *snrt_current_team() {
+    return _snrt_team_current->root;
+}
+
+static inline struct snrt_peripherals *snrt_peripherals() {
+    return &(snrt_current_team()->peripherals);
+}
+
 static inline uint32_t __attribute__((pure)) snrt_hartid() {
     uint32_t hartid;
     asm("csrr %0, mhartid" : "=r"(hartid));
     return hartid;
+}
+
+static inline uint32_t snrt_global_core_base_hartid() {
+    return snrt_current_team()->global_core_base_hartid;
+}
+
+static inline uint32_t snrt_global_core_idx() {
+    return snrt_hartid() - snrt_current_team()->global_core_base_hartid;
+}
+
+static inline uint32_t snrt_global_core_num() {
+    return snrt_current_team()->global_core_num;
+}
+
+static inline uint32_t snrt_cluster_idx() {
+    return snrt_current_team()->cluster_idx;
+}
+
+static inline uint32_t snrt_cluster_num() {
+    return snrt_current_team()->cluster_num;
+}
+
+static inline uint32_t snrt_cluster_core_base_hartid() {
+    return snrt_current_team()->cluster_core_base_hartid;
+}
+
+static inline uint32_t snrt_cluster_core_idx() {
+    return (snrt_hartid() - snrt_cluster_core_base_hartid()) %
+        snrt_current_team()->cluster_core_num;
+}
+
+static inline uint32_t snrt_cluster_core_num() {
+    return snrt_current_team()->cluster_core_num;
+}
+
+static inline uint32_t snrt_cluster_compute_core_idx() {
+    // TODO: Actually derive this from the device tree!
+    return snrt_cluster_core_idx();
+}
+
+static inline uint32_t snrt_cluster_compute_core_num() {
+    // TODO: Actually derive this from the device tree!
+    return snrt_cluster_core_num() - 1;
+}
+
+static inline int snrt_is_compute_core() {
+    // TODO: Actually derive this from the device tree!
+    return snrt_cluster_core_idx() < snrt_cluster_core_num() - 1;
+}
+
+static inline int snrt_is_dm_core() {
+    // TODO: Actually derive this from the device tree!
+    return !snrt_is_compute_core();
+}
+
+static inline uint32_t snrt_cluster_dm_core_idx() {
+    // TODO: Actually derive this from the device tree!
+    return snrt_cluster_core_num() - 1;
+}
+static inline uint32_t snrt_cluster_dm_core_num() {
+    // TODO: Actually derive this from the device tree!
+    return 1;
 }
 
 //================================================================================

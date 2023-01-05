@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "debug.h"
 #include "snrt.h"
-#include "team.h"
 
 #define ALIGN_UP(addr, size) (((addr) + (size)-1) & ~((size)-1))
 #define ALIGN_DOWN(addr, size) ((addr) & ~((size)-1))

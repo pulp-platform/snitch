@@ -1,7 +1,6 @@
 // Copyright 2020 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
-#include "../../team.h"
 #include "snitch_cluster_peripheral.h"
 #include "snrt.h"
 
@@ -73,9 +72,6 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
 
     // TLS caches of frequently used data
     _snrt_team_current = &team->base;
-    _snrt_core_idx =
-        (snrt_hartid() - _snrt_team_current->root->cluster_core_base_hartid) %
-        _snrt_team_current->root->cluster_core_num;
 
     // Initialize the string buffer. This technically doesn't belong here, but
     // the _snrt_init_team function is called once per thread before main, so
