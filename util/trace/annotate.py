@@ -123,9 +123,9 @@ with open(trace, 'r') as f:
         files_abs = [x for x in ret[1::2]]
         # Assemble annotation string
         if len(funs):
-            annot = f'; {funs[0]} ({files[0]})'
+            annot = f'#; {funs[0]} ({files[0]})'
             for fun, file in zip(funs[1:], files[1:]):
-                annot = f'{annot}\n;  in {fun} ({file})'
+                annot = f'{annot}\n#;  in {fun} ({file})'
 
         # Get source of last file and print the line
         src_fname = files_abs[0].split(':')[0]
@@ -136,9 +136,10 @@ with open(trace, 'r') as f:
             except OSError:
                 src_files[src_fname] = None
         if src_files[src_fname] is not None:
-            srf_f_line = int(files_abs[0].split(':')[-1])
+            print(files_abs[0])
+            srf_f_line = int(files_abs[0].split(':')[-1].split(' ')[0])
             src_line = src_files[src_fname][srf_f_line-1]
-            annot = f'{annot}\n;  {src_line}'
+            annot = f'{annot}\n#;  {src_line}'
 
         if len(annot) and annot != last:
             of.write(annot+'\n')
