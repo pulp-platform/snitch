@@ -12,6 +12,11 @@
 #     ;  in main (event_unit.c:21)
 #     ;  asm("csrr %0, mhartid" : "=r"(hartid));
 #           80000048  x13=0000000a                            # csrr    a3, mhartid
+#
+# If the -d/--diff option is specified, it instead outputs a (fictitious) diff
+# file which allows to visualize the same information in a neater way.
+# For neater visualization, feed the diff file into a diff visualization tool e.g.:
+# kompare -o <diff_file>
 
 import sys
 import os
@@ -44,6 +49,12 @@ parser.add_argument(
     default='llvm-addr2line',
     help='`addr2line` binary to use for parsing')
 parser.add_argument(
+    '-d',
+    '--diff',
+    action='store_true',
+    default=False,
+    help='When true outputs a diff file instead of the annotated trace')
+parser.add_argument(
     '-s',
     '--start',
     metavar='<line>',
@@ -70,6 +81,7 @@ args = parser.parse_args()
 elf = args.elf
 trace = args.trace
 output = args.output
+diff = args.diff
 addr2line = args.addr2line
 quiet = args.quiet
 
@@ -77,6 +89,7 @@ if not quiet:
     print('elf:', elf, file=sys.stderr)
     print('trace:', trace, file=sys.stderr)
     print('output:', output, file=sys.stderr)
+    print('diff:', diff, file=sys.stderr)
     print('addr2line:', addr2line, file=sys.stderr)
 
 of = open(output, 'w')
@@ -95,15 +108,95 @@ def adr2line(addr):
     return os.popen(cmd).read().split('\n')
 
 
+# helper functions to parse addr2line output
+def a2l_file_path(a2l_file_str):
+    return a2l_file_str.split(':')[0]
+
+
+def a2l_file_name(a2l_file_str):
+    return a2l_file_str.split('/')[-1].split(':')[0]
+
+
+def a2l_file_line(a2l_file_str):
+    return int(a2l_file_str.split(':')[-1].split(' ')[0])
+
+
+def format_a2l_funcname(a2l_func_name):
+    if a2l_func_name == '??':
+        return 'unknown function'
+    return a2l_func_name
+
+
+# helper functions to assemble diff output
+def format_call(level, call):
+    funcname = format_a2l_funcname(call[0])
+    if level == 0:
+        return f'{funcname} ({call[1]})\n'
+    else:
+        indentation = '  ' * (level - 1)
+        return f'{indentation}{call[4]}: inlined call to {funcname} ({call[1]})\n'
+
+
+def assemble_call_stack(funs, file_paths, file_lines):
+    call_stack = list(zip(funs,                       # func name
+                          file_paths,                 # func path
+                          file_lines,                 # func line
+                          [*(file_paths[1:]), '??'],  # caller path
+                          [*(file_lines[1:]), 0]))    # call line
+    call_stack.reverse()
+    return call_stack
+
+
+def matching_call_stack_levels(cstack1, cstack2):
+    matching_levels = 0
+    for i, call in enumerate(cstack1):
+        # Compare each call: i.e. called function, caller file and call line
+        if i < len(cstack2) and \
+                call[0] == cstack2[i][0] and \
+                call[1] == cstack2[i][1] and \
+                call[3] == cstack2[i][3] and \
+                call[4] == cstack2[i][4]:
+            matching_levels += 1
+        else:
+            return matching_levels
+    return matching_levels
+
+
+def matching_source_line(cstack1, cstack2):
+    # Two trace lines match the same source line evaluation
+    # if the corresponding source line is the same *and* also
+    # the call stack which led that source line
+    try:
+        matched_src_line = cstack1[-1][2] == cstack2[-1][2]
+    except IndexError:
+        matched_src_line = False
+    matched_call_stack = matching_call_stack_levels(cstack1, cstack2) == len(next_call_stack)
+    return matched_src_line and matched_call_stack
+
+
+def dump_hunk(hunk_tstart, hunk_sstart, hunk_trace, hunk_source):
+    hunk_tlen = len(hunk_trace.splitlines())
+    hunk_slen = len(hunk_source.splitlines())
+    hunk_header = f'@@ -{hunk_tstart},{hunk_tlen} +{hunk_sstart},{hunk_slen} @@\n'
+    of.write(f'{hunk_header}{hunk_trace}{hunk_source}')
+
+
+# core functionality
 with open(trace, 'r') as f:
 
     last = ''
-    # print(addr)
-    # print(fun)
+    if diff:
+        of.write('--- trace\n+++ source\n')
+        call_stack = []
+        hunk_trace = ''
+        hunk_source = ''
+        hunk_tstart = 1
+        hunk_sstart = 1
 
-    tot_lines = len(open(trace).readlines()[args.start:args.end])
+    trace_lines = f.readlines()[args.start:args.end]
+    tot_lines = len(trace_lines)
     last_prog = 0
-    for lino, line in enumerate(f.readlines()):
+    for lino, line in enumerate(trace_lines):
 
         # RTL traces might not contain a PC on each line
         try:
@@ -112,23 +205,27 @@ with open(trace, 'r') as f:
             if trace_start_col < 0:
                 trace_start_col = line.find(addr_str)
         except (ValueError, IndexError):
-            of.write(f'      {line[trace_start_col:]}')
+            if diff:
+                hunk_trace += f'-{line[trace_start_col:]}'
+            else:
+                of.write(f'      {line[trace_start_col:]}')
             continue
 
         addr_hex = f'{addr:x}'
         ret = adr2line(addr)
 
         funs = ret[::2]
-        files = [x.split('/')[-1] for x in ret[1::2]]
-        files_abs = [x for x in ret[1::2]]
+        file_paths = [a2l_file_path(x) for x in ret[1::2]]
+        file_names = [a2l_file_name(x) for x in ret[1::2]]
+        file_lines = [a2l_file_line(x) for x in ret[1::2]]
         # Assemble annotation string
         if len(funs):
-            annot = f'; {funs[0]} ({files[0]})'
-            for fun, file in zip(funs[1:], files[1:]):
-                annot = f'{annot}\n;  in {fun} ({file})'
+            annot = f'#; {funs[0]} ({file_names[0]}:{file_lines[0]})'
+            for fun, file_name, file_line in zip(funs[1:], file_names[1:], file_lines[1:]):
+                annot = f'{annot}\n#;  in {fun} ({file_name}:{file_line})'
 
         # Get source of last file and print the line
-        src_fname = files_abs[0].split(':')[0]
+        src_fname = file_paths[0]
         if src_fname not in src_files.keys():
             try:
                 src_files[src_fname] = [x.strip()
@@ -136,14 +233,47 @@ with open(trace, 'r') as f:
             except OSError:
                 src_files[src_fname] = None
         if src_files[src_fname] is not None:
-            srf_f_line = int(files_abs[0].split(':')[-1])
-            src_line = src_files[src_fname][srf_f_line-1]
-            annot = f'{annot}\n;  {src_line}'
+            src_line = src_files[src_fname][file_lines[0]-1]
+            annot = f'{annot}\n#;  {src_line}'
 
-        if len(annot) and annot != last:
-            of.write(annot+'\n')
-        of.write(f'      {line[trace_start_col:]}')
-        last = annot
+        # Print diff
+        if diff:
+            # Compare current and previous call stacks
+            next_call_stack = assemble_call_stack(funs, file_paths, file_lines)
+            matching_cstack_levels = matching_call_stack_levels(next_call_stack, call_stack)
+            matching_src_line = matching_source_line(next_call_stack, call_stack)
+
+            # If this instruction does not map to the same evaluation of the source line
+            # of the last instruction, we finalize and dump the previous hunk
+            if hunk_trace and not matching_src_line:
+                dump_hunk(hunk_tstart, hunk_sstart, hunk_trace, hunk_source)
+                # Initialize next hunk
+                hunk_trace = ''
+                hunk_source = ''
+                hunk_tstart += len(hunk_trace.splitlines())
+                hunk_sstart += len(hunk_source.splitlines())
+
+            # Update state for next iteration
+            call_stack = next_call_stack
+
+            # Assemble source part of hunk
+            if len(funs) and src_files[src_fname]:
+                for i, call in enumerate(call_stack):
+                    if i >= matching_cstack_levels:
+                        hunk_source += f'+{format_call(i, call)}'
+                if not matching_src_line:
+                    indentation = '  ' * (len(call_stack) - 1)
+                    hunk_source += f'+{indentation}{file_lines[0]}: {src_line}\n'
+
+            # Assemble trace part of hunk
+            hunk_trace += f'-{line[trace_start_col:]}'
+
+        # Default: print trace interleaved with source annotations
+        else:
+            if len(annot) and annot != last:
+                of.write(annot+'\n')
+            of.write(f'      {line[trace_start_col:]}')
+            last = annot
 
         # very simple progress
         if not quiet:
@@ -152,6 +282,11 @@ with open(trace, 'r') as f:
                 last_prog = prog
                 sys.stdout.write(f'\b\b\b\b{prog:3d}%')
                 sys.stdout.flush()
+
+    # Dump last hunk
+    if diff:
+        dump_hunk(hunk_tstart, hunk_sstart, hunk_trace, hunk_source)
+
 if not quiet:
     print(' done')
     print(adr2line.cache_info())
