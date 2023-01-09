@@ -2,13 +2,15 @@
 # Solderpad Hardware License, Version 0.51, see LICENSE for details.
 # SPDX-License-Identifier: SHL-0.51
 
-set(CMAKE_C_COMPILER riscv32-unknown-elf-clang)
-set(CMAKE_CXX_COMPILER riscv32-unknown-elf-clang++)
-set(CMAKE_OBJCOPY llvm-objcopy)
-set(CMAKE_OBJDUMP llvm-objdump --mcpu=snitch)
-set(CMAKE_AR llvm-ar)
-set(CMAKE_STRIP llvm-strip)
-set(CMAKE_RANLIB llvm-ranlib)
+set(SNITCH_LLVM_BIN /home/paulsc/dev/llvm-ssr/llvm-iis/install/bin/)
+
+set(CMAKE_C_COMPILER "${SNITCH_LLVM_BIN}/clang")
+set(CMAKE_CXX_COMPILER "${SNITCH_LLVM_BIN}/clang++")
+set(CMAKE_OBJCOPY "${SNITCH_LLVM_BIN}/llvm-objcopy")
+set(CMAKE_OBJDUMP "${SNITCH_LLVM_BIN}/llvm-objdump" --mcpu=snitch)
+set(CMAKE_AR "${SNITCH_LLVM_BIN}/llvm-ar")
+set(CMAKE_STRIP "${SNITCH_LLVM_BIN}/llvm-strip")
+set(CMAKE_RANLIB "${SNITCH_LLVM_BIN}/llvm-ranlib")
 
 # LTO
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION true)
@@ -21,6 +23,10 @@ set(CMAKE_CXX_COMPILER_RANLIB "${CMAKE_RANLIB}")
 ## Compile options
 ##
 add_compile_options(-mcpu=snitch -mcmodel=medany -ffast-math -fno-builtin-printf -fno-common)
+
+# TODO: Add march manually due to Zfh arch issue
+add_compile_options(-march=rv32imafd_zfh_xfrep_xssr_xdma_xfalthalf_xfquarter_xfaltquarter_xfvecsingle_xfvechalf_xfvecalthalf_xfvecquarter_xfvecaltquarter_xfauxhalf_xfauxalthalf_xfauxquarter_xfauxaltquarter_xfauxvecsingle_xfauxvechalf_xfauxvecalthalf_xfauxvecquarter_xfauxvecaltquarter_xfexpauxvechalf_xfexpauxvecalthalf_xfexpauxvecquarter_xfexpauxvecaltquarter)
+
 add_compile_options(-ffunction-sections)
 add_compile_options(-Wextra)
 add_compile_options(-static)
