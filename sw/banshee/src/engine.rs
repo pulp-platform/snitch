@@ -1027,6 +1027,46 @@ impl<'a, 'b> Cpu<'a, 'b> {
             TraceAccess::WriteF32Reg(x) => {
                 format!("f{:02}={:>12.4}", x, f32::from_bits(data as u32))
             }
+            TraceAccess::Readf8Reg(x) => format!(
+                "f{:02}:[{:>5.3}]",
+                x,
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s(
+                    (data & 0x0000_0000_0000_00ff) >> 0,
+                    flexfloat::FfOpCvt::Fcvt8f2f,
+                    false,
+                    false
+                ) as u32)
+            ),
+            TraceAccess::Writef8Reg(x) => format!(
+                "f{:02}=[{:>5.3}]",
+                x,
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s(
+                    (data & 0x0000_0000_0000_00ff) >> 0,
+                    flexfloat::FfOpCvt::Fcvt8f2f,
+                    false,
+                    false
+                ) as u32),
+            ),
+            TraceAccess::Readf16Reg(x) => format!(
+                "f{:02}=[{:>8.4}]",
+                x,
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s(
+                    (data & 0x0000_0000_0000_ffff) >> 0,
+                    flexfloat::FfOpCvt::Fcvt16f2f,
+                    false,
+                    false
+                ) as u32),
+            ),
+            TraceAccess::Writef16Reg(x) => format!(
+                "f{:02}=[{:>5.3}]",
+                x,
+                f32::from_bits(flexfloat::ff_instruction_cvt_to_s(
+                    (data & 0x0000_0000_0000_00ff) >> 0,
+                    flexfloat::FfOpCvt::Fcvt16f2f,
+                    false,
+                    false
+                ) as u32),
+            ),
             TraceAccess::Readvf64sReg(x) => format!(
                 "f{:02}:[{:>12.4}, {:>12.4}]",
                 x,
@@ -1457,6 +1497,8 @@ pub enum TraceAccess {
     ReadMem,
     ReadReg(u8),
     ReadFReg(u8),
+    Readf8Reg(u8),
+    Readf16Reg(u8),
     ReadF32Reg(u8),
     Readvf64sReg(u8),
     Readvf64hReg(u8),
@@ -1464,6 +1506,8 @@ pub enum TraceAccess {
     WriteMem,
     WriteReg(u8),
     WriteFReg(u8),
+    Writef8Reg(u8),
+    Writef16Reg(u8),
     WriteF32Reg(u8),
     Writevf64sReg(u8),
     Writevf64hReg(u8),

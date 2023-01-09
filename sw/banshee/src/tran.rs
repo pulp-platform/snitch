@@ -7013,7 +7013,7 @@ impl<'a> InstructionTranslator<'a> {
         self.emit_possible_ssr_read(rs);
         let raw_ptr = self.freg_ptr(rs);
         self.trace_access(
-            TraceAccess::ReadFReg(rs as u8),
+            TraceAccess::Readf8Reg(rs as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
         let ptr = LLVMBuildBitCast(
@@ -7030,7 +7030,7 @@ impl<'a> InstructionTranslator<'a> {
         self.emit_possible_ssr_read(rs);
         let raw_ptr = self.freg_ptr(rs);
         self.trace_access(
-            TraceAccess::ReadFReg(rs as u8),
+            TraceAccess::Readf16Reg(rs as u8),
             LLVMBuildLoad(self.builder, raw_ptr, NONAME),
         );
         let ptr = LLVMBuildBitCast(
@@ -7433,7 +7433,7 @@ impl<'a> InstructionTranslator<'a> {
         let ptr = self.freg_ptr(rd);
         LLVMBuildStore(self.builder, value, ptr);
         self.trace_access(
-            TraceAccess::WriteFReg(rd as u8),
+            TraceAccess::Writef16Reg(rd as u8),
             LLVMBuildLoad(self.builder, ptr, NONAME),
         );
         self.emit_possible_ssr_write(rd);
@@ -7450,7 +7450,7 @@ impl<'a> InstructionTranslator<'a> {
         let ptr = self.freg_ptr(rd);
         LLVMBuildStore(self.builder, value, ptr);
         self.trace_access(
-            TraceAccess::WriteFReg(rd as u8),
+            TraceAccess::Writef8Reg(rd as u8),
             LLVMBuildLoad(self.builder, ptr, NONAME),
         );
         self.emit_possible_ssr_write(rd);
