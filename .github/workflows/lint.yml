@@ -213,7 +213,7 @@ jobs:
   ##########
   # Re-generate all files and detect any changes on the generated files.
   Occamy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
