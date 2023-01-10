@@ -157,7 +157,7 @@ if ($DEBUG) {
 }
 
 # Incremental implementation
-set incremental_impl_dcp /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch-incremental/occamy_vcu128_wrapper_routed.dcp
+set incremental_impl_dcp /usr/scratch2/wuerzburg/cykoenig/development/vivado_checkpoints/occamy_vcu128_wrapper_routed.dcp
 if { [info exists incremental_impl_dcp]} {
   if { [file exists $incremental_impl_dcp]} {
     set_property incremental_checkpoint ${incremental_impl_dcp} [get_runs impl_1]

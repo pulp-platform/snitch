@@ -15,6 +15,11 @@ set_property IOSTANDARD LVCMOS18 [get_ports uart_rx_i_0]
 set_property PACKAGE_PIN BN26 [get_ports uart_tx_o_0]
 set_property IOSTANDARD LVCMOS18 [get_ports uart_tx_o_0]
 
+# CPU_RESET pushbutton switch
+set_false_path -from [get_port reset] -to [all_registers]
+set_property PACKAGE_PIN BM29      [get_ports reset]
+set_property IOSTANDARD  LVCMOS12  [get_ports reset]
+
 # Set RTC as false path
 set_false_path -to [get_pins occamy_vcu128_i/occamy/inst/i_occamy/i_clint/i_sync_edge/i_sync/reg_q_reg[0]/D]
 
