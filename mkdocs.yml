@@ -49,3 +49,4 @@ nav:
   - Modules: runtime/Modules/index.md
   - Namespaces: runtime/Namespaces/index.md
   # - Solder: rm/solder.md
+- Publications: publications.md

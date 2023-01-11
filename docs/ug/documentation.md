@@ -10,7 +10,7 @@ documentation, make sure you have the required dependencies installed:
 pip install -r docs/requirements.txt
 ```
 
-After everything ist installed, you can build and serve a local copy by
+After everything is installed, you can build and serve a local copy by
 executing (in the root directory):
 
 ```bash
