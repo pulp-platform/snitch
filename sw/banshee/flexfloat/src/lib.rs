@@ -80,7 +80,6 @@ pub enum FlexfloatOp {
     Fsub,
     Fmul,
     Fdiv,
-    // Fsqrt, // Not implemented ?
     Fsgnj,
     Fsgnjn,
     Fsgnjx,
@@ -106,6 +105,7 @@ pub enum FfOpCvt {
     Fcvt32f2f,
     Fcvt16f2f,
     Fcvt8f2f,
+    Fsqrt,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -192,6 +192,7 @@ pub unsafe fn ff_instruction_cvt_to_b(
         FfOpCvt::Fcvt16f2f => ff_cast(ff_res, ff_a16, env_dst),
         FfOpCvt::Fcvt32f2f => ff_cast(ff_res, ff_a32, env_dst),
         FfOpCvt::Fcvt64f2f => ff_cast(ff_res, ff_a64, env_dst),
+        FfOpCvt::Fsqrt => ff_sqrt(ff_res, ff_a8),
         _ => (),
     };
 
@@ -281,6 +282,7 @@ pub unsafe fn ff_instruction_cvt_to_h(
         FfOpCvt::Fcvt16f2f => ff_cast(ff_res, ff_a16, env_dst),
         FfOpCvt::Fcvt32f2f => ff_cast(ff_res, ff_a32, env_dst),
         FfOpCvt::Fcvt64f2f => ff_cast(ff_res, ff_a64, env_dst),
+        FfOpCvt::Fsqrt => ff_sqrt(ff_res, ff_a16),
         _ => (),
     };
 
@@ -337,6 +339,10 @@ pub unsafe fn ff_instruction_cvt_to_s(
         value: 0.0,
         desc: env_fp16_src,
     };
+    let ff_a32: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp32,
+    };
     let ff_res: *mut flexfloat_t = &mut flexfloat_t {
         value: 0.0,
         desc: env_fp32,
@@ -344,10 +350,12 @@ pub unsafe fn ff_instruction_cvt_to_s(
 
     flexfloat_set_bits(ff_a8, rs1 as u64);
     flexfloat_set_bits(ff_a16, rs1 as u64);
+    flexfloat_set_bits(ff_a32, rs1 as u64);
 
     match op {
         FfOpCvt::Fcvt8f2f => ff_cast(ff_res, ff_a8, env_fp32),
         FfOpCvt::Fcvt16f2f => ff_cast(ff_res, ff_a16, env_fp32),
+        FfOpCvt::Fsqrt => ff_sqrt(ff_res, ff_a32),
         _ => (),
     };
 
@@ -373,6 +381,10 @@ pub unsafe fn ff_instruction_cvt_to_d(
         value: 0.0,
         desc: env_fp16_src,
     };
+    let ff_a64: *mut flexfloat_t = &mut flexfloat_t {
+        value: 0.0,
+        desc: env_fp64,
+    };
     let ff_res: *mut flexfloat_t = &mut flexfloat_t {
         value: 0.0,
         desc: env_fp64,
@@ -380,10 +392,12 @@ pub unsafe fn ff_instruction_cvt_to_d(
 
     flexfloat_set_bits(ff_a8, rs1 as u64);
     flexfloat_set_bits(ff_a16, rs1 as u64);
+    flexfloat_set_bits(ff_a64, rs1 as u64);
 
     match op {
         FfOpCvt::Fcvt8f2f => ff_cast(ff_res, ff_a8, env_fp64),
         FfOpCvt::Fcvt16f2f => ff_cast(ff_res, ff_a16, env_fp64),
+        FfOpCvt::Fsqrt => ff_sqrt(ff_res, ff_a64),
         _ => (),
     };
 

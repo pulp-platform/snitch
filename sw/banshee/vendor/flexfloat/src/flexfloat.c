@@ -589,6 +589,34 @@ INLINE void ff_div_any(flexfloat_t *dest, const flexfloat_t *a, const flexfloat_
     #endif
 }
 
+INLINE void ff_sqrt(flexfloat_t *dest, const flexfloat_t *a) {
+    assert((dest->desc.exp_bits == a->desc.exp_bits) && (dest->desc.frac_bits == a->desc.frac_bits));
+    dest->value = sqrt(a->value);
+    #ifdef FLEXFLOAT_TRACKING
+    dest->exact_value = sqrt(a->value);
+    if(dest->tracking_fn) (dest->tracking_fn)(dest, dest->tracking_arg);
+    #endif
+    flexfloat_sanitize(dest);
+    #ifdef FLEXFLOAT_STATS
+    // TODO STATS
+    if(StatsEnabled) getOpStats(dest->desc)->sqrt += 1;
+    #endif
+}
+
+// Operation result in different precision than source
+INLINE void ff_sqrt_any(flexfloat_t *dest, const flexfloat_t *a) {
+    dest->value = sqrt(a->value);
+    #ifdef FLEXFLOAT_TRACKING
+    dest->exact_value = sqrt(a->exact_value);
+    if(dest->tracking_fn) (dest->tracking_fn)(dest, dest->tracking_arg);
+    #endif
+    flexfloat_sanitize(dest);
+    #ifdef FLEXFLOAT_STATS
+    // TODO STATS
+    // if(StatsEnabled) getOpStats(dest->desc)->sqrt += 1;
+    #endif
+}
+
 INLINE void ff_acc(flexfloat_t *dest, const flexfloat_t *a) {
     assert((dest->desc.exp_bits == a->desc.exp_bits) && (dest->desc.frac_bits == a->desc.frac_bits));
     dest->value += a->value;

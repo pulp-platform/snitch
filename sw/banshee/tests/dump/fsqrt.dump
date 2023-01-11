@@ -1,0 +1,256 @@
+
+bin/fsqrt:	file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+80010000 <.text>:
+80010000: 97 11 00 00  	auipc	gp, 1
+80010004: 93 81 01 95  	addi	gp, gp, -1712
+80010008: 6f 00 40 00  	j	0x8001000c <.text+0xc>
+8001000c: 17 01 ff bf  	auipc	sp, 786416
+80010010: 13 01 c1 ff  	addi	sp, sp, -4
+80010014: 03 21 01 00  	lw	sp, 0(sp)
+80010018: 73 25 40 f1  	csrr	a0, mhartid
+8001001c: 97 02 ff bf  	auipc	t0, 786416
+80010020: 83 a2 42 02  	lw	t0, 36(t0)
+80010024: 33 05 55 40  	sub	a0, a0, t0
+80010028: 93 12 35 00  	slli	t0, a0, 3
+8001002c: 33 01 51 40  	sub	sp, sp, t0
+80010030: 93 92 62 00  	slli	t0, t0, 6
+80010034: 33 01 51 40  	sub	sp, sp, t0
+80010038: 13 02 01 00  	mv	tp, sp
+8001003c: 93 02 10 00  	addi	t0, zero, 1
+80010040: 93 92 92 00  	slli	t0, t0, 9
+80010044: 33 02 52 40  	sub	tp, tp, t0
+80010048: 97 02 ff bf  	auipc	t0, 786416
+8001004c: 93 82 82 fc  	addi	t0, t0, -56
+80010050: 83 a5 02 00  	lw	a1, 0(t0)
+80010054: 97 00 00 00  	auipc	ra, 0
+80010058: e7 80 c0 03  	jalr	60(ra)
+8001005c: 13 15 15 00  	slli	a0, a0, 1
+80010060: 13 65 15 00  	ori	a0, a0, 1
+80010064: 6f 00 00 01  	j	0x80010074 <.text+0x74>
+80010068: 93 02 f0 ff  	addi	t0, zero, -1
+8001006c: 33 45 55 00  	xor	a0, a0, t0
+80010070: 6f 00 40 00  	j	0x80010074 <.text+0x74>
+80010074: f3 22 40 f1  	csrr	t0, mhartid
+80010078: 63 98 02 00  	bnez	t0, 0x80010088 <.text+0x88>
+8001007c: 97 02 ff bf  	auipc	t0, 786416
+80010080: 93 82 42 fa  	addi	t0, t0, -92
+80010084: 23 a0 a2 00  	sw	a0, 0(t0)
+80010088: 73 00 50 10  	wfi	
+8001008c: 6f f0 df ff  	j	0x80010088 <.text+0x88>
+
+Disassembly of section .text.main:
+
+80010090 <.text.main>:
+80010090: 37 45 ff ff  	lui	a0, 1048564
+80010094: 13 05 85 24  	addi	a0, a0, 584
+80010098: 93 05 20 f4  	addi	a1, zero, -190
+8001009c: d3 81 05 f0  	fmv.w.x	ft3, a1
+800100a0: 53 02 05 f0  	fmv.w.x	ft4, a0
+800100a4: 17 05 00 00  	auipc	a0, 0
+800100a8: 13 05 c5 0a  	addi	a0, a0, 172
+800100ac: 07 30 05 00  	fld	ft0, 0(a0)
+800100b0: 17 05 00 00  	auipc	a0, 0
+800100b4: 13 05 85 0a  	addi	a0, a0, 168
+800100b8: 87 30 05 00  	fld	ft1, 0(a0)
+800100bc: 13 05 00 00  	mv	a0, zero
+800100c0: d3 72 00 5a  	fsqrt.d	ft5, ft0
+800100c4: 53 a5 50 a2  	feq.d	a0, ft1, ft5
+800100c8: 13 05 f5 ff  	addi	a0, a0, -1
+800100cc: 13 35 15 00  	seqz	a0, a0
+800100d0: 97 05 00 00  	auipc	a1, 0
+800100d4: 93 85 05 09  	addi	a1, a1, 144
+800100d8: 07 a0 05 00  	flw	ft0, 0(a1)
+800100dc: 93 05 00 00  	mv	a1, zero
+800100e0: d3 72 00 58  	fsqrt.s	ft5, ft0
+800100e4: 53 f3 10 40  	fcvt.s.d	ft6, ft1
+800100e8: d3 25 53 a0  	feq.s	a1, ft6, ft5
+800100ec: 93 85 f5 ff  	addi	a1, a1, -1
+800100f0: 93 b5 15 00  	seqz	a1, a1
+800100f4: 33 05 b5 00  	add	a0, a0, a1
+800100f8: 93 05 00 00  	mv	a1, zero
+800100fc: d3 72 02 5c  	fsqrt.h	ft5, ft4
+80010100: 53 f3 10 44  	fcvt.h.d	ft6, ft1
+80010104: d3 25 53 a4  	feq.h	a1, ft6, ft5
+80010108: 93 85 f5 ff  	addi	a1, a1, -1
+8001010c: 93 b5 15 00  	seqz	a1, a1
+80010110: 33 05 b5 00  	add	a0, a0, a1
+80010114: 97 05 00 00  	auipc	a1, 0
+80010118: 93 85 45 05  	addi	a1, a1, 84
+8001011c: 07 b0 05 00  	fld	ft0, 0(a1)
+80010120: 93 05 00 00  	mv	a1, zero
+80010124: d3 f2 01 5e  	fsqrt.b	ft5, ft3
+80010128: 53 73 10 46  	fcvt.b.d	ft6, ft0
+8001012c: d3 25 53 a6  	feq.b	a1, ft6, ft5
+80010130: 93 85 f5 ff  	addi	a1, a1, -1
+80010134: 93 b5 15 00  	seqz	a1, a1
+80010138: 33 05 b5 00  	add	a0, a0, a1
+8001013c: 93 05 40 00  	addi	a1, zero, 4
+80010140: 33 85 a5 40  	sub	a0, a1, a0
+80010144: 67 80 00 00  	ret
+
+Disassembly of section .sdata:
+
+80010150 <.sdata>:
+80010150: 1f 85 eb 51  	<unknown>
+80010154: b8 1e        	<unknown>
+80010156: 09 40        	<unknown>
+80010158: cd bd        	<unknown>
+8001015a: ed 67        	<unknown>
+8001015c: 21 5a        	<unknown>
+8001015e: fc 3f        	<unknown>
+80010160: c3 f5 48 40  	fmadd.s	fa1, fa7, ft4, fs0
+		...
+8001016c: 00 00        	<unknown>
+8001016e: f8 3f        	<unknown>
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+       0: 63 6c 61 6e  	bltu	sp, t1, 0x6f8 <.comment+0x6f8>
+       4: 67 20 76 65  	<unknown>
+       8: 72 73        	<unknown>
+       a: 69 6f        	<unknown>
+       c: 6e 20        	<unknown>
+       e: 31 32        	<unknown>
+      10: 2e 30        	<unknown>
+      12: 2e 31        	<unknown>
+      14: 20 28        	<unknown>
+      16: 2f 68 6f 6d  	<unknown>
+      1a: 65 2f        	<unknown>
+      1c: 62 75        	<unknown>
+      1e: 69 6c        	<unknown>
+      20: 64 65        	<unknown>
+      22: 72 2f        	<unknown>
+      24: 6c 6c        	<unknown>
+      26: 76 6d        	<unknown>
+      28: 2d 70        	<unknown>
+      2a: 72 6f        	<unknown>
+      2c: 6a 65        	<unknown>
+      2e: 63 74 2f 63  	bgeu	t5, s2, 0x656 <.comment+0x656>
+      32: 6c 61        	<unknown>
+      34: 6e 67        	<unknown>
+      36: 20 64        	<unknown>
+      38: 32 66        	<unknown>
+      3a: 30 65        	<unknown>
+      3c: 66 66        	<unknown>
+      3e: 39 62        	<unknown>
+      40: 65 31        	<unknown>
+      42: 66 35        	<unknown>
+      44: 38 62        	<unknown>
+      46: 62 31        	<unknown>
+      48: 38 36        	<unknown>
+      4a: 34 39        	<unknown>
+      4c: 39 65        	<unknown>
+      4e: 32 30        	<unknown>
+      50: 35 35        	<unknown>
+      52: 65 62        	<unknown>
+      54: 36 38        	<unknown>
+      56: 38 38        	<unknown>
+      58: 63 65 38 38  	bltu	a6, gp, 0x3e2 <.comment+0x3e2>
+      5c: 64 63        	<unknown>
+      5e: 63 29 00 4c  	<unknown>
+      62: 69 6e        	<unknown>
+      64: 6b 65 72 3a  	<unknown>
+      68: 20 4c        	<unknown>
+      6a: 4c 44        	<unknown>
+      6c: 20 31        	<unknown>
+      6e: 32 2e        	<unknown>
+      70: 30 2e        	<unknown>
+      72: 31 20        	<unknown>
+      74: 28 2f        	<unknown>
+      76: 68 6f        	<unknown>
+      78: 6d 65        	<unknown>
+      7a: 2f 62 75 69  	<unknown>
+      7e: 6c 64        	<unknown>
+      80: 65 72        	<unknown>
+      82: 2f 6c 6c 76  	<unknown>
+      86: 6d 2d        	<unknown>
+      88: 70 72        	<unknown>
+      8a: 6f 6a 65 63  	jal	s4, 0x566c0 <.comment+0x566c0>
+      8e: 74 2f        	<unknown>
+      90: 6c 6c        	<unknown>
+      92: 64 20        	<unknown>
+      94: 64 32        	<unknown>
+      96: 66 30        	<unknown>
+      98: 65 66        	<unknown>
+      9a: 66 39        	<unknown>
+      9c: 62 65        	<unknown>
+      9e: 31 66        	<unknown>
+      a0: 35 38        	<unknown>
+      a2: 62 62        	<unknown>
+      a4: 31 38        	<unknown>
+      a6: 36 34        	<unknown>
+      a8: 39 39        	<unknown>
+      aa: 65 32        	<unknown>
+      ac: 30 35        	<unknown>
+      ae: 35 65        	<unknown>
+      b0: 62 36        	<unknown>
+      b2: 38 38        	<unknown>
+      b4: 38 63        	<unknown>
+      b6: 65 38        	<unknown>
+      b8: 38 64        	<unknown>
+      ba: 63 63 29 00  	bltu	s2, sp, 0xc0 <.comment+0xc0>
+      be: 00           	<unknown>
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+       0: 41 36        	<unknown>
+       2: 00 00        	<unknown>
+       4: 00 72        	<unknown>
+       6: 69 73        	<unknown>
+       8: 63 76 00 01  	bgeu	zero, a6, 0x14 <.comment+0x14>
+       c: 2c 00        	<unknown>
+       e: 00 00        	<unknown>
+      10: 04 10        	<unknown>
+      12: 05 72        	<unknown>
+      14: 76 33        	<unknown>
+      16: 32 69        	<unknown>
+      18: 32 70        	<unknown>
+      1a: 30 5f        	<unknown>
+      1c: 6d 32        	<unknown>
+      1e: 70 30        	<unknown>
+      20: 5f 61 32 70  	<unknown>
+      24: 30 5f        	<unknown>
+      26: 66 32        	<unknown>
+      28: 70 30        	<unknown>
+      2a: 5f 64 32 70  	<unknown>
+      2e: 30 5f        	<unknown>
+      30: 7a 66        	<unknown>
+      32: 68 30        	<unknown>
+      34: 70 31        	<unknown>
+      36: 00           	<unknown>
+
+Disassembly of section .shstrtab:
+
+00000000 <.shstrtab>:
+       0: 00 2e        	<unknown>
+       2: 74 65        	<unknown>
+       4: 78 74        	<unknown>
+       6: 00 2e        	<unknown>
+       8: 63 6f 6d 6d  	bltu	s10, s6, 0x6e6 <.comment+0x6e6>
+       c: 65 6e        	<unknown>
+       e: 74 00        	<unknown>
+      10: 2e 72        	<unknown>
+      12: 69 73        	<unknown>
+      14: 63 76 2e 61  	bgeu	t3, s2, 0x620 <.comment+0x620>
+      18: 74 74        	<unknown>
+      1a: 72 69        	<unknown>
+      1c: 62 75        	<unknown>
+      1e: 74 65        	<unknown>
+      20: 73 00 2e 74  	<unknown>
+      24: 65 78        	<unknown>
+      26: 74 2e        	<unknown>
+      28: 6d 61        	<unknown>
+      2a: 69 6e        	<unknown>
+      2c: 00 2e        	<unknown>
+      2e: 73 68 73 74  	csrrsi	a6, 1863, 6
+      32: 72 74        	<unknown>
+      34: 61 62        	<unknown>
+      36: 00 2e        	<unknown>
+      38: 73 64 61 74  	csrrsi	s0, 1862, 2
+      3c: 61 00        	<unknown>

@@ -1571,6 +1571,12 @@ extern "C" {
     pub fn ff_div_any(dest: *mut flexfloat_t, a: *const flexfloat_t, b: *const flexfloat_t);
 }
 extern "C" {
+    pub fn ff_sqrt(dest: *mut flexfloat_t, a: *const flexfloat_t);
+}
+extern "C" {
+    pub fn ff_sqrt_any(dest: *mut flexfloat_t, a: *const flexfloat_t);
+}
+extern "C" {
     pub fn ff_acc(dest: *mut flexfloat_t, a: *const flexfloat_t);
 }
 extern "C" {
