@@ -170,7 +170,8 @@ module automatic axi_riscv_atomics_tb;
         .AXI_USER_AS_ID     ( USER_AS_ID       ),
         .AXI_USER_ID_MSB    ( AXI_USER_WIDTH-1 ),
         .AXI_USER_ID_LSB    ( 0                ),
-        .RISCV_WORD_WIDTH   ( SYS_DATA_WIDTH   )
+        .RISCV_WORD_WIDTH   ( SYS_DATA_WIDTH   ),
+        .N_AXI_CUT          ( 1                )
     ) i_axi_atomic_adapter (
         .clk_i    ( clk     ),
         .rst_ni   ( rst_n   ),

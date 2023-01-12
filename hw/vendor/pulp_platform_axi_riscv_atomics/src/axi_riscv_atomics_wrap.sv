@@ -35,6 +35,8 @@ module axi_riscv_atomics_wrap #(
     // 32 for RV32; 64 for RV64, where both 32-bit (.W suffix) and 64-bit (.D suffix) AMOs are
     // supported if `aw_strb` is set correctly.
     parameter int unsigned RISCV_WORD_WIDTH = 0,
+    // Add a cut between axi_riscv_amos and axi_riscv_lrsc
+    parameter int unsigned N_AXI_CUT = 0,
     /// Derived Parameters (do NOT change manually!)
     localparam int unsigned AXI_STRB_WIDTH = AXI_DATA_WIDTH / 8
 ) (
@@ -54,7 +56,8 @@ module axi_riscv_atomics_wrap #(
         .AXI_USER_AS_ID     (AXI_USER_AS_ID),
         .AXI_USER_ID_MSB    (AXI_USER_ID_MSB),
         .AXI_USER_ID_LSB    (AXI_USER_ID_LSB),
-        .RISCV_WORD_WIDTH   (RISCV_WORD_WIDTH)
+        .RISCV_WORD_WIDTH   (RISCV_WORD_WIDTH),
+        .N_AXI_CUT          (N_AXI_CUT)
     ) i_atomics (
         .clk_i           ( clk_i         ),
         .rst_ni          ( rst_ni        ),
