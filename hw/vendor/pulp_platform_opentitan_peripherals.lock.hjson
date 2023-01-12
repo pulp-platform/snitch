@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: git@github.com:pulp-platform/opentitan_peripherals.git
-    rev: df65ad8395f7dad408dc11738b924f25663a298c
+    url: https://github.com/pulp-platform/opentitan_peripherals.git
+    rev: 45d9755013aede6b2ff5104a5945a8811d8aee26
   }
 }
