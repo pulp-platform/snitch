@@ -16,3 +16,4 @@ tabulate
 yamlfmt
 pyyaml
 pytablewriter
+termcolor

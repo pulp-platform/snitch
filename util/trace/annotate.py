@@ -14,7 +14,8 @@
 #           80000048  x13=0000000a                            # csrr    a3, mhartid
 #
 # If the -d/--diff option is specified, it instead outputs a (fictitious) diff
-# file which allows to visualize the same information in a neater way.
+# file which allows to visualize the trace-source correlation side-by-side
+# instead of interleaved.
 # For neater visualization, feed the diff file into a diff visualization tool e.g.:
 # kompare -o <diff_file>
 
@@ -23,6 +24,7 @@ import os
 import re
 from functools import lru_cache
 import argparse
+from termcolor import colored
 
 # Argument parsing
 parser = argparse.ArgumentParser('annotate', allow_abbrev=True)
@@ -184,6 +186,9 @@ def dump_hunk(hunk_tstart, hunk_sstart, hunk_trace, hunk_source):
 # core functionality
 with open(trace, 'r') as f:
 
+    # get modified timestamp of trace to compare with source files
+    trace_timestamp = os.path.getmtime(trace)
+
     last = ''
     if diff:
         of.write('--- trace\n+++ source\n')
@@ -228,8 +233,13 @@ with open(trace, 'r') as f:
         src_fname = file_paths[0]
         if src_fname not in src_files.keys():
             try:
-                src_files[src_fname] = [x.strip()
-                                        for x in open(src_fname, 'r').readlines()]
+                # Issue warning if source was modified after trace
+                src_timestamp = os.path.getmtime(src_fname)
+                if src_timestamp >= trace_timestamp:
+                    print(colored('Warning:', 'yellow'), f'{src_fname} has been edited since the trace was generated')
+
+                with open(src_fname, 'r') as src_f:
+                    src_files[src_fname] = [x.strip() for x in src_f.readlines()]
             except OSError:
                 src_files[src_fname] = None
         if src_files[src_fname] is not None:
@@ -248,10 +258,10 @@ with open(trace, 'r') as f:
             if hunk_trace and not matching_src_line:
                 dump_hunk(hunk_tstart, hunk_sstart, hunk_trace, hunk_source)
                 # Initialize next hunk
-                hunk_trace = ''
-                hunk_source = ''
                 hunk_tstart += len(hunk_trace.splitlines())
                 hunk_sstart += len(hunk_source.splitlines())
+                hunk_trace = ''
+                hunk_source = ''
 
             # Update state for next iteration
             call_stack = next_call_stack
