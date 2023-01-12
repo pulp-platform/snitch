@@ -6,10 +6,11 @@
   target_dir: "pulp_platform_opentitan_peripherals",
 
   upstream: {
-    // TODO: use an HTTP master release here once available
-    url: "git@github.com:pulp-platform/opentitan_peripherals.git",
-    rev: "init",
+    url: "https://github.com/pulp-platform/opentitan_peripherals.git",
+    rev: "v0.1.0",
   },
+
+  patch_dir: "patches/pulp_platform_opentitan_peripherals",
 
   exclude_from_upstream: [
     ".github"

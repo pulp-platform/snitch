@@ -1,6 +1,6 @@
 # Copyright 2022 ETH Zurich and University of Bologna.
-# Solderpad Hardware License, Version 0.51, see LICENSE for details.
-# SPDX-License-Identifier: SHL-0.51
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
 
 package:
   name: opentitan_peripherals
@@ -10,9 +10,9 @@ package:
 
 dependencies:
   common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.25.0 }
-  register_interface: { git: "https://github.com/pulp-platform/register_interface.git", rev: a692f9911f505ddf0e1d01ea57cf208f0d9e8e7f }
+  register_interface: { git: "https://github.com/pulp-platform/register_interface.git", version: 0.3.3 }
 
-vendor:
+external_import:
   - name: lowrisc_opentitan
     target_dir: src
     upstream: { git: "https://github.com/lowRISC/opentitan.git", rev: "726718a6de32aa047a4064e02e7b619699f054ed" }
