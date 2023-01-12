@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/pulp-platform/axi_riscv_atomics.git
-    rev: 0c049715abc91a74e2292057fb16333af628d3fc
+    rev: 430838a10a9bdf1e381d4fcb33907428f3273420
   }
 }
