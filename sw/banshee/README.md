@@ -6,7 +6,12 @@
 
 Banshee can be installed on your system using cargo as follows:
 
-    cargo install --path . -f
+    cargo instal --path . -f
+    banshee --help
+
+To allow the logging levels `debug` and `trace` make sure to install Banshee in debug mode:
+
+    cargo install --debug --path . -f
     banshee --help
 
 ## Usage
@@ -20,6 +25,8 @@ Run a binary as follows:
 If you make any changes to `src/runtime.rs` or the `../riscv-opcodes`, run `make` to update the `src/runtime.ll` and `src/riscv.rs` files.
 
 To enable logging output, set the `SNITCH_LOG` environment variable to `error`, `warn`, `info`, `debug`, or `trace`. More detailed [configurations](https://docs.rs/env_logger) are possible.
+
+For larger executable you might encounter segmentation faults due to an insufficient stack size. To increase the stack size of the emulation threads set the `RUST_MIN_STACK` environment variable to the desired number of bytes (default is 2MiB). ([More Information](https://doc.rust-lang.org/std/thread/#stack-size))
 
 ### Tracing
 
