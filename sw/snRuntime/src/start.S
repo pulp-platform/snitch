@@ -156,7 +156,7 @@ snrt.crt0.init_tls:
 2:
 
     # Store bootloader return address on top of stack
-    addi      sp, sp, -4
+    addi      sp, sp, -8
     sw        s1, 0(sp)
 
     # Initialize the root team.
@@ -210,7 +210,7 @@ snrt.crt0.end:
 snrt.crt0.exit:
     # load bootloader return address from stack and jump out of snRuntime
     lw        ra, 0(sp)
-    addi      sp, sp, 4
+    addi      sp, sp, 8
     jr        ra
 
 __snrt_crt0_interrupt_handler:
