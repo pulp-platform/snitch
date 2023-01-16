@@ -96,6 +96,8 @@ static inline void set_sw_interrupts_unsafe(uint32_t base_hartid,
                                             uint32_t num_harts,
                                             uint32_t stride);
 
+static inline volatile uint32_t* cluster_clint_set_ptr(uint32_t cluster_id);
+
 //===============================================================
 // Initialization
 //===============================================================
@@ -180,11 +182,22 @@ static inline void wakeup_snitch(uint32_t hartid) { set_sw_interrupt(hartid); }
 // TODO: implement in a more robust manner
 void wait_snitches_parked(uint32_t timeout) { delay_ns(100000); }
 
+static inline void wakeup_cluster(uint32_t cluster_id) {
+     *(cluster_clint_set_ptr(cluster_id)) |= 511;
+}
+
+void wakeup_snitches_cl() {
+    for (int i = 0; i < N_CLUSTERS; i++)
+        wakeup_cluster(i);
+    __rt_get_timer();
+}
+
 void wakeup_snitches() {
     volatile uint32_t* lock = get_shared_lock();
 
     mutex_ttas_lock(lock);
     set_sw_interrupts_unsafe(1, N_SNITCHES, 1);
+    __rt_get_timer();
     mutex_release(lock);
 }
 
@@ -207,6 +220,7 @@ void wakeup_master_snitches() {
 
 void wait_snitches_done() {
     wait_sw_interrupt();
+    __rt_get_timer();
     clear_sw_interrupt(0);
 }
 

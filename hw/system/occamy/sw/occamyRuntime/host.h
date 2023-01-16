@@ -52,6 +52,15 @@ extern void program_snitches();
 extern void wakeup_snitches();
 
 /**
+ * @brief Wake-up Snitches using cluster CLINTs
+ *
+ * @detail All Snitches are "parked" in a WFI. A SW interrupt
+ *         must be issued to "unpark" every Snitch. This function
+ *         sends a SW interrupt to all Snitches.
+ */
+extern void wakeup_snitches_cl();
+
+/**
  * @brief Wake-up Snitches
  *
  * @detail All Snitches are "parked" in a WFI. A SW interrupt

@@ -64,6 +64,11 @@ static inline void post_wakeup() {
     );
 }
 
+static inline void post_wakeup_cl() {
+    uint32_t hartid = snrt_cluster_core_idx();
+    snrt_int_cluster_clr(1 << hartid);
+}
+
 static inline uint32_t is_master() {
     return snrt_cluster_core_idx() == 0;
 }
@@ -84,7 +89,13 @@ static inline void post_hierarchical_wakeup() {
     }
 }
 
-static void return_hierarchical() {
+static inline volatile uint32_t __rt_get_timer() {
+    uint32_t register r;
+    asm volatile ("csrr %0, mcycle" : "=r"(r));
+    return r;
+}
+
+static inline void return_hierarchical() {
     volatile uint32_t* clint = snrt_peripherals()->clint;
     // Synchronize all cores
     // Hardware barriers synchronize cores intra-cluster,
@@ -92,17 +103,13 @@ static void return_hierarchical() {
     // the last one arriving wins the race.
     snrt_cluster_hw_barrier();
     if (snrt_is_dm_core() && elect_director(N_CLUSTERS)) {
+        __rt_get_timer();
         *(clint + ((0 & ~0x1f) >> 5)) |= (1 << (0 & 0x1f));
+    } else {
+        __rt_get_timer();
     }
-    snrt_wfi();
 }
 
 static inline comm_buffer_t* get_communication_buffer() {
     return (comm_buffer_t *)(*soc_ctrl_scratch_ptr(2));
-}
-
-static inline volatile uint32_t __rt_get_timer() {
-    uint32_t register r;
-    asm volatile ("csrr %0, mcycle" : "=r"(r));
-    return r;
 }

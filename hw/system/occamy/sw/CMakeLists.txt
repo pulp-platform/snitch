@@ -137,3 +137,5 @@ endfunction()
 ######################
 
 add_host_executable(hello_world src/hello_world.c)
+add_heterogeneous_executable(offload src/offload.c sn_src/offload.c)
+add_heterogeneous_executable(offload_cl src/offload_cl.c sn_src/offload_cl.c)
