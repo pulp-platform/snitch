@@ -46,7 +46,7 @@
 static omp_t *volatile omp_p_global;
 
 #ifndef OMPSTATIC_NUMTHREADS
-__thread omp_t volatile *omp_p;
+__thread omp_t *omp_p;
 #else
 omp_t omp_p = {
     .plainTeam = {.nbThreads = OMPSTATIC_NUMTHREADS},
@@ -83,7 +83,7 @@ void omp_init(void) {
         omp_p->plainTeam.loop_epoch = 0;
         omp_p->plainTeam.loop_is_setup = 0;
 
-        for (int i = 0; i < sizeof(omp_p->plainTeam.core_epoch) /
+        for (unsigned i = 0; i < sizeof(omp_p->plainTeam.core_epoch) /
                                 sizeof(omp_p->plainTeam.core_epoch[0]);
              i++)
             omp_p->plainTeam.core_epoch[i] = 0;
@@ -165,3 +165,11 @@ void omp_print_prof(void) {
     printf("%-20s %d\r\n", "fork_oh", omp_prof->fork_oh);
 }
 #endif
+
+unsigned omp_get_thread_num(void) {
+    return snrt_cluster_core_idx();
+}
+
+unsigned omp_get_num_threads(void) {
+    return omp_getData()->numThreads;
+}

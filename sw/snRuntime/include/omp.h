@@ -86,7 +86,7 @@ extern omp_prof_t *omp_prof;
 #endif
 
 #ifndef OMPSTATIC_NUMTHREADS
-extern __thread omp_t volatile *omp_p;
+extern __thread omp_t *omp_p;
 #else
 extern omp_t omp_p;
 #endif
@@ -105,6 +105,9 @@ void omp_print_prof(void);
 extern omp_prof_t *omp_prof;
 #endif
 
+unsigned omp_get_thread_num(void);
+unsigned omp_get_num_threads(void);
+
 //================================================================================
 // inlines
 //================================================================================
@@ -120,10 +123,6 @@ static inline const omp_team_t *omp_get_team(const omp_t *_this) {
     return &_this->plainTeam;
 }
 #endif
-
-static inline unsigned omp_get_thread_num(void) {
-    return snrt_cluster_core_idx();
-}
 
 static inline void __attribute__((always_inline))
 parallelRegionExec(int32_t argc, void *data, void (*fn)(void *, uint32_t),
