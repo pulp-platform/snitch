@@ -41,6 +41,12 @@ macro(add_snitch_executable name)
     add_custom_command(
         TARGET ${name}
         POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY}
+        ARGS -O binary --strip-unneeded $<TARGET_FILE:${name}> $<TARGET_FILE:${name}>.bin
+    )
+    add_custom_command(
+        TARGET ${name}
+        POST_BUILD
         COMMAND ${CMAKE_OBJDUMP} -dhS $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.s)
     # Run target for banshee
     if (SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
