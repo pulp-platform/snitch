@@ -9,7 +9,6 @@ extern const uint32_t _snrt_cluster_cluster_core_num;
 extern const uint32_t _snrt_cluster_cluster_base_hartid;
 extern const uint32_t _snrt_cluster_cluster_num;
 extern const uint32_t _snrt_cluster_cluster_id;
-void *const _snrt_cluster_global_offset = (void *)0x10000000;
 
 const uint32_t snrt_stack_size __attribute__((weak, section(".rodata"))) = 10;
 
@@ -57,7 +56,7 @@ void _snrt_init_team(uint32_t cluster_core_id, uint32_t cluster_core_num,
     team->cluster_core_base_hartid = bootdata->hartid_base;
     team->cluster_core_num = cluster_core_num;
     team->global_mem.start =
-        (uint64_t)(bootdata->global_mem_start + _snrt_cluster_global_offset);
+        (uint64_t)(bootdata->global_mem_start);
     team->global_mem.end = (uint64_t)bootdata->global_mem_end;
     team->cluster_mem.start = (uint64_t)spm_start;
     team->cluster_mem.end = (uint64_t)spm_end;
