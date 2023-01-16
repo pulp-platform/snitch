@@ -153,8 +153,16 @@ extern void snrt_ssr_loop_4d(enum snrt_ssr_dm dm, size_t b0, size_t b1,
                              size_t b2, size_t b3, size_t i0, size_t i1,
                              size_t i2, size_t i3);
 extern void snrt_ssr_repeat(enum snrt_ssr_dm dm, size_t count);
-extern void snrt_ssr_enable();
-extern void snrt_ssr_disable();
+
+/// Enable/Disable SSR
+#ifdef __TOOLCHAIN_LLVM__
+#define snrt_ssr_enable() __builtin_ssr_enable()
+#define snrt_ssr_disable() __builtin_ssr_disable()
+#else
+#define snrt_ssr_enable() asm volatile("csrsi 0x7C0, 1")
+#define snrt_ssr_disable() asm volatile("csrci 0x7C0, 1")
+#endif
+
 extern void snrt_ssr_read(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
                           volatile void *ptr);
 extern void snrt_ssr_write(enum snrt_ssr_dm dm, enum snrt_ssr_dim dim,
