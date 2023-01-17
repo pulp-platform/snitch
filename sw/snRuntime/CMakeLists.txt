@@ -76,6 +76,11 @@ set(rtl_snitch_sources
     src/platforms/rtl/start_snitch.S
     src/platforms/rtl/putchar.c
 )
+set(hero_snitch_sources
+    src/platforms/hero/start_snitch.S
+    src/platforms/hero/start_hero.c
+    src/platforms/hero/snitch_hero_support.c
+)
 
 # Sources only compatible with the LLVM toolchain
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
@@ -105,6 +110,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     # Bare Runtimes (with startup code)
     add_snitch_library(snRuntime-banshee src/platforms/shared/start.c ${banshee_snitch_sources} ${sources} src/ssr_v1.c)
     add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
+    add_snitch_library(snRuntime-hero ${hero_snitch_sources} ${sources} src/ssr_v2.c)
+
 
 
 else()
@@ -127,6 +134,10 @@ else()
         else()
             add_snitch_library(snRuntime-cluster src/platforms/shared/start.c ${rtl_snitch_sources} ${sources} src/ssr_v2.c)
         endif()
+    elseif(SNITCH_RUNTIME STREQUAL "snRuntime-hero")
+        # Supported only with the LLVM toolchain
+        add_snitch_library(snRuntime-hero ${hero_snitch_sources} ${sources} src/ssr_v3.c)
+        set(public_headers ${public_headers} include/snitch_hero_support.h)
     else()
         message(FATAL_ERROR "Requested runtime not implemented: ${SNITCH_RUNTIME}")
     endif()
