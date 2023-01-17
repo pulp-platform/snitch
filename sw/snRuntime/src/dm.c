@@ -111,7 +111,7 @@ static void wake_dm(void);
 // debug
 //=============================================================================
 
-#define DM_DEBUG_LEVEL 100
+#define DM_DEBUG_LEVEL 0
 
 #ifdef DM_DEBUG_LEVEL
 #define DEBUG

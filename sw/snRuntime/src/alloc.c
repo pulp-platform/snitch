@@ -1,9 +1,12 @@
 // Copyright 2020 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
-#include "debug.h"
+
 #include "snrt.h"
 #include "team.h"
+
+#define DEBUG
+#include "debug.h"
 
 #define ALIGN_UP(addr, size) (((addr) + (size)-1) & ~((size)-1))
 #define ALIGN_DOWN(addr, size) ((addr) & ~((size)-1))
@@ -20,12 +23,11 @@
 void *snrt_l1alloc(size_t size) {
     struct snrt_allocator_inst *alloc = &snrt_current_team()->allocator.l1;
 
-    size = ALIGN_UP(size, MIN_CHUNK_SIZE);
+    snrt_trace("Trying to allocate %#x bytes (avalailable: %#x bytes)\n", size, alloc->base + alloc->size - alloc->next);
 
+    size = ALIGN_UP(size, MIN_CHUNK_SIZE);
     if (alloc->next + size > alloc->base + alloc->size) {
-        snrt_trace(
-            "Not enough memory to allocate: base %#x size %#x next %#x\n",
-            alloc->base, alloc->size, alloc->next);
+        snrt_error("Not enough memory to allocate size %#x (base %#x size %#x next %#x)\n", size, alloc->base, alloc->size, alloc->next);
         return 0;
     }
 

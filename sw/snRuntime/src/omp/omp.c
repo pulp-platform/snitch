@@ -23,7 +23,7 @@
 // debug
 //================================================================================
 
-#define OMP_DEBUG_LEVEL 100
+#define OMP_DEBUG_LEVEL 0
 
 #ifdef OMP_DEBUG_LEVEL
 #define DEBUG

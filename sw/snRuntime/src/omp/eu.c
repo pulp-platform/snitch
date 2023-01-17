@@ -25,7 +25,7 @@
 //================================================================================
 // debug
 //================================================================================
-#define EU_DEBUG_LEVEL 10
+#define EU_DEBUG_LEVEL 0
 #ifdef EU_DEBUG_LEVEL
 #define DEBUG
 #include "debug.h"
@@ -172,7 +172,7 @@ void eu_event_loop(uint32_t cluster_core_idx) {
             // hart will reset eu_p->e.nthreads as soon as all workers finished
             // which might cause a race condition
             nthds = eu_p->e.nthreads;
-            EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
+            EU_PRINTF(3, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
                       ((uint32_t *)eu_p->e.data)[0]);
             // call
             eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
@@ -226,7 +226,7 @@ void eu_run_empty(uint32_t core_idx) {
     // Am i also part of the team?
     if (core_idx < eu_p->e.nthreads) {
         // call
-        EU_PRINTF(0, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
+        EU_PRINTF(3, "run fn @ %#x (arg 0 = %#x)\r\n", eu_p->e.fn,
                   ((uint32_t *)eu_p->e.data)[0]);
         eu_p->e.fn(eu_p->e.data, eu_p->e.argc);
     }

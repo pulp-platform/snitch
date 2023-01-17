@@ -1,8 +1,6 @@
 // Copyright 2020 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
-#define DEBUG
-
 #include <stdarg.h>
 
 #include "omp.h"
@@ -297,11 +295,10 @@ static int gomp_offload_manager() {
     // reset_timer();
     // start_timer();
 
-    for (unsigned i = 0; i < 10; i += 2) {
-      snrt_trace(" %2d: 0x%08x = %08d  %2d: 0x%08x = %08d\n", i, ((uint32_t *)offloadArgs)[i],
-                 *((uint32_t *)(((uint32_t *)offloadArgs)[i])), i + 1,
-                 ((uint32_t *)offloadArgs)[i + 1],
-                 *((uint32_t *)(((uint32_t *)offloadArgs)[i + 1])));
+    for (unsigned i = 0; i < 16; i += 2) {
+      snrt_trace(" %2d: 0x%08x = ... ; %2d: 0x%08x = ...\n", i, ((uint32_t *)offloadArgs)[i],
+                 /* *((uint32_t *)(((uint32_t *)offloadArgs)[i])) ,*/  i + 1,
+                 ((uint32_t *)offloadArgs)[i + 1] /*, *((uint32_t *)(((uint32_t *)offloadArgs)[i + 1]))*/ );
     }
 
     // (5) Execute the offloaded function.

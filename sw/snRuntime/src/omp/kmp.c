@@ -13,7 +13,7 @@
 // debug
 //=============================================================================
 
-#define KMP_LOG_LEVEL 100
+#define KMP_LOG_LEVEL 0
 
 #ifdef KMP_LOG_LEVEL
 #define DEBUG
