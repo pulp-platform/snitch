@@ -20,29 +20,38 @@ To create the bitstream for Occamy on the VCU128, you currently need to follow t
 
 ### Reducing Occamy's Size
 
-First, the default configuration of Occamy (4k cores) is too large for the VCU128. Therefore, open `hw/system/occamy/src/occamy_cfg.hjson`, and reduce `nr_s1_quadrant` and `nr_clusters` (e.g. both to `1`). To make the changes effective, navigate to `hw/system/occamy` and run the following command:
+First, the default configuration of Occamy (4k cores) is too large for the VCU128. Therefore, open `hw/system/occamy/src/occamy_cfg.hjson`, and reduce `nr_s1_quadrant` and `nr_clusters` (both to `1`). To make the changes effective, navigate to `hw/system/occamy` and run the following command:
 
 ```
 make update-sources
 ```
 
+### Compiling the bootrom
 
-### Compiling Occamy IP
-
-To package the Occamy IP for use in Vivado (and run an elaboration to check for syntax errors), run the following command from this directory:
-
+To compile the bootrom you will need a riscv64 toolchain as well as u-boot pre-compiled.
+Add the hero toolchain to your PATH and compile the bootrom with u-boot path :
+```bash
+cd bootrom
+export $HERO_INSTALL path_to_your_hero_repository/install
+export PATH=$HERO_INSTALL/share:$HERO_INSTALL/bin:$PATH
+UBOOT_SPL_BIN=path_to_your_hero_repository/output/br-hrv-occamy/images/u-boot-spl.bin make all
 ```
-make -C vivado_ips
-```
-
+If you use an other toolchain, change CROSS_COMPILE in `bootrom/Makefile`.
 
 ### Compiling Occamy
 
 To compile Occamy for the VCU128, run the following command from this directory:
 
 ```
-make occamy_vcu128
+make occamy_vcu128 [EXT_JTAG=1] [DEBUG=1]
 ```
+The DEBUG option instanciates ILAs to follow waveform of selected signals with (* mark_debug = "true" *).
+
+The EXT_JTAG option redirects the debug module's JTAG signals to GPIOs to be used externally. This way it is possible to use both Vivado ILAs and CVA6 debug module simultaneously.
+
+This was tested with VCU128 and a FMC XM105 Debug Card (used to add GPIOs) with a Digilent JTAG HS2 USB Dongle (used to add a JTAG chain on these GPIOs, to connect to the debug module), see the related connections on `occamy_vcu128_impl_ext_jtag.xdc`.
+
+Open `occamy_vcu128/occamy_vcu128.xpr` in Vivado and program the FPGA. (__Attention:__ The FPGA core is currently reset by default (oops), open hw_vio_1 and set \*_rst_\* signals to 0). Then, still in Vivado, overwrite the bootrom by sourcing `bootrom/bootrom-spl.tcl`.
 
 At IIS, you can download a cached version with the following command:
 
@@ -51,6 +60,11 @@ memora get occamy_vcu128
 ```
 
 ---
+
+
+## Running Hero
+
+Goto HERO's branch `occamy_ci_2` and follow the `README.md` there.
 
 ## Running Linux
 
