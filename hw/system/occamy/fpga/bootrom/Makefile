@@ -12,10 +12,9 @@ include $(ROOT)/util/Makefrag
 
 CVA6_SDK  ?= ${ROOT}/../cva6-sdk
 
-# UBOOT_SPL_BIN = $(CVA6_SDK)/u-boot/spl/u-boot-spl.bin
-UBOOT_SPL_BIN = /scratch/cykoenig/development/hero-occamy/output/br-hrv-occamy/images/u-boot-spl.bin
+# Define UBOOT_SPL_BIN in command line with the path to u-boot-spl.bin
 
-CROSS_COMPILE = riscv64-buildroot-linux-gnu-
+CROSS_COMPILE = riscv64-hero-linux-gnu-
 INCLUDES = -I./ -I./src
 SRCS_C = src/main.c src/uart.c
 OBJS_C = $(SRCS_C:.c=.o)
@@ -47,6 +46,10 @@ bootrom.elf bootrom.dump bootrom.bin: bootrom.S $(OBJS_C) bootrom.ld occamy.dtb
 	$(CC) $(CFLAGS) $(INCLUDES) -Tbootrom.ld $< $(OBJS_C) -o bootrom.elf
 	$(OBJDUMP) -d bootrom.elf > bootrom.dump
 	$(OBJCOPY) -O binary bootrom.elf bootrom.bin
+
+check-uboot:
+	@[ "${UBOOT_SPL_BIN}" ] || ( echo "UBOOT_SPL_BIN is not set"; exit 1 )
+bootrom-spl.bin: check-uboot
 
 bootrom-spl.bin: bootrom.S $(OBJS_C) bootrom.ld occamy.dtb
 	$(CC) $(CFLAGS) $(INCLUDES) -Tbootrom.ld -DSPLBIN=\"$(UBOOT_SPL_BIN)\" $< $(OBJS_C) -o bootrom-spl.elf

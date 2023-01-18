@@ -20,6 +20,15 @@
     device_type = "memory";
     reg = <0x0 0x80000000 0x0 0x80000000>;
   };
+  // Create a reserved memory region for Snitch program memory
+  reserved-memory {
+    #address-cells = <2>;
+    #size-cells = <2>;
+    ranges;
+    snitch_mem: buffer@c0000000 {
+        reg = <0x0 0xc0000000 0x0 0x10000000>;
+    };
+  };
   cpus {
     #address-cells = <1>;
     #size-cells = <0>;
@@ -58,6 +67,7 @@
     ranges;
     debug@0 {
       compatible = "riscv,debug-013";
+      // interrupts-extended = <&CPU0_intc 65535>;
       reg-names = "control";
       reg = <0x0 0x0 0x0 0x1000>;
     };
@@ -76,7 +86,7 @@
     timer@2006000 {
       compatible = "pulp,apb_timer";
       interrupt-parent = <&PLIC0>;
-      interrupts = <68 69 70 71>; // todo review
+      interrupts = <68 69 70 71>;
       reg = <0x00000000 0x2006000 0x00000000 0x00001000>;
       reg-names = "control";
     };
@@ -217,6 +227,36 @@
           ti,dp83867-rxctrl-strap-quirk;
         };
       };
+    };
+    soc_ctl0: soc-control@2000000 {
+      compatible = "eth,occamy-soc-control";
+      reg-names = "soc-control";
+      reg = <0x0 0x02000000 0x0 0x1000>;
+    };
+    quadrant_ctrl0: quadrant-control@b000000 {
+      compatible = "eth,occamy-quadrant-control";
+      reg-names = "quadrant-control";
+      reg = <0x0 0x0b000000 0x0 0x10000>;
+    };
+    // Instantiate a snitch cluster
+    snitch-cluster@10000000 {
+      compatible = "eth,snitch-cluster";
+      // TCDM and Peripheral spaces
+      reg-names = "tcdm", "peripheral";
+      reg = <0x0 0x10000000 0x0 0x20000>, <0x0 0x10020000 0x0 0x20000>;
+      // points to a memory region reserved for use by the cluster
+      memory-region = <&snitch_mem>;
+      // cluster specific properties
+      eth,compute-cores = <8>;
+      eth,dm-cores = <1>;
+      eth,quadrant-idx = <0>;
+      eth,cluster-idx = <0>; // Used to calculate offsets in clint, soc-ctrl etc..
+      // A handle to the soc-control register where isolates etc are located
+      eth,soc-ctl = <&soc_ctl0>;
+      // Handle to the associated quadrant controller
+      eth,quadrant-ctrl = <&quadrant_ctrl0>;
+      // handle to the clint where IPI interrupts are attached
+      eth,clint = <&clint0>;
     };
   };
 };
