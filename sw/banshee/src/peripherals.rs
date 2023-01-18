@@ -4,6 +4,7 @@
 
 /// Generic, memory-mapped peripherals implemented using runtime callbacks.
 use crate::configuration::Callback;
+use crate::Cpu;
 use std::sync::atomic::{AtomicU32, Ordering};
 use PeriphReq::{Load, Store};
 
@@ -40,15 +41,22 @@ impl Peripherals {
         );
     }
 
-    pub fn load(&self, cluster_id: usize, addr: u32, size: u8) -> u32 {
-        self.load_store(cluster_id, addr, size, Load)
+    pub fn load(&self, cpu: &Cpu, cluster_id: usize, addr: u32, size: u8) -> u32 {
+        self.load_store(cpu, cluster_id, addr, size, Load)
     }
 
-    pub fn store(&self, cluster_id: usize, addr: u32, value: u32, mask: u32, size: u8) {
-        self.load_store(cluster_id, addr, size, Store(value, mask));
+    pub fn store(&self, cpu: &Cpu, cluster_id: usize, addr: u32, value: u32, mask: u32, size: u8) {
+        self.load_store(cpu, cluster_id, addr, size, Store(value, mask));
     }
 
-    fn load_store(&self, cluster_id: usize, mut addr: u32, size: u8, req: PeriphReq) -> u32 {
+    fn load_store(
+        &self,
+        cpu: &Cpu,
+        cluster_id: usize,
+        mut addr: u32,
+        size: u8,
+        req: PeriphReq,
+    ) -> u32 {
         for i in &self.cluster_peripherals[cluster_id] {
             if addr < i.0 {
                 return match req {
@@ -60,7 +68,7 @@ impl Peripherals {
                             addr,
                             size
                         );
-                        self.peripherals[i.1].load(addr, size)
+                        self.peripherals[i.1].load(cpu, addr, size)
                     }
                     Store(val, mask) => {
                         trace!(
@@ -72,7 +80,7 @@ impl Peripherals {
                             mask,
                             val
                         );
-                        self.peripherals[i.1].store(addr, val, mask, size);
+                        self.peripherals[i.1].store(cpu, addr, val, mask, size);
                         0
                     }
                 };
@@ -111,12 +119,12 @@ pub trait Peripheral {
     /// should return the same name as in the config file
     fn get_name(&self) -> &'static str;
     /// store instruction
-    fn store(&self, addr: u32, value: u32, mask: u32, size: u8);
+    fn store(&self, cpu: &Cpu, addr: u32, value: u32, mask: u32, size: u8);
     /// load instruction
-    fn load(&self, addr: u32, size: u8) -> u32;
+    fn load(&self, cpu: &Cpu, addr: u32, size: u8) -> u32;
 }
 
-/// Function called by the engine to get the peripheral types. This function should
+/// Function called by the cpu to get the peripheral types. This function should
 /// return a vector containing an instance of each available peripherable type.
 /// To add a new peripheral type, declare it below and add it here.
 pub fn get_peripheral_types() -> Vec<Box<dyn Peripheral>> {
@@ -124,6 +132,7 @@ pub fn get_peripheral_types() -> Vec<Box<dyn Peripheral>> {
         Box::new(Semaphores::default()),
         Box::new(Fence::default()),
         Box::new(ZeroMemory::default()),
+        Box::new(MemPoolDMA::default()),
     ]
 }
 
@@ -138,14 +147,14 @@ impl Peripheral for Fence {
         "fence"
     }
 
-    fn store(&self, addr: u32, val: u32, _mask: u32, _: u8) {
+    fn store(&self, _cpu: &Cpu, addr: u32, val: u32, _mask: u32, _: u8) {
         match addr {
             0x0 => self.set.store(val, Ordering::SeqCst),
             _ => self.current.store(val, Ordering::SeqCst),
         }
     }
 
-    fn load(&self, _: u32, _: u8) -> u32 {
+    fn load(&self, _cpu: &Cpu, _: u32, _: u8) -> u32 {
         self.current.fetch_add(1, Ordering::SeqCst);
         while self.set.load(Ordering::SeqCst) != self.current.load(Ordering::SeqCst) {}
         0
@@ -164,7 +173,7 @@ impl Peripheral for Semaphores {
         "semaphores"
     }
 
-    fn store(&self, addr: u32, val: u32, _mask: u32, _: u8) {
+    fn store(&self, _cpu: &Cpu, addr: u32, val: u32, _mask: u32, _: u8) {
         match addr {
             0x0 => self.empty_count.store(val, Ordering::SeqCst),
             0x4 => {
@@ -220,7 +229,7 @@ impl Peripheral for Semaphores {
         }
     }
 
-    fn load(&self, _: u32, _: u8) -> u32 {
+    fn load(&self, _cpu: &Cpu, _: u32, _: u8) -> u32 {
         0
     }
 }
@@ -233,9 +242,62 @@ impl Peripheral for ZeroMemory {
         "zero-memory"
     }
 
-    fn store(&self, _: u32, _: u32, _: u32, _: u8) {}
+    fn store(&self, _cpu: &Cpu, _: u32, _: u32, _: u32, _: u8) {}
 
-    fn load(&self, _: u32, _: u8) -> u32 {
+    fn load(&self, _cpu: &Cpu, _: u32, _: u8) -> u32 {
         0
+    }
+}
+
+#[derive(Default)]
+struct MemPoolDMA {
+    src_addr: AtomicU32,
+    dst_addr: AtomicU32,
+    num_bytes: AtomicU32,
+    conf: AtomicU32,
+    status: AtomicU32,
+    next_id: AtomicU32,
+    done: AtomicU32,
+}
+
+impl Peripheral for MemPoolDMA {
+    /// should return the same name as in the config file
+    fn get_name(&self) -> &'static str {
+        "mempool-dma"
+    }
+    /// store instruction
+    fn store(&self, _cpu: &Cpu, addr: u32, value: u32, _mask: u32, _size: u8) {
+        match addr {
+            0x00 => self.src_addr.store(value, Ordering::SeqCst),
+            0x04 => self.dst_addr.store(value, Ordering::SeqCst),
+            0x08 => self.num_bytes.store(value, Ordering::SeqCst),
+            0x0C => self.conf.store(value, Ordering::SeqCst),
+            0x10 => (), /* status: Write has no effect */
+            0x14 => (), /* next_id: Write has no effect */
+            0x18 => (), /* done: Write has no effect */
+            _ => unimplemented!(),
+        }
+        self.done.store(0, Ordering::SeqCst);
+    }
+    /// load instruction
+    fn load(&self, cpu: &Cpu, addr: u32, _size: u8) -> u32 {
+        match addr {
+            0x00 => self.src_addr.load(Ordering::SeqCst),
+            0x04 => self.dst_addr.load(Ordering::SeqCst),
+            0x08 => self.num_bytes.load(Ordering::SeqCst),
+            0x0C => self.conf.load(Ordering::SeqCst),
+            0x10 => self.status.load(Ordering::SeqCst),
+            0x14 => {
+                cpu.binary_memcpy(
+                    self.dst_addr.load(Ordering::SeqCst),
+                    self.src_addr.load(Ordering::SeqCst),
+                    self.num_bytes.load(Ordering::SeqCst),
+                );
+                self.done.store(1, Ordering::SeqCst);
+                self.next_id.load(Ordering::SeqCst)
+            }
+            0x18 => self.done.load(Ordering::SeqCst),
+            _ => unimplemented!(),
+        }
     }
 }

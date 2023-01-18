@@ -20,19 +20,21 @@ address:
 memory:
 - tcdm:
     start: 0x0
-    end: 0x100000
+    end: 0x400000
     latency: 5
   dram:
     start: 0x80000000
-    end: 0x80010000
+    end: 0x81000000
     latency: 10
   # Not used in MemPool
   ext_tcdm: []
   periphs:
-    callbacks: []
-    end: 0x100000
+    callbacks:
+      - name: mempool-dma
+        size: 28
+    end: 0x40100000
     latency: 5
-    start: 0x100000
+    start: 0x40010000
 inst_latency:
   mul: 3
   mulh: 3
