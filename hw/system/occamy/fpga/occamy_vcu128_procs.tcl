@@ -47,6 +47,17 @@ proc occ_refresh {} {
   display_hw_ila_data
 }
 
+proc occ_print_vios {} {
+    global occ_hw_device
+    puts "--------------------"
+    set vios [get_hw_vios -of_objects [get_hw_devices ${occ_hw_device}]]
+    puts "Done programming device, found [llength $vios] VIOS: "
+    foreach vio $vios {
+        puts "- $vio : [get_hw_probes * -of_objects $vio]"
+    }
+    puts "--------------------"
+}
+
 proc occ_program { bit_stem } {
     global occ_hw_device
     puts "Programming ${bit_stem}.bit"
@@ -61,40 +72,76 @@ proc occ_program { bit_stem } {
 proc occ_program_bit { } {
     global occ_bit_stem
     occ_program $occ_bit_stem
+    occ_print_vios
 }
 
-proc occ_rst { } {
+proc occ_write_vio {regexp_vio regexp_probe val} {
     global occ_hw_device
-    set vio_sys [get_hw_vios -of_objects [get_hw_devices ${occ_hw_device}] -filter {CELL_NAME=~"*vio_sys"}]
-    set_property OUTPUT_VALUE 0 [get_hw_probes */occamy_rstn -of_objects $vio_sys]
-    commit_hw_vio [get_hw_probes {*/occamy_rstn} -of_objects $vio_sys]
-}
-proc occ_go { } {
-    global occ_hw_device
-    set vio_sys [get_hw_vios -of_objects [get_hw_devices ${occ_hw_device}] -filter {CELL_NAME=~"*vio_sys"}]
-    set_property OUTPUT_VALUE 1 [get_hw_probes */occamy_rstn -of_objects $vio_sys]
-    commit_hw_vio [get_hw_probes {*/occamy_rstn} -of_objects $vio_sys]
-}
-
-proc occ_rst_toggle { } {
-    occ_rst
-    occ_go
+    puts "\[occ_write_vio $regexp_vio $regexp_probe\]"
+    set vio_sys [get_hw_vios -of_objects [get_hw_devices ${occ_hw_device}] -regexp $regexp_vio]
+    set_property OUTPUT_VALUE $val [get_hw_probes -of_objects $vio_sys -regexp $regexp_probe]
+    commit_hw_vio [get_hw_probes -of_objects $vio_sys -regexp $regexp_probe]
 }
 
 proc occ_flash_bootrom { } {
     global occ_hw_device
-    occ_rst
+    # Reset peripherals and CPU
+    occ_write_vio "hw_vio_1" ".*rst.*" 1
+    after 100
+    # Wake up peripherals to write bootrom
+    occ_write_vio "hw_vio_1" ".*glbl_rst.*" 0
+    after 100
+    # Overwrite bootrom
     refresh_hw_device [lindex [get_hw_devices ${occ_hw_device}] 0]
     source bootrom/bootrom.tcl
     after 100
-    occ_go
+    # Wake up CPU
+    occ_write_vio "hw_vio_1" ".*rst.*" 0
 }
 
 proc occ_flash_bootrom_spl { } {
     global occ_hw_device
-    occ_rst
+    # Reset peripherals and CPU
+    occ_write_vio "hw_vio_1" ".*rst.*" 1
+    after 100
+    # Wake up peripherals to write bootrom
+    occ_write_vio "hw_vio_1" ".*glbl_rst.*" 0
+    after 100
+    # Overwrite bootrom
     refresh_hw_device [lindex [get_hw_devices ${occ_hw_device}] 0]
     source bootrom/bootrom-spl.tcl
     after 100
-    occ_go
+    # Wake up CPU
+    occ_write_vio "hw_vio_1" ".*rst.*" 0
+}
+
+proc occ_flash_spi { mcs_file flash_offset flash_file } {
+    global occ_hw_device
+    puts "Writing config mem file for ${flash_offset} ${flash_file}"
+    # Create flash configuration file
+    write_cfgmem -force -format mcs -size 256 -interface SPIx4 \
+        -loaddata "up ${flash_offset} ${flash_file}" \
+        -checksum \
+        -file ${mcs_file}
+    # Add the SPI flash as configuration memory
+    set hw_device [get_hw_devices ${occ_hw_device}]
+    create_hw_cfgmem -hw_device $hw_device [lindex [get_cfgmem_parts {mt25qu02g-spi-x1_x2_x4}] 0]
+    set hw_cfgmem [get_property PROGRAM.HW_CFGMEM $hw_device]
+    set_property PROGRAM.ADDRESS_RANGE  {use_file} $hw_cfgmem
+    set_property PROGRAM.FILES [list $mcs_file ] $hw_cfgmem
+    set_property PROGRAM.PRM_FILE {} $hw_cfgmem
+    set_property PROGRAM.UNUSED_PIN_TERMINATION {pull-none} $hw_cfgmem
+    set_property PROGRAM.BLANK_CHECK  0 $hw_cfgmem
+    set_property PROGRAM.ERASE  1 $hw_cfgmem
+    set_property PROGRAM.CFG_PROGRAM  1 $hw_cfgmem
+    set_property PROGRAM.VERIFY  1 $hw_cfgmem
+    set_property PROGRAM.CHECKSUM  0 $hw_cfgmem
+    # Create bitstream to access SPI flash
+    puts "Creating bitstream to access SPI flash"
+    create_hw_bitstream -hw_device $hw_device [get_property PROGRAM.HW_CFGMEM_BITFILE $hw_device]; 
+    program_hw_devices $hw_device; 
+    refresh_hw_device $hw_device;
+    # Program SPI flash
+    puts "Programing SPI flash"
+    program_hw_cfgmem -hw_cfgmem $hw_cfgmem
 }

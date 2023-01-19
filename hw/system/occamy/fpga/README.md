@@ -58,9 +58,22 @@ ssh bordcomputer
 /home/vcu128-02/hw_server.sh
 ```
 
+First flash u-boot in the SPI (this erases the design) :
+```bash
+# Edit your own fpga infos in Makefile
+UBOOT_ITB=path_to_your_hero_repository/output/br-hrv-occamy/images/u-boot.itb VCU=02 make flash-u-boot
+```
+
 Open `occamy_vcu128/occamy_vcu128.xpr` in your Vivado client and program the FPGA. (__Attention:__ The FPGA core may be reset by default (oops), open hw_vio_1 and set \*_rst_\* signals to 0). Then, still in Vivado, overwrite the bootrom by sourcing `bootrom/bootrom-spl.tcl`.
 
----
+__Infos:__ You can also do everything (flash + programm + bootrom) in command line without opening Vivado client :
+
+Note that GUI Vivado is smoother, this script might bug in which case you need kill and restart the hw_server before retrying.
+
+```bash
+# Edit your own fpga infos in occamy_vcu128_procs.tcl
+make program VCU=02
+```
 
 ### OpenOCD
 

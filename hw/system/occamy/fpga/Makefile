@@ -63,7 +63,7 @@ define_defines_includes_no_simset.tcl: $(BENDER_FILES)
 	${BENDER} script vivado --only-defines --only-includes --no-simset > $@
 
 program:
-	${VIVADO} -mode batch -source occamy_vcu128_program.tcl -tclargs ${VCU}
+	${VIVADO} -mode batch -source occamy_vcu128_program.tcl -tclargs ${VCU} 6000000 ${UBOOT_ITB}
 
 flash: ${FILE}
 	${VIVADO} -mode batch -source occamy_vcu128_flash.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs ${OFFSET} ${FILE}
