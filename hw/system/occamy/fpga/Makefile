@@ -25,12 +25,12 @@ MKIMAGE ?= $(CURDIR)/br2_external/install/bin/mkimage
 NPROC  ?= $(shell nproc)
 
 # u-boot and OpenSBI wrapped in an mkimage wrapper
-UBOOT_ITB = ${CVA6_SDK}/u-boot/u-boot.itb
+UBOOT_ITB ?=
 # u-boot-wrapped image with kernel, rootfs and device tree blob. Name must match
 # with the file fetched in u-boot command from TFTP server
-IMG = 
-FITIMG = output/br-hrv-vcu128/images/Image.itb
-FITIMG_ITS = occamy_vcu128.its
+IMG ?= 
+FITIMG ?=
+FITIMG_ITS ?=
 
 DTB = bootrom/occamy.dtb
 
@@ -73,18 +73,13 @@ flashrun: ${UBOOT_ITB}
 	${VIVADO} -mode batch -source occamy_vcu128_flashrun.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs 6000000 ${UBOOT_ITB}
 	rm flash.mcs
 
-#flash: ${UBOOT_ITB}
-#	${VIVADO} -mode batch -source occamy_vcu128_flash.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs 6000000 ${UBOOT_ITB}
-#	rm flash.mcs
-${UBOOT_ITB}:
-	@echo "To generate u-boot.itb, run make 'br-hrv-vcu128'"
-
 flash-u-boot:
-	${MAKE} flash FILE=/scratch/cykoenig/development/hero-occamy/output/br-hrv-occamy/images/u-boot.itb OFFSET=0x6000000
+	${MAKE} flash FILE=${UBOOT_ITB} OFFSET=0x6000000
 
 flash-uimage:
 	${MAKE} flash FILE=${CVA6_SDK}/uImage OFFSET=0x6100000
 
+# Deprecated
 # `prepare-sdk` makes the host directory relocatable which is required 
 # when cached with Memora
 .PHONY: br-hrv-vcu128
@@ -95,6 +90,7 @@ br-hrv-vcu128:
 	$(MAKE) -C $(CURDIR)/output/$@
 	$(MAKE) -C $(CURDIR)/output/$@ make prepare-sdk
 
+# Deprecated
 .PHONY : linux-image
 linux-image: $(FITIMG)
 # Image sources must be in same directory as the ITS file
@@ -103,10 +99,6 @@ $(FITIMG): $(FITIMG_ITS) output/br-hrv-vcu128/images/Image $(DTB)
 	cp $(FITIMG_ITS) $(@D)
 	gzip -c $(@D)/Image > $(@D)/Image.gz
 	$(MKIMAGE) -f $(@D)/$(notdir $(FITIMG_ITS)) $(FITIMG)
-
-.PHONY : upload-linux-image
-upload-linux-image:
-	scp /scratch/cykoenig/development/hero-occamy/output/br-hrv-occamy/images/Image.itb vcu128-$(VCU)@bordcomputer.ee.ethz.ch:/srv/tftp/vcu128-$(VCU)/Image.itb
 
 clean:
 	rm -rf .Xil occamy_vcu128 *.jou *.log *.str define_defines_includes_no_simset.tcl
