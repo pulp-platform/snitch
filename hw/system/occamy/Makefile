@@ -76,6 +76,7 @@ VLOG_FLAGS += -suppress 2583
 VLOG_FLAGS += -suppress 13314
 VLOG_FLAGS += ${QUESTA_64BIT}
 VLOG_FLAGS += -timescale 1ns/1ps
+VLOG_FLAGS += +define+WT_DCACHE
 
 # Verilated and compiled Occamy system
 VLT_AR     = ${VLT_BUILDDIR}/Vtestharness__ALL.a
@@ -240,7 +241,7 @@ annotate: $(shell (echo logs/trace_hart_00000.txt | sed 's/\.txt/\.s/') || echo 
 
 perf-csv: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/trace_hart/hart/' | sed 's/.dasm/_perf.json/')) \
 		  logs/hart_00000_perf.json $(ROOT)/util/trace/perf_csv.py
-	$(PYTHON) $(ROOT)/util/trace/perf_csv.py logs logs/perf_metrics.csv
+	$(PYTHON) $(ROOT)/util/trace/perf_csv.py -o logs/perf_metrics.csv -i logs/hart_*_perf.json
 
 clean-annotate:
 	rm -f logs/*.s logs/*.diff

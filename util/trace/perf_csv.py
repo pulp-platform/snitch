@@ -18,44 +18,58 @@ import json
 import pandas as pd
 
 
-FILES_GLOB_STRING = 'hart_*_perf.json'
-HARTID_REGEX_STRING = r'hart_(\d+)_perf\.json'
+HARTID_REGEX = r'\D*(\d*)\D*'
 
 
 def main():
-    # Argument parsing and iterator creation
+    # Argument parsing
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'in_dir',
-        type=str,
-        help='Input directory')
+        '-i',
+        '--inputs',
+        metavar='<inputs>',
+        nargs='+',
+        help='Input performance metric dumps')
     parser.add_argument(
-        'csv',
-        type=str,
-        help='CSV output file')
+        '-o',
+        '--output',
+        metavar='<csv>',
+        nargs='?',
+        default='perf.csv',
+        help='Output CSV file')
+    parser.add_argument(
+        '--filter',
+        nargs='*',
+        help='All and only performance metrics to include in the CSV')
     args = parser.parse_args()
 
-    files = sorted(glob.glob(args.in_dir + '/' + FILES_GLOB_STRING))
+    dumps = sorted(args.inputs)
 
     # Populate a list (one entry per hart) of dictionaries
     # enumerating all the performance metrics for each hart
     data = []
     index = []
-    for file in files:
+    for dump in dumps:
 
         # Get hart id from filename and append to index
-        hartid = int(re.search(HARTID_REGEX_STRING, file).group(1))
+        hartid = int(re.search(HARTID_REGEX, dump).group(1))
         index.append(hartid)
 
         # Populate dictionary of metrics for the current hart
         hart_metrics = {}
-        with open(file, 'r') as f:
+        with open(dump, 'r') as f:
             hart_data = json.load(f)
 
             # Uniquefy names of performance metrics in each trace
             # region by prepending the region index, and merge
             # all region metrics in a single dictionary
             for i, region in enumerate(hart_data):
+
+                # If filter was provided on the command-line then filter out all
+                # perf metrics which were not listed
+                if args.filter:
+                    region = {key: val for (key, val) in region.items() if key in args.filter}
+
                 region_metrics = {f'{i}_{key}': val for (key, val) in region.items()}
                 hart_metrics.update(region_metrics)
 
@@ -63,7 +77,7 @@ def main():
 
     # Export data
     df = pd.DataFrame.from_records(data, index)
-    df.to_csv(args.csv)
+    df.to_csv(args.output)
 
 
 if __name__ == '__main__':

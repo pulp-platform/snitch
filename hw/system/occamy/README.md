@@ -53,6 +53,13 @@ with the following target:
 
     make perf-csv
 
+Among these performance metrics are start and end times of particular regions marked
+in the traces (via mcycle CSR reads). It can sometimes be useful to visualize
+these regions in a timeline. You can use the `util/trace/eventvis.py` tool to generate a
+JSON file starting from a CSV file (similar to the output of the previous command)
+which can be visualized in a Chrome browser at `chrome://tracing`.
+A detailed description of the expected CSV file format can be found in the tool's source code.
+
 A source-code annotated trace can be generated using the `annotate` target. The Snitch binary with the debugging
 symbols should be passed to the target:
 
