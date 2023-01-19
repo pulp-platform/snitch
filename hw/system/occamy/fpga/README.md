@@ -1,17 +1,4 @@
-# Occamy on FPGA
-
-We currently support the Xilinx VCU128 evaluation board.
-
-
----
-
-## Features
-
-- Boot through SPI flash and TFTP
-- Generation of all images through buildroot with upstream versions and patches (`br2_external/patch`)
-- SSH into the Linux running on the VCU128 with `ssh root@hero-vcu128-02.ee.ethz.ch`
-
----
+# HerOccamy
 
 ## Generating the Bitstream
 
@@ -32,7 +19,7 @@ To compile the bootrom you will need a riscv64 toolchain as well as u-boot pre-c
 Add the hero toolchain to your PATH and compile the bootrom with u-boot path :
 ```bash
 cd bootrom
-export $HERO_INSTALL path_to_your_hero_repository/install
+export HERO_INSTALL=path_to_your_hero_repository/install
 export PATH=$HERO_INSTALL/share:$HERO_INSTALL/bin:$PATH
 UBOOT_SPL_BIN=path_to_your_hero_repository/output/br-hrv-occamy/images/u-boot-spl.bin make all
 ```
@@ -72,7 +59,7 @@ Note that GUI Vivado is smoother, this script might bug in which case you need k
 
 ```bash
 # Edit your own fpga infos in occamy_vcu128_procs.tcl
-make program VCU=02
+make program VCU=02 UBOOT_ITB=/scratch/cykoenig/development/hero-occamy/output/br-hrv-occamy/images/u-boot.itb
 ```
 
 ### OpenOCD
@@ -84,24 +71,32 @@ You can later use OpenOCD to debug CVA6.
 openocd -f openocd_configs/vcu128-2.cfg 
 # With    EXT_JTAG
 openocd -f openocd_configs/digilent-HS2.cfg 
+# If needed modify the ftdi parameters in the openocd config accordingly to your device
 
 riscv64-hero-linux-gnu-gdb -ex "target extended-remote :3334"
 ```
 
-We recomment waiting for the boot to be done before startnig openocd, if you need to test connectivity to your debug module you can as well set BOOTMODE to JTAG in `bootrom/src/main.c` before re-programming the bootrom (see previous section).
+We recommend waiting for the boot to be done before starting openocd, if you need to test connectivity to your debug module you can as well set BOOTMODE to JTAG in `bootrom/src/main.c` before re-programming the bootrom (see previous section).
 
 
 ## Running Hero
 
-First you need to flash u-boot in the SPI :
-
-```bash
-UBOOT_ITB=path_to_your_hero_repository/output/br-hrv-occamy/images/u-boot.itb VCU=02 make flash-u-boot
-# In IIS we use VCU= to hold FPGA infos,
-# you may modify FPGA_ID and HW_SERVER in the Makefile
-```
-
 Goto HERO's branch `occamy_ci_2` and follow the `README.md` there.
+
+# Occamy on FPGA
+
+We currently support the Xilinx VCU128 evaluation board.
+
+
+---
+
+## Features
+
+- Boot through SPI flash and TFTP
+- Generation of all images through buildroot with upstream versions and patches (`br2_external/patch`)
+- SSH into the Linux running on the VCU128 with `ssh root@hero-vcu128-02.ee.ethz.ch`
+
+---
 
 ## Running Linux
 
