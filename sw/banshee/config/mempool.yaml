@@ -30,11 +30,11 @@ memory:
   ext_tcdm: []
   periphs:
     callbacks:
-      - name: mempool-dma
-        size: 28
-    end: 0x40100000
+      - name: mempool-ita
+        size: 16
+    end: 0x40000050
     latency: 5
-    start: 0x40010000
+    start: 0x40000040
 inst_latency:
   mul: 3
   mulh: 3

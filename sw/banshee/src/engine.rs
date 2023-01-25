@@ -645,7 +645,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         }
     }
 
-    fn binary_load(&self, addr: u32, size: u8) -> u32 {
+    pub fn binary_load(&self, addr: u32, size: u8) -> u32 {
         match addr {
             x if x == self.engine.config.address.tcdm_start => {
                 self.engine.config.memory[self.cluster_id].tcdm.start
@@ -756,7 +756,7 @@ impl<'a, 'b> Cpu<'a, 'b> {
         }
     }
 
-    fn binary_store(&self, addr: u32, value: u32, mask: u32, size: u8) {
+    pub fn binary_store(&self, addr: u32, value: u32, mask: u32, size: u8) {
         match addr {
             x if x == self.engine.config.address.tcdm_start => (), // tcdm_start
             x if x == self.engine.config.address.tcdm_end => (),   // tcdm_end
