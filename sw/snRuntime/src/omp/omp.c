@@ -68,7 +68,8 @@ void omp_init(void) {
             omp_p->plainTeam.core_epoch[i] = 0;
 
         initTeam(omp_p, &omp_p->plainTeam);
-        omp_p->kmpc_barrier = (struct snrt_barrier*) snrt_l1alloc(sizeof(struct snrt_barrier));
+        omp_p->kmpc_barrier =
+            (struct snrt_barrier *)snrt_l1alloc(sizeof(struct snrt_barrier));
         snrt_memset(omp_p->kmpc_barrier, 0, sizeof(struct snrt_barrier));
         // Exchange omp pointer with other cluster cores
         omp_p_global = omp_p;
