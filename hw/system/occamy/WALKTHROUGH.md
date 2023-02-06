@@ -16,7 +16,7 @@ hostname
 # (Note, keep only the name before .ee.ethz.ch)
 ```
 
-### Binaries
+### Dependencies
 
 At IIS the default version of some tools (`gcc`, `cmake`, ...) might be too old for certain projects. You will need to setup your own default binary for these tools:
 
@@ -27,10 +27,21 @@ mkdir ~/bin && cd ~/bin
 ln -s /usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc gcc
 ln -s /usr/pack/gcc-9.2.0-af/linux-x64/bin/g++ g++
 ln -s /usr/sepp/bin/cmake-3.18.1 cmake
+ln -s /home/colluca/bin/spike-dasm spike-dasm
 # Now you need to add this folder to your PATH:
-# Open ~/.profile and add the line
+# Open ~/.profile and add the lines
 export PATH=~/bin:$PATH
+export PATH=/usr/scratch/dachstein/colluca/opt/verible/bin:$PATH
 ```
+
+Create a Python virtual environment:
+
+```
+python3.9 -m venv ~/.venvs/snitch
+source ~/.venvs/snitch/bin/activate
+```
+
+Add the last line to your `~/.profile` if you want the virtual environment to be activated by default when you open a new terminal.
 
 ## Cloning and compiling Occamy
 
@@ -38,8 +49,17 @@ First, clone this repository on your scratch folder. We suggest you first make a
 
 ```bash
 git clone https://github.com/pulp-platform/snitch.git --branch=occamy-sw
+```
 
-# Go to the occamy folder
+Now install the required Python dependencies. Make sure you have activated your virtual environment before doing so.
+
+```
+pip install -r python-requirements.txt
+```
+
+Go to the occamy folder, where most of your efforts will take place:
+
+```
 cd hw/system/occamy
 ```
 
@@ -64,7 +84,7 @@ You can now setup your toolchain. There are plenty of pre-compiled RISC-V toolch
 
 ```bash
 # You can add this to your ~/.profile such that you do not have to run this command every time you open a new terminal
-export PATH=/home/colluca/workspace/riscv/bin/riscv32-unknown-elf-gcc:$PATH
+export PATH=/home/colluca/workspace/riscv/bin/:$PATH
 ```
 
 You can now compile some applications for Occamy:
@@ -151,8 +171,10 @@ Run the executable with the RTL simulation:
 ```bash
 # If it's the first time you run this the logs/ folder won't exist and you will have to create it
 mkdir logs
-# Run the simulation
+# Run the simulation in the current terminal
 ./bin/occamy_top.vsim sw/build/axpy
+# Run the simulation in the QuestaSim GUI
+./bin/occamy_top.vsim.gui sw/build/axpy
 ```
 
 ### Debugging and benchmarking
