@@ -157,6 +157,12 @@ extern void wait_remote_sw_interrupt_pending(uint32_t hartid);
 // Timers
 //===============================================================
 
+static inline uint64_t __rt_get_timer() {
+    register uint64_t r;
+    asm volatile ("csrr %0, mcycle" : "=r"(r));
+    return r;
+}
+
 extern void delay_ns(uint64_t delay);
 
 //===============================================================

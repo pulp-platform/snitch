@@ -47,12 +47,17 @@ endfunction()
 # providing a 3rd optional argument to the function.
 function(add_host_executable name srcs)
 	# Variables
-  set(CVA6_COMMON_SRCS
+  set(
+    CVA6_COMMON_SRCS
     ${OCCAMY_RUNTIME_DIR}/start_host.S
-    ${OCCAMY_RUNTIME_DIR}/host.c)
-  set(CVA6_INCLUDE_FLAGS
+    ${OCCAMY_RUNTIME_DIR}/host.c
+  )
+  set(
+    CVA6_INCLUDE_FLAGS
     -I${OCCAMY_RUNTIME_DIR}
-    -I${CMAKE_CURRENT_SOURCE_DIR}/include)
+    -I${CMAKE_CURRENT_SOURCE_DIR}/include
+    -I${CMAKE_CURRENT_SOURCE_DIR}/src
+  )
   # Get optional function arguments
   if(${ARGC} GREATER 2)
     list(GET ARGN 0 SN_BINARY)
