@@ -157,13 +157,13 @@ module snitch_icache_l0 import snitch_icache_pkg::*; #(
   // HIT
   // ----
   // we hit in the cache and there was a unique hit.
-  assign in_ready_o = hit_any & hit_early_is_onehot;
+  assign in_ready_o = hit_any;
 
   logic [CFG.LINE_WIDTH-1:0] ins_data;
   always_comb begin : data_muxer
     ins_data = '0;
     for (int unsigned i = 0; i < CFG.L0_LINE_COUNT; i++) begin
-      ins_data |= {CFG.LINE_WIDTH{hit_early[i]}} & data[i];
+      ins_data |= {CFG.LINE_WIDTH{hit[i]}} & data[i];
     end
     in_data_o = ins_data >> (in_addr_i[CFG.LINE_ALIGN-1:CFG.FETCH_ALIGN] * CFG.FETCH_DW);
   end
