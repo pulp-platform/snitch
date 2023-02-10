@@ -38,6 +38,8 @@ VLT_SOURCES  := $(shell ${BENDER} script flist ${VLT_BENDER} | ${SED_SRCS})
 VLT_CFLAGS   += -std=c++14 -pthread
 VLT_CFLAGS   +=-I ${VLT_BUILDDIR} -I $(VLT_ROOT)/include -I $(VLT_ROOT)/include/vltstd -I $(VLT_FESVR)/include -I $(TB_DIR)
 
+ANNOTATE_FLAGS ?= -q --keep-time
+
 # We need a recent LLVM installation (>11) to compile Verilator.
 # We also need to link the binaries with LLVM's libc++.
 # Define CLANG_PATH to be the path of your Clang installation.
@@ -169,9 +171,9 @@ traces: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.txt/') 
 # Generate source-code interleaved traces for all harts. Reads the binary from
 # the logs/.rtlbinary file that is written at start of simulation in the vsim script
 logs/trace_hart_%.s: logs/trace_hart_%.txt ${ANNOTATE}
-	$(PYTHON) ${ANNOTATE} -q -o $@ $(BINARY) $<
+	$(PYTHON) ${ANNOTATE} ${ANNOTATE_FLAGS} -o $@ $(BINARY) $<
 logs/trace_hart_%.diff: logs/trace_hart_%.txt ${ANNOTATE}
-	$(PYTHON) ${ANNOTATE} -q -o $@ $(BINARY) $< -d
+	$(PYTHON) ${ANNOTATE} ${ANNOTATE_FLAGS} -o $@ $(BINARY) $< -d
 BINARY ?= $(shell cat logs/.rtlbinary)
 annotate: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.s/') || echo "") \
           $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.diff/') || echo "")

@@ -231,8 +231,11 @@ CVA6_BINARY ?= $(shell cat logs/.rtlbinary)
 logs/hart_00000_perf.json: logs/trace_hart_00000.txt $(ROOT)/util/trace/events.py
 	$(PYTHON) $(ROOT)/util/trace/events.py -f cva6 $< -o $@
 
-logs/trace_hart_00000.s logs/trace_hart_00000.diff: logs/trace_hart_00000.txt ${ANNOTATE}
-	$(PYTHON) ${ANNOTATE} -q -o $@ $(CVA6_BINARY) $< -d
+logs/trace_hart_00000.s: logs/trace_hart_00000.txt ${ANNOTATE}
+	$(PYTHON) ${ANNOTATE} ${ANNOTATE_FLAGS} -o $@ $(CVA6_BINARY) $<
+
+logs/trace_hart_00000.diff: logs/trace_hart_00000.txt ${ANNOTATE}
+	$(PYTHON) ${ANNOTATE} ${ANNOTATE_FLAGS} -o $@ $(CVA6_BINARY) $< -d
 
 traces: logs/hart_00000_perf.json
 
