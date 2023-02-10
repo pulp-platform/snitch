@@ -37,6 +37,8 @@ if { $EXT_JTAG } {
     add_files -fileset constrs_1 -norecurse occamy_vcu128_impl_ext_jtag.xdc
     import_files -fileset constrs_1 occamy_vcu128_impl_ext_jtag.xdc
     set_property used_in_synthesis false [get_files occamy_vcu128/occamy_vcu128.srcs/constrs_1/imports/fpga/occamy_vcu128_impl_ext_jtag.xdc]
+} else {
+    delete_bd_objs [get_bd_ports jtag_*]
 }
 
 # Generate wrapper
@@ -57,7 +59,6 @@ eval [exec sed {s/current_fileset/get_filesets occamy_vcu128_occamy_0/} define_d
 
 # Do NOT insert BUFGs on high-fanout nets (e.g. reset). This will backfire during placement.
 set_param logicopt.enableBUFGinsertHFN no
-
 
 # OOC synthesis of changed IP
 set synth_runs [get_runs *synth*]
@@ -96,7 +97,6 @@ if {[get_property PROGRESS [get_run $run]] != "100%"} {
 } else {
     puts "Skipping 100% complete run: $run"
 }
-
 
 # Create ILA. Attach all signals that were previously marked debug.
 # For occamy-internal signals: Add "(* mark_debug = "true" *)" before signal definition in HDL code.
