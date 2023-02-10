@@ -63,7 +63,7 @@ parser.add_argument(
     nargs='?',
     type=int,
     default=0,
-    help='First line to parse')
+    help='First line to parse, zero-based and inclusive')
 parser.add_argument(
     '-e',
     '--end',
@@ -71,7 +71,7 @@ parser.add_argument(
     nargs='?',
     type=int,
     default=-1,
-    help='Last line to parse')
+    help='Last line to parse, zero-based and inclusive')
 parser.add_argument(
     '--keep-time',
     action='store_true',
@@ -203,7 +203,14 @@ with open(trace, 'r') as f:
         hunk_tstart = 1
         hunk_sstart = 1
 
-    trace_lines = f.readlines()[args.start:args.end]
+    # Filter lines before args.start
+    trace_lines = f.readlines()[args.start:]
+    # Filter lines after args.end (requires special care to make the bound inclusive)
+    end = args.end + 1
+    if end == 0:
+        end = len(trace_lines)
+    trace_lines = trace_lines[:end]
+
     tot_lines = len(trace_lines)
     last_prog = 0
     for lino, line in enumerate(trace_lines):
