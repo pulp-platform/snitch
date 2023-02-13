@@ -75,7 +75,7 @@ def main():
             tid = row[0]
 
             # Start and end times of each region follow
-            for i, (start, end) in enumerate(pairwise(row[1:-1])):
+            for i, (start, end) in enumerate(pairwise(row[1:])):
 
                 # Filter regions this hart does not take part in
                 if start:
