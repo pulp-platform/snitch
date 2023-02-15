@@ -38,6 +38,7 @@ if { $EXT_JTAG } {
     import_files -fileset constrs_1 occamy_vcu128_impl_ext_jtag.xdc
     set_property used_in_synthesis false [get_files occamy_vcu128/occamy_vcu128.srcs/constrs_1/imports/fpga/occamy_vcu128_impl_ext_jtag.xdc]
 } else {
+    delete_bd_objs [get_bd_nets -of_objects [get_bd_ports "jtag_tck_i jtag_tdi_i jtag_tdo_o jtag_tms_i" ]]
     delete_bd_objs [get_bd_ports jtag_*]
 }
 
