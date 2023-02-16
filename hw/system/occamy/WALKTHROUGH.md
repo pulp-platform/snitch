@@ -1,3 +1,5 @@
+# Walkthrough
+
 ## Fast setup at IIS
 
 ### Scratch folder
@@ -67,7 +69,7 @@ ___Note:__ from now on, assume all the path to be relative to `hw/system/occamy`
 
 First, the default configuration of Occamy is too large for a fast RTL simulation. Therefore, open `./src/occamy_cfg.hjson`, and reduce `nr_s1_quadrant` and `nr_clusters` (e.g. both to `1`). To make the changes effective, run the following command:
 
-```
+```bash
 make update-rtl -B
 ```
 
@@ -90,10 +92,10 @@ export PATH=/home/colluca/workspace/riscv/bin/:$PATH
 You can now compile some applications for Occamy:
 
 ```bash
-make DEBUG=ON update-sw
+$ make DEBUG=ON update-sw
 ```
 
-___Note:__ When you have time, give a look at the `Makefile` and the commands that have been executed by the `update-sw` and `bin/occamy_top.vsim` targets (the latter only if you are interested in how the RTL compilation flow works), note that the Makefile includes the Makefrag in `util/Makefrag` at the root of this repository where plenty of things are defined._
+___Note:__ When you have time, give a look at the `Makefile` and the commands that have been executed by the `update-sw` and `./bin/occamy_top.vsim` targets (the latter only if you are interested in how the RTL compilation flow works), note that the Makefile includes the Makefrag in `util/Makefrag` at the root of this repository where plenty of things are defined._
 
 The `update-sw` target firt updated the C headers which depend on the hardware configuration through Solder (we will talk about this later), before calling the `make` target in `./sw/Makefile` to build the apps/kernels in the `./sw` directory. Note that all Occamy software is compiled with `CMake` so you might also want to look into `./sw/CMakeLists.txt` in this directory.
 
@@ -104,7 +106,7 @@ The `update-sw` target firt updated the C headers which depend on the hardware c
 Create a C file in `./sw/src` with the following contents, and call it `axpy.c`.
 
 ```C
-/* ./src/axpy.c */
+/* ./sw/src/axpy.c */
 
 #include "host.h"
 #include "axpy.h"
@@ -133,22 +135,31 @@ Create a C file in `./sw/src` with the following contents, and call it `axpy.h`.
 
 
 ```C
-/* ./src/axpy.h */
+/* ./sw/src/axpy.h */
+
+#ifndef AXPY_DATA_H_
+#define AXPY_DATA_H_
 
 // Statically define the data which will be used for the computation
 // (this will be loaded into DRAM together with the binary)
-#define L 10
-double a = 1;
-double x[L] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-double y[L] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+
+#define L 16
+
+double a = 2;
+double x[L] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+double y[L] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1,  1,  1,  1,  1};
 double z[L];
+
+uint32_t finished = 0;
+
+#endif // AXPY_DATA_H_
 ```
 
 ### Compiling  the C code
 
 Go to `./sw/CMakeLists.txt` and add the following line at the end of the file:
 
-```
+```CMake
 add_host_executable(axpy src/axpy.c)
 ```
 
@@ -157,7 +168,7 @@ The `add_host_executable` function defines an executable for the CVA6 core, its 
 Now recompile the sources.
 
 ```bash
-make DEBUG=ON update-sw
+$ make DEBUG=ON update-sw
 ```
 
 Your newly created executable will be `./sw/build/axpy`.
@@ -170,11 +181,11 @@ Run the executable with the RTL simulation:
 
 ```bash
 # If it's the first time you run this the logs/ folder won't exist and you will have to create it
-mkdir logs
+$ mkdir logs
 # Run the simulation in the current terminal
-./bin/occamy_top.vsim sw/build/axpy
+$ ./bin/occamy_top.vsim sw/build/axpy
 # Run the simulation in the QuestaSim GUI
-./bin/occamy_top.vsim.gui sw/build/axpy
+$ ./bin/occamy_top.vsim.gui sw/build/axpy
 ```
 
 ### Debugging and benchmarking
@@ -187,7 +198,7 @@ Indeed, in Occamy, CVA6 is associated with hartid 0, and all Snitches follow.
 Snitch traces are in a different format (`.dasm`), not human readable, and have to be processed with the following command first. The following command will fail if you forget to wake up the Snitch cores since their trace files would be empty.
 
 ```bash
-make traces
+$ make traces
 ```
 
 In addition to generating readable traces (`.txt` format), the above command also dumps several performance metrics for the core at the end of the trace. These can be collected into a single CSV file with the following target:
@@ -209,6 +220,187 @@ Finally, debugging your program from the trace alone can be quite tedious and ti
 Alternatively, you can automatically annotate the traces with that information. With the following commands you can view the trace instructions side-by-side with the corresponding source code line which it was compiled from:
 
 ```bash
-make BINARY=sw/build/axpy annotate 
-kompare -o logs/trace_hart_00000.diff
+$ make BINARY=sw/build/axpy annotate 
+$ kompare -o logs/trace_hart_00000.diff
+```
+
+## Creating your first app for Snitch
+
+### Write the Snitch accelerator (device) core
+
+It is is now time to run C code on the Snitch cluster! We will run our axpy on Snitch for instance.
+
+You should already have `./sw/src/axpy.c` and `./sw/src/axpy_data.h`. Please create a file `./sw/src/axpy_snitch.c`.
+
+```C
+/* ./sw/src/axpy_snitch.c */
+
+#include "device.h"
+
+#include "axpy_data.h"
+
+// Define your kernel
+void axpy(uint32_t l, double *x, double *y, double a, double *z) {
+    for (uint32_t i = 0; i < l ; i++) {
+        z[i] = a * x[i] + y[i];
+    }
+}
+
+int main() {
+
+    if(snrt_is_dm_core())
+        return 0;
+    
+    uint32_t start_time = __rt_get_timer();
+    axpy(L, x, y, a, z);
+    uint32_t end_time = __rt_get_timer();
+
+    return 0;
+}
+```
+
+Note two things:
+
+First, we now include `device.h` present in `./sw/occamyRuntime`. This file defines __the functions that are must accesible to all Snitch cores in Occamy__. It defines `get_communication_buffer` for instance, that exploits an hardware property of Occamy (the presence of SoC scratch registers). This file also includes the `snRuntime` (by including `sw/snRuntime/include/snrt.h`). The `snRuntime` defines __the functions that must be accessible to all Snitch cores in a Snitch cluster based system__. It defines `snrt_cluster_core_idx` for instance, that reads the `mhartid` CSR and other Snitch cluster related data structures.
+
+Second, `start_time` is now of type `uint32_t`. Don't forget that Snitch embbeds 32-bits int registers and 64-bits float registers!
+
+___Note:__ When you have time, give a look at the files inside `/sw/snRuntime/include` to see what can of functionnalities of the Snitch harware you can use for your kernels._
+
+### Write the CVA6 (host) code
+
+On the CVA6 side now, you don't want to compute AXPY anymore but you will have to monitor the Snitch cluster:
+
+```C
+/* ./sw/src/axpy.c */
+
+#include "host.h"
+
+#include "axpy_data.h"
+
+int main() {
+    // Un-assert reset on Snitches
+    reset_and_ungate_quad(0);
+    // Let them communicate with the AXI bus
+    deisolate_quad(0, ISO_MASK_ALL);
+    // Pass them the pointer to their main function
+    program_snitches();
+    // Wake them up with an interrupt
+    wakeup_snitches();
+
+    wait_snitches_done();
+}
+```
+
+### Compile and execute your heterogeneous app
+
+Now you need to define your kernel as heterogeneous. Go to `./sw/CMakeLists.txt` and add the following line at the end of the file:
+
+```CMake
+add_heterogeneous_executable(axpy src/axpy.c src/axpy_snitch.c)
+```
+
+You can now compile and execute your program:
+
+```bash
+$ make DEBUG=ON update-sw
+$ ./bin/occamy_top.vsim sw/build/axpy
+```
+
+You can watch the traces as before :
+
+```bash
+$ make traces
+# Annotate with the Snitch C code
+$ make BINARY=sw/build/sn_axpy.elf annotate  -B
+# Export the performance counter
+$ make perf-csv
+# Open the results
+$ libreoffice logs/perf_metrics.csv
+```
+
+In this file you can now see the performance metrics inside the differents sections of the code (0=startup, 1=axpy, 2=exit). Note that since CVA6 does not call to `__rt_get_timer` anymore, it only contains one section.
+
+__Great, but, have you noticed a problem?__
+
+Look into `./sw/build/sn_axpy.elf.dump` and search for the address of the output variable `<z>` :
+
+```
+Disassembly of section .bss:
+
+80000960 <z>:
+	...
+```
+
+Now grep this address in your traces :
+
+```bash
+$ grep 80000960 logs/*.txt
+...
+```
+
+It appears in every trace! All the cores issue a `fsd` (float store double) to this address. You are not parallelizing your kernel but executing it 8 times!
+
+Modify your `./sw/src/axpy_snitch.c` to truly parallelize your kernel :
+
+```C
+/* ./sw/src/axpy_snitch.c */
+
+#include "device.h"
+
+#include "axpy_data.h"
+
+// Define your kernel
+void axpy(uint32_t core_idx uint32_t core_num, uint32_t l, double *x, double *y, double a, double *z) {
+    // Let each core compute only a subset of the result
+    uint32_t portion_l = l / core_num;
+    for (uint32_t i = portion_l * core_idx; i < portion_l * (core_idx+1); i++) {
+        z[i] = a * x[i] + y[i];
+    }
+}
+
+int main() {
+
+    if(snrt_is_dm_core())
+        return 0;
+
+    uint32_t core_idx = snrt_cluster_idx();
+    uint32_t core_num = snrt_cluster_compute_core_num();
+
+    uint32_t start_time = __rt_get_timer();
+    axpy(core_idx, L, x, y, a, z);
+    uint32_t end_time = __rt_get_timer();
+
+    return 0;
+}
+```
+
+Now re-run your kernel and compare the execution time of section 1 with the precedent version.
+
+# Troubleshooting
+
+```bash
+# When building your app
+$ make DEBUG=ON update-sw
+lto1: fatal error: bytecode stream in file '../../../../../sw/snRuntime/build/libsnRuntime-cluster.a' generated with LTO version 8.1 instead of the expected 7.1
+# You did not compile the snRuntime with the same compiler, you need to clean it :
+$ rm -rf ../../../sw/snRuntime/build
+$ make DEBUG=ON update-sw
+```
+
+```bash
+# When building your app
+$ make DEBUG=ON update-sw
+.../hw/system/occamy/sw/occamyRuntime/start_host.S:12: Error: unable to include `./
+# We observed this error on certain versions of GCC please use the one recommended
+$ export PATH=/home/colluca/workspace/riscv/bin/:$PATH
+$ make DEBUG=ON update-sw
+```
+
+```bash
+# My code does not end but enter an infinite loop...
+# You can just kill it (Ctrl+C) after a given amount of time and reduce the size of the trace with
+for a in `ls logs/*.dasm`; do
+tmp=`head -n 2000 $a`; echo $tmp > $a
+done
 ```
