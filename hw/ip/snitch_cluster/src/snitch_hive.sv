@@ -126,14 +126,17 @@ module snitch_hive #(
   // Shared VM Subsystem
   // -------------------
 
+  // Typedef outside of the generate block
+  // for VCS compatibility reasons
+
+  `SNITCH_VM_TYPEDEF(AddrWidth)
+
+  typedef struct packed {
+    snitch_pkg::va_t va;
+    pa_t ppn;
+  } va_arb_t;
+
   if (VMSupport) begin : gen_ptw
-
-    `SNITCH_VM_TYPEDEF(AddrWidth)
-
-    typedef struct packed {
-      snitch_pkg::va_t va;
-      pa_t ppn;
-    } va_arb_t;
 
     logic [2*CoreCount-1:0] ptw_valid, ptw_ready;
     va_arb_t [2*CoreCount-1:0] ptw_req_in;
