@@ -23,7 +23,7 @@ int main() {
     print_uart("\r\n");
 
     // Hardcode boot mode for now. TODO(niwis): derive e.g. from GPIO.
-    enum boot_mode_t boot_mode = SPL_ROM;
+    enum boot_mode_t boot_mode = JTAG;
 
     switch (boot_mode) {
         case JTAG:

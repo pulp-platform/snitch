@@ -675,7 +675,7 @@ proc create_root_design { parentCell } {
   set smc_spcie [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smc_spcie ]
   set_property -dict [ list \
    CONFIG.NUM_CLKS {2} \
-   CONFIG.NUM_SI {4} \
+   CONFIG.NUM_SI {5} \
  ] $smc_spcie
 
   # Create instance: util_ds_buf, and set properties
@@ -707,6 +707,11 @@ proc create_root_design { parentCell } {
    CONFIG.PF3_DEVICE_ID_mqdma {9014} \
    CONFIG.SYS_RST_N_BOARD_INTERFACE {pcie_perstn} \
    CONFIG.axi_addr_width {64} \
+   CONFIG.axi_bypass_64bit_en {true} \
+   CONFIG.axi_bypass_prefetchable {true} \
+   CONFIG.axist_bypass_en {true} \
+   CONFIG.axist_bypass_scale {Gigabytes} \
+   CONFIG.axist_bypass_size {4} \
    CONFIG.axisten_freq {125} \
    CONFIG.functional_mode {DMA} \
    CONFIG.pf0_device_id {9014} \
@@ -768,6 +773,7 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net smc_hbm_7_M00_AXI [get_bd_intf_pins hbm_0/SAXI_28] [get_bd_intf_pins smc_hbm_7/M00_AXI]
   connect_bd_intf_net -intf_net smc_pcie_M05_AXI [get_bd_intf_pins axi_iic_0/S_AXI] [get_bd_intf_pins smc_pcie/M00_AXI]
   connect_bd_intf_net -intf_net xdma_0_M_AXI [get_bd_intf_pins smc_spcie/S03_AXI] [get_bd_intf_pins xdma_0/M_AXI]
+  connect_bd_intf_net -intf_net xdma_0_M_AXI_BYPASS [get_bd_intf_pins smc_spcie/S04_AXI] [get_bd_intf_pins xdma_0/M_AXI_BYPASS]
   connect_bd_intf_net -intf_net xdma_0_pcie_mgt [get_bd_intf_ports pci_express_x4] [get_bd_intf_pins xdma_0/pcie_mgt]
 
   # Create port connections
@@ -870,6 +876,7 @@ proc create_root_design { parentCell } {
   assign_bd_address -offset 0x4CC00000 -range 0x00400000 -target_address_space [get_bd_addr_spaces occamy/m_axi_pcie] [get_bd_addr_segs hbm_0/SAPB_0/Reg] -force
   assign_bd_address -offset 0x4C800000 -range 0x00400000 -target_address_space [get_bd_addr_spaces occamy/m_axi_pcie] [get_bd_addr_segs hbm_0/SAPB_1/Reg] -force
   assign_bd_address -offset 0x00000000 -range 0x0001000000000000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs occamy/s_axi_pcie/reg0] -force
+  assign_bd_address -offset 0x00000000 -range 0x0001000000000000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs occamy/s_axi_pcie/reg0] -force
 
   # Exclude Address Segments
   exclude_bd_addr_seg -offset 0xC0000000 -range 0x10000000 -target_address_space [get_bd_addr_spaces occamy/m_axi_hbm_0] [get_bd_addr_segs hbm_0/SAXI_00/HBM_MEM04]
