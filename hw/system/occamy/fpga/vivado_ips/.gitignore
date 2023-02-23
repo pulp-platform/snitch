@@ -1,7 +1,5 @@
-occamy_xilinx/
+build/
 .Xil/
-component.xml
-define-sources.tcl
 *.jou
 *.zip
 *.str

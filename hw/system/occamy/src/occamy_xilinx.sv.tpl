@@ -56,7 +56,7 @@ import ${name}_pkg::*;
   output logic [3:0]  spim_sd_en_o,
   input        [3:0]  spim_sd_i,
 
-  input  logic [3:0]  ext_irq_i,
+  input  logic [11:0]  ext_irq_i,
 
   // Boot ROM
   output logic                                             bootrom_en_o,
@@ -101,7 +101,9 @@ import ${name}_pkg::*;
   `AXI_FLATTEN_MASTER(hbm_${i}, hbm_${i}_req_o, hbm_${i}_rsp_i)
 % endfor
 
-  /// Boot ROM
+  ///////////////////
+  // Boot ROM      //
+  ///////////////////
   // TODO(niwis, aottaviano) This is a temporary solution. Either put this in a dedicated module for
   // regbus <-> Xilinx memory conversion and add support to solder, or replace by a different ROM
 
@@ -115,7 +117,7 @@ import ${name}_pkg::*;
   logic bootrom_req_ready_d, bootrom_req_ready_q;
 
   assign bootrom_en_o        = bootrom_req.valid;
-  assign bootrom_addr_o      = bootrom_req.addr >> 2; // 32-bit addressed
+  assign bootrom_addr_o      = bootrom_req.addr;
   assign bootrom_rsp.ready   = bootrom_req_ready_q;
   assign bootrom_rsp.rdata   = bootrom_data_i;
   assign bootrom_rsp.error   = '0;
@@ -143,13 +145,6 @@ import ${name}_pkg::*;
   <% regbus_fll_periph = soc_axi_lite_narrow_periph_xbar.out_fll_periph.to_reg(context, "fll_periph", fr="fll_periph_axi_lite") %>
   <% regbus_fll_hbm2e = soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e.to_reg(context,   "fll_hbm2e", fr="fll_hbm2e_axi_lite") %>
 
-  ${regbus_fll_system.req_type()} fll_system_req;
-  ${regbus_fll_system.rsp_type()} fll_system_rsp;
-  ${regbus_fll_periph.req_type()} fll_periph_req;
-  ${regbus_fll_periph.rsp_type()} fll_periph_rsp;
-  ${regbus_fll_hbm2e.req_type()} fll_hbm2e_req;
-  ${regbus_fll_hbm2e.rsp_type()} fll_hbm2e_rsp;
-
   // Occamy top-level
   ${name}_top i_${name} (
     .bootrom_req_o   (bootrom_axi_lite_req),
@@ -160,25 +155,22 @@ import ${name}_pkg::*;
     .fll_periph_rsp_i(fll_periph_axi_lite_rsp),
     .fll_hbm2e_req_o (fll_hbm2e_axi_lite_req),
     .fll_hbm2e_rsp_i (fll_hbm2e_axi_lite_rsp),
-    .pcie_cfg_req_o  (),
+    .ext_irq_i(ext_irq_i),
+    // Tie-off unused ports
     .pcie_cfg_rsp_i  ('0),
-    // Tie the HBM interrupts to zero.
-    .ext_irq_i ({8'b0, ext_irq_i}),
-    .apb_hbm_cfg_req_o (),
-    .apb_hbm_cfg_rsp_i ('0),
-    .hbi_cfg_req_o (),
-    .hbi_cfg_rsp_i ('0),
-    .apb_hbi_ctl_req_o (),
-    .apb_hbi_ctl_rsp_i ('0),
-    .hbm_phy_cfg_req_o (),
-    .hbm_phy_cfg_rsp_i ('0),
-    .hbm_seq_req_o (),
-    .hbm_seq_rsp_i ('0),
+    .hbi_wide_cfg_rsp_i ('0),
+    .hbi_narrow_cfg_rsp_i ('0),
+    .hbm_cfg_rsp_i ('0),
+    .chip_ctrl_rsp_i ('0),
+    .hbi_wide_req_i ('0),
+    .hbi_wide_rsp_i ('0),
+    .hbi_narrow_req_i ('0),
+    .hbi_narrow_rsp_i ('0),
     .*
   );
 
-  assign fll_system_rsp = '0;
-  assign fll_periph_rsp = '0;
-  assign fll_hbm2e_rsp = '0;
+  assign fll_system_axi_lite_rsp = '0;
+  assign fll_periph_axi_lite_rsp = '0;
+  assign fll_hbm2e_axi_lite_rsp = '0;
 
 endmodule
