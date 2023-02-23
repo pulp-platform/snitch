@@ -1,0 +1,130 @@
+# Copyright 2022 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+variables:
+  GIT_STRATEGY: clone
+  PATH: /home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
+  VIVADO: vitis-2020.2 vivado
+  PYTHON: $CI_PROJECT_DIR/install/python/bin/python3.9
+  VERIBLE_FMT: $CI_PROJECT_DIR/.local/bin/verible-verilog-format
+  BENDER: $CI_PROJECT_DIR/.local/bin/bender
+  RUST_LOG: memora=debug
+
+before_script:
+- >
+  if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get python; then
+    $CI_PROJECT_DIR/.gitlab-ci.d/build-python.sh $CI_PROJECT_DIR
+    $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert python
+  fi
+- ${PYTHON} -m venv .venv
+- source .venv/bin/activate
+- pip install -r python-requirements.txt
+- |
+  cd $CI_PROJECT_DIR && mkdir -p .local/bin && cd .local/bin
+  curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh -s -- 0.23.2
+  ${BENDER} --version
+- |
+  cd $CI_PROJECT_DIR && mkdir -p .local
+  curl -L https://github.com/chipsalliance/verible/releases/download/v0.0-807-g10e7c71/verible-v0.0-807-g10e7c71-CentOS-7.9.2009-Core-x86_64.tar.gz | tar xz -C .local --strip-components=1
+  ${VERIBLE_FMT} --version
+
+stages:
+- build1
+- build2
+- test
+- package
+- deploy
+
+# Buildroot flow for toolchain and Linux binaries
+br-hrv-vcu128:
+  stage: build1
+  needs: []
+  script:
+  - >
+    if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-vcu128; then
+      exit 0
+    fi
+  - make -C hw/system/occamy/fpga br-hrv-vcu128
+  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-vcu128
+  artifacts:
+    when: always
+    paths:
+    - hw/system/occamy/fpga/output/br-hrv-vcu128/images/
+
+# Packages and elaborates the vivado IPs where occamy is part of. This ensures
+# that the occamy xilinx IP can be elaborated
+vivado_ip:
+  stage: build2
+  needs: []
+  script:
+    # Make Occamy system smaller to fit on FPGA
+  - ./.gitlab-ci.d/occamy_cfg_fpga.sh
+  - make -C hw/system/occamy update-source
+    # Package IPs and run test elaboration
+  - make -C hw/system/occamy/fpga/vivado_ips all
+
+# The occamy on vcu128 design
+occamy_vcu128:
+  stage: build2
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "schedule"
+    when: never
+  - changes:
+    - .gitlab-ci.d/occamy_cfg_fpga.sh
+    - hw/ip/**/*
+    - hw/vendor/**/*
+    - hw/system/occamy/**/*
+    - util/occamygen.py
+    - util/clustergen/**/*
+    - util/solder/**/*
+    - util/Makefrag
+    - util/reggen
+    - util/regtool.py
+  needs: []
+  script:
+  # Make Occamy system smaller to fit on FPGA, Generate IP, Synthesize and Implement design, Cache
+  - |
+    if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup occamy_vcu128; then
+      ./.gitlab-ci.d/occamy_cfg_fpga.sh
+      make -C hw/system/occamy update-source
+      make -C hw/system/occamy/fpga/vivado_ips
+      make -C hw/system/occamy/fpga occamy_vcu128
+      git checkout -- hw/system/occamy/src
+      $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert occamy_vcu128
+      cp -v hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper_routed.dcp /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch-incremental/occamy_vcu128_wrapper_routed.dcp
+    fi
+  artifacts:
+    when: always
+    paths:
+    - hw/system/occamy/fpga/**/*.bit
+    - hw/system/occamy/fpga/**/*.ltx
+    - hw/system/occamy/fpga/**/*.log
+    - hw/system/occamy/fpga/occamy_vcu128/*.zip
+    - hw/system/occamy/fpga/occamy_vcu128/*.reports
+
+# Boot Linux on the VCU128 FPGA and check for prompt
+occamy_vcu128_fpga:
+  stage: test
+  needs: [br-hrv-vcu128]
+  only:
+    refs:
+    - schedules
+    variables:
+    - $SCHEDULE == "occamy_vcu128_nightly"
+    changes:
+    - .gitlab-ci.d/occamy_cfg_fpga.sh
+    - .gitlab-ci.d/occamy_fpga_nightly.sh
+      # Only run if changes were made to anything related to Occamy
+    - hw/ip/**/*
+    - hw/vendor/**/*
+    - hw/system/occamy/**/*
+  script:
+  # We need the bitstream, bootrom (tracked in the repo) and linux binaries
+  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get br-hrv-vcu128
+  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get occamy_vcu128
+  - .gitlab-ci.d/occamy_fpga_nightly.sh
+  artifacts:
+    when: always
+    paths:
+    - console.log

@@ -5,13 +5,16 @@
 # Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 # Noah Huetter <huettern@iis.ee.ethz.ch>
 # 
-# Programs the SPI Flash of the VCU128 board with with two partitions
+# Programs the SPI Flash of the VCU128 board with with two partitions and 
+# Afterwards programs the real bitstream and runs the bootrom
 # 
 # HW_SERVER  host:port URL to the server where the FPGA board is connected to 
 # FPGA_ID    Serial of the FPGA to target
 # MCS        Output flash configuration file
 # OFFSET0    Address offset of partition 0
 # FILE0      File to program to partition 0
+
+source occamy_vcu128_procs.tcl
 
 # Parse arguments
 if {$argc < 5} {
@@ -22,10 +25,6 @@ set FPGA_ID   [lindex $argv 1]
 set MCS       [lindex $argv 2]
 set OFFSET0   [lindex $argv 3]
 set FILE0     [lindex $argv 4]
-# set OFFSET1   [lindex $argv 5]
-# set FILE1     [lindex $argv 6]
-
-set IS_GUI [expr {$rdi::mode == "gui" ? true: false}]
 
 set mcs_file $MCS
 
@@ -64,6 +63,25 @@ refresh_hw_device $hw_device;
 
 # Program SPI flash
 program_hw_cfgmem -hw_cfgmem $hw_cfgmem
+
+# Program BIT
+global occ_hw_server
+global occ_target_serial
+global occ_hw_device
+global occ_bit_stem
+set occ_hw_server $HW_SERVER
+set occ_target_serial $FPGA_ID
+set occ_hw_device xcvu37p_0
+set occ_bit_stem occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper
+
+occ_program_bit
+
+# Write bootrom
+if [file exists bootrom/bootrom-spl.tcl] {
+  occ_flash_bootrom_spl
+} else {
+  puts "Not writing bootrom. File does not exist."
+}
 
 # Close connection
 close_hw_manager
