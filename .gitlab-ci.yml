@@ -30,46 +30,26 @@ before_script:
   ${VERIBLE_FMT} --version
 
 stages:
-- build1
-- build2
-- test
-- package
-- deploy
-
-# Buildroot flow for toolchain and Linux binaries
-br-hrv-vcu128:
-  stage: build1
-  needs: []
-  script:
-  - >
-    if $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup br-hrv-vcu128; then
-      exit 0
-    fi
-  - make -C hw/system/occamy/fpga br-hrv-vcu128
-  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert br-hrv-vcu128
-  artifacts:
-    when: always
-    paths:
-    - hw/system/occamy/fpga/output/br-hrv-vcu128/images/
+- build_occamy_ip
+- build_occamy_vcu128
+- linux_boot
 
 # Packages and elaborates the vivado IPs where occamy is part of. This ensures
 # that the occamy xilinx IP can be elaborated
 vivado_ip:
-  stage: build2
-  needs: []
+  stage: build_occamy_ip
   script:
     # Make Occamy system smaller to fit on FPGA
   - ./.gitlab-ci.d/occamy_cfg_fpga.sh
   - make -C hw/system/occamy update-source
     # Package IPs and run test elaboration
-  - make -C hw/system/occamy/fpga/vivado_ips all
+  - make -C hw/system/occamy/fpga/vivado_ips occamy_xilinx EXT_JTAG=0 DEBUG=0
 
 # The occamy on vcu128 design
 occamy_vcu128:
-  stage: build2
+  stage: build_occamy_vcu128
   rules:
   - if: $CI_PIPELINE_SOURCE == "schedule"
-    when: never
   - changes:
     - .gitlab-ci.d/occamy_cfg_fpga.sh
     - hw/ip/**/*
@@ -81,18 +61,29 @@ occamy_vcu128:
     - util/Makefrag
     - util/reggen
     - util/regtool.py
-  needs: []
+  timeout: 18h 00m
   script:
+  - |
+    if [[ ! -f /usr/scratch2/dolent1/gitlabci/tmp/hero_occamy_wip/output/br-hrv-occamy/images/u-boot-spl.bin ]]; then
+      cd /usr/scratch2/dolent1/gitlabci/tmp
+      rm -rf snitch_occamy_wip hero_occamy_wip
+      git clone git@github.com:pulp-platform/hero.git hero_occamy_wip
+      cd hero_occamy_wip && git checkout tmp/hero_occamy_wip && git submodule update --init --recursive
+      export HERO_DEVICE_DTS=${CI_PROJECT_DIR}/hw/system/occamy/fpga/bootrom/occamy.dts
+      export HERO_INSTALL=/usr/scratch2/dolent1/gitlabci/tmp/hero_occamy_wip/install && export PATH=$HERO_INSTALL/share:$HERO_INSTALL/bin:$PATH
+      mkdir -p ${HERO_INSTALL} && make br-hrv-occamy-defconfig
+      cd output/br-hrv-occamy && make toolchain uboot
+    fi
+    export HERO_INSTALL=/usr/scratch2/dolent1/gitlabci/tmp/hero_occamy_wip/install && export PATH=$HERO_INSTALL/share:$HERO_INSTALL/bin:$PATH
+    export UBOOT_SPL_BIN=/usr/scratch2/dolent1/gitlabci/tmp/hero_occamy_wip/output/br-hrv-occamy/images/u-boot-spl.bin
+    cd $CI_PROJECT_DIR
   # Make Occamy system smaller to fit on FPGA, Generate IP, Synthesize and Implement design, Cache
   - |
     if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup occamy_vcu128; then
-      ./.gitlab-ci.d/occamy_cfg_fpga.sh
-      make -C hw/system/occamy update-source
-      make -C hw/system/occamy/fpga/vivado_ips
-      make -C hw/system/occamy/fpga occamy_vcu128
-      git checkout -- hw/system/occamy/src
+      make -C hw/system/occamy/fpga occamy_vcu128 EXT_JTAG=0 DEBUG=0
       $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert occamy_vcu128
-      cp -v hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper_routed.dcp /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch-incremental/occamy_vcu128_wrapper_routed.dcp
+      mkdir -p /usr/scratch2/dolent1/gitlabci/buildcache/snitch/snitch-incremental/
+      cp -v hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper_routed.dcp /usr/scratch2/dolent1/gitlabci/buildcache/snitch/snitch-incremental/occamy_vcu128_wrapper_routed.dcp
     fi
   artifacts:
     when: always
@@ -105,8 +96,7 @@ occamy_vcu128:
 
 # Boot Linux on the VCU128 FPGA and check for prompt
 occamy_vcu128_fpga:
-  stage: test
-  needs: [br-hrv-vcu128]
+  stage: linux_boot
   only:
     refs:
     - schedules
@@ -121,8 +111,8 @@ occamy_vcu128_fpga:
     - hw/system/occamy/**/*
   script:
   # We need the bitstream, bootrom (tracked in the repo) and linux binaries
-  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get br-hrv-vcu128
   - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get occamy_vcu128
+  # Todo get linux distrib from hero and flash it
   - .gitlab-ci.d/occamy_fpga_nightly.sh
   artifacts:
     when: always

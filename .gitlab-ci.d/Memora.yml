@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-cache_root_dir: /usr/scratch2/dolent1/gitlabci/buildcache/huettern/snitch
+cache_root_dir: /usr/scratch2/dolent1/gitlabci/buildcache/snitch
 
 artifacts:
   python:
@@ -21,16 +21,3 @@ artifacts:
     - hw/vendor
     outputs:
     - hw/system/occamy/fpga/occamy_vcu128
-
-  br-hrv-vcu128:
-    inputs:
-    - hw/system/occamy/fpga/Makefile
-    - hw/system/occamy/fpga/br2_external/configs
-    - hw/system/occamy/fpga/br2_external/rootfs
-    - hw/system/occamy/fpga/br2_external/patch
-    - hw/system/occamy/fpga/br2_external/external.desc
-    - hw/system/occamy/fpga/br2_external/external.mk
-    - hw/system/occamy/fpga/br2_external/Config.in
-    outputs:
-    - hw/system/occamy/fpga/br2_external/install
-    - hw/system/occamy/fpga/output/br-hrv-vcu128/images
