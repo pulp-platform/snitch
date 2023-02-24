@@ -126,13 +126,13 @@ clean.vcs:
 # SW #
 ######
 ## Build SW into sw/build with the LLVM toolchain
-sw: clean-sw
+sw: clean.sw
 	mkdir -p sw/build
 	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm && make
 
 # VSIM
 ## Build SW into sw/build with the LLVM toolchain (including tests) for Questasim simulator
-sw.vsim: clean-sw
+sw.vsim: clean.sw
 	mkdir -p sw/build
 	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make
 
@@ -142,7 +142,7 @@ sw.test.vsim: sw.vsim
 
 # VCS
 ## Build SW into sw/build with the LLVM toolchain (including tests) for VCS simulator
-sw.vcs: clean-sw
+sw.vcs: clean.sw
 	mkdir -p sw/build
 	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vcs -DBUILD_TESTS=ON .. && make
 
@@ -152,7 +152,7 @@ sw.test.vcs: sw.vcs
 
 # VLT
 ## Build SW into sw/build with the LLVM toolchain (including tests) for Verilator simulator
-sw.vlt: clean-sw
+sw.vlt: clean.sw
 	mkdir -p sw/build
 	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
 
@@ -164,11 +164,48 @@ sw.test.vlt: sw.vlt
 clean.sw:
 	rm -rf sw/build
 
-#########
-# Phony #
-#########
+########
+# Util #
+########
+.PHONY: help clean vlt.build vsim.build all
+.DEFAULT_GOAL := help
+
 ## Clean everything
 clean: clean.vcs clean.vlt clean.vsim clean.sw
 	rm -rf Bender.lock .bender/ work/
 
-.PHONY: help clean vlt.build vsim.build all
+clean.logs:
+	rm -rf logs/
+
+## Help command
+Blue=\033[1;34m
+Black=\033[0m
+help:
+	@echo -e "${Blue}Makefile Targets${Black} for the ${Blue}Snitch Cluster${Black}"
+	@echo -e "Use 'make <target>' where <target> is one of:"
+	@echo -e ""
+	@echo -e "${Blue}help           ${Black}Show an overview of all Makefile targets."
+	@echo -e ""
+	@echo -e "${Blue}bin/snitch_cluster.vcs  ${Black}Build compilation script and compile all sources for VCS simulation."
+	@echo -e "${Blue}bin/snitch_cluster.vlt  ${Black}Build compilation script and compile all sources for Verilator simulation."
+	@echo -e "${Blue}bin/snitch_cluster.vsim ${Black}Build compilation script and compile all sources for Questasim simulation."
+	@echo -e ""
+	@echo -e "${Blue}clean          ${Black}Clean everything except traces in logs directory."
+	@echo -e "${Blue}clean.sw       ${Black}Delete sw/build."
+	@echo -e "${Blue}clean.logs     ${Black}Delete all traces in logs directory."
+	@echo -e "${Blue}clean.vcs      ${Black}Clean all build directories and temporary files for VCS simulation."
+	@echo -e "${Blue}clean.vlt      ${Black}Clean all build directories and temporary files for Verilator simulation."
+	@echo -e "${Blue}clean.vsim     ${Black}Clean all build directories and temporary files for Questasim simulation."
+	@echo -e ""
+	@echo -e "${Blue}sw             ${Black}Build SW into sw/build with the LLVM."
+	@echo -e "${Blue}sw.vcs         ${Black}Build SW into sw/build with the LLVM (incl. tests) for VCS simulator."
+	@echo -e "${Blue}sw.vlt         ${Black}Build SW into sw/build with the LLVM (incl. tests) for Verilator simulator."
+	@echo -e "${Blue}sw.vsim        ${Black}Build SW into sw/build with the LLVM (incl. tests) for Questasim simulator."
+	@echo -e ""
+	@echo -e "${Blue}sw.test.vcs    ${Black}Build SW and run all tests with VCS simulator."
+	@echo -e "${Blue}sw.test.vlt    ${Black}Build SW and run all tests with Verilator simulator."
+	@echo -e "${Blue}sw.test.vsim   ${Black}Build SW and run all tests with Questasim simulator."
+	@echo -e ""
+	@echo -e "Additional useful targets from the included Makefrag:"
+	@echo -e "${Blue}traces         ${Black}Generate the better readable traces in .logs/trace_hart_<hart_id>.txt with spike-dasm."
+	@echo -e "${Blue}annotate       ${Black}Annotate the better readable traces in .logs/trace_hart_<hart_id>.s with the source code related with the retired instructions."
