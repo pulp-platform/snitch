@@ -24,6 +24,7 @@ nav:
 - Home: index.md
 - User Guide:
   - Getting Started: ug/getting_started.md
+  - Tooling Setup at IIS: ug/setup-iis.md
   - Trace Example: ug/example_trace.html
   - Docker: ug/docker.md
   - Directory Structure: ug/directory_structure.md
