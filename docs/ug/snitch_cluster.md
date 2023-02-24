@@ -63,11 +63,20 @@ In `hw/system/snicht_cluster`:
         bin/snitch_cluster.vcs path/to/riscv/binary
         ```
 
-- Build the traces:
+- Build the traces in .logs/trace_hart_<hart_id>.txt with the help of spike-dasm:
     ```
     make traces
     ```
 
+- Annotate the traces in .logs/trace_hart_<hart_id>.s with the source code related with the retired instructions:
+    ```
+    make annotate
+    ```
+
+- Get an overview of all Makefile targets:
+    ```
+    make help
+    ```
 
 ## Configure the Cluster
 
