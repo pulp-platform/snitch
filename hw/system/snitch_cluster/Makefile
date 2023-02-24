@@ -98,6 +98,9 @@ ${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} ${TB_DIR}/rtl_lib.
 bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
 	$(call QUESTASIM,tb_bin)
 
+clean.vsim:
+	rm -rf bin/snitch_cluster.vsim bin/snitch_cluster.vsim.gui work-vsim work vsim.wlf
+
 #######
 # VCS #
 #######
@@ -107,13 +110,16 @@ bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch
 		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc \
 		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}" -LDFLAGS "-L${FESVR}/lib" -lfesvr
 
+clean.vcs:
+	rm -rf bin/snitch_cluster.vcs work-vcs work
+
 ######
 # SW #
 ######
 # VSIM
 sw/build.vsim: clean-sw
 	mkdir -p sw/build
-	cd sw/build && cmake-3.18.1 -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make
+	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make
 
 sw/test.vsim: sw/build.vsim
 	cd sw/build && make test
