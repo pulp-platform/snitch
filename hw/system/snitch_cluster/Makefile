@@ -5,53 +5,175 @@
 # Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 # Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
+#######################
+# Makefile invocation #
+#######################
+
+DEBUG        ?= OFF # ON to turn on debugging symbols
+CFG_OVERRIDE ?=     # Override default config file
+
+.PHONY: all clean
+all: update-rtl sw addrmap
+clean: clean-sw
+
+############
+# Makefrag #
+############
+
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ROOT        := ${MKFILE_DIR}../../..
 
 include $(ROOT)/util/Makefrag
 
-CFG 		?= cfg/cluster.default.hjson
-CLUSTER_GEN ?= $(ROOT)/util/clustergen.py
+############
+# Programs #
+############
+
+REGGEN          ?= ${ROOT}/util/regtool.py
+CLUSTER_GEN     ?= $(ROOT)/util/clustergen.py
 CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
 
+QUESTA_64BIT = -64
+VSIM      	 = vsim ${QUESTA_64BIT}
+VLOG      	 = vlog ${QUESTA_64BIT}
+
+#########################
+# Files and directories #
+#########################
+
+PLATFORM_HEADERS_DIR ?= sw/runtime/platform
+GENERATED_DIR        ?= $(MKFILE_DIR)generated
+
 # Verilated and compiled snitch cluster
-VLT_AR          = ${VLT_BUILDDIR}/Vtestharness__ALL.a
+VLT_AR = ${VLT_BUILDDIR}/Vtestharness__ALL.a
 
-# uncomment, if questasim should be run in 64-bit mode
-QUESTA_64BIT	= -64
-VSIM      		= vsim ${QUESTA_64BIT}
-VLOG      		= vlog ${QUESTA_64BIT}
+# If the configuration file is overriden on the command-line (through
+# CFG_OVERRIDE) and this file differs from the least recently used
+# (LRU) config, all targets depending on the configuration file have
+# to be rebuilt. This file is used to express this condition as a
+# prerequisite for other rules.
+CFG = cfg/lru.hjson
 
-VLT_FLAGS    += --trace
+#####################
+# Simulator options #
+#####################
 
-VSIM_FLAGS    += -t 1ps
-VSIM_FLAGS    += -voptargs=+acc
-VSIM_FLAGS    += -do "log -r /*; run -a"
+VLT_FLAGS  += --trace
 
-VLOG_FLAGS 	  += -svinputport=compat
-VLOG_FLAGS 	  += -override_timescale 1ns/1ps
-VLOG_FLAGS 	  += -suppress 2583
-VLOG_FLAGS 	  += -suppress 13314
-VLOG_FLAGS 	  += ${QUESTA_64BIT}
+VSIM_FLAGS += -t 1ps
+VSIM_FLAGS += -voptargs=+acc
+VSIM_FLAGS += -do "log -r /*; run -a"
 
-#######
-# RTL #
-#######
-${MKFILE_DIR}generated/snitch_cluster_wrapper.sv: ${CFG} ${CLUSTER_GEN} ${CLUSTER_GEN_SRC}
-	$(CLUSTER_GEN) -c $< -o .
+VLOG_FLAGS += -svinputport=compat
+VLOG_FLAGS += -override_timescale 1ns/1ps
+VLOG_FLAGS += -suppress 2583
+VLOG_FLAGS += -suppress 13314
+VLOG_FLAGS += ${QUESTA_64BIT}
+
+###############
+# C testbench #
+###############
+
+TB_CC_SOURCES += \
+	${TB_DIR}/rtl_lib.cc \
+	${TB_DIR}/common_lib.cc \
+	$(GENERATED_DIR)/bootdata.cc
+
+TB_CC_FLAGS += \
+	-std=c++14 \
+	-I${MKFILE_DIR}/test \
+	-I${FESVR}/include \
+	-I${TB_DIR}
 
 #################
 # Prerequisites #
 #################
+
+CLUSTER_GEN_PREREQ = ${CLUSTER_GEN} ${CLUSTER_GEN_SRC}
+
+$(CFG): FORCE
+	@# If the LRU config file doesn't exist, we use the default config.
+	@if [ ! -e $@ ] ; then \
+		DEFAULT_CFG="cfg/cluster.hjson"; \
+		echo "Using default config file: $$DEFAULT_CFG"; \
+		cp $$DEFAULT_CFG $@; \
+	fi
+	@# If a config file is provided on the command-line and it differs
+	@# from the LRU config file then we override the LRU file with it
+	@if [ $(CFG_OVERRIDE) ] ; then \
+		echo "Overriding config file with: $(CFG_OVERRIDE)"; \
+		if cmp -s $(CFG_OVERRIDE) $@ ; then \
+			echo "Override and LRU config files are equivalent. Nothing to be done."; \
+		else \
+			cp $(CFG_OVERRIDE) $@; \
+		fi \
+	fi
+FORCE:
+
 test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom.ld
 	riscv64-unknown-elf-gcc -mabi=ilp32d -march=rv32imafd -static -nostartfiles -Ttest/bootrom.ld $< -o test/bootrom.elf
 	riscv64-unknown-elf-objdump -d test/bootrom.elf > test/bootrom.dump
 	riscv64-unknown-elf-objcopy -j .text -O binary test/bootrom.elf test/bootrom.bin
 
+############
+# Software #
+############
+
+CLUSTER_GEN_HEADERS = snitch_cluster_cfg.h \
+					  snitch_cluster_addrmap.h
+
+REGGEN_HEADERS = snitch_cluster_peripheral.h
+
+PLATFORM_HEADERS = $(addprefix $(PLATFORM_HEADERS_DIR)/,$(CLUSTER_GEN_HEADERS) $(REGGEN_HEADERS))
+
+.PHONY: sw clean-headers clean-sw
+
+sw: $(PLATFORM_HEADERS)
+	$(MAKE) -C sw/
+
+clean-headers:
+	rm -f $(PLATFORM_HEADERS)
+
+clean-sw: clean-headers
+	$(MAKE) -C sw/ TARGET=clean
+
+# CLUSTERGEN headers
+$(addprefix $(PLATFORM_HEADERS_DIR)/,$(CLUSTER_GEN_HEADERS)): %.h: $(CFG) $(CLUSTER_GEN_PREREQ) %.h.tpl
+	@echo "[CLUSTERGEN] Generate $@"
+	$(CLUSTER_GEN) -c $< --outdir $(PLATFORM_HEADERS_DIR) --template $@.tpl
+
+# REGGEN headers
+$(PLATFORM_HEADERS_DIR)/snitch_cluster_peripheral.h: $(ROOT)/hw/ip/snitch_cluster/src/snitch_cluster_peripheral/snitch_cluster_peripheral_reg.hjson $(REGGEN)
+	$(call reggen_generate_header,$@,$<)
+
+#######
+# RTL #
+#######
+
+$(GENERATED_DIR):
+	mkdir -p $@
+
+$(GENERATED_DIR)/snitch_cluster_wrapper.sv: ${CFG} ${CLUSTER_GEN_PREREQ} | $(GENERATED_DIR)
+	$(CLUSTER_GEN) -c $< -o $(GENERATED_DIR) --wrapper
+
+$(GENERATED_DIR)/link.ld: ${CFG} ${CLUSTER_GEN_PREREQ} | $(GENERATED_DIR)
+	$(CLUSTER_GEN) -c $< -o $(GENERATED_DIR) --linker
+
+$(GENERATED_DIR)/memories.json: ${CFG} ${CLUSTER_GEN_PREREQ} | $(GENERATED_DIR)
+	$(CLUSTER_GEN) -c $< -o $(GENERATED_DIR) --memories
+
+$(GENERATED_DIR)/bootdata.cc: ${CFG} ${CLUSTER_GEN_PREREQ} | $(GENERATED_DIR)
+	$(CLUSTER_GEN) -c $< -o $(GENERATED_DIR) --bootdata
+
 #############
 # Verilator #
 #############
+
+.PHONY: clean-vlt
+clean-vlt:
+	rm -rf $(VLT_BUILDDIR)
+
 $(VLT_AR): ${VLT_SOURCES} ${TB_SRCS}
 	$(call VERILATE,testharness)
 verilate: $(VLT_AR)
@@ -67,9 +189,6 @@ VLT_COBJ += $(VLT_BUILDDIR)/vlt/verilated_vcd_c.o
 # Bootdata
 VLT_COBJ += $(VLT_BUILDDIR)/generated/bootdata.o
 
-clean-vlt-obj:
-	rm $(VLT_COBJ)
-
 # Build targets for verilator TB
 $(VLT_BUILDDIR)/tb/%.o: $(TB_DIR)/%.cc $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
 	mkdir -p $(dir $@)
@@ -77,11 +196,11 @@ $(VLT_BUILDDIR)/tb/%.o: $(TB_DIR)/%.cc $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
 $(VLT_BUILDDIR)/vlt/%.o: $(VLT_ROOT)/include/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
-$(VLT_BUILDDIR)/generated/%.o: generated/%.cc ${VLT_BUILDDIR}/lib/libfesvr.a
+$(VLT_BUILDDIR)/generated/%.o: $(GENERATED_DIR)/%.cc ${VLT_BUILDDIR}/lib/libfesvr.a
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
 
-# Link verilated archive wich $(VLT_COBJ)
+# Link verilated archive with $(VLT_COBJ)
 bin/snitch_cluster.vlt: $(VLT_AR) $(VLT_COBJ) ${VLT_BUILDDIR}/lib/libfesvr.a
 	mkdir -p $(dir $@)
 	$(CXX) $(LDFLAGS) -std=c++14 -L ${VLT_BUILDDIR}/lib -o $@ $(VLT_COBJ) $(VLT_AR) -lfesvr -lpthread
@@ -89,10 +208,11 @@ bin/snitch_cluster.vlt: $(VLT_AR) $(VLT_COBJ) ${VLT_BUILDDIR}/lib/libfesvr.a
 ############
 # Modelsim #
 ############
-${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc
+
+${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} ${TB_CC_SOURCES}
 	vlib $(dir $@)
 	${BENDER} script vsim ${VSIM_BENDER} --vlog-arg="${VLOG_FLAGS} -work $(dir $@) " > $@
-	echo '${VLOG} -work $(dir $@) ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc -ccflags "-std=c++14 -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}"' >> $@
+	echo '${VLOG} -work $(dir $@) ${TB_CC_SOURCES} -ccflags "$(TB_CC_FLAGS)"' >> $@
 	echo 'return 0' >> $@
 
 bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
@@ -101,17 +221,18 @@ bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
 #######
 # VCS #
 #######
-bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch_cluster_wrapper.sv ${TB_DIR}/common_lib.cc generated/bootdata.cc
+bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a $(GENERATED_DIR)/snitch_cluster_wrapper.sv ${TB_DIR}/common_lib.cc $(GENERATED_DIR)/bootdata.cc
 	mkdir -p bin
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/snitch_cluster.vcs -cc $(CC) -cpp $(CXX) \
-		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc \
+		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc $(GENERATED_DIR)/bootdata.cc \
 		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}" -LDFLAGS "-L${FESVR}/lib" -lfesvr
 
 ######
 # SW #
 ######
+# TODO colluca
 # VSIM
-sw/build.vsim: clean-sw
+sw/build.vsim:
 	mkdir -p sw/build
 	cd sw/build && cmake-3.18.1 -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make
 
@@ -119,22 +240,9 @@ sw/test.vsim: sw/build.vsim
 	cd sw/build && make test
 
 # VLT
-sw/build.vlt: clean-sw
+sw/build.vlt:
 	mkdir -p sw/build
 	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
 
 sw/test.vlt: sw/build.vlt
 	cd sw/build && make test
-
-# Clean
-clean-sw:
-	rm -rf sw/build
-
-#########
-# Phony #
-#########
-clean:
-	rm -rf ${VLT_BUILDDIR} Bender.lock .bender/
-	# work/
-
-.PHONY: clean vlt.build vsim.build all

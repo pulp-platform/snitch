@@ -1,27 +1,29 @@
-// Copyright 2020 ETH Zurich and University of Bologna.
+// Copyright 2023 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "snrt.h"
+extern uint32_t snrt_hartid();
 
-// TLS copy of frequently used data that doesn't change at runtime
-__thread struct snrt_team *_snrt_team_current;
+extern uint32_t snrt_global_core_base_hartid();
 
-const uint32_t _snrt_team_size __attribute__((section(".rodata"))) =
-    sizeof(struct snrt_team_root);
+extern uint32_t snrt_global_core_idx();
 
-uint32_t _snrt_barrier_reg_ptr() {
-    return _snrt_team_current->root->barrier_reg_ptr;
-}
+extern uint32_t snrt_global_core_num();
 
-snrt_slice_t snrt_global_memory() {
-    return _snrt_team_current->root->global_mem;
-}
+extern uint32_t snrt_cluster_idx();
 
-snrt_slice_t snrt_cluster_memory() {
-    return _snrt_team_current->root->cluster_mem;
-}
+extern uint32_t snrt_cluster_num();
 
-snrt_slice_t snrt_zero_memory() { return _snrt_team_current->root->zero_mem; }
+extern uint32_t snrt_cluster_core_idx();
 
-void snrt_wakeup(uint32_t mask) { *snrt_peripherals()->wakeup = mask; }
+extern uint32_t snrt_cluster_core_num();
+
+extern uint32_t snrt_cluster_compute_core_idx();
+
+extern uint32_t snrt_cluster_compute_core_num();
+
+extern int snrt_is_compute_core();
+
+extern int snrt_is_dm_core();
+
+extern uint32_t snrt_cluster_dm_core_num();

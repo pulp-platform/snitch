@@ -84,7 +84,7 @@ def main():
                     ts = int(start)
                     dur = int(end) - ts
                     event = {'name': regions[i],
-                             'ph': "X", # Complete event type
+                             'ph': "X",  # Complete event type
                              'ts': us(ts),
                              'dur': us(dur),
                              'pid': 0,

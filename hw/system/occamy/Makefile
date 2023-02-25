@@ -5,7 +5,20 @@
 # Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 # Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
-DEBUG ?= OFF # ON to turn on debugging symbols
+#######################
+# Makefile invocation #
+#######################
+
+DEBUG        ?= OFF # ON to turn on debugging symbols
+CFG_OVERRIDE ?=     # Override default config file
+
+.PHONY: all
+all: update-rtl sw addrmap
+clean: clean-sw
+
+############
+# Makefrag #
+############
 
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
@@ -13,42 +26,35 @@ ROOT        := ${MKFILE_DIR}../../..
 
 include $(ROOT)/util/Makefrag
 
-REGGEN        ?= ${ROOT}/util/regtool.py
-OCCAMYGEN     ?= ${ROOT}/util/occamygen.py
+############
+# Programs #
+############
 
-CLANG_FORMAT  ?= $(shell which clang-format-10.0.1)
+REGGEN    ?= ${ROOT}/util/regtool.py
+OCCAMYGEN ?= ${ROOT}/util/occamygen.py
 
-VSIM      		= vsim -64
-VLOG      		= vlog -64
+CLANG_FORMAT ?= $(shell which clang-format-10.0.1)
 
-CVA6_TRACE = trace_hart_0.log
+VSIM = vsim -64
+VLOG = vlog -64
 
-TB_CC_SOURCES += \
-	$(TB_DIR)/rtl_lib.cc \
-	$(TB_DIR)/common_lib.cc \
-	$(ROOT)/hw/system/occamy/test/bootdata.cc \
-	$(ROOT)/hw/system/occamy/test/uartdpi/uartdpi.c
+#########################
+# Files and directories #
+#########################
 
-TB_CC_FLAGS += \
-	-std=c++14 \
-	-I$(MKFILE_DIR) \
-	-I$(MKFILE_DIR)/test \
-	-I$(FESVR)/include \
-	-I$(TB_DIR) \
-	-I$(ROOT)/hw/system/occamy/test/uartdpi
+PLATFORM_HEADERS_DIR ?= sw/shared/platform/generated
+CVA6_TRACE            = trace_hart_0.log
 
-# Required C sources for the verilator TB that are linked against the verilated model
-VLT_COBJ += \
-    $(VLT_BUILDDIR)/tb/common_lib.o \
-	$(VLT_BUILDDIR)/tb/verilator_lib.o \
-	$(VLT_BUILDDIR)/tb/tb_bin.o \
-	$(VLT_BUILDDIR)/test/uartdpi/uartdpi.o \
-	$(VLT_BUILDDIR)/test/bootdata.o
-# Sources from verilator root
-VLT_COBJ += \
-	$(VLT_BUILDDIR)/vlt/verilated.o \
-	$(VLT_BUILDDIR)/vlt/verilated_dpi.o \
-	$(VLT_BUILDDIR)/vlt/verilated_vcd_c.o
+# If the configuration file is overriden on the command-line (through
+# CFG_OVERRIDE) and this file differs from the least recently used
+# (LRU) config, all targets depending on the configuration file have
+# to be rebuilt. This file is used to express this condition as a
+# prerequisite for other rules.
+CFG = cfg/lru.hjson
+
+#####################
+# Simulator options #
+#####################
 
 VSIM_FLAGS += -t 1ps
 VSIM_FLAGS += -voptargs=+acc
@@ -84,11 +90,36 @@ VLT_FLAGS += -Wno-SYMRSVDWORD -Wno-BLKLOOPINIT
 VLT_FLAGS += --trace       # Enable VCD dumping
 VLT_FLAGS += --prof-cfuncs # Enable code profiling
 
+###############
+# C testbench #
+###############
 
-CFG ?= src/occamy_cfg.hjson
-REG_INCDIR ?= ${ROOT}/sw/snRuntime/include/
+TB_CC_SOURCES += \
+	$(TB_DIR)/rtl_lib.cc \
+	$(TB_DIR)/common_lib.cc \
+	$(ROOT)/hw/system/occamy/test/bootdata.cc \
+	$(ROOT)/hw/system/occamy/test/uartdpi/uartdpi.c
 
-all: update-rtl update-sw addrmap
+TB_CC_FLAGS += \
+	-std=c++14 \
+	-I$(MKFILE_DIR) \
+	-I$(MKFILE_DIR)/test \
+	-I$(FESVR)/include \
+	-I$(TB_DIR) \
+	-I$(ROOT)/hw/system/occamy/test/uartdpi
+
+# Required C sources for the verilator TB that are linked against the verilated model
+VLT_COBJ += \
+    $(VLT_BUILDDIR)/tb/common_lib.o \
+	$(VLT_BUILDDIR)/tb/verilator_lib.o \
+	$(VLT_BUILDDIR)/tb/tb_bin.o \
+	$(VLT_BUILDDIR)/test/uartdpi/uartdpi.o \
+	$(VLT_BUILDDIR)/test/bootdata.o
+# Sources from verilator root
+VLT_COBJ += \
+	$(VLT_BUILDDIR)/vlt/verilated.o \
+	$(VLT_BUILDDIR)/vlt/verilated_dpi.o \
+	$(VLT_BUILDDIR)/vlt/verilated_vcd_c.o
 
 #################
 # Prerequisites #
@@ -99,6 +130,25 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 	riscv64-unknown-elf-objdump -D test/bootrom.elf > test/bootrom.dump
 	riscv64-unknown-elf-objcopy -O binary test/bootrom.elf test/bootrom.bin
 
+$(CFG): FORCE
+	@# If the LRU config file doesn't exist, we use the default config.
+	@if [ ! -e $@ ] ; then \
+		DEFAULT_CFG="cfg/full.hjson"; \
+		echo "Using default config file: $$DEFAULT_CFG"; \
+		cp $$DEFAULT_CFG $@; \
+	fi
+	@# If a config file is provided on the command-line and it differs
+	@# from the LRU config file then we override the LRU file with it
+	@if [ $(CFG_OVERRIDE) ] ; then \
+		echo "Overriding config file with: $(CFG_OVERRIDE)"; \
+		if cmp -s $(CFG_OVERRIDE) $@ ; then \
+			echo "Override and LRU config files are equivalent. Nothing to be done."; \
+		else \
+			cp $(CFG_OVERRIDE) $@; \
+		fi \
+	fi
+FORCE:
+
 ##########
 # Source #
 ##########
@@ -107,7 +157,7 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 
 update-rtl: update-clint update-plic update-socreg update-quadreg update-source
 
-update-source:
+update-source: $(CFG)
 	@echo "[SOLDER]  Generating sources"
 	@echo "[SOLDER]  RTL"
 	@$(OCCAMYGEN) --cfg $(CFG) --graph addrmap/addrmap.dot --outdir src --wrapper --memories \
@@ -118,7 +168,7 @@ update-source:
 		--quadrant-s1-ctrl src/occamy_quadrant_s1_ctrl.sv.tpl \
 		--xilinx-sv src/occamy_xilinx.sv.tpl \
 		--cva6-sv src/occamy_cva6.sv.tpl
-	@$(OCCAMYGEN) --cfg $(CFG) --graph addrmap/addrmap.dot --am-csv addrmap/addrmap.csv --am-cheader $(REG_INCDIR)/occamy_base_addr.h \
+	@$(OCCAMYGEN) --cfg $(CFG) --graph addrmap/addrmap.dot --am-csv addrmap/addrmap.csv \
 		--outdir test \
 		--testharness-sv test/testharness.sv.tpl \
 		--bootdata ../../ip/snitch_cluster/test/bootdata.cc.tpl
@@ -128,7 +178,7 @@ update-source:
 	@echo "[VERIBLE] Formatting"
 	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_soc.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
-update-clint:
+update-clint: $(CFG)
 	@mkdir -p src/clint
 	@echo "[SOLDER]  Generate CLINT config"
 	@$(OCCAMYGEN) --cfg $(CFG) --outdir src/clint \
@@ -146,15 +196,12 @@ update-plic:
 	@$(REGGEN) -r -t src/rv_plic src/rv_plic/rv_plic.hjson
 
 # Update generic control register.
-# $1: config name, $2: output directory, $3: output filename stem, $4: header filename stem
+# $1: config name, $2: output directory, $3: output filename stem
 define update_ctrl_regs
 	$(if $5, @echo "[REGGEN]  Generate $1 config" && \
 		$(OCCAMYGEN) --cfg $(CFG) --outdir $2 --chip $2/$3.tpl)
 	@echo "[REGGEN]  Generate $1"
 	@$(REGGEN) -r $2/$3 --outdir $2
-	@echo "[REGGEN]  Generate $1 CDEFS"
-	@$(REGGEN) --cdefines --outfile $(REG_INCDIR)/${4}.h $2/$3
-	@$(CLANG_FORMAT) -i $(REG_INCDIR)/${4}.h
 endef
 
 update-socreg:
@@ -199,23 +246,44 @@ clean-addrmap: clean-addrmap.pdf
 # Software #
 ############
 
-.PHONY: update-headers update-binaries update-sw
+PLATFORM_HEADERS = $(PLATFORM_HEADERS_DIR)/occamy_cfg.h                \
+                   $(PLATFORM_HEADERS_DIR)/occamy_base_addr.h          \
+                   $(PLATFORM_HEADERS_DIR)/clint.h                     \
+                   $(PLATFORM_HEADERS_DIR)/occamy_soc_ctrl.h           \
+                   $(PLATFORM_HEADERS_DIR)/snitch_cluster_peripheral.h \
+                   $(PLATFORM_HEADERS_DIR)/snitch_quad_peripheral.h    \
+                   $(PLATFORM_HEADERS_DIR)/snitch_hbm_xbar_peripheral.h
 
-update-sw: update-headers update-binaries
+.PHONY: sw clean-headers clean-sw
 
-update-binaries:
-	make -C sw DEBUG=$(DEBUG) clean all
+sw: $(PLATFORM_HEADERS)
+	$(MAKE) -C sw/ all
 
-update-headers:
-	@echo "[SOLDER] Generating headers"
-	@$(OCCAMYGEN) -c $(CFG) --outdir sw/include/ --cheader sw/include/occamy_cfg.h.tpl
-	@$(OCCAMYGEN) -c $(CFG) --outdir sw/include/ -D sw/include/occamy_addrmap.h
-	@echo "[REGTOOL] Generating headers"
-	@$(REGGEN) -D -o sw/include/clint.h src/clint/clint.hjson
-	@$(REGGEN) -D -o sw/include/occamy_soc_ctrl.h src/occamy_soc_ctrl/occamy_soc_reg.hjson
-	@$(REGGEN) -D -o sw/include/snitch_cluster_peripheral.h $(ROOT)/hw/ip/snitch_cluster/src/snitch_cluster_peripheral/snitch_cluster_peripheral_reg.hjson
-	@$(REGGEN) -D -o sw/include/snitch_quad_peripheral.h src/occamy_quadrant_s1_ctrl/occamy_quadrant_s1_reg.hjson
-	@$(REGGEN) -D -o sw/include/snitch_hbm_xbar_peripheral.h src/occamy_hbm_xbar_ctrl/occamy_hbm_xbar_reg.hjson
+clean-headers:
+	rm -f $(PLATFORM_HEADERS)
+
+clean-sw: clean-headers
+	$(MAKE) -C sw/ clean
+
+# REGGEN headers
+$(PLATFORM_HEADERS_DIR)/clint.h: src/clint/clint.hjson
+	$(call reggen_generate_header,$@,$<)
+$(PLATFORM_HEADERS_DIR)/occamy_soc_ctrl.h: src/occamy_soc_ctrl/occamy_soc_reg.hjson
+	$(call reggen_generate_header,$@,$<)
+$(PLATFORM_HEADERS_DIR)/snitch_cluster_peripheral.h: $(ROOT)/hw/ip/snitch_cluster/src/snitch_cluster_peripheral/snitch_cluster_peripheral_reg.hjson
+	$(call reggen_generate_header,$@,$<)
+$(PLATFORM_HEADERS_DIR)/snitch_quad_peripheral.h: src/occamy_quadrant_s1_ctrl/occamy_quadrant_s1_reg.hjson
+	$(call reggen_generate_header,$@,$<)
+$(PLATFORM_HEADERS_DIR)/snitch_hbm_xbar_peripheral.h: src/occamy_hbm_xbar_ctrl/occamy_hbm_xbar_reg.hjson
+	$(call reggen_generate_header,$@,$<)
+
+# OCCAMYGEN headers
+$(PLATFORM_HEADERS_DIR)/occamy_cfg.h: $(PLATFORM_HEADERS_DIR)/occamy_cfg.h.tpl $(CFG)
+	@echo "[OCCAMYGEN] Generating $@"
+	@$(OCCAMYGEN) -c $(CFG) --outdir $(PLATFORM_HEADERS_DIR) --cheader $<
+$(PLATFORM_HEADERS_DIR)/occamy_base_addr.h: $(CFG)
+	@echo "[OCCAMYGEN] Generating $@"
+	@$(OCCAMYGEN) -c $(CFG) --outdir $(PLATFORM_HEADERS_DIR) -D $@
 
 ##########
 # Traces #
@@ -242,9 +310,13 @@ traces: logs/hart_00000_perf.json
 annotate: $(shell (echo logs/trace_hart_00000.txt | sed 's/\.txt/\.s/') || echo "") \
           $(shell (echo logs/trace_hart_00000.txt | sed 's/\.txt/\.diff/') || echo "")
 
-perf-csv: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/trace_hart/hart/' | sed 's/.dasm/_perf.json/')) \
+logs/perf.csv: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/trace_hart/hart/' | sed 's/.dasm/_perf.json/')) \
 		  logs/hart_00000_perf.json $(ROOT)/util/trace/perf_csv.py
-	$(PYTHON) $(ROOT)/util/trace/perf_csv.py -o logs/perf_metrics.csv -i logs/hart_*_perf.json
+	$(PYTHON) $(ROOT)/util/trace/perf_csv.py -o $@ -i logs/hart_*_perf.json
+
+logs/event.csv: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/trace_hart/hart/' | sed 's/.dasm/_perf.json/')) \
+		  logs/hart_00000_perf.json $(ROOT)/util/trace/perf_csv.py
+	$(PYTHON) $(ROOT)/util/trace/perf_csv.py -o $@ -i logs/hart_*_perf.json --filter tstart tend
 
 clean-annotate:
 	rm -f logs/*.s logs/*.diff

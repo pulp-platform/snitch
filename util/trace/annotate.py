@@ -109,6 +109,7 @@ if not quiet:
 src_files = {}
 trace_start_col = -1
 
+
 @lru_cache(maxsize=1024)
 def adr2line(addr):
     cmd = f'{addr2line} -e {elf} -f -i {addr:x}'

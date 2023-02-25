@@ -132,7 +132,7 @@ define QUESTASIM
 	@! grep -P "Errors: [1-9]*," $(dir $<)vsim.log
 	@mkdir -p bin
 	@echo "#!/bin/bash" > $@
-	@echo 'binary=$$(pwd)/$$1' >> $@
+	@echo 'binary=$$(realpath --relative-to=${MKFILE_DIR} $$1)' >> $@
 	@echo 'cd ${MKFILE_DIR}' >> $@
 	@echo 'echo $$binary > logs/.rtlbinary' >> $@
 	@echo '${VSIM} +permissive ${VSIM_FLAGS} -work ${MKFILE_DIR}/${VSIM_BUILDDIR} -c \
@@ -161,6 +161,15 @@ work-vcs/compile.sh: ${VSIM_SOURCES} ${TB_SRCS}
 ########
 # Util #
 ########
+
+# Common rule to generate C header with REGGEN
+# $1: target name, $2: prerequisite (hjson description file)
+define reggen_generate_header
+	@echo "[REGGEN] Generating $1"
+	@$(REGGEN) -D -o $1 $2
+	@$(CLANG_FORMAT) -i $1
+endef
+
 logs/trace_hart_%.txt logs/hart_%_perf.json: logs/trace_hart_%.dasm ${ROOT}/util/gen_trace.py
 	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py -d logs/hart_$*_perf.json > logs/trace_hart_$*.txt
 

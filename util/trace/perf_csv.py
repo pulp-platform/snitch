@@ -12,7 +12,6 @@
 
 import sys
 import argparse
-import glob
 import re
 import json
 import pandas as pd
