@@ -860,10 +860,10 @@ module snitch_cc #(
         alu_result:   i_snitch.alu_result,
         // Atomics
         ls_amo:       i_snitch.ls_amo,
-        // Accumulator
+        // Accelerator
         retire_acc:   i_snitch.retire_acc,
-        acc_pid:      i_snitch.acc_qreq_o.id,
-        acc_pdata_32: i_snitch.acc_qreq_o.data_op[31:0],
+        acc_pid:      i_snitch.acc_prsp_i.id,
+        acc_pdata_32: i_snitch.acc_prsp_i.data[31:0],
         // FPU offload
         fpu_offload:
           (i_snitch.acc_qready_i && i_snitch.acc_qvalid_o && i_snitch.acc_qreq_o.addr == 0),
