@@ -2,13 +2,13 @@
 # Solderpad Hardware License, Version 0.51, see LICENSE for details.
 # SPDX-License-Identifier: SHL-0.51
 
-set(CMAKE_C_COMPILER riscv32-unknown-elf-clang)
-set(CMAKE_CXX_COMPILER riscv32-unknown-elf-clang++)
-set(CMAKE_OBJCOPY llvm-objcopy)
-set(CMAKE_OBJDUMP llvm-objdump --mcpu=snitch)
-set(CMAKE_AR llvm-ar)
-set(CMAKE_STRIP llvm-strip)
-set(CMAKE_RANLIB llvm-ranlib)
+set(CMAKE_C_COMPILER /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/riscv32-unknown-elf-clang)
+set(CMAKE_CXX_COMPILER /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/riscv32-unknown-elf-clang++)
+set(CMAKE_OBJCOPY /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/llvm-objcopy)
+set(CMAKE_OBJDUMP /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/llvm-objdump --mcpu=snitch)
+set(CMAKE_AR /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/llvm-ar)
+set(CMAKE_STRIP /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/llvm-strip)
+set(CMAKE_RANLIB /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/llvm-ranlib)
 
 # LTO
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION true)

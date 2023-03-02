@@ -6,11 +6,11 @@
 
 {
     kernel: "GEMM"
-    M: 16,
-    N: 16,
-    K: 16,
+    M: 32,
+    N: 32,
+    K: 32,
     alpha: 0,
     transpose_A: false,
     transpose_B: true,
-    prec: 16
+    prec: 64
 }

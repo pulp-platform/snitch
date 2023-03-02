@@ -16,26 +16,41 @@
         cluster_base_hartid: 0,
         addr_width: 48,
         data_width: 64,
+        user_width: 5, // clog2(total number of clusters)
         tcdm: {
-            size: 128,
+            size: 128, // 128 kiB
             banks: 32,
         },
         cluster_periph_size: 64, // kB
         zero_mem_size: 64, // kB
         dma_data_width: 512,
-        dma_axi_req_fifo_depth: 3,
-        dma_req_fifo_depth: 3,
+        dma_axi_req_fifo_depth: 24,
+        dma_req_fifo_depth: 8,
+        narrow_trans: 4,
+        wide_trans: 32,
+        dma_user_width: 1,
+        // We don't need Snitch debugging in Occamy
+        enable_debug: false,
+        // We don't need Snitch (core-internal) virtual memory support
+        vm_support: false,
+        // Memory configuration inputs
+        sram_cfg_expose: true,
+        sram_cfg_fields: {
+            ema: 3,
+            emaw: 2,
+            emas: 1
+        },
         // Timing parameters
         timing: {
-            lat_comp_fp32: 3,
+            lat_comp_fp32: 2,
             lat_comp_fp64: 3,
-            lat_comp_fp16: 2,
-            lat_comp_fp16_alt: 2,
+            lat_comp_fp16: 1,
+            lat_comp_fp16_alt: 1,
             lat_comp_fp8: 1,
             lat_comp_fp8_alt: 1,
             lat_noncomp: 1,
-            lat_conv: 1,
-            lat_sdotp: 2,
+            lat_conv: 2,
+            lat_sdotp: 3,
             fpu_pipe_config: "BEFORE"
             narrow_xbar_latency: "CUT_ALL_PORTS",
             wide_xbar_latency: "CUT_ALL_PORTS",
@@ -43,27 +58,24 @@
             register_core_req: true,
             register_core_rsp: true,
             register_offload_req: true,
-            register_offload_rsp: true
+            register_offload_rsp: true,
+            register_fpu_req: true,
+            register_ext_narrow: false,
+            register_ext_wide: false
         },
         hives: [
             // Hive 0
             {
-                cores: [
-                    { $ref: "#/compute_core_template" },
-                    { $ref: "#/compute_core_template" },
-                    { $ref: "#/compute_core_template" },
-                    { $ref: "#/compute_core_template" },
-                    # { $ref: "#/compute_core_template" },
-                ]
-            }
-            // Hive 1
-            {
                 icache: {
                     size: 8, // total instruction cache size in kByte
                     sets: 2, // number of ways
-                    cacheline: 128 // word size in bits
+                    cacheline: 256 // word size in bits
                 },
                 cores: [
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
                     { $ref: "#/compute_core_template" },
                     { $ref: "#/compute_core_template" },
                     { $ref: "#/compute_core_template" },
@@ -90,14 +102,16 @@
     // Templates.
     compute_core_template: {
         isa: "rv32imafd",
-        xssr: true
-        xfrep: true
+        xssr: true,
+        xfrep: true,
+        xdma: false,
         xf16: true,
         xf16alt: true,
         xf8: true,
         xf8alt: true,
         xfdotp: true,
         xfvec: true,
+        ssr_nr_credits: 4,
         num_int_outstanding_loads: 1,
         num_int_outstanding_mem: 4,
         num_fp_outstanding_loads: 4,
@@ -105,16 +119,28 @@
         num_sequencer_instructions: 16,
         num_dtlb_entries: 1,
         num_itlb_entries: 1,
-        // Enable division/square root unit
-        // Xdiv_sqrt: true,
+        // SSSR configuration below
+        ssr_intersection: true,
+        ssr_intersection_triple: [0, 1, 2],
+        ssrs: [
+            {indirection: true},    // Master 0
+            {indirection: true},    // Master 1
+            {},                     // Slave
+        ],
     },
     dma_core_template: {
-        isa: "rv32ima",
+        isa: "rv32imafd",
         // Xdiv_sqrt: true,
         # isa: "rv32ema",
         xdma: true
         xssr: false
         xfrep: false
+        xf16: false,
+        xf16alt: false,
+        xf8: false,
+        xf8alt: false,
+        xfdotp: false,
+        xfvec: false,
         num_int_outstanding_loads: 1,
         num_int_outstanding_mem: 4,
         num_fp_outstanding_loads: 4,

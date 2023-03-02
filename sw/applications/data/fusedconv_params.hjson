@@ -30,5 +30,5 @@
     }
     depthwise: 0,
     chw_layer: 0,
-    prec: 32
+    prec: 64
 }

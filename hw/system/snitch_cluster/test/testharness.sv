@@ -25,7 +25,6 @@ module testharness import snitch_cluster_pkg::*; (
   snitch_cluster_wrapper i_snitch_cluster (
     .clk_i,
     .rst_ni,
-    .debug_req_i ('0),
     .meip_i ('0),
     .mtip_i ('0),
     .msip_i (msip),
