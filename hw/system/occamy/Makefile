@@ -129,7 +129,7 @@ addrmap.tex: update-source
 
 ## Generate the MD addrmap graphic
 addrmap.md: update-source
-	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir $(ROOT)/docs/ug/ --md occamy_addrmap.md
+	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir docs --md 2_addrmap.md
 
 ## Generate the PDF addrmap graphic
 addrmap.pdf: addrmap.tex

@@ -34,9 +34,13 @@ nav:
     - Guide: ug/snitch_cluster.md
     - Schema: schema-doc/snitch_cluster.md
   - Occamy:
-    - Guide: ug/occamy.md
+    - Guide: ug/occamy_system/occamy.md
+    - Architecture: ug/occamy_system/1_overview.md
+      - Address Map: ug/occamy_system/2_addrmap.md
+      - System Components: ug/occamy_system/3_system_components.md
+      - Clocking: ug/occamy_system/4_clocking.md.md
+      - Interrupts and Synchronization: 5_interrupts_and_synchronization.md.md
     - Schema: schema-doc/occamy.md
-    - Memory Map: ug/occamy_addrmap.md
 - Reference Manual:
   - Snitch: rm/snitch/index.md
   - Snitch Cluster: rm/snitch_cluster/index.md
