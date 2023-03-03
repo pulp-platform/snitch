@@ -55,18 +55,15 @@ total_ipc                                   0.1427
 The trace script also allows to split the execution into multiple sections. The sections are defined by reading from the `mcycle` CSR register. This register will return the current cycle count, but also serves as a trigger for the trace script, to start a new section. The following example shows how to split the execution into two sections:
 
 ```c
-// Start of section 0
-asm volatile("csrr t0, mcycle":::"t0");
-// End of section 0
-
-// Start of section 1
-asm volatile("csrr t0, mcycle":::"t0");
-// End of section 1
-```
-
-Alternatively you can also define a function for this purpose:
-
-```c
 #include "sw/vendor/riscv-opcodes/encoding.h"
 size_t benchmark_get_cycle() { return read_csr(mcycle); }
+
+// End of section 0, Start of section 1
+benchmark_get_cycle();
+
+// Execute kernel to be benchmarked
+my_kernel();
+
+// End of section 1, Start of section 2
+benchmark_get_cycle();
 ```
