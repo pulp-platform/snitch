@@ -60,21 +60,21 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   parameter type data_t = logic [DataWidth-1:0]
 ) (
   input  logic          clk_i,
-(* mark_debug = "true" *)  input  logic          rst_i,
+  input  logic          rst_i,
   input  logic [31:0]   hart_id_i,
   /// Interrupts
- (* mark_debug = "true" *) input  interrupts_t   irq_i,
+  input  interrupts_t   irq_i,
   /// Instruction cache flush request
   output logic          flush_i_valid_o,
   /// Flush has completed when the signal goes to `1`.
   /// Tie to `1` if unused
   input  logic          flush_i_ready_i,
   // Instruction Refill Port
-(* mark_debug = "true" *)  output addr_t         inst_addr_o,
+  output addr_t         inst_addr_o,
   output logic          inst_cacheable_o,
-(* mark_debug = "true" *)  input  logic [31:0]   inst_data_i,
-(* mark_debug = "true" *)  output logic          inst_valid_o,
-(* mark_debug = "true" *)  input  logic          inst_ready_i,
+  input  logic [31:0]   inst_data_i,
+  output logic          inst_valid_o,
+  input  logic          inst_ready_i,
   /// Accelerator Interface - Master Port
   /// Independent channels for transaction request and read completion.
   /// AXI-like handshaking.
@@ -88,7 +88,7 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
   /// TCDM Data Interface
   /// Write transactions do not return data on the `P Channel`
   /// Transactions need to be handled strictly in-order.
-(* mark_debug = "true" *)  output dreq_t         data_req_o,
+  output dreq_t         data_req_o,
   input  drsp_t         data_rsp_i,
   // Address Translation interface.
   output logic    [1:0] ptw_valid_o,
