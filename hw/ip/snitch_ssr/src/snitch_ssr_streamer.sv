@@ -199,8 +199,17 @@ module snitch_ssr_streamer import snitch_ssr_pkg::*; #(
     dmcfg_upper_addr = cfg_word_i[11:7];
     dmcfg_strobe = (dmcfg_upper_addr == '1 ? '1 : (1 << dmcfg_upper_addr));
     cfg_rdata_o = dmcfg_rdata[dmcfg_upper_addr];
-    cfg_wready_o = (cfg_write_i && dmcfg_upper_addr < NumSsrs) ?
-        dmcfg_wready[dmcfg_upper_addr] : 1'b1;
+  end
+
+  // cfg_wready_o indicates whether the SSR(s) can service a write without
+  // overriding a shadowed job; writes will not take effect until high.
+  always_comb begin
+    cfg_wready_o = 1'b1;
+    if (dmcfg_upper_addr < NumSsrs) begin
+      cfg_wready_o = dmcfg_wready[dmcfg_upper_addr];
+    end else if (dmcfg_upper_addr == '1) begin
+      cfg_wready_o = &dmcfg_wready;
+    end
   end
 
 endmodule

@@ -67,6 +67,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   logic [Cfg.NumLoops-1:0] loop_last;
   logic enable, done;
 
+  logic cfg_write_ena;
+
   typedef struct packed {
     logic idx_base;
     logic idx_cfg;
@@ -289,8 +291,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   // Unpack the configuration address and write signal into a write strobe for
   // the individual registers. Also assign the alias strobe if the address is
   // targeting one of the status register aliases.
-  assign write_strobe = (cfg_write_i << cfg_word_i);
-  assign alias_strobe = cfg_write_i & (cfg_word_i[$bits(cfg_word_i)-1:$bits(alias_fields)] == '1);
+  assign write_strobe = (cfg_write_ena << cfg_word_i);
+  assign alias_strobe = cfg_write_ena & (cfg_word_i[$bits(cfg_word_i)-1:$bits(alias_fields)] == '1);
   assign alias_fields = cfg_word_i[0+:$bits(alias_fields)];
 
   // Generate the loop counters.
@@ -427,7 +429,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
 
   // Block configuration writes iff there a pending shadowed job.
   // This prevents job clobbering and stalls the master as needed.
-  assign cfg_wready_o = config_sq.done;
+  assign cfg_wready_o  = config_sq.done;
+  assign cfg_write_ena = config_sq.done & cfg_write_i;
 
   // Parameter sanity checks
   `ASSERT_INIT(CheckPointerWidth, Cfg.PointerWidth <= AddrWidth);
