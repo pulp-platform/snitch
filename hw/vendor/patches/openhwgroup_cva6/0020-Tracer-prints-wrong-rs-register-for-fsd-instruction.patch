@@ -1,0 +1,26 @@
+From c27131ac3df3a0dfddee36289a4ad36f5a91714a Mon Sep 17 00:00:00 2001
+From: Luca Colagrande <luca.colagrande3@gmail.com>
+Date: Fri, 17 Mar 2023 13:10:16 +0100
+Subject: [PATCH] Tracer prints wrong rs register for fsd instruction
+
+---
+ src/util/instr_trace_item.svh | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/src/util/instr_trace_item.svh b/src/util/instr_trace_item.svh
+index c767d00c..b9b1bbbd 100644
+--- a/src/util/instr_trace_item.svh
++++ b/src/util/instr_trace_item.svh
+@@ -312,9 +312,6 @@ class instr_trace_item;
+             instr_tracer_pkg::FLW:            s = this.printLoadInstr("flw");
+             instr_tracer_pkg::FLD:            s = this.printLoadInstr("fld");
+             instr_tracer_pkg::FLQ:            s = this.printLoadInstr("flq");
+-            instr_tracer_pkg::FSW:            s = this.printLoadInstr("fsw");
+-            instr_tracer_pkg::FSD:            s = this.printLoadInstr("fsd");
+-            instr_tracer_pkg::FSQ:            s = this.printLoadInstr("fsq");
+             instr_tracer_pkg::SB:             s = this.printStoreInstr("sb");
+             instr_tracer_pkg::SH:             s = this.printStoreInstr("sh");
+             instr_tracer_pkg::SW:             s = this.printStoreInstr("sw");
+-- 
+2.28.0
+
