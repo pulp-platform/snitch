@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/openhwgroup/cva6.git
-    rev: 6265f1d7151ac2ae75441b943af602178a7cf054
+    url: https://github.com/pulp-platform/cva6.git
+    rev: e0e05ab47f4e58d101aa8c95b9cf039a983a835a
   }
 }

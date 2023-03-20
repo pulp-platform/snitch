@@ -1,0 +1,559 @@
+From 09a26e4b49e0937049c5d690c60013039a7bf0c5 Mon Sep 17 00:00:00 2001
+From: Paul Scheffler <paulsc@iis.ee.ethz.ch>
+Date: Thu, 21 Oct 2021 23:17:48 +0200
+Subject: [PATCH 7/9] cva6: Add SRAM config ports
+
+---
+ common/local/util/sram.sv                       | 12 +++++++++++
+ common/local/util/tc_sram_wrapper.sv            |  8 ++++++++
+ core/cache_subsystem/cva6_icache.sv             | 13 +++++++++++-
+ core/cache_subsystem/cva6_icache_axi_wrapper.sv | 12 +++++++++--
+ core/cache_subsystem/std_cache_subsystem.sv     | 20 +++++++++++++++---
+ core/cache_subsystem/std_nbdcache.sv            | 16 ++++++++++++++-
+ core/cache_subsystem/wt_cache_subsystem.sv      | 18 ++++++++++++++---
+ core/cache_subsystem/wt_dcache.sv               | 13 ++++++++++--
+ core/cache_subsystem/wt_dcache_mem.sv           | 13 +++++++++++-
+ core/cva6.sv                                    | 27 +++++++++++++++++++++----
+ 10 files changed, 135 insertions(+), 17 deletions(-)
+
+diff --git a/common/local/util/sram.sv b/common/local/util/sram.sv
+index c105c544..20b5d629 100644
+--- a/common/local/util/sram.sv
++++ b/common/local/util/sram.sv
+@@ -19,6 +19,8 @@
+ // `FPGA_TARGET_ALTERA in your build environment (default is ALTERA)
+ 
+ module sram #(
++    parameter type impl_in_t  = logic,
++    parameter type impl_out_t = logic,
+     parameter DATA_WIDTH = 64,
+     parameter USER_WIDTH = 1,
+     parameter USER_EN    = 0,
+@@ -29,6 +31,8 @@ module sram #(
+ )(
+    input  logic                          clk_i,
+    input  logic                          rst_ni,
++   input  impl_in_t                      impl_i,
++   output impl_out_t                     impl_o,
+    input  logic                          req_i,
+    input  logic                          we_i,
+    input  logic [$clog2(NUM_WORDS)-1:0]  addr_i,
+@@ -97,6 +101,8 @@ end
+     end else begin : gen_mem
+       // unused byte-enable segments (8bits) are culled by the tool
+       tc_sram_wrapper #(
++        .impl_in_t ( impl_in_t ),
++        .impl_out_t ( impl_out_t ),
+         .NumWords(NUM_WORDS),           // Number of Words in data array
+         .DataWidth(64),                 // Data signal width
+         .ByteWidth(32'd8),              // Width of a data byte
+@@ -107,6 +113,8 @@ end
+       ) i_tc_sram_wrapper (
+           .clk_i    ( clk_i                     ),
+           .rst_ni   ( rst_ni                    ),
++          .impl_i   ( impl_i                    ),
++          .impl_o   ( impl_o                    ),
+           .req_i    ( req_i                     ),
+           .we_i     ( we_i                      ),
+           .be_i     ( be_aligned[k*8 +: 8]      ),
+@@ -116,6 +124,8 @@ end
+       );
+       if (USER_EN) begin : gen_mem_user
+         tc_sram_wrapper #(
++          .impl_in_t ( impl_in_t ),
++          .impl_out_t ( impl_out_t ),
+           .NumWords(NUM_WORDS),           // Number of Words in data array
+           .DataWidth(64),                 // Data signal width
+           .ByteWidth(32'd8),              // Width of a data byte
+@@ -126,6 +136,8 @@ end
+         ) i_tc_sram_wrapper_user (
+             .clk_i    ( clk_i                     ),
+             .rst_ni   ( rst_ni                    ),
++            .impl_i   ( impl_i                    ),
++            .impl_o   ( impl_o                    ),
+             .req_i    ( req_i                     ),
+             .we_i     ( we_i                      ),
+             .be_i     ( be_aligned[k*8 +: 8]      ),
+diff --git a/common/local/util/tc_sram_wrapper.sv b/common/local/util/tc_sram_wrapper.sv
+index ae3287d9..34cb0788 100644
+--- a/common/local/util/tc_sram_wrapper.sv
++++ b/common/local/util/tc_sram_wrapper.sv
+@@ -8,6 +8,8 @@
+ // Original Author: Jean-Roch COULON - Thales
+ 
+ module tc_sram_wrapper #(
++  parameter type         impl_in_t    = logic,
++  parameter type         impl_out_t   = logic,
+   parameter int unsigned NumWords     = 32'd1024, // Number of Words in data array
+   parameter int unsigned DataWidth    = 32'd128,  // Data signal width
+   parameter int unsigned ByteWidth    = 32'd8,    // Width of a data byte
+@@ -24,6 +26,8 @@ module tc_sram_wrapper #(
+ ) (
+   input  logic                 clk_i,      // Clock
+   input  logic                 rst_ni,     // Asynchronous reset active low
++  input  impl_in_t             impl_i,
++  output impl_out_t            impl_o,
+   // input ports
+   input  logic  [NumPorts-1:0] req_i,      // request
+   input  logic  [NumPorts-1:0] we_i,       // write enable
+@@ -37,6 +41,8 @@ module tc_sram_wrapper #(
+ // synthesis translate_off
+ 
+   tc_sram #(
++    .impl_in_t(impl_in_t),
++    .impl_out_t(impl_out_t),
+     .NumWords(NumWords),
+     .DataWidth(DataWidth),
+     .ByteWidth(ByteWidth),
+@@ -47,6 +53,8 @@ module tc_sram_wrapper #(
+   ) i_tc_sram (
+       .clk_i    ( clk_i   ),
+       .rst_ni   ( rst_ni  ),
++      .impl_i   ( impl_i  ),
++      .impl_o   ( impl_o  ),
+       .req_i    ( req_i   ),
+       .we_i     ( we_i    ),
+       .be_i     ( be_i    ),
+diff --git a/core/cache_subsystem/cva6_icache.sv b/core/cache_subsystem/cva6_icache.sv
+index 0494048b..900de7ea 100644
+--- a/core/cache_subsystem/cva6_icache.sv
++++ b/core/cache_subsystem/cva6_icache.sv
+@@ -27,11 +27,16 @@
+ 
+ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
+   parameter logic [CACHE_ID_WIDTH-1:0]  RdTxId             = 0,                                  // ID to be used for read transactions
+-  parameter ariane_pkg::ariane_cfg_t    ArianeCfg          = ariane_pkg::ArianeDefaultConfig     // contains cacheable regions
++  parameter ariane_pkg::ariane_cfg_t    ArianeCfg          = ariane_pkg::ArianeDefaultConfig,    // contains cacheable regions
++  parameter type                        sram_cfg_t         = logic
+ ) (
+   input  logic                      clk_i,
+   input  logic                      rst_ni,
+ 
++  // SRAM config
++  input sram_cfg_t                  sram_cfg_data_i,
++  input sram_cfg_t                  sram_cfg_tag_i,
++
+   input  logic                      flush_i,              // flush the icache, flush and kill have to be asserted together
+   input  logic                      en_i,                 // enable icache
+   output logic                      miss_o,               // to performance counter
+@@ -429,12 +434,15 @@ end else begin : gen_piton_offset
+   for (genvar i = 0; i < ICACHE_SET_ASSOC; i++) begin : gen_sram
+     // Tag RAM
+     sram #(
++      .impl_in_t ( sram_cfg_t         ),
+       // tag + valid bit
+       .DATA_WIDTH ( ICACHE_TAG_WIDTH+1 ),
+       .NUM_WORDS  ( ICACHE_NUM_WORDS   )
+     ) tag_sram (
+       .clk_i     ( clk_i                    ),
+       .rst_ni    ( rst_ni                   ),
++      .impl_i    ( sram_cfg_tag_i           ),
++      .impl_o    (                          ),
+       .req_i     ( vld_req[i]               ),
+       .we_i      ( vld_we                   ),
+       .addr_i    ( vld_addr                 ),
+@@ -452,6 +460,7 @@ end else begin : gen_piton_offset
+ 
+     // Data RAM
+     sram #(
++      .impl_in_t  ( sram_cfg_t ),
+       .USER_WIDTH ( ICACHE_USER_LINE_WIDTH ),
+       .DATA_WIDTH ( ICACHE_LINE_WIDTH ),
+       .USER_EN    ( ariane_pkg::FETCH_USER_EN ),
+@@ -459,6 +468,8 @@ end else begin : gen_piton_offset
+     ) data_sram (
+       .clk_i     ( clk_i               ),
+       .rst_ni    ( rst_ni              ),
++      .impl_i    ( sram_cfg_data_i     ),
++      .impl_o    (                     ),
+       .req_i     ( cl_req[i]           ),
+       .we_i      ( cl_we               ),
+       .addr_i    ( cl_index            ),
+diff --git a/core/cache_subsystem/cva6_icache_axi_wrapper.sv b/core/cache_subsystem/cva6_icache_axi_wrapper.sv
+index 3d53b875..fbeff6df 100644
+--- a/core/cache_subsystem/cva6_icache_axi_wrapper.sv
++++ b/core/cache_subsystem/cva6_icache_axi_wrapper.sv
+@@ -19,12 +19,17 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
+   parameter int unsigned AxiDataWidth = 0,
+   parameter int unsigned AxiIdWidth   = 0,
+   parameter type axi_req_t = ariane_axi::req_t,
+-  parameter type axi_rsp_t = ariane_axi::resp_t
++  parameter type axi_rsp_t = ariane_axi::resp_t,
++  parameter type sram_cfg_t = logic
+ ) (
+   input  logic              clk_i,
+   input  logic              rst_ni,
+   input riscv::priv_lvl_t   priv_lvl_i,
+ 
++  // SRAM config
++  input sram_cfg_t          sram_cfg_data_i,
++  input sram_cfg_t          sram_cfg_tag_i,
++
+   input  logic              flush_i,     // flush the icache, flush and kill have to be asserted together
+   input  logic              en_i,        // enable icache
+   output logic              miss_o,      // to performance counter
+@@ -104,10 +109,13 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
+   cva6_icache #(
+     // use ID 0 for icache reads
+     .RdTxId             ( 0             ),
+-    .ArianeCfg          ( ArianeCfg     )
++    .ArianeCfg          ( ArianeCfg     ),
++    .sram_cfg_t         ( sram_cfg_t    )
+   ) i_cva6_icache (
+     .clk_i              ( clk_i               ),
+     .rst_ni             ( rst_ni              ),
++    .sram_cfg_data_i    ( sram_cfg_data_i     ),
++    .sram_cfg_tag_i     ( sram_cfg_tag_i      ),
+     .flush_i            ( flush_i             ),
+     .en_i               ( en_i                ),
+     .miss_o             ( miss_o              ),
+diff --git a/core/cache_subsystem/std_cache_subsystem.sv b/core/cache_subsystem/std_cache_subsystem.sv
+index 38a04115..b7f9efb5 100644
+--- a/core/cache_subsystem/std_cache_subsystem.sv
++++ b/core/cache_subsystem/std_cache_subsystem.sv
+@@ -24,7 +24,8 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+     parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+     parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+     parameter type axi_req_t = ariane_axi::req_t,
+-    parameter type axi_rsp_t = ariane_axi::resp_t
++    parameter type axi_rsp_t = ariane_axi::resp_t,
++    parameter type sram_cfg_t = logic
+ ) (
+     input  logic                           clk_i,
+     input  logic                           rst_ni,
+@@ -32,6 +33,12 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+     output logic                           busy_o,
+     input  logic                           stall_i,                // stall new memory requests
+     input  logic                           init_ni,                // do not init after reset
++    // SRAM config
++    input sram_cfg_t                       sram_cfg_idata_i,
++    input sram_cfg_t                       sram_cfg_itag_i,
++    input sram_cfg_t                       sram_cfg_ddata_i,
++    input sram_cfg_t                       sram_cfg_dtag_i,
++    input sram_cfg_t                       sram_cfg_dvalid_dirty_i,
+     // I$
+     input  logic                           icache_en_i,            // enable icache (or bypass e.g: in debug mode)
+     input  logic                           icache_flush_i,         // flush the icache, flush and kill have to be asserted together
+@@ -80,11 +87,14 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+         .AxiDataWidth ( AxiDataWidth ),
+         .AxiIdWidth   ( AxiIdWidth   ),
+         .axi_req_t    ( axi_req_t    ),
+-        .axi_rsp_t    ( axi_rsp_t    )
++        .axi_rsp_t    ( axi_rsp_t    ),
++        .sram_cfg_t   ( sram_cfg_t   )
+     ) i_cva6_icache_axi_wrapper (
+         .clk_i      ( clk_i                 ),
+         .rst_ni     ( rst_ni                ),
+         .priv_lvl_i ( priv_lvl_i            ),
++        .sram_cfg_data_i ( sram_cfg_idata_i ),
++        .sram_cfg_tag_i  ( sram_cfg_itag_i  ),
+         .flush_i    ( icache_flush_i        ),
+         .en_i       ( icache_en_i           ),
+         .miss_o     ( icache_miss_o         ),
+@@ -109,10 +119,14 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+       .AXI_DATA_WIDTH   ( AxiDataWidth ),
+       .AXI_ID_WIDTH     ( AxiIdWidth   ),
+       .axi_req_t        ( axi_req_t    ),
+-      .axi_rsp_t        ( axi_rsp_t    )
++      .axi_rsp_t        ( axi_rsp_t    ),
++      .sram_cfg_t       ( sram_cfg_t   )
+    ) i_nbdcache (
+       .clk_i,
+       .rst_ni,
++      .sram_cfg_data_i ( sram_cfg_ddata_i    ),
++      .sram_cfg_tag_i  ( sram_cfg_dtag_i     ),
++      .sram_cfg_valid_dirty_i ( sram_cfg_dvalid_dirty_i ),
+       .enable_i     ( dcache_enable_i        ),
+       .flush_i      ( dcache_flush_i         ),
+       .flush_ack_o  ( dcache_flush_ack_o     ),
+diff --git a/core/cache_subsystem/std_nbdcache.sv b/core/cache_subsystem/std_nbdcache.sv
+index edef70f1..466c2bf5 100644
+--- a/core/cache_subsystem/std_nbdcache.sv
++++ b/core/cache_subsystem/std_nbdcache.sv
+@@ -19,10 +19,15 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
+     parameter int unsigned AXI_DATA_WIDTH   = 0,
+     parameter int unsigned AXI_ID_WIDTH     = 0,
+     parameter type axi_req_t = ariane_axi::req_t,
+-    parameter type axi_rsp_t = ariane_axi::resp_t
++    parameter type axi_rsp_t = ariane_axi::resp_t,
++    parameter type sram_cfg_t = logic
+ )(
+     input  logic                           clk_i,       // Clock
+     input  logic                           rst_ni,      // Asynchronous reset active low
++    // SRAM config
++    input sram_cfg_t                       sram_cfg_data_i,
++    input sram_cfg_t                       sram_cfg_tag_i,
++    input sram_cfg_t                       sram_cfg_valid_dirty_i,
+     // Cache management
+     input  logic                           enable_i,    // from CSR
+     input  logic                           flush_i,     // high until acknowledged
+@@ -184,11 +189,14 @@ import std_cache_pkg::*;
+     // --------------
+     for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
+         sram #(
++            .impl_in_t  ( sram_cfg_t                        ),
+             .DATA_WIDTH ( DCACHE_LINE_WIDTH                 ),
+             .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
+         ) data_sram (
+             .req_i   ( req_ram [i]                          ),
+             .rst_ni  ( rst_ni                               ),
++            .impl_i  ( sram_cfg_data_i                      ),
++            .impl_o  (  ),
+             .we_i    ( we_ram                               ),
+             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
+             .wuser_i ( '0                                   ),
+@@ -200,11 +208,14 @@ import std_cache_pkg::*;
+         );
+ 
+         sram #(
++            .impl_in_t  ( sram_cfg_t                        ),
+             .DATA_WIDTH ( DCACHE_TAG_WIDTH                  ),
+             .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
+         ) tag_sram (
+             .req_i   ( req_ram [i]                          ),
+             .rst_ni  ( rst_ni                               ),
++            .impl_i  ( sram_cfg_tag_i                       ),
++            .impl_o  (                                      ),
+             .we_i    ( we_ram                               ),
+             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
+             .wuser_i ( '0                                   ),
+@@ -234,12 +245,15 @@ import std_cache_pkg::*;
+     end
+ 
+     sram #(
++        .impl_in_t  ( sram_cfg_t                       ),
+         .USER_WIDTH ( 1                                ),
+         .DATA_WIDTH ( 4*DCACHE_DIRTY_WIDTH             ),
+         .NUM_WORDS  ( DCACHE_NUM_WORDS                 )
+     ) valid_dirty_sram (
+         .clk_i   ( clk_i                               ),
+         .rst_ni  ( rst_ni                              ),
++        .impl_i  ( sram_cfg_valid_dirty_i              ),
++        .impl_o  (                                     ),
+         .req_i   ( |req_ram                            ),
+         .we_i    ( we_ram                              ),
+         .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] ),
+diff --git a/core/cache_subsystem/wt_cache_subsystem.sv b/core/cache_subsystem/wt_cache_subsystem.sv
+index 8565601c..8886590b 100644
+--- a/core/cache_subsystem/wt_cache_subsystem.sv
++++ b/core/cache_subsystem/wt_cache_subsystem.sv
+@@ -25,13 +25,19 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+   parameter int unsigned AxiDataWidth = 0,
+   parameter int unsigned AxiIdWidth   = 0,
+   parameter type axi_req_t = ariane_axi::req_t,
+-  parameter type axi_rsp_t = ariane_axi::resp_t
++  parameter type axi_rsp_t = ariane_axi::resp_t,
++  parameter type sram_cfg_t = logic
+ ) (
+   input  logic                           clk_i,
+   input  logic                           rst_ni,
+   output logic                           busy_o,
+   input  logic                           stall_i,                // stall new memory requests
+   input  logic                           init_ni,
++  // SRAM config
++  input sram_cfg_t                       sram_cfg_idata_i,
++  input sram_cfg_t                       sram_cfg_itag_i,
++  input sram_cfg_t                       sram_cfg_ddata_i,
++  input sram_cfg_t                       sram_cfg_dtag_i,
+   // I$
+   input  logic                           icache_en_i,            // enable icache (or bypass e.g: in debug mode)
+   input  logic                           icache_flush_i,         // flush the icache, flush and kill have to be asserted together
+@@ -86,11 +92,14 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+   cva6_icache #(
+     // use ID 0 for icache reads
+     .RdTxId             ( 0             ),
+-    .ArianeCfg          ( ArianeCfg     )
++    .ArianeCfg          ( ArianeCfg     ),
++    .sram_cfg_t         ( sram_cfg_t    )
+   ) i_cva6_icache (
+     .clk_i              ( clk_i                   ),
+     .rst_ni             ( rst_ni                  ),
+     .flush_i            ( icache_flush_i          ),
++    .sram_cfg_data_i    ( sram_cfg_idata_i        ),
++    .sram_cfg_tag_i     ( sram_cfg_itag_i         ),
+     .en_i               ( icache_en_i             ),
+     .miss_o             ( icache_miss_o           ),
+     .busy_o             ( icache_busy             ),
+@@ -117,10 +126,13 @@ module wt_cache_subsystem import ariane_pkg::*; import wt_cache_pkg::*; #(
+     // use ID 1 for dcache reads and amos. note that the writebuffer
+     // uses all IDs up to DCACHE_MAX_TX-1 for write transactions.
+     .RdAmoTxId       ( 1             ),
+-    .ArianeCfg       ( ArianeCfg     )
++    .ArianeCfg       ( ArianeCfg     ),
++    .sram_cfg_t      ( sram_cfg_t    )
+   ) i_wt_dcache (
+     .clk_i           ( clk_i                   ),
+     .rst_ni          ( rst_ni                  ),
++    .sram_cfg_data_i ( sram_cfg_ddata_i        ),
++    .sram_cfg_tag_i  ( sram_cfg_dtag_i         ),
+     .enable_i        ( dcache_enable_i         ),
+     .busy_o          ( dcache_busy             ),
+     .stall_i         ( stall_i                 ),
+diff --git a/core/cache_subsystem/wt_dcache.sv b/core/cache_subsystem/wt_dcache.sv
+index 7dfd40cf..a998e73a 100644
+--- a/core/cache_subsystem/wt_dcache.sv
++++ b/core/cache_subsystem/wt_dcache.sv
+@@ -19,11 +19,16 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
+   // note that the write buffer uses all IDs up to DCACHE_MAX_TX-1 for write transactions
+   parameter logic [CACHE_ID_WIDTH-1:0]   RdAmoTxId          = 1,
+   // contains cacheable regions
+-  parameter ariane_pkg::ariane_cfg_t     ArianeCfg          = ariane_pkg::ArianeDefaultConfig
++  parameter ariane_pkg::ariane_cfg_t     ArianeCfg          = ariane_pkg::ArianeDefaultConfig,
++  parameter type                         sram_cfg_t         = logic
+ ) (
+   input  logic                           clk_i,       // Clock
+   input  logic                           rst_ni,      // Asynchronous reset active low
+ 
++  // SRAM config
++  input sram_cfg_t                       sram_cfg_data_i,
++  input sram_cfg_t                       sram_cfg_tag_i,
++
+   // Cache management
+   input  logic                           enable_i,    // from CSR
+   input  logic                           flush_i,     // high until acknowledged
+@@ -293,10 +298,14 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
+   wt_dcache_mem #(
+     .AxiCompliant ( ArianeCfg.AxiCompliant ),
+     .AxiDataWidth ( AxiDataWidth           ),
+-    .NumPorts     ( NumPorts               )
++    .NumPorts     ( NumPorts               ),
++    .sram_cfg_t   ( sram_cfg_t             )
+   ) i_wt_dcache_mem (
+     .clk_i             ( clk_i              ),
+     .rst_ni            ( rst_ni             ),
++    // SRAM config
++    .sram_cfg_data_i   ( sram_cfg_data_i    ),
++    .sram_cfg_tag_i    ( sram_cfg_tag_i     ),
+     // read ports
+     .rd_prio_i         ( rd_prio            ),
+     .rd_tag_i          ( rd_tag             ),
+diff --git a/core/cache_subsystem/wt_dcache_mem.sv b/core/cache_subsystem/wt_dcache_mem.sv
+index e791bd6b..1e1e69a6 100644
+--- a/core/cache_subsystem/wt_dcache_mem.sv
++++ b/core/cache_subsystem/wt_dcache_mem.sv
+@@ -29,11 +29,16 @@
+ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+   parameter bit          AxiCompliant  = 1'b0, // set this to 1 when using in conjunction with AXI bus adapter
+   parameter int unsigned AxiDataWidth  = 0,
+-  parameter int unsigned NumPorts      = 3
++  parameter int unsigned NumPorts      = 3,
++  parameter type         sram_cfg_t    = logic
+ ) (
+   input  logic                                              clk_i,
+   input  logic                                              rst_ni,
+ 
++  // SRAM config
++  input sram_cfg_t                                          sram_cfg_data_i,
++  input sram_cfg_t                                          sram_cfg_tag_i,
++
+   // ports
+   input  logic  [NumPorts-1:0][DCACHE_TAG_WIDTH-1:0]        rd_tag_i,           // tag in - comes one cycle later
+   input  logic  [NumPorts-1:0][DCACHE_CL_IDX_WIDTH-1:0]     rd_idx_i,
+@@ -282,6 +287,7 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+   for (genvar k = 0; k < DCACHE_NUM_BANKS; k++) begin : gen_data_banks
+     // Data RAM
+     sram #(
++      .impl_in_t  ( sram_cfg_t ),
+       .USER_WIDTH ( ariane_pkg::DCACHE_SET_ASSOC * DATA_USER_WIDTH ),
+       .DATA_WIDTH ( ariane_pkg::DCACHE_SET_ASSOC * riscv::XLEN ),
+       .USER_EN    ( ariane_pkg::DATA_USER_EN          ),
+@@ -289,6 +295,8 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+     ) i_data_sram (
+       .clk_i      ( clk_i               ),
+       .rst_ni     ( rst_ni              ),
++      .impl_i     ( sram_cfg_data_i     ),
++      .impl_o     (  ),
+       .req_i      ( bank_req   [k]      ),
+       .we_i       ( bank_we    [k]      ),
+       .addr_i     ( bank_idx   [k]      ),
+@@ -307,12 +315,15 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+ 
+     // Tag RAM
+     sram #(
++      .impl_in_t  ( sram_cfg_t                       ),
+       // tag + valid bit
+       .DATA_WIDTH ( ariane_pkg::DCACHE_TAG_WIDTH + 1 ),
+       .NUM_WORDS  ( wt_cache_pkg::DCACHE_NUM_WORDS   )
+     ) i_tag_sram (
+       .clk_i     ( clk_i               ),
+       .rst_ni    ( rst_ni              ),
++      .impl_i    ( sram_cfg_tag_i      ),
++      .impl_o    (  ),
+       .req_i     ( vld_req[i]          ),
+       .we_i      ( vld_we              ),
+       .addr_i    ( vld_addr            ),
+diff --git a/core/cva6.sv b/core/cva6.sv
+index 707ceb12..b9513a5d 100644
+--- a/core/cva6.sv
++++ b/core/cva6.sv
+@@ -32,14 +32,20 @@ module cva6 import ariane_pkg::*; #(
+   parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+   parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+   parameter type axi_req_t = ariane_axi::req_t,
+-  parameter type axi_rsp_t = ariane_axi::resp_t
++  parameter type axi_rsp_t = ariane_axi::resp_t,
++  parameter type sram_cfg_t = logic
+ ) (
+   input  logic                         clk_i,
+   input  logic                         rst_ni,
+   // Core ID, Cluster ID and boot address are considered more or less static
+   input  logic [riscv::VLEN-1:0]       boot_addr_i,  // reset boot address
+   input  logic [riscv::XLEN-1:0]       hart_id_i,    // hart id in a multicore environment (reflected in a CSR)
+-
++  // SRAM config
++  input sram_cfg_t                     sram_cfg_idata_i,
++  input sram_cfg_t                     sram_cfg_itag_i,
++  input sram_cfg_t                     sram_cfg_ddata_i,
++  input sram_cfg_t                     sram_cfg_dtag_i,
++  input sram_cfg_t                     sram_cfg_dvalid_dirty_i,
+   // Interrupt inputs
+   input  logic [1:0]                   irq_i,        // level sensitive IR lines, mip & sip (async)
+   input  logic                         ipi_i,        // inter-processor interrupts (async)
+@@ -728,7 +734,8 @@ module cva6 import ariane_pkg::*; #(
+     .AxiDataWidth         ( AxiDataWidth ),
+     .AxiIdWidth           ( AxiIdWidth ),
+     .axi_req_t            ( axi_req_t ),
+-    .axi_rsp_t            ( axi_rsp_t )
++    .axi_rsp_t            ( axi_rsp_t ),
++    .sram_cfg_t           ( sram_cfg_t )
+   ) i_cache_subsystem (
+     // to D$
+     .clk_i                 ( clk_i                       ),
+@@ -736,6 +743,11 @@ module cva6 import ariane_pkg::*; #(
+     .busy_o                ( busy_cache_ctrl             ),
+     .stall_i               ( stall_ctrl_cache            ),
+     .init_ni               ( init_ctrl_cache_n           ),
++    // SRAM config
++    .sram_cfg_idata_i        ( sram_cfg_idata_i          ),
++    .sram_cfg_itag_i         ( sram_cfg_itag_i           ),
++    .sram_cfg_ddata_i        ( sram_cfg_ddata_i          ),
++    .sram_cfg_dtag_i         ( sram_cfg_dtag_i           ),
+     // I$
+     .icache_en_i           ( icache_en_csr               ),
+     .icache_flush_i        ( icache_flush_ctrl_cache     ),
+@@ -781,7 +793,8 @@ module cva6 import ariane_pkg::*; #(
+     .axi_aw_chan_t         ( axi_aw_chan_t               ),
+     .axi_w_chan_t          ( axi_w_chan_t                ),
+     .axi_req_t             ( axi_req_t                   ),
+-    .axi_rsp_t             ( axi_rsp_t                   )
++    .axi_rsp_t             ( axi_rsp_t                   ),
++    .sram_cfg_t            ( sram_cfg_t                  )
+   ) i_cache_subsystem (
+     // to D$
+     .clk_i                 ( clk_i                       ),
+@@ -790,6 +803,12 @@ module cva6 import ariane_pkg::*; #(
+     .busy_o                ( busy_cache_ctrl             ),
+     .stall_i               ( stall_ctrl_cache            ),
+     .init_ni               ( init_ctrl_cache_n           ),
++    // SRAM config
++    .sram_cfg_idata_i        ( sram_cfg_idata_i          ),
++    .sram_cfg_itag_i         ( sram_cfg_itag_i           ),
++    .sram_cfg_ddata_i        ( sram_cfg_ddata_i          ),
++    .sram_cfg_dtag_i         ( sram_cfg_dtag_i           ),
++    .sram_cfg_dvalid_dirty_i ( sram_cfg_dvalid_dirty_i   ),
+     // I$
+     .icache_en_i           ( icache_en_csr               ),
+     .icache_flush_i        ( icache_flush_ctrl_cache     ),
+-- 
+2.16.5
+

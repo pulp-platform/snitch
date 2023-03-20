@@ -6,31 +6,21 @@
   target_dir: "openhwgroup_cva6",
 
   upstream: {
-    url: "https://github.com/openhwgroup/cva6.git",
-    rev: "master",
+    url: "https://github.com/pulp-platform/cva6.git",
+    rev: "pulp",
   },
 
   patch_dir: "patches/openhwgroup_cva6",
 
   exclude_from_upstream: [
     "ci",
-    "bootrom",
+    "core/Flist*"
+    "corev_apu"
     "docs",
-    "fpga"
-    "openpiton"
+    "pd"
     "scripts"
-    "tb"
-    "src/axi"
-    "src/axi_mem_if"
-    "src/axi_node"
-    "src/axi_riscv_atomics"
-    "src/common_cells"
-    "src/fpga-support"
-    "src/fpu"
-    "src/register_interface"
-    "src/riscv-dbg"
-    "src/rv_plic"
-    "src/tech_cells_generic"
+    "util"
+    "vendor"
     ".*"
     "LICENSE*"
     "src_files.yml"
@@ -39,6 +29,7 @@
     "CODEOWNERS"
     "Flist.ariane"
     "ariane.core"
-    "Bender.yml"
+    "init_testharness.do"
+    "config_pkg_generator.py"
   ]
 }

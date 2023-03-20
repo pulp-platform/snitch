@@ -1,0 +1,51 @@
+From 8bbefe64cffd700bacc50eb7158109dda55f8223 Mon Sep 17 00:00:00 2001
+From: Tim Fischer <fischeti@iis.ee.ethz.ch>
+Date: Thu, 23 Sep 2021 17:13:36 +0200
+Subject: [PATCH 4/9] Fix mismatch of cva6 fpu config
+
+---
+ core/fpu_wrap.sv           | 12 +++++++-----
+ core/include/ariane_pkg.sv |  1 +
+ 2 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/core/fpu_wrap.sv b/core/fpu_wrap.sv
+index 958590da..7aa03f68 100644
+--- a/core/fpu_wrap.sv
++++ b/core/fpu_wrap.sv
+@@ -61,14 +61,16 @@ module fpu_wrap import ariane_pkg::*; (
+     // Implementation (number of registers etc)
+     localparam fpnew_pkg::fpu_implementation_t FPU_IMPLEMENTATION = '{
+       PipeRegs:  '{// FP32, FP64, FP16, FP8, FP16alt
+-                 '{LAT_COMP_FP32, LAT_COMP_FP64, LAT_COMP_FP16, LAT_COMP_FP8, LAT_COMP_FP16ALT}, // ADDMUL
+-                 '{default: LAT_DIVSQRT}, // DIVSQRT
+-                 '{default: LAT_NONCOMP}, // NONCOMP
+-                 '{default: LAT_CONV}},   // CONV
++                 '{LAT_COMP_FP32, LAT_COMP_FP64, LAT_COMP_FP16, LAT_COMP_FP8, LAT_COMP_FP16ALT, LAT_COMP_FP8ALT}, // ADDMUL
++                 '{default: LAT_DIVSQRT},         // DIVSQRT
++                 '{default: LAT_NONCOMP},         // NONCOMP
++                 '{default: LAT_CONV},            // CONV
++                 '{default: fpnew_pkg::MERGED}},  // DOTP
+       UnitTypes: '{'{default: fpnew_pkg::PARALLEL}, // ADDMUL
+                    '{default: fpnew_pkg::MERGED},   // DIVSQRT
+                    '{default: fpnew_pkg::PARALLEL}, // NONCOMP
+-                   '{default: fpnew_pkg::MERGED}},  // CONV
++                   '{default: fpnew_pkg::MERGED},   // CONV
++                   '{default: fpnew_pkg::MERGED}},  // DOTP
+       PipeConfig: fpnew_pkg::DISTRIBUTED
+     };
+ 
+diff --git a/core/include/ariane_pkg.sv b/core/include/ariane_pkg.sv
+index c3ef51b9..c886b9e8 100644
+--- a/core/include/ariane_pkg.sv
++++ b/core/include/ariane_pkg.sv
+@@ -179,6 +179,7 @@ package ariane_pkg;
+     localparam int unsigned LAT_COMP_FP16    = 'd1;
+     localparam int unsigned LAT_COMP_FP16ALT = 'd1;
+     localparam int unsigned LAT_COMP_FP8     = 'd1;
++    localparam int unsigned LAT_COMP_FP8ALT  = 'd1;
+     localparam int unsigned LAT_DIVSQRT      = 'd2;
+     localparam int unsigned LAT_NONCOMP      = 'd1;
+     localparam int unsigned LAT_CONV         = 'd2;
+-- 
+2.16.5
+
