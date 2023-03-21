@@ -27,7 +27,6 @@ At IIS the default version of some tools (`gcc`, `cmake`, ...) might be too old 
 
 - Create a install directory to install the needed tools:
     ```bash
-    #deinfe
     export INSTALL_DIR=/usr/scratch/${MACHINE}/${USER}/install-snitch
     mkdir $INSTALL_DIR
     cd $INSTALL_DIR
@@ -95,6 +94,20 @@ At IIS the default version of some tools (`gcc`, `cmake`, ...) might be too old 
     # export INCLUDE_PATH="${INSTALL_DIR}/verilator-${VERILATOR_VERSION}/include/vltstd/:$INCLUDE_PATH"
     ```
 
+- Install the correct `verible-verilog-lint` tool version:
+    ```bash
+    export VERIBLE_VERSION=0.0-807-g10e7c71
+    mkdir -p verible-${VERIBLE_VERSION}
+    cd verible-${VERIBLE_VERSION}
+    curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-18.04-bionic-x86_64.tar.gz
+    chmod 777 ${INSTALL_DIR}/verible-${VERIBLE_VERSION}
+    tar -C ${INSTALL_DIR}/verible-${VERIBLE_VERSION} -xf verible.tar.gz --strip-components=1
+    # add location to path
+    export PATH="${INSTALL_DIR}/verible-${VERIBLE_VERSION}/bin/:$PATH"
+    # unset temporary variables
+    unset VERIBLE_VERSION
+    ```
+
 For installing the last missing pieces you need to clone the repository.
 
 - Clone the repository:
@@ -139,31 +152,6 @@ For installing the last missing pieces you need to clone the repository.
     ln -s /usr/sepp/bin/cmake-3.18.1 cmake
     ```
 
-### Post Installation
-
-If you work next time from a clean bash shell you only have to run the following commands (or you can add them to your `.bashrc`)
-
-```bash
-export INSTALL_DIR=/usr/scratch/${MACHINE}/${USER}/install-snitch
-
-# LLVM
-# pre-installed
-export PATH=/usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/:$PATH
-# or manually installad
-#export PATH=${INSTALL_DIR}/riscv-llvm/bin/:${PATH}
-
-# Correct Python version
-export PATH=${PWD}/python-${PYTHON_VERSION}/bin/:$PATH
-
-# Activate the virtual python environment
-source ~/.venvs/snitch/bin/activate
-
-# Correct Verilator Version
-export PATH="${INSTALL_DIR}/verilator-${VERILATOR_VERSION}/bin/:$PATH"
-
-# Use correct `cmake` and `spike-dasm` version
-export PATH=/home/${USER}/.snitch-bin:$PATH
-```
 
 ### Tool Specific Versions
 Unfortunately, depending on which RTL simulator you are using, you need to use a different GCC version. Therefore, you have to set the following variables **in addition** to the above commands.
@@ -249,25 +237,35 @@ Next time you start with a fresh terminal, you can execute the following command
 
 ```bash
 bash
+# set all required variables
+export MACHINE=$(hostname | cut -d . -f 1)
 export INSTALL_DIR=/usr/scratch/${MACHINE}/${USER}/install-snitch
+export PYTHON_VERSION=3.9.10
+export VERILATOR_VERSION=4.100
+export VERIBLE_VERSION=0.0-807-g10e7c71
 
 # LLVM
 # pre-installed
 export PATH=/usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/:$PATH
 # or manually installad
 #export PATH=${INSTALL_DIR}/riscv-llvm/bin/:${PATH}
-
 # Correct Python version
-export PATH=${PWD}/python-${PYTHON_VERSION}/bin/:$PATH
-
+export PATH=${INSTALL_DIR}/python-${PYTHON_VERSION}/bin/:$PATH
 # Activate the virtual python environment
 source ~/.venvs/snitch/bin/activate
-
-# Correct Verilator Version
+# Correct Verilator version
 export PATH="${INSTALL_DIR}/verilator-${VERILATOR_VERSION}/bin/:$PATH"
-
+# Correct Verible version
+export PATH="${INSTALL_DIR}/verible-${VERIBLE_VERSION}/bin/:$PATH"
 # Use correct `cmake` and `spike-dasm` version
 export PATH=/home/${USER}/.snitch-bin:$PATH
+
+# unset all temporary variables
+unset MACHINE
+unset INSTALL_DIR
+unset PYTHON_VERSION=3.9.10
+unset VERILATOR_VERSION=4.100
+unset VERIBLE_VERSION=0.0-807-g10e7c71
 ```
 
 If you use **Questasim**, set the following variables:
