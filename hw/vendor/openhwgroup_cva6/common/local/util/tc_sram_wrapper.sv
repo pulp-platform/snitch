@@ -8,6 +8,8 @@
 // Original Author: Jean-Roch COULON - Thales
 
 module tc_sram_wrapper #(
+  parameter type         impl_in_t    = logic,
+  parameter type         impl_out_t   = logic,
   parameter int unsigned NumWords     = 32'd1024, // Number of Words in data array
   parameter int unsigned DataWidth    = 32'd128,  // Data signal width
   parameter int unsigned ByteWidth    = 32'd8,    // Width of a data byte
@@ -24,6 +26,8 @@ module tc_sram_wrapper #(
 ) (
   input  logic                 clk_i,      // Clock
   input  logic                 rst_ni,     // Asynchronous reset active low
+  input  impl_in_t             impl_i,
+  output impl_out_t            impl_o,
   // input ports
   input  logic  [NumPorts-1:0] req_i,      // request
   input  logic  [NumPorts-1:0] we_i,       // write enable
@@ -37,6 +41,8 @@ module tc_sram_wrapper #(
 // synthesis translate_off
 
   tc_sram #(
+    .impl_in_t(impl_in_t),
+    .impl_out_t(impl_out_t),
     .NumWords(NumWords),
     .DataWidth(DataWidth),
     .ByteWidth(ByteWidth),
@@ -47,6 +53,8 @@ module tc_sram_wrapper #(
   ) i_tc_sram (
       .clk_i    ( clk_i   ),
       .rst_ni   ( rst_ni  ),
+      .impl_i   ( impl_i  ),
+      .impl_o   ( impl_o  ),
       .req_i    ( req_i   ),
       .we_i     ( we_i    ),
       .be_i     ( be_i    ),

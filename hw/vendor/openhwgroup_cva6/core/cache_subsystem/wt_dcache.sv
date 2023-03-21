@@ -19,16 +19,24 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
   // note that the write buffer uses all IDs up to DCACHE_MAX_TX-1 for write transactions
   parameter logic [CACHE_ID_WIDTH-1:0]   RdAmoTxId          = 1,
   // contains cacheable regions
-  parameter ariane_pkg::ariane_cfg_t     ArianeCfg          = ariane_pkg::ArianeDefaultConfig
+  parameter ariane_pkg::ariane_cfg_t     ArianeCfg          = ariane_pkg::ArianeDefaultConfig,
+  parameter type                         sram_cfg_t         = logic
 ) (
   input  logic                           clk_i,       // Clock
   input  logic                           rst_ni,      // Asynchronous reset active low
+
+  // SRAM config
+  input sram_cfg_t                       sram_cfg_data_i,
+  input sram_cfg_t                       sram_cfg_tag_i,
 
   // Cache management
   input  logic                           enable_i,    // from CSR
   input  logic                           flush_i,     // high until acknowledged
   output logic                           flush_ack_o, // send a single cycle acknowledge signal when the cache is flushed
   output logic                           miss_o,      // we missed on a ld/st
+  output logic                           busy_o,
+  input  logic                           stall_i,     // stall new memory requests
+  input  logic                           init_ni,
   output logic                           wbuffer_empty_o,
   output logic                           wbuffer_not_ni_o,
 
@@ -107,6 +115,13 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
   // wbuffer <-> memory
   wbuffer_t [DCACHE_WBUF_DEPTH-1:0]             wbuffer_data;
 
+  // controllers -> management
+  logic [NumPorts-2:0]                          ctrl_busy;
+
+  // missunit -> management
+  logic                                         missunit_busy;
+
+  assign busy_o = |ctrl_busy | missunit_busy | ~wbuffer_empty_o;
 
 ///////////////////////////////////////////////////////
 // miss handling unit
@@ -124,8 +139,10 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
     .flush_i            ( flush_i            ),
     .flush_ack_o        ( flush_ack_o        ),
     .miss_o             ( miss_o             ),
+    .busy_o             ( missunit_busy      ),
     .wbuffer_empty_i    ( wbuffer_empty_o    ),
     .cache_en_o         ( cache_en           ),
+    .init_ni            ( init_ni            ),
     // amo interface
     .amo_req_i          ( amo_req_i          ),
     .amo_resp_o         ( amo_resp_o         ),
@@ -181,6 +198,8 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
       .clk_i           ( clk_i             ),
       .rst_ni          ( rst_ni            ),
       .cache_en_i      ( cache_en          ),
+      .busy_o          ( ctrl_busy     [k] ),
+      .stall_i         ( stall_i           ),
       // reqs from core
       .req_port_i      ( req_ports_i   [k] ),
       .req_port_o      ( req_ports_o   [k] ),
@@ -279,10 +298,14 @@ module wt_dcache import ariane_pkg::*; import wt_cache_pkg::*; #(
   wt_dcache_mem #(
     .AxiCompliant ( ArianeCfg.AxiCompliant ),
     .AxiDataWidth ( AxiDataWidth           ),
-    .NumPorts     ( NumPorts               )
+    .NumPorts     ( NumPorts               ),
+    .sram_cfg_t   ( sram_cfg_t             )
   ) i_wt_dcache_mem (
     .clk_i             ( clk_i              ),
     .rst_ni            ( rst_ni             ),
+    // SRAM config
+    .sram_cfg_data_i   ( sram_cfg_data_i    ),
+    .sram_cfg_tag_i    ( sram_cfg_tag_i     ),
     // read ports
     .rd_prio_i         ( rd_prio            ),
     .rd_tag_i          ( rd_tag             ),

@@ -54,21 +54,23 @@ module fpu_wrap import ariane_pkg::*; (
       Width:         riscv::XLEN, // parameterized using XLEN
       EnableVectors: ariane_pkg::XFVEC,
       EnableNanBox:  1'b1,
-      FpFmtMask:     {RVF, RVD, XF16, XF8, XF16ALT},
-      IntFmtMask:    {XFVEC && XF8, XFVEC && (XF16 || XF16ALT), 1'b1, 1'b1}
+      FpFmtMask:     {RVF, RVD, XF16, XF8, XF16ALT, XF8ALT},
+      IntFmtMask:    {XFVEC && (XF8 || XF8ALT), XFVEC && (XF16 || XF16ALT), 1'b1, 1'b1}
     };
 
     // Implementation (number of registers etc)
     localparam fpnew_pkg::fpu_implementation_t FPU_IMPLEMENTATION = '{
       PipeRegs:  '{// FP32, FP64, FP16, FP8, FP16alt
-                 '{LAT_COMP_FP32, LAT_COMP_FP64, LAT_COMP_FP16, LAT_COMP_FP8, LAT_COMP_FP16ALT}, // ADDMUL
-                 '{default: LAT_DIVSQRT}, // DIVSQRT
-                 '{default: LAT_NONCOMP}, // NONCOMP
-                 '{default: LAT_CONV}},   // CONV
-      UnitTypes: '{'{default: fpnew_pkg::PARALLEL}, // ADDMUL
-                   '{default: fpnew_pkg::MERGED},   // DIVSQRT
-                   '{default: fpnew_pkg::PARALLEL}, // NONCOMP
-                   '{default: fpnew_pkg::MERGED}},  // CONV
+                 '{LAT_COMP_FP32, LAT_COMP_FP64, LAT_COMP_FP16, LAT_COMP_FP8, LAT_COMP_FP16ALT, LAT_COMP_FP8ALT}, // ADDMUL
+                 '{default: LAT_DIVSQRT},         // DIVSQRT
+                 '{default: LAT_NONCOMP},         // NONCOMP
+                 '{default: LAT_CONV},            // CONV
+                 '{default: LAT_DOTP}},           // DOTP
+      UnitTypes: '{'{default: fpnew_pkg::PARALLEL},  // ADDMUL
+                   '{default: fpnew_pkg::MERGED},    // DIVSQRT
+                   '{default: fpnew_pkg::PARALLEL},  // NONCOMP
+                   '{default: fpnew_pkg::MERGED},    // CONV
+                   '{default: fpnew_pkg::DISABLED}}, // DOTP
       PipeConfig: fpnew_pkg::DISTRIBUTED
     };
 

@@ -19,6 +19,8 @@
 // `FPGA_TARGET_ALTERA in your build environment (default is ALTERA)
 
 module sram #(
+    parameter type impl_in_t  = logic,
+    parameter type impl_out_t = logic,
     parameter DATA_WIDTH = 64,
     parameter USER_WIDTH = 1,
     parameter USER_EN    = 0,
@@ -29,6 +31,8 @@ module sram #(
 )(
    input  logic                          clk_i,
    input  logic                          rst_ni,
+   input  impl_in_t                      impl_i,
+   output impl_out_t                     impl_o,
    input  logic                          req_i,
    input  logic                          we_i,
    input  logic [$clog2(NUM_WORDS)-1:0]  addr_i,
@@ -97,6 +101,8 @@ end
     end else begin : gen_mem
       // unused byte-enable segments (8bits) are culled by the tool
       tc_sram_wrapper #(
+        .impl_in_t ( impl_in_t ),
+        .impl_out_t ( impl_out_t ),
         .NumWords(NUM_WORDS),           // Number of Words in data array
         .DataWidth(64),                 // Data signal width
         .ByteWidth(32'd8),              // Width of a data byte
@@ -107,6 +113,8 @@ end
       ) i_tc_sram_wrapper (
           .clk_i    ( clk_i                     ),
           .rst_ni   ( rst_ni                    ),
+          .impl_i   ( impl_i                    ),
+          .impl_o   ( impl_o                    ),
           .req_i    ( req_i                     ),
           .we_i     ( we_i                      ),
           .be_i     ( be_aligned[k*8 +: 8]      ),
@@ -116,6 +124,8 @@ end
       );
       if (USER_EN) begin : gen_mem_user
         tc_sram_wrapper #(
+          .impl_in_t ( impl_in_t ),
+          .impl_out_t ( impl_out_t ),
           .NumWords(NUM_WORDS),           // Number of Words in data array
           .DataWidth(64),                 // Data signal width
           .ByteWidth(32'd8),              // Width of a data byte
@@ -126,6 +136,8 @@ end
         ) i_tc_sram_wrapper_user (
             .clk_i    ( clk_i                     ),
             .rst_ni   ( rst_ni                    ),
+            .impl_i   ( impl_i                    ),
+            .impl_o   ( impl_o                    ),
             .req_i    ( req_i                     ),
             .we_i     ( we_i                      ),
             .be_i     ( be_aligned[k*8 +: 8]      ),

@@ -29,10 +29,15 @@
 module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
   parameter bit          AxiCompliant  = 1'b0, // set this to 1 when using in conjunction with AXI bus adapter
   parameter int unsigned AxiDataWidth  = 0,
-  parameter int unsigned NumPorts      = 3
+  parameter int unsigned NumPorts      = 3,
+  parameter type         sram_cfg_t    = logic
 ) (
   input  logic                                              clk_i,
   input  logic                                              rst_ni,
+
+  // SRAM config
+  input sram_cfg_t                                          sram_cfg_data_i,
+  input sram_cfg_t                                          sram_cfg_tag_i,
 
   // ports
   input  logic  [NumPorts-1:0][DCACHE_TAG_WIDTH-1:0]        rd_tag_i,           // tag in - comes one cycle later
@@ -282,6 +287,7 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
   for (genvar k = 0; k < DCACHE_NUM_BANKS; k++) begin : gen_data_banks
     // Data RAM
     sram #(
+      .impl_in_t  ( sram_cfg_t ),
       .USER_WIDTH ( ariane_pkg::DCACHE_SET_ASSOC * DATA_USER_WIDTH ),
       .DATA_WIDTH ( ariane_pkg::DCACHE_SET_ASSOC * riscv::XLEN ),
       .USER_EN    ( ariane_pkg::DATA_USER_EN          ),
@@ -289,6 +295,8 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
     ) i_data_sram (
       .clk_i      ( clk_i               ),
       .rst_ni     ( rst_ni              ),
+      .impl_i     ( sram_cfg_data_i     ),
+      .impl_o     (  ),
       .req_i      ( bank_req   [k]      ),
       .we_i       ( bank_we    [k]      ),
       .addr_i     ( bank_idx   [k]      ),
@@ -307,12 +315,15 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
 
     // Tag RAM
     sram #(
+      .impl_in_t  ( sram_cfg_t                       ),
       // tag + valid bit
       .DATA_WIDTH ( ariane_pkg::DCACHE_TAG_WIDTH + 1 ),
       .NUM_WORDS  ( wt_cache_pkg::DCACHE_NUM_WORDS   )
     ) i_tag_sram (
       .clk_i     ( clk_i               ),
       .rst_ni    ( rst_ni              ),
+      .impl_i    ( sram_cfg_tag_i      ),
+      .impl_o    (  ),
       .req_i     ( vld_req[i]          ),
       .we_i      ( vld_we              ),
       .addr_i    ( vld_addr            ),

@@ -140,10 +140,12 @@ module instr_tracer (
       // --------------
       // Exceptions
       // --------------
+      `ifndef VCS
       if (tracer_if.pck.exception.valid && !(tracer_if.pck.debug_mode && tracer_if.pck.exception.cause == riscv::BREAKPOINT)) begin
         // print exception
         printException(tracer_if.pck.commit_instr[0].pc, tracer_if.pck.exception.cause, tracer_if.pck.exception.tval);
       end
+      `endif
       // ----------------------
       // Commit Registers
       // ----------------------

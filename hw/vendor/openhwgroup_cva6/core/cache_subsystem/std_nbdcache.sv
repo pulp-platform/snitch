@@ -18,16 +18,26 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
     parameter int unsigned AXI_ADDR_WIDTH   = 0,
     parameter int unsigned AXI_DATA_WIDTH   = 0,
     parameter int unsigned AXI_ID_WIDTH     = 0,
+    parameter int unsigned AXI_USER_WIDTH   = 0,
     parameter type axi_req_t = ariane_axi::req_t,
-    parameter type axi_rsp_t = ariane_axi::resp_t
+    parameter type axi_rsp_t = ariane_axi::resp_t,
+    parameter type sram_cfg_t = logic
 )(
     input  logic                           clk_i,       // Clock
     input  logic                           rst_ni,      // Asynchronous reset active low
+    // SRAM config
+    input sram_cfg_t                       sram_cfg_data_i,
+    input sram_cfg_t                       sram_cfg_tag_i,
+    input sram_cfg_t                       sram_cfg_valid_dirty_i,
     // Cache management
     input  logic                           enable_i,    // from CSR
     input  logic                           flush_i,     // high until acknowledged
     output logic                           flush_ack_o, // send a single cycle acknowledge signal when the cache is flushed
     output logic                           miss_o,      // we missed on a LD/ST
+    output logic                           busy_o,
+    input  logic                           stall_i,   // stall new memory requests
+    input  logic                           init_ni,
+    input  logic [63:0]                    hart_id_i,    // hart id in a multicore environment (to be sent via the AXI user signal)
     // AMOs
     input  amo_req_t                       amo_req_i,
     output amo_resp_t                      amo_resp_o,
@@ -87,6 +97,10 @@ import std_cache_pkg::*;
     cache_line_t [DCACHE_SET_ASSOC-1:0]  rdata_ram;
     cl_be_t                              be_ram;
 
+    // Busy signals
+    logic miss_handler_busy;
+    assign busy_o = |busy | miss_handler_busy;
+
     // ------------------
     // Cache Controller
     // ------------------
@@ -97,6 +111,7 @@ import std_cache_pkg::*;
             ) i_cache_ctrl (
                 .bypass_i              ( ~enable_i            ),
                 .busy_o                ( busy            [i]  ),
+                .stall_i               ( stall_i | flush_i    ),
                 // from core
                 .req_port_i            ( req_ports_i     [i]  ),
                 .req_port_o            ( req_ports_o     [i]  ),
@@ -136,11 +151,14 @@ import std_cache_pkg::*;
         .AXI_ADDR_WIDTH         ( AXI_ADDR_WIDTH       ),
         .AXI_DATA_WIDTH         ( AXI_DATA_WIDTH       ),
         .AXI_ID_WIDTH           ( AXI_ID_WIDTH         ),
+        .AXI_USER_WIDTH         ( AXI_USER_WIDTH       ),
         .axi_req_t              ( axi_req_t            ),
         .axi_rsp_t              ( axi_rsp_t            )
     ) i_miss_handler (
+        .busy_o                 ( miss_handler_busy    ),
         .flush_i                ( flush_i              ),
         .busy_i                 ( |busy                ),
+        .hart_id_i              ( hart_id_i            ),
         // AMOs
         .amo_req_i              ( amo_req_i            ),
         .amo_resp_o             ( amo_resp_o           ),
@@ -175,11 +193,14 @@ import std_cache_pkg::*;
     // --------------
     for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
         sram #(
+            .impl_in_t  ( sram_cfg_t                        ),
             .DATA_WIDTH ( DCACHE_LINE_WIDTH                 ),
             .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
         ) data_sram (
             .req_i   ( req_ram [i]                          ),
             .rst_ni  ( rst_ni                               ),
+            .impl_i  ( sram_cfg_data_i                      ),
+            .impl_o  (  ),
             .we_i    ( we_ram                               ),
             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
             .wuser_i ( '0                                   ),
@@ -191,11 +212,14 @@ import std_cache_pkg::*;
         );
 
         sram #(
+            .impl_in_t  ( sram_cfg_t                        ),
             .DATA_WIDTH ( DCACHE_TAG_WIDTH                  ),
             .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
         ) tag_sram (
             .req_i   ( req_ram [i]                          ),
             .rst_ni  ( rst_ni                               ),
+            .impl_i  ( sram_cfg_tag_i                       ),
+            .impl_o  (                                      ),
             .we_i    ( we_ram                               ),
             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
             .wuser_i ( '0                                   ),
@@ -225,12 +249,15 @@ import std_cache_pkg::*;
     end
 
     sram #(
+        .impl_in_t  ( sram_cfg_t                       ),
         .USER_WIDTH ( 1                                ),
         .DATA_WIDTH ( 4*DCACHE_DIRTY_WIDTH             ),
         .NUM_WORDS  ( DCACHE_NUM_WORDS                 )
     ) valid_dirty_sram (
         .clk_i   ( clk_i                               ),
         .rst_ni  ( rst_ni                              ),
+        .impl_i  ( sram_cfg_valid_dirty_i              ),
+        .impl_o  (                                     ),
         .req_i   ( |req_ram                            ),
         .we_i    ( we_ram                              ),
         .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] ),

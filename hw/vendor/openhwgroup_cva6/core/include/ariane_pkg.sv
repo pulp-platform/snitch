@@ -171,6 +171,7 @@ package ariane_pkg;
     localparam bit XF16    = cva6_config_pkg::CVA6ConfigF16En; // Is half-precision float extension (Xf16) enabled
     localparam bit XF16ALT = cva6_config_pkg::CVA6ConfigF16AltEn; // Is alternative half-precision float extension (Xf16alt) enabled
     localparam bit XF8     = cva6_config_pkg::CVA6ConfigF8En; // Is quarter-precision float extension (Xf8) enabled
+    localparam bit XF8ALT  = cva6_config_pkg::CVA6ConfigF8AltEn; // Is alternative quarter-precision float extension (Xf8alt) enabled
     localparam bit XFVEC   = cva6_config_pkg::CVA6ConfigFVecEn; // Is vectorial float extension (Xfvec) enabled
 
     // Transprecision float unit
@@ -179,9 +180,11 @@ package ariane_pkg;
     localparam int unsigned LAT_COMP_FP16    = 'd1;
     localparam int unsigned LAT_COMP_FP16ALT = 'd1;
     localparam int unsigned LAT_COMP_FP8     = 'd1;
+    localparam int unsigned LAT_COMP_FP8ALT  = 'd1;
     localparam int unsigned LAT_DIVSQRT      = 'd2;
     localparam int unsigned LAT_NONCOMP      = 'd1;
     localparam int unsigned LAT_CONV         = 'd2;
+    localparam int unsigned LAT_DOTP         = 'd2;
 
     // --------------------------------------
     // vvvv Don't change these by hand! vvvv
@@ -192,7 +195,8 @@ package ariane_pkg;
                          RVF     ? 32 : // F ext.
                          XF16    ? 16 : // Xf16 ext.
                          XF16ALT ? 16 : // Xf16alt ext.
-                         XF8     ? 8 :  // Xf8 ext.
+                         XF8     ? 8  : // Xf8 ext.
+                         XF8ALT  ? 8  : // Xf8alt ext.
                          1;             // Unused in case of no FP
 
     localparam bit NSX = XF16 | XF16ALT | XF8 | XFVEC; // Are non-standard extensions present?
@@ -201,6 +205,7 @@ package ariane_pkg;
     localparam bit XF16VEC    = XF16    & XFVEC & FLEN>16; // FP16 vectors available if vectors and larger fmt enabled
     localparam bit XF16ALTVEC = XF16ALT & XFVEC & FLEN>16; // FP16ALT vectors available if vectors and larger fmt enabled
     localparam bit XF8VEC     = XF8     & XFVEC & FLEN>8;  // FP8 vectors available if vectors and larger fmt enabled
+    localparam bit XF8ALTVEC  = XF8ALT  & XFVEC & FLEN>8;  // FP8ALT vectors available if vectors and larger fmt enabled
     // ^^^^ until here ^^^^
     // ---------------------
 
@@ -487,7 +492,7 @@ package ariane_pkg;
                                // set lower than operations
                                SLTS, SLTU,
                                // CSR functions
-                               MRET, SRET, DRET, ECALL, WFI, FENCE, FENCE_I, SFENCE_VMA, CSR_WRITE, CSR_READ, CSR_SET, CSR_CLEAR,
+                               MRET, SRET, DRET, ECALL, WFI, FENCE, FENCE_I, SFENCE_VMA, CSR_WRITE, CSR_READ, CSR_SET, CSR_CLEAR, FENCE_T,
                                // LSU functions
                                LD, SD, LW, LWU, SW, LH, LHU, SH, LB, SB, LBU,
                                // Atomic Memory Operations

@@ -388,11 +388,12 @@ module instr_queue import ariane_pkg::*; (
     .pop_i      ( pop_address                  )
   );
 
-  unread i_unread_address_fifo (.d_i(|{empty_address, address_queue_usage}));
-  unread i_unread_branch_mask (.d_i(|branch_mask_extended));
-  unread i_unread_lzc (.d_i(|{branch_empty}));
-  unread i_unread_fifo_pos (.d_i(|fifo_pos_extended)); // we don't care about the lower signals
-  unread i_unread_instr_fifo (.d_i(|instr_queue_usage));
+  // Vivado interprets these as blackboxes when adding debug constraints
+  // unread i_unread_address_fifo (.d_i(|{empty_address, address_queue_usage}));
+  // unread i_unread_branch_mask (.d_i(|branch_mask_extended));
+  // unread i_unread_lzc (.d_i(|{branch_empty}));
+  // unread i_unread_fifo_pos (.d_i(|fifo_pos_extended)); // we don't care about the lower signals
+  // unread i_unread_instr_fifo (.d_i(|instr_queue_usage));
 
   if (ariane_pkg::RVC) begin : gen_pc_q_with_c
     always_ff @(posedge clk_i or negedge rst_ni) begin

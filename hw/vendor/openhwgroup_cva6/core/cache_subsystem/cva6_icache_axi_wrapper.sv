@@ -19,15 +19,23 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
   parameter int unsigned AxiDataWidth = 0,
   parameter int unsigned AxiIdWidth   = 0,
   parameter type axi_req_t = ariane_axi::req_t,
-  parameter type axi_rsp_t = ariane_axi::resp_t
+  parameter type axi_rsp_t = ariane_axi::resp_t,
+  parameter type sram_cfg_t = logic
 ) (
   input  logic              clk_i,
   input  logic              rst_ni,
   input riscv::priv_lvl_t   priv_lvl_i,
 
+  // SRAM config
+  input sram_cfg_t          sram_cfg_data_i,
+  input sram_cfg_t          sram_cfg_tag_i,
+
   input  logic              flush_i,     // flush the icache, flush and kill have to be asserted together
   input  logic              en_i,        // enable icache
   output logic              miss_o,      // to performance counter
+  output logic              busy_o,
+  input  logic              stall_i,
+  input  logic              init_ni,
   // address translation requests
   input  icache_areq_i_t    areq_i,
   output icache_areq_o_t    areq_o,
@@ -53,13 +61,13 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
   logic [63:0]                           axi_rd_addr;
   logic [$clog2(AxiNumWords)-1:0]        axi_rd_blen;
   logic [2:0]                            axi_rd_size;
-  logic [$size(axi_resp_i.r.id)-1:0]     axi_rd_id_in;
+  logic [AxiIdWidth-1:0]                 axi_rd_id_in;
   logic                                  axi_rd_rdy;
   logic                                  axi_rd_lock;
   logic                                  axi_rd_last;
   logic                                  axi_rd_valid;
   logic [AxiDataWidth-1:0]               axi_rd_data;
-  logic [$size(axi_resp_i.r.id)-1:0]     axi_rd_id_out;
+  logic [AxiIdWidth-1:0]                 axi_rd_id_out;
   logic                                  axi_rd_exokay;
 
   logic                                  req_valid_d, req_valid_q;
@@ -101,13 +109,19 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
   cva6_icache #(
     // use ID 0 for icache reads
     .RdTxId             ( 0             ),
-    .ArianeCfg          ( ArianeCfg     )
+    .ArianeCfg          ( ArianeCfg     ),
+    .sram_cfg_t         ( sram_cfg_t    )
   ) i_cva6_icache (
     .clk_i              ( clk_i               ),
     .rst_ni             ( rst_ni              ),
+    .sram_cfg_data_i    ( sram_cfg_data_i     ),
+    .sram_cfg_tag_i     ( sram_cfg_tag_i      ),
     .flush_i            ( flush_i             ),
     .en_i               ( en_i                ),
     .miss_o             ( miss_o              ),
+    .busy_o             ( busy_o              ),
+    .stall_i            ( stall_i             ),
+    .init_ni            ( init_ni             ),
     .areq_i             ( areq_i              ),
     .areq_o             ( areq_o              ),
     .dreq_i             ( dreq_i              ),
