@@ -1,0 +1,67 @@
+From 5fd414d76832eef564cab4dbec88915339e3c6d4 Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Tue, 21 Mar 2023 16:17:43 +0100
+Subject: [PATCH] cva6: Expose AXI user width
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ core/ariane.sv                              | 2 ++
+ core/cache_subsystem/std_cache_subsystem.sv | 1 +
+ core/cva6.sv                                | 2 ++
+ 3 files changed, 5 insertions(+)
+
+diff --git a/core/ariane.sv b/core/ariane.sv
+index e2337799..c724ad9d 100644
+--- a/core/ariane.sv
++++ b/core/ariane.sv
+@@ -18,6 +18,7 @@ module ariane import ariane_pkg::*; #(
+   parameter int unsigned AxiAddrWidth = ariane_axi::AddrWidth,
+   parameter int unsigned AxiDataWidth = ariane_axi::DataWidth,
+   parameter int unsigned AxiIdWidth   = ariane_axi::IdWidth,
++  parameter int unsigned AxiUserWidth = ariane_axi::UserWidth,
+   parameter type axi_ar_chan_t = ariane_axi::ar_chan_t,
+   parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+   parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+@@ -66,6 +67,7 @@ module ariane import ariane_pkg::*; #(
+     .AxiAddrWidth ( AxiAddrWidth ),
+     .AxiDataWidth ( AxiDataWidth ),
+     .AxiIdWidth ( AxiIdWidth ),
++    .AxiUserWidth ( AxiUserWidth ),
+     .axi_ar_chan_t (axi_ar_chan_t),
+     .axi_aw_chan_t (axi_aw_chan_t),
+     .axi_w_chan_t (axi_w_chan_t),
+diff --git a/core/cache_subsystem/std_cache_subsystem.sv b/core/cache_subsystem/std_cache_subsystem.sv
+index 2ff00452..b556008f 100644
+--- a/core/cache_subsystem/std_cache_subsystem.sv
++++ b/core/cache_subsystem/std_cache_subsystem.sv
+@@ -20,6 +20,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+     parameter int unsigned AxiAddrWidth = 0,
+     parameter int unsigned AxiDataWidth = 0,
+     parameter int unsigned AxiIdWidth   = 0,
++    parameter int unsigned AxiUserWidth = 0,
+     parameter type axi_ar_chan_t = ariane_axi::ar_chan_t,
+     parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+     parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+diff --git a/core/cva6.sv b/core/cva6.sv
+index 7ed2d203..50f5589a 100644
+--- a/core/cva6.sv
++++ b/core/cva6.sv
+@@ -28,6 +28,7 @@ module cva6 import ariane_pkg::*; #(
+   parameter int unsigned AxiAddrWidth = ariane_axi::AddrWidth,
+   parameter int unsigned AxiDataWidth = ariane_axi::DataWidth,
+   parameter int unsigned AxiIdWidth   = ariane_axi::IdWidth,
++  parameter int unsigned AxiUserWidth = ariane_axi::UserWidth,
+   parameter type axi_ar_chan_t = ariane_axi::ar_chan_t,
+   parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+   parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+@@ -789,6 +790,7 @@ module cva6 import ariane_pkg::*; #(
+     .AxiAddrWidth          ( AxiAddrWidth                ),
+     .AxiDataWidth          ( AxiDataWidth                ),
+     .AxiIdWidth            ( AxiIdWidth                  ),
++    .AxiUserWidth          ( AxiUserWidth                ),
+     .axi_ar_chan_t         ( axi_ar_chan_t               ),
+     .axi_aw_chan_t         ( axi_aw_chan_t               ),
+     .axi_w_chan_t          ( axi_w_chan_t                ),
+-- 
+2.16.5
+
