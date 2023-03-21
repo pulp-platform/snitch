@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/pulp-platform/fpnew.git
-    rev: d4bd9cc844f7d86e24b9ae432919b28f747687e0
+    url: https://github.com/openhwgroup/cvfpu.git
+    rev: 1202ca3a767b563bca5de505574373e53941506f
   }
 }
