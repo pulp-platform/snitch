@@ -22,7 +22,9 @@ module ariane import ariane_pkg::*; #(
   parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
   parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
   parameter type axi_req_t = ariane_axi::req_t,
-  parameter type axi_rsp_t = ariane_axi::resp_t
+  parameter type axi_rsp_t = ariane_axi::resp_t,
+  parameter type sram_cfg_t = logic
+
 ) (
   input  logic                         clk_i,
   input  logic                         rst_ni,
@@ -68,7 +70,8 @@ module ariane import ariane_pkg::*; #(
     .axi_aw_chan_t (axi_aw_chan_t),
     .axi_w_chan_t (axi_w_chan_t),
     .axi_req_t (axi_req_t),
-    .axi_rsp_t (axi_rsp_t)
+    .axi_rsp_t (axi_rsp_t),
+    .sram_cfg_t (sram_cfg_t)
   ) i_cva6 (
     .clk_i                ( clk_i                     ),
     .rst_ni               ( rst_ni                    ),

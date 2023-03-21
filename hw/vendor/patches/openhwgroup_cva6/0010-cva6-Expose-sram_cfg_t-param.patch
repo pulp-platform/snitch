@@ -1,0 +1,38 @@
+From 4be089d0bdfedfe6d3ebcbf3764865d70a78abe3 Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Tue, 21 Mar 2023 16:05:24 +0100
+Subject: [PATCH] cva6: Expose sram_cfg_t param
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ core/ariane.sv | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/core/ariane.sv b/core/ariane.sv
+index 222cb715..e2337799 100644
+--- a/core/ariane.sv
++++ b/core/ariane.sv
+@@ -22,7 +22,9 @@ module ariane import ariane_pkg::*; #(
+   parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+   parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+   parameter type axi_req_t = ariane_axi::req_t,
+-  parameter type axi_rsp_t = ariane_axi::resp_t
++  parameter type axi_rsp_t = ariane_axi::resp_t,
++  parameter type sram_cfg_t = logic
++
+ ) (
+   input  logic                         clk_i,
+   input  logic                         rst_ni,
+@@ -68,7 +70,8 @@ module ariane import ariane_pkg::*; #(
+     .axi_aw_chan_t (axi_aw_chan_t),
+     .axi_w_chan_t (axi_w_chan_t),
+     .axi_req_t (axi_req_t),
+-    .axi_rsp_t (axi_rsp_t)
++    .axi_rsp_t (axi_rsp_t),
++    .sram_cfg_t (sram_cfg_t)
+   ) i_cva6 (
+     .clk_i                ( clk_i                     ),
+     .rst_ni               ( rst_ni                    ),
+-- 
+2.16.5
+
