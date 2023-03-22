@@ -39,7 +39,7 @@ def main():
         data = f.read()
 
     # Writes jtag commands to fd_o
-    convert(df_o, data, width, radix, int(options.base, 16), options.device, True, options.chunk_size)
+    convert(fd_o, data, width, radix, int(options.base, 16), options.device, True, options.chunk_size)
 
 def convert(output, data, width, radix, address, dev, rb, chunk_size):
     # License
