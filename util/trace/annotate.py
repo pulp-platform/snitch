@@ -63,7 +63,7 @@ parser.add_argument(
     nargs='?',
     type=int,
     default=0,
-    help='First line to parse')
+    help='First line to parse, zero-based and inclusive')
 parser.add_argument(
     '-e',
     '--end',
@@ -71,7 +71,11 @@ parser.add_argument(
     nargs='?',
     type=int,
     default=-1,
-    help='Last line to parse')
+    help='Last line to parse, zero-based and inclusive')
+parser.add_argument(
+    '--keep-time',
+    action='store_true',
+    help='Preserve simulation time in trace')
 parser.add_argument(
     '-q',
     '--quiet',
@@ -86,6 +90,7 @@ output = args.output
 diff = args.diff
 addr2line = args.addr2line
 quiet = args.quiet
+keep_time = args.keep_time
 
 if not quiet:
     print('elf:', elf, file=sys.stderr)
@@ -93,6 +98,7 @@ if not quiet:
     print('output:', output, file=sys.stderr)
     print('diff:', diff, file=sys.stderr)
     print('addr2line:', addr2line, file=sys.stderr)
+    print('keep_time:', keep_time, file=sys.stderr)
 
 of = open(output, 'w')
 
@@ -198,23 +204,46 @@ with open(trace, 'r') as f:
         hunk_tstart = 1
         hunk_sstart = 1
 
-    trace_lines = f.readlines()[args.start:args.end]
+    # Filter lines before args.start
+    trace_lines = f.readlines()[args.start:]
+    # Filter lines after args.end (requires special care to make the bound inclusive)
+    end = args.end + 1
+    if end == 0:
+        end = len(trace_lines)
+    trace_lines = trace_lines[:end]
+
     tot_lines = len(trace_lines)
     last_prog = 0
     for lino, line in enumerate(trace_lines):
 
+        # Split trace line in columns
+        cols = re.split(r" +", line.strip())
+        # Get simulation time from first column
+        time = cols[0]
         # RTL traces might not contain a PC on each line
         try:
-            addr_str = re.split(r" +", line.strip())[3]
+            # Get address from PC column
+            addr_str = cols[3]
             addr = int(addr_str, base=16)
+            # Find index of first character in PC
             if trace_start_col < 0:
                 trace_start_col = line.find(addr_str)
         except (ValueError, IndexError):
-            if diff:
-                hunk_trace += f'-{line[trace_start_col:]}'
+            if keep_time:
+                filtered_line = f'{time:>12}    {line[trace_start_col:]}'
             else:
-                of.write(f'      {line[trace_start_col:]}')
+                filtered_line = f'{line[trace_start_col:]}'
+            if diff:
+                hunk_trace += f'-{filtered_line}'
+            else:
+                of.write(f'      {filtered_line}')
             continue
+
+        # Filter trace line for printing
+        if keep_time:
+            filtered_line = f'{time:>12}    {line[trace_start_col:]}'
+        else:
+            filtered_line = f'{line[trace_start_col:]}'
 
         addr_hex = f'{addr:x}'
         ret = adr2line(addr)
@@ -276,13 +305,13 @@ with open(trace, 'r') as f:
                     hunk_source += f'+{indentation}{file_lines[0]}: {src_line}\n'
 
             # Assemble trace part of hunk
-            hunk_trace += f'-{line[trace_start_col:]}'
+            hunk_trace += f'-{filtered_line}'
 
         # Default: print trace interleaved with source annotations
         else:
             if len(annot) and annot != last:
                 of.write(annot+'\n')
-            of.write(f'      {line[trace_start_col:]}')
+            of.write(f'      {filtered_line}')
             last = annot
 
         # very simple progress

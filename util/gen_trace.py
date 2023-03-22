@@ -465,6 +465,7 @@ def read_annotations(dict_str: str) -> dict:
 
 
 def annotate_snitch(extras: dict,
+                    sim_time: int,
                     cycle: int,
                     pc: int,
                     gpr_wb_info: dict,
@@ -498,8 +499,10 @@ def annotate_snitch(extras: dict,
                     csr_addr)
             cycles_past = extras['opb']
             if csr_name == 'mcycle':
+                perf_metrics[-1]['tend'] = sim_time / 1000
                 perf_metrics[-1]['end'] = cycles_past
                 perf_metrics.append(defaultdict(int))
+                perf_metrics[-1]['tstart'] = sim_time / 1000
                 perf_metrics[-1]['start'] = cycles_past + 2
             ret.append('{} = {}'.format(csr_name, int_lit(cycles_past)))
         # Load / Store
@@ -651,9 +654,9 @@ def annotate_insn(
         extras = read_annotations(extras_str)
         # Annotate snitch
         if extras['source'] == TRACE_SRCES['snitch']:
-            annot = annotate_snitch(extras, time_info[1], int(pc_str, 16),
-                                    gpr_wb_info, perf_metrics, annot_fseq_offl,
-                                    force_hex_addr, permissive)
+            annot = annotate_snitch(extras, time_info[0], time_info[1],
+                                    int(pc_str, 16), gpr_wb_info, perf_metrics,
+                                    annot_fseq_offl, force_hex_addr, permissive)
             if extras['fpu_offload']:
                 perf_metrics[-1]['snitch_fseq_offloads'] += 1
                 fseq_info['fpss_pcs'].appendleft(
@@ -849,11 +852,13 @@ def main():
                 line, gpr_wb_info, fpr_wb_info, fseq_info, perf_metrics, False,
                 time_info, args.offl, not args.saddr, args.permissive)
             if perf_metrics[0]['start'] is None:
+                perf_metrics[0]['tstart'] = time_info[0] / 1000
                 perf_metrics[0]['start'] = time_info[1]
             if not empty:
                 print(ann_insn)
         else:
             break  # Nothing more in pipe, EOF
+    perf_metrics[-1]['tend'] = time_info[0] / 1000
     perf_metrics[-1]['end'] = time_info[1]
     # Compute metrics
     eval_perf_metrics(perf_metrics)
