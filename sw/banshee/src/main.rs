@@ -306,26 +306,32 @@ fn main() -> Result<()> {
 
         // loop through the files and offsets
         for (file_path, mem_offset) in file_paths.zip(mem_offsets) {
-            trace!("Loading binary data from file: {} and storing at memory offset: {}", file_path, mem_offset);
-            debug!("Loading binary data from file: {} and storing at memory offset: {}", file_path, mem_offset);
+            trace!(
+                "Loading binary data from file: {} and storing at memory offset: {}",
+                file_path,
+                mem_offset
+            );
+            debug!(
+                "Loading binary data from file: {} and storing at memory offset: {}",
+                file_path, mem_offset
+            );
             // get memory offset from argument
             let mut memory_offset = mem_offset.trim_start_matches("0x");
             // turn the string into a u64
             let mut mem_offset = u64::from_str_radix(memory_offset, 16).unwrap();
 
             let data = dram_preload::generic_bin_read::<4>(file_path, mem_offset).unwrap();
-                
+
             let data_length = data.len() as u64;
 
             let mut mem = engine.memory.lock().unwrap();
-            
+
             mem.extend(data);
             for addr in mem_offset..mem_offset + data_length {
-                let val:u32 = mem.get(&(addr)).copied().unwrap_or(0);
+                let val: u32 = mem.get(&(addr)).copied().unwrap_or(0);
                 trace!("address = 0x{:x}, binary value = {:#034b}", addr, val);
             }
         }
-
     }
     // Write the module to disk if requested.
     if let Some(path) = matches.value_of("emit-llvm") {
