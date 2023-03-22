@@ -1,0 +1,2 @@
+overrides:
+  fpnew: {path: "../../vendor/openhwgroup_cvfpu"}
