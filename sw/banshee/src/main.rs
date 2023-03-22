@@ -144,29 +144,22 @@ fn main() -> Result<()> {
                 .multiple(true)
                 .help("Pass command line arguments to LLVM"),
         )
+        // Replace single arguments with lists of arguments.
         .arg(
-            Arg::with_name("train-data-bin-file-path")
-                .long("train-data-bin-file-path")
+            Arg::with_name("file-paths")
+                .long("file-paths")
                 .takes_value(true)
-                .help("Path to the binary file of the data for training."),
+                .multiple(true)
+                .value_delimiter(",")
+                .help("Path to the binary data files (without labels) for training."),
         )
         .arg(
-            Arg::with_name("train-data-mem-offset")
-                .long("train-data-mem-offset")
+            Arg::with_name("mem-offsets")
+                .long("mem-offsets")
                 .takes_value(true)
-                .help("Define the offset at which the train data should be written into DRAM."),
-        )
-        .arg(
-            Arg::with_name("train-labels-bin-file-path")
-                .long("train-labels-bin-file-path")
-                .takes_value(true)
-                .help("Path to the binary file of the labels for training."),
-        )
-        .arg(
-            Arg::with_name("train-labels-mem-offset")
-                .long("train-labels-mem-offset")
-                .takes_value(true)
-                .help("Define the offset at which the train labels should be written into DRAM."),
+                .multiple(true)
+                .value_delimiter(",")
+                .help("The memory offsets of the data files for training."),
         )
         .get_matches();
 
@@ -236,8 +229,7 @@ fn main() -> Result<()> {
     let has_num_cores = matches.is_present("num-cores");
     let has_num_clusters = matches.is_present("num-clusters");
     let has_base_hartid = matches.is_present("base-hartid");
-    let has_train_bin = matches.is_present("train-data-bin-file-path");
-    let has_train_labels_bin = matches.is_present("train-labels-bin-file-path");
+    let has_bin_files = matches.is_present("file-paths");
 
     matches
         .value_of("num-cores")
@@ -293,56 +285,48 @@ fn main() -> Result<()> {
         .translate_elf(&elf)
         .context("Failed to translate ELF binary")?;
 
-    if has_train_bin {
-        let bin_path = matches.value_of("train-data-bin-file-path").unwrap();
-
-        trace!("Loading train data from binary file: {}", bin_path);
-
-        // get memory offset from argument
-        let mut memory_offset = matches
-            .value_of("train-data-mem-offset")
-            .unwrap()
-            .trim_start_matches("0x");
-        // turn the string into a u64
-        let mut mem_offset = u64::from_str_radix(memory_offset, 16).unwrap();
-
-        trace!("Train data starts at address: 0x{:x}", mem_offset);
-
-        let train_data = dram_preload::generic_bin_read::<4>(bin_path, mem_offset).unwrap();
-
-        let train_data_length = train_data.len() as u64;
-
-        let mut mem = engine.memory.lock().unwrap();
-
-        mem.extend(train_data);
-
-        for addr in mem_offset..mem_offset + train_data_length {
-            let val: u32 = mem.get(&(addr)).copied().unwrap_or(0);
-            trace!("address = 0x{:x}, binary value = {:#034b}", addr, val);
+    if has_bin_files {
+        // loop through the file paths
+        let file_paths = matches.values_of("file-paths").unwrap();
+        debug!("File paths: {:?}", file_paths);
+        for file_path in matches.values_of("file-paths").unwrap() {
+            debug!("loop File path: {:?}", file_path);
         }
-    }
-
-    if has_train_labels_bin {
-        let bin_path = matches.value_of("train-labels-bin-file-path").unwrap();
-        trace!("Loading train labels from binary file: {}", bin_path);
-        // get memory offset from argument
-        let mut memory_offset = matches
-            .value_of("train-labels-mem-offset")
-            .unwrap()
-            .trim_start_matches("0x");
-        // turn the string into a u64
-        let mut mem_offset = u64::from_str_radix(memory_offset, 16).unwrap();
-        trace!("Train labels starts at address: 0x{:x}", mem_offset);
-        let train_labels = dram_preload::generic_bin_read::<8>(bin_path, mem_offset).unwrap();
-        let train_labels_length = train_labels.len() as u64;
-        let mut mem = engine.memory.lock().unwrap();
-        mem.extend(train_labels);
-        for addr in mem_offset..mem_offset + train_labels_length {
-            let val: u32 = mem.get(&(addr)).copied().unwrap_or(0);
-            trace!("address = 0x{:x}, binary value = {:#034b}", addr, val);
+        // iterate through the memory offsets
+        for mem_offset in matches.values_of("mem-offsets").unwrap() {
+            debug!("loop Memory offset: {:?}", mem_offset);
         }
-    }
+        let mem_offsets = matches.values_of("mem-offsets").unwrap();
+        debug!("Memory offsets: {:?}", mem_offsets);
 
+        // check if the number of files and offsets are the same
+        if file_paths.len() != mem_offsets.len() {
+            bail!("Number of files and offsets are not the same. Cannot allocate memory.");
+        }
+
+        // loop through the files and offsets
+        for (file_path, mem_offset) in file_paths.zip(mem_offsets) {
+            trace!("Loading binary data from file: {} and storing at memory offset: {}", file_path, mem_offset);
+            debug!("Loading binary data from file: {} and storing at memory offset: {}", file_path, mem_offset);
+            // get memory offset from argument
+            let mut memory_offset = mem_offset.trim_start_matches("0x");
+            // turn the string into a u64
+            let mut mem_offset = u64::from_str_radix(memory_offset, 16).unwrap();
+
+            let data = dram_preload::generic_bin_read::<4>(file_path, mem_offset).unwrap();
+                
+            let data_length = data.len() as u64;
+
+            let mut mem = engine.memory.lock().unwrap();
+            
+            mem.extend(data);
+            for addr in mem_offset..mem_offset + data_length {
+                let val:u32 = mem.get(&(addr)).copied().unwrap_or(0);
+                trace!("address = 0x{:x}, binary value = {:#034b}", addr, val);
+            }
+        }
+
+    }
     // Write the module to disk if requested.
     if let Some(path) = matches.value_of("emit-llvm") {
         unsafe {
