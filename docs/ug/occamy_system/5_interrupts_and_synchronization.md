@@ -1,0 +1,1 @@
+../../../hw/system/occamy/docs/5_interrupts_and_synchronization.md

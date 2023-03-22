@@ -82,9 +82,14 @@ $(VLT_BUILDDIR)/generated/%.o: generated/%.cc ${VLT_BUILDDIR}/lib/libfesvr.a
 	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
 
 # Link verilated archive wich $(VLT_COBJ)
+## Build compilation script and compile all sources for Verilator simulation
 bin/snitch_cluster.vlt: $(VLT_AR) $(VLT_COBJ) ${VLT_BUILDDIR}/lib/libfesvr.a
 	mkdir -p $(dir $@)
 	$(CXX) $(LDFLAGS) -std=c++14 -L ${VLT_BUILDDIR}/lib -o $@ $(VLT_COBJ) $(VLT_AR) -lfesvr -lpthread
+
+## Clean all build directories and temporary files for Verilator simulation
+clean.vlt:
+	rm -rf ${VLT_BUILDDIR} work
 
 ############
 # Modelsim #
@@ -95,46 +100,112 @@ ${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} ${TB_DIR}/rtl_lib.
 	echo '${VLOG} -work $(dir $@) ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc -ccflags "-std=c++14 -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}"' >> $@
 	echo 'return 0' >> $@
 
+## Build compilation script and compile all sources for Questasim simulation
 bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
 	$(call QUESTASIM,tb_bin)
+
+## Clean all build directories and temporary files for Questasim simulation
+clean.vsim:
+	rm -rf bin/snitch_cluster.vsim bin/snitch_cluster.vsim.gui work-vsim work vsim.wlf
 
 #######
 # VCS #
 #######
+## Build compilation script and compile all sources for VCS simulation
 bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a generated/snitch_cluster_wrapper.sv ${TB_DIR}/common_lib.cc generated/bootdata.cc
 	mkdir -p bin
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/snitch_cluster.vcs -cc $(CC) -cpp $(CXX) \
 		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc generated/bootdata.cc \
 		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}" -LDFLAGS "-L${FESVR}/lib" -lfesvr
 
+## Clean all build directories and temporary files for VCS simulation
+clean.vcs:
+	rm -rf bin/snitch_cluster.vcs work-vcs work
+
 ######
 # SW #
 ######
-# VSIM
-sw/build.vsim: clean-sw
+## Build SW into sw/build with the LLVM toolchain
+sw: clean.sw
 	mkdir -p sw/build
-	cd sw/build && cmake-3.18.1 -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make
+	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm && make
 
-sw/test.vsim: sw/build.vsim
+# VSIM
+## Build SW into sw/build with the LLVM toolchain (including tests) for Questasim simulator
+sw.vsim: clean.sw
+	mkdir -p sw/build
+	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vsim -DBUILD_TESTS=ON .. && make
+
+## Build SW and run all tests with Questasim simulator
+sw.test.vsim: sw.vsim
+	cd sw/build && make test
+
+# VCS
+## Build SW into sw/build with the LLVM toolchain (including tests) for VCS simulator
+sw.vcs: clean.sw
+	mkdir -p sw/build
+	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/snitch_cluster/bin/snitch_cluster.vcs -DBUILD_TESTS=ON .. && make
+
+## Build SW and run all tests with VCS simulator
+sw.test.vcs: sw.vcs
 	cd sw/build && make test
 
 # VLT
-sw/build.vlt: clean-sw
+## Build SW into sw/build with the LLVM toolchain (including tests) for Verilator simulator
+sw.vlt: clean.sw
 	mkdir -p sw/build
 	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
 
-sw/test.vlt: sw/build.vlt
+## Build SW and run all tests with Verilator simulator
+sw.test.vlt: sw.vlt
 	cd sw/build && make test
 
-# Clean
-clean-sw:
+## Delete sw/build
+clean.sw:
 	rm -rf sw/build
 
-#########
-# Phony #
-#########
-clean:
-	rm -rf ${VLT_BUILDDIR} Bender.lock .bender/
-	# work/
+########
+# Util #
+########
+.PHONY: help clean vlt.build vsim.build all
+.DEFAULT_GOAL := help
 
-.PHONY: clean vlt.build vsim.build all
+## Clean everything
+clean: clean.vcs clean.vlt clean.vsim clean.sw
+	rm -rf Bender.lock .bender/ work/
+
+clean.logs:
+	rm -rf logs/
+
+## Help command
+Blue=\033[1;34m
+Black=\033[0m
+help:
+	@echo -e "${Blue}Makefile Targets${Black} for the ${Blue}Snitch Cluster${Black}"
+	@echo -e "Use 'make <target>' where <target> is one of:"
+	@echo -e ""
+	@echo -e "${Blue}help           ${Black}Show an overview of all Makefile targets."
+	@echo -e ""
+	@echo -e "${Blue}bin/snitch_cluster.vcs  ${Black}Build compilation script and compile all sources for VCS simulation."
+	@echo -e "${Blue}bin/snitch_cluster.vlt  ${Black}Build compilation script and compile all sources for Verilator simulation."
+	@echo -e "${Blue}bin/snitch_cluster.vsim ${Black}Build compilation script and compile all sources for Questasim simulation."
+	@echo -e ""
+	@echo -e "${Blue}clean          ${Black}Clean everything except traces in logs directory."
+	@echo -e "${Blue}clean.sw       ${Black}Delete sw/build."
+	@echo -e "${Blue}clean.logs     ${Black}Delete all traces in logs directory."
+	@echo -e "${Blue}clean.vcs      ${Black}Clean all build directories and temporary files for VCS simulation."
+	@echo -e "${Blue}clean.vlt      ${Black}Clean all build directories and temporary files for Verilator simulation."
+	@echo -e "${Blue}clean.vsim     ${Black}Clean all build directories and temporary files for Questasim simulation."
+	@echo -e ""
+	@echo -e "${Blue}sw             ${Black}Build SW into sw/build with the LLVM."
+	@echo -e "${Blue}sw.vcs         ${Black}Build SW into sw/build with the LLVM (incl. tests) for VCS simulator."
+	@echo -e "${Blue}sw.vlt         ${Black}Build SW into sw/build with the LLVM (incl. tests) for Verilator simulator."
+	@echo -e "${Blue}sw.vsim        ${Black}Build SW into sw/build with the LLVM (incl. tests) for Questasim simulator."
+	@echo -e ""
+	@echo -e "${Blue}sw.test.vcs    ${Black}Build SW and run all tests with VCS simulator."
+	@echo -e "${Blue}sw.test.vlt    ${Black}Build SW and run all tests with Verilator simulator."
+	@echo -e "${Blue}sw.test.vsim   ${Black}Build SW and run all tests with Questasim simulator."
+	@echo -e ""
+	@echo -e "Additional useful targets from the included Makefrag:"
+	@echo -e "${Blue}traces         ${Black}Generate the better readable traces in .logs/trace_hart_<hart_id>.txt with spike-dasm."
+	@echo -e "${Blue}annotate       ${Black}Annotate the better readable traces in .logs/trace_hart_<hart_id>.s with the source code related with the retired instructions."

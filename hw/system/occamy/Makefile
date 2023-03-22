@@ -109,31 +109,42 @@ update-socreg:
 update-quadreg:
 	$(call update_ctrl_regs,QUADREGS,src/occamy_quadrant_s1_ctrl,occamy_quadrant_s1_reg.hjson,occamy_quad_peripheral,1)
 
-# Generate all addressmaps
+
+###############
+# Address Map #
+###############
+
+## Generate the addressmap in the following formats: MD, TEX
 update-addrmap: addrmap.tex addrmap.md
 
+## Generate the addressmap in the following formats: MD, PNG, TEX, PDF
 addrmap: update-source update-addrmap addrmap.png addrmap.pdf
 
 addrmap.png: update-source
 	dot -Tpng addrmap/addrmap.dot > addrmap/addrmap.png
 
+## Generate the TEX addrmap source
 addrmap.tex: update-source
 	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir addrmap --tex addrmap/addrmap.tex.tpl
 
+## Generate the MD addrmap graphic
 addrmap.md: update-source
-	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir $(ROOT)/docs/ug/ --md occamy_addrmap.md
+	@$(ROOT)/util/addrmapgen.py --file addrmap/addrmap.csv --outdir docs --md 2_addrmap.md
 
+## Generate the PDF addrmap graphic
 addrmap.pdf: addrmap.tex
 	cd addrmap && latexmk -quiet -pdf addrmap.tex
 
-clean-addrmap.pdf:
+## Delete all Latex outputs when generating the addrmap.pdf from addrmap.tex
+clean.addrmap.pdf:
 	rm -rf addrmap/addrmap.aux
 	rm -rf addrmap/addrmap.fdb*
 	rm -rf addrmap/addrmap.fls
 	rm -rf addrmap/addrmap.log
 	rm -rf addrmap/addrmap.pdf
 
-clean-addrmap: clean-addrmap.pdf
+## Delete the Latex output addrmap.pdf
+clean.addrmap: clean.addrmap.pdf
 	rm -rf addrmap.png
 
 
@@ -146,6 +157,11 @@ ${VLT_BUILDDIR}/verilate: ${VLT_SOURCES} ${TB_SRCS}
 # Quick sanity check, not really meant for simulation.
 verilate: ${VLT_BUILDDIR}/verilate
 
+## Clean all build directories and temporary files for Verilator simulation
+clean.vlt:
+	rm -rf ${VLT_BUILDDIR} work
+
+
 ############
 # Modelsim #
 ############
@@ -156,26 +172,142 @@ ${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} ${TB_DIR}/rtl_lib.
 	echo '${VLOG} -work $(dir $@) test/uartdpi/uartdpi.c -ccflags "-Itest/uartdpi"' >> $@
 	echo 'return 0' >> $@
 
+# @IIS:
+# CC=$(QUESTA_HOME)/gcc-5.3.0-linux_x86_64/bin/gcc
+# CXX=$(QUESTA_HOME)/gcc-5.3.0-linux_x86_64/bin/g++
+# LD=$(QUESTA_HOME)/gcc-5.3.0-linux_x86_64/bin/ld
+# make bin/occamy_top.vsim
+## Build compilation script and compile all sources for Questasim simulation
 bin/occamy_top.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl work/lib/libfesvr.a
 	$(call QUESTASIM,tb_bin)
+
+## Clean all build directories and temporary files for Questasim simulation
+clean.vsim:
+	rm -rf bin/occamy_top.vsim bin/occamy_top.vsim.gui work-vsim work vsim.wlf
+
 
 #######
 # VCS #
 #######
-# make bin/occamy_top.vsim
-# CC=$(QUESTA_HOME)/gcc-5.3.0-linux_x86_64/bin/gcc
-# CXX=$(QUESTA_HOME)/gcc-5.3.0-linux_x86_64/bin/g++
-# LD=$(QUESTA_HOME)/gcc-5.3.0-linux_x86_64/bin/ld
+# @IIS: vcs-2020.12 make bin/occamy_top.vcs
+## Build compilation script and compile all sources for VCS simulation
 bin/occamy_top.vcs: work-vcs/compile.sh work/lib/libfesvr.a ${TB_DIR}/common_lib.cc test/bootdata.cc test/bootrom.bin test/uartdpi/uartdpi.c
 	mkdir -p bin
 	vcs -Mlib=work-vcs -Mdir=work-vcs -debug_access+all -fgp -kdb +vcs+fsdbon -o bin/occamy_top.vcs -cc $(CC) -cpp $(CXX) \
 		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc test/bootdata.cc test/uartdpi/uartdpi.c \
 		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR} -Itest/uartdpi" -LDFLAGS "-L${FESVR}/lib" -lfesvr -lutil
 
+## Clean all build directories and temporary files for VCS simulation
+clean.vcs:
+	rm -rf bin/occamy_top.vcs work-vcs work
+
+
+######
+# SW #
+######
+## Build SW into sw/build with the LLVM toolchain
+sw: clean.sw
+	mkdir -p sw/build
+	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm && make
+
+# VSIM
+## Build SW into sw/build with the LLVM toolchain (including tests) for Questasim simulator
+sw.vsim: clean.sw
+	mkdir -p sw/build
+	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/occamy/bin/occamy_top.vsim -DBUILD_TESTS=ON .. && make
+
+## Build SW and run all tests with Questasim simulator
+sw.test.vsim: sw.vsim
+	cd sw/build && make test
+
+# VCS
+## Build SW into sw/build with the LLVM toolchain (including tests) for VCS simulator
+sw.vcs: clean.sw
+	mkdir -p sw/build
+	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DSNITCH_SIMULATOR=../../../../../hw/system/occamy/bin/occamy_top.vcs -DBUILD_TESTS=ON .. && make
+
+## Build SW and run all tests with VCS simulator
+sw.test.vcs: sw.vcs
+	cd sw/build && make test
+
+# VLT
+## Build SW into sw/build with the LLVM toolchain (including tests) for Verilator simulator
+sw.vlt: clean.sw
+	mkdir -p sw/build
+	cd sw/build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-llvm -DBUILD_TESTS=ON .. && make
+
+## Build SW and run all tests with Verilator simulator
+sw.test.vlt: sw.vlt
+	cd sw/build && make test
+
+## Delete sw/build
+clean.sw:
+	rm -rf sw/build
+
+
 ########
 # FPGA #
 ########
+## Build a small Occamy version (CVA6 + 1xcluster) for the VCU128 FPGA board
 fpga:
 	${MAKE} -C fpga occamy_vcu128
 
 .PHONY: fpga
+
+
+########
+# Util #
+########
+
+## Clean everything except logs
+clean: clean.vcs clean.vlt clean.vsim clean.sw
+	rm -rf Bender.lock .bender/ work/
+
+clean.logs:
+	rm -rf logs/
+
+## Help command
+.DEFAULT_GOAL := help
+Blue=\033[1;34m
+Black=\033[0m
+help:
+	@echo -e "${Blue}Makefile Targets${Black} for the ${Blue}Snitch Cluster${Black}"
+	@echo -e "Use 'make <target>' where <target> is one of:"
+	@echo -e ""
+	@echo -e "${Blue}help           ${Black}Show an overview of all Makefile targets."
+	@echo -e ""
+	@echo -e "${Blue}bin/occamy_top.vcs  ${Black}Build compilation script and compile all sources for VCS simulation. @IIS: vcs-2020.12 make bin/occamy_top.vcs"
+	@echo -e "${Blue}bin/occamy_top.vlt  ${Black}Build compilation script and compile all sources for Verilator simulation."
+	@echo -e "${Blue}bin/occamy_top.vsim ${Black}Build compilation script and compile all sources for Questasim simulation. @IIS: QUESTA_HOME=/usr/pack/modelsim-10.7b-kgf/questasim/ CC=$(QUESTA_HOME)/gcc-5.3.0-linux_x86_64/bin/gcc CXX=$(QUESTA_HOME)/gcc-5.3.0-linux_x86_64/bin/g++ LD=$(QUESTA_HOME)/gcc-5.3.0-linux_x86_64/bin/ld make bin/occamy_top.vsim"
+	@echo -e ""
+	@echo -e "${Blue}all            ${Black}Update all SW and HW related sources (by, e.g., re-generating the RegGen registers and their c-header files)."
+	@echo -e "${Blue}fpga           ${Black}Build a small Occamy version (CVA6 + 1xcluster) for the VCU128 FPGA board."
+	@echo -e ""
+	@echo -e "${Blue}update-addrmap ${Black}Generate the addressmap in the following formats: MD, TEX."
+	@echo -e "${Blue}addrmap        ${Black}Generate the addressmap in the following formats: MD, PNG, TEX, PDF."
+	@echo -e "${Blue}addrmap.tex    ${Black}Generate the TEX addrmap source."
+	@echo -e "${Blue}addrmap.md     ${Black}Generate the MD addrmap graphic."
+	@echo -e "${Blue}addrmap.png    ${Black}Generate the PNG addrmap graphic."
+	@echo -e "${Blue}addrmap.pdf    ${Black}Generate the PDF addrmap graphic."
+	@echo -e ""
+	@echo -e "${Blue}clean          ${Black}Clean everything except traces in logs directory."
+	@echo -e "${Blue}clean.sw       ${Black}Delete sw/build."
+	@echo -e "${Blue}clean.addrmap  ${Black}Delete all addrmap outputs."
+	@echo -e "${Blue}clean.addrmap.pdf ${Black}Delete all Latex outputs when generating the addrmap.pdf from addrmap.tex"
+	@echo -e "${Blue}clean.logs     ${Black}Delete all traces in logs directory."
+	@echo -e "${Blue}clean.vcs      ${Black}Clean all build directories and temporary files for VCS simulation."
+	@echo -e "${Blue}clean.vlt      ${Black}Clean all build directories and temporary files for Verilator simulation."
+	@echo -e "${Blue}clean.vsim     ${Black}Clean all build directories and temporary files for Questasim simulation."
+	@echo -e ""
+	@echo -e "${Blue}sw             ${Black}Build SW into sw/build with the LLVM."
+	@echo -e "${Blue}sw.vcs         ${Black}Build SW into sw/build with the LLVM (incl. tests) for VCS simulator."
+	@echo -e "${Blue}sw.vlt         ${Black}Build SW into sw/build with the LLVM (incl. tests) for Verilator simulator."
+	@echo -e "${Blue}sw.vsim        ${Black}Build SW into sw/build with the LLVM (incl. tests) for Questasim simulator."
+	@echo -e ""
+	@echo -e "${Blue}sw.test.vcs    ${Black}Build SW and run all tests with VCS simulator."
+	@echo -e "${Blue}sw.test.vlt    ${Black}Build SW and run all tests with Verilator simulator."
+	@echo -e "${Blue}sw.test.vsim   ${Black}Build SW and run all tests with Questasim simulator."
+	@echo -e ""
+	@echo -e "Additional useful targets from the included Makefrag:"
+	@echo -e "${Blue}traces         ${Black}Generate the better readable traces in .logs/trace_hart_<hart_id>.txt with spike-dasm."
+	@echo -e "${Blue}annotate       ${Black}Annotate the better readable traces in .logs/trace_hart_<hart_id>.s with the source code related with the retired instructions."
