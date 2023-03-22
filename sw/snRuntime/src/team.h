@@ -1,46 +1,57 @@
-// Copyright 2020 ETH Zurich and University of Bologna.
+// Copyright 2023 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
-#pragma once
-#include "snrt.h"
 
-extern __thread struct snrt_team *_snrt_team_current;
-extern __thread uint32_t _snrt_core_idx;
-extern const uint32_t _snrt_team_size;
+inline uint32_t __attribute__((const)) snrt_hartid() {
+    uint32_t hartid;
+    asm("csrr %0, mhartid" : "=r"(hartid));
+    return hartid;
+}
 
-struct snrt_team {
-    /// Pointer to the root team description of this cluster.
-    struct snrt_team_root *root;
-};
+inline uint32_t __attribute__((const)) snrt_cluster_num() {
+    return SNRT_CLUSTER_NUM;
+}
 
-struct snrt_allocator_inst {
-    // Base address from where allocation starts
-    uint32_t base;
-    // Number of bytes alloctable
-    uint32_t size;
-    // Address of the next allocated block
-    uint32_t next;
-};
-struct snrt_allocator {
-    struct snrt_allocator_inst l1;
-    struct snrt_allocator_inst l3;
-};
+inline uint32_t __attribute__((const)) snrt_cluster_core_num() {
+    return SNRT_CLUSTER_CORE_NUM;
+}
 
-// This struct is placed at the end of each clusters TCDM
-struct snrt_team_root {
-    struct snrt_team base;
-    const void *bootdata;
-    uint32_t global_core_base_hartid;
-    uint32_t global_core_num;
-    uint32_t cluster_idx;
-    uint32_t cluster_num;
-    uint32_t cluster_core_base_hartid;
-    uint32_t cluster_core_num;
-    snrt_slice_t global_mem;
-    snrt_slice_t cluster_mem;
-    snrt_slice_t zero_mem;
-    struct snrt_allocator allocator;
-    struct snrt_barrier cluster_barrier;
-    uint32_t barrier_reg_ptr;
-    struct snrt_peripherals peripherals;
-};
+inline uint32_t __attribute__((const)) snrt_global_core_base_hartid() {
+    return SNRT_BASE_HARTID;
+}
+
+inline uint32_t __attribute__((const)) snrt_global_core_num() {
+    return snrt_cluster_num() * snrt_cluster_core_num();
+}
+
+inline uint32_t __attribute__((const)) snrt_global_core_idx() {
+    return snrt_hartid() - snrt_global_core_base_hartid();
+}
+
+inline uint32_t __attribute__((const)) snrt_cluster_idx() {
+    return snrt_global_core_idx() / snrt_cluster_core_num();
+}
+
+inline uint32_t __attribute__((const)) snrt_cluster_core_idx() {
+    return snrt_global_core_idx() % snrt_cluster_core_num();
+}
+
+inline uint32_t __attribute__((const)) snrt_cluster_compute_core_idx() {
+    return snrt_cluster_core_idx();
+}
+
+inline uint32_t __attribute__((const)) snrt_cluster_dm_core_num() {
+    return SNRT_CLUSTER_DM_CORE_NUM;
+}
+
+inline uint32_t __attribute__((const)) snrt_cluster_compute_core_num() {
+    return snrt_cluster_core_num() - snrt_cluster_dm_core_num();
+}
+
+inline int __attribute__((const)) snrt_is_compute_core() {
+    return snrt_cluster_core_idx() < snrt_cluster_compute_core_num();
+}
+
+inline int __attribute__((const)) snrt_is_dm_core() {
+    return !snrt_is_compute_core();
+}
