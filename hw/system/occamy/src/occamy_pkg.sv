@@ -116,7 +116,8 @@ package occamy_pkg;
 
 
   // AXI-Lite bus with 48 bit address and 64 bit data.
-  `AXI_LITE_TYPEDEF_ALL(axi_lite_a48_d64, logic [47:0], logic [63:0], logic [7:0])
+  `AXI_LITE_TYPEDEF_ALL_CT(axi_lite_a48_d64, axi_lite_a48_d64_req_t, axi_lite_a48_d64_rsp_t,
+                           logic [47:0], logic [63:0], logic [7:0])
 
   /// Inputs of the `soc_axi_lite_periph_xbar` crossbar.
   typedef enum int {
@@ -192,7 +193,8 @@ package occamy_pkg;
 };
 
   // AXI-Lite bus with 48 bit address and 32 bit data.
-  `AXI_LITE_TYPEDEF_ALL(axi_lite_a48_d32, logic [47:0], logic [31:0], logic [3:0])
+  `AXI_LITE_TYPEDEF_ALL_CT(axi_lite_a48_d32, axi_lite_a48_d32_req_t, axi_lite_a48_d32_rsp_t,
+                           logic [47:0], logic [31:0], logic [3:0])
 
   /// Inputs of the `soc_axi_lite_narrow_periph_xbar` crossbar.
   typedef enum int {
@@ -286,8 +288,8 @@ package occamy_pkg;
 };
 
   // AXI bus with 48 bit address, 512 bit data, 4 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i4_u0, logic [47:0], logic [3:0], logic [511:0], logic [63:0],
-                   logic [0:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i4_u0, axi_a48_d512_i4_u0_req_t, axi_a48_d512_i4_u0_resp_t,
+                      logic [47:0], logic [3:0], logic [511:0], logic [63:0], logic [0:0])
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_0_in_req_t;
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_0_out_req_t;
@@ -595,8 +597,8 @@ package occamy_pkg;
 };
 
   // AXI bus with 48 bit address, 512 bit data, 7 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i7_u0, logic [47:0], logic [6:0], logic [511:0], logic [63:0],
-                   logic [0:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i7_u0, axi_a48_d512_i7_u0_req_t, axi_a48_d512_i7_u0_resp_t,
+                      logic [47:0], logic [6:0], logic [511:0], logic [63:0], logic [0:0])
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_inter_xbar_in_req_t;
   typedef axi_a48_d512_i7_u0_req_t quadrant_inter_xbar_out_req_t;
@@ -716,8 +718,8 @@ package occamy_pkg;
 };
 
   // AXI bus with 48 bit address, 512 bit data, 6 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i6_u0, logic [47:0], logic [5:0], logic [511:0], logic [63:0],
-                   logic [0:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i6_u0, axi_a48_d512_i6_u0_req_t, axi_a48_d512_i6_u0_resp_t,
+                      logic [47:0], logic [5:0], logic [511:0], logic [63:0], logic [0:0])
 
   typedef axi_a48_d512_i4_u0_req_t soc_wide_xbar_in_req_t;
   typedef axi_a48_d512_i6_u0_req_t soc_wide_xbar_out_req_t;
@@ -790,12 +792,12 @@ package occamy_pkg;
 };
 
   // AXI bus with 48 bit address, 64 bit data, 4 bit IDs, and 5 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d64_i4_u5, logic [47:0], logic [3:0], logic [63:0], logic [7:0],
-                   logic [4:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d64_i4_u5, axi_a48_d64_i4_u5_req_t, axi_a48_d64_i4_u5_resp_t,
+                      logic [47:0], logic [3:0], logic [63:0], logic [7:0], logic [4:0])
 
   // AXI bus with 48 bit address, 64 bit data, 8 bit IDs, and 5 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d64_i8_u5, logic [47:0], logic [7:0], logic [63:0], logic [7:0],
-                   logic [4:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d64_i8_u5, axi_a48_d64_i8_u5_req_t, axi_a48_d64_i8_u5_resp_t,
+                      logic [47:0], logic [7:0], logic [63:0], logic [7:0], logic [4:0])
 
   typedef axi_a48_d64_i4_u5_req_t soc_narrow_xbar_in_req_t;
   typedef axi_a48_d64_i8_u5_req_t soc_narrow_xbar_out_req_t;
@@ -998,8 +1000,8 @@ package occamy_pkg;
 };
 
   // AXI bus with 48 bit address, 512 bit data, 3 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i3_u0, logic [47:0], logic [2:0], logic [511:0], logic [63:0],
-                   logic [0:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i3_u0, axi_a48_d512_i3_u0_req_t, axi_a48_d512_i3_u0_resp_t,
+                      logic [47:0], logic [2:0], logic [511:0], logic [63:0], logic [0:0])
 
   typedef axi_a48_d512_i3_u0_req_t wide_xbar_quadrant_s1_in_req_t;
   typedef axi_a48_d512_i6_u0_req_t wide_xbar_quadrant_s1_out_req_t;
@@ -1058,8 +1060,8 @@ package occamy_pkg;
 };
 
   // AXI bus with 48 bit address, 64 bit data, 7 bit IDs, and 5 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d64_i7_u5, logic [47:0], logic [6:0], logic [63:0], logic [7:0],
-                   logic [4:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d64_i7_u5, axi_a48_d64_i7_u5_req_t, axi_a48_d64_i7_u5_resp_t,
+                      logic [47:0], logic [6:0], logic [63:0], logic [7:0], logic [4:0])
 
   typedef axi_a48_d64_i4_u5_req_t narrow_xbar_quadrant_s1_in_req_t;
   typedef axi_a48_d64_i7_u5_req_t narrow_xbar_quadrant_s1_out_req_t;
@@ -1086,35 +1088,35 @@ package occamy_pkg;
   `APB_TYPEDEF_RESP_T(apb_a48_d32_rsp_t, logic [31:0])
 
   // AXI bus with 48 bit address, 32 bit data, 8 bit IDs, and 5 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d32_i8_u5, logic [47:0], logic [7:0], logic [31:0], logic [3:0],
-                   logic [4:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d32_i8_u5, axi_a48_d32_i8_u5_req_t, axi_a48_d32_i8_u5_resp_t,
+                      logic [47:0], logic [7:0], logic [31:0], logic [3:0], logic [4:0])
 
   // Register bus with 48 bit address and 64 bit data.
   `REG_BUS_TYPEDEF_ALL(reg_a48_d64, logic [47:0], logic [63:0], logic [7:0])
 
   // AXI bus with 48 bit address, 64 bit data, 4 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d64_i4_u0, logic [47:0], logic [3:0], logic [63:0], logic [7:0],
-                   logic [0:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d64_i4_u0, axi_a48_d64_i4_u0_req_t, axi_a48_d64_i4_u0_resp_t,
+                      logic [47:0], logic [3:0], logic [63:0], logic [7:0], logic [0:0])
 
   // AXI bus with 48 bit address, 512 bit data, 4 bit IDs, and 5 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i4_u5, logic [47:0], logic [3:0], logic [511:0], logic [63:0],
-                   logic [4:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i4_u5, axi_a48_d512_i4_u5_req_t, axi_a48_d512_i4_u5_resp_t,
+                      logic [47:0], logic [3:0], logic [511:0], logic [63:0], logic [4:0])
 
   // AXI bus with 48 bit address, 64 bit data, 1 bit IDs, and 5 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d64_i1_u5, logic [47:0], logic [0:0], logic [63:0], logic [7:0],
-                   logic [4:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d64_i1_u5, axi_a48_d64_i1_u5_req_t, axi_a48_d64_i1_u5_resp_t,
+                      logic [47:0], logic [0:0], logic [63:0], logic [7:0], logic [4:0])
 
   // AXI bus with 48 bit address, 32 bit data, 1 bit IDs, and 5 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d32_i1_u5, logic [47:0], logic [0:0], logic [31:0], logic [3:0],
-                   logic [4:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d32_i1_u5, axi_a48_d32_i1_u5_req_t, axi_a48_d32_i1_u5_resp_t,
+                      logic [47:0], logic [0:0], logic [31:0], logic [3:0], logic [4:0])
 
   // AXI bus with 48 bit address, 64 bit data, 2 bit IDs, and 5 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d64_i2_u5, logic [47:0], logic [1:0], logic [63:0], logic [7:0],
-                   logic [4:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d64_i2_u5, axi_a48_d64_i2_u5_req_t, axi_a48_d64_i2_u5_resp_t,
+                      logic [47:0], logic [1:0], logic [63:0], logic [7:0], logic [4:0])
 
   // AXI bus with 48 bit address, 512 bit data, 1 bit IDs, and 0 bit user data.
-  `AXI_TYPEDEF_ALL(axi_a48_d512_i1_u0, logic [47:0], logic [0:0], logic [511:0], logic [63:0],
-                   logic [0:0])
+  `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i1_u0, axi_a48_d512_i1_u0_req_t, axi_a48_d512_i1_u0_resp_t,
+                      logic [47:0], logic [0:0], logic [511:0], logic [63:0], logic [0:0])
 
 
 endpackage
