@@ -205,8 +205,10 @@ sources:
       - target: not(synthesis)
         include_dirs:
           - core/include
+          - common/local/util
         files:
           # Tracer (behavioral code, not RTL)
+          - core/include/instr_tracer_pkg.sv
           - common/local/util/instr_tracer.sv
           - common/local/util/instr_tracer_if.sv
           - common/local/util/instr_trace_item.svh
