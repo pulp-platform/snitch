@@ -44,6 +44,8 @@ default: all
 # Build rules
 #--------------------------------------------------------------------
 
+# TODO: if integrating in Mempool move all Mempool related things in this Makefile
+# outside of riscv-tests
 MEMPOOL_DIR       := $(shell git rev-parse --show-toplevel 2>/dev/null || echo $$MEMPOOL_DIR)
 INSTALL_DIR       ?= $(MEMPOOL_DIR)/install
 GCC_INSTALL_DIR   ?= $(INSTALL_DIR)/riscv-gcc
@@ -52,6 +54,7 @@ SPIKE_INSTALL_DIR ?= $(INSTALL_DIR)/riscv-isa-sim
 RISCV_PREFIX ?= riscv$(XLEN)-unknown-elf-
 RISCV_GCC ?= $(RISCV_PREFIX)gcc
 RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
+# TODO: update with new compiler which separates Xpulp partitions
 RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --disassembler-option="march=rv32gXpulpimg" --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
 RISCV_SIM ?= spike
 

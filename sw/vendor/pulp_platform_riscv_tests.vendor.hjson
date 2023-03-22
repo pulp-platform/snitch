@@ -6,7 +6,7 @@
   target_dir: "riscv-tests",
 
   upstream: {
-    url: "https://github.com/oakentling/riscv-tests.git",
-    rev: "revision",
+    url: "https://github.com/pulp-platform/riscv-tests.git",
+    rev: "xpulp-dev",
   },
 }

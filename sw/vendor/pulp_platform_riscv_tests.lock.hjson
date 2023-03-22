@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/oakentling/riscv-tests.git
-    rev: fe2f531401f2cefb6b93487dac3959fb8b7e3fbe
+    url: https://github.com/pulp-platform/riscv-tests.git
+    rev: 1d484a5ec9590229c9e15f64889537006cdd675f
   }
 }
