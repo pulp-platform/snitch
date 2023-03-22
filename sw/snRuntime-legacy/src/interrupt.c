@@ -4,7 +4,6 @@
 #include "encoding.h"
 #include "printf.h"
 #include "snrt.h"
-#include "team.h"
 
 //================================================================================
 // Macros
