@@ -4,7 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.2.11 - 2022-12-12
+### Added
+- `tc_clk_or2`: A new generic tech cell for balanced clock OR-gates.
+- `tc_clk_mux2`: Added warning about misusing `tc_clk_mux2` cells.
+
+## 0.2.10 - 2022-11-20
+### Added
+- `tc_sram_impl`: Wrapper for `tc_sram` with implementation-specific keys and IO 
+
+### Changed
+- `tc_sram`: Improve simulation performance
+
+### Fixed
+- `tc_clk_xilinx`: Add `IS_FUNCTIONAL` parameter to match `tc_clk_gating` interface
 
 ## 0.2.9 - 2022-03-17
 ### Changed
@@ -18,7 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## 0.2.6 - 2021-10-04
 ### Added
-- Add `pad_functional_xilinx
+- Add `pad_functional_xilinx`
 
 ### Fixed
 - Bender targets
