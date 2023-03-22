@@ -12,7 +12,7 @@ SED_SRCS  := sed -e ${MATCH_END} -e ${MATCH_BGN}
 TB_SRCS   := $(wildcard ${ROOT}/hw/ip/test/*.sv)
 TB_DIR    := ${ROOT}/hw/ip/test/src
 
-VSIM_BENDER   += -t test -t rtl -t simulation -t vsim
+VSIM_BENDER   += -t test -t rtl -t simulation -t vsim -t cv64a6_imafdc_sv39
 VSIM_SOURCES  := $(shell ${BENDER} script flist ${VSIM_BENDER} | ${SED_SRCS})
 VSIM_BUILDDIR := work-vsim
 
