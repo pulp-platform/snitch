@@ -108,10 +108,10 @@ int main() {
             volatile uint32_t ldC = l1_gemm_l.N * compute_num;
 
             benchmark_get_cycle();
-            gemm_fp64_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
-                               l1_gemm_l.K, &mat_A[A_offset], ldA, l1_gemm_l.TA,
-                               mat_B, ldB, l1_gemm_l.TB, &mat_C[C_offset], ldC,
-                               &l1_gemm_l.ALPHA, setup_SSR);
+            gemm_fp64_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N, l1_gemm_l.K,
+                          &mat_A[A_offset], ldA, l1_gemm_l.TA, mat_B, ldB,
+                          l1_gemm_l.TB, &mat_C[C_offset], ldC, &l1_gemm_l.ALPHA,
+                          setup_SSR);
             benchmark_get_cycle();
         } else if (!l1_gemm_l.TA && l1_gemm_l.TB) {
             volatile uint32_t A_offset =
@@ -127,10 +127,10 @@ int main() {
             switch (l1_gemm_l.dtype) {
                 case FP64:
                     gemm_fp64_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,
-                                       l1_gemm_l.K, &mat_A[A_offset], ldA,
-                                       l1_gemm_l.TA, mat_B, ldB, l1_gemm_l.TB,
-                                       &mat_C[C_offset], ldC, &l1_gemm_l.ALPHA,
-                                       setup_SSR);
+                                  l1_gemm_l.K, &mat_A[A_offset], ldA,
+                                  l1_gemm_l.TA, mat_B, ldB, l1_gemm_l.TB,
+                                  &mat_C[C_offset], ldC, &l1_gemm_l.ALPHA,
+                                  setup_SSR);
                     break;
                 case FP32:
                     gemm_fp32_opt(l1_gemm_l.M / compute_num, l1_gemm_l.N,

@@ -57,11 +57,9 @@ void gemm_fp64_baseline(uint32_t M, uint32_t N, uint32_t K, double* A,
     }
 }
 
-
-void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
-                        uint32_t ldA, uint32_t ta, double* B, uint32_t ldB,
-                        uint32_t tb, double* C, uint32_t ldC,
-                        const uint32_t* ALPHA, uint32_t setup_SSR) {
+void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
+                   uint32_t ta, double* B, uint32_t ldB, uint32_t tb, double* C,
+                   uint32_t ldC, const uint32_t* ALPHA, uint32_t setup_SSR) {
     // Unrolling factor of most inner loop.
     // Should be at least as high as the FMA delay
     // for maximum utilization
@@ -80,20 +78,22 @@ void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A,
         const uint32_t ssr0_i[4] = {0, sizeof(double), 0, sizeof(double) * ldA};
 
         snrt_ssr_loop_3d(SNRT_SSR_DM0, ssr0_b[1], ssr0_b[2], ssr0_b[3],
-                            ssr0_i[1], ssr0_i[2], ssr0_i[3]);
+                         ssr0_i[1], ssr0_i[2], ssr0_i[3]);
         snrt_ssr_repeat(SNRT_SSR_DM0, unroll);
 
         // Second matrix is stored in transposed format
         if (tb) {
             const uint32_t ssr1_b[4] = {unroll, K, N / unroll, M};
-            const uint32_t ssr1_i[4] = {sizeof(double) * ldB, sizeof(double), sizeof(double) * ldB * unroll, 0};
+            const uint32_t ssr1_i[4] = {sizeof(double) * ldB, sizeof(double),
+                                        sizeof(double) * ldB * unroll, 0};
 
             snrt_ssr_loop_4d(SNRT_SSR_DM1, ssr1_b[0], ssr1_b[1], ssr1_b[2],
                              ssr1_b[3], ssr1_i[0], ssr1_i[1], ssr1_i[2],
                              ssr1_i[3]);
         } else {
             const uint32_t ssr1_b[4] = {unroll, K, N / unroll, M};
-            const uint32_t ssr1_i[4] = {sizeof(double), sizeof(double) * ldB, sizeof(double) * unroll, 0};
+            const uint32_t ssr1_i[4] = {sizeof(double), sizeof(double) * ldB,
+                                        sizeof(double) * unroll, 0};
 
             snrt_ssr_loop_4d(SNRT_SSR_DM1, ssr1_b[0], ssr1_b[1], ssr1_b[2],
                              ssr1_b[3], ssr1_i[0], ssr1_i[1], ssr1_i[2],
