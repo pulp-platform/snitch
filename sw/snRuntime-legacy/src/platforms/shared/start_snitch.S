@@ -5,7 +5,7 @@
 #include "../../start.S"
 
 # Function to determine the initial cluster layout to setup the initial stack.
-# See `hw/system/snitch_cluster/test/tb_lib.hh` for details of the bootdata
+# See `hw/system/ip/test/tb_lib.hh` for details of the bootdata
 # layout.
 #
 # Expecting:

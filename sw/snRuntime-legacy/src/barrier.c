@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 #include "snrt.h"
-#include "team.h"
 
 /// Synchronize cores in a cluster with a hardware barrier
 void snrt_cluster_hw_barrier() { _snrt_cluster_barrier(); }
@@ -11,7 +10,7 @@ void snrt_cluster_hw_barrier() { _snrt_cluster_barrier(); }
 void snrt_cluster_sw_barrier() {
     // Remember previous iteration
     volatile struct snrt_barrier *barrier_ptr =
-        &_snrt_team_current->root->cluster_barrier;
+        &(snrt_current_team()->cluster_barrier);
     uint32_t prev_barrier_iteration = barrier_ptr->barrier_iteration;
     uint32_t barrier =
         __atomic_add_fetch(&barrier_ptr->barrier, 1, __ATOMIC_RELAXED);
