@@ -11,15 +11,17 @@
 #
 # In vivado then `source mem.tcl` to execute
 #
-# Using
-# - https://github.com/anishathalye/bin2coe/blob/master/src/bin2coe/convert.py
+# Requires bin2coe 
+# - https://github.com/anishathalye/bin2coe/blob/master/src/bin2coe
 
-import sys
 from argparse import ArgumentParser
-
+from io import BytesIO
 from signal import signal, SIGPIPE, SIG_DFL
-signal(SIGPIPE, SIG_DFL)
+import sys
 
+import bin2coe.convert
+
+signal(SIGPIPE, SIG_DFL)
 
 def main():
     parser = ArgumentParser()
@@ -36,91 +38,55 @@ def main():
     with open(options.binary[0], 'rb') as f:
         data = f.read()
 
-    convert(fd_o, data, width, radix, adr=int(options.base, 16), dev=options.device, chunk_size=options.chunk_size)
+    # Writes jtag commands to fd_o
+    convert(df_o, data, width, radix, int(options.base, 16), options.device, True, options.chunk_size)
 
+def convert(output, data, width, radix, address, dev, rb, chunk_size):
+    # License
+    output.write("# Copyright 2020 ETH Zurich and University of Bologna.\n")
+    output.write("# Solderpad Hardware License, Version 0.51, see LICENSE for details.\n")
+    output.write("# SPDX-License-Identifier: SHL-0.51\n")
 
-def chunks(it, n):
-    res = []
-    for elem in it:
-        res.append(elem)
-        if len(res) == n:
-            yield res
-            res = []
-    if res:
-        yield res
+    # Pre tcl script
+    output.write("set errs 0\n")
 
-
-def word_to_int(word, little_endian):
-    if not little_endian:
-        word = reversed(word)
-    value = 0
-    for i, byte in enumerate(word):
-        value += byte << (8*i)
-    return value
-
-
-def format_int(num, base, pad_width=0):
-    chars = "0123456789abcdefghijklmnopqrstuvwxyz"
-    if num < 0:
-        raise ValueError('negative numbers not supported')
-    res = []
-    res.append(chars[num % base])
-    while num >= base:
-        num //= base
-        res.append(chars[num % base])
-    while len(res) < pad_width:
-        res.append('0')
-    return ''.join(res[::-1])
-
-
-def convert(output, data, width, radix, adr=0, little_endian=True, dev='hw_axi_1', rb=True, chunk_size=1):
-    pad_width = len(format_int(2**width-1, radix))
+    # Templates for one data write
     t = f"[get_hw_axis {dev}]"
     tpl = "create_hw_axi_txn -cache 0 -force {n} {t} -address {a} -len {l} -type write -data {d}"
     tpl_rb = "create_hw_axi_txn -cache 0 -force {n} {t} -address {a} -len {l} -type read"
     tpl_run = "run_hw_axi {txn}"
     tx_name = "txn"
 
-    d_buf = []
-    chunk_cnt = 0
+    # Get coe format from bin2coe
+    temp = BytesIO()
+    bin2coe.convert.convert(output=temp, data=data, width=width, depth=0, fill=0, radix=radix, little_endian=True, mem=True)
+    # Split the coe format into string words
+    word_list = [w for w in temp.getvalue().decode("utf-8").split("\n") if w != ""]
 
-    output.write("# Copyright 2020 ETH Zurich and University of Bologna.\n")
-    output.write("# Solderpad Hardware License, Version 0.51, see LICENSE for details.\n")
-    output.write("# SPDX-License-Identifier: SHL-0.51\n")
-
-    output.write("set errs 0\n")
-
-    def dump(adr, d_buf):
-        # dump
-        # tx_name = f"tx{chunk_cnt:05}"
-        out = tpl.format(n=tx_name, t=t, a=f"{adr:08x}", d="_".join(d_buf), l=len(d_buf)) + '\n'
+    # Loop over the string words
+    i = 0
+    while i < len(word_list):
+        # Take care at for the end of the list
+        k = min(len(word_list)-i, chunk_size)
+        # Reorganize words
+        words = word_list[i:i+k][::-1]
+        # Write axi write
+        out = tpl.format(n=tx_name, t=t, a=f"{address:08x}", d="_".join(words), l=len(words)) + '\n'
         output.write(out)
         output.write(tpl_run.format(txn=tx_name) + '\n')
-        # read-back
+        # Write axi readback
         if rb:
-            out = tpl_rb.format(n="wb", t=t, a=f"{adr:08x}", l=len(d_buf)) + '\n'
+            out = tpl_rb.format(n="wb", t=t, a=f"{address:08x}", l=len(words)) + '\n'
             output.write(out)
             output.write(f"run_hw_axi {'wb'}\n")
             output.write("set resp [get_property DATA [get_hw_axi_txns wb]]\n")
-            # output.write("puts $resp\n")
-            # output.write(f"puts {''.join(d_buf)}\n")
-            s = f"set exp {''.join(d_buf)}\n"
+            s = f"set exp {''.join(words)}\n"
             s += "if {$exp ne $resp} { puts Error; incr errs }\n"
-            # output.write(f"puts {''.join(d_buf)}\n")
             output.write(s)
+        # Get to next chunk
+        address += k * 4
+        i += k
 
-    for word in chunks(data, width // 8):
-        d = format_int(word_to_int(word, little_endian), radix, pad_width)
-        d_buf.insert(0, d)
-
-        if len(d_buf) == chunk_size:
-            dump(adr, d_buf)
-            d_buf = []
-            chunk_cnt += 1
-            adr += chunk_size*(width // 8)
-
-    if len(d_buf):
-        dump(adr, d_buf)
     if rb:
         output.write("puts \"Errors: $errs\"\n")
 

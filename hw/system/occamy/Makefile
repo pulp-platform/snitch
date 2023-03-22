@@ -71,7 +71,7 @@ update-source:
 	@echo "[SOLDER]  Device Tree"
 	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir . --dts test/occamy.dts
 	@echo "[VERIBLE] Formatting"
-	@$(VERIBLE_FMT) --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_soc.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
+	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_soc.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
 update-clint:
 	@mkdir -p src/clint
