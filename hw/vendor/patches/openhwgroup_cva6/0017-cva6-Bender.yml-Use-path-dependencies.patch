@@ -1,0 +1,37 @@
+From 809477459e8b912b6d092a8e4811009db237e368 Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Wed, 22 Mar 2023 18:49:59 +0100
+Subject: [PATCH] cva6/Bender.yml: Use path dependencies
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ Bender.yml | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
+
+diff --git a/Bender.yml b/Bender.yml
+index 1d678985..029b7c37 100644
+--- a/Bender.yml
++++ b/Bender.yml
+@@ -7,15 +7,12 @@ package:
+ 
+ # WT_DCACHE
+ dependencies:
+-  axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.31.0 }
++  axi: { path: ../../vendor/pulp_platform_axi }
+   common_cells:
+-    { git: "https://github.com/pulp-platform/common_cells", version: 1.23.0 }
+-  FPnew: { git: "https://github.com/openhwgroup/fpnew.git", version: 0.6.2 }
++    { path: ../../vendor/pulp_platform_common_cells }
++  FPnew: { path: ../../vendor/pulp_platform_fpnew }
+   tech_cells_generic:
+-    {
+-      git: "https://github.com/pulp-platform/tech_cells_generic.git",
+-      rev: b2a68114302af1d8191ddf34ea0e07b471911866,
+-    }
++    { path: ../../vendor/pulp_platform_tech_cells_generic }
+ 
+ frozen: true
+ 
+-- 
+2.16.5
+

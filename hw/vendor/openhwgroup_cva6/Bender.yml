@@ -7,15 +7,12 @@ package:
 
 # WT_DCACHE
 dependencies:
-  axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.31.0 }
+  axi: { path: ../../vendor/pulp_platform_axi }
   common_cells:
-    { git: "https://github.com/pulp-platform/common_cells", version: 1.23.0 }
-  FPnew: { git: "https://github.com/openhwgroup/fpnew.git", version: 0.6.2 }
+    { path: ../../vendor/pulp_platform_common_cells }
+  FPnew: { path: ../../vendor/pulp_platform_fpnew }
   tech_cells_generic:
-    {
-      git: "https://github.com/pulp-platform/tech_cells_generic.git",
-      rev: b2a68114302af1d8191ddf34ea0e07b471911866,
-    }
+    { path: ../../vendor/pulp_platform_tech_cells_generic }
 
 frozen: true
 
