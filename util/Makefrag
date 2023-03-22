@@ -3,7 +3,8 @@ BENDER		   ?= bender
 DASM 	       ?= spike-dasm
 VLT			   ?= verilator
 VERIBLE_FMT    ?= verible-verilog-format
-BIN2JTAG     ?=  $(ROOT)/util/bin2jtag.py
+BIN2JTAG       ?= $(ROOT)/util/bin2jtag.py
+ANNOTATE	   ?= ${ROOT}/util/trace/annotate.py
 
 VERILATOR_ROOT ?= $(dir $(shell which $(VLT)))/../share/verilator
 VLT_ROOT	   ?= ${VERILATOR_ROOT}
@@ -38,6 +39,8 @@ VLT_BENDER   += -t rtl
 VLT_SOURCES  := $(shell ${BENDER} script flist ${VLT_BENDER} | ${SED_SRCS})
 VLT_CFLAGS   += -std=c++14 -pthread
 VLT_CFLAGS   +=-I ${VLT_BUILDDIR} -I $(VLT_ROOT)/include -I $(VLT_ROOT)/include/vltstd -I $(VLT_FESVR)/include -I $(TB_DIR)
+
+ANNOTATE_FLAGS ?= -q --keep-time
 
 # We need a recent LLVM installation (>11) to compile Verilator.
 # We also need to link the binaries with LLVM's libc++.
@@ -131,16 +134,20 @@ define QUESTASIM
 	@! grep -P "Errors: [1-9]*," $(dir $<)vsim.log
 	@mkdir -p bin
 	@echo "#!/bin/bash" > $@
-	@echo 'echo $$1 > logs/.rtlbinary' >> $@
+	@echo 'binary=$$(realpath --relative-to=${MKFILE_DIR} $$1)' >> $@
+	@echo 'cd ${MKFILE_DIR}' >> $@
+	@echo 'echo $$binary > logs/.rtlbinary' >> $@
 	@echo '${VSIM} +permissive ${VSIM_FLAGS} -work ${MKFILE_DIR}/${VSIM_BUILDDIR} -c \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr -lutil" \
-				$1 +permissive-off ++$$1' >> $@
+				$1 +permissive-off ++$$binary' >> $@
 	@chmod +x $@
 	@echo "#!/bin/bash" > $@.gui
-	@echo 'echo $$1 > logs/.rtlbinary' >> $@
+	@echo 'binary=$$(pwd)/$$1' >> $@.gui
+	@echo 'cd ${MKFILE_DIR}' >> $@.gui
+	@echo 'echo $$binary > logs/.rtlbinary' >> $@.gui
 	@echo '${VSIM} +permissive ${VSIM_FLAGS} -work ${MKFILE_DIR}/${VSIM_BUILDDIR} \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr -lutil" \
-				$1 +permissive-off ++$$1' >> $@.gui
+				$1 +permissive-off ++$$binary' >> $@.gui
 	@chmod +x $@.gui
 endef
 
@@ -156,18 +163,31 @@ work-vcs/compile.sh: ${VSIM_SOURCES} ${TB_SRCS}
 ########
 # Util #
 ########
-logs/trace_hart_%.txt: logs/trace_hart_%.dasm ${ROOT}/util/gen_trace.py
-	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py > $@
 
-traces: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.txt/') || echo "")
+# Common rule to generate C header with REGGEN
+# $1: target name, $2: prerequisite (hjson description file)
+define reggen_generate_header
+	@echo "[REGGEN] Generating $1"
+	@$(REGGEN) -D -o $1 $2
+	@$(CLANG_FORMAT) -i $1
+endef
+
+logs/trace_hart_%.txt logs/hart_%_perf.json: logs/trace_hart_%.dasm ${ROOT}/util/gen_trace.py
+	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py -d logs/hart_$*_perf.json > logs/trace_hart_$*.txt
+
+traces: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.txt/') || echo "") \
+        $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/trace_hart/hart/' | sed 's/.dasm/_perf.json/') || echo "")
 
 # make annotate
 # Generate source-code interleaved traces for all harts. Reads the binary from
 # the logs/.rtlbinary file that is written at start of simulation in the vsim script
-logs/trace_hart_%.s: logs/trace_hart_%.txt ${ROOT}/util/trace/annotate.py
-	$(PYTHON) ${ROOT}/util/trace/annotate.py -q -o $@ $(BINARY) $<
+logs/trace_hart_%.s: logs/trace_hart_%.txt ${ANNOTATE}
+	$(PYTHON) ${ANNOTATE} ${ANNOTATE_FLAGS} -o $@ $(BINARY) $<
+logs/trace_hart_%.diff: logs/trace_hart_%.txt ${ANNOTATE}
+	$(PYTHON) ${ANNOTATE} ${ANNOTATE_FLAGS} -o $@ $(BINARY) $< -d
 BINARY ?= $(shell cat logs/.rtlbinary)
-annotate: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.s/') || echo "")
+annotate: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.s/') || echo "") \
+          $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.diff/') || echo "")
 
 # Arg 1: binary
 # Arg 2: max size in bytes
