@@ -2,10 +2,9 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-# pragma once
+#pragma once
 
 #include "math.h"
-
 #include "printf.h"
 #include "snrt.h"
 #include "utils.h"
@@ -29,18 +28,17 @@ typedef union {
 
 /**
  * Baseline kernels for a single core execution
-*/
+ */
 
 #define NUM_CLASSES 10
 #define IN_CH 784
 #define BATCH_SIZE 256
 
 /**
- * SoftMax calculation 
-*/
+ * SoftMax calculation
+ */
 
 static inline void SoftMax_baseline(float *activations, int length) {
-
     // printf("============= SoftMax feedforward start =============\n");
     float sum = 0;
     float max = activations[0];
@@ -53,9 +51,9 @@ static inline void SoftMax_baseline(float *activations, int length) {
         }
     }
 
-    // normalize 
+    // normalize
     for (int i = 0; i < length; i++) {
-        activations[i] = exp(activations[i]- max);
+        activations[i] = exp(activations[i] - max);
         sum += activations[i];
     }
 
@@ -71,11 +69,11 @@ static inline void SoftMax_baseline(float *activations, int length) {
 }
 
 /**
- * FeedForward calculation 
-*/
+ * FeedForward calculation
+ */
 
-static inline void FeedForward_baseline(float *image, float *activations, float *biases, float *weights) {
-
+static inline void FeedForward_baseline(float *image, float *activations,
+                                        float *biases, float *weights) {
     // printf("============= Feedforward pass start =============\n");
 
     // float checksum = 0;
@@ -93,7 +91,7 @@ static inline void FeedForward_baseline(float *image, float *activations, float 
 
         // printf("activations[%d] = %f\n", i, activations[i]);
     }
-    
+
     // printf("Activation checksum = %f\n", checksum);
     // printf("Image FeedForward checksum = %f\n", img_checksum);
     // printf("Weight FeedForward checksum = %f\n", weight_checksum);
@@ -101,27 +99,27 @@ static inline void FeedForward_baseline(float *image, float *activations, float 
     // printf("============= Feedforward pass end =============\n");
 
     // snrt_cluster_hw_barrier();
-    
+
     SoftMax_baseline(activations, NUM_CLASSES);
 }
 
 /**
  * Gradient update calculation
-*/
+ */
 
-static inline void GradientUpdate_baseline(
-            float *image, float *activations, float *biases, 
-            float *weights, float *W_gradients, float *b_gradients,
-            uint32_t label, float *loss) {
-    
-
+static inline void GradientUpdate_baseline(float *image, float *activations,
+                                           float *biases, float *weights,
+                                           float *W_gradients,
+                                           float *b_gradients, uint32_t label,
+                                           float *loss) {
     FeedForward_baseline(image, activations, biases, weights);
 
     loss[0] = 0.0f - log(activations[label]);
-    // printf("loss = %f, label = %u, activation = %f\n", loss[0], label, activations[label]);
-    
+    // printf("loss = %f, label = %u, activation = %f\n", loss[0], label,
+    // activations[label]);
+
     snrt_cluster_hw_barrier();
-    
+
     float b_grad, W_grad;
     for (int i = 0; i < NUM_CLASSES; i++) {
         b_grad = (i == label) ? (activations[i] - 1) : activations[i];
@@ -132,31 +130,29 @@ static inline void GradientUpdate_baseline(
 
         b_gradients[i] += b_grad;
     }
-    
+
     // return loss;
     snrt_cluster_hw_barrier();
-    
 }
-
 
 /**
  * Training step calculation
-*/
+ */
 
-static inline void TrainingStep_baseline(
-            float *biases, float *weights, float *W_gradients, float *b_gradients,
-            float learning_rate) {
-
+static inline void TrainingStep_baseline(float *biases, float *weights,
+                                         float *W_gradients, float *b_gradients,
+                                         float learning_rate) {
     // float b_checksum = 0;
     // float W_checksum = 0;
     // float b_grad_checksum = 0;
     // float W_grad_checksum = 0;
-    for(int i = 0; i < NUM_CLASSES; i++) {
+    for (int i = 0; i < NUM_CLASSES; i++) {
         biases[i] -= learning_rate * b_gradients[i] / BATCH_SIZE;
         // b_grad_checksum += b_gradients[i];
         // b_checksum += biases[i];
-        for(int j = 0; j < IN_CH; j++) {
-            weights[i * IN_CH + j] -= learning_rate * W_gradients[i * IN_CH + j] / BATCH_SIZE;
+        for (int j = 0; j < IN_CH; j++) {
+            weights[i * IN_CH + j] -=
+                learning_rate * W_gradients[i * IN_CH + j] / BATCH_SIZE;
             // W_checksum += weights[i * IN_CH + j];
             // W_grad_checksum += W_gradients[i * IN_CH + j];
         }

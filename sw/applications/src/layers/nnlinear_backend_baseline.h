@@ -6,7 +6,7 @@
 
 /**
  * @brief MNIST baseline network handling data transfers & function calls
- *        for a single core execution and no fancy optimizations like 
+ *        for a single core execution and no fancy optimizations like
  *        SSRs or FREP.
  *
  * @param n network_t struct holding all addresses and parameters

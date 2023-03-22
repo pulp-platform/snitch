@@ -7,20 +7,19 @@
 // different memory layouts for matrices (transposed/not-transposed)
 // Correctness of results are checked automatically
 
-#include "nnlinear_backend_baseline.h"
 #include "data_fp32_nnlinear.h"
-#include "network.h"
 #include "math.h"
+#include "network.h"
+#include "nnlinear_backend_baseline.h"
 #include "perf_cnt.h"
 #include "printf.h"
 #include "snrt.h"
 #include "utils.h"
 
-int main(){
-
+int main() {
     nn_linear_baseline_t.W = (void *)nn_linear_baseline_weights_dram;
     nn_linear_baseline_t.b = (void *)nn_linear_baseline_biases_dram;
-    
+
     // Run the baseline neural network
     nnlinear_backend_baseline(&nn_linear_baseline_t);
     snrt_global_barrier();
