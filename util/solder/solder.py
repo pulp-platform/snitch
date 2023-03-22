@@ -329,8 +329,9 @@ class AxiStruct:
         name = "axi_a{}_d{}_i{}_u{}".format(*key)
         code = "// AXI bus with {} bit address, {} bit data, {} bit IDs, and {} bit user data.\n".format(
             *key)
-        code += "`AXI_TYPEDEF_ALL_CT({}, {}_req_t, {}_resp_t, logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])\n".format(
-            name, name, name, aw - 1, iw - 1, dw - 1, (dw + 7) // 8 - 1, max(0, uw - 1))
+        code += "`AXI_TYPEDEF_ALL_CT({}, {}_req_t, {}_resp_t, ".format(name, name, name)
+        code += "logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])\n".format(
+            aw - 1, iw - 1, dw - 1, (dw + 7) // 8 - 1, max(0, uw - 1))
         code_package += "\n" + code
         AxiStruct.configs[key] = name
         return name
