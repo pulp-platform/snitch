@@ -123,3 +123,24 @@ jobs:
       - name: Run Unit Tests
         run: |-
           cd hw/system/snitch_cluster/ && ./run-tests sw/tests/passing-apps.list --simulator verilator
+
+  ######################################
+  # Build SW for Single-Cluster Occamy #
+  ######################################
+  # TODO: add simulation w/ Verilator
+  sw-single-cluster-occamy:
+    container:
+      image: ghcr.io/pulp-platform/snitch
+    name: Build SW for Single-Cluster Occamy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Software
+      env:
+        CC: clang
+        LD: lld
+        AR: llvm-ar
+        OBJCOPY: llvm-objcopy
+        OBJDUMP: llvm-objdump
+        DWARFDUMP: llvm-dwarfdump
+      run: make -C hw/system/occamy CFG_OVERRIDE=cfg/single-cluster.hjson sw

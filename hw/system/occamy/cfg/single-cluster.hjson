@@ -1,0 +1,406 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Cluster configuration for Occamy.
+{
+    is_remote_quadrant: false,
+    remote_quadrants: [],
+    quadrant_pre_xbar: {
+      max_slv_trans: 64,
+      max_mst_trans: 64,
+      fall_through: false,
+    },
+    pre_xbar_slv_id_width_no_rocache: 3,
+    wide_xbar: {
+      max_slv_trans: 64,
+      max_mst_trans: 64,
+      fall_through: false,
+    },
+    quadrant_inter_xbar: {
+      max_slv_trans: 64,
+      max_mst_trans: 64,
+      fall_through: false,
+    },
+    hbm_xbar: {
+      max_slv_trans: 128,
+      max_mst_trans: 128,
+      fall_through: false,
+    },
+    narrow_xbar: {
+      max_slv_trans: 32,
+      max_mst_trans: 32,
+      fall_through: false,
+    },
+    cuts: {
+      narrow_to_quad: 3,
+      quad_to_narrow: 3,
+      quad_to_pre: 1,
+      pre_to_inter: 1,
+      inter_to_quad: 3,
+      narrow_to_cva6: 2,
+      narrow_conv_to_spm_narrow_pre: 2,
+      narrow_conv_to_spm_narrow: 1,
+      narrow_and_pcie: 3,
+      narrow_and_wide: 1,
+      wide_conv_to_spm_wide: 3,
+      wide_to_wide_zero_mem: 0,
+      wide_to_hbm: 3,
+      wide_and_inter: 3,
+      wide_and_hbi: 3,
+      narrow_and_hbi: 3,
+      pre_to_hbmx: 3,
+      hbmx_to_hbm: 3,
+      atomic_adapter_narrow: 1,
+      atomic_adapter_narrow_wide: 1,
+      // Give some flexibility in peripheral xbar placement
+      periph_axi_lite_narrow: 2,
+      periph_axi_lite: 2,
+      periph_axi_lite_narrow_hbm_xbar_cfg: 2,
+      // Non-right-side chip peripherals
+      periph_axi_lite_narrow_hbm_cfg: 3,
+      periph_axi_lite_narrow_pcie_cfg: 3,
+      periph_axi_lite_narrow_chip_ctrl_cfg: 3,
+      periph_axi_lite_narrow_hbi_narrow_cfg: 3,
+      periph_axi_lite_narrow_hbi_wide_cfg: 3,
+      periph_axi_lite_narrow_bootrom_cfg: 3,
+      periph_axi_lite_narrow_fll_system_cfg: 3,
+      periph_axi_lite_narrow_fll_periph_cfg: 3,
+      periph_axi_lite_narrow_fll_hbm2e_cfg: 3,
+      // Right-side or latency-invariant chip peripherals
+      periph_axi_lite_narrow_soc_ctrl_cfg: 1,
+      periph_axi_lite_narrow_uart_cfg: 1,
+      periph_axi_lite_narrow_i2c_cfg: 1,
+      periph_axi_lite_narrow_gpio_cfg: 1,
+      periph_axi_lite_narrow_clint_cfg: 1,
+      periph_axi_lite_narrow_plic_cfg: 1,
+      periph_axi_lite_narrow_spim_cfg: 1,
+      periph_axi_lite_narrow_timer_cfg: 1,
+    }
+    txns: {
+      wide_and_inter: 128,
+      wide_to_hbm: 128,
+      narrow_and_wide: 16,
+      rmq: 4,
+    }
+    narrow_xbar_slv_id_width: 4,
+    narrow_xbar_user_width: 5, // clog2(total number of clusters)
+    nr_s1_quadrant: 1,
+    s1_quadrant: {
+      nr_clusters: 1,
+      // number of pending transactions on the narrow/wide network
+      narrow_trans: 32,
+      wide_trans: 32,
+      // Disable for easier flow trials.
+      ro_cache_cfg: {
+          width: 1024,
+          count: 128,
+          sets: 2,
+          max_trans: 32,
+          address_regions: 4,
+      }
+      narrow_tlb_cfg: {
+          max_trans: 32,
+          l1_num_entries: 8,
+          l1_cut_ax: true,
+      }
+      wide_tlb_cfg: {
+          max_trans: 32,
+          l1_num_entries: 8,
+          l1_cut_ax: true,
+      }
+      wide_xbar: {
+        max_slv_trans: 32,
+        max_mst_trans: 32,
+        fall_through: false,
+      },
+      wide_xbar_slv_id_width: 3
+      narrow_xbar: {
+        max_slv_trans: 8,
+        max_mst_trans: 8,
+        fall_through: false,
+      },
+      narrow_xbar_slv_id_width: 4,
+      narrow_xbar_user_width: 5, // clog2(total number of clusters)
+      cfg_base_addr: 184549376, // 0x0b000000
+      cfg_base_offset: 65536 // 0x10000
+    },
+    cluster: {
+        name: "occamy_cluster"
+        boot_addr: 4096, // 0x1000
+        cluster_base_addr: 268435456, // 0x10000000
+        cluster_base_offset: 262144 // 0x40000
+        cluster_base_hartid: 1,
+        addr_width: 48,
+        data_width: 64,
+        user_width: 5, // clog2(total number of clusters)
+        tcdm: {
+            size: 128, // 128 kiB
+            banks: 32,
+        },
+        cluster_periph_size: 64, // kB
+        zero_mem_size: 64, // kB
+        dma_data_width: 512,
+        dma_axi_req_fifo_depth: 24,
+        dma_req_fifo_depth: 8,
+        narrow_trans: 4,
+        wide_trans: 32,
+        dma_user_width: 1,
+        // We don't need Snitch debugging in Occamy
+        enable_debug: false,
+        // We don't need Snitch (core-internal) virtual memory support
+        vm_support: false,
+        // Memory configuration inputs
+        sram_cfg_expose: true,
+        sram_cfg_fields: {
+            ema: 3,
+            emaw: 2,
+            emas: 1
+        },
+        // Timing parameters
+        timing: {
+            lat_comp_fp32: 2,
+            lat_comp_fp64: 3,
+            lat_comp_fp16: 1,
+            lat_comp_fp16_alt: 1,
+            lat_comp_fp8: 1,
+            lat_comp_fp8_alt: 1,
+            lat_noncomp: 1,
+            lat_conv: 2,
+            lat_sdotp: 3,
+            fpu_pipe_config: "BEFORE"
+            narrow_xbar_latency: "CUT_ALL_PORTS",
+            wide_xbar_latency: "CUT_ALL_PORTS",
+            // Isolate the core.
+            register_core_req: true,
+            register_core_rsp: true,
+            register_offload_req: true,
+            register_offload_rsp: true,
+            register_fpu_req: true,
+            register_ext_narrow: false,
+            register_ext_wide: false
+        },
+        hives: [
+            // Hive 0
+            {
+                icache: {
+                    size: 8, // total instruction cache size in kByte
+                    sets: 2, // number of ways
+                    cacheline: 256 // word size in bits
+                },
+                cores: [
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/compute_core_template" },
+                    { $ref: "#/dma_core_template" },
+                ]
+            }
+        ],
+    }
+    // Templates.
+    compute_core_template: {
+        isa: "rv32imafd",
+        xssr: true,
+        xfrep: true,
+        xdma: false,
+        xf16: true,
+        xf16alt: true,
+        xf8: true,
+        xf8alt: true,
+        xfdotp: true,
+        xfvec: true,
+        ssr_nr_credits: 4,
+        num_int_outstanding_loads: 1,
+        num_int_outstanding_mem: 4,
+        num_fp_outstanding_loads: 4,
+        num_fp_outstanding_mem: 4,
+        num_sequencer_instructions: 16,
+        num_dtlb_entries: 1,
+        num_itlb_entries: 1,
+        // SSSR configuration below
+        ssr_intersection: true,
+        ssr_intersection_triple: [0, 1, 2],
+        ssrs: [
+            {indirection: true},    // Master 0
+            {indirection: true},    // Master 1
+            {},                     // Slave
+        ],
+    },
+    dma_core_template: {
+        isa: "rv32imafd",
+        // Xdiv_sqrt: true,
+        # isa: "rv32ema",
+        xdma: true
+        xssr: false
+        xfrep: false
+        xf16: false,
+        xf16alt: false,
+        xf8: false,
+        xf8alt: false,
+        xfdotp: false,
+        xfvec: false,
+        num_int_outstanding_loads: 1,
+        num_int_outstanding_mem: 4,
+        num_fp_outstanding_loads: 4,
+        num_fp_outstanding_mem: 4,
+        num_sequencer_instructions: 16,
+        num_dtlb_entries: 1,
+        num_itlb_entries: 1,
+    }
+    // peripherals
+    peripherals: {
+        rom: {
+            address: 16777216, // 0x0100_0000
+            length: 131072, // 128 kiB 0x2_0000
+        },
+        clint: {
+                    address: 67108864, // 0x0400_0000
+                    length: 1048576, // 1 MiB 0x10_0000
+        },
+        axi_lite_peripherals: [
+            {
+                name: "debug",
+                address: 0, // 0x0000_0000
+                length: 4096, // 4 kiB 0x1000
+            }
+        ],
+        axi_lite_narrow_peripherals: [
+            {
+                name: "soc_ctrl",
+                address: 33554432, // 0x0200_0000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "fll_system",
+                address: 33558528, // 0x0200_1000
+                length: 1024, // 1 kiB 0x400
+            },
+            {
+                name: "fll_periph",
+                address: 33559552, // 0x0200_1400
+                length: 1024, // 1 kiB 0x400
+            },
+            {
+                name: "fll_hbm2e",
+                address: 33560576, // 0x0200_1800
+                length: 1024, // 1 kiB 0x400
+            },
+            {
+                name: "uart",
+                address: 33562624, // 0x0200_2000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "gpio",
+                address:  33566720, // 0x0200_3000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "i2c",
+                address: 33570816, // 0x0200_4000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "chip_ctrl",
+                address: 33574912, // 0x0200_5000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "timer",
+                address: 33579008, // 0x0200_6000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "hbm_xbar_cfg",
+                address: 33583104, // 0x0200_7000
+                length: 4096, // 4 kiB 0x1000
+            },
+            {
+                name: "spim",
+                address: 50331648, // 0x0300_0000
+                length: 131072, // 4 kiB 0x2_0000
+            },
+            {
+                name: "pcie_cfg",
+                address: 83886080, // 0x0500_0000
+                length: 131072, // 128 kiB 0x2_0000
+            },
+            {
+                name: "hbi_wide_cfg",
+                address: 100663296, // 0x0600_0000
+                length: 65536, // 64 kiB 0x1_0000
+            },
+            {
+                name: "hbi_narrow_cfg",
+                address: 117440512, // 0x0700_0000
+                length: 65536, // 64 kiB 0x1_0000
+            },
+            {
+                name: "plic",
+                address: 201326592, // 0x0C00_0000
+                length: 67108864, // 64 MiB 0x400_0000
+            },
+        ],
+    },
+    // non-peripheral IPs
+    pcie: {
+      address_io: 536870912, // 0x2000_0000
+      address_mm: 1207959552, // 0x4800_0000
+      length: 671088640, // 640 MiB 0x2800_0000
+    },
+    spm_narrow: {
+      address: 1879048192, // 0x7000_0000
+      length: 524288, // 512 kiB 0x8_0000
+    },
+    spm_wide: {
+      address: 1895825408, // 0x7100_0000
+      length: 1048576, // 1 MiB 0x10_0000
+    },
+    wide_zero_mem: {
+      address: 4294967296, // 0x1_0000_0000
+      length: 8589934592, // 8 GiB 0x2_0000_0000
+    },
+    sys_idma_cfg: {
+      address: 285212672, // 0x1100_0000
+      length: 65536, // 64 kiB 0x1_0000
+    },
+    hbi: {
+        address: 1099511627776, // 0x100_0000_0000
+        length: 1099511627776, // 1 TiB 0x100_0000_0000
+    }
+    hbm: {
+        address_0: 2147483648, // 0x8000_0000
+        address_1: 68719476736, // 0x10_0000_0000
+        channel_size: 1073741824, // 1 GiB 0x4000_0000
+        nr_channels_total: 8,
+        nr_channels_address_0: 2,
+        cfg_regions: {
+            top: {
+                address: 134217728, // 0x0800_0000
+                length: 4194304, // 4 MiB 0x40_0000
+            },
+            phy: {
+                address: 150994944 // 0x0900_0000
+                length: 1048576, // 1 MiB 0x10_0000
+            },
+            seq: {
+                address: 167772160, // 0x0A00_0000
+                length: 65536, // 64 kiB 0x1_0000
+            },
+            ctrl: {
+                address: 176160768, // 0x0A80_0000
+                length: 65536, // 64 kiB 0x1_0000
+            }
+        }
+    },
+    // dram corresponds to 'hbm address_0' and 'nr_channels_address_0'
+    dram: {
+        address: 2147483648, // 0x8000_0000
+        length: 2147483648, // 2 GiB 0x8000_0000
+    },
+}

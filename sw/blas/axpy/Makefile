@@ -11,9 +11,9 @@ SRC_DIR  := $(realpath $(MK_DIR)/src)
 
 LENGTH ?= 24
 
-APP     := axpy
-SRCS    := $(realpath $(SRC_DIR)/main.c)
-INCDIRS := $(DATA_DIR) $(SRC_DIR)
+APP     ?= axpy
+SRCS    ?= $(realpath $(SRC_DIR)/main.c)
+INCDIRS ?= $(DATA_DIR) $(SRC_DIR)
 
 $(DATA_DIR)/data.h: $(DATA_DIR)/datagen.py
 	$< $(LENGTH) > $@

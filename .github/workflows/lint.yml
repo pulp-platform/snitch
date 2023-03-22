@@ -250,5 +250,5 @@ jobs:
         env:
           CLANG_FORMAT: clang-format-12
         run: |-
-          make -C hw/system/occamy all
-          util/git-diff.py --error-msg "::error ::Found differences, run \`make -C hw/system/occamy all\` before committing."
+          make -C hw/system/occamy update-rtl
+          util/git-diff.py --error-msg "::error ::Found differences, run \`make -C hw/system/occamy update-rtl\` before committing."

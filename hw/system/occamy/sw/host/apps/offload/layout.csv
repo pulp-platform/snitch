@@ -1,0 +1,4 @@
+,prepare data,send interrupt,clr interrupt,get local job ptr,barrier,copy job in,copy data in,get args,barrier,compute,barrier,copy output,send interrupt,clr interrupt
+0,1,2,,,,,,,,,,,,4
+"range(1,9)",,,1,2,3,,,4,5,6,7,,,
+9,,,1,2,,3,4,,5,,6,7,8,

@@ -7,6 +7,9 @@ typedef struct {
     uint32_t volatile iteration;
 } snrt_barrier_t;
 
+extern volatile uint32_t _snrt_mutex;
+extern volatile snrt_barrier_t _snrt_barrier;
+
 inline volatile uint32_t *snrt_mutex();
 
 inline void snrt_mutex_acquire(volatile uint32_t *pmtx);

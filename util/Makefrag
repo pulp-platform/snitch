@@ -10,6 +10,8 @@ CLANG_FORMAT   ?= clang-format
 VERILATOR_ROOT ?= $(dir $(shell which $(VLT)))/../share/verilator
 VLT_ROOT	   ?= ${VERILATOR_ROOT}
 
+LOGS_DIR       ?= logs
+
 MATCH_END := '/+incdir+/ s/$$/\/*\/*/'
 MATCH_BGN := 's/+incdir+//g'
 SED_SRCS  := sed -e ${MATCH_END} -e ${MATCH_BGN}
@@ -137,7 +139,7 @@ define QUESTASIM
 	@echo "#!/bin/bash" > $@
 	@echo 'binary=$$(realpath --relative-to=${MKFILE_DIR} $$1)' >> $@
 	@echo 'cd ${MKFILE_DIR}' >> $@
-	@echo 'echo $$binary > logs/.rtlbinary' >> $@
+	@echo 'echo $$binary > $(LOGS_DIR)/.rtlbinary' >> $@
 	@echo '${VSIM} +permissive ${VSIM_FLAGS} -work ${MKFILE_DIR}/${VSIM_BUILDDIR} -c \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr -lutil" \
 				$1 +permissive-off ++$$binary' >> $@
@@ -145,7 +147,7 @@ define QUESTASIM
 	@echo "#!/bin/bash" > $@.gui
 	@echo 'binary=$$(pwd)/$$1' >> $@.gui
 	@echo 'cd ${MKFILE_DIR}' >> $@.gui
-	@echo 'echo $$binary > logs/.rtlbinary' >> $@.gui
+	@echo 'echo $$binary > $(LOGS_DIR)/.rtlbinary' >> $@.gui
 	@echo '${VSIM} +permissive ${VSIM_FLAGS} -work ${MKFILE_DIR}/${VSIM_BUILDDIR} \
 				-ldflags "-Wl,-rpath,${FESVR}/lib -L${FESVR}/lib -lfesvr -lutil" \
 				$1 +permissive-off ++$$binary' >> $@.gui
@@ -173,22 +175,22 @@ define reggen_generate_header
 	@$(CLANG_FORMAT) -i $1
 endef
 
-logs/trace_hart_%.txt logs/hart_%_perf.json: logs/trace_hart_%.dasm ${ROOT}/util/gen_trace.py
-	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py -d logs/hart_$*_perf.json > logs/trace_hart_$*.txt
+$(LOGS_DIR)/trace_hart_%.txt $(LOGS_DIR)/hart_%_perf.json: $(LOGS_DIR)/trace_hart_%.dasm ${ROOT}/util/gen_trace.py
+	$(DASM) < $< | $(PYTHON) ${ROOT}/util/gen_trace.py --permissive -d $(LOGS_DIR)/hart_$*_perf.json > $(LOGS_DIR)/trace_hart_$*.txt
 
-traces: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.txt/') || echo "") \
-        $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/trace_hart/hart/' | sed 's/.dasm/_perf.json/') || echo "")
+traces: $(shell (ls $(LOGS_DIR)/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.txt/') || echo "") \
+        $(shell (ls $(LOGS_DIR)/trace_hart_*.dasm 2>/dev/null | sed 's/trace_hart/hart/' | sed 's/.dasm/_perf.json/') || echo "")
 
 # make annotate
 # Generate source-code interleaved traces for all harts. Reads the binary from
 # the logs/.rtlbinary file that is written at start of simulation in the vsim script
-logs/trace_hart_%.s: logs/trace_hart_%.txt ${ANNOTATE}
+$(LOGS_DIR)/trace_hart_%.s: $(LOGS_DIR)/trace_hart_%.txt ${ANNOTATE}
 	$(PYTHON) ${ANNOTATE} ${ANNOTATE_FLAGS} -o $@ $(BINARY) $<
-logs/trace_hart_%.diff: logs/trace_hart_%.txt ${ANNOTATE}
+$(LOGS_DIR)/trace_hart_%.diff: $(LOGS_DIR)/trace_hart_%.txt ${ANNOTATE}
 	$(PYTHON) ${ANNOTATE} ${ANNOTATE_FLAGS} -o $@ $(BINARY) $< -d
-BINARY ?= $(shell cat logs/.rtlbinary)
-annotate: $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.s/') || echo "") \
-          $(shell (ls logs/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.diff/') || echo "")
+BINARY ?= $(shell cat $(LOGS_DIR)/.rtlbinary)
+annotate: $(shell (ls $(LOGS_DIR)/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.s/') || echo "") \
+          $(shell (ls $(LOGS_DIR)/trace_hart_*.dasm 2>/dev/null | sed 's/\.dasm/\.diff/') || echo "")
 
 # Arg 1: binary
 # Arg 2: max size in bytes
