@@ -6,39 +6,36 @@
 _start:
     .globl _start
 
-#ifdef SNRT_INIT_GP
-snrt.crt0.init_global_pointer:
-    # Initialize global pointer
-    .option push
-    .option norelax
-1:  auipc   gp, %pcrel_hi(__global_pointer$)
-    addi    gp, gp, %pcrel_lo(1b)
-    .option pop
-#endif
-
-#ifdef SNRT_INIT_CORE_INFO
-snrt.crt0.init_core_info:
-    # Initialize information needed by the following routines
-
-    # Calculate cluster idx
-    csrr a0, mhartid
-    li   t0, SNRT_BASE_HARTID
-    sub  a0, a0, t0
-    li   a1, SNRT_CLUSTER_CORE_NUM
-    div  t0, a0, a1
-    
-    # Calculate cluster-local core ID
-    remu a0, a0, a1
-    
-    # Calculate cluster's TCDM start address
-    li   a2, SNRT_TCDM_START_ADDR
-    li   t1, SNRT_CLUSTER_OFFSET
-    mul  t0, t1, t0
-    add  a2, a2, t0
-    
-    # Calculate cluster's TCDM end address
-    li   t0, SNRT_TCDM_SIZE
-    add  a2, a2, t0
+#ifdef SNRT_INIT_INT_REGS
+snrt.crt0.init_int_registers:
+    # Clear integer registers
+    mv t0, x0
+    mv t1, x0
+    mv t2, x0
+    mv t3, x0
+    mv t4, x0
+    mv t5, x0
+    mv t6, x0
+    mv a0, x0
+    mv a1, x0
+    mv a2, x0
+    mv a3, x0
+    mv a4, x0
+    mv a5, x0
+    mv a6, x0
+    mv a7, x0
+    mv s0, x0
+    mv s1, x0
+    mv s2, x0
+    mv s3, x0
+    mv s4, x0
+    mv s5, x0
+    mv s6, x0
+    mv s7, x0
+    mv s8, x0
+    mv s9, x0
+    mv s10, x0
+    mv s11, x0
 #endif
 
 #ifdef SNRT_INIT_FP_REGS
@@ -81,6 +78,41 @@ snrt.crt0.init_fp_registers:
     fcvt.d.w f30, zero
     fcvt.d.w f31, zero
 3:
+#endif
+
+#ifdef SNRT_INIT_GP
+snrt.crt0.init_global_pointer:
+    # Initialize global pointer
+    .option push
+    .option norelax
+1:  auipc   gp, %pcrel_hi(__global_pointer$)
+    addi    gp, gp, %pcrel_lo(1b)
+    .option pop
+#endif
+
+#ifdef SNRT_INIT_CORE_INFO
+snrt.crt0.init_core_info:
+    # Initialize information needed by the following routines
+
+    # Calculate cluster idx
+    csrr a0, mhartid
+    li   t0, SNRT_BASE_HARTID
+    sub  a0, a0, t0
+    li   a1, SNRT_CLUSTER_CORE_NUM
+    div  t0, a0, a1
+
+    # Calculate cluster-local core ID
+    remu a0, a0, a1
+
+    # Calculate cluster's TCDM start address
+    li   a2, SNRT_TCDM_START_ADDR
+    li   t1, SNRT_CLUSTER_OFFSET
+    mul  t0, t1, t0
+    add  a2, a2, t0
+
+    # Calculate cluster's TCDM end address
+    li   t0, SNRT_TCDM_SIZE
+    add  a2, a2, t0
 #endif
 
 #ifdef SNRT_INIT_CLS

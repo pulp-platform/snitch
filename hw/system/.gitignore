@@ -4,7 +4,6 @@ Bender.lock
 *.vcd
 *.log
 trace_*
-generated
 work*/
 *wlf*
 modelsim.ini
