@@ -77,9 +77,9 @@ sources:
       # for all the below files use Flist.cva6 as baseline and also look at Makefile pd/synth
 
       # FPGA support keep vendoring here because too old
-      - vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv
-      - vendor/pulp-platform/fpga-support/rtl/AsyncDpRam.sv
-      - vendor/pulp-platform/fpga-support/rtl/AsyncThreePortRam.sv
+#       - vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv
+#       - vendor/pulp-platform/fpga-support/rtl/AsyncDpRam.sv
+#       - vendor/pulp-platform/fpga-support/rtl/AsyncThreePortRam.sv
 
       # CVXIF
       - core/include/cvxif_pkg.sv
