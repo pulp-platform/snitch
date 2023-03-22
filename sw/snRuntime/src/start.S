@@ -2,62 +2,52 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-# This file defines the `_start` symbol and initializes the global pointer. This
-# is common among all bare runtimes.
-
-
-# Expected from bootloader:
-# - a0: mhartid
-# - a1: device tree ptr
 .section .init
 _start:
     .globl _start
 
-    # Initialize global pointer
+#ifdef SNRT_INIT_GP
 snrt.crt0.init_global_pointer:
+    # Initialize global pointer
     .option push
     .option norelax
-1:  auipc     gp, %pcrel_hi(__global_pointer$)
-    addi      gp, gp, %pcrel_lo(1b)
+1:  auipc   gp, %pcrel_hi(__global_pointer$)
+    addi    gp, gp, %pcrel_lo(1b)
     .option pop
+#endif
 
+#ifdef SNRT_INIT_CORE_INFO
 snrt.crt0.init_core_info:
-    # Information passed into the call:
-    # - a0: mhartid (from bootloader)
-    # - a1: device tree ptr (from bootloader)
-    call      _snrt_init_core_info
-    # Information needed after the call:
-    # - a0: cluster-local core id
-    # - a1: cluster-local core count
-    # - a2: TCDM start ptr
-    # - a3: TCDM end ptr
-    # - a4: device tree ptr
+    # Initialize information needed by the following routines
 
-    # Clear the bss segment.
-snrt.crt0.init_bss:
-    # Takes device tree ptr as argument and returns the hart base ID
-    mv        s0, a0 # store a0 in s0 since we dont have a stack yet
-    mv        a0, a4
-    call      _snrt_get_base_hartid
-    mv        t0, a0
-    mv        a0, s0
-    # only core 0. t0: return value base hartid
-    csrr      t1, mhartid
-    sub       t0, t1, t0
-    bnez      t0, 2f
-    la        t0, _edata
-    la        t1, _end
-    bge       t0, t1, 2f
-1:  sw        zero, 0(t0)
-    addi      t0, t0, 4
-    blt       t0, t1, 1b
-2:
+    # Calculate cluster idx
+    csrr a0, mhartid
+    li   t0, SNRT_BASE_HARTID
+    sub  a0, a0, t0
+    li   a1, SNRT_CLUSTER_CORE_NUM
+    div  t0, a0, a1
+    
+    # Calculate cluster-local core ID
+    remu a0, a0, a1
+    
+    # Calculate cluster's TCDM start address
+    li   a2, SNRT_TCDM_START_ADDR
+    li   t1, SNRT_CLUSTER_OFFSET
+    mul  t0, t1, t0
+    add  a2, a2, t0
+    
+    # Calculate cluster's TCDM end address
+    li   t0, SNRT_TCDM_SIZE
+    add  a2, a2, t0
+#endif
 
-snrt.crt0.init_registers:
-    # Clear FP registers
+#ifdef SNRT_INIT_FP_REGS
+snrt.crt0.init_fp_registers:
+    # Check if core has FP registers otherwise skip
     csrr    t0, misa
     andi    t0, t0, (1 << 3) | (1 << 5) # D/F - single/double precision float extension
     beqz    t0, 3f
+    # Clear FP registers
     fcvt.d.w f0, zero
     fcvt.d.w f1, zero
     fcvt.d.w f2, zero
@@ -91,113 +81,83 @@ snrt.crt0.init_registers:
     fcvt.d.w f30, zero
     fcvt.d.w f31, zero
 3:
+#endif
 
-    # Read hartid and number of cores in the cluster.
+#ifdef SNRT_INIT_CLS
+snrt.crt0.init_cls:
+    # Reserve space in TCDM for cluster-local storage
+    la        t0, __cdata_end
+    la        t1, __cdata_start
+    sub       t0, t0, t1
+    sub       a2, a2, t0
+    la        t0, __cbss_end
+    la        t1, __cbss_start
+    sub       t0, t0, t1
+    sub       a2, a2, t0
+#endif
+
+#ifdef SNRT_INIT_STACK
 snrt.crt0.init_stack:
-
+    # TODO colluca: do we need this?
     # Set 8 bytes aside for the main return value and clear that to zero.
-    addi      a3, a3, -8
-    sw        zero, 0(a3)
+    addi      a2, a2, -8
+    sw        zero, 0(a2)
 
-    # Set space aside for the root team structure.
-    lw        t0, _snrt_team_size
-    sub       a3, a3, t0
-    mv        a5, a3
+    # Compute the relative start address of the stack for each hart.
+    # The stack for hart N starts at the end of the stack of hart N-1.
+    sll       t0, a0, SNRT_LOG2_STACK_SIZE
+    
+    # Initialize the stack pointer to the start of the stack
+    sub       sp, a2, t0
 
-    # Compute the stack top for this hart, and the cluster-wide stack bottom.
-    lw        t2, snrt_stack_size  # load stack size (overridable by binary)
-
-    sll       t0, a0, t2  # this hart
-    sll       t1, a1, t2  # all harts
-    sub       sp, a3, t0
-    sub       a3, a3, t1
+    # Calculate the end of the stack, could be used by later routines
+    # to calculate remaining TCDM space
+    sll       t1, a1, t2    
+    sub       a2, a2, t1
 
     # Misalign stacks in the TCDM to reduce banking conflicts
     slli      t0, a0, 3  # this hart
     slli      t1, a1, 3  # all harts
     sub       sp, sp, t0
-    sub       a3, a3, t1
+    sub       a2, a2, t1
+#endif
 
-    # Allocate thread-local storage at the top of the stack and set tp
-    # to the base of the tls
+#ifdef SNRT_INIT_TLS
 snrt.crt0.init_tls:
-    la        t0, __tdata_start
-    la        t1, __tdata_end
-    la        t2, __tbss_start
-    la        t3, __tbss_end
-    add       sp, sp, t0   # subtract sp to make room for TLS and align
-    sub       sp, sp, t1
-    add       sp, sp, t2
-    sub       sp, sp, t3
-    andi      sp, sp, ~0x7
-    mv        tp, sp       # palce tp at start of TLS
+    # Reserve space for thread-local storage at the top of the stack
+    la        t0, __tdata_end
+    la        t1, __tdata_start
+    sub       t0, t0, t1
+    sub       sp, sp, t0
+    la        t0, __tbss_end
+    la        t1, __tbss_start
+    sub       t0, t0, t1
+    sub       sp, sp, t0
+    andi      sp, sp, ~0x7 # align to 8B
+    # Set tp to the base of the tls
+    mv        tp, sp
+    # TODO colluca: why again?
     andi      sp, sp, ~0x7 # align stack to 8B
+#endif
 
-    # Copy __tdata_start to __tdata_end.
-    mv        t4, tp
-    bge       t0, t1, 2f
-1:  lw        t5, 0(t0)
-    sw        t5, 0(t4)
-    addi      t0, t0, 4
-    addi      t4, t4, 4
-    blt       t0, t1, 1b
-2:
-
-    # Clear from _tdata_end to _tbss_end.
-    la        t0, __tbss_start
-    la        t1, __tbss_end
-    bge       t0, t1, 2f
-1:  sw        zero, 0(t4)
-    addi      t0, t0, 4
-    addi      t4, t4, 4
-    blt       t0, t2, 1b
-2:
-
-    # Initialize the root team.
-snrt.crt0.init_team:
-    addi      sp, sp, -20
-    sw        a0, 0(sp)
-    sw        a1, 4(sp)
-    sw        a2, 8(sp)
-    sw        a3, 12(sp)
-    sw        a4, 16(sp)
-    call      _snrt_init_team
-    lw        a0, 0(sp)
-    lw        a1, 4(sp)
-    lw        a2, 8(sp)
-    lw        a3, 12(sp)
-    lw        a4, 16(sp)
-    addi      sp, sp, 20
-
-    # Prepare interrupts
+#ifdef SNRT_INIT_INTERRUPT
 snrt.crt0.init_interrupt:
+    # Prepare interrupts
     la t0, __snrt_crt0_interrupt_handler
     csrw   mtvec, t0
+#endif
 
-    # Synchronize cores.
-snrt.crt0.pre_barrier:
-    call      _snrt_cluster_barrier
-
-    # Execute the main function.
 snrt.crt0.main:
-    call      main  # main(int core_id, int core_num, void *spm_start, void *spm_end)
-    mv        s0, a0 # store return value in s0
-    # lw        s0, tcdm_end_address_reg  # add return value to special slot
-    # addi      s0, s0, -8
-    # amoadd.w  zero, a0, (s0)
+    call snrt_main
 
-    # Synchronize cores.
-snrt.crt0.post_barrier:
-    call      _snrt_cluster_barrier
-
-    # Write execution result to EOC register.
+#ifdef SNRT_CRT0_PARK
 snrt.crt0.end:
-    mv        a0, s0 # recover return value of main function in s0
-    call      _snrt_exit
 1:
     wfi
     j       1b
+#endif
 
+#ifdef SNRT_INIT_INTERRUPT
 __snrt_crt0_interrupt_handler:
     .align 4
     .globl __snrt_crt0_interrupt_handler
@@ -319,3 +279,9 @@ __snrt_crt0_interrupt_handler:
     addi    sp, sp, 80
     # return from interrupt context
     mret
+#endif
+
+# HTIF sections
+.pushsection .htif,"aw",@progbits;
+.align 6; .global tohost; tohost: .dword 0;
+.align 6; .global fromhost; fromhost: .dword 0;
