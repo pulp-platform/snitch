@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/pulp-platform/opentitan_peripherals.git
-    rev: 45d9755013aede6b2ff5104a5945a8811d8aee26
+    rev: e38ebcc6dbfe30e03b7548f5acb87a61d0fc17bd
   }
 }
