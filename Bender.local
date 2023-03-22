@@ -8,5 +8,5 @@ overrides:
     common_cells: { path: hw/vendor/pulp_platform_common_cells }
     register_interface: { path: hw/vendor/pulp_platform_register_interface }
     axi: { path: hw/vendor/pulp_platform_axi }
-    fpnew: { path: hw/vendor/pulp_platform_fpnew }
+    fpnew: { path: hw/vendor/openhwgroup_cvfpu }
     riscv-dbg: { path: hw/vendor/pulp_platform_riscv_dbg }
