@@ -120,11 +120,29 @@ The following command generate various graphics of Occamy's Address Map based on
 - `addrmap.pdf` Generate the PDF addrmap graphic.
 - `clean.addrmap` Delete all addrmap outputs.
 - `clean.addrmap.pdf` Delete all Latex outputs when generating the addrmap.pdf from addrmap.tex
+## Software
+
+The runtime and tests can be compiled as follows:
+
+    make DEBUG=ON update-sw
+
+The `DEBUG` flag is used to include debugging symbols in the binaries, and can be omitted if this is not required.
+It is required if you later want to annotate the traces.
+
+## Running
+
+You can run a Snitch binary on the simulator by passing it as a command-line argument
+to `bin/occamy_top`, for example:
+
+    bin/occamy_top.vsim sw/build/<some test>
 
 
 #### SW Build
 Depending on which toolchain you want to use and whether you target `banshee` (our instruction-accurate emulator) you cann add the following flags when calling `cmake`:
 Interesting CMake options that can be set via `-D<option>=<value>`:
+Each simulation will generate a unique trace file for each hart in the system.
+The trace file can be disassembled to instruction mnemonics by using the `traces`
+target.
 
 - `CMAKE_TOOLCHAIN_FILE`: The compiler toolchain configuration to use. Acceptable values:
     - `toolchain-gcc` for a GNU tolchain
@@ -153,6 +171,23 @@ The following command build and run all specified cmake tests with the correspon
 For the FPGA build flow have a look at the directory `fpga`. The following Makefile target basically enters this directory and builds Occamy's FPGA version:
 
 - `fpga` Build a small Occamy version (CVA6 + 1xcluster) for the VCU128 FPGA board.
+In addition to generating readable traces, the above command also dumps several
+performance metrics to file for each hart. These can be collected into a single CSV file
+with the following target:
+
+    make perf-csv
+
+Among these performance metrics are start and end times of particular regions marked
+in the traces (via mcycle CSR reads). It can sometimes be useful to visualize
+these regions in a timeline. You can use the `util/trace/eventvis.py` tool to generate a
+JSON file starting from a CSV file (similar to the output of the previous command)
+which can be visualized in a Chrome browser at `chrome://tracing`.
+A detailed description of the expected CSV file format can be found in the tool's source code.
+
+A source-code annotated trace can be generated using the `annotate` target. The Snitch binary with the debugging
+symbols should be passed to the target:
+
+    make BINARY=sw/build/sn_<some test>.elf annotate
 
 ## Notes
 

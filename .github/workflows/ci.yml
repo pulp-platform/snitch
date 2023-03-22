@@ -205,3 +205,24 @@ jobs:
     - name: Run Tests
       run: |
         echo "TODO run tests on verilator"
+
+  ###############################
+  # SW on Single-Cluster Occamy #
+  ###############################
+
+  sw-single-cluster-occamy:
+    container:
+      image: ghcr.io/pulp-platform/snitch
+    name: SW on Single-Cluster Occamy
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Software
+      run: |
+        make -C hw/system/occamy/ CFG_OVERRIDE=cfg/single-cluster.hjson sw
+    - name: Build Hardware
+      run: |
+        echo "TODO build hardware"
+    - name: Run Tests
+      run: |
+        echo "TODO run tests on verilator"
