@@ -1558,6 +1558,7 @@ class AxiXbar(Xbar):
         cfg += "  MaxMstTrans:        {},\n".format(self.max_mst_trans)
         cfg += "  FallThrough:        {},\n".format(int(self.fall_through))
         cfg += "  LatencyMode:        {},\n".format(self.latency_mode)
+        cfg += "  PipelineStages:     {},\n".format(0)
         cfg += "  AxiIdWidthSlvPorts: {},\n".format(self.iw)
         cfg += "  AxiIdUsedSlvPorts:  {},\n".format(self.iw)
         cfg += "  UniqueIds:          {},\n".format(0)

@@ -38,6 +38,7 @@ localparam axi_pkg::xbar_cfg_t ${cfg_name} = '{
   MaxMstTrans:        ${xbar.max_mst_trans},
   FallThrough:        ${int(xbar.fall_through)},
   LatencyMode:        ${xbar.latency_mode},
+  PipelineStages:     0,
   AxiIdWidthSlvPorts: 0,
   AxiIdUsedSlvPorts:  0,
   UniqueIds:          0,
