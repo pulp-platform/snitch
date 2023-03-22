@@ -10,6 +10,8 @@
     rev: "v0.1.0",
   },
 
+  patch_dir: "patches/pulp_platform_axi_tlb",
+
   exclude_from_upstream: [
     ".github"
   ]

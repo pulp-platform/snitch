@@ -180,7 +180,6 @@ module axi_tlb_noreg #(
     .NoMstPorts   ( 2                 ),
     .MaxTrans     ( AxiSlvPortMaxTxns ),
     .AxiLookBits  ( AxiIdWidth        ),
-    .FallThrough  ( 1'b0              ),
     .SpillAw      ( L1CutAx           ),
     .SpillW       ( 1'b0              ),
     .SpillB       ( 1'b0              ),

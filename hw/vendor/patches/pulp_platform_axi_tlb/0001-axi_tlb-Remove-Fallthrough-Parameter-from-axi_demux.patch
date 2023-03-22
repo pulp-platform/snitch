@@ -1,0 +1,24 @@
+From a82056d98aa6365c0f6b31767a87b8744707e99a Mon Sep 17 00:00:00 2001
+From: Tim Fischer <fischeti@iis.ee.ethz.ch>
+Date: Wed, 22 Mar 2023 19:06:36 +0100
+Subject: [PATCH] axi_tlb: Remove Fallthrough Parameter from `axi_demux`
+
+---
+ src/axi_tlb_noreg.sv | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/src/axi_tlb_noreg.sv b/src/axi_tlb_noreg.sv
+index d9f62a89..165b79ca 100644
+--- a/src/axi_tlb_noreg.sv
++++ b/src/axi_tlb_noreg.sv
+@@ -180,7 +180,6 @@ module axi_tlb_noreg #(
+     .NoMstPorts   ( 2                 ),
+     .MaxTrans     ( AxiSlvPortMaxTxns ),
+     .AxiLookBits  ( AxiIdWidth        ),
+-    .FallThrough  ( 1'b0              ),
+     .SpillAw      ( L1CutAx           ),
+     .SpillW       ( 1'b0              ),
+     .SpillB       ( 1'b0              ),
+-- 
+2.35.1.677.gabf474a5dd
+
