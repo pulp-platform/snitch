@@ -1,7 +1,7 @@
-From 09a26e4b49e0937049c5d690c60013039a7bf0c5 Mon Sep 17 00:00:00 2001
+From 433ad7e75dd0c4faf2aed9f89836a281aa39eed4 Mon Sep 17 00:00:00 2001
 From: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 Date: Thu, 21 Oct 2021 23:17:48 +0200
-Subject: [PATCH 7/9] cva6: Add SRAM config ports
+Subject: [PATCH 08/10] cva6: Add SRAM config ports
 
 ---
  common/local/util/sram.sv                       | 12 +++++++++++
@@ -115,7 +115,7 @@ index ae3287d9..34cb0788 100644
        .we_i     ( we_i    ),
        .be_i     ( be_i    ),
 diff --git a/core/cache_subsystem/cva6_icache.sv b/core/cache_subsystem/cva6_icache.sv
-index 0494048b..900de7ea 100644
+index a7b38cac..da854242 100644
 --- a/core/cache_subsystem/cva6_icache.sv
 +++ b/core/cache_subsystem/cva6_icache.sv
 @@ -27,11 +27,16 @@
@@ -136,14 +136,15 @@ index 0494048b..900de7ea 100644
    input  logic                      flush_i,              // flush the icache, flush and kill have to be asserted together
    input  logic                      en_i,                 // enable icache
    output logic                      miss_o,               // to performance counter
-@@ -429,12 +434,15 @@ end else begin : gen_piton_offset
+@@ -429,6 +434,7 @@ end else begin : gen_piton_offset
    for (genvar i = 0; i < ICACHE_SET_ASSOC; i++) begin : gen_sram
      // Tag RAM
-     sram #(
+     tc_sram #(
 +      .impl_in_t ( sram_cfg_t         ),
        // tag + valid bit
-       .DATA_WIDTH ( ICACHE_TAG_WIDTH+1 ),
-       .NUM_WORDS  ( ICACHE_NUM_WORDS   )
+       .DataWidth ( ICACHE_TAG_WIDTH+1 ),
+       .NumWords  ( ICACHE_NUM_WORDS   ),
+@@ -436,6 +442,8 @@ end else begin : gen_piton_offset
      ) tag_sram (
        .clk_i     ( clk_i                    ),
        .rst_ni    ( rst_ni                   ),
@@ -152,15 +153,14 @@ index 0494048b..900de7ea 100644
        .req_i     ( vld_req[i]               ),
        .we_i      ( vld_we                   ),
        .addr_i    ( vld_addr                 ),
-@@ -452,6 +460,7 @@ end else begin : gen_piton_offset
+@@ -453,12 +461,15 @@ end else begin : gen_piton_offset
  
      // Data RAM
-     sram #(
-+      .impl_in_t  ( sram_cfg_t ),
-       .USER_WIDTH ( ICACHE_USER_LINE_WIDTH ),
-       .DATA_WIDTH ( ICACHE_LINE_WIDTH ),
-       .USER_EN    ( ariane_pkg::FETCH_USER_EN ),
-@@ -459,6 +468,8 @@ end else begin : gen_piton_offset
+     tc_sram #(
++      .impl_in_t ( sram_cfg_t        ),
+       .DataWidth ( ICACHE_LINE_WIDTH ),
+       .NumWords  ( ICACHE_NUM_WORDS  ),
+       .NumPorts  ( 1                 )
      ) data_sram (
        .clk_i     ( clk_i               ),
        .rst_ni    ( rst_ni              ),
@@ -267,7 +267,7 @@ index 38a04115..b7f9efb5 100644
        .flush_i      ( dcache_flush_i         ),
        .flush_ack_o  ( dcache_flush_ack_o     ),
 diff --git a/core/cache_subsystem/std_nbdcache.sv b/core/cache_subsystem/std_nbdcache.sv
-index edef70f1..466c2bf5 100644
+index 0a4d2018..e0b2d559 100644
 --- a/core/cache_subsystem/std_nbdcache.sv
 +++ b/core/cache_subsystem/std_nbdcache.sv
 @@ -19,10 +19,15 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
@@ -287,13 +287,14 @@ index edef70f1..466c2bf5 100644
      // Cache management
      input  logic                           enable_i,    // from CSR
      input  logic                           flush_i,     // high until acknowledged
-@@ -184,11 +189,14 @@ import std_cache_pkg::*;
+@@ -184,12 +189,15 @@ import std_cache_pkg::*;
      // --------------
      for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
-         sram #(
-+            .impl_in_t  ( sram_cfg_t                        ),
-             .DATA_WIDTH ( DCACHE_LINE_WIDTH                 ),
-             .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
+         tc_sram #(
++            .impl_in_t ( sram_cfg_t                         ),
+             .DataWidth ( DCACHE_LINE_WIDTH                  ),
+             .NumWords  ( DCACHE_NUM_WORDS                   ),
+             .NumPorts  ( 1                                  )
          ) data_sram (
              .req_i   ( req_ram [i]                          ),
              .rst_ni  ( rst_ni                               ),
@@ -302,13 +303,14 @@ index edef70f1..466c2bf5 100644
              .we_i    ( we_ram                               ),
              .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
              .wuser_i ( '0                                   ),
-@@ -200,11 +208,14 @@ import std_cache_pkg::*;
+@@ -201,12 +209,15 @@ import std_cache_pkg::*;
          );
  
-         sram #(
-+            .impl_in_t  ( sram_cfg_t                        ),
-             .DATA_WIDTH ( DCACHE_TAG_WIDTH                  ),
-             .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
+         tc_sram #(
++            .impl_in_t ( sram_cfg_t                         ),
+             .DataWidth ( DCACHE_TAG_WIDTH                   ),
+             .NumWords  ( DCACHE_NUM_WORDS                   ),
+             .NumPorts  ( 1                                  )
          ) tag_sram (
              .req_i   ( req_ram [i]                          ),
              .rst_ni  ( rst_ni                               ),
@@ -317,14 +319,14 @@ index edef70f1..466c2bf5 100644
              .we_i    ( we_ram                               ),
              .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
              .wuser_i ( '0                                   ),
-@@ -234,12 +245,15 @@ import std_cache_pkg::*;
+@@ -236,12 +247,15 @@ import std_cache_pkg::*;
      end
  
-     sram #(
-+        .impl_in_t  ( sram_cfg_t                       ),
-         .USER_WIDTH ( 1                                ),
-         .DATA_WIDTH ( 4*DCACHE_DIRTY_WIDTH             ),
-         .NUM_WORDS  ( DCACHE_NUM_WORDS                 )
+     tc_sram #(
++        .impl_in_t ( sram_cfg_t                       ),
+         .DataWidth ( 4*DCACHE_DIRTY_WIDTH             ),
+         .NumWords  ( DCACHE_NUM_WORDS                 ),
+         .NumPorts  ( 1                                )
      ) valid_dirty_sram (
          .clk_i   ( clk_i                               ),
          .rst_ni  ( rst_ni                              ),
@@ -428,7 +430,7 @@ index 7dfd40cf..a998e73a 100644
      .rd_prio_i         ( rd_prio            ),
      .rd_tag_i          ( rd_tag             ),
 diff --git a/core/cache_subsystem/wt_dcache_mem.sv b/core/cache_subsystem/wt_dcache_mem.sv
-index e791bd6b..1e1e69a6 100644
+index d77440d5..917f0cbe 100644
 --- a/core/cache_subsystem/wt_dcache_mem.sv
 +++ b/core/cache_subsystem/wt_dcache_mem.sv
 @@ -29,11 +29,16 @@
@@ -449,15 +451,14 @@ index e791bd6b..1e1e69a6 100644
    // ports
    input  logic  [NumPorts-1:0][DCACHE_TAG_WIDTH-1:0]        rd_tag_i,           // tag in - comes one cycle later
    input  logic  [NumPorts-1:0][DCACHE_CL_IDX_WIDTH-1:0]     rd_idx_i,
-@@ -282,6 +287,7 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -282,12 +287,15 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
    for (genvar k = 0; k < DCACHE_NUM_BANKS; k++) begin : gen_data_banks
      // Data RAM
-     sram #(
-+      .impl_in_t  ( sram_cfg_t ),
-       .USER_WIDTH ( ariane_pkg::DCACHE_SET_ASSOC * DATA_USER_WIDTH ),
-       .DATA_WIDTH ( ariane_pkg::DCACHE_SET_ASSOC * riscv::XLEN ),
-       .USER_EN    ( ariane_pkg::DATA_USER_EN          ),
-@@ -289,6 +295,8 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+     tc_sram #(
++      .impl_in_t ( sram_cfg_t ),
+       .DataWidth ( ariane_pkg::DCACHE_SET_ASSOC * riscv::XLEN ),
+       .NumWords  ( wt_cache_pkg::DCACHE_NUM_WORDS             ),
+       .NumPorts  ( 1                                          )
      ) i_data_sram (
        .clk_i      ( clk_i               ),
        .rst_ni     ( rst_ni              ),
@@ -466,14 +467,15 @@ index e791bd6b..1e1e69a6 100644
        .req_i      ( bank_req   [k]      ),
        .we_i       ( bank_we    [k]      ),
        .addr_i     ( bank_idx   [k]      ),
-@@ -307,12 +315,15 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -306,6 +314,7 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
  
      // Tag RAM
-     sram #(
+     tc_sram #(
 +      .impl_in_t  ( sram_cfg_t                       ),
        // tag + valid bit
-       .DATA_WIDTH ( ariane_pkg::DCACHE_TAG_WIDTH + 1 ),
-       .NUM_WORDS  ( wt_cache_pkg::DCACHE_NUM_WORDS   )
+       .DataWidth ( ariane_pkg::DCACHE_TAG_WIDTH + 1 ),
+       .NumWords  ( wt_cache_pkg::DCACHE_NUM_WORDS   ),
+@@ -313,6 +322,8 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
      ) i_tag_sram (
        .clk_i     ( clk_i               ),
        .rst_ni    ( rst_ni              ),

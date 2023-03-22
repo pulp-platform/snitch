@@ -1,7 +1,7 @@
-From 2a1993d74fb5375b3c2d1b2e1e84cad91c3618d8 Mon Sep 17 00:00:00 2001
+From b55b7fb622c6943f8dd8d6f4bbcb482348d7e680 Mon Sep 17 00:00:00 2001
 From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 Date: Thu, 9 Sep 2021 14:31:06 +0200
-Subject: [PATCH 3/9] cva6: Add temporal fence
+Subject: [PATCH 04/10] cva6: Add temporal fence
 
 Experimental feature for some security research
 
@@ -72,7 +72,7 @@ index 0062ed1c..1789d7e5 100644
                              mem_req_d.index  = req_port_i.address_index;
                              mem_req_d.be     = req_port_i.data_be;
 diff --git a/core/cache_subsystem/cva6_icache.sv b/core/cache_subsystem/cva6_icache.sv
-index 10277820..0494048b 100644
+index 5aca3225..a7b38cac 100644
 --- a/core/cache_subsystem/cva6_icache.sv
 +++ b/core/cache_subsystem/cva6_icache.sv
 @@ -35,6 +35,9 @@ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
@@ -252,7 +252,7 @@ index c8df5d6e..38a04115 100644
        .axi_bypass_i ( axi_resp_bypass        ),
        .axi_data_o   ( axi_req_data           ),
 diff --git a/core/cache_subsystem/std_nbdcache.sv b/core/cache_subsystem/std_nbdcache.sv
-index 91a56514..edef70f1 100644
+index d86a8a27..0a4d2018 100644
 --- a/core/cache_subsystem/std_nbdcache.sv
 +++ b/core/cache_subsystem/std_nbdcache.sv
 @@ -28,6 +28,9 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(

@@ -1,17 +1,38 @@
-From c3c96fbd2be9edc91f896d011d427b73675caf5f Mon Sep 17 00:00:00 2001
+From e2ad3d64066445f9ea2c30a5f8d4907a5ae03c17 Mon Sep 17 00:00:00 2001
 From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 Date: Fri, 29 Apr 2022 00:30:41 +0200
-Subject: [PATCH 9/9] ariane: Send hartid via user signal
+Subject: [PATCH 10/10] ariane: Send hartid via user signal
 
 Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 ---
+ core/ariane.sv                              | 2 ++
  core/cache_subsystem/miss_handler.sv        | 6 ++++++
- core/cache_subsystem/std_cache_subsystem.sv | 3 +++
+ core/cache_subsystem/std_cache_subsystem.sv | 4 ++++
  core/cache_subsystem/std_nbdcache.sv        | 4 ++++
- core/cva6.sv                                | 1 +
+ core/cva6.sv                                | 3 +++
  corev_apu/tb/axi_adapter.sv                 | 8 +++++---
- 5 files changed, 19 insertions(+), 3 deletions(-)
+ 6 files changed, 24 insertions(+), 3 deletions(-)
 
+diff --git a/core/ariane.sv b/core/ariane.sv
+index 69b708fb..7644fddb 100644
+--- a/core/ariane.sv
++++ b/core/ariane.sv
+@@ -18,6 +18,7 @@ module ariane import ariane_pkg::*; #(
+   parameter int unsigned AxiAddrWidth = ariane_axi::AddrWidth,
+   parameter int unsigned AxiDataWidth = ariane_axi::DataWidth,
+   parameter int unsigned AxiIdWidth   = ariane_axi::IdWidth,
++  parameter int unsigned AxiUserWidth = ariane_axi::UserWidth,
+   parameter type axi_ar_chan_t = ariane_axi::ar_chan_t,
+   parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+   parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+@@ -71,6 +72,7 @@ module ariane import ariane_pkg::*; #(
+     .AxiAddrWidth ( AxiAddrWidth ),
+     .AxiDataWidth ( AxiDataWidth ),
+     .AxiIdWidth ( AxiIdWidth ),
++    .AxiUserWidth ( AxiUserWidth ),
+     .axi_ar_chan_t (axi_ar_chan_t),
+     .axi_aw_chan_t (axi_aw_chan_t),
+     .axi_w_chan_t (axi_w_chan_t),
 diff --git a/core/cache_subsystem/miss_handler.sv b/core/cache_subsystem/miss_handler.sv
 index 765ddae1..540e8875 100644
 --- a/core/cache_subsystem/miss_handler.sv
@@ -65,10 +86,18 @@ index 765ddae1..540e8875 100644
          .rdata_o             ( data_miss_fsm      ),
          .id_o                (                    ),
 diff --git a/core/cache_subsystem/std_cache_subsystem.sv b/core/cache_subsystem/std_cache_subsystem.sv
-index b7f9efb5..2ff00452 100644
+index b7f9efb5..b556008f 100644
 --- a/core/cache_subsystem/std_cache_subsystem.sv
 +++ b/core/cache_subsystem/std_cache_subsystem.sv
-@@ -33,6 +33,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+@@ -20,6 +20,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+     parameter int unsigned AxiAddrWidth = 0,
+     parameter int unsigned AxiDataWidth = 0,
+     parameter int unsigned AxiIdWidth   = 0,
++    parameter int unsigned AxiUserWidth = 0,
+     parameter type axi_ar_chan_t = ariane_axi::ar_chan_t,
+     parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+     parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+@@ -33,6 +34,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
      output logic                           busy_o,
      input  logic                           stall_i,                // stall new memory requests
      input  logic                           init_ni,                // do not init after reset
@@ -76,7 +105,7 @@ index b7f9efb5..2ff00452 100644
      // SRAM config
      input sram_cfg_t                       sram_cfg_idata_i,
      input sram_cfg_t                       sram_cfg_itag_i,
-@@ -118,6 +119,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+@@ -118,6 +120,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
        .AXI_ADDR_WIDTH   ( AxiAddrWidth ),
        .AXI_DATA_WIDTH   ( AxiDataWidth ),
        .AXI_ID_WIDTH     ( AxiIdWidth   ),
@@ -84,7 +113,7 @@ index b7f9efb5..2ff00452 100644
        .axi_req_t        ( axi_req_t    ),
        .axi_rsp_t        ( axi_rsp_t    ),
        .sram_cfg_t       ( sram_cfg_t   )
-@@ -134,6 +136,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
+@@ -134,6 +137,7 @@ module std_cache_subsystem import ariane_pkg::*; import std_cache_pkg::*; #(
        .busy_o       ( dcache_busy            ),
        .stall_i      ( stall_i                ),
        .init_ni      ( init_ni                ),
@@ -93,7 +122,7 @@ index b7f9efb5..2ff00452 100644
        .axi_bypass_i ( axi_resp_bypass        ),
        .axi_data_o   ( axi_req_data           ),
 diff --git a/core/cache_subsystem/std_nbdcache.sv b/core/cache_subsystem/std_nbdcache.sv
-index 466c2bf5..43c4bbf1 100644
+index e0b2d559..322f9b54 100644
 --- a/core/cache_subsystem/std_nbdcache.sv
 +++ b/core/cache_subsystem/std_nbdcache.sv
 @@ -18,6 +18,7 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
@@ -128,10 +157,26 @@ index 466c2bf5..43c4bbf1 100644
          .amo_req_i              ( amo_req_i            ),
          .amo_resp_o             ( amo_resp_o           ),
 diff --git a/core/cva6.sv b/core/cva6.sv
-index b9513a5d..7ed2d203 100644
+index b9513a5d..50f5589a 100644
 --- a/core/cva6.sv
 +++ b/core/cva6.sv
-@@ -803,6 +803,7 @@ module cva6 import ariane_pkg::*; #(
+@@ -28,6 +28,7 @@ module cva6 import ariane_pkg::*; #(
+   parameter int unsigned AxiAddrWidth = ariane_axi::AddrWidth,
+   parameter int unsigned AxiDataWidth = ariane_axi::DataWidth,
+   parameter int unsigned AxiIdWidth   = ariane_axi::IdWidth,
++  parameter int unsigned AxiUserWidth = ariane_axi::UserWidth,
+   parameter type axi_ar_chan_t = ariane_axi::ar_chan_t,
+   parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+   parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+@@ -789,6 +790,7 @@ module cva6 import ariane_pkg::*; #(
+     .AxiAddrWidth          ( AxiAddrWidth                ),
+     .AxiDataWidth          ( AxiDataWidth                ),
+     .AxiIdWidth            ( AxiIdWidth                  ),
++    .AxiUserWidth          ( AxiUserWidth                ),
+     .axi_ar_chan_t         ( axi_ar_chan_t               ),
+     .axi_aw_chan_t         ( axi_aw_chan_t               ),
+     .axi_w_chan_t          ( axi_w_chan_t                ),
+@@ -803,6 +805,7 @@ module cva6 import ariane_pkg::*; #(
      .busy_o                ( busy_cache_ctrl             ),
      .stall_i               ( stall_ctrl_cache            ),
      .init_ni               ( init_ctrl_cache_n           ),

@@ -1,7 +1,7 @@
-From b2ac601537ecbdd7dda9a9a377f3fa19789285a2 Mon Sep 17 00:00:00 2001
+From 8b24d32586218a77c7127536f5cda2fc1f4b5ed4 Mon Sep 17 00:00:00 2001
 From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 Date: Wed, 29 Sep 2021 16:24:18 +0200
-Subject: [PATCH 5/9] ariane_pkg: Add new FP formats
+Subject: [PATCH 06/10] ariane_pkg: Add new FP formats
 
 Co-authored-by: Gianna Paulin <pauling@student.ethz.ch>
 Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>

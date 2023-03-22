@@ -1,7 +1,7 @@
-From 8bbefe64cffd700bacc50eb7158109dda55f8223 Mon Sep 17 00:00:00 2001
+From 20da0bf2504940afc4b9f526faa4294f1edba8fd Mon Sep 17 00:00:00 2001
 From: Tim Fischer <fischeti@iis.ee.ethz.ch>
 Date: Thu, 23 Sep 2021 17:13:36 +0200
-Subject: [PATCH 4/9] Fix mismatch of cva6 fpu config
+Subject: [PATCH 05/10] Fix mismatch of cva6 fpu config
 
 ---
  core/fpu_wrap.sv           | 12 +++++++-----
