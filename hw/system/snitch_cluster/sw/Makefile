@@ -6,6 +6,7 @@
 
 # Add user applications to APPS variable
 APPS  = apps/nop
+APPS += apps/blas/axpy
 
 TARGET ?= all
 
