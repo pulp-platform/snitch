@@ -24,7 +24,7 @@ set flash_file [lindex $argv 2]
 
 occ_connect
 
-occ_flash_spi $mcs_file $flash_offset $flash_file
+#occ_flash_spi $mcs_file $flash_offset $flash_file
 
 occ_program_bit
 

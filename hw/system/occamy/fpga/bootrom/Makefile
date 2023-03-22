@@ -10,11 +10,12 @@ ROOT        := ${MKFILE_DIR}../../../../..
 
 include $(ROOT)/util/Makefrag
 
-CVA6_SDK  ?= ${ROOT}/../cva6-sdk
+CVA6_SDK  ?= $(ROOT)/../cva6-sdk
+UBOOT_SPL_BIN ?= $(CVA6_SDK)/u-boot/spl/u-boot-spl.bin
 
 # Define UBOOT_SPL_BIN in command line with the path to u-boot-spl.bin
 
-CROSS_COMPILE = riscv64-hero-linux-gnu-
+CROSS_COMPILE = riscv64-unknown-elf-
 INCLUDES = -I./ -I./src
 SRCS_C = src/main.c src/uart.c
 OBJS_C = $(SRCS_C:.c=.o)

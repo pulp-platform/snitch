@@ -24,13 +24,10 @@ VIVADO ?= vivado
 MKIMAGE ?= $(CURDIR)/br2_external/install/bin/mkimage
 NPROC  ?= $(shell nproc)
 
-# u-boot and OpenSBI wrapped in an mkimage wrapper
-UBOOT_ITB ?=
-# u-boot-wrapped image with kernel, rootfs and device tree blob. Name must match
-# with the file fetched in u-boot command from TFTP server
-IMG ?= 
-FITIMG ?=
-FITIMG_ITS ?=
+# U-boot and OpenSBI wrapped in an mkimage wrapper
+UBOOT_ITB ?= ${CVA6_SDK}/u-boot/u-boot.itb
+# U-boot compatible Linux image
+LINUX_UIMAGE ?= ${CVA6_SDK}/uImage
 
 DTB = bootrom/occamy.dtb
 
@@ -38,17 +35,6 @@ default: all
 all: occamy_vcu128
 
 include $(ROOT)/util/Makefrag
-
-# Clone a repo or pull if it exists
-# Args: path, repo, branch
-define clone
-if [ ! -d "$1" ]; then \
-  git clone --depth 1 --branch $3 $2 $1; \
-else \
-  git fetch -a; \
-	git pull ; \
-fi
-endef
 
 vivado_ips/occamy_xilinx:
 	${MAKE} -C vivado_ips occamy_xilinx
@@ -63,12 +49,13 @@ define_defines_includes_no_simset.tcl: $(BENDER_FILES)
 	${BENDER} script vivado --only-defines --only-includes --no-simset > $@
 
 program:
-	${VIVADO} -mode batch -source occamy_vcu128_program.tcl -tclargs ${VCU} 6000000 ${UBOOT_ITB}
+	${VIVADO} -mode batch -source occamy_vcu128_program.tcl -tclargs ${VCU}
 
 flash: ${FILE}
 	${VIVADO} -mode batch -source occamy_vcu128_flash.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs ${OFFSET} ${FILE}
 	rm flash.mcs
 
+# Flash only uboot (made for TFTP bootmode), overwrite the bootrom, and reset the board
 flashrun: ${UBOOT_ITB}
 	${VIVADO} -mode batch -source occamy_vcu128_flashrun.tcl -tclargs ${HW_SERVER} ${FPGA_ID} flash.mcs 6000000 ${UBOOT_ITB}
 	rm flash.mcs
@@ -76,8 +63,9 @@ flashrun: ${UBOOT_ITB}
 flash-u-boot:
 	${MAKE} flash FILE=${UBOOT_ITB} OFFSET=0x6000000
 
+# Flash Linux at some 
 flash-uimage:
-	${MAKE} flash FILE=${CVA6_SDK}/uImage OFFSET=0x6100000
+	${MAKE} flash FILE=${LINUX_UIMAGE} OFFSET=0x6100000
 
 clean:
 	rm -rf .Xil occamy_vcu128 *.jou *.log *.str define_defines_includes_no_simset.tcl
