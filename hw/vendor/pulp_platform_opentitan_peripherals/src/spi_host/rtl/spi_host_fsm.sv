@@ -487,7 +487,7 @@ module spi_host_fsm
   assign speed_o           = cmd_speed;
   assign sample_en_d       = byte_starting | shift_en_o;
   assign full_cyc_o        = full_cyc;
-  assign cmd_end_o         = (byte_cntr_q == 'h1) & wr_en_o & sr_wr_ready_i;
+  assign cmd_end_o         = ((byte_cntr_q == 'h1) & wr_en_o & ~rd_en_o & sr_wr_ready_i) || ((byte_cntr_q == 'h0) & rd_en_o & sr_rd_ready_i);
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin

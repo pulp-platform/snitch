@@ -7,7 +7,7 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/opentitan_peripherals.git",
-    rev: "v0.1.0",
+    rev: "v0.2.1",
   },
 
   patch_dir: "patches/pulp_platform_opentitan_peripherals",
