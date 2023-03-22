@@ -1,0 +1,29 @@
+#=======================================================================
+# Makefrag for rv32uxpulpvect tests
+#-----------------------------------------------------------------------
+
+rv32uxpulpvect_sc_tests = \
+  pv_add \
+  pv_sub \
+  pv_avg pv_avgu \
+  pv_min pv_minu \
+  pv_max pv_maxu \
+  pv_srl \
+  pv_sra \
+  pv_sll \
+  pv_or \
+  pv_xor \
+  pv_and \
+  pv_abs \
+  pv_extract pv_extractu \
+  pv_insert \
+  pv_dotup \
+  pv_dotusp \
+  pv_dotsp \
+  pv_sdotup \
+  pv_sdotusp \
+
+rv32uxpulpvect_p_tests = $(addprefix rv32uxpulpvect-p-, $(rv32uxpulpvect_sc_tests))
+rv32uxpulpvect_v_tests = $(addprefix rv32uxpulpvect-v-, $(rv32uxpulpvect_sc_tests))
+
+spike32_tests += $(rv32uxpulpvect_p_tests) $(rv32uxpulpvect_v_tests)

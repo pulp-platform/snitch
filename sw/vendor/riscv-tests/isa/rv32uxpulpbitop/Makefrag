@@ -1,0 +1,12 @@
+#=======================================================================
+# Makefrag for rv32uxpulpbitop tests
+#-----------------------------------------------------------------------
+
+rv32uxpulpbitop_sc_tests = \
+  p_exths p_exthz \
+  p_extbs p_extbz \
+
+rv32uxpulpbitop_p_tests = $(addprefix rv32uxpulpbitop-p-, $(rv32uxpulpbitop_sc_tests))
+rv32uxpulpbitop_v_tests = $(addprefix rv32uxpulpbitop-v-, $(rv32uxpulpbitop_sc_tests))
+
+spike32_tests += $(rv32uxpulpbitop_p_tests) $(rv32uxpulpbitop_v_tests)

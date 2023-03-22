@@ -1,0 +1,11 @@
+#=======================================================================
+# Makefrag for rv32uxpulpslet tests
+#-----------------------------------------------------------------------
+
+rv32uxpulpslet_sc_tests = \
+  p_slet p_sletu \
+
+rv32uxpulpslet_p_tests = $(addprefix rv32uxpulpslet-p-, $(rv32uxpulpslet_sc_tests))
+rv32uxpulpslet_v_tests = $(addprefix rv32uxpulpslet-v-, $(rv32uxpulpslet_sc_tests))
+
+spike32_tests += $(rv32uxpulpslet_p_tests) $(rv32uxpulpslet_v_tests)
