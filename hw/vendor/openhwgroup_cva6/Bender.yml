@@ -7,7 +7,7 @@ package:
 dependencies:
   axi: {path: ../../vendor/pulp_platform_axi}
   common_cells: {path: ../../vendor/pulp_platform_common_cells}
-  FPnew: {path: ../../vendor/openhwgroup_cvfpu}
+  fpnew: {path: ../../vendor/pulp_platform_fpnew}
   reqrsp_interface: {path: ../../ip/reqrsp_interface}
   riscv-dbg: {path: ../../vendor/pulp_platform_riscv_dbg}
 
