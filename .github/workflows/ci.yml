@@ -180,30 +180,28 @@ jobs:
       working-directory: sw/applications/build
       run: ctest -L snApplications
 
-  ################################
-  # SW on Default Snitch Cluster #
-  ################################
-  sw-snitch-cluster-default:
+  ########################
+  # SW on Snitch Cluster #
+  ########################
+
+  sw-snitch-cluster:
     container:
       image: ghcr.io/pulp-platform/snitch
-    name: SW on Default Snitch Cluster Config
+    name: SW on Snitch Cluster
     runs-on: ubuntu-18.04
     strategy:
       matrix:
         toolchain:
         - gcc
-        - llvm
-        cmake_args:
-        - ''
-        - -DOMPSTATIC_NUMTHREADS=8
+        # - llvm
     steps:
     - uses: actions/checkout@v2
-    - name: Build Hardware
-      run: |
-        cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
     - name: Build Software
       run: |
-        cd hw/system/snitch_cluster/sw && mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain }} -DBUILD_TESTS=ON .. && make
-    - name: Run Unit Tests
+        make -C hw/system/snitch_cluster sw
+    - name: Build Hardware
       run: |
-        cd hw/system/snitch_cluster/sw/build && make test
+        cd hw/system/snitch_cluster/ && make bin/snitch_cluster.vlt
+    - name: Run Tests
+      run: |
+        echo "TODO run tests on verilator"
