@@ -7,12 +7,13 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/common_cells.git",
-    rev: "v1.25.0",
+    rev: "v1.28.0",
   },
 
   patch_dir: "patches/pulp_platform_common_cells",
 
   exclude_from_upstream: [
+    ".github",
     "ci/*",
     "ips_list.yml",
     "src_files.yml"
