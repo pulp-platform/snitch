@@ -4,7 +4,7 @@ riscv-tests
 About
 -----------
 
-This repository hosts unit tests for RISC-V processors including the instructions of the Xpulpimg extension subsets as defined [here](https://iis-people.ee.ethz.ch/~balasr/pulp-ext/pulp.html).
+This repository hosts unit tests for RISC-V processors including the instructions of the Xpulp extension subsets as defined [here](https://iis-people.ee.ethz.ch/~balasr/pulp-ext/pulp.html).
 
 This repository can be used to do behavioral [Spike](https://github.com/pulp-platform/riscv-isa-sim) simulations of instructions. This allows verification of new instructions or to find out the validity of a test case.
 
@@ -15,10 +15,8 @@ The tests can also be used for RTL simulation (outside of the scope of
 Building from repository
 -----------------------------
 
-We assume that the RISCV environment variable is set to the RISC-V tools
-install path, and that the riscv-gnu-toolchain package is installed.
-
-For 32-bit architectures use the flag `--with-xlen=32`.
+The RISCV environment variable has to be set to the RISC-V tools
+install path, and the riscv-gnu-toolchain package has be installed.
 
     $ git clone https://github.com/riscv/riscv-tests
     $ cd riscv-tests
@@ -27,11 +25,13 @@ For 32-bit architectures use the flag `--with-xlen=32`.
     $ make
     $ make install
 
+For 32-bit architectures use the flag `--with-xlen=32` for `configure`.
+
 The rest of this document describes the format of test programs for the RISC-V
 architecture.
 
-To compile the test, we assume that you have in your `PATH` the directories for
-the binaries of `riscv-gcc`, `riscv-isa-sim` and `dtc`.
+To compile the tests, you need to have the directories for
+the binaries of `riscv-gcc`, `riscv-isa-sim` and `dtc` in your `PATH`.
 
     $ cd isa
     $ make run
@@ -64,15 +64,15 @@ TVMs only support a single hardware thread.
 | `rv32ud`                    | RV32 user-level, double-precision                     |
 | `rv32uf`                    | RV32 user-level, floating-point                       |
 | `rv32um`                    | RV32 user-level, integer mul/div                      |
-| `rv32uxpulpabs`             | RV32 user-level, Xpulp extension subset (complete)    |
+| `rv32uxpulpabs`             | RV32 user-level, Xpulp extension subset               |
 | `rv32uxpulpbitop`           | RV32 user-level, Xpulp extension subset (incomplete)  |
 | `rv32uxpulpbitopsmall`      | RV32 user-level, Xpulp extension subset (incomplete)  |
-| `rv32uxpulpbr`              | RV32 user-level, Xpulp extension subset (complete)    |
-| `rv32uxpulpclip`            | RV32 user-level, Xpulp extension subset (complete)    |
-| `rv32uxpulpmacsi`           | RV32 user-level, Xpulp extension subset (complete)    |
+| `rv32uxpulpbr`              | RV32 user-level, Xpulp extension subset               |
+| `rv32uxpulpclip`            | RV32 user-level, Xpulp extension subset               |
+| `rv32uxpulpmacsi`           | RV32 user-level, Xpulp extension subset               |
 | `rv32uxpulpminmax`          | RV32 user-level, Xpulp extension subset (incomplete)  |
-| `rv32uxpulppostmod`         | RV32 user-level, Xpulp extension subset (complete)    |
-| `rv32uxpulpslet`            | RV32 user-level, Xpulp extension subset (complete)    |
+| `rv32uxpulppostmod`         | RV32 user-level, Xpulp extension subset               |
+| `rv32uxpulpslet`            | RV32 user-level, Xpulp extension subset               |
 | `rv32uxpulpvect`            | RV32 user-level, Xpulp extension subset (incomplete)  |
 | `rv32uxpulpvectshufflepack` | RV32 user-level, Xpulp extension subset (incomplete)  |
 | WIP                         | complete and add further RV32 Xpulp extension subsets |
@@ -90,6 +90,7 @@ TVMs only support a single hardware thread.
 | `rv64sv`                    | RV64 supervisor-level, integer and vector             |
 | `rv64mi`                    | RV64 machine-level, integer only                      |
 
+A TVM is marked as incomplete if tests for some instructions are missing.
 
 A test program for RISC-V is written within a single assembly language file,
 which is passed through the C preprocessor, and all regular assembly
@@ -202,8 +203,8 @@ Supervisor-Level TVMs
 --------------------------
 
 The supervisor-level TVMs allow testing of supervisor-level state and
-instructions.  As with the user-level TVMs, we provide integer-only
-supervisor-level TVMs indicated with a trailing `i`.
+instructions. As with the user-level TVMs, the integer-only
+supervisor-level TVMs indicated with a trailing `i` are provided.
 
 History and Acknowledgements
 ---------------------------------

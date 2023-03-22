@@ -91,7 +91,7 @@ test_ ## testnum: \
     )
 
 #-----------------------------------------------------------------------
-# Tests for Xpulpimg instructions with 5-bit unsigned immediate operand
+# Tests for Xpulp extension instructions with 5-bit unsigned immediate operand
 #-----------------------------------------------------------------------
 
 #define ZEXT_UIMM5(x) ((x) & 0x1F)
@@ -143,7 +143,7 @@ test_ ## testnum: \
     )
 
 #-----------------------------------------------------------------------
-# Tests for Xpulpimg instructions with 6-bit unsigned immediate operand
+# Tests for Xpulp extension instructions with 6-bit unsigned immediate operand
 #-----------------------------------------------------------------------
 
 #define ZEXT_UIMM6(x) ((x) & 0x3F)
@@ -195,7 +195,7 @@ test_ ## testnum: \
     )
 
 #-----------------------------------------------------------------------
-# Tests for Xpulpimg instructions with 6-bit signed immediate operand
+# Tests for Xpulp extension instructions with 6-bit signed immediate operand
 #-----------------------------------------------------------------------
 #define SEXT_IMM6(x) ((x) | (-(((x) >> 5) & 1) << 5))
 
@@ -497,7 +497,7 @@ test_ ## testnum: \
     )
 
 #-----------------------------------------------------------------------
-# Tests for Xpulpimg instructions with 2 register operands (rd and rs1)
+# Tests for Xpulp extension instructions with 2 register operands (rd and rs1)
 # and a 6-bit unsigned immediate input
 #-----------------------------------------------------------------------
 
@@ -511,7 +511,7 @@ test_ ## testnum: \
 # TODO(smazzola): finish to write macros to cover all tests types
 
 #-----------------------------------------------------------------------
-# Tests for Xpulpimg instructions with 2 register operands (rd and rs1)
+# Tests for Xpulp extension instructions with 2 register operands (rd and rs1)
 # and a 6-bit signed immediate input
 #-----------------------------------------------------------------------
 
