@@ -1,0 +1,16 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "pulp_platform_axi_tlb",
+  target_dir: "pulp_platform_axi_tlb",
+
+  upstream: {
+    url: "https://github.com/pulp-platform/axi_tlb.git",
+    rev: "v0.1.0",
+  },
+
+  exclude_from_upstream: [
+    ".github"
+  ]
+}

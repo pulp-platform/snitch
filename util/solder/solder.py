@@ -972,16 +972,16 @@ class AxiBus(Bus):
             ) + "\n")
         return bus
 
-    def add_tlb(self,
-                context,
-                name,
-                cfg,
-                entry_t,
-                entries,
-                bypass,
-                inst_name=None,
-                to=None
-                ):
+    def add_tlb_no_reg(self,
+                       context,
+                       name,
+                       cfg,
+                       entry_t,
+                       entries,
+                       bypass,
+                       inst_name=None,
+                       to=None
+                       ):
         # Generate the new bus.
         if to is None:
             bus = copy(self)
@@ -1003,7 +1003,7 @@ class AxiBus(Bus):
 
         # Emit the TLB instance.
         bus.declare(context)
-        tpl = templates.get_template("solder.axi_tlb.sv.tpl")
+        tpl = templates.get_template("solder.axi_tlb_noreg.sv.tpl")
         context.write(
             tpl.render_unicode(
                 axi_in=self,
