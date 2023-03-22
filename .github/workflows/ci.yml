@@ -7,6 +7,24 @@ name: ci
 on: [push, pull_request]
 
 jobs:
+
+  ########
+  # Docs #
+  ########
+  docs:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+        cache: pip
+    - name: Install Python dependencies
+      run: pip install -r docs/requirements.txt
+    - name: Build docs
+      run: mkdocs build
+
   ###########
   # Banshee #
   ###########
