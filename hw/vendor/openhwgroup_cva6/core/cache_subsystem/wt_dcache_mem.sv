@@ -299,12 +299,12 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
       .req_i      ( bank_req   [k]      ),
       .we_i       ( bank_we    [k]      ),
       .addr_i     ( bank_idx   [k]      ),
-      .wuser_i    ( bank_wuser [k]      ),
       .wdata_i    ( bank_wdata [k]      ),
       .be_i       ( bank_be    [k]      ),
-      .ruser_o    ( bank_ruser [k]      ),
       .rdata_o    ( bank_rdata [k]      )
     );
+
+    assign bank_ruser [k] = '0;
   end
 
   for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : gen_tag_srams
@@ -327,10 +327,8 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
       .req_i     ( vld_req[i]          ),
       .we_i      ( vld_we              ),
       .addr_i    ( vld_addr            ),
-      .wuser_i   ( '0                  ),
       .wdata_i   ( {vld_wdata[i], wr_cl_tag_i} ),
       .be_i      ( '1                  ),
-      .ruser_o   (                     ),
       .rdata_o   ( vld_tag_rdata[i]    )
     );
   end

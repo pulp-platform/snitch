@@ -204,10 +204,8 @@ import std_cache_pkg::*;
             .impl_o  (  ),
             .we_i    ( we_ram                               ),
             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
-            .wuser_i ( '0                                   ),
             .wdata_i ( wdata_ram.data                       ),
             .be_i    ( be_ram.data                          ),
-            .ruser_o (                                      ),
             .rdata_o ( rdata_ram[i].data                    ),
             .*
         );
@@ -224,10 +222,8 @@ import std_cache_pkg::*;
             .impl_o  (                                      ),
             .we_i    ( we_ram                               ),
             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
-            .wuser_i ( '0                                   ),
             .wdata_i ( wdata_ram.tag                        ),
             .be_i    ( be_ram.tag                           ),
-            .ruser_o (                                      ),
             .rdata_o ( rdata_ram[i].tag                     ),
             .*
         );
@@ -263,10 +259,8 @@ import std_cache_pkg::*;
         .req_i   ( |req_ram                            ),
         .we_i    ( we_ram                              ),
         .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] ),
-        .wuser_i ( '0                                  ),
         .wdata_i ( dirty_wdata                         ),
         .be_i    ( be_ram.vldrty                       ),
-        .ruser_o (                                     ),
         .rdata_o ( dirty_rdata                         )
     );
 
