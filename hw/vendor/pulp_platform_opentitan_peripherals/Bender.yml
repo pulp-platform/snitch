@@ -10,9 +10,9 @@ package:
 
 dependencies:
   common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.25.0 }
-  register_interface: { git: "https://github.com/pulp-platform/register_interface.git", version: 0.3.3 }
+  register_interface: { git: "https://github.com/pulp-platform/register_interface.git", version: 0.3.8 }
 
-external_import:
+vendor_package:
   - name: lowrisc_opentitan
     target_dir: src
     upstream: { git: "https://github.com/lowRISC/opentitan.git", rev: "726718a6de32aa047a4064e02e7b619699f054ed" }
@@ -68,7 +68,6 @@ sources:
   # Level 2
   - src/i2c/rtl/i2c_fsm.sv
   - src/rv_plic/rtl/rv_plic_gateway.sv
-  - src/spi_host/rtl/spi_host_reg_pkg.sv
   - src/spi_host/rtl/spi_host_byte_merge.sv
   - src/spi_host/rtl/spi_host_byte_select.sv
   - src/spi_host/rtl/spi_host_cmd_pkg.sv

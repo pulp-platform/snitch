@@ -8,12 +8,12 @@
 `include "common_cells/assertions.svh"
 
 module spi_host_reg_top #(
-    parameter type reg_req_t = logic,
-    parameter type reg_rsp_t = logic,
-    parameter int AW = 6
+  parameter type reg_req_t = logic,
+  parameter type reg_rsp_t = logic,
+  parameter int AW = 6
 ) (
-  input clk_i,
-  input rst_ni,
+  input logic clk_i,
+  input logic rst_ni,
   input  reg_req_t reg_req_i,
   output reg_rsp_t reg_rsp_o,
 
@@ -2073,3 +2073,65 @@ module spi_host_reg_top #(
   `ASSERT(en2addrHit, (reg_we || reg_re) |-> $onehot0(addr_hit))
 
 endmodule
+
+module spi_host_reg_top_intf
+#(
+  parameter int AW = 6,
+  localparam int DW = 32
+) (
+  input logic clk_i,
+  input logic rst_ni,
+  REG_BUS.in  regbus_slave,
+  REG_BUS.out  regbus_win_mst[1-1:0],
+  // To HW
+  output spi_host_reg_pkg::spi_host_reg2hw_t reg2hw, // Write
+  input  spi_host_reg_pkg::spi_host_hw2reg_t hw2reg, // Read
+  // Config
+  input devmode_i // If 1, explicit error return for unmapped register access
+);
+ localparam int unsigned STRB_WIDTH = DW/8;
+
+`include "register_interface/typedef.svh"
+`include "register_interface/assign.svh"
+
+  // Define structs for reg_bus
+  typedef logic [AW-1:0] addr_t;
+  typedef logic [DW-1:0] data_t;
+  typedef logic [STRB_WIDTH-1:0] strb_t;
+  `REG_BUS_TYPEDEF_ALL(reg_bus, addr_t, data_t, strb_t)
+
+  reg_bus_req_t s_reg_req;
+  reg_bus_rsp_t s_reg_rsp;
+  
+  // Assign SV interface to structs
+  `REG_BUS_ASSIGN_TO_REQ(s_reg_req, regbus_slave)
+  `REG_BUS_ASSIGN_FROM_RSP(regbus_slave, s_reg_rsp)
+
+  reg_bus_req_t s_reg_win_req[1-1:0];
+  reg_bus_rsp_t s_reg_win_rsp[1-1:0];
+  for (genvar i = 0; i < 1; i++) begin : gen_assign_window_structs
+    `REG_BUS_ASSIGN_TO_REQ(s_reg_win_req[i], regbus_win_mst[i])
+    `REG_BUS_ASSIGN_FROM_RSP(regbus_win_mst[i], s_reg_win_rsp[i])
+  end
+  
+  
+
+  spi_host_reg_top #(
+    .reg_req_t(reg_bus_req_t),
+    .reg_rsp_t(reg_bus_rsp_t),
+    .AW(AW)
+  ) i_regs (
+    .clk_i,
+    .rst_ni,
+    .reg_req_i(s_reg_req),
+    .reg_rsp_o(s_reg_rsp),
+    .reg_req_win_o(s_reg_win_req),
+    .reg_rsp_win_i(s_reg_win_rsp),
+    .reg2hw, // Write
+    .hw2reg, // Read
+    .devmode_i
+  );
+  
+endmodule
+
+
