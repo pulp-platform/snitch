@@ -1,0 +1,29 @@
+From fe6b30ff70f0016bc53bd1e37669138bb6aa1246 Mon Sep 17 00:00:00 2001
+From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+Date: Mon, 23 Aug 2021 16:19:27 +0200
+Subject: [PATCH 03/10] occamy: Chip simulation fixes
+
+---
+ common/local/util/instr_tracer.sv | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/common/local/util/instr_tracer.sv b/common/local/util/instr_tracer.sv
+index 3bc8889a..81e547d7 100644
+--- a/common/local/util/instr_tracer.sv
++++ b/common/local/util/instr_tracer.sv
+@@ -140,10 +140,12 @@ module instr_tracer (
+       // --------------
+       // Exceptions
+       // --------------
++      `ifndef VCS
+       if (tracer_if.pck.exception.valid && !(tracer_if.pck.debug_mode && tracer_if.pck.exception.cause == riscv::BREAKPOINT)) begin
+         // print exception
+         printException(tracer_if.pck.commit_instr[0].pc, tracer_if.pck.exception.cause, tracer_if.pck.exception.tval);
+       end
++      `endif
+       // ----------------------
+       // Commit Registers
+       // ----------------------
+-- 
+2.16.5
+

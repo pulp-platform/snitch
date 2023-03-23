@@ -1,0 +1,63 @@
+From 5aafe76809ad11c6478e033d9ef97e205b763bac Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Thu, 18 Aug 2022 15:26:48 +0200
+Subject: [PATCH 02/10] frontend: Remove `unread` for Vivado compatibility
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ core/frontend/bht.sv         |  2 +-
+ core/frontend/btb.sv         |  2 +-
+ core/frontend/instr_queue.sv | 11 ++++++-----
+ 3 files changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/core/frontend/bht.sv b/core/frontend/bht.sv
+index f0ea82fc..c79aa781 100644
+--- a/core/frontend/bht.sv
++++ b/core/frontend/bht.sv
+@@ -40,7 +40,7 @@ module bht #(
+     // number of bits we should use for prediction
+     localparam PREDICTION_BITS = $clog2(NR_ROWS) + OFFSET + ROW_ADDR_BITS;
+     // we are not interested in all bits of the address
+-    unread i_unread (.d_i(|vpc_i));
++    // unread i_unread (.d_i(|vpc_i));
+ 
+     struct packed {
+         logic       valid;
+diff --git a/core/frontend/btb.sv b/core/frontend/btb.sv
+index 4e169af7..535323f6 100644
+--- a/core/frontend/btb.sv
++++ b/core/frontend/btb.sv
+@@ -51,7 +51,7 @@ module btb #(
+     // number of bits par word in the bram 
+     localparam BRAM_WORD_BITS = $bits(ariane_pkg::btb_prediction_t);
+     // we are not interested in all bits of the address
+-    unread i_unread (.d_i(|vpc_i));
++    // unread i_unread (.d_i(|vpc_i));
+ 
+     
+     logic [$clog2(NR_ROWS)-1:0]  index, update_pc;
+diff --git a/core/frontend/instr_queue.sv b/core/frontend/instr_queue.sv
+index 1596beaf..273c82bc 100644
+--- a/core/frontend/instr_queue.sv
++++ b/core/frontend/instr_queue.sv
+@@ -388,11 +388,12 @@ module instr_queue import ariane_pkg::*; (
+     .pop_i      ( pop_address                  )
+   );
+ 
+-  unread i_unread_address_fifo (.d_i(|{empty_address, address_queue_usage}));
+-  unread i_unread_branch_mask (.d_i(|branch_mask_extended));
+-  unread i_unread_lzc (.d_i(|{branch_empty}));
+-  unread i_unread_fifo_pos (.d_i(|fifo_pos_extended)); // we don't care about the lower signals
+-  unread i_unread_instr_fifo (.d_i(|instr_queue_usage));
++  // Vivado interprets these as blackboxes when adding debug constraints
++  // unread i_unread_address_fifo (.d_i(|{empty_address, address_queue_usage}));
++  // unread i_unread_branch_mask (.d_i(|branch_mask_extended));
++  // unread i_unread_lzc (.d_i(|{branch_empty}));
++  // unread i_unread_fifo_pos (.d_i(|fifo_pos_extended)); // we don't care about the lower signals
++  // unread i_unread_instr_fifo (.d_i(|instr_queue_usage));
+ 
+   if (ariane_pkg::RVC) begin : gen_pc_q_with_c
+     always_ff @(posedge clk_i or negedge rst_ni) begin
+-- 
+2.16.5
+
