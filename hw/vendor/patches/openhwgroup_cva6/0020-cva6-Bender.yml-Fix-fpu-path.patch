@@ -1,0 +1,26 @@
+From 4eff9bef9eae564f906fd3f41dc42b0b1a93e030 Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Thu, 23 Mar 2023 21:12:43 +0100
+Subject: [PATCH] cva6/Bender.yml: Fix fpu path
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ Bender.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Bender.yml b/Bender.yml
+index 4a19e19e..d6cc4a13 100644
+--- a/Bender.yml
++++ b/Bender.yml
+@@ -10,7 +10,7 @@ dependencies:
+   axi: { path: ../../vendor/pulp_platform_axi }
+   common_cells:
+     { path: ../../vendor/pulp_platform_common_cells }
+-  FPnew: { path: ../../vendor/pulp_platform_fpnew }
++  FPnew: { path: ../../vendor/openhwgroup_cvfpu }
+   tech_cells_generic:
+     { path: ../../vendor/pulp_platform_tech_cells_generic }
+ 
+-- 
+2.16.5
+

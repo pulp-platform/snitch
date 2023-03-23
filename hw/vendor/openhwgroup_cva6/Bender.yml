@@ -10,7 +10,7 @@ dependencies:
   axi: { path: ../../vendor/pulp_platform_axi }
   common_cells:
     { path: ../../vendor/pulp_platform_common_cells }
-  FPnew: { path: ../../vendor/pulp_platform_fpnew }
+  FPnew: { path: ../../vendor/openhwgroup_cvfpu }
   tech_cells_generic:
     { path: ../../vendor/pulp_platform_tech_cells_generic }
 
