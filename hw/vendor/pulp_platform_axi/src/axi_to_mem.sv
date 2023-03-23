@@ -1,10 +1,15 @@
 // Copyright 2020 ETH Zurich and University of Bologna.
-// Solderpad Hardware License, Version 0.51, see LICENSE for details.
-// SPDX-License-Identifier: SHL-0.51
+// Copyright and related rights are licensed under the Solderpad Hardware
+// License, Version 0.51 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
+// or agreed to in writing, software, hardware and materials distributed under
+// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
 
 // Authors:
-// - Andreas Kurth <akurth@iis.ee.ethz.ch>
-// - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
+// - Michael Rogenmoser <michaero@iis.ee.ethz.ch>
 
 `include "common_cells/registers.svh"
 /// AXI4+ATOP slave module which translates AXI bursts into a memory stream.
@@ -27,6 +32,10 @@ module axi_to_mem #(
   parameter int unsigned NumBanks   = 0,
   /// Depth of memory response buffer. This should be equal to the memory response latency.
   parameter int unsigned BufDepth   = 1,
+  /// Hide write requests if the strb == '0
+  parameter bit          HideStrb   = 1'b0,
+  /// Depth of output fifo/fall_through_register. Increase for asymmetric backpressure (contention) on banks.
+  parameter int unsigned OutFifoDepth = 1,
   /// Dependent parameter, do not override. Memory address type.
   localparam type addr_t     = logic [AddrWidth-1:0],
   /// Dependent parameter, do not override. Memory data type.
@@ -123,7 +132,7 @@ module axi_to_mem #(
     // Default assignments
     axi_resp_o.ar_ready = 1'b0;
     rd_meta_d           = rd_meta_q;
-    rd_meta             = '{default: '0};
+    rd_meta             = meta_t'{default: '0};
     rd_valid            = 1'b0;
     r_cnt_d             = r_cnt_q;
     // Handle R burst in progress.
@@ -163,7 +172,7 @@ module axi_to_mem #(
     axi_resp_o.aw_ready = 1'b0;
     axi_resp_o.w_ready  = 1'b0;
     wr_meta_d           = wr_meta_q;
-    wr_meta             = '{default: '0};
+    wr_meta             = meta_t'{default: '0};
     wr_valid            = 1'b0;
     w_cnt_d             = w_cnt_q;
     // Handle W bursts in progress.
@@ -310,7 +319,7 @@ module axi_to_mem #(
   );
 
   // Assemble the actual memory request from meta information and write data.
-  assign m2s_req = '{
+  assign m2s_req = mem_req_t'{
     addr:  meta.addr,
     atop:  meta.atop,
     strb:  axi_req_i.w.strb,
@@ -341,9 +350,13 @@ module axi_to_mem #(
 
   // Split single memory request to desired number of banks.
   mem_to_banks #(
-    .AddrWidth  ( AddrWidth ),
-    .DataWidth  ( DataWidth ),
-    .NumBanks   ( NumBanks  )
+    .AddrWidth ( AddrWidth       ),
+    .DataWidth ( DataWidth       ),
+    .NumBanks  ( NumBanks        ),
+    .HideStrb  ( HideStrb        ),
+    .MaxTrans  ( BufDepth        ),
+    .FifoDepth ( OutFifoDepth    ),
+    .atop_t    ( axi_pkg::atop_t )
   ) i_mem_to_banks (
     .clk_i,
     .rst_ni,
@@ -454,17 +467,21 @@ endmodule
 /// Interface wrapper for module `axi_to_mem`.
 module axi_to_mem_intf #(
   /// See `axi_to_mem`, parameter `AddrWidth`.
-  parameter int unsigned ADDR_WIDTH = 32'd0,
+  parameter int unsigned ADDR_WIDTH     = 32'd0,
   /// See `axi_to_mem`, parameter `DataWidth`.
-  parameter int unsigned DATA_WIDTH = 32'd0,
+  parameter int unsigned DATA_WIDTH     = 32'd0,
   /// AXI4+ATOP ID width.
-  parameter int unsigned ID_WIDTH   = 32'd0,
+  parameter int unsigned ID_WIDTH       = 32'd0,
   /// AXI4+ATOP user width.
-  parameter int unsigned USER_WIDTH = 32'd0,
+  parameter int unsigned USER_WIDTH     = 32'd0,
   /// See `axi_to_mem`, parameter `NumBanks`.
-  parameter int unsigned NUM_BANKS  = 32'd0,
+  parameter int unsigned NUM_BANKS      = 32'd0,
   /// See `axi_to_mem`, parameter `BufDepth`.
-  parameter int unsigned BUF_DEPTH  = 32'd1,
+  parameter int unsigned BUF_DEPTH      = 32'd1,
+  /// Hide write requests if the strb == '0
+  parameter bit          HIDE_STRB      = 1'b0,
+  /// Depth of output fifo/fall_through_register. Increase for asymmetric backpressure (contention) on banks.
+  parameter int unsigned OUT_FIFO_DEPTH = 32'd1,
   /// Dependent parameter, do not override. See `axi_to_mem`, parameter `addr_t`.
   localparam type addr_t     = logic [ADDR_WIDTH-1:0],
   /// Dependent parameter, do not override. See `axi_to_mem`, parameter `mem_data_t`.
@@ -515,13 +532,15 @@ module axi_to_mem_intf #(
   `AXI_ASSIGN_TO_REQ(req, slv)
   `AXI_ASSIGN_FROM_RESP(slv, resp)
   axi_to_mem #(
-    .axi_req_t  ( req_t     ),
-    .axi_resp_t ( resp_t    ),
-    .AddrWidth  ( ADDR_WIDTH ),
-    .DataWidth  ( DATA_WIDTH ),
-    .IdWidth    ( ID_WIDTH   ),
-    .NumBanks   ( NUM_BANKS  ),
-    .BufDepth   ( BUF_DEPTH  )
+    .axi_req_t    ( req_t          ),
+    .axi_resp_t   ( resp_t         ),
+    .AddrWidth    ( ADDR_WIDTH     ),
+    .DataWidth    ( DATA_WIDTH     ),
+    .IdWidth      ( ID_WIDTH       ),
+    .NumBanks     ( NUM_BANKS      ),
+    .BufDepth     ( BUF_DEPTH      ),
+    .HideStrb     ( HIDE_STRB      ),
+    .OutFifoDepth ( OUT_FIFO_DEPTH )
   ) i_axi_to_mem (
     .clk_i,
     .rst_ni,
@@ -538,166 +557,4 @@ module axi_to_mem_intf #(
     .mem_rvalid_i,
     .mem_rdata_i
   );
-endmodule
-
-/// Split memory access over multiple parallel banks, where each bank has its own req/gnt
-/// request and valid response direction.
-module mem_to_banks #(
-  /// Input address width.
-  parameter int unsigned AddrWidth = 32'd0,
-  /// Input data width, must be a power of two.
-  parameter int unsigned DataWidth = 32'd0,
-  /// Number of banks at output, must evenly divide `DataWidth`.
-  parameter int unsigned NumBanks  = 32'd0,
-  /// Dependent parameter, do not override! Address type.
-  localparam type addr_t     = logic [AddrWidth-1:0],
-  /// Dependent parameter, do not override! Input data type.
-  localparam type inp_data_t = logic [DataWidth-1:0],
-  /// Dependent parameter, do not override! Input write strobe type.
-  localparam type inp_strb_t = logic [DataWidth/8-1:0],
-  /// Dependent parameter, do not override! Output data type.
-  localparam type oup_data_t = logic [DataWidth/NumBanks-1:0],
-  /// Dependent parameter, do not override! Output write strobe type.
-  localparam type oup_strb_t = logic [DataWidth/NumBanks/8-1:0]
-) (
-  /// Clock input.
-  input  logic                      clk_i,
-  /// Asynchronous reset, active low.
-  input  logic                      rst_ni,
-  /// Memory request to split, request is valid.
-  input  logic                      req_i,
-  /// Memory request to split, request can be granted.
-  output logic                      gnt_o,
-  /// Memory request to split, request address, byte-wise.
-  input  addr_t                     addr_i,
-  /// Memory request to split, request write data.
-  input  inp_data_t                 wdata_i,
-  /// Memory request to split, request write strobe.
-  input  inp_strb_t                 strb_i,
-  /// Memory request to split, request Atomic signal from AXI4+ATOP.
-  input  axi_pkg::atop_t            atop_i,
-  /// Memory request to split, request write enable, active high.
-  input  logic                      we_i,
-  /// Memory request to split, response is valid. Required for read and write requests
-  output logic                      rvalid_o,
-  /// Memory request to split, response read data.
-  output inp_data_t                 rdata_o,
-  /// Memory bank request, request is valid.
-  output logic           [NumBanks-1:0]  bank_req_o,
-  /// Memory bank request, request can be granted.
-  input  logic           [NumBanks-1:0]  bank_gnt_i,
-  /// Memory bank request, request address, byte-wise. Will be different for each bank.
-  output addr_t          [NumBanks-1:0]  bank_addr_o,
-  /// Memory bank request, request write data.
-  output oup_data_t      [NumBanks-1:0]  bank_wdata_o,
-  /// Memory bank request, request write strobe.
-  output oup_strb_t      [NumBanks-1:0]  bank_strb_o,
-  /// Memory bank request, request Atomic signal from AXI4+ATOP.
-  output axi_pkg::atop_t [NumBanks-1:0]  bank_atop_o,
-  /// Memory bank request, request write enable, active high.
-  output logic           [NumBanks-1:0]  bank_we_o,
-  /// Memory bank request, response is valid. Required for read and write requests
-  input  logic           [NumBanks-1:0]  bank_rvalid_i,
-  /// Memory bank request, response read data.
-  input  oup_data_t      [NumBanks-1:0]  bank_rdata_i
-);
-
-  localparam int unsigned DataBytes    = $bits(inp_strb_t);
-  localparam int unsigned BitsPerBank  = $bits(oup_data_t);
-  localparam int unsigned BytesPerBank = $bits(oup_strb_t);
-
-  typedef struct packed {
-    addr_t          addr;
-    oup_data_t      wdata;
-    oup_strb_t      strb;
-    axi_pkg::atop_t atop;
-    logic           we;
-  } req_t;
-
-  logic                 req_valid;
-  logic [NumBanks-1:0]              req_ready,
-                        resp_valid, resp_ready;
-  req_t [NumBanks-1:0]  bank_req,
-                        bank_oup;
-
-  function automatic addr_t align_addr(input addr_t addr);
-    return (addr >> $clog2(DataBytes)) << $clog2(DataBytes);
-  endfunction
-
-  if (NumBanks == 1) begin : gen_direct_connection
-    assign bank_req_o = req_i;
-    assign gnt_o = bank_gnt_i;
-    assign bank_addr_o = addr_i;
-    assign bank_wdata_o = wdata_i;
-    assign bank_strb_o = strb_i;
-    assign bank_atop_o = atop_i;
-    assign bank_we_o = we_i;
-    assign rvalid_o = bank_rvalid_i;
-    assign rdata_o = bank_rdata_i;
-  end else begin : gen_bank_split
-    // Handle requests.
-    assign req_valid = req_i & gnt_o;
-    for (genvar i = 0; unsigned'(i) < NumBanks; i++) begin : gen_reqs
-      assign bank_req[i].addr  = align_addr(addr_i) + i * BytesPerBank;
-      assign bank_req[i].wdata = wdata_i[i*BitsPerBank+:BitsPerBank];
-      assign bank_req[i].strb  = strb_i[i*BytesPerBank+:BytesPerBank];
-      assign bank_req[i].atop  = atop_i;
-      assign bank_req[i].we    = we_i;
-      fall_through_register #(
-        .T ( req_t )
-      ) i_ft_reg (
-        .clk_i,
-        .rst_ni,
-        .clr_i      ( 1'b0          ),
-        .testmode_i ( 1'b0          ),
-        .valid_i    ( req_valid     ),
-        .ready_o    ( req_ready[i]  ),
-        .data_i     ( bank_req[i]   ),
-        .valid_o    ( bank_req_o[i] ),
-        .ready_i    ( bank_gnt_i[i] ),
-        .data_o     ( bank_oup[i]   )
-      );
-      assign bank_addr_o[i]  = bank_oup[i].addr;
-      assign bank_wdata_o[i] = bank_oup[i].wdata;
-      assign bank_strb_o[i]  = bank_oup[i].strb;
-      assign bank_atop_o[i]  = bank_oup[i].atop;
-      assign bank_we_o[i]    = bank_oup[i].we;
-    end
-
-    // Grant output if all our requests have been granted.
-    assign gnt_o = (&req_ready) & (&resp_ready);
-
-    // Handle responses.
-    for (genvar i = 0; unsigned'(i) < NumBanks; i++) begin : gen_resp_regs
-      fall_through_register #(
-        .T ( oup_data_t )
-      ) i_ft_reg (
-        .clk_i,
-        .rst_ni,
-        .clr_i      ( 1'b0                                ),
-        .testmode_i ( 1'b0                                ),
-        .valid_i    ( bank_rvalid_i[i]                    ),
-        .ready_o    ( resp_ready[i]                       ),
-        .data_i     ( bank_rdata_i[i]                     ),
-        .data_o     ( rdata_o[i*BitsPerBank+:BitsPerBank] ),
-        .ready_i    ( rvalid_o                            ),
-        .valid_o    ( resp_valid[i]                       )
-      );
-    end
-    assign rvalid_o = &resp_valid;
-  end
-
-  // Assertions
-  // pragma translate_off
-  `ifndef VERILATOR
-    initial begin
-      assume (DataWidth != 0 && (DataWidth & (DataWidth - 1)) == 0)
-        else $fatal(1, "Data width must be a power of two!");
-      assume (DataWidth % NumBanks == 0)
-        else $fatal(1, "Data width must be evenly divisible over banks!");
-      assume ((DataWidth / NumBanks) % 8 == 0)
-        else $fatal(1, "Data width of each bank must be divisible into 8-bit bytes!");
-    end
-  `endif
-  // pragma translate_on
 endmodule

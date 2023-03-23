@@ -9,6 +9,7 @@
 
 
 `include "axi/typedef.svh"
+`include "axi_tlb/typedef.svh"
 
 /// Occamy Stage 1 Quadrant
 module occamy_quadrant_s1
@@ -224,7 +225,7 @@ module occamy_quadrant_s1
   axi_a48_d64_i7_u5_req_t  narrow_cluster_out_tlb_req;
   axi_a48_d64_i7_u5_resp_t narrow_cluster_out_tlb_rsp;
 
-  axi_tlb #(
+  axi_tlb_noreg #(
       .AxiSlvPortAddrWidth(48),
       .AxiMstPortAddrWidth(48),
       .AxiDataWidth(64),
@@ -321,7 +322,7 @@ module occamy_quadrant_s1
   axi_a48_d512_i6_u0_req_t  wide_cluster_out_tlb_req;
   axi_a48_d512_i6_u0_resp_t wide_cluster_out_tlb_rsp;
 
-  axi_tlb #(
+  axi_tlb_noreg #(
       .AxiSlvPortAddrWidth(48),
       .AxiMstPortAddrWidth(48),
       .AxiDataWidth(512),

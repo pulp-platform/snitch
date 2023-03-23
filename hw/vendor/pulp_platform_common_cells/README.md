@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/pulp-platform/common_cells.svg?branch=master)](https://travis-ci.com/pulp-platform/common_cells)
+[![Build Status](https://github.com/pulp-platform/common_cells/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/pulp-platform/common_cells/actions/workflows/ci.yml?query=branch%3Amaster)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/pulp-platform/common_cells?color=blue&label=current&sort=semver)](CHANGELOG.md)
 [![SHL-0.51 license](https://img.shields.io/badge/license-SHL--0.51-green)](LICENSE)
 
@@ -35,6 +35,7 @@ Please note that cells with status *deprecated* are not to be used for new desig
 | `cdc_fifo_gray`                | Clock domain crossing FIFO using a gray-counter, with ready/valid interface                   | active       |               |
 | `cdc_fifo_gray_clearable`      | Identical to `cdc_fifo_gray` but supports one-sided async/sync resetting of either src or dst | active       |               |
 | `cdc_reset_ctrlr`              | Lock-step reset sequencer accross clock domains (internally used by clearable CDCs)           | active       |               |
+| `clk_mux_glitch_free`          | A glitch-free clock multiplexer with parametrizeable number of inputs.                        | active       |               |
 | `edge_detect`                  | Rising/falling edge detector                                                                  | active       |               |
 | `edge_propagator`              | Propagates a single-cycle pulse across an asynchronous clock domain crossing                  | active       |               |
 | `edge_propagator_ack`          | `edge_propagator` with sender-synchronous acknowledge pin (flags received pulse)              | active       |               |
@@ -94,24 +95,27 @@ Please note that cells with status *deprecated* are not to be used for new desig
 | `stream_to_mem`            | Use memories without flow control for output data in streams.                                             | active       |               |
 | `stream_xbar`              | Fully connected crossbar with ready/valid interface.                                                      | active       |               |
 | `stream_omega_net`         | One-way stream omega-net with ready/valid interface. Isomorphic to a butterfly.                           | active       |               |
+| `stream_throttle`          | Restrict the number of outstanding transfers in a stream.                                                 | active       |               |
 | `sub_per_hash`             | Substitution-permutation hash function                                                                    | active       |               |
 | `popcount`                 | Combinatorial popcount (hamming weight)                                                                   | active       |               |
+| `mem_to_banks`             | Split memory access over multiple parallel banks                                                          | active       |               |
 
 ### Data Structures
 
-| Name                       | Description                                                      | Status       | Superseded By |
-| -------------------------- | ---------------------------------------------------------------- | ------------ | ------------- |
-| `cb_filter`                | Counting-Bloom-Filter with combinational lookup                  | active       |               |
-| `fifo`                     | FIFO register with upper threshold                               | *deprecated* | `fifo_v3`     |
-| `fifo_v2`                  | FIFO register with upper and lower threshold                     | *deprecated* | `fifo_v3`     |
-| `fifo_v3`                  | FIFO register with generic fill counts                           | active       |               |
-| `stream_fifo`              | FIFO register with ready/valid interface                         | active       |               |
-| `stream_fifo_optimal_wrap` | Wrapper that optimally selects either a spill register or a FIFO | active       |               |
-| `generic_fifo`             | FIFO register without thresholds                                 | *deprecated* | `fifo_v3`     |
-| `generic_fifo_adv`         | FIFO register without thresholds                                 | *deprecated* | `fifo_v3`     |
-| `sram`                     | SRAM behavioral model                                            | active       |               |
-| `plru_tree`                | Pseudo least recently used tree                                  | active       |               |
-| `unread`                   | Empty module to sink unconnected outputs into                    | active       |               |
+| Name                       | Description                                                             | Status       | Superseded By |
+| -------------------------- | ----------------------------------------------------------------------- | ------------ | ------------- |
+| `cb_filter`                | Counting-Bloom-Filter with combinational lookup                         | active       |               |
+| `fifo`                     | FIFO register with upper threshold                                      | *deprecated* | `fifo_v3`     |
+| `fifo_v2`                  | FIFO register with upper and lower threshold                            | *deprecated* | `fifo_v3`     |
+| `fifo_v3`                  | FIFO register with generic fill counts                                  | active       |               |
+| `stream_fifo`              | FIFO register with ready/valid interface                                | active       |               |
+| `stream_fifo_optimal_wrap` | Wrapper that optimally selects either a spill register or a FIFO        | active       |               |
+| `generic_fifo`             | FIFO register without thresholds                                        | *deprecated* | `fifo_v3`     |
+| `generic_fifo_adv`         | FIFO register without thresholds                                        | *deprecated* | `fifo_v3`     |
+| `sram`                     | SRAM behavioral model                                                   | active       |               |
+| `plru_tree`                | Pseudo least recently used tree                                         | active       |               |
+| `unread`                   | Empty module to sink unconnected outputs into                           | active       |               |
+| `read`                     | Dummy module that prevents a signal from being removed during synthesis | active       |               |
 
 
 ## Header Contents

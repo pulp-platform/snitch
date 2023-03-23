@@ -26,6 +26,7 @@
 %>
 
 `include "axi/typedef.svh"
+`include "axi_tlb/typedef.svh"
 
 /// Occamy Stage 1 Quadrant
 module ${name}_quadrant_s1
@@ -99,7 +100,7 @@ module ${name}_quadrant_s1
   #// Add TLB behind crossbar if enabled
   if narrow_tlb_cfg:
     narrow_cluster_out_tlb = narrow_xbar_quadrant_s1.out_top \
-    .add_tlb(context, "narrow_cluster_out_tlb", \
+    .add_tlb_no_reg(context, "narrow_cluster_out_tlb", \
       cfg=narrow_tlb_cfg, \
       entry_t="tlb_entry_t", \
       entries="narrow_tlb_entries", \
@@ -121,7 +122,7 @@ module ${name}_quadrant_s1
     #// Add TLB behind crossbar if enabled
     if wide_tlb_cfg:
       wide_cluster_out_tlb = wide_xbar_quadrant_s1.out_top \
-      .add_tlb(context, "wide_cluster_out_tlb", \
+      .add_tlb_no_reg(context, "wide_cluster_out_tlb", \
         cfg=wide_tlb_cfg, \
       entry_t="tlb_entry_t", \
       entries="wide_tlb_entries", \

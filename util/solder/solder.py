@@ -329,8 +329,9 @@ class AxiStruct:
         name = "axi_a{}_d{}_i{}_u{}".format(*key)
         code = "// AXI bus with {} bit address, {} bit data, {} bit IDs, and {} bit user data.\n".format(
             *key)
-        code += "`AXI_TYPEDEF_ALL({}, logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])\n".format(
-            name, aw - 1, iw - 1, dw - 1, (dw + 7) // 8 - 1, max(0, uw - 1))
+        code += "`AXI_TYPEDEF_ALL_CT({}, {}_req_t, {}_resp_t, ".format(name, name, name)
+        code += "logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])\n".format(
+            aw - 1, iw - 1, dw - 1, (dw + 7) // 8 - 1, max(0, uw - 1))
         code_package += "\n" + code
         AxiStruct.configs[key] = name
         return name
@@ -348,8 +349,8 @@ class AxiLiteStruct:
         name = "axi_lite_a{}_d{}".format(*key)
         code = "// AXI-Lite bus with {} bit address and {} bit data.\n".format(
             *key)
-        code += "`AXI_LITE_TYPEDEF_ALL({}, logic [{}:0], logic [{}:0], logic [{}:0])\n".format(
-            name, aw - 1, dw - 1, (dw + 7) // 8 - 1)
+        code += "`AXI_LITE_TYPEDEF_ALL_CT({}, {}_req_t, {}_rsp_t, logic [{}:0], logic [{}:0], logic [{}:0])\n".format(
+            name, name, name, aw - 1, dw - 1, (dw + 7) // 8 - 1)
         code_package += "\n" + code
         AxiLiteStruct.configs[key] = name
         return name
@@ -972,16 +973,16 @@ class AxiBus(Bus):
             ) + "\n")
         return bus
 
-    def add_tlb(self,
-                context,
-                name,
-                cfg,
-                entry_t,
-                entries,
-                bypass,
-                inst_name=None,
-                to=None
-                ):
+    def add_tlb_no_reg(self,
+                       context,
+                       name,
+                       cfg,
+                       entry_t,
+                       entries,
+                       bypass,
+                       inst_name=None,
+                       to=None
+                       ):
         # Generate the new bus.
         if to is None:
             bus = copy(self)
@@ -1003,7 +1004,7 @@ class AxiBus(Bus):
 
         # Emit the TLB instance.
         bus.declare(context)
-        tpl = templates.get_template("solder.axi_tlb.sv.tpl")
+        tpl = templates.get_template("solder.axi_tlb_noreg.sv.tpl")
         context.write(
             tpl.render_unicode(
                 axi_in=self,
@@ -1558,6 +1559,7 @@ class AxiXbar(Xbar):
         cfg += "  MaxMstTrans:        {},\n".format(self.max_mst_trans)
         cfg += "  FallThrough:        {},\n".format(int(self.fall_through))
         cfg += "  LatencyMode:        {},\n".format(self.latency_mode)
+        cfg += "  PipelineStages:     {},\n".format(0)
         cfg += "  AxiIdWidthSlvPorts: {},\n".format(self.iw)
         cfg += "  AxiIdUsedSlvPorts:  {},\n".format(self.iw)
         cfg += "  UniqueIds:          {},\n".format(0)

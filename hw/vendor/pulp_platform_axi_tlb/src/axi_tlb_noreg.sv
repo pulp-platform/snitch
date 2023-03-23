@@ -1,21 +1,17 @@
-// Copyright (c) 2020 ETH Zurich, University of Bologna
+// Copyright 2018-2022 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
 //
-// Copyright and related rights are licensed under the Solderpad Hardware
-// License, Version 0.51 (the "License"); you may not use this file except in
-// compliance with the License.  You may obtain a copy of the License at
-// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
-// or agreed to in writing, software, hardware and materials distributed under
-// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-
-// Author: Andreas Kurth  <akurth@iis.ee.ethz.ch>
+// Author: Andreas Kurth <akurth@iis.ee.ethz.ch>
+// Author: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
 `include "axi/typedef.svh"
 `include "common_cells/registers.svh"
 
-/// AXI4+ATOP Translation Lookaside Buffer (TLB)
-module axi_tlb #(
+/// AXI4+ATOP Translation Lookaside Buffer (TLB) *without* integrated regfile.
+/// Use this as a top level if you want to reuse an existing register file,
+/// a different register interface, or avoid this IP's generated registers.
+module axi_tlb_noreg #(
   /// Address width of main AXI4+ATOP slave port
   parameter int unsigned AxiSlvPortAddrWidth = 0,
   /// Address width of main AXI4+ATOP master port
@@ -184,7 +180,6 @@ module axi_tlb #(
     .NoMstPorts   ( 2                 ),
     .MaxTrans     ( AxiSlvPortMaxTxns ),
     .AxiLookBits  ( AxiIdWidth        ),
-    .FallThrough  ( 1'b0              ),
     .SpillAw      ( L1CutAx           ),
     .SpillW       ( 1'b0              ),
     .SpillB       ( 1'b0              ),
@@ -266,86 +261,4 @@ module axi_tlb #(
   );
 
   // TODO: many parameter and type assertions
-endmodule
-
-`include "axi/assign.svh"
-`include "axi/typedef.svh"
-
-/// Interface variant of [`axi_tlb`](module.axi_tlb)
-module axi_tlb_intf #(
-  parameter int unsigned AXI_SLV_PORT_ADDR_WIDTH = 0,
-  parameter int unsigned AXI_MST_PORT_ADDR_WIDTH = 0,
-  parameter int unsigned AXI_DATA_WIDTH = 0,
-  parameter int unsigned AXI_ID_WIDTH = 0,
-  parameter int unsigned AXI_USER_WIDTH = 0,
-  parameter int unsigned AXI_SLV_PORT_MAX_TXNS = 0,
-  parameter int unsigned CFG_AXI_ADDR_WIDTH = 0,
-  parameter int unsigned CFG_AXI_DATA_WIDTH = 0,
-  parameter int unsigned L1_NUM_ENTRIES = 0,
-  parameter bit L1_CUT_AX = 1'b1,
-  // TODO: provide as interface?
-  parameter type entry_t = logic
-) (
-  input  logic    clk_i,
-  input  logic    rst_ni,
-  input  logic    test_en_i,
-  AXI_BUS.Slave   slv,
-  AXI_BUS.Master  mst,
-  input  entry_t [L1_NUM_ENTRIES-1:0] entries_i,
-  input logic     bypass_i
-);
-
-  typedef logic [AXI_SLV_PORT_ADDR_WIDTH-1:0] slv_addr_t;
-  typedef logic [AXI_MST_PORT_ADDR_WIDTH-1:0] mst_addr_t;
-  typedef logic [AXI_DATA_WIDTH-1:0]          data_t;
-  typedef logic [AXI_ID_WIDTH-1:0]            id_t;
-  typedef logic [AXI_DATA_WIDTH/8-1:0]        strb_t;
-  typedef logic [AXI_USER_WIDTH-1:0]          user_t;
-  `AXI_TYPEDEF_AW_CHAN_T(slv_aw_t, slv_addr_t, id_t, user_t)
-  `AXI_TYPEDEF_AW_CHAN_T(mst_aw_t, mst_addr_t, id_t, user_t)
-  `AXI_TYPEDEF_W_CHAN_T(w_t, data_t, strb_t, user_t)
-  `AXI_TYPEDEF_B_CHAN_T(b_t, id_t, user_t)
-  `AXI_TYPEDEF_AR_CHAN_T(slv_ar_t, slv_addr_t, id_t, user_t)
-  `AXI_TYPEDEF_AR_CHAN_T(mst_ar_t, mst_addr_t, id_t, user_t)
-  `AXI_TYPEDEF_R_CHAN_T(r_t, data_t, id_t, user_t)
-  `AXI_TYPEDEF_REQ_T(slv_req_t, slv_aw_t, w_t, slv_ar_t)
-  `AXI_TYPEDEF_REQ_T(mst_req_t, mst_aw_t, w_t, mst_ar_t)
-  `AXI_TYPEDEF_RESP_T(axi_resp_t, b_t, r_t)
-
-  slv_req_t   slv_req;
-  mst_req_t   mst_req;
-  axi_resp_t  slv_resp,
-              mst_resp;
-
-  `AXI_ASSIGN_TO_REQ(slv_req, slv)
-  `AXI_ASSIGN_FROM_RESP(slv, slv_resp)
-
-  `AXI_ASSIGN_FROM_REQ(mst, mst_req)
-  `AXI_ASSIGN_TO_RESP(mst_resp, mst)
-
-  axi_tlb #(
-    .AxiSlvPortAddrWidth  ( AXI_SLV_PORT_ADDR_WIDTH ),
-    .AxiMstPortAddrWidth  ( AXI_MST_PORT_ADDR_WIDTH ),
-    .AxiDataWidth         ( AXI_DATA_WIDTH          ),
-    .AxiIdWidth           ( AXI_ID_WIDTH            ),
-    .AxiUserWidth         ( AXI_USER_WIDTH          ),
-    .AxiSlvPortMaxTxns    ( AXI_SLV_PORT_MAX_TXNS   ),
-    .L1NumEntries         ( L1_NUM_ENTRIES          ),
-    .L1CutAx              ( L1_CUT_AX               ),
-    .slv_req_t            ( slv_req_t               ),
-    .mst_req_t            ( mst_req_t               ),
-    .axi_resp_t           ( axi_resp_t              ),
-    .entry_t              ( entry_t                 )
-  ) i_axi_tlb (
-    .clk_i,
-    .rst_ni,
-    .test_en_i,
-    .slv_req_i  ( slv_req   ),
-    .slv_resp_o ( slv_resp  ),
-    .mst_req_o  ( mst_req   ),
-    .mst_resp_i ( mst_resp  ),
-    .entries_i,
-    .bypass_i
-  );
-
 endmodule
