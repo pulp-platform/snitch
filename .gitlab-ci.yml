@@ -105,21 +105,6 @@ occamy_vcu128:
   timeout: 18h 00m
   script:
   - |
-    if [[ ! -f /usr/scratch2/dolent1/gitlabci/tmp/hero_occamy_wip/output/br-hrv-occamy/images/u-boot-spl.bin ]]; then
-      cd /usr/scratch2/dolent1/gitlabci/tmp
-      rm -rf hero_occamy_wip
-      git clone git@github.com:pulp-platform/hero.git hero_occamy_wip
-      cd hero_occamy_wip && git checkout tmp/hero_occamy_wip && git submodule update --init --recursive
-      export HERO_DEVICE_DTS=${CI_PROJECT_DIR}/hw/system/occamy/fpga/bootrom/occamy.dts
-      export HERO_INSTALL=/usr/scratch2/dolent1/gitlabci/tmp/hero_occamy_wip/install && export PATH=$HERO_INSTALL/share:$HERO_INSTALL/bin:$PATH
-      mkdir -p ${HERO_INSTALL} && make br-hrv-occamy-defconfig
-      cd output/br-hrv-occamy && make toolchain uboot
-    fi
-    export HERO_INSTALL=/usr/scratch2/dolent1/gitlabci/tmp/hero_occamy_wip/install && export PATH=$HERO_INSTALL/share:$HERO_INSTALL/bin:$PATH
-    export UBOOT_SPL_BIN=/usr/scratch2/dolent1/gitlabci/tmp/hero_occamy_wip/output/br-hrv-occamy/images/u-boot-spl.bin
-    cd $CI_PROJECT_DIR
-  # Synthesize and Implement Occamy block design
-  - |
     if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup occamy_vcu128; then
       make -C hw/system/occamy/fpga occamy_vcu128 EXT_JTAG=0 DEBUG=0
       mkdir -p /usr/scratch2/dolent1/gitlabci/buildcache/snitch/snitch-incremental/
