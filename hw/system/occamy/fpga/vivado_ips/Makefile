@@ -12,8 +12,9 @@ DEBUG       ?= 0
 VIVADO ?= vivado
 BENDER ?= bender
 
+BENDER_TARGETS += -t cv64a6_imafdc_sv39
 ifeq ($(EXT_JTAG), 0)
-	BENDER_TARGETS := $(BENDER_TARGETS) -t bscane
+	BENDER_TARGETS += -t bscane
 endif
 
 include $(ROOT)/util/Makefrag
