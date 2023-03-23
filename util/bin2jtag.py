@@ -11,7 +11,7 @@
 #
 # In vivado then `source mem.tcl` to execute
 #
-# Requires bin2coe 
+# Requires bin2coe
 # - https://github.com/anishathalye/bin2coe/blob/master/src/bin2coe
 
 from argparse import ArgumentParser
@@ -22,6 +22,7 @@ import sys
 import bin2coe.convert
 
 signal(SIGPIPE, SIG_DFL)
+
 
 def main():
     parser = ArgumentParser()
@@ -41,6 +42,7 @@ def main():
     # Writes jtag commands to fd_o
     convert(fd_o, data, width, radix, int(options.base, 16), options.device, True, options.chunk_size)
 
+
 def convert(output, data, width, radix, address, dev, rb, chunk_size):
     # License
     output.write("# Copyright 2020 ETH Zurich and University of Bologna.\n")
@@ -59,7 +61,9 @@ def convert(output, data, width, radix, address, dev, rb, chunk_size):
 
     # Get coe format from bin2coe
     temp = BytesIO()
-    bin2coe.convert.convert(output=temp, data=data, width=width, depth=0, fill=0, radix=radix, little_endian=True, mem=True)
+    bin2coe.convert.convert(output=temp, data=data, width=width, depth=0, fill=0,
+                            radix=radix, little_endian=True, mem=True)
+
     # Split the coe format into string words
     word_list = [w for w in temp.getvalue().decode("utf-8").split("\n") if w != ""]
 

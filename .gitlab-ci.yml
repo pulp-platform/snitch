@@ -66,7 +66,7 @@ get_linux:
       ln -s /home/cykoenig/bin/ld $CI_PROJECT_DIR/.local/bin/ld && hash -r
       cd $CVA6_SDK && make uImage LD_LIBRARY_PATH=/home/cykoenig/lib64
     fi
-  needs: ["get_toolchain"]
+  needs: [get_toolchain]
   timeout: 2h 00m
 
 # Packages and elaborates the vivado IPs where occamy is part of. This ensures
@@ -115,7 +115,7 @@ occamy_vcu128:
     paths:
     - hw/system/occamy/fpga
     - hw/system/occamy/src
-  needs: ["get_toolchain", "occamy_vivado_ip"]
+  needs: [get_toolchain, occamy_vivado_ip]
 
 # Boot Linux on the VCU128 FPGA and check for prompt
 occamy_vcu128_fpga:
