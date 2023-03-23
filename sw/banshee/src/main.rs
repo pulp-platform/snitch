@@ -14,10 +14,15 @@ use clap::Arg;
 use llvm_sys::{
     bit_writer::*, core::*, execution_engine::*, initialization::*, support::*, target::*,
 };
-use std::{ffi::CString, os::raw::c_int, path::Path, ptr::null_mut};
+
+use std::{
+    collections::HashMap, ffi::CString, fs, fs::File, io::prelude::*, num::ParseIntError,
+    os::raw::c_int, path::Path, ptr::null_mut, str::FromStr,
+};
 
 pub mod bootroms;
 pub mod configuration;
+pub mod dram_preload;
 pub mod engine;
 pub mod peripherals;
 pub mod riscv;
@@ -28,6 +33,8 @@ pub mod util;
 
 use crate::configuration::*;
 use crate::engine::*;
+
+use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 
 fn main() -> Result<()> {
     // Parse the command line arguments.
@@ -137,6 +144,23 @@ fn main() -> Result<()> {
                 .multiple(true)
                 .help("Pass command line arguments to LLVM"),
         )
+        // Replace single arguments with lists of arguments.
+        .arg(
+            Arg::with_name("file-paths")
+                .long("file-paths")
+                .takes_value(true)
+                .multiple(true)
+                .value_delimiter(",")
+                .help("Path to the binary data files (without labels) for training."),
+        )
+        .arg(
+            Arg::with_name("mem-offsets")
+                .long("mem-offsets")
+                .takes_value(true)
+                .multiple(true)
+                .value_delimiter(",")
+                .help("The memory offsets of the data files for training."),
+        )
         .get_matches();
 
     // Configure the logger.
@@ -205,6 +229,7 @@ fn main() -> Result<()> {
     let has_num_cores = matches.is_present("num-cores");
     let has_num_clusters = matches.is_present("num-clusters");
     let has_base_hartid = matches.is_present("base-hartid");
+    let has_bin_files = matches.is_present("file-paths");
 
     matches
         .value_of("num-cores")
@@ -260,6 +285,54 @@ fn main() -> Result<()> {
         .translate_elf(&elf)
         .context("Failed to translate ELF binary")?;
 
+    if has_bin_files {
+        // loop through the file paths
+        let file_paths = matches.values_of("file-paths").unwrap();
+        debug!("File paths: {:?}", file_paths);
+        for file_path in matches.values_of("file-paths").unwrap() {
+            debug!("loop File path: {:?}", file_path);
+        }
+        // iterate through the memory offsets
+        for mem_offset in matches.values_of("mem-offsets").unwrap() {
+            debug!("loop Memory offset: {:?}", mem_offset);
+        }
+        let mem_offsets = matches.values_of("mem-offsets").unwrap();
+        debug!("Memory offsets: {:?}", mem_offsets);
+
+        // check if the number of files and offsets are the same
+        if file_paths.len() != mem_offsets.len() {
+            bail!("Number of files and offsets are not the same. Cannot allocate memory.");
+        }
+
+        // loop through the files and offsets
+        for (file_path, mem_offset) in file_paths.zip(mem_offsets) {
+            trace!(
+                "Loading binary data from file: {} and storing at memory offset: {}",
+                file_path,
+                mem_offset
+            );
+            debug!(
+                "Loading binary data from file: {} and storing at memory offset: {}",
+                file_path, mem_offset
+            );
+            // get memory offset from argument
+            let mut memory_offset = mem_offset.trim_start_matches("0x");
+            // turn the string into a u64
+            let mut mem_offset = u64::from_str_radix(memory_offset, 16).unwrap();
+
+            let data = dram_preload::generic_bin_read::<4>(file_path, mem_offset).unwrap();
+
+            let data_length = data.len() as u64;
+
+            let mut mem = engine.memory.lock().unwrap();
+
+            mem.extend(data);
+            for addr in mem_offset..mem_offset + data_length {
+                let val: u32 = mem.get(&(addr)).copied().unwrap_or(0);
+                trace!("address = 0x{:x}, binary value = {:#034b}", addr, val);
+            }
+        }
+    }
     // Write the module to disk if requested.
     if let Some(path) = matches.value_of("emit-llvm") {
         unsafe {
