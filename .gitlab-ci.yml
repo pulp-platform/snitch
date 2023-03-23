@@ -35,6 +35,7 @@ before_script:
   ${VERIBLE_FMT} --version
 
 stages:
+- verify-snitch-ips
 - linux_boot
 - build_fpga
 
@@ -140,3 +141,27 @@ occamy_vcu128_fpga:
     when: always
     paths:
     - console.log
+
+#######################
+# Test Individual IPs #
+#######################
+# Build and run all individual IP testbenches
+# currently missing IP tests:
+# -> clint, snitch_vm, test, snitch_ipu, snitch_dma, snitch
+# currently failing IP tests/scripts:
+# -> reqrsp_interface, snitch_ssr
+ip-tests-vsim:
+  stage: verify-snitch-ips
+  parallel:
+    matrix:
+    - IP: [mem_interface, snitch_cluster, snitch_icache, snitch_read_only_cache, spm_interface,
+        tcdm_interface]
+  script:
+  - cd hw/ip/$IP
+  - ./util/compile.sh > compile-$IP.log
+  - grep -n "Errors" compile-$IP.log
+  - grep -n "Errors[:] 0" compile-$IP.log
+  - FILES=$(find util -type f ! -name 'compile.sh' ! -name 'wave.tcl')
+  - for file in $FILES; do echo "# Run $file"; eval "$file"  > vsim-$IP.log; done
+  - grep -n "Errors" vsim-$IP.log
+  - grep -n "Errors[:] 0" vsim-$IP.log
