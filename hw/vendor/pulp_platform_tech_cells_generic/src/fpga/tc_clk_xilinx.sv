@@ -57,7 +57,6 @@ module tc_clk_inverter (
 
 endmodule
 
-// Disable glitchless muxing on FPGA as it has undesirable effects on non-clock signals (resets)
 module tc_clk_mux2 (
   input  logic clk0_i,
   input  logic clk1_i,
@@ -65,7 +64,12 @@ module tc_clk_mux2 (
   output logic clk_o
 );
 
-  assign clk_o = clk_sel_i ? clk1_i : clk0_i;
+  BUFGMUX i_BUFGMUX (
+    .S  ( clk_sel_i ),
+    .I0 ( clk0_i    ),
+    .I1 ( clk1_i    ),
+    .O  ( clk_o     )
+  );
 
 endmodule
 
