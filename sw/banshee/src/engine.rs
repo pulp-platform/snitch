@@ -453,6 +453,47 @@ impl Engine {
 
         // Print some final statistics.
         trace!("Final state hart {}: {:#?}", cpus[0].hartid, cpus[0].state);
+        for cpu in &cpus {
+            trace!("Final state hart {}: {:#?}", cpu.hartid, cpu.state);
+        }
+        for cpu in &cpus {
+            let ssr_vec = &cpu.state.ssrs;
+            let mut ssr_id = 0;
+            for ssr in ssr_vec {
+                for idx in 0..ssr.index.len() {
+                    if ssr.index[idx] != ssr.bound[idx] && ssr.index[idx] != 0 {
+                        warn!(
+                            "Final state hart {}: SSR {} NOT fully consumed.",
+                            cpu.hartid, ssr_id
+                        );
+                        warn!(
+                            "index != bound : {:?} != {:?}",
+                            ssr.index[idx], ssr.bound[idx]
+                        );
+                    }
+                }
+                if ((ssr.dims != 0) && !(ssr.done)) {
+                    trace!(
+                        "Final state hart {}: SSR {} NOT fully consumed.",
+                        cpu.hartid,
+                        ssr_id
+                    );
+                    warn!(
+                        "Final state hart {}: SSR {} NOT fully consumed.",
+                        cpu.hartid, ssr_id
+                    );
+                } else if ((ssr.dims != 0) && ssr.done) {
+                    trace!(
+                        "Final state hart {}: SSR {} fully consumed.",
+                        cpu.hartid,
+                        ssr_id
+                    );
+                } else {
+                    trace!("Final state hart {}: SSR {} not used.", cpu.hartid, ssr_id);
+                }
+                ssr_id += 1;
+            }
+        }
         // Fetch the return value {ret[31:1] = exit_code, ret[0] = exit_code_valid}
         let ret = self.exit_code.load(Ordering::SeqCst);
         if (ret & 0x1) == 0x1 {
