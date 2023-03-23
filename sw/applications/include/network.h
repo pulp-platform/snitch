@@ -5,11 +5,13 @@
 #pragma once
 
 #include <stdint.h>
+
 #include "layer.h"
 
 /**
  * @struct network_t_
- * @brief This structure contains all parameters necessary for building a simple neural netowork.
+ * @brief This structure contains all parameters necessary for building a simple
+ * neural netowork.
  * @var network_t_::IN_CH1
  * First dimension of the input data matrix (first channel)
  * @var network_t_::IN_CH2
@@ -41,7 +43,7 @@ typedef struct network_t_ {
     uint32_t *targets;
 
     precision_t dtype;
-    
+
 } network_t;
 
 typedef struct network_fp64_t_ {
@@ -59,7 +61,7 @@ typedef struct network_fp64_t_ {
     float learning_rate;
 
     precision_t dtype;
-    
+
 } network_fp64_t;
 
 typedef struct network_fp32_t_ {
@@ -77,7 +79,7 @@ typedef struct network_fp32_t_ {
     float learning_rate;
 
     precision_t dtype;
-    
+
 } network_fp32_t;
 
 typedef struct network_fp16_t_ {
@@ -95,7 +97,7 @@ typedef struct network_fp16_t_ {
     float learning_rate;
 
     precision_t dtype;
-    
+
 } network_fp16_t;
 
 typedef struct network_fp8_t_ {
@@ -113,7 +115,7 @@ typedef struct network_fp8_t_ {
     float learning_rate;
 
     precision_t dtype;
-    
+
 } network_fp8_t;
 
 // TODO: add description for MNIST CNN network struct
@@ -124,7 +126,7 @@ typedef struct cnn_t_ {
     uint16_t W;
     uint16_t K;
     uint16_t M;
-    
+
     uint16_t padding;
     uint16_t stride;
 
@@ -133,7 +135,7 @@ typedef struct cnn_t_ {
     double *conv1_biases;
 
     precision_t dtype;
-    
+
 } cnn_t;
 
 typedef struct network_benchmark_t_ {
@@ -147,7 +149,7 @@ typedef struct network_benchmark_t_ {
     uint32_t *targets;
 
     precision_t dtype;
-    
+
 } network_benchmark_t;
 
 typedef struct network_single_cluster_t_ {
@@ -164,5 +166,5 @@ typedef struct network_single_cluster_t_ {
     uint32_t *targets;
 
     precision_t dtype;
-    
+
 } network_single_cluster_t;
