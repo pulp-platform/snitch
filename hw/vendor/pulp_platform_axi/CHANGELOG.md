@@ -8,10 +8,106 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 
 ### Added
+- Add `axi_channel_compare.sv`: Non-synthesizable module comparing two AXI channels of the same type
+- Add `axi_bus_compare` and `axi_slave_compare`; two synthesizable verification IPs meant to be used
+  to compare two AXI buses on an FPGA.
+- Add `axi_lite_from_mem` and `axi_from_mem` acting like SRAMs making AXI4 requests downstream.
+- Add `axi_rw_join` and `axi_rw_split` to split/join AXI buses.
+- Add `#_width` functions returning the width of the AXI channels.
 
 ### Changed
+- `axi_demux`: Replace FIFO between AW and W channel by a register plus a counter.  This prevents
+  AWs from being issued to one master port while Ws from another burst are ongoing to another
+  master port.  This is required to prevents deadlocks due to circular waits downstream.
+- `axi_xbar`: Add parameter `PipelineStages` to `axi_pkg::xbar_cfg_t`.  This adds `axi_multicuts`
+  in the crossed connections in the xbar between the demuxes and muxes.
+- `axi_pkg`: Add documentation to `xbar_cfg_t`.
+- Move `mem_to_banks` to `common_cells`.
+- Update `common_cells` from version `v1.26.0` to `v1.27.0`.
+- `axi_pkg`: Define `localparams` to define AXI type widths.
 
 ### Fixed
+
+
+## 0.38.0 - 2022-09-28
+
+### Added
+- Add `axi_dumper` and `axi_dumper_interpret` script to dump log from an AXI bus for debugging
+  purposes.
+- Add FuseSoC and Vivado XSIM limited test to CI
+- `assign.svh`: Add macros to assign flat buses using the Vivado naming style.
+- `axi_lfsr` and `axi_lite_lfsr`: Add AXI4 and AXI4 Lite LFSR Subordinate devices.
+- `axi_xp`: Add crosspoint with homomorphous slave and master ports.
+
+### Changed
+- Improve compatibility with FuseSoC
+- Improve compatibility with Vivado XSIM
+- Performance improvements to `axi_to_mem`
+- Use `scripts/update_authors` to update authors, slight manual fixes performed.
+
+`v0.38.0` is fully **backward-compatible** to `v0.36.0` and `v0.37.0`.
+
+
+## 0.37.0 - 2022-08-30
+
+### Added
+- `axi_fifo`: Inserts a FIFO into all 5 AXI4 channels; add module and its testbench
+- `axi_test`: Add `mapped` mode to the random classes as well as additional functionality to the
+  scoreboard class.
+- `axi_throttle`: Add a module that limits the maximum number of outstanding transfers sent to the
+  downstream logic.
+- `axi_to_mem`: AXI4+ATOP slave to control on chip memory.
+- `axi_to_mem_banked`:  AXI4+ATOP slave to control on chip memory, with banking support, higher
+  throughput than `axi_to_mem`.
+- `axi_to_mem_interleaved`: AXI4+ATOP slave to control on chip memory, interleaved to prevent
+  deadlocks.
+- `axi_to_mem_split`: AXI4+ATOP slave to control memory protocol interconnect.
+- `Bender`: Add dependency `tech_cells_generic` `v0.2.2` for generic SRAM macro for simulation.
+
+### Changed
+- `axi_demux`: Add module docstring
+- `axi_sim_mem`: Add the capability to emit read and write errors
+- `Bender`: Update dependency `common_cells` to `v1.26.0` from `v1.21.0` (required by
+  `axi_throttle`)
+- Remove `docs` directory, move content to `doc` folder. `docs` is automatically created and
+  populated during the CI run.
+- Update vsim version to `2021.3` in CI, drop test for `2020.1` and `2021.1`
+
+### Fixed
+- `axi_lite_demux`: Improve compatibility with vsim version 10.7b.
+- `axi_lite_mux`: Reduce complexity of W channel at master port by removing an unnecessary
+  multiplexer.
+
+`v0.37.0` is fully **backward-compatible** to `v0.36.0`.
+
+
+## 0.36.0 - 2022-07-07
+
+### Added
+- Add Monitor modport to `AXI_BUS`, `AXI_LITE`, and `AXI_LITE_DV` interfaces.
+
+
+## 0.35.3 - 2022-05-03
+
+### Fixed
+- `axi_demux`: Eliminate unnecessary stalls of AW channel when the AR channel has reached its
+  maximum number of transactions.  Prior to this fix, `axi_demux` would always stall AWs while read
+  transactions were at their maximum (that is, while `MaxTrans` read transactions were outstanding).
+  However, this stall is only required when the AW that is being handled by `axi_demux` is an atomic
+  operation (ATOP) that entails an R response.  This fix therefore removes unnecessary stalls as
+  well as an unnecessary dependency between reads and writes.  The integrity of data or transactions
+  was not affected by this problem.
+
+
+## 0.35.2 - 2022-04-14
+
+### Fixed
+- `axi_lite_mux_intf`: Fix type of `slv` and `mst` interface ports; they were `AXI_BUS` instead of
+  `AXI_LITE`.
+- `axi_xbar_intf`: Fix order of parameters.  Prior to this fix, the `CONNECTIVITY` parameter was
+  defined using the `Cfg` parameter before the `Cfg` parameter was defined.
+- `axi_test::axi_rand_master`: Improve compatibility with simulators by changing an implication
+  inside an assertion to a conditional assertion.
 
 
 ## 0.35.1 - 2022-03-31

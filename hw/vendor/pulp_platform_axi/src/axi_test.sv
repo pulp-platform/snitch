@@ -10,10 +10,9 @@
 // specific language governing permissions and limitations under the License.
 //
 // Authors:
-// - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
 // - Andreas Kurth <akurth@iis.ee.ethz.ch>
+// - Wolfgang Roenninger <wroennin@iis.ee.ethz.ch>
 // - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
-// - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 // - Matheus Cavalcante <matheusd@iis.ee.ethz.ch>
 
 
@@ -699,6 +698,7 @@ package axi_test;
     parameter int   RESP_MIN_WAIT_CYCLES = 0,
     parameter int   RESP_MAX_WAIT_CYCLES = 20,
     // AXI feature usage
+    parameter int   SIZE_ALIGN        = 0,
     parameter int   AXI_MAX_BURST_LEN = 0, // maximum number of beats in burst; 0 = AXI max (256)
     parameter int   TRAFFIC_SHAPING   = 0,
     parameter bit   AXI_EXCLS         = 1'b0,
@@ -862,7 +862,9 @@ package axi_test;
         for (int i = 0; i < traffic_shape.size(); i++)
           if (traffic_shape[i].cprob > cprob) begin
             len = traffic_shape[i].len;
-            assert (ax_beat.ax_burst == BURST_WRAP -> len inside {len_t'(1), len_t'(3), len_t'(7), len_t'(15)});
+            if (ax_beat.ax_burst == BURST_WRAP) begin
+              assert (len inside {len_t'(1), len_t'(3), len_t'(7), len_t'(15)});
+            end
             break;
           end
 
@@ -925,7 +927,7 @@ package axi_test;
         end
       end
 
-      ax_beat.ax_addr = addr;
+      ax_beat.ax_addr =  axi_pkg::aligned_addr(addr, axi_pkg::size_t'(SIZE_ALIGN) );
       rand_success = std::randomize(id); assert(rand_success);
       rand_success = std::randomize(qos); assert(rand_success);
       // The random ID *must* be legalized with `legalize_id()` before the beat is sent!  This is
@@ -1188,12 +1190,19 @@ package axi_test;
         static logic rand_success;
         wait (w_queue.size() > 0 || (aw_done && w_queue.size() == 0));
         aw_beat = w_queue.pop_front();
-        addr = aw_beat.ax_addr;
         for (int unsigned i = 0; i < aw_beat.ax_len + 1; i++) begin
           automatic w_beat_t w_beat = new;
           automatic int unsigned begin_byte, end_byte, n_bytes;
           automatic logic [AXI_STRB_WIDTH-1:0] rand_strb, strb_mask;
+          addr = axi_pkg::beat_addr(aw_beat.ax_addr, aw_beat.ax_size, aw_beat.ax_len,
+                                    aw_beat.ax_burst, i);
+`ifdef XSIM
+          // std::randomize(w_beat) may behave differently to w_beat.randomize() wrt. limited ranges
+          // Keeping alternate implementation for XSIM only
+          rand_success = std::randomize(w_beat); assert (rand_success);
+`else
           rand_success = w_beat.randomize(); assert (rand_success);
+`endif
           // Determine strobe.
           w_beat.w_strb = '0;
           n_bytes = 2**aw_beat.ax_size;
@@ -1208,8 +1217,6 @@ package axi_test;
           w_beat.w_last = (i == aw_beat.ax_len);
           rand_wait(W_MIN_WAIT_CYCLES, W_MAX_WAIT_CYCLES);
           drv.send_w(w_beat);
-          if (aw_beat.ax_burst == axi_pkg::BURST_INCR)
-            addr += n_bytes;
         end
       end
     endtask
@@ -1267,7 +1274,11 @@ package axi_test;
     parameter int   R_MIN_WAIT_CYCLES = 0,
     parameter int   R_MAX_WAIT_CYCLES = 5,
     parameter int   RESP_MIN_WAIT_CYCLES = 0,
-    parameter int   RESP_MAX_WAIT_CYCLES = 20
+    parameter int   RESP_MAX_WAIT_CYCLES = 20,
+    /// This parameter eneables an internal memory, which gets randomly initialized, if it is read
+    /// and retains written data. This mode does currently not support `axi_pkg::BURST_WRAP`!
+    /// All responses are `axi_pkg::RESP_OKAY` when in this mode.
+    parameter bit   MAPPED = 1'b0
   );
     typedef axi_test::axi_driver #(
       .AW(AW), .DW(DW), .IW(IW), .UW(UW), .TA(TA), .TT(TT)
@@ -1281,10 +1292,16 @@ package axi_test;
     typedef axi_driver_t::r_beat_t r_beat_t;
     typedef axi_driver_t::w_beat_t w_beat_t;
 
+    typedef logic [AW-1:0] addr_t;
+    typedef logic [7:0]    byte_t;
+
     axi_driver_t          drv;
     rand_ax_beat_queue_t  ar_queue;
     ax_beat_t             aw_queue[$];
     int unsigned          b_wait_cnt;
+
+    // Memory array for when the `MAPPED` parameter is set.
+    byte_t memory_q[addr_t];
 
     function new(
       virtual AXI_BUS_DV #(
@@ -1301,7 +1318,8 @@ package axi_test;
     endfunction
 
     function void reset();
-      drv.reset_slave();
+      this.drv.reset_slave();
+      this.memory_q.delete();
     endfunction
 
     // TODO: The `rand_wait` task exists in `rand_verif_pkg`, but that task cannot be called with
@@ -1321,6 +1339,10 @@ package axi_test;
         automatic ax_beat_t ar_beat;
         rand_wait(AX_MIN_WAIT_CYCLES, AX_MAX_WAIT_CYCLES);
         drv.recv_ar(ar_beat);
+        if (MAPPED) begin
+          assert (ar_beat.ax_burst != axi_pkg::BURST_WRAP) else
+            $error("axi_pkg::BURST_WRAP not supported in MAPPED mode.");
+        end
         ar_queue.push(ar_beat.ax_id, ar_beat);
       end
     endtask
@@ -1329,10 +1351,30 @@ package axi_test;
       forever begin
         automatic logic rand_success;
         automatic ax_beat_t ar_beat;
-        automatic r_beat_t r_beat = new;
+        automatic r_beat_t  r_beat = new;
+        automatic addr_t    byte_addr;
         wait (ar_queue.size > 0);
-        ar_beat = ar_queue.peek();
+        ar_beat      = ar_queue.peek();
+        byte_addr    = axi_pkg::aligned_addr(ar_beat.ax_addr, axi_pkg::size_t'($clog2(DW/8)));
+`ifdef XSIM
+        // std::randomize(r_beat) may behave differently to r_beat.randomize() wrt. limited ranges
+        // Keeping alternate implementation for XSIM only
+        rand_success = std::randomize(r_beat); assert(rand_success);
+`else
         rand_success = r_beat.randomize(); assert(rand_success);
+`endif
+        if (MAPPED) begin
+          // Either use the actual data, or save the random generated.
+          for (int unsigned i = 0; i < (DW/8); i++) begin
+            if (this.memory_q.exists(byte_addr)) begin
+              r_beat.r_data[i*8+:8] = this.memory_q[byte_addr];
+            end else begin
+              this.memory_q[byte_addr] = r_beat.r_data[i*8+:8];
+            end
+            byte_addr++;
+          end
+          r_beat.r_resp = axi_pkg::RESP_OKAY;
+        end
         r_beat.r_id = ar_beat.ax_id;
         if (RAND_RESP && !ar_beat.ax_atop[axi_pkg::ATOP_R_RESP])
           r_beat.r_resp[1] = $random();
@@ -1343,6 +1385,10 @@ package axi_test;
           r_beat.r_last = 1'b1;
           void'(ar_queue.pop_id(ar_beat.ax_id));
         end else begin
+          if ((ar_beat.ax_burst == axi_pkg::BURST_INCR) && MAPPED) begin
+            ar_beat.ax_addr = axi_pkg::aligned_addr(ar_beat.ax_addr, ar_beat.ax_size) +
+                                  2**ar_beat.ax_size;
+          end
           ar_beat.ax_len--;
           ar_queue.set(ar_beat.ax_id, ar_beat);
         end
@@ -1355,6 +1401,12 @@ package axi_test;
         automatic ax_beat_t aw_beat;
         rand_wait(AX_MIN_WAIT_CYCLES, AX_MAX_WAIT_CYCLES);
         drv.recv_aw(aw_beat);
+        if (MAPPED) begin
+          assert (aw_beat.ax_atop == '0) else
+            $error("ATOP not supported in MAPPED mode.");
+          assert (aw_beat.ax_burst != axi_pkg::BURST_WRAP) else
+            $error("axi_pkg::BURST_WRAP not supported in MAPPED mode.");
+        end
         aw_queue.push_back(aw_beat);
         // Atomic{Load,Swap,Compare}s require an R response.
         if (aw_beat.ax_atop[axi_pkg::ATOP_R_RESP]) begin
@@ -1366,10 +1418,30 @@ package axi_test;
     task recv_ws();
       forever begin
         automatic ax_beat_t aw_beat;
+        automatic addr_t    byte_addr;
         forever begin
           automatic w_beat_t w_beat;
           rand_wait(RESP_MIN_WAIT_CYCLES, RESP_MAX_WAIT_CYCLES);
           drv.recv_w(w_beat);
+          if (MAPPED) begin
+            wait (aw_queue.size() > 0);
+            aw_beat = aw_queue[0];
+            byte_addr    = axi_pkg::aligned_addr(aw_beat.ax_addr, $clog2(DW/8));
+
+            // Write Data if the strobe is defined
+            for (int unsigned i = 0; i < (DW/8); i++) begin
+              if (w_beat.w_strb[i]) begin
+                this.memory_q[byte_addr] = w_beat.w_data[i*8+:8];
+              end
+              byte_addr++;
+            end
+            // Update address in beat
+            if (aw_beat.ax_burst == axi_pkg::BURST_INCR) begin
+              aw_beat.ax_addr = axi_pkg::aligned_addr(aw_beat.ax_addr, aw_beat.ax_size) +
+                                    2**aw_beat.ax_size;
+            end
+            aw_queue[0] = aw_beat;
+          end
           if (w_beat.w_last)
             break;
         end
@@ -1384,7 +1456,13 @@ package axi_test;
         automatic logic rand_success;
         wait (b_wait_cnt > 0 && (aw_queue.size() != 0));
         aw_beat = aw_queue.pop_front();
-        rand_success = b_beat.randomize(); assert(rand_success);
+`ifdef XSIM
+        // std::randomize(b_beat) may behave differently to b_beat.randomize() wrt. limited ranges
+        // Keeping alternate implementation for XSIM only
+        rand_success = std::randomize(b_beat); assert (rand_success);
+`else
+        rand_success = b_beat.randomize(); assert (rand_success);
+`endif
         b_beat.b_id = aw_beat.ax_id;
         if (RAND_RESP && !aw_beat.ax_atop[axi_pkg::ATOP_R_RESP])
           b_beat.b_resp[1] = $random();
@@ -1392,6 +1470,9 @@ package axi_test;
           b_beat.b_resp[0]= $random();
         end
         rand_wait(RESP_MIN_WAIT_CYCLES, RESP_MAX_WAIT_CYCLES);
+        if (MAPPED) begin
+          b_beat.b_resp = axi_pkg::RESP_OKAY;
+        end
         drv.send_b(b_beat);
         b_wait_cnt--;
       end
@@ -1937,8 +2018,6 @@ package axi_test;
         b_beat  = b_sample[id].pop_front();
         if (check_en[BRespCheck]) begin
           assert (b_beat.b_id   == id);
-          assert (b_beat.b_resp == axi_pkg::RESP_OKAY) else
-              $warning("Behavior for b_resp != axi_pkg::RESP_OKAY not modeled.");
         end
         // pop all accessed memory locations by this beat
         for (int unsigned i = 0; i <= aw_beat.ax_len; i++) begin
@@ -1946,7 +2025,11 @@ package axi_test;
               axi_pkg::beat_addr(aw_beat.ax_addr, aw_beat.ax_size, aw_beat.ax_len, aw_beat.ax_burst,
                   i), BUS_SIZE);
           for (int j = 0; j < axi_pkg::num_bytes(BUS_SIZE); j++) begin
-            memory_q[bus_address+j].delete(0);
+            if (b_beat.b_resp inside {axi_pkg::RESP_OKAY, axi_pkg::RESP_EXOKAY}) begin
+              memory_q[bus_address+j].delete(0);
+            end else begin
+              memory_q[bus_address+j].delete(memory_q[bus_address+j].size() - 1);
+            end
           end
         end
       end
@@ -1980,22 +2063,29 @@ package axi_test;
             end
           end
           // Assert that the correct data is read.
-          if (this.check_en[ReadCheck]) begin
+          if (this.check_en[ReadCheck] &&
+              (r_beat.r_resp inside {axi_pkg::RESP_OKAY, axi_pkg::RESP_EXOKAY})) begin
             for (int unsigned j = 0; j < axi_pkg::num_bytes(ar_beat.ax_size); j++) begin
               idx_data  = 8*BUS_SIZE'(beat_address+j);
               act_data  = r_beat.r_data[idx_data+:8];
               exp_data  = this.memory_q[beat_address+j];
-              tst_data  = exp_data.find with (item === 8'hxx || item === act_data);
-              assert (tst_data.size() > 0) else begin
-                $warning("Unexpected RData ID: %0h Addr: %0h Byte Idx: %0h Exp Data : %0h Data: %h",
-                r_beat.r_id, beat_address+j, idx_data, exp_data, act_data);
+              if (exp_data.size() > 0) begin
+                tst_data  = exp_data.find with (item === 8'hxx || item === act_data);
+                assert (tst_data.size() > 0) else begin
+                  $warning("Unexpected RData ID: %0h \n \
+                            Addr:     %h \n \
+                            Byte Idx: %h \n \
+                            Exp Data: %h \n \
+                            Act Data: %h \n \
+                            BeatData: %h",
+                  r_beat.r_id, beat_address+j, idx_data, exp_data, act_data, r_beat.r_data);
+                end
               end
             end
           end
         end
         if (this.check_en[RRespCheck]) begin
           assert (r_beat.r_id   == id);
-          assert (r_beat.r_resp == axi_pkg::RESP_OKAY);
           assert (r_beat.r_last);
         end
       end
@@ -2180,6 +2270,40 @@ package axi_test;
         assert(this.b_queue[i].size()   == 0);
       end
     endtask : reset
+
+    /// Check that the byte in memory_q is the same as check_data.
+    task automatic check_byte(axi_addr_t check_addr, byte_t check_data);
+      assert(this.memory_q[check_addr][0] === check_data) else
+        $warning("Byte at ADDR: %h does not match: memory_q: %h check_data: %h",
+            check_addr, this.memory_q[check_addr][0], check_data);
+    endtask : check_byte
+
+    /// Clear a byte from memoy. Can be used to partially delete mem space.
+    task clear_byte(axi_addr_t clear_addr);
+      if (this.memory_q.exists(clear_addr)) begin
+        this.memory_q.delete(clear_addr);
+      end
+    endtask : clear_byte
+
+    /// Clear a memory range.
+    /// The end address alo gets cleared.
+    task automatic clear_range(axi_addr_t clear_start_addr, clear_end_addr);
+      axi_addr_t curr_addr = clear_start_addr;
+      while (curr_addr <= clear_end_addr) begin
+        this.clear_byte(curr_addr);
+        curr_addr++;
+      end
+    endtask : clear_range
+
+    /// Get a byte from the modeled memory.
+    task automatic get_byte(input axi_addr_t byte_addr, output byte_t byte_data);
+      if (this.memory_q.exists(byte_addr)) begin
+        byte_data = this.memory_q[byte_addr][0];
+      end else begin
+        byte_data = 8'hxx;
+      end
+    endtask : get_byte
+
   endclass : axi_scoreboard
 
 endpackage

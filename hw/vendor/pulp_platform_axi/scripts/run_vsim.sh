@@ -13,7 +13,6 @@
 # Authors:
 # - Andreas Kurth <akurth@iis.ee.ethz.ch>
 # - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
-# - Matheus Cavalcante <matheusd@iis.ee.ethz.ch>
 
 set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
@@ -69,6 +68,14 @@ exec_test() {
                     call_vsim tb_axi_dw_upsizer \
                             -gTbAxiSlvPortDataWidth=$AxiSlvPortDataWidth \
                             -gTbAxiMstPortDataWidth=$AxiMstPortDataWidth -t 1ps
+                done
+            done
+            ;;
+        axi_fifo)
+            for DEPTH in 0 1 16; do
+                for FALL_THROUGH in 0 1; do
+                    call_vsim tb_axi_fifo -gDepth=$DEPTH \
+                            -gFallThrough=$FALL_THROUGH
                 done
             done
             ;;
@@ -165,9 +172,53 @@ exec_test() {
                     for Atop in 0 1; do
                         for Exclusive in 0 1; do
                             for UniqueIds in 0 1; do
-                                call_vsim tb_axi_xbar -gTbNumMst=$NumMst -gTbNumSlv=$NumSlv \
+                                call_vsim tb_axi_xbar -gTbNumMasters=$NumMst -gTbNumSlaves=$NumSlv \
                                         -gTbEnAtop=$Atop -gTbEnExcl=$Exclusive \
                                         -gTbUniqueIds=$UniqueIds
+                            done
+                        done
+                    done
+                done
+            done
+            ;;
+        axi_to_mem_banked)
+            for MEM_LAT in 1 2; do
+                for BANK_FACTOR in 1 2; do
+                    for NUM_BANKS in 1 2 ; do
+                        for AXI_DATA_WIDTH in 64 256 ; do
+                            ACT_BANKS=$((2*$BANK_FACTOR*$NUM_BANKS))
+                            MEM_DATA_WIDTH=$(($AXI_DATA_WIDTH/$NUM_BANKS))
+                            call_vsim tb_axi_to_mem_banked \
+                                -voptargs="+acc +cover=bcesfx" \
+                                -gTbAxiDataWidth=$AXI_DATA_WIDTH \
+                                -gTbNumWords=2048 \
+                                -gTbNumBanks=$ACT_BANKS \
+                                -gTbMemDataWidth=$MEM_DATA_WIDTH \
+                                -gTbMemLatency=$MEM_LAT \
+                                -gTbNumWrites=2000 \
+                                -gTbNumReads=2000
+                        done
+                    done
+                done
+            done
+            ;;
+        axi_xbar)
+            for GEN_ATOP in 0 1; do
+                for NUM_MST in 1 6; do
+                    for NUM_SLV in 2 9; do
+                        for MST_ID_USE in 3 5; do
+                            MST_ID=5
+                            for DATA_WIDTH in 64 256; do
+                                for PIPE in 0 1; do
+                                    call_vsim tb_axi_xbar -t 1ns -voptargs="+acc" \
+                                        -gTbNumMasters=$NUM_MST       \
+                                        -gTbNumSlaves=$NUM_SLV        \
+                                        -gTbAxiIdWidthMasters=$MST_ID \
+                                        -gTbAxiIdUsed=$MST_ID_USE     \
+                                        -gTbAxiDataWidth=$DATA_WIDTH  \
+                                        -gTbPipeline=$PIPE            \
+                                        -gTbEnAtop=$GEN_ATOP
+                                done
                             done
                         done
                     done

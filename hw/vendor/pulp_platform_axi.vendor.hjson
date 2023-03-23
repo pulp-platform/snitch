@@ -7,10 +7,8 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/axi.git",
-    rev: "master",
+    rev: "v0.39.0-beta.4",
   },
-
-  patch_dir: "patches/pulp_platform_axi",
 
   exclude_from_upstream: [
     ".ci",
