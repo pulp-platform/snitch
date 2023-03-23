@@ -54,11 +54,11 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
 
     set(SNITCH_TEST_PREFIX snApplications-)
 
-    add_snitch_raw_test_args(batchnorm batchnorm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/occ_multi_cluster.yaml)
-    add_snitch_raw_test_args(maxpool maxpool --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/occ_multi_cluster.yaml)
-    add_snitch_raw_test_args(conv2d conv2d --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/occ_multi_cluster.yaml)
-    add_snitch_raw_test_args(gemm gemm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/occ_multi_cluster.yaml)
-    add_snitch_raw_test_args(fusedconv fusedconv --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/occ_multi_cluster.yaml)
+    add_snitch_raw_test_args(batchnorm batchnorm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml.yaml)
+    add_snitch_raw_test_args(maxpool maxpool --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml.yaml)
+    add_snitch_raw_test_args(conv2d conv2d --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml.yaml)
+    add_snitch_raw_test_args(gemm gemm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml.yaml)
+    add_snitch_raw_test_args(fusedconv fusedconv --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml.yaml)
     add_snitch_raw_test_args(nnlinear_baseline nnlinear_baseline --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml)
     
 endif()
