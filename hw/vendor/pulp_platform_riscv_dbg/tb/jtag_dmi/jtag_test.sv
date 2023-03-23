@@ -225,12 +225,12 @@ package jtag_test;
     // successive operations is automatically adjusted through
     // an exponential backoff scheme.
     // Note: read operations which have side-effects (e.g.
-    // reading SBData0) should not use this
+    // reading SBData0) should not use this function
     task read_dmi_exp_backoff(input dm::dm_csr_e address, output logic [31:0] data);
       logic read_data [DMIWidth], write_data [DMIWidth];
       logic [DMIWidth-1:0] write_data_packed;
       logic [DMIWidth-1:0] data_out = 0;
-      dm::dtm_op_status_e op = dm::DTM_OK;
+      dm::dtm_op_status_e op = dm::DTM_SUCCESS;
       int trial_idx = 0;
       int wait_cycles = 8;
 
@@ -245,6 +245,63 @@ package jtag_test;
         trial_idx++;
       end while (op == dm::DTM_BUSY);
     endtask
+
+  task sba_read_double(input logic [31:0] address, output logic [63:0] data);
+    // Attempt the access sequence. Two timing violations may
+    // occur:
+    // 1) an operation is attempted while a DMI request is still
+    //    in progress;
+    // 2) a SB read is attempted while a read is still in progress
+    //    or a SB access is attempted while one is in progress
+    // In either case the whole sequence must be re-attempted with
+    // increased delays.
+    // Case 1) is intercepted when the op returned by a read is == DTM_BUSY,
+    // the sequence can be interrupted early and the delay to be adjusted is
+    // that between the update phase and the capture phase of a successive op.
+    // Case 2) is intercepted at the end of the sequence by reading the
+    // SBCS register, and checking sbbusyerror. In this case the delay to be
+    // adjusted is that before the SBData read operations.
+    dm::dtm_op_status_e op;
+    automatic int dmi_wait_cycles = 2;
+    automatic int sba_wait_cycles = 2;
+    automatic dm::sbcs_t sbcs = '{sbreadonaddr: 1, sbaccess: 3, default: '0};
+    dm::sbcs_t read_sbcs;
+    // Check address is 64b aligned
+    assert (address[2:0] == '0) else $error("[JTAG] 64b-unaligned accesses not supported");
+    // Start SBA sequence attempts
+    while (1) begin
+      automatic bit failed = 0;
+      write_dmi(dm::SBCS, sbcs);
+      write_dmi(dm::SBAddress0, address);
+      wait_idle(sba_wait_cycles);
+      read_dmi(dm::SBData1, data[63:32], dmi_wait_cycles, op);
+      // Skip second read if we already have a DTM busy error
+      // else we can override op
+      if (op != dm::DTM_BUSY) begin
+        read_dmi(dm::SBData0, data[31:0], dmi_wait_cycles, op);
+      end
+      // If we had a DTM_BUSY error, increase dmi_wait_cycles and clear error
+      if (op == dm::DTM_BUSY) begin
+        dmi_wait_cycles *= 2;
+        failed = 1'b1;
+        reset_dmi();
+      end
+      // Test sbbusyerror and wait for sbbusy == 0
+      // Error is cleared in next iteration when writing SBCS
+      do begin
+        sbcs.sbbusyerror = 1'b0;
+        read_dmi_exp_backoff(dm::SBCS, read_sbcs);
+        if (read_sbcs.sbbusyerror) begin
+          sbcs.sbbusyerror = 1'b1; // set 1 to clear
+          sba_wait_cycles *= 2;
+          failed = 1'b1;
+        end
+        if (read_sbcs.sbbusy) wait_idle(sba_wait_cycles);
+      end while (read_sbcs.sbbusy);
+      // Exit loop if sequence was successful
+      if (!failed) break;
+    end
+  endtask
 
   endclass
 endpackage

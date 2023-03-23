@@ -1,0 +1,68 @@
+From 71292f69b7842308bca0e905c8a4ed2cd7d11b4f Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Fri, 8 Oct 2021 13:07:46 +0200
+Subject: [PATCH 07/10] fpga: Streamline debug flow
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ core/csr_regfile.sv | 12 ++++++++----
+ core/cva6.sv        |  6 +++---
+ 2 files changed, 11 insertions(+), 7 deletions(-)
+
+diff --git a/core/csr_regfile.sv b/core/csr_regfile.sv
+index 17326431..5ebb5379 100644
+--- a/core/csr_regfile.sv
++++ b/core/csr_regfile.sv
+@@ -125,9 +125,12 @@ module csr_regfile import ariane_pkg::*; #(
+     riscv::xlen_t mie_q,       mie_d;
+     riscv::xlen_t mcounteren_q,mcounteren_d;
+     riscv::xlen_t mscratch_q,  mscratch_d;
+-    riscv::xlen_t mepc_q,      mepc_d;
+-    riscv::xlen_t mcause_q,    mcause_d;
+-    riscv::xlen_t mtval_q,     mtval_d;
++    (* mark_debug = "true" *) riscv::xlen_t mepc_q;
++    riscv::xlen_t mepc_d;
++    (* mark_debug = "true" *) riscv::xlen_t mcause_q;
++    riscv::xlen_t mcause_d;
++    (* mark_debug = "true" *) riscv::xlen_t mtval_q;
++    riscv::xlen_t mtval_d;
+ 
+     riscv::xlen_t stvec_q,     stvec_d;
+     riscv::xlen_t scounteren_q,scounteren_d;
+@@ -142,7 +145,8 @@ module csr_regfile import ariane_pkg::*; #(
+ 
+     logic        wfi_d,       wfi_q;
+ 
+-    logic [63:0] cycle_q,     cycle_d;
++    (* mark_debug = "true" *) logic [63:0] cycle_q;
++    logic [63:0] cycle_d;
+     logic [63:0] instret_q,   instret_d;
+ 
+     riscv::pmpcfg_t [15:0]    pmpcfg_q,  pmpcfg_d;
+diff --git a/core/cva6.sv b/core/cva6.sv
+index 5fa2115c..707ceb12 100644
+--- a/core/cva6.sv
++++ b/core/cva6.sv
+@@ -63,8 +63,8 @@ module cva6 import ariane_pkg::*; #(
+   input  wt_cache_pkg::l15_rtrn_t      l15_rtrn_i
+ `else
+   // memory side, AXI Master
+-  output axi_req_t                     axi_req_o,
+-  input  axi_rsp_t                     axi_resp_i
++  (* mark_debug = "true" *) output axi_req_t                     axi_req_o,
++  (* mark_debug = "true" *) input  axi_rsp_t                     axi_resp_i
+ `endif
+ );
+ 
+@@ -75,7 +75,7 @@ module cva6 import ariane_pkg::*; #(
+   riscv::priv_lvl_t           priv_lvl;
+   exception_t                 ex_commit; // exception from commit stage
+   bp_resolve_t                resolved_branch;
+-  logic [riscv::VLEN-1:0]     pc_commit;
++  (* mark_debug = "true" *) logic [riscv::VLEN-1:0]     pc_commit;
+   logic                       eret;
+   logic [NR_COMMIT_PORTS-1:0] commit_ack;
+   logic                       rst_uarch_n;
+-- 
+2.16.5
+

@@ -6,6 +6,7 @@ overrides:
     common_verification: { git: https://github.com/pulp-platform/common_verification.git, rev: master}
     tech_cells_generic: { path: hw/vendor/pulp_platform_tech_cells_generic }
     common_cells: { path: hw/vendor/pulp_platform_common_cells }
+    register_interface: { path: hw/vendor/pulp_platform_register_interface }
     axi: { path: hw/vendor/pulp_platform_axi }
-    fpnew: { path: hw/vendor/pulp_platform_fpnew }
+    fpnew: { path: hw/vendor/openhwgroup_cvfpu }
     riscv-dbg: { path: hw/vendor/pulp_platform_riscv_dbg }

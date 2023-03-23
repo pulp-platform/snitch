@@ -72,7 +72,7 @@ module occamy_cva6
     (64'hff_ffff_ffff - 64'h8000_0000), 64'd524288
   },
   //  cache config
-  Axi64BitCompliant: 1'b1, SwapEndianess: 1'b0,
+  AxiCompliant: 1'b1, SwapEndianess: 1'b0,
   // debug
   DmBaseAddress: 64'h0, NrPMPEntries: 8};
 

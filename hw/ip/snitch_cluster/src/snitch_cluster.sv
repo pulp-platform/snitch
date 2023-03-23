@@ -275,6 +275,7 @@ module snitch_cluster
     MaxSlvTrans: NarrowMaxSlvTrans,
     FallThrough: 1'b0,
     LatencyMode: NarrowXbarLatency,
+    PipelineStages: 0,
     AxiIdWidthSlvPorts: NarrowIdWidthIn,
     AxiIdUsedSlvPorts: NarrowIdWidthIn,
     UniqueIds: 1'b0,
@@ -291,6 +292,7 @@ module snitch_cluster
     MaxSlvTrans: WideMaxSlvTrans,
     FallThrough: 1'b0,
     LatencyMode: WideXbarLatency,
+    PipelineStages: 0,
     AxiIdWidthSlvPorts: WideIdWidthIn,
     AxiIdUsedSlvPorts: WideIdWidthIn,
     UniqueIds: 1'b0,
@@ -690,7 +692,7 @@ module snitch_cluster
       strb_t mem_be;
       data_t mem_rdata, mem_wdata;
 
-      tc_sram #(
+      tc_sram_impl #(
         .NumWords (TCDMDepth),
         .DataWidth (NarrowDataWidth),
         .ByteWidth (8),

@@ -1,0 +1,34 @@
+From aedd481c2040a84feafbc068241008c6db9e2df7 Mon Sep 17 00:00:00 2001
+From: Paul Scheffler <paulsc@iis.ee.ethz.ch>
+Date: Fri, 19 Aug 2022 00:16:12 +0200
+Subject: [PATCH] vendor: Remove generated PLIC RTL from dependency
+
+---
+ Bender.yml | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/Bender.yml b/Bender.yml
+index 88217e36..9500344e 100644
+--- a/Bender.yml
++++ b/Bender.yml
+@@ -60,12 +60,10 @@ sources:
+   # Level 0 (generated, see README for regeneration)
+   - src/gpio/rtl/gpio_reg_pkg.sv
+   - src/i2c/rtl/i2c_reg_pkg.sv
+-  - src/rv_plic/rtl/rv_plic_reg_pkg.sv
+   - src/spi_host/rtl/spi_host_reg_pkg.sv
+   # Level 1 (generated, see README for regeneration)
+   - src/gpio/rtl/gpio_reg_top.sv
+   - src/i2c/rtl/i2c_reg_top.sv
+-  - src/rv_plic/rtl/rv_plic_reg_top.sv
+   - src/spi_host/rtl/spi_host_reg_top.sv
+   # Level 2
+   - src/i2c/rtl/i2c_fsm.sv
+@@ -87,4 +85,3 @@ sources:
+   - src/gpio/rtl/gpio.sv
+   - src/i2c/rtl/i2c.sv
+   - src/spi_host/rtl/spi_host.sv
+-  - src/rv_plic/rtl/rv_plic.sv
+-- 
+2.16.5
+

@@ -1,0 +1,112 @@
+From 88f601c8c076445e7935f85e903a01c5583afb8d Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Wed, 22 Mar 2023 10:32:47 +0100
+Subject: [PATCH] cva6/sram: Remove user ports
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ core/cache_subsystem/cva6_icache.sv   | 6 ++----
+ core/cache_subsystem/std_nbdcache.sv  | 6 ------
+ core/cache_subsystem/wt_dcache_mem.sv | 6 ++----
+ 3 files changed, 4 insertions(+), 14 deletions(-)
+
+diff --git a/core/cache_subsystem/cva6_icache.sv b/core/cache_subsystem/cva6_icache.sv
+index da854242..86779b7a 100644
+--- a/core/cache_subsystem/cva6_icache.sv
++++ b/core/cache_subsystem/cva6_icache.sv
+@@ -449,10 +449,8 @@ end else begin : gen_piton_offset
+       .addr_i    ( vld_addr                 ),
+       // we can always use the saved tag here since it takes a
+       // couple of cycle until we write to the cache upon a miss
+-      .wuser_i   ( '0                       ),
+       .wdata_i   ( {vld_wdata[i], cl_tag_q} ),
+       .be_i      ( '1                       ),
+-      .ruser_o   (                          ),
+       .rdata_o   ( cl_tag_valid_rdata[i]    )
+     );
+ 
+@@ -473,12 +471,12 @@ end else begin : gen_piton_offset
+       .req_i     ( cl_req[i]           ),
+       .we_i      ( cl_we               ),
+       .addr_i    ( cl_index            ),
+-      .wuser_i   ( mem_rtrn_i.user     ),
+       .wdata_i   ( mem_rtrn_i.data     ),
+       .be_i      ( '1                  ),
+-      .ruser_o   ( cl_ruser[i]         ),
+       .rdata_o   ( cl_rdata[i]         )
+     );
++
++    assign cl_ruser[i] = '0;
+   end
+ 
+ 
+diff --git a/core/cache_subsystem/std_nbdcache.sv b/core/cache_subsystem/std_nbdcache.sv
+index 322f9b54..b497b7b0 100644
+--- a/core/cache_subsystem/std_nbdcache.sv
++++ b/core/cache_subsystem/std_nbdcache.sv
+@@ -204,10 +204,8 @@ import std_cache_pkg::*;
+             .impl_o  (  ),
+             .we_i    ( we_ram                               ),
+             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
+-            .wuser_i ( '0                                   ),
+             .wdata_i ( wdata_ram.data                       ),
+             .be_i    ( be_ram.data                          ),
+-            .ruser_o (                                      ),
+             .rdata_o ( rdata_ram[i].data                    ),
+             .*
+         );
+@@ -224,10 +222,8 @@ import std_cache_pkg::*;
+             .impl_o  (                                      ),
+             .we_i    ( we_ram                               ),
+             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
+-            .wuser_i ( '0                                   ),
+             .wdata_i ( wdata_ram.tag                        ),
+             .be_i    ( be_ram.tag                           ),
+-            .ruser_o (                                      ),
+             .rdata_o ( rdata_ram[i].tag                     ),
+             .*
+         );
+@@ -263,10 +259,8 @@ import std_cache_pkg::*;
+         .req_i   ( |req_ram                            ),
+         .we_i    ( we_ram                              ),
+         .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] ),
+-        .wuser_i ( '0                                  ),
+         .wdata_i ( dirty_wdata                         ),
+         .be_i    ( be_ram.vldrty                       ),
+-        .ruser_o (                                     ),
+         .rdata_o ( dirty_rdata                         )
+     );
+ 
+diff --git a/core/cache_subsystem/wt_dcache_mem.sv b/core/cache_subsystem/wt_dcache_mem.sv
+index 917f0cbe..ea576f19 100644
+--- a/core/cache_subsystem/wt_dcache_mem.sv
++++ b/core/cache_subsystem/wt_dcache_mem.sv
+@@ -299,12 +299,12 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+       .req_i      ( bank_req   [k]      ),
+       .we_i       ( bank_we    [k]      ),
+       .addr_i     ( bank_idx   [k]      ),
+-      .wuser_i    ( bank_wuser [k]      ),
+       .wdata_i    ( bank_wdata [k]      ),
+       .be_i       ( bank_be    [k]      ),
+-      .ruser_o    ( bank_ruser [k]      ),
+       .rdata_o    ( bank_rdata [k]      )
+     );
++
++    assign bank_ruser [k] = '0;
+   end
+ 
+   for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : gen_tag_srams
+@@ -327,10 +327,8 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+       .req_i     ( vld_req[i]          ),
+       .we_i      ( vld_we              ),
+       .addr_i    ( vld_addr            ),
+-      .wuser_i   ( '0                  ),
+       .wdata_i   ( {vld_wdata[i], wr_cl_tag_i} ),
+       .be_i      ( '1                  ),
+-      .ruser_o   (                     ),
+       .rdata_o   ( vld_tag_rdata[i]    )
+     );
+   end
+-- 
+2.16.5
+

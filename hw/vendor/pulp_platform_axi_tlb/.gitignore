@@ -1,0 +1,10 @@
+.bender
+bender
+Bender.lock
+test/work
+test/modelsim.ini
+test/*.wlf
+test/wlf*
+test/transcript
+test/compile.vsim.tcl
+test/start.vsim.tcl

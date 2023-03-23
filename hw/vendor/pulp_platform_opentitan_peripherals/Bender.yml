@@ -1,0 +1,86 @@
+# Copyright 2022 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+package:
+  name: opentitan_peripherals
+  authors:
+    - "Paul Scheffler <paulsc@iis.ee.ethz.ch>" # current maintainer
+    - "lowRISC Contributors"
+
+dependencies:
+  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.25.0 }
+  register_interface: { git: "https://github.com/pulp-platform/register_interface.git", version: 0.3.8 }
+
+vendor_package:
+  - name: lowrisc_opentitan
+    target_dir: src
+    upstream: { git: "https://github.com/lowRISC/opentitan.git", rev: "726718a6de32aa047a4064e02e7b619699f054ed" }
+    patch_dir: "patches"
+    mapping:
+      - {from: 'hw/ip/prim', to: 'prim', patch_dir: 'prim'}
+      - {from: 'hw/ip/gpio', to: 'gpio', patch_dir: 'gpio'}
+      - {from: 'hw/ip/i2c', to: 'i2c', patch_dir: 'i2c'}
+      - {from: 'hw/ip/spi_host', to: 'spi_host', patch_dir: 'spi_host'}
+      - {from: 'hw/ip/rv_plic', to: 'rv_plic', patch_dir: 'rv_plic'}
+    exclude_from_upstream:
+      - "*.core"
+      - "*doc"
+      - "*dv"
+      - "*lint"
+      - "*fpv"
+      - "*.prj.hjson"
+      - "*_testplan.hjson"
+      - "*README.md"
+      # We do not need primitive generation
+      - "hw/ip/prim/util"
+      # Exclude various primitives to reduce clutter (keep in sync with sources)
+      - "hw/ip/prim/rtl/*.svh*"
+      - "hw/ip/prim/rtl/prim_[!fipsu]*"
+      - "hw/ip/prim/rtl/prim_secded*"
+      - "hw/ip/prim/rtl/prim_subreg*"
+
+sources:
+  ### lowRISC Primitives ###
+  # Patched in
+  - src/prim/prim_pulp_platform/prim_flop_2sync.sv
+  # Level 0
+  - src/prim/rtl/prim_util_pkg.sv
+  # Level 1
+  - src/prim/rtl/prim_sync_reqack.sv
+  - src/prim/rtl/prim_sync_reqack_data.sv
+  - src/prim/rtl/prim_pulse_sync.sv
+  - src/prim/rtl/prim_packer_fifo.sv
+  - src/prim/rtl/prim_fifo_sync.sv
+  - src/prim/rtl/prim_filter_ctr.sv
+  - src/prim/rtl/prim_intr_hw.sv
+  # Level 2
+  - src/prim/rtl/prim_fifo_async.sv
+  ### Peripheral sources ###
+  # Level 0 (generated, see README for regeneration)
+  - src/gpio/rtl/gpio_reg_pkg.sv
+  - src/i2c/rtl/i2c_reg_pkg.sv
+  - src/spi_host/rtl/spi_host_reg_pkg.sv
+  # Level 1 (generated, see README for regeneration)
+  - src/gpio/rtl/gpio_reg_top.sv
+  - src/i2c/rtl/i2c_reg_top.sv
+  - src/spi_host/rtl/spi_host_reg_top.sv
+  # Level 2
+  - src/i2c/rtl/i2c_fsm.sv
+  - src/rv_plic/rtl/rv_plic_gateway.sv
+  - src/spi_host/rtl/spi_host_byte_merge.sv
+  - src/spi_host/rtl/spi_host_byte_select.sv
+  - src/spi_host/rtl/spi_host_cmd_pkg.sv
+  - src/spi_host/rtl/spi_host_command_cdc.sv
+  - src/spi_host/rtl/spi_host_fsm.sv
+  - src/spi_host/rtl/spi_host_window.sv
+  - src/spi_host/rtl/spi_host_data_cdc.sv
+  - src/spi_host/rtl/spi_host_shift_register.sv
+  # Level 3
+  - src/i2c/rtl/i2c_core.sv
+  - src/rv_plic/rtl/rv_plic_target.sv
+  - src/spi_host/rtl/spi_host_core.sv
+  # Level 4
+  - src/gpio/rtl/gpio.sv
+  - src/i2c/rtl/i2c.sv
+  - src/spi_host/rtl/spi_host.sv

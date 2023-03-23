@@ -41,7 +41,7 @@ module ${name}_cva6 import ${name}_pkg::*; (
     CachedRegionAddrBase:  {64'h8000_0000, 64'd${cfg["spm_narrow"]["address"]}},
     CachedRegionLength:    {(64'hff_ffff_ffff-64'h8000_0000), 64'd${cfg["spm_narrow"]["length"]}},
     //  cache config
-    Axi64BitCompliant:      1'b1,
+    AxiCompliant:           1'b1,
     SwapEndianess:          1'b0,
     // debug
     DmBaseAddress:          64'h0,

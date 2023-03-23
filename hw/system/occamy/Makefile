@@ -67,27 +67,27 @@ update-source:
 		--outdir test \
 		--testharness-sv test/testharness.sv.tpl \
 		--bootdata ../../ip/snitch_cluster/test/bootdata.cc.tpl
-	@echo "[SOLDER]  CLINT"
 	@echo "[SOLDER]  Device Tree"
 	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir . --dts test/occamy.dts
 	@echo "[VERIBLE] Formatting"
 	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_soc.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
+CLINTROOT = $(ROOT)/hw/vendor/pulp_platform_clint
 update-clint:
 	@mkdir -p src/clint
 	@echo "[SOLDER]  Generate CLINT config"
-	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/clint \
-		--chip ../../ip/clint/data/clint.hjson.tpl
-	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/clint \
-		--chip ../../ip/clint/data/clint.sv.tpl
-	@echo "[REGGEN]  Re-generate CLINT regs"
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/clint --chip $(CLINTROOT)/data/clint.hjson.tpl
+	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/clint --chip $(CLINTROOT)/data/clint.sv.tpl
+	@echo "[REGGEN]  Generate CLINT regs"
 	@$(ROOT)/util/regtool.py -r -t src/clint src/clint/clint.hjson
 
+PLICSRC = $(ROOT)/hw/vendor/pulp_platform_opentitan_peripherals/src/rv_plic
 update-plic:
 	@mkdir -p src/rv_plic
-	@echo "[REGGEN]  Generate PLIC"
-	@$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv
-	@$(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(ROOT)/hw/vendor/lowrisc_opentitan/rv_plic/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
+	@echo "[PLICGEN] Generate PLIC config"
+	@$(PLICSRC)/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(PLICSRC)/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv
+	@$(PLICSRC)/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(PLICSRC)/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
+	@echo "[REGGEN]  Generate PLIC regs"
 	@$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
 
 # Update generic control register.

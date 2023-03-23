@@ -1,0 +1,22 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "pulp_platform_opentitan_peripherals",
+  target_dir: "pulp_platform_opentitan_peripherals",
+
+  upstream: {
+    url: "https://github.com/pulp-platform/opentitan_peripherals.git",
+    rev: "v0.2.1",
+  },
+
+  patch_dir: "patches/pulp_platform_opentitan_peripherals",
+
+  exclude_from_upstream: [
+    ".github"
+    "patches",
+    "Makefile",
+    "requirements.txt"
+    "README.md"
+  ]
+}

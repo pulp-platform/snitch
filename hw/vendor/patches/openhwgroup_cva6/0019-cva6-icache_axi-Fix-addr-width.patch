@@ -1,0 +1,26 @@
+From 03b83ff54e63523dd6044514ae3219af2069bb1b Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Thu, 23 Mar 2023 00:23:05 +0100
+Subject: [PATCH] cva6/icache_axi: Fix addr width
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ core/cache_subsystem/cva6_icache_axi_wrapper.sv | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/cache_subsystem/cva6_icache_axi_wrapper.sv b/core/cache_subsystem/cva6_icache_axi_wrapper.sv
+index c11db6e3..49cf2486 100644
+--- a/core/cache_subsystem/cva6_icache_axi_wrapper.sv
++++ b/core/cache_subsystem/cva6_icache_axi_wrapper.sv
+@@ -58,7 +58,7 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
+ 
+   logic                                  axi_rd_req;
+   logic                                  axi_rd_gnt;
+-  logic [63:0]                           axi_rd_addr;
++  logic [AxiAddrWidth-1:0]               axi_rd_addr;
+   logic [$clog2(AxiNumWords)-1:0]        axi_rd_blen;
+   logic [2:0]                            axi_rd_size;
+   logic [AxiIdWidth-1:0]                 axi_rd_id_in;
+-- 
+2.16.5
+

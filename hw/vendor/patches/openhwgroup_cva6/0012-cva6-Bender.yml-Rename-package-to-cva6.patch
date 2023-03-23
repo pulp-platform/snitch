@@ -1,0 +1,24 @@
+From 5927c1c4ba7a47cdb503b23173fb69a936b99f06 Mon Sep 17 00:00:00 2001
+From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+Date: Wed, 22 Mar 2023 11:43:10 +0100
+Subject: [PATCH] cva6/Bender.yml: Rename package to cva6
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+---
+ Bender.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Bender.yml b/Bender.yml
+index 8d1837ca..a391709b 100644
+--- a/Bender.yml
++++ b/Bender.yml
+@@ -1,5 +1,5 @@
+ package:
+-  name: ariane
++  name: cva6
+   authors:
+     - "Florian Zaruba <zarubaf@iis.ee.ethz.ch>"
+     - "Michael Schaffner <schaffner@iis.ee.ethz.ch>"
+-- 
+2.16.5
+
