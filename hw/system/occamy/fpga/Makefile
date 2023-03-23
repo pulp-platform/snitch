@@ -46,7 +46,7 @@ occamy_vcu128: vivado_ips/occamy_xilinx bootrom/bootrom-spl.coe define_defines_i
 	${VIVADO} -mode batch -source occamy_vcu128.tcl -tclargs $(DEBUG) $(EXT_JTAG) $(NPROC) ${MKFILE_DIR}/bootrom/bootrom-spl.coe
 
 define_defines_includes_no_simset.tcl: $(BENDER_FILES)
-	${BENDER} script vivado --only-defines --only-includes --no-simset > $@
+	${BENDER} script vivado -t cv64a6_imafdc_sv39 --only-defines --only-includes --no-simset > $@
 
 program:
 	${VIVADO} -mode batch -source occamy_vcu128_program.tcl -tclargs ${VCU}
