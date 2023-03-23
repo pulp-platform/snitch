@@ -9,8 +9,6 @@
 address:
 #Snitch : cl_peripherals + 0x40
   barrier_reg: 0x10020190
-  barrier_reg_2: 0x10060190
-  barrier_reg_3: 0x100A0190
   cluster_base_hartid: 0x40000040
   cluster_id: 0x40000050
   cluster_num: 0x40000048
