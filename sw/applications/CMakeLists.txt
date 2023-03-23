@@ -34,7 +34,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     include_directories(include data src/layers src/kernels src/utils)
     include_directories(${SNRUNTIME_INCLUDE_DIRS})
 
-    add_library(kernels src/kernels/batchnorm.c src/kernels/maxpool.c src/kernels/gemm.c src/kernels/conv2d.c src/kernels/linear.c src/kernels/softmax.c src/kernels/celoss.c src/kernels/simple.c src/kernels/cnn.c src/kernels/mnist_network.c src/kernels/mnist_fp16_network.c src/kernels/mnist_fp8_network.c)
+    add_library(kernels src/kernels/batchnorm.c src/kernels/maxpool.c src/kernels/gemm.c src/kernels/conv2d.c src/kernels/celoss.c src/kernels/cnn.c)
     add_library(layers src/layers/batchnorm_layer.c
                 src/layers/maxpool_layer.c
                 src/layers/conv2d_layer.c
