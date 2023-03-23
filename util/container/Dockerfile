@@ -74,7 +74,7 @@ RUN apt-get update && \
 # Install Verilator
 RUN echo 'deb http://download.opensuse.org/repositories/home:/phiwag:/edatools/xUbuntu_18.04/ /' | tee /etc/apt/sources.list.d/home:phiwag:edatools.list && \
     curl -fsSL https://download.opensuse.org/repositories/home:phiwag:edatools/xUbuntu_18.04/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/home_phiwag_edatools.gpg > /dev/null && \
-    apt-get update && apt-get install -y verilator-${VERILATOR_VERSION} && \
+    apt update && apt install verilator-${VERILATOR_VERSION} && \
     apt-get clean ; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
