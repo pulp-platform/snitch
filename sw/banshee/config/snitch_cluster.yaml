@@ -49,3 +49,5 @@ memory:
     end: 0x120000
     latency: 1
     start: 0x100000
+  ssr:
+    num_dm: 3

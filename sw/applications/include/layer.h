@@ -39,6 +39,8 @@ typedef enum { FP64 = 8, FP32 = 4, FP16 = 2, FP8 = 1 } precision_t;
  * constant factor: A * B + ALPHA * C
  * @var gemm_layer_struct::dtype
  * Precision of GEMM
+ * @var gemm_layer_struct::expand
+ * Use expanding DOTP instructions
  */
 typedef struct gemm_layer_struct {
     uint32_t M;
@@ -60,6 +62,7 @@ typedef struct gemm_layer_struct {
     uint32_t ALPHA;
 
     precision_t dtype;
+    uint32_t expand;
 } gemm_layer;
 
 /**

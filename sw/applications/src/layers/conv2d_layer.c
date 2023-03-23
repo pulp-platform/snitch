@@ -345,7 +345,7 @@ void conv2d_layer(const conv_layer *l) {
 
                             if (ci != 0 && l->TILE_CI != l->CI) {
                                 const uint32_t alpha = 0;
-                                gemm_fp64_ssr_frep(
+                                gemm_fp64_opt(
                                     1, 8, l->FH * l->FW * l->TILE_CI,
                                     &im2col[read_buf * im2col_mat_stride +
                                             compute_id * im2col_row_stride],
@@ -357,7 +357,7 @@ void conv2d_layer(const conv_layer *l) {
 
                             } else {
                                 const uint32_t alpha = 1;
-                                gemm_fp64_ssr_frep(
+                                gemm_fp64_opt(
                                     1, 8, l->FH * l->FW * l->TILE_CI,
                                     &im2col[read_buf * im2col_mat_stride +
                                             compute_id * im2col_row_stride],
