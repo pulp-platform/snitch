@@ -8,19 +8,19 @@
 
 name: gitlab-ci
 
-on: [ push, pull_request, workflow_dispatch ]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   gitlab-ci:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Gitlab CI
-        uses: pulp-platform/pulp-actions/gitlab-ci@v1
-        with:
-          domain: iis-git.ee.ethz.ch
-          repo: github-mirror/snitch
-          token: ${{ secrets.GITLAB_TOKEN }}
-          poll-period: 20
-          poll-count: 1000
-          retry-count: 100
-          retry-period: 50
+    - name: Check Gitlab CI
+      uses: pulp-platform/pulp-actions/gitlab-ci@v1
+      with:
+        domain: iis-git.ee.ethz.ch
+        repo: github-mirror/snitch
+        token: ${{ secrets.GITLAB_TOKEN }}
+        poll-period: 20
+        poll-count: 1000
+        retry-count: 100
+        retry-period: 50

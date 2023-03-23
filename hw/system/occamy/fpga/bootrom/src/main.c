@@ -7,7 +7,9 @@
 #define SPL_SIZE 65536
 #define SPL_DEST 0x70000000UL
 
-#define BIG_ENDIAN(n) ( ((n >> 24)&0xFFu ) | (((n >> 16)&0xFFu) << 8) | (((n >> 8)&0xFFu) << 16) | ((n&0xFFu) << 24 ) )
+#define BIG_ENDIAN(n)                                   \
+    (((n >> 24) & 0xFFu) | (((n >> 16) & 0xFFu) << 8) | \
+     (((n >> 8) & 0xFFu) << 16) | ((n & 0xFFu) << 24))
 // + (((n) >> 16)&0xFFu) << 8 + (((n) >>  8)&0xFFu) << 16 + ((n)&0xFFu ) << 24
 
 extern uint32_t __spl_start;
@@ -78,18 +80,21 @@ int main() {
 
             print_uart("\r\nCopying DTB at ");
             print_uart_addr(SPL_DEST + 1);
-            for(int i = 0; i < totalsize; i++)
-                *(uint8_t *)(SPL_DEST + 4 + i) = *(((uint8_t *)__dtb_start) + i);
+            for (int i = 0; i < totalsize; i++)
+                *(uint8_t *)(SPL_DEST + 4 + i) =
+                    *(((uint8_t *)__dtb_start) + i);
 
             // Assert copy is done
             __asm__ volatile("fence.i;");
 
-            // Copy the magic at SPM+0 to indicate end of transfert (put it back in big endian)
+            // Copy the magic at SPM+0 to indicate end of transfert (put it back
+            // in big endian)
             *((uint32_t *)SPL_DEST) = BIG_ENDIAN(magic);
 
             __asm__ volatile("fence.i;");
 
-            // Now the host driver can read the DTB, CVA6 can go to sleep forever
+            // Now the host driver can read the DTB, CVA6 can go to sleep
+            // forever
 
             print_uart("\r\nDone");
 
