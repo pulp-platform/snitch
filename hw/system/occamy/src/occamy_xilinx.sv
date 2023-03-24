@@ -598,8 +598,6 @@ module occamy_xilinx
   );
 
 
-  reg_a48_d32_req_t bootrom_req;
-  reg_a48_d32_rsp_t bootrom_rsp;
 
   logic bootrom_req_ready_d, bootrom_req_ready_q;
 
