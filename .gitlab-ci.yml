@@ -36,12 +36,13 @@ before_script:
 
 stages:
 - verify-snitch-ips
-- linux_boot
+- linux_prepare
 - build_fpga
+- linux_boot
 
 # CVA6 SDK
 get_toolchain:
-  stage: linux_boot
+  stage: linux_prepare
   script:
   - |
     if [[ ! -d ${CVA6_SDK} ]]; then
@@ -56,7 +57,7 @@ get_toolchain:
   timeout: 2h 00m
 
 get_linux:
-  stage: linux_boot
+  stage: linux_prepare
   script:
   - |
     if [[ ! -f ${UBOOT_ITB} ]]; then
@@ -90,9 +91,12 @@ occamy_vivado_ip:
 # The occamy on vcu128 design
 occamy_vcu128:
   stage: build_fpga
-  rules:
-  - if: $CI_PIPELINE_SOURCE == "schedule"
-  - changes:
+  only:
+    refs:
+    - schedules
+    variables:
+    - $SCHEDULE == "occamy_vcu128_nightly"
+    changes:
     - .gitlab-ci.d/occamy_cfg_fpga.sh
     - hw/ip/**/*
     - hw/vendor/**/*
@@ -103,13 +107,13 @@ occamy_vcu128:
     - util/Makefrag
     - util/reggen
     - util/regtool.py
-  timeout: 18h 00m
+  timeout: 11h 00m
   script:
   - |
     if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup occamy_vcu128; then
       make -C hw/system/occamy/fpga occamy_vcu128 EXT_JTAG=0 DEBUG=0
       mkdir -p /usr/scratch2/dolent1/gitlabci/buildcache/snitch/snitch-incremental/
-      #cp -v hw/system/occamy/fpga/occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper_routed.dcp /usr/scratch2/dolent1/gitlabci/buildcache/snitch/snitch-incremental/occamy_vcu128_wrapper_routed.dcp
+      $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert occamy_vcu128
     fi
   artifacts:
     paths:
@@ -117,9 +121,10 @@ occamy_vcu128:
     - hw/system/occamy/src
   needs: [get_toolchain, occamy_vivado_ip]
 
-# Boot Linux on the VCU128 FPGA and check for prompt
+# Boot Linux on the VCU128 FPGA and check for prompt (disabled for now)
 occamy_vcu128_fpga:
   stage: linux_boot
+  when: manual
   only:
     refs:
     - schedules
