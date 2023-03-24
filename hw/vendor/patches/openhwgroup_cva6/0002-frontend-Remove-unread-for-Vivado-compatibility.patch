@@ -1,7 +1,7 @@
-From 5aafe76809ad11c6478e033d9ef97e205b763bac Mon Sep 17 00:00:00 2001
+From 7502f6a7a888e7c56c6eba449e0fc386a386bb09 Mon Sep 17 00:00:00 2001
 From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 Date: Thu, 18 Aug 2022 15:26:48 +0200
-Subject: [PATCH 02/10] frontend: Remove `unread` for Vivado compatibility
+Subject: [PATCH 2/8] frontend: Remove `unread` for Vivado compatibility
 
 Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 ---

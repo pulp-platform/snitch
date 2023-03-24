@@ -1,20 +1,34 @@
-From 433ad7e75dd0c4faf2aed9f89836a281aa39eed4 Mon Sep 17 00:00:00 2001
+From 1ebab1f62f0b96c830a93e4d4eb9ef941caea91e Mon Sep 17 00:00:00 2001
 From: Paul Scheffler <paulsc@iis.ee.ethz.ch>
 Date: Thu, 21 Oct 2021 23:17:48 +0200
-Subject: [PATCH 08/10] cva6: Add SRAM config ports
+Subject: [PATCH 6/8] cva6/sram: Use tc_sram_impl
 
+cva6: Add SRAM config ports
+
+cva6: Expose sram_cfg_t param
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+
+cva6/sram: Remove user ports
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
+
+cva6/sram: Use tc_sram_impl
+
+Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 ---
  common/local/util/sram.sv                       | 12 +++++++++++
- common/local/util/tc_sram_wrapper.sv            |  8 ++++++++
- core/cache_subsystem/cva6_icache.sv             | 13 +++++++++++-
+ common/local/util/tc_sram_wrapper.sv            |  8 +++++++
+ core/ariane.sv                                  | 19 ++++++++++++++---
+ core/cache_subsystem/cva6_icache.sv             | 23 +++++++++++++-------
  core/cache_subsystem/cva6_icache_axi_wrapper.sv | 12 +++++++++--
  core/cache_subsystem/std_cache_subsystem.sv     | 20 +++++++++++++++---
- core/cache_subsystem/std_nbdcache.sv            | 16 ++++++++++++++-
- core/cache_subsystem/wt_cache_subsystem.sv      | 18 ++++++++++++++---
+ core/cache_subsystem/std_nbdcache.sv            | 28 ++++++++++++++++---------
+ core/cache_subsystem/wt_cache_subsystem.sv      | 18 +++++++++++++---
  core/cache_subsystem/wt_dcache.sv               | 13 ++++++++++--
- core/cache_subsystem/wt_dcache_mem.sv           | 13 +++++++++++-
- core/cva6.sv                                    | 27 +++++++++++++++++++++----
- 10 files changed, 135 insertions(+), 17 deletions(-)
+ core/cache_subsystem/wt_dcache_mem.sv           | 23 +++++++++++++-------
+ core/cva6.sv                                    | 27 ++++++++++++++++++++----
+ 11 files changed, 162 insertions(+), 41 deletions(-)
 
 diff --git a/common/local/util/sram.sv b/common/local/util/sram.sv
 index c105c544..20b5d629 100644
@@ -114,8 +128,56 @@ index ae3287d9..34cb0788 100644
        .req_i    ( req_i   ),
        .we_i     ( we_i    ),
        .be_i     ( be_i    ),
+diff --git a/core/ariane.sv b/core/ariane.sv
+index 222cb715..69b708fb 100644
+--- a/core/ariane.sv
++++ b/core/ariane.sv
+@@ -22,14 +22,21 @@ module ariane import ariane_pkg::*; #(
+   parameter type axi_aw_chan_t = ariane_axi::aw_chan_t,
+   parameter type axi_w_chan_t  = ariane_axi::w_chan_t,
+   parameter type axi_req_t = ariane_axi::req_t,
+-  parameter type axi_rsp_t = ariane_axi::resp_t
++  parameter type axi_rsp_t = ariane_axi::resp_t,
++  parameter type sram_cfg_t = logic
++
+ ) (
+   input  logic                         clk_i,
+   input  logic                         rst_ni,
+   // Core ID, Cluster ID and boot address are considered more or less static
+   input  logic [riscv::VLEN-1:0]       boot_addr_i,  // reset boot address
+   input  logic [riscv::XLEN-1:0]       hart_id_i,    // hart id in a multicore environment (reflected in a CSR)
+-
++  // SRAM config
++  input sram_cfg_t                     sram_cfg_idata_i,
++  input sram_cfg_t                     sram_cfg_itag_i,
++  input sram_cfg_t                     sram_cfg_ddata_i,
++  input sram_cfg_t                     sram_cfg_dtag_i,
++  input sram_cfg_t                     sram_cfg_dvalid_dirty_i,
+   // Interrupt inputs
+   input  logic [1:0]                   irq_i,        // level sensitive IR lines, mip & sip (async)
+   input  logic                         ipi_i,        // inter-processor interrupts (async)
+@@ -68,12 +75,18 @@ module ariane import ariane_pkg::*; #(
+     .axi_aw_chan_t (axi_aw_chan_t),
+     .axi_w_chan_t (axi_w_chan_t),
+     .axi_req_t (axi_req_t),
+-    .axi_rsp_t (axi_rsp_t)
++    .axi_rsp_t (axi_rsp_t),
++    .sram_cfg_t (sram_cfg_t)
+   ) i_cva6 (
+     .clk_i                ( clk_i                     ),
+     .rst_ni               ( rst_ni                    ),
+     .boot_addr_i          ( boot_addr_i               ),
+     .hart_id_i            ( hart_id_i                 ),
++    .sram_cfg_idata_i     ( sram_cfg_idata_i          ),
++    .sram_cfg_itag_i      ( sram_cfg_itag_i           ),
++    .sram_cfg_ddata_i     ( sram_cfg_ddata_i          ),
++    .sram_cfg_dtag_i      ( sram_cfg_dtag_i           ),
++    .sram_cfg_dvalid_dirty_i ( sram_cfg_dvalid_dirty_i ),
+     .irq_i                ( irq_i                     ),
+     .ipi_i                ( ipi_i                     ),
+     .time_irq_i           ( time_irq_i                ),
 diff --git a/core/cache_subsystem/cva6_icache.sv b/core/cache_subsystem/cva6_icache.sv
-index a7b38cac..da854242 100644
+index a7b38cac..6dd677d8 100644
 --- a/core/cache_subsystem/cva6_icache.sv
 +++ b/core/cache_subsystem/cva6_icache.sv
 @@ -27,11 +27,16 @@
@@ -136,15 +198,17 @@ index a7b38cac..da854242 100644
    input  logic                      flush_i,              // flush the icache, flush and kill have to be asserted together
    input  logic                      en_i,                 // enable icache
    output logic                      miss_o,               // to performance counter
-@@ -429,6 +434,7 @@ end else begin : gen_piton_offset
+@@ -428,7 +433,8 @@ end else begin : gen_piton_offset
+ 
    for (genvar i = 0; i < ICACHE_SET_ASSOC; i++) begin : gen_sram
      // Tag RAM
-     tc_sram #(
+-    tc_sram #(
++    tc_sram_impl #(
 +      .impl_in_t ( sram_cfg_t         ),
        // tag + valid bit
        .DataWidth ( ICACHE_TAG_WIDTH+1 ),
        .NumWords  ( ICACHE_NUM_WORDS   ),
-@@ -436,6 +442,8 @@ end else begin : gen_piton_offset
+@@ -436,15 +442,15 @@ end else begin : gen_piton_offset
      ) tag_sram (
        .clk_i     ( clk_i                    ),
        .rst_ni    ( rst_ni                   ),
@@ -153,10 +217,21 @@ index a7b38cac..da854242 100644
        .req_i     ( vld_req[i]               ),
        .we_i      ( vld_we                   ),
        .addr_i    ( vld_addr                 ),
-@@ -453,12 +461,15 @@ end else begin : gen_piton_offset
+       // we can always use the saved tag here since it takes a
+       // couple of cycle until we write to the cache upon a miss
+-      .wuser_i   ( '0                       ),
+       .wdata_i   ( {vld_wdata[i], cl_tag_q} ),
+       .be_i      ( '1                       ),
+-      .ruser_o   (                          ),
+       .rdata_o   ( cl_tag_valid_rdata[i]    )
+     );
+ 
+@@ -452,22 +458,25 @@ end else begin : gen_piton_offset
+     assign vld_rdata[i]    = cl_tag_valid_rdata[i][ICACHE_TAG_WIDTH];
  
      // Data RAM
-     tc_sram #(
+-    tc_sram #(
++    tc_sram_impl #(
 +      .impl_in_t ( sram_cfg_t        ),
        .DataWidth ( ICACHE_LINE_WIDTH ),
        .NumWords  ( ICACHE_NUM_WORDS  ),
@@ -169,8 +244,19 @@ index a7b38cac..da854242 100644
        .req_i     ( cl_req[i]           ),
        .we_i      ( cl_we               ),
        .addr_i    ( cl_index            ),
+-      .wuser_i   ( mem_rtrn_i.user     ),
+       .wdata_i   ( mem_rtrn_i.data     ),
+       .be_i      ( '1                  ),
+-      .ruser_o   ( cl_ruser[i]         ),
+       .rdata_o   ( cl_rdata[i]         )
+     );
++
++    assign cl_ruser[i] = '0;
+   end
+ 
+ 
 diff --git a/core/cache_subsystem/cva6_icache_axi_wrapper.sv b/core/cache_subsystem/cva6_icache_axi_wrapper.sv
-index 3d53b875..fbeff6df 100644
+index 251ff25a..49cf2486 100644
 --- a/core/cache_subsystem/cva6_icache_axi_wrapper.sv
 +++ b/core/cache_subsystem/cva6_icache_axi_wrapper.sv
 @@ -19,12 +19,17 @@ module cva6_icache_axi_wrapper import ariane_pkg::*; import wt_cache_pkg::*; #(
@@ -267,7 +353,7 @@ index 38a04115..b7f9efb5 100644
        .flush_i      ( dcache_flush_i         ),
        .flush_ack_o  ( dcache_flush_ack_o     ),
 diff --git a/core/cache_subsystem/std_nbdcache.sv b/core/cache_subsystem/std_nbdcache.sv
-index 0a4d2018..e0b2d559 100644
+index 0a4d2018..59fe0f7b 100644
 --- a/core/cache_subsystem/std_nbdcache.sv
 +++ b/core/cache_subsystem/std_nbdcache.sv
 @@ -19,10 +19,15 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(
@@ -287,10 +373,12 @@ index 0a4d2018..e0b2d559 100644
      // Cache management
      input  logic                           enable_i,    // from CSR
      input  logic                           flush_i,     // high until acknowledged
-@@ -184,12 +189,15 @@ import std_cache_pkg::*;
+@@ -183,36 +188,38 @@ import std_cache_pkg::*;
+     // Memory Arrays
      // --------------
      for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
-         tc_sram #(
+-        tc_sram #(
++        tc_sram_impl #(
 +            .impl_in_t ( sram_cfg_t                         ),
              .DataWidth ( DCACHE_LINE_WIDTH                  ),
              .NumWords  ( DCACHE_NUM_WORDS                   ),
@@ -302,11 +390,16 @@ index 0a4d2018..e0b2d559 100644
 +            .impl_o  (  ),
              .we_i    ( we_ram                               ),
              .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
-             .wuser_i ( '0                                   ),
-@@ -201,12 +209,15 @@ import std_cache_pkg::*;
+-            .wuser_i ( '0                                   ),
+             .wdata_i ( wdata_ram.data                       ),
+             .be_i    ( be_ram.data                          ),
+-            .ruser_o (                                      ),
+             .rdata_o ( rdata_ram[i].data                    ),
+             .*
          );
  
-         tc_sram #(
+-        tc_sram #(
++        tc_sram_impl #(
 +            .impl_in_t ( sram_cfg_t                         ),
              .DataWidth ( DCACHE_TAG_WIDTH                   ),
              .NumWords  ( DCACHE_NUM_WORDS                   ),
@@ -318,11 +411,19 @@ index 0a4d2018..e0b2d559 100644
 +            .impl_o  (                                      ),
              .we_i    ( we_ram                               ),
              .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
-             .wuser_i ( '0                                   ),
-@@ -236,12 +247,15 @@ import std_cache_pkg::*;
+-            .wuser_i ( '0                                   ),
+             .wdata_i ( wdata_ram.tag                        ),
+             .be_i    ( be_ram.tag                           ),
+-            .ruser_o (                                      ),
+             .rdata_o ( rdata_ram[i].tag                     ),
+             .*
+         );
+@@ -235,20 +242,21 @@ import std_cache_pkg::*;
+         assign rdata_ram[i].valid = dirty_rdata[8*i+1];
      end
  
-     tc_sram #(
+-    tc_sram #(
++    tc_sram_impl #(
 +        .impl_in_t ( sram_cfg_t                       ),
          .DataWidth ( 4*DCACHE_DIRTY_WIDTH             ),
          .NumWords  ( DCACHE_NUM_WORDS                 ),
@@ -335,6 +436,13 @@ index 0a4d2018..e0b2d559 100644
          .req_i   ( |req_ram                            ),
          .we_i    ( we_ram                              ),
          .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] ),
+-        .wuser_i ( '0                                  ),
+         .wdata_i ( dirty_wdata                         ),
+         .be_i    ( be_ram.vldrty                       ),
+-        .ruser_o (                                     ),
+         .rdata_o ( dirty_rdata                         )
+     );
+ 
 diff --git a/core/cache_subsystem/wt_cache_subsystem.sv b/core/cache_subsystem/wt_cache_subsystem.sv
 index 8565601c..8886590b 100644
 --- a/core/cache_subsystem/wt_cache_subsystem.sv
@@ -430,7 +538,7 @@ index 7dfd40cf..a998e73a 100644
      .rd_prio_i         ( rd_prio            ),
      .rd_tag_i          ( rd_tag             ),
 diff --git a/core/cache_subsystem/wt_dcache_mem.sv b/core/cache_subsystem/wt_dcache_mem.sv
-index d77440d5..917f0cbe 100644
+index d77440d5..aee71913 100644
 --- a/core/cache_subsystem/wt_dcache_mem.sv
 +++ b/core/cache_subsystem/wt_dcache_mem.sv
 @@ -29,11 +29,16 @@
@@ -451,10 +559,12 @@ index d77440d5..917f0cbe 100644
    // ports
    input  logic  [NumPorts-1:0][DCACHE_TAG_WIDTH-1:0]        rd_tag_i,           // tag in - comes one cycle later
    input  logic  [NumPorts-1:0][DCACHE_CL_IDX_WIDTH-1:0]     rd_idx_i,
-@@ -282,12 +287,15 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -281,22 +286,25 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+ 
    for (genvar k = 0; k < DCACHE_NUM_BANKS; k++) begin : gen_data_banks
      // Data RAM
-     tc_sram #(
+-    tc_sram #(
++    tc_sram_impl #(
 +      .impl_in_t ( sram_cfg_t ),
        .DataWidth ( ariane_pkg::DCACHE_SET_ASSOC * riscv::XLEN ),
        .NumWords  ( wt_cache_pkg::DCACHE_NUM_WORDS             ),
@@ -467,15 +577,28 @@ index d77440d5..917f0cbe 100644
        .req_i      ( bank_req   [k]      ),
        .we_i       ( bank_we    [k]      ),
        .addr_i     ( bank_idx   [k]      ),
-@@ -306,6 +314,7 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+-      .wuser_i    ( bank_wuser [k]      ),
+       .wdata_i    ( bank_wdata [k]      ),
+       .be_i       ( bank_be    [k]      ),
+-      .ruser_o    ( bank_ruser [k]      ),
+       .rdata_o    ( bank_rdata [k]      )
+     );
++
++    assign bank_ruser [k] = '0;
+   end
+ 
+   for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : gen_tag_srams
+@@ -305,7 +313,8 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+     assign rd_vld_bits_o[i] = vld_tag_rdata[i][DCACHE_TAG_WIDTH];
  
      // Tag RAM
-     tc_sram #(
+-    tc_sram #(
++    tc_sram_impl #(
 +      .impl_in_t  ( sram_cfg_t                       ),
        // tag + valid bit
        .DataWidth ( ariane_pkg::DCACHE_TAG_WIDTH + 1 ),
        .NumWords  ( wt_cache_pkg::DCACHE_NUM_WORDS   ),
-@@ -313,6 +322,8 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
+@@ -313,13 +322,13 @@ module wt_dcache_mem import ariane_pkg::*; import wt_cache_pkg::*; #(
      ) i_tag_sram (
        .clk_i     ( clk_i               ),
        .rst_ni    ( rst_ni              ),
@@ -484,6 +607,13 @@ index d77440d5..917f0cbe 100644
        .req_i     ( vld_req[i]          ),
        .we_i      ( vld_we              ),
        .addr_i    ( vld_addr            ),
+-      .wuser_i   ( '0                  ),
+       .wdata_i   ( {vld_wdata[i], wr_cl_tag_i} ),
+       .be_i      ( '1                  ),
+-      .ruser_o   (                     ),
+       .rdata_o   ( vld_tag_rdata[i]    )
+     );
+   end
 diff --git a/core/cva6.sv b/core/cva6.sv
 index 707ceb12..b9513a5d 100644
 --- a/core/cva6.sv

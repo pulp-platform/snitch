@@ -5,12 +5,11 @@ package:
     - "Michael Schaffner <schaffner@iis.ee.ethz.ch>"
     - "Andreas Kuster <kustera@ethz.ch>"
 
-# WT_DCACHE
 dependencies:
   axi: { path: ../../vendor/pulp_platform_axi }
   common_cells:
     { path: ../../vendor/pulp_platform_common_cells }
-  FPnew: { path: ../../vendor/pulp_platform_fpnew }
+  FPnew: { path: ../../vendor/openhwgroup_cvfpu }
   tech_cells_generic:
     { path: ../../vendor/pulp_platform_tech_cells_generic }
 
@@ -74,9 +73,11 @@ sources:
       # for all the below files use Flist.cva6 as baseline and also look at Makefile pd/synth
 
       # FPGA support keep vendoring here because too old
-#       - vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv
-#       - vendor/pulp-platform/fpga-support/rtl/AsyncDpRam.sv
-#       - vendor/pulp-platform/fpga-support/rtl/AsyncThreePortRam.sv
+      - target: all(fpga, xilinx)
+        files
+          - vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv
+          - vendor/pulp-platform/fpga-support/rtl/AsyncDpRam.sv
+          - vendor/pulp-platform/fpga-support/rtl/AsyncThreePortRam.sv
 
       # CVXIF
       - core/include/cvxif_pkg.sv

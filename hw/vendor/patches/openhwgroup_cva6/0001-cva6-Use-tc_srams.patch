@@ -1,7 +1,7 @@
-From 84229406793ca8960442f3f761465fa519f888af Mon Sep 17 00:00:00 2001
+From 5022da1c104f1258d129c8c391b67eae4ebbaa28 Mon Sep 17 00:00:00 2001
 From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 Date: Wed, 3 Mar 2021 10:59:07 +0100
-Subject: [PATCH 01/10] cva6: Use `tc_srams`
+Subject: [PATCH 1/8] cva6: Use `tc_srams`
 
 ---
  core/cache_subsystem/cva6_icache.sv   | 16 ++++++++--------
@@ -10,10 +10,10 @@ Subject: [PATCH 01/10] cva6: Use `tc_srams`
  3 files changed, 28 insertions(+), 26 deletions(-)
 
 diff --git a/core/cache_subsystem/cva6_icache.sv b/core/cache_subsystem/cva6_icache.sv
-index 10277820..5aca3225 100644
+index 0494048b..a7b38cac 100644
 --- a/core/cache_subsystem/cva6_icache.sv
 +++ b/core/cache_subsystem/cva6_icache.sv
-@@ -422,10 +422,11 @@ end else begin : gen_piton_offset
+@@ -428,10 +428,11 @@ end else begin : gen_piton_offset
  
    for (genvar i = 0; i < ICACHE_SET_ASSOC; i++) begin : gen_sram
      // Tag RAM
@@ -28,7 +28,7 @@ index 10277820..5aca3225 100644
      ) tag_sram (
        .clk_i     ( clk_i                    ),
        .rst_ni    ( rst_ni                   ),
-@@ -445,11 +446,10 @@ end else begin : gen_piton_offset
+@@ -451,11 +452,10 @@ end else begin : gen_piton_offset
      assign vld_rdata[i]    = cl_tag_valid_rdata[i][ICACHE_TAG_WIDTH];
  
      // Data RAM
@@ -45,10 +45,10 @@ index 10277820..5aca3225 100644
        .clk_i     ( clk_i               ),
        .rst_ni    ( rst_ni              ),
 diff --git a/core/cache_subsystem/std_nbdcache.sv b/core/cache_subsystem/std_nbdcache.sv
-index 91a56514..d86a8a27 100644
+index edef70f1..0a4d2018 100644
 --- a/core/cache_subsystem/std_nbdcache.sv
 +++ b/core/cache_subsystem/std_nbdcache.sv
-@@ -174,9 +174,10 @@ import std_cache_pkg::*;
+@@ -183,9 +183,10 @@ import std_cache_pkg::*;
      // Memory Arrays
      // --------------
      for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
@@ -62,7 +62,7 @@ index 91a56514..d86a8a27 100644
          ) data_sram (
              .req_i   ( req_ram [i]                          ),
              .rst_ni  ( rst_ni                               ),
-@@ -190,9 +191,10 @@ import std_cache_pkg::*;
+@@ -199,9 +200,10 @@ import std_cache_pkg::*;
              .*
          );
  
@@ -76,7 +76,7 @@ index 91a56514..d86a8a27 100644
          ) tag_sram (
              .req_i   ( req_ram [i]                          ),
              .rst_ni  ( rst_ni                               ),
-@@ -224,10 +226,10 @@ import std_cache_pkg::*;
+@@ -233,10 +235,10 @@ import std_cache_pkg::*;
          assign rdata_ram[i].valid = dirty_rdata[8*i+1];
      end
  
