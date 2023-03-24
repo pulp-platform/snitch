@@ -82,6 +82,7 @@ occamy_vivado_ip:
     # Package IPs and run test elaboration
   - make -C hw/system/occamy/fpga/vivado_ips occamy_xilinx EXT_JTAG=0 DEBUG=0
   artifacts:
+    expire_in: 4 days
     paths:
     - hw/system/occamy/src
     - hw/system/occamy/test
@@ -90,8 +91,10 @@ occamy_vivado_ip:
 # The occamy on vcu128 design
 occamy_vcu128:
   stage: build_fpga
-  when: manual
-  only:
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "web"
+  - if: $CI_PIPELINE_SOURCE != "web"
+    when: manual
     changes:
     - .gitlab-ci.d/occamy_cfg_fpga.sh
     - hw/ip/**/*
@@ -106,12 +109,13 @@ occamy_vcu128:
   timeout: 11h 00m
   script:
   - |
-    if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh lookup occamy_vcu128; then
+    if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh --ignore-uncommitted-changes lookup occamy_vcu128; then
       make -C hw/system/occamy/fpga occamy_vcu128 EXT_JTAG=0 DEBUG=0
       mkdir -p /usr/scratch2/dolent1/gitlabci/buildcache/snitch/snitch-incremental/
-      $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert occamy_vcu128
+      $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh --ignore-uncommitted-changes insert occamy_vcu128
     fi
   artifacts:
+    expire_in: 4 days
     paths:
     - hw/system/occamy/fpga
     - hw/system/occamy/src
@@ -131,10 +135,11 @@ occamy_vcu128_fpga:
     - hw/system/occamy/**/*
   script:
   # We need the bitstream, bootrom (tracked in the repo) and linux binaries
-  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get occamy_vcu128
+  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh --ignore-uncommitted-changes get occamy_vcu128
   # Todo get linux distrib from hero and flash it
   - .gitlab-ci.d/occamy_fpga_nightly.sh
   artifacts:
+    expire_in: 4 days
     paths:
     - console.log
   needs: [occamy_vcu128]

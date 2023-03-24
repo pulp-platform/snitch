@@ -10,7 +10,7 @@
 
 module ${name}_xilinx
 import ${name}_pkg::*;
-(
+ (
   input  logic        clk_i,
   input  logic        rst_ni,
   /// Peripheral clock
@@ -168,9 +168,5 @@ import ${name}_pkg::*;
     .hbi_narrow_rsp_i ('0),
     .*
   );
-
-  assign fll_system_axi_lite_rsp = '0;
-  assign fll_periph_axi_lite_rsp = '0;
-  assign fll_hbm2e_axi_lite_rsp = '0;
 
 endmodule
