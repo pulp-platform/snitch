@@ -82,7 +82,6 @@ occamy_vivado_ip:
     # Package IPs and run test elaboration
   - make -C hw/system/occamy/fpga/vivado_ips occamy_xilinx EXT_JTAG=0 DEBUG=0
   artifacts:
-    when: always
     paths:
     - hw/system/occamy/src
     - hw/system/occamy/test
@@ -91,11 +90,8 @@ occamy_vivado_ip:
 # The occamy on vcu128 design
 occamy_vcu128:
   stage: build_fpga
+  when: manual
   only:
-    refs:
-    - schedules
-    variables:
-    - $SCHEDULE == "occamy_vcu128_nightly"
     changes:
     - .gitlab-ci.d/occamy_cfg_fpga.sh
     - hw/ip/**/*
@@ -119,17 +115,13 @@ occamy_vcu128:
     paths:
     - hw/system/occamy/fpga
     - hw/system/occamy/src
-  needs: [get_toolchain, occamy_vivado_ip]
+  needs: [get_toolchain, get_linux, occamy_vivado_ip]
 
 # Boot Linux on the VCU128 FPGA and check for prompt (disabled for now)
 occamy_vcu128_fpga:
   stage: linux_boot
   when: manual
   only:
-    refs:
-    - schedules
-    variables:
-    - $SCHEDULE == "occamy_vcu128_nightly"
     changes:
     - .gitlab-ci.d/occamy_cfg_fpga.sh
     - .gitlab-ci.d/occamy_fpga_nightly.sh
@@ -143,9 +135,9 @@ occamy_vcu128_fpga:
   # Todo get linux distrib from hero and flash it
   - .gitlab-ci.d/occamy_fpga_nightly.sh
   artifacts:
-    when: always
     paths:
     - console.log
+  needs: [occamy_vcu128]
 
 #######################
 # Test Individual IPs #
