@@ -111,8 +111,6 @@ import ${name}_pkg::*;
   ${soc_axi_lite_narrow_periph_xbar.out_bootrom.rsp_type()} bootrom_axi_lite_rsp;
 
   <% regbus_bootrom = soc_axi_lite_narrow_periph_xbar.out_bootrom.to_reg(context, "bootrom", fr="bootrom_axi_lite") %>
-  ${regbus_bootrom.req_type()} bootrom_req;
-  ${regbus_bootrom.rsp_type()} bootrom_rsp;
 
   logic bootrom_req_ready_d, bootrom_req_ready_q;
 
