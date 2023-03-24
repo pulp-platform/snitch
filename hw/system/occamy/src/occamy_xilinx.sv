@@ -711,8 +711,4 @@ module occamy_xilinx
       .*
   );
 
-  assign fll_system_axi_lite_rsp = '0;
-  assign fll_periph_axi_lite_rsp = '0;
-  assign fll_hbm2e_axi_lite_rsp  = '0;
-
 endmodule

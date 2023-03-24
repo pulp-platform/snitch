@@ -135,7 +135,8 @@ occamy_vcu128_fpga:
     - hw/system/occamy/**/*
   script:
   # We need the bitstream, bootrom (tracked in the repo) and linux binaries
-  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh --ignore-uncommitted-changes get occamy_vcu128
+  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh --ignore-uncommitted-changes get
+    occamy_vcu128
   # Todo get linux distrib from hero and flash it
   - .gitlab-ci.d/occamy_fpga_nightly.sh
   artifacts:

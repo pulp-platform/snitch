@@ -21,4 +21,4 @@ artifacts:
     - hw/vendor
     outputs:
     - hw/system/occamy/fpga/occamy_vcu128
-    - hw/system/occamy/bootrom
+    - hw/system/occamy/fpga/bootrom
