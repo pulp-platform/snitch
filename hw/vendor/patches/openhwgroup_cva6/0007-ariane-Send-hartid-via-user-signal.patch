@@ -1,7 +1,7 @@
-From e2ad3d64066445f9ea2c30a5f8d4907a5ae03c17 Mon Sep 17 00:00:00 2001
+From 760a49b891edf5dc0ab3fa38e33c802acbb2fd79 Mon Sep 17 00:00:00 2001
 From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 Date: Fri, 29 Apr 2022 00:30:41 +0200
-Subject: [PATCH 10/10] ariane: Send hartid via user signal
+Subject: [PATCH 7/8] ariane: Send hartid via user signal
 
 Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 ---
@@ -122,7 +122,7 @@ index b7f9efb5..b556008f 100644
        .axi_bypass_i ( axi_resp_bypass        ),
        .axi_data_o   ( axi_req_data           ),
 diff --git a/core/cache_subsystem/std_nbdcache.sv b/core/cache_subsystem/std_nbdcache.sv
-index e0b2d559..322f9b54 100644
+index 59fe0f7b..824ec898 100644
 --- a/core/cache_subsystem/std_nbdcache.sv
 +++ b/core/cache_subsystem/std_nbdcache.sv
 @@ -18,6 +18,7 @@ module std_nbdcache import std_cache_pkg::*; import ariane_pkg::*; #(

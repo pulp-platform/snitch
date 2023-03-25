@@ -1,25 +1,29 @@
-From 8b24d32586218a77c7127536f5cda2fc1f4b5ed4 Mon Sep 17 00:00:00 2001
-From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
-Date: Wed, 29 Sep 2021 16:24:18 +0200
-Subject: [PATCH 06/10] ariane_pkg: Add new FP formats
+From 47f7d175e871ea590289eac5bd32f54d4c0bfe00 Mon Sep 17 00:00:00 2001
+From: Tim Fischer <fischeti@iis.ee.ethz.ch>
+Date: Thu, 23 Sep 2021 17:13:36 +0200
+Subject: [PATCH 4/8] cva6/fpu: Add new FP formats
+
+Fix mismatch of cva6 fpu config
+
+ariane_pkg: Add new FP formats
 
 Co-authored-by: Gianna Paulin <pauling@student.ethz.ch>
 Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 ---
- core/fpu_wrap.sv                              | 16 ++++++++--------
- core/include/ariane_pkg.sv                    |  6 +++++-
+ core/fpu_wrap.sv                              | 22 ++++++++++++----------
+ core/include/ariane_pkg.sv                    |  7 ++++++-
  core/include/cv32a60x_config_pkg.sv           |  1 +
  core/include/cv32a6_imac_sv0_config_pkg.sv    |  1 +
  core/include/cv32a6_imac_sv32_config_pkg.sv   |  1 +
  core/include/cv32a6_imafc_sv32_config_pkg.sv  |  1 +
  core/include/cv64a6_imafdc_sv39_config_pkg.sv |  1 +
- 7 files changed, 18 insertions(+), 9 deletions(-)
+ 7 files changed, 23 insertions(+), 11 deletions(-)
 
 diff --git a/core/fpu_wrap.sv b/core/fpu_wrap.sv
-index 7aa03f68..1dbe5268 100644
+index 958590da..1dbe5268 100644
 --- a/core/fpu_wrap.sv
 +++ b/core/fpu_wrap.sv
-@@ -54,8 +54,8 @@ module fpu_wrap import ariane_pkg::*; (
+@@ -54,21 +54,23 @@ module fpu_wrap import ariane_pkg::*; (
        Width:         riscv::XLEN, // parameterized using XLEN
        EnableVectors: ariane_pkg::XFVEC,
        EnableNanBox:  1'b1,
@@ -30,16 +34,20 @@ index 7aa03f68..1dbe5268 100644
      };
  
      // Implementation (number of registers etc)
-@@ -65,12 +65,12 @@ module fpu_wrap import ariane_pkg::*; (
-                  '{default: LAT_DIVSQRT},         // DIVSQRT
-                  '{default: LAT_NONCOMP},         // NONCOMP
-                  '{default: LAT_CONV},            // CONV
--                 '{default: fpnew_pkg::MERGED}},  // DOTP
+     localparam fpnew_pkg::fpu_implementation_t FPU_IMPLEMENTATION = '{
+       PipeRegs:  '{// FP32, FP64, FP16, FP8, FP16alt
+-                 '{LAT_COMP_FP32, LAT_COMP_FP64, LAT_COMP_FP16, LAT_COMP_FP8, LAT_COMP_FP16ALT}, // ADDMUL
+-                 '{default: LAT_DIVSQRT}, // DIVSQRT
+-                 '{default: LAT_NONCOMP}, // NONCOMP
+-                 '{default: LAT_CONV}},   // CONV
 -      UnitTypes: '{'{default: fpnew_pkg::PARALLEL}, // ADDMUL
 -                   '{default: fpnew_pkg::MERGED},   // DIVSQRT
 -                   '{default: fpnew_pkg::PARALLEL}, // NONCOMP
--                   '{default: fpnew_pkg::MERGED},   // CONV
--                   '{default: fpnew_pkg::MERGED}},  // DOTP
+-                   '{default: fpnew_pkg::MERGED}},  // CONV
++                 '{LAT_COMP_FP32, LAT_COMP_FP64, LAT_COMP_FP16, LAT_COMP_FP8, LAT_COMP_FP16ALT, LAT_COMP_FP8ALT}, // ADDMUL
++                 '{default: LAT_DIVSQRT},         // DIVSQRT
++                 '{default: LAT_NONCOMP},         // NONCOMP
++                 '{default: LAT_CONV},            // CONV
 +                 '{default: LAT_DOTP}},           // DOTP
 +      UnitTypes: '{'{default: fpnew_pkg::PARALLEL},  // ADDMUL
 +                   '{default: fpnew_pkg::MERGED},    // DIVSQRT
@@ -50,7 +58,7 @@ index 7aa03f68..1dbe5268 100644
      };
  
 diff --git a/core/include/ariane_pkg.sv b/core/include/ariane_pkg.sv
-index c886b9e8..d3f4463e 100644
+index c3ef51b9..d3f4463e 100644
 --- a/core/include/ariane_pkg.sv
 +++ b/core/include/ariane_pkg.sv
 @@ -171,6 +171,7 @@ package ariane_pkg;
@@ -61,7 +69,11 @@ index c886b9e8..d3f4463e 100644
      localparam bit XFVEC   = cva6_config_pkg::CVA6ConfigFVecEn; // Is vectorial float extension (Xfvec) enabled
  
      // Transprecision float unit
-@@ -183,6 +184,7 @@ package ariane_pkg;
+@@ -179,9 +180,11 @@ package ariane_pkg;
+     localparam int unsigned LAT_COMP_FP16    = 'd1;
+     localparam int unsigned LAT_COMP_FP16ALT = 'd1;
+     localparam int unsigned LAT_COMP_FP8     = 'd1;
++    localparam int unsigned LAT_COMP_FP8ALT  = 'd1;
      localparam int unsigned LAT_DIVSQRT      = 'd2;
      localparam int unsigned LAT_NONCOMP      = 'd1;
      localparam int unsigned LAT_CONV         = 'd2;
@@ -69,7 +81,7 @@ index c886b9e8..d3f4463e 100644
  
      // --------------------------------------
      // vvvv Don't change these by hand! vvvv
-@@ -193,7 +195,8 @@ package ariane_pkg;
+@@ -192,7 +195,8 @@ package ariane_pkg;
                           RVF     ? 32 : // F ext.
                           XF16    ? 16 : // Xf16 ext.
                           XF16ALT ? 16 : // Xf16alt ext.
@@ -79,7 +91,7 @@ index c886b9e8..d3f4463e 100644
                           1;             // Unused in case of no FP
  
      localparam bit NSX = XF16 | XF16ALT | XF8 | XFVEC; // Are non-standard extensions present?
-@@ -202,6 +205,7 @@ package ariane_pkg;
+@@ -201,6 +205,7 @@ package ariane_pkg;
      localparam bit XF16VEC    = XF16    & XFVEC & FLEN>16; // FP16 vectors available if vectors and larger fmt enabled
      localparam bit XF16ALTVEC = XF16ALT & XFVEC & FLEN>16; // FP16ALT vectors available if vectors and larger fmt enabled
      localparam bit XF8VEC     = XF8     & XFVEC & FLEN>8;  // FP8 vectors available if vectors and larger fmt enabled

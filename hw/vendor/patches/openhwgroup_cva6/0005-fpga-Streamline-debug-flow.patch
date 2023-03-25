@@ -1,7 +1,7 @@
-From 71292f69b7842308bca0e905c8a4ed2cd7d11b4f Mon Sep 17 00:00:00 2001
+From dab3e7c5ef5f8d7ef7755921205661224f606690 Mon Sep 17 00:00:00 2001
 From: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 Date: Fri, 8 Oct 2021 13:07:46 +0200
-Subject: [PATCH 07/10] fpga: Streamline debug flow
+Subject: [PATCH 5/8] fpga: Streamline debug flow
 
 Signed-off-by: Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 ---

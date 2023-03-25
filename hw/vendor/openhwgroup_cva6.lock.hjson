@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/pulp-platform/cva6.git
-    rev: e0e05ab47f4e58d101aa8c95b9cf039a983a835a
+    rev: 6a6b8c656b8bb789d50b9c84cce1b99c74966884
   }
 }

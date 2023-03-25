@@ -1,7 +1,7 @@
-From fe6b30ff70f0016bc53bd1e37669138bb6aa1246 Mon Sep 17 00:00:00 2001
+From 5bfa35a3d7db936a0524511fcdf84b4da23bdaec Mon Sep 17 00:00:00 2001
 From: Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 Date: Mon, 23 Aug 2021 16:19:27 +0200
-Subject: [PATCH 03/10] occamy: Chip simulation fixes
+Subject: [PATCH 3/8] occamy: Chip simulation fixes
 
 ---
  common/local/util/instr_tracer.sv | 2 ++
