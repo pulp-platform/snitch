@@ -9,8 +9,9 @@
 # Makefile invocation #
 #######################
 
-DEBUG        ?= OFF # ON to turn on debugging symbols
-CFG_OVERRIDE ?=     # Override default config file
+DEBUG          ?= OFF  # ON to turn on debugging symbols
+CFG_OVERRIDE   ?=      # Override default config file
+SELECT_RUNTIME ?=      # Select snRuntime implementation: "banshee" or "rtl" (default)
 
 .DEFAULT_GOAL := help
 .PHONY: all clean
@@ -31,19 +32,19 @@ include $(ROOT)/util/Makefrag
 # Programs #
 ############
 
-REGGEN          ?= ${ROOT}/util/regtool.py
+REGGEN          ?= $(shell $(BENDER) path register_interface)/vendor/lowrisc_opentitan/util/regtool.py
 CLUSTER_GEN     ?= $(ROOT)/util/clustergen.py
 CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
 
 QUESTA_64BIT = -64
-VSIM      	 = vsim ${QUESTA_64BIT}
-VLOG      	 = vlog ${QUESTA_64BIT}
+VSIM      	?= vsim ${QUESTA_64BIT}
+VLOG      	?= vlog ${QUESTA_64BIT}
 
 #########################
 # Files and directories #
 #########################
 
-PLATFORM_HEADERS_DIR ?= sw/runtime/platform
+PLATFORM_HEADERS_DIR ?= sw/platform-headers
 GENERATED_DIR        ?= $(MKFILE_DIR)generated
 
 # Verilated and compiled snitch cluster

@@ -7,7 +7,7 @@
 //================================================================================
 
 volatile uint32_t _snrt_mutex;
-volatile uint32_t _snrt_barrier;
+volatile snrt_barrier_t _snrt_barrier;
 
 //================================================================================
 // Functions
@@ -22,3 +22,7 @@ extern void snrt_mutex_ttas_acquire(volatile uint32_t *pmtx);
 extern void snrt_mutex_release(volatile uint32_t *pmtx);
 
 extern void snrt_cluster_hw_barrier();
+
+extern void snrt_global_barrier();
+
+extern void snrt_partial_barrier(snrt_barrier_t *barr, uint32_t n);
