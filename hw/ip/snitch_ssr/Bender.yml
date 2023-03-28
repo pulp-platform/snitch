@@ -10,7 +10,8 @@ package:
 
 dependencies:
   common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
-  register_interface: {git: https://github.com/pulp-platform/register_interface.git, version: 0.3.8}
+  register_interface: {git: https://github.com/pulp-platform/register_interface.git,
+    version: 0.3.8}
   # Local dependencies.
   tcdm_interface: {path: ../../ip/tcdm_interface}
 
