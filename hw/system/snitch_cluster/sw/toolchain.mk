@@ -15,25 +15,32 @@ DEBUG ?= OFF # ON to turn on debugging symbols
 ###################
 
 # Compiler toolchain
-CC      = riscv32-unknown-elf-gcc
-AR      = riscv32-unknown-elf-ar
-OBJCOPY = riscv32-unknown-elf-objcopy
-OBJDUMP = riscv32-unknown-elf-objdump
-READELF = riscv32-unknown-elf-readelf
+CC        ?= clang
+LD        ?= lld
+AR        ?= llvm-ar
+OBJCOPY   ?= llvm-objcopy
+OBJDUMP   ?= llvm-objdump
+DWARFDUMP ?= llvm-dwarfdump
 
 # Compiler flags
 CFLAGS += $(addprefix -I,$(INCDIRS))
-CFLAGS += -march=rv32imafd
+CFLAGS += -mcpu=snitch
+CFLAGS += -menable-experimental-extensions
 CFLAGS += -mabi=ilp32d
 CFLAGS += -mcmodel=medany
-CFLAGS += -mno-fdiv
 CFLAGS += -ffast-math
 CFLAGS += -fno-builtin-printf
 CFLAGS += -fno-common
+CFLAGS += -fopenmp
 CFLAGS += -O3
 ifeq ($(DEBUG), ON)
 CFLAGS += -g
 endif
+
+# Linker flags
+LDFLAGS += -fuse-ld=$(LD)
+LDFLAGS += -nostartfiles
+LDFLAGS += -lm
 
 # Archiver flags
 ARFLAGS = rcs

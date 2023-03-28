@@ -7,7 +7,7 @@
 //================================================================================
 
 extern volatile uint32_t _snrt_mutex;
-extern volatile uint32_t _snrt_barrier;
+extern volatile snrt_barrier_t _snrt_barrier;
 
 //================================================================================
 // Mutex functions
@@ -71,26 +71,46 @@ inline void snrt_cluster_hw_barrier() {
                  : "memory");
 }
 
-inline void snrt_reset_barrier() { _snrt_barrier = 0; }
+/// Synchronize clusters globally with a global software barrier
+inline void snrt_global_barrier() {
+    // Synchronize all DM cores in software
+    if (snrt_is_dm_core()) {
+        // Remember previous iteration
+        uint32_t prev_barrier_iteration = _snrt_barrier.iteration;
+        uint32_t barrier =
+            __atomic_add_fetch(&(_snrt_barrier.cnt), 1, __ATOMIC_RELAXED);
 
-inline uint32_t snrt_sw_barrier_arrival() {
-    return __atomic_add_fetch(&_snrt_barrier, 1, __ATOMIC_RELAXED);
+        // Increment the barrier counter
+        if (barrier == snrt_cluster_num()) {
+            _snrt_barrier.cnt = 0;
+            __atomic_add_fetch(&(_snrt_barrier.iteration), 1, __ATOMIC_RELAXED);
+        } else {
+            while (prev_barrier_iteration == _snrt_barrier.iteration)
+                ;
+        }
+    }
+    // Synchronize cores in a cluster with the HW barrier
+    snrt_cluster_hw_barrier();
 }
 
-// TODO colluca
-// inline void snrt_sw_barrier_departure() {
-//     _snrt_barrier = 0;
-// }
+/**
+ * @brief Generic barrier
+ *
+ * @param barr pointer to a barrier
+ * @param n number of harts that have to enter before released
+ */
+inline void snrt_partial_barrier(snrt_barrier_t *barr, uint32_t n) {
+    // Remember previous iteration
+    uint32_t prev_it = barr->iteration;
+    uint32_t barrier = __atomic_add_fetch(&barr->cnt, 1, __ATOMIC_RELAXED);
 
-// TODO colluca
-// inline void snrt_sw_barrier() {
-//     // Arrival phase
-//     uint32_t cnt = snrt_sw_barrier_arrival();
-//     // Idle phase
-//     if (cnt != n) { snrt_wfi(); }
-//     // Departure phase
-//     else {
-//         barr->barrier = 0;
-//         __atomic_add_fetch(&barr->barrier_iteration, 1, __ATOMIC_RELAXED);
-//     }
-// }
+    // Increment the barrier counter
+    if (barrier == n) {
+        barr->cnt = 0;
+        __atomic_add_fetch(&barr->iteration, 1, __ATOMIC_RELAXED);
+    } else {
+        // Some threads have not reached the barrier --> Let's wait
+        while (prev_it == barr->iteration)
+            ;
+    }
+}

@@ -5,12 +5,11 @@
 # Luca Colagrande <colluca@iis.ee.ethz.ch>
 
 # Usage of absolute paths is required to externally include this Makefile
-MK_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-
-LENGTH ?= 24
-
+MK_DIR   := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 DATA_DIR := $(realpath $(MK_DIR)/data)
 SRC_DIR  := $(realpath $(MK_DIR)/src)
+
+LENGTH ?= 24
 
 APP     := axpy
 SRCS    := $(realpath $(SRC_DIR)/main.c)

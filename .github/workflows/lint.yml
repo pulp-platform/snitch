@@ -125,11 +125,7 @@ jobs:
           */vendor/*
           util/lowrisc_misc-linters/*
           sw/banshee/tests/runtime/printf.*
-          sw/snRuntime/include/interface.h
-          sw/snRuntime/include/snitch_cluster_peripheral.h
-          sw/snRuntime/include/occamy_quad_peripheral.h
-          sw/snRuntime/include/occamy_soc_peripheral.h
-          sw/snRuntime/include/occamy_hbm_xbar_peripheral.h
+          sw/snRuntime/src/omp/interface.h
           util/solder/*.sv.tpl
           hw/system/occamy/addrmap/addrmap.tex.tpl
           hw/system/*.do

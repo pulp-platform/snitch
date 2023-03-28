@@ -90,7 +90,7 @@ static inline void snrt_exit(int exit_code) {
     if (snrt_global_core_idx() == 0) tohost = (exit_code << 1) | 1;
 }
 
-int snrt_main() {
+void snrt_main() {
     int exit_code = 0;
 
 #ifdef SNRT_CRT0_CALLBACK0
@@ -160,6 +160,6 @@ int snrt_main() {
 #endif
 
 #ifdef SNRT_CRT0_CALLBACK8
-    snrt_crt0_callback8();
+    snrt_crt0_callback8(exit_code);
 #endif
 }

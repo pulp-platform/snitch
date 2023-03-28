@@ -10,6 +10,5 @@
 ./sw/banshee/tests/runtime/printf.*
 ./sw/banshee/tests/runtime/encoding.h
 ./sw/snRuntime/vendor/*
-./sw/snRuntime-legacy/*
 # Ignore any checked-out directories
 */.bender/*

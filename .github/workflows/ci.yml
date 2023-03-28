@@ -25,9 +25,10 @@ jobs:
     - name: Build docs
       run: mkdocs build
 
-  ###########
-  # Banshee #
-  ###########
+  ##########################
+  # Build and test Banshee #
+  ##########################
+  # TODO: remove once Banshee out of repository
   Banshee:
     runs-on: ubuntu-22.04
     strategy:
@@ -54,96 +55,23 @@ jobs:
     - working-directory: sw/banshee
       run: make test TERM=xterm-256color LOG_FAILED=`mktemp` LOG_TOTAL=`mktemp`
 
-  #################
-  # SW on Banshee #
-  #################
-  sw-banshee:
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        toolchain:
-        - gcc
-        - llvm
-        cmake_args:
-        - ''
-        - -DOMPSTATIC_NUMTHREADS=8
-    name: SW on Banshee
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
-        cache: pip
-    - name: Install python packages
-      run: pip install -r sw/applications/requirements.txt
-    - name: Install LLVM
-      run: sudo apt-get install llvm-12-dev
-    - working-directory: sw/banshee
-      run: cargo install --path .
-    - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@v1.8
-      with:
-        cmake-version: 3.19.x
-    - name: Install RISC-V GCC Toolchain
-      if: ${{ matrix.toolchain == 'gcc' }}
-      run: |
-        curl -Ls -o riscv-gcc.tar.gz https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-${RISCV_GCC_VERSION}-x86_64-linux-ubuntu14.tar.gz
-        sudo mkdir -p /tools/riscv && sudo chmod 777 /tools/riscv
-        tar -C /tools/riscv -xf riscv-gcc.tar.gz --strip-components=1
-        cd /tools/riscv/bin && for file in riscv64-*; do ln -s $file $(echo "$file" | sed 's/^riscv64/riscv32/g'); done
-        echo "PATH=$PATH:/tools/riscv/bin" >> $GITHUB_ENV
-      env:
-        RISCV_GCC_VERSION: 8.3.0-2020.04.0
-    - name: Install RISC-V LLVM Toolchain
-      if: ${{ matrix.toolchain == 'llvm' }}
-      run: |
-        curl -Ls -o riscv-llvm.tar.gz https://github.com/pulp-platform/llvm-project/releases/download/0.12.0/riscv32-pulp-llvm-ubuntu1804-0.12.0.tar.gz
-        sudo mkdir -p /tools/riscv-llvm && sudo chmod 777 /tools/riscv-llvm
-        tar -C /tools/riscv-llvm -xf riscv-llvm.tar.gz --strip-components=1
-        echo "PATH=$PATH:/tools/riscv-llvm/bin" >> $GITHUB_ENV
-    - name: Build runtime
-      working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
-    - name: Test snRuntime
-      working-directory: sw/snRuntime/build
-      run: ctest -L snRuntime
-    - name: Build snBLAS
-      working-directory: sw/snBLAS
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
-    - name: Test snBLAS
-      working-directory: sw/snBLAS/build
-      run: ctest -L snBLAS
-    - name: Build applications
-      working-directory: sw/applications
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
-    - name: Test applications
-      working-directory: sw/applications/build
-      run: ctest -L snApplications
+  ############################################
+  # Simulate SW on Snitch Cluster w/ Banshee #
+  ############################################
 
-  #############################
-  # SW on Banshee (Container) #
-  #############################
-  snRuntime:
+  sw-banshee:
     container:
       image: ghcr.io/pulp-platform/snitch
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         toolchain:
-        - gcc
+        # - gcc
         - llvm
-        cmake_args:
-        - ''
-        - -DOMPSTATIC_NUMTHREADS=8
-    name: SW on Banshee (Container)
+        # cmake_args:
+        # - ''
+        # - -DOMPSTATIC_NUMTHREADS=8
+    name: Simulate SW on Snitch Cluster w/ Banshee (Container)
     steps:
     - uses: actions/checkout@v1
       with:
@@ -158,50 +86,43 @@ jobs:
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         export PATH=$HOME/.cargo/bin:${PATH}
         cargo install --path sw/banshee
-    - name: Build runtime
-      working-directory: sw/snRuntime
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON .. && make
-    - name: Test snRuntime
-      working-directory: sw/snRuntime/build
-      run: ctest -L snRuntime
-    - name: Build snBLAS
-      working-directory: sw/snBLAS
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON .. && make
-    - name: Test snBLAS
-      working-directory: sw/snBLAS/build
-      run: ctest -L snBLAS
-    - name: Build applications
-      working-directory: sw/applications
-      run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-${{ matrix.toolchain
-        }} -DBUILD_TESTS=ON ${{ matrix.cmake_args }} .. && make
-    - name: Test applications
-      working-directory: sw/applications/build
-      run: ctest -L snApplications
+    - name: Build Software
+      env:
+        CC: clang
+        LD: lld
+        AR: llvm-ar
+        OBJCOPY: llvm-objcopy
+        OBJDUMP: llvm-objdump
+        DWARFDUMP: llvm-dwarfdump
+      run: make -C hw/system/snitch_cluster SELECT_RUNTIME=banshee sw
+    - name: Run Unit Tests
+      run: cd hw/system/snitch_cluster/ && ./run-tests sw/tests/banshee-apps.list
+        --simulator banshee
 
-  ########################
-  # SW on Snitch Cluster #
-  ########################
+  ##############################################
+  # Simulate SW on Snitch Cluster w/ Verilator #
+  ##############################################
 
   sw-snitch-cluster:
     container:
       image: ghcr.io/pulp-platform/snitch
-    name: SW on Snitch Cluster
+    name: Simulate SW on Snitch Cluster w/ Verilator
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        toolchain:
-        - gcc
-        # - llvm
     steps:
     - uses: actions/checkout@v2
     - name: Build Software
+      env:
+        CC: clang
+        LD: lld
+        AR: llvm-ar
+        OBJCOPY: llvm-objcopy
+        OBJDUMP: llvm-objdump
+        DWARFDUMP: llvm-dwarfdump
       run: |
         make -C hw/system/snitch_cluster sw
     - name: Build Hardware
       run: |
-        cd hw/system/snitch_cluster/ && make bin/snitch_cluster.vlt
-    - name: Run Tests
+        cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
+    - name: Run Unit Tests
       run: |
-        echo "TODO run tests on verilator"
+        cd hw/system/snitch_cluster/ && ./run-tests sw/tests/passing-apps.list --simulator verilator

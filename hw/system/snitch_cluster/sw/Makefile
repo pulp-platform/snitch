@@ -4,13 +4,19 @@
 #
 # Luca Colagrande <colluca@iis.ee.ethz.ch>
 
-# Add user applications to APPS variable
-APPS  = apps/nop
-APPS += apps/blas/axpy
+APPS := $(shell cat apps.list)
 
 TARGET ?= all
+SELECT_RUNTIME ?= rtl
 
-SUBDIRS  = runtime
+ifeq ($(SELECT_RUNTIME), banshee)
+RUNTIME = banshee-runtime
+else
+RUNTIME = rtl-runtime
+endif
+
+SUBDIRS  = banshee-runtime
+SUBDIRS += rtl-runtime
 SUBDIRS += $(APPS)
 
 .PHONY: all $(SUBDIRS)
@@ -18,7 +24,7 @@ SUBDIRS += $(APPS)
 all: $(SUBDIRS)
 
 # Explicit dependency of apps on runtime
-$(APPS): runtime
+$(APPS): $(RUNTIME)
 
 $(SUBDIRS):
 	$(MAKE) -C $@ $(TARGET)

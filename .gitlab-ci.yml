@@ -2,6 +2,8 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
+# TODO colluca: make before_script its own stage with artifacts
+
 variables:
   GIT_STRATEGY: clone
   VIVADO: vitis-2020.2 vivado
@@ -15,6 +17,8 @@ variables:
   UBOOT_ITB: ${CVA6_SDK}/u-boot/u-boot.itb
   LINUX_UIMAGE: ${CVA6_SDK}/uImage
   PATH: $CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
+  VSIM: vsim
+  VLOG: vlog
 
 before_script:
 - >
@@ -35,6 +39,7 @@ before_script:
   ${VERIBLE_FMT} --version
 
 stages:
+- build-sw
 - verify-snitch-ips
 - linux_prepare
 - build_fpga
@@ -168,3 +173,26 @@ ip-tests-vsim:
   - for file in $FILES; do echo "# Run $file"; eval "$file"  > vsim-$IP.log; done
   - grep -n "Errors" vsim-$IP.log
   - grep -n "Errors[:] 0" vsim-$IP.log
+
+########################
+# Snitch cluster tests #
+########################
+
+# Build Snitch cluster software
+snitch-cluster-sw:
+  stage: build-sw
+  script:
+  - cd hw/system/snitch_cluster
+  - make sw
+  artifacts:
+    paths:
+    - hw/system/snitch_cluster/sw/tests/build/*.elf
+
+# Run software tests on the Snitch cluster using Questasim
+snitch-cluster-vsim:
+  stage: verify-snitch-ips
+  needs: [snitch-cluster-sw]
+  script:
+  - cd hw/system/snitch_cluster
+  - questa-2022.3 make bin/snitch_cluster.vsim
+  - questa-2022.3 ./run-tests sw/tests/passing-apps.list --simulator vsim

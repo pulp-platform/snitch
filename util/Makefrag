@@ -5,6 +5,7 @@ VLT			   ?= verilator
 VERIBLE_FMT    ?= verible-verilog-format
 BIN2JTAG       ?= $(ROOT)/util/bin2jtag.py
 ANNOTATE	   ?= ${ROOT}/util/trace/annotate.py
+CLANG_FORMAT   ?= clang-format
 
 VERILATOR_ROOT ?= $(dir $(shell which $(VLT)))/../share/verilator
 VLT_ROOT	   ?= ${VERILATOR_ROOT}
