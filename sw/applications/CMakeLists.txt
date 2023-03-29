@@ -59,6 +59,6 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_snitch_raw_test_args(conv2d conv2d --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
     add_snitch_raw_test_args(gemm gemm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
     add_snitch_raw_test_args(fusedconv fusedconv --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(nnlinear_baseline nnlinear_baseline --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml)
+    add_snitch_raw_test_args(nnlinear_baseline nnlinear_baseline --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
     
 endif()
