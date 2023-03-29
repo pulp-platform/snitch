@@ -1,0 +1,11 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Parameters for a NN with a linear and a softmax layer
+// Currently not really used, but could be used to configure the NN
+
+{
+    kernel: "MNIST"
+    prec: 32
+}

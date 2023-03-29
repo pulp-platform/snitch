@@ -1,0 +1,58 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+#this configuration file is supposed to simplify multi - cluster multi - core
+#initialization
+
+---
+address:
+#Snitch : cl_peripherals + 0x40
+  barrier_reg: 0x10020190
+  cluster_base_hartid: 0x40000040
+  cluster_id: 0x40000050
+  cluster_num: 0x40000048
+  nr_cores: 0x40000010
+#Snitch / Occamy : SOC_CTRL + 0x14
+#in Banshee also used as exit code location
+  scratch_reg: 0x02000014
+  tcdm_end: 0x40000008
+  tcdm_start: 0x40000000
+  uart: 0xF00B8000
+  wakeup_reg: 0x40000028
+#Snitch : Bootdata.clint_base
+  clint: 0xFFFF0000
+#Snitch : cl_peripherals + 0x30
+  cl_clint: 0x120180
+architecture:
+  num_cores: 9
+  num_clusters: 1
+  base_hartid: 0
+bootrom:
+  callbacks:
+    - name: bootrom-multicluster
+      size: 0x34
+  start: 0x01000000
+  size: 0x20000 # end address of bootrom cluster 0x01020000
+  offset: 0x0
+  latency: 5
+memory:
+  dram:
+    start: 0x80000000
+    size: 0x70000000 # dram end address: 0xF0000000
+    offset: 0x0 # dram is global for all clusters
+    latency: 4
+  tcdm:
+    start: 0x10000000 # cluster "num_clusters" start address
+    size: 0x20000   # size of the TCDM
+    offset: 0x40000 # offset to next cluster is start + size + offset
+    latency: 5
+#Periphs
+  periphs:
+    start: 0x130000 # cluster "num_clusters" start address
+    size: 0x10000   # size of the peripheral memory space
+    offset: 0x40000 # offset to start address of next cluster
+    latency: 2
+    callbacks:
+    - name: zero-memory
+      size: 64000
