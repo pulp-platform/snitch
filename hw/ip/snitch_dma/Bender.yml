@@ -7,8 +7,8 @@ package:
   - Thomas Benz <tbenz@iis.ee.ethz.ch>
 
 dependencies:
-  common_cells: {path: ../../vendor/pulp_platform_common_cells}
-  axi: {path: ../../vendor/pulp_platform_axi}
+  axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
+  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
   snitch: {path: ../../ip/snitch}
 
 sources:

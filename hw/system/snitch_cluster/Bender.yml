@@ -10,7 +10,7 @@ package:
 
 dependencies:
   snitch_cluster: {path: ../../ip/snitch_cluster}
-  axi: {path: ../../vendor/pulp_platform_axi}
+  axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
   test: {path: ../../ip/test}
 
 sources:

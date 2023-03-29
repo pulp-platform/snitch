@@ -1,0 +1,36 @@
+From 3c48f73545e08e5653a5e6b43b839258ef818248 Mon Sep 17 00:00:00 2001
+From: Luca Colagrande <luca.colagrande3@gmail.com>
+Date: Sun, 26 Mar 2023 23:52:53 +0200
+Subject: [PATCH] cva6: Update git dependencies
+
+---
+ Bender.yml | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
+
+diff --git a/Bender.yml b/Bender.yml
+index 84b4ab8..a12628b 100644
+--- a/Bender.yml
++++ b/Bender.yml
+@@ -6,15 +6,10 @@ package:
+     - "Andreas Kuster <kustera@ethz.ch>"
+ 
+ dependencies:
+-  axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.31.0 }
+-  common_cells:
+-    { git: "https://github.com/pulp-platform/common_cells", version: 1.23.0 }
+-  fpnew: { git: "https://github.com/openhwgroup/cvfpu.git", version: 0.7.0 }
+-  tech_cells_generic:
+-    {
+-      git: "https://github.com/pulp-platform/tech_cells_generic.git",
+-      rev: b2a68114302af1d8191ddf34ea0e07b471911866,
+-    }
++  axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
++  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
++  fpnew: {git: https://github.com/openhwgroup/cvfpu.git, rev: feature/expanding_dotp}
++  tech_cells_generic: {git: https://github.com/pulp-platform/tech_cells_generic.git, rev: v0.2.11}
+ 
+ frozen: true
+ 
+-- 
+2.28.0
+

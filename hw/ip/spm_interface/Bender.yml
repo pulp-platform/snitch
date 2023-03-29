@@ -7,7 +7,7 @@ package:
   - Tim Fischer <fischeti@iis.ee.ethz.ch>
 
 dependencies:
-  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
 
 export_include_dirs:
 - include

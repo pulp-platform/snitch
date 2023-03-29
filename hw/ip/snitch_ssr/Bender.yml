@@ -9,8 +9,9 @@ package:
   - Paul Scheffler <paulsc@iis.ee.ethz.ch>
 
 dependencies:
-  common_cells: {path: ../../vendor/pulp_platform_common_cells}
-  register_interface: {path: ../../vendor/pulp_platform_register_interface}
+  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
+  register_interface: {git: https://github.com/pulp-platform/register_interface.git,
+    version: 0.3.8}
   # Local dependencies.
   tcdm_interface: {path: ../../ip/tcdm_interface}
 

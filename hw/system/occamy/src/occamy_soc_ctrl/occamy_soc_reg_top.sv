@@ -12,40 +12,40 @@ module occamy_soc_reg_top #(
     parameter type reg_rsp_t = logic,
     parameter int AW = 8
 ) (
-  input clk_i,
-  input rst_ni,
-  input  reg_req_t reg_req_i,
-  output reg_rsp_t reg_rsp_o,
-  // To HW
-  output occamy_soc_reg_pkg::occamy_soc_reg2hw_t reg2hw, // Write
-  input  occamy_soc_reg_pkg::occamy_soc_hw2reg_t hw2reg, // Read
+    input logic clk_i,
+    input logic rst_ni,
+    input reg_req_t reg_req_i,
+    output reg_rsp_t reg_rsp_o,
+    // To HW
+    output occamy_soc_reg_pkg::occamy_soc_reg2hw_t reg2hw,  // Write
+    input occamy_soc_reg_pkg::occamy_soc_hw2reg_t hw2reg,  // Read
 
 
-  // Config
-  input devmode_i // If 1, explicit error return for unmapped register access
+    // Config
+    input devmode_i  // If 1, explicit error return for unmapped register access
 );
 
-  import occamy_soc_reg_pkg::* ;
+  import occamy_soc_reg_pkg::*;
 
   localparam int DW = 32;
-  localparam int DBW = DW/8;                    // Byte Width
+  localparam int DBW = DW / 8;  // Byte Width
 
   // register signals
-  logic           reg_we;
-  logic           reg_re;
-  logic [AW-1:0]  reg_addr;
-  logic [DW-1:0]  reg_wdata;
-  logic [DBW-1:0] reg_be;
-  logic [DW-1:0]  reg_rdata;
-  logic           reg_error;
+  logic               reg_we;
+  logic               reg_re;
+  logic [BlockAw-1:0] reg_addr;
+  logic [     DW-1:0] reg_wdata;
+  logic [    DBW-1:0] reg_be;
+  logic [     DW-1:0] reg_rdata;
+  logic               reg_error;
 
-  logic          addrmiss, wr_err;
+  logic addrmiss, wr_err;
 
   logic [DW-1:0] reg_rdata_next;
 
   // Below register interface can be changed
-  reg_req_t  reg_intf_req;
-  reg_rsp_t  reg_intf_rsp;
+  reg_req_t reg_intf_req;
+  reg_rsp_t reg_intf_rsp;
 
 
   assign reg_intf_req = reg_req_i;
@@ -54,14 +54,14 @@ module occamy_soc_reg_top #(
 
   assign reg_we = reg_intf_req.valid & reg_intf_req.write;
   assign reg_re = reg_intf_req.valid & ~reg_intf_req.write;
-  assign reg_addr = reg_intf_req.addr;
+  assign reg_addr = reg_intf_req.addr[BlockAw-1:0];
   assign reg_wdata = reg_intf_req.wdata;
   assign reg_be = reg_intf_req.wstrb;
   assign reg_intf_rsp.rdata = reg_rdata;
   assign reg_intf_rsp.error = reg_error;
   assign reg_intf_rsp.ready = 1'b1;
 
-  assign reg_rdata = reg_rdata_next ;
+  assign reg_rdata = reg_rdata_next;
   assign reg_error = (devmode_i & addrmiss) | wr_err;
 
 
@@ -404,105 +404,105 @@ module occamy_soc_reg_top #(
 
   //   F[ecc_narrow_uncorrectable]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("W1C"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("W1C"),
+      .RESVAL  (1'h0)
   ) u_intr_state_ecc_narrow_uncorrectable (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (intr_state_ecc_narrow_uncorrectable_we),
-    .wd     (intr_state_ecc_narrow_uncorrectable_wd),
+      // from register interface
+      .we(intr_state_ecc_narrow_uncorrectable_we),
+      .wd(intr_state_ecc_narrow_uncorrectable_wd),
 
-    // from internal hardware
-    .de     (hw2reg.intr_state.ecc_narrow_uncorrectable.de),
-    .d      (hw2reg.intr_state.ecc_narrow_uncorrectable.d ),
+      // from internal hardware
+      .de(hw2reg.intr_state.ecc_narrow_uncorrectable.de),
+      .d (hw2reg.intr_state.ecc_narrow_uncorrectable.d),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.intr_state.ecc_narrow_uncorrectable.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.intr_state.ecc_narrow_uncorrectable.q),
 
-    // to register interface (read)
-    .qs     (intr_state_ecc_narrow_uncorrectable_qs)
+      // to register interface (read)
+      .qs(intr_state_ecc_narrow_uncorrectable_qs)
   );
 
 
   //   F[ecc_narrow_correctable]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("W1C"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("W1C"),
+      .RESVAL  (1'h0)
   ) u_intr_state_ecc_narrow_correctable (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (intr_state_ecc_narrow_correctable_we),
-    .wd     (intr_state_ecc_narrow_correctable_wd),
+      // from register interface
+      .we(intr_state_ecc_narrow_correctable_we),
+      .wd(intr_state_ecc_narrow_correctable_wd),
 
-    // from internal hardware
-    .de     (hw2reg.intr_state.ecc_narrow_correctable.de),
-    .d      (hw2reg.intr_state.ecc_narrow_correctable.d ),
+      // from internal hardware
+      .de(hw2reg.intr_state.ecc_narrow_correctable.de),
+      .d (hw2reg.intr_state.ecc_narrow_correctable.d),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.intr_state.ecc_narrow_correctable.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.intr_state.ecc_narrow_correctable.q),
 
-    // to register interface (read)
-    .qs     (intr_state_ecc_narrow_correctable_qs)
+      // to register interface (read)
+      .qs(intr_state_ecc_narrow_correctable_qs)
   );
 
 
   //   F[ecc_wide_uncorrectable]: 2:2
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("W1C"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("W1C"),
+      .RESVAL  (1'h0)
   ) u_intr_state_ecc_wide_uncorrectable (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (intr_state_ecc_wide_uncorrectable_we),
-    .wd     (intr_state_ecc_wide_uncorrectable_wd),
+      // from register interface
+      .we(intr_state_ecc_wide_uncorrectable_we),
+      .wd(intr_state_ecc_wide_uncorrectable_wd),
 
-    // from internal hardware
-    .de     (hw2reg.intr_state.ecc_wide_uncorrectable.de),
-    .d      (hw2reg.intr_state.ecc_wide_uncorrectable.d ),
+      // from internal hardware
+      .de(hw2reg.intr_state.ecc_wide_uncorrectable.de),
+      .d (hw2reg.intr_state.ecc_wide_uncorrectable.d),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.intr_state.ecc_wide_uncorrectable.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.intr_state.ecc_wide_uncorrectable.q),
 
-    // to register interface (read)
-    .qs     (intr_state_ecc_wide_uncorrectable_qs)
+      // to register interface (read)
+      .qs(intr_state_ecc_wide_uncorrectable_qs)
   );
 
 
   //   F[ecc_wide_correctable]: 3:3
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("W1C"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("W1C"),
+      .RESVAL  (1'h0)
   ) u_intr_state_ecc_wide_correctable (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (intr_state_ecc_wide_correctable_we),
-    .wd     (intr_state_ecc_wide_correctable_wd),
+      // from register interface
+      .we(intr_state_ecc_wide_correctable_we),
+      .wd(intr_state_ecc_wide_correctable_wd),
 
-    // from internal hardware
-    .de     (hw2reg.intr_state.ecc_wide_correctable.de),
-    .d      (hw2reg.intr_state.ecc_wide_correctable.d ),
+      // from internal hardware
+      .de(hw2reg.intr_state.ecc_wide_correctable.de),
+      .d (hw2reg.intr_state.ecc_wide_correctable.d),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.intr_state.ecc_wide_correctable.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.intr_state.ecc_wide_correctable.q),
 
-    // to register interface (read)
-    .qs     (intr_state_ecc_wide_correctable_qs)
+      // to register interface (read)
+      .qs(intr_state_ecc_wide_correctable_qs)
   );
 
 
@@ -510,105 +510,105 @@ module occamy_soc_reg_top #(
 
   //   F[ecc_narrow_uncorrectable]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_intr_enable_ecc_narrow_uncorrectable (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (intr_enable_ecc_narrow_uncorrectable_we),
-    .wd     (intr_enable_ecc_narrow_uncorrectable_wd),
+      // from register interface
+      .we(intr_enable_ecc_narrow_uncorrectable_we),
+      .wd(intr_enable_ecc_narrow_uncorrectable_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.intr_enable.ecc_narrow_uncorrectable.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.intr_enable.ecc_narrow_uncorrectable.q),
 
-    // to register interface (read)
-    .qs     (intr_enable_ecc_narrow_uncorrectable_qs)
+      // to register interface (read)
+      .qs(intr_enable_ecc_narrow_uncorrectable_qs)
   );
 
 
   //   F[ecc_narrow_correctable]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_intr_enable_ecc_narrow_correctable (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (intr_enable_ecc_narrow_correctable_we),
-    .wd     (intr_enable_ecc_narrow_correctable_wd),
+      // from register interface
+      .we(intr_enable_ecc_narrow_correctable_we),
+      .wd(intr_enable_ecc_narrow_correctable_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.intr_enable.ecc_narrow_correctable.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.intr_enable.ecc_narrow_correctable.q),
 
-    // to register interface (read)
-    .qs     (intr_enable_ecc_narrow_correctable_qs)
+      // to register interface (read)
+      .qs(intr_enable_ecc_narrow_correctable_qs)
   );
 
 
   //   F[ecc_wide_uncorrectable]: 2:2
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_intr_enable_ecc_wide_uncorrectable (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (intr_enable_ecc_wide_uncorrectable_we),
-    .wd     (intr_enable_ecc_wide_uncorrectable_wd),
+      // from register interface
+      .we(intr_enable_ecc_wide_uncorrectable_we),
+      .wd(intr_enable_ecc_wide_uncorrectable_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.intr_enable.ecc_wide_uncorrectable.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.intr_enable.ecc_wide_uncorrectable.q),
 
-    // to register interface (read)
-    .qs     (intr_enable_ecc_wide_uncorrectable_qs)
+      // to register interface (read)
+      .qs(intr_enable_ecc_wide_uncorrectable_qs)
   );
 
 
   //   F[ecc_wide_correctable]: 3:3
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_intr_enable_ecc_wide_correctable (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (intr_enable_ecc_wide_correctable_we),
-    .wd     (intr_enable_ecc_wide_correctable_wd),
+      // from register interface
+      .we(intr_enable_ecc_wide_correctable_we),
+      .wd(intr_enable_ecc_wide_correctable_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.intr_enable.ecc_wide_correctable.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.intr_enable.ecc_wide_correctable.q),
 
-    // to register interface (read)
-    .qs     (intr_enable_ecc_wide_correctable_qs)
+      // to register interface (read)
+      .qs(intr_enable_ecc_wide_correctable_qs)
   );
 
 
@@ -616,61 +616,61 @@ module occamy_soc_reg_top #(
 
   //   F[ecc_narrow_uncorrectable]: 0:0
   prim_subreg_ext #(
-    .DW    (1)
+      .DW(1)
   ) u_intr_test_ecc_narrow_uncorrectable (
-    .re     (1'b0),
-    .we     (intr_test_ecc_narrow_uncorrectable_we),
-    .wd     (intr_test_ecc_narrow_uncorrectable_wd),
-    .d      ('0),
-    .qre    (),
-    .qe     (reg2hw.intr_test.ecc_narrow_uncorrectable.qe),
-    .q      (reg2hw.intr_test.ecc_narrow_uncorrectable.q ),
-    .qs     ()
+      .re (1'b0),
+      .we (intr_test_ecc_narrow_uncorrectable_we),
+      .wd (intr_test_ecc_narrow_uncorrectable_wd),
+      .d  ('0),
+      .qre(),
+      .qe (reg2hw.intr_test.ecc_narrow_uncorrectable.qe),
+      .q  (reg2hw.intr_test.ecc_narrow_uncorrectable.q),
+      .qs ()
   );
 
 
   //   F[ecc_narrow_correctable]: 1:1
   prim_subreg_ext #(
-    .DW    (1)
+      .DW(1)
   ) u_intr_test_ecc_narrow_correctable (
-    .re     (1'b0),
-    .we     (intr_test_ecc_narrow_correctable_we),
-    .wd     (intr_test_ecc_narrow_correctable_wd),
-    .d      ('0),
-    .qre    (),
-    .qe     (reg2hw.intr_test.ecc_narrow_correctable.qe),
-    .q      (reg2hw.intr_test.ecc_narrow_correctable.q ),
-    .qs     ()
+      .re (1'b0),
+      .we (intr_test_ecc_narrow_correctable_we),
+      .wd (intr_test_ecc_narrow_correctable_wd),
+      .d  ('0),
+      .qre(),
+      .qe (reg2hw.intr_test.ecc_narrow_correctable.qe),
+      .q  (reg2hw.intr_test.ecc_narrow_correctable.q),
+      .qs ()
   );
 
 
   //   F[ecc_wide_uncorrectable]: 2:2
   prim_subreg_ext #(
-    .DW    (1)
+      .DW(1)
   ) u_intr_test_ecc_wide_uncorrectable (
-    .re     (1'b0),
-    .we     (intr_test_ecc_wide_uncorrectable_we),
-    .wd     (intr_test_ecc_wide_uncorrectable_wd),
-    .d      ('0),
-    .qre    (),
-    .qe     (reg2hw.intr_test.ecc_wide_uncorrectable.qe),
-    .q      (reg2hw.intr_test.ecc_wide_uncorrectable.q ),
-    .qs     ()
+      .re (1'b0),
+      .we (intr_test_ecc_wide_uncorrectable_we),
+      .wd (intr_test_ecc_wide_uncorrectable_wd),
+      .d  ('0),
+      .qre(),
+      .qe (reg2hw.intr_test.ecc_wide_uncorrectable.qe),
+      .q  (reg2hw.intr_test.ecc_wide_uncorrectable.q),
+      .qs ()
   );
 
 
   //   F[ecc_wide_correctable]: 3:3
   prim_subreg_ext #(
-    .DW    (1)
+      .DW(1)
   ) u_intr_test_ecc_wide_correctable (
-    .re     (1'b0),
-    .we     (intr_test_ecc_wide_correctable_we),
-    .wd     (intr_test_ecc_wide_correctable_wd),
-    .d      ('0),
-    .qre    (),
-    .qe     (reg2hw.intr_test.ecc_wide_correctable.qe),
-    .q      (reg2hw.intr_test.ecc_wide_correctable.q ),
-    .qs     ()
+      .re (1'b0),
+      .we (intr_test_ecc_wide_correctable_we),
+      .wd (intr_test_ecc_wide_correctable_wd),
+      .d  ('0),
+      .qre(),
+      .qe (reg2hw.intr_test.ecc_wide_correctable.qe),
+      .q  (reg2hw.intr_test.ecc_wide_correctable.q),
+      .qs ()
   );
 
 
@@ -683,16 +683,16 @@ module occamy_soc_reg_top #(
   // R[chip_id]: V(True)
 
   prim_subreg_ext #(
-    .DW    (2)
+      .DW(2)
   ) u_chip_id (
-    .re     (chip_id_re),
-    .we     (1'b0),
-    .wd     ('0),
-    .d      (hw2reg.chip_id.d),
-    .qre    (),
-    .qe     (),
-    .q      (),
-    .qs     (chip_id_qs)
+      .re (chip_id_re),
+      .we (1'b0),
+      .wd ('0),
+      .d  (hw2reg.chip_id.d),
+      .qre(),
+      .qe (),
+      .q  (),
+      .qs (chip_id_qs)
   );
 
 
@@ -701,140 +701,140 @@ module occamy_soc_reg_top #(
   // R[scratch_0]: V(False)
 
   prim_subreg #(
-    .DW      (32),
-    .SWACCESS("RW"),
-    .RESVAL  (32'h0)
+      .DW      (32),
+      .SWACCESS("RW"),
+      .RESVAL  (32'h0)
   ) u_scratch_0 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (scratch_0_we),
-    .wd     (scratch_0_wd),
+      // from register interface
+      .we(scratch_0_we),
+      .wd(scratch_0_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (),
+      // to internal hardware
+      .qe(),
+      .q (),
 
-    // to register interface (read)
-    .qs     (scratch_0_qs)
+      // to register interface (read)
+      .qs(scratch_0_qs)
   );
 
   // Subregister 1 of Multireg scratch
   // R[scratch_1]: V(False)
 
   prim_subreg #(
-    .DW      (32),
-    .SWACCESS("RW"),
-    .RESVAL  (32'h0)
+      .DW      (32),
+      .SWACCESS("RW"),
+      .RESVAL  (32'h0)
   ) u_scratch_1 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (scratch_1_we),
-    .wd     (scratch_1_wd),
+      // from register interface
+      .we(scratch_1_we),
+      .wd(scratch_1_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (),
+      // to internal hardware
+      .qe(),
+      .q (),
 
-    // to register interface (read)
-    .qs     (scratch_1_qs)
+      // to register interface (read)
+      .qs(scratch_1_qs)
   );
 
   // Subregister 2 of Multireg scratch
   // R[scratch_2]: V(False)
 
   prim_subreg #(
-    .DW      (32),
-    .SWACCESS("RW"),
-    .RESVAL  (32'h0)
+      .DW      (32),
+      .SWACCESS("RW"),
+      .RESVAL  (32'h0)
   ) u_scratch_2 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (scratch_2_we),
-    .wd     (scratch_2_wd),
+      // from register interface
+      .we(scratch_2_we),
+      .wd(scratch_2_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (),
+      // to internal hardware
+      .qe(),
+      .q (),
 
-    // to register interface (read)
-    .qs     (scratch_2_qs)
+      // to register interface (read)
+      .qs(scratch_2_qs)
   );
 
   // Subregister 3 of Multireg scratch
   // R[scratch_3]: V(False)
 
   prim_subreg #(
-    .DW      (32),
-    .SWACCESS("RW"),
-    .RESVAL  (32'h0)
+      .DW      (32),
+      .SWACCESS("RW"),
+      .RESVAL  (32'h0)
   ) u_scratch_3 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (scratch_3_we),
-    .wd     (scratch_3_wd),
+      // from register interface
+      .we(scratch_3_we),
+      .wd(scratch_3_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (),
+      // to internal hardware
+      .qe(),
+      .q (),
 
-    // to register interface (read)
-    .qs     (scratch_3_qs)
+      // to register interface (read)
+      .qs(scratch_3_qs)
   );
 
 
   // R[boot_mode]: V(True)
 
   prim_subreg_ext #(
-    .DW    (2)
+      .DW(2)
   ) u_boot_mode (
-    .re     (boot_mode_re),
-    .we     (1'b0),
-    .wd     ('0),
-    .d      (hw2reg.boot_mode.d),
-    .qre    (),
-    .qe     (),
-    .q      (),
-    .qs     (boot_mode_qs)
+      .re (boot_mode_re),
+      .we (1'b0),
+      .wd ('0),
+      .d  (hw2reg.boot_mode.d),
+      .qre(),
+      .qe (),
+      .q  (),
+      .qs (boot_mode_qs)
   );
 
 
   // R[num_quadrants]: V(True)
 
   prim_subreg_ext #(
-    .DW    (32)
+      .DW(32)
   ) u_num_quadrants (
-    .re     (num_quadrants_re),
-    .we     (1'b0),
-    .wd     ('0),
-    .d      ('0),
-    .qre    (),
-    .qe     (),
-    .q      (),
-    .qs     (num_quadrants_qs)
+      .re (num_quadrants_re),
+      .we (1'b0),
+      .wd ('0),
+      .d  ('0),
+      .qre(),
+      .qe (),
+      .q  (),
+      .qs (num_quadrants_qs)
   );
 
 
@@ -844,79 +844,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_0]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_0_slw_0 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_0_slw_0_we),
-    .wd     (pad_0_slw_0_wd),
+      // from register interface
+      .we(pad_0_slw_0_we),
+      .wd(pad_0_slw_0_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[0].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[0].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_0_slw_0_qs)
+      // to register interface (read)
+      .qs(pad_0_slw_0_qs)
   );
 
 
   // F[smt_0]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_0_smt_0 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_0_smt_0_we),
-    .wd     (pad_0_smt_0_wd),
+      // from register interface
+      .we(pad_0_smt_0_we),
+      .wd(pad_0_smt_0_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[0].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[0].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_0_smt_0_qs)
+      // to register interface (read)
+      .qs(pad_0_smt_0_qs)
   );
 
 
   // F[drv_0]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_0_drv_0 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_0_drv_0_we),
-    .wd     (pad_0_drv_0_wd),
+      // from register interface
+      .we(pad_0_drv_0_we),
+      .wd(pad_0_drv_0_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[0].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[0].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_0_drv_0_qs)
+      // to register interface (read)
+      .qs(pad_0_drv_0_qs)
   );
 
 
@@ -925,79 +925,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_1]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_1_slw_1 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_1_slw_1_we),
-    .wd     (pad_1_slw_1_wd),
+      // from register interface
+      .we(pad_1_slw_1_we),
+      .wd(pad_1_slw_1_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[1].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[1].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_1_slw_1_qs)
+      // to register interface (read)
+      .qs(pad_1_slw_1_qs)
   );
 
 
   // F[smt_1]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_1_smt_1 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_1_smt_1_we),
-    .wd     (pad_1_smt_1_wd),
+      // from register interface
+      .we(pad_1_smt_1_we),
+      .wd(pad_1_smt_1_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[1].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[1].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_1_smt_1_qs)
+      // to register interface (read)
+      .qs(pad_1_smt_1_qs)
   );
 
 
   // F[drv_1]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_1_drv_1 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_1_drv_1_we),
-    .wd     (pad_1_drv_1_wd),
+      // from register interface
+      .we(pad_1_drv_1_we),
+      .wd(pad_1_drv_1_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[1].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[1].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_1_drv_1_qs)
+      // to register interface (read)
+      .qs(pad_1_drv_1_qs)
   );
 
 
@@ -1006,79 +1006,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_2]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_2_slw_2 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_2_slw_2_we),
-    .wd     (pad_2_slw_2_wd),
+      // from register interface
+      .we(pad_2_slw_2_we),
+      .wd(pad_2_slw_2_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[2].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[2].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_2_slw_2_qs)
+      // to register interface (read)
+      .qs(pad_2_slw_2_qs)
   );
 
 
   // F[smt_2]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_2_smt_2 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_2_smt_2_we),
-    .wd     (pad_2_smt_2_wd),
+      // from register interface
+      .we(pad_2_smt_2_we),
+      .wd(pad_2_smt_2_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[2].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[2].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_2_smt_2_qs)
+      // to register interface (read)
+      .qs(pad_2_smt_2_qs)
   );
 
 
   // F[drv_2]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_2_drv_2 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_2_drv_2_we),
-    .wd     (pad_2_drv_2_wd),
+      // from register interface
+      .we(pad_2_drv_2_we),
+      .wd(pad_2_drv_2_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[2].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[2].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_2_drv_2_qs)
+      // to register interface (read)
+      .qs(pad_2_drv_2_qs)
   );
 
 
@@ -1087,79 +1087,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_3]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_3_slw_3 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_3_slw_3_we),
-    .wd     (pad_3_slw_3_wd),
+      // from register interface
+      .we(pad_3_slw_3_we),
+      .wd(pad_3_slw_3_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[3].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[3].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_3_slw_3_qs)
+      // to register interface (read)
+      .qs(pad_3_slw_3_qs)
   );
 
 
   // F[smt_3]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_3_smt_3 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_3_smt_3_we),
-    .wd     (pad_3_smt_3_wd),
+      // from register interface
+      .we(pad_3_smt_3_we),
+      .wd(pad_3_smt_3_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[3].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[3].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_3_smt_3_qs)
+      // to register interface (read)
+      .qs(pad_3_smt_3_qs)
   );
 
 
   // F[drv_3]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_3_drv_3 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_3_drv_3_we),
-    .wd     (pad_3_drv_3_wd),
+      // from register interface
+      .we(pad_3_drv_3_we),
+      .wd(pad_3_drv_3_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[3].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[3].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_3_drv_3_qs)
+      // to register interface (read)
+      .qs(pad_3_drv_3_qs)
   );
 
 
@@ -1168,79 +1168,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_4]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_4_slw_4 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_4_slw_4_we),
-    .wd     (pad_4_slw_4_wd),
+      // from register interface
+      .we(pad_4_slw_4_we),
+      .wd(pad_4_slw_4_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[4].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[4].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_4_slw_4_qs)
+      // to register interface (read)
+      .qs(pad_4_slw_4_qs)
   );
 
 
   // F[smt_4]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_4_smt_4 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_4_smt_4_we),
-    .wd     (pad_4_smt_4_wd),
+      // from register interface
+      .we(pad_4_smt_4_we),
+      .wd(pad_4_smt_4_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[4].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[4].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_4_smt_4_qs)
+      // to register interface (read)
+      .qs(pad_4_smt_4_qs)
   );
 
 
   // F[drv_4]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_4_drv_4 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_4_drv_4_we),
-    .wd     (pad_4_drv_4_wd),
+      // from register interface
+      .we(pad_4_drv_4_we),
+      .wd(pad_4_drv_4_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[4].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[4].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_4_drv_4_qs)
+      // to register interface (read)
+      .qs(pad_4_drv_4_qs)
   );
 
 
@@ -1249,79 +1249,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_5]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_5_slw_5 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_5_slw_5_we),
-    .wd     (pad_5_slw_5_wd),
+      // from register interface
+      .we(pad_5_slw_5_we),
+      .wd(pad_5_slw_5_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[5].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[5].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_5_slw_5_qs)
+      // to register interface (read)
+      .qs(pad_5_slw_5_qs)
   );
 
 
   // F[smt_5]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_5_smt_5 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_5_smt_5_we),
-    .wd     (pad_5_smt_5_wd),
+      // from register interface
+      .we(pad_5_smt_5_we),
+      .wd(pad_5_smt_5_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[5].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[5].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_5_smt_5_qs)
+      // to register interface (read)
+      .qs(pad_5_smt_5_qs)
   );
 
 
   // F[drv_5]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_5_drv_5 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_5_drv_5_we),
-    .wd     (pad_5_drv_5_wd),
+      // from register interface
+      .we(pad_5_drv_5_we),
+      .wd(pad_5_drv_5_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[5].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[5].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_5_drv_5_qs)
+      // to register interface (read)
+      .qs(pad_5_drv_5_qs)
   );
 
 
@@ -1330,79 +1330,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_6]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_6_slw_6 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_6_slw_6_we),
-    .wd     (pad_6_slw_6_wd),
+      // from register interface
+      .we(pad_6_slw_6_we),
+      .wd(pad_6_slw_6_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[6].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[6].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_6_slw_6_qs)
+      // to register interface (read)
+      .qs(pad_6_slw_6_qs)
   );
 
 
   // F[smt_6]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_6_smt_6 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_6_smt_6_we),
-    .wd     (pad_6_smt_6_wd),
+      // from register interface
+      .we(pad_6_smt_6_we),
+      .wd(pad_6_smt_6_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[6].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[6].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_6_smt_6_qs)
+      // to register interface (read)
+      .qs(pad_6_smt_6_qs)
   );
 
 
   // F[drv_6]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_6_drv_6 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_6_drv_6_we),
-    .wd     (pad_6_drv_6_wd),
+      // from register interface
+      .we(pad_6_drv_6_we),
+      .wd(pad_6_drv_6_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[6].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[6].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_6_drv_6_qs)
+      // to register interface (read)
+      .qs(pad_6_drv_6_qs)
   );
 
 
@@ -1411,79 +1411,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_7]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_7_slw_7 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_7_slw_7_we),
-    .wd     (pad_7_slw_7_wd),
+      // from register interface
+      .we(pad_7_slw_7_we),
+      .wd(pad_7_slw_7_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[7].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[7].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_7_slw_7_qs)
+      // to register interface (read)
+      .qs(pad_7_slw_7_qs)
   );
 
 
   // F[smt_7]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_7_smt_7 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_7_smt_7_we),
-    .wd     (pad_7_smt_7_wd),
+      // from register interface
+      .we(pad_7_smt_7_we),
+      .wd(pad_7_smt_7_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[7].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[7].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_7_smt_7_qs)
+      // to register interface (read)
+      .qs(pad_7_smt_7_qs)
   );
 
 
   // F[drv_7]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_7_drv_7 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_7_drv_7_we),
-    .wd     (pad_7_drv_7_wd),
+      // from register interface
+      .we(pad_7_drv_7_we),
+      .wd(pad_7_drv_7_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[7].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[7].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_7_drv_7_qs)
+      // to register interface (read)
+      .qs(pad_7_drv_7_qs)
   );
 
 
@@ -1492,79 +1492,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_8]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_8_slw_8 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_8_slw_8_we),
-    .wd     (pad_8_slw_8_wd),
+      // from register interface
+      .we(pad_8_slw_8_we),
+      .wd(pad_8_slw_8_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[8].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[8].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_8_slw_8_qs)
+      // to register interface (read)
+      .qs(pad_8_slw_8_qs)
   );
 
 
   // F[smt_8]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_8_smt_8 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_8_smt_8_we),
-    .wd     (pad_8_smt_8_wd),
+      // from register interface
+      .we(pad_8_smt_8_we),
+      .wd(pad_8_smt_8_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[8].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[8].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_8_smt_8_qs)
+      // to register interface (read)
+      .qs(pad_8_smt_8_qs)
   );
 
 
   // F[drv_8]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_8_drv_8 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_8_drv_8_we),
-    .wd     (pad_8_drv_8_wd),
+      // from register interface
+      .we(pad_8_drv_8_we),
+      .wd(pad_8_drv_8_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[8].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[8].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_8_drv_8_qs)
+      // to register interface (read)
+      .qs(pad_8_drv_8_qs)
   );
 
 
@@ -1573,79 +1573,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_9]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_9_slw_9 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_9_slw_9_we),
-    .wd     (pad_9_slw_9_wd),
+      // from register interface
+      .we(pad_9_slw_9_we),
+      .wd(pad_9_slw_9_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[9].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[9].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_9_slw_9_qs)
+      // to register interface (read)
+      .qs(pad_9_slw_9_qs)
   );
 
 
   // F[smt_9]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_9_smt_9 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_9_smt_9_we),
-    .wd     (pad_9_smt_9_wd),
+      // from register interface
+      .we(pad_9_smt_9_we),
+      .wd(pad_9_smt_9_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[9].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[9].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_9_smt_9_qs)
+      // to register interface (read)
+      .qs(pad_9_smt_9_qs)
   );
 
 
   // F[drv_9]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_9_drv_9 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_9_drv_9_we),
-    .wd     (pad_9_drv_9_wd),
+      // from register interface
+      .we(pad_9_drv_9_we),
+      .wd(pad_9_drv_9_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[9].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[9].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_9_drv_9_qs)
+      // to register interface (read)
+      .qs(pad_9_drv_9_qs)
   );
 
 
@@ -1654,79 +1654,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_10]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_10_slw_10 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_10_slw_10_we),
-    .wd     (pad_10_slw_10_wd),
+      // from register interface
+      .we(pad_10_slw_10_we),
+      .wd(pad_10_slw_10_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[10].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[10].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_10_slw_10_qs)
+      // to register interface (read)
+      .qs(pad_10_slw_10_qs)
   );
 
 
   // F[smt_10]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_10_smt_10 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_10_smt_10_we),
-    .wd     (pad_10_smt_10_wd),
+      // from register interface
+      .we(pad_10_smt_10_we),
+      .wd(pad_10_smt_10_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[10].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[10].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_10_smt_10_qs)
+      // to register interface (read)
+      .qs(pad_10_smt_10_qs)
   );
 
 
   // F[drv_10]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_10_drv_10 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_10_drv_10_we),
-    .wd     (pad_10_drv_10_wd),
+      // from register interface
+      .we(pad_10_drv_10_we),
+      .wd(pad_10_drv_10_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[10].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[10].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_10_drv_10_qs)
+      // to register interface (read)
+      .qs(pad_10_drv_10_qs)
   );
 
 
@@ -1735,79 +1735,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_11]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_11_slw_11 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_11_slw_11_we),
-    .wd     (pad_11_slw_11_wd),
+      // from register interface
+      .we(pad_11_slw_11_we),
+      .wd(pad_11_slw_11_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[11].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[11].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_11_slw_11_qs)
+      // to register interface (read)
+      .qs(pad_11_slw_11_qs)
   );
 
 
   // F[smt_11]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_11_smt_11 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_11_smt_11_we),
-    .wd     (pad_11_smt_11_wd),
+      // from register interface
+      .we(pad_11_smt_11_we),
+      .wd(pad_11_smt_11_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[11].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[11].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_11_smt_11_qs)
+      // to register interface (read)
+      .qs(pad_11_smt_11_qs)
   );
 
 
   // F[drv_11]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_11_drv_11 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_11_drv_11_we),
-    .wd     (pad_11_drv_11_wd),
+      // from register interface
+      .we(pad_11_drv_11_we),
+      .wd(pad_11_drv_11_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[11].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[11].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_11_drv_11_qs)
+      // to register interface (read)
+      .qs(pad_11_drv_11_qs)
   );
 
 
@@ -1816,79 +1816,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_12]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_12_slw_12 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_12_slw_12_we),
-    .wd     (pad_12_slw_12_wd),
+      // from register interface
+      .we(pad_12_slw_12_we),
+      .wd(pad_12_slw_12_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[12].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[12].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_12_slw_12_qs)
+      // to register interface (read)
+      .qs(pad_12_slw_12_qs)
   );
 
 
   // F[smt_12]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_12_smt_12 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_12_smt_12_we),
-    .wd     (pad_12_smt_12_wd),
+      // from register interface
+      .we(pad_12_smt_12_we),
+      .wd(pad_12_smt_12_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[12].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[12].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_12_smt_12_qs)
+      // to register interface (read)
+      .qs(pad_12_smt_12_qs)
   );
 
 
   // F[drv_12]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_12_drv_12 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_12_drv_12_we),
-    .wd     (pad_12_drv_12_wd),
+      // from register interface
+      .we(pad_12_drv_12_we),
+      .wd(pad_12_drv_12_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[12].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[12].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_12_drv_12_qs)
+      // to register interface (read)
+      .qs(pad_12_drv_12_qs)
   );
 
 
@@ -1897,79 +1897,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_13]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_13_slw_13 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_13_slw_13_we),
-    .wd     (pad_13_slw_13_wd),
+      // from register interface
+      .we(pad_13_slw_13_we),
+      .wd(pad_13_slw_13_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[13].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[13].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_13_slw_13_qs)
+      // to register interface (read)
+      .qs(pad_13_slw_13_qs)
   );
 
 
   // F[smt_13]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_13_smt_13 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_13_smt_13_we),
-    .wd     (pad_13_smt_13_wd),
+      // from register interface
+      .we(pad_13_smt_13_we),
+      .wd(pad_13_smt_13_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[13].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[13].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_13_smt_13_qs)
+      // to register interface (read)
+      .qs(pad_13_smt_13_qs)
   );
 
 
   // F[drv_13]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_13_drv_13 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_13_drv_13_we),
-    .wd     (pad_13_drv_13_wd),
+      // from register interface
+      .we(pad_13_drv_13_we),
+      .wd(pad_13_drv_13_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[13].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[13].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_13_drv_13_qs)
+      // to register interface (read)
+      .qs(pad_13_drv_13_qs)
   );
 
 
@@ -1978,79 +1978,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_14]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_14_slw_14 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_14_slw_14_we),
-    .wd     (pad_14_slw_14_wd),
+      // from register interface
+      .we(pad_14_slw_14_we),
+      .wd(pad_14_slw_14_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[14].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[14].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_14_slw_14_qs)
+      // to register interface (read)
+      .qs(pad_14_slw_14_qs)
   );
 
 
   // F[smt_14]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_14_smt_14 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_14_smt_14_we),
-    .wd     (pad_14_smt_14_wd),
+      // from register interface
+      .we(pad_14_smt_14_we),
+      .wd(pad_14_smt_14_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[14].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[14].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_14_smt_14_qs)
+      // to register interface (read)
+      .qs(pad_14_smt_14_qs)
   );
 
 
   // F[drv_14]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_14_drv_14 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_14_drv_14_we),
-    .wd     (pad_14_drv_14_wd),
+      // from register interface
+      .we(pad_14_drv_14_we),
+      .wd(pad_14_drv_14_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[14].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[14].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_14_drv_14_qs)
+      // to register interface (read)
+      .qs(pad_14_drv_14_qs)
   );
 
 
@@ -2059,79 +2059,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_15]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_15_slw_15 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_15_slw_15_we),
-    .wd     (pad_15_slw_15_wd),
+      // from register interface
+      .we(pad_15_slw_15_we),
+      .wd(pad_15_slw_15_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[15].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[15].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_15_slw_15_qs)
+      // to register interface (read)
+      .qs(pad_15_slw_15_qs)
   );
 
 
   // F[smt_15]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_15_smt_15 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_15_smt_15_we),
-    .wd     (pad_15_smt_15_wd),
+      // from register interface
+      .we(pad_15_smt_15_we),
+      .wd(pad_15_smt_15_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[15].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[15].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_15_smt_15_qs)
+      // to register interface (read)
+      .qs(pad_15_smt_15_qs)
   );
 
 
   // F[drv_15]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_15_drv_15 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_15_drv_15_we),
-    .wd     (pad_15_drv_15_wd),
+      // from register interface
+      .we(pad_15_drv_15_we),
+      .wd(pad_15_drv_15_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[15].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[15].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_15_drv_15_qs)
+      // to register interface (read)
+      .qs(pad_15_drv_15_qs)
   );
 
 
@@ -2140,79 +2140,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_16]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_16_slw_16 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_16_slw_16_we),
-    .wd     (pad_16_slw_16_wd),
+      // from register interface
+      .we(pad_16_slw_16_we),
+      .wd(pad_16_slw_16_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[16].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[16].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_16_slw_16_qs)
+      // to register interface (read)
+      .qs(pad_16_slw_16_qs)
   );
 
 
   // F[smt_16]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_16_smt_16 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_16_smt_16_we),
-    .wd     (pad_16_smt_16_wd),
+      // from register interface
+      .we(pad_16_smt_16_we),
+      .wd(pad_16_smt_16_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[16].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[16].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_16_smt_16_qs)
+      // to register interface (read)
+      .qs(pad_16_smt_16_qs)
   );
 
 
   // F[drv_16]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_16_drv_16 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_16_drv_16_we),
-    .wd     (pad_16_drv_16_wd),
+      // from register interface
+      .we(pad_16_drv_16_we),
+      .wd(pad_16_drv_16_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[16].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[16].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_16_drv_16_qs)
+      // to register interface (read)
+      .qs(pad_16_drv_16_qs)
   );
 
 
@@ -2221,79 +2221,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_17]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_17_slw_17 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_17_slw_17_we),
-    .wd     (pad_17_slw_17_wd),
+      // from register interface
+      .we(pad_17_slw_17_we),
+      .wd(pad_17_slw_17_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[17].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[17].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_17_slw_17_qs)
+      // to register interface (read)
+      .qs(pad_17_slw_17_qs)
   );
 
 
   // F[smt_17]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_17_smt_17 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_17_smt_17_we),
-    .wd     (pad_17_smt_17_wd),
+      // from register interface
+      .we(pad_17_smt_17_we),
+      .wd(pad_17_smt_17_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[17].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[17].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_17_smt_17_qs)
+      // to register interface (read)
+      .qs(pad_17_smt_17_qs)
   );
 
 
   // F[drv_17]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_17_drv_17 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_17_drv_17_we),
-    .wd     (pad_17_drv_17_wd),
+      // from register interface
+      .we(pad_17_drv_17_we),
+      .wd(pad_17_drv_17_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[17].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[17].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_17_drv_17_qs)
+      // to register interface (read)
+      .qs(pad_17_drv_17_qs)
   );
 
 
@@ -2302,79 +2302,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_18]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_18_slw_18 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_18_slw_18_we),
-    .wd     (pad_18_slw_18_wd),
+      // from register interface
+      .we(pad_18_slw_18_we),
+      .wd(pad_18_slw_18_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[18].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[18].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_18_slw_18_qs)
+      // to register interface (read)
+      .qs(pad_18_slw_18_qs)
   );
 
 
   // F[smt_18]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_18_smt_18 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_18_smt_18_we),
-    .wd     (pad_18_smt_18_wd),
+      // from register interface
+      .we(pad_18_smt_18_we),
+      .wd(pad_18_smt_18_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[18].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[18].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_18_smt_18_qs)
+      // to register interface (read)
+      .qs(pad_18_smt_18_qs)
   );
 
 
   // F[drv_18]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_18_drv_18 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_18_drv_18_we),
-    .wd     (pad_18_drv_18_wd),
+      // from register interface
+      .we(pad_18_drv_18_we),
+      .wd(pad_18_drv_18_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[18].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[18].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_18_drv_18_qs)
+      // to register interface (read)
+      .qs(pad_18_drv_18_qs)
   );
 
 
@@ -2383,79 +2383,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_19]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_19_slw_19 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_19_slw_19_we),
-    .wd     (pad_19_slw_19_wd),
+      // from register interface
+      .we(pad_19_slw_19_we),
+      .wd(pad_19_slw_19_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[19].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[19].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_19_slw_19_qs)
+      // to register interface (read)
+      .qs(pad_19_slw_19_qs)
   );
 
 
   // F[smt_19]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_19_smt_19 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_19_smt_19_we),
-    .wd     (pad_19_smt_19_wd),
+      // from register interface
+      .we(pad_19_smt_19_we),
+      .wd(pad_19_smt_19_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[19].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[19].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_19_smt_19_qs)
+      // to register interface (read)
+      .qs(pad_19_smt_19_qs)
   );
 
 
   // F[drv_19]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_19_drv_19 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_19_drv_19_we),
-    .wd     (pad_19_drv_19_wd),
+      // from register interface
+      .we(pad_19_drv_19_we),
+      .wd(pad_19_drv_19_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[19].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[19].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_19_drv_19_qs)
+      // to register interface (read)
+      .qs(pad_19_drv_19_qs)
   );
 
 
@@ -2464,79 +2464,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_20]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_20_slw_20 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_20_slw_20_we),
-    .wd     (pad_20_slw_20_wd),
+      // from register interface
+      .we(pad_20_slw_20_we),
+      .wd(pad_20_slw_20_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[20].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[20].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_20_slw_20_qs)
+      // to register interface (read)
+      .qs(pad_20_slw_20_qs)
   );
 
 
   // F[smt_20]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_20_smt_20 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_20_smt_20_we),
-    .wd     (pad_20_smt_20_wd),
+      // from register interface
+      .we(pad_20_smt_20_we),
+      .wd(pad_20_smt_20_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[20].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[20].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_20_smt_20_qs)
+      // to register interface (read)
+      .qs(pad_20_smt_20_qs)
   );
 
 
   // F[drv_20]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_20_drv_20 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_20_drv_20_we),
-    .wd     (pad_20_drv_20_wd),
+      // from register interface
+      .we(pad_20_drv_20_we),
+      .wd(pad_20_drv_20_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[20].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[20].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_20_drv_20_qs)
+      // to register interface (read)
+      .qs(pad_20_drv_20_qs)
   );
 
 
@@ -2545,79 +2545,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_21]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_21_slw_21 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_21_slw_21_we),
-    .wd     (pad_21_slw_21_wd),
+      // from register interface
+      .we(pad_21_slw_21_we),
+      .wd(pad_21_slw_21_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[21].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[21].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_21_slw_21_qs)
+      // to register interface (read)
+      .qs(pad_21_slw_21_qs)
   );
 
 
   // F[smt_21]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_21_smt_21 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_21_smt_21_we),
-    .wd     (pad_21_smt_21_wd),
+      // from register interface
+      .we(pad_21_smt_21_we),
+      .wd(pad_21_smt_21_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[21].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[21].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_21_smt_21_qs)
+      // to register interface (read)
+      .qs(pad_21_smt_21_qs)
   );
 
 
   // F[drv_21]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_21_drv_21 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_21_drv_21_we),
-    .wd     (pad_21_drv_21_wd),
+      // from register interface
+      .we(pad_21_drv_21_we),
+      .wd(pad_21_drv_21_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[21].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[21].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_21_drv_21_qs)
+      // to register interface (read)
+      .qs(pad_21_drv_21_qs)
   );
 
 
@@ -2626,79 +2626,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_22]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_22_slw_22 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_22_slw_22_we),
-    .wd     (pad_22_slw_22_wd),
+      // from register interface
+      .we(pad_22_slw_22_we),
+      .wd(pad_22_slw_22_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[22].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[22].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_22_slw_22_qs)
+      // to register interface (read)
+      .qs(pad_22_slw_22_qs)
   );
 
 
   // F[smt_22]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_22_smt_22 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_22_smt_22_we),
-    .wd     (pad_22_smt_22_wd),
+      // from register interface
+      .we(pad_22_smt_22_we),
+      .wd(pad_22_smt_22_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[22].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[22].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_22_smt_22_qs)
+      // to register interface (read)
+      .qs(pad_22_smt_22_qs)
   );
 
 
   // F[drv_22]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_22_drv_22 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_22_drv_22_we),
-    .wd     (pad_22_drv_22_wd),
+      // from register interface
+      .we(pad_22_drv_22_we),
+      .wd(pad_22_drv_22_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[22].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[22].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_22_drv_22_qs)
+      // to register interface (read)
+      .qs(pad_22_drv_22_qs)
   );
 
 
@@ -2707,79 +2707,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_23]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_23_slw_23 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_23_slw_23_we),
-    .wd     (pad_23_slw_23_wd),
+      // from register interface
+      .we(pad_23_slw_23_we),
+      .wd(pad_23_slw_23_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[23].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[23].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_23_slw_23_qs)
+      // to register interface (read)
+      .qs(pad_23_slw_23_qs)
   );
 
 
   // F[smt_23]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_23_smt_23 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_23_smt_23_we),
-    .wd     (pad_23_smt_23_wd),
+      // from register interface
+      .we(pad_23_smt_23_we),
+      .wd(pad_23_smt_23_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[23].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[23].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_23_smt_23_qs)
+      // to register interface (read)
+      .qs(pad_23_smt_23_qs)
   );
 
 
   // F[drv_23]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_23_drv_23 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_23_drv_23_we),
-    .wd     (pad_23_drv_23_wd),
+      // from register interface
+      .we(pad_23_drv_23_we),
+      .wd(pad_23_drv_23_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[23].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[23].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_23_drv_23_qs)
+      // to register interface (read)
+      .qs(pad_23_drv_23_qs)
   );
 
 
@@ -2788,79 +2788,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_24]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_24_slw_24 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_24_slw_24_we),
-    .wd     (pad_24_slw_24_wd),
+      // from register interface
+      .we(pad_24_slw_24_we),
+      .wd(pad_24_slw_24_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[24].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[24].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_24_slw_24_qs)
+      // to register interface (read)
+      .qs(pad_24_slw_24_qs)
   );
 
 
   // F[smt_24]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_24_smt_24 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_24_smt_24_we),
-    .wd     (pad_24_smt_24_wd),
+      // from register interface
+      .we(pad_24_smt_24_we),
+      .wd(pad_24_smt_24_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[24].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[24].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_24_smt_24_qs)
+      // to register interface (read)
+      .qs(pad_24_smt_24_qs)
   );
 
 
   // F[drv_24]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_24_drv_24 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_24_drv_24_we),
-    .wd     (pad_24_drv_24_wd),
+      // from register interface
+      .we(pad_24_drv_24_we),
+      .wd(pad_24_drv_24_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[24].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[24].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_24_drv_24_qs)
+      // to register interface (read)
+      .qs(pad_24_drv_24_qs)
   );
 
 
@@ -2869,79 +2869,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_25]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_25_slw_25 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_25_slw_25_we),
-    .wd     (pad_25_slw_25_wd),
+      // from register interface
+      .we(pad_25_slw_25_we),
+      .wd(pad_25_slw_25_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[25].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[25].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_25_slw_25_qs)
+      // to register interface (read)
+      .qs(pad_25_slw_25_qs)
   );
 
 
   // F[smt_25]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_25_smt_25 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_25_smt_25_we),
-    .wd     (pad_25_smt_25_wd),
+      // from register interface
+      .we(pad_25_smt_25_we),
+      .wd(pad_25_smt_25_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[25].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[25].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_25_smt_25_qs)
+      // to register interface (read)
+      .qs(pad_25_smt_25_qs)
   );
 
 
   // F[drv_25]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_25_drv_25 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_25_drv_25_we),
-    .wd     (pad_25_drv_25_wd),
+      // from register interface
+      .we(pad_25_drv_25_we),
+      .wd(pad_25_drv_25_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[25].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[25].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_25_drv_25_qs)
+      // to register interface (read)
+      .qs(pad_25_drv_25_qs)
   );
 
 
@@ -2950,79 +2950,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_26]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_26_slw_26 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_26_slw_26_we),
-    .wd     (pad_26_slw_26_wd),
+      // from register interface
+      .we(pad_26_slw_26_we),
+      .wd(pad_26_slw_26_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[26].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[26].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_26_slw_26_qs)
+      // to register interface (read)
+      .qs(pad_26_slw_26_qs)
   );
 
 
   // F[smt_26]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_26_smt_26 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_26_smt_26_we),
-    .wd     (pad_26_smt_26_wd),
+      // from register interface
+      .we(pad_26_smt_26_we),
+      .wd(pad_26_smt_26_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[26].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[26].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_26_smt_26_qs)
+      // to register interface (read)
+      .qs(pad_26_smt_26_qs)
   );
 
 
   // F[drv_26]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_26_drv_26 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_26_drv_26_we),
-    .wd     (pad_26_drv_26_wd),
+      // from register interface
+      .we(pad_26_drv_26_we),
+      .wd(pad_26_drv_26_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[26].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[26].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_26_drv_26_qs)
+      // to register interface (read)
+      .qs(pad_26_drv_26_qs)
   );
 
 
@@ -3031,79 +3031,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_27]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_27_slw_27 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_27_slw_27_we),
-    .wd     (pad_27_slw_27_wd),
+      // from register interface
+      .we(pad_27_slw_27_we),
+      .wd(pad_27_slw_27_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[27].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[27].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_27_slw_27_qs)
+      // to register interface (read)
+      .qs(pad_27_slw_27_qs)
   );
 
 
   // F[smt_27]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_27_smt_27 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_27_smt_27_we),
-    .wd     (pad_27_smt_27_wd),
+      // from register interface
+      .we(pad_27_smt_27_we),
+      .wd(pad_27_smt_27_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[27].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[27].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_27_smt_27_qs)
+      // to register interface (read)
+      .qs(pad_27_smt_27_qs)
   );
 
 
   // F[drv_27]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_27_drv_27 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_27_drv_27_we),
-    .wd     (pad_27_drv_27_wd),
+      // from register interface
+      .we(pad_27_drv_27_we),
+      .wd(pad_27_drv_27_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[27].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[27].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_27_drv_27_qs)
+      // to register interface (read)
+      .qs(pad_27_drv_27_qs)
   );
 
 
@@ -3112,79 +3112,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_28]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_28_slw_28 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_28_slw_28_we),
-    .wd     (pad_28_slw_28_wd),
+      // from register interface
+      .we(pad_28_slw_28_we),
+      .wd(pad_28_slw_28_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[28].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[28].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_28_slw_28_qs)
+      // to register interface (read)
+      .qs(pad_28_slw_28_qs)
   );
 
 
   // F[smt_28]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_28_smt_28 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_28_smt_28_we),
-    .wd     (pad_28_smt_28_wd),
+      // from register interface
+      .we(pad_28_smt_28_we),
+      .wd(pad_28_smt_28_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[28].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[28].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_28_smt_28_qs)
+      // to register interface (read)
+      .qs(pad_28_smt_28_qs)
   );
 
 
   // F[drv_28]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_28_drv_28 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_28_drv_28_we),
-    .wd     (pad_28_drv_28_wd),
+      // from register interface
+      .we(pad_28_drv_28_we),
+      .wd(pad_28_drv_28_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[28].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[28].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_28_drv_28_qs)
+      // to register interface (read)
+      .qs(pad_28_drv_28_qs)
   );
 
 
@@ -3193,79 +3193,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_29]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_29_slw_29 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_29_slw_29_we),
-    .wd     (pad_29_slw_29_wd),
+      // from register interface
+      .we(pad_29_slw_29_we),
+      .wd(pad_29_slw_29_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[29].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[29].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_29_slw_29_qs)
+      // to register interface (read)
+      .qs(pad_29_slw_29_qs)
   );
 
 
   // F[smt_29]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_29_smt_29 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_29_smt_29_we),
-    .wd     (pad_29_smt_29_wd),
+      // from register interface
+      .we(pad_29_smt_29_we),
+      .wd(pad_29_smt_29_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[29].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[29].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_29_smt_29_qs)
+      // to register interface (read)
+      .qs(pad_29_smt_29_qs)
   );
 
 
   // F[drv_29]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_29_drv_29 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_29_drv_29_we),
-    .wd     (pad_29_drv_29_wd),
+      // from register interface
+      .we(pad_29_drv_29_we),
+      .wd(pad_29_drv_29_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[29].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[29].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_29_drv_29_qs)
+      // to register interface (read)
+      .qs(pad_29_drv_29_qs)
   );
 
 
@@ -3274,79 +3274,79 @@ module occamy_soc_reg_top #(
 
   // F[slw_30]: 0:0
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_30_slw_30 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_30_slw_30_we),
-    .wd     (pad_30_slw_30_wd),
+      // from register interface
+      .we(pad_30_slw_30_we),
+      .wd(pad_30_slw_30_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[30].slw.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[30].slw.q),
 
-    // to register interface (read)
-    .qs     (pad_30_slw_30_qs)
+      // to register interface (read)
+      .qs(pad_30_slw_30_qs)
   );
 
 
   // F[smt_30]: 1:1
   prim_subreg #(
-    .DW      (1),
-    .SWACCESS("RW"),
-    .RESVAL  (1'h0)
+      .DW      (1),
+      .SWACCESS("RW"),
+      .RESVAL  (1'h0)
   ) u_pad_30_smt_30 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_30_smt_30_we),
-    .wd     (pad_30_smt_30_wd),
+      // from register interface
+      .we(pad_30_smt_30_we),
+      .wd(pad_30_smt_30_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[30].smt.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[30].smt.q),
 
-    // to register interface (read)
-    .qs     (pad_30_smt_30_qs)
+      // to register interface (read)
+      .qs(pad_30_smt_30_qs)
   );
 
 
   // F[drv_30]: 3:2
   prim_subreg #(
-    .DW      (2),
-    .SWACCESS("RW"),
-    .RESVAL  (2'h2)
+      .DW      (2),
+      .SWACCESS("RW"),
+      .RESVAL  (2'h2)
   ) u_pad_30_drv_30 (
-    .clk_i   (clk_i    ),
-    .rst_ni  (rst_ni  ),
+      .clk_i (clk_i),
+      .rst_ni(rst_ni),
 
-    // from register interface
-    .we     (pad_30_drv_30_we),
-    .wd     (pad_30_drv_30_wd),
+      // from register interface
+      .we(pad_30_drv_30_we),
+      .wd(pad_30_drv_30_wd),
 
-    // from internal hardware
-    .de     (1'b0),
-    .d      ('0  ),
+      // from internal hardware
+      .de(1'b0),
+      .d ('0),
 
-    // to internal hardware
-    .qe     (),
-    .q      (reg2hw.pad[30].drv.q ),
+      // to internal hardware
+      .qe(),
+      .q (reg2hw.pad[30].drv.q),
 
-    // to register interface (read)
-    .qs     (pad_30_drv_30_qs)
+      // to register interface (read)
+      .qs(pad_30_drv_30_qs)
   );
 
 
@@ -3356,16 +3356,16 @@ module occamy_soc_reg_top #(
   logic [41:0] addr_hit;
   always_comb begin
     addr_hit = '0;
-    addr_hit[ 0] = (reg_addr == OCCAMY_SOC_INTR_STATE_OFFSET);
-    addr_hit[ 1] = (reg_addr == OCCAMY_SOC_INTR_ENABLE_OFFSET);
-    addr_hit[ 2] = (reg_addr == OCCAMY_SOC_INTR_TEST_OFFSET);
-    addr_hit[ 3] = (reg_addr == OCCAMY_SOC_VERSION_OFFSET);
-    addr_hit[ 4] = (reg_addr == OCCAMY_SOC_CHIP_ID_OFFSET);
-    addr_hit[ 5] = (reg_addr == OCCAMY_SOC_SCRATCH_0_OFFSET);
-    addr_hit[ 6] = (reg_addr == OCCAMY_SOC_SCRATCH_1_OFFSET);
-    addr_hit[ 7] = (reg_addr == OCCAMY_SOC_SCRATCH_2_OFFSET);
-    addr_hit[ 8] = (reg_addr == OCCAMY_SOC_SCRATCH_3_OFFSET);
-    addr_hit[ 9] = (reg_addr == OCCAMY_SOC_BOOT_MODE_OFFSET);
+    addr_hit[0] = (reg_addr == OCCAMY_SOC_INTR_STATE_OFFSET);
+    addr_hit[1] = (reg_addr == OCCAMY_SOC_INTR_ENABLE_OFFSET);
+    addr_hit[2] = (reg_addr == OCCAMY_SOC_INTR_TEST_OFFSET);
+    addr_hit[3] = (reg_addr == OCCAMY_SOC_VERSION_OFFSET);
+    addr_hit[4] = (reg_addr == OCCAMY_SOC_CHIP_ID_OFFSET);
+    addr_hit[5] = (reg_addr == OCCAMY_SOC_SCRATCH_0_OFFSET);
+    addr_hit[6] = (reg_addr == OCCAMY_SOC_SCRATCH_1_OFFSET);
+    addr_hit[7] = (reg_addr == OCCAMY_SOC_SCRATCH_2_OFFSET);
+    addr_hit[8] = (reg_addr == OCCAMY_SOC_SCRATCH_3_OFFSET);
+    addr_hit[9] = (reg_addr == OCCAMY_SOC_BOOT_MODE_OFFSET);
     addr_hit[10] = (reg_addr == OCCAMY_SOC_NUM_QUADRANTS_OFFSET);
     addr_hit[11] = (reg_addr == OCCAMY_SOC_PAD_0_OFFSET);
     addr_hit[12] = (reg_addr == OCCAMY_SOC_PAD_1_OFFSET);
@@ -3400,7 +3400,7 @@ module occamy_soc_reg_top #(
     addr_hit[41] = (reg_addr == OCCAMY_SOC_PAD_30_OFFSET);
   end
 
-  assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
+  assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0;
 
   // Check sub-word write is permitted
   always_comb begin
@@ -3840,188 +3840,188 @@ module occamy_soc_reg_top #(
       end
 
       addr_hit[11]: begin
-        reg_rdata_next[0] = pad_0_slw_0_qs;
-        reg_rdata_next[1] = pad_0_smt_0_qs;
+        reg_rdata_next[0]   = pad_0_slw_0_qs;
+        reg_rdata_next[1]   = pad_0_smt_0_qs;
         reg_rdata_next[3:2] = pad_0_drv_0_qs;
       end
 
       addr_hit[12]: begin
-        reg_rdata_next[0] = pad_1_slw_1_qs;
-        reg_rdata_next[1] = pad_1_smt_1_qs;
+        reg_rdata_next[0]   = pad_1_slw_1_qs;
+        reg_rdata_next[1]   = pad_1_smt_1_qs;
         reg_rdata_next[3:2] = pad_1_drv_1_qs;
       end
 
       addr_hit[13]: begin
-        reg_rdata_next[0] = pad_2_slw_2_qs;
-        reg_rdata_next[1] = pad_2_smt_2_qs;
+        reg_rdata_next[0]   = pad_2_slw_2_qs;
+        reg_rdata_next[1]   = pad_2_smt_2_qs;
         reg_rdata_next[3:2] = pad_2_drv_2_qs;
       end
 
       addr_hit[14]: begin
-        reg_rdata_next[0] = pad_3_slw_3_qs;
-        reg_rdata_next[1] = pad_3_smt_3_qs;
+        reg_rdata_next[0]   = pad_3_slw_3_qs;
+        reg_rdata_next[1]   = pad_3_smt_3_qs;
         reg_rdata_next[3:2] = pad_3_drv_3_qs;
       end
 
       addr_hit[15]: begin
-        reg_rdata_next[0] = pad_4_slw_4_qs;
-        reg_rdata_next[1] = pad_4_smt_4_qs;
+        reg_rdata_next[0]   = pad_4_slw_4_qs;
+        reg_rdata_next[1]   = pad_4_smt_4_qs;
         reg_rdata_next[3:2] = pad_4_drv_4_qs;
       end
 
       addr_hit[16]: begin
-        reg_rdata_next[0] = pad_5_slw_5_qs;
-        reg_rdata_next[1] = pad_5_smt_5_qs;
+        reg_rdata_next[0]   = pad_5_slw_5_qs;
+        reg_rdata_next[1]   = pad_5_smt_5_qs;
         reg_rdata_next[3:2] = pad_5_drv_5_qs;
       end
 
       addr_hit[17]: begin
-        reg_rdata_next[0] = pad_6_slw_6_qs;
-        reg_rdata_next[1] = pad_6_smt_6_qs;
+        reg_rdata_next[0]   = pad_6_slw_6_qs;
+        reg_rdata_next[1]   = pad_6_smt_6_qs;
         reg_rdata_next[3:2] = pad_6_drv_6_qs;
       end
 
       addr_hit[18]: begin
-        reg_rdata_next[0] = pad_7_slw_7_qs;
-        reg_rdata_next[1] = pad_7_smt_7_qs;
+        reg_rdata_next[0]   = pad_7_slw_7_qs;
+        reg_rdata_next[1]   = pad_7_smt_7_qs;
         reg_rdata_next[3:2] = pad_7_drv_7_qs;
       end
 
       addr_hit[19]: begin
-        reg_rdata_next[0] = pad_8_slw_8_qs;
-        reg_rdata_next[1] = pad_8_smt_8_qs;
+        reg_rdata_next[0]   = pad_8_slw_8_qs;
+        reg_rdata_next[1]   = pad_8_smt_8_qs;
         reg_rdata_next[3:2] = pad_8_drv_8_qs;
       end
 
       addr_hit[20]: begin
-        reg_rdata_next[0] = pad_9_slw_9_qs;
-        reg_rdata_next[1] = pad_9_smt_9_qs;
+        reg_rdata_next[0]   = pad_9_slw_9_qs;
+        reg_rdata_next[1]   = pad_9_smt_9_qs;
         reg_rdata_next[3:2] = pad_9_drv_9_qs;
       end
 
       addr_hit[21]: begin
-        reg_rdata_next[0] = pad_10_slw_10_qs;
-        reg_rdata_next[1] = pad_10_smt_10_qs;
+        reg_rdata_next[0]   = pad_10_slw_10_qs;
+        reg_rdata_next[1]   = pad_10_smt_10_qs;
         reg_rdata_next[3:2] = pad_10_drv_10_qs;
       end
 
       addr_hit[22]: begin
-        reg_rdata_next[0] = pad_11_slw_11_qs;
-        reg_rdata_next[1] = pad_11_smt_11_qs;
+        reg_rdata_next[0]   = pad_11_slw_11_qs;
+        reg_rdata_next[1]   = pad_11_smt_11_qs;
         reg_rdata_next[3:2] = pad_11_drv_11_qs;
       end
 
       addr_hit[23]: begin
-        reg_rdata_next[0] = pad_12_slw_12_qs;
-        reg_rdata_next[1] = pad_12_smt_12_qs;
+        reg_rdata_next[0]   = pad_12_slw_12_qs;
+        reg_rdata_next[1]   = pad_12_smt_12_qs;
         reg_rdata_next[3:2] = pad_12_drv_12_qs;
       end
 
       addr_hit[24]: begin
-        reg_rdata_next[0] = pad_13_slw_13_qs;
-        reg_rdata_next[1] = pad_13_smt_13_qs;
+        reg_rdata_next[0]   = pad_13_slw_13_qs;
+        reg_rdata_next[1]   = pad_13_smt_13_qs;
         reg_rdata_next[3:2] = pad_13_drv_13_qs;
       end
 
       addr_hit[25]: begin
-        reg_rdata_next[0] = pad_14_slw_14_qs;
-        reg_rdata_next[1] = pad_14_smt_14_qs;
+        reg_rdata_next[0]   = pad_14_slw_14_qs;
+        reg_rdata_next[1]   = pad_14_smt_14_qs;
         reg_rdata_next[3:2] = pad_14_drv_14_qs;
       end
 
       addr_hit[26]: begin
-        reg_rdata_next[0] = pad_15_slw_15_qs;
-        reg_rdata_next[1] = pad_15_smt_15_qs;
+        reg_rdata_next[0]   = pad_15_slw_15_qs;
+        reg_rdata_next[1]   = pad_15_smt_15_qs;
         reg_rdata_next[3:2] = pad_15_drv_15_qs;
       end
 
       addr_hit[27]: begin
-        reg_rdata_next[0] = pad_16_slw_16_qs;
-        reg_rdata_next[1] = pad_16_smt_16_qs;
+        reg_rdata_next[0]   = pad_16_slw_16_qs;
+        reg_rdata_next[1]   = pad_16_smt_16_qs;
         reg_rdata_next[3:2] = pad_16_drv_16_qs;
       end
 
       addr_hit[28]: begin
-        reg_rdata_next[0] = pad_17_slw_17_qs;
-        reg_rdata_next[1] = pad_17_smt_17_qs;
+        reg_rdata_next[0]   = pad_17_slw_17_qs;
+        reg_rdata_next[1]   = pad_17_smt_17_qs;
         reg_rdata_next[3:2] = pad_17_drv_17_qs;
       end
 
       addr_hit[29]: begin
-        reg_rdata_next[0] = pad_18_slw_18_qs;
-        reg_rdata_next[1] = pad_18_smt_18_qs;
+        reg_rdata_next[0]   = pad_18_slw_18_qs;
+        reg_rdata_next[1]   = pad_18_smt_18_qs;
         reg_rdata_next[3:2] = pad_18_drv_18_qs;
       end
 
       addr_hit[30]: begin
-        reg_rdata_next[0] = pad_19_slw_19_qs;
-        reg_rdata_next[1] = pad_19_smt_19_qs;
+        reg_rdata_next[0]   = pad_19_slw_19_qs;
+        reg_rdata_next[1]   = pad_19_smt_19_qs;
         reg_rdata_next[3:2] = pad_19_drv_19_qs;
       end
 
       addr_hit[31]: begin
-        reg_rdata_next[0] = pad_20_slw_20_qs;
-        reg_rdata_next[1] = pad_20_smt_20_qs;
+        reg_rdata_next[0]   = pad_20_slw_20_qs;
+        reg_rdata_next[1]   = pad_20_smt_20_qs;
         reg_rdata_next[3:2] = pad_20_drv_20_qs;
       end
 
       addr_hit[32]: begin
-        reg_rdata_next[0] = pad_21_slw_21_qs;
-        reg_rdata_next[1] = pad_21_smt_21_qs;
+        reg_rdata_next[0]   = pad_21_slw_21_qs;
+        reg_rdata_next[1]   = pad_21_smt_21_qs;
         reg_rdata_next[3:2] = pad_21_drv_21_qs;
       end
 
       addr_hit[33]: begin
-        reg_rdata_next[0] = pad_22_slw_22_qs;
-        reg_rdata_next[1] = pad_22_smt_22_qs;
+        reg_rdata_next[0]   = pad_22_slw_22_qs;
+        reg_rdata_next[1]   = pad_22_smt_22_qs;
         reg_rdata_next[3:2] = pad_22_drv_22_qs;
       end
 
       addr_hit[34]: begin
-        reg_rdata_next[0] = pad_23_slw_23_qs;
-        reg_rdata_next[1] = pad_23_smt_23_qs;
+        reg_rdata_next[0]   = pad_23_slw_23_qs;
+        reg_rdata_next[1]   = pad_23_smt_23_qs;
         reg_rdata_next[3:2] = pad_23_drv_23_qs;
       end
 
       addr_hit[35]: begin
-        reg_rdata_next[0] = pad_24_slw_24_qs;
-        reg_rdata_next[1] = pad_24_smt_24_qs;
+        reg_rdata_next[0]   = pad_24_slw_24_qs;
+        reg_rdata_next[1]   = pad_24_smt_24_qs;
         reg_rdata_next[3:2] = pad_24_drv_24_qs;
       end
 
       addr_hit[36]: begin
-        reg_rdata_next[0] = pad_25_slw_25_qs;
-        reg_rdata_next[1] = pad_25_smt_25_qs;
+        reg_rdata_next[0]   = pad_25_slw_25_qs;
+        reg_rdata_next[1]   = pad_25_smt_25_qs;
         reg_rdata_next[3:2] = pad_25_drv_25_qs;
       end
 
       addr_hit[37]: begin
-        reg_rdata_next[0] = pad_26_slw_26_qs;
-        reg_rdata_next[1] = pad_26_smt_26_qs;
+        reg_rdata_next[0]   = pad_26_slw_26_qs;
+        reg_rdata_next[1]   = pad_26_smt_26_qs;
         reg_rdata_next[3:2] = pad_26_drv_26_qs;
       end
 
       addr_hit[38]: begin
-        reg_rdata_next[0] = pad_27_slw_27_qs;
-        reg_rdata_next[1] = pad_27_smt_27_qs;
+        reg_rdata_next[0]   = pad_27_slw_27_qs;
+        reg_rdata_next[1]   = pad_27_smt_27_qs;
         reg_rdata_next[3:2] = pad_27_drv_27_qs;
       end
 
       addr_hit[39]: begin
-        reg_rdata_next[0] = pad_28_slw_28_qs;
-        reg_rdata_next[1] = pad_28_smt_28_qs;
+        reg_rdata_next[0]   = pad_28_slw_28_qs;
+        reg_rdata_next[1]   = pad_28_smt_28_qs;
         reg_rdata_next[3:2] = pad_28_drv_28_qs;
       end
 
       addr_hit[40]: begin
-        reg_rdata_next[0] = pad_29_slw_29_qs;
-        reg_rdata_next[1] = pad_29_smt_29_qs;
+        reg_rdata_next[0]   = pad_29_slw_29_qs;
+        reg_rdata_next[1]   = pad_29_smt_29_qs;
         reg_rdata_next[3:2] = pad_29_drv_29_qs;
       end
 
       addr_hit[41]: begin
-        reg_rdata_next[0] = pad_30_slw_30_qs;
-        reg_rdata_next[1] = pad_30_smt_30_qs;
+        reg_rdata_next[0]   = pad_30_slw_30_qs;
+        reg_rdata_next[1]   = pad_30_smt_30_qs;
         reg_rdata_next[3:2] = pad_30_drv_30_qs;
       end
 
@@ -4044,3 +4044,54 @@ module occamy_soc_reg_top #(
   `ASSERT(en2addrHit, (reg_we || reg_re) |-> $onehot0(addr_hit))
 
 endmodule
+
+module occamy_soc_reg_top_intf #(
+    parameter  int AW = 8,
+    localparam int DW = 32
+) (
+    input logic clk_i,
+    input logic rst_ni,
+    REG_BUS.in regbus_slave,
+    // To HW
+    output occamy_soc_reg_pkg::occamy_soc_reg2hw_t reg2hw,  // Write
+    input occamy_soc_reg_pkg::occamy_soc_hw2reg_t hw2reg,  // Read
+    // Config
+    input devmode_i  // If 1, explicit error return for unmapped register access
+);
+  localparam int unsigned STRB_WIDTH = DW / 8;
+
+  `include "register_interface/typedef.svh"
+  `include "register_interface/assign.svh"
+
+  // Define structs for reg_bus
+  typedef logic [AW-1:0] addr_t;
+  typedef logic [DW-1:0] data_t;
+  typedef logic [STRB_WIDTH-1:0] strb_t;
+  `REG_BUS_TYPEDEF_ALL(reg_bus, addr_t, data_t, strb_t)
+
+  reg_bus_req_t s_reg_req;
+  reg_bus_rsp_t s_reg_rsp;
+
+  // Assign SV interface to structs
+  `REG_BUS_ASSIGN_TO_REQ(s_reg_req, regbus_slave)
+  `REG_BUS_ASSIGN_FROM_RSP(regbus_slave, s_reg_rsp)
+
+
+
+  occamy_soc_reg_top #(
+      .reg_req_t(reg_bus_req_t),
+      .reg_rsp_t(reg_bus_rsp_t),
+      .AW(AW)
+  ) i_regs (
+      .clk_i,
+      .rst_ni,
+      .reg_req_i(s_reg_req),
+      .reg_rsp_o(s_reg_rsp),
+      .reg2hw,  // Write
+      .hw2reg,  // Read
+      .devmode_i
+  );
+
+endmodule
+
+

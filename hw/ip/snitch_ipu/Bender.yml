@@ -8,7 +8,7 @@ package:
   - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 
 dependencies:
-  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
   snitch: {path: ../../ip/snitch}
 
 sources:
@@ -18,4 +18,3 @@ sources:
 - src/snitch_ipu_alu.sv
 # Level 2:
 - src/snitch_int_ss.sv
-

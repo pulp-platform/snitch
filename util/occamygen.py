@@ -37,6 +37,7 @@ def write_template(tpl_path, outdir, fname=None, **kwargs):
                 code = re_trailws.sub("", code)
                 file.write(code)
         else:
+            print(f'Could not find file {tpl_path}')
             raise FileNotFoundError
 
 

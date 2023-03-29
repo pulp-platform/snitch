@@ -12,7 +12,7 @@ ROOT        := ${MKFILE_DIR}../../..
 include $(ROOT)/util/Makefrag
 
 VLT_FLAGS 	  += -Wno-SYMRSVDWORD
-REGGEN        ?= ${ROOT}/util/regtool.py
+REGGEN        ?= $(shell $(BENDER) path register_interface)/vendor/lowrisc_opentitan/util/regtool.py
 CLANG_FORMAT  ?= $(shell which clang-format-10.0.1)
 
 QUESTA_64BIT	= -64
@@ -72,14 +72,15 @@ update-source:
 	@echo "[VERIBLE] Formatting"
 	@verible-verilog-format --inplace src/occamy_quadrant_s1.sv src/occamy_pkg.sv src/occamy_soc.sv src/occamy_top.sv src/occamy_xilinx.sv src/occamy_cva6.sv
 
-CLINTROOT = $(ROOT)/hw/vendor/pulp_platform_clint
+CLINTROOT = $(shell $(BENDER) path clint)
 update-clint:
 	@mkdir -p src/clint
 	@echo "[SOLDER]  Generate CLINT config"
 	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/clint --chip $(CLINTROOT)/data/clint.hjson.tpl
 	@$(ROOT)/util/occamygen.py --cfg $(CFG) --outdir src/clint --chip $(CLINTROOT)/data/clint.sv.tpl
 	@echo "[REGGEN]  Generate CLINT regs"
-	@$(ROOT)/util/regtool.py -r -t src/clint src/clint/clint.hjson
+	@$(REGGEN) -r -t src/clint src/clint/clint.hjson
+	@verible-verilog-format --inplace src/clint/clint_reg_top.sv
 
 PLICSRC = $(ROOT)/hw/vendor/pulp_platform_opentitan_peripherals/src/rv_plic
 update-plic:
@@ -88,7 +89,8 @@ update-plic:
 	@$(PLICSRC)/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(PLICSRC)/data/rv_plic.sv.tpl > src/rv_plic/rv_plic.sv
 	@$(PLICSRC)/util/reg_rv_plic.py -s 73 -t 2 -p 6 $(PLICSRC)/data/rv_plic.hjson.tpl > src/rv_plic/rv_plic.hjson
 	@echo "[REGGEN]  Generate PLIC regs"
-	@$(ROOT)/util/regtool.py -r -t src/rv_plic src/rv_plic/rv_plic.hjson
+	@$(REGGEN) -r -t src/rv_plic src/rv_plic/rv_plic.hjson
+	@verible-verilog-format --inplace src/rv_plic/rv_plic_reg_top.sv
 
 # Update generic control register.
 # $1: config name, $2: output directory, $3: output filename stem, $4: header filename stem
@@ -104,11 +106,13 @@ endef
 
 update-socreg:
 	$(call update_ctrl_regs,SOCREGS,src/occamy_soc_ctrl,occamy_soc_reg.hjson,occamy_soc_peripheral,1)
+	@verible-verilog-format --inplace src/occamy_soc_ctrl/occamy_soc_reg_top.sv
 	$(call update_ctrl_regs,HBMXBARREGS,src/occamy_hbm_xbar_ctrl,occamy_hbm_xbar_reg.hjson,occamy_hbm_xbar_peripheral,1)
+	@verible-verilog-format --inplace src/occamy_hbm_xbar_ctrl/occamy_hbm_xbar_reg_top.sv
 
 update-quadreg:
 	$(call update_ctrl_regs,QUADREGS,src/occamy_quadrant_s1_ctrl,occamy_quadrant_s1_reg.hjson,occamy_quad_peripheral,1)
-
+	@verible-verilog-format --inplace src/occamy_quadrant_s1_ctrl/occamy_quadrant_s1_reg_top.sv
 
 ###############
 # Address Map #

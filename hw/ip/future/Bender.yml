@@ -5,8 +5,8 @@ package:
   name: future
 
 dependencies:
-  axi: {path: ../../vendor/pulp_platform_axi}
-  common_cells: {path: ../../vendor/pulp_platform_common_cells}
+  axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
+  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
 
 sources:
 # Level 0:
