@@ -18,8 +18,8 @@
 #define GET_LOSS 1
 #define RUN_RTL 0
 #define NUM_EPOCHS 1
-#define BATCH_SIZE 256
-#define DATASET_SIZE 512  // 60000
+#define BATCH_SIZE 1
+#define DATASET_SIZE 20  // 60000
 #define INFO 1
 
 void nnlinear_backend_baseline(const network_fp32_t *n) {
@@ -133,10 +133,12 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
             correct = 0;
             if (snrt_is_compute_core()) {
                 if (INFO == 1) {
-                    printf(
-                        "======================== BATCH [%d/%d] start. "
-                        "========================\n",
-                        (batch + 1), batches);
+                    if (compute_id == 0) {
+                        printf(
+                            "======================== BATCH [%d/%d] start. "
+                            "========================\n",
+                            (batch + 1), batches);
+                    }
                 }
                 /* Zero out the gradients
                  * TODO: make this more efficient!
@@ -149,7 +151,8 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
                 }
 
                 if (INFO == 1) {
-                    printf("INFO: Gradients have been zeroed out.\n");
+                    if (compute_id == 0)
+                        printf("INFO: Gradients have been zeroed out.\n");
                 }
 
                 snrt_cluster_hw_barrier();
@@ -202,7 +205,13 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
                     }
                     snrt_cluster_hw_barrier();
 
-                    // printf("pred = %d, target = %d\n", predict, targets[0]);
+                    if (INFO == 1) {
+                        if (compute_id == 0) {
+                            printf("Image %d: ", curr_img / IN_CH);
+                            printf("pred = %d, target = %d\n", predict,
+                                   targets[0]);
+                        }
+                    }
 
                 } else if (!snrt_is_compute_core()) {
                     snrt_cluster_hw_barrier();
@@ -221,12 +230,14 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
                 epoch_acc += batch_acc;
                 epoch_loss += batch_loss / BATCH_SIZE;
                 if (INFO == 1) {
-                    printf(
+                    if (compute_id == 0) {
+                        printf(
                         "A total of [%d/%d] images were predicted correctly in "
                         "batch %d\n",
                         correct, BATCH_SIZE, batch + 1);
-                    printf("batch acc = %.6f\n", batch_acc * 100);
-                    printf("batch loss = %.6f\n", batch_loss / BATCH_SIZE);
+                        printf("batch acc = %.6f\n", batch_acc * 100);
+                        printf("batch loss = %.6f\n", batch_loss / BATCH_SIZE);
+                    }
                 }
 
                 TrainingStep_baseline(biases, weights, weight_grads, bias_grads,
@@ -237,18 +248,20 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
                     mean_epoch_loss = epoch_loss / batches;
                     mean_epoch_acc = epoch_acc / batches;
                     if (INFO == 1) {
-                        printf(
-                            "===========================  EPOCH %u done. "
-                            "===========================\n",
-                            epoch_count);
-                        printf(
-                            "===========================  Epoch  Acc %.3f  "
-                            "===========================\n",
-                            mean_epoch_acc * 100);
-                        printf(
-                            "===========================  Epoch  Loss %.3f  "
-                            "===========================\n",
-                            mean_epoch_loss);
+                        if (compute_id == 0) {
+                            printf(
+                                "===========================  EPOCH %u done. "
+                                "===========================\n",
+                                epoch_count);
+                            printf(
+                                "===========================  Epoch Acc %.3f \% "
+                                "===========================\n",
+                                mean_epoch_acc * 100);
+                            printf(
+                                "===========================  Epoch Loss %.3f  "
+                                "===========================\n",
+                                mean_epoch_loss);
+                        }
                     }
                     epoch_loss = 0;
                     epoch_acc = 0;
