@@ -125,17 +125,20 @@ impl Default for Memories {
         Memories {
             tcdm: Memory {
                 start: 0x100000,
-                end: 0x120000,
+                size: 0x20000,
+                offset: 0x20000,
                 latency: 2,
             },
             dram: Memory {
                 start: 0x80000000,
-                end: 0x90000000,
+                size: 0x10000000,
+                offset: 0x0,
                 latency: 10,
             },
             periphs: MemoryCallback {
                 start: 0x20000,
-                end: 0x20000,
+                size: 0x10000,
+                offset: 0x40000, 
                 latency: 2,
                 callbacks: vec![],
             },
@@ -144,11 +147,13 @@ impl Default for Memories {
     }
 }
 
+
 /// Description of a single memory hierarchy
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct Memory {
     pub start: u32,
-    pub end: u32,
+    pub size: u32,
+    pub offset: u32,
     pub latency: u64,
 }
 
@@ -156,7 +161,8 @@ impl Default for Memory {
     fn default() -> Memory {
         Memory {
             start: 0,
-            end: u32::MAX,
+            size: u32::MAX,
+            offset: 0,
             latency: 1,
         }
     }
@@ -166,7 +172,8 @@ impl Default for Memory {
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct MemoryCallback {
     pub start: u32,
-    pub end: u32,
+    pub size: u32,
+    pub offset: u32,
     pub latency: u64,
     pub callbacks: Vec<Callback>,
 }
@@ -175,7 +182,8 @@ impl Default for MemoryCallback {
     fn default() -> Self {
         Self {
             start: 0,
-            end: u32::MAX,
+            size: u32::MAX,
+            offset: 0,
             latency: 1,
             callbacks: vec![],
         }
@@ -202,7 +210,7 @@ pub struct Address {
     pub nr_cores: u32,
     pub scratch_reg: u32,
     pub wakeup_reg: u32,
-    pub barrier_reg: u32,
+    pub barrier_reg: Barrier,
     pub cluster_base_hartid: u32,
     pub cluster_num: u32,
     pub cluster_id: u32,
@@ -219,7 +227,7 @@ impl Default for Address {
             nr_cores: 0x40000010,
             scratch_reg: 0x40000020,
             wakeup_reg: 0x40000028,
-            barrier_reg: 0x40000038,
+            barrier_reg: Barrier::default(),
             cluster_base_hartid: 0x40000040,
             cluster_num: 0x40000048,
             cluster_id: 0x40000050,
@@ -266,6 +274,22 @@ impl Default for Architecture {
             num_cores: 0,
             num_clusters: 0,
             base_hartid: 0,
+        }
+    }
+}
+
+/// Description of barrier hierarchy for multiple clusters
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+pub struct Barrier {
+    pub start: u32,
+    pub offset: u32,
+}
+
+impl Default for Barrier {
+    fn default() -> Barrier {
+        Barrier {
+            start: 0,
+            offset: 0,
         }
     }
 }
