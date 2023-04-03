@@ -74,6 +74,7 @@ pub fn get_bootrom_types() -> Vec<Box<dyn Bootrom>> {
     vec![
         Box::new(BootromOccamy::default()),
         Box::new(BootromCluster::default()),
+        Box::new(BootromMultiCluster::default()),
     ]
 }
 
@@ -216,7 +217,7 @@ impl Default for BootromMultiCluster {
             tcdm_offset: AtomicU32::new(0x40000),
             global_mem_start: AtomicU64::new(0x80000000),
             global_mem_end: AtomicU64::new(0x100000000),
-            cluster_count: AtomicU32::new(2),
+            cluster_count: AtomicU32::new(13),
             s1_quadrant_count: AtomicU32::new(1),
             clint_base: AtomicU32::new(0x4000000),
         }
