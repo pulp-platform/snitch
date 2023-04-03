@@ -74,6 +74,7 @@ pub fn get_bootrom_types() -> Vec<Box<dyn Bootrom>> {
     vec![
         Box::new(BootromOccamy::default()),
         Box::new(BootromCluster::default()),
+        Box::new(BootromMultiCluster::default()),
     ]
 }
 
@@ -183,6 +184,63 @@ impl Bootrom for BootromCluster {
             0x1c => ((self.global_mem_start.load(Ordering::SeqCst) >> 32) & 0xffffffff) as u32,
             0x20 => (self.global_mem_end.load(Ordering::SeqCst) & 0xffffffff) as u32,
             0x24 => ((self.global_mem_end.load(Ordering::SeqCst) >> 32) & 0xffffffff) as u32,
+            0x28 => self.cluster_count.load(Ordering::SeqCst),
+            0x2c => self.s1_quadrant_count.load(Ordering::SeqCst),
+            0x30 => self.clint_base.load(Ordering::SeqCst),
+            _ => 0,
+        }
+    }
+}
+
+struct BootromMultiCluster {
+    boot_addr: AtomicU32,
+    core_count: AtomicU32,
+    hartid_base: AtomicU32,
+    tcdm_start: AtomicU32,
+    tcdm_size: AtomicU32,
+    tcdm_offset: AtomicU32,
+    global_mem_start: AtomicU64,
+    global_mem_end: AtomicU64,
+    cluster_count: AtomicU32,
+    s1_quadrant_count: AtomicU32,
+    clint_base: AtomicU32,
+}
+
+impl Default for BootromMultiCluster {
+    fn default() -> Self {
+        Self {
+            boot_addr: AtomicU32::new(0x1000000),
+            core_count: AtomicU32::new(9),
+            hartid_base: AtomicU32::new(1),
+            tcdm_start: AtomicU32::new(0x10000000),
+            tcdm_size: AtomicU32::new(0x20000),
+            tcdm_offset: AtomicU32::new(0x40000),
+            global_mem_start: AtomicU64::new(0x80000000),
+            global_mem_end: AtomicU64::new(0x100000000),
+            cluster_count: AtomicU32::new(13),
+            s1_quadrant_count: AtomicU32::new(1),
+            clint_base: AtomicU32::new(0x4000000),
+        }
+    }
+}
+
+impl Bootrom for BootromMultiCluster {
+    fn get_name(&self) -> &'static str {
+        "bootrom-multicluster"
+    }
+
+    fn load(&self, addr: u32) -> u32 {
+        match addr {
+            0x0 => self.boot_addr.load(Ordering::SeqCst),
+            0x4 => self.core_count.load(Ordering::SeqCst),
+            0x8 => self.hartid_base.load(Ordering::SeqCst),
+            0xc => self.tcdm_start.load(Ordering::SeqCst),
+            0x10 => self.tcdm_size.load(Ordering::SeqCst),
+            0x14 => self.tcdm_offset.load(Ordering::SeqCst),
+            0x18 => (self.global_mem_start.load(Ordering::SeqCst) & 0xfff) as u32,
+            0x1c => ((self.global_mem_start.load(Ordering::SeqCst) >> 5) & 0xfff) as u32,
+            0x20 => (self.global_mem_end.load(Ordering::SeqCst) & 0xfff) as u32,
+            0x24 => ((self.global_mem_end.load(Ordering::SeqCst) >> 5) & 0xfff) as u32,
             0x28 => self.cluster_count.load(Ordering::SeqCst),
             0x2c => self.s1_quadrant_count.load(Ordering::SeqCst),
             0x30 => self.clint_base.load(Ordering::SeqCst),
