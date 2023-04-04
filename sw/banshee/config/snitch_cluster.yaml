@@ -5,7 +5,9 @@
 ---
 address:
   # Snitch: cl_peripherals + 0x190
-  barrier_reg: 0x120190
+  barrier_reg: 
+    offset: 0x40000
+    start: 0x120190
   cluster_base_hartid: 0x40000040
   cluster_id: 0x40000050
   cluster_num: 0x40000048
@@ -29,25 +31,28 @@ bootrom:
   callbacks:
     - name: bootrom-cluster
       size: 0x34
-  end: 0x01020000
-  latency: 5
   start: 0x01000000
+  size: 0x20000 # end address of bootrom cluster 0x01020000
+  offset: 0x0
+  latency: 5
 memory:
-- dram:
-    end: 0xF0000000
-    latency: 4
+  dram:
     start: 0x80000000
-  ext_tcdm: []
+    size: 0x70000000 # dram end address: 0xF0000000
+    offset: 0x0 # dram is global for all clusters
+    latency: 4
   periphs:
+    start: 0x130000 # cluster "num_clusters" start address
+    size: 0x10000   # size of the peripheral memory space
+    offset: 0x40000 # offset to start address of next cluster
+    latency: 2
     callbacks:
     - name: zero-memory
       size: 64000
-    end: 0x140000
-    latency: 2
-    start: 0x130000
   tcdm:
-    end: 0x120000
+    start: 0x100000 # cluster "num_clusters" start address
+    size: 0x20000   # size of the TCDM
+    offset: 0x40000 # offset to next cluster is start + size + offset
     latency: 1
-    start: 0x100000
   ssr:
     num_dm: 3
