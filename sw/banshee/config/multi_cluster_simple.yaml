@@ -48,8 +48,8 @@ memory:
     start: 0x10000000 # cluster "num_clusters" start address
     size: 0x20000   # size of the TCDM
     offset: 0x40000 # offset to next cluster is start + size + offset
-    latency: 5
-  # Periphs
+    latency: 1
+#Periphs
   periphs:
     start: 0x130000 # cluster "num_clusters" start address
     size: 0x10000   # size of the peripheral memory space

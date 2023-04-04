@@ -404,7 +404,7 @@ impl Engine {
             })
             .collect();
 
-        // External TCDM
+        // TCDM
         let tcdm_ptrs: Vec<_> = (0..self.num_clusters).map(|i| &tcdms[i][0]).collect();
         debug!("tcdm_ptrs = {:?}:", tcdm_ptrs);
 
@@ -463,6 +463,7 @@ impl Engine {
         crossbeam_utils::thread::scope(|s| {
             for cpu in &cpus {
                 let exec = execs[cpu.cluster_id];
+                debug!("Cluster ID: {}", cpu.cluster_id);
                 s.spawn(move |_| {
                     exec(cpu);
                     debug!("Hart {} finished", cpu.hartid);

@@ -6667,7 +6667,7 @@ impl<'a> InstructionTranslator<'a> {
             LLVMBuildBitCast(self.builder, self.tcdm_ext_ptr(tcdm_ext.0), pty8, NONAME),
             [index].as_mut_ptr(),
             1 as u32,
-            b"ptr_tcdm_ext\0".as_ptr() as *const _,
+            b"ptr_tcdm\0".as_ptr() as *const _,
         );
         let ptr = LLVMBuildBitCast(self.builder, ptr, pty32, NONAME);
         (in_range, ptr)
@@ -7816,17 +7816,17 @@ impl<'a> InstructionTranslator<'a> {
 
     unsafe fn tcdm_ptr(&self) -> LLVMValueRef {
         self.section
-            .emit_call_with_name("banshee_tcdm_ptr", [self.section.state_ptr], "ptr_tcdm")
+            .emit_call_with_name("banshee_tcdm_ptr", [self.section.state_ptr, LLVMConstInt(LLVMInt32Type(), self.section.elf.cluster_id as u64, 0)], "ptr_tcdm")
     }
 
     unsafe fn tcdm_ext_ptr(&self, id: u32) -> LLVMValueRef {
         self.section.emit_call_with_name(
-            "banshee_tcdm_ext_ptr",
+            "banshee_tcdm_ptr",
             [
                 self.section.state_ptr,
                 LLVMConstInt(LLVMInt32Type(), id as u64, 0),
             ],
-            &format!("ptr_tcdm_ext{}", id),
+            &format!("ptr_tcdm{}", id),
         )
     }
 
