@@ -360,27 +360,46 @@ impl Engine {
         // Allocate some TCDM memories.
         let tcdms: Vec<_> = (0..self.num_clusters)
             .map(|i| {
-                let mut tcdm = vec![
-                    0u32;
-                    ((self.config.memory.tcdm.size) / 4)
-                        as usize
-                ];
+                let mut tcdm = vec![0u32; ((self.config.memory.tcdm.size) / 4) as usize];
 
-                debug!("Cluster {} TCDM addr range: [0x{:x}, 0x{:x}]", i, 
-                        self.config.memory.tcdm.start + self.config.memory.tcdm.offset * i as u32, 
-                        self.config.memory.tcdm.start + self.config.memory.tcdm.offset * i as u32 + self.config.memory.tcdm.size);
+                debug!(
+                    "Cluster {} TCDM addr range: [0x{:x}, 0x{:x}]",
+                    i,
+                    self.config.memory.tcdm.start + self.config.memory.tcdm.offset * i as u32,
+                    self.config.memory.tcdm.start
+                        + self.config.memory.tcdm.offset * i as u32
+                        + self.config.memory.tcdm.size
+                );
 
                 for (&addr, &value) in self.memory.lock().unwrap().iter() {
-                    if (addr as u32) >= (self.config.memory.tcdm.start + self.config.memory.tcdm.offset * i as u32)
-                        && (addr as u32) < (self.config.memory.tcdm.start + self.config.memory.tcdm.offset * i as u32 + self.config.memory.tcdm.size)
+                    if (addr as u32)
+                        >= (self.config.memory.tcdm.start
+                            + self.config.memory.tcdm.offset * i as u32)
+                        && (addr as u32)
+                            < (self.config.memory.tcdm.start
+                                + self.config.memory.tcdm.offset * i as u32
+                                + self.config.memory.tcdm.size)
                     {
                         debug!("Entering TCDM allocation section.");
-                        debug!("Writing value into position: 0x{:x}", ((addr - ((self.config.memory.tcdm.start + self.config.memory.tcdm.offset * i as u32) as u64 )) / 4) as usize);
-                        tcdm[((addr - ((self.config.memory.tcdm.start + self.config.memory.tcdm.offset * i as u32) as u64 )) / 4) as usize] =
-                            value;
+                        debug!(
+                            "Writing value into position: 0x{:x}",
+                            ((addr
+                                - ((self.config.memory.tcdm.start
+                                    + self.config.memory.tcdm.offset * i as u32)
+                                    as u64))
+                                / 4) as usize
+                        );
+                        tcdm[((addr
+                            - ((self.config.memory.tcdm.start
+                                + self.config.memory.tcdm.offset * i as u32)
+                                as u64))
+                            / 4) as usize] = value;
                     }
                 }
-                debug!("TCDM vector size = [{}]:", ((self.config.memory.tcdm.size) / 4) as usize);
+                debug!(
+                    "TCDM vector size = [{}]:",
+                    ((self.config.memory.tcdm.size) / 4) as usize
+                );
                 tcdm
             })
             .collect();
@@ -696,10 +715,13 @@ impl<'a, 'b> Cpu<'a, 'b> {
     fn binary_load(&self, addr: u32, size: u8) -> u32 {
         match addr {
             x if x == self.engine.config.address.tcdm_start => {
-                self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * self.cluster_id as u32
+                self.engine.config.memory.tcdm.start
+                    + self.engine.config.memory.tcdm.offset * self.cluster_id as u32
             } // tcdm_start
             x if x == self.engine.config.address.tcdm_end => {
-                self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * self.cluster_id as u32 + self.engine.config.memory.tcdm.size
+                self.engine.config.memory.tcdm.start
+                    + self.engine.config.memory.tcdm.offset * self.cluster_id as u32
+                    + self.engine.config.memory.tcdm.size
             } // tcdm_end
             x if x == self.engine.config.address.nr_cores => self.num_cores as u32, // nr_cores
             x if x == self.engine.config.address.scratch_reg => {
@@ -707,8 +729,15 @@ impl<'a, 'b> Cpu<'a, 'b> {
             } // scratch_reg
             x if (0..self.engine.num_clusters)
                 // return self.cluster_barrier() for all clusters
-                .any(|i| x == (self.engine.config.address.barrier_reg.start + self.engine.config.address.barrier_reg.offset * i as u32)) => { 
-                debug!("core {} reads barrier_reg 0x{:x} from cluster {}", self.hartid, x, self.cluster_id);
+                .any(|i| {
+                    x == (self.engine.config.address.barrier_reg.start
+                        + self.engine.config.address.barrier_reg.offset * i as u32)
+                }) =>
+            {
+                debug!(
+                    "core {} reads barrier_reg 0x{:x} from cluster {}",
+                    self.hartid, x, self.cluster_id
+                );
                 self.cluster_barrier();
                 0
             } // barrier_reg
@@ -718,15 +747,29 @@ impl<'a, 'b> Cpu<'a, 'b> {
             x if x == self.engine.config.address.cluster_num => self.engine.num_clusters as u32, // cluster_num
             x if x == self.engine.config.address.cluster_id => self.cluster_id as u32, // cluster_id
             // TCDM
-            x if (0..self.engine.num_clusters)
-                .any(|i| x >= (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * i as u32) && x < (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * i as u32 + self.engine.config.memory.tcdm.size)) =>
+            x if (0..self.engine.num_clusters).any(|i| {
+                x >= (self.engine.config.memory.tcdm.start
+                    + self.engine.config.memory.tcdm.offset * i as u32)
+                    && x < (self.engine.config.memory.tcdm.start
+                        + self.engine.config.memory.tcdm.offset * i as u32
+                        + self.engine.config.memory.tcdm.size)
+            }) =>
             {
                 debug!("TCDM Binary Load");
                 debug!("Binary load address: 0x{:x}", x);
                 let id = (0..self.engine.num_clusters)
-                    .position(|i| addr >= (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * i as u32) && addr < (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * i as u32 + self.engine.config.memory.tcdm.size))
+                    .position(|i| {
+                        addr >= (self.engine.config.memory.tcdm.start
+                            + self.engine.config.memory.tcdm.offset * i as u32)
+                            && addr
+                                < (self.engine.config.memory.tcdm.start
+                                    + self.engine.config.memory.tcdm.offset * i as u32
+                                    + self.engine.config.memory.tcdm.size)
+                    })
                     .unwrap();
-                let tcdm_addr = addr - (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * id as u32);
+                let tcdm_addr = addr
+                    - (self.engine.config.memory.tcdm.start
+                        + self.engine.config.memory.tcdm.offset * id as u32);
                 let word_addr = tcdm_addr / 4;
                 let word_offs = tcdm_addr - 4 * word_addr;
                 let ptr: *const u32 = self.tcdm_ptr[id];
@@ -734,18 +777,25 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 (word >> (8 * word_offs)) & ((((1 as u64) << (8 << size)) - 1) as u32)
             }
             // Peripherals
-            x if x >= (self.engine.config.memory.periphs.start + self.engine.config.memory.periphs.offset)
-                && x < (self.engine.config.memory.periphs.start + self.engine.config.memory.periphs.offset + self.engine.config.memory.periphs.size) =>
+            x if x
+                >= (self.engine.config.memory.periphs.start
+                    + self.engine.config.memory.periphs.offset)
+                && x < (self.engine.config.memory.periphs.start
+                    + self.engine.config.memory.periphs.offset
+                    + self.engine.config.memory.periphs.size) =>
             {
                 debug!("Peripheral Binary Load");
                 self.engine.peripherals.load(
                     self.cluster_id,
-                    addr - (self.engine.config.memory.periphs.start + self.engine.config.memory.periphs.offset),
+                    addr - (self.engine.config.memory.periphs.start
+                        + self.engine.config.memory.periphs.offset),
                     size,
                 )
             }
             // Bootrom
-            x if x >= self.engine.config.bootrom.start && x < (self.engine.config.bootrom.start + self.engine.config.bootrom.size)=> {
+            x if x >= self.engine.config.bootrom.start
+                && x < (self.engine.config.bootrom.start + self.engine.config.bootrom.size) =>
+            {
                 debug!("Bootrom Binary Load");
                 self.engine
                     .bootrom
@@ -772,7 +822,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
             _ => {
                 // Map all remaining addresses to the hash map but throw a warning if we read outside the memory map
                 if addr < self.engine.config.memory.dram.start
-                    || addr >= self.engine.config.memory.dram.start + self.engine.config.memory.dram.size
+                    || addr
+                        >= self.engine.config.memory.dram.start
+                            + self.engine.config.memory.dram.size
                 {
                     warn!(
                         "Hart {} (pc=0x{:08x}) is reading outside the memory map at 0x{:08x}",
@@ -827,13 +879,27 @@ impl<'a, 'b> Cpu<'a, 'b> {
             // TCDM
             // TODO: this is *not* thread-safe and *will* lead to undefined behavior on simultaneous access
             // by 2 harts. However, changing `tcdm_ptr` to a locked structure would require pervasive redesign.
-            x if (0..self.engine.num_clusters)
-                .any(|i| x >= (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * i as u32) && x < (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * i as u32 + self.engine.config.memory.tcdm.size)) =>
+            x if (0..self.engine.num_clusters).any(|i| {
+                x >= (self.engine.config.memory.tcdm.start
+                    + self.engine.config.memory.tcdm.offset * i as u32)
+                    && x < (self.engine.config.memory.tcdm.start
+                        + self.engine.config.memory.tcdm.offset * i as u32
+                        + self.engine.config.memory.tcdm.size)
+            }) =>
             {
                 let id = (0..self.engine.num_clusters)
-                    .position(|i| addr >= (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * i as u32) && addr < (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * i as u32 + self.engine.config.memory.tcdm.size))
+                    .position(|i| {
+                        addr >= (self.engine.config.memory.tcdm.start
+                            + self.engine.config.memory.tcdm.offset * i as u32)
+                            && addr
+                                < (self.engine.config.memory.tcdm.start
+                                    + self.engine.config.memory.tcdm.offset * i as u32
+                                    + self.engine.config.memory.tcdm.size)
+                    })
                     .unwrap();
-                let tcdm_addr = addr - (self.engine.config.memory.tcdm.start + self.engine.config.memory.tcdm.offset * id as u32);
+                let tcdm_addr = addr
+                    - (self.engine.config.memory.tcdm.start
+                        + self.engine.config.memory.tcdm.offset * id as u32);
                 let word_addr = tcdm_addr / 4;
                 let word_offs = tcdm_addr - 4 * word_addr;
                 let ptr = self.tcdm_ptr[id] as *const u32;
@@ -846,19 +912,25 @@ impl<'a, 'b> Cpu<'a, 'b> {
                 }
             }
             // Peripherals
-            x if x >= (self.engine.config.memory.periphs.start + self.engine.config.memory.periphs.offset * self.cluster_id as u32)
-                && x < (self.engine.config.memory.periphs.start + self.engine.config.memory.periphs.offset * self.cluster_id as u32 + self.engine.config.memory.periphs.size) =>
+            x if x
+                >= (self.engine.config.memory.periphs.start
+                    + self.engine.config.memory.periphs.offset * self.cluster_id as u32)
+                && x < (self.engine.config.memory.periphs.start
+                    + self.engine.config.memory.periphs.offset * self.cluster_id as u32
+                    + self.engine.config.memory.periphs.size) =>
             {
                 self.engine.peripherals.store(
                     self.cluster_id,
-                    addr - (self.engine.config.memory.periphs.start + self.engine.config.memory.periphs.offset * self.cluster_id as u32),
+                    addr - (self.engine.config.memory.periphs.start
+                        + self.engine.config.memory.periphs.offset * self.cluster_id as u32),
                     value,
                     mask,
                     size,
                 )
             }
             // Bootrom
-            x if x >= self.engine.config.bootrom.start && x < (self.engine.config.bootrom.start + self.engine.config.bootrom.size) => {}
+            x if x >= self.engine.config.bootrom.start
+                && x < (self.engine.config.bootrom.start + self.engine.config.bootrom.size) => {}
             // access to the CLINT
             x if x >= self.engine.config.address.clint
                 && x < self.engine.config.address.clint + 0x1000 =>
@@ -907,7 +979,9 @@ impl<'a, 'b> Cpu<'a, 'b> {
             _ => {
                 // Map all remaining addresses to the hash map but throw a warning if we write outside the memory map
                 if addr < self.engine.config.memory.dram.start
-                    || addr >= self.engine.config.memory.dram.start + self.engine.config.memory.dram.size
+                    || addr
+                        >= self.engine.config.memory.dram.start
+                            + self.engine.config.memory.dram.size
                 {
                     warn!(
                         "Hart {} (pc=0x{:08x}) is writing outside the memory map at 0x{:08x}",

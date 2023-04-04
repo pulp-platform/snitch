@@ -200,13 +200,18 @@ impl<'a> ElfTranslator<'a> {
             .map(|x| {
                 (
                     x as u32,
-                    engine.config.memory.tcdm.start + (x as u32)*engine.config.memory.tcdm.offset,
-                    engine.config.memory.tcdm.start + (x as u32)*engine.config.memory.tcdm.offset as u32 + engine.config.memory.tcdm.size,
+                    engine.config.memory.tcdm.start + (x as u32) * engine.config.memory.tcdm.offset,
+                    engine.config.memory.tcdm.start
+                        + (x as u32) * engine.config.memory.tcdm.offset as u32
+                        + engine.config.memory.tcdm.size,
                 )
             })
             .collect();
 
-            info!("tcdm_range for cluster {} is [0x{:x}, 0x{:x}]", &tcdm_range[cluster_id].0, &tcdm_range[cluster_id].1, &tcdm_range[cluster_id].2);
+        info!(
+            "tcdm_range for cluster {} is [0x{:x}, 0x{:x}]",
+            &tcdm_range[cluster_id].0, &tcdm_range[cluster_id].1, &tcdm_range[cluster_id].2
+        );
 
         Self {
             elf,
@@ -219,8 +224,11 @@ impl<'a> ElfTranslator<'a> {
             inst_bbs: Default::default(),
             trace: engine.trace,
             latency: engine.latency,
-            tcdm_start: engine.config.memory.tcdm.start + engine.config.memory.tcdm.offset * cluster_id as u32,
-            tcdm_end: engine.config.memory.tcdm.start + engine.config.memory.tcdm.offset * cluster_id as u32 + engine.config.memory.tcdm.size,
+            tcdm_start: engine.config.memory.tcdm.start
+                + engine.config.memory.tcdm.offset * cluster_id as u32,
+            tcdm_end: engine.config.memory.tcdm.start
+                + engine.config.memory.tcdm.offset * cluster_id as u32
+                + engine.config.memory.tcdm.size,
             tcdm_range,
             cluster_id,
         }
@@ -6220,16 +6228,12 @@ impl<'a> InstructionTranslator<'a> {
                     is_tcdm,
                     LLVMConstInt(
                         LLVMTypeOf(max_cycle),
-                        self.section.engine.config.memory
-                            .tcdm
-                            .latency,
+                        self.section.engine.config.memory.tcdm.latency,
                         0,
                     ),
                     LLVMConstInt(
                         LLVMTypeOf(max_cycle),
-                        self.section.engine.config.memory
-                            .dram
-                            .latency,
+                        self.section.engine.config.memory.dram.latency,
                         0,
                     ),
                     NONAME,
