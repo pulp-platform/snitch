@@ -3,21 +3,33 @@
 # SPDX-License-Identifier: SHL-0.51
 
 # Parse arguments
-if {$argc < 1} {
-    error "usage: occamy_vcu_138_program.tcl FPGA_ID"
+if {$argc < 2} {
+    error "usage: occamy_vcu_128_program.tcl [01|02] [uboot_offset] [uboot_itb]"
 }
-set FPGA_ID [lindex $argv 0]
 
-open_hw_manager
-connect_hw_server -url bordcomputer:3231 -allow_non_jtag
+source occamy_vcu128_procs.tcl
 
-current_hw_target [get_hw_targets */xilinx_tcf/Xilinx/${FPGA_ID}]
-set_property PARAM.FREQUENCY 15000000 [get_hw_targets */xilinx_tcf/Xilinx/${FPGA_ID}]
-open_hw_target
+switch [lindex $argv 0] {
+   01 {
+      target_01
+   }
+   02 {
+      target_02
+   }
+}
 
-set_property PROGRAM.FILE {occamy_vcu128/occamy_vcu128.runs/impl_1/occamy_vcu128_wrapper.bit} [get_hw_devices xcvu37p_0]
+set mcs_file "flash.mcs"
+set flash_offset [lindex $argv 1]
+set flash_file [lindex $argv 2]
 
-current_hw_device [get_hw_devices xcvu37p_0]
-program_hw_devices [get_hw_devices xcvu37p_0]
+occ_connect
+
+#occ_flash_spi $mcs_file $flash_offset $flash_file
+
+occ_program_bit
+
+if [file exists bootrom/bootrom-spl.tcl] {
+  occ_flash_bootrom_spl
+}
 
 close_hw_manager

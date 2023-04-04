@@ -1,0 +1,170 @@
+# Copyright 2022 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+variables:
+  GIT_STRATEGY: clone
+  VIVADO: vitis-2020.2 vivado
+  PYTHON: $CI_PROJECT_DIR/install/python/bin/python3.9
+  VERIBLE_FMT: $CI_PROJECT_DIR/.local/bin/verible-verilog-format
+  BENDER: $CI_PROJECT_DIR/.local/bin/bender
+  RUST_LOG: memora=debug
+  CVA6_SDK: /usr/scratch2/dolent1/gitlabci/tmp/cva6-sdk
+  RISCV: ${CVA6_SDK}/install
+  UBOOT_SPL_BIN: ${CVA6_SDK}/u-boot/spl/u-boot-spl.bin
+  UBOOT_ITB: ${CVA6_SDK}/u-boot/u-boot.itb
+  LINUX_UIMAGE: ${CVA6_SDK}/uImage
+  PATH: $CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
+
+before_script:
+- >
+  if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get python; then
+    $CI_PROJECT_DIR/.gitlab-ci.d/build-python.sh $CI_PROJECT_DIR
+    $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh insert python
+  fi
+- ${PYTHON} -m venv .venv
+- source .venv/bin/activate
+- pip install -r python-requirements.txt
+- |
+  cd $CI_PROJECT_DIR && mkdir -p .local/bin && cd .local/bin
+  curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh -s -- 0.23.2
+  ${BENDER} --version
+- |
+  cd $CI_PROJECT_DIR && mkdir -p .local
+  curl -L https://github.com/chipsalliance/verible/releases/download/v0.0-807-g10e7c71/verible-v0.0-807-g10e7c71-CentOS-7.9.2009-Core-x86_64.tar.gz | tar xz -C .local --strip-components=1
+  ${VERIBLE_FMT} --version
+
+stages:
+- verify-snitch-ips
+- linux_prepare
+- build_fpga
+- linux_boot
+
+# CVA6 SDK
+get_toolchain:
+  stage: linux_prepare
+  script:
+  - |
+    if [[ ! -d ${CVA6_SDK} ]]; then
+      git clone git@github.com:openhwgroup/cva6-sdk.git $CVA6_SDK
+      cd $CVA6_SDK && git checkout occamy
+      git submodule update --init --recursive
+    fi
+  - |
+    if [[ ! -f ${RISCV}/bin/riscv64-unknown-linux-gnu-gcc ]]; then
+      cd $CVA6_SDK && make all
+    fi
+  timeout: 2h 00m
+
+get_linux:
+  stage: linux_prepare
+  script:
+  - |
+    if [[ ! -f ${UBOOT_ITB} ]]; then
+      cd $CVA6_SDK && make u-boot/u-boot.itb
+    fi
+  - |
+    if [[ ! -f ${LINUX_UIMAGE} ]]; then
+      ln -s /home/cykoenig/bin/ld $CI_PROJECT_DIR/.local/bin/ld && hash -r
+      cd $CVA6_SDK && make uImage LD_LIBRARY_PATH=/home/cykoenig/lib64
+    fi
+  needs: [get_toolchain]
+  timeout: 2h 00m
+
+# Packages and elaborates the vivado IPs where occamy is part of. This ensures
+# that the occamy xilinx IP can be elaborated
+occamy_vivado_ip:
+  stage: build_fpga
+  script:
+    # Make Occamy system smaller to fit on FPGA
+  - ./.gitlab-ci.d/occamy_cfg_fpga.sh
+  - make -C hw/system/occamy update-source
+    # Package IPs and run test elaboration
+  - make -C hw/system/occamy/fpga/vivado_ips occamy_xilinx EXT_JTAG=0 DEBUG=0
+  artifacts:
+    expire_in: 4 days
+    paths:
+    - hw/system/occamy/src
+    - hw/system/occamy/test
+    - sw/snRuntime/include/occamy_base_addr.h
+
+# The occamy on vcu128 design
+occamy_vcu128:
+  stage: build_fpga
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "web"
+  - if: $CI_PIPELINE_SOURCE != "web"
+    when: manual
+    changes:
+    - .gitlab-ci.d/occamy_cfg_fpga.sh
+    - hw/ip/**/*
+    - hw/vendor/**/*
+    - hw/system/occamy/**/*
+    - util/occamygen.py
+    - util/clustergen/**/*
+    - util/solder/**/*
+    - util/Makefrag
+    - util/reggen
+    - util/regtool.py
+  timeout: 11h 00m
+  script:
+  - |
+    if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh --ignore-uncommitted-changes lookup occamy_vcu128; then
+      make -C hw/system/occamy/fpga occamy_vcu128 EXT_JTAG=0 DEBUG=0
+      mkdir -p /usr/scratch2/dolent1/gitlabci/buildcache/snitch/snitch-incremental/
+      $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh --ignore-uncommitted-changes insert occamy_vcu128
+    fi
+  artifacts:
+    expire_in: 4 days
+    paths:
+    - hw/system/occamy/fpga
+    - hw/system/occamy/src
+  needs: [get_toolchain, get_linux, occamy_vivado_ip]
+
+# Boot Linux on the VCU128 FPGA and check for prompt (disabled for now)
+occamy_vcu128_fpga:
+  stage: linux_boot
+  when: manual
+  only:
+    changes:
+    - .gitlab-ci.d/occamy_cfg_fpga.sh
+    - .gitlab-ci.d/occamy_fpga_nightly.sh
+      # Only run if changes were made to anything related to Occamy
+    - hw/ip/**/*
+    - hw/vendor/**/*
+    - hw/system/occamy/**/*
+  script:
+  # We need the bitstream, bootrom (tracked in the repo) and linux binaries
+  - $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh --ignore-uncommitted-changes get
+    occamy_vcu128
+  # Todo get linux distrib from hero and flash it
+  - .gitlab-ci.d/occamy_fpga_nightly.sh
+  artifacts:
+    expire_in: 4 days
+    paths:
+    - console.log
+  needs: [occamy_vcu128]
+
+#######################
+# Test Individual IPs #
+#######################
+# Build and run all individual IP testbenches
+# currently missing IP tests:
+# -> clint, snitch_vm, test, snitch_ipu, snitch_dma, snitch
+# currently failing IP tests/scripts:
+# -> reqrsp_interface, snitch_ssr
+ip-tests-vsim:
+  stage: verify-snitch-ips
+  parallel:
+    matrix:
+    - IP: [mem_interface, snitch_cluster, snitch_icache, snitch_read_only_cache, spm_interface,
+        tcdm_interface]
+  script:
+  - cd hw/ip/$IP
+  - ./util/compile.sh > compile-$IP.log
+  - grep -n "Errors" compile-$IP.log
+  - grep -n "Errors[:] 0" compile-$IP.log
+  - FILES=$(find util -type f ! -name 'compile.sh' ! -name 'wave.tcl')
+  - for file in $FILES; do echo "# Run $file"; eval "$file"  > vsim-$IP.log; done
+  - grep -n "Errors" vsim-$IP.log
+  - grep -n "Errors[:] 0" vsim-$IP.log

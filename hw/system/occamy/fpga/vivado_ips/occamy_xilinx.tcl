@@ -4,14 +4,12 @@
 #
 # Nils Wistoff <nwistoff@iis.ee.ethz.ch>
 
-# Parse arguments
+# Parse arguments (Vivado's boolean properties are not compatible with all tcl boolean variables)
 set DEBUG false
-if {$argc > 0} {
-    # Vivado's boolean properties are not compatible with all tcl boolean variables.
-    if {[lindex $argv 0]} {
-        set DEBUG true
-    }
-}
+set EXT_JTAG false
+
+if {$argc > 0 && [lindex $argv 0]} { set DEBUG true }
+if {$argc > 1 && [lindex $argv 1]} { set EXT_JTAG true }
 
 # Create project
 set project occamy_xilinx
@@ -22,9 +20,16 @@ set_property XPM_LIBRARIES XPM_MEMORY [current_project]
 # Define sources
 source define-sources.tcl
 
+# Add constraints
+set ooc_constraint_file ooc_synth_constraints.xdc
+if {[file exists ${ooc_constraint_file}]} {
+    add_files -fileset constrs_1 -norecurse ${ooc_constraint_file}
+    set_property USED_IN {synthesis out_of_context} [get_files ${ooc_constraint_file}]
+}
+
 # Buggy Vivado doesn't like these files. That's ok, we don't need them anyways.
-set_property IS_ENABLED 0 [get_files $ROOT/../../vendor/pulp_platform_axi/src/axi_intf.sv]
-set_property IS_ENABLED 0 [get_files $ROOT/../../vendor/pulp_platform_register_interface/src/reg_intf.sv]
+set_property IS_ENABLED 0 [get_files -regex .*/axi_intf.sv]
+set_property IS_ENABLED 0 [get_files -regex .*/reg_intf.sv]
 
 # Package IP
 set_property top occamy_xilinx [current_fileset]
@@ -49,4 +54,6 @@ ipx::associate_bus_interfaces -busif s_axi_pcie -clock clk_i [ipx::current_core]
 set_property core_revision 1 [ipx::current_core]
 ipx::create_xgui_files [ipx::current_core]
 ipx::update_checksums [ipx::current_core]
+ipx::save_core [ipx::current_core]
+ipx::check_integrity [ipx::current_core]
 ipx::save_core [ipx::current_core]

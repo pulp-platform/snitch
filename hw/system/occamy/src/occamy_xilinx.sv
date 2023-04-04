@@ -56,7 +56,7 @@ module occamy_xilinx
     output logic [ 3:0]      spim_sd_en_o,
     input        [ 3:0]      spim_sd_i,
 
-    input logic [3:0] ext_irq_i,
+    input logic [11:0] ext_irq_i,
 
     // Boot ROM
     output logic        bootrom_en_o,
@@ -569,7 +569,9 @@ module occamy_xilinx
   // Assign structs to flattened ports
   `AXI_FLATTEN_MASTER(hbm_7, hbm_7_req_o, hbm_7_rsp_i)
 
-  /// Boot ROM
+  ///////////////////
+  // Boot ROM      //
+  ///////////////////
   // TODO(niwis, aottaviano) This is a temporary solution. Either put this in a dedicated module for
   // regbus <-> Xilinx memory conversion and add support to solder, or replace by a different ROM
 
@@ -596,13 +598,11 @@ module occamy_xilinx
   );
 
 
-  reg_a48_d32_req_t bootrom_req;
-  reg_a48_d32_rsp_t bootrom_rsp;
 
   logic bootrom_req_ready_d, bootrom_req_ready_q;
 
   assign bootrom_en_o        = bootrom_req.valid;
-  assign bootrom_addr_o      = bootrom_req.addr >> 2;  // 32-bit addressed
+  assign bootrom_addr_o      = bootrom_req.addr;
   assign bootrom_rsp.ready   = bootrom_req_ready_q;
   assign bootrom_rsp.rdata   = bootrom_data_i;
   assign bootrom_rsp.error   = '0;
@@ -687,13 +687,6 @@ module occamy_xilinx
 
 
 
-  reg_a48_d32_req_t fll_system_req;
-  reg_a48_d32_rsp_t fll_system_rsp;
-  reg_a48_d32_req_t fll_periph_req;
-  reg_a48_d32_rsp_t fll_periph_rsp;
-  reg_a48_d32_req_t fll_hbm2e_req;
-  reg_a48_d32_rsp_t fll_hbm2e_rsp;
-
   // Occamy top-level
   occamy_top i_occamy (
       .bootrom_req_o   (bootrom_axi_lite_req),
@@ -704,25 +697,18 @@ module occamy_xilinx
       .fll_periph_rsp_i(fll_periph_axi_lite_rsp),
       .fll_hbm2e_req_o (fll_hbm2e_axi_lite_req),
       .fll_hbm2e_rsp_i (fll_hbm2e_axi_lite_rsp),
-      .pcie_cfg_req_o  (),
+      .ext_irq_i(ext_irq_i),
+      // Tie-off unused ports
       .pcie_cfg_rsp_i  ('0),
-      // Tie the HBM interrupts to zero.
-      .ext_irq_i ({8'b0, ext_irq_i}),
-      .apb_hbm_cfg_req_o (),
-      .apb_hbm_cfg_rsp_i ('0),
-      .hbi_cfg_req_o (),
-      .hbi_cfg_rsp_i ('0),
-      .apb_hbi_ctl_req_o (),
-      .apb_hbi_ctl_rsp_i ('0),
-      .hbm_phy_cfg_req_o (),
-      .hbm_phy_cfg_rsp_i ('0),
-      .hbm_seq_req_o (),
-      .hbm_seq_rsp_i ('0),
+      .hbi_wide_cfg_rsp_i ('0),
+      .hbi_narrow_cfg_rsp_i ('0),
+      .hbm_cfg_rsp_i ('0),
+      .chip_ctrl_rsp_i ('0),
+      .hbi_wide_req_i ('0),
+      .hbi_wide_rsp_i ('0),
+      .hbi_narrow_req_i ('0),
+      .hbi_narrow_rsp_i ('0),
       .*
   );
-
-  assign fll_system_rsp = '0;
-  assign fll_periph_rsp = '0;
-  assign fll_hbm2e_rsp  = '0;
 
 endmodule
