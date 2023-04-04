@@ -136,14 +136,13 @@ impl Default for Memories {
             periphs: MemoryCallback {
                 start: 0x20000,
                 size: 0x10000,
-                offset: 0x40000, 
+                offset: 0x40000,
                 latency: 2,
                 callbacks: vec![],
             },
         }
     }
 }
-
 
 /// Description of a single memory hierarchy
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
