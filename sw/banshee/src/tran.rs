@@ -6625,7 +6625,7 @@ impl<'a> InstructionTranslator<'a> {
     unsafe fn emit_tcdm_check(&self, addr: LLVMValueRef) -> (LLVMValueRef, LLVMValueRef) {
         let tcdm_start = LLVMConstInt(LLVMInt32Type(), self.section.elf.tcdm_start as u64, 0);
         let tcdm_end = LLVMConstInt(LLVMInt32Type(), self.section.elf.tcdm_end as u64, 0);
-        let in_range = LLVMBuildAnd(
+        let mut in_range = LLVMBuildAnd(
             self.builder,
             LLVMBuildICmp(self.builder, LLVMIntUGE, addr, tcdm_start, NONAME),
             LLVMBuildICmp(self.builder, LLVMIntULT, addr, tcdm_end, NONAME),
@@ -6637,11 +6637,12 @@ impl<'a> InstructionTranslator<'a> {
         let ptr = LLVMBuildGEP(
             self.builder,
             LLVMBuildBitCast(self.builder, self.tcdm_ptr(), pty8, NONAME),
-            [index].as_mut_ptr(),
+            [index].as_mut_ptr(), 
             1 as u32,
             b"ptr_tcdm\0".as_ptr() as *const _,
         );
         let ptr = LLVMBuildBitCast(self.builder, ptr, pty32, NONAME);
+        let in_range = LLVMConstInt(LLVMInt1Type(), 0, 0);
         (in_range, ptr)
     }
 
@@ -6653,7 +6654,7 @@ impl<'a> InstructionTranslator<'a> {
     ) -> (LLVMValueRef, LLVMValueRef) {
         let tcdm_start = LLVMConstInt(LLVMInt32Type(), tcdm_ext.1 as u64, 0);
         let tcdm_end = LLVMConstInt(LLVMInt32Type(), tcdm_ext.2 as u64, 0);
-        let in_range = LLVMBuildAnd(
+        let mut in_range = LLVMBuildAnd(
             self.builder,
             LLVMBuildICmp(self.builder, LLVMIntUGE, addr, tcdm_start, NONAME),
             LLVMBuildICmp(self.builder, LLVMIntULT, addr, tcdm_end, NONAME),
