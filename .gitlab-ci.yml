@@ -17,6 +17,8 @@ variables:
   PATH: $CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
 
 before_script:
+- echo "CI VARIABLE IS"
+- echo $CI_PIPELINE_SOURCE
 - >
   if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get python; then
     $CI_PROJECT_DIR/.gitlab-ci.d/build-python.sh $CI_PROJECT_DIR
@@ -92,9 +94,7 @@ occamy_vivado_ip:
 occamy_vcu128:
   stage: build_fpga
   rules:
-  - if: $CI_PIPELINE_SOURCE == "web"
-  - if: $CI_PIPELINE_SOURCE != "web"
-    when: manual
+  - if: $CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "external_pull_request_event"
     changes:
     - .gitlab-ci.d/occamy_cfg_fpga.sh
     - hw/ip/**/*
