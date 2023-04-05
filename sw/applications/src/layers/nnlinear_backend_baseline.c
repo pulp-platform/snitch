@@ -18,8 +18,8 @@
 #define GET_LOSS 1
 #define RUN_RTL 0
 #define NUM_EPOCHS 1
-#define BATCH_SIZE 256
-#define DATASET_SIZE 512  // 60000
+#define BATCH_SIZE 1
+#define DATASET_SIZE 2  // 60000
 #define INFO 1
 
 void nnlinear_backend_baseline(const network_fp32_t *n) {
