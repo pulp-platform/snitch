@@ -59,7 +59,7 @@ memory:
       size: 64000
   tcdm:
     start: 0x100000 # cluster "num_clusters" start address
-    size: 0x20000   # size of the TCDM
+    size: 0x020000   # size of the TCDM
     offset: 0x40000 # offset to next cluster is start + size + offset
     latency: 1
   ssr:

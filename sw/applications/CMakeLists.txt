@@ -45,6 +45,13 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     target_link_libraries(layers ${SNITCH_RUNTIME} kernels utils)
     target_link_libraries(utils ${SNITCH_RUNTIME})
 
+    add_snitch_raw_test_args(batchnorm batchnorm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --num-clusters 2)
+    add_snitch_raw_test_args(maxpool maxpool --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --num-clusters 2)
+    add_snitch_raw_test_args(conv2d conv2d --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --num-clusters 2)
+    add_snitch_raw_test_args(gemm gemm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --num-clusters 2)
+    add_snitch_raw_test_args(fusedconv fusedconv --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --num-clusters 2)
+    add_snitch_raw_test_args(nnlinear_baseline nnlinear_baseline --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --num-clusters 2)
+
     add_snitch_application_executable(batchnorm)
     add_snitch_application_executable(maxpool)
     add_snitch_application_executable(conv2d)
@@ -54,11 +61,4 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
 
     set(SNITCH_TEST_PREFIX snApplications-)
 
-    add_snitch_raw_test_args(batchnorm batchnorm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(maxpool maxpool --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(conv2d conv2d --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(gemm gemm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(fusedconv fusedconv --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(nnlinear_baseline nnlinear_baseline --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml)
-    
 endif()
