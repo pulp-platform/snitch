@@ -227,7 +227,8 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
                 if (INFO == 1) {
                     if (compute_id == 0 && cluster_id == 0) {
                         printf(
-                            "A total of [%d/%d] images were predicted correctly in "
+                            "A total of [%d/%d] images were predicted "
+                            "correctly in "
                             "batch %d\n",
                             correct, BATCH_SIZE, batch + 1);
                         printf("batch acc = %.6f\n", batch_acc * 100);
@@ -253,7 +254,8 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
                                 "===========================\n",
                                 mean_epoch_acc * 100);
                             printf(
-                                "===========================  Epoch  Loss %.3f  "
+                                "===========================  Epoch  Loss %.3f "
+                                " "
                                 "===========================\n",
                                 mean_epoch_loss);
                         }
