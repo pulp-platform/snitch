@@ -5,7 +5,7 @@
 # Locate the banshee simulator for test execution.
 set(SNITCH_BANSHEE "banshee" CACHE PATH "Path to the banshee simulator for testing")
 set(BANSHEE_TIMEOUT "360" CACHE STRING "Timeout when running tests on banshee")
-set(RUN_BANSHEE_ARGS "--num-cores=9" "--num-clusters=2" "--base-hartid=1"
+set(RUN_BANSHEE_ARGS "--num-cores=9" "--base-hartid=1"
     CACHE PATH "Arguments passed to the banshee sim for the run-banshee target")
 set(SNITCH_RUNTIME "snRuntime-banshee" CACHE STRING "Target name of the snRuntime flavor to link against")
 set(SNITCH_SIMULATOR "" CACHE PATH "Command to run a binary in an RTL simulation")
@@ -35,7 +35,21 @@ macro(add_snitch_library name)
         COMMAND ${CMAKE_OBJDUMP} -dhS $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.s)
 endmacro()
 
+macro(add_snitch_raw_test_args test_name target_name)
+    if (SNITCH_RUNTIME STREQUAL "snRuntime-banshee" AND BUILD_TESTS)
+        add_test(NAME ${SNITCH_TEST_PREFIX}${test_name} COMMAND ${SNITCH_BANSHEE} $<TARGET_FILE:${target_name}> ${ARGN})
+        set_property(TEST ${SNITCH_TEST_PREFIX}${test_name}
+        PROPERTY LABELS ${SNITCH_TEST_PREFIX})
+        set_tests_properties(${SNITCH_TEST_PREFIX}${test_name} PROPERTIES TIMEOUT ${BANSHEE_TIMEOUT})
+    endif()
+    set(${test_name}_args ${ARGN} CACHE INTERNAL "Test arguments for ${test_name}")
+    set_property(GLOBAL PROPERTY ${test_name}_args ${ARGN})
+endmacro()
+
 macro(add_snitch_executable name)
+    # get global test args
+    get_property(args GLOBAL PROPERTY ${name}_args)
+    # message("Global test args for ${name}: ${args}")
     add_executable(${ARGV})
     target_link_libraries(${name} ${SNITCH_RUNTIME})
     target_link_options(${name} PRIVATE "SHELL:-T ${LINKER_SCRIPT}")
@@ -46,7 +60,7 @@ macro(add_snitch_executable name)
     # Run target for banshee
     if (SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
         add_custom_target( run-banshee-${name}
-            COMMAND ${SNITCH_BANSHEE} --no-opt-llvm --no-opt-jit ${RUN_BANSHEE_ARGS} --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --trace $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.trace
+            COMMAND ${SNITCH_BANSHEE} --no-opt-llvm --no-opt-jit ${RUN_BANSHEE_ARGS} ${args} --trace $<TARGET_FILE:${name}> > $<TARGET_FILE:${name}>.trace
             COMMAND cat $<TARGET_FILE:${name}>.trace | ${SPIKE_DASM} > $<TARGET_FILE:${name}>.trace.txt
             COMMAND awk -F\" \" '{print>\"${name}\"$$3\".txt\"}' $<TARGET_FILE:${name}>.trace.txt
             DEPENDS $<TARGET_FILE:${name}>)
@@ -66,14 +80,6 @@ macro(add_snitch_test_executable name)
     endif()
 endmacro()
 
-macro(add_snitch_raw_test_args test_name target_name)
-    if (SNITCH_RUNTIME STREQUAL "snRuntime-banshee" AND BUILD_TESTS)
-        add_test(NAME ${SNITCH_TEST_PREFIX}${test_name} COMMAND ${SNITCH_BANSHEE} $<TARGET_FILE:${target_name}> ${ARGN})
-        set_property(TEST ${SNITCH_TEST_PREFIX}${test_name}
-        PROPERTY LABELS ${SNITCH_TEST_PREFIX})
-        set_tests_properties(${SNITCH_TEST_PREFIX}${test_name} PROPERTIES TIMEOUT ${BANSHEE_TIMEOUT})
-    endif()
-endmacro()
 
 macro(add_snitch_test_args executable_name test_name)
     if (SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
@@ -101,7 +107,7 @@ macro(add_snitch_test name)
         message(STATUS "Adding test: ${name}")
         add_snitch_test_executable(${ARGV})
         if (SNITCH_RUNTIME STREQUAL "snRuntime-banshee")
-            add_snitch_test_args(${name} ${name}-snitch --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml)
+            add_snitch_test_args(${name} ${name}-snitch --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
         elseif (SNITCH_SIMULATOR)
             add_snitch_test_rtl(${name})
         endif()
