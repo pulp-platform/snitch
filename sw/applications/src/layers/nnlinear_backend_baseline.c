@@ -20,7 +20,7 @@
 #define NUM_EPOCHS 1
 #define BATCH_SIZE 1
 #define DATASET_SIZE 2  // 60000
-#define INFO 1
+#define INFO 0
 
 void nnlinear_backend_baseline(const network_fp32_t *n) {
     uint32_t cluster_num = snrt_cluster_num();  // Total number of clusters
@@ -38,7 +38,7 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
         snrt_global_core_idx();  // Core ID of each core on all clusters
 
     if (INFO == 1) {
-        if (compute_id == 0) {
+        if (compute_id == 0 && cluster_id == 0) {
             printf(
                 "======================== System Info "
                 "========================\n");
@@ -120,7 +120,7 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
 
     for (int epoch = 0; epoch < NUM_EPOCHS; epoch++) {
         if (INFO == 1) {
-            if (compute_id == 0) {
+            if (compute_id == 0 && cluster_id == 0) {
                 printf(
                     "======================== EPOCH [%d/%d] start. "
                     "========================\n",
@@ -133,10 +133,12 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
             correct = 0;
             if (snrt_is_compute_core()) {
                 if (INFO == 1) {
-                    printf(
-                        "======================== BATCH [%d/%d] start. "
-                        "========================\n",
-                        (batch + 1), batches);
+                    if (compute_id == 0 && cluster_id == 0) {
+                        printf(
+                            "======================== BATCH [%d/%d] start. "
+                            "========================\n",
+                            (batch + 1), batches);
+                    }
                 }
                 /* Zero out the gradients
                  * TODO: make this more efficient!
@@ -149,7 +151,9 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
                 }
 
                 if (INFO == 1) {
-                    printf("INFO: Gradients have been zeroed out.\n");
+                    if (compute_id == 0 && cluster_id == 0) {
+                        printf("INFO: Gradients have been zeroed out.\n");
+                    }
                 }
 
                 snrt_cluster_hw_barrier();
@@ -221,12 +225,14 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
                 epoch_acc += batch_acc;
                 epoch_loss += batch_loss / BATCH_SIZE;
                 if (INFO == 1) {
-                    printf(
-                        "A total of [%d/%d] images were predicted correctly in "
-                        "batch %d\n",
-                        correct, BATCH_SIZE, batch + 1);
-                    printf("batch acc = %.6f\n", batch_acc * 100);
-                    printf("batch loss = %.6f\n", batch_loss / BATCH_SIZE);
+                    if (compute_id == 0 && cluster_id == 0) {
+                        printf(
+                            "A total of [%d/%d] images were predicted correctly in "
+                            "batch %d\n",
+                            correct, BATCH_SIZE, batch + 1);
+                        printf("batch acc = %.6f\n", batch_acc * 100);
+                        printf("batch loss = %.6f\n", batch_loss / BATCH_SIZE);
+                    }
                 }
 
                 TrainingStep_baseline(biases, weights, weight_grads, bias_grads,
@@ -237,18 +243,20 @@ void nnlinear_backend_baseline(const network_fp32_t *n) {
                     mean_epoch_loss = epoch_loss / batches;
                     mean_epoch_acc = epoch_acc / batches;
                     if (INFO == 1) {
-                        printf(
-                            "===========================  EPOCH %u done. "
-                            "===========================\n",
-                            epoch_count);
-                        printf(
-                            "===========================  Epoch  Acc %.3f  "
-                            "===========================\n",
-                            mean_epoch_acc * 100);
-                        printf(
-                            "===========================  Epoch  Loss %.3f  "
-                            "===========================\n",
-                            mean_epoch_loss);
+                        if (compute_id == 0 && cluster_id == 0) {
+                            printf(
+                                "===========================  EPOCH %u done. "
+                                "===========================\n",
+                                epoch_count);
+                            printf(
+                                "===========================  Epoch  Acc %.3f  "
+                                "===========================\n",
+                                mean_epoch_acc * 100);
+                            printf(
+                                "===========================  Epoch  Loss %.3f  "
+                                "===========================\n",
+                                mean_epoch_loss);
+                        }
                     }
                     epoch_loss = 0;
                     epoch_acc = 0;
