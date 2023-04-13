@@ -61,7 +61,7 @@ OPER_TYPES = {'gpr': 1, 'csr': 8}
 
 FPU_OPER_TYPES = ('NONE', 'acc', 'rs1', 'rs2', 'rs3', 'rs1', 'rd')
 
-FLOAT_FMTS = ((8, 23), (11, 52), (5, 10), (5, 2), (8, 7))
+FLOAT_FMTS = ((8, 23), (11, 52), (5, 10), (5, 2), (8, 7), (4, 3))
 
 LS_TO_FLOAT = (3, 2, 0, 1)
 
