@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Author: Tim Fischer <fischeti@iis.ee.ethz.ch>
+# Author: Viviane Potocnik <vivianep@iis.ee.ethz.ch>
 
 import numpy as np
 import torch
@@ -11,6 +12,7 @@ import torch.nn as nn
 import argparse
 import pathlib
 import hjson
+
 
 np.random.seed(42)
 torch.manual_seed(42)
@@ -57,9 +59,48 @@ def emit_header_file(layer_type: str, **kwargs):
     elif layer_type == 'FusedConv':
         file = file_path / 'data_fusedconv.h'
         emit_str += emit_fusedconv(**kwargs)
+    elif layer_type == 'Linear':
+        file = file_path / 'data_linear.h'
+        emit_str += emit_linear_layer(**kwargs)
+        
     with file.open('w') as f:
         f.write(emit_str)
 
+def emit_linear_layer(name='linear', **kwargs):
+    ifmap = kwargs['ifmap']
+    ofmap = kwargs['ofmap']
+    weights = kwargs['weights']
+    bias = kwargs['bias']
+    
+    ctypes = {
+        '64': 'double',
+        '32': 'float',
+        '16': '__fp16',
+        '8': 'char'
+    }
+
+    dtype = ctypes[str(kwargs['prec'])]
+
+    ch, ci = ifmap.shape
+    _, co = ofmap.shape
+
+    layer_str = ''
+    layer_str += '#include "layer.h"\n\n'
+    layer_str += f'linear_layer_t {name}_l = {{\n'
+    layer_str += f'\t.CO = {co},\n' # out_features
+    layer_str += f'\t.CI = {ci},\n' # in_features
+    layer_str += f'\t.CH = {ch},\n' # height
+    layer_str += f'\t.CW = {ci}\n'  # width
+    layer_str += '};\n\n\n'
+
+    layer_str += f'static {dtype} {name}_result[{co*ch}] __attribute__((section(".data")));\n\n'
+    layer_str += f'static {dtype} {name}_checksum[{co*ch}] = ' + array_to_cstr(ofmap) + ';\n\n\n'
+    layer_str += f'static {dtype} {name}_ifmap_dram[{ch}][{ci}] = ' + array_to_cstr(ifmap) + ';\n\n\n'
+    layer_str += f'static {dtype} {name}_weights_dram[{co}][{ci}] = ' + array_to_cstr(weights) + ';\n\n\n'
+    layer_str += f'static {dtype} {name}_bias_dram[{co}] = ' + array_to_cstr(bias) + ';\n\n\n'
+    layer_str += f'static {dtype} {name}_ofmap_dram[{ch}][{co}] = ' + array_to_cstr(ofmap) + ';\n\n\n'
+
+    return layer_str
 
 def emit_conv2d_layer(name='conv2d', **kwargs):
     ifmap = kwargs['ifmap']
@@ -92,10 +133,6 @@ def emit_conv2d_layer(name='conv2d', **kwargs):
     return layer_str
 
 
-def emit_linear_layer(input, weights, ofmap):
-
-    layer_str = ''
-    return layer_str
 
 
 def emit_GEMM_layer(name='gemm', **kwargs):
@@ -393,6 +430,12 @@ def fused_conv(ifmap, weights, bn_k, bn_l, padding, stride, bn, relu, accumulate
 
     return ofmap, ofmap_before, ifmap_padded
 
+def linear(ifmap, weights, bias):
+
+    ifmap = ifmap.flatten(1)
+    ofmap = torch.matmul(ifmap, weights.T) + bias
+
+    return ofmap
 
 def main():
 
@@ -552,6 +595,24 @@ def main():
             'chw_layer': param['chw_layer']
         }
         emit_header_file('FusedConv', **kwargs)
+
+    elif param['kernel'] == 'Linear':
+        # in_features = param['input_dim']['width']
+        # out_features = param['channels']['out']
+        ifmap = torch.randn(param['input_dim']['height'], param['input_dim']['width'], requires_grad=False, dtype=dtype)
+        weights = torch.randn(param['channels']['out'], param['input_dim']['width'], requires_grad=False, dtype=dtype)
+        bias = torch.randn(param['channels']['out'], requires_grad=False, dtype=dtype)
+
+        ofmap = linear(ifmap, weights, bias)
+
+        kwargs = {
+            'ifmap': ifmap,
+            'weights': weights,
+            'bias': bias,
+            'ofmap': ofmap,
+            'prec': param['prec'],
+        }
+        emit_header_file('Linear', **kwargs)
 
     else:
         print("No valid kernel selected")
