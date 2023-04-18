@@ -134,7 +134,7 @@ jobs:
   snRuntime:
     container:
       image: ghcr.io/pulp-platform/snitch
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         toolchain:
@@ -187,7 +187,7 @@ jobs:
     container:
       image: ghcr.io/pulp-platform/snitch
     name: SW on Default Snitch Cluster Config
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         toolchain:
