@@ -129,6 +129,38 @@ uint32_t check_layer(const conv_layer *l, double *checksum) {
     return errors;
 }
 
+uint32_t check_linear_layer(const linear_layer_t *l, float *checksum) {
+    uint32_t errors = 0;
+    float *ptr = snrt_cluster_memory().start;
+    volatile float *result_buf = ptr;
+    ptr += l->CO * l->CH;
+    volatile float *ofmap_checksums = ptr;
+    uint32_t total = 0;
+
+    // DMA Core compares result with a precomputed checksum
+    if (snrt_cluster_idx() == 0) {
+        if (snrt_is_dm_core()) {
+            snrt_dma_txid_t ofmap_checksum_txid = snrt_dma_start_1d(
+                (float *)ofmap_checksums, checksum,
+                sizeof(float) * l->CO * l->CH);
+            snrt_dma_wait_all();
+        } 
+
+        if(snrt_cluster_core_idx == 0) {
+            //print the ofmap_checksums
+            for (uint32_t co = 0; co < l->CO; co++) {
+                for (uint32_t ch = 0; ch < l->CH; ch++) {
+                    printf("checksum[%d][%d] = %f\n", co, ch, ofmap_checksums[co * l->CH + ch]);
+                }
+                printf("\n");
+            }
+        }
+    }
+
+    return errors;
+            
+}
+
 /**
  * @brief fast memset function performed by DMA
  *

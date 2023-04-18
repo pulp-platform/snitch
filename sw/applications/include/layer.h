@@ -132,3 +132,38 @@ typedef struct conv_layer_struct {
 
     precision_t dtype;
 } conv_layer;
+
+/**
+ * @struct linear_layer_struct
+ * @brief This structure contains all parameters necessary for Linear layers
+ * @var linear_layer_struct::CO 
+ * Size of each output sample
+ * @var linear_layer_struct::CI
+ * Size of each input sample
+ * @var linear_layer_struct::CH
+ * Height of input feature map
+ * @var linear_layer_struct::CW
+ * Width of input feature map
+ * @var linear_layer_struct::ifmap
+ * Pointer to input feature map
+ * @var linear_layer_struct::weights
+ * Pointer to weights
+ * @var linear_layer_struct::bias
+ * Pointer to bias
+ * @var linear_layer_struct::ofmap
+ * Pointer to output feature map
+ */
+ 
+typedef struct linear_layer_struct {
+    uint32_t CO;
+    uint32_t CI;
+    uint32_t CH;
+    uint32_t CW;
+
+    double *ifmap;
+    double *weights;
+    double *bias;
+    double *ofmap;
+
+    precision_t dtype;
+} linear_layer_t;

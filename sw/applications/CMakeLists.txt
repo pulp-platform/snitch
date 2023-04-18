@@ -38,7 +38,8 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_library(layers src/layers/batchnorm_layer.c
                 src/layers/maxpool_layer.c
                 src/layers/conv2d_layer.c
-                src/layers/nnlinear_backend_baseline.c )
+                src/layers/nnlinear_backend_baseline.c 
+                src/layers/linear_layer.c)
     add_library(utils src/utils/utils.c)
 
     target_link_libraries(kernels ${SNITCH_RUNTIME})
@@ -58,6 +59,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_snitch_application_executable(gemm)
     add_snitch_application_executable(fusedconv)
     add_snitch_application_executable(nnlinear_baseline)
+    add_snitch_application_executable(linear)
 
     set(SNITCH_TEST_PREFIX snApplications-)
 
