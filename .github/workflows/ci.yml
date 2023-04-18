@@ -46,7 +46,7 @@ jobs:
         override: true
         components: rustfmt
     - name: Install LLVM
-      run: sudo apt install llvm-12-dev
+      run: sudo apt-get install llvm-12-dev
     - working-directory: sw/banshee
       run: cargo build
     - working-directory: sw/banshee
@@ -82,7 +82,7 @@ jobs:
     - name: Install python packages
       run: pip install -r sw/applications/requirements.txt
     - name: Install LLVM
-      run: sudo apt install llvm-12-dev
+      run: sudo apt-get install llvm-12-dev
     - working-directory: sw/banshee
       run: cargo install --path .
     - name: Setup cmake

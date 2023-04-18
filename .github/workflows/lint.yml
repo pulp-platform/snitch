@@ -221,8 +221,8 @@ jobs:
         python-version: 3.9
     - name: Install apt requirements
       run: |
-        sudo apt update
-        sudo apt install device-tree-compiler clang-format-10
+        sudo apt-get update
+        sudo apt-get install device-tree-compiler clang-format-10
     - name: Install Python requirements
       run: pip install -r python-requirements.txt
     - name: Install Verible
