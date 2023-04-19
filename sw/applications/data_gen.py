@@ -602,7 +602,6 @@ def main():
         ifmap = torch.randn(param['input_dim']['height'], param['input_dim']['width'], requires_grad=False, dtype=dtype)
         weights = torch.randn(param['channels']['out'], param['input_dim']['width'], requires_grad=False, dtype=dtype)
         bias = torch.randn(param['channels']['out'], requires_grad=False, dtype=dtype)
-
         ofmap = linear(ifmap, weights, bias)
 
         kwargs = {
