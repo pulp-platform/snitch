@@ -160,10 +160,11 @@ typedef struct linear_layer_struct {
     uint32_t CH;
     uint32_t CW;
 
-    double *ifmap;
-    double *weights;
-    double *bias;
-    double *ofmap;
+    float *ifmap;
+    float *weights;
+    float *bias;
+    float *ofmap;
+    float *result;
 
     precision_t dtype;
 } linear_layer_t;

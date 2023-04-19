@@ -7,11 +7,11 @@
 {
     kernel: "Linear"
     channels: {
-        out: 3,
+        out: 16,
     }
     input_dim: {
-        height: 4,
-        width: 6
+        height: 3,
+        width:16
     }
     prec: 32
 }

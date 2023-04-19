@@ -17,18 +17,14 @@
 #include "utils.h"
 
 int main() {
-    printf("============= Linear layer start =============\n");
-    // linear_l.ifmap = (float*)linear_ifmap_dram;
-    // linear_l.weights = (float*)linear_weights_dram;
-    // linear_l.bias = (float*)linear_bias_dram;
+    linear_l.ifmap = (float*)linear_ifmap_dram;
+    linear_l.weights = (float*)linear_weights_dram;
+    linear_l.bias = (float*)linear_bias_dram;
+    linear_l.result = (float*)linear_ofmap_dram;
 
-    // linear_layer(&linear_l);
-
-    // snrt_global_barrier();
+    linear_layer(&linear_l);
 
     // uint32_t error = check_linear_layer(&linear_l, (float*)linear_checksum);
-
-    snrt_global_barrier();
 
     return 0;
 }

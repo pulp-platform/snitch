@@ -30,6 +30,8 @@ void linear_layer(const linear_layer_t *l) {
     ptr += bias_size;
     float *ofmap = ptr;
     ptr += ofmap_size;
+    float *result = ptr;
+    ptr += ofmap_size;
 
     // now we DMA transfer the weights and bias into the cluster TCDM
     if (snrt_is_dm_core()) {
@@ -39,21 +41,69 @@ void linear_layer(const linear_layer_t *l) {
                                     l->weights, l->CO * sizeof(float),
                                     l->CO * sizeof(float), l->CO * sizeof(float),
                                     l->CI * sizeof(float));
+
+        snrt_dma_txid_t txid_ifmap = snrt_dma_start_2d(ifmap,
+                                    l->ifmap, l->CH * sizeof(float),
+                                    l->CH * sizeof(float), l->CH * sizeof(float),
+                                    l->CW * sizeof(float));
+
         snrt_dma_wait_all();
     }
 
     snrt_cluster_hw_barrier();
 
+    if (snrt_is_compute_core() &&
+                    snrt_cluster_compute_core_idx() < compute_num) {
+
+        // determine the row stride of each matrix
+        int32_t ldI = l->CH * l->CW;
+        int32_t ldW = compute_num * l->CO;
+        int32_t ldB = compute_num;
+        int32_t ldO = ldB;
+
+        // determine the row offset of each matrix
+        int32_t offW = compute_id * l->CO;
+        int32_t offB = compute_id;
+        int32_t offO = compute_id;
+        
+        // printf("compute_id = %d, offW = %d, offB = %d, offO = %d\n",
+        //         compute_id, offW, offB, offO);
+
+        linear_fp32(ifmap, ldI, &weights[offW], ldW, &bias[compute_id], ldB,
+                    ofmap, ldO, l->CI, l->CO / compute_num, l->CH);
+
+    } else {
+        snrt_cluster_hw_barrier();
+    }
+
+    snrt_cluster_hw_barrier();
+
+    if (snrt_is_dm_core()) {
+        snrt_dma_txid_t txid_result = snrt_dma_start_2d(result,
+                                    l->result, l->CH * sizeof(float),
+                                    l->CH * sizeof(float), l->CH * sizeof(float),
+                                    l->CO * sizeof(float));
+        snrt_dma_wait_all();
+    }
+
+    snrt_cluster_hw_barrier();
+
+    // TODO: fix this, wrong values for ofmap printed
     if (compute_id == 0) {
-        // print the bias
-        for (int i = 0; i < l->CO; i++) {
-            printf("bias[%d] = %f\n", i, bias[i]);
-            // print the weights
-            for (int j = 0; j < l->CI; j++) {
-                printf("weights[%d][%d] = %f\n", i, j, weights[i * l->CI + j]);
+        // compare result with ofmap
+        float tolerance = 1e-6;
+        int error = 0;
+        for (int i = 0; i < l->CH; i++) {
+            for (int j = 0; j < l->CO; j++) {
+                if (result[i * l->CO + j] - ofmap[i * l->CO + j] > tolerance) {
+                    printf("MISMATCH: result[%d][%d] = %f, ofmap[%d][%d] = %f\n",
+                            i, j, result[i * l->CO + j], i, j, ofmap[i * l->CO + j]);
+                    error += 1;
+                }
             }
         }
 
+        printf("[%d/%d] mismatches\n", error, l->CH * l->CO);
     }
 
 }
