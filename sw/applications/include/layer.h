@@ -168,3 +168,31 @@ typedef struct linear_layer_struct {
 
     precision_t dtype;
 } linear_layer_t;
+
+/**
+ * @struct gelu_layer_struct
+ * @brief This structure contains all parameters necessary 
+ *        for computing the GELU activation function
+ * @var gelu_layer_struct::batch_size 
+ * Size of each input sample
+ * @var gelu_layer_struct::seq_len
+ * Size of each output sample
+ * @var gelu_layer_struct::nodes
+ * Number of hidden dimensions
+ * @var gelu_layer_struct::ifmap
+ * Pointer to input feature map
+ * @var gelu_layer_struct::ofmap
+ * Pointer to output feature map
+ * @var gelu_layer_struct::result
+ * Pointer to the golden model output
+ */
+
+typedef struct gelu_layer_struct {
+    uint32_t BATCH_SIZE;
+    uint32_t SEQ_LEN;
+    uint32_t HIDDEN_NODES;
+
+    float *ifmap;
+    float *ofmap;
+    float *result;
+} gelu_layer_t;

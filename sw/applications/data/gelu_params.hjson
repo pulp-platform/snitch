@@ -1,0 +1,15 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Parameters for a single linear layer
+
+{
+    kernel: "GELU"
+    input_dim: {
+        batch_size: 3,
+        seq_len:8,
+        hidden_nodes: 4
+    }
+    prec: 32
+}

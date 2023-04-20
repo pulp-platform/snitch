@@ -62,9 +62,48 @@ def emit_header_file(layer_type: str, **kwargs):
     elif layer_type == 'Linear':
         file = file_path / 'data_linear.h'
         emit_str += emit_linear_layer(**kwargs)
+    elif layer_type == 'GELU':
+        file = file_path / 'data_gelu.h'
+        emit_str += emit_gelu_layer(**kwargs)
         
     with file.open('w') as f:
         f.write(emit_str)
+
+def emit_gelu_layer(name='gelu', **kwargs):
+    ifmap = kwargs['ifmap']
+    ofmap = kwargs['ofmap']
+
+    batch_size, seq_len, hidden_nodes = ifmap.shape
+    # print("batch_size: {}, seq_len: {}, hidden_nodes: {}".format(batch_size, seq_len, hidden_nodes))
+    # for i in range(batch_size):
+    #     for j in range(seq_len):
+    #         for k in range(hidden_nodes):
+    #                 print("ifmap[{}][{}][{}] = {}".format(i, j, k, ifmap[i][j][k]))
+    #                 print("ofmap[{}][{}][{}] = {}".format(i, j, k, ofmap[i][j][k]))
+
+    ctypes = {
+        '64': 'double',
+        '32': 'float',
+        '16': '__fp16',
+        '8': 'char'
+    }
+
+    dtype = ctypes[str(kwargs['prec'])]
+    
+    layer_str = ''
+    layer_str += '#include "layer.h"\n\n'
+    layer_str += f'gelu_layer_t {name}_l = {{\n'
+    layer_str += f'\t.BATCH_SIZE = {batch_size},\n' # batch_size
+    layer_str += f'\t.SEQ_LEN = {seq_len},\n'       # seq_len
+    layer_str += f'\t.HIDDEN_NODES = {hidden_nodes}\n' # hidden_size
+    layer_str += '};\n\n\n'
+
+    layer_str += f'static {dtype} {name}_result[{batch_size}][{seq_len}][{hidden_nodes}] __attribute__((section(".data")));\n\n'
+    layer_str += f'static {dtype} {name}_ifmap_dram[{batch_size}][{seq_len}][{hidden_nodes}] = ' + array_to_cstr(ifmap) + ';\n\n\n'
+    layer_str += f'static {dtype} {name}_ofmap_dram[{batch_size}][{seq_len}][{hidden_nodes}] = ' + array_to_cstr(ofmap) + ';\n\n\n'
+    layer_str += f'static {dtype} {name}_checksum[{batch_size}][{seq_len}][{hidden_nodes}] = ' + array_to_cstr(torch.sum(ofmap, dim=-1)) + ';\n\n\n'
+
+    return layer_str
 
 def emit_linear_layer(name='linear', **kwargs):
     ifmap = kwargs['ifmap']
@@ -94,7 +133,7 @@ def emit_linear_layer(name='linear', **kwargs):
     layer_str += '};\n\n\n'
 
     layer_str += f'static {dtype} {name}_result[{co*ch}] __attribute__((section(".data")));\n\n'
-    layer_str += f'static {dtype} {name}_checksum[{co*ch}] = ' + array_to_cstr(ofmap) + ';\n\n\n'
+    layer_str += f'static {dtype} {name}_checksum[{co*ch}] = ' + array_to_cstr(torch.sum(ofmap, dim=-1)) + ';\n\n\n'
     layer_str += f'static {dtype} {name}_ifmap_dram[{ch}][{ci}] = ' + array_to_cstr(ifmap) + ';\n\n\n'
     layer_str += f'static {dtype} {name}_weights_dram[{co}][{ci}] = ' + array_to_cstr(weights) + ';\n\n\n'
     layer_str += f'static {dtype} {name}_bias_dram[{co}] = ' + array_to_cstr(bias) + ';\n\n\n'
@@ -437,6 +476,12 @@ def linear(ifmap, weights, bias):
 
     return ofmap
 
+def gelu(ifmap):
+    gelu = torch.nn.GELU()
+    ofmap = gelu(ifmap)
+
+    return ofmap
+
 def main():
 
     parser = argparse.ArgumentParser(description='Generate data for kernels')
@@ -612,6 +657,19 @@ def main():
             'prec': param['prec'],
         }
         emit_header_file('Linear', **kwargs)
+
+    elif param['kernel'] == 'GELU':
+        ifmap = torch.randn(param['input_dim']['batch_size'], param['input_dim']['seq_len'],
+                            param['input_dim']['hidden_nodes'], requires_grad=False, dtype=dtype)
+        ofmap = gelu(ifmap)
+        
+        kwargs = {
+            'ifmap': ifmap,
+            'ofmap': ofmap,
+            'prec': param['prec'],
+        }
+
+        emit_header_file('GELU', **kwargs)
 
     else:
         print("No valid kernel selected")
