@@ -1,0 +1,16 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Parameters for a single SoftMax layer
+
+{
+    kernel: "SoftMax"
+    input_dim: {
+        batch_size: 3,
+        seq_len: 16,
+        input_samples: 4
+    }
+    reduce_dim: -1
+    prec: 32
+}

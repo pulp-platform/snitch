@@ -65,9 +65,47 @@ def emit_header_file(layer_type: str, **kwargs):
     elif layer_type == 'GELU':
         file = file_path / 'data_gelu.h'
         emit_str += emit_gelu_layer(**kwargs)
+    elif layer_type == 'SoftMax':
+        file = file_path / 'data_softmax.h'
+        emit_str += emit_softmax_layer(**kwargs)
         
     with file.open('w') as f:
         f.write(emit_str)
+
+def emit_softmax_layer(name='softmax', **kwargs):
+    ifmap = kwargs['ifmap']
+    ofmap = kwargs['ofmap']
+    reduce_dim = kwargs['reduce_dim']
+
+    batch_size, seq_len, input_samples = ifmap.shape
+
+    ctypes = {
+        '64': 'double',
+        '32': 'float',
+        '16': '__fp16',
+        '8': 'char'
+    }
+
+    dtype = ctypes[str(kwargs['prec'])]
+
+    layer_str = ''
+    layer_str += '#include "layer.h"\n\n'
+    layer_str += f'softmax_layer_t {name}_l = {{\n'
+    layer_str += f'\t.BATCH_SIZE = {batch_size},\n' # batch_size
+    layer_str += f'\t.SEQ_LEN = {seq_len},\n'       # seq_len
+    layer_str += f'\t.INPUT_SAMPLES = {input_samples},\n' # input_samples
+    layer_str += f'\t.REDUCE_DIM = {reduce_dim},\n' # reduce_dim
+    layer_str += f'\t.dtype = FP{kwargs["prec"]},\n'
+    layer_str += '};\n\n\n'
+
+    checksum = torch.sum(ofmap, dim=-1)
+
+    layer_str += f'static {dtype} {name}_result[{batch_size}][{seq_len}][{input_samples}] __attribute__((section(".data")));\n\n'
+    layer_str += f'static {dtype} {name}_ifmap_dram[{batch_size}][{seq_len}][{input_samples}] = ' + array_to_cstr(ifmap) + ';\n\n'
+    layer_str += f'static {dtype} {name}_ofmap_dram[{batch_size}][{seq_len}][{input_samples}] = ' + array_to_cstr(ofmap) + ';\n\n'
+    layer_str += f'static {dtype} {name}_checksum[{batch_size}][{seq_len}] = ' + array_to_cstr(checksum) + ';\n\n'
+
+    return layer_str
 
 def emit_gelu_layer(name='gelu', **kwargs):
     ifmap = kwargs['ifmap']
@@ -95,13 +133,14 @@ def emit_gelu_layer(name='gelu', **kwargs):
     layer_str += f'gelu_layer_t {name}_l = {{\n'
     layer_str += f'\t.BATCH_SIZE = {batch_size},\n' # batch_size
     layer_str += f'\t.SEQ_LEN = {seq_len},\n'       # seq_len
-    layer_str += f'\t.HIDDEN_NODES = {hidden_nodes}\n' # hidden_size
+    layer_str += f'\t.HIDDEN_NODES = {hidden_nodes},\n' # hidden_size
+    layer_str += f'\t.dtype = FP{kwargs["prec"]},\n'
     layer_str += '};\n\n\n'
 
     layer_str += f'static {dtype} {name}_result[{batch_size}][{seq_len}][{hidden_nodes}] __attribute__((section(".data")));\n\n'
     layer_str += f'static {dtype} {name}_ifmap_dram[{batch_size}][{seq_len}][{hidden_nodes}] = ' + array_to_cstr(ifmap) + ';\n\n\n'
     layer_str += f'static {dtype} {name}_ofmap_dram[{batch_size}][{seq_len}][{hidden_nodes}] = ' + array_to_cstr(ofmap) + ';\n\n\n'
-    layer_str += f'static {dtype} {name}_checksum[{batch_size}][{seq_len}][{hidden_nodes}] = ' + array_to_cstr(torch.sum(ofmap, dim=-1)) + ';\n\n\n'
+    layer_str += f'static {dtype} {name}_checksum[{batch_size}][{seq_len}] = ' + array_to_cstr(torch.sum(ofmap, dim=-1)) + ';\n\n\n'
 
     return layer_str
 
@@ -482,6 +521,15 @@ def gelu(ifmap):
 
     return ofmap
 
+def softmax(ifmap, axis):
+    softmax = torch.nn.Softmax(dim=axis)
+    ofmap = softmax(ifmap)
+
+    # print the global max of the input
+    print("max of input: ", torch.max(ifmap))
+
+    return ofmap
+
 def main():
 
     parser = argparse.ArgumentParser(description='Generate data for kernels')
@@ -670,6 +718,20 @@ def main():
         }
 
         emit_header_file('GELU', **kwargs)
+
+    elif param['kernel'] == 'SoftMax':
+        ifmap = torch.randn(param['input_dim']['batch_size'], param['input_dim']['seq_len'],
+                            param['input_dim']['input_samples'], requires_grad=False, dtype=dtype)
+        ofmap = softmax(ifmap, param['reduce_dim'])
+
+        kwargs = {
+            'ifmap': ifmap,
+            'ofmap': ofmap,
+            'reduce_dim': param['reduce_dim'],
+            'prec': param['prec'],
+        }
+
+        emit_header_file('SoftMax', **kwargs)
 
     else:
         print("No valid kernel selected")

@@ -173,11 +173,11 @@ typedef struct linear_layer_struct {
  * @struct gelu_layer_struct
  * @brief This structure contains all parameters necessary 
  *        for computing the GELU activation function
- * @var gelu_layer_struct::batch_size 
+ * @var gelu_layer_struct::BATCH_SIZE 
  * Size of each input sample
- * @var gelu_layer_struct::seq_len
+ * @var gelu_layer_struct::SEQ_LEN
  * Size of each output sample
- * @var gelu_layer_struct::nodes
+ * @var gelu_layer_struct::HIDDEN_NODES
  * Number of hidden dimensions
  * @var gelu_layer_struct::ifmap
  * Pointer to input feature map
@@ -195,4 +195,40 @@ typedef struct gelu_layer_struct {
     float *ifmap;
     float *ofmap;
     float *result;
+
+    precision_t dtype;
 } gelu_layer_t;
+
+
+/**
+ * @struct softmax_layer_struct
+ * @brief This structure contains all parameters necessary
+ *       for computing the Softmax activation function
+ * @var softmax_layer_struct::BATCH_SIZE
+ * Size of each input sample
+ * @var softmax_layer_struct::SEQ_LEN
+ * Size of each output sample
+ * @var softmax_layer_struct::INPUT_SAMPLES
+ * Number of input samples
+ * @var softmax_layer_struct::REDUCE_DIM
+ * Along which dimension to reduce
+ * @var softmax_layer_struct::ifmap
+ * Pointer to input feature map
+ * @var softmax_layer_struct::ofmap
+ * Pointer to output feature map
+ * @var softmax_layer_struct::result
+ * Pointer to the golden model output
+ */
+
+typedef struct softmax_layer_struct {
+    uint32_t BATCH_SIZE;
+    uint32_t SEQ_LEN;
+    uint32_t INPUT_SAMPLES;
+    uint32_t REDUCE_DIM;
+
+    float *ifmap;
+    float *ofmap;
+    float *result;
+
+    precision_t dtype;
+} softmax_layer_t;
