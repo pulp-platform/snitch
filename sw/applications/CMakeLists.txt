@@ -39,7 +39,8 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
                 src/layers/maxpool_layer.c
                 src/layers/conv2d_layer.c
                 src/layers/nnlinear_backend_baseline.c 
-                src/layers/linear_layer.c)
+                src/layers/linear_layer.c
+                src/layers/gelu_layer.c)
     add_library(utils src/utils/utils.c)
 
     target_link_libraries(kernels ${SNITCH_RUNTIME})
@@ -53,6 +54,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_snitch_raw_test_args(fusedconv fusedconv --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --num-clusters 2)
     add_snitch_raw_test_args(nnlinear_baseline nnlinear_baseline --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --num-clusters 2)
     add_snitch_raw_test_args(linear linear --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    add_snitch_raw_test_args(gelu gelu --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
 
     add_snitch_application_executable(batchnorm)
     add_snitch_application_executable(maxpool)
@@ -61,15 +63,17 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_snitch_application_executable(fusedconv)
     add_snitch_application_executable(nnlinear_baseline)
     add_snitch_application_executable(linear)
+    add_snitch_application_executable(gelu)
 
     set(SNITCH_TEST_PREFIX snApplications-)
 
-    add_snitch_raw_test_args(batchnorm batchnorm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(maxpool maxpool --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(conv2d conv2d --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(gemm gemm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(fusedconv fusedconv --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(nnlinear_baseline nnlinear_baseline --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(linear linear --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    # add_snitch_raw_test_args(batchnorm batchnorm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    # add_snitch_raw_test_args(maxpool maxpool --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    # add_snitch_raw_test_args(conv2d conv2d --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    # add_snitch_raw_test_args(gemm gemm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    # add_snitch_raw_test_args(fusedconv fusedconv --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    # add_snitch_raw_test_args(nnlinear_baseline nnlinear_baseline --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    # add_snitch_raw_test_args(linear linear --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    # add_snitch_raw_test_args(gelu gelu --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
     
 endif()
