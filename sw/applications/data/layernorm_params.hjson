@@ -1,0 +1,16 @@
+// Copyright 2020 ETH Zurich and University of Bologna.
+// Solderpad Hardware License, Version 0.51, see LICENSE for details.
+// SPDX-License-Identifier: SHL-0.51
+
+// Parameters for a single LayerNorm layer
+
+{
+    kernel: "LayerNorm"
+    input_dim: {
+        batch_size: 3,
+        seq_len: 8,
+        embeddings: 4
+    }
+    eps: 1e-5
+    prec: 32
+}

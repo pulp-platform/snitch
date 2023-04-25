@@ -232,3 +232,34 @@ typedef struct softmax_layer_struct {
 
     precision_t dtype;
 } softmax_layer_t;
+
+/**
+ * @struct layernorm_layer_struct
+ * @brief This structure contains all parameters necessary 
+ *        for computing the LayerNorm activation function
+ * @var layernorm_layer_struct::BATCH_SIZE 
+ * Size of each input sample
+ * @var layernorm_layer_struct::SEQ_LEN
+ * Size of each output sample
+ * @var layernorm_layer_struct::EMBEDDINGS
+ * Number of hidden dimensions
+ * @var layernorm_layer_struct::ifmap
+ * Pointer to input feature map
+ * @var layernorm_layer_struct::ofmap
+ * Pointer to output feature map
+ * @var layernorm_layer_struct::result
+ * Pointer to the golden model output
+ */
+
+typedef struct layernorm_layer_struct {
+    uint32_t BATCH_SIZE;
+    uint32_t SEQ_LEN;
+    uint32_t EMBEDDINGS;
+    uint32_t EPS;
+
+    float *ifmap;
+    float *ofmap;
+    float *result;
+
+    precision_t dtype;
+} layernorm_layer_t;
