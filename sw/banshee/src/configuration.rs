@@ -284,7 +284,7 @@ pub struct Barrier {
 impl Default for Barrier {
     fn default() -> Barrier {
         Barrier {
-            start: 0,
+            start: 0x40000038,
             offset: 0,
         }
     }
