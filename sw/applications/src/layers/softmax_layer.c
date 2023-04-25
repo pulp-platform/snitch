@@ -30,7 +30,8 @@ void softmax_layer(const softmax_layer_t *l) {
     if (snrt_is_dm_core()) {
         snrt_dma_txid_t txid_ifmap = snrt_dma_start_2d(ifmap,
                                     l->ifmap, l->BATCH_SIZE * sizeof(float),
-                                    l->BATCH_SIZE * sizeof(float), l->BATCH_SIZE * sizeof(float),
+                                    l->BATCH_SIZE * sizeof(float), 
+                                    l->BATCH_SIZE * sizeof(float),
                                     l->SEQ_LEN * l->INPUT_SAMPLES * sizeof(float));
 
         snrt_dma_wait_all();
