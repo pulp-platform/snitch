@@ -68,9 +68,46 @@ def emit_header_file(layer_type: str, **kwargs):
     elif layer_type == 'SoftMax':
         file = file_path / 'data_softmax.h'
         emit_str += emit_softmax_layer(**kwargs)
+    elif layer_type == 'LayerNorm':
+        file = file_path / 'data_layernorm.h'
+        emit_str += emit_layernorm_layer(**kwargs)
         
     with file.open('w') as f:
         f.write(emit_str)
+
+def emit_layernorm_layer(name='layernorm', **kwargs):
+    ifmap = kwargs['ifmap']
+    ofmap = kwargs['ofmap']
+
+    batch_size, seq_len, embeddings = ifmap.shape
+
+    ctypes = {
+        '64': 'double',
+        '32': 'float',
+        '16': '__fp16',
+        '8': 'char'
+    }
+
+    dtype = ctypes[str(kwargs['prec'])]
+
+    checksum = torch.sum(ifmap, dim = -1)
+
+    layer_str = ''
+    layer_str += '#include "layer.h"\n\n'
+    layer_str += f'layernorm_layer_t {name}_l = {{\n'
+    layer_str += f'\t.BATCH_SIZE = {batch_size},\n' # batch_size
+    layer_str += f'\t.SEQ_LEN = {seq_len},\n'       # seq_len
+    layer_str += f'\t.EMBEDDINGS = {embeddings},\n' # embeddings
+    layer_str += f'\t.dtype = FP{kwargs["prec"]},\n'
+    layer_str += '};\n\n\n'
+
+    layer_str += f'static {dtype} {name}_result[{batch_size}][{seq_len}][{embeddings}] __attribute__((section(".data")));\n\n'
+    layer_str += f'static {dtype} {name}_ifmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' + array_to_cstr(ifmap) + ';\n\n'
+    layer_str += f'static {dtype} {name}_ofmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' + array_to_cstr(ofmap) + ';\n\n'
+    layer_str += f'static {dtype} {name}_checksum[{batch_size}][{seq_len}] = ' + array_to_cstr(checksum) + ';\n\n'
+
+    return layer_str
+
 
 def emit_softmax_layer(name='softmax', **kwargs):
     ifmap = kwargs['ifmap']
@@ -530,6 +567,12 @@ def softmax(ifmap, axis):
 
     return ofmap
 
+def layernorm(ifmap, eps, shape):
+    ln = torch.nn.LayerNorm(shape, eps=eps)
+    ofmap = ln(ifmap)
+
+    return ofmap
+
 def main():
 
     parser = argparse.ArgumentParser(description='Generate data for kernels')
@@ -732,6 +775,27 @@ def main():
         }
 
         emit_header_file('SoftMax', **kwargs)
+
+    elif param['kernel'] == 'LayerNorm':
+        ifmap = torch.randn(param['input_dim']['batch_size'], param['input_dim']['seq_len'],
+                            param['input_dim']['embeddings'], requires_grad=False, dtype=dtype)
+        
+        eps = param['eps']
+        
+        ofmap = layernorm(ifmap, eps, param['input_dim']['embeddings'])
+
+        ofmap = ofmap.detach().numpy()
+
+        print("LayerNorm output shape: ", ofmap.shape)
+        print("LayerNorm output: ", ofmap)
+
+        kwargs = {
+            'ifmap': ifmap,
+            'ofmap': ofmap,
+            'prec': param['prec'],
+        }
+
+        emit_header_file('LayerNorm', **kwargs)
 
     else:
         print("No valid kernel selected")
