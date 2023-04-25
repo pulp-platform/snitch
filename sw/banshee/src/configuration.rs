@@ -124,7 +124,7 @@ impl Default for Memories {
             tcdm: Memory {
                 start: 0x100000,
                 size: 0x20000,
-                offset: 0x20000,
+                offset: 0x40000,
                 latency: 2,
             },
             dram: Memory {
