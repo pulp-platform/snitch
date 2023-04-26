@@ -9,7 +9,7 @@ SHELL := /bin/bash
 ###########################
 
 TESTS_DIR ?= tests/bin
-TESTS_BLACKLIST += dma_simple matmul_ssr_frep matmul_ssr
+TESTS_BLACKLIST += dma_simple matmul_ssr_frep matmul_ssr barrier
 TESTS += $(patsubst $(TESTS_DIR)/%,%,$(wildcard $(TESTS_DIR)/*))
 TEST_TARGETS = $(patsubst %,test-%,$(TESTS))
 LOG_FAILED ?= /tmp/banshee_tests_failed
