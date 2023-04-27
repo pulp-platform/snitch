@@ -135,20 +135,20 @@ package occamy_pkg;
 
   /// Configuration of the `soc_axi_lite_periph_xbar` crossbar.
   localparam axi_pkg::xbar_cfg_t SocAxiLitePeriphXbarCfg = '{
-  NoSlvPorts:         SOC_AXI_LITE_PERIPH_XBAR_NUM_INPUTS,
-  NoMstPorts:         SOC_AXI_LITE_PERIPH_XBAR_NUM_OUTPUTS,
-  MaxSlvTrans:        4,
-  MaxMstTrans:        4,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 0,
-  AxiIdUsedSlvPorts:  0,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       64,
-  NoAddrRules:        2
-};
+      NoSlvPorts: SOC_AXI_LITE_PERIPH_XBAR_NUM_INPUTS,
+      NoMstPorts: SOC_AXI_LITE_PERIPH_XBAR_NUM_OUTPUTS,
+      MaxSlvTrans: 4,
+      MaxMstTrans: 4,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 0,
+      AxiIdUsedSlvPorts: 0,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 64,
+      NoAddrRules: 2
+  };
 
   // AXI plugs of the `soc_axi_lite_periph_xbar` crossbar.
 
@@ -187,11 +187,11 @@ package occamy_pkg;
 
   /// Address map of the `hbm_cfg_xbar` crossbar.
   localparam xbar_rule_48_t [3:0] HbmCfgXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h08000000, end_addr: 48'h08400000 },
-  '{ idx: 1, start_addr: 48'h09000000, end_addr: 48'h09100000 },
-  '{ idx: 2, start_addr: 48'h0a000000, end_addr: 48'h0a010000 },
-  '{ idx: 3, start_addr: 48'h0a800000, end_addr: 48'h0a810000 }
-};
+      '{idx: 0, start_addr: 48'h08000000, end_addr: 48'h08400000},
+      '{idx: 1, start_addr: 48'h09000000, end_addr: 48'h09100000},
+      '{idx: 2, start_addr: 48'h0a000000, end_addr: 48'h0a010000},
+      '{idx: 3, start_addr: 48'h0a800000, end_addr: 48'h0a810000}
+  };
 
   // AXI-Lite bus with 48 bit address and 32 bit data.
   `AXI_LITE_TYPEDEF_ALL_CT(axi_lite_a48_d32, axi_lite_a48_d32_req_t, axi_lite_a48_d32_rsp_t,
@@ -228,20 +228,20 @@ package occamy_pkg;
 
   /// Configuration of the `soc_axi_lite_narrow_periph_xbar` crossbar.
   localparam axi_pkg::xbar_cfg_t SocAxiLiteNarrowPeriphXbarCfg = '{
-  NoSlvPorts:         SOC_AXI_LITE_NARROW_PERIPH_XBAR_NUM_INPUTS,
-  NoMstPorts:         SOC_AXI_LITE_NARROW_PERIPH_XBAR_NUM_OUTPUTS,
-  MaxSlvTrans:        4,
-  MaxMstTrans:        4,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 0,
-  AxiIdUsedSlvPorts:  0,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       32,
-  NoAddrRules:        18
-};
+      NoSlvPorts: SOC_AXI_LITE_NARROW_PERIPH_XBAR_NUM_INPUTS,
+      NoMstPorts: SOC_AXI_LITE_NARROW_PERIPH_XBAR_NUM_OUTPUTS,
+      MaxSlvTrans: 4,
+      MaxMstTrans: 4,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 0,
+      AxiIdUsedSlvPorts: 0,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 32,
+      NoAddrRules: 18
+  };
 
   // AXI plugs of the `soc_axi_lite_narrow_periph_xbar` crossbar.
 
@@ -275,20 +275,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_pre_xbar_0` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantPreXbar0Cfg = '{
-  NoSlvPorts:         QUADRANT_PRE_XBAR_0_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_PRE_XBAR_0_NUM_OUTPUTS,
-  MaxSlvTrans:        64,
-  MaxMstTrans:        64,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        5
-};
+      NoSlvPorts: QUADRANT_PRE_XBAR_0_NUM_INPUTS,
+      NoMstPorts: QUADRANT_PRE_XBAR_0_NUM_OUTPUTS,
+      MaxSlvTrans: 64,
+      MaxMstTrans: 64,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 5
+  };
 
   // AXI bus with 48 bit address, 512 bit data, 4 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i4_u0, axi_a48_d512_i4_u0_req_t, axi_a48_d512_i4_u0_resp_t,
@@ -329,20 +329,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_pre_xbar_1` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantPreXbar1Cfg = '{
-  NoSlvPorts:         QUADRANT_PRE_XBAR_1_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_PRE_XBAR_1_NUM_OUTPUTS,
-  MaxSlvTrans:        64,
-  MaxMstTrans:        64,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        5
-};
+      NoSlvPorts: QUADRANT_PRE_XBAR_1_NUM_INPUTS,
+      NoMstPorts: QUADRANT_PRE_XBAR_1_NUM_OUTPUTS,
+      MaxSlvTrans: 64,
+      MaxMstTrans: 64,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 5
+  };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_1_in_req_t;
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_1_out_req_t;
@@ -379,20 +379,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_pre_xbar_2` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantPreXbar2Cfg = '{
-  NoSlvPorts:         QUADRANT_PRE_XBAR_2_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_PRE_XBAR_2_NUM_OUTPUTS,
-  MaxSlvTrans:        64,
-  MaxMstTrans:        64,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        5
-};
+      NoSlvPorts: QUADRANT_PRE_XBAR_2_NUM_INPUTS,
+      NoMstPorts: QUADRANT_PRE_XBAR_2_NUM_OUTPUTS,
+      MaxSlvTrans: 64,
+      MaxMstTrans: 64,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 5
+  };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_2_in_req_t;
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_2_out_req_t;
@@ -429,20 +429,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_pre_xbar_3` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantPreXbar3Cfg = '{
-  NoSlvPorts:         QUADRANT_PRE_XBAR_3_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_PRE_XBAR_3_NUM_OUTPUTS,
-  MaxSlvTrans:        64,
-  MaxMstTrans:        64,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        5
-};
+      NoSlvPorts: QUADRANT_PRE_XBAR_3_NUM_INPUTS,
+      NoMstPorts: QUADRANT_PRE_XBAR_3_NUM_OUTPUTS,
+      MaxSlvTrans: 64,
+      MaxMstTrans: 64,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 5
+  };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_3_in_req_t;
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_3_out_req_t;
@@ -479,20 +479,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_pre_xbar_4` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantPreXbar4Cfg = '{
-  NoSlvPorts:         QUADRANT_PRE_XBAR_4_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_PRE_XBAR_4_NUM_OUTPUTS,
-  MaxSlvTrans:        64,
-  MaxMstTrans:        64,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        5
-};
+      NoSlvPorts: QUADRANT_PRE_XBAR_4_NUM_INPUTS,
+      NoMstPorts: QUADRANT_PRE_XBAR_4_NUM_OUTPUTS,
+      MaxSlvTrans: 64,
+      MaxMstTrans: 64,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 5
+  };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_4_in_req_t;
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_4_out_req_t;
@@ -529,20 +529,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_pre_xbar_5` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantPreXbar5Cfg = '{
-  NoSlvPorts:         QUADRANT_PRE_XBAR_5_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_PRE_XBAR_5_NUM_OUTPUTS,
-  MaxSlvTrans:        64,
-  MaxMstTrans:        64,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        5
-};
+      NoSlvPorts: QUADRANT_PRE_XBAR_5_NUM_INPUTS,
+      NoMstPorts: QUADRANT_PRE_XBAR_5_NUM_OUTPUTS,
+      MaxSlvTrans: 64,
+      MaxMstTrans: 64,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 5
+  };
 
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_5_in_req_t;
   typedef axi_a48_d512_i4_u0_req_t quadrant_pre_xbar_5_out_req_t;
@@ -590,20 +590,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_inter_xbar` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantInterXbarCfg = '{
-  NoSlvPorts:         QUADRANT_INTER_XBAR_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_INTER_XBAR_NUM_OUTPUTS,
-  MaxSlvTrans:        64,
-  MaxMstTrans:        64,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        8
-};
+      NoSlvPorts: QUADRANT_INTER_XBAR_NUM_INPUTS,
+      NoMstPorts: QUADRANT_INTER_XBAR_NUM_OUTPUTS,
+      MaxSlvTrans: 64,
+      MaxMstTrans: 64,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 8
+  };
 
   // AXI bus with 48 bit address, 512 bit data, 7 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i7_u0, axi_a48_d512_i7_u0_req_t, axi_a48_d512_i7_u0_resp_t,
@@ -656,20 +656,20 @@ package occamy_pkg;
 
   /// Configuration of the `hbm_xbar` crossbar.
   localparam axi_pkg::xbar_cfg_t HbmXbarCfg = '{
-  NoSlvPorts:         HBM_XBAR_NUM_INPUTS,
-  NoMstPorts:         HBM_XBAR_NUM_OUTPUTS,
-  MaxSlvTrans:        128,
-  MaxMstTrans:        128,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        10
-};
+      NoSlvPorts: HBM_XBAR_NUM_INPUTS,
+      NoMstPorts: HBM_XBAR_NUM_OUTPUTS,
+      MaxSlvTrans: 128,
+      MaxMstTrans: 128,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 10
+  };
 
   typedef axi_a48_d512_i4_u0_req_t hbm_xbar_in_req_t;
   typedef axi_a48_d512_i7_u0_req_t hbm_xbar_out_req_t;
@@ -713,20 +713,20 @@ package occamy_pkg;
 
   /// Configuration of the `soc_wide_xbar` crossbar.
   localparam axi_pkg::xbar_cfg_t SocWideXbarCfg = '{
-  NoSlvPorts:         SOC_WIDE_XBAR_NUM_INPUTS,
-  NoMstPorts:         SOC_WIDE_XBAR_NUM_OUTPUTS,
-  MaxSlvTrans:        64,
-  MaxMstTrans:        64,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        8
-};
+      NoSlvPorts: SOC_WIDE_XBAR_NUM_INPUTS,
+      NoMstPorts: SOC_WIDE_XBAR_NUM_OUTPUTS,
+      MaxSlvTrans: 64,
+      MaxMstTrans: 64,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 8
+  };
 
   // AXI bus with 48 bit address, 512 bit data, 6 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i6_u0, axi_a48_d512_i6_u0_req_t, axi_a48_d512_i6_u0_resp_t,
@@ -788,20 +788,20 @@ package occamy_pkg;
 
   /// Configuration of the `soc_narrow_xbar` crossbar.
   localparam axi_pkg::xbar_cfg_t SocNarrowXbarCfg = '{
-  NoSlvPorts:         SOC_NARROW_XBAR_NUM_INPUTS,
-  NoMstPorts:         SOC_NARROW_XBAR_NUM_OUTPUTS,
-  MaxSlvTrans:        32,
-  MaxMstTrans:        32,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       64,
-  NoAddrRules:        20
-};
+      NoSlvPorts: SOC_NARROW_XBAR_NUM_INPUTS,
+      NoMstPorts: SOC_NARROW_XBAR_NUM_OUTPUTS,
+      MaxSlvTrans: 32,
+      MaxMstTrans: 32,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 64,
+      NoAddrRules: 20
+  };
 
   // AXI bus with 48 bit address, 64 bit data, 4 bit IDs, and 5 bit user data.
   `AXI_TYPEDEF_ALL_CT(axi_a48_d64_i4_u5, axi_a48_d64_i4_u5_req_t, axi_a48_d64_i4_u5_resp_t,
@@ -846,20 +846,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_s1_ctrl_soc_to_quad_xbar` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantS1CtrlSocToQuadXbarCfg = '{
-  NoSlvPorts:         QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_NUM_OUTPUTS,
-  MaxSlvTrans:        32,
-  MaxMstTrans:        32,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_SLV_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 8,
-  AxiIdUsedSlvPorts:  8,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       64,
-  NoAddrRules:        1
-};
+      NoSlvPorts: QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_NUM_INPUTS,
+      NoMstPorts: QUADRANT_S1_CTRL_SOC_TO_QUAD_XBAR_NUM_OUTPUTS,
+      MaxSlvTrans: 32,
+      MaxMstTrans: 32,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_SLV_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 8,
+      AxiIdUsedSlvPorts: 8,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 64,
+      NoAddrRules: 1
+  };
 
   typedef axi_a48_d64_i8_u5_req_t quadrant_s1_ctrl_soc_to_quad_xbar_in_req_t;
   typedef axi_a48_d64_i8_u5_req_t quadrant_s1_ctrl_soc_to_quad_xbar_out_req_t;
@@ -896,20 +896,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_s1_ctrl_quad_to_soc_xbar` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantS1CtrlQuadToSocXbarCfg = '{
-  NoSlvPorts:         QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_NUM_OUTPUTS,
-  MaxSlvTrans:        32,
-  MaxMstTrans:        32,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_MST_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       64,
-  NoAddrRules:        1
-};
+      NoSlvPorts: QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_NUM_INPUTS,
+      NoMstPorts: QUADRANT_S1_CTRL_QUAD_TO_SOC_XBAR_NUM_OUTPUTS,
+      MaxSlvTrans: 32,
+      MaxMstTrans: 32,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_MST_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 64,
+      NoAddrRules: 1
+  };
 
   typedef axi_a48_d64_i4_u5_req_t quadrant_s1_ctrl_quad_to_soc_xbar_in_req_t;
   typedef axi_a48_d64_i4_u5_req_t quadrant_s1_ctrl_quad_to_soc_xbar_out_req_t;
@@ -946,20 +946,20 @@ package occamy_pkg;
 
   /// Configuration of the `quadrant_s1_ctrl_mux` crossbar.
   localparam axi_pkg::xbar_cfg_t QuadrantS1CtrlMuxCfg = '{
-  NoSlvPorts:         QUADRANT_S1_CTRL_MUX_NUM_INPUTS,
-  NoMstPorts:         QUADRANT_S1_CTRL_MUX_NUM_OUTPUTS,
-  MaxSlvTrans:        32,
-  MaxMstTrans:        32,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 0,
-  AxiIdUsedSlvPorts:  0,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       32,
-  NoAddrRules:        1
-};
+      NoSlvPorts: QUADRANT_S1_CTRL_MUX_NUM_INPUTS,
+      NoMstPorts: QUADRANT_S1_CTRL_MUX_NUM_OUTPUTS,
+      MaxSlvTrans: 32,
+      MaxMstTrans: 32,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 0,
+      AxiIdUsedSlvPorts: 0,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 32,
+      NoAddrRules: 1
+  };
 
   // AXI plugs of the `quadrant_s1_ctrl_mux` crossbar.
 
@@ -1000,20 +1000,20 @@ package occamy_pkg;
 
   /// Configuration of the `wide_xbar_quadrant_s1` crossbar.
   localparam axi_pkg::xbar_cfg_t WideXbarQuadrantS1Cfg = '{
-  NoSlvPorts:         WIDE_XBAR_QUADRANT_S1_NUM_INPUTS,
-  NoMstPorts:         WIDE_XBAR_QUADRANT_S1_NUM_OUTPUTS,
-  MaxSlvTrans:        32,
-  MaxMstTrans:        32,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 3,
-  AxiIdUsedSlvPorts:  3,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       512,
-  NoAddrRules:        4
-};
+      NoSlvPorts: WIDE_XBAR_QUADRANT_S1_NUM_INPUTS,
+      NoMstPorts: WIDE_XBAR_QUADRANT_S1_NUM_OUTPUTS,
+      MaxSlvTrans: 32,
+      MaxMstTrans: 32,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 3,
+      AxiIdUsedSlvPorts: 3,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 512,
+      NoAddrRules: 4
+  };
 
   // AXI bus with 48 bit address, 512 bit data, 3 bit IDs, and 0 bit user data.
   `AXI_TYPEDEF_ALL_CT(axi_a48_d512_i3_u0, axi_a48_d512_i3_u0_req_t, axi_a48_d512_i3_u0_resp_t,
@@ -1061,20 +1061,20 @@ package occamy_pkg;
 
   /// Configuration of the `narrow_xbar_quadrant_s1` crossbar.
   localparam axi_pkg::xbar_cfg_t NarrowXbarQuadrantS1Cfg = '{
-  NoSlvPorts:         NARROW_XBAR_QUADRANT_S1_NUM_INPUTS,
-  NoMstPorts:         NARROW_XBAR_QUADRANT_S1_NUM_OUTPUTS,
-  MaxSlvTrans:        8,
-  MaxMstTrans:        8,
-  FallThrough:        0,
-  LatencyMode:        axi_pkg::CUT_ALL_PORTS,
-  PipelineStages:     0,
-  AxiIdWidthSlvPorts: 4,
-  AxiIdUsedSlvPorts:  4,
-  UniqueIds:          0,
-  AxiAddrWidth:       48,
-  AxiDataWidth:       64,
-  NoAddrRules:        4
-};
+      NoSlvPorts: NARROW_XBAR_QUADRANT_S1_NUM_INPUTS,
+      NoMstPorts: NARROW_XBAR_QUADRANT_S1_NUM_OUTPUTS,
+      MaxSlvTrans: 8,
+      MaxMstTrans: 8,
+      FallThrough: 0,
+      LatencyMode: axi_pkg::CUT_ALL_PORTS,
+      PipelineStages: 0,
+      AxiIdWidthSlvPorts: 4,
+      AxiIdUsedSlvPorts: 4,
+      UniqueIds: 0,
+      AxiAddrWidth: 48,
+      AxiDataWidth: 64,
+      NoAddrRules: 4
+  };
 
   // AXI bus with 48 bit address, 64 bit data, 7 bit IDs, and 5 bit user data.
   `AXI_TYPEDEF_ALL_CT(axi_a48_d64_i7_u5, axi_a48_d64_i7_u5_req_t, axi_a48_d64_i7_u5_resp_t,

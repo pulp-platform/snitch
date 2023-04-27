@@ -96,10 +96,10 @@ At IIS the default version of some tools (`gcc`, `cmake`, ...) might be too old 
 
 - Install the correct `verible-verilog-lint` tool version:
     ```bash
-    export VERIBLE_VERSION=0.0-807-g10e7c71
+    export VERIBLE_VERSION=0.0-3222-gb19cdf44
     mkdir -p verible-${VERIBLE_VERSION}
     cd verible-${VERIBLE_VERSION}
-    curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-18.04-bionic-x86_64.tar.gz
+    curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-CentOS-7.9.2009-Core-x86_64.tar.gz
     chmod 777 ${INSTALL_DIR}/verible-${VERIBLE_VERSION}
     tar -C ${INSTALL_DIR}/verible-${VERIBLE_VERSION} -xf verible.tar.gz --strip-components=1
     # add location to path
@@ -214,8 +214,8 @@ vcs-2020.12 make bin/snitch_cluster.vcs
 vcs-2020.12 make sw.test.vcs
 
 # undo the variables if you change simulator
-unset CC=gcc-9.2.0
-unset CXX=g++-9.2.0
+unset CC
+unset CXX
 ```
 
 
@@ -242,7 +242,7 @@ export MACHINE=$(hostname | cut -d . -f 1)
 export INSTALL_DIR=/usr/scratch/${MACHINE}/${USER}/install-snitch
 export PYTHON_VERSION=3.9.10
 export VERILATOR_VERSION=4.100
-export VERIBLE_VERSION=0.0-807-g10e7c71
+export VERIBLE_VERSION=0.0-3222-gb19cdf44
 
 # LLVM
 # pre-installed
@@ -263,9 +263,9 @@ export PATH=/home/${USER}/.snitch-bin:$PATH
 # unset all temporary variables
 unset MACHINE
 unset INSTALL_DIR
-unset PYTHON_VERSION=3.9.10
-unset VERILATOR_VERSION=4.100
-unset VERIBLE_VERSION=0.0-807-g10e7c71
+unset PYTHON_VERSION
+unset VERILATOR_VERSION
+unset VERIBLE_VERSION
 ```
 
 If you use **Questasim**, set the following variables:

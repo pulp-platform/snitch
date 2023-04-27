@@ -114,12 +114,12 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_0` crossbar.
   xbar_rule_48_t [4:0] QuadrantPreXbar0Addrmap;
   assign QuadrantPreXbar0Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000 },
-  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
-  '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
-  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
-};
+          '{idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000},
+          '{idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000},
+          '{idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000},
+          '{idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000},
+          '{idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000}
+      };
 
   quadrant_pre_xbar_0_in_req_t   [0:0] quadrant_pre_xbar_0_in_req;
   quadrant_pre_xbar_0_in_resp_t  [0:0] quadrant_pre_xbar_0_in_rsp;
@@ -160,12 +160,12 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_1` crossbar.
   xbar_rule_48_t [4:0] QuadrantPreXbar1Addrmap;
   assign QuadrantPreXbar1Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000 },
-  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
-  '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
-  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
-};
+          '{idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000},
+          '{idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000},
+          '{idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000},
+          '{idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000},
+          '{idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000}
+      };
 
   quadrant_pre_xbar_1_in_req_t   [0:0] quadrant_pre_xbar_1_in_req;
   quadrant_pre_xbar_1_in_resp_t  [0:0] quadrant_pre_xbar_1_in_rsp;
@@ -206,12 +206,12 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_2` crossbar.
   xbar_rule_48_t [4:0] QuadrantPreXbar2Addrmap;
   assign QuadrantPreXbar2Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000 },
-  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
-  '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
-  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
-};
+          '{idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000},
+          '{idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000},
+          '{idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000},
+          '{idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000},
+          '{idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000}
+      };
 
   quadrant_pre_xbar_2_in_req_t   [0:0] quadrant_pre_xbar_2_in_req;
   quadrant_pre_xbar_2_in_resp_t  [0:0] quadrant_pre_xbar_2_in_rsp;
@@ -252,12 +252,12 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_3` crossbar.
   xbar_rule_48_t [4:0] QuadrantPreXbar3Addrmap;
   assign QuadrantPreXbar3Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000 },
-  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
-  '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
-  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
-};
+          '{idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000},
+          '{idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000},
+          '{idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000},
+          '{idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000},
+          '{idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000}
+      };
 
   quadrant_pre_xbar_3_in_req_t   [0:0] quadrant_pre_xbar_3_in_req;
   quadrant_pre_xbar_3_in_resp_t  [0:0] quadrant_pre_xbar_3_in_rsp;
@@ -298,12 +298,12 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_4` crossbar.
   xbar_rule_48_t [4:0] QuadrantPreXbar4Addrmap;
   assign QuadrantPreXbar4Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000 },
-  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
-  '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
-  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
-};
+          '{idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000},
+          '{idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000},
+          '{idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000},
+          '{idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000},
+          '{idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000}
+      };
 
   quadrant_pre_xbar_4_in_req_t   [0:0] quadrant_pre_xbar_4_in_req;
   quadrant_pre_xbar_4_in_resp_t  [0:0] quadrant_pre_xbar_4_in_rsp;
@@ -344,12 +344,12 @@ module occamy_soc
   /// Address map of the `quadrant_pre_xbar_5` crossbar.
   xbar_rule_48_t [4:0] QuadrantPreXbar5Addrmap;
   assign QuadrantPreXbar5Addrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000 },
-  '{ idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000 },
-  '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
-  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 }
-};
+          '{idx: 0, start_addr: 48'h00000000, end_addr: 48'h71100000},
+          '{idx: 0, start_addr: 48'h100000000, end_addr: 48'h300000000},
+          '{idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000},
+          '{idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000},
+          '{idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000}
+      };
 
   quadrant_pre_xbar_5_in_req_t   [0:0] quadrant_pre_xbar_5_in_req;
   quadrant_pre_xbar_5_in_resp_t  [0:0] quadrant_pre_xbar_5_in_rsp;
@@ -390,15 +390,15 @@ module occamy_soc
   /// Address map of the `quadrant_inter_xbar` crossbar.
   xbar_rule_48_t [7:0] QuadrantInterXbarAddrmap;
   assign QuadrantInterXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h00000000, end_addr: 48'h10000000 },
-  '{ idx: 0, start_addr: 48'h11000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h10000000, end_addr: 48'h10100000 },
-  '{ idx: 2, start_addr: 48'h10100000, end_addr: 48'h10200000 },
-  '{ idx: 3, start_addr: 48'h10200000, end_addr: 48'h10300000 },
-  '{ idx: 4, start_addr: 48'h10300000, end_addr: 48'h10400000 },
-  '{ idx: 5, start_addr: 48'h10400000, end_addr: 48'h10500000 },
-  '{ idx: 6, start_addr: 48'h10500000, end_addr: 48'h10600000 }
-};
+          '{idx: 0, start_addr: 48'h00000000, end_addr: 48'h10000000},
+          '{idx: 0, start_addr: 48'h11000000, end_addr: 48'h20000000000},
+          '{idx: 1, start_addr: 48'h10000000, end_addr: 48'h10100000},
+          '{idx: 2, start_addr: 48'h10100000, end_addr: 48'h10200000},
+          '{idx: 3, start_addr: 48'h10200000, end_addr: 48'h10300000},
+          '{idx: 4, start_addr: 48'h10300000, end_addr: 48'h10400000},
+          '{idx: 5, start_addr: 48'h10400000, end_addr: 48'h10500000},
+          '{idx: 6, start_addr: 48'h10500000, end_addr: 48'h10600000}
+      };
 
   quadrant_inter_xbar_in_req_t   [6:0] quadrant_inter_xbar_in_req;
   quadrant_inter_xbar_in_resp_t  [6:0] quadrant_inter_xbar_in_rsp;
@@ -439,17 +439,17 @@ module occamy_soc
   /// Address map of the `hbm_xbar` crossbar.
   xbar_rule_48_t [9:0] HbmXbarAddrmap;
   assign HbmXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h80000000, end_addr: 48'hc0000000 },
-  '{ idx: 0, start_addr: 48'h1000000000, end_addr: 48'h1040000000 },
-  '{ idx: 1, start_addr: 48'hc0000000, end_addr: 48'h100000000 },
-  '{ idx: 1, start_addr: 48'h1040000000, end_addr: 48'h1080000000 },
-  '{ idx: 2, start_addr: 48'h1080000000, end_addr: 48'h10c0000000 },
-  '{ idx: 3, start_addr: 48'h10c0000000, end_addr: 48'h1100000000 },
-  '{ idx: 4, start_addr: 48'h1100000000, end_addr: 48'h1140000000 },
-  '{ idx: 5, start_addr: 48'h1140000000, end_addr: 48'h1180000000 },
-  '{ idx: 6, start_addr: 48'h1180000000, end_addr: 48'h11c0000000 },
-  '{ idx: 7, start_addr: 48'h11c0000000, end_addr: 48'h1200000000 }
-};
+          '{idx: 0, start_addr: 48'h80000000, end_addr: 48'hc0000000},
+          '{idx: 0, start_addr: 48'h1000000000, end_addr: 48'h1040000000},
+          '{idx: 1, start_addr: 48'hc0000000, end_addr: 48'h100000000},
+          '{idx: 1, start_addr: 48'h1040000000, end_addr: 48'h1080000000},
+          '{idx: 2, start_addr: 48'h1080000000, end_addr: 48'h10c0000000},
+          '{idx: 3, start_addr: 48'h10c0000000, end_addr: 48'h1100000000},
+          '{idx: 4, start_addr: 48'h1100000000, end_addr: 48'h1140000000},
+          '{idx: 5, start_addr: 48'h1140000000, end_addr: 48'h1180000000},
+          '{idx: 6, start_addr: 48'h1180000000, end_addr: 48'h11c0000000},
+          '{idx: 7, start_addr: 48'h11c0000000, end_addr: 48'h1200000000}
+      };
 
   hbm_xbar_in_req_t   [6:0] hbm_xbar_in_req;
   hbm_xbar_in_resp_t  [6:0] hbm_xbar_in_rsp;
@@ -491,15 +491,15 @@ module occamy_soc
   /// Address map of the `soc_wide_xbar` crossbar.
   xbar_rule_48_t [7:0] SocWideXbarAddrmap;
   assign SocWideXbarAddrmap = '{
-  '{ idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000 },
-  '{ idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000 },
-  '{ idx: 2, start_addr: 48'h10000000, end_addr: 48'h10600000 },
-  '{ idx: 3, start_addr: 48'h00000000, end_addr: 48'h10000000 },
-  '{ idx: 3, start_addr: 48'h11000000, end_addr: 48'h70080000 },
-  '{ idx: 4, start_addr: 48'h71000000, end_addr: 48'h71100000 },
-  '{ idx: 5, start_addr: 48'h100000000, end_addr: 48'h300000000 }
-};
+          '{idx: 0, start_addr: 48'h10000000000, end_addr: 48'h20000000000},
+          '{idx: 1, start_addr: 48'h80000000, end_addr: 48'h100000000},
+          '{idx: 1, start_addr: 48'h1000000000, end_addr: 48'h1200000000},
+          '{idx: 2, start_addr: 48'h10000000, end_addr: 48'h10600000},
+          '{idx: 3, start_addr: 48'h00000000, end_addr: 48'h10000000},
+          '{idx: 3, start_addr: 48'h11000000, end_addr: 48'h70080000},
+          '{idx: 4, start_addr: 48'h71000000, end_addr: 48'h71100000},
+          '{idx: 5, start_addr: 48'h100000000, end_addr: 48'h300000000}
+      };
 
   soc_wide_xbar_in_req_t   [3:0] soc_wide_xbar_in_req;
   soc_wide_xbar_in_resp_t  [3:0] soc_wide_xbar_in_rsp;
@@ -540,27 +540,75 @@ module occamy_soc
   /// Address map of the `soc_narrow_xbar` crossbar.
   xbar_rule_48_t [19:0] SocNarrowXbarAddrmap;
   assign SocNarrowXbarAddrmap = '{
-  '{ idx: 6, start_addr: 48'h71000000, end_addr: 48'h1200000000 },
-  '{ idx: 7, start_addr: 48'h10000000000, end_addr: 48'h20000000000 },
-  '{ idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000 },
-  '{ idx: 9, start_addr: 48'h70000000, end_addr: 48'h70080000 },
-  '{ idx: 10, start_addr: 48'h11000000, end_addr: 48'h11010000 },
-  '{ idx: 11, start_addr: 48'h01000000, end_addr: 48'h0a810000 },
-  '{ idx: 11, start_addr: 48'h0c000000, end_addr: 48'h10000000 },
-  '{ idx: 12, start_addr: 48'h20000000, end_addr: 48'h70000000 },
-  '{ idx: 0, start_addr: s1_quadrant_base_addr[0], end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace },
-  '{ idx: 0, start_addr: s1_quadrant_cfg_base_addr[0], end_addr: s1_quadrant_cfg_base_addr[0] + S1QuadrantCfgAddressSpace },
-  '{ idx: 1, start_addr: s1_quadrant_base_addr[1], end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace },
-  '{ idx: 1, start_addr: s1_quadrant_cfg_base_addr[1], end_addr: s1_quadrant_cfg_base_addr[1] + S1QuadrantCfgAddressSpace },
-  '{ idx: 2, start_addr: s1_quadrant_base_addr[2], end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace },
-  '{ idx: 2, start_addr: s1_quadrant_cfg_base_addr[2], end_addr: s1_quadrant_cfg_base_addr[2] + S1QuadrantCfgAddressSpace },
-  '{ idx: 3, start_addr: s1_quadrant_base_addr[3], end_addr: s1_quadrant_base_addr[3] + S1QuadrantAddressSpace },
-  '{ idx: 3, start_addr: s1_quadrant_cfg_base_addr[3], end_addr: s1_quadrant_cfg_base_addr[3] + S1QuadrantCfgAddressSpace },
-  '{ idx: 4, start_addr: s1_quadrant_base_addr[4], end_addr: s1_quadrant_base_addr[4] + S1QuadrantAddressSpace },
-  '{ idx: 4, start_addr: s1_quadrant_cfg_base_addr[4], end_addr: s1_quadrant_cfg_base_addr[4] + S1QuadrantCfgAddressSpace },
-  '{ idx: 5, start_addr: s1_quadrant_base_addr[5], end_addr: s1_quadrant_base_addr[5] + S1QuadrantAddressSpace },
-  '{ idx: 5, start_addr: s1_quadrant_cfg_base_addr[5], end_addr: s1_quadrant_cfg_base_addr[5] + S1QuadrantCfgAddressSpace }
-};
+          '{idx: 6, start_addr: 48'h71000000, end_addr: 48'h1200000000},
+          '{idx: 7, start_addr: 48'h10000000000, end_addr: 48'h20000000000},
+          '{idx: 8, start_addr: 48'h00000000, end_addr: 48'h00001000},
+          '{idx: 9, start_addr: 48'h70000000, end_addr: 48'h70080000},
+          '{idx: 10, start_addr: 48'h11000000, end_addr: 48'h11010000},
+          '{idx: 11, start_addr: 48'h01000000, end_addr: 48'h0a810000},
+          '{idx: 11, start_addr: 48'h0c000000, end_addr: 48'h10000000},
+          '{idx: 12, start_addr: 48'h20000000, end_addr: 48'h70000000},
+          '{
+              idx: 0,
+              start_addr: s1_quadrant_base_addr[0],
+              end_addr: s1_quadrant_base_addr[0] + S1QuadrantAddressSpace
+          },
+          '{
+              idx: 0,
+              start_addr: s1_quadrant_cfg_base_addr[0],
+              end_addr: s1_quadrant_cfg_base_addr[0] + S1QuadrantCfgAddressSpace
+          },
+          '{
+              idx: 1,
+              start_addr: s1_quadrant_base_addr[1],
+              end_addr: s1_quadrant_base_addr[1] + S1QuadrantAddressSpace
+          },
+          '{
+              idx: 1,
+              start_addr: s1_quadrant_cfg_base_addr[1],
+              end_addr: s1_quadrant_cfg_base_addr[1] + S1QuadrantCfgAddressSpace
+          },
+          '{
+              idx: 2,
+              start_addr: s1_quadrant_base_addr[2],
+              end_addr: s1_quadrant_base_addr[2] + S1QuadrantAddressSpace
+          },
+          '{
+              idx: 2,
+              start_addr: s1_quadrant_cfg_base_addr[2],
+              end_addr: s1_quadrant_cfg_base_addr[2] + S1QuadrantCfgAddressSpace
+          },
+          '{
+              idx: 3,
+              start_addr: s1_quadrant_base_addr[3],
+              end_addr: s1_quadrant_base_addr[3] + S1QuadrantAddressSpace
+          },
+          '{
+              idx: 3,
+              start_addr: s1_quadrant_cfg_base_addr[3],
+              end_addr: s1_quadrant_cfg_base_addr[3] + S1QuadrantCfgAddressSpace
+          },
+          '{
+              idx: 4,
+              start_addr: s1_quadrant_base_addr[4],
+              end_addr: s1_quadrant_base_addr[4] + S1QuadrantAddressSpace
+          },
+          '{
+              idx: 4,
+              start_addr: s1_quadrant_cfg_base_addr[4],
+              end_addr: s1_quadrant_cfg_base_addr[4] + S1QuadrantCfgAddressSpace
+          },
+          '{
+              idx: 5,
+              start_addr: s1_quadrant_base_addr[5],
+              end_addr: s1_quadrant_base_addr[5] + S1QuadrantAddressSpace
+          },
+          '{
+              idx: 5,
+              start_addr: s1_quadrant_cfg_base_addr[5],
+              end_addr: s1_quadrant_cfg_base_addr[5] + S1QuadrantCfgAddressSpace
+          }
+      };
 
   soc_narrow_xbar_in_req_t   [10:0] soc_narrow_xbar_in_req;
   soc_narrow_xbar_in_resp_t  [10:0] soc_narrow_xbar_in_rsp;
@@ -2232,14 +2280,14 @@ module occamy_soc
 
   // burst request
   typedef struct packed {
-    logic [6:0] id;
-    logic [47:0] src, dst;
-    logic [47:0] num_bytes;
-    axi_pkg::cache_t cache_src, cache_dst;
-    axi_pkg::burst_t burst_src, burst_dst;
-    logic decouple_rw;
-    logic deburst;
-    logic serialize;
+    logic [6:0]      id;
+    logic [47:0]     src,         dst;
+    logic [47:0]     num_bytes;
+    axi_pkg::cache_t cache_src,   cache_dst;
+    axi_pkg::burst_t burst_src,   burst_dst;
+    logic            decouple_rw;
+    logic            deburst;
+    logic            serialize;
   } idma_burst_req_t;
 
   // local regbus definition

@@ -7,7 +7,7 @@ name: lint
 on: [push, pull_request]
 
 env:
-  VERIBLE_VERSION: 0.0-807-g10e7c71
+  VERIBLE_VERSION: 0.0-3222-gb19cdf44
 
 jobs:
   ################
@@ -24,7 +24,7 @@ jobs:
         set -e
         mkdir -p build/verible
         cd build/verible
-        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-bionic-x86_64.tar.gz
+        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-jammy-x86_64.tar.gz
         sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
         tar -C /tools/verible -xf verible.tar.gz --strip-components=1
         echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
@@ -245,7 +245,7 @@ jobs:
         set -e
         mkdir -p build/verible
         cd build/verible
-        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-bionic-x86_64.tar.gz
+        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-jammy-x86_64.tar.gz
         sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
         tar -C /tools/verible -xf verible.tar.gz --strip-components=1
         echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
