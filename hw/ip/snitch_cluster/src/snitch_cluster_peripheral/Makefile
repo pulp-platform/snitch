@@ -6,7 +6,7 @@
 
 REGTOOL=../../../../../util/regtool.py
 PYTHON3=$(shell which python)
-CLANG_FORMAT=$(shell which clang-format-10.0.1)
+CLANG_FORMAT=$(shell which clang-format-12.0.1)
 
 SCHEMA=snitch_cluster_peripheral_reg.hjson
 
