@@ -105,6 +105,7 @@ module snitch_fpu import snitch_pkg::*; #(
   ) i_fpu (
     .clk_i                                    ,
     .rst_ni                                   ,
+    .hart_id_i       ( '0                    ),
     .operands_i      ( fpu_in_q.operands     ),
     .rnd_mode_i      ( fpu_in_q.rnd_mode     ),
     .op_i            ( fpu_in_q.op           ),
@@ -114,6 +115,7 @@ module snitch_fpu import snitch_pkg::*; #(
     .int_fmt_i       ( fpu_in_q.int_fmt      ),
     .vectorial_op_i  ( fpu_in_q.vectorial_op ),
     .tag_i           ( fpu_in_q.tag          ),
+    .simd_mask_i     ( '1                    ),
     .in_valid_i      ( in_valid_q            ),
     .in_ready_o      ( in_ready_q            ),
     .flush_i         ( 1'b0                  ),

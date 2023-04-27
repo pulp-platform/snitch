@@ -10,7 +10,7 @@ package:
 dependencies:
   axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
   common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
-  FPnew: {git: https://github.com/openhwgroup/cvfpu.git, rev: feature/expanding_dotp}
+  FPnew: {git: https://github.com/pulp-platform/cvfpu.git, rev: sdotp_integration}
   reqrsp_interface: {path: ../reqrsp_interface}
   riscv-dbg: {git: https://github.com/pulp-platform/riscv-dbg.git, rev: ec0d92fa5fdaaf611e5b8a4cc8ee84017ff98710}
 
