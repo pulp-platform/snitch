@@ -34,7 +34,7 @@ jobs:
       matrix:
         rust:
         - stable
-        - beta
+        # - beta
         # - nightly
         - 1.63.0   # minimum supported version
     steps:
