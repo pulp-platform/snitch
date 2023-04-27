@@ -40,8 +40,8 @@ bootrom:
 memory:
 - dram:
     start: 0x80000000
-    size: 0x70000000
-    end: 0xF0000000
+    size: 0x80000000
+    end: 0xFFFFFFFF
     offset: 0x0 # dram is global for all clusters
     latency: 4
   ext_tcdm: []
