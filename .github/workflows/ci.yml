@@ -13,7 +13,7 @@ jobs:
   ########
   docs:
     name: Build Documentation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -29,7 +29,7 @@ jobs:
   # Banshee #
   ###########
   Banshee:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         rust:
@@ -58,7 +58,7 @@ jobs:
   # SW on Banshee #
   #################
   sw-banshee:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         toolchain:
@@ -134,7 +134,7 @@ jobs:
   snRuntime:
     container:
       image: ghcr.io/pulp-platform/snitch
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         toolchain:
@@ -187,7 +187,7 @@ jobs:
     container:
       image: ghcr.io/pulp-platform/snitch
     name: SW on Default Snitch Cluster Config
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         toolchain:
