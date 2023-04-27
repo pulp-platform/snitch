@@ -31,7 +31,7 @@ before_script:
   ${BENDER} --version
 - |
   cd $CI_PROJECT_DIR && mkdir -p .local
-  curl -L https://github.com/chipsalliance/verible/releases/download/v0.0-807-g10e7c71/verible-v0.0-807-g10e7c71-CentOS-7.9.2009-Core-x86_64.tar.gz | tar xz -C .local --strip-components=1
+  curl -L https://github.com/chipsalliance/verible/releases/download/v0.0-3222-gb19cdf44/verible-v0.0-3222-gb19cdf44-CentOS-7.9.2009-Core-x86_64.tar.gz | tar xz -C .local --strip-components=1
   ${VERIBLE_FMT} --version
 
 stages:
