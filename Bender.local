@@ -8,5 +8,5 @@ overrides:
     common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
     register_interface: {git: https://github.com/pulp-platform/register_interface.git, version: 0.3.8}
     axi: {git: https://github.com/pulp-platform/axi.git, rev: d2f98d691594c1a8dd1af5bedd5d37d965027535}
-    fpnew: {git: https://github.com/openhwgroup/cvfpu.git, rev: feature/expanding_dotp}
+    fpnew: {git: https://github.com/pulp-platform/cvfpu.git, rev: sdotp_integration}
     riscv-dbg: {git: https://github.com/pulp-platform/riscv-dbg.git, rev: ec0d92fa5fdaaf611e5b8a4cc8ee84017ff98710}
