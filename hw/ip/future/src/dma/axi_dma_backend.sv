@@ -308,7 +308,7 @@ module axi_dma_backend #(
       for (genvar d = 0; d < BufferDepth; d++) begin : gen_buff_depth
         for (genvar i = 0; i < DataWidth / 8 - 1; i++) begin : gen_data_width
           assign buffer_mem[i][d] =
-                    i_axi_dma_data_mover.i_axi_dma_data_path.fifo_buffer[i].i_fifo_buffer.mem_q[d];
+                    i_axi_dma_data_mover.i_axi_dma_data_path.gen_fifo_buffer[i].i_fifo_buffer.mem_q[d];
         end
       end
 
