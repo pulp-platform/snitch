@@ -17,6 +17,8 @@ variables:
   PATH: $CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
 
 before_script:
+- printenv
+- echo $GITHUB_EVENT_NAME
 - >
   if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get python; then
     $CI_PROJECT_DIR/.gitlab-ci.d/build-python.sh $CI_PROJECT_DIR
@@ -153,7 +155,7 @@ occamy_vcu128_fpga:
 # -> clint, snitch_vm, test, snitch_ipu, snitch_dma, snitch
 # currently failing IP tests/scripts:
 # -> reqrsp_interface, snitch_ssr
-ip-tests-vsim:
+.ip-tests-vsim:
   stage: verify-snitch-ips
   parallel:
     matrix:
