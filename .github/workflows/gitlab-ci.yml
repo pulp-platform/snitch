@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check Gitlab CI
-      uses: pulp-platform/pulp-actions/gitlab-ci@v1
+      uses: pulp-platform/pulp-actions/gitlab-ci@feature/manual_poll_count
       with:
         domain: iis-git.ee.ethz.ch
         repo: github-mirror/snitch
@@ -24,3 +24,5 @@ jobs:
         poll-count: 1000
         retry-count: 100
         retry-period: 50
+        manual-poll-count: 10
+        manual-poll-err: 0
