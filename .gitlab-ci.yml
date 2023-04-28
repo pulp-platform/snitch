@@ -18,7 +18,6 @@ variables:
 
 before_script:
 - printenv
-- echo $GITHUB_EVENT_NAME
 - >
   if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get python; then
     $CI_PROJECT_DIR/.gitlab-ci.d/build-python.sh $CI_PROJECT_DIR
@@ -77,6 +76,22 @@ get_linux:
 # that the occamy xilinx IP can be elaborated
 occamy_vivado_ip:
   stage: build_fpga
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "web" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    changes:
+    - .gitlab-ci.d/occamy_cfg_fpga.sh
+    - hw/ip/**/*
+    - hw/vendor/**/*
+    - hw/system/occamy/**/*
+    - util/occamygen.py
+    - util/clustergen/**/*
+    - util/solder/**/*
+    - util/Makefrag
+    - util/reggen
+    - util/regtool.py
+  - if: $CI_PIPELINE_SOURCE != "web" && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+    when: manual
+  timeout: 11h 00m
   script:
     # Make Occamy system smaller to fit on FPGA
   - ./.gitlab-ci.d/occamy_cfg_fpga.sh
@@ -124,7 +139,7 @@ occamy_vcu128:
   needs: [get_toolchain, get_linux, occamy_vivado_ip]
 
 # Boot Linux on the VCU128 FPGA and check for prompt (disabled for now)
-occamy_vcu128_fpga:
+.occamy_vcu128_fpga:
   stage: linux_boot
   when: manual
   only:
