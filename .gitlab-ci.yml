@@ -16,7 +16,7 @@ variables:
   UBOOT_SPL_BIN: ${CVA6_SDK}/u-boot/spl/u-boot-spl.bin
   UBOOT_ITB: ${CVA6_SDK}/u-boot/u-boot.itb
   LINUX_UIMAGE: ${CVA6_SDK}/uImage
-  PATH: $CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
+  PATH: /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/:$CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
   VSIM: vsim
   VLOG: vlog
 
@@ -181,6 +181,13 @@ ip-tests-vsim:
 # Build Snitch cluster software
 snitch-cluster-sw:
   stage: build-sw
+  variables:
+    CC: clang
+    LD: lld
+    AR: llvm-ar
+    OBJCOPY: llvm-objcopy
+    OBJDUMP: llvm-objdump
+    DWARFDUMP: llvm-dwarfdump
   script:
   - cd hw/system/snitch_cluster
   - make sw
