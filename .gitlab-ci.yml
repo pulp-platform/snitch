@@ -14,7 +14,7 @@ variables:
   UBOOT_SPL_BIN: ${CVA6_SDK}/u-boot/spl/u-boot-spl.bin
   UBOOT_ITB: ${CVA6_SDK}/u-boot/u-boot.itb
   LINUX_UIMAGE: ${CVA6_SDK}/uImage
-  PATH: $CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
+  PATH: /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/:$CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
 
 before_script:
 - >
@@ -33,9 +33,13 @@ before_script:
   cd $CI_PROJECT_DIR && mkdir -p .local
   curl -L https://github.com/chipsalliance/verible/releases/download/v0.0-3222-gb19cdf44/verible-v0.0-3222-gb19cdf44-CentOS-7.9.2009-Core-x86_64.tar.gz | tar xz -C .local --strip-components=1
   ${VERIBLE_FMT} --version
+- |
+  cd $CI_PROJECT_DIR && mkdir -p .local/bin && cd .local/bin
+  ln -s /usr/sepp/bin/cmake-3.18.1 $CI_PROJECT_DIR/.local/bin/cmake
+- cd $CI_PROJECT_DIR
 
 stages:
-- verify-snitch-ips
+- snitch-tests
 - linux_prepare
 - build_fpga
 - linux_boot
@@ -146,6 +150,41 @@ occamy_vcu128_fpga:
   needs: [occamy_vcu128]
 
 #######################
+# SNITCH_CLUSTER VSIM #
+#######################
+snitch-cluster-vsim:
+  stage: snitch-tests
+  variables:
+    QUESTA_HOME: /usr/pack/modelsim-10.7b-kgf/questasim/
+    CC: $QUESTA_HOME/gcc-5.3.0-linux_x86_64/bin/gcc
+    CXX: $QUESTA_HOME/gcc-5.3.0-linux_x86_64/bin/g++
+    LD: $QUESTA_HOME/gcc-5.3.0-linux_x86_64/bin/ld
+  script:
+  - cd hw/system/snitch_cluster
+  - make bin/snitch_cluster.vsim
+  - make sw.test.vsim
+
+######################
+# SNITCH_CLUSTER VCS #
+######################
+snitch-cluster-vcs:
+  stage: snitch-tests
+  variables:
+    GCC_DIR: /usr/pack/gcc-9.2.0-af
+    GCC_DIR2: ${GCC_DIR}/linux-x64
+    CC: ${GCC_DIR2}/bin/gcc
+    CXX: ${GCC_DIR2}/bin/g++
+    LD_LIBRARY_PATH: ${GCC_DIR2}/lib64
+    LIBRARY_PATH: ${GCC_DIR2}/lib64
+    C_INCLUDE_PATH: ${GCC_DIR}/include
+    CPLUS_INCLUDE_PATH: ${GCC_DIR}/include
+  script:
+  - export PATH="${GCC_DIR2}/linux-x64/bin:${PATH}"
+  - cd hw/system/snitch_cluster
+  - vcs-2020.12 make bin/snitch_cluster.vcs
+  - vcs-2020.12 make sw.test.vcs
+
+#######################
 # Test Individual IPs #
 #######################
 # Build and run all individual IP testbenches
@@ -154,7 +193,7 @@ occamy_vcu128_fpga:
 # currently failing IP tests/scripts:
 # -> reqrsp_interface, snitch_ssr
 ip-tests-vsim:
-  stage: verify-snitch-ips
+  stage: snitch-tests
   parallel:
     matrix:
     - IP: [mem_interface, snitch_cluster, snitch_icache, snitch_read_only_cache, spm_interface,
