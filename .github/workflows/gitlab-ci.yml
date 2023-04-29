@@ -21,6 +21,6 @@ jobs:
         repo: github-mirror/snitch
         token: ${{ secrets.GITLAB_TOKEN }}
         poll-period: 20
-        poll-count: 1000
+        poll-count: 2000
         retry-count: 100
         retry-period: 50
