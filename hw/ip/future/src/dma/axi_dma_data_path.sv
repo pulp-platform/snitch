@@ -349,7 +349,7 @@ module axi_dma_data_path #(
   //--------------------------------------
   logic control_empty;
 
-  for (genvar i = 0; i < StrbWidth; i++) begin : gen_fifo_buffer
+  for (genvar i = 0; i < StrbWidth; i++) begin : gen_fifo_buf
     fifo_v3 #(
         .FALL_THROUGH(1'b0),
         .DATA_WIDTH  (8),

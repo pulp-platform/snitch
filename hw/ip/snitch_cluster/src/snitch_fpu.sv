@@ -102,7 +102,8 @@ module snitch_fpu import snitch_pkg::*; #(
     .Features       ( FPUFeatures ),
     .Implementation ( FPUImplementation ),
     .TagType        ( logic[6:0]        ),
-    .CompressedVecCmpResult ( 1         )
+    .CompressedVecCmpResult ( 1'b1         ),
+    .StochasticRndImplementation (fpnew_pkg::DEFAULT_RSR)
   ) i_fpu (
     .clk_i                                    ,
     .rst_ni                                   ,
