@@ -7,7 +7,7 @@ name: lint
 on: [push, pull_request]
 
 env:
-  VERIBLE_VERSION: 0.0-807-g10e7c71
+  VERIBLE_VERSION: 0.0-3222-gb19cdf44
 
 jobs:
   ################
@@ -16,7 +16,7 @@ jobs:
   verilog:
     name: Verilog Sources
     # This job runs on Linux (fixed ubuntu version)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - name: Install Verible
@@ -24,7 +24,7 @@ jobs:
         set -e
         mkdir -p build/verible
         cd build/verible
-        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-18.04-bionic-x86_64.tar.gz
+        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-jammy-x86_64.tar.gz
         sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
         tar -C /tools/verible -xf verible.tar.gz --strip-components=1
         echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
@@ -41,7 +41,7 @@ jobs:
   # Check that all vendored sources are up-to-date.
   check-vendor:
     name: Vendor Up-to-Date
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -61,7 +61,7 @@ jobs:
   ######################
   check-opcodes:
     name: Check Opcodes Up-to-Date
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -85,7 +85,7 @@ jobs:
   ########################
   check-doc:
     name: Documentation Up-to-Date
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
@@ -104,28 +104,43 @@ jobs:
   #################
   # Check License #
   #################
-  licence:
-    name: Check License
-    runs-on: ubuntu-latest
+  lint-license:
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - name: Check License
+      uses: pulp-platform/pulp-actions/lint-license@patch/license-checker
       with:
-        python-version: 3.9
-    - name: Install requirements
-      run: pip install -r python-requirements.txt
-    - name: Check license
-      run: |
-        echo "::add-matcher::.github/license-checker-matcher.json"
-        ./util/check-license
-        echo "::remove-matcher owner=license-checker-matcher::"
+        patches: 0001-Allow-hash-comments-in-assembly.patch
+        # We cover ETH Zurich and lowRISC licenses and Apache 2.0 (mostly for SW)
+        # and Solderpad for the hardware.
+        license: |
+          Copyright (\d{4}(-\d{4})?\s)?(ETH Zurich and University of Bologna|lowRISC contributors).
+          (Solderpad Hardware License, Version 0.51|Licensed under the Apache License, Version 2.0), see LICENSE for details.
+          SPDX-License-Identifier: (SHL-0.51|Apache-2.0)
+        match_regex: true
+        # Exclude anything in vendored directories, solder snippets and TEX templates
+        # (which generally do not contain valid standalone code), generated files
+        # and Questasim scripts (*.do)
+        exclude_paths: |
+          */vendor/*
+          util/lowrisc_misc-linters/*
+          sw/banshee/tests/runtime/printf.*
+          sw/snRuntime/include/interface.h
+          sw/snRuntime/include/snitch_cluster_peripheral.h
+          sw/snRuntime/include/occamy_quad_peripheral.h
+          sw/snRuntime/include/occamy_soc_peripheral.h
+          sw/snRuntime/include/occamy_hbm_xbar_peripheral.h
+          util/solder/*.sv.tpl
+          hw/system/occamy/addrmap/addrmap.tex.tpl
+          hw/system/*.do
+          hw/system/occamy/fpga/bootrom/bootrom.tcl
 
   ####################
   # Format YML Files #
   ####################
   yamlfmt:
     name: YAML Sources
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -144,7 +159,7 @@ jobs:
   ########################
   python:
     name: Python Sources
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -165,7 +180,7 @@ jobs:
   # Check C/C++ files for correct formatting.
   clangfmt:
     name: C/C++ Sources
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: DoozyX/clang-format-lint-action@v0.11
@@ -178,7 +193,7 @@ jobs:
   # Detect trailing whitespaces, missing new lines and wrong file encodings.
   editorconfig:
     name: Editorconfig
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -196,7 +211,7 @@ jobs:
   # Banshee #
   ###########
   Banshee:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
@@ -213,7 +228,7 @@ jobs:
   ##########
   # Re-generate all files and detect any changes on the generated files.
   Occamy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -221,8 +236,8 @@ jobs:
         python-version: 3.9
     - name: Install apt requirements
       run: |
-        sudo apt update
-        sudo apt install device-tree-compiler clang-format-10
+        sudo apt-get update
+        sudo apt-get install device-tree-compiler clang-format-12
     - name: Install Python requirements
       run: pip install -r python-requirements.txt
     - name: Install Verible
@@ -230,7 +245,7 @@ jobs:
         set -e
         mkdir -p build/verible
         cd build/verible
-        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-18.04-bionic-x86_64.tar.gz
+        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-jammy-x86_64.tar.gz
         sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
         tar -C /tools/verible -xf verible.tar.gz --strip-components=1
         echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
@@ -240,7 +255,7 @@ jobs:
         mkdir -p ~/.local/bin && mv bender ~/.local/bin/
     - name: Generated Files Up-to-Date
       env:
-        CLANG_FORMAT: clang-format-10
+        CLANG_FORMAT: clang-format-12
       run: |
         make -C hw/system/occamy all
         util/git-diff.py --error-msg "::error ::Found differences, run \`make -C hw/system/occamy all\` before committing."

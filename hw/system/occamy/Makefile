@@ -13,7 +13,7 @@ include $(ROOT)/util/Makefrag
 
 VLT_FLAGS 	  += -Wno-SYMRSVDWORD
 REGGEN        ?= $(shell $(BENDER) path register_interface)/vendor/lowrisc_opentitan/util/regtool.py
-CLANG_FORMAT  ?= $(shell which clang-format-10.0.1)
+CLANG_FORMAT  ?= $(shell which clang-format-12.0.1)
 
 QUESTA_64BIT	= -64
 VSIM      		= vsim ${QUESTA_64BIT}
