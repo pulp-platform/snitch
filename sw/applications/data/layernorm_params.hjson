@@ -7,9 +7,9 @@
 {
     kernel: "LayerNorm"
     input_dim: {
-        batch_size: 3,
-        seq_len: 8,
-        embeddings: 4
+        batch_size: 1,
+        seq_len: 2048,
+        embeddings: 768
     }
     eps: 1e-5
     prec: 32

@@ -101,10 +101,10 @@ def emit_layernorm_layer(name='layernorm', **kwargs):
     layer_str += f'\t.dtype = FP{kwargs["prec"]},\n'
     layer_str += '};\n\n\n'
 
-    layer_str += f'static {dtype} {name}_result[{batch_size}][{seq_len}][{embeddings}] __attribute__((section(".data")));\n\n'
-    layer_str += f'static {dtype} {name}_ifmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' + array_to_cstr(ifmap) + ';\n\n'
-    layer_str += f'static {dtype} {name}_ofmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' + array_to_cstr(ofmap) + ';\n\n'
-    layer_str += f'static {dtype} {name}_checksum[{batch_size}][{seq_len}] = ' + array_to_cstr(checksum) + ';\n\n'
+    # layer_str += f'static {dtype} {name}_result[{batch_size}][{seq_len}][{embeddings}] __attribute__((section(".data")));\n\n'
+    # layer_str += f'static {dtype} {name}_ifmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' + array_to_cstr(ifmap) + ';\n\n'
+    # layer_str += f'static {dtype} {name}_ofmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' + array_to_cstr(ofmap) + ';\n\n'
+    # layer_str += f'static {dtype} {name}_checksum[{batch_size}][{seq_len}] = ' + array_to_cstr(checksum) + ';\n\n'
 
     return layer_str
 
