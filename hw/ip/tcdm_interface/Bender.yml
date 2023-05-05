@@ -3,28 +3,21 @@
 # SPDX-License-Identifier: SHL-0.51
 package:
   name: tcdm_interface
-  authors:
-  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-
+  authors: [Florian Zaruba <zarubaf@iis.ee.ethz.ch>]
 dependencies:
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
   reqrsp_interface: {path: ../reqrsp_interface}
-
-export_include_dirs:
-- include
-
+export_include_dirs: [include]
 sources:
   # Level 0
-- src/tcdm_interface.sv
+  - src/tcdm_interface.sv
   # Level 1
-- src/axi_to_tcdm.sv
-- src/reqrsp_to_tcdm.sv
-- src/tcdm_mux.sv
-- target: simulation
-  files:
-  - src/tcdm_test.sv
-- target: test
-  files:
-  # Level 0
-  - test/reqrsp_to_tcdm_tb.sv
-  - test/tcdm_mux_tb.sv
+  - src/axi_to_tcdm.sv
+  - src/reqrsp_to_tcdm.sv
+  - src/tcdm_mux.sv
+  - target: simulation
+    files: [src/tcdm_test.sv]
+  - target: test
+    files: [test/reqrsp_to_tcdm_tb.sv, test/tcdm_mux_tb.sv]

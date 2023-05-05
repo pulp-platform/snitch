@@ -17,41 +17,41 @@ address:
   clint: 0xFFFF0000
   cl_clint: 0x40000060
 memory:
-- dram:
-    end: 0x80020000
-    latency: 10
-    start: 0x80010000
-  ext_tcdm: []
-  periphs:
-    callbacks:
-    - name: semaphores
-      size: 36
-    - name: fence
-      size: 8
-    end: 0x10002c
-    latency: 5
-    start: 0x100000
-  tcdm:
-    end: 0x20000
-    latency: 5
-    start: 0x0
-- dram:
-    end: 0x80020000
-    latency: 10
-    start: 0x80010000
-  ext_tcdm:
-  - cluster: 0
-    start: 0x10000
-  periphs:
-    callbacks:
-    - name: semaphores
-      size: 36
-    - name: fence
-      size: 8
-    end: 0x10002c
-    latency: 5
-    start: 0x100000
-  tcdm:
-    end: 0x10000
-    latency: 5
-    start: 0x0
+  - dram:
+      end: 0x80020000
+      latency: 10
+      start: 0x80010000
+    ext_tcdm: []
+    periphs:
+      callbacks:
+        - name: semaphores
+          size: 36
+        - name: fence
+          size: 8
+      end: 0x10002c
+      latency: 5
+      start: 0x100000
+    tcdm:
+      end: 0x20000
+      latency: 5
+      start: 0x0
+  - dram:
+      end: 0x80020000
+      latency: 10
+      start: 0x80010000
+    ext_tcdm:
+      - cluster: 0
+        start: 0x10000
+    periphs:
+      callbacks:
+        - name: semaphores
+          size: 36
+        - name: fence
+          size: 8
+      end: 0x10002c
+      latency: 5
+      start: 0x100000
+    tcdm:
+      end: 0x10000
+      latency: 5
+      start: 0x0

@@ -5,7 +5,6 @@
 # Run functional regression checks
 name: ci
 on: [push, pull_request]
-
 jobs:
 
   ########
@@ -15,15 +14,15 @@ jobs:
     name: Build Documentation
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
-        cache: pip
-    - name: Install Python dependencies
-      run: pip install -r docs/requirements.txt
-    - name: Build docs
-      run: mkdocs build
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          cache: pip
+      - name: Install Python dependencies
+        run: pip install -r docs/requirements.txt
+      - name: Build docs
+        run: mkdocs build
 
   ##########################
   # Build and test Banshee #
@@ -34,31 +33,30 @@ jobs:
     strategy:
       matrix:
         rust:
-        - stable
+          - stable
         # - beta
         # - nightly
-        - 1.63.0   # minimum supported version
+          - 1.63.0 # minimum supported version
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ matrix.rust }}
-        override: true
-        components: rustfmt
-    - name: Install LLVM
-      run: sudo apt-get install llvm-12-dev
-    - working-directory: sw/banshee
-      run: cargo build
-    - working-directory: sw/banshee
-      run: cargo test --all
-    - working-directory: sw/banshee
-      run: make test TERM=xterm-256color LOG_FAILED=`mktemp` LOG_TOTAL=`mktemp`
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: rustfmt
+      - name: Install LLVM
+        run: sudo apt-get install llvm-12-dev
+      - working-directory: sw/banshee
+        run: cargo build
+      - working-directory: sw/banshee
+        run: cargo test --all
+      - working-directory: sw/banshee
+        run: make test TERM=xterm-256color LOG_FAILED=`mktemp` LOG_TOTAL=`mktemp`
 
   ############################################
   # Simulate SW on Snitch Cluster w/ Banshee #
   ############################################
-
   sw-banshee:
     container:
       image: ghcr.io/pulp-platform/snitch
@@ -67,62 +65,61 @@ jobs:
       matrix:
         toolchain:
         # - gcc
-        - llvm
+          - llvm
         # cmake_args:
         # - ''
         # - -DOMPSTATIC_NUMTHREADS=8
     name: Simulate SW on Snitch Cluster w/ Banshee (Container)
     steps:
-    - uses: actions/checkout@v1
-      with:
-        fetch-depth: 0
-    - name: Get Banshee changed
-      id: banshee-changes
-      run: echo "::set-output name=banshee_changed::$(! git diff --name-only --diff-filter=ACMRT
-        ${{ github.event.pull_request.base.sha }} | grep -q ^sw/banshee; echo $?)"
-    - name: Build banshee
-      if: ${{ steps.banshee-changes.outputs.banshee_changed == 1 }}
-      run: |
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        export PATH=$HOME/.cargo/bin:${PATH}
-        cargo install --path sw/banshee
-    - name: Build Software
-      env:
-        CC: clang
-        LD: lld
-        AR: llvm-ar
-        OBJCOPY: llvm-objcopy
-        OBJDUMP: llvm-objdump
-        DWARFDUMP: llvm-dwarfdump
-      run: make -C hw/system/snitch_cluster SELECT_RUNTIME=banshee sw
-    - name: Run Unit Tests
-      run: cd hw/system/snitch_cluster/ && ./run-tests sw/tests/banshee-apps.list
-        --simulator banshee
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
+      - name: Get Banshee changed
+        id: banshee-changes
+        run: echo "::set-output name=banshee_changed::$(! git diff --name-only --diff-filter=ACMRT
+          ${{ github.event.pull_request.base.sha }} | grep -q ^sw/banshee; echo $?)"
+      - name: Build banshee
+        if: ${{ steps.banshee-changes.outputs.banshee_changed == 1 }}
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          export PATH=$HOME/.cargo/bin:${PATH}
+          cargo install --path sw/banshee
+      - name: Build Software
+        env:
+          CC: clang
+          LD: lld
+          AR: llvm-ar
+          OBJCOPY: llvm-objcopy
+          OBJDUMP: llvm-objdump
+          DWARFDUMP: llvm-dwarfdump
+        run: make -C hw/system/snitch_cluster SELECT_RUNTIME=banshee sw
+      - name: Run Unit Tests
+        run: cd hw/system/snitch_cluster/ && ./run-tests sw/tests/banshee-apps.list
+          --simulator banshee
 
   ##############################################
   # Simulate SW on Snitch Cluster w/ Verilator #
   ##############################################
-
   sw-snitch-cluster:
     container:
       image: ghcr.io/pulp-platform/snitch
     name: Simulate SW on Snitch Cluster w/ Verilator
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - name: Build Software
-      env:
-        CC: clang
-        LD: lld
-        AR: llvm-ar
-        OBJCOPY: llvm-objcopy
-        OBJDUMP: llvm-objdump
-        DWARFDUMP: llvm-dwarfdump
-      run: |
-        make -C hw/system/snitch_cluster sw
-    - name: Build Hardware
-      run: |
-        cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
-    - name: Run Unit Tests
-      run: |
-        cd hw/system/snitch_cluster/ && ./run-tests sw/tests/passing-apps.list --simulator verilator
+      - uses: actions/checkout@v2
+      - name: Build Software
+        env:
+          CC: clang
+          LD: lld
+          AR: llvm-ar
+          OBJCOPY: llvm-objcopy
+          OBJDUMP: llvm-objdump
+          DWARFDUMP: llvm-dwarfdump
+        run: |
+          make -C hw/system/snitch_cluster sw
+      - name: Build Hardware
+        run: |
+          cd hw/system/snitch_cluster && make bin/snitch_cluster.vlt
+      - name: Run Unit Tests
+        run: |-
+          cd hw/system/snitch_cluster/ && ./run-tests sw/tests/passing-apps.list --simulator verilator

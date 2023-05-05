@@ -13,7 +13,7 @@ jsonschema
 mako
 progressbar2
 tabulate
-yamlfmt
+yamllint
 pyyaml
 pytablewriter
 termcolor

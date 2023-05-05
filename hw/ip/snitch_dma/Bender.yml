@@ -3,20 +3,19 @@
 # SPDX-License-Identifier: SHL-0.51
 package:
   name: snitch_dma
-  authors:
-  - Thomas Benz <tbenz@iis.ee.ethz.ch>
-
+  authors: [Thomas Benz <tbenz@iis.ee.ethz.ch>]
 dependencies:
   axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
   snitch: {path: ../../ip/snitch}
-
 sources:
-# Level 0:
-- src/axi_dma_pkg.sv
-# Level 1:
-- src/axi_dma_error_handler.sv
-- src/axi_dma_perf_counters.sv
-- src/axi_dma_twod_ext.sv
-# Level 2:
-- src/axi_dma_tc_snitch_fe.sv
+  # Level 0:
+  - src/axi_dma_pkg.sv
+  # Level 1:
+  - src/axi_dma_error_handler.sv
+  - src/axi_dma_perf_counters.sv
+  - src/axi_dma_twod_ext.sv
+  # Level 2:
+  - src/axi_dma_tc_snitch_fe.sv

@@ -4,26 +4,27 @@
 package:
   name: test
   authors:
-  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
-
+    - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+    - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 dependencies:
   axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
   reqrsp_interface: {path: ../reqrsp_interface}
-  axi_riscv_atomics: {git: https://github.com/pulp-platform/axi_riscv_atomics.git,
-    rev: v0.6.0}
-  register_interface: {git: https://github.com/pulp-platform/register_interface.git,
-    rev: v0.3.3}
-
+  axi_riscv_atomics:
+    git: https://github.com/pulp-platform/axi_riscv_atomics.git
+    rev: v0.6.0
+  register_interface:
+    git: https://github.com/pulp-platform/register_interface.git
+    rev: v0.3.3
 sources:
-# Level 1:
-- target: any(simulation, verilator)
-  files:
-  - src/tb_memory_regbus.sv
-  # Level 2
-  - src/tb_memory_axi.sv
-# Level 3:
-- target: test
-  files:
-  - src/tb_bin.sv
+  # Level 1:
+  - target: any(simulation, verilator)
+    files:
+      - src/tb_memory_regbus.sv
+      # Level 2
+      - src/tb_memory_axi.sv
+  # Level 3:
+  - target: test
+    files: [src/tb_bin.sv]

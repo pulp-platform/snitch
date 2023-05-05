@@ -16,7 +16,7 @@ address:
   clint: 0xFFFF0000
   # Snitch: cl_peripherals + 0x180
   cl_clint: 0x10020180
-  #-- These parameters are not used, but Banshee requires them being defined
+  ## These parameters are not used, but Banshee requires them being defined
   tcdm_end: 0x00000000
   tcdm_start: 0x00000000
   cluster_base_hartid: 0x00000000
@@ -24,7 +24,7 @@ address:
   cluster_num: 0x00000000
   nr_cores: 0x00000000
   wakeup_reg: 0x00000000
-  #-- End of unused parameters
+  ## End of unused parameters
 architecture:
   num_cores: 9
   num_clusters: 1
@@ -38,26 +38,26 @@ bootrom:
   offset: 0x0
   latency: 5
 memory:
-- dram:
-    start: 0x80000000
-    size: 0x80000000
-    end: 0xFFFFFFFF
-    offset: 0x0 # dram is global for all clusters
-    latency: 4
-  ext_tcdm: []
-  tcdm:
-    start: 0x10000000 # cluster "num_clusters" start address
-    end: 0x10020000   # size of the TCDM
-    offset: 0x40000 # offset to next cluster is start + size + offset
-    latency: 1
-#Periphs
-  periphs:
-    start: 0x10030000
-    end: 0x10040000
-    offset: 0x40000 # offset to start address of next cluster
-    latency: 1
-    callbacks:
-    - name: zero-memory
-      size: 64000
-  ssr:
-    num_dm: 3
+  - dram:
+      start: 0x80000000
+      size: 0x80000000
+      end: 0xFFFFFFFF
+      offset: 0x0 # dram is global for all clusters
+      latency: 4
+    ext_tcdm: []
+    tcdm:
+      start: 0x10000000 # cluster "num_clusters" start address
+      end: 0x10020000   # size of the TCDM
+      offset: 0x40000 # offset to next cluster is start + size + offset
+      latency: 1
+    # Periphs
+    periphs:
+      start: 0x10030000
+      end: 0x10040000
+      offset: 0x40000 # offset to start address of next cluster
+      latency: 1
+      callbacks:
+        - name: zero-memory
+          size: 64000
+    ssr:
+      num_dm: 3
