@@ -58,7 +58,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_snitch_raw_test_args(linear linear --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
     add_snitch_raw_test_args(gelu gelu --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
     add_snitch_raw_test_args(softmax softmax --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
-    add_snitch_raw_test_args(layernorm layernorm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/snitch_cluster.yaml)
+    add_snitch_raw_test_args(layernorm layernorm --configuration ${CMAKE_CURRENT_SOURCE_DIR}/../banshee/config/multi_cluster_simple.yaml --num-clusters 24)
 
     add_snitch_application_executable(batchnorm)
     add_snitch_application_executable(maxpool)

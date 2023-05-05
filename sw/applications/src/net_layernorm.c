@@ -17,7 +17,7 @@
 #include "utils.h"
 
 int main() {
-    layernorm_l.ifmap = (float*)layernorm_ifmap_dram;
+    // layernorm_l.ifmap = (float*)layernorm_ifmap_dram;
     // layernorm_l.result = (float*)layernorm_ofmap_dram;
 
     // checksum = (float*)layernorm_checksum;

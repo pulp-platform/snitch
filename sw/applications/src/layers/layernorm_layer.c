@@ -52,8 +52,10 @@ void layernorm_layer(const layernorm_layer_t *l) {
         // determine the batch offset for each core
         int32_t batch_offset = l->SEQ_LEN * l->EMBEDDINGS;
 
+        printf("Batch size: %d, Seq len: %d, Embeddings: %d\n", l->BATCH_SIZE, l->SEQ_LEN, l->EMBEDDINGS);
+
         // printf("row_offset: %d, ldI: %d\n", row_offset, ldI);
-        layernorm_fp32(&ifmap[row_offset], &ofmap[row_offset], ldI, batch_offset, l->BATCH_SIZE, l->SEQ_LEN / 8, l->EMBEDDINGS, l->EPS);
+        // layernorm_fp32(&ifmap[row_offset], &ofmap[row_offset], ldI, batch_offset, l->BATCH_SIZE, l->SEQ_LEN / 8, l->EMBEDDINGS, l->EPS);
 
     } else {
         snrt_cluster_hw_barrier();   
