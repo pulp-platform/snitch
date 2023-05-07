@@ -9,7 +9,6 @@
 #define NTHREADS 8
 #include "data.h"
 
-
 unsigned __attribute__((noinline)) double_buffering(void) {
     static double *bufx, *bufy, *x, *y;
     static double a;
