@@ -21,7 +21,7 @@
 //================================================================================
 // data
 //================================================================================
-static volatile omp_t *omp_p_global;
+static volatile omp_t *volatile omp_p_global;
 
 #ifndef OMPSTATIC_NUMTHREADS
 __thread omp_t volatile *omp_p;

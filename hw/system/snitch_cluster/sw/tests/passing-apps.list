@@ -27,7 +27,9 @@ tls
 multi_cluster
 varargs_1
 data_mover
-#openmp
+openmp_parallel
+openmp_for_static_schedule
+openmp_double_buffering
 varargs_2
 dma_simple
 perf_cnt

@@ -44,9 +44,16 @@ LDFLAGS += -lsnRuntime
 ###########
 
 # Treat lines starting with '#' as comments
-APPS  = $(shell grep -v '^\#' passing-apps.list)
-APPS += $(shell grep -v '^\#' failing-apps.list)
-APPS += $(shell grep -v '^\#' banshee-apps.list)
+define get_apps_from_list
+	$(shell grep -v '^\#' $(1))
+endef
+
+ifeq ($(SELECT_RUNTIME), banshee)
+	APPS = $(call get_apps_from_list,banshee-apps.list)
+else
+	APPS  = $(call get_apps_from_list,passing-apps.list)
+	APPS += $(call get_apps_from_list,failing-apps.list)
+endif
 
 ELFS        = $(abspath $(addprefix $(BUILDDIR)/,$(addsuffix .elf,$(APPS))))
 DEPS        = $(abspath $(addprefix $(BUILDDIR)/,$(addsuffix .d,$(APPS))))
