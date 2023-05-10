@@ -17,6 +17,17 @@ variables:
   PATH: $CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
 
 before_script:
+# Get the path of the memora cache from Memora.yml and keep only the latest 5 artifacts
+- |+
+  export MEMORA_CACHE_DIR=`grep 'cache_root_dir:' $CI_PROJECT_DIR/.gitlab-ci.d/Memora.yml | sed 's/^.*: //'`
+  echo "Cleaning $MEMORA_CACHE_DIR :" 
+  for dir in $(ls -tp1 $MEMORA_CACHE_DIR)
+  do
+    echo $MEMORA_CACHE_DIR/$dir
+    flock $MEMORA_CACHE_DIR/$dir -c "[ -d $MEMORA_CACHE_DIR/$dir ] && echo \"Deleting $dir\" && rm -rf $MEMORA_CACHE_DIR/$dir"
+  done
+
+# Get python installation
 - >
   if ! $CI_PROJECT_DIR/.gitlab-ci.d/memora_retry.sh get python; then
     $CI_PROJECT_DIR/.gitlab-ci.d/build-python.sh $CI_PROJECT_DIR
