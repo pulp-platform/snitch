@@ -114,7 +114,7 @@ $(PARTIAL_DUMP): $(PARTIAL_ELF) | $(BUILDDIR)
 
 # Device object relocation address
 $(ORIGIN_LD): $(PARTIAL_ELF) | $(DEVICE_BUILDDIR)
-	@RELOC_ADDR=$$($(OBJDUMP) -t $< | grep __end | cut -c9-16); \
+	@RELOC_ADDR=$$($(OBJDUMP) -t $< | grep snitch_main | cut -c9-16); \
 	echo "Writing device object relocation address 0x$$RELOC_ADDR to $@"; \
 	echo "L3_ORIGIN = 0x$$RELOC_ADDR;" > $@
 
