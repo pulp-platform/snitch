@@ -3,13 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //================================================================================
-// Data
-//================================================================================
-
-extern volatile uint32_t _snrt_mutex;
-extern volatile snrt_barrier_t _snrt_barrier;
-
-//================================================================================
 // Mutex functions
 //================================================================================
 
@@ -77,11 +70,11 @@ inline void snrt_global_barrier() {
     if (snrt_is_dm_core()) {
         // Remember previous iteration
         uint32_t prev_barrier_iteration = _snrt_barrier.iteration;
-        uint32_t barrier =
+        uint32_t cnt =
             __atomic_add_fetch(&(_snrt_barrier.cnt), 1, __ATOMIC_RELAXED);
 
         // Increment the barrier counter
-        if (barrier == snrt_cluster_num()) {
+        if (cnt == snrt_cluster_num()) {
             _snrt_barrier.cnt = 0;
             __atomic_add_fetch(&(_snrt_barrier.iteration), 1, __ATOMIC_RELAXED);
         } else {
@@ -102,10 +95,10 @@ inline void snrt_global_barrier() {
 inline void snrt_partial_barrier(snrt_barrier_t *barr, uint32_t n) {
     // Remember previous iteration
     uint32_t prev_it = barr->iteration;
-    uint32_t barrier = __atomic_add_fetch(&barr->cnt, 1, __ATOMIC_RELAXED);
+    uint32_t cnt = __atomic_add_fetch(&barr->cnt, 1, __ATOMIC_RELAXED);
 
     // Increment the barrier counter
-    if (barrier == n) {
+    if (cnt == n) {
         barr->cnt = 0;
         __atomic_add_fetch(&barr->iteration, 1, __ATOMIC_RELAXED);
     } else {

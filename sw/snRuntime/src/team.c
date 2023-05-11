@@ -18,8 +18,6 @@ extern uint32_t snrt_cluster_core_idx();
 
 extern uint32_t snrt_cluster_core_num();
 
-extern uint32_t snrt_cluster_compute_core_idx();
-
 extern uint32_t snrt_cluster_compute_core_num();
 
 extern int snrt_is_compute_core();

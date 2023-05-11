@@ -1,0 +1,10 @@
+clint.h
+occamy_base_addr.h
+occamy_cfg.h
+occamy_hbm_xbar_peripheral.h
+occamy_quad_peripheral.h
+occamy_soc_ctrl.h
+occamy_soc_peripheral.h
+snitch_cluster_peripheral.h
+snitch_hbm_xbar_peripheral.h
+snitch_quad_peripheral.h
