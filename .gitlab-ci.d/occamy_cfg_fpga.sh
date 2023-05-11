@@ -5,7 +5,7 @@
 
 # Makes the occamy system smaller so that it fits on a VCU128 FPGA board
 
-occamy_cfg="hw/system/occamy/src/occamy_cfg.hjson"
+occamy_cfg="hw/system/occamy/cfg/full.hjson"
 
 # nr_s1_quadrant -> 1
 sed -i 's|nr_s1_quadrant.*|nr_s1_quadrant: 1,|' ${occamy_cfg}
