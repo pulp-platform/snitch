@@ -1504,7 +1504,7 @@ class AxiXbar(Xbar):
 
     def addr_map_len(self):
         return len(self.addrmap) + len(self.symbolic_addrmap) + sum(
-            len(am) for am in self.symbolic_addrmap_multi)
+            len(am[1]) for am in self.symbolic_addrmap_multi)
 
     def iw_out(self):
         return self.iw + int(math.ceil(math.log2(max(1, len(self.inputs)))))
