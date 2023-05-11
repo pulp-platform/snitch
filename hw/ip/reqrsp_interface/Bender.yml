@@ -4,36 +4,33 @@
 package:
   name: reqrsp_interface
   authors:
-  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
-  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-
+    - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+    - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 dependencies:
   axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
-
-export_include_dirs:
-- include
-
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
+export_include_dirs: [include]
 sources:
-# Level 0:
-- src/reqrsp_pkg.sv
-# Level 1:
-- src/reqrsp_intf.sv
-# Level 2:
-- src/axi_to_reqrsp.sv
-- src/reqrsp_cut.sv
-- src/reqrsp_demux.sv
-- src/reqrsp_iso.sv
-- src/reqrsp_mux.sv
-- src/reqrsp_to_axi.sv
-- target: simulation
-  files:
-  - src/reqrsp_test.sv
-- target: test
-  files:
-  # Level 0
-  - test/axi_to_reqrsp_tb.sv
-  - test/reqrsp_demux_tb.sv
-  - test/reqrsp_idempotent_tb.sv
-  - test/reqrsp_mux_tb.sv
-  - test/reqrsp_to_axi_tb.sv
+  # Level 0:
+  - src/reqrsp_pkg.sv
+  # Level 1:
+  - src/reqrsp_intf.sv
+  # Level 2:
+  - src/axi_to_reqrsp.sv
+  - src/reqrsp_cut.sv
+  - src/reqrsp_demux.sv
+  - src/reqrsp_iso.sv
+  - src/reqrsp_mux.sv
+  - src/reqrsp_to_axi.sv
+  - target: simulation
+    files: [src/reqrsp_test.sv]
+  - target: test
+    files:
+      # Level 0
+      - test/axi_to_reqrsp_tb.sv
+      - test/reqrsp_demux_tb.sv
+      - test/reqrsp_idempotent_tb.sv
+      - test/reqrsp_mux_tb.sv
+      - test/reqrsp_to_axi_tb.sv

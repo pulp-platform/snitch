@@ -1,0 +1,42 @@
+# atomics
+# fp8_computation_vector
+# fp8_comparison_scalar
+# fp8_comparison_vector
+# fp8_computation_scalar
+# fp8alt_comparison_scalar
+# fp8alt_comparison_vector
+# fp8alt_computation_scalar
+# fp8alt_computation_vector
+# fp16_comparison_vector
+# fp16_computation_scalar
+# fp16_computation_vector
+# fp16_comparison_scalar
+# fp16alt_comparison_scalar
+# fp16alt_comparison_vector
+# fp16alt_computation_scalar
+# fp16alt_computation_vector
+# fp32_comparison_vector
+# fp32_computation_scalar
+# fp32_computation_vector
+# fp32_conversions_scalar
+# fp32_comparison_scalar
+# fp64_conversions_scalar
+team_global
+barrier
+tls
+# multi_cluster
+varargs_1
+# data_mover
+# openmp
+varargs_2
+dma_simple
+# perf_cnt
+# zero_mem
+# event_unit
+# interrupt-local
+printf_fmtint
+fence_i
+# interrupt
+printf_simple
+# lto
+simple

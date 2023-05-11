@@ -3,23 +3,17 @@
 # SPDX-License-Identifier: SHL-0.51
 package:
   name: mem_interface
-  authors:
-  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-
+  authors: [Florian Zaruba <zarubaf@iis.ee.ethz.ch>]
 dependencies:
   reqrsp_interface: {path: ../reqrsp_interface}
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
-
-export_include_dirs:
-- include
-
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
+export_include_dirs: [include]
 sources:
-- src/mem_wide_narrow_mux.sv
-- src/mem_interface.sv
-- target: simulation
-  files:
-  - src/mem_test.sv
-- target: test
-  files:
-  # Level 0
-  - test/mem_wide_narrow_mux_tb.sv
+  - src/mem_wide_narrow_mux.sv
+  - src/mem_interface.sv
+  - target: simulation
+    files: [src/mem_test.sv]
+  - target: test
+    files: [test/mem_wide_narrow_mux_tb.sv]

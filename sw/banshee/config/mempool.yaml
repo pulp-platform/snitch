@@ -18,21 +18,21 @@ address:
   cl_clint: 0x40000060
   clint: 0xFFFF0000
 memory:
-- tcdm:
-    start: 0x0
-    end: 0x100000
-    latency: 5
-  dram:
-    start: 0x80000000
-    end: 0x80010000
-    latency: 10
-  # Not used in MemPool
-  ext_tcdm: []
-  periphs:
-    callbacks: []
-    end: 0x100000
-    latency: 5
-    start: 0x100000
+  - tcdm:
+      start: 0x0
+      end: 0x100000
+      latency: 5
+    dram:
+      start: 0x80000000
+      end: 0x80010000
+      latency: 10
+    # Not used in MemPool
+    ext_tcdm: []
+    periphs:
+      callbacks: []
+      end: 0x100000
+      latency: 5
+      start: 0x100000
 inst_latency:
   mul: 3
   mulh: 3

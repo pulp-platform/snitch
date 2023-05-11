@@ -4,17 +4,17 @@
 package:
   name: snitch_ipu
   authors:
-  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
-  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-
+    - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+    - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
 dependencies:
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
   snitch: {path: ../../ip/snitch}
-
 sources:
-# Level 0:
-- src/snitch_ipu_pkg.sv
-# Level 1:
-- src/snitch_ipu_alu.sv
-# Level 2:
-- src/snitch_int_ss.sv
+  # Level 0:
+  - src/snitch_ipu_pkg.sv
+  # Level 1:
+  - src/snitch_ipu_alu.sv
+  # Level 2:
+  - src/snitch_int_ss.sv

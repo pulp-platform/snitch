@@ -1,0 +1,9 @@
+# Get all Bender.yml and format them. Exclude the vendor directory and hidden
+# dirs.
+# Unfortunately we also need to exclude the `mkdocs.yml` file because the
+# formatter would remove the double exclamation mark. Preventing `mkdocs` from
+# loading the modules correctly.
+ignore: |
+  hw/vendor
+  */.bender/*
+  mkdocs.yml

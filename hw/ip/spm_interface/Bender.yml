@@ -3,26 +3,19 @@
 # SPDX-License-Identifier: SHL-0.51
 package:
   name: spm_interface
-  authors:
-  - Tim Fischer <fischeti@iis.ee.ethz.ch>
-
+  authors: [Tim Fischer <fischeti@iis.ee.ethz.ch>]
 dependencies:
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
-
-export_include_dirs:
-- include
-
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
+export_include_dirs: [include]
 sources:
-# Level 1
-- src/spm_interface.sv
-- src/spm_rmw_adapter.sv
-# Level 1
-- src/spm_1p_adv.sv
-- target: simulation
-  files:
-  - src/spm_test.sv
-- target: test
-  files:
-  # Level 0
-  - test/tb_spm_rmw_adapter.sv
-  - test/tb_spm_1p_adv.sv
+  # Level 1
+  - src/spm_interface.sv
+  - src/spm_rmw_adapter.sv
+  # Level 2
+  - src/spm_1p_adv.sv
+  - target: simulation
+    files: [src/spm_test.sv]
+  - target: test
+    files: [test/tb_spm_rmw_adapter.sv, test/tb_spm_1p_adv.sv]

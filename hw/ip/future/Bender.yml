@@ -3,29 +3,26 @@
 # SPDX-License-Identifier: SHL-0.51
 package:
   name: future
-
 dependencies:
   axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
-
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
 sources:
-# Level 0:
-- src/mem_to_axi_lite.sv
-- src/idma_reg64_frontend_reg_pkg.sv
-- src/idma_tf_id_gen.sv
-- src/dma/axi_dma_data_path.sv
-- src/axi_interleaved_xbar.sv
-# Level 1:
-- src/axi_zero_mem.sv
-- src/idma_reg64_frontend_reg_top.sv
-# Level 2:
-- src/idma_reg64_frontend.sv
-- src/dma/axi_dma_data_mover.sv
-- src/dma/axi_dma_burst_reshaper.sv
-# Level 2
-- src/dma/axi_dma_backend.sv
-
-- target: test
-  files:
-  - test/fixture_axi_dma_backend.sv
-  - test/tb_axi_dma_backend.sv
+  # Level 0:
+  - src/mem_to_axi_lite.sv
+  - src/idma_reg64_frontend_reg_pkg.sv
+  - src/idma_tf_id_gen.sv
+  - src/dma/axi_dma_data_path.sv
+  - src/axi_interleaved_xbar.sv
+  # Level 1:
+  - src/axi_zero_mem.sv
+  - src/idma_reg64_frontend_reg_top.sv
+  # Level 2:
+  - src/idma_reg64_frontend.sv
+  - src/dma/axi_dma_data_mover.sv
+  - src/dma/axi_dma_burst_reshaper.sv
+  # Level 2
+  - src/dma/axi_dma_backend.sv
+  - target: test
+    files: [test/fixture_axi_dma_backend.sv, test/tb_axi_dma_backend.sv]

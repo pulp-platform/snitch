@@ -1,0 +1,92 @@
+// Copyright 2023 ETH Zurich and University of Bologna.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+// Single-core configuration.
+{
+    nr_s1_quadrant: 1,
+    s1_quadrant: {
+        nr_clusters: 1,
+    },
+
+    cluster: {
+        boot_addr: 4096, // 0x1000
+        cluster_base_addr: 268435456, // 0x1000_0000
+        cluster_base_offset: 0, // 0x0
+        cluster_base_hartid: 0,
+        addr_width: 48,
+        data_width: 64,
+        tcdm: {
+            size: 128,
+            banks: 32,
+        },
+        cluster_periph_size: 64, // kB
+        zero_mem_size: 64, // kB
+        dma_data_width: 512,
+        dma_axi_req_fifo_depth: 3,
+        dma_req_fifo_depth: 3,
+        // Timing parameters
+        timing: {
+            lat_comp_fp32: 3,
+            lat_comp_fp64: 3,
+            lat_comp_fp16: 2,
+            lat_comp_fp16_alt: 2,
+            lat_comp_fp8: 1,
+            lat_comp_fp8_alt: 1,
+            lat_noncomp: 1,
+            lat_conv: 1,
+            lat_sdotp: 2,
+            fpu_pipe_config: "BEFORE"
+            narrow_xbar_latency: "NO_LATENCY",
+            wide_xbar_latency: "NO_LATENCY",
+        }
+        hives: [
+            {
+                icache: {
+                    size: 8, // total instruction cache size in kByte
+                    sets: 2, // number of ways
+                    cacheline: 256 // word size in bits
+                },
+                cores: [
+                    { $ref: "#/compute_core_template" },
+                ]
+            },
+        ]
+    },
+    dram: {
+        // 0x8000_0000
+        address: 2147483648,
+        // 0x8000_0000
+        length: 2147483648
+    },
+    peripherals: {
+        clint: {
+            // 0xffff_0000
+            address: 4294901760,
+            // 0x0000_1000
+            length: 4096
+        },
+    },
+    // Templates.
+    compute_core_template: {
+        isa: "rv32imafd",
+        xssr: true
+        xfrep: true
+        xdma: true
+        xf16: true,
+        xf16alt: true,
+        xf8: true,
+        xf8alt: true,
+        xfdotp: true,
+        xfvec: true,
+        num_int_outstanding_loads: 1,
+        num_int_outstanding_mem: 4,
+        num_fp_outstanding_loads: 4,
+        num_fp_outstanding_mem: 4,
+        num_sequencer_instructions: 16,
+        num_dtlb_entries: 1,
+        num_itlb_entries: 1,
+        // Enable division/square root unit
+        // Xdiv_sqrt: true,
+    },
+}

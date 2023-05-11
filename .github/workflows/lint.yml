@@ -5,10 +5,8 @@
 # Run all lint checks
 name: lint
 on: [push, pull_request]
-
 env:
   VERIBLE_VERSION: 0.0-3222-gb19cdf44
-
 jobs:
   ################
   # Verible Lint #
@@ -18,22 +16,22 @@ jobs:
     # This job runs on Linux (fixed ubuntu version)
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - name: Install Verible
-      run: |
-        set -e
-        mkdir -p build/verible
-        cd build/verible
-        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-jammy-x86_64.tar.gz
-        sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
-        tar -C /tools/verible -xf verible.tar.gz --strip-components=1
-        echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Install Verible
+        run: |
+          set -e
+          mkdir -p build/verible
+          cd build/verible
+          curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-jammy-x86_64.tar.gz
+          sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
+          tar -C /tools/verible -xf verible.tar.gz --strip-components=1
+          echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
     # Run linter in hw/ip subdir
-    - name: Run Lint
-      run: |
-        echo "::add-matcher::.github/verible-lint-matcher.json"
-        util/verible-lint
-        echo "::remove-matcher owner=verible-lint-matcher::"
+      - name: Run Lint
+        run: |
+          echo "::add-matcher::.github/verible-lint-matcher.json"
+          util/verible-lint
+          echo "::remove-matcher owner=verible-lint-matcher::"
 
   #####################
   # Vendor Up-to-Date #
@@ -43,18 +41,18 @@ jobs:
     name: Vendor Up-to-Date
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install requirements
-      run: pip install -r python-requirements.txt
-    - name: Re-vendor and diff
-      run: |
-        find . \
-            -name '*.vendor.hjson' \
-            | xargs -n1 util/vendor.py --verbose \
-            && util/git-diff.py --error-msg "::error::Found differences, please re-vendor."
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install requirements
+        run: pip install -r python-requirements.txt
+      - name: Re-vendor and diff
+        run: |
+          find . \
+              -name '*.vendor.hjson' \
+              | xargs -n1 util/vendor.py --verbose \
+              && util/git-diff.py --error-msg "::error::Found differences, please re-vendor."
 
   ######################
   # Opcodes Up-to-Date #
@@ -63,22 +61,22 @@ jobs:
     name: Check Opcodes Up-to-Date
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
-        components: rustfmt
-    - name: Install requirements
-      run: pip install -r python-requirements.txt
-    - name: Update opcodes and diff
-      run: |
-        ./util/generate-opcodes.sh \
-            && util/git-diff.py --error-msg "::error ::Found differences, please update all opcodes."
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt
+      - name: Install requirements
+        run: pip install -r python-requirements.txt
+      - name: Update opcodes and diff
+        run: |
+          ./util/generate-opcodes.sh \
+              && util/git-diff.py --error-msg "::error ::Found differences, please update all opcodes."
 
   ########################
   # Check Doc up-to-date #
@@ -87,19 +85,19 @@ jobs:
     name: Documentation Up-to-Date
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '12'
-    - run: npm install -g @adobe/jsonschema2md@v5.0.1
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - run: pip install -r python-requirements.txt
-    - name: Re-generate documentation and diff
-      run: |
-        cd docs/ && rm -r schema-doc && jsonschema2md -d schema/ --out schema-doc -x schema-doc -n
-        ../util/git-diff.py --error-msg "::error ::Found stale documentation, please re-generate schema doc."
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - run: npm install -g @adobe/jsonschema2md@v5.0.1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - run: pip install -r python-requirements.txt
+      - name: Re-generate documentation and diff
+        run: |
+          cd docs/ && rm -r schema-doc && jsonschema2md -d schema/ --out schema-doc -x schema-doc -n
+          ../util/git-diff.py --error-msg "::error ::Found stale documentation, please re-generate schema doc."
 
   #################
   # Check License #
@@ -107,52 +105,47 @@ jobs:
   lint-license:
     runs-on: ubuntu-22.04
     steps:
-    - name: Check License
-      uses: pulp-platform/pulp-actions/lint-license@patch/license-checker
-      with:
-        patches: 0001-Allow-hash-comments-in-assembly.patch
+      - name: Check License
+        uses: pulp-platform/pulp-actions/lint-license@patch/license-checker
+        with:
+          patches: 0001-Allow-hash-comments-in-assembly.patch
         # We cover ETH Zurich and lowRISC licenses and Apache 2.0 (mostly for SW)
         # and Solderpad for the hardware.
-        license: |
-          Copyright (\d{4}(-\d{4})?\s)?(ETH Zurich and University of Bologna|lowRISC contributors).
-          (Solderpad Hardware License, Version 0.51|Licensed under the Apache License, Version 2.0), see LICENSE for details.
-          SPDX-License-Identifier: (SHL-0.51|Apache-2.0)
-        match_regex: true
+          license: |
+            Copyright (\d{4}(-\d{4})?\s)?(ETH Zurich and University of Bologna|lowRISC contributors).
+            (Solderpad Hardware License, Version 0.51|Licensed under the Apache License, Version 2.0), see LICENSE for details.
+            SPDX-License-Identifier: (SHL-0.51|Apache-2.0)
+          match_regex: true
         # Exclude anything in vendored directories, solder snippets and TEX templates
         # (which generally do not contain valid standalone code), generated files
         # and Questasim scripts (*.do)
-        exclude_paths: |
-          */vendor/*
-          util/lowrisc_misc-linters/*
-          sw/banshee/tests/runtime/printf.*
-          sw/snRuntime/include/interface.h
-          sw/snRuntime/include/snitch_cluster_peripheral.h
-          sw/snRuntime/include/occamy_quad_peripheral.h
-          sw/snRuntime/include/occamy_soc_peripheral.h
-          sw/snRuntime/include/occamy_hbm_xbar_peripheral.h
-          util/solder/*.sv.tpl
-          hw/system/occamy/addrmap/addrmap.tex.tpl
-          hw/system/*.do
-          hw/system/occamy/fpga/bootrom/bootrom.tcl
+          exclude_paths: |
+            */vendor/*
+            util/lowrisc_misc-linters/*
+            sw/banshee/tests/runtime/printf.*
+            sw/snRuntime/src/omp/interface.h
+            util/solder/*.sv.tpl
+            hw/system/occamy/addrmap/addrmap.tex.tpl
+            hw/system/*.do
+            hw/system/occamy/fpga/bootrom/bootrom.tcl
 
-  ####################
-  # Format YML Files #
-  ####################
-  yamlfmt:
+  ##################
+  # Lint YML Files #
+  ##################
+  yamllint:
     name: YAML Sources
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install requirements
-      run: pip install -r python-requirements.txt
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install requirements
+        run: pip install -r python-requirements.txt
     # Check the proper formatting of all Bender.yml
-    - name: Check YAML formatting
-      run: |
-        util/yml-format
-        util/git-diff.py --error-msg "::error ::Found differences, run util/yml-format before committing."
+      - name: Check YAML formatting
+        run: |
+          yamllint .
 
   ########################
   # Check Python Sources #
@@ -161,18 +154,18 @@ jobs:
     name: Python Sources
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install requirements
-      run: pip install flake8
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install requirements
+        run: pip install flake8
     # Check that all python sources conform to the `pep8` standard
-    - name: Check Python sources
-      run: |
-        echo "::add-matcher::.github/flake8-matcher.json"
-        flake8
-        echo "::remove-matcher owner=flake8-matcher::"
+      - name: Check Python sources
+        run: |
+          echo "::add-matcher::.github/flake8-matcher.json"
+          flake8
+          echo "::remove-matcher owner=flake8-matcher::"
 
   ######################
   # Clang-Format Check #
@@ -182,10 +175,10 @@ jobs:
     name: C/C++ Sources
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: DoozyX/clang-format-lint-action@v0.11
-      with:
-        clangFormatVersion: 10
+      - uses: actions/checkout@v2
+      - uses: DoozyX/clang-format-lint-action@v0.11
+        with:
+          clangFormatVersion: 10
 
   ######################
   # Lint Editor Config #
@@ -195,17 +188,17 @@ jobs:
     name: Editorconfig
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install requirements
-      run: pip install -r python-requirements.txt
-    - name: Check files
-      run: |
-        echo "::add-matcher::.github/editorconfig-checker-matcher.json"
-        util/lint-editorconfig
-        echo "::remove-matcher owner=editorconfig-checker-matcher::"
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install requirements
+        run: pip install -r python-requirements.txt
+      - name: Check files
+        run: |
+          echo "::add-matcher::.github/editorconfig-checker-matcher.json"
+          util/lint-editorconfig
+          echo "::remove-matcher owner=editorconfig-checker-matcher::"
 
   ###########
   # Banshee #
@@ -213,15 +206,15 @@ jobs:
   Banshee:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
-        components: rustfmt
-    - working-directory: sw/banshee
-      run: cargo fmt --all -- --check
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt
+      - working-directory: sw/banshee
+        run: cargo fmt --all -- --check
 
   ##########
   # Occamy #
@@ -230,32 +223,32 @@ jobs:
   Occamy:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install apt requirements
-      run: |
-        sudo apt-get update
-        sudo apt-get install device-tree-compiler clang-format-12
-    - name: Install Python requirements
-      run: pip install -r python-requirements.txt
-    - name: Install Verible
-      run: |
-        set -e
-        mkdir -p build/verible
-        cd build/verible
-        curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-jammy-x86_64.tar.gz
-        sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
-        tar -C /tools/verible -xf verible.tar.gz --strip-components=1
-        echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
-    - name: Install Bender
-      run: |
-        curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh
-        mkdir -p ~/.local/bin && mv bender ~/.local/bin/
-    - name: Generated Files Up-to-Date
-      env:
-        CLANG_FORMAT: clang-format-12
-      run: |
-        make -C hw/system/occamy all
-        util/git-diff.py --error-msg "::error ::Found differences, run \`make -C hw/system/occamy all\` before committing."
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install apt requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get install device-tree-compiler clang-format-12
+      - name: Install Python requirements
+        run: pip install -r python-requirements.txt
+      - name: Install Verible
+        run: |
+          set -e
+          mkdir -p build/verible
+          cd build/verible
+          curl -Ls -o verible.tar.gz https://github.com/google/verible/releases/download/v$VERIBLE_VERSION/verible-v$VERIBLE_VERSION-Ubuntu-22.04-jammy-x86_64.tar.gz
+          sudo mkdir -p /tools/verible && sudo chmod 777 /tools/verible
+          tar -C /tools/verible -xf verible.tar.gz --strip-components=1
+          echo "PATH=$PATH:/tools/verible/bin" >> $GITHUB_ENV
+      - name: Install Bender
+        run: |
+          curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh
+          mkdir -p ~/.local/bin && mv bender ~/.local/bin/
+      - name: Generated Files Up-to-Date
+        env:
+          CLANG_FORMAT: clang-format-12
+        run: |-
+          make -C hw/system/occamy all
+          util/git-diff.py --error-msg "::error ::Found differences, run \`make -C hw/system/occamy all\` before committing."

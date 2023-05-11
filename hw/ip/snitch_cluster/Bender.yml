@@ -4,18 +4,25 @@
 package:
   name: snitch_cluster
   authors:
-  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
-
+    - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+    - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 dependencies:
   axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
-  FPnew: {git: https://github.com/openhwgroup/cvfpu.git, rev: 1202ca3a767b563bca5de505574373e53941506f}
-  register_interface: {git: https://github.com/pulp-platform/register_interface.git,
-    rev: v0.3.3}
-  riscv-dbg: {git: https://github.com/pulp-platform/riscv-dbg.git, rev: ec0d92fa5fdaaf611e5b8a4cc8ee84017ff98710}
-  tech_cells_generic: {git: https://github.com/pulp-platform/tech_cells_generic.git,
-    rev: v0.2.11}
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
+  FPnew:
+    git: https://github.com/openhwgroup/cvfpu.git
+    rev: 1202ca3a767b563bca5de505574373e53941506f
+  register_interface:
+    git: https://github.com/pulp-platform/register_interface.git
+    rev: v0.3.3
+  riscv-dbg:
+    git: https://github.com/pulp-platform/riscv-dbg.git
+    rev: ec0d92fa5fdaaf611e5b8a4cc8ee84017ff98710
+  tech_cells_generic:
+    git: https://github.com/pulp-platform/tech_cells_generic.git
+    rev: v0.2.11
   # Local dependencies.
   future: {path: ../../ip/future}
   reqrsp_interface: {path: ../../ip/reqrsp_interface}
@@ -27,28 +34,25 @@ dependencies:
   snitch_vm: {path: ../../ip/snitch_vm}
   snitch_ssr: {path: ../../ip/snitch_ssr}
   snitch: {path: ../../ip/snitch}
-
 sources:
-# Level 0:
-- src/snitch_amo_shim.sv
-- src/snitch_cluster_peripheral/snitch_cluster_peripheral_reg_pkg.sv
-- src/snitch_cluster_peripheral/snitch_cluster_peripheral_reg_top.sv
-- src/snitch_cluster_peripheral/snitch_cluster_peripheral.sv
-- src/snitch_fpu.sv
-- src/snitch_sequencer.sv
-- src/snitch_tcdm_interconnect.sv
-# Level 1:
-- src/snitch_barrier.sv
-- src/snitch_fp_ss.sv
-- src/snitch_shared_muldiv.sv
-# Level 2:
-- src/snitch_cc.sv
-- src/snitch_clkdiv2.sv
-# Level 3:
-- src/snitch_hive.sv
-# Level 4:
-- src/snitch_cluster.sv
-- target: test
-  files:
-  # Level 0
-  - test/snitch_tcdm_interconnect_tb.sv
+  # Level 0:
+  - src/snitch_amo_shim.sv
+  - src/snitch_cluster_peripheral/snitch_cluster_peripheral_reg_pkg.sv
+  - src/snitch_cluster_peripheral/snitch_cluster_peripheral_reg_top.sv
+  - src/snitch_cluster_peripheral/snitch_cluster_peripheral.sv
+  - src/snitch_fpu.sv
+  - src/snitch_sequencer.sv
+  - src/snitch_tcdm_interconnect.sv
+  # Level 1:
+  - src/snitch_barrier.sv
+  - src/snitch_fp_ss.sv
+  - src/snitch_shared_muldiv.sv
+  # Level 2:
+  - src/snitch_cc.sv
+  - src/snitch_clkdiv2.sv
+  # Level 3:
+  - src/snitch_hive.sv
+  # Level 4:
+  - src/snitch_cluster.sv
+  - target: test
+    files: [test/snitch_tcdm_interconnect_tb.sv]

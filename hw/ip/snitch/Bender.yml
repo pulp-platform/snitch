@@ -4,42 +4,39 @@
 package:
   name: snitch
   authors:
-  - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
-  - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
-
+    - Florian Zaruba <zarubaf@iis.ee.ethz.ch>
+    - Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
 dependencies:
   axi: {git: https://github.com/pulp-platform/axi.git, rev: v0.39.0-beta.4}
-  common_cells: {git: https://github.com/pulp-platform/common_cells.git, rev: v1.28.0}
-  FPnew: {git: https://github.com/openhwgroup/cvfpu.git, rev: 1202ca3a767b563bca5de505574373e53941506f}
+  common_cells:
+    git: https://github.com/pulp-platform/common_cells.git
+    rev: v1.28.0
+  FPnew:
+    git: https://github.com/openhwgroup/cvfpu.git
+    rev: 1202ca3a767b563bca5de505574373e53941506f
   reqrsp_interface: {path: ../reqrsp_interface}
-  riscv-dbg: {git: https://github.com/pulp-platform/riscv-dbg.git, rev: ec0d92fa5fdaaf611e5b8a4cc8ee84017ff98710}
-
-export_include_dirs:
-- include
-
+  riscv-dbg:
+    git: https://github.com/pulp-platform/riscv-dbg.git
+    rev: ec0d92fa5fdaaf611e5b8a4cc8ee84017ff98710
+export_include_dirs: [include]
 sources:
-# Level 0:
-- src/snitch_pma_pkg.sv
-- src/riscv_instr.sv
-# Level 1:
-- src/snitch_pkg.sv
-# Level 2:
-- src/snitch_regfile_ff.sv
-# - src/snitch_regfile_fpga.sv
-# - src/snitch_regfile_latch.sv
-- src/snitch_lsu.sv
-- src/snitch_l0_tlb.sv
-# Level 1:
-- target: not(disable_pmcs)
-  defines:
-    SNITCH_ENABLE_PERF:
-  files:
-  - src/snitch.sv
-# Disable the performance monitoring counters to save area.
-- target: disable_pmcs
-  files:
-  - src/snitch.sv
-
-- target: test
-  files:
-  - test/snitch_l0_tlb_tb.sv
+  # Level 0:
+  - src/snitch_pma_pkg.sv
+  - src/riscv_instr.sv
+  # Level 1:
+  - src/snitch_pkg.sv
+  # Level 2:
+  - src/snitch_regfile_ff.sv
+  - src/snitch_lsu.sv
+  - src/snitch_l0_tlb.sv
+  # Level 1:
+  - target: not(disable_pmcs)
+    defines:
+      SNITCH_ENABLE_PERF:
+    files:
+      - src/snitch.sv
+  # Disable the performance monitoring counters to save area.
+  - target: disable_pmcs
+    files: [src/snitch.sv]
+  - target: test
+    files: [test/snitch_l0_tlb_tb.sv]

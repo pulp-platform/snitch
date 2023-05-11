@@ -2,25 +2,29 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
+# TODO colluca: generate automatically with clustergen
+
 ---
 address:
   # Snitch: cl_peripherals + 0x190
-  barrier_reg: 0x120190
-  cluster_base_hartid: 0x40000040
-  cluster_id: 0x40000050
-  cluster_num: 0x40000048
-  nr_cores: 0x40000010
+  barrier_reg: 0x10020190
   # Snitch/Occamy: SOC_CTRL + 0x14
   # in Banshee also used as exit code location
   scratch_reg: 0x02000014
-  tcdm_end: 0x40000008
-  tcdm_start: 0x40000000
   uart: 0xF00B8000
-  wakeup_reg: 0x40000028
   # Snitch: Bootdata.clint_base
   clint: 0xFFFF0000
   # Snitch: cl_peripherals + 0x180
-  cl_clint: 0x120180
+  cl_clint: 0x10020180
+  ## These parameters are not used, but Banshee requires them being defined
+  tcdm_end: 0x00000000
+  tcdm_start: 0x00000000
+  cluster_base_hartid: 0x00000000
+  cluster_id: 0x00000000
+  cluster_num: 0x00000000
+  nr_cores: 0x00000000
+  wakeup_reg: 0x00000000
+  ## End of unused parameters
 architecture:
   num_cores: 9
   num_clusters: 1
@@ -29,25 +33,31 @@ bootrom:
   callbacks:
     - name: bootrom-cluster
       size: 0x34
-  end: 0x01020000
-  latency: 5
   start: 0x01000000
+  end: 0x01020000
+  offset: 0x0
+  latency: 5
 memory:
-- dram:
-    end: 0xF0000000
-    latency: 4
-    start: 0x80000000
-  ext_tcdm: []
-  periphs:
-    callbacks:
-    - name: zero-memory
-      size: 64000
-    end: 0x140000
-    latency: 2
-    start: 0x130000
-  tcdm:
-    end: 0x120000
-    latency: 1
-    start: 0x100000
-  ssr:
-    num_dm: 3
+  - dram:
+      start: 0x80000000
+      size: 0x80000000
+      end: 0xFFFFFFFF
+      offset: 0x0 # dram is global for all clusters
+      latency: 4
+    ext_tcdm: []
+    tcdm:
+      start: 0x10000000 # cluster "num_clusters" start address
+      end: 0x10020000   # size of the TCDM
+      offset: 0x40000 # offset to next cluster is start + size + offset
+      latency: 1
+    # Periphs
+    periphs:
+      start: 0x10030000
+      end: 0x10040000
+      offset: 0x40000 # offset to start address of next cluster
+      latency: 1
+      callbacks:
+        - name: zero-memory
+          size: 64000
+    ssr:
+      num_dm: 3

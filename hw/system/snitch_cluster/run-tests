@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+#
+# Copyright 2023 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Luca Colagrande <colluca@iis.ee.ethz.ch>
+
+# TODO colluca: timeout feature
+# TODO colluca: catch simulator failure (if vsim fails, the test would be reported as pass)
+
+import argparse
+from pathlib import Path
+import subprocess
+import sys
+from termcolor import colored, cprint
+import re
+
+
+BANSHEE_CFG = Path(__file__).parent / '../../../sw/banshee/config/snitch_cluster.yaml'
+
+# Tool settings
+SIMULATORS        = ['vsim', 'banshee', 'verilator']
+DEFAULT_SIMULATOR = SIMULATORS[0]
+SIMULATOR_CMDS    = {
+    'vsim': 'bin/snitch_cluster.vsim {0}',
+    'banshee': (f'banshee --no-opt-llvm --no-opt-jit --configuration {BANSHEE_CFG}'
+                ' --trace {0} > /dev/null'),
+    'verilator': 'bin/snitch_cluster.vlt {0}'
+}
+
+
+def main():
+    # Argument parsing
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'testlist',
+        help='File specifying a list of apps to run')
+    parser.add_argument(
+        '--simulator',
+        action='store',
+        nargs='?',
+        default=DEFAULT_SIMULATOR,
+        choices=SIMULATORS,
+        help='Choose a simulator to run the test with')
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Preview the simulation commands which will be run')
+    parser.add_argument(
+        '--early-exit',
+        action='store_true',
+        help='Exit as soon as any test fails')
+    args = parser.parse_args()
+
+    # Program inputs
+    testlist   = args.testlist
+    simulator  = args.simulator
+    dry_run    = args.dry_run
+    early_exit = args.early_exit
+
+    failed = []
+    retcodes = []
+
+    # Read test list file
+    testlist_path = Path(testlist).absolute()
+    with open(testlist_path, 'r') as f:
+        tests = [Path(line) for line in f.read().splitlines() if line.partition('#')[0]]
+        
+        # Iterate tests
+        for test in tests:
+
+            # Construct path to test executable
+            name = test.name
+            elf = testlist_path.parent / 'build' / f'{name}.elf'
+            cprint(f'Run test {colored(elf, "cyan")}', attrs=["bold"])
+
+            # Construct simulation command
+            cmd = SIMULATOR_CMDS[simulator].format(elf)
+            print(f'$ {cmd}', flush=True)
+
+            # Run test
+            retcode = 0
+            if not dry_run:
+
+                # When simulating with vsim, we need to parse the simulation log to catch the
+                # application's return code
+                if simulator == 'vsim':
+                    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, text=True)
+
+                    while p.poll() is None:
+                        line = p.stdout.readline()
+                        print(line, end='', flush=True)
+                        regex = r'\[FAILURE\] Finished with exit code\s*(\d*)'
+                        match = re.search(regex, line)
+                        if match:
+                            retcode = match.group(1)
+
+                else:
+                    p = subprocess.Popen(cmd, shell=True)
+                    p.wait()
+                    retcode = p.returncode
+
+            # When test fails
+            if retcode != 0:
+
+                # Report failure
+                cprint(f'Failed with exit code {retcode}', 'red', attrs=['bold'], flush=True)
+
+                # Record failing tests for final summary
+                failed.append(test)
+                retcodes.append(retcode)
+
+                # End program if requested on first test failure
+                if early_exit:
+                    break
+
+    # Print test summary
+    if not dry_run:
+        print('\n==== Test summary ====')
+        if failed:
+            for test, retcode in zip(failed, retcodes):
+                print(f'{colored(test, "cyan")} test {colored("failed", "red")} with exit code {retcode}')
+            return 1
+        else:
+            print(f'All tests {colored("passed", "green")}!')
+            return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

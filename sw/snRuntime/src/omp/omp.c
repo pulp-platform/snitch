@@ -5,7 +5,6 @@
 #include "omp.h"
 
 #include "dm.h"
-#include "snrt.h"
 
 //================================================================================
 // settings
@@ -22,7 +21,7 @@
 //================================================================================
 // data
 //================================================================================
-static omp_t *volatile omp_p_global;
+static volatile omp_t *volatile omp_p_global;
 
 #ifndef OMPSTATIC_NUMTHREADS
 __thread omp_t volatile *omp_p;
@@ -35,7 +34,6 @@ omp_t omp_p = {
 #endif
 
 #ifdef OMP_PROF
-#include "printf.h"
 omp_prof_t *omp_prof;
 #endif
 
@@ -67,16 +65,16 @@ void omp_init(void) {
              i++)
             omp_p->plainTeam.core_epoch[i] = 0;
 
-        initTeam(omp_p, &omp_p->plainTeam);
+        initTeam((omp_t *)omp_p, (omp_team_t *)&omp_p->plainTeam);
         omp_p->kmpc_barrier =
-            (struct snrt_barrier *)snrt_l1alloc(sizeof(struct snrt_barrier));
-        snrt_memset(omp_p->kmpc_barrier, 0, sizeof(struct snrt_barrier));
+            (snrt_barrier_t *)snrt_l1alloc(sizeof(snrt_barrier_t));
+        snrt_memset(omp_p->kmpc_barrier, 0, sizeof(snrt_barrier_t));
         // Exchange omp pointer with other cluster cores
         omp_p_global = omp_p;
 #else
         omp_p.kmpc_barrier =
-            (struct snrt_barrier *)snrt_l1alloc(sizeof(struct snrt_barrier));
-        snrt_memset(omp_p.kmpc_barrier, 0, sizeof(struct snrt_barrier));
+            (snrt_barrier_t *)snrt_l1alloc(sizeof(snrt_barrier_t));
+        snrt_memset(omp_p.kmpc_barrier, 0, sizeof(snrt_barrier_t));
         // Exchange omp pointer with other cluster cores
         omp_p_global = &omp_p;
 #endif
@@ -130,19 +128,8 @@ unsigned __attribute__((noinline)) snrt_omp_bootstrap(uint32_t core_idx) {
     }
 }
 
-void partialParallelRegion(int32_t argc, void *data,
-                           void (*fn)(void *, uint32_t), int num_threads) {
-#ifndef OMPSTATIC_NUMTHREADS
-    omp_p->plainTeam.nbThreads = num_threads;
-#endif
-
-    OMP_PRINTF(10, "num_threads=%d nbThreads=%d omp_p->numThreads=%d\n",
-               num_threads, omp_p->plainTeam.nbThreads, omp_p->numThreads);
-    parallelRegionExec(argc, data, fn, num_threads);
-}
-
-#ifdef OPENMP_PROFILE
 void omp_print_prof(void) {
+#ifdef OPENMP_PROFILE
     printf("%-20s %d\n", "fork_oh", omp_prof->fork_oh);
-}
 #endif
+}
