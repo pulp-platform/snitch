@@ -5,7 +5,17 @@ software development tools for Snitch.
 
 ## Pre-built Container
 
-There is an experimental version of the container available. To download, run:
+There is an experimental version of the container available.
+To download, first login to the GitHub container registry:
+```shell
+$ docker login ghcr.io
+```
+You will be asked for a username (your GitHub username).
+As a password you should use a
+[PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+that at least has package registry read permission.
+
+Then you can run:
 
 ```shell
 $ docker pull ghcr.io/pulp-platform/snitch
