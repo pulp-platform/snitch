@@ -4,16 +4,16 @@
 
 ### Scratch folder
 
-First, create yourself a folder to work in on the scratch disk space. This is due to the limited size of your home directory, you can select between `/scratch`, `/scratch2`, `/scratch3`.
+First, create yourself a folder to work in on the scratch disk. Your home directory is mounted from the network, and has tighter size and access speed constraints than the scratch disks in your machine. You can sometimes select between multiple scratch disks, such as `/scratch`, `/scratch2`, `/scratch3`.
 
 ```bash
 # Look how much free space there is in the scratch folders
 df -h | grep scratch
-# Pick one and create your folder in there, example :
+# Pick one and create your folder in there, for example:
 mkdir /scratch/[your username]
 # Note, contrary to your home folder, the scratch folder is local to your machine, but you can access it on any other machine like so
 cd /usr/scratch/[your machine]/[your username]
-# You can find the name of the machine by running
+# You can find the name of a machine by running
 hostname
 # (Note, keep only the name before .ee.ethz.ch)
 ```
@@ -50,7 +50,7 @@ Add the last line to your `~/.profile` if you want the virtual environment to be
 First, clone this repository on your scratch folder. We suggest you first make a private fork of the repo.
 
 ```bash
-git clone https://github.com/pulp-platform/snitch.git --branch=occamy-sw
+git clone https://github.com/pulp-platform/snitch.git
 ```
 
 Now install the required Python dependencies. Make sure you have activated your virtual environment before doing so.
@@ -67,11 +67,11 @@ cd hw/system/occamy
 
 ___Note:__ from now on, assume all paths to be relative to `hw/system/occamy`._
 
-To compile your code to a RISC-V executable you will need a compiler toolchain for RISC-V. There are plenty of pre-compiled RISC-V toolchains at IIS, for Snitch you can use the following GCC toolchain.
+To compile your code to a RISC-V executable you will need a compiler toolchain for RISC-V. There are plenty of pre-compiled RISC-V toolchains at IIS, for Snitch you can use the following LLVM toolchain.
 
 ```bash
 # You can add this to your ~/.profile such that you do not have to run this command every time you open a new terminal
-export PATH=/home/colluca/workspace/riscv/bin/:$PATH
+export PATH=/usr/scratch2/rapanui/lbertaccini/snitch_occamy_vsum_test/riscv32-pulp-llvm-centos7-131/bin/:$PATH
 ```
 
 The default configuration of Occamy is too large for a fast RTL simulation. Under the `cfg` folder different configurations are provided. The `full.hjson` configuration describes the full system comprising 6 quadrants and 4 clusters per quadrant which we have taped out in Occamy, which is used by default. The `single-cluster.hjson` configuration describes a system with a single quadrant containing a single cluster. When developing a new application it is beneficial to use the latter configuration, to increase the speed of your debugging iterations. To override the default configuration, define the following variable when you invoke Make:

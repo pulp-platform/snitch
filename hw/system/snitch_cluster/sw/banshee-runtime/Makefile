@@ -53,19 +53,19 @@ $(BUILDDIR):
 	mkdir -p $@
 
 $(BUILDDIR)/%.o: $(SRC_DIR)/%.S | $(BUILDDIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.o: $(SRC_DIR)/%.c | $(BUILDDIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.d: $(SRC_DIR)/%.c | $(BUILDDIR)
-	$(CC) $(CFLAGS) -MM -MT '$(@:.d=.o)' $< > $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -MM -MT '$(@:.d=.o)' $< > $@
 
 $(LIB): $(OBJS) | $(BUILDDIR)
-	$(AR) $(ARFLAGS) $@ $^
+	$(RISCV_AR) $(RISCV_ARFLAGS) $@ $^
 
 $(DUMP): $(LIB) | $(BUILDDIR)
-	$(OBJDUMP) -D $< > $@
+	$(RISCV_OBJDUMP) -D $< > $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)

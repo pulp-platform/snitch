@@ -15,25 +15,25 @@ DEBUG ?= OFF # ON to turn on debugging symbols
 ###################
 
 # Compiler toolchain
-CC      = riscv32-unknown-elf-gcc
-AR      = riscv32-unknown-elf-ar
-OBJCOPY = riscv32-unknown-elf-objcopy
-OBJDUMP = riscv32-unknown-elf-objdump
-READELF = riscv32-unknown-elf-readelf
+RISCV_CC      = riscv32-unknown-elf-gcc
+RISCV_AR      = riscv32-unknown-elf-ar
+RISCV_OBJCOPY = riscv32-unknown-elf-objcopy
+RISCV_OBJDUMP = riscv32-unknown-elf-objdump
+RISCV_READELF = riscv32-unknown-elf-readelf
 
 # Compiler flags
-CFLAGS += $(addprefix -I,$(INCDIRS))
-CFLAGS += -march=rv32imafd
-CFLAGS += -mabi=ilp32d
-CFLAGS += -mcmodel=medany
-CFLAGS += -mno-fdiv
-CFLAGS += -ffast-math
-CFLAGS += -fno-builtin-printf
-CFLAGS += -fno-common
-CFLAGS += -O3
+RISCV_CFLAGS += $(addprefix -I,$(INCDIRS))
+RISCV_CFLAGS += -march=rv32imafd
+RISCV_CFLAGS += -mabi=ilp32d
+RISCV_CFLAGS += -mcmodel=medany
+RISCV_CFLAGS += -mno-fdiv
+RISCV_CFLAGS += -ffast-math
+RISCV_CFLAGS += -fno-builtin-printf
+RISCV_CFLAGS += -fno-common
+RISCV_CFLAGS += -O3
 ifeq ($(DEBUG), ON)
-CFLAGS += -g
+RISCV_CFLAGS += -g
 endif
 
 # Archiver flags
-ARFLAGS = rcs
+RISCV_ARFLAGS = rcs

@@ -37,16 +37,16 @@ SNRT_LIB      = $(realpath $(SNRT_LIB_DIR)/lib$(SNRT_LIB_NAME).a)
 LD_SRCS       = $(BASE_LD) $(MEMORY_LD) $(ORIGIN_LD) $(SNRT_LIB)
 
 # Linker flags
-LDFLAGS += -nostartfiles
-LDFLAGS += -lm
-LDFLAGS += -lgcc
+RISCV_LDFLAGS += -nostartfiles
+RISCV_LDFLAGS += -lm
+RISCV_LDFLAGS += -lgcc
 # Linker script
-LDFLAGS += -L$(APPSDIR)
-LDFLAGS += -L$(BUILDDIR)
-LDFLAGS += -T$(BASE_LD)
+RISCV_LDFLAGS += -L$(APPSDIR)
+RISCV_LDFLAGS += -L$(BUILDDIR)
+RISCV_LDFLAGS += -T$(BASE_LD)
 # Link snRuntime library
-LDFLAGS += -L$(SNRT_LIB_DIR)
-LDFLAGS += -l$(SNRT_LIB_NAME)
+RISCV_LDFLAGS += -L$(SNRT_LIB_DIR)
+RISCV_LDFLAGS += -l$(SNRT_LIB_NAME)
 
 # Objcopy flags
 OBJCOPY_FLAGS  = -O binary
@@ -84,19 +84,19 @@ $(BUILDDIR):
 	mkdir -p $@
 
 $(DEP): $(SRCS) | $(BUILDDIR)
-	$(CC) $(CFLAGS) -MM -MT '$(ELF)' $< > $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -MM -MT '$(ELF)' $< > $@
 
 $(ELF): $(DEP) $(LD_SRCS) | $(BUILDDIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(SRCS) -o $@
+	$(RISCV_CC) $(RISCV_CFLAGS) $(RISCV_LDFLAGS) $(SRCS) -o $@
 
 $(BIN): $(ELF) | $(BUILDDIR)
-	$(OBJCOPY) $(OBJCOPY_FLAGS) $< $@
+	$(RISCV_OBJCOPY) $(OBJCOPY_FLAGS) $< $@
 
 $(DUMP): $(ELF) | $(BUILDDIR)
-	$(OBJDUMP) -D $< > $@
+	$(RISCV_OBJDUMP) -D $< > $@
 
 $(DWARF): $(ELF) | $(BUILDDIR)
-	$(READELF) --debug-dump $< > $@
+	$(RISCV_READELF) --debug-dump $< > $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEP)

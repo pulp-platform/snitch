@@ -32,11 +32,11 @@ INCDIRS += $(SNRT_DIR)/src/omp
 INCDIRS += $(SNRT_DIR)/vendor/riscv-opcodes
 
 # Linker script
-LDFLAGS += -L$(abspath $(RUNTIME_DIR))
-LDFLAGS += -T$(abspath $(SNRT_DIR)/base.ld)
+RISCV_LDFLAGS += -L$(abspath $(RUNTIME_DIR))
+RISCV_LDFLAGS += -T$(abspath $(SNRT_DIR)/base.ld)
 # Link snRuntime library
-LDFLAGS += -L$(abspath $(RUNTIME_DIR)/build/)
-LDFLAGS += -lsnRuntime
+RISCV_LDFLAGS += -L$(abspath $(RUNTIME_DIR)/build/)
+RISCV_LDFLAGS += -lsnRuntime
 
 ###########
 # Outputs #
@@ -63,17 +63,17 @@ $(BUILDDIR):
 	mkdir -p $@
 
 $(DEP): $(SRCS) | $(BUILDDIR)
-	$(CC) $(CFLAGS) -MM -MT '$(ELF)' $< > $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -MM -MT '$(ELF)' $< > $@
 
 $(ELF): $(SRCS) | $(BUILDDIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(SRCS) -o $@
+	$(RISCV_CC) $(RISCV_CFLAGS) $(RISCV_LDFLAGS) $(SRCS) -o $@
 
 $(DUMP): $(ELF) | $(BUILDDIR)
-	$(OBJDUMP) -D $< > $@
+	$(RISCV_OBJDUMP) -D $< > $@
 
 $(DWARF): $(ELF) | $(BUILDDIR)
-# 	$(READELF) --debug-dump $< > $@
-	$(DWARFDUMP) $< > $@
+# 	$(RISCV_READELF) --debug-dump $< > $@
+	$(RISCV_DWARFDUMP) $< > $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEP)
