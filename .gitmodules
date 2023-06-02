@@ -1,0 +1,3 @@
+[submodule "sw/vendor/musl"]
+	path = sw/vendor/musl
+	url = git@github.com:kraj/musl.git
