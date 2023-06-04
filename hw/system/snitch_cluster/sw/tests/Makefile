@@ -18,14 +18,14 @@ BUILDDIR     = $(abspath build)
 SNRT_DIR    := $(abspath $(MK_DIR)/../../../../../sw/snRuntime)
 SRC_DIR     := $(abspath $(MK_DIR)/../../../../../sw/tests)
 ifeq ($(SELECT_RUNTIME), banshee)
-RUNTIME_DIR := $(abspath $(MK_DIR)/../banshee-runtime)
+RUNTIME_DIR := $(abspath $(MK_DIR)/../runtime/banshee)
 else
-RUNTIME_DIR := $(abspath $(MK_DIR)/../rtl-runtime)
+RUNTIME_DIR := $(abspath $(MK_DIR)/../runtime/rtl)
 endif
 
 # Dependencies
 INCDIRS += $(RUNTIME_DIR)/src
-INCDIRS += $(RUNTIME_DIR)/../platform-headers
+INCDIRS += $(RUNTIME_DIR)/../shared
 INCDIRS += $(SNRT_DIR)/api
 INCDIRS += $(SNRT_DIR)/api/omp
 INCDIRS += $(SNRT_DIR)/src

@@ -14,7 +14,7 @@ CFG_OVERRIDE ?=     # Override default config file
 
 .DEFAULT_GOAL := help
 .PHONY: all clean
-all: update-rtl sw addrmap
+all: rtl sw addrmap
 clean: clean-bender clean-sw clean-addrmap clean-vlt clean-vsim clean-vcs clean-logs
 
 ############
@@ -166,9 +166,9 @@ test/bootrom.bin: test/bootrom.elf
 # Source #
 ##########
 
-.PHONY: update-rtl update-clint update-plic update-socreg update-quadreg update-source
+.PHONY: rtl update-clint update-plic update-socreg update-quadreg update-source
 
-update-rtl: update-clint update-plic update-socreg update-quadreg update-source
+rtl: update-clint update-plic update-socreg update-quadreg update-source
 
 update-source: $(CFG)
 	@echo "[SOLDER]  Generating sources"

@@ -4,7 +4,7 @@
 #
 # Luca Colagrande <colluca@iis.ee.ethz.ch>
 
-include ../toolchain.mk
+include ../../toolchain.mk
 
 ###################
 # Build variables #
@@ -12,10 +12,9 @@ include ../toolchain.mk
 
 # Directories
 BUILDDIR    = $(abspath build/)
-SW_DIR      = $(abspath ../)
-RUNTIME_DIR = $(abspath ./)
-SRC_DIR     = $(abspath $(RUNTIME_DIR)/src)
-SNRT_DIR    = $(abspath $(SW_DIR)/../../../../sw/snRuntime)
+RUNTIME_DIR = $(abspath ../)
+SRC_DIR     = $(abspath $(RUNTIME_DIR)/rtl/src)
+SNRT_DIR    = $(abspath $(RUNTIME_DIR)/../../../../../sw/snRuntime)
 
 # Dependencies
 INCDIRS += $(SNRT_DIR)/src
@@ -23,7 +22,7 @@ INCDIRS += $(SNRT_DIR)/src/omp
 INCDIRS += $(SNRT_DIR)/api
 INCDIRS += $(SNRT_DIR)/api/omp
 INCDIRS += $(SNRT_DIR)/vendor/riscv-opcodes
-INCDIRS += $(SW_DIR)/platform-headers
+INCDIRS += $(RUNTIME_DIR)/shared
 SRCS += $(SRC_DIR)/snitch_cluster_start.S
 SRCS += $(SRC_DIR)/snrt.c
 

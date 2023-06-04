@@ -1,63 +1,10 @@
 # Walkthrough
 
-## Fast setup at IIS
+## Setup
 
-### Scratch folder
+The system setup steps for Occamy are the same as for the Snitch cluster. Follow the "Setup" and "Cloning Snitch" sections of the Snitch cluster walkthrough guide `hw/system/snitch_cluster/WALKTHROUGH.md`.
 
-First, create yourself a folder to work in on the scratch disk. Your home directory is mounted from the network, and has tighter size and access speed constraints than the scratch disks in your machine. You can sometimes select between multiple scratch disks, such as `/scratch`, `/scratch2`, `/scratch3`.
-
-```bash
-# Look how much free space there is in the scratch folders
-df -h | grep scratch
-# Pick one and create your folder in there, for example:
-mkdir /scratch/[your username]
-# Note, contrary to your home folder, the scratch folder is local to your machine, but you can access it on any other machine like so
-cd /usr/scratch/[your machine]/[your username]
-# You can find the name of a machine by running
-hostname
-# (Note, keep only the name before .ee.ethz.ch)
-```
-
-### Dependencies
-
-At IIS the default version of some tools (`gcc`, `cmake`, ...) might be too old for certain projects. You will need to setup your own default binary for these tools:
-
-```bash
-# Create your own bin folder in your home directory
-mkdir ~/bin && cd ~/bin
-# There you can change the default binaries for your user
-ln -s /usr/pack/gcc-9.2.0-af/linux-x64/bin/gcc gcc
-ln -s /usr/pack/gcc-9.2.0-af/linux-x64/bin/g++ g++
-ln -s /usr/sepp/bin/cmake-3.18.1 cmake
-ln -s /home/colluca/bin/spike-dasm spike-dasm
-# Now you need to add this folder to your PATH:
-# Open ~/.profile and add the lines
-export PATH=~/bin:$PATH
-export PATH=/usr/scratch/dachstein/colluca/opt/verible/bin:$PATH
-```
-
-Create a Python virtual environment:
-
-```
-python3.9 -m venv ~/.venvs/snitch
-source ~/.venvs/snitch/bin/activate
-```
-
-Add the last line to your `~/.profile` if you want the virtual environment to be activated by default when you open a new terminal.
-
-## Cloning and compiling Occamy
-
-First, clone this repository on your scratch folder. We suggest you first make a private fork of the repo.
-
-```bash
-git clone https://github.com/pulp-platform/snitch.git
-```
-
-Now install the required Python dependencies. Make sure you have activated your virtual environment before doing so.
-
-```
-pip install -r python-requirements.txt
-```
+## Compiling the Snitch hardware for simulation
 
 Go to the `occamy` folder, where most of your efforts will take place:
 
@@ -67,42 +14,41 @@ cd hw/system/occamy
 
 ___Note:__ from now on, assume all paths to be relative to `hw/system/occamy`._
 
-To compile your code to a RISC-V executable you will need a compiler toolchain for RISC-V. There are plenty of pre-compiled RISC-V toolchains at IIS, for Snitch you can use the following LLVM toolchain.
+The Snitch cluster RTL sources are partly automatically generated from a configuration file provided in `.hjson` format. Several RTL files are templated and use the `.hjson` configuration file to fill the template entries. An example is `src/occamy_top.sv.tpl`.
+Under the `cfg` folder different configurations are provided. The default configuration of Occamy is too large for a fast RTL simulation. Under the cfg folder different configurations are provided. The `full.hjson` configuration describes the full system comprising 6 quadrants and 4 clusters per quadrant which we have taped out in Occamy, which is used by default. The `single-cluster.hjson` configuration describes a system with a single quadrant containing a single cluster. When developing a new application it is beneficial to use the latter configuration, to increase the speed of your debugging iterations. To override the default configuration, define the following variable when you invoke Make:
 
 ```bash
-# You can add this to your ~/.profile such that you do not have to run this command every time you open a new terminal
-export PATH=/usr/scratch2/rapanui/lbertaccini/snitch_occamy_vsum_test/riscv32-pulp-llvm-centos7-131/bin/:$PATH
+make CFG_OVERRIDE=cfg/single-cluster.hjson rtl
 ```
 
-The default configuration of Occamy is too large for a fast RTL simulation. Under the `cfg` folder different configurations are provided. The `full.hjson` configuration describes the full system comprising 6 quadrants and 4 clusters per quadrant which we have taped out in Occamy, which is used by default. The `single-cluster.hjson` configuration describes a system with a single quadrant containing a single cluster. When developing a new application it is beneficial to use the latter configuration, to increase the speed of your debugging iterations. To override the default configuration, define the following variable when you invoke Make:
+The previous command will fill out all template files and generate the RTL files for your system.
 
-```bash
-make CFG_OVERRIDE=cfg/single-cluster.hjson sw
-```
-
-The `sw` target first generates some C header files which depend on the hardware configuration through Solder (we will talk about this later). Hence, the need to specify the hardware configuration to be used explicitly. Afterwards, it recursively invokes the `make` target in the `sw` subdirectory to build the apps/kernels which have been developed in that directory.
-
-It is important, that whenever you compile the software for a specific configuration, you build the hardware with the same configuration. Two steps are required to update the hardware.
-
-Firstly, several RTL files are templated and use the `.hjson` configuration file to fill the template entries. An example is `src/occamy_top.sv.tpl`. To fill out all template files and build the RTL for your system, run the following command:
-
-```bash
-make CFG_OVERRIDE=<your_cfg_file_of_choice> update-rtl
-```
-
-Once the RTL has been generated, it has to be compiled for simulation. Different targets are provided for different simulators. For Questasim you can run:
+Once the RTL has been generated, it can be compiled for simulation. Different targets are provided for different simulators. For Questasim you can run:
 
 ```bash
 # Compile the RTL for Questasim
 make bin/occamy_top.vsim
 ```
 
-Note the `CFG_OVERRIDE` variable need only be defined for those targets which make use of the template, i.e. software and RTL generation. The last `make` target compiled the previously generated RTL files and thus does not make direct use of the `.hjson` configuration file.
+The RTL simulation model is compiled in `./work-vsim` and the [frontend server (fesvr)](https://github.com/riscv-software-src/riscv-isa-sim) and other C++ sources used throughout the testbench are compiled into `./work`. A script named `bin/occamy_top.vsim` was also generated (_you can have a look inside the file_) as a wrapper for the command that you would invoke to simulate your hardware with Questasim. The script takes an executable compiled for Snitch as input, and feeds it as an argument to the simulator. The testbench relies on the `fesvr` utilities to load your executable into the simulated DRAM memory.
 
-The RTL simulation model is compiled in `./work-vsim` and the [frontend server (fesvr)](https://github.com/riscv-software-src/riscv-isa-sim) and other C++ sources used throughout the testbench are compiled into `./work`. A script was also generated `bin/occamy_top.vsim` (_you can have a look inside the file_) as a wrapper for the command that you would invoke to simulate your hardware with Questasim.
-The testbench relies on the `fesvr` utilities to load your ELF program into the simulated DRAM memory.
+Note the `CFG_OVERRIDE` variable need only be defined for those targets which make use of the configuration file, e.g. RTL generation. The last `make` target only compiled the previously generated RTL files and thus does not make direct use of the `.hjson` configuration file.
 
-___Note:__ When you have time, have a look at the `Makefile` and the commands that are executed by the `sw`, `update-rtl` and `bin/occamy_top.vsim` targets. Note that the Makefile includes the Makefrag in `util/Makefrag` at the root of this repository where plenty of things are defined._
+Note that the RTL is not the only source which is generated from the configuration file. The software stack also depends on the configuration file. Make sure you always build the software with the same configuration of the hardware you are going to run it on. By default, if you compile the software after you have compiled the hardware, this is ensured automatically for you. Whenever you override the configuration file on the Make command-line, the configuration will be stored in the `cfg/lru.hjson` file. Successive invocations of Make may omit the `CFG_OVERRIDE` flag and the least-recently used configuration saved in `cfg/lru.hjson` will be picked up automatically.
+
+___Note:__ When you have time, have a look at the `Makefile` and the commands that are executed by the `sw`, `rtl` and `bin/occamy_top.vsim` targets. Note that the Makefile includes the Makefrag in `util/Makefrag` at the root of this repository where plenty of things are defined._
+
+## Building the Snitch software
+
+To build all of the software for the Snitch cluster, run the following Make command:
+
+```bash
+make DEBUG=ON sw
+```
+
+The `sw` target first generates some C header files which depend on the hardware configuration. Hence, the need to generate the software for the same configuration as your hardware. Afterwards, it recursively invokes the `make` target in the `sw` subdirectory to build the apps/kernels which have been developed in that directory.
+
+The `DEBUG=ON` flag is used to tell the compiler to produce debugging symbols. It is necessary for the `annotate` target, showcased in the Debugging section of this guide, to work.
 
 ## Creating your first app for CVA6 (the host)
 
