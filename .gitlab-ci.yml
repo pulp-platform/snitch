@@ -13,7 +13,13 @@ variables:
   UBOOT_SPL_BIN: ${CVA6_SDK}/u-boot/spl/u-boot-spl.bin
   UBOOT_ITB: ${CVA6_SDK}/u-boot/u-boot.itb
   LINUX_UIMAGE: ${CVA6_SDK}/uImage
-  PATH: $CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
+  RISCV_LLVM: /usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/
+  PATH: $RISCV_LLVM:$CI_PROJECT_DIR/.local/bin:${RISCV}/bin:/home/gitlabci/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/condor/bin:/usr/sepp/bin
+  GCC_DIR: /usr/pack/gcc-9.2.0-af/linux-x64
+  CC: ${GCC_DIR}/bin/gcc
+  CXX: ${GCC_DIR}/bin/g++
+  VCS_VERSION: vcs-2020.12
+  VLT_VERSION: verilator-4.110
   VSIM: vsim
   VLOG: vlog
 before_script:
@@ -38,6 +44,7 @@ before_script:
   # yamllint enable rule:line-length
 stages:
   - build-sw
+  - snitch-cluster-tests
   - verify-snitch-ips
   - linux_prepare
   - build_fpga
@@ -173,3 +180,31 @@ ip-tests-vsim:
       done
     - grep -n "Errors" vsim-$IP.log
     - grep -n "Errors[:] 0" vsim-$IP.log
+#####################################
+# Test Snitch Cluster on IIS system #
+#####################################
+# Verilator
+snitch-cluster-vlt:
+  stage: snitch-cluster-tests
+  script:
+    - cd hw/system/snitch_cluster
+    - make sw
+    - $VLT_VERSION verilator-4.110 make bin/snitch_cluster.vlt
+    - ./run-tests sw/tests/passing-apps.list --simulator verilator
+# VCS
+# requires newer gcc version
+snitch-cluster-vcs:
+  stage: snitch-cluster-tests
+  script:
+    - cd hw/system/snitch_cluster
+    - make sw
+    - $VCS_VERSION make bin/snitch_cluster.vcs
+    - ./run-tests sw/tests/passing-apps.list --simulator vcs
+# QUESTASIM
+snitch-cluster-vsim:
+  stage: snitch-cluster-tests
+  script:
+    - cd hw/system/snitch_cluster
+    - make sw
+    - make bin/snitch_cluster.vsim
+    - ./run-tests sw/tests/passing-apps.list --simulator vsim

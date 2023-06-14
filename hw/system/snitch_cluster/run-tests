@@ -20,13 +20,14 @@ import re
 BANSHEE_CFG = Path(__file__).parent / '../../../sw/banshee/config/snitch_cluster.yaml'
 
 # Tool settings
-SIMULATORS        = ['vsim', 'banshee', 'verilator']
+SIMULATORS        = ['vsim', 'banshee', 'verilator', 'vcs']
 DEFAULT_SIMULATOR = SIMULATORS[0]
 SIMULATOR_CMDS    = {
     'vsim': 'bin/snitch_cluster.vsim {0}',
     'banshee': (f'banshee --no-opt-llvm --no-opt-jit --configuration {BANSHEE_CFG}'
                 ' --trace {0} > /dev/null'),
-    'verilator': 'bin/snitch_cluster.vlt {0}'
+    'verilator': 'bin/snitch_cluster.vlt {0}',
+    'vcs': 'bin/snitch_cluster.vcs {0}'
 }
 
 
@@ -66,7 +67,7 @@ def main():
     testlist_path = Path(testlist).absolute()
     with open(testlist_path, 'r') as f:
         tests = [Path(line) for line in f.read().splitlines() if line.partition('#')[0]]
-        
+
         # Iterate tests
         for test in tests:
 
