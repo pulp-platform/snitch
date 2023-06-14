@@ -606,14 +606,12 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::FCVT_S_D: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP32;
       end
       riscv_instr::FCVT_D_S: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP64;
       end
@@ -778,35 +776,30 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::FCVT_S_H: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP32;
       end
       riscv_instr::FCVT_H_S: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP16;
       end
       riscv_instr::FCVT_D_H: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP64;
       end
       riscv_instr::FCVT_H_D: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP16;
       end
       riscv_instr::FCVT_H_H: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
       end
@@ -1017,7 +1010,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::VFCVTU_S_H: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP32;
         vectorial_op = 1'b1;
@@ -1028,7 +1020,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::VFCVTU_H_S: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP16;
         vectorial_op = 1'b1;
@@ -1253,42 +1244,36 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::FCVT_S_B: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP32;
       end
       riscv_instr::FCVT_B_S: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP8;
       end
       riscv_instr::FCVT_D_B: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP64;
       end
       riscv_instr::FCVT_B_D: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP64;
         dst_fmt      = fpnew_pkg::FP8;
       end
       riscv_instr::FCVT_H_B: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP16;
       end
       riscv_instr::FCVT_B_H: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP8;
       end
@@ -1526,7 +1511,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::VFCVTU_S_B: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP32;
         vectorial_op = 1'b1;
@@ -1537,7 +1521,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::VFCVTU_B_S: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP32;
         dst_fmt      = fpnew_pkg::FP8;
         vectorial_op = 1'b1;
@@ -1548,7 +1531,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::VFCVTU_H_H: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP16;
         vectorial_op = 1'b1;
@@ -1559,7 +1541,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::VFCVTU_H_B: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP16;
         vectorial_op = 1'b1;
@@ -1570,7 +1551,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::VFCVTU_B_H: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP16;
         dst_fmt      = fpnew_pkg::FP8;
         vectorial_op = 1'b1;
@@ -1581,7 +1561,6 @@ module snitch_fp_ss import snitch_pkg::*; #(
       riscv_instr::VFCVTU_B_B: begin
         fpu_op = fpnew_pkg::F2F;
         op_select[0] = RegA;
-        op_select[1] = RegB;
         src_fmt      = fpnew_pkg::FP8;
         dst_fmt      = fpnew_pkg::FP8;
         vectorial_op = 1'b1;
