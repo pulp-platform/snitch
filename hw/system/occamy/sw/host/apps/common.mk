@@ -15,10 +15,10 @@ DEBUG ?= OFF # ON to turn on debugging symbols
 ###################
 
 # Compiler toolchain
-CC      = riscv64-unknown-elf-gcc
-OBJCOPY = riscv64-unknown-elf-objcopy
-OBJDUMP = riscv64-unknown-elf-objdump
-READELF = riscv64-unknown-elf-readelf
+RISCV_CC      = riscv64-unknown-elf-gcc
+RISCV_OBJCOPY = riscv64-unknown-elf-objcopy
+RISCV_OBJDUMP = riscv64-unknown-elf-objdump
+RISCV_READELF = riscv64-unknown-elf-readelf
 
 # Directories
 BUILDDIR    = $(abspath build)
@@ -34,19 +34,19 @@ INCDIRS += $(HOST_DIR)/../shared/runtime
 SRCS    += $(RUNTIME_DIR)/start.S
 
 # Compiler flags
-CFLAGS += $(addprefix -I,$(INCDIRS))
-CFLAGS += -march=rv64imafdc
-CFLAGS += -mabi=lp64d
-CFLAGS += -mcmodel=medany
-CFLAGS += -ffast-math
-CFLAGS += -fno-builtin-printf
-CFLAGS += -fno-common
-CFLAGS += -O3
-CFLAGS += -ffunction-sections
-CFLAGS += -Wextra
-CFLAGS += -Werror
+RISCV_CFLAGS += $(addprefix -I,$(INCDIRS))
+RISCV_CFLAGS += -march=rv64imafdc
+RISCV_CFLAGS += -mabi=lp64d
+RISCV_CFLAGS += -mcmodel=medany
+RISCV_CFLAGS += -ffast-math
+RISCV_CFLAGS += -fno-builtin-printf
+RISCV_CFLAGS += -fno-common
+RISCV_CFLAGS += -O3
+RISCV_CFLAGS += -ffunction-sections
+RISCV_CFLAGS += -Wextra
+RISCV_CFLAGS += -Werror
 ifeq ($(DEBUG), ON)
-CFLAGS += -g
+RISCV_CFLAGS += -g
 endif
 
 # Linking sources
@@ -54,10 +54,10 @@ LINKER_SCRIPT = $(abspath $(HOST_DIR)/runtime/host.ld)
 LD_SRCS       = $(LINKER_SCRIPT)
 
 # Linker flags
-LDFLAGS += -nostartfiles
-LDFLAGS += -lm
-LDFLAGS += -lgcc
-LDFLAGS += -T$(LINKER_SCRIPT)
+RISCV_LDFLAGS += -nostartfiles
+RISCV_LDFLAGS += -lm
+RISCV_LDFLAGS += -lgcc
+RISCV_LDFLAGS += -T$(LINKER_SCRIPT)
 
 # Device binary
 ifeq ($(INCL_DEVICE_BINARY),true)
@@ -102,30 +102,30 @@ $(DEVICE_BUILDDIR):
 	mkdir -p $@
 
 $(DEP): $(SRCS) | $(BUILDDIR)
-	$(CC) $(CFLAGS) -MM -MT '$(PARTIAL_ELF)' $< > $@
-	$(CC) $(CFLAGS) -MM -MT '$(ELF)' $< >> $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -MM -MT '$(PARTIAL_ELF)' $< > $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -MM -MT '$(ELF)' $< >> $@
 
 # Partially linked object
 $(PARTIAL_ELF): $(DEP) $(LD_SRCS) | $(BUILDDIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(SRCS) -o $@
+	$(RISCV_CC) $(RISCV_CFLAGS) $(RISCV_LDFLAGS) $(SRCS) -o $@
 
 $(PARTIAL_DUMP): $(PARTIAL_ELF) | $(BUILDDIR)
-	$(OBJDUMP) -D $< > $@
+	$(RISCV_OBJDUMP) -D $< > $@
 
 # Device object relocation address
 $(ORIGIN_LD): $(PARTIAL_ELF) | $(DEVICE_BUILDDIR)
-	@RELOC_ADDR=$$($(OBJDUMP) -t $< | grep snitch_main | cut -c9-16); \
+	@RELOC_ADDR=$$($(RISCV_OBJDUMP) -t $< | grep snitch_main | cut -c9-16); \
 	echo "Writing device object relocation address 0x$$RELOC_ADDR to $@"; \
 	echo "L3_ORIGIN = 0x$$RELOC_ADDR;" > $@
 
 $(ELF): $(DEP) $(LD_SRCS) $(DEVICE_BINARY) | $(BUILDDIR)
-	$(CC) $(CFLAGS) $(FINAL_CFLAGS) $(LDFLAGS) $(SRCS) -o $@
+	$(RISCV_CC) $(RISCV_CFLAGS) $(FINAL_CFLAGS) $(RISCV_LDFLAGS) $(SRCS) -o $@
 
 $(DUMP): $(ELF) | $(BUILDDIR)
-	$(OBJDUMP) -D $< > $@
+	$(RISCV_OBJDUMP) -D $< > $@
 
 $(DWARF): $(ELF) | $(BUILDDIR)
-	$(READELF) --debug-dump $< > $@
+	$(RISCV_READELF) --debug-dump $< > $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEP)

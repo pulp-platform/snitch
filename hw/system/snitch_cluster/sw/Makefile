@@ -10,13 +10,13 @@ TARGET ?= all
 SELECT_RUNTIME ?= rtl
 
 ifeq ($(SELECT_RUNTIME), banshee)
-RUNTIME = banshee-runtime
+RUNTIME = runtime/banshee
 else
-RUNTIME = rtl-runtime
+RUNTIME = runtime/rtl
 endif
 
-SUBDIRS  = banshee-runtime
-SUBDIRS += rtl-runtime
+SUBDIRS  = runtime/banshee
+SUBDIRS += runtime/rtl
 SUBDIRS += $(APPS)
 
 .PHONY: all $(SUBDIRS)

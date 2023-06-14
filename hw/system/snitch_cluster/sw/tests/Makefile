@@ -18,14 +18,14 @@ BUILDDIR     = $(abspath build)
 SNRT_DIR    := $(abspath $(MK_DIR)/../../../../../sw/snRuntime)
 SRC_DIR     := $(abspath $(MK_DIR)/../../../../../sw/tests)
 ifeq ($(SELECT_RUNTIME), banshee)
-RUNTIME_DIR := $(abspath $(MK_DIR)/../banshee-runtime)
+RUNTIME_DIR := $(abspath $(MK_DIR)/../runtime/banshee)
 else
-RUNTIME_DIR := $(abspath $(MK_DIR)/../rtl-runtime)
+RUNTIME_DIR := $(abspath $(MK_DIR)/../runtime/rtl)
 endif
 
 # Dependencies
 INCDIRS += $(RUNTIME_DIR)/src
-INCDIRS += $(RUNTIME_DIR)/../platform-headers
+INCDIRS += $(RUNTIME_DIR)/../shared
 INCDIRS += $(SNRT_DIR)/api
 INCDIRS += $(SNRT_DIR)/api/omp
 INCDIRS += $(SNRT_DIR)/src
@@ -33,11 +33,11 @@ INCDIRS += $(SNRT_DIR)/src/omp
 INCDIRS += $(SNRT_DIR)/vendor/riscv-opcodes
 
 # Linker script
-LDFLAGS += -L$(abspath $(RUNTIME_DIR))
-LDFLAGS += -T$(abspath $(SNRT_DIR)/base.ld)
+RISCV_LDFLAGS += -L$(abspath $(RUNTIME_DIR))
+RISCV_LDFLAGS += -T$(abspath $(SNRT_DIR)/base.ld)
 # Link snRuntime library
-LDFLAGS += -L$(abspath $(RUNTIME_DIR)/build/)
-LDFLAGS += -lsnRuntime
+RISCV_LDFLAGS += -L$(abspath $(RUNTIME_DIR)/build/)
+RISCV_LDFLAGS += -lsnRuntime
 
 ###########
 # Outputs #
@@ -80,17 +80,17 @@ $(BUILDDIR):
 	mkdir -p $@
 
 $(BUILDDIR)/%.d: $(SRC_DIR)/%.c | $(BUILDDIR)
-	$(CC) $(CFLAGS) -MM -MT '$(BUILDDIR)/$*.elf' $< > $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -MM -MT '$(BUILDDIR)/$*.elf' $< > $@
 
 $(BUILDDIR)/%.elf: $(SRC_DIR)/%.c $(BUILDDIR)/%.d | $(BUILDDIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(SRC_DIR)/$*.c -o $@
+	$(RISCV_CC) $(RISCV_CFLAGS) $(RISCV_LDFLAGS) $(SRC_DIR)/$*.c -o $@
 
 $(BUILDDIR)/%.dump: $(BUILDDIR)/%.elf | $(BUILDDIR)
-	$(OBJDUMP) -D -S $< > $@
+	$(RISCV_OBJDUMP) -D -S $< > $@
 
 $(BUILDDIR)/%.dwarf: $(BUILDDIR)/%.elf | $(BUILDDIR)
-# 	$(READELF) --debug-dump $< > $@
-	$(DWARFDUMP) --all $< > $@
+# 	$(RISCV_READELF) --debug-dump $< > $@
+	$(RISCV_DWARFDUMP) --all $< > $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)

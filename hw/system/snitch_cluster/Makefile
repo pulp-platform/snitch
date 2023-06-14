@@ -44,7 +44,7 @@ VLOG      	?= vlog ${QUESTA_64BIT}
 # Files and directories #
 #########################
 
-PLATFORM_HEADERS_DIR ?= sw/platform-headers
+PLATFORM_HEADERS_DIR ?= sw/runtime/shared
 GENERATED_DIR        ?= $(MKFILE_DIR)generated
 
 # Verilated and compiled snitch cluster
@@ -246,6 +246,18 @@ bin/snitch_cluster.vcs: work-vcs/compile.sh work/lib/libfesvr.a $(GENERATED_DIR)
 	vcs -Mlib=work-vcs -Mdir=work-vcs -o bin/snitch_cluster.vcs -cc $(CC) -cpp $(CXX) \
 		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin ${TB_DIR}/rtl_lib.cc ${TB_DIR}/common_lib.cc $(GENERATED_DIR)/bootdata.cc \
 		-CFLAGS "-std=c++14 -I${MKFILE_DIR} -I${MKFILE_DIR}/test -I${FESVR}/include -I${TB_DIR}" -LDFLAGS "-L${FESVR}/lib" -lfesvr
+
+##########
+# Traces #
+##########
+
+$(LOGS_DIR)/perf.csv: $(shell (ls $(LOGS_DIR)/trace_hart_*.dasm 2>/dev/null | sed 's/trace_hart/hart/' | sed 's/.dasm/_perf.json/')) \
+		$(ROOT)/util/trace/perf_csv.py
+	$(PYTHON) $(ROOT)/util/trace/perf_csv.py -o $@ -i $(LOGS_DIR)/hart_*_perf.json
+
+$(LOGS_DIR)/event.csv: $(shell (ls $(LOGS_DIR)/trace_hart_*.dasm 2>/dev/null | sed 's/trace_hart/hart/' | sed 's/.dasm/_perf.json/')) \
+		$(ROOT)/util/trace/perf_csv.py
+	$(PYTHON) $(ROOT)/util/trace/perf_csv.py -o $@ -i $(LOGS_DIR)/hart_*_perf.json --filter tstart tend
 
 ########
 # Util #

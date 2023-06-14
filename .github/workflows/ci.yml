@@ -85,13 +85,6 @@ jobs:
           export PATH=$HOME/.cargo/bin:${PATH}
           cargo install --path sw/banshee
       - name: Build Software
-        env:
-          CC: clang
-          LD: lld
-          AR: llvm-ar
-          OBJCOPY: llvm-objcopy
-          OBJDUMP: llvm-objdump
-          DWARFDUMP: llvm-dwarfdump
         run: make -C hw/system/snitch_cluster SELECT_RUNTIME=banshee sw
       - name: Run Unit Tests
         run: cd hw/system/snitch_cluster/ && ./run-tests sw/tests/banshee-apps.list
@@ -108,13 +101,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build Software
-        env:
-          CC: clang
-          LD: lld
-          AR: llvm-ar
-          OBJCOPY: llvm-objcopy
-          OBJDUMP: llvm-objdump
-          DWARFDUMP: llvm-dwarfdump
         run: |
           make -C hw/system/snitch_cluster sw
       - name: Build Hardware
@@ -137,10 +123,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build Software
       env:
-        CC: clang
-        LD: lld
-        AR: llvm-ar
-        OBJCOPY: llvm-objcopy
-        OBJDUMP: llvm-objdump
-        DWARFDUMP: llvm-dwarfdump
+        RISCV_CC: clang
+        RISCV_LD: lld
+        RISCV_AR: llvm-ar
+        RISCV_OBJCOPY: llvm-objcopy
+        RISCV_OBJDUMP: llvm-objdump
+        RISCV_DWARFDUMP: llvm-dwarfdump
       run: make -C hw/system/occamy CFG_OVERRIDE=cfg/single-cluster.hjson sw

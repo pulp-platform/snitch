@@ -4,26 +4,25 @@
 #
 # Luca Colagrande <colluca@iis.ee.ethz.ch>
 
-include ../toolchain.mk
+include ../../toolchain.mk
 
 ###################
 # Build variables #
 ###################
 
 # Directories
-BUILDDIR    = $(abspath build/)
-SW_DIR      = $(abspath ../)
-RUNTIME_DIR = $(abspath ./)
-SRC_DIR     = $(abspath $(RUNTIME_DIR)/src)
-SNRT_DIR    = $(abspath $(SW_DIR)/../../../../sw/snRuntime)
+BUILDDIR          = $(abspath build/)
+RUNTIME_DIR       = $(abspath ../)
+SRC_DIR           = $(abspath $(RUNTIME_DIR)/banshee/src)
+SNRT_DIR          = $(abspath $(RUNTIME_DIR)/../../../../../sw/snRuntime)
 
 # Dependencies
 INCDIRS += $(SNRT_DIR)/src
-INCDIRS += $(SNRT_DIR)/src/omp
 INCDIRS += $(SNRT_DIR)/api
+INCDIRS += $(SNRT_DIR)/src/omp
 INCDIRS += $(SNRT_DIR)/api/omp
 INCDIRS += $(SNRT_DIR)/vendor/riscv-opcodes
-INCDIRS += $(SW_DIR)/platform-headers
+INCDIRS += $(RUNTIME_DIR)/shared
 SRCS += $(SRC_DIR)/snitch_cluster_start.S
 SRCS += $(SRC_DIR)/snrt.c
 
@@ -52,19 +51,19 @@ $(BUILDDIR):
 	mkdir -p $@
 
 $(BUILDDIR)/%.o: $(SRC_DIR)/%.S | $(BUILDDIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.o: $(SRC_DIR)/%.c | $(BUILDDIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.d: $(SRC_DIR)/%.c | $(BUILDDIR)
-	$(CC) $(CFLAGS) -MM -MT '$(@:.d=.o)' $< > $@
+	$(RISCV_CC) $(RISCV_CFLAGS) -MM -MT '$(@:.d=.o)' $< > $@
 
 $(LIB): $(OBJS) | $(BUILDDIR)
-	$(AR) $(ARFLAGS) $@ $^
+	$(RISCV_AR) $(RISCV_ARFLAGS) $@ $^
 
 $(DUMP): $(LIB) | $(BUILDDIR)
-	$(OBJDUMP) -D $< > $@
+	$(RISCV_OBJDUMP) -D $< > $@
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)

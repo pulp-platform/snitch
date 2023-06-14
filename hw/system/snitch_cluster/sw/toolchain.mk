@@ -15,32 +15,32 @@ DEBUG ?= OFF # ON to turn on debugging symbols
 ###################
 
 # Compiler toolchain
-CC        ?= clang
-LD        ?= lld
-AR        ?= llvm-ar
-OBJCOPY   ?= llvm-objcopy
-OBJDUMP   ?= llvm-objdump
-DWARFDUMP ?= llvm-dwarfdump
+RISCV_CC        ?= clang
+RISCV_LD        ?= lld
+RISCV_AR        ?= llvm-ar
+RISCV_OBJCOPY   ?= llvm-objcopy
+RISCV_OBJDUMP   ?= llvm-objdump
+RISCV_DWARFDUMP ?= llvm-dwarfdump
 
 # Compiler flags
-CFLAGS += $(addprefix -I,$(INCDIRS))
-CFLAGS += -mcpu=snitch
-CFLAGS += -menable-experimental-extensions
-CFLAGS += -mabi=ilp32d
-CFLAGS += -mcmodel=medany
-CFLAGS += -ffast-math
-CFLAGS += -fno-builtin-printf
-CFLAGS += -fno-common
-CFLAGS += -fopenmp
-CFLAGS += -O3
+RISCV_CFLAGS += $(addprefix -I,$(INCDIRS))
+RISCV_CFLAGS += -mcpu=snitch
+RISCV_CFLAGS += -menable-experimental-extensions
+RISCV_CFLAGS += -mabi=ilp32d
+RISCV_CFLAGS += -mcmodel=medany
+RISCV_CFLAGS += -ffast-math
+RISCV_CFLAGS += -fno-builtin-printf
+RISCV_CFLAGS += -fno-common
+RISCV_CFLAGS += -fopenmp
+RISCV_CFLAGS += -O3
 ifeq ($(DEBUG), ON)
-CFLAGS += -g
+RISCV_CFLAGS += -g
 endif
 
 # Linker flags
-LDFLAGS += -fuse-ld=$(LD)
-LDFLAGS += -nostartfiles
-LDFLAGS += -lm
+RISCV_LDFLAGS += -fuse-ld=$(RISCV_LD)
+RISCV_LDFLAGS += -nostartfiles
+RISCV_LDFLAGS += -lm
 
 # Archiver flags
-ARFLAGS = rcs
+RISCV_ARFLAGS = rcs
