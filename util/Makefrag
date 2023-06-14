@@ -38,7 +38,7 @@ VLT_FLAGS    += -Wno-UNSIGNED
 VLT_FLAGS    += -Wno-UNOPTFLAT
 VLT_FLAGS    += -Wno-fatal
 VLT_FLAGS    += --unroll-count 1024
-VLT_BENDER   += -t rtl
+VLT_BENDER   += -t rtl -t cv64a6_imafdc_sv39
 VLT_SOURCES  := $(shell ${BENDER} script flist ${VLT_BENDER} | ${SED_SRCS})
 VLT_CFLAGS   += -std=c++14 -pthread
 VLT_CFLAGS   +=-I ${VLT_BUILDDIR} -I $(VLT_ROOT)/include -I $(VLT_ROOT)/include/vltstd -I $(VLT_FESVR)/include -I $(TB_DIR)
