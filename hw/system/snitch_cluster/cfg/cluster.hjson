@@ -84,8 +84,9 @@
     // Templates.
     compute_core_template: {
         isa: "rv32imafd",
-        xssr: true
-        xfrep: true
+        xssr: true,
+        xfrep: true,
+        xdma: false,
         xf16: true,
         xf16alt: true,
         xf8: true,
@@ -103,12 +104,18 @@
         // Xdiv_sqrt: true,
     },
     dma_core_template: {
-        isa: "rv32ima",
+        isa: "rv32imafd",
         // Xdiv_sqrt: true,
         # isa: "rv32ema",
         xdma: true
         xssr: false
         xfrep: false
+        xf16: false,
+        xf16alt: false,
+        xf8: false,
+        xf8alt: false,
+        xfdotp: false,
+        xfvec: false,
         num_int_outstanding_loads: 1,
         num_int_outstanding_mem: 4,
         num_fp_outstanding_loads: 4,
