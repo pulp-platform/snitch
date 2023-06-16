@@ -46,6 +46,7 @@ def main():
     x = np.random.uniform(MIN, MAX, length)
     y = np.random.uniform(MIN, MAX, length)
     z = np.zeros(length)
+    g = a*x + y
 
     # Format header file
     l_str = format_scalar_definition('l', length, 'uint32_t')
@@ -53,7 +54,8 @@ def main():
     x_str = format_vector_definition('x', x)
     y_str = format_vector_definition('y', y)
     z_str = format_vector_declaration('z', z)
-    f_str = '\n\n'.join([l_str, a_str, x_str, y_str, z_str])
+    g_str = format_vector_definition('g', g)
+    f_str = '\n\n'.join([l_str, a_str, x_str, y_str, z_str, g_str])
     f_str += '\n'
 
     # Write to stdout
