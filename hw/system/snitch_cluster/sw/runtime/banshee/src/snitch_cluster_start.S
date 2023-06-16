@@ -11,5 +11,5 @@
 #define SNRT_INIT_TLS
 #define SNRT_CRT0_PARK
 
-#include "snitch_cluster_defs.h"
+#include "banshee_snitch_cluster_defs.h"
 #include "start.S"

@@ -2,4 +2,5 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-#define N_CORES_PER_CLUSTER ${cfg['cluster']['nr_cores']}
+#define CFG_CLUSTER_NR_CORES ${cfg['cluster']['nr_cores']}
+#define CFG_CLUSTER_BASE_HARTID ${cfg['cluster']['cluster_base_hartid']}

@@ -344,7 +344,7 @@ module ${cfg['name']}_wrapper (
     .mtip_i,
     .msip_i,
 % if cfg['tie_ports']:
-    .hart_base_id_i (${to_sv_hex(cfg['hart_base_id'], 10)}),
+    .hart_base_id_i (${to_sv_hex(cfg['cluster_base_hartid'], 10)}),
     .cluster_base_addr_i (${to_sv_hex(cfg['cluster_base_addr'], cfg['addr_width'])}),
 % else:
     .hart_base_id_i,

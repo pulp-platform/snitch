@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 // Snitch cluster specific
-#include "snitch_cluster_defs.h"
+#include "banshee_snitch_cluster_defs.h"
 #include "snitch_cluster_memory.h"
 
 // Forward declarations
