@@ -4,11 +4,7 @@
 
 #include <stdint.h>
 
-#include "snitch_cluster_addrmap.h"
-#include "snitch_cluster_cfg.h"
-
-// Auto-generated headers
-#include "snitch_cluster_peripheral.h"
+#include "snitch_cluster_defs.h"
 
 //===============================================================
 // Constants
