@@ -48,10 +48,18 @@ jobs:
       - name: Install LLVM
         run: sudo apt-get install llvm-12-dev
       - working-directory: sw/banshee
+        run: whereis llvm-12
+      - working-directory: sw/banshee
+        env:
+          LLVM_SYS_120_PREFIX: /usr/lib/llvm-12
         run: cargo build
       - working-directory: sw/banshee
+        env:
+          LLVM_SYS_120_PREFIX: /usr/lib/llvm-12
         run: cargo test --all
       - working-directory: sw/banshee
+        env:
+          LLVM_SYS_120_PREFIX: /usr/lib/llvm-12
         run: make test TERM=xterm-256color LOG_FAILED=`mktemp` LOG_TOTAL=`mktemp`
 
   ############################################
