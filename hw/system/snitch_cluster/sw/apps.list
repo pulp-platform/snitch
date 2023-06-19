@@ -1,4 +1,5 @@
 apps/nop
 apps/lto
 apps/blas/axpy
+apps/blas/gemm
 tests/
