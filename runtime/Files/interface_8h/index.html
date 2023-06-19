@@ -1,0 +1,2020 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+    
+    
+      
+        <title>snRuntime/src/omp/interface.h - Snitch</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#snruntimesrcompinterfaceh" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Snitch" class="md-header__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Snitch
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              snRuntime/src/omp/interface.h
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Snitch" class="md-nav__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Snitch
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          User Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          User Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/getting_started/" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/benchmarking/" class="md-nav__link">
+        Benchmarking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/setup-iis/" class="md-nav__link">
+        Tooling Setup at IIS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/example_trace.html" class="md-nav__link">
+        Trace Example
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/docker/" class="md-nav__link">
+        Docker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/directory_structure/" class="md-nav__link">
+        Directory Structure
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/documentation/" class="md-nav__link">
+        Documentation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Systems
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Systems
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+          Snitch Cluster
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Cluster
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/snitch_cluster/" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../schema-doc/snitch_cluster/" class="md-nav__link">
+        Schema
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          Occamy
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Occamy
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/occamy.md" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2_2" id="__nav_3_2_2_label" tabindex="0">
+          Architecture
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Architecture
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/1_overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/2_addrmap/" class="md-nav__link">
+        Address Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/3_system_components/" class="md-nav__link">
+        System Components
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/4_clocking/" class="md-nav__link">
+        Clocking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_interrupts_and_synchronization.md" class="md-nav__link">
+        Interrupts and Synchronization
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../schema-doc/occamy/" class="md-nav__link">
+        Schema
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          Reference Manual
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Reference Manual
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rm/snitch/" class="md-nav__link">
+        Snitch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rm/snitch_cluster/" class="md-nav__link">
+        Snitch Cluster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rm/reqrsp_interface/" class="md-nav__link">
+        Reqrsp Interface
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rm/custom_instructions/" class="md-nav__link">
+        Custom Instructions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          Snitch Runtime
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Runtime
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Pages/" class="md-nav__link">
+        Pages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        Files
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Classes/" class="md-nav__link">
+        Classes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Examples/" class="md-nav__link">
+        Examples
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Modules/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Namespaces/" class="md-nav__link">
+        Namespaces
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../publications/" class="md-nav__link">
+        Publications
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#classes" class="md-nav__link">
+    Classes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defines" class="md-nav__link">
+    Defines
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#types-documentation" class="md-nav__link">
+    Types Documentation
+  </a>
+  
+    <nav class="md-nav" aria-label="Types Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enum-sched_type" class="md-nav__link">
+    enum sched_type
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typedef-kmp_int32" class="md-nav__link">
+    typedef kmp_int32
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typedef-kmp_uint32" class="md-nav__link">
+    typedef kmp_uint32
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typedef-kmp_int64" class="md-nav__link">
+    typedef kmp_int64
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typedef-kmp_uint64" class="md-nav__link">
+    typedef kmp_uint64
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typedef-_kmp_ptr64" class="md-nav__link">
+    typedef _kmp_ptr64
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typedef-_kmp_ptr32" class="md-nav__link">
+    typedef _kmp_ptr32
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typedef-ident_t" class="md-nav__link">
+    typedef ident_t
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#macros-documentation" class="md-nav__link">
+    Macros Documentation
+  </a>
+  
+    <nav class="md-nav" aria-label="Macros Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#define-schedule_without_modifiers" class="md-nav__link">
+    define SCHEDULE_WITHOUT_MODIFIERS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-schedule_has_monotonic" class="md-nav__link">
+    define SCHEDULE_HAS_MONOTONIC
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-schedule_has_nonmonotonic" class="md-nav__link">
+    define SCHEDULE_HAS_NONMONOTONIC
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-schedule_has_no_modifiers" class="md-nav__link">
+    define SCHEDULE_HAS_NO_MODIFIERS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-schedule_get_modifiers" class="md-nav__link">
+    define SCHEDULE_GET_MODIFIERS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-schedule_set_modifiers" class="md-nav__link">
+    define SCHEDULE_SET_MODIFIERS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-schedule_nonmonotonic" class="md-nav__link">
+    define SCHEDULE_NONMONOTONIC
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-schedule_monotonic" class="md-nav__link">
+    define SCHEDULE_MONOTONIC
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-code" class="md-nav__link">
+    Source code
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="snruntimesrcompinterfaceh">snRuntime/src/omp/interface.h</h1>
+<h2 id="classes">Classes</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>struct</td>
+<td><strong><a href="/snitch/runtime/Classes/structident/">ident</a></strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="types">Types</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>enum <a href="/snitch/runtime/Files/interface_8h/#typedef-kmp-int32">kmp_int32</a></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#enum-sched-type">sched_type</a></strong> { kmp_sch_lower = 32, kmp_sch_static_chunked = 33, kmp_sch_static = 34, kmp_sch_dynamic_chunked = 35, kmp_sch_guided_chunked = 36, kmp_sch_runtime = 37, kmp_sch_auto = 38, kmp_sch_trapezoidal = 39, kmp_sch_static_greedy = 40, kmp_sch_static_balanced = 41, kmp_sch_guided_iterative_chunked = 42, kmp_sch_guided_analytical_chunked = 43, kmp_sch_static_steal = 44, kmp_sch_static_balanced_chunked = 45, kmp_sch_guided_simd = 46, kmp_sch_runtime_simd = 47, kmp_sch_upper, kmp_ord_lower =</td>
+</tr>
+<tr>
+<td>64, kmp_ord_static_chunked = 65, kmp_ord_static = 66, kmp_ord_dynamic_chunked = 67, kmp_ord_guided_chunked = 68, kmp_ord_runtime = 69, kmp_ord_auto = 70, kmp_ord_trapezoidal = 71, kmp_ord_upper, kmp_distribute_static_chunked = 91, kmp_distribute_static = 92, kmp_nm_lower = 160, kmp_nm_static_chunked =</td>
+<td></td>
+</tr>
+<tr>
+<td>(kmp_sch_static_chunked - kmp_sch_lower + kmp_nm_lower), kmp_nm_static = 162, kmp_nm_dynamic_chunked = 163, kmp_nm_guided_chunked = 164, kmp_nm_runtime = 165, kmp_nm_auto = 166, kmp_nm_trapezoidal = 167, kmp_nm_static_greedy = 168, kmp_nm_static_balanced = 169, kmp_nm_guided_iterative_chunked = 170, kmp_nm_guided_analytical_chunked = 171, kmp_nm_static_steal =</td>
+<td></td>
+</tr>
+<tr>
+<td>172, kmp_nm_ord_static_chunked = 193, kmp_nm_ord_static = 194, kmp_nm_ord_dynamic_chunked = 195, kmp_nm_ord_guided_chunked = 196, kmp_nm_ord_runtime = 197, kmp_nm_ord_auto = 198, kmp_nm_ord_trapezoidal = 199, kmp_nm_upper, kmp_sch_modifier_monotonic =</td>
+<td></td>
+</tr>
+<tr>
+<td>(1 &lt;&lt; 29), kmp_sch_modifier_nonmonotonic =</td>
+<td></td>
+</tr>
+<tr>
+<td>(1 &lt;&lt; 30), kmp_sch_default = kmp_sch_static, kmp_sch_lower = 32, kmp_sch_static_chunked = 33, kmp_sch_static = 34, kmp_sch_dynamic_chunked = 35, kmp_sch_guided_chunked = 36, kmp_sch_runtime = 37, kmp_sch_auto = 38, kmp_sch_trapezoidal = 39, kmp_sch_static_greedy = 40, kmp_sch_static_balanced = 41, kmp_sch_guided_iterative_chunked = 42, kmp_sch_guided_analytical_chunked = 43, kmp_sch_static_steal = 44, kmp_sch_static_balanced_chunked = 45, kmp_sch_guided_simd = 46, kmp_sch_runtime_simd = 47, kmp_sch_upper, kmp_ord_lower =</td>
+<td></td>
+</tr>
+<tr>
+<td>64, kmp_ord_static_chunked = 65, kmp_ord_static = 66, kmp_ord_dynamic_chunked = 67, kmp_ord_guided_chunked = 68, kmp_ord_runtime = 69, kmp_ord_auto = 70, kmp_ord_trapezoidal = 71, kmp_ord_upper, kmp_distribute_static_chunked = 91, kmp_distribute_static = 92, kmp_nm_lower = 160, kmp_nm_static_chunked =</td>
+<td></td>
+</tr>
+<tr>
+<td>(kmp_sch_static_chunked - kmp_sch_lower + kmp_nm_lower), kmp_nm_static = 162, kmp_nm_dynamic_chunked = 163, kmp_nm_guided_chunked = 164, kmp_nm_runtime = 165, kmp_nm_auto = 166, kmp_nm_trapezoidal = 167, kmp_nm_static_greedy = 168, kmp_nm_static_balanced = 169, kmp_nm_guided_iterative_chunked = 170, kmp_nm_guided_analytical_chunked = 171, kmp_nm_static_steal =</td>
+<td></td>
+</tr>
+<tr>
+<td>172, kmp_nm_ord_static_chunked = 193, kmp_nm_ord_static = 194, kmp_nm_ord_dynamic_chunked = 195, kmp_nm_ord_guided_chunked = 196, kmp_nm_ord_runtime = 197, kmp_nm_ord_auto = 198, kmp_nm_ord_trapezoidal = 199, kmp_nm_upper, kmp_sch_modifier_monotonic =</td>
+<td></td>
+</tr>
+<tr>
+<td>(1 &lt;&lt; 29), kmp_sch_modifier_nonmonotonic =</td>
+<td></td>
+</tr>
+<tr>
+<td>(1 &lt;&lt; 30), kmp_sch_default = kmp_sch_static}</td>
+<td></td>
+</tr>
+<tr>
+<td>typedef int32_t</td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#typedef-kmp-int32">kmp_int32</a></strong></td>
+</tr>
+<tr>
+<td>typedef uint32_t</td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#typedef-kmp-uint32">kmp_uint32</a></strong></td>
+</tr>
+<tr>
+<td>typedef int64_t</td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#typedef-kmp-int64">kmp_int64</a></strong></td>
+</tr>
+<tr>
+<td>typedef uint64_t</td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#typedef-kmp-uint64">kmp_uint64</a></strong></td>
+</tr>
+<tr>
+<td>typedef <a href="/snitch/runtime/Files/interface_8h/#typedef-kmp-uint64">kmp_uint64</a></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#typedef--kmp-ptr64">_kmp_ptr64</a></strong></td>
+</tr>
+<tr>
+<td>typedef <a href="/snitch/runtime/Files/interface_8h/#typedef-kmp-uint32">kmp_uint32</a></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#typedef--kmp-ptr32">_kmp_ptr32</a></strong></td>
+</tr>
+<tr>
+<td>typedef struct <a href="/snitch/runtime/Classes/structident/">ident</a></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#typedef-ident-t">ident_t</a></strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="defines">Defines</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#define-schedule-without-modifiers">SCHEDULE_WITHOUT_MODIFIERS</a></strong>(s)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#define-schedule-has-monotonic">SCHEDULE_HAS_MONOTONIC</a></strong>(s)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#define-schedule-has-nonmonotonic">SCHEDULE_HAS_NONMONOTONIC</a></strong>(s)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#define-schedule-has-no-modifiers">SCHEDULE_HAS_NO_MODIFIERS</a></strong>(s)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#define-schedule-get-modifiers">SCHEDULE_GET_MODIFIERS</a></strong>(s)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#define-schedule-set-modifiers">SCHEDULE_SET_MODIFIERS</a></strong>(s, m)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#define-schedule-nonmonotonic">SCHEDULE_NONMONOTONIC</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/interface_8h/#define-schedule-monotonic">SCHEDULE_MONOTONIC</a></strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="types-documentation">Types Documentation</h2>
+<h3 id="enum-sched_type">enum sched_type</h3>
+<table>
+<thead>
+<tr>
+<th>Enumerator</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>kmp_sch_lower</td>
+<td>32</td>
+<td>lower bound for unordered values</td>
+</tr>
+<tr>
+<td>kmp_sch_static_chunked</td>
+<td>33</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static</td>
+<td>34</td>
+<td>static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_sch_dynamic_chunked</td>
+<td>35</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_guided_chunked</td>
+<td>36</td>
+<td>guided unspecialized</td>
+</tr>
+<tr>
+<td>kmp_sch_runtime</td>
+<td>37</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_auto</td>
+<td>38</td>
+<td>auto</td>
+</tr>
+<tr>
+<td>kmp_sch_trapezoidal</td>
+<td>39</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static_greedy</td>
+<td>40</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static_balanced</td>
+<td>41</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_guided_iterative_chunked</td>
+<td>42</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_guided_analytical_chunked</td>
+<td>43</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static_steal</td>
+<td>44</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static_balanced_chunked</td>
+<td>45</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_guided_simd</td>
+<td>46</td>
+<td>guided with chunk adjustment</td>
+</tr>
+<tr>
+<td>kmp_sch_runtime_simd</td>
+<td>47</td>
+<td>runtime with chunk adjustment</td>
+</tr>
+<tr>
+<td>kmp_sch_upper</td>
+<td></td>
+<td>upper bound for unordered values</td>
+</tr>
+<tr>
+<td>kmp_ord_lower</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>64</td>
+<td>lower bound for ordered values, must be power of 2</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_static_chunked</td>
+<td>65</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_static</td>
+<td>66</td>
+<td>ordered static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_ord_dynamic_chunked</td>
+<td>67</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_guided_chunked</td>
+<td>68</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_runtime</td>
+<td>69</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_auto</td>
+<td>70</td>
+<td>ordered auto</td>
+</tr>
+<tr>
+<td>kmp_ord_trapezoidal</td>
+<td>71</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_upper</td>
+<td></td>
+<td>upper bound for ordered values</td>
+</tr>
+<tr>
+<td>kmp_distribute_static_chunked</td>
+<td>91</td>
+<td>distribute static chunked</td>
+</tr>
+<tr>
+<td>kmp_distribute_static</td>
+<td>92</td>
+<td>distribute static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_nm_lower</td>
+<td>160</td>
+<td>lower bound for nomerge values</td>
+</tr>
+<tr>
+<td>kmp_nm_static_chunked</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>(kmp_sch_static_chunked - kmp_sch_lower + kmp_nm_lower)</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_static</td>
+<td>162</td>
+<td>static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_nm_dynamic_chunked</td>
+<td>163</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_guided_chunked</td>
+<td>164</td>
+<td>guided unspecialized</td>
+</tr>
+<tr>
+<td>kmp_nm_runtime</td>
+<td>165</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_auto</td>
+<td>166</td>
+<td>auto</td>
+</tr>
+<tr>
+<td>kmp_nm_trapezoidal</td>
+<td>167</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_static_greedy</td>
+<td>168</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_static_balanced</td>
+<td>169</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_guided_iterative_chunked</td>
+<td>170</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_guided_analytical_chunked</td>
+<td>171</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_static_steal</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>172</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_static_chunked</td>
+<td>193</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_static</td>
+<td>194</td>
+<td>ordered static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_nm_ord_dynamic_chunked</td>
+<td>195</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_guided_chunked</td>
+<td>196</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_runtime</td>
+<td>197</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_auto</td>
+<td>198</td>
+<td>auto</td>
+</tr>
+<tr>
+<td>kmp_nm_ord_trapezoidal</td>
+<td>199</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_upper</td>
+<td></td>
+<td>upper bound for nomerge values</td>
+</tr>
+<tr>
+<td>kmp_sch_modifier_monotonic</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>(1 &lt;&lt; 29)</td>
+<td>Set if the monotonic schedule modifier was present</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_modifier_nonmonotonic</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>(1 &lt;&lt; 30)</td>
+<td>Set if the nonmonotonic schedule modifier was present</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_default</td>
+<td>kmp_sch_static</td>
+<td>default scheduling algorithm</td>
+</tr>
+<tr>
+<td>kmp_sch_lower</td>
+<td>32</td>
+<td>lower bound for unordered values</td>
+</tr>
+<tr>
+<td>kmp_sch_static_chunked</td>
+<td>33</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static</td>
+<td>34</td>
+<td>static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_sch_dynamic_chunked</td>
+<td>35</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_guided_chunked</td>
+<td>36</td>
+<td>guided unspecialized</td>
+</tr>
+<tr>
+<td>kmp_sch_runtime</td>
+<td>37</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_auto</td>
+<td>38</td>
+<td>auto</td>
+</tr>
+<tr>
+<td>kmp_sch_trapezoidal</td>
+<td>39</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static_greedy</td>
+<td>40</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static_balanced</td>
+<td>41</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_guided_iterative_chunked</td>
+<td>42</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_guided_analytical_chunked</td>
+<td>43</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static_steal</td>
+<td>44</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_static_balanced_chunked</td>
+<td>45</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_guided_simd</td>
+<td>46</td>
+<td>guided with chunk adjustment</td>
+</tr>
+<tr>
+<td>kmp_sch_runtime_simd</td>
+<td>47</td>
+<td>runtime with chunk adjustment</td>
+</tr>
+<tr>
+<td>kmp_sch_upper</td>
+<td></td>
+<td>upper bound for unordered values</td>
+</tr>
+<tr>
+<td>kmp_ord_lower</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>64</td>
+<td>lower bound for ordered values, must be power of 2</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_static_chunked</td>
+<td>65</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_static</td>
+<td>66</td>
+<td>ordered static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_ord_dynamic_chunked</td>
+<td>67</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_guided_chunked</td>
+<td>68</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_runtime</td>
+<td>69</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_auto</td>
+<td>70</td>
+<td>ordered auto</td>
+</tr>
+<tr>
+<td>kmp_ord_trapezoidal</td>
+<td>71</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_ord_upper</td>
+<td></td>
+<td>upper bound for ordered values</td>
+</tr>
+<tr>
+<td>kmp_distribute_static_chunked</td>
+<td>91</td>
+<td>distribute static chunked</td>
+</tr>
+<tr>
+<td>kmp_distribute_static</td>
+<td>92</td>
+<td>distribute static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_nm_lower</td>
+<td>160</td>
+<td>lower bound for nomerge values</td>
+</tr>
+<tr>
+<td>kmp_nm_static_chunked</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>(kmp_sch_static_chunked - kmp_sch_lower + kmp_nm_lower)</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_static</td>
+<td>162</td>
+<td>static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_nm_dynamic_chunked</td>
+<td>163</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_guided_chunked</td>
+<td>164</td>
+<td>guided unspecialized</td>
+</tr>
+<tr>
+<td>kmp_nm_runtime</td>
+<td>165</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_auto</td>
+<td>166</td>
+<td>auto</td>
+</tr>
+<tr>
+<td>kmp_nm_trapezoidal</td>
+<td>167</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_static_greedy</td>
+<td>168</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_static_balanced</td>
+<td>169</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_guided_iterative_chunked</td>
+<td>170</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_guided_analytical_chunked</td>
+<td>171</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_static_steal</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>172</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_static_chunked</td>
+<td>193</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_static</td>
+<td>194</td>
+<td>ordered static unspecialized</td>
+</tr>
+<tr>
+<td>kmp_nm_ord_dynamic_chunked</td>
+<td>195</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_guided_chunked</td>
+<td>196</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_runtime</td>
+<td>197</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_ord_auto</td>
+<td>198</td>
+<td>auto</td>
+</tr>
+<tr>
+<td>kmp_nm_ord_trapezoidal</td>
+<td>199</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_nm_upper</td>
+<td></td>
+<td>upper bound for nomerge values</td>
+</tr>
+<tr>
+<td>kmp_sch_modifier_monotonic</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>(1 &lt;&lt; 29)</td>
+<td>Set if the monotonic schedule modifier was present</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_modifier_nonmonotonic</td>
+<td>=</td>
+<td></td>
+</tr>
+<tr>
+<td>(1 &lt;&lt; 30)</td>
+<td>Set if the nonmonotonic schedule modifier was present</td>
+<td></td>
+</tr>
+<tr>
+<td>kmp_sch_default</td>
+<td>kmp_sch_static</td>
+<td>default scheduling algorithm</td>
+</tr>
+</tbody>
+</table>
+<p>Describes the loop schedule to be used for a parallel for loop. </p>
+<h3 id="typedef-kmp_int32">typedef kmp_int32</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">kmp_int32</span><span class="p">;</span>
+</code></pre></div>
+<p>The ident structure that describes a source location. The struct is identical to the one in the <a href="/snitch/runtime/Files/kmp_8h/#file-kmp.h">kmp.h</a> file. We maintain the same data structure for compatibility. </p>
+<h3 id="typedef-kmp_uint32">typedef kmp_uint32</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">kmp_uint32</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="typedef-kmp_int64">typedef kmp_int64</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="kt">int64_t</span><span class="w"> </span><span class="n">kmp_int64</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="typedef-kmp_uint64">typedef kmp_uint64</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">kmp_uint64</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="typedef-_kmp_ptr64">typedef _kmp_ptr64</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">kmp_uint64</span><span class="w"> </span><span class="n">_kmp_ptr64</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="typedef-_kmp_ptr32">typedef _kmp_ptr32</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">kmp_uint32</span><span class="w"> </span><span class="n">_kmp_ptr32</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="typedef-ident_t">typedef ident_t</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ident</span><span class="w"> </span><span class="n">ident_t</span><span class="p">;</span>
+</code></pre></div>
+<h2 id="macros-documentation">Macros Documentation</h2>
+<h3 id="define-schedule_without_modifiers">define SCHEDULE_WITHOUT_MODIFIERS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SCHEDULE_WITHOUT_MODIFIERS(</span>
+<span class="w">    </span><span class="n">s</span>
+<span class="p">)</span>
+<span class="w">    </span><span class="p">(</span><span class="k">enum</span><span class="w"> </span><span class="nc">sched_type</span><span class="p">)(</span><span class="w">                </span>\
+<span class="w">        </span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="p">(</span><span class="n">kmp_sch_modifier_nonmonotonic</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">kmp_sch_modifier_monotonic</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="define-schedule_has_monotonic">define SCHEDULE_HAS_MONOTONIC</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SCHEDULE_HAS_MONOTONIC(</span>
+<span class="w">    </span><span class="n">s</span>
+<span class="p">)</span>
+<span class="p">(((</span><span class="n">s</span><span class="p">)</span><span class="o">&amp;</span><span class="n">kmp_sch_modifier_monotonic</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="define-schedule_has_nonmonotonic">define SCHEDULE_HAS_NONMONOTONIC</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SCHEDULE_HAS_NONMONOTONIC(</span>
+<span class="w">    </span><span class="n">s</span>
+<span class="p">)</span>
+<span class="p">(((</span><span class="n">s</span><span class="p">)</span><span class="o">&amp;</span><span class="n">kmp_sch_modifier_nonmonotonic</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="define-schedule_has_no_modifiers">define SCHEDULE_HAS_NO_MODIFIERS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SCHEDULE_HAS_NO_MODIFIERS(</span>
+<span class="w">    </span><span class="n">s</span>
+<span class="p">)</span>
+<span class="w">    </span><span class="p">(((</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">kmp_sch_modifier_nonmonotonic</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">kmp_sch_modifier_monotonic</span><span class="p">))</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="define-schedule_get_modifiers">define SCHEDULE_GET_MODIFIERS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SCHEDULE_GET_MODIFIERS(</span>
+<span class="w">    </span><span class="n">s</span>
+<span class="p">)</span>
+<span class="w">    </span><span class="p">((</span><span class="k">enum</span><span class="w"> </span><span class="nc">sched_type</span><span class="p">)(</span><span class="w">           </span>\
+<span class="w">        </span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">kmp_sch_modifier_nonmonotonic</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">kmp_sch_modifier_monotonic</span><span class="p">)))</span>
+</code></pre></div>
+<h3 id="define-schedule_set_modifiers">define SCHEDULE_SET_MODIFIERS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SCHEDULE_SET_MODIFIERS(</span>
+<span class="w">    </span><span class="n">s</span><span class="p">,</span>
+<span class="w">    </span><span class="n">m</span>
+<span class="p">)</span>
+<span class="w">    </span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">enum</span><span class="w"> </span><span class="nc">sched_type</span><span class="p">)((</span><span class="n">kmp_int32</span><span class="p">)</span><span class="n">s</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">kmp_int32</span><span class="p">)</span><span class="n">m</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="define-schedule_nonmonotonic">define SCHEDULE_NONMONOTONIC</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SCHEDULE_NONMONOTONIC 0</span>
+</code></pre></div>
+<h3 id="define-schedule_monotonic">define SCHEDULE_MONOTONIC</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SCHEDULE_MONOTONIC 1</span>
+</code></pre></div>
+<h2 id="source-code">Source code</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.</span>
+<span class="c1">// See https://llvm.org/LICENSE.txt for license information.</span>
+<span class="c1">// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception</span>
+
+<span class="cp">#ifndef INTERFACE_H</span>
+<span class="cp">#define INTERFACE_H</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdint.h&gt;</span>
+
+<span class="c1">// kmp specific types</span>
+<span class="c1">// Code taken from</span>
+<span class="c1">//     https://github.com/llvm/llvm-project/blob/main/openmp/runtime/src/kmp.h</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">kmp_int32</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">kmp_uint32</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">int64_t</span><span class="w"> </span><span class="n">kmp_int64</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">kmp_uint64</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">kmp_uint64</span><span class="w"> </span><span class="n">_kmp_ptr64</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">kmp_uint32</span><span class="w"> </span><span class="n">_kmp_ptr32</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ident</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">kmp_int32</span><span class="w"> </span><span class="n">reserved_1</span><span class="p">;</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_int32</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_int32</span>
+<span class="w">        </span><span class="n">reserved_2</span><span class="p">;</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_int32</span><span class="w"> </span><span class="n">reserved_3</span><span class="p">;</span><span class="w"> </span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">psource</span><span class="p">;</span><span class="w">  </span>
+<span class="p">}</span><span class="w"> </span><span class="n">ident_t</span><span class="p">;</span>
+
+<span class="k">enum</span><span class="w"> </span><span class="nc">sched_type</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">kmp_int32</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">kmp_sch_lower</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_sch_static_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">33</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_sch_static</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">34</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_sch_dynamic_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">35</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_sch_guided_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">36</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_sch_runtime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">37</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_sch_auto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">38</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_sch_trapezoidal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">39</span><span class="p">,</span>
+
+<span class="w">    </span><span class="cm">/* accessible only through KMP_SCHEDULE environment variable */</span>
+<span class="w">    </span><span class="n">kmp_sch_static_greedy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_sch_static_balanced</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">41</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/* accessible only through KMP_SCHEDULE environment variable */</span>
+<span class="w">    </span><span class="n">kmp_sch_guided_iterative_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_sch_guided_analytical_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">43</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/* accessible only through KMP_SCHEDULE environment variable */</span>
+<span class="w">    </span><span class="n">kmp_sch_static_steal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">44</span><span class="p">,</span>
+
+<span class="w">    </span><span class="cm">/* static with chunk adjustment (e.g., simd) */</span>
+<span class="w">    </span><span class="n">kmp_sch_static_balanced_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">45</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_sch_guided_simd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">46</span><span class="p">,</span><span class="w">  </span>
+<span class="w">    </span><span class="n">kmp_sch_runtime_simd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">47</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="cm">/* accessible only through KMP_SCHEDULE environment variable */</span>
+<span class="w">    </span><span class="n">kmp_sch_upper</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_ord_lower</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_ord_static_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_ord_static</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">66</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_ord_dynamic_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">67</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_ord_guided_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">68</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_ord_runtime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">69</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_ord_auto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">70</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_ord_trapezoidal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">71</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_ord_upper</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="cm">/* Schedules for Distribute construct */</span>
+<span class="w">    </span><span class="n">kmp_distribute_static_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">91</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_distribute_static</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">92</span><span class="p">,</span><span class="w">         </span>
+<span class="w">    </span><span class="cm">/* For the &quot;nomerge&quot; versions, kmp_dispatch_next*() will always return a</span>
+<span class="cm">       single iteration/chunk, even if the loop is serialized. For the schedule</span>
+<span class="cm">       types listed above, the entire iteration vector is returned if the loop</span>
+<span class="cm">       is serialized. This doesn&#39;t work for gcc/gcomp sections. */</span>
+<span class="w">    </span><span class="n">kmp_nm_lower</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">160</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_nm_static_chunked</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="p">(</span><span class="n">kmp_sch_static_chunked</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">kmp_sch_lower</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">kmp_nm_lower</span><span class="p">),</span>
+<span class="w">    </span><span class="n">kmp_nm_static</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">162</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_nm_dynamic_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">163</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_guided_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">164</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_nm_runtime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">165</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_auto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">166</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_nm_trapezoidal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">167</span><span class="p">,</span>
+
+<span class="w">    </span><span class="cm">/* accessible only through KMP_SCHEDULE environment variable */</span>
+<span class="w">    </span><span class="n">kmp_nm_static_greedy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">168</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_static_balanced</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">169</span><span class="p">,</span>
+<span class="w">    </span><span class="cm">/* accessible only through KMP_SCHEDULE environment variable */</span>
+<span class="w">    </span><span class="n">kmp_nm_guided_iterative_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">170</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_guided_analytical_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">171</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_static_steal</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="mi">172</span><span class="p">,</span><span class="w"> </span><span class="cm">/* accessible only through OMP_SCHEDULE environment variable */</span>
+
+<span class="w">    </span><span class="n">kmp_nm_ord_static_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">193</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_ord_static</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">194</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_nm_ord_dynamic_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">195</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_ord_guided_chunked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">196</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_ord_runtime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">197</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_ord_auto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">198</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_nm_ord_trapezoidal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">199</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kmp_nm_upper</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="cm">/* Support for OpenMP 4.5 monotonic and nonmonotonic schedule modifiers.</span>
+<span class="cm">       Since we need to distinguish the three possible cases (no modifier,</span>
+<span class="cm">       monotonic modifier, nonmonotonic modifier), we need separate bits for</span>
+<span class="cm">       each modifier. The absence of monotonic does not imply nonmonotonic,</span>
+<span class="cm">       especially since 4.5 says that the behaviour of the &quot;no modifier&quot; case is</span>
+<span class="cm">       implementation defined in 4.5, but will become &quot;nonmonotonic&quot; in 5.0.</span>
+
+<span class="cm">       Since we&#39;re passing a full 32 bit value, we can use a couple of high bits</span>
+<span class="cm">       for these flags; out of paranoia we avoid the sign bit.</span>
+
+<span class="cm">       These modifiers can be or-ed into non-static schedules by the compiler to</span>
+<span class="cm">       pass the additional information. They will be stripped early in the</span>
+<span class="cm">       processing in __kmp_dispatch_init when setting up schedules, so most of</span>
+<span class="cm">       the code won&#39;t ever see schedules with these bits set.  */</span>
+<span class="w">    </span><span class="n">kmp_sch_modifier_monotonic</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">29</span><span class="p">),</span><span class="w"> </span>
+<span class="w">    </span><span class="n">kmp_sch_modifier_nonmonotonic</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">30</span><span class="p">),</span><span class="w"> </span>
+<span class="cp">#define SCHEDULE_WITHOUT_MODIFIERS(s) \</span>
+<span class="cp">    (enum sched_type)(                \</span>
+<span class="cp">        (s) &amp; ~(kmp_sch_modifier_nonmonotonic | kmp_sch_modifier_monotonic))</span>
+<span class="cp">#define SCHEDULE_HAS_MONOTONIC(s) (((s)&amp;kmp_sch_modifier_monotonic) != 0)</span>
+<span class="cp">#define SCHEDULE_HAS_NONMONOTONIC(s) (((s)&amp;kmp_sch_modifier_nonmonotonic) != 0)</span>
+<span class="cp">#define SCHEDULE_HAS_NO_MODIFIERS(s) \</span>
+<span class="cp">    (((s) &amp; (kmp_sch_modifier_nonmonotonic | kmp_sch_modifier_monotonic)) == 0)</span>
+<span class="cp">#define SCHEDULE_GET_MODIFIERS(s) \</span>
+<span class="cp">    ((enum sched_type)(           \</span>
+<span class="cp">        (s) &amp; (kmp_sch_modifier_nonmonotonic | kmp_sch_modifier_monotonic)))</span>
+<span class="cp">#define SCHEDULE_SET_MODIFIERS(s, m) \</span>
+<span class="cp">    (s = (enum sched_type)((kmp_int32)s | (kmp_int32)m))</span>
+<span class="cp">#define SCHEDULE_NONMONOTONIC 0</span>
+<span class="cp">#define SCHEDULE_MONOTONIC 1</span>
+
+<span class="w">    </span><span class="n">kmp_sch_default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kmp_sch_static</span><span class="w"> </span>
+<span class="p">};</span>
+
+<span class="cp">#endif</span>
+</code></pre></div>
+<hr />
+<p>Updated on 2023-06-19 at 09:43:56 +0000</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      
+    
+  </body>
+</html>

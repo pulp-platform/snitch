@@ -1,0 +1,4162 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+    
+    
+      
+        <title>snRuntime/vendor/riscv-opcodes/encoding.h - Snitch</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#snruntimevendorriscv-opcodesencodingh" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Snitch" class="md-header__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Snitch
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              snRuntime/vendor/riscv-opcodes/encoding.h
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Snitch" class="md-nav__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Snitch
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          User Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          User Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/getting_started/" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/benchmarking/" class="md-nav__link">
+        Benchmarking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/setup-iis/" class="md-nav__link">
+        Tooling Setup at IIS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/example_trace.html" class="md-nav__link">
+        Trace Example
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/docker/" class="md-nav__link">
+        Docker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/directory_structure/" class="md-nav__link">
+        Directory Structure
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/documentation/" class="md-nav__link">
+        Documentation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Systems
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Systems
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+          Snitch Cluster
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Cluster
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/snitch_cluster/" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../schema-doc/snitch_cluster/" class="md-nav__link">
+        Schema
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          Occamy
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Occamy
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/occamy.md" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2_2" id="__nav_3_2_2_label" tabindex="0">
+          Architecture
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Architecture
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/1_overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/2_addrmap/" class="md-nav__link">
+        Address Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/3_system_components/" class="md-nav__link">
+        System Components
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ug/occamy_system/4_clocking/" class="md-nav__link">
+        Clocking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_interrupts_and_synchronization.md" class="md-nav__link">
+        Interrupts and Synchronization
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../schema-doc/occamy/" class="md-nav__link">
+        Schema
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          Reference Manual
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Reference Manual
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rm/snitch/" class="md-nav__link">
+        Snitch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rm/snitch_cluster/" class="md-nav__link">
+        Snitch Cluster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rm/reqrsp_interface/" class="md-nav__link">
+        Reqrsp Interface
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rm/custom_instructions/" class="md-nav__link">
+        Custom Instructions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          Snitch Runtime
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Runtime
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Pages/" class="md-nav__link">
+        Pages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        Files
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Classes/" class="md-nav__link">
+        Classes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Examples/" class="md-nav__link">
+        Examples
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Modules/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Namespaces/" class="md-nav__link">
+        Namespaces
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../publications/" class="md-nav__link">
+        Publications
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#defines" class="md-nav__link">
+    Defines
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#macros-documentation" class="md-nav__link">
+    Macros Documentation
+  </a>
+  
+    <nav class="md-nav" aria-label="Macros Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_uie" class="md-nav__link">
+    define MSTATUS_UIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_sie" class="md-nav__link">
+    define MSTATUS_SIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_hie" class="md-nav__link">
+    define MSTATUS_HIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_mie" class="md-nav__link">
+    define MSTATUS_MIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_upie" class="md-nav__link">
+    define MSTATUS_UPIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_spie" class="md-nav__link">
+    define MSTATUS_SPIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_ube" class="md-nav__link">
+    define MSTATUS_UBE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_mpie" class="md-nav__link">
+    define MSTATUS_MPIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_spp" class="md-nav__link">
+    define MSTATUS_SPP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_vs" class="md-nav__link">
+    define MSTATUS_VS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_mpp" class="md-nav__link">
+    define MSTATUS_MPP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_fs" class="md-nav__link">
+    define MSTATUS_FS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_xs" class="md-nav__link">
+    define MSTATUS_XS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_mprv" class="md-nav__link">
+    define MSTATUS_MPRV
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_sum" class="md-nav__link">
+    define MSTATUS_SUM
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_mxr" class="md-nav__link">
+    define MSTATUS_MXR
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_tvm" class="md-nav__link">
+    define MSTATUS_TVM
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_tw" class="md-nav__link">
+    define MSTATUS_TW
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_tsr" class="md-nav__link">
+    define MSTATUS_TSR
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus32_sd" class="md-nav__link">
+    define MSTATUS32_SD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_uxl" class="md-nav__link">
+    define MSTATUS_UXL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_sxl" class="md-nav__link">
+    define MSTATUS_SXL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_sbe" class="md-nav__link">
+    define MSTATUS_SBE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_mbe" class="md-nav__link">
+    define MSTATUS_MBE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_gva" class="md-nav__link">
+    define MSTATUS_GVA
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus_mpv" class="md-nav__link">
+    define MSTATUS_MPV
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatus64_sd" class="md-nav__link">
+    define MSTATUS64_SD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatush_sbe" class="md-nav__link">
+    define MSTATUSH_SBE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mstatush_mbe" class="md-nav__link">
+    define MSTATUSH_MBE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_uie" class="md-nav__link">
+    define SSTATUS_UIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_sie" class="md-nav__link">
+    define SSTATUS_SIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_upie" class="md-nav__link">
+    define SSTATUS_UPIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_spie" class="md-nav__link">
+    define SSTATUS_SPIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_ube" class="md-nav__link">
+    define SSTATUS_UBE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_spp" class="md-nav__link">
+    define SSTATUS_SPP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_vs" class="md-nav__link">
+    define SSTATUS_VS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_fs" class="md-nav__link">
+    define SSTATUS_FS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_xs" class="md-nav__link">
+    define SSTATUS_XS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_sum" class="md-nav__link">
+    define SSTATUS_SUM
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_mxr" class="md-nav__link">
+    define SSTATUS_MXR
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus32_sd" class="md-nav__link">
+    define SSTATUS32_SD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_uxl" class="md-nav__link">
+    define SSTATUS_UXL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus64_sd" class="md-nav__link">
+    define SSTATUS64_SD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sstatus_vs_mask" class="md-nav__link">
+    define SSTATUS_VS_MASK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_vsxl" class="md-nav__link">
+    define HSTATUS_VSXL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_vtsr" class="md-nav__link">
+    define HSTATUS_VTSR
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_vtw" class="md-nav__link">
+    define HSTATUS_VTW
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_vtvm" class="md-nav__link">
+    define HSTATUS_VTVM
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_vgein" class="md-nav__link">
+    define HSTATUS_VGEIN
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_hu" class="md-nav__link">
+    define HSTATUS_HU
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_spvp" class="md-nav__link">
+    define HSTATUS_SPVP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_spv" class="md-nav__link">
+    define HSTATUS_SPV
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_gva" class="md-nav__link">
+    define HSTATUS_GVA
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hstatus_vsbe" class="md-nav__link">
+    define HSTATUS_VSBE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-ustatus_uie" class="md-nav__link">
+    define USTATUS_UIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-ustatus_upie" class="md-nav__link">
+    define USTATUS_UPIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_xdebugver" class="md-nav__link">
+    define DCSR_XDEBUGVER
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_ndreset" class="md-nav__link">
+    define DCSR_NDRESET
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_fullreset" class="md-nav__link">
+    define DCSR_FULLRESET
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_ebreakm" class="md-nav__link">
+    define DCSR_EBREAKM
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_ebreakh" class="md-nav__link">
+    define DCSR_EBREAKH
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_ebreaks" class="md-nav__link">
+    define DCSR_EBREAKS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_ebreaku" class="md-nav__link">
+    define DCSR_EBREAKU
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_stopcycle" class="md-nav__link">
+    define DCSR_STOPCYCLE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_stoptime" class="md-nav__link">
+    define DCSR_STOPTIME
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_cause" class="md-nav__link">
+    define DCSR_CAUSE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_debugint" class="md-nav__link">
+    define DCSR_DEBUGINT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_halt" class="md-nav__link">
+    define DCSR_HALT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_step" class="md-nav__link">
+    define DCSR_STEP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_prv" class="md-nav__link">
+    define DCSR_PRV
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_cause_none" class="md-nav__link">
+    define DCSR_CAUSE_NONE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_cause_swbp" class="md-nav__link">
+    define DCSR_CAUSE_SWBP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_cause_hwbp" class="md-nav__link">
+    define DCSR_CAUSE_HWBP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_cause_debugint" class="md-nav__link">
+    define DCSR_CAUSE_DEBUGINT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_cause_step" class="md-nav__link">
+    define DCSR_CAUSE_STEP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_cause_halt" class="md-nav__link">
+    define DCSR_CAUSE_HALT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-dcsr_cause_group" class="md-nav__link">
+    define DCSR_CAUSE_GROUP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_type" class="md-nav__link">
+    define MCONTROL_TYPE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_dmode" class="md-nav__link">
+    define MCONTROL_DMODE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_maskmax" class="md-nav__link">
+    define MCONTROL_MASKMAX
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_select" class="md-nav__link">
+    define MCONTROL_SELECT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_timing" class="md-nav__link">
+    define MCONTROL_TIMING
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_action" class="md-nav__link">
+    define MCONTROL_ACTION
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_chain" class="md-nav__link">
+    define MCONTROL_CHAIN
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_match" class="md-nav__link">
+    define MCONTROL_MATCH
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_m" class="md-nav__link">
+    define MCONTROL_M
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_h" class="md-nav__link">
+    define MCONTROL_H
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_s" class="md-nav__link">
+    define MCONTROL_S
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_u" class="md-nav__link">
+    define MCONTROL_U
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_execute" class="md-nav__link">
+    define MCONTROL_EXECUTE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_store" class="md-nav__link">
+    define MCONTROL_STORE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_load" class="md-nav__link">
+    define MCONTROL_LOAD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_type_none" class="md-nav__link">
+    define MCONTROL_TYPE_NONE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_type_match" class="md-nav__link">
+    define MCONTROL_TYPE_MATCH
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_action_debug_exception" class="md-nav__link">
+    define MCONTROL_ACTION_DEBUG_EXCEPTION
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_action_debug_mode" class="md-nav__link">
+    define MCONTROL_ACTION_DEBUG_MODE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_action_trace_start" class="md-nav__link">
+    define MCONTROL_ACTION_TRACE_START
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_action_trace_stop" class="md-nav__link">
+    define MCONTROL_ACTION_TRACE_STOP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_action_trace_emit" class="md-nav__link">
+    define MCONTROL_ACTION_TRACE_EMIT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_match_equal" class="md-nav__link">
+    define MCONTROL_MATCH_EQUAL
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_match_napot" class="md-nav__link">
+    define MCONTROL_MATCH_NAPOT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_match_ge" class="md-nav__link">
+    define MCONTROL_MATCH_GE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_match_lt" class="md-nav__link">
+    define MCONTROL_MATCH_LT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_match_mask_low" class="md-nav__link">
+    define MCONTROL_MATCH_MASK_LOW
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcontrol_match_mask_high" class="md-nav__link">
+    define MCONTROL_MATCH_MASK_HIGH
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_usip" class="md-nav__link">
+    define MIP_USIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_ssip" class="md-nav__link">
+    define MIP_SSIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_vssip" class="md-nav__link">
+    define MIP_VSSIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_msip" class="md-nav__link">
+    define MIP_MSIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_utip" class="md-nav__link">
+    define MIP_UTIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_stip" class="md-nav__link">
+    define MIP_STIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_vstip" class="md-nav__link">
+    define MIP_VSTIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_mtip" class="md-nav__link">
+    define MIP_MTIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_ueip" class="md-nav__link">
+    define MIP_UEIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_seip" class="md-nav__link">
+    define MIP_SEIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_vseip" class="md-nav__link">
+    define MIP_VSEIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_meip" class="md-nav__link">
+    define MIP_MEIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_sgeip" class="md-nav__link">
+    define MIP_SGEIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sip_scip" class="md-nav__link">
+    define SIP_SCIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_mcip" class="md-nav__link">
+    define MIP_MCIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_ssie" class="md-nav__link">
+    define MIE_SSIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_hsie" class="md-nav__link">
+    define MIE_HSIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_msie" class="md-nav__link">
+    define MIE_MSIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_stie" class="md-nav__link">
+    define MIE_STIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_htie" class="md-nav__link">
+    define MIE_HTIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_mtie" class="md-nav__link">
+    define MIE_MTIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_seie" class="md-nav__link">
+    define MIE_SEIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_heie" class="md-nav__link">
+    define MIE_HEIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_meie" class="md-nav__link">
+    define MIE_MEIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_scie" class="md-nav__link">
+    define MIE_SCIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mie_mcie" class="md-nav__link">
+    define MIE_MCIE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mcause_interrupt" class="md-nav__link">
+    define MCAUSE_INTERRUPT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_s_mask" class="md-nav__link">
+    define MIP_S_MASK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_vs_mask" class="md-nav__link">
+    define MIP_VS_MASK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mip_hs_mask" class="md-nav__link">
+    define MIP_HS_MASK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-mideleg_forced_mask" class="md-nav__link">
+    define MIDELEG_FORCED_MASK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sip_ssip" class="md-nav__link">
+    define SIP_SSIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-sip_stip" class="md-nav__link">
+    define SIP_STIP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-prv_u" class="md-nav__link">
+    define PRV_U
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-prv_s" class="md-nav__link">
+    define PRV_S
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-prv_m" class="md-nav__link">
+    define PRV_M
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-prv_hs" class="md-nav__link">
+    define PRV_HS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp32_mode" class="md-nav__link">
+    define SATP32_MODE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp32_asid" class="md-nav__link">
+    define SATP32_ASID
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp32_ppn" class="md-nav__link">
+    define SATP32_PPN
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp64_mode" class="md-nav__link">
+    define SATP64_MODE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp64_asid" class="md-nav__link">
+    define SATP64_ASID
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp64_ppn" class="md-nav__link">
+    define SATP64_PPN
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp_mode_off" class="md-nav__link">
+    define SATP_MODE_OFF
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp_mode_sv32" class="md-nav__link">
+    define SATP_MODE_SV32
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp_mode_sv39" class="md-nav__link">
+    define SATP_MODE_SV39
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp_mode_sv48" class="md-nav__link">
+    define SATP_MODE_SV48
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp_mode_sv57" class="md-nav__link">
+    define SATP_MODE_SV57
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-satp_mode_sv64" class="md-nav__link">
+    define SATP_MODE_SV64
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp32_mode" class="md-nav__link">
+    define HGATP32_MODE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp32_vmid" class="md-nav__link">
+    define HGATP32_VMID
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp32_ppn" class="md-nav__link">
+    define HGATP32_PPN
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp64_mode" class="md-nav__link">
+    define HGATP64_MODE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp64_vmid" class="md-nav__link">
+    define HGATP64_VMID
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp64_ppn" class="md-nav__link">
+    define HGATP64_PPN
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp_mode_off" class="md-nav__link">
+    define HGATP_MODE_OFF
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp_mode_sv32x4" class="md-nav__link">
+    define HGATP_MODE_SV32X4
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp_mode_sv39x4" class="md-nav__link">
+    define HGATP_MODE_SV39X4
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-hgatp_mode_sv48x4" class="md-nav__link">
+    define HGATP_MODE_SV48X4
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pmp_r" class="md-nav__link">
+    define PMP_R
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pmp_w" class="md-nav__link">
+    define PMP_W
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pmp_x" class="md-nav__link">
+    define PMP_X
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pmp_a" class="md-nav__link">
+    define PMP_A
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pmp_l" class="md-nav__link">
+    define PMP_L
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pmp_shift" class="md-nav__link">
+    define PMP_SHIFT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pmp_tor" class="md-nav__link">
+    define PMP_TOR
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pmp_na4" class="md-nav__link">
+    define PMP_NA4
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pmp_napot" class="md-nav__link">
+    define PMP_NAPOT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_u_soft" class="md-nav__link">
+    define IRQ_U_SOFT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_s_soft" class="md-nav__link">
+    define IRQ_S_SOFT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_vs_soft" class="md-nav__link">
+    define IRQ_VS_SOFT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_m_soft" class="md-nav__link">
+    define IRQ_M_SOFT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_u_timer" class="md-nav__link">
+    define IRQ_U_TIMER
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_s_timer" class="md-nav__link">
+    define IRQ_S_TIMER
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_vs_timer" class="md-nav__link">
+    define IRQ_VS_TIMER
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_m_timer" class="md-nav__link">
+    define IRQ_M_TIMER
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_u_ext" class="md-nav__link">
+    define IRQ_U_EXT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_s_ext" class="md-nav__link">
+    define IRQ_S_EXT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_vs_ext" class="md-nav__link">
+    define IRQ_VS_EXT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_m_ext" class="md-nav__link">
+    define IRQ_M_EXT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_s_gext" class="md-nav__link">
+    define IRQ_S_GEXT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_cop" class="md-nav__link">
+    define IRQ_COP
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_host" class="md-nav__link">
+    define IRQ_HOST
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_m_cluster" class="md-nav__link">
+    define IRQ_M_CLUSTER
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-irq_s_cluster" class="md-nav__link">
+    define IRQ_S_CLUSTER
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_v" class="md-nav__link">
+    define PTE_V
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_r" class="md-nav__link">
+    define PTE_R
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_w" class="md-nav__link">
+    define PTE_W
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_x" class="md-nav__link">
+    define PTE_X
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_u" class="md-nav__link">
+    define PTE_U
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_g" class="md-nav__link">
+    define PTE_G
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_a" class="md-nav__link">
+    define PTE_A
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_d" class="md-nav__link">
+    define PTE_D
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_soft" class="md-nav__link">
+    define PTE_SOFT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_rsvd" class="md-nav__link">
+    define PTE_RSVD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_pbmt" class="md-nav__link">
+    define PTE_PBMT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_n" class="md-nav__link">
+    define PTE_N
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_attr" class="md-nav__link">
+    define PTE_ATTR
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_ppn_shift" class="md-nav__link">
+    define PTE_PPN_SHIFT
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define-pte_table" class="md-nav__link">
+    define PTE_TABLE
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-code" class="md-nav__link">
+    Source code
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="snruntimevendorriscv-opcodesencodingh">snRuntime/vendor/riscv-opcodes/encoding.h</h1>
+<h2 id="defines">Defines</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-uie">MSTATUS_UIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-sie">MSTATUS_SIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-hie">MSTATUS_HIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-mie">MSTATUS_MIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-upie">MSTATUS_UPIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-spie">MSTATUS_SPIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-ube">MSTATUS_UBE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-mpie">MSTATUS_MPIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-spp">MSTATUS_SPP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-vs">MSTATUS_VS</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-mpp">MSTATUS_MPP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-fs">MSTATUS_FS</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-xs">MSTATUS_XS</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-mprv">MSTATUS_MPRV</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-sum">MSTATUS_SUM</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-mxr">MSTATUS_MXR</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-tvm">MSTATUS_TVM</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-tw">MSTATUS_TW</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-tsr">MSTATUS_TSR</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus32-sd">MSTATUS32_SD</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-uxl">MSTATUS_UXL</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-sxl">MSTATUS_SXL</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-sbe">MSTATUS_SBE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-mbe">MSTATUS_MBE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-gva">MSTATUS_GVA</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus-mpv">MSTATUS_MPV</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatus64-sd">MSTATUS64_SD</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatush-sbe">MSTATUSH_SBE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mstatush-mbe">MSTATUSH_MBE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-uie">SSTATUS_UIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-sie">SSTATUS_SIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-upie">SSTATUS_UPIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-spie">SSTATUS_SPIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-ube">SSTATUS_UBE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-spp">SSTATUS_SPP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-vs">SSTATUS_VS</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-fs">SSTATUS_FS</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-xs">SSTATUS_XS</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-sum">SSTATUS_SUM</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-mxr">SSTATUS_MXR</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus32-sd">SSTATUS32_SD</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-uxl">SSTATUS_UXL</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus64-sd">SSTATUS64_SD</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sstatus-vs-mask">SSTATUS_VS_MASK</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-vsxl">HSTATUS_VSXL</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-vtsr">HSTATUS_VTSR</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-vtw">HSTATUS_VTW</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-vtvm">HSTATUS_VTVM</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-vgein">HSTATUS_VGEIN</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-hu">HSTATUS_HU</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-spvp">HSTATUS_SPVP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-spv">HSTATUS_SPV</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-gva">HSTATUS_GVA</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hstatus-vsbe">HSTATUS_VSBE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-ustatus-uie">USTATUS_UIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-ustatus-upie">USTATUS_UPIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-xdebugver">DCSR_XDEBUGVER</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-ndreset">DCSR_NDRESET</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-fullreset">DCSR_FULLRESET</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-ebreakm">DCSR_EBREAKM</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-ebreakh">DCSR_EBREAKH</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-ebreaks">DCSR_EBREAKS</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-ebreaku">DCSR_EBREAKU</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-stopcycle">DCSR_STOPCYCLE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-stoptime">DCSR_STOPTIME</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-cause">DCSR_CAUSE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-debugint">DCSR_DEBUGINT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-halt">DCSR_HALT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-step">DCSR_STEP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-prv">DCSR_PRV</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-cause-none">DCSR_CAUSE_NONE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-cause-swbp">DCSR_CAUSE_SWBP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-cause-hwbp">DCSR_CAUSE_HWBP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-cause-debugint">DCSR_CAUSE_DEBUGINT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-cause-step">DCSR_CAUSE_STEP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-cause-halt">DCSR_CAUSE_HALT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-dcsr-cause-group">DCSR_CAUSE_GROUP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-type">MCONTROL_TYPE</a></strong>(xlen)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-dmode">MCONTROL_DMODE</a></strong>(xlen)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-maskmax">MCONTROL_MASKMAX</a></strong>(xlen)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-select">MCONTROL_SELECT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-timing">MCONTROL_TIMING</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-action">MCONTROL_ACTION</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-chain">MCONTROL_CHAIN</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-match">MCONTROL_MATCH</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-m">MCONTROL_M</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-h">MCONTROL_H</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-s">MCONTROL_S</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-u">MCONTROL_U</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-execute">MCONTROL_EXECUTE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-store">MCONTROL_STORE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-load">MCONTROL_LOAD</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-type-none">MCONTROL_TYPE_NONE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-type-match">MCONTROL_TYPE_MATCH</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-action-debug-exception">MCONTROL_ACTION_DEBUG_EXCEPTION</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-action-debug-mode">MCONTROL_ACTION_DEBUG_MODE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-action-trace-start">MCONTROL_ACTION_TRACE_START</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-action-trace-stop">MCONTROL_ACTION_TRACE_STOP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-action-trace-emit">MCONTROL_ACTION_TRACE_EMIT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-match-equal">MCONTROL_MATCH_EQUAL</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-match-napot">MCONTROL_MATCH_NAPOT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-match-ge">MCONTROL_MATCH_GE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-match-lt">MCONTROL_MATCH_LT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-match-mask-low">MCONTROL_MATCH_MASK_LOW</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcontrol-match-mask-high">MCONTROL_MATCH_MASK_HIGH</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-usip">MIP_USIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-ssip">MIP_SSIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-vssip">MIP_VSSIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-msip">MIP_MSIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-utip">MIP_UTIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-stip">MIP_STIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-vstip">MIP_VSTIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-mtip">MIP_MTIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-ueip">MIP_UEIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-seip">MIP_SEIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-vseip">MIP_VSEIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-meip">MIP_MEIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-sgeip">MIP_SGEIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sip-scip">SIP_SCIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-mcip">MIP_MCIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-ssie">MIE_SSIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-hsie">MIE_HSIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-msie">MIE_MSIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-stie">MIE_STIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-htie">MIE_HTIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-mtie">MIE_MTIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-seie">MIE_SEIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-heie">MIE_HEIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-meie">MIE_MEIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-scie">MIE_SCIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mie-mcie">MIE_MCIE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mcause-interrupt">MCAUSE_INTERRUPT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-s-mask">MIP_S_MASK</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-vs-mask">MIP_VS_MASK</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mip-hs-mask">MIP_HS_MASK</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-mideleg-forced-mask">MIDELEG_FORCED_MASK</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sip-ssip">SIP_SSIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-sip-stip">SIP_STIP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-prv-u">PRV_U</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-prv-s">PRV_S</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-prv-m">PRV_M</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-prv-hs">PRV_HS</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp32-mode">SATP32_MODE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp32-asid">SATP32_ASID</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp32-ppn">SATP32_PPN</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp64-mode">SATP64_MODE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp64-asid">SATP64_ASID</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp64-ppn">SATP64_PPN</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp-mode-off">SATP_MODE_OFF</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp-mode-sv32">SATP_MODE_SV32</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp-mode-sv39">SATP_MODE_SV39</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp-mode-sv48">SATP_MODE_SV48</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp-mode-sv57">SATP_MODE_SV57</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-satp-mode-sv64">SATP_MODE_SV64</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp32-mode">HGATP32_MODE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp32-vmid">HGATP32_VMID</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp32-ppn">HGATP32_PPN</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp64-mode">HGATP64_MODE</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp64-vmid">HGATP64_VMID</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp64-ppn">HGATP64_PPN</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp-mode-off">HGATP_MODE_OFF</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp-mode-sv32x4">HGATP_MODE_SV32X4</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp-mode-sv39x4">HGATP_MODE_SV39X4</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-hgatp-mode-sv48x4">HGATP_MODE_SV48X4</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pmp-r">PMP_R</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pmp-w">PMP_W</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pmp-x">PMP_X</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pmp-a">PMP_A</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pmp-l">PMP_L</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pmp-shift">PMP_SHIFT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pmp-tor">PMP_TOR</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pmp-na4">PMP_NA4</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pmp-napot">PMP_NAPOT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-u-soft">IRQ_U_SOFT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-s-soft">IRQ_S_SOFT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-vs-soft">IRQ_VS_SOFT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-m-soft">IRQ_M_SOFT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-u-timer">IRQ_U_TIMER</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-s-timer">IRQ_S_TIMER</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-vs-timer">IRQ_VS_TIMER</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-m-timer">IRQ_M_TIMER</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-u-ext">IRQ_U_EXT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-s-ext">IRQ_S_EXT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-vs-ext">IRQ_VS_EXT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-m-ext">IRQ_M_EXT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-s-gext">IRQ_S_GEXT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-cop">IRQ_COP</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-host">IRQ_HOST</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-m-cluster">IRQ_M_CLUSTER</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-irq-s-cluster">IRQ_S_CLUSTER</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-v">PTE_V</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-r">PTE_R</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-w">PTE_W</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-x">PTE_X</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-u">PTE_U</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-g">PTE_G</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-a">PTE_A</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-d">PTE_D</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-soft">PTE_SOFT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-rsvd">PTE_RSVD</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-pbmt">PTE_PBMT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-n">PTE_N</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-attr">PTE_ATTR</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-ppn-shift">PTE_PPN_SHIFT</a></strong></td>
+</tr>
+<tr>
+<td></td>
+<td><strong><a href="/snitch/runtime/Files/encoding_8h/#define-pte-table">PTE_TABLE</a></strong>(PTE)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="macros-documentation">Macros Documentation</h2>
+<h3 id="define-mstatus_uie">define MSTATUS_UIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_UIE 0x00000001</span>
+</code></pre></div>
+<h3 id="define-mstatus_sie">define MSTATUS_SIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_SIE 0x00000002</span>
+</code></pre></div>
+<h3 id="define-mstatus_hie">define MSTATUS_HIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_HIE 0x00000004</span>
+</code></pre></div>
+<h3 id="define-mstatus_mie">define MSTATUS_MIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_MIE 0x00000008</span>
+</code></pre></div>
+<h3 id="define-mstatus_upie">define MSTATUS_UPIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_UPIE 0x00000010</span>
+</code></pre></div>
+<h3 id="define-mstatus_spie">define MSTATUS_SPIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_SPIE 0x00000020</span>
+</code></pre></div>
+<h3 id="define-mstatus_ube">define MSTATUS_UBE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_UBE 0x00000040</span>
+</code></pre></div>
+<h3 id="define-mstatus_mpie">define MSTATUS_MPIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_MPIE 0x00000080</span>
+</code></pre></div>
+<h3 id="define-mstatus_spp">define MSTATUS_SPP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_SPP 0x00000100</span>
+</code></pre></div>
+<h3 id="define-mstatus_vs">define MSTATUS_VS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_VS 0x00000600</span>
+</code></pre></div>
+<h3 id="define-mstatus_mpp">define MSTATUS_MPP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_MPP 0x00001800</span>
+</code></pre></div>
+<h3 id="define-mstatus_fs">define MSTATUS_FS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_FS 0x00006000</span>
+</code></pre></div>
+<h3 id="define-mstatus_xs">define MSTATUS_XS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_XS 0x00018000</span>
+</code></pre></div>
+<h3 id="define-mstatus_mprv">define MSTATUS_MPRV</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_MPRV 0x00020000</span>
+</code></pre></div>
+<h3 id="define-mstatus_sum">define MSTATUS_SUM</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_SUM 0x00040000</span>
+</code></pre></div>
+<h3 id="define-mstatus_mxr">define MSTATUS_MXR</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_MXR 0x00080000</span>
+</code></pre></div>
+<h3 id="define-mstatus_tvm">define MSTATUS_TVM</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_TVM 0x00100000</span>
+</code></pre></div>
+<h3 id="define-mstatus_tw">define MSTATUS_TW</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_TW 0x00200000</span>
+</code></pre></div>
+<h3 id="define-mstatus_tsr">define MSTATUS_TSR</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_TSR 0x00400000</span>
+</code></pre></div>
+<h3 id="define-mstatus32_sd">define MSTATUS32_SD</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS32_SD 0x80000000</span>
+</code></pre></div>
+<h3 id="define-mstatus_uxl">define MSTATUS_UXL</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_UXL 0x0000000300000000</span>
+</code></pre></div>
+<h3 id="define-mstatus_sxl">define MSTATUS_SXL</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_SXL 0x0000000C00000000</span>
+</code></pre></div>
+<h3 id="define-mstatus_sbe">define MSTATUS_SBE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_SBE 0x0000001000000000</span>
+</code></pre></div>
+<h3 id="define-mstatus_mbe">define MSTATUS_MBE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_MBE 0x0000002000000000</span>
+</code></pre></div>
+<h3 id="define-mstatus_gva">define MSTATUS_GVA</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_GVA 0x0000004000000000</span>
+</code></pre></div>
+<h3 id="define-mstatus_mpv">define MSTATUS_MPV</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS_MPV 0x0000008000000000</span>
+</code></pre></div>
+<h3 id="define-mstatus64_sd">define MSTATUS64_SD</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUS64_SD 0x8000000000000000</span>
+</code></pre></div>
+<h3 id="define-mstatush_sbe">define MSTATUSH_SBE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUSH_SBE 0x00000010</span>
+</code></pre></div>
+<h3 id="define-mstatush_mbe">define MSTATUSH_MBE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MSTATUSH_MBE 0x00000020</span>
+</code></pre></div>
+<h3 id="define-sstatus_uie">define SSTATUS_UIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_UIE 0x00000001</span>
+</code></pre></div>
+<h3 id="define-sstatus_sie">define SSTATUS_SIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_SIE 0x00000002</span>
+</code></pre></div>
+<h3 id="define-sstatus_upie">define SSTATUS_UPIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_UPIE 0x00000010</span>
+</code></pre></div>
+<h3 id="define-sstatus_spie">define SSTATUS_SPIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_SPIE 0x00000020</span>
+</code></pre></div>
+<h3 id="define-sstatus_ube">define SSTATUS_UBE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_UBE 0x00000040</span>
+</code></pre></div>
+<h3 id="define-sstatus_spp">define SSTATUS_SPP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_SPP 0x00000100</span>
+</code></pre></div>
+<h3 id="define-sstatus_vs">define SSTATUS_VS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_VS 0x00000600</span>
+</code></pre></div>
+<h3 id="define-sstatus_fs">define SSTATUS_FS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_FS 0x00006000</span>
+</code></pre></div>
+<h3 id="define-sstatus_xs">define SSTATUS_XS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_XS 0x00018000</span>
+</code></pre></div>
+<h3 id="define-sstatus_sum">define SSTATUS_SUM</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_SUM 0x00040000</span>
+</code></pre></div>
+<h3 id="define-sstatus_mxr">define SSTATUS_MXR</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_MXR 0x00080000</span>
+</code></pre></div>
+<h3 id="define-sstatus32_sd">define SSTATUS32_SD</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS32_SD 0x80000000</span>
+</code></pre></div>
+<h3 id="define-sstatus_uxl">define SSTATUS_UXL</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_UXL 0x0000000300000000</span>
+</code></pre></div>
+<h3 id="define-sstatus64_sd">define SSTATUS64_SD</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS64_SD 0x8000000000000000</span>
+</code></pre></div>
+<h3 id="define-sstatus_vs_mask">define SSTATUS_VS_MASK</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SSTATUS_VS_MASK     (SSTATUS_SIE | SSTATUS_SPIE | SSTATUS_SPP | SSTATUS_FS | SSTATUS_SUM | \</span>
+<span class="cp">     SSTATUS_MXR | SSTATUS_UXL)</span>
+</code></pre></div>
+<h3 id="define-hstatus_vsxl">define HSTATUS_VSXL</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_VSXL 0x300000000</span>
+</code></pre></div>
+<h3 id="define-hstatus_vtsr">define HSTATUS_VTSR</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_VTSR 0x00400000</span>
+</code></pre></div>
+<h3 id="define-hstatus_vtw">define HSTATUS_VTW</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_VTW 0x00200000</span>
+</code></pre></div>
+<h3 id="define-hstatus_vtvm">define HSTATUS_VTVM</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_VTVM 0x00100000</span>
+</code></pre></div>
+<h3 id="define-hstatus_vgein">define HSTATUS_VGEIN</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_VGEIN 0x0003f000</span>
+</code></pre></div>
+<h3 id="define-hstatus_hu">define HSTATUS_HU</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_HU 0x00000200</span>
+</code></pre></div>
+<h3 id="define-hstatus_spvp">define HSTATUS_SPVP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_SPVP 0x00000100</span>
+</code></pre></div>
+<h3 id="define-hstatus_spv">define HSTATUS_SPV</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_SPV 0x00000080</span>
+</code></pre></div>
+<h3 id="define-hstatus_gva">define HSTATUS_GVA</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_GVA 0x00000040</span>
+</code></pre></div>
+<h3 id="define-hstatus_vsbe">define HSTATUS_VSBE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HSTATUS_VSBE 0x00000020</span>
+</code></pre></div>
+<h3 id="define-ustatus_uie">define USTATUS_UIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define USTATUS_UIE 0x00000001</span>
+</code></pre></div>
+<h3 id="define-ustatus_upie">define USTATUS_UPIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define USTATUS_UPIE 0x00000010</span>
+</code></pre></div>
+<h3 id="define-dcsr_xdebugver">define DCSR_XDEBUGVER</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_XDEBUGVER (3U &lt;&lt; 30)</span>
+</code></pre></div>
+<h3 id="define-dcsr_ndreset">define DCSR_NDRESET</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_NDRESET (1 &lt;&lt; 29)</span>
+</code></pre></div>
+<h3 id="define-dcsr_fullreset">define DCSR_FULLRESET</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_FULLRESET (1 &lt;&lt; 28)</span>
+</code></pre></div>
+<h3 id="define-dcsr_ebreakm">define DCSR_EBREAKM</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_EBREAKM (1 &lt;&lt; 15)</span>
+</code></pre></div>
+<h3 id="define-dcsr_ebreakh">define DCSR_EBREAKH</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_EBREAKH (1 &lt;&lt; 14)</span>
+</code></pre></div>
+<h3 id="define-dcsr_ebreaks">define DCSR_EBREAKS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_EBREAKS (1 &lt;&lt; 13)</span>
+</code></pre></div>
+<h3 id="define-dcsr_ebreaku">define DCSR_EBREAKU</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_EBREAKU (1 &lt;&lt; 12)</span>
+</code></pre></div>
+<h3 id="define-dcsr_stopcycle">define DCSR_STOPCYCLE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_STOPCYCLE (1 &lt;&lt; 10)</span>
+</code></pre></div>
+<h3 id="define-dcsr_stoptime">define DCSR_STOPTIME</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_STOPTIME (1 &lt;&lt; 9)</span>
+</code></pre></div>
+<h3 id="define-dcsr_cause">define DCSR_CAUSE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_CAUSE (7 &lt;&lt; 6)</span>
+</code></pre></div>
+<h3 id="define-dcsr_debugint">define DCSR_DEBUGINT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_DEBUGINT (1 &lt;&lt; 5)</span>
+</code></pre></div>
+<h3 id="define-dcsr_halt">define DCSR_HALT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_HALT (1 &lt;&lt; 3)</span>
+</code></pre></div>
+<h3 id="define-dcsr_step">define DCSR_STEP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_STEP (1 &lt;&lt; 2)</span>
+</code></pre></div>
+<h3 id="define-dcsr_prv">define DCSR_PRV</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_PRV (3 &lt;&lt; 0)</span>
+</code></pre></div>
+<h3 id="define-dcsr_cause_none">define DCSR_CAUSE_NONE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_CAUSE_NONE 0</span>
+</code></pre></div>
+<h3 id="define-dcsr_cause_swbp">define DCSR_CAUSE_SWBP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_CAUSE_SWBP 1</span>
+</code></pre></div>
+<h3 id="define-dcsr_cause_hwbp">define DCSR_CAUSE_HWBP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_CAUSE_HWBP 2</span>
+</code></pre></div>
+<h3 id="define-dcsr_cause_debugint">define DCSR_CAUSE_DEBUGINT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_CAUSE_DEBUGINT 3</span>
+</code></pre></div>
+<h3 id="define-dcsr_cause_step">define DCSR_CAUSE_STEP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_CAUSE_STEP 4</span>
+</code></pre></div>
+<h3 id="define-dcsr_cause_halt">define DCSR_CAUSE_HALT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_CAUSE_HALT 5</span>
+</code></pre></div>
+<h3 id="define-dcsr_cause_group">define DCSR_CAUSE_GROUP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define DCSR_CAUSE_GROUP 6</span>
+</code></pre></div>
+<h3 id="define-mcontrol_type">define MCONTROL_TYPE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_TYPE(</span>
+<span class="w">    </span><span class="n">xlen</span>
+<span class="p">)</span>
+<span class="p">(</span><span class="mh">0xfULL</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">((</span><span class="n">xlen</span><span class="p">)</span><span class="mi">-4</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="define-mcontrol_dmode">define MCONTROL_DMODE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_DMODE(</span>
+<span class="w">    </span><span class="n">xlen</span>
+<span class="p">)</span>
+<span class="p">(</span><span class="mi">1ULL</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">((</span><span class="n">xlen</span><span class="p">)</span><span class="mi">-5</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="define-mcontrol_maskmax">define MCONTROL_MASKMAX</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_MASKMAX(</span>
+<span class="w">    </span><span class="n">xlen</span>
+<span class="p">)</span>
+<span class="p">(</span><span class="mh">0x3fULL</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">((</span><span class="n">xlen</span><span class="p">)</span><span class="mi">-11</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="define-mcontrol_select">define MCONTROL_SELECT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_SELECT (1 &lt;&lt; 19)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_timing">define MCONTROL_TIMING</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_TIMING (1 &lt;&lt; 18)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_action">define MCONTROL_ACTION</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_ACTION (0x3f &lt;&lt; 12)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_chain">define MCONTROL_CHAIN</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_CHAIN (1 &lt;&lt; 11)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_match">define MCONTROL_MATCH</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_MATCH (0xf &lt;&lt; 7)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_m">define MCONTROL_M</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_M (1 &lt;&lt; 6)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_h">define MCONTROL_H</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_H (1 &lt;&lt; 5)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_s">define MCONTROL_S</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_S (1 &lt;&lt; 4)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_u">define MCONTROL_U</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_U (1 &lt;&lt; 3)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_execute">define MCONTROL_EXECUTE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_EXECUTE (1 &lt;&lt; 2)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_store">define MCONTROL_STORE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_STORE (1 &lt;&lt; 1)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_load">define MCONTROL_LOAD</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_LOAD (1 &lt;&lt; 0)</span>
+</code></pre></div>
+<h3 id="define-mcontrol_type_none">define MCONTROL_TYPE_NONE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_TYPE_NONE 0</span>
+</code></pre></div>
+<h3 id="define-mcontrol_type_match">define MCONTROL_TYPE_MATCH</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_TYPE_MATCH 2</span>
+</code></pre></div>
+<h3 id="define-mcontrol_action_debug_exception">define MCONTROL_ACTION_DEBUG_EXCEPTION</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_ACTION_DEBUG_EXCEPTION 0</span>
+</code></pre></div>
+<h3 id="define-mcontrol_action_debug_mode">define MCONTROL_ACTION_DEBUG_MODE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_ACTION_DEBUG_MODE 1</span>
+</code></pre></div>
+<h3 id="define-mcontrol_action_trace_start">define MCONTROL_ACTION_TRACE_START</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_ACTION_TRACE_START 2</span>
+</code></pre></div>
+<h3 id="define-mcontrol_action_trace_stop">define MCONTROL_ACTION_TRACE_STOP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_ACTION_TRACE_STOP 3</span>
+</code></pre></div>
+<h3 id="define-mcontrol_action_trace_emit">define MCONTROL_ACTION_TRACE_EMIT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_ACTION_TRACE_EMIT 4</span>
+</code></pre></div>
+<h3 id="define-mcontrol_match_equal">define MCONTROL_MATCH_EQUAL</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_MATCH_EQUAL 0</span>
+</code></pre></div>
+<h3 id="define-mcontrol_match_napot">define MCONTROL_MATCH_NAPOT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_MATCH_NAPOT 1</span>
+</code></pre></div>
+<h3 id="define-mcontrol_match_ge">define MCONTROL_MATCH_GE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_MATCH_GE 2</span>
+</code></pre></div>
+<h3 id="define-mcontrol_match_lt">define MCONTROL_MATCH_LT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_MATCH_LT 3</span>
+</code></pre></div>
+<h3 id="define-mcontrol_match_mask_low">define MCONTROL_MATCH_MASK_LOW</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_MATCH_MASK_LOW 4</span>
+</code></pre></div>
+<h3 id="define-mcontrol_match_mask_high">define MCONTROL_MATCH_MASK_HIGH</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCONTROL_MATCH_MASK_HIGH 5</span>
+</code></pre></div>
+<h3 id="define-mip_usip">define MIP_USIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_USIP (1 &lt;&lt; IRQ_U_SOFT)</span>
+</code></pre></div>
+<h3 id="define-mip_ssip">define MIP_SSIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_SSIP (1 &lt;&lt; IRQ_S_SOFT)</span>
+</code></pre></div>
+<h3 id="define-mip_vssip">define MIP_VSSIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_VSSIP (1 &lt;&lt; IRQ_VS_SOFT)</span>
+</code></pre></div>
+<h3 id="define-mip_msip">define MIP_MSIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_MSIP (1 &lt;&lt; IRQ_M_SOFT)</span>
+</code></pre></div>
+<h3 id="define-mip_utip">define MIP_UTIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_UTIP (1 &lt;&lt; IRQ_U_TIMER)</span>
+</code></pre></div>
+<h3 id="define-mip_stip">define MIP_STIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_STIP (1 &lt;&lt; IRQ_S_TIMER)</span>
+</code></pre></div>
+<h3 id="define-mip_vstip">define MIP_VSTIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_VSTIP (1 &lt;&lt; IRQ_VS_TIMER)</span>
+</code></pre></div>
+<h3 id="define-mip_mtip">define MIP_MTIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_MTIP (1 &lt;&lt; IRQ_M_TIMER)</span>
+</code></pre></div>
+<h3 id="define-mip_ueip">define MIP_UEIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_UEIP (1 &lt;&lt; IRQ_U_EXT)</span>
+</code></pre></div>
+<h3 id="define-mip_seip">define MIP_SEIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_SEIP (1 &lt;&lt; IRQ_S_EXT)</span>
+</code></pre></div>
+<h3 id="define-mip_vseip">define MIP_VSEIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_VSEIP (1 &lt;&lt; IRQ_VS_EXT)</span>
+</code></pre></div>
+<h3 id="define-mip_meip">define MIP_MEIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_MEIP (1 &lt;&lt; IRQ_M_EXT)</span>
+</code></pre></div>
+<h3 id="define-mip_sgeip">define MIP_SGEIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_SGEIP (1 &lt;&lt; IRQ_S_GEXT)</span>
+</code></pre></div>
+<h3 id="define-sip_scip">define SIP_SCIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SIP_SCIP (1 &lt;&lt; IRQ_S_CLUSTER)</span>
+</code></pre></div>
+<h3 id="define-mip_mcip">define MIP_MCIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_MCIP (1 &lt;&lt; IRQ_M_CLUSTER)</span>
+</code></pre></div>
+<h3 id="define-mie_ssie">define MIE_SSIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_SSIE (1 &lt;&lt; IRQ_S_SOFT)</span>
+</code></pre></div>
+<h3 id="define-mie_hsie">define MIE_HSIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_HSIE (1 &lt;&lt; IRQ_H_SOFT)</span>
+</code></pre></div>
+<h3 id="define-mie_msie">define MIE_MSIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_MSIE (1 &lt;&lt; IRQ_M_SOFT)</span>
+</code></pre></div>
+<h3 id="define-mie_stie">define MIE_STIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_STIE (1 &lt;&lt; IRQ_S_TIMER)</span>
+</code></pre></div>
+<h3 id="define-mie_htie">define MIE_HTIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_HTIE (1 &lt;&lt; IRQ_H_TIMER)</span>
+</code></pre></div>
+<h3 id="define-mie_mtie">define MIE_MTIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_MTIE (1 &lt;&lt; IRQ_M_TIMER)</span>
+</code></pre></div>
+<h3 id="define-mie_seie">define MIE_SEIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_SEIE (1 &lt;&lt; IRQ_S_EXT)</span>
+</code></pre></div>
+<h3 id="define-mie_heie">define MIE_HEIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_HEIE (1 &lt;&lt; IRQ_H_EXT)</span>
+</code></pre></div>
+<h3 id="define-mie_meie">define MIE_MEIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_MEIE (1 &lt;&lt; IRQ_M_EXT)</span>
+</code></pre></div>
+<h3 id="define-mie_scie">define MIE_SCIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_SCIE (1 &lt;&lt; IRQ_S_CLUSTER)</span>
+</code></pre></div>
+<h3 id="define-mie_mcie">define MIE_MCIE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIE_MCIE (1 &lt;&lt; IRQ_M_CLUSTER)</span>
+</code></pre></div>
+<h3 id="define-mcause_interrupt">define MCAUSE_INTERRUPT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MCAUSE_INTERRUPT 0x80000000</span>
+</code></pre></div>
+<h3 id="define-mip_s_mask">define MIP_S_MASK</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_S_MASK (MIP_SSIP | MIP_STIP | MIP_SEIP)</span>
+</code></pre></div>
+<h3 id="define-mip_vs_mask">define MIP_VS_MASK</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_VS_MASK (MIP_VSSIP | MIP_VSTIP | MIP_VSEIP)</span>
+</code></pre></div>
+<h3 id="define-mip_hs_mask">define MIP_HS_MASK</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIP_HS_MASK (MIP_VS_MASK | MIP_SGEIP)</span>
+</code></pre></div>
+<h3 id="define-mideleg_forced_mask">define MIDELEG_FORCED_MASK</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MIDELEG_FORCED_MASK MIP_HS_MASK</span>
+</code></pre></div>
+<h3 id="define-sip_ssip">define SIP_SSIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SIP_SSIP MIP_SSIP</span>
+</code></pre></div>
+<h3 id="define-sip_stip">define SIP_STIP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SIP_STIP MIP_STIP</span>
+</code></pre></div>
+<h3 id="define-prv_u">define PRV_U</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PRV_U 0</span>
+</code></pre></div>
+<h3 id="define-prv_s">define PRV_S</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PRV_S 1</span>
+</code></pre></div>
+<h3 id="define-prv_m">define PRV_M</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PRV_M 3</span>
+</code></pre></div>
+<h3 id="define-prv_hs">define PRV_HS</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PRV_HS (PRV_S + 1)</span>
+</code></pre></div>
+<h3 id="define-satp32_mode">define SATP32_MODE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP32_MODE 0x80000000</span>
+</code></pre></div>
+<h3 id="define-satp32_asid">define SATP32_ASID</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP32_ASID 0x7FC00000</span>
+</code></pre></div>
+<h3 id="define-satp32_ppn">define SATP32_PPN</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP32_PPN 0x003FFFFF</span>
+</code></pre></div>
+<h3 id="define-satp64_mode">define SATP64_MODE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP64_MODE 0xF000000000000000</span>
+</code></pre></div>
+<h3 id="define-satp64_asid">define SATP64_ASID</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP64_ASID 0x0FFFF00000000000</span>
+</code></pre></div>
+<h3 id="define-satp64_ppn">define SATP64_PPN</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP64_PPN 0x00000FFFFFFFFFFF</span>
+</code></pre></div>
+<h3 id="define-satp_mode_off">define SATP_MODE_OFF</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP_MODE_OFF 0</span>
+</code></pre></div>
+<h3 id="define-satp_mode_sv32">define SATP_MODE_SV32</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP_MODE_SV32 1</span>
+</code></pre></div>
+<h3 id="define-satp_mode_sv39">define SATP_MODE_SV39</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP_MODE_SV39 8</span>
+</code></pre></div>
+<h3 id="define-satp_mode_sv48">define SATP_MODE_SV48</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP_MODE_SV48 9</span>
+</code></pre></div>
+<h3 id="define-satp_mode_sv57">define SATP_MODE_SV57</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP_MODE_SV57 10</span>
+</code></pre></div>
+<h3 id="define-satp_mode_sv64">define SATP_MODE_SV64</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SATP_MODE_SV64 11</span>
+</code></pre></div>
+<h3 id="define-hgatp32_mode">define HGATP32_MODE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP32_MODE 0x80000000</span>
+</code></pre></div>
+<h3 id="define-hgatp32_vmid">define HGATP32_VMID</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP32_VMID 0x1FC00000</span>
+</code></pre></div>
+<h3 id="define-hgatp32_ppn">define HGATP32_PPN</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP32_PPN 0x003FFFFF</span>
+</code></pre></div>
+<h3 id="define-hgatp64_mode">define HGATP64_MODE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP64_MODE 0xF000000000000000</span>
+</code></pre></div>
+<h3 id="define-hgatp64_vmid">define HGATP64_VMID</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP64_VMID 0x03FFF00000000000</span>
+</code></pre></div>
+<h3 id="define-hgatp64_ppn">define HGATP64_PPN</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP64_PPN 0x00000FFFFFFFFFFF</span>
+</code></pre></div>
+<h3 id="define-hgatp_mode_off">define HGATP_MODE_OFF</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP_MODE_OFF 0</span>
+</code></pre></div>
+<h3 id="define-hgatp_mode_sv32x4">define HGATP_MODE_SV32X4</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP_MODE_SV32X4 1</span>
+</code></pre></div>
+<h3 id="define-hgatp_mode_sv39x4">define HGATP_MODE_SV39X4</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP_MODE_SV39X4 8</span>
+</code></pre></div>
+<h3 id="define-hgatp_mode_sv48x4">define HGATP_MODE_SV48X4</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HGATP_MODE_SV48X4 9</span>
+</code></pre></div>
+<h3 id="define-pmp_r">define PMP_R</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PMP_R 0x01</span>
+</code></pre></div>
+<h3 id="define-pmp_w">define PMP_W</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PMP_W 0x02</span>
+</code></pre></div>
+<h3 id="define-pmp_x">define PMP_X</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PMP_X 0x04</span>
+</code></pre></div>
+<h3 id="define-pmp_a">define PMP_A</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PMP_A 0x18</span>
+</code></pre></div>
+<h3 id="define-pmp_l">define PMP_L</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PMP_L 0x80</span>
+</code></pre></div>
+<h3 id="define-pmp_shift">define PMP_SHIFT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PMP_SHIFT 2</span>
+</code></pre></div>
+<h3 id="define-pmp_tor">define PMP_TOR</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PMP_TOR 0x08</span>
+</code></pre></div>
+<h3 id="define-pmp_na4">define PMP_NA4</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PMP_NA4 0x10</span>
+</code></pre></div>
+<h3 id="define-pmp_napot">define PMP_NAPOT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PMP_NAPOT 0x18</span>
+</code></pre></div>
+<h3 id="define-irq_u_soft">define IRQ_U_SOFT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_U_SOFT 0</span>
+</code></pre></div>
+<h3 id="define-irq_s_soft">define IRQ_S_SOFT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_S_SOFT 1</span>
+</code></pre></div>
+<h3 id="define-irq_vs_soft">define IRQ_VS_SOFT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_VS_SOFT 2</span>
+</code></pre></div>
+<h3 id="define-irq_m_soft">define IRQ_M_SOFT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_M_SOFT 3</span>
+</code></pre></div>
+<h3 id="define-irq_u_timer">define IRQ_U_TIMER</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_U_TIMER 4</span>
+</code></pre></div>
+<h3 id="define-irq_s_timer">define IRQ_S_TIMER</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_S_TIMER 5</span>
+</code></pre></div>
+<h3 id="define-irq_vs_timer">define IRQ_VS_TIMER</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_VS_TIMER 6</span>
+</code></pre></div>
+<h3 id="define-irq_m_timer">define IRQ_M_TIMER</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_M_TIMER 7</span>
+</code></pre></div>
+<h3 id="define-irq_u_ext">define IRQ_U_EXT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_U_EXT 8</span>
+</code></pre></div>
+<h3 id="define-irq_s_ext">define IRQ_S_EXT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_S_EXT 9</span>
+</code></pre></div>
+<h3 id="define-irq_vs_ext">define IRQ_VS_EXT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_VS_EXT 10</span>
+</code></pre></div>
+<h3 id="define-irq_m_ext">define IRQ_M_EXT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_M_EXT 11</span>
+</code></pre></div>
+<h3 id="define-irq_s_gext">define IRQ_S_GEXT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_S_GEXT 12</span>
+</code></pre></div>
+<h3 id="define-irq_cop">define IRQ_COP</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_COP 12</span>
+</code></pre></div>
+<h3 id="define-irq_host">define IRQ_HOST</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_HOST 13</span>
+</code></pre></div>
+<h3 id="define-irq_m_cluster">define IRQ_M_CLUSTER</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_M_CLUSTER 19</span>
+</code></pre></div>
+<h3 id="define-irq_s_cluster">define IRQ_S_CLUSTER</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IRQ_S_CLUSTER 17</span>
+</code></pre></div>
+<h3 id="define-pte_v">define PTE_V</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_V 0x001                 </span><span class="cm">/* Valid */</span>
+</code></pre></div>
+<h3 id="define-pte_r">define PTE_R</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_R 0x002                 </span><span class="cm">/* Read */</span>
+</code></pre></div>
+<h3 id="define-pte_w">define PTE_W</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_W 0x004                 </span><span class="cm">/* Write */</span>
+</code></pre></div>
+<h3 id="define-pte_x">define PTE_X</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_X 0x008                 </span><span class="cm">/* Execute */</span>
+</code></pre></div>
+<h3 id="define-pte_u">define PTE_U</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_U 0x010                 </span><span class="cm">/* User */</span>
+</code></pre></div>
+<h3 id="define-pte_g">define PTE_G</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_G 0x020                 </span><span class="cm">/* Global */</span>
+</code></pre></div>
+<h3 id="define-pte_a">define PTE_A</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_A 0x040                 </span><span class="cm">/* Accessed */</span>
+</code></pre></div>
+<h3 id="define-pte_d">define PTE_D</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_D 0x080                 </span><span class="cm">/* Dirty */</span>
+</code></pre></div>
+<h3 id="define-pte_soft">define PTE_SOFT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_SOFT 0x300              </span><span class="cm">/* Reserved for Software */</span>
+</code></pre></div>
+<h3 id="define-pte_rsvd">define PTE_RSVD</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_RSVD 0x1FC0000000000000 </span><span class="cm">/* Reserved for future standard use */</span>
+</code></pre></div>
+<h3 id="define-pte_pbmt">define PTE_PBMT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_PBMT 0x6000000000000000 </span><span class="cm">/* Svpbmt: Page-based memory types */</span>
+</code></pre></div>
+<h3 id="define-pte_n">define PTE_N</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_N 0x8000000000000000    </span><span class="cm">/* Svnapot: NAPOT translation contiguity */</span>
+</code></pre></div>
+<h3 id="define-pte_attr">define PTE_ATTR</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_ATTR 0xFFC0000000000000 </span><span class="cm">/* All attributes and reserved bits */</span>
+</code></pre></div>
+<h3 id="define-pte_ppn_shift">define PTE_PPN_SHIFT</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_PPN_SHIFT 10</span>
+</code></pre></div>
+<h3 id="define-pte_table">define PTE_TABLE</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define PTE_TABLE(</span>
+<span class="w">    </span><span class="n">PTE</span>
+<span class="p">)</span>
+<span class="p">(((</span><span class="n">PTE</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">PTE_V</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_R</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_W</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PTE_X</span><span class="p">))</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PTE_V</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="source-code">Source code</h2>
+<div class="highlight"><pre><span></span><code><span class="cm">/* See LICENSE for license details. */</span>
+
+<span class="cp">#ifndef RISCV_CSR_ENCODING_H</span>
+<span class="cp">#define RISCV_CSR_ENCODING_H</span>
+
+<span class="cp">#ifdef __cplusplus</span>
+<span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#define MSTATUS_UIE 0x00000001</span>
+<span class="cp">#define MSTATUS_SIE 0x00000002</span>
+<span class="cp">#define MSTATUS_HIE 0x00000004</span>
+<span class="cp">#define MSTATUS_MIE 0x00000008</span>
+<span class="cp">#define MSTATUS_UPIE 0x00000010</span>
+<span class="cp">#define MSTATUS_SPIE 0x00000020</span>
+<span class="cp">#define MSTATUS_UBE 0x00000040</span>
+<span class="cp">#define MSTATUS_MPIE 0x00000080</span>
+<span class="cp">#define MSTATUS_SPP 0x00000100</span>
+<span class="cp">#define MSTATUS_VS 0x00000600</span>
+<span class="cp">#define MSTATUS_MPP 0x00001800</span>
+<span class="cp">#define MSTATUS_FS 0x00006000</span>
+<span class="cp">#define MSTATUS_XS 0x00018000</span>
+<span class="cp">#define MSTATUS_MPRV 0x00020000</span>
+<span class="cp">#define MSTATUS_SUM 0x00040000</span>
+<span class="cp">#define MSTATUS_MXR 0x00080000</span>
+<span class="cp">#define MSTATUS_TVM 0x00100000</span>
+<span class="cp">#define MSTATUS_TW 0x00200000</span>
+<span class="cp">#define MSTATUS_TSR 0x00400000</span>
+<span class="cp">#define MSTATUS32_SD 0x80000000</span>
+<span class="cp">#define MSTATUS_UXL 0x0000000300000000</span>
+<span class="cp">#define MSTATUS_SXL 0x0000000C00000000</span>
+<span class="cp">#define MSTATUS_SBE 0x0000001000000000</span>
+<span class="cp">#define MSTATUS_MBE 0x0000002000000000</span>
+<span class="cp">#define MSTATUS_GVA 0x0000004000000000</span>
+<span class="cp">#define MSTATUS_MPV 0x0000008000000000</span>
+<span class="cp">#define MSTATUS64_SD 0x8000000000000000</span>
+
+<span class="cp">#define MSTATUSH_SBE 0x00000010</span>
+<span class="cp">#define MSTATUSH_MBE 0x00000020</span>
+
+<span class="cp">#define SSTATUS_UIE 0x00000001</span>
+<span class="cp">#define SSTATUS_SIE 0x00000002</span>
+<span class="cp">#define SSTATUS_UPIE 0x00000010</span>
+<span class="cp">#define SSTATUS_SPIE 0x00000020</span>
+<span class="cp">#define SSTATUS_UBE 0x00000040</span>
+<span class="cp">#define SSTATUS_SPP 0x00000100</span>
+<span class="cp">#define SSTATUS_VS 0x00000600</span>
+<span class="cp">#define SSTATUS_FS 0x00006000</span>
+<span class="cp">#define SSTATUS_XS 0x00018000</span>
+<span class="cp">#define SSTATUS_SUM 0x00040000</span>
+<span class="cp">#define SSTATUS_MXR 0x00080000</span>
+<span class="cp">#define SSTATUS32_SD 0x80000000</span>
+<span class="cp">#define SSTATUS_UXL 0x0000000300000000</span>
+<span class="cp">#define SSTATUS64_SD 0x8000000000000000</span>
+
+<span class="cp">#define SSTATUS_VS_MASK                                                    \</span>
+<span class="cp">    (SSTATUS_SIE | SSTATUS_SPIE | SSTATUS_SPP | SSTATUS_FS | SSTATUS_SUM | \</span>
+<span class="cp">     SSTATUS_MXR | SSTATUS_UXL)</span>
+
+<span class="cp">#define HSTATUS_VSXL 0x300000000</span>
+<span class="cp">#define HSTATUS_VTSR 0x00400000</span>
+<span class="cp">#define HSTATUS_VTW 0x00200000</span>
+<span class="cp">#define HSTATUS_VTVM 0x00100000</span>
+<span class="cp">#define HSTATUS_VGEIN 0x0003f000</span>
+<span class="cp">#define HSTATUS_HU 0x00000200</span>
+<span class="cp">#define HSTATUS_SPVP 0x00000100</span>
+<span class="cp">#define HSTATUS_SPV 0x00000080</span>
+<span class="cp">#define HSTATUS_GVA 0x00000040</span>
+<span class="cp">#define HSTATUS_VSBE 0x00000020</span>
+
+<span class="cp">#define USTATUS_UIE 0x00000001</span>
+<span class="cp">#define USTATUS_UPIE 0x00000010</span>
+
+<span class="cp">#define DCSR_XDEBUGVER (3U &lt;&lt; 30)</span>
+<span class="cp">#define DCSR_NDRESET (1 &lt;&lt; 29)</span>
+<span class="cp">#define DCSR_FULLRESET (1 &lt;&lt; 28)</span>
+<span class="cp">#define DCSR_EBREAKM (1 &lt;&lt; 15)</span>
+<span class="cp">#define DCSR_EBREAKH (1 &lt;&lt; 14)</span>
+<span class="cp">#define DCSR_EBREAKS (1 &lt;&lt; 13)</span>
+<span class="cp">#define DCSR_EBREAKU (1 &lt;&lt; 12)</span>
+<span class="cp">#define DCSR_STOPCYCLE (1 &lt;&lt; 10)</span>
+<span class="cp">#define DCSR_STOPTIME (1 &lt;&lt; 9)</span>
+<span class="cp">#define DCSR_CAUSE (7 &lt;&lt; 6)</span>
+<span class="cp">#define DCSR_DEBUGINT (1 &lt;&lt; 5)</span>
+<span class="cp">#define DCSR_HALT (1 &lt;&lt; 3)</span>
+<span class="cp">#define DCSR_STEP (1 &lt;&lt; 2)</span>
+<span class="cp">#define DCSR_PRV (3 &lt;&lt; 0)</span>
+
+<span class="cp">#define DCSR_CAUSE_NONE 0</span>
+<span class="cp">#define DCSR_CAUSE_SWBP 1</span>
+<span class="cp">#define DCSR_CAUSE_HWBP 2</span>
+<span class="cp">#define DCSR_CAUSE_DEBUGINT 3</span>
+<span class="cp">#define DCSR_CAUSE_STEP 4</span>
+<span class="cp">#define DCSR_CAUSE_HALT 5</span>
+<span class="cp">#define DCSR_CAUSE_GROUP 6</span>
+
+<span class="cp">#define MCONTROL_TYPE(xlen) (0xfULL &lt;&lt; ((xlen)-4))</span>
+<span class="cp">#define MCONTROL_DMODE(xlen) (1ULL &lt;&lt; ((xlen)-5))</span>
+<span class="cp">#define MCONTROL_MASKMAX(xlen) (0x3fULL &lt;&lt; ((xlen)-11))</span>
+
+<span class="cp">#define MCONTROL_SELECT (1 &lt;&lt; 19)</span>
+<span class="cp">#define MCONTROL_TIMING (1 &lt;&lt; 18)</span>
+<span class="cp">#define MCONTROL_ACTION (0x3f &lt;&lt; 12)</span>
+<span class="cp">#define MCONTROL_CHAIN (1 &lt;&lt; 11)</span>
+<span class="cp">#define MCONTROL_MATCH (0xf &lt;&lt; 7)</span>
+<span class="cp">#define MCONTROL_M (1 &lt;&lt; 6)</span>
+<span class="cp">#define MCONTROL_H (1 &lt;&lt; 5)</span>
+<span class="cp">#define MCONTROL_S (1 &lt;&lt; 4)</span>
+<span class="cp">#define MCONTROL_U (1 &lt;&lt; 3)</span>
+<span class="cp">#define MCONTROL_EXECUTE (1 &lt;&lt; 2)</span>
+<span class="cp">#define MCONTROL_STORE (1 &lt;&lt; 1)</span>
+<span class="cp">#define MCONTROL_LOAD (1 &lt;&lt; 0)</span>
+
+<span class="cp">#define MCONTROL_TYPE_NONE 0</span>
+<span class="cp">#define MCONTROL_TYPE_MATCH 2</span>
+
+<span class="cp">#define MCONTROL_ACTION_DEBUG_EXCEPTION 0</span>
+<span class="cp">#define MCONTROL_ACTION_DEBUG_MODE 1</span>
+<span class="cp">#define MCONTROL_ACTION_TRACE_START 2</span>
+<span class="cp">#define MCONTROL_ACTION_TRACE_STOP 3</span>
+<span class="cp">#define MCONTROL_ACTION_TRACE_EMIT 4</span>
+
+<span class="cp">#define MCONTROL_MATCH_EQUAL 0</span>
+<span class="cp">#define MCONTROL_MATCH_NAPOT 1</span>
+<span class="cp">#define MCONTROL_MATCH_GE 2</span>
+<span class="cp">#define MCONTROL_MATCH_LT 3</span>
+<span class="cp">#define MCONTROL_MATCH_MASK_LOW 4</span>
+<span class="cp">#define MCONTROL_MATCH_MASK_HIGH 5</span>
+
+<span class="cp">#define MIP_USIP (1 &lt;&lt; IRQ_U_SOFT)</span>
+<span class="cp">#define MIP_SSIP (1 &lt;&lt; IRQ_S_SOFT)</span>
+<span class="cp">#define MIP_VSSIP (1 &lt;&lt; IRQ_VS_SOFT)</span>
+<span class="cp">#define MIP_MSIP (1 &lt;&lt; IRQ_M_SOFT)</span>
+<span class="cp">#define MIP_UTIP (1 &lt;&lt; IRQ_U_TIMER)</span>
+<span class="cp">#define MIP_STIP (1 &lt;&lt; IRQ_S_TIMER)</span>
+<span class="cp">#define MIP_VSTIP (1 &lt;&lt; IRQ_VS_TIMER)</span>
+<span class="cp">#define MIP_MTIP (1 &lt;&lt; IRQ_M_TIMER)</span>
+<span class="cp">#define MIP_UEIP (1 &lt;&lt; IRQ_U_EXT)</span>
+<span class="cp">#define MIP_SEIP (1 &lt;&lt; IRQ_S_EXT)</span>
+<span class="cp">#define MIP_VSEIP (1 &lt;&lt; IRQ_VS_EXT)</span>
+<span class="cp">#define MIP_MEIP (1 &lt;&lt; IRQ_M_EXT)</span>
+<span class="cp">#define MIP_SGEIP (1 &lt;&lt; IRQ_S_GEXT)</span>
+<span class="cp">#define SIP_SCIP (1 &lt;&lt; IRQ_S_CLUSTER)</span>
+<span class="cp">#define MIP_MCIP (1 &lt;&lt; IRQ_M_CLUSTER)</span>
+
+<span class="cp">#define MIE_SSIE (1 &lt;&lt; IRQ_S_SOFT)</span>
+<span class="cp">#define MIE_HSIE (1 &lt;&lt; IRQ_H_SOFT)</span>
+<span class="cp">#define MIE_MSIE (1 &lt;&lt; IRQ_M_SOFT)</span>
+<span class="cp">#define MIE_STIE (1 &lt;&lt; IRQ_S_TIMER)</span>
+<span class="cp">#define MIE_HTIE (1 &lt;&lt; IRQ_H_TIMER)</span>
+<span class="cp">#define MIE_MTIE (1 &lt;&lt; IRQ_M_TIMER)</span>
+<span class="cp">#define MIE_SEIE (1 &lt;&lt; IRQ_S_EXT)</span>
+<span class="cp">#define MIE_HEIE (1 &lt;&lt; IRQ_H_EXT)</span>
+<span class="cp">#define MIE_MEIE (1 &lt;&lt; IRQ_M_EXT)</span>
+<span class="cp">#define MIE_SCIE (1 &lt;&lt; IRQ_S_CLUSTER)</span>
+<span class="cp">#define MIE_MCIE (1 &lt;&lt; IRQ_M_CLUSTER)</span>
+
+<span class="cp">#define MCAUSE_INTERRUPT 0x80000000</span>
+
+<span class="cp">#define MIP_S_MASK (MIP_SSIP | MIP_STIP | MIP_SEIP)</span>
+<span class="cp">#define MIP_VS_MASK (MIP_VSSIP | MIP_VSTIP | MIP_VSEIP)</span>
+<span class="cp">#define MIP_HS_MASK (MIP_VS_MASK | MIP_SGEIP)</span>
+
+<span class="cp">#define MIDELEG_FORCED_MASK MIP_HS_MASK</span>
+
+<span class="cp">#define SIP_SSIP MIP_SSIP</span>
+<span class="cp">#define SIP_STIP MIP_STIP</span>
+
+<span class="cp">#define PRV_U 0</span>
+<span class="cp">#define PRV_S 1</span>
+<span class="cp">#define PRV_M 3</span>
+
+<span class="cp">#define PRV_HS (PRV_S + 1)</span>
+
+<span class="cp">#define SATP32_MODE 0x80000000</span>
+<span class="cp">#define SATP32_ASID 0x7FC00000</span>
+<span class="cp">#define SATP32_PPN 0x003FFFFF</span>
+<span class="cp">#define SATP64_MODE 0xF000000000000000</span>
+<span class="cp">#define SATP64_ASID 0x0FFFF00000000000</span>
+<span class="cp">#define SATP64_PPN 0x00000FFFFFFFFFFF</span>
+
+<span class="cp">#define SATP_MODE_OFF 0</span>
+<span class="cp">#define SATP_MODE_SV32 1</span>
+<span class="cp">#define SATP_MODE_SV39 8</span>
+<span class="cp">#define SATP_MODE_SV48 9</span>
+<span class="cp">#define SATP_MODE_SV57 10</span>
+<span class="cp">#define SATP_MODE_SV64 11</span>
+
+<span class="cp">#define HGATP32_MODE 0x80000000</span>
+<span class="cp">#define HGATP32_VMID 0x1FC00000</span>
+<span class="cp">#define HGATP32_PPN 0x003FFFFF</span>
+
+<span class="cp">#define HGATP64_MODE 0xF000000000000000</span>
+<span class="cp">#define HGATP64_VMID 0x03FFF00000000000</span>
+<span class="cp">#define HGATP64_PPN 0x00000FFFFFFFFFFF</span>
+
+<span class="cp">#define HGATP_MODE_OFF 0</span>
+<span class="cp">#define HGATP_MODE_SV32X4 1</span>
+<span class="cp">#define HGATP_MODE_SV39X4 8</span>
+<span class="cp">#define HGATP_MODE_SV48X4 9</span>
+
+<span class="cp">#define PMP_R 0x01</span>
+<span class="cp">#define PMP_W 0x02</span>
+<span class="cp">#define PMP_X 0x04</span>
+<span class="cp">#define PMP_A 0x18</span>
+<span class="cp">#define PMP_L 0x80</span>
+<span class="cp">#define PMP_SHIFT 2</span>
+
+<span class="cp">#define PMP_TOR 0x08</span>
+<span class="cp">#define PMP_NA4 0x10</span>
+<span class="cp">#define PMP_NAPOT 0x18</span>
+
+<span class="cp">#define IRQ_U_SOFT 0</span>
+<span class="cp">#define IRQ_S_SOFT 1</span>
+<span class="cp">#define IRQ_VS_SOFT 2</span>
+<span class="cp">#define IRQ_M_SOFT 3</span>
+<span class="cp">#define IRQ_U_TIMER 4</span>
+<span class="cp">#define IRQ_S_TIMER 5</span>
+<span class="cp">#define IRQ_VS_TIMER 6</span>
+<span class="cp">#define IRQ_M_TIMER 7</span>
+<span class="cp">#define IRQ_U_EXT 8</span>
+<span class="cp">#define IRQ_S_EXT 9</span>
+<span class="cp">#define IRQ_VS_EXT 10</span>
+<span class="cp">#define IRQ_M_EXT 11</span>
+<span class="cp">#define IRQ_S_GEXT 12</span>
+<span class="cp">#define IRQ_COP 12</span>
+<span class="cp">#define IRQ_HOST 13</span>
+<span class="cp">#define IRQ_M_CLUSTER 19</span>
+<span class="cp">#define IRQ_S_CLUSTER 17</span>
+
+<span class="cm">/* page table entry (PTE) fields */</span>
+<span class="cp">#define PTE_V 0x001                 </span><span class="cm">/* Valid */</span>
+<span class="cp">#define PTE_R 0x002                 </span><span class="cm">/* Read */</span>
+<span class="cp">#define PTE_W 0x004                 </span><span class="cm">/* Write */</span>
+<span class="cp">#define PTE_X 0x008                 </span><span class="cm">/* Execute */</span>
+<span class="cp">#define PTE_U 0x010                 </span><span class="cm">/* User */</span>
+<span class="cp">#define PTE_G 0x020                 </span><span class="cm">/* Global */</span>
+<span class="cp">#define PTE_A 0x040                 </span><span class="cm">/* Accessed */</span>
+<span class="cp">#define PTE_D 0x080                 </span><span class="cm">/* Dirty */</span>
+<span class="cp">#define PTE_SOFT 0x300              </span><span class="cm">/* Reserved for Software */</span>
+<span class="cp">#define PTE_RSVD 0x1FC0000000000000 </span><span class="cm">/* Reserved for future standard use */</span>
+<span class="cp">#define PTE_PBMT 0x6000000000000000 </span><span class="cm">/* Svpbmt: Page-based memory types */</span>
+<span class="cp">#define PTE_N 0x8000000000000000    </span><span class="cm">/* Svnapot: NAPOT translation contiguity */</span>
+<span class="cp">#define PTE_ATTR 0xFFC0000000000000 </span><span class="cm">/* All attributes and reserved bits */</span>
+
+<span class="cp">#define PTE_PPN_SHIFT 10</span>
+
+<span class="cp">#define PTE_TABLE(PTE) (((PTE) &amp; (PTE_V | PTE_R | PTE_W | PTE_X)) == PTE_V)</span>
+
+<span class="cp">#ifdef __riscv</span>
+
+<span class="cp">#if __riscv_xlen == 64</span>
+<span class="cp">#define MSTATUS_SD MSTATUS64_SD</span>
+<span class="cp">#define SSTATUS_SD SSTATUS64_SD</span>
+<span class="cp">#define RISCV_PGLEVEL_BITS 9</span>
+<span class="cp">#define SATP_MODE SATP64_MODE</span>
+<span class="cp">#else</span>
+<span class="cp">#define MSTATUS_SD MSTATUS32_SD</span>
+<span class="cp">#define SSTATUS_SD SSTATUS32_SD</span>
+<span class="cp">#define RISCV_PGLEVEL_BITS 10</span>
+<span class="cp">#define SATP_MODE SATP32_MODE</span>
+<span class="cp">#endif</span>
+<span class="cp">#define RISCV_PGSHIFT 12</span>
+<span class="cp">#define RISCV_PGSIZE (1 &lt;&lt; RISCV_PGSHIFT)</span>
+
+<span class="cp">#ifndef __ASSEMBLER__</span>
+
+<span class="cp">#ifdef __GNUC__</span>
+
+<span class="cp">#define read_csr(reg)                                 \</span>
+<span class="cp">    ({                                                \</span>
+<span class="cp">        unsigned long __tmp;                          \</span>
+<span class="cp">        asm volatile(&quot;csrr %0, &quot; #reg : &quot;=r&quot;(__tmp)); \</span>
+<span class="cp">        __tmp;                                        \</span>
+<span class="cp">    })</span>
+
+<span class="cp">#define write_csr(reg, val) ({ asm volatile(&quot;csrw &quot; #reg &quot;, %0&quot; ::&quot;rK&quot;(val)); })</span>
+
+<span class="cp">#define swap_csr(reg, val)                                                \</span>
+<span class="cp">    ({                                                                    \</span>
+<span class="cp">        unsigned long __tmp;                                              \</span>
+<span class="cp">        asm volatile(&quot;csrrw %0, &quot; #reg &quot;, %1&quot; : &quot;=r&quot;(__tmp) : &quot;rK&quot;(val)); \</span>
+<span class="cp">        __tmp;                                                            \</span>
+<span class="cp">    })</span>
+
+<span class="cp">#define set_csr(reg, bit)                                                 \</span>
+<span class="cp">    ({                                                                    \</span>
+<span class="cp">        unsigned long __tmp;                                              \</span>
+<span class="cp">        asm volatile(&quot;csrrs %0, &quot; #reg &quot;, %1&quot; : &quot;=r&quot;(__tmp) : &quot;rK&quot;(bit)); \</span>
+<span class="cp">        __tmp;                                                            \</span>
+<span class="cp">    })</span>
+
+<span class="cp">#define clear_csr(reg, bit)                                               \</span>
+<span class="cp">    ({                                                                    \</span>
+<span class="cp">        unsigned long __tmp;                                              \</span>
+<span class="cp">        asm volatile(&quot;csrrc %0, &quot; #reg &quot;, %1&quot; : &quot;=r&quot;(__tmp) : &quot;rK&quot;(bit)); \</span>
+<span class="cp">        __tmp;                                                            \</span>
+<span class="cp">    })</span>
+
+<span class="cp">#define rdtime() read_csr(time)</span>
+<span class="cp">#define rdcycle() read_csr(cycle)</span>
+<span class="cp">#define rdinstret() read_csr(instret)</span>
+
+<span class="cp">#endif  </span><span class="c1">// __GNUC__</span>
+
+<span class="cp">#endif  </span><span class="c1">// __ASSEMBLER__</span>
+
+<span class="cp">#endif  </span><span class="c1">// __riscv</span>
+
+<span class="cp">#ifdef __cplusplus</span>
+<span class="p">}</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#endif  </span><span class="c1">// RISCV_CSR_ENCODING_H</span>
+</code></pre></div>
+<hr />
+<p>Updated on 2023-06-19 at 09:43:56 +0000</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      
+    
+  </body>
+</html>

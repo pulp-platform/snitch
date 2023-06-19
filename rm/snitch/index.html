@@ -1,0 +1,1507 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../../schema-doc/occamy/">
+      
+      
+        <link rel="next" href="../snitch_cluster/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+    
+    
+      
+        <title>Snitch - Snitch</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.26e3688c.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#snitch" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Snitch" class="md-header__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Snitch
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Snitch
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Snitch" class="md-nav__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Snitch
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          User Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          User Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/getting_started/" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/benchmarking/" class="md-nav__link">
+        Benchmarking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/setup-iis/" class="md-nav__link">
+        Tooling Setup at IIS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/example_trace.html" class="md-nav__link">
+        Trace Example
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/docker/" class="md-nav__link">
+        Docker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/directory_structure/" class="md-nav__link">
+        Directory Structure
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/documentation/" class="md-nav__link">
+        Documentation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Systems
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Systems
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+          Snitch Cluster
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Cluster
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/snitch_cluster/" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../schema-doc/snitch_cluster/" class="md-nav__link">
+        Schema
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          Occamy
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Occamy
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/occamy.md" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2_2" id="__nav_3_2_2_label" tabindex="0">
+          Architecture
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Architecture
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/1_overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/2_addrmap/" class="md-nav__link">
+        Address Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/3_system_components/" class="md-nav__link">
+        System Components
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/4_clocking/" class="md-nav__link">
+        Clocking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_interrupts_and_synchronization.md" class="md-nav__link">
+        Interrupts and Synchronization
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../schema-doc/occamy/" class="md-nav__link">
+        Schema
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          Reference Manual
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Reference Manual
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Snitch
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Snitch
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-integration" class="md-nav__link">
+    Core Integration
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-list" class="md-nav__link">
+    File List
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ports" class="md-nav__link">
+    Ports
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instantiation-template" class="md-nav__link">
+    Instantiation Template
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testbench" class="md-nav__link">
+    Testbench
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snitch_cluster/" class="md-nav__link">
+        Snitch Cluster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reqrsp_interface/" class="md-nav__link">
+        Reqrsp Interface
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_instructions/" class="md-nav__link">
+        Custom Instructions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          Snitch Runtime
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Runtime
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Pages/" class="md-nav__link">
+        Pages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Files/" class="md-nav__link">
+        Files
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Classes/" class="md-nav__link">
+        Classes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Examples/" class="md-nav__link">
+        Examples
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Modules/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Namespaces/" class="md-nav__link">
+        Namespaces
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publications/" class="md-nav__link">
+        Publications
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-integration" class="md-nav__link">
+    Core Integration
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-list" class="md-nav__link">
+    File List
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ports" class="md-nav__link">
+    Ports
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instantiation-template" class="md-nav__link">
+    Instantiation Template
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testbench" class="md-nav__link">
+    Testbench
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="snitch">Snitch</h1>
+<p>Snitch is a single-stage, single-issue, in-order RISC-V core (RV32I or RV32E)
+tuned for simplicity and minimal area footprint. Furthermore it is highly
+configurable and can be used in a plethora of different applications.</p>
+<p>The core has an optional accelerator interface which can be used to control and
+off-load RISC-V instructions. The load/store interface is a dual-channel
+interface with a separately handshaked request and response channel. More
+information can be found <a href="../../rm/reqrsp_interface">here</a>.</p>
+<p>This folder contains the main Snitch core, incl. L0 translation lookaside buffer
+(TLB), register file and load store unit (LSU).</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The virtual memory support in Snitch is still in a very early, untested stage
+so do not expect it to work yet.</p>
+</div>
+<h2 id="core-integration">Core Integration</h2>
+<p>This section covers integration aspects of the core.</p>
+<h3 id="file-list">File List</h3>
+<p>We use <code>Bender</code> to generate the file lists for the modules. To get stated with
+the Snitch core and a file list you can:</p>
+<ul>
+<li>In <code>hw/ip/snitch</code>, call <code>bender sources</code> (or <code>bender script flist</code> for a flat
+  file list).</li>
+<li>If you also want to use bender for your project you can create a minimal
+  bender manifest with a path dependency to the Snitch core. For an example
+  please have a look at <code>hw/system/snitch_cluster/Bender.yml</code>.</li>
+</ul>
+<h3 id="parameters">Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type/Range</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AddrWidth</code></td>
+<td>int</td>
+<td>48</td>
+<td>Address width of the system.</td>
+</tr>
+<tr>
+<td><code>DataWidth</code></td>
+<td>int</td>
+<td>64</td>
+<td>Data width of the data bus. Can either be <code>32</code> or <code>64</code>.</td>
+</tr>
+<tr>
+<td><code>acc_req_t</code></td>
+<td>type</td>
+<td>logic</td>
+<td>Type of accelerator request port. See <code>snitch_pkg.sv</code> for an example. <strong>Must be set to a meaningful type.</strong></td>
+</tr>
+<tr>
+<td><code>acc_resp_t</code></td>
+<td>type</td>
+<td>logic</td>
+<td>Type of accelerator response port. See <code>snitch_pkg.sv</code> for an example. <strong>Must be set to a meaningful type.</strong></td>
+</tr>
+<tr>
+<td><code>dreq_t</code></td>
+<td>type</td>
+<td>logic</td>
+<td>Type of data request port. See <code>hw/ip/reqrsp_intf</code> for examples and typedef helper functions. <strong>Must be set to a meaningful type.</strong></td>
+</tr>
+<tr>
+<td><code>drsp_t</code></td>
+<td>type</td>
+<td>logic</td>
+<td>Type of data response port. See <code>hw/ip/reqrsp_intf</code> for examples and typedef helper functions. <strong>Must be set to a meaningful type.</strong></td>
+</tr>
+<tr>
+<td><code>pa_t</code></td>
+<td>type</td>
+<td>logic</td>
+<td>Type of physical address. See <code>hw/ip/snitch_vm</code> for examples and typedef helper functions. <strong>Must be set to a meaningful type.</strong></td>
+</tr>
+<tr>
+<td><code>l0_pte_t</code></td>
+<td>type</td>
+<td>logic</td>
+<td>Type of L0 page table entry. See <code>hw/ip/snitch_vm</code> for examples and typedef helper functions. <strong>Must be set to a meaningful type.</strong></td>
+</tr>
+<tr>
+<td><code>BootAddr</code></td>
+<td>int</td>
+<td>0x1000</td>
+<td>Address where the core starts to fetch for instruction after reset.</td>
+</tr>
+<tr>
+<td><code>SnitchPMACfg</code></td>
+<td>struct</td>
+<td>'0</td>
+<td>Physical memory attribute configuration.</td>
+</tr>
+<tr>
+<td><code>NumIntOutstandingLoads</code></td>
+<td>int</td>
+<td>0</td>
+<td>Number of outstanding loads. This determines the size of the load queue.</td>
+</tr>
+<tr>
+<td><code>NumIntOutstandingMem</code></td>
+<td>int</td>
+<td>0</td>
+<td>Number of outstanding memory operations (loads <em>and</em> stores).</td>
+</tr>
+<tr>
+<td><code>NumDTLBEntries</code></td>
+<td>int</td>
+<td>0</td>
+<td>Number of TLB entries for the data TLB.</td>
+</tr>
+<tr>
+<td><code>NumITLBEntries</code></td>
+<td>int</td>
+<td>0</td>
+<td>Number of TLB entries for the instruction TLB.</td>
+</tr>
+<tr>
+<td><code>RVE</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable embedded ABI (reduced register ABI).</td>
+</tr>
+<tr>
+<td><code>FP_EN</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable floating point support (in general).</td>
+</tr>
+<tr>
+<td><code>Xdma</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable custom DMA extension (changes the decoder of the core).</td>
+</tr>
+<tr>
+<td><code>Xssr</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable custom SSR extension (changes the decoder of the core).</td>
+</tr>
+<tr>
+<td><code>RVF</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable single-precision floating point extension (needs <code>FP_EN</code>).</td>
+</tr>
+<tr>
+<td><code>RVD</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable double-precision floating point extension (needs <code>FP_EN</code>).</td>
+</tr>
+<tr>
+<td><code>XF16</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable half-precision floating point extension (needs <code>FP_EN</code>).</td>
+</tr>
+<tr>
+<td><code>XF16ALT</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable brain-float extension (needs <code>FP_EN</code>).</td>
+</tr>
+<tr>
+<td><code>XF8</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable eight byte floating-point extensions (needs <code>FP_EN</code>).</td>
+</tr>
+<tr>
+<td><code>XF8ALT</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable alternate eight byte floating-point extensions (needs <code>FP_EN</code>).</td>
+</tr>
+<tr>
+<td><code>XFVEC</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable vectorized extension (needs <code>FP_EN</code>).</td>
+</tr>
+<tr>
+<td><code>XFDOTP</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Enable DOTP operation group (needs <code>FP_EN</code>).</td>
+</tr>
+<tr>
+<td><code>FLEN</code></td>
+<td>bit</td>
+<td>0</td>
+<td>Required floating-point length (depends on enabled extension). Determined by the maximum floating-point length (<code>64</code> for double, <code>32</code> for single, etc.).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ports">Ports</h3>
+<table>
+<thead>
+<tr>
+<th>Signals</th>
+<th>Width</th>
+<th>Dir</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>clk_i</td>
+<td><code>1</code></td>
+<td>In</td>
+<td>Clock.</td>
+</tr>
+<tr>
+<td>rst_i</td>
+<td><code>1</code></td>
+<td>In</td>
+<td>Reset, asynchronous, active-high.</td>
+</tr>
+<tr>
+<td>hart_id_i</td>
+<td><code>32</code></td>
+<td>In</td>
+<td>Id present in <code>mhartid</code>.</td>
+</tr>
+<tr>
+<td>irq_i</td>
+<td><code>3</code></td>
+<td>In</td>
+<td>M-Mode timer, software, and external interrupt.</td>
+</tr>
+<tr>
+<td>flush_i_valid_o</td>
+<td><code>1</code></td>
+<td>In</td>
+<td>Flush the instruction cache (<code>fence.i</code>). Once high wait for <code>flush_i_ready_i</code> is asserted. <em>AXI-style handshake.</em></td>
+</tr>
+<tr>
+<td>flush_i_ready_i</td>
+<td><code>1</code></td>
+<td>In</td>
+<td>Instruction cache is ready.</td>
+</tr>
+<tr>
+<td>inst_addr_o</td>
+<td><code>AddrWidth</code></td>
+<td>Out</td>
+<td>Instruction address.</td>
+</tr>
+<tr>
+<td>inst_cacheable_o</td>
+<td><code>1</code></td>
+<td>Out</td>
+<td>If asserted high, the instruction should be cached.</td>
+</tr>
+<tr>
+<td>inst_data_i</td>
+<td><code>32</code></td>
+<td>In</td>
+<td>32-bit RISC-V instruction word.</td>
+</tr>
+<tr>
+<td>inst_valid_o</td>
+<td><code>1</code></td>
+<td>Out</td>
+<td>Instruction request is valid.</td>
+</tr>
+<tr>
+<td>inst_ready_i</td>
+<td><code>1</code></td>
+<td>In</td>
+<td>Instruction word has been consumed.</td>
+</tr>
+<tr>
+<td>acc_qreq_o</td>
+<td><code>bits(acc_req_t)</code></td>
+<td>Out</td>
+<td>Accelerator off-load information.</td>
+</tr>
+<tr>
+<td>acc_qvalid_o</td>
+<td><code>1</code></td>
+<td>Out</td>
+<td>Accelerator off-load request is valid. <em>AXI-style handshake.</em></td>
+</tr>
+<tr>
+<td>acc_qready_i</td>
+<td><code>1</code></td>
+<td>In</td>
+<td>Request has been accepted.</td>
+</tr>
+<tr>
+<td>acc_prsp_i</td>
+<td><code>bits(acc_resp_t)</code></td>
+<td>In</td>
+<td>Accelerator response information.</td>
+</tr>
+<tr>
+<td>acc_pvalid_i</td>
+<td><code>1</code></td>
+<td>In</td>
+<td>Accelerator response is valid. <em>AXI-style handshake.</em></td>
+</tr>
+<tr>
+<td>acc_pready_o</td>
+<td><code>1</code></td>
+<td>Out</td>
+<td>Accelerator response has been accepted by the core.</td>
+</tr>
+<tr>
+<td>data_req_o</td>
+<td><code>bits(dreq_t)</code></td>
+<td>Out</td>
+<td>Load/store request. See <a href="../../rm/reqrsp_interface">reqrsp interface</a>.</td>
+</tr>
+<tr>
+<td>data_rsp_i</td>
+<td><code>bits(drsp_t)</code></td>
+<td>In</td>
+<td>Load/store response. See <a href="../../rm/reqrsp_interface">reqrsp interface</a>.</td>
+</tr>
+<tr>
+<td>wake_up_sync_i</td>
+<td><code>1</code></td>
+<td>In</td>
+<td>Deprecated. Tie-low.</td>
+</tr>
+<tr>
+<td>ptw_valid_o</td>
+<td><code>2</code></td>
+<td>Out</td>
+<td>Instruction or data TLB missed. Page table walking request.</td>
+</tr>
+<tr>
+<td>ptw_ready_i</td>
+<td><code>2</code></td>
+<td>In</td>
+<td>Instruction or data miss has been accepted.</td>
+</tr>
+<tr>
+<td>ptw_va_o</td>
+<td><code>2*bits(va_t)</code></td>
+<td>Out</td>
+<td>Instruction or data virtual address requested to be translated.</td>
+</tr>
+<tr>
+<td>ptw_ppn_o,</td>
+<td><code>2*bits(pa_t)</code></td>
+<td>Out</td>
+<td>Instruction or data physical base address. Forwarded from <code>satp</code> register.</td>
+</tr>
+<tr>
+<td>ptw_pte_i,</td>
+<td><code>2*bits(l0_pte_t)</code></td>
+<td>In</td>
+<td>Instruction or data PTE entry in (translated virtual address).</td>
+</tr>
+<tr>
+<td>ptw_is_4mega_i,</td>
+<td><code>2</code></td>
+<td>In</td>
+<td>Instruction or data PTE is a 4 mega page.</td>
+</tr>
+<tr>
+<td>fpu_rnd_mode_o</td>
+<td><code>bits(roundmode_e)</code></td>
+<td>Out</td>
+<td>Side-band signal forwarding the rounding mode from <code>fcsr</code>.</td>
+</tr>
+<tr>
+<td>fpu_status_i</td>
+<td><code>bits(status_t)</code></td>
+<td>In</td>
+<td>Exception status of FPU (can be tied to <code>0</code> if no FPU is used).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="instantiation-template">Instantiation Template</h3>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="n">snitch</span><span class="w"> </span><span class="p">#(</span>
+<span class="w">    </span><span class="p">.</span><span class="n">AddrWidth</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">DataWidth</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">acc_req_t</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">acc_resp_t</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">dreq_t</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">drsp_t</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">pa_t</span><span class="w"> </span><span class="p">(</span><span class="n">pa_t</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">l0_pte_t</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">BootAddr</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">SnitchPMACfg</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">NumIntOutstandingLoads</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">NumIntOutstandingMem</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">NumDTLBEntries</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">NumITLBEntries</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">RVE</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">FP_EN</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">Xdma</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">Xssr</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">RVF</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">RVD</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">XF16</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">XF16ALT</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">XF8</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">XF8ALT</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">XFVEC</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">XFDOTP</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">FLEN</span><span class="w"> </span><span class="p">()</span>
+<span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">i_snitch</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">rst_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">hart_id_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">irq_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">flush_i_valid_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">flush_i_ready_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">inst_addr_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">inst_cacheable_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">inst_data_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">inst_valid_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">inst_ready_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">acc_qreq_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">acc_qvalid_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">acc_qready_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">acc_prsp_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">acc_pvalid_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">acc_pready_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">data_req_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">data_rsp_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">ptw_valid_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">ptw_ready_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">ptw_va_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">ptw_ppn_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">ptw_pte_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">ptw_is_4mega_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">wake_up_sync_i</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">fpu_rnd_mode_o</span><span class="w"> </span><span class="p">(),</span>
+<span class="w">    </span><span class="p">.</span><span class="n">fpu_status_i</span><span class="w"> </span><span class="p">()</span>
+<span class="w">  </span><span class="p">);</span>
+</code></pre></div>
+<h2 id="testbench">Testbench</h2>
+<ul>
+<li>The L0 TLBs: Random requests are generated. The golden model saves all
+  requests, if a new request comes in it is either sourced from memory (if it
+  exists) or re-generated based on constraint randomization. Response from the
+  DUT are compared to the golden model.</li>
+</ul>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      
+    
+  </body>
+</html>

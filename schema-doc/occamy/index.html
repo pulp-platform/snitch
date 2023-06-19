@@ -1,0 +1,1629 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../../ug/occamy_system/4_clocking/">
+      
+      
+        <link rel="next" href="../../rm/snitch/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+    
+    
+      
+        <title>Schema - Snitch</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.26e3688c.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#occamy-system-schema-schema" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Snitch" class="md-header__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Snitch
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Schema
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Snitch" class="md-nav__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Snitch
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          User Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          User Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/getting_started/" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/benchmarking/" class="md-nav__link">
+        Benchmarking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/setup-iis/" class="md-nav__link">
+        Tooling Setup at IIS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/example_trace.html" class="md-nav__link">
+        Trace Example
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/docker/" class="md-nav__link">
+        Docker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/directory_structure/" class="md-nav__link">
+        Directory Structure
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/documentation/" class="md-nav__link">
+        Documentation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Systems
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Systems
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+          Snitch Cluster
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Cluster
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/snitch_cluster/" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snitch_cluster/" class="md-nav__link">
+        Schema
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          Occamy
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Occamy
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/occamy.md" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2_2" id="__nav_3_2_2_label" tabindex="0">
+          Architecture
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Architecture
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/1_overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/2_addrmap/" class="md-nav__link">
+        Address Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/3_system_components/" class="md-nav__link">
+        System Components
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ug/occamy_system/4_clocking/" class="md-nav__link">
+        Clocking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_interrupts_and_synchronization.md" class="md-nav__link">
+        Interrupts and Synchronization
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Schema
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Schema
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#occamy-system-schema-type" class="md-nav__link">
+    Occamy System Schema Type
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          Reference Manual
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Reference Manual
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rm/snitch/" class="md-nav__link">
+        Snitch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rm/snitch_cluster/" class="md-nav__link">
+        Snitch Cluster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rm/reqrsp_interface/" class="md-nav__link">
+        Reqrsp Interface
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rm/custom_instructions/" class="md-nav__link">
+        Custom Instructions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          Snitch Runtime
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Runtime
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Pages/" class="md-nav__link">
+        Pages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Files/" class="md-nav__link">
+        Files
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Classes/" class="md-nav__link">
+        Classes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Examples/" class="md-nav__link">
+        Examples
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Modules/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Namespaces/" class="md-nav__link">
+        Namespaces
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publications/" class="md-nav__link">
+        Publications
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#occamy-system-schema-type" class="md-nav__link">
+    Occamy System Schema Type
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="occamy-system-schema-schema">Occamy System Schema Schema</h1>
+<div class="highlight"><pre><span></span><code>http://pulp-platform.org/snitch/occamy.schema.json
+</code></pre></div>
+<p>Description of an Occamy-based system.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Abstract</th>
+<th align="left">Extensible</th>
+<th align="left">Status</th>
+<th align="left">Identifiable</th>
+<th align="left">Custom Properties</th>
+<th align="left">Additional Properties</th>
+<th align="left">Access Restrictions</th>
+<th align="left">Defined In</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Can be instantiated</td>
+<td align="left">No</td>
+<td align="left">Unknown status</td>
+<td align="left">No</td>
+<td align="left">Forbidden</td>
+<td align="left">Allowed</td>
+<td align="left">none</td>
+<td align="left"><a href="../occamy.schema.json" title="open original schema">occamy.schema.json</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="occamy-system-schema-type">Occamy System Schema Type</h2>
+<p><code>object</code> (<a href="./">Occamy System Schema</a>)</p>
+<h1 id="occamy-system-schema-properties">Occamy System Schema Properties</h1>
+<table>
+<thead>
+<tr>
+<th align="left">Property</th>
+<th align="left">Type</th>
+<th align="left">Required</th>
+<th align="left">Nullable</th>
+<th align="left">Defined by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><a href="#cluster">cluster</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Required</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-snitch-cluster-schema/" title="http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#quadrant_pre_xbar">quadrant_pre_xbar</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-axi-crossbar-schema.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_pre_xbar">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#pre_xbar_slv_id_width_no_rocache">pre_xbar_slv_id_width_no_rocache</a></td>
+<td align="left"><code>integer</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-pre_xbar_slv_id_width_no_rocache/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/pre_xbar_slv_id_width_no_rocache">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#wide_xbar">wide_xbar</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-axi-crossbar-schema-1.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/wide_xbar">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#quadrant_inter_xbar">quadrant_inter_xbar</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-axi-crossbar-schema-2.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_inter_xbar">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#hbm_xbar">hbm_xbar</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-axi-crossbar-schema-3.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/hbm_xbar">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#narrow_xbar">narrow_xbar</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-axi-crossbar-schema-4.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#narrow_xbar_slv_id_width">narrow_xbar_slv_id_width</a></td>
+<td align="left"><code>integer</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-narrow_xbar_slv_id_width/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#nr_s1_quadrant">nr_s1_quadrant</a></td>
+<td align="left"><code>integer</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-number-of-s1-quadrants/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#narrow_tlb_cfg">narrow_tlb_cfg</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-axi-tlb-schema.md" title="http://pulp-platform.org/snitch/axi_tlb.schema.json#/properties/narrow_tlb_cfg">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#wide_tlb_cfg">wide_tlb_cfg</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-axi-tlb-schema-1.md" title="http://pulp-platform.org/snitch/axi_tlb.schema.json#/properties/wide_tlb_cfg">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#cuts">cuts</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-number-of-cuts-on-the-axi-bus/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#txns">txns</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-number-of-outstanding-transactions-on-the-axi-bus/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/txns">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#is_remote_quadrant">is_remote_quadrant</a></td>
+<td align="left"><code>boolean</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-is_remote_quadrant/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/is_remote_quadrant">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#remote_quadrants">remote_quadrants</a></td>
+<td align="left"><code>array</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-remote-quadrants/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/remote_quadrants">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#s1_quadrant">s1_quadrant</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-s1-quadrant-properties/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#spm_narrow">spm_narrow</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-address-range-schema.md" title="http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm_narrow">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#spm_wide">spm_wide</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-address-range-schema-1.md" title="http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm_wide">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#wide_zero_mem">wide_zero_mem</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-address-range-schema-2.md" title="http://pulp-platform.org/snitch/address_range.schema.json#/properties/wide_zero_mem">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#pcie">pcie</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-configuration-of-external-pcie-port/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#hbi">hbi</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="occamy-properties-address-range-schema-3.md" title="http://pulp-platform.org/snitch/address_range.schema.json#/properties/hbi">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#hbm">hbm</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-configuration-of-external-hbm-interface/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm">Occamy System Schema</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#peripherals">peripherals</a></td>
+<td align="left"><code>object</code></td>
+<td align="left">Optional</td>
+<td align="left">cannot be null</td>
+<td align="left"><a href="../occamy-properties-peripherals-schema/" title="http://pulp-platform.org/snitch/peripherals.schema.json#/properties/peripherals">Occamy System Schema</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="cluster">cluster</h2>
+<p>Base description of a Snitch cluster and its internal structure and configuration.</p>
+<p><code>cluster</code></p>
+<ul>
+<li>
+<p>is required</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="../occamy-properties-snitch-cluster-schema/">Snitch Cluster Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-snitch-cluster-schema/" title="http://pulp-platform.org/snitch/snitch_cluster.schema.json#/properties/cluster">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="cluster-type">cluster Type</h3>
+<p><code>object</code> (<a href="../occamy-properties-snitch-cluster-schema/">Snitch Cluster Schema</a>)</p>
+<h2 id="quadrant_pre_xbar">quadrant_pre_xbar</h2>
+<p>AXI Crossbar Properties</p>
+<p><code>quadrant_pre_xbar</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-axi-crossbar-schema-4.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_pre_xbar">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="quadrant_pre_xbar-type">quadrant_pre_xbar Type</h3>
+<p><code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+<h2 id="pre_xbar_slv_id_width_no_rocache">pre_xbar_slv_id_width_no_rocache</h2>
+<p>ID width of quadrant pre-crossbar slave ports assuming no read-only cache.</p>
+<p><code>pre_xbar_slv_id_width_no_rocache</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>integer</code></p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-pre_xbar_slv_id_width_no_rocache/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/pre_xbar_slv_id_width_no_rocache">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="pre_xbar_slv_id_width_no_rocache-type">pre_xbar_slv_id_width_no_rocache Type</h3>
+<p><code>integer</code></p>
+<h3 id="pre_xbar_slv_id_width_no_rocache-default-value">pre_xbar_slv_id_width_no_rocache Default Value</h3>
+<p>The default value is:</p>
+<div class="highlight"><pre><span></span><code><span class="mi">3</span>
+</code></pre></div>
+<h2 id="wide_xbar">wide_xbar</h2>
+<p>AXI Crossbar Properties</p>
+<p><code>wide_xbar</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-axi-crossbar-schema-4.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/wide_xbar">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="wide_xbar-type">wide_xbar Type</h3>
+<p><code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+<h2 id="quadrant_inter_xbar">quadrant_inter_xbar</h2>
+<p>AXI Crossbar Properties</p>
+<p><code>quadrant_inter_xbar</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-axi-crossbar-schema-4.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/quadrant_inter_xbar">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="quadrant_inter_xbar-type">quadrant_inter_xbar Type</h3>
+<p><code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+<h2 id="hbm_xbar">hbm_xbar</h2>
+<p>AXI Crossbar Properties</p>
+<p><code>hbm_xbar</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-axi-crossbar-schema-4.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/hbm_xbar">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="hbm_xbar-type">hbm_xbar Type</h3>
+<p><code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+<h2 id="narrow_xbar">narrow_xbar</h2>
+<p>AXI Crossbar Properties</p>
+<p><code>narrow_xbar</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-axi-crossbar-schema-4.md" title="http://pulp-platform.org/snitch/axi_xbar.schema.json#/properties/narrow_xbar">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="narrow_xbar-type">narrow_xbar Type</h3>
+<p><code>object</code> (<a href="occamy-properties-axi-crossbar-schema-4.md">AXI Crossbar Schema</a>)</p>
+<h2 id="narrow_xbar_slv_id_width">narrow_xbar_slv_id_width</h2>
+<p>ID width of narrow crossbar slave ports.</p>
+<p><code>narrow_xbar_slv_id_width</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>integer</code></p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-narrow_xbar_slv_id_width/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/narrow_xbar_slv_id_width">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="narrow_xbar_slv_id_width-type">narrow_xbar_slv_id_width Type</h3>
+<p><code>integer</code></p>
+<h3 id="narrow_xbar_slv_id_width-default-value">narrow_xbar_slv_id_width Default Value</h3>
+<p>The default value is:</p>
+<div class="highlight"><pre><span></span><code><span class="mi">4</span>
+</code></pre></div>
+<h2 id="nr_s1_quadrant">nr_s1_quadrant</h2>
+<p><code>nr_s1_quadrant</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>integer</code> (<a href="../occamy-properties-number-of-s1-quadrants/">Number of S1 Quadrants</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-number-of-s1-quadrants/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/nr_s1_quadrant">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="nr_s1_quadrant-type">nr_s1_quadrant Type</h3>
+<p><code>integer</code> (<a href="../occamy-properties-number-of-s1-quadrants/">Number of S1 Quadrants</a>)</p>
+<h3 id="nr_s1_quadrant-default-value">nr_s1_quadrant Default Value</h3>
+<p>The default value is:</p>
+<div class="highlight"><pre><span></span><code><span class="mi">8</span>
+</code></pre></div>
+<h2 id="narrow_tlb_cfg">narrow_tlb_cfg</h2>
+<p>AXI TLB Properties</p>
+<p><code>narrow_tlb_cfg</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-axi-tlb-schema-1.md">AXI TLB Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-axi-tlb-schema-1.md" title="http://pulp-platform.org/snitch/axi_tlb.schema.json#/properties/narrow_tlb_cfg">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="narrow_tlb_cfg-type">narrow_tlb_cfg Type</h3>
+<p><code>object</code> (<a href="occamy-properties-axi-tlb-schema-1.md">AXI TLB Schema</a>)</p>
+<h2 id="wide_tlb_cfg">wide_tlb_cfg</h2>
+<p>AXI TLB Properties</p>
+<p><code>wide_tlb_cfg</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-axi-tlb-schema-1.md">AXI TLB Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-axi-tlb-schema-1.md" title="http://pulp-platform.org/snitch/axi_tlb.schema.json#/properties/wide_tlb_cfg">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="wide_tlb_cfg-type">wide_tlb_cfg Type</h3>
+<p><code>object</code> (<a href="occamy-properties-axi-tlb-schema-1.md">AXI TLB Schema</a>)</p>
+<h2 id="cuts">cuts</h2>
+<p><code>cuts</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="../occamy-properties-number-of-cuts-on-the-axi-bus/">Number of cuts on the AXI bus</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-number-of-cuts-on-the-axi-bus/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/cuts">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="cuts-type">cuts Type</h3>
+<p><code>object</code> (<a href="../occamy-properties-number-of-cuts-on-the-axi-bus/">Number of cuts on the AXI bus</a>)</p>
+<h2 id="txns">txns</h2>
+<p><code>txns</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="../occamy-properties-number-of-outstanding-transactions-on-the-axi-bus/">Number of outstanding transactions on the AXI bus</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-number-of-outstanding-transactions-on-the-axi-bus/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/txns">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="txns-type">txns Type</h3>
+<p><code>object</code> (<a href="../occamy-properties-number-of-outstanding-transactions-on-the-axi-bus/">Number of outstanding transactions on the AXI bus</a>)</p>
+<h2 id="is_remote_quadrant">is_remote_quadrant</h2>
+<p>Set if this is a remote quadrant. Only quadrant ant remote interconnect is generated</p>
+<p><code>is_remote_quadrant</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>boolean</code></p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-is_remote_quadrant/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/is_remote_quadrant">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="is_remote_quadrant-type">is_remote_quadrant Type</h3>
+<p><code>boolean</code></p>
+<h2 id="remote_quadrants">remote_quadrants</h2>
+<p>List of attached remote quadrants</p>
+<p><code>remote_quadrants</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object[]</code> (<a href="../occamy-properties-remote-quadrants-remote-quadrant-description/">Remote Quadrant Description</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-remote-quadrants/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/remote_quadrants">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="remote_quadrants-type">remote_quadrants Type</h3>
+<p><code>object[]</code> (<a href="../occamy-properties-remote-quadrants-remote-quadrant-description/">Remote Quadrant Description</a>)</p>
+<h3 id="remote_quadrants-constraints">remote_quadrants Constraints</h3>
+<p><strong>minimum number of items</strong>: the minimum number of items for this array is: <code>0</code></p>
+<h2 id="s1_quadrant">s1_quadrant</h2>
+<p><code>s1_quadrant</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="../occamy-properties-s1-quadrant-properties/">S1 Quadrant Properties</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-s1-quadrant-properties/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/s1_quadrant">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="s1_quadrant-type">s1_quadrant Type</h3>
+<p><code>object</code> (<a href="../occamy-properties-s1-quadrant-properties/">S1 Quadrant Properties</a>)</p>
+<h2 id="spm_narrow">spm_narrow</h2>
+<p>Description of a generic address range</p>
+<p><code>spm_narrow</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-address-range-schema-3.md">Address Range Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-address-range-schema-3.md" title="http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm_narrow">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="spm_narrow-type">spm_narrow Type</h3>
+<p><code>object</code> (<a href="occamy-properties-address-range-schema-3.md">Address Range Schema</a>)</p>
+<h2 id="spm_wide">spm_wide</h2>
+<p>Description of a generic address range</p>
+<p><code>spm_wide</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-address-range-schema-3.md">Address Range Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-address-range-schema-3.md" title="http://pulp-platform.org/snitch/address_range.schema.json#/properties/spm_wide">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="spm_wide-type">spm_wide Type</h3>
+<p><code>object</code> (<a href="occamy-properties-address-range-schema-3.md">Address Range Schema</a>)</p>
+<h2 id="wide_zero_mem">wide_zero_mem</h2>
+<p>Description of a generic address range</p>
+<p><code>wide_zero_mem</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-address-range-schema-3.md">Address Range Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-address-range-schema-3.md" title="http://pulp-platform.org/snitch/address_range.schema.json#/properties/wide_zero_mem">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="wide_zero_mem-type">wide_zero_mem Type</h3>
+<p><code>object</code> (<a href="occamy-properties-address-range-schema-3.md">Address Range Schema</a>)</p>
+<h2 id="pcie">pcie</h2>
+<p><code>pcie</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="../occamy-properties-configuration-of-external-pcie-port/">Configuration of external PCIe port</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-configuration-of-external-pcie-port/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/pcie">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="pcie-type">pcie Type</h3>
+<p><code>object</code> (<a href="../occamy-properties-configuration-of-external-pcie-port/">Configuration of external PCIe port</a>)</p>
+<h2 id="hbi">hbi</h2>
+<p>Description of a generic address range</p>
+<p><code>hbi</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="occamy-properties-address-range-schema-3.md">Address Range Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="occamy-properties-address-range-schema-3.md" title="http://pulp-platform.org/snitch/address_range.schema.json#/properties/hbi">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="hbi-type">hbi Type</h3>
+<p><code>object</code> (<a href="occamy-properties-address-range-schema-3.md">Address Range Schema</a>)</p>
+<h2 id="hbm">hbm</h2>
+<p><code>hbm</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="../occamy-properties-configuration-of-external-hbm-interface/">Configuration of external HBM interface</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-configuration-of-external-hbm-interface/" title="http://pulp-platform.org/snitch/occamy.schema.json#/properties/hbm">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="hbm-type">hbm Type</h3>
+<p><code>object</code> (<a href="../occamy-properties-configuration-of-external-hbm-interface/">Configuration of external HBM interface</a>)</p>
+<h2 id="peripherals">peripherals</h2>
+<p>Description of an a peripheral sub-system.</p>
+<p><code>peripherals</code></p>
+<ul>
+<li>
+<p>is optional</p>
+</li>
+<li>
+<p>Type: <code>object</code> (<a href="../occamy-properties-peripherals-schema/">Peripherals Schema</a>)</p>
+</li>
+<li>
+<p>cannot be null</p>
+</li>
+<li>
+<p>defined in: <a href="../occamy-properties-peripherals-schema/" title="http://pulp-platform.org/snitch/peripherals.schema.json#/properties/peripherals">Occamy System Schema</a></p>
+</li>
+</ul>
+<h3 id="peripherals-type">peripherals Type</h3>
+<p><code>object</code> (<a href="../occamy-properties-peripherals-schema/">Peripherals Schema</a>)</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1348 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../benchmarking/">
+      
+      
+        <link rel="next" href="../example_trace.html">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+    
+    
+      
+        <title>Tooling Setup at IIS - Snitch</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.26e3688c.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#getting-started-at-iis" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Snitch" class="md-header__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Snitch
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Tooling Setup at IIS
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Snitch" class="md-nav__button md-logo" aria-label="Snitch" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Snitch
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pulp-platform/snitch" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pulp-platform/snitch
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          User Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          User Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarking/" class="md-nav__link">
+        Benchmarking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Tooling Setup at IIS
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Tooling Setup at IIS
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scratch-folder" class="md-nav__link">
+    Scratch folder
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tool-specific-versions" class="md-nav__link">
+    Tool Specific Versions
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool Specific Versions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#questasim" class="md-nav__link">
+    Questasim
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vcs" class="md-nav__link">
+    VCS
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verilator" class="md-nav__link">
+    Verilator
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    Summary
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../example_trace.html" class="md-nav__link">
+        Trace Example
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker/" class="md-nav__link">
+        Docker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../directory_structure/" class="md-nav__link">
+        Directory Structure
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../documentation/" class="md-nav__link">
+        Documentation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Systems
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Systems
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+          Snitch Cluster
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Cluster
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snitch_cluster/" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../schema-doc/snitch_cluster/" class="md-nav__link">
+        Schema
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          Occamy
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Occamy
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../occamy_system/occamy.md" class="md-nav__link">
+        Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2_2" id="__nav_3_2_2_label" tabindex="0">
+          Architecture
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Architecture
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../occamy_system/1_overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../occamy_system/2_addrmap/" class="md-nav__link">
+        Address Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../occamy_system/3_system_components/" class="md-nav__link">
+        System Components
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../occamy_system/4_clocking/" class="md-nav__link">
+        Clocking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_interrupts_and_synchronization.md" class="md-nav__link">
+        Interrupts and Synchronization
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../schema-doc/occamy/" class="md-nav__link">
+        Schema
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          Reference Manual
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Reference Manual
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rm/snitch/" class="md-nav__link">
+        Snitch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rm/snitch_cluster/" class="md-nav__link">
+        Snitch Cluster
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rm/reqrsp_interface/" class="md-nav__link">
+        Reqrsp Interface
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rm/custom_instructions/" class="md-nav__link">
+        Custom Instructions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          Snitch Runtime
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Snitch Runtime
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Pages/" class="md-nav__link">
+        Pages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Files/" class="md-nav__link">
+        Files
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Classes/" class="md-nav__link">
+        Classes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Examples/" class="md-nav__link">
+        Examples
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Modules/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../runtime/Namespaces/" class="md-nav__link">
+        Namespaces
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publications/" class="md-nav__link">
+        Publications
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scratch-folder" class="md-nav__link">
+    Scratch folder
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tool-specific-versions" class="md-nav__link">
+    Tool Specific Versions
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool Specific Versions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#questasim" class="md-nav__link">
+    Questasim
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vcs" class="md-nav__link">
+    VCS
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verilator" class="md-nav__link">
+    Verilator
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    Summary
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="getting-started-at-iis">Getting Started at IIS</h1>
+<p>Below you can find the flow to run</p>
+<p>First, be aware of the shell which you are using.
+- We recommend using bash:
+    <div class="highlight"><pre><span></span><code>bash
+</code></pre></div></p>
+<h2 id="scratch-folder">Scratch folder</h2>
+<p>Due to the limited size of your home directory, we recomment working in your scratch. You can select between <code>/scratch</code>, <code>/scratch2</code>, <code>/scratch3</code>.</p>
+<ul>
+<li>Create yourself a scratch folder to work in it:
+    <div class="highlight"><pre><span></span><code><span class="c1"># get your machine name</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MACHINE</span><span class="o">=</span><span class="k">$(</span>hostname<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="w"> </span>.<span class="w"> </span>-f<span class="w"> </span><span class="m">1</span><span class="k">)</span>
+<span class="c1"># Look how much free space there is in the scratch folders</span>
+df<span class="w"> </span>-h<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>scratch
+<span class="c1"># Pick one and create your folder in there, example :</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>/scratch/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>
+<span class="c1"># Note, contrary to your home folder, the scratch folder is local to your machine, but you can access it on any other machine over the network as follows:</span>
+<span class="nb">cd</span><span class="w"> </span>/usr/scratch/<span class="si">${</span><span class="nv">MACHINE</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>
+</code></pre></div></li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>At IIS the default version of some tools (<code>gcc</code>, <code>cmake</code>, ...) might be too old for certain projects.</p>
+<ul>
+<li>
+<p>Create a install directory to install the needed tools:
+    <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">INSTALL_DIR</span><span class="o">=</span>/usr/scratch/<span class="si">${</span><span class="nv">MACHINE</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>/install-snitch
+mkdir<span class="w"> </span><span class="nv">$INSTALL_DIR</span>
+<span class="nb">cd</span><span class="w"> </span><span class="nv">$INSTALL_DIR</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Use the pre-installed LLVM toolchain by adding the following to your path:
+    <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/:<span class="nv">$PATH</span>
+</code></pre></div></p>
+<p>or download the latest toolchain (andd add the location to your path):
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>riscv-llvm
+<span class="nb">export</span><span class="w"> </span><span class="nv">LATEST_TAG</span><span class="o">=</span><span class="sb">`</span>curl<span class="w"> </span>-s<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/vnd.github.v3+json&quot;</span><span class="w"> </span>https://api.github.com/repos/pulp-platform/llvm-project/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">&#39;&quot;tag_name&quot;:&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;s/.*&quot;([^&quot;]+)&quot;.*/\1/&#39;</span><span class="sb">`</span>
+wget<span class="w"> </span>-qO-<span class="w"> </span>https://github.com/pulp-platform/llvm-project/releases/download/<span class="si">${</span><span class="nv">LATEST_TAG</span><span class="si">}</span>/riscv32-pulp-llvm-centos7-<span class="si">${</span><span class="nv">LATEST_TAG</span><span class="si">}</span>.tar.gz<span class="w">  </span><span class="p">|</span><span class="w"> </span>tar<span class="w"> </span>xvz<span class="w"> </span>--strip-components<span class="o">=</span><span class="m">1</span><span class="w"> </span>-C<span class="w"> </span>riscv-llvm
+<span class="c1"># go back to installation directory</span>
+<span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span>
+<span class="c1"># add location to path</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span>/riscv-llvm/bin/:<span class="si">${</span><span class="nv">PATH</span><span class="si">}</span>
+<span class="c1"># unset temporary variables</span>
+<span class="nb">unset</span><span class="w"> </span>LATEST_TAG
+</code></pre></div></p>
+</li>
+<li>
+<p>Install the correct python version:
+    <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="m">3</span>.9.10
+mkdir<span class="w"> </span>-p<span class="w"> </span>python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
+<span class="c1"># download into temporary directory</span>
+mkdir<span class="w"> </span>tmp
+<span class="nb">cd</span><span class="w"> </span>tmp
+curl<span class="w"> </span>https://www.python.org/ftp/python/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>/Python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>.tgz<span class="w"> </span><span class="p">|</span><span class="w"> </span>tar<span class="w"> </span>-xz<span class="w"> </span>--strip-components<span class="o">=</span><span class="m">1</span>
+<span class="c1"># install into location /usr/scratch/${MACHINE}/${USER}/python-${PYTHON_VERSION}</span>
+./configure<span class="w"> </span>--prefix<span class="o">=</span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span>/python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="w"> </span>--enable-ipv6
+make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+make<span class="w"> </span>install
+<span class="c1"># go back to installation directory</span>
+<span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span>
+<span class="c1"># delete temporary installation directory</span>
+rm<span class="w"> </span>-rf<span class="w"> </span>tmp
+<span class="c1"># add location to path</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>/python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>/bin/:<span class="nv">$PATH</span>
+<span class="c1"># unset temporary variables</span>
+<span class="nb">unset</span><span class="w"> </span>PYTHON_VERSION
+</code></pre></div></p>
+</li>
+<li>
+<p>Install the correct verilator version:
+    <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">VERILATOR_VERSION</span><span class="o">=</span><span class="m">4</span>.100
+mkdir<span class="w"> </span>tmp
+wget<span class="w"> </span>-qO-<span class="w"> </span>https://github.com/verilator/verilator/archive/refs/tags/v<span class="si">${</span><span class="nv">VERILATOR_VERSION</span><span class="si">}</span>.tar.gz<span class="w">  </span><span class="p">|</span><span class="w"> </span>tar<span class="w"> </span>xvz<span class="w"> </span>--strip-components<span class="o">=</span><span class="m">1</span><span class="w"> </span>-C<span class="w"> </span>tmp
+mkdir<span class="w"> </span>-p<span class="w"> </span>verilator-<span class="si">${</span><span class="nv">VERILATOR_VERSION</span><span class="si">}</span>
+<span class="nb">cd</span><span class="w"> </span>tmp
+autoconf
+<span class="nb">unset</span><span class="w"> </span>VERILATOR_ROOT
+./configure<span class="w"> </span>--prefix<span class="o">=</span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span>/verilator-<span class="si">${</span><span class="nv">VERILATOR_VERSION</span><span class="si">}</span>
+make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+make<span class="w"> </span>install
+<span class="c1"># unset temporary variables</span>
+<span class="nb">unset</span><span class="w"> </span>VERILATOR_VERSION
+<span class="c1"># go back to installation directory</span>
+<span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span>
+<span class="c1"># create symbolic link</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span><span class="s2">/verilator-</span><span class="si">${</span><span class="nv">VERILATOR_VERSION</span><span class="si">}</span><span class="s2">/bin/:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<span class="c1"># export INCLUDE_PATH=&quot;${INSTALL_DIR}/verilator-${VERILATOR_VERSION}/include/:$INCLUDE_PATH&quot;</span>
+<span class="c1"># export INCLUDE_PATH=&quot;${INSTALL_DIR}/verilator-${VERILATOR_VERSION}/include/vltstd/:$INCLUDE_PATH&quot;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Install the correct <code>verible-verilog-lint</code> tool version:
+    <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">VERIBLE_VERSION</span><span class="o">=</span><span class="m">0</span>.0-3222-gb19cdf44
+mkdir<span class="w"> </span>-p<span class="w"> </span>verible-<span class="si">${</span><span class="nv">VERIBLE_VERSION</span><span class="si">}</span>
+<span class="nb">cd</span><span class="w"> </span>verible-<span class="si">${</span><span class="nv">VERIBLE_VERSION</span><span class="si">}</span>
+curl<span class="w"> </span>-Ls<span class="w"> </span>-o<span class="w"> </span>verible.tar.gz<span class="w"> </span>https://github.com/google/verible/releases/download/v<span class="nv">$VERIBLE_VERSION</span>/verible-v<span class="nv">$VERIBLE_VERSION</span>-CentOS-7.9.2009-Core-x86_64.tar.gz
+chmod<span class="w"> </span><span class="m">777</span><span class="w"> </span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span>/verible-<span class="si">${</span><span class="nv">VERIBLE_VERSION</span><span class="si">}</span>
+tar<span class="w"> </span>-C<span class="w"> </span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span>/verible-<span class="si">${</span><span class="nv">VERIBLE_VERSION</span><span class="si">}</span><span class="w"> </span>-xf<span class="w"> </span>verible.tar.gz<span class="w"> </span>--strip-components<span class="o">=</span><span class="m">1</span>
+<span class="c1"># add location to path</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span><span class="s2">/verible-</span><span class="si">${</span><span class="nv">VERIBLE_VERSION</span><span class="si">}</span><span class="s2">/bin/:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<span class="c1"># unset temporary variables</span>
+<span class="nb">unset</span><span class="w"> </span>VERIBLE_VERSION
+</code></pre></div></p>
+</li>
+</ul>
+<p>For installing the last missing pieces you need to clone the repository.</p>
+<ul>
+<li>Clone the repository:
+    <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/usr/scratch/<span class="si">${</span><span class="nv">MACHINE</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>
+git<span class="w"> </span>clone<span class="w"> </span>git@github.com:pulp-platform/snitch.git
+</code></pre></div></li>
+<li>
+<p>Create virtual environment and install the <code>python-requirements.txt</code>:
+    <div class="highlight"><pre><span></span><code><span class="c1"># create virtual environment with correct and newly installed python version</span>
+python3.9<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/.venvs/snitch
+<span class="c1"># activate the virtual environment</span>
+<span class="nb">source</span><span class="w"> </span>~/.venvs/snitch/bin/activate
+<span class="c1"># enter the cloned snitch directory</span>
+<span class="nb">cd</span><span class="w"> </span>snitch
+<span class="c1"># install python requirements</span>
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>python-requirements.txt
+</code></pre></div></p>
+</li>
+<li>
+<p>Create a location for all you binaries in your home directory and create it to your path:
+    <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/home/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>/.snitch-bin
+<span class="c1"># Add the created binary location to your path</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/home/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>/.snitch-bin:<span class="nv">$PATH</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Install the correct <code>spike-dasm</code> and create a symbolic link to your binary location <code>/home/${USER}/.snitch-bin</code>:
+    <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>sw/vendor/riscv-isa-sim
+mkdir<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+../configure
+make<span class="w"> </span>spike-dasm
+<span class="c1"># create symbolic link</span>
+ln<span class="w"> </span>-s<span class="w"> </span>/usr/scratch/<span class="si">${</span><span class="nv">MACHINE</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>/snitch/sw/vendor/riscv-isa-sim/build/spike-dasm<span class="w"> </span>/home/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>/.snitch-bin/spike-dasm
+</code></pre></div></p>
+</li>
+<li>
+<p>Use a newer <code>cmake</code> versions:
+    <div class="highlight"><pre><span></span><code><span class="c1"># make sure you are in /home/${USER}/.snitch-bin</span>
+<span class="nb">cd</span><span class="w"> </span>/home/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>/.snitch-bin
+ln<span class="w"> </span>-s<span class="w"> </span>/usr/sepp/bin/cmake-3.18.1<span class="w"> </span>cmake
+</code></pre></div></p>
+</li>
+</ul>
+<h3 id="tool-specific-versions">Tool Specific Versions</h3>
+<p>Unfortunately, depending on which RTL simulator you are using, you need to use a different GCC version. Therefore, you have to set the following variables <strong>in addition</strong> to the above commands.</p>
+<p>Let's go to the system <code>snitch_cluster</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/usr/scratch/<span class="si">${</span><span class="nv">MACHINE</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>/snitch
+<span class="nb">cd</span><span class="w"> </span>hw/system/snitch_cluster
+</code></pre></div>
+<h4 id="questasim">Questasim</h4>
+<p>First, let's prepare the environment to use Questasim and let's run some tests:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use Questasim&#39;s older GCC version for correct DPI compilation</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">QUESTA_HOME</span><span class="o">=</span>/usr/pack/modelsim-10.7b-kgf/questasim/
+<span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span><span class="nv">$QUESTA_HOME</span>/gcc-5.3.0-linux_x86_64/bin/gcc
+<span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span><span class="nv">$QUESTA_HOME</span>/gcc-5.3.0-linux_x86_64/bin/g++
+<span class="nb">export</span><span class="w"> </span><span class="nv">LD</span><span class="o">=</span><span class="nv">$QUESTA_HOME</span>/gcc-5.3.0-linux_x86_64/bin/ld
+
+<span class="c1"># compile HW for Questasim</span>
+make<span class="w"> </span>bin/snitch_cluster.vsim
+
+<span class="c1"># build and run all snRuntime SW tests on Questasim</span>
+make<span class="w"> </span>sw.test.vsim
+
+<span class="c1"># undo the variables if you change simulator</span>
+<span class="nb">unset</span><span class="w"> </span>QUESTA_HOME
+<span class="nb">unset</span><span class="w"> </span>CC
+<span class="nb">unset</span><span class="w"> </span>CXX
+<span class="nb">unset</span><span class="w"> </span>LD
+</code></pre></div>
+<h4 id="vcs">VCS</h4>
+<p>Next, let's test prepare the environment for VCS and let's run some tests:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># set GCC and G++ to version 9.2</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GCC_DIR</span><span class="o">=</span><span class="s2">&quot;/usr/pack/gcc-9.2.0-af&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GCC_DIR2</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR</span><span class="si">}</span><span class="s2">/linux-x64&quot;</span>
+<span class="c1"># use correct CC and CXX</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/bin/gcc&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/bin/g++&quot;</span>
+<span class="c1"># set correct libraries</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/lib64&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">LIBRARY_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/lib64&quot;</span>
+<span class="c1"># set correct include paths</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">C_INCLUDE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR</span><span class="si">}</span><span class="s2">/include&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CPLUS_INCLUDE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR</span><span class="si">}</span><span class="s2">/include&quot;</span>
+<span class="c1"># set correct PATH</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/linux-x64/bin:</span><span class="si">${</span><span class="nv">PATH</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="c1"># compile HW for VCS with correct VCS version prefix</span>
+vcs-2020.12<span class="w"> </span>make<span class="w"> </span>bin/snitch_cluster.vcs
+
+<span class="c1"># build and run all snRuntime SW tests on VCS</span>
+vcs-2020.12<span class="w"> </span>make<span class="w"> </span>sw.test.vcs
+
+<span class="c1"># undo the variables if you change simulator</span>
+<span class="nb">unset</span><span class="w"> </span>CC
+<span class="nb">unset</span><span class="w"> </span>CXX
+</code></pre></div>
+<h3 id="verilator">Verilator</h3>
+<p>Verilator uses the same GCC compiler as VCS:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># compile HW for Verilator</span>
+make<span class="w"> </span>bin/snitch_cluster.vlt
+
+<span class="c1"># build and run all snRuntime SW tests on Verilator</span>
+make<span class="w"> </span>sw.test.vlt
+</code></pre></div>
+<h2 id="summary">Summary</h2>
+<p>Next time you start with a fresh terminal, you can execute the following commands to use the correct tools:</p>
+<div class="highlight"><pre><span></span><code>bash
+<span class="c1"># set all required variables</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MACHINE</span><span class="o">=</span><span class="k">$(</span>hostname<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="w"> </span>.<span class="w"> </span>-f<span class="w"> </span><span class="m">1</span><span class="k">)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">INSTALL_DIR</span><span class="o">=</span>/usr/scratch/<span class="si">${</span><span class="nv">MACHINE</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>/install-snitch
+<span class="nb">export</span><span class="w"> </span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="m">3</span>.9.10
+<span class="nb">export</span><span class="w"> </span><span class="nv">VERILATOR_VERSION</span><span class="o">=</span><span class="m">4</span>.100
+<span class="nb">export</span><span class="w"> </span><span class="nv">VERIBLE_VERSION</span><span class="o">=</span><span class="m">0</span>.0-3222-gb19cdf44
+
+<span class="c1"># LLVM</span>
+<span class="c1"># pre-installed</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/usr/pack/riscv-1.0-kgf/pulp-llvm-0.12.0/bin/:<span class="nv">$PATH</span>
+<span class="c1"># or manually installad</span>
+<span class="c1">#export PATH=${INSTALL_DIR}/riscv-llvm/bin/:${PATH}</span>
+<span class="c1"># Correct Python version</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span>/python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>/bin/:<span class="nv">$PATH</span>
+<span class="c1"># Activate the virtual python environment</span>
+<span class="nb">source</span><span class="w"> </span>~/.venvs/snitch/bin/activate
+<span class="c1"># Correct Verilator version</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span><span class="s2">/verilator-</span><span class="si">${</span><span class="nv">VERILATOR_VERSION</span><span class="si">}</span><span class="s2">/bin/:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<span class="c1"># Correct Verible version</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">INSTALL_DIR</span><span class="si">}</span><span class="s2">/verible-</span><span class="si">${</span><span class="nv">VERIBLE_VERSION</span><span class="si">}</span><span class="s2">/bin/:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<span class="c1"># Use correct `cmake` and `spike-dasm` version</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/home/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>/.snitch-bin:<span class="nv">$PATH</span>
+
+<span class="c1"># unset all temporary variables</span>
+<span class="nb">unset</span><span class="w"> </span>MACHINE
+<span class="nb">unset</span><span class="w"> </span>INSTALL_DIR
+<span class="nb">unset</span><span class="w"> </span>PYTHON_VERSION
+<span class="nb">unset</span><span class="w"> </span>VERILATOR_VERSION
+<span class="nb">unset</span><span class="w"> </span>VERIBLE_VERSION
+</code></pre></div>
+<p>If you use <strong>Questasim</strong>, set the following variables:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">QUESTA_HOME</span><span class="o">=</span>/usr/pack/modelsim-10.7b-kgf/questasim/
+<span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span><span class="nv">$QUESTA_HOME</span>/gcc-5.3.0-linux_x86_64/bin/gcc
+<span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span><span class="nv">$QUESTA_HOME</span>/gcc-5.3.0-linux_x86_64/bin/g++
+<span class="nb">export</span><span class="w"> </span><span class="nv">LD</span><span class="o">=</span><span class="nv">$QUESTA_HOME</span>/gcc-5.3.0-linux_x86_64/bin/ld
+</code></pre></div>
+<p>If you use <strong>VCS</strong> or <strong>Verilator</strong>, set the following variables:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># set GCC and G++ to version 9.2</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GCC_DIR</span><span class="o">=</span><span class="s2">&quot;/usr/pack/gcc-9.2.0-af&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GCC_DIR2</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR</span><span class="si">}</span><span class="s2">/linux-x64&quot;</span>
+<span class="c1"># use correct CC and CXX</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/bin/gcc&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CXX</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/bin/g++&quot;</span>
+<span class="c1"># set correct libraries</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/lib64&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">LIBRARY_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/lib64&quot;</span>
+<span class="c1"># set correct include paths</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">C_INCLUDE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR</span><span class="si">}</span><span class="s2">/include&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CPLUS_INCLUDE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR</span><span class="si">}</span><span class="s2">/include&quot;</span>
+<span class="c1"># set correct PATH</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GCC_DIR2</span><span class="si">}</span><span class="s2">/linux-x64/bin:</span><span class="si">${</span><span class="nv">PATH</span><span class="si">}</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      
+    
+  </body>
+</html>
