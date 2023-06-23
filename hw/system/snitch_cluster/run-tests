@@ -52,6 +52,10 @@ def main():
         '--early-exit',
         action='store_true',
         help='Exit as soon as any test fails')
+    parser.add_argument(
+        '--app',
+        action='store_true',
+        help='Run applications instead of tests (adapts the path to the binary files)')
     args = parser.parse_args()
 
     # Program inputs
@@ -59,8 +63,10 @@ def main():
     simulator  = args.simulator
     dry_run    = args.dry_run
     early_exit = args.early_exit
+    app        = args.app
 
     failed = []
+    passed = []
     retcodes = []
 
     # Read test list file
@@ -73,7 +79,15 @@ def main():
 
             # Construct path to test executable
             name = test.name
-            elf = testlist_path.parent / 'build' / f'{name}.elf'
+            path = test.parent
+
+            # test binaries are merged in a single build directory
+            # while application binaries have individual build directories
+            build_dir = testlist_path.parent / path / 'build'
+            if app:
+                build_dir = testlist_path.parent / path / name / 'build'
+            elf = build_dir / f'{name}.elf'
+
             cprint(f'Run test {colored(elf, "cyan")}', attrs=["bold"])
 
             # Construct simulation command
@@ -81,21 +95,28 @@ def main():
             print(f'$ {cmd}', flush=True)
 
             # Run test
-            retcode = 0
+            retcode = -1
             if not dry_run:
 
                 # When simulating with vsim, we need to parse the simulation log to catch the
                 # application's return code
                 if simulator == 'vsim':
                     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, text=True)
-
                     while p.poll() is None:
                         line = p.stdout.readline()
                         print(line, end='', flush=True)
+
+                        # Capture failure return code
                         regex = r'\[FAILURE\] Finished with exit code\s*(\d*)'
                         match = re.search(regex, line)
                         if match:
                             retcode = match.group(1)
+
+                        # Capture success return code
+                        regex = r'\[SUCCESS\] Program finished successfully'
+                        match_success = re.search(regex, line)
+                        if match_success:
+                            retcode = 0
 
                 else:
                     p = subprocess.Popen(cmd, shell=True)
@@ -116,10 +137,22 @@ def main():
                 if early_exit:
                     break
 
+            # When test passes
+            else:
+
+                # Report success
+                cprint(f'Passed', 'green', attrs=['bold'], flush=True)
+
+                # Record failing tests for final summary
+                passed.append(test)
+
+
     # Print test summary
     if not dry_run:
         print('\n==== Test summary ====')
         if failed:
+            for test in passed:
+                print(f'{colored(test, "cyan")} test {colored("passed", "green")}')
             for test, retcode in zip(failed, retcodes):
                 print(f'{colored(test, "cyan")} test {colored("failed", "red")} with exit code {retcode}')
             return 1
