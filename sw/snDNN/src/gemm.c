@@ -1,10 +1,8 @@
-// Copyright 2023 ETH Zurich and University of Bologna.
+// Copyright 2020 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
-//
-// Author: Tim Fischer <fischeti@iis.ee.ethz.ch>
 
-#include <stdint.h>
+#include "gemm.h"
 
 #include "snrt.h"
 
@@ -149,7 +147,7 @@ void gemm_fp64_opt(uint32_t M, uint32_t N, uint32_t K, double* A, uint32_t ldA,
                   [ c3 ] "+f"(c[3]), [ c4 ] "+f"(c[4]), [ c5 ] "+f"(c[5]),
                   [ c6 ] "+f"(c[6]), [ c7 ] "+f"(c[7])
                 : [ n_frep ] "r"(K - 1)
-                : "ft0", "ft1", "ft2");
+                : "ft0", "ft1");
 
             // Store results back
             C[m * ldC + n + 0] = c[0];

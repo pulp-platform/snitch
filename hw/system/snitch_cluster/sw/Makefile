@@ -17,6 +17,7 @@ endif
 
 SUBDIRS  = runtime/banshee
 SUBDIRS += runtime/rtl
+SUBDIRS += libraries/snDNN
 SUBDIRS += $(APPS)
 
 .PHONY: all $(SUBDIRS)

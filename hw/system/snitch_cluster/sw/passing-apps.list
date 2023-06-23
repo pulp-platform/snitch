@@ -1,9 +1,7 @@
 apps/nop
-apps/lto
 apps/blas/axpy
 apps/blas/gemm
 apps/sndnn/fusedconv
 apps/sndnn/gelu
 apps/sndnn/gemm
 apps/sndnn/linear
-tests/

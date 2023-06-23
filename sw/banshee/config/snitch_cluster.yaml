@@ -7,7 +7,7 @@
 ---
 address:
   # Snitch: cl_peripherals + 0x190
-  barrier_reg: 
+  barrier_reg:
     offset: 0x40000
     start: 0x120190
   cluster_base_hartid: 0x40000040
@@ -25,10 +25,10 @@ address:
   ## These parameters are not used, but Banshee requires them being defined
   tcdm_end: 0x00000000
   tcdm_start: 0x00000000
-  cluster_base_hartid: 0x00000000
-  cluster_id: 0x00000000
-  cluster_num: 0x00000000
-  nr_cores: 0x00000000
+  # cluster_base_hartid: 0x00000000
+  # cluster_id: 0x00000000
+  # cluster_num: 0x00000000
+  # nr_cores: 0x00000000
   wakeup_reg: 0x00000000
   ## End of unused parameters
 architecture:
@@ -55,8 +55,8 @@ memory:
     offset: 0x40000 # offset to start address of next cluster
     latency: 2
     callbacks:
-    - name: zero-memory
-      size: 64000
+      - name: zero-memory
+        size: 64000
   tcdm:
     start: 0x100000 # cluster "num_clusters" start address
     size: 0x020000   # size of the TCDM

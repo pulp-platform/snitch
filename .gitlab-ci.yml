@@ -32,6 +32,7 @@ before_script:
   - ${PYTHON} -m venv .venv
   - source .venv/bin/activate
   - pip install -r python-requirements.txt
+  - pip install -r sw/snDNN/requirements.txt
   - |
     cd $CI_PROJECT_DIR && mkdir -p .local/bin && cd .local/bin
     curl --proto '=https' --tlsv1.2 \
@@ -191,6 +192,7 @@ snitch-cluster-vlt:
     - make sw
     - $VLT_VERSION verilator-4.110 make bin/snitch_cluster.vlt
     - ./run-tests sw/tests/passing-apps.list --simulator verilator
+    - ./run-tests sw/passing-apps.list --simulator verilator --app
 # VCS
 # requires newer gcc version
 snitch-cluster-vcs:
@@ -200,6 +202,7 @@ snitch-cluster-vcs:
     - make sw
     - $VCS_VERSION make bin/snitch_cluster.vcs
     - ./run-tests sw/tests/passing-apps.list --simulator vcs
+    - ./run-tests sw/passing-apps.list --simulator vcs --app
 # QUESTASIM
 snitch-cluster-vsim:
   stage: snitch-cluster-tests
@@ -208,3 +211,4 @@ snitch-cluster-vsim:
     - make sw
     - make bin/snitch_cluster.vsim
     - ./run-tests sw/tests/passing-apps.list --simulator vsim
+    - ./run-tests sw/passing-apps.list --simulator vsim --app

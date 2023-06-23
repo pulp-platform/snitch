@@ -4,7 +4,7 @@
 
 ---
 address:
-  barrier_reg: 
+  barrier_reg:
     offset: 0x40000
     start: 0x40000038
   cluster_base_hartid: 0x40000040
@@ -26,14 +26,14 @@ memory:
     latency: 10
   periphs:
     start: 0x100000
-    size: 0x00002c  
-    offset: 0x40000 
+    size: 0x00002c
+    offset: 0x40000
     latency: 5
     callbacks:
-    - name: semaphores
-      size: 36
-    - name: fence
-      size: 8
+      - name: semaphores
+        size: 36
+      - name: fence
+        size: 8
   tcdm:
     start: 0x0
     size: 0x20000

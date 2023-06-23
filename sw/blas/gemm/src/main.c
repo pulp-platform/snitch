@@ -4,8 +4,9 @@
 //
 // Author: Tim Fischer <fischeti@iis.ee.ethz.ch>
 
-#include <stdint.h>
 #include <math.h>
+#include <stdint.h>
+
 #include "data.h"
 #include "gemm.h"
 #include "snrt.h"
@@ -112,35 +113,38 @@ int main() {
 
     uint32_t errors = 0;
     if (compute_id == 0) {
-        switch(dtype_size) {
-          case FP64:
-              for (uint32_t m = 0; m < M; m++) {
-                  for (uint32_t n = 0; n < N; n++) {
-                    uint32_t idx = m * N + n;
-                    if (fabs(result[idx] - ((double*)l1_c)[idx]) > 0.001) errors++;
-                  }
-              }
-              break;
-          case FP32:
-              for (uint32_t m = 0; m < M; m++) {
-                  for (uint32_t n = 0; n < N; n++) {
-                    uint32_t idx = m * N + n;
-                    if (fabs(result[idx] - ((float*)l1_c)[idx]) > 0.001) errors++;
-                  }
-              }
-              break;
-          case FP16:
-              for (uint32_t m = 0; m < M; m++) {
-                  for (uint32_t n = 0; n < N; n++) {
-                    uint32_t idx = m * N + n;
-                    if (fabs(result[idx] - ((__fp16*)l1_c)[idx]) > 0.001) errors++;
-                  }
-              }
-              break;
-          case FP8:
-            printf("No golden model yet for fp8!\n");
-            return -1;
-            break;
+        switch (dtype_size) {
+            case FP64:
+                for (uint32_t m = 0; m < M; m++) {
+                    for (uint32_t n = 0; n < N; n++) {
+                        uint32_t idx = m * N + n;
+                        if (fabs(result[idx] - ((double *)l1_c)[idx]) > 0.001)
+                            errors++;
+                    }
+                }
+                break;
+            case FP32:
+                for (uint32_t m = 0; m < M; m++) {
+                    for (uint32_t n = 0; n < N; n++) {
+                        uint32_t idx = m * N + n;
+                        if (fabs(result[idx] - ((float *)l1_c)[idx]) > 0.001)
+                            errors++;
+                    }
+                }
+                break;
+            case FP16:
+                for (uint32_t m = 0; m < M; m++) {
+                    for (uint32_t n = 0; n < N; n++) {
+                        uint32_t idx = m * N + n;
+                        if (fabs(result[idx] - ((__fp16 *)l1_c)[idx]) > 0.001)
+                            errors++;
+                    }
+                }
+                break;
+            case FP8:
+                printf("No golden model yet for fp8!\n");
+                return -1;
+                break;
         }
         printf("%d/%d Errors\n", errors, M * N);
     }
@@ -149,5 +153,4 @@ int main() {
 #endif
 
     return 0;
-
 }

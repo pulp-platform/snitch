@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Luca Colagrande <colluca@iis.ee.ethz.ch>
+# Gianna Paulin <pauling@iis.ee.ethz.ch>
 
 # Usage of absolute paths is required to externally include
 # this Makefile from multiple different locations
@@ -37,6 +38,25 @@ RISCV_LDFLAGS += -T$(abspath $(SNRT_DIR)/base.ld)
 # Link snRuntime library
 RISCV_LDFLAGS += -L$(abspath $(RUNTIME_DIR)/build/)
 RISCV_LDFLAGS += -lsnRuntime
+
+#################
+# SNDNN_LIBRARY #
+#################
+ifdef USE_SNDNN_LIBRARY
+SNDNN_DIR    := $(abspath $(MK_DIR)/../../../../../sw/snDNN)
+SNDNN_LIB_DIR := $(abspath $(MK_DIR)/../libraries/snDNN)
+# Dependencies
+INCDIRS += $(SNDNN_DIR)/src
+# INCDIRS += $(SNDNN_DIR)/src/kernels
+# INCDIRS += $(SNDNN_DIR)/src/layers
+# INCDIRS += $(SNDNN_DIR)/src/utils
+INCDIRS += $(SNDNN_DIR)/include
+# Linker script
+RISCV_LDFLAGS += -L$(abspath $(SNDNN_LIB_DIR))
+# Link snRuntime library
+RISCV_LDFLAGS += -L$(abspath $(SNDNN_LIB_DIR)/build/)
+RISCV_LDFLAGS += -lsnDNN
+endif
 
 ###########
 # Outputs #
