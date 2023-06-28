@@ -37,8 +37,8 @@ ADDRMAPGEN ?= $(ROOT)/util/addrmapgen.py
 
 CLANG_FORMAT ?= $(shell which clang-format-12.0.1)
 
-VSIM = vsim -64
-VLOG = vlog -64
+VSIM = vsim #-64
+VLOG = vlog #-64
 
 #########################
 # Files and directories #
