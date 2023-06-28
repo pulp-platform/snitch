@@ -8,7 +8,12 @@
 # Usage of absolute paths is required to externally include
 # this Makefile from multiple different locations
 MK_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+
+ifeq ($(MUSL),1)
+include $(MK_DIR)/../musl.mk
+else
 include $(MK_DIR)/../toolchain.mk
+endif
 
 ###################
 # Build variables #

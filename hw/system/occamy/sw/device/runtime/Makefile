@@ -4,7 +4,13 @@
 #
 # Luca Colagrande <colluca@iis.ee.ethz.ch>
 
+
+ifeq ($(MUSL),1)
+include ../musl.mk
+else
 include ../toolchain.mk
+endif
+
 
 ###################
 # Build variables #

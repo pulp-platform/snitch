@@ -4,7 +4,12 @@
 #
 # Luca Colagrande <colluca@iis.ee.ethz.ch>
 
+ifeq ($(MUSL),1)
+include ../../musl.mk
+else
 include ../../toolchain.mk
+endif
+
 
 ###################
 # Build variables #
@@ -39,7 +44,7 @@ LD_SRCS       = $(BASE_LD) $(MEMORY_LD) $(ORIGIN_LD) $(SNRT_LIB)
 # Linker flags
 RISCV_LDFLAGS += -nostartfiles
 RISCV_LDFLAGS += -lm
-RISCV_LDFLAGS += -lgcc
+# RISCV_LDFLAGS += -lgcc
 # Linker script
 RISCV_LDFLAGS += -L$(APPSDIR)
 RISCV_LDFLAGS += -L$(BUILDDIR)
