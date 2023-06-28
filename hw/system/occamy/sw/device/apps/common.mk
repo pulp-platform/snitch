@@ -44,7 +44,9 @@ LD_SRCS       = $(BASE_LD) $(MEMORY_LD) $(ORIGIN_LD) $(SNRT_LIB)
 # Linker flags
 RISCV_LDFLAGS += -nostartfiles
 RISCV_LDFLAGS += -lm
-# RISCV_LDFLAGS += -lgcc
+ifeq ($(MUSL),)
+RISCV_LDFLAGS += -lgcc
+endif
 # Linker script
 RISCV_LDFLAGS += -L$(APPSDIR)
 RISCV_LDFLAGS += -L$(BUILDDIR)
