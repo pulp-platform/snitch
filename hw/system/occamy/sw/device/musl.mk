@@ -48,6 +48,7 @@ RISCV_CFLAGS += -I$(SW_INSTALL_DIR)include
 RISCV_CFLAGS += -B$(SW_INSTALL_DIR)bin
 # RISCV_CFLAGS += -static-libgcc
 RISCV_CFLAGS += -nostdinc
+RISCV_CFLAGS += -ftls-model=local-exec
 
 RISCV_CFLAGS += -O3
 ifeq ($(DEBUG), ON)
