@@ -10,6 +10,7 @@
 #include "occamy_memory_map.h"
 
 // Forward declarations
+#pragma once
 #include "alloc_decls.h"
 #include "cls_decls.h"
 #include "cluster_interrupt_decls.h"
