@@ -15,8 +15,8 @@ DEBUG ?= OFF # ON to turn on debugging symbols
 ###################
 
 # Compiler toolchain
-RISCV_CC        ?= riscv32-unknown-elf-clang
-RISCV_CXX 	    ?= riscv32-unknown-elf-clang++
+RISCV_CC        ?= clang
+RISCV_CXX 	    ?= clang++
 RISCV_LD        ?= lld
 RISCV_AR        ?= llvm-ar
 RISCV_STRIP     ?= llvm-strip
@@ -24,7 +24,7 @@ RISCV_RANLIB	?= llvm-ranlib
 RISCV_OBJCOPY   ?= llvm-objcopy
 RISCV_OBJDUMP   ?= llvm-objdump
 RISCV_DWARFDUMP ?= llvm-dwarfdump
-SW_INSTALL_DIR  ?= /scratch/vivianep/snitch_dev/snitch/sw/vendor/install/
+SW_INSTALL_DIR  ?= ../../../../../sw/vendor/install/
 
 # Compiler flags
 RISCV_CFLAGS += $(addprefix -I,$(INCDIRS))
