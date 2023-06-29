@@ -19,13 +19,16 @@ endif
 # snRuntime #
 #############
 # Directories
-CUR_DIR     := $(abspath .)
-SNRT_DIR    := $(abspath ../../../../../../sw/snRuntime)
-ifeq (SELECT_RUNTIME, banshee)
-RUNTIME_DIR := $(abspath ../../runtime/banshee)
-else
-RUNTIME_DIR := $(abspath ../../runtime/rtl)
-endif
+CUR_DIR     		:= $(abspath .)
+SNRT_DIR    		:= $(abspath ../../../../../../../sw/snRuntime)
+RUNTIME_DIR 		:= $(abspath ../../runtime)
+SHARED_DIR  		:= $(abspath ../../../../sw/shared)
+HERO_RUNTIME_DIR 	:= $(abspath ../../../../sw/shared/runtime)
+# ifeq (SELECT_RUNTIME, banshee)
+# RUNTIME_DIR := $(abspath ../../runtime/banshee)
+# else
+# RUNTIME_DIR := $(abspath ../../runtime/rtl)
+# endif
 
 # Dependencies
 INCDIRS += $(RUNTIME_DIR)/src
@@ -35,13 +38,16 @@ INCDIRS += $(SNRT_DIR)/api/omp
 INCDIRS += $(SNRT_DIR)/src
 INCDIRS += $(SNRT_DIR)/src/omp
 INCDIRS += $(SNRT_DIR)/vendor/riscv-opcodes
+INCDIRS += $(SHARED_DIR)/platform
+INCDIRS += $(SHARED_DIR)/platform/generated
+INCDIRS += $(HERO_RUNTIME_DIR)
 
 #########
 # snDNN #
 #########
 # Directories
 BUILDDIR      = $(abspath build/)
-SNDNN_DIR     = $(abspath ../../../../../../sw/snDNN)
+SNDNN_DIR     = $(abspath ../../../../../../../sw/snDNN)
 SRC_DIR       = $(SNDNN_DIR)/src
 SRC_DIR_LAYER = $(CUR_DIR)/src
 
