@@ -12,6 +12,7 @@ TARGET ?= all
 APP_SUBDIRS = $(addprefix apps/,$(APPS))
 
 SUBDIRS  = runtime
+SUBDIRS += libraries/snDNN
 SUBDIRS += $(APP_SUBDIRS)
 
 .PHONY: all $(SUBDIRS)
