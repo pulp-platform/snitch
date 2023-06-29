@@ -39,3 +39,4 @@ interrupt-local
 fence_i
 # interrupt
 simple
+printf_simple

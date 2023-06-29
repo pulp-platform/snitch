@@ -25,6 +25,8 @@ INCDIRS += $(SNRT_DIR)/vendor/riscv-opcodes
 INCDIRS += $(RUNTIME_DIR)/shared
 SRCS += $(SRC_DIR)/snitch_cluster_start.S
 SRCS += $(SRC_DIR)/snrt.c
+SRCS += $(SRC_DIR)/putchar.c
+SRCS += $(SNRT_DIR)/vendor/printf/printf.c
 
 ###########
 # Outputs #
@@ -54,6 +56,9 @@ $(BUILDDIR)/%.o: $(SRC_DIR)/%.S | $(BUILDDIR)
 	$(RISCV_CC) $(RISCV_CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.o: $(SRC_DIR)/%.c | $(BUILDDIR)
+	$(RISCV_CC) $(RISCV_CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/%.o: $(SNRT_DIR)/vendor/printf/%.c | $(BUILDDIR)
 	$(RISCV_CC) $(RISCV_CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.d: $(SRC_DIR)/%.c | $(BUILDDIR)
