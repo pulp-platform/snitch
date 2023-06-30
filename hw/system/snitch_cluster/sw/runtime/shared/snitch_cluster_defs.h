@@ -7,6 +7,7 @@
 #include "snitch_cluster_peripheral.h"
 
 // Hardware parameters
+#pragma once
 #define SNRT_BASE_HARTID CFG_CLUSTER_BASE_HARTID
 #define SNRT_CLUSTER_CORE_NUM CFG_CLUSTER_NR_CORES
 #define SNRT_CLUSTER_NUM 1
