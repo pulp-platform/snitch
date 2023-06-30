@@ -6,7 +6,6 @@
 # Author: Tim Fischer <fischeti@iis.ee.ethz.ch>
 
 import numpy as np
-import torch
 import argparse
 import pathlib
 import hjson
@@ -24,14 +23,23 @@ NUMPY_TYPES = {
   '64': np.double,
   '32': np.single,
   '16': np.half,
-  '8': np.byte
+  '8': np.ubyte
 }
 
+FP8_FORMATS = {
+    'fp8': {'exp': 5, 'mant': 2},
+    'fp8alt': {'exp': 4, 'mant': 3}
+}
 
 def format_vector_definition(id, vector, typ):
     s = f'{typ} {id}[{len(vector)}] = ' + '{\n'
     for i, el in enumerate(vector):
-        s += f'\t{el},'
+        if typ != 'char':
+            s += f'\t{el},'
+        else:
+            if type(el) == float:
+                print(el)
+            s += f'0x{el:02x},'
         if i % 8 == 7:
             s += '\n'
     s += '};'
@@ -63,32 +71,39 @@ def emit_gemm_data(**kwargs):
     dtype = NUMPY_TYPES[str(kwargs['prec'])]
     if (kwargs['prec']) == 8:
         # sign -1 or 1
-        sign_a = torch.randint(0, 2, (kwargs['M'], kwargs['K']), requires_grad=False, dtype=torch.uint8)
+        sign_a = np.random.randint(0, 2, (kwargs['M'], kwargs['K'])).astype(dtype)
         # esponent < 0b01111
-        exponent_a = torch.randint(0, 16, (kwargs['M'], kwargs['K']), requires_grad=False, dtype=torch.uint8)
+        exponent_a = np.random.randint(0, 16, (kwargs['M'], kwargs['K'])).astype(dtype)
          # mantissa can be arbitrary
-        mantissa_a = torch.randint(0, 4, (kwargs['M'], kwargs['K']), requires_grad=False, dtype=torch.uint8)
+        mantissa_a = np.random.randint(0, 4, (kwargs['M'], kwargs['K'])).astype(dtype)
         # sign -1 or 1
-        sign_b = torch.randint(0, 2, (kwargs['K'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+        sign_b = np.random.randint(0, 2, (kwargs['K'], kwargs['N'])).astype(dtype)
         # esponent < 0b01111
-        exponent_b = torch.randint(0, 16, (kwargs['K'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+        exponent_b = np.random.randint(0, 16, (kwargs['K'], kwargs['N'])).astype(dtype)
          # mantissa can be arbitrary
-        mantissa_b = torch.randint(0, 4, (kwargs['K'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+        mantissa_b = np.random.randint(0, 4, (kwargs['K'], kwargs['N'])).astype(dtype)
         # sign -1 or 1
-        sign_c = torch.randint(0, 2, (kwargs['M'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+        sign_c = np.random.randint(0, 2, (kwargs['M'], kwargs['N'])).astype(dtype)
         # esponent < 0b01111
-        exponent_c = torch.randint(0, 16, (kwargs['M'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+        exponent_c = np.random.randint(0, 16, (kwargs['M'], kwargs['N'])).astype(dtype)
          # mantissa can be arbitrary
-        mantissa_c = torch.randint(0, 4, (kwargs['M'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
-        a = ((-1.0)**sign_a.double())*(2.0**(exponent_a.double()-15.0))*(1.0 + mantissa_a.double() / (2**2))
-        b = ((-1.0)**sign_b.double())*(2.0**(exponent_b.double()-15.0))*(1.0 + mantissa_b.double() / (2**2))
-        c = ((-1.0)**sign_c.double())*(2.0**(exponent_c.double()-15.0))*(1.0 + mantissa_c.double() / (2**2))
+        mantissa_c = np.random.randint(0, 4, (kwargs['M'], kwargs['N'])).astype(dtype)
+        _a = ((-1.0)**sign_a.astype(np.double))*(2.0**(exponent_a.astype(np.double)-15.0)) \
+             * (1.0 + mantissa_a.astype(np.double) / (2**2))
+        _b = ((-1.0)**sign_b.astype(np.double))*(2.0**(exponent_b.astype(np.double)-15.0)) \
+             * (1.0 + mantissa_b.astype(np.double) / (2**2))
+        _c = ((-1.0)**sign_c.astype(np.double))*(2.0**(exponent_c.astype(np.double)-15.0)) \
+             * (1.0 + mantissa_c.astype(np.double) / (2**2))
+        result = np.matmul(_a, _b) + kwargs['alpha'] * _c
+        a = sign_a << 7 | exponent_a << FP8_FORMATS['fp8']['mant'] | mantissa_a
+        b = sign_b << 7 | exponent_b << FP8_FORMATS['fp8']['mant'] | mantissa_b
+        c = sign_c << 7 | exponent_c << FP8_FORMATS['fp8']['mant'] | mantissa_c
     else:
         a = np.random.rand(kwargs['M'], kwargs['K']).astype(dtype)
         b = np.random.rand(kwargs['K'], kwargs['N']).astype(dtype)
         c = np.random.rand(kwargs['M'], kwargs['N']).astype(dtype)
+        result = np.matmul(a, b) + kwargs['alpha'] * c
 
-    result = np.matmul(a, b) + kwargs['alpha'] * c
 
     # Store matrices in transposed form if requested
     a = a.T if kwargs['ta'] else a
@@ -106,7 +121,10 @@ def emit_gemm_data(**kwargs):
     data_str += [format_vector_definition('a', a.flatten(), C_TYPES[str(kwargs['prec'])])]
     data_str += [format_vector_definition('b', b.flatten(), C_TYPES[str(kwargs['prec'])])]
     data_str += [format_vector_definition('c', c.flatten(), C_TYPES[str(kwargs['prec'])])]
-    data_str += [format_vector_definition('result', result.flatten(), C_TYPES[str(kwargs['prec'])])]
+    if kwargs['prec'] == 8:
+        data_str += [format_vector_definition('result', result.flatten(), C_TYPES['64'])]
+    else:
+        data_str += [format_vector_definition('result', result.flatten(), C_TYPES[str(kwargs['prec'])])]
     data_str = '\n\n'.join(data_str)
 
     return data_str
@@ -121,6 +139,7 @@ def main():
         required=True,
         help='Select param config file kernel'
     )
+    print(parser)
     args = parser.parse_args()
 
     # Load param config file
