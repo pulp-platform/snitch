@@ -9,7 +9,7 @@ address:
   # Snitch: cl_peripherals + 0x190
   barrier_reg:
     offset: 0x40000
-    start: 0x120190
+    start: 0x10020190
   cluster_base_hartid: 0x40000040
   cluster_id: 0x40000050
   cluster_num: 0x40000048
@@ -50,7 +50,7 @@ memory:
     offset: 0x0 # dram is global for all clusters
     latency: 4
   periphs:
-    start: 0x130000 # cluster "num_clusters" start address
+    start: 0x10030000 # cluster "num_clusters" start address
     size: 0x10000   # size of the peripheral memory space
     offset: 0x40000 # offset to start address of next cluster
     latency: 2
@@ -58,7 +58,7 @@ memory:
       - name: zero-memory
         size: 64000
   tcdm:
-    start: 0x100000 # cluster "num_clusters" start address
+    start: 0x10000000 # cluster "num_clusters" start address
     size: 0x020000   # size of the TCDM
     offset: 0x40000 # offset to next cluster is start + size + offset
     latency: 1
