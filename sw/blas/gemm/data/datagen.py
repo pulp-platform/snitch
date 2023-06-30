@@ -139,7 +139,6 @@ def main():
         required=True,
         help='Select param config file kernel'
     )
-    print(parser)
     args = parser.parse_args()
 
     # Load param config file
