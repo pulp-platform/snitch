@@ -15,8 +15,11 @@ else
 RUNTIME = runtime/rtl
 endif
 
+ifeq ($(SELECT_RUNTIME), banshee)
 SUBDIRS  = runtime/banshee
+else
 SUBDIRS += runtime/rtl
+endif
 SUBDIRS += libraries/snDNN
 SUBDIRS += $(APPS)
 
