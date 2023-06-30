@@ -579,7 +579,7 @@ def softmax(ifmap, axis):
     ofmap = softmax(ifmap)
 
     # print the global max of the input
-    print("max of input: ", torch.max(ifmap))
+    # print("max of input: ", torch.max(ifmap))
 
     return ofmap
 

@@ -5,15 +5,16 @@
 #include "softmax_layer.h"
 
 #include "layer.h"
-#include "printf.h"
 #include "snrt.h"
+#include "printf.h"
 #include "softmax.h"
 
-void softmax_layer(const softmax_layer_t *l) {
+void softmax_layer(softmax_layer_t* const l) {
+
     uint32_t cluster_num = snrt_cluster_num();
     uint32_t cluster_id = snrt_cluster_idx();
     uint32_t compute_num = snrt_cluster_compute_core_num();
-    uint32_t compute_id = snrt_cluster_compute_core_num();
+    uint32_t compute_id = snrt_global_core_idx();
 
     uint32_t ifmap_size =
         l->BATCH_SIZE * l->SEQ_LEN * l->INPUT_SAMPLES * sizeof(float);
@@ -37,8 +38,7 @@ void softmax_layer(const softmax_layer_t *l) {
 
     snrt_cluster_hw_barrier();
 
-    if (snrt_is_compute_core() &&
-        snrt_cluster_compute_core_num() < compute_num) {
+    if (snrt_is_compute_core()) {
         // determine the row offset for each core
         int32_t row_offset = compute_id * l->INPUT_SAMPLES;
 

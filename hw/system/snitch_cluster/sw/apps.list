@@ -7,4 +7,5 @@ apps/sndnn/gelu
 apps/sndnn/gemm
 apps/sndnn/linear
 apps/sndnn/batchnorm
+apps/sndnn/softmax
 tests/

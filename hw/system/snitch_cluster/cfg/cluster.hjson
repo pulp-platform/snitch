@@ -101,11 +101,11 @@
         num_dtlb_entries: 1,
         num_itlb_entries: 1,
         // Enable division/square root unit
-        // Xdiv_sqrt: true,
+        Xdiv_sqrt: true,
     },
     dma_core_template: {
         isa: "rv32imafd",
-        // Xdiv_sqrt: true,
+        Xdiv_sqrt: true,
         # isa: "rv32ema",
         xdma: true
         xssr: false

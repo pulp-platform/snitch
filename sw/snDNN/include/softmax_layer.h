@@ -11,4 +11,4 @@
  *
  */
 
-void softmax_layer(const softmax_layer_t *l);
+void softmax_layer(softmax_layer_t* const l);

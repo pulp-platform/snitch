@@ -5,8 +5,8 @@
 #pragma once
 
 #include "math.h"
-// #include "printf.h"
 #include "snrt.h"
+#include "printf.h"
 #include "utils.h"
 
 typedef float v2f32 __attribute__((vector_size(8)));
@@ -38,8 +38,8 @@ static inline void softmax_fp32(float *input, float *output, int32_t ldI,
     float max_core = 0.0;  // max value of the current core
     float sum = 0.0;       // sum of the exp values of the current core
 
-    uint32_t compute_id = snrt_cluster_compute_core_num();
-    uint32_t num_cores = snrt_cluster_compute_core_num();
+    // uint32_t compute_id = snrt_global_core_idx();
+    // uint32_t num_cores = snrt_cluster_compute_core_num();
 
     for (int32_t b = 0; b < batch_size; b++) {
         for (int32_t s = 0; s < seq_len; s++) {
@@ -55,13 +55,20 @@ static inline void softmax_fp32(float *input, float *output, int32_t ldI,
             // compute the shifted value of the current row
             for (int32_t i = 0; i < input_samples; i++) {
                 output[b * batch_offset + s * ldI + i] =
-                    expf(input[b * batch_offset + s * ldI + i] - max_core);
+                // FIXME: Below code is erroring due to the standard math lib conflict
+                // TODO: Try out with musl lib
+                    // expf(input[b * batch_offset + s * ldI + i] - max_core);
+                    //FIXME: actually there should be an exponentiation
+                    input[b * batch_offset + s * ldI + i] - max_core;
                 sum += output[b * batch_offset + s * ldI + i];
             }
 
             // compute the softmax value of the current row
             for (int32_t i = 0; i < input_samples; i++) {
+                // INFO: DIVSQRT unit MUST be activated in the cluster configuration
                 output[b * batch_offset + s * ldI + i] /= sum;
+                // printf("output[%d] = %f\n", compute_id * input_samples + b * batch_offset + s * ldI + i,
+                //        output[b * batch_offset + s * ldI + i]);
             }
         }
     }

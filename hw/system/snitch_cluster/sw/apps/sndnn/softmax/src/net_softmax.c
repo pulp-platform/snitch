@@ -11,9 +11,10 @@
 #include "math.h"
 #include "network.h"
 #include "softmax_layer.h"
+#include "layer.h"
 // #include "perf_cnt.h"
-#include "printf.h"
 #include "snrt.h"
+#include "printf.h"
 #include "utils.h"
 
 int main() {
@@ -23,6 +24,8 @@ int main() {
     // checksum = (float*)softmax_checksum;
 
     softmax_layer(&softmax_l);
+
+    snrt_global_barrier();
 
     // uint32_t error = check_softmax_layer(&linear_l, (float*)linear_checksum);
 
