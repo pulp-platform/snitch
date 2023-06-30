@@ -22,7 +22,7 @@ endif
 # Directories
 BUILDDIR     = $(abspath build)
 SNRT_DIR    := $(abspath $(MK_DIR)/../../../../../sw/snRuntime)
-ifeq (SELECT_RUNTIME, banshee)
+ifeq ($(SELECT_RUNTIME), banshee)
 RUNTIME_DIR := $(abspath $(MK_DIR)/../runtime/banshee)
 else
 RUNTIME_DIR := $(abspath $(MK_DIR)/../runtime/rtl)
