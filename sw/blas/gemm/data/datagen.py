@@ -74,19 +74,19 @@ def emit_gemm_data(**kwargs):
         sign_a = np.random.randint(0, 2, (kwargs['M'], kwargs['K'])).astype(dtype)
         # esponent < 0b01111
         exponent_a = np.random.randint(0, 16, (kwargs['M'], kwargs['K'])).astype(dtype)
-         # mantissa can be arbitrary
+        # mantissa can be arbitrary
         mantissa_a = np.random.randint(0, 4, (kwargs['M'], kwargs['K'])).astype(dtype)
         # sign -1 or 1
         sign_b = np.random.randint(0, 2, (kwargs['K'], kwargs['N'])).astype(dtype)
         # esponent < 0b01111
         exponent_b = np.random.randint(0, 16, (kwargs['K'], kwargs['N'])).astype(dtype)
-         # mantissa can be arbitrary
+        # mantissa can be arbitrary
         mantissa_b = np.random.randint(0, 4, (kwargs['K'], kwargs['N'])).astype(dtype)
         # sign -1 or 1
         sign_c = np.random.randint(0, 2, (kwargs['M'], kwargs['N'])).astype(dtype)
         # esponent < 0b01111
         exponent_c = np.random.randint(0, 16, (kwargs['M'], kwargs['N'])).astype(dtype)
-         # mantissa can be arbitrary
+        # mantissa can be arbitrary
         mantissa_c = np.random.randint(0, 4, (kwargs['M'], kwargs['N'])).astype(dtype)
         _a = ((-1.0)**sign_a.astype(np.double))*(2.0**(exponent_a.astype(np.double)-15.0)) \
              * (1.0 + mantissa_a.astype(np.double) / (2**2))
