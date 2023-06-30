@@ -36,7 +36,7 @@ REGGEN          ?= $(shell $(BENDER) path register_interface)/vendor/lowrisc_ope
 CLUSTER_GEN     ?= $(ROOT)/util/clustergen.py
 CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
 
-QUESTA_64BIT = -64
+# QUESTA_64BIT = -64
 VSIM      	?= vsim ${QUESTA_64BIT}
 VLOG      	?= vlog ${QUESTA_64BIT}
 
@@ -144,6 +144,9 @@ PLATFORM_HEADERS = $(addprefix $(PLATFORM_HEADERS_DIR)/,$(CLUSTER_GEN_HEADERS) $
 
 sw: $(PLATFORM_HEADERS)
 	$(MAKE) -C sw/
+
+sw-banshee: $(PLATFORM_HEADERS)
+	$(MAKE) -C sw/ SELECT_RUNTIME=banshee
 
 clean-headers:
 	rm -f $(PLATFORM_HEADERS)
