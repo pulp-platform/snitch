@@ -7,6 +7,7 @@
 #include "batchnorm.h"
 #include "layer.h"
 #include "snrt.h"
+#include "printf.h"
 
 void batchnorm_layer(const conv_layer *l) {
     const uint32_t cluster_num = snrt_cluster_num();

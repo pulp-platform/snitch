@@ -6,4 +6,5 @@ apps/sndnn/fusedconv
 apps/sndnn/gelu
 apps/sndnn/gemm
 apps/sndnn/linear
+apps/sndnn/batchnorm
 tests/
