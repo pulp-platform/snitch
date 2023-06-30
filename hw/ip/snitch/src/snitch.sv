@@ -1679,6 +1679,22 @@ module snitch import snitch_pkg::*; import riscv_instr::*; #(
           illegal_inst = 1'b1;
         end
       end
+      VFDOTPEXA_S_B,
+      VFDOTPEXB_S_B,
+      VFDOTPEXA_S_R_B,
+      VFDOTPEXB_S_R_B: begin
+        if (FP_EN && XFVEC && FLEN >= 32 && XFDOTP) begin
+          if ((XF8 && fcsr_q.fmode.src == 1'b0) ||
+             (XF8ALT && fcsr_q.fmode.src == 1'b1)) begin
+            write_rd = 1'b0;
+            acc_qvalid_o = valid_instr;
+          end else begin
+            illegal_inst = 1'b1;
+          end
+        end else begin
+          illegal_inst = 1'b1;
+        end
+      end
       // Offload FP-Int Instructions - fire and forget
       // Double Precision Floating-Point
       FLE_D,
