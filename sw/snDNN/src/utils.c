@@ -9,8 +9,8 @@
 
 #include "../../vendor/riscv-opcodes/encoding.h"
 #include "layer.h"
-// #include "printf.h"
 #include "snrt.h"
+#include "printf.h"
 
 uint32_t benchmark_get_cycle() { return read_csr(mcycle); }
 
