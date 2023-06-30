@@ -50,6 +50,8 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
   logic has_credit, credit_take, credit_give, credit_full;
   logic [Cfg.RptWidth-1:0] rep_max, rep_q, rep_d, rep_done, rep_enable, rep_clear;
 
+  logic flush;
+
   fifo_v3 #(
     .FALL_THROUGH ( 0           ),
     .DATA_WIDTH   ( DataWidth   ),
@@ -58,7 +60,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .clk_i,
     .rst_ni,
     .testmode_i ( 1'b0       ),
-    .flush_i    ( '0         ),
+    .flush_i    ( flush      ),
     .full_o     ( fifo_full  ),
     .empty_o    ( fifo_empty ),
     .usage_o    (            ),
@@ -100,6 +102,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .cfg_write_i,
     .cfg_wready_o,
     .reg_rep_o      ( rep_max           ),
+    .flush_o        ( flush             ),
     .mem_addr_o     ( data_req.q.addr   ),
     .mem_zero_o     ( agen_zero         ),
     .mem_write_o    ( agen_write        ),
@@ -189,7 +192,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
       .clk_i,
       .rst_ni,
       .testmode_i ( 1'b0        ),
-      .flush_i    ( '0          ),
+      .flush_i    ( flush       ),
       .full_o     (  ),
       .empty_o    ( zero_empty  ),
       .usage_o    (  ),
@@ -215,7 +218,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
     .credit_o      (  ),
     .credit_give_i ( credit_give ),
     .credit_take_i ( credit_take ),
-    .credit_init_i ( 1'b0 ),
+    .credit_init_i ( flush       ),
     .credit_left_o ( has_credit  ),
     .credit_crit_o (  ),
     .credit_full_o ( credit_full )
@@ -223,7 +226,7 @@ module snitch_ssr import snitch_ssr_pkg::*; #(
 
   // Repetition counter.
   assign rep_d = rep_q + 1;
-  assign rep_clear = rep_enable & rep_done;
+  assign rep_clear = (rep_enable & rep_done) | flush;
   `FFLARNC(rep_q, rep_d, rep_enable, rep_clear, '0, clk_i, rst_ni)
 
   assign rep_done = (rep_q == rep_max);

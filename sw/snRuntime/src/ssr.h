@@ -34,6 +34,9 @@ enum {
     REG_REPEAT = 1,
     REG_BOUNDS = 2,   // + loop index
     REG_STRIDES = 6,  // + loop index
+    REG_FLUSH = 13,   // clear SSR
+    REG_IDX = 14,
+    REG_PTR = 15,
     REG_RPTR = 24,    // + snrt_ssr_dim
     REG_WPTR = 28,    // + snrt_ssr_dim
 };
@@ -139,6 +142,28 @@ inline void snrt_ssr_loop_4d(enum snrt_ssr_dm dm, size_t b0, size_t b1,
 /// Configure the repetition count for a stream.
 inline void snrt_ssr_repeat(enum snrt_ssr_dm dm, size_t count) {
     write_ssr_cfg(REG_REPEAT, dm, count - 1);
+}
+
+// Flush
+inline void snrt_ssr_flush(enum snrt_ssr_dm dm, uint32_t value) {
+    write_ssr_cfg(REG_FLUSH, dm, value);
+}
+
+inline void snrt_ssr_idx_ab(enum snrt_ssr_dm dm, uint32_t value_a, uint32_t value_b) {
+    uint32_t value;
+    value_b = value_b << 16;
+    value   = value_a + value_b;
+    write_ssr_cfg(REG_IDX, dm, value);
+}
+inline void snrt_ssr_idx_cd(enum snrt_ssr_dm dm, uint32_t value_c, uint32_t value_d) {
+    uint32_t value = 1 << 31;
+    value_d = value_d << 16;
+    value  += value_c + value_d;
+    write_ssr_cfg(REG_IDX, dm, value);
+}
+
+inline void snrt_ssr_ptr(enum snrt_ssr_dm dm, uint32_t value) {
+    write_ssr_cfg(REG_PTR, dm, value);
 }
 
 /// Start a streaming read.

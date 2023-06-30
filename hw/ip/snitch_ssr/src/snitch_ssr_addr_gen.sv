@@ -48,6 +48,7 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   output logic        cfg_wready_o,
 
   output logic [Cfg.RptWidth-1:0] reg_rep_o,
+  output logic        flush_o,
 
   output addr_t       mem_addr_o,
   output logic        mem_zero_o,
@@ -62,7 +63,10 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   pointer_t [Cfg.NumLoops-1:0] stride_q, stride_sd, stride_sq;
   pointer_t pointer_q, pointer_qn, pointer_sd, pointer_sq, pointer_sqn, selected_stride;
   index_t [Cfg.NumLoops-1:0] index_q, index_d, bound_q, bound_sd, bound_sq;
+  index_t [Cfg.NumLoops-1:0] ext_index;
+  logic [Cfg.NumLoops-1:0] ext_enable;
   logic [Cfg.RptWidth-1:0] rep_q, rep_sd, rep_sq;
+  logic                    flush_q, flush_sd, flush_sq;
   logic [Cfg.NumLoops-1:0] loop_enabled;
   logic [Cfg.NumLoops-1:0] loop_last;
   logic enable, done;
@@ -70,6 +74,10 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   logic cfg_write_ena;
 
   typedef struct packed {
+    logic ptr;
+    logic idx;
+    logic flush;
+    logic idx_isect;
     logic idx_base;
     logic idx_cfg;
     logic [3:0] stride;
@@ -158,17 +166,19 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     };
 
     // Config registers
-    `FFARN(idx_shift_sq, idx_shift_sd, '0, clk_i, rst_ni)
-    `FFLARN(idx_shift_q, idx_shift_sd, config_q.done, '0, clk_i, rst_ni)
-    `FFARN(idx_base_sq, idx_base_sd, '0, clk_i, rst_ni)
-    `FFLARN(idx_base_q, idx_base_sd, config_q.done, '0, clk_i, rst_ni)
-    `FFARN(idx_size_sq, idx_size_sd, '0, clk_i, rst_ni)
-    `FFLARN(idx_size_q, idx_size_sd, config_q.done, '0, clk_i, rst_ni)
-    `FFARN(idx_flags_sq, idx_flags_sd, '0, clk_i, rst_ni)
-    `FFLARN(idx_flags_q, idx_flags_sd, config_q.done, '0, clk_i, rst_ni)
+    `FFLARNC(idx_shift_sq, idx_shift_sd, '1, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(idx_shift_q, idx_shift_sd, config_q.done, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(idx_base_sq, idx_base_sd, '1, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(idx_base_q, idx_base_sd, config_q.done, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(idx_size_sq, idx_size_sd, '1, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(idx_size_q, idx_size_sd, config_q.done, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(idx_flags_sq, idx_flags_sd, '1, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(idx_flags_q, idx_flags_sd, config_q.done, flush_sq, '0, clk_i, rst_ni)
 
+    logic natit_clear;
+    assign natit_clear = (natit_done | flush_sq);
     // Delay register for last iteration of base loop, in case additional iteration needed.
-    `FFLARNC(natit_base_last_q, natit_base_last_d, enable, natit_done, 1'b0, clk_i, rst_ni)
+    `FFLARNC(natit_base_last_q, natit_base_last_d, enable, natit_clear, 1'b0, clk_i, rst_ni)
 
     // Indicate last iteration (loop 0)
     assign natit_base_bound   = bound_q[0] >> (config_q.indir ? idx_size_t'('1) - idx_size_q : '0);
@@ -178,7 +188,9 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     // Track last index word to set downstream last signal and handle word misalignment at end.
     logic config_load;
     assign config_load = enable & done;
-    `FFLARNC(natit_last_word_inflight_q, 1'b1, config_load, config_q.done, 1'b0, clk_i, rst_ni)
+    logic natit_last_word_clear;
+    assign natit_last_word_clear = (config_q.done | flush_sq);
+    `FFLARNC(natit_last_word_inflight_q, 1'b1, config_load, natit_last_word_clear, 1'b0, clk_i, rst_ni)
 
     // Natural iteration loop 0 is done when last word inflight or address gen done.
     assign natit_done = natit_last_word_inflight_q | config_q.done;
@@ -309,15 +321,53 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
         bound_sd[i] = cfg_wdata_i;
     end
 
-    `FFARN(stride_sq[i], stride_sd[i], '0, clk_i, rst_ni)
-    `FFLARN(stride_q[i], stride_sd[i], config_q.done, '0, clk_i, rst_ni)
-    `FFARN(bound_sq[i], bound_sd[i], '0, clk_i, rst_ni)
-    `FFLARN(bound_q[i], bound_sd[i], config_q.done, '0, clk_i, rst_ni)
+    `FFLARNC(stride_sq[i], stride_sd[i], '1, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(stride_q[i], stride_sd[i], config_q.done, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(bound_sq[i], bound_sd[i], '1, flush_sq, '0, clk_i, rst_ni)
+    `FFLARNC(bound_q[i], bound_sd[i], config_q.done, flush_sq, '0, clk_i, rst_ni)
+
+    always_comb begin
+      ext_enable[i] = '0;
+      if ((i == 0) || (i == 1)) begin
+        if (write_strobe.idx && !cfg_wdata_i[31])
+          ext_enable[i] = 1'b1;
+      end else if ((i == 2) || (i == 3)) begin
+        if (write_strobe.idx && cfg_wdata_i[31])
+          ext_enable[i] = 1'b1;
+      end
+    end
+
+    logic [31:0] cfg_wdata_shifted;
+    always_comb begin
+      ext_index[i] = '0;
+      cfg_wdata_shifted = '0;
+      if (i == 0) begin
+        if (write_strobe.idx && !cfg_wdata_i[31])
+          ext_index[i] = cfg_wdata_i[Cfg.IndexWidth-1:0];
+      end else if (i == 2) begin
+        if (write_strobe.idx && cfg_wdata_i[31])
+          ext_index[i] = cfg_wdata_i[Cfg.IndexWidth-1:0];
+      end else if (i == 1) begin
+        if (write_strobe.idx && !cfg_wdata_i[31]) begin
+          cfg_wdata_shifted = cfg_wdata_i >> 16;
+          ext_index[i] = cfg_wdata_shifted[Cfg.IndexWidth-1:0];
+        end
+      end else if (i == 3) begin
+        if (write_strobe.idx && cfg_wdata_i[31]) begin
+          cfg_wdata_shifted = cfg_wdata_i >> 16;
+          ext_index[i] = cfg_wdata_shifted[Cfg.IndexWidth-1:0];
+        end
+      end
+    end
 
     assign index_ena = enable & loop_enabled[i];
 
-    assign index_d[i] = index_q[i] + 1;
-    `FFLARNC(index_q[i], index_d[i], index_ena, index_clear, '0, clk_i, rst_ni)
+    assign index_d[i] = (ext_enable[i]) ? ext_index[i] : index_q[i] + 1;
+    logic index_soft_clear;
+    assign index_soft_clear = (index_clear | flush_sq);
+    logic index_enable;
+    assign index_enable = (index_ena || ext_enable[i]);
+    `FFLARNC(index_q[i], index_d[i], index_enable, index_soft_clear, '0, clk_i, rst_ni)
 
     // Indicate last iteration (loops > 0); base loop handled differently in indirection
     if (i > 0) begin : gen_loop_upper
@@ -335,10 +385,22 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
       rep_sd = cfg_wdata_i;
   end
 
-  `FFARN(rep_sq, rep_sd, '0, clk_i, rst_ni)
-  `FFLARN(rep_q, rep_sd, config_q.done, '0, clk_i, rst_ni)
+  `FFLARNC(rep_sq, rep_sd, '1, flush_sq, '0, clk_i, rst_ni)
+  `FFLARNC(rep_q, rep_sd, config_q.done, flush_sq, '0, clk_i, rst_ni)
 
   assign reg_rep_o = rep_q;
+
+  // Flush
+  always_comb begin
+    flush_sd = flush_sq;
+    if (write_strobe.flush)
+      flush_sd = cfg_wdata_i;
+  end
+
+  logic flush_clear;
+  assign flush_clear = '0;
+  `FFLARNC(flush_sq, flush_sd, '1, flush_clear, '0, clk_i, rst_ni)
+  `FFLARNC(flush_q, flush_sd, config_q.done, flush_clear, '0, clk_i, rst_ni)
 
   // Enable a loop if they are enabled globally, and the next inner loop is at
   // its maximum.
@@ -379,18 +441,27 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     end
   end
 
-  `FFARN(pointer_q, pointer_qn, '0, clk_i, rst_ni)
-  `FFARN(pointer_sq, pointer_sqn, '0, clk_i, rst_ni)
-  `FFARN(config_q, config_qn, '{done: 1, default: '0}, clk_i, rst_ni)
-  `FFARN(config_sq, config_sqn, '{done: 1, default: '0}, clk_i, rst_ni)
+  logic ptr_init_q, ptr_init_d;
+
+  `FFLARNC(pointer_q, pointer_qn, '1, flush_sq, '0, clk_i, rst_ni)
+  `FFLARNC(pointer_sq, pointer_sqn, '1, flush_sq, '0, clk_i, rst_ni)
+  `FFLARNC(config_q, config_qn, '1, flush_sq, '{done: 1, default: '0}, clk_i, rst_ni)
+  `FFLARNC(config_sq, config_sqn, '1, flush_sq, '{done: 1, default: '0}, clk_i, rst_ni)
+  `FFLARNC(ptr_init_q, ptr_init_d, write_strobe.ptr, flush_sq, '0, clk_i, rst_ni)
+
+  assign ptr_init_d = write_strobe.ptr;
 
   always_comb begin
     pointer_qn  = pointer_q;
     config_qn   = config_q;
     pointer_sqn = pointer_sd;
     config_sqn  = config_sd;
-    if (config_q.done) begin
-      pointer_qn  = pointer_sd;
+    if (write_strobe.ptr) begin
+      pointer_qn = cfg_wdata_i[Cfg.PointerWidth-1:0];
+      // pointer_sqn = cfg_wdata_i[Cfg.PointerWidth-1:0];
+    end else if (config_q.done) begin
+      if (!ptr_init_q)
+        pointer_qn  = pointer_sd;
       config_qn   = config_sd;
       config_sqn.done = 1;
     end else begin
@@ -402,6 +473,9 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   end
 
   typedef struct packed {
+    logic [31:0] ptr;
+    logic [31:0] idx;
+    logic [31:0] flush;
     indir_read_map_t indir_read_map;
     logic [3:0][31:0] stride;
     logic [3:0][31:0] bound;
@@ -419,6 +493,9 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
     read_map.rep = rep_q;
     read_map.bound = '0;
     read_map.stride = '0;
+    read_map.flush = {31'h00000000, flush_sq};
+    read_map.idx = index_q;
+    read_map.ptr = pointer_q;
     for (int i = 0; i < Cfg.NumLoops; i++) begin
       read_map.bound[i] = bound_q[i];
       read_map.stride[i] = stride_q[i];
@@ -431,6 +508,8 @@ module snitch_ssr_addr_gen import snitch_ssr_pkg::*; #(
   // This prevents job clobbering and stalls the master as needed.
   assign cfg_wready_o  = config_sq.done;
   assign cfg_write_ena = config_sq.done & cfg_write_i;
+
+  assign flush_o = flush_sq;
 
   // Parameter sanity checks
   `ASSERT_INIT(CheckPointerWidth, Cfg.PointerWidth <= AddrWidth);
