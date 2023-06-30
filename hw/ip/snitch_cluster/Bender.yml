@@ -12,8 +12,8 @@ dependencies:
     git: https://github.com/pulp-platform/common_cells.git
     rev: v1.28.0
   FPnew:
-    git: https://github.com/openhwgroup/cvfpu.git
-    rev: 1202ca3a767b563bca5de505574373e53941506f
+    git: https://github.com/pulp-platform/cvfpu.git
+    rev: pulp-v0.1.2
   register_interface:
     git: https://github.com/pulp-platform/register_interface.git
     rev: v0.3.3

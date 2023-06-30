@@ -479,6 +479,7 @@ module snitch_cc #(
       .trace_port_o            ( fpu_trace           ),
       .sequencer_tracer_port_o ( fpu_sequencer_trace ),
       // pragma translate_on
+      .hart_id_i        ( hart_id_i      ),
       .acc_req_i        ( acc_snitch_req ),
       .acc_req_valid_i  ( acc_qvalid     ),
       .acc_req_ready_o  ( acc_qready     ),

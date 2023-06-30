@@ -19,6 +19,7 @@ module snitch_fpu import snitch_pkg::*; #(
   input logic                               clk_i,
   input logic                               rst_ni,
   // Input signals
+  input logic [31:0]                        hart_id_i,
   input logic [2:0][FLEN-1:0]               operands_i,
   input fpnew_pkg::roundmode_e              rnd_mode_i,
   input fpnew_pkg::operation_e              op_i,
@@ -101,10 +102,12 @@ module snitch_fpu import snitch_pkg::*; #(
     // FPU configuration
     .Features       ( FPUFeatures ),
     .Implementation ( FPUImplementation ),
-    .TagType        ( logic[6:0]        )
+    .TagType        ( logic[6:0]        ),
+    .StochasticRndImplementation (fpnew_pkg::DEFAULT_RSR)
   ) i_fpu (
     .clk_i                                    ,
     .rst_ni                                   ,
+    .hart_id_i       ( hart_id_i             ),
     .operands_i      ( fpu_in_q.operands     ),
     .rnd_mode_i      ( fpu_in_q.rnd_mode     ),
     .op_i            ( fpu_in_q.op           ),
@@ -114,6 +117,7 @@ module snitch_fpu import snitch_pkg::*; #(
     .int_fmt_i       ( fpu_in_q.int_fmt      ),
     .vectorial_op_i  ( fpu_in_q.vectorial_op ),
     .tag_i           ( fpu_in_q.tag          ),
+    .simd_mask_i     ( '1                    ),
     .in_valid_i      ( in_valid_q            ),
     .in_ready_o      ( in_ready_q            ),
     .flush_i         ( 1'b0                  ),
