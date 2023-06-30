@@ -6,6 +6,7 @@
 # Author: Tim Fischer <fischeti@iis.ee.ethz.ch>
 
 import numpy as np
+import torch
 import argparse
 import pathlib
 import hjson
@@ -15,13 +16,15 @@ np.random.seed(42)
 C_TYPES = {
   '64': 'double',
   '32': 'float',
-  '16': '__fp16'
+  '16': '__fp16',
+  '8': 'char'
 }
 
 NUMPY_TYPES = {
   '64': np.double,
   '32': np.single,
-  '16': np.half
+  '16': np.half,
+  '8': np.byte
 }
 
 
@@ -58,9 +61,33 @@ def emit_gemm_data(**kwargs):
 
     # Generate random input matrices
     dtype = NUMPY_TYPES[str(kwargs['prec'])]
-    a = np.random.rand(kwargs['M'], kwargs['K']).astype(dtype)
-    b = np.random.rand(kwargs['K'], kwargs['N']).astype(dtype)
-    c = np.random.rand(kwargs['M'], kwargs['N']).astype(dtype)
+    if (kwargs['prec']) == 8:
+        # sign -1 or 1
+        sign_a = torch.randint(0, 2, (kwargs['M'], kwargs['K']), requires_grad=False, dtype=torch.uint8)
+        # esponent < 0b01111
+        exponent_a = torch.randint(0, 16, (kwargs['M'], kwargs['K']), requires_grad=False, dtype=torch.uint8)
+         # mantissa can be arbitrary
+        mantissa_a = torch.randint(0, 4, (kwargs['M'], kwargs['K']), requires_grad=False, dtype=torch.uint8)
+        # sign -1 or 1
+        sign_b = torch.randint(0, 2, (kwargs['K'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+        # esponent < 0b01111
+        exponent_b = torch.randint(0, 16, (kwargs['K'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+         # mantissa can be arbitrary
+        mantissa_b = torch.randint(0, 4, (kwargs['K'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+        # sign -1 or 1
+        sign_c = torch.randint(0, 2, (kwargs['M'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+        # esponent < 0b01111
+        exponent_c = torch.randint(0, 16, (kwargs['M'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+         # mantissa can be arbitrary
+        mantissa_c = torch.randint(0, 4, (kwargs['M'], kwargs['N']), requires_grad=False, dtype=torch.uint8)
+        a = ((-1.0)**sign_a.double())*(2.0**(exponent_a.double()-15.0))*(1.0 + mantissa_a.double() / (2**2))
+        b = ((-1.0)**sign_b.double())*(2.0**(exponent_b.double()-15.0))*(1.0 + mantissa_b.double() / (2**2))
+        c = ((-1.0)**sign_c.double())*(2.0**(exponent_c.double()-15.0))*(1.0 + mantissa_c.double() / (2**2))
+    else:
+        a = np.random.rand(kwargs['M'], kwargs['K']).astype(dtype)
+        b = np.random.rand(kwargs['K'], kwargs['N']).astype(dtype)
+        c = np.random.rand(kwargs['M'], kwargs['N']).astype(dtype)
+
     result = np.matmul(a, b) + kwargs['alpha'] * c
 
     # Store matrices in transposed form if requested
