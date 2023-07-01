@@ -2,5 +2,4 @@ apps/lto
 apps/sndnn/batchnorm
 apps/sndnn/conv2d
 apps/sndnn/layernorm
-apps/sndnn/maxpool
 apps/sndnn/nnlinear_baseline
