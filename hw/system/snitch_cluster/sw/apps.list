@@ -8,4 +8,5 @@ apps/sndnn/gemm
 apps/sndnn/linear
 apps/sndnn/batchnorm
 apps/sndnn/softmax
+apps/sndnn/maxpool
 tests/
