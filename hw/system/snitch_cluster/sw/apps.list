@@ -9,4 +9,5 @@ apps/sndnn/linear
 apps/sndnn/batchnorm
 apps/sndnn/softmax
 apps/sndnn/maxpool
+apps/sndnn/layernorm
 tests/

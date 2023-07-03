@@ -5,8 +5,8 @@
 #pragma once
 
 #include "math.h"
-// #include "printf.h"
 #include "snrt.h"
+#include "printf.h"
 #include "utils.h"
 
 typedef float v2f32 __attribute__((vector_size(8)));
@@ -39,7 +39,7 @@ static inline void layernorm_fp32(float *input, float *output, int32_t ldI,
     float mean = 0.0;  // max value of the current core
     float var = 0.0;   // sum of the exp values of the current core
 
-    uint32_t compute_id = snrt_cluster_compute_core_num();
+    uint32_t compute_id = snrt_global_core_idx();
     uint32_t num_cores = snrt_cluster_compute_core_num();
 
     // compute the mean and variance along the last dimension
@@ -68,8 +68,8 @@ static inline void layernorm_fp32(float *input, float *output, int32_t ldI,
                 output[b * batch_offset + s * ldI + i] =
                     (input[b * batch_offset + s * ldI + i] - mean) /
                     sqrtf(var + eps);
-                printf("output[%d][%d][%d] = %f\n", b, s + compute_id, i,
-                       output[b * batch_offset + s * ldI + i]);
+                // printf("output[%d][%d][%d] = %f\n", b, s + compute_id, i,
+                //        output[b * batch_offset + s * ldI + i]);
             }
         }
     }

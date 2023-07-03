@@ -12,15 +12,17 @@
 #include "math.h"
 #include "network.h"
 // #include "perf_cnt.h"
-#include "printf.h"
 #include "snrt.h"
+#include "printf.h"
 #include "utils.h"
 
 int main() {
-    // layernorm_l.ifmap = (float*)layernorm_ifmap_dram;
-    // layernorm_l.result = (float*)layernorm_ofmap_dram;
+    layernorm_l.ifmap = (float*)layernorm_ifmap_dram;
+    layernorm_l.result = (float*)layernorm_ofmap_dram;
 
     // checksum = (float*)layernorm_checksum;
+
+    // printf("Starting layernorm layer\n");
 
     layernorm_layer(&layernorm_l);
 

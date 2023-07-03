@@ -6,14 +6,14 @@
 
 #include "layer.h"
 #include "layernorm.h"
-#include "printf.h"
 #include "snrt.h"
+#include "printf.h"
 
 void layernorm_layer(const layernorm_layer_t *l) {
     uint32_t cluster_num = snrt_cluster_num();
     uint32_t cluster_id = snrt_cluster_idx();
     uint32_t compute_num = snrt_cluster_compute_core_num();
-    uint32_t compute_id = snrt_cluster_compute_core_num();
+    uint32_t compute_id = snrt_global_core_idx();
 
     uint32_t ifmap_size =
         l->BATCH_SIZE * l->SEQ_LEN * l->EMBEDDINGS * sizeof(float);
@@ -37,8 +37,7 @@ void layernorm_layer(const layernorm_layer_t *l) {
 
     snrt_cluster_hw_barrier();
 
-    if (snrt_is_compute_core() &&
-        snrt_cluster_compute_core_num() < compute_num) {
+    if (snrt_is_compute_core()) {
         // determine the row offset for each core
         int32_t row_offset = compute_id * l->EMBEDDINGS;
 
@@ -48,12 +47,9 @@ void layernorm_layer(const layernorm_layer_t *l) {
         // determine the batch offset for each core
         int32_t batch_offset = l->SEQ_LEN * l->EMBEDDINGS;
 
-        printf("Batch size: %d, Seq len: %d, Embeddings: %d\n", l->BATCH_SIZE,
-               l->SEQ_LEN, l->EMBEDDINGS);
-
         // printf("row_offset: %d, ldI: %d\n", row_offset, ldI);
-        // layernorm_fp32(&ifmap[row_offset], &ofmap[row_offset], ldI,
-        // batch_offset, l->BATCH_SIZE, l->SEQ_LEN / 8, l->EMBEDDINGS, l->EPS);
+        layernorm_fp32(&ifmap[row_offset], &ofmap[row_offset], ldI,
+        batch_offset, l->BATCH_SIZE, l->SEQ_LEN / 8, l->EMBEDDINGS, l->EPS);
 
     } else {
         snrt_cluster_hw_barrier();

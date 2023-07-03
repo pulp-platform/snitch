@@ -78,19 +78,19 @@ def emit_header_file(layer_type: str, **kwargs):
 
 def emit_layernorm_layer(name='layernorm', **kwargs):
     ifmap = kwargs['ifmap']
-    # ofmap = kwargs['ofmap']
+    ofmap = kwargs['ofmap']
 
     batch_size, seq_len, embeddings = ifmap.shape
 
-    # ctypes = {
-    #     '64': 'double',
-    #     '32': 'float',
-    #     '16': '__fp16',
-    #     '8': 'char'
-    # }
+    ctypes = {
+        '64': 'double',
+        '32': 'float',
+        '16': '__fp16',
+        '8': 'char'
+    }
 
-    # dtype    = ctypes[str(kwargs['prec'])]
-    # checksum = torch.sum(ifmap, dim = -1)
+    dtype    = ctypes[str(kwargs['prec'])]
+    checksum = torch.sum(ifmap, dim = -1)
 
     layer_str = ''
     layer_str += '#include "layer.h"\n\n'
@@ -101,14 +101,14 @@ def emit_layernorm_layer(name='layernorm', **kwargs):
     layer_str += f'\t.dtype = FP{kwargs["prec"]},\n'
     layer_str += '};\n\n\n'
 
-    # layer_str += f'static {dtype} {name}_result[{batch_size}][{seq_len}]'
-    # layer_str += f'[{embeddings}] __attribute__((section(".data")));\n\n'
-    # layer_str += f'static {dtype} {name}_ifmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' \
-    #     + array_to_cstr(ifmap) + ';\n\n'
-    # layer_str += f'static {dtype} {name}_ofmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' \
-    #     + array_to_cstr(ofmap) + ';\n\n'
-    # layer_str += f'static {dtype} {name}_checksum[{batch_size}][{seq_len}] = ' \
-    #     + array_to_cstr(checksum) + ';\n\n'
+    layer_str += f'static {dtype} {name}_result[{batch_size}][{seq_len}]'
+    layer_str += f'[{embeddings}] __attribute__((section(".data")));\n\n'
+    layer_str += f'static {dtype} {name}_ifmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' \
+        + array_to_cstr(ifmap) + ';\n\n'
+    layer_str += f'static {dtype} {name}_ofmap_dram[{batch_size}][{seq_len}][{embeddings}] = ' \
+        + array_to_cstr(ofmap) + ';\n\n'
+    layer_str += f'static {dtype} {name}_checksum[{batch_size}][{seq_len}] = ' \
+        + array_to_cstr(checksum) + ';\n\n'
 
     return layer_str
 
@@ -804,8 +804,8 @@ def main():
 
         ofmap = ofmap.detach().numpy()
 
-        print("LayerNorm output shape: ", ofmap.shape)
-        print("LayerNorm output: ", ofmap)
+        # print("LayerNorm output shape: ", ofmap.shape)
+        # print("LayerNorm output: ", ofmap)
 
         kwargs = {
             'ifmap': ifmap,
