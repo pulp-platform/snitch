@@ -209,13 +209,11 @@ module axi_dma_data_path #(
   logic                 is_last_w;
 
   always_comb begin : proc_out_mask_generator
-    // default case: all ones
-    out_mask = '1;
-    // is first word: some bytes at the beginning may be invalid
-    out_mask = is_first_w ? (out_mask & w_first_mask) : out_mask;
-    // is last word in write burst: some bytes at the end may be invalid
-    if (w_tailer_i != '0) begin
-      out_mask = is_last_w ? out_mask & w_last_mask : out_mask;
+    case ( {is_first_w, (w_tailer_i != 0) && is_last_w} ) begin
+      2'b00: out_mask = '1;
+      2'b01: out_mask = w_last_mask;
+      2'b10: out_mask = w_first_mask;
+      2'b11: out_mask = w_first_mask & w_last_mask;
     end
   end
 
