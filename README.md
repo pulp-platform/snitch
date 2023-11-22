@@ -1,5 +1,12 @@
-![CI](https://github.com/pulp-platform/snitch/actions/workflows/ci.yml/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+# DEPRECATED
+
+This repository has been deprecated. However, development on Snitch-related projects continues in the following new dedicated repositories:
+
+* Snitch cluster: https://github.com/pulp-platform/snitch_cluster
+* Occamy: https://github.com/pulp-platform/occamy
+* Banshee: https://github.com/pulp-platform/banshee
 
 # Snitch System
 
